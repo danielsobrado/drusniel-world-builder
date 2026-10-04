@@ -27,7 +27,7 @@ import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { meadowInstance } from './meadowBladeShape.js';
-import { applyHandoff } from './meadowFade.js';
+import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowNoise } from './meadowNoise.js';
 import { meadowPigment } from './meadowPigment.js';
 
@@ -110,6 +110,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
     .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill));
 
   applyHandoff(material, { base: card.base, fadeIn: uniforms.handoff, fadeOut: uniforms.farFade });
+  applyPublicationFade(material, { instance: card, time: uniforms.time });
   applyCloudShadow(material, config.sky);
   applyJungleMist(material, config.ambientEffects);
   return assignGrassMaterialData(material);
@@ -127,4 +128,3 @@ export function loadMeadowCardAtlas(url) {
   atlas.magFilter = THREE.LinearFilter;
   return atlas;
 }
-

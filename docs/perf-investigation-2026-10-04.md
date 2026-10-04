@@ -110,23 +110,24 @@ The earlier integrated matrix (`matrix-final.json`) failed construction.
 Construction had timed out waiting for draw preparation and its timing is
 invalid for acceptance, even though the old matrix gate reported only the
 2.08% hitch-rate failure. The gate now rejects unsuccessful settle explicitly.
-The corrected construction recheck (`construction-recheck.json`) settled with
-all scenery ready, reached **99.14 FPS**, and passed the stress gates:
-**15.055 ms frame p95**, **0.51% hitches**, and collision acceptance. Its heavy
-moving backlog took **6.67 s** to clear after stopping. This is measurable
-progress under load, but it exceeds the plan's provisional near-job latency
-objectives and needs further work.
+The earlier construction recheck (`construction-recheck.json`) settled and
+reported a 6.67 s recovery, but precedes the bush fix. It is a checkpoint rather
+than acceptance for the final workload. The corrected matrix construction case
+settled after an additional **42.5 s**, reached **91.11 FPS**, and passed the
+stress gates with **16.920 ms frame p95**, five hitches, and collision acceptance.
+It still ended with 110 queued jobs, 162 meadow tiles, and 27 draws pending.
 
-The final matrix (`matrix-integrated.json`) passed every gate:
+The corrected matrix (`matrix-frozen.json`) passed every gate with zero browser
+errors in all cases:
 
 | Case | FPS | Frame p95 | Hitches >33.3 ms | Settle |
 | --- | ---: | ---: | ---: | --- |
-| Standard diagonal | 167.41 | 7.900 ms | 1 | Passed |
-| Dense forest | 167.98 | 7.700 ms | 0 | Passed |
-| High grass, active meadow ×2 | 129.88 | 12.040 ms | 18 | Passed |
-| Dense mixed | 126.09 | 13.010 ms | 17 | Passed |
-| Approaching construction | 98.11 | 16.405 ms | 10 | Passed |
-| Water | 197.72 | 6.900 ms | 1 | Passed |
+| Standard diagonal | 171.58 | 7.600 ms | 0 | Passed |
+| Dense forest | 169.30 | 7.800 ms | 0 | Passed |
+| High grass, active meadow ×2 | 127.40 | 12.890 ms | 22 | Passed |
+| Dense mixed | 125.12 | 12.710 ms | 15 | Passed |
+| Approaching construction | 91.11 | 16.920 ms | 5 | Passed |
+| Water | 178.05 | 8.200 ms | 4 | Passed |
 
 These are the existing matrix regression gates: frame p95 at most 33.3 ms,
 hitches at most 2%, correct workload activation, and collision/water acceptance.
@@ -135,17 +136,19 @@ They do not establish 144 FPS in the dense or construction stress scenes.
 ## Water
 
 The actual water route reaches its deep target and completes entry, swimming,
-diving, surfacing, and dry exit with active caustics. `water-integrated.json`
-passed all acceptance gates with **197.72 FPS**, **6.9 ms frame p95**, one hitch,
-and no WebGPU validation errors. Start and end preparation were complete.
+diving, surfacing, and dry exit with active caustics. `water-frozen.json`
+passed all acceptance gates with **178.05 FPS**, **8.2 ms frame p95**, four hitches,
+and no browser or WebGPU validation errors. Start and end preparation were complete.
 
 The original 300 ms dive stalls involved scene/material preparation. Streamed
-pass prewarming reduces that first-use work. The final water run still contains
-a **44.5 ms maximum full-pipeline CPU cost** and a **43.2 ms maximum frame**;
+pass prewarming addresses that first-use work. The corrected water run still contains
+a **125.1 ms maximum full-pipeline CPU cost** and a **126 ms maximum frame**;
 those remain visible as a frame-tail failure. The **0.3 ms maximum observed
 caustic CPU** measures only the post-effect. Separate scene and full-pipeline
 gauges retain the rest. The former counter measured the entire scene plus
-effect, so its old and new values are not directly comparable. Passing the
+effect, so its old and new values are not directly comparable. The earlier
+`water-integrated.json` reported a 44.5 ms pipeline maximum but lacked the bush
+fix and general browser-error check. It is retained as a checkpoint. Passing the
 effect's 4 ms gate does not establish hitch-free diving.
 
 ## Evidence and reproduction

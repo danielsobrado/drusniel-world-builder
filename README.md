@@ -252,16 +252,18 @@ Generated density, triangle counts, positions, normals, and draw commands are ne
 
 ## Object visuals
 
-Placeable objects are generated in code. Models are assembled from primitives in
-`src/editor/ObjectModelLibrary.js` and shaded with procedurally synthesized
-colour, normal, and roughness maps, so there is no art build step and no GLB
-pack to keep in sync.
+The base catalog uses primitive models and shared procedural materials in
+`src/editor/ObjectModelLibrary.js`. The Gods’ End library adds 133 placeable
+entries, including its five procedural medieval houses, and retains all 107
+published GLBs and 255 texture/image assets locally. Imported models load when
+selected or restored from saves. Workshop texture selectors expose the image maps.
 
 ```bash
 npm run validate:assets
 ```
 
-See `docs/object-pipeline.md` for the authoring contract.
+See `docs/object-pipeline.md` for the authoring contract and
+`docs/gods-end-objects-and-textures.md` for import, ownership and validation details.
 
 ## Current limits
 

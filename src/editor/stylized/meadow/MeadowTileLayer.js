@@ -38,7 +38,7 @@ export class MeadowTileLayer {
    * @param {object} options.ground MeadowGroundSampler
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, name, tileSize, templates, material, selectBand, reach, ground, renderOrder = 0 }) {
+  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0 }) {
     this.tileSize = tileSize;
     this.templates = templates;
     this.selectBand = selectBand;
@@ -47,6 +47,7 @@ export class MeadowTileLayer {
     const definitions = Object.values(templates).map(template => template.userData?.meadow);
     this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
       && definition.cards === definitions[0].cards);
+    this.selectPreparationBand = this.stablePrefixes ? selectPreparationBand : null;
     this.batches = new MeadowGrassBatches({ scene, templates, material, name, renderOrder });
     this.tiles = new Map();
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
@@ -63,7 +64,8 @@ export class MeadowTileLayer {
    * @param {{ x: number, z: number }} origin floating origin
    * @param {number} deadline performance.now() by which this frame's builds stop
    */
-  update(camera, origin, deadline) {
+  update(camera, origin, deadline, time = performance.now() / 1000) {
+    this.time = time;
     const size = this.tileSize;
     const reach = this.reach + size;
     const keep = new Set();
@@ -74,7 +76,8 @@ export class MeadowTileLayer {
         const nearest = tileDistanceSquared(camera.x, camera.z, centerX, centerZ, size);
         const farthest = (Math.abs(camera.x - centerX) + size / 2) ** 2 + (Math.abs(camera.z - centerZ) + size / 2) ** 2;
         const band = this.selectBand(nearest, farthest);
-        if (!band) continue;
+        const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
+        if (!preparationBand) continue;
         const key = `${tx}:${tz}`;
         keep.add(key);
         let tile = this.tiles.get(key);
@@ -83,6 +86,9 @@ export class MeadowTileLayer {
           this.tiles.set(key, tile);
         }
         tile.band = band;
+        if (band === null) tile.output = null;
+        tile.preparationBand = preparationBand;
+        tile.preparationCapacity = this.templates[preparationBand].instanceCount;
         tile.distanceSquared = nearest;
         tile.renderX = centerX - origin.x;
         tile.renderZ = centerZ - origin.z;
@@ -106,14 +112,19 @@ export class MeadowTileLayer {
 
   /** A tile needs a build when its ground is resident and its band or page moved on. */
   static isStale(tile) {
-    return tile.revision !== null && (tile.builtBand !== tile.band || tile.builtRevision !== tile.revision);
+    return tile.revision !== null && ((tile.band !== null
+      && (tile.builtBand !== tile.band || tile.builtRevision !== tile.revision))
+      || (tile.preparationBand !== tile.band
+        && (tile.prepared?.revision !== tile.revision || tile.prepared.capacity < tile.preparationCapacity)));
   }
 
   build(deadline) {
     const stale = [];
     for (const tile of this.tiles.values()) {
       // A job started for a band or page the tile has since left is abandoned.
-      if (tile.job && (tile.job.band !== tile.band || tile.job.revision !== tile.revision)) {
+      if (tile.job && ((tile.job.band !== tile.preparationBand
+        && this.templates[tile.job.band].instanceCount < tile.preparationCapacity)
+        || tile.job.revision !== tile.revision)) {
         this.release(tile.job.band, tile.job.compaction.output);
         tile.job = null;
       }
@@ -131,12 +142,12 @@ export class MeadowTileLayer {
     let compacted = 0;
     for (const tile of stale) {
       if (performance.now() >= deadline) break;
-      const capacity = this.templates[tile.band].instanceCount;
+      const capacity = tile.preparationCapacity;
       if (this.stablePrefixes && tile.prepared?.revision === tile.revision
         && tile.prepared.capacity >= capacity) {
         this.release(tile.job?.band, tile.job?.compaction.output);
         tile.job = null;
-        this.publish(tile, compactionPrefix(tile.prepared.output, capacity), tile.band, tile.revision);
+        this.publishPrepared(tile);
         PerfCounters.inc('meadowCompactionReuses');
         continue;
       }
@@ -144,14 +155,14 @@ export class MeadowTileLayer {
         const ground = this.ground.forTile(tile.centerX, tile.centerZ, this.tileSize / 2);
         if (!ground) continue;
         tile.job = {
-          band: tile.band,
+          band: tile.preparationBand,
           revision: ground.revision,
           compaction: createCompaction({
-            template: this.templates[tile.band],
+            template: this.templates[tile.preparationBand],
             centerX: tile.centerX,
             centerZ: tile.centerZ,
             sample: ground.sample,
-            output: this.pools.get(tile.band).pop() ?? null,
+            output: this.pools.get(tile.preparationBand).pop() ?? null,
             previous: this.stablePrefixes && tile.prepared?.revision === ground.revision ? tile.prepared : null,
           }),
         };
@@ -167,7 +178,8 @@ export class MeadowTileLayer {
       if (this.stablePrefixes) tile.prepared = {
         output: compaction.output, capacity: total, band: tile.job.band, revision: tile.job.revision,
       };
-      this.publish(tile, compaction.output, tile.job.band, tile.job.revision);
+      if (this.stablePrefixes) this.publishPrepared(tile, true);
+      else this.publish(tile, compaction.output, tile.job.band, tile.job.revision);
       tile.job = null;
     }
     this.stats.building = building;
@@ -175,17 +187,32 @@ export class MeadowTileLayer {
   }
 
   publish(tile, output, band, revision) {
+    const previousCapacity = tile.output?.count ? this.templates[tile.builtBand].instanceCount : 0;
+    if (!previousCapacity || this.templates[band].instanceCount > previousCapacity) {
+      // Keep an active arrival fade across a rapid second promotion. A ground
+      // refresh of already-present ranks must not make the whole tile blink.
+      if (!tile.output?.count || this.time - tile.revealTime >= 0.35) {
+        tile.revealTime = this.time;
+        tile.revealRank = previousCapacity;
+      }
+    }
     tile.output = output;
     tile.builtBand = band;
     tile.builtRevision = revision;
     tile.buildId = ++this.buildSerial;
   }
 
+  publishPrepared(tile, force = false) {
+    if (tile.band === null || (!force && tile.output
+      && tile.builtBand === tile.band && tile.builtRevision === tile.revision)) return;
+    this.publish(tile, compactionPrefix(tile.prepared.output, this.templates[tile.band].instanceCount), tile.band, tile.revision);
+  }
+
   commit() {
     this.batches.begin();
     let tiles = 0;
     for (const tile of this.tiles.values()) {
-      if (!tile.output || tile.output.count === 0) continue;
+      if (tile.band === null || !tile.output || tile.output.count === 0) continue;
       this.batches.add(tile.builtBand, tile);
       tiles += 1;
     }

@@ -27,3 +27,12 @@ export function applyHandoff(material, { base, fadeIn, fadeOut }) {
   material.maskNode = incoming.and(outgoing);
   return material;
 }
+
+/** Arriving ranks fade on the GPU; retained stems keep their full coverage. */
+export function applyPublicationFade(material, { instance, time }) {
+  const arrival = smoothstep(0, 0.35, time.sub(instance.revealTime));
+  const coverage = instance.rank.lessThan(instance.revealRank).select(float(1), arrival);
+  const mask = interleavedGradientNoise(screenCoordinate.xy).lessThan(coverage);
+  material.maskNode = material.maskNode ? material.maskNode.and(mask) : mask;
+  return material;
+}

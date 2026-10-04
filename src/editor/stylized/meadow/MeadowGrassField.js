@@ -91,6 +91,9 @@ export class MeadowGrassField {
       tileSize: settings.tileSize,
     });
     const thresholds = lodThresholds(settings.maxDistance, settings.lod);
+    // About half a second of running ahead of a density boundary. Preparation
+    // uses the same shared deadline; the drawn band and viewing range stay put.
+    const preparationLead = settings.tileSize;
     this.blades = new MeadowTileLayer({
       scene,
       name: 'meadow-grass',
@@ -98,7 +101,8 @@ export class MeadowGrassField {
       templates: bladeTemplates,
       material: this.bladeMaterial,
       selectBand: (nearest) => selectLod(nearest, thresholds),
-      reach: settings.maxDistance,
+      selectPreparationBand: (nearest) => selectLod(Math.max(0, Math.sqrt(nearest) - preparationLead) ** 2, thresholds),
+      reach: settings.maxDistance + preparationLead,
       ground: this.ground,
     });
     this.cards = null;
@@ -163,8 +167,8 @@ export class MeadowGrassField {
       layer.workRunner = this.workRunner;
     }
     // Blades first: the ground under the player matters more than the horizon.
-    this.blades.update(canonical, origin, deadline);
-    this.cards?.update(canonical, origin, deadline);
+    this.blades.update(canonical, origin, deadline, timestamp / 1000);
+    this.cards?.update(canonical, origin, deadline, timestamp / 1000);
     PerfCounters.inc('meadowGrassMs', performance.now() - startedAt);
   }
 

@@ -1,5 +1,5 @@
 import { HouseWalls } from './HouseWalls.js';
-import { UP, sub, add, scale, dot, cross, length, normalize, lerp3, smooth, faceAxes, FOUNDATION_DEPTH } from './houseMath.js';
+import { UP, add, cross, length, lerp3 } from './houseMath.js';
 
 export class HouseRoofs extends HouseWalls {
   gableRoof({

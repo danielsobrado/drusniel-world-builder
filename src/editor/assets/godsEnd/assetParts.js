@@ -7,7 +7,9 @@ export function createGodsEndAssetParts(scene, asset) {
   scene.updateMatrixWorld(true);
   const roots = asset.rootNames.length
     ? asset.rootNames.map((name) => {
-      const node = scene.getObjectByName(name);
+      let node = scene.getObjectByName(name);
+      // GLTFLoader sanitizes animation names, retaining the authored spelling here.
+      if (!node) scene.traverse((candidate) => { if (!node && candidate.userData.name === name) node = candidate; });
       if (!node) throw new Error(`Gods’ End asset is missing ${name}: ${asset.path}.`);
       return node;
     }) : [scene];
@@ -18,10 +20,12 @@ export function createGodsEndAssetParts(scene, asset) {
     for (const child of node.children) visit(child);
   };
   roots.forEach(visit);
+  for (const mesh of meshes) {
+    if (mesh.isInstancedMesh) throw new Error(`Gods’ End asset ${asset.path} is a scene input, not a placeable object.`);
+  }
   const bounds = new Box3();
   const geometries = new Map();
   for (const mesh of meshes) {
-    if (mesh.isInstancedMesh) throw new Error(`Gods’ End asset ${asset.path} is a scene input, not a placeable object.`);
     const geometry = mesh.geometry.clone();
     // Birds can be placed in their authored pose; their animated source is preserved in the library.
     if (mesh.isSkinnedMesh) {

@@ -12,6 +12,7 @@
     "generate:forest-assets": "node scripts/generate-forest-assets.mjs",
     "import:gods-end-assets": "node scripts/import-gods-end-assets.mjs",
     "validate:gods-end-assets": "node scripts/validate-gods-end-assets.mjs",
+    "qa:gods-end-assets": "node scripts/run-gods-end-asset-qa.mjs",
     "extract:authored-assets": "node scripts/extract-authored-assets.mjs && npm run optimize:runtime-assets",
     "optimize:runtime-assets": "node scripts/optimize-runtime-assets.mjs",
     "prepare:wildlife-assets": "node scripts/prepare-wildlife-assets.mjs && npm run optimize:runtime-assets",

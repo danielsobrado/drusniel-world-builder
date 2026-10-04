@@ -350,3 +350,16 @@ Source: https://ambientcg.com/view?id=Snow007C
 
 Imported from drusniel-gods-end. The original provenance and channel packing
 are recorded in `public/assets/textures/snow/manifest.json`.
+
+## Gods’ End visual asset library
+
+The owner’s `drusniel-gods-end` published models, textures and procedural medieval
+house recipes are preserved in `public/assets/gods-end/Assets` and
+`src/editor/assets/godsEnd/village`. Each import is recorded in
+`public/assets/gods-end/manifest.json`. Original attribution, source rights and
+texture/geometry provenance are retained in the imported per-folder manifests;
+this port does not grant a new license to those assets.
+
+The local Draco decoder and Basis transcoder are redistributed from the installed
+Three.js examples. Their upstream licenses remain Apache License 2.0, as covered
+by the Draco and Basis Universal notices above.

@@ -106,7 +106,7 @@ test('a batch gives each tile its own slot and clears it when the tile leaves', 
   assert.equal(geometry.instanceCount, 16);
   const position = geometry.getAttribute('instancePosition').array;
   assert.equal(position[5 * 4], EMPTY_POSITION, 'unused stems in a slot are parked out of range');
-  assert.equal(geometry.getAttribute('instanceTile').array[8 * 2], 8, 'each stem carries its tile origin');
+  assert.equal(geometry.getAttribute('instanceTile').array[8 * 4], 8, 'each stem carries its tile origin');
   batches.begin();
   batches.add('high', a);
   batches.commit();

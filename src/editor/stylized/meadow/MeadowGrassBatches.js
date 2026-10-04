@@ -57,7 +57,8 @@ class MeadowBandBatch {
     for (const [name, itemSize] of INSTANCE_ATTRIBUTES) {
       geometry.setAttribute(name, new THREE.InstancedBufferAttribute(new Float32Array(capacity * itemSize), itemSize));
     }
-    geometry.setAttribute('instanceTile', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 2), 2));
+    // Origin plus publication time/retained rank: no extra vertex-buffer binding.
+    geometry.setAttribute('instanceTile', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     return geometry;
   }
 
@@ -75,7 +76,7 @@ class MeadowBandBatch {
   }
 
   markRange(start, count) {
-    for (const [name, itemSize] of [...INSTANCE_ATTRIBUTES, ['instanceTile', 2]]) {
+    for (const [name, itemSize] of [...INSTANCE_ATTRIBUTES, ['instanceTile', 4]]) {
       const attribute = this.geometry.getAttribute(name);
       attribute.addUpdateRange(start * itemSize, count * itemSize);
       attribute.needsUpdate = true;
@@ -97,8 +98,10 @@ class MeadowBandBatch {
       this.geometry.getAttribute('instanceData').array.set(source.data.subarray(0, count * 4), start * 4);
       const origins = this.geometry.getAttribute('instanceTile').array;
       for (let i = start; i < start + count; i += 1) {
-        origins[i * 2] = tile.renderX;
-        origins[i * 2 + 1] = tile.renderZ;
+        origins[i * 4] = tile.renderX;
+        origins[i * 4 + 1] = tile.renderZ;
+        origins[i * 4 + 2] = tile.revealTime ?? -1;
+        origins[i * 4 + 3] = tile.revealRank ?? 16777216;
       }
     }
     for (let i = start + count; i < start + this.stride; i += 1) {

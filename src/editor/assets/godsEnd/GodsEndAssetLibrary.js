@@ -5,6 +5,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { StylizedSceneAssetCache } from '../../stylized/StylizedSceneAssetCache.js';
 import { resolveAssetUrl } from '../assetUrl.js';
 import { createGodsEndAssetParts } from './assetParts.js';
+import { disposeModelParts } from '../modelParts.js';
 
 /** Acquires only selected or saved objects; unused catalog entries allocate no GPU resources. */
 export class GodsEndAssetLibrary {
@@ -68,6 +69,7 @@ export class GodsEndAssetLibrary {
   async load(definition) {
     const asset = definition.asset;
     let acquired = false;
+    let transferred = false;
     let parts;
     try {
       if (asset.kind === 'house') parts = await this.houseFactory(asset);
@@ -77,16 +79,16 @@ export class GodsEndAssetLibrary {
         parts = createGodsEndAssetParts(scene, asset);
       }
       if (this.disposed) {
-        const { disposeModelParts } = await import('../modelParts.js');
-        disposeModelParts(parts);
         return;
       }
-      this.installed.set(definition.key, acquired ? asset.path : null);
       this.objectView.registerDefinition(definition, parts);
+      transferred = true;
+      this.installed.set(definition.key, acquired ? asset.path : null);
       acquired = false; // Reference ownership transfers to installed.
       this.controller.updatePreviews();
       this.prune();
     } finally {
+      if (parts && !transferred) disposeModelParts(parts);
       if (acquired) this.cache.release(asset.path);
     }
   }

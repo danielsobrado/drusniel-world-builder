@@ -1,8 +1,9 @@
 # Procedural object pipeline
 
-Placeable settlement objects are generated in code. There is no GLB pack, no
-external texture, and no art build step: models and their materials are
-synthesized at startup from the object catalog.
+The base settlement catalog is generated in code with shared procedural textures.
+The Gods’ End library also provides imported objects and the donor’s procedural
+house recipes. Its models load on selection or save restoration. See
+`gods-end-objects-and-textures.md` for that library’s import and ownership contract.
 
 ## Layers
 

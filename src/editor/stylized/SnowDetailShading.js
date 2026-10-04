@@ -1,7 +1,8 @@
 import {
-  Fn, If, cameraViewMatrix, float, mix, normalize, texture, vec2, vec3, vec4,
+  Fn, If, cameraViewMatrix, float, mix, normalize, vec2, vec3, vec4,
 } from 'three/tsl';
 import { acquireSnowTextures } from '../assets/godsEnd/snowTextures.js';
+import { repeatMipTextureLoad } from './RepeatMipTextureLoad.js';
 
 /** Snow007C's centered detail response, adapted to streamed terrain normals. */
 export function createSnowDetailNodes({ terrainUv, chunkWorldSize, chunkCenter, snow, material }) {
@@ -22,8 +23,8 @@ export function createSnowDetailNodes({ terrainUv, chunkWorldSize, chunkCenter, 
   const detail = Fn(() => {
     const result = vec4(1, 1, 1, 0).toVar();
     If(amount.greaterThan(0.002), () => {
-      const color = texture(maps.color, point).grad(dx, dy).rgb.div(vec3(0.629, 0.737, 0.849)).clamp(0.75, 1.25);
-      const packed = texture(maps.packed, point).grad(dx, dy);
+      const color = repeatMipTextureLoad(maps.color, point, dx, dy).rgb.div(vec3(0.629, 0.737, 0.849)).clamp(0.75, 1.25);
+      const packed = repeatMipTextureLoad(maps.packed, point, dx, dy);
       const cavity = packed.r.sub(0.944).mul(0.8).add(1).clamp(0.65, 1.08);
       result.assign(vec4(color.mul(cavity), packed.g.sub(0.714).mul(0.3)));
     });
@@ -32,7 +33,7 @@ export function createSnowDetailNodes({ terrainUv, chunkWorldSize, chunkCenter, 
   const slope = Fn(() => {
     const result = vec2(0).toVar();
     If(amount.greaterThan(0.002), () => {
-      const sample = texture(maps.normal, point.mul(4)).grad(dx.mul(4), dy.mul(4));
+      const sample = repeatMipTextureLoad(maps.normal, point.mul(4), dx.mul(4), dy.mul(4));
       const normal = sample.xyz.mul(2).sub(1);
       result.assign(normal.xy.div(normal.z.max(0.15)).mul(2.4));
     });

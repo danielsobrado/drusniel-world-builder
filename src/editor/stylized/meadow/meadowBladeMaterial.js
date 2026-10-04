@@ -20,7 +20,7 @@ import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { applyCloudShadow } from '../CloudShadow.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
-import { applyHandoff } from './meadowFade.js';
+import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowPigment } from './meadowPigment.js';
 
 /**
@@ -85,6 +85,7 @@ export function createMeadowBladeMaterial({
     .add(sheen);
 
   if (handoff) applyHandoff(material, { base: blade.base, fadeIn: null, fadeOut: uniforms.handoff });
+  applyPublicationFade(material, { instance: blade, time: uniforms.time });
   applyCloudShadow(material, config.sky);
   applyJungleMist(material, config.ambientEffects);
   return assignGrassMaterialData(material);

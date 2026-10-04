@@ -47,7 +47,8 @@ const DONOR_UNITS_PER_METRE = 2.8;
  */
 export function meadowInstance(originUniform, { cards = false } = {}) {
   const position = attribute('instancePosition', 'vec4');
-  const tile = attribute('instanceTile', 'vec2');
+  const publication = attribute('instanceTile', 'vec4');
+  const tile = publication.xy;
   const data = attribute('instanceData', 'vec4');
   const base = vec3(tile.x.add(position.x), position.y, tile.y.add(position.z));
   // The look code: shape + MEADOW_SHAPE_COUNT × palette (meadowPalettes.js).
@@ -57,6 +58,8 @@ export function meadowInstance(originUniform, { cards = false } = {}) {
   return {
     base,
     tile,
+    revealTime: publication.z,
+    revealRank: publication.w,
     local: position.xz,
     canonical: base.xz.add(originUniform),
     strength: position.w,

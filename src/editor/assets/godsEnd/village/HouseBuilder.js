@@ -1,5 +1,5 @@
 import { HouseRoofs } from './HouseRoofs.js';
-import { UP, sub, add, scale, dot, cross, length, normalize, lerp3, smooth, faceAxes, FOUNDATION_DEPTH } from './houseMath.js';
+import { UP, add, scale, cross, normalize } from './houseMath.js';
 
 export class HouseBuilder extends HouseRoofs {
   chimney({ x, z, w = 0.9, d = 0.9, y0, y1, material = 'stone', pots = 2, tint = 1, capTint = 0.8 }) {

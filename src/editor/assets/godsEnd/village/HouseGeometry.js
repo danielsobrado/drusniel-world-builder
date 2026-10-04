@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { TEXTURE_METRES } from '../houseTextureData.js';
-import { UP, sub, add, scale, dot, cross, length, normalize, lerp3, smooth, faceAxes, FOUNDATION_DEPTH } from './houseMath.js';
+import { UP, sub, add, scale, dot, cross, length, normalize, smooth, faceAxes } from './houseMath.js';
 
 export class HouseGeometry {
   constructor({ seed = 1, grimeHeight = 0, palette = {} } = {}) {

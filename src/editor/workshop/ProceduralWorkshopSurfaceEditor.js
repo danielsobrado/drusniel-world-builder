@@ -319,6 +319,7 @@ export class ProceduralWorkshopSurfaceEditor {
     const defaults = getSurfaceTextureDefaults(this.activeSlot);
     const settings = slot ?? defaults;
     const importing = this.importingSlots.has(this.activeSlot);
+    this.librarySelect.disabled = importing;
 
     for (const button of this.root.querySelectorAll('[data-surface-action="select"]')) {
       button.classList.toggle('is-active', button.dataset.surfaceSlot === this.activeSlot);
