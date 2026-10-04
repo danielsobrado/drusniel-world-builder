@@ -1,0 +1,2402 @@
+{
+  "version": 1,
+  "sourceProject": "drusniel-gods-end",
+  "files": [
+    {
+      "source": "public/Assets/Arcane_Wizard.glb",
+      "output": "public/assets/gods-end/Assets/Arcane_Wizard.glb",
+      "bytes": 1425716,
+      "sha256": "7692f6f816e0fec1eaa9870619717764335cdebf959a9634c80bb5401e23c746"
+    },
+    {
+      "source": "public/Assets/Devout_Cleric.glb",
+      "output": "public/assets/gods-end/Assets/Devout_Cleric.glb",
+      "bytes": 2767484,
+      "sha256": "d9da872335748df2f59a04b103e5051785d2d0542b5d5f91b59dc32d841d92c2"
+    },
+    {
+      "source": "public/Assets/Drusniel_Dark_Elf.glb",
+      "output": "public/assets/gods-end/Assets/Drusniel_Dark_Elf.glb",
+      "bytes": 1700848,
+      "sha256": "48ddb4195f412fca15757c2696f1ded3280736f736bd229dfbaa5eb58e1db918"
+    },
+    {
+      "source": "public/Assets/Enanillo_Dwarven.glb",
+      "output": "public/assets/gods-end/Assets/Enanillo_Dwarven.glb",
+      "bytes": 1284028,
+      "sha256": "d4cca7e22fc15089d6ffce3917197ab724640f5db288ac739dc07d74996340d3"
+    },
+    {
+      "source": "public/Assets/GameLoad.webp",
+      "output": "public/assets/gods-end/Assets/GameLoad.webp",
+      "bytes": 120966,
+      "sha256": "bbce8c52308b5debc7339bd51f458bd74e7b4406a6dd2d3541581f5b70a0d92c"
+    },
+    {
+      "source": "public/Assets/Goblin_Gribble_Thornhide.glb",
+      "output": "public/assets/gods-end/Assets/Goblin_Gribble_Thornhide.glb",
+      "bytes": 1116464,
+      "sha256": "3f0a4680b1719b652dcf3a31f8cc012cfd909b6d0e289dfb39c6e4ab436ae682"
+    },
+    {
+      "source": "public/Assets/Radiant_Paladin.glb",
+      "output": "public/assets/gods-end/Assets/Radiant_Paladin.glb",
+      "bytes": 1329200,
+      "sha256": "f4d6e89a2dd9d3c18d6e6c55c360fe0002fe27edb5787c6b6d6f29dd42bbe579"
+    },
+    {
+      "source": "public/Assets/Serpent_Master.glb",
+      "output": "public/assets/gods-end/Assets/Serpent_Master.glb",
+      "bytes": 2452992,
+      "sha256": "2728814494a1bcb352adc3af69aa475030d207ed9bef0511d3538d22330f5d1d"
+    },
+    {
+      "source": "public/Assets/Villager_Rugged_Blacks.glb",
+      "output": "public/assets/gods-end/Assets/Villager_Rugged_Blacks.glb",
+      "bytes": 1039220,
+      "sha256": "7a308783824ae1c7b4891005e6610f84f633d3d10f4b4b89f38c02b30b4fc331"
+    },
+    {
+      "source": "public/Assets/grass.jpg",
+      "output": "public/assets/gods-end/Assets/grass.jpg",
+      "bytes": 76274,
+      "sha256": "4fa1c1c97d303960a77b232372db988df036d47eb94c551adda9b6f983709b5e"
+    },
+    {
+      "source": "public/Assets/ground/ground_0109_color_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/ground_0109_color_1k.jpg",
+      "bytes": 214743,
+      "sha256": "45a7ddeb06c9b54a64142debad085f942bc453d87541c67f2d707fddd0bff7f0"
+    },
+    {
+      "source": "public/Assets/ground/ground_0109_normal_directx_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/ground_0109_normal_directx_1k.jpg",
+      "bytes": 354881,
+      "sha256": "d6c5b034ae70acd8378e8c7946183e3c67d4fd454f9bb088c4c61b46dc739786"
+    },
+    {
+      "source": "public/Assets/ground/ground_0109_roughness_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/ground_0109_roughness_1k.jpg",
+      "bytes": 174840,
+      "sha256": "00385c65254b2d6e077c00548e86898026c051eda2575194d77a6a47c728390c"
+    },
+    {
+      "source": "public/Assets/ground/snow/manifest.json",
+      "output": "public/assets/gods-end/Assets/ground/snow/manifest.json",
+      "bytes": 740,
+      "sha256": "8cedb1e982aa0fa2269b5a8d98f5325c78189b9ec723f5d0e57bd208a9516963"
+    },
+    {
+      "source": "public/Assets/ground/snow/snow007c_ao_rough_height_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/snow/snow007c_ao_rough_height_1k.jpg",
+      "bytes": 491567,
+      "sha256": "6dee472226dd08a61a2fa390e722507060fccc20fecc8861cc3e13dc3572204a"
+    },
+    {
+      "source": "public/Assets/ground/snow/snow007c_color_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/snow/snow007c_color_1k.jpg",
+      "bytes": 44534,
+      "sha256": "d25c368467cb730625f323c268f892962d54dd76903bdf23fd6d3203ceb9107b"
+    },
+    {
+      "source": "public/Assets/ground/snow/snow007c_normal_gl_1k.jpg",
+      "output": "public/assets/gods-end/Assets/ground/snow/snow007c_normal_gl_1k.jpg",
+      "bytes": 452592,
+      "sha256": "92d5355ffc96cab251d2ff207a6d82adb4d2eb693b23b491582af51dec039c74"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/manifest.json",
+      "bytes": 61844,
+      "sha256": "c314772282bab3b97357115afea851d8f64ccf701e95526367d0cab278a97a86"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/background_tree_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_01.glb",
+      "bytes": 140704,
+      "sha256": "3fdaeb3560ece597186f70b144897470c525bd2026ddc1ebd4ac8a539af84a7c"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/background_tree_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_02.glb",
+      "bytes": 140424,
+      "sha256": "b28a346b06c3be3d841bf7a4b4c50bf504686060d6bc4d52cb8ce2f9e642aea1"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/background_tree_03.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_03.glb",
+      "bytes": 143640,
+      "sha256": "c4faaa4a5e0f0cf54270836a2c01654e510851df5b612bd8fb5b45b7ccf8d6f8"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/broadleaf_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_01.glb",
+      "bytes": 26512,
+      "sha256": "91efb9622cc10c03840dc9571b7fc15b133f9937bdc681bb2105b3ae4b7c4150"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/broadleaf_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_02.glb",
+      "bytes": 25580,
+      "sha256": "0974bd9b2afef786d213cb112518396397bc0a3e1f3100b6f0c2c803e3cc4b1b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/broadleaf_03.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_03.glb",
+      "bytes": 25452,
+      "sha256": "df42f9c4e59d4c4d4a5df271f4c70aea0f4f2f39fb2727b55102eb47c819f09b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/climber_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/climber_01.glb",
+      "bytes": 44024,
+      "sha256": "63ec57049a6cef49f23d19926753a7fb43341a9187cc118055be7bc617779bff"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/climber_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/climber_02.glb",
+      "bytes": 43960,
+      "sha256": "b99d56628cd2e92092ba3ebda4690d63996755e5074fa19de8f18ec83fefa3a3"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/fern_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/fern_01.glb",
+      "bytes": 8740,
+      "sha256": "beca8eca51919e2b3270e62026dc012f93219e6ef697b9680847412349c27bfa"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/fern_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/fern_02.glb",
+      "bytes": 8816,
+      "sha256": "d2f53b98361ea8a57d1dea311f368521c8fbc332ffe46358f1c9e300603d948a"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/grass_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_01.glb",
+      "bytes": 14108,
+      "sha256": "08ecd08067a0ba95ac57f49681d2147d897c2b5863423c0d0bad6ecd9cfccfbb"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/grass_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_02.glb",
+      "bytes": 14092,
+      "sha256": "2d598d761c94556be9180b1d34d894ff5579a1e9947b36bb9eb0936bf645dc39"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/grass_03.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_03.glb",
+      "bytes": 14080,
+      "sha256": "8b17044775e5a78dcfe68e4b1e7742c201443aa047135b60fa61971a2ef7ebf1"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/groundcover_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/groundcover_01.glb",
+      "bytes": 6096,
+      "sha256": "56820a8663b8d9362735ef2589db823360c466dad2249ba2ba513ee0a62c28ed"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/groundcover_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/groundcover_02.glb",
+      "bytes": 6096,
+      "sha256": "3fa16921b832915ad63eb9cc3990d5f17ea452aae00157416815041d316a2244"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/manifest.json",
+      "bytes": 6852,
+      "sha256": "e3d0a0271680a2c149ede24b9ae59844639d18d933628ae60de700876191aba4"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/palm_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/palm_01.glb",
+      "bytes": 22988,
+      "sha256": "cc643589a8befa85be58ef6bed73b3ff2b1995e7069229b630b00e431ba54d59"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/palm_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/palm_02.glb",
+      "bytes": 23116,
+      "sha256": "5cd804b7d684d7539871c6995c20b542363d91063036244f5a3958343b4a1b6c"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/shrub_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/shrub_01.glb",
+      "bytes": 32728,
+      "sha256": "53e86dfeef6412f444e88b82cd9d97036eccee0eb15d48eec23262195b2fcc28"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/shrub_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/shrub_02.glb",
+      "bytes": 32140,
+      "sha256": "a48209db2c431a196b9eb983d9352fa69fd8ada803df8cbca7ee2f4dcb7b9cb3"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/split_leaf_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/split_leaf_01.glb",
+      "bytes": 20764,
+      "sha256": "a1ff305c1b71771788e82f15fc4f3f12f6f5a63d5167094ffa41d1250decb405"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/split_leaf_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/split_leaf_02.glb",
+      "bytes": 21332,
+      "sha256": "6f5926e397ca8f97cc07773f7c72a750c2db1b8a40040f79771040f1c4281478"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_01.glb",
+      "bytes": 299904,
+      "sha256": "2f0af4c76504eafe7b7b566bac97ec4d17a3c9f38ef6cb199099ba9a8c41fdaa"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_02.glb",
+      "bytes": 259956,
+      "sha256": "749b931d6a766e3bbaf7e6a4948ebc12a4e9556331d52c5f97c1032154b302d9"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_03.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_03.glb",
+      "bytes": 340852,
+      "sha256": "e64da1bb8aec090969b9af1e10ede0a30a1ae88db0d2ca19e6173a24f9fa501e"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_04.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_04.glb",
+      "bytes": 277876,
+      "sha256": "5298a48831f239790c84416e76404843f4da458aca818264bc4953d752fc889e"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_05.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_05.glb",
+      "bytes": 319220,
+      "sha256": "b55a944f271e5e7815c2bde1859d96dd09f8130cd0c76f93d875ed1caec73aa5"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_06.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_06.glb",
+      "bytes": 299612,
+      "sha256": "1ed33daacf47c41d1e345e552643a4a90f48d6837e7af87b399dc3ee8ad5750d"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_lod_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_01.glb",
+      "bytes": 73956,
+      "sha256": "eb3dfe86b7aa80201b2f678653d43fb65f26b397ca77c958a45379388a1fb8e2"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_lod_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_02.glb",
+      "bytes": 72536,
+      "sha256": "9663c9155f7b99c5c9b8bb8cb11557cc2f7c5ec60fffb9a73de3a621b6b19e21"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/tree_lod_03.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_03.glb",
+      "bytes": 73032,
+      "sha256": "cd3955021c0fc8d57d419e5467458f9efa93980515222e6ea33f412ad6e188dd"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/vine_01.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/vine_01.glb",
+      "bytes": 131056,
+      "sha256": "d0f6970b8b67d2ce3f1186f5b1ef7280ba247e959dfc003b22811026152b319d"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/forest/vine_02.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/vine_02.glb",
+      "bytes": 130348,
+      "sha256": "f90315201c416799cd3b250ad4d3e9f54f9310137f6de50cd0a2dffe6df496b3"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/banana_understory.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/banana_understory.glb",
+      "bytes": 27564,
+      "sha256": "286b689ca1c12877954f67333fe79539ef6faf114a550d2ee73d753f53efb6bc"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/broad_leaf_module.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/broad_leaf_module.glb",
+      "bytes": 2308,
+      "sha256": "27f3dbd89fd961e7cf2060ea1c7736c7f9f90c8005a249ab41db32e9720798b0"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/elephant_ear.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/elephant_ear.glb",
+      "bytes": 25584,
+      "sha256": "b6d94e733264e6ea8e5cc04b3e7c552da6418173fc2d84f37fdabcca52f989e6"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_frond_module.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_frond_module.glb",
+      "bytes": 68724,
+      "sha256": "65bbf0b4ad76e42fb10316b959eba1fd8be0f4adbc21206156fd1d850f869376"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_large.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_large.glb",
+      "bytes": 795156,
+      "sha256": "2f657c1d36ca1a1af423342cf5e8dbafc7853b799bc2a462a4174bb3191ec80b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_small.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_small.glb",
+      "bytes": 419404,
+      "sha256": "2aafc1bdfd56e64ebee52f3b49a29ae6aa976f7b1e0e6550fd1f9ac614f9929a"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/hanging_vine_cluster.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/hanging_vine_cluster.glb",
+      "bytes": 343592,
+      "sha256": "1d693edf1be617fdbe07c854f7f732dc2aa05f9d640a1f154fbdff6fbcb458ac"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_canopy_tree.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_canopy_tree.glb",
+      "bytes": 3101744,
+      "sha256": "50cdf0d413cad05e3eb96758c70f54194df79f758cf90844b1aac6c68994c9e5"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_broad.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_broad.glb",
+      "bytes": 98296,
+      "sha256": "848601ba811775d75ac7ff968b6d9bad50bcd86e6fad8c28faf5eb3104c832d8"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_short.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_short.glb",
+      "bytes": 126308,
+      "sha256": "a35459c4c2d63c38c1fca4b130c6d27be4359f158fe3c8258ac009ad2243b2c6"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_tall.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_tall.glb",
+      "bytes": 159908,
+      "sha256": "023b9df431e569f1aaf9ffe952d97d698eb532a9f42096135347ca1134807396"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_groundcover.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_groundcover.glb",
+      "bytes": 47148,
+      "sha256": "caa1e764fddff60ad98ec230565b6d137763686b18c334ebd87167a38d95e1cb"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/manifest.json",
+      "bytes": 4352,
+      "sha256": "91bbba04c168a8e30c0cf6fa478bcc4b51f956c3cea06d6d6a4c6bddf1a9e45b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_frond_module.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_frond_module.glb",
+      "bytes": 109568,
+      "sha256": "954a49335483aef53ad3dd152e17cbf8e4f6013d5c334cf837bb3ca4c26e0828"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_tall.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_tall.glb",
+      "bytes": 1763384,
+      "sha256": "72bce1dec1c67f445990d361902c349637d2bf646fbd59bd316b05a40afff19d"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_young.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_young.glb",
+      "bytes": 944244,
+      "sha256": "318a8ba19ebecaf336f3d0a72e0804ea9fb5c0cf17b732e62561050bf26a965d"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/objects/tropical-kit/vine_strand_module.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/vine_strand_module.glb",
+      "bytes": 46996,
+      "sha256": "27b99c9a7d18cff54fff94d6dcac99f4ae3e34e2e0d6daffbdec382eb30c18b8"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/forest_manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/forest_manifest.json",
+      "bytes": 579,
+      "sha256": "3a6cc29c563761a5a7358a9d1d2aaa6f89d8ba5a243a5d9126e40dd4657e2177"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/threejs_interior.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/threejs_interior.png",
+      "bytes": 2649275,
+      "sha256": "b6eb82ff142e38fa52a22ea296610851021cec2e30cfb9a5e55f11682f985dc4"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/threejs_preview.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/threejs_preview.png",
+      "bytes": 2614024,
+      "sha256": "d597ad05053d8b3743baba863248489d533272199a5d68a0b6fb387fcf5b46fb"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/v2/forest_manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/forest_manifest.json",
+      "bytes": 618,
+      "sha256": "12a20c58494a68c57fb0e5c55376d818878e947126667a53f97cc6cc3cd3f3ce"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/v2/threejs_interior.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_interior.png",
+      "bytes": 2451102,
+      "sha256": "18730b54200a4e77c2308a8e88de719b9e5dea820c9b104782fafa4b718f5d00"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/v2/threejs_overview.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_overview.png",
+      "bytes": 1939581,
+      "sha256": "336435903a410b9eb44c5a8deacac33f897b684b84fee5a7b87bfba9db9e9c91"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/v2/threejs_preview.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_preview.png",
+      "bytes": 2482226,
+      "sha256": "baf89f6ebbd3eb0f6daa689a07b1189d689baafc9254e558b46143230473ba5e"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/reference/v2/world_config.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/world_config.json",
+      "bytes": 358,
+      "sha256": "c42d605a0e08a7f2b516da84883dbe0221e0a1431f1fb26996866002e8bb21c8"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/scenes/coastal_jungle_reference.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/scenes/coastal_jungle_reference.glb",
+      "bytes": 3951004,
+      "sha256": "0f7c832e9461b12c8a3181ba622b90ec9069869f2f5fc593713545dba3ffbc6c"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/scenes/coastal_jungle_v2_reference.glb",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/scenes/coastal_jungle_v2_reference.glb",
+      "bytes": 8998392,
+      "sha256": "6687a8a7dac3ace90b524e9f3a1e75cae72c5ff9d3a675c67bf9dcf86b86707b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.json",
+      "bytes": 902,
+      "sha256": "0798a4614519937937752d271adea158786abefe14256c83eb5ecf5919c93670"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.png",
+      "bytes": 730298,
+      "sha256": "9a5f161defbdd555f7ae53f34d984b929f5677f298e90b6feb38ec898fb0b864"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.webp",
+      "bytes": 211436,
+      "sha256": "62c7d4959defd724cd9c97a8349efec047e3207d825e24e195889aafe4d42ac4"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.png",
+      "bytes": 1350230,
+      "sha256": "bcc259260f2955d90eee28ac178f2c287b56878f832a3cf1193bd5b5e671b9e1"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.webp",
+      "bytes": 401246,
+      "sha256": "a6de5ae2aa881cff4d116f7d3c50647be6d411f0355fffb6cd94e3a0a15042e6"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.png",
+      "bytes": 908939,
+      "sha256": "9237fc9e22e40641e082ab5b9f81bc4973927b0140443a8e2a2ba5980c64cdbf"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.webp",
+      "bytes": 316126,
+      "sha256": "c9727784906396b4baed94182ff71f894424a49eb28aff63647315cac24f9065"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.png",
+      "bytes": 986011,
+      "sha256": "af884580923f672914c7f235269a0f4c79ff4613f1a9fbe3ff86eb2ca3532567"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.webp",
+      "bytes": 312430,
+      "sha256": "04c9a04a6500003bf5e56b7b4f38e4d7e7844b60cf6939f23c29744ea0553cd7"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.png",
+      "bytes": 2394365,
+      "sha256": "99de99c22b1e3f442c86d5a92590d238961ce5ac460521b7feaba735e8027c70"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.webp",
+      "bytes": 467220,
+      "sha256": "e3d85bed0aecc2fb812710742a1949438c3895a96c58559fac104754a29525b1"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.png",
+      "bytes": 2624413,
+      "sha256": "3d8d84b2078c3017fff6dedc2860cb906f65926cc46153a961213ef07e154b95"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.webp",
+      "bytes": 556758,
+      "sha256": "4bd1de5c92154e816676ec3b13c7ce196edcf020baf3b989b117b54f83e20dd2"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.png",
+      "bytes": 3095564,
+      "sha256": "bc196fb6dc59fb05cb065f723a9f1303ace5e3e3acf301d8498046c573694496"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.webp",
+      "bytes": 522582,
+      "sha256": "c604db8a5edb53a1d0c35b01dae3b52bc8ffe1f721925848c28253cee7d7e46a"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/manifest.json",
+      "bytes": 3379,
+      "sha256": "26b713e157e808637c4b492e6d91c14cc33f6f26f0a528e2e02648c04045bcae"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.png",
+      "bytes": 2433489,
+      "sha256": "dd1d7dabd45e2e1bf15f99a23ed0fd3dba38f839a9cafeb3037fa1439fb9596c"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.webp",
+      "bytes": 449878,
+      "sha256": "a4781e7e54655c58c6d63d035e4789365d6eb0a1ea71a839003fc9d0be9d9aec"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.png",
+      "bytes": 1581710,
+      "sha256": "cf5e68434c152a0d1d8abf24c6f69c285d808da2ecf546c529826de12bb3b9a1"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.webp",
+      "bytes": 576196,
+      "sha256": "f40b57e864f8e433bf7751174c6f0aace366e59043ec1f90f3b7da1fa582445e"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.png",
+      "bytes": 575210,
+      "sha256": "1fb9d26676dbbd813f22b20f9e2b79f3e67abcfb4b9339c2c50c4c0608aa277b"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.webp",
+      "bytes": 150920,
+      "sha256": "3b78824e767c0c7d65869017be04b741f61f6192b6bf5160ad31aaf853b13d98"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.png",
+      "bytes": 2397443,
+      "sha256": "452122715a8bec39ee532b6c9ab9e0c32f7977701af16ead25d12c5663503749"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.webp",
+      "bytes": 449702,
+      "sha256": "ab6d59a796a04995cd0dcc74b19e8ae79ebaa72a4f12e07c14cbbb138975d027"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.png",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.png",
+      "bytes": 1353529,
+      "sha256": "1b7c74ba3d3d301479e6f1c294a503a98775e9b9640f8d473eb7dd7b0b0ceefd"
+    },
+    {
+      "source": "public/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.webp",
+      "output": "public/assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.webp",
+      "bytes": 276462,
+      "sha256": "19b0b73e62eb71ae04314bb83e3d48cd5076dbbc0b13155d30b809d9b739177b"
+    },
+    {
+      "source": "public/Assets/terrain/colliders/colliders.glb",
+      "output": "public/assets/gods-end/Assets/terrain/colliders/colliders.glb",
+      "bytes": 3752,
+      "sha256": "959517e6d1d356bff888e30058ce1188251798b5c67d317bda1529375dcc3681"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/bark-knotted.jpg",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/bark-knotted.jpg",
+      "bytes": 53873,
+      "sha256": "f1d884d2e7037e03844f000396d62855a541dc9c7edcce32862f9b1f3a8fc244"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/bark-painted.jpg",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/bark-painted.jpg",
+      "bytes": 56801,
+      "sha256": "a585fb1dc4b47f49a5a70147e1de549ebe29b3fd8e3d3fe0d333560db48763d7"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/bark-peeling.jpg",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/bark-peeling.jpg",
+      "bytes": 63167,
+      "sha256": "95c7e62d8a977b0131d3b83e3ce1fe2b5d915b4de030646c99d84b225ca6c539"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/bark-rugged.jpg",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/bark-rugged.jpg",
+      "bytes": 80264,
+      "sha256": "2e0567c4ab9aa88655cc583a832c1761fb44f9b32c59df0898f70a819d2d4720"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-1.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-1.json",
+      "bytes": 524,
+      "sha256": "edcc95d02fff9574d2c4f872c9e51fb7044b6db5ff03b37dd547bc05c884c4d0"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-1.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-1.png",
+      "bytes": 89922,
+      "sha256": "49742fb5faa9aab9a86ba7be7570988c46f38796a53c3ae48b9f3dfc56c694e9"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-10.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-10.json",
+      "bytes": 520,
+      "sha256": "7794723f8c6e1df4c2eb3ebe890ae0162d0dd35f2c45bdd966126ac63cc1465e"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-10.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-10.png",
+      "bytes": 68047,
+      "sha256": "1c0578b6bfc8cce6099cf016b1f5800051432bc4dbf436d56c1308d1e2302c36"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-11.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-11.json",
+      "bytes": 518,
+      "sha256": "291cc917134cb926be639edd4dce3dfd6f3802d2b0d97a799cbbfdd8bea2dd3d"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-11.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-11.png",
+      "bytes": 49328,
+      "sha256": "5ac61e6b23b50d3ebd4b849d189f0a9984521ed0e71c6c441027c650b5d32c51"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-12.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-12.json",
+      "bytes": 522,
+      "sha256": "c025efec69968b881317c8e84325c67ac3bef70cafa9e93b4342e46160cfc63c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-12.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-12.png",
+      "bytes": 57783,
+      "sha256": "6f630068923fc4ec9e3c59f1261f8b51346f11da0df13876657d3e694f60a48b"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-13.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-13.json",
+      "bytes": 522,
+      "sha256": "347f8f8e2bff3be3ced60cb1a4360166f0807eebdfe9fe6735dc40cd0993b4e8"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-13.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-13.png",
+      "bytes": 50107,
+      "sha256": "03f775468736b695b3dd7163f943fccc8c1db2116d4607263cded978bac5184a"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-14.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-14.json",
+      "bytes": 520,
+      "sha256": "5fea22a70ed022f8d53b6093eb4344955181bc679502ae44e25e18fd48ed8b82"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-14.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-14.png",
+      "bytes": 58347,
+      "sha256": "414de0a81a6150d277c83796d93372c63f92bb7b367d908cb56396c9657f1903"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-15.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-15.json",
+      "bytes": 510,
+      "sha256": "7ca6ead6c871363ef3ca45ccc57fb97c8ae6a8db084d376f1a91803903ab8e84"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-15.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-15.png",
+      "bytes": 62643,
+      "sha256": "5805cbec5b6a2a08290734394a7eeae263deff612bc9102bdfcb585b065f2300"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-16.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-16.json",
+      "bytes": 522,
+      "sha256": "6ae8d9ee101f97aa6bee0e6fbbd8e160ae1125e4789965ebc13a1ca0682564f5"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-16.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-16.png",
+      "bytes": 48743,
+      "sha256": "f003aaf7d544715a652566417e90de291e0828d00a8d0756e45918804069fb73"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-17.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-17.json",
+      "bytes": 520,
+      "sha256": "e3444768e756c4b0229dcf2b69feb2eff76025c41b79388e5cf657bb16543727"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-17.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-17.png",
+      "bytes": 66764,
+      "sha256": "cab9ce2f92a6717506da6446184f359aa63dc061703fe34463f2ff9c78ed95a6"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-18.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-18.json",
+      "bytes": 524,
+      "sha256": "694ae2b67ea2e381c0a79d3727e7e5913c124cda3b64413223435a832ce1f7b1"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-18.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-18.png",
+      "bytes": 51694,
+      "sha256": "6643482a3e3f9ccaffb044f8bebd4f70b62c6b4da33ab65eefd9a14eae089035"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-19.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-19.json",
+      "bytes": 530,
+      "sha256": "1bb456ba140dac7cbb3d1138b03633174ab2c1182ccf4d6c75646e36e78e7583"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-19.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-19.png",
+      "bytes": 49595,
+      "sha256": "29ea8ddbb40ada78f3797d7820724bf017759a8ffbab6ea192e720b8d9c1af17"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-2.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-2.json",
+      "bytes": 644,
+      "sha256": "9b0b477f6df43990b422f62fb40fda5633baed0b1c5243ed4f976ca8e34c0de4"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-2.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-2.png",
+      "bytes": 68182,
+      "sha256": "dbf91e309615e7f750ef5768869d329a8967294f33218641e8bf0f01db418a8c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-3.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-3.json",
+      "bytes": 748,
+      "sha256": "e12c1500683c41a7140419235e41129a52e29277918d1d656a3254acfb7d8186"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-3.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-3.png",
+      "bytes": 171319,
+      "sha256": "935cef454031f91e409b4b294c2452af0388017686707820cd25ae77fac48cc8"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-4.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-4.json",
+      "bytes": 524,
+      "sha256": "69cc38c4db3ed3c45ef6e98f526bc17a89368f9ffe994c7eaed06c245c0dbf7f"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-4.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-4.png",
+      "bytes": 234000,
+      "sha256": "d81a80fcaddd9bde47c661d42892ff5faad9ff423b4b948d4ba32f8832d141d7"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-5.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-5.json",
+      "bytes": 596,
+      "sha256": "848c815acf421d74c8705f9fb403db899039d8fc848bbf6731d6c8b9da1f9385"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-5.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-5.png",
+      "bytes": 236925,
+      "sha256": "f5015226dc5fd7d6c492963efb915aab631d0430ed8a8c954f6861e55f47bbdc"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-6.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-6.json",
+      "bytes": 595,
+      "sha256": "db797f7fe30350e896cdd4fda50207382806edf16b71a2ed25d09ec1ceebbb40"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-6.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-6.png",
+      "bytes": 236009,
+      "sha256": "ee6adb264c3499b786f48bd8fc67c4fc2ae265afa79dbad00532b05ecfa07bd6"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-7.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-7.json",
+      "bytes": 596,
+      "sha256": "129c91572aa244983f59e7827c3f9b5a9c710f7b41f3e6b3896199917e9bf45c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-7.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-7.png",
+      "bytes": 258277,
+      "sha256": "2eface317b5b7d2a654da968b3ffdd7f6029565f7e07dae7c248107084559b8a"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-8.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-8.json",
+      "bytes": 660,
+      "sha256": "8e9e719faba5cbe92f10edbf6803ba8293a16e71a1f94eb50b437e81a3791980"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-8.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-8.png",
+      "bytes": 192372,
+      "sha256": "afce25bc4ab034e4b9f2a3ac1d3fa2f6e7879e46061d291192bc239b88ab65bd"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-9.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-9.json",
+      "bytes": 657,
+      "sha256": "9cd1adc0e95fa459e2424c7309b6650d4057885f562305bf961a2fa317a063a6"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/billboard-9.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/billboard-9.png",
+      "bytes": 236547,
+      "sha256": "3da7f4f2dda40c00fd7af4e38fa8cac6a833a03d04475232cdfb7bf751340fc1"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/leaves-gold.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/leaves-gold.png",
+      "bytes": 153620,
+      "sha256": "8eb43e77b33f2e04da29970ae727e4e9e2fb78fcaefe408e0d89c203c45dc2f9"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/leaves-green.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/leaves-green.png",
+      "bytes": 152170,
+      "sha256": "440a3b14e758b8f578edc035f6e6742356162d9b852d8a5730b3bbc2a87b72b9"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/leaves-pale.png",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/leaves-pale.png",
+      "bytes": 167091,
+      "sha256": "195e961e91c1ca744babdb52661243a572b64eb49a2ffd9b97db56a2a0e9d29b"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy-textures/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy-textures/manifest.json",
+      "bytes": 2006,
+      "sha256": "5abb5b1b210c90303c899fb46c6270de6ae0d2bddec11b9fe0f82c941e9f2d12"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/lantern.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/lantern.glb",
+      "bytes": 50544,
+      "sha256": "e5c63994d314fc01819eed94a0b33fe3daed53d3ba29671a2c1f4fcbfa10e1d8"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/manifest.json",
+      "bytes": 2726,
+      "sha256": "4bc035ccb199e363bd21329b0cbfb1cd50e0836fdb6676e3f90ce6ae8fc0e974"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/rocks.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+      "bytes": 31252,
+      "sha256": "ad433b4fa0ca47205e2b8d284b77b43e96003610d161979aa44392fac80d1ba4"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree1.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree1.glb",
+      "bytes": 218944,
+      "sha256": "f5d708af103eb91a9fd5f304d1deee7e7f3442def55c48f909d307ba7971da69"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree10.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree10.glb",
+      "bytes": 205104,
+      "sha256": "474c4e02af82b833a46c289874624ed44071d38b643c6e0c4fdd0d5ea8898316"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree11.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree11.glb",
+      "bytes": 105396,
+      "sha256": "3742e2485628d96e2fa62acf727eeef3b96fd0b6626d335256dbe3d7e8a7140c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree12.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree12.glb",
+      "bytes": 127200,
+      "sha256": "ea8ab3b96cd4727841dbe880118a8861c363e355269507016e8bf375d6e5f5ab"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree13.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree13.glb",
+      "bytes": 92912,
+      "sha256": "f7877295d60332f29d1e0d2ef49e9418ac94373088ec3ffb6125d79d78786431"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree14.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree14.glb",
+      "bytes": 161488,
+      "sha256": "67a02c63360c6b5e6040f49ac98f895657cd6c04ff1dfac539c870915a24588b"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree15.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree15.glb",
+      "bytes": 196972,
+      "sha256": "96071544841f574795f568ca6cd417e8024813514ce797967e15695d16e8e91b"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree16.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree16.glb",
+      "bytes": 121248,
+      "sha256": "67e05bdb758901fa6ea775a29243d2fbd9e0f7b2680552144ad0f4b5385fa24c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree17.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree17.glb",
+      "bytes": 191736,
+      "sha256": "9ced17d1f6448106d9f62c61a3ebc693086d9d5eee0d125075720cb9f0a27757"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree18.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree18.glb",
+      "bytes": 97528,
+      "sha256": "5ec831216295ab12d543d7f96cab3c5aae9567e867e7a7839bd37338023c6d8c"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree19.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree19.glb",
+      "bytes": 85544,
+      "sha256": "d86c3677cac4e99f56b426274a9e34ea9c17ccea787e7cf8071d7674ebdeebb0"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree2.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree2.glb",
+      "bytes": 130464,
+      "sha256": "4e1bb2f4cbc271d835c77da4b623f3b34d755b22f3a294ff9c43c36c9af4aa09"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree3.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree3.glb",
+      "bytes": 240352,
+      "sha256": "9bb4129e8599f9506835c7e543075f98c83645ef643036380559259c98179584"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree4.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree4.glb",
+      "bytes": 442412,
+      "sha256": "ae16ad7e20d8bc7f1614bd11a3b299de3a149b04d3c1233cb447c4f040fcdaa1"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree5.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree5.glb",
+      "bytes": 445916,
+      "sha256": "dd3d80656b4412534e904d92482cdb5cb81d73486edefc17b9ea853a4ef118d1"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree6.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree6.glb",
+      "bytes": 444080,
+      "sha256": "dda934270bbb23f61d00ac0123366203ab4bc65abb6477d0ea168e8543ec96b4"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree7.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree7.glb",
+      "bytes": 466700,
+      "sha256": "d67e4ff4f929c799247ba52ff347f84c24146f924ed4fd1daac9e1436ae53599"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree8.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree8.glb",
+      "bytes": 387500,
+      "sha256": "58c999eccefda69f6f819115a673ec1c8098375a3e4f2661fd2b20b1eaadb6ed"
+    },
+    {
+      "source": "public/Assets/terrain/fantasy/tree9.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fantasy/tree9.glb",
+      "bytes": 430200,
+      "sha256": "0a732555b1e3048457d866981aa0a15af3784ffde94291b74e2bce78da6f0c45"
+    },
+    {
+      "source": "public/Assets/terrain/fauna/birds.glb",
+      "output": "public/assets/gods-end/Assets/terrain/fauna/birds.glb",
+      "bytes": 72176,
+      "sha256": "d53734db03aa5e8503f2c219bc142d46720f11f710da39cd3adc14af496ff709"
+    },
+    {
+      "source": "public/Assets/terrain/foliage/game_ready_grass.glb",
+      "output": "public/assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+      "bytes": 341444,
+      "sha256": "a56cbfab0e3db92924f9456a364ba9409bb4cc840af1c55c2aa1fde506754967"
+    },
+    {
+      "source": "public/Assets/terrain/landscape/landscape.glb",
+      "output": "public/assets/gods-end/Assets/terrain/landscape/landscape.glb",
+      "bytes": 88136,
+      "sha256": "f62c4f435e7eeb6667d90f2e85b3c45b168c32d4a111d6d028de9c0f34849851"
+    },
+    {
+      "source": "public/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+      "output": "public/assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+      "bytes": 116456,
+      "sha256": "0304031417775e1f05f4b3818789f9b0b08d7501e38315d67219b485db22642a"
+    },
+    {
+      "source": "public/Assets/terrain/props/lantern.glb",
+      "output": "public/assets/gods-end/Assets/terrain/props/lantern.glb",
+      "bytes": 498400,
+      "sha256": "1cf067c4913d54e593fd67098f5f735cbd15ce55825efb47ca21f05b005504b6"
+    },
+    {
+      "source": "public/Assets/terrain/props/stone.glb",
+      "output": "public/assets/gods-end/Assets/terrain/props/stone.glb",
+      "bytes": 367356,
+      "sha256": "5a32c3972bd8d638ca173f2060f923c10130fd19b6efa94860ec9e772cb22cfa"
+    },
+    {
+      "source": "public/Assets/terrain/props/sunken-chest.glb",
+      "output": "public/assets/gods-end/Assets/terrain/props/sunken-chest.glb",
+      "bytes": 184644,
+      "sha256": "b0981e122cdf200f257b61543bec46d2940646df838abf61e34b9ff6ff3ff741"
+    },
+    {
+      "source": "public/Assets/terrain/reference-biome/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/reference-biome/manifest.json",
+      "bytes": 327,
+      "sha256": "e2f324a65dacb11550c66d57fffd7020b84e23c7a0ef8cdb80dd8419902fe3a0"
+    },
+    {
+      "source": "public/Assets/terrain/structures/fence.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/fence.glb",
+      "bytes": 231268,
+      "sha256": "51e7da274832bddf94dde0c9d13f13a98255fa31365549c18f50c38ae168f2fd"
+    },
+    {
+      "source": "public/Assets/terrain/structures/medieval/medieval-house-003.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/medieval/medieval-house-003.glb",
+      "bytes": 9489752,
+      "sha256": "6d96335019b64d2423fb15be62f653d3decc0b449a17591be18bf1c92ecb52f6"
+    },
+    {
+      "source": "public/Assets/terrain/structures/medieval/medieval-house-004-tavern.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/medieval/medieval-house-004-tavern.glb",
+      "bytes": 7895336,
+      "sha256": "c2f42ec6c1b406d9a7d6abb054fd20ac2473879346a382597f5aca0645cc88ff"
+    },
+    {
+      "source": "public/Assets/terrain/structures/medieval/medieval-house-005-blacksmith.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/medieval/medieval-house-005-blacksmith.glb",
+      "bytes": 7011076,
+      "sha256": "3ba9675f6bd1f39eda50471ef359c7237e115119cc3678bd503462d174664d4c"
+    },
+    {
+      "source": "public/Assets/terrain/structures/medieval/medieval-house-006-residential.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/medieval/medieval-house-006-residential.glb",
+      "bytes": 10215780,
+      "sha256": "6de01e9a1df34ea95b55ee9d672421f452b63e24a675e866ac708184616ea0f9"
+    },
+    {
+      "source": "public/Assets/terrain/structures/medieval/medieval-house-009-tavern.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/medieval/medieval-house-009-tavern.glb",
+      "bytes": 7445360,
+      "sha256": "cc8c33a3aae68ddc407919796ddbb5bbc89197eb8f4035323bac13adff83dd0c"
+    },
+    {
+      "source": "public/Assets/terrain/structures/sketchfab-world.glb",
+      "output": "public/assets/gods-end/Assets/terrain/structures/sketchfab-world.glb",
+      "bytes": 315992,
+      "sha256": "6b45f23665376f4e2d594aa842a4f7295ddd8fc80faebfdcab8cb99da74ac78b"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree1.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree1.glb",
+      "bytes": 183556,
+      "sha256": "cdff37cd112772bc56df7dab47239c98d1a37d842000e21f5aaa9c37fd33fce0"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree2.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree2.glb",
+      "bytes": 97148,
+      "sha256": "2667538bf58fc20cfb3b7dd18ccde90b60a29ff07854ea1a1cfb81fb5c9a240c"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree3.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree3.glb",
+      "bytes": 188280,
+      "sha256": "d8a0cd0ad3b69cb8b3e309544da4155f09318a5b09aaf1ec7c3dfcfdbfe22243"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree4.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree4.glb",
+      "bytes": 362120,
+      "sha256": "61b71ec7f4a474f7bd466f860d81cd0caedbbbb3db2cc63d987e015efa872455"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree5.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree5.glb",
+      "bytes": 355280,
+      "sha256": "c635c49ebf0d8f2fa5a35bdb2c6b950b4b700cb7bca5141b65de4fb3a19ffa40"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree6.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree6.glb",
+      "bytes": 348252,
+      "sha256": "dce46d11f2b26673d64b078522d9180a2fe7f2d2aa1550de3493950a11c50132"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree7.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree7.glb",
+      "bytes": 389828,
+      "sha256": "472e1fd7f09844b234cc1556782111e9181beaa21d96d0d2f40208100bc0ebd4"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree8.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree8.glb",
+      "bytes": 1046940,
+      "sha256": "f2cb51f2ee94f93822c1ec3ce5790ebce875a62322f4273fe66656711c25e4dd"
+    },
+    {
+      "source": "public/Assets/terrain/trees/tree9.glb",
+      "output": "public/assets/gods-end/Assets/terrain/trees/tree9.glb",
+      "bytes": 356120,
+      "sha256": "7f31b3a1963bf5fecdc8c52ff1d85e5263fdcbc6b5f8ee584a6be0b418f7edd4"
+    },
+    {
+      "source": "public/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+      "output": "public/assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+      "bytes": 221528,
+      "sha256": "8488312bb8c4821d9ef29b58e2a2095ae4f96e607e2e48dd2f464319facdfdea"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/forest.glb",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/forest.glb",
+      "bytes": 3520500,
+      "sha256": "25091ad1ff123edae39e812abae7ddb9b249ab8e0b496c6307390e6932a78c71"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-broadleaf.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-broadleaf.ktx2",
+      "bytes": 25688,
+      "sha256": "718936acdb7c7c0f6601edbdd7becc3e18fb1064daad180544abeb776cd23a5c"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-broadleaf.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-broadleaf.webp",
+      "bytes": 10902,
+      "sha256": "dc474c9c388783183839b6b239c15cb732fcc7a39d2a8469a217a51a003acc6a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-reed.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-reed.ktx2",
+      "bytes": 30776,
+      "sha256": "8e48699fb2e5ce1d56db2af41aa80aa3d72074a461d741ebe0abfdd028319309"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-reed.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-reed.webp",
+      "bytes": 13834,
+      "sha256": "0d0f6897247c8a4fc312a4a016f9d77dc72f2ba7824411865812abc366f355ce"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-slender.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-slender.ktx2",
+      "bytes": 27170,
+      "sha256": "b7352266c8e538408c5f4b79ac916d5538c2ea42df7e30017f884768ea818398"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/grass-slender.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/grass-slender.webp",
+      "bytes": 13424,
+      "sha256": "af6d11bf004af508de42929b6f4f6f0a92c5211c1c96930d5ee5bb86df766ac8"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0-normal-mask.webp",
+      "bytes": 52924,
+      "sha256": "a998f1e6ac1d23e12a5345e883c166aefd377869afea04236b7c0e41f43ea444"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.ktx2",
+      "bytes": 33677,
+      "sha256": "20948905ec055ae8256f670f10ed68c9f2bc08a62cec2f33e957b3b09ba31e1c"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.webp",
+      "bytes": 12324,
+      "sha256": "f71ec28ed2344e08bc88205bf38725ecb2ef459515edac291aea2167b596b42f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1-normal-mask.webp",
+      "bytes": 49440,
+      "sha256": "cbdfc0bd4eacec4700d8e07a166819416cedb6fa9dfe0b2d2f9a71bd04132696"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.ktx2",
+      "bytes": 32014,
+      "sha256": "41600d72beaf727bcda7aa778d0b77b92a356d712c6f722c924bcb6d860b62a4"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.webp",
+      "bytes": 11950,
+      "sha256": "3140a8d861474d724e85db1b289c4e163f4892761123ca8592c925c1064987d1"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2-normal-mask.webp",
+      "bytes": 46246,
+      "sha256": "b602bc1fd8329c06c3e2ea00f836fdc7183ead70aea0b0f711f10a3fc7edbfdf"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.ktx2",
+      "bytes": 32932,
+      "sha256": "0ff3d598137599f819318ec93a1bda12d29186e6750536e3acd8de784848693a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.webp",
+      "bytes": 12360,
+      "sha256": "ac1c6298cb9a62caafba08b6f076f29bf5e92e27d68a7742aca3a44292d47551"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3-normal-mask.webp",
+      "bytes": 56882,
+      "sha256": "d27d012b0c94d4d9ad4fd5217a301b7fd2952cce256eb9162ec237951744ce61"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.ktx2",
+      "bytes": 35991,
+      "sha256": "1b13c69fe052f4470d9106267a4b6ec503120934dc0f47fcc10ddfc353981267"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.webp",
+      "bytes": 13832,
+      "sha256": "140ca3cfbdfbdc9b927648ec3500bc32124750343b4db4106e08165c7b45a677"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_01-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01-normal-mask.webp",
+      "bytes": 168948,
+      "sha256": "81fd613a945bdcb97264ed0ea38ceb51c8a018cd5577cde55af587043129a758"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01.ktx2",
+      "bytes": 64217,
+      "sha256": "d1c9be2585ff221ff8eac13f8caf7a6ef24d7440edc0156948c7a7cc5bbd9afb"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01.webp",
+      "bytes": 27096,
+      "sha256": "6bf37e74b2b62051a930e45ff4a68d5ebf5b9eec3f2b053fec51a16f7fc6089f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_02-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02-normal-mask.webp",
+      "bytes": 161670,
+      "sha256": "86a0f55a3d54290ce82155492adbfe307b4255dba1fbebe731a907b68f4b9290"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02.ktx2",
+      "bytes": 60601,
+      "sha256": "adda7861624351f354050dc0aefae341e8e71292519cd9637bd5ea93fcb73ae9"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02.webp",
+      "bytes": 24762,
+      "sha256": "40e018336a3be77727034692ec51d78918e9f823df30a20718ad4ac575051fba"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_03-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03-normal-mask.webp",
+      "bytes": 163192,
+      "sha256": "1be44d78c4aff08adc8ec6409aeb5b065e9fc6f4fea0c0339c5a34fb09e99494"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_03.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03.ktx2",
+      "bytes": 61649,
+      "sha256": "7280038e78f81bb244228489a863c32bc4c8ecf062a441a25c3f849c5c10f667"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-background_tree_03.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03.webp",
+      "bytes": 25352,
+      "sha256": "8a4cb2a920fdd3b2cdb1d1bab7a6493d1ea5c5ba9845eda5f37b504c860de1ce"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_01.ktx2",
+      "bytes": 22575,
+      "sha256": "71939ce0c48806248b8307bfe06c094e6ebca1a819baa91103bdc0239ba42e4e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_01.webp",
+      "bytes": 10058,
+      "sha256": "ce1cfba15c3f1f608444e344d0ef4a2e6e30d796b397906e0f4d39f6c063d1f7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_02.ktx2",
+      "bytes": 24624,
+      "sha256": "75e21aa30a7f383f8992fda2a36eccd4fcdbcb9a7f2c406a6279069132da000b"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_02.webp",
+      "bytes": 10352,
+      "sha256": "b95b32f1f21e3364fe8971a9437bf4f6c694f7d53e19d3f8cf473fd9e96dd51a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_03.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_03.ktx2",
+      "bytes": 23612,
+      "sha256": "7eefe7bcefa6cabe5f70126ebb59f11d79dbcf403cbe4b103136a8e064b061f0"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-broadleaf_03.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_03.webp",
+      "bytes": 10070,
+      "sha256": "23b80ef3b395be93292fcd46f558edb565dd2effb1edb50014f530529700d300"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-climber_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_01.ktx2",
+      "bytes": 38919,
+      "sha256": "ae85844dd685ed6b0078f1cd82b3f1abe103d71b391d7efceb061a158cc0d531"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-climber_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_01.webp",
+      "bytes": 18696,
+      "sha256": "33b475b365102cdb895c2c60d277bf53cc79a5a615487f4f7b9d8e30a41e4cb2"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-climber_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_02.ktx2",
+      "bytes": 38416,
+      "sha256": "a03ae713e62f03f3310b35fc5adfb4d1968ea7e641aeaf4f9e7b8464312fef4e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-climber_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_02.webp",
+      "bytes": 18568,
+      "sha256": "172270732d392dba299b9edeb592fbf27c1a2207ef1bd292db7b2a99d798ef06"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-fern_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_01.ktx2",
+      "bytes": 22072,
+      "sha256": "dec40121c7bf3bcf5b8b643dc69be03c789797f7261c9e8f69232d778c2b2e2f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-fern_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_01.webp",
+      "bytes": 9470,
+      "sha256": "c37f93bb107afba20f2e08736ef22ba62e0453eddc277f781e14dff2c2f818dc"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-fern_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_02.ktx2",
+      "bytes": 20551,
+      "sha256": "1f38208def5246a767c53fe15d3477788d2a475dc0f62ce8e847d4fd2e8bd80f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-fern_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_02.webp",
+      "bytes": 9112,
+      "sha256": "8eeed5799bee32f79eec9fec2fee22b9d1542e431736d021877c047737e6780f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_01.ktx2",
+      "bytes": 28277,
+      "sha256": "9270f2812b46ea3d1323cdd09928c687b7d975465acf78b585b53ff6449c984c"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_01.webp",
+      "bytes": 14676,
+      "sha256": "bdeed598b052ad6294be24e4d790e0d67f2243d4c9b9bc7e7970d27f5d727af2"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_02.ktx2",
+      "bytes": 30763,
+      "sha256": "889ad51f0fac5b7a870e9a20a09a3d548b3574e1061d8e623c8d052ac3606ae7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_02.webp",
+      "bytes": 14878,
+      "sha256": "5688df1f1f085df5de5ed8ef7d282cd4554ceba8122270770c9f2e3cf481db73"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_03.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_03.ktx2",
+      "bytes": 32902,
+      "sha256": "54d770abcf2243dad38d93179ab38a7b5ec2b705b3fb667bedeaf3c50341b9a7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-grass_03.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_03.webp",
+      "bytes": 16008,
+      "sha256": "c6530df4756141de3702b9532e49ea3488a5c0522d5a6e6fa733de08799bb50b"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-groundcover_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_01.ktx2",
+      "bytes": 28370,
+      "sha256": "ac4d1d1eee15bff815d4fe6611fed5cc0765dd752ea2180c0ecd5e1bb2fdc9ac"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-groundcover_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_01.webp",
+      "bytes": 11122,
+      "sha256": "19aa8fbaa6b461a8698c1f7d326cca3506a774af20e04f89648644f776d87fb9"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-groundcover_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_02.ktx2",
+      "bytes": 25725,
+      "sha256": "09dd51c65465c624ff49463c08235561d8210e1e43c29acdcb7db51c27205362"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-groundcover_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_02.webp",
+      "bytes": 9824,
+      "sha256": "5862a9b118e1787591d3a3b45b586abbadb2439da52b1991f144a8cf2f88f745"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_01-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01-normal-mask.webp",
+      "bytes": 56252,
+      "sha256": "9e73330a80e3e9f456209de9a4b379fb00e29ef7428628128a6a37a25c417835"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01.ktx2",
+      "bytes": 35286,
+      "sha256": "5ce19aba18087b42aa07065d8544d15e3687a58fa240dfa10dd6f844913106f6"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01.webp",
+      "bytes": 13070,
+      "sha256": "0430c9c443fcbad510945d1175f6e0a32af05ef6d2cbdaa88cb2df7ecb4faa2f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_02-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02-normal-mask.webp",
+      "bytes": 47012,
+      "sha256": "1bfd236006a9424aa5fa2f8503e4ec4c927ba8b34bff2c5aa8f826438ceaa0e3"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02.ktx2",
+      "bytes": 31993,
+      "sha256": "6102a6fb50d88f254152634e7298aebefad6468c68acf302720c1960652dafce"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-palm_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02.webp",
+      "bytes": 11922,
+      "sha256": "629ed17608543b9e4261d216b44793e626fd129b4a20d1d7aa806f0af8a7b798"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-shrub_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_01.ktx2",
+      "bytes": 35177,
+      "sha256": "db63ae873670758222199ad95661a8adf13afdd77d8b618dd675249acf374f75"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-shrub_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_01.webp",
+      "bytes": 13222,
+      "sha256": "1205de7c09c4acaf345a412b3c38a7b9f174404305f0525308b15a7c614dcc6d"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-shrub_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_02.ktx2",
+      "bytes": 30865,
+      "sha256": "926cefc59013680e180f2c241255c9e1d79b1950a8fa71660d36d0337097e2ca"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-shrub_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_02.webp",
+      "bytes": 13084,
+      "sha256": "1b52c30ab365fe12073ebfad53c15c7119ecb7fc6a67ba98fe938754f738a159"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-split_leaf_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_01.ktx2",
+      "bytes": 23851,
+      "sha256": "638bc356a7311607ac9e4a2b92c8db042d5d85519172f12dc328f84feb266e90"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-split_leaf_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_01.webp",
+      "bytes": 10974,
+      "sha256": "b2160a06e260e36d557bbcda2075f5b96496542238e75dda7471cc71e9567399"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-split_leaf_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_02.ktx2",
+      "bytes": 25534,
+      "sha256": "3dc8b3119648ed35cdb66a45c000dc34d4914b6a20d7bb04c428c60e50ff6d89"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-split_leaf_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_02.webp",
+      "bytes": 11542,
+      "sha256": "c675d2076f362d868216e5ac49c23cff7f52dcc84e17455b60fc7503c961affd"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_0010-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010-normal-mask.webp",
+      "bytes": 163550,
+      "sha256": "dd329a673112d69b137e4c0c57eb55566fc0d1a4bca206e92e57113860adb9f3"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_0010.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010.ktx2",
+      "bytes": 65811,
+      "sha256": "927da6edbd3fc95f80aa43a84cffaf42bde86c76a2109b80df9fd09a0ae69eac"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_0010.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010.webp",
+      "bytes": 28082,
+      "sha256": "6eec5b7546b050a73aa0a04f54485c5a4d6cda965a1eb6ff4a2b41acdbf0c140"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_01-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01-normal-mask.webp",
+      "bytes": 189506,
+      "sha256": "280819521f68da9caaa6845f056342a27302af4b2f58dd1202b13b067e004bc0"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01.ktx2",
+      "bytes": 70523,
+      "sha256": "1ee0814a366847abc1c1676a5dc14d43c9428cf51e2f0e9a27b77a74102e1669"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01.webp",
+      "bytes": 32458,
+      "sha256": "bfa66631296ef1ba994b662ace34a463b7b03fa15911fe94dac899720db929c9"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_02-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02-normal-mask.webp",
+      "bytes": 174396,
+      "sha256": "fc5ed1a47ee7447b7030ecdf7810349eb23a5247bfa104e3e2d2c8251fe6b7fb"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02.ktx2",
+      "bytes": 68870,
+      "sha256": "bad64d7b3810bf88d85669995545d563020d90cdb5ebda205679a7dc435ed5a1"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02.webp",
+      "bytes": 31044,
+      "sha256": "1fe3f36f6f8f849d55f48607d6bdb514339423ac5d1f9bfe68ad35f6a517c04f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_03-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03-normal-mask.webp",
+      "bytes": 212560,
+      "sha256": "62535ff2ebb7b34d5c363865001dbc4bae30e39bb4ced07b081bd23a56225876"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_03.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03.ktx2",
+      "bytes": 76876,
+      "sha256": "d2e009cbea8d4fe6b68a6caed17914a4012dff7d1018fa87f6b18f9fdb05e836"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_03.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03.webp",
+      "bytes": 35766,
+      "sha256": "af1f0814817e26bfc47c0a7a67ae9df69abda611fd18d90b92727b2a64be50d5"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_05-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05-normal-mask.webp",
+      "bytes": 197852,
+      "sha256": "e8f14c5dcf0f9a8f4e8558af1689176b86c290d68280e2d1a09779b419b8dab5"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_05.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05.ktx2",
+      "bytes": 71882,
+      "sha256": "b99a38eab1f13a3e274076d1a4faa0d48e99fef7660af6635de1b90d04cd4661"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_05.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05.webp",
+      "bytes": 32438,
+      "sha256": "83783c544d66f2a85453809fe9005bfda53b127d9b58e18b2d38b793e5510662"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_06-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06-normal-mask.webp",
+      "bytes": 177136,
+      "sha256": "1523951cb399f1cd1c53010a06188fb6906b43479ffe299a30af35dddd607c29"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_06.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06.ktx2",
+      "bytes": 67996,
+      "sha256": "95ff54c97e07eddde8f01aba97d0ee761e86bac35ffa5e25db38af9ff937b6cb"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-tree_06.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06.webp",
+      "bytes": 30456,
+      "sha256": "e1e95cc06510d330c618c21355d57192c0aee2d7dffa3e693a262ecf558a16b6"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-vine_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_01.ktx2",
+      "bytes": 26654,
+      "sha256": "9bc472bbaa1620499cd47a102739a59f2687d4cdea552743dcb049f688016c63"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-vine_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_01.webp",
+      "bytes": 12400,
+      "sha256": "0653e6629e9181f428091a0723cdb55699528a17fde47814648b5d433dab2f8d"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-vine_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_02.ktx2",
+      "bytes": 28931,
+      "sha256": "ffd8de9a8ef7c0134a4a0af84fef6a76f18339e0455a4de12ee91b5ec4e46ac2"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle-vine_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_02.webp",
+      "bytes": 13734,
+      "sha256": "92b983bf5c3b84090f753543a56ee5c4f17d8abb640a930ca989b0f7467441ae"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/jungle.glb",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/jungle.glb",
+      "bytes": 2430520,
+      "sha256": "f54048fc2e98bc70eeb901f8ba04c18dc40ffc08ee61676048ceed602d60aecf"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/manifest.json",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/manifest.json",
+      "bytes": 38674,
+      "sha256": "b887c51584079253f2bcf0cbeee7d1cb2698a170bf8a7dd8a2d36f739558e057"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree1-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree1-normal-mask.webp",
+      "bytes": 261242,
+      "sha256": "47c970de9e951ba0b65652a9e15dcedaaef7c36fc950a757360a955b0f578cfd"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree1.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree1.ktx2",
+      "bytes": 58043,
+      "sha256": "e897e34daf2e2927d4692d984d96349944cbd9092c707137093c1d626cd886fd"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree1.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree1.webp",
+      "bytes": 24524,
+      "sha256": "9aa359038866c15e5e8ace6811a36774ac0ff63651fe4181b7da80635ecaa21e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree10-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree10-normal-mask.webp",
+      "bytes": 237984,
+      "sha256": "1997c7bb3a92947f1b619882238f641418254bc706c69db47e144e9c8e927eec"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree10.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree10.ktx2",
+      "bytes": 83762,
+      "sha256": "5c8361aa1d70f240da94aa11e7236acf58eb59cdd95b1172dc2a19594a6a3573"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree10.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree10.webp",
+      "bytes": 65042,
+      "sha256": "892c3eb5fc383a88aa997fa8627e7cda37b89165c347ea311d1eee6c0c8cf5e7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree11-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree11-normal-mask.webp",
+      "bytes": 153262,
+      "sha256": "167f29c169aabd25ed6d6150dd1d2b9091d2e7bfbe4cf63ee9eca5dfdb64f2ed"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree11.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree11.ktx2",
+      "bytes": 74096,
+      "sha256": "01f8e4df4691661c71f745ef8aa91160d35ec68815c618f5a0456368d132c2e3"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree11.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree11.webp",
+      "bytes": 39078,
+      "sha256": "0b7cb9bd16a5f5a537e477043bd535e342cb683bb902f080b628eab887204d4a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree12-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree12-normal-mask.webp",
+      "bytes": 209028,
+      "sha256": "f9635c6b225cd661b531816669063242685bf11d8256266d2182c0cb7bef253e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree12.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree12.ktx2",
+      "bytes": 80135,
+      "sha256": "d2f952cab8c05ae9b39d52fe5b3a2582df97cf2d70c8407f9124e41ea89bafac"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree12.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree12.webp",
+      "bytes": 55848,
+      "sha256": "b8610704b2cef44217c87d0527e507f537f54e0406796884b729e4363c502a54"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree13-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree13-normal-mask.webp",
+      "bytes": 157666,
+      "sha256": "7d782a2e9337983e81c9cac025b7eec56dc1c29167fe5549c1634d8287d31e72"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree13.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree13.ktx2",
+      "bytes": 77123,
+      "sha256": "adf02d362112753e41cb88a9bd82bcca20085514bcd3cfce2a2f4b71b93414a5"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree13.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree13.webp",
+      "bytes": 44514,
+      "sha256": "edaf3de8c0a588ad3d6a01624275e495fe8ed4dd4cc471fc8684c1a187bdbada"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree14-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree14-normal-mask.webp",
+      "bytes": 193218,
+      "sha256": "577c9d207e3f926de3c50eea706f8d1b39e5878a1ffab89623b94fff5a20ab91"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree14.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree14.ktx2",
+      "bytes": 84182,
+      "sha256": "a1ccf52d209546fa6887977352ee0791765f8f40e3c017768f1a93db2d634343"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree14.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree14.webp",
+      "bytes": 63586,
+      "sha256": "d573eee9d7e3ff1d572e355306b0a41eb656fb7d0fabba2df8e8b16c7710bdbb"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree15-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree15-normal-mask.webp",
+      "bytes": 213586,
+      "sha256": "e2744765f1941a697c5758a5cd59f21b7041775221c2d7f6e09aa5268a97c5e0"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree15.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree15.ktx2",
+      "bytes": 77713,
+      "sha256": "4e61dc52bf6ce44a62fa0fa7e54a80d0fb96b682797536dacb375a13835b26c0"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree15.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree15.webp",
+      "bytes": 58792,
+      "sha256": "61be4e061d96f7d19a9959ca5f7a68246fa4cd90a5990f2eaa536881633c1ea3"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree16-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree16-normal-mask.webp",
+      "bytes": 144554,
+      "sha256": "9cdf5f08121622770daf32773107ccf0ebad2283587aec3667b675d081bf6c5a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree16.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree16.ktx2",
+      "bytes": 72146,
+      "sha256": "e734082508a245aa94d475858846a3ad775c5a6926fbfdf9f0bcf3821dcea227"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree16.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree16.webp",
+      "bytes": 43634,
+      "sha256": "abb0e9d64682868c1b3e24160720863df2198c9c283e0dc859d2c03b6ec977fa"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree17-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree17-normal-mask.webp",
+      "bytes": 226338,
+      "sha256": "36d4a248b6a68c4bd1dd5ad32ead4a2ad64b3c656be4689a7bcf1c68e75785f2"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree17.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree17.ktx2",
+      "bytes": 77208,
+      "sha256": "c9ffabef71557752cb3043e8c47096cff17cf811441cc13b8e220ecd61e66051"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree17.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree17.webp",
+      "bytes": 67518,
+      "sha256": "8c6d065799915bd293a431c466fce8e5ce2d2f358d303d09780f61a89c274c15"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree18-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree18-normal-mask.webp",
+      "bytes": 150382,
+      "sha256": "0234ca4cfa17dd4b84b5ead7155d27997ec37abc7e365856fbbe995d83d44906"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree18.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree18.ktx2",
+      "bytes": 75025,
+      "sha256": "1b630bbdaa9b81de23969b753aecd2fdfc5f47c6221b0a9a973f83779dd182dc"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree18.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree18.webp",
+      "bytes": 41692,
+      "sha256": "1800452b71bb02ce2ea3da438419838212ed8b808d7140756aa2d7584c8f3d05"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree19-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree19-normal-mask.webp",
+      "bytes": 180114,
+      "sha256": "e307b3d86fbdc5cb4ca88457e452fe928a868a377df81dfdc80d45cb6753ea08"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree19.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree19.ktx2",
+      "bytes": 78338,
+      "sha256": "cf5c68f912fa85aab58f7fd925ccd31ca07de0bf7394bd0b3c1638bfc959f947"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree19.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree19.webp",
+      "bytes": 49434,
+      "sha256": "ca65d11969c444aa41f2c840d5e14668ab26430225111e799ca6925a5626c6a1"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree2-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree2-normal-mask.webp",
+      "bytes": 213908,
+      "sha256": "62a582b4eced975af4649c8e260a17a4fd46979dc83805ba12a966091389b8b7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree2.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree2.ktx2",
+      "bytes": 49156,
+      "sha256": "a2e3ace9110992d5e43d4ba258d14c81a3a29a1ed739de00fb5468ca9c023b33"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree2.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree2.webp",
+      "bytes": 21820,
+      "sha256": "bbb604cda543d57347b80e28cc15c5e3447b38436d3514cae5502d8be6e9316f"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree3-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree3-normal-mask.webp",
+      "bytes": 305152,
+      "sha256": "95ae1fa7fd1fcd4171aa85319f0803c2f0e0568e92f5591b64e12736458704b5"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree3.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree3.ktx2",
+      "bytes": 67194,
+      "sha256": "ba04c5ada2a6269a9ae49dd83a27ac668efb7781c98a0ad2205cee3e06e1cb90"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree3.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree3.webp",
+      "bytes": 33850,
+      "sha256": "4d18c571cab4b244f5d1b8a72005aeb09fd6c263d3808a123c3ba2ca423e641a"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree4-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree4-normal-mask.webp",
+      "bytes": 331014,
+      "sha256": "d7d66537f3f9a07f8c6e1c8b68e90de5af6ae5fe144253d8f0ed3fe8dc21ac72"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree4.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree4.ktx2",
+      "bytes": 60294,
+      "sha256": "e170651961ad24eb516d416fadec9fea9e595f06e0bbf822c8e99ae025ce6319"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree4.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree4.webp",
+      "bytes": 27474,
+      "sha256": "ec2c9df03687b2e4200295d7c3a24947e1e8cc544edcf9e56811e51b9b1d0b77"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree5-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree5-normal-mask.webp",
+      "bytes": 324998,
+      "sha256": "2b2be49062786c7ccc9a2ccc306ce15d356992b1a8fa833aab3805a56a2cf0c6"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree5.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree5.ktx2",
+      "bytes": 66486,
+      "sha256": "71c4d04f7b0c8ac801bab56b1158d8fe4527df4e272ce5c5b5103ef94f237a45"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree5.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree5.webp",
+      "bytes": 32712,
+      "sha256": "29090db8d5cee99ee2120665cf2fac54c9679be79e33835bc833d149520ec4ec"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree6-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree6-normal-mask.webp",
+      "bytes": 323018,
+      "sha256": "91d08e51eb353e2ac1e24d290dbe473f4b8994a2c095554fe6d423ab768d0caf"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree6.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree6.ktx2",
+      "bytes": 65560,
+      "sha256": "7d09a10175eb2eb2ca45fd4f5c6dec3d523a73cd2e029f84d45c22a3bfef6d8e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree6.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree6.webp",
+      "bytes": 31340,
+      "sha256": "5849526ba7033c23f10f4a25f864fab1aedd24d5fb0e50dbcda0cb15da951022"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree7-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree7-normal-mask.webp",
+      "bytes": 344246,
+      "sha256": "83c6a23e753d88c8a8704f49be16342d8d09b75dc02d3029cbb74c995f073407"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree7.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree7.ktx2",
+      "bytes": 65376,
+      "sha256": "c4f3919ffff3a72607063e192b6ec2f6c32c3671bf8e4a72fb51ac4a77e0eef4"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree7.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree7.webp",
+      "bytes": 29282,
+      "sha256": "9f10c53168a9ccb53c2a15de68ac5bab365a591df8826de3f0fc6f1fc04c41db"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree8-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree8-normal-mask.webp",
+      "bytes": 326228,
+      "sha256": "b602b039c3898b473155f1673722b901f179d31ac2044a772ad0051f4352fa90"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree8.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree8.ktx2",
+      "bytes": 55387,
+      "sha256": "68446977888d9f5684d44b89a926aef32ce358df2f7d6ee33ff4801c4c509297"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree8.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree8.webp",
+      "bytes": 23562,
+      "sha256": "302aa6feb7255c23295d2b39883cbd109ae442c9926c2ed8a291025ac071e3ba"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree9-normal-mask.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree9-normal-mask.webp",
+      "bytes": 321784,
+      "sha256": "25f41b36a335624e1c56b67f244ea69a69877d8502cc22af947d6e38ff48881b"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree9.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree9.ktx2",
+      "bytes": 55553,
+      "sha256": "44ac4a531e374c3ddeef281d9162c79a61c1f2b3831528b8bd451a551e1825b1"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/tree9.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/tree9.webp",
+      "bytes": 24098,
+      "sha256": "5da6815651cc486a64d1d27c18a0230840fb94c91060a6ec4bff3e5c045f1fd7"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_01.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_01.ktx2",
+      "bytes": 30295,
+      "sha256": "a9906398177b5694bc8e88c9e02fca6b4ab6e3aebcf20c9b3a87e33c3eaa5122"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_01.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_01.webp",
+      "bytes": 12524,
+      "sha256": "ec43f135ef08bc7eaa46090b3c4cba39cfae79307b0a0c55af915542cb750ad2"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_02.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_02.ktx2",
+      "bytes": 32060,
+      "sha256": "0faf80d3a005de840eb13debd851f862d4e77a347f73635751499cc11d27dfc4"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_02.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_02.webp",
+      "bytes": 14986,
+      "sha256": "8b162c299e1fb2c3930007c06bf02a6de3a2256138caf2a9bbdd817eae1dc533"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_03.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_03.ktx2",
+      "bytes": 25198,
+      "sha256": "aedc6641620dba75d9c5cdc82619c25e36e534cacaded92793b8f666373464bf"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_03.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_03.webp",
+      "bytes": 13718,
+      "sha256": "5058a7be57e96bb268b40a1701e8aafae0a814e270c2ac0e4535a876f192183d"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_04.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_04.ktx2",
+      "bytes": 30750,
+      "sha256": "d38b0e9e8ca3ac4b5d1f106890d33ec571725c508aa5792e0d37d2c825782ae6"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_04.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_04.webp",
+      "bytes": 13978,
+      "sha256": "d2e80c93bb037dbfd767e70fe2b7f35774383b336d928e46d147667bf28d5557"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_05.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_05.ktx2",
+      "bytes": 23057,
+      "sha256": "842f44155bd8bcf021923b218a404d6795e19a9c957ec4827697179160524a12"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_05.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_05.webp",
+      "bytes": 11208,
+      "sha256": "923d1f24c5b3ce87b49e40b54a71f6fbec02030f3bb29e0a00ec58ad01c60cd9"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_06.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_06.ktx2",
+      "bytes": 28707,
+      "sha256": "06bc655d7ba84c138b96d3c00975749cd6155c17cd7e613b70297334279b6568"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_06.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_06.webp",
+      "bytes": 13976,
+      "sha256": "6def9ca88c179af577cfdca51b6fe6e82853112123493bd22b27b20c73a2998e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_07.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_07.ktx2",
+      "bytes": 29740,
+      "sha256": "be690c41e52dcf0648878a344851b9e5bb54f1365eff9ad2d554f50d76207fab"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_07.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_07.webp",
+      "bytes": 14296,
+      "sha256": "46926513fb93647daf0aab891f3bd9e10f774e3ba97518ddfd472453493ba635"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_08.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_08.ktx2",
+      "bytes": 35681,
+      "sha256": "18654836954a407785160e2699b155b534eb179b282eefa3b3f7705f6290c806"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_08.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_08.webp",
+      "bytes": 20482,
+      "sha256": "505b10ee9a94b6bde49756e2033445b49a336443241b43fe38ac87e4b0558546"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_09.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_09.ktx2",
+      "bytes": 22278,
+      "sha256": "046bdd1639203bda3cb2e69d7a703342d14744c253269113347b33133853ab6e"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_09.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_09.webp",
+      "bytes": 8820,
+      "sha256": "caeee61e6387ade1bb27097109dc73874f54bd8cd07a98df3626244a9a1cbec1"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_10.ktx2",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_10.ktx2",
+      "bytes": 21721,
+      "sha256": "4f083c593900227d35917bcd841ed0e41be4956e8027bab8814b059489a18311"
+    },
+    {
+      "source": "public/Assets/terrain/vegetation-lods/understory-Plants_10.webp",
+      "output": "public/assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_10.webp",
+      "bytes": 11380,
+      "sha256": "d6b1695bf86dba29762a51ed22bc4175ff58b663fb8aaffd9702c53102332261"
+    },
+    {
+      "source": "public/Assets/terrain/zones/zones.glb",
+      "output": "public/assets/gods-end/Assets/terrain/zones/zones.glb",
+      "bytes": 13756,
+      "sha256": "5cd21ae3e4351b963172f38f118794b26fb339f419191f778d04ed4db6dfade8"
+    },
+    {
+      "source": "public/Assets/textures/shared/alpine-bark-2e0567c4ab9a.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/alpine-bark-2e0567c4ab9a.jpg",
+      "bytes": 80264,
+      "sha256": "2e0567c4ab9aa88655cc583a832c1761fb44f9b32c59df0898f70a819d2d4720"
+    },
+    {
+      "source": "public/Assets/textures/shared/bark-painted-a585fb1dc4b4.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/bark-painted-a585fb1dc4b4.jpg",
+      "bytes": 56801,
+      "sha256": "a585fb1dc4b47f49a5a70147e1de549ebe29b3fd8e3d3fe0d333560db48763d7"
+    },
+    {
+      "source": "public/Assets/textures/shared/bark-peeling-95c7e62d8a97.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/bark-peeling-95c7e62d8a97.jpg",
+      "bytes": 63167,
+      "sha256": "95c7e62d8a977b0131d3b83e3ce1fe2b5d915b4de030646c99d84b225ca6c539"
+    },
+    {
+      "source": "public/Assets/textures/shared/canopy-branch-atlas-new-61ad81033825.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/canopy-branch-atlas-new-61ad81033825.webp",
+      "bytes": 331048,
+      "sha256": "61ad8103382577d81c9b78d236ebb5e53f33b59bd02defc1d5ed382125850be5"
+    },
+    {
+      "source": "public/Assets/textures/shared/image-1-046-2b8565157794.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/image-1-046-2b8565157794.jpg",
+      "bytes": 82789,
+      "sha256": "2b8565157794d455f8cd155ff584f19597dc8217379f361577b8e35a949437ca"
+    },
+    {
+      "source": "public/Assets/textures/shared/image-1-3622b701462b.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/image-1-3622b701462b.jpg",
+      "bytes": 93887,
+      "sha256": "3622b701462b8b2fb546aeed2f91514440602b91b27538468425869565959954"
+    },
+    {
+      "source": "public/Assets/textures/shared/image-3-028-f70da07ae8aa.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/image-3-028-f70da07ae8aa.png",
+      "bytes": 102147,
+      "sha256": "f70da07ae8aa59bb56963bb28e167c245508b47dd3acf970a7fc30b7c36e9e1c"
+    },
+    {
+      "source": "public/Assets/textures/shared/image-3-033-a002de4055c6.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/image-3-033-a002de4055c6.png",
+      "bytes": 146063,
+      "sha256": "a002de4055c64b5183c1788d716e66215bb033703057c095f98f241559932d8f"
+    },
+    {
+      "source": "public/Assets/textures/shared/image-3-0332-baebf623847b.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/image-3-0332-baebf623847b.png",
+      "bytes": 49985,
+      "sha256": "baebf623847bf608f1e112b9ce510c763909549349be4db5dc1b08d3a234934a"
+    },
+    {
+      "source": "public/Assets/textures/shared/jungle-grass-reference-atlas-32d2af1b6b61.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/jungle-grass-reference-atlas-32d2af1b6b61.webp",
+      "bytes": 243130,
+      "sha256": "32d2af1b6b618a966ce0dd5dc5ba32c9ab32d60008b901856805a09fb2347f45"
+    },
+    {
+      "source": "public/Assets/textures/shared/jungle-grass-reference-atlas-45e00f9c3ba4.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/jungle-grass-reference-atlas-45e00f9c3ba4.webp",
+      "bytes": 341794,
+      "sha256": "45e00f9c3ba40c186ad4dca56d2b781cd9a8e19047d41f7eba1b19a203fa90e0"
+    },
+    {
+      "source": "public/Assets/textures/shared/jungle-ground-basecolor-7412c9333dfc.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/jungle-ground-basecolor-7412c9333dfc.webp",
+      "bytes": 470768,
+      "sha256": "7412c9333dfc81003c3c6e4225691bd9edd572e1a2af9ed10c6c50d33823936f"
+    },
+    {
+      "source": "public/Assets/textures/shared/jungle-path-basecolor-edge-5bc9e10caaef.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/jungle-path-basecolor-edge-5bc9e10caaef.webp",
+      "bytes": 566600,
+      "sha256": "5bc9e10caaefa056f970231d02a20a32663643e08dfbfe0af062818d8b809b47"
+    },
+    {
+      "source": "public/Assets/textures/shared/leaves-gold-8eb43e77b33f.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/leaves-gold-8eb43e77b33f.png",
+      "bytes": 153620,
+      "sha256": "8eb43e77b33f2e04da29970ae727e4e9e2fb78fcaefe408e0d89c203c45dc2f9"
+    },
+    {
+      "source": "public/Assets/textures/shared/leaves-green-440a3b14e758.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/leaves-green-440a3b14e758.png",
+      "bytes": 152170,
+      "sha256": "440a3b14e758b8f578edc035f6e6742356162d9b852d8a5730b3bbc2a87b72b9"
+    },
+    {
+      "source": "public/Assets/textures/shared/leaves-pale-195e961e91c1.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/leaves-pale-195e961e91c1.png",
+      "bytes": 167091,
+      "sha256": "195e961e91c1ca744babdb52661243a572b64eb49a2ffd9b97db56a2a0e9d29b"
+    },
+    {
+      "source": "public/Assets/textures/shared/painted-foundation-stone-3c8fe2d6a296.png",
+      "output": "public/assets/gods-end/Assets/textures/shared/painted-foundation-stone-3c8fe2d6a296.png",
+      "bytes": 948528,
+      "sha256": "3c8fe2d6a29622b5ffa088c49ffa2215eab0ce927b9a4c7c759ccb0502a6b9a7"
+    },
+    {
+      "source": "public/Assets/textures/shared/palm-bark-basecolor-2d1ec3fdb9e2.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/palm-bark-basecolor-2d1ec3fdb9e2.webp",
+      "bytes": 452746,
+      "sha256": "2d1ec3fdb9e2c40036a27783d3cb5c95148c633c71918046a04599230b711665"
+    },
+    {
+      "source": "public/Assets/textures/shared/palm-bark-basecolor-89ca81f75eba.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/palm-bark-basecolor-89ca81f75eba.webp",
+      "bytes": 80552,
+      "sha256": "89ca81f75eba4b1cc6c740c50fc5b8127951ff16b2a44819e2eb1b9554f94287"
+    },
+    {
+      "source": "public/Assets/textures/shared/palm-fern-atlas-4dd66352b4c2.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/palm-fern-atlas-4dd66352b4c2.webp",
+      "bytes": 595618,
+      "sha256": "4dd66352b4c287a1ec1de3007f9d60083ccf344cf58be303b20e66fa13e996b3"
+    },
+    {
+      "source": "public/Assets/textures/shared/palm-fern-atlas-af044d977e5e.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/palm-fern-atlas-af044d977e5e.webp",
+      "bytes": 490122,
+      "sha256": "af044d977e5eb41a90eec20d6aa4ae5d45856223a8e6a5a887ced7c4bc737b30"
+    },
+    {
+      "source": "public/Assets/textures/shared/shrub-leaf-atlas-283f80a6257f.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/shrub-leaf-atlas-283f80a6257f.webp",
+      "bytes": 117080,
+      "sha256": "283f80a6257f058b69e0197dc8a1dd22f5981ed7c26bb1e933be75ac5e04e3b3"
+    },
+    {
+      "source": "public/Assets/textures/shared/shrub-leaf-atlas-76e3e27d9e80.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/shrub-leaf-atlas-76e3e27d9e80.webp",
+      "bytes": 160152,
+      "sha256": "76e3e27d9e807a08d08c0664116586791f3d3087e5e9e4dc42b311abbbb16c1a"
+    },
+    {
+      "source": "public/Assets/textures/shared/tropical-bark-basecolor-f7855f5a8771.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/tropical-bark-basecolor-f7855f5a8771.webp",
+      "bytes": 80776,
+      "sha256": "f7855f5a87719aa333665f7f17d91fd5aef050a776dce6a53ecf41bce13d244b"
+    },
+    {
+      "source": "public/Assets/textures/shared/tropical-leaf-atlas-0852ffadda23.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/tropical-leaf-atlas-0852ffadda23.webp",
+      "bytes": 287332,
+      "sha256": "0852ffadda238a11c99f1b32438ba1bfe92c452118775279f7cfed1747d14d73"
+    },
+    {
+      "source": "public/Assets/textures/shared/tropical-leaf-atlas-fffec155511c.webp",
+      "output": "public/assets/gods-end/Assets/textures/shared/tropical-leaf-atlas-fffec155511c.webp",
+      "bytes": 211766,
+      "sha256": "fffec155511cf7d594232f4353fc07fa48f7fc3a044e3baccd09dcc280aa30e2"
+    },
+    {
+      "source": "public/Assets/textures/shared/weathered-wood-f1d884d2e703.jpg",
+      "output": "public/assets/gods-end/Assets/textures/shared/weathered-wood-f1d884d2e703.jpg",
+      "bytes": 53873,
+      "sha256": "f1d884d2e7037e03844f000396d62855a541dc9c7edcce32862f9b1f3a8fc244"
+    },
+    {
+      "source": "public/Assets/zwartkops_straight_morning_1k.hdr",
+      "output": "public/assets/gods-end/Assets/zwartkops_straight_morning_1k.hdr",
+      "bytes": 1535655,
+      "sha256": "91c1c6e878a54c7c2e92c614963a1cf1fbd858a32bb4fce2c9e7eddc804f204a"
+    },
+    {
+      "source": "node_modules/three/examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js",
+      "output": "public/assets/gods-end/decoders/draco/draco_wasm_wrapper.js",
+      "bytes": 58456,
+      "sha256": "8bb2952d2ba7d67e1414f8df819410cb0434a666be53f671fff75f68843d76f6"
+    },
+    {
+      "source": "node_modules/three/examples/jsm/libs/draco/gltf/draco_decoder.wasm",
+      "output": "public/assets/gods-end/decoders/draco/draco_decoder.wasm",
+      "bytes": 192420,
+      "sha256": "a680d927bed9cb864ddbd63521868891af2bfbe755092761b4837487618df8ac"
+    },
+    {
+      "source": "node_modules/three/examples/jsm/libs/draco/gltf/draco_decoder.js",
+      "output": "public/assets/gods-end/decoders/draco/draco_decoder.js",
+      "bytes": 512465,
+      "sha256": "8625489da79a805f4f2a7d511c3e52d8b4085608a9d2a4d5f4f9de5db0aea04f"
+    },
+    {
+      "source": "node_modules/three/examples/jsm/libs/basis/basis_transcoder.js",
+      "output": "public/assets/gods-end/decoders/basis/basis_transcoder.js",
+      "bytes": 57529,
+      "sha256": "8478b5b6d6b74e7d3082b89f6417321d8d1dc0307f2b30d4484bb11b441696a1"
+    },
+    {
+      "source": "node_modules/three/examples/jsm/libs/basis/basis_transcoder.wasm",
+      "output": "public/assets/gods-end/decoders/basis/basis_transcoder.wasm",
+      "bytes": 527333,
+      "sha256": "6cf17dc889352c42e9acf8897107978d127005fe3386c36a0e3845e27967630a"
+    }
+  ],
+  "objectCount": 133,
+  "textureCount": 255
+}

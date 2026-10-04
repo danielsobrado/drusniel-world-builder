@@ -1,3 +1,4 @@
+import { WORKSHOP_UV_DENSITY } from './WorkshopProjectedUv.js';
 import { TEXTURE_METRES } from '../assets/godsEnd/houseTextureData.js';
 
 const surfaces = [
@@ -16,7 +17,7 @@ export const GODS_END_WORKSHOP_PRESETS = Object.freeze(Object.fromEntries(
       baseColor: '#ffffff', tint: '#ffffff', roughness: surface === 'window' ? 0.35 : 0.9,
       metalness: surface === 'window' ? 0.2 : 0, normalStrength: 1, aoStrength: 1,
       heightStrength: 0, weathering: 0, mapping: 'projected',
-      repeat: 1 / TEXTURE_METRES[surface], rotation: 0, alignment: 'world',
+      repeat: 1 / (TEXTURE_METRES[surface] * WORKSHOP_UV_DENSITY), rotation: 0, alignment: 'world',
       sources: Object.freeze({}),
     })];
   }),

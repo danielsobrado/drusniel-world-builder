@@ -6,6 +6,7 @@ import {
   WORKSHOP_SURFACE_TEXTURE_SLOTS,
 } from './ProceduralWorkshopTextureConfig.js';
 import { prepareWorkshopAlbedo } from './ProceduralWorkshopTextureUpload.js';
+import { loadGodsEndTextureFile, populateGodsEndTextureSelect } from '../assets/godsEnd/textureLibrary.js';
 
 function tabsMarkup() {
   return WORKSHOP_SURFACE_TEXTURE_SLOTS.map(({ key, label }, index) => `
@@ -62,6 +63,9 @@ export class ProceduralWorkshopSurfaceEditor {
           />
         </div>
         <div class="workshop-surface-options" data-role="surface-options">
+          <label>Gods’ End texture library
+            <select data-role="surface-texture-library" aria-label="Gods’ End albedo texture"></select>
+          </label>
           <label>Mapping
             <select data-surface-setting="mapping" disabled>
               <option value="repeat">Repeat tile</option>
@@ -118,6 +122,8 @@ export class ProceduralWorkshopSurfaceEditor {
     this.copyButton = root.querySelector('[data-surface-action="copy"]');
     this.copyTarget = root.querySelector('[data-role="surface-copy-target"]');
     this.repeatOutput = root.querySelector('[data-role="surface-repeat-output"]');
+    this.librarySelect = root.querySelector('[data-role="surface-texture-library"]');
+    populateGodsEndTextureSelect(this.librarySelect);
     this.bind();
     this.render();
   }
@@ -146,6 +152,12 @@ export class ProceduralWorkshopSurfaceEditor {
       if (!file) return;
       await this.importFile(file);
     });
+    this.librarySelect.addEventListener('change', (event) => {
+      event.stopPropagation();
+      const path = this.librarySelect.value;
+      this.librarySelect.value = '';
+      if (path) void this.importFile(loadGodsEndTextureFile(path));
+    });
 
     this.root.addEventListener('change', (event) => {
       const setting = event.target.dataset.surfaceSetting;
@@ -173,13 +185,15 @@ export class ProceduralWorkshopSurfaceEditor {
     this.importingSlots.delete(slotKey);
   }
 
-  async importFile(file) {
+  async importFile(fileOrPromise) {
     const slotKey = this.activeSlot;
     const revision = this.nextImportRevision(slotKey);
     this.importingSlots.add(slotKey);
     this.render();
-    this.onStatus?.(`Preparing ${file.name} for ${this.slotLabel(slotKey)}…`, false);
     try {
+      const file = await fileOrPromise;
+      if (this.importRevisionBySlot.get(slotKey) !== revision) return;
+      this.onStatus?.(`Preparing ${file.name} for ${this.slotLabel(slotKey)}…`, false);
       const source = await prepareWorkshopAlbedo(file);
       if (this.importRevisionBySlot.get(slotKey) !== revision) return;
 

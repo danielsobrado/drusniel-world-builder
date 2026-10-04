@@ -29,7 +29,7 @@ test('water acceptance runner drives enter, dive, surface and exit phases', () =
 test('water acceptance runner writes a gated report', () => {
   assert.match(source, /water-acceptance-latest\.json/);
   assert.match(source, /tracker\.buildResult/);
-  assert.match(source, /if \(!acceptance\.pass \|\| gpuValidationErrorCount > 0\) process\.exitCode = 1/);
+  assert.match(source, /if \(!acceptance\.pass \|\| gpuValidationErrorCount > 0 \|\| report\.capture\.browserErrors\.count > 0\) process\.exitCode = 1/);
 });
 
 // Water is the only material sampling the viewport colour and depth textures,

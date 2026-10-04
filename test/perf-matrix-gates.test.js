@@ -85,6 +85,14 @@ test('performance matrix gate proves workload activation and portable frame budg
   assert.deepEqual(result.failures, []);
 });
 
+test('performance matrix gate rejects a saved capture containing browser errors', () => {
+  const matrix = passingMatrix();
+  matrix.cases[0].report.capture = { browserErrors: { count: 1 } };
+  const result = evaluatePerfMatrix(matrix);
+  assert.equal(result.passed, false);
+  assert.ok(result.failures.some(message => /browser errors/.test(message)));
+});
+
 test('performance matrix gate rejects inactive density, construction, water, and WebGPU cases', () => {
   const matrix = passingMatrix();
   matrix.cases.find(({ id }) => id === 'dense-forest').report.density.treesPerChunk = 24;

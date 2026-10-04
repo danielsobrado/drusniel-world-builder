@@ -173,6 +173,7 @@ export function createStylizedWaterMaterial({
   const sea = water.sea?.enabled && quality.flow && seaPhaseOrigin && sunDirection
     ? createSeaSurfaceNodes({
       terrainUv,
+      patternXZ: surfacePatterns.latticePoint('riverDetail', localXZ),
       chunkWorldSize,
       surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
       waterDepth,
@@ -547,6 +548,13 @@ export function createStylizedWaterMaterial({
     // Side is assigned by StylizedWaterSlot (DoubleSide) so the surface stays
     // visible from underwater. Do not set FrontSide here.
   });
+  if (sea?.release) {
+    const dispose = () => {
+      sea.release();
+      material.removeEventListener('dispose', dispose);
+    };
+    material.addEventListener('dispose', dispose);
+  }
   material.positionNode = positionLocal.add(vec3(0, 0, surfaceHeight));
   // Unlit, so it dims with the sky's light itself.
   let lit = color.mul(skyLightUniforms.brightness);

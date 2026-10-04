@@ -103,7 +103,7 @@ export class ObjectView {
     terrainView.scene.add(hemisphere, sun);
 
     for (const definition of objectCatalog) {
-      const parts = createObjectModelParts(definition, tileMap.tileSize);
+      const parts = definition.asset ? [] : createObjectModelParts(definition, tileMap.tileSize);
       this.definitionByKey.set(definition.key, definition);
       this.renderers.set(definition.key, this.createRendererRecord(definition, parts));
     }
@@ -163,6 +163,18 @@ export class ObjectView {
       this.previewDefinitionKey = null;
     }
     this.refreshAll();
+  }
+
+  clearAssetParts(definitionKey) {
+    const previous = this.renderers.get(definitionKey);
+    if (!previous?.definition.asset) return;
+    this.disposeRendererRecord(previous);
+    this.renderers.set(definitionKey, this.createRendererRecord(previous.definition, []));
+    if (this.previewDefinitionKey === definitionKey) {
+      for (const child of this.previewGroup.children) child.material.dispose();
+      this.previewGroup.clear();
+      this.previewDefinitionKey = null;
+    }
   }
 
   createOverlay(color, opacity) {

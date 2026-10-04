@@ -39,6 +39,9 @@ function addCaseFailures(entry, failures) {
   if (report.summary?.frameBufferComplete === false) {
     failures.push(`${label}: measured frame buffer was incomplete`);
   }
+  if (report.capture?.browserErrors?.count > 0) {
+    failures.push(`${label}: browser errors invalidate the capture`);
+  }
   if (!finite(report.summary?.dt?.p95Ms)
     || report.summary.dt.p95Ms > PERF_MATRIX_MAX_P95_MS) {
     failures.push(

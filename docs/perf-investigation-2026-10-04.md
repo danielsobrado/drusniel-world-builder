@@ -30,7 +30,7 @@ collision rules, and visual preset remain the comparison workload.
 | Grass | Meadow compactions share their exact stable stem sequence across bands. Lower density takes an accepted prefix; increased density appends new ranks. Ground changes still rebuild the data. Previous complete publications stay visible while replacements prepare. |
 | Submission | Static instance matrices update when their transforms change. LOD plans reuse stable results between fade steps. Cached viewport height avoids repeated DOM layout reads. Water slots share one material graph per variant, with textures and pattern origins selected per object. |
 | Material preparation | Terrain material baking uses the existing worker pool; at most one completed bake uploads per frame. Streamed meshes and material changes prepare in surface and underwater passes before publication. Prewarming uses the persistent underwater fog object and both sky visibility states. |
-| QA | Settle includes vegetation, fields, variants, draw preparation, meadow work, and material jobs. The matrix rejects unsuccessful settle and incomplete captures. High-grass doubles the active meadow densities. CPU statistics include early rock preparation; GPU timing is explicitly unavailable. Reports record start/end readiness, post-stop recovery, procedural misses, and per-frame draw counts. |
+| QA | Settle includes vegetation, fields, variants, draw preparation, meadow work, and material jobs. The matrix rejects unsuccessful settle, incomplete captures, and browser errors. High-grass doubles the active meadow densities. CPU statistics include early rock preparation; GPU timing is explicitly unavailable. Reports record start/end readiness, post-stop recovery, procedural misses, and per-frame draw counts. |
 
 The new arrays are derived data, separate from canonical persistence. Azgaar's
 standard biome IDs `0–12` and custom terrain IDs remain unchanged.
@@ -76,14 +76,28 @@ fixes. They are not substituted for the final three repeats.
 
 ## Sustained streaming and heavy scenes
 
-The valid 60 s diagonal route (`sustained-diagonal.json`) kept moving throughout,
-covering approximately **972 m** at **169.65 FPS**, with complete scenery CPU
-**1.222 ms average / 2.000 ms p95**. It prepared 165 fields, 125 rock manifests,
-and 105 tree manifests during measurement, with **zero procedural terrain
-misses and zero collision-readiness stops**. It retained 454 prepared chunks
-and 131,563,524 array bytes (about 125 MiB), below the 625-chunk limit. Its end
-backlog was two meadow tiles and two draws; it cleared before the recovery
-observer's next frame. This capture precedes the final accounting/viewport fixes.
+The corrected 60 s diagonal route (`sustained-frozen.json`) kept moving
+throughout, covering approximately **972 m** at **147.57 FPS**, with complete
+scenery CPU **1.430 ms average / 2.600 ms p95**. Frame p95 was **9.9 ms**, with
+seven hitches. It prepared 165 fields, 125 rock manifests, and 105 tree manifests
+during measurement, with **zero procedural terrain misses and zero measured
+collision-readiness stops**. It published **1,243 bush placements**, alongside
+1,444 tree impostors and 38 species fallback impostors. The browser-error count
+was zero. Start and end preparation were complete.
+
+The same-browser revisit adds a 180° turn halfway through its 60 s measurement,
+travelling out to roughly `(344, -344)` and back near the spawn. It reached
+**143.65 FPS**, with **9.8 ms frame p95**, 12 hitches, and scenery CPU
+**1.167 ms average / 2.100 ms p95**. It generated **zero new prepared fields,
+rock manifests, or tree manifests**. Both runs retained 454 prepared chunks and
+131,563,524 array bytes (about 125 MiB), below the 625-chunk limit; start and end
+queues were clear. This verifies cache reuse and absence of a growing backlog,
+but the revisit falls below 144 FPS and both frame tails miss the strict target.
+
+The earlier `sustained-diagonal.json` reported 169.65 FPS. It had no published
+bush placement counts, before the missing builder import was fixed. Its speed
+is not comparable evidence for the corrected scenery workload; retain it only
+as an earlier checkpoint, not as sustained-route acceptance.
 
 The straight 60 s capture (`sustained.json`) reached 186.49 FPS but hit a natural
 obstacle at about 498 m after 31 s, then remained stationary. Its full-run FPS
@@ -153,6 +167,22 @@ object updates, and garbage collection. It identified the remaining object
 viewport layout read. Raw evidence lives in ignored `tmp/` and is local to this
 checkout; preserve it separately if another checkout needs to reproduce the audit.
 
+The follow-up uses a detached snapshot at `9968f5c`, with the performance-only
+changes from `84d81fc` applied through `validated-performance.patch`, plus the
+bush streaming import fix and browser-error reporting. The snapshot is in
+`tmp/movement-cpu/validated-runtime`. The active checkout has concurrent weather
+and workshop changes; these captures do not validate those later feature changes.
+The snapshot copies the same runtime assets and permits its shared `node_modules`
+decoder path in its temporary Vite configuration.
+
+Two follow-up attempts are excluded. `sustained-integrated.json` experienced
+concurrent HMR runtime changes. `sustained-isolated.json` had a blocked Basis
+decoder, fallback tree impostors, and a missing bush builder import. Neither is
+comparable throughput evidence. The latter exposed the import error; behavioral
+coverage now exercises real bush manifest creation, dependency waiting, slicing,
+and retained completion. The runner preserves a bounded browser-error list and
+rejects a capture when an exception or console error occurs.
+
 ```bash
 npm run qa:perf:windows -- --qa chunk-cross --warmup 8 --duration 12 --speed run --settle --drain-seconds 15 --out tmp/movement-cpu/reproduce-standard.json
 npm run qa:perf:windows -- --qa diagonal --warmup 8 --duration 60 --speed run --settle --drain-seconds 15 --out tmp/movement-cpu/reproduce-sustained.json
@@ -172,11 +202,15 @@ uses settle and approaches the construction corridor from `z = -100`, yaw 180.
 - Stress construction still builds a moving backlog that needs seconds to drain.
   The provisional 250 ms readiness / 500 ms near-job limits are not established.
 - The four straight-route height misses remain an unresolved observation.
-- Hardware camera-turn/revisit, edit-during-motion, and floating-origin exercises
-  remain follow-up checks. Behavioral tests cover retention, edits, and seams.
+- Hardware camera-turn/revisit confirms retained manifests and complete end
+  queues, but misses 144 FPS and the strict frame tail. Edit-during-motion and
+  floating-origin exercises remain follow-up checks. Behavioral tests cover
+  retention, edits, and seams.
 
-`npm run verify` passed **3,078 tests**, asset/configuration validation, and the
-production build after the final runtime changes. Tests cover nested accounting,
+`npm run verify` passed **3,081 tests**, asset/configuration validation, and the
+production build on the frozen snapshot after the bush fix and error-monitor
+addition. Subsequent water-runner changes passed their focused contract checks.
+Tests cover nested accounting,
 one progress floor, lazy deadline activation, consumer limits, real shoreline
 resumption, precise sampling, edited/negative/large coordinates, stale workers,
 eviction, retained manifests, collision pending semantics, complete publication,

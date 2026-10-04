@@ -8,6 +8,7 @@ import {
   serializeWorkshopMaterialDocument,
 } from './ProceduralWorkshopMaterialConfig.js';
 import { prepareWorkshopTexture } from './ProceduralWorkshopTextureUpload.js';
+import { loadGodsEndTextureFile, populateGodsEndTextureSelect } from '../assets/godsEnd/textureLibrary.js';
 import { RadialPalette } from '../ui/RadialPalette.js';
 
 const POINTER_SELECT_DISTANCE = 6;
@@ -122,6 +123,9 @@ export class ProceduralWorkshopMaterialController {
             </button>
             <input type="file" accept="image/png,image/jpeg,image/webp"
               data-material-source-file="${kind}" hidden />
+            <label>${kind.toUpperCase()} library
+              <select data-material-library-kind="${kind}" aria-label="Gods’ End ${kind} texture"></select>
+            </label>
           `).join('')}
         </div>
         <div class="workshop-material-actions">
@@ -137,6 +141,18 @@ export class ProceduralWorkshopMaterialController {
       </aside>
       <div class="workshop-material-region-label" data-role="material-region-label" hidden></div>
     `;
+    for (const select of root.querySelectorAll('[data-material-library-kind]')) {
+      populateGodsEndTextureSelect(select);
+    }
+    this.onLibraryChange = (event) => {
+      const kind = event.target.dataset.materialLibraryKind;
+      const assetPath = event.target.value;
+      if (!kind || !assetPath || !this.selectedRegionId) return;
+      event.stopPropagation();
+      event.target.value = '';
+      void this.importSourceFile(loadGodsEndTextureFile(assetPath), kind, this.selectedRegionId);
+    };
+    root.addEventListener('change', this.onLibraryChange);
     this.palette = new RadialPalette({
       host: root,
       modifier: 'radial-palette--workshop',
@@ -478,11 +494,17 @@ export class ProceduralWorkshopMaterialController {
     const [file] = event.target.files ?? [];
     event.target.value = '';
     if (!file) return;
+    await this.importSourceFile(file, kind, regionId);
+  }
+
+  async importSourceFile(fileOrPromise, kind, regionId) {
     const uploadKey = `${regionId}\u0000${kind}`;
     const uploadRevision = ++this.sourceUploadRevision;
     this.sourceUploadRevisions.set(uploadKey, uploadRevision);
-    this.onStatus?.(`Preparing ${file.name} as a ${kind.toUpperCase()} source…`, false);
     try {
+      const file = await fileOrPromise;
+      if (this.disposed || this.sourceUploadRevisions.get(uploadKey) !== uploadRevision) return;
+      this.onStatus?.(`Preparing ${file.name} as a ${kind.toUpperCase()} source…`, false);
       const prepared = await prepareWorkshopTexture(file, kind);
       if (this.disposed || this.sourceUploadRevisions.get(uploadKey) !== uploadRevision) return;
       const region = this.regions.get(regionId);
@@ -683,6 +705,7 @@ export class ProceduralWorkshopMaterialController {
     this.root.removeEventListener('click', this.onRootClick);
     this.root.removeEventListener('change', this.onRootChange);
     this.root.removeEventListener('change', this.onSourceFileChange);
+    this.root.removeEventListener('change', this.onLibraryChange);
     window.removeEventListener('keydown', this.onKeyDown);
     this.palette.dispose();
     this.highlight.removeFromParent();

@@ -5,4 +5,5 @@ tmp/
 debug.log
 **/debug.log
 *.glb
+!public/assets/gods-end/**/*.glb
 .commandcode/

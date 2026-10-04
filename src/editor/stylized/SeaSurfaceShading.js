@@ -1,3 +1,4 @@
+import { createSeaDetailNodes } from './SeaDetailShading.js';
 import {
   abs,
   clamp,
@@ -45,6 +46,7 @@ export function seaWaterMask({ surfaceWorldHeight, currentStrength }) {
 
 export function createSeaSurfaceNodes({
   terrainUv,
+  patternXZ = null,
   chunkWorldSize,
   surfaceWorldHeight,
   waterDepth,
@@ -75,7 +77,11 @@ export function createSeaSurfaceNodes({
   // Share of full offshore height, so crests and whitecaps fade in the shallows.
   const strength = amplitude.div(offshore.max(1e-4));
 
-  const normal = normalize(vec3(slope.x.negate(), 1, slope.y.negate()));
+  const detail = patternXZ ? createSeaDetailNodes({
+    patternXZ, time, choppiness: config.choppiness, strength,
+  }) : null;
+  const surfaceSlope = detail ? slope.add(detail.slope) : slope;
+  const normal = normalize(vec3(surfaceSlope.x.negate(), 1, surfaceSlope.y.negate()));
   const sun = normalize(sunDirection);
   const lit = dot(normal, sun).sub(sun.y);
   const crest = smoothstep(0.3, 0.95, height).mul(strength);
@@ -97,6 +103,7 @@ export function createSeaSurfaceNodes({
 
   return {
     displacement: swell.height.mul(amplitude),
+    release: detail?.release,
     normal,
     // How much of this water is sea, 0..1: at sea level and without a current.
     mask: seaMask,

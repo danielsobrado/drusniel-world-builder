@@ -39,7 +39,7 @@ export function getSurfaceTextures(kind) {
     return cached;
   }
 
-  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  const houseSurface = Object.hasOwn(HOUSE_SURFACE_ALIASES, kind) ? HOUSE_SURFACE_ALIASES[kind] : null;
   if (houseSurface) {
     const textures = createHouseSurfaceTextures(houseSurface);
     textureCache.set(kind, textures);
@@ -57,11 +57,11 @@ export function getSurfaceTextures(kind) {
 }
 
 /**
- * Returns the shared material for a surface kind, optionally tinted. Roughness
- * is baked into the map, so the scalar stays at 1 and lets the texture drive it.
+ * Returns the shared material for a surface kind, optionally tinted. Existing
+ * surfaces bake roughness; donor house surfaces use their original scalar.
  */
 export function getSurfaceMaterial(kind, tint = null) {
-  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  const houseSurface = Object.hasOwn(HOUSE_SURFACE_ALIASES, kind) ? HOUSE_SURFACE_ALIASES[kind] : null;
   const properties = houseSurface ? houseSurfaceProperties(houseSurface) : SURFACE_PROPERTIES[kind];
   if (!properties) {
     throw new Error(`Unknown procedural surface kind: ${kind}.`);
@@ -95,7 +95,7 @@ export function getSurfaceMaterial(kind, tint = null) {
 }
 
 export function surfaceDensity(kind) {
-  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  const houseSurface = Object.hasOwn(HOUSE_SURFACE_ALIASES, kind) ? HOUSE_SURFACE_ALIASES[kind] : null;
   const properties = houseSurface ? houseSurfaceProperties(houseSurface) : SURFACE_PROPERTIES[kind];
   if (!properties) {
     throw new Error(`Unknown procedural surface kind: ${kind}.`);

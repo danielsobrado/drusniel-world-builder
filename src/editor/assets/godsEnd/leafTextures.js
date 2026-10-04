@@ -69,7 +69,7 @@ export function paintLeaf({ base, light, vein }, seed = 1) {
 
 /** A mipmapped sRGB texture of one zone's leaf. */
 export function createLeafTexture(zone) {
-  const palette = LEAF_PALETTES[zone];
+  const palette = Object.hasOwn(LEAF_PALETTES, zone) ? LEAF_PALETTES[zone] : null;
   if (!palette) return null;
   const texture = new THREE.DataTexture(paintLeaf(palette, zone.length * 7919), SIZE, SIZE);
   texture.colorSpace = THREE.SRGBColorSpace;

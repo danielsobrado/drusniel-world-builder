@@ -1,3 +1,4 @@
+import { createSnowDetailNodes } from './stylized/SnowDetailShading.js';
 import * as THREE from 'three/webgpu';
 import {
   abs,
@@ -345,11 +346,19 @@ export function createTerrainMaterial({
       state: snowWakeRecorder.state,
       config: stylizedConfig.snowWake,
     });
-    const printed = footprints.apply(snowColor);
+    const snowDetail = bakedSurface.snow ? createSnowDetailNodes({
+      terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, material,
+    }) : null;
+    const detailedSnowColor = snowDetail ? snowDetail.color(snowColor) : snowColor;
+    const printed = footprints.apply(detailedSnowColor);
     material.colorNode = wake ? wake.apply(printed) : printed;
     material.roughnessNode = surface.roughness;
     if (snowSurface) material.emissiveNode = snowSurface.emissive;
     if (bakedSurface.normal) material.normalNode = bakedSurface.normal;
+    if (snowDetail) {
+      material.roughnessNode = snowDetail.roughness(surface.roughness);
+      if (bakedSurface.normal) material.normalNode = snowDetail.normal(bakedSurface.normal);
+    }
     // Wind-blown snow and sand streaming across the ground, behind the ambient
     // layer's own weights. The snow streak keys on the baked snow the terrain
     // already draws (so a material with no snow field adds none) and the sand

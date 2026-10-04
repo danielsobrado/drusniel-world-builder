@@ -1,4 +1,4 @@
-# Gods' End weather port
+# Gods' End weather and texture port
 
 Source: the owner's `/home/drusniel/drusniel-gods-end` checkout.
 
@@ -13,6 +13,8 @@ are unchanged.
 | `src/weather/SnowfallSystem.js` | `snowfall/SnowfallField.js` and `snowfallFieldMaterial.js`, used by `SnowWeatherSystem` on WebGPU |
 | `CinematicPipeline.js` light-shaft passes | `GodsEndLightShafts.js`, selected as the `cinematic` god-ray technique |
 | `src/world/village/houseTextureData.js` and `src/foliage/leafTextures.js` | Shared `assets/godsEnd` generators, catalog materials, workshop surface presets, and falling-leaf textures |
+| `src/water/seaDetail.js` | Shared procedural sea-detail texture and streamed water shading |
+| `src/world/snowTextures.js` | Shared snow surface maps and terrain detail shading |
 
 Choose **Rain** or **Snow** in the weather panel. Configure particle counts,
 columns, dimensions and snow populations in `config/weather-effects.yaml`.
@@ -41,7 +43,10 @@ Dormant shaft targets warm once, then skip GPU work. Both targets and particle
 geometry are released with their owning systems. WebGL keeps its existing
 precipitation shaders.
 
-Validation commands:
+Code port complete. Browser acceptance and performance validation are deferred
+at the owner's request; the migration is not yet validated visually.
+
+Commands for the later validation pass:
 
 ```bash
 node --test test/gods-end-weather.test.js test/snowfall-field.test.js tests/godRaysScreen.test.js

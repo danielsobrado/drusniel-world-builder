@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { WaterAcceptanceTracker } from '../src/editor/performance/qa/WaterAcceptance.js';
+import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'tmp');
@@ -313,6 +314,7 @@ async function main() {
     // A validation error discards the whole command buffer for that frame, which
     // no frame-time metric would ever report as a failure.
     const gpuErrors = collectGpuValidationErrors(page);
+    const browserErrors = createBrowserErrorMonitor(page);
 
     await page.goto(`${baseUrl}/?qa=water-acceptance&autostart=0&download=0`, {
       waitUntil: 'domcontentloaded',
@@ -443,6 +445,7 @@ async function main() {
       waterAcceptance: acceptance,
       gpuValidationErrorCount,
       gpuValidationErrors,
+      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot() },
       phases: {
         enterSeconds: entry.elapsedSeconds,
         entryReachedTarget: entry.reached,
@@ -460,7 +463,7 @@ async function main() {
       outPath: OUT_PATH,
       adapter,
       performanceAuthoritative: authoritativePerformance,
-      pass: acceptance.pass && gpuValidationErrorCount === 0,
+      pass: acceptance.pass && gpuValidationErrorCount === 0 && report.capture.browserErrors.count === 0,
       gates: acceptance.gates,
       metrics: acceptance.metrics,
       frameP95Ms: perfReport.summary.dt.p95Ms,
@@ -469,7 +472,7 @@ async function main() {
       gpuValidationErrors: gpuValidationErrors.slice(0, 4),
     }, null, 2));
 
-    if (!acceptance.pass || gpuValidationErrorCount > 0) process.exitCode = 1;
+    if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0) process.exitCode = 1;
   } finally {
     await browser?.close();
     if (server) {

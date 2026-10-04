@@ -4,6 +4,7 @@ import {
   OBJECT_COLLISION_POLICY_TRIGGER,
   OBJECT_COLLISION_POLICY_WALKABLE,
 } from './ObjectCollisionPolicy.js';
+import { createGodsEndColliderDescriptions } from './assets/godsEnd/objectCatalog.js';
 
 const BOX = 'box';
 const CAPSULE = 'capsule';
@@ -363,6 +364,11 @@ export function createObjectColliderDescriptions(definition, tileSize) {
     throw new Error('Object collider creation requires a validated definition and tile size.');
   }
   if (definition.collision.policy === OBJECT_COLLISION_POLICY_NONE) return Object.freeze([]);
+  if (definition.asset) {
+    const descriptions = applyOverrides(createGodsEndColliderDescriptions(definition), definition.collision);
+    validateFootprint(definition, tileSize, descriptions);
+    return Object.freeze(descriptions);
+  }
   const factory = FACTORIES[definition.collision.profile ?? definition.model];
   if (!factory) {
     throw new Error(`Object ${definition.key} has no collider profile ${definition.collision.profile}.`);

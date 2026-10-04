@@ -189,7 +189,7 @@ class NaturalObjectThumbnails {
   }
 
   enqueue(key) {
-    if (this.disposed || this.failed || !OBJECT_BY_KEY.has(key)) return;
+    if (this.disposed || this.failed || !OBJECT_BY_KEY.has(key) || OBJECT_BY_KEY.get(key).asset) return;
     const cached = this.cache.get(key);
     if (cached) {
       this.touchCache(key, cached);

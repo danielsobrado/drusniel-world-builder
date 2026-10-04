@@ -202,6 +202,13 @@ released. Its separate `recovery` result does not enter movement FPS statistics.
 `revisit` report. Add `--turn-on-revisit` for a 180° camera turn halfway through
 that second measurement; the report records this route override explicitly.
 
+Browser exceptions and `console.error` messages invalidate a capture. The runner
+saves their count and a bounded list in `capture.browserErrors`, preserves the
+report, and exits non-zero. Check this evidence before quoting FPS; failed asset
+loading can change the scene to a cheaper or more expensive fallback. Capture
+against frozen runtime sources: an HMR reload can change the workload and clear
+caches during a run.
+
 The runner rejects software/fallback adapters. Headless Chromium commonly fails
 that gate on Windows, so use `--headed` for comparisons. `--cpu-profile` writes
 a Chrome sampled CPU profile alongside the JSON without making profiling the

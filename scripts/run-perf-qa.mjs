@@ -13,7 +13,7 @@ import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defaultPerfQaTimeoutMs } from './lib/perf-qa-timeout.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -136,6 +136,8 @@ const fs = require('fs');
       deviceScaleFactor: ${deviceScaleFactor},
     });
     page.setDefaultTimeout(${timeoutMs});
+    const { createBrowserErrorMonitor } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-errors.mjs')).href)});
+    const browserErrors = createBrowserErrorMonitor(page);
     await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
 
@@ -209,10 +211,8 @@ const fs = require('fs');
       cpuProfiling = true;
     }
 
-    // Vite can briefly replace the document while applying a pending full
-    // reload. The harness API is republished by the next bootstrap, so keep
-    // polling through that gap instead of turning a harmless reload into a
-    // failed performance run.
+    // Wait through bootstrap publication; capture against frozen sources so
+    // development reloads cannot silently change the measured runtime.
     await page.waitForFunction(() => window.__perfQa?.status === 'done', null, {
       timeout: ${timeoutMs},
     });
@@ -275,7 +275,12 @@ const fs = require('fs');
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
     };
     ${screenshotPath === null ? '' : `await page.screenshot({ path: ${JSON.stringify(screenshotPath.replace(/\\/g, '/'))} });`}
+    report.capture.browserErrors = browserErrors.snapshot();
     fs.writeFileSync(${JSON.stringify(outPath.replace(/\\/g, '/'))}, JSON.stringify(report, null, 2) + '\\n');
+    if (report.capture.browserErrors.count > 0) {
+      console.error('Perf QA invalid: browser errors occurred; inspect capture.browserErrors in the saved report.');
+      process.exitCode = 1;
+    }
     console.log(JSON.stringify({
       outPath: ${JSON.stringify(outPath.replace(/\\/g, '/'))},
       screenshotPath: ${JSON.stringify(screenshotPath?.replace(/\\/g, '/') ?? null)},

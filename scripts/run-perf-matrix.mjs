@@ -40,6 +40,7 @@ function reportSummary(report) {
     preparation: report.preparation,
     sceneryUpdateCpu: report.sceneryUpdateCpu,
     adapter: report.adapter,
+    capture: report.capture,
     density: {
       treesPerChunk: stylized?.trees?.perChunk ?? null,
       candidateBudgetPerChunk:

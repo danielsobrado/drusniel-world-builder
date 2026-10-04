@@ -1,0 +1,5406 @@
+{
+  "version": 1,
+  "objects": [
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-background-tree-01",
+      "label": "Gods’ End Background Tree 01",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_01.glb",
+        "rootNames": [
+          "background_tree_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -3.8921549320220947,
+            -0.023793213069438934,
+            -3.2743988037109375
+          ],
+          "max": [
+            5.131290435791016,
+            12.29344367980957,
+            5.296957015991211
+          ]
+        },
+        "dimensions": [
+          9.02344536781311,
+          12.31723689287901,
+          8.571355819702148
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-background-tree-02",
+      "label": "Gods’ End Background Tree 02",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_02.glb",
+        "rootNames": [
+          "background_tree_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -3.918264389038086,
+            -0.02072368748486042,
+            -3.786451816558838
+          ],
+          "max": [
+            4.137087821960449,
+            13.861379623413086,
+            3.9723596572875977
+          ]
+        },
+        "dimensions": [
+          8.055352210998535,
+          13.882103310897946,
+          7.7588114738464355
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-background-tree-03",
+      "label": "Gods’ End Background Tree 03",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/background_tree_03.glb",
+        "rootNames": [
+          "background_tree_03"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.477024078369141,
+            -0.02828274480998516,
+            -4.518376350402832
+          ],
+          "max": [
+            6.217977523803711,
+            10.025306701660156,
+            4.652318954467773
+          ]
+        },
+        "dimensions": [
+          10.695001602172852,
+          10.053589446470141,
+          9.170695304870605
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-broadleaf-01",
+      "label": "Gods’ End Broadleaf 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_01.glb",
+        "rootNames": [
+          "broadleaf_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.3825587034225464,
+            -0.0032905321568250656,
+            -1.4910298585891724
+          ],
+          "max": [
+            1.279593825340271,
+            1.6980820894241333,
+            1.4086600542068481
+          ]
+        },
+        "dimensions": [
+          2.6621525287628174,
+          1.7013726215809584,
+          2.8996899127960205
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-broadleaf-02",
+      "label": "Gods’ End Broadleaf 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_02.glb",
+        "rootNames": [
+          "broadleaf_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.3983877897262573,
+            -0.0034158099442720413,
+            -1.110609531402588
+          ],
+          "max": [
+            1.320366621017456,
+            1.4956668615341187,
+            1.2552194595336914
+          ]
+        },
+        "dimensions": [
+          2.7187544107437134,
+          1.4990826714783907,
+          2.3658289909362793
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-broadleaf-03",
+      "label": "Gods’ End Broadleaf 03",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/broadleaf_03.glb",
+        "rootNames": [
+          "broadleaf_03"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.2741695642471313,
+            -0.0034867259673774242,
+            -1.148052453994751
+          ],
+          "max": [
+            1.3274424076080322,
+            1.850416898727417,
+            1.4178804159164429
+          ]
+        },
+        "dimensions": [
+          2.6016119718551636,
+          1.8539036246947944,
+          2.565932869911194
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-climber-01",
+      "label": "Gods’ End Climber 01",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/climber_01.glb",
+        "rootNames": [
+          "climber_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.0142865180969238,
+            -0.6068560481071472,
+            -1.0014979839324951
+          ],
+          "max": [
+            0.9842826128005981,
+            5.007648468017578,
+            0.9611494541168213
+          ]
+        },
+        "dimensions": [
+          1.998569130897522,
+          5.614504516124725,
+          1.9626474380493164
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-climber-02",
+      "label": "Gods’ End Climber 02",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/climber_02.glb",
+        "rootNames": [
+          "climber_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.0052077770233154,
+            -0.6014593839645386,
+            -0.9913612604141235
+          ],
+          "max": [
+            1.0583088397979736,
+            5.007648468017578,
+            1.022847056388855
+          ]
+        },
+        "dimensions": [
+          2.063516616821289,
+          5.609107851982117,
+          2.0142083168029785
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-fern-01",
+      "label": "Gods’ End Fern 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/fern_01.glb",
+        "rootNames": [
+          "fern_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.7453301548957825,
+            0.03999999910593033,
+            -0.9521209001541138
+          ],
+          "max": [
+            1.0332024097442627,
+            0.4270437955856323,
+            0.8955521583557129
+          ]
+        },
+        "dimensions": [
+          1.7785325646400452,
+          0.387043796479702,
+          1.8476730585098267
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-fern-02",
+      "label": "Gods’ End Fern 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/fern_02.glb",
+        "rootNames": [
+          "fern_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.050114631652832,
+            0.03999999910593033,
+            -0.933525562286377
+          ],
+          "max": [
+            0.9850377440452576,
+            0.42885202169418335,
+            0.8079591989517212
+          ]
+        },
+        "dimensions": [
+          2.0351523756980896,
+          0.388852022588253,
+          1.7414847612380981
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-grass-01",
+      "label": "Gods’ End Grass 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_01.glb",
+        "rootNames": [
+          "grass_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.432413786649704,
+            0,
+            -0.4236796796321869
+          ],
+          "max": [
+            0.5702807903289795,
+            0.6892572641372681,
+            0.45055100321769714
+          ]
+        },
+        "dimensions": [
+          1.0026945769786835,
+          0.6892572641372681,
+          0.874230682849884
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-grass-02",
+      "label": "Gods’ End Grass 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_02.glb",
+        "rootNames": [
+          "grass_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.5871020555496216,
+            0,
+            -0.5279424786567688
+          ],
+          "max": [
+            0.5904170870780945,
+            0.645779550075531,
+            0.47007203102111816
+          ]
+        },
+        "dimensions": [
+          1.177519142627716,
+          0.645779550075531,
+          0.998014509677887
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-grass-03",
+      "label": "Gods’ End Grass 03",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/grass_03.glb",
+        "rootNames": [
+          "grass_03"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.6188416481018066,
+            0,
+            -0.481515109539032
+          ],
+          "max": [
+            0.5166667103767395,
+            0.6578365564346313,
+            0.540260910987854
+          ]
+        },
+        "dimensions": [
+          1.1355083584785461,
+          0.6578365564346313,
+          1.021776020526886
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-groundcover-01",
+      "label": "Gods’ End Groundcover 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/groundcover_01.glb",
+        "rootNames": [
+          "groundcover_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.798879086971283,
+            0.02500000037252903,
+            -0.4418317973613739
+          ],
+          "max": [
+            0.7910732626914978,
+            0.11034160852432251,
+            0.43555161356925964
+          ]
+        },
+        "dimensions": [
+          1.5899523496627808,
+          0.08534160815179348,
+          0.8773834109306335
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-groundcover-02",
+      "label": "Gods’ End Groundcover 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/groundcover_02.glb",
+        "rootNames": [
+          "groundcover_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.6207818388938904,
+            0.02500000037252903,
+            -0.6367758512496948
+          ],
+          "max": [
+            0.7350202202796936,
+            0.11462187767028809,
+            0.6379015445709229
+          ]
+        },
+        "dimensions": [
+          1.355802059173584,
+          0.08962187729775906,
+          1.2746773958206177
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-palm-01",
+      "label": "Gods’ End Palm 01",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/palm_01.glb",
+        "rootNames": [
+          "palm_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -2.6830227375030518,
+            -0.00812509749084711,
+            -3.0494344234466553
+          ],
+          "max": [
+            3.697700023651123,
+            10.847734451293945,
+            3.277839422225952
+          ]
+        },
+        "dimensions": [
+          6.380722761154175,
+          10.855859548784792,
+          6.327273845672607
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-palm-02",
+      "label": "Gods’ End Palm 02",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/palm_02.glb",
+        "rootNames": [
+          "palm_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -2.825361490249634,
+            -0.00812509749084711,
+            -2.943434476852417
+          ],
+          "max": [
+            3.9805235862731934,
+            10.752096176147461,
+            2.4045982360839844
+          ]
+        },
+        "dimensions": [
+          6.805885076522827,
+          10.760221273638308,
+          5.348032712936401
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-shrub-01",
+      "label": "Gods’ End Shrub 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/shrub_01.glb",
+        "rootNames": [
+          "shrub_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.2506870031356812,
+            -0.055287331342697144,
+            -1.2853070497512817
+          ],
+          "max": [
+            1.1979944705963135,
+            1.659829020500183,
+            1.1906747817993164
+          ]
+        },
+        "dimensions": [
+          2.4486814737319946,
+          1.7151163518428802,
+          2.475981831550598
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-shrub-02",
+      "label": "Gods’ End Shrub 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/shrub_02.glb",
+        "rootNames": [
+          "shrub_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.18234384059906,
+            -0.01286882534623146,
+            -1.2101471424102783
+          ],
+          "max": [
+            1.161698579788208,
+            1.6429368257522583,
+            1.1838120222091675
+          ]
+        },
+        "dimensions": [
+          2.344042420387268,
+          1.6558056510984898,
+          2.393959164619446
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-split-leaf-01",
+      "label": "Gods’ End Split Leaf 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/split_leaf_01.glb",
+        "rootNames": [
+          "split_leaf_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.1710350513458252,
+            -0.0027491699438542128,
+            -1.2536448240280151
+          ],
+          "max": [
+            1.3387469053268433,
+            1.422176718711853,
+            1.3812413215637207
+          ]
+        },
+        "dimensions": [
+          2.5097819566726685,
+          1.4249258886557072,
+          2.634886145591736
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-split-leaf-02",
+      "label": "Gods’ End Split Leaf 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/split_leaf_02.glb",
+        "rootNames": [
+          "split_leaf_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.3164503574371338,
+            -0.0036083527375012636,
+            -1.1988506317138672
+          ],
+          "max": [
+            1.2405883073806763,
+            1.3701863288879395,
+            1.0433038473129272
+          ]
+        },
+        "dimensions": [
+          2.55703866481781,
+          1.3737946816254407,
+          2.2421544790267944
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-01",
+      "label": "Gods’ End Tree 01",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_01.glb",
+        "rootNames": [
+          "tree_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.461095809936523,
+            -0.04169287905097008,
+            -4.410111427307129
+          ],
+          "max": [
+            4.376413345336914,
+            11.41065788269043,
+            5.208247184753418
+          ]
+        },
+        "dimensions": [
+          8.837509155273438,
+          11.4523507617414,
+          9.618358612060547
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-02",
+      "label": "Gods’ End Tree 02",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_02.glb",
+        "rootNames": [
+          "tree_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.655145645141602,
+            -0.0364055410027504,
+            -4.116359710693359
+          ],
+          "max": [
+            4.317122459411621,
+            12.555609703063965,
+            4.448283672332764
+          ]
+        },
+        "dimensions": [
+          8.972268104553223,
+          12.592015244066715,
+          8.564643383026123
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-03",
+      "label": "Gods’ End Tree 03",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_03.glb",
+        "rootNames": [
+          "tree_03"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -5.084015846252441,
+            -0.04845503717660904,
+            -4.925544261932373
+          ],
+          "max": [
+            4.547494888305664,
+            9.373895645141602,
+            5.322972297668457
+          ]
+        },
+        "dimensions": [
+          9.631510734558105,
+          9.42235068231821,
+          10.24851655960083
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-04",
+      "label": "Gods’ End Tree 04",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_04.glb",
+        "rootNames": [
+          "tree_04"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -3.380539894104004,
+            -0.032214242964982986,
+            -3.299665927886963
+          ],
+          "max": [
+            5.702432155609131,
+            14.718402862548828,
+            5.3421101570129395
+          ]
+        },
+        "dimensions": [
+          9.082972049713135,
+          14.750617105513811,
+          8.641776084899902
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-05",
+      "label": "Gods’ End Tree 05",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_05.glb",
+        "rootNames": [
+          "tree_05"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.115668296813965,
+            -0.044862404465675354,
+            -4.563657283782959
+          ],
+          "max": [
+            6.214534759521484,
+            10.225881576538086,
+            5.545922756195068
+          ]
+        },
+        "dimensions": [
+          10.33020305633545,
+          10.270743981003761,
+          10.109580039978027
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-06",
+      "label": "Gods’ End Tree 06",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_06.glb",
+        "rootNames": [
+          "tree_06"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -5.073976516723633,
+            -0.038890816271305084,
+            -3.9904041290283203
+          ],
+          "max": [
+            4.403326034545898,
+            11.957818031311035,
+            3.403818368911743
+          ]
+        },
+        "dimensions": [
+          9.477302551269531,
+          11.99670884758234,
+          7.3942224979400635
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-lod-01",
+      "label": "Gods’ End Tree Lod 01",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_01.glb",
+        "rootNames": [
+          "tree_lod_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.4790802001953125,
+            -0.023793213069438934,
+            -4.131378173828125
+          ],
+          "max": [
+            4.893538951873779,
+            11.829418182373047,
+            4.897321701049805
+          ]
+        },
+        "dimensions": [
+          9.372619152069092,
+          11.853211395442486,
+          9.02869987487793
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-lod-02",
+      "label": "Gods’ End Tree Lod 02",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_02.glb",
+        "rootNames": [
+          "tree_lod_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.319704055786133,
+            -0.02215871401131153,
+            -3.9737727642059326
+          ],
+          "max": [
+            2.7949018478393555,
+            12.844971656799316,
+            4.086942672729492
+          ]
+        },
+        "dimensions": [
+          7.114605903625488,
+          12.867130370810628,
+          8.060715436935425
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-tree-lod-03",
+      "label": "Gods’ End Tree Lod 03",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/tree_lod_03.glb",
+        "rootNames": [
+          "tree_lod_03"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -4.804558277130127,
+            -0.03470480442047119,
+            -4.3771653175354
+          ],
+          "max": [
+            5.772347927093506,
+            9.180405616760254,
+            3.64255952835083
+          ]
+        },
+        "dimensions": [
+          10.576906204223633,
+          9.215110421180725,
+          8.01972484588623
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-vine-01",
+      "label": "Gods’ End Vine 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/vine_01.glb",
+        "rootNames": [
+          "vine_01"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.48295363783836365,
+            -6.274717807769775,
+            -0.49820324778556824
+          ],
+          "max": [
+            1.247710943222046,
+            0.0025862373877316713,
+            0.4981725811958313
+          ]
+        },
+        "dimensions": [
+          1.7306645810604095,
+          6.277304045157507,
+          0.9963758289813995
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-forest-vine-02",
+      "label": "Gods’ End Vine 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/forest/vine_02.glb",
+        "rootNames": [
+          "vine_02"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.4361966848373413,
+            -5.610414505004883,
+            -0.4295378029346466
+          ],
+          "max": [
+            1.3305189609527588,
+            0.0029849561396986246,
+            0.5115408897399902
+          ]
+        },
+        "dimensions": [
+          1.7667156457901,
+          5.613399461144581,
+          0.9410786926746368
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-banana-understory",
+      "label": "Gods’ End Banana Understory",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/banana_understory.glb",
+        "rootNames": [
+          "banana_understory"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.7084118127822876,
+            -0.00394450081512332,
+            -1.8698832988739014
+          ],
+          "max": [
+            1.8122402429580688,
+            1.8302192687988281,
+            1.559067964553833
+          ]
+        },
+        "dimensions": [
+          3.5206520557403564,
+          1.8341637696139514,
+          3.4289512634277344
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-broad-leaf-module",
+      "label": "Gods’ End Broad Leaf Module",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/broad_leaf_module.glb",
+        "rootNames": [
+          "broad_leaf_module"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            0,
+            0,
+            -0.25
+          ],
+          "max": [
+            0.9578262567520142,
+            0.19207830727100372,
+            0.25
+          ]
+        },
+        "dimensions": [
+          0.9578262567520142,
+          0.19207830727100372,
+          0.5
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-elephant-ear",
+      "label": "Gods’ End Elephant Ear",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/elephant_ear.glb",
+        "rootNames": [
+          "elephant_ear"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.0610346794128418,
+            -0.005164551082998514,
+            -1.1663644313812256
+          ],
+          "max": [
+            1.1442193984985352,
+            0.9876531958580017,
+            1.0449036359786987
+          ]
+        },
+        "dimensions": [
+          2.205254077911377,
+          0.9928177469410002,
+          2.2112680673599243
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-fern-frond-module",
+      "label": "Gods’ End Fern Frond Module",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_frond_module.glb",
+        "rootNames": [
+          "fern_frond_module"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.003449932439252734,
+            -0.004845580086112022,
+            -0.27274537086486816
+          ],
+          "max": [
+            1.2056570053100586,
+            0.22809599339962006,
+            0.27274537086486816
+          ]
+        },
+        "dimensions": [
+          1.2091069377493113,
+          0.23294157348573208,
+          0.5454907417297363
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-fern-large",
+      "label": "Gods’ End Fern Large",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_large.glb",
+        "rootNames": [
+          "fern_large"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.2080625295639038,
+            0.023973850533366203,
+            -1.2167410850524902
+          ],
+          "max": [
+            1.1206212043762207,
+            0.32193371653556824,
+            1.0479466915130615
+          ]
+        },
+        "dimensions": [
+          2.3286837339401245,
+          0.29795986600220203,
+          2.2646877765655518
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-fern-small",
+      "label": "Gods’ End Fern Small",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/fern_small.glb",
+        "rootNames": [
+          "fern_small"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.5879874229431152,
+            0.026640234515070915,
+            -0.6510800123214722
+          ],
+          "max": [
+            0.7410601377487183,
+            0.20504580438137054,
+            0.7321382164955139
+          ]
+        },
+        "dimensions": [
+          1.3290475606918335,
+          0.17840556986629963,
+          1.383218228816986
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-hanging-vine-cluster",
+      "label": "Gods’ End Hanging Vine Cluster",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/hanging_vine_cluster.glb",
+        "rootNames": [
+          "hanging_vine_cluster"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.8768274784088135,
+            0.004279004409909248,
+            -0.1667613387107849
+          ],
+          "max": [
+            0.8790931701660156,
+            3.2098143100738525,
+            0.12369488179683685
+          ]
+        },
+        "dimensions": [
+          1.755920648574829,
+          3.2055353056639433,
+          0.29045622050762177
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-jungle-canopy-tree",
+      "label": "Gods’ End Jungle Canopy Tree",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_canopy_tree.glb",
+        "rootNames": [
+          "jungle_canopy_tree"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -2.8590054512023926,
+            -0.07136213779449463,
+            -2.967291831970215
+          ],
+          "max": [
+            2.8360679149627686,
+            7.470232963562012,
+            3.2104134559631348
+          ]
+        },
+        "dimensions": [
+          5.695073366165161,
+          7.541595101356506,
+          6.17770528793335
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-jungle-grass-broad",
+      "label": "Gods’ End Jungle Grass Broad",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_broad.glb",
+        "rootNames": [
+          "jungle_grass_broad"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.0131721496582031,
+            0,
+            -0.8849995136260986
+          ],
+          "max": [
+            1.0591658353805542,
+            0.6863014698028564,
+            0.9581905603408813
+          ]
+        },
+        "dimensions": [
+          2.0723379850387573,
+          0.6863014698028564,
+          1.84319007396698
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-jungle-grass-short",
+      "label": "Gods’ End Jungle Grass Short",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_short.glb",
+        "rootNames": [
+          "jungle_grass_short"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.6459856033325195,
+            0,
+            -0.6314307451248169
+          ],
+          "max": [
+            0.5083029866218567,
+            0.3836561143398285,
+            0.5790840983390808
+          ]
+        },
+        "dimensions": [
+          1.1542885899543762,
+          0.3836561143398285,
+          1.2105148434638977
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-jungle-grass-tall",
+      "label": "Gods’ End Jungle Grass Tall",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_grass_tall.glb",
+        "rootNames": [
+          "jungle_grass_tall"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.2038657665252686,
+            0,
+            -1.1239910125732422
+          ],
+          "max": [
+            1.09367036819458,
+            0.8710921406745911,
+            0.9862455129623413
+          ]
+        },
+        "dimensions": [
+          2.2975361347198486,
+          0.8710921406745911,
+          2.1102365255355835
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-jungle-groundcover",
+      "label": "Gods’ End Jungle Groundcover",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/jungle_groundcover.glb",
+        "rootNames": [
+          "jungle_groundcover"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.44556349515914917,
+            -0.0033733968157321215,
+            -0.37043678760528564
+          ],
+          "max": [
+            0.4500238001346588,
+            0.34084203839302063,
+            0.43252819776535034
+          ]
+        },
+        "dimensions": [
+          0.895587295293808,
+          0.34421543520875275,
+          0.802964985370636
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-palm-frond-module",
+      "label": "Gods’ End Palm Frond Module",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_frond_module.glb",
+        "rootNames": [
+          "palm_frond_module"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.0068990797735750675,
+            -0.010432659648358822,
+            -0.6973602771759033
+          ],
+          "max": [
+            2.5144636631011963,
+            0.4016249179840088,
+            0.6973602771759033
+          ]
+        },
+        "dimensions": [
+          2.5213627428747714,
+          0.4120575776323676,
+          1.3947205543518066
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-palm-tall",
+      "label": "Gods’ End Palm Tall",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_tall.glb",
+        "rootNames": [
+          "palm_tall"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -2.209311008453369,
+            -0.008600429631769657,
+            -2.7164721488952637
+          ],
+          "max": [
+            3.6330511569976807,
+            7.654448986053467,
+            3.1943390369415283
+          ]
+        },
+        "dimensions": [
+          5.84236216545105,
+          7.6630494156852365,
+          5.910811185836792
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-palm-young",
+      "label": "Gods’ End Palm Young",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/palm_young.glb",
+        "rootNames": [
+          "palm_young"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -1.7267711162567139,
+            -0.016457725316286087,
+            -1.5794459581375122
+          ],
+          "max": [
+            1.8308720588684082,
+            2.1004936695098877,
+            1.7346124649047852
+          ]
+        },
+        "dimensions": [
+          3.557643175125122,
+          2.116951394826174,
+          3.3140584230422974
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-coastal-jungle-objects-tropical-kit-vine-strand-module",
+      "label": "Gods’ End Vine Strand Module",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/coastal-jungle/objects/tropical-kit/vine_strand_module.glb",
+        "rootNames": [
+          "vine_strand_module"
+        ],
+        "scale": 1,
+        "bounds": {
+          "min": [
+            -0.3261522054672241,
+            0.016490081325173378,
+            -0.16677406430244446
+          ],
+          "max": [
+            0.3263855576515198,
+            2.0074827671051025,
+            0.12369806319475174
+          ]
+        },
+        "dimensions": [
+          0.6525377631187439,
+          1.9909926857799292,
+          0.2904721274971962
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fantasy-lantern-lantern",
+      "label": "Gods’ End Lantern",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/lantern.glb",
+        "rootNames": [
+          "Lantern"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -0.5799999833106995,
+            -0.07000000774860382,
+            -0.5708001255989075
+          ],
+          "max": [
+            1.6399999856948853,
+            4.650000095367432,
+            0.5708001255989075
+          ]
+        },
+        "dimensions": [
+          0.7991999888420105,
+          1.6992000371217728,
+          0.41097609043121336
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fantasy-lantern-lanternroadside",
+      "label": "Gods’ End LanternRoadside",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/lantern.glb",
+        "rootNames": [
+          "LanternRoadside"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -0.5799999833106995,
+            -0.07000000774860382,
+            -0.5708001255989075
+          ],
+          "max": [
+            1.6423909664154053,
+            4.650000095367432,
+            0.5708001255989075
+          ]
+        },
+        "dimensions": [
+          0.8000607419013976,
+          1.6992000371217728,
+          0.41097609043121336
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fantasy-lantern-lanternwoodland",
+      "label": "Gods’ End LanternWoodland",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/lantern.glb",
+        "rootNames": [
+          "LanternWoodland"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -0.6309937238693237,
+            -0.07000000774860382,
+            -0.5708001255989075
+          ],
+          "max": [
+            1.6235533952713013,
+            4.873385429382324,
+            0.5708001255989075
+          ]
+        },
+        "dimensions": [
+          0.8116369628906249,
+          1.779618757367134,
+          0.41097609043121336
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-01",
+      "label": "Gods’ End SM Rocks 01",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_01"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.1925507502432744,
+            0,
+            0.9241610511207341
+          ],
+          "max": [
+            0.26013917341517256,
+            0.32452259338356165,
+            1.4398370802438905
+          ]
+        },
+        "dimensions": [
+          1.1407786076192863,
+          0.8177969353265754,
+          1.299503593390354
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-02",
+      "label": "Gods’ End SM Rocks 02",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_02"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.0044059528915739,
+            0,
+            -0.09538034225895231
+          ],
+          "max": [
+            1.6218314762004127,
+            0.5585672735160248,
+            0.564838167916875
+          ]
+        },
+        "dimensions": [
+          1.5559123187382737,
+          1.4075895292603824,
+          1.6637506456430848
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-03",
+      "label": "Gods’ End SM Rocks 03",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_03"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -2.7974111313206436,
+            0,
+            -0.0980419709226048
+          ],
+          "max": [
+            -0.6133135086302417,
+            0.8878301903507608,
+            1.5103479429256623
+          ]
+        },
+        "dimensions": [
+          5.503926009179812,
+          2.237332079683917,
+          4.0531425828976335
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-04",
+      "label": "Gods’ End SM Rocks 04",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_04"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.9269809515703997,
+            0,
+            -1.6742247397998398
+          ],
+          "max": [
+            0.9729433986631761,
+            1.6951458461339743,
+            -0.0882686404525792
+          ]
+        },
+        "dimensions": [
+          4.787809362588611,
+          4.271767532257615,
+          3.9966093703550967
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-05",
+      "label": "Gods’ End SM Rocks 05",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_05"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.8999813418094504,
+            0,
+            -0.30309199609401816
+          ],
+          "max": [
+            2.7974111313206436,
+            1.1446504818515908,
+            0.5996496066529389
+          ]
+        },
+        "dimensions": [
+          2.2615230695682067,
+          2.884519214266009,
+          2.2749088389223315
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-06",
+      "label": "Gods’ End SM Rocks 06",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_06"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.540165370848058,
+            -1.327896340958995e-10,
+            1.3114407055502966
+          ],
+          "max": [
+            1.8233503315593964,
+            0.24095783695059828,
+            1.6742247397998398
+          ]
+        },
+        "dimensions": [
+          0.7136261009925727,
+          0.6072137494501375,
+          0.9142157663088488
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-07",
+      "label": "Gods’ End SM Rocks 07",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_07"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            0.21642108433497498,
+            0,
+            0.257380641906396
+          ],
+          "max": [
+            0.7913213934454006,
+            0.40958679283720906,
+            0.8344412426402883
+          ]
+        },
+        "dimensions": [
+          1.4487487789582727,
+          1.0321587179497669,
+          1.4541927138494086
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-08",
+      "label": "Gods’ End SM Rocks 08",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_08"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.3074152844976936,
+            0,
+            -0.7886136450928376
+          ],
+          "max": [
+            1.8702737008719055,
+            0.9757673526918527,
+            -0.4252326488815399
+          ]
+        },
+        "dimensions": [
+          1.4184032092630139,
+          2.4589337287834687,
+          0.9157201104524703
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-09",
+      "label": "Gods’ End SM Rocks 09",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_09"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -2.0037023477918865,
+            0,
+            -1.1102138271134976
+          ],
+          "max": [
+            -1.1246873985673318,
+            1.594952672103935,
+            -0.3661495889838875
+          ]
+        },
+        "dimensions": [
+          2.215117672045878,
+          4.019280733701916,
+          1.8750418800866175
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-10",
+      "label": "Gods’ End SM Rocks 10",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_10"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            0.9861922997342276,
+            -4.53674364371635e-9,
+            0.9978435293322008
+          ],
+          "max": [
+            1.1580319717966319,
+            0.31206224744014827,
+            1.178165790926684
+          ]
+        },
+        "dimensions": [
+          0.4330359735972587,
+          0.7863968749817676,
+          0.4544120992180979
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-rocks-sm-rocks-11",
+      "label": "Gods’ End SM Rocks 11",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/rocks.glb",
+        "rootNames": [
+          "SM_Rocks_11"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.38775961962879535,
+            4.999999307183329e-9,
+            0.2516291466736238
+          ],
+          "max": [
+            -0.03633826651413141,
+            0.7171635376713172,
+            0.5468963119336294
+          ]
+        },
+        "dimensions": [
+          0.8855818098489531,
+          1.8072521023317212,
+          0.7440732564552142
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-fantasy-tree1",
+      "label": "Gods’ End Tree1",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree1.glb",
+        "rootNames": [
+          "Tree1_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -7.215030227767102,
+            -3.227036334826348,
+            697.7328625528637
+          ],
+          "max": [
+            10.542504058022132,
+            31.809382369751575,
+            717.1737698464264
+          ]
+        },
+        "dimensions": [
+          6.392712342884124,
+          12.613110733648053,
+          6.998726625682552
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree10",
+      "label": "Gods’ End Tree10",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree10.glb",
+        "rootNames": [
+          "Tree10_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -4.733978748321533,
+            -0.7212247848510742,
+            -4.821631908416748
+          ],
+          "max": [
+            3.713876247406006,
+            15.142000198364258,
+            4.50463342666626
+          ]
+        },
+        "dimensions": [
+          3.041227798461914,
+          5.7107609939575195,
+          3.3574555206298826
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree11",
+      "label": "Gods’ End Tree11",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree11.glb",
+        "rootNames": [
+          "Tree11_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -1.4320706129074097,
+            -0.24697937071323395,
+            -4.046591281890869
+          ],
+          "max": [
+            7.961979866027832,
+            12.860594749450684,
+            4.674310684204102
+          ]
+        },
+        "dimensions": [
+          3.381858172416687,
+          4.7187266832590105,
+          3.1395247077941892
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree12",
+      "label": "Gods’ End Tree12",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree12.glb",
+        "rootNames": [
+          "Tree12_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -3.0403032302856445,
+            -0.6172009706497192,
+            -2.4487128257751465
+          ],
+          "max": [
+            3.0157008171081543,
+            7.606500148773193,
+            2.7113430500030518
+          ]
+        },
+        "dimensions": [
+          2.1801614570617676,
+          2.9605324029922486,
+          1.8576201152801513
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree13",
+      "label": "Gods’ End Tree13",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree13.glb",
+        "rootNames": [
+          "Tree13_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -2.369394540786743,
+            -0.3756220042705536,
+            -3.0615451335906982
+          ],
+          "max": [
+            4.733590602874756,
+            13,
+            3.8121440410614014
+          ]
+        },
+        "dimensions": [
+          2.5570746517181395,
+          4.815223921537399,
+          2.4745281028747557
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree14",
+      "label": "Gods’ End Tree14",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree14.glb",
+        "rootNames": [
+          "Tree14_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -2.6094019412994385,
+            -1.008767008781433,
+            -2.756427764892578
+          ],
+          "max": [
+            3.4401001930236816,
+            19.142000198364258,
+            2.656116485595703
+          ]
+        },
+        "dimensions": [
+          2.177820768356323,
+          7.254276194572449,
+          1.9485159301757813
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree15",
+      "label": "Gods’ End Tree15",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree15.glb",
+        "rootNames": [
+          "Tree15_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -6.007332801818848,
+            -4.149946689605713,
+            -5.922732830047607
+          ],
+          "max": [
+            6.645537376403809,
+            17.142000198364258,
+            6.163449764251709
+          ]
+        },
+        "dimensions": [
+          4.555033264160156,
+          7.665100879669189,
+          4.351025733947754
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree16",
+      "label": "Gods’ End Tree16",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree16.glb",
+        "rootNames": [
+          "Tree16_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -2.8014979362487793,
+            -0.24723167717456818,
+            -3.7083468437194824
+          ],
+          "max": [
+            3.503277540206909,
+            16.142000198364258,
+            3.553089141845703
+          ]
+        },
+        "dimensions": [
+          2.2697191715240477,
+          5.900123475193977,
+          2.6141169548034666
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree17",
+      "label": "Gods’ End Tree17",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree17.glb",
+        "rootNames": [
+          "Tree17_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -4.272479057312012,
+            -3.4561874866485596,
+            -4.075257778167725
+          ],
+          "max": [
+            4.322187423706055,
+            8.924960136413574,
+            3.97973370552063
+          ]
+        },
+        "dimensions": [
+          3.094079933166504,
+          4.457213144302368,
+          2.8997969341278074
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree18",
+      "label": "Gods’ End Tree18",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree18.glb",
+        "rootNames": [
+          "Tree18_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -2.3437042236328125,
+            -0.2726592719554901,
+            -2.813662528991699
+          ],
+          "max": [
+            4.296741962432861,
+            13,
+            2.958946704864502
+          ]
+        },
+        "dimensions": [
+          2.3905606269836426,
+          4.778157337903976,
+          2.0781393241882324
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree19",
+      "label": "Gods’ End Tree19",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree19.glb",
+        "rootNames": [
+          "Tree19_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -1.3446229696273804,
+            -0.31584247946739197,
+            -1.6421149969100952
+          ],
+          "max": [
+            1.5899862051010132,
+            3.6511199474334717,
+            1.4075473546981812
+          ]
+        },
+        "dimensions": [
+          1.0564593029022216,
+          1.4281064736843108,
+          1.0978784465789795
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree2",
+      "label": "Gods’ End Tree2",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree2.glb",
+        "rootNames": [
+          "Tree2_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -3.532006099721457,
+            -2.8768880700898585,
+            726.8538143045967
+          ],
+          "max": [
+            3.31362293410632,
+            14.111912551584282,
+            734.304506783772
+          ]
+        },
+        "dimensions": [
+          2.4644264521779995,
+          6.115968223802691,
+          2.682249292503129
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree3",
+      "label": "Gods’ End Tree3",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree3.glb",
+        "rootNames": [
+          "Tree3_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -13.996419134987661,
+            -3.141534735294984,
+            742.5328442134648
+          ],
+          "max": [
+            13.25917492066128,
+            28.480919709558066,
+            771.9739868427644
+          ]
+        },
+        "dimensions": [
+          9.812013860033618,
+          11.384083600147097,
+          10.598811346547826
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree4",
+      "label": "Gods’ End Tree4",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree4.glb",
+        "rootNames": [
+          "Tree4_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -20.096785232132106,
+            -3.3989148189469773,
+            775.3114858508543
+          ],
+          "max": [
+            11.404504640893947,
+            41.322380115025226,
+            805.953783197841
+          ]
+        },
+        "dimensions": [
+          11.340464354289379,
+          16.09966617622999,
+          11.031227044915195
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree5",
+      "label": "Gods’ End Tree5",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree5.glb",
+        "rootNames": [
+          "Tree5_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -19.297776237576045,
+            -3.852408473954693,
+            814.1419086482783
+          ],
+          "max": [
+            10.671386283278366,
+            40.52415849344948,
+            847.304577617105
+          ]
+        },
+        "dimensions": [
+          10.788898507507588,
+          15.975564108265502,
+          11.938560828777598
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree6",
+      "label": "Gods’ End Tree6",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree6.glb",
+        "rootNames": [
+          "Tree6_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -15.6805404840743,
+            -3.5996301298404205,
+            846.6466550546438
+          ],
+          "max": [
+            15.682319270076732,
+            42.420574471478176,
+            881.6238982586519
+          ]
+        },
+        "dimensions": [
+          11.290629511494371,
+          16.567273656474693,
+          12.591807553442923
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree7",
+      "label": "Gods’ End Tree7",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree7.glb",
+        "rootNames": [
+          "Tree7_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -6.743955489264408,
+            -3.651737759471473,
+            889.2572096085642
+          ],
+          "max": [
+            25.05018238531011,
+            43.864302407768264,
+            923.673029132191
+          ]
+        },
+        "dimensions": [
+          11.445889634846825,
+          17.105774460206305,
+          12.389695028505667
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree8",
+      "label": "Gods’ End Tree8",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree8.glb",
+        "rootNames": [
+          "Tree8_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -11.275806466627273,
+            -3.7456390897988,
+            922.963207721828
+          ],
+          "max": [
+            26.560623512325947,
+            48.38905675506703,
+            967.0654810279639
+          ]
+        },
+        "dimensions": [
+          13.621114792423159,
+          18.7684905041517,
+          15.876818390208918
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fantasy-tree9",
+      "label": "Gods’ End Tree9",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fantasy/tree9.glb",
+        "rootNames": [
+          "Tree9_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -14.121245574397108,
+            -3.962577480042313,
+            968.2409244200198
+          ],
+          "max": [
+            30.320332932697056,
+            61.91149157795735,
+            1016.5491203840793
+          ]
+        },
+        "dimensions": [
+          15.998968262553898,
+          23.71466486087988,
+          17.3909505470614
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-fauna-birds-object-10",
+      "label": "Gods’ End Bird 1 (posed)",
+      "category": "nature",
+      "icon": "🐦",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fauna/birds.glb",
+        "rootNames": [
+          "Object_10"
+        ],
+        "scale": 4.296324234656243,
+        "bounds": {
+          "min": [
+            11.0535193575922,
+            217.40995097794723,
+            1055.6509333317852
+          ],
+          "max": [
+            11.216449332558582,
+            217.4285207666593,
+            1055.7550512082043
+          ]
+        },
+        "dimensions": [
+          0.6999999999999998,
+          0.07978183327605572,
+          0.4473241557207332
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fauna-birds-object-26",
+      "label": "Gods’ End Bird 2 (posed)",
+      "category": "nature",
+      "icon": "🐦",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fauna/birds.glb",
+        "rootNames": [
+          "Object_26"
+        ],
+        "scale": 4.6985215364750115,
+        "bounds": {
+          "min": [
+            11.792374671433247,
+            207.91422400721254,
+            1056.1075591750318
+          ],
+          "max": [
+            11.941357706748898,
+            207.9312261295642,
+            1056.2027644684447
+          ]
+        },
+        "dimensions": [
+          0.7,
+          0.07988483803510404,
+          0.4473241214866795
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fauna-birds-object-42",
+      "label": "Gods’ End Bird 3 (posed)",
+      "category": "nature",
+      "icon": "🐦",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fauna/birds.glb",
+        "rootNames": [
+          "Object_42"
+        ],
+        "scale": 4.296321610833021,
+        "bounds": {
+          "min": [
+            10.089462384866886,
+            217.58184756744936,
+            1056.3727753568587
+          ],
+          "max": [
+            10.252392459336864,
+            217.60041735616142,
+            1056.4768933576574
+          ]
+        },
+        "dimensions": [
+          0.7,
+          0.07978178455221287,
+          0.447324416908335
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fauna-birds-object-58",
+      "label": "Gods’ End Bird 4 (posed)",
+      "category": "nature",
+      "icon": "🐦",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fauna/birds.glb",
+        "rootNames": [
+          "Object_58"
+        ],
+        "scale": 4.296324234656243,
+        "bounds": {
+          "min": [
+            12.173486943474991,
+            217.7000144707769,
+            1056.8978761810642
+          ],
+          "max": [
+            12.336416918441373,
+            217.71858425948898,
+            1057.0019940326001
+          ]
+        },
+        "dimensions": [
+          0.6999999999999998,
+          0.07978183327617783,
+          0.4473240488139212
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-fauna-birds-object-74",
+      "label": "Gods’ End Bird 5 (posed)",
+      "category": "nature",
+      "icon": "🐦",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/fauna/birds.glb",
+        "rootNames": [
+          "Object_74"
+        ],
+        "scale": 6.2388364508327605,
+        "bounds": {
+          "min": [
+            9.65510356483678,
+            180.32787433970432,
+            1057.1879485737552
+          ],
+          "max": [
+            9.767303973601553,
+            180.34066318715702,
+            1057.2596485572467
+          ]
+        },
+        "dimensions": [
+          0.7,
+          0.07978752765202529,
+          0.44732447053086893
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass1",
+      "label": "Gods’ End Trasparent Grass1",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass1"
+        ],
+        "scale": 1.0214514842176334,
+        "bounds": {
+          "min": [
+            0.2628497539250093,
+            2.893105063896547,
+            -0.29137992207601915
+          ],
+          "max": [
+            0.6162411628394835,
+            4.0679038855156895,
+            -0.2913798707239314
+          ]
+        },
+        "dimensions": [
+          0.36097217914545027,
+          1.2,
+          5.245366624864221e-8
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass2",
+      "label": "Gods’ End Trasparent Grass2",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass2"
+        ],
+        "scale": 0.310404202749999,
+        "bounds": {
+          "min": [
+            -0.3091037145335276,
+            2.7499367671474033,
+            -0.29137992207601765
+          ],
+          "max": [
+            0.5832053124883677,
+            6.615863804760632,
+            -0.29137975309097897
+          ]
+        },
+        "dimensions": [
+          0.2769764721393587,
+          1.2,
+          5.245366620949151e-8
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass2-003",
+      "label": "Gods’ End Trasparent Grass2.003",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass2.003"
+        ],
+        "scale": 0.3014055348604701,
+        "bounds": {
+          "min": [
+            -2.427404691731712,
+            -0.5394544670255619,
+            -1.6030405657181048
+          ],
+          "max": [
+            1.0103566226640002,
+            3.4418924599826526,
+            1.6692969383818563
+          ]
+        },
+        "dimensions": [
+          1.0361602876880724,
+          1.2,
+          0.9863006356672246
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass3",
+      "label": "Gods’ End Trasparent Grass3",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass3"
+        ],
+        "scale": 0.5956621124391636,
+        "bounds": {
+          "min": [
+            -0.49610278559714305,
+            2.8960411950340585,
+            -0.2913799220760176
+          ],
+          "max": [
+            -0.23524145021009962,
+            4.910606121928849,
+            -0.2913798340165874
+          ]
+        },
+        "dimensions": [
+          0.15538521409034742,
+          1.2,
+          5.245366620846828e-8
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass4",
+      "label": "Gods’ End Trasparent Grass4",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass4"
+        ],
+        "scale": 0.7173723072524685,
+        "bounds": {
+          "min": [
+            -0.9085298841236673,
+            2.8492916233250867,
+            -0.29137992207601765
+          ],
+          "max": [
+            -0.5385297184423992,
+            4.522063192381038,
+            -0.2913798489568497
+          ]
+        },
+        "dimensions": [
+          0.2654278725385669,
+          1.2,
+          5.2453666211374194e-8
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass4-002",
+      "label": "Gods’ End Trasparent Grass4.002",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass4.002"
+        ],
+        "scale": 0.6808052747965513,
+        "bounds": {
+          "min": [
+            1.2179990054650738,
+            -0.03379365118467622,
+            -0.6238810385340794
+          ],
+          "max": [
+            2.73249262765269,
+            1.7288248895700242,
+            0.8067963407715985
+          ]
+        },
+        "dimensions": [
+          1.0310752466310644,
+          1.2,
+          0.9740127063634118
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass4-005",
+      "label": "Gods’ End Trasparent Grass4.005",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass4.005"
+        ],
+        "scale": 0.27617695836722755,
+        "bounds": {
+          "min": [
+            -4.484658322000167,
+            -0.5108426196133842,
+            -1.8722142961683823
+          ],
+          "max": [
+            -0.4397860747271729,
+            3.8341976295604137,
+            2.636660543864644
+          ]
+        },
+        "dimensions": [
+          1.1171005142358679,
+          1.2,
+          1.245247338978841
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-foliage-game-ready-grass-trasparent-grass4-008",
+      "label": "Gods’ End Trasparent Grass4.008",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/foliage/game_ready_grass.glb",
+        "rootNames": [
+          "trasparent grass4.008"
+        ],
+        "scale": 0.5003787231726341,
+        "bounds": {
+          "min": [
+            -0.8915844844299401,
+            -0.15535055517033175,
+            -1.616275371337867
+          ],
+          "max": [
+            1.5971435125950966,
+            2.2428329494987738,
+            1.032981454512413
+          ]
+        },
+        "dimensions": [
+          1.245306537475375,
+          1.1999999999999997,
+          1.3256317478753485
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-house-003",
+      "label": "Gods’ End Cottage",
+      "category": "building",
+      "icon": "🏠",
+      "color": "#95694f",
+      "asset": {
+        "kind": "house",
+        "design": "003",
+        "scale": 1,
+        "groundY": 0,
+        "bounds": {
+          "min": [
+            -4.974999904632568,
+            -6,
+            -5.599999904632568
+          ],
+          "max": [
+            4.545000076293945,
+            9.579999923706055,
+            5.550000190734863
+          ]
+        },
+        "dimensions": [
+          9.519999980926514,
+          9.579999923706055,
+          11.150000095367432
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-house-004",
+      "label": "Gods’ End Red Tavern",
+      "category": "building",
+      "icon": "🏠",
+      "color": "#95694f",
+      "asset": {
+        "kind": "house",
+        "design": "004",
+        "scale": 1,
+        "groundY": 0,
+        "bounds": {
+          "min": [
+            -3.575000047683716,
+            -6,
+            -5
+          ],
+          "max": [
+            3.3499999046325684,
+            8.139471054077148,
+            4.900000095367432
+          ]
+        },
+        "dimensions": [
+          6.924999952316284,
+          8.139471054077148,
+          9.900000095367432
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-house-005",
+      "label": "Gods’ End Blacksmith",
+      "category": "building",
+      "icon": "🏠",
+      "color": "#95694f",
+      "asset": {
+        "kind": "house",
+        "design": "005",
+        "scale": 1,
+        "groundY": 0,
+        "bounds": {
+          "min": [
+            -5.150000095367432,
+            -6,
+            -5.010572910308838
+          ],
+          "max": [
+            4.949999809265137,
+            7.28000020980835,
+            5.050000190734863
+          ]
+        },
+        "dimensions": [
+          10.099999904632568,
+          7.28000020980835,
+          10.060573101043701
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-house-006",
+      "label": "Gods’ End Town House",
+      "category": "building",
+      "icon": "🏠",
+      "color": "#95694f",
+      "asset": {
+        "kind": "house",
+        "design": "006",
+        "scale": 1,
+        "groundY": 1.4,
+        "bounds": {
+          "min": [
+            -6.699999809265137,
+            -4.599999904632568,
+            -5.599999904632568
+          ],
+          "max": [
+            7.900000095367432,
+            15.829999923706055,
+            5.699999809265137
+          ]
+        },
+        "dimensions": [
+          14.599999904632568,
+          14.429999923706054,
+          11.299999713897705
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-house-009",
+      "label": "Gods’ End Slate Tavern",
+      "category": "building",
+      "icon": "🏠",
+      "color": "#95694f",
+      "asset": {
+        "kind": "house",
+        "design": "009",
+        "scale": 1,
+        "groundY": 1.9,
+        "bounds": {
+          "min": [
+            -4.849999904632568,
+            -4.119999885559082,
+            -4.1502532958984375
+          ],
+          "max": [
+            6.320000171661377,
+            13.278804779052734,
+            4.186023235321045
+          ]
+        },
+        "dimensions": [
+          11.170000076293945,
+          11.378804779052734,
+          8.336276531219482
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-01",
+      "label": "Gods’ End SM Rocks 01",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_01"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.1925507502432744,
+            -3.197080563001013e-16,
+            0.9241610511207341
+          ],
+          "max": [
+            0.26013917341517256,
+            0.32452259338356143,
+            1.4398370802438905
+          ]
+        },
+        "dimensions": [
+          1.1407786076192863,
+          0.8177969353265756,
+          1.299503593390354
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-02",
+      "label": "Gods’ End SM Rocks 02",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_02"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.0044059528915739,
+            -1.254192685274378e-16,
+            -0.09538034225895231
+          ],
+          "max": [
+            1.6218314762004127,
+            0.5585672735160249,
+            0.5648381679168751
+          ]
+        },
+        "dimensions": [
+          1.5559123187382737,
+          1.407589529260383,
+          1.6637506456430853
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-03",
+      "label": "Gods’ End SM Rocks 03",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_03"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -2.7974111313206436,
+            -3.353646132971498e-16,
+            -0.0980419709226048
+          ],
+          "max": [
+            -0.6133135086302417,
+            0.8878301903507609,
+            1.5103479429256625
+          ]
+        },
+        "dimensions": [
+          5.503926009179812,
+          2.2373320796839185,
+          4.0531425828976335
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-04",
+      "label": "Gods’ End SM Rocks 04",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_04"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.9269809515703997,
+            1.959957477585606e-17,
+            -1.6742247397998398
+          ],
+          "max": [
+            0.9729433986631761,
+            1.6951458461339748,
+            -0.08826864045257882
+          ]
+        },
+        "dimensions": [
+          4.787809362588611,
+          4.271767532257616,
+          3.9966093703550976
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-05",
+      "label": "Gods’ End SM Rocks 05",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_05"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.8999813418094504,
+            -1.3314896033183552e-16,
+            -0.30309199609401816
+          ],
+          "max": [
+            2.7974111313206436,
+            1.144650481851591,
+            0.5996496066529391
+          ]
+        },
+        "dimensions": [
+          2.2615230695682067,
+          2.88451921426601,
+          2.2749088389223324
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-06",
+      "label": "Gods’ End SM Rocks 06",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_06"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.540165370848058,
+            -1.3279000584847083e-10,
+            1.3114407055502966
+          ],
+          "max": [
+            1.8233503315593964,
+            0.240957836950598,
+            1.6742247397998398
+          ]
+        },
+        "dimensions": [
+          0.7136261009925727,
+          0.6072137494501377,
+          0.9142157663088488
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-07",
+      "label": "Gods’ End SM Rocks 07",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_07"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            0.21642108433497498,
+            -1.8528317649084766e-16,
+            0.257380641906396
+          ],
+          "max": [
+            0.7913213934454006,
+            0.409586792837209,
+            0.8344412426402884
+          ]
+        },
+        "dimensions": [
+          1.4487487789582727,
+          1.032158717949767,
+          1.4541927138494088
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-08",
+      "label": "Gods’ End SM Rocks 08",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_08"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            1.3074152844976936,
+            9.442061551500898e-17,
+            -0.7886136450928376
+          ],
+          "max": [
+            1.8702737008719055,
+            0.9757673526918529,
+            -0.42523264888153967
+          ]
+        },
+        "dimensions": [
+          1.4184032092630139,
+          2.458933728783469,
+          0.9157201104524708
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-09",
+      "label": "Gods’ End SM Rocks 09",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_09"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -2.0037023477918865,
+            8.130154092608531e-17,
+            -1.1102138271134976
+          ],
+          "max": [
+            -1.1246873985673318,
+            1.5949526721039353,
+            -0.36614958898388716
+          ]
+        },
+        "dimensions": [
+          2.215117672045878,
+          4.019280733701917,
+          1.8750418800866182
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-10",
+      "label": "Gods’ End SM Rocks 10",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_10"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            0.9861922997342276,
+            -1.398473709941054e-15,
+            0.9978435293322008
+          ],
+          "max": [
+            1.1580319717966319,
+            0.31206224744014804,
+            1.178165790926684
+          ]
+        },
+        "dimensions": [
+          0.4330359735972587,
+          0.7863968635491766,
+          0.4544120992180979
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-free-pack-rocks-stylized-sm-rocks-11",
+      "label": "Gods’ End SM Rocks 11",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/free_pack_-_rocks_stylized.glb",
+        "rootNames": [
+          "SM_Rocks_11"
+        ],
+        "scale": 2.52,
+        "bounds": {
+          "min": [
+            -0.38775961962879535,
+            -1.2583037282510134e-15,
+            0.25162915144199527
+          ],
+          "max": [
+            -0.036338264129945674,
+            0.7171635376713172,
+            0.5468963119336296
+          ]
+        },
+        "dimensions": [
+          0.8855818158571012,
+          1.8072521149317224,
+          0.7440732444389186
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-lantern",
+      "label": "Gods’ End Lantern",
+      "category": "civic",
+      "icon": "🏮",
+      "color": "#ac824e",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/lantern.glb",
+        "rootNames": [
+          "Lantern"
+        ],
+        "scale": 0.47619034604469346,
+        "bounds": {
+          "min": [
+            8.342763841152191,
+            -2.910060867667198,
+            1059.3213086724281
+          ],
+          "max": [
+            10.166737973690033,
+            2.1299405097961426,
+            1061.145590364933
+          ]
+        },
+        "dimensions": [
+          0.8685588733497644,
+          2.4,
+          0.8687053304368992
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-stone",
+      "label": "Gods’ End Stone",
+      "category": "civic",
+      "icon": "🪨",
+      "color": "#8c8276",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/stone.glb",
+        "rootNames": [
+          "Stone"
+        ],
+        "scale": 0.191163566056916,
+        "bounds": {
+          "min": [
+            0.65594482421875,
+            -3.5645392537117004,
+            1023.7144401073456
+          ],
+          "max": [
+            16.34931182861328,
+            4.0402727127075195,
+            1032.2934427261353
+          ]
+        },
+        "dimensions": [
+          3,
+          1.4537629746930059,
+          1.639992733819455
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-props-sunken-chest",
+      "label": "Gods’ End Sunken Chest",
+      "category": "civic",
+      "icon": "🏮",
+      "color": "#ac824e",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/props/sunken-chest.glb",
+        "rootNames": [
+          "Sketchfab_model"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -1.2338094618579616,
+            -0.07117716728645965,
+            -1.0341911852242418
+          ],
+          "max": [
+            1.421958637813899,
+            2.19835655655137,
+            0.9907515438056642
+          ]
+        },
+        "dimensions": [
+          0.9560765158818698,
+          0.8170321405816187,
+          0.7289793824507661
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-structures-fence",
+      "label": "Gods’ End Fence",
+      "category": "civic",
+      "icon": "🏮",
+      "color": "#ac824e",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/structures/fence.glb",
+        "rootNames": [
+          "fence6_Material_0.042"
+        ],
+        "scale": 0.0036,
+        "bounds": {
+          "min": [
+            -417.6886840970439,
+            -99.79080325284399,
+            -418.3523254394531
+          ],
+          "max": [
+            398.03769016203046,
+            114.53591699303763,
+            411.0713806152344
+          ]
+        },
+        "dimensions": [
+          2.936614947332668,
+          0.7715761928851739,
+          2.9859253417968747
+        ]
+      },
+      "collision": "bounds"
+    },
+    {
+      "key": "gods-end-trees-tree1",
+      "label": "Gods’ End Tree1 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree1.glb",
+        "rootNames": [
+          "Tree1_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -6.740403261375661,
+            -2.7586801052093506,
+            697.4424118123986
+          ],
+          "max": [
+            10.895749357166835,
+            31.809382369751575,
+            716.7105558856015
+          ]
+        },
+        "dimensions": [
+          6.349014942675298,
+          12.444502490985933,
+          6.936531866353025
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree2",
+      "label": "Gods’ End Tree2 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree2.glb",
+        "rootNames": [
+          "Tree2_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -3.5638316257859515,
+            -2.7586841583251953,
+            726.9944812158011
+          ],
+          "max": [
+            3.2959690257750935,
+            14.111912551584282,
+            734.5343214790214
+          ]
+        },
+        "dimensions": [
+          2.469528234561976,
+          6.0734148155674115,
+          2.7143424947593076
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree3",
+      "label": "Gods’ End Tree3 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree3.glb",
+        "rootNames": [
+          "Tree3_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -14.27096658275343,
+            -2.7586841583251953,
+            742.2077368900003
+          ],
+          "max": [
+            12.985078420154423,
+            28.480919709558066,
+            771.6141118993509
+          ]
+        },
+        "dimensions": [
+          9.812176201046826,
+          11.246257392437974,
+          10.586295003366194
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree4",
+      "label": "Gods’ End Tree4 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree4.glb",
+        "rootNames": [
+          "Tree4_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -19.67548665887489,
+            -2.7526350021362305,
+            775.472436203831
+          ],
+          "max": [
+            12.270515578692994,
+            41.322380115025226,
+            806.0867201735236
+          ]
+        },
+        "dimensions": [
+          11.500560805524437,
+          15.867005442178124,
+          11.021142229089364
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree5",
+      "label": "Gods’ End Tree5 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree5.glb",
+        "rootNames": [
+          "Tree5_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -20.15404246029209,
+            -3.0476484298706055,
+            814.5767259838833
+          ],
+          "max": [
+            9.852665033479411,
+            40.52415849344948,
+            847.8919799427358
+          ]
+        },
+        "dimensions": [
+          10.80241469775774,
+          15.685850492395229,
+          11.993491425186903
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree6",
+      "label": "Gods’ End Tree6 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree6.glb",
+        "rootNames": [
+          "Tree6_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -15.523115841092476,
+            -2.7586841583251953,
+            846.1793868754257
+          ],
+          "max": [
+            15.832842067072306,
+            42.420574471478176,
+            880.9926594560393
+          ]
+        },
+        "dimensions": [
+          11.288144846939321,
+          16.264533106729214,
+          12.53277812902088
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree7",
+      "label": "Gods’ End Tree7 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree7.glb",
+        "rootNames": [
+          "Tree7_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -6.634582090582626,
+            -2.7586841583251953,
+            889.8813819180559
+          ],
+          "max": [
+            25.26206517276478,
+            43.864302407768264,
+            924.0824418534921
+          ]
+        },
+        "dimensions": [
+          11.482793014805065,
+          16.784275163793644,
+          12.312381576757033
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree8",
+      "label": "Gods’ End Tree8 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree8.glb",
+        "rootNames": [
+          "Tree8_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -12.388696448504106,
+            -2.7586841583251953,
+            922.5448270849797
+          ],
+          "max": [
+            26.03060460885399,
+            48.38905675506703,
+            966.6498941334198
+          ]
+        },
+        "dimensions": [
+          13.830948380648914,
+          18.413186728821202,
+          15.877824137438438
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-trees-tree9",
+      "label": "Gods’ End Tree9 (original)",
+      "category": "nature",
+      "icon": "🌳",
+      "color": "#587346",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/trees/tree9.glb",
+        "rootNames": [
+          "Tree9_High"
+        ],
+        "scale": 0.36,
+        "bounds": {
+          "min": [
+            -13.414477987116697,
+            -2.7586841583251953,
+            967.9157287941644
+          ],
+          "max": [
+            30.551432910888252,
+            61.91149157795735,
+            1016.1956328030237
+          ]
+        },
+        "dimensions": [
+          15.827727923281781,
+          23.281263265061714,
+          17.380765443189375
+        ]
+      },
+      "collision": "trunk"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-01",
+      "label": "Gods’ End Plants 01",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_01"
+        ],
+        "scale": 34.67992447625533,
+        "bounds": {
+          "min": [
+            -0.051951330931082396,
+            -2.4840673167472076e-17,
+            -0.06492511604148632
+          ],
+          "max": [
+            0.06309833862412706,
+            0.036043907790394694,
+            0.051872447761764036
+          ]
+        },
+        "dimensions": [
+          3.989913851192796,
+          1.25,
+          4.050530691707335
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-02",
+      "label": "Gods’ End Plants 02",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_02"
+        ],
+        "scale": 50.42020636874289,
+        "bounds": {
+          "min": [
+            -0.47714496499721015,
+            7.957548200964833e-17,
+            -0.21919439064276824
+          ],
+          "max": [
+            -0.42285501488622224,
+            0.02479164783377244,
+            -0.18080560041653504
+          ]
+        },
+        "dimensions": [
+          2.7373104883447668,
+          1.25,
+          1.9355707254530583
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-03",
+      "label": "Gods’ End Plants 03",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_03"
+        ],
+        "scale": 27.396490666991504,
+        "bounds": {
+          "min": [
+            -0.40297705226442826,
+            1.1377487112440583e-17,
+            -0.2524705830409246
+          ],
+          "max": [
+            -0.2764086804596628,
+            0.04562628167212873,
+            -0.13523964102775654
+          ]
+        },
+        "dimensions": [
+          3.4675292168855667,
+          1.25,
+          3.2117164087463816
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-04",
+      "label": "Gods’ End Plants 04",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_04"
+        ],
+        "scale": 40.73513659664873,
+        "bounds": {
+          "min": [
+            -0.25763282915280383,
+            1.5697371458143926e-17,
+            -0.2204591868715169
+          ],
+          "max": [
+            -0.1997654989414177,
+            0.03068603923873519,
+            -0.1795408041877864
+          ]
+        },
+        "dimensions": [
+          2.3572336006441916,
+          1.25,
+          1.6668159079357077
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-05",
+      "label": "Gods’ End Plants 05",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_05"
+        ],
+        "scale": 33.43971259933283,
+        "bounds": {
+          "min": [
+            -0.16479530919800744,
+            3.7081569531112237e-17,
+            -0.24235591346720042
+          ],
+          "max": [
+            -0.08111573037991526,
+            0.03738070404423693,
+            -0.15700054294614763
+          ]
+        },
+        "dimensions": [
+          2.7982210661102216,
+          1.25,
+          2.8542590590335712
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-06",
+      "label": "Gods’ End Plants 06",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_06"
+        ],
+        "scale": 40.971725871141864,
+        "bounds": {
+          "min": [
+            -0.03188607383028996,
+            4.0390784245258225e-17,
+            -0.2225468538132267
+          ],
+          "max": [
+            0.03188607383028996,
+            0.03050884417052175,
+            -0.1774531372460766
+          ]
+        },
+        "dimensions": [
+          2.6128549521632616,
+          1.25,
+          1.8475673937002426
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-07",
+      "label": "Gods’ End Plants 07",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_07"
+        ],
+        "scale": 45.248794809564934,
+        "bounds": {
+          "min": [
+            -0.48747718436694454,
+            -1.5958661528894685e-18,
+            -0.0420768060816048
+          ],
+          "max": [
+            -0.40423692753381424,
+            0.027625045158899308,
+            0.03718714154093395
+          ]
+        },
+        "dimensions": [
+          3.7665213013377983,
+          1.25,
+          3.586598101768358
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-08",
+      "label": "Gods’ End Plants 08",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_08"
+        ],
+        "scale": 61.9239978894513,
+        "bounds": {
+          "min": [
+            -0.37170785788354577,
+            2.254530604655139e-18,
+            -0.018799562034020667
+          ],
+          "max": [
+            -0.328292126470235,
+            0.020186035181894105,
+            0.01879956203402067
+          ]
+        },
+        "dimensions": [
+          2.6884756604068416,
+          1.25,
+          2.3282880794346092
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-09",
+      "label": "Gods’ End Plants 09",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_09"
+        ],
+        "scale": 111.4657015550277,
+        "bounds": {
+          "min": [
+            -0.2700891911218495,
+            -6.99117248879798e-18,
+            -0.04129782584388941
+          ],
+          "max": [
+            -0.19167595673331705,
+            0.011214211928526794,
+            0.03448544186758751
+          ]
+        },
+        "dimensions": [
+          8.740386182316591,
+          1.25,
+          8.447235101592254
+        ]
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-understories-low-poly-stylized-plants-pack-free-plants-10",
+      "label": "Gods’ End Plants 10",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#648353",
+      "asset": {
+        "kind": "glb",
+        "path": "assets/gods-end/Assets/terrain/understories/low_poly_stylized_plants_pack_free.glb",
+        "rootNames": [
+          "Plants_10"
+        ],
+        "scale": 64.30713630128244,
+        "bounds": {
+          "min": [
+            -0.1587956965238817,
+            -6.539788773644274e-18,
+            -0.029314922631198392
+          ],
+          "max": [
+            -0.09206650051325926,
+            0.019437967104361194,
+            0.034652589977102195
+          ]
+        },
+        "dimensions": [
+          4.29116350313009,
+          1.25,
+          4.113567552155988
+        ]
+      },
+      "collision": "none"
+    }
+  ],
+  "textures": [
+    {
+      "name": "GameLoad.webp",
+      "path": "assets/gods-end/Assets/GameLoad.webp"
+    },
+    {
+      "name": "grass.jpg",
+      "path": "assets/gods-end/Assets/grass.jpg"
+    },
+    {
+      "name": "ground/ground_0109_color_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/ground_0109_color_1k.jpg"
+    },
+    {
+      "name": "ground/ground_0109_normal_directx_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/ground_0109_normal_directx_1k.jpg"
+    },
+    {
+      "name": "ground/ground_0109_roughness_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/ground_0109_roughness_1k.jpg"
+    },
+    {
+      "name": "ground/snow/snow007c_ao_rough_height_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/snow/snow007c_ao_rough_height_1k.jpg"
+    },
+    {
+      "name": "ground/snow/snow007c_color_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/snow/snow007c_color_1k.jpg"
+    },
+    {
+      "name": "ground/snow/snow007c_normal_gl_1k.jpg",
+      "path": "assets/gods-end/Assets/ground/snow/snow007c_normal_gl_1k.jpg"
+    },
+    {
+      "name": "terrain/coastal-jungle/reference/threejs_interior.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/reference/threejs_interior.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/reference/threejs_preview.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/reference/threejs_preview.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/reference/v2/threejs_interior.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_interior.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/reference/v2/threejs_overview.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_overview.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/reference/v2/threejs_preview.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/reference/v2/threejs_preview.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/canopy_branch_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/canopy_branch_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/canopy_branch_atlas_new.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/canopy_branch_atlas_new.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/canopy_branch_atlas_new.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_grass_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_grass_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_atlas.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_grass_reference_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_grass_reference_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_grass_reference_atlas.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_ground_basecolor.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_ground_basecolor.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_ground_basecolor.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_path_basecolor.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_path_basecolor.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_path_basecolor_edge.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/jungle_path_basecolor_edge.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/jungle_path_basecolor_edge.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/palm_bark_basecolor.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/palm_bark_basecolor.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_bark_basecolor.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/palm_fern_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/palm_fern_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/palm_fern_atlas.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/shrub_leaf_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/shrub_leaf_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/shrub_leaf_atlas.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/tropical_bark_basecolor.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/tropical_bark_basecolor.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_bark_basecolor.webp"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/tropical_leaf_atlas.png",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.png"
+    },
+    {
+      "name": "terrain/coastal-jungle/textures/tropical_leaf_atlas.webp",
+      "path": "assets/gods-end/Assets/terrain/coastal-jungle/textures/tropical_leaf_atlas.webp"
+    },
+    {
+      "name": "terrain/fantasy-textures/bark-knotted.jpg",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/bark-knotted.jpg"
+    },
+    {
+      "name": "terrain/fantasy-textures/bark-painted.jpg",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/bark-painted.jpg"
+    },
+    {
+      "name": "terrain/fantasy-textures/bark-peeling.jpg",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/bark-peeling.jpg"
+    },
+    {
+      "name": "terrain/fantasy-textures/bark-rugged.jpg",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/bark-rugged.jpg"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-1.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-1.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-10.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-10.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-11.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-11.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-12.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-12.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-13.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-13.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-14.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-14.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-15.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-15.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-16.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-16.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-17.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-17.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-18.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-18.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-19.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-19.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-2.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-2.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-3.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-3.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-4.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-4.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-5.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-5.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-6.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-6.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-7.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-7.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-8.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-8.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/billboard-9.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/billboard-9.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/leaves-gold.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/leaves-gold.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/leaves-green.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/leaves-green.png"
+    },
+    {
+      "name": "terrain/fantasy-textures/leaves-pale.png",
+      "path": "assets/gods-end/Assets/terrain/fantasy-textures/leaves-pale.png"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-broadleaf.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-broadleaf.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-broadleaf.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-broadleaf.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-reed.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-reed.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-reed.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-reed.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-slender.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-slender.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/grass-slender.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/grass-slender.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_0-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_0.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_0.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_0.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_1-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_1.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_1.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_1.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_2-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_2.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_2.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_2.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_3-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_3.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-ForegroundPalm_3.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-ForegroundPalm_3.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_01-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_02-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_03-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_03.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-background_tree_03.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-background_tree_03.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_03.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_03.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-broadleaf_03.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-broadleaf_03.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-climber_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-climber_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-climber_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-climber_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-climber_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-fern_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-fern_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-fern_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-fern_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-fern_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_03.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_03.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-grass_03.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-grass_03.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-groundcover_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-groundcover_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-groundcover_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-groundcover_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-groundcover_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_01-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_02-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-palm_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-palm_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-shrub_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-shrub_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-shrub_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-shrub_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-shrub_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-split_leaf_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-split_leaf_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-split_leaf_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-split_leaf_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-split_leaf_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_0010-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_0010.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_0010.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_0010.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_01-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_02-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_03-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_03.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_03.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_03.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_05-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_05.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_05.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_05.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_06-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_06.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-tree_06.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-tree_06.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-vine_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-vine_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-vine_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/jungle-vine_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/jungle-vine_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree1-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree1-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree1.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree1.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree1.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree1.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree10-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree10-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree10.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree10.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree10.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree10.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree11-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree11-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree11.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree11.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree11.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree11.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree12-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree12-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree12.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree12.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree12.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree12.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree13-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree13-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree13.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree13.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree13.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree13.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree14-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree14-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree14.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree14.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree14.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree14.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree15-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree15-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree15.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree15.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree15.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree15.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree16-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree16-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree16.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree16.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree16.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree16.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree17-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree17-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree17.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree17.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree17.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree17.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree18-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree18-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree18.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree18.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree18.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree18.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree19-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree19-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree19.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree19.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree19.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree19.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree2-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree2-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree2.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree2.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree2.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree2.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree3-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree3-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree3.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree3.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree3.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree3.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree4-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree4-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree4.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree4.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree4.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree4.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree5-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree5-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree5.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree5.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree5.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree5.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree6-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree6-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree6.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree6.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree6.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree6.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree7-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree7-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree7.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree7.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree7.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree7.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree8-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree8-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree8.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree8.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree8.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree8.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree9-normal-mask.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree9-normal-mask.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree9.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree9.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/tree9.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/tree9.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_01.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_01.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_01.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_01.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_02.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_02.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_02.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_02.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_03.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_03.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_03.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_03.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_04.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_04.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_04.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_04.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_05.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_05.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_05.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_05.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_06.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_06.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_06.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_06.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_07.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_07.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_07.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_07.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_08.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_08.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_08.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_08.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_09.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_09.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_09.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_09.webp"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_10.ktx2",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_10.ktx2"
+    },
+    {
+      "name": "terrain/vegetation-lods/understory-Plants_10.webp",
+      "path": "assets/gods-end/Assets/terrain/vegetation-lods/understory-Plants_10.webp"
+    },
+    {
+      "name": "textures/shared/alpine-bark-2e0567c4ab9a.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/alpine-bark-2e0567c4ab9a.jpg"
+    },
+    {
+      "name": "textures/shared/bark-painted-a585fb1dc4b4.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/bark-painted-a585fb1dc4b4.jpg"
+    },
+    {
+      "name": "textures/shared/bark-peeling-95c7e62d8a97.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/bark-peeling-95c7e62d8a97.jpg"
+    },
+    {
+      "name": "textures/shared/canopy-branch-atlas-new-61ad81033825.webp",
+      "path": "assets/gods-end/Assets/textures/shared/canopy-branch-atlas-new-61ad81033825.webp"
+    },
+    {
+      "name": "textures/shared/image-1-046-2b8565157794.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/image-1-046-2b8565157794.jpg"
+    },
+    {
+      "name": "textures/shared/image-1-3622b701462b.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/image-1-3622b701462b.jpg"
+    },
+    {
+      "name": "textures/shared/image-3-028-f70da07ae8aa.png",
+      "path": "assets/gods-end/Assets/textures/shared/image-3-028-f70da07ae8aa.png"
+    },
+    {
+      "name": "textures/shared/image-3-033-a002de4055c6.png",
+      "path": "assets/gods-end/Assets/textures/shared/image-3-033-a002de4055c6.png"
+    },
+    {
+      "name": "textures/shared/image-3-0332-baebf623847b.png",
+      "path": "assets/gods-end/Assets/textures/shared/image-3-0332-baebf623847b.png"
+    },
+    {
+      "name": "textures/shared/jungle-grass-reference-atlas-32d2af1b6b61.webp",
+      "path": "assets/gods-end/Assets/textures/shared/jungle-grass-reference-atlas-32d2af1b6b61.webp"
+    },
+    {
+      "name": "textures/shared/jungle-grass-reference-atlas-45e00f9c3ba4.webp",
+      "path": "assets/gods-end/Assets/textures/shared/jungle-grass-reference-atlas-45e00f9c3ba4.webp"
+    },
+    {
+      "name": "textures/shared/jungle-ground-basecolor-7412c9333dfc.webp",
+      "path": "assets/gods-end/Assets/textures/shared/jungle-ground-basecolor-7412c9333dfc.webp"
+    },
+    {
+      "name": "textures/shared/jungle-path-basecolor-edge-5bc9e10caaef.webp",
+      "path": "assets/gods-end/Assets/textures/shared/jungle-path-basecolor-edge-5bc9e10caaef.webp"
+    },
+    {
+      "name": "textures/shared/leaves-gold-8eb43e77b33f.png",
+      "path": "assets/gods-end/Assets/textures/shared/leaves-gold-8eb43e77b33f.png"
+    },
+    {
+      "name": "textures/shared/leaves-green-440a3b14e758.png",
+      "path": "assets/gods-end/Assets/textures/shared/leaves-green-440a3b14e758.png"
+    },
+    {
+      "name": "textures/shared/leaves-pale-195e961e91c1.png",
+      "path": "assets/gods-end/Assets/textures/shared/leaves-pale-195e961e91c1.png"
+    },
+    {
+      "name": "textures/shared/painted-foundation-stone-3c8fe2d6a296.png",
+      "path": "assets/gods-end/Assets/textures/shared/painted-foundation-stone-3c8fe2d6a296.png"
+    },
+    {
+      "name": "textures/shared/palm-bark-basecolor-2d1ec3fdb9e2.webp",
+      "path": "assets/gods-end/Assets/textures/shared/palm-bark-basecolor-2d1ec3fdb9e2.webp"
+    },
+    {
+      "name": "textures/shared/palm-bark-basecolor-89ca81f75eba.webp",
+      "path": "assets/gods-end/Assets/textures/shared/palm-bark-basecolor-89ca81f75eba.webp"
+    },
+    {
+      "name": "textures/shared/palm-fern-atlas-4dd66352b4c2.webp",
+      "path": "assets/gods-end/Assets/textures/shared/palm-fern-atlas-4dd66352b4c2.webp"
+    },
+    {
+      "name": "textures/shared/palm-fern-atlas-af044d977e5e.webp",
+      "path": "assets/gods-end/Assets/textures/shared/palm-fern-atlas-af044d977e5e.webp"
+    },
+    {
+      "name": "textures/shared/shrub-leaf-atlas-283f80a6257f.webp",
+      "path": "assets/gods-end/Assets/textures/shared/shrub-leaf-atlas-283f80a6257f.webp"
+    },
+    {
+      "name": "textures/shared/shrub-leaf-atlas-76e3e27d9e80.webp",
+      "path": "assets/gods-end/Assets/textures/shared/shrub-leaf-atlas-76e3e27d9e80.webp"
+    },
+    {
+      "name": "textures/shared/tropical-bark-basecolor-f7855f5a8771.webp",
+      "path": "assets/gods-end/Assets/textures/shared/tropical-bark-basecolor-f7855f5a8771.webp"
+    },
+    {
+      "name": "textures/shared/tropical-leaf-atlas-0852ffadda23.webp",
+      "path": "assets/gods-end/Assets/textures/shared/tropical-leaf-atlas-0852ffadda23.webp"
+    },
+    {
+      "name": "textures/shared/tropical-leaf-atlas-fffec155511c.webp",
+      "path": "assets/gods-end/Assets/textures/shared/tropical-leaf-atlas-fffec155511c.webp"
+    },
+    {
+      "name": "textures/shared/weathered-wood-f1d884d2e703.jpg",
+      "path": "assets/gods-end/Assets/textures/shared/weathered-wood-f1d884d2e703.jpg"
+    },
+    {
+      "name": "zwartkops_straight_morning_1k.hdr",
+      "path": "assets/gods-end/Assets/zwartkops_straight_morning_1k.hdr"
+    }
+  ]
+}

@@ -112,9 +112,7 @@ function shaderErrors(messages) {
 async function run() {
   await mkdir(outputDirectory, { recursive: true });
   const port = existingUrl ? null : await reservePort(requestedPort);
-  const targetUrl = new URL(existingUrl ?? `http://127.0.0.1:${port}/`);
-  targetUrl.searchParams.set('qaWeather', '1');
-  const baseUrl = targetUrl.href;
+  const baseUrl = existingUrl ?? `http://127.0.0.1:${port}/`;
   const server = existingUrl ? null : startServer(port);
   let serverOutput = '';
   server?.stdout.on('data', (chunk) => { serverOutput += chunk.toString(); });
@@ -161,7 +159,6 @@ async function run() {
     report.errors = runtimeErrors;
     page.on('pageerror', (error) => runtimeErrors.push(`pageerror: ${error.message}`));
     page.on('console', (message) => {
-      if (message.text().startsWith('Weather warmup:')) console.log(message.text());
       if (message.type() === 'error' || message.type() === 'warning') {
         runtimeErrors.push(`${message.type()}: ${message.text()}`);
       }

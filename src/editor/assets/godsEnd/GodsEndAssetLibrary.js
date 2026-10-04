@@ -1,0 +1,119 @@
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { StylizedSceneAssetCache } from '../../stylized/StylizedSceneAssetCache.js';
+import { resolveAssetUrl } from '../assetUrl.js';
+import { createGodsEndAssetParts } from './assetParts.js';
+
+/** Acquires only selected or saved objects; unused catalog entries allocate no GPU resources. */
+export class GodsEndAssetLibrary {
+  constructor({ renderer, objectMap, objectView, controller, baseUrl = '/', cache = null, houseFactory = null }) {
+    Object.assign(this, { objectMap, objectView, controller, baseUrl });
+    this.definitions = new Map([...objectMap.definitionByKey].filter(([, definition]) => definition.asset));
+    this.pending = new Map();
+    this.installed = new Map();
+    this.failed = new Set();
+    this.disposed = false;
+    this.houseFactory = houseFactory ?? (async (asset) => {
+      const { createGodsEndHouseParts } = await import('./village/houseParts.js');
+      return createGodsEndHouseParts(asset);
+    });
+    // Loader creation is deferred until an actual GLB is needed.
+    this.renderer = renderer;
+    this.cache = cache;
+    this.unsubscribe = controller.subscribe((state) => {
+      this.selectedKey = state.tool === 'object' ? state.selectedObjectKey : null;
+      if (this.selectedKey) this.request(this.selectedKey);
+      this.prune();
+    });
+    this.unsubscribeMap = controller.subscribeMap(() => this.restorePlaced());
+    this.restorePlaced();
+  }
+
+  getCache() {
+    if (this.cache) return this.cache;
+    this.draco = new DRACOLoader().setDecoderPath(resolveAssetUrl(this.baseUrl, 'assets/gods-end/decoders/draco/'));
+    this.ktx2 = new KTX2Loader().setTranscoderPath(resolveAssetUrl(this.baseUrl, 'assets/gods-end/decoders/basis/'))
+      .detectSupport(this.renderer);
+    const loader = new GLTFLoader().setDRACOLoader(this.draco).setKTX2Loader(this.ktx2).setMeshoptDecoder(MeshoptDecoder);
+    this.cache = new StylizedSceneAssetCache({ loader, baseUrl: this.baseUrl });
+    return this.cache;
+  }
+
+  restorePlaced() {
+    for (const object of this.objectMap.list()) this.request(object.definitionKey);
+    this.prune();
+  }
+
+  request(key) {
+    if (!this.definitions.has(key) || this.disposed || this.failed.has(key)) return;
+    void this.ensure(key).catch((error) => {
+      if (this.disposed) return;
+      this.failed.add(key);
+      this.controller.emitNotice(`Could not load ${this.definitions.get(key).label}: ${error.message}`, true);
+    });
+  }
+
+  ensure(key) {
+    if (this.installed.has(key)) return Promise.resolve();
+    if (this.pending.has(key)) return this.pending.get(key);
+    const definition = this.definitions.get(key);
+    if (!definition || this.disposed) return Promise.resolve();
+    const task = this.load(definition).finally(() => this.pending.delete(key));
+    this.pending.set(key, task);
+    return task;
+  }
+
+  async load(definition) {
+    const asset = definition.asset;
+    let acquired = false;
+    let parts;
+    try {
+      if (asset.kind === 'house') parts = await this.houseFactory(asset);
+      else {
+        const scene = await this.getCache().acquire(asset.path);
+        acquired = true;
+        parts = createGodsEndAssetParts(scene, asset);
+      }
+      if (this.disposed) {
+        const { disposeModelParts } = await import('../modelParts.js');
+        disposeModelParts(parts);
+        return;
+      }
+      this.installed.set(definition.key, acquired ? asset.path : null);
+      this.objectView.registerDefinition(definition, parts);
+      acquired = false; // Reference ownership transfers to installed.
+      this.controller.updatePreviews();
+      this.prune();
+    } finally {
+      if (acquired) this.cache.release(asset.path);
+    }
+  }
+
+  prune() {
+    const wanted = new Set(this.objectMap.list().map((object) => object.definitionKey));
+    if (this.selectedKey) wanted.add(this.selectedKey);
+    for (const [key, assetPath] of this.installed) {
+      if (wanted.has(key)) continue;
+      this.objectView.clearAssetParts(key);
+      if (assetPath) this.cache.release(assetPath);
+      this.installed.delete(key);
+    }
+  }
+
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.unsubscribe?.();
+    this.unsubscribeMap?.();
+    for (const [key, assetPath] of this.installed) {
+      this.objectView.clearAssetParts(key);
+      if (assetPath) this.cache.release(assetPath);
+    }
+    this.installed.clear();
+    this.cache?.dispose();
+    this.draco?.dispose();
+    this.ktx2?.dispose();
+  }
+}

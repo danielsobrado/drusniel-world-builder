@@ -4,7 +4,7 @@ import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
 import { instanceCapacity } from './scatterMath.js';
-import { buildStableChunkManifest, placementSignature } from './StableScatterManifest.js';
+import { createStableChunkManifestBuilder, placementSignature } from './StableScatterManifest.js';
 import {
   buildChunkLodPlan,
   createInstancedRenderers,

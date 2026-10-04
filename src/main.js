@@ -29,6 +29,7 @@ import { ProceduralWorkshopUi } from './editor/workshop/ProceduralWorkshopUi.js'
 import { ObjectMap } from './editor/ObjectMap.js';
 import { ObjectView } from './editor/ObjectView.js';
 import { OBJECT_CATALOG } from './editor/objectCatalog.js';
+import { GodsEndAssetLibrary } from './editor/assets/godsEnd/GodsEndAssetLibrary.js';
 import { FrameRateDisplay } from './editor/performance/FrameRateDisplay.js';
 import { FrameRateMeter } from './editor/performance/FrameRateMeter.js';
 import { FRAME_RATE_DISPLAY_INTERVAL_MS } from './editor/performance/frameRateConstants.js';
@@ -621,6 +622,11 @@ async function initializeEditor(restoreState, resources) {
     worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked(),
   });
   resources.own(controller);
+  const godsEndAssets = new GodsEndAssetLibrary({
+    renderer: terrainView.renderer, objectMap, objectView, controller,
+    baseUrl: import.meta.env.BASE_URL,
+  });
+  resources.own(godsEndAssets);
   const postProcessingFocus = new PostProcessingFocusResolver({
     terrainView,
     playerController,
@@ -1156,6 +1162,9 @@ async function initializeEditor(restoreState, resources) {
   if (import.meta.env.DEV) {
     window.__editor = {
       controller,
+      objectMap,
+      objectView,
+      godsEndAssets,
       worldMapController,
       gameplayOverlayController,
       inventoryController,
@@ -1228,33 +1237,23 @@ async function initializeEditor(restoreState, resources) {
   releaseAssetProgress();
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: prewarm');
   boot.start('prewarm', 'Compiling shaders — this is the long one');
-  const traceWeatherWarmup = stage => {
-    if (window.location.search.includes('qaWeather=1')) console.log(`Weather warmup: ${stage}`);
-  };
   let finishWaterPrewarm = null;
   try {
-    traceWeatherWarmup('spells');
     await spellRuntime?.precompile?.(terrainView.renderer);
     stylizedSurface.prewarmStreamingResources(terrainView.renderer);
     finishWaterPrewarm = stylizedSurface.beginWaterRefractionPrewarm();
-    traceWeatherWarmup('scene');
     await terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera);
-    traceWeatherWarmup('scene ready');
     if (finishWaterPrewarm) {
       terrainView.renderer.render(terrainView.scene, editorCamera.camera);
     }
     worldWind.update(0, editorCamera.camera.position, terrainView.floatingOrigin.getState(), null);
     worldWind.render(terrainView.renderer);
-    traceWeatherWarmup('character');
     await characterView?.prewarm(terrainView.renderer, playerController.camera);
-    traceWeatherWarmup('post processing');
     await postProcessingController.precompile(playerController.camera);
-    traceWeatherWarmup('god rays');
     terrainView.prewarmPostProcessing(playerController.camera);
     withPreparationFrame(terrainView.renderer, null, () => withSceneWarmup(terrainView.scene,
       () => terrainView.prewarmPostProcessing(playerController.camera)));
     postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET);
-    traceWeatherWarmup('complete');
   } catch (error) {
     console.warn('Render pipeline pre-warm failed; pipelines will compile on demand.', error);
   } finally {
