@@ -1,3 +1,4 @@
+import { createFallingLeafTexture } from './FallingLeafTextures.js';
 import * as THREE from 'three/webgpu';
 import {
   attribute,
@@ -6,12 +7,11 @@ import {
   dot,
   float,
   fract,
-  length,
   mix,
   normalize,
   sin,
-  smoothstep,
   step,
+  texture,
   uniform,
   uv,
   vec2,
@@ -76,21 +76,17 @@ export function createFallingLeavesMaterial(uniforms, { size, fallSpeed, palette
   const material = new THREE.MeshBasicNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = origin.add(rotateAbout(scaled, axis, angle));
 
-  // A leaf: an ellipse narrowing to a tip, with a midrib.
-  const p = uv().sub(0.5).mul(2);
-  const width = mix(float(0.62), float(0.08), smoothstep(-0.2, 1, p.y));
-  const body = step(length(vec2(p.x.div(width), p.y)), 1);
+  const leafTexture = createFallingLeafTexture(palette);
+  const leaf = texture(leafTexture, uv()).depth(seed.z.mul(3).floor().min(2));
   material.alphaTest = 0.5;
-  material.opacityNode = body;
-  const hue = fract(seed.z.mul(7.31));
-  const tone = mix(
-    mix(vec3(...palette[0]), vec3(...palette[1]), smoothstep(0, 0.5, hue)),
-    vec3(...palette[2]),
-    smoothstep(0.5, 1, hue),
-  );
-  const rib = smoothstep(0.06, 0, p.x.abs()).mul(0.25);
-  material.colorNode = tone.mul(float(1).sub(rib)).mul(mix(0.8, 1.05, seed.y))
-    .mul(skyLightUniforms.brightness);
+  material.opacityNode = leaf.a;
+  material.colorNode = leaf.rgb.mul(mix(0.8, 1.05, seed.y)).mul(skyLightUniforms.brightness);
+  material.userData.leafTexture = leafTexture;
+  const dispose = () => {
+    leafTexture.dispose();
+    material.removeEventListener('dispose', dispose);
+  };
+  material.addEventListener('dispose', dispose);
   material.depthWrite = true;
   return material;
 }

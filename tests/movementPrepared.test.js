@@ -232,6 +232,28 @@ test('empty queues do not start the shared deadline before later work becomes el
   assert.equal(frame.available(0.25, 3), 0);
 });
 
+test('readiness checks preserve the progress floor across mandatory work', () => {
+  let clock = 0;
+  const frame = new FrameSlack({ targetMs: 7, now: () => clock });
+  frame.fixedMs = 10;
+  frame.beginFrame();
+  assert.equal(frame.peek(0.25, 3), 0.25);
+  clock += 10;
+  assert.equal(frame.available(0.25, 3), 0.25);
+  frame.defer(() => { clock += 0.3; });
+  assert.equal(frame.peek(0.25, 3), 0);
+});
+
+test('a small consumer limit does not shorten the shared frame allowance', () => {
+  let clock = 0;
+  const frame = new FrameSlack({ targetMs: 7, maximumMs: 1.2, now: () => clock });
+  frame.fixedMs = 1;
+  frame.beginFrame();
+  assert.equal(frame.available(0.25, 0.25), 0.25);
+  frame.defer(() => { clock += 0.15; });
+  assert.equal(frame.available(0.25, 3), 1.05);
+});
+
 test('worker CPU arrays preserve canonical precision and canonical edits including negative chunks', () => {
   const generator = new ProceduralWorldGenerator();
   const world = new InfiniteWorldStore({ generator, chunkSize: 8, tileSize: 2 });

@@ -1,3 +1,4 @@
+import { applyWorkshopGeneratedMaps } from './ProceduralWorkshopGeneratedMaps.js';
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { disposeModelParts } from '../assets/modelParts.js';
@@ -134,6 +135,7 @@ function presetTexture(recipe, preset, kind, cache) {
 function applyPreset(material, preset, recipe, textureCache) {
   if (!preset) return material;
   const result = material.clone();
+  applyWorkshopGeneratedMaps(result, preset);
   result.color.set(preset.baseColor).multiply(new THREE.Color(preset.tint));
   result.roughness = preset.roughness;
   result.metalness = preset.metalness;

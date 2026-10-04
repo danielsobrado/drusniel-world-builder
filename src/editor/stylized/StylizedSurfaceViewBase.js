@@ -708,7 +708,8 @@ export class StylizedSurfaceView {
       }
       return false;
     });
-    this.updateForestGroundTextures();
+    if (this.runDeferredWork) this.runDeferredWork(() => this.updateForestGroundTextures());
+    else this.updateForestGroundTextures();
     this.flowerView?.update(timestamp);
     this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     for (const slot of this.waterSlots) slot.update(timestamp);

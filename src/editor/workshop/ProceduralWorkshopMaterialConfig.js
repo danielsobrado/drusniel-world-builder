@@ -1,3 +1,5 @@
+import { GODS_END_WORKSHOP_PRESETS } from './ProceduralWorkshopGodsEndPresets.js';
+import { SURFACE_NAMES } from '../assets/godsEnd/houseTextureData.js';
 import { parseWorkshopImageDimensions } from './ProceduralWorkshopImageMetadata.js';
 
 const MAX_PRESETS = 48;
@@ -16,6 +18,7 @@ const VALID_FAMILY = new Set([
 const VALID_SOURCE_KIND = new Set(['albedo', 'normal', 'orm', 'height']);
 
 export const BUILTIN_WORKSHOP_MATERIAL_PRESETS = Object.freeze({
+  ...GODS_END_WORKSHOP_PRESETS,
   'granite-masonry': Object.freeze({
     id: 'granite-masonry', label: 'Granite', family: 'walls', baseColor: '#827e79',
     tint: '#ffffff', roughness: 0.9, metalness: 0, normalStrength: 0.8, aoStrength: 1,
@@ -128,7 +131,12 @@ function normalizePreset(presetId, input) {
     if (!VALID_SOURCE_KIND.has(kind)) throw new Error(`Unknown PBR source kind: ${kind}.`);
     sources[kind] = id(sourceId, `Material preset ${presetId} ${kind} source`);
   }
+  const proceduralSurface = source.proceduralSurface;
+  if (proceduralSurface !== undefined && !SURFACE_NAMES.includes(proceduralSurface)) {
+    throw new Error(`Unknown Gods End surface: ${proceduralSurface}.`);
+  }
   return Object.freeze({
+    ...(proceduralSurface ? { proceduralSurface } : {}),
     id: presetId,
     label: string(source.label, `Material preset ${presetId} label`, presetId).trim().slice(0, 64)
       || presetId,

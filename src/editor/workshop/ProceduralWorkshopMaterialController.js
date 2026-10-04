@@ -1,3 +1,4 @@
+import { applyWorkshopGeneratedMaps } from './ProceduralWorkshopGeneratedMaps.js';
 import * as THREE from 'three/webgpu';
 import {
   BUILTIN_WORKSHOP_MATERIAL_PRESETS,
@@ -37,6 +38,7 @@ function hashDescriptor(value) {
 
 function applyPreset(material, preset) {
   const result = material.clone();
+  applyWorkshopGeneratedMaps(result, preset);
   result.color.set(preset.baseColor).multiply(new THREE.Color(preset.tint));
   result.roughness = preset.roughness;
   result.metalness = preset.metalness;

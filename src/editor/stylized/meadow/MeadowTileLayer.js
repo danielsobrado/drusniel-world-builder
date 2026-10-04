@@ -120,6 +120,13 @@ export class MeadowTileLayer {
       if (MeadowTileLayer.isStale(tile)) stale.push(tile);
     }
     stale.sort((a, b) => a.distanceSquared - b.distanceSquared);
+    const run = () => this.buildTiles(stale, this.workBudgetProvider && stale.length
+      ? Math.min(deadline, performance.now() + this.workBudgetProvider(this.workBudgetMs)) : deadline);
+    if (this.workRunner && stale.length) this.workRunner(run);
+    else run();
+  }
+
+  buildTiles(stale, deadline) {
     let building = 0;
     let compacted = 0;
     for (const tile of stale) {

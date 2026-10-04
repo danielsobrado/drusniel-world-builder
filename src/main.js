@@ -1438,8 +1438,8 @@ async function initializeEditor(restoreState, resources) {
       }
       : null;
     deferredWork.attachSurface(stylizedSurface);
-    stylizedSurface.workBudgetMs = deferredWork.available(stylizedSurface.frameBudgetMs);
-    deferredWork.run(() => stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody));
+    stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
+    stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
     if (profiling) perfQa.mark('stylized');
 

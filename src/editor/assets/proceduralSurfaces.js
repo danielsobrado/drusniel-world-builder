@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SURFACE_PROPERTIES, createSurfaceTexturePixels } from './proceduralTexturePixels.js';
+import { HOUSE_SURFACE_ALIASES, createHouseSurfaceTextures, houseSurfaceProperties } from './godsEnd/houseSurfaces.js';
 
 /**
  * Shared procedural surface textures and materials.
@@ -38,6 +39,13 @@ export function getSurfaceTextures(kind) {
     return cached;
   }
 
+  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  if (houseSurface) {
+    const textures = createHouseSurfaceTextures(houseSurface);
+    textureCache.set(kind, textures);
+    return textures;
+  }
+
   const pixels = createSurfaceTexturePixels(kind, { size: TEXTURE_SIZE });
   const textures = Object.freeze({
     map: createTexture(pixels.color, pixels.size, THREE.SRGBColorSpace),
@@ -53,7 +61,8 @@ export function getSurfaceTextures(kind) {
  * is baked into the map, so the scalar stays at 1 and lets the texture drive it.
  */
 export function getSurfaceMaterial(kind, tint = null) {
-  const properties = SURFACE_PROPERTIES[kind];
+  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  const properties = houseSurface ? houseSurfaceProperties(houseSurface) : SURFACE_PROPERTIES[kind];
   if (!properties) {
     throw new Error(`Unknown procedural surface kind: ${kind}.`);
   }
@@ -71,7 +80,7 @@ export function getSurfaceMaterial(kind, tint = null) {
     map: textures.map,
     normalMap: textures.normalMap,
     roughnessMap: textures.roughnessMap,
-    roughness: 1,
+    roughness: properties.roughness ?? 1,
     metalness: properties.metalness,
   });
   material.normalScale.set(properties.normalStrength, properties.normalStrength);
@@ -86,7 +95,8 @@ export function getSurfaceMaterial(kind, tint = null) {
 }
 
 export function surfaceDensity(kind) {
-  const properties = SURFACE_PROPERTIES[kind];
+  const houseSurface = HOUSE_SURFACE_ALIASES[kind];
+  const properties = houseSurface ? houseSurfaceProperties(houseSurface) : SURFACE_PROPERTIES[kind];
   if (!properties) {
     throw new Error(`Unknown procedural surface kind: ${kind}.`);
   }
@@ -160,7 +170,7 @@ export function disposeProceduralSurfaces() {
   for (const textures of textureCache.values()) {
     textures.map.dispose();
     textures.normalMap.dispose();
-    textures.roughnessMap.dispose();
+    textures.roughnessMap?.dispose();
   }
   textureCache.clear();
 }

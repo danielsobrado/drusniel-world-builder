@@ -30,6 +30,15 @@ function addCaseFailures(entry, failures) {
   if (!finite(report.summary?.frameCount) || report.summary.frameCount <= 0) {
     failures.push(`${label}: no measured frames`);
   }
+  if (report.scenario?.settle?.settled !== true) {
+    failures.push(`${label}: preparation did not settle before measurement`);
+  }
+  if (report.preparation?.start?.ready === false) {
+    failures.push(`${label}: scenery preparation was incomplete at measurement start`);
+  }
+  if (report.summary?.frameBufferComplete === false) {
+    failures.push(`${label}: measured frame buffer was incomplete`);
+  }
   if (!finite(report.summary?.dt?.p95Ms)
     || report.summary.dt.p95Ms > PERF_MATRIX_MAX_P95_MS) {
     failures.push(

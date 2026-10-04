@@ -13,8 +13,8 @@ export const DEFAULT_FALLING_LEAVES = Object.freeze({
   fallSpeed: 0.9,
   /** Biomes whose canopy sheds: temperate deciduous forest and temperate rainforest. */
   tileIds: [6, 8],
-  /** Autumn tones, linear RGB: gold, rust, brown. */
-  palette: [[0.78, 0.5, 0.08], [0.62, 0.2, 0.04], [0.3, 0.16, 0.06]],
+  /** Null uses the donor green/gold/pale leaves; three linear RGB colors override them. */
+  palette: null,
 });
 
 /** Rings of ground samples, metres, for how much shedding canopy is around. */

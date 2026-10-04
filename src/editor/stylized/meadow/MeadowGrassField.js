@@ -156,7 +156,12 @@ export class MeadowGrassField {
     this.interaction?.update(body);
     this.ground.beginFrame();
     const startedAt = performance.now();
-    const deadline = shouldYield?.() ? startedAt : startedAt + (budgetProvider?.(this.settings.buildBudgetMs) ?? this.settings.buildBudgetMs);
+    const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
+    for (const layer of [this.blades, this.cards]) if (layer) {
+      layer.workBudgetProvider = budgetProvider;
+      layer.workBudgetMs = this.settings.buildBudgetMs;
+      layer.workRunner = this.workRunner;
+    }
     // Blades first: the ground under the player matters more than the horizon.
     this.blades.update(canonical, origin, deadline);
     this.cards?.update(canonical, origin, deadline);

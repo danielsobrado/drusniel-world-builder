@@ -246,6 +246,23 @@ const fs = require('fs');
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
       }, ${drainSeconds});
     }
+    if (${hasFlag('revisit')}) {
+      await page.evaluate(() => window.__perfQa.restart());
+      if (${hasFlag('turn-on-revisit')}) {
+        await page.waitForFunction(() => window.__perfQa?.recording === true);
+        await page.waitForTimeout(${Number(duration) * 500});
+        await page.evaluate(() => {
+          const player = window.__editor.playerController;
+          const state = player.getStatus();
+          player.setPose({ ...state.position, yaw: state.yaw + Math.PI, pitch: state.pitch });
+        });
+      }
+      await page.waitForFunction(() => window.__perfQa?.status === 'done'
+        && window.__perfQa.getReport() !== null);
+      report.revisit = await page.evaluate(() => window.__perfQa.getReport());
+      report.revisit.conditions = { sameBrowser: true,
+        midpointCameraTurnDegrees: ${hasFlag('turn-on-revisit') ? 180 : 0} };
+    }
     report.adapter = adapter;
     report.capture = {
       viewport: {

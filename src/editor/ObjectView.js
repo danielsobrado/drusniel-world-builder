@@ -356,7 +356,7 @@ export class ObjectView {
 
   update(timestamp, camera) {
     const startedAt = performance.now();
-    const viewportHeight = this.terrainView.renderer.domElement.clientHeight
+    const viewportHeight = this.terrainView.viewportHeight
       || this.terrainView.renderer.domElement.height
       || 1;
     const counts = { near: 0, coarse: 0, shell: 0 };

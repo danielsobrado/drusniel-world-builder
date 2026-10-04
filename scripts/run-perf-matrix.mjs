@@ -37,6 +37,8 @@ function reportSummary(report) {
     scenario: report.scenario,
     summary: report.summary,
     collision: report.collision,
+    preparation: report.preparation,
+    sceneryUpdateCpu: report.sceneryUpdateCpu,
     adapter: report.adapter,
     density: {
       treesPerChunk: stylized?.trees?.perChunk ?? null,

@@ -15,7 +15,8 @@ function report(id, densityProfile, {
   webgl = 0,
 } = {}) {
   return {
-    scenario: { id: id === 'construction-ring' ? id : 'diagonal', densityProfile },
+    scenario: { id: id === 'construction-ring' ? id : 'diagonal', densityProfile,
+      settle: { settled: true } },
     summary: { frameCount: 100, hitchRate, dt: { p95Ms } },
     collision: { gate: { passed: true } },
     counters: {
@@ -102,4 +103,16 @@ test('performance matrix gate rejects inactive density, construction, water, and
   assert.ok(result.failures.some((failure) => failure.includes('high-grass')));
   assert.ok(result.failures.some((failure) => failure.includes('construction-ring')));
   assert.ok(result.failures.some((failure) => failure.includes('water acceptance')));
+});
+
+test('performance matrix rejects timed-out preparation and incomplete captures', () => {
+  const matrix = passingMatrix();
+  matrix.cases[0].report.scenario.settle.settled = false;
+  matrix.cases[1].report.preparation = { start: { ready: false } };
+  matrix.cases[2].report.summary.frameBufferComplete = false;
+  const result = evaluatePerfMatrix(matrix);
+  assert.equal(result.passed, false);
+  assert.ok(result.failures.some(f => f.includes('did not settle')));
+  assert.ok(result.failures.some(f => f.includes('preparation was incomplete')));
+  assert.ok(result.failures.some(f => f.includes('frame buffer was incomplete')));
 });

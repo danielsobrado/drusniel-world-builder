@@ -39,15 +39,23 @@ export class FrameSlack {
   // Time this frame can still give deferred work: the target minus the usual
   // cost of everything else. The floor is granted only once per frame.
   available(floorMs, maxMs) {
+    this.peek(floorMs, maxMs);
+    // A readiness probe must not start the deadline before actual work is eligible.
+    const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
+    this.deadline ??= this.now() + Math.max(0, this.allowanceMs - this.deferredMs - inProgressMs);
+    return this.peek(floorMs, maxMs);
+  }
+
+  peek(floorMs, maxMs) {
     const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
     if (this.allowanceMs === null) {
       const predicted = this.fixedMs === null ? maxMs
         : this.targetMs - this.reserveMs - this.fixedMs;
       this.allowanceMs = Math.min(this.maximumMs, Math.max(floorMs, predicted));
-      this.deadline = this.now() + this.allowanceMs;
     }
     const remaining = this.allowanceMs - this.deferredMs - inProgressMs;
-    return Math.min(maxMs, Math.max(0, Math.min(remaining, this.deadline - this.now())));
+    return Math.min(maxMs, Math.max(0, Math.min(remaining,
+      this.deadline === null ? Infinity : this.deadline - this.now())));
   }
 
   // Runs deferred work and books its time, so it is not mistaken for the fixed

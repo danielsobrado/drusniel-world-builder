@@ -196,6 +196,12 @@ npm run qa:perf:matrix -- --headed --water-only
 npm run qa:perf -- --headed
 ```
 
+`--drain-seconds 15` observes scenery readiness after the measured keys are
+released. Its separate `recovery` result does not enter movement FPS statistics.
+`--revisit` restarts the same route in the same browser and records a separate
+`revisit` report. Add `--turn-on-revisit` for a 180° camera turn halfway through
+that second measurement; the report records this route override explicitly.
+
 The runner rejects software/fallback adapters. Headless Chromium commonly fails
 that gate on Windows, so use `--headed` for comparisons. `--cpu-profile` writes
 a Chrome sampled CPU profile alongside the JSON without making profiling the

@@ -97,7 +97,9 @@ export class StylizedBuildQueue {
       const job = this.queue.shift();
       this.entriesByKey.delete(job.key);
       // Only count successful work so stale/no-op jobs cannot starve real rebuilds.
-      if (run(job, shouldYield)) {
+      const completed = this.workRunner
+        ? this.workRunner(() => run(job, shouldYield)) : run(job, shouldYield);
+      if (completed) {
         built += 1;
       }
     }
