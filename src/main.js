@@ -965,6 +965,8 @@ async function initializeEditor(restoreState, resources) {
       isWebGpu: true,
       worldCells: 1e9,
       samplers: createWeatherTerrainSamplers(terrainView),
+      effects: config.weatherEffects,
+      getOrigin: () => terrainView.floatingOrigin.getState(),
       getSettings: () => weatherSettings,
       getCamera: () => viewModeController.camera,
       getSunDirection: () => stylizedSurface.skyView?.sunDirectionValue ?? undefined,
@@ -1226,23 +1228,33 @@ async function initializeEditor(restoreState, resources) {
   releaseAssetProgress();
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: prewarm');
   boot.start('prewarm', 'Compiling shaders — this is the long one');
+  const traceWeatherWarmup = stage => {
+    if (window.location.search.includes('qaWeather=1')) console.log(`Weather warmup: ${stage}`);
+  };
   let finishWaterPrewarm = null;
   try {
+    traceWeatherWarmup('spells');
     await spellRuntime?.precompile?.(terrainView.renderer);
     stylizedSurface.prewarmStreamingResources(terrainView.renderer);
     finishWaterPrewarm = stylizedSurface.beginWaterRefractionPrewarm();
+    traceWeatherWarmup('scene');
     await terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera);
+    traceWeatherWarmup('scene ready');
     if (finishWaterPrewarm) {
       terrainView.renderer.render(terrainView.scene, editorCamera.camera);
     }
     worldWind.update(0, editorCamera.camera.position, terrainView.floatingOrigin.getState(), null);
     worldWind.render(terrainView.renderer);
+    traceWeatherWarmup('character');
     await characterView?.prewarm(terrainView.renderer, playerController.camera);
+    traceWeatherWarmup('post processing');
     await postProcessingController.precompile(playerController.camera);
+    traceWeatherWarmup('god rays');
     terrainView.prewarmPostProcessing(playerController.camera);
     withPreparationFrame(terrainView.renderer, null, () => withSceneWarmup(terrainView.scene,
       () => terrainView.prewarmPostProcessing(playerController.camera)));
     postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET);
+    traceWeatherWarmup('complete');
   } catch (error) {
     console.warn('Render pipeline pre-warm failed; pipelines will compile on demand.', error);
   } finally {
@@ -1502,6 +1514,7 @@ async function initializeEditor(restoreState, resources) {
     const snowCountryWeight = snowCountry.update(frameDelta, viewModeController.camera);
     skyLooks?.setSnowCountry(snowCountryWeight);
     weatherController?.setRegionalSnow(snowCountryWeight);
+    terrainView.godRays.setShaftAtmosphere(snowCountryWeight);
     if (dayNightCycle) {
       // A paused cycle reports the same preset every frame and `setPreset` ignores
       // a repeat, so this is a genuine no-op. The moon follows the clock's own

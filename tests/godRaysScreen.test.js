@@ -36,7 +36,7 @@ function frontCamera() {
 function enabledConfig() {
   return {
     enabled: true,
-    technique: 'volumetric',
+    technique: 'cinematic',
     intensity: 0.85,
     resolutionScale: 0.6,
     samples: 24,

@@ -206,9 +206,9 @@ function validateStylizedSurface(config) {
   assertBoolean(config, ['stylizedSurface', 'sky', 'shadows']);
   assertBoolean(config, ['stylizedSurface', 'sky', 'godRays', 'enabled']);
   const godRaysTechnique = surface.sky.godRays.technique;
-  if (!['screen-space', 'volumetric'].includes(godRaysTechnique)) {
+  if (!['screen-space', 'volumetric', 'cinematic'].includes(godRaysTechnique)) {
     throw new Error(
-      'Invalid editor configuration: stylizedSurface.sky.godRays.technique must be screen-space or volumetric.',
+      'Invalid editor configuration: stylizedSurface.sky.godRays.technique must be screen-space or volumetric or cinematic.',
     );
   }
   assertBoolean(config, ['stylizedSurface', 'path', 'naturalTrail', 'enabled']);

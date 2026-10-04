@@ -208,11 +208,13 @@ export function createWeatherController(deps) {
     worldCells: deps.worldCells,
     seed: 0xdecafbad,
     samplers: deps.samplers,
+    rain: deps.effects?.rain,
   });
   const snowWeather = new SnowWeatherSystem({
     scene: deps.scene,
     isWebGpu,
     seed: 0x51eaf00d,
+    snowfall: deps.effects?.snowfall,
   });
   const sandstormWeather = new SandstormWeatherSystem({
     scene: deps.scene,
@@ -357,7 +359,7 @@ export function createWeatherController(deps) {
       );
       windWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
       rainWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter);
-      snowWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
+      snowWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, deps.getOrigin?.());
       sandstormWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
       stormWeather.update(deltaSeconds, elapsedSeconds, effectCenter);
     },

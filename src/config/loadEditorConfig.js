@@ -9,6 +9,8 @@ import { resolveExplorationConfig } from '../editor/exploration/ExplorationConfi
 import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.yaml?raw';
 import waterConfigSource from '../../config/water-domain.yaml?raw';
 import waterVisualConfigSource from '../../config/water-visual.yaml?raw';
+import weatherEffectsConfigSource from '../../config/weather-effects.yaml?raw';
+import { resolveWeatherEffects } from '../editor/weather/WeatherEffectsConfig.js';
 import { createCollisionConfig } from '../editor/collision/CollisionConfig.js';
 import { registerCollisionConfig } from '../editor/collision/CollisionPlayerBridge.js';
 import { createTerrainMaterialBakeConfig } from '../editor/materials/TerrainMaterialBakeConfig.js';
@@ -43,6 +45,7 @@ function applyRuntimeOverrides(config) {
 export function loadEditorConfig() {
   const config = yaml.load(configSource);
   config.exploration = resolveExplorationConfig(yaml.load(explorationConfigSource));
+  config.weatherEffects = resolveWeatherEffects(yaml.load(weatherEffectsConfigSource));
   config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;
   config.import.azgaarGuidance = yaml.load(azgaarGuidanceConfigSource);
   config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(

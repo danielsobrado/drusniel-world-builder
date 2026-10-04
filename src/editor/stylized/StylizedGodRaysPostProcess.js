@@ -18,6 +18,7 @@ import {
 import { buildDustGodRays } from './GodRaysScreenScattering.js';
 import { setPipelineOutput } from './pipelineOutput.js';
 import { createFinishUniforms } from './cinematicFinish.js';
+import { GodsEndLightShafts } from './GodsEndLightShafts.js';
 export {
   advectedDustDensityReference,
   dustModulationReference,
@@ -32,7 +33,7 @@ export {
 
 const SUN_FADE_UV_MARGIN = 0.35;
 const SUN_FADE_FORWARD_END = 0.12;
-const GOD_RAY_TECHNIQUES = Object.freeze(['screen-space', 'volumetric']);
+const GOD_RAY_TECHNIQUES = Object.freeze(['cinematic', 'screen-space', 'volumetric']);
 
 export function directionFromAngles(elevationDegrees, azimuthDegrees) {
   const elevation = THREE.MathUtils.degToRad(elevationDegrees);
@@ -197,6 +198,10 @@ export class StylizedGodRaysPostProcess {
     this.volumetricBlur = null;
     this.volumetricCamera = null;
     this.camera = null;
+    this.cinematicPipeline = null;
+    this.cinematicShafts = null;
+    this.cinematicIntensity = uniform(0);
+    this.shaftAtmosphere = 0;
   }
 
   setCloudMaskScene(scene, { cloudOcclusionUniform = null } = {}) {
@@ -218,6 +223,10 @@ export class StylizedGodRaysPostProcess {
 
   setTime(timeSeconds) {
     if (Number.isFinite(timeSeconds)) this.atmosphereTime.value = timeSeconds;
+  }
+
+  setShaftAtmosphere(weight) {
+    this.shaftAtmosphere = THREE.MathUtils.clamp(Number(weight) || 0, 0, 1);
   }
 
   shouldRender(camera) {
@@ -281,6 +290,21 @@ export class StylizedGodRaysPostProcess {
       beauty.a,
     ), { fxaa: this.config.fxaa !== false, finish: this.finishFor(beauty) }).pipeline;
     return this.screenPipeline;
+  }
+
+  ensureCinematicPipeline(camera) {
+    this.ensureScenePass(camera);
+    if (this.cinematicPipeline) return this.cinematicPipeline;
+    const beauty = this.scenePass.getTextureNode('output');
+    this.cinematicShafts = new GodsEndLightShafts({
+      depth: this.scenePass.getTextureNode('depth'),
+      sunUv: this.sunUv, intensity: this.cinematicIntensity,
+    });
+    this.cinematicPipeline = setPipelineOutput(new THREE.RenderPipeline(this.renderer), vec4(
+      beauty.rgb.add(this.cinematicShafts.outputNode.mul(this.tint).mul(this.lightScale)),
+      beauty.a,
+    ), { fxaa: this.config.fxaa !== false, finish: this.finishFor(beauty) }).pipeline;
+    return this.cinematicPipeline;
   }
 
   canBuildVolumetricPipeline() {
@@ -349,7 +373,9 @@ export class StylizedGodRaysPostProcess {
   }
 
   ensurePipeline(camera) {
-    const selected = this.technique === 'volumetric'
+    const selected = this.technique === 'cinematic'
+      ? this.ensureCinematicPipeline(camera)
+      : this.technique === 'volumetric'
       ? this.ensureVolumetricPipeline(camera)
       : this.ensureScreenPipeline(camera);
     this.pipeline = selected ?? this.ensureScreenPipeline(camera);
@@ -369,6 +395,12 @@ export class StylizedGodRaysPostProcess {
     const info = projectSunToScreen(this.sunDirection, camera);
     this.sunUv.value.set(info.u, info.v);
     this.intensity.value = (this.config.intensity ?? 1) * sunScreenFade(info);
+    // Donor shafts fade at high noon and strengthen in snowy valley air.
+    const elevation = THREE.MathUtils.smoothstep(this.sunDirection.y, -0.02, 0.08)
+      * (1 - THREE.MathUtils.smoothstep(this.sunDirection.y, 0.45, 0.75));
+    this.cinematicIntensity.value = sunScreenFade(info) * elevation
+      * THREE.MathUtils.lerp(1, 2.4, this.shaftAtmosphere) * (this.config.intensity ?? 1);
+    if (this.cinematicShafts) this.cinematicShafts.aspect.value = camera.aspect;
     this.cameraMatrixWorld.value.copy(camera.matrixWorld);
     this.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
     camera.getWorldPosition(this.cameraPosition.value);
@@ -546,6 +578,8 @@ export class StylizedGodRaysPostProcess {
     if (this.disposed) return;
     this.disposed = true;
     this.screenPipeline?.dispose();
+    this.cinematicPipeline?.dispose();
+    this.cinematicShafts?.dispose();
     this.disposeVolumetricPipeline();
     this.scenePass?.dispose();
     this.cloudPass?.dispose();
@@ -554,6 +588,8 @@ export class StylizedGodRaysPostProcess {
     this.raysTexture?.dispose();
     this.pipeline = null;
     this.screenPipeline = null;
+    this.cinematicPipeline = null;
+    this.cinematicShafts = null;
     this.volumetricPipeline = null;
     this.scenePass = null;
     this.cloudPass = null;

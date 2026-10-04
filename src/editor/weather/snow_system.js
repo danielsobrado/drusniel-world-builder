@@ -3,7 +3,7 @@ import { createSnowShaderMaterial } from "./rainShaderMaterial.js";
 import { SNOW_FLAKE_COUNT } from "./rain_constants.js";
 import { DEFAULT_SNOW_WEATHER_SETTINGS } from "./rain_defaults.js";
 import { createSnowGeometry } from "./rain_geometry.js";
-import { createSnowfallField, snowfallFlakeCount } from "./snowfall/SnowfallField.js";
+import { createSnowfallField } from "./snowfall/SnowfallField.js";
 import { clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
 /**
  * How hard it snows in snow country with the weather off: a light, steady
@@ -23,9 +23,9 @@ class SnowWeatherSystem {
     // WebGPU draws the camera-facing, three-population field; WebGL keeps the
     // crossed-quad flakes its shader material was written for.
     if (options.isWebGpu) {
-      this.snowMaterial = createSnowfallField();
+      this.snowMaterial = createSnowfallField(options.snowfall, options.seed);
       this.snowMesh = new THREE.Mesh(this.snowMaterial.geometry, this.snowMaterial.material);
-      this.flakeCount = snowfallFlakeCount();
+      this.flakeCount = this.snowMaterial.geometry.instanceCount;
     } else {
       this.snowMaterial = createSnowShaderMaterial();
       this.snowMesh = new THREE.Mesh(createSnowGeometry(options.seed ?? 1374351373), this.snowMaterial.material);
@@ -60,11 +60,12 @@ class SnowWeatherSystem {
     this.group.visible = intensity > 1e-3;
     this.snowMaterial.setIntensity(intensity);
   }
-  update(deltaSeconds, elapsedSeconds, cameraPosition) {
+  update(deltaSeconds, elapsedSeconds, cameraPosition, origin) {
     void deltaSeconds;
     if (!this.group.visible) return;
     this.center.copy(cameraPosition);
     this.snowMaterial.setCenter(this.center);
+    this.snowMaterial.setOrigin?.(origin);
     this.snowMaterial.setTime(elapsedSeconds);
   }
   getStats() {
@@ -72,7 +73,7 @@ class SnowWeatherSystem {
   }
   dispose() {
     this.group.removeFromParent();
-    this.snowMesh.geometry.dispose();
+    if (!this.snowMaterial.geometry) this.snowMesh.geometry.dispose();
     this.snowMaterial.dispose();
   }
 }

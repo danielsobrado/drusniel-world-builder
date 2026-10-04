@@ -505,7 +505,7 @@ export class InfiniteTerrainView {
     const draw = () => {
       if (
         this.godRays.enabled
-        && this.godRays.technique === 'volumetric'
+        && ['volumetric', 'cinematic'].includes(this.godRays.technique)
         && this.godRays.render(camera)
       ) {
         return;
@@ -535,7 +535,7 @@ export class InfiniteTerrainView {
   }
 
   prewarmPostProcessing(camera) {
-    if (this.godRays.enabled && this.godRays.technique === 'volumetric') {
+    if (this.godRays.enabled && ['volumetric', 'cinematic'].includes(this.godRays.technique)) {
       return this.godRays.prewarm(camera);
     }
     if (this.postProcessing?.warmup(camera)) return true;

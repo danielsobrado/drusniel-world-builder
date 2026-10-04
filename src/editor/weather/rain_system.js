@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { createRainNodeMaterial, createSplashNodeMaterial } from "./rainNodeMaterial.js";
+import { createSplashNodeMaterial } from "./rainNodeMaterial.js";
 import { createRainShaderMaterial, createSplashShaderMaterial } from "./rainShaderMaterial.js";
 import { HARD_SPLASH_COUNT, REPOSITION_DISTANCE, WATER_SPLASH_COUNT } from "./rain_constants.js";
 import { DEFAULT_RAIN_WEATHER_SETTINGS } from "./rain_defaults.js";
 import { createRainGeometry, createSplashGeometry } from "./rain_geometry.js";
 import { RainSplashPlacement } from "./rain_splash_placement.js";
+import { createCinematicRainField } from './CinematicRainField.js';
 import { applyWindWeatherToMaterials, clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
 class RainWeatherSystem {
   group = new THREE.Group();
@@ -26,10 +27,12 @@ class RainWeatherSystem {
     this.splashPlacement = new RainSplashPlacement(options.samplers, options.worldCells, seed);
     this.group.name = "weather-rain";
     this.group.visible = this.settings.enabled;
-    this.rainMaterial = options.isWebGpu ? createRainNodeMaterial() : createRainShaderMaterial();
+    this.rainMaterial = options.isWebGpu
+      ? createCinematicRainField(options.rain, seed)
+      : createRainShaderMaterial();
     this.hardSplashMaterial = options.isWebGpu ? createSplashNodeMaterial("hard") : createSplashShaderMaterial("hard");
     this.waterSplashMaterial = options.isWebGpu ? createSplashNodeMaterial("water") : createSplashShaderMaterial("water");
-    this.rainMesh = new THREE.Mesh(createRainGeometry(seed), this.rainMaterial.material);
+    this.rainMesh = new THREE.Mesh(this.rainMaterial.geometry ?? createRainGeometry(seed), this.rainMaterial.material);
     this.rainMesh.name = "weather-rain-streaks";
     this.rainMesh.frustumCulled = false;
     this.rainMesh.renderOrder = 40;
@@ -74,11 +77,11 @@ class RainWeatherSystem {
     }
   }
   getStats() {
-    return { ...this.stats };
+    return { ...this.stats, drops: this.group.visible ? this.rainMesh.geometry.instanceCount : 0 };
   }
   dispose() {
     this.group.removeFromParent();
-    this.rainMesh.geometry.dispose();
+    if (!this.rainMaterial.geometry) this.rainMesh.geometry.dispose();
     this.hardSplashMesh.geometry.dispose();
     this.waterSplashMesh.geometry.dispose();
     this.rainMaterial.dispose();

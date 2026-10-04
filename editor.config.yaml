@@ -1746,11 +1746,11 @@ stylizedSurface:
     canopyShelter: 0.7
   sky:
     enabled: true
-    # Half-resolution, low-tap screen-space light shafts. The effect is routed
+    # Gods' End quarter-resolution, two-pass light shafts. The effect is routed
     # only through the perspective walking camera; the editor stays unfiltered.
     godRays:
       enabled: true
-      technique: volumetric
+      technique: cinematic
       intensity: 0.85
       # Preserve enough ray-buffer detail for close silhouettes and use enough
       # radial taps that one tap cannot appear as a displaced canopy-sized slab.

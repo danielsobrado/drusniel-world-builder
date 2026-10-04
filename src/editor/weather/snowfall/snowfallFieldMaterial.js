@@ -2,7 +2,7 @@
 import * as THREE from 'three/webgpu';
 import {
   attribute, cameraPosition, cameraWorldMatrix, cos, float, fract,
-  mix, positionGeometry, sin, smoothstep, step, uniform, vec2, vec3,
+  mix, positionGeometry, sin, smoothstep, step, uniform, uniformArray, vec2, vec3,
 } from 'three/tsl';
 import { DEFAULT_WEATHER_EFFECTS } from '../WeatherEffectsConfig.js';
 import { skyLightUniforms } from '../../stylized/sky/skyLight.js';
@@ -13,6 +13,7 @@ export function createSnowfallUniforms(settings = DEFAULT_WEATHER_EFFECTS.snowfa
     time: uniform(0), center: uniform(new THREE.Vector3()),
     drift: uniform(new THREE.Vector2()), intensity: uniform(1),
     color: uniform(new THREE.Color(settings.color)), opacity: uniform(settings.opacity),
+    phases: uniformArray(settings.layers.map(() => new THREE.Vector2())),
   };
 }
 
@@ -20,7 +21,7 @@ export function createSnowfallMaterial(uniforms, settings = DEFAULT_WEATHER_EFFE
   const seed = attribute('snowSeed', 'vec4');
   const shape = attribute('snowShape', 'vec4');
   const appearance = attribute('snowAppearance', 'vec4');
-  const { time, center, drift, intensity } = uniforms;
+  const { time, center, intensity } = uniforms;
   const width = shape.x;
   const height = shape.y;
   const fall = fract(seed.z.sub(time.mul(shape.w).div(height)));
@@ -31,8 +32,8 @@ export function createSnowfallMaterial(uniforms, settings = DEFAULT_WEATHER_EFFE
     cos(phase.mul(0.83)).mul(settings.swayRadius).sub(eddy.mul(0.7)));
   // World-anchored wrapping lets the camera move through the field. Only its
   // bounded window follows the view; seeded flakes do not travel with it.
-  const anchor = seed.xy.mul(width).add(drift).add(swirl);
-  const offset = fract(anchor.sub(center.xz).div(width)).sub(0.5).mul(width);
+  const phaseOffset = uniforms.phases.element(attribute('snowLayer', 'float').toUint());
+  const offset = fract(seed.xy.add(swirl.div(width)).sub(phaseOffset)).sub(0.5).mul(width);
   const flake = vec3(center.x.add(offset.x), center.y.add(y), center.z.add(offset.y));
   const fadeStart = appearance.x.max(0.001);
   const lens = smoothstep(fadeStart, fadeStart.mul(3), cameraPosition.distance(flake));

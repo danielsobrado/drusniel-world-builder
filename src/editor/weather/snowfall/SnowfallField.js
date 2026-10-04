@@ -30,8 +30,9 @@ export function createSnowfallGeometry(populations = SNOWFALL_POPULATIONS, rando
   const seeds = new Float32Array(count * 4);
   const shapes = new Float32Array(count * 4);
   const appearances = new Float32Array(count * 4);
+  const layers = new Float32Array(count);
   let flake = 0;
-  for (const population of populations) {
+  for (const [layer, population] of populations.entries()) {
     for (let index = 0; index < population.count; index += 1) {
       const at = flake * 4;
       seeds.set([random(), random(), random(), (index + random()) / population.count], at);
@@ -40,12 +41,14 @@ export function createSnowfallGeometry(populations = SNOWFALL_POPULATIONS, rando
         population.fallSpeed * (0.6 + random() * 0.75)], at);
       appearances.set([population.nearFade, population.softness,
         population.brightness, population.opacity * (0.55 + random() * 0.45)], at);
+      layers[flake] = layer;
       flake += 1;
     }
   }
   geometry.setAttribute('snowSeed', new THREE.InstancedBufferAttribute(seeds, 4));
   geometry.setAttribute('snowShape', new THREE.InstancedBufferAttribute(shapes, 4));
   geometry.setAttribute('snowAppearance', new THREE.InstancedBufferAttribute(appearances, 4));
+  geometry.setAttribute('snowLayer', new THREE.InstancedBufferAttribute(layers, 1));
   geometry.instanceCount = count;
   return geometry;
 }
@@ -69,6 +72,17 @@ export function createSnowfallField(settings = DEFAULT_WEATHER_EFFECTS.snowfall,
   const rng = new Rng(seed);
   const geometry = createSnowfallGeometry(snowfallPopulations(settings), () => rng.float());
   const wind = new THREE.Vector2(-0.62, 0.21);
+  const origin = new THREE.Vector2();
+  const updatePhases = () => {
+    settings.layers.forEach((layer, index) => {
+      // Reduce canonical coordinates in double precision on the CPU. A large
+      // Azgaar origin never enters the float32 shader, and rebasing preserves flakes.
+      uniforms.phases.array[index].set(
+        ((uniforms.center.value.x + origin.x - uniforms.drift.value.x) % layer.area) / layer.area,
+        ((uniforms.center.value.z + origin.y - uniforms.drift.value.y) % layer.area) / layer.area,
+      );
+    });
+  };
   let lastTime = null;
   let disposed = false;
   return {
@@ -81,9 +95,11 @@ export function createSnowfallField(settings = DEFAULT_WEATHER_EFFECTS.snowfall,
       }
       lastTime = seconds;
       uniforms.time.value = seconds;
+      updatePhases();
     },
     setIntensity(value) { uniforms.intensity.value = value; },
-    setCenter(center) { uniforms.center.value.copy(center); },
+    setCenter(center) { uniforms.center.value.copy(center); updatePhases(); },
+    setOrigin(value) { origin.set(value?.x ?? 0, value?.z ?? 0); updatePhases(); },
     setWind(x, z) { wind.set(x, z); },
     dispose() {
       if (disposed) return;

@@ -15,14 +15,19 @@ test('every population thins alike as intensity drops', () => {
   const geometry = createSnowfallGeometry(SNOWFALL_POPULATIONS, () => 0.5);
   const seeds = geometry.attributes.snowSeed;
   const shapes = geometry.attributes.snowShape;
-  assert.equal(seeds.count, snowfallFlakeCount() * 4);
+  assert.equal(seeds.count, snowfallFlakeCount());
+  assert.equal(geometry.attributes.position.count, 4, 'all flakes share one quad');
+  assert.equal(geometry.instanceCount, snowfallFlakeCount());
   let start = 0;
   for (const population of SNOWFALL_POPULATIONS) {
-    const ranks = Array.from({ length: population.count }, (_, i) => seeds.getW((start + i) * 4));
+    const ranks = Array.from({ length: population.count }, (_, i) => seeds.getW(start + i));
     assert.ok(ranks[0] < 1 / population.count + 1e-9 && ranks.at(-1) > 1 - 1 / population.count - 1e-9);
-    assert.equal(Math.sign(shapes.getZ(start * 4)), Math.sign(population.radius), 'bokeh flakes keep a negative radius');
+    const appearance = geometry.attributes.snowAppearance;
+    assert.equal(appearance.getY(start), population.softness, 'soft lens flakes keep their population profile');
+    assert.ok(shapes.getZ(start) >= population.sizeMin && shapes.getZ(start) <= population.sizeMax);
     start += population.count;
   }
+  geometry.dispose();
 });
 
 test('the drift integrates the wind, so a gust never jumps the field', () => {

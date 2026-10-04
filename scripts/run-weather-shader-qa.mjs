@@ -12,6 +12,7 @@ import { terminateChildProcess } from './lib/processLifecycle.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDirectory = path.join(root, 'tmp', 'weather-shader-qa');
 const modes = Object.freeze(['meadow', 'rain', 'snow', 'sandstorm', 'storm', 'wind']);
+const viewportSelector = 'canvas[aria-label="Drusniel World infinite world editor viewport"]';
 const shaderErrorPattern = /shader|wgsl|webgpu|gpu validation|pipeline|bind.?group|nodematerial|istexture|weather.*precompile/i;
 
 function readArgument(name, fallback) {
@@ -23,6 +24,7 @@ const headed = process.argv.includes('--headed');
 const timeoutMs = Number(readArgument('timeoutMs', '180000'));
 const settleMs = Number(readArgument('settleMs', '1200'));
 const requestedPort = process.argv.includes('--port') ? Number(readArgument('port', '4178')) : 0;
+const existingUrl = readArgument('url', null);
 
 async function reservePort(preferredPort = 0) {
   return new Promise((resolve, reject) => {
@@ -89,7 +91,7 @@ async function setWeatherMode(page, mode) {
 
 async function captureViewport(page, mode) {
   try {
-    const canvas = await page.locator('canvas').first().boundingBox({ timeout: 10000 });
+    const canvas = await page.locator(viewportSelector).boundingBox({ timeout: 10000 });
     if (!canvas || canvas.width < 1 || canvas.height < 1) return null;
     const buffer = await page.screenshot({
       path: path.join(outputDirectory, `${mode}.png`),
@@ -109,12 +111,14 @@ function shaderErrors(messages) {
 
 async function run() {
   await mkdir(outputDirectory, { recursive: true });
-  const port = await reservePort(requestedPort);
-  const baseUrl = `http://127.0.0.1:${port}/`;
-  const server = startServer(port);
+  const port = existingUrl ? null : await reservePort(requestedPort);
+  const targetUrl = new URL(existingUrl ?? `http://127.0.0.1:${port}/`);
+  targetUrl.searchParams.set('qaWeather', '1');
+  const baseUrl = targetUrl.href;
+  const server = existingUrl ? null : startServer(port);
   let serverOutput = '';
-  server.stdout.on('data', (chunk) => { serverOutput += chunk.toString(); });
-  server.stderr.on('data', (chunk) => { serverOutput += chunk.toString(); });
+  server?.stdout.on('data', (chunk) => { serverOutput += chunk.toString(); });
+  server?.stderr.on('data', (chunk) => { serverOutput += chunk.toString(); });
 
   const report = {
     baseUrl,
@@ -124,9 +128,10 @@ async function run() {
     errors: [],
   };
   let browser;
+  let progressTimer;
 
   try {
-    await waitForServer(server, baseUrl);
+    if (server) await waitForServer(server, baseUrl);
     browser = await chromium.launch({
       headless: !headed,
       channel: 'chromium',
@@ -140,19 +145,55 @@ async function run() {
       ],
     });
     const page = await browser.newPage({ viewport: { width: 1600, height: 950 } });
+    progressTimer = setInterval(async () => {
+      try {
+        const state = await page.evaluate(() => ({
+          editor: Boolean(window.__editor),
+          weather: Boolean(window.__editor?.weatherController),
+          exploration: Boolean(window.__editor?.exploration),
+          rendererFrame: window.__editor?.terrainView.renderer.info.render.frame,
+          loading: [...document.querySelectorAll('[data-role="loading-detail"], .loading-detail')].map(node => node.textContent),
+        }));
+        console.log(`Weather QA startup: ${JSON.stringify(state)}`);
+      } catch { /* Navigation or close may overlap the progress sample. */ }
+    }, 15000);
     const runtimeErrors = [];
+    report.errors = runtimeErrors;
     page.on('pageerror', (error) => runtimeErrors.push(`pageerror: ${error.message}`));
     page.on('console', (message) => {
+      if (message.text().startsWith('Weather warmup:')) console.log(message.text());
       if (message.type() === 'error' || message.type() === 'warning') {
         runtimeErrors.push(`${message.type()}: ${message.text()}`);
       }
     });
 
     await page.goto(baseUrl, { waitUntil: 'load', timeout: timeoutMs });
+    console.log('Weather QA: waiting for world startup.');
     await page.waitForSelector('[data-weather="mode"]', { timeout: timeoutMs });
-    await page.waitForSelector('canvas', { timeout: timeoutMs });
+    await page.waitForSelector(viewportSelector, { state: 'attached', timeout: timeoutMs });
+    console.log('Weather QA: viewport attached.');
     const hasWebGpu = await page.evaluate(() => Boolean(navigator.gpu));
     assert.equal(hasWebGpu, true, 'Chromium did not expose WebGPU.');
+    await page.waitForFunction(() => window.__editor?.weatherController && window.__editor?.exploration, null, { timeout: timeoutMs });
+    console.log('Weather QA: world ready.');
+    report.adapter = await page.evaluate(async () => {
+      const adapter = await navigator.gpu.requestAdapter({ featureLevel: 'compatibility', xrCompatible: false });
+      if (!adapter) return null;
+      const info = adapter.info;
+      return { vendor: info.vendor, architecture: info.architecture, description: info.description,
+        fallback: Boolean(adapter.isFallbackAdapter),
+        webgpu: window.__editor.terrainView.renderer.backend.isWebGPUBackend === true };
+    });
+    assert.ok(report.adapter?.webgpu && report.adapter.fallback === false, 'Weather acceptance requires hardware WebGPU.');
+    assert.doesNotMatch(`${report.adapter.vendor} ${report.adapter.architecture} ${report.adapter.description}`, /swiftshader|llvmpipe|software/i);
+    console.log(`Weather QA: hardware WebGPU ${report.adapter.vendor} ${report.adapter.architecture}.`);
+    await page.evaluate(() => {
+      const editor = window.__editor;
+      editor.playerController.setHarnessActive(true);
+      editor.viewModeController.setMode('walk', { requestPointerLock: false });
+      const sun = editor.godRays.sunDirection;
+      editor.playerController.setPose({ x: 0, z: 0, yaw: Math.atan2(-sun.x, -sun.z), pitch: Math.asin(sun.y) });
+    });
 
     await delay(settleMs);
     const warmupErrors = shaderErrors(runtimeErrors);
@@ -163,6 +204,7 @@ async function run() {
     );
 
     for (const mode of modes) {
+      console.log(`Weather QA: ${mode}.`);
       const startedAt = performance.now();
       const errorStart = runtimeErrors.length;
       await setWeatherMode(page, mode);
@@ -175,6 +217,7 @@ async function run() {
         activationMs: performance.now() - startedAt,
         screenshotHash,
         errors: modeErrors,
+        stats: await page.evaluate(() => window.__editor.weatherController.getStats()),
       });
       assert.deepEqual(
         modeShaderErrors,
@@ -185,9 +228,18 @@ async function run() {
 
     report.errors = runtimeErrors;
     await setWeatherMode(page, 'off');
+    report.godRays = await page.evaluate(() => {
+      const effect = window.__editor.godRays;
+      return { technique: effect.technique, maskScale: effect.cinematicShafts?.mask.getResolutionScale(),
+        marchScale: effect.cinematicShafts?.march.getResolutionScale(), intensity: effect.cinematicIntensity.value };
+    });
+    assert.equal(report.godRays.technique, 'cinematic');
+    assert.equal(report.godRays.maskScale, 0.25);
+    assert.equal(report.godRays.marchScale, 0.25);
   } finally {
+    clearInterval(progressTimer);
     await browser?.close();
-    await terminateChildProcess(server);
+    if (server) await terminateChildProcess(server);
     await writeFile(path.join(outputDirectory, 'vite.log'), serverOutput);
     report.finishedAt = new Date().toISOString();
     await writeFile(

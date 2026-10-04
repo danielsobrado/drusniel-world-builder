@@ -406,10 +406,17 @@ export class EditorUi {
               <span>Technique</span>
               <select data-god-rays-setting="technique">
                 <option value="off">Off</option>
+                <option value="cinematic">Gods' End</option>
                 <option value="volumetric">Volumetric</option>
                 <option value="screen-space">Screen-space</option>
               </select>
             </label>
+
+            <div class="settings-group" data-god-rays-section="cinematic" hidden>
+              <h3>Sunlit shafts</h3>
+              <p>Soft light through silhouettes, with stronger shafts over snowy ground.</p>
+              ${this.rangeControl('Intensity', 'screenIntensity', 0, 3, 0.05, 2)}
+            </div>
 
             <div class="settings-group" data-god-rays-section="screen-space">
               <h3>Screen-space shafts</h3>
@@ -828,8 +835,8 @@ export class EditorUi {
         const effect = this.godRaysEffect?.getSettings?.();
         this.godRaysTechnique = shaftsEnabled
           ? 'screen-space'
-          : effect?.enabled && effect.technique === 'volumetric'
-            ? 'volumetric'
+          : effect?.enabled && ['volumetric', 'cinematic'].includes(effect.technique)
+            ? effect.technique
             : 'off';
       }
       this.syncGodRaysRuntimeForPostSettings(settings);
@@ -840,8 +847,8 @@ export class EditorUi {
   syncGodRaysSettings(settings) {
     if (!settings) return;
     const shaftsEnabled = this.postProcessingStore?.get()?.screenSpaceShafts?.enabled === true;
-    this.godRaysTechnique = settings.enabled && settings.technique === 'volumetric'
-      ? 'volumetric'
+    this.godRaysTechnique = settings.enabled && ['volumetric', 'cinematic'].includes(settings.technique)
+      ? settings.technique
       : shaftsEnabled || (settings.enabled && settings.technique === 'screen-space')
         ? 'screen-space'
         : 'off';
@@ -888,15 +895,15 @@ export class EditorUi {
         technique: 'screen-space',
         enabled: settings.enabled !== true,
       });
-    } else if (this.godRaysTechnique === 'volumetric') {
-      this.godRaysEffect.setSettings({ technique: 'volumetric', enabled: true });
+    } else if (['volumetric', 'cinematic'].includes(this.godRaysTechnique)) {
+      this.godRaysEffect.setSettings({ technique: this.godRaysTechnique, enabled: true });
     } else {
       this.godRaysEffect.setSettings({ enabled: false });
     }
   }
 
   applyGodRaysTechnique(technique, { markCustom = true } = {}) {
-    if (!['off', 'volumetric', 'screen-space'].includes(technique)) return;
+    if (!['off', 'cinematic', 'volumetric', 'screen-space'].includes(technique)) return;
     this.godRaysTechnique = technique;
     this.syncGodRaysRuntimeForPostSettings();
     const shaftsEnabled = technique === 'screen-space';
@@ -1537,7 +1544,7 @@ export class EditorUi {
               : 'Select a wall to edit';
     } else if (state.tool === 'settings') {
       this.selection.textContent = this.godRaysTechnique !== 'off'
-        ? `God rays · ${this.godRaysTechnique === 'volumetric' ? 'volumetric shadow' : 'screen-space'}`
+        ? `God rays · ${{ volumetric: 'volumetric shadow', cinematic: "Gods' End", 'screen-space': 'screen-space' }[this.godRaysTechnique]}`
         : 'God rays disabled';
     } else {
       this.selection.textContent = state.selectedObject
