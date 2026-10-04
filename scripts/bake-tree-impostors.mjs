@@ -9,6 +9,7 @@ import {
   terminateChildProcess,
 } from './lib/processLifecycle.mjs';
 import { chromium } from 'playwright';
+import { bakeFoliageMips } from './lib/bake-foliage-mips.mjs';
 import {
   TREE_IMPOSTOR_MANIFEST_VERSION,
   validateTreeImpostorManifest,
@@ -320,6 +321,7 @@ async function writeAssets(bundle) {
     join(OUTPUT_DIRECTORY, 'manifest.json'),
     `${JSON.stringify(manifest, null, 2)}\n`,
   );
+  await bakeFoliageMips(OUTPUT_DIRECTORY);
 }
 
 async function collectPageSnapshot(cdp, diagnostics) {

@@ -1,3 +1,5 @@
+import { bakeTerrainMaterialPage } from '../materials/TerrainMaterialBakeCpu.js';
+import { generatePreparedPlacementChunk } from './PreparedPlacementChunk.js';
 import { generateBaseWorldChunk } from './generateWorldChunk.js';
 import { createTerrainWorkerBaseTerrain } from './TerrainWorkerBaseTerrain.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
@@ -131,10 +133,10 @@ export class WorldChunkWorkerClient {
     return Promise.resolve()
       .then(() => {
         if (this.disposed) throw disposedError();
-        return generateBaseWorldChunk({
-          ...request,
-          worldGenerator: this.ensureWorldGenerator(),
-        });
+        if (request.materialBakeRequest) return bakeTerrainMaterialPage(request.materialBakeRequest);
+        return request.placementSamplingConfig
+          ? generatePreparedPlacementChunk(request, this.ensureWorldGenerator())
+          : generateBaseWorldChunk({ ...request, worldGenerator: this.ensureWorldGenerator() });
       })
       .then((page) => {
         if (this.disposed) throw disposedError();
@@ -161,7 +163,7 @@ export class WorldChunkWorkerClient {
     }
   }
 
-  request(chunkX, chunkZ, { priority = 0 } = {}) {
+  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null } = {}) {
     if (this.disposed) {
       return Promise.reject(disposedError());
     }
@@ -172,6 +174,8 @@ export class WorldChunkWorkerClient {
       generator: this.generator,
       surfaceMaskConfig: this.surfaceMaskConfig,
       vegetationScatterConfig: this.vegetationScatterConfig,
+      placementSamplingConfig,
+      materialBakeRequest,
     };
     // No workers available (Node/tests or degraded browser): preserve the async contract.
     if (this.workers.length === 0) {
@@ -180,7 +184,8 @@ export class WorldChunkWorkerClient {
 
     const id = this.nextId;
     this.nextId += 1;
-    const key = chunkKey(chunkX, chunkZ);
+    const key = materialBakeRequest ? `material:${materialBakeRequest.descriptor.key}`
+      : `${placementSamplingConfig ? 'placement:' : ''}${chunkKey(chunkX, chunkZ)}`;
     return new Promise((resolve, reject) => {
       const job = {
         id,
@@ -198,8 +203,8 @@ export class WorldChunkWorkerClient {
   }
 
   /** Raise/lower the priority of a still-queued request. No-op once dispatched. */
-  reprioritize(chunkX, chunkZ, priority) {
-    const job = this.queuedByKey.get(chunkKey(chunkX, chunkZ));
+  reprioritize(chunkX, chunkZ, priority, namespace = '') {
+    const job = this.queuedByKey.get(`${namespace}${chunkKey(chunkX, chunkZ)}`);
     if (!job) {
       return false;
     }
@@ -208,8 +213,8 @@ export class WorldChunkWorkerClient {
   }
 
   /** Drop a request that has not started generating yet. */
-  cancel(chunkX, chunkZ) {
-    const key = chunkKey(chunkX, chunkZ);
+  cancel(chunkX, chunkZ, namespace = '') {
+    const key = `${namespace}${chunkKey(chunkX, chunkZ)}`;
     const job = this.queuedByKey.get(key);
     if (!job) {
       return false;

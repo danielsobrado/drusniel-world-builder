@@ -1,3 +1,4 @@
+import { isCollisionBuildDeferred } from '../CollisionBuildResult.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { createCollisionSourceId } from '../CollisionIds.js';
 import { COLLISION_LAYERS } from '../CollisionLayers.js';
@@ -201,6 +202,7 @@ export class RockCollisionProvider {
 
   buildChunkData(chunkX, chunkZ) {
     const snapshot = this.source.snapshotChunk(chunkX, chunkZ);
+    if (isCollisionBuildDeferred(snapshot)) return snapshot;
     const profiles = this.source.getProfiles();
     const colliders = [];
     const stats = {

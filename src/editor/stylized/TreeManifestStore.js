@@ -1,3 +1,6 @@
+import { createIteratorBuilder } from './ResumableIterator.js';
+import { finalizeTreeManifest } from './TreeManifestFinalizer.js';
+import { ForestEditRevisions } from './forest/ForestEditRevisions.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { cellCenterToWorld } from '../world/WorldCoordinates.js';
 import { StylizedBuildQueue } from './StylizedBuildQueue.js';
@@ -39,7 +42,10 @@ function addForestStatsDelta(target, before, after) {
 }
 
 export function createPathClearanceField(terrainView, config) {
-  return new PathClearanceField({
+  const key = JSON.stringify(config.path ?? {});
+  terrainView.placementPaths ??= new Map();
+  if (terrainView.placementPaths.has(key)) return terrainView.placementPaths.get(key);
+  const field = new PathClearanceField({
     tileAt: (cellX, cellZ) => terrainView.tileMap.get(cellX, cellZ),
     tileSize: terrainView.worldStore.tileSize,
     chunkSize: terrainView.worldStore.chunkSize,
@@ -48,12 +54,15 @@ export function createPathClearanceField(terrainView, config) {
     naturalTrail: config.path?.naturalTrail,
     revisionProvider: () => terrainView.worldStore.revision,
   });
+  field.field.preparedProvider = (x, z) => terrainView.preparedPlacement?.field('path', x, z);
+  terrainView.placementPaths.set(key, field);
+  return field;
 }
 
 function createForestField(terrainView, config, regionalCharacterField = null) {
   const habitat = config.trees.habitat ?? {};
   if (habitat.enabled === false) return null;
-  return new ForestHabitatField({
+  const field = new ForestHabitatField({
     seed: resolveForestSeed(terrainView.worldStore),
     tileSize: terrainView.worldStore.tileSize,
     tileAt: (cellX, cellZ) => terrainView.tileMap.get(cellX, cellZ),
@@ -65,6 +74,11 @@ function createForestField(terrainView, config, regionalCharacterField = null) {
     regionalCharacterField,
     config: habitat,
   });
+  field.preparedProvider = (x, z) => terrainView.preparedPlacement?.forestSample(x, z);
+  field.localRevisionProvider = (x, z) => terrainView.preparedPlacement
+    ? terrainView.preparedPlacement.signature(Math.floor(x / terrainView.chunkWorldSize), Math.floor(-z / terrainView.chunkWorldSize))
+    : terrainView.worldStore.revision;
+  return field;
 }
 
 function percentile90(values) {
@@ -84,6 +98,7 @@ export class TreeManifestStore {
     objectMap = null,
     regionalCharacterField = null,
     onBuilt,
+    fitPlacement = null,
   }) {
     this.terrainView = terrainView;
     this.config = config;
@@ -91,6 +106,7 @@ export class TreeManifestStore {
     this.prototypeCount = prototypeCount;
     this.objectMap = objectMap;
     this.onBuilt = onBuilt;
+    this.fitPlacement = fitPlacement;
     this.forestField = createForestField(terrainView, config, regionalCharacterField);
     this.speciesRegistry = new ForestSpeciesRegistry({
       species: config.trees.species,
@@ -103,6 +119,10 @@ export class TreeManifestStore {
     this.pathClearance = createPathClearanceField(terrainView, config);
     this.editStore = new ForestEditStore(terrainView.worldStore.forestEdits);
     this.editDocumentRef = terrainView.worldStore.forestEdits ?? null;
+    this.editRevisions = new ForestEditRevisions(terrainView.chunkWorldSize);
+    this.version = 0;
+    this.clock = 0;
+    this.cacheLimit = config.streaming?.retainedManifestChunks ?? 625;
     this.cache = new Map();
     this.contextCache = new Map();
     this.pendingBuilds = new Map();
@@ -156,10 +176,27 @@ export class TreeManifestStore {
     if (editDocument !== this.editDocumentRef) {
       this.editStore.loadDocument(editDocument);
       this.editDocumentRef = editDocument;
+      this.editRevisions.reset();
       this.contextCache.clear();
     }
+    const cacheKey = `${chunkX}:${chunkZ}`;
+    const previous = this.contextCache.get(cacheKey);
+    const version = rockSource?.manifestStore?.version;
+    const worldRevision = this.revisionTracker.revision;
+    const objectRevision = this.objectMap?.revision ?? 0;
+    const prototypeRevision = rockSource?.prototypeRevision ?? 0;
+    const paletteRevision = rockSource?.biomeAssetPalette?.revision ?? 0;
+    if (version !== undefined && previous?.version === version
+      && previous.worldRevision === worldRevision && previous.objectRevision === objectRevision
+      && previous.prototypeRevision === prototypeRevision && previous.paletteRevision === paletteRevision
+      && previous.editRevision === this.editStore.revision && previous.prototypeCount === this.prototypeCount) {
+      return previous.context;
+    }
     const clearRadius = this.config.trees.clearRadius ?? this.terrainView.worldStore.tileSize;
-    const rocks = Array.isArray(rockSource)
+    const rockSnapshot = rockSource?.blockerSnapshotForChunk?.(chunkX, chunkZ, 1);
+    const rocks = rockSource?.blockerSnapshotForChunk
+      ? rockSnapshot?.placements ?? null
+      : Array.isArray(rockSource)
       ? rockSource
       : rockSource?.getPreparedBlockersForChunk
         ? rockSource.getPreparedBlockersForChunk(chunkX, chunkZ, 1)
@@ -172,16 +209,20 @@ export class TreeManifestStore {
     const key = `${chunkX}:${chunkZ}`;
     const inputSignature = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
-      placementSignature(rocks),
+      rockSnapshot?.signature ?? placementSignature(rocks),
       constructionRevision,
       this.prototypeCount,
       this.forestField?.signature ?? 'uniform',
       this.speciesRegistry.signature,
       this.pathClearance.signature,
-      this.editStore.revision,
+      this.editRevisions.signature(chunkX, chunkZ),
     ].join('|');
     const cached = this.contextCache.get(key);
-    if (cached?.inputSignature === inputSignature) return cached.context;
+    if (cached?.inputSignature === inputSignature) {
+      Object.assign(cached, { version, worldRevision, objectRevision, prototypeRevision,
+        paletteRevision, editRevision: this.editStore.revision, prototypeCount: this.prototypeCount });
+      return cached.context;
+    }
 
     const construction = this.constructionBlockers(constructionBounds);
     const blockers = blockersForChunk({
@@ -196,7 +237,8 @@ export class TreeManifestStore {
       blockers,
       signature: `${inputSignature}|${placementSignature(blockers)}`,
     });
-    this.contextCache.set(key, { inputSignature, context });
+    this.contextCache.set(key, { inputSignature, context, version, worldRevision, objectRevision,
+      prototypeRevision, paletteRevision, editRevision: this.editStore.revision, prototypeCount: this.prototypeCount });
     return context;
   }
 
@@ -205,9 +247,9 @@ export class TreeManifestStore {
     const cached = this.cache.get(key);
     if (!cached) return null;
     const context = this.context(chunkX, chunkZ, rockSource);
-    return context && cached.signature === context.signature
-      ? cached.placements
-      : null;
+    if (!context || cached.signature !== context.signature) return null;
+    cached.used = ++this.clock;
+    return cached.placements;
   }
 
   lodAnchor(chunkX, chunkZ) {
@@ -320,6 +362,9 @@ export class TreeManifestStore {
   }
 
   build(chunkX, chunkZ, rockSource, shouldYield = null) {
+    if (shouldYield?.()) return null;
+    const prepared = this.terrainView.preparedPlacement;
+    if (prepared && !prepared.ensureChunk(chunkX, chunkZ, 2, 0)) return null;
     const context = this.context(chunkX, chunkZ, rockSource);
     if (!context) return null;
     const key = `${chunkX}:${chunkZ}`;
@@ -329,86 +374,32 @@ export class TreeManifestStore {
       this.pendingBuilds.set(key, state);
     }
 
-    const statsBefore = forestStats(this.forestField);
-    const generated = state.builder.step({ shouldYield });
-    addForestStatsDelta(
-      state.accumulatedFieldStats,
-      statsBefore,
-      forestStats(this.forestField),
-    );
-    PerfCounters.inc('treeManifestBuildSlices');
-    if (generated === null) return null;
-
+    if (!state.finalizer) {
+      const before = forestStats(this.forestField);
+      const generated = state.builder.step({ shouldYield });
+      addForestStatsDelta(state.accumulatedFieldStats, before, forestStats(this.forestField));
+      PerfCounters.inc('treeManifestBuildSlices');
+      if (generated === null) return null;
+      state.generatedCount = generated.length;
+      state.finalizer = createIteratorBuilder(() => finalizeTreeManifest(this, state, generated, chunkX, chunkZ));
+    }
+    const before = forestStats(this.forestField);
+    const placements = state.finalizer.step({ shouldYield });
+    addForestStatsDelta(state.accumulatedFieldStats, before, forestStats(this.forestField));
+    if (placements === null) return null;
     this.pendingBuilds.delete(key);
-    const plantedStatsBefore = forestStats(this.forestField);
-    const planted = this.editStore.plantedForChunk(
-      chunkX,
-      chunkZ,
-      this.terrainView.chunkWorldSize,
-    ).map((plant, index) => {
-      const habitat = this.forestField?.sample(plant.x, plant.z) ?? {
-        patchId: null,
-        profileKey: null,
-        structure: null,
-        suitability: 1,
-        patchCoverage: 1,
-        patchEdge: 0,
-        slope: 0,
-        elevation: this.terrainView.getCanonicalHeight(plant.x, plant.z),
-        waterWeight: 1,
-      };
-      const candidate = {
-        stableId: plant.stableId,
-        ownerChunkX: chunkX,
-        ownerChunkZ: chunkZ,
-        index: state.candidateBudget + index,
-        x: plant.x,
-        z: plant.z,
-        height: this.terrainView.getCanonicalHeight(plant.x, plant.z),
-        scale: this.config.trees.minScale,
-        rotationY: 0,
-        prototypeIndex: 0,
-        radius: context.clearRadius,
-        priority: 0,
-        speciesId: plant.speciesId,
-        ageClass: plant.ageClass,
-      };
-      const ecological = this.speciesRegistry.select(candidate, {
-        ...habitat,
-        profileKey: habitat.profileKey ?? 'temperate_deciduous_forest',
-      });
-      return Object.freeze({
-        ...candidate,
-        ...ecological,
-        patchId: habitat.patchId ?? `planted:${plant.stableId}`,
-        forestProfileKey: habitat.profileKey,
-        forestStructure: habitat.structure ?? 'planted',
-        forestSuitability: habitat.suitability,
-        forestPatchCoverage: habitat.patchCoverage,
-        forestPatchEdge: habitat.patchEdge,
-        forestSlope: habitat.slope,
-        forestElevation: habitat.elevation,
-        planted: true,
-      });
-    });
-    addForestStatsDelta(
-      state.accumulatedFieldStats,
-      plantedStatsBefore,
-      forestStats(this.forestField),
-    );
-
-    const placements = Object.freeze([...generated, ...planted]);
     const rejectedSpacing = Math.max(
       0,
       state.counters.evaluated
         - state.counters.rejectedHabitat
         - state.counters.rejectedEdits
-        - generated.length,
+        - state.generatedCount,
     );
     this.cache.set(key, {
       signature: context.signature,
-      placements,
+      placements, used: ++this.clock,
     });
+    this.version++;
     PerfCounters.inc('treeManifestBuilds');
     PerfCounters.set('forestLastChunkCandidatesEvaluated', state.counters.evaluated);
     PerfCounters.set('forestLastChunkCandidatesRejectedHabitat', state.counters.rejectedHabitat);
@@ -419,13 +410,8 @@ export class TreeManifestStore {
     PerfCounters.inc('forestFieldCacheHits', state.accumulatedFieldStats.cacheHits);
     PerfCounters.inc('forestPatchGridBuilds', state.accumulatedFieldStats.patchBuilds);
     PerfCounters.inc('forestPatchGridCacheHits', state.accumulatedFieldStats.patchCacheHits);
-    PerfCounters.set('forestLastChunkPatchCount', new Set(
-      placements.map((placement) => placement.patchId).filter(Boolean),
-    ).size);
-    for (const [speciesId, count] of placements.reduce((counts, placement) => {
-      counts.set(placement.speciesId, (counts.get(placement.speciesId) ?? 0) + 1);
-      return counts;
-    }, new Map())) {
+    PerfCounters.set('forestLastChunkPatchCount', state.patchCount);
+    for (const [speciesId, count] of state.species) {
       PerfCounters.set(`forestSpecies.${speciesId}`, count);
     }
     return placements;
@@ -435,6 +421,7 @@ export class TreeManifestStore {
     this.cache.clear();
     this.contextCache.clear();
     this.pendingBuilds.clear();
+    this.version++;
   }
 
   fell(stableId) {
@@ -442,7 +429,8 @@ export class TreeManifestStore {
     if (changed) {
       this.terrainView.worldStore.forestEdits = this.editStore.toDocument();
       this.editDocumentRef = this.terrainView.worldStore.forestEdits;
-      this.invalidateAll();
+      this.editRevisions.fell(stableId, this.editStore.planted.get(stableId));
+      this.version++;
     }
     return changed;
   }
@@ -451,7 +439,8 @@ export class TreeManifestStore {
     const planted = this.editStore.plant(record);
     this.terrainView.worldStore.forestEdits = this.editStore.toDocument();
     this.editDocumentRef = this.terrainView.worldStore.forestEdits;
-    this.invalidateAll();
+    this.editRevisions.touchPosition(planted.x, planted.z);
+    this.version++;
     return planted;
   }
 
@@ -459,11 +448,13 @@ export class TreeManifestStore {
     this.editStore.setPatchState(patchId, state, progress);
     this.terrainView.worldStore.forestEdits = this.editStore.toDocument();
     this.editDocumentRef = this.terrainView.worldStore.forestEdits;
-    this.invalidateAll();
+    this.editRevisions.patch(patchId, this.forestField);
+    this.version++;
   }
 
   schedule(chunkX, chunkZ, rockSource) {
     const key = `${chunkX}:${chunkZ}`;
+    this.activeKeys.add(key);
     const focus = this.terrainView.focusChunk;
     const priority = focus
       ? Math.max(Math.abs(chunkX - focus.chunkX), Math.abs(chunkZ - focus.chunkZ))
@@ -480,18 +471,29 @@ export class TreeManifestStore {
 
   setActive(keys) {
     this.activeKeys = keys;
-    for (const key of this.cache.keys()) {
-      if (!keys.has(key)) this.cache.delete(key);
-    }
-    for (const key of this.contextCache.keys()) {
-      if (!keys.has(key)) this.contextCache.delete(key);
+    this.queue.retain(job => {
+      if (keys.has(job.key)) return true;
+      this.pendingKeys.delete(job.key);
+      return false;
+    });
+    if (this.cache.size > this.cacheLimit) {
+      const unpinned = [...this.cache].filter(([key]) => !keys.has(key))
+        .sort((a, b) => a[1].used - b[1].used);
+      for (const [key] of unpinned.slice(0, this.cache.size - this.cacheLimit)) {
+        this.cache.delete(key);
+        this.contextCache.delete(key);
+      }
     }
     for (const key of this.pendingBuilds.keys()) {
       if (!keys.has(key)) this.pendingBuilds.delete(key);
     }
+    for (const key of this.contextCache.keys()) {
+      if (!keys.has(key) && !this.cache.has(key)) this.contextCache.delete(key);
+    }
   }
 
   flush() {
+    let completed = 0;
     const result = this.queue.flush((job, shouldYield) => {
       if (!this.activeKeys.has(job.key)) {
         this.pendingKeys.delete(job.key);
@@ -505,12 +507,16 @@ export class TreeManifestStore {
         this.queue.enqueue(job);
         return true;
       }
+      PerfCounters.set('treeManifestReadyLatencyMs', performance.now() - job.requestedAt);
       this.pendingKeys.delete(job.key);
+      completed++;
       this.onBuilt?.();
       return true;
     });
     PerfCounters.set('treeManifestQueueDepth', result.remaining);
-    return result;
+    PerfCounters.set('treeManifestOldestJobMs', this.queue.size
+      ? performance.now() - Math.min(...this.queue.queue.map(job => job.requestedAt)) : 0);
+    return { ...result, completed };
   }
 
   dispose() {

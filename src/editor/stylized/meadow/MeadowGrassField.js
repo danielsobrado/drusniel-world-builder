@@ -144,7 +144,7 @@ export class MeadowGrassField {
    * @param {{ x: number, y: number, z: number } | null} [body] the player's feet in
    *   render space, or null to let the pressed grass stand back up
    */
-  update(timestamp, camera, body = null) {
+  update(timestamp, camera, body = null, shouldYield = null, budgetProvider = null) {
     if (!camera) return;
     const origin = this.terrainView.floatingOrigin.getState();
     this.interactionOrigin.x = origin.x;
@@ -156,7 +156,7 @@ export class MeadowGrassField {
     this.interaction?.update(body);
     this.ground.beginFrame();
     const startedAt = performance.now();
-    const deadline = startedAt + this.settings.buildBudgetMs;
+    const deadline = shouldYield?.() ? startedAt : startedAt + (budgetProvider?.(this.settings.buildBudgetMs) ?? this.settings.buildBudgetMs);
     // Blades first: the ground under the player matters more than the horizon.
     this.blades.update(canonical, origin, deadline);
     this.cards?.update(canonical, origin, deadline);

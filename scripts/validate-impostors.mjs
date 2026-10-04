@@ -1,6 +1,7 @@
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import yaml from 'js-yaml';
+import { gunzipSync } from 'node:zlib';
 import sharp from 'sharp';
 import {
   validateTreeImpostorManifest,
@@ -78,6 +79,15 @@ async function main() {
   }
 
   for (const prototype of manifest.prototypes) {
+    if (prototype.albedoMips) {
+      const data = gunzipSync(await readFile(publicPath(prototype.albedoMips)));
+      if (data.length < 16 || data.readUInt32LE(0) !== 0x50494d46) throw new Error('Invalid foliage mip header.');
+      let w = data.readUInt32LE(4), h = data.readUInt32LE(8), bytes = 16;
+      const count = data.readUInt32LE(12);
+      if (!w || !h || count !== Math.floor(Math.log2(Math.max(w, h))) + 1) throw new Error('Invalid foliage mip dimensions.');
+      for (let i = 0; i < count; i++) { bytes += w * h * 4; w = Math.max(1, w >> 1); h = Math.max(1, h >> 1); }
+      if (bytes !== data.length) throw new Error('Invalid foliage mip payload size.');
+    }
     const expectedWidth = prototype.columns * prototype.tileSize;
     const expectedHeight = prototype.rows * prototype.tileSize;
     const buffers = {};

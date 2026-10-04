@@ -1,0 +1,51 @@
+# Gods' End systems adapted to canonical coordinates and bounded residency.
+frameBudget:
+  enabled: true
+  targetFps: 144
+  reserveMs: 0.5
+  minimumMs: 0.25
+  maximumMs: 1.2
+drawPreparation:
+  enabled: true
+  meshesPerFrame: 2
+residents:
+  enabled: true
+  radiusMeters: 220
+  maxResidents: 24
+  maxPerSettlement: 8
+  wanderRadius: 18
+  refreshSeconds: 0.5
+serpents:
+  enabled: true
+  maxResident: 2
+  regionSize: 256
+  loadRadius: 180
+  unloadRadius: 260
+  spawnChance: 0.12
+  tileIds: [5, 7]
+  sizeScale: 0.06
+  entries: []
+tour:
+  enabled: true
+  durationSeconds: 45
+  radiusMeters: 180
+  clearanceMeters: 18
+  lookAheadMeters: 12
+  preloadMeters: 40
+mobile:
+  enabled: true
+  maxShortSide: 900
+  requireCoarsePointer: true
+  pixelRatioCap: 1
+  initialQuality: low
+  lookSensitivity: 0.006
+recovery:
+  enabled: true
+treeRoots:
+  enabled: true
+  rootHeight: 0.25
+  conformHeight: 3
+  maxSlope: 1.2
+  maxSink: 2
+  bury: 0.05
+  maxOverhang: 1

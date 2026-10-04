@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { loadFoliageMipTexture } from './FoliageMipTexture.js';
 import { normalizeBaseUrl, resolveAssetUrl } from '../../assets/assetUrl.js';
 import {
   TREE_IMPOSTOR_MANIFEST_VERSION,
@@ -10,7 +11,7 @@ function configureTexture(texture, colorSpace) {
   texture.colorSpace = colorSpace;
   texture.magFilter = THREE.LinearFilter;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.generateMipmaps = true;
+  texture.generateMipmaps = !(texture.mipmaps?.length);
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.needsUpdate = true;
@@ -48,7 +49,9 @@ function triggerDownload(filename, content, type = 'application/json') {
 
 async function loadAtlasTextures(loader, resolvePath, prototype) {
   const results = await Promise.allSettled([
-    loader.loadAsync(resolvePath(prototype.albedo)),
+    prototype.albedoMips
+      ? loadFoliageMipTexture(resolvePath(prototype.albedoMips))
+      : loader.loadAsync(resolvePath(prototype.albedo)),
     loader.loadAsync(resolvePath(prototype.normal)),
   ]);
   const failure = results.find((result) => result.status === 'rejected');

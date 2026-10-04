@@ -1,3 +1,4 @@
+import { createIteratorBuilder } from './ResumableIterator.js';
 import { cellCenterToWorld } from '../world/WorldCoordinates.js';
 import { hash32, overlaps, scatterRandom01 } from './scatterMath.js';
 
@@ -38,14 +39,16 @@ function candidateOverlaps(left, right) {
  * one of the eight neighbours — the spacing rule itself is unchanged, only the
  * pairs visited shrink from O(n²) to O(n · localDensity).
  */
-function createSpacingIndex(candidates) {
+function* createSpacingIndex(candidates) {
   let maximumRadius = 0;
   for (const candidate of candidates) {
+    yield;
     if (candidate.radius > maximumRadius) maximumRadius = candidate.radius;
   }
   const cellSize = maximumRadius > 0 ? maximumRadius * 2 : 1;
   const buckets = new Map();
   for (const candidate of candidates) {
+    yield;
     const cellX = Math.floor(candidate.x / cellSize);
     const cellZ = Math.floor(candidate.z / cellSize);
     const key = `${cellX}:${cellZ}`;
@@ -152,11 +155,12 @@ function candidateOwnerKey(candidate) {
   return `${candidate.ownerChunkX}:${candidate.ownerChunkZ}`;
 }
 
-function limitCandidatesByOwner(candidates, acceptedLimit) {
+function* limitCandidatesByOwner(candidates, acceptedLimit) {
   if (!Number.isFinite(acceptedLimit)) return candidates;
 
   const candidatesByOwner = new Map();
   for (const candidate of candidates) {
+    yield;
     const key = candidateOwnerKey(candidate);
     const owned = candidatesByOwner.get(key) ?? [];
     owned.push(candidate);
@@ -165,6 +169,7 @@ function limitCandidatesByOwner(candidates, acceptedLimit) {
 
   const limited = [];
   for (const owned of candidatesByOwner.values()) {
+    yield;
     limited.push(...owned.sort(candidateOrder).slice(0, acceptedLimit));
   }
   return limited;
@@ -248,8 +253,8 @@ function completedBuilder(result) {
 /**
  * Incremental form of buildStableChunkManifest.
  *
- * A step always completes at least one candidate when work remains, then checks
- * shouldYield between candidates. This bounds expensive terrain/habitat/cluster
+ * A step checks the parent deadline before starting and between candidates,
+ * indexing and acceptance units. This bounds expensive terrain/habitat/cluster
  * sampling without changing candidate order, RNG channels, spacing, or output.
  */
 export function createStableChunkManifestBuilder({
@@ -295,6 +300,12 @@ export function createStableChunkManifestBuilder({
   let acceptanceIndex = 0;
   const owned = [];
   let result = null;
+  const preprocessing = createIteratorBuilder(function* () {
+    authoritativeCandidates = yield* limitCandidatesByOwner(candidates, acceptedLimit);
+    spacingIndex = yield* createSpacingIndex(authoritativeCandidates);
+    candidates = null;
+    return true;
+  });
 
   function advanceCandidate() {
     candidateIndex += 1;
@@ -314,6 +325,7 @@ export function createStableChunkManifestBuilder({
     step({ shouldYield = null } = {}) {
       if (result !== null) return result;
       const yieldRequested = typeof shouldYield === 'function' ? shouldYield : null;
+      if (yieldRequested?.()) return null;
       let workUnits = 0;
 
       while (candidateChunkZ <= maximumChunkZ) {
@@ -346,11 +358,7 @@ export function createStableChunkManifestBuilder({
         if (workUnits > 0 && yieldRequested?.()) return null;
       }
 
-      if (authoritativeCandidates === null) {
-        authoritativeCandidates = limitCandidatesByOwner(candidates, acceptedLimit);
-        spacingIndex = createSpacingIndex(authoritativeCandidates);
-        candidates = null;
-      }
+      if (!preprocessing.done && preprocessing.step({ shouldYield }) === null) return null;
 
       while (acceptanceIndex < authoritativeCandidates.length) {
         const candidate = authoritativeCandidates[acceptanceIndex];

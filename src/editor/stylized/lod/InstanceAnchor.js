@@ -41,6 +41,11 @@ export class InstanceAnchor {
 
   /** Places the root holding anchor-relative instances for this origin. */
   place(root, origin) {
-    root.position.set((this.x ?? 0) - origin.x, 0, (this.z ?? 0) - origin.z);
+    const x = (this.x ?? 0) - origin.x, z = (this.z ?? 0) - origin.z;
+    if (root.matrixAutoUpdate || root.position.x !== x || root.position.z !== z) {
+      root.position.set(x, 0, z);
+      root.updateMatrix();
+      root.matrixAutoUpdate = false;
+    }
   }
 }

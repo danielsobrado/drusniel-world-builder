@@ -14,6 +14,7 @@ const RUNTIME_TREE_FIELDS = new Set([
   'clearRadius',
   'groveMix',
   'habitat',
+  'rootFit',
 ]);
 const REQUIRED_NUMERIC_FIELDS = Object.freeze([
   'columns',
@@ -184,6 +185,7 @@ function validatePrototype(prototype, expectedIndex, normalEncoding) {
   }
   assertAssetPath(prototype.albedo, 'albedo', expectedIndex);
   assertAssetPath(prototype.normal, 'normal', expectedIndex);
+  if (prototype.albedoMips) assertAssetPath(prototype.albedoMips, 'albedoMips', expectedIndex);
   return Object.freeze({ ...prototype, gutter, normalEncoding });
 }
 

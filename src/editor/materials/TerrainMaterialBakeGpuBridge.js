@@ -133,9 +133,10 @@ export class TerrainMaterialBakeGpuBridge {
     }
   }
 
-  update() {
+  update({ shouldYield = null, maxUploads = Infinity } = {}) {
     if (this.disposed) return;
     const now = this.now();
+    let uploads = 0;
     let readySlots = 0;
     let staleSlots = 0;
     let transitioningSlots = 0;
@@ -144,6 +145,10 @@ export class TerrainMaterialBakeGpuBridge {
     for (const slot of this.terrainView.slots) {
       activeSlotIndexes.add(slot.slotIndex);
       const state = this.stateFor(slot);
+      const needsUpload = slot.materialBake?.descriptor?.key
+        && state.key !== slot.materialBake.descriptor.key;
+      if (needsUpload && (uploads >= maxUploads || shouldYield?.())) continue;
+      if (needsUpload) uploads++;
       if (this.updateSlot(slot, state, now)) {
         readySlots += 1;
         if (state.stale) staleSlots += 1;

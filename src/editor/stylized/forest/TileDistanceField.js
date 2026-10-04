@@ -24,6 +24,7 @@ export class TileDistanceField {
     label = 'tile',
     revisionProvider = null,
     maxCachedChunks = 1,
+    preparedProvider = null,
   }) {
     if (typeof tileAt !== 'function') {
       throw new Error('TileDistanceField requires a tileAt function.');
@@ -32,6 +33,7 @@ export class TileDistanceField {
       throw new Error('TileDistanceField maxCachedChunks must be a positive integer.');
     }
     this.tileAt = tileAt;
+    this.preparedProvider = preparedProvider;
     this.tileSize = tileSize;
     this.chunkSize = chunkSize;
     this.targetTileId = targetTileId;
@@ -53,6 +55,8 @@ export class TileDistanceField {
   }
 
   chunkField(chunkX, chunkZ) {
+    const prepared = this.preparedProvider?.(chunkX, chunkZ);
+    if (prepared) { this.stats.cacheHits += 1; return prepared; }
     const revision = this.revisionProvider?.() ?? this.cacheRevision;
     if (revision !== this.cacheRevision) {
       this.cache.clear();

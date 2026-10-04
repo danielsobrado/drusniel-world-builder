@@ -89,6 +89,8 @@ function createWaterDistanceField(terrainView, stylizedConfig) {
     targetTileId: stylizedConfig?.water?.tileId ?? 0,
     maxCells: Math.ceil(rangeMeters / tileSize),
     label: 'water',
+    preparedProvider: (x, z) => terrainView.preparedPlacement?.field('water', x, z),
+    maxCachedChunks: 169,
     revisionProvider: () => terrainView.worldStore.revision,
   });
 }
@@ -332,6 +334,10 @@ export class InfiniteTerrainView {
     this.resize(container.clientWidth, container.clientHeight);
 
     this.scene = new THREE.Scene();
+    // The scene itself has no transform. Avoid forcing every static descendant
+    // to recompute its world matrix in each nested render pass.
+    this.scene.updateMatrix();
+    this.scene.matrixAutoUpdate = false;
     this.scene.background = new THREE.Color('#0a100c');
     const skyConfig = stylizedConfig?.sky;
     this.godRays = new StylizedGodRaysPostProcess({
@@ -436,6 +442,7 @@ export class InfiniteTerrainView {
   resize(width, height) {
     const nextWidth = Math.max(1, width);
     const nextHeight = Math.max(1, height);
+    this.viewportHeight = nextHeight;
     this.renderer.setSize(nextWidth, nextHeight, false);
     // Drive post targets from the renderer sizes that setSize just committed so
     // CSS/DPR flooring cannot drift between the drawing buffer and history/RTT.
@@ -701,7 +708,7 @@ export class InfiniteTerrainView {
           slot.retryAt = performance.now() + TERRAIN_REQUEST_RETRY_DELAY_MS;
         }
         // Cancellation is an intentional optimization, not a failure.
-        if (!error?.cancelled) {
+        if (!this.disposed && !error?.cancelled) {
           console.error('Terrain chunk request failed.', error);
         }
       });

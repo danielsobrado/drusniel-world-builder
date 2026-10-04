@@ -59,6 +59,18 @@ export class PerfQaHarness {
       collisionReady: null,
       collisionFailure: null,
     };
+    this.samplingMisses = [];
+    const world = this.terrainView?.worldStore;
+    if (world) {
+      this.previousSamplingMissObserver = world.onProceduralSamplingMiss;
+      this.samplingMissObserver = sample => {
+        this.previousSamplingMissObserver?.(sample);
+        if (this.recording && this.samplingMisses.length < 8) {
+          this.samplingMisses.push({ ...sample, stack: new Error().stack });
+        }
+      };
+      world.onProceduralSamplingMiss = this.samplingMissObserver;
+    }
     this.overlay = null;
     this.phaseFrameCount = 0;
     this.boundDownload = () => this.download();
@@ -277,6 +289,8 @@ export class PerfQaHarness {
     if (next.record && !this.profiler.recording) {
       this.profiler.start();
       this.lastCounters = PerfCounters.snapshot();
+      this.preparationAtMeasureStart = this.terrainView.stylizedSurface?.getPreparationStatus?.() ?? null;
+      this.samplingMisses.length = 0;
       this.live.hitchCount = 0;
       const budget = Number.isFinite(next.durationFrames)
         ? `${next.durationFrames} frames`
@@ -294,6 +308,7 @@ export class PerfQaHarness {
       collision: collision ? Boolean(collision.ready) : true,
       streaming: streaming ? streaming.loading === 0 : true,
       construction: !(PerfCounters.get('constructionQueueDepth') > 0),
+      vegetation: this.terrainView?.stylizedSurface?.getPreparationStatus?.().ready ?? true,
     };
   }
 
@@ -373,13 +388,21 @@ export class PerfQaHarness {
           loadRadius: this.editorConfig.world?.loadRadius,
           floatingOriginThreshold: this.editorConfig.world?.floatingOriginThreshold,
           stylizedSurface: this.editorConfig.stylizedSurface ?? null,
+          exploration: this.editorConfig.exploration ?? null,
         }
         : null,
       collisionConfig: this.editorConfig?.collision ?? null,
       collisionStatus: collision,
       postProcessingCapture: this.buildPostProcessingCaptureSnapshot(),
       settle: this.settleResult,
+      preparation: {
+        start: this.preparationAtMeasureStart,
+        end: this.terrainView.stylizedSurface?.getPreparationStatus?.() ?? null,
+        workerCount: this.terrainView.worldStore.chunkWorker?.workerCount ?? 0,
+        cacheLimit: this.terrainView.preparedPlacement?.limit ?? null,
+      },
     });
+    this.report.samplingMisses = [...this.samplingMisses];
     if (typeof window !== 'undefined') {
       window.__perfQaReport = this.report;
       try {
@@ -459,8 +482,10 @@ export class PerfQaHarness {
     if (typeof window === 'undefined') {
       return;
     }
+    const harness = this;
     window.__perfQa = {
       status: this.status,
+      get recording() { return harness.recording; },
       setKeys: (codes) => this.setKeys(codes),
       config: this.config,
       live: this.live,
@@ -518,6 +543,10 @@ export class PerfQaHarness {
   }
 
   dispose() {
+    const world = this.terrainView?.worldStore;
+    if (world?.onProceduralSamplingMiss === this.samplingMissObserver) {
+      world.onProceduralSamplingMiss = this.previousSamplingMissObserver;
+    }
     this.playerController.setHarnessActive(false);
     this.playerController.setHarnessKeys([]);
     this.profiler.stop();

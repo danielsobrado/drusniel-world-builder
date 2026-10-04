@@ -88,7 +88,10 @@ export function createTreeCollisionSource({ treeView, rockSource = null, config 
     resolvePrototypeIndex: (placement) => treeView.resolvePalettePrototypeIndex(placement),
     snapshotChunk(chunkX, chunkZ) {
       let placements = manifestStore.get(chunkX, chunkZ, rockSource);
-      if (!placements) placements = manifestStore.build(chunkX, chunkZ, rockSource);
+      if (!placements) {
+        manifestStore.schedule(chunkX, chunkZ, rockSource);
+        return COLLISION_BUILD_DEFERRED;
+      }
       if (!placements) return COLLISION_BUILD_DEFERRED;
       const context = manifestStore.context(chunkX, chunkZ, rockSource);
       if (!context) return COLLISION_BUILD_DEFERRED;

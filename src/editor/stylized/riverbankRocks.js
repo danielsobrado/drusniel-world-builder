@@ -1,3 +1,4 @@
+import { completeIterator } from './ResumableIterator.js';
 import { reachFallAt } from '../water/RiverReachProfile.js';
 import { createStonePlacementSink, smoothstep, stoneHash01 as hash01 } from './stonePlacementSink.js';
 
@@ -81,7 +82,7 @@ function clipToBox(segment, minX, minZ, maxX, maxZ) {
  * @param {(scale: number) => number} options.radiusForScale
  * @param {object} [options.config] `rocks.riverbank`
  */
-export function buildRiverbankRocks({
+export function* iterateRiverbankRocks({
   chunkX,
   chunkZ,
   chunkSize,
@@ -111,6 +112,7 @@ export function buildRiverbankRocks({
   );
 
   for (const segment of segments) {
+    yield;
     const margin = segment.radiusCells + BANK_REACH_METERS / tileSize + 1;
     const range = clipToBox(segment, minX - margin, minZ - margin, maxX + margin, maxZ + margin);
     if (!range) continue;
@@ -127,6 +129,7 @@ export function buildRiverbankRocks({
       const cellZ = segment.az + segment.dz * t;
       const onFace = reachFallAt(segment.profile, t) > 0.05;
       for (const side of [-1, 1]) {
+        yield;
         const rolls = [0, 1, 2, 3, 4, 5].map((channel) => hash01(seed, step, side, channel));
         const cluster = smoothstep(0.35, 0.75, clusterNoise(
           step * config.spacingMeters / config.clusterMeters,
@@ -147,6 +150,7 @@ export function buildRiverbankRocks({
     const acrossZ = fall.dirX;
     const half = fall.widthMeters * 0.5;
     for (let index = 0; index < config.lipBoulders; index += 1) {
+      yield;
       const rolls = [0, 1, 2, 3, 4].map((channel) => hash01(fall.seed, 11, index, channel));
       const across = (rolls[0] * 2 - 1) * (half + 2);
       place(
@@ -160,6 +164,7 @@ export function buildRiverbankRocks({
       );
     }
     for (let index = 0; index < config.plungeBlocks; index += 1) {
+      yield;
       const rolls = [0, 1, 2, 3, 4].map((channel) => hash01(fall.seed, 29, index, channel));
       const across = (rolls[0] * 2 - 1) * half * 0.9;
       const along = 3 + rolls[1] * 14;
@@ -175,4 +180,8 @@ export function buildRiverbankRocks({
     }
   }
   return sink.placements;
+}
+
+export function buildRiverbankRocks(options) {
+  return completeIterator(iterateRiverbankRocks(options));
 }

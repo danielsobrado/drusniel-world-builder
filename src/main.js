@@ -89,6 +89,14 @@ import {
 } from './editor/character/heroPreference.js';
 import { PROCEDURAL_HERO_ID } from './config/validateCharacterConfig.js';
 
+import { RendererRecovery } from './editor/lifecycle/RendererRecovery.js';
+import { captureEditorRecoveryState, restoreEditorRecoveryState } from './editor/lifecycle/EditorRecoveryState.js';
+import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
+import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
+import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
+import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
+import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
+import { ExplorationRuntime } from './editor/exploration/ExplorationRuntime.js';
 /** How long the drow holds the casting stance after a spell fires. */
 const SPELL_CAST_POSE_MS = 520;
 import './editor/weather/weather.css';
@@ -145,21 +153,32 @@ const BOOT_STEPS = Object.freeze([
   { id: 'prewarm', label: 'Compiling render pipelines' },
 ]);
 
-async function startEditor() {
+async function startEditor(restoreState = null) {
+  if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: start');
+  const resources = new ResourceScope();
+  try { return await initializeEditor(restoreState, resources); }
+  catch (error) { resources.dispose(); throw error; }
+}
+
+async function initializeEditor(restoreState, resources) {
   let sceneReloadPending = false;
   const loading = new LoadingTracker();
   const loadingOverlay = new LoadingOverlay(document.body);
+  resources.own(loadingOverlay);
   loadingOverlay.attach(loading);
   const boot = loading.begin({ title: 'Starting Drusniel World', steps: BOOT_STEPS });
   boot.start('settings');
   let bootSceneSettings = null;
   let bootSceneSettingsError = null;
   try {
-    bootSceneSettings = await loadBootSceneSettings();
+    bootSceneSettings = restoreState?.document.visualConfig?.sceneSettings
+      ? { document: restoreState.document.visualConfig.sceneSettings, sourceUrl: window.location.href }
+      : await loadBootSceneSettings();
   } catch (error) {
     bootSceneSettingsError = error;
   }
   const config = loadEditorConfig();
+  if (restoreState?.backend) config.renderer.forceWebGL = restoreState.backend === 'webgl';
   const postProcessingStore = createPostProcessingSettings(
     config.stylizedSurface.postProcessing,
   );
@@ -168,6 +187,7 @@ async function startEditor() {
     applyPerfQaDensityProfile(config, perfQaConfig.densityProfile);
   }
   const localAssetObjectUrls = [];
+  resources.defer(() => { localAssetObjectUrls.forEach((url) => URL.revokeObjectURL(url)); });
   if (bootSceneSettings) {
     try {
       await applySceneAssetSettings(config, bootSceneSettings.document, {
@@ -244,6 +264,7 @@ async function startEditor() {
     surfaceMaskConfig,
     contentProvider,
   });
+  resources.own(worldStore);
   const tileMap = new ChunkedTileMap({ worldStore, defaultTileId: defaultTile.id });
   const heightField = new ChunkedHeightField({ worldStore });
   const objectMap = new ObjectMap({ tileMap, objectCatalog: OBJECT_CATALOG });
@@ -261,6 +282,7 @@ async function startEditor() {
     threshold: config.world.floatingOriginThreshold,
     snapSize: config.world.chunkSize * config.map.tileSize,
   });
+  if (restoreState) { floatingOrigin.originX = restoreState.origin.x; floatingOrigin.originZ = restoreState.origin.z; }
 
   const voxelWorldLayout = createVoxelWorldLayout(config.voxelPrototype, config.map);
   const voxelStampStore = new VoxelStampStore({
@@ -278,8 +300,10 @@ async function startEditor() {
     objectCatalog: OBJECT_CATALOG,
     objectMap,
   });
+  resources.own(ui);
   ui.attachBiomeAssetPalette(biomeAssetPalette);
   const frameRateDisplay = new FrameRateDisplay({ root });
+  resources.own(frameRateDisplay);
   const frameRateMeter = new FrameRateMeter();
 
   const terrainView = new InfiniteTerrainView({
@@ -292,7 +316,9 @@ async function startEditor() {
     rendererConfig: config.renderer,
     stylizedConfig: config.stylizedSurface,
   });
+  resources.own(terrainView);
 
+  if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: GPU init');
   boot.start('terrain');
   try {
     await terrainView.initialize();
@@ -313,8 +339,10 @@ async function startEditor() {
       && terrainView.godRays.technique === 'volumetric'
     ),
   });
+  resources.own(postProcessingController);
   terrainView.setPostProcessingController(postProcessingController);
   const temporalUnsubscribers = [];
+  resources.defer(() => { for (const unsubscribe of temporalUnsubscribers) unsubscribe(); });
   temporalUnsubscribers.push(
     floatingOrigin.subscribe(() => {
       postProcessingController.invalidate(
@@ -355,6 +383,7 @@ async function startEditor() {
     objectMap,
     objectCatalog: OBJECT_CATALOG,
   });
+  resources.own(objectView);
   const constructionStore = new ConstructionStore();
   const constructionSpatialIndex = new ConstructionSpatialIndex({
     chunkWorldSize: config.world.chunkSize * config.map.tileSize,
@@ -385,6 +414,7 @@ async function startEditor() {
     else if (change.id) constructionSpatialIndex.remove(change.id);
   });
   const constructionCompiler = new ConstructionCompilerClient();
+  resources.own(constructionCompiler);
   const constructionMaterialStore = new ConstructionMaterialStore();
   const constructionView = new ConstructionView({
     terrainView,
@@ -392,6 +422,7 @@ async function startEditor() {
     compilerClient: constructionCompiler,
     materialStore: constructionMaterialStore,
   });
+  resources.own(constructionView);
   const proceduralAssetManager = new ProceduralAssetManager({
     tileSize: tileMap.tileSize,
     objectMap,
@@ -399,6 +430,7 @@ async function startEditor() {
     ui,
     lodConfig: config.objects?.lod,
   });
+  resources.defer(() => proceduralAssetManager.clearInstalled());
   const stylizedSurface = new StylizedSurfaceView({
     terrainView,
     objectMap,
@@ -410,6 +442,7 @@ async function startEditor() {
     // whiten at the same altitude, and this is the only place that can see both.
     snowBand: config.world?.farTerrain,
   });
+  resources.own(stylizedSurface);
   boot.start('assets');
   const releaseAssetProgress = bindAssetProgress(boot);
   ui.attachPostProcessing(postProcessingStore);
@@ -441,6 +474,7 @@ async function startEditor() {
     config,
     forestFieldProvider: () => stylizedSurface.treeView?.manifestStore?.forestField ?? null,
   });
+  resources.own(macroFarTerrain);
 
   const editorCamera = new EditorCamera({
     canvas: terrainView.renderer.domElement,
@@ -450,6 +484,7 @@ async function startEditor() {
     damping: config.camera.damping,
     farPlane: nearView.farPlane,
   });
+  resources.own(editorCamera);
 
   let playerController;
   let viewModeController;
@@ -457,8 +492,11 @@ async function startEditor() {
   const gameplayOverlayController = new GameplayOverlayController({
     getPlayerController: () => playerController,
   });
+  resources.own(gameplayOverlayController);
   let spellKeyHandler = null;
   const detachSpellHotkeys = attachSpellHotkeys(() => spellKeyHandler);
+  resources.defer(() => { detachSpellHotkeys(); });
+  resources.defer(() => { spellKeyHandler = null; });
   const inventoryStore = new InventoryStore(ITEM_CATALOG, null, {
     capacity: PLAYER_STARTING_LOADOUT.capacity,
   });
@@ -471,7 +509,9 @@ async function startEditor() {
     overlayController: gameplayOverlayController,
     catalog: ITEM_CATALOG,
   });
+  resources.own(inventoryController);
   const inventoryUi = new InventoryUi({ root, controller: inventoryController });
+  resources.own(inventoryUi);
   const worldMapController = new WorldMapController({
     worldStore,
     floatingOrigin,
@@ -481,10 +521,13 @@ async function startEditor() {
     getCampaign: () => controller?.campaign ?? null,
     overlayController: gameplayOverlayController,
   });
+  resources.own(worldMapController);
   const worldMapUi = new WorldMapUi({ root, controller: worldMapController });
+  resources.own(worldMapUi);
 
   let cameraViewKeyHandler = null;
   const detachCameraViewHotkey = attachCaptureHotkey(() => cameraViewKeyHandler);
+  resources.defer(() => { detachCameraViewHotkey(); });
 
   playerController = new PlayerController({
     canvas: terrainView.renderer.domElement,
@@ -492,6 +535,7 @@ async function startEditor() {
     config: config.player,
     farPlane: nearView.farPlane,
   });
+  resources.own(playerController);
   const characterGround = {
     heightAt: (x, z) => playerController.getGroundHeight(x, z),
   };
@@ -511,6 +555,7 @@ async function startEditor() {
     thirdPersonCamera,
     objectView,
   });
+  resources.own(viewModeController);
   cameraViewKeyHandler = (event) => viewModeController.handleCameraViewKey(event);
   let previousViewMode = viewModeController.mode;
   let previousActiveCamera = viewModeController.camera;
@@ -575,6 +620,7 @@ async function startEditor() {
     inventoryStore,
     worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked(),
   });
+  resources.own(controller);
   const postProcessingFocus = new PostProcessingFocusResolver({
     terrainView,
     playerController,
@@ -705,9 +751,11 @@ async function startEditor() {
       true,
     );
   }
+  if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: document');
   boot.start('map');
   try {
-    await sceneSettingsRuntime.applyInitialRuntime();
+    if (restoreState) await controller.loadDocument(restoreState.document, { loadReason: 'renderer-recovery' });
+    else await sceneSettingsRuntime.applyInitialRuntime();
   } catch (error) {
     sceneReloadPending = false;
     ui.failSceneReload(error);
@@ -728,6 +776,7 @@ async function startEditor() {
       ui.showToast(`${record.label} is ready to place from Objects.`);
     },
   });
+  resources.own(proceduralWorkshop);
   ui.attachWorkshop(proceduralWorkshop);
   const sceneLabel = (preset) => {
     const label = SKY_PRESETS[preset]?.label ?? '';
@@ -747,6 +796,7 @@ async function startEditor() {
       getSceneLabel: () => sceneLabel(skyLooks?.preset),
     },
   });
+  resources.own(viewModeUi);
 
   let farViewActive = false;
   const applyViewDistance = (active) => {
@@ -764,12 +814,14 @@ async function startEditor() {
     layout: voxelWorldLayout,
     stampStore: voxelStampStore,
   });
+  resources.own(voxelPrototype);
   const voxelPrototypeUi = new VoxelPrototypeUi({
     root,
     prototype: voxelPrototype,
     controller,
     stampStore: voxelStampStore,
   });
+  resources.own(voxelPrototypeUi);
   const voxelStatus = await voxelPrototype.initialize({ x: 0, z: 0 });
   voxelPrototypeUi.render();
   if (voxelStatus.code === 'failed') {
@@ -792,6 +844,7 @@ async function startEditor() {
     config: config.weather?.windField ?? {},
     defaultDirection: config.stylizedSurface?.wind?.direction ?? [1, 0],
   });
+  resources.own(worldWind);
   let lastWindTimestamp = null;
   const waterVisual = config.stylizedSurface.water;
   configureSea(waterVisual.enabled !== false && resolveWaterQualityFeatures(waterVisual).flow
@@ -817,6 +870,7 @@ async function startEditor() {
     enabled: waterVisual.enabled !== false && waterVisual.foam.enabled
       && resolveWaterQualityFeatures(waterVisual).foam,
   });
+  resources.own(waterfallMist);
   // Rain on the ground and wind in the open, for the ambient beds; the sea
   // reads the same rain.
   const weatherAudioLevels = () => {
@@ -858,6 +912,7 @@ async function startEditor() {
     getTileSize: () => config.map.tileSize,
     getOrigin: () => terrainView.floatingOrigin.getState(),
   });
+  resources.own(fallingLeaves);
   const snowCountry = new SnowCountryWeight({
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),
     getTileSize: () => config.map.tileSize,
@@ -876,10 +931,12 @@ async function startEditor() {
     defaultWindDirection: config.stylizedSurface?.wind?.direction ?? [1, 0],
     snowLine: config.stylizedSurface.materialBake.classification.snowLine,
   });
+  resources.own(worldAmbience);
   const snowPowder = new SnowPowderKicks({
     scene: terrainView.scene,
     config: config.stylizedSurface.snowPowder,
   });
+  resources.own(snowPowder);
   const weatherOvercast = () => {
     if (!weatherEnabled) return 0;
     const intensity = Math.max(0, Math.min(1, weatherSettings.weatherIntensity ?? 0));
@@ -900,6 +957,7 @@ async function startEditor() {
       && Boolean(playerController.getStatus().headSubmerged),
     getFallSites: fallSites,
   });
+  resources.own(worldSoundscape);
   const weatherController = weatherEnabled
     ? createWeatherController({
       scene: terrainView.scene,
@@ -912,6 +970,7 @@ async function startEditor() {
       getSunDirection: () => stylizedSurface.skyView?.sunDirectionValue ?? undefined,
     })
     : null;
+  resources.own(weatherController);
   if (weatherController && weatherSettings.weatherMode !== 'off') {
     postProcessingController.notifyReactive(
       POST_PROCESSING_REACTIVE_EVENTS.WEATHER_STARTED,
@@ -953,6 +1012,7 @@ async function startEditor() {
       }),
     })
     : null;
+  resources.own(characterView);
   // Footfalls sound once the hero's stride lands them; the variant alternates
   // by foot and cycles so a run of steps never repeats one sound exactly.
   let footstepCount = 0;
@@ -1030,6 +1090,8 @@ async function startEditor() {
       },
     })
     : null;
+  resources.own(heroSelectUi);
+  resources.defer(() => { detachFootsteps?.(); });
   characterView?.setVisible(false);
   const characterInFirstPerson = config.character?.visibleInFirstPerson !== false;
   const weatherUi = weatherEnabled
@@ -1061,6 +1123,7 @@ async function startEditor() {
       },
     })
     : null;
+  resources.own(weatherUi);
 
   const spellsEnabled = config.spells?.enabled !== false;
   const spellRuntime = spellsEnabled
@@ -1084,6 +1147,7 @@ async function startEditor() {
       registerKeys: false,
     })
     : null;
+  resources.own(spellRuntime);
   spellKeyHandler = spellRuntime
     ? (event) => spellRuntime.handleKeyDown(event)
     : null;
@@ -1160,6 +1224,7 @@ async function startEditor() {
   }
 
   releaseAssetProgress();
+  if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: prewarm');
   boot.start('prewarm', 'Compiling shaders — this is the long one');
   let finishWaterPrewarm = null;
   try {
@@ -1175,11 +1240,27 @@ async function startEditor() {
     await characterView?.prewarm(terrainView.renderer, playerController.camera);
     await postProcessingController.precompile(playerController.camera);
     terrainView.prewarmPostProcessing(playerController.camera);
+    withPreparationFrame(terrainView.renderer, null, () => withSceneWarmup(terrainView.scene,
+      () => terrainView.prewarmPostProcessing(playerController.camera)));
+    postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET);
   } catch (error) {
     console.warn('Render pipeline pre-warm failed; pipelines will compile on demand.', error);
   } finally {
     finishWaterPrewarm?.();
   }
+  const deferredWork = new DeferredWorkBudget(config.exploration.frameBudget);
+  const drawPreparation = new StreamedDrawPreparation({ scene: terrainView.scene, renderer: terrainView.renderer,
+    settings: config.exploration.drawPreparation, render: camera => terrainView.prewarmPostProcessing(camera),
+    invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET) });
+  resources.own(drawPreparation);
+  drawPreparation.markInitialScene(); terrainView.drawPreparation = drawPreparation;
+  const exploration = new ExplorationRuntime({ config, terrainView, viewModeController, container: ui.viewport,
+    sceneLoader: stylizedSurface.sceneAssets?.loader,
+    onInstalled: () => drawPreparation.discover(),
+    invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.ACTIVE_CAMERA_REPLACED) });
+  resources.own(exploration);
+  if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { exploration, deferredWork, drawPreparation });
+  if (restoreState) await restoreEditorRecoveryState(restoreState, { controller, editorCamera, playerController, viewModeController, proceduralWorkshop });
   boot.finish();
 
   const perfQa = PerfQaHarness.fromLocation({
@@ -1191,6 +1272,7 @@ async function startEditor() {
     voxelPrototype,
     editorConfig: config,
   });
+  resources.own(perfQa);
   if (perfQa) {
     perfQa.mount(root);
     perfQa.publishApi();
@@ -1207,6 +1289,7 @@ async function startEditor() {
     viewModeController.resize(width, height);
   });
   resizeObserver.observe(ui.viewport);
+  resources.defer(() => { resizeObserver.disconnect(); });
 
   let active = true;
   let nextFrameRateDisplayAt = 0;
@@ -1220,6 +1303,7 @@ async function startEditor() {
     nextPredictiveRefreshAt = 0;
   };
   document.addEventListener('visibilitychange', onVisibilityChange);
+  resources.defer(() => { document.removeEventListener('visibilitychange', onVisibilityChange); });
 
   let lastWeatherTimestamp = null;
   let lastCharacterTimestamp = null;
@@ -1228,8 +1312,13 @@ async function startEditor() {
     if (!active) return;
 
     const frameTimestamp = Number.isFinite(timestamp) ? timestamp : performance.now();
-    stylizedSurface.beginFrame(frameTimestamp);
+    deferredWork.beginFrame();
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
+    drawPreparation.revealPending();
+    exploration.beforeMovement(frameTimestamp);
+    deferredWork.attachSurface(stylizedSurface);
+    deferredWork.run(() => stylizedSurface.beginFrame(frameTimestamp));
+    if (profiling) perfQa.mark('placementPreparation');
     const averageFps = frameRateMeter.record(frameTimestamp);
     if (frameTimestamp >= nextFrameRateDisplayAt) {
       frameRateDisplay.update(averageFps);
@@ -1244,7 +1333,7 @@ async function startEditor() {
 
     terrainView.flushUploadQueue();
     constructionView.update(frameTimestamp);
-    constructionView.updateLod(viewModeController.camera, terrainView.renderer.domElement.clientHeight);
+    constructionView.updateLod(viewModeController.camera, terrainView.viewportHeight);
     PerfCounters.set('constructionModulesResident', constructionView.stats.modulesResident);
     PerfCounters.set('constructionModulesRebuilt', constructionView.stats.modulesRebuilt);
     PerfCounters.set('constructionModulesSkippedByHash', constructionView.stats.modulesSkippedByHash);
@@ -1273,6 +1362,7 @@ async function startEditor() {
       snowPowder.shiftWorld(rebase.shiftX, rebase.shiftZ);
       worldAmbience.shiftWorld(rebase.shiftX, rebase.shiftZ);
       stylizedSurface.shiftOrigin(rebase.shiftX, rebase.shiftZ);
+      exploration.shiftWorld(rebase.shiftX, rebase.shiftZ);
       renderFocus = viewModeController.getFocusWorld();
     }
     if (profiling) perfQa.mark('floatingOrigin');
@@ -1326,7 +1416,7 @@ async function startEditor() {
       nextPredictiveRefreshAt = frameTimestamp + TERRAIN_PREFETCH_REFRESH_MS;
     }
     terrainView.updateStreaming(
-      canonicalFocus,
+      exploration.tour.preloadFocus() ?? canonicalFocus,
       frameTimestamp,
       forcePredictiveRefresh,
     ).catch((error) => {
@@ -1347,7 +1437,10 @@ async function startEditor() {
         z: bodyStatus.position.z,
       }
       : null;
-    stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
+    deferredWork.attachSurface(stylizedSurface);
+    stylizedSurface.workBudgetMs = deferredWork.available(stylizedSurface.frameBudgetMs);
+    deferredWork.run(() => stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody));
+    exploration.update(frameTimestamp, canonicalFocus, playerBody);
     if (profiling) perfQa.mark('stylized');
 
     if (weatherController) {
@@ -1455,7 +1548,11 @@ async function startEditor() {
         : { x: 0.3, z: 0.1 },
       viewModeController.mode === PLAYER_MODE_WALK,
     );
+    deferredWork.run(() => drawPreparation.flush(viewModeController.camera, () => deferredWork.available(6) <= 0));
+    drawPreparation.hidePending();
     terrainView.render(viewModeController.camera);
+    stylizedSurface.updateRendererCounters();
+    deferredWork.endFrame();
     assetStartupTelemetry.markFirstFrame();
     if (profiling) {
       perfQa.mark('render');
@@ -1478,50 +1575,24 @@ async function startEditor() {
     }
   });
 
-  window.addEventListener('pagehide', () => {
-    active = false;
-    for (const unsubscribe of temporalUnsubscribers) unsubscribe();
-    document.removeEventListener('visibilitychange', onVisibilityChange);
-    resizeObserver.disconnect();
-    perfQa?.dispose();
-    voxelPrototypeUi.dispose();
-    voxelPrototype.dispose();
-    stylizedSurface.dispose();
-    weatherController?.dispose();
-    weatherUi?.dispose();
-    spellKeyHandler = null;
-    detachSpellHotkeys();
-    detachCameraViewHotkey();
-    detachFootsteps?.();
-    worldWind.dispose();
-    waterfallMist.dispose();
-    worldSoundscape.dispose();
-    fallingLeaves.dispose();
-    snowPowder.dispose();
-    worldAmbience.dispose();
-    heroSelectUi?.dispose();
-    characterView?.dispose();
-    spellRuntime?.dispose();
-    worldMapUi.dispose();
-    worldMapController.dispose();
-    inventoryUi.dispose();
-    inventoryController.dispose();
-    gameplayOverlayController.dispose();
-    macroFarTerrain.dispose();
-    proceduralWorkshop.dispose();
-    viewModeUi.dispose();
-    viewModeController.dispose();
-    controller.dispose();
-    editorCamera.dispose();
-    objectView.dispose();
-    constructionView.dispose();
-    constructionCompiler.dispose();
-    frameRateDisplay.dispose();
-    postProcessingController.dispose();
-    terrainView.dispose();
-    worldStore.dispose();
-    localAssetObjectUrls.forEach((url) => URL.revokeObjectURL(url));
-  }, { once: true });
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return; disposed = true; active = false;
+    terrainView.renderer.onDeviceLost = () => {};
+    terrainView.setAnimationLoop(null);
+    window.removeEventListener('pagehide', onPageHide); resources.dispose();
+    if (window.__editor?.terrainView === terrainView) delete window.__editor;
+  };
+  const onPageHide = () => { recovery.dispose(); dispose(); };
+  window.addEventListener('pagehide', onPageHide, { once: true });
+  const runtime = { dispose, capture: () => captureEditorRecoveryState({ controller, editorCamera, playerController,
+    viewModeController, proceduralWorkshop, floatingOrigin, exploration }) };
+  if (config.exploration.recovery.enabled) terrainView.renderer.onDeviceLost = info => {
+    console.warn('Renderer device lost; restoring editor state.', info);
+    void recovery.recover('webgpu', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
+  };
+  if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { recovery, captureRecoveryState: runtime.capture });
+  return runtime;
 }
 
 function showStartupError(error) {
@@ -1546,4 +1617,21 @@ function showStartupError(error) {
   root.replaceChildren(container);
 }
 
-startEditor().catch(showStartupError);
+let activeRuntime = null;
+const recovery = new RendererRecovery({
+  capture: () => activeRuntime.capture(), release: () => activeRuntime?.dispose(),
+  restart: async (_backend, state) => { activeRuntime = await startEditor({ ...state, backend: _backend }); },
+  onFailure: error => {
+    showStartupError(error);
+    const documentValue = recovery.lastState?.document;
+    if (!documentValue) return;
+    const button = document.createElement('button'); button.textContent = 'Download recovered world';
+    button.addEventListener('click', () => {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(documentValue)], { type: 'application/json' }));
+      const link = document.createElement('a'); link.href = url; link.download = 'drusniel-recovered-world.json'; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    document.querySelector('#app main')?.append(button);
+  },
+});
+startEditor().then(runtime => { activeRuntime = runtime; }).catch(showStartupError);

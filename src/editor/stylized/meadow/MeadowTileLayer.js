@@ -2,6 +2,7 @@ import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { createCompaction } from './meadowGrassCompaction.js';
 import { MeadowGrassBatches } from './MeadowGrassBatches.js';
 import { tileDistanceSquared } from './meadowGrassLayout.js';
+import { compactionPrefix } from './MeadowCompactionPrefix.js';
 
 /**
  * A camera-centred grid of chunk-aligned tiles, each drawing one band's template
@@ -20,7 +21,7 @@ import { tileDistanceSquared } from './meadowGrassLayout.js';
  *    showed up as 40–230 ms collector pauses while running across the meadow.
  */
 /** Stems compacted between deadline checks. */
-const SLICE_STEMS = 1024;
+const SLICE_STEMS = 256;
 /** Recycled outputs kept per band; past this they are left to the collector. */
 const POOL_LIMIT = 24;
 
@@ -43,6 +44,9 @@ export class MeadowTileLayer {
     this.selectBand = selectBand;
     this.reach = reach;
     this.ground = ground;
+    const definitions = Object.values(templates).map(template => template.userData?.meadow);
+    this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
+      && definition.cards === definitions[0].cards);
     this.batches = new MeadowGrassBatches({ scene, templates, material, name, renderOrder });
     this.tiles = new Map();
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
@@ -87,7 +91,7 @@ export class MeadowTileLayer {
     }
     for (const [key, tile] of this.tiles) {
       if (keep.has(key)) continue;
-      this.release(tile.builtBand, tile.output);
+      this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
       this.release(tile.job?.band, tile.job?.compaction.output);
       this.tiles.delete(key);
     }
@@ -120,6 +124,15 @@ export class MeadowTileLayer {
     let compacted = 0;
     for (const tile of stale) {
       if (performance.now() >= deadline) break;
+      const capacity = this.templates[tile.band].instanceCount;
+      if (this.stablePrefixes && tile.prepared?.revision === tile.revision
+        && tile.prepared.capacity >= capacity) {
+        this.release(tile.job?.band, tile.job?.compaction.output);
+        tile.job = null;
+        this.publish(tile, compactionPrefix(tile.prepared.output, capacity), tile.band, tile.revision);
+        PerfCounters.inc('meadowCompactionReuses');
+        continue;
+      }
       if (!tile.job) {
         const ground = this.ground.forTile(tile.centerX, tile.centerZ, this.tileSize / 2);
         if (!ground) continue;
@@ -132,6 +145,7 @@ export class MeadowTileLayer {
             centerZ: tile.centerZ,
             sample: ground.sample,
             output: this.pools.get(tile.band).pop() ?? null,
+            previous: this.stablePrefixes && tile.prepared?.revision === ground.revision ? tile.prepared : null,
           }),
         };
       }
@@ -142,16 +156,22 @@ export class MeadowTileLayer {
       compacted += Math.round((compaction.progress - before) * total);
       building += 1;
       if (!compaction.done) continue;
-      this.release(tile.builtBand, tile.output);
-      tile.output = compaction.output;
-      tile.builtBand = tile.job.band;
-      tile.builtRevision = tile.job.revision;
-      this.buildSerial += 1;
-      tile.buildId = this.buildSerial;
+      this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
+      if (this.stablePrefixes) tile.prepared = {
+        output: compaction.output, capacity: total, band: tile.job.band, revision: tile.job.revision,
+      };
+      this.publish(tile, compaction.output, tile.job.band, tile.job.revision);
       tile.job = null;
     }
     this.stats.building = building;
     PerfCounters.inc('meadowStemsCompacted', compacted);
+  }
+
+  publish(tile, output, band, revision) {
+    tile.output = output;
+    tile.builtBand = band;
+    tile.builtRevision = revision;
+    tile.buildId = ++this.buildSerial;
   }
 
   commit() {
@@ -170,11 +190,14 @@ export class MeadowTileLayer {
   }
 
   getState() {
-    return { ...this.stats, bands: { ...this.stats.bands }, resident: this.tiles.size };
+    let building = 0;
+    for (const tile of this.tiles.values()) if (tile.job || MeadowTileLayer.isStale(tile)) building++;
+    return { ...this.stats, building, bands: { ...this.stats.bands }, resident: this.tiles.size };
   }
 
   dispose() {
     this.batches.dispose();
     this.tiles.clear();
+    this.pools.clear();
   }
 }

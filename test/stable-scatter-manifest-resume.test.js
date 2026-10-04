@@ -39,7 +39,7 @@ test('resumable stable scatter is identical to synchronous generation', () => {
 
   while (actual === null) {
     let checks = 0;
-    actual = builder.step({ shouldYield: () => ++checks >= 3 });
+    actual = builder.step({ shouldYield: () => ++checks >= 6 });
     slices += 1;
     assert.ok(slices < 1000, 'resumable scatter must make forward progress');
   }

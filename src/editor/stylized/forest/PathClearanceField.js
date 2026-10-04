@@ -28,6 +28,7 @@ export class PathClearanceField {
       targetTileId: roadTileId,
       maxCells: this.clearCells,
       label: 'path',
+      maxCachedChunks: 169,
       revisionProvider,
     });
     this.roadTileId = roadTileId;

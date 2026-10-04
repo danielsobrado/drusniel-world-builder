@@ -101,8 +101,14 @@ export class LoadingOverlay {
     this.lastState = null;
   }
 
+  dispose() {
+    this.#cancelLeave(); this.unsubscribe?.(); this.element.remove();
+  }
+
   attach(tracker) {
-    return tracker.subscribe((state) => this.render(state));
+    this.unsubscribe?.();
+    this.unsubscribe = tracker.subscribe((state) => this.render(state));
+    return this.unsubscribe;
   }
 
   /**

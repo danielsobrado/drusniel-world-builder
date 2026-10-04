@@ -1,11 +1,13 @@
+import { cachedLodPlan } from './lod/CachedLodPlan.js';
+import { ITERATOR_PENDING } from './ResumableIterator.js';
+import { stepViewRebuild } from './StagedViewRebuild.js';
+import { RockManifestStore } from './RockManifestStore.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
 import { extractAuthoredMeshPrototypes } from './StylizedPrototypeBake.js';
 import { instanceCapacity } from './scatterMath.js';
 import {
-  buildStableChunkManifest,
-  createStableChunkManifestBuilder,
   placementSignature,
 } from './StableScatterManifest.js';
 import {
@@ -30,10 +32,10 @@ const ROCK_SCRATCH = {
   scale: new THREE.Vector3(),
 };
 import { createPathClearanceField } from './TreeManifestStore.js';
-import { buildRiverbankRocks, DEFAULT_RIVERBANK_ROCKS } from './riverbankRocks.js';
+import { iterateRiverbankRocks, DEFAULT_RIVERBANK_ROCKS } from './riverbankRocks.js';
 import { RiverRockSource } from './RiverRockSource.js';
-import { buildCoastStones, DEFAULT_COAST_STONES } from './coastStones.js';
-import { buildSeabedRocks, DEFAULT_SEABED_ROCKS } from './seabedRocks.js';
+import { iterateCoastStones, DEFAULT_COAST_STONES } from './coastStones.js';
+import { iterateSeabedRocks, DEFAULT_SEABED_ROCKS } from './seabedRocks.js';
 import { applyRockWeathering, resolveRockWeathering } from './rockWeathering.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
@@ -130,18 +132,14 @@ export class StylizedRockView {
     this.placementsByChunk = new Map();
     this.clusterField = null;
     this.signature = '';
-    this.manifestCache = new Map();
-    this.pendingManifestBuilds = new Map();
-    this.manifestBuildsThisFrame = 0;
     this.manifestBuildBudgetMs = config.streaming?.rockManifestBuildBudgetMs
       ?? config.streaming?.heavyBuildBudgetMs
       ?? 3;
-    this.manifestFrameStartedAt = 0;
+    this.manifestStore = new RockManifestStore(this);
+    this.manifestCache = this.manifestStore.cache;
+    this.pendingManifestBuilds = this.manifestStore.pending;
     this.manifestFrameTimestamp = null;
     this.prototypeBiomeRulesSignature = '[]';
-    // Chunks other scatter layers asked about since the last prune. Bounded by
-    // their request windows, which are a few hundred chunks of ~14 placements.
-    this.blockerRequests = new Set();
     this.chunkLodStates = new Map();
     this.lastUpdateKey = null;
     this.pendingRebuild = null;
@@ -211,6 +209,9 @@ export class StylizedRockView {
       slopeSampleDistance: this.config.trees.habitat?.slopeSampleDistance ?? 4,
       config: this.config.rocks,
     });
+    this.clusterField.localRevisionProvider = (x, z) => this.revisionTracker.signature(
+      Math.floor(x / this.terrainView.chunkWorldSize), Math.floor(-z / this.terrainView.chunkWorldSize), 1);
+    this.clusterField.preparedProvider = (x, z) => this.terrainView.preparedPlacement?.rockNode(x, z, this.clusterField.sampleSpacing);
     this.pathClearance ??= createPathClearanceField(this.terrainView, this.config);
 
     const settings = lodSettings(this.config);
@@ -255,10 +256,7 @@ export class StylizedRockView {
   beginFrame(timestamp) {
     if (this.manifestFrameTimestamp === timestamp) return;
     this.manifestFrameTimestamp = timestamp;
-    this.manifestBuildsThisFrame = 0;
-    // Start the clock with the first cold build, rather than charging terrain
-    // commits or other frame work against the rock preparation allowance.
-    this.manifestFrameStartedAt = 0;
+    this.manifestStore.flush();
   }
 
   update(timestamp, camera) {
@@ -270,10 +268,11 @@ export class StylizedRockView {
     const settings = lodSettings(this.config);
     const renderRadius = settings.enabled ? settings.proxyRadius : this.config.rocks.residentRadius;
     const placementRadius = renderRadius + 1;
-    const viewportHeight = this.terrainView.renderer.domElement.clientHeight
-      || this.terrainView.renderer.domElement.height
-      || 1;
-    const plan = settings.enabled
+    const viewportHeight = this.terrainView.viewportHeight
+      ?? this.terrainView.renderer.domElement.height ?? 1;
+    const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${viewportHeight}:${
+      camera.fov}:${camera.zoom}:${this.prototypeRevision}`;
+    const plan = cachedLodPlan(this, planKey, timestamp, settings.transitionMs / 8, () => settings.enabled
       ? buildChunkLodPlan({
         focus,
         radius: renderRadius + 1,
@@ -302,8 +301,11 @@ export class StylizedRockView {
       : {
         entries: this.createNearOnlyPlan(focus, renderRadius),
         signature: `near:${focus.chunkX}:${focus.chunkZ}:${renderRadius}`,
-      };
-    pruneStateMap(this.chunkLodStates, plan.entries);
+      });
+    if (this.previousPlan !== plan) {
+      pruneStateMap(this.chunkLodStates, plan.entries);
+      this.previousPlan = plan;
+    }
     const revisionSignature = this.revisionTracker.windowSignature(focus, placementRadius, 1);
     const updateKey = `${focus.chunkX}:${focus.chunkZ}:${revisionSignature}:${
       plan.signature
@@ -318,26 +320,9 @@ export class StylizedRockView {
     };
   }
 
-  applyPendingRebuild() {
-    const job = this.pendingRebuild;
-    if (!job) return false;
-    for (let chunkZ = job.focus.chunkZ - job.placementRadius;
-      chunkZ <= job.focus.chunkZ + job.placementRadius;
-      chunkZ += 1) {
-      for (let chunkX = job.focus.chunkX - job.placementRadius;
-        chunkX <= job.focus.chunkX + job.placementRadius;
-        chunkX += 1) {
-        if (this.cachedManifestForChunk(chunkX, chunkZ) !== null) continue;
-        // One cold manifest is resumed under the frame budget instead of
-        // running its terrain/cluster candidate loop as one monolithic task.
-        this.prepareManifestForChunk(chunkX, chunkZ);
-        return true;
-      }
-    }
-    this.pendingRebuild = null;
-    this.lastUpdateKey = job.updateKey;
-    this.rebuild(job.focus, job.placementRadius, job.plan);
-    return true;
+  applyPendingRebuild(shouldYield = null) {
+    return stepViewRebuild(this, this.pendingRebuild, shouldYield,
+      job => this.iterateRebuild(job.focus, job.placementRadius, job.plan));
   }
 
   createNearOnlyPlan(focus, radius) {
@@ -395,15 +380,7 @@ export class StylizedRockView {
   }
 
   cachedManifestForChunk(chunkX, chunkZ) {
-    const key = this.manifestKey(chunkX, chunkZ);
-    const cacheKey = `${chunkX}:${chunkZ}`;
-    const cached = this.manifestCache.get(cacheKey);
-    if (cached?.key === key) {
-      this.pendingManifestBuilds.delete(cacheKey);
-      this.placementsByChunk.set(cacheKey, cached.placements);
-      return cached.placements;
-    }
-    return null;
+    return this.manifestStore.get(chunkX, chunkZ);
   }
 
   manifestOptions(chunkX, chunkZ) {
@@ -435,26 +412,13 @@ export class StylizedRockView {
     };
   }
 
-  storeManifest(cacheKey, key, scattered) {
-    const [chunkX, chunkZ] = cacheKey.split(':').map(Number);
-    const features = [
-      ...this.riverbankRocksForChunk(chunkX, chunkZ),
-      ...this.coastStonesForChunk(chunkX, chunkZ),
-      ...this.seabedRocksForChunk(chunkX, chunkZ),
-    ];
-    const placements = features.length ? [...scattered, ...features] : scattered;
-    this.manifestCache.set(cacheKey, { key, placements });
-    this.placementsByChunk.set(cacheKey, placements);
-    return placements;
-  }
-
   /** Beach pebbles on ground just above the sea in a chunk. */
   coastStonesForChunk(chunkX, chunkZ) {
     const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
-    if (!this.coastStoneConfig.enabled || !Number.isFinite(seaLevel)) return [];
+    if (!this.coastStoneConfig.enabled || !Number.isFinite(seaLevel)) return (function* () { return []; })();
     const tileSize = this.terrainView.worldStore.tileSize;
     const options = this.manifestOptions(chunkX, chunkZ);
-    return buildCoastStones({
+    return iterateCoastStones({
       chunkX,
       chunkZ,
       chunkSize: this.terrainView.worldStore.chunkSize,
@@ -491,10 +455,10 @@ export class StylizedRockView {
   /** Boulders sitting on the seabed in a chunk's shallows. */
   seabedRocksForChunk(chunkX, chunkZ) {
     const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
-    if (!this.seabedRockConfig.enabled || !Number.isFinite(seaLevel)) return [];
+    if (!this.seabedRockConfig.enabled || !Number.isFinite(seaLevel)) return (function* () { return []; })();
     const tileSize = this.terrainView.worldStore.tileSize;
     const options = this.manifestOptions(chunkX, chunkZ);
-    return buildSeabedRocks({
+    return iterateSeabedRocks({
       chunkX,
       chunkZ,
       chunkSize: this.terrainView.worldStore.chunkSize,
@@ -519,9 +483,9 @@ export class StylizedRockView {
     const rivers = this.riverbankConfig.enabled
       ? this.riverRocks.forChunk(chunkX, chunkZ, chunkSize, tileSize)
       : null;
-    if (!rivers) return [];
+    if (!rivers) return (function* () { return []; })();
     const options = this.manifestOptions(chunkX, chunkZ);
-    return buildRiverbankRocks({
+    return iterateRiverbankRocks({
       chunkX,
       chunkZ,
       chunkSize,
@@ -541,67 +505,14 @@ export class StylizedRockView {
   }
 
   manifestForChunk(chunkX, chunkZ) {
-    const cached = this.cachedManifestForChunk(chunkX, chunkZ);
-    if (cached !== null) return cached;
-    const key = this.manifestKey(chunkX, chunkZ);
-    const cacheKey = `${chunkX}:${chunkZ}`;
-    const startedAt = performance.now();
-    const pending = this.pendingManifestBuilds.get(cacheKey);
-    const placements = pending?.key === key
-      ? pending.builder.step()
-      : buildStableChunkManifest(this.manifestOptions(chunkX, chunkZ));
-    this.pendingManifestBuilds.delete(cacheKey);
-    const elapsed = performance.now() - startedAt;
-    PerfCounters.inc('rockManifestBuilds');
-    PerfCounters.inc('rockManifestBuildMs', elapsed);
-    PerfCounters.set('rockManifestBuild', elapsed);
-    return this.storeManifest(cacheKey, key, placements);
+    return this.manifestStore.request(chunkX, chunkZ);
   }
 
   prepareManifestForChunk(chunkX, chunkZ) {
-    const cached = this.cachedManifestForChunk(chunkX, chunkZ);
-    if (cached !== null) return cached;
-    const elapsed = performance.now() - this.manifestFrameStartedAt;
-    if (
-      this.manifestBuildsThisFrame >= 1
-      || (this.manifestFrameStartedAt > 0 && elapsed >= this.manifestBuildBudgetMs)
-    ) {
-      return null;
-    }
-    if (this.manifestFrameStartedAt === 0) this.manifestFrameStartedAt = performance.now();
-    this.manifestBuildsThisFrame += 1;
-
-    const key = this.manifestKey(chunkX, chunkZ);
-    const cacheKey = `${chunkX}:${chunkZ}`;
-    let pending = this.pendingManifestBuilds.get(cacheKey);
-    if (pending?.key !== key) {
-      pending = {
-        key,
-        cacheKey,
-        builder: createStableChunkManifestBuilder(this.manifestOptions(chunkX, chunkZ)),
-      };
-      this.pendingManifestBuilds.set(cacheKey, pending);
-    }
-
-    const startedAt = performance.now();
-    const placements = pending.builder.step({
-      shouldYield: () => (
-        this.manifestFrameStartedAt > 0
-        && performance.now() - this.manifestFrameStartedAt >= this.manifestBuildBudgetMs
-      ),
-    });
-    const sliceElapsed = performance.now() - startedAt;
-    PerfCounters.inc('rockManifestBuildSlices');
-    PerfCounters.inc('rockManifestBuildMs', sliceElapsed);
-    PerfCounters.set('rockManifestBuild', sliceElapsed);
-    if (placements === null) return null;
-
-    this.pendingManifestBuilds.delete(cacheKey);
-    PerfCounters.inc('rockManifestBuilds');
-    return this.storeManifest(cacheKey, key, placements);
+    return this.manifestStore.request(chunkX, chunkZ);
   }
 
-  rebuild(focus, placementRadius, plan) {
+  *iterateRebuild(focus, placementRadius, plan) {
     PerfCounters.inc('rockRebuilds');
     // Sink each boulder by a fraction of its height so it reads as embedded in
     // the ground rather than resting on it.
@@ -626,13 +537,16 @@ export class StylizedRockView {
         chunkX += 1) {
         const key = `${chunkX}:${chunkZ}`;
         activeChunks.add(key);
-        const manifest = this.manifestForChunk(chunkX, chunkZ);
+        let manifest;
+        while ((manifest = this.manifestForChunk(chunkX, chunkZ)) === null) yield ITERATOR_PENDING;
+        yield;
         placements.push(...manifest);
         const entry = planByChunk.get(key);
         if (!entry) continue;
         for (const representation of entry.representations) {
           if (representation.band === 'culled' || representation.fade <= 0) continue;
           for (const placement of manifest) {
+            yield;
             const instance = {
               matrix: new THREE.Matrix4().compose(
                 ROCK_SCRATCH.position.set(
@@ -655,6 +569,7 @@ export class StylizedRockView {
       }
     }
 
+    yield;
     const anchorOrigin = this.terrainView.floatingOrigin.getState();
     this.instanceAnchor.follow(anchorOrigin);
     const nearCount = writeInstances(this.meshes, near, this.instanceAnchor);
@@ -665,70 +580,21 @@ export class StylizedRockView {
     PerfCounters.set('rockNearInstances', nearCount);
     PerfCounters.set('rockProxyInstances', proxyCount);
     PerfCounters.set('rockPlacementInstances', placements.length);
-
-    for (const key of this.manifestCache.keys()) {
-      if (!activeChunks.has(key) && !this.blockerRequests.has(key)) {
-        this.manifestCache.delete(key);
-        this.placementsByChunk.delete(key);
-      }
-    }
-    for (const key of this.pendingManifestBuilds.keys()) {
-      if (!activeChunks.has(key) && !this.blockerRequests.has(key)) {
-        this.pendingManifestBuilds.delete(key);
-      }
-    }
-    // Consumers re-request every frame, so a fresh window is rebuilt before the
-    // next prune; anything that stops being asked about is dropped then.
-    this.blockerRequests.clear();
+    return true;
   }
 
-  getPlacements() {
-    return this.placements;
+  getPlacements() { return this.placements; }
+
+  blockerSnapshotForChunk(x, z, halo = 1) {
+    return this.manifestStore.blockerSnapshot(x, z, halo);
   }
 
-  /**
-   * Boulder blockers for a chunk and its halo, consumed by tree and bush
-   * placement.
-   *
-   * Trees ask about chunks far outside the boulder render window (their cluster
-   * band reaches much further than `proxyRadius`), so every requested chunk is
-   * recorded here. Without that, `rebuild` would prune those manifests as
-   * "inactive" and they would be rebuilt from scratch on the very next frame —
-   * a continuous rebuild of the same far chunks.
-   */
-  getBlockersForChunk(chunkX, chunkZ, halo = 1) {
-    const placements = [];
-    for (let offsetZ = -halo; offsetZ <= halo; offsetZ += 1) {
-      for (let offsetX = -halo; offsetX <= halo; offsetX += 1) {
-        const neighbourX = chunkX + offsetX;
-        const neighbourZ = chunkZ + offsetZ;
-        this.blockerRequests.add(`${neighbourX}:${neighbourZ}`);
-        placements.push(...this.manifestForChunk(neighbourX, neighbourZ));
-      }
-    }
-    return placements;
+  getBlockersForChunk(x, z, halo = 1) {
+    return this.blockerSnapshotForChunk(x, z, halo)?.placements ?? null;
   }
 
-  /**
-   * Returns a complete blocker halo only after its cold manifests have been
-   * prepared. A caller may retry next frame; each retry advances one bounded
-   * slice of the first cold rock manifest.
-   */
-  getPreparedBlockersForChunk(chunkX, chunkZ, halo = 1) {
-    const placements = [];
-    for (let offsetZ = -halo; offsetZ <= halo; offsetZ += 1) {
-      for (let offsetX = -halo; offsetX <= halo; offsetX += 1) {
-        const neighbourX = chunkX + offsetX;
-        const neighbourZ = chunkZ + offsetZ;
-        const key = `${neighbourX}:${neighbourZ}`;
-        this.blockerRequests.add(key);
-        const manifest = this.cachedManifestForChunk(neighbourX, neighbourZ)
-          ?? this.prepareManifestForChunk(neighbourX, neighbourZ);
-        if (!manifest) return null;
-        placements.push(...manifest);
-      }
-    }
-    return placements;
+  getPreparedBlockersForChunk(x, z, halo = 1) {
+    return this.getBlockersForChunk(x, z, halo);
   }
 
   getSignature() {
@@ -750,6 +616,7 @@ export class StylizedRockView {
     disposePrototypeParts(this.proxyPrototypes);
     this.prototypeIndicesByAsset.clear();
     this.placements.length = 0;
+    this.manifestStore.dispose();
     this.manifestCache.clear();
     this.pendingManifestBuilds.clear();
     this.placementsByChunk.clear();

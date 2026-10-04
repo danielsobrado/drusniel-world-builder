@@ -1,4 +1,5 @@
 import { withSettlementData } from './settlements/SettlementData.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { hasForestEdits, normalizeForestEditDocument } from '../forest/ForestEditDocument.js';
 import { ProceduralWorldGenerator } from './ProceduralWorldGenerator.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
@@ -123,10 +124,10 @@ export class InfiniteWorldStore {
     // Generated-tile memo, one small typed-array block per chunk. Bounded by
     // block count rather than by cell count so it costs no per-cell bookkeeping.
     this.generatedTileBlocks = new Map();
-    this.generatedTileBlockLimit = 512;
+    this.generatedTileBlockLimit = 1024;
     // Heights are 8 bytes per vertex, so this cap is lower than the tile one.
     this.generatedHeightBlocks = new Map();
-    this.generatedHeightBlockLimit = 256;
+    this.generatedHeightBlockLimit = 1024;
     // Last block touched, to keep string-key lookups off the hot path.
     this.lastTileBlock = null;
     this.lastTileBlockX = 0;
@@ -200,7 +201,9 @@ export class InfiniteWorldStore {
     const block = this.generatedTileBlock(blockX, blockZ);
     const index = (cellZ - blockZ * size) * size + (cellX - blockX * size);
     if (block.filled[index]) return block.tiles[index];
-    const tileId = this.generator.sampleTile(cellX, cellZ);
+    const prepared = this.preparedPlacementSamples?.get(blockX, blockZ);
+    const tileId = prepared ? prepared.tiles[index] : this.generator.sampleTile(cellX, cellZ);
+    if (!prepared) PerfCounters.inc('mainProceduralTileMisses');
     block.tiles[index] = tileId;
     block.filled[index] = 1;
     return tileId;
@@ -261,6 +264,20 @@ export class InfiniteWorldStore {
     return block;
   }
 
+  /** Install precise worker samples into the existing generated-value memo. */
+  installPreparedSamples(page) {
+    const { chunkX, chunkZ, canonicalHeights, tiles } = page;
+    const size = this.chunkSize;
+    const block = this.generatedHeightBlock(chunkX, chunkZ);
+    const tileBlock = this.generatedTileBlock(chunkX, chunkZ);
+    for (let z = 0; z < size; z++) {
+      block.heights.set(canonicalHeights.subarray(z * (size + 1), z * (size + 1) + size), z * size);
+    }
+    block.filled.fill(1);
+    tileBlock.tiles.set(tiles);
+    tileBlock.filled.fill(1);
+  }
+
   generatedHeight(vertexX, vertexZ) {
     const size = this.chunkSize;
     const blockX = Math.floor(vertexX / size);
@@ -268,7 +285,14 @@ export class InfiniteWorldStore {
     const block = this.generatedHeightBlock(blockX, blockZ);
     const index = (vertexZ - blockZ * size) * size + (vertexX - blockX * size);
     if (block.filled[index]) return block.heights[index];
-    const height = this.generator.sampleHeight(vertexX, vertexZ);
+    const prepared = this.preparedPlacementSamples?.get(blockX, blockZ);
+    const height = prepared ? prepared.canonicalHeights[
+      (vertexZ - blockZ * size) * (size + 1) + vertexX - blockX * size]
+      : this.generator.sampleHeight(vertexX, vertexZ);
+    if (!prepared) {
+      PerfCounters.inc('mainProceduralHeightMisses');
+      this.onProceduralSamplingMiss?.({ kind: 'height', x: vertexX, z: vertexZ });
+    }
     block.heights[index] = height;
     block.filled[index] = 1;
     return height;

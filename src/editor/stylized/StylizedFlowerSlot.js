@@ -85,9 +85,12 @@ export class StylizedFlowerSlot {
     };
   }
 
-  applyPendingRebuild() {
+  applyPendingRebuild(shouldYield = null) {
     if (!this.pendingRebuild) return false;
+    if (shouldYield?.()) return false;
     const job = this.pendingRebuild;
+    const prepared = this.terrainView?.preparedPlacement;
+    if (prepared && !prepared.ensureChunk(job.descriptor.chunkX, job.descriptor.chunkZ, 1)) return false;
     this.pendingRebuild = null;
     this.rebuild(job.page, job.descriptor, job.sampleLimit);
     this.readyKey = job.descriptor.key;

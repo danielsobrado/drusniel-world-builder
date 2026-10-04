@@ -20,6 +20,7 @@ export class StylizedChunkRevisionTracker {
     this.revisions = new Map();
     this.materialRevisionMaps = createMaterialRevisionMaps();
     this.zeroSignatures = new Map();
+    this.windowSignatures = new Map();
     this.unsubscribe = worldStore.subscribe((change) => this.onWorldChange(change));
   }
 
@@ -146,19 +147,26 @@ export class StylizedChunkRevisionTracker {
       }
       return cached;
     }
+    const key = `${focus.chunkX}:${focus.chunkZ}:${radius}:${halo}`;
+    const cached = this.windowSignatures.get(key);
+    if (cached?.revision === this.revision) return cached.value;
     const values = [`e${this.epoch}`];
     for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
       for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
         values.push(this.signature(chunkX, chunkZ, halo));
       }
     }
-    return values.join('|');
+    const value = values.join('|');
+    this.windowSignatures.set(key, { revision: this.revision, value });
+    if (this.windowSignatures.size > 64) this.windowSignatures.delete(this.windowSignatures.keys().next().value);
+    return value;
   }
 
   dispose() {
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.revisions.clear();
+    this.windowSignatures.clear();
     for (const revisions of Object.values(this.materialRevisionMaps)) revisions.clear();
   }
 }

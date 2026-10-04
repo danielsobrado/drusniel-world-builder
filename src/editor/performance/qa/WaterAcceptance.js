@@ -147,6 +147,7 @@ export class WaterAcceptanceTracker {
     this.maxDepth = 0;
     this.maxUnderwaterBlend = 0;
     this.maxProjectedCausticCpuMs = 0;
+    this.maxProjectedCausticPipelineCpuMs = 0;
     this.projectedCausticFrames = 0;
     this.originSnapCount = 0;
     this.originSnapViolations = 0;
@@ -192,6 +193,8 @@ export class WaterAcceptanceTracker {
       this.maxProjectedCausticCpuMs,
       finite(counters.waterProjectedCausticCpuMs),
     );
+    this.maxProjectedCausticPipelineCpuMs = Math.max(this.maxProjectedCausticPipelineCpuMs,
+      finite(counters.waterProjectedCausticPipelineCpuMs));
 
     if (this.lastState !== null && this.lastState !== state) {
       this.transitions.push(Object.freeze({ from: this.lastState, to: state, phaseId }));
@@ -245,6 +248,8 @@ export class WaterAcceptanceTracker {
         maxUnderwaterBlend: this.maxUnderwaterBlend,
         projectedCausticFrames: this.projectedCausticFrames,
         maximumProjectedCausticCpuMs: this.maxProjectedCausticCpuMs,
+        maximumProjectedCausticPipelineCpuMs: this.maxProjectedCausticPipelineCpuMs,
+        projectedCausticCpuScope: 'post-effect excluding scene pass',
         originSnapCount: this.originSnapCount,
         originSnapViolations: this.originSnapViolations,
       }),

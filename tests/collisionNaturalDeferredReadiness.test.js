@@ -66,8 +66,8 @@ function createHarness() {
     pathClearance: { signature: 'paths:1' },
     forestField: { signature: 'forest:1' },
     speciesRegistry: { signature: 'species:1' },
-    get: () => null,
-    build: () => (rockHaloReady ? placements : null),
+    get: () => (rockHaloReady ? placements : null),
+    schedule: () => {},
     context: () => (
       rockHaloReady ? { signature: `context:${sourceRevision}` } : null
     ),

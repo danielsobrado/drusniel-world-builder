@@ -102,6 +102,7 @@ export class UnderwaterCausticsPostProcess {
     this.cameraPosition = uniform(new THREE.Vector3());
     this.scenePass = null;
     this.pipeline = null;
+    this.sceneCpuMs = 0;
   }
 
   update({ blend = 0, surfaceHeight } = {}) {
@@ -113,6 +114,12 @@ export class UnderwaterCausticsPostProcess {
     if (!this.scenePass) {
       this.scenePass = pass(this.scene, camera, { samples: this.renderer.samples });
       this.scenePass.name = 'Underwater Caustics Scene Pass';
+      const renderScene = this.scenePass.updateBefore.bind(this.scenePass);
+      this.scenePass.updateBefore = frame => {
+        const started = performance.now();
+        try { return renderScene(frame); }
+        finally { this.sceneCpuMs += performance.now() - started; }
+      };
     }
     this.scenePass.camera = camera;
     if (!this.pipeline) {
@@ -148,12 +155,16 @@ export class UnderwaterCausticsPostProcess {
     this.ensurePipeline(camera);
     this.updateCamera(camera);
     const startedAt = performance.now();
+    this.sceneCpuMs = 0;
     this.pipeline.render();
+    const pipelineCpuMs = performance.now() - startedAt;
     PerfCounters.inc(PERF_COUNTER_WATER_PROJECTED_CAUSTIC_FRAMES);
     PerfCounters.set(
       PERF_COUNTER_WATER_PROJECTED_CAUSTIC_CPU_MS,
-      performance.now() - startedAt,
+      Math.max(0, pipelineCpuMs - this.sceneCpuMs),
     );
+    PerfCounters.set('waterProjectedCausticSceneCpuMs', this.sceneCpuMs);
+    PerfCounters.set('waterProjectedCausticPipelineCpuMs', pipelineCpuMs);
     return true;
   }
 

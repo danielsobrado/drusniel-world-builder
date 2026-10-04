@@ -1,3 +1,7 @@
+import { SharedWaterMaterials } from './SharedWaterMaterials.js';
+import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
+import { PreparedPlacementStore } from '../world/PreparedPlacementStore.js';
+import { placementPreparationRadius } from '../world/PlacementPreparationWindow.js';
 import {
   PerfCounters,
   resetWaterChunkGauges,
@@ -69,6 +73,11 @@ export class StylizedSurfaceView {
     this.revisionTracker = this.enabled
       ? new StylizedChunkRevisionTracker({ worldStore: terrainView.worldStore })
       : null;
+    this.preparedPlacement = this.enabled && terrainView.worldStore.chunkWorker
+      ? new PreparedPlacementStore({ worldStore: terrainView.worldStore, revisionTracker: this.revisionTracker, config })
+      : null;
+    terrainView.preparedPlacement = this.preparedPlacement;
+    terrainView.stylizedSurface = this;
     this.regionalCharacterField = this.enabled
       ? new RegionalCharacterField({
         seed: resolveForestSeed(terrainView.worldStore),
@@ -268,12 +277,14 @@ export class StylizedSurfaceView {
         tuning: this.grassTuning,
       }))
       : [];
+    this.sharedWaterMaterials = new SharedWaterMaterials();
     this.waterSlots = this.enabled && !this.impostorBakeMode && config.water?.enabled
       ? terrainView.slots.map((terrainSlot) => new StylizedWaterSlot({
         terrainSlot,
         terrainView,
         config,
         sunDirection,
+        sharedMaterials: this.sharedWaterMaterials,
       }))
       : [];
     for (const slot of this.slots) slot.mesh.receiveShadow = true;
@@ -284,7 +295,7 @@ export class StylizedSurfaceView {
     this.frameBudgetMs = config.streaming?.stylizedFrameBudgetMs ?? 6;
     this.frameStartedAt = 0;
     const shouldYield = () => (
-      this.frameStartedAt > 0 && performance.now() - this.frameStartedAt > this.frameBudgetMs
+      this.frameStartedAt > 0 && performance.now() - this.frameStartedAt > (this.workBudgetMs ?? this.frameBudgetMs)
     );
     this.grassBuildQueue = new StylizedBuildQueue({
       buildsPerFrame: config.streaming?.grassBuildsPerFrame ?? 1,
@@ -468,7 +479,7 @@ export class StylizedSurfaceView {
     PerfCounters.set('rendererWebGPUBackend', renderer.backend?.isWebGPUBackend ? 1 : 0);
     PerfCounters.set('rendererWebGLBackend', renderer.backend?.isWebGLBackend ? 1 : 0);
     for (const [name, value] of [
-      ['rendererDrawCalls', info.render?.calls],
+      ['rendererDrawCalls', info.render?.drawCalls ?? info.render?.calls],
       ['rendererTriangles', info.render?.triangles],
       ['rendererLines', info.render?.lines],
       ['rendererPoints', info.render?.points],
@@ -498,6 +509,7 @@ export class StylizedSurfaceView {
         terrainSlot.surfaceMaskTexture,
         terrainSlot.heightTexture,
         terrainSlot.forestFloorTexture,
+        ...Object.values(getTerrainMaterialBakeGpuState(terrainSlot.mesh)?.textures ?? {}),
       ]) {
         if (texture) textures.add(texture);
       }
@@ -576,7 +588,12 @@ export class StylizedSurfaceView {
     // single frame. Its material/texture bindings are then resident before the
     // chunk reaches the near-water band, spreading N cold initializations over
     // N ordinary frames instead of one shoreline hitch.
-    candidate.mesh.material = candidate.ensureRefractiveMaterial();
+    const material = candidate.ensureRefractiveMaterial();
+    if (this.terrainView.drawPreparation) {
+      this.terrainView.drawPreparation.requestMaterial(candidate.mesh, material);
+    } else {
+      candidate.mesh.material = material;
+    }
     candidate.refractionPrewarmed = true;
     PerfCounters.inc('waterRefractionSlotsPrewarmed');
     return true;
@@ -590,8 +607,29 @@ export class StylizedSurfaceView {
     this.meadowGrass?.shiftOrigin(dx, dz);
   }
 
+  getPreparationStatus() {
+    const queues = [this.grassBuildQueue, this.flowerBuildQueue, this.treeBuildQueue,
+      this.rockBuildQueue, this.bushBuildQueue, this.detailBuildQueue];
+    const queueDepth = queues.reduce((sum, queue) => sum + (queue?.size ?? 0), 0)
+      + (this.treeView?.manifestStore?.queue.size ?? 0)
+      + (this.rockView?.manifestStore?.queue.size ?? 0);
+    const fields = this.preparedPlacement?.pending.size ?? 0;
+    const meadow = this.meadowGrass?.getState().building ?? 0;
+    const draws = this.terrainView.drawPreparation?.pending.size ?? 0;
+    const variants = PerfCounters.get('stylizedVariantsPendingLoad');
+    return { ready: queueDepth + fields + meadow + draws + variants === 0,
+      queueDepth, fields, meadow, draws, variants };
+  }
+
   /** Share one preparation allowance between player collision and rendering. */
   beginFrame(timestamp) {
+    const focus = this.terrainView?.focusChunk;
+    if (focus && this.preparedPlacement) {
+      const radius = placementPreparationRadius(this.config, this.terrainView.loadRadius ?? 0);
+      this.preparedPlacement.setWindow(focus.chunkX, focus.chunkZ, radius);
+      this.rockView?.manifestStore.setWindow(focus.chunkX, focus.chunkZ, radius - 2);
+    }
+    this.preparedPlacement?.flush(this.shouldYieldWork);
     this.rockView?.beginFrame(timestamp);
   }
 
@@ -609,7 +647,6 @@ export class StylizedSurfaceView {
     // so reports describe current water residency instead of accumulating one
     // increment per slot on every frame.
     resetWaterChunkGauges();
-    this.updateRendererCounters();
     // Ahead of the layer updates: a variant installed here is picked up by this
     // frame's rebuild scheduling rather than waiting for the next one.
     this.variantResidency?.update(this.frameStartedAt);
@@ -630,9 +667,9 @@ export class StylizedSurfaceView {
     if (this.rockView?.pendingRebuild) {
       this.rockBuildQueue.enqueue(this.rockView.pendingRebuild);
     }
-    this.rockBuildQueue.flush((job) => {
+    this.rockBuildQueue.flush((job, shouldYield) => {
       void job;
-      return this.rockView?.applyPendingRebuild() ?? false;
+      return this.rockView?.applyPendingRebuild(shouldYield) ?? false;
     });
 
     const rockPlacements = this.rockView?.getPlacements() ?? [];
@@ -640,9 +677,9 @@ export class StylizedSurfaceView {
     if (this.treeView?.pendingLodRebuild) {
       this.treeBuildQueue.enqueue(this.treeView.pendingLodRebuild);
     }
-    this.treeBuildQueue.flush((job) => {
+    this.treeBuildQueue.flush((job, shouldYield) => {
       void job;
-      return this.treeView?.applyPendingRebuild() ?? false;
+      return this.treeView?.applyPendingRebuild(shouldYield) ?? false;
     });
     // Bush blockers cover the complete local rock ring. Keep the previous bush
     // publication until that ring is ready so bush rebuilds cannot force a cold
@@ -652,9 +689,9 @@ export class StylizedSurfaceView {
       this.bushBuildQueue.enqueue(this.bushView.pendingRebuild);
     }
     if (!this.rockView?.pendingRebuild) {
-      this.bushBuildQueue.flush((job) => {
+      this.bushBuildQueue.flush((job, shouldYield) => {
         void job;
-        return this.bushView?.applyPendingRebuild() ?? false;
+        return this.bushView?.applyPendingRebuild(shouldYield) ?? false;
       });
     }
     for (const view of this.detailViews) view.update();
@@ -663,17 +700,17 @@ export class StylizedSurfaceView {
     for (const view of this.detailViews) {
       if (view.pendingRebuild) this.detailBuildQueue.enqueue(view.pendingRebuild);
     }
-    this.detailBuildQueue.flush((job) => {
+    this.detailBuildQueue.flush((job, shouldYield) => {
       for (const view of this.detailViews) {
         if (job.key.startsWith(`${view.layerName}:`)) {
-          return view.applyPendingRebuild() ?? false;
+          return view.applyPendingRebuild(shouldYield) ?? false;
         }
       }
       return false;
     });
     this.updateForestGroundTextures();
     this.flowerView?.update(timestamp);
-    this.meadowGrass?.update(timestamp, camera, body);
+    this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     for (const slot of this.waterSlots) slot.update(timestamp);
     this.prewarmOneDistantWaterSlot();
 
@@ -753,18 +790,19 @@ export class StylizedSurfaceView {
     }
 
     this.grassBuildQueue.flush((job) => job.slot.applyPendingRebuild());
-    this.flowerBuildQueue.flush((job) => job.slot.applyPendingRebuild());
+    this.flowerBuildQueue.flush((job, shouldYield) => job.slot.applyPendingRebuild(shouldYield));
   }
 
   updateForestGroundTextures() {
     const field = this.treeView?.manifestStore?.forestField;
-    if (!field) return;
+    if (!field || this.shouldYieldWork?.()) return;
     for (const terrainSlot of this.terrainView.slots) {
       const descriptor = terrainSlot.descriptor;
       if (!descriptor) continue;
       const contactKey = this.contactShadeKey(descriptor);
       const key = `${descriptor.key}:${terrainSlot.pageRevision}:${field.signature}:${contactKey}`;
       if (terrainSlot.forestFloorKey === key) continue;
+      if (this.preparedPlacement && !this.preparedPlacement.ensureChunk(descriptor.chunkX, descriptor.chunkZ, 1, 0)) continue;
       const samples = FOREST_FLOOR_CANOPY_SAMPLES;
       const half = this.chunkWorldSize * 0.5;
       // R is the canopy, G the contact shade: writing the canopy clears the
@@ -852,16 +890,14 @@ export class StylizedSurfaceView {
       descriptor.chunkZ,
       this.rockView,
     ) ?? [];
-    const rocks = this.rockView?.getPlacements() ?? [];
-    let rocksHere = 0;
-    for (const placement of rocks) {
-      if (placement.ownerChunkX === descriptor.chunkX
-        && placement.ownerChunkZ === descriptor.chunkZ) rocksHere += 1;
-    }
+    const rocksHere = this.rockView?.placementsByChunk?.get(`${descriptor.chunkX}:${descriptor.chunkZ}`)?.length ?? 0;
     return `${manifest.length}:${rocksHere}`;
   }
 
   dispose() {
+    this.preparedPlacement?.dispose();
+    this.terrainView.preparedPlacement = null;
+    this.terrainView.stylizedSurface = null;
     this.skyView?.dispose();
     this.variantResidency?.dispose();
     this.variantResidency = null;
@@ -897,6 +933,7 @@ export class StylizedSurfaceView {
     this.bushBuildQueue.clear();
     this.detailBuildQueue.clear();
     for (const slot of this.waterSlots) slot.dispose();
+    this.sharedWaterMaterials.dispose();
     this.waterSlots.length = 0;
     for (const slot of this.slots) slot.dispose();
     this.meadowGrass?.dispose();

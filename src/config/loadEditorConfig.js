@@ -3,6 +3,9 @@ import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?raw';
 import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?raw';
 import collisionConfigSource from '../../config/collision.yaml?raw';
 import configSource from '../../editor.config.yaml?raw';
+import explorationConfigSource from '../../config/exploration.yaml?raw';
+import { applyMobileStartupProfile } from '../editor/exploration/MobileProfile.js';
+import { resolveExplorationConfig } from '../editor/exploration/ExplorationConfig.js';
 import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.yaml?raw';
 import waterConfigSource from '../../config/water-domain.yaml?raw';
 import waterVisualConfigSource from '../../config/water-visual.yaml?raw';
@@ -39,6 +42,8 @@ function applyRuntimeOverrides(config) {
 
 export function loadEditorConfig() {
   const config = yaml.load(configSource);
+  config.exploration = resolveExplorationConfig(yaml.load(explorationConfigSource));
+  config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;
   config.import.azgaarGuidance = yaml.load(azgaarGuidanceConfigSource);
   config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(
     yaml.load(terrainMaterialBakeConfigSource),
@@ -51,6 +56,7 @@ export function loadEditorConfig() {
   applyWaterVisualConfig(config, yaml.load(waterVisualConfigSource));
   config.collision = createCollisionConfig(yaml.load(collisionConfigSource), runtimeSearch());
   applyRuntimeOverrides(config);
+  applyMobileStartupProfile(config);
   validateEditorConfig(config);
   validateFarTerrainConfig(config.world?.farTerrain);
   validateImportConfig(config);

@@ -7,6 +7,7 @@ export class StylizedBuildQueue {
     budgetMs = 3,
     now = () => performance.now(),
     shouldYield = null,
+    budgetProvider = null,
   } = {}) {
     this.buildsPerFrame = buildsPerFrame;
     this.budgetMs = budgetMs;
@@ -15,6 +16,7 @@ export class StylizedBuildQueue {
     // trees and bushes all flush inside one update, so without a shared view of
     // the frame three separately "cheap" queues can still stack into one hitch.
     this.shouldYield = typeof shouldYield === 'function' ? shouldYield : null;
+    this.budgetProvider = budgetProvider;
     this.queue = [];
     this.entriesByKey = new Map();
     this.sortDirty = false;
@@ -30,6 +32,14 @@ export class StylizedBuildQueue {
     this.entriesByKey.clear();
     this.sortDirty = false;
     this.nextSequence = 0;
+  }
+
+  retain(keep) {
+    this.queue = this.queue.filter(job => {
+      if (keep(job)) return true;
+      this.entriesByKey.delete(job.key);
+      return false;
+    });
   }
 
   enqueue(job) {
@@ -50,6 +60,7 @@ export class StylizedBuildQueue {
       ...job,
       queuePriority: priority,
       queueSequence: this.nextSequence,
+      requestedAt: job.requestedAt ?? this.now(),
     };
     this.nextSequence += 1;
     this.queue.push(queued);
@@ -68,10 +79,12 @@ export class StylizedBuildQueue {
   }
 
   flush(run) {
+    if (this.queue.length === 0) return { built: 0, remaining: 0 };
     const startedAt = this.now();
+    const budgetMs = this.budgetProvider?.(this.budgetMs) ?? this.budgetMs;
     let built = 0;
     const shouldYield = () => (
-      this.now() - startedAt >= this.budgetMs
+      this.now() - startedAt >= budgetMs
       || Boolean(this.shouldYield?.())
     );
     if (shouldYield()) return { built: 0, remaining: this.queue.length };

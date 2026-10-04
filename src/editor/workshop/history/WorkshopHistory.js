@@ -95,6 +95,16 @@ export class WorkshopHistory {
     this.#lastDocument = this.#bus.document;
   }
 
+  captureRuntimeState() {
+    return { past: [...this.#past], future: [...this.#future] };
+  }
+
+  restoreRuntimeState(state) {
+    this.#past = [...state.past].slice(-this.maxEntries);
+    this.#future = [...state.future].slice(-this.maxEntries);
+    this.#lastDocument = this.#bus.document;
+  }
+
   dispose() {
     this.#unsubscribe?.();
     this.#unsubscribe = null;

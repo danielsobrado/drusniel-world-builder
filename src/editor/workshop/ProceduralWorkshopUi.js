@@ -416,6 +416,48 @@ export class ProceduralWorkshopUi {
     };
   }
 
+  captureRuntimeState() {
+    return {
+      open: !this.overlay.hidden,
+      fields: [...this.form.elements].filter(element => element.name).map(element => ({
+        name: element.name, value: element.value, checked: element.checked,
+      })),
+      input: this.readInput(),
+      componentSession: this.componentController?.semanticEditSession?.captureRuntimeState(),
+      materialHistory: this.materialController ? {
+        history: [...this.materialController.history], future: [...this.materialController.future],
+      } : null,
+    };
+  }
+
+  async restoreRuntimeState(state) {
+    const applyFields = () => {
+      for (const field of state.fields) {
+        const element = this.form.elements.namedItem(field.name);
+        if (!element) continue;
+        element.value = field.value;
+        if (element.type === 'checkbox') element.checked = field.checked;
+      }
+    };
+    applyFields(); this.variantFields.onArchetypeChanged(); applyFields(); this.syncRangeOutputs();
+    this.surfaceEditor.commit(state.input.recipe.surfaceTextures);
+    if (!state.componentSession && !state.open) return;
+    await this.ensureRenderer();
+    this.materialController.setDocument(state.input.recipe);
+    // Restore semantic authoring before deriving the new renderer's preview.
+    this.componentController.transforms = structuredClone(state.input.recipe.componentTransforms);
+    this.componentController.openingAttachments = structuredClone(state.input.recipe.openingAttachments);
+    this.componentController.openingAssemblies = structuredClone(state.input.recipe.openingAssemblies);
+    await this.generatePreview({ frame: true, allowHidden: true });
+    if (state.componentSession) this.componentController.semanticEditSession.restoreRuntimeState(state.componentSession);
+    this.componentController.updateHistoryButtons();
+    if (state.materialHistory) Object.assign(this.materialController, state.materialHistory);
+    if (state.open) {
+      this.root.classList.add('is-workshop-open'); this.overlay.hidden = false;
+      if (!this.animationFrame) this.renderLoop();
+    }
+  }
+
   async open() {
     if (this.disposed) return;
     const revision = ++this.openRevision;
@@ -600,7 +642,7 @@ export class ProceduralWorkshopUi {
     this.camera.updateProjectionMatrix();
   }
 
-  async generatePreview({ draft = false, frame = false } = {}) {
+  async generatePreview({ draft = false, frame = false, allowHidden = false } = {}) {
     const revision = ++this.planRevision;
     try {
       if (!this.componentController) {
@@ -615,7 +657,7 @@ export class ProceduralWorkshopUi {
         }
         : recipe;
       await this.planner.plan(previewRecipe);
-      if (revision !== this.planRevision || this.overlay.hidden) return;
+      if (revision !== this.planRevision || (this.overlay.hidden && !allowHidden)) return;
       const nextParts = this.manager.createPreviewParts(previewRecipe);
       this.clearPreview();
       this.previewParts = nextParts;

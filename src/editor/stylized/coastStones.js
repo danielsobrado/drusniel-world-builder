@@ -1,3 +1,4 @@
+import { completeIterator } from './ResumableIterator.js';
 import {
   clusterNoise,
   createStonePlacementSink,
@@ -37,7 +38,7 @@ const CHUNK_REJECT_MARGIN = 12;
  * @param {number} options.seaLevel
  * @param {object} [options.config] `rocks.coast`
  */
-export function buildCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, ...sinkOptions }) {
+export function* iterateCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, ...sinkOptions }) {
   if (!config.enabled) return [];
   const sink = createStonePlacementSink({ prefix: 'coast-rock', ...sinkOptions });
   const { tileSize, heightAt } = sinkOptions;
@@ -59,6 +60,7 @@ export function buildCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, ...s
   // candidates this chunk owns, so none is placed twice.
   for (let gz = Math.ceil(z0 / spacing) - 1; gz * spacing < z1; gz += 1) {
     for (let gx = Math.ceil(x0 / spacing) - 1; gx * spacing < x1; gx += 1) {
+      yield;
       const rolls = [0, 1, 2, 3, 4, 5, 6].map((channel) => stoneHash01(gx, gz, channel, 0x5a17));
       const x = (gx + rolls[0]) * spacing;
       const z = (gz + rolls[1]) * spacing;
@@ -74,4 +76,8 @@ export function buildCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, ...s
     }
   }
   return sink.placements;
+}
+
+export function buildCoastStones(options) {
+  return completeIterator(iterateCoastStones(options));
 }

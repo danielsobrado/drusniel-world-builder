@@ -18,7 +18,9 @@ import * as THREE from 'three/webgpu';
  * touches a batch; blades behind the camera are culled by the clipper.
  */
 const INSTANCE_ATTRIBUTES = Object.freeze([['instancePosition', 4], ['instanceRotation', 2], ['instanceData', 4]]);
-const MIN_SLOTS = 16;
+// A band can cross 16 tiles at an ordinary chunk boundary. Allocate its next
+// capacity during loading so that crossing does not replace four GPU buffers.
+const MIN_SLOTS = 32;
 export const EMPTY_POSITION = 1e7;
 
 class MeadowBandBatch {

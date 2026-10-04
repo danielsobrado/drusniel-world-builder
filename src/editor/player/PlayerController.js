@@ -1,3 +1,4 @@
+import { CameraFollow } from './CameraFollow.js';
 import * as THREE from 'three';
 import { registerCollisionPlayer } from '../collision/CollisionPlayerBridge.js';
 import { createPlayerState, stepPlayerPhysics } from './PlayerPhysics.js';
@@ -69,6 +70,8 @@ export class PlayerController {
       })
       : null;
 
+    this.mobile = { enabled: false, right: 0, forward: 0, running: false, ascend: false, descend: false };
+    this.cameraFollow = new CameraFollow();
     this.boundHandlers = {
       canvasPointer: (event) => this.onCanvasPointer(event),
       contextMenu: (event) => this.onContextMenu(event),
@@ -104,7 +107,7 @@ export class PlayerController {
       uiBlocked: this.uiBlocked,
       pointerLocked: this.pointerLocked,
       grounded: this.state.grounded,
-      running: this.keys.has('ShiftLeft') || this.keys.has('ShiftRight'),
+      running: this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.mobile.running,
       position: Object.freeze({ x: this.state.x, y: this.state.y, z: this.state.z }),
       footY: this.state.footY,
       yaw: this.yaw,
@@ -318,6 +321,7 @@ export class PlayerController {
   }
 
   requestPointerLock() {
+    if (this.mobile.enabled) return;
     if (this.enabled && !this.uiBlocked && !this.pointerLocked) {
       this.canvas.requestPointerLock();
     }
@@ -350,29 +354,36 @@ export class PlayerController {
       this.collisionRuntime.update(focus, current);
     }
 
+    let movementYaw = this.yaw;
+    if (this.mobile.enabled && !this.uiBlocked) {
+      const follow = this.cameraFollow.update({ yaw: this.yaw, x: this.mobile.right,
+        z: -this.mobile.forward, dt: deltaSeconds, touch: true });
+      this.yaw = follow.yaw; movementYaw = follow.movementYaw; this.applyCameraState();
+    }
     this.camera.getWorldDirection(this.forward);
+    if (this.mobile.enabled) this.forward.set(-Math.sin(movementYaw), 0, -Math.cos(movementYaw));
     this.forward.y = 0;
     if (this.forward.lengthSq() > 0) this.forward.normalize();
     this.right.crossVectors(this.forward, this.up).normalize();
 
-    const acceptsMovement = !this.uiBlocked && (this.pointerLocked || this.harnessActive);
-    const ascend = acceptsMovement && this.keys.has('Space') ? 1 : 0;
+    const acceptsMovement = !this.uiBlocked && (this.pointerLocked || this.harnessActive || this.mobile.enabled);
+    const ascend = acceptsMovement && (this.keys.has('Space') || this.mobile.ascend) ? 1 : 0;
     const descend = acceptsMovement && (
       this.keys.has('ControlLeft')
       || this.keys.has('ControlRight')
-      || this.keys.has('KeyC')
+      || this.keys.has('KeyC') || this.mobile.descend
     ) ? 1 : 0;
     const previousState = this.state;
     const nextState = stepPlayerPhysics({
       state: previousState,
       input: {
         forward: acceptsMovement
-          ? Number(this.keys.has('KeyW')) - Number(this.keys.has('KeyS'))
+          ? Number(this.keys.has('KeyW')) - Number(this.keys.has('KeyS')) + this.mobile.forward
           : 0,
         right: acceptsMovement
-          ? Number(this.keys.has('KeyD')) - Number(this.keys.has('KeyA'))
+          ? Number(this.keys.has('KeyD')) - Number(this.keys.has('KeyA')) + this.mobile.right
           : 0,
-        running: acceptsMovement && (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight')),
+        running: acceptsMovement && (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.mobile.running),
         jump: acceptsMovement && this.jumpQueued,
         ascend,
         descend,
@@ -508,6 +519,21 @@ export class PlayerController {
     }
   }
 
+  setMobileInput(input) {
+    Object.assign(this.mobile, input);
+    this.mobile.right = THREE.MathUtils.clamp(this.mobile.right, -1, 1);
+    this.mobile.forward = THREE.MathUtils.clamp(this.mobile.forward, -1, 1);
+    if (input.ascend === true && this.enabled && !this.paused && !this.uiBlocked) this.jumpQueued = true;
+  }
+
+  lookMobile(deltaYaw, deltaPitch) {
+    if (!this.mobile.enabled || !this.enabled || this.paused || this.uiBlocked) return;
+    this.yaw -= deltaYaw; this.pitch -= deltaPitch; this.cameraFollow.manualLook(-deltaYaw);
+    const limit = THREE.MathUtils.degToRad(this.config.maxPitchDegrees);
+    this.pitch = THREE.MathUtils.clamp(this.pitch, -limit, limit);
+    this.applyCameraState();
+  }
+
   onMouseMove(event) {
     if (!this.enabled || this.harnessActive || this.uiBlocked || !this.pointerLocked) return;
     this.yaw -= event.movementX * this.config.mouseSensitivity;
@@ -520,6 +546,8 @@ export class PlayerController {
   resetInput() {
     if (this.harnessActive) return;
     this.keys.clear();
+    Object.assign(this.mobile, { right: 0, forward: 0, running: false, ascend: false, descend: false });
+    this.cameraFollow.resetGesture();
     this.jumpQueued = false;
   }
 
@@ -536,6 +564,7 @@ export class PlayerController {
   }
 
   dispose() {
+    if (this.disposed) return; this.disposed = true;
     this.releaseCollisionPlayer?.();
     for (const eventName of ['pointerdown', 'pointerup', 'pointermove']) {
       this.canvas.removeEventListener(eventName, this.boundHandlers.canvasPointer, true);

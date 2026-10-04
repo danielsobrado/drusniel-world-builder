@@ -127,6 +127,7 @@ export function buildPerfReport({
   collisionStatus = null,
   postProcessingCapture = null,
   settle = null,
+  preparation = null,
 }) {
   const frames = profiler.getFrames();
   const summary = profiler.summarize();
@@ -193,21 +194,27 @@ export function buildPerfReport({
     ),
   };
 
-  const cpuUpdate = summary.phases
-    ? Object.freeze({
-      p50Ms: round(percentileFromPhases(summary.phases, 'avgMs'), 3),
-      p95Ms: round(
-        Object.values(summary.phases).reduce((sum, phase) => sum + (phase.p95Ms ?? 0), 0),
-        3,
-      ),
-    })
-    : null;
-  const gpuRender = summary.phases?.render
-    ? Object.freeze({
-      p50Ms: round(summary.phases.render.avgMs, 3),
-      p95Ms: round(summary.phases.render.p95Ms, 3),
-    })
-    : null;
+  const cpuValues = frames.filter(frame => frame.dt > 0)
+    .map(frame => Object.values(frame.phases).reduce((sum, value) => sum + value, 0))
+    .sort((a, b) => a - b);
+  const cpuUpdate = {
+    p50Ms: round(percentileSorted(cpuValues, 0.5)),
+    p95Ms: round(percentileSorted(cpuValues, 0.95)),
+  };
+  const sceneryValues = frames.filter(frame => frame.dt > 0)
+    .map(frame => (frame.phases.placementPreparation ?? 0) + (frame.phases.stylized ?? 0))
+    .sort((a, b) => a - b);
+  const sceneryUpdateCpu = {
+    includesPlacementPreparation: Boolean(summary.phases?.placementPreparation),
+    avgMs: round(sceneryValues.length
+      ? sceneryValues.reduce((sum, value) => sum + value, 0) / sceneryValues.length : 0),
+    p95Ms: round(percentileSorted(sceneryValues, 0.95)),
+    p99Ms: round(percentileSorted(sceneryValues, 0.99)),
+    maxMs: round(sceneryValues.at(-1) ?? 0),
+  };
+  const renderSubmissionCpu = summary.phases?.render ?? null;
+  // GPU timing requires timestamp queries; CPU submission is not a GPU measurement.
+  const gpuRender = null;
 
   return {
     version: 2,
@@ -241,7 +248,9 @@ export function buildPerfReport({
     },
     summary: roundedSummary,
     cpuUpdate,
+    sceneryUpdateCpu,
     gpuRender,
+    renderSubmissionCpu,
     postProcessingCapture,
     collision: buildCollisionReport({
       frames,
@@ -250,14 +259,13 @@ export function buildPerfReport({
       collisionStatus,
     }),
     counters,
+    preparation,
+    measuredCounters: Object.fromEntries(['mainProceduralTileMisses', 'mainProceduralHeightMisses',
+      'collisionReadinessMisses', 'placementPreparedChunks', 'rockManifestBuilds', 'treeManifestBuilds']
+      .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
   };
-}
-
-function percentileFromPhases(phases, key) {
-  const values = Object.values(phases ?? {}).map((phase) => phase[key] ?? 0);
-  return values.reduce((sum, value) => sum + value, 0);
 }
 
 export function downloadPerfReport(report, filename = null) {

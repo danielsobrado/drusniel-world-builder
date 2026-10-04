@@ -89,9 +89,9 @@ test('the slot only builds the refractive variant for chunks near the viewer', a
   assert.match(source, /this\.refractiveMaterial = null;/);
   const resolve = source.match(/resolveMaterial\(\)[\s\S]*?\n {2}\}/)?.[0] ?? '';
   assert.match(resolve, /isWithinRefractionRange\(\)/);
-  assert.match(resolve, /this\.refractiveMaterial === null/);
+  assert.match(resolve, /this\.ensureRefractiveMaterial\(\)/);
   assert.ok(
-    resolve.indexOf('isWithinRefractionRange') < resolve.indexOf('createMaterial(true)'),
+    resolve.indexOf('isWithinRefractionRange') < resolve.indexOf('ensureRefractiveMaterial()'),
     'range is checked before the refractive material is built',
   );
 });

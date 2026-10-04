@@ -89,6 +89,7 @@ export class ForestHabitatField {
     this.cacheRevision = this.revisionProvider?.() ?? 0;
     this.cacheLimit = Math.max(256, Math.trunc(config.cacheSamples) || 32768);
     this.sampleCache = new Map();
+    this.sampleRevisions = new Map();
     this.patchCache = new Map();
     this.stats = { builds: 0, cacheHits: 0, patchBuilds: 0, patchCacheHits: 0 };
     this.slopeSampleDistance = Math.max(
@@ -205,20 +206,26 @@ export class ForestHabitatField {
   }
 
   sample(x, z) {
+    const prepared = this.preparedProvider?.(x, z);
+    if (prepared) { this.stats.cacheHits++; return prepared; }
     const revision = this.revisionProvider?.() ?? this.cacheRevision;
-    if (revision !== this.cacheRevision) {
+    if (!this.localRevisionProvider && revision !== this.cacheRevision) {
       // patchCache depends only on seed, supercell size and profile — never on
       // terrain heights or tiles — so world edits cannot stale it.
       this.sampleCache.clear();
+      this.sampleRevisions.clear();
       this.cacheRevision = revision;
     }
     const cacheKey = `${x}:${z}`;
+    const localRevision = this.localRevisionProvider?.(x, z);
     const cached = this.sampleCache.get(cacheKey);
-    if (cached) {
+    if (cached && (!this.localRevisionProvider || this.sampleRevisions.get(cacheKey) === localRevision)) {
       this.stats.cacheHits += 1;
       return cached;
     }
-    return this.cacheSample(cacheKey, this.evaluate(x, z, { withWater: true }));
+    const sample = this.cacheSample(cacheKey, this.evaluate(x, z, { withWater: true }));
+    if (this.localRevisionProvider) this.sampleRevisions.set(cacheKey, localRevision);
+    return sample;
   }
 
   /**
@@ -323,7 +330,9 @@ export class ForestHabitatField {
 
   cacheSample(key, sample) {
     if (this.sampleCache.size >= this.cacheLimit) {
-      this.sampleCache.delete(this.sampleCache.keys().next().value);
+      const oldest = this.sampleCache.keys().next().value;
+      this.sampleCache.delete(oldest);
+      this.sampleRevisions.delete(oldest);
     }
     this.sampleCache.set(key, sample);
     this.stats.builds += 1;

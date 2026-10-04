@@ -105,6 +105,7 @@ export function createStylizedWaterMaterial({
   // not avoid it. Chunks far from the camera get a variant built without the
   // branch so a player away from water pays nothing.
   enableRefraction = true,
+  sampleTexture = (_name, value, uvNode) => texture(value, uvNode),
 }) {
   const water = config.water;
   const quality = resolveWaterQualityFeatures(water);
@@ -112,9 +113,9 @@ export function createStylizedWaterMaterial({
   const fieldUv = terrainUv
     .mul((waterFieldSize - 1) / waterFieldSize)
     .add(0.5 / waterFieldSize);
-  const surface = texture(surfaceMaskTexture, terrainUv);
+  const surface = sampleTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
   const exactCoverage = createSurfaceClassNodes(surface).waterCoverage;
-  const waterField = texture(waterFieldTexture, fieldUv);
+  const waterField = sampleTexture('waterFieldTexture', waterFieldTexture, fieldUv);
   const waterCoverage = max(exactCoverage, clamp(waterField.r, 0, 1));
   const waterDepth = max(waterField.b, 0);
   const shoreDistance = max(waterField.a, 0);
@@ -141,7 +142,7 @@ export function createStylizedWaterMaterial({
   let currentStrength = float(0);
   let fallPlunge = null;
   if (quality.flow) {
-    const flowSample = texture(waterFlowTexture, fieldUv);
+    const flowSample = sampleTexture('waterFlowTexture', waterFlowTexture, fieldUv);
     fallPlunge = flowSample.ba;
     const encodedFlow = flowSample.rg;
     const decodedCellFlow = encodedFlow.mul(2).sub(1);

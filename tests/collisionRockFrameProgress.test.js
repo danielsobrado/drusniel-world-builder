@@ -1,3 +1,4 @@
+import { RockManifestStore } from '../src/editor/stylized/RockManifestStore.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { StylizedRockView } from '../src/editor/stylized/StylizedRockView.js';
@@ -10,29 +11,29 @@ import { setUnderwaterBlend } from '../src/editor/water/underwaterState.js';
 function rockHarness() {
   const rocks = Object.create(StylizedRockView.prototype);
   const manifests = new Map();
-  rocks.prototypes = [];
+  rocks.prototypes = [{}];
+  rocks.terrainView = { focusChunk: { chunkX: 0, chunkZ: 0 } };
+  rocks.placementsByChunk = new Map();
   rocks.blockerRequests = new Set();
   rocks.pendingManifestBuilds = new Map();
   rocks.manifestBuildsThisFrame = 1;
   rocks.manifestFrameStartedAt = performance.now() - 1000;
   rocks.manifestBuildBudgetMs = 100;
   rocks.manifestKey = (x, z) => `key:${x}:${z}`;
-  rocks.cachedManifestForChunk = (x, z) => manifests.get(`${x}:${z}`) ?? null;
-  rocks.storeManifest = (key, signature, placements) => {
-    manifests.set(key, placements);
-    return placements;
-  };
   rocks.manifestOptions = (chunkX, chunkZ) => ({
     kind: 'frame-progress', chunkX, chunkZ, chunkSize: 1, tileSize: 1,
     perChunk: 1, tileIds: new Set([1]), tileAt: () => 1, heightAt: () => 0,
     prototypeCount: 1, minScale: 1, maxScale: 1, radiusForScale: () => 0,
   });
+  rocks.riverbankRocksForChunk = rocks.coastStonesForChunk = rocks.seabedRocksForChunk = function* () { return []; };
+  rocks.manifestStore = new RockManifestStore(rocks);
+  rocks.manifestStore.queue.buildsPerFrame = 1;
   const surface = Object.create(StylizedSurfaceViewBase.prototype);
   surface.rockView = rocks;
   surface.enabled = true;
   surface.waterSlots = [];
   surface.updateRendererCounters = () => {};
-  return { rocks, surface, manifests };
+  return { rocks, surface, manifests: rocks.manifestStore.cache };
 }
 
 test('collision halo progresses before rendering, including when land rendering is suspended', (t) => {
@@ -48,7 +49,8 @@ test('collision halo progresses before rendering, including when land rendering 
       ? { revision: 1, colliders: [] } : COLLISION_BUILD_DEFERRED,
   });
   for (let frame = 1; frame <= 9; frame++) {
-    // The actual animation loop order: frame entry, player collision, render.
+    rocks.getPreparedBlockersForChunk(0, 0);
+    // Requests precede the next budgeted preparation tick.
     surface.beginFrame(frame);
     residency.update({ focus: { x: 1, z: -1 } });
     residency.flush();
@@ -56,6 +58,7 @@ test('collision halo progresses before rendering, including when land rendering 
     // A second frame entry in a layer must share the consumed allowance.
     surface.update(frame, null);
     assert.equal(rocks.prepareManifestForChunk(30, 30), null);
+    assert.equal(manifests.size, frame, "read-only requests do not advance work");
   }
   assert.equal(world.isOwnerChunkReady(0, 0), true);
   assert.equal(residency.getStatus().queuedBuilds, 0);
@@ -73,15 +76,16 @@ test('interleaved collision and render requests retain both incremental rock bui
         return count < 3 ? null : [{ stableId: key }];
       },
     } };
-    rocks.pendingManifestBuilds.set(key, build);
+    rocks.manifestStore.pending.set(key, { ...build, stage: 0, placements: [], startedAt: performance.now() });
   }
   for (let frame = 0; frame < 6; frame++) {
     rocks.manifestBuildsThisFrame = 0;
     rocks.manifestFrameStartedAt = performance.now();
     const chunk = frame % 2 === 0 ? -1 : -4;
-    rocks.prepareManifestForChunk(chunk, chunk);
+    const key = `${chunk}:${chunk}`;
+    rocks.manifestStore.step({ key, chunkX: chunk, chunkZ: chunk }, () => false);
   }
   assert.deepEqual([...slices.values()], [3, 3]);
   assert.equal(manifests.size, 2);
-  assert.equal(rocks.pendingManifestBuilds.size, 0);
+  assert.equal(rocks.manifestStore.pending.size, 0);
 });

@@ -95,6 +95,10 @@ export function evaluatePerfMatrix(
     }
     for (const entry of [highGrass, denseMixed]) {
       expectMultiplier(entry, standard, 'bladesPerCell', 2, failures);
+      if (standard?.report?.density?.grassSystem === 'meadow') {
+        expectMultiplier(entry, standard, 'meadowHighDensity', 2, failures);
+        expectMultiplier(entry, standard, 'meadowFarDensity', 2, failures);
+      }
     }
 
     const construction = caseMap.get('construction-ring')?.report?.counters;

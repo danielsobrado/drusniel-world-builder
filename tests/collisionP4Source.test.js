@@ -1,3 +1,4 @@
+import { COLLISION_BUILD_DEFERRED } from '../src/editor/collision/CollisionBuildResult.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createRockCollisionSource } from '../src/editor/collision/providers/RockCollisionSource.js';
@@ -56,7 +57,7 @@ test('rock source derives profiles lazily when streamed variants arrive', () => 
   const source = createRockCollisionSource({ rockView, config });
 
   assert.equal(source.getProfiles().length, 0);
-  assert.equal(source.snapshotChunk(0, 0).placements.length, 0);
+  assert.equal(source.snapshotChunk(0, 0), COLLISION_BUILD_DEFERRED);
   const emptyEpoch = source.epoch();
 
   rockView.prototypes.push(prototype(2, 1, 1));

@@ -54,3 +54,15 @@ test('unknown density profiles fall back without mutating production values', ()
   assert.equal(result.id, 'standard');
   assert.deepEqual(value, config());
 });
+
+test('high grass increases the active meadow and far-card densities', () => {
+  const value = config();
+  value.stylizedSurface.grass.system = 'meadow';
+  value.stylizedSurface.grass.meadow = {
+    lod: { high: { density: 12.6 }, low: { density: 5.6 } }, far: { density: 1.3 },
+  };
+  applyPerfQaDensityProfile(value, 'high-grass');
+  assert.equal(value.stylizedSurface.grass.meadow.lod.high.density, 25.2);
+  assert.equal(value.stylizedSurface.grass.meadow.lod.low.density, 11.2);
+  assert.equal(value.stylizedSurface.grass.meadow.far.density, 2.6);
+});

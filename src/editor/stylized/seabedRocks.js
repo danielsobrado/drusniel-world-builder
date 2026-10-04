@@ -1,3 +1,4 @@
+import { completeIterator } from './ResumableIterator.js';
 import {
   clusterNoise,
   createStonePlacementSink,
@@ -42,7 +43,7 @@ export const DEFAULT_SEABED_ROCKS = Object.freeze({
  * @param {number} options.seaLevel
  * @param {object} [options.config] `rocks.seabed`
  */
-export function buildSeabedRocks({ seaLevel, config = DEFAULT_SEABED_ROCKS, ...sinkOptions }) {
+export function* iterateSeabedRocks({ seaLevel, config = DEFAULT_SEABED_ROCKS, ...sinkOptions }) {
   if (!config.enabled) return [];
   const sink = createStonePlacementSink({ prefix: 'seabed-rock', ...sinkOptions });
   const { tileSize, heightAt } = sinkOptions;
@@ -64,6 +65,7 @@ export function buildSeabedRocks({ seaLevel, config = DEFAULT_SEABED_ROCKS, ...s
   // chunk owns, so none is placed twice.
   for (let gz = Math.ceil(z0 / spacing) - 1; gz * spacing < z1; gz += 1) {
     for (let gx = Math.ceil(x0 / spacing) - 1; gx * spacing < x1; gx += 1) {
+      yield;
       const rolls = [0, 1, 2, 3, 4, 5, 6].map((channel) => stoneHash01(gx, gz, channel, 0x3b9));
       const x = (gx + rolls[0]) * spacing;
       const z = (gz + rolls[1]) * spacing;
@@ -79,4 +81,8 @@ export function buildSeabedRocks({ seaLevel, config = DEFAULT_SEABED_ROCKS, ...s
     }
   }
   return sink.placements;
+}
+
+export function buildSeabedRocks(options) {
+  return completeIterator(iterateSeabedRocks(options));
 }

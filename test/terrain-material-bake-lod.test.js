@@ -77,8 +77,8 @@ test('new and stale baked terrain crossfade against live procedural shading only
 });
 
 test('stylized surface uploads CPU bakes after the bake runtime update', () => {
-  const runtimeIndex = surfaceSource.indexOf('this.materialBakeRuntime?.update();');
-  const gpuIndex = surfaceSource.indexOf('this.materialBakeGpuBridge?.update();');
+  const runtimeIndex = surfaceSource.indexOf('this.materialBakeRuntime?.update(this.shouldYieldWork);');
+  const gpuIndex = surfaceSource.indexOf('this.materialBakeGpuBridge?.update(');
   assert.ok(runtimeIndex >= 0);
   assert.ok(gpuIndex > runtimeIndex);
   assert.match(surfaceSource, /config: this\.config\.materialBake/);

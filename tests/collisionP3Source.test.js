@@ -1,3 +1,4 @@
+import { COLLISION_BUILD_DEFERRED } from '../src/editor/collision/CollisionBuildResult.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
@@ -60,7 +61,7 @@ test('tree collision source reads canonical manifests and includes planted trees
     forestField: { signature: 'forest:1' },
     speciesRegistry: { signature: 'species:1' },
     get: () => cached,
-    build: () => {
+    schedule: () => {
       buildCount += 1;
       cached = placements;
       return cached;
@@ -81,6 +82,7 @@ test('tree collision source reads canonical manifests and includes planted trees
     treeView,
     config: { minimumTrunkRadius: 0.16, prototypeOverrides: {} },
   });
+  assert.equal(source.snapshotChunk(0, 0), COLLISION_BUILD_DEFERRED);
   const snapshot = source.snapshotChunk(0, 0);
 
   assert.equal(buildCount, 1);

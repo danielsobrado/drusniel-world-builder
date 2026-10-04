@@ -82,6 +82,9 @@ export function createInstancedRenderers({
     const tinted = tintLeaves && part.kind === 'leaf';
     const morphed = tintLeaves;
     const geometry = createGeometry(part.geometry, capacity, tinted, morphed);
+    if (morphed && part.kind === 'trunk') {
+      geometry.setAttribute('instanceRootPlane', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
+    }
     const material = createDitheredMaterial(part.material, {
       tinted,
       kind: morphed ? part.kind : null,
@@ -99,6 +102,7 @@ export function createInstancedRenderers({
     // version, so every tracked range reaches the GPU.
     mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
     mesh.count = 0;
+    mesh.matrixAutoUpdate = false;
     mesh.castShadow = Boolean(castShadow && part.kind !== 'leaf');
     mesh.receiveShadow = true;
     mesh.frustumCulled = true;
@@ -205,12 +209,23 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       const dither = mesh.geometry.getAttribute('instanceDither');
       const tints = mesh.geometry.getAttribute('instanceLeafTint');
       const morphologies = mesh.geometry.getAttribute('instanceMorphology');
+      const roots = mesh.geometry.getAttribute('instanceRootPlane');
       const matrixRange = resetDirtyRange(MATRIX_RANGE);
       const ditherRange = resetDirtyRange(DITHER_RANGE);
       const tintRange = resetDirtyRange(TINT_RANGE);
       const morphologyRange = resetDirtyRange(MORPHOLOGY_RANGE);
       for (let index = 0; index < writableCount; index += 1) {
         const instance = instances[index];
+        if (roots) {
+          const fit = instance.rootFit;
+          const e = instance.matrix.elements;
+          const up = e[5];
+          const bend = fit && Math.abs(up) > 1e-6
+            ? [(fit.slopeX * e[0] + fit.slopeZ * e[2]) / up,
+              (fit.slopeX * e[8] + fit.slopeZ * e[10]) / up, fit.conformHeight]
+            : [0, 0, 0];
+          writeVector3Instance(roots, index, bend, morphologyRange);
+        }
         writeMatrixInstance(mesh.instanceMatrix, index, instance.matrix, matrixRange, offsetX, offsetZ);
         writeDitherInstance(
           dither,
@@ -235,6 +250,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       markAttributeSubrangeUpdated(mesh.instanceMatrix, matrixRange.min, matrixRange.max);
       markAttributeSubrangeUpdated(dither, ditherRange.min, ditherRange.max);
       if (tints) markAttributeSubrangeUpdated(tints, tintRange.min, tintRange.max);
+      if (roots) markAttributeSubrangeUpdated(roots, morphologyRange.min, morphologyRange.max);
       if (morphologies) {
         markAttributeSubrangeUpdated(
           morphologies,

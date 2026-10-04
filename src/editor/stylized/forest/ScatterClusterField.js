@@ -85,6 +85,7 @@ export class ScatterClusterField {
     });
     this.cacheLimit = Math.max(256, Math.trunc(config.cacheSamples) || DEFAULT_CACHE_LIMIT);
     this.cache = new Map();
+    this.cacheRevisions = new Map();
     this.stats = { builds: 0, cacheHits: 0 };
     this.signature = [
       this.kind,
@@ -105,9 +106,12 @@ export class ScatterClusterField {
   }
 
   nodeAt(nodeX, nodeZ) {
+    const prepared = this.preparedProvider?.(nodeX, nodeZ);
+    if (prepared) { this.stats.cacheHits++; return prepared; }
     const key = `${nodeX}:${nodeZ}`;
+    const revision = this.localRevisionProvider?.(nodeX * this.sampleSpacing, nodeZ * this.sampleSpacing);
     const cached = this.cache.get(key);
-    if (cached) {
+    if (cached && (!this.localRevisionProvider || this.cacheRevisions.get(key) === revision)) {
       this.stats.cacheHits += 1;
       return cached;
     }
@@ -126,9 +130,12 @@ export class ScatterClusterField {
       slope: this.slopeAt(worldX, worldZ),
     };
     if (this.cache.size >= this.cacheLimit) {
-      this.cache.delete(this.cache.keys().next().value);
+      const oldest = this.cache.keys().next().value;
+      this.cache.delete(oldest);
+      this.cacheRevisions.delete(oldest);
     }
     this.cache.set(key, node);
+    if (this.localRevisionProvider) this.cacheRevisions.set(key, revision);
     this.stats.builds += 1;
     return node;
   }

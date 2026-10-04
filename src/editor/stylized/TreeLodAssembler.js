@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { completeIterator } from './ResumableIterator.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import {
   treeColorVariation,
@@ -49,7 +50,7 @@ function treeMatrix(placement) {
   const lean = treeLeanAngles(placement);
   const matrix = createMatrix({
     x: placement.x,
-    y: placement.height,
+    y: placement.height + (placement.rootFit?.sink ?? 0),
     z: placement.z,
     rotationX: lean.rotationX,
     rotationY: placement.rotationY,
@@ -127,6 +128,7 @@ function geometryInstance(
   const appearance = leafAppearance(placement, resolveLeafTint, proxyReadable);
   return {
     matrix: treeMatrix(placement),
+    rootFit: placement.rootFit,
     fade,
     ditherDirection,
     seed: treeRenderSeed(placement),
@@ -142,7 +144,7 @@ function impostorRecord(placement, atlas, fade, ditherDirection, resolveLeafTint
   const seed = treeRenderSeed(placement);
   return {
     x: placement.x,
-    y: placement.height + (atlas.centerY ?? atlas.height * 0.5) * heightScale,
+    y: placement.height + (placement.rootFit?.sink ?? 0) + (atlas.centerY ?? atlas.height * 0.5) * heightScale,
     z: placement.z,
     scale: heightScale,
     radius: atlas.radius * heightScale * Math.max(1, appearance.impostorAppearance[0]),
@@ -184,7 +186,7 @@ export function selectTreePhysicalRepresentation({
   return band;
 }
 
-export function rebuildTreeLod({
+export function* iterateTreeLod({
   plan,
   rockSource,
   manifestStore,
@@ -202,6 +204,7 @@ export function rebuildTreeLod({
   resolvePrototypeIndex = null,
   // Canonical point the instance matrices are written relative to (InstanceAnchor).
   anchor = null,
+  beforePublish = null,
 }) {
   PerfCounters.inc('treeRebuilds');
   const near = createInstances(prototypeCount);
@@ -218,6 +221,7 @@ export function rebuildTreeLod({
   ));
 
   for (const entry of ordered) {
+    yield;
     const visible = entry.representations.some((value) => (
       value.band !== 'culled' && value.fade > 0
     ));
@@ -247,6 +251,7 @@ export function rebuildTreeLod({
           minimumHeight,
         });
         for (const cluster of patchClusters) {
+          yield;
           clusters[0].push({
             matrix: clusterMatrix(cluster),
             fade: representation.fade,
@@ -266,6 +271,7 @@ export function rebuildTreeLod({
             .slice(0, emergentCount);
         })();
         for (const placement of emergent) {
+          yield;
           const prototypeIndex = resolvePrototypeIndex?.(placement)
             ?? placement.prototypeIndex;
           const atlas = impostorAtlases[prototypeIndex];
@@ -292,6 +298,7 @@ export function rebuildTreeLod({
       }
 
       for (const placement of placements) {
+        yield;
         const prototypeIndex = resolvePrototypeIndex?.(placement)
           ?? placement.prototypeIndex;
         const seed = treeRenderSeed(placement);
@@ -346,6 +353,8 @@ export function rebuildTreeLod({
     }
   }
 
+  yield;
+  beforePublish?.();
   manifestStore.setActive(active);
   const nearCount = writeInstances(renderers, near, anchor);
   const proxyCount = writeInstances(proxyRenderers, proxy, anchor);
@@ -383,4 +392,9 @@ export function rebuildTreeLod({
   PerfCounters.set('treeFallbackImpostorInstances', fallbackCount);
   PerfCounters.set('treeCanopyClusters', clusterCount);
   PerfCounters.set('forestUnderstoryInstances', understoryCount);
+  return true;
+}
+
+export function rebuildTreeLod(options) {
+  return completeIterator(iterateTreeLod(options));
 }

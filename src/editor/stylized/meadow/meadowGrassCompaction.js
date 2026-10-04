@@ -1,4 +1,5 @@
 import { createMeadowWindVariationWriter } from './meadowWindVariation.js';
+import { compactionPrefix } from './MeadowCompactionPrefix.js';
 
 /**
  * One tile's stems, filtered to where grass grows, ported from grass-test's
@@ -33,7 +34,7 @@ export function createCompactionOutput(capacity) {
  * @param {Function} options.sample MeadowGroundSampler tile sampler
  * @param {object} [options.output] a recycled createCompactionOutput() of the band's capacity
  */
-export function createCompaction({ template, centerX, centerZ, sample, output: recycled = null }) {
+export function createCompaction({ template, centerX, centerZ, sample, output: recycled = null, previous = null }) {
   const source = {
     position: template.getAttribute('instancePosition').array,
     rotation: template.getAttribute('instanceRotation').array,
@@ -44,8 +45,15 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
   const ground = { height: 0, strength: 1, shape: 0, path: 0 };
   const cards = Boolean(template.userData.meadow?.cards);
   const writeWind = createMeadowWindVariationWriter(centerX, centerZ, template.userData.meadow.tileSize);
-  let cursor = 0;
   const total = template.instanceCount;
+  let cursor = previous ? Math.min(previous.capacity, total) : 0;
+  if (previous) {
+    const prefix = compactionPrefix(previous.output, total);
+    output.count = prefix.count;
+    for (const [name, width] of [['position', 4], ['rotation', 2], ['data', 4]]) {
+      output[name].set(prefix[name].subarray(0, output.count * width));
+    }
+  }
   return {
     output,
     get done() {

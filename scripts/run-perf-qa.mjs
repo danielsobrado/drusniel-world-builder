@@ -70,6 +70,8 @@ const cpuProfilePath = cpuProfileArg === null ? null : path.resolve(cpuProfileAr
 const cpuProfileReportPath = cpuProfilePath === null
   ? null
   : path.relative(root, cpuProfilePath).replaceAll('\\', '/');
+const drainSeconds = readArg('drain-seconds') === null
+  ? 0 : positiveNumber('drain-seconds', 15);
 const runnerPath = path.join(
   outDir,
   `perf-qa-playwright-runner-${process.pid}-${randomUUID()}.cjs`,
@@ -222,6 +224,27 @@ const fs = require('fs');
         ${JSON.stringify(cpuProfilePath?.replace(/\\/g, '/') ?? null)},
         JSON.stringify(profile),
       );
+    }
+    if (${drainSeconds} > 0) {
+      // Separate from measured movement: finish() has already released the keys.
+      report.recovery = await page.evaluate(async seconds => {
+        const { PerfCounters } = await import('/src/editor/performance/qa/PerfCounters.js');
+        const surface = window.__editor.stylizedSurface;
+        const started = performance.now();
+        const start = surface.getPreparationStatus();
+        let readyFrames = 0;
+        let firstReadyMs = null;
+        while (performance.now() - started < seconds * 1000 && readyFrames < 60) {
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          if (surface.getPreparationStatus().ready) {
+            firstReadyMs ??= performance.now() - started;
+            readyFrames++;
+          } else { readyFrames = 0; firstReadyMs = null; }
+        }
+        return { ready: readyFrames >= 60, firstReadyMs,
+          waitedMs: performance.now() - started, start,
+          end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
+      }, ${drainSeconds});
     }
     report.adapter = adapter;
     report.capture = {

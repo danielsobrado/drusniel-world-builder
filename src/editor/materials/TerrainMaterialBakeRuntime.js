@@ -279,7 +279,7 @@ export class TerrainMaterialBakeRuntime {
     state.generation = generation;
     state.pendingKey = descriptor.key;
     const build = async () => {
-      const result = await this.bakePage({
+      const request = {
         source,
         descriptor,
         config: this.config,
@@ -287,8 +287,14 @@ export class TerrainMaterialBakeRuntime {
         tileSize: this.terrainView.worldStore.tileSize,
         worldSeed: this.worldSeed(),
         materialStyle: this.materialStyle(),
-      });
-      PerfCounters.inc('terrainMaterialBakeCpuMs', result.value.durationMs ?? 0);
+      };
+      const worker = this.terrainView.worldStore.chunkWorker;
+      const offThread = worker?.workerCount > 0 && this.bakePage === bakeTerrainMaterialPage;
+      const result = worker && this.bakePage === bakeTerrainMaterialPage
+        ? await worker.request(descriptor.chunkX, descriptor.chunkZ,
+          { priority: 200 + focusDistance(slot, this.terrainView.focusChunk), materialBakeRequest: request })
+        : await this.bakePage(request);
+      PerfCounters.inc(offThread ? 'terrainMaterialBakeWorkerWallMs' : 'terrainMaterialBakeCpuMs', result.value.durationMs ?? 0);
       return result;
     };
 
@@ -321,7 +327,7 @@ export class TerrainMaterialBakeRuntime {
     PerfCounters.set('terrainMaterialBakeBuildFailures', stats.buildFailures);
   }
 
-  update() {
+  update(shouldYield = null) {
     if (!this.enabled || this.disposed) return;
     const now = clockNow();
     const activeSlotIndexes = new Set();
@@ -350,7 +356,7 @@ export class TerrainMaterialBakeRuntime {
     ));
     let available = Math.max(0, this.config.build.maxConcurrent - this.cache.getStats().inFlight);
     for (const candidate of candidates) {
-      if (available <= 0) break;
+      if (available <= 0 || shouldYield?.()) break;
       if (this.requestSlot(candidate.slot, candidate.state, candidate.descriptor, now)) {
         available -= 1;
       }

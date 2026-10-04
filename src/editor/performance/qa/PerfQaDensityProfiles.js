@@ -62,6 +62,12 @@ export function applyPerfQaDensityProfile(editorConfig, id = 'standard') {
       1,
       Math.round(grass.bladesPerCell * profile.grassMultiplier),
     );
+    if (grass.system === 'meadow') {
+      for (const band of Object.values(grass.meadow?.lod ?? {})) {
+        band.density *= profile.grassMultiplier;
+      }
+      if (grass.meadow?.far) grass.meadow.far.density *= profile.grassMultiplier;
+    }
   }
   return profile;
 }

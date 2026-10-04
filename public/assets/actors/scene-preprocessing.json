@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "settings": "{\"version\":1,\"structures\":{\"detail\":{\"error\":0.001},\"shadow\":{\"error\":0.003}},\"npcRatios\":[1,0.3,0.12,0.04]}",
+  "meshoptimizer": "1.2.0",
+  "three": "0.186.1",
+  "data": "assets/actors/scene-preprocessing.bin.gz",
+  "sources": {
+    "/assets/characters/villager-rugged-blacks.glb": {
+      "sha256": "6f0796f7f31d213d8d5c6b185526f36e117ece552b27afa32047c07aafced365",
+      "primitives": [
+        {
+          "ordinal": 0,
+          "signature": "d4211338f0b7e1a7",
+          "vertexCount": 28485,
+          "stages": {
+            "ratio:0.3": {
+              "offset": 0,
+              "bytes": 37624,
+              "count": 36759
+            },
+            "ratio:0.12": {
+              "offset": 37624,
+              "bytes": 15544,
+              "count": 14697
+            },
+            "ratio:0.04": {
+              "offset": 53168,
+              "bytes": 9521,
+              "count": 8865
+            }
+          }
+        }
+      ]
+    },
+    "/assets/characters/radiant-paladin.glb": {
+      "sha256": "065ec837df8af6a7eb2593126d9d74cdd26fb4ab816a60627122bb351fbcb654",
+      "primitives": [
+        {
+          "ordinal": 0,
+          "signature": "16f80fd6b54ffe14",
+          "vertexCount": 20983,
+          "stages": {
+            "ratio:0.3": {
+              "offset": 62689,
+              "bytes": 25865,
+              "count": 25344
+            },
+            "ratio:0.12": {
+              "offset": 88554,
+              "bytes": 10594,
+              "count": 10128
+            },
+            "ratio:0.04": {
+              "offset": 99148,
+              "bytes": 9294,
+              "count": 8886
+            }
+          }
+        }
+      ]
+    }
+  },
+  "dataBytes": 108442,
+  "dataSha256": "d38cbb740ba58958b167b13047dba3ebee11fae0dfdb7db32ad2f4e60d941be3"
+}

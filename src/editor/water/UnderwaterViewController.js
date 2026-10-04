@@ -48,6 +48,9 @@ export class UnderwaterViewController {
     }
     this.underwaterBackground = new THREE.Color(config.backgroundColor);
     this.underwaterFogColor = new THREE.Color(config.fogColor);
+    // Keep this identity across preparation, dives, and surface restoration so
+    // the renderer can reuse the prepared fog graph on the first dive.
+    this.underwaterFog = new THREE.FogExp2(this.underwaterFogColor, config.fogDensity);
     this.appliedBackground = new THREE.Color();
     this.appliedFogColor = new THREE.Color();
     this.appliedFogDensity = this.surfaceFogDensity;
@@ -73,7 +76,21 @@ export class UnderwaterViewController {
       };
       this.causticsPrewarmHook = (camera) => {
         const original = this.originalTerrainPrewarm?.call(terrainView, camera) ?? false;
-        const projected = this.causticsPostProcess.prewarm(camera);
+        const previousFog = this.scene.fog;
+        let projected;
+        try {
+          if (!previousFog?.isFogExp2) this.scene.fog = this.underwaterFog;
+          projected = this.causticsPostProcess.prewarm(camera);
+          const skyVisible = this.skyMesh?.visible;
+          try {
+            if (this.skyMesh) this.skyMesh.visible = false;
+            this.causticsPostProcess.prewarm(camera);
+          } finally {
+            if (this.skyMesh) this.skyMesh.visible = skyVisible;
+          }
+        } finally {
+          this.scene.fog = previousFog;
+        }
         return Boolean(original || projected);
       };
       terrainView.render = this.causticsRenderHook;
@@ -100,7 +117,7 @@ export class UnderwaterViewController {
     this.scene.background = this.appliedBackground;
 
     if (!this.scene.fog?.isFogExp2) {
-      this.scene.fog = new THREE.FogExp2(this.surfaceFogColor, this.surfaceFogDensity);
+      this.scene.fog = this.underwaterFog;
     }
     this.appliedFogColor.copy(this.surfaceFogColor).lerp(this.underwaterFogColor, this.blend);
     this.scene.fog.color.copy(this.appliedFogColor);

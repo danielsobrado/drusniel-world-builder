@@ -1,3 +1,4 @@
+import { WATER_SLOT_OPTIONS } from './SharedWaterMaterials.js';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import {
@@ -21,10 +22,11 @@ const WATER_FIELD_CHANNELS = 4;
 const REFRACTION_CHUNK_RADIUS = 2;
 
 export class StylizedWaterSlot {
-  constructor({ terrainSlot, terrainView, config, sunDirection = null }) {
+  constructor({ terrainSlot, terrainView, config, sunDirection = null, sharedMaterials = null }) {
     this.terrainSlot = terrainSlot;
     this.terrainView = terrainView;
     this.config = config;
+    this.sharedMaterials = sharedMaterials;
     this.time = uniform(0);
     this.surfaceOrigin = uniform(0);
     // Each swell component's phase at this chunk's centre, in double precision.
@@ -99,6 +101,7 @@ export class StylizedWaterSlot {
     this.refractiveMaterial = null;
     this.refractionPrewarmed = false;
     this.mesh = new THREE.Mesh(terrainView.geometry, this.material);
+    this.mesh.userData[WATER_SLOT_OPTIONS] = this.materialOptions;
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.visible = false;
     this.mesh.renderOrder = 2;
@@ -112,6 +115,7 @@ export class StylizedWaterSlot {
   }
 
   createMaterial(enableRefraction) {
+    if (this.sharedMaterials) return this.sharedMaterials.get(this.materialOptions, enableRefraction);
     const material = createStylizedWaterMaterial({
       ...this.materialOptions,
       enableRefraction,
@@ -139,10 +143,13 @@ export class StylizedWaterSlot {
 
   resolveMaterial() {
     if (!this.hasWaterCoverage || !this.isWithinRefractionRange()) return this.material;
-    if (this.refractiveMaterial === null) {
-      this.refractiveMaterial = this.createMaterial(true);
+    const material = this.ensureRefractiveMaterial();
+    const preparation = this.terrainView.drawPreparation;
+    if (preparation && !preparation.isMaterialReady(this.mesh, material)) {
+      preparation.requestMaterial(this.mesh, material);
+      return this.material;
     }
-    return this.refractiveMaterial;
+    return material;
   }
 
   ensureRefractiveMaterial() {
@@ -231,7 +238,9 @@ export class StylizedWaterSlot {
     this.terrainView.scene.remove(this.mesh);
     this.waterFieldTexture.dispose();
     this.waterFlowTexture.dispose();
-    this.material.dispose();
-    this.refractiveMaterial?.dispose();
+    if (!this.sharedMaterials) {
+      this.material.dispose();
+      this.refractiveMaterial?.dispose();
+    }
   }
 }

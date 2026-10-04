@@ -334,6 +334,7 @@ export class ObjectView {
         })[0],
       };
       renderer.capacity = capacity;
+      this.terrainView.drawPreparation?.discover();
       return;
     }
     for (const mesh of renderer.meshes) {
@@ -347,6 +348,7 @@ export class ObjectView {
       mesh.receiveShadow = true;
       mesh.userData.objectIds = [];
       this.root.add(mesh);
+      this.terrainView.drawPreparation?.discover();
       return mesh;
     });
     renderer.capacity = capacity;
@@ -415,6 +417,7 @@ export class ObjectView {
     renderer.foundationMesh.receiveShadow = true;
     renderer.foundationMesh.userData.objectIds = [];
     this.root.add(renderer.foundationMesh);
+    this.terrainView.drawPreparation?.discover();
   }
 
   refreshFoundations(renderer, placements) {

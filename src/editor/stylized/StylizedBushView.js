@@ -1,3 +1,5 @@
+import { ITERATOR_PENDING } from './ResumableIterator.js';
+import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
@@ -106,6 +108,7 @@ export class StylizedBushView {
     this.proxyMeshes = [];
     this.placements = [];
     this.manifestCache = new Map();
+    this.pendingManifests = new Map();
     this.chunkLodStates = new Map();
     this.lastUpdateKey = null;
     this.pendingRebuild = null;
@@ -138,6 +141,8 @@ export class StylizedBushView {
       slopeSampleDistance: this.config.trees.habitat?.slopeSampleDistance ?? 4,
       config: bushes,
     });
+    this.clusterField.localRevisionProvider = (x, z) => this.revisionTracker.signature(
+      Math.floor(x / this.terrainView.chunkWorldSize), Math.floor(-z / this.terrainView.chunkWorldSize), 1);
     this.pathClearance ??= createPathClearanceField(this.terrainView, this.config);
 
     const firstNewPrototype = this.prototypes.length;
@@ -255,7 +260,7 @@ export class StylizedBushView {
     };
   }
 
-  manifestForChunk(chunkX, chunkZ, blockers) {
+  manifestForChunk(chunkX, chunkZ, blockers, shouldYield = null) {
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
       this.prototypes.length,
@@ -272,7 +277,7 @@ export class StylizedBushView {
     if (cached?.key === key) return cached.placements;
 
     const bushes = this.config.bushes;
-    const placements = buildStableChunkManifest({
+    const options = {
       kind: 'bush',
       chunkX,
       chunkZ,
@@ -308,7 +313,17 @@ export class StylizedBushView {
       randomChannelOffset: BUSH_RANDOM_CHANNEL_OFFSET,
       priorityChannel: BUSH_PRIORITY_CHANNEL,
       candidateEvaluator: this.createCandidateEvaluator(),
-    });
+    };
+    const prepared = this.terrainView.preparedPlacement;
+    if (prepared && !prepared.ensureChunk(chunkX, chunkZ, 2, 1)) return null;
+    let state = this.pendingManifests.get(cacheKey);
+    if (state?.key !== key) {
+      state = { key, builder: createStableChunkManifestBuilder(options) };
+      this.pendingManifests.set(cacheKey, state);
+    }
+    const placements = state.builder.step({ shouldYield });
+    if (placements === null) return null;
+    this.pendingManifests.delete(cacheKey);
     this.manifestCache.set(cacheKey, { key, placements });
     return placements;
   }
@@ -323,9 +338,8 @@ export class StylizedBushView {
     const renderRadius = settings.enabled
       ? settings.proxyRadius
       : this.config.bushes.residentRadius;
-    const viewportHeight = this.terrainView.renderer.domElement.clientHeight
-      || this.terrainView.renderer.domElement.height
-      || 1;
+    const viewportHeight = this.terrainView.viewportHeight
+      ?? this.terrainView.renderer.domElement.height ?? 1;
     const plan = settings.enabled
       ? buildChunkLodPlan({
         focus,
@@ -367,6 +381,7 @@ export class StylizedBushView {
       // that were scattered before the boulders existed.
       + `:r${rockSource?.prototypeRevision ?? 0}`;
     if (updateKey === this.lastUpdateKey && !this.pendingRebuild) return;
+    if (this.pendingRebuild?.updateKey === updateKey) return;
     this.pendingRebuild = {
       key: `bush-lod:${updateKey}`,
       updateKey,
@@ -377,13 +392,9 @@ export class StylizedBushView {
     };
   }
 
-  applyPendingRebuild() {
-    const job = this.pendingRebuild;
-    if (!job) return false;
-    this.pendingRebuild = null;
-    this.lastUpdateKey = job.updateKey;
-    this.rebuild(job.focus, job.placementRadius, job.plan, job.rockSource);
-    return true;
+  applyPendingRebuild(shouldYield = null) {
+    return stepViewRebuild(this, this.pendingRebuild, shouldYield,
+      job => this.iterateRebuild(job.focus, job.placementRadius, job.plan, job.rockSource));
   }
 
   createNearOnlyPlan(focus, radius) {
@@ -401,6 +412,8 @@ export class StylizedBushView {
   }
 
   blockersFor(chunkX, chunkZ, rockSource) {
+    const snapshot = rockSource?.blockerSnapshotForChunk?.(chunkX, chunkZ, 1);
+    if (rockSource?.blockerSnapshotForChunk) return snapshot;
     const placements = rockSource?.getBlockersForChunk?.(chunkX, chunkZ, 1) ?? [];
     return {
       placements,
@@ -408,7 +421,7 @@ export class StylizedBushView {
     };
   }
 
-  rebuild(focus, placementRadius, plan, rockSource) {
+  *iterateRebuild(focus, placementRadius, plan, rockSource) {
     PerfCounters.inc('bushRebuilds');
     const near = this.prototypes.map(() => []);
     const proxy = this.proxyPrototypes.map(() => []);
@@ -432,16 +445,18 @@ export class StylizedBushView {
           representation.band !== 'culled' && representation.fade > 0
         ));
         if (!visible) continue;
-        const manifest = this.manifestForChunk(
-          chunkX,
-          chunkZ,
-          this.blockersFor(chunkX, chunkZ, rockSource),
-        );
+        let manifest = null;
+        while (manifest === null) {
+          const blockers = this.blockersFor(chunkX, chunkZ, rockSource);
+          if (blockers) manifest = this.manifestForChunk(chunkX, chunkZ, blockers, this.currentShouldYield);
+          if (manifest === null) yield ITERATOR_PENDING;
+        }
         placements.push(...manifest);
         for (const representation of entry.representations) {
           if (representation.band === 'culled' || representation.fade <= 0) continue;
           const target = representation.band === 'near' ? near : proxy;
           for (const placement of manifest) {
+            yield;
             target[placement.prototypeIndex].push({
               matrix: new THREE.Matrix4().compose(
                 BUSH_SCRATCH.position.set(placement.x, placement.height, placement.z),
@@ -473,6 +488,7 @@ export class StylizedBushView {
     for (const key of this.manifestCache.keys()) {
       if (!activeChunks.has(key)) this.manifestCache.delete(key);
     }
+    return true;
   }
 
   dispose() {

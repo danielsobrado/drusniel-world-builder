@@ -52,6 +52,19 @@ export class LegacyWorkshopEditSession {
     return legacyWorkshopEditStateFromDocument(this.#bus.document);
   }
 
+  captureRuntimeState() {
+    return { document: this.#bus.document, history: this.#history.captureRuntimeState() };
+  }
+
+  restoreRuntimeState(state) {
+    this.#history.dispose();
+    this.#bus = new WorkshopCommandBus(state.document);
+    this.#history = new WorkshopHistory(this.#bus);
+    this.#history.restoreRuntimeState(state.history);
+    this.#tool = new WorkshopToolController({ bus: this.#bus });
+    this.#gestureLabel = null;
+  }
+
   get canUndo() {
     return this.#history.canUndo;
   }

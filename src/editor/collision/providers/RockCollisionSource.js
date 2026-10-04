@@ -1,3 +1,4 @@
+import { COLLISION_BUILD_DEFERRED } from '../CollisionBuildResult.js';
 import {
   authoredCollisionProxyForGeometry,
   releaseAuthoredCollisionProxy,
@@ -197,14 +198,10 @@ export function createRockCollisionSource({ rockView, config }) {
     snapshotChunk(chunkX, chunkZ) {
       const currentProfiles = ensureProfiles();
       if (currentProfiles.length === 0) {
-        return Object.freeze({
-          chunkX,
-          chunkZ,
-          signature: `empty:${observedPrototypeRevision}`,
-          placements: EMPTY_PLACEMENTS,
-        });
+        return COLLISION_BUILD_DEFERRED;
       }
       const placements = rockView.manifestForChunk(chunkX, chunkZ);
+      if (placements === null || currentProfiles.length === 0) return COLLISION_BUILD_DEFERRED;
       return Object.freeze({
         chunkX,
         chunkZ,

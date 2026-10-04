@@ -2,6 +2,11 @@
 
 Deterministic harness for reproducing and measuring player-mode stutter while moving across the streamed world.
 
+> The prepared terrain/vegetation work and hardware captures for 2026-10-04
+> are recorded in [perf-investigation-2026-10-04.md](perf-investigation-2026-10-04.md).
+> Settle now includes scenery preparation. Older captures can have incomplete
+> vegetation at measurement start even when their original settle gate passed.
+
 > The 2026-07-25 collapse to 3 FPS and its fixes are written up in
 > [perf-investigation-2026-07-25.md](perf-investigation-2026-07-25.md), including
 > the two harness defects that made earlier numbers untrustworthy. Read that before
@@ -81,7 +86,7 @@ When a run finishes, the report is available as:
 | `x`, `z` | `0` | Spawn pose (render-space) |
 | `yaw`, `pitch` | `0` | Look angles in degrees |
 | `warmup` | `2` | Seconds to settle streaming before measuring |
-| `settle` | off | After `warmup`, keep warming up until collision is ready, terrain has stopped loading and the wall build queue is empty for 60 frames running; the report's `scenario.settle` records the wait, or what it timed out on |
+| `settle` | off | After `warmup`, wait for collision, terrain, construction, and scenery preparation to remain ready for 60 consecutive frames. Scenery includes prepared fields, manifests, meadow compaction, material jobs, variants, and draw preparation. `scenario.settle` records the additional wait or timeout blockers. |
 | `settleTimeout` | `120` | Seconds `settle` may wait past `warmup` before measuring anyway |
 | `duration` | `12` (`20` for `chunk-cross`) | Measured motion seconds |
 | `speed` | `run` | `walk` or `run` |
@@ -124,6 +129,9 @@ Density profiles are QA-only multipliers applied before worker and stylized
 systems are created. `dense-forest` doubles tree placement/candidate budgets,
 `high-grass` doubles `bladesPerCell`, and `dense-mixed` does both. They do not
 change Azgaar biome IDs, tile persistence, or production configuration.
+When the active grass system is meadow, the grass profiles also double each
+meadow band's density and the far-card density. The matrix checks those active
+densities; changing only the unused clump setting does not establish meadow stress.
 
 The harness enters walk mode at a fixed pose, bypasses pointer lock, and injects keys so runs are repeatable without mouse capture.
 
@@ -143,6 +151,12 @@ Report kind: `simcity-dnd-perf-qa` (version `2`).
   - `render`
 - **Counters** — totals for grass/flower/tree/rock rebuilds, terrain slot assigns/uploads, floating-origin snaps
 - **Backend gauges** — `rendererWebGPUBackend` / `rendererWebGLBackend` make an unexpected fallback visible in every report
+- **Water CPU gauges** — `waterProjectedCausticCpuMs` measures the post-effect
+  excluding its scene pass; `waterProjectedCausticSceneCpuMs` measures that pass,
+  and `waterProjectedCausticPipelineCpuMs` preserves their total. Older reports
+  called the whole pipeline the caustic cost. Use frame timings and the full
+  pipeline gauge when assessing dive stalls; passing the effect's 4 ms gate
+  does not excuse a scene-rendering hitch.
 - **Hitch frames** — every frame with `dt > hitchMs`, including phase breakdown, counter deltas, streaming/voxel/player snapshots
 - **Samples** — downsampled frames, plus any hitch, expensive phase (≥8 ms), or non-empty counter-delta frame
 

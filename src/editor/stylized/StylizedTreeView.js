@@ -1,3 +1,4 @@
+import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -27,7 +28,8 @@ import { createForestLeafTintTable } from './forest/forestLeafTint.js';
 import { createProceduralBarkTextures } from './forest/ProceduralBarkTextures.js';
 import { instanceCapacity } from './scatterMath.js';
 import { TreeManifestStore } from './TreeManifestStore.js';
-import { rebuildTreeLod } from './TreeLodAssembler.js';
+import { iterateTreeLod } from './TreeLodAssembler.js';
+import { stepViewRebuild } from './StagedViewRebuild.js';
 import {
   buildChunkLodPlan,
   createInstancedRenderers,
@@ -52,6 +54,7 @@ import { createTreeImpostorSourceSignature } from './impostor/TreeImpostorManife
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
+import { TreeRootFitter } from './forest/TreeRootFitter.js';
 
 function firstMaterial(mesh, name) {
   return materialList(mesh).find((material) => material?.name === name) ?? materialList(mesh)[0];
@@ -587,7 +590,14 @@ export class StylizedTreeView {
       name: 'stylized-forest-understory',
       castShadow: false,
     });
+    const rootFitter = new TreeRootFitter({
+      parts: this.prototypes,
+      sampleHeight: (x, z) => this.terrainView.getCanonicalHeight(x, z),
+      settings: this.config.trees.rootFit ?? { enabled: false },
+      resolvePrototypeIndex: placement => this.resolvePalettePrototypeIndex(placement),
+    });
     this.manifestStore = new TreeManifestStore({
+      fitPlacement: placement => rootFitter.fit(placement),
       terrainView: this.terrainView,
       config: this.config,
       revisionTracker: this.revisionTracker,
@@ -660,10 +670,12 @@ export class StylizedTreeView {
     this.instanceAnchor.place(this.root, origin);
     const settings = lodSettings(this.config);
     const radius = settings.enabled ? settings.clusterRadius : this.config.trees.residentRadius;
-    const viewportHeight = this.terrainView.renderer.domElement.clientHeight
-      || this.terrainView.renderer.domElement.height
-      || 1;
-    const plan = settings.enabled
+    const viewportHeight = this.terrainView.viewportHeight
+      ?? this.terrainView.renderer.domElement.height ?? 1;
+    const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${
+      this.manifestStore.version ?? 0}:${viewportHeight}:${camera.fov}:${camera.zoom}:${this.impostorVersion}`;
+    const plan = cachedLodPlan(this, planKey, timestamp,
+      Math.min(this.lodRebuildIntervalMs, settings.transitionMs / 8), () => settings.enabled
       ? buildChunkLodPlan({
         focus,
         radius: radius + 1,
@@ -691,8 +703,8 @@ export class StylizedTreeView {
       : {
         entries: this.createNearOnlyPlan(focus, radius),
         signature: `near:${focus.chunkX}:${focus.chunkZ}:${radius}`,
-      };
-    pruneStateMap(this.chunkLodStates, plan.entries);
+      });
+    if (this.previousPlan !== plan) pruneStateMap(this.chunkLodStates, plan.entries);
     const revision = this.revisionTracker.windowSignature(focus, radius + 1, 1);
     // Per-chunk rock blockers live in TreeManifestStore — do not use a global
     // rock signature that would rebuild every tree band when far rocks stream.
@@ -700,23 +712,28 @@ export class StylizedTreeView {
       this.impostorVersion
     }:${this.biomeAssetPalette?.revision ?? 0}`;
 
-    for (const entry of plan.entries) {
-      const visible = entry.representations.some((value) => (
-        value.band !== 'culled' && value.fade > 0
-      ));
-      if (!visible) continue;
-      if (!this.manifestStore.get(entry.chunkX, entry.chunkZ, rockSource)) {
-        this.manifestStore.schedule(entry.chunkX, entry.chunkZ, rockSource);
+    const rockVersion = rockSource?.manifestStore?.version;
+    if (this.previousPlan !== plan || rockVersion === undefined || rockVersion !== this.previousRockVersion) {
+      for (const entry of plan.entries) {
+        const visible = entry.representations.some((value) => (
+          value.band !== 'culled' && value.fade > 0
+        ));
+        if (!visible) continue;
+        if (!this.manifestStore.get(entry.chunkX, entry.chunkZ, rockSource)) {
+          this.manifestStore.schedule(entry.chunkX, entry.chunkZ, rockSource);
+        }
       }
+      this.manifestStore.setActive(new Set(
+        plan.entries.map((entry) => `${entry.chunkX}:${entry.chunkZ}`),
+      ));
+      this.previousPlan = plan;
+      this.previousRockVersion = rockVersion;
     }
-    this.manifestStore.setActive(new Set(
-      plan.entries.map((entry) => `${entry.chunkX}:${entry.chunkZ}`),
-    ));
     const manifestFlush = this.manifestStore.flush();
 
     if (shouldScheduleTreeLodRebuild({
       planChanged: key !== this.lastUpdateKey,
-      manifestsBuilt: manifestFlush.built > 0,
+      manifestsBuilt: manifestFlush.completed > 0,
       queueRemaining: manifestFlush.remaining,
       lastRebuildAt: this.lastLodRebuildAt,
       timestamp,
@@ -748,17 +765,16 @@ export class StylizedTreeView {
     }
   }
 
-  applyPendingRebuild() {
+  applyPendingRebuild(shouldYield = null) {
     const job = this.pendingLodRebuild;
-    if (!job) return false;
-    this.pendingLodRebuild = null;
-    this.lastUpdateKey = job.updateKey;
-    this.lastLodRebuildAt = job.timestamp;
-    const anchorOrigin = this.terrainView.floatingOrigin.getState();
-    this.instanceAnchor.follow(anchorOrigin);
-    rebuildTreeLod({
+    const completed = stepViewRebuild(this, job, shouldYield, job => iterateTreeLod({
       plan: job.plan,
       anchor: this.instanceAnchor,
+      beforePublish: () => {
+        const origin = this.terrainView.floatingOrigin.getState();
+        this.instanceAnchor.follow(origin);
+        this.instanceAnchor.place(this.root, origin);
+      },
       rockSource: job.rockSource,
       manifestStore: this.manifestStore,
       prototypeCount: this.prototypes.length,
@@ -773,14 +789,9 @@ export class StylizedTreeView {
       understoryRenderers: this.understoryRenderers,
       resolveLeafTint: (record) => this.resolveLeafTint(record),
       resolvePrototypeIndex: (placement) => this.resolvePalettePrototypeIndex(placement),
-    });
-    this.instanceAnchor.place(this.root, anchorOrigin);
-    // Deliberately no second manifest flush here. `update` already flushed the
-    // queue this frame; flushing again put a full chunk manifest build — fractal
-    // noise, habitat sampling and boulder blockers — inside the same frame as the
-    // instance rebuild, which is what made these frames 12-18 ms. Chunks scheduled
-    // during the rebuild are picked up by the next frame's flush.
-    return true;
+    }), 'pendingLodRebuild');
+    if (completed) this.lastLodRebuildAt = performance.now();
+    return completed;
   }
 
   /** Canonical tile under a placement, in the same convention the scatter uses. */

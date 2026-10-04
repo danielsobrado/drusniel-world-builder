@@ -1,9 +1,11 @@
+import { ITERATOR_PENDING } from './ResumableIterator.js';
+import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
 import { evaluateAquaticPlacement } from '../water/AquaticPlacement.js';
 import { instanceCapacity } from './scatterMath.js';
-import { buildStableChunkManifest } from './StableScatterManifest.js';
+import { createStableChunkManifestBuilder } from './StableScatterManifest.js';
 import {
   createInstancedRenderers,
   disposeInstancedRenderers,
@@ -87,6 +89,7 @@ export class StylizedGroundDetailView {
     this.prototypeRevision = 0;
     this.meshes = [];
     this.manifestCache = new Map();
+    this.pendingManifests = new Map();
     this.lastUpdateKey = null;
     this.pendingRebuild = null;
     this.disposed = false;
@@ -251,7 +254,7 @@ export class StylizedGroundDetailView {
     this.prototypeRevision += 1;
   }
 
-  manifestForChunk(chunkX, chunkZ) {
+  manifestForChunk(chunkX, chunkZ, shouldYield = null) {
     const forestField = this.forestFieldProvider?.();
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
@@ -272,7 +275,7 @@ export class StylizedGroundDetailView {
     const cacheKey = `${chunkX}:${chunkZ}`;
     const cached = this.manifestCache.get(cacheKey);
     if (cached?.key === key) return cached.placements;
-    const placements = buildStableChunkManifest({
+    const options = {
       kind: this.layerName,
       chunkX,
       chunkZ,
@@ -347,7 +350,17 @@ export class StylizedGroundDetailView {
           ? { ...(metadata ?? {}), regionalMeadow }
           : null;
       },
-    });
+    };
+    const prepared = this.terrainView.preparedPlacement;
+    if (prepared && !prepared.ensureChunk(chunkX, chunkZ, 2, 1)) return null;
+    let state = this.pendingManifests.get(cacheKey);
+    if (state?.key !== key) {
+      state = { key, builder: createStableChunkManifestBuilder(options) };
+      this.pendingManifests.set(cacheKey, state);
+    }
+    const placements = state.builder.step({ shouldYield });
+    if (placements === null) return null;
+    this.pendingManifests.delete(cacheKey);
     this.manifestCache.set(cacheKey, { key, placements });
     return placements;
   }
@@ -363,6 +376,7 @@ export class StylizedGroundDetailView {
       this.biomeAssetPalette?.revision ?? 0
     }:p${this.prototypeRevision}`;
     if (updateKey === this.lastUpdateKey && !this.pendingRebuild) return;
+    if (this.pendingRebuild?.updateKey === updateKey) return;
     this.pendingRebuild = {
       key: `${this.layerName}:${updateKey}`,
       updateKey,
@@ -370,16 +384,12 @@ export class StylizedGroundDetailView {
     };
   }
 
-  applyPendingRebuild() {
-    const job = this.pendingRebuild;
-    if (!job) return false;
-    this.pendingRebuild = null;
-    this.lastUpdateKey = job.updateKey;
-    this.rebuild(job.focus);
-    return true;
+  applyPendingRebuild(shouldYield = null) {
+    return stepViewRebuild(this, this.pendingRebuild, shouldYield,
+      job => this.iterateRebuild(job.focus));
   }
 
-  rebuild(focus) {
+  *iterateRebuild(focus) {
     PerfCounters.inc(`${this.layerName}Rebuilds`);
     const instances = this.prototypes.map(() => []);
     const activeChunks = new Set();
@@ -389,7 +399,13 @@ export class StylizedGroundDetailView {
       for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
         const key = `${chunkX}:${chunkZ}`;
         activeChunks.add(key);
-        for (const placement of this.manifestForChunk(chunkX, chunkZ)) {
+        let manifest = null;
+        while (manifest === null) {
+          manifest = this.manifestForChunk(chunkX, chunkZ, this.currentShouldYield);
+          if (manifest === null) yield ITERATOR_PENDING;
+        }
+        for (const placement of manifest) {
+          yield;
           const placementHeight = Number.isFinite(placement.waterPlacementHeight)
             ? placement.waterPlacementHeight
             : placement.height;
@@ -418,6 +434,7 @@ export class StylizedGroundDetailView {
     for (const key of this.manifestCache.keys()) {
       if (!activeChunks.has(key)) this.manifestCache.delete(key);
     }
+    return true;
   }
 
   dispose() {

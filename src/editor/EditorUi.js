@@ -1944,4 +1944,9 @@ export class EditorUi {
       this.toast.classList.remove('is-visible');
     }, 2600);
   }
+  dispose() {
+    this.postProcessingPanel?.dispose(); this.unsubscribeGodRaysPostProcessing?.();
+    this.constructionDrawingControls?.dispose();
+  }
+
 }

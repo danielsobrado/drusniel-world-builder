@@ -2,6 +2,7 @@ import {
   attribute,
   float,
   step,
+  smoothstep,
   vec3,
 } from 'three/tsl';
 import { authoredTexture } from '../AuthoredTextureNode.js';
@@ -40,11 +41,17 @@ function applyMorphology(material, kind, pivot) {
   const pivotX = float(pivot.x);
   const pivotY = float(pivot.y);
   const pivotZ = float(pivot.z);
-  setPreInstancePosition(material, (position) => vec3(
+  setPreInstancePosition(material, (position) => {
+    const shaped = vec3(
     position.x.sub(pivotX).mul(horizontalScale).add(pivotX),
     position.y.sub(pivotY).mul(verticalScale).add(pivotY),
     position.z.sub(pivotZ).mul(horizontalScale).add(pivotZ),
-  ));
+    );
+    if (kind !== 'trunk') return shaped;
+    const root = attribute('instanceRootPlane', 'vec3');
+    const weight = smoothstep(0, root.z.max(0.001), position.y).oneMinus();
+    return vec3(shaped.x, shaped.y.add(shaped.x.mul(root.x).add(shaped.z.mul(root.y)).mul(weight)), shaped.z);
+  });
   material.userData.treeMorphologyPivot = [pivot.x, pivot.y, pivot.z];
   material.userData.treeMorphologyPivotY = pivot.y;
 }

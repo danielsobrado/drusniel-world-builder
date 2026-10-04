@@ -45,6 +45,9 @@ function reportSummary(report) {
       maxAcceptedPerChunk:
         stylized?.trees?.habitat?.maxAcceptedPerChunk ?? null,
       bladesPerCell: stylized?.grass?.bladesPerCell ?? null,
+      grassSystem: stylized?.grass?.system ?? 'clumps',
+      meadowHighDensity: stylized?.grass?.meadow?.lod?.high?.density ?? null,
+      meadowFarDensity: stylized?.grass?.meadow?.far?.density ?? null,
     },
     counters: {
       rendererWebGPUBackend: report.counters?.rendererWebGPUBackend ?? 0,
@@ -95,10 +98,12 @@ for (const entry of waterOnly ? [] : cases) {
     '--density', entry.density,
     '--duration', duration,
     '--warmup', warmup,
+    '--settle',
     '--viewportWidth', viewportWidth,
     '--viewportHeight', viewportHeight,
     '--out', outPath,
   ];
+  if (entry.id === 'construction-ring') args.push('--x', '0', '--z', '-100', '--yaw', '180');
   if (headed) args.unshift('--headed');
   const execution = await runScript('scripts/run-perf-qa.mjs', args);
   const report = fs.existsSync(outPath)

@@ -352,6 +352,7 @@ async function main() {
       z: String(discovery.route.start.z),
       yaw: String(discovery.route.yawDegrees),
       warmup: String(warmupSeconds),
+      settle: '1',
       duration: String(measuredSeconds),
       speed: 'walk',
       hitchMs: '33.3',
@@ -363,7 +364,7 @@ async function main() {
       const focus = window.__editor?.controller?.focusProvider?.();
       return focus && Math.hypot(focus.x - x, focus.z - z) < 2;
     }, discovery.route.start);
-    await page.waitForTimeout((warmupSeconds + 0.5) * 1000);
+    await page.waitForFunction(() => window.__perfQa?.recording, null, { timeout: 180_000 });
 
     const tracker = new WaterAcceptanceTracker({
       route: discovery.route,

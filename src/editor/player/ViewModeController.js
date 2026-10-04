@@ -65,6 +65,7 @@ export class ViewModeController {
   }
 
   get camera() {
+    if (this.cameraOverride) return this.cameraOverride;
     if (this.mode !== PLAYER_MODE_WALK) return this.editorCamera.camera;
     if (!this.isThirdPerson) return this.playerController.camera;
 
@@ -295,6 +296,7 @@ export class ViewModeController {
   }
 
   update(timestamp) {
+    if (this.cameraOverride) return;
     if (this.mode === PLAYER_MODE_WALK) {
       this.playerController.update(timestamp);
       if (this.isThirdPerson) {
@@ -311,6 +313,7 @@ export class ViewModeController {
   }
 
   getFocusWorld() {
+    if (this.focusOverride) return this.focusOverride;
     return this.mode === PLAYER_MODE_WALK
       ? this.playerController.getFocusWorld()
       : this.editorCamera.getFocusWorld();

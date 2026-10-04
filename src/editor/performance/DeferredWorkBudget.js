@@ -1,0 +1,39 @@
+import { FrameSlack } from './FrameSlack.js';
+import { PerfCounters } from './qa/PerfCounters.js';
+
+/** One shared allowance; collision/physics remain mandatory work. */
+export class DeferredWorkBudget {
+  constructor(settings) {
+    this.settings = settings;
+    this.provider = max => this.available(max);
+    this.slack = new FrameSlack({ targetMs: 1000 / settings.targetFps,
+      reserveMs: settings.reserveMs, maximumMs: settings.maximumMs ?? 1.2 });
+  }
+  beginFrame() { this.slack.beginFrame(); }
+  available(maxMs) {
+    return this.settings.enabled
+      ? this.slack.available(Math.min(this.settings.minimumMs, maxMs), maxMs)
+      : maxMs;
+  }
+  run(work) { return this.slack.defer(work); }
+  endFrame() {
+    PerfCounters.set('frameFixedCpuMs', this.slack.endFrame());
+    PerfCounters.set('frameDeferredCpuMs', this.slack.deferredMs);
+    PerfCounters.set('frameDeferredBudgetMs', this.available(6));
+  }
+  attachSurface(surface) {
+    const provider = this.provider;
+    const queues = ['grassBuildQueue', 'flowerBuildQueue', 'treeBuildQueue', 'rockBuildQueue',
+      'bushBuildQueue', 'detailBuildQueue', 'aquaticBuildQueue', 'tropicalBuildQueue'];
+    for (const name of queues) {
+      if (surface[name]) surface[name].budgetProvider = provider;
+    }
+    surface.workBudgetProvider = provider;
+    surface.shouldYieldWork = () => this.available(6) <= 0;
+    if (surface.rockView) surface.rockView.shouldYieldWork = surface.shouldYieldWork;
+    if (surface.rockView?.manifestStore?.queue) surface.rockView.manifestStore.queue.budgetProvider = provider;
+    if (surface.treeView?.manifestStore?.queue) {
+      surface.treeView.manifestStore.queue.budgetProvider = provider;
+    }
+  }
+}
