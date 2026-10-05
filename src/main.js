@@ -1456,13 +1456,15 @@ async function initializeEditor(restoreState, resources) {
     if (forcePredictiveRefresh) {
       nextPredictiveRefreshAt = frameTimestamp + TERRAIN_PREFETCH_REFRESH_MS;
     }
-    terrainView.updateStreaming(
-      exploration.tour.preloadFocus() ?? canonicalFocus,
-      frameTimestamp,
-      forcePredictiveRefresh,
-    ).catch((error) => {
+    try {
+      terrainView.updateStreaming(
+        exploration.tour.preloadFocus() ?? canonicalFocus,
+        frameTimestamp,
+        forcePredictiveRefresh,
+      );
+    } catch (error) {
       console.error('Terrain streaming update failed.', error);
-    });
+    }
     if (profiling) perfQa.mark('streaming');
 
     // The player's feet, in render space like the layers' own state, for the layers
