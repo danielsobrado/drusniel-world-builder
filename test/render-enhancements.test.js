@@ -61,12 +61,14 @@ test('reflection exceptions restore targets, MRT, visibility and shadow update p
     getMRT: () => mrt, setMRT: v => { mrt = v; } };
   const scene = new Scene(), hidden = new Group(); scene.add(hidden);
   const light = new Group(); light.shadow = { autoUpdate: true, needsUpdate: true }; scene.add(light);
+  const scratch = { states: [], shadows: [] };
   assert.throws(() => withReflectionCapture(renderer, scene, [hidden], () => {
     assert.equal(hidden.visible, false); assert.equal(mrt, null);
     target = 'probe'; throw new Error('device');
-  }));
+  }, scratch));
   assert.equal(target, 'main'); assert.equal(mrt, 'gbuffer'); assert.equal(hidden.visible, true);
   assert.deepEqual(light.shadow, { autoUpdate: true, needsUpdate: true }); assert.equal(renderer.autoClear, false);
+  assert.equal(scratch.states.length, 0); assert.equal(scratch.shadows.length, 0);
 });
 
 test('planar camera mirrors the pose and clips below a translated water plane', () => {
