@@ -70,6 +70,7 @@ export class ObjectLodController {
     hysteresisRatio = 0.15,
     transitionMs = 240,
     fadeSteps = 16,
+    evaluationHz = 30,
   } = {}) {
     this.thresholds = {
       nearPixels,
@@ -80,6 +81,8 @@ export class ObjectLodController {
     };
     this.transitionMs = transitionMs;
     this.fadeSteps = fadeSteps;
+    this.evaluationIntervalMs = 1000 / Math.max(1, evaluationHz);
+    this.nextEvaluationAt = 0;
     this.states = new Map();
     this.seeds = new Map();
     this.activeIds = new Set();
@@ -96,6 +99,7 @@ export class ObjectLodController {
     this.states.clear();
     this.seeds.clear();
     this.activeIds.clear();
+    this.nextEvaluationAt = 0;
     this.hasLastCameraState = false;
     this.lastSelectedObjectId = null;
     this.lastPlan = null;
@@ -131,11 +135,10 @@ export class ObjectLodController {
     writeCameraState(camera, viewportHeight, this.cameraState);
     const cameraUnchanged = this.hasLastCameraState
       && cameraStatesEqual(this.cameraState, this.lastCameraState);
-    if (!force && !this.transitioning
-      && cameraUnchanged
-      && selectedObjectId === this.lastSelectedObjectId
-      && this.lastPlan) {
-      return this.lastPlan;
+    const selectionUnchanged = selectedObjectId === this.lastSelectedObjectId;
+    if (!force && selectionUnchanged && this.lastPlan) {
+      if (!this.transitioning && cameraUnchanged) return this.lastPlan;
+      if (Number.isFinite(timestamp) && timestamp < this.nextEvaluationAt) return this.lastPlan;
     }
 
     const buckets = { near: [], coarse: [], shell: [] };
@@ -200,6 +203,9 @@ export class ObjectLodController {
       signatures[band] = this.bandVersions[band];
     }
     this.transitioning = transitions > 0;
+    this.nextEvaluationAt = Number.isFinite(timestamp)
+      ? timestamp + this.evaluationIntervalMs
+      : 0;
     this.lastCameraState.set(this.cameraState);
     this.hasLastCameraState = true;
     this.lastSelectedObjectId = selectedObjectId;

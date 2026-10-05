@@ -20,3 +20,23 @@ test('construction build queue prioritizes visible work and keeps one current jo
   assert.equal(replaced.requestedBand, 'coarse');
   assert.equal(queue.length, 0);
 });
+
+test('construction build queue updates priority without a linear selection scan', () => {
+  const queue = new ConstructionBuildQueue();
+  queue.upsert(job('first', 10));
+  queue.upsert(job('second', 5));
+  queue.upsert(job('first', 1));
+
+  assert.equal(queue.length, 2);
+  assert.equal(queue.shift().module.id, 'first');
+  assert.equal(queue.shift().module.id, 'second');
+});
+
+test('construction build queue keeps FIFO order for equal priorities', () => {
+  const queue = new ConstructionBuildQueue();
+  queue.upsert(job('first', 1));
+  queue.upsert(job('second', 1));
+
+  assert.equal(queue.shift().module.id, 'first');
+  assert.equal(queue.shift().module.id, 'second');
+});

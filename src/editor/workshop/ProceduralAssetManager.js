@@ -292,6 +292,7 @@ export function createProceduralObjectLodParts(record, nearParts, config = {}) {
       hysteresisRatio: config.hysteresisRatio ?? 0.15,
       transitionMs: config.transitionMs ?? 240,
       fadeSteps: config.fadeSteps ?? 16,
+      evaluationHz: config.evaluationHz,
     }),
     shadows: Object.freeze({
       near: config.near?.castShadow ?? true,

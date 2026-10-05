@@ -1403,7 +1403,7 @@ async function initializeEditor(restoreState, resources, startup) {
       : 0;
     deferredWork.run(() => constructionView.update({
       budgetMs: constructionBudgetMs,
-      shouldYield: () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
+      shouldYield: deferredWork.shouldYield,
     }));
     PerfCounters.set('constructionModulesResident', constructionView.stats.modulesResident);
     PerfCounters.set('constructionModulesRebuilt', constructionView.stats.modulesRebuilt);
@@ -1474,10 +1474,8 @@ async function initializeEditor(restoreState, resources, startup) {
       if (profiling) perfQa.mark('character');
     }
 
-    if (deferredWork.peek(Number.POSITIVE_INFINITY) > 0) {
-      deferredWork.run(() => macroFarTerrain.update(
-        () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
-      ));
+    if (!deferredWork.shouldYield()) {
+      deferredWork.run(() => macroFarTerrain.update(deferredWork.shouldYield));
     }
     const backdropActive = macroFarTerrain.isActive();
     if (backdropActive !== farViewActive) {
