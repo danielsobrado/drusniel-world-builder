@@ -70,3 +70,16 @@ test('terrain commit queue replaces a slot without duplicating work and preserve
 
   assert.deepEqual(committed, ['current', 'other']);
 });
+
+test('terrain commit queue preserves replacement insertion order for equal priorities', () => {
+  const queue = new TerrainCommitQueue({ now: () => 0 });
+  const first = { slotIndex: 0 };
+  queue.enqueue({ slot: first, priority: 0, enqueuedAt: 0, page: 'first-old' });
+  queue.enqueue({ slot: { slotIndex: 1 }, priority: 0, enqueuedAt: 0, page: 'second' });
+  queue.enqueue({ slot: first, priority: 0, enqueuedAt: 0, page: 'first-new' });
+
+  const committed = [];
+  queue.drain((job) => committed.push(job.page));
+
+  assert.deepEqual(committed, ['second', 'first-new']);
+});

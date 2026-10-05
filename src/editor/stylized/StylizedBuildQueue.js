@@ -76,10 +76,11 @@ export class StylizedBuildQueue {
 
   sortQueue() {
     if (!this.sortDirty) return;
-    this.queue.sort((left, right) => (
-      right.queuePriority - left.queuePriority
-      || right.queueSequence - left.queueSequence
-    ));
+    this.queue.sort((left, right) => {
+      if (left.queuePriority < right.queuePriority) return 1;
+      if (left.queuePriority > right.queuePriority) return -1;
+      return right.queueSequence - left.queueSequence;
+    });
     this.sortDirty = false;
   }
 

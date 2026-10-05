@@ -230,3 +230,13 @@ test('rejects a default brush size outside the configured sizes', () => {
     /brush\.defaultSize must be listed/,
   );
 });
+
+test('rejects a non-positive object LOD evaluation cadence', () => {
+  const config = loadShippedConfig();
+  config.objects.lod.evaluationHz = 0;
+
+  assert.throws(
+    () => validateEditorConfig(config),
+    /objects\.lod\.evaluationHz must be positive/,
+  );
+});

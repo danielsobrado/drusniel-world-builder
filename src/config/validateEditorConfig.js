@@ -1086,6 +1086,10 @@ export function validateEditorConfig(config) {
     if (!Number.isInteger(objectLod.fadeSteps)) {
       throw new Error('Invalid editor configuration: objects.lod.fadeSteps must be an integer.');
     }
+    if (objectLod.evaluationHz !== undefined
+        && (!Number.isFinite(objectLod.evaluationHz) || objectLod.evaluationHz <= 0)) {
+      throw new Error('Invalid editor configuration: objects.lod.evaluationHz must be positive.');
+    }
     for (const band of ['near', 'coarse', 'shell']) {
       if (typeof objectLod[band]?.castShadow !== 'boolean') {
         throw new Error(

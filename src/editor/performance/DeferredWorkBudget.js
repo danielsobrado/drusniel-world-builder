@@ -7,9 +7,11 @@ export class DeferredWorkBudget {
     this.settings = settings;
     this.provider = max => this.available(max);
     this.runner = work => this.run(work);
+    this.maximumMs = settings.maximumMs ?? 1.2;
+    this.shouldYield = () => this.peek(Number.POSITIVE_INFINITY) <= 0;
     this.boundQueues = new WeakSet();
     this.slack = new FrameSlack({ targetMs: 1000 / settings.targetFps,
-      reserveMs: settings.reserveMs, maximumMs: settings.maximumMs ?? 1.2 });
+      reserveMs: settings.reserveMs, maximumMs: this.maximumMs });
   }
   beginFrame() { this.slack.beginFrame(); }
   available(maxMs) {
@@ -59,7 +61,7 @@ export class DeferredWorkBudget {
 
   attachSurface(surface) {
     if (!surface) return;
-    const shouldYield = () => this.peek(6) <= 0;
+    const shouldYield = this.shouldYield;
     const queues = ['grassBuildQueue', 'flowerBuildQueue', 'treeBuildQueue', 'rockBuildQueue',
       'bushBuildQueue', 'detailBuildQueue', 'aquaticBuildQueue', 'tropicalBuildQueue'];
     for (const name of queues) this.bindQueue(surface[name], shouldYield);
