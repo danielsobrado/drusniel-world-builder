@@ -313,6 +313,8 @@ export class StylizedSurfaceView {
     // of compounding into a visible stall.
     this.frameBudgetMs = config.streaming?.stylizedFrameBudgetMs ?? 6;
     this.frameStartedAt = 0;
+    this.lastBeginFrameTimestamp = null;
+    this.grassRockInputs = new WeakMap();
     const shouldYield = () => (
       this.frameStartedAt > 0 && performance.now() - this.frameStartedAt > (this.workBudgetMs ?? this.frameBudgetMs)
     );
@@ -650,6 +652,8 @@ export class StylizedSurfaceView {
   }
 
   beginFrame(timestamp) {
+    if (this.lastBeginFrameTimestamp === timestamp) return;
+    this.lastBeginFrameTimestamp = timestamp;
     const focus = this.terrainView?.focusChunk;
     if (focus && this.preparedPlacement) {
       const radius = placementPreparationRadius(this.config, this.terrainView.loadRadius ?? 0);
@@ -769,42 +773,60 @@ export class StylizedSurfaceView {
         slot.update(timestamp, focusChunk, '', [], canonicalFocus);
         continue;
       }
-      const localRocks = rocksInfluencingChunk({
-        descriptor,
-        rockPlacements,
-        chunkWorldSize: this.chunkWorldSize,
-        radius: rockRadius,
-        falloff: rockFalloff,
-      });
-      const localObjectBoulders = rocksInfluencingChunk({
-        descriptor,
-        rockPlacements: objectBoulders,
-        chunkWorldSize: this.chunkWorldSize,
-        radius: rockRadius,
-        falloff: rockFalloff,
-      });
-      const signature = [
-        objectBoulderSignatureForChunk({
-          objectMap: this.objectMap,
-          objectPlacements: objectBoulders,
-          descriptor,
-          tileSize: this.tileSize,
-          chunkWorldSize: this.chunkWorldSize,
-          radius: rockRadius,
-          falloff: rockFalloff,
-        }),
-        rockSignatureForChunk({
+      let rockInput = this.grassRockInputs.get(slot);
+      if (
+        !rockInput
+        || rockInput.descriptorKey !== descriptor.key
+        || rockInput.rockPlacements !== rockPlacements
+        || rockInput.objectBoulders !== objectBoulders
+      ) {
+        const localRocks = rocksInfluencingChunk({
           descriptor,
           rockPlacements,
           chunkWorldSize: this.chunkWorldSize,
           radius: rockRadius,
           falloff: rockFalloff,
-        }),
-      ].join('|');
-      slot.update(timestamp, focusChunk, signature, [
-        ...localObjectBoulders,
-        ...localRocks,
-      ], canonicalFocus);
+        });
+        const localObjectBoulders = rocksInfluencingChunk({
+          descriptor,
+          rockPlacements: objectBoulders,
+          chunkWorldSize: this.chunkWorldSize,
+          radius: rockRadius,
+          falloff: rockFalloff,
+        });
+        const signature = [
+          objectBoulderSignatureForChunk({
+            objectMap: this.objectMap,
+            objectPlacements: objectBoulders,
+            descriptor,
+            tileSize: this.tileSize,
+            chunkWorldSize: this.chunkWorldSize,
+            radius: rockRadius,
+            falloff: rockFalloff,
+          }),
+          rockSignatureForChunk({
+            descriptor,
+            rockPlacements,
+            chunkWorldSize: this.chunkWorldSize,
+            radius: rockRadius,
+            falloff: rockFalloff,
+          }),
+        ].join('|');
+        const localBoulders = localObjectBoulders.length === 0
+          ? localRocks
+          : localRocks.length === 0
+            ? localObjectBoulders
+            : [...localObjectBoulders, ...localRocks];
+        rockInput = {
+          descriptorKey: descriptor.key,
+          rockPlacements,
+          objectBoulders,
+          signature,
+          localBoulders,
+        };
+        this.grassRockInputs.set(slot, rockInput);
+      }
+      slot.update(timestamp, focusChunk, rockInput.signature, rockInput.localBoulders, canonicalFocus);
       if (slot.pendingRebuild) {
         this.grassBuildQueue.enqueue({
           key: slot.pendingRebuild.key,
