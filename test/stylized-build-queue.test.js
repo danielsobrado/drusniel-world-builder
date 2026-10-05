@@ -41,3 +41,21 @@ test('StylizedBuildQueue remains compatible with one-argument jobs', () => {
   assert.equal(visited, true);
   assert.deepEqual(result, { built: 1, remaining: 0 });
 });
+
+test('StylizedBuildQueue keeps FIFO order for default infinite priorities', () => {
+  const queue = new StylizedBuildQueue({
+    buildsPerFrame: 2,
+    budgetMs: 3,
+    now: () => 0,
+  });
+  queue.enqueue({ key: 'first' });
+  queue.enqueue({ key: 'second' });
+
+  const visited = [];
+  queue.flush((job) => {
+    visited.push(job.key);
+    return true;
+  });
+
+  assert.deepEqual(visited, ['first', 'second']);
+});

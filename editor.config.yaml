@@ -118,6 +118,7 @@ objects:
     hysteresisRatio: 0.15
     transitionMs: 240
     fadeSteps: 16
+    evaluationHz: 30
     near:
       castShadow: true
     coarse:
