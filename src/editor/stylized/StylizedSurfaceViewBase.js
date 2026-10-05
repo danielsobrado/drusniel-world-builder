@@ -283,15 +283,40 @@ export class StylizedSurfaceView {
     this.reflections = this.enabled && !this.impostorBakeMode && config.enhancements?.waterReflections.enabled
       ? new WaterReflectionController(terrainView, config.enhancements.waterReflections) : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections);
+    this.reflectionFrame = 0;
+    this.reflectionPrepared = null;
     terrainView.beforeMainRender = camera => {
       this.skyView?.cascades?.prepare(camera);
-      this.reflections?.prepare(camera, this);
-      // Captures reuse shadows from this main-camera draw. Standalone views may
-      // have no shared scheduler; the main loop supplies a debited reservation.
-      this.reflectionBudgetReserved = Boolean(this.reflections && !this.reserveDeferredWork && !this.shouldYieldWork?.());
+      const now = performance.now();
+      const prepared = this.reflections?.prepare(camera, this) ?? null;
+      this.reflectionPrepared = prepared;
+      this.reflectionReservation?.cancel();
+      this.reflectionReservation = null;
+      const captureTurn = this.reflectionFrame++ % 4 === 0;
+      if (
+        prepared
+        && captureTurn
+        && now >= this.reflections.nextCapture
+        && this.reserveDeferredWork
+      ) {
+        this.reflectionReservation = this.reserveDeferredWork(6);
+      }
+      // Standalone views have no shared scheduler; preserve their direct capture path.
+      this.reflectionBudgetReserved = Boolean(
+        prepared
+        && !this.reserveDeferredWork
+        && !this.shouldYieldWork?.()
+      );
     };
     terrainView.afterMainRender = camera => {
-      const capture = () => this.reflections.update(camera, this, performance.now(), { budgetReserved: true });
+      const prepared = this.reflectionPrepared;
+      this.reflectionPrepared = null;
+      const capture = () => this.reflections.update(
+        camera,
+        this,
+        performance.now(),
+        { budgetReserved: true, prepared },
+      );
       this.reflectionReservation?.run(capture);
       this.reflectionReservation = null;
       if (this.reflectionBudgetReserved) this.runDeferredWork ? this.runDeferredWork(capture) : capture();
