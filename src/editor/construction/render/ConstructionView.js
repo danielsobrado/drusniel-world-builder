@@ -97,23 +97,21 @@ function quantizeOrigin(value) {
 function updateCameraState(state, camera, viewportHeight) {
   const position = camera.position;
   const quaternion = camera.quaternion;
-  const next = [
-    Math.round(position.x * LOD_POSITION_SCALE),
-    Math.round(position.y * LOD_POSITION_SCALE),
-    Math.round(position.z * LOD_POSITION_SCALE),
-    Math.round(quaternion.x * LOD_ROTATION_SCALE),
-    Math.round(quaternion.y * LOD_ROTATION_SCALE),
-    Math.round(quaternion.z * LOD_ROTATION_SCALE),
-    Math.round(quaternion.w * LOD_ROTATION_SCALE),
-    Math.round((camera.zoom ?? 1) * 10),
-    Math.round((camera.fov ?? 0) * 10),
-    Math.round(viewportHeight * 10),
-  ];
-  let changed = state.length !== next.length;
-  for (let index = 0; index < next.length; index += 1) {
-    if (state[index] !== next[index]) changed = true;
-    state[index] = next[index];
-  }
+  const n0 = Math.round(position.x * LOD_POSITION_SCALE);
+  const n1 = Math.round(position.y * LOD_POSITION_SCALE);
+  const n2 = Math.round(position.z * LOD_POSITION_SCALE);
+  const n3 = Math.round(quaternion.x * LOD_ROTATION_SCALE);
+  const n4 = Math.round(quaternion.y * LOD_ROTATION_SCALE);
+  const n5 = Math.round(quaternion.z * LOD_ROTATION_SCALE);
+  const n6 = Math.round(quaternion.w * LOD_ROTATION_SCALE);
+  const n7 = Math.round((camera.zoom ?? 1) * 10);
+  const n8 = Math.round((camera.fov ?? 0) * 10);
+  const n9 = Math.round(viewportHeight * 10);
+  const changed = state[0] !== n0 || state[1] !== n1 || state[2] !== n2
+    || state[3] !== n3 || state[4] !== n4 || state[5] !== n5
+    || state[6] !== n6 || state[7] !== n7 || state[8] !== n8 || state[9] !== n9;
+  state[0] = n0; state[1] = n1; state[2] = n2; state[3] = n3; state[4] = n4;
+  state[5] = n5; state[6] = n6; state[7] = n7; state[8] = n8; state[9] = n9;
   return changed;
 }
 
