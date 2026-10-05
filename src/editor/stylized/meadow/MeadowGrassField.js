@@ -62,6 +62,7 @@ export class MeadowGrassField {
         recoverySpeed: settings.interaction.recoverySpeed,
         strength: settings.interaction.strength,
         bodyRadius: settings.interaction.bodyRadius,
+        uploadIntervalFrames: settings.interaction.uploadIntervalFrames,
         getHeight: (x, z) => terrainView.getCanonicalHeight(
           x + this.interactionOrigin.x,
           z + this.interactionOrigin.z,
