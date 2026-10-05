@@ -86,3 +86,55 @@ test('v3 atlases load only when signature and mask encoding match', async () => 
   assert.equal(textures.length, 2);
   assert.equal(atlases[0].normalEncoding, TREE_IMPOSTOR_NORMAL_ENCODING);
 });
+
+function compressedPrototype(index = 0) {
+  return { ...prototype(index), albedoMips: `/assets/impostors/trees/prototype-${index}-albedo-mips.bin`,
+    albedoKtx2: `/assets/impostors/trees/prototype-${index}-albedo.ktx2`, albedoKtx2Metadata: { sha256: 'compressed-hash' } };
+}
+
+test('compressed atlas loads by content version without touching the RGBA fallback', async () => {
+  const texture = { isCompressedTexture: true, image: { width: 1024, height: 256 }, mipmaps: [{}, {}] };
+  let path, disposed = false;
+  const loader = new TreeImpostorAssetLoader({
+    fetchImpl: async () => response(TREE_IMPOSTOR_MANIFEST_VERSION, { prototypes: [compressedPrototype()] }),
+    loader: { loadAsync: async () => ({ dispose() {} }) },
+    compressedLoader: { loadAsync: async url => { path = url; return texture; }, dispose: () => { disposed = true; } },
+    mipLoader: async () => { throw new Error('Fallback should not load.'); },
+  });
+  const [atlas] = await loader.load('/assets/impostors/trees/manifest.json');
+  assert.equal(atlas.albedo, texture);
+  assert.ok(path.endsWith('.ktx2?v=compressed-hash'));
+  assert.equal(disposed, false, 'Injected loader retains caller ownership.');
+  assert.equal(texture.generateMipmaps, false);
+});
+
+test('invalid compressed atlas is disposed and falls back to the baked alpha-preserving chain', async () => {
+  let disposed = false, fallbackPath;
+  const fallback = { mipmaps: [{}, {}], dispose() {} };
+  const loader = new TreeImpostorAssetLoader({
+    fetchImpl: async () => response(TREE_IMPOSTOR_MANIFEST_VERSION, { prototypes: [compressedPrototype()] }),
+    loader: { loadAsync: async () => ({ dispose() {} }) },
+    compressedLoader: { loadAsync: async () => ({ isCompressedTexture: true, image: { width: 4, height: 4 },
+      mipmaps: [{}], dispose: () => { disposed = true; } }) },
+    mipLoader: async path => { fallbackPath = path; return fallback; },
+  });
+  const [atlas] = await loader.load('/assets/impostors/trees/manifest.json');
+  assert.equal(disposed, true); assert.equal(atlas.albedo, fallback);
+  assert.match(fallbackPath, /-albedo-mips.bin/); assert.equal(fallback.generateMipmaps, false);
+});
+
+test('atlas failure disposes completed compressed albedos and sibling prototypes', async () => {
+  let disposed = 0;
+  const disposable = extra => ({ ...extra, dispose: () => { disposed++; } });
+  const loader = new TreeImpostorAssetLoader({
+    fetchImpl: async () => response(TREE_IMPOSTOR_MANIFEST_VERSION, { prototypes: [compressedPrototype(), compressedPrototype(1)] }),
+    loader: { loadAsync: async path => {
+      if (path.includes('prototype-1-normal')) throw new Error('Normal failed.');
+      return disposable({});
+    } },
+    compressedLoader: { loadAsync: async () => disposable({ isCompressedTexture: true,
+      image: { width: 1024, height: 256 }, mipmaps: [{}, {}] }) },
+  });
+  await assert.rejects(loader.load('/assets/impostors/trees/manifest.json'), /Normal failed/);
+  assert.equal(disposed, 3);
+});

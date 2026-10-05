@@ -1,4 +1,5 @@
 const DEFAULTS = {
+  freeFly: { enabled: true, moveSpeed: 24, fastMultiplier: 4, lookSensitivity: 0.003 },
   frameBudget: { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2 },
   drawPreparation: { enabled: true, meshesPerFrame: 2 },
   residents: { enabled: true, radiusMeters: 220, maxResidents: 24, maxPerSettlement: 8,

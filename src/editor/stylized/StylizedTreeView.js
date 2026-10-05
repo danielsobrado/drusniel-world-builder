@@ -48,6 +48,7 @@ import {
   disposeTreeImpostorAtlases,
   downloadTreeImpostorBundle,
 } from './impostor/TreeImpostorAssets.js';
+import { foliageTextureBytes } from './impostor/FoliageKtx2Loader.js';
 import { TreeImpostorBaker } from './impostor/TreeImpostorBaker.js';
 import { TreeImpostorBatch } from './impostor/TreeImpostorBatch.js';
 import { createTreeImpostorSourceSignature } from './impostor/TreeImpostorManifest.js';
@@ -624,6 +625,9 @@ export class StylizedTreeView {
       && new URLSearchParams(location.search).get('bakeImpostors') === '1';
     const loader = new TreeImpostorAssetLoader({
       baseUrl: this.baseUrl,
+      renderer: this.terrainView.renderer,
+      compressed: settings.compressed !== false && (typeof location === 'undefined'
+        || new URLSearchParams(location.search).get('impostorCompression') !== '0'),
       expectedPrototypeCount: this.prototypes.length,
       expectedSourceSignature: this.prototypeSignature,
     });
@@ -661,8 +665,9 @@ export class StylizedTreeView {
     this.impostorVersion += 1;
     this.lastUpdateKey = null;
     PerfCounters.set('treeImpostorAtlasBytes', this.impostorAtlases.reduce((total, atlas) => (
-      total + atlas.columns * atlas.rows * atlas.tileSize * atlas.tileSize * 8 * 4 / 3
+      total + foliageTextureBytes(atlas.albedo) + foliageTextureBytes(atlas.normal)
     ), 0));
+    PerfCounters.set('treeImpostorCompressedAtlases', this.impostorAtlases.filter(atlas => atlas.albedo.isCompressedTexture).length);
     return this.impostorAtlases;
   }
 

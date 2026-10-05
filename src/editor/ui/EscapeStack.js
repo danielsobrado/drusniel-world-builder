@@ -17,6 +17,7 @@ export const ESCAPE_PRIORITY = Object.freeze({
   palette: 90,
   inspector: 80,
   gesture: 70,
+  freeFlight: 65,
   selection: 60,
   playerPaused: 50,
   playerWalking: 40,

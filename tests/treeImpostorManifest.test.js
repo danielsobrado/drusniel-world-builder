@@ -184,6 +184,7 @@ test('source signature ignores runtime-only impostor policy', () => {
         enabled: true,
         manifest: '/assets/impostors/trees/manifest.json',
         runtimeBake: true,
+        compressed: true,
       },
     },
   });
@@ -195,6 +196,7 @@ test('source signature ignores runtime-only impostor policy', () => {
         enabled: false,
         manifest: '/different/runtime/path.json',
         runtimeBake: false,
+        compressed: false,
       },
     },
   });

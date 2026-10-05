@@ -1,4 +1,5 @@
-import { Frustum, Matrix4, Sphere, Vector3 } from 'three/webgpu';
+import { Sphere } from 'three/webgpu';
+import { TurnEnvelopeFrustum } from '../../../render/visibility/TurnEnvelopeFrustum.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { writeInstances } from './StylizedLodRuntime.js';
 
@@ -12,8 +13,8 @@ export class BudgetedDetailVisibility {
     this.job = null;
     this.selectionPose = null;
     this.scratchSphere = new Sphere();
-    this.frustum = new Frustum();
-    this.matrix = new Matrix4();
+    this.turnEnvelope = new TurnEnvelopeFrustum();
+    this.frustum = this.turnEnvelope.frustum;
   }
 
   reset(instances) {
@@ -66,10 +67,7 @@ export class BudgetedDetailVisibility {
     if (!matches(this.job?.pose ?? this.selectionPose)) {
       // A camera change exposes full resident detail immediately while a new selection is pending.
       this.showFull(true);
-      const projection = camera.projectionMatrix.clone();
-      projection.elements[0] /= 1.25;
-      projection.elements[5] /= 1.25;
-      this.frustum.setFromProjectionMatrix(this.matrix.multiplyMatrices(projection, camera.matrixWorldInverse), camera.coordinateSystem);
+      this.turnEnvelope.update(camera, this.view.config?.enhancements?.detailTurnMarginDegrees ?? 12);
       this.job = { pose, prototype: 0, index: 0, selected: this.instances.map(() => []) };
     }
     if (!this.job) return;

@@ -117,7 +117,7 @@
  * The large pieces slide off toward their own edge (`--glade-exit`, set in
  * NaturalGladeChrome.css) and spring back; the small transient ones just go.
  */
-[data-view-mode='player']:not([data-player-paused='true']) :is(
+:is([data-view-mode='player']:not([data-player-paused='true']), [data-view-mode='fly']) :is(
   .natural-top-chrome,
   .natural-toolbar,
   .sidebar,
@@ -141,7 +141,7 @@
     visibility 0s linear var(--glade-spring-soft-ms, 470ms) !important;
 }
 
-[data-view-mode='player']:not([data-player-paused='true']) :is(
+:is([data-view-mode='player']:not([data-player-paused='true']), [data-view-mode='fly']) :is(
   .natural-world-menu,
   .natural-build-strip,
   .natural-context-toolbar,
@@ -159,8 +159,20 @@
 }
 
 [data-view-mode='player'] .toast,
+[data-view-mode='fly'] .toast,
 [data-view-mode='player-spawn'] .toast {
   display: none;
+}
+
+.free-flight-hints {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  color: #fff;
+  font: 13px var(--glade-font);
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
 }
 
 [data-awaiting-spawn='true'] [data-role='viewport'] {

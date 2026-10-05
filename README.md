@@ -23,7 +23,7 @@ The editor now runs on an effectively unbounded logical world rather than one fi
 - Native saves use infinite-world document version 6 only.
 - Azgaar Fantasy Map Generator Full JSON import into the infinite streamed world.
 - Camera-driven GPU marching-cubes voxel streaming with no geometry readbacks.
-- Selectable Edit / Orbit and first-person Player modes.
+- Selectable Edit / Orbit, first-person Player, and free-flight camera modes.
 - Terrain painting, raise, lower, and smooth brushes.
 - Slope-aware building placement with foundations.
 - Instanced settlement rendering from procedurally textured models.
@@ -51,7 +51,7 @@ unbounded world cells
   → fixed GPU terrain slots
 ```
 
-Only pages around the active Edit or Player camera are resident. The streamer also predicts the camera position from its velocity and starts loading forward pages before the current chunk border is crossed.
+Only pages around the active Edit, Player, or Fly camera are resident. The streamer also predicts the camera position from its velocity and starts loading forward pages before the current chunk border is crossed.
 
 The default terrain settings are:
 
@@ -232,6 +232,17 @@ content without affecting terrain streaming.
 - Select **Edit / Orbit** to return to editing.
 
 Player grounding uses the authoritative CPU heightfield and therefore remains readback-free. GPU-only caves, overhangs, and added voxel surfaces do not yet provide player collision.
+
+### Free flight
+
+Click **Fly** or press `F` to explore with a separate camera. Click the viewport
+to capture the mouse, use `W`, `A`, `S`, `D` to move, `Space` to rise, `Ctrl` to
+descend, and `Shift` to move faster. `F` or `Esc` returns to the previous mode
+and preserves the player's position and paused state. Flight uses keyboard and
+mouse controls; its speed and sensitivity are in `config/exploration.yaml`.
+
+The rendering and navigation ports, compressed tree atlas pipeline, and browser
+checks are documented in [Gods' End rendering and navigation migration](docs/gods-end-rendering-navigation-migration.md).
 
 The player walks as Drusniel, a rigged dark elf, by default. The **Hero** picker in the top bar swaps live between eight authored characters and the procedural drow. The choice is remembered per browser, `?hero=<id>` overrides it, and `character.hero` in `editor.config.yaml` sets the default. A soft contact shadow grounds the hero, footfalls play surface-aware steps, and tree canopy dithers open around the hero in third person. Movement stays owned by the player controller. The walk and run clips advance by distance travelled, so the feet stay planted at any speed. Each foot is planted on the ground under it on slopes, and the arms rise into a cast with every spell. In deep water he treads water when still, swims a front crawl along the surface when moving, and dives head-first when heading down; the swim is posed procedurally, since no rig ships a swim clip. The model streams in after the first frame and never delays startup.
 

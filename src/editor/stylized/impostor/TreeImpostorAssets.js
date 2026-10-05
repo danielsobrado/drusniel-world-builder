@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { loadFoliageMipTexture } from './FoliageMipTexture.js';
+import { createFoliageKtx2Loader } from './FoliageKtx2Loader.js';
 import { normalizeBaseUrl, resolveAssetUrl } from '../../assets/assetUrl.js';
 import {
   TREE_IMPOSTOR_MANIFEST_VERSION,
@@ -47,11 +48,26 @@ function triggerDownload(filename, content, type = 'application/json') {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-async function loadAtlasTextures(loader, resolvePath, prototype) {
+async function loadAtlasTextures(loader, resolvePath, prototype, compressedLoader, mipLoader) {
+  const loadAlbedo = async () => {
+    if (compressedLoader && prototype.albedoKtx2) {
+      let map;
+      try {
+        map = await compressedLoader.loadAsync(resolvePath(prototype.albedoKtx2));
+        if (!map.isCompressedTexture || map.image?.width !== prototype.columns * prototype.tileSize
+          || map.image?.height !== prototype.rows * prototype.tileSize || map.mipmaps?.length < 2) {
+          throw new Error('Compressed foliage dimensions or mip chain are invalid.');
+        }
+        return map;
+      } catch (error) {
+        map?.dispose();
+        console.warn(`Compressed foliage ${prototype.prototypeIndex} unavailable; using baked RGBA mip chains.`, error);
+      }
+    }
+    return prototype.albedoMips ? mipLoader(resolvePath(prototype.albedoMips)) : loader.loadAsync(resolvePath(prototype.albedo));
+  };
   const results = await Promise.allSettled([
-    prototype.albedoMips
-      ? loadFoliageMipTexture(resolvePath(prototype.albedoMips))
-      : loader.loadAsync(resolvePath(prototype.albedo)),
+    loadAlbedo(),
     loader.loadAsync(resolvePath(prototype.normal)),
   ]);
   const failure = results.find((result) => result.status === 'rejected');
@@ -75,6 +91,10 @@ export class TreeImpostorAssetLoader {
     fetchImpl = null,
     expectedPrototypeCount = null,
     expectedSourceSignature = null,
+    renderer = null,
+    compressed = true,
+    compressedLoader = null,
+    mipLoader = loadFoliageMipTexture,
   } = {}) {
     this.baseUrl = normalizeBaseUrl(baseUrl);
     this.loader = loader;
@@ -86,6 +106,7 @@ export class TreeImpostorAssetLoader {
     this.fetchImpl = fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.expectedPrototypeCount = expectedPrototypeCount;
     this.expectedSourceSignature = expectedSourceSignature;
+    Object.assign(this, { renderer, compressed, compressedLoader, mipLoader });
   }
 
   resolve(path) {
@@ -110,15 +131,20 @@ export class TreeImpostorAssetLoader {
       return null;
     }
     const assetVersion = manifest.generatedAt ?? manifest.sourceSignature;
-    const resolveVersionedPath = (path) => versionAssetUrl(this.resolve(path), assetVersion);
-    const results = await Promise.allSettled(manifest.prototypes.map(async (prototype) => {
-      const textures = await loadAtlasTextures(this.loader, resolveVersionedPath, prototype);
-      return Object.freeze({
-        ...prototype,
-        ...textures,
-        source: 'asset',
-      });
-    }));
+    const compressedLoader = this.compressed
+      ? this.compressedLoader ?? createFoliageKtx2Loader(this.renderer, this.baseUrl) : null;
+    let results;
+    try {
+      results = await Promise.allSettled(manifest.prototypes.map(async (prototype) => {
+        const resolveVersionedPath = path => versionAssetUrl(this.resolve(path),
+          path === prototype.albedoKtx2 ? prototype.albedoKtx2Metadata?.sha256 ?? assetVersion : assetVersion);
+        const textures = await loadAtlasTextures(this.loader, resolveVersionedPath, prototype, compressedLoader, this.mipLoader);
+        return Object.freeze({ ...prototype, ...textures, source: 'asset' });
+      }));
+    } finally {
+      // Textures own their GPU data; transcoder workers have no runtime role.
+      if (compressedLoader !== this.compressedLoader) compressedLoader?.dispose();
+    }
     const atlases = results
       .filter((result) => result.status === 'fulfilled')
       .map((result) => result.value);
