@@ -1,0 +1,1825 @@
+schemaVersion: 1
+catalogId: "eldara-cultures-v1"
+source:
+  mapNames:
+    - "Eldara"
+  mappingPolicy: "explicit-id"
+  unmatchedCulturePolicy: "passthrough"
+principles:
+  dimensions:
+    - "ancestry"
+    - "culture"
+    - "polity"
+    - "faith"
+  cultureRule: "Every culture must have something admirable, something ugly, something it lies about, and something outsiders misunderstand."
+  sourceCompatibility: "Azgaar culture IDs are immutable import identifiers, not canonical culture IDs."
+  migrationRule: "Multiple canonical cultures may share one Azgaar source culture without changing the source map."
+sourceMappings:
+  -
+    sourceId: 0
+    sourceNames:
+      - "Wildlands"
+    targetType: "none"
+  -
+    sourceId: 1
+    sourceNames:
+      - "Eldoria"
+      - "Eldar"
+    targetType: "culture"
+    targetKey: "elenori"
+  -
+    sourceId: 2
+    sourceNames:
+      - "Mercian"
+    targetType: "seed"
+    targetKey: "serpent-peoples"
+  -
+    sourceId: 3
+    sourceNames:
+      - "Kentland"
+      - "Kentian"
+    targetType: "culture"
+    targetKey: "lumish"
+  -
+    sourceId: 4
+    sourceNames:
+      - "Yotunn"
+    targetType: "seed"
+    targetKey: "jotunn"
+  -
+    sourceId: 5
+    sourceNames:
+      - "Enlandic"
+    targetType: "seed"
+    targetKey: "draconic-remnant"
+  -
+    sourceId: 6
+    sourceNames:
+      - "Valarans"
+      - "Nortumbic"
+    targetType: "culture"
+    targetKey: "zuraldarr"
+  -
+    sourceId: 7
+    sourceNames:
+      - "Norheim"
+      - "Norse"
+    targetType: "culture"
+    targetKey: "norths"
+  -
+    sourceId: 8
+    sourceNames:
+      - "Darkhold"
+      - "Romian"
+    targetType: "culture"
+    targetKey: "umbra-kori"
+  -
+    sourceId: 9
+    sourceNames:
+      - "Uruk"
+    targetType: "seed"
+    targetKey: "orc-peoples"
+  -
+    sourceId: 10
+    sourceNames:
+      - "Durinheim"
+      - "Durinn"
+    targetType: "culture"
+    targetKey: "vondari"
+  -
+    sourceId: 11
+    sourceNames:
+      - "Schwarzlicht"
+      - "Schwarzen"
+    targetType: "culture"
+    targetKey: "contian"
+  -
+    sourceId: 12
+    sourceNames:
+      - "Rakhnid"
+    targetType: "seed"
+    targetKey: "rakhnid-broods"
+  -
+    sourceId: 13
+    sourceNames:
+      - "Darkspire"
+      - "Kobblin"
+    targetType: "seed"
+    targetKey: "goblin-peoples"
+cultures:
+  lumish:
+    id: "lumish"
+    displayName: "Lumish Heartlanders"
+    status: "core"
+    azgaarCultureIds:
+      - 3
+    regions:
+      - "western and central Lumeshire"
+      - "Imperial market corridors"
+      - "fortified border towns"
+    ancestryWeights:
+      human: 0.94
+      dwarf: 0.02
+      elf: 0.01
+      orc: 0.01
+      goblin: 0.01
+      other: 0.01
+    identity:
+      public: "Civilization, faith, law, duty, and protection."
+      admired: "Institutions genuinely protect people and sustain roads, courts, granaries, and defenses."
+      ugly: "Institutional cruelty, privilege, provincial exploitation, and hiding moral failures in procedure."
+      internalLie: "Empire and faith naturally act with one purpose."
+      outsiderMisconception: "Every Lumish person is a zealot or willing servant of the center."
+    architecture:
+      materials:
+        - "pale stone"
+        - "lime plaster"
+        - "dark timber"
+        - "slate"
+        - "tile"
+        - "black iron"
+      forms:
+        - "formal churches"
+        - "fortified markets"
+        - "administrative compounds"
+        - "courtyard housing"
+      grammar: "Imperial buildings are axial and legible; private construction becomes less formal away from administrative centers."
+    settlementGrammar:
+      core: "Market square, church, administrative hall, granary, watch, then residential wards."
+      frontier: "Defensive earthworks and watchtowers precede monumental civic buildings."
+      infrastructure: "Maintained roads, bridges, toll points, record houses, and storehouses make Imperial presence visible."
+    values:
+      - "duty"
+      - "legal continuity"
+      - "public order"
+      - "service"
+      - "reputation"
+      - "protection of dependents"
+    food:
+      staples:
+        - "wheat bread"
+        - "barley"
+        - "beans"
+        - "pork"
+      signatures:
+        - "meat pies"
+        - "sausages"
+        - "hard cheese"
+      constraints: "Elite tables import foods ordinary households rarely see."
+    clothing:
+      everyday: "Wool and linen layers, practical cloaks, leather belts."
+      status: "Clerical, military, guild, and administrative rank is visible in trim and insignia."
+      climate: "Heavier wool north; lighter linen in richer southern provinces."
+    military:
+      doctrine: "Hold roads, forts, passes, and population centers; win through logistics and layered authority."
+      formations:
+        - "professional infantry"
+        - "provincial levies"
+        - "cavalry retainers"
+        - "church orders"
+        - "engineers"
+      strengths:
+        - "logistics"
+        - "fortification"
+        - "replacement manpower"
+      weaknesses:
+        - "slow decisions"
+        - "political interference"
+        - "bad-news suppression"
+    magic:
+      attitude: "Useful when licensed, sanctified, or subordinate to recognized institutions."
+      institutions:
+        - "church orders"
+        - "licensed court practitioners"
+        - "military specialists"
+      commonUses:
+        - "healing"
+        - "warding"
+        - "investigation"
+        - "logistics"
+      taboos:
+        - "unsanctioned necromancy"
+        - "uncontrolled summoning"
+        - "magic outside state or church authority"
+    religion:
+      traditions:
+        - "Imperial church"
+        - "household saints"
+        - "tolerated provincial rites"
+      institutions:
+        - "parish clergy"
+        - "monasteries"
+        - "military orders"
+        - "church bureaucracy"
+      tensions: "Local priests may defend communities from the same central institutions they serve."
+    economy:
+      strengths:
+        - "grain"
+        - "taxation"
+        - "road trade"
+        - "textiles"
+        - "metalworking"
+      imports:
+        - "mountain metals"
+        - "luxury goods"
+        - "rare magical materials"
+        - "furs"
+      exports:
+        - "grain"
+        - "textiles"
+        - "tools"
+        - "administrative services"
+      labor: "Tenant farmers, freeholders, guild labor, soldiers, and clerks coexist by province."
+    socialClasses:
+      -
+        key: "landholding-elite"
+        role: "Nobility and provincial families controlling land and offices."
+      -
+        key: "clergy-administrators"
+        role: "Priests, judges, scribes, and officials."
+      -
+        key: "guild-citizens"
+        role: "Merchants and skilled urban craftspeople."
+      -
+        key: "rural-households"
+        role: "Farmers, herders, and laborers carrying most tax and levy burdens."
+    naming:
+      personal: "Broad human pool with strong provincial variation."
+      family: "Occupational, locative, patronymic, and landed-family names coexist."
+      place: "Saints, founders, rivers, crossings, forts, and markets."
+      notes: "Names reveal province and class more often than ancestry."
+    factions:
+      -
+        key: "imperial-administration"
+        goal: "Keep taxes, law, roads, and reporting chains functioning."
+      -
+        key: "church-hierarchy"
+        goal: "Preserve doctrinal authority."
+      -
+        key: "provincial-houses"
+        goal: "Keep local autonomy and wealth without losing protection."
+      -
+        key: "reformist-clergy"
+        goal: "Make institutions live up to their public claims."
+    prejudices:
+      -
+        toward: "zuraldarr"
+        belief: "Backward highlanders resist proper administration."
+        reality: "Their route knowledge is essential to Imperial trade."
+      -
+        toward: "norths"
+        belief: "Harsh people with little law."
+        reality: "Frostgard law is personal and obligation-based."
+    relations:
+      zuraldarr:
+        stance: "semi-autonomous"
+        pressurePoints:
+          - "taxation"
+          - "conscription"
+          - "jurisdiction"
+        ties:
+          - "trade"
+          - "mutual defense"
+      contian:
+        stance: "strategic rivalry"
+        pressurePoints:
+          - "magic regulation"
+          - "doctrine"
+        ties:
+          - "trade"
+          - "shared threats"
+      norths:
+        stance: "pragmatic distance"
+        pressurePoints:
+          - "raiding"
+          - "border law"
+        ties:
+          - "furs"
+          - "sea trade"
+      vondari:
+        stance: "essential trade"
+        pressurePoints:
+          - "tariffs"
+          - "mining access"
+        ties:
+          - "metals"
+          - "engineering"
+      elenori:
+        stance: "respectful suspicion"
+        pressurePoints:
+          - "archives"
+          - "land use"
+        ties:
+          - "medicine"
+          - "diplomacy"
+      umbra-kori:
+        stance: "guarded necessity"
+        pressurePoints:
+          - "secrecy"
+          - "religious distrust"
+        ties:
+          - "intelligence"
+          - "shared threats"
+    visualPalette:
+      - "#e8e1d4"
+      - "#a7a29a"
+      - "#565a58"
+      - "#303738"
+      - "#7c4e3d"
+    storyHooks:
+      - "A governor buries evidence of a real threat because it exposes falsified reports."
+      - "A decent priest breaks Imperial law to protect a town."
+      - "A road project saves lives while destroying old local autonomy."
+  zuraldarr:
+    id: "zuraldarr"
+    displayName: "Zuraldarr"
+    status: "core"
+    azgaarCultureIds:
+      - 6
+    regions:
+      - "eastern Lumeshire highlands"
+      - "Zuraldi valleys"
+      - "Lumeshire-Stonehold mountain passes"
+    ancestryWeights:
+      human: 0.97
+      elf: 0.01
+      dwarf: 0.01
+      other: 0.01
+    identity:
+      public: "Autonomy, ancestry, land, route knowledge, and household obligation."
+      admired: "Community resilience, mountain knowledge, and institutions that preserve local voice."
+      ugly: "Insular pressure, old grudges, patronage, and exclusion of outsiders."
+      internalLie: "The Zuraldarr are completely independent and never needed outside powers."
+      outsiderMisconception: "They are primitive hillfolk held back by superstition."
+    architecture:
+      materials:
+        - "gray mountain stone"
+        - "lime wash"
+        - "dark slate"
+        - "heavy timber"
+      forms:
+        - "terraced farmsteads"
+        - "ridge watchhouses"
+        - "stone cattle yards"
+        - "council halls"
+      grammar: "Buildings follow slope and wind; retaining walls and terraces are civic infrastructure."
+    settlementGrammar:
+      core: "Council hall, spring, shared yard, ancestor place, clustered houses, cattle structures, terraces."
+      frontier: "Watch posts and refuge enclosures dominate narrow passes."
+      infrastructure: "Terraces, switchbacks, bridges, cairns, and route markers preserve local knowledge."
+    values:
+      - "autonomy"
+      - "reciprocity"
+      - "ancestral obligation"
+      - "practical competence"
+      - "bounded hospitality"
+      - "land stewardship"
+    food:
+      staples:
+        - "barley"
+        - "oats"
+        - "roots"
+        - "milk"
+        - "beef"
+      signatures:
+        - "smoked beef"
+        - "mountain cheese"
+        - "thick stews"
+      constraints: "Short highland growing seasons make preservation and cattle central."
+    clothing:
+      everyday: "Layered wool, hard-wearing trousers and skirts, mountain cloaks, leather boots."
+      status: "House and office affiliation appears through woven borders, pins, and inherited jewelry."
+      climate: "Rain, wind, and altitude matter more than court fashion."
+    military:
+      doctrine: "Control passes, delay stronger forces, attack supply lines, and exploit terrain."
+      formations:
+        - "valley militias"
+        - "pass wardens"
+        - "mounted messengers"
+        - "scouts"
+      strengths:
+        - "terrain knowledge"
+        - "ambush"
+        - "mobility"
+      weaknesses:
+        - "small manpower pool"
+        - "council factionalism"
+        - "limited siege capacity"
+    magic:
+      attitude: "Land, healing, weather, ancestor, and protection traditions are accepted; external licensing is distrusted."
+      institutions:
+        - "witch lineages"
+        - "druid circles"
+        - "household rites"
+      commonUses:
+        - "healing"
+        - "weather reading"
+        - "route finding"
+        - "animal care"
+      taboos:
+        - "binding ancestors"
+        - "poisoning land"
+        - "seizure of sacred knowledge"
+    religion:
+      traditions:
+        - "ancestor traditions"
+        - "land and grove rites"
+        - "select Imperial practices"
+      institutions:
+        - "spirituality office"
+        - "druids"
+        - "witches"
+        - "household keepers"
+      tensions: "Witches, druids, and Imperial priests overlap in practice but dispute authority."
+    economy:
+      strengths:
+        - "cattle"
+        - "terraced agriculture"
+        - "caravan support"
+        - "mountain transit"
+        - "timber"
+      imports:
+        - "grain"
+        - "urban goods"
+        - "salt"
+        - "cloth"
+      exports:
+        - "cattle"
+        - "cheese"
+        - "hides"
+        - "timber"
+        - "guides"
+        - "transit access"
+      labor: "Family holdings dominate while caravan houses and council routes create non-landed power."
+    socialClasses:
+      -
+        key: "old-landholders"
+        role: "Lineages with deep claims to terraces and local office."
+      -
+        key: "caravan-families"
+        role: "Route operators whose interests often favor integration."
+      -
+        key: "spiritual-keepers"
+        role: "Witches, druids, and ancestor authorities."
+      -
+        key: "free-households"
+        role: "Farmers, herders, craftspeople, guides, and militia households."
+    naming:
+      personal: "Local human names with valley variation and reuse of ancestor names."
+      family: "House, farm, valley, and maternal-line identifiers are common."
+      place: "Ridges, passes, old battles, springs, and founding households."
+      notes: "Valley or house affiliation can matter more than surname."
+    factions:
+      -
+        key: "leadership-office"
+        goal: "Preserve unity without allowing one office to dominate."
+      -
+        key: "agriculture-office"
+        goal: "Protect land, water, grazing, and food security."
+      -
+        key: "trade-office"
+        goal: "Expand caravan wealth and transit."
+      -
+        key: "defense-office"
+        goal: "Keep militia and pass control outside foreign command."
+      -
+        key: "justice-office"
+        goal: "Maintain local law."
+      -
+        key: "spirituality-office"
+        goal: "Protect ancestral and land traditions."
+    prejudices:
+      -
+        toward: "lumish"
+        belief: "Lowlanders obey paper before people."
+        reality: "Many officials bend rules to keep communities functioning."
+      -
+        toward: "vondari"
+        belief: "Stonehold respects contracts more than relationships."
+        reality: "Vondari obligations can be intensely personal."
+    relations:
+      lumish:
+        stance: "semi-autonomous"
+        pressurePoints:
+          - "taxation"
+          - "conscription"
+          - "jurisdiction"
+        ties:
+          - "protection"
+          - "trade"
+      contian:
+        stance: "suspicious"
+        pressurePoints:
+          - "unlicensed rites"
+          - "jurisdiction"
+        ties:
+          - "herbs"
+          - "scholarship"
+      norths:
+        stance: "respectful distance"
+        pressurePoints:
+          - "cattle theft"
+          - "mercenaries"
+        ties:
+          - "seasonal trade"
+          - "mountain craft"
+      vondari:
+        stance: "close trade"
+        pressurePoints:
+          - "tolls"
+          - "mining access"
+        ties:
+          - "caravans"
+          - "pass defense"
+      elenori:
+        stance: "cautious affinity"
+        pressurePoints:
+          - "land rites"
+          - "secrecy"
+        ties:
+          - "druidic exchange"
+          - "rare plants"
+      umbra-kori:
+        stance: "guarded"
+        pressurePoints:
+          - "hidden passes"
+          - "smuggling"
+        ties:
+          - "intelligence"
+          - "depth warnings"
+    visualPalette:
+      - "#d4d0c7"
+      - "#7d817d"
+      - "#454a45"
+      - "#26302c"
+      - "#8a6b3f"
+    storyHooks:
+      - "A caravan family funds a road that would make rival valleys irrelevant."
+      - "A witch and druid agree something is wrong but blame each other."
+      - "A heroic battle myth conflicts with living veterans' memories."
+  contian:
+    id: "contian"
+    displayName: "Contians"
+    status: "core"
+    azgaarCultureIds:
+      - 11
+    regions:
+      - "Contian Theocracy"
+      - "academy cities"
+      - "controlled magical research enclaves"
+    ancestryWeights:
+      human: 0.95
+      elf: 0.01
+      dwarf: 0.01
+      goblin: 0.01
+      other: 0.02
+    identity:
+      public: "Knowledge, discipline, measurement, and safety through controlled understanding."
+      admired: "Exceptional scholarship, record keeping, research, and coordination."
+      ugly: "Repression, censorship, surveillance, and the assumption expertise grants moral authority."
+      internalLie: "Control makes dangerous knowledge safe."
+      outsiderMisconception: "Contians are simply mad mages or universally loyal servants of the theocracy."
+    architecture:
+      materials:
+        - "pale cut stone"
+        - "dark basalt"
+        - "bronze"
+        - "glass"
+        - "ceramic tile"
+      forms:
+        - "tall towers"
+        - "geometric plazas"
+        - "observatories"
+        - "archives"
+        - "laboratories"
+      grammar: "Administrative centers favor measured spacing, sight lines, repeated proportions, controlled water, and inscriptions."
+    settlementGrammar:
+      core: "Administrative axis, temple, archive, academy, registry, market, workshops, housing."
+      frontier: "Survey station and secure compound precede open growth."
+      infrastructure: "Numbered streets, drains, cisterns, inspection gates, notices, and standardized measurements."
+    values:
+      - "knowledge"
+      - "discipline"
+      - "legibility"
+      - "competence"
+      - "controlled risk"
+      - "institutional service"
+    food:
+      staples:
+        - "wheat"
+        - "lentils"
+        - "vegetables"
+        - "goat"
+        - "fish"
+      signatures:
+        - "precise baked dishes"
+        - "spiced stews"
+        - "preserved fruits"
+      constraints: "Urban centers depend on measured storage and coordinated supply."
+    clothing:
+      everyday: "Clean structured garments with practical layers and limited ornament."
+      status: "Rank, academy, office, and profession are encoded through trim, badges, and robe geometry."
+      climate: "Regional fabrics vary while official dress stays standardized."
+    military:
+      doctrine: "Identify, classify, isolate, then apply specialized force with intelligence support."
+      formations:
+        - "professional guards"
+        - "inquisitorial detachments"
+        - "battle mages"
+        - "engineers"
+      strengths:
+        - "planning"
+        - "specialization"
+        - "intelligence"
+        - "siege science"
+      weaknesses:
+        - "bureaucratic certainty"
+        - "overclassification"
+        - "political purges"
+    magic:
+      attitude: "Magic is a measurable hazard and strategic resource that must be licensed and governed."
+      institutions:
+        - "academies"
+        - "registries"
+        - "inquisitorial laboratories"
+        - "observatories"
+      commonUses:
+        - "research"
+        - "wards"
+        - "medicine"
+        - "communication"
+        - "infrastructure"
+      taboos:
+        - "unlicensed teaching"
+        - "unsupervised summoning"
+        - "private magical archives"
+    religion:
+      traditions:
+        - "theocratic orthodoxy"
+        - "licensed philosophical schools"
+        - "suppressed heterodox devotions"
+      institutions:
+        - "temples"
+        - "doctrinal courts"
+        - "academies"
+        - "inquisition"
+      tensions: "Scholars and inquisitors dispute who gets to define acceptable truth."
+    economy:
+      strengths:
+        - "education"
+        - "alchemy"
+        - "precision crafts"
+        - "state workshops"
+        - "magical services"
+      imports:
+        - "food"
+        - "timber"
+        - "ores"
+        - "rare biological materials"
+      exports:
+        - "instruments"
+        - "books"
+        - "processed magical goods"
+        - "expert services"
+      labor: "Licensed professions dominate high-status work; clerical, workshop, service, and agricultural classes sustain them."
+    socialClasses:
+      -
+        key: "doctrinal-elite"
+        role: "Authorities defining legitimate knowledge."
+      -
+        key: "licensed-scholars"
+        role: "Mages, engineers, physicians, and archivists."
+      -
+        key: "administrative-citizens"
+        role: "Clerks, inspectors, merchants, and skilled workers."
+      -
+        key: "unlicensed-margin"
+        role: "Workers, migrants, dissidents, and informal practitioners."
+    naming:
+      personal: "Formal names coexist with titles and professional usage."
+      family: "Family, academy, office, and master-apprentice lineage all matter."
+      place: "Founders, institutions, towers, and doctrinal events shape official names."
+      notes: "Informal local names often survive under administrative names."
+    factions:
+      -
+        key: "theocratic-hierarchy"
+        goal: "Keep doctrine, state, and magical authority aligned."
+      -
+        key: "academy-establishment"
+        goal: "Protect research autonomy without losing legitimacy."
+      -
+        key: "inquisition"
+        goal: "Prevent catastrophic magical threats at severe social cost."
+      -
+        key: "reform-scholars"
+        goal: "Separate hazard controls from political censorship."
+    prejudices:
+      -
+        toward: "lumish"
+        belief: "Lumish regulation is inconsistent superstition disguised as law."
+        reality: "Plural institutions sometimes expose failures centralization suppresses."
+      -
+        toward: "elenori"
+        belief: "Elenori secrecy is anti-intellectual hoarding."
+        reality: "Some hidden knowledge may genuinely be dangerous."
+    relations:
+      lumish:
+        stance: "strategic rivalry"
+        pressurePoints:
+          - "magic regulation"
+          - "doctrine"
+        ties:
+          - "trade"
+          - "shared threats"
+      zuraldarr:
+        stance: "interested suspicion"
+        pressurePoints:
+          - "unlicensed rites"
+          - "field knowledge"
+        ties:
+          - "herbs"
+          - "guides"
+      norths:
+        stance: "patronizing caution"
+        pressurePoints:
+          - "unregistered magic"
+          - "mercenaries"
+        ties:
+          - "navigation"
+          - "cold-weather materials"
+      vondari:
+        stance: "competitive respect"
+        pressurePoints:
+          - "standards"
+          - "patents"
+        ties:
+          - "instruments"
+          - "metallurgy"
+      elenori:
+        stance: "epistemic conflict"
+        pressurePoints:
+          - "sealed archives"
+          - "research access"
+        ties:
+          - "botany"
+          - "ancient texts"
+      umbra-kori:
+        stance: "intelligence contest"
+        pressurePoints:
+          - "forbidden records"
+          - "depth magic"
+        ties:
+          - "threat data"
+          - "artifacts"
+    visualPalette:
+      - "#e4e2dd"
+      - "#a8adb2"
+      - "#555d68"
+      - "#2d3038"
+      - "#7a6250"
+    storyHooks:
+      - "An inquisitor is correct about a dangerous practice but the legal remedy will destroy a district."
+      - "A scholar proves a foundational doctrine mistranslated an ancient text."
+      - "A city is prepared for every classified threat and helpless against one it refuses to name."
+  norths:
+    id: "norths"
+    displayName: "Norths of Frostgard"
+    status: "core"
+    azgaarCultureIds:
+      - 7
+    regions:
+      - "Frostgard coasts"
+      - "inland hunting country"
+      - "giant-frontier fortress communities"
+    ancestryWeights:
+      human: 0.92
+      giant: 0.04
+      dwarf: 0.02
+      other: 0.02
+    identity:
+      public: "Reputation, reciprocal obligation, endurance, and remembered debt."
+      admired: "Communities survive through mutual obligation and leaders who must materially provide."
+      ugly: "Feuds, harsh justice, inherited debts, raiding, and exclusion presented as toughness."
+      internalLie: "Hardship automatically makes people stronger and more honest."
+      outsiderMisconception: "The Norths are primitive barbarians without institutions."
+    architecture:
+      materials:
+        - "stone footings"
+        - "heavy timber"
+        - "sod insulation"
+        - "slate"
+        - "iron"
+      forms:
+        - "long halls"
+        - "winter villages"
+        - "storm sheds"
+        - "fortified stores"
+        - "watch forts"
+      grammar: "Buildings minimize exposure, cluster around stores and halls, and prioritize repairability."
+    settlementGrammar:
+      core: "Hall, communal stores, smith, shrine, livestock shelter, then households."
+      frontier: "Fortified refuge and signal points precede civilian expansion."
+      infrastructure: "Raised paths, snow markers, boathouses, winter caches, watch fires, and treaty stones."
+    values:
+      - "reciprocity"
+      - "reputation"
+      - "endurance"
+      - "remembered debt"
+      - "hospitality"
+      - "leader competence"
+    food:
+      staples:
+        - "barley"
+        - "oats"
+        - "fish"
+        - "goat"
+        - "game"
+        - "roots"
+      signatures:
+        - "smoked fish"
+        - "dried meat"
+        - "sour dairy"
+        - "winter stews"
+      constraints: "Storage failure can kill communities; wasting preserved food is a serious moral failure."
+    clothing:
+      everyday: "Layered wool, fur where needed, weatherproof leather, wrapped boots."
+      status: "Proven equipment, repaired heirlooms, and oath gifts signal status."
+      climate: "Designed around wet cold, wind, snow, and travel."
+    military:
+      doctrine: "Mobilize quickly, exploit weather and terrain, defend stores and halls, make enemies pay for distance."
+      formations:
+        - "household warbands"
+        - "coastal crews"
+        - "fortress companies"
+        - "hunters"
+      strengths:
+        - "cold-weather operations"
+        - "initiative"
+        - "small-unit cohesion"
+      weaknesses:
+        - "feuds"
+        - "uneven strategic coordination"
+        - "limited manpower"
+    magic:
+      attitude: "Judged by proven usefulness and social trust more than abstract legality."
+      institutions:
+        - "household seers"
+        - "oath keepers"
+        - "healers"
+      commonUses:
+        - "weather reading"
+        - "healing"
+        - "navigation"
+        - "wards"
+        - "hunting"
+      taboos:
+        - "magic breaking sworn obligation"
+        - "reckless weather working"
+        - "rites drawing dangerous attention"
+    religion:
+      traditions:
+        - "ancestor memory"
+        - "oath rites"
+        - "local gods and spirits"
+        - "southern imported faiths"
+      institutions:
+        - "hall keepers"
+        - "family shrines"
+        - "regional holy sites"
+      tensions: "Conversion may be sincere or political; old reciprocal duties often survive new doctrine."
+    economy:
+      strengths:
+        - "fishing"
+        - "timber"
+        - "furs"
+        - "shipbuilding"
+        - "livestock"
+        - "trade"
+      imports:
+        - "grain"
+        - "salt"
+        - "metal goods"
+        - "wine"
+        - "tools"
+      exports:
+        - "fish"
+        - "furs"
+        - "timber"
+        - "ships"
+        - "guides"
+        - "mercenary service"
+      labor: "Households combine farming, fishing, craft, hunting, and seasonal trade."
+    socialClasses:
+      -
+        key: "hall-leaders"
+        role: "Authority depends on feeding, protecting, and rewarding followers."
+      -
+        key: "free-households"
+        role: "Most producers and fighters."
+      -
+        key: "specialists"
+        role: "Smiths, navigators, healers, traders, and oath keepers."
+      -
+        key: "dependents"
+        role: "People protected by stronger households in unequal obligations."
+    naming:
+      personal: "Strong names reused across kin networks, distinguished by parent, place, deed, or hall."
+      family: "Patronymics, matronymics, hall affiliation, and nicknames coexist."
+      place: "Weather, coasts, battles, animals, halls, and treaties."
+      notes: "A remembered deed can outlast a hereditary surname."
+    factions:
+      -
+        key: "coastal-traders"
+        goal: "Keep southern commerce open."
+      -
+        key: "inland-halls"
+        goal: "Protect hunting land and resist coastal dominance."
+      -
+        key: "frontier-fortresses"
+        goal: "Maintain giant defenses and manpower."
+      -
+        key: "treaty-keepers"
+        goal: "Preserve old agreements with particular giant communities."
+    prejudices:
+      -
+        toward: "lumish"
+        belief: "Southerners hide brutality behind paperwork."
+        reality: "Frostgard also formalizes coercion through obligations."
+      -
+        toward: "contian"
+        belief: "Contians think naming danger means controlling it."
+        reality: "Their records preserve lessons oral traditions can lose."
+    relations:
+      lumish:
+        stance: "pragmatic trade"
+        pressurePoints:
+          - "border law"
+          - "missionaries"
+        ties:
+          - "grain"
+          - "sea trade"
+      zuraldarr:
+        stance: "respectful distance"
+        pressurePoints:
+          - "cattle raids"
+          - "mercenaries"
+        ties:
+          - "seasonal trade"
+          - "craft"
+      contian:
+        stance: "distrustful"
+        pressurePoints:
+          - "registration"
+          - "magical authority"
+        ties:
+          - "instruments"
+          - "weather records"
+      vondari:
+        stance: "hard respect"
+        pressurePoints:
+          - "prices"
+          - "fortress contracts"
+        ties:
+          - "weapons"
+          - "engineering"
+      elenori:
+        stance: "remote curiosity"
+        pressurePoints:
+          - "hunting rights"
+          - "old routes"
+        ties:
+          - "medicine"
+          - "navigation lore"
+      umbra-kori:
+        stance: "rare contact"
+        pressurePoints:
+          - "unknown motives"
+          - "old tunnels"
+        ties:
+          - "specialty goods"
+          - "threat intelligence"
+    visualPalette:
+      - "#d6d9dc"
+      - "#8d9498"
+      - "#4c555b"
+      - "#293137"
+      - "#806c51"
+    storyHooks:
+      - "A village must honor a giant treaty after a neighboring raid."
+      - "A chieftain can feed the coast only by accepting humiliating southern terms."
+      - "Two halls agree on the law of a killing and still drift toward feud."
+  vondari:
+    id: "vondari"
+    displayName: "Vondari of Stonehold"
+    status: "core"
+    azgaarCultureIds:
+      - 10
+    regions:
+      - "Stonehold"
+      - "Ironpeak"
+      - "fortress-cities and mining corridors"
+    ancestryWeights:
+      dwarf: 0.78
+      gnome: 0.18
+      human: 0.02
+      other: 0.02
+    identity:
+      public: "Craft as proof, measurable competence, durable obligation, and responsibility for built things."
+      admired: "Engineering excellence, apprenticeship, reliability, and demonstrated competence."
+      ugly: "Institutional rigidity, guild exclusion, and deference to precedent even when systems fail."
+      internalLie: "Correct methods do not fail when properly followed."
+      outsiderMisconception: "The Vondari care only about gold, drink, and mining."
+    architecture:
+      materials:
+        - "cut stone"
+        - "basalt"
+        - "granite"
+        - "iron"
+        - "bronze"
+        - "ceramic conduit"
+      forms:
+        - "fortress-cities"
+        - "vaulted workshops"
+        - "terraced galleries"
+        - "deep halls"
+        - "bridge complexes"
+      grammar: "Loads, drainage, inspection, access, and repair are visibly expressed; decoration records maker and work."
+    settlementGrammar:
+      core: "Water, ventilation, stores, forge district, guild halls, civic chambers, housing, then ceremonial works."
+      frontier: "Survey camps become engineered waystations before permanent settlement."
+      infrastructure: "Bridges, shafts, drainage, lifts, inspection galleries, and redundant access dominate investment."
+    values:
+      - "proof"
+      - "competence"
+      - "craft lineage"
+      - "durability"
+      - "accountability"
+      - "contractual memory"
+    food:
+      staples:
+        - "barley"
+        - "mushrooms"
+        - "roots"
+        - "goat"
+        - "preserved meat"
+        - "imported grain"
+      signatures:
+        - "dense breads"
+        - "aged cheese"
+        - "smoked meats"
+        - "strong broths"
+      constraints: "Deep settlements depend on disciplined storage, water, and surface trade."
+    clothing:
+      everyday: "Durable work layers, aprons, heavy boots, protective gloves."
+      status: "Guild marks, masterwork tools, badges, and high-quality protective gear signal rank."
+      climate: "Deep-city clothing prioritizes dust, heat, and workshop hazards."
+    military:
+      doctrine: "Prepare ground, fortify, channel movement, and make every position costly to assault."
+      formations:
+        - "heavy infantry"
+        - "engineers"
+        - "crossbow companies"
+        - "sappers"
+        - "fortress guards"
+      strengths:
+        - "fortification"
+        - "siege engineering"
+        - "equipment"
+        - "discipline"
+      weaknesses:
+        - "slow mobility"
+        - "guild politics"
+        - "overconfidence in engineered assumptions"
+    magic:
+      attitude: "Respected when repeatable, testable, and integrated into craft."
+      institutions:
+        - "forge rites"
+        - "rune workshops"
+        - "instrument makers"
+        - "engineering colleges"
+      commonUses:
+        - "material testing"
+        - "wards"
+        - "mining"
+        - "forging"
+        - "measurement"
+      taboos:
+        - "unverifiable structural enchantments"
+        - "concealing failure evidence"
+        - "bypassing inspection safeguards"
+    religion:
+      traditions:
+        - "Vondar forge rites"
+        - "ancestor masters"
+        - "workshop observances"
+      institutions:
+        - "priests of Vondar"
+        - "guild shrines"
+        - "master memorial halls"
+      tensions: "Faith in craft becomes denial when evidence threatens revered masters."
+    economy:
+      strengths:
+        - "mining"
+        - "engineering"
+        - "metalworking"
+        - "stonework"
+        - "tools"
+        - "instruments"
+      imports:
+        - "grain"
+        - "timber"
+        - "textiles"
+        - "livestock"
+      exports:
+        - "metals"
+        - "tools"
+        - "weapons"
+        - "engineering services"
+        - "instruments"
+      labor: "Guild and house systems organize apprentices, journeymen, masters, miners, and haulers."
+    socialClasses:
+      -
+        key: "master-houses"
+        role: "Lineages and guild masters controlling major works and training."
+      -
+        key: "journeymen-specialists"
+        role: "Skilled workers with portable reputations."
+      -
+        key: "miners-haulers"
+        role: "Labor base carrying extraction and transport risk."
+      -
+        key: "instrument-makers"
+        role: "Specialists bridging craft, measurement, and experiment."
+    naming:
+      personal: "Dwarven and gnomish names coexist with house, workshop, and apprenticeship identifiers."
+      family: "House, master-line, craft, and place names are common."
+      place: "Founders, geology, works, disasters, and engineering achievements."
+      notes: "Credited work may become part of formal identification."
+    factions:
+      -
+        key: "mining-houses"
+        goal: "Control ore bodies and extraction rights."
+      -
+        key: "masonry-houses"
+        goal: "Preserve authority over civic and fortress work."
+      -
+        key: "engineers"
+        goal: "Make evidence and inspection outrank prestige."
+      -
+        key: "merchants"
+        goal: "Keep surface routes open."
+      -
+        key: "priests-of-vondar"
+        goal: "Protect sacred craft without turning it into dogma."
+    prejudices:
+      -
+        toward: "lumish"
+        belief: "Officials confuse authority with competence."
+        reality: "Imperial logistics enable large Vondari contracts."
+      -
+        toward: "contian"
+        belief: "Contians trust theory before proving the work."
+        reality: "Their research can expose risks traditional testing misses."
+    relations:
+      lumish:
+        stance: "essential commerce"
+        pressurePoints:
+          - "tariffs"
+          - "contracts"
+        ties:
+          - "roads"
+          - "fortifications"
+      zuraldarr:
+        stance: "close trade"
+        pressurePoints:
+          - "tolls"
+          - "survey boundaries"
+        ties:
+          - "passes"
+          - "caravans"
+      contian:
+        stance: "competitive respect"
+        pressurePoints:
+          - "standards"
+          - "patents"
+        ties:
+          - "instruments"
+          - "research"
+      norths:
+        stance: "hard respect"
+        pressurePoints:
+          - "prices"
+          - "surface claims"
+        ties:
+          - "weapons"
+          - "giant defense"
+      elenori:
+        stance: "careful exchange"
+        pressurePoints:
+          - "mining"
+          - "resource extraction"
+        ties:
+          - "rare wood"
+          - "botany"
+      umbra-kori:
+        stance: "deep-route pragmatism"
+        pressurePoints:
+          - "tunnels"
+          - "claims"
+        ties:
+          - "engineering"
+          - "containment knowledge"
+    visualPalette:
+      - "#c4c0b6"
+      - "#77736a"
+      - "#44413d"
+      - "#242424"
+      - "#8a7048"
+    storyHooks:
+      - "Measurements prove a revered bridge is failing."
+      - "A mine disaster comes from a phenomenon the guild system cannot classify."
+      - "An engineer can save a fortress only by discrediting her master."
+  elenori:
+    id: "elenori"
+    displayName: "Elenori"
+    status: "core"
+    azgaarCultureIds:
+      - 1
+    regions:
+      - "Elenoria"
+      - "Eternal Woods"
+      - "old forest settlements and hidden roads"
+    ancestryWeights:
+      elf: 0.94
+      human: 0.02
+      darkElf: 0.01
+      other: 0.03
+    identity:
+      public: "Stewardship, continuity, ecological memory, patience, and restraint."
+      admired: "Deep ecological knowledge, preservation, long-term planning, and restraint."
+      ugly: "Manipulation of memory, paternalism, and institutions deciding what others may know."
+      internalLie: "Elenori history is continuous and preserved rather than curated."
+      outsiderMisconception: "The Elenori are benevolent ancient sages who always know best."
+    architecture:
+      materials:
+        - "living wood"
+        - "stone foundations"
+        - "woven branches"
+        - "pale plaster"
+        - "aged bronze"
+      forms:
+        - "tree-integrated halls"
+        - "swallowed ruins"
+        - "curved bridges"
+        - "hidden archives"
+        - "garden courts"
+      grammar: "Paths avoid rigid axes; old and new construction interlock until age becomes difficult to read."
+    settlementGrammar:
+      core: "Water and grove first, then halls, gardens, craft spaces, memory house, and dispersed residences."
+      frontier: "Ranger posts and living boundaries substitute for heavy walls."
+      infrastructure: "Paths, canopy bridges, controlled clearings, water channels, and deliberately removed roads shape movement."
+    values:
+      - "stewardship"
+      - "continuity"
+      - "restraint"
+      - "ecological balance"
+      - "memory"
+      - "long horizons"
+    food:
+      staples:
+        - "nuts"
+        - "fruits"
+        - "greens"
+        - "grains"
+        - "mushrooms"
+        - "fish"
+      signatures:
+        - "herb breads"
+        - "preserved fruits"
+        - "nut pastes"
+        - "smoked fish"
+      constraints: "Harvest rules prioritize ecosystem health over maximum yield."
+    clothing:
+      everyday: "Layered natural fibers for quiet movement, weather, and repair."
+      status: "Age, office, archive access, and craft lineage appear through subtle patterns and materials."
+      climate: "Ranger clothing favors concealment; civic clothing is lighter and ceremonial."
+    military:
+      doctrine: "Deny information, shape routes, strike from prepared terrain, and avoid costly open battles."
+      formations:
+        - "rangers"
+        - "wardens"
+        - "small professional companies"
+        - "scouts"
+      strengths:
+        - "reconnaissance"
+        - "terrain control"
+        - "preparation"
+        - "precision"
+      weaknesses:
+        - "small numbers"
+        - "slow consensus"
+        - "overreliance on secrecy"
+    magic:
+      attitude: "Some knowledge is dangerous merely by being known; practice is judged by consequence and custodianship."
+      institutions:
+        - "memory keepers"
+        - "grove circles"
+        - "ranger traditions"
+        - "restricted archives"
+      commonUses:
+        - "healing"
+        - "growth"
+        - "concealment"
+        - "path shaping"
+        - "wards"
+      taboos:
+        - "broadcasting sealed knowledge"
+        - "forcing ancient sites open"
+        - "permanent damage to living systems"
+    religion:
+      traditions:
+        - "grove traditions"
+        - "ancestor-memory observances"
+        - "older divine rites"
+      institutions:
+        - "grove keepers"
+        - "memory keepers"
+        - "regional custodians"
+      tensions: "Religious authority and historical curation blur when the same institutions control both."
+    economy:
+      strengths:
+        - "medicines"
+        - "botany"
+        - "high-value craft"
+        - "forestry stewardship"
+        - "specialized knowledge"
+      imports:
+        - "metals"
+        - "salt"
+        - "some grain"
+        - "urban tools"
+      exports:
+        - "medicines"
+        - "quota-controlled rare woods"
+        - "craft goods"
+        - "guides"
+      labor: "Households and craft lineages operate inside strong ecological restrictions."
+    socialClasses:
+      -
+        key: "memory-keepers"
+        role: "Custodians of archives and censored histories."
+      -
+        key: "rangers-wardens"
+        role: "Protectors controlling routes, borders, and dangerous sites."
+      -
+        key: "craft-lineages"
+        role: "Specialists whose methods may span centuries."
+      -
+        key: "ordinary-households"
+        role: "Farmers, gatherers, fishers, and craftspeople."
+    naming:
+      personal: "Names may persist for centuries inside lineages."
+      family: "Lineage, grove, craft, and remembered-place affiliations coexist."
+      place: "Trees, waters, old events, vanished settlements, and poetic compounds."
+      notes: "Official names and older remembered names may intentionally differ."
+    factions:
+      -
+        key: "conservators"
+        goal: "Preserve institutions and sealed knowledge."
+      -
+        key: "rangers"
+        goal: "Let field reality outrank archival assumptions."
+      -
+        key: "memory-keepers"
+        goal: "Control dangerous historical knowledge."
+      -
+        key: "younger-reformists"
+        goal: "Expose censored history and challenge inherited authority."
+    prejudices:
+      -
+        toward: "lumish"
+        belief: "Humans mistake administrative continuity for historical understanding."
+        reality: "Elenori memory can be equally political."
+      -
+        toward: "umbra-kori"
+        belief: "They accepted darkness instead of confronting it."
+        reality: "Their institutions may have contained threats the Elenori only hid."
+    relations:
+      lumish:
+        stance: "respectful suspicion"
+        pressurePoints:
+          - "roads"
+          - "archives"
+        ties:
+          - "medicine"
+          - "diplomacy"
+      zuraldarr:
+        stance: "cautious affinity"
+        pressurePoints:
+          - "land rites"
+          - "secret paths"
+        ties:
+          - "druidic exchange"
+          - "old routes"
+      contian:
+        stance: "epistemic conflict"
+        pressurePoints:
+          - "sealed archives"
+          - "memory ethics"
+        ties:
+          - "ancient texts"
+          - "botany"
+      norths:
+        stance: "remote curiosity"
+        pressurePoints:
+          - "hunting boundaries"
+          - "old roads"
+        ties:
+          - "medicine"
+          - "navigation lore"
+      vondari:
+        stance: "careful exchange"
+        pressurePoints:
+          - "mining"
+          - "ancient sites"
+        ties:
+          - "craft"
+          - "technical exchange"
+      umbra-kori:
+        stance: "old unease"
+        pressurePoints:
+          - "hidden history"
+          - "depth threats"
+        ties:
+          - "records"
+          - "containment knowledge"
+    visualPalette:
+      - "#d9ddcf"
+      - "#87927c"
+      - "#4a5b49"
+      - "#26372d"
+      - "#9b8d68"
+    storyHooks:
+      - "A road removed from every map is being maintained again."
+      - "A censored archive proves a revered peace sacrificed a settlement."
+      - "The eastern groves are changing and reformers may be dangerously correct."
+  umbra-kori:
+    id: "umbra-kori"
+    displayName: "Umbra'kori"
+    status: "core"
+    azgaarCultureIds:
+      - 8
+    regions:
+      - "Umbra'kor dominions"
+      - "deep cavern cities"
+      - "controlled underground rivers and passages"
+    ancestryWeights:
+      darkElf: 0.91
+      human: 0.01
+      elf: 0.01
+      goblin: 0.02
+      other: 0.05
+    identity:
+      public: "Debt, secrecy, continuity, hierarchy, and duty to the Depths."
+      admired: "They may literally protect the wider world through generations of containment and institutional memory."
+      ugly: "Ruthless hierarchy, tribute, secrecy that enables abuse, and permanent-emergency politics."
+      internalLie: "Darkness gave the Umbra'kori freedom and official history explains why they went below."
+      outsiderMisconception: "They are servants of evil whose cruelty needs no political explanation."
+    architecture:
+      materials:
+        - "basalt"
+        - "dark stone"
+        - "iron"
+        - "bronze"
+        - "phosphorescent pigments"
+      forms:
+        - "cavern-wall cities"
+        - "bridges over voids"
+        - "deep civic halls"
+        - "defensive choke points"
+        - "vertical tiers"
+      grammar: "Access, defense, ventilation, water, and vertical circulation determine form; facades are carved into geology."
+    settlementGrammar:
+      core: "Water control, defensive gate, civic hall, tribute stores, market, house compounds, temples, then vertical housing."
+      frontier: "Narrow approaches, sealed gates, watch stations, and fallback chambers dominate."
+      infrastructure: "Bridges, lifts, ventilation, canals, flood gates, signal routes, and phosphorescent wayfinding."
+    values:
+      - "continuity"
+      - "duty"
+      - "debt"
+      - "secrecy"
+      - "house obligation"
+      - "containment"
+    food:
+      staples:
+        - "fungi"
+        - "cave grains"
+        - "fish"
+        - "insects"
+        - "imported grain"
+        - "preserved meat"
+      signatures:
+        - "fermented fungi"
+        - "mineral-salt broths"
+        - "smoked cave fish"
+      constraints: "Food depends on water, ventilation, secure trade, and political control of habitable caverns."
+    clothing:
+      everyday: "Close-fitting layered garments, durable boots, wraps, and fabrics suited to damp or dusty caverns."
+      status: "House, temple, military, and civic rank appear through metalwork, pattern, and controlled dyes."
+      climate: "Surface clothing is specialized and region-specific."
+    military:
+      doctrine: "Control choke points, deny route knowledge, preserve fallbacks, and keep threats from population centers."
+      formations:
+        - "Shadowblades"
+        - "house guards"
+        - "gate companies"
+        - "scouts"
+        - "engineers"
+        - "depth wardens"
+      strengths:
+        - "defense in depth"
+        - "intelligence"
+        - "route control"
+        - "institutional memory"
+      weaknesses:
+        - "house rivalry"
+        - "secrecy between commands"
+        - "limited surface logistics"
+    magic:
+      attitude: "Necessary, dangerous, and inseparable from containment, secrecy, and political power."
+      institutions:
+        - "temples"
+        - "house specialists"
+        - "depth wardens"
+        - "sealed archives"
+      commonUses:
+        - "wards"
+        - "concealment"
+        - "navigation"
+        - "containment"
+        - "water control"
+      taboos:
+        - "breaking seals"
+        - "revealing restricted routes"
+        - "unauthorized contact with contained entities"
+    religion:
+      traditions:
+        - "official darkness doctrine"
+        - "depth-duty rites"
+        - "house ancestors"
+        - "suppressed older traditions"
+      institutions:
+        - "temples"
+        - "house cults"
+        - "depth custodians"
+      tensions: "Records contradict official doctrine about why they went underground and whether they guard the Depths voluntarily."
+    economy:
+      strengths:
+        - "underground trade"
+        - "rare minerals"
+        - "fungiculture"
+        - "specialty metalwork"
+        - "information"
+      imports:
+        - "grain"
+        - "timber"
+        - "livestock"
+        - "textiles"
+        - "medicine"
+      exports:
+        - "rare minerals"
+        - "crafted goods"
+        - "fungal products"
+        - "intelligence"
+        - "transit"
+      labor: "House obligations, civic service, tribute labor, specialists, merchants, and dependents overlap."
+    socialClasses:
+      -
+        key: "great-houses"
+        role: "Elites controlling tribute, guards, and strategic routes."
+      -
+        key: "depth-authorities"
+        role: "Custodians claiming religious and security authority."
+      -
+        key: "free-specialists"
+        role: "Merchants, engineers, scribes, craftspeople, and scouts."
+      -
+        key: "dependent-communities"
+        role: "Settlements protected by stronger houses for tribute and service."
+    naming:
+      personal: "Dark-elven traditions vary by house and cavern region, often paired with duty titles."
+      family: "House affiliation is salient but not universal."
+      place: "Geology, depths, rulers, sealed events, rivers, and defensive functions."
+      notes: "Public names may conceal older names tied to forbidden history."
+    factions:
+      -
+        key: "great-houses"
+        goal: "Preserve house autonomy while controlling tribute and access."
+      -
+        key: "depth-wardens"
+        goal: "Keep containment above house politics."
+      -
+        key: "temple-authorities"
+        goal: "Preserve doctrine legitimizing the order."
+      -
+        key: "revisionist-recordkeepers"
+        goal: "Recover the real history without collapsing society."
+    prejudices:
+      -
+        toward: "elenori"
+        belief: "Elenori hide danger and call it wisdom."
+        reality: "Umbra'kori institutions also curate history."
+      -
+        toward: "vondari"
+        belief: "Stonehold thinks everything below can be engineered."
+        reality: "Vondari methods may be essential to failing containment works."
+    relations:
+      lumish:
+        stance: "guarded necessity"
+        pressurePoints:
+          - "religious distrust"
+          - "secrecy"
+        ties:
+          - "intelligence"
+          - "shared threats"
+      zuraldarr:
+        stance: "guarded"
+        pressurePoints:
+          - "hidden passes"
+          - "jurisdiction"
+        ties:
+          - "route control"
+          - "depth warnings"
+      contian:
+        stance: "intelligence contest"
+        pressurePoints:
+          - "forbidden knowledge"
+          - "artifacts"
+        ties:
+          - "controlled research"
+          - "threat records"
+      norths:
+        stance: "rare contact"
+        pressurePoints:
+          - "unknown motives"
+          - "old tunnels"
+        ties:
+          - "specialty goods"
+          - "threat intelligence"
+      vondari:
+        stance: "deep-route pragmatism"
+        pressurePoints:
+          - "tunnels"
+          - "claims"
+        ties:
+          - "containment works"
+          - "trade"
+      elenori:
+        stance: "old unease"
+        pressurePoints:
+          - "hidden history"
+          - "secrecy"
+        ties:
+          - "records"
+          - "rare diplomacy"
+    visualPalette:
+      - "#b9b3bf"
+      - "#6e6776"
+      - "#403b48"
+      - "#201f27"
+      - "#66756d"
+    storyHooks:
+      - "A brutal depth law is necessary only because safer reforms were blocked for centuries."
+      - "A sealed record suggests they are imprisoned with what they guard."
+      - "A house hides a containment failure to protect the doctrine justifying its rule."
+regionalSpheres:
+  grukmar:
+    id: "grukmar"
+    displayName: "Grukmar"
+    status: "heterogeneous-region"
+    azgaarCultureIds:
+      - 4
+      - 8
+      - 9
+      - 12
+      - 13
+    rule: "Grukmar is a geographic and political label used by outsiders, not an ethnicity or single culture."
+    composition:
+      - "orc clans"
+      - "goblin trading communities"
+      - "Rakhnid broods"
+      - "Jotunn groups"
+      - "Umbra'kori enclaves"
+    politicalGrammar: "Authority shifts among clans, towns, broods, giant holds, tribute networks, and temporary coalitions."
+    simulationUse: "Generate local cultures and factions from ancestry, settlement history, patronage, trade, and conquest rather than a Grukmar culture template."
+  wyrmreach:
+    id: "wyrmreach"
+    displayName: "Wyrmreach"
+    status: "deliberately-incomplete-region"
+    azgaarCultureIds:
+      - 2
+      - 4
+      - 5
+      - 9
+      - 12
+      - 13
+    rule: "Do not collapse Wyrmreach into one culture and do not fully define it at launch."
+    knownTruths:
+      - "Wyrmreach is culturally heterogeneous."
+      - "Old dragon wars and their aftermath reshaped its societies."
+      - "Most confident mainland accounts of Wyrmreach are wrong."
+    protectedUnknowns:
+      - "draconic-remnant meaning"
+      - "serpent-peoples history"
+      - "internal polities"
+      - "religious structure"
+      - "true relationship to the old dragon wars"
+    simulationUse: "Use Azgaar distribution as geographic guidance while authored culture profiles are added later."
+culturalSeeds:
+  serpent-peoples:
+    id: "serpent-peoples"
+    displayName: "Serpent peoples"
+    status: "seed"
+    ancestry: "serpent"
+    azgaarCultureIds:
+      - 2
+    regionalAssociations:
+      - "wyrmreach"
+    rule: "Treat as ancestry and historical seed, not a finished universal culture."
+    futureCultureCandidates:
+      []
+  jotunn:
+    id: "jotunn"
+    displayName: "Jotunn peoples"
+    status: "seed"
+    ancestry: "giant"
+    azgaarCultureIds:
+      - 4
+    regionalAssociations:
+      - "frostgard"
+      - "grukmar"
+      - "wyrmreach"
+    rule: "Giant ancestry spans enemies, communities, treaty partners, and unrelated cultures."
+    futureCultureCandidates:
+      - "frostgard-treaty-holds"
+      - "grukmar-giants"
+      - "wyrmreach-jotunn"
+  draconic-remnant:
+    id: "draconic-remnant"
+    displayName: "Draconic remnant"
+    status: "seed"
+    ancestry: "draconic"
+    azgaarCultureIds:
+      - 5
+    regionalAssociations:
+      - "wyrmreach"
+    rule: "Preserve as a tiny obscure remnant; do not spend its narrative importance early."
+    futureCultureCandidates:
+      []
+  orc-peoples:
+    id: "orc-peoples"
+    displayName: "Orc peoples"
+    status: "seed"
+    ancestry: "orc"
+    azgaarCultureIds:
+      - 9
+    regionalAssociations:
+      - "grukmar"
+      - "wyrmreach"
+      - "lumish-border"
+      - "stonehold-border"
+    rule: "Orc is an ancestry, never one canonical culture."
+    futureCultureCandidates:
+      - "grukmar-clan-orcs"
+      - "wyrmreach-orcs"
+      - "border-orcs"
+  rakhnid-broods:
+    id: "rakhnid-broods"
+    displayName: "Rakhnid broods"
+    status: "seed"
+    ancestry: "rakhnid"
+    azgaarCultureIds:
+      - 12
+    regionalAssociations:
+      - "grukmar"
+      - "wyrmreach"
+    rule: "Broods may develop unrelated customs and political systems; do not flatten them into a species stereotype."
+    futureCultureCandidates:
+      []
+  goblin-peoples:
+    id: "goblin-peoples"
+    displayName: "Goblin peoples"
+    status: "seed"
+    ancestry: "goblin"
+    azgaarCultureIds:
+      - 13
+    regionalAssociations:
+      - "grukmar"
+      - "wyrmreach"
+      - "lumish-border"
+    rule: "Goblin is an ancestry; many communities survive economically between stronger powers."
+    culturalPressure: "Never depend on one patron."
+    futureCultureCandidates:
+      - "grukmar-caravan-goblins"
+      - "wyrmreach-goblins"
+      - "border-goblins"

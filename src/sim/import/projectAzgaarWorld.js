@@ -14,6 +14,10 @@ import {
 } from '../model/ids.js';
 import { checksumCanonical } from '../persistence/canonicalSerialize.js';
 import { PROJECTION_VERSION } from './projectionVersion.js';
+import {
+  resolveCultureCatalogForCampaign,
+  resolveSourceCultureMapping,
+} from '../config/cultureCatalog.js';
 
 function sortBySourceId(items) {
   return [...(items ?? [])]
@@ -56,13 +60,23 @@ export function projectAzgaarWorld(campaign, {
     ?? String(source.mapId ?? source.seed ?? 'world');
   const sourceFingerprint = fingerprintCampaignSource(campaign);
   const seed = String(source.seed ?? simulationConfig.seed ?? resolvedWorldId);
+  const cultureCatalog = resolveCultureCatalogForCampaign(
+    simulationConfig.cultureCatalog,
+    campaign,
+  );
 
-  const cultures = sortBySourceId(campaign?.cultures).map((c) => ({
-    id: importedCultureId(c.i),
-    sourceId: c.i,
-    name: String(c.name ?? `Culture ${c.i}`),
-    color: c.color ?? null,
-  }));
+  const cultures = sortBySourceId(campaign?.cultures).map((c) => {
+    const mapping = resolveSourceCultureMapping(cultureCatalog, Number(c.i));
+    return {
+      id: importedCultureId(c.i),
+      sourceId: c.i,
+      name: String(c.name ?? `Culture ${c.i}`),
+      color: c.color ?? null,
+      mappingType: mapping?.targetType ?? 'unmapped',
+      canonicalCultureKey: mapping?.targetType === 'culture' ? mapping.targetKey : null,
+      culturalSeedKey: mapping?.targetType === 'seed' ? mapping.targetKey : null,
+    };
+  });
   const religions = sortBySourceId(campaign?.religions).map((r) => ({
     id: importedReligionId(r.i),
     sourceId: r.i,
@@ -82,12 +96,14 @@ export function projectAzgaarWorld(campaign, {
       kilometersPerUnit: Number(simulationConfig.kilometersPerUnit ?? 1),
     },
     cultures,
+    cultureCatalog,
     religions,
     biomes: [],
     sourceMeta: {
       type: source.type ?? 'azgaar-campaign',
       mapName: source.mapName ?? null,
       version: source.version ?? null,
+      cultureCatalogId: cultureCatalog?.catalogId ?? null,
     },
   });
 

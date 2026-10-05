@@ -565,6 +565,10 @@ export class InfiniteTerrainView {
   }
 
   async updateStreaming(focusWorld, timestamp = performance.now(), force = false) {
+    this.updateStreamingFrame(focusWorld, timestamp, force);
+  }
+
+  updateStreamingFrame(focusWorld, timestamp = performance.now(), force = false) {
     if (this.disposed) return;
     const velocity = this.calculateVelocity(focusWorld, timestamp);
     this.focusVelocity = velocity;
@@ -592,7 +596,6 @@ export class InfiniteTerrainView {
 
     if (!force && nextFocusKey === this.focusChunkKey) {
       this.retryFailedSlots(timestamp);
-      this.positionSlots();
       return;
     }
     this.focusChunkKey = nextFocusKey;

@@ -842,6 +842,10 @@ stylizedSurface:
         medium: { detail: 3, density: 12.6, distance: 0.28 }
         low: { detail: 3, density: 5.6, distance: 0.6 }
         veryLow: { detail: 2, density: 2.8, distance: 1 }
+      interaction:
+        # CPU recovery still runs every frame; upload the small stamp texture at
+        # half rate to avoid redundant 256x256 transfers at high refresh rates.
+        uploadIntervalFrames: 2
       # Billboard clumps past the blades (grass-test's far grass): 64 m tiles, a
       # screen-door handoff from 40 to 50 m, dissolving out by 180 m where the
       # terrain's painted ground cover has taken over.

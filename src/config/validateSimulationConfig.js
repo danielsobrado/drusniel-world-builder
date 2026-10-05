@@ -1,4 +1,5 @@
 import { DEFAULT_SIMULATION_CONFIG } from '../sim/config/defaultSimulationConfig.js';
+import { validateCultureCatalog } from '../sim/config/cultureCatalog.js';
 
 function assertObject(value, path) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -39,6 +40,9 @@ function assertSafeTickProduct(value, path) {
 export function validateSimulationConfig(simulation) {
   if (simulation == null) return simulation;
   assertObject(simulation, 'simulation');
+  if (simulation.cultureCatalog !== undefined) {
+    validateCultureCatalog(simulation.cultureCatalog);
+  }
 
   assertNonNegInt(simulation.schemaVersion ?? DEFAULT_SIMULATION_CONFIG.schemaVersion, 'simulation.schemaVersion');
   assertNonNegInt(simulation.projectionVersion ?? DEFAULT_SIMULATION_CONFIG.projectionVersion, 'simulation.projectionVersion');

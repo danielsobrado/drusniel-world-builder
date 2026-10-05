@@ -283,15 +283,40 @@ export class StylizedSurfaceView {
     this.reflections = this.enabled && !this.impostorBakeMode && config.enhancements?.waterReflections.enabled
       ? new WaterReflectionController(terrainView, config.enhancements.waterReflections) : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections);
+    this.reflectionFrame = 0;
+    this.reflectionPrepared = null;
     terrainView.beforeMainRender = camera => {
       this.skyView?.cascades?.prepare(camera);
-      this.reflections?.prepare(camera, this);
-      // Captures reuse shadows from this main-camera draw. Standalone views may
-      // have no shared scheduler; the main loop supplies a debited reservation.
-      this.reflectionBudgetReserved = Boolean(this.reflections && !this.reserveDeferredWork && !this.shouldYieldWork?.());
+      const now = performance.now();
+      const prepared = this.reflections?.prepare(camera, this) ?? null;
+      this.reflectionPrepared = prepared;
+      this.reflectionReservation?.cancel();
+      this.reflectionReservation = null;
+      const captureTurn = this.reflectionFrame++ % 4 === 0;
+      if (
+        prepared
+        && captureTurn
+        && now >= this.reflections.nextCapture
+        && this.reserveDeferredWork
+      ) {
+        this.reflectionReservation = this.reserveDeferredWork(6);
+      }
+      // Standalone views have no shared scheduler; preserve their direct capture path.
+      this.reflectionBudgetReserved = Boolean(
+        prepared
+        && !this.reserveDeferredWork
+        && !this.shouldYieldWork?.()
+      );
     };
     terrainView.afterMainRender = camera => {
-      const capture = () => this.reflections.update(camera, this, performance.now(), { budgetReserved: true });
+      const prepared = this.reflectionPrepared;
+      this.reflectionPrepared = null;
+      const capture = () => this.reflections.update(
+        camera,
+        this,
+        performance.now(),
+        { budgetReserved: true, prepared },
+      );
       this.reflectionReservation?.run(capture);
       this.reflectionReservation = null;
       if (this.reflectionBudgetReserved) this.runDeferredWork ? this.runDeferredWork(capture) : capture();
@@ -313,6 +338,8 @@ export class StylizedSurfaceView {
     // of compounding into a visible stall.
     this.frameBudgetMs = config.streaming?.stylizedFrameBudgetMs ?? 6;
     this.frameStartedAt = 0;
+    this.lastBeginFrameTimestamp = null;
+    this.grassRockInputs = new WeakMap();
     const shouldYield = () => (
       this.frameStartedAt > 0 && performance.now() - this.frameStartedAt > (this.workBudgetMs ?? this.frameBudgetMs)
     );
@@ -650,6 +677,8 @@ export class StylizedSurfaceView {
   }
 
   beginFrame(timestamp) {
+    if (this.lastBeginFrameTimestamp === timestamp) return;
+    this.lastBeginFrameTimestamp = timestamp;
     const focus = this.terrainView?.focusChunk;
     if (focus && this.preparedPlacement) {
       const radius = placementPreparationRadius(this.config, this.terrainView.loadRadius ?? 0);
@@ -769,42 +798,60 @@ export class StylizedSurfaceView {
         slot.update(timestamp, focusChunk, '', [], canonicalFocus);
         continue;
       }
-      const localRocks = rocksInfluencingChunk({
-        descriptor,
-        rockPlacements,
-        chunkWorldSize: this.chunkWorldSize,
-        radius: rockRadius,
-        falloff: rockFalloff,
-      });
-      const localObjectBoulders = rocksInfluencingChunk({
-        descriptor,
-        rockPlacements: objectBoulders,
-        chunkWorldSize: this.chunkWorldSize,
-        radius: rockRadius,
-        falloff: rockFalloff,
-      });
-      const signature = [
-        objectBoulderSignatureForChunk({
-          objectMap: this.objectMap,
-          objectPlacements: objectBoulders,
-          descriptor,
-          tileSize: this.tileSize,
-          chunkWorldSize: this.chunkWorldSize,
-          radius: rockRadius,
-          falloff: rockFalloff,
-        }),
-        rockSignatureForChunk({
+      let rockInput = this.grassRockInputs.get(slot);
+      if (
+        !rockInput
+        || rockInput.descriptorKey !== descriptor.key
+        || rockInput.rockPlacements !== rockPlacements
+        || rockInput.objectBoulders !== objectBoulders
+      ) {
+        const localRocks = rocksInfluencingChunk({
           descriptor,
           rockPlacements,
           chunkWorldSize: this.chunkWorldSize,
           radius: rockRadius,
           falloff: rockFalloff,
-        }),
-      ].join('|');
-      slot.update(timestamp, focusChunk, signature, [
-        ...localObjectBoulders,
-        ...localRocks,
-      ], canonicalFocus);
+        });
+        const localObjectBoulders = rocksInfluencingChunk({
+          descriptor,
+          rockPlacements: objectBoulders,
+          chunkWorldSize: this.chunkWorldSize,
+          radius: rockRadius,
+          falloff: rockFalloff,
+        });
+        const signature = [
+          objectBoulderSignatureForChunk({
+            objectMap: this.objectMap,
+            objectPlacements: objectBoulders,
+            descriptor,
+            tileSize: this.tileSize,
+            chunkWorldSize: this.chunkWorldSize,
+            radius: rockRadius,
+            falloff: rockFalloff,
+          }),
+          rockSignatureForChunk({
+            descriptor,
+            rockPlacements,
+            chunkWorldSize: this.chunkWorldSize,
+            radius: rockRadius,
+            falloff: rockFalloff,
+          }),
+        ].join('|');
+        const localBoulders = localObjectBoulders.length === 0
+          ? localRocks
+          : localRocks.length === 0
+            ? localObjectBoulders
+            : [...localObjectBoulders, ...localRocks];
+        rockInput = {
+          descriptorKey: descriptor.key,
+          rockPlacements,
+          objectBoulders,
+          signature,
+          localBoulders,
+        };
+        this.grassRockInputs.set(slot, rockInput);
+      }
+      slot.update(timestamp, focusChunk, rockInput.signature, rockInput.localBoulders, canonicalFocus);
       if (slot.pendingRebuild) {
         this.grassBuildQueue.enqueue({
           key: slot.pendingRebuild.key,

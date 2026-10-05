@@ -32,6 +32,12 @@ export class WaterReflectionController {
     this.sceneRevision = null;
     this.disposed = false;
     this.capturing = false;
+    this.wetSlots = [];
+    this.hiddenObjects = [];
+    this.planarWetSlots = [];
+    this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
+    this.captureScratch = { states: [], shadows: [] };
+    this.lastCaptureCpuMs = 0;
   }
 
   sample(direction, fallback, allowPlanar = float(1)) {
@@ -58,29 +64,41 @@ export class WaterReflectionController {
     if (this.generator !== this.view.worldStore.generator || this.lastOrigin?.x !== origin.x || this.lastOrigin?.z !== origin.z) {
       this.invalidate(); this.generator = this.view.worldStore.generator; this.lastOrigin = { ...origin };
     }
-    const canonical = { x: camera.position.x + origin.x, z: camera.position.z + origin.z };
+    const canonical = this.preparedState.canonical;
+    canonical.x = camera.position.x + origin.x;
+    canonical.z = camera.position.z + origin.z;
     const revision = `${this.view.worldStore.revision ?? 0}:${surface.revisionTracker?.revision ?? 0}:${surface.objectMap?.revision ?? 0}:${this.revisionProvider?.() ?? 0}`;
     if (revision !== this.sceneRevision) { this.invalidate(); this.sceneRevision = revision; }
-    const wet = surface.waterSlots.filter(slot => slot.hasWaterCoverage && slot.terrainSlot.descriptor);
-    const nearby = wet.some(slot => {
+    const wet = this.wetSlots;
+    wet.length = 0;
+    let nearby = false;
+    for (const slot of surface.waterSlots) {
+      if (!slot.hasWaterCoverage || !slot.terrainSlot.descriptor) continue;
+      wet.push(slot);
       const d = slot.terrainSlot.descriptor;
-      return Math.hypot(d.centerWorldX - canonical.x, d.centerWorldZ - canonical.z) < this.config.reachMeters + this.view.chunkWorldSize;
-    });
+      if (Math.hypot(d.centerWorldX - canonical.x, d.centerWorldZ - canonical.z)
+        < this.config.reachMeters + this.view.chunkWorldSize) nearby = true;
+    }
     if (!nearby) { this.invalidate(); return; }
     if (this.canonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
       || Math.abs(camera.position.y - this.probeY) > this.config.reachMeters * 0.2)) this.invalidate();
     if (this.canonicalProbe) this.origin.value.set(this.canonicalProbe.x - origin.x, this.probeY, this.canonicalProbe.z - origin.z);
-    return { origin, canonical, wet };
+    this.preparedState.origin = origin;
+    return this.preparedState;
   }
 
-  update(camera, surface, now = performance.now(), { budgetReserved = false } = {}) {
-    const prepared = this.prepare(camera, surface);
-    if (!prepared) return;
-    const { origin, canonical, wet } = prepared;
+  update(camera, surface, now = performance.now(), { budgetReserved = false, prepared = null } = {}) {
+    const state = prepared ?? this.prepare(camera, surface);
+    if (!state) return;
+    const { origin, canonical, wet } = state;
     if (now < this.nextCapture) return;
     if (!budgetReserved && surface.shouldYieldWork?.()) return;
-    const hidden = surface.waterSlots.map(slot => slot.mesh);
-    this.view.scene.traverse(object => { if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) hidden.push(object); });
+    const hidden = this.hiddenObjects;
+    hidden.length = 0;
+    for (const slot of surface.waterSlots) hidden.push(slot.mesh);
+    this.view.scene.traverse(object => {
+      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) hidden.push(object);
+    });
     const started = performance.now();
     this.capturing = true;
     try {
@@ -116,13 +134,20 @@ export class WaterReflectionController {
           this.nextCapture = now + this.config.intervalMs;
           this.planarPending = Boolean(this.planarTarget);
         }
-      });
-    } finally { this.capturing = false; PerfCounters.inc('waterReflectionCpuMs', performance.now() - started); }
+      }, this.captureScratch);
+    } finally {
+      this.capturing = false;
+      this.lastCaptureCpuMs = performance.now() - started;
+      PerfCounters.inc('waterReflectionCpuMs', this.lastCaptureCpuMs);
+    }
   }
 
   capturePlanar(camera, wet, origin, now, surface) {
     if (!this.planarTarget || now - this.lastPlanar < this.config.intervalMs) return;
-    const ordered = [...wet].sort((a, b) => {
+    const ordered = this.planarWetSlots;
+    ordered.length = 0;
+    for (const slot of wet) ordered.push(slot);
+    ordered.sort((a, b) => {
       const dist = slot => { const d = slot.terrainSlot.descriptor; return Math.hypot(d.centerWorldX - origin.x - camera.position.x, d.centerWorldZ - origin.z - camera.position.z); };
       return dist(a) - dist(b);
     });

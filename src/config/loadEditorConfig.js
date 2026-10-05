@@ -4,6 +4,7 @@ import { resolveRenderEnhancements } from './RenderEnhancements.js';
 import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?raw';
 import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?raw';
 import collisionConfigSource from '../../config/collision.yaml?raw';
+import culturesConfigSource from '../../config/cultures.yaml?raw';
 import configSource from '../../editor.config.yaml?raw';
 import explorationConfigSource from '../../config/exploration.yaml?raw';
 import { applyMobileStartupProfile } from '../editor/exploration/MobileProfile.js';
@@ -31,6 +32,7 @@ import { validateEditorConfig } from './validateEditorConfig.js';
 import { validateFarTerrainConfig } from './validateFarTerrainConfig.js';
 import { validateImportConfig } from './validateImportConfig.js';
 import { validateStylizedLodConfig } from './validateStylizedLodConfig.js';
+import { resolveCultureCatalog } from '../sim/config/cultureCatalog.js';
 
 function runtimeSearch() {
   return typeof window === 'undefined' ? '' : window.location.search;
@@ -46,6 +48,8 @@ function applyRuntimeOverrides(config) {
 
 export function loadEditorConfig() {
   const config = yaml.load(configSource);
+  config.simulation ??= {};
+  config.simulation.cultureCatalog = resolveCultureCatalog(yaml.load(culturesConfigSource));
   config.stylizedSurface.enhancements = resolveRenderEnhancements(yaml.load(enhancementsSource), runtimeSearch(),
     { mobile: typeof window !== 'undefined' && window.innerWidth < 768 });
   config.exploration = resolveExplorationConfig(yaml.load(explorationConfigSource));

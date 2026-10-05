@@ -53,6 +53,8 @@ export class MeadowTileLayer {
     this.tiles = new Map();
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
     this.buildSerial = 0;
+    this.frameSerial = 0;
+    this.staleTiles = [];
     this.stats = { tiles: 0, building: 0, stems: 0, bands: {}, visibleMissing: 0, visibleCapacityLag: 0 };
   }
 
@@ -69,7 +71,7 @@ export class MeadowTileLayer {
     this.time = time;
     const size = this.tileSize;
     const reach = this.reach + size;
-    const keep = new Set();
+    const frameSerial = ++this.frameSerial;
     for (let tz = Math.floor((camera.z - reach) / size); tz <= Math.floor((camera.z + reach) / size); tz += 1) {
       for (let tx = Math.floor((camera.x - reach) / size); tx <= Math.floor((camera.x + reach) / size); tx += 1) {
         const centerX = (tx + 0.5) * size;
@@ -80,12 +82,12 @@ export class MeadowTileLayer {
         const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
         if (!preparationBand) continue;
         const key = `${tx}:${tz}`;
-        keep.add(key);
         let tile = this.tiles.get(key);
         if (!tile) {
           tile = { key, centerX, centerZ, output: null, buildId: 0, job: null };
           this.tiles.set(key, tile);
         }
+        tile.seenFrame = frameSerial;
         tile.band = band;
         if (band === null) tile.output = null;
         tile.preparationBand = preparationBand;
@@ -110,7 +112,7 @@ export class MeadowTileLayer {
       }
     }
     for (const [key, tile] of this.tiles) {
-      if (keep.has(key)) continue;
+      if (tile.seenFrame === frameSerial) continue;
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
       this.release(tile.job?.band, tile.job?.compaction.output);
       this.tiles.delete(key);
@@ -133,7 +135,8 @@ export class MeadowTileLayer {
   }
 
   build(deadline) {
-    const stale = [];
+    const stale = this.staleTiles;
+    stale.length = 0;
     for (const tile of this.tiles.values()) {
       // A job started for a band or page the tile has since left is abandoned.
       if (tile.job && ((tile.job.band !== tile.preparationBand

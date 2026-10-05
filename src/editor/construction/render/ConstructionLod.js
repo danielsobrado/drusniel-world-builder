@@ -30,6 +30,8 @@ const FROM_SHARED = Object.freeze({
   culled: 'shell',
 });
 
+const MODULE_WORLD_POSITION = { x: 0, y: 0, z: 0 };
+
 export function selectConstructionLod({
   pixels,
   previous = null,
@@ -58,18 +60,25 @@ export function moduleProjectedPixels({
   module,
   height,
   viewportHeight,
+  origin = null,
   toRender = null,
   cameraY = 0,
 }) {
   const bounds = module.bounds;
   const canonicalX = (bounds.minX + bounds.maxX) / 2;
   const canonicalZ = (bounds.minZ + bounds.maxZ) / 2;
-  const rendered = toRender
-    ? toRender(canonicalX, canonicalZ)
-    : { x: canonicalX, z: canonicalZ };
+  if (toRender) {
+    const rendered = toRender(canonicalX, canonicalZ);
+    MODULE_WORLD_POSITION.x = rendered.x;
+    MODULE_WORLD_POSITION.z = rendered.z;
+  } else {
+    MODULE_WORLD_POSITION.x = canonicalX - (origin?.x ?? 0);
+    MODULE_WORLD_POSITION.z = canonicalZ - (origin?.z ?? 0);
+  }
+  MODULE_WORLD_POSITION.y = cameraY;
   return projectedPixelHeight({
     camera,
-    worldPosition: { x: rendered.x, y: cameraY, z: rendered.z },
+    worldPosition: MODULE_WORLD_POSITION,
     worldHeight: height,
     viewportHeight,
   });

@@ -18,6 +18,17 @@ export function createWorldQueries(definition, state) {
     getDefinitionFingerprint() {
       return fingerprintWorldDefinition(definition);
     },
+    getCultureCatalog() {
+      return definition.cultureCatalog == null ? null : structuredClone(definition.cultureCatalog);
+    },
+    getCanonicalCulture(cultureKey) {
+      const culture = definition.cultureCatalog?.cultures?.[cultureKey];
+      return culture ? structuredClone(culture) : null;
+    },
+    getSourceCulture(sourceId) {
+      const culture = definition.cultures.find((entry) => Number(entry.sourceId) === Number(sourceId));
+      return culture ? structuredClone(culture) : null;
+    },
     getEntity(kind, id) {
       const entity = getEntity(state, kind, id);
       return entity ? structuredClone(entity) : null;

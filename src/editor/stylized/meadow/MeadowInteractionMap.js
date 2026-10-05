@@ -24,13 +24,17 @@ export class MeadowInteractionMap {
    * @param {(x: number, z: number) => number} options.getHeight render-space ground
    */
   constructor({
-    resolution = 256, worldSize = 27, recoverySpeed = 0.94, strength = 1, bodyRadius = 0.26, getHeight,
+    resolution = 256, worldSize = 27, recoverySpeed = 0.94, strength = 1, bodyRadius = 0.26,
+    uploadIntervalFrames = 1, getHeight,
   }) {
     this.resolution = resolution;
     this.worldSize = worldSize;
     this.recoverySpeed = recoverySpeed;
     this.strength = strength;
     this.bodyRadius = bodyRadius;
+    this.uploadIntervalFrames = Math.max(1, Math.round(uploadIntervalFrames));
+    this.uploadFrame = 0;
+    this.textureDirty = false;
     this.getHeight = getHeight;
     this.center = new THREE.Vector2();
     this.lastCenter = new THREE.Vector2();
@@ -97,7 +101,18 @@ export class MeadowInteractionMap {
     const hadInk = this.peak > 0;
     this.recover();
     if (body) this.paintSphere(body.x, body.y, body.z, this.bodyRadius, this.strength);
-    if (hadInk || body) this.texture.needsUpdate = true;
+    if (hadInk || body) this.textureDirty = true;
+    this.uploadFrame += 1;
+    if (
+      this.textureDirty
+      && (
+        this.uploadFrame % this.uploadIntervalFrames === 0
+        || this.peak === 0
+      )
+    ) {
+      this.texture.needsUpdate = true;
+      this.textureDirty = false;
+    }
   }
 
   recover() {

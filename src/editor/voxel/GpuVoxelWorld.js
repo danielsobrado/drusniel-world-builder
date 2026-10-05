@@ -106,6 +106,9 @@ export class GpuVoxelWorld {
     this.visible = layout.visible;
     this.initialized = false;
     this.disposed = false;
+    this.positionOriginX = Number.NaN;
+    this.positionOriginZ = Number.NaN;
+    this.positionTerrainRevision = Number.NaN;
   }
 
   getStatus() {
@@ -259,8 +262,17 @@ export class GpuVoxelWorld {
       this.updateAssignments(pendingFocusWorld, true);
     }
 
-    for (const slot of this.slots) {
-      this.positionSlot(slot);
+    const origin = this.terrainView.floatingOrigin?.getState?.() ?? { x: 0, z: 0 };
+    const terrainRevision = this.terrainView.worldStore?.revision ?? 0;
+    if (
+      origin.x !== this.positionOriginX
+      || origin.z !== this.positionOriginZ
+      || terrainRevision !== this.positionTerrainRevision
+    ) {
+      this.positionOriginX = origin.x;
+      this.positionOriginZ = origin.z;
+      this.positionTerrainRevision = terrainRevision;
+      for (const slot of this.slots) this.positionSlot(slot);
     }
   }
 
