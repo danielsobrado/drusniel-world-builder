@@ -24,8 +24,10 @@ floating origin, existing player physics, semantic documents, and bounded pools.
   vertices conform near the base, leaves share the resulting placement, and
   naturally generated trees with excessive root overhang are rejected.
 - Tree albedo atlases have offline, coverage-preserving mip chains at the runtime
-  alpha cutoff. Existing PNGs remain the bake sources. Runtime loads the baked
-  RGBA chains without canvas scans or CPU downsampling.
+  alpha cutoff. Existing PNGs remain the bake sources. Runtime prefers KTX2
+  albedos and falls back to baked RGBA chains without canvas scans or CPU
+  downsampling. The follow-up [rendering and navigation migration](gods-end-rendering-navigation-migration.md)
+  covers compression, free flight, reflection reprojection and camera-turn envelopes.
 - Renderer device loss captures the current world, inventory, camera/player pose,
   origin, edit history and workshop draft. Recovery rebuilds GPU resources from
   authoring state and has a two-attempt limit. If recovery fails, the error screen
@@ -48,6 +50,7 @@ Regenerate and validate artifacts with:
 ```bash
 npm run bake:resident-lods
 npm run bake:impostor-mips
+npm run bake:impostor-ktx2 # Requires toktx v4.4.2; see the follow-up guide.
 npm run validate:resident-lods
 npm run validate:impostors
 npm run verify

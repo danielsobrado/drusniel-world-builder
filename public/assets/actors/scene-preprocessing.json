@@ -1,7 +1,7 @@
 {
   "version": 1,
   "settings": "{\"version\":1,\"structures\":{\"detail\":{\"error\":0.001},\"shadow\":{\"error\":0.003}},\"npcRatios\":[1,0.3,0.12,0.04]}",
-  "meshoptimizer": "1.3.0",
+  "meshoptimizer": "1.2.0",
   "three": "0.186.1",
   "data": "assets/actors/scene-preprocessing.bin.gz",
   "sources": {
@@ -20,12 +20,12 @@
             },
             "ratio:0.12": {
               "offset": 37624,
-              "bytes": 15548,
+              "bytes": 15544,
               "count": 14697
             },
             "ratio:0.04": {
-              "offset": 53172,
-              "bytes": 9527,
+              "offset": 53168,
+              "bytes": 9521,
               "count": 8865
             }
           }
@@ -41,17 +41,17 @@
           "vertexCount": 20983,
           "stages": {
             "ratio:0.3": {
-              "offset": 62699,
+              "offset": 62689,
               "bytes": 25865,
               "count": 25344
             },
             "ratio:0.12": {
-              "offset": 88564,
+              "offset": 88554,
               "bytes": 10594,
               "count": 10128
             },
             "ratio:0.04": {
-              "offset": 99158,
+              "offset": 99148,
               "bytes": 9294,
               "count": 8886
             }
@@ -60,6 +60,6 @@
       ]
     }
   },
-  "dataBytes": 108452,
-  "dataSha256": "842a37af9fb5a1be046905ef5bfa7e92475d4ffbc43b9ca06c8dcbdc687842aa"
+  "dataBytes": 108442,
+  "dataSha256": "d38cbb740ba58958b167b13047dba3ebee11fae0dfdb7db32ad2f4e60d941be3"
 }

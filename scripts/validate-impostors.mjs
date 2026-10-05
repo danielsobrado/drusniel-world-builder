@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 import { gunzipSync } from 'node:zlib';
 import sharp from 'sharp';
+import { validateImpostorKtx2 } from './lib/impostor-ktx2-validation.mjs';
 import {
   validateTreeImpostorManifest,
 } from '../src/editor/stylized/impostor/TreeImpostorManifest.js';
@@ -103,6 +104,12 @@ async function main() {
       }
     }
     if (manifest.requiresRuntimeBake) continue;
+
+    if (prototype.albedoKtx2) {
+      validateImpostorKtx2(await readFile(publicPath(prototype.albedoKtx2)), buffers.albedo, prototype);
+    } else if (REQUIRED) {
+      throw new Error(`Required compressed foliage atlas is missing for prototype ${prototype.prototypeIndex}.`);
+    }
 
     const albedoPixels = await alphaCoverage(buffers.albedo, `albedo atlas ${prototype.albedo}`);
     const foliagePixels = await alphaCoverage(buffers.normal, `normal atlas ${prototype.normal}`);

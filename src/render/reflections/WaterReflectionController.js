@@ -1,8 +1,9 @@
-import { CubeCamera, CubeRenderTarget, HalfFloatType, LinearFilter, Matrix4, RenderTarget, Vector3 } from 'three/webgpu';
-import { abs, cubeTexture, distance, float, mix, positionWorld, smoothstep, texture, uniform, vec2, vec4 } from 'three/tsl';
+import { CubeCamera, CubeRenderTarget, HalfFloatType, LinearFilter, RenderTarget, Vector3 } from 'three/webgpu';
+import { abs, cubeTexture, distance, float, mix, positionWorld, smoothstep, texture, uniform } from 'three/tsl';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { withReflectionCapture } from './ReflectionCapture.js';
 import { preparePlanarCamera } from './PlanarCamera.js';
+import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
 import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js';
 
@@ -19,9 +20,10 @@ export class WaterReflectionController {
     this.origin = uniform(new Vector3());
     this.planarTarget = config.planar ? new RenderTarget(config.resolution * 2, config.resolution, { type: HalfFloatType, minFilter: LinearFilter, generateMipmaps: false }) : null;
     this.planar = this.planarTarget ? texture(this.planarTarget.texture) : null;
-    this.planarMatrix = uniform(new Matrix4());
+    this.reprojection = new PlanarReprojection();
+    this.planarMatrix = this.reprojection.viewProjection;
     this.planarHeight = uniform(0);
-    this.planarValid = uniform(0);
+    this.planarValid = this.reprojection.valid;
     this.canonicalProbe = null;
     this.pendingProbe = null;
     this.face = 0;
@@ -43,12 +45,8 @@ export class WaterReflectionController {
       distance(positionWorld, this.origin)).oneMinus());
     let result = mix(fallback, this.cube.sample(direction).rgb, local);
     if (this.planar) {
-      const clip = this.planarMatrix.mul(vec4(positionWorld, 1));
-      const ndc = clip.xy.div(clip.w.max(0.0001));
-      const uv = vec2(ndc.x.mul(0.5).add(0.5), float(0.5).sub(ndc.y.mul(0.5)));
-      const offset = uv.sub(0.5).abs();
-      const edge = offset.x.max(offset.y);
-      const weight = this.planarValid.mul(local).mul(allowPlanar).mul(clip.w.greaterThan(0.001).select(1, 0)).mul(smoothstep(0.44, 0.5, edge).oneMinus())
+      const { uv, weight: projectionWeight } = this.reprojection.uvNode();
+      const weight = projectionWeight.mul(local).mul(allowPlanar)
         .mul(smoothstep(0.1, 0.3, abs(positionWorld.y.sub(this.planarHeight))).oneMinus());
       result = mix(result, this.planar.sample(uv).rgb, weight);
     }
@@ -161,9 +159,8 @@ export class WaterReflectionController {
       this.virtualCamera = virtual;
       this.view.renderer.setRenderTarget(this.planarTarget);
       withAuxiliaryScene(surface, virtual, origin, now, () => this.view.renderer.render(this.view.scene, virtual));
-      this.planarMatrix.value.multiplyMatrices(virtual.projectionMatrix, virtual.matrixWorldInverse);
+      this.reprojection.record(virtual);
       this.planarHeight.value = water.surfaceHeight;
-      this.planarValid.value = 1;
       this.lastPlanar = now;
       PerfCounters.inc('waterPlanarCaptures');
       return;

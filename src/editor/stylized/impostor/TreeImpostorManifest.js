@@ -117,6 +117,7 @@ export function createTreeImpostorSourceSignature(prototypes, config) {
     enabled: _enabled,
     manifest: _manifest,
     runtimeBake: _runtimeBake,
+    compressed: _compressed,
     ...impostorBakeConfig
   } = config?.lod?.impostor ?? {};
   const configuration = JSON.stringify({
@@ -186,6 +187,10 @@ function validatePrototype(prototype, expectedIndex, normalEncoding) {
   assertAssetPath(prototype.albedo, 'albedo', expectedIndex);
   assertAssetPath(prototype.normal, 'normal', expectedIndex);
   if (prototype.albedoMips) assertAssetPath(prototype.albedoMips, 'albedoMips', expectedIndex);
+  if (prototype.albedoKtx2) {
+    assertAssetPath(prototype.albedoKtx2, 'albedoKtx2', expectedIndex);
+    if (!prototype.albedoKtx2.endsWith('.ktx2')) throw new Error(`Tree impostor prototype ${expectedIndex} needs a KTX2 path.`);
+  }
   return Object.freeze({ ...prototype, gutter, normalEncoding });
 }
 

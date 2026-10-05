@@ -1097,6 +1097,7 @@ stylizedSurface:
       transitionMs: 220
     impostor:
       enabled: true
+      compressed: true
       manifest: /assets/impostors/trees/manifest.json
       # Normal gameplay stays GPU-readback-free. Use ?bakeImpostors=1 through
       # the offline bake command when atlases need to be regenerated.

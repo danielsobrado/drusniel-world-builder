@@ -358,7 +358,11 @@ house recipes are preserved in `public/assets/gods-end/Assets` and
 `src/editor/assets/godsEnd/village`. Procedural aquatic plants and seabed boulders
 are ported under `src/editor/assets/godsEnd/aquatic` and `seabed`; terrain height
 blending and underwater optical algorithms are adapted in the editor's material
-and water modules. Each published asset import is recorded in
+and water modules. Cached planar reflection reprojection, angular visibility
+envelopes, free-flight controls, foliage KTX2 mip preparation and rendered-pixel
+QA are also adapted from the owner's project. Compressed tree impostor albedos
+are derived from the existing attributed tree assets and retain their source
+rights. Each published asset import is recorded in
 `public/assets/gods-end/manifest.json`. Original attribution, source rights and
 texture/geometry provenance are retained in the imported per-folder manifests;
 this port does not grant a new license to those assets.

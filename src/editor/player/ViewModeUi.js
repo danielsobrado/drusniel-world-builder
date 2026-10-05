@@ -1,9 +1,9 @@
-import { PLAYER_MODE_EDIT, PLAYER_MODE_WALK } from './playerConstants.js';
+import { PLAYER_MODE_EDIT, PLAYER_MODE_WALK, PLAYER_MODE_FLY } from './playerConstants.js';
 import { hudIcon } from './hud/hudIcons.js';
 import { PlayerHud } from './hud/PlayerHud.js';
 
 /**
- * The Edit / Play switch and the walking HUD.
+ * The Edit / Play / Fly switch and navigation hints.
  *
  * The switch floats over the viewport rather than living in the topbar, which
  * the editor chrome hides; it stays reachable in every mode. The mode is also
@@ -37,8 +37,14 @@ export class ViewModeUi {
       <button type="button" data-view-mode="${PLAYER_MODE_WALK}" title="Walk the world as the player">
         ${hudIcon('play')}<span>Play</span>
       </button>
+      ${controller.freeFly.settings.enabled ? `<button type="button" data-view-mode="${PLAYER_MODE_FLY}" title="Free flight (F)">
+        ${hudIcon('fly')}<span>Fly</span>
+      </button>` : ''}
     `;
     viewport.append(this.switcher);
+    this.flightHints = document.createElement('div'); this.flightHints.className = 'free-flight-hints';
+    this.flightHints.textContent = 'Free flight · WASD move · Mouse look · Space / Ctrl rise / descend · Shift faster · F / Esc return';
+    this.flightHints.hidden = true; viewport.append(this.flightHints);
 
     this.hud = new PlayerHud({
       viewport,
@@ -54,7 +60,7 @@ export class ViewModeUi {
         return;
       }
       controller.setMode(button.dataset.viewMode, {
-        requestPointerLock: button.dataset.viewMode === PLAYER_MODE_WALK,
+        requestPointerLock: button.dataset.viewMode !== PLAYER_MODE_EDIT,
       });
     };
     this.switcher.addEventListener('click', this.onClick);
@@ -68,6 +74,7 @@ export class ViewModeUi {
       : state.mode;
     this.root.toggleAttribute('data-awaiting-spawn', state.awaitingSpawn);
     this.root.dataset.playerPaused = state.paused ? 'true' : 'false';
+    this.flightHints.hidden = state.mode !== PLAYER_MODE_FLY;
 
     for (const button of this.switcher.querySelectorAll('[data-view-mode]')) {
       const isPlayerButton = button.dataset.viewMode === PLAYER_MODE_WALK;
@@ -90,6 +97,7 @@ export class ViewModeUi {
     this.unsubscribe?.();
     this.switcher.removeEventListener('click', this.onClick);
     this.switcher.remove();
+    this.flightHints.remove();
     this.hud.dispose();
     delete this.root.dataset.viewMode;
     this.root.removeAttribute('data-awaiting-spawn');

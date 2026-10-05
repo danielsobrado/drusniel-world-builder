@@ -47,7 +47,7 @@ import { PlayerController } from './editor/player/PlayerController.js';
 import { ViewModeController } from './editor/player/ViewModeController.js';
 import { ViewModeUi } from './editor/player/ViewModeUi.js';
 import { createHudMinimapSource } from './editor/player/hud/createHudMinimapSource.js';
-import { PLAYER_MODE_EDIT, PLAYER_MODE_WALK } from './editor/player/playerConstants.js';
+import { PLAYER_MODE_EDIT, PLAYER_MODE_WALK, PLAYER_MODE_FLY } from './editor/player/playerConstants.js';
 import { isTreeImpostorBakeMode } from './editor/stylized/impostorBakeMode.js';
 import { StylizedSurfaceView } from './editor/stylized/StylizedSurfaceView.js';
 import { BiomeAssetPalette } from './editor/stylized/BiomeAssetPalette.js';
@@ -564,6 +564,7 @@ async function initializeEditor(restoreState, resources) {
     terrainView,
     thirdPersonCamera,
     objectView,
+    freeFlySettings: config.exploration.freeFly,
   });
   resources.own(viewModeController);
   cameraViewKeyHandler = (event) => viewModeController.handleCameraViewKey(event);
@@ -628,7 +629,7 @@ async function initializeEditor(restoreState, resources) {
     constructionView,
     biomeAssetPalette,
     inventoryStore,
-    worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked(),
+    worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked() || viewModeController.mode === PLAYER_MODE_FLY,
   });
   resources.own(controller);
   const godsEndAssets = new GodsEndAssetLibrary({
@@ -669,6 +670,10 @@ async function initializeEditor(restoreState, resources) {
   );
   viewModeController.onPausedEditing = () => controller.selectTool('construction');
   viewModeController.onLeaveOrbitEditing = () => controller.clearHoverPreviews();
+  viewModeController.onBeforeFreeFly = () => {
+    controller.finishStroke();
+    controller.cancelBlockedWorldInteraction();
+  };
   playerController.constructionGround = new ConstructionGroundProvider({
     store: constructionStore,
     spatialIndex: constructionSpatialIndex,
@@ -723,6 +728,7 @@ async function initializeEditor(restoreState, resources) {
     controller.emitState();
     return true;
   }, { label: 'selection' });
+  escapeStack.register(ESCAPE_PRIORITY.freeFlight, () => !viewModeController.cameraOverride && viewModeController.stopFreeFly(), { label: 'free flight' });
   escapeStack.register(ESCAPE_PRIORITY.playerPaused, () => {
     if (!viewModeController.paused) return false;
     viewModeController.setMode(PLAYER_MODE_EDIT);

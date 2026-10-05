@@ -15,6 +15,7 @@ export class ExplorationRuntime {
       baseUrl: import.meta.env.BASE_URL, loader: sceneLoader, onInstalled });
     this.serpents = new SerpentSystem({ scene: terrainView.scene, terrainView, settings: config.exploration.serpents, onInstalled });
     this.tour = new ScenicTour({ terrainView, viewModeController, settings: config.exploration.tour, container, invalidateHistory });
+    viewModeController.onBeforeModeChange = () => this.tour.stop();
     this.container = container;
     this.onResize = () => this.syncMobile(); window.addEventListener('resize', this.onResize); this.syncMobile();
   }
@@ -49,5 +50,6 @@ export class ExplorationRuntime {
     window.removeEventListener('resize', this.onResize); this.mobile?.destroy(); this.mobile = null;
     this.viewModeController.playerController.setMobileInput({ enabled: false });
     this.tour.dispose(); this.residents.dispose(); this.serpents.dispose();
+    this.viewModeController.onBeforeModeChange = null;
   }
 }

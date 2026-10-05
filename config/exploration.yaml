@@ -1,4 +1,9 @@
 # Gods' End systems adapted to canonical coordinates and bounded residency.
+freeFly:
+  enabled: true
+  moveSpeed: 24
+  fastMultiplier: 4
+  lookSensitivity: 0.003
 frameBudget:
   enabled: true
   targetFps: 144

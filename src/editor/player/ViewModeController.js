@@ -3,9 +3,11 @@ import { emitAudio } from '../audio/index.js';
 import {
   PLAYER_MODE_EDIT,
   PLAYER_MODE_WALK,
+  PLAYER_MODE_FLY,
   PLAYER_MODES,
 } from './playerConstants.js';
 import { applyTerrainInspectionMode } from './ViewModeSurfacePolicy.js';
+import { FreeFlyController } from './FreeFlyController.js';
 
 export const CAMERA_VIEW_FIRST = 'first';
 export const CAMERA_VIEW_THIRD = 'third';
@@ -25,6 +27,7 @@ function invokeOptional(callback, label, ...args) {
 export class ViewModeController {
   constructor({
     editorCamera, playerController, terrainView, thirdPersonCamera = null,
+    freeFlySettings = { enabled: true, moveSpeed: 24, fastMultiplier: 4, lookSensitivity: 0.003 },
   }) {
     this.editorCamera = editorCamera;
     this.playerController = playerController;
@@ -37,12 +40,13 @@ export class ViewModeController {
     this.cameraView = CAMERA_VIEW_FIRST;
     this.canvas = terrainView.renderer.domElement;
     this.mode = PLAYER_MODE_EDIT;
+    this.freeFly = new FreeFlyController({ canvas: this.canvas, settings: freeFlySettings,
+      isBlocked: () => this.playerController.uiBlocked || Boolean(this.cameraOverride) });
     /**
      * Walking suspended for in-world editing.
      *
-     * Deliberately a flag rather than a third entry in `PLAYER_MODES`: keeping
-     * the mode set at two means `ViewModeUi`, every `playerMode.css` selector,
-     * the perf harness and every `setMode` caller keep working untouched.
+     * A flag within walk mode: editing in place preserves the walking camera,
+     * while free flight owns a separate navigation camera.
      */
     this.paused = false;
     this.awaitingSpawn = false;
@@ -66,6 +70,13 @@ export class ViewModeController {
 
   get camera() {
     if (this.cameraOverride) return this.cameraOverride;
+    if (this.mode === PLAYER_MODE_FLY) {
+      if (this.freeFly.camera.far !== this.playerController.camera.far) {
+        this.freeFly.camera.far = this.playerController.camera.far;
+        this.freeFly.camera.updateProjectionMatrix();
+      }
+      return this.freeFly.camera;
+    }
     if (this.mode !== PLAYER_MODE_WALK) return this.editorCamera.camera;
     if (!this.isThirdPerson) return this.playerController.camera;
 
@@ -128,6 +139,7 @@ export class ViewModeController {
    * `attachCaptureHotkey`. Returns true when the event was claimed.
    */
   handleCameraViewKey(event) {
+    if (this.handleFlightKey(event)) return true;
     if (event.code !== CAMERA_VIEW_TOGGLE_CODE) return false;
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return false;
     if (this.mode !== PLAYER_MODE_WALK || this.paused || this.awaitingSpawn) return false;
@@ -135,6 +147,59 @@ export class ViewModeController {
     if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return false;
     event.preventDefault();
     return this.toggleCameraView();
+  }
+
+  handleFlightKey(event) {
+    if (event.code === 'KeyF' && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey
+      && !this.playerController.uiBlocked && !this.playerController.harnessActive && !this.cameraOverride
+      && !event.target?.matches?.('input, select, textarea, [contenteditable="true"]')) {
+      event.preventDefault();
+      return this.mode === PLAYER_MODE_FLY ? this.stopFreeFly() : this.startFreeFly({ requestPointerLock: true });
+    }
+    return this.freeFly.handleKey(event);
+  }
+
+  startFreeFly({ requestPointerLock = false } = {}) {
+    if (!this.freeFly.settings.enabled || this.mode === PLAYER_MODE_FLY || this.cameraOverride
+      || this.playerController.uiBlocked || this.playerController.harnessActive) return false;
+    invokeOptional(this.onBeforeFreeFly, 'before free flight');
+    const camera = this.camera;
+    this.flightReturnState = { mode: this.mode, paused: this.paused, playerEnabled: this.playerController.enabled,
+      editorEnabled: this.editorCamera.controls.enabled };
+    this.cancelSpawnSelection();
+    this.freeFly.start(camera);
+    this.flightGenerator = this.terrainView.worldStore?.generator;
+    this.mode = PLAYER_MODE_FLY; this.paused = false;
+    this.playerController.setEnabled(false); this.editorCamera.setEnabled(false);
+    this._lastTimestamp = null;
+    invokeOptional(this.onLeaveOrbitEditing, 'leave orbit editing');
+    this.syncTerrainInspectionMode(); this.emit();
+    if (requestPointerLock) this.freeFly.requestPointerLock();
+    return true;
+  }
+
+  stopFreeFly() {
+    if (this.mode !== PLAYER_MODE_FLY) return false;
+    const previous = this.flightReturnState;
+    this.mode = previous.mode; this.paused = previous.paused;
+    this.freeFly.stop();
+    this.playerController.setEnabled(previous.playerEnabled);
+    this.playerController.setPaused(previous.paused);
+    this.editorCamera.setEnabled(previous.editorEnabled);
+    this._lastTimestamp = null; this.syncTerrainInspectionMode(); this.emit();
+    return true;
+  }
+
+  captureFlightState() {
+    return this.mode === PLAYER_MODE_FLY ? { ...this.freeFly.captureState(), returnState: { ...this.flightReturnState } } : null;
+  }
+
+  restoreFlightState(state) {
+    if (!state) return false;
+    if (!this.startFreeFly()) return false;
+    if (!this.freeFly.restoreState(state)) { this.stopFreeFly(); return false; }
+    if ([PLAYER_MODE_EDIT, PLAYER_MODE_WALK].includes(state.returnState?.mode)) this.flightReturnState = { ...state.returnState };
+    this.emit(); return true;
   }
 
   /** Suspend walking so the world can be edited from the player's viewpoint. */
@@ -168,6 +233,9 @@ export class ViewModeController {
     if (!PLAYER_MODES.includes(mode)) {
       return;
     }
+    invokeOptional(this.onBeforeModeChange, 'before mode change');
+    if (mode === PLAYER_MODE_FLY) { this.startFreeFly({ requestPointerLock }); return; }
+    if (this.mode === PLAYER_MODE_FLY) this.stopFreeFly();
 
     if (mode === PLAYER_MODE_WALK) {
       if (this.mode === PLAYER_MODE_WALK) {
@@ -293,10 +361,16 @@ export class ViewModeController {
     this.editorCamera.resize(width, height);
     this.playerController.resize(width, height);
     this.thirdPersonCamera?.resize(width, height);
+    this.freeFly.resize(width, height);
   }
 
   update(timestamp) {
     if (this.cameraOverride) return;
+    if (this.mode === PLAYER_MODE_FLY) {
+      if (this.flightGenerator !== this.terrainView.worldStore?.generator) { this.stopFreeFly(); return; }
+      const dt = this._lastTimestamp === null ? 0 : (timestamp - this._lastTimestamp) / 1000;
+      this.freeFly.update(dt); this._lastTimestamp = timestamp; return;
+    }
     if (this.mode === PLAYER_MODE_WALK) {
       this.playerController.update(timestamp);
       if (this.isThirdPerson) {
@@ -314,21 +388,24 @@ export class ViewModeController {
 
   getFocusWorld() {
     if (this.focusOverride) return this.focusOverride;
+    if (this.mode === PLAYER_MODE_FLY) return this.freeFly.camera.position;
     return this.mode === PLAYER_MODE_WALK
       ? this.playerController.getFocusWorld()
       : this.editorCamera.getFocusWorld();
   }
 
-  // Only the first-person view has a heading worth turning the minimap by; the
+  // Walking and free flight turn the minimap with the camera heading; the
   // orbit view keeps it north-up so its click-to-recentre maths stays valid.
   getHeading() {
-    return this.mode === PLAYER_MODE_WALK ? this.playerController.yaw : 0;
+    return this.mode === PLAYER_MODE_FLY ? this.freeFly.euler.y
+      : this.mode === PLAYER_MODE_WALK ? this.playerController.yaw : 0;
   }
 
   shiftWorld(shiftX, shiftZ) {
     this.editorCamera.shiftWorld(shiftX, shiftZ);
     this.playerController.shiftWorld(shiftX, shiftZ);
     this.thirdPersonCamera?.shiftWorld(shiftX, shiftZ);
+    this.freeFly.shiftWorld(shiftX, shiftZ);
   }
 
   emit() {
@@ -347,6 +424,7 @@ export class ViewModeController {
     window.removeEventListener('keydown', this.boundHandlers.keyDown, true);
     window.removeEventListener('keyup', this.boundHandlers.keyUp, true);
     this.unsubscribePlayer?.();
+    this.freeFly.dispose();
     this.playerController.dispose();
     this.listeners.clear();
   }

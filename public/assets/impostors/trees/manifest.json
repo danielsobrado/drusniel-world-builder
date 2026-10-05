@@ -21,7 +21,17 @@
       "albedo": "/assets/impostors/trees/prototype-0-albedo.png",
       "normal": "/assets/impostors/trees/prototype-0-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-0-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-0-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-0-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "7e9bc06ec99b262b65b6494d607878a11a10f25a2c778584adfd342d41c1bbbb",
+        "sha256": "16929d92a80d21e3ceb0aede68736b9e6f2e5c8ebe58ab662e5a324bf6452c4e",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 1,
@@ -39,7 +49,17 @@
       "albedo": "/assets/impostors/trees/prototype-1-albedo.png",
       "normal": "/assets/impostors/trees/prototype-1-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-1-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-1-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-1-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "fe46382b4913ec0d02e367549b2969a0f0dd95ed6fbd5d365e43ddc7513092ae",
+        "sha256": "75bd33cb010ab5219b066a5a3ebc1949db60eb3d267c86655fe8162e1aaf4ada",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 2,
@@ -57,7 +77,17 @@
       "albedo": "/assets/impostors/trees/prototype-2-albedo.png",
       "normal": "/assets/impostors/trees/prototype-2-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-2-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-2-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-2-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "9a5270ffd93c777b3280963d8091838ab965edbf0c42fe2a3eae3f5436cd39ff",
+        "sha256": "3c2e4b56df9a925929d967295877ea58eadd3e8df77a34d91fbbea4b98daac9b",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 3,
@@ -75,7 +105,17 @@
       "albedo": "/assets/impostors/trees/prototype-3-albedo.png",
       "normal": "/assets/impostors/trees/prototype-3-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-3-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-3-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-3-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "6fe4e1ad5a6b6e87835e2b7595485bcbf36493521735b5ab13a66f4efab46e7c",
+        "sha256": "2849600e1c647ef1086247e4c606c361ec5bf9e0222e1de759300879299f64d4",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 4,
@@ -93,7 +133,17 @@
       "albedo": "/assets/impostors/trees/prototype-4-albedo.png",
       "normal": "/assets/impostors/trees/prototype-4-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-4-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-4-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-4-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "60c48507f6abd82d37df0a8b2ffa0dec074edfa20adb0deedd7cc87ef273b0e7",
+        "sha256": "e2b7d48418d7d627ce3646b859509ce21564ca515c5a0f280e36c52e7daf930c",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 5,
@@ -111,7 +161,17 @@
       "albedo": "/assets/impostors/trees/prototype-5-albedo.png",
       "normal": "/assets/impostors/trees/prototype-5-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-5-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-5-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-5-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "a9faff821c8eda876402c37d2cbb2e2afc527dbbf48bcd6aae797c6179a61d6d",
+        "sha256": "3253ddf9012792c852fe0235df4e9bdcd7cadce0ade098a04d0076116e44657e",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 6,
@@ -129,7 +189,17 @@
       "albedo": "/assets/impostors/trees/prototype-6-albedo.png",
       "normal": "/assets/impostors/trees/prototype-6-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-6-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-6-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-6-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "91ff7689f2526373b319f5c38220ef73cdc36907f09d4ed0e6acfd103a5b670f",
+        "sha256": "f23b9a75fbd204c1fa79e708c3e1544818de3e4222c81d2d0ee4f2b0a2b4d6dc",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 7,
@@ -147,7 +217,17 @@
       "albedo": "/assets/impostors/trees/prototype-7-albedo.png",
       "normal": "/assets/impostors/trees/prototype-7-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-7-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-7-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-7-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "85a4029a70419ac3c8fa4f3c270b9fc9c7aaa0f34035b8743156763041ab0b95",
+        "sha256": "ae98e1f39e0053cfc7e89277efcb2e39ade0f78db55725afe849a45470c8528d",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 8,
@@ -165,7 +245,17 @@
       "albedo": "/assets/impostors/trees/prototype-8-albedo.png",
       "normal": "/assets/impostors/trees/prototype-8-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-8-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-8-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-8-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "72741d396f5028ea2e18506b2fa3ae1cf2e4811fbb328c17cf93ddc67611a255",
+        "sha256": "36b8ab15b44d34ff477f1f30f5d410a8a5c8e7c6d8d7dc75cc204ee355024d76",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 9,
@@ -183,7 +273,17 @@
       "albedo": "/assets/impostors/trees/prototype-9-albedo.png",
       "normal": "/assets/impostors/trees/prototype-9-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-9-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-9-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-9-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "a67caa08894fd092dd75a9276b6f15bb7236ea2343f601d6ddf98f680bfddb69",
+        "sha256": "84d8ecfd5149ea34b064ff92db49af6c854611bde49ea6dda217515da10ea7b3",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 10,
@@ -201,7 +301,17 @@
       "albedo": "/assets/impostors/trees/prototype-10-albedo.png",
       "normal": "/assets/impostors/trees/prototype-10-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-10-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-10-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-10-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "b0aa7b835331ef5e9648e9815d5ba5a2ad0091abc80ad360f29ecdfe816fc7d7",
+        "sha256": "53b72e638104cd648af09d1f17236f48b34cad2e51f6f524635b620108697eed",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 11,
@@ -219,7 +329,17 @@
       "albedo": "/assets/impostors/trees/prototype-11-albedo.png",
       "normal": "/assets/impostors/trees/prototype-11-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-11-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-11-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-11-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "815e20a07f6fd435cf07dce3f617ff676093eaa8e10be8f72b609edf15f0383d",
+        "sha256": "e85e51578fa93d0bce63c70912da7c3f0b64067ce2275165ae95254b6fc74cfc",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 12,
@@ -237,7 +357,17 @@
       "albedo": "/assets/impostors/trees/prototype-12-albedo.png",
       "normal": "/assets/impostors/trees/prototype-12-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-12-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-12-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-12-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "a68e4f9cb40ec04890e8925d24e1529d87bd1540ff2075cb7a653276a2d472f7",
+        "sha256": "8c8b128efccda15851b94f370373dcae445cf4d1fa04f87419ed5f919c37f85a",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 13,
@@ -255,7 +385,17 @@
       "albedo": "/assets/impostors/trees/prototype-13-albedo.png",
       "normal": "/assets/impostors/trees/prototype-13-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-13-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-13-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-13-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "13fd05012830a22b15bf6dddb490cb59facc77f85e87af71e2e2e5592bebd473",
+        "sha256": "625b53a38de769b0dbc880136fe42b6bc01a97aacc74d83c9de8f54dbc84d437",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 14,
@@ -273,7 +413,17 @@
       "albedo": "/assets/impostors/trees/prototype-14-albedo.png",
       "normal": "/assets/impostors/trees/prototype-14-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-14-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-14-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-14-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "b55de88a4a95056fcac3e97791fe61d88c9ebe74aca6a9b6c5b414be90ffaaaf",
+        "sha256": "79ab24ea9d454e6b48c8f27265a038a163699aad4c7454f8311b2b9f23041b32",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 15,
@@ -291,7 +441,17 @@
       "albedo": "/assets/impostors/trees/prototype-15-albedo.png",
       "normal": "/assets/impostors/trees/prototype-15-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-15-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-15-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-15-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "70e932506c642dca512adea20d74a12d74762dfec71715997758e685fceecca5",
+        "sha256": "ecf7018dafcf17c88f91323dcf6e10e31d851001749e53f323e415ef4f9991e8",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 16,
@@ -309,7 +469,17 @@
       "albedo": "/assets/impostors/trees/prototype-16-albedo.png",
       "normal": "/assets/impostors/trees/prototype-16-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-16-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-16-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-16-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "c992bead7f354a13833d80e20e214da09b066889bf5c72bc43e1f5ae1ebcc437",
+        "sha256": "98e962e56ed7868d8a06b127aad656d43974700621819a18b57f619db0f716a5",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 17,
@@ -327,7 +497,17 @@
       "albedo": "/assets/impostors/trees/prototype-17-albedo.png",
       "normal": "/assets/impostors/trees/prototype-17-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-17-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-17-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-17-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "6d1c8d8498c35d4235c9fd462a7a17c18fb814b1fa595d51d2700474483cd220",
+        "sha256": "3c3c3e3e608a6dea699bac6d3aea7f809dd93926de236f953c3ed3a9df09e527",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 18,
@@ -345,7 +525,17 @@
       "albedo": "/assets/impostors/trees/prototype-18-albedo.png",
       "normal": "/assets/impostors/trees/prototype-18-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-18-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-18-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-18-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "e3755005a80acd14fd8fcabc56f61c1f5e6368075464bd3c76ccd51ee7ebf844",
+        "sha256": "d3c17032653b2abcbe86116527922b03a044b50d8b2614b2a33cf8383a3bdf5a",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 19,
@@ -363,7 +553,17 @@
       "albedo": "/assets/impostors/trees/prototype-19-albedo.png",
       "normal": "/assets/impostors/trees/prototype-19-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-19-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-19-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-19-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "b3c72ceb863fb0fde7aa3b489100824fde8f4abc21bd3810be12c79e71563b70",
+        "sha256": "ca394e433e2a1eee37f94ac4823a5ac9f2ca9de1e7977cb3ab7d7ddce0148a31",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 20,
@@ -381,7 +581,17 @@
       "albedo": "/assets/impostors/trees/prototype-20-albedo.png",
       "normal": "/assets/impostors/trees/prototype-20-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-20-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-20-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-20-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "d5854be2732874828f7cef29e22f9a2baaf235088f1074e2de1f6af1f69c3057",
+        "sha256": "935278b232ca63f8acd2256ff5f32f4adc742a8d8c9b83c137a2094446c3fea7",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 21,
@@ -399,7 +609,17 @@
       "albedo": "/assets/impostors/trees/prototype-21-albedo.png",
       "normal": "/assets/impostors/trees/prototype-21-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-21-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-21-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-21-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "ba4f610eca6ed74a006cf8157b955e2373f123c6109b50eb3ed20fd16ef3619c",
+        "sha256": "6294587f39544dcbb91fcd8f80da4f3a462cf4b55029644452ec147859c8d65b",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 22,
@@ -417,7 +637,17 @@
       "albedo": "/assets/impostors/trees/prototype-22-albedo.png",
       "normal": "/assets/impostors/trees/prototype-22-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-22-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-22-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-22-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "b38dbaf33245daf6c3fb242751f4e11193d8a1bbec1fc935d0be7398b1070340",
+        "sha256": "45be170b56af042a66504e92f5de5d09e9130495a822e4b1226a58359bbed425",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 23,
@@ -435,7 +665,17 @@
       "albedo": "/assets/impostors/trees/prototype-23-albedo.png",
       "normal": "/assets/impostors/trees/prototype-23-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-23-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-23-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-23-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "7ffd146cb42558df884ef1b230383dd9c06fd31093d8a766f47a5f95bd51f54f",
+        "sha256": "fbc5abb1772c3941f06fe0ef3e6ce34a28722aff58754a905689e11178a67216",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 24,
@@ -453,7 +693,17 @@
       "albedo": "/assets/impostors/trees/prototype-24-albedo.png",
       "normal": "/assets/impostors/trees/prototype-24-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-24-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-24-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-24-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "c9c3c53229748171076c42f0be7bacab8a54955f1a1d8f055cc9ee729dacc3a5",
+        "sha256": "95f6109167d4998d1b4af3bec7daff110206c1243f969c8598ddbb92c89cc7ee",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 25,
@@ -471,7 +721,17 @@
       "albedo": "/assets/impostors/trees/prototype-25-albedo.png",
       "normal": "/assets/impostors/trees/prototype-25-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-25-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-25-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-25-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "c119aeee9ab7fe90ff5bb190c3d26426c71a17adcb12b7fb5f4c238a228970a7",
+        "sha256": "df825e99a41197956ab2a4668fa10450ae04b35bbc0d51b56355a8d2488a9f33",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 26,
@@ -489,7 +749,17 @@
       "albedo": "/assets/impostors/trees/prototype-26-albedo.png",
       "normal": "/assets/impostors/trees/prototype-26-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-26-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-26-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-26-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "b4c22d3ce4de4918b58121148373467beb2552948a0cfc6d90a8a86ec333c36d",
+        "sha256": "807b07bca064294e9b108134a4ceafa94830bebd69dd03272879acdd3e63a8ab",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 27,
@@ -507,7 +777,17 @@
       "albedo": "/assets/impostors/trees/prototype-27-albedo.png",
       "normal": "/assets/impostors/trees/prototype-27-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-27-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-27-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-27-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "4dfbc5f63631cfc1d0560ce8f322ad8a0a1c5c69843ce5ac6504b975ef6326ed",
+        "sha256": "35dc6890e235ef272579f470ba7f491066109a79438d2781ad17b8a1cda0f844",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     },
     {
       "prototypeIndex": 28,
@@ -525,7 +805,17 @@
       "albedo": "/assets/impostors/trees/prototype-28-albedo.png",
       "normal": "/assets/impostors/trees/prototype-28-normal.png",
       "normalEncoding": "view-normal-rgb-foliage-mask-a",
-      "albedoMips": "/assets/impostors/trees/prototype-28-albedo-mips.bin.gz"
+      "albedoMips": "/assets/impostors/trees/prototype-28-albedo-mips.bin.gz",
+      "albedoKtx2": "/assets/impostors/trees/prototype-28-albedo.ktx2",
+      "albedoKtx2Metadata": {
+        "encoder": "toktx v4.4.2",
+        "sourceSha256": "1185db4f18f0d678561427bef272870fcc379039e6a11dd2e07b8cfbdb8cc670",
+        "sha256": "929f496159d5709855f3737a938c4bdfaba8c62a027ce7b89b9c4271b6e12c6e",
+        "width": 1024,
+        "height": 256,
+        "levels": 6,
+        "alphaCutoff": 0.5
+      }
     }
   ]
 }

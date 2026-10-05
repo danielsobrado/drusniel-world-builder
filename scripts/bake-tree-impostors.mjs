@@ -10,6 +10,7 @@ import {
 } from './lib/processLifecycle.mjs';
 import { chromium } from 'playwright';
 import { bakeFoliageMips } from './lib/bake-foliage-mips.mjs';
+import { requireKtx2Encoder } from './lib/ktx2-encoder.mjs';
 import {
   TREE_IMPOSTOR_MANIFEST_VERSION,
   validateTreeImpostorManifest,
@@ -322,6 +323,11 @@ async function writeAssets(bundle) {
     `${JSON.stringify(manifest, null, 2)}\n`,
   );
   await bakeFoliageMips(OUTPUT_DIRECTORY);
+  const encoder = optionValue('--encoder');
+  execFileSync(process.execPath, [
+    'scripts/encode-impostor-ktx2.mjs',
+    ...(encoder ? ['--encoder', encoder] : []),
+  ], { stdio: 'inherit' });
 }
 
 async function collectPageSnapshot(cdp, diagnostics) {
@@ -406,6 +412,7 @@ async function bakeWithPlaywright(url, downloadDirectory, diagnostics) {
 }
 
 async function main() {
+  requireKtx2Encoder(optionValue('--encoder') ?? process.env.TOKTX ?? 'toktx');
   const diagnostics = [];
   const installedBrowser = findBrowser();
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'simcity-dnd-impostor-'));

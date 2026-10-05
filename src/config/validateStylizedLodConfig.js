@@ -322,6 +322,7 @@ function validateGroundDetailLayer(layer, path) {
 
 function validateImpostor(impostor) {
   assertBoolean(impostor.enabled, 'stylizedSurface.lod.impostor.enabled');
+  if (impostor.compressed !== undefined) assertBoolean(impostor.compressed, 'stylizedSurface.lod.impostor.compressed');
   assertBoolean(impostor.runtimeBake, 'stylizedSurface.lod.impostor.runtimeBake');
   assertPositiveInteger(impostor.columns, 'stylizedSurface.lod.impostor.columns');
   assertPositiveInteger(impostor.rows, 'stylizedSurface.lod.impostor.rows');

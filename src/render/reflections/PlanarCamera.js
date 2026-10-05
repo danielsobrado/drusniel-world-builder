@@ -27,9 +27,11 @@ export function preparePlanarCamera(source, height, target = source.clone()) {
   const scale = (source.coordinateSystem === WebGPUCoordinateSystem ? 1 : 2) / clip.dot(q);
   clip.multiplyScalar(scale);
   const p = target.projectionMatrix.elements;
-  p[2] = clip.x; p[6] = clip.y;
-  p[10] = source.coordinateSystem === WebGPUCoordinateSystem ? clip.z : clip.z + 1;
-  p[14] = clip.w;
+  // OpenGL's near boundary is row 3 + row 4. Subtract the actual fourth
+  // row, which differs for perspective (z=-1) and orthographic (w=1).
+  const gl = source.coordinateSystem !== WebGPUCoordinateSystem;
+  p[2] = clip.x - (gl ? p[3] : 0); p[6] = clip.y - (gl ? p[7] : 0);
+  p[10] = clip.z - (gl ? p[11] : 0); p[14] = clip.w - (gl ? p[15] : 0);
   target.projectionMatrixInverse.copy(target.projectionMatrix).invert();
   return target;
 }
