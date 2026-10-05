@@ -256,6 +256,30 @@ test('attached scenery queues honor the shared late floor instead of the legacy 
   assert.equal(queue.flush(() => assert.fail('disabled adaptive mode bypassed its legacy gate')).built, 0);
 });
 
+test('attaching the same scenery queue twice keeps one stable yield gate', () => {
+  let legacyCalls = 0;
+  const budget = new DeferredWorkBudget({
+    enabled: false,
+    targetFps: 144,
+    reserveMs: 0.5,
+    minimumMs: 0.25,
+    maximumMs: 1.2,
+  });
+  const queue = new StylizedBuildQueue({
+    shouldYield: () => {
+      legacyCalls += 1;
+      return true;
+    },
+  });
+  const surface = { bushBuildQueue: queue };
+  budget.attachSurface(surface);
+  const firstGate = queue.shouldYield;
+  budget.attachSurface(surface);
+  assert.equal(queue.shouldYield, firstGate);
+  assert.equal(queue.shouldYield(), true);
+  assert.equal(legacyCalls, 1);
+});
+
 test('readiness checks preserve the progress floor across mandatory work', () => {
   let clock = 0;
   const frame = new FrameSlack({ targetMs: 7, now: () => clock });
