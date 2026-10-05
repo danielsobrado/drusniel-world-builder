@@ -4,6 +4,7 @@ import { createCurveArcTable } from '../masonry/CurveArcTable.js';
 import { attachConstructionGrowth, buildModuleMasonry } from '../compile/ConstructionMasonryBuilder.js';
 import { CONSTRUCTION_MATERIAL_SLOT } from './ConstructionMaterialSlots.js';
 import { createConstructionMaterials, releaseConstructionMaterials } from './ConstructionMaterials.js';
+import { ConstructionBuildQueue } from './ConstructionBuildQueue.js';
 import { ConstructionShellMaterials } from './ConstructionShellMaterials.js';
 import { applyShellDetail, loadShellDetailTexture } from './ConstructionShellDetail.js';
 import { coarsePlacementsForModule, moduleProjectedPixels } from './ConstructionLod.js';
@@ -172,7 +173,7 @@ export class ConstructionView {
      * without moving it.
      */
     this.entries = new Map();
-    this.buildQueue = [];
+    this.buildQueue = new ConstructionBuildQueue();
     this.handleMeshes = [];
     this.handleLines = [];
     this.selectedId = null;
@@ -332,7 +333,7 @@ export class ConstructionView {
     releaseConstructionMaterials(entry.materials);
     this.root.remove(entry.group);
     this.entries.delete(constructionId);
-    this.buildQueue = this.buildQueue.filter((job) => job.constructionId !== constructionId);
+    this.buildQueue.removeConstruction(constructionId);
     this.stats.queueDepth = this.buildQueue.length;
     this.refreshResidentCount();
   }
@@ -689,10 +690,7 @@ export class ConstructionView {
       resident.requestedBand = band;
       resident.requestedAt = performance.now();
     }
-    this.buildQueue = this.buildQueue.filter((job) => (
-      job.constructionId !== constructionId || job.module.id !== module.id
-    ));
-    this.buildQueue.push({ constructionId, module, requestedBand: band });
+    this.buildQueue.upsert({ constructionId, module, requestedBand: band });
     this.stats.queueDepth = this.buildQueue.length;
   }
 
