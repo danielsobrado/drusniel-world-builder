@@ -34,6 +34,7 @@ export class ConstructionModuleBuilder {
     pathInterval,
     lodBand,
     placements,
+    terrainRevision,
     retainedGrowth = null,
   }) {
     return {
@@ -45,6 +46,7 @@ export class ConstructionModuleBuilder {
       pathInterval,
       lodBand,
       placements,
+      terrainRevision,
       retainedGrowth,
       groundHeightAt: (x, z) => this.terrainView.getCanonicalHeight(x, z) ?? 0,
       offset: 0,
