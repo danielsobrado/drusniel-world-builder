@@ -132,8 +132,12 @@ export class PreparedPlacementStore {
     PerfCounters.set('placementPreparedEntries', this.entries.size);
     PerfCounters.set('placementPreparedPending', this.pending.size);
     PerfCounters.set('placementPreparedArrayBytes', this.arrayBytes);
+    let oldestRequest = Number.POSITIVE_INFINITY;
+    for (const token of this.pending.values()) {
+      if (token.started < oldestRequest) oldestRequest = token.started;
+    }
     PerfCounters.set('placementOldestRequestMs', this.pending.size
-      ? performance.now() - Math.min(...[...this.pending.values()].map(token => token.started)) : 0);
+      ? performance.now() - oldestRequest : 0);
   }
 
   forestSample(x, z) {
