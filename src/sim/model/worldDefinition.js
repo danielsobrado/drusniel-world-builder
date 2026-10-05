@@ -1,5 +1,11 @@
 import { checksumCanonical } from '../persistence/canonicalSerialize.js';
 
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const nested of Object.values(value)) deepFreeze(nested);
+  return Object.freeze(value);
+}
+
 export function createWorldDefinition({
   worldId,
   seed,
@@ -8,6 +14,7 @@ export function createWorldDefinition({
   schemaVersion = 1,
   physicalScale = { mapWidth: 0, mapHeight: 0, kilometersPerUnit: 1 },
   cultures = [],
+  cultureCatalog = null,
   religions = [],
   biomes = [],
   sourceMeta = {},
@@ -23,6 +30,7 @@ export function createWorldDefinition({
     schemaVersion,
     physicalScale: Object.freeze({ ...physicalScale }),
     cultures: Object.freeze(sortById(cultures).map((c) => Object.freeze({ ...c }))),
+    cultureCatalog: cultureCatalog == null ? null : deepFreeze(structuredClone(cultureCatalog)),
     religions: Object.freeze(sortById(religions).map((r) => Object.freeze({ ...r }))),
     biomes: Object.freeze([...biomes].map((b) => Object.freeze({ ...b }))),
     sourceMeta: Object.freeze({ ...sourceMeta }),
@@ -42,6 +50,7 @@ export function fingerprintWorldDefinition(definition) {
     schemaVersion: definition.schemaVersion,
     physicalScale: definition.physicalScale,
     cultures: definition.cultures,
+    cultureCatalog: definition.cultureCatalog,
     religions: definition.religions,
     biomes: definition.biomes,
   });
