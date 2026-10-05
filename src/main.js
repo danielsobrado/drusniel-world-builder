@@ -1392,7 +1392,7 @@ async function initializeEditor(restoreState, resources, startup) {
       const commitBudgetMs = deferredWork.available(terrainView.commitQueue.commitBudgetMs);
       if (commitBudgetMs > 0) {
         deferredWork.run(() => terrainView.flushUploadQueue({
-          maxCommits: 1,
+          maxCommits: terrainView.adaptiveCommitBudget(),
           budgetMs: commitBudgetMs,
         }));
       }
