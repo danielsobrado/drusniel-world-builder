@@ -1280,6 +1280,7 @@ async function initializeEditor(restoreState, resources) {
     finishWaterPrewarm?.();
   }
   const deferredWork = new DeferredWorkBudget(config.exploration.frameBudget);
+  deferredWork.attachSurface(stylizedSurface);
   const drawPreparation = new StreamedDrawPreparation({ scene: terrainView.scene, renderer: terrainView.renderer,
     settings: config.exploration.drawPreparation, render: camera => terrainView.prewarmPostProcessing(camera),
     invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET) });
@@ -1349,7 +1350,6 @@ async function initializeEditor(restoreState, resources) {
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
     drawPreparation.revealPending();
     exploration.beforeMovement(frameTimestamp);
-    deferredWork.attachSurface(stylizedSurface);
     if (stylizedSurface.reflections && reflectionWorkFrame++ % 4 === 0) {
       stylizedSurface.reserveReflectionCapture(viewModeController.camera, performance.now());
     }
@@ -1478,7 +1478,6 @@ async function initializeEditor(restoreState, resources) {
         z: bodyStatus.position.z,
       }
       : null;
-    deferredWork.attachSurface(stylizedSurface);
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
