@@ -564,7 +564,11 @@ export class InfiniteTerrainView {
     });
   }
 
-  updateStreaming(focusWorld, timestamp = performance.now(), force = false) {
+  async updateStreaming(focusWorld, timestamp = performance.now(), force = false) {
+    this.updateStreamingFrame(focusWorld, timestamp, force);
+  }
+
+  updateStreamingFrame(focusWorld, timestamp = performance.now(), force = false) {
     if (this.disposed) return;
     const velocity = this.calculateVelocity(focusWorld, timestamp);
     this.focusVelocity = velocity;
