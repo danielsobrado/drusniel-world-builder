@@ -16,6 +16,7 @@ import {
   SCENE_SETTINGS_SESSION_KEY,
   toMapReference,
 } from './SceneSettings.js';
+import { resolveRenderEnhancements } from '../../config/RenderEnhancements.js';
 
 export const SCENE_SETTINGS_BROWSER_PREFIX = 'simcity-dnd:scene-setting:';
 export const LOCAL_ASSET_BROWSER_PREFIX = 'simcity-dnd:local-glb:';
@@ -237,6 +238,7 @@ export class SceneSettingsRuntime {
    */
   capture(name = this.document.name, { includeMapDocument = false } = {}) {
     return createSceneSettingsDocument({
+      enhancements: this.config.stylizedSurface.enhancements,
       name,
       map: includeMapDocument ? this.mapSource : toMapReference(this.mapSource),
       godRays: this.godRays?.getSettings?.() ?? {},
@@ -310,7 +312,9 @@ export class SceneSettingsRuntime {
     const savedSettings = worldDocument?.visualConfig?.sceneSettings
       ? normalizeSceneSettings(worldDocument.visualConfig.sceneSettings)
       : null;
-    if (savedSettings?.assets.length > 0) {
+    const graphChange = savedSettings?.environment.enhancements && JSON.stringify(savedSettings.environment.enhancements)
+      !== JSON.stringify(resolveRenderEnhancements(this.config.stylizedSurface.enhancements));
+    if (savedSettings?.assets.length > 0 || graphChange) {
       await this.activate(savedSettings, {
         worldDocument,
         sourceUrl: map.kind === 'url' ? resolvedMap.url : baseUrl,
@@ -349,6 +353,12 @@ export class SceneSettingsRuntime {
     await saveToBrowser(key, document);
     this.document = document;
     return { key, document };
+  }
+
+  async setRenderEnhancements(settings) {
+    const document = this.capture();
+    document.environment.enhancements = resolveRenderEnhancements(settings, '', { mobile: globalThis.innerWidth < 768 });
+    return this.activate(document, { worldDocument: this.controller.toDocument(), sourceUrl: this.sourceUrl });
   }
 
   async listBrowserSettings() {

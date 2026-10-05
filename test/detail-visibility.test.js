@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { BoxGeometry, Group, Matrix4, MeshBasicNodeMaterial, PerspectiveCamera } from 'three/webgpu';
+import { BudgetedDetailVisibility } from '../src/editor/stylized/lod/BudgetedDetailVisibility.js';
+import { createInstancedRenderers, disposeInstancedRenderers, writeInstances } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
+import { InstanceAnchor } from '../src/editor/stylized/lod/InstanceAnchor.js';
+
+test('detail turns immediately fall back to residents; auxiliary passes and rebases preserve all placements', () => {
+  let origin = { x: 1000000, z: 2000000 };
+  const root = new Group(), geometry = new BoxGeometry(), material = new MeshBasicNodeMaterial();
+  const prototypes = [[{ geometry, material }]], anchor = new InstanceAnchor().follow(origin);
+  const meshes = createInstancedRenderers({ root, partsByPrototype: prototypes, capacity: 8, name: 'test', castShadow: false });
+  const view = { root, prototypes, meshes, instanceAnchor: anchor, layerName: 'test', terrainView: { floatingOrigin: { getState: () => origin } } };
+  const rows = [[-12, 20].map(z => ({ matrix: new Matrix4().makeTranslation(origin.x, 0, origin.z + z), fade: 1, seed: 0 }))];
+  writeInstances(meshes, rows, anchor);
+  const selector = new BudgetedDetailVisibility(view); selector.reset(rows);
+  assert.equal(selector.fullMeshes[0].instanceMatrix.isStorageInstancedBufferAttribute, true);
+  assert.notEqual(selector.fullMeshes[0].instanceMatrix.array, meshes[0][0].instanceMatrix.array);
+  const camera = new PerspectiveCamera(60, 1.5, 0.1, 100); camera.lookAt(0, 0, -1);
+  selector.update(camera, () => false);
+  assert.equal(meshes[0][0].count, 1);
+  assert.equal(meshes[0][0].visible, true);
+  selector.withFull(() => {
+    assert.equal(meshes[0][0].visible, false);
+    assert.equal(selector.fullMeshes[0].visible, true);
+    assert.equal(selector.fullMeshes[0].count, 2);
+  });
+  assert.equal(selector.fullMeshes[0].visible, false);
+  camera.lookAt(0, 0, 1);
+  selector.update(camera, () => true);
+  assert.equal(selector.fullMeshes[0].visible, true, 'turn cannot expose a partially computed selection');
+  selector.update(camera, () => false);
+  assert.equal(meshes[0][0].count, 1);
+  origin = { x: origin.x + 128, z: origin.z };
+  camera.position.x = -128; camera.lookAt(-128, 0, 1);
+  selector.update(camera, () => false);
+  assert.equal(meshes[0][0].count, 1);
+  assert.deepEqual(rows[0].map(row => row.matrix.elements[14]), [2000000 - 12, 2000000 + 20]);
+  selector.dispose(); disposeInstancedRenderers(root, meshes); geometry.dispose(); material.dispose();
+});

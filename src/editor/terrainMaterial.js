@@ -352,6 +352,8 @@ export function createTerrainMaterial({
     });
     const snowDetail = bakedSurface.snow ? createSnowDetailNodes({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, material,
+      groundHeight: terrainHeight, pathMask: max(pathMask, footprints.pressed), baseNormal: bakedSurface.normal,
+      reliefEnabled: stylizedConfig.enhancements?.snowRelief === true,
     }) : null;
     const detailedSnowColor = snowDetail ? snowDetail.color(snowColor) : snowColor;
     const printed = footprints.apply(detailedSnowColor);

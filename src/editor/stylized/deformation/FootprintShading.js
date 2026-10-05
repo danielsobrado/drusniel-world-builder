@@ -38,6 +38,7 @@ export function createFootprintShading({ terrainUv, chunkWorldSize, chunkCenter,
   const surface = max(snow, beach);
   const pressed = depth.mul(surface);
   return {
+    pressed,
     apply(color) {
       const tint = mix(vec3(0.72, 0.68, 0.64), vec3(0.8, 0.88, 1), snow);
       return mix(color, color.mul(tint), pressed.mul(float(0.85)));

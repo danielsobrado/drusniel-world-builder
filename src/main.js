@@ -1,4 +1,8 @@
 import './styles.css';
+import './editor/roadside/roadside.css';
+import { RoadsideDetailsView } from './editor/roadside/RoadsideDetailsView.js';
+import { RoadsideDetailsUi } from './editor/roadside/RoadsideDetailsUi.js';
+import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
 import './editor/performance/qa/perfQa.css';
@@ -168,6 +172,9 @@ async function initializeEditor(restoreState, resources) {
   resources.own(loadingOverlay);
   loadingOverlay.attach(loading);
   const boot = loading.begin({ title: 'Starting Drusniel World', steps: BOOT_STEPS });
+  const closeBootTrace = assetStartupTelemetry.trace.bindLoadingSession(boot);
+  resources.defer(closeBootTrace);
+  resources.defer(() => assetStartupTelemetry.trace.dispose());
   boot.start('settings');
   let bootSceneSettings = null;
   let bootSceneSettingsError = null;
@@ -318,6 +325,8 @@ async function initializeEditor(restoreState, resources) {
     stylizedConfig: config.stylizedSurface,
   });
   resources.own(terrainView);
+  const creationDiagnostics = new RendererCreationDiagnostics(terrainView.renderer, assetStartupTelemetry.trace);
+  resources.own(creationDiagnostics);
 
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: GPU init');
   boot.start('terrain');
@@ -627,6 +636,13 @@ async function initializeEditor(restoreState, resources) {
     baseUrl: import.meta.env.BASE_URL,
   });
   resources.own(godsEndAssets);
+  const roadsideDetails = new RoadsideDetailsView({ terrainView, controller, assets: godsEndAssets, surface: stylizedSurface,
+    constructionSpatialIndex,
+    enabled: config.stylizedSurface.enhancements?.roadsideLanterns === true });
+  resources.own(roadsideDetails);
+  if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
+  const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
+  resources.own(roadsideDetailsUi);
   const postProcessingFocus = new PostProcessingFocusResolver({
     terrainView,
     playerController,
@@ -743,6 +759,7 @@ async function initializeEditor(restoreState, resources) {
     );
   };
   controller.sceneSettingsProvider = () => sceneSettingsRuntime.capture();
+  roadsideDetailsUi.attachRenderingSettings(sceneSettingsRuntime);
   controller.sceneSettingsConsumer = (document) => {
     sceneSettingsRuntime.applyVisualSettings(document);
     ui.syncGodRaysSettings(terrainView.godRays.getSettings());
@@ -836,6 +853,7 @@ async function initializeEditor(restoreState, resources) {
 
   await stylizedSurface.ready;
   assetStartupTelemetry.markAssetsReady();
+  await roadsideDetails.initialize();
 
   const weatherSettings = {
     weatherMode: config.weather?.mode ?? 'off',
@@ -1165,6 +1183,7 @@ async function initializeEditor(restoreState, resources) {
       objectMap,
       objectView,
       godsEndAssets,
+      roadsideDetails,
       worldMapController,
       gameplayOverlayController,
       inventoryController,
@@ -1242,7 +1261,7 @@ async function initializeEditor(restoreState, resources) {
     await spellRuntime?.precompile?.(terrainView.renderer);
     stylizedSurface.prewarmStreamingResources(terrainView.renderer);
     finishWaterPrewarm = stylizedSurface.beginWaterRefractionPrewarm();
-    await terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera);
+    await assetStartupTelemetry.trace.measure('warmup.initialScene', () => terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera));
     if (finishWaterPrewarm) {
       terrainView.renderer.render(terrainView.scene, editorCamera.camera);
     }
@@ -1251,9 +1270,10 @@ async function initializeEditor(restoreState, resources) {
     await characterView?.prewarm(terrainView.renderer, playerController.camera);
     await postProcessingController.precompile(playerController.camera);
     terrainView.prewarmPostProcessing(playerController.camera);
-    withPreparationFrame(terrainView.renderer, null, () => withSceneWarmup(terrainView.scene,
-      () => terrainView.prewarmPostProcessing(playerController.camera)));
+    assetStartupTelemetry.trace.measureSync('warmup.actualPass', () => withPreparationFrame(terrainView.renderer, null,
+      () => withSceneWarmup(terrainView.scene, () => terrainView.prewarmPostProcessing(playerController.camera))));
     postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET);
+    assetStartupTelemetry.trace.measureSync('warmup.waterCaptures', () => stylizedSurface.reflections?.prewarm(editorCamera.camera, stylizedSurface));
   } catch (error) {
     console.warn('Render pipeline pre-warm failed; pipelines will compile on demand.', error);
   } finally {
@@ -1562,6 +1582,9 @@ async function initializeEditor(restoreState, resources) {
     );
     deferredWork.run(() => drawPreparation.flush(viewModeController.camera, () => deferredWork.available(6) <= 0));
     drawPreparation.hidePending();
+    deferredWork.run(() => roadsideDetails.update(viewModeController.camera));
+    roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
+    roadsideDetailsUi.update();
     terrainView.render(viewModeController.camera);
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();

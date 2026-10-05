@@ -56,12 +56,12 @@ function sampleBakeTextures(gpuState, terrainUv) {
     : bilinearLoad(gpuState.textures[name], terrainUv));
   return {
     macroTint: load('macroTint'),
-    terrainShape: sample('terrainShape'),
-    materialWeights: sample('materialWeights'),
-    wetnessShoreline: sample('wetnessShoreline'),
+    terrainShape: load('terrainShape'),
+    materialWeights: load('materialWeights'),
+    wetnessShoreline: load('wetnessShoreline'),
     farColor: sample('farColor'),
     farNormal: sample('farNormal'),
-    canopyWater: sample('canopyWater'),
+    canopyWater: load('canopyWater'),
   };
 }
 

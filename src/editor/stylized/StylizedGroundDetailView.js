@@ -1,4 +1,5 @@
 import { ITERATOR_PENDING } from './ResumableIterator.js';
+import { BudgetedDetailVisibility } from './lod/BudgetedDetailVisibility.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -97,6 +98,8 @@ export class StylizedGroundDetailView {
     // Instances are written relative to this, not in canonical metres (InstanceAnchor).
     this.instanceAnchor = new InstanceAnchor();
     this.root.name = `stylized-${layerName}`;
+    this.visibility = config.enhancements?.detailVisibility && layerConfig.castShadow !== true
+      && ['groundDetail', 'tropicalPlant'].includes(layerName) ? new BudgetedDetailVisibility(this) : null;
     terrainView.scene.add(this.root);
   }
 
@@ -429,6 +432,7 @@ export class StylizedGroundDetailView {
     const anchorOrigin = this.terrainView.floatingOrigin.getState();
     this.instanceAnchor.follow(anchorOrigin);
     const count = writeInstances(this.meshes, instances, this.instanceAnchor);
+    this.visibility?.reset(instances);
     this.instanceAnchor.place(this.root, anchorOrigin);
     PerfCounters.set(`${this.layerName}Instances`, count);
     for (const key of this.manifestCache.keys()) {
@@ -440,6 +444,7 @@ export class StylizedGroundDetailView {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.visibility?.dispose();
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.meshes);
     for (const parts of this.prototypes) {

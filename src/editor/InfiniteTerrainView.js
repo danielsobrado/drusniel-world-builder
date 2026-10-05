@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { installUnusedSamplerPruning } from '../render/UnusedSamplerBindings.js';
 import { uniform } from 'three/tsl';
 import {
   PERF_COUNTER_OCCLUSION_CANDIDATES,
@@ -317,6 +318,7 @@ export class InfiniteTerrainView {
       powerPreference: rendererConfig.powerPreference ?? 'high-performance',
       requiredLimits: this.requiredLimits,
     });
+    this.samplerPruning = installUnusedSamplerPruning(this.renderer);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, rendererConfig.maxPixelRatio));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     // Match the workshop preview renderer. Until 2026-07-25 the world used no
@@ -506,6 +508,7 @@ export class InfiniteTerrainView {
   }
 
   render(camera) {
+    this.beforeMainRender?.(camera);
     const draw = () => {
       if (
         this.godRays.enabled
@@ -521,6 +524,7 @@ export class InfiniteTerrainView {
     };
     if (!this.occlusion) {
       draw();
+      this.afterMainRender?.(camera);
       return;
     }
     // Hi-Z prepare runs immediately before the frame's draw, and its indirect-record
@@ -531,6 +535,7 @@ export class InfiniteTerrainView {
     this.occlusion.world.camera = camera;
     this.occlusion.prepare();
     this.occlusion.render(draw);
+    this.afterMainRender?.(camera);
     const stats = this.occlusion.stats;
     PerfCounters.set(PERF_COUNTER_OCCLUSION_CANDIDATES, stats.candidates);
     PerfCounters.set(PERF_COUNTER_OCCLUSION_OCCLUDERS, stats.occluders);
@@ -1050,6 +1055,7 @@ export class InfiniteTerrainView {
       return;
     }
     this.disposed = true;
+    this.samplerPruning?.dispose();
     if (typeof this.worldStore.cancelChunk === 'function') {
       for (const slot of this.slots) {
         if (slot.loading && slot.descriptor) {

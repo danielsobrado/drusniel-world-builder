@@ -652,8 +652,12 @@ export class StylizedTreeView {
       capacity,
       name: `stylized-pine-impostor-${atlas.prototypeIndex}`,
       gpuCulling: this.config.lod?.gpuCulling?.enabled !== false,
+      auxiliaryViews: this.config.enhancements?.waterReflections?.enabled === true,
     }));
-    for (const batch of this.impostorBatches) applyCloudShadow(batch.batch.material, this.config.sky);
+    for (const batch of this.impostorBatches) {
+      applyCloudShadow(batch.batch.material, this.config.sky);
+      if (batch.auxiliary) applyCloudShadow(batch.auxiliary.material, this.config.sky);
+    }
     this.impostorVersion += 1;
     this.lastUpdateKey = null;
     PerfCounters.set('treeImpostorAtlasBytes', this.impostorAtlases.reduce((total, atlas) => (

@@ -12,6 +12,7 @@ import {
   RGBA_S3TC_DXT1_Format,
   RGBA_S3TC_DXT5_Format,
 } from 'three';
+import { StartupTrace, startupDiagnosticsEnabled } from './StartupTrace.js';
 
 const FORMAT_NAMES = new Map([
   [RGB_ETC1_Format, 'ETC1_RGB'],
@@ -92,6 +93,7 @@ export class AssetStartupTelemetry {
     this.ktx2Transcodes = [];
     this.ktx2Support = null;
     this.assetListeners = new Set();
+    this.trace = new StartupTrace({ enabled: startupDiagnosticsEnabled(), clock });
   }
 
   /**
@@ -119,10 +121,11 @@ export class AssetStartupTelemetry {
 
   beginAsset(url) {
     this.notifyAsset({ phase: 'begin', url });
-    return { url, startedAt: this.clock() };
+    return { url, startedAt: this.clock(), span: this.trace.begin(`asset.${url}`) };
   }
 
   endAsset(token, error = null) {
+    this.trace.end(token.span, error ? 'failed' : 'complete');
     const endedAt = this.clock();
     this.notifyAsset({ phase: 'end', url: token.url, failed: Boolean(error) });
     this.assets.push({
@@ -177,6 +180,7 @@ export class AssetStartupTelemetry {
     return {
       version: 1,
       kind: 'simcity-dnd-asset-startup-qa',
+      diagnostics: this.trace.getReport(),
       status: this.status,
       navigationToAssetsReadyMs: this.assetsReadyAt === null
         ? null

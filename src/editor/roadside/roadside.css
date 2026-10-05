@@ -1,0 +1,8 @@
+.roadside-details { position: fixed; right: 16px; bottom: 64px; z-index: 15; width: 320px; padding: 10px; color: #e9ecdf; background: #18231eee; border: 1px solid #59705a; border-radius: 8px; font: 12px system-ui; }
+.roadside-details summary { cursor: pointer; font-weight: 600; }
+.roadside-details label { display: block; margin: 8px 0; }
+.roadside-detail-row { display: flex; flex-wrap: wrap; gap: 5px; padding: 5px 0; }
+.roadside-detail-row span { width: 100%; }
+.roadside-detail-row button { padding: 4px 8px; cursor: pointer; }
+.roadside-details { max-width: calc(100vw - 32px); max-height: 70vh; overflow: auto; }
+.roadside-details fieldset { margin-top: 12px; border: 1px solid #59705a; }

@@ -1,5 +1,9 @@
 # Handover: the grass-test → SimCity-DnD merge
 
+> Historical handover. Several open items below have since been implemented.
+> Use the [2026-10-04 remaining work plan](grass-test-remaining-value-plan-2026-10-04.md)
+> for the current source audit and proposed next steps.
+
 Date: 2026-09-28 (second pass). Written to be picked up cold, without the conversation that
 produced it. The *reasoning* for every decision is in
 [the merge plan's implementation log](grass-test-merge-plan-2026-09-24.md) §9 — including the

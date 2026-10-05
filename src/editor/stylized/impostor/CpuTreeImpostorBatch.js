@@ -69,7 +69,7 @@ export class CpuTreeImpostorBatch {
   update(camera, origin, timestamp = 0) {
     updateImpostorCameraUniforms(this.uniforms, camera, timestamp);
     this.projectionView.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-    this.frustum.setFromProjectionMatrix(this.projectionView);
+    this.frustum.setFromProjectionMatrix(this.projectionView, camera.coordinateSystem);
     const transforms = this.geometry.getAttribute('instanceTransform');
     const parameters = this.geometry.getAttribute('instanceImpostorParams');
     const appearances = this.geometry.getAttribute('instanceImpostorAppearance');

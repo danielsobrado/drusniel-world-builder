@@ -2,6 +2,7 @@ import {
   BIOME_ASSET_CONFIG_KIND,
   BIOME_ASSET_CONFIG_VERSION,
 } from '../stylized/BiomeAssetPalette.js';
+import { resolveRenderEnhancements } from '../../config/RenderEnhancements.js';
 import {
   normalizePostProcessingSettings,
   postProcessingSettingsToPlain,
@@ -228,7 +229,7 @@ function normalizeEnvironment(environment) {
   const postProcessing = postProcessingSettingsToPlain(
     normalizePostProcessingSettings(source.postProcessing),
   );
-  return { godRays, postProcessing };
+  return { godRays, postProcessing, ...(source.enhancements === undefined ? {} : { enhancements: resolveRenderEnhancements(source.enhancements) }) };
 }
 
 /**
@@ -283,13 +284,14 @@ export function createSceneSettingsDocument({
   biomeAssets,
   assets = [],
   placement = {},
+  enhancements,
 }) {
   return normalizeSceneSettings({
     kind: SCENE_SETTINGS_KIND,
     version: SCENE_SETTINGS_VERSION,
     name,
     map,
-    environment: { godRays, postProcessing },
+    environment: { godRays, postProcessing, ...(enhancements === undefined ? {} : { enhancements }) },
     biomeAssets,
     assets,
     placement,
@@ -324,6 +326,8 @@ export async function applySceneAssetSettings(config, settings, {
   resolveLocalAsset = null,
 } = {}) {
   const normalized = normalizeSceneSettings(settings);
+  if (normalized.environment.enhancements) config.stylizedSurface.enhancements = resolveRenderEnhancements(
+    normalized.environment.enhancements, '', { mobile: typeof window !== 'undefined' && window.innerWidth < 768 });
   const assets = config.stylizedSurface.assets;
   for (const asset of normalized.assets) {
     const variantsKey = SCENE_ASSET_LAYERS[asset.layer];

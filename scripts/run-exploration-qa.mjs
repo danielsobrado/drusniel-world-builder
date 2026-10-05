@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
+const urlIndex = process.argv.indexOf('--url');
+const baseUrl = urlIndex < 0 ? 'http://localhost:5173' : process.argv[urlIndex + 1];
+const recoveryUrl = new URL(baseUrl); recoveryUrl.searchParams.set('qaRecovery', '1');
+
 // Run with native Windows Node from WSL for the host's hardware WebGPU adapter.
 const browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu',
   '--ignore-gpu-blocklist', '--use-angle=default', '--disable-gpu-vsync', '--disable-frame-rate-limit'] });
@@ -15,7 +19,7 @@ try {
     if (message.type() === 'error') { errors.push(message.text()); console.log('Browser error:', message.text().slice(0, 500)); }
     if (message.type() === 'warn') { warnings.push(message.text()); console.log('Browser warning:', message.text().slice(0, 500)); }
   });
-  await page.goto('http://localhost:5173/?qaRecovery=1', { waitUntil: 'domcontentloaded' });
+  await page.goto(recoveryUrl.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !!window.__editor?.captureRecoveryState, null, { timeout: 180000 });
   await page.waitForFunction(() => window.__editor?.exploration?.lastTimestamp !== null && document.querySelector('.loading-overlay')?.hidden, null, { timeout: 60000 });
   checks.adapter = await page.evaluate(async () => {
@@ -140,7 +144,7 @@ try {
   await page.close();
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 3 });
   mobile.on('pageerror', error => errors.push(error.stack));
-  await mobile.goto('http://localhost:5173', { waitUntil: 'domcontentloaded' });
+  await mobile.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   await mobile.waitForFunction(() => !!window.__editor?.captureRecoveryState, null, { timeout: 180000 });
   await mobile.evaluate(() => { const e = window.__editor; e.viewModeController.setMode('player', { spawn: { x: 0, z: 0 } }); e.exploration.syncMobileVisibility(); });
   checks.mobile = await mobile.evaluate(() => {

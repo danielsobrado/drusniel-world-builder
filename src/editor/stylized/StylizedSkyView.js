@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { CascadedSunShadows } from '../../render/shadows/CascadedSunShadows.js';
 import {
   clamp,
   dot,
@@ -287,6 +288,8 @@ export class StylizedSkyView {
     this.directional.shadow.camera.top = extent;
     this.directional.shadow.camera.bottom = -extent;
     terrainView.scene.add(this.hemisphere, this.directional, this.directional.target);
+    this.cascades = config.sky.shadows && config.enhancements?.shadowCascades === 2
+      ? new CascadedSunShadows(this.directional, config.sky.shadowDistance) : null;
     terrainView.godRays.setVolumetricLight(this.directional);
     terrainView.scene.fog = new THREE.FogExp2(config.sky.fogColor, config.sky.fogDensity);
     // The soft outdoor HDR standard materials take their fill and reflections from.
@@ -392,6 +395,7 @@ export class StylizedSkyView {
   }
 
   dispose() {
+    this.cascades?.dispose();
     this.environment?.dispose();
     this.terrainView.scene.remove(
       this.mesh,

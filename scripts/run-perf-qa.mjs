@@ -97,7 +97,9 @@ setOptionalQuery(query, 'x', spawnX);
 setOptionalQuery(query, 'z', spawnZ);
 setOptionalQuery(query, 'yaw', yaw);
 setOptionalQuery(query, 'pitch', pitch);
-const targetUrl = `${baseUrl.replace(/\/$/, '')}/?${query.toString()}`;
+const target = new URL(baseUrl);
+for (const [key, value] of query) target.searchParams.set(key, value);
+const targetUrl = target.href;
 const timeoutMs = positiveNumber('timeoutMs', defaultPerfQaTimeoutMs(query));
 
 fs.mkdirSync(outDir, { recursive: true });

@@ -17,6 +17,21 @@ function settingsDocument() {
   return createSceneSettingsDocument({ name: 'Test look' });
 }
 
+test('quality graph changes hand off the semantic world and source URL intact', async () => {
+  const world = { version: 6, terrain: { biomeDefinitions: [{ id: 32 }] }, roadsideDetails: { version: 1, suppressed: ['lantern-v1:aa:1:L'] },
+    constructions: { entries: [{ id: 'authored' }] } };
+  const runtime = new SceneSettingsRuntime({ controller: { toDocument: () => world },
+    biomeAssetPalette: { toDocument: () => settingsDocument().biomeAssets }, godRays: {},
+    config: { stylizedSurface: { postProcessing: {}, regionalPlacement: {} } } });
+  runtime.sourceUrl = 'https://example.test/maps/world.json';
+  let handoff; runtime.activate = async (document, options) => { handoff = { document, options }; };
+  await runtime.setRenderEnhancements({ shadowCascades: 2, waterReflections: { enabled: true, planar: true } });
+  assert.equal(handoff.document.environment.enhancements.shadowCascades, 2);
+  assert.equal(handoff.document.environment.enhancements.waterReflections.planar, true);
+  assert.equal(handoff.options.worldDocument, world);
+  assert.equal(handoff.options.sourceUrl, runtime.sourceUrl);
+});
+
 test('failed session staging removes the temporary world document', async () => {
   const saved = [];
   const deleted = [];

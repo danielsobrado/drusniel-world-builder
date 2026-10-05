@@ -1,4 +1,5 @@
 import { EditorController } from './EditorController.js';
+import { RoadsideDetailsStore } from './roadside/RoadsideDetailsStore.js';
 import { evaluateObjectSurface } from './TerrainPlacement.js';
 import { createWorldDocument, loadWorldDocument } from './WorldDocument.js';
 import { worldToCell } from './world/WorldCoordinates.js';
@@ -84,6 +85,7 @@ export class TerrainAwareEditorController extends EditorController {
     this.sceneSettingsConsumer = null;
     this.inventoryStore = options.inventoryStore ?? null;
   }
+  get roadsideDetails() { return this._roadsideDetails ??= new RoadsideDetailsStore(); }
 
   getState() {
     return {
@@ -214,6 +216,12 @@ export class TerrainAwareEditorController extends EditorController {
   }
 
   applyHistory(entry, direction) {
+    if (entry.kind === 'roadside-detail') {
+      if (entry.object) this.objectMap.applyChange({ before: null, after: entry.object }, direction);
+      this.roadsideDetails.replaceDocument(direction === 'undo' ? entry.before : entry.after);
+      this.refreshObjects();
+      return;
+    }
     if (entry.kind === 'voxel-stamp') {
       this.voxelStampStore.applyChange(entry, direction);
       return;
@@ -223,6 +231,7 @@ export class TerrainAwareEditorController extends EditorController {
       return;
     }
     if (entry.kind === 'infinite-world') {
+      this.roadsideDetails.replaceDocument(direction === 'undo' ? entry.beforeRoadside : entry.afterRoadside);
       this.worldStore.restoreSnapshot(
         direction === 'undo' ? entry.beforeWorld : entry.afterWorld,
       );
@@ -261,6 +270,7 @@ export class TerrainAwareEditorController extends EditorController {
       throw new Error('Clearing the world requires an infinite world store.');
     }
     const beforeWorld = this.worldStore.createSnapshot();
+    const beforeRoadside = this.roadsideDetails.toDocument();
     const beforeObjects = this.objectMap.clear();
     const beforeVoxelStamps = this.voxelStampStore?.clear() ?? [];
     const beforeConstructions = this.constructionStore?.clear() ?? [];
@@ -272,6 +282,8 @@ export class TerrainAwareEditorController extends EditorController {
         && beforeObjects.length === 0
         && beforeVoxelStamps.length === 0
         && beforeConstructions.length === 0
+        && beforeRoadside.suppressed.length === 0
+        && beforeRoadside.enabled === undefined
         && !beforeCampaign) {
       return;
     }
@@ -279,8 +291,11 @@ export class TerrainAwareEditorController extends EditorController {
     this.campaign = null;
     this.importWarnings = [];
     const afterWorld = this.worldStore.createSnapshot();
+    this.roadsideDetails.replaceDocument(null);
     this.commitHistory({
       kind: 'infinite-world',
+      beforeRoadside,
+      afterRoadside: this.roadsideDetails.toDocument(),
       beforeWorld,
       afterWorld,
       beforeObjects,
@@ -303,6 +318,7 @@ export class TerrainAwareEditorController extends EditorController {
 
   toDocument() {
     return {
+      roadsideDetails: this.roadsideDetails.toDocument(),
       ...createWorldDocument(
         this.tileMap,
         this.heightField,
@@ -356,8 +372,10 @@ export class TerrainAwareEditorController extends EditorController {
     const previousBiomeAssets = this.biomeAssetPalette?.toDocument() ?? null;
     const previousSceneSettings = this.sceneSettingsProvider?.() ?? null;
     const previousInventory = this.inventoryStore?.toDocument() ?? null;
+    const previousRoadside = this.roadsideDetails.toDocument();
     let inventoryCommitted = false;
     try {
+      this.roadsideDetails.replaceDocument(document.roadsideDetails);
       if (this.inventoryStore) {
         const incoming = document.playerState?.inventory;
         if (preserveInventory && incoming == null) {
@@ -391,6 +409,7 @@ export class TerrainAwareEditorController extends EditorController {
         () => this.validateLoadedObjectSurfaces(),
       );
     } catch (error) {
+      this.roadsideDetails.replaceDocument(previousRoadside);
       const rollbackErrors = restoreAuxiliaryLoadState({
         proceduralAssetManager: this.proceduralAssetManager,
         previousProceduralAssets,

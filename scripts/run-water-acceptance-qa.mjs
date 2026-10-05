@@ -321,7 +321,9 @@ async function main() {
     const gpuErrors = collectGpuValidationErrors(page);
     const browserErrors = createBrowserErrorMonitor(page);
 
-    await page.goto(`${baseUrl}/?qa=water-acceptance&autostart=0&download=0`, {
+    const discoveryUrl = new URL(baseUrl);
+    for (const [key, value] of new URLSearchParams({ qa: 'water-acceptance', autostart: '0', download: '0' })) discoveryUrl.searchParams.set(key, value);
+    await page.goto(discoveryUrl.href, {
       waitUntil: 'domcontentloaded',
     });
     const adapter = await inspectAdapter(page);
@@ -366,7 +368,9 @@ async function main() {
       autostart: '1',
       download: '0',
     });
-    await page.goto(`${baseUrl}/?${query}`, { waitUntil: 'domcontentloaded' });
+    const measuredUrl = new URL(baseUrl);
+    for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
+    await page.goto(measuredUrl.href, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(({ x, z }) => {
       const focus = window.__editor?.controller?.focusProvider?.();
       return focus && Math.hypot(focus.x - x, focus.z - z) < 2;

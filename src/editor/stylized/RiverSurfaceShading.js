@@ -198,5 +198,5 @@ export function createRiverSurfaceNodes({
     .mul(smoothstep(0.3, 0.75, foamNoise)).mul(0.5);
   const foam = riverShore.add(bankFoam).mul(oneMinus(fall)).clamp(0, 0.94);
 
-  return { fresnel, sky, glint, foam };
+  return { fresnel, sky, glint, foam, reflected };
 }

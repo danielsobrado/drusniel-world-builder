@@ -1,0 +1,11 @@
+# Optional quality features. These are deliberately independent of world generation.
+detailVisibility: false
+waterReflections:
+  enabled: false
+  planar: false
+  resolution: 256
+  intervalMs: 250
+  reachMeters: 96
+shadowCascades: 1
+snowRelief: true
+roadsideLanterns: false

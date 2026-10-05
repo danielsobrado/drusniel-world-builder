@@ -3,6 +3,7 @@ import test from 'node:test';
 import * as THREE from 'three/webgpu';
 import { CpuTreeImpostorBatch } from '../src/editor/stylized/impostor/CpuTreeImpostorBatch.js';
 import { GpuTreeImpostorBatch } from '../src/editor/stylized/impostor/GpuTreeImpostorBatch.js';
+import { TreeImpostorBatch } from '../src/editor/stylized/impostor/TreeImpostorBatch.js';
 
 function createFixture(Batch) {
   const scene = new THREE.Scene();
@@ -28,6 +29,23 @@ function isTraversed(scene, mesh) {
 }
 
 const record = { x: 0, y: 0, z: -10, scale: 1, yaw: 0, fade: 1, seed: 0.3, radius: 1 };
+
+test('reflection cameras recover off-screen impostors and restore the main selection after failure', () => {
+  const { batch, camera, atlas } = createFixture(TreeImpostorBatch);
+  batch.dispose();
+  const owned = new TreeImpostorBatch({ renderer: {}, scene: new THREE.Scene(), atlas, capacity: 4, auxiliaryViews: true });
+  try {
+    owned.setRecords([{ ...record, z: 10 }]); owned.update(camera, { x: 0, z: 0 });
+    assert.equal(owned.batch.mesh.visible, false);
+    const reflection = camera.clone(); reflection.lookAt(0, 0, 10); reflection.updateMatrixWorld();
+    assert.throws(() => owned.withCamera(reflection, { x: 0, z: 0 }, 0, () => {
+      assert.equal(owned.auxiliary.geometry.instanceCount, 1); assert.equal(owned.auxiliary.mesh.visible, true);
+      assert.equal(owned.batch.mesh.visible, false); throw new Error('capture');
+    }), /capture/);
+    assert.equal(owned.auxiliary.mesh.visible, false); assert.equal(owned.batch.mesh.visible, false);
+    assert.equal(owned.batch.geometry.instanceCount, 0);
+  } finally { owned.dispose(); atlas.albedo.dispose(); atlas.normal.dispose(); }
+});
 
 test('empty GPU impostor batches leave render traversal and can become populated again', () => {
   const { batch, scene, camera, atlas, computes } = createFixture(GpuTreeImpostorBatch);

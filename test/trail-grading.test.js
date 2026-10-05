@@ -29,6 +29,14 @@ function grading(routes, overrides = {}) {
 
 const trail = { id: 1, group: 'trails', points: [[20, 50], [50, 50], [80, 50]] };
 
+test('local dressing queries find narrow roads away from the centre bucket', () => {
+  const field = grading([{ id: 3, group: 'roads', points: [[20, 50.07], [80, 50.07]] }]);
+  assert.equal(field.nearbyRoutes(5000, 4700).length, 0);
+  const roads = field.nearbyRoutesInBounds(5000, 4700, 400);
+  assert.equal(roads.length, 1); assert.ok(Math.abs(roads[0].distance - 614) < 0.001);
+  assert.equal(field.nearbyRoutesInBounds(9000, 9000, 20).length, 0);
+});
+
 test('only land routes are imported, in atlas coordinates', () => {
   const routes = createRouteData({
     info: { width: 200, height: 100 },

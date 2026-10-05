@@ -4,6 +4,10 @@ Date: 2026-09-24
 
 Status: approved; P1 in progress
 
+> Historical plan and implementation log. For the source-audited remaining gaps
+> as of 2026-10-04, use the [useful remaining work plan](grass-test-remaining-value-plan-2026-10-04.md).
+> The original status and inventory below do not describe all later ports.
+
 Source project: `F:\Development\grass-test` (three 0.186, WebGPU/TSL, ~44 k LOC in `src/`)
 Target project: this repository (three 0.185.1, WebGPU/TSL, streamed Azgaar world)
 

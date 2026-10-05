@@ -27,7 +27,8 @@ export function resolveObjectCanonicalCenter({ object, objectMap, tileSize }) {
     object.definitionKey,
     object.rotation,
   );
-  return cellBoundsCenterToCanonicalWorld(bounds, tileSize);
+  const center = cellBoundsCenterToCanonicalWorld(bounds, tileSize);
+  return { ...center, x: center.x + (object.roadsidePlacement?.offsetX ?? 0), z: center.z + (object.roadsidePlacement?.offsetZ ?? 0) };
 }
 
 export class ObjectPlacementResolver {
@@ -109,7 +110,7 @@ export class ObjectPlacementResolver {
   createPlacementQuaternion(object, definition, surface) {
     const yaw = new THREE.Quaternion().setFromAxisAngle(
       WORLD_UP,
-      -object.rotation * QUARTER_TURN_RADIANS,
+      -object.rotation * QUARTER_TURN_RADIANS + (object.roadsidePlacement?.yaw ?? 0),
     );
     if (!definition.foundation.alignToNormal) return yaw;
     const normal = new THREE.Vector3(surface.normal.x, surface.normal.y, surface.normal.z);
@@ -132,9 +133,11 @@ export class ObjectPlacementResolver {
 
   createCanonicalObjectMatrix(object, surfaceOverride = null) {
     const placement = this.placementFor(object, surfaceOverride);
-    const center = this.canonicalCenter(placement.bounds);
+    const center = { ...this.canonicalCenter(placement.bounds) };
+    center.x += object.roadsidePlacement?.offsetX ?? 0;
+    center.z += object.roadsidePlacement?.offsetZ ?? 0;
     return new THREE.Matrix4().compose(
-      new THREE.Vector3(center.x, placement.surface.baseHeight, center.z),
+      new THREE.Vector3(center.x, placement.surface.baseHeight + (object.roadsidePlacement?.offsetY ?? 0), center.z),
       this.createPlacementQuaternion(object, placement.definition, placement.surface),
       UNIT_SCALE,
     );
@@ -142,9 +145,11 @@ export class ObjectPlacementResolver {
 
   createObjectMatrix(object, surfaceOverride = null) {
     const placement = this.placementFor(object, surfaceOverride);
-    const center = this.renderCenter(placement.bounds);
+    const center = { ...this.renderCenter(placement.bounds) };
+    center.x += object.roadsidePlacement?.offsetX ?? 0;
+    center.z += object.roadsidePlacement?.offsetZ ?? 0;
     return new THREE.Matrix4().compose(
-      new THREE.Vector3(center.x, placement.surface.baseHeight, center.z),
+      new THREE.Vector3(center.x, placement.surface.baseHeight + (object.roadsidePlacement?.offsetY ?? 0), center.z),
       this.createPlacementQuaternion(object, placement.definition, placement.surface),
       UNIT_SCALE,
     );

@@ -2,7 +2,7 @@ import { CpuTreeImpostorBatch } from './CpuTreeImpostorBatch.js';
 import { GpuTreeImpostorBatch } from './GpuTreeImpostorBatch.js';
 
 export class TreeImpostorBatch {
-  constructor({ renderer, scene, atlas, capacity, name, gpuCulling }) {
+  constructor({ renderer, scene, atlas, capacity, name, gpuCulling, auxiliaryViews = false }) {
     this.mode = 'cpu';
     this.batch = null;
     this.acceptedRecords = 0;
@@ -17,10 +17,13 @@ export class TreeImpostorBatch {
     if (!this.batch) {
       this.batch = new CpuTreeImpostorBatch({ scene, atlas, capacity, name });
     }
+    this.auxiliary = auxiliaryViews ? new CpuTreeImpostorBatch({ scene, atlas, capacity, name: `${name}-reflection` }) : null;
+    if (this.auxiliary) this.auxiliary.mesh.visible = false;
   }
 
   setRecords(records) {
     this.acceptedRecords = this.batch.setRecords(records);
+    this.auxiliary?.setRecords(records);
     return Object.freeze({
       mode: this.mode,
       requested: records.length,
@@ -39,5 +42,16 @@ export class TreeImpostorBatch {
 
   dispose() {
     this.batch.dispose();
+    this.auxiliary?.dispose();
+  }
+
+  withCamera(camera, origin, timestamp, operation) {
+    if (!this.auxiliary) return operation();
+    const visible = this.batch.mesh.visible, auxiliaryVisible = this.auxiliary.mesh.visible;
+    try {
+      this.auxiliary.update(camera, origin, timestamp);
+      this.batch.mesh.visible = false;
+      return operation();
+    } finally { this.batch.mesh.visible = visible; this.auxiliary.mesh.visible = auxiliaryVisible; }
   }
 }

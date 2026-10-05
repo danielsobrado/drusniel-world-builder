@@ -1,4 +1,5 @@
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
+import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
 import { PreparedPlacementStore } from '../world/PreparedPlacementStore.js';
 import { placementPreparationRadius } from '../world/PlacementPreparationWindow.js';
@@ -277,7 +278,21 @@ export class StylizedSurfaceView {
         tuning: this.grassTuning,
       }))
       : [];
-    this.sharedWaterMaterials = new SharedWaterMaterials();
+    this.reflections = this.enabled && !this.impostorBakeMode && config.enhancements?.waterReflections.enabled
+      ? new WaterReflectionController(terrainView, config.enhancements.waterReflections) : null;
+    this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections);
+    terrainView.beforeMainRender = camera => {
+      this.skyView?.cascades?.prepare(camera);
+      // Reserve remaining shared slack before the fixed render consumes the wall-clock
+      // deadline. No deferred queue runs between these callbacks. Capturing afterward
+      // reuses shadows produced for this main-camera pose rather than stale matrices.
+      this.reflectionBudgetReserved = Boolean(this.reflections && !this.shouldYieldWork?.());
+    };
+    terrainView.afterMainRender = camera => {
+      if (this.reflectionBudgetReserved) this.runDeferredWork?.(() => this.reflections.update(
+        camera, this, performance.now(), { budgetReserved: true }));
+      this.reflectionBudgetReserved = false;
+    };
     this.waterSlots = this.enabled && !this.impostorBakeMode && config.water?.enabled
       ? terrainView.slots.map((terrainSlot) => new StylizedWaterSlot({
         terrainSlot,
@@ -701,6 +716,9 @@ export class StylizedSurfaceView {
       });
     }
     for (const view of this.detailViews) view.update();
+    for (const view of this.detailViews) {
+      if (view.visibility) this.runDeferredWork?.(() => view.visibility.update(camera, this.shouldYieldWork));
+    }
     // One clock for every swaying plant, advanced once here rather than per layer.
     advancePlantSway(timestamp);
     for (const view of this.detailViews) {
@@ -941,6 +959,9 @@ export class StylizedSurfaceView {
     this.detailBuildQueue.clear();
     for (const slot of this.waterSlots) slot.dispose();
     this.sharedWaterMaterials.dispose();
+    this.reflections?.dispose();
+    this.terrainView.beforeMainRender = null;
+    this.terrainView.afterMainRender = null;
     this.waterSlots.length = 0;
     for (const slot of this.slots) slot.dispose();
     this.meadowGrass?.dispose();

@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { assignMaterialData, REFLECTION_CLASSES } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import {
   abs,
   cameraFar,
@@ -83,6 +84,7 @@ export function createStylizedWaterMaterial({
   chunkWorldSize,
   time,
   config,
+  reflections = null,
   // Per-chunk phase of each swell component at the chunk centre (SeaSwell), and
   // the sun the swell's slopes are shaded against. Without them there is no swell.
   seaPhaseOrigin = null,
@@ -490,7 +492,9 @@ export function createStylizedWaterMaterial({
     // The reflected sky takes the current look's tint (dusk, night, overcast).
     color = mix(
       color,
-      colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint),
+      reflections ? reflections.sample(normalize(positionWorld.sub(cameraPosition)).reflect(vec3(0, 1, 0)),
+        colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint))
+        : colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint),
       clamp(river ? surfaceReflection.mul(oneMinus(inland)) : surfaceReflection, 0, 1),
     );
   }
@@ -498,7 +502,8 @@ export function createStylizedWaterMaterial({
     // The donor's own Fresnel over its sky, damped on a fall's white face.
     color = mix(
       color,
-      river.sky.mul(skyLightUniforms.reflectionTint),
+      reflections ? reflections.sample(river.reflected, river.sky.mul(skyLightUniforms.reflectionTint), float(0))
+        : river.sky.mul(skyLightUniforms.reflectionTint),
       river.fresnel.mul(oneMinus(fall.mul(0.85))).mul(reflectionVisibility).mul(inland),
     );
   }
@@ -567,5 +572,8 @@ export function createStylizedWaterMaterial({
   material.colorNode = lit;
   material.opacityNode = alpha;
   material.alphaTest = 0.02;
-  return assignWaterMaterialData(material);
+  assignWaterMaterialData(material);
+  // Local sources own water's reflection response. SSR remains available to other surfaces.
+  if (reflections) assignMaterialData(material, { ...material.userData.postProcessingMaterialData, reflectionClass: REFLECTION_CLASSES.NONE });
+  return material;
 }

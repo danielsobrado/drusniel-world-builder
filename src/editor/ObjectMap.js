@@ -1,4 +1,5 @@
 import { ObjectSpatialIndex } from './ObjectSpatialIndex.js';
+import { normalizeRoadsidePlacement } from './roadside/RoadsidePlacement.js';
 
 const MAX_OBJECT_FOOTPRINT_CELLS = 65_536;
 /** Spatial bucket side, in cells, for a tile map that is not chunked. */
@@ -173,7 +174,7 @@ export class ObjectMap {
     return { valid: true, reason: null, cells };
   }
 
-  place({ definitionKey, x, z, rotation = 0 }) {
+  place({ definitionKey, x, z, rotation = 0, roadsidePlacement = null }) {
     const normalizedRotation = normalizeRotation(rotation);
     const validation = this.validatePlacement({ definitionKey, x, z, rotation: normalizedRotation });
     if (!validation.valid) {
@@ -186,6 +187,7 @@ export class ObjectMap {
       x,
       z,
       rotation: normalizedRotation,
+      ...(roadsidePlacement ? { roadsidePlacement: normalizeRoadsidePlacement(roadsidePlacement, this.tileMap.tileSize) } : {}),
     };
     this.nextId += 1;
     this.objectsById.set(object.id, object);
@@ -245,6 +247,7 @@ export class ObjectMap {
       x: object.x,
       z: object.z,
       rotation: normalizeRotation(object.rotation),
+      ...(object.roadsidePlacement ? { roadsidePlacement: normalizeRoadsidePlacement(object.roadsidePlacement, this.tileMap.tileSize) } : {}),
     };
     const validation = this.validatePlacement(snapshot);
     if (!validation.valid) {

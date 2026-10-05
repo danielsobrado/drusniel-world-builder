@@ -1,4 +1,6 @@
 import yaml from 'js-yaml';
+import enhancementsSource from '../../config/render-enhancements.yaml?raw';
+import { resolveRenderEnhancements } from './RenderEnhancements.js';
 import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?raw';
 import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?raw';
 import collisionConfigSource from '../../config/collision.yaml?raw';
@@ -44,6 +46,8 @@ function applyRuntimeOverrides(config) {
 
 export function loadEditorConfig() {
   const config = yaml.load(configSource);
+  config.stylizedSurface.enhancements = resolveRenderEnhancements(yaml.load(enhancementsSource), runtimeSearch(),
+    { mobile: typeof window !== 'undefined' && window.innerWidth < 768 });
   config.exploration = resolveExplorationConfig(yaml.load(explorationConfigSource));
   config.weatherEffects = resolveWeatherEffects(yaml.load(weatherEffectsConfigSource));
   config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;

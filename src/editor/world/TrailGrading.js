@@ -153,6 +153,24 @@ export class TrailGrading {
       Math.floor(z / this.cellsPerBucket),
     ));
     if (!entries) return [];
+    return this.nearestRoutesFromSegments(entries, x, z);
+  }
+
+  /** Local route dressing needs every intersecting bucket, including narrow roads
+   * between query sample points. Only indexed segments in this region are visited. */
+  nearbyRoutesInBounds(x, z, radiusCells) {
+    const size = this.cellsPerBucket;
+    const entries = [];
+    for (let bz = Math.floor((z - radiusCells) / size); bz <= Math.floor((z + radiusCells) / size); bz++) {
+      for (let bx = Math.floor((x - radiusCells) / size); bx <= Math.floor((x + radiusCells) / size); bx++) {
+        const bucket = this.buckets.get(this.bucketKey(bx, bz));
+        if (bucket) entries.push(...bucket);
+      }
+    }
+    return this.nearestRoutesFromSegments(entries, x, z);
+  }
+
+  nearestRoutesFromSegments(entries, x, z) {
     const nearestByRoute = new Map();
     for (let i = 0; i < entries.length; i += 2) {
       const route = entries[i];

@@ -6,7 +6,8 @@ export const WATER_SLOT_OPTIONS = 'waterSlotOptions';
 
 /** One graph for each water variant, with exact per-slot inputs at draw time. */
 export class SharedWaterMaterials {
-  constructor() {
+  constructor(reflections = null) {
+    this.reflections = reflections;
     this.materials = new Map();
     this.bindings = null;
     this.disposed = false;
@@ -30,7 +31,7 @@ export class SharedWaterMaterials {
         .setUpdateMatrix(true).onObjectUpdate(({ object }) => read(object)[name]);
       this.bindings = bindings;
     }
-    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction });
+    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, reflections: this.reflections });
     material.side = DoubleSide;
     this.materials.set(enableRefraction, material);
     return material;
