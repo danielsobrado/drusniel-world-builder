@@ -61,14 +61,21 @@ export function moduleProjectedPixels({
   height,
   viewportHeight,
   origin = null,
+  toRender = null,
   cameraY = 0,
 }) {
   const bounds = module.bounds;
   const canonicalX = (bounds.minX + bounds.maxX) / 2;
   const canonicalZ = (bounds.minZ + bounds.maxZ) / 2;
-  MODULE_WORLD_POSITION.x = canonicalX - (origin?.x ?? 0);
+  if (toRender) {
+    const rendered = toRender(canonicalX, canonicalZ);
+    MODULE_WORLD_POSITION.x = rendered.x;
+    MODULE_WORLD_POSITION.z = rendered.z;
+  } else {
+    MODULE_WORLD_POSITION.x = canonicalX - (origin?.x ?? 0);
+    MODULE_WORLD_POSITION.z = canonicalZ - (origin?.z ?? 0);
+  }
   MODULE_WORLD_POSITION.y = cameraY;
-  MODULE_WORLD_POSITION.z = canonicalZ - (origin?.z ?? 0);
   return projectedPixelHeight({
     camera,
     worldPosition: MODULE_WORLD_POSITION,
