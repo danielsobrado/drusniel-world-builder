@@ -1453,7 +1453,7 @@ async function initializeEditor(restoreState, resources) {
       nextPredictiveRefreshAt = frameTimestamp + TERRAIN_PREFETCH_REFRESH_MS;
     }
     try {
-      terrainView.updateStreaming(
+      terrainView.updateStreamingFrame(
         exploration.tour.preloadFocus() ?? canonicalFocus,
         frameTimestamp,
         forcePredictiveRefresh,
