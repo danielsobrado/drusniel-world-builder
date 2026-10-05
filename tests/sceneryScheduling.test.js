@@ -17,7 +17,7 @@ function fixture() {
     updateForestGroundTextures: record('ground'), prewarmOneDistantWaterSlot() {},
   });
   for (const name of ['rock', 'tree', 'bush', 'detail', 'grass', 'flower']) {
-    surface[`${name}BuildQueue`] = { flush: record(`${name} flush`) };
+    surface[`${name}BuildQueue`] = { flush: record(`${name} flush`), retain() {}, enqueue() {} };
   }
   return { surface, calls };
 }

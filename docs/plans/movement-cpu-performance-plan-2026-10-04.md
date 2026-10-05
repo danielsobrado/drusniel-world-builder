@@ -243,6 +243,6 @@ Run the complete density/construction/water matrix after integration. The migrat
 - [x] Ecology preparation, local invalidation, and bounded residency covered by behavioral checks.
 - [ ] Remaining scenery/submission work fits the complete frame budget.
 - [ ] Three standard hardware runs meet all frame-time criteria; sustained-route and full matrix gates pass.
-- [x] Grass prepares density changes ahead, retains existing stems, fades arrivals, and publishes ready prefixes without waiting for compaction time. The final long turn-back run ends with complete drawable grass; a small preparation remainder clears promptly. Camera-facing priority and regular scenery turns share the same allowance.
+- [x] Grass prepares density changes ahead, retains existing stems, fades arrivals, and publishes ready prefixes without waiting for compaction time. Both final long-route legs end with complete drawable grass and clear queues. Camera-facing priority and regular scenery turns share the same allowance.
 
 Use small reviewable changes in this order. For each checkpoint record what changed, correctness results, before/after CPU phases and frame distribution, queue age, completed scenery, memory, and remaining failures. If a checkpoint misses its target, retain the failing result and profile the remaining work. Do not close the performance task merely because the scheduler exists or one average FPS number improves.

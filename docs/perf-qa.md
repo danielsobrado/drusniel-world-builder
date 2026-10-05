@@ -213,6 +213,11 @@ With `--drain-seconds`, both measurements receive separate recovery observations
 Their density-lag counterparts track lower-capacity publications. The cone
 prioritizes preparation and is not a renderer frustum-culling change.
 
+The runner records bounded scenery queue snapshots once per second during warmup,
+stopping before measured movement starts. `preparationQueuesDuringWarmup` helps
+identify settle blockers; `preparationQueuesAtStart` can already include work
+from the first movement frame. Neither diagnostic enters the measured phase.
+
 Browser exceptions and `console.error` messages invalidate a capture. The runner
 saves their count and a bounded list in `capture.browserErrors`, preserves the
 report, and exits non-zero. Check this evidence before quoting FPS; failed asset

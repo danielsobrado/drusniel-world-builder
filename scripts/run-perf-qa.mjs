@@ -214,6 +214,47 @@ const fs = require('fs');
       cpuProfiling = true;
     }
 
+    // Observe warmup only: after recording starts, the first movement frame can
+    // already enqueue new chunks and obscure the queue that blocked settling.
+    await page.evaluate(() => {
+      window.__perfQaWarmupQueues = [];
+      let lastSample = -Infinity;
+      const observe = now => {
+        if (window.__perfQa.recording || window.__perfQa.status === 'done') return;
+        if (now - lastSample >= 1000) {
+          lastSample = now;
+          const surface = window.__editor.stylizedSurface;
+          const describe = queue => ({ size: queue?.size ?? 0,
+            jobs: (queue?.queue ?? []).slice(0, 3).map(job => ({
+              key: String(job.key).slice(0, 1024), chunkX: job.chunkX, chunkZ: job.chunkZ,
+              ageMs: now - job.requestedAt,
+            })) });
+          const views = [surface?.rockView, surface?.treeView, surface?.bushView,
+            ...(surface?.detailViews ?? [])].filter(Boolean).map(view => ({
+              name: view.layerName ?? view.constructor.name,
+              pending: (view.pendingRebuild ?? view.pendingLodRebuild)?.updateKey?.slice(0, 1024),
+              staged: view.stagedRebuild?.job.updateKey?.slice(0, 1024),
+              last: view.lastUpdateKey?.slice(0, 1024),
+              builderDone: view.stagedRebuild?.builder.done,
+              pendingMatchesStaged: (view.pendingRebuild ?? view.pendingLodRebuild)?.updateKey
+                === view.stagedRebuild?.job.updateKey,
+              pendingManifestChunks: [...(view.pendingManifests?.keys() ?? [])].slice(0, 3),
+              revision: view.revisionTracker?.revision, prototypes: view.prototypeRevision,
+            }));
+          window.__perfQaWarmupQueues.push({ now,
+            preparation: surface?.getPreparationStatus(),
+            position: window.__editor.playerController?.getStatus().position,
+            views,
+            ...Object.fromEntries(['rock', 'tree', 'bush', 'detail', 'grass', 'flower'].map(name =>
+              [name, describe(surface?.[name + 'BuildQueue'])])),
+            rockManifests: describe(surface?.rockView?.manifestStore?.queue),
+            treeManifests: describe(surface?.treeView?.manifestStore?.queue) });
+          if (window.__perfQaWarmupQueues.length > 60) window.__perfQaWarmupQueues.shift();
+        }
+        requestAnimationFrame(observe);
+      };
+      requestAnimationFrame(observe);
+    });
     // Wait through bootstrap publication; capture against frozen sources so
     // development reloads cannot silently change the measured runtime.
     await page.waitForFunction(() => window.__perfQa?.recording
@@ -235,6 +276,7 @@ const fs = require('fs');
       timeout: ${timeoutMs},
     });
     const report = await page.evaluate(() => window.__perfQa.getReport());
+    report.preparationQueuesDuringWarmup = await page.evaluate(() => window.__perfQaWarmupQueues);
     report.preparationQueuesAtStart = preparationQueuesAtStart;
     const readGrassDiagnostics = () => page.evaluate(async () => {
         const field = window.__editor.stylizedSurface.meadowGrass;

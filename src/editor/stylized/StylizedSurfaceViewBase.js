@@ -3,6 +3,7 @@ import { WaterReflectionController } from '../../render/reflections/WaterReflect
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
 import { PreparedPlacementStore } from '../world/PreparedPlacementStore.js';
 import { placementPreparationRadius } from '../world/PlacementPreparationWindow.js';
+import { syncViewRebuildQueue } from './ViewRebuildQueue.js';
 import {
   PerfCounters,
   resetWaterChunkGauges,
@@ -685,9 +686,7 @@ export class StylizedSurfaceView {
     const meadowFirst = this.sceneryFrame % 4 !== 0;
     if (meadowFirst) this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     this.rockView?.update(timestamp, camera);
-    if (this.rockView?.pendingRebuild) {
-      this.rockBuildQueue.enqueue(this.rockView.pendingRebuild);
-    }
+    syncViewRebuildQueue(this.rockBuildQueue, [this.rockView]);
     this.rockBuildQueue.flush((job, shouldYield) => {
       void job;
       return this.rockView?.applyPendingRebuild(shouldYield) ?? false;
@@ -695,9 +694,7 @@ export class StylizedSurfaceView {
 
     const rockPlacements = this.rockView?.getPlacements() ?? [];
     this.treeView?.update(timestamp, camera, this.rockView);
-    if (this.treeView?.pendingLodRebuild) {
-      this.treeBuildQueue.enqueue(this.treeView.pendingLodRebuild);
-    }
+    syncViewRebuildQueue(this.treeBuildQueue, [this.treeView], 'pendingLodRebuild');
     this.treeBuildQueue.flush((job, shouldYield) => {
       void job;
       return this.treeView?.applyPendingRebuild(shouldYield) ?? false;
@@ -706,9 +703,7 @@ export class StylizedSurfaceView {
     // publication until that ring is ready so bush rebuilds cannot force a cold
     // rock manifest to finish synchronously and reintroduce the boundary hitch.
     this.bushView?.update(timestamp, camera, this.rockView);
-    if (this.bushView?.pendingRebuild) {
-      this.bushBuildQueue.enqueue(this.bushView.pendingRebuild);
-    }
+    syncViewRebuildQueue(this.bushBuildQueue, [this.bushView]);
     if (!this.rockView?.pendingRebuild) {
       this.bushBuildQueue.flush((job, shouldYield) => {
         void job;
@@ -721,9 +716,7 @@ export class StylizedSurfaceView {
     }
     // One clock for every swaying plant, advanced once here rather than per layer.
     advancePlantSway(timestamp);
-    for (const view of this.detailViews) {
-      if (view.pendingRebuild) this.detailBuildQueue.enqueue(view.pendingRebuild);
-    }
+    syncViewRebuildQueue(this.detailBuildQueue, this.detailViews);
     this.detailBuildQueue.flush((job, shouldYield) => {
       for (const view of this.detailViews) {
         if (job.key.startsWith(`${view.layerName}:`)) {
