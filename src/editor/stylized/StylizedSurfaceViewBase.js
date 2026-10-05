@@ -1,5 +1,6 @@
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
 import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
+import { advancePendingScenery } from './advancePendingScenery.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
 import { PreparedPlacementStore } from '../world/PreparedPlacementStore.js';
 import { placementPreparationRadius } from '../world/PlacementPreparationWindow.js';
@@ -647,6 +648,10 @@ export class StylizedSurfaceView {
     }
     this.preparedPlacement?.flush(this.shouldYieldWork);
     this.rockView?.beginFrame(timestamp);
+    if (this.earlySceneryTimestamp !== timestamp && !isLandStreamingSuspended()) {
+      this.earlySceneryTimestamp = timestamp;
+      advancePendingScenery(this);
+    }
   }
 
   /**

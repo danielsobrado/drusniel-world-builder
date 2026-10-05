@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { StylizedSurfaceView } from '../src/editor/stylized/StylizedSurfaceViewBase.js';
 import { setUnderwaterBlend } from '../src/editor/water/underwaterState.js';
+import { advancePendingScenery } from '../src/editor/stylized/advancePendingScenery.js';
 
 function fixture() {
   const calls = [];
@@ -21,6 +22,28 @@ function fixture() {
   }
   return { surface, calls };
 }
+
+test('waiting publications receive fair early turns when later queues have no frame slack', () => {
+  let remaining = 0, paid = 0;
+  const surface = { detailViews: [], rockView: {}, treeView: {}, bushView: {} };
+  const progress = { rock: 0, tree: 0, bush: 0 };
+  for (const layer of Object.keys(progress)) {
+    const view = surface[`${layer}View`], property = layer === 'tree' ? 'pendingLodRebuild' : 'pendingRebuild';
+    view[property] = { key: layer };
+    view.applyPendingRebuild = () => {
+      if (remaining > 0) { remaining = 0; paid += 0.25; progress[layer]++; view[property] = null; return true; }
+      return false;
+    };
+    surface[`${layer}BuildQueue`] = { enqueue() {}, flush: run => run({}, () => remaining <= 0) };
+  }
+  for (let frame = 0; frame < 3; frame++) {
+    remaining = 0.25; advancePendingScenery(surface);
+    assert.equal(remaining, 0);
+    // Fixed work has now exhausted the cutoff: late queues cannot grant a new floor.
+    for (const layer of Object.keys(progress)) surface[`${layer}BuildQueue`].flush(() => false);
+  }
+  assert.deepEqual(progress, { rock: 1, tree: 1, bush: 1 }); assert.equal(paid, 0.75);
+});
 
 test('visible meadow gets shared work time after collision preparation and before scenery rebuilds', () => {
   const { surface, calls } = fixture();

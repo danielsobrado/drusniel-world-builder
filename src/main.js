@@ -1337,6 +1337,7 @@ async function initializeEditor(restoreState, resources) {
   resources.defer(() => { document.removeEventListener('visibilitychange', onVisibilityChange); });
 
   let lastWeatherTimestamp = null;
+  let roadsideWorkFrame = 0;
   let lastCharacterTimestamp = null;
   const characterCentre = { x: 0, y: 0, z: 0 };
   terrainView.setAnimationLoop((timestamp) => {
@@ -1348,6 +1349,11 @@ async function initializeEditor(restoreState, resources) {
     drawPreparation.revealPending();
     exploration.beforeMovement(frameTimestamp);
     deferredWork.attachSurface(stylizedSurface);
+    // Optional dressing receives a sparse early turn in the same allowance;
+    // fixed updates can otherwise leave its late queue permanently starved.
+    if (roadsideDetails.enabled && roadsideWorkFrame++ % 8 === 0) {
+      deferredWork.run(() => roadsideDetails.update(viewModeController.camera));
+    }
     deferredWork.run(() => stylizedSurface.beginFrame(frameTimestamp));
     if (profiling) perfQa.mark('placementPreparation');
     const averageFps = frameRateMeter.record(frameTimestamp);

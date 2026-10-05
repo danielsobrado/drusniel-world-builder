@@ -40,6 +40,15 @@ try {
   await page.waitForTimeout(3000);
   if (process.argv.includes('--roadside')) {
     stage = 'imported road';
+    if (process.argv.includes('--cpu-probe')) {
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Profiler.enable'); await cdp.send('Profiler.start');
+      setTimeout(async () => {
+        const { profile } = await cdp.send('Profiler.stop');
+        fs.writeFileSync(out.replace(/\.json$/, '.cpuprofile'), JSON.stringify(profile));
+        console.log('Roadside CPU profile saved.');
+      }, 20000);
+    }
     report.roadside = await page.evaluate(async () => {
       const e = window.__editor;
       const { importAzgaarFullJson } = await import('/src/editor/import/AzgaarJsonImporter.js');
