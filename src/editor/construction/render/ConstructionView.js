@@ -916,18 +916,21 @@ export class ConstructionView {
       return false;
     }
 
-    const placements = lodBand === 'coarse'
-      ? coarsePlacementsForModule({
-        record: entry.record,
-        module,
-        totalLength: entry.plan?.totalLength,
-      })
-      : module.placements ?? [];
     const terrainRevision = this.terrainView.worldStore?.revision ?? 0;
-
     let state = resident.buildState;
-    if (!state || state.key !== expectedKey) {
+    if (
+      !state
+      || state.key !== expectedKey
+      || state.terrainRevision !== terrainRevision
+    ) {
       this.disposeResidentBuild(resident);
+      const placements = lodBand === 'coarse'
+        ? coarsePlacementsForModule({
+          record: entry.record,
+          module,
+          totalLength: entry.plan?.totalLength,
+        })
+        : module.placements ?? [];
       const source = resident.growthSource;
       const retainedGrowth = source?.recordRevision === entry.record.revision
         && source.contentHash === module.contentHash
@@ -946,6 +949,7 @@ export class ConstructionView {
         pathInterval: module.pathInterval,
         lodBand,
         placements,
+        terrainRevision,
         retainedGrowth,
       });
       resident.buildState = state;
@@ -997,7 +1001,7 @@ export class ConstructionView {
     resident.growthSource = {
       recordRevision: entry.record.revision,
       contentHash: module.contentHash,
-      placements,
+      placements: state.placements,
       terrainRevision,
     };
     this.refreshModuleStats();
