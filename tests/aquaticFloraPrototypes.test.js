@@ -37,7 +37,7 @@ test('the shipped config yields every species, each with a viable water rule', (
   const prototypes = createAquaticFloraPrototypes(shippedAquaticPlants());
   assert.deepEqual(
     prototypes.map((prototype) => prototype.id),
-    ['seagrass', 'kelp', 'redAlgae', 'eelgrass', 'waterweed', 'pondweed', 'lilyPad'],
+    ['seagrass', 'kelp', 'redAlgae', 'eelgrass', 'waterweed', 'pondweed', 'lilyPad', 'floweringLilyPad'],
   );
   for (const prototype of prototypes) {
     assert.ok(prototype.parts[0].geometry, `${prototype.id} has no geometry`);

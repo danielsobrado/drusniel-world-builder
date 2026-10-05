@@ -37,12 +37,14 @@ export class ObjectPlacementResolver {
     heightField,
     tileSize,
     floatingOrigin,
+    getWaterSample = null,
   }) {
     this.objectMap = objectMap;
     this.definitionByKey = definitionByKey;
     this.heightField = heightField;
     this.tileSize = tileSize;
     this.floatingOrigin = floatingOrigin;
+    this.getWaterSample = getWaterSample;
     this.releaseCollisionObjectSource = null;
     this.pagehideTarget = null;
     this.pagehideListener = null;
@@ -90,6 +92,7 @@ export class ObjectPlacementResolver {
       heightField: this.heightField,
       bounds,
       tileSize: this.tileSize,
+      getWaterSample: this.getWaterSample,
     });
     return Object.freeze({ definition, bounds, ...evaluation });
   }

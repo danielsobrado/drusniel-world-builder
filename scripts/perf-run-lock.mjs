@@ -2,6 +2,7 @@ import {
   closeSync,
   openSync,
   readFileSync,
+  statSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
@@ -29,6 +30,7 @@ export function acquirePerfRunLock(
   {
     pid = process.pid,
     isProcessAlive = defaultProcessAlive,
+    label = 'Performance matrix',
   } = {},
 ) {
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -41,8 +43,17 @@ export function acquirePerfRunLock(
       if (handle !== undefined) closeSync(handle);
       if (error?.code !== 'EEXIST') throw error;
       const owner = lockOwner(lockPath);
+      // Another process may have created the file but not written its owner
+      // yet, especially through the WSL share. Do not steal that fresh lock.
+      if (!owner && Date.now() - statSync(lockPath).mtimeMs < 5000) {
+        const busy = new Error(`${label} is initializing its run lock.`);
+        busy.code = 'PERF_RUN_BUSY';
+        throw busy;
+      }
       if (isProcessAlive(owner?.pid)) {
-        throw new Error(`Performance matrix is already running as PID ${owner.pid}.`);
+        const busy = new Error(`${label} is already running as PID ${owner.pid}.`);
+        busy.code = 'PERF_RUN_BUSY';
+        throw busy;
       }
       unlinkSync(lockPath);
       continue;
@@ -62,4 +73,26 @@ export function acquirePerfRunLock(
     };
   }
   throw new Error('Could not acquire the performance matrix run lock.');
+}
+
+/** Browser runs share the GPU; waiting preserves both callers' measurements. */
+export async function waitForPerfRunLock(lockPath, {
+  timeoutMs = 300_000,
+  now = () => Date.now(),
+  sleep = () => new Promise(resolve => setTimeout(resolve, 1000)),
+  onWait = () => console.log('Waiting for another hardware browser QA run to finish.'),
+  ...options
+} = {}) {
+  const started = now();
+  let announced = false;
+  while (true) {
+    try { return acquirePerfRunLock(lockPath, { label: 'Hardware browser QA', ...options }); }
+    catch (error) {
+      // The owner can release between reading its metadata and stat/unlink.
+      // Retry disappearance just like contention; never remove a live lock.
+      if (!['PERF_RUN_BUSY', 'ENOENT'].includes(error.code) || now() - started >= timeoutMs) throw error;
+      if (error.code === 'PERF_RUN_BUSY' && !announced) { onWait(); announced = true; }
+      await sleep();
+    }
+  }
 }

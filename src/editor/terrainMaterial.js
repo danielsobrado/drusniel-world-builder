@@ -80,6 +80,7 @@ export function createTerrainMaterial({
   // The slot's swash pattern origins (createCoastPatternOrigins). Without
   // them there is no swash: it cannot be drawn from canonical positions.
   coastPatterns: coastPatternsTemplate = null,
+  transitionPatterns: transitionPatternsTemplate = null,
   chunkWorldSize,
   stylizedConfig,
   bakeGpuState = null,
@@ -282,6 +283,9 @@ export function createTerrainMaterial({
       familyAtlas,
       gpuState: materialBakeGpu,
       stylizedConfig,
+      pathMask,
+      localXZ,
+      transitionPatterns: transitionPatternsTemplate && slotPatternOrigins('transitionPatterns', transitionPatternsTemplate),
     });
     // grass-test's path surface over the baked ground: textured dirt with a
     // broken contour and a worn verge (stylized/path/terrainPathPaint.js).

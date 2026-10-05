@@ -46,7 +46,9 @@ export function createGodsEndAssetParts(scene, asset) {
   }
   if (bounds.isEmpty()) throw new Error(`Gods’ End asset is empty: ${asset.path}.`);
   const center = bounds.getCenter(new Vector3());
-  const normalize = new Matrix4().makeScale(asset.scale, asset.scale, asset.scale)
+  const size = bounds.getSize(new Vector3());
+  const scale = asset.targetSpan ? asset.targetSpan / Math.max(size.x, size.y, size.z) : asset.scale;
+  const normalize = new Matrix4().makeScale(scale, scale, scale)
     .multiply(new Matrix4().makeTranslation(-center.x, -bounds.min.y, -center.z));
   return [...meshes].map((mesh) => {
     for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {

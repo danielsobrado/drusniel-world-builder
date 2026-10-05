@@ -253,8 +253,9 @@ Generated density, triangle counts, positions, normals, and draw commands are ne
 ## Object visuals
 
 The base catalog uses primitive models and shared procedural materials in
-`src/editor/ObjectModelLibrary.js`. The Gods’ End library adds 133 placeable
-entries, including its five procedural medieval houses, and retains all 107
+`src/editor/ObjectModelLibrary.js`. The Gods’ End library adds 144 placeable
+entries, including five procedural medieval houses, eight aquatic plants and
+three seabed boulders, and retains all 107
 published GLBs and 255 texture/image assets locally. Imported models load when
 selected or restored from saves. Workshop texture selectors expose the image maps.
 

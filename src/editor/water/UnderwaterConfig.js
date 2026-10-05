@@ -1,3 +1,4 @@
+import { resolveUnderwaterOpticsConfig } from './UnderwaterOpticsConfig.js';
 const REQUIRED_COLORS = Object.freeze(['backgroundColor', 'fogColor']);
 const REQUIRED_POSITIVE = Object.freeze(['fogDensity', 'transitionSeconds', 'nearPlane']);
 
@@ -22,5 +23,6 @@ export function validateUnderwaterConfig(config) {
   if (!Number.isFinite(config.lightScale) || config.lightScale < 0 || config.lightScale > 1) {
     throw new Error('player.water.underwater.lightScale must be within [0, 1].');
   }
+  if (config.optics) resolveUnderwaterOpticsConfig(config.optics);
   return config;
 }

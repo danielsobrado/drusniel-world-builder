@@ -355,7 +355,10 @@ are recorded in `public/assets/textures/snow/manifest.json`.
 
 The owner’s `drusniel-gods-end` published models, textures and procedural medieval
 house recipes are preserved in `public/assets/gods-end/Assets` and
-`src/editor/assets/godsEnd/village`. Each import is recorded in
+`src/editor/assets/godsEnd/village`. Procedural aquatic plants and seabed boulders
+are ported under `src/editor/assets/godsEnd/aquatic` and `seabed`; terrain height
+blending and underwater optical algorithms are adapted in the editor's material
+and water modules. Each published asset import is recorded in
 `public/assets/gods-end/manifest.json`. Original attribution, source rights and
 texture/geometry provenance are retained in the imported per-folder manifests;
 this port does not grant a new license to those assets.

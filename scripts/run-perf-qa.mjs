@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defaultPerfQaTimeoutMs } from './lib/perf-qa-timeout.mjs';
+import { waitForPerfRunLock } from './perf-run-lock.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -213,10 +214,43 @@ const fs = require('fs');
 
     // Wait through bootstrap publication; capture against frozen sources so
     // development reloads cannot silently change the measured runtime.
+    await page.waitForFunction(() => window.__perfQa?.recording
+      || window.__perfQa?.status === 'done', null, { timeout: ${timeoutMs} });
+    const preparationQueuesAtStart = await page.evaluate(() => {
+      const surface = window.__editor.stylizedSurface;
+      const describe = queue => ({ size: queue?.size ?? 0,
+        jobs: (queue?.queue ?? []).slice(0, 3).map(job => ({
+          key: String(job.key).slice(0, 2048), chunkX: job.chunkX, chunkZ: job.chunkZ,
+          ageMs: performance.now() - job.requestedAt,
+        })) });
+      return { recording: window.__perfQa.recording,
+        ...Object.fromEntries(['rock', 'tree', 'bush', 'detail', 'grass', 'flower'].map(name =>
+          [name, describe(surface?.[name + 'BuildQueue'])])),
+        rockManifests: describe(surface?.rockView?.manifestStore?.queue),
+        treeManifests: describe(surface?.treeView?.manifestStore?.queue) };
+    });
     await page.waitForFunction(() => window.__perfQa?.status === 'done', null, {
       timeout: ${timeoutMs},
     });
     const report = await page.evaluate(() => window.__perfQa.getReport());
+    report.preparationQueuesAtStart = preparationQueuesAtStart;
+    const readGrassDiagnostics = () => page.evaluate(async () => {
+        const field = window.__editor.stylizedSurface.meadowGrass;
+        if (!field) return null;
+        const { MeadowTileLayer } = await import('/src/editor/stylized/meadow/MeadowTileLayer.js');
+        return { state: field.getState(), pending: ['blades', 'cards'].flatMap(name => {
+          const layer = field[name];
+          if (!layer) return [];
+          return [...layer.tiles.values()].filter(tile => MeadowTileLayer.isStale(tile)).slice(0, 24).map(tile => ({
+            layer: name, key: tile.key, band: tile.band, preparationBand: tile.preparationBand,
+            inView: tile.inView,
+            builtBand: tile.builtBand, revision: tile.revision, builtRevision: tile.builtRevision,
+            preparedCapacity: tile.prepared?.capacity, desiredCapacity: tile.preparationCapacity,
+            jobBand: tile.job?.band, jobRevision: tile.job?.revision, progress: tile.job?.compaction.progress,
+          }));
+        }) };
+    });
+    if (${hasFlag('grass-diagnostics')}) report.grass = await readGrassDiagnostics();
     if (cpuProfiling) {
       const { profile } = await cdp.send('Profiler.stop');
       cpuProfiling = false;
@@ -225,9 +259,8 @@ const fs = require('fs');
         JSON.stringify(profile),
       );
     }
-    if (${drainSeconds} > 0) {
-      // Separate from measured movement: finish() has already released the keys.
-      report.recovery = await page.evaluate(async seconds => {
+    // Separate from measured movement: finish() has already released the keys.
+    const observeRecovery = () => page.evaluate(async seconds => {
         const { PerfCounters } = await import('/src/editor/performance/qa/PerfCounters.js');
         const surface = window.__editor.stylizedSurface;
         const started = performance.now();
@@ -244,8 +277,8 @@ const fs = require('fs');
         return { ready: readyFrames >= 60, firstReadyMs,
           waitedMs: performance.now() - started, start,
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
-      }, ${drainSeconds});
-    }
+    }, ${drainSeconds});
+    if (${drainSeconds} > 0) report.recovery = await observeRecovery();
     if (${hasFlag('revisit')}) {
       await page.evaluate(() => window.__perfQa.restart());
       if (${hasFlag('turn-on-revisit')}) {
@@ -262,6 +295,8 @@ const fs = require('fs');
       report.revisit = await page.evaluate(() => window.__perfQa.getReport());
       report.revisit.conditions = { sameBrowser: true,
         midpointCameraTurnDegrees: ${hasFlag('turn-on-revisit') ? 180 : 0} };
+      if (${hasFlag('grass-diagnostics')}) report.revisit.grass = await readGrassDiagnostics();
+      if (${drainSeconds} > 0) report.revisit.recovery = await observeRecovery();
     }
     report.adapter = adapter;
     report.capture = {
@@ -316,7 +351,10 @@ const fs = require('fs');
 
 console.log(`Running Perf QA: ${targetUrl}`);
 
+let releaseBrowserLock = () => {};
 try {
+  releaseBrowserLock = await waitForPerfRunLock(path.join(outDir, `perf-browser-${process.platform}.lock`));
+  process.once('exit', releaseBrowserLock);
   await new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
@@ -330,5 +368,6 @@ try {
     });
   });
 } finally {
+  releaseBrowserLock();
   fs.rmSync(runnerPath, { force: true });
 }

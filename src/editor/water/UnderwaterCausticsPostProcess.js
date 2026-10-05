@@ -23,6 +23,8 @@ import {
   PerfCounters,
 } from '../performance/qa/PerfCounters.js';
 import { validateProjectedWaterCausticsConfig } from './ProjectedWaterCaustics.js';
+import { UnderwaterOpticsState } from './UnderwaterOpticsState.js';
+import { createUnderwaterOpticsNodes } from './UnderwaterOpticsNodes.js';
 
 const SKY_DEPTH_THRESHOLD = 0.9999;
 
@@ -87,12 +89,14 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1 }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null }) {
     this.renderer = renderer;
     this.scene = scene;
     this.config = validateProjectedWaterCausticsConfig(config);
     this.qualityStrength = Math.max(0, Number(qualityStrength) || 0);
     this.enabled = this.config.enabled && this.qualityStrength > 0;
+    this.opticsState = this.enabled && optics?.enabled
+      ? new UnderwaterOpticsState({ settings: optics, scene, floatingOrigin }) : null;
     this.disposed = false;
     this.blend = uniform(0);
     this.surfaceHeight = uniform(0);
@@ -105,9 +109,10 @@ export class UnderwaterCausticsPostProcess {
     this.sceneCpuMs = 0;
   }
 
-  update({ blend = 0, surfaceHeight } = {}) {
+  update({ blend = 0, surfaceHeight, waterKind } = {}) {
     this.blend.value = THREE.MathUtils.clamp(Number(blend) || 0, 0, 1);
     if (Number.isFinite(surfaceHeight)) this.surfaceHeight.value = surfaceHeight;
+    this.opticsState?.update({ waterKind });
   }
 
   ensurePipeline(camera) {
@@ -126,7 +131,7 @@ export class UnderwaterCausticsPostProcess {
       const beauty = this.scenePass.getTextureNode('output');
       const depthTexture = this.scenePass.getTextureNode('depth');
       this.pipeline = new THREE.RenderPipeline(this.renderer);
-      this.pipeline.outputNode = buildProjectedCaustics({
+      const inputs = {
         beauty,
         depthTexture,
         cameraMatrixWorld: this.cameraMatrixWorld,
@@ -139,7 +144,10 @@ export class UnderwaterCausticsPostProcess {
           ...this.config,
           intensity: this.config.intensity * this.qualityStrength,
         },
-      });
+      };
+      this.pipeline.outputNode = this.opticsState
+        ? createUnderwaterOpticsNodes({ ...inputs, state: this.opticsState, qualityStrength: this.qualityStrength })
+        : buildProjectedCaustics(inputs);
     }
   }
 
@@ -148,6 +156,7 @@ export class UnderwaterCausticsPostProcess {
     this.cameraMatrixWorld.value.copy(camera.matrixWorld);
     this.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
     camera.getWorldPosition(this.cameraPosition.value);
+    this.opticsState?.updateCamera(camera, this.surfaceHeight.value);
   }
 
   render(camera) {
@@ -185,6 +194,7 @@ export class UnderwaterCausticsPostProcess {
       active: this.enabled && this.blend.value > 0,
       blend: this.blend.value,
       surfaceHeight: this.surfaceHeight.value,
+      optics: Boolean(this.opticsState),
     });
   }
 

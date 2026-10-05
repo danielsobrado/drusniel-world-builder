@@ -42,7 +42,12 @@ export class FrameSlack {
     this.peek(floorMs, maxMs);
     // A readiness probe must not start the deadline before actual work is eligible.
     const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
-    this.deadline ??= this.now() + Math.max(0, this.allowanceMs - this.deferredMs - inProgressMs);
+    // Mandatory updates between queues are already included in fixedMs. They
+    // must not also consume a short wall-clock window opened by an early job.
+    // All queues share the frame cutoff; actual deferred time consumes the
+    // allowance. If the first eligible job arrives late, grant its one floor.
+    this.deadline ??= Math.max(this.frameStart + Math.max(0, this.targetMs - this.reserveMs),
+      this.now() + Math.max(0, Math.min(floorMs, this.allowanceMs - this.deferredMs - inProgressMs)));
     return this.peek(floorMs, maxMs);
   }
 

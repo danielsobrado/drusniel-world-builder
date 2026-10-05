@@ -1,3 +1,6 @@
+import { evaluateAquaticPlacement } from './water/AquaticPlacement.js';
+import { cellBoundsCenterToCanonicalWorld } from './world/CoordinateSpaces.js';
+
 const EPSILON = 1e-4;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 
@@ -58,8 +61,20 @@ export function analyzeTerrainSurface({ heightField, bounds, tileSize }) {
   });
 }
 
-export function evaluateObjectSurface({ definition, heightField, bounds, tileSize }) {
+export function evaluateObjectSurface({ definition, heightField, bounds, tileSize, getWaterSample = null }) {
   const analyzed = analyzeTerrainSurface({ heightField, bounds, tileSize });
+  if (definition.water) {
+    const center = cellBoundsCenterToCanonicalWorld(bounds, tileSize);
+    const placement = evaluateAquaticPlacement({
+      waterSample: getWaterSample?.(center.x, center.z), prototypeRule: definition.water,
+    });
+    return Object.freeze({
+      valid: Boolean(placement), reason: placement ? null : 'This aquatic object needs suitable water depth and a matching water body.',
+      surface: Object.freeze({ ...analyzed, baseHeight: placement
+        ? placement.waterPlacementHeight + (definition.water.heightOffset ?? 0) : analyzed.centerHeight,
+      foundationDepth: 0 }),
+    });
+  }
   const foundation = definition.foundation;
   const baseHeight = foundation.mode === 'terrace'
     ? analyzed.maximumHeight

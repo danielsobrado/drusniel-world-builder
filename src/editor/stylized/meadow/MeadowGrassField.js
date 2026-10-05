@@ -1,4 +1,5 @@
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { Vector3 } from 'three/webgpu';
 import { createMeadowBladeMaterial } from './meadowBladeMaterial.js';
 import { createMeadowCardMaterial, loadMeadowCardAtlas } from './meadowCardMaterial.js';
 import { createMeadowTemplate } from './meadowGrassGeometry.js';
@@ -46,6 +47,8 @@ export class MeadowGrassField {
   }) {
     this.terrainView = terrainView;
     this.settings = settings;
+    this.forward = new Vector3();
+    this.viewCone = { x: 0, z: 0, tangent: 1 };
     this.skyView = skyView;
     // The player's body stamp, built before the uniforms that read it. Its window is
     // render space, like the blades, but the ground it tests the body sphere against
@@ -154,6 +157,17 @@ export class MeadowGrassField {
     this.interactionOrigin.x = origin.x;
     this.interactionOrigin.z = origin.z;
     const canonical = { x: camera.position.x + origin.x, z: camera.position.z + origin.z };
+    let viewCone = null;
+    if (camera.getWorldDirection) {
+      camera.getWorldDirection(this.forward);
+      const length = Math.hypot(this.forward.x, this.forward.z);
+      if (length > 0.01) {
+        viewCone = this.viewCone;
+        viewCone.x = this.forward.x / length;
+        viewCone.z = this.forward.z / length;
+        viewCone.tangent = Math.tan((camera.fov ?? 60) * Math.PI / 360) * (camera.aspect ?? 1);
+      }
+    }
     this.uniforms.time.value = timestamp / 1000;
     this.uniforms.origin.value.set(origin.x, origin.z);
     this.syncLight();
@@ -167,8 +181,12 @@ export class MeadowGrassField {
       layer.workRunner = this.workRunner;
     }
     // Blades first: the ground under the player matters more than the horizon.
-    this.blades.update(canonical, origin, deadline, timestamp / 1000);
-    this.cards?.update(canonical, origin, deadline, timestamp / 1000);
+    this.blades.update(canonical, origin, deadline, timestamp / 1000, viewCone);
+    this.cards?.update(canonical, origin, deadline, timestamp / 1000, viewCone);
+    PerfCounters.set('meadowVisibleMissingTiles', this.blades.stats.visibleMissing + (this.cards?.stats.visibleMissing ?? 0));
+    PerfCounters.set('meadowVisibleCapacityLagTiles', this.blades.stats.visibleCapacityLag + (this.cards?.stats.visibleCapacityLag ?? 0));
+    PerfCounters.set('meadowInViewMissingTiles', this.blades.stats.inViewMissing + (this.cards?.stats.inViewMissing ?? 0));
+    PerfCounters.set('meadowInViewCapacityLagTiles', this.blades.stats.inViewCapacityLag + (this.cards?.stats.inViewCapacityLag ?? 0));
     PerfCounters.inc('meadowGrassMs', performance.now() - startedAt);
   }
 

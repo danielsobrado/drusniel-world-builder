@@ -1398,7 +1398,7 @@ stylizedSurface:
     residentRadius: 1
     # This candidate pool gives selected lotus colonies several leaves;
     # the colony rule rejects lotus everywhere else, while rooted plants remain
-    # sparse enough for the six shared instanced renderers.
+    # sparse enough for the eight shared instanced renderers.
     perChunk: 24
     # Water is a field laid over the terrain, not a biome, so a lake or river
     # covering grassland leaves those cells classified as their dry biome. A
@@ -1424,25 +1424,21 @@ stylizedSurface:
     proceduralVariants:
       seagrass:
         kind: seagrass
-        color: '#3f6b34'
       kelp:
         kind: kelp
-        color: '#4a5c2c'
       redAlgae:
         kind: redAlgae
-        color: '#8c3f3a'
       eelgrass:
         kind: eelgrass
-        color: '#43682f'
       waterweed:
         kind: waterweed
-        color: '#4f7434'
       pondweed:
         kind: pondweed
-        color: '#3d5f2e'
       lilyPad:
         kind: lilyPad
-        color: '#4c7a3a'
+      floweringLilyPad:
+        kind: floweringLilyPad
+        weight: 0.35
   # Shore life: starfish, shells, driftwood and creeping leaves, after grass-test's
   # beach scatter, starfish and coastal groundcover.
   #

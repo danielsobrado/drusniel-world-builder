@@ -1,0 +1,26 @@
+{
+  "0:near": {
+    "vertices": 92,
+    "sha256": "f3878cc0aa741f972fdcd53c5682fb6c4d04b51eddc5b5a06a0b831c73119d8f"
+  },
+  "0:far": {
+    "vertices": 42,
+    "sha256": "8f9e5a5d38c896673a80883ae50dd27b20c66269e39068644d3c4933bdc2c970"
+  },
+  "1:near": {
+    "vertices": 92,
+    "sha256": "e1fb03c52cdf3192a2b671c903ec640b78c4a9a686f0262dcf0824df70c0e206"
+  },
+  "1:far": {
+    "vertices": 42,
+    "sha256": "52fcf796be451746587598a3b7a40a369042d0e93466d82f0e17763b166e76be"
+  },
+  "2:near": {
+    "vertices": 92,
+    "sha256": "d805ee19b79621257d9fbf16c67420aee0b2e4206e762fae181fc10836ac0a8c"
+  },
+  "2:far": {
+    "vertices": 42,
+    "sha256": "639ba550fd21e1eaa8e125969af1ee89a5ebfa63ad2652c2675ba6a92270bd4e"
+  }
+}

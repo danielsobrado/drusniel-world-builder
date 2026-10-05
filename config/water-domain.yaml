@@ -75,3 +75,15 @@ player:
       lightScale: 0.38
       transitionSeconds: 0.28
       nearPlane: 0.15
+      # Gods' End depth absorption, caustics, refracted Snell window and sun shafts.
+      # Runs in the existing underwater scene pass on high/ultra water quality.
+      optics:
+        enabled: true
+        extinction: [0.1, 0.038, 0.045]
+        dimming: [0.11, 0.04, 0.035]
+        causticTileMeters: 5.5
+        causticStrength: 1.4
+        shaftStrength: 1.1
+        distortion: 0.0016
+        surfaceRefraction: 0.09
+        surfaceMirror: 0.62

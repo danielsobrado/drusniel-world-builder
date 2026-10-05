@@ -44,8 +44,9 @@ test('imported catalog validates collision and round-trips placements for differ
     const after = new ObjectMap({ tileMap, objectCatalog: definitions });
     after.replaceAll(JSON.parse(JSON.stringify(before.list())));
     assert.deepEqual(after.getById(placement.id), placement);
-    assert.deepEqual([...new Set(definitions.flatMap((definition) => definition.allowedTileIds))].filter((id) => id < 13).sort((a, b) => a - b),
+    assert.deepEqual([...new Set(definitions.filter((definition) => !definition.water).flatMap((definition) => definition.allowedTileIds))].filter((id) => id < 13).sort((a, b) => a - b),
       Array.from({ length: 12 }, (_, index) => index + 1));
+    assert.ok(definitions.filter((definition) => definition.water).every((definition) => definition.allowedTileIds.includes(0)));
   }
 });
 
@@ -74,6 +75,18 @@ test('imported parts preserve node transforms and UVs, ground the selected proto
   mesh.material.addEventListener('dispose', () => materialDisposals++);
   disposeModelParts(parts);
   assert.equal(materialDisposals, 0, 'the acquired scene owns shared materials');
+});
+
+test('placed bird poses fit their declared metre-sized envelope without changing proportions', () => {
+  const scene = new THREE.Group();
+  scene.add(new THREE.Mesh(new THREE.BoxGeometry(8, 1, 2), new THREE.MeshStandardMaterial()));
+  const parts = createGodsEndAssetParts(scene, { rootNames: [], scale: 1, targetSpan: 0.7, path: 'bird.glb' });
+  const bounds = parts[0].geometry.boundingBox.clone().applyMatrix4(parts[0].matrix);
+  const size = bounds.getSize(new THREE.Vector3());
+  assert.ok(Math.abs(size.x - 0.7) < 1e-8);
+  assert.equal(size.x / size.z, 4);
+  assert.equal(bounds.min.y, 0);
+  disposeModelParts(parts);
 });
 
 function libraryFixture() {

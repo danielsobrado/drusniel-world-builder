@@ -2,6 +2,234 @@
   "version": 1,
   "objects": [
     {
+      "key": "gods-end-aquatic-eelgrass",
+      "label": "Gods’ End Eelgrass",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#43682f",
+      "asset": {
+        "kind": "aquatic",
+        "species": "eelgrass",
+        "dimensions": [
+          0.2873236760497093,
+          0.5996488332748413,
+          0.3643246293067932
+        ],
+        "height": 0.6
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.7196488332748413,
+        "maximumDepth": 5,
+        "allowedKinds": [
+          2
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-floweringlilypad",
+      "label": "Gods’ End Flowering Lily Pad",
+      "category": "nature",
+      "icon": "🪷",
+      "color": "#ffffff",
+      "asset": {
+        "kind": "aquatic",
+        "species": "floweringLilyPad",
+        "dimensions": [
+          0.516028881072998,
+          0.07800000160932542,
+          0.5184468030929565
+        ],
+        "height": 0.26
+      },
+      "water": {
+        "placement": "surface",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.4,
+        "maximumDepth": 6,
+        "allowedKinds": [
+          2
+        ],
+        "maximumShoreDistance": 22,
+        "heightOffset": 0.06
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-kelp",
+      "label": "Gods’ End Kelp",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#4a5c2c",
+      "asset": {
+        "kind": "aquatic",
+        "species": "kelp",
+        "dimensions": [
+          0.4010137990117073,
+          1.4992976188659668,
+          0.599710687994957
+        ],
+        "height": 1.5
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 1.619297618865967,
+        "maximumDepth": 9,
+        "allowedKinds": [
+          1
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-lilypad",
+      "label": "Gods’ End Lily Pad",
+      "category": "nature",
+      "icon": "🪷",
+      "color": "#4c7a3a",
+      "asset": {
+        "kind": "aquatic",
+        "species": "lilyPad",
+        "dimensions": [
+          0.516028881072998,
+          0.01,
+          0.5184468030929565
+        ],
+        "height": 0.26
+      },
+      "water": {
+        "placement": "surface",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.4,
+        "maximumDepth": 6,
+        "allowedKinds": [
+          2
+        ],
+        "maximumShoreDistance": 22,
+        "heightOffset": 0.06
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-pondweed",
+      "label": "Gods’ End Pondweed",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#3d5f2e",
+      "asset": {
+        "kind": "aquatic",
+        "species": "pondweed",
+        "dimensions": [
+          0.3909038156270981,
+          1.100000023841858,
+          0.38434116542339325
+        ],
+        "height": 1.1
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 1.220000023841858,
+        "maximumDepth": 8,
+        "allowedKinds": [
+          2
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-redalgae",
+      "label": "Gods’ End Red Algae",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#8c3f3a",
+      "asset": {
+        "kind": "aquatic",
+        "species": "redAlgae",
+        "dimensions": [
+          0.7506939470767975,
+          0.20107266528066248,
+          0.6959001123905182
+        ],
+        "height": 0.2
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.8,
+        "maximumDepth": 7,
+        "allowedKinds": [
+          1,
+          2
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-seagrass",
+      "label": "Gods’ End Seagrass",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#3f6b34",
+      "asset": {
+        "kind": "aquatic",
+        "species": "seagrass",
+        "dimensions": [
+          0.5749422311782837,
+          0.3797330856323242,
+          0.42488087713718414
+        ],
+        "height": 0.38
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.6,
+        "maximumDepth": 4,
+        "allowedKinds": [
+          1,
+          2
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
+      "key": "gods-end-aquatic-waterweed",
+      "label": "Gods’ End Waterweed",
+      "category": "nature",
+      "icon": "🌿",
+      "color": "#4f7434",
+      "asset": {
+        "kind": "aquatic",
+        "species": "waterweed",
+        "dimensions": [
+          0.5199999809265137,
+          0.8500000238418579,
+          0.5199999809265137
+        ],
+        "height": 0.85
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 0.9700000238418579,
+        "maximumDepth": 7,
+        "allowedKinds": [
+          2
+        ],
+        "heightOffset": -0.02
+      },
+      "collision": "none"
+    },
+    {
       "key": "gods-end-coastal-jungle-objects-forest-background-tree-01",
       "label": "Gods’ End Background Tree 01",
       "category": "nature",
@@ -2687,6 +2915,7 @@
           "Object_10"
         ],
         "scale": 4.296324234656243,
+        "targetSpan": 0.7,
         "bounds": {
           "min": [
             11.0535193575922,
@@ -2700,9 +2929,9 @@
           ]
         },
         "dimensions": [
-          0.6999999999999998,
-          0.07978183327605572,
-          0.4473241557207332
+          0.7,
+          0.7,
+          0.7
         ]
       },
       "collision": "none"
@@ -2720,6 +2949,7 @@
           "Object_26"
         ],
         "scale": 4.6985215364750115,
+        "targetSpan": 0.7,
         "bounds": {
           "min": [
             11.792374671433247,
@@ -2734,8 +2964,8 @@
         },
         "dimensions": [
           0.7,
-          0.07988483803510404,
-          0.4473241214866795
+          0.7,
+          0.7
         ]
       },
       "collision": "none"
@@ -2753,6 +2983,7 @@
           "Object_42"
         ],
         "scale": 4.296321610833021,
+        "targetSpan": 0.7,
         "bounds": {
           "min": [
             10.089462384866886,
@@ -2767,8 +2998,8 @@
         },
         "dimensions": [
           0.7,
-          0.07978178455221287,
-          0.447324416908335
+          0.7,
+          0.7
         ]
       },
       "collision": "none"
@@ -2786,6 +3017,7 @@
           "Object_58"
         ],
         "scale": 4.296324234656243,
+        "targetSpan": 0.7,
         "bounds": {
           "min": [
             12.173486943474991,
@@ -2799,9 +3031,9 @@
           ]
         },
         "dimensions": [
-          0.6999999999999998,
-          0.07978183327617783,
-          0.4473240488139212
+          0.7,
+          0.7,
+          0.7
         ]
       },
       "collision": "none"
@@ -2819,6 +3051,7 @@
           "Object_74"
         ],
         "scale": 6.2388364508327605,
+        "targetSpan": 0.7,
         "bounds": {
           "min": [
             9.65510356483678,
@@ -2833,8 +3066,8 @@
         },
         "dimensions": [
           0.7,
-          0.07978752765202529,
-          0.44732447053086893
+          0.7,
+          0.7
         ]
       },
       "collision": "none"
@@ -3719,6 +3952,87 @@
         ]
       },
       "collision": "bounds"
+    },
+    {
+      "key": "gods-end-seabed-boulder-1",
+      "label": "Gods’ End Seabed Boulder 1",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#6f7560",
+      "collision": "bounds",
+      "asset": {
+        "kind": "seabedRock",
+        "variant": 0,
+        "dimensions": [
+          1.8902978301048279,
+          0.7243396602571011,
+          1.986012578010559
+        ]
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 1.2,
+        "maximumDepth": 11,
+        "allowedKinds": [
+          1
+        ],
+        "heightOffset": -0.08
+      }
+    },
+    {
+      "key": "gods-end-seabed-boulder-2",
+      "label": "Gods’ End Seabed Boulder 2",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#6f7560",
+      "collision": "bounds",
+      "asset": {
+        "kind": "seabedRock",
+        "variant": 1,
+        "dimensions": [
+          2.2071961164474487,
+          0.8110841475427151,
+          2.1480880975723267
+        ]
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 1.2,
+        "maximumDepth": 11,
+        "allowedKinds": [
+          1
+        ],
+        "heightOffset": -0.08
+      }
+    },
+    {
+      "key": "gods-end-seabed-boulder-3",
+      "label": "Gods’ End Seabed Boulder 3",
+      "category": "nature",
+      "icon": "🪨",
+      "color": "#6f7560",
+      "collision": "bounds",
+      "asset": {
+        "kind": "seabedRock",
+        "variant": 2,
+        "dimensions": [
+          2.1429275274276733,
+          0.9149379692971706,
+          2.3285725116729736
+        ]
+      },
+      "water": {
+        "placement": "rooted",
+        "minimumCoverage": 0.55,
+        "minimumDepth": 1.2,
+        "maximumDepth": 11,
+        "allowedKinds": [
+          1
+        ],
+        "heightOffset": -0.08
+      }
     },
     {
       "key": "gods-end-structures-fence",

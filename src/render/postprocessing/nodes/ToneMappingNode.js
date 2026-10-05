@@ -4,7 +4,6 @@ import {
   float,
   max,
   pow,
-  screenUV,
   toneMapping,
   uniform,
   vec3,
@@ -70,14 +69,14 @@ export class ToneMappingNode {
     this.bloomIntensity = uniform(bloomIntensity);
 
     const adjustedHdr = Fn(() => {
-      const colour = sourceNode
-        .sample(screenUV)
-        .rgb
+      // The previous stage can be a texture or a computed DOF colour node.
+      // Its default screen coordinate already supplies the current pixel.
+      const colour = sourceNode.rgb
         .mul(this.exposure)
         .toVar();
       if (bloomNode) {
         colour.addAssign(
-          bloomNode.sample(screenUV).rgb.mul(this.bloomIntensity),
+          bloomNode.rgb.mul(this.bloomIntensity),
         );
       }
 
@@ -99,10 +98,9 @@ export class ToneMappingNode {
     const toneMappingMode = settings.enabled === false
       ? THREE.NoToneMapping
       : toneMappingConstantForMode(settings.mode);
-    this.outputNode = Fn(() => vec4(
-      toneMapping(toneMappingMode, 1, adjustedHdr.rgb),
-      1,
-    ))();
+    // r186 toneMapping preserves RGBA; wrapping it as RGB plus alpha emits
+    // an invalid five-component vec4 during shader construction.
+    this.outputNode = toneMapping(toneMappingMode, 1, adjustedHdr);
   }
 
   updateUniforms(settings, bloomIntensity = 0) {

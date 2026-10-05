@@ -20,6 +20,17 @@ export class GodsEndAssetLibrary {
       const { createGodsEndHouseParts } = await import('./village/houseParts.js');
       return createGodsEndHouseParts(asset);
     });
+    this.proceduralFactories = new Map([
+      ['house', this.houseFactory],
+      ['aquatic', async (asset) => {
+        const { createGodsEndAquaticParts } = await import('./aquatic/aquaticParts.js');
+        return createGodsEndAquaticParts(asset);
+      }],
+      ['seabedRock', async (asset) => {
+        const { createGodsEndSeabedRockParts } = await import('./seabed/seabedParts.js');
+        return createGodsEndSeabedRockParts(asset);
+      }],
+    ]);
     // Loader creation is deferred until an actual GLB is needed.
     this.renderer = renderer;
     this.cache = cache;
@@ -72,7 +83,8 @@ export class GodsEndAssetLibrary {
     let transferred = false;
     let parts;
     try {
-      if (asset.kind === 'house') parts = await this.houseFactory(asset);
+      const factory = this.proceduralFactories.get(asset.kind);
+      if (factory) parts = await factory(asset);
       else {
         const scene = await this.getCache().acquire(asset.path);
         acquired = true;

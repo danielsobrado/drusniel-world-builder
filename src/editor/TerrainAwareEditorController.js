@@ -152,6 +152,7 @@ export class TerrainAwareEditorController extends EditorController {
       heightField: this.heightField,
       bounds,
       tileSize: this.tileMap.tileSize,
+      getWaterSample: (x, z) => this.terrainView.getCanonicalWater?.(x, z),
     });
   }
 

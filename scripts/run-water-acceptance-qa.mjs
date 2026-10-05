@@ -6,10 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { WaterAcceptanceTracker } from '../src/editor/performance/qa/WaterAcceptance.js';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
+import { waitForPerfRunLock } from './perf-run-lock.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'tmp');
-const OUT_PATH = join(OUT_DIR, 'water-acceptance-latest.json');
+const OUT_PATH = resolve(ROOT, readArg('out', 'tmp/water-acceptance-latest.json'));
 const DEFAULT_URL = 'http://127.0.0.1:5173';
 const SAMPLE_INTERVAL_MS = 100;
 
@@ -293,8 +294,12 @@ async function main() {
   const headed = hasFlag('headed');
   const server = useExistingServer ? null : startServer(baseUrl);
   let browser = null;
+  mkdirSync(OUT_DIR, { recursive: true });
+  let releaseBrowserLock = () => {};
 
   try {
+    releaseBrowserLock = await waitForPerfRunLock(join(OUT_DIR, `perf-browser-${process.platform}.lock`));
+    process.once('exit', releaseBrowserLock);
     await waitForServer(baseUrl);
     browser = await chromium.launch({
       headless: !headed,
@@ -457,7 +462,7 @@ async function main() {
       },
     };
 
-    mkdirSync(OUT_DIR, { recursive: true });
+    mkdirSync(dirname(OUT_PATH), { recursive: true });
     writeFileSync(OUT_PATH, `${JSON.stringify(report, null, 2)}\n`);
     console.log(JSON.stringify({
       outPath: OUT_PATH,
@@ -475,6 +480,7 @@ async function main() {
     if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0) process.exitCode = 1;
   } finally {
     await browser?.close();
+    releaseBrowserLock();
     if (server) {
       server.kill('SIGTERM');
       await new Promise((resolvePromise) => {

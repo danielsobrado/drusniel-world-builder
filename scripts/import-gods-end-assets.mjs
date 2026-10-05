@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { catalogEntries, readGlbDocument } from './lib/gods-end-catalog.mjs';
 import { createHouseCatalogEntries } from '../src/editor/assets/godsEnd/village/houseCatalog.js';
+import { createAquaticCatalogEntries } from '../src/editor/assets/godsEnd/aquatic/aquaticCatalog.js';
+import { createSeabedRockCatalogEntries } from '../src/editor/assets/godsEnd/seabed/seabedCatalog.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const source = path.resolve(process.argv.find((arg) => arg.startsWith('--source='))?.slice(9)
@@ -85,6 +87,8 @@ for (const [directory, names] of [
   }
 }
 objects.push(...createHouseCatalogEntries());
+objects.push(...createAquaticCatalogEntries());
+objects.push(...createSeabedRockCatalogEntries());
 const keys = new Set(objects.map((entry) => entry.key));
 if (keys.size !== objects.length) throw new Error('Duplicate Gods’ End object keys.');
 objects.sort((a, b) => a.key.localeCompare(b.key));

@@ -39,7 +39,7 @@ assert.equal(definitions.length, manifest.objectCount);
 assert.equal(catalog.textures.length, manifest.textureCount);
 for (const definition of definitions) {
   createObjectColliderDescriptions(definition, config.map.tileSize);
-  if (definition.asset.kind === 'house') continue;
+  if (definition.asset.kind !== 'glb') continue;
   const target = path.join(root, 'public', definition.asset.path);
   assert.ok(imported.has(target), `Untracked object asset: ${definition.asset.path}.`);
   const document = readGlbDocument(await readFile(target));

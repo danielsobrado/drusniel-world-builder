@@ -29,10 +29,13 @@ export function acquireSnowTextures({ loader, baseUrl = import.meta.env?.BASE_UR
       map.name = `Gods End snow ${kind}`;
       map.colorSpace = kind === 'color' ? THREE.SRGBColorSpace : THREE.NoColorSpace;
       map.wrapS = map.wrapT = THREE.RepeatWrapping;
-      map.magFilter = THREE.LinearFilter;
-      map.minFilter = THREE.LinearMipmapLinearFilter;
+      // TSL binds a sampler even for textureLoad on a filterable texture.
+      // Nearest flags suppress that binding; RepeatMipTextureLoad performs
+      // repeat-wrapped trilinear filtering explicitly using the generated mips.
+      map.magFilter = THREE.NearestFilter;
+      map.minFilter = THREE.NearestFilter;
       map.generateMipmaps = true;
-      map.anisotropy = 8;
+      map.anisotropy = 1;
       entry.textures[kind] = map;
     }
     shared = entry;

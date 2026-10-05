@@ -1,0 +1,66 @@
+{
+  "seagrass:near": {
+    "vertices": 240,
+    "sha256": "41e62a2cb49fa8761fdfd24baa81d8ccd71114a37bee78d5768e030519c24763"
+  },
+  "kelp:near": {
+    "vertices": 210,
+    "sha256": "31e18330ef42c2910ff485695cc3d3b84cda8c7eb6a40dcc8c60b4da0298552b"
+  },
+  "redAlgae:near": {
+    "vertices": 264,
+    "sha256": "a8993ee1a0f7acb5dc9dbb7e10a60596fd6604bbf0bd11c55738ac19a2ce056e"
+  },
+  "eelgrass:near": {
+    "vertices": 210,
+    "sha256": "b207f8490791440c9ce1bc4f632129e09e5c1a4a48e2b32f9d2b3f9c416451f8"
+  },
+  "waterweed:near": {
+    "vertices": 240,
+    "sha256": "ed789686436fdb12ded3ad7e8c6ca5ae62ba356cc4fd5a550678429525811d88"
+  },
+  "pondweed:near": {
+    "vertices": 144,
+    "sha256": "6de6c809d231e86c2b0ccb2463e3eb64c0e51fa93e89d13a100419c4d384e0c2"
+  },
+  "lilyPad:near": {
+    "vertices": 54,
+    "sha256": "1f316441d2e8385eeb29fe331954ff778e746a1f05a00cc11561447723289c0a"
+  },
+  "floweringLilyPad:near": {
+    "vertices": 132,
+    "sha256": "4a5ea9e03ca95b715ea201219c14d05bdbd67aee68e137bc02c4ed2a14cf52c1"
+  },
+  "seagrass:far": {
+    "vertices": 48,
+    "sha256": "30f86d42b8cfe13987253229c55c58360d218f3dd62aa20081c0b8b255f3cb41"
+  },
+  "kelp:far": {
+    "vertices": 54,
+    "sha256": "39101c1bce049361581d4cf82498005dff1ea87e43a17a49b13cae3163e70b71"
+  },
+  "redAlgae:far": {
+    "vertices": 60,
+    "sha256": "52fc901481b447615638468c1edc3460b6870ff2f8f9ca37d13f4a84b1e56659"
+  },
+  "eelgrass:far": {
+    "vertices": 36,
+    "sha256": "e8e5cba36b4a80fb86eb33dde0f0ff304df753b8b9477761a844674fec64bbc0"
+  },
+  "waterweed:far": {
+    "vertices": 99,
+    "sha256": "b82ee70c0c12f06193829d2637c5ffd2950f5bfff07695178ecda8f40d19f595"
+  },
+  "pondweed:far": {
+    "vertices": 69,
+    "sha256": "249054beb2c183568caaa6271c97d6f289c041a894db48991e3effff62814060"
+  },
+  "lilyPad:far": {
+    "vertices": 21,
+    "sha256": "8e390ab6caa6dcf9d12c96275cf0cb4ca4cd3dbc47a16e51ea0b41e5832c87bd"
+  },
+  "floweringLilyPad:far": {
+    "vertices": 75,
+    "sha256": "fb4a9113544542d5aafbc04f92eee1e8a1fabf891af2627c41d1d71c224fc458"
+  }
+}

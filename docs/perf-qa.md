@@ -183,6 +183,11 @@ The verdict and any failure messages are stored in `gate` inside
 silently sharing the GPU and corrupting both measurements. A stale lock is
 recovered when its recorded PID is no longer alive.
 
+Performance, water-acceptance, and Gods’ End asset browser runners also share
+`tmp/perf-browser-<platform>.lock`. They wait for the previous hardware browser
+run to close before launching Chromium; waiting times out after five minutes.
+This guards those runners, not manually opened app tabs or concurrent CPU builds.
+
 Extra CLI flags for `qa:perf`:
 
 ```bash
@@ -201,6 +206,12 @@ released. Its separate `recovery` result does not enter movement FPS statistics.
 `--revisit` restarts the same route in the same browser and records a separate
 `revisit` report. Add `--turn-on-revisit` for a 180° camera turn halfway through
 that second measurement; the report records this route override explicitly.
+With `--drain-seconds`, both measurements receive separate recovery observations.
+`--grass-diagnostics` adds bounded end-of-movement tile diagnostics to each leg.
+`meadowVisibleMissingTiles` counts the whole drawable range;
+`meadowInViewMissingTiles` counts the conservative horizontal viewing cone.
+Their density-lag counterparts track lower-capacity publications. The cone
+prioritizes preparation and is not a renderer frustum-culling change.
 
 Browser exceptions and `console.error` messages invalidate a capture. The runner
 saves their count and a bounded list in `capture.browserErrors`, preserves the

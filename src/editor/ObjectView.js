@@ -63,6 +63,7 @@ export class ObjectView {
       heightField,
       tileSize: tileMap.tileSize,
       floatingOrigin: terrainView.floatingOrigin,
+      getWaterSample: (x, z) => terrainView.getCanonicalWater?.(x, z),
     });
     this.root = new THREE.Group();
     this.root.name = 'placed-objects';

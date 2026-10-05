@@ -254,6 +254,32 @@ test('a small consumer limit does not shorten the shared frame allowance', () =>
   assert.equal(frame.available(0.25, 3), 1.05);
 });
 
+test('mandatory work between early placement and grass does not spend the deferred allowance twice', () => {
+  let clock = 0;
+  const frame = new FrameSlack({ targetMs: 7, reserveMs: 0.5, maximumMs: 1.2, now: () => clock });
+  frame.fixedMs = 4;
+  frame.beginFrame();
+  assert.equal(frame.available(0.25, 3), 1.2);
+  const deadline = frame.deadline;
+  frame.defer(() => { clock += 0.2; });
+  clock += 2; // Physics and mandatory scenery, already predicted by fixedMs.
+  assert.equal(frame.available(0.25, 3), 1);
+  assert.equal(frame.deadline, deadline, 'later queues inherit the same frame cutoff');
+  frame.defer(() => { clock += 1.1; });
+  assert.equal(frame.available(0.25, 3), 0, 'later queues cannot grant another floor');
+});
+
+test('the shared frame cutoff bounds unspent deferred allowance', () => {
+  let clock = 0;
+  const frame = new FrameSlack({ targetMs: 7, reserveMs: 0.5, maximumMs: 1.2, now: () => clock });
+  frame.fixedMs = 4;
+  frame.beginFrame();
+  assert.equal(frame.available(0.25, 3), 1.2);
+  clock = 6.6;
+  assert.equal(frame.available(0.25, 3), 0);
+  assert.equal(frame.deadline, 6.5, 'a later consumer cannot extend the cutoff');
+});
+
 test('worker CPU arrays preserve canonical precision and canonical edits including negative chunks', () => {
   const generator = new ProceduralWorldGenerator();
   const world = new InfiniteWorldStore({ generator, chunkSize: 8, tileSize: 2 });

@@ -1,4 +1,5 @@
 import { TERRAIN_MATERIAL_FAMILIES } from './TerrainMaterialFamilyConstants.js';
+import { resolveTerrainTransitionConfig } from './TerrainTransitionConfig.js';
 
 const MIN_RESOLUTION = 16;
 const MAX_RESOLUTION = 256;
@@ -261,6 +262,7 @@ export function normalizeTerrainMaterialFamilies(source) {
     genomes: normalizeGenomes(source.genomes),
     features: normalizeFeatures(source.features),
     weathering: normalizeWeathering(source.weathering),
+    transitions: resolveTerrainTransitionConfig(source.transitions),
     projection: Object.freeze({ ...source.projection }),
     environment: Object.freeze({ ...source.environment }),
     profiles,

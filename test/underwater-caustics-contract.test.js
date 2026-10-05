@@ -37,7 +37,7 @@ test('underwater controller installs and ownership-safely restores render hooks'
 });
 
 test('surface height is retained while the underwater blend fades out', () => {
-  assert.match(postSource, /update\(\{ blend = 0, surfaceHeight \} = \{\}\)/);
+  assert.match(postSource, /update\(\{ blend = 0, surfaceHeight, waterKind \} = \{\}\)/);
   assert.match(controllerSource, /if \(status\.headSubmerged \|\| status\.waterDepth > 0\)/);
   assert.match(controllerSource, /causticsState\.surfaceHeight = status\.waterSurfaceHeight;/);
 });

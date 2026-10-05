@@ -63,6 +63,8 @@ export class UnderwaterViewController {
         scene: terrainView.scene,
         config: waterVisual.projectedCaustics,
         qualityStrength: quality.projectedCausticStrength,
+        optics: config.optics,
+        floatingOrigin: terrainView.floatingOrigin,
       })
       : null;
     this.originalTerrainRender = terrainView.render;
@@ -113,7 +115,8 @@ export class UnderwaterViewController {
   }
 
   applyEnvironment() {
-    this.appliedBackground.copy(this.surfaceBackground).lerp(this.underwaterBackground, this.blend);
+    const opticalMedium = Boolean(this.causticsPostProcess?.opticsState);
+    this.appliedBackground.copy(this.surfaceBackground).lerp(this.underwaterBackground, opticalMedium ? 0 : this.blend);
     this.scene.background = this.appliedBackground;
 
     if (!this.scene.fog?.isFogExp2) {
@@ -123,19 +126,21 @@ export class UnderwaterViewController {
     this.scene.fog.color.copy(this.appliedFogColor);
     this.appliedFogDensity = mixNumber(
       this.surfaceFogDensity,
-      this.config.fogDensity,
+      opticalMedium ? 0 : this.config.fogDensity,
       this.blend,
     );
     this.scene.fog.density = this.appliedFogDensity;
 
-    const lightBlend = mixNumber(1, this.config.lightScale, this.blend);
+    const lightBlend = mixNumber(1, opticalMedium ? 1 : this.config.lightScale, this.blend);
     if (this.hemisphere) {
       this.hemisphere.intensity = this.surfaceHemisphereIntensity * lightBlend;
     }
     if (this.directional) {
       this.directional.intensity = this.surfaceDirectionalIntensity * lightBlend;
     }
-    const showSky = this.blend < SKY_HIDE_THRESHOLD;
+    // The optical shader needs the world above for Snell's window, then applies
+    // the water's absorption itself. Fog fallback hides the sky as before.
+    const showSky = opticalMedium || this.blend < SKY_HIDE_THRESHOLD;
     if (this.skyMesh) this.skyMesh.visible = showSky && this.surfaceSkyVisible;
     if (this.cloudMaskMesh) this.cloudMaskMesh.visible = showSky && this.surfaceCloudVisible;
 
@@ -167,6 +172,7 @@ export class UnderwaterViewController {
       this.config.transitionSeconds,
     );
     const causticsState = { blend: this.blend };
+    causticsState.waterKind = status.waterKind;
     if (status.headSubmerged || status.waterDepth > 0) {
       causticsState.surfaceHeight = status.waterSurfaceHeight;
     }

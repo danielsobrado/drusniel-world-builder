@@ -16,6 +16,9 @@ function createHarness({ fog = null } = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#0a100c');
   scene.fog = fog;
+  const sky = new THREE.Mesh();
+  sky.name = 'stylized-sky-dome';
+  scene.add(sky, new THREE.DirectionalLight('#ffffff', 2));
   const camera = new THREE.PerspectiveCamera(70, 1, 0.5, 1000);
   const playerController = {
     camera,
@@ -34,8 +37,24 @@ function createHarness({ fog = null } = {}) {
     playerController,
     config: underwaterConfig,
   });
-  return { controller, scene, playerController };
+  return { controller, scene, playerController, sky };
 }
+
+test('optical underwater rendering preserves the sky and light for Snell’s window without double absorption', () => {
+  const { controller, scene, sky } = createHarness({ fog: new THREE.FogExp2('#9ab4c0', 0.012) });
+  const originalBackground = scene.background.clone();
+  controller.causticsPostProcess = { opticsState: {}, update() {}, dispose() {} };
+  controller.blend = 1;
+  controller.applyEnvironment();
+  assert.equal(sky.visible, true);
+  assert.equal(controller.directional.intensity, 2);
+  assert.equal(scene.fog.density, 0);
+  assert.deepEqual(scene.background, originalBackground);
+  controller.restoreSurfaceEnvironment();
+  assert.equal(scene.fog.density, 0.012);
+  assert.equal(sky.visible, true);
+  controller.dispose();
+});
 
 test('fog-less worlds restore null fog after a dive cycle', () => {
   const { controller, scene, playerController } = createHarness({ fog: null });

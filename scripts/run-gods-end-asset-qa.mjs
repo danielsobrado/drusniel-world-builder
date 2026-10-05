@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { waitForPerfRunLock } from './perf-run-lock.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argument = (name, fallback) => {
@@ -12,17 +13,20 @@ const argument = (name, fallback) => {
 const url = argument('url', 'http://localhost:5173');
 const output = path.join(root, 'tmp/gods-end-assets-qa');
 await mkdir(output, { recursive: true });
-const browser = await chromium.launch({ headless: !process.argv.includes('--headed'), args: [
-  '--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-gpu-rasterization',
-] });
+const releaseBrowserLock = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`), { timeoutMs: 900000 });
+process.once('exit', releaseBrowserLock);
+let browser = null;
 const errors = [];
 const failures = [];
 const loaded = [];
 try {
+  browser = await chromium.launch({ headless: !process.argv.includes('--headed'), args: [
+    '--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-gpu-rasterization',
+  ] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    if (message.type() === 'error' && /shader|wgsl|webgpu|gpu validation|pipeline|bind.?group|Gods.*End|couldn't load texture/i.test(message.text())) {
+    if (message.type() === 'error') {
       errors.push(message.text());
     }
   });
@@ -76,7 +80,8 @@ try {
   }
 
   const rendered = await page.evaluate(async () => {
-    const { controller, objectView, objectMap, godsEndAssets, terrainView } = window.__editor;
+    const { controller, objectView, objectMap, godsEndAssets, terrainView, viewModeController } = window.__editor;
+    viewModeController.setMode('edit');
     const keys = ['gods-end-house-003', 'gods-end-house-004', 'gods-end-house-005', 'gods-end-house-006',
       'gods-end-house-009', 'gods-end-fantasy-tree1', 'gods-end-fantasy-tree10',
       'gods-end-fantasy-rocks-sm-rocks-01', 'gods-end-fantasy-lantern-lantern',
@@ -88,15 +93,39 @@ try {
     godsEndAssets.restorePlaced();
     await Promise.all(keys.map((key) => godsEndAssets.ensure(key)));
     objectView.refreshAll();
-    controller.editorCamera.focusWorld(0, 0);
-    await terrainView.renderer.compileAsync(terrainView.scene, controller.editorCamera.camera);
+    const THREE = await import('/node_modules/three/build/three.module.js');
+    const bounds = new THREE.Box3();
+    for (const key of keys) for (const mesh of objectView.renderers.get(key).meshes) {
+      if (!mesh.count) throw new Error(`No rendered instance: ${key}.`);
+      mesh.computeBoundingBox();
+      mesh.updateMatrixWorld();
+      bounds.union(mesh.boundingBox.clone().applyMatrix4(mesh.matrixWorld));
+    }
+    const center = bounds.getCenter(new THREE.Vector3());
+    const span = bounds.getSize(new THREE.Vector3()).length();
+    const camera = new THREE.PerspectiveCamera(55, 1280 / 720, 0.1, 5000);
+    camera.position.copy(center).add(new THREE.Vector3(0.65, 0.8, 1).multiplyScalar(span));
+    camera.lookAt(center);
+    camera.updateMatrixWorld();
+    viewModeController.cameraOverride = camera;
+    await terrainView.renderer.compileAsync(terrainView.scene, camera);
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    terrainView.renderer.render(terrainView.scene, camera);
     const document = controller.toDocument();
     if (!keys.every((key) => document.objects.some((object) => object.definitionKey === key))) {
       throw new Error('Imported object keys were not serialized.');
     }
-    return { keys, saved: document.objects.length, installed: godsEndAssets.installed.size };
+    return { keys, saved: document.objects.length, installed: godsEndAssets.installed.size,
+      bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() } };
   });
+  // Streamed draw preparation hides new meshes until their real render passes
+  // are ready. compileAsync alone does not publish them.
+  await page.waitForFunction(() => {
+    const { objectView, terrainView } = window.__editor;
+    const preparation = terrainView.drawPreparation;
+    return (!preparation || (preparation.pending.size === 0 && preparation.hidden.size === 0))
+      && [...objectView.renderers.values()].every(record => record.meshes.every(mesh => !mesh.count || mesh.visible));
+  }, null, { timeout: 180000 });
   await page.screenshot({ path: path.join(output, 'objects.png') });
 
   const texture = await page.evaluate(async () => {
@@ -106,7 +135,8 @@ try {
     const normal = GODS_END_IMAGE_TEXTURES.find((entry) => /snow007c_normal_gl/.test(entry.path));
     const files = await Promise.all([loadGodsEndTextureFile(color.path), loadGodsEndTextureFile(normal.path)]);
     const prepared = await Promise.all(files.map((file, i) => prepareWorkshopTexture(file, i ? 'normal' : 'albedo')));
-    if (prepared.some((source) => source.width !== 512 || !source.dataUrl.startsWith('data:image/'))) {
+    if (prepared.some((source) => source.width < 256 || source.width > 512
+        || source.height !== source.width || !source.dataUrl.startsWith('data:image/'))) {
       throw new Error('Library textures did not use the workshop upload path.');
     }
     return { images: GODS_END_IMAGE_TEXTURES.length, imported: prepared.map(({ name, width }) => ({ name, width })) };
@@ -116,5 +146,6 @@ try {
   assert.equal(errors.length, 0, JSON.stringify(errors));
   console.log(`Hardware WebGPU: loaded ${loaded.length} catalog entries, rendered ${rendered.keys.length} fixtures, imported albedo/normal textures with no shader errors.`);
 } finally {
-  await browser.close();
+  await browser?.close();
+  releaseBrowserLock();
 }

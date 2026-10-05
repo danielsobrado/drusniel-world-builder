@@ -89,6 +89,15 @@ families:
   normalStrength: 0.72
   normalFadeStartDistance: 45
   normalFadeEndDistance: 150
+  # Gods' End relief-based edges: raised rock breaks through turf, snow fills
+  # cracks, and wet river/sea banks retain grass tufts. Far LOD stays soft.
+  transitions:
+    enabled: true
+    strength: 0.85
+    contrast: 0.32
+    width: 0.18
+    fadeStartDistance: 35
+    fadeEndDistance: 140
   genomes:
     enabled: true
     regionScaleMeters: 720

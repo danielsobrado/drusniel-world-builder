@@ -16,6 +16,7 @@ import {
 import { createTerrainMaterialFamilyMultiplier } from './TerrainMaterialStochasticNodes.js';
 import { bilinearLoad } from './TerrainSlotBindings.js';
 import { createTerrainMaterialGenome } from './TerrainMaterialGenomeNodes.js';
+import { createTerrainTransitionState } from './TerrainTransitionNodes.js';
 import {
   applyTerrainMaterialFeatureColor,
   createTerrainMaterialFeatureState,
@@ -124,6 +125,9 @@ export function createTerrainMaterialBakedSurface({
   familyAtlas,
   gpuState,
   stylizedConfig,
+  pathMask = float(0),
+  localXZ = null,
+  transitionPatterns = null,
 }) {
   const materialBake = stylizedConfig.materialBake;
   const render = materialBake.render;
@@ -134,7 +138,16 @@ export function createTerrainMaterialBakedSurface({
   }
 
   const samples = sampleBakeTextures(gpuState, terrainUv);
-  const weights = normalizedWeights(samples.materialWeights);
+  const transitions = createTerrainTransitionState({
+    weights: normalizedWeights(samples.materialWeights),
+    shoreline: samples.wetnessShoreline.g,
+    path: pathMask,
+    cameraDistance,
+    patterns: transitionPatterns,
+    localXZ,
+    settings: families.transitions,
+  });
+  const weights = transitions.weights;
   const genome = createTerrainMaterialGenome({
     worldXZ,
     biomeColor: tileColor,
@@ -248,7 +261,7 @@ export function createTerrainMaterialBakedSurface({
   midColor = mix(
     midColor,
     colorNode(render.shorelineColor),
-    samples.wetnessShoreline.g.mul(render.shorelineStrength),
+    transitions.shoreline.mul(render.shorelineStrength),
   );
   midColor = mix(
     midColor,
@@ -276,7 +289,12 @@ export function createTerrainMaterialBakedSurface({
     families.features,
   );
   nearProcedural = applyTerrainWeatheringColor(nearProcedural, weatheringState);
-  const nearDetailed = mix(nearProcedural, midColor, render.nearMaterialBlend);
+  // Exposed rock and snow need their own colour at walking distance, rather
+  // than being reduced to the turf's detail multiplier. Banks retain some turf.
+  const nearMaterialBlend = families.transitions?.enabled
+    ? max(float(render.nearMaterialBlend), weights.b.add(weights.a).add(transitions.shoreline.mul(0.5)).clamp(0, 1))
+    : float(render.nearMaterialBlend);
+  const nearDetailed = mix(nearProcedural, midColor, nearMaterialBlend);
 
   const nearBlendEnd = render.nearDistance + render.transitionDistance;
   const farBlendEnd = render.farDistance + render.transitionDistance;

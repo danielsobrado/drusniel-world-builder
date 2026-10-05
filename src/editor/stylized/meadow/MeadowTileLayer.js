@@ -3,6 +3,7 @@ import { createCompaction } from './meadowGrassCompaction.js';
 import { MeadowGrassBatches } from './MeadowGrassBatches.js';
 import { tileDistanceSquared } from './meadowGrassLayout.js';
 import { compactionPrefix } from './MeadowCompactionPrefix.js';
+import { meadowTileInView } from './meadowTileVisibility.js';
 
 /**
  * A camera-centred grid of chunk-aligned tiles, each drawing one band's template
@@ -52,7 +53,7 @@ export class MeadowTileLayer {
     this.tiles = new Map();
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
     this.buildSerial = 0;
-    this.stats = { tiles: 0, building: 0, stems: 0, bands: {} };
+    this.stats = { tiles: 0, building: 0, stems: 0, bands: {}, visibleMissing: 0, visibleCapacityLag: 0 };
   }
 
   get meshes() {
@@ -64,7 +65,7 @@ export class MeadowTileLayer {
    * @param {{ x: number, z: number }} origin floating origin
    * @param {number} deadline performance.now() by which this frame's builds stop
    */
-  update(camera, origin, deadline, time = performance.now() / 1000) {
+  update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null) {
     this.time = time;
     const size = this.tileSize;
     const reach = this.reach + size;
@@ -90,9 +91,22 @@ export class MeadowTileLayer {
         tile.preparationBand = preparationBand;
         tile.preparationCapacity = this.templates[preparationBand].instanceCount;
         tile.distanceSquared = nearest;
+        tile.inView = meadowTileInView(centerX, centerZ, camera, size, viewCone);
         tile.renderX = centerX - origin.x;
         tile.renderZ = centerZ - origin.z;
         tile.revision = this.ground.revisionAt(centerX, centerZ);
+        // Selecting a prefix of ready data is the same cheap LOD handoff as
+        // selecting a band. It needs no sampling or compaction allowance.
+        // Otherwise an outside tile can remain blank after entering view even
+        // though its preparation completed before the boundary.
+        if (this.stablePrefixes && tile.band !== null && tile.revision !== null
+          && tile.prepared?.revision === tile.revision
+          && tile.prepared.capacity >= this.templates[tile.band].instanceCount) {
+          if (!tile.output || tile.builtBand !== tile.band || tile.builtRevision !== tile.revision) {
+            this.publishPrepared(tile);
+            PerfCounters.inc('meadowCompactionReuses');
+          }
+        }
       }
     }
     for (const [key, tile] of this.tiles) {
@@ -129,8 +143,16 @@ export class MeadowTileLayer {
         tile.job = null;
       }
       if (MeadowTileLayer.isStale(tile)) stale.push(tile);
+      else if (tile.job) {
+        // A cached handoff can satisfy a reduced preparation target while an
+        // older higher-density job is still partial. It is no longer runnable;
+        // release it instead of leaving readiness permanently pending.
+        this.release(tile.job.band, tile.job.compaction.output);
+        tile.job = null;
+      }
     }
-    stale.sort((a, b) => a.distanceSquared - b.distanceSquared);
+    stale.sort((a, b) => Number(!a.inView) - Number(!b.inView)
+      || a.distanceSquared - b.distanceSquared);
     const run = () => this.buildTiles(stale, this.workBudgetProvider && stale.length
       ? Math.min(deadline, performance.now() + this.workBudgetProvider(this.workBudgetMs)) : deadline);
     if (this.workRunner && stale.length) this.workRunner(run);
@@ -211,7 +233,18 @@ export class MeadowTileLayer {
   commit() {
     this.batches.begin();
     let tiles = 0;
+    let visibleMissing = 0, visibleCapacityLag = 0;
+    let inViewMissing = 0, inViewCapacityLag = 0;
     for (const tile of this.tiles.values()) {
+      if (tile.band !== null && tile.revision !== null) {
+        if (!tile.output) {
+          visibleMissing++;
+          if (tile.inView) inViewMissing++;
+        } else if (this.templates[tile.builtBand].instanceCount < this.templates[tile.band].instanceCount) {
+          visibleCapacityLag++;
+          if (tile.inView) inViewCapacityLag++;
+        }
+      }
       if (tile.band === null || !tile.output || tile.output.count === 0) continue;
       this.batches.add(tile.builtBand, tile);
       tiles += 1;
@@ -220,6 +253,10 @@ export class MeadowTileLayer {
     this.stats.bands = this.batches.commit();
     PerfCounters.inc('meadowBatchCommitMs', performance.now() - uploadStartedAt);
     this.stats.tiles = tiles;
+    this.stats.visibleMissing = visibleMissing;
+    this.stats.visibleCapacityLag = visibleCapacityLag;
+    this.stats.inViewMissing = inViewMissing;
+    this.stats.inViewCapacityLag = inViewCapacityLag;
     this.stats.stems = Object.values(this.stats.bands).reduce((sum, value) => sum + value, 0);
   }
 

@@ -87,7 +87,9 @@ export function catalogEntries(relativePath, document) {
     if (relativePath.endsWith('/props/stone.glb')) scale = 3 / Math.max(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z);
     if (relativePath.endsWith('/props/lantern.glb')) scale = 2.4 / Math.max(0.01, bounds.max.y - bounds.min.y);
     if (bird) scale = 0.7 / Math.max(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z);
-    const dimensions = bounds.getSize(new Vector3()).multiplyScalar(scale).toArray();
+    // Bird accessor bounds precede skinning. Declare the desired placed span;
+    // the renderer uniformly fits the authored pose to that metre-sized envelope.
+    const dimensions = bird ? [0.7, 0.7, 0.7] : bounds.getSize(new Vector3()).multiplyScalar(scale).toArray();
     entries.push({
       key: `gods-end-${slug(relativePath.slice('Assets/terrain/'.length))}${roots.length > 1 ? `-${slug(name)}` : ''}`,
       label: `Gods’ End ${bird ? `Bird ${entries.length + 1} (posed)` : label(name)}${relativePath.includes('/trees/') ? ' (original)' : ''}`,
@@ -97,7 +99,8 @@ export function catalogEntries(relativePath, document) {
       asset: {
         kind: 'glb', path: `assets/gods-end/${relativePath}`,
         rootNames: indices.map((index) => nodes[index].name).filter(Boolean),
-        scale, bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() }, dimensions,
+        scale, ...(bird ? { targetSpan: 0.7 } : {}),
+        bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() }, dimensions,
       },
       collision: tree ? 'trunk' : rock || prop ? 'bounds' : 'none',
     });

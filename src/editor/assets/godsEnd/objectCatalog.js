@@ -9,12 +9,13 @@ export function createGodsEndObjectCatalog(entries, tileByKey, tileSize) {
       depth: Math.max(1, Math.ceil(entry.asset.dimensions[2] / tileSize)) },
     foundation: { mode: entry.category === 'building' ? 'terrace' : 'conform', maxSlopeDegrees: 30,
       maxDepth: entry.asset.kind === 'house' ? 6 : 3, alignToNormal: false, color: '#71685d' },
-    allowedTerrain: terrain,
+    allowedTerrain: entry.water ? [...tileByKey.keys()] : terrain,
     collision: { policy: entry.collision === 'none' ? 'none' : 'solid', profile: 'godsEndAsset' },
   }));
   const validated = createObjectCatalog(raw, tileByKey);
   return Object.freeze(validated.map((definition, index) => Object.freeze({
     ...definition, asset: Object.freeze({ ...entries[index].asset, collision: entries[index].collision }),
+    ...(entries[index].water ? { water: Object.freeze({ ...entries[index].water }) } : {}),
   })));
 }
 

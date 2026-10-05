@@ -663,6 +663,12 @@ export class StylizedSurfaceView {
       for (const slot of this.waterSlots) slot.update(timestamp);
       return;
     }
+    // Grass gets first access most frames, but continuous streaming must not
+    // starve rock/tree publication. All turns consume the same allowance.
+    // Collision fields and blockers have already received their turn in beginFrame.
+    this.sceneryFrame = (this.sceneryFrame ?? 0) + 1;
+    const meadowFirst = this.sceneryFrame % 4 !== 0;
+    if (meadowFirst) this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     this.rockView?.update(timestamp, camera);
     if (this.rockView?.pendingRebuild) {
       this.rockBuildQueue.enqueue(this.rockView.pendingRebuild);
@@ -711,7 +717,7 @@ export class StylizedSurfaceView {
     if (this.runDeferredWork) this.runDeferredWork(() => this.updateForestGroundTextures());
     else this.updateForestGroundTextures();
     this.flowerView?.update(timestamp);
-    this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
+    if (!meadowFirst) this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     for (const slot of this.waterSlots) slot.update(timestamp);
     this.prewarmOneDistantWaterSlot();
 
