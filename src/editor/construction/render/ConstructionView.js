@@ -48,6 +48,10 @@ const ORIGIN_QUANTUM = 64;
  */
 const MODULE_BUILD_BUDGET_MS = 4;
 const MODULE_BUILD_COUNT = 1;
+const MODULE_BUILD_IDLE_DELAY_MS = 150;
+const LOD_REFRESH_MS = 50;
+const LOD_POSITION_SCALE = 8;
+const LOD_ROTATION_SCALE = 500;
 
 /**
  * Preview buffer floor. Buffers grow by doubling from here, so dragging an
@@ -88,6 +92,29 @@ const ROUNDED_STAT_KEYS = Object.freeze([
 
 function quantizeOrigin(value) {
   return Math.round(value / ORIGIN_QUANTUM) * ORIGIN_QUANTUM;
+}
+
+function updateCameraState(state, camera, viewportHeight) {
+  const position = camera.position;
+  const quaternion = camera.quaternion;
+  const next = [
+    Math.round(position.x * LOD_POSITION_SCALE),
+    Math.round(position.y * LOD_POSITION_SCALE),
+    Math.round(position.z * LOD_POSITION_SCALE),
+    Math.round(quaternion.x * LOD_ROTATION_SCALE),
+    Math.round(quaternion.y * LOD_ROTATION_SCALE),
+    Math.round(quaternion.z * LOD_ROTATION_SCALE),
+    Math.round(quaternion.w * LOD_ROTATION_SCALE),
+    Math.round((camera.zoom ?? 1) * 10),
+    Math.round((camera.fov ?? 0) * 10),
+    Math.round(viewportHeight * 10),
+  ];
+  let changed = state.length !== next.length;
+  for (let index = 0; index < next.length; index += 1) {
+    if (state[index] !== next[index]) changed = true;
+    state[index] = next[index];
+  }
+  return changed;
 }
 
 /**
@@ -174,6 +201,11 @@ export class ConstructionView {
      */
     this.entries = new Map();
     this.buildQueue = new ConstructionBuildQueue();
+    this.lodCameraState = new Int32Array(10);
+    this.lodCameraState.fill(0x7fffffff);
+    this.lodDirty = true;
+    this.nextLodEvaluationAt = 0;
+    this.lastLodCameraChangeAt = performance.now();
     this.handleMeshes = [];
     this.handleLines = [];
     this.selectedId = null;
@@ -333,6 +365,7 @@ export class ConstructionView {
     releaseConstructionMaterials(entry.materials);
     this.root.remove(entry.group);
     this.entries.delete(constructionId);
+    this.lodDirty = true;
     this.buildQueue.removeConstruction(constructionId);
     this.stats.queueDepth = this.buildQueue.length;
     this.refreshResidentCount();
@@ -520,6 +553,7 @@ export class ConstructionView {
     if (!entry) return;
     entry.plan = plan;
     entry.planRevision = entry.structuralRevision;
+    this.lodDirty = true;
     if (entry.shellMesh) entry.shellMesh.userData.structuralPlan = plan;
     this.rebuildRecordShell(entry, plan);
     const planned = new Set();
@@ -711,10 +745,17 @@ export class ConstructionView {
    */
   updateLod(camera, viewportHeight) {
     if (!camera || !(viewportHeight > 0)) return;
+    const now = performance.now();
+    const cameraChanged = updateCameraState(this.lodCameraState, camera, viewportHeight);
+    if (cameraChanged) this.lastLodCameraChangeAt = now;
+    if (!cameraChanged && !this.lodDirty && now < this.nextLodEvaluationAt) return;
+    this.lodDirty = false;
+    this.nextLodEvaluationAt = now + LOD_REFRESH_MS;
+
     let nearCount = 0;
     let coarseCount = 0;
     let shellCount = 0;
-    const now = performance.now();
+    const origin = this.floatingOrigin.getState();
     for (const entry of this.entries.values()) {
       if (!entry.plan) continue;
       const pinned = entry.record.id === this.selectedId;
@@ -728,7 +769,7 @@ export class ConstructionView {
           height: entry.record.dimensions.height,
           viewportHeight,
           // Module bounds are canonical; the camera is in render space.
-          toRender: (x, z) => this.floatingOrigin.toRender(x, z),
+          origin,
           cameraY: camera.position.y,
         });
         const previousVisible = resident.visibleBand ?? resident.band ?? null;
@@ -801,7 +842,11 @@ export class ConstructionView {
 
   update() {
     this.updatePreviewHold();
-    if (this.buildQueue.length === 0) {
+    if (
+      this.buildQueue.length === 0
+      || performance.now() - this.lastLodCameraChangeAt < MODULE_BUILD_IDLE_DELAY_MS
+    ) {
+      this.stats.queueDepth = this.buildQueue.length;
       this.enforceDraftOcclusion();
       return;
     }
@@ -1070,9 +1115,11 @@ export class ConstructionView {
   }
 
   setSelection(constructionId, anchorId = null) {
+    const previousSelectedId = this.selectedId;
     this.selectedId = constructionId && this.store.get(constructionId)
       ? String(constructionId)
       : null;
+    if (this.selectedId !== previousSelectedId) this.lodDirty = true;
     this.selectedAnchorId = this.selectedId && anchorId ? String(anchorId) : null;
     for (const [id, entry] of this.entries) this.applySelectionMaterial(id, entry);
     this.rebuildHandles();
