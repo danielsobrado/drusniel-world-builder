@@ -42,6 +42,11 @@ export class ConstructionBuildQueue {
     return undefined;
   }
 
+  removeModule(constructionId, moduleId) {
+    this.jobs.delete(`${constructionId}:${moduleId}`);
+    this.compact();
+  }
+
   removeConstruction(constructionId) {
     for (const [key, current] of this.jobs) {
       if (current.job.constructionId === constructionId) this.jobs.delete(key);
