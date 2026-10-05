@@ -35,3 +35,19 @@ test('a camera high on a ridge still sees the chunk it looks across', () => {
   );
   assert.ok(frustum.intersectsObject(mesh));
 });
+
+
+test('refitting a terrain slot reuses its culling volumes', () => {
+  const plane = new THREE.PlaneGeometry(128, 128, 4, 4);
+  const slot = createSlotGeometry(plane);
+  fitSlotBounds(slot, Float32Array.from([10, 20, 30]), 128);
+  const box = slot.boundingBox;
+  const sphere = slot.boundingSphere;
+
+  fitSlotBounds(slot, Float32Array.from([100, 110, 120]), 128);
+
+  assert.strictEqual(slot.boundingBox, box);
+  assert.strictEqual(slot.boundingSphere, sphere);
+  assert.ok(slot.boundingBox.min.z <= 100);
+  assert.ok(slot.boundingBox.max.z >= 120);
+});

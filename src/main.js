@@ -1474,9 +1474,11 @@ async function initializeEditor(restoreState, resources, startup) {
       if (profiling) perfQa.mark('character');
     }
 
-    deferredWork.run(() => macroFarTerrain.update(
-      () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
-    ));
+    if (deferredWork.peek(Number.POSITIVE_INFINITY) > 0) {
+      deferredWork.run(() => macroFarTerrain.update(
+        () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
+      ));
+    }
     const backdropActive = macroFarTerrain.isActive();
     if (backdropActive !== farViewActive) {
       farViewActive = backdropActive;

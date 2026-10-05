@@ -43,9 +43,9 @@ export function fitSlotBounds(geometry, heights, chunkWorldSize) {
   const half = chunkWorldSize * 0.5;
   // Headroom for anything the material adds on top of the height texture.
   const pad = 2;
-  geometry.boundingBox = new THREE.Box3(
-    new THREE.Vector3(-half, -half, minimum - pad),
-    new THREE.Vector3(half, half, maximum + pad),
-  );
-  geometry.boundingSphere = geometry.boundingBox.getBoundingSphere(new THREE.Sphere());
+  geometry.boundingBox ??= new THREE.Box3();
+  geometry.boundingBox.min.set(-half, -half, minimum - pad);
+  geometry.boundingBox.max.set(half, half, maximum + pad);
+  geometry.boundingSphere ??= new THREE.Sphere();
+  geometry.boundingBox.getBoundingSphere(geometry.boundingSphere);
 }

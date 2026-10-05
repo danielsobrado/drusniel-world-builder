@@ -88,6 +88,12 @@ const ROUNDED_STAT_KEYS = Object.freeze([
   'roundedBuildMs',
   'footingStones',
 ]);
+const AGGREGATE_EXTRA_STAT_KEYS = Object.freeze([
+  ...ROUNDED_STAT_KEYS,
+  'growthLeaves',
+  'growthTriangles',
+]);
+const CONSTRUCTION_COARSE_BUILD_PRIORITY_BIAS = 1_000_000;
 
 function quantizeOrigin(value) {
   return Math.round(value / ORIGIN_QUANTUM) * ORIGIN_QUANTUM;
@@ -724,6 +730,8 @@ export class ConstructionView {
       const decision = evaluateBuildRequest({ resident, buildKey });
       if (!decision.enqueue) {
         this.stats.duplicateBuildsSuppressed += 1;
+        resident.buildPriority = priority;
+        this.buildQueue.upsert({ constructionId, module, requestedBand: band, priority });
         return;
       }
       if (resident.buildState?.key !== undefined && resident.buildState.key !== buildKey) {
@@ -820,7 +828,9 @@ export class ConstructionView {
             && resident.builtBand !== band
           );
           if (needsRebuild) {
-            const buildPriority = (band === 'near' ? 0 : 1000000) - pixels;
+            const buildPriority = (
+              band === 'near' ? 0 : CONSTRUCTION_COARSE_BUILD_PRIORITY_BIAS
+            ) - pixels;
             this.enqueueModuleBuild(entry.record.id, module, band, buildPriority);
             // Keep showing the previous band until the destination mesh lands.
           } else {
@@ -1012,9 +1022,7 @@ export class ConstructionView {
 
   /** Recompute stone/mortar counters from resident module stats (avoids drift). */
   refreshModuleStats() {
-    for (const key of [...ROUNDED_STAT_KEYS, 'growthLeaves', 'growthTriangles']) {
-      this.stats[key] = 0;
-    }
+    for (const key of AGGREGATE_EXTRA_STAT_KEYS) this.stats[key] = 0;
     let stones = 0;
     let mortarPrisms = 0;
     let stoneTriangles = 0;
