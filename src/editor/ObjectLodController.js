@@ -44,14 +44,17 @@ function cameraStatesEqual(left, right) {
   return true;
 }
 
-function bandSignature(instances) {
-  let signature = '';
-  for (let index = 0; index < instances.length; index += 1) {
-    const instance = instances[index];
-    if (index > 0) signature += '|';
-    signature += `${instance.objectId}:${instance.quantizedFade}:${instance.ditherDirection}`;
+function bucketEqual(left, right) {
+  if (left === right) return true;
+  if (!left || !right || left.length !== right.length) return false;
+  for (let index = 0; index < left.length; index += 1) {
+    const a = left[index];
+    const b = right[index];
+    if (a.objectId !== b.objectId
+      || a.quantizedFade !== b.quantizedFade
+      || a.ditherDirection !== b.ditherDirection) return false;
   }
-  return signature;
+  return true;
 }
 
 function stableSeed(id) {
@@ -85,6 +88,7 @@ export class ObjectLodController {
     this.hasLastCameraState = false;
     this.lastSelectedObjectId = null;
     this.lastPlan = null;
+    this.bandVersions = { near: 0, coarse: 0, shell: 0 };
     this.transitioning = false;
   }
 
@@ -95,6 +99,7 @@ export class ObjectLodController {
     this.hasLastCameraState = false;
     this.lastSelectedObjectId = null;
     this.lastPlan = null;
+    this.bandVersions = { near: 0, coarse: 0, shell: 0 };
     this.transitioning = false;
   }
 
@@ -191,7 +196,8 @@ export class ObjectLodController {
 
     const signatures = {};
     for (const band of OBJECT_BANDS) {
-      signatures[band] = bandSignature(buckets[band]);
+      if (!bucketEqual(this.lastPlan?.buckets?.[band], buckets[band])) this.bandVersions[band] += 1;
+      signatures[band] = this.bandVersions[band];
     }
     this.transitioning = transitions > 0;
     this.lastCameraState.set(this.cameraState);

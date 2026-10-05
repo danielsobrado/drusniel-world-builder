@@ -48,7 +48,6 @@ const ORIGIN_QUANTUM = 64;
  */
 const MODULE_BUILD_BUDGET_MS = 4;
 const MODULE_BUILD_COUNT = 1;
-const MODULE_BUILD_IDLE_DELAY_MS = 150;
 const LOD_REFRESH_MS = 50;
 const LOD_POSITION_SCALE = 8;
 const LOD_ROTATION_SCALE = 500;
@@ -204,7 +203,6 @@ export class ConstructionView {
     this.lodCameraState.fill(0x7fffffff);
     this.lodDirty = true;
     this.nextLodEvaluationAt = 0;
-    this.lastLodCameraChangeAt = performance.now();
     this.handleMeshes = [];
     this.handleLines = [];
     this.selectedId = null;
@@ -708,7 +706,7 @@ export class ConstructionView {
     resident.buildState = null;
   }
 
-  enqueueModuleBuild(constructionId, module, requestedBand = null) {
+  enqueueModuleBuild(constructionId, module, requestedBand = null, priority = 0) {
     const entry = this.entries.get(constructionId);
     const resident = entry?.modules.get(module.id);
     const band = requestedBand
@@ -734,8 +732,9 @@ export class ConstructionView {
       resident.pendingBuildKey = buildKey;
       resident.requestedBand = band;
       resident.requestedAt = performance.now();
+      resident.buildPriority = priority;
     }
-    this.buildQueue.upsert({ constructionId, module, requestedBand: band });
+    this.buildQueue.upsert({ constructionId, module, requestedBand: band, priority });
     this.stats.queueDepth = this.buildQueue.length;
   }
 
@@ -757,11 +756,11 @@ export class ConstructionView {
   updateLod(camera, viewportHeight) {
     if (!camera || !(viewportHeight > 0)) return;
     const now = performance.now();
+    if (!this.lodDirty && now < this.nextLodEvaluationAt) return;
     const cameraChanged = updateCameraState(this.lodCameraState, camera, viewportHeight);
-    if (cameraChanged) this.lastLodCameraChangeAt = now;
-    if (!cameraChanged && !this.lodDirty && now < this.nextLodEvaluationAt) return;
-    this.lodDirty = false;
     this.nextLodEvaluationAt = now + LOD_REFRESH_MS;
+    if (!cameraChanged && !this.lodDirty) return;
+    this.lodDirty = false;
 
     let nearCount = 0;
     let coarseCount = 0;
@@ -821,7 +820,8 @@ export class ConstructionView {
             && resident.builtBand !== band
           );
           if (needsRebuild) {
-            this.enqueueModuleBuild(entry.record.id, module, band);
+            const buildPriority = (band === 'near' ? 0 : 1000000) - pixels;
+            this.enqueueModuleBuild(entry.record.id, module, band, buildPriority);
             // Keep showing the previous band until the destination mesh lands.
           } else {
             resident.visibleBand = band;
@@ -856,12 +856,9 @@ export class ConstructionView {
     this.enforceDraftOcclusion();
   }
 
-  update() {
+  update({ budgetMs = MODULE_BUILD_BUDGET_MS, shouldYield = null } = {}) {
     this.updatePreviewHold();
-    if (
-      this.buildQueue.length === 0
-      || performance.now() - this.lastLodCameraChangeAt < MODULE_BUILD_IDLE_DELAY_MS
-    ) {
+    if (this.buildQueue.length === 0 || !(budgetMs > 0) || shouldYield?.()) {
       this.stats.queueDepth = this.buildQueue.length;
       this.enforceDraftOcclusion();
       return;
@@ -871,7 +868,8 @@ export class ConstructionView {
     while (
       this.buildQueue.length > 0
       && built < MODULE_BUILD_COUNT
-      && performance.now() - started < MODULE_BUILD_BUDGET_MS
+      && performance.now() - started < budgetMs
+      && !shouldYield?.()
     ) {
       const job = this.buildQueue.shift();
       const entry = this.entries.get(job.constructionId);
@@ -911,7 +909,7 @@ export class ConstructionView {
       this.disposeResidentBuild(resident);
       resident.pendingBuildKey = null;
       if (resident.hash === module.contentHash) {
-        this.enqueueModuleBuild(entry.record.id, module, lodBand);
+        this.enqueueModuleBuild(entry.record.id, module, lodBand, resident.buildPriority ?? 0);
       }
       return false;
     }
@@ -961,6 +959,7 @@ export class ConstructionView {
         constructionId: entry.record.id,
         module,
         requestedBand: lodBand,
+        priority: resident.buildPriority ?? 0,
       });
       return false;
     }
@@ -974,6 +973,7 @@ export class ConstructionView {
     resident.band = lodBand;
     resident.visibleSince = performance.now();
     resident.pendingBuildKey = null;
+    resident.buildPriority = 0;
     resident.transitionTarget = null;
     this.stats.lodTransitionsCompleted += 1;
     if (lodBand === 'near') this.stats.nearBuilds += 1;
@@ -1012,6 +1012,9 @@ export class ConstructionView {
 
   /** Recompute stone/mortar counters from resident module stats (avoids drift). */
   refreshModuleStats() {
+    for (const key of [...ROUNDED_STAT_KEYS, 'growthLeaves', 'growthTriangles']) {
+      this.stats[key] = 0;
+    }
     let stones = 0;
     let mortarPrisms = 0;
     let stoneTriangles = 0;
@@ -1064,6 +1067,9 @@ export class ConstructionView {
         lodReductionMs += other.stats?.lodReductionMs ?? 0;
         stoneBuildMs += other.stats?.stoneBuildMs ?? 0;
         mortarBuildMs += other.stats?.mortarBuildMs ?? 0;
+        for (const key of ROUNDED_STAT_KEYS) this.stats[key] += other.stats?.[key] ?? 0;
+        this.stats.growthLeaves += other.stats?.growthLeaves ?? 0;
+        this.stats.growthTriangles += other.stats?.growthTriangles ?? 0;
       }
     }
     this.stats.stones = stones;
@@ -1091,13 +1097,6 @@ export class ConstructionView {
     this.stats.lodReductionMs = lodReductionMs;
     this.stats.stoneBuildMs = stoneBuildMs;
     this.stats.mortarBuildMs = mortarBuildMs;
-    for (const key of [...ROUNDED_STAT_KEYS, 'growthLeaves', 'growthTriangles']) {
-      let total = 0;
-      for (const entry of this.entries.values()) {
-        for (const other of entry.modules.values()) total += other.stats?.[key] ?? 0;
-      }
-      this.stats[key] = total;
-    }
   }
 
   /** True once every resident module can show a ribbon for its own arc. */

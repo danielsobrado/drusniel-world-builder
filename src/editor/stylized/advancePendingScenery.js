@@ -11,12 +11,21 @@ export function advancePendingScenery(surface) {
   for (let offset = 0; offset < 4; offset++) {
     const index = (first + offset) % 4;
     if (index === 3) {
-      const pending = surface.detailViews?.filter(view => view.pendingRebuild) ?? [];
-      if (!pending.length) continue;
-      for (const view of pending) surface.detailBuildQueue.enqueue(view.pendingRebuild);
+      const views = surface.detailViews ?? [];
+      let pending = false;
+      for (const view of views) {
+        if (!view?.pendingRebuild) continue;
+        surface.detailBuildQueue.enqueue(view.pendingRebuild);
+        pending = true;
+      }
+      if (!pending) continue;
       surface.detailBuildQueue.flush((job, yieldWork) => {
-        const view = surface.detailViews.find(item => job.key.startsWith(`${item.layerName}:`));
-        return view?.applyPendingRebuild(yieldWork) ?? false;
+        for (const view of views) {
+          if (job.key.startsWith(`${view.layerName}:`)) {
+            return view.applyPendingRebuild(yieldWork) ?? false;
+          }
+        }
+        return false;
       });
     } else {
       const [layer, property, method] = LAYERS[index];

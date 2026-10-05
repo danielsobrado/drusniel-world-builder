@@ -128,3 +128,22 @@ test('the far ring reads the forest from its own tile, height and slope', () => 
   assert.equal(view.job.forest[west], 0);
   assert.equal(view.pendingPositions[west * 3 + 1], view.job.heights[west]);
 });
+
+
+test('MacroFarTerrainView yields between rings while guaranteeing progress', () => {
+  const view = Object.create(MacroFarTerrainView.prototype);
+  Object.assign(view, {
+    radialResolution: 4,
+    rowsPerFrame: 4,
+    job: { sampleRing: 0, shadeRing: 0 },
+    sampleRing: (_job, ring) => { view.lastSampled = ring; },
+    shadeRing: () => {},
+  });
+
+  let checks = 0;
+  const done = view.advanceJob(() => ++checks >= 1);
+
+  assert.equal(done, false);
+  assert.equal(view.job.sampleRing, 1);
+  assert.equal(view.lastSampled, 0);
+});

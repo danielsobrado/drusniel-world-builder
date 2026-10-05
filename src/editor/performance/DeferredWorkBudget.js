@@ -41,7 +41,9 @@ export class DeferredWorkBudget {
   endFrame() {
     PerfCounters.set('frameFixedCpuMs', this.slack.endFrame());
     PerfCounters.set('frameDeferredCpuMs', this.slack.deferredMs);
-    PerfCounters.set('frameDeferredBudgetMs', this.available(6));
+    PerfCounters.set('frameDeferredBudgetMs', this.settings.enabled
+      ? this.slack.strictAvailable(6)
+      : 6);
   }
   bindQueue(queue, shouldYield) {
     if (!queue || this.boundQueues.has(queue)) return;

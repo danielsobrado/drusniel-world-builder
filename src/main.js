@@ -1388,9 +1388,23 @@ async function initializeEditor(restoreState, resources, startup) {
       nextFrameRateDisplayAt = frameTimestamp + FRAME_RATE_DISPLAY_INTERVAL_MS;
     }
 
-    terrainView.flushUploadQueue();
-    constructionView.update(frameTimestamp);
+    if (terrainView.commitQueue.size > 0) {
+      const commitBudgetMs = deferredWork.available(terrainView.commitQueue.commitBudgetMs);
+      if (commitBudgetMs > 0) {
+        deferredWork.run(() => terrainView.flushUploadQueue({
+          maxCommits: 1,
+          budgetMs: commitBudgetMs,
+        }));
+      }
+    }
     constructionView.updateLod(viewModeController.camera, terrainView.viewportHeight);
+    const constructionBudgetMs = constructionView.buildQueue.length > 0
+      ? deferredWork.available(Number.POSITIVE_INFINITY)
+      : 0;
+    deferredWork.run(() => constructionView.update({
+      budgetMs: constructionBudgetMs,
+      shouldYield: () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
+    }));
     PerfCounters.set('constructionModulesResident', constructionView.stats.modulesResident);
     PerfCounters.set('constructionModulesRebuilt', constructionView.stats.modulesRebuilt);
     PerfCounters.set('constructionModulesSkippedByHash', constructionView.stats.modulesSkippedByHash);
@@ -1460,7 +1474,9 @@ async function initializeEditor(restoreState, resources, startup) {
       if (profiling) perfQa.mark('character');
     }
 
-    macroFarTerrain.update();
+    deferredWork.run(() => macroFarTerrain.update(
+      () => deferredWork.peek(Number.POSITIVE_INFINITY) <= 0,
+    ));
     const backdropActive = macroFarTerrain.isActive();
     if (backdropActive !== farViewActive) {
       farViewActive = backdropActive;

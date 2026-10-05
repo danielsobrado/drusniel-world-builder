@@ -35,11 +35,16 @@ export class StylizedBuildQueue {
   }
 
   retain(keep) {
-    this.queue = this.queue.filter(job => {
-      if (keep(job)) return true;
-      this.entriesByKey.delete(job.key);
-      return false;
-    });
+    let writeIndex = 0;
+    for (let readIndex = 0; readIndex < this.queue.length; readIndex += 1) {
+      const job = this.queue[readIndex];
+      if (keep(job)) {
+        this.queue[writeIndex++] = job;
+      } else {
+        this.entriesByKey.delete(job.key);
+      }
+    }
+    this.queue.length = writeIndex;
   }
 
   enqueue(job) {
@@ -72,8 +77,8 @@ export class StylizedBuildQueue {
   sortQueue() {
     if (!this.sortDirty) return;
     this.queue.sort((left, right) => (
-      left.queuePriority - right.queuePriority
-      || left.queueSequence - right.queueSequence
+      right.queuePriority - left.queuePriority
+      || right.queueSequence - left.queueSequence
     ));
     this.sortDirty = false;
   }
@@ -94,7 +99,7 @@ export class StylizedBuildQueue {
       && built < this.buildsPerFrame
       && !shouldYield()
     ) {
-      const job = this.queue.shift();
+      const job = this.queue.pop();
       this.entriesByKey.delete(job.key);
       // Only count successful work so stale/no-op jobs cannot starve real rebuilds.
       const completed = this.workRunner

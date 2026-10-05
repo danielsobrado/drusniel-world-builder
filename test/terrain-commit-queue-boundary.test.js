@@ -46,3 +46,27 @@ test('terrain commit drain keeps its intentional unbounded limits', () => {
   assert.equal(committed, 2);
   assert.equal(result.remaining, 0);
 });
+
+
+test('terrain commit queue replaces a slot without duplicating work and preserves priority', () => {
+  const queue = new TerrainCommitQueue({ now: () => 0 });
+  const first = createJob(0);
+  first.priority = 20;
+  first.page = { id: 'stale' };
+  queue.enqueue(first);
+
+  const replacement = createJob(0);
+  replacement.priority = 5;
+  replacement.page = { id: 'current' };
+  queue.enqueue(replacement);
+
+  const other = createJob(1);
+  other.priority = 10;
+  other.page = { id: 'other' };
+  queue.enqueue(other);
+
+  const committed = [];
+  queue.drain(job => committed.push(job.page.id));
+
+  assert.deepEqual(committed, ['current', 'other']);
+});

@@ -366,27 +366,32 @@ export class MacroFarTerrainView {
   }
 
   /** Advances one bounded phase of a sliced rebuild. */
-  advanceJob() {
+  advanceJob(shouldYield = null) {
     const job = this.job;
     const rings = this.radialResolution;
     if (job.sampleRing < rings) {
       const limit = Math.min(rings, job.sampleRing + this.rowsPerFrame);
-      for (let ring = job.sampleRing; ring < limit; ring += 1) {
+      let ring = job.sampleRing;
+      for (; ring < limit; ring += 1) {
+        if (ring > job.sampleRing && shouldYield?.()) break;
         this.sampleRing(job, ring);
       }
-      job.sampleRing = limit;
+      job.sampleRing = ring;
       return false;
     }
 
     if (job.shadeRing < rings) {
       const limit = Math.min(rings, job.shadeRing + this.rowsPerFrame);
-      for (let ring = job.shadeRing; ring < limit; ring += 1) {
+      let ring = job.shadeRing;
+      for (; ring < limit; ring += 1) {
+        if (ring > job.shadeRing && shouldYield?.()) break;
         this.shadeRing(job, ring);
       }
-      job.shadeRing = limit;
+      job.shadeRing = ring;
       if (job.shadeRing < rings) return false;
     }
 
+    if (shouldYield?.()) return false;
     this.positions.set(this.pendingPositions);
     this.colors.set(this.pendingColors);
     this.geometry.getAttribute('position').needsUpdate = true;
@@ -420,7 +425,7 @@ export class MacroFarTerrainView {
     return this.enabled && !!this.generator;
   }
 
-  update() {
+  update(shouldYield = null) {
     if (!this.enabled) return;
     const generator = this.ensureGenerator();
     if (!generator) {
@@ -439,7 +444,7 @@ export class MacroFarTerrainView {
       ) {
         this.startJob(origin.x, origin.z, field);
       }
-      this.advanceJob();
+      this.advanceJob(shouldYield);
       return;
     }
 
@@ -447,7 +452,7 @@ export class MacroFarTerrainView {
       if (this.builtForestSignature === forestSignature) return;
     }
     this.startJob(origin.x, origin.z, field);
-    this.advanceJob();
+    this.advanceJob(shouldYield);
   }
 
   dispose() {
