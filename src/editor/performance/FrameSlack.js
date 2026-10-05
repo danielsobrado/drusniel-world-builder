@@ -40,7 +40,16 @@ export class FrameSlack {
   // Reserve part of this frame's single allowance for a pass that must run
   // after the main draw. Other consumers see the debit immediately.
   reserve(floorMs, maxMs) {
-    const amount = this.available(floorMs, maxMs);
+    return this.createReservation(this.available(floorMs, maxMs));
+  }
+
+  reserveStrict(requiredMs) {
+    const required = Math.max(0, requiredMs);
+    if (required <= 0 || this.strictAvailable(required) + 1e-6 < required) return null;
+    return this.createReservation(required);
+  }
+
+  createReservation(amount) {
     if (amount <= 0) return null;
     const frame = this.frameId;
     this.deferredMs += amount;
@@ -53,6 +62,16 @@ export class FrameSlack {
       return true;
     };
     return { cancel: release, run: work => release() ? this.defer(work) : undefined };
+  }
+
+  strictAvailable(maxMs = Infinity) {
+    const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
+    const predictedFixedMs = this.fixedMs ?? 0;
+    const predicted = this.targetMs - this.reserveMs - predictedFixedMs
+      - this.deferredMs - inProgressMs;
+    const elapsed = Math.max(0, this.now() - this.frameStart);
+    const wallClock = this.targetMs - this.reserveMs - elapsed;
+    return Math.min(maxMs, Math.max(0, Math.min(predicted, wallClock)));
   }
 
   // Time this frame can still give deferred work: the target minus the usual
