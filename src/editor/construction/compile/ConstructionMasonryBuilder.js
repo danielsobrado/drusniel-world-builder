@@ -363,6 +363,54 @@ export function attachConstructionGrowth(built, growth) {
   return built;
 }
 
+export function buildModuleGrowth(placements, options) {
+  return buildConstructionGrowth({ ...options, placements });
+}
+
+export function mergeModuleMasonryBatches(batches) {
+  const ready = batches.filter(batch => batch?.meshes?.length || batch?.stats);
+  if (ready.length === 0) return { meshes: [], stats: emptyStats() };
+  if (ready.length === 1) return ready[0];
+
+  const stats = emptyStats();
+  const groups = new Map();
+  for (const batch of ready) {
+    for (const [key, value] of Object.entries(batch.stats ?? {})) {
+      if (typeof value === 'number') stats[key] = (stats[key] ?? 0) + value;
+    }
+    for (const mesh of batch.meshes ?? []) {
+      const slot = mesh.userData.constructionMaterialSlot ?? CONSTRUCTION_MATERIAL_SLOT.STONE;
+      let group = groups.get(slot);
+      if (!group) groups.set(slot, group = []);
+      group.push(mesh);
+    }
+  }
+
+  const meshes = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      meshes.push(group[0]);
+      continue;
+    }
+    const geometries = group.map(mesh => mesh.geometry);
+    const geometry = mergeGeometries(geometries);
+    if (!geometry) {
+      meshes.push(...group);
+      continue;
+    }
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+    const source = group[0];
+    const mesh = new THREE.Mesh(geometry, source.material);
+    Object.assign(mesh.userData, source.userData);
+    mesh.castShadow = source.castShadow;
+    mesh.receiveShadow = source.receiveShadow;
+    for (const original of group) original.geometry.dispose();
+    meshes.push(mesh);
+  }
+  return { meshes, stats };
+}
+
 function buildStoneBatches(placements, options) {
   if (constructionStyle(options.record.style.key).geometry === 'rounded') {
     return buildRoundedModuleMasonry(placements, options);
