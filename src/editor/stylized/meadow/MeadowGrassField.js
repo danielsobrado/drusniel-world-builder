@@ -49,6 +49,7 @@ export class MeadowGrassField {
     this.settings = settings;
     this.forward = new Vector3();
     this.viewCone = { x: 0, z: 0, tangent: 1 };
+    this.canonical = { x: 0, z: 0 };
     this.skyView = skyView;
     // The player's body stamp, built before the uniforms that read it. Its window is
     // render space, like the blades, but the ground it tests the body sphere against
@@ -156,7 +157,9 @@ export class MeadowGrassField {
     const origin = this.terrainView.floatingOrigin.getState();
     this.interactionOrigin.x = origin.x;
     this.interactionOrigin.z = origin.z;
-    const canonical = { x: camera.position.x + origin.x, z: camera.position.z + origin.z };
+    const canonical = this.canonical;
+    canonical.x = camera.position.x + origin.x;
+    canonical.z = camera.position.z + origin.z;
     let viewCone = null;
     if (camera.getWorldDirection) {
       camera.getWorldDirection(this.forward);
