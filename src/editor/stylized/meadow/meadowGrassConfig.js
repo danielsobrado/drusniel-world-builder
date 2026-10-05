@@ -80,6 +80,7 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
     recoverySpeed: 0.94,
     strength: 1,
     bodyRadius: 0.26,
+    uploadIntervalFrames: 2,
   }),
   /**
    * The meadow's own pigment (grass-test's `grass.blade` base and tip), with
@@ -148,6 +149,12 @@ export function resolveMeadowGrassConfig(source) {
     recoverySpeed: finite(interactionSource.recoverySpeed, d.interaction.recoverySpeed, `${path}.interaction.recoverySpeed`, { min: 0, max: 1 }),
     strength: finite(interactionSource.strength, d.interaction.strength, `${path}.interaction.strength`, { min: 0, max: 4 }),
     bodyRadius: finite(interactionSource.bodyRadius, d.interaction.bodyRadius, `${path}.interaction.bodyRadius`, { min: 0.01, max: 5 }),
+    uploadIntervalFrames: Math.round(finite(
+      interactionSource.uploadIntervalFrames,
+      d.interaction.uploadIntervalFrames,
+      `${path}.interaction.uploadIntervalFrames`,
+      { min: 1, max: 8 },
+    )),
   };
   return {
     enabled: true,
