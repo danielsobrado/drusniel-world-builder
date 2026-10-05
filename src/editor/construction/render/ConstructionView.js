@@ -584,6 +584,7 @@ export class ConstructionView {
     for (const moduleId of [...entry.modules.keys()]) {
       if (planned.has(moduleId)) continue;
       const stale = entry.modules.get(moduleId);
+      this.buildQueue.removeModule(entry.record.id, moduleId);
       this.disposeResidentBuild(stale);
       for (const mesh of stale.meshes ?? []) {
         entry.group.remove(mesh);
