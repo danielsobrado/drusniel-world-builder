@@ -94,6 +94,7 @@ import {
 } from './editor/character/heroPreference.js';
 import { PROCEDURAL_HERO_ID } from './config/validateCharacterConfig.js';
 
+import { RendererStartupGuard } from './editor/lifecycle/RendererStartupGuard.js';
 import { RendererRecovery } from './editor/lifecycle/RendererRecovery.js';
 import { captureEditorRecoveryState, restoreEditorRecoveryState } from './editor/lifecycle/EditorRecoveryState.js';
 import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
@@ -161,11 +162,16 @@ const BOOT_STEPS = Object.freeze([
 async function startEditor(restoreState = null) {
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: start');
   const resources = new ResourceScope();
-  try { return await initializeEditor(restoreState, resources); }
+  const startup = resources.own(new RendererStartupGuard());
+  try {
+    const runtime = await initializeEditor(restoreState, resources, startup);
+    startup.dispose();
+    return runtime;
+  }
   catch (error) { resources.dispose(); throw error; }
 }
 
-async function initializeEditor(restoreState, resources) {
+async function initializeEditor(restoreState, resources, startup) {
   let sceneReloadPending = false;
   const loading = new LoadingTracker();
   const loadingOverlay = new LoadingOverlay(document.body);
@@ -193,6 +199,10 @@ async function initializeEditor(restoreState, resources) {
   const perfQaConfig = parseQaParams(window.location.search);
   if (perfQaConfig) {
     applyPerfQaDensityProfile(config, perfQaConfig.densityProfile);
+    if (!perfQaConfig.seaPolish) {
+      config.stylizedSurface.water.sea.surf.enabled = false;
+      config.stylizedSurface.water.sea.detail.enabled = false;
+    }
   }
   const localAssetObjectUrls = [];
   resources.defer(() => { localAssetObjectUrls.forEach((url) => URL.revokeObjectURL(url)); });
@@ -325,13 +335,14 @@ async function initializeEditor(restoreState, resources) {
     stylizedConfig: config.stylizedSurface,
   });
   resources.own(terrainView);
+  startup.attach(terrainView.renderer);
   const creationDiagnostics = new RendererCreationDiagnostics(terrainView.renderer, assetStartupTelemetry.trace);
   resources.own(creationDiagnostics);
 
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: GPU init');
   boot.start('terrain');
   try {
-    await terrainView.initialize();
+    await startup.wait(terrainView.initialize());
   } catch (error) {
     boot.fail(error);
     terrainView.dispose();
@@ -462,10 +473,10 @@ async function initializeEditor(restoreState, resources) {
   ui.attachGrassBladeProfiles(stylizedSurface.bladeProfiles);
   stylizedSurface.bladeProfiles.ready.then(() => ui.renderGrassBladeProfiles());
   boot.start('blades');
-  await stylizedSurface.bladeProfiles.ready;
+  await startup.wait(stylizedSurface.bladeProfiles.ready);
 
   if (impostorBakeMode) {
-    await stylizedSurface.bakeRequest;
+    await startup.wait(stylizedSurface.bakeRequest);
     return;
   }
 
@@ -543,6 +554,7 @@ async function initializeEditor(restoreState, resources) {
     canvas: terrainView.renderer.domElement,
     terrainView,
     config: config.player,
+    speedBoost: config.exploration.speedBoost,
     farPlane: nearView.farPlane,
   });
   resources.own(playerController);
@@ -783,9 +795,10 @@ async function initializeEditor(restoreState, resources) {
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: document');
   boot.start('map');
   try {
-    if (restoreState) await controller.loadDocument(restoreState.document, { loadReason: 'renderer-recovery' });
-    else await sceneSettingsRuntime.applyInitialRuntime();
+    if (restoreState) await startup.wait(controller.loadDocument(restoreState.document, { loadReason: 'renderer-recovery' }));
+    else await startup.wait(sceneSettingsRuntime.applyInitialRuntime());
   } catch (error) {
+    startup.throwIfLost();
     sceneReloadPending = false;
     ui.failSceneReload(error);
     boot.fail(error);
@@ -851,15 +864,15 @@ async function initializeEditor(restoreState, resources) {
     stampStore: voxelStampStore,
   });
   resources.own(voxelPrototypeUi);
-  const voxelStatus = await voxelPrototype.initialize({ x: 0, z: 0 });
+  const voxelStatus = await startup.wait(voxelPrototype.initialize({ x: 0, z: 0 }));
   voxelPrototypeUi.render();
   if (voxelStatus.code === 'failed') {
     console.error('GPU voxel world failed to initialize.', voxelStatus.error);
   }
 
-  await stylizedSurface.ready;
+  await startup.wait(stylizedSurface.ready);
   assetStartupTelemetry.markAssetsReady();
-  await roadsideDetails.initialize();
+  await startup.wait(roadsideDetails.initialize());
 
   const weatherSettings = {
     weatherMode: config.weather?.mode ?? 'off',
@@ -1264,23 +1277,24 @@ async function initializeEditor(restoreState, resources) {
   boot.start('prewarm', 'Compiling shaders — this is the long one');
   let finishWaterPrewarm = null;
   try {
-    await spellRuntime?.precompile?.(terrainView.renderer);
+    await startup.wait(spellRuntime?.precompile?.(terrainView.renderer));
     stylizedSurface.prewarmStreamingResources(terrainView.renderer);
     finishWaterPrewarm = stylizedSurface.beginWaterRefractionPrewarm();
-    await assetStartupTelemetry.trace.measure('warmup.initialScene', () => terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera));
+    await startup.wait(assetStartupTelemetry.trace.measure('warmup.initialScene', () => terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera)));
     if (finishWaterPrewarm) {
       terrainView.renderer.render(terrainView.scene, editorCamera.camera);
     }
     worldWind.update(0, editorCamera.camera.position, terrainView.floatingOrigin.getState(), null);
     worldWind.render(terrainView.renderer);
-    await characterView?.prewarm(terrainView.renderer, playerController.camera);
-    await postProcessingController.precompile(playerController.camera);
+    await startup.wait(characterView?.prewarm(terrainView.renderer, playerController.camera));
+    await startup.wait(postProcessingController.precompile(playerController.camera));
     terrainView.prewarmPostProcessing(playerController.camera);
     assetStartupTelemetry.trace.measureSync('warmup.actualPass', () => withPreparationFrame(terrainView.renderer, null,
       () => withSceneWarmup(terrainView.scene, () => terrainView.prewarmPostProcessing(playerController.camera))));
     postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET);
     assetStartupTelemetry.trace.measureSync('warmup.waterCaptures', () => stylizedSurface.reflections?.prewarm(editorCamera.camera, stylizedSurface));
   } catch (error) {
+    startup.throwIfLost();
     console.warn('Render pipeline pre-warm failed; pipelines will compile on demand.', error);
   } finally {
     finishWaterPrewarm?.();
@@ -1298,7 +1312,7 @@ async function initializeEditor(restoreState, resources) {
     invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.ACTIVE_CAMERA_REPLACED) });
   resources.own(exploration);
   if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { exploration, deferredWork, drawPreparation });
-  if (restoreState) await restoreEditorRecoveryState(restoreState, { controller, editorCamera, playerController, viewModeController, proceduralWorkshop });
+  if (restoreState) await startup.wait(restoreEditorRecoveryState(restoreState, { controller, editorCamera, playerController, viewModeController, proceduralWorkshop }));
   boot.finish();
 
   const perfQa = PerfQaHarness.fromLocation({
@@ -1637,7 +1651,7 @@ async function initializeEditor(restoreState, resources) {
     viewModeController, proceduralWorkshop, floatingOrigin, exploration }) };
   if (config.exploration.recovery.enabled) terrainView.renderer.onDeviceLost = info => {
     console.warn('Renderer device lost; restoring editor state.', info);
-    void recovery.recover('webgpu', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
+    void recovery.recover(config.renderer.forceWebGL ? 'webgl' : 'auto', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
   };
   if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { recovery, captureRecoveryState: runtime.capture });
   return runtime;

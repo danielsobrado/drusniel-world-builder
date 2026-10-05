@@ -1,4 +1,4 @@
-import { attribute, cos, float, positionLocal, sin, uniform, vec3 } from 'three/tsl';
+import { attribute, cos, positionLocal, sin, uniform, vec3 } from 'three/tsl';
 
 /**
  * Water-plant sway, after grass-test's `plantMaterial`.

@@ -547,7 +547,6 @@ export class ConstructionView {
    * The hint is kept on the change for the compiler client to narrow its
    * request set, not to gate rebuilds here.
    */
-  // eslint-disable-next-line no-unused-vars
   applyPlan(record, plan, hint = null) {
     const entry = this.entries.get(record.id);
     if (!entry) return;

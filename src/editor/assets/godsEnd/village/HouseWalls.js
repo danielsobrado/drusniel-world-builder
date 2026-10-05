@@ -1,5 +1,5 @@
 import { HouseGeometry } from './HouseGeometry.js';
-import { UP, dot, cross, length, normalize, smooth, FOUNDATION_DEPTH } from './houseMath.js';
+import { UP, dot, cross, normalize, smooth, FOUNDATION_DEPTH } from './houseMath.js';
 
 export class HouseWalls extends HouseGeometry {
   walls(material, { x0, x1, z0, z1, y0, y1, tint = 1, skip = [], topShade = 0.7 }) {
@@ -175,6 +175,5 @@ export class HouseWalls extends HouseGeometry {
       this.beam(material, this.at(wall, u, y, -0.1), this.at(wall, u, y, out), size, { tint, side: UP });
     }
   }
-
 
 }

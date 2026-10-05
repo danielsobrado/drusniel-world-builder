@@ -31,10 +31,6 @@ function readGlbChunks(bytes, filePath) {
   return { json, binary };
 }
 
-function readGlbJson(bytes, filePath) {
-  return readGlbChunks(bytes, filePath).json;
-}
-
 const IMAGE_MAGIC = Object.freeze({
   'image/webp': (image) => image.length > 12
     && image.toString('ascii', 0, 4) === 'RIFF'

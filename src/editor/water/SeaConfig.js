@@ -1,3 +1,6 @@
+import { resolveSeaSurf } from './SeaSurf.js';
+import { resolveSeaDetail } from './SeaDetailPolicy.js';
+
 function assertFiniteRange(value, fieldName, minimum, maximum) {
   if (!Number.isFinite(value) || value < minimum || value > maximum) {
     throw new Error(`${fieldName} must be within [${minimum}, ${maximum}].`);
@@ -17,6 +20,8 @@ export function validateSeaConfig(config) {
     throw new Error('stylizedSurface.water.sea.enabled must be a boolean.');
   }
   const field = (name) => `stylizedSurface.water.sea.${name}`;
+  resolveSeaSurf(config.surf);
+  resolveSeaDetail(config.detail);
   assertFiniteRange(config.amplitude, field('amplitude'), 0, 4);
   assertFiniteRange(config.stormScale, field('stormScale'), 1, 4);
   assertFiniteRange(config.choppiness, field('choppiness'), 0, 6);

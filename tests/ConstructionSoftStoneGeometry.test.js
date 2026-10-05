@@ -81,7 +81,7 @@ function buildPair() {
 }
 
 test('soft stone geometry stays inside nominal bounds with finite attributes', () => {
-  const { stoneShape, topology, corners, depth } = buildPair();
+  const { stoneShape, topology, corners } = buildPair();
   assert.equal(topology.valid, true);
   const built = buildSoftStoneGeometry({ topology, stoneShape });
   assert.equal(built.edgeWearApplied, true);

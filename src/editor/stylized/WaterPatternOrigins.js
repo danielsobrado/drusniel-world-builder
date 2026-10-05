@@ -1,5 +1,7 @@
 import { PatternOrigins } from './PatternOrigins.js';
 import { RIVER_DETAIL_PATTERN_PERIOD_METERS } from './RiverSurfaceShading.js';
+import { resolveSeaSurf, seaSurfPatternFrames } from '../water/SeaSurf.js';
+import { resolveSeaDetail, seaDetailPatternFrames } from '../water/SeaDetailPolicy.js';
 
 /**
  * Metres between the reference points that the river foam bands are measured
@@ -19,6 +21,8 @@ export const WATER_FLOW_REFERENCE_BLEND = 0.08;
  */
 export function createWaterPatternOrigins(water) {
   return new PatternOrigins({
+    ...seaSurfPatternFrames(resolveSeaSurf(water.sea?.surf)),
+    ...seaDetailPatternFrames(resolveSeaDetail(water.sea?.detail)),
     surfaceNoise: { scale: water.noiseScale },
     cells: { scale: water.scale },
     refractionCoarse: { scale: water.refraction?.coarseScale ?? 1 },

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as THREE from 'three/webgpu';
+
 import { beveledBox } from '../src/editor/workshop/ProceduralWorkshopGeometry.js';
 import {
   STONE_PALETTES,

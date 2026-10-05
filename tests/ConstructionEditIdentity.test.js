@@ -12,7 +12,6 @@ import { constructionStyle } from '../src/editor/construction/masonry/Constructi
 import { coarsePlacementsForModule } from '../src/editor/construction/render/ConstructionCoarsePlacements.js';
 import {
   buildWallGeometry,
-  sampleShellPath,
 } from '../src/editor/construction/render/ConstructionShell.js';
 import { buildModuleMasonry } from '../src/editor/construction/compile/ConstructionMasonryBuilder.js';
 import {

@@ -254,7 +254,7 @@ function resolveProfile(paletteKey) {
   });
 }
 
-for (const [key, override] of Object.entries(STONE_SURFACE_PROFILES)) {
+for (const key of Object.keys(STONE_SURFACE_PROFILES)) {
   validateProfile(resolveProfile(key), `STONE_SURFACE_PROFILES.${key}`);
 }
 validateProfile(DEFAULT_STONE_SURFACE_PROFILE, 'DEFAULT_STONE_SURFACE_PROFILE');

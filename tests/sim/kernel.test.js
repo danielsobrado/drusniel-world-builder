@@ -7,13 +7,12 @@ import {
   mergeSimulationConfig,
   validateWorldState,
   checksumWorldState,
-  serializeWorldSnapshot,
   restoreWorldSnapshot,
   generatedEntityId,
   createCommandEnvelope,
 } from '../../src/sim/index.js';
 import { createCommandDispatcher } from '../../src/sim/commands/dispatcher.js';
-import { createEmptyWorldState, createAndPutEntity, cloneWorldState } from '../../src/sim/model/worldState.js';
+import { createEmptyWorldState, createAndPutEntity } from '../../src/sim/model/worldState.js';
 import { importedSettlementId } from '../../src/sim/model/ids.js';
 import { createSeededRng } from '../../src/sim/util/seededRng.js';
 import { canonicalSerialize, checksumCanonical } from '../../src/sim/persistence/canonicalSerialize.js';

@@ -1,4 +1,4 @@
-import { color, float, mix, smoothstep, uniform } from 'three/tsl';
+import { color, float, mix, uniform } from 'three/tsl';
 
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
 

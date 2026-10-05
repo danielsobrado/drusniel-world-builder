@@ -1,10 +1,18 @@
 import { mix, texture, vec2 } from 'three/tsl';
 import { acquireSeaDetailTexture } from '../assets/godsEnd/seaDetailCache.js';
 import { SEA_DETAIL_SLOPE_RANGE, SEA_DETAIL_MOMENT_SCALE } from '../assets/godsEnd/seaDetail.js';
+import { resolveSeaDetail } from '../water/SeaDetailPolicy.js';
+import { createSeaRippleNodes } from './SeaRippleShading.js';
 
 /** Packed donor slopes, filtered with their second moment to suppress distant shimmer. */
-export function createSeaDetailNodes({ patternXZ, time, choppiness, strength }) {
+export function createSeaDetailNodes({ patternXZ, time, choppiness, strength,
+  patterns, localXZ, phases, amplitude, settings: source }) {
+  const settings = resolveSeaDetail(source);
   const lease = acquireSeaDetailTexture(choppiness);
+  if (settings.enabled && patterns && phases) {
+    return { slope: createSeaRippleNodes({ map: lease.texture, patterns, localXZ, phases,
+      amplitude, time, strength, settings }), release: lease.release };
+  }
   // Both frequencies close over the existing 320 m river-detail origin period.
   const a = texture(lease.texture, patternXZ.mul(0.125).add(vec2(time.mul(0.027), time.mul(-0.018))));
   const b = texture(lease.texture, patternXZ.mul(0.25).add(vec2(time.mul(-0.021), time.mul(0.014))));

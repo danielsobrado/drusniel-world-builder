@@ -257,6 +257,8 @@ export function parseQaParams(search = '') {
     captureSpell: Boolean(capture?.spell) || readBoolean(params, 'spell', false),
     speed,
     running,
+    explorationBoost: readBoolean(params, 'explorationBoost', false),
+    seaPolish: readBoolean(params, 'seaPolish', true),
     hitchMs: Math.max(1, readNumber(params, 'hitchMs', 1000 / 30)),
     autostart: readBoolean(params, 'autostart', true),
     download: readBoolean(params, 'download', true),

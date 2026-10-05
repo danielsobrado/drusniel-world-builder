@@ -1,5 +1,5 @@
 import { uniform } from 'three/tsl';
-import { sampleSeaSwellCpu } from './SeaSwell.js';
+import { resolveSeaSurf, sampleSeaHeightCpu } from './SeaSurf.js';
 
 /**
  * The sea's shared, per-frame state, read by every water material and by
@@ -19,9 +19,11 @@ export const seaStateUniforms = Object.freeze({
 
 let seaConfig = null;
 let seaTime = 0;
+let surfSettings = null;
 
 export function configureSea(config) {
   seaConfig = config?.enabled ? config : null;
+  surfSettings = resolveSeaSurf(config?.surf);
 }
 
 export function updateSeaState({ timeSeconds, storm, seaLevel, rain }) {
@@ -50,5 +52,5 @@ export function seaSurfaceOffset(x, z, depth) {
   const storm = seaStateUniforms.storm.value;
   const amplitude = seaAmplitude(seaConfig, storm, depth);
   if (amplitude <= 0) return 0;
-  return amplitude * sampleSeaSwellCpu(x, z, seaTime, seaSharpness(seaConfig, storm));
+  return amplitude * sampleSeaHeightCpu(x, z, depth, seaTime, seaSharpness(seaConfig, storm), surfSettings);
 }

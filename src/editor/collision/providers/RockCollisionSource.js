@@ -12,7 +12,6 @@ import {
 } from './RockCollisionProfiles.js';
 import { ROCK_COLLISION_SIGNATURE_SCALE } from './RockCollisionConstants.js';
 
-const EMPTY_PLACEMENTS = Object.freeze([]);
 const EMPTY_PROFILES = Object.freeze([]);
 
 function quantize(value) {

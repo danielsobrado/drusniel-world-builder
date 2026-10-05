@@ -68,14 +68,6 @@ function cameraProjection(camera) {
   return cachedProjectionValue;
 }
 
-function thresholdForBand(band, thresholds) {
-  if (band === 'near') return thresholds.nearPixels;
-  if (band === 'proxy') return thresholds.proxyPixels;
-  if (band === 'impostor') return thresholds.impostorPixels;
-  if (band === 'cluster') return thresholds.clusterPixels;
-  return 0;
-}
-
 function baseBand(pixels, thresholds) {
   if (pixels >= thresholds.nearPixels) return 'near';
   if (pixels >= thresholds.proxyPixels) return 'proxy';

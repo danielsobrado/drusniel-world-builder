@@ -64,7 +64,7 @@
     "qa:construction:rounded": "node scripts/run-construction-rounded-stone-qa.mjs",
     "qa:construction:appearance": "node scripts/run-construction-appearance-qa.mjs",
     "qa:construction:editing": "node scripts/run-construction-editing-qa.mjs",
-    "verify": "npm run check:natural-ui && npm run validate:assets:production && npm test && npm run build",
+    "verify": "npm run lint && npm run check:natural-ui && npm run validate:assets:production && npm test && npm run build",
     "extract:grass-profiles": "node scripts/extract-grass-blade-profiles.mjs",
     "bake:resident-lods": "node scripts/bake-resident-lods.mjs",
     "bake:impostor-mips": "node scripts/bake-impostor-mips.mjs",
@@ -72,27 +72,31 @@
     "qa:environment:parity": "node scripts/run-environment-parity-qa.mjs",
     "qa:free-flight": "node scripts/run-free-flight-qa.mjs",
     "validate:resident-lods": "node scripts/bake-resident-lods.mjs --check",
-    "qa:exploration": "node scripts/run-exploration-qa.mjs"
+    "qa:exploration": "node scripts/run-exploration-qa.mjs",
+    "lint": "eslint .",
+    "qa:recovery": "node scripts/run-renderer-recovery-qa.mjs"
   },
   "dependencies": {
     "js-yaml": "4.3.2",
+    "meshoptimizer": "^1.2.0",
     "polygon-clipping": "0.15.7",
     "straight-skeleton": "1.1.0",
     "three": "0.186.1",
-    "three-mesh-bvh": "0.9.13",
-    "meshoptimizer": "^1.2.0"
+    "three-mesh-bvh": "0.9.13"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.4.2",
     "@gltf-transform/extensions": "^4.4.2",
     "@gltf-transform/functions": "^4.4.2",
     "@img/sharp-wasm32": "^0.35.3",
+    "eslint": "^10.12.0",
+    "globals": "^16.5.0",
     "gltf-validator": "2.0.0-dev.3.10",
     "playwright": "1.62.0",
     "sharp": "^0.35.3",
     "vite": "8.1.5"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.13.0 || >=24"
   }
 }

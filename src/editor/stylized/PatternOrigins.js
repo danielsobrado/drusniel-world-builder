@@ -78,7 +78,11 @@ export class PatternOrigins {
   latticePoint(name, localMeters) {
     const frame = this.frame(name);
     if (frame.wave) throw new Error(`Pattern origin "${name}" is a wave, not a lattice.`);
-    return this.uniforms[name].add(localMeters.mul(frame.scale));
+    const local = frame.basis ? vec2(
+      localMeters.x.mul(frame.basis[0][0]).add(localMeters.y.mul(frame.basis[0][1])),
+      localMeters.x.mul(frame.basis[1][0]).add(localMeters.y.mul(frame.basis[1][1])),
+    ) : localMeters.mul(frame.scale);
+    return this.uniforms[name].add(local);
   }
 
   /** A plane wave's phase: the origin plus dot(localMeters, waveVector). */
@@ -116,7 +120,9 @@ export class PatternOrigins {
       if (frame.wave) {
         this.uniforms[name].value = wavePatternOrigin(centerX, centerZ, frame.wave[0], frame.wave[1]);
       } else {
-        const [x, z] = latticePatternOrigin(centerX, centerZ, frame.scale, frame.period ?? PATTERN_PERIOD);
+        const [x, z] = frame.basis
+          ? frame.basis.map(basis => wrapPeriodic(centerX * basis[0] + centerZ * basis[1], frame.period ?? 1))
+          : latticePatternOrigin(centerX, centerZ, frame.scale, frame.period ?? PATTERN_PERIOD);
         this.uniforms[name].value.set(x, z);
       }
     }

@@ -29,7 +29,7 @@ export class PlayerHud {
    * @param {() => string} [options.getSceneLabel] the legend's title (time of day)
    */
   constructor({
-    viewport, canToggleCamera = false, minimap = null, getRenderer = () => null, getSceneLabel = () => '',
+    viewport, canToggleCamera = false, canBoost = false, minimap = null, getRenderer = () => null, getSceneLabel = () => '',
   }) {
     this.element = document.createElement('div');
     this.element.className = 'player-hud';
@@ -39,7 +39,7 @@ export class PlayerHud {
     this.status = new HudStatus();
     this.reticle = createReticle();
     this.minimap = minimap ? new HudMinimap(minimap) : null;
-    this.hints = new HudKeyHints({ canToggleCamera, getSceneLabel });
+    this.hints = new HudKeyHints({ canToggleCamera, canBoost, getSceneLabel });
     this.metrics = new HudMetrics({ getRenderer });
     this.element.append(
       this.status.element,

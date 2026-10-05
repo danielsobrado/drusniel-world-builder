@@ -2,7 +2,6 @@ import {
   Fn,
   If,
   cameraPosition,
-  dot,
   float,
   positionWorld,
   smoothstep,

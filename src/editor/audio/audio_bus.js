@@ -2,6 +2,7 @@ import { defaultAudioConfig } from "./audio_config.js";
 import { ProceduralAudio } from "./procedural_audio.js";
 import { AudioThrottle } from "./audio_throttle.js";
 import { SampleBank } from "./sample_bank.js";
+import { ShuffleBag } from './audio_variations.js';
 
 /** Spread of playback rate between repeats of one recorded sound. */
 const SAMPLE_RATE_JITTER = 0.08;
@@ -21,6 +22,7 @@ function normalizedVolume(value, fallback) {
 }
 
 class AudioBus {
+  sampleBags = new WeakMap();
   synthManager = new ProceduralAudio();
   throttle = new AudioThrottle();
   config = defaultAudioConfig;
@@ -120,10 +122,12 @@ class AudioBus {
   playSample(eventCfg, volume, options) {
     const samples = eventCfg.samples;
     if (!samples?.length || !this.synthManager.ctx) return false;
-    const pick = Number.isFinite(options?.variant)
-      ? Math.floor(options.variant * 2) % samples.length
-      : Math.floor(Math.random() * samples.length);
-    const played = this.samples.play(samples[pick], {
+    let bag = this.sampleBags.get(samples);
+    if (!bag) { bag = new ShuffleBag(samples); this.sampleBags.set(samples, bag); }
+    const path = Number.isFinite(options?.variant)
+      ? samples[((Math.floor(options.variant * 2) % samples.length) + samples.length) % samples.length]
+      : bag.next();
+    const played = this.samples.play(path, {
       volume,
       rate: 1 + (Math.random() - 0.5) * SAMPLE_RATE_JITTER,
     });

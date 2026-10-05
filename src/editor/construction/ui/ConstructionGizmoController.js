@@ -3,7 +3,7 @@ import { IconGridMenu } from '../../ui/IconGridMenu.js';
 import { icon } from '../../ui/icons.js';
 import { FEATURE_KINDS, OPENING_PROFILES } from '../ConstructionSchema.js';
 import { sampleCubicBezierPath } from '../curve/CubicBezierPath.js';
-import { adjustDelta, motionPrecision, snappedValue } from '../curve/CurveSnapping.js';
+import { adjustDelta, motionPrecision } from '../curve/CurveSnapping.js';
 import { createCurveArcTable } from '../masonry/CurveArcTable.js';
 import { CONSTRUCTION_DIRECT_GIZMO_CONFIG as DIRECT_CONFIG } from '../config/ConstructionDirectGizmoConfig.generated.js';
 import {

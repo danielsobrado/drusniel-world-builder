@@ -91,7 +91,7 @@ for (const style of ['glade-sandstone', 'rounded-fieldstone', 'coursed-rubble'])
 }
 
 test('undressed arch shoulders fit the contour without relying on trim to hide a gap', () => {
-  const { record, arcTable, opening } = fixture('glade-sandstone', 'round', false, false);
+  const { record, opening } = fixture('glade-sandstone', 'round', false, false);
   const plan = planConstruction(record);
   const fitted = plan.modules.flatMap(module => module.placements).filter(stone => stone.contourPolygons);
   assert.ok(fitted.length > 0);

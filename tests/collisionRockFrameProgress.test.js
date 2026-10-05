@@ -10,7 +10,6 @@ import { setUnderwaterBlend } from '../src/editor/water/underwaterState.js';
 
 function rockHarness() {
   const rocks = Object.create(StylizedRockView.prototype);
-  const manifests = new Map();
   rocks.prototypes = [{}];
   rocks.terrainView = { focusChunk: { chunkX: 0, chunkZ: 0 } };
   rocks.placementsByChunk = new Map();

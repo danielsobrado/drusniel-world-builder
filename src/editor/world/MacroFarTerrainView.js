@@ -9,7 +9,6 @@ import {
   positionWorld,
   smoothstep,
   uniform,
-  vec3,
 } from 'three/tsl';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { isAzgaarMacroWorldSource } from '../import/AzgaarMacroWorldSource.js';

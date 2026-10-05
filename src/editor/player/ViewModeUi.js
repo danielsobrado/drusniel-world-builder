@@ -49,6 +49,7 @@ export class ViewModeUi {
     this.hud = new PlayerHud({
       viewport,
       canToggleCamera: Boolean(controller.thirdPersonCamera),
+      canBoost: controller.playerController.speedMode?.enabled ?? false,
       minimap: hud.minimap ?? null,
       getRenderer: hud.getRenderer,
       getSceneLabel: hud.getSceneLabel,

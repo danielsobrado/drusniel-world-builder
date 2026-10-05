@@ -16,7 +16,6 @@ import {
 } from '../mesh/MeshInstanceTransform.js';
 import {
   ROCK_COLLISION_SHAPE_CAPSULE,
-  ROCK_COLLISION_TIER_BLOCKING,
   ROCK_COLLISION_TIER_DECORATIVE,
   ROCK_COLLISION_TIER_WALKABLE,
 } from './RockCollisionConstants.js';

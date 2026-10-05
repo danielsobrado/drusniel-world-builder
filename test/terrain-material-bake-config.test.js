@@ -75,6 +75,6 @@ test('editor config loader installs the validated terrain material bake config',
     new URL('../src/config/loadEditorConfig.js', import.meta.url),
     'utf8',
   );
-  assert.match(source, /terrain-material-bake\.yaml\?raw/);
+  assert.match(source, /terrain-material-bake\.yaml\?compiled/);
   assert.match(source, /config\.stylizedSurface\.materialBake = createTerrainMaterialBakeConfig/);
 });

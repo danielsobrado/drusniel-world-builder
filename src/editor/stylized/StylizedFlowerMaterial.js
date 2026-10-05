@@ -85,7 +85,6 @@ export function createStylizedFlowerMaterial({
   const worldWind = sampleWorldWindCanonical(worldXZ);
   const windDirection = worldWind.direction;
   const gustScale = worldWind.envelope.clamp(0.35, 3.5);
-  const windPerpendicular = vec2(windDirection.y.negate(), windDirection.x);
   // Wave phase against the prevailing wind, not the local field: on a planet-scale
   // map the latter scatters neighbouring patches onto unrelated phases
   // (windWaveCoordinates).

@@ -1,4 +1,5 @@
 import { Vector3 } from 'three';
+import { WATER_KIND_OCEAN } from '../water/WaterConstants.js';
 
 import { AmbientSoundscape } from './ambient_soundscape.js';
 import { seaBearing, soundscapeWeights } from './soundscape_weights.js';
@@ -79,6 +80,8 @@ export class WorldSoundscape {
       ? ringPoints({ x, z, rings: WATER_RINGS, directions: SAMPLE_DIRECTIONS })
       : [];
     const water = waterPoints.map((point) => this.getWaterKind(point.x, point.z));
+    this.seaPoints = waterPoints.filter((point, index) => water[index] === WATER_KIND_OCEAN && (point.dx || point.dz))
+      .map(point => ({ x: point.x, z: point.z, y: this.getSeaLevel() }));
     this.sea = seaBearing(waterPoints, water);
     this.weights = soundscapeWeights({
       tiles: this.sampleTiles(x, z),
@@ -111,9 +114,10 @@ export class WorldSoundscape {
     camera.getWorldDirection(this.forward);
     this.soundscape.update(dt, {
       weights: this.weights,
-      listener: { x, z, yaw: Math.atan2(-this.forward.x, -this.forward.z) },
+      listener: { x, y: camera.position.y, z, yaw: Math.atan2(-this.forward.x, -this.forward.z) },
       fall: this.fall,
       sea: this.sea,
+      seaPoints: this.seaPoints,
       enabled: this.audioBus.synthManager.isEnabled(),
     });
   }

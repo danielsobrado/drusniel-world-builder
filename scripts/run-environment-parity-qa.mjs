@@ -70,6 +70,13 @@ try {
     assert.equal(result.passed, true, `${id}: ${result.failures.join(' ')}`);
   };
   for (const backend of ['webgpu', 'webgl']) {
+    const changed = compareRenderedImages(images.get(`${backend}-surf-off`), images.get(`${backend}-surf-on`), { maximumMeanColorError: 255 });
+    assert.ok(changed.meanColorError > 0.2, `${backend}: surf must visibly change the actual water material`);
+    report.checks.push({ id: `${backend} surf visibly changes pixels`, passed: true, meanColorError: changed.meanColorError });
+    const moving = compareRenderedImages(images.get(`${backend}-surf-on`), images.get(`${backend}-surf-moving`), { maximumMeanColorError: 255 });
+    assert.ok(moving.meanColorError > 0.2, `${backend}: waves must animate`);
+    report.checks.push({ id: `${backend} surf animates`, passed: true, meanColorError: moving.meanColorError });
+    check(`${backend} surf survives rebase`, `${backend}-surf-on`, `${backend}-surf-rebased`, { maximumMeanColorError: 1 });
     for (const distance of ['near', 'far']) check(`${backend} compressed ${distance}`,
       `${backend}-foliage-raw-${distance}`, `${backend}-foliage-compressed-${distance}`);
     check(`${backend} frost visibly changes pixels`, `${backend}-frost-off`, `${backend}-frost-on`, {
@@ -86,7 +93,8 @@ try {
     });
   }
   for (const id of ['foliage-raw-near', 'foliage-compressed-near', 'foliage-raw-far', 'foliage-compressed-far', 'frost-off', 'frost-on',
-    'reflection-cached-turn', 'reflection-refreshed-turn', 'reflection-rebased', 'reflection-orbit-on', 'reflection-orbit-off']) {
+    'reflection-cached-turn', 'reflection-refreshed-turn', 'reflection-rebased', 'reflection-orbit-on', 'reflection-orbit-off',
+    'surf-off', 'surf-on', 'surf-rebased', 'surf-moving']) {
     check(`backend parity ${id}`, `webgpu-${id}`, `webgl-${id}`, { minimumBrightnessRatio: 0.9, maximumBrightnessRatio: 1.1 });
   }
   report.passed = true;

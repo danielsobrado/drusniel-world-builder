@@ -34,7 +34,7 @@ export class PreparedPlacementStore {
     if (this.window?.x === x && this.window.z === z && this.window.radius === radius) return;
     if ((radius * 2 + 1) ** 2 > this.limit) throw new Error('Placement cache cannot hold its dependency window.');
     this.window = { x, z, radius };
-    for (const [key, token] of this.pending) {
+    for (const key of this.pending.keys()) {
       const [cx, cz] = key.split(':').map(Number);
       if (!withinPreparationWindow(cx, cz, this.window)) {
         this.world.chunkWorker.cancel?.(cx, cz, 'placement:');

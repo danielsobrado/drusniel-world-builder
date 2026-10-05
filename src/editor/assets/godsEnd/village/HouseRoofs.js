@@ -1,5 +1,5 @@
 import { HouseWalls } from './HouseWalls.js';
-import { UP, add, cross, length, lerp3 } from './houseMath.js';
+import { UP, add, cross, lerp3 } from './houseMath.js';
 
 export class HouseRoofs extends HouseWalls {
   gableRoof({
@@ -161,6 +161,5 @@ export class HouseRoofs extends HouseWalls {
       this.beam('metal', mid, b, 0.025);
     }
   }
-
 
 }

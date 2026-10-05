@@ -147,6 +147,7 @@ export class PerfQaHarness {
     this.phaseFrameCount = 0;
 
     this.playerController.setHarnessActive(true);
+    this.playerController.speedMode?.setActive(this.config.explorationBoost);
     this.viewModeController.enterWalkMode(this.config.spawn, {
       requestPointerLock: false,
     });
@@ -380,7 +381,7 @@ export class PerfQaHarness {
         href: typeof location !== 'undefined' ? location.href : null,
         visibilityState: typeof document !== 'undefined' ? document.visibilityState : null,
       },
-      playerConfig: this.editorConfig?.player ?? null,
+      playerConfig: this.playerController.speedMode?.config ?? this.editorConfig?.player ?? null,
       worldConfig: this.editorConfig
         ? {
           seed: this.editorConfig.world?.seed,

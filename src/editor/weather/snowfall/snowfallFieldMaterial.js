@@ -1,8 +1,20 @@
 // Adapted from drusniel-gods-end/src/weather/SnowfallSystem.js.
 import * as THREE from 'three/webgpu';
 import {
-  attribute, cameraPosition, cameraWorldMatrix, cos, float, fract,
-  mix, positionGeometry, sin, smoothstep, step, uniform, uniformArray, vec2, vec3,
+  attribute,
+  cameraPosition,
+  cameraWorldMatrix,
+  cos,
+  fract,
+  mix,
+  positionGeometry,
+  sin,
+  smoothstep,
+  step,
+  uniform,
+  uniformArray,
+  vec2,
+  vec3,
 } from 'three/tsl';
 import { DEFAULT_WEATHER_EFFECTS } from '../WeatherEffectsConfig.js';
 import { skyLightUniforms } from '../../stylized/sky/skyLight.js';

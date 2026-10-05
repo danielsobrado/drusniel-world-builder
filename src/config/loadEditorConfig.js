@@ -1,18 +1,17 @@
-import yaml from 'js-yaml';
-import enhancementsSource from '../../config/render-enhancements.yaml?raw';
+import enhancementsSource from '../../config/render-enhancements.yaml?compiled';
 import { resolveRenderEnhancements } from './RenderEnhancements.js';
-import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?raw';
-import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?raw';
-import collisionConfigSource from '../../config/collision.yaml?raw';
-import culturesConfigSource from '../../config/cultures.yaml?raw';
-import configSource from '../../editor.config.yaml?raw';
-import explorationConfigSource from '../../config/exploration.yaml?raw';
+import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?compiled';
+import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?compiled';
+import collisionConfigSource from '../../config/collision.yaml?compiled';
+import culturesConfigSource from '../../config/cultures.yaml?compiled';
+import configSource from '../../editor.config.yaml?compiled';
+import explorationConfigSource from '../../config/exploration.yaml?compiled';
 import { applyMobileStartupProfile } from '../editor/exploration/MobileProfile.js';
 import { resolveExplorationConfig } from '../editor/exploration/ExplorationConfig.js';
-import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.yaml?raw';
-import waterConfigSource from '../../config/water-domain.yaml?raw';
-import waterVisualConfigSource from '../../config/water-visual.yaml?raw';
-import weatherEffectsConfigSource from '../../config/weather-effects.yaml?raw';
+import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.yaml?compiled';
+import waterConfigSource from '../../config/water-domain.yaml?compiled';
+import waterVisualConfigSource from '../../config/water-visual.yaml?compiled';
+import weatherEffectsConfigSource from '../../config/weather-effects.yaml?compiled';
 import { resolveWeatherEffects } from '../editor/weather/WeatherEffectsConfig.js';
 import { createCollisionConfig } from '../editor/collision/CollisionConfig.js';
 import { registerCollisionConfig } from '../editor/collision/CollisionPlayerBridge.js';
@@ -47,25 +46,25 @@ function applyRuntimeOverrides(config) {
 }
 
 export function loadEditorConfig() {
-  const config = yaml.load(configSource);
+  const config = structuredClone(configSource);
   config.simulation ??= {};
-  config.simulation.cultureCatalog = resolveCultureCatalog(yaml.load(culturesConfigSource));
-  config.stylizedSurface.enhancements = resolveRenderEnhancements(yaml.load(enhancementsSource), runtimeSearch(),
+  config.simulation.cultureCatalog = resolveCultureCatalog(structuredClone(culturesConfigSource));
+  config.stylizedSurface.enhancements = resolveRenderEnhancements(structuredClone(enhancementsSource), runtimeSearch(),
     { mobile: typeof window !== 'undefined' && window.innerWidth < 768 });
-  config.exploration = resolveExplorationConfig(yaml.load(explorationConfigSource));
-  config.weatherEffects = resolveWeatherEffects(yaml.load(weatherEffectsConfigSource));
+  config.exploration = resolveExplorationConfig(structuredClone(explorationConfigSource));
+  config.weatherEffects = resolveWeatherEffects(structuredClone(weatherEffectsConfigSource));
   config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;
-  config.import.azgaarGuidance = yaml.load(azgaarGuidanceConfigSource);
+  config.import.azgaarGuidance = structuredClone(azgaarGuidanceConfigSource);
   config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(
-    yaml.load(terrainMaterialBakeConfigSource),
+    structuredClone(terrainMaterialBakeConfigSource),
   );
   config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness);
   config.stylizedSurface.ambientEffects = resolveAmbientEffectsConfig(
-    yaml.load(ambientEffectsConfigSource)?.ambientEffects,
+    structuredClone(ambientEffectsConfigSource)?.ambientEffects,
   );
-  applyWaterDomainConfig(config, yaml.load(waterConfigSource));
-  applyWaterVisualConfig(config, yaml.load(waterVisualConfigSource));
-  config.collision = createCollisionConfig(yaml.load(collisionConfigSource), runtimeSearch());
+  applyWaterDomainConfig(config, structuredClone(waterConfigSource));
+  applyWaterVisualConfig(config, structuredClone(waterVisualConfigSource));
+  config.collision = createCollisionConfig(structuredClone(collisionConfigSource), runtimeSearch());
   applyRuntimeOverrides(config);
   applyMobileStartupProfile(config);
   validateEditorConfig(config);

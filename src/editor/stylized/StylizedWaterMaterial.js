@@ -176,6 +176,7 @@ export function createStylizedWaterMaterial({
     ? createSeaSurfaceNodes({
       terrainUv,
       patternXZ: surfacePatterns.latticePoint('riverDetail', localXZ),
+      patterns: surfacePatterns,
       chunkWorldSize,
       surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
       waterDepth,
@@ -509,7 +510,7 @@ export function createStylizedWaterMaterial({
   }
 
   if (sea && quality.foam && water.foam.enabled) {
-    const whitecap = sea.whitecap().mul(waterCoverage);
+    const whitecap = max(sea.whitecap(), sea.surfFoam ?? float(0)).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
     whitewater = whitewater ? max(whitewater, whitecap) : whitecap;
   }

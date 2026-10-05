@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Group, Matrix4, MeshBasicNodeMaterial, PerspectiveCamera, Scene, Vector2, Vector3, WebGPUCoordinateSystem } from 'three/webgpu';
+import { Group, PerspectiveCamera, Scene, Vector2, Vector3, WebGPUCoordinateSystem } from 'three/webgpu';
 import { float, uniform, vec2, vec3 } from 'three/tsl';
 import { StartupTrace } from '../src/editor/performance/StartupTrace.js';
 import { RendererCreationDiagnostics } from '../src/render/RendererCreationDiagnostics.js';

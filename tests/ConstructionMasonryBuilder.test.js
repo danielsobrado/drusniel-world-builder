@@ -579,7 +579,7 @@ test('quoins voussoirs and coping do not use relief', () => {
 });
 
 test('mortar descriptors stay identical with relief enabled and disabled', () => {
-  const { record, arcTable, placements } = packSoftLimestone(6);
+  const { placements } = packSoftLimestone(6);
   const subset = placements.slice(0, 20);
   const withRelief = [];
   const withoutRelief = [];

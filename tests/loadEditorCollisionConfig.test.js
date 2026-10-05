@@ -9,7 +9,7 @@ const source = readFileSync(
 
 test('editor config loader installs collision without dropping water config', () => {
   assert.match(source, /config\.collision = createCollisionConfig/);
-  assert.match(source, /config\/collision\.yaml\?raw/);
+  assert.match(source, /config\/collision\.yaml\?compiled/);
   assert.match(source, /applyWaterDomainConfig/);
   assert.match(source, /validateWaterDomainConfig/);
 });

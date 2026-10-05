@@ -15,7 +15,6 @@ import {
   MIN_SPLIT_HEIGHT,
   createBedField,
   jointTilt,
-  resolveCellCorners,
   resolveLeafFaces,
   scaleCorners,
   splitCell,

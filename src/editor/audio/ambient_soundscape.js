@@ -14,6 +14,8 @@
  * the world volume and silences with audio.
  */
 
+import { AmbientOneShots } from './ambient_one_shots.js';
+
 const numbered = (folder, stem, count) => Array.from(
   { length: count },
   (_, index) => `${folder}/${stem}-${String(index + 1).padStart(2, '0')}.mp3`,
@@ -102,6 +104,7 @@ export class AmbientSoundscape {
     this.bus = null;
     this.beds = new Map();
     this.timers = new Map();
+    this.wildlife = new AmbientOneShots({ bank, definitions: WILDLIFE, random });
     this.roar = null;
     this.roarPanner = null;
   }
@@ -138,35 +141,8 @@ export class AmbientSoundscape {
   }
 
   /** @param {number | null} seaPan -1 left … 1 right, where the sea lies */
-  updateWildlife(weights, dt, seaPan = null) {
-    for (const [name, kind] of Object.entries(WILDLIFE)) {
-      const weight = weights[name] ?? 0;
-      if (weight <= 0.02) {
-        this.timers.delete(name);
-        continue;
-      }
-      if (!this.timers.has(name)) for (const path of kind.samples) this.bank.load(path);
-      // Busier surroundings call more often.
-      const left = (this.timers.get(name) ?? this.nextInterval(kind)) - dt * (0.4 + weight * 0.6);
-      if (left > 0) {
-        this.timers.set(name, left);
-        continue;
-      }
-      this.timers.set(name, this.nextInterval(kind));
-      const path = kind.samples[Math.floor(this.random() * kind.samples.length)];
-      this.bank.play(path, {
-        volume: kind.volume * weight * (0.6 + this.random() * 0.4),
-        rate: 0.92 + this.random() * 0.16,
-        pan: kind.bearing === 'sea' && seaPan !== null
-          ? Math.max(-1, Math.min(1, seaPan + (this.random() - 0.5) * 0.5))
-          : (this.random() * 2 - 1) * 0.85,
-        destination: this.bus,
-      });
-    }
-  }
-
-  nextInterval(kind) {
-    return kind.interval[0] + this.random() * (kind.interval[1] - kind.interval[0]);
+  updateWildlife(weights, dt, listener, seaPoints, enabled) {
+    this.wildlife.update(weights, dt, listener, this.bus, seaPoints, enabled);
   }
 
   /**
@@ -207,17 +183,18 @@ export class AmbientSoundscape {
    * @param {{ x: number, z: number } | null} [state.sea] unit bearing toward the sea
    * @param {boolean} [state.enabled] audio switched on
    */
-  update(dt, { weights, listener, fall = null, sea = null, enabled = true }) {
+  update(dt, { weights, listener, fall = null, seaPoints = [], enabled = true }) {
     if (!(dt > 0) || !this.ensureBus()) return;
     const step = Math.min(dt, 0.25);
     // Muting audio stops the synth; the loops fade out through the bus.
     this.fade(this.bus.gain, enabled ? this.volume : 0, step);
     this.updateBeds(weights, step);
-    this.updateWildlife(weights, step, sea ? panToward(listener, sea) : null);
+    this.updateWildlife(weights, step, listener, seaPoints, enabled);
     this.updateFallRoar(listener, fall, step);
   }
 
   dispose() {
+    this.wildlife.dispose();
     for (const voice of this.beds.values()) {
       try { voice.source.stop(); } catch { /* already stopped */ }
     }

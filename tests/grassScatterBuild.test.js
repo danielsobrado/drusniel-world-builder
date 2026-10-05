@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createGrassScatterComposer } from '../src/editor/stylized/grassScatterBuild.js';
 
-const CHUNK_SIZE = 4;
 const SOURCE_CLUMPS = 6;
 
 /**

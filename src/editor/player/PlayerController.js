@@ -1,4 +1,5 @@
 import { CameraFollow } from './CameraFollow.js';
+import { ExplorationSpeedMode } from './ExplorationSpeedMode.js';
 import * as THREE from 'three';
 import { registerCollisionPlayer } from '../collision/CollisionPlayerBridge.js';
 import { createPlayerState, stepPlayerPhysics } from './PlayerPhysics.js';
@@ -30,10 +31,11 @@ const INACTIVE_COLLISION_STATUS = Object.freeze({
 });
 
 export class PlayerController {
-  constructor({ canvas, terrainView, config, farPlane = 5000 }) {
+  constructor({ canvas, terrainView, config, speedBoost = {}, farPlane = 5000 }) {
     this.canvas = canvas;
     this.terrainView = terrainView;
     this.config = config;
+    this.speedMode = new ExplorationSpeedMode(config, speedBoost);
     this.camera = new THREE.PerspectiveCamera(config.fovDegrees, 1, 0.5, farPlane);
     this.camera.rotation.order = 'YXZ';
     this.state = createPlayerState({
@@ -108,6 +110,8 @@ export class PlayerController {
       pointerLocked: this.pointerLocked,
       grounded: this.state.grounded,
       running: this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.mobile.running,
+      explorationBoost: this.speedMode.active,
+      canBoost: this.speedMode.enabled,
       position: Object.freeze({ x: this.state.x, y: this.state.y, z: this.state.z }),
       footY: this.state.footY,
       yaw: this.yaw,
@@ -389,7 +393,7 @@ export class PlayerController {
         descend,
       },
       deltaSeconds,
-      config: this.config,
+      config: this.speedMode.config,
       forward: this.forward,
       right: this.right,
       getGroundHeight: (x, z) => this.getGroundHeight(x, z),
@@ -492,8 +496,7 @@ export class PlayerController {
         || this.harnessActive
         || this.uiBlocked
         || this.paused
-        || event.target instanceof HTMLInputElement
-        || event.target instanceof HTMLTextAreaElement) {
+        || event.target?.matches?.('input, textarea, select, button, [contenteditable="true"]')) {
       return;
     }
     // Escape is owned by `EscapeStack`, which listens on the capture phase at a
@@ -501,6 +504,7 @@ export class PlayerController {
     if (event.code !== 'Escape') event.stopImmediatePropagation();
     if (!MOVEMENT_CODES.has(event.code)) return;
     event.preventDefault();
+    if (this.pointerLocked && this.speedMode.handleKeyDown(event)) this.emit();
     this.keys.add(event.code);
     if (event.code === 'Space'
         && !event.repeat
@@ -544,6 +548,7 @@ export class PlayerController {
   }
 
   resetInput() {
+    this.speedMode.resetGesture();
     if (this.harnessActive) return;
     this.keys.clear();
     Object.assign(this.mobile, { right: 0, forward: 0, running: false, ascend: false, descend: false });

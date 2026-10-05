@@ -112,7 +112,7 @@ test('LRU eviction does not dispose textures still held by live materials', () =
   const previousImage = globalThis.Image;
   globalThis.Image = class FakeImage {
     addEventListener() {}
-    // eslint-disable-next-line class-methods-use-this
+
     set src(_value) {}
   };
 

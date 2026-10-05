@@ -3,7 +3,6 @@ import { CascadedSunShadows } from '../../render/shadows/CascadedSunShadows.js';
 import {
   clamp,
   dot,
-  float,
   max,
   mix,
   normalize,

@@ -1,10 +1,11 @@
 import * as THREE from 'three/webgpu';
-import { float, texture, uv, vec3 } from 'three/tsl';
+import { texture, uv, vec3 } from 'three/tsl';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { loadFoliageMipTexture } from '../../stylized/impostor/FoliageMipTexture.js';
 import { createFrostShading, resolveFrost, frostUniforms } from '../../stylized/ambient/FrostShading.js';
 import { installUnusedSamplerPruning } from '../../../render/UnusedSamplerBindings.js';
 import { runReflectionReprojectionFixture } from './ReflectionReprojectionFixture.js';
+import { runSeaSurfFixture } from './SeaSurfFixture.js';
 
 // A bounded render fixture. The world movement harness remains the performance authority.
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
@@ -71,6 +72,7 @@ try {
   }
   scene.remove(floor); floor.geometry.dispose(); material.dispose();
   await runReflectionReprojectionFixture(renderer, publishCapture);
+  await runSeaSurfFixture(renderer, publishCapture);
 } catch (error) { state.report.failure = error.stack; }
 finally {
   owned.forEach(map => map.dispose()); loader.dispose(); frostUniforms.cold.value = 0;

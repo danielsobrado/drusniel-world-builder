@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { StylizedBuildQueue } from '../src/editor/stylized/StylizedBuildQueue.js';
 import { StylizedGrassSlot } from '../src/editor/stylized/StylizedGrassSlot.js';
-import { StylizedRockView } from '../src/editor/stylized/StylizedRockView.js';
+
 import {
   shouldScheduleTreeLodRebuild,
   StylizedTreeView,

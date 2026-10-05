@@ -30,8 +30,6 @@ const TRUNK_CLEARANCE = 1.3;
 const THREADING_RADIUS = 1.5;
 // Meadow snakes stay out of the forest and this far inland of the coast
 // (the beach and the dunes behind it), in metres.
-const MEADOW_FOREST_LIMIT = 0.3;
-const MEADOW_COAST_CLEARANCE = 200;
 // Beyond these the body is re-posed every second and every third frame; it
 // moves a few centimetres a frame, which does not show from there.
 const CLOSE_UPDATE_DISTANCE = 25;
@@ -41,8 +39,6 @@ const UP = new THREE.Vector3(0, 1, 0);
 function angleDelta(from, to) {
   return Math.atan2(Math.sin(to - from), Math.cos(to - from));
 }
-
-
 
 // Flat forked tongue along +z, unit length, lying in the x-z plane.
 function createTongueGeometry(width) {

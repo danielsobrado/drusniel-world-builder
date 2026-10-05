@@ -1,4 +1,5 @@
 const DEFAULTS = {
+  speedBoost: { enabled: true, speedMultiplier: 3, doubleTapWindowMs: 300 },
   freeFly: { enabled: true, moveSpeed: 24, fastMultiplier: 4, lookSensitivity: 0.003 },
   frameBudget: { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2 },
   drawPreparation: { enabled: true, meshesPerFrame: 2 },
@@ -40,6 +41,10 @@ export function resolveExplorationConfig(source = {}) {
     if (!Number.isSafeInteger(result[section][key])) throw new Error(`exploration.${section}.${key} must be an integer.`);
   }
   const snakes = result.serpents;
+  if (result.speedBoost.speedMultiplier <= 1 || result.speedBoost.speedMultiplier > 5
+    || result.speedBoost.doubleTapWindowMs > 1000) {
+    throw new Error('exploration.speedBoost requires a multiplier within (1, 5] and a tap window at most 1000 ms.');
+  }
   if (result.frameBudget.maximumMs < result.frameBudget.minimumMs) {
     throw new Error('exploration.frameBudget.maximumMs must cover minimumMs.');
   }

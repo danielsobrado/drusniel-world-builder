@@ -11,7 +11,8 @@ export function captureEditorRecoveryState({ controller, editorCamera, playerCon
     flight: viewModeController.captureFlightState?.() ?? null,
     editor: { position: editorCamera.camera.position.toArray(), target: editorCamera.controls.target.toArray(),
       quaternion: editorCamera.camera.quaternion.toArray(), zoom: editorCamera.camera.zoom },
-    player: { state: structuredClone(playerController.state), yaw: playerController.yaw, pitch: playerController.pitch },
+    player: { state: structuredClone(playerController.state), yaw: playerController.yaw, pitch: playerController.pitch,
+      explorationBoost: playerController.speedMode?.active ?? false },
     workshop: proceduralWorkshop.captureRuntimeState(),
   };
 }
@@ -29,6 +30,7 @@ export async function restoreEditorRecoveryState(state, { controller, editorCame
   }
   playerController.state = structuredClone(state.player.state); playerController.yaw = state.player.yaw;
   playerController.pitch = state.player.pitch; playerController.applyCameraState();
+  playerController.speedMode?.setActive(state.player.explorationBoost);
   if (state.cameraView !== viewModeController.cameraView) viewModeController.toggleCameraView();
   if (state.paused || state.flight?.returnState.paused) viewModeController.pause();
   if (state.flight) viewModeController.restoreFlightState(state.flight);

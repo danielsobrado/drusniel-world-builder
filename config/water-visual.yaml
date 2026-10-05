@@ -97,6 +97,35 @@ water:
     # the term off and compiles nothing for it.
     crestTransmission: 0.5
     crestColor: '#8fd0a8'
+    # Depth-following wave sets and breaking rolls; independent of coast orientation.
+    surf:
+      enabled: true
+      fadeStart: 2.5
+      fadeEnd: 7
+      depthPhaseScale: 1.4
+      setDepth: 0.5
+      setGroup: 0.29
+      alongFrequency: 0.031
+      phaseWarp: 0.32
+      breakDepthStart: 0.25
+      breakDepthFull: 0.7
+      breakDepthFade: 2.4
+      breakDepthEnd: 4.5
+      strength: 0.8
+      trail: 4.5
+      laceScale: 0.19
+    # Crossing ripple trains ride the broad swell and disperse at their own speeds.
+    detail:
+      enabled: true
+      textureWorldScale: 8
+      mediumScale: 2.1
+      fineScale: 5.7
+      mediumDistance: 120
+      fineDistance: 28
+      mediumStrength: 0.14
+      fineStrength: 0.055
+      orbitalAdvection: 0.8
+      advectionRatio: 0.9
   # Where the ground meets the sea: a swash film that runs up the sand and back
   # each wave, a foam line on its front, and wet sand behind it. Keyed on height
   # above sea level, so it follows any coast; lakes and rivers get none.

@@ -12,7 +12,6 @@ import {
   rtt,
   screenUV,
   uniform,
-  vec3,
   vec4,
 } from 'three/tsl';
 import { buildDustGodRays } from './GodRaysScreenScattering.js';
@@ -421,7 +420,6 @@ export class StylizedGodRaysPostProcess {
     this.pipeline.render();
     return true;
   }
-
 
   getSettings() {
     const volumetric = this.config.volumetric;

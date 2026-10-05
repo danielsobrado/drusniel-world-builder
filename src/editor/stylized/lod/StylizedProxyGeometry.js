@@ -7,7 +7,6 @@ import {
   positionGeometry,
   positionLocal,
   sin,
-  vec2,
   vec3,
   vec4,
 } from 'three/tsl';

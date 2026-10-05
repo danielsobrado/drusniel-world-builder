@@ -1,4 +1,8 @@
 # Gods' End systems adapted to canonical coordinates and bounded residency.
+speedBoost:
+  enabled: true
+  speedMultiplier: 3
+  doubleTapWindowMs: 300
 freeFly:
   enabled: true
   moveSpeed: 24

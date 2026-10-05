@@ -9,6 +9,7 @@ import {
   PerfCounters,
 } from './performance/qa/PerfCounters.js';
 import { createTerrainMaterial } from './terrainMaterial.js';
+import { terrainRendererProfile } from './materials/TerrainRendererProfile.js';
 import { createCoastPatternOrigins } from './stylized/CoastSwashShading.js';
 import { createTerrainTransitionPatterns } from './materials/TerrainTransitionNodes.js';
 import { resolveBlownStreaks } from './stylized/ambient/BlownStreaks.js';
@@ -260,6 +261,7 @@ export class InfiniteTerrainView {
     stylizedConfig,
     postProcessingController = null,
   }) {
+    stylizedConfig = terrainRendererProfile(stylizedConfig, rendererConfig);
     this.container = container;
     this.tileMap = tileMap;
     this.heightField = heightField;

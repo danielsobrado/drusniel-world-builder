@@ -67,6 +67,9 @@ export function resolveHudStatus(state) {
   if (!player.pointerLocked && !player.uiBlocked && !player.harnessActive) {
     return status('info', 'mouse', PLAYER_POINTER_LOCK_MESSAGE);
   }
+  if (player.explorationBoost) {
+    return status('info', 'pin', 'Fast travel', [{ key: 'Shift ×2', label: 'normal speed' }]);
+  }
   return null;
 }
 

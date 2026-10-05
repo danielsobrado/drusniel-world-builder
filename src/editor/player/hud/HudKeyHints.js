@@ -4,11 +4,12 @@ import { HUD_PHASE } from './hudState.js';
 const REST_AFTER_MS = 8000;
 const TAGLINE = 'Explore at your own pace';
 
-function hintColumns({ canToggleCamera }) {
+function hintColumns({ canToggleCamera, canBoost }) {
   return [
     { key: 'Mouse', label: 'Look around' },
     { key: 'WASD', label: 'Move' },
     { key: 'Shift', label: 'Run' },
+    canBoost ? { key: 'Shift ×2', label: 'Fast travel' } : null,
     { key: 'Space', label: 'Jump' },
     canToggleCamera ? { key: 'V', label: 'Camera' } : null,
     { key: 'I', label: 'Bag' },
@@ -30,7 +31,7 @@ export class HudKeyHints {
    * @param {boolean} [options.canToggleCamera]
    * @param {() => string} [options.getSceneLabel] the place or time of day to title the legend
    */
-  constructor({ canToggleCamera = false, getSceneLabel = () => '' } = {}) {
+  constructor({ canToggleCamera = false, canBoost = false, getSceneLabel = () => '' } = {}) {
     this.getSceneLabel = getSceneLabel;
     this.element = document.createElement('section');
     this.element.className = 'hud-legend';
@@ -41,7 +42,7 @@ export class HudKeyHints {
     `;
     this.sceneName = this.element.querySelector('.hud-legend__scene strong');
     this.keys = this.element.querySelector('.hud-keys');
-    for (const column of hintColumns({ canToggleCamera })) {
+    for (const column of hintColumns({ canToggleCamera, canBoost })) {
       const cell = document.createElement('div');
       const key = document.createElement('dt');
       key.textContent = column.key;

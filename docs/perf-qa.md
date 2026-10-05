@@ -90,6 +90,8 @@ When a run finishes, the report is available as:
 | `settleTimeout` | `120` | Seconds `settle` may wait past `warmup` before measuring anyway |
 | `duration` | `12` (`20` for `chunk-cross`) | Measured motion seconds |
 | `speed` | `run` | `walk` or `run` |
+| `explorationBoost` | off | `1` enables the configured fast-travel multiplier; recorded with effective player settings |
+| `seaPolish` | on | `0` disables the new surf and crossing ripple layers for A/B controls; resolved settings remain in the report |
 | `hitchMs` | `~33.3` | Frame-dt threshold that counts as a hitch |
 | `autostart` | `1` | Start as soon as stylized assets are ready |
 | `download` | `1` | Auto-download the JSON report when done |

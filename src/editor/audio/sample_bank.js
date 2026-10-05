@@ -6,6 +6,9 @@
  * procedural synth for events), so nothing ever plays late and out of step.
  */
 
+import { trimLoopPadding } from './audio_variations.js';
+import { createAudioVoice } from './spatial_audio_voice.js';
+
 export const SAMPLE_BANK_ROOT = 'audio/cc0/';
 
 export class SampleBank {
@@ -28,6 +31,7 @@ export class SampleBank {
     this.buffers = new Map();
     this.pending = new Map();
     this.failed = new Set();
+    this.loopBuffers = new WeakMap();
   }
 
   url(path) {
@@ -69,27 +73,14 @@ export class SampleBank {
    *
    * @returns {boolean} whether it played
    */
-  play(path, { volume = 1, rate = 1, pan = 0, destination = null } = {}) {
+  play(path, options = {}) { return Boolean(this.playVoice(path, options)); }
+
+  playVoice(path, { destination = null, ...options } = {}) {
     const context = this.getContext();
     const target = destination ?? this.getDestination();
     const buffer = this.get(path);
-    if (!context || !target || !buffer) return false;
-    const source = context.createBufferSource();
-    source.buffer = buffer;
-    source.playbackRate.value = rate;
-    const gain = context.createGain();
-    gain.gain.value = volume;
-    let tail = gain;
-    if (pan !== 0 && typeof context.createStereoPanner === 'function') {
-      const panner = context.createStereoPanner();
-      panner.pan.value = Math.max(-1, Math.min(1, pan));
-      gain.connect(panner);
-      tail = panner;
-    }
-    source.connect(gain);
-    tail.connect(target);
-    source.start();
-    return true;
+    if (!context || !target || !buffer) return null;
+    return createAudioVoice(context, buffer, target, options);
   }
 
   /**
@@ -102,13 +93,15 @@ export class SampleBank {
     const buffer = this.get(path);
     if (!context || !target || !buffer) return null;
     const source = context.createBufferSource();
-    source.buffer = buffer;
+    let loopBuffer = this.loopBuffers.get(buffer);
+    if (!loopBuffer) { loopBuffer = trimLoopPadding(buffer, context); this.loopBuffers.set(buffer, loopBuffer); }
+    source.buffer = loopBuffer;
     source.loop = true;
     const gain = context.createGain();
     gain.gain.value = 0;
     source.connect(gain);
     gain.connect(target);
-    source.start(0, Math.random() * buffer.duration);
+    source.start(0, Math.random() * loopBuffer.duration);
     return { source, gain };
   }
 }
