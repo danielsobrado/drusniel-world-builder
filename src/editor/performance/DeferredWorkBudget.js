@@ -28,26 +28,34 @@ export class DeferredWorkBudget {
   }
   attachSurface(surface) {
     const provider = this.provider;
+    const shouldYield = () => this.peek(6) <= 0;
     const queues = ['grassBuildQueue', 'flowerBuildQueue', 'treeBuildQueue', 'rockBuildQueue',
       'bushBuildQueue', 'detailBuildQueue', 'aquaticBuildQueue', 'tropicalBuildQueue'];
     for (const name of queues) {
       if (surface[name]) {
         surface[name].budgetProvider = provider;
         surface[name].workRunner = this.runner;
+        const previousGate = surface[name].shouldYield;
+        // The legacy wall-clock gate includes mandatory scenery updates and
+        // can reject the shared scheduler's late progress floor indefinitely.
+        surface[name].shouldYield = () => this.settings.enabled
+          ? shouldYield() : Boolean(previousGate?.());
       }
     }
     surface.workBudgetProvider = provider;
     surface.runDeferredWork = this.runner;
-    surface.shouldYieldWork = () => this.peek(6) <= 0;
+    surface.shouldYieldWork = shouldYield;
     if (surface.meadowGrass) surface.meadowGrass.workRunner = this.runner;
     if (surface.rockView) surface.rockView.shouldYieldWork = surface.shouldYieldWork;
     if (surface.rockView?.manifestStore?.queue) {
       surface.rockView.manifestStore.queue.budgetProvider = provider;
       surface.rockView.manifestStore.queue.workRunner = this.runner;
+      surface.rockView.manifestStore.queue.shouldYield = shouldYield;
     }
     if (surface.treeView?.manifestStore?.queue) {
       surface.treeView.manifestStore.queue.budgetProvider = provider;
       surface.treeView.manifestStore.queue.workRunner = this.runner;
+      surface.treeView.manifestStore.queue.shouldYield = shouldYield;
     }
   }
 }
