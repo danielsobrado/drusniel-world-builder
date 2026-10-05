@@ -44,6 +44,8 @@ export class DeferredWorkBudget {
     }
     surface.workBudgetProvider = provider;
     surface.runDeferredWork = this.runner;
+    surface.reserveDeferredWork = max => this.slack.reserve(this.settings.enabled
+      ? Math.min(this.settings.minimumMs, max) : 0, max);
     surface.shouldYieldWork = shouldYield;
     if (surface.meadowGrass) surface.meadowGrass.workRunner = this.runner;
     if (surface.rockView) surface.rockView.shouldYieldWork = surface.shouldYieldWork;

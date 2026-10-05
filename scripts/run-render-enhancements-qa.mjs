@@ -40,23 +40,15 @@ try {
   await page.waitForTimeout(3000);
   if (process.argv.includes('--roadside')) {
     stage = 'imported road';
-    if (process.argv.includes('--cpu-probe')) {
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Profiler.enable'); await cdp.send('Profiler.start');
-      setTimeout(async () => {
-        const { profile } = await cdp.send('Profiler.stop');
-        fs.writeFileSync(out.replace(/\.json$/, '.cpuprofile'), JSON.stringify(profile));
-        console.log('Roadside CPU profile saved.');
-      }, 20000);
-    }
-    report.roadside = await page.evaluate(async () => {
+    const physicalWidthMeters = Number(value('--roadside-width', '512000'));
+    report.roadside = await page.evaluate(async physicalWidthMeters => {
       const e = window.__editor;
       const { importAzgaarFullJson } = await import('/src/editor/import/AzgaarJsonImporter.js');
       const { RoadsideLanternGenerator } = await import('/src/editor/roadside/RoadsideLanternGenerator.js');
       const { PLAYER_MODE_WALK } = await import('/src/editor/player/playerConstants.js');
       const manifest = await (await fetch('/maps/manifest.json')).json();
       const source = await (await fetch('/maps/' + manifest.maps[0].url)).json();
-      e.controller.loadDocument(importAzgaarFullJson(source, e.config));
+      e.controller.loadDocument(importAzgaarFullJson(source, e.config, { physicalWidthMeters }));
       const generator = e.terrainView.worldStore.generator;
       const field = generator.ensureSettlementField(), lanterns = new RoadsideLanternGenerator(generator);
       const tileSize = e.terrainView.worldStore.tileSize, reach = e.terrainView.chunkWorldSize * 2;
@@ -70,11 +62,11 @@ try {
             Math.abs(e.terrainView.worldStore.sampleHeight(detail.cellX, detail.cellZ + 1) - height)) / tileSize;
           if (water.coverage > 0.05 || slope > 0.25) continue;
           e.viewModeController.setMode(PLAYER_MODE_WALK, { spawn: e.terrainView.floatingOrigin.toRender(detail.x, detail.z) });
-          return { home: { x: detail.x, z: detail.z }, settlement: settlement.id };
+          return { home: { x: detail.x, z: detail.z }, settlement: settlement.id, physicalWidthMeters };
         }
       }
       throw new Error('Imported-road fixture has no eligible roadside station.');
-    });
+    }, physicalWidthMeters);
     console.log(JSON.stringify(report.roadside)); stage = 'roadside residency';
     await page.waitForFunction(() => window.__editor.roadsideDetails.records.length > 0, null, { timeout });
     stage = 'roadside history'; report.roadside.checks = await page.evaluate(async () => {

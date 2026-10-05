@@ -45,6 +45,25 @@ test('deferred exceptions still book their cost', () => {
   let clock = 0; const budget = new FrameSlack({ now: () => clock }); budget.beginFrame();
   assert.throws(() => budget.defer(() => { clock = 2; throw Error('job'); })); assert.equal(budget.deferredMs, 2);
 });
+
+test('late capture reservations consume the same floor and cannot affect a later frame', () => {
+  let clock = 0;
+  const budget = new FrameSlack({ targetMs: 10, reserveMs: 1, maximumMs: 0.25, now: () => clock });
+  budget.beginFrame();
+  const capture = budget.reserve(0.25, 6);
+  assert.equal(budget.available(0.25, 6), 0);
+  clock = 20; // Mandatory render finishes past the cutoff.
+  assert.throws(() => capture.run(() => { clock += 2; throw Error('capture'); }));
+  assert.equal(budget.deferredMs, 2);
+  assert.equal(budget.available(0.25, 6), 0);
+  capture.cancel(); capture.run(() => assert.fail('single use'));
+  budget.beginFrame();
+  const stale = budget.reserve(0.25, 6);
+  budget.beginFrame(); stale.run(() => assert.fail('stale frame')); stale.cancel();
+  assert.equal(budget.deferredMs, 0);
+  const cancelled = budget.reserve(0.25, 6); cancelled.cancel();
+  assert.equal(budget.available(0.25, 6), 0.25);
+});
 test('queues consume the same allowance while a deferred update is still running', () => {
   let clock = 0; const budget = new FrameSlack({ targetMs: 10, reserveMs: 1, now: () => clock });
   budget.beginFrame(); clock = 5; budget.endFrame(); budget.beginFrame();

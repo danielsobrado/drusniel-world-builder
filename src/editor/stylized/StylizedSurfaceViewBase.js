@@ -285,14 +285,16 @@ export class StylizedSurfaceView {
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections);
     terrainView.beforeMainRender = camera => {
       this.skyView?.cascades?.prepare(camera);
-      // Reserve remaining shared slack before the fixed render consumes the wall-clock
-      // deadline. No deferred queue runs between these callbacks. Capturing afterward
-      // reuses shadows produced for this main-camera pose rather than stale matrices.
-      this.reflectionBudgetReserved = Boolean(this.reflections && !this.shouldYieldWork?.());
+      this.reflections?.prepare(camera, this);
+      // Captures reuse shadows from this main-camera draw. Standalone views may
+      // have no shared scheduler; the main loop supplies a debited reservation.
+      this.reflectionBudgetReserved = Boolean(this.reflections && !this.reserveDeferredWork && !this.shouldYieldWork?.());
     };
     terrainView.afterMainRender = camera => {
-      if (this.reflectionBudgetReserved) this.runDeferredWork?.(() => this.reflections.update(
-        camera, this, performance.now(), { budgetReserved: true }));
+      const capture = () => this.reflections.update(camera, this, performance.now(), { budgetReserved: true });
+      this.reflectionReservation?.run(capture);
+      this.reflectionReservation = null;
+      if (this.reflectionBudgetReserved) this.runDeferredWork ? this.runDeferredWork(capture) : capture();
       this.reflectionBudgetReserved = false;
     };
     this.waterSlots = this.enabled && !this.impostorBakeMode && config.water?.enabled
@@ -639,6 +641,14 @@ export class StylizedSurfaceView {
   }
 
   /** Share one preparation allowance between player collision and rendering. */
+  reserveReflectionCapture(camera, now) {
+    this.reflectionReservation?.cancel();
+    this.reflectionReservation = null;
+    if (this.reflections?.prepare(camera, this) && now >= this.reflections.nextCapture) {
+      this.reflectionReservation = this.reserveDeferredWork?.(6) ?? null;
+    }
+  }
+
   beginFrame(timestamp) {
     const focus = this.terrainView?.focusChunk;
     if (focus && this.preparedPlacement) {
@@ -957,6 +967,7 @@ export class StylizedSurfaceView {
     this.detailBuildQueue.clear();
     for (const slot of this.waterSlots) slot.dispose();
     this.sharedWaterMaterials.dispose();
+    this.reflectionReservation?.cancel();
     this.reflections?.dispose();
     this.terrainView.beforeMainRender = null;
     this.terrainView.afterMainRender = null;

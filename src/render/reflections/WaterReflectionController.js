@@ -51,7 +51,8 @@ export class WaterReflectionController {
 
   invalidate() { this.valid.value = 0; this.planarValid.value = 0; this.face = 0; this.nextCapture = 0; this.lastPlanar = -Infinity; this.canonicalProbe = null; this.pendingProbe = null; this.planarPending = false; }
 
-  update(camera, surface, now = performance.now(), { budgetReserved = false } = {}) {
+  // Validity must follow world/camera changes even when no capture work fits.
+  prepare(camera, surface) {
     if (this.disposed || this.capturing) return;
     if (isLandStreamingSuspended()) { this.invalidate(); return; }
     if (this.planarValid.value && camera.position.y <= this.planarHeight.value + 0.1) this.planarValid.value = 0;
@@ -71,6 +72,13 @@ export class WaterReflectionController {
     if (this.canonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
       || Math.abs(camera.position.y - this.probeY) > this.config.reachMeters * 0.2)) this.invalidate();
     if (this.canonicalProbe) this.origin.value.set(this.canonicalProbe.x - origin.x, this.probeY, this.canonicalProbe.z - origin.z);
+    return { origin, canonical, wet };
+  }
+
+  update(camera, surface, now = performance.now(), { budgetReserved = false } = {}) {
+    const prepared = this.prepare(camera, surface);
+    if (!prepared) return;
+    const { origin, canonical, wet } = prepared;
     if (now < this.nextCapture) return;
     if (!budgetReserved && surface.shouldYieldWork?.()) return;
     const hidden = surface.waterSlots.map(slot => slot.mesh);

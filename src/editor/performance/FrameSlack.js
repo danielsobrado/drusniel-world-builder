@@ -30,10 +30,29 @@ export class FrameSlack {
   }
 
   beginFrame() {
+    this.frameId = (this.frameId ?? 0) + 1;
     this.frameStart = this.now();
     this.deferredMs = 0;
     this.allowanceMs = null;
     this.deadline = null;
+  }
+
+  // Reserve part of this frame's single allowance for a pass that must run
+  // after the main draw. Other consumers see the debit immediately.
+  reserve(floorMs, maxMs) {
+    const amount = this.available(floorMs, maxMs);
+    if (amount <= 0) return null;
+    const frame = this.frameId;
+    this.deferredMs += amount;
+    let active = true;
+    const release = () => {
+      if (!active) return false;
+      active = false;
+      if (frame !== this.frameId) return false;
+      this.deferredMs -= amount;
+      return true;
+    };
+    return { cancel: release, run: work => release() ? this.defer(work) : undefined };
   }
 
   // Time this frame can still give deferred work: the target minus the usual

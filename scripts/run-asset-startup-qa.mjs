@@ -43,11 +43,14 @@ const browser = await chromium.launch({
 });
 
 const runs = [];
+const repeatCache = hasFlag('repeat-cache');
+let repeatContext;
 try {
   for (let run = 1; run <= runCount; run += 1) {
-    const context = await browser.newContext({
+    const context = repeatContext ?? await browser.newContext({
       viewport: { width: 1440, height: 1000 },
     });
+    if (repeatCache) repeatContext = context;
     await context.addInitScript(() => {
       performance.setResourceTimingBufferSize(5000);
     });
@@ -60,7 +63,7 @@ try {
     page.on('pageerror', (error) => errors.push(`page: ${error.message}`));
     const cdp = await context.newCDPSession(page);
     await cdp.send('Network.enable');
-    await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
+    await cdp.send('Network.setCacheDisabled', { cacheDisabled: !repeatCache });
 
     await page.goto(`${baseUrl}/?assetQa=1&run=${run}`, {
       waitUntil: 'domcontentloaded',
@@ -77,7 +80,7 @@ try {
         vendor: info.vendor ?? null,
         architecture: info.architecture ?? null,
         description: info.description ?? null,
-        fallback: Boolean(found.isFallbackAdapter),
+        fallback: Boolean(info.isFallbackAdapter ?? found.isFallbackAdapter),
       };
     });
     const softwareHint = [
@@ -153,13 +156,16 @@ try {
         || report.ktx2.gpuTextureBytes === 0) {
       throw new Error('Asset startup telemetry did not observe Meshopt and KTX2 work.');
     }
-    runs.push({ run, adapter, ...report });
+    runs.push({ run, adapter, cachePolicy: repeatCache
+      ? (run === 1 ? 'fresh-context-cache-enabled' : 'repeat-context-cache-enabled')
+      : 'fresh-context-cache-disabled', ...report });
     console.log(
       `asset startup ${run}/${runCount}: assets ${report.navigationToAssetsReadyMs} ms, `
       + `first frame ${report.navigationToFirstFrameMs} ms, `
       + `KTX2 ${(report.ktx2.gpuTextureBytes / 1024 / 1024).toFixed(2)} MiB GPU`,
     );
-    await context.close();
+    if (repeatCache) await page.close();
+    else await context.close();
   }
 } finally {
   await browser.close();

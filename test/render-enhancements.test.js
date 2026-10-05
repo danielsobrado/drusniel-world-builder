@@ -109,7 +109,9 @@ test('water captures publish complete probes, share reserved slack and reset cad
   yielding = true; controller.update(camera, surface, 106); assert.equal(draws, 6);
   controller.update(camera, surface, 106, { budgetReserved: true }); assert.equal(controller.planarValid.value, 1); assert.equal(draws, 7);
   origin = { x: 4096, z: 0 }; camera.position.x -= 4096;
-  controller.update(camera, surface, 107); assert.equal(controller.valid.value, 0); assert.equal(controller.planarValid.value, 0);
+  // The main-render hook must invalidate without executing budgeted captures.
+  controller.prepare(camera, surface); assert.equal(controller.valid.value, 0); assert.equal(controller.planarValid.value, 0);
+  assert.equal(draws, 7);
   assert.equal(controller.lastPlanar, -Infinity);
   yielding = false; controller.prewarm(camera, surface); assert.equal(controller.planarValid.value, 1);
   controller.dispose(); controller.update(camera, surface, 9999); assert.equal(draws, 14);
