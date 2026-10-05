@@ -159,8 +159,10 @@ export class UnderwaterCausticsPostProcess {
     this.opticsState?.updateCamera(camera, this.surfaceHeight.value);
   }
 
+  get active() { return this.enabled && !this.disposed && this.blend.value > 0; }
+
   render(camera) {
-    if (!this.enabled || this.disposed || this.blend.value <= 0) return false;
+    if (!this.active) return false;
     this.ensurePipeline(camera);
     this.updateCamera(camera);
     const startedAt = performance.now();
@@ -191,7 +193,7 @@ export class UnderwaterCausticsPostProcess {
   getStatus() {
     return Object.freeze({
       enabled: this.enabled,
-      active: this.enabled && this.blend.value > 0,
+      active: this.active,
       blend: this.blend.value,
       surfaceHeight: this.surfaceHeight.value,
       optics: Boolean(this.opticsState),

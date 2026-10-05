@@ -56,6 +56,27 @@ test('optical underwater rendering preserves the sky and light for Snell’s win
   controller.dispose();
 });
 
+test('underwater draws keep the main-camera hooks and dry draws call them once', () => {
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera();
+  const calls = [];
+  const terrainView = { scene, beforeMainRender: () => calls.push('before'), afterMainRender: () => calls.push('after'),
+    render(camera) { this.beforeMainRender(camera); calls.push('surface'); this.afterMainRender(camera); },
+    stylizedConfig: { water: { qualityTier: 'high', projectedCaustics: {
+      enabled: true, color: '#b9f4e5', intensity: 0.16, scale: 0.42, speed: 0.55,
+      contrast: 2.6, depthFadeStart: 0.15, depthFadeEnd: 6, maxDistance: 45,
+    } } } };
+  const controller = new UnderwaterViewController({ terrainView,
+    playerController: { camera, getStatus: () => ({ enabled: true, headSubmerged: false }) }, config: underwaterConfig });
+  controller.causticsPostProcess.render = () => { calls.push('underwater'); return true; };
+  controller.causticsPostProcess.blend.value = 1;
+  terrainView.render(camera);
+  assert.deepEqual(calls, ['before', 'underwater', 'after']);
+  calls.length = 0; controller.causticsPostProcess.blend.value = 0;
+  terrainView.render(camera);
+  assert.deepEqual(calls, ['before', 'surface', 'after']);
+  controller.dispose();
+});
+
 test('fog-less worlds restore null fog after a dive cycle', () => {
   const { controller, scene, playerController } = createHarness({ fog: null });
   assert.equal(controller.originalFogExists, false);

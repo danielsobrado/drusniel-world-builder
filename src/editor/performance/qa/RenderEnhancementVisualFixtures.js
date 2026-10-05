@@ -58,7 +58,10 @@ export async function runRenderEnhancementVisualFixtures(renderer, capture) {
     await draw(); reflections.invalidate(); reflections.prewarm(camera, surface); await draw();
     await capture('night-captures', stats());
     origin = { x: 4096, z: -4096 };
-    for (const child of scene.children) child.position.add(new THREE.Vector3(-origin.x, 0, -origin.z));
+    // Hemisphere-light position expresses a direction, not a world anchor.
+    for (const child of scene.children) {
+      if (!child.isHemisphereLight) child.position.add(new THREE.Vector3(-origin.x, 0, -origin.z));
+    }
     camera.position.add(new THREE.Vector3(-origin.x, 0, -origin.z)); camera.updateMatrixWorld();
     await draw(); reflections.invalidate(); reflections.prewarm(camera, surface); await draw();
     if (!reflections.planarValid.value) throw new Error('Rebase did not refresh the planar capture.');

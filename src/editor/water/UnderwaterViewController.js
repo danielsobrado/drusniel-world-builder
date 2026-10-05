@@ -73,7 +73,12 @@ export class UnderwaterViewController {
     this.causticsPrewarmHook = null;
     if (this.causticsPostProcess) {
       this.causticsRenderHook = (camera) => {
-        if (this.causticsPostProcess.render(camera)) return undefined;
+        if (this.causticsPostProcess.active) {
+          terrainView.beforeMainRender?.(camera);
+          this.causticsPostProcess.render(camera);
+          terrainView.afterMainRender?.(camera);
+          return undefined;
+        }
         return this.originalTerrainRender.call(terrainView, camera);
       };
       this.causticsPrewarmHook = (camera) => {

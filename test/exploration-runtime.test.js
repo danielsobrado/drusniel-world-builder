@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { FrameSlack } from '../src/editor/performance/FrameSlack.js';
+import { DeferredWorkBudget } from '../src/editor/performance/DeferredWorkBudget.js';
 import { resolveExplorationConfig } from '../src/editor/exploration/ExplorationConfig.js';
 import { usesMobileProfile, applyMobileStartupProfile } from '../src/editor/exploration/MobileProfile.js';
 import { CameraFollow } from '../src/editor/player/CameraFollow.js';
@@ -63,6 +64,15 @@ test('late capture reservations consume the same floor and cannot affect a later
   assert.equal(budget.deferredMs, 0);
   const cancelled = budget.reserve(0.25, 6); cancelled.cancel();
   assert.equal(budget.available(0.25, 6), 0.25);
+});
+
+test('disabling adaptive scheduling still permits a single cancellable capture', () => {
+  const budget = new DeferredWorkBudget({ targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, enabled: false });
+  budget.beginFrame(); budget.slack.fixedMs = 100;
+  let draws = 0;
+  const capture = budget.reserve(6); capture.run(() => draws++); capture.run(() => draws++);
+  const cancelled = budget.reserve(6); cancelled.cancel(); cancelled.run(() => draws++);
+  assert.equal(draws, 1);
 });
 test('queues consume the same allowance while a deferred update is still running', () => {
   let clock = 0; const budget = new FrameSlack({ targetMs: 10, reserveMs: 1, now: () => clock });

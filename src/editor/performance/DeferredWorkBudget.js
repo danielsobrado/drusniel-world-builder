@@ -17,6 +17,15 @@ export class DeferredWorkBudget {
       : maxMs;
   }
   run(work) { return this.slack.defer(work); }
+  reserve(maxMs) {
+    if (this.settings.enabled) return this.slack.reserve(Math.min(this.settings.minimumMs, maxMs), maxMs);
+    let active = true;
+    return { cancel: () => { active = false; }, run: work => {
+      if (!active) return;
+      active = false;
+      return this.run(work);
+    } };
+  }
   peek(maxMs) {
     return this.settings.enabled
       ? this.slack.peek(Math.min(this.settings.minimumMs, maxMs), maxMs) : maxMs;
@@ -44,8 +53,7 @@ export class DeferredWorkBudget {
     }
     surface.workBudgetProvider = provider;
     surface.runDeferredWork = this.runner;
-    surface.reserveDeferredWork = max => this.slack.reserve(this.settings.enabled
-      ? Math.min(this.settings.minimumMs, max) : 0, max);
+    surface.reserveDeferredWork = max => this.reserve(max);
     surface.shouldYieldWork = shouldYield;
     if (surface.meadowGrass) surface.meadowGrass.workRunner = this.runner;
     if (surface.rockView) surface.rockView.shouldYieldWork = surface.shouldYieldWork;
