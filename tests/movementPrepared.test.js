@@ -4,6 +4,7 @@ import test from 'node:test';
 import { RockManifestStore } from '../src/editor/stylized/RockManifestStore.js';
 import { StylizedBuildQueue } from '../src/editor/stylized/StylizedBuildQueue.js';
 import { FrameSlack } from '../src/editor/performance/FrameSlack.js';
+import { DeferredWorkBudget } from '../src/editor/performance/DeferredWorkBudget.js';
 import { createIteratorBuilder } from '../src/editor/stylized/ResumableIterator.js';
 import { buildCoastStones, iterateCoastStones } from '../src/editor/stylized/coastStones.js';
 import { generatePreparedPlacementChunk } from '../src/editor/world/PreparedPlacementChunk.js';
@@ -230,6 +231,29 @@ test('empty queues do not start the shared deadline before later work becomes el
   queue.enqueue({ key: 'later' });
   assert.equal(queue.flush(() => { frame.defer(() => { clock += 0.3; }); return true; }).built, 1);
   assert.equal(frame.available(0.25, 3), 0);
+});
+
+test('attached scenery queues honor the shared late floor instead of the legacy wall-clock gate', () => {
+  let clock = 0;
+  const settings = { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2 };
+  const budget = new DeferredWorkBudget(settings);
+  budget.slack = new FrameSlack({ targetMs: 7, maximumMs: 1.2, now: () => clock });
+  budget.slack.fixedMs = 10;
+  const queue = new StylizedBuildQueue({ now: () => clock, shouldYield: () => true });
+  budget.attachSurface({ bushBuildQueue: queue });
+  budget.beginFrame();
+  clock = 10; // Mandatory scenery has exceeded the old wall-clock deadline.
+  queue.enqueue({ key: 'bush:first' });
+  assert.equal(queue.flush(() => { clock += 0.3; return true; }).built, 1);
+  queue.enqueue({ key: 'bush:second' });
+  assert.equal(queue.flush(() => assert.fail('floor granted twice')).built, 0);
+  budget.beginFrame();
+  clock += 10;
+  assert.equal(queue.flush(() => { clock += 0.3; return true; }).built, 1);
+  settings.enabled = false;
+  budget.beginFrame();
+  queue.enqueue({ key: 'legacy' });
+  assert.equal(queue.flush(() => assert.fail('disabled adaptive mode bypassed its legacy gate')).built, 0);
 });
 
 test('readiness checks preserve the progress floor across mandatory work', () => {

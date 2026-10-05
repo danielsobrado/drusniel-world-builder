@@ -1,13 +1,13 @@
 # Movement CPU performance — 2026-10-04
 
-Status: runtime and grass corrections validated; three final standard repeats exceed 144 FPS. The latest stress matrix fails construction settle; its frame and hitch gates pass. Strict frame-time acceptance remains open.
+Status: runtime and grass corrections validated; three final standard repeats exceed 144 FPS. The construction settle stall is resolved and the full stress matrix passes. Strict frame-time acceptance remains open.
 
 **The CPU bottleneck was substantial placement work inside movement updates.**
 Preparing exact terrain and ecology samples in workers, sharing rock manifests,
 and making nested jobs resume under one budget raised the standard route from
-about 71 FPS to **154.68 / 148.82 / 150.23 FPS**, with a median of **150.23 FPS**.
+about 71 FPS to **159.14 / 149.66 / 154.77 FPS**, with a median of **154.77 FPS**.
 This meets the average throughput target in all three final repeats. Frame p95
-remains **10.3–11.0 ms**, above 6.94 ms; consistent 144 Hz presentation is still
+remains **8.4–9.2 ms**, above 6.94 ms; consistent 144 Hz presentation is still
 an open acceptance item.
 
 The implementation follows the
@@ -43,17 +43,17 @@ CPU averaged **8.77, 8.68, and 8.60 ms/frame**.
 
 Baseline settle checked terrain, construction, and collision. Vegetation was
 still incomplete. Current settle also waits for scenery dependencies; the
-final runs needed another **13.1–13.4 s** beyond the 8 s warmup. This loading
+final runs needed another **14.0–16.5 s** beyond the 8 s warmup. This loading
 cost is part of the result.
 
 | Capture | FPS | Complete scenery average / p95 | Submission average | Frame p95 / p99 | Hitches >33.3 ms |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `grass-ready-standard-1.json` | 154.68 | 1.322 / 2.400 ms | 4.042 ms | 10.430 / 13.638 ms | 0 |
-| `grass-ready-standard-2.json` | 148.82 | 1.361 / 2.400 ms | 4.231 ms | 11.000 / 14.400 ms | 0 |
-| `grass-ready-standard-3.json` | 150.23 | 1.358 / 2.400 ms | 4.161 ms | 10.300 / 15.400 ms | 2 |
+| `grass-shared-standard-1.json` | 159.14 | 1.295 / 2.400 ms | 3.941 ms | 8.400 / 11.193 ms | 1 |
+| `grass-shared-standard-2.json` | 149.66 | 1.383 / 2.500 ms | 4.177 ms | 9.200 / 11.421 ms | 1 |
+| `grass-shared-standard-3.json` | 154.77 | 1.338 / 2.500 ms | 4.055 ms | 8.800 / 11.300 ms | 0 |
 
-The median throughput is about **2.12 times the baseline median**. Complete
-scenery update CPU fell by approximately **84%**. `sceneryUpdateCpu` sums
+The median throughput is about **2.19 times the baseline median**. Complete
+scenery update CPU fell by approximately **85%**. `sceneryUpdateCpu` sums
 `placementPreparation` and `stylized` within each frame before calculating
 percentiles. Earlier checkpoint reports omit the early preparation phase from
 their `stylized` time; their FPS measurements still include it. Material graph
@@ -62,14 +62,16 @@ preparation performed during rendering remains in the render phase.
 All three final runs measured **zero procedural tile/height misses and zero
 collision-readiness stops**. The player reached approximately `z = -194.5 m`.
 Final counts matched the baseline: **63 near trees, 668 impostors, 796 near
-rocks, 1,818 rock placement records, and 673 bush placements**. The reports retain 183 draws at the final pose. Two ended with clear queues and
-zero missing grass; the second had one fresh meadow job and one missing tile
-in both the drawable range and viewing cone. All three ended with zero visible
-density lag and recovered to 60 consecutive ready frames in 0.28–0.29 s.
+rocks, 1,818 rock placement records, and 673 bush placements**. The reports retain 183–184 draws at the final pose. The first ended with clear queues and zero missing grass. The second and third
+had nine and five meadow preparation jobs respectively, with two and one missing
+tiles in both the drawable range and viewing cone. All three ended with zero
+visible density lag and recovered to 60 consecutive ready frames in 0.29–0.32 s.
 These end gauges do not establish zero delay on every frame. The preceding
 `grass-fair-standard-1.json` exposed an unused higher-density job that blocked
 recovery for 15 s despite complete drawable grass; the final cancellation fix
-is included in all three repeats above.
+is included in all three repeats above. The preceding `grass-ready-standard`
+repeats reached 154.68 / 148.82 / 150.23 FPS before the view-queue and legacy-gate
+corrections, and remain complete-workload checkpoints.
 
 The prepared arrays occupied **89,188,460 bytes (about 85 MiB)** for 306 retained
 chunks. This measures typed arrays, not total JavaScript heap or GPU memory.
@@ -125,26 +127,32 @@ gaps between queues, and submerged suspension.
 
 ## Sustained streaming and heavy scenes
 
-The final direction/fairness/cancellation capture (`grass-ready-sustained.json`) kept moving
-for 60 s, covering approximately **972 m** at **168.97 FPS**. Complete scenery
-CPU was **1.388 ms average / 2.500 ms p95**; frame p95 was **8.0 ms**, with one
-hitch. It prepared 165 fields, 125 rock manifests, and 105 tree manifests during
+The final shared-gate capture (`grass-shared-sustained.json`) kept moving
+for 60 s, covering approximately **972 m** at **133.50 FPS**. Complete scenery
+CPU was **1.759 ms average / 2.900 ms p95**; frame p95 was **11.1 ms**, with nine
+hitches. It prepared 165 fields, 125 rock manifests, and 105 tree manifests during
 measurement, with zero procedural terrain misses and zero collision-readiness
 stops. It published 1,243 bush placements, 1,444 tree impostors, and 38 species
-fallback impostors. Start and end preparation were complete; both whole-range
-and viewing-cone grass missing/density-lag counts were zero at the end.
+fallback impostors. Start preparation was complete. It ended with two scenery jobs and ten meadow
+jobs, with both whole-range and viewing-cone grass missing/density-lag counts
+zero at the end.
 
 The same-browser revisit turned 180° halfway through, returning near the spawn.
-It reached **151.34 FPS**, with **9.2 ms frame p95**, two hitches, and scenery CPU
-**1.262 ms average / 2.200 ms p95**. It generated zero new prepared fields,
-rock manifests, or tree manifests, confirming cache reuse. Both grass missing
-counts and both density-lag counts were zero at its end. All scenery queues were clear at both movement endpoints. Both post-stop
-observations remained ready for 60 frames in approximately 0.35 s. Both legs exceed
-144 FPS on average, while neither meets the strict frame-tail target.
+It reached **122.00 FPS**, with **13.1 ms frame p95**, 23 hitches, and scenery CPU
+**1.504 ms average / 2.600 ms p95**. It generated zero new prepared fields,
+rock manifests, or tree manifests, confirming cache reuse. The viewing-cone missing count and both density-lag counts were zero;
+eight tiles were missing in the whole drawable range, outside that cone. The
+revisit ended with 30 scenery jobs, eight meadow jobs, and four draws pending.
+Both post-stop observations remained ready for 60 frames, in 0.39 s and 0.74 s
+respectively. Both legs fall below 144 FPS and miss the strict frame-tail target.
+The previous `grass-ready-sustained.json` checkpoint reached 168.97 / 151.34 FPS
+with complete end queues. Both checkpoints and final results are retained; their throughput difference
+requires attribution before claiming sustained acceptance.
 
 Both legs retained 454 prepared chunks and 131,563,524 array bytes (about
 125 MiB), below the 625-chunk limit, and had zero browser errors. End gauges
-establish completion at that pose, not zero preparation delay on every frame.
+describe the endpoint states; they do not establish zero preparation delay
+throughout movement.
 The direction-only checkpoint (`grass-view-sustained.json`) reached
 129.52 / 116.08 FPS before fair queue turns; five in-cone tiles were missing at
 the revisit end and cleared during recovery. The cached-handoff-only long run
@@ -161,7 +169,8 @@ The third retained 84 missing in-range grass tiles, 126 meadow jobs, and 51
 scenery jobs; it is a valid failing checkpoint. The older missing-tile gauge
 counts the whole range, including tiles behind the camera. These remain
 checkpoints, not passing acceptance. Publishing ready prefixes without waiting for generation budget
-removed the remaining end backlog in the final long route. The earlier
+removed the large grass backlog in later captures; the final shared-gate revisit
+retains the smaller preparation remainder described above. The earlier
 `sustained-frozen.json` pre-grass capture reached 147.57 / 143.65 FPS and remains
 an earlier complete-workload checkpoint.
 
@@ -176,6 +185,26 @@ is not evidence of uninterrupted streaming. It also recorded four height misses
 that did not recur in the diagonal run or the subsequent 30 s attribution run.
 Keep that result as a known unresolved sampling observation. QA now captures
 bounded call-stack diagnostics if such misses recur.
+
+The final matrix (`matrix-shared-gate.json`) **passes all regression gates**,
+including settle, collision, workload activation, and water acceptance, with
+zero browser errors. Its standard scenario is diagonal movement; the three
+forward standard repeats above use `chunk-cross`.
+
+| Case | FPS | Frame p95 | Hitches >33.3 ms | Settle |
+| --- | ---: | ---: | ---: | --- |
+| Standard diagonal | 128.09 | 10.900 ms | 2 | Passed |
+| Dense forest | 115.73 | 11.900 ms | 3 | Passed |
+| High grass, active meadow ×2 | 92.75 | 17.100 ms | 11 | Passed |
+| Dense mixed | 100.97 | 20.600 ms | 8 | Passed |
+| Approaching construction | 94.92 | 15.100 ms | 5 | Passed |
+| Water | 139.99 | 13.100 ms | 13 | Passed |
+
+Construction settles after an additional 36.2 s with complete scenery at
+measurement start. It still ends with 46 queued jobs, 176 meadow jobs, and
+27 draws pending. Passing these stress gates does not establish 144 FPS or
+bounded preparation latency while moving. The diagonal standard case also
+falls below the average throughput target in this batch.
 
 The earlier integrated matrix (`matrix-final.json`) failed construction.
 Construction had timed out waiting for draw preparation and its timing is
@@ -216,7 +245,21 @@ also fails construction settle: one scenery queue remains pending after the
 cases reach 152.81 FPS (standard diagonal), 150.01 (dense forest), 123.99
 (high grass), and 121.88 (dense mixed). Construction's 106.81 FPS is not valid
 acceptance because scenery was incomplete at measurement start. Warmup queue
-diagnostics are being used to identify this separate blocker.
+diagnostics identify this separate blocker as bush publication
+(`construction-warmup-queues.json`, with no browser errors). Hundreds of old
+LOD request keys had accumulated although each view owns one resumable
+replacement. Keeping one current request per view removes that obsolete queue
+state, but the coalescing-only recheck still fails settle
+(`construction-coalesced.json`). The remaining cause is the legacy 6 ms
+scenery wall-clock gate: it can reject the adaptive scheduler's late progress
+floor even when no other preparation remains. Adaptive queues now use the
+shared gate; disabled adaptive budgeting retains its former gate. The final targeted recheck
+(`construction-shared-gate.json`) settles after 66.3 s beyond warmup, with
+complete scenery at measurement start and no browser errors. It reaches
+82.48 FPS, frame p95 29.1 ms, and a 1.34% hitch rate. Its moving queues and draw
+preparation still do not clear within the 15 s recovery observation; this is a
+stress-scene backlog, separate from the resolved stationary settle stall.
+The final full matrix above passes with this correction.
 
 These are the existing matrix regression gates: frame p95 at most 33.3 ms,
 hitches at most 2%, correct workload activation, and collision/water acceptance.
@@ -225,17 +268,19 @@ They do not establish 144 FPS in the dense or construction stress scenes.
 ## Water
 
 The actual water route reaches its deep target and completes entry, swimming,
-diving, surfacing, and dry exit with active caustics. `water-grass-ready.json`
-passed all acceptance gates with **195.67 FPS**, **7.1 ms frame p95**, one hitch,
+diving, surfacing, and dry exit with active caustics. `water-shared-gate.json`
+passed all acceptance gates with **139.99 FPS**, **13.1 ms frame p95**, 13 hitches,
 and no browser or WebGPU validation errors. Start and end preparation were complete.
 
 The original 300 ms dive stalls involved scene/material preparation. Streamed
 pass prewarming addresses that first-use work. The corrected water run still contains
-a **114.4 ms maximum full-pipeline CPU cost** and a **108.8 ms maximum frame**;
+a **58.1 ms maximum full-pipeline CPU cost** and a **67.2 ms maximum frame**;
 those remain visible as a frame-tail failure. The **0.3 ms maximum observed
 caustic CPU** measures only the post-effect. Separate scene and full-pipeline
 gauges retain the rest. The former counter measured the entire scene plus
-effect, so its old and new values are not directly comparable. The earlier
+effect, so its old and new values are not directly comparable. The preceding
+`water-grass-ready.json` reached 195.67 FPS, with one hitch and a 114.4 ms full
+pipeline maximum, and remains an earlier checkpoint. The earlier
 `water-integrated.json` reported a 44.5 ms pipeline maximum but lacked the bush
 fix and general browser-error check. It is retained as a checkpoint. Passing the
 effect's 4 ms gate does not establish hitch-free diving.
@@ -263,7 +308,8 @@ The follow-up uses a detached snapshot at `9968f5c`, with the performance-only
 changes from `84d81fc` applied through `validated-performance.patch`, plus the
 bush streaming import fix and browser-error reporting. The snapshot is in
 `tmp/movement-cpu/validated-runtime`, with subsequent grass lookahead, arrival
-fades, priority, cached handoff, frame-cutoff accounting, and QA validity fixes
+fades, priority, cached handoff, frame-cutoff accounting, queue coalescing,
+shared yield gates, and QA validity fixes
 preserved in `validated-runtime.patch`. Its SHA-256 is recorded alongside the
 base in `validated-runtime-source.json`. The active checkout has concurrent
 weather, terrain-transition, asset, and underwater changes; these captures do
@@ -296,24 +342,29 @@ uses settle and approaches the construction corridor from `z = -100`, yaw 180.
 
 ## Remaining acceptance
 
-- Standard averages exceed 144 FPS. Frame p95 remains 10.3–11.0 ms against
-  6.94 ms; all three p99 values exceed 10 ms and the third has two hitches.
-  Scenery mean is 1.322–1.361 ms against 1.20 ms, and p95 is 2.4 ms against
+- Standard averages exceed 144 FPS. Frame p95 remains 8.4–9.2 ms against
+  6.94 ms; all three p99 values exceed 10 ms and the first two have one hitch each.
+  Scenery mean is 1.295–1.383 ms against 1.20 ms, and p95 is 2.4–2.5 ms against
   the 2 ms goal. Strict acceptance remains open.
-- The latest construction stress case fails settle and ends with a moving
-  backlog. The provisional 250 ms readiness / 500 ms near-job limits
-  are not established.
-- The final long turn-back capture reaches 151.34 FPS and ends with complete
-  drawable grass and clear queues. Both long legs still miss the strict
-  frame-time target.
+- Construction now settles in the targeted recheck, but its moving backlog
+  does not clear within 15 s in the targeted recheck. The full matrix passes its
+  regression gates, but the diagonal standard, density stresses, and water are
+  below 144 FPS. The provisional 250 ms readiness / 500 ms near-job limits are
+  not established.
+- The final long route reaches 133.50 / 122.00 FPS, below the 144 FPS target.
+  Neither endpoint has missing grass in the viewing cone. The revisit retains
+  eight missing tiles outside that cone and its queues clear in 0.74 s after
+  stopping. These endpoints do not establish zero delay throughout movement. Long-route
+  rendering submission averages 4.539 / 5.485 ms; scenery averages
+  1.759 / 1.504 ms, leaving insufficient room for the strict frame allocation.
 - The four earlier straight-route height misses remain an unresolved observation.
   Edit-during-motion and floating-origin hardware exercises remain follow-up
   checks; behavioral tests cover retention, edits, and seams.
 
-`npm run verify` passed **3,094 tests**, asset/configuration validation, and the
+`npm run verify` passed **3,097 tests**, asset/configuration validation, and the
 production build on the frozen snapshot including grass direction priority,
-fair queue turns, the cached handoff, frame-cutoff accounting, and shared
-browser-lock checks. Tests cover
+fair queue turns, the cached handoff, frame-cutoff accounting, obsolete view-job
+retention, adaptive queue gates, and shared browser-lock checks. Tests cover
 nested accounting, one progress floor, lazy deadline activation, consumer limits,
 shoreline resumption, precise sampling, edited/negative/large coordinates, stale
 workers, eviction, retained manifests, collision pending semantics, complete
