@@ -4,6 +4,7 @@ import { BoxGeometry, Group, Matrix4, MeshBasicNodeMaterial, PerspectiveCamera }
 import { BudgetedDetailVisibility } from '../src/editor/stylized/lod/BudgetedDetailVisibility.js';
 import { createInstancedRenderers, disposeInstancedRenderers, writeInstances } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
 import { InstanceAnchor } from '../src/editor/stylized/lod/InstanceAnchor.js';
+import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
 test('detail turns immediately fall back to residents; auxiliary passes and rebases preserve all placements', () => {
   let origin = { x: 1000000, z: 2000000 };
@@ -20,15 +21,18 @@ test('detail turns immediately fall back to residents; auxiliary passes and reba
   selector.update(camera, () => false);
   assert.equal(meshes[0][0].count, 1);
   assert.equal(meshes[0][0].visible, true);
+  assert.equal(PerfCounters.get('testVisibilitySubmitted'), 1);
   selector.withFull(() => {
     assert.equal(meshes[0][0].visible, false);
     assert.equal(selector.fullMeshes[0].visible, true);
     assert.equal(selector.fullMeshes[0].count, 2);
   });
   assert.equal(selector.fullMeshes[0].visible, false);
+  assert.equal(PerfCounters.get('testVisibilitySubmitted'), 1, 'auxiliary captures preserve the main-camera gauge');
   camera.lookAt(0, 0, 1);
   selector.update(camera, () => true);
   assert.equal(selector.fullMeshes[0].visible, true, 'turn cannot expose a partially computed selection');
+  assert.equal(PerfCounters.get('testVisibilitySubmitted'), 2, 'camera fallback reports all residents');
   selector.update(camera, () => false);
   assert.equal(meshes[0][0].count, 1);
   origin = { x: origin.x + 128, z: origin.z };

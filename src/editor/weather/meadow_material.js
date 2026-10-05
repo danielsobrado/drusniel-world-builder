@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { MeshBasicNodeMaterial } from "three/webgpu";
+import { assignWeatherNodeOutput } from './weather_node_output.js';
 import {
   attribute,
   clamp,
@@ -375,7 +376,7 @@ function createMeadowNodeMaterial() {
   const material = new MeshBasicNodeMaterial();
   material.name = "weather-sunbeam-motes-node";
   material.positionNode = localPosition;
-  material.fragmentNode = fragment();
+  assignWeatherNodeOutput(material, fragment());
   material.transparent = true;
   material.depthWrite = false;
   material.depthTest = true;

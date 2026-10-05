@@ -46,7 +46,9 @@ export class BudgetedDetailVisibility {
     this.key = '';
     this.job = null;
     this.selectionPose = null;
-    PerfCounters.set(`${this.view.layerName}VisibilityEligible`, instances.reduce((n, rows) => n + rows.length, 0));
+    this.eligible = instances.reduce((n, rows) => n + rows.length, 0);
+    PerfCounters.set(`${this.view.layerName}VisibilityEligible`, this.eligible);
+    PerfCounters.set(`${this.view.layerName}VisibilitySubmitted`, this.eligible);
     PerfCounters.set(`${this.view.layerName}VisibilityRetainedBytes`, this.fullMeshes.reduce((sum, mesh) =>
       sum + mesh.instanceMatrix.array.byteLength + Object.values(mesh.geometry.attributes)
         .reduce((bytes, attribute) => bytes + attribute.array.byteLength, 0), 0));
@@ -100,14 +102,15 @@ export class BudgetedDetailVisibility {
     PerfCounters.inc(`${this.view.layerName}VisibilityCpuMs`, performance.now() - started);
   }
 
-  showFull(full) {
+  showFull(full, recordMainVisibility = true) {
     for (const parts of this.view.meshes) for (const mesh of parts) mesh.visible = !full;
     for (const mesh of this.fullMeshes) mesh.visible = full;
+    if (full && recordMainVisibility) PerfCounters.set(`${this.view.layerName}VisibilitySubmitted`, this.eligible);
   }
 
   withFull(operation) {
     const states = [...this.view.meshes.flat(), ...this.fullMeshes].map(mesh => [mesh, mesh.visible]);
-    this.showFull(true);
+    this.showFull(true, false);
     try { return operation(); } finally { for (const [mesh, visible] of states) mesh.visible = visible; }
   }
 

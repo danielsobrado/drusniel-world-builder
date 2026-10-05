@@ -1,7 +1,7 @@
 # Useful remaining work from grass-test
 
 Date: 2026-10-04  
-Status: implemented; integrated hardware acceptance in progress (2026-10-05)  
+Status: implemented and measured; failed stress gates and unverified recovery/mobile paths documented (2026-10-05)
 Host audited: `1a876ea`, clean working tree before this documentation change  
 Donor audited: `F:\Development\grass-test` at `95cc587`  
 Scope: selective additions to the current world builder, with its existing world and rendering ownership
@@ -369,14 +369,15 @@ checks; this documentation-only plan does not require browser or runtime tests.
 
 ## Implementation checklist
 
-- [ ] G0: current integrated baseline and reusable visual fixtures
-- [ ] G1: opt-in shader/startup diagnostics
-- [ ] G2: vegetation visibility experiment and evidence-based adoption decision
-- [ ] G3a: bounded local water probes
-- [ ] G3b: optional planar captures and SSR integration
-- [ ] G4: optional cascaded shadows
-- [ ] G5: richer snow surface treatment
-- [ ] G6: optional semantic roadside dressing
+- [x] G0: current integrated baseline and reusable visual fixtures; stress failures and recovery/mobile gaps remain explicit
+- [x] G1: opt-in shader/startup diagnostics, with fresh-context and repeat-cache hardware reports
+- [x] G2: vegetation visibility experiment; three paired runs do not justify adoption, so it stays off
+- [x] G3a: bounded local water probes, with full high-quality water-route acceptance
+- [x] G3b: optional planar captures and SSR integration, with actual capture cost recorded
+- [x] G4: optional cascaded shadows, with fixed-pose and water-route hardware acceptance
+- [x] G5: richer snow surface treatment, with slope/path/night/rebase fixture acceptance
+- [x] G6: optional semantic roadside dressing, with bounded imported-road history/save acceptance
 
-The first implementation slice is **G0 + G1**. The first new rendering feature to
-evaluate is **G2**; the first appearance feature is **G3a**.
+The implementation report records the resulting behavior and evidence for each
+step. These checkmarks close this port plan; they do not mark the failed stress
+matrix, device-loss recovery or unmeasured mobile path as passing.

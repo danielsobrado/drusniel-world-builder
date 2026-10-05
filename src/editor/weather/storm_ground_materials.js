@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { MeshBasicNodeMaterial } from "three/webgpu";
+import { assignWeatherNodeOutput } from './weather_node_output.js';
 import {
   abs,
   attribute,
@@ -315,7 +316,7 @@ function createStormGroundNodeMaterial() {
   const material = new MeshBasicNodeMaterial();
   material.name = "weather-storm-ground-node";
   material.positionNode = worldPosition;
-  material.fragmentNode = fragment();
+  assignWeatherNodeOutput(material, fragment());
   material.transparent = true;
   material.depthWrite = false;
   material.depthTest = true;
@@ -380,7 +381,7 @@ function createStormGroundImpactNodeMaterial() {
   const material = new MeshBasicNodeMaterial();
   material.name = "weather-storm-impact-roots-node";
   material.positionNode = worldPosition;
-  material.fragmentNode = fragment();
+  assignWeatherNodeOutput(material, fragment());
   material.transparent = true;
   material.depthWrite = false;
   material.depthTest = true;

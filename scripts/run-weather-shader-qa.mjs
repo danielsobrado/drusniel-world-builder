@@ -25,6 +25,7 @@ const timeoutMs = Number(readArgument('timeoutMs', '180000'));
 const settleMs = Number(readArgument('settleMs', '1200'));
 const requestedPort = process.argv.includes('--port') ? Number(readArgument('port', '4178')) : 0;
 const existingUrl = readArgument('url', null);
+const viewport = { width: Number(readArgument('width', '1600')), height: Number(readArgument('height', '950')) };
 
 async function reservePort(preferredPort = 0) {
   return new Promise((resolve, reject) => {
@@ -122,10 +123,12 @@ async function run() {
     baseUrl,
     startedAt: new Date().toISOString(),
     headed,
+    viewport,
     modes: [],
     errors: [],
   };
   let browser;
+  let page;
   let progressTimer;
 
   try {
@@ -142,25 +145,38 @@ async function run() {
         '--disable-frame-rate-limit',
       ],
     });
-    const page = await browser.newPage({ viewport: { width: 1600, height: 950 } });
+    page = await browser.newPage({ viewport });
+    let progressPending = false;
     progressTimer = setInterval(async () => {
+      if (progressPending) return;
+      progressPending = true;
       try {
         const state = await page.evaluate(() => ({
           editor: Boolean(window.__editor),
           weather: Boolean(window.__editor?.weatherController),
           exploration: Boolean(window.__editor?.exploration),
           rendererFrame: window.__editor?.terrainView.renderer.info.render.frame,
+          startup: window.__assetStartupTelemetry?.status,
+          completedSpans: window.__assetStartupTelemetry?.getReport().diagnostics?.spans.slice(-3).map(span => span.name),
           loading: [...document.querySelectorAll('[data-role="loading-detail"], .loading-detail')].map(node => node.textContent),
         }));
         console.log(`Weather QA startup: ${JSON.stringify(state)}`);
       } catch { /* Navigation or close may overlap the progress sample. */ }
+      finally { progressPending = false; }
     }, 15000);
     const runtimeErrors = [];
     report.errors = runtimeErrors;
-    page.on('pageerror', (error) => runtimeErrors.push(`pageerror: ${error.message}`));
+    let errorCount = 0;
+    let shaderErrorCount = 0;
+    const recordError = message => {
+      report.errorCount = ++errorCount;
+      if (shaderErrorPattern.test(message)) report.shaderErrorCount = ++shaderErrorCount;
+      if (runtimeErrors.length < 100) runtimeErrors.push(message);
+    };
+    page.on('pageerror', (error) => recordError(`pageerror: ${error.message}`));
     page.on('console', (message) => {
       if (message.type() === 'error' || message.type() === 'warning') {
-        runtimeErrors.push(`${message.type()}: ${message.text()}`);
+        recordError(`${message.type()}: ${message.text()}`);
       }
     });
 
@@ -178,32 +194,30 @@ async function run() {
       if (!adapter) return null;
       const info = adapter.info;
       return { vendor: info.vendor, architecture: info.architecture, description: info.description,
-        fallback: Boolean(adapter.isFallbackAdapter),
+        fallback: Boolean(info.isFallbackAdapter ?? adapter.isFallbackAdapter),
         webgpu: window.__editor.terrainView.renderer.backend.isWebGPUBackend === true };
     });
     assert.ok(report.adapter?.webgpu && report.adapter.fallback === false, 'Weather acceptance requires hardware WebGPU.');
     assert.doesNotMatch(`${report.adapter.vendor} ${report.adapter.architecture} ${report.adapter.description}`, /swiftshader|llvmpipe|software/i);
     console.log(`Weather QA: hardware WebGPU ${report.adapter.vendor} ${report.adapter.architecture}.`);
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const editor = window.__editor;
+      const { PLAYER_MODE_WALK } = await import('/src/editor/player/playerConstants.js');
       editor.playerController.setHarnessActive(true);
-      editor.viewModeController.setMode('walk', { requestPointerLock: false });
+      editor.viewModeController.setMode(PLAYER_MODE_WALK, { requestPointerLock: false });
       const sun = editor.godRays.sunDirection;
       editor.playerController.setPose({ x: 0, z: 0, yaw: Math.atan2(-sun.x, -sun.z), pitch: Math.asin(sun.y) });
     });
 
     await delay(settleMs);
     const warmupErrors = shaderErrors(runtimeErrors);
-    assert.deepEqual(
-      warmupErrors,
-      [],
-      `Weather shader warmup failed:\n${warmupErrors.join('\n')}`,
-    );
+    assert.equal(shaderErrorCount, 0, `Weather shader warmup failed:\n${warmupErrors.slice(0, 3).join('\n')}`);
 
     for (const mode of modes) {
       console.log(`Weather QA: ${mode}.`);
       const startedAt = performance.now();
       const errorStart = runtimeErrors.length;
+      const shaderErrorStart = shaderErrorCount;
       await setWeatherMode(page, mode);
       await delay(settleMs);
       const modeErrors = runtimeErrors.slice(errorStart);
@@ -214,13 +228,11 @@ async function run() {
         activationMs: performance.now() - startedAt,
         screenshotHash,
         errors: modeErrors,
+        shaderErrorCount: shaderErrorCount - shaderErrorStart,
         stats: await page.evaluate(() => window.__editor.weatherController.getStats()),
       });
-      assert.deepEqual(
-        modeShaderErrors,
-        [],
-        `${mode} produced shader/runtime errors:\n${modeShaderErrors.join('\n')}`,
-      );
+      assert.equal(shaderErrorCount - shaderErrorStart, 0,
+        `${mode} produced shader/runtime errors:\n${modeShaderErrors.slice(0, 3).join('\n')}`);
     }
 
     report.errors = runtimeErrors;
@@ -235,6 +247,8 @@ async function run() {
     assert.equal(report.godRays.marchScale, 0.25);
   } finally {
     clearInterval(progressTimer);
+    report.startup = await page?.evaluate(() => window.__assetStartupTelemetry?.getReport()).catch(() => null);
+    report.body = await page?.locator('body').innerText().catch(() => '');
     await browser?.close();
     if (server) await terminateChildProcess(server);
     await writeFile(path.join(outputDirectory, 'vite.log'), serverOutput);

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { MeshBasicNodeMaterial } from "three/webgpu";
+import { assignWeatherNodeOutput } from './weather_node_output.js';
 import {
   abs,
   attribute,
@@ -29,7 +30,7 @@ function makeMat(name, frag, pos) {
   const m = new MeshBasicNodeMaterial();
   m.name = name;
   if (pos) m.positionNode = pos;
-  m.fragmentNode = frag;
+  assignWeatherNodeOutput(m, frag);
   m.transparent = true;
   m.depthWrite = false;
   m.depthTest = !!pos;

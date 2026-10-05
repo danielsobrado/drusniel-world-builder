@@ -100,6 +100,10 @@ test('weather controller applies VFX material policy and restores visibility aft
           : [];
       for (const material of materials) {
         assert.equal(material.toneMapped, false);
+        if (material.isNodeMaterial) {
+          assert.equal(material.fragmentNode, null, 'weather must preserve pass-level MRT outputs');
+          assert.ok(material.colorNode && material.opacityNode);
+        }
         if (material.transparent && material.side === THREE.DoubleSide) {
           assert.equal(material.forceSinglePass, true);
         }

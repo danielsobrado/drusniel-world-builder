@@ -276,6 +276,14 @@ const fs = require('fs');
       timeout: ${timeoutMs},
     });
     const report = await page.evaluate(() => window.__perfQa.getReport());
+    report.detailVisibilityAtStop = await page.evaluate(() => window.__editor.stylizedSurface.detailViews
+      .filter(view => view.visibility).map(view => {
+        const visibility = view.visibility;
+        const eligible = visibility.instances?.reduce((sum, rows) => sum + rows.length, 0) ?? 0;
+        const full = visibility.fullMeshes.some(mesh => mesh.visible);
+        return { layer: view.layerName, eligible, full, pending: Boolean(visibility.job),
+          submitted: full ? eligible : view.meshes.reduce((sum, parts) => sum + (parts[0]?.count ?? 0), 0) };
+      }));
     report.preparationQueuesDuringWarmup = await page.evaluate(() => window.__perfQaWarmupQueues);
     report.preparationQueuesAtStart = preparationQueuesAtStart;
     const readGrassDiagnostics = () => page.evaluate(async () => {
