@@ -24,8 +24,9 @@ export class WaterReflectionController {
     this.planarMatrix = this.reprojection.viewProjection;
     this.planarHeight = uniform(0);
     this.planarValid = this.reprojection.valid;
-    this.canonicalProbe = null;
-    this.pendingProbe = null;
+    this.canonicalProbe = { x: 0, z: 0 };
+    this.pendingProbe = { x: 0, z: 0 };
+    this.hasCanonicalProbe = false;
     this.face = 0;
     this.nextCapture = 0;
     this.lastPlanar = -Infinity;
@@ -34,6 +35,9 @@ export class WaterReflectionController {
     this.capturing = false;
     this.wetSlots = [];
     this.hiddenObjects = [];
+    this.overlayObjects = [];
+    this.overlaySceneChildCount = -1;
+    this.overlayRefreshCountdown = 0;
     this.planarWetSlots = [];
     this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
     this.captureScratch = { states: [], shadows: [] };
@@ -53,7 +57,15 @@ export class WaterReflectionController {
     return result;
   }
 
-  invalidate() { this.valid.value = 0; this.planarValid.value = 0; this.face = 0; this.nextCapture = 0; this.lastPlanar = -Infinity; this.canonicalProbe = null; this.pendingProbe = null; this.planarPending = false; }
+  invalidate() {
+    this.valid.value = 0;
+    this.planarValid.value = 0;
+    this.face = 0;
+    this.nextCapture = 0;
+    this.lastPlanar = -Infinity;
+    this.hasCanonicalProbe = false;
+    this.planarPending = false;
+  }
 
   // Validity must follow world/camera changes even when no capture work fits.
   prepare(camera, surface) {
@@ -62,7 +74,11 @@ export class WaterReflectionController {
     if (this.planarValid.value && camera.position.y <= this.planarHeight.value + 0.1) this.planarValid.value = 0;
     const origin = this.view.floatingOrigin.getState();
     if (this.generator !== this.view.worldStore.generator || this.lastOrigin?.x !== origin.x || this.lastOrigin?.z !== origin.z) {
-      this.invalidate(); this.generator = this.view.worldStore.generator; this.lastOrigin = { ...origin };
+      this.invalidate();
+      this.generator = this.view.worldStore.generator;
+      this.lastOrigin ??= { x: 0, z: 0 };
+      this.lastOrigin.x = origin.x;
+      this.lastOrigin.z = origin.z;
     }
     const canonical = this.preparedState.canonical;
     canonical.x = camera.position.x + origin.x;
@@ -80,9 +96,15 @@ export class WaterReflectionController {
         < this.config.reachMeters + this.view.chunkWorldSize) nearby = true;
     }
     if (!nearby) { this.invalidate(); return; }
-    if (this.canonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
+    if (this.hasCanonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
       || Math.abs(camera.position.y - this.probeY) > this.config.reachMeters * 0.2)) this.invalidate();
-    if (this.canonicalProbe) this.origin.value.set(this.canonicalProbe.x - origin.x, this.probeY, this.canonicalProbe.z - origin.z);
+    if (this.hasCanonicalProbe) {
+      this.origin.value.set(
+        this.canonicalProbe.x - origin.x,
+        this.probeY,
+        this.canonicalProbe.z - origin.z,
+      );
+    }
     this.preparedState.origin = origin;
     return this.preparedState;
   }
@@ -96,9 +118,8 @@ export class WaterReflectionController {
     const hidden = this.hiddenObjects;
     hidden.length = 0;
     for (const slot of surface.waterSlots) hidden.push(slot.mesh);
-    this.view.scene.traverse(object => {
-      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) hidden.push(object);
-    });
+    this.refreshOverlayObjects();
+    for (const object of this.overlayObjects) hidden.push(object);
     const started = performance.now();
     this.capturing = true;
     try {
@@ -110,7 +131,8 @@ export class WaterReflectionController {
           return;
         }
         if (this.face === 0) {
-          this.pendingProbe = canonical;
+          this.pendingProbe.x = canonical.x;
+          this.pendingProbe.z = canonical.z;
           this.pendingProbeY = camera.position.y;
           this.cubeCamera.position.set(camera.position.x, camera.position.y, camera.position.z);
           this.cubeCamera.coordinateSystem = this.view.renderer.coordinateSystem;
@@ -126,7 +148,9 @@ export class WaterReflectionController {
         if (this.face === 6) {
           this.front = 1 - this.front;
           this.cube.value = this.targets[this.front].texture;
-          this.canonicalProbe = this.pendingProbe;
+          this.canonicalProbe.x = this.pendingProbe.x;
+          this.canonicalProbe.z = this.pendingProbe.z;
+          this.hasCanonicalProbe = true;
           this.probeY = this.pendingProbeY;
           this.valid.value = 1;
           this.origin.value.set(this.canonicalProbe.x - origin.x, this.probeY, this.canonicalProbe.z - origin.z);
@@ -140,6 +164,21 @@ export class WaterReflectionController {
       this.lastCaptureCpuMs = performance.now() - started;
       PerfCounters.inc('waterReflectionCpuMs', this.lastCaptureCpuMs);
     }
+  }
+
+  refreshOverlayObjects() {
+    const scene = this.view.scene;
+    const childCount = scene.children.length;
+    this.overlayRefreshCountdown -= 1;
+    if (childCount === this.overlaySceneChildCount && this.overlayRefreshCountdown > 0) return;
+    this.overlaySceneChildCount = childCount;
+    this.overlayRefreshCountdown = 32;
+    this.overlayObjects.length = 0;
+    scene.traverse((object) => {
+      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) {
+        this.overlayObjects.push(object);
+      }
+    });
   }
 
   capturePlanar(camera, wet, origin, now, surface) {
