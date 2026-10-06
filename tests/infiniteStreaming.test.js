@@ -4,9 +4,14 @@ import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import {
   createTerrainSlotPlan,
   selectTerrainResidentDescriptors,
+  writeTerrainChunk,
   worldToTerrainChunk,
 } from '../src/editor/world/TerrainStreamingPlan.js';
-import { parseChunkKey } from '../src/editor/world/WorldCoordinates.js';
+import {
+  parseChunkKey,
+  writeWorldToCell,
+  writeWorldToChunk,
+} from '../src/editor/world/WorldCoordinates.js';
 
 function createSlots(count) {
   return Array.from({ length: count }, (_, slotIndex) => ({
@@ -26,6 +31,17 @@ test('terrain chunk coordinates remain stable for negative world positions', () 
     chunkX: 1,
     chunkZ: 1,
   });
+});
+
+test('coordinate writers reuse caller-owned targets across negative and positive positions', () => {
+  const cell = { x: 0, z: 0 };
+  const chunk = { chunkX: 0, chunkZ: 0 };
+  assert.strictEqual(writeWorldToCell(-0.1, 0.1, 2, cell), cell);
+  assert.deepEqual(cell, { x: -1, z: -1 });
+  assert.strictEqual(writeWorldToChunk(-0.1, 0.1, 2, 64, chunk), chunk);
+  assert.deepEqual(chunk, { chunkX: -1, chunkZ: -1 });
+  assert.strictEqual(writeTerrainChunk(128, -128, 2, 64, chunk), chunk);
+  assert.deepEqual(chunk, { chunkX: 1, chunkZ: 1 });
 });
 
 test('predictive streaming includes current and forward chunk neighborhoods', () => {
@@ -86,6 +102,15 @@ test('floating origin preserves canonical coordinates across rebases', () => {
   });
   assert.deepEqual(origin.toCanonical(22, -2), { x: 150, z: -130 });
   assert.deepEqual(origin.toRender(150, -130), { x: 22, z: -2 });
+  const canonical = { x: 0, z: 0 };
+  const render = { x: 0, z: 0 };
+  const state = { x: 0, z: 0 };
+  assert.strictEqual(origin.writeCanonical(22, -2, canonical), canonical);
+  assert.deepEqual(canonical, { x: 150, z: -130 });
+  assert.strictEqual(origin.writeRender(150, -130, render), render);
+  assert.deepEqual(render, { x: 22, z: -2 });
+  assert.strictEqual(origin.readState(state), state);
+  assert.deepEqual(state, { x: 128, z: -128 });
 });
 
 test('streaming focus dirty key is not a parseable world chunk key', () => {
