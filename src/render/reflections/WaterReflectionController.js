@@ -7,6 +7,8 @@ import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
 import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js';
 
+const OVERLAY_REFRESH_CAPTURES = 32;
+
 /** Fixed-size local capture pool, owned by the scene rather than by water chunks. */
 export class WaterReflectionController {
   constructor(terrainView, config) {
@@ -188,7 +190,7 @@ export class WaterReflectionController {
     this.overlayRefreshCountdown -= 1;
     if (childCount === this.overlaySceneChildCount && this.overlayRefreshCountdown > 0) return;
     this.overlaySceneChildCount = childCount;
-    this.overlayRefreshCountdown = 32;
+    this.overlayRefreshCountdown = OVERLAY_REFRESH_CAPTURES;
     this.overlayObjects.length = 0;
     scene.traverse((object) => {
       if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) {
