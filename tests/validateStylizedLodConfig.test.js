@@ -101,3 +101,17 @@ test('rejects invalid tree manifest budgets', () => {
   value.stylizedSurface.streaming.treeManifestBuildsPerFrame = 0;
   assert.throws(() => validateStylizedLodConfig(value), /treeManifestBuildsPerFrame/);
 });
+
+
+test('validates prepared placement cache bounds', () => {
+  const value = config();
+  value.stylizedSurface.preparedPlacementCache = { maxEntries: 625, maxMiB: 192 };
+  assert.equal(validateStylizedLodConfig(value), value);
+
+  value.stylizedSurface.preparedPlacementCache.maxEntries = 0;
+  assert.throws(() => validateStylizedLodConfig(value), /preparedPlacementCache\.maxEntries/);
+
+  value.stylizedSurface.preparedPlacementCache.maxEntries = 625;
+  value.stylizedSurface.preparedPlacementCache.maxMiB = 0;
+  assert.throws(() => validateStylizedLodConfig(value), /preparedPlacementCache\.maxMiB/);
+});
