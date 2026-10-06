@@ -1,4 +1,4 @@
-import { cellToChunk, chunkKey, worldToCell } from './WorldCoordinates.js';
+import { chunkKey, writeWorldToChunk } from './WorldCoordinates.js';
 
 function normalizeZero(value) {
   return Object.is(value, -0) ? 0 : value;
@@ -11,10 +11,9 @@ function distanceSquared(left, right) {
 }
 
 export function writeTerrainChunk(worldX, worldZ, tileSize, chunkSize, target) {
-  const cell = worldToCell(worldX, worldZ, tileSize);
-  const chunk = cellToChunk(cell.x, cell.z, chunkSize);
-  target.chunkX = normalizeZero(chunk.chunkX);
-  target.chunkZ = normalizeZero(chunk.chunkZ);
+  writeWorldToChunk(worldX, worldZ, tileSize, chunkSize, target);
+  target.chunkX = normalizeZero(target.chunkX);
+  target.chunkZ = normalizeZero(target.chunkZ);
   return target;
 }
 
