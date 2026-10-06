@@ -49,6 +49,7 @@ import { createWaterfallFoamNode } from './WaterfallShading.js';
 import { createSeaSurfaceNodes, seaWaterMask } from './SeaSurfaceShading.js';
 import { createRainRippleNode } from './RainRippleShading.js';
 import { createRiverSurfaceNodes } from './RiverSurfaceShading.js';
+import { compositeWaterFoam, waterRippleRefraction } from './WaterSurfaceResponse.js';
 import { seaStateUniforms } from '../water/seaState.js';
 import { skyLightUniforms } from './sky/skyLight.js';
 
@@ -353,8 +354,7 @@ export function createStylizedWaterMaterial({
     foamAmount = foamAmount.mul(waterCoverage);
   }
 
-  // Whitewater is opaque, so it also lifts the sheet's alpha — applied after
-  // the refraction branch, which resets alpha to coverage.
+  // Foam is composited after refraction, which resets alpha to coverage.
   let whitewater = null;
   if (quality.foam && water.foam.enabled && fallPlunge && water.waterfall.enabled) {
     whitewater = createWaterfallFoamNode({
@@ -381,7 +381,10 @@ export function createStylizedWaterMaterial({
       refraction.depthFadeEnd,
       waterDepth,
     );
-    const distortionUv = refractionWarp(coarsePoint, finePoint)
+    const warp = refractionWarp(coarsePoint, finePoint);
+    const distortionUv = (river
+      ? mix(warp, waterRippleRefraction(river.normal, river.baseNormal), inland)
+      : warp)
       .mul(refraction.strength * quality.refractionStrength)
       .mul(depthFactor);
     const baseViewportUv = viewportSafeUV(screenUV);
@@ -438,6 +441,7 @@ export function createStylizedWaterMaterial({
       ));
       const intersectionFoam = contact
         .mul(foam.intersectionStrength * quality.intersectionFoamStrength)
+        .mul(river ? mix(float(1), smoothstep(0.25, 0.7, river.foamNoise), inland) : float(1))
         .mul(waterCoverage);
       foamAmount = max(foamAmount, intersectionFoam);
     }
@@ -493,7 +497,7 @@ export function createStylizedWaterMaterial({
     // The reflected sky takes the current look's tint (dusk, night, overcast).
     color = mix(
       color,
-      reflections ? reflections.sample(normalize(positionWorld.sub(cameraPosition)).reflect(vec3(0, 1, 0)),
+      reflections ? reflections.sample(normalize(positionWorld.sub(cameraPosition)).reflect(sea?.normal ?? vec3(0, 1, 0)),
         colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint))
         : colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint),
       clamp(river ? surfaceReflection.mul(oneMinus(inland)) : surfaceReflection, 0, 1),
@@ -516,11 +520,16 @@ export function createStylizedWaterMaterial({
   }
 
   if (quality.foam && water.foam.enabled) {
-    color = mix(
-      color,
-      colorNode(water.foam.color),
-      clamp(foamAmount, 0, 1),
-    );
+    // Aerated falls and plunge pools are paler than calm bank foam, as in the
+    // reference. Foam is a surface layer: shallow transparent water must not
+    // make the foam transparent a second time.
+    const aeration = whitewater && fallPlunge
+      ? max(fallPlunge.x, clamp(fallPlunge.y.mul(1.5), 0, 1)) : float(0);
+    const foamColor = mix(colorNode(water.foam.color), colorNode('#e4f5ff'), aeration);
+    const foamed = compositeWaterFoam(color, alpha, foamColor,
+      clamp(foamAmount, 0, 1).mul(waterlineFade));
+    color = foamed.color;
+    alpha = foamed.opacity;
   }
 
   // Light through a backlit crest, after grass-test's crest transmission: the glow
@@ -535,7 +544,6 @@ export function createStylizedWaterMaterial({
       clamp(transmission, 0, 1),
     );
   }
-  if (whitewater) alpha = max(alpha, clamp(whitewater, 0, 1).mul(waterlineFade));
 
   // The offset lifts the sheet clear of the bed so shallow water cannot z-fight
   // with it. Applied at full strength it also floats the sheet over the beach:

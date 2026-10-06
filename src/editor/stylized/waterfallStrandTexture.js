@@ -114,6 +114,7 @@ export function getWaterfallStrandTexture() {
   sharedTexture.minFilter = THREE.LinearMipmapLinearFilter;
   sharedTexture.magFilter = THREE.LinearFilter;
   sharedTexture.generateMipmaps = true;
+  sharedTexture.anisotropy = 8;
   sharedTexture.colorSpace = THREE.NoColorSpace;
   sharedTexture.needsUpdate = true;
   return sharedTexture;

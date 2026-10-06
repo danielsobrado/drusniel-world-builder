@@ -11,7 +11,9 @@ import {
   normalize,
   oneMinus,
   pow,
+  positionWorld,
   reflect,
+  select,
   smoothstep,
   texture,
   vec2,
@@ -138,7 +140,8 @@ export function createRiverSurfaceNodes({
   const detail = getWaterDetailTexture();
   // The donor's `current`: 1 on a river, 0 on a lake. Our current is a field.
   const current = clamp(currentStrength.mul(4), 0, 1);
-  const direction = flow.div(max(length(flow), 1e-4));
+  const flowLength = length(flow);
+  const direction = select(flowLength.greaterThan(1e-4), flow.div(max(flowLength, 1e-4)), vec2(0, 1));
   const detailUv = patternXZ.mul(DETAIL_SCALE);
   // Drift per cross-fade cycle, in detail tiles. Still water keeps the donor's
   // lake drift (0.13, 0.07 of a tile per cycle), rivers move with the current.
@@ -161,12 +164,17 @@ export function createRiverSurfaceNodes({
     .mul(config.normalStrength)
     .toVar('riverDetailSlope');
 
-  // Across and down the current on a river, plain slopes on a lake.
-  const across = vec3(direction.y.negate(), 0, direction.x);
-  const downstream = vec3(direction.x, 0, direction.y);
+  // The terrain-grid water sheet has displaced positions but flat geometry
+  // normals. Recover its actual incline so falls do not reflect a level lake.
+  const geometric = positionWorld.dFdx().cross(positionWorld.dFdy());
+  const baseNormal = normalize(geometric.mul(select(geometric.y.lessThan(0), -1, 1)))
+    .toVar('riverBaseNormal');
+  const downhill = dot(baseNormal.xz, direction).negate().div(max(baseNormal.y, 0.01));
+  const downstream = normalize(vec3(direction.x, downhill, direction.y));
+  const across = normalize(downstream.cross(baseNormal));
   const riverTilt = across.mul(slope.x).add(downstream.mul(slope.y));
   const lakeTilt = vec3(slope.x.negate(), 0, slope.y.negate());
-  const normal = normalize(vec3(0, 1, 0).add(mix(lakeTilt, riverTilt, current))).toVar('riverDetailNormal');
+  const normal = normalize(baseNormal.add(mix(lakeTilt, riverTilt, current))).toVar('riverDetailNormal');
 
   const facing = max(dot(normal, viewDirection), 0);
   const fresnel = pow(oneMinus(facing), 5).mul(0.98).add(0.02).mul(0.85);
@@ -198,5 +206,5 @@ export function createRiverSurfaceNodes({
     .mul(smoothstep(0.3, 0.75, foamNoise)).mul(0.5);
   const foam = riverShore.add(bankFoam).mul(oneMinus(fall)).clamp(0, 0.94);
 
-  return { fresnel, sky, glint, foam, reflected };
+  return { fresnel, sky, glint, foam, foamNoise, reflected, normal, baseNormal };
 }

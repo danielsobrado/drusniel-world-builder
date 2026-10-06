@@ -1,6 +1,7 @@
 import {
   dot,
   float,
+  fwidth,
   length,
   max,
   oneMinus,
@@ -9,12 +10,11 @@ import {
   vec2,
 } from 'three/tsl';
 import { getWaterfallStrandTexture } from './waterfallStrandTexture.js';
+import { getWaterDetailTexture } from './RiverSurfaceShading.js';
 
 /** Half-width of the threshold band that turns strand detail into whitewater. */
 const STRAND_EDGE = 0.08;
 const CHURN_EDGE = 0.12;
-/** The strand texture is four times wider than tall, with square lattice cells. */
-const TEXTURE_ASPECT = 4;
 
 /**
  * Strands are centimetre-scale texture detail (a 10 m tile over 256 texels), so
@@ -53,8 +53,8 @@ export function waterfallPatternOrigin(centerX, centerZ) {
  * gives the fall a direction, the strand texture streaks along it and
  * scrolls at `fallSpeed`, and the flow texture's fall weight decides how much
  * of it turns white. Below the face the plunge weight whitens slow, drifting
- * patches instead. Two texture samples of one shared 256×64 texture, built
- * only into materials that draw foam.
+ * patches instead. Two strand samples and two samples of the shared river
+ * detail texture, built only into materials that draw foam.
  *
  * @param {object} options
  * @param {object} options.fallPlunge vec2 node: fall and plunge weights, 0..1
@@ -76,25 +76,41 @@ export function createWaterfallFoamNode({ fallPlunge, flow, patternXZ, time, con
     across.div(config.strandWidthMeters),
     along.sub(time.mul(config.fallSpeed)).div(config.strandLengthMeters),
   ));
-  const faceDetail = face.r.mul(0.6).add(face.g.mul(0.4));
-  const faceThreshold = oneMinus(fall.mul(config.faceCoverage));
+  const sheets = texture(strandTexture, vec2(
+    across.div(config.strandWidthMeters).mul(0.5).add(0.37),
+    along.sub(time.mul(config.fallSpeed * 0.8)).div(config.strandLengthMeters).mul(0.5).add(0.53),
+  ));
+  const faceDetail = face.r.mul(0.6).add(sheets.g.mul(0.4));
+  const thickness = sheets.b.mul(0.7).add(0.55);
+  const faceThreshold = oneMinus(fall.mul(config.faceCoverage).mul(thickness).clamp(0, 1));
+  const strandEdge = max(float(STRAND_EDGE), fwidth(faceDetail));
   const strands = smoothstep(
-    faceThreshold.sub(STRAND_EDGE),
-    faceThreshold.add(STRAND_EDGE),
+    faceThreshold.sub(strandEdge),
+    faceThreshold.add(strandEdge),
     faceDetail,
   ).mul(smoothstep(0, 0.2, fall));
-  const faceFoam = max(strands, fall.mul(config.faceAeration));
+  const veil = smoothstep(0.15, 0.85, sheets.g).mul(fall).mul(config.faceAeration);
+  const faceFoam = max(strands, veil);
 
   const plunge = fallPlunge.y;
   const churnScale = float(config.plungeScaleMeters);
-  const churn = texture(strandTexture, vec2(
-    across.div(churnScale.mul(TEXTURE_ASPECT)),
+  const churnUv = vec2(
+    across.div(churnScale),
     along.sub(time.mul(config.plungeSpeed)).div(churnScale),
-  )).b;
+  );
+  // The strand texture's B channel is broad coverage variation, not bubbles.
+  // Two moving octaves of the river's isotropic noise break the pool into
+  // small patches with clear water between them as the plunge dissipates.
+  const detail = getWaterDetailTexture();
+  const churn = texture(detail, churnUv).b.mul(0.55).add(texture(detail,
+    vec2(across.div(churnScale).mul(2).add(0.3),
+      along.sub(time.mul(config.plungeSpeed * 0.7)).div(churnScale).mul(2).add(0.6)),
+  ).b.mul(0.45));
   const churnThreshold = oneMinus(plunge.mul(config.plungeCoverage));
+  const churnEdge = max(float(CHURN_EDGE), fwidth(churn));
   const plungeFoam = smoothstep(
-    churnThreshold.sub(CHURN_EDGE),
-    churnThreshold.add(CHURN_EDGE),
+    churnThreshold.sub(churnEdge),
+    churnThreshold.add(churnEdge),
     churn,
   ).mul(smoothstep(0, 0.15, plunge));
 

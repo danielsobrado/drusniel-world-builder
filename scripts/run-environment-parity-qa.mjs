@@ -77,6 +77,12 @@ try {
     assert.ok(moving.meanColorError > 0.2, `${backend}: waves must animate`);
     report.checks.push({ id: `${backend} surf animates`, passed: true, meanColorError: moving.meanColorError });
     check(`${backend} surf survives rebase`, `${backend}-surf-on`, `${backend}-surf-rebased`, { maximumMeanColorError: 1 });
+    const riverMotion = compareRenderedImages(images.get(`${backend}-river-high`), images.get(`${backend}-river-moving`), { maximumMeanColorError: 255 });
+    assert.ok(riverMotion.meanColorError > 0.2, `${backend}: river ripples and whitewater must animate`);
+    report.checks.push({ id: `${backend} river animates`, passed: true, meanColorError: riverMotion.meanColorError });
+    check(`${backend} river survives rebase`, `${backend}-river-high`, `${backend}-river-rebased`, { maximumMeanColorError: 1 });
+    check(`${backend} river foam composites like separate layers`, `${backend}-river-foam-layers`, `${backend}-river-foam-composite`,
+      { maximumMeanColorError: 1, minimumBrightnessRatio: 0.99, maximumBrightnessRatio: 1.01 });
     for (const distance of ['near', 'far']) check(`${backend} compressed ${distance}`,
       `${backend}-foliage-raw-${distance}`, `${backend}-foliage-compressed-${distance}`);
     check(`${backend} frost visibly changes pixels`, `${backend}-frost-off`, `${backend}-frost-on`, {
@@ -94,7 +100,8 @@ try {
   }
   for (const id of ['foliage-raw-near', 'foliage-compressed-near', 'foliage-raw-far', 'foliage-compressed-far', 'frost-off', 'frost-on',
     'reflection-cached-turn', 'reflection-refreshed-turn', 'reflection-rebased', 'reflection-orbit-on', 'reflection-orbit-off',
-    'surf-off', 'surf-on', 'surf-rebased', 'surf-moving']) {
+    'surf-off', 'surf-on', 'surf-rebased', 'surf-moving',
+    'river-medium', 'river-high', 'river-moving', 'river-rebased', 'river-fall', 'river-foam-composite', 'river-foam-layers']) {
     check(`backend parity ${id}`, `webgpu-${id}`, `webgl-${id}`, { minimumBrightnessRatio: 0.9, maximumBrightnessRatio: 1.1 });
   }
   report.passed = true;

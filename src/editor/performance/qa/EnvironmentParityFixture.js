@@ -6,6 +6,7 @@ import { createFrostShading, resolveFrost, frostUniforms } from '../../stylized/
 import { installUnusedSamplerPruning } from '../../../render/UnusedSamplerBindings.js';
 import { runReflectionReprojectionFixture } from './ReflectionReprojectionFixture.js';
 import { runSeaSurfFixture } from './SeaSurfFixture.js';
+import { runRiverAppearanceFixture } from './RiverAppearanceFixture.js';
 
 // A bounded render fixture. The world movement harness remains the performance authority.
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
@@ -73,6 +74,7 @@ try {
   scene.remove(floor); floor.geometry.dispose(); material.dispose();
   await runReflectionReprojectionFixture(renderer, publishCapture);
   await runSeaSurfFixture(renderer, publishCapture);
+  await runRiverAppearanceFixture(renderer, publishCapture);
 } catch (error) { state.report.failure = error.stack; }
 finally {
   owned.forEach(map => map.dispose()); loader.dispose(); frostUniforms.cold.value = 0;
