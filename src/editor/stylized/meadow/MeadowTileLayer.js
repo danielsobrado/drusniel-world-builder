@@ -25,6 +25,8 @@ import { meadowTileInView } from './meadowTileVisibility.js';
 const SLICE_STEMS = 256;
 /** Recycled outputs kept per band; past this they are left to the collector. */
 const POOL_LIMIT = 24;
+const CAMERA_POSITION_QUANTIZATION = 4;
+const VIEW_DIRECTION_QUANTIZATION = 512;
 
 export class MeadowTileLayer {
   /**
@@ -54,8 +56,23 @@ export class MeadowTileLayer {
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
     this.buildSerial = 0;
     this.frameSerial = 0;
+    this.updateSerial = 0;
     this.staleTiles = [];
-    this.stats = { tiles: 0, building: 0, stems: 0, bands: {}, visibleMissing: 0, visibleCapacityLag: 0 };
+    this.layoutState = new Float64Array(5);
+    this.layoutState.fill(Number.NaN);
+    this.viewState = new Float64Array(3);
+    this.viewState.fill(Number.NaN);
+    this.batchDirty = true;
+    this.stats = {
+      tiles: 0,
+      building: 0,
+      stems: 0,
+      bands: {},
+      visibleMissing: 0,
+      visibleCapacityLag: 0,
+      inViewMissing: 0,
+      inViewCapacityLag: 0,
+    };
   }
 
   get meshes() {
@@ -69,6 +86,59 @@ export class MeadowTileLayer {
    */
   update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null) {
     this.time = time;
+    this.updateSerial += 1;
+    const groundRevision = Number.isFinite(this.ground.revision)
+      ? this.ground.revision
+      : this.updateSerial;
+    const layoutChanged = this.updateLayoutState(camera, origin, groundRevision);
+    if (layoutChanged) this.refreshLayout(camera, origin, viewCone);
+    else if (this.staleTiles.length > 1 && this.updateViewState(viewCone)) {
+      for (const tile of this.staleTiles) {
+        tile.inView = meadowTileInView(
+          tile.centerX,
+          tile.centerZ,
+          camera,
+          this.tileSize,
+          viewCone,
+        );
+      }
+      this.sortStaleTiles();
+    }
+    this.build(deadline, layoutChanged);
+    this.commit();
+  }
+
+  updateLayoutState(camera, origin, groundRevision) {
+    const next = [
+      Math.round(camera.x * CAMERA_POSITION_QUANTIZATION),
+      Math.round(camera.z * CAMERA_POSITION_QUANTIZATION),
+      origin.x,
+      origin.z,
+      groundRevision,
+    ];
+    let changed = false;
+    for (let index = 0; index < next.length; index += 1) {
+      if (this.layoutState[index] !== next[index]) changed = true;
+      this.layoutState[index] = next[index];
+    }
+    return changed;
+  }
+
+  updateViewState(viewCone) {
+    const nextX = viewCone ? Math.round(viewCone.x * VIEW_DIRECTION_QUANTIZATION) : 0;
+    const nextZ = viewCone ? Math.round(viewCone.z * VIEW_DIRECTION_QUANTIZATION) : 0;
+    const nextTangent = viewCone ? Math.round(viewCone.tangent * VIEW_DIRECTION_QUANTIZATION) : 0;
+    const changed = this.viewState[0] !== nextX
+      || this.viewState[1] !== nextZ
+      || this.viewState[2] !== nextTangent;
+    this.viewState[0] = nextX;
+    this.viewState[1] = nextZ;
+    this.viewState[2] = nextTangent;
+    return changed;
+  }
+
+  refreshLayout(camera, origin, viewCone) {
+    this.updateViewState(viewCone);
     const size = this.tileSize;
     const reach = this.reach + size;
     const frameSerial = ++this.frameSerial;
@@ -77,7 +147,8 @@ export class MeadowTileLayer {
         const centerX = (tx + 0.5) * size;
         const centerZ = (tz + 0.5) * size;
         const nearest = tileDistanceSquared(camera.x, camera.z, centerX, centerZ, size);
-        const farthest = (Math.abs(camera.x - centerX) + size / 2) ** 2 + (Math.abs(camera.z - centerZ) + size / 2) ** 2;
+        const farthest = (Math.abs(camera.x - centerX) + size / 2) ** 2
+          + (Math.abs(camera.z - centerZ) + size / 2) ** 2;
         const band = this.selectBand(nearest, farthest);
         const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
         if (!preparationBand) continue;
@@ -86,21 +157,29 @@ export class MeadowTileLayer {
         if (!tile) {
           tile = { key, centerX, centerZ, output: null, buildId: 0, job: null };
           this.tiles.set(key, tile);
+          this.batchDirty = true;
         }
+        const previousBand = tile.band;
+        const previousRenderX = tile.renderX;
+        const previousRenderZ = tile.renderZ;
         tile.seenFrame = frameSerial;
         tile.band = band;
-        if (band === null) tile.output = null;
+        if (band === null && tile.output) {
+          tile.output = null;
+          this.batchDirty = true;
+        }
         tile.preparationBand = preparationBand;
         tile.preparationCapacity = this.templates[preparationBand].instanceCount;
         tile.distanceSquared = nearest;
         tile.inView = meadowTileInView(centerX, centerZ, camera, size, viewCone);
         tile.renderX = centerX - origin.x;
         tile.renderZ = centerZ - origin.z;
+        if (previousBand !== tile.band
+            || previousRenderX !== tile.renderX
+            || previousRenderZ !== tile.renderZ) {
+          this.batchDirty = true;
+        }
         tile.revision = this.ground.revisionAt(centerX, centerZ);
-        // Selecting a prefix of ready data is the same cheap LOD handoff as
-        // selecting a band. It needs no sampling or compaction allowance.
-        // Otherwise an outside tile can remain blank after entering view even
-        // though its preparation completed before the boundary.
         if (this.stablePrefixes && tile.band !== null && tile.revision !== null
           && tile.prepared?.revision === tile.revision
           && tile.prepared.capacity >= this.templates[tile.band].instanceCount) {
@@ -113,12 +192,37 @@ export class MeadowTileLayer {
     }
     for (const [key, tile] of this.tiles) {
       if (tile.seenFrame === frameSerial) continue;
+      if (tile.output) this.batchDirty = true;
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
       this.release(tile.job?.band, tile.job?.compaction.output);
       this.tiles.delete(key);
     }
-    this.build(deadline);
-    this.commit();
+    this.rebuildStaleTiles();
+  }
+
+  rebuildStaleTiles() {
+    const stale = this.staleTiles;
+    stale.length = 0;
+    for (const tile of this.tiles.values()) {
+      if (tile.job && ((tile.job.band !== tile.preparationBand
+        && this.templates[tile.job.band].instanceCount < tile.preparationCapacity)
+        || tile.job.revision !== tile.revision)) {
+        this.release(tile.job.band, tile.job.compaction.output);
+        tile.job = null;
+      }
+      if (MeadowTileLayer.isStale(tile)) stale.push(tile);
+      else if (tile.job) {
+        this.release(tile.job.band, tile.job.compaction.output);
+        tile.job = null;
+      }
+    }
+    this.sortStaleTiles();
+    this.stats.building = stale.length;
+  }
+
+  sortStaleTiles() {
+    this.staleTiles.sort((a, b) => Number(!a.inView) - Number(!b.inView)
+      || a.distanceSquared - b.distanceSquared);
   }
 
   release(band, output) {
@@ -134,39 +238,33 @@ export class MeadowTileLayer {
         && (tile.prepared?.revision !== tile.revision || tile.prepared.capacity < tile.preparationCapacity)));
   }
 
-  build(deadline) {
+  build(deadline, layoutChanged) {
     const stale = this.staleTiles;
-    stale.length = 0;
-    for (const tile of this.tiles.values()) {
-      // A job started for a band or page the tile has since left is abandoned.
-      if (tile.job && ((tile.job.band !== tile.preparationBand
-        && this.templates[tile.job.band].instanceCount < tile.preparationCapacity)
-        || tile.job.revision !== tile.revision)) {
-        this.release(tile.job.band, tile.job.compaction.output);
-        tile.job = null;
-      }
-      if (MeadowTileLayer.isStale(tile)) stale.push(tile);
-      else if (tile.job) {
-        // A cached handoff can satisfy a reduced preparation target while an
-        // older higher-density job is still partial. It is no longer runnable;
-        // release it instead of leaving readiness permanently pending.
-        this.release(tile.job.band, tile.job.compaction.output);
-        tile.job = null;
-      }
+    if (layoutChanged && stale.length === 0) {
+      this.stats.building = 0;
+      return;
     }
-    stale.sort((a, b) => Number(!a.inView) - Number(!b.inView)
-      || a.distanceSquared - b.distanceSquared);
     const run = () => this.buildTiles(stale, this.workBudgetProvider && stale.length
-      ? Math.min(deadline, performance.now() + this.workBudgetProvider(this.workBudgetMs)) : deadline);
+      ? Math.min(deadline, performance.now() + this.workBudgetProvider(this.workBudgetMs))
+      : deadline);
     if (this.workRunner && stale.length) this.workRunner(run);
-    else run();
+    else if (stale.length) run();
+    else this.stats.building = 0;
   }
 
   buildTiles(stale, deadline) {
-    let building = 0;
     let compacted = 0;
-    for (const tile of stale) {
-      if (performance.now() >= deadline) break;
+    let write = 0;
+    for (let read = 0; read < stale.length; read += 1) {
+      const tile = stale[read];
+      if (!MeadowTileLayer.isStale(tile)) continue;
+      if (performance.now() >= deadline) {
+        for (let remaining = read; remaining < stale.length; remaining += 1) {
+          const pending = stale[remaining];
+          if (MeadowTileLayer.isStale(pending)) stale[write++] = pending;
+        }
+        break;
+      }
       const capacity = tile.preparationCapacity;
       if (this.stablePrefixes && tile.prepared?.revision === tile.revision
         && tile.prepared.capacity >= capacity) {
@@ -178,7 +276,10 @@ export class MeadowTileLayer {
       }
       if (!tile.job) {
         const ground = this.ground.forTile(tile.centerX, tile.centerZ, this.tileSize / 2);
-        if (!ground) continue;
+        if (!ground) {
+          stale[write++] = tile;
+          continue;
+        }
         tile.job = {
           band: tile.preparationBand,
           revision: ground.revision,
@@ -188,7 +289,9 @@ export class MeadowTileLayer {
             centerZ: tile.centerZ,
             sample: ground.sample,
             output: this.pools.get(tile.preparationBand).pop() ?? null,
-            previous: this.stablePrefixes && tile.prepared?.revision === ground.revision ? tile.prepared : null,
+            previous: this.stablePrefixes && tile.prepared?.revision === ground.revision
+              ? tile.prepared
+              : null,
           }),
         };
       }
@@ -197,17 +300,26 @@ export class MeadowTileLayer {
       const before = compaction.progress;
       while (!compaction.done && performance.now() < deadline) compaction.advance(SLICE_STEMS);
       compacted += Math.round((compaction.progress - before) * total);
-      building += 1;
-      if (!compaction.done) continue;
+      if (!compaction.done) {
+        stale[write++] = tile;
+        continue;
+      }
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
-      if (this.stablePrefixes) tile.prepared = {
-        output: compaction.output, capacity: total, band: tile.job.band, revision: tile.job.revision,
-      };
+      if (this.stablePrefixes) {
+        tile.prepared = {
+          output: compaction.output,
+          capacity: total,
+          band: tile.job.band,
+          revision: tile.job.revision,
+        };
+      }
       if (this.stablePrefixes) this.publishPrepared(tile, true);
       else this.publish(tile, compaction.output, tile.job.band, tile.job.revision);
       tile.job = null;
+      if (MeadowTileLayer.isStale(tile)) stale[write++] = tile;
     }
-    this.stats.building = building;
+    stale.length = write;
+    this.stats.building = stale.length;
     PerfCounters.inc('meadowStemsCompacted', compacted);
   }
 
@@ -225,6 +337,7 @@ export class MeadowTileLayer {
     tile.builtBand = band;
     tile.builtRevision = revision;
     tile.buildId = ++this.buildSerial;
+    this.batchDirty = true;
   }
 
   publishPrepared(tile, force = false) {
@@ -234,6 +347,7 @@ export class MeadowTileLayer {
   }
 
   commit() {
+    if (!this.batchDirty) return;
     this.batches.begin();
     let tiles = 0;
     let visibleMissing = 0, visibleCapacityLag = 0;
@@ -261,12 +375,16 @@ export class MeadowTileLayer {
     this.stats.inViewMissing = inViewMissing;
     this.stats.inViewCapacityLag = inViewCapacityLag;
     this.stats.stems = Object.values(this.stats.bands).reduce((sum, value) => sum + value, 0);
+    this.batchDirty = false;
   }
 
   getState() {
-    let building = 0;
-    for (const tile of this.tiles.values()) if (tile.job || MeadowTileLayer.isStale(tile)) building++;
-    return { ...this.stats, building, bands: { ...this.stats.bands }, resident: this.tiles.size };
+    return {
+      ...this.stats,
+      building: this.staleTiles.length,
+      bands: { ...this.stats.bands },
+      resident: this.tiles.size,
+    };
   }
 
   dispose() {
