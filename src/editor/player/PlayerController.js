@@ -137,6 +137,34 @@ export class PlayerController {
     });
   }
 
+  readFrameStatus(out) {
+    const position = out.position ??= { x: 0, y: 0, z: 0 };
+    out.enabled = this.enabled;
+    out.harnessActive = this.harnessActive;
+    out.uiBlocked = this.uiBlocked;
+    out.pointerLocked = this.pointerLocked;
+    out.grounded = this.state.grounded;
+    out.running = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.mobile.running;
+    out.explorationBoost = this.speedMode.active;
+    out.canBoost = this.speedMode.enabled;
+    position.x = this.state.x;
+    position.y = this.state.y;
+    position.z = this.state.z;
+    out.footY = this.state.footY;
+    out.yaw = this.yaw;
+    out.pitch = this.pitch;
+    out.supportSourceId = this.state.supportSourceId;
+    out.waterState = this.state.waterState;
+    out.waterDepth = this.state.waterDepth;
+    out.waterSurfaceHeight = this.state.waterSurfaceHeight;
+    out.waterBodyId = this.state.waterBodyId;
+    out.waterKind = this.state.waterKind;
+    out.waterFlowX = this.state.waterFlowX;
+    out.waterFlowZ = this.state.waterFlowZ;
+    out.headSubmerged = this.state.headSubmerged;
+    return out;
+  }
+
   attachCollision({ runtime, motor }) {
     if (!runtime || !motor) throw new Error('Player collision attachment requires runtime and motor.');
     this.collisionRuntime = runtime;
@@ -438,8 +466,14 @@ export class PlayerController {
     return wall === null ? terrain : Math.max(terrain, wall);
   }
 
+  readFocusWorld(out) {
+    out.x = this.state.x;
+    out.z = this.state.z;
+    return out;
+  }
+
   getFocusWorld() {
-    return Object.freeze({ x: this.state.x, z: this.state.z });
+    return Object.freeze(this.readFocusWorld({}));
   }
 
   /**
