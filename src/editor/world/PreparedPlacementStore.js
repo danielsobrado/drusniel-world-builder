@@ -12,6 +12,7 @@ export class PreparedPlacementStore {
     this.entries = new Map();
     this.pending = new Map();
     this.completed = [];
+    this.completedHead = 0;
     this.disposed = false;
     this.clock = 0;
     this.window = null;
@@ -103,8 +104,8 @@ export class PreparedPlacementStore {
   }
 
   flush(shouldYield = null) {
-    while (this.completed.length && !shouldYield?.()) {
-      const { key, x, z, token, page } = this.completed.shift();
+    while (this.completedHead < this.completed.length && !shouldYield?.()) {
+      const { key, x, z, token, page } = this.completed[this.completedHead++];
       if (this.pending.get(key) !== token || token.signature !== this.signature(x, z)) {
         PerfCounters.inc('placementStaleResults');
         if (this.pending.get(key) === token) this.pending.delete(key);
@@ -118,6 +119,13 @@ export class PreparedPlacementStore {
       this.world.installPreparedSamples(page);
       PerfCounters.inc('placementPreparedChunks');
       PerfCounters.set('placementPreparedLatencyMs', performance.now() - token.started);
+    }
+    if (this.completedHead >= 64 && this.completedHead * 2 >= this.completed.length) {
+      this.completed.splice(0, this.completedHead);
+      this.completedHead = 0;
+    } else if (this.completedHead === this.completed.length) {
+      this.completed.length = 0;
+      this.completedHead = 0;
     }
     if (this.entries.size > this.limit) {
       const ordered = [...this.entries].filter(([key]) => {
@@ -159,7 +167,7 @@ export class PreparedPlacementStore {
       this.world.chunkWorker.cancel?.(x, z, 'placement:');
     }
     if (this.world.preparedPlacementSamples === this) this.world.preparedPlacementSamples = null;
-    this.entries.clear(); this.pending.clear(); this.completed.length = 0;
+    this.entries.clear(); this.pending.clear(); this.completed.length = 0; this.completedHead = 0;
     this.arrayBytes = 0;
   }
 }

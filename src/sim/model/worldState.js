@@ -1,6 +1,9 @@
 import { ENTITY_KINDS } from './entityKinds.js';
 import { createEntityEnvelope } from './entityEnvelope.js';
 
+const entityListCache = new WeakMap();
+const cloneBaseState = new WeakMap();
+
 const COLLECTION_BY_KIND = Object.freeze({
   region: 'regions',
   settlement: 'settlements',
@@ -54,7 +57,8 @@ export function createEmptyWorldState({
   };
 }
 
-export function cloneWorldState(state) {
+export function cloneWorldState(state, { mutableKinds = ENTITY_KINDS } = {}) {
+  const mutable = new Set(mutableKinds);
   const next = createEmptyWorldState({
     calendar: { ...state.calendar },
     revision: state.revision,
@@ -62,25 +66,40 @@ export function cloneWorldState(state) {
   next.diagnostics = structuredClone(state.diagnostics);
   for (const kind of ENTITY_KINDS) {
     const key = collectionNameForKind(kind);
-    for (const [id, entity] of state[key]) {
-      next[key].set(id, structuredClone(entity));
+    if (!mutable.has(kind)) {
+      next[key] = state[key];
+      continue;
     }
+    for (const [id, entity] of state[key]) next[key].set(id, structuredClone(entity));
   }
+  cloneBaseState.set(next, state);
   return next;
 }
 
+function invalidateEntityList(state, kind) {
+  entityListCache.get(state)?.delete(kind);
+}
+
+function writableCollection(state, kind) {
+  const key = collectionNameForKind(kind);
+  const base = cloneBaseState.get(state);
+  if (base && state[key] === base[key]) state[key] = new Map(base[key]);
+  return state[key];
+}
+
 export function putEntity(state, entity) {
-  const key = collectionNameForKind(entity.kind);
-  if (state[key].has(entity.id)) {
+  const collection = writableCollection(state, entity.kind);
+  if (collection.has(entity.id)) {
     throw Object.assign(new Error(`duplicate_entity_id:${entity.id}`), { code: 'duplicate_entity_id' });
   }
-  state[key].set(entity.id, entity);
+  collection.set(entity.id, entity);
+  invalidateEntityList(state, entity.kind);
   return entity;
 }
 
 export function upsertEntity(state, entity) {
-  const key = collectionNameForKind(entity.kind);
-  state[key].set(entity.id, entity);
+  writableCollection(state, entity.kind).set(entity.id, entity);
+  invalidateEntityList(state, entity.kind);
   return entity;
 }
 
@@ -97,10 +116,20 @@ export function requireEntity(state, kind, id) {
 }
 
 export function listEntities(state, kind, { includeDestroyed = true } = {}) {
-  const entities = [...state[collectionNameForKind(kind)].values()];
-  entities.sort((a, b) => a.id.localeCompare(b.id));
-  if (includeDestroyed) return entities;
-  return entities.filter((e) => e.status === 'active');
+  let cache = entityListCache.get(state);
+  if (!cache) {
+    cache = new Map();
+    entityListCache.set(state, cache);
+  }
+  let entities = cache.get(kind);
+  if (!entities) {
+    entities = [...state[collectionNameForKind(kind)].values()]
+      .sort((a, b) => a.id.localeCompare(b.id));
+    cache.set(kind, entities);
+  }
+  return includeDestroyed
+    ? entities.slice()
+    : entities.filter((entity) => entity.status === 'active');
 }
 
 export function createAndPutEntity(state, fields) {

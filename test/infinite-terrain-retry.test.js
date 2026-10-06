@@ -18,6 +18,7 @@ function createView(t, requestChunk) {
     focusChunkKey: '0:0|0:0',
     pendingFetches: new Set(),
     commitQueue: new TerrainCommitQueue(),
+    nextRetryAt: Number.POSITIVE_INFINITY,
     positionSlot() {},
     positionSlots() {},
   });

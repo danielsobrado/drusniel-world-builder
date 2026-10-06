@@ -20,6 +20,10 @@ export class DeferredWorkBudget {
       : maxMs;
   }
   run(work) { return this.slack.defer(work); }
+  tryRun(work, maxMs = Number.POSITIVE_INFINITY) {
+    if (!(this.available(maxMs) > 0)) return undefined;
+    return this.run(work);
+  }
   reserve(maxMs) {
     if (this.settings.enabled) return this.slack.reserve(Math.min(this.settings.minimumMs, maxMs), maxMs);
     return this.unbudgetedReservation();

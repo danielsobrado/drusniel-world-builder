@@ -9,14 +9,22 @@ const handlers = new Map();
 function snapshotRuntimeState(runtimeCtx) {
   const ledger = runtimeCtx?.ledger;
   const lod = runtimeCtx?.lod;
+  const ledgerCheckpoint = ledger?.checkpoint && ledger?.rollback
+    ? ledger.checkpoint()
+    : null;
   return {
-    ledger: ledger?.list && ledger?.clear && ledger?.record ? ledger.list() : null,
+    ledgerCheckpoint,
+    ledger: ledgerCheckpoint === null && ledger?.list && ledger?.clear && ledger?.record
+      ? ledger.list()
+      : null,
     lod: lod?.serialize && lod?.restore ? lod.serialize() : null,
   };
 }
 
 function restoreRuntimeState(runtimeCtx, snapshot) {
-  if (snapshot.ledger !== null) {
+  if (snapshot.ledgerCheckpoint !== null) {
+    runtimeCtx.ledger.rollback(snapshot.ledgerCheckpoint);
+  } else if (snapshot.ledger !== null) {
     runtimeCtx.ledger.clear();
     for (const entry of snapshot.ledger) runtimeCtx.ledger.record(entry);
   }
@@ -46,18 +54,21 @@ function rejectCommand(state, error, runtimeCtx, runtimeSnapshot, fallbackCode) 
   };
 }
 
-export function registerCommandHandler(type, handler) {
+export function registerCommandHandler(type, handler, { mutableKinds = null } = {}) {
   if (handlers.has(type)) {
     throw new Error(`duplicate_handler:${type}`);
   }
-  handlers.set(type, handler);
+  handlers.set(type, {
+    handler,
+    mutableKinds: mutableKinds == null ? null : Object.freeze([...mutableKinds]),
+  });
 }
 
 export function createCommandDispatcher({ onAccepted = null } = {}) {
   return {
     dispatch(state, command, runtimeCtx = null) {
-      const handler = handlers.get(command.type);
-      if (!handler) {
+      const registration = handlers.get(command.type);
+      if (!registration) {
         state.diagnostics.commandsRejected += 1;
         recordValidationFailure(state, 'unknown_command_type');
         return {
@@ -80,7 +91,9 @@ export function createCommandDispatcher({ onAccepted = null } = {}) {
         };
       }
 
-      const working = cloneWorldState(state);
+      const working = cloneWorldState(state, registration.mutableKinds === null
+        ? undefined
+        : { mutableKinds: registration.mutableKinds });
       const commandWithCtx = runtimeCtx
         ? { ...command, payload: { ...command.payload, __ctx: runtimeCtx, __result: null } }
         : { ...command, payload: { ...command.payload, __result: null } };
@@ -91,7 +104,7 @@ export function createCommandDispatcher({ onAccepted = null } = {}) {
         if (runtimeCtx?.config?.time) {
           working.calendar = calendarFromTick(command.issuedAtTick, runtimeCtx.config.time);
         }
-        emitted = handler(working, commandWithCtx) ?? [];
+        emitted = registration.handler(working, commandWithCtx) ?? [];
       } catch (error) {
         return rejectCommand(state, error, runtimeCtx, runtimeSnapshot, 'command_failed');
       }
@@ -137,22 +150,22 @@ registerCommandHandler('sim.upsertEntity', (_state, command) => [{
   type: 'entity.upserted',
   entityIds: [command.payload.id],
   payload: command.payload,
-}]);
+}], { mutableKinds: [] });
 
 registerCommandHandler('sim.destroyEntity', (_state, command) => [{
   type: 'entity.destroyed',
   entityIds: [command.payload.id],
   payload: command.payload,
-}]);
+}], { mutableKinds: [] });
 
 registerCommandHandler('sim.patchEntity', (_state, command) => [{
   type: 'entity.patched',
   entityIds: [command.payload.id],
   payload: command.payload,
-}]);
+}], { mutableKinds: [] });
 
 registerCommandHandler('sim.setCalendar', (_state, command) => [{
   type: 'calendar.set',
   entityIds: [],
   payload: command.payload,
-}]);
+}], { mutableKinds: [] });

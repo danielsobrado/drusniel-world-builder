@@ -29,6 +29,15 @@ export function createLedger() {
     list() {
       return entries.map((e) => structuredClone(e));
     },
+    checkpoint() {
+      return entries.length;
+    },
+    rollback(checkpoint) {
+      if (!Number.isSafeInteger(checkpoint) || checkpoint < 0 || checkpoint > entries.length) {
+        throw new Error('invalid_ledger_checkpoint');
+      }
+      entries.length = checkpoint;
+    },
     totalTransferred(commodityId) {
       return entries
         .filter((e) => e.commodityId === commodityId)
@@ -182,21 +191,39 @@ export function runDailyEconomy(state, definition, config, ledger) {
   const reasonCodes = [];
   const markets = listEntities(state, 'market', { includeDestroyed: false });
   const facilities = listEntities(state, 'facility', { includeDestroyed: false });
+  const settlements = listEntities(state, 'settlement', { includeDestroyed: false });
+  const cohorts = listEntities(state, 'populationCohort', { includeDestroyed: false });
   const recipes = config.recipes;
   const commodities = config.commodities;
+  const facilitiesBySettlement = new Map();
+  const labourBySettlement = new Map();
+  for (const facility of facilities) {
+    const list = facilitiesBySettlement.get(facility.data.settlementId) ?? [];
+    list.push(facility);
+    facilitiesBySettlement.set(facility.data.settlementId, list);
+  }
+  for (const cohort of cohorts) {
+    if (cohort.data.ageBand !== 'working') continue;
+    labourBySettlement.set(
+      cohort.data.settlementId,
+      (labourBySettlement.get(cohort.data.settlementId) ?? 0) + cohort.data.count,
+    );
+  }
 
-  for (const settlement of listEntities(state, 'settlement', { includeDestroyed: false })) {
-    try {
-      assertLabourCap(state, settlement.id);
-    } catch (error) {
+  for (const settlement of settlements) {
+    const supply = labourBySettlement.get(settlement.id) ?? 0;
+    const localFacilities = facilitiesBySettlement.get(settlement.id) ?? [];
+    const assigned = localFacilities
+      .filter((facility) => facility.data.enabled)
+      .reduce((sum, facility) => sum + (facility.data.labourAssigned ?? 0), 0);
+    if (assigned > supply) {
       reasonCodes.push({
-        code: error.code ?? 'labour_over_assigned',
+        code: 'labour_over_assigned',
         settlementId: settlement.id,
-        assigned: error.assigned,
-        supply: error.supply,
+        assigned,
+        supply,
       });
-      for (const facility of facilities.filter((f) => f.data.settlementId === settlement.id)) {
-        const supply = labourSupply(state, settlement.id);
+      for (const facility of localFacilities) {
         const capped = Math.min(facility.data.labourAssigned ?? 0, supply);
         if (capped !== facility.data.labourAssigned) {
           events.push({
@@ -360,7 +387,7 @@ export function runDailyEconomy(state, definition, config, ledger) {
     market.data.foodSecurity = foodSecurity;
   }
 
-  const taxes = collectTaxes(state, config, ledger);
+  const taxes = collectTaxes(state, config, ledger, { settlements, labourBySettlement });
   events.push(...taxes.events);
   reasonCodes.push(...taxes.reasonCodes);
 
@@ -443,11 +470,15 @@ export function assertLabourCap(state, settlementId) {
   return { assigned, supply };
 }
 
-export function collectTaxes(state, config, ledger) {
+export function collectTaxes(state, config, ledger, {
+  settlements = null,
+  labourBySettlement = null,
+} = {}) {
   const events = [];
   const reasonCodes = [];
   const taxRate = config.economy?.taxRate ?? 0.1;
-  for (const settlement of listEntities(state, 'settlement', { includeDestroyed: false })) {
+  const rows = settlements ?? listEntities(state, 'settlement', { includeDestroyed: false });
+  for (const settlement of rows) {
     const treasury = settlement.data.treasuryAccountId
       ? getEntity(state, 'inventoryAccount', settlement.data.treasuryAccountId)
       : null;
@@ -455,7 +486,7 @@ export function collectTaxes(state, config, ledger) {
       ? getEntity(state, 'inventoryAccount', settlement.data.inventoryAccountId)
       : null;
     if (!treasury || !inventory) continue;
-    const wagePool = labourSupply(state, settlement.id);
+    const wagePool = labourBySettlement?.get(settlement.id) ?? labourSupply(state, settlement.id);
     const wages = Math.floor(wagePool * 0.5);
     const tax = Math.floor(wages * taxRate);
     const coin = inventory.data.quantities?.coin ?? 0;

@@ -86,18 +86,25 @@ export function runMonthlyPopulation(state, definition, config) {
   const birthRate = config.population?.birthRatePerMonth ?? 0.002;
   const deathRate = config.population?.deathRatePerMonth ?? 0.0015;
   const migrationThreshold = config.population?.migrationThreshold ?? 0.4;
+  const settlements = listEntities(state, 'settlement', { includeDestroyed: false });
+  const cohorts = listEntities(state, 'populationCohort', { includeDestroyed: false });
+  const cohortsBySettlement = new Map();
+  for (const cohort of cohorts) {
+    const local = cohortsBySettlement.get(cohort.data.settlementId) ?? [];
+    local.push(cohort);
+    cohortsBySettlement.set(cohort.data.settlementId, local);
+  }
 
   // Apply demography to working state first so later migration sees updated counts.
-  for (const settlement of listEntities(state, 'settlement', { includeDestroyed: false })) {
+  for (const settlement of settlements) {
     const market = settlement.data.marketId
       ? getEntity(state, 'market', settlement.data.marketId)
       : null;
     const foodSecurity = market?.data.foodSecurity ?? 1;
-    const cohorts = listEntities(state, 'populationCohort', { includeDestroyed: false })
-      .filter((c) => c.data.settlementId === settlement.id);
+    const localCohorts = cohortsBySettlement.get(settlement.id) ?? [];
 
     let total = 0;
-    for (const cohort of cohorts) {
+    for (const cohort of localCohorts) {
       let count = cohort.data.count;
       const births = cohort.data.ageBand === 'working'
         ? Math.floor(count * birthRate * foodSecurity)
@@ -154,14 +161,16 @@ export function runMonthlyPopulation(state, definition, config) {
     };
   }
 
-  const migration = migrateBetweenSettlements(state, definition, config);
+  const migration = migrateBetweenSettlements(state, definition, config, { settlements, cohorts });
   reasonCodes.push(...migration.reasonCodes);
 
   // Creates must precede patches so new destination cohorts exist when patched.
   events.push(...(migration.createEvents ?? []));
 
   // Emit final authoritative patches after demography + migration.
-  for (const cohort of listEntities(state, 'populationCohort', { includeDestroyed: false })) {
+  const finalCohorts = listEntities(state, 'populationCohort', { includeDestroyed: false });
+  const populationTotals = new Map();
+  for (const cohort of finalCohorts) {
     events.push({
       type: 'entity.patched',
       entityIds: [cohort.id],
@@ -174,9 +183,20 @@ export function runMonthlyPopulation(state, definition, config) {
         },
       },
     });
+    populationTotals.set(
+      cohort.data.settlementId,
+      (populationTotals.get(cohort.data.settlementId) ?? 0) + cohort.data.count,
+    );
   }
-  for (const settlement of listEntities(state, 'settlement', { includeDestroyed: false })) {
-    const total = settlementPopulationTotal(state, settlement.id);
+  for (const character of listEntities(state, 'character', { includeDestroyed: false })) {
+    if (character.data.countsInPopulation === false) continue;
+    populationTotals.set(
+      character.data.homeSettlementId,
+      (populationTotals.get(character.data.homeSettlementId) ?? 0) + 1,
+    );
+  }
+  for (const settlement of settlements) {
+    const total = populationTotals.get(settlement.id) ?? 0;
     settlement.data.population = total;
     events.push({
       type: 'entity.patched',
@@ -260,18 +280,36 @@ export function applyHousingAndDisease(state, settlement, foodSecurity, config) 
   };
 }
 
-export function migrateBetweenSettlements(state, definition, config) {
+export function migrateBetweenSettlements(state, definition, config, {
+  settlements = null,
+  cohorts = null,
+  graphNodes = null,
+  graphEdges = null,
+} = {}) {
   const events = [];
   const createEvents = [];
   const reasonCodes = [];
-  const settlements = listEntities(state, 'settlement', { includeDestroyed: false });
+  const settlementRows = settlements ?? listEntities(state, 'settlement', { includeDestroyed: false });
+  const cohortRows = cohorts ?? listEntities(state, 'populationCohort', { includeDestroyed: false });
+  const nodeRows = graphNodes ?? listEntities(state, 'graphNode', { includeDestroyed: false });
+  const edgeRows = graphEdges ?? listEntities(state, 'graphEdge', { includeDestroyed: false });
+  const nodeBySettlement = new Map(nodeRows.map((node) => [node.data.settlementId, node]));
+  const openFromNodes = new Set(
+    edgeRows.filter((edge) => edge.data.accessPolicy !== 'closed').map((edge) => edge.data.fromNodeId),
+  );
+  const cohortsBySettlement = new Map();
+  for (const cohort of cohortRows) {
+    const local = cohortsBySettlement.get(cohort.data.settlementId) ?? [];
+    local.push(cohort);
+    cohortsBySettlement.set(cohort.data.settlementId, local);
+  }
   const threshold = config.population?.migrationThreshold ?? 0.4;
   let createOrdinal = 0;
 
-  for (const from of settlements) {
+  for (const from of settlementRows) {
     const pressure = from.data.social?.migrationPressure ?? 0;
     if (pressure < threshold) continue;
-    const candidates = settlements
+    const candidates = settlementRows
       .filter((s) => s.id !== from.id)
       .map((s) => ({
         settlement: s,
@@ -280,27 +318,22 @@ export function migrateBetweenSettlements(state, definition, config) {
       .sort((a, b) => b.score - a.score || a.settlement.id.localeCompare(b.settlement.id));
     if (candidates.length === 0) continue;
     const to = candidates[0].settlement;
-    const fromNode = listEntities(state, 'graphNode', { includeDestroyed: false })
-      .find((n) => n.data.settlementId === from.id);
-    const toNode = listEntities(state, 'graphNode', { includeDestroyed: false })
-      .find((n) => n.data.settlementId === to.id);
+    const fromNode = nodeBySettlement.get(from.id);
+    const toNode = nodeBySettlement.get(to.id);
     if (fromNode && toNode) {
-      const hasEdge = listEntities(state, 'graphEdge', { includeDestroyed: false })
-        .some((e) => e.data.fromNodeId === fromNode.id && e.data.accessPolicy !== 'closed');
+      const hasEdge = openFromNodes.has(fromNode.id);
       if (!hasEdge) {
         reasonCodes.push({ code: 'migration_blocked_no_route', from: from.id, to: to.id });
         continue;
       }
     }
-    const fromCohorts = listEntities(state, 'populationCohort', { includeDestroyed: false })
-      .filter((c) => c.data.settlementId === from.id && c.data.ageBand === 'working' && c.data.count > 0)
-      .sort((a, b) => a.id.localeCompare(b.id));
+    const fromCohorts = (cohortsBySettlement.get(from.id) ?? [])
+      .filter((c) => c.data.ageBand === 'working' && c.data.count > 0);
     if (fromCohorts.length === 0) continue;
     const movers = Math.min(5, Math.floor(fromCohorts[0].data.count * 0.05) || 1);
     const source = fromCohorts[0];
-    let destCohort = listEntities(state, 'populationCohort', { includeDestroyed: false })
-      .find((c) => c.data.settlementId === to.id
-        && c.data.ageBand === source.data.ageBand
+    let destCohort = (cohortsBySettlement.get(to.id) ?? [])
+      .find((c) => c.data.ageBand === source.data.ageBand
         && c.data.role === source.data.role);
 
     source.data.count -= movers;
@@ -340,6 +373,10 @@ export function migrateBetweenSettlements(state, definition, config) {
           data: { ...destCohort.data },
         },
       });
+      cohortRows.push(destCohort);
+      const destinationCohorts = cohortsBySettlement.get(to.id) ?? [];
+      destinationCohorts.push(destCohort);
+      cohortsBySettlement.set(to.id, destinationCohorts);
     }
     destCohort.data.count += movers;
 

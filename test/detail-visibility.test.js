@@ -6,7 +6,7 @@ import { createInstancedRenderers, disposeInstancedRenderers, writeInstances } f
 import { InstanceAnchor } from '../src/editor/stylized/lod/InstanceAnchor.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
-test('detail turns immediately fall back to residents; auxiliary passes and rebases preserve all placements', () => {
+test('detail turns retain the last complete selection; auxiliary passes and rebases preserve all placements', () => {
   let origin = { x: 1000000, z: 2000000 };
   const root = new Group(), geometry = new BoxGeometry(), material = new MeshBasicNodeMaterial();
   const prototypes = [[{ geometry, material }]], anchor = new InstanceAnchor().follow(origin);
@@ -31,8 +31,9 @@ test('detail turns immediately fall back to residents; auxiliary passes and reba
   assert.equal(PerfCounters.get('testVisibilitySubmitted'), 1, 'auxiliary captures preserve the main-camera gauge');
   camera.lookAt(0, 0, 1);
   selector.update(camera, () => true);
-  assert.equal(selector.fullMeshes[0].visible, true, 'turn cannot expose a partially computed selection');
-  assert.equal(PerfCounters.get('testVisibilitySubmitted'), 2, 'camera fallback reports all residents');
+  assert.equal(meshes[0][0].visible, true, 'turn keeps the previous complete selection');
+  assert.equal(selector.fullMeshes[0].visible, false, 'movement does not expose every resident detail');
+  assert.equal(PerfCounters.get('testVisibilitySubmitted'), 1, 'pending selection keeps the prior main-camera gauge');
   selector.update(camera, () => false);
   assert.equal(meshes[0][0].count, 1);
   origin = { x: origin.x + 128, z: origin.z };

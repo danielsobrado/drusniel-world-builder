@@ -24,7 +24,7 @@ import { cellCenterToWorld, worldToCell } from './world/WorldCoordinates.js';
 import {
   createTerrainSlotPlan,
   selectTerrainResidentDescriptors,
-  worldToTerrainChunk,
+  writeTerrainChunk,
 } from './world/TerrainStreamingPlan.js';
 import {
   TERRAIN_COMMIT_BUDGET_MS,
@@ -291,7 +291,12 @@ export class InfiniteTerrainView {
     this.lastFocus = null;
     this.lastFocusTimestamp = null;
     this.focusChunkKey = null;
+    this.predictedChunk = { chunkX: 0, chunkZ: 0 };
+    this.streamingChunkState = new Float64Array(4);
+    this.streamingChunkState.fill(Number.POSITIVE_INFINITY);
     this.clock = 0;
+    this.contentRevision = 0;
+    this.nextRetryAt = Number.POSITIVE_INFINITY;
     this.disposed = false;
     this.focusChunk = { chunkX: 0, chunkZ: 0 };
     this.focusVelocity = { x: 0, z: 0 };
@@ -580,27 +585,40 @@ export class InfiniteTerrainView {
     // neither changed, so steady-state frames don't churn Maps/sorts.
     const tileSize = this.worldStore.tileSize;
     const prefetchSeconds = this.streamingConfig.prefetchSeconds;
-    const currentChunk = worldToTerrainChunk(
+    const currentChunk = writeTerrainChunk(
       focusWorld.x,
       focusWorld.z,
       tileSize,
       this.chunkSize,
+      this.focusChunk,
     );
-    const predictedChunk = worldToTerrainChunk(
+    const predictedChunk = writeTerrainChunk(
       focusWorld.x + velocity.x * prefetchSeconds,
       focusWorld.z + velocity.z * prefetchSeconds,
       tileSize,
       this.chunkSize,
+      this.predictedChunk ??= { chunkX: 0, chunkZ: 0 },
     );
-    const nextFocusKey = `${currentChunk.chunkX}:${currentChunk.chunkZ}`
-      + `|${predictedChunk.chunkX}:${predictedChunk.chunkZ}`;
-    this.focusChunk = currentChunk;
+    if (!this.streamingChunkState) {
+      this.streamingChunkState = new Float64Array(4);
+      this.streamingChunkState.fill(Number.POSITIVE_INFINITY);
+    }
+    const chunkState = this.streamingChunkState;
+    const changed = currentChunk.chunkX !== chunkState[0]
+      || currentChunk.chunkZ !== chunkState[1]
+      || predictedChunk.chunkX !== chunkState[2]
+      || predictedChunk.chunkZ !== chunkState[3];
 
-    if (!force && nextFocusKey === this.focusChunkKey) {
+    if (!force && !changed) {
       this.retryFailedSlots(timestamp);
       return;
     }
-    this.focusChunkKey = nextFocusKey;
+    chunkState[0] = currentChunk.chunkX;
+    chunkState[1] = currentChunk.chunkZ;
+    chunkState[2] = predictedChunk.chunkX;
+    chunkState[3] = predictedChunk.chunkZ;
+    this.focusChunkKey = `${currentChunk.chunkX}:${currentChunk.chunkZ}`
+      + `|${predictedChunk.chunkX}:${predictedChunk.chunkZ}`;
     this.clock += 1;
 
     const selection = selectTerrainResidentDescriptors({
@@ -643,23 +661,34 @@ export class InfiniteTerrainView {
   }
 
   retryFailedSlots(timestamp) {
+    if (timestamp < (this.nextRetryAt ?? Number.POSITIVE_INFINITY)) return;
+    let nextRetryAt = Number.POSITIVE_INFINITY;
     for (const slot of this.slots) {
-      if (!slot.loading && slot.descriptor && slot.retryAt != null && timestamp >= slot.retryAt) {
+      if (slot.loading || !slot.descriptor || slot.retryAt == null) continue;
+      if (timestamp >= slot.retryAt) {
         void this.assignSlot(slot, slot.descriptor);
+      } else {
+        nextRetryAt = Math.min(nextRetryAt, slot.retryAt);
       }
     }
+    this.nextRetryAt = nextRetryAt;
   }
 
   calculateVelocity(focusWorld, timestamp) {
-    let velocity = { x: 0, z: 0 };
+    const velocity = this.focusVelocity;
+    velocity.x = 0;
+    velocity.z = 0;
     if (this.lastFocus && Number.isFinite(this.lastFocusTimestamp)) {
       const deltaSeconds = Math.max(0.001, (timestamp - this.lastFocusTimestamp) / 1000);
-      velocity = {
-        x: (focusWorld.x - this.lastFocus.x) / deltaSeconds,
-        z: (focusWorld.z - this.lastFocus.z) / deltaSeconds,
-      };
+      velocity.x = (focusWorld.x - this.lastFocus.x) / deltaSeconds;
+      velocity.z = (focusWorld.z - this.lastFocus.z) / deltaSeconds;
     }
-    this.lastFocus = { x: focusWorld.x, z: focusWorld.z };
+    if (this.lastFocus) {
+      this.lastFocus.x = focusWorld.x;
+      this.lastFocus.z = focusWorld.z;
+    } else {
+      this.lastFocus = { x: focusWorld.x, z: focusWorld.z };
+    }
     this.lastFocusTimestamp = timestamp;
     return velocity;
   }
@@ -720,6 +749,10 @@ export class InfiniteTerrainView {
           // Retained slots are otherwise skipped even after a focus change.
           // Back off instead of leaving a permanent hole or retrying every frame.
           slot.retryAt = performance.now() + TERRAIN_REQUEST_RETRY_DELAY_MS;
+          this.nextRetryAt = Math.min(
+            this.nextRetryAt ?? Number.POSITIVE_INFINITY,
+            slot.retryAt,
+          );
         }
         // Cancellation is an intentional optimization, not a failure.
         if (!this.disposed && !error?.cancelled) {
@@ -770,6 +803,7 @@ export class InfiniteTerrainView {
     slot.heightTexture.needsUpdate = true;
     slot.page = ready;
     slot.pageRevision = ready.revision;
+    this.contentRevision = (this.contentRevision ?? 0) + 1;
     slot.mesh.visible = true;
     slot.loading = false;
     slot.retryAt = null;

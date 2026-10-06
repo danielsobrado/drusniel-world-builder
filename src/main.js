@@ -1358,7 +1358,6 @@ async function initializeEditor(restoreState, resources, startup) {
   resources.defer(() => { document.removeEventListener('visibilitychange', onVisibilityChange); });
 
   let lastWeatherTimestamp = null;
-  let roadsideWorkFrame = 0;
   let lastCharacterTimestamp = null;
   const characterCentre = { x: 0, y: 0, z: 0 };
   terrainView.setAnimationLoop((timestamp) => {
@@ -1369,10 +1368,10 @@ async function initializeEditor(restoreState, resources, startup) {
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
     drawPreparation.revealPending();
     exploration.beforeMovement(frameTimestamp);
-    // Optional dressing receives a sparse early turn in the same allowance;
-    // fixed updates can otherwise leave its late queue permanently starved.
-    if (roadsideDetails.enabled && roadsideWorkFrame++ % 8 === 0) {
-      deferredWork.run(() => roadsideDetails.update(viewModeController.camera));
+    // Optional roadside dressing gets one budget-gated turn near the start of the frame.
+    // Its own revision gate makes unchanged frames effectively free.
+    if (roadsideDetails.enabled) {
+      deferredWork.tryRun(() => roadsideDetails.update(viewModeController.camera), 0.5);
     }
     deferredWork.run(() => stylizedSurface.beginFrame(frameTimestamp));
     if (profiling) perfQa.mark('placementPreparation');
@@ -1623,9 +1622,11 @@ async function initializeEditor(restoreState, resources, startup) {
         : { x: 0.3, z: 0.1 },
       viewModeController.mode === PLAYER_MODE_WALK,
     );
-    deferredWork.run(() => drawPreparation.flush(viewModeController.camera, () => deferredWork.available(6) <= 0));
+    deferredWork.tryRun(
+      () => drawPreparation.flush(viewModeController.camera, deferredWork.shouldYield),
+      6,
+    );
     drawPreparation.hidePending();
-    deferredWork.run(() => roadsideDetails.update(viewModeController.camera));
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
     roadsideDetailsUi.update();
     terrainView.render(viewModeController.camera);

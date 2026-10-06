@@ -301,6 +301,7 @@ export function createFixedStepRunner({
   scheduler,
   calendarConfig,
   onCadence = null,
+  cadences = Object.values(CADENCES),
 }) {
   const config = createCalendarConfig(calendarConfig);
   const dayTicks = ticksPerDay(config);
@@ -308,17 +309,29 @@ export function createFixedStepRunner({
   const weekTicks = ticksPerWeek(config);
   const monthTicks = ticksPerMonth(config);
   const yearTicks = ticksPerYear(config);
+  const cadenceSteps = new Map([
+    [CADENCES.tick, 1],
+    [CADENCES.hour, hourTicks],
+    [CADENCES.day, dayTicks],
+    [CADENCES.week, weekTicks],
+    [CADENCES.month, monthTicks],
+    [CADENCES.year, yearTicks],
+  ]);
+  const cadenceOrder = new Map([...cadenceSteps.keys()].map((cadence, index) => [cadence, index]));
+  const activeCadences = new Set(cadences);
+  for (const cadence of activeCadences) {
+    if (!cadenceSteps.has(cadence)) throw invalidSchedulerValue('cadence');
+  }
 
   function emitCadence(fromTick, toTick) {
     const fired = [];
-    for (let tick = fromTick + 1; tick <= toTick; tick += 1) {
-      fired.push({ cadence: CADENCES.tick, tick });
-      if (tick % hourTicks === 0) fired.push({ cadence: CADENCES.hour, tick });
-      if (tick % dayTicks === 0) fired.push({ cadence: CADENCES.day, tick });
-      if (tick % weekTicks === 0) fired.push({ cadence: CADENCES.week, tick });
-      if (tick % monthTicks === 0) fired.push({ cadence: CADENCES.month, tick });
-      if (tick % yearTicks === 0) fired.push({ cadence: CADENCES.year, tick });
+    for (const cadence of activeCadences) {
+      const step = cadenceSteps.get(cadence);
+      let tick = Math.floor(fromTick / step) * step + step;
+      for (; tick <= toTick; tick += step) fired.push({ cadence, tick });
     }
+    fired.sort((left, right) => left.tick - right.tick
+      || cadenceOrder.get(left.cadence) - cadenceOrder.get(right.cadence));
     return fired;
   }
 

@@ -10,13 +10,16 @@ function distanceSquared(left, right) {
   return deltaX * deltaX + deltaZ * deltaZ;
 }
 
-export function worldToTerrainChunk(worldX, worldZ, tileSize, chunkSize) {
+export function writeTerrainChunk(worldX, worldZ, tileSize, chunkSize, target) {
   const cell = worldToCell(worldX, worldZ, tileSize);
   const chunk = cellToChunk(cell.x, cell.z, chunkSize);
-  return Object.freeze({
-    chunkX: normalizeZero(chunk.chunkX),
-    chunkZ: normalizeZero(chunk.chunkZ),
-  });
+  target.chunkX = normalizeZero(chunk.chunkX);
+  target.chunkZ = normalizeZero(chunk.chunkZ);
+  return target;
+}
+
+export function worldToTerrainChunk(worldX, worldZ, tileSize, chunkSize) {
+  return Object.freeze(writeTerrainChunk(worldX, worldZ, tileSize, chunkSize, {}));
 }
 
 export function createTerrainChunkDescriptor({ chunkX, chunkZ, chunkSize, tileSize }) {

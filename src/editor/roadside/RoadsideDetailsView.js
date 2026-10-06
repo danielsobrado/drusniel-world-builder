@@ -11,6 +11,7 @@ export class RoadsideDetailsView {
     Object.assign(this, { terrainView, controller, assets, surface, defaultEnabled: enabled, constructionSpatialIndex });
     this.root = new Group(); this.root.name = 'roadside-lanterns'; terrainView.scene.add(this.root);
     this.anchor = new InstanceAnchor(); this.records = []; this.meshes = []; this.key = ''; this.disposed = false;
+    this.sourceKey = '';
     this.unsubscribe = controller.subscribeMap?.(() => this.synchronizeEnabled());
   }
   get enabled() { return this.controller.roadsideDetails.enabled ?? this.defaultEnabled; }
@@ -56,7 +57,7 @@ export class RoadsideDetailsView {
     if (generator !== this.worldGenerator) {
       this.worldGenerator = generator;
       this.generator = new RoadsideLanternGenerator(generator);
-      this.key = ''; this.pending = null;
+      this.key = ''; this.sourceKey = ''; this.pending = null;
     }
     const focus = view.focusChunk;
     if (!focus) return;
@@ -65,16 +66,39 @@ export class RoadsideDetailsView {
     const reach = view.chunkWorldSize * 2;
     const bounds = { minX: (x - reach) / tileSize - 2, maxX: (x + reach) / tileSize + 2,
       minZ: (-z - reach) / tileSize - 2, maxZ: (-z + reach) / tileSize + 2 };
-    const resident = view.slots.filter(slot => slot.page && Math.abs(slot.descriptor.chunkX - focus.chunkX) <= 2
-      && Math.abs(slot.descriptor.chunkZ - focus.chunkZ) <= 2)
-      .map(slot => `${slot.descriptor.chunkX}:${slot.descriptor.chunkZ}:${slot.pageRevision}`).sort().join('|');
-    const construction = this.constructionSpatialIndex?.keysForBounds({ minX: x - reach, maxX: x + reach, minZ: z - reach, maxZ: z + reach })
-      .map(key => this.constructionSpatialIndex.signature(...key.split(':').map(Number))).join(':');
-    const key = `${focus.chunkX}:${focus.chunkZ}:${this.surface.revisionTracker?.windowSignature(focus, 2, 1)}:${this.controller.objectMap.signatureForBounds(bounds)}:${construction}:${store.revision}:${resident}`;
-    if (key === this.key) return;
-    if (this.pending?.key !== key) {
-      this.pending = { key, rows: [], identities: new Set(), iterator: this.generator.candidates(x / tileSize, -z / tileSize, reach, tileSize) };
+    let fallbackTerrainRevision = 0;
+    if (!Number.isFinite(view.contentRevision)) {
+      for (const slot of view.slots) {
+        if (!slot.page || !slot.descriptor) continue;
+        fallbackTerrainRevision = ((fallbackTerrainRevision * 33)
+          ^ slot.descriptor.chunkX ^ (slot.descriptor.chunkZ << 8) ^ (slot.pageRevision ?? 0)) >>> 0;
+      }
     }
+    const terrainRevision = Number.isFinite(view.contentRevision) ? view.contentRevision : fallbackTerrainRevision;
+    const surfaceRevision = this.surface.revisionTracker?.revision
+      ?? this.surface.revisionTracker?.windowSignature?.(focus, 2, 1)
+      ?? 0;
+    const objectRevision = this.controller.objectMap.revision
+      ?? this.controller.objectMap.signatureForBounds(bounds);
+    const constructionRevision = this.constructionSpatialIndex?.revision ?? 0;
+    const sourceKey = `${focus.chunkX}:${focus.chunkZ}:${terrainRevision}:${surfaceRevision}:${objectRevision}:${constructionRevision}:${store.revision}`;
+    if (!this.pending && sourceKey === this.sourceKey) return;
+    if (this.pending?.sourceKey !== sourceKey) {
+      const residentChunks = new Set();
+      for (const slot of view.slots) {
+        if (slot.page && slot.descriptor) residentChunks.add(`${slot.descriptor.chunkX}:${slot.descriptor.chunkZ}`);
+      }
+      this.pending = {
+        key: sourceKey,
+        sourceKey,
+        rows: [],
+        identities: new Set(),
+        residentChunks,
+        constructionBounds: new Map(),
+        iterator: this.generator.candidates(x / tileSize, -z / tileSize, reach, tileSize),
+      };
+    }
+    const key = sourceKey;
     const started = performance.now();
     while (!this.surface.shouldYieldWork?.()) {
       const next = this.pending.iterator.next();
@@ -84,18 +108,15 @@ export class RoadsideDetailsView {
         writeInstances(this.meshes, [this.records.map(record => ({ matrix: new Matrix4().compose(
           new Vector3(record.x, record.height, record.z), new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), record.rotationY), new Vector3(1, 1, 1)), fade: 1, seed: 0 }))], this.anchor);
         this.anchor.place(this.root, origin);
-        this.key = key; this.pending = null;
+        this.key = key; this.sourceKey = sourceKey; this.pending = null;
         PerfCounters.set('roadsideLanternInstances', this.records.length);
         break;
       }
       const detail = next.value;
       if (store.has(detail.key) || this.pending.identities.has(detail.key) || this.pending.rows.length >= 128) continue;
-      const resident = view.slots.some(slot => {
-        const d = slot.descriptor;
-        return slot.page && d?.chunkX === Math.floor(detail.x / view.chunkWorldSize)
-          && d?.chunkZ === Math.floor(-detail.z / view.chunkWorldSize);
-      });
-      if (!resident) continue;
+      const chunkX = Math.floor(detail.x / view.chunkWorldSize);
+      const chunkZ = Math.floor(-detail.z / view.chunkWorldSize);
+      if (!this.pending.residentChunks.has(`${chunkX}:${chunkZ}`)) continue;
       const water = view.getCanonicalWater(detail.x, detail.z);
       if (water.coverage > 0.05 || water.shoreDistance < 3 && water.kind !== 0) continue;
       const cell = { x: Math.floor(detail.cellX), z: Math.floor(detail.cellZ) };
@@ -104,9 +125,16 @@ export class RoadsideDetailsView {
       const region = { minX: detail.x - 2, maxX: detail.x + 2, minZ: detail.z - 2, maxZ: detail.z + 2 };
       const ids = new Set((index?.keysForBounds(region) ?? []).flatMap(key => index.list(...key.split(':').map(Number))));
       const obstructed = [...ids].some(id => {
-        const record = this.controller.constructionStore.get(id);
-        const b = record && cubicBezierPathBounds(record.path);
-        const margin = record?.dimensions.thickness ?? 0;
+        let cached = this.pending.constructionBounds.get(id);
+        if (cached === undefined) {
+          const record = this.controller.constructionStore.get(id);
+          cached = record
+            ? { bounds: cubicBezierPathBounds(record.path), margin: record.dimensions.thickness ?? 0 }
+            : null;
+          this.pending.constructionBounds.set(id, cached);
+        }
+        const b = cached?.bounds;
+        const margin = cached?.margin ?? 0;
         return b && b.minX - margin <= region.maxX && b.maxX + margin >= region.minX
           && b.minZ - margin <= region.maxZ && b.maxZ + margin >= region.minZ;
       });
@@ -129,6 +157,6 @@ export class RoadsideDetailsView {
     disposeInstancedRenderers(this.root, this.meshes); this.meshes = [];
     for (const part of this.parts ?? []) part.geometry.dispose();
     if (this.assetPath) this.assets.getCache().release(this.assetPath);
-    this.assetPath = null; this.parts = null; this.records = []; this.pending = null; this.key = '';
+    this.assetPath = null; this.parts = null; this.records = []; this.pending = null; this.key = ''; this.sourceKey = '';
   }
 }

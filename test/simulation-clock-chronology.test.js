@@ -44,3 +44,24 @@ test('catch-up restores the final clock tick when a cadence callback fails', () 
   assert.throws(() => created.runner.stepTicks(3, {}), /cadence failed/);
   assert.equal(clock.getTick(), 3);
 });
+
+
+test('sparse cadence mode jumps directly between requested boundaries', () => {
+  const observed = [];
+  const clock = createWorldClock({});
+  const scheduler = createScheduler(clock);
+  const runner = createFixedStepRunner({
+    clock,
+    scheduler,
+    calendarConfig: {},
+    cadences: ['day', 'month'],
+    onCadence: (event) => observed.push(event),
+  });
+
+  const result = runner.stepTicks(60 * 24 * 31, {});
+
+  assert.equal(result.advanced, 60 * 24 * 31);
+  assert.equal(observed.filter((event) => event.cadence === 'day').length, 31);
+  assert.equal(observed.filter((event) => event.cadence === 'month').length, 1);
+  assert.equal(observed.length, 32);
+});

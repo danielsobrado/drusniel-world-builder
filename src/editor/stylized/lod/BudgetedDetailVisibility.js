@@ -3,6 +3,42 @@ import { TurnEnvelopeFrustum } from '../../../render/visibility/TurnEnvelopeFrus
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { writeInstances } from './StylizedLodRuntime.js';
 
+const CAMERA_STATE_SIZE = 25;
+
+function writeCameraState(camera, origin, target) {
+  const position = camera.position;
+  const quaternion = camera.quaternion;
+  target[0] = position.x + origin.x;
+  target[1] = position.y;
+  target[2] = position.z + origin.z;
+  target[3] = quaternion.x;
+  target[4] = quaternion.y;
+  target[5] = quaternion.z;
+  target[6] = quaternion.w;
+  target[7] = origin.x;
+  target[8] = origin.z;
+  const projection = camera.projectionMatrix.elements;
+  for (let index = 0; index < 16; index += 1) target[index + 9] = projection[index];
+}
+
+function cameraStatesMatch(current, previous) {
+  if (!previous || current[7] !== previous[7] || current[8] !== previous[8]) return false;
+  if (Math.hypot(
+    current[0] - previous[0],
+    current[1] - previous[1],
+    current[2] - previous[2],
+  ) >= 2) return false;
+  const quaternionDot = current[3] * previous[3]
+    + current[4] * previous[4]
+    + current[5] * previous[5]
+    + current[6] * previous[6];
+  if (Math.abs(quaternionDot) <= 0.998) return false;
+  for (let index = 9; index < CAMERA_STATE_SIZE; index += 1) {
+    if (current[index] !== previous[index]) return false;
+  }
+  return true;
+}
+
 /** Main-camera selection only. Full resident buffers are retained for auxiliary views. */
 export class BudgetedDetailVisibility {
   constructor(view) {
@@ -12,6 +48,7 @@ export class BudgetedDetailVisibility {
     this.key = '';
     this.job = null;
     this.selectionPose = null;
+    this.cameraState = new Float64Array(CAMERA_STATE_SIZE);
     this.scratchSphere = new Sphere();
     this.turnEnvelope = new TurnEnvelopeFrustum();
     this.frustum = this.turnEnvelope.frustum;
@@ -59,18 +96,18 @@ export class BudgetedDetailVisibility {
     if (!this.instances || !camera || this.view.pendingRebuild) return;
     const origin = this.view.terrainView.floatingOrigin.getState();
     camera.updateMatrixWorld();
-    const projectionKey = camera.projectionMatrix.elements.join(',');
-    const pose = { x: camera.position.x + origin.x, y: camera.position.y, z: camera.position.z + origin.z,
-      rotation: camera.quaternion.clone(), projectionKey, originX: origin.x, originZ: origin.z };
-    const matches = previous => previous && previous.projectionKey === projectionKey
-      && previous.originX === origin.x && previous.originZ === origin.z
-      && Math.hypot(pose.x - previous.x, pose.y - previous.y, pose.z - previous.z) < 2
-      && Math.abs(previous.rotation.dot(pose.rotation)) > 0.998;
-    if (!matches(this.job?.pose ?? this.selectionPose)) {
-      // A camera change exposes full resident detail immediately while a new selection is pending.
-      this.showFull(true);
+    writeCameraState(camera, origin, this.cameraState);
+    if (!cameraStatesMatch(this.cameraState, this.job?.pose ?? this.selectionPose)) {
+      // Keep the previous complete selection visible while its replacement is built.
+      // Only the initial selection needs the full-resident fallback.
+      if (!this.selectionPose) this.showFull(true);
       this.turnEnvelope.update(camera, this.view.config?.enhancements?.detailTurnMarginDegrees ?? 12);
-      this.job = { pose, prototype: 0, index: 0, selected: this.instances.map(() => []) };
+      this.job = {
+        pose: new Float64Array(this.cameraState),
+        prototype: 0,
+        index: 0,
+        selected: this.instances.map(() => []),
+      };
     }
     if (!this.job) return;
     const started = performance.now();

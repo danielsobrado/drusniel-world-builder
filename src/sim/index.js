@@ -137,7 +137,7 @@ function ensureHandlersRegistered() {
       reasonCodes: [...economy.reasonCodes, ...shipments.reasonCodes],
     };
     return [...economy.events, ...shipments.events];
-  });
+  }, { mutableKinds: ['facility', 'inventoryAccount', 'market', 'shipment'] });
 
   registerCommandHandler('sim.monthlyTick', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -148,7 +148,7 @@ function ensureHandlersRegistered() {
       reasonCodes: [...pop.reasonCodes, ...factions.reasonCodes, ...expired.reasonCodes],
     };
     return [...pop.events, ...factions.events, ...expired.events];
-  });
+  }, { mutableKinds: ['populationCohort', 'settlement'] });
 
   registerCommandHandler('sim.planShipment', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -458,6 +458,7 @@ export function createSimulationWorld({
     clock,
     scheduler,
     calendarConfig: config.time,
+    cadences: [CADENCES.day, CADENCES.month],
     onCadence(event) {
       if (event.cadence === CADENCES.day) {
         dispatch('sim.dailyTick', {});

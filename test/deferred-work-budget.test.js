@@ -33,3 +33,22 @@ test('shared shouldYield is stable and non-mutating', () => {
   assert.equal(gate(), false);
   assert.equal(budget.slack.deadline, null);
 });
+
+
+test('tryRun does not execute after the shared allowance is consumed', () => {
+  const budget = new DeferredWorkBudget({
+    enabled: true,
+    targetFps: 144,
+    reserveMs: 0.5,
+    minimumMs: 0.25,
+    maximumMs: 1.2,
+  });
+
+  budget.beginFrame();
+  budget.slack.allowanceMs = 0;
+  let ran = false;
+  const result = budget.tryRun(() => { ran = true; }, 1);
+
+  assert.equal(result, undefined);
+  assert.equal(ran, false);
+});

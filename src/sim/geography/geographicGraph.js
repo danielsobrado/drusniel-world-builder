@@ -345,6 +345,50 @@ export function edgeTravelCost(edge, options = {}) {
   return edgeTravelCostBreakdown(edge, options).total;
 }
 
+function queueComesFirst(left, right) {
+  return left.cost < right.cost || (left.cost === right.cost && left.id.localeCompare(right.id) < 0);
+}
+
+class PathMinHeap {
+  constructor() {
+    this.items = [];
+  }
+
+  get size() {
+    return this.items.length;
+  }
+
+  push(value) {
+    let index = this.items.length;
+    this.items.push(value);
+    while (index > 0) {
+      const parent = (index - 1) >> 1;
+      if (!queueComesFirst(this.items[index], this.items[parent])) break;
+      [this.items[index], this.items[parent]] = [this.items[parent], this.items[index]];
+      index = parent;
+    }
+  }
+
+  pop() {
+    const first = this.items[0];
+    const last = this.items.pop();
+    if (this.items.length === 0) return first;
+    this.items[0] = last;
+    let index = 0;
+    while (true) {
+      const left = index * 2 + 1;
+      const right = left + 1;
+      let best = index;
+      if (left < this.items.length && queueComesFirst(this.items[left], this.items[best])) best = left;
+      if (right < this.items.length && queueComesFirst(this.items[right], this.items[best])) best = right;
+      if (best === index) break;
+      [this.items[index], this.items[best]] = [this.items[best], this.items[index]];
+      index = best;
+    }
+    return first;
+  }
+}
+
 export function shortestPath(state, fromNodeId, toNodeId, options = {}) {
   const edges = listEntities(state, 'graphEdge', { includeDestroyed: false })
     .filter((e) => e.data.enabled !== false);
@@ -357,11 +401,11 @@ export function shortestPath(state, fromNodeId, toNodeId, options = {}) {
   const distMap = new Map([[fromNodeId, 0]]);
   const prev = new Map();
   const prevEdge = new Map();
-  const queue = [{ id: fromNodeId, cost: 0 }];
+  const queue = new PathMinHeap();
+  queue.push({ id: fromNodeId, cost: 0 });
 
-  while (queue.length > 0) {
-    queue.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id));
-    const current = queue.shift();
+  while (queue.size > 0) {
+    const current = queue.pop();
     if (current.id === toNodeId) break;
     if (current.cost > (distMap.get(current.id) ?? Infinity)) continue;
     for (const edge of adjacency.get(current.id) ?? []) {
