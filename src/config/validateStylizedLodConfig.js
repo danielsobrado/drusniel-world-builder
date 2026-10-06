@@ -542,11 +542,13 @@ export function validateStylizedLodConfig(config) {
   const surface = config.stylizedSurface;
   if (!surface?.enabled) return config;
   const preparedPlacementCache = surface.preparedPlacementCache;
-  if (preparedPlacementCache !== undefined) {
+  if (preparedPlacementCache?.maxEntries !== undefined) {
     assertPositiveInteger(
       preparedPlacementCache.maxEntries,
       'stylizedSurface.preparedPlacementCache.maxEntries',
     );
+  }
+  if (preparedPlacementCache?.maxMiB !== undefined) {
     assertPositive(
       preparedPlacementCache.maxMiB,
       'stylizedSurface.preparedPlacementCache.maxMiB',
