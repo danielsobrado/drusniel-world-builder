@@ -541,6 +541,17 @@ function assertStrandBand(band, path) {
 export function validateStylizedLodConfig(config) {
   const surface = config.stylizedSurface;
   if (!surface?.enabled) return config;
+  const preparedPlacementCache = surface.preparedPlacementCache;
+  if (preparedPlacementCache !== undefined) {
+    assertPositiveInteger(
+      preparedPlacementCache.maxEntries,
+      'stylizedSurface.preparedPlacementCache.maxEntries',
+    );
+    assertPositive(
+      preparedPlacementCache.maxMiB,
+      'stylizedSurface.preparedPlacementCache.maxMiB',
+    );
+  }
   const habitat = surface.trees?.habitat;
   if (habitat) {
     assertBoolean(habitat.enabled, 'stylizedSurface.trees.habitat.enabled');
