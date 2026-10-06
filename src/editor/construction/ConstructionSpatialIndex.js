@@ -44,6 +44,42 @@ export class ConstructionSpatialIndex {
     return result;
   }
 
+  signatureForBounds(bounds, margin = 0) {
+    validateBounds(bounds);
+    if (!Number.isFinite(margin) || margin < 0) {
+      throw new Error('Construction bounds margin must be non-negative.');
+    }
+    const minX = Math.floor((bounds.minX - margin) / this.chunkWorldSize);
+    const maxX = Math.floor((bounds.maxX + margin) / this.chunkWorldSize);
+    const minZ = Math.floor((bounds.minZ - margin) / this.chunkWorldSize);
+    const maxZ = Math.floor((bounds.maxZ + margin) / this.chunkWorldSize);
+    let revision = 0;
+    for (let z = minZ; z <= maxZ; z += 1) {
+      for (let x = minX; x <= maxX; x += 1) {
+        revision = Math.max(revision, this.chunkRevisions.get(key(x, z)) ?? 0);
+      }
+    }
+    return revision;
+  }
+
+  idsForBounds(bounds, margin = 0, target = new Set()) {
+    validateBounds(bounds);
+    if (!Number.isFinite(margin) || margin < 0) {
+      throw new Error('Construction bounds margin must be non-negative.');
+    }
+    target.clear();
+    const minX = Math.floor((bounds.minX - margin) / this.chunkWorldSize);
+    const maxX = Math.floor((bounds.maxX + margin) / this.chunkWorldSize);
+    const minZ = Math.floor((bounds.minZ - margin) / this.chunkWorldSize);
+    const maxZ = Math.floor((bounds.maxZ + margin) / this.chunkWorldSize);
+    for (let z = minZ; z <= maxZ; z += 1) {
+      for (let x = minX; x <= maxX; x += 1) {
+        for (const id of this.byChunk.get(key(x, z)) ?? []) target.add(id);
+      }
+    }
+    return target;
+  }
+
   keysFor(record) {
     if (record.path.type !== 'cubicBezier') {
       throw new Error('Construction spatial indexing currently requires a cubic Bézier path.');
