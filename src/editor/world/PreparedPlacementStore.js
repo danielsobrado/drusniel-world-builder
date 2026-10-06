@@ -3,14 +3,18 @@ import { resolveForestSeed } from '../stylized/forest/ForestRuntimeConfig.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { withinPreparationWindow } from './PlacementPreparationWindow.js';
 
+const DEFAULT_CACHE_ENTRIES = 625;
+const DEFAULT_CACHE_MIB = 192;
+const BYTES_PER_MIB = 1024 * 1024;
+
 /** Versioned worker preparation, separate from render residency. */
 export class PreparedPlacementStore {
   constructor({ worldStore, revisionTracker, config, limit = null, maxBytes = null }) {
     this.world = worldStore;
     this.revisions = revisionTracker;
     const cacheConfig = config.preparedPlacementCache ?? {};
-    this.limit = limit ?? cacheConfig.maxEntries ?? 625;
-    this.maxBytes = maxBytes ?? (cacheConfig.maxMiB ?? 192) * 1024 * 1024;
+    this.limit = limit ?? cacheConfig.maxEntries ?? DEFAULT_CACHE_ENTRIES;
+    this.maxBytes = maxBytes ?? (cacheConfig.maxMiB ?? DEFAULT_CACHE_MIB) * BYTES_PER_MIB;
     this.entries = new Map();
     this.pending = new Map();
     this.completed = [];
