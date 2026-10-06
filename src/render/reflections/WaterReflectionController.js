@@ -188,11 +188,20 @@ export class WaterReflectionController {
     const ordered = this.planarWetSlots;
     ordered.length = 0;
     for (const slot of wet) ordered.push(slot);
+    const cameraX = origin.x + camera.position.x;
+    const cameraZ = origin.z + camera.position.z;
     ordered.sort((a, b) => {
-      const dist = slot => { const d = slot.terrainSlot.descriptor; return Math.hypot(d.centerWorldX - origin.x - camera.position.x, d.centerWorldZ - origin.z - camera.position.z); };
-      return dist(a) - dist(b);
+      const left = a.terrainSlot.descriptor;
+      const right = b.terrainSlot.descriptor;
+      const leftX = left.centerWorldX - cameraX;
+      const leftZ = left.centerWorldZ - cameraZ;
+      const rightX = right.centerWorldX - cameraX;
+      const rightZ = right.centerWorldZ - cameraZ;
+      return leftX * leftX + leftZ * leftZ - (rightX * rightX + rightZ * rightZ);
     });
-    for (const slot of ordered.slice(0, 4)) {
+    const candidateCount = Math.min(4, ordered.length);
+    for (let index = 0; index < candidateCount; index += 1) {
+      const slot = ordered[index];
       const d = slot.terrainSlot.descriptor;
       const water = this.view.getCanonicalWater(d.centerWorldX, d.centerWorldZ);
       if (![1, 2].includes(water.kind) || water.coverage < 0.5 || camera.position.y <= water.surfaceHeight + 0.1) continue;
