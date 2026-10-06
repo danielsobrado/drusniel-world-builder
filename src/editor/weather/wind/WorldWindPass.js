@@ -100,12 +100,14 @@ export class WorldWindPass {
     const prevailing = prevailingWindFromWeather(weather, this.defaultDirection);
     this.directionDegrees = prevailing.directionDegrees;
     this.intensity = prevailing.intensity;
-    this.origin = { x: origin.x, z: origin.z };
+    this.origin.x = origin.x;
+    this.origin.z = origin.z;
 
     const texel = WIND_WINDOW_METRES / WIND_TEXTURE_SIZE;
     const centerX = Math.round((cameraRender.x + origin.x) / texel) * texel;
     const centerZ = Math.round((cameraRender.z + origin.z) / texel) * texel;
-    this.centerCanonical = { x: centerX, z: centerZ };
+    this.centerCanonical.x = centerX;
+    this.centerCanonical.z = centerZ;
 
     this.uniforms.time.value = this.time;
     this.uniforms.directionDegrees.value = this.directionDegrees;
