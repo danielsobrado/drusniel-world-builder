@@ -392,9 +392,12 @@ export class ViewModeController {
   }
 
   getPlayerFrameStatus() {
-    return this.mode === PLAYER_MODE_WALK && this.hasPlayerFrameStatus
-      ? this.playerFrameStatus
-      : null;
+    if (this.mode !== PLAYER_MODE_WALK) return null;
+    if (!this.hasPlayerFrameStatus) {
+      this.playerController.readFrameStatus(this.playerFrameStatus);
+      this.hasPlayerFrameStatus = true;
+    }
+    return this.playerFrameStatus;
   }
 
   readFocusWorld(out) {
