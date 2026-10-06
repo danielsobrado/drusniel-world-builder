@@ -52,6 +52,8 @@ export class ViewModeController {
     this.awaitingSpawn = false;
     this.spacePressed = false;
     this._lastTimestamp = null;
+    this.playerFrameStatus = { position: { x: 0, y: 0, z: 0 } };
+    this.hasPlayerFrameStatus = false;
     this.listeners = new Set();
     this.unsubscribePlayer = playerController.subscribe(() => this.emit());
     this.editorCamera.setEnabled(true);
@@ -373,25 +375,46 @@ export class ViewModeController {
     }
     if (this.mode === PLAYER_MODE_WALK) {
       this.playerController.update(timestamp);
+      this.playerController.readFrameStatus(this.playerFrameStatus);
+      this.hasPlayerFrameStatus = true;
       if (this.isThirdPerson) {
         const deltaSeconds = this._lastTimestamp === null
           ? 0
           : (timestamp - this._lastTimestamp) / 1000;
-        this.thirdPersonCamera.update(deltaSeconds, this.playerController.getStatus());
+        this.thirdPersonCamera.update(deltaSeconds, this.playerFrameStatus);
       }
       this._lastTimestamp = timestamp;
     } else {
+      this.hasPlayerFrameStatus = false;
       this._lastTimestamp = null;
       this.editorCamera.update();
     }
   }
 
-  getFocusWorld() {
-    if (this.focusOverride) return this.focusOverride;
-    if (this.mode === PLAYER_MODE_FLY) return this.freeFly.camera.position;
+  getPlayerFrameStatus() {
+    return this.mode === PLAYER_MODE_WALK && this.hasPlayerFrameStatus
+      ? this.playerFrameStatus
+      : null;
+  }
+
+  readFocusWorld(out) {
+    if (this.focusOverride) {
+      out.x = this.focusOverride.x;
+      out.z = this.focusOverride.z;
+      return out;
+    }
+    if (this.mode === PLAYER_MODE_FLY) {
+      out.x = this.freeFly.camera.position.x;
+      out.z = this.freeFly.camera.position.z;
+      return out;
+    }
     return this.mode === PLAYER_MODE_WALK
-      ? this.playerController.getFocusWorld()
-      : this.editorCamera.getFocusWorld();
+      ? this.playerController.readFocusWorld(out)
+      : this.editorCamera.readFocusWorld(out);
+  }
+
+  getFocusWorld() {
+    return Object.freeze(this.readFocusWorld({}));
   }
 
   // Walking and free flight turn the minimap with the camera heading; the
