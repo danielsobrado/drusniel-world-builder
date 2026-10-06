@@ -38,11 +38,14 @@ export class EditorCamera {
     this.controls.mouseButtons.LEFT = enabled ? THREE.MOUSE.PAN : null;
   }
 
+  readFocusWorld(out) {
+    out.x = this.controls.target.x;
+    out.z = this.controls.target.z;
+    return out;
+  }
+
   getFocusWorld() {
-    return Object.freeze({
-      x: this.controls.target.x,
-      z: this.controls.target.z,
-    });
+    return Object.freeze(this.readFocusWorld({}));
   }
 
   focusWorld(x, z) {
