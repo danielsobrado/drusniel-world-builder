@@ -9,6 +9,7 @@ import {
   LOD_ORDER, bandStemCount, grassTrianglesPerBlade, lodBandVectors, lodThresholds, selectLod, tileDistanceSquared, validateLodBands,
 } from '../src/editor/stylized/meadow/meadowGrassLayout.js';
 import { EMPTY_POSITION, MeadowGrassBatches } from '../src/editor/stylized/meadow/MeadowGrassBatches.js';
+import { MeadowTileLayer } from '../src/editor/stylized/meadow/MeadowTileLayer.js';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { MeadowInteractionMap } from '../src/editor/stylized/meadow/MeadowInteractionMap.js';
 import { meadowShapeId, resolveShapeTable } from '../src/editor/stylized/meadow/meadowGrassShapes.js';
@@ -148,7 +149,7 @@ test('meadow tile layout only reevaluates after meaningful camera or ground chan
       },
     }),
   };
-  const layer = new (await import('../src/editor/stylized/meadow/MeadowTileLayer.js')).MeadowTileLayer({
+  const layer = new MeadowTileLayer({
     scene,
     name: 'dirty-gate',
     tileSize: 8,
