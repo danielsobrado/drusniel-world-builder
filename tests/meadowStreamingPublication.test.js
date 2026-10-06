@@ -100,6 +100,8 @@ test('a no-longer-needed density job releases its buffer without blocking readin
     assert.ok(tile.job && !tile.job.compaction.done);
     const unusedBuffer = tile.job.compaction.output;
     tile.preparationBand = 'low'; tile.preparationCapacity = 40;
+    // Layout changes cancel obsolete jobs before the budgeted build step.
+    layer.rebuildStaleTiles();
     layer.build(-Infinity);
     assert.equal(tile.job, null);
     assert.strictEqual(tile.output, publication);

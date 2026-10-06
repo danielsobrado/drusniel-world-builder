@@ -8,7 +8,7 @@ import { importedSettlementId } from '../../src/sim/model/ids.js';
 import { migrateBetweenSettlements } from '../../src/sim/population/cohorts.js';
 import { matchTradeOffers, createTradeOffer } from '../../src/sim/logistics/shipments.js';
 import { applyEvent } from '../../src/sim/events/reducers.js';
-import { cloneWorldState, listEntities } from '../../src/sim/model/worldState.js';
+import { cloneWorldState, listEntities, upsertEntity } from '../../src/sim/model/worldState.js';
 
 function boot() {
   const world = createSimulationWorld({ campaign: createMiniCampaignFixture() });
@@ -67,10 +67,11 @@ test('regression: migration creates destination cohort instead of dropping mover
     foodPressure: 0,
   };
 
-  // Remove matching destination cohorts so migration must create one
+  // Mark matching destination cohorts destroyed through the state API so the
+  // cached entity list and the live migration query agree.
   for (const cohort of listEntities(state, 'populationCohort')) {
     if (cohort.data.settlementId === to.id && cohort.data.ageBand === 'working') {
-      state.populations.delete(cohort.id);
+      upsertEntity(state, { ...cohort, status: 'destroyed', data: { ...cohort.data, count: 0 } });
     }
   }
 

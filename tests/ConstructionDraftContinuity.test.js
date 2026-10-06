@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
+import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import { executeConstructionCommand } from '../src/editor/construction/ConstructionCommands.js';
 import { ConstructionStore } from '../src/editor/construction/ConstructionStore.js';
 import { normalizeConstructionRecord } from '../src/editor/construction/ConstructionSchema.js';
@@ -11,6 +12,7 @@ import {
 import { planConstruction } from '../src/editor/construction/planning/ConstructionPlanner.js';
 import { disposeConstructionMaterials } from '../src/editor/construction/render/ConstructionMaterials.js';
 import { ConstructionView } from '../src/editor/construction/render/ConstructionView.js';
+import { advanceConstructionFrames } from './helpers/constructionFrames.js';
 
 /**
  * Continuity of a drag preview (phase 11 §8, finding 4, the W3 gate).
@@ -54,10 +56,7 @@ function wallRecord(id = 'construction-1') {
 function createTerrainView() {
   return {
     scene: new THREE.Scene(),
-    floatingOrigin: {
-      toRender: (x, z) => ({ x, z }),
-      toCanonical: (x, z) => ({ x, z }),
-    },
+    floatingOrigin: new FloatingOrigin({ threshold: 1024, snapSize: 128 }),
     getCanonicalHeight: () => 0,
     renderer: {
       domElement: {
@@ -77,10 +76,8 @@ function nearCamera() {
 
 /** The frame loop's order: drain one build, then classify each module's band. */
 function drainBuildQueue(view, plan, camera = nearCamera()) {
-  for (let frame = 0; frame < plan.modules.length + 2; frame += 1) {
-    view.update();
-    view.updateLod(camera, VIEWPORT_HEIGHT);
-  }
+  advanceConstructionFrames(view, { camera, viewportHeight: VIEWPORT_HEIGHT,
+    maxFrames: plan.modules.length * 1000 });
 }
 
 /** A wall with its masonry resident, which is the state a reshape starts from. */

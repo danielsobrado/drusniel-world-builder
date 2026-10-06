@@ -8,7 +8,7 @@ import { createMeadowTemplate, createStableInstances } from '../src/editor/styli
 import {
   LOD_ORDER, bandStemCount, grassTrianglesPerBlade, lodBandVectors, lodThresholds, selectLod, tileDistanceSquared, validateLodBands,
 } from '../src/editor/stylized/meadow/meadowGrassLayout.js';
-import { EMPTY_POSITION, MeadowGrassBatches } from '../src/editor/stylized/meadow/MeadowGrassBatches.js';
+import { MeadowGrassBatches } from '../src/editor/stylized/meadow/MeadowGrassBatches.js';
 import { MeadowTileLayer } from '../src/editor/stylized/meadow/MeadowTileLayer.js';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { MeadowInteractionMap } from '../src/editor/stylized/meadow/MeadowInteractionMap.js';
@@ -89,7 +89,7 @@ test('compaction keeps only stems on grass, with their ground, rank and shape', 
   assert.deepEqual(ranks, [...ranks].sort((a, b) => a - b), 'survivors keep their stable order');
 });
 
-test('a batch gives each tile its own slot and clears it when the tile leaves', () => {
+test('a batch packs populated stems and removes them when the tile leaves', () => {
   const scene = new THREE.Scene();
   const template = createMeadowTemplate({ detail: 2, count: 8, tileSize: 8 });
   const batches = new MeadowGrassBatches({ scene, templates: { high: template }, material: new THREE.MeshBasicNodeMaterial(), name: 't' });
@@ -103,11 +103,9 @@ test('a batch gives each tile its own slot and clears it when the tile leaves', 
   batches.add('high', a);
   batches.add('high', b);
   assert.deepEqual(batches.commit(), { high: 13 });
-  const geometry = batches.batches.get('high').geometry;
-  assert.equal(geometry.instanceCount, 16);
-  const position = geometry.getAttribute('instancePosition').array;
-  assert.equal(position[5 * 4], EMPTY_POSITION, 'unused stems in a slot are parked out of range');
-  assert.equal(geometry.getAttribute('instanceTile').array[8 * 4], 8, 'each stem carries its tile origin');
+  const geometry = batches.batches.get('high').pages[0].geometry;
+  assert.equal(geometry.instanceCount, 13, 'only populated stems are submitted');
+  assert.equal(geometry.getAttribute('instanceTile').array[5 * 4], 8, 'each stem carries its tile origin');
   const stableVersion = geometry.getAttribute('instancePosition').version;
   batches.begin();
   batches.add('high', a);
@@ -121,7 +119,7 @@ test('a batch gives each tile its own slot and clears it when the tile leaves', 
   batches.begin();
   batches.add('high', a);
   batches.commit();
-  assert.equal(geometry.instanceCount, 8, 'a trailing free slot stops being drawn');
+  assert.equal(geometry.instanceCount, 5, 'retired stems stop being drawn');
   batches.dispose();
   assert.equal(scene.children.length, 0);
 });
@@ -235,6 +233,7 @@ test('the shipped defaults resolve, and bad names fail at load', () => {
 test('the interaction window resolves, and can be switched off', () => {
   assert.deepEqual(SETTINGS.interaction, {
     enabled: true, resolution: 256, worldSize: 27, recoverySpeed: 0.94, strength: 1, bodyRadius: 0.26,
+    uploadIntervalFrames: 2,
   });
   assert.equal(resolveMeadowGrassConfig({ interaction: { enabled: false } }).interaction, null);
   assert.equal(resolveMeadowGrassConfig({ interaction: { worldSize: 40 } }).interaction.worldSize, 40);

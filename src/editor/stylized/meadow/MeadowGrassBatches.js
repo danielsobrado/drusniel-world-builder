@@ -1,177 +1,61 @@
-import * as THREE from 'three/webgpu';
+import { MEADOW_TILES_PER_PAGE, MeadowBandBatch } from './MeadowBandBatch.js';
 
-/**
- * One draw per LOD band, ported from grass-test's `GrassBatches`.
- *
- * Every in-range tile of a band is drawn by that band's batch. Stem positions
- * stay tile-local and each instance carries its tile's render-space origin
- * (`instanceTile`), which the material adds only where a position becomes
- * world space — so per-stem hashes see exactly the inputs they would per tile.
- *
- * Each tile owns a fixed slot sized to its band's uncompacted stem count, so a
- * tile entering, leaving or recompacting rewrites and uploads only its own slot.
- * (The donor measured repacking the whole batch on every membership change at
- * tens of MiB a frame at fly speed.) Unused instances in a slot sit far outside
- * the grass range, where the shader's visibility test collapses them.
- *
- * Membership is every in-range tile, visible or not, so a camera turn never
- * touches a batch; blades behind the camera are culled by the clipper.
- */
-const INSTANCE_ATTRIBUTES = Object.freeze([['instancePosition', 4], ['instanceRotation', 2], ['instanceData', 4]]);
-// A band can cross 16 tiles at an ordinary chunk boundary. Allocate its next
-// capacity during loading so that crossing does not replace four GPU buffers.
-const MIN_SLOTS = 32;
-export const EMPTY_POSITION = 1e7;
-
-class MeadowBandBatch {
-  constructor({ scene, template, material, name, renderOrder = 0 }) {
-    this.scene = scene;
-    this.template = template;
-    this.stride = Math.max(1, template.instanceCount);
+/** Keep tile assignments stable and bound the buffers affected by an update. */
+class MeadowBandPages {
+  constructor(options) {
+    this.options = options;
+    this.stride = Math.max(1, options.template.instanceCount);
     this.slots = new Map();
-    this.free = [];
-    this.freeSet = new Set();
-    this.used = 0;
     this.present = new Set();
-    this.geometry = this.createGeometry(MIN_SLOTS);
-    this.mesh = new THREE.Mesh(this.geometry, material);
-    this.mesh.name = name;
-    this.mesh.renderOrder = renderOrder;
-    this.mesh.frustumCulled = false;
-    this.mesh.castShadow = false;
-    this.mesh.receiveShadow = true;
-    this.mesh.matrixAutoUpdate = false;
-    this.mesh.visible = false;
-    scene.add(this.mesh);
+    this.pages = [];
+    this.addPage();
   }
 
-  // Growing builds a new geometry: the WebGPU renderer caches a geometry's
-  // attribute bindings, so attributes replaced in place kept drawing from the old,
-  // smaller buffers.
-  createGeometry(slotCapacity) {
-    this.slotCapacity = slotCapacity;
-    const capacity = slotCapacity * this.stride;
-    const geometry = new THREE.InstancedBufferGeometry();
-    for (const name of ['position', 'uv', 'bladeSide']) geometry.setAttribute(name, this.template.getAttribute(name));
-    geometry.index = this.template.index;
-    geometry.instanceCount = 0;
-    for (const [name, itemSize] of INSTANCE_ATTRIBUTES) {
-      geometry.setAttribute(name, new THREE.InstancedBufferAttribute(new Float32Array(capacity * itemSize), itemSize));
-    }
-    // Origin plus publication time/retained rank: no extra vertex-buffer binding.
-    geometry.setAttribute('instanceTile', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
-    return geometry;
+  addPage() {
+    const page = new MeadowBandBatch({ ...this.options,
+      name: `${this.options.name}-${this.pages.length}` });
+    page.members = [];
+    page.memberCount = 0;
+    this.pages.push(page);
+    return page;
   }
 
-  grow() {
-    const previous = this.geometry;
-    this.geometry = this.createGeometry(this.slotCapacity * 2);
-    for (const name of [...INSTANCE_ATTRIBUTES.map(([key]) => key), 'instanceTile']) {
-      const attribute = this.geometry.getAttribute(name);
-      attribute.array.set(previous.getAttribute(name).array);
-      attribute.needsUpdate = true;
-    }
-    this.geometry.instanceCount = previous.instanceCount;
-    this.mesh.geometry = this.geometry;
-    previous.dispose();
-  }
-
-  markRange(start, count) {
-    for (const [name, itemSize] of [...INSTANCE_ATTRIBUTES, ['instanceTile', 4]]) {
-      const attribute = this.geometry.getAttribute(name);
-      attribute.addUpdateRange(start * itemSize, count * itemSize);
-      attribute.needsUpdate = true;
-    }
-  }
-
-  clearUpdateRanges() {
-    for (const [name] of [...INSTANCE_ATTRIBUTES, ['instanceTile', 2]]) this.geometry.getAttribute(name).clearUpdateRanges();
-  }
-
-  writeSlot(index, tile) {
-    const start = index * this.stride;
-    const source = tile?.output ?? null;
-    const count = source ? Math.min(source.count, this.stride) : 0;
-    const position = this.geometry.getAttribute('instancePosition').array;
-    if (count > 0) {
-      position.set(source.position.subarray(0, count * 4), start * 4);
-      this.geometry.getAttribute('instanceRotation').array.set(source.rotation.subarray(0, count * 2), start * 2);
-      this.geometry.getAttribute('instanceData').array.set(source.data.subarray(0, count * 4), start * 4);
-      const origins = this.geometry.getAttribute('instanceTile').array;
-      for (let i = start; i < start + count; i += 1) {
-        origins[i * 4] = tile.renderX;
-        origins[i * 4 + 1] = tile.renderZ;
-        origins[i * 4 + 2] = tile.revealTime ?? -1;
-        origins[i * 4 + 3] = tile.revealRank ?? 16777216;
-      }
-    }
-    for (let i = start + count; i < start + this.stride; i += 1) {
-      position[i * 4] = EMPTY_POSITION;
-      position[i * 4 + 1] = 0;
-      position[i * 4 + 2] = EMPTY_POSITION;
-      position[i * 4 + 3] = 0;
-    }
-    this.markRange(start, this.stride);
-  }
-
-  /** `tiles` share this band and carry finished compactions. Returns stems drawn. */
   update(tiles) {
-    let dirty = false;
-    const present = this.present;
-    present.clear();
-    for (const tile of tiles) present.add(tile);
-    for (const [tile, slot] of this.slots) {
-      if (present.has(tile)) continue;
-      if (!dirty) { this.clearUpdateRanges(); dirty = true; }
-      this.writeSlot(slot.index, null);
-      this.free.push(slot.index);
-      this.freeSet.add(slot.index);
+    this.present.clear();
+    for (const tile of tiles) this.present.add(tile);
+    for (const [tile, page] of this.slots) {
+      if (this.present.has(tile)) continue;
+      page.memberCount -= 1;
       this.slots.delete(tile);
     }
+    for (const page of this.pages) page.members.length = 0;
     for (const tile of tiles) {
-      let slot = this.slots.get(tile);
-      if (slot
-          && slot.buildId === tile.buildId
-          && slot.renderX === tile.renderX
-          && slot.renderZ === tile.renderZ) {
-        continue;
+      let page = this.slots.get(tile);
+      if (!page) {
+        page = this.pages.find(candidate => candidate.memberCount < MEADOW_TILES_PER_PAGE)
+          ?? this.addPage();
+        this.slots.set(tile, page);
+        page.memberCount += 1;
       }
-      if (!slot) {
-        let index;
-        while (this.free.length && index === undefined) {
-          const candidate = this.free.pop();
-          if (this.freeSet.delete(candidate) && candidate < this.used) index = candidate;
-        }
-        if (index === undefined) {
-          if (this.used === this.slotCapacity) this.grow();
-          index = this.used;
-          this.used += 1;
-        }
-        slot = { index, buildId: -1, renderX: Number.NaN, renderZ: Number.NaN };
-        this.slots.set(tile, slot);
-      }
-      slot.buildId = tile.buildId;
-      slot.renderX = tile.renderX;
-      slot.renderZ = tile.renderZ;
-      if (!dirty) { this.clearUpdateRanges(); dirty = true; }
-      this.writeSlot(slot.index, tile);
+      page.members.push(tile);
     }
-    if (dirty) {
-      while (this.used > 0 && this.freeSet.delete(this.used - 1)) this.used -= 1;
-      if (this.free.length > this.freeSet.size * 2 + 64) {
-        this.free = [...this.freeSet];
-      }
-      this.geometry.instanceCount = this.used * this.stride;
-    }
-    this.mesh.visible = this.slots.size > 0;
     let stems = 0;
-    for (const tile of tiles) stems += Math.min(tile.output.count, this.stride);
+    for (const page of this.pages) stems += page.update(page.members);
     return stems;
   }
 
+  get meshes() {
+    return this.pages.map(page => page.mesh);
+  }
+
+  get slotCapacity() {
+    return this.pages.reduce((sum, page) => sum + page.slotCapacity, 0);
+  }
+
   dispose() {
-    this.mesh.removeFromParent();
-    this.geometry.dispose();
+    for (const page of this.pages) page.dispose();
+    this.pages.length = 0;
+    this.slots.clear();
   }
 }
 
@@ -189,7 +73,7 @@ export class MeadowGrassBatches {
     this.batches = new Map();
     this.members = new Map();
     for (const [band, template] of Object.entries(templates)) {
-      this.batches.set(band, new MeadowBandBatch({ scene, template, material, name: `${name}-${band}`, renderOrder }));
+      this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder }));
       this.members.set(band, []);
     }
   }
@@ -210,7 +94,7 @@ export class MeadowGrassBatches {
   }
 
   get meshes() {
-    return [...this.batches.values()].map((batch) => batch.mesh);
+    return [...this.batches.values()].flatMap((batch) => batch.meshes);
   }
 
   dispose() {

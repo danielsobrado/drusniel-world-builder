@@ -290,7 +290,20 @@ const fs = require('fs');
         const field = window.__editor.stylizedSurface.meadowGrass;
         if (!field) return null;
         const { MeadowTileLayer } = await import('/src/editor/stylized/meadow/MeadowTileLayer.js');
-        return { state: field.getState(), pending: ['blades', 'cards'].flatMap(name => {
+        return { state: field.getState(), batches: ['blades', 'cards'].flatMap(name => {
+          const layer = field[name];
+          if (!layer) return [];
+          return [...layer.batches.batches].map(([band, batch]) => ({
+            layer: name, band, tiles: batch.slots.size,
+            capacity: batch.slotCapacity, stride: batch.stride,
+            submitted: batch.meshes?.reduce((sum, mesh) => sum + mesh.geometry.instanceCount, 0)
+              ?? batch.geometry.instanceCount,
+            retainedBytes: (batch.meshes ?? [{ geometry: batch.geometry }])
+              .reduce((sum, mesh) => sum + Object.values(mesh.geometry.attributes)
+                .filter(attribute => attribute.isInstancedBufferAttribute)
+                .reduce((bytes, attribute) => bytes + attribute.array.byteLength, 0), 0),
+          }));
+        }), pending: ['blades', 'cards'].flatMap(name => {
           const layer = field[name];
           if (!layer) return [];
           return [...layer.tiles.values()].filter(tile => MeadowTileLayer.isStale(tile)).slice(0, 24).map(tile => ({

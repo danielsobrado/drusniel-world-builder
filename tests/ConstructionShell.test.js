@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
+import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import { normalizeConstructionRecord } from '../src/editor/construction/ConstructionSchema.js';
 import {
   createCubicBezierPathFromStroke,
@@ -36,10 +37,7 @@ function createTerrainView() {
   const scene = new THREE.Scene();
   return {
     scene,
-    floatingOrigin: {
-      toRender: (x, z) => ({ x, z }),
-      toCanonical: (x, z) => ({ x, z }),
-    },
+    floatingOrigin: new FloatingOrigin({ threshold: 1024, snapSize: 128 }),
     getCanonicalHeight: () => 0,
     renderer: {
       domElement: {
@@ -175,7 +173,9 @@ test('a far module shell never covers a near module that is drawing masonry', ()
   far.meshes = [];
   far.band = 'shell';
 
-  view.updateLod({ fov: 60, position: { x: 0, y: 2, z: 4 } }, 1080);
+  const camera = new THREE.PerspectiveCamera(60, 800 / 1080, 0.1, 1000);
+  camera.position.set(0, 2, 4);
+  view.updateLod(camera, 1080);
 
   assert.equal(masonry.visible, true);
   assert.equal(near.shellMesh.visible, false, 'near module must not draw its ribbon');

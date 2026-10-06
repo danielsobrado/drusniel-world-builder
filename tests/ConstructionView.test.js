@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
+import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import { ConstructionStore } from '../src/editor/construction/ConstructionStore.js';
 import { normalizeConstructionRecord } from '../src/editor/construction/ConstructionSchema.js';
 import {
@@ -36,10 +37,7 @@ function createTerrainView() {
   const scene = new THREE.Scene();
   return {
     scene,
-    floatingOrigin: {
-      toRender: (x, z) => ({ x, z }),
-      toCanonical: (x, z) => ({ x, z }),
-    },
+    floatingOrigin: new FloatingOrigin({ threshold: 1024, snapSize: 128 }),
     getCanonicalHeight: () => 0,
     renderer: {
       domElement: {
@@ -141,20 +139,18 @@ test('ConstructionView selection and material-only updates respect slots', () =>
   // LOD: selection pins near, so clear it before distance checks.
   view.setSelection(null);
   resident.band = 'shell';
-  view.updateLod(
-    { fov: 60, position: { x: 0, y: 2, z: 200 } },
-    1080,
-  );
+  const camera = new THREE.PerspectiveCamera(60, 800 / 1080, 0.1, 1000);
+  camera.position.set(0, 2, 200);
+  view.updateLod(camera, 1080);
   assert.equal(stoneMesh.visible, false);
   assert.equal(mortarMesh.visible, false);
   assert.equal(after.shellMesh.visible, true);
 
   // Near shows both
   resident.band = 'near';
-  view.updateLod(
-    { fov: 60, position: { x: 0, y: 2, z: 5 } },
-    1080,
-  );
+  camera.position.z = 5;
+  view.nextLodEvaluationAt = 0;
+  view.updateLod(camera, 1080);
   assert.equal(stoneMesh.visible, true);
   assert.equal(mortarMesh.visible, true);
   assert.equal(after.shellMesh.visible, false);

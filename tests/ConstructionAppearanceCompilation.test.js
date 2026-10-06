@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
+import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import { executeConstructionCommand } from '../src/editor/construction/ConstructionCommands.js';
 import { ConstructionStore } from '../src/editor/construction/ConstructionStore.js';
 import { normalizeConstructionRecord } from '../src/editor/construction/ConstructionSchema.js';
@@ -9,6 +10,7 @@ import { planConstruction } from '../src/editor/construction/planning/Constructi
 import { disposeConstructionMaterials } from '../src/editor/construction/render/ConstructionMaterials.js';
 import { ConstructionView } from '../src/editor/construction/render/ConstructionView.js';
 import { BUILTIN_WORKSHOP_MATERIAL_PRESETS } from '../src/editor/workshop/ProceduralWorkshopMaterialConfig.js';
+import { advanceConstructionFrames } from './helpers/constructionFrames.js';
 
 function wallRecord() {
   return normalizeConstructionRecord({
@@ -30,10 +32,7 @@ function wallRecord() {
 function createTerrainView() {
   return {
     scene: new THREE.Scene(),
-    floatingOrigin: {
-      toRender: (x, z) => ({ x, z }),
-      toCanonical: (x, z) => ({ x, z }),
-    },
+    floatingOrigin: new FloatingOrigin({ threshold: 1024, snapSize: 128 }),
     getCanonicalHeight: () => 0,
     renderer: {
       domElement: {
@@ -71,7 +70,7 @@ function flushAsync() {
 
 /** Frame-loop equivalent: `document.hidden` keeps rAF from firing in the pane. */
 function drainBuildQueue(view, plan) {
-  for (let frame = 0; frame < plan.modules.length + 2; frame += 1) view.update();
+  advanceConstructionFrames(view, { maxFrames: plan.modules.length * 1000 });
 }
 
 function stoneMaterialOf(entry) {
@@ -173,7 +172,7 @@ test('an appearance-only change does not rebuild layout or cancel a queued build
   assert.ok(plan.modules.length >= 2, 'the fixture needs several modules');
 
   // Leave the rest of the modules queued, as an ordinary frame loop would.
-  view.update();
+  advanceConstructionFrames(view, { until: () => view.stats.modulesRebuilt === 1 });
   assert.ok(view.stats.queueDepth > 0, 'the fixture must leave work queued');
 
   const planBefore = entry.plan;

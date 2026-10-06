@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
+import { FloatingOrigin } from '../src/editor/world/FloatingOrigin.js';
 import { ConstructionStore } from '../src/editor/construction/ConstructionStore.js';
 import { normalizeConstructionRecord } from '../src/editor/construction/ConstructionSchema.js';
 import { createCubicBezierPathFromStroke } from '../src/editor/construction/curve/CubicBezierPath.js';
@@ -8,6 +9,7 @@ import { planConstruction } from '../src/editor/construction/planning/Constructi
 import { disposeConstructionMaterials } from '../src/editor/construction/render/ConstructionMaterials.js';
 import { ConstructionView } from '../src/editor/construction/render/ConstructionView.js';
 import { CONSTRUCTION_MATERIAL_SLOT } from '../src/editor/construction/render/ConstructionMaterialSlots.js';
+import { advanceConstructionFrames } from './helpers/constructionFrames.js';
 
 const VIEWPORT_HEIGHT = 600;
 
@@ -31,10 +33,7 @@ function wallRecord() {
 function createTerrainView() {
   return {
     scene: new THREE.Scene(),
-    floatingOrigin: {
-      toRender: (x, z) => ({ x, z }),
-      toCanonical: (x, z) => ({ x, z }),
-    },
+    floatingOrigin: new FloatingOrigin({ threshold: 1024, snapSize: 128 }),
     getCanonicalHeight: () => 0,
     renderer: {
       domElement: {
@@ -68,10 +67,7 @@ test('modules the LOD sends to another band while queued still get built', () =>
 
   const camera = coarseCamera();
   // The frame loop's order: drain one build, then classify.
-  for (let frame = 0; frame < plan.modules.length * 4; frame += 1) {
-    view.update();
-    view.updateLod(camera, VIEWPORT_HEIGHT);
-  }
+  advanceConstructionFrames(view, { camera, viewportHeight: VIEWPORT_HEIGHT });
 
   const residents = [...view.entries.get(record.id).modules.values()];
   // The scenario: jobs queued as `near` that the LOD reclassified before
@@ -98,23 +94,16 @@ test('a wall first seen from afar gets its masonry when the camera comes close',
   distant.position.set(18, 20, 900);
   distant.lookAt(18, 1.5, 0);
   distant.updateMatrixWorld();
-  for (let frame = 0; frame < plan.modules.length * 3; frame += 1) {
-    view.update();
-    view.updateLod(distant, VIEWPORT_HEIGHT);
-  }
+  advanceConstructionFrames(view, { camera: distant, viewportHeight: VIEWPORT_HEIGHT });
   const residents = [...view.entries.get(record.id).modules.values()];
-  // The frame loop builds before it classifies, so the first queued module is
-  // built before the LOD has seen it (and its minimum residence then holds it
-  // in the near band); every later one is skipped while it is far.
+  // A resumable slice starts before classification; the far classification
+  // cancels it and keeps each module's shell resident.
   const far = residents.filter((resident) => resident.requestedBand === 'shell');
   assert.ok(far.length >= 2);
   assert.ok(far.every((resident) => resident.meshes.length === 0));
 
   const near = coarseCamera();
-  for (let frame = 0; frame < plan.modules.length * 4; frame += 1) {
-    view.update();
-    view.updateLod(near, VIEWPORT_HEIGHT);
-  }
+  advanceConstructionFrames(view, { camera: near, viewportHeight: VIEWPORT_HEIGHT });
   for (const resident of residents) {
     assert.notEqual(resident.requestedBand, 'shell');
     assert.equal(resident.builtBand, resident.requestedBand);
@@ -135,7 +124,7 @@ test('pure LOD changes retain ivy while terrain and authored changes rebuild it'
   const plan = planConstruction(record);
   view.applyPlan(record, plan);
   const entry = view.entries.get(record.id);
-  for (const module of plan.modules) view.buildModule(entry, module);
+  advanceConstructionFrames(view);
   const module = plan.modules.find(m => entry.modules.get(m.id).meshes.some(mesh =>
     mesh.userData.constructionMaterialSlot === CONSTRUCTION_MATERIAL_SLOT.GROWTH));
   assert.ok(module, 'fixture includes an occupied growth patch');
@@ -144,25 +133,25 @@ test('pure LOD changes retain ivy while terrain and authored changes rebuild it'
   const original = growth();
   let disposals = 0;
   original.geometry.addEventListener('dispose', () => { disposals += 1; });
-  resident.requestedBand = 'coarse';
-  view.buildModule(entry, module);
+  const rebuild = band => {
+    view.enqueueModuleBuild(record.id, module, band);
+    advanceConstructionFrames(view);
+  };
+  rebuild('coarse');
   assert.equal(growth(), original);
   assert.equal(disposals, 0);
   assert.equal(original.castShadow, false);
   assert.equal(resident.stats.totalTriangles, resident.stats.stoneTriangles + resident.stats.mortarTriangles + resident.stats.growthTriangles);
-  resident.requestedBand = 'near';
-  view.buildModule(entry, module);
+  rebuild('near');
   assert.equal(growth(), original);
   assert.equal(original.castShadow, true);
   terrainView.worldStore.revision += 1;
-  resident.requestedBand = 'coarse';
-  view.buildModule(entry, module);
+  rebuild('coarse');
   assert.notEqual(growth(), original);
   assert.equal(disposals, 1);
   const afterTerrain = growth();
   entry.record = normalizeConstructionRecord({ ...record, seed: 456, revision: 2 });
-  resident.requestedBand = 'near';
-  view.buildModule(entry, module);
+  rebuild('near');
   assert.notEqual(growth(), afterTerrain);
   view.dispose();
 });
