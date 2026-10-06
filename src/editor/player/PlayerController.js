@@ -165,6 +165,10 @@ export class PlayerController {
     return out;
   }
 
+  isHeadSubmerged() {
+    return Boolean(this.state.headSubmerged);
+  }
+
   attachCollision({ runtime, motor }) {
     if (!runtime || !motor) throw new Error('Player collision attachment requires runtime and motor.');
     this.collisionRuntime = runtime;
