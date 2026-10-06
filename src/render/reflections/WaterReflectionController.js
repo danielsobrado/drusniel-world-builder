@@ -30,7 +30,8 @@ export class WaterReflectionController {
     this.face = 0;
     this.nextCapture = 0;
     this.lastPlanar = -Infinity;
-    this.sceneRevision = null;
+    this.sceneRevisionState = new Float64Array(4);
+    this.sceneRevisionState.fill(Number.NaN);
     this.disposed = false;
     this.capturing = false;
     this.wetSlots = [];
@@ -85,8 +86,21 @@ export class WaterReflectionController {
     const canonical = this.preparedState.canonical;
     canonical.x = camera.position.x + origin.x;
     canonical.z = camera.position.z + origin.z;
-    const revision = `${this.view.worldStore.revision ?? 0}:${surface.revisionTracker?.revision ?? 0}:${surface.objectMap?.revision ?? 0}:${this.revisionProvider?.() ?? 0}`;
-    if (revision !== this.sceneRevision) { this.invalidate(); this.sceneRevision = revision; }
+    const sceneRevision = this.sceneRevisionState;
+    const worldRevision = this.view.worldStore.revision ?? 0;
+    const surfaceRevision = surface.revisionTracker?.revision ?? 0;
+    const objectRevision = surface.objectMap?.revision ?? 0;
+    const constructionRevision = this.revisionProvider?.() ?? 0;
+    if (sceneRevision[0] !== worldRevision
+        || sceneRevision[1] !== surfaceRevision
+        || sceneRevision[2] !== objectRevision
+        || sceneRevision[3] !== constructionRevision) {
+      this.invalidate();
+      sceneRevision[0] = worldRevision;
+      sceneRevision[1] = surfaceRevision;
+      sceneRevision[2] = objectRevision;
+      sceneRevision[3] = constructionRevision;
+    }
     const wet = this.wetSlots;
     wet.length = 0;
     let nearby = false;
