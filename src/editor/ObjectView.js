@@ -48,6 +48,25 @@ function modelBounds(parts) {
   return bounds;
 }
 
+export function residentObjectCellBounds(slots, chunkSize) {
+  if (!Array.isArray(slots) || slots.length === 0 || !Number.isSafeInteger(chunkSize) || chunkSize < 1) {
+    return null;
+  }
+  let minX = Number.POSITIVE_INFINITY;
+  let minZ = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxZ = Number.NEGATIVE_INFINITY;
+  for (const slot of slots) {
+    const descriptor = slot?.descriptor;
+    if (!descriptor) continue;
+    minX = Math.min(minX, descriptor.originCellX);
+    minZ = Math.min(minZ, descriptor.originCellZ);
+    maxX = Math.max(maxX, descriptor.originCellX + chunkSize - 1);
+    maxZ = Math.max(maxZ, descriptor.originCellZ + chunkSize - 1);
+  }
+  return Number.isFinite(minX) ? { minX, minZ, maxX, maxZ } : null;
+}
+
 export class ObjectView {
   constructor({ terrainView, tileMap, heightField, objectMap, objectCatalog }) {
     this.terrainView = terrainView;
@@ -74,6 +93,9 @@ export class ObjectView {
     this.renderers = new Map();
     this.pickMeshes = [];
     this.selectedObjectId = null;
+    this.lastResidencyFocusKey = null;
+    this.lastResidencyObjectRevision = Number.NaN;
+    this.lastResidencySelection = null;
     this.previewGroup = new THREE.Group();
     this.previewGroup.visible = false;
     terrainView.scene.add(this.previewGroup);
@@ -198,10 +220,36 @@ export class ObjectView {
     return this.placementResolver.resolve(object);
   }
 
-  refreshAll() {
+  collectResidentObjects() {
+    const slots = this.terrainView.slots;
+    if (!Array.isArray(slots)) return this.objectMap.list();
+    const chunkSize = this.terrainView.worldStore?.chunkSize;
+    const bounds = residentObjectCellBounds(slots, chunkSize);
+    const objects = bounds ? this.objectMap.queryBounds(bounds) : [];
+    if (this.selectedObjectId && !objects.some((object) => object.id === this.selectedObjectId)) {
+      const selected = this.objectMap.getById(this.selectedObjectId);
+      if (selected) objects.push(selected);
+    }
+    return objects;
+  }
+
+  syncResidency(force = false) {
+    const focusKey = this.terrainView.focusChunkKey ?? null;
+    const objectRevision = this.objectMap.revision;
+    if (!force
+        && focusKey === this.lastResidencyFocusKey
+        && objectRevision === this.lastResidencyObjectRevision
+        && this.selectedObjectId === this.lastResidencySelection) {
+      return false;
+    }
+    this.refreshAll(this.collectResidentObjects());
+    return true;
+  }
+
+  refreshAll(objects = null) {
     const startedAt = performance.now();
     const grouped = new Map(Array.from(this.renderers.keys(), (definitionKey) => [definitionKey, []]));
-    for (const object of this.objectMap.list()) grouped.get(object.definitionKey)?.push(object);
+    for (const object of objects ?? this.collectResidentObjects()) grouped.get(object.definitionKey)?.push(object);
 
     this.pickMeshes = [];
     for (const [definitionKey, renderer] of this.renderers.entries()) {
@@ -277,6 +325,9 @@ export class ObjectView {
       this.refreshFoundations(renderer, foundationPlacements);
     }
 
+    this.lastResidencyFocusKey = this.terrainView.focusChunkKey ?? null;
+    this.lastResidencyObjectRevision = this.objectMap.revision;
+    this.lastResidencySelection = this.selectedObjectId;
     this.updatePerformanceCounters(grouped);
     PerfCounters.inc('objectRefreshes');
     PerfCounters.inc('objectRefreshMs', performance.now() - startedAt);
@@ -368,6 +419,7 @@ export class ObjectView {
   }
 
   update(timestamp, camera) {
+    this.syncResidency();
     const startedAt = performance.now();
     const viewportHeight = this.terrainView.viewportHeight
       || this.terrainView.renderer.domElement.height
