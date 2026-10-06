@@ -62,6 +62,10 @@ export class MeadowGroundSampler {
     this.rockPlacementsProvider = rockPlacementsProvider;
     this.rocks = rocks;
     this.rockPlacements = [];
+    this.revision = 0;
+    this.lastTerrainRevision = Number.NaN;
+    this.lastFocusChunkKey = null;
+    this.lastRockPlacements = null;
   }
 
   get chunkSize() {
@@ -78,7 +82,18 @@ export class MeadowGroundSampler {
 
   /** Indexes the resident slots by chunk; call once a frame before `forTile`. */
   beginFrame() {
-    this.rockPlacements = this.rocks ? (this.rockPlacementsProvider?.() ?? []) : [];
+    const rockPlacements = this.rocks ? (this.rockPlacementsProvider?.() ?? []) : [];
+    const terrainRevision = this.terrainView.contentRevision ?? 0;
+    const focusChunkKey = this.terrainView.focusChunkKey ?? null;
+    if (terrainRevision !== this.lastTerrainRevision
+        || focusChunkKey !== this.lastFocusChunkKey
+        || rockPlacements !== this.lastRockPlacements) {
+      this.revision += 1;
+      this.lastTerrainRevision = terrainRevision;
+      this.lastFocusChunkKey = focusChunkKey;
+      this.lastRockPlacements = rockPlacements;
+    }
+    this.rockPlacements = rockPlacements;
     this.slotsByChunk ??= new Map();
     this.slotsByChunk.clear();
     for (const slot of this.terrainView.slots) {
