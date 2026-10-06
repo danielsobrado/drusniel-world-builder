@@ -28,18 +28,24 @@ export class FloatingOrigin {
     }
   }
 
+  writeCanonical(renderX, renderZ, target) {
+    target.x = renderX + this.originX;
+    target.z = renderZ + this.originZ;
+    return target;
+  }
+
   toCanonical(renderX, renderZ) {
-    return Object.freeze({
-      x: renderX + this.originX,
-      z: renderZ + this.originZ,
-    });
+    return Object.freeze(this.writeCanonical(renderX, renderZ, {}));
+  }
+
+  writeRender(worldX, worldZ, target) {
+    target.x = worldX - this.originX;
+    target.z = worldZ - this.originZ;
+    return target;
   }
 
   toRender(worldX, worldZ) {
-    return Object.freeze({
-      x: worldX - this.originX,
-      z: worldZ - this.originZ,
-    });
+    return Object.freeze(this.writeRender(worldX, worldZ, {}));
   }
 
   update(renderFocus) {
@@ -74,7 +80,13 @@ export class FloatingOrigin {
     return Object.freeze({ shiftX, shiftZ, originX, originZ });
   }
 
+  readState(target) {
+    target.x = this.originX;
+    target.z = this.originZ;
+    return target;
+  }
+
   getState() {
-    return Object.freeze({ x: this.originX, z: this.originZ });
+    return Object.freeze(this.readState({}));
   }
 }
