@@ -787,6 +787,11 @@ stylizedSurface:
       mask: /assets/textures/flower3/flowers.png
       zones: /assets/textures/flower3/flowersRGB.png
       gradient: /assets/textures/flower3/flowersGradient.png
+  preparedPlacementCache:
+    # Worker-prepared terrain/ecology survives render-slot turnover. The entry cap
+    # protects lookup locality; the byte cap bounds typed-array residency on long runs.
+    maxEntries: 625
+    maxMiB: 192
   # One coarse canonical field coordinates the natural layers into broad
   # meadow, woodland, scrub and rocky districts. It is sampled from world
   # coordinates, so imported macro maps gain the same regional detail without
