@@ -916,14 +916,14 @@ async function initializeEditor(restoreState, resources, startup) {
   resources.own(waterfallMist);
   // Rain on the ground and wind in the open, for the ambient beds; the sea
   // reads the same rain.
+  const weatherAudioLevelsScratch = { rain: 0, wind: 0.25 };
   const weatherAudioLevels = () => {
     const active = weatherEnabled && weatherSettings.weatherMode !== 'off';
     const intensity = active ? Math.max(0, Math.min(1, weatherSettings.weatherIntensity ?? 0)) : 0;
     const mode = weatherSettings.weatherMode;
-    return {
-      rain: mode === 'rain' || mode === 'storm' ? intensity : 0,
-      wind: mode === 'wind' || mode === 'storm' ? intensity : 0.25,
-    };
+    weatherAudioLevelsScratch.rain = mode === 'rain' || mode === 'storm' ? intensity : 0;
+    weatherAudioLevelsScratch.wind = mode === 'wind' || mode === 'storm' ? intensity : 0.25;
+    return weatherAudioLevelsScratch;
   };
   const surfaceWetness = new SurfaceWetness(config.stylizedSurface.wetness);
   let lastWetnessSeconds = null;
@@ -1090,11 +1090,12 @@ async function initializeEditor(restoreState, resources, startup) {
   const snowWakeEnabled = config.stylizedSurface?.snowWake?.enabled === true;
   // Read every frame, so both objects are reused rather than rebuilt.
   const snowWakeFooting = { x: 0, z: 0, footY: 0, grounded: false, waterState: PLAYER_WATER_DRY };
+  const snowWakeOrigin = { x: 0, z: 0 };
   const snowWakeBodyScratch = { x: 0, y: 0, z: 0, grounded: false, inWater: false };
   const snowWakeBody = () => {
     if (!snowWakeEnabled || viewModeController.mode !== PLAYER_MODE_WALK) return null;
     const footing = playerController.readFooting(snowWakeFooting);
-    const origin = terrainView.floatingOrigin.getState();
+    const origin = terrainView.floatingOrigin.readState(snowWakeOrigin);
     snowWakeBodyScratch.x = footing.x + origin.x;
     snowWakeBodyScratch.y = footing.footY;
     snowWakeBodyScratch.z = footing.z + origin.z;
@@ -1360,6 +1361,10 @@ async function initializeEditor(restoreState, resources, startup) {
   let lastWeatherTimestamp = null;
   let lastCharacterTimestamp = null;
   const characterCentre = { x: 0, y: 0, z: 0 };
+  const renderFocusScratch = { x: 0, z: 0 };
+  const canonicalFocusScratch = { x: 0, z: 0 };
+  const frameOriginScratch = { x: 0, z: 0 };
+  const playerBodyScratch = { x: 0, y: 0, z: 0 };
   terrainView.setAnimationLoop((timestamp) => {
     if (!active) return;
 
@@ -1421,7 +1426,8 @@ async function initializeEditor(restoreState, resources, startup) {
     viewModeUi.update();
     if (profiling) perfQa.mark('player');
 
-    let renderFocus = viewModeController.getFocusWorld();
+    const framePlayerStatus = viewModeController.getPlayerFrameStatus();
+    const renderFocus = viewModeController.readFocusWorld(renderFocusScratch);
     const rebase = terrainView.updateFloatingOrigin(renderFocus);
     if (rebase) {
       PerfCounters.inc('floatingOriginSnaps');
@@ -1433,7 +1439,7 @@ async function initializeEditor(restoreState, resources, startup) {
       worldAmbience.shiftWorld(rebase.shiftX, rebase.shiftZ);
       stylizedSurface.shiftOrigin(rebase.shiftX, rebase.shiftZ);
       exploration.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      renderFocus = viewModeController.getFocusWorld();
+      viewModeController.readFocusWorld(renderFocus);
     }
     if (profiling) perfQa.mark('floatingOrigin');
 
@@ -1449,18 +1455,19 @@ async function initializeEditor(restoreState, resources, startup) {
           : (frameTimestamp - lastCharacterTimestamp) / 1000;
         characterView.update(
           deltaSeconds,
-          playerController.getStatus(),
+          framePlayerStatus,
           frameTimestamp,
         );
       }
       lastCharacterTimestamp = wantVisible ? frameTimestamp : null;
       const occluding = wantVisible && viewModeController.isThirdPerson;
       if (occluding) {
-        const status = playerController.getStatus();
-        const footY = Number.isFinite(status.footY) ? status.footY : status.position.y;
-        characterCentre.x = status.position.x;
+        const footY = Number.isFinite(framePlayerStatus.footY)
+          ? framePlayerStatus.footY
+          : framePlayerStatus.position.y;
+        characterCentre.x = framePlayerStatus.position.x;
         characterCentre.y = footY + characterView.height * 0.55;
-        characterCentre.z = status.position.z;
+        characterCentre.z = framePlayerStatus.position.z;
       }
       updateCharacterOcclusion({
         renderer: terrainView.renderer,
@@ -1482,7 +1489,11 @@ async function initializeEditor(restoreState, resources, startup) {
       applyViewDistance(backdropActive);
     }
 
-    const canonicalFocus = floatingOrigin.toCanonical(renderFocus.x, renderFocus.z);
+    const canonicalFocus = floatingOrigin.writeCanonical(
+      renderFocus.x,
+      renderFocus.z,
+      canonicalFocusScratch,
+    );
     const forcePredictiveRefresh = frameTimestamp >= nextPredictiveRefreshAt;
     if (forcePredictiveRefresh) {
       nextPredictiveRefreshAt = frameTimestamp + TERRAIN_PREFETCH_REFRESH_MS;
@@ -1502,15 +1513,14 @@ async function initializeEditor(restoreState, resources, startup) {
     // that react to the body standing in them. A paused or non-walking view passes
     // null, which lets what the body pressed stand back up rather than freezing it.
     const bodyStatus = viewModeController.mode === PLAYER_MODE_WALK && !viewModeController.paused
-      ? playerController.getStatus()
+      ? framePlayerStatus
       : null;
-    const playerBody = bodyStatus
-      ? {
-        x: bodyStatus.position.x,
-        y: Number.isFinite(bodyStatus.footY) ? bodyStatus.footY : bodyStatus.position.y,
-        z: bodyStatus.position.z,
-      }
-      : null;
+    const playerBody = bodyStatus ? playerBodyScratch : null;
+    if (bodyStatus) {
+      playerBody.x = bodyStatus.position.x;
+      playerBody.y = Number.isFinite(bodyStatus.footY) ? bodyStatus.footY : bodyStatus.position.y;
+      playerBody.z = bodyStatus.position.z;
+    }
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
@@ -1544,10 +1554,11 @@ async function initializeEditor(restoreState, resources, startup) {
     }
     for (const listener of streamingFrameListeners) listener();
     const windCamera = viewModeController.camera.position;
+    const frameOrigin = terrainView.floatingOrigin.readState(frameOriginScratch);
     worldWind.update(
       lastWindTimestamp === null ? 0 : (frameTimestamp - lastWindTimestamp) / 1000,
       windCamera,
-      terrainView.floatingOrigin.getState(),
+      frameOrigin,
       {
         enabled: weatherEnabled && weatherSettings.weatherMode !== 'off',
         windX: weatherSettings.weatherWindX,
@@ -1560,17 +1571,18 @@ async function initializeEditor(restoreState, resources, startup) {
     waterfallMist.update(frameTimestamp / 1000, viewModeController.camera);
     updateGroundDeformation(frameTimestamp / 1000);
     snowWakeRecorder.update(frameTimestamp / 1000, snowWakeBody());
+    const frameWeatherAudio = weatherAudioLevels();
     updateSeaState({
       timeSeconds: frameTimestamp / 1000,
       storm: seaStormForWeather(),
-      rain: weatherAudioLevels().rain,
+      rain: frameWeatherAudio.rain,
       seaLevel: worldStore.generator?.seaLevel,
     });
     worldSoundscape.update(frameTimestamp / 1000, viewModeController.camera);
     const frameSeconds = frameTimestamp / 1000;
     const frameDelta = lastWetnessSeconds === null ? 0 : Math.min(1, frameSeconds - lastWetnessSeconds);
     lastWetnessSeconds = frameSeconds;
-    surfaceWetness.update(frameDelta, weatherAudioLevels().rain);
+    surfaceWetness.update(frameDelta, frameWeatherAudio.rain);
     skyLooks?.setOvercast(weatherOvercast());
     const snowCountryWeight = snowCountry.update(frameDelta, viewModeController.camera);
     skyLooks?.setSnowCountry(snowCountryWeight);
@@ -1589,7 +1601,7 @@ async function initializeEditor(restoreState, resources, startup) {
     // in the gorges and fades out of the lowlands.
     terrainView.updateValleyFog({
       focus: viewModeController.camera.position,
-      origin: terrainView.floatingOrigin.getState(),
+      origin: frameOrigin,
       timeSeconds: frameSeconds,
       weight: snowCountryWeight,
       sunDirection: stylizedSurface.skyView?.sunDirectionValue,
