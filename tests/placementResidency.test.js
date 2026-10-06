@@ -70,3 +70,35 @@ test('focus change cancels obsolete jobs, ignores late results and pins the depe
   assert.equal(f.store.arrayBytes, 0);
   assert.equal(f.world.preparedPlacementSamples, null);
 });
+
+
+test('prepared placement requests gather only spatially relevant authored overrides', () => {
+  const f = fixture();
+  f.world.setTile(0, 0, 0);
+  f.world.setTile(200, 200, 0);
+  f.world.setHeight(0, 0, 12);
+  f.world.setHeight(200, 200, 15);
+  f.store.setWindow(0, 0, 1);
+  f.store.request(0, 0, 0);
+  const sampling = f.requests[0].options.placementSamplingConfig;
+  assert.ok(sampling.tileOverrides.some(([key]) => key === '0:0'));
+  assert.ok(sampling.heightOverrides.some(([key]) => key === '0:0'));
+  assert.ok(!sampling.tileOverrides.some(([key]) => key === '200:200'));
+  assert.ok(!sampling.heightOverrides.some(([key]) => key === '200:200'));
+  f.dispose();
+});
+
+test('prepared placement byte eviction keeps the most recently used unpinned chunk', async () => {
+  const f = fixture();
+  f.store.request(0, 0, 0);
+  await f.complete();
+  const oneChunkBytes = f.store.arrayBytes;
+  assert.ok(oneChunkBytes > 0);
+  f.store.maxBytes = oneChunkBytes + 1;
+  f.store.request(1, 0, 0);
+  await f.complete();
+  assert.equal(f.store.entries.size, 1);
+  assert.ok(f.store.entries.has('1:0'));
+  assert.ok(f.store.arrayBytes <= f.store.maxBytes);
+  f.dispose();
+});
