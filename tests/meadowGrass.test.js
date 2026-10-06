@@ -107,12 +107,73 @@ test('a batch gives each tile its own slot and clears it when the tile leaves', 
   const position = geometry.getAttribute('instancePosition').array;
   assert.equal(position[5 * 4], EMPTY_POSITION, 'unused stems in a slot are parked out of range');
   assert.equal(geometry.getAttribute('instanceTile').array[8 * 4], 8, 'each stem carries its tile origin');
+  const stableVersion = geometry.getAttribute('instancePosition').version;
+  batches.begin();
+  batches.add('high', a);
+  batches.add('high', b);
+  batches.commit();
+  assert.equal(
+    geometry.getAttribute('instancePosition').version,
+    stableVersion,
+    'unchanged membership does not dirty instance buffers',
+  );
   batches.begin();
   batches.add('high', a);
   batches.commit();
   assert.equal(geometry.instanceCount, 8, 'a trailing free slot stops being drawn');
   batches.dispose();
   assert.equal(scene.children.length, 0);
+});
+
+test('meadow tile layout only reevaluates after meaningful camera or ground changes', () => {
+  const scene = new THREE.Scene();
+  const template = createMeadowTemplate({ detail: 2, count: 16, tileSize: 8 });
+  const material = new THREE.MeshBasicNodeMaterial();
+  let revision = 1;
+  let revisionReads = 0;
+  const ground = {
+    revision,
+    revisionAt() {
+      revisionReads += 1;
+      return revision;
+    },
+    forTile: () => ({
+      revision,
+      sample: (_x, _z, _rank, out) => {
+        out.height = 0;
+        out.strength = 1;
+        out.shape = 0;
+        out.path = 0;
+        return true;
+      },
+    }),
+  };
+  const layer = new (await import('../src/editor/stylized/meadow/MeadowTileLayer.js')).MeadowTileLayer({
+    scene,
+    name: 'dirty-gate',
+    tileSize: 8,
+    templates: { high: template },
+    material,
+    reach: 0,
+    selectBand: nearest => nearest === 0 ? 'high' : null,
+    ground,
+  });
+  layer.update({ x: 4, z: 4 }, { x: 0, z: 0 }, Infinity);
+  const firstReads = revisionReads;
+  layer.update({ x: 4, z: 4 }, { x: 0, z: 0 }, Infinity);
+  assert.equal(revisionReads, firstReads, 'steady frames reuse the last layout');
+  layer.update({ x: 4.1, z: 4 }, { x: 0, z: 0 }, Infinity);
+  assert.equal(revisionReads, firstReads, 'sub-quarter-metre motion stays inside the dirty gate');
+  layer.update({ x: 4.3, z: 4 }, { x: 0, z: 0 }, Infinity);
+  assert.ok(revisionReads > firstReads, 'meaningful motion refreshes the layout');
+  const afterMove = revisionReads;
+  revision += 1;
+  ground.revision = revision;
+  layer.update({ x: 4.3, z: 4 }, { x: 0, z: 0 }, Infinity);
+  assert.ok(revisionReads > afterMove, 'ground revision changes refresh the layout');
+  layer.dispose();
+  material.dispose();
+  template.dispose();
 });
 
 test('the ground sampler reads height, grass, water and shape from the resident page', () => {
