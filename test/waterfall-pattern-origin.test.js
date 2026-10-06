@@ -51,8 +51,12 @@ test('a wrap never shows on falls that flow along an axis', () => {
   const tiles = [
     waterfall.strandWidthMeters,
     waterfall.strandLengthMeters,
+    // The overlapping sheet samples at half the strand frequency.
+    waterfall.strandWidthMeters * 2,
+    waterfall.strandLengthMeters * 2,
     waterfall.plungeScaleMeters,
-    waterfall.plungeScaleMeters * 4,
+    // The second isotropic churn layer samples at twice the frequency.
+    waterfall.plungeScaleMeters / 2,
     chunkWorldSize,
   ];
   for (const tile of tiles) {
