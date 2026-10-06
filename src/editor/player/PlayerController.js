@@ -534,7 +534,9 @@ export class PlayerController {
         || this.harnessActive
         || this.uiBlocked
         || this.paused
-        || event.target?.matches?.('input, textarea, select, button, [contenteditable="true"]')) {
+        || event.target?.matches?.('input, textarea, select, [contenteditable="true"]')
+        // Clicking Play can retain button focus after capturing the pointer.
+        || (!this.pointerLocked && event.target?.matches?.('button'))) {
       return;
     }
     // Escape is owned by `EscapeStack`, which listens on the capture phase at a

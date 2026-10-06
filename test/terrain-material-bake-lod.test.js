@@ -50,11 +50,13 @@ test('baked terrain normal is a computed surface gradient gated on bake readines
     bakedSource,
     /detailStrength: normalVisibility\.mul\(families\.normalStrength\),/,
   );
-  // Readiness gate: before the bake publishes, the geometry normal is used.
+  // Readiness gate: use the geometry directly. The completed material normal
+  // would recurse when this output also feeds snow color and roughness.
   assert.match(
     bakedSource,
-    /const readyNormal = select\(gpuState\.ready\.greaterThan\(0\.5\),surfaceNormal,normalView,\);/,
+    /const readyNormal = select\(gpuState\.ready\.greaterThan\(0\.5\),surfaceNormal,[\s\S]*?normalViewGeometry\.mul\(faceDirection\),\);/,
   );
+  assert.doesNotMatch(bakedSource, /surfaceNormal,normalView,/);
   assert.match(bakedSource, /normal: readyNormal,/);
 });
 

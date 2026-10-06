@@ -123,6 +123,49 @@ test('setUiBlocked preserves pose and enabled mode', () => {
   dispose();
 });
 
+function movementKey(code, target) {
+  return { code, target, repeat: false, preventDefault() {}, stopImmediatePropagation() {} };
+}
+
+test('a focused Play button accepts movement, jump and double-tap Shift during pointer lock', () => {
+  const { controller, canvas, dispose } = createController();
+  try {
+    document.pointerLockElement = canvas;
+    const button = { matches: selector => selector.split(',').some(part => part.trim() === 'button') };
+    let now = 0;
+    controller.speedMode.now = () => now;
+    controller.onKeyDown(movementKey('KeyW', button));
+    controller.update(0);
+    controller.update(100);
+    assert.ok(controller.state.z < 0, 'the player actually moves after resuming from Play');
+    controller.onKeyDown(movementKey('Space', button));
+    assert.equal(controller.jumpQueued, true);
+    controller.onKeyDown(movementKey('ShiftLeft', button));
+    controller.onKeyUp(movementKey('ShiftLeft', button));
+    now = 100;
+    controller.onKeyDown(movementKey('ShiftLeft', button));
+    assert.equal(controller.speedMode.active, true);
+    controller.setUiBlocked(true);
+    controller.onKeyDown(movementKey('KeyW', button));
+    assert.equal(controller.keys.size, 0, 'open UI still owns input while the pointer is locked');
+  } finally { dispose(); }
+});
+
+test('buttons outside pointer lock and editable controls do not capture movement keys', () => {
+  const { controller, canvas, dispose } = createController();
+  try {
+    const button = { matches: selector => selector.split(',').some(part => part.trim() === 'button') };
+    controller.onKeyDown(movementKey('KeyW', button));
+    assert.equal(controller.keys.size, 0);
+    document.pointerLockElement = canvas;
+    for (const kind of ['input', 'textarea', 'select', '[contenteditable="true"]']) {
+      const editable = { matches: selector => selector.split(',').some(part => part.trim() === kind) };
+      controller.onKeyDown(movementKey('KeyW', editable));
+      assert.equal(controller.keys.size, 0, `${kind} keeps its text/form input`);
+    }
+  } finally { dispose(); }
+});
+
 
 test('readFrameStatus reuses caller-owned frame state', () => {
   const { controller, dispose } = createController();

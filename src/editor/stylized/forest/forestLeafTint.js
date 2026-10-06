@@ -131,7 +131,10 @@ export function createForestLeafTintTable({
      * both are absolute target colours expressed as ratios, so multiplying them
      * would land on neither. A turned grove is already saying what colour it is.
      */
-    tintFor(speciesId, groveSeed, tileId = null) {
+    tintFor(speciesId, groveSeed, tileId = null, preserveAuthoredColor = false) {
+      // Painted snow and needles share a crown. A biome's green multiplier
+      // would recolor the settled snow too, across mesh and impostor bands.
+      if (preserveAuthoredColor) return UNTINTED;
       if (autumnShare > 0 && groveSeed < autumnShare) {
         const tints = tintsBySpecies.get(speciesId);
         if (tints) {

@@ -3,7 +3,8 @@ import yaml from 'js-yaml';
 
 /** Compile authoring YAML into module data; runtime resolution stays in the app. */
 export function compileYamlModule(source, filename) {
-  const value = yaml.load(source, { filename, schema: yaml.JSON_SCHEMA });
+  // Match the former runtime parser, including YAML anchor merge semantics.
+  const value = yaml.load(source, { filename });
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${filename} must contain a configuration object.`);
   }

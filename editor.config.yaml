@@ -170,6 +170,21 @@ terrain:
   smoothFactor: 0.45
 stylizedSurface:
   enabled: true
+  # Gods' End's powder/compaction response. Appearance only: Azgaar terrain IDs
+  # and the material bake still decide where snow lies.
+  snowSurface:
+    calmScale: 34
+    calmCoverage: 0.5
+    calmRelief: 0.25
+    calmDetail: 0.45
+    windward: 0.6
+    pathCompaction: 0.85
+    pathColor: '#a3b4c9'
+    baseRoughness: 0.7
+    compactedRoughness: 0.4
+    toneContrast: 0.06
+    cavityStrength: 0.8
+    subsurfaceStrength: 0.12
   # The trail a walking body cuts through deep snow (grass-test's SnowSurfWake):
   # a banked trench that widens and deepens with speed and settles flat within
   # 25 s. Terrain-only and gated on baked snow, on a live trail and on a circle
@@ -478,6 +493,7 @@ stylizedSurface:
         species: conifer_narrow
         scale: 0.357
         tileIds: [9, 10]
+        preferredTileIds: [9, 10]
         # Its crown sits ~0.5 m off the stem; enough, at a chunk edge, to put the
         # trunk collider in the neighbouring chunk.
         pivot: trunk
@@ -487,6 +503,7 @@ stylizedSurface:
         species: [conifer_narrow, conifer_wide]
         scale: 0.357
         tileIds: [9, 10]
+        preferredTileIds: [9, 10]
         # Windswept: the crown streams ~3 m downwind of the stem, so a bounds pivot
         # would stand the trunk (and its collider) that far off the placement.
         pivot: trunk
@@ -1639,6 +1656,11 @@ stylizedSurface:
       # It also bounds the chamfer halo, so raising it costs per-chunk work.
       # Set to 0 to disable the water term entirely.
       waterRangeMeters: 80
+      # Imported Azgaar alpine biomes sit hundreds of metres above sea level.
+      # Snowy conifers fade into a sparse treeline below the 700 m snow band.
+      profiles:
+        9: { elevationMax: 550, elevationFade: 100 }
+        10: { elevationMax: 620, elevationFade: 80 }
     forestFloor:
       # Core densities are how much ground cover survives under closed canopy.
       # These were low enough (0.18 grass, 0.08 flowers) that a wood interior was

@@ -2,17 +2,21 @@ import * as THREE from 'three/webgpu';
 import {
   attribute,
   cameraWorldMatrix,
+  cameraViewMatrix,
+  dot,
   exp,
   float,
   int,
   length,
   mix,
+  normalize,
   smoothstep,
   step,
   uniform,
   uniformArray,
   uv,
   vec3,
+  vec4,
 } from 'three/tsl';
 
 import { skyLightUniforms } from '../sky/skyLight.js';
@@ -39,7 +43,7 @@ export function createSnowPowderUniforms(slots) {
  * footfall forward and up, slowing in the air and settling as it spreads and
  * fades. A slot not kicked for a while has aged out and draws nothing.
  */
-export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }) {
+export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }, sunDirection = null) {
   const slot = attribute('powderSlot', 'float');
   const seed = attribute('powderSeed', 'vec4');
   const kick = uniforms.kicks.element(int(slot));
@@ -66,7 +70,7 @@ export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }) 
     .add(velocity.mul(travel))
     .sub(vec3(0, age.mul(age).mul(GRAVITY * 0.5).mul(t), 0));
 
-  const radius = mix(float(size * 0.45), float(size), t.sqrt()).mul(alive);
+  const radius = mix(float(size * 0.45), float(size), t.clamp(0, 1).sqrt()).mul(alive);
   const corner = attribute('powderCorner', 'vec2');
   const right = cameraWorldMatrix.element(0).xyz;
   const up = cameraWorldMatrix.element(1).xyz;
@@ -75,6 +79,7 @@ export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }) 
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
+    forceSinglePass: true,
   });
   // Sat on the snow rather than cut into it: a quad crossing the ground shows
   // its intersection as a hard hatched edge.
@@ -83,6 +88,18 @@ export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }) 
   const soft = float(1).sub(smoothstep(0.25, 1, length(uv().sub(0.5).mul(2))));
   const fade = float(1).sub(t).mul(smoothstep(0, 0.2, t));
   material.opacityNode = soft.mul(fade).mul(opacity).mul(strength.min(1)).mul(alive);
-  material.colorNode = vec3(0.93, 0.95, 0.98).mul(mix(0.82, 1, seed.y)).mul(skyLightUniforms.brightness);
+  // Gods' End's powder catches warm direct light while its shaded side stays
+  // cool. The forward-scatter lobe brightens a puff viewed toward the sun.
+  const local = uv().sub(0.5).mul(2);
+  const sphereNormal = normalize(vec3(local, dot(local, local).oneMinus().max(0).sqrt()));
+  const sun = uniform(sunDirection ?? new THREE.Vector3(0.35, 0.85, 0.25));
+  const lightView = normalize(cameraViewMatrix.mul(vec4(sun, 0)).xyz);
+  const diffuse = dot(sphereNormal, lightView).add(0.75).div(1.75).max(0);
+  const mu = lightView.z.negate();
+  const phase = mu.mul(mu).add(1).mul(0.03614)
+    .div(mu.mul(-1.1).add(1.3025).pow(1.5));
+  const fill = skyLightUniforms.reflectionTint.mul(skyLightUniforms.brightness).mul(0.65);
+  const lighting = fill.add(skyLightUniforms.sunColor.mul(diffuse.mul(0.55).add(phase.mul(0.935))));
+  material.colorNode = vec3(0.86, 0.93, 0.98).mul(mix(0.82, 1, seed.y)).mul(lighting);
   return material;
 }

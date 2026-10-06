@@ -18,6 +18,17 @@ function config(autumnGroves) {
   };
 }
 
+test('authored snow-colored crowns retain their painted white across biome and autumn tints', () => {
+  const table = createForestLeafTintTable({ config: config(1) });
+  for (const tileId of [9, 10]) {
+    for (const speciesId of ['conifer_narrow', 'conifer_wide', 'broadleaf_round']) {
+      assert.deepEqual(table.tintFor(speciesId, 0.1, tileId, true), FOREST_LEAF_TINT_UNTINTED);
+    }
+  }
+  assert.notDeepEqual(table.tintFor('conifer_narrow', 0.1, 10), FOREST_LEAF_TINT_UNTINTED,
+    'ordinary needles still receive their biome grade');
+});
+
 /** The colour the top of the crown renders: the species' `leafTop` times the tint. */
 function tinted(speciesId, tint) {
   const base = new THREE.Color(FOREST_SPECIES_PALETTES[speciesId].leafTop);

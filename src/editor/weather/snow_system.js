@@ -5,11 +5,12 @@ import { DEFAULT_SNOW_WEATHER_SETTINGS } from "./rain_defaults.js";
 import { createSnowGeometry } from "./rain_geometry.js";
 import { createSnowfallField } from "./snowfall/SnowfallField.js";
 import { clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+import { DEFAULT_WEATHER_EFFECTS } from './WeatherEffectsConfig.js';
 /**
- * How hard it snows in snow country with the weather off: a light, steady
- * fall over the snowfields, as the weather's snow mode at this intensity.
+ * Maximum coverage-driven snowfall over snow country with the weather off.
+ * Resolved weather-effects settings can override this reference intensity.
  */
-const REGIONAL_SNOW_INTENSITY = 0.3;
+const REGIONAL_SNOW_INTENSITY = DEFAULT_WEATHER_EFFECTS.snowfall.regionalIntensity;
 class SnowWeatherSystem {
   group = new THREE.Group();
   snowMaterial;
@@ -17,13 +18,15 @@ class SnowWeatherSystem {
   center = new THREE.Vector3();
   settings = { ...DEFAULT_SNOW_WEATHER_SETTINGS };
   regional = 0;
+  regionalTarget = 0;
   flakeCount;
   constructor(options) {
+    this.snowfallSettings = { ...DEFAULT_WEATHER_EFFECTS.snowfall, ...options.snowfall };
     this.group.name = "weather-snow";
     // WebGPU draws the camera-facing, three-population field; WebGL keeps the
     // crossed-quad flakes its shader material was written for.
     if (options.isWebGpu) {
-      this.snowMaterial = createSnowfallField(options.snowfall, options.seed);
+      this.snowMaterial = createSnowfallField(this.snowfallSettings, options.seed);
       this.snowMesh = new THREE.Mesh(this.snowMaterial.geometry, this.snowMaterial.material);
       this.flakeCount = this.snowMaterial.geometry.instanceCount;
     } else {
@@ -44,16 +47,17 @@ class SnowWeatherSystem {
     this.refresh();
   }
   /**
-   * Snow country (0..1) snows lightly whatever the weather; the weather's snow
+   * Snow country (0..1) snows whatever the weather; the weather's snow
    * mode can only make it heavier.
    */
   setRegionalSnow(amount) {
-    this.regional = Math.max(0, Math.min(1, Number(amount) || 0));
-    this.refresh();
+    const coverage = Math.max(0, Math.min(1, Number(amount) || 0));
+    const { regionalMinCoverage, regionalFullCoverage, regionalIntensity } = this.snowfallSettings;
+    this.regionalTarget = THREE.MathUtils.smoothstep(coverage, regionalMinCoverage, regionalFullCoverage) * regionalIntensity;
   }
   effectiveIntensity() {
     const weather = isWeatherVisible(this.settings) ? this.settings.intensity : 0;
-    return Math.max(weather, this.regional * REGIONAL_SNOW_INTENSITY);
+    return Math.max(weather, this.regional);
   }
   refresh() {
     const intensity = this.effectiveIntensity();
@@ -61,7 +65,11 @@ class SnowWeatherSystem {
     this.snowMaterial.setIntensity(intensity);
   }
   update(deltaSeconds, elapsedSeconds, cameraPosition, origin) {
-    void deltaSeconds;
+    const dt = Math.max(0, Math.min(0.1, Number(deltaSeconds) || 0));
+    const eased = this.regionalTarget + (this.regional - this.regionalTarget)
+      * Math.exp(-this.snowfallSettings.regionalFadeRate * dt);
+    this.regional = Math.abs(eased - this.regionalTarget) < 0.002 ? this.regionalTarget : eased;
+    this.refresh();
     if (!this.group.visible) return;
     this.center.copy(cameraPosition);
     this.snowMaterial.setCenter(this.center);

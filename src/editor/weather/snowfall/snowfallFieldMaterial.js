@@ -10,7 +10,6 @@ import {
   positionGeometry,
   sin,
   smoothstep,
-  step,
   uniform,
   uniformArray,
   vec2,
@@ -49,8 +48,9 @@ export function createSnowfallMaterial(uniforms, settings = DEFAULT_WEATHER_EFFE
   const flake = vec3(center.x.add(offset.x), center.y.add(y), center.z.add(offset.y));
   const fadeStart = appearance.x.max(0.001);
   const lens = smoothstep(fadeStart, fadeStart.mul(3), cameraPosition.distance(flake));
-  const falling = step(seed.w, intensity.min(1));
-  const size = shape.z.mul(lens).mul(falling);
+  // Coverage fades the field once in opacity, as in Gods' End. Also thinning
+  // instances here would square the effect and erase light regional snowfall.
+  const size = shape.z.mul(lens);
   const right = cameraWorldMatrix.element(0).xyz;
   const up = cameraWorldMatrix.element(1).xyz;
   const corner = positionGeometry.xy;

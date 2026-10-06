@@ -236,6 +236,14 @@ test('source signature ignores runtime tree density and residency policy', () =>
   );
 });
 
+test('biome prototype preference preserves the existing baked atlas signature', () => {
+  const parts = [[{ kind: 'leaf', geometry: geometry(1), sourceMap: null }]];
+  const base = { assets: { treeVariants: [{ scene: 'snow.glb', species: 'conifer_narrow', tileIds: [9, 10] }] } };
+  const preferred = structuredClone(base);
+  preferred.assets.treeVariants[0].preferredTileIds = [9, 10];
+  assert.equal(createTreeImpostorSourceSignature(parts, base), createTreeImpostorSourceSignature(parts, preferred));
+});
+
 test('source signature changes when wind affecting the baked silhouette changes', () => {
   const prototypeParts = [[{
     kind: 'leaf',

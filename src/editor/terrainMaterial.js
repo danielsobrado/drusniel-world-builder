@@ -1,4 +1,5 @@
 import { createSnowDetailNodes } from './stylized/SnowDetailShading.js';
+import { resolveSnowSurfaceConfig } from './stylized/SnowSurfaceConfig.js';
 import * as THREE from 'three/webgpu';
 import {
   abs,
@@ -295,8 +296,8 @@ export function createTerrainMaterial({
       terrainUv,
       chunkWorldSize,
       chunkCenter,
-      pathMask,
-      verge: pathWear.verge,
+      pathMask: pathMask.mul(oneMinus(bakedSurface.snow ?? float(0))),
+      verge: pathWear.verge.mul(oneMinus(bakedSurface.snow ?? float(0))),
       settings: pathPaintSettings,
       textures: pathPaintSettings ? acquirePathTextures() : null,
     });
@@ -322,16 +323,6 @@ export function createTerrainMaterial({
       shoreSurface.color,
       shoreSurface.roughness ?? float(stylizedConfig.materialBake.render.fallbackRoughness),
     );
-    const snowSurface = bakedSurface.snow
-      ? createSnowSurfaceNodes({
-        terrainUv,
-        chunkWorldSize,
-        chunkCenter,
-        snow: bakedSurface.snow,
-        stylizedConfig,
-        sunDirection,
-      })
-      : null;
     const footprints = createFootprintShading({
       terrainUv,
       chunkWorldSize,
@@ -339,7 +330,6 @@ export function createTerrainMaterial({
       groundHeight: terrainHeight,
       snow: bakedSurface.snow ?? float(0),
     });
-    const snowColor = snowSurface ? snowSurface.apply(surface.color) : surface.color;
     // The trail a body cuts through deep snow, over the prints it leaves there.
     // Disabled or snowless, it compiles to nothing.
     const wake = createSnowWakeShading({
@@ -350,20 +340,29 @@ export function createTerrainMaterial({
       state: snowWakeRecorder.state,
       config: stylizedConfig.snowWake,
     });
+    const snowSettings = resolveSnowSurfaceConfig(stylizedConfig.snowSurface);
+    const snowPressed = max(pathMask, footprints.pressed);
     const snowDetail = bakedSurface.snow ? createSnowDetailNodes({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, material,
-      groundHeight: terrainHeight, pathMask: max(pathMask, footprints.pressed), baseNormal: bakedSurface.normal,
+      groundHeight: terrainHeight, pathMask: snowPressed, baseNormal: bakedSurface.normal, settings: snowSettings,
       reliefEnabled: stylizedConfig.enhancements?.snowRelief === true,
     }) : null;
-    const detailedSnowColor = snowDetail ? snowDetail.color(snowColor) : snowColor;
-    const printed = footprints.apply(detailedSnowColor);
+    const snowNormal = bakedSurface.normal && snowDetail
+      ? snowDetail.normal(bakedSurface.normal).toVar()
+      : bakedSurface.normal;
+    const snowSurface = bakedSurface.snow ? createSnowSurfaceNodes({
+      terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, stylizedConfig, sunDirection,
+      baseNormal: snowNormal, pathMask: snowPressed, settings: snowSettings,
+    }) : null;
+    const detailedSnowColor = snowDetail ? snowDetail.color(surface.color) : surface.color;
+    const printed = footprints.apply(snowSurface ? snowSurface.apply(detailedSnowColor) : detailedSnowColor);
     material.colorNode = wake ? wake.apply(printed) : printed;
     material.roughnessNode = surface.roughness;
     if (snowSurface) material.emissiveNode = snowSurface.emissive;
     if (bakedSurface.normal) material.normalNode = bakedSurface.normal;
     if (snowDetail) {
       material.roughnessNode = snowDetail.roughness(surface.roughness);
-      if (bakedSurface.normal) material.normalNode = snowDetail.normal(bakedSurface.normal);
+      if (snowNormal) material.normalNode = snowNormal;
     }
     // Wind-blown snow and sand streaming across the ground, behind the ambient
     // layer's own weights. The snow streak keys on the baked snow the terrain

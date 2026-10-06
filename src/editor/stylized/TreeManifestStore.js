@@ -95,6 +95,7 @@ export class TreeManifestStore {
     prototypeCount,
     prototypeIndexBySpecies = null,
     prototypeTileIds = null,
+    prototypePreferredTileIds = null,
     objectMap = null,
     regionalCharacterField = null,
     onBuilt,
@@ -114,6 +115,7 @@ export class TreeManifestStore {
       prototypeCount,
       prototypeIndexBySpecies,
       prototypeTileIds,
+      prototypePreferredTileIds,
       groveMix: config.trees.groveMix,
     });
     this.pathClearance = createPathClearanceField(terrainView, config);

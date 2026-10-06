@@ -13,6 +13,11 @@ rain:
   opacity: 2
   colorLinear: [0.78, 0.86, 1]
 snowfall:
+  # Match Gods' End's coverage-driven alpine snowfall even in clear weather.
+  regionalIntensity: 1
+  regionalMinCoverage: 0.2
+  regionalFullCoverage: 0.7
+  regionalFadeRate: 1.2
   count: 12000
   top: 16.2
   bottom: -3.6

@@ -30,8 +30,25 @@ function unionBounds(parts, kind = null) {
 function makeMaterial(color, side = THREE.FrontSide) {
   const value = new THREE.Color(color);
   const material = new THREE.MeshLambertNodeMaterial({ side });
+  material.color.copy(value);
   material.colorNode = vec3(value.r, value.g, value.b);
   return material;
+}
+
+/** Preserve the broad color of painted crowns in the cheap/loading fallback. */
+function proxyCanopyColor(parts, fallback) {
+  const sum = new THREE.Vector3();
+  let count = 0;
+  for (const part of parts) {
+    if (part.kind !== 'leaf') continue;
+    const colors = part.geometry.getAttribute('color');
+    if (!colors) continue;
+    for (let i = 0; i < colors.count; i++) {
+      sum.x += colors.getX(i); sum.y += colors.getY(i); sum.z += colors.getZ(i);
+    }
+    count += colors.count;
+  }
+  return count > 0 ? new THREE.Color().setRGB(sum.x / count, sum.y / count, sum.z / count) : fallback;
 }
 
 function makeTreeLeafMaterial(color, config, bounds, side = THREE.FrontSide) {
@@ -125,7 +142,7 @@ export function createTreeProxyPrototype(parts, config) {
       {
         geometry: canopyGeometry,
         material: makeTreeLeafMaterial(
-          config.trees.leafTop,
+          proxyCanopyColor(parts, config.trees.leafTop),
           config,
           canopyGeometry.boundingBox,
         ),

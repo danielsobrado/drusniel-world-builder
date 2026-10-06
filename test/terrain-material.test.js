@@ -23,7 +23,8 @@ test('terrain uses PBR response and baked slope-aware surface normals', () => {
   // Roughness comes from the baked surface; the coast swash only wets it at the sea's edge.
   assert.match(source, /bakedSurface\.roughness/);
   assert.match(source, /material\.roughnessNode\s*=\s*surface\.roughness/);
-  assert.match(source, /material\.normalNode\s*=\s*bakedSurface\.normal/);
+  assert.match(source, /snowDetail\.normal\(bakedSurface\.normal\)/);
+  assert.match(source, /material\.normalNode\s*=\s*snowNormal/);
 });
 
 test('terrain color does not overlay the editor cell grid in player view', () => {

@@ -3,10 +3,11 @@ import {
   Fn,
   clamp,
   dot,
+  faceDirection,
   float,
   max,
   mix,
-  normalView,
+  normalViewGeometry,
   oneMinus,
   select,
   smoothstep,
@@ -202,7 +203,7 @@ export function createTerrainMaterialBakedSurface({
     return {
       color: select(gpuState.ready.greaterThan(0.5), requestedDebugColor, proceduralColor),
       roughness: readyRoughness,
-      normal: normalView,
+      normal: normalViewGeometry.mul(faceDirection),
     };
   }
 
@@ -249,7 +250,10 @@ export function createTerrainMaterialBakedSurface({
   const readyNormal = select(
     gpuState.ready.greaterThan(0.5),
     surfaceNormal,
-    normalView,
+    // This normal also feeds snow color/roughness and emission. normalView
+    // would ask those passes for the material's completed normal, recursing
+    // through the snow normal that is being built from this fallback.
+    normalViewGeometry.mul(faceDirection),
   );
   const macroMultiplier = clamp(samples.macroTint.rgb.mul(2), vec3(0.65), vec3(1.35));
   midColor = midColor

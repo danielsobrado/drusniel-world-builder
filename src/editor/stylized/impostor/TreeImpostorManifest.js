@@ -123,7 +123,9 @@ export function createTreeImpostorSourceSignature(prototypes, config) {
   const configuration = JSON.stringify({
     trees: treeBakeConfiguration(config?.trees),
     wind: config?.wind ?? null,
-    treeVariants: config?.assets?.treeVariants ?? null,
+    // Biome preference only selects existing prototypes; their baked pixels
+    // stay identical, so this must not invalidate the shared atlas.
+    treeVariants: config?.assets?.treeVariants?.map(({ preferredTileIds: _preferred, ...variant }) => variant) ?? null,
     impostor: impostorBakeConfig,
     normalEncoding: TREE_IMPOSTOR_NORMAL_ENCODING,
   });

@@ -185,6 +185,8 @@ export class StylizedTreeView {
     this.prototypeSignature = null;
     this.speciesPrototypeIndex = null;
     this.prototypeTileIds = null;
+    this.prototypePreferredTileIds = null;
+    this.preservePrototypeLeafColor = [];
     this.leafTints = createForestLeafTintTable({ config });
     this.proxyPrototypes = [];
     this.renderers = [];
@@ -295,6 +297,7 @@ export class StylizedTreeView {
     );
     const additionalPrototypeIndicesBySpecies = new Map();
     const prototypeTileIds = new Map();
+    const prototypePreferredTileIds = new Map();
     for (const { scene: variantScene, definition: inputDefinition } of authoredVariants) {
       const definition = inferTreeMaterials(variantScene, inputDefinition);
       const extractionConfig = {
@@ -343,6 +346,10 @@ export class StylizedTreeView {
         const tiles = new Set(definition.tileIds);
         for (const index of indices) prototypeTileIds.set(index, tiles);
       }
+      if (definition.preferredTileIds) {
+        const tiles = new Set(definition.preferredTileIds);
+        for (const index of indices) prototypePreferredTileIds.set(index, tiles);
+      }
       // One geometry can serve several species. We have three authored broadleaf
       // crowns, not six, so a tropical emergent and a temperate beech share a
       // mesh and are told apart by the species registry's crown aspect, spacing
@@ -372,6 +379,9 @@ export class StylizedTreeView {
       additionalPrototypeIndicesBySpecies,
     });
     this.prototypeTileIds = prototypeTileIds;
+    this.prototypePreferredTileIds = prototypePreferredTileIds;
+    this.preservePrototypeLeafColor = this.prototypes.map(parts => parts.some(part =>
+      part.kind === 'leaf' && Boolean(part.geometry.getAttribute('color'))));
     this.prototypeSignature = createTreeImpostorSourceSignature(this.prototypes, this.config);
     this.createRenderResources();
   }
@@ -605,6 +615,7 @@ export class StylizedTreeView {
       prototypeCount: this.prototypes.length,
       prototypeIndexBySpecies: this.speciesPrototypeIndex ?? null,
       prototypeTileIds: this.prototypeTileIds ?? null,
+      prototypePreferredTileIds: this.prototypePreferredTileIds ?? null,
       objectMap: this.objectMap,
       regionalCharacterField: this.regionalCharacterField,
       onBuilt: () => {
@@ -822,6 +833,7 @@ export class StylizedTreeView {
       record.speciesId,
       record.groveSeed ?? 0,
       this.tileIdAt(record.x, record.z),
+      this.preservePrototypeLeafColor[this.resolvePalettePrototypeIndex(record)] ?? false,
     );
   }
 

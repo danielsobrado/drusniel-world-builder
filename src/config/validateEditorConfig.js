@@ -733,6 +733,12 @@ function validateStylizedSurface(config) {
     if (variant.tileIds !== undefined) {
       assertTileIds(variant.tileIds, `${path}.tileIds`);
     }
+    if (variant.preferredTileIds !== undefined) {
+      assertTileIds(variant.preferredTileIds, `${path}.preferredTileIds`);
+      if (variant.tileIds && variant.preferredTileIds.some(tile => !variant.tileIds.includes(tile))) {
+        throw new Error(`Invalid editor configuration: ${path}.preferredTileIds must be allowed by tileIds.`);
+      }
+    }
   });
 
   const wildlifeVariants = surface.assets?.wildlifeVariants ?? [];

@@ -42,9 +42,20 @@ try {
       });
       assert.equal(result.adapter.backend, 'webgpu'); assert.equal(result.adapter.fallback, false);
       assert.ok(result.adapter.vendor || result.adapter.architecture);
-      await page.evaluate(() => window.__editor.viewModeController.setMode('player', { spawn: { x: 0, z: 0 } }));
-      await page.locator('canvas[aria-label="Drusniel World infinite world editor viewport"]').click({ position: { x: 640, y: 360 } });
+      await page.evaluate(() => {
+        window.__editor.viewModeController.setMode('player', { spawn: { x: 0, z: 0 } });
+        window.__editor.viewModeController.pause();
+      });
+      await page.locator('button[data-view-mode="player"]').click();
       await page.waitForFunction(() => window.__editor.playerController.pointerLocked);
+      assert.equal(await page.evaluate(() => document.activeElement.matches('button[data-view-mode="player"]')), true,
+        'The focused Play button must not suppress captured player input.');
+      await page.keyboard.down('w');
+      assert.equal(await page.evaluate(() => window.__editor.playerController.keys.has('KeyW')), true, 'Play accepts WASD.');
+      await page.keyboard.up('w');
+      await page.keyboard.down('Space');
+      assert.equal(await page.evaluate(() => window.__editor.playerController.keys.has('Space')), true, 'Play accepts jumping.');
+      await page.keyboard.up('Space');
       await page.keyboard.press('Shift'); await page.waitForTimeout(50); await page.keyboard.press('Shift');
       assert.equal(await page.evaluate(() => window.__editor.playerController.speedMode.active), true, 'Real double-tap enables fast travel.');
       await page.keyboard.press('Shift'); await page.waitForTimeout(50); await page.keyboard.press('Shift');
@@ -81,6 +92,11 @@ try {
         e.controller.commitHistory({ kind: 'terrain', patch: e.controller.tileMap.paintSquare(2, 2, 1, redoAfter) });
         e.controller.undo();
         e.viewModeController.setMode('player', { spawn: { x: 0, z: 0 } }); e.viewModeController.pause();
+        e.playerController.setPose({ x: 17.25, z: -23.5, yaw: 0.7, pitch: -0.12 });
+        // Use a paused, airborne pose so default spawn/ground state cannot pass.
+        e.playerController.state.y += 2.5; e.playerController.state.footY += 2.5;
+        e.playerController.state.grounded = false; e.playerController.state.verticalVelocity = -1.25;
+        e.playerController.applyCameraState();
         e.playerController.speedMode.setActive(true);
         window.__recoveryTiles = { before, after, redoAfter };
         window.__recoveryExpected = e.captureRecoveryState();
@@ -126,6 +142,13 @@ try {
           origin: JSON.stringify(actual.origin) === JSON.stringify(expected.origin),
           mode: actual.mode === expected.mode && actual.paused === expected.paused,
           player: actual.player.yaw === expected.player.yaw && actual.player.pitch === expected.player.pitch,
+          playerPosition: ['x', 'y', 'z', 'footY'].every(key => actual.player.state[key] === expected.player.state[key]),
+          playerPhysics: JSON.stringify(actual.player.state) === JSON.stringify(expected.player.state),
+          bakePipelineDisabled: e.terrainView.stylizedConfig.materialBake.enabled === false
+            && e.terrainView.stylizedSurface.materialBakeRuntime === null
+            && e.terrainView.stylizedSurface.materialBakeGpuBridge === null
+            && e.terrainView.materialBakeRuntime == null
+            && e.terrainView.slots.every(slot => !slot.mesh.userData.terrainMaterialBakeGpu && !slot.materialBake),
           boost: actual.player.explorationBoost === true,
           history: actual.undoStack.length === expected.undoStack.length && actual.redoStack.length === expected.redoStack.length,
           canvases: document.querySelectorAll('canvas[aria-label="Drusniel World infinite world editor viewport"]').length,
@@ -135,7 +158,8 @@ try {
         e.controller.redo(); result.futureRedo = e.controller.tileMap.get(2, 2) === window.__recoveryTiles.redoAfter;
         window.__restoreStartupWait?.(); return result;
       });
-      for (const key of ['document', 'workshop', 'origin', 'mode', 'player', 'boost', 'history', 'undo', 'redo', 'futureRedo']) {
+      for (const key of ['document', 'workshop', 'origin', 'mode', 'player', 'playerPosition', 'playerPhysics',
+        'bakePipelineDisabled', 'boost', 'history', 'undo', 'redo', 'futureRedo']) {
         assert.equal(result.state[key], true, `${scenario}: ${key}`);
       }
       assert.equal(result.state.attempts, 2); assert.equal(result.state.canvases, 1);

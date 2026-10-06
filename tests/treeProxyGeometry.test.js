@@ -27,6 +27,22 @@ function disposeProxy(proxy) {
   }
 }
 
+test('snow-painted crowns stay pale in the loading proxy instead of becoming green', () => {
+  const parts = [
+    { kind: 'trunk', geometry: new THREE.CylinderGeometry(0.2, 0.3, 3) },
+    { kind: 'leaf', geometry: new THREE.ConeGeometry(1, 4) },
+  ];
+  const leaf = parts[1].geometry;
+  leaf.translate(0, 3, 0);
+  const colors = new Float32Array(leaf.attributes.position.count * 3).fill(0.8);
+  leaf.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const proxy = createTreeProxyPrototype(parts, PROXY_CONFIG);
+  try {
+    const color = proxy.proxyParts.find(part => part.kind === 'leaf').material.color;
+    assert.ok(Math.abs(color.r - 0.8) < 1e-6 && Math.abs(color.g - 0.8) < 1e-6 && Math.abs(color.b - 0.8) < 1e-6);
+  } finally { disposeProxy(proxy); parts.forEach(part => part.geometry.dispose()); }
+});
+
 test('tree proxies keep branch extents out of the low-LOD trunk diameter', () => {
   const prototypes = createForestSpeciesPrototypeGeometry(FOREST_GENERATED_SPECIES);
   try {

@@ -54,11 +54,11 @@ export function createPowderGeometry(slots, puffsPerKick, random = Math.random) 
  * draw of collapsed quads, and the mesh hides once the last kick has settled.
  */
 export class SnowPowderKicks {
-  constructor({ scene, config = {} }) {
+  constructor({ scene, config = {}, sunDirection = null }) {
     this.config = { ...DEFAULT_SNOW_POWDER, ...config };
     this.uniforms = createSnowPowderUniforms(this.config.slots);
     this.geometry = createPowderGeometry(this.config.slots, this.config.puffsPerKick);
-    this.material = createSnowPowderMaterial(this.uniforms, this.config);
+    this.material = createSnowPowderMaterial(this.uniforms, this.config, sunDirection);
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.name = 'stylized-snow-powder';
     this.mesh.frustumCulled = false;

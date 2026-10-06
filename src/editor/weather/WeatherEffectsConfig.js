@@ -6,6 +6,7 @@ export const DEFAULT_WEATHER_EFFECTS = Object.freeze({
     dropWidth: 0.0126, opacity: 2, colorLinear: Object.freeze([0.78, 0.86, 1]),
   }),
   snowfall: Object.freeze({
+    regionalIntensity: 1, regionalMinCoverage: 0.2, regionalFullCoverage: 0.7, regionalFadeRate: 1.2,
     count: 12000, top: 16.2, bottom: -3.6, speed: 1.224,
     swayRadius: 0.504, swayFrequency: 0.6, turbulence: 0.396,
     opacity: 0.95, color: '#dae6f6', gustStrength: 0.45, gustPeriod: 11,
@@ -51,6 +52,13 @@ export function resolveWeatherEffects(source = {}) {
   rain.colorLinear.forEach(value => number(value, 'weatherEffects.rain.colorLinear', 0, 1));
   for (const key of ['swayRadius', 'swayFrequency']) number(snowfall[key], `weatherEffects.snowfall.${key}`, 0, 10);
   number(snowfall.opacity, 'weatherEffects.snowfall.opacity', 0, 1);
+  for (const key of ['regionalIntensity', 'regionalMinCoverage', 'regionalFullCoverage']) {
+    number(snowfall[key], `weatherEffects.snowfall.${key}`, 0, 1);
+  }
+  number(snowfall.regionalFadeRate, 'weatherEffects.snowfall.regionalFadeRate', 0.01, 20);
+  if (snowfall.regionalFullCoverage <= snowfall.regionalMinCoverage) {
+    throw new Error('weatherEffects.snowfall.regionalFullCoverage must exceed regionalMinCoverage.');
+  }
   number(snowfall.gustStrength, 'weatherEffects.snowfall.gustStrength', 0, 0.95);
   number(snowfall.gustPeriod, 'weatherEffects.snowfall.gustPeriod', 0.1, 120);
   if (!/^#[0-9a-f]{6}$/i.test(snowfall.color)) throw new Error('weatherEffects.snowfall.color must be a hex colour.');

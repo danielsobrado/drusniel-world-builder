@@ -34,7 +34,8 @@ and immediate fallback for unloaded one-shots remain in place.
 
 ## Configuration and lint
 
-Vite compiles `*.yaml?compiled` into data modules using js-yaml’s JSON schema.
+Vite compiles `*.yaml?compiled` into data modules using js-yaml’s default schema,
+preserving anchor merges and explicit override precedence from the former parser.
 YAML files remain the editable source, with development watch invalidation.
 The config loader clones data before applying existing validation and runtime
 overrides. Browser startup no longer parses these configuration files as YAML.
@@ -75,11 +76,12 @@ WebGPU retains the full baked material graph.
 
 `npm run qa:recovery` exercises a real second device loss and loss during restart.
 It verifies backend selection, document/workshop state, player mode, speed mode,
-undo/redo and canvas ownership. It also checks actual keyboard toggles, MP3
-loading and HRTF panner motion. Use native Windows Node from WSL for hardware
+player coordinates and physics, undo/redo, disabled WebGL bake pipelines and
+canvas ownership. It also checks input from the focused Play button, keyboard
+toggles, MP3 loading and HRTF panner motion. Use native Windows Node from WSL for hardware
 browser tests, as described in `docs/perf-qa.md`.
 
-## Validation
+## Initial validation — 2026-10-05
 
 - Lint, generated UI check, production asset validation and production build pass.
 - All 30 focused checks pass, covering compiled YAML, surf/seams/direction,
@@ -99,7 +101,7 @@ Reports are in `tmp/gods-end-six-parity/report.json` and
 `tmp/gods-end-six-recovery/report.json`. The two initial baseline movement runs settled and measured 135.21 / 150.03 FPS,
 with p95 frame times of 12.2 / 8.8 ms and passing collision gates.
 
-**Performance comparison pending.** Subsequent movement captures did not settle
+**Initial performance comparison blocked.** Subsequent movement captures did not settle
 within 120 seconds; vegetation remained pending. The same happened with
 `seaPolish=0`. DuneSandbox started immediately before those captures; Windows
 GPU-engine counters measured about 84% utilization from that process, and total
@@ -108,8 +110,8 @@ measurements. Do not use their frame rates to claim a speedup or regression.
 The later separate-worktree browser control also had asset-serving errors and
 is invalid; only the original two error-free baseline captures are accepted.
 
-After the competing GPU workload is stopped, rerun two ordinary captures,
-boosted travel and the full matrix:
+The requested follow-up was two ordinary captures, boosted travel and the full
+matrix after the competing GPU workload stopped:
 
 ```sh
 npm run qa:perf:windows -- --url http://127.0.0.1:5183 --qa chunk-cross --warmup 8 --duration 12 --settle
@@ -119,6 +121,87 @@ node.exe "$(wslpath -w scripts/run-perf-matrix.mjs)" --url http://127.0.0.1:5183
 ```
 
 Accept movement statistics only when `scenario.settle.settled` is true, hardware
-WebGPU is identified, and browser errors are zero. The full matrix and boosted
-movement timings remain unverified; the boosted not-ready collision policy is
+WebGPU is identified, and browser errors are zero. At that stage, the full matrix and boosted
+movement timings were unverified; the boosted not-ready collision policy was
 covered by the physics test.
+
+
+## Review fixes and validation — 2026-10-06
+
+Three review findings are fixed:
+
+- A focused Play button accepts movement, jumping and double-tap Shift after
+  pointer capture. Editable controls and blocked UI retain their input guards.
+- The stylized surface uses the terrain renderer's resolved backend profile,
+  so WebGL fallback disables bake workers, cache and GPU bridge together.
+- Compiled YAML resolves anchor merges with the former parser's precedence,
+  including explicit overrides.
+
+The input and YAML regressions fail before the fixes and pass afterward.
+All 26 focused checks pass. Lint, generated UI checks, production asset
+validation and the production build pass. The full suite reports 6,304 passing
+and 21 failing tests; the identical 21 failure names reproduce on untouched
+revision `1a6246e` in a separate worktree.
+
+Both hardware recovery scenarios pass on NVIDIA Lovelace with zero browser
+errors. They verify actual Play-button input and preserve exact player
+coordinates and physics from a paused airborne pose, alongside the existing
+state/history checks. Both end on WebGL with no bake runtime, bridge or GPU bake
+slots. Report: `tmp/gods-end-review-recovery/report.json`.
+
+Browser validation uses an isolated checkout of `1a6246e` plus the three runtime
+fixes, avoiding reloads and rendering changes from concurrent snow work. The
+checkout shares dependencies and missing local assets; its temporary Vite
+configuration permits the shared texture decoder files.
+
+The two ordinary follow-up movement captures settle and pass collision gates
+with zero browser errors. They use the same 1280 × 720 hardware WebGPU viewport,
+8 s warmup and 12 s measurement as the current-revision baseline captures.
+
+| Capture | FPS | Frame p95 | Hitches >33.3 ms |
+|---------|-----|-----------|------------------|
+| Baseline 1 | 138.16 | 9.1 ms | 0 |
+| Baseline 2 | 154.56 | 8.7 ms | 0 |
+| Review fixes 1 | 145.13 | 11.0 ms | 4 (0.23%) |
+| Review fixes 2 | 157.00 | 8.5 ms | 0 |
+
+These small samples do not establish a speedup. Both follow-up captures pass the
+matrix's 33.3 ms p95 and 2% hitch-rate limits. Reports are
+`tmp/gods-end-review-before-{1,2}.json` and
+`tmp/gods-end-review-after-{1,2}.json`.
+
+Boosted chunk crossing also settles with zero browser errors and passing
+collision gates: 117.44 FPS, 13.965 ms p95 and three hitches (0.21%). The report
+records `explorationBoost: true` and effective walk speed 27 m/s, confirming the
+configured 3× multiplier is active. Report: `tmp/gods-end-review-boosted.json`.
+
+The matrix's five movement cases all settle, use hardware WebGPU, record zero
+browser errors and pass collision gates. High grass and dense mixed exceed the
+2% hitch-rate limit, so the matrix is not a passing performance acceptance.
+
+| Density / scenario | FPS | Frame p95 | Hitch rate |
+|--------------------|-----|-----------|------------|
+| Standard | 156.57 | 8.500 ms | 0.05% |
+| Dense forest | 148.78 | 9.090 ms | 0.06% |
+| High grass | 109.15 | 20.525 ms | **3.29%** |
+| Dense mixed | 106.59 | 19.360 ms | **3.13%** |
+| Construction ring | 104.64 | 13.500 ms | 0.24% |
+
+Construction retains 96 modules and 426 stones. The largest high-grass stall is
+428.6 ms, with 426.9 ms recorded in the render phase; this evidence does not
+identify a particular shader or GPU operation as its cause.
+
+Water acceptance passes every gate: dry → swim → dive → surface → dry, stable
+water-body identity, origin stability, active/bounded caustics, frame p95 and
+hitch rate. The archived matrix and full case reports are
+`tmp/gods-end-review-matrix.json` and `tmp/gods-end-review-matrix-data/`.
+
+High grass repeats at 108.40 FPS, 15.62 ms p95 and 2.85% hitches (37).
+Removing all three review runtime fixes from the isolated checkout reproduces
+the failure on `1a6246e`: 106.10 FPS, 15.97 ms p95 and 3.22% hitches (41).
+Both settle in about 44 s, record zero browser errors and pass collision gates.
+This establishes that the high-grass stress failure predates these review fixes;
+it does not attribute it to a particular shader or to the original ports.
+Reports: `tmp/gods-end-review-high-grass-repeat.json` and
+`tmp/gods-end-review-high-grass-baseline.json`. Dense mixed was not separately
+retested on the unchanged baseline. The initial matrix remains a failed result.

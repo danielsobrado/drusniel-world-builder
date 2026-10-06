@@ -2,6 +2,7 @@ import {
   Fn,
   If,
   cameraPosition,
+  cameraWorldMatrix,
   clamp,
   cross,
   dot,
@@ -22,10 +23,12 @@ import {
   uniform,
   vec2,
   vec3,
+  vec4,
 } from 'three/tsl';
 import { latticeHashNode } from '../weather/wind/windNoise.js';
 import { directionFromAngles } from './StylizedGodRaysPostProcess.js';
 import { skyLightUniforms } from './sky/skyLight.js';
+import { resolveSnowSurfaceConfig } from './SnowSurfaceConfig.js';
 
 /**
  * What a lit material leaves out of snow (after grass-test's snow shading,
@@ -89,6 +92,9 @@ export function createSnowSurfaceNodes({
   snow,
   stylizedConfig,
   sunDirection = null,
+  baseNormal = null,
+  pathMask = float(0),
+  settings = resolveSnowSurfaceConfig(stylizedConfig?.snowSurface),
 }) {
   const sky = stylizedConfig?.sky;
   const sunVector = directionFromAngles(sky?.sunElevation ?? 10, sky?.sunAzimuth ?? 258);
@@ -98,7 +104,7 @@ export function createSnowSurfaceNodes({
   const sun = sunDirection
     ? normalize(uniform(sunDirection))
     : vec3(sunVector.x, sunVector.y, sunVector.z);
-  const normal = normalize(normalWorld);
+  const normal = normalize(baseNormal ? cameraWorldMatrix.mul(vec4(baseNormal, 0)).xyz : normalWorld).toVar();
   const view = normalize(cameraPosition.sub(positionWorld));
   const halfVector = normalize(view.add(sun));
 
@@ -111,12 +117,13 @@ export function createSnowSurfaceNodes({
   const footprint = length(fwidth(localMeters));
   const graze = float(1).sub(clamp(dot(normal, view), 0, 1)).pow(3);
   const facingSun = clamp(dot(normal, sun), 0, 1);
-  const lightGate = smoothstep(0.02, 0.35, facingSun);
+  const lightGate = smoothstep(0.02, 0.35, facingSun)
+    .mul(smoothstep(0.55, 0.95, facingSun).mul(0.55).oneMinus());
   // Ten integer hashes per pixel: only snow pays them, and snowless regions
   // branch coherently past the block.
   const glints = Fn(() => {
     const result = float(0).toVar();
-    If(snow.greaterThan(0.02), () => {
+    If(snow.greaterThan(0.02).and(normal.y.greaterThanEqual(-1)).and(footprint.greaterThanEqual(0)), () => {
       const fine = glintOctave({
         localMeters, originMeters, cellMeters: FINE_CELL_METERS, salt: 11, normal, halfVector, sharpness: 780,
       }).mul(float(1).sub(smoothstep(FINE_CELL_METERS * 0.55, FINE_CELL_METERS * 2.2, footprint)));
@@ -131,6 +138,14 @@ export function createSnowSurfaceNodes({
 
   const shade = float(1).sub(smoothstep(0.05, 0.6, max(dot(normal, sun), 0)));
   const backscatter = snow.mul(shade).mul(0.35);
+  // Backlit powder transmits a small blue lobe. Use direct light radiance so
+  // ambient light alone cannot make the ground glow when the sun is gone.
+  const thickness = mix(float(1), float(0.35), pathMask.clamp(0, 1));
+  const transmitted = normalize(sun.add(normal.mul(0.28)));
+  const lobe = dot(view, transmitted.negate()).clamp(0, 1)
+    .pow(mix(float(3), float(9), thickness)).mul(mix(float(1), float(0.3), thickness));
+  const transmissionTint = mix(vec3(0.94, 0.965, 1), vec3(0.55, 0.72, 1), thickness);
+  const subsurface = transmissionTint.mul(lobe).mul(settings.subsurfaceStrength).mul(snow);
 
   return {
     /** Cool blue on snow turned from the sun. */
@@ -141,6 +156,6 @@ export function createSnowSurfaceNodes({
      * Sparkle, added as emission so it survives the lit shading — and so it
      * takes the sky's light itself (1 in the configured look, dim at night).
      */
-    emissive: vec3(glints.mul(2.2).mul(skyLightUniforms.brightness)),
+    emissive: vec3(glints.mul(2.2)).add(subsurface).mul(skyLightUniforms.sunColor),
   };
 }

@@ -11,7 +11,7 @@ import {
 } from '../src/editor/weather/snowfall/SnowfallField.js';
 import { REGIONAL_SNOW_INTENSITY, SnowWeatherSystem } from '../src/editor/weather/snow_system.js';
 
-test('every population thins alike as intensity drops', () => {
+test('the seeded flake populations share one quad and retain their size and appearance profiles', () => {
   const geometry = createSnowfallGeometry(SNOWFALL_POPULATIONS, () => 0.5);
   const seeds = geometry.attributes.snowSeed;
   const shapes = geometry.attributes.snowShape;
@@ -47,19 +47,38 @@ test('the drift integrates the wind, so a gust never jumps the field', () => {
   field.dispose();
 });
 
-test('snow country snows lightly with the weather off, and weather snow only adds', () => {
+test('coverage-driven snow fades in with the weather off, and weather snow only adds', () => {
   const scene = new THREE.Scene();
   const snow = new SnowWeatherSystem({ scene, isWebGpu: true });
   snow.applySettings({ enabled: false, intensity: 0.7, windX: 0, windZ: 0 });
   assert.equal(snow.group.visible, false);
   snow.setRegionalSnow(1);
+  assert.equal(snow.group.visible, false, 'regional snow starts through the update fade');
+  snow.update(0.1, 0.1, new THREE.Vector3());
   assert.equal(snow.group.visible, true);
+  assert.ok(snow.snowMaterial.uniforms.intensity.value > 0 && snow.snowMaterial.uniforms.intensity.value < 0.2);
+  for (let frame = 2; frame <= 60; frame++) snow.update(0.1, frame / 10, new THREE.Vector3());
   assert.equal(snow.snowMaterial.uniforms.intensity.value, REGIONAL_SNOW_INTENSITY);
   snow.applySettings({ enabled: true, intensity: 1.2, windX: 0, windZ: 0 });
   assert.equal(snow.snowMaterial.uniforms.intensity.value, 1.2);
   snow.applySettings({ enabled: false, intensity: 1.2, windX: 0, windZ: 0 });
   snow.setRegionalSnow(0);
+  for (let frame = 61; frame <= 120; frame++) snow.update(0.1, frame / 10, new THREE.Vector3());
   assert.equal(snow.group.visible, false);
   assert.equal(snow.getStats().flakes, 0);
+  snow.dispose();
+});
+
+test('regional coverage thresholds and intensity are configurable without changing the flake budget', () => {
+  const snow = new SnowWeatherSystem({ scene: new THREE.Scene(), isWebGpu: true,
+    snowfall: { regionalIntensity: 0.5, regionalMinCoverage: 0.2, regionalFullCoverage: 0.7 } });
+  const count = snow.flakeCount;
+  snow.setRegionalSnow(0.1);
+  snow.update(0.1, 0.1, new THREE.Vector3());
+  assert.equal(snow.group.visible, false);
+  snow.setRegionalSnow(0.6);
+  for (let frame = 1; frame <= 60; frame++) snow.update(0.1, frame / 10, new THREE.Vector3());
+  assert.ok(Math.abs(snow.effectiveIntensity() - 0.448) < 0.002);
+  assert.equal(snow.flakeCount, count);
   snow.dispose();
 });

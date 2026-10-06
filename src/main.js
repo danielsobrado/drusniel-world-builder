@@ -455,7 +455,7 @@ async function initializeEditor(restoreState, resources, startup) {
   const stylizedSurface = new StylizedSurfaceView({
     terrainView,
     objectMap,
-    config: config.stylizedSurface,
+    config: terrainView.stylizedConfig,
     baseUrl: import.meta.env.BASE_URL,
     biomeAssetPalette,
     // The snow band lives in the world's own configuration, so it is handed down
@@ -982,6 +982,7 @@ async function initializeEditor(restoreState, resources, startup) {
   const snowPowder = new SnowPowderKicks({
     scene: terrainView.scene,
     config: config.stylizedSurface.snowPowder,
+    sunDirection: terrainView.godRays.sunDirection,
   });
   resources.own(snowPowder);
   const weatherOvercast = () => {

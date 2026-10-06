@@ -5,6 +5,7 @@ import { resolveFrost } from '../editor/stylized/ambient/FrostShading.js';
 import { resolveValleyFogConfig } from '../editor/stylized/mist/valleyFogConfig.js';
 import { resolveMeadowGrassConfig } from '../editor/stylized/meadow/meadowGrassConfig.js';
 import { resolveCinematicFinish } from '../editor/stylized/cinematicFinish.js';
+import { resolveSnowSurfaceConfig } from '../editor/stylized/SnowSurfaceConfig.js';
 
 function assertBoolean(value, path) {
   if (typeof value !== 'boolean') {
@@ -541,6 +542,7 @@ function assertStrandBand(band, path) {
 export function validateStylizedLodConfig(config) {
   const surface = config.stylizedSurface;
   if (!surface?.enabled) return config;
+  resolveSnowSurfaceConfig(surface.snowSurface);
   const preparedPlacementCache = surface.preparedPlacementCache;
   if (preparedPlacementCache?.maxEntries !== undefined) {
     assertPositiveInteger(

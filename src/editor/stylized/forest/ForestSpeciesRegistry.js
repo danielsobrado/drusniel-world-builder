@@ -85,6 +85,7 @@ export class ForestSpeciesRegistry {
     prototypeCount = 1,
     prototypeIndexBySpecies = null,
     prototypeTileIds = null,
+    prototypePreferredTileIds = null,
     groveMix = DEFAULT_GROVE_MIX,
   } = {}) {
     this.species = new Map();
@@ -107,6 +108,7 @@ export class ForestSpeciesRegistry {
     // characterful tree is confined to the biomes it belongs in without giving
     // it a species of its own.
     this.prototypeTileIds = prototypeTileIds?.size > 0 ? prototypeTileIds : null;
+    this.prototypePreferredTileIds = prototypePreferredTileIds?.size > 0 ? prototypePreferredTileIds : null;
     this.prototypeTileCache = new Map();
     this.groveMix = Math.min(1, Math.max(0, Number(groveMix) || 0));
     this.signature = JSON.stringify({
@@ -120,27 +122,34 @@ export class ForestSpeciesRegistry {
       prototypeTileIds: this.prototypeTileIds
         ? [...this.prototypeTileIds.entries()].map(([index, tiles]) => [index, [...tiles]])
         : null,
+      prototypePreferredTileIds: this.prototypePreferredTileIds
+        ? [...this.prototypePreferredTileIds.entries()].map(([index, tiles]) => [index, [...tiles]])
+        : null,
     });
   }
 
   /**
    * Prototype indices able to render `speciesId` in `tileId`, in ascending
-   * order. A restriction that would leave the species with nothing is ignored
+   * order, preferring authored specialists for that biome when available.
+   * A restriction that would leave the species with nothing is ignored
    * rather than applied, so a tree always has something to draw.
    */
   prototypesFor(speciesId, tileId = null) {
     if (!this.prototypeIndexBySpecies) return null;
     const configured = this.prototypeIndexBySpecies.map.get(speciesId);
     const indices = configured?.length > 0 ? configured : this.prototypeIndexBySpecies.fallback;
-    if (!this.prototypeTileIds || tileId === null || tileId === undefined) return indices;
+    if ((!this.prototypeTileIds && !this.prototypePreferredTileIds) || tileId === null || tileId === undefined) return indices;
     const cacheKey = `${speciesId}:${tileId}`;
     const cached = this.prototypeTileCache.get(cacheKey);
     if (cached) return cached;
     const allowed = indices.filter((index) => {
-      const tiles = this.prototypeTileIds.get(index);
+      const tiles = this.prototypeTileIds?.get(index);
       return !tiles || tiles.has(tileId);
     });
-    const result = allowed.length > 0 ? allowed : indices;
+    // Biome specialists replace generic prototypes without changing species,
+    // morphology, or instance pools. Preferences never bypass eligibility.
+    const preferred = allowed.filter(index => this.prototypePreferredTileIds?.get(index)?.has(tileId));
+    const result = preferred.length > 0 ? preferred : allowed.length > 0 ? allowed : indices;
     this.prototypeTileCache.set(cacheKey, result);
     return result;
   }
