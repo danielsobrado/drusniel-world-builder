@@ -30,6 +30,7 @@ class MeadowBandBatch {
     this.stride = Math.max(1, template.instanceCount);
     this.slots = new Map();
     this.free = [];
+    this.freeSet = new Set();
     this.used = 0;
     this.present = new Set();
     this.geometry = this.createGeometry(MIN_SLOTS);
@@ -124,36 +125,41 @@ class MeadowBandBatch {
       if (!dirty) { this.clearUpdateRanges(); dirty = true; }
       this.writeSlot(slot.index, null);
       this.free.push(slot.index);
+      this.freeSet.add(slot.index);
       this.slots.delete(tile);
     }
     for (const tile of tiles) {
-      const key = `${tile.buildId}:${tile.renderX}:${tile.renderZ}`;
       let slot = this.slots.get(tile);
-      if (slot?.key === key) continue;
+      if (slot
+          && slot.buildId === tile.buildId
+          && slot.renderX === tile.renderX
+          && slot.renderZ === tile.renderZ) {
+        continue;
+      }
       if (!slot) {
-        // Lowest free slot first keeps the drawn range short.
         let index;
-        if (this.free.length) {
-          this.free.sort((a, b) => a - b);
-          index = this.free.shift();
-        } else {
+        while (this.free.length && index === undefined) {
+          const candidate = this.free.pop();
+          if (this.freeSet.delete(candidate) && candidate < this.used) index = candidate;
+        }
+        if (index === undefined) {
           if (this.used === this.slotCapacity) this.grow();
           index = this.used;
           this.used += 1;
         }
-        slot = { index, key };
+        slot = { index, buildId: -1, renderX: Number.NaN, renderZ: Number.NaN };
         this.slots.set(tile, slot);
       }
-      slot.key = key;
+      slot.buildId = tile.buildId;
+      slot.renderX = tile.renderX;
+      slot.renderZ = tile.renderZ;
       if (!dirty) { this.clearUpdateRanges(); dirty = true; }
       this.writeSlot(slot.index, tile);
     }
     if (dirty) {
-      // Trailing free slots stop being drawn.
-      this.free.sort((a, b) => a - b);
-      while (this.used > 0 && this.free[this.free.length - 1] === this.used - 1) {
-        this.free.pop();
-        this.used -= 1;
+      while (this.used > 0 && this.freeSet.delete(this.used - 1)) this.used -= 1;
+      if (this.free.length > this.freeSet.size * 2 + 64) {
+        this.free = [...this.freeSet];
       }
       this.geometry.instanceCount = this.used * this.stride;
     }
