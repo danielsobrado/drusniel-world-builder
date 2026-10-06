@@ -59,15 +59,18 @@ export function parseCellKey(key) {
   return parseChunkKey(key);
 }
 
-export function cellToChunk(cellX, cellZ, chunkSize) {
+export function writeCellToChunk(cellX, cellZ, chunkSize, target) {
   assertSafeCellCoordinate(cellX, 'cellX');
   assertSafeCellCoordinate(cellZ, 'cellZ');
-  return Object.freeze({
-    chunkX: floorDiv(cellX, chunkSize),
-    chunkZ: floorDiv(cellZ, chunkSize),
-    localX: positiveModulo(cellX, chunkSize),
-    localZ: positiveModulo(cellZ, chunkSize),
-  });
+  target.chunkX = floorDiv(cellX, chunkSize);
+  target.chunkZ = floorDiv(cellZ, chunkSize);
+  target.localX = positiveModulo(cellX, chunkSize);
+  target.localZ = positiveModulo(cellZ, chunkSize);
+  return target;
+}
+
+export function cellToChunk(cellX, cellZ, chunkSize) {
+  return Object.freeze(writeCellToChunk(cellX, cellZ, chunkSize, {}));
 }
 
 export function vertexToChunk(vertexX, vertexZ, chunkSize) {
@@ -96,7 +99,7 @@ export function chunkCellBounds(chunkX, chunkZ, chunkSize) {
   return Object.freeze({ minX, minZ, maxX, maxZ });
 }
 
-export function worldToCell(worldX, worldZ, tileSize) {
+export function writeWorldToCell(worldX, worldZ, tileSize, target) {
   if (!Number.isFinite(worldX) || !Number.isFinite(worldZ)) {
     throw new Error('World position must be finite.');
   }
@@ -105,7 +108,27 @@ export function worldToCell(worldX, worldZ, tileSize) {
   const z = Math.floor(-worldZ / tileSize);
   assertSafeCellCoordinate(x, 'cellX');
   assertSafeCellCoordinate(z, 'cellZ');
-  return Object.freeze({ x, z });
+  target.x = x;
+  target.z = z;
+  return target;
+}
+
+export function worldToCell(worldX, worldZ, tileSize) {
+  return Object.freeze(writeWorldToCell(worldX, worldZ, tileSize, {}));
+}
+
+export function writeWorldToChunk(worldX, worldZ, tileSize, chunkSize, target) {
+  if (!Number.isFinite(worldX) || !Number.isFinite(worldZ)) {
+    throw new Error('World position must be finite.');
+  }
+  assertPositiveFiniteTileSize(tileSize);
+  const cellX = Math.floor(worldX / tileSize);
+  const cellZ = Math.floor(-worldZ / tileSize);
+  assertSafeCellCoordinate(cellX, 'cellX');
+  assertSafeCellCoordinate(cellZ, 'cellZ');
+  target.chunkX = floorDiv(cellX, chunkSize);
+  target.chunkZ = floorDiv(cellZ, chunkSize);
+  return target;
 }
 
 /** Where a world position falls in cell space before `worldToCell` floors it. */
