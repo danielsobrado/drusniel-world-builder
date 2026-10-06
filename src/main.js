@@ -948,18 +948,22 @@ async function initializeEditor(restoreState, resources, startup) {
       paused: skyCycleConfig.paused,
     })
     : null;
+  const fallingLeavesOrigin = { x: 0, z: 0 };
+  const snowCountryOrigin = { x: 0, z: 0 };
+  const soundscapeOrigin = { x: 0, z: 0 };
+  const weatherOrigin = { x: 0, z: 0 };
   const fallingLeaves = new FallingLeaves({
     scene: terrainView.scene,
     config: config.stylizedSurface.fallingLeaves,
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),
     getTileSize: () => config.map.tileSize,
-    getOrigin: () => terrainView.floatingOrigin.getState(),
+    getOrigin: () => terrainView.floatingOrigin.readState(fallingLeavesOrigin),
   });
   resources.own(fallingLeaves);
   const snowCountry = new SnowCountryWeight({
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),
     getTileSize: () => config.map.tileSize,
-    getOrigin: () => terrainView.floatingOrigin.getState(),
+    getOrigin: () => terrainView.floatingOrigin.readState(snowCountryOrigin),
     getGroundHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
     snowLine: config.stylizedSurface.materialBake.classification.snowLine,
     snowFade: config.stylizedSurface.materialBake.classification.snowFade,
@@ -991,13 +995,13 @@ async function initializeEditor(restoreState, resources, startup) {
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),
     getTileSize: () => config.map.tileSize,
     getSeaLevel: () => worldStore.generator?.seaLevel ?? 0,
-    getOrigin: () => terrainView.floatingOrigin.getState(),
+    getOrigin: () => terrainView.floatingOrigin.readState(soundscapeOrigin),
     getWeather: weatherAudioLevels,
     isNight: () => Boolean(skyLooks?.night),
     getWaterKind: (x, z) => worldStore.generator?.sampleWater?.(x / config.map.tileSize, -z / config.map.tileSize)?.kind ?? 0,
     getSnowCountry: () => snowCountry.value,
     isUnderwater: () => viewModeController.mode === PLAYER_MODE_WALK
-      && Boolean(playerController.getStatus().headSubmerged),
+      && playerController.isHeadSubmerged(),
     getFallSites: fallSites,
   });
   resources.own(worldSoundscape);
@@ -1009,7 +1013,7 @@ async function initializeEditor(restoreState, resources, startup) {
       worldCells: 1e9,
       samplers: createWeatherTerrainSamplers(terrainView),
       effects: config.weatherEffects,
-      getOrigin: () => terrainView.floatingOrigin.getState(),
+      getOrigin: () => terrainView.floatingOrigin.readState(weatherOrigin),
       getSettings: () => weatherSettings,
       getCamera: () => viewModeController.camera,
       getSunDirection: () => stylizedSurface.skyView?.sunDirectionValue ?? undefined,
