@@ -122,3 +122,30 @@ test('setUiBlocked preserves pose and enabled mode', () => {
   assert.equal(controller.pitch, 0.1);
   dispose();
 });
+
+
+test('readFrameStatus reuses caller-owned frame state', () => {
+  const { controller, dispose } = createController();
+  controller.setPose({ x: 12, z: -8, yaw: 1.2, pitch: 0.1 });
+  controller.state.footY = 3.5;
+  controller.state.headSubmerged = true;
+  const status = { position: { x: 0, y: 0, z: 0 } };
+  const position = status.position;
+
+  assert.strictEqual(controller.readFrameStatus(status), status);
+  assert.strictEqual(status.position, position);
+  assert.equal(status.position.x, 12);
+  assert.equal(status.position.z, -8);
+  assert.equal(status.footY, 3.5);
+  assert.equal(status.yaw, 1.2);
+  assert.equal(status.pitch, 0.1);
+  assert.equal(status.headSubmerged, true);
+  assert.equal(controller.isHeadSubmerged(), true);
+
+  controller.setPose({ x: 4, z: 6, yaw: 0.2, pitch: -0.1 });
+  assert.strictEqual(controller.readFrameStatus(status), status);
+  assert.strictEqual(status.position, position);
+  assert.equal(status.position.x, 4);
+  assert.equal(status.position.z, 6);
+  dispose();
+});
