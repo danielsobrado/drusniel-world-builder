@@ -109,18 +109,19 @@ export class MeadowTileLayer {
   }
 
   updateLayoutState(camera, origin, groundRevision) {
-    const next = [
-      Math.round(camera.x * CAMERA_POSITION_QUANTIZATION),
-      Math.round(camera.z * CAMERA_POSITION_QUANTIZATION),
-      origin.x,
-      origin.z,
-      groundRevision,
-    ];
-    let changed = false;
-    for (let index = 0; index < next.length; index += 1) {
-      if (this.layoutState[index] !== next[index]) changed = true;
-      this.layoutState[index] = next[index];
-    }
+    const cameraX = Math.round(camera.x * CAMERA_POSITION_QUANTIZATION);
+    const cameraZ = Math.round(camera.z * CAMERA_POSITION_QUANTIZATION);
+    const state = this.layoutState;
+    const changed = state[0] !== cameraX
+      || state[1] !== cameraZ
+      || state[2] !== origin.x
+      || state[3] !== origin.z
+      || state[4] !== groundRevision;
+    state[0] = cameraX;
+    state[1] = cameraZ;
+    state[2] = origin.x;
+    state[3] = origin.z;
+    state[4] = groundRevision;
     return changed;
   }
 
