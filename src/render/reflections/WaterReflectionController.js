@@ -41,6 +41,7 @@ export class WaterReflectionController {
     this.planarWetSlots = [];
     this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
     this.captureScratch = { states: [], shadows: [] };
+    this.originScratch = { x: 0, z: 0 };
     this.lastCaptureCpuMs = 0;
   }
 
@@ -72,7 +73,8 @@ export class WaterReflectionController {
     if (this.disposed || this.capturing) return;
     if (isLandStreamingSuspended()) { this.invalidate(); return; }
     if (this.planarValid.value && camera.position.y <= this.planarHeight.value + 0.1) this.planarValid.value = 0;
-    const origin = this.view.floatingOrigin.getState();
+    const origin = this.view.floatingOrigin.readState?.(this.originScratch)
+      ?? this.view.floatingOrigin.getState();
     if (this.generator !== this.view.worldStore.generator || this.lastOrigin?.x !== origin.x || this.lastOrigin?.z !== origin.z) {
       this.invalidate();
       this.generator = this.view.worldStore.generator;
