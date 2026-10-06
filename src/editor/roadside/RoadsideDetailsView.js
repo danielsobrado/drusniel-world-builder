@@ -184,7 +184,8 @@ export class RoadsideDetailsView {
         0,
         pending.constructionIds,
       ) ?? pending.constructionIds;
-      const obstructed = [...ids].some((id) => {
+      let obstructed = false;
+      for (const id of ids) {
         let cached = pending.constructionBounds.get(id);
         if (cached === undefined) {
           const record = this.controller.constructionStore?.get(id);
@@ -195,9 +196,12 @@ export class RoadsideDetailsView {
         }
         const b = cached?.bounds;
         const margin = cached?.margin ?? 0;
-        return b && b.minX - margin <= region.maxX && b.maxX + margin >= region.minX
-          && b.minZ - margin <= region.maxZ && b.maxZ + margin >= region.minZ;
-      });
+        if (b && b.minX - margin <= region.maxX && b.maxX + margin >= region.minX
+            && b.minZ - margin <= region.maxZ && b.maxZ + margin >= region.minZ) {
+          obstructed = true;
+          break;
+        }
+      }
       if (obstructed) continue;
       const height = view.worldStore.sampleHeight(detail.cellX, detail.cellZ);
       const slope = Math.max(
