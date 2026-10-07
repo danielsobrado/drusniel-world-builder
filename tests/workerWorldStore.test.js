@@ -19,7 +19,7 @@ class FakeChunkWorker {
     this.baseTerrain = baseTerrain;
   }
 
-  request(chunkX, chunkZ) {
+  request(chunkX, chunkZ, options = {}) {
     this.requestCount += 1;
     return Promise.resolve(generateBaseWorldChunk({
       chunkX,
@@ -27,6 +27,7 @@ class FakeChunkWorker {
       chunkSize: this.chunkSize,
       generator: this.generator,
       baseTerrain: this.baseTerrain,
+      terrainOverrides: options.terrainOverrides,
     }));
   }
 
@@ -110,7 +111,7 @@ test('concurrent requests for one chunk share a single worker job', async () => 
   assert.equal(chunkWorker.disposed, true);
 });
 
-test('sparse overrides are applied after worker generation', async () => {
+test('sparse overrides are resolved during worker generation', async () => {
   const { store } = createStore();
   store.setTile(1, 1, 9);
   store.setHeight(2, 2, 18.5);

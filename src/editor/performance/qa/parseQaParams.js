@@ -43,6 +43,12 @@ const SCENARIOS = Object.freeze({
     label: 'Diagonal run',
     keys: ({ running }) => (running ? ['KeyW', 'KeyD', 'ShiftLeft'] : ['KeyW', 'KeyD']),
   },
+  'edited-world': {
+    id: 'edited-world',
+    label: 'Authored terrain and edit-during-motion',
+    keys: ({ running }) => (running ? ['KeyW', 'KeyD', 'ShiftLeft'] : ['KeyW', 'KeyD']),
+    defaults: { warmup: 8, duration: 12 },
+  },
   'chunk-cross': {
     id: 'chunk-cross',
     label: 'Cross chunk boundaries',
@@ -259,6 +265,7 @@ export function parseQaParams(search = '') {
     running,
     explorationBoost: readBoolean(params, 'explorationBoost', false),
     seaPolish: readBoolean(params, 'seaPolish', true),
+    gpuTimings: readBoolean(params, 'gpuTimings', false),
     hitchMs: Math.max(1, readNumber(params, 'hitchMs', 1000 / 30)),
     autostart: readBoolean(params, 'autostart', true),
     download: readBoolean(params, 'download', true),

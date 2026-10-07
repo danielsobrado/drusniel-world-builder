@@ -1,8 +1,15 @@
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { MeadowPageBounds } from './MeadowPageBounds.js';
 
 export const MEADOW_TILES_PER_PAGE = 4;
+// Dense bands need smaller pages: otherwise first use of a new page allocates
+// and uploads several megabytes in one render, even for a single live tile.
+const PAGE_STEMS = 65536;
+export function meadowPageTileCapacity(stride) {
+  return Math.max(1, Math.min(MEADOW_TILES_PER_PAGE, Math.floor(PAGE_STEMS / stride)));
+}
 const INSTANCE_ATTRIBUTES = Object.freeze([
   ['instancePosition', 'position', 4],
   ['instanceRotation', 'rotation', 2],
@@ -11,14 +18,14 @@ const INSTANCE_ATTRIBUTES = Object.freeze([
 
 /**
  * A persistent small GPU page containing only completed, populated stems.
- * Membership changes repack at most four tiles. Unchanged tile ranges remain
+ * Repacking stays within each affected page. Unchanged tile ranges remain
  * resident; unused capacity never enters the draw. Stem ranks, local positions,
  * wind data and publication fades are copied together without resampling.
  */
 export class MeadowBandBatch {
-  constructor({ scene, template, material, name, renderOrder = 0 }) {
+  constructor({ scene, template, material, name, renderOrder = 0, boundsPadding = null }) {
     this.stride = Math.max(1, template.instanceCount);
-    this.slotCapacity = MEADOW_TILES_PER_PAGE;
+    this.slotCapacity = meadowPageTileCapacity(this.stride);
     this.slots = new Map();
     this.present = new Set();
     this.geometry = new THREE.InstancedBufferGeometry();
@@ -33,9 +40,13 @@ export class MeadowBandBatch {
         new THREE.InstancedBufferAttribute(new Float32Array(capacity * width), width));
     }
     PerfCounters.inc('meadowBufferAllocationBytes', capacity * 14 * 4);
+    this.bounds = boundsPadding === null ? null
+      : new MeadowPageBounds(this.geometry, template.userData.meadow.tileSize, boundsPadding);
     this.mesh = new THREE.Mesh(this.geometry, material);
     this.mesh.name = name;
     this.mesh.renderOrder = renderOrder;
+    // Empty pages have no spatial bounds yet. Bootstrap still compiles their
+    // material through a temporary draw before the first tile is published.
     this.mesh.frustumCulled = false;
     this.mesh.castShadow = false;
     this.mesh.receiveShadow = true;
@@ -98,6 +109,8 @@ export class MeadowBandBatch {
     }
     this.geometry.instanceCount = start;
     this.mesh.visible = start > 0;
+    this.bounds?.update(tiles);
+    this.mesh.frustumCulled = this.bounds !== null && !this.bounds.ground.isEmpty();
     return start;
   }
 

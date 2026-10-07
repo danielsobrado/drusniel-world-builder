@@ -30,6 +30,10 @@ function createPage(chunkX, chunkZ) {
     originZ: chunkZ * CHUNK_SIZE,
     tiles: new Uint8Array(CHUNK_SIZE ** 2),
     heights: new Float32Array((CHUNK_SIZE + 1) ** 2),
+    tilePixels: new Uint8Array(CHUNK_SIZE ** 2 * 4),
+    surfaceMaskPixels: new Uint8Array((CHUNK_SIZE + 1) ** 2 * 4),
+    waterFieldPixels: new Uint16Array((CHUNK_SIZE + 1) ** 2 * 4),
+    waterFlowPixels: new Uint8Array((CHUNK_SIZE + 1) ** 2 * 4),
   };
 }
 

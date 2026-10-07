@@ -62,9 +62,15 @@ export function sampleWorldStoreWater(worldStore, cellX, cellZ) {
   const hasExplicitTileOverrides = worldStore.tileOverrides instanceof Map
     && worldStore.tileOverrides.size > 0;
   const explicitTileOverride = hasExplicitTileOverrides
-    && worldStore.tileOverrides.has(cellKey(tileX, tileZ));
+    && (worldStore.tileOverrides.hasAt
+      ? worldStore.tileOverrides.hasAt(tileX, tileZ)
+      : worldStore.tileOverrides.has(cellKey(tileX, tileZ)));
   const canUseBaseBed = worldStore.heightOverrides instanceof Map
-    && worldStore.heightOverrides.size === 0;
+    && (worldStore.heightOverrides.size === 0 || (worldStore.heightOverrides.hasAt
+      && !worldStore.heightOverrides.hasAt(tileX, tileZ)
+      && !worldStore.heightOverrides.hasAt(tileX + 1, tileZ)
+      && !worldStore.heightOverrides.hasAt(tileX, tileZ + 1)
+      && !worldStore.heightOverrides.hasAt(tileX + 1, tileZ + 1)));
   const bedHeight = canUseBaseBed
     ? base.bedHeight
     : worldStore.sampleHeight(cellX, cellZ);

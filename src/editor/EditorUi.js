@@ -1594,7 +1594,9 @@ export class EditorUi {
 
   renderStreamingStatus(status) {
     if (!status || !this.streamingStatus) return;
-    this.streamingStatus.textContent = `${status.resident}/${status.capacity} terrain chunks · ${status.loading} loading · origin ${Math.round(status.origin.x)},${Math.round(status.origin.z)}`;
+    this.streamingStatus.textContent = status.unavailableReason
+      ? `Terrain streaming paused: ${status.unavailableReason}`
+      : `${status.resident}/${status.capacity} terrain chunks · ${status.loading} loading · origin ${Math.round(status.origin.x)},${Math.round(status.origin.z)}`;
     const focus = this.controller?.getFocusCell?.();
     if (focus) {
       const moved = Math.abs(focus.x - this.minimapCenter.x) > this.minimapCells * 0.2

@@ -1420,6 +1420,9 @@ async function initializeEditor(restoreState, resources, startup) {
     PerfCounters.set('constructionQueueDepth', constructionView.stats.queueDepth);
     PerfCounters.set('constructionStones', constructionView.stats.stones);
     PerfCounters.set('constructionBuildMs', Math.round(constructionView.stats.buildMs));
+    PerfCounters.set('constructionMaxBuildStepMs', constructionView.stats.maxBuildStepMs ?? 0);
+    PerfCounters.set('constructionRecordsResident', constructionView.stats.recordsResident ?? 0);
+    PerfCounters.set('constructionRecordsCandidates', constructionView.stats.recordsCandidates ?? 0);
     PerfCounters.set('constructionModulesNear', constructionView.stats.modulesNear);
     PerfCounters.set('constructionModulesCoarse', constructionView.stats.modulesCoarse);
     PerfCounters.set('constructionModulesShell', constructionView.stats.modulesShell);

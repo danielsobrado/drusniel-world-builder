@@ -37,6 +37,8 @@ test('normal editor runtime has no GPU-to-CPU readback APIs', async () => {
   const violations = [];
   for (const filePath of files) {
     if (filePath === EXPLICIT_BAKER) continue;
+    // Timestamp readback is restricted to explicitly requested QA captures.
+    if (filePath === path.join(EDITOR_ROOT, 'performance', 'qa', 'GpuPassProfiler.js')) continue;
     const source = await readFile(filePath, 'utf8');
     if (READBACK_PATTERN.test(source)) {
       violations.push(path.relative(ROOT, filePath));
@@ -62,4 +64,3 @@ test('tree readback is isolated to explicit impostor bake mode', async () => {
   );
   assert.doesNotMatch(bakerSource, /readRenderTargetPixels\s*\(/);
 });
-

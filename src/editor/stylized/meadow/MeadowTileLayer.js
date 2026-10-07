@@ -16,7 +16,8 @@ import { meadowTileInView } from './meadowTileVisibility.js';
  *  - Builds run nearest-first until the caller's deadline, in slices of
  *    `SLICE_STEMS`, and a tile keeps drawing its previous band until the new one
  *    is ready, so nothing blinks.
- *  - One draw per band.
+ *  - Stable sparse batches avoid copying neighbors; packed dense pages avoid
+ *    drawing unused stems.
  *  - No garbage in steady state: a band's compaction outputs (up to ~0.5 MB each)
  *    are pooled and reused as tiles leave and rebuild. Allocating them fresh
  *    showed up as 40–230 ms collector pauses while running across the meadow.
@@ -41,7 +42,7 @@ export class MeadowTileLayer {
    * @param {object} options.ground MeadowGroundSampler
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0 }) {
+  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null }) {
     this.tileSize = tileSize;
     this.templates = templates;
     this.selectBand = selectBand;
@@ -51,7 +52,7 @@ export class MeadowTileLayer {
     this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
       && definition.cards === definitions[0].cards);
     this.selectPreparationBand = this.stablePrefixes ? selectPreparationBand : null;
-    this.batches = new MeadowGrassBatches({ scene, templates, material, name, renderOrder });
+    this.batches = new MeadowGrassBatches({ scene, templates, material, name, renderOrder, boundsPadding });
     this.tiles = new Map();
     this.pools = new Map(Object.keys(templates).map((band) => [band, []]));
     this.buildSerial = 0;

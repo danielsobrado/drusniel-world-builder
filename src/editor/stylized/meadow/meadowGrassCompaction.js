@@ -23,6 +23,8 @@ export function createCompactionOutput(capacity) {
     rotation: new Float32Array(capacity * 2),
     data: new Float32Array(capacity * 4),
     count: 0,
+    minHeight: Infinity,
+    maxHeight: -Infinity,
   };
 }
 
@@ -42,6 +44,8 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
   };
   const output = recycled ?? createCompactionOutput(template.instanceCount);
   output.count = 0;
+  output.minHeight = previous?.output.minHeight ?? Infinity;
+  output.maxHeight = previous?.output.maxHeight ?? -Infinity;
   const ground = { height: 0, strength: 1, shape: 0, path: 0 };
   const cards = Boolean(template.userData.meadow?.cards);
   const writeWind = createMeadowWindVariationWriter(centerX, centerZ, template.userData.meadow.tileSize);
@@ -52,6 +56,13 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
     output.count = prefix.count;
     for (const [name, width] of [['position', 4], ['rotation', 2], ['data', 4]]) {
       output[name].set(prefix[name].subarray(0, output.count * width));
+    }
+    if (output.count && (!Number.isFinite(output.minHeight) || !Number.isFinite(output.maxHeight))) {
+      for (let i = 0; i < output.count; i += 1) {
+        const height = output.position[i * 4 + 1];
+        output.minHeight = Math.min(output.minHeight, height);
+        output.maxHeight = Math.max(output.maxHeight, height);
+      }
     }
   }
   return {
@@ -75,6 +86,8 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
         const o = output.count;
         output.position[o * 4] = localX;
         output.position[o * 4 + 1] = ground.height;
+        output.minHeight = Math.min(output.minHeight, output.position[o * 4 + 1]);
+        output.maxHeight = Math.max(output.maxHeight, output.position[o * 4 + 1]);
         output.position[o * 4 + 2] = localZ;
         output.position[o * 4 + 3] = ground.strength;
         output.rotation[o * 2] = source.rotation[cursor * 2];

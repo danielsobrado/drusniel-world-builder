@@ -84,7 +84,7 @@ test('modules the LOD sends to another band while queued still get built', () =>
 
 test('a wall first seen from afar gets its masonry when the camera comes close', () => {
   const store = new ConstructionStore();
-  const view = new ConstructionView({ terrainView: createTerrainView(), store, compilerClient: null });
+  const view = new ConstructionView({ terrainView: createTerrainView(), store, compilerClient: null, residencyRadius: 1024 });
   const record = wallRecord();
   store.add(record);
   const plan = planConstruction(record);

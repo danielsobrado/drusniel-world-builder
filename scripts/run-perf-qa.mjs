@@ -89,6 +89,7 @@ const query = new URLSearchParams({
 });
 setOptionalQuery(query, 'buildings', buildings);
 setOptionalQuery(query, 'density', density);
+setOptionalQuery(query, 'gpuTimings', readArg('gpuTimings'));
 setOptionalQuery(query, 'collisionDebug', collisionDebug);
 setOptionalQuery(query, 'constructionStyle', constructionStyle);
 if (hasFlag('settle')) query.set('settle', '1');
@@ -141,6 +142,7 @@ const fs = require('fs');
     page.setDefaultTimeout(${timeoutMs});
     const { createBrowserErrorMonitor } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-errors.mjs')).href)});
     const browserErrors = createBrowserErrorMonitor(page);
+    page.on('pageerror', error => console.error('Perf QA browser error:', error.stack ?? error.message));
     await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
 
@@ -296,7 +298,7 @@ const fs = require('fs');
           return [...layer.batches.batches].map(([band, batch]) => ({
             layer: name, band, tiles: batch.slots.size,
             capacity: batch.slotCapacity, stride: batch.stride,
-            submitted: batch.meshes?.reduce((sum, mesh) => sum + mesh.geometry.instanceCount, 0)
+            eligibleInstances: batch.meshes?.reduce((sum, mesh) => sum + mesh.geometry.instanceCount, 0)
               ?? batch.geometry.instanceCount,
             retainedBytes: (batch.meshes ?? [{ geometry: batch.geometry }])
               .reduce((sum, mesh) => sum + Object.values(mesh.geometry.attributes)

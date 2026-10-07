@@ -10,6 +10,7 @@ import { MeadowGroundSampler } from './MeadowGroundSampler.js';
 import { MeadowInteractionMap } from './MeadowInteractionMap.js';
 import { MeadowTileLayer } from './MeadowTileLayer.js';
 import { createMeadowUniforms } from './meadowUniforms.js';
+import { meadowBladeBoundsPadding, meadowCardBoundsPadding } from './MeadowPageBounds.js';
 
 const CARD_ATLAS = 'assets/ground/meadow/meadow-grass-cards.webp';
 
@@ -18,7 +19,8 @@ const CARD_ATLAS = 'assets/ground/meadow/meadow-grass-cards.webp';
  *
  *  - *Blades* to `maxDistance`: individual blades at the meadow's real scale on
  *    chunk-aligned tiles, four LOD bands that cut segments and thin the stand,
- *    one draw per band. The donor measured its whole near meadow at 0.29 M
+ *    stable sparse batches or packed dense pages per band. The donor measured
+ *    its whole near meadow at 0.29 M
  *    triangles.
  *  - *Cards* beyond, to `far.distance`: billboard clumps of ~180 stems at two
  *    triangles each, handed over by a screen-door dissolve so neither layer is
@@ -47,6 +49,8 @@ export class MeadowGrassField {
   }) {
     this.terrainView = terrainView;
     this.settings = settings;
+    this.tuning = tuning.uniforms;
+    this.dirtBladeCut = config.dirt.bladeCut;
     this.forward = new Vector3();
     this.viewCone = { x: 0, z: 0, tangent: 1 };
     this.canonical = { x: 0, z: 0 };
@@ -109,6 +113,7 @@ export class MeadowGrassField {
       selectPreparationBand: (nearest) => selectLod(Math.max(0, Math.sqrt(nearest) - preparationLead) ** 2, thresholds),
       reach: settings.maxDistance + preparationLead,
       ground: this.ground,
+      boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
     });
     this.cards = null;
     if (far) {
@@ -131,6 +136,7 @@ export class MeadowGrassField {
         selectBand: (nearest, farthest) => (nearest < far.distance ** 2 && farthest > start ** 2 ? 'cards' : null),
         reach: far.distance,
         ground: this.ground,
+        boundsPadding: meadowCardBoundsPadding(this.uniforms),
       });
     }
     this.stats = {};
@@ -175,6 +181,8 @@ export class MeadowGrassField {
     this.uniforms.time.value = timestamp / 1000;
     this.uniforms.origin.value.set(origin.x, origin.z);
     this.syncLight();
+    this.blades.batches.setBoundsPadding(meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut));
+    this.cards?.batches.setBoundsPadding(meadowCardBoundsPadding(this.uniforms));
     this.interaction?.update(body);
     this.ground.beginFrame();
     const startedAt = performance.now();

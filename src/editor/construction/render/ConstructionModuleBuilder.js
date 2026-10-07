@@ -4,6 +4,9 @@ import {
   buildModuleMasonry,
   mergeModuleMasonryBatches,
 } from '../compile/ConstructionMasonryBuilder.js';
+import { ConstructionGeometryWorkerClient } from '../compile/ConstructionGeometryWorkerClient.js';
+import { decodeConstructionGeometry } from '../compile/ConstructionGeometryCodec.js';
+import { createConstructionGroundPatch, advanceConstructionGroundPatch } from '../compile/ConstructionGroundPatch.js';
 
 const DEFAULT_PLACEMENTS_PER_SLICE = 8;
 
@@ -20,9 +23,11 @@ function buildOptions(state) {
 }
 
 export class ConstructionModuleBuilder {
-  constructor({ terrainView, placementsPerSlice = DEFAULT_PLACEMENTS_PER_SLICE }) {
+  constructor({ terrainView, placementsPerSlice = DEFAULT_PLACEMENTS_PER_SLICE, geometryWorker = null }) {
     this.terrainView = terrainView;
     this.placementsPerSlice = Math.max(1, Math.floor(placementsPerSlice));
+    this.geometryWorker = geometryWorker ?? ((typeof Worker === 'function' || typeof window !== 'undefined')
+      ? new ConstructionGeometryWorkerClient() : null);
   }
 
   createState({
@@ -36,6 +41,8 @@ export class ConstructionModuleBuilder {
     placements,
     terrainRevision,
     retainedGrowth = null,
+    bounds = null,
+    growthOnly = false,
   }) {
     return {
       key,
@@ -48,6 +55,13 @@ export class ConstructionModuleBuilder {
       placements,
       terrainRevision,
       retainedGrowth,
+      bounds,
+      growthOnly,
+      cancelled: false,
+      workerStarted: false,
+      workerProduct: null,
+      workerError: null,
+      groundPatch: null,
       groundHeightAt: (x, z) => this.terrainView.getCanonicalHeight(x, z) ?? 0,
       offset: 0,
       batches: [],
@@ -59,6 +73,7 @@ export class ConstructionModuleBuilder {
   }
 
   advance(state) {
+    if (this.geometryWorker) return this.advanceWorker(state);
     if (state.offset < state.placements.length) {
       const end = Math.min(
         state.placements.length,
@@ -95,8 +110,42 @@ export class ConstructionModuleBuilder {
     return { done: true, built: null };
   }
 
+  advanceWorker(state) {
+    if (state.workerError || this.geometryWorker.error) {
+      if (!this.failureReported) {
+        console.error('Construction detail is unavailable; retaining its shell.', state.workerError ?? this.geometryWorker.error);
+        this.failureReported = true;
+      }
+      return { done: true, built: null };
+    }
+    if (state.workerProduct) {
+      const built = decodeConstructionGeometry(state.workerProduct, state.materials);
+      if (state.retainedGrowth) attachConstructionGrowth(built, state.retainedGrowth);
+      state.workerProduct = null;
+      return { done: true, built };
+    }
+    if (state.workerStarted) return { done: false, built: null };
+    if (!this.geometryWorker.available) return { done: false, built: null };
+    state.groundPatch ??= createConstructionGroundPatch(state.bounds, state.record,
+      this.terrainView.worldStore?.tileSize ?? 2);
+    if (!advanceConstructionGroundPatch(state.groundPatch, this.terrainView)) return { done: false, built: null };
+    state.workerStarted = true;
+    this.geometryWorker.request({ record: state.record, placements: state.placements,
+      moduleOrigin: state.moduleOrigin, pathInterval: state.pathInterval, lodBand: state.lodBand,
+      includeGrowth: Boolean(state.materials.growth) && !state.retainedGrowth,
+      growthOnly: state.growthOnly, groundPatch: state.groundPatch,
+    }).then(product => {
+      if (!state.cancelled) state.workerProduct = product;
+    }, error => { if (!state.cancelled) state.workerError = error; });
+    return { done: false, built: null };
+  }
+
+  shutdown() { this.geometryWorker?.dispose(); }
+
   dispose(state) {
     if (!state) return;
+    state.cancelled = true;
+    state.workerProduct = null;
     for (const batch of state.batches ?? []) {
       for (const mesh of batch.meshes ?? []) mesh.geometry.dispose();
     }

@@ -324,6 +324,7 @@ export class InfiniteTerrainView {
       forceWebGL: rendererConfig.forceWebGL,
       powerPreference: rendererConfig.powerPreference ?? 'high-performance',
       requiredLimits: this.requiredLimits,
+      trackTimestamp: new URLSearchParams(window.location.search).get('gpuTimings') === '1',
     });
     this.samplerPruning = installUnusedSamplerPruning(this.renderer);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, rendererConfig.maxPixelRatio));
@@ -566,6 +567,7 @@ export class InfiniteTerrainView {
       maxQueuedCommitAgeMs: this.commitQueue.maxQueuedAgeMs,
       capacity: this.slots.length,
       focusChunk: this.focusChunkKey,
+      unavailableReason: this.worldStore.chunkWorker?.unavailableReason ?? null,
       cache: this.worldStore.getStats(),
       origin: this.floatingOrigin.getState(),
     });
@@ -693,7 +695,7 @@ export class InfiniteTerrainView {
     return velocity;
   }
 
-  async assignSlot(slot, descriptor, { immediate = false } = {}) {
+  async assignSlot(slot, descriptor, { immediate = false, retainVisible = false } = {}) {
     if (this.disposed) return;
     PerfCounters.inc('terrainAssignSlots');
     slot.token += 1;
@@ -703,7 +705,7 @@ export class InfiniteTerrainView {
     slot.lastUsed = this.clock;
     slot.loading = true;
     slot.retryAt = null;
-    slot.mesh.visible = false;
+    if (!retainVisible) slot.mesh.visible = false;
     this.positionSlot(slot);
 
     const requestPriority = this.focusChunk
@@ -748,11 +750,14 @@ export class InfiniteTerrainView {
           slot.loading = false;
           // Retained slots are otherwise skipped even after a focus change.
           // Back off instead of leaving a permanent hole or retrying every frame.
-          slot.retryAt = performance.now() + TERRAIN_REQUEST_RETRY_DELAY_MS;
-          this.nextRetryAt = Math.min(
-            this.nextRetryAt ?? Number.POSITIVE_INFINITY,
-            slot.retryAt,
-          );
+          slot.retryAt = error?.streamingUnavailable ? null
+            : performance.now() + TERRAIN_REQUEST_RETRY_DELAY_MS;
+          if (slot.retryAt !== null) {
+            this.nextRetryAt = Math.min(
+              this.nextRetryAt ?? Number.POSITIVE_INFINITY,
+              slot.retryAt,
+            );
+          }
         }
         // Cancellation is an intentional optimization, not a failure.
         if (!this.disposed && !error?.cancelled) {
@@ -769,6 +774,10 @@ export class InfiniteTerrainView {
   }
 
   ensurePageRenderPixels(page) {
+    if (this.worldStore.renderPagesPreparedInWorker) {
+      if (page.renderPixelsDirty) throw new Error('Terrain publication requires a current worker page.');
+      return page;
+    }
     if (page.tilePixels && page.surfaceMaskPixels && !page.renderPixelsDirty) {
       return page;
     }
@@ -950,8 +959,11 @@ export class InfiniteTerrainView {
     for (const coordinate of coordinates) {
       const chunkX = Math.floor(coordinate.x / this.chunkSize);
       const chunkZ = Math.floor(coordinate.z / this.chunkSize);
-      const minimumOffset = change.kind === 'tile' ? -this.surfaceMaskChunkRadius : -1;
-      const maximumOffset = change.kind === 'tile' ? this.surfaceMaskChunkRadius : 0;
+      const radius = Math.max(1, this.surfaceMaskChunkRadius);
+      const minimumOffset = this.worldStore.renderPagesPreparedInWorker ? -radius
+        : change.kind === 'tile' ? -this.surfaceMaskChunkRadius : -1;
+      const maximumOffset = this.worldStore.renderPagesPreparedInWorker ? radius
+        : change.kind === 'tile' ? this.surfaceMaskChunkRadius : 0;
       for (let offsetZ = minimumOffset; offsetZ <= maximumOffset; offsetZ += 1) {
         for (let offsetX = minimumOffset; offsetX <= maximumOffset; offsetX += 1) {
           affected.add(`${chunkX + offsetX}:${chunkZ + offsetZ}`);
@@ -960,6 +972,12 @@ export class InfiniteTerrainView {
     }
     for (const slot of this.slots) {
       if (slot.key && affected.has(slot.key)) {
+        if (this.worldStore.renderPagesPreparedInWorker) {
+          // Keep the last valid visual while workers resolve the authored edit.
+          // A new token also invalidates any queued publication of the old page.
+          void this.assignSlot(slot, slot.descriptor, { retainVisible: true });
+          continue;
+        }
         const page = this.worldStore.getChunk(slot.descriptor.chunkX, slot.descriptor.chunkZ);
         if (change.kind === 'tile') {
           page.renderPixelsDirty = true;
@@ -975,6 +993,10 @@ export class InfiniteTerrainView {
   refreshAll() {
     for (const slot of this.slots) {
       if (slot.descriptor) {
+        if (this.worldStore.renderPagesPreparedInWorker) {
+          void this.assignSlot(slot, slot.descriptor, { retainVisible: true });
+          continue;
+        }
         const page = this.worldStore.getChunk(slot.descriptor.chunkX, slot.descriptor.chunkZ);
         this.uploadPage(slot, page);
       }

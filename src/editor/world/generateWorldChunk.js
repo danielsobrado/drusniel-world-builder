@@ -1,6 +1,7 @@
 import { enrichPageVegetationScatter } from '../stylized/vegetationScatter.js';
 import { enrichPageWaterField } from '../water/WaterField.js';
 import { chunkKey } from './WorldCoordinates.js';
+import { createEditedChunkSampling } from './EditedChunkSampling.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { WORLD_MAX_SAFE_CELL_COORDINATE } from './worldConstants.js';
 import {
@@ -55,6 +56,7 @@ export function generateBaseWorldChunk(request) {
   const generator = request.worldGenerator
     ?? createWorldGenerator(request.generator, request.baseTerrain ?? null);
   const { chunkX, chunkZ, chunkSize } = request;
+  const sampling = createEditedChunkSampling(generator, chunkSize, request.terrainOverrides);
   const vertexSize = chunkSize + 1;
   const tiles = new Uint8Array(chunkSize * chunkSize);
   const heights = new Float32Array(vertexSize * vertexSize);
@@ -63,7 +65,7 @@ export function generateBaseWorldChunk(request) {
 
   for (let localZ = 0; localZ < chunkSize; localZ += 1) {
     for (let localX = 0; localX < chunkSize; localX += 1) {
-      tiles[localZ * chunkSize + localX] = generator.sampleTile(
+      tiles[localZ * chunkSize + localX] = sampling.sampleTile(
         originX + localX,
         originZ + localZ,
       );
@@ -71,7 +73,7 @@ export function generateBaseWorldChunk(request) {
   }
   for (let localZ = 0; localZ <= chunkSize; localZ += 1) {
     for (let localX = 0; localX <= chunkSize; localX += 1) {
-      heights[localZ * vertexSize + localX] = generator.sampleHeight(
+      heights[localZ * vertexSize + localX] = sampling.sampleHeight(
         originX + localX,
         originZ + localZ,
       );
@@ -89,14 +91,14 @@ export function generateBaseWorldChunk(request) {
   };
   const timings = {};
   const waterStartedAt = performance.now();
-  enrichPageWaterField(page, (cellX, cellZ) => generator.sampleWater(cellX, cellZ));
+  enrichPageWaterField(page, (cellX, cellZ) => sampling.sampleWater(cellX, cellZ));
   timings.waterGenerationMs = performance.now() - waterStartedAt;
 
   const maskConfig = resolveMaskConfig(request);
   const tilePixelsStartedAt = performance.now();
   enrichPageRenderPixels(
     page,
-    (cellX, cellZ) => generator.sampleTile(cellX, cellZ),
+    (cellX, cellZ) => sampling.sampleTile(cellX, cellZ),
     {
       ...(generator.getSurfaceMaskConfig?.(maskConfig) ?? maskConfig),
       worldSeed: generator.toMetadata?.().seed ?? 0,

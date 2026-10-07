@@ -1,10 +1,12 @@
-import { MEADOW_TILES_PER_PAGE, MeadowBandBatch } from './MeadowBandBatch.js';
+import { meadowPageTileCapacity, MeadowBandBatch } from './MeadowBandBatch.js';
+import { MeadowStableBandBatch } from './MeadowStableBandBatch.js';
 
 /** Keep tile assignments stable and bound the buffers affected by an update. */
 class MeadowBandPages {
   constructor(options) {
     this.options = options;
     this.stride = Math.max(1, options.template.instanceCount);
+    this.pageTileCapacity = meadowPageTileCapacity(this.stride);
     this.slots = new Map();
     this.present = new Set();
     this.pages = [];
@@ -32,7 +34,7 @@ class MeadowBandPages {
     for (const tile of tiles) {
       let page = this.slots.get(tile);
       if (!page) {
-        page = this.pages.find(candidate => candidate.memberCount < MEADOW_TILES_PER_PAGE)
+        page = this.pages.find(candidate => candidate.memberCount < this.pageTileCapacity)
           ?? this.addPage();
         this.slots.set(tile, page);
         page.memberCount += 1;
@@ -52,6 +54,12 @@ class MeadowBandPages {
     return this.pages.reduce((sum, page) => sum + page.slotCapacity, 0);
   }
 
+  setBoundsPadding(padding) {
+    if (this.options.boundsPadding === padding) return;
+    this.options.boundsPadding = padding;
+    for (const page of this.pages) page.bounds?.setPadding(padding);
+  }
+
   dispose() {
     for (const page of this.pages) page.dispose();
     this.pages.length = 0;
@@ -69,11 +77,13 @@ export class MeadowGrassBatches {
    * @param {string} options.name
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, templates, material, name, renderOrder = 0 }) {
+  constructor({ scene, templates, material, name, renderOrder = 0, boundsPadding = null }) {
     this.batches = new Map();
     this.members = new Map();
+    const familyStride = Math.max(1, ...Object.values(templates).map(template => template.instanceCount));
+    const Batch = familyStride > 16384 ? MeadowBandPages : MeadowStableBandBatch;
     for (const [band, template] of Object.entries(templates)) {
-      this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder }));
+      this.batches.set(band, new Batch({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding }));
       this.members.set(band, []);
     }
   }
@@ -95,6 +105,10 @@ export class MeadowGrassBatches {
 
   get meshes() {
     return [...this.batches.values()].flatMap((batch) => batch.meshes);
+  }
+
+  setBoundsPadding(padding) {
+    for (const batch of this.batches.values()) batch.setBoundsPadding?.(padding);
   }
 
   dispose() {

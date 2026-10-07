@@ -342,7 +342,8 @@ function resolveStoneEdgeWear({
  * @param options.moduleOrigin canonical XZ the emitted vertices are relative to.
  * @param options.groundHeightAt `(canonicalX, canonicalZ) => number`. Courses are
  *   solved relative to grade, so the packer never needs terrain and none has to
- *   cross into the worker; ground is resolved here, on the main thread.
+ *   cross into the worker. Browser builds receive a canonical ground lattice;
+ *   materials and transferred geometry are attached during publication.
  */
 export function buildModuleMasonry(placements, options) {
   const built = buildStoneBatches(placements, options);

@@ -4,11 +4,13 @@ import { MeshBasicNodeMaterial, Scene } from 'three/webgpu';
 import { MeadowGrassBatches } from '../src/editor/stylized/meadow/MeadowGrassBatches.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 
-function fixture(t) {
+function fixture(t, { dense = true } = {}) {
   const template = createMeadowTemplate({ detail: 2, count: 16, tileSize: 8 });
+  const denseTemplate = dense ? createMeadowTemplate({ detail: 2, count: 20000, tileSize: 8 }) : null;
   const material = new MeshBasicNodeMaterial();
-  const batches = new MeadowGrassBatches({ scene: new Scene(), templates: { low: template }, material, name: 'uploads' });
-  t.after(() => { batches.dispose(); template.dispose(); material.dispose(); });
+  const batches = new MeadowGrassBatches({ scene: new Scene(),
+    templates: { low: template, ...(denseTemplate ? { high: denseTemplate } : {}) }, material, name: 'uploads' });
+  t.after(() => { batches.dispose(); template.dispose(); denseTemplate?.dispose(); material.dispose(); });
   const tile = count => ({ buildId: 1, renderX: 8, renderZ: -8,
     output: { count, position: new Float32Array(count * 4).fill(1),
       rotation: new Float32Array(count * 2).fill(2), data: new Float32Array(count * 4).fill(3) } });
@@ -17,7 +19,8 @@ function fixture(t) {
     for (const item of tiles) batches.add('low', item);
     batches.commit();
   };
-  const geometry = batches.batches.get('low').pages[0].geometry;
+  const band = batches.batches.get('low');
+  const geometry = band.pages?.[0].geometry ?? band.geometry;
   const attributes = ['instancePosition', 'instanceRotation', 'instanceData', 'instanceTile']
     .map(name => geometry.getAttribute(name));
   const uploaded = attributes.map(attribute => attribute.array.slice());
@@ -147,4 +150,101 @@ test('meadow pages bound buffer capacity and reuse storage through tile churn', 
   assert.deepEqual(band.meshes.map(mesh => mesh.geometry), pages, 'churn reuses pages without reallocating');
   f.commit([]);
   assert.ok(band.meshes.every(mesh => !mesh.visible && mesh.geometry.instanceCount === 0));
+});
+
+test('dense meadow pages keep allocation below one large tile plus the stem ceiling', t => {
+  const template = createMeadowTemplate({ detail: 2, count: 40401, tileSize: 8 });
+  const sparse = createMeadowTemplate({ detail: 2, count: 16, tileSize: 8 });
+  const material = new MeshBasicNodeMaterial();
+  const batches = new MeadowGrassBatches({ scene: new Scene(), templates: { high: template, low: sparse }, material, name: 'dense' });
+  t.after(() => { batches.dispose(); template.dispose(); sparse.dispose(); material.dispose(); });
+  const tiles = Array.from({ length: 3 }, (_, i) => ({ buildId: 1, renderX: i * 8, renderZ: 0,
+    output: { count: 2, position: new Float32Array(8).fill(i),
+      rotation: new Float32Array(4), data: new Float32Array(8) } }));
+  batches.begin();
+  for (const tile of tiles) batches.add('high', tile);
+  assert.equal(batches.commit().high, 6);
+  const band = batches.batches.get('high');
+  assert.equal(batches.batches.get('low').pageTileCapacity, 4, 'dense families retain the bounded repacking policy in every band');
+  assert.equal(band.pages.length, 3);
+  assert.ok(band.pages.every(page => page.slotCapacity === 1));
+  assert.ok(band.meshes.every(mesh => mesh.geometry.getAttribute('instancePosition').count === 40401));
+  batches.begin();
+  batches.add('high', tiles[2]);
+  batches.commit();
+  assert.equal(band.slots.get(tiles[2]), band.pages[2], 'a retained tile does not move or rewrite its buffer');
+});
+
+test('sparse meadow retirement and slot reuse leave neighboring stems resident', t => {
+  const f = fixture(t, { dense: false });
+  const a = f.tile(7), b = f.tile(5);
+  b.output.position.fill(5);
+  b.output.rotation.fill(6);
+  b.output.data.fill(7);
+  f.commit([a, b]);
+  f.flush();
+  const band = f.batches.batches.get('low');
+  const slot = band.slots.get(b).index;
+  const versions = f.attributes.slice(1).map(attribute => attribute.version);
+  f.commit([b]);
+  assert.equal(band.slots.get(b).index, slot);
+  assert.deepEqual(f.attributes.slice(1).map(attribute => attribute.version), versions);
+  assert.deepEqual(f.attributes[0].updateRanges, [{ start: 0, count: 28 }]);
+  f.flush();
+  for (let i = 0; i < 7; i += 1) {
+    assert.equal(f.uploaded[0][i * 4], 1e7);
+    assert.equal(f.uploaded[0][i * 4 + 3], 0);
+  }
+  assert.deepEqual(f.uploaded[0].subarray(slot * 16 * 4, slot * 16 * 4 + 20), b.output.position);
+  const c = f.tile(4);
+  f.commit([b, c]);
+  assert.equal(band.slots.get(c).index, 0);
+  f.flush();
+  assert.deepEqual(f.uploaded[2].subarray(0, 16), c.output.data);
+});
+
+test('sparse meadow density shrink retires tails and rebases upload metadata alone', t => {
+  const f = fixture(t, { dense: false });
+  const tile = f.tile(7);
+  f.commit([tile]);
+  f.flush();
+  tile.buildId += 1;
+  tile.output = f.tile(3).output;
+  f.commit([tile]);
+  f.flush();
+  assert.deepEqual(f.uploaded[0].subarray(0, 12), tile.output.position);
+  for (let i = 3; i < 7; i += 1) assert.equal(f.uploaded[0][i * 4 + 3], 0);
+  const versions = f.attributes.slice(0, 3).map(attribute => attribute.version);
+  tile.renderX -= 4096;
+  f.commit([tile]);
+  assert.deepEqual(f.attributes.slice(0, 3).map(attribute => attribute.version), versions);
+  f.flush();
+  assert.equal(f.uploaded[3][0], tile.renderX);
+});
+
+test('sparse meadow preserves pending writes and grows by replacing geometry bindings', t => {
+  const f = fixture(t, { dense: false });
+  const tiles = Array.from({ length: 33 }, () => f.tile(5));
+  f.commit(tiles.slice(0, 2));
+  f.flush();
+  tiles[0].buildId += 1;
+  tiles[0].output.position.fill(8);
+  f.commit(tiles.slice(0, 2));
+  tiles[1].buildId += 1;
+  tiles[1].output.position.fill(9);
+  f.commit(tiles.slice(0, 2));
+  f.flush();
+  assert.deepEqual(f.uploaded[0].subarray(0, 20), tiles[0].output.position);
+  assert.deepEqual(f.uploaded[0].subarray(64, 84), tiles[1].output.position);
+  let disposed = 0;
+  f.geometry.addEventListener('dispose', () => { disposed += 1; });
+  f.commit(tiles);
+  const band = f.batches.batches.get('low');
+  assert.notEqual(band.geometry, f.geometry);
+  assert.equal(disposed, 1);
+  assert.equal(band.geometry.instanceCount, 33 * 16);
+  for (const tile of tiles) {
+    const start = band.slots.get(tile).index * 16 * 4;
+    assert.deepEqual(band.geometry.getAttribute('instancePosition').array.subarray(start, start + 20), tile.output.position);
+  }
 });

@@ -91,7 +91,7 @@ test('compaction keeps only stems on grass, with their ground, rank and shape', 
 
 test('a batch packs populated stems and removes them when the tile leaves', () => {
   const scene = new THREE.Scene();
-  const template = createMeadowTemplate({ detail: 2, count: 8, tileSize: 8 });
+  const template = createMeadowTemplate({ detail: 2, count: 20000, tileSize: 8 });
   const batches = new MeadowGrassBatches({ scene, templates: { high: template }, material: new THREE.MeshBasicNodeMaterial(), name: 't' });
   const tile = (id, count, x) => ({
     buildId: id, renderX: x, renderZ: 0,
@@ -121,6 +121,7 @@ test('a batch packs populated stems and removes them when the tile leaves', () =
   batches.commit();
   assert.equal(geometry.instanceCount, 5, 'retired stems stop being drawn');
   batches.dispose();
+  template.dispose();
   assert.equal(scene.children.length, 0);
 });
 

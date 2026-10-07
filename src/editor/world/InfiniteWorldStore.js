@@ -2,6 +2,7 @@ import { withSettlementData } from './settlements/SettlementData.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { hasForestEdits, normalizeForestEditDocument } from '../forest/ForestEditDocument.js';
 import { ProceduralWorldGenerator } from './ProceduralWorldGenerator.js';
+import { SpatialOverrideMap } from './SpatialOverrideMap.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import {
   cellKey,
@@ -117,8 +118,8 @@ export class InfiniteWorldStore {
     this.cacheLimit = cacheLimit;
     this.generator = generator;
     this.baseTerrain = null;
-    this.tileOverrides = new Map();
-    this.heightOverrides = new Map();
+    this.tileOverrides = new SpatialOverrideMap(chunkSize);
+    this.heightOverrides = new SpatialOverrideMap(chunkSize);
     this.forestEdits = { version: 1, felled: [], planted: [], patches: [] };
     this.cache = new Map();
     // Generated-tile memo, one small typed-array block per chunk. Bounded by
@@ -143,6 +144,17 @@ export class InfiniteWorldStore {
   subscribe(listener) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  get tileOverrides() { return this._tileOverrides; }
+  set tileOverrides(value) {
+    this._tileOverrides = value instanceof SpatialOverrideMap
+      ? value : new SpatialOverrideMap(this.chunkSize, value);
+  }
+  get heightOverrides() { return this._heightOverrides; }
+  set heightOverrides(value) {
+    this._heightOverrides = value instanceof SpatialOverrideMap
+      ? value : new SpatialOverrideMap(this.chunkSize, value);
   }
 
   emit(change) {
@@ -210,11 +222,10 @@ export class InfiniteWorldStore {
   }
 
   getTile(cellX, cellZ) {
-    // Building the string cell key costs an allocation per lookup, and the
-    // canonical distance fields make millions of them per frame. An unedited
-    // world has no overrides to consult, so skip the key entirely.
+    // Numeric sparse blocks cache misses too: an edit elsewhere never adds a
+    // world-coordinate string allocation to these millions of sample queries.
     if (this.tileOverrides.size > 0) {
-      const override = this.tileOverrides.get(cellKey(cellX, cellZ));
+      const override = this.tileOverrides.getAt(cellX, cellZ);
       if (override !== undefined) return override;
     }
     return this.generatedTile(cellX, cellZ);
@@ -276,6 +287,10 @@ export class InfiniteWorldStore {
     block.filled.fill(1);
     tileBlock.tiles.set(tiles);
     tileBlock.filled.fill(1);
+    // Prepared placement pages include authored edits. Those values cannot
+    // become procedural memo entries: undo must reveal the generator again.
+    for (const index of this.tileOverrides.block(chunkX, chunkZ)?.keys() ?? []) tileBlock.filled[index] = 0;
+    for (const index of this.heightOverrides.block(chunkX, chunkZ)?.keys() ?? []) block.filled[index] = 0;
   }
 
   generatedHeight(vertexX, vertexZ) {
@@ -299,10 +314,9 @@ export class InfiniteWorldStore {
   }
 
   getHeight(vertexX, vertexZ) {
-    // Same reasoning as `getTile`: an unedited world has no overrides, so skip
-    // building the string key on a path that runs millions of times per frame.
+    // Height overrides use the same numeric block lookup as terrain edits.
     if (this.heightOverrides.size > 0) {
-      const override = this.heightOverrides.get(cellKey(vertexX, vertexZ));
+      const override = this.heightOverrides.getAt(vertexX, vertexZ);
       if (override !== undefined) return override;
     }
     return this.generatedHeight(vertexX, vertexZ);

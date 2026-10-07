@@ -5,13 +5,15 @@ import { CONSTRUCTION_MATERIAL_SLOT } from './ConstructionMaterialSlots.js';
 import { createConstructionMaterials, releaseConstructionMaterials } from './ConstructionMaterials.js';
 import { ConstructionBuildQueue } from './ConstructionBuildQueue.js';
 import { ConstructionModuleBuilder } from './ConstructionModuleBuilder.js';
+import { ConstructionResidency } from './ConstructionResidency.js';
+import { ConstructionModuleResidency } from './ConstructionModuleResidency.js';
+import { updateConstructionLod } from './ConstructionLodController.js';
 import { ConstructionShellMaterials } from './ConstructionShellMaterials.js';
 import { applyShellDetail, loadShellDetailTexture } from './ConstructionShellDetail.js';
-import { coarsePlacementsForModule, moduleProjectedPixels } from './ConstructionLod.js';
+import { coarsePlacementsForModule } from './ConstructionLod.js';
 import {
   evaluateBuildRequest,
   moduleBuildKey,
-  resolveRequestedLodBand,
 } from '../compile/ConstructionLodState.js';
 import {
   buildShellGeometry,
@@ -38,19 +40,11 @@ const TANGENT_HANDLE_RADIUS = 0.09;
 const ORIGIN_QUANTUM = 64;
 
 /**
- * Per-frame ceiling on module rebuilds, so a large commit cannot hitch.
- *
- * One module per frame, matching the one-install-per-frame rule the stylized
- * variant residency already follows. The time budget is checked *before* a
- * build starts and a module cannot be interrupted once begun, so the real
- * worst-case frame is one module's build time — measured at ~9 ms for a dense
- * 12 m module. Allowing two put a 200 m commit over 18 ms per frame.
+ * One preparation/publication step per frame. Browser geometry generation and
+ * merging run in a worker; the non-browser builder remains resumable.
  */
 const MODULE_BUILD_BUDGET_MS = 4;
 const MODULE_BUILD_COUNT = 1;
-const LOD_REFRESH_MS = 50;
-const LOD_POSITION_SCALE = 8;
-const LOD_ROTATION_SCALE = 500;
 
 /**
  * Preview buffer floor. Buffers grow by doubling from here, so dragging an
@@ -93,32 +87,11 @@ const AGGREGATE_EXTRA_STAT_KEYS = Object.freeze([
   'growthLeaves',
   'growthTriangles',
 ]);
-const CONSTRUCTION_COARSE_BUILD_PRIORITY_BIAS = 1_000_000;
 
 function quantizeOrigin(value) {
   return Math.round(value / ORIGIN_QUANTUM) * ORIGIN_QUANTUM;
 }
 
-function updateCameraState(state, camera, viewportHeight) {
-  const position = camera.position;
-  const quaternion = camera.quaternion;
-  const n0 = Math.round(position.x * LOD_POSITION_SCALE);
-  const n1 = Math.round(position.y * LOD_POSITION_SCALE);
-  const n2 = Math.round(position.z * LOD_POSITION_SCALE);
-  const n3 = Math.round(quaternion.x * LOD_ROTATION_SCALE);
-  const n4 = Math.round(quaternion.y * LOD_ROTATION_SCALE);
-  const n5 = Math.round(quaternion.z * LOD_ROTATION_SCALE);
-  const n6 = Math.round(quaternion.w * LOD_ROTATION_SCALE);
-  const n7 = Math.round((camera.zoom ?? 1) * 10);
-  const n8 = Math.round((camera.fov ?? 0) * 10);
-  const n9 = Math.round(viewportHeight * 10);
-  const changed = state[0] !== n0 || state[1] !== n1 || state[2] !== n2
-    || state[3] !== n3 || state[4] !== n4 || state[5] !== n5
-    || state[6] !== n6 || state[7] !== n7 || state[8] !== n8 || state[9] !== n9;
-  state[0] = n0; state[1] = n1; state[2] = n2; state[3] = n3; state[4] = n4;
-  state[5] = n5; state[6] = n6; state[7] = n7; state[8] = n8; state[9] = n9;
-  return changed;
-}
 
 /**
  * Resolve the material for one resident mesh from its explicit slot.
@@ -185,7 +158,7 @@ function draftDirtySegments(record, anchorId) {
 }
 
 export class ConstructionView {
-  constructor({ terrainView, store, compilerClient = null, materialStore = null }) {
+  constructor({ terrainView, store, compilerClient = null, materialStore = null, residencyRadius = 512 }) {
     this.terrainView = terrainView;
     this.floatingOrigin = terrainView.floatingOrigin;
     this.scene = terrainView.scene;
@@ -203,6 +176,8 @@ export class ConstructionView {
      * without moving it.
      */
     this.entries = new Map();
+    this.residency = new ConstructionResidency({ store, floatingOrigin: this.floatingOrigin,
+      radius: residencyRadius, chunkWorldSize: terrainView.chunkWorldSize ?? 128 });
     this.buildQueue = new ConstructionBuildQueue();
     this.moduleBuilder = new ConstructionModuleBuilder({ terrainView });
     this.lodCameraState = new Int32Array(10);
@@ -417,6 +392,18 @@ export class ConstructionView {
     this.positionGroup(entry);
 
     if (hint?.decorationOnly && entry.shellMesh) {
+      if (this.moduleBuilder.geometryWorker) {
+        for (const module of entry.plan?.modules ?? []) {
+          const resident = entry.modules.get(module.id);
+          if (!resident?.meshes.length) continue;
+          this.disposeResidentBuild(resident);
+          resident.growthOnlyPending = true;
+          resident.pendingBuildKey = null;
+          this.buildQueue.upsert({ constructionId: record.id, module,
+            requestedBand: resident.builtBand, priority: -1 });
+        }
+        return;
+      }
       refreshConstructionGrowth(entry, this.terrainView);
       this.refreshModuleStats();
       return;
@@ -500,17 +487,44 @@ export class ConstructionView {
       this.refreshAll();
       return;
     }
-    if (change.after) this.upsertRecord(change.after, change.hint ?? null);
-    else if (change.id) this.removeRecord(change.id);
+    if (change.after) {
+      this.residency.update(change.after);
+      if (this.entries.has(change.id) || this.residency.query(null, [this.selectedId]).has(change.id)) {
+        this.upsertRecord(change.after, change.hint ?? null);
+      }
+    } else if (change.id) {
+      this.residency.remove(change.id);
+      this.removeRecord(change.id);
+    }
+    this.lodDirty = true;
     if (this.selectedId && !this.store.get(this.selectedId)) this.selectedId = null;
     if (change.id === this.selectedId || !this.selectedId) this.rebuildHandles();
   }
 
   refreshAll() {
     for (const id of [...this.entries.keys()]) this.removeRecord(id);
-    for (const record of this.store.list()) this.upsertRecord(record);
+    this.residency.reset();
+    this.refreshResidency();
     if (this.selectedId && !this.store.get(this.selectedId)) this.selectedId = null;
     this.rebuildHandles();
+  }
+
+  refreshResidency(camera = null) {
+    const candidates = this.residency.query(camera, [this.selectedId, this.previewedConstructionId]);
+    for (const id of this.entries.keys()) if (!candidates.has(id)) this.removeRecord(id);
+    const started = performance.now();
+    let added = 0;
+    for (const id of candidates) {
+      if (this.entries.has(id)) continue;
+      if (added >= 4 || performance.now() - started >= 2) {
+        this.lodDirty = true;
+        break;
+      }
+      const record = this.store.get(id);
+      if (record) { this.upsertRecord(record); added += 1; }
+    }
+    this.stats.recordsResident = this.entries.size;
+    this.stats.recordsCandidates = candidates.size;
   }
 
   /**
@@ -519,6 +533,7 @@ export class ConstructionView {
    * multi-hundred-millisecond hitch and nothing at all once masonry lands.
    */
   rebase() {
+    this.lodDirty = true;
     for (const entry of this.entries.values()) this.positionGroup(entry);
     this.repositionHandles();
     if (this.previewMesh) {
@@ -530,10 +545,12 @@ export class ConstructionView {
   scheduleCompile(record, hint = null) {
     if (!this.compilerClient) return;
     const compiledRevision = this.entries.get(record.id)?.structuralRevision ?? record.revision;
+    const scheduledEntry = this.entries.get(record.id);
     this.compilerClient.compile(record).then((plan) => {
       // A material tint bumps the record revision without invalidating the
       // structure the plan solved, so only a newer structural edit discards it.
-      if (this.entries.get(record.id)?.structuralRevision !== compiledRevision) return;
+      if (this.entries.get(record.id) !== scheduledEntry
+          || scheduledEntry?.structuralRevision !== compiledRevision) return;
       this.applyPlan(record, plan, hint);
     }).catch((error) => {
       if (error?.name !== 'AbortError') {
@@ -559,8 +576,19 @@ export class ConstructionView {
     this.lodDirty = true;
     if (entry.shellMesh) entry.shellMesh.userData.structuralPlan = plan;
     this.rebuildRecordShell(entry, plan);
+    entry.moduleResidency = new ConstructionModuleResidency(plan.modules, this.residency.index.chunkWorldSize);
+    this.reconcileModuleResidency(entry);
+    this.refreshRuinDebug(entry, plan);
+  }
+
+  reconcileModuleResidency(entry) {
+    const plan = entry.plan;
+    const record = entry.record;
+    const modules = entry.moduleResidency.query(this.residency.focus, this.residency.radius);
+    if (!entry.moduleResidency.changed && entry.activePlanModules) return;
+    entry.activePlanModules = modules;
     const planned = new Set();
-    for (const module of plan.modules) {
+    for (const module of modules) {
       planned.add(module.id);
       const existing = entry.modules.get(module.id);
       if (existing && existing.hash === module.contentHash) {
@@ -601,7 +629,6 @@ export class ConstructionView {
     }
     this.refreshResidentCount();
     this.updateShellVisibility(entry);
-    this.refreshRuinDebug(entry, plan);
   }
 
   /**
@@ -762,108 +789,7 @@ export class ConstructionView {
    * set, so switching between them never waits on geometry.
    */
   updateLod(camera, viewportHeight) {
-    if (!camera || !(viewportHeight > 0)) return;
-    const now = performance.now();
-    if (!this.lodDirty && now < this.nextLodEvaluationAt) return;
-    const cameraChanged = updateCameraState(this.lodCameraState, camera, viewportHeight);
-    this.nextLodEvaluationAt = now + LOD_REFRESH_MS;
-    if (!cameraChanged && !this.lodDirty) return;
-    this.lodDirty = false;
-
-    let nearCount = 0;
-    let coarseCount = 0;
-    let shellCount = 0;
-    const origin = this.floatingOrigin.getState();
-    for (const entry of this.entries.values()) {
-      if (!entry.plan) continue;
-      const pinned = entry.record.id === this.selectedId;
-      let uncovered = 0;
-      for (const module of entry.plan.modules) {
-        const resident = entry.modules.get(module.id);
-        if (!resident) continue;
-        const pixels = moduleProjectedPixels({
-          camera,
-          module,
-          height: entry.record.dimensions.height,
-          viewportHeight,
-          // Module bounds are canonical; the camera is in render space.
-          origin,
-          cameraY: camera.position.y,
-        });
-        const previousVisible = resident.visibleBand ?? resident.band ?? null;
-        const band = resolveRequestedLodBand({
-          pixels,
-          previousVisible,
-          pinned,
-          now,
-          visibleSince: resident.visibleSince ?? 0,
-          styleKey: entry.record.style?.key,
-          force: !resident.builtBand || resident.meshes.length === 0,
-          // Metre hysteresis (`transition.hysteresisMetres`) activates only when
-          // distanceMetres / nearDistanceMetres / shellDistanceMetres are passed.
-          // Pixel hysteresis from selectConstructionLod remains the live path.
-        });
-        resident.requestedBand = band;
-        if (band === 'shell' && (resident.pendingBuildKey || resident.buildState)) {
-          this.buildQueue.removeModule(entry.record.id, module.id);
-          this.disposeResidentBuild(resident);
-          resident.pendingBuildKey = null;
-        }
-        if (band !== previousVisible) {
-          // A transition starts once per requested destination; the frames it
-          // then spends waiting for that band's build are counted separately,
-          // so the counter reports real requests, not queue latency.
-          if (resident.transitionTarget === band) {
-            this.stats.lodTransitionWaitFrames += 1;
-          } else {
-            resident.transitionTarget = band;
-            this.stats.lodTransitionsStarted += 1;
-            this.stats.lodTransitions += 1;
-          }
-          // Any band that draws masonry needs a build of that band — including
-          // a module that has never been built, which is every module that was
-          // in the far band when its plan landed.
-          const needsRebuild = (
-            (band === 'near' || band === 'coarse')
-            && resident.builtBand !== band
-          );
-          if (needsRebuild) {
-            const buildPriority = (
-              band === 'near' ? 0 : CONSTRUCTION_COARSE_BUILD_PRIORITY_BIAS
-            ) - pixels;
-            this.enqueueModuleBuild(entry.record.id, module, band, buildPriority);
-            // Keep showing the previous band until the destination mesh lands.
-          } else {
-            resident.visibleBand = band;
-            resident.visibleSince = now;
-            resident.band = band;
-            resident.transitionTarget = null;
-          }
-        } else {
-          resident.transitionTarget = null;
-          resident.band = band;
-          resident.visibleBand = band;
-        }
-        const shown = resident.visibleBand ?? resident.band ?? band;
-        const visible = shown !== 'shell' && resident.meshes.length > 0;
-        for (const mesh of resident.meshes) mesh.visible = visible;
-        // Each module's ribbon covers exactly the arc its masonry vacated.
-        if (resident.shellMesh) resident.shellMesh.visible = !visible;
-        if (!visible) uncovered += 1;
-        if (band === 'near') nearCount += 1;
-        else if (band === 'coarse') coarseCount += 1;
-        else shellCount += 1;
-      }
-      // The record-wide ribbon is only the fallback for arcs no module owns a
-      // shell for; once every module has one it would just double the surface.
-      if (entry.shellMesh) {
-        entry.shellMesh.visible = uncovered > 0 && !this.modulesOwnTheirShells(entry);
-      }
-    }
-    this.stats.modulesNear = nearCount;
-    this.stats.modulesCoarse = coarseCount;
-    this.stats.modulesShell = shellCount;
-    this.enforceDraftOcclusion();
+    updateConstructionLod(this, camera, viewportHeight);
   }
 
   update({ budgetMs = MODULE_BUILD_BUDGET_MS, shouldYield = null } = {}) {
@@ -886,7 +812,9 @@ export class ConstructionView {
       if (!entry || !entry.modules.has(job.module.id)) continue;
       const moduleStarted = performance.now();
       const completed = this.buildModule(entry, job.module);
-      this.stats.buildMs += performance.now() - moduleStarted;
+      const elapsed = performance.now() - moduleStarted;
+      this.stats.buildMs += elapsed;
+      this.stats.maxBuildStepMs = Math.max(this.stats.maxBuildStepMs ?? 0, elapsed);
       if (completed) this.stats.modulesRebuilt += 1;
       built += 1;
     }
@@ -959,6 +887,8 @@ export class ConstructionView {
         placements,
         terrainRevision,
         retainedGrowth,
+        bounds: module.bounds,
+        growthOnly: resident.growthOnlyPending && resident.builtBand === lodBand,
       });
       resident.buildState = state;
     }
@@ -977,6 +907,16 @@ export class ConstructionView {
     resident.buildState = null;
     const built = result.built;
     if (!built) return false;
+    if (state.growthOnly) {
+      const previous = resident.stats ?? {};
+      const growthTriangles = built.stats.growthTriangles ?? 0;
+      const totalTriangles = (previous.totalTriangles ?? 0) - (previous.growthTriangles ?? 0) + growthTriangles;
+      built.stats = { ...previous, growthLeaves: built.stats.growthLeaves ?? 0,
+        groundDetails: built.stats.groundDetails ?? 0, growthTriangles, totalTriangles, triangles: totalTriangles };
+      built.meshes.unshift(...resident.meshes.filter(mesh =>
+        mesh.userData.constructionMaterialSlot !== CONSTRUCTION_MATERIAL_SLOT.GROWTH));
+    }
+    resident.growthOnlyPending = false;
 
     resident.builtBand = lodBand;
     resident.visibleBand = lodBand;
@@ -1134,6 +1074,10 @@ export class ConstructionView {
       if (resident.shellMesh) resident.shellMesh.visible = bare;
     }
     if (!entry.shellMesh) return;
+    if (entry.moduleResidency && entry.activePlanModules?.length === 0) {
+      entry.shellMesh.visible = false;
+      return;
+    }
     const covered = entry.modules.size > 0
       && (pending === 0 || this.modulesOwnTheirShells(entry));
     entry.shellMesh.visible = !covered;
@@ -1146,6 +1090,9 @@ export class ConstructionView {
       : null;
     if (this.selectedId !== previousSelectedId) this.lodDirty = true;
     this.selectedAnchorId = this.selectedId && anchorId ? String(anchorId) : null;
+    if (this.selectedId && !this.entries.has(this.selectedId)) {
+      this.upsertRecord(this.store.get(this.selectedId));
+    }
     for (const [id, entry] of this.entries) this.applySelectionMaterial(id, entry);
     this.rebuildHandles();
   }
@@ -1779,6 +1726,7 @@ export class ConstructionView {
 
   dispose() {
     this.unsubscribe?.();
+    this.moduleBuilder.shutdown();
     this.finishPreviewDraft();
     for (const id of [...this.entries.keys()]) this.removeRecord(id);
     this.scene.remove(this.root);

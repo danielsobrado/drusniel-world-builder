@@ -10,34 +10,13 @@ import {
 } from './ChunkDocumentCodec.js';
 import {
   createSurfaceMaskConfig,
-  enrichPageRenderPixels,
   getSurfaceMaskSearchRadius,
 } from './ChunkRenderPixels.js';
 import { assertCompatibleWaterDomainMetadata } from '../water/WaterConfig.js';
-import { enrichPageWaterField } from '../water/WaterField.js';
-import { sampleWorldStoreWater } from '../water/TerrainWaterQueries.js';
-import { cellKey, chunkKey, parseCellKey } from './WorldCoordinates.js';
+import { chunkKey } from './WorldCoordinates.js';
 import { INFINITE_WORLD_FORMAT_VERSION } from './worldConstants.js';
 
 const MAX_TILE_ID = 255;
-
-function tileIndex(localX, localZ, chunkSize) {
-  return localZ * chunkSize + localX;
-}
-
-function heightIndex(localX, localZ, vertexSize) {
-  return localZ * vertexSize + localX;
-}
-
-function hasOverrideInRect(overrides, minX, maxX, minZ, maxZ) {
-  if (minX > maxX || minZ > maxZ) return false;
-  for (let cellZ = minZ; cellZ <= maxZ; cellZ += 1) {
-    for (let cellX = minX; cellX <= maxX; cellX += 1) {
-      if (overrides.has(cellKey(cellX, cellZ))) return true;
-    }
-  }
-  return false;
-}
 
 function recordWaterGeneration(page, durationMs) {
   page.timings = {
@@ -141,7 +120,9 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     this.surfaceMaskConfig = surfaceMaskConfig ?? createSurfaceMaskConfig(null);
     this.pendingChunks = new Map();
     this.baseTerrainRevision = 0;
+    this.worldStateEpoch = 0;
     this.disposed = false;
+    this.renderPagesPreparedInWorker = true;
   }
 
   restoreBaseTerrainState(baseTerrain, generator) {
@@ -180,13 +161,50 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     this.pendingChunks.clear();
   }
 
+  pageEditState(chunkX, chunkZ) {
+    const radius = Math.max(2, getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells));
+    const minX = chunkX * this.chunkSize - radius;
+    const maxX = (chunkX + 1) * this.chunkSize + radius;
+    const minZ = chunkZ * this.chunkSize - radius;
+    const maxZ = (chunkZ + 1) * this.chunkSize + radius;
+    return {
+      tiles: this.tileOverrides,
+      heights: this.heightOverrides,
+      tileVersion: this.tileOverrides.signature(minX, maxX, minZ, maxZ),
+      heightVersion: this.heightOverrides.signature(minX, maxX, minZ, maxZ),
+      bounds: [minX, maxX, minZ, maxZ],
+    };
+  }
+
+  pageEditsMatch(state, chunkX, chunkZ) {
+    if (!state) return false;
+    const current = this.pageEditState(chunkX, chunkZ);
+    return state.tiles === current.tiles && state.heights === current.heights
+      && state.tileVersion === current.tileVersion && state.heightVersion === current.heightVersion;
+  }
+
   requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining = 1) {
+    const epoch = this.worldStateEpoch;
+    const baseRevision = this.baseTerrainRevision;
     return Promise.resolve()
       .then(() => {
         if (this.disposed) {
           throw createCancelledRequestError('World chunk request cancelled by store disposal.');
         }
-        return this.chunkWorker.request(chunkX, chunkZ, { priority });
+        const editState = this.pageEditState(chunkX, chunkZ);
+        const terrainOverrides = {
+          tiles: editState.tiles.entriesInRect(...editState.bounds),
+          heights: editState.heights.entriesInRect(...editState.bounds),
+        };
+        return Promise.resolve(this.chunkWorker.request(chunkX, chunkZ, { priority, terrainOverrides })).then(page => {
+          if (this.disposed || epoch !== this.worldStateEpoch || baseRevision !== this.baseTerrainRevision) {
+            throw createCancelledRequestError('World chunk request superseded by a world change.');
+          }
+          if (!this.pageEditsMatch(editState, chunkX, chunkZ)) {
+            return this.requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining);
+          }
+          return { ...page, editState };
+        });
       })
       .catch((error) => {
         if (this.disposed) {
@@ -204,7 +222,8 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
 
     const key = chunkKey(chunkX, chunkZ);
     const cached = this.cache.get(key);
-    if (cached) {
+    if (cached && !cached.renderPixelsDirty
+        && this.pageEditsMatch(cached.editState, chunkX, chunkZ)) {
       this.clock += 1;
       cached.lastUsed = this.clock;
       return Promise.resolve(cached);
@@ -216,6 +235,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     }
 
     const sourceRevision = this.baseTerrainRevision;
+    const sourceEpoch = this.worldStateEpoch;
     const workerRequest = this.requestWorkerPage(chunkX, chunkZ, priority);
     const contentRequest = Promise.resolve().then(() => {
       if (this.disposed) {
@@ -227,12 +247,18 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     });
     let request;
     request = Promise.all([workerRequest, contentRequest])
-      .then(([page, content]) => {
+      .then(async ([page, content]) => {
         if (this.disposed) {
           throw createCancelledRequestError('World chunk request cancelled by store disposal.');
         }
-        if (sourceRevision !== this.baseTerrainRevision) {
+        if (sourceRevision !== this.baseTerrainRevision || sourceEpoch !== this.worldStateEpoch) {
           throw createCancelledRequestError('World chunk request superseded by a base terrain change.');
+        }
+        if (!this.pageEditsMatch(page.editState, chunkX, chunkZ)) {
+          page = await this.requestWorkerPage(chunkX, chunkZ, priority);
+          if (this.disposed || sourceRevision !== this.baseTerrainRevision || sourceEpoch !== this.worldStateEpoch) {
+            throw createCancelledRequestError('World chunk request superseded by a world change.');
+          }
         }
         assertWorkerPage(page, chunkX, chunkZ, this.chunkSize);
         return this.completeWorkerPage({
@@ -262,115 +288,24 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
   }
 
   refreshPageRenderPixels(page) {
-    const maskConfig = {
-      ...(this.generator.getSurfaceMaskConfig?.(this.surfaceMaskConfig) ?? this.surfaceMaskConfig),
-      worldSeed: this.generator.toMetadata?.().seed ?? 0,
-    };
-    delete page.grassScatter;
-    delete page.flowerScatter;
-    // Water first, as in generateBaseWorldChunk: the surface mask classifies
-    // land from this field, so rebuilding the mask against the pre-edit field
-    // would leave the bank a revision behind the water the edit just moved.
-    const waterStartedAt = performance.now();
-    enrichPageWaterField(
-      page,
-      (cellX, cellZ) => sampleWorldStoreWater(this, cellX, cellZ),
-    );
-    recordWaterGeneration(page, performance.now() - waterStartedAt);
-    enrichPageRenderPixels(
-      page,
-      (cellX, cellZ) => this.getTile(cellX, cellZ),
-      maskConfig,
-      (tileId) => this.generator.getTileDefinition?.(tileId),
-    );
-    return page;
-  }
-
-  hasHaloTileOverrides(originX, originZ) {
-    const overrides = this.tileOverrides;
-    if (overrides.size === 0) {
-      return false;
-    }
-    const searchRadius = getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells);
-    if (searchRadius <= 0) return false;
-
-    const chunkMinX = originX;
-    const chunkMaxX = originX + this.chunkSize - 1;
-    const chunkMinZ = originZ;
-    const chunkMaxZ = originZ + this.chunkSize - 1;
-    const haloMinX = chunkMinX - searchRadius;
-    const haloMaxX = chunkMaxX + searchRadius;
-    const haloMinZ = chunkMinZ - searchRadius;
-    const haloMaxZ = chunkMaxZ + searchRadius;
-    const haloWidth = this.chunkSize + searchRadius * 2;
-    const haloCellCount = haloWidth ** 2 - this.chunkSize ** 2;
-
-    if (overrides.size <= haloCellCount) {
-      for (const key of overrides.keys()) {
-        const { chunkX: cellX, chunkZ: cellZ } = parseCellKey(key);
-        const inHaloBounds = cellX >= haloMinX && cellX <= haloMaxX
-          && cellZ >= haloMinZ && cellZ <= haloMaxZ;
-        const inChunk = cellX >= chunkMinX && cellX <= chunkMaxX
-          && cellZ >= chunkMinZ && cellZ <= chunkMaxZ;
-        if (inHaloBounds && !inChunk) return true;
-      }
-      return false;
-    }
-
-    return hasOverrideInRect(overrides, haloMinX, haloMaxX, haloMinZ, chunkMinZ - 1)
-      || hasOverrideInRect(overrides, haloMinX, haloMaxX, chunkMaxZ + 1, haloMaxZ)
-      || hasOverrideInRect(overrides, haloMinX, chunkMinX - 1, chunkMinZ, chunkMaxZ)
-      || hasOverrideInRect(overrides, chunkMaxX + 1, haloMaxX, chunkMinZ, chunkMaxZ);
+    // Compatibility entry point stays asynchronous: render fields belong to the worker.
+    page.renderPixelsDirty = true;
+    return this.requestChunk(page.chunkX, page.chunkZ);
   }
 
   completeWorkerPage(page) {
     const current = this.cache.get(page.key);
-    if (current) {
-      return current;
+    if (current && !current.renderPixelsDirty
+        && this.pageEditsMatch(current.editState, page.chunkX, page.chunkZ)) return current;
+    if (!page.tilePixels || !page.surfaceMaskPixels || !page.waterFieldPixels || !page.waterFlowPixels
+        || page.renderPixelsDirty) {
+      throw new Error('World chunk worker must return a complete render-ready terrain page.');
     }
-    const { originX, originZ } = page;
-    let appliedTileOverrides = false;
-    let appliedHeightOverrides = false;
-    if (this.tileOverrides.size > 0) {
-      for (let localZ = 0; localZ < this.chunkSize; localZ += 1) {
-        for (let localX = 0; localX < this.chunkSize; localX += 1) {
-          const override = this.tileOverrides.get(cellKey(originX + localX, originZ + localZ));
-          if (override !== undefined) {
-            page.tiles[tileIndex(localX, localZ, this.chunkSize)] = override;
-            appliedTileOverrides = true;
-          }
-        }
-      }
-    }
-    if (this.heightOverrides.size > 0) {
-      for (let localZ = 0; localZ <= this.chunkSize; localZ += 1) {
-        for (let localX = 0; localX <= this.chunkSize; localX += 1) {
-          const override = this.heightOverrides.get(cellKey(originX + localX, originZ + localZ));
-          if (override !== undefined) {
-            page.heights[heightIndex(localX, localZ, this.vertexSize)] = override;
-            appliedHeightOverrides = true;
-          }
-        }
-      }
-    }
-
-    const pixelsMissing = !page.tilePixels || !page.surfaceMaskPixels;
-    const waterFieldsMissing = !page.waterFieldPixels || !page.waterFlowPixels;
-    const neighborHaloDirty = this.hasHaloTileOverrides(originX, originZ);
-    if (appliedTileOverrides || appliedHeightOverrides || pixelsMissing || waterFieldsMissing
-        || page.renderPixelsDirty || neighborHaloDirty) {
-      this.refreshPageRenderPixels(page);
-    }
-
     if (!page.waterGenerationRecorded && Number.isFinite(page.timings?.waterGenerationMs)) {
       recordWaterGeneration(page, page.timings.waterGenerationMs);
     }
     this.clock += 1;
-    const completed = {
-      ...page,
-      revision: this.revision,
-      lastUsed: this.clock,
-    };
+    const completed = { ...page, revision: this.revision, lastUsed: this.clock };
     this.cache.set(page.key, completed);
     this.evictCache();
     return completed;
@@ -392,11 +327,13 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
   }
 
   clearOverrides() {
+    this.worldStateEpoch += 1;
     this.pendingChunks.clear();
     return super.clearOverrides();
   }
 
   restoreSnapshot(snapshot) {
+    this.worldStateEpoch += 1;
     this.pendingChunks.clear();
     super.restoreSnapshot(snapshot);
   }
@@ -416,6 +353,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
   }
 
   restoreTransactionSnapshot(snapshot, { emit = true } = {}) {
+    this.worldStateEpoch += 1;
     this.pendingChunks.clear();
     if (this.baseTerrain !== snapshot.baseTerrain) {
       this.setBaseTerrain(snapshot.baseTerrain);
@@ -428,6 +366,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
   }
 
   loadDocument(document) {
+    this.worldStateEpoch += 1;
     this.pendingChunks.clear();
     const previous = this.createTransactionSnapshot();
 

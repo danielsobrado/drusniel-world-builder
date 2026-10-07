@@ -185,7 +185,7 @@ test('a synchronous postMessage failure replaces the poisoned worker slot', asyn
   }
 });
 
-test('worker construction failure falls back to main-thread chunk generation', async () => {
+test('worker construction failure pauses streaming without main-thread generation', async () => {
   const restoreWorker = installFakeWorker();
   const originalConsoleWarn = console.warn;
   console.warn = () => {};
@@ -196,10 +196,8 @@ test('worker construction failure falls back to main-thread chunk generation', a
     assert.equal(client.workers.length, 0);
     assert.equal(client.workerCount, 0);
     assert.equal(client.worldGenerator, null);
-    const page = await client.request(4, -3);
-    assert.equal(page.chunkX, 4);
-    assert.equal(page.chunkZ, -3);
-    assert.ok(client.worldGenerator);
+    await assert.rejects(client.request(4, -3), error => error.streamingUnavailable === true);
+    assert.equal(client.worldGenerator, null);
   } finally {
     client.dispose();
     console.warn = originalConsoleWarn;
@@ -246,7 +244,7 @@ test('a permanently failing worker slot is disabled without taking down healthy 
   }
 });
 
-test('a fully disabled worker pool degrades to main-thread generation', async () => {
+test('a fully disabled worker pool pauses streaming without main-thread generation', async () => {
   const restoreWorker = installFakeWorker();
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
@@ -260,9 +258,8 @@ test('a fully disabled worker pool degrades to main-thread generation', async ()
     FakeWorker.instances[2].emit('error', { message: 'boom 3', preventDefault() {} });
 
     assert.equal(client.workers.length, 0);
-    const page = await client.request(-2, 5);
-    assert.equal(page.chunkX, -2);
-    assert.equal(page.chunkZ, 5);
+    await assert.rejects(client.request(-2, 5), error => error.streamingUnavailable === true);
+    assert.equal(client.worldGenerator, null);
   } finally {
     client.dispose();
     console.error = originalConsoleError;

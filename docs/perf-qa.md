@@ -2,6 +2,16 @@
 
 Deterministic harness for reproducing and measuring player-mode stutter while moving across the streamed world.
 
+> Dense-meadow buffer changes, the 21 test-fixture corrections, repeated hardware
+> captures, and the passing 2026-10-07 matrix are recorded in
+> [dense-grass-test-fixes-2026-10-07.md](dense-grass-test-fixes-2026-10-07.md).
+> Grass preparation still lags movement; that report includes endpoint coverage
+> and post-stop recovery alongside the hitch results.
+
+> Authored terrain locality, worker-derived edited pages, construction geometry
+> workers and spatial residency, and worker failure handling are recorded in
+> [runtime-review-fixes-2026-10-07.md](runtime-review-fixes-2026-10-07.md).
+
 > The prepared terrain/vegetation work and hardware captures for 2026-10-04
 > are recorded in [perf-investigation-2026-10-04.md](perf-investigation-2026-10-04.md).
 > Settle now includes scenery preparation. Older captures can have incomplete
@@ -96,6 +106,7 @@ When a run finishes, the report is available as:
 | `autostart` | `1` | Start as soon as stylized assets are ready |
 | `download` | `1` | Auto-download the JSON report when done |
 | `density` | `standard` | `standard`, `dense-forest`, `high-grass`, or `dense-mixed` QA load envelope |
+| `gpuTimings` | off | `1` samples asynchronous WebGPU render-pass timestamps every eight measured frames. The optional `gpuRender` report includes totals and render-context timings. Unsupported adapters are reported explicitly. |
 | `constructionStyle` | default style | Wall style key for the `construction-ring` walls (and the castle captures that reuse them); an unknown key falls back to the default |
 
 ### Scenarios
@@ -106,6 +117,7 @@ When a run finishes, the report is available as:
 | `strafe` | Hold right (`D`) |
 | `diagonal` | Hold `W`+`D` |
 | `chunk-cross` | Long forward run intended to cross chunk boundaries |
+| `edited-world` | Authored biome/height patches, a distant override, and paint/sculpt every three seconds during diagonal movement |
 | `object-town` | Deterministic 64/256-building masonry town; set `buildings=64` or `256` |
 | `construction-ring` | Twelve deterministic 96 m wall constructions around a clear movement corridor (see the note below before using it to measure walls) |
 | `water-acceptance` | External phase driver: dry → swim → dive → surface → dry |
@@ -198,6 +210,8 @@ npm run qa:perf -- --headed --qa object-town --buildings 256 --warmup 8 --durati
 npm run qa:perf -- --headed --qa diagonal --density dense-mixed --warmup 8 --duration 14
 npm run qa:perf -- --headed --qa construction-ring --warmup 10 --duration 14
 npm run qa:perf -- --headed --cpu-profile tmp/diagonal.cpuprofile
+npm run qa:perf -- --headed --qa edited-world --warmup 8 --duration 12 --settle --drain-seconds 15
+npm run qa:perf -- --headed --qa construction-ring --settle --gpuTimings 1
 npm run qa:perf:matrix -- --headed --warmup 8 --duration 8
 npm run qa:perf:matrix -- --headed --water-only
 npm run qa:perf -- --headed

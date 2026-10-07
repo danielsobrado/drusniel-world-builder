@@ -3,6 +3,7 @@ import { generatePreparedPlacementChunk } from './PreparedPlacementChunk.js';
 import { generateBaseWorldChunk } from './generateWorldChunk.js';
 import { createTerrainWorkerBaseTerrain } from './TerrainWorkerBaseTerrain.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
+import { WorkerPriorityQueue } from './WorkerPriorityQueue.js';
 import { chunkKey } from './WorldCoordinates.js';
 
 const DEFAULT_MAX_IN_FLIGHT_PER_WORKER = 1;
@@ -60,6 +61,7 @@ export class WorldChunkWorkerClient {
     vegetationScatterConfig = null,
     workerCount = null,
     maxInFlightPerWorker = DEFAULT_MAX_IN_FLIGHT_PER_WORKER,
+    allowMainThreadFallback = typeof window === 'undefined' && typeof Worker !== 'function',
   }) {
     this.chunkSize = chunkSize;
     this.generator = generator.toMetadata();
@@ -70,9 +72,11 @@ export class WorldChunkWorkerClient {
     this.maxInFlightPerWorker = resolveMaxInFlightPerWorker(maxInFlightPerWorker);
     this.nextId = 1;
     this.pending = new Map();      // id -> { resolve, reject, workerIndex }
-    this.queue = [];               // waiting jobs (not yet dispatched)
+    this.queue = new WorkerPriorityQueue(); // waiting jobs (not yet dispatched)
     this.queuedByKey = new Map();  // chunk key -> queued job (for cancel/reprioritize)
     this.disposed = false;
+    this.allowMainThreadFallback = allowMainThreadFallback;
+    this.unavailableReason = null;
     this.workers = [];
     this.inFlight = [];
     this.workerRestartCounts = [];
@@ -93,10 +97,10 @@ export class WorldChunkWorkerClient {
       }
       if (this.workerCount === 0) {
         console.warn(
-          'World chunk workers are unavailable; generation will run on the main thread.',
+          'World chunk workers are unavailable; terrain streaming is paused.',
           firstCreationError,
         );
-        this.useMainThreadFallback();
+        this.disablePool(firstCreationError);
       } else if (firstCreationError) {
         console.warn('Some world chunk workers could not start; using reduced capacity.', firstCreationError);
       }
@@ -114,7 +118,8 @@ export class WorldChunkWorkerClient {
     return worker;
   }
 
-  useMainThreadFallback() {
+  disablePool(reason = null) {
+    this.unavailableReason = reason?.message ?? 'World chunk workers are unavailable. Terrain streaming is paused.';
     this.workers = [];
     this.inFlight = [];
     this.workerRestartCounts = [];
@@ -130,6 +135,11 @@ export class WorldChunkWorkerClient {
   }
 
   generateOnMainThread(request) {
+    if (!this.allowMainThreadFallback) {
+      const error = new Error(this.unavailableReason ?? 'World chunk workers are unavailable. Terrain streaming is paused.');
+      error.streamingUnavailable = true;
+      return Promise.reject(error);
+    }
     return Promise.resolve()
       .then(() => {
         if (this.disposed) throw disposedError();
@@ -163,7 +173,7 @@ export class WorldChunkWorkerClient {
     }
   }
 
-  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null } = {}) {
+  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null } = {}) {
     if (this.disposed) {
       return Promise.reject(disposedError());
     }
@@ -176,8 +186,9 @@ export class WorldChunkWorkerClient {
       vegetationScatterConfig: this.vegetationScatterConfig,
       placementSamplingConfig,
       materialBakeRequest,
+      terrainOverrides,
     };
-    // No workers available (Node/tests or degraded browser): preserve the async contract.
+    // CPU generation is an explicit non-browser backend; browser failure pauses streaming.
     if (this.workers.length === 0) {
       return this.generateOnMainThread(request);
     }
@@ -208,8 +219,7 @@ export class WorldChunkWorkerClient {
     if (!job) {
       return false;
     }
-    job.priority = priority;
-    return true;
+    return this.queue.reprioritize(job, priority);
   }
 
   /** Drop a request that has not started generating yet. */
@@ -220,7 +230,7 @@ export class WorldChunkWorkerClient {
       return false;
     }
     this.queuedByKey.delete(key);
-    this.queue = this.queue.filter((entry) => entry.id !== job.id);
+    this.queue.remove(job.id);
     const error = new Error('World chunk request cancelled.');
     error.cancelled = true;
     job.reject(error);
@@ -250,9 +260,8 @@ export class WorldChunkWorkerClient {
       if (workerIndex < 0) {
         break; // every worker is at capacity; wait for a completion
       }
-      this.queue.sort((left, right) => left.priority - right.priority || left.id - right.id);
       const job = this.queue.shift();
-      this.queuedByKey.delete(job.key);
+      if (this.queuedByKey.get(job.key) === job) this.queuedByKey.delete(job.key);
       this.inFlight[workerIndex] += 1;
       this.pending.set(job.id, {
         resolve: job.resolve,
@@ -353,11 +362,11 @@ export class WorldChunkWorkerClient {
     }
 
     if (this.workerCount === 0) {
-      const queued = this.queue;
-      this.queue = [];
+      const queued = [...this.queue];
+      this.queue.clear();
       this.queuedByKey.clear();
-      console.warn('World chunk worker pool is unavailable; falling back to main-thread generation.');
-      this.useMainThreadFallback();
+      console.warn('World chunk worker pool is unavailable; terrain streaming is paused.');
+      this.disablePool(error);
       for (const job of queued) {
         this.generateOnMainThread(job.request).then(job.resolve, job.reject);
       }
@@ -387,7 +396,7 @@ export class WorldChunkWorkerClient {
     for (const job of this.queue) {
       job.reject(error);
     }
-    this.queue = [];
+    this.queue.clear();
     this.queuedByKey.clear();
   }
 }

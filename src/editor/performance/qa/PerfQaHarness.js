@@ -1,5 +1,6 @@
 import { FrameProfiler } from './FrameProfiler.js';
 import { PerfCounters } from './PerfCounters.js';
+import { GpuPassProfiler } from './GpuPassProfiler.js';
 import { PerfQaSettleGate } from './PerfQaSettleGate.js';
 import { buildPerfReport, downloadPerfReport } from './buildPerfReport.js';
 import { createMovementPlan, parseQaParams } from './parseQaParams.js';
@@ -45,6 +46,7 @@ export class PerfQaHarness {
     this.voxelPrototype = voxelPrototype;
     this.editorConfig = editorConfig;
     this.profiler = new FrameProfiler({ hitchMs: config.hitchMs });
+    this.gpuProfiler = new GpuPassProfiler(terrainView?.renderer, { requested: config.gpuTimings });
     this.status = 'idle';
     this.phaseIndex = -1;
     this.phaseStartedAt = 0;
@@ -121,6 +123,7 @@ export class PerfQaHarness {
   }
 
   start() {
+    this.gpuProfiler.reset();
     PerfCounters.reset();
     this.objectView?.updatePerformanceCounters();
     if (this.config.scenarioId === 'object-town') {
@@ -158,6 +161,16 @@ export class PerfQaHarness {
       pitch: degreesToRadians(this.config.pitchDegrees),
     });
     this.enterPhase(this.plan.phases[0]);
+    this.nextTerrainEditAt = 0;
+    if (this.config.scenarioId === 'edited-world') {
+      const world = this.terrainView.worldStore;
+      // Authored patches along the deterministic route, plus an unrelated edit.
+      for (let offset = 0; offset <= 96; offset += 16) {
+        world.paintSquare(offset, offset, 5, 9);
+        world.setHeight(offset + 2, offset + 2, world.getHeight(offset + 2, offset + 2) + 0.5);
+      }
+      world.setTile(8192, -8192, 9);
+    }
     this.log(`Started ${this.config.scenarioId} at (${this.config.spawn.x}, ${this.config.spawn.z})`);
     this.renderOverlay();
   }
@@ -173,7 +186,21 @@ export class PerfQaHarness {
     if (!this.recording) {
       return false;
     }
-    return this.profiler.beginFrame(timestamp);
+    const recording = this.profiler.beginFrame(timestamp);
+    this.gpuProfiler.beginFrame(timestamp);
+    if (this.config.scenarioId === 'edited-world' && timestamp >= this.nextTerrainEditAt) {
+      this.nextTerrainEditAt = timestamp + 3000;
+      const world = this.terrainView.worldStore;
+      const position = this.playerController.getStatus().position;
+      const canonical = this.terrainView.floatingOrigin.toCanonical(position.x, position.z);
+      const x = Math.floor(canonical.x / world.tileSize) + 3;
+      const z = Math.floor(-canonical.z / world.tileSize) + 3;
+      world.paintSquare(x, z, 5, 9);
+      world.setHeight(x, z, world.getHeight(x, z) + 0.25);
+      PerfCounters.inc('qaTerrainEdits');
+      this.profiler.mark('terrainEdits');
+    }
+    return recording;
   }
 
   mark(phase) {
@@ -186,6 +213,7 @@ export class PerfQaHarness {
     originSnap = false,
     forcePredictiveRefresh = false,
   } = {}) {
+    this.gpuProfiler.endFrame();
     const collision = collisionStatus(this.playerController, { lightweight: true });
     this.live.collisionReady = collision?.ready ?? null;
     this.live.collisionFailure = collision?.failure?.message ?? null;
@@ -404,6 +432,7 @@ export class PerfQaHarness {
       },
     });
     this.report.samplingMisses = [...this.samplingMisses];
+    this.report.gpuRender = this.gpuProfiler.report();
     if (typeof window !== 'undefined') {
       window.__perfQaReport = this.report;
       try {
@@ -544,6 +573,7 @@ export class PerfQaHarness {
   }
 
   dispose() {
+    this.gpuProfiler.dispose();
     const world = this.terrainView?.worldStore;
     if (world?.onProceduralSamplingMiss === this.samplingMissObserver) {
       world.onProceduralSamplingMiss = this.previousSamplingMissObserver;

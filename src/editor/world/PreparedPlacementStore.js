@@ -107,6 +107,12 @@ export class PreparedPlacementStore {
   }
 
   overridesIn(kind, x, z, margin) {
+    const source = kind === 'tile' ? this.world.tileOverrides : this.world.heightOverrides;
+    if (source.persistedEntriesInRect) {
+      const size = this.world.chunkSize;
+      return source.persistedEntriesInRect(x * size - margin, (x + 1) * size + margin,
+        z * size - margin, (z + 1) * size + margin);
+    }
     this.rebuildOverrideIndexes();
     const size = this.world.chunkSize;
     const minX = x * size - margin;

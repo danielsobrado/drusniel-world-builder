@@ -6,5 +6,6 @@ export function compactionPrefix(output, capacity) {
     if (output.data[middle * 4 + 1] < capacity) low = middle + 1;
     else high = middle;
   }
-  return { position: output.position, rotation: output.rotation, data: output.data, count: low };
+  return { position: output.position, rotation: output.rotation, data: output.data, count: low,
+    minHeight: output.minHeight, maxHeight: output.maxHeight };
 }
