@@ -37,6 +37,7 @@ import {
   stylizedPathWearMask,
 } from './stylized/StylizedNoiseNodes.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './stylized/CoastSwashShading.js';
+import { createCoastSandNodes } from './stylized/CoastSandShading.js';
 import { createSnowSurfaceNodes } from './stylized/SnowSurfaceShading.js';
 import { blownStreaks } from './stylized/ambient/BlownStreaks.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
@@ -304,16 +305,24 @@ export function createTerrainMaterial({
     const paintedSurface = pathPaint
       ? { ...bakedSurface, ...pathPaint.apply(bakedSurface.color, bakedRoughness) }
       : { ...bakedSurface, roughness: bakedRoughness };
+    const coastPatterns = coastPatternsTemplate && slotPatternOrigins('coastPatterns', coastPatternsTemplate);
+    const sand = coastPatterns && createCoastSandNodes({
+      localXZ, patterns: coastPatterns, groundHeight: terrainHeight,
+      sandMask: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0))),
+      waterCoverage: surface.b, config: stylizedConfig.water?.coast?.sand,
+    });
+    const beachSurface = sand ? sand.apply(paintedSurface.color, paintedSurface.roughness) : paintedSurface;
     // Swash, foam and wet sand where the ground meets the sea.
     const swash = coastPatternsTemplate && createCoastSwashNodes({
       localXZ,
-      patternOrigins: slotPatternOrigins('coastPatterns', coastPatternsTemplate),
+      patternOrigins: coastPatterns,
       groundHeight: terrainHeight,
       config: { ...DEFAULT_COAST_SWASH, ...(stylizedConfig.water?.coast ?? {}) },
+      shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
     });
     const shoreSurface = swash
-      ? swash.apply(paintedSurface.color, paintedSurface.roughness)
-      : paintedSurface;
+      ? swash.apply(beachSurface.color, beachSurface.roughness)
+      : beachSurface;
     // Rain darkens and slicks exposed ground; snow and canopy shelter it.
     const surface = createRainWetnessShading({
       snow: bakedSurface.snow ?? float(0),

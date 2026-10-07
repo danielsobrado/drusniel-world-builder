@@ -1,5 +1,5 @@
 import { CubeCamera, CubeRenderTarget, HalfFloatType, LinearFilter, RenderTarget, Vector3 } from 'three/webgpu';
-import { abs, cubeTexture, distance, float, mix, positionWorld, smoothstep, texture, uniform } from 'three/tsl';
+import { abs, cubeTexture, distance, float, mix, positionWorld, smoothstep, texture, uniform, vec2 } from 'three/tsl';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { withReflectionCapture } from './ReflectionCapture.js';
 import { preparePlanarCamera } from './PlanarCamera.js';
@@ -48,7 +48,7 @@ export class WaterReflectionController {
     this.lastCaptureCpuMs = 0;
   }
 
-  sample(direction, fallback, allowPlanar = float(1)) {
+  sample(direction, fallback, allowPlanar = float(1), distortion = vec2(0)) {
     const local = this.valid.mul(smoothstep(this.config.reachMeters * 0.7, this.config.reachMeters,
       distance(positionWorld, this.origin)).oneMinus());
     let result = mix(fallback, this.cube.sample(direction).rgb, local);
@@ -56,7 +56,7 @@ export class WaterReflectionController {
       const { uv, weight: projectionWeight } = this.reprojection.uvNode();
       const weight = projectionWeight.mul(local).mul(allowPlanar)
         .mul(smoothstep(0.1, 0.3, abs(positionWorld.y.sub(this.planarHeight))).oneMinus());
-      result = mix(result, this.planar.sample(uv).rgb, weight);
+      result = mix(result, this.planar.sample(uv.add(distortion).clamp(0, 1)).rgb, weight);
     }
     return result;
   }

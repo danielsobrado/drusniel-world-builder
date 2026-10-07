@@ -1,10 +1,10 @@
 export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   detailVisibility: false, detailTurnMarginDegrees: 12, shadowCascades: 1, snowRelief: true, roadsideLanterns: false,
   waterReflections: Object.freeze({
-    enabled: false,
-    planar: false,
-    resolution: 256,
-    intervalMs: 250,
+    enabled: true,
+    planar: true,
+    resolution: 128,
+    intervalMs: 500,
     reachMeters: 96,
     captureFrameStride: 4,
     captureSafetyFactor: 1.25,
@@ -20,6 +20,8 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (params.get('enhancements') === 'high') {
     value.waterReflections.enabled = true;
     value.waterReflections.planar = true;
+    value.waterReflections.resolution = Math.max(256, value.waterReflections.resolution);
+    value.waterReflections.intervalMs = Math.min(250, value.waterReflections.intervalMs);
     value.shadowCascades = 2;
     value.roadsideLanterns = true;
   }

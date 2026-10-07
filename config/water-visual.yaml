@@ -79,6 +79,19 @@ water:
   # and it fades out in the shallows so the waterline stays put.
   sea:
     enabled: true
+    # Clear salt water has its own depth palette and RGB absorption, rather
+    # than inheriting the silty inland response. Values are per metre.
+    optics:
+      sunny: { lagoon: '#4fd3cf', shallow: '#259eac', deep: '#073c58' }
+      storm: { lagoon: '#2f8a80', shallow: '#176662', deep: '#032d48' }
+      absorptionCoefficients: [0.896, 0.182, 0.14]
+      absorptionDensity: 0.22
+      lagoonStart: 0.18
+      lagoonEnd: 2.5
+      deepStart: 0.71
+      deepEnd: 8.6
+      maximumOpticalDistance: 43
+      fresnelStrength: 0.85
     # Offshore crest height in metres; a storm multiplies it by stormScale.
     amplitude: 0.9
     stormScale: 1.65
@@ -131,6 +144,16 @@ water:
   # above sea level, so it follows any coast; lakes and rivers get none.
   coast:
     enabled: true
+    sand:
+      enabled: true
+      dryDark: '#b39a72'
+      dryLight: '#d6be96'
+      seabedColor: '#efe6cf'
+      seabedColorWeight: 0.55
+      reefColor: '#426356'
+      reefRockColor: '#6d7b68'
+      reefStrength: 0.55
+      causticStrength: 0.65
     # Seconds per wave, and how far above still water it runs up the sand.
     period: 7.5
     runupHeight: 1.1

@@ -12,6 +12,7 @@ export function createSeaRippleNodes({ map, patterns, localXZ, phases, amplitude
   const medium = oneMinus(smoothstep(settings.mediumDistance * 0.55, settings.mediumDistance, distance));
   const fine = oneMinus(smoothstep(settings.fineDistance * 0.55, settings.fineDistance, distance));
   let slope = vec2(0);
+  let unresolvedVariance = float(0);
   for (const layer of seaDetailLayers(settings)) {
     const uv = patterns.latticePoint(layer.name, localXZ.add(orbit))
       .add(vec2(time.mul(layer.speed).mod(1), 0));
@@ -23,8 +24,13 @@ export function createSeaRippleNodes({ map, patterns, localXZ, phases, amplitude
       filtered.x.mul(layer.z).add(filtered.y.mul(layer.x)));
     const weight = layer.index === 0 ? 0.78 : layer.index === 1 ? 0.22 : 1;
     const fade = layer.index === 2 ? fine.mul(settings.fineStrength) : medium.mul(settings.mediumStrength);
-    slope = slope.add(rotated.mul(fade).mul(weight * 0.62));
+    const gain = fade.mul(weight * 0.62);
+    slope = slope.add(rotated.mul(gain));
+    unresolvedVariance = unresolvedVariance.add(variance.mul(gain.mul(gain)));
   }
   // Avoid independent short waves overwhelming steep carrier faces.
-  return slope.mul(strength).mul(mix(float(0.4), float(1), smoothstep(0.1, 0.7, strength)));
+  return {
+    slope: slope.mul(strength).mul(mix(float(0.4), float(1), smoothstep(0.1, 0.7, strength))),
+    variance: unresolvedVariance.mul(strength.mul(strength)),
+  };
 }

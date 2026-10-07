@@ -2,6 +2,7 @@ import {
   abs,
   cos,
   float,
+  fwidth,
   max,
   mix,
   oneMinus,
@@ -67,12 +68,17 @@ const FOAM_BREAKUP_WAVE = Object.freeze([0.27, -0.21]);
 
 /** The per-chunk pattern origins the swash reads; re-centre them with the terrain chunk. */
 export function createCoastPatternOrigins() {
-  return new PatternOrigins({
-    drift: { scale: DRIFT_SCALE },
-    frontBreakup: { wave: FRONT_BREAKUP_WAVE },
-    foamBreakup: { wave: FOAM_BREAKUP_WAVE },
-  });
+  return new PatternOrigins(COAST_PATTERN_FRAMES);
 }
+
+export const COAST_PATTERN_FRAMES = Object.freeze({
+  drift: { scale: DRIFT_SCALE },
+  frontBreakup: { wave: FRONT_BREAKUP_WAVE },
+  foamBreakup: { wave: FOAM_BREAKUP_WAVE },
+  // Macro's 1/8 frequency closes over this 512-unit origin period too.
+  sand: { scale: 0.18 },
+  sandCaustics: { scale: 1, period: 5.5 },
+});
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -92,6 +98,8 @@ export function createCoastSwashNodes({
   patternOrigins,
   groundHeight,
   config = DEFAULT_COAST_SWASH,
+  clock = time,
+  shorelineFadeDepth = 0.35,
 }) {
   if (!config.enabled) return null;
   const height = groundHeight.sub(seaStateUniforms.seaLevel);
@@ -101,7 +109,7 @@ export function createCoastSwashNodes({
   const drift = periodicFbm(patternOrigins.latticePoint('drift', localXZ)).mul(TAU * 1.6);
   const frontBreakupPhase = patternOrigins.wavePhase('frontBreakup', localXZ);
   const foamBreakupPhase = patternOrigins.wavePhase('foamBreakup', localXZ);
-  const phase = time.mul(TAU / config.period).add(drift);
+  const phase = clock.mul(TAU / config.period).add(drift);
   const frontAt = (samplePhase) => {
     const excursion = oneMinus(cos(samplePhase)).mul(0.5);
     const breakup = sin(frontBreakupPhase.add(samplePhase.mul(0.17)))
@@ -116,7 +124,8 @@ export function createCoastSwashNodes({
   const film = coverageAt(phase).mul(band);
   const foamBreakup = smoothstep(0.2, 0.8, sin(foamBreakupPhase.add(phase))
     .mul(0.5).add(0.5));
-  const foam = oneMinus(smoothstep(config.foamCore, config.foamWidth, abs(height.sub(front))))
+  const foamDistance = abs(height.sub(front));
+  const foam = oneMinus(smoothstep(config.foamCore, max(float(config.foamWidth), fwidth(foamDistance)), foamDistance))
     .mul(float(1 - config.breakupStrength).add(foamBreakup.mul(config.breakupStrength)))
     .mul(film.max(0.3))
     .mul(band);
@@ -128,12 +137,16 @@ export function createCoastSwashNodes({
   const wet = max(memory, damp).mul(band);
   const filmTint = colorNode(config.filmTint);
   const foamColor = colorNode(config.foamColor);
+  // The same foam front crosses sand and water. The ground owns the portion
+  // where the water sheet fades out; deeper water owns it through refraction.
+  const groundHandoff = oneMinus(smoothstep(0, shorelineFadeDepth, height.negate()));
 
   return {
+    film, foam, wet,
     apply(color, roughness) {
       let result = color.mul(mix(float(1), float(config.wetDarkening), wet));
       result = mix(result, result.mul(filmTint).mul(1.6), film.mul(config.filmTintStrength));
-      result = mix(result, foamColor, foam.mul(config.foamStrength));
+      result = mix(result, foamColor, foam.mul(config.foamStrength).mul(groundHandoff));
       let resultRoughness = mix(roughness, float(config.wetRoughness), wet);
       resultRoughness = mix(resultRoughness, float(config.filmRoughness), film);
       resultRoughness = mix(resultRoughness, float(0.72), foam);

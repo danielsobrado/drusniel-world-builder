@@ -2,10 +2,10 @@
 detailVisibility: false
 detailTurnMarginDegrees: 12
 waterReflections:
-  enabled: false
-  planar: false
-  resolution: 256
-  intervalMs: 250
+  enabled: true
+  planar: true
+  resolution: 128
+  intervalMs: 500
   reachMeters: 96
 shadowCascades: 1
 snowRelief: true

@@ -11,14 +11,17 @@ import {
   normalize,
   oneMinus,
   positionWorld,
+  pow,
   select,
   sin,
   smoothstep,
+  sqrt,
   vec2,
   vec3,
 } from 'three/tsl';
 import { createSeaSwellNodes } from '../water/SeaSwell.js';
 import { seaStateUniforms } from '../water/seaState.js';
+import { createSeaFoamNoise } from './SeaSurfNodes.js';
 
 /** Nearshore normals follow the rendered depth contours and amplitude envelope. */
 function displacedSurfaceSlope() {
@@ -77,7 +80,6 @@ export function createSeaSurfaceNodes({
   );
   const sharpness = float(config.choppiness * 0.075).mul(storm.mul(0.5).add(1));
   const swell = createSeaSwellNodes({ localXZ, phaseOrigin, time, sharpness });
-  const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time, settings: resolveSeaSurf(config.surf) });
   const seaMask = seaWaterMask({ surfaceWorldHeight, currentStrength });
   const offshore = float(config.amplitude).mul(storm.mul(config.stormScale - 1).add(1));
   const amplitude = min(offshore, waterDepth.mul(config.depthRatio))
@@ -85,9 +87,6 @@ export function createSeaSurfaceNodes({
     .mul(seaMask)
     .mul(waterCoverage)
     .toVarying('seaSwellAmplitude');
-  const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
-  const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
-  const slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope;
   // Share of full offshore height, so crests and whitecaps fade in the shallows.
   const strength = amplitude.div(offshore.max(1e-4));
 
@@ -95,6 +94,11 @@ export function createSeaSurfaceNodes({
     patternXZ, time, choppiness: config.choppiness, strength, patterns, localXZ,
     phases: swell.phases, amplitude, settings: config.detail,
   }) : null;
+  const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time, laceTexture: detail?.map,
+    settings: resolveSeaSurf(config.surf) });
+  const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
+  const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
+  const slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope;
   const surfaceSlope = detail ? slope.add(detail.slope) : slope;
   const normal = normalize(vec3(surfaceSlope.x.negate(), 1, surfaceSlope.y.negate()));
   const sun = normalize(sunDirection);
@@ -120,6 +124,15 @@ export function createSeaSurfaceNodes({
     displacement: height.mul(amplitude),
     release: detail?.release,
     normal,
+    foamNoise: detail?.map ? createSeaFoamNoise(detail.map, patterns, localXZ, time) : float(1),
+    glint(viewDirection) {
+      const roughness = float(0.055).add(storm.mul(0.09))
+        .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
+      const specular = dot(sun.negate().reflect(normal), viewDirection).max(0);
+      const exponent = mix(float(190), float(18), smoothstep(0.05, 0.48, roughness));
+      return pow(specular, exponent).mul(1.55)
+        .add(pow(specular, mix(float(24), float(8), roughness)).mul(0.12));
+    },
     // How much of this water is sea, 0..1: at sea level and without a current.
     mask: seaMask,
     surfFoam: surf?.foam.mul(seaMask),

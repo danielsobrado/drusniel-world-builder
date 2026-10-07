@@ -47,6 +47,8 @@ import {
 import { createSurfaceClassNodes } from './SurfaceMaskNodes.js';
 import { createWaterfallFoamNode } from './WaterfallShading.js';
 import { createSeaSurfaceNodes, seaWaterMask } from './SeaSurfaceShading.js';
+import { createSeaOpticsNodes } from './SeaOpticsShading.js';
+import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './CoastSwashShading.js';
 import { createRainRippleNode } from './RainRippleShading.js';
 import { createRiverSurfaceNodes } from './RiverSurfaceShading.js';
 import { compositeWaterFoam, waterRippleRefraction } from './WaterSurfaceResponse.js';
@@ -210,6 +212,7 @@ export function createStylizedWaterMaterial({
     surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
     currentStrength,
   }));
+  const seaOptics = sea ? createSeaOpticsNodes(waterDepth, water.sea.optics) : null;
   const distort = surfaceNoise.sub(0.5).mul(water.distortAmount);
   const sampleUv = surfacePatterns.latticePoint('cells', localXZ)
     .add(surfaceOffset)
@@ -280,17 +283,21 @@ export function createStylizedWaterMaterial({
     const verticalDistance = mix(waterDepth, cameraSubmersionDepth, underwaterBlend);
     opticalDistance = min(
       verticalDistance.div(viewCosine),
-      optics.maximumOpticalDistance,
+      seaOptics ? mix(float(optics.maximumOpticalDistance), float(seaOptics.settings.maximumOpticalDistance), sea.mask)
+        : optics.maximumOpticalDistance,
     );
-    const transmission = exp(opticalDistance.mul(-optics.absorptionDensity));
+    const density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), sea.mask)
+      : float(optics.absorptionDensity);
+    const transmission = exp(opticalDistance.mul(density).negate());
     const absorbed = oneMinus(transmission);
     bedVisibility = transmission;
     const depthMix = smoothstep(optics.shallowDepth, optics.deepDepth, waterDepth);
-    const depthColor = mix(
+    const inlandColor = mix(
       colorNode(optics.shallowColor),
       colorNode(optics.deepColor),
       depthMix,
     );
+    const depthColor = seaOptics ? mix(inlandColor, seaOptics.color, sea.mask) : inlandColor;
     bodyColor = mix(
       depthColor,
       colorNode(optics.underwaterColor),
@@ -309,6 +316,11 @@ export function createStylizedWaterMaterial({
     surfaceReflection = pow(oneMinus(reflectionCosine), FRESNEL_POWER)
       .mul(quality.fresnelStrength)
       .mul(reflectionVisibility);
+    if (seaOptics) {
+      const seaFresnel = pow(oneMinus(reflectionCosine), 3).mul(0.96).add(0.04)
+        .mul(Math.min(1, seaOptics.settings.fresnelStrength * quality.fresnelStrength / 0.42));
+      surfaceReflection = mix(surfaceReflection, seaFresnel.mul(reflectionVisibility), sea.mask);
+    }
     color = mix(bodyColor, legacyColor, surfaceDetailMix);
     alpha = mix(
       float(optics.minimumOpacity),
@@ -351,6 +363,8 @@ export function createStylizedWaterMaterial({
       const riverFoam = river.foam.mul(quality.foamStrength * (water.riverSurface.foamStrength ?? 1));
       foamAmount = mix(foamAmount, riverFoam, inland);
     }
+    // Sea foam comes from breaking crests and the shared swash front.
+    if (sea) foamAmount = foamAmount.mul(oneMinus(sea.mask));
     foamAmount = foamAmount.mul(waterCoverage);
   }
 
@@ -382,9 +396,10 @@ export function createStylizedWaterMaterial({
       waterDepth,
     );
     const warp = refractionWarp(coarsePoint, finePoint);
-    const distortionUv = (river
+    const inlandWarp = river
       ? mix(warp, waterRippleRefraction(river.normal, river.baseNormal), inland)
-      : warp)
+      : warp;
+    const distortionUv = (sea ? mix(inlandWarp, waterRippleRefraction(sea.normal, vec3(0, 1, 0)), sea.mask) : inlandWarp)
       .mul(refraction.strength * quality.refractionStrength)
       .mul(depthFactor);
     const baseViewportUv = viewportSafeUV(screenUV);
@@ -415,11 +430,12 @@ export function createStylizedWaterMaterial({
       acceptedViewportUv,
       float(refraction.mipLevel),
     ).rgb;
-    const coefficients = vec3(
+    const inlandCoefficients = vec3(
       refraction.absorptionCoefficients[0],
       refraction.absorptionCoefficients[1],
       refraction.absorptionCoefficients[2],
     );
+    const coefficients = seaOptics ? mix(inlandCoefficients, seaOptics.absorption, sea.mask) : inlandCoefficients;
     const channelTransmission = exp(coefficients.mul(opticalDistance).negate());
     const refractedBody = sceneColor.mul(channelTransmission)
       .add(bodyColor.mul(oneMinus(channelTransmission)));
@@ -442,6 +458,7 @@ export function createStylizedWaterMaterial({
       const intersectionFoam = contact
         .mul(foam.intersectionStrength * quality.intersectionFoamStrength)
         .mul(river ? mix(float(1), smoothstep(0.25, 0.7, river.foamNoise), inland) : float(1))
+        .mul(sea ? mix(float(1), smoothstep(0.25, 0.7, sea.foamNoise), sea.mask) : float(1))
         .mul(waterCoverage);
       foamAmount = max(foamAmount, intersectionFoam);
     }
@@ -494,12 +511,14 @@ export function createStylizedWaterMaterial({
   }
 
   if (quality.fresnelStrength > 0) {
+    const reflected = normalize(positionWorld.sub(cameraPosition)).reflect(sea?.normal ?? vec3(0, 1, 0));
+    const sky = mix(colorNode('#81a8b4'), colorNode('#38658a'), smoothstep(0, 0.7, reflected.y))
+      .mul(skyLightUniforms.reflectionTint);
     // The reflected sky takes the current look's tint (dusk, night, overcast).
     color = mix(
       color,
-      reflections ? reflections.sample(normalize(positionWorld.sub(cameraPosition)).reflect(sea?.normal ?? vec3(0, 1, 0)),
-        colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint))
-        : colorNode(water.highlightColor).mul(skyLightUniforms.reflectionTint),
+      reflections ? reflections.sample(reflected, sky, float(0.65),
+        sea ? waterRippleRefraction(sea.normal, vec3(0, 1, 0)).mul(0.014) : vec2(0)) : sky,
       clamp(river ? surfaceReflection.mul(oneMinus(inland)) : surfaceReflection, 0, 1),
     );
   }
@@ -507,14 +526,21 @@ export function createStylizedWaterMaterial({
     // The donor's own Fresnel over its sky, damped on a fall's white face.
     color = mix(
       color,
-      reflections ? reflections.sample(river.reflected, river.sky.mul(skyLightUniforms.reflectionTint), float(0))
+      reflections ? reflections.sample(river.reflected, river.sky.mul(skyLightUniforms.reflectionTint),
+        oneMinus(smoothstep(0.05, 0.2, currentStrength)).mul(oneMinus(fall)),
+        waterRippleRefraction(river.normal, river.baseNormal).mul(0.014))
         : river.sky.mul(skyLightUniforms.reflectionTint),
       river.fresnel.mul(oneMinus(fall.mul(0.85))).mul(reflectionVisibility).mul(inland),
     );
   }
 
   if (sea && quality.foam && water.foam.enabled) {
-    const whitecap = max(sea.whitecap(), sea.surfFoam ?? float(0)).mul(waterCoverage);
+    const coast = createCoastSwashNodes({ localXZ, patternOrigins: surfacePatterns,
+      groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterDepth),
+      config: { ...DEFAULT_COAST_SWASH, ...water.coast }, clock: time,
+      shorelineFadeDepth: water.optics.shorelineFadeDepth });
+    const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask) : float(0);
+    const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), swashFoam).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
     whitewater = whitewater ? max(whitewater, whitecap) : whitecap;
   }
@@ -525,7 +551,8 @@ export function createStylizedWaterMaterial({
     // make the foam transparent a second time.
     const aeration = whitewater && fallPlunge
       ? max(fallPlunge.x, clamp(fallPlunge.y.mul(1.5), 0, 1)) : float(0);
-    const foamColor = mix(colorNode(water.foam.color), colorNode('#e4f5ff'), aeration);
+    const inlandFoamColor = mix(colorNode(water.foam.color), colorNode('#e4f5ff'), aeration);
+    const foamColor = sea ? mix(inlandFoamColor, colorNode(water.coast?.foamColor ?? '#edf8fb'), sea.mask) : inlandFoamColor;
     const foamed = compositeWaterFoam(color, alpha, foamColor,
       clamp(foamAmount, 0, 1).mul(waterlineFade));
     color = foamed.color;
@@ -576,6 +603,11 @@ export function createStylizedWaterMaterial({
   if (river) {
     lit = lit.add(river.glint.mul(skyLightUniforms.sunColor)
       .mul(inland).mul(waterCoverage).mul(reflectionVisibility)
+      .mul(oneMinus(clamp(foamAmount, 0, 1))));
+  }
+  if (sea) {
+    lit = lit.add(sea.glint(normalize(cameraPosition.sub(positionWorld))).mul(skyLightUniforms.sunColor)
+      .mul(sea.mask).mul(waterCoverage).mul(reflectionVisibility)
       .mul(oneMinus(clamp(foamAmount, 0, 1))));
   }
   material.colorNode = lit;
