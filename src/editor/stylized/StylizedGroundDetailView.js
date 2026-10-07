@@ -4,7 +4,7 @@ import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
-import { evaluateAquaticPlacement } from '../water/AquaticPlacement.js';
+import { evaluateDetailSurfacePlacement } from './DetailSurfacePlacement.js';
 import { instanceCapacity } from './scatterMath.js';
 import { createStableChunkManifestBuilder } from './StableScatterManifest.js';
 import {
@@ -17,14 +17,16 @@ import { extractAuthoredGroupedPrototypes } from './StylizedPrototypeBake.js';
 import { acceptsStrategicDetailPlacement } from './StrategicDetailPlacement.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
-import { evaluateStrandPlacement } from './strandPlacement.js';
 import { groundDetailWindPosition } from './groundDetailWind.js';
+import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
 const DETAIL_SCRATCH = {
   position: new THREE.Vector3(),
   quaternion: new THREE.Quaternion(),
   scale: new THREE.Vector3(),
+  normal: new THREE.Vector3(),
+  yaw: new THREE.Quaternion(),
 };
 
 function cloneDetailMaterial(source, { wind = null, height = 0 } = {}) {
@@ -85,6 +87,9 @@ export class StylizedGroundDetailView {
     this.prototypePlacementRules = [];
     this.prototypeWaterRules = [];
     this.prototypeStrandRules = [];
+    this.prototypeShoreRules = [];
+    this.oceanDistance = layerName === 'shoreLife'
+      ? createOceanDistanceField(terrainView, layerConfig.coastalReachMeters ?? 48) : null;
     this.prototypeBiomeRules = [];
     this.prototypeIndexForRoll = null;
     this.prototypeRevision = 0;
@@ -132,6 +137,7 @@ export class StylizedGroundDetailView {
               : null),
         );
         this.prototypeStrandRules.push(null);
+        this.prototypeShoreRules.push(null);
         this.prototypeBiomeRules.push({
           tileIds: definition.tileIds ?? null,
           weight: definition.prototypeWeights?.[groupIndex] ?? definition.weight ?? 1,
@@ -181,6 +187,7 @@ export class StylizedGroundDetailView {
     this.meshes.push(...createInstancedRenderers({
       root: this.root,
       partsByPrototype: this.prototypes.slice(firstNewPrototype),
+      renderer: this.terrainView.renderer,
       capacity,
       name: `stylized-${this.layerName}-${firstNewPrototype}`,
       castShadow: this.layerConfig.castShadow === true,
@@ -220,6 +227,7 @@ export class StylizedGroundDetailView {
       this.prototypeStrandRules.push(
         definition.strand ?? this.layerConfig.strand ?? null,
       );
+      this.prototypeShoreRules.push(definition.shoreHabitat ?? null);
       this.prototypeBiomeRules.push({
         tileIds: definition.tileIds ?? null,
         weight: definition.weight ?? 1,
@@ -231,6 +239,7 @@ export class StylizedGroundDetailView {
         geometry: part.geometry,
         material: part.material,
         kind: part.kind ?? 'detail',
+        instanceSurface: part.instanceSurface,
       })));
       registerPrototypeIndices(
         this.prototypeIndicesByAsset,
@@ -250,6 +259,7 @@ export class StylizedGroundDetailView {
     this.meshes.push(...createInstancedRenderers({
       root: this.root,
       partsByPrototype: this.prototypes.slice(firstNewPrototype),
+      renderer: this.terrainView.renderer,
       capacity,
       name: `stylized-${this.layerName}-${firstNewPrototype}`,
       castShadow: this.layerConfig.castShadow === true,
@@ -271,6 +281,7 @@ export class StylizedGroundDetailView {
       JSON.stringify(this.prototypePlacementRules),
       JSON.stringify(this.prototypeWaterRules),
       JSON.stringify(this.prototypeStrandRules),
+      JSON.stringify(this.prototypeShoreRules),
       this.regionalCharacterField?.signature ?? 'uniform-regions',
       forestField?.signature ?? 'uniform-forest',
       this.biomeAssetPalette?.revision ?? 0,
@@ -319,27 +330,8 @@ export class StylizedGroundDetailView {
           },
         )) return null;
 
-        let metadata = null;
-        if (this.layerName === 'aquaticPlant') {
-          const waterSample = this.terrainView.getCanonicalWater?.(candidate.x, candidate.z);
-          metadata = evaluateAquaticPlacement({
-            waterSample,
-            layerRule: this.layerConfig.water,
-            prototypeRule: this.prototypeWaterRules[candidate.prototypeIndex],
-          });
-          if (!metadata) return null;
-        } else if (this.prototypeStrandRules[candidate.prototypeIndex]) {
-          // The band either side of the waterline, which has no water sample to
-          // read because the field reports no kind on dry ground.
-          const strand = evaluateStrandPlacement({
-            height: candidate.height,
-            seaLevel: this.terrainView.worldStore?.generator?.seaLevel,
-            layerRule: this.layerConfig.strand,
-            prototypeRule: this.prototypeStrandRules[candidate.prototypeIndex],
-          });
-          if (!strand) return null;
-          metadata = strand;
-        }
+        const metadata = evaluateDetailSurfacePlacement(this, candidate, options.heightAt);
+        if (!metadata) return null;
 
         const tileDensity = this.layerConfig.densityByTile?.[candidate.tileId] ?? 1;
         if (tileDensity < 1 && candidate.priority >= tileDensity) return null;
@@ -419,12 +411,17 @@ export class StylizedGroundDetailView {
                 placementHeight + (this.prototypeHeightOffsets[placement.prototypeIndex] ?? 0),
                 placement.z,
               ),
-              DETAIL_SCRATCH.quaternion.setFromAxisAngle(DETAIL_UP, placement.rotationY),
+              placement.groundNormal
+                ? DETAIL_SCRATCH.quaternion.setFromUnitVectors(DETAIL_UP,
+                  DETAIL_SCRATCH.normal.fromArray(placement.groundNormal)).multiply(
+                  DETAIL_SCRATCH.yaw.setFromAxisAngle(DETAIL_UP, placement.rotationY))
+                : DETAIL_SCRATCH.quaternion.setFromAxisAngle(DETAIL_UP, placement.rotationY),
               DETAIL_SCRATCH.scale.setScalar(placement.scale),
             ),
             fade: 1,
             seed: placement.priority,
             colorVariation: 1 - colorVariation * 0.5 + placement.priority * colorVariation,
+            surfaceData: placement.surfaceData,
           });
         }
       }
@@ -458,6 +455,8 @@ export class StylizedGroundDetailView {
     this.prototypePlacementRules.length = 0;
     this.prototypeWaterRules.length = 0;
     this.prototypeStrandRules.length = 0;
+    this.prototypeShoreRules.length = 0;
+    this.oceanDistance?.cache.clear();
     this.prototypeBiomeRules.length = 0;
     this.prototypeIndicesByAsset.clear();
     this.prototypeIndexForRoll = null;

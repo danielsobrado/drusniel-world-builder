@@ -556,6 +556,7 @@ export class StylizedTreeView {
     this.prototypeWidth = Math.max(...proxies.map((prototype) => prototype.width));
     this.renderers = createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: this.prototypes,
       capacity: nearCapacity,
       name: 'stylized-pine-near',
@@ -564,6 +565,7 @@ export class StylizedTreeView {
     });
     this.proxyRenderers = createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: this.proxyPrototypes,
       capacity: proxyCapacity,
       name: 'stylized-pine-proxy',
@@ -572,6 +574,7 @@ export class StylizedTreeView {
     });
     this.fallbackImpostorRenderers = createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: this.proxyPrototypes,
       capacity: impostorCapacity,
       name: 'stylized-pine-impostor-fallback',
@@ -586,6 +589,7 @@ export class StylizedTreeView {
       : [];
     this.clusterRenderers = createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: this.clusterPrototypes,
       capacity: capacityFor(settings.clusterRadius),
       name: 'stylized-canopy-cluster',
@@ -595,6 +599,7 @@ export class StylizedTreeView {
     this.understoryPrototypes = createForestUnderstoryPrototypes(this.config);
     this.understoryRenderers = createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: this.understoryPrototypes,
       // Deadwood is emitted from the near band only.
       capacity: nearCapacity,

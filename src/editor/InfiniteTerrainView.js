@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { installUnusedSamplerPruning } from '../render/UnusedSamplerBindings.js';
+import { installSurfaceAnisotropy } from '../render/SurfaceAnisotropyController.js';
 import { uniform } from 'three/tsl';
 import {
   PERF_COUNTER_OCCLUSION_CANDIDATES,
@@ -327,6 +328,7 @@ export class InfiniteTerrainView {
       trackTimestamp: new URLSearchParams(window.location.search).get('gpuTimings') === '1',
     });
     this.samplerPruning = installUnusedSamplerPruning(this.renderer);
+    this.surfaceAnisotropy = installSurfaceAnisotropy(this.renderer, stylizedConfig.enhancements?.surfaceAnisotropy);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, rendererConfig.maxPixelRatio));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     // Match the workshop preview renderer. Until 2026-07-25 the world used no
@@ -1116,6 +1118,7 @@ export class InfiniteTerrainView {
       return;
     }
     this.disposed = true;
+    this.surfaceAnisotropy?.dispose();
     this.samplerPruning?.dispose();
     if (typeof this.worldStore.cancelChunk === 'function') {
       for (const slot of this.slots) {

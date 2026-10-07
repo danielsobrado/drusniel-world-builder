@@ -189,7 +189,7 @@ export class StylizedSurfaceView {
     // no scene to load so they install here.
     if (this.aquaticPlantView) {
       this.aquaticPlantView.appendProceduralPrototypes(
-        createAquaticFloraPrototypes(config.aquaticPlants),
+        createAquaticFloraPrototypes(config.aquaticPlants, config.water),
       );
     }
     // Shore life is procedural, so unlike the authored layers it installs here and
@@ -712,6 +712,9 @@ export class StylizedSurfaceView {
     this.variantResidency?.update(this.frameStartedAt);
     this.skyView?.update(timestamp, camera);
     this.wildlifeView?.update(timestamp, camera);
+    // Aquatic plants remain visible while land preparation stands down. Their
+    // clock must keep matching the water surface during swimming and diving.
+    advancePlantSway(timestamp);
     // Under water, the land stands down: the water sheet and the fog occlude
     // everything above the surface, and this project's cost is in the rebuilding —
     // scatter compactions, buffer uploads, ground-texture paints — rather than in
@@ -759,7 +762,6 @@ export class StylizedSurfaceView {
       if (view.visibility) this.runDeferredWork?.(() => view.visibility.update(camera, this.shouldYieldWork));
     }
     // One clock for every swaying plant, advanced once here rather than per layer.
-    advancePlantSway(timestamp);
     syncViewRebuildQueue(this.detailBuildQueue, this.detailViews);
     this.detailBuildQueue.flush((job, shouldYield) => {
       for (const view of this.detailViews) {

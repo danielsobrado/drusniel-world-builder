@@ -1,6 +1,7 @@
 import { packSampleTable, sampleTableBuffers } from './PreparedSampleTable.js';
 import { preparePlacementEcology } from './PreparedPlacementEcology.js';
 import { computeRoadDistanceField } from './ChunkRenderPixels.js';
+import { oceanTile } from '../water/OceanDistanceField.js';
 
 /** Exact CPU terrain and canonical distance fields; rendering keeps its Float32 payload. */
 export function generatePreparedPlacementChunk(request, generator) {
@@ -23,7 +24,10 @@ export function generatePreparedPlacementChunk(request, generator) {
     const width = size + margin * 2;
     const fieldTiles = new Uint8Array(width ** 2);
     for (let z = 0; z < width; z++) for (let x = 0; x < width; x++) {
-      fieldTiles[z * width + x] = tileAt(originX + x - margin, originZ + z - margin);
+      const cx = originX + x - margin, cz = originZ + z - margin;
+      const tile = tileAt(cx, cz);
+      fieldTiles[z * width + x] = target.oceanOnly && tile === 0
+        ? oceanTile(tile, generator.sampleWater(cx + 0.5, cz + 0.5)) : target.oceanOnly ? 1 : tile;
     }
     fields[target.label] = {
       size: width, margin, originX, originZ,

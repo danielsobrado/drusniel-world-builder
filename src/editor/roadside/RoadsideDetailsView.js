@@ -43,7 +43,7 @@ export class RoadsideDetailsView {
       if (this.disposed || !this.enabled) return;
       const parts = createGodsEndAssetParts(scene, definition.asset);
       this.parts = parts.map(part => ({ geometry: part.geometry.applyMatrix4(part.matrix), material: part.material }));
-      this.meshes = createInstancedRenderers({ root: this.root, partsByPrototype: [this.parts], capacity: 128,
+      this.meshes = createInstancedRenderers({ root: this.root, renderer: this.terrainView.renderer, partsByPrototype: [this.parts], capacity: 128,
         name: 'roadside-lantern', castShadow: true });
       this.assetPath = path; retained = true;
     } finally { if (!retained) cache.release(path); }

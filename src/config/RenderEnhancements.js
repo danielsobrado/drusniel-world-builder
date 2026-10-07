@@ -1,5 +1,6 @@
 export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   detailVisibility: false, detailTurnMarginDegrees: 12, shadowCascades: 1, snowRelief: true, roadsideLanterns: false,
+  surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
     enabled: true,
     planar: true,
@@ -15,6 +16,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
 export function resolveRenderEnhancements(source = {}, search = '', { mobile = false } = {}) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) throw new TypeError('Render enhancements must be an object.');
   const value = { ...RENDER_ENHANCEMENT_DEFAULTS, ...source,
+    surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
   const params = new URLSearchParams(search);
   if (params.get('enhancements') === 'high') {
@@ -51,6 +53,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (!Number.isInteger(water.captureFrameStride) || water.captureFrameStride < 1 || water.captureFrameStride > 16) {
     throw new RangeError('waterReflections.captureFrameStride must be an integer in [1, 16].');
   }
-  if (mobile) { value.shadowCascades = 1; water.enabled = false; water.planar = false; }
+  if (mobile) { value.shadowCascades = 1; water.enabled = false; water.planar = false;
+    value.surfaceAnisotropy.level = Math.min(4, value.surfaceAnisotropy.level); }
   return value;
 }

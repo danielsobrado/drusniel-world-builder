@@ -90,22 +90,25 @@ export class RockManifestStore {
       state = this.createState(x, z, key);
       this.pending.set(cacheKey, state);
     }
-    const stageNames = ['Scatter', 'Riverbank', 'Coast', 'Seabed'];
-    while (state.stage < 4 && !shouldYield()) {
+    const stageNames = ['Scatter', 'Riverbank', 'Coast', 'Seabed', 'GroundFit'];
+    while (state.stage < 5 && !shouldYield()) {
       const started = performance.now();
       const placements = state.builder.step({ shouldYield });
       PerfCounters.inc(`rock${stageNames[state.stage]}Ms`, performance.now() - started);
       if (placements === null) break;
-      state.placements.push(...placements);
+      if (state.stage === 4) state.placements = placements;
+      else state.placements.push(...placements);
       state.stage++;
       if (state.stage < 4) {
         const factories = [null, 'riverbankRocksForChunk', 'coastStonesForChunk', 'seabedRocksForChunk'];
         const factory = factories[state.stage];
         state.builder = createIteratorBuilder(() => this.view[factory](x, z));
+      } else if (state.stage === 4) {
+        state.builder = createIteratorBuilder(() => this.view.resolveGroundPlacements(state.placements));
       }
     }
     PerfCounters.inc('rockManifestBuildSlices');
-    if (state.stage < 4 || shouldYield()) {
+    if (state.stage < 5 || shouldYield()) {
       this.queue.enqueue(job);
       return true;
     }

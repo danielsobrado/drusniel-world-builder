@@ -9,12 +9,9 @@ import {
 /**
  * Pebbles and small stones on beaches (after grass-test's beach scatter).
  *
- * Coasts here come from Azgaar, not an analytic curve, so a beach is simply
- * ground standing just above the sea: candidates on a jittered grid are kept
- * where the ground is within `band` metres above sea level, thinned by a
- * clustering noise so stones gather in drifts with clean sand between. Lake
- * shores stand above sea level and get none; the swash (CoastSwashShading)
- * washes over the lowest ones.
+ * Jittered candidates stand within `band` metres above sea level and within
+ * reach of an actual ocean body. Clustering leaves clean sand between drifts.
+ * The ocean distance field excludes inland lakes, even at the same elevation.
  *
  * Most chunks are nowhere near the sea: five height samples reject them before
  * any candidate is tried.
@@ -38,7 +35,7 @@ const CHUNK_REJECT_MARGIN = 12;
  * @param {number} options.seaLevel
  * @param {object} [options.config] `rocks.coast`
  */
-export function* iterateCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, ...sinkOptions }) {
+export function* iterateCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, coastalDistanceAt = null, ...sinkOptions }) {
   if (!config.enabled) return [];
   const sink = createStonePlacementSink({ prefix: 'coast-rock', ...sinkOptions });
   const { tileSize, heightAt } = sinkOptions;
@@ -67,6 +64,7 @@ export function* iterateCoastStones({ seaLevel, config = DEFAULT_COAST_STONES, .
       const height = heightAt(x, z);
       const above = height - seaLevel;
       if (above < 0.05 || above > config.band) continue;
+      if (coastalDistanceAt && !(coastalDistanceAt(x, z) <= 24)) continue;
       // Densest just above the water, thinning up the beach.
       const beach = 1 - smoothstep(config.band * 0.4, config.band, above);
       const cluster = smoothstep(0.45, 0.8, clusterNoise(x, z, config.clusterMeters, 0x71));

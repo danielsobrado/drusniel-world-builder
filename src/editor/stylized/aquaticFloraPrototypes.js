@@ -3,6 +3,9 @@ import { AQUATIC_PLACEMENT_SURFACE } from '../water/AquaticPlacement.js';
 import { GODS_END_AQUATIC_SPECIES as KINDS } from '../assets/godsEnd/aquatic/aquaticSpecies.js';
 import { createGodsEndAquaticGeometry } from '../assets/godsEnd/aquatic/aquaticGeometry.js';
 import { applyAquaticSway } from './aquaticSway.js';
+import { attribute, positionLocal, vec3 } from 'three/tsl';
+import { plantSwayTime } from './plantSway.js';
+import { lakeWaveRise } from '../water/LakeSurfaceWaves.js';
 
 /**
  * Water plants — after grass-test's sea algae (seagrass, kelp, red tufts) and its
@@ -26,7 +29,7 @@ import { applyAquaticSway } from './aquaticSway.js';
  */
 export const AQUATIC_FLORA_KINDS = Object.freeze(Object.keys(KINDS));
 
-function materialFor(kind, entry, height) {
+function materialFor(kind, entry, height, clock) {
   const material = new THREE.MeshStandardNodeMaterial({
     color: entry.color ?? '#ffffff',
     vertexColors: true,
@@ -36,6 +39,14 @@ function materialFor(kind, entry, height) {
     transparent: kind.placement === AQUATIC_PLACEMENT_SURFACE,
     depthWrite: true,
   });
+  if (kind.placement === AQUATIC_PLACEMENT_SURFACE) {
+    const surface = attribute('instanceSurface', 'vec3');
+    // positionLocal is already instanced here: rise is in metres and must not
+    // inherit the plant's scale. Stable CPU phases survive origin rebases.
+    material.positionNode = positionLocal.add(vec3(0, lakeWaveRise([surface.x, surface.y], clock).mul(surface.z), 0));
+    material.roughness = entry.roughness ?? 0.55;
+    return material;
+  }
   return applyAquaticSway(material, { amount: entry.sway ?? kind.sway, height });
 }
 
@@ -44,7 +55,7 @@ function materialFor(kind, entry, height) {
  *
  * @param {object} layer `stylizedSurface.aquaticPlants`
  */
-export function createAquaticFloraPrototypes(layer = {}) {
+export function createAquaticFloraPrototypes(layer = {}, water = {}, { clock = plantSwayTime } = {}) {
   const definitions = [];
   for (const [id, entry] of Object.entries(layer.proceduralVariants ?? {})) {
     const spec = entry?.kind ?? id;
@@ -62,10 +73,12 @@ export function createAquaticFloraPrototypes(layer = {}) {
       id,
       parts: [{
         geometry,
-        material: materialFor(kind, entry, height),
+        material: materialFor(kind, entry, height, clock),
         kind: 'detail',
+        instanceSurface: kind.placement === AQUATIC_PLACEMENT_SURFACE,
       }],
-      heightOffset: kind.placement === AQUATIC_PLACEMENT_SURFACE ? 0.06 : layer.heightOffset ?? 0,
+      heightOffset: kind.placement === AQUATIC_PLACEMENT_SURFACE
+        ? (water.heightOffset ?? 0.12) + 0.035 : layer.heightOffset ?? 0,
       // The water rule the view hands to `evaluateAquaticPlacement`: niche depth,
       // which bodies it lives in, and rooted or floating.
       water: {

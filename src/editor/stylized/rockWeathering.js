@@ -23,13 +23,9 @@ import { stylizedFbm2 } from './StylizedNoiseNodes.js';
  * shaded undersides and a toned-down albedo are what make them sit in the world
  * instead, and it is a handful of ALU ops with no extra texture.
  *
- * The donor's wet waterline is adapted rather than copied: it reads its sea and
- * lake levels from the fixed map's config, and this world has no fixed levels —
- * a lake's surface depends on the body the stone is standing in. Sea level is the
- * one level that is global, so the splash line keys on that, and a stone on a
- * lake shore simply keeps its dry band. A per-point answer would need the rock
- * material to bind the water field, which is a much larger change than this
- * effect is worth.
+ * The streamed rock view resolves each stone's nearest water body once during
+ * placement. Its packed instance attribute supplies level and eligibility, so
+ * rivers and raised lakes carry their own splash lines without a GPU water field.
  *
  * The donor also dithered rocks away in front of the character. This project's
  * `CharacterOcclusion` deliberately cuts foliage only — rocks are solid obstacles
@@ -105,7 +101,7 @@ export function resolveRockWeathering(configured) {
  * @param {object} options.settings resolved weathering settings
  * @param {number|null} [options.seaLevel] world sea level, for the splash line
  */
-export function applyRockWeathering(material, { settings, seaLevel = null }) {
+export function applyRockWeathering(material, { settings, seaLevel = null, localWater = false }) {
   if (!settings?.enabled) return material;
   const sourceMap = material.map ?? null;
   const world = positionWorld;
@@ -151,13 +147,15 @@ export function applyRockWeathering(material, { settings, seaLevel = null }) {
   // Wet, dark and glossy up to a ragged splash line at the sea, with the green
   // that grows just above it. The donor darkens the band; the tint is the half of
   // a waterline that makes it read as a tide mark rather than as shadow.
-  if (Number.isFinite(seaLevel) && settings.waterline > 0) {
-    const level = uniform(seaLevel);
+  if ((localWater || Number.isFinite(seaLevel)) && settings.waterline > 0) {
+    const contact = localWater ? attribute('instanceSurface', 'vec3') : null;
+    const level = contact ? contact.x : uniform(seaLevel);
+    const eligible = contact ? contact.y : float(1);
     const splash = stylizedFbm2(pattern.xz.mul(0.7)).mul(0.5).add(0.5)
-      .mul(settings.waterlineHeight);
+      .mul(settings.waterlineHeight).mul(contact ? contact.z.mul(0.5).add(1) : float(1));
     const above = world.y.sub(level);
     const wet = above.smoothstep(splash.mul(0.6), splash.add(0.15)).oneMinus()
-      .mul(above.smoothstep(-2, -0.5))
+      .mul(eligible)
       .mul(settings.waterline);
     weathered = weathered.mul(wet.mul(settings.wetDarkening).oneMinus());
     roughness = mix(roughness, float(0.25), wet);
@@ -169,7 +167,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null }) {
       const growth = band.mul(above.smoothstep(-0.2, 0.7)).oneMinus()
         .mul(splash)
         .mul(settings.algae);
-      weathered = mix(weathered, color(settings.algaeColor ?? ALGAE), growth.clamp(0, 1));
+      weathered = mix(weathered, color(settings.algaeColor ?? ALGAE), growth.mul(eligible).clamp(0, 1));
     }
   }
 

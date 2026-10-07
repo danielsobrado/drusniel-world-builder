@@ -1,6 +1,9 @@
 # Optional quality features. These are deliberately independent of world generation.
 detailVisibility: false
 detailTurnMarginDegrees: 12
+surfaceAnisotropy:
+  enabled: true
+  level: 16
 waterReflections:
   enabled: true
   planar: true

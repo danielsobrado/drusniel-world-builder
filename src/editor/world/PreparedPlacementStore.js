@@ -34,6 +34,8 @@ export class PreparedPlacementStore {
     this.targets = [];
     const waterRange = Number(config.trees.habitat?.waterRangeMeters) || 0;
     if (waterRange > 0) this.targets.push({ label: 'water', maxCells: Math.ceil(waterRange / tileSize), targetTileId: config.water.tileId ?? 0 });
+    if (config.shoreLife?.enabled || config.rocks?.coast?.enabled) this.targets.push({ label: 'coast',
+      maxCells: Math.ceil((config.shoreLife?.coastalReachMeters ?? 48) / tileSize), targetTileId: 0, oceanOnly: true });
     if (config.path?.clearCells > 0) this.targets.push({ label: 'path', maxCells: config.path.clearCells, targetTileId: config.path.tileId ?? 13 });
     const slopeCells = (Number(config.trees.habitat?.slopeSampleDistance) || 4) / tileSize;
     const rockGridCells = (Number(config.rocks?.clusterSampleSpacing) || 6) / tileSize;

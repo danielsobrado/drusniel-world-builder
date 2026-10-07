@@ -24,12 +24,14 @@ const LOD_WORLD_POSITION = { x: 0, y: 0, z: 0 };
  *
  * x = signed LOD fade, y = stable dither seed, z = colour variation.
  */
-function createGeometry(source, capacity, tinted, morphed) {
+function createGeometry(source, capacity, tinted, morphed, surface) {
   const geometry = source.clone();
   const dither = new Float32Array(capacity * 3);
   // Colour variation is a multiplier, so it must default to 1 rather than 0.
   for (let index = 0; index < capacity; index += 1) dither[index * 3 + 2] = 1;
   geometry.setAttribute('instanceDither', new THREE.InstancedBufferAttribute(dither, 3));
+  if (surface) geometry.setAttribute('instanceSurface',
+    new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
   if (morphed) {
     geometry.setAttribute(
       'instanceMorphology',
@@ -77,11 +79,12 @@ export function createInstancedRenderers({
   name,
   castShadow,
   tintLeaves = false,
+  renderer = null,
 }) {
   return partsByPrototype.map((parts, prototypeIndex) => parts.map((part, partIndex) => {
     const tinted = tintLeaves && part.kind === 'leaf';
     const morphed = tintLeaves;
-    const geometry = createGeometry(part.geometry, capacity, tinted, morphed);
+    const geometry = createGeometry(part.geometry, capacity, tinted, morphed, part.instanceSurface);
     if (morphed && part.kind === 'trunk') {
       geometry.setAttribute('instanceRootPlane', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
     }
@@ -100,7 +103,11 @@ export function createInstancedRenderers({
     // matrices the buffer was created with — the donor rock pack drew nothing at
     // all until forced to re-upload. A storage buffer is its own binding with one
     // version, so every tracked range reaches the GPU.
-    mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+    // WebGL cannot bind a mat4 storage attribute. Its standard instancing path
+    // uses a uniform buffer or four interleaved columns instead.
+    if (!renderer?.backend?.isWebGLBackend) {
+      mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+    }
     mesh.count = 0;
     mesh.matrixAutoUpdate = false;
     mesh.castShadow = Boolean(castShadow && part.kind !== 'leaf');
@@ -186,6 +193,8 @@ const MATRIX_RANGE = { min: Infinity, max: -1 };
 const DITHER_RANGE = { min: Infinity, max: -1 };
 const TINT_RANGE = { min: Infinity, max: -1 };
 const MORPHOLOGY_RANGE = { min: Infinity, max: -1 };
+const SURFACE_RANGE = { min: Infinity, max: -1 };
+const DRY_SURFACE = Object.freeze([0, 0, 0]);
 
 /**
  * @param {Array<Array<THREE.InstancedMesh>>} renderers parts per prototype
@@ -210,12 +219,15 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       const tints = mesh.geometry.getAttribute('instanceLeafTint');
       const morphologies = mesh.geometry.getAttribute('instanceMorphology');
       const roots = mesh.geometry.getAttribute('instanceRootPlane');
+      const surfaces = mesh.geometry.getAttribute('instanceSurface');
       const matrixRange = resetDirtyRange(MATRIX_RANGE);
       const ditherRange = resetDirtyRange(DITHER_RANGE);
       const tintRange = resetDirtyRange(TINT_RANGE);
       const morphologyRange = resetDirtyRange(MORPHOLOGY_RANGE);
+      const surfaceRange = resetDirtyRange(SURFACE_RANGE);
       for (let index = 0; index < writableCount; index += 1) {
         const instance = instances[index];
+        if (surfaces) writeVector3Instance(surfaces, index, instance.surfaceData ?? DRY_SURFACE, surfaceRange);
         if (roots) {
           const fit = instance.rootFit;
           const e = instance.matrix.elements;
@@ -251,6 +263,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       markAttributeSubrangeUpdated(dither, ditherRange.min, ditherRange.max);
       if (tints) markAttributeSubrangeUpdated(tints, tintRange.min, tintRange.max);
       if (roots) markAttributeSubrangeUpdated(roots, morphologyRange.min, morphologyRange.max);
+      if (surfaces) markAttributeSubrangeUpdated(surfaces, surfaceRange.min, surfaceRange.max);
       if (morphologies) {
         markAttributeSubrangeUpdated(
           morphologies,

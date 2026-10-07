@@ -377,6 +377,7 @@ export class ObjectView {
       renderer.lodMeshes = {
         near: createInstancedRenderers({
           root: this.root,
+          renderer: this.terrainView.renderer,
           partsByPrototype: [renderer.lodSources.near],
           capacity,
           name: `${renderer.definition.key}-near`,
@@ -384,6 +385,7 @@ export class ObjectView {
         })[0],
         coarse: createInstancedRenderers({
           root: this.root,
+          renderer: this.terrainView.renderer,
           partsByPrototype: [renderer.lodSources.coarse],
           capacity,
           name: `${renderer.definition.key}-coarse`,
@@ -391,6 +393,7 @@ export class ObjectView {
         })[0],
         shell: createInstancedRenderers({
           root: this.root,
+          renderer: this.terrainView.renderer,
           partsByPrototype: [renderer.lodSources.shell],
           capacity,
           name: `${renderer.definition.key}-shell`,

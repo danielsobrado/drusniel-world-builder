@@ -204,6 +204,7 @@ export class StylizedBushView {
     });
     this.meshes.push(...createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: newPrototypes.map((prototype) => [prototype]),
       capacity,
       name: `stylized-bush-near-${firstNewPrototype}`,
@@ -211,6 +212,7 @@ export class StylizedBushView {
     }));
     this.proxyMeshes.push(...createInstancedRenderers({
       root: this.root,
+      renderer: this.terrainView.renderer,
       partsByPrototype: newProxyPrototypes.map((prototype) => [prototype]),
       capacity,
       name: `stylized-bush-proxy-${firstNewPrototype}`,

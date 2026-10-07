@@ -54,6 +54,7 @@ import { createRiverSurfaceNodes } from './RiverSurfaceShading.js';
 import { compositeWaterFoam, waterRippleRefraction } from './WaterSurfaceResponse.js';
 import { seaStateUniforms } from '../water/seaState.js';
 import { skyLightUniforms } from './sky/skyLight.js';
+import { LAKE_WAVES, lakeWaveRise } from '../water/LakeSurfaceWaves.js';
 
 const CAUSTIC_RING_RADIUS = 0.4;
 const CAUSTIC_AA_SCALE = 1.25;
@@ -583,6 +584,12 @@ export function createStylizedWaterMaterial({
   let surfaceHeight = waterField.g.add(waterSurfaceOrigin)
     .add(float(water.heightOffset).mul(waterlineFade));
   if (sea) surfaceHeight = surfaceHeight.add(sea.displacement);
+  if (water.riverSurface?.enabled && quality.flow) {
+    const phases = LAKE_WAVES.map((_, i) => surfacePatterns.wavePhase(`lakeWave${i}`, localXZ));
+    surfaceHeight = surfaceHeight.add(lakeWaveRise(phases, time)
+      .mul(oneMinus(clamp(currentStrength.mul(4), 0, 1)))
+      .mul(sea ? oneMinus(sea.mask) : float(1)).mul(waterlineFade));
+  }
   const material = new THREE.MeshBasicNodeMaterial({
     transparent: true,
     depthWrite: false,

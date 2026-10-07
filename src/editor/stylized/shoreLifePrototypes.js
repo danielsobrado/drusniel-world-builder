@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { STRAND_PLACEMENT_GROUND } from './strandPlacement.js';
+import { SHORE_HABITATS } from './shoreHabitat.js';
 import {
   createDriftwoodGeometry,
   createLeafGeometry,
@@ -13,9 +14,8 @@ import {
  *
  * One kind per donor feature, each shape coming from `proceduralFlora.js` and its
  * material built here rather than extracted from an asset. The band each one
- * occupies is what matters: all of these are placed against an authored coastline
- * in the donor, and the equivalent here is a band of metres above sea level, which
- * is what `strand` carries.
+ * occupies is what matters: `strand` carries its height band and `shoreHabitat`
+ * adds the donor's ocean proximity, moisture, clustering and slope restrictions.
  *
  * Each shape is built at its *natural size* — a 12 cm starfish, a 6 cm shell, a
  * 1.6 m twig — and the layer's scale band is then only variation around that,
@@ -107,6 +107,9 @@ export function createShoreLifePrototypes(layer = {}) {
         kind: 'detail',
       }],
       heightOffset: entry.heightOffset ?? layer.heightOffset ?? 0,
+      shoreHabitat: { ...SHORE_HABITATS[kind], ...entry.habitat,
+        reachMeters: Math.min(entry.habitat?.reachMeters ?? SHORE_HABITATS[kind].reachMeters,
+          layer.coastalReachMeters ?? 48) },
       // The layer owns the band; a variant narrows it, which is how one layer
       // carries species that live at different heights on the same beach.
       strand: {

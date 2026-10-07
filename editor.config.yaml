@@ -1481,6 +1481,7 @@ stylizedSurface:
   # or below the waterline: the donor places all of this against an authored
   # coastline, and a height band is the streamed equivalent of that curve.
   shoreLife:
+    coastalReachMeters: 48
     enabled: true
     # Shores are the third ring in: grass and rocks already occupy the near ones,
     # and this is the layer the player notices last.

@@ -37,6 +37,10 @@ import { RiverRockSource } from './RiverRockSource.js';
 import { iterateCoastStones, DEFAULT_COAST_STONES } from './coastStones.js';
 import { iterateSeabedRocks, DEFAULT_SEABED_ROCKS } from './seabedRocks.js';
 import { applyRockWeathering, resolveRockWeathering } from './rockWeathering.js';
+import { fitRockToGround } from './rockGroundFit.js';
+import { rockWaterContact } from './localRockWater.js';
+import { staticWaterAt } from '../water/StaticWaterSample.js';
+import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
 
@@ -60,6 +64,7 @@ function cloneMaterial(mesh, config, weathering) {
     applyRockWeathering(material, {
       settings: weathering.settings,
       seaLevel: weathering.seaLevel,
+      localWater: true,
     });
   }
   material.needsUpdate = true;
@@ -115,6 +120,8 @@ export class StylizedRockView {
     this.coastStoneConfig = { ...DEFAULT_COAST_STONES, ...(config.rocks?.coast ?? {}) };
     this.seabedRockConfig = { ...DEFAULT_SEABED_ROCKS, ...(config.rocks?.seabed ?? {}) };
     this.rockWeatheringSettings = resolveRockWeathering(config.rocks?.weathering);
+    this.oceanDistance = this.coastStoneConfig.enabled
+      ? createOceanDistanceField(terrainView, config.shoreLife?.coastalReachMeters ?? 48) : null;
     this.biomeAssetPalette = biomeAssetPalette;
     this.regionalCharacterField = regionalCharacterField;
     this.prototypeIndicesByAsset = new Map();
@@ -126,6 +133,7 @@ export class StylizedRockView {
     this.prototypes = [];
     this.proxyPrototypes = [];
     this.prototypeHeights = [];
+    this.prototypeFootprints = [];
     this.meshes = [];
     this.proxyMeshes = [];
     this.placements = [];
@@ -197,6 +205,7 @@ export class StylizedRockView {
       geometry,
       material: cloneMaterial(source, this.config, this.rockWeathering()),
       kind: 'rock',
+      instanceSurface: Boolean(this.rockWeatheringSettings),
     }));
     this.prototypes.push(...newPrototypes);
     // Both fields describe the terrain, not the prop set, so they are built once
@@ -226,6 +235,7 @@ export class StylizedRockView {
       geometry: prototype.geometry.clone(),
       material: prototype.material.clone(),
       kind: 'rock',
+      instanceSurface: prototype.instanceSurface,
     }]);
     this.proxyPrototypes.push(...newProxyPrototypes);
     this.prototypeHeights.push(...newPrototypes.map((prototype) => {
@@ -236,9 +246,14 @@ export class StylizedRockView {
       );
     }));
     this.prototypeHeight = Math.max(...this.prototypeHeights);
+    this.prototypeFootprints.push(...newPrototypes.map(({ geometry }) => Math.max(
+      geometry.boundingBox.max.x - geometry.boundingBox.min.x,
+      geometry.boundingBox.max.z - geometry.boundingBox.min.z,
+    )));
     this.meshes.push(...createInstancedRenderers({
       root: this.root,
       partsByPrototype: newPrototypes.map((prototype) => [prototype]),
+      renderer: this.terrainView.renderer,
       capacity,
       name: `stylized-rock-near-${firstNewPrototype}`,
       castShadow: true,
@@ -246,6 +261,7 @@ export class StylizedRockView {
     this.proxyMeshes.push(...createInstancedRenderers({
       root: this.root,
       partsByPrototype: newProxyPrototypes,
+      renderer: this.terrainView.renderer,
       capacity,
       name: `stylized-rock-proxy-${firstNewPrototype}`,
       castShadow: false,
@@ -383,6 +399,21 @@ export class StylizedRockView {
     return this.manifestStore.get(chunkX, chunkZ);
   }
 
+  *resolveGroundPlacements(placements) {
+    const heightAt = (x, z) => this.terrainView.getCanonicalHeight(x, z);
+    const waterAt = (x, z) => staticWaterAt(this.terrainView, x, z);
+    const resolved = [];
+    for (const placement of placements) {
+      yield;
+      const footprint = this.prototypeFootprints[placement.prototypeIndex] ?? placement.radius * 2 / placement.scale;
+      const fit = fitRockToGround(placement, footprint, heightAt);
+      if (!fit) continue;
+      resolved.push(Object.freeze({ ...placement, height: fit.groundFitHeight,
+        surfaceData: Object.freeze(this.rockWeatheringSettings ? rockWaterContact(placement, footprint, waterAt) : [0, 0, 0]) }));
+    }
+    return resolved;
+  }
+
   manifestOptions(chunkX, chunkZ) {
     return {
       kind: 'rock',
@@ -433,6 +464,7 @@ export class StylizedRockView {
       ),
       radiusForScale: options.radiusForScale,
       config: this.coastStoneConfig,
+      coastalDistanceAt: (x, z) => this.oceanDistance.worldDistanceAt(x, z),
     });
   }
 
@@ -561,6 +593,7 @@ export class StylizedRockView {
               ditherDirection: representation.ditherDirection ?? 1,
               seed: placement.priority,
               colorVariation: 1 - colorRange * 0.5 + placement.priority * colorRange,
+              surfaceData: placement.surfaceData,
             };
             const target = representation.band === 'near' ? near : proxy;
             target[placement.prototypeIndex].push(instance);
@@ -613,6 +646,8 @@ export class StylizedRockView {
     }
     this.prototypes.length = 0;
     this.prototypeHeights.length = 0;
+    this.prototypeFootprints.length = 0;
+    this.oceanDistance?.cache.clear();
     disposePrototypeParts(this.proxyPrototypes);
     this.prototypeIndicesByAsset.clear();
     this.placements.length = 0;

@@ -25,6 +25,8 @@ function rockHarness() {
     prototypeCount: 1, minScale: 1, maxScale: 1, radiusForScale: () => 0,
   });
   rocks.riverbankRocksForChunk = rocks.coastStonesForChunk = rocks.seabedRocksForChunk = function* () { return []; };
+  // This harness isolates queue ownership; surface fitting has separate tests.
+  rocks.resolveGroundPlacements = function* (placements) { yield; return placements; };
   rocks.manifestStore = new RockManifestStore(rocks);
   rocks.manifestStore.queue.buildsPerFrame = 1;
   const surface = Object.create(StylizedSurfaceViewBase.prototype);
