@@ -71,12 +71,21 @@ export function createCoastPatternOrigins() {
   return new PatternOrigins(COAST_PATTERN_FRAMES);
 }
 
-export const COAST_PATTERN_FRAMES = Object.freeze({
+export const COAST_SWASH_PATTERN_FRAMES = Object.freeze({
   drift: { scale: DRIFT_SCALE },
   frontBreakup: { wave: FRONT_BREAKUP_WAVE },
   foamBreakup: { wave: FOAM_BREAKUP_WAVE },
-  // Macro's 1/8 frequency closes over this 512-unit origin period too.
-  sand: { scale: 0.18 },
+});
+
+export const COAST_PATTERN_FRAMES = Object.freeze({
+  ...COAST_SWASH_PATTERN_FRAMES,
+  sandMacro: { scale: 0.0225 },
+  sandReef: { scale: 0.09 },
+  sandMesoX: { wave: [0.558, 0] },
+  sandMesoWarp: { wave: [0, 0.684] },
+  sandMesoZ: { wave: [0, 0.846] },
+  sandRippleX: { wave: [3.42, 0] },
+  sandRippleWarp: { wave: [0, 1.26] },
   sandCaustics: { scale: 1, period: 5.5 },
 });
 
@@ -100,11 +109,13 @@ export function createCoastSwashNodes({
   config = DEFAULT_COAST_SWASH,
   clock = time,
   shorelineFadeDepth = 0.35,
+  oceanMask = float(1),
 }) {
   if (!config.enabled) return null;
   const height = groundHeight.sub(seaStateUniforms.seaLevel);
   const band = smoothstep(-config.breakDepth - 0.2, -config.breakDepth, height)
-    .mul(oneMinus(smoothstep(config.runupHeight + 0.2, config.runupHeight + config.dampHeight + 0.4, height)));
+    .mul(oneMinus(smoothstep(config.runupHeight + 0.2, config.runupHeight + config.dampHeight + 0.4, height)))
+    .mul(oceanMask);
   // Slow drift of the wave timing along the shore.
   const drift = periodicFbm(patternOrigins.latticePoint('drift', localXZ)).mul(TAU * 1.6);
   const frontBreakupPhase = patternOrigins.wavePhase('frontBreakup', localXZ);

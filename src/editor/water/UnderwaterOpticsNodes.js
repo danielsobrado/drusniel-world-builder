@@ -9,12 +9,12 @@ import { godsEndCausticLattice, godsEndSurfaceRipple } from './GodsEndWaterPatte
  * Depth and beauty share the refracted coordinate. No viewport copies or passes
  * run above water; the owning postprocess prewarms once and bypasses at blend 0.
  */
-export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, state, qualityStrength = 1 }) {
+export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, state, qualityStrength = 1, clock = time }) {
   const settings = state.settings;
   const coord = screenUV;
   const wobble = vec2(
-    sin(coord.y.mul(23).add(time.mul(1.7))).add(sin(coord.x.mul(9).sub(time.mul(1.1))).mul(0.6)),
-    sin(coord.x.mul(19).add(time.mul(1.4))).add(sin(coord.y.mul(7).add(time.mul(0.9))).mul(0.6)),
+    sin(coord.y.mul(23).add(clock.mul(1.7))).add(sin(coord.x.mul(9).sub(clock.mul(1.1))).mul(0.6)),
+    sin(coord.x.mul(19).add(clock.mul(1.4))).add(sin(coord.y.mul(7).add(clock.mul(0.9))).mul(0.6)),
   );
   const warped = coord.add(wobble.mul(blend.mul(settings.distortion))).clamp(0, 1);
   const lit = beauty.sample(warped).rgb;
@@ -37,7 +37,7 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const surface = ray.y.greaterThan(0).and(toSurface.lessThan(sceneDistance));
       const distance = surface.select(toSurface, sceneDistance).min(400).toVar();
       const hit = state.eye.xz.add(ray.xz.mul(toSurface.min(400)));
-      const slope = godsEndSurfaceRipple(hit, toSurface.min(400), state.ripplePhases).toVar();
+      const slope = godsEndSurfaceRipple(hit, toSurface.min(400), state.ripplePhases, clock).toVar();
       const surfaceNormal = normalize(vec3(slope.x.negate(), 1, slope.y.negate()));
       const steepness = dot(ray, surfaceNormal);
       const inWindow = smoothstep(0.645, 0.685, steepness).toVar();
@@ -61,15 +61,15 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const causticReach = exp(pointDepth.mul(-0.12))
         .mul(smoothstep(0, 1, float(45).sub(distance).div(25)))
         .mul(state.sun).mul(surface.select(float(0), float(1)));
-      const caustics = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters)
+      const caustics = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters, clock)
         .mul(causticReach).mul(settings.causticStrength * qualityStrength);
       const bed = lit.mul(dimming).mul(caustics.add(1));
       const transmittance = exp(vec3(...settings.extinction).mul(distance.negate())).toVar();
       const seen = surface.select(underside, bed);
       const angle = atan(dot(ray, state.beamV), dot(ray, state.beamU));
-      const fan = sin(angle.mul(29).add(sin(angle.mul(7).add(time.mul(0.35))).mul(2.2)).add(time.mul(0.15)))
+      const fan = sin(angle.mul(29).add(sin(angle.mul(7).add(clock.mul(0.35))).mul(2.2)).add(clock.mul(0.15)))
         .mul(0.5).add(0.5)
-        .mul(sin(angle.mul(13).sub(time.mul(0.22)).add(1.7)).mul(0.5).add(0.5));
+        .mul(sin(angle.mul(13).sub(clock.mul(0.22)).add(1.7)).mul(0.5).add(0.5));
       const alongSun = dot(ray, state.sunDirection);
       const beams = fan.pow(3).mul(mix(float(0.3), float(1), smoothstep(-0.3, 1, alongSun)))
         .mul(smoothstep(0, 0.02, alongSun.oneMinus())).mul(transmittance.g.oneMinus()).mul(state.sun);

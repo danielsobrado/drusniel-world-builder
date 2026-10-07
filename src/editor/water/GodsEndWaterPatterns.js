@@ -1,10 +1,10 @@
 import { cos, float, mod, sin, smoothstep, time, vec2 } from 'three/tsl';
 
 /** Five-iteration tileable caustic lattice from Gods' End CinematicPipeline. */
-export function godsEndCausticLattice(xz, tileMeters = 5.5) {
+export function godsEndCausticLattice(xz, tileMeters = 5.5, elapsedTime = time) {
   const tau = Math.PI * 2;
   const p = mod(xz.mul(tau / tileMeters), tau).sub(250).toVar();
-  const clock = time.mul(0.5).add(23).toVar();
+  const clock = elapsedTime.mul(0.5).add(23).toVar();
   let i = p;
   let sum = float(1);
   for (let n = 0; n < 5; n++) {
@@ -17,19 +17,19 @@ export function godsEndCausticLattice(xz, tileMeters = 5.5) {
 }
 
 /** Distance-filtered crossed surface ripples from the donor's Snell window. */
-export function godsEndSurfaceRipple(point, distance, phases) {
+export function godsEndSurfaceRipple(point, distance, phases, elapsedTime = time) {
   const near = smoothstep(8, 70, distance).oneMinus();
   const fine = smoothstep(4, 26, distance).oneMinus();
   const phase = (index, x, z) => point.x.mul(x).add(point.y.mul(z)).add(phases[index]);
   return vec2(
-    cos(phase(0, 0.9, 0.35).add(time.mul(1.1))),
-    cos(phase(1, -0.3, 0.8).add(time.mul(0.9))),
+    cos(phase(0, 0.9, 0.35).add(elapsedTime.mul(1.1))),
+    cos(phase(1, -0.3, 0.8).add(elapsedTime.mul(0.9))),
   ).mul(0.085).add(vec2(
-    cos(phase(2, 2.3, -1.1).sub(time.mul(1.7))),
-    cos(phase(3, 0.9, 2.1).add(time.mul(1.5))),
+    cos(phase(2, 2.3, -1.1).sub(elapsedTime.mul(1.7))),
+    cos(phase(3, 0.9, 2.1).add(elapsedTime.mul(1.5))),
   ).mul(0.05).mul(near)).add(vec2(
-    cos(phase(4, 5.1, 3.7).add(time.mul(2.6))),
-    cos(phase(5, -3.1, 4.8).sub(time.mul(2.3))),
+    cos(phase(4, 5.1, 3.7).add(elapsedTime.mul(2.6))),
+    cos(phase(5, -3.1, 4.8).sub(elapsedTime.mul(2.3))),
   ).mul(0.028).mul(fine));
 }
 

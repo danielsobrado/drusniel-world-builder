@@ -1,5 +1,5 @@
 import { createSeaDetailNodes } from './SeaDetailShading.js';
-import { createSeaSurfNodes } from './SeaSurfNodes.js';
+import { createSeaSurfNodes, createSeaFoamNoise } from './SeaSurfNodes.js';
 import { resolveSeaSurf } from '../water/SeaSurf.js';
 import {
   abs,
@@ -21,7 +21,6 @@ import {
 } from 'three/tsl';
 import { createSeaSwellNodes } from '../water/SeaSwell.js';
 import { seaStateUniforms } from '../water/seaState.js';
-import { createSeaFoamNoise } from './SeaSurfNodes.js';
 
 /** Nearshore normals follow the rendered depth contours and amplitude envelope. */
 function displacedSurfaceSlope() {
@@ -124,7 +123,7 @@ export function createSeaSurfaceNodes({
     displacement: height.mul(amplitude),
     release: detail?.release,
     normal,
-    foamNoise: detail?.map ? createSeaFoamNoise(detail.map, patterns, localXZ, time) : float(1),
+    foamNoise: surf?.foamNoise ?? (detail?.map ? createSeaFoamNoise(detail.map, patterns, localXZ, time) : float(1)),
     glint(viewDirection) {
       const roughness = float(0.055).add(storm.mul(0.09))
         .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);

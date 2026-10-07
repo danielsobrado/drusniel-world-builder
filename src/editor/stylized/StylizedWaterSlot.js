@@ -1,4 +1,5 @@
 import { WATER_SLOT_OPTIONS } from './SharedWaterMaterials.js';
+import { TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import {
@@ -78,6 +79,8 @@ export class StylizedWaterSlot {
     this.uploadedPage = null;
     this.uploadedFieldRevision = -1;
     this.hasWaterCoverage = false;
+    const terrainData = terrainSlot.mesh.userData?.[TERRAIN_SLOT_KEY];
+    if (terrainData) terrainData.waterSlot = this;
     this.materialOptions = {
       surfaceMaskTexture: terrainSlot.surfaceMaskTexture,
       waterFieldTexture: this.waterFieldTexture,
@@ -235,6 +238,8 @@ export class StylizedWaterSlot {
   }
 
   dispose() {
+    const terrainData = this.terrainSlot.mesh.userData?.[TERRAIN_SLOT_KEY];
+    if (terrainData?.waterSlot === this) delete terrainData.waterSlot;
     this.terrainView.scene.remove(this.mesh);
     this.waterFieldTexture.dispose();
     this.waterFlowTexture.dispose();

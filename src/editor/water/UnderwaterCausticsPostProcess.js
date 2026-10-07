@@ -89,9 +89,10 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined }) {
     this.renderer = renderer;
     this.scene = scene;
+    this.clock = clock;
     this.config = validateProjectedWaterCausticsConfig(config);
     this.qualityStrength = Math.max(0, Number(qualityStrength) || 0);
     this.enabled = this.config.enabled && this.qualityStrength > 0;
@@ -133,6 +134,7 @@ export class UnderwaterCausticsPostProcess {
       this.pipeline = new THREE.RenderPipeline(this.renderer);
       const inputs = {
         beauty,
+        clock: this.clock,
         depthTexture,
         cameraMatrixWorld: this.cameraMatrixWorld,
         cameraProjectionMatrixInverse: this.cameraProjectionMatrixInverse,

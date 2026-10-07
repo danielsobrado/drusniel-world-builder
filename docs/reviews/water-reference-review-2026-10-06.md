@@ -98,4 +98,15 @@ modules from `6be59a1`. No working files are rolled back. Both servers use the
 same assets and configuration; browser measurements run sequentially under the
 shared hardware QA lock.
 
-Repeat measurements are recorded below when complete.
+| Isolated repeat | Baseline FPS / p95 | Updated FPS / p95 | Hitches, baseline / updated |
+| --- | --- | --- | --- |
+| 1 | 111.66 / 15.31 ms | 118.18 / 12.1 ms | 2 / 1 |
+| 2 | 115.44 / 13.3 ms | 130.38 / 10.6 ms | 1 / 0 |
+
+Every repeat settled and recorded zero browser errors. Water upload bytes
+(354900), wet slots (14), refractive slots (4) and page commits (7) matched.
+These repeats did not reproduce the initial slowdown; they do not establish
+a statistically significant speed improvement.
+
+The subsequent sea, beach and lake work is recorded in
+[water-body-reference-review-2026-10-07.md](water-body-reference-review-2026-10-07.md).

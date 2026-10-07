@@ -38,6 +38,7 @@ import {
 } from './stylized/StylizedNoiseNodes.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './stylized/CoastSwashShading.js';
 import { createCoastSandNodes } from './stylized/CoastSandShading.js';
+import { createTerrainOceanMask } from './stylized/TerrainOceanMask.js';
 import { createSnowSurfaceNodes } from './stylized/SnowSurfaceShading.js';
 import { blownStreaks } from './stylized/ambient/BlownStreaks.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
@@ -84,6 +85,7 @@ export function createTerrainMaterial({
   coastPatterns: coastPatternsTemplate = null,
   transitionPatterns: transitionPatternsTemplate = null,
   chunkWorldSize,
+  width = 32,
   stylizedConfig,
   bakeGpuState = null,
   // The ambient surface terms (blown snow/sand streaks, rime), resolved once by
@@ -96,7 +98,7 @@ export function createTerrainMaterial({
   const terrainUv = uv();
   const tileColor = slotTexture('tileTexture', tileTexture, terrainUv).rgb;
   const terrainHeight = slotTexture('heightTexture', heightTexture, terrainUv).r;
-  const surface = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
+  const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
   const forestFloorSample = slotTexture('forestFloorTexture', forestFloorTexture, terrainUv);
   const forestFloor = forestFloorSample.r;
   // The don't-hover patch under trunks and boulders: ambient occlusion rather than
@@ -126,7 +128,7 @@ export function createTerrainMaterial({
     scale: float(stylizedConfig.patch.scale),
     bias: float(stylizedConfig.patch.bias),
   };
-  const grassCoverage = surface.g;
+  const grassCoverage = surfaceMask.g;
   const proceduralDirt = stylizedDirtMask(worldXZ, dirtSettings).mul(grassCoverage);
   const pathConfig = stylizedConfig.path ?? {};
   const naturalTrailConfig = pathConfig.naturalTrail;
@@ -139,7 +141,7 @@ export function createTerrainMaterial({
       warp: float(naturalTrailConfig.warp),
     }).mul(grassCoverage)
     : float(0);
-  const pathMask = max(surface.r, naturalTrail);
+  const pathMask = max(surfaceMask.r, naturalTrail);
   const pathWear = stylizedPathWearMask(pathMask, worldXZ, {
     vergeWidth: float(pathConfig.vergeWidth ?? 0.45),
     vergeCut: float(pathConfig.vergeCut ?? 0.72),
@@ -306,19 +308,25 @@ export function createTerrainMaterial({
       ? { ...bakedSurface, ...pathPaint.apply(bakedSurface.color, bakedRoughness) }
       : { ...bakedSurface, roughness: bakedRoughness };
     const coastPatterns = coastPatternsTemplate && slotPatternOrigins('coastPatterns', coastPatternsTemplate);
+    // The interpolated mesh height keeps narrow wash fronts smooth between
+    // vertices; the nearest-filtered height texture would make texel terraces.
+    const coastalHeight = positionWorld.y;
+    const oceanMask = coastPatterns ? createTerrainOceanMask(terrainUv, coastalHeight, width + 1) : float(0);
     const sand = coastPatterns && createCoastSandNodes({
-      localXZ, patterns: coastPatterns, groundHeight: terrainHeight,
+      localXZ, patterns: coastPatterns, groundHeight: coastalHeight,
       sandMask: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0))),
-      waterCoverage: surface.b, config: stylizedConfig.water?.coast?.sand,
+      waterCoverage: surfaceMask.b, config: stylizedConfig.water?.coast?.sand,
+      oceanMask,
     });
     const beachSurface = sand ? sand.apply(paintedSurface.color, paintedSurface.roughness) : paintedSurface;
     // Swash, foam and wet sand where the ground meets the sea.
     const swash = coastPatternsTemplate && createCoastSwashNodes({
       localXZ,
       patternOrigins: coastPatterns,
-      groundHeight: terrainHeight,
+      groundHeight: coastalHeight,
       config: { ...DEFAULT_COAST_SWASH, ...(stylizedConfig.water?.coast ?? {}) },
       shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
+      oceanMask,
     });
     const shoreSurface = swash
       ? swash.apply(beachSurface.color, beachSurface.roughness)

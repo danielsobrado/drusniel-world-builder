@@ -16,7 +16,7 @@ test('medium and higher tiers derive opacity from semantic water depth', () => {
   assert.match(source, /\n\s*opticalDistance = min\(/);
   assert.match(
     source,
-    /const transmission = exp\(opticalDistance\.mul\(-optics\.absorptionDensity\)\);/,
+    /const transmission = exp\(opticalDistance\.mul\(density\)\.negate\(\)\);/,
   );
   assert.match(source, /float\(optics\.maximumOpacity\)/);
 });

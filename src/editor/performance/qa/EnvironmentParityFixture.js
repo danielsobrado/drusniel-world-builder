@@ -4,14 +4,17 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { loadFoliageMipTexture } from '../../stylized/impostor/FoliageMipTexture.js';
 import { createFrostShading, resolveFrost, frostUniforms } from '../../stylized/ambient/FrostShading.js';
 import { installUnusedSamplerPruning } from '../../../render/UnusedSamplerBindings.js';
+import { raiseDeviceLimits } from '../../../render/deviceLimits.js';
 import { runReflectionReprojectionFixture } from './ReflectionReprojectionFixture.js';
 import { runSeaSurfFixture } from './SeaSurfFixture.js';
 import { runRiverAppearanceFixture } from './RiverAppearanceFixture.js';
 import { runWaterBodyAppearanceFixture } from './WaterBodyAppearanceFixture.js';
+import { runTerrainCoastAppearanceFixture } from './TerrainCoastAppearanceFixture.js';
 
 // A bounded render fixture. The world movement harness remains the performance authority.
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
-const renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: backend === 'webgl', powerPreference: 'high-performance' });
+const requiredLimits = backend === 'webgpu' ? await raiseDeviceLimits({}, { powerPreference: 'high-performance' }) : {};
+const renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: backend === 'webgl', powerPreference: 'high-performance', requiredLimits });
 const pruning = installUnusedSamplerPruning(renderer);
 await renderer.init(); renderer.setSize(640, 480); renderer.setPixelRatio(1);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
@@ -77,6 +80,7 @@ try {
   await runSeaSurfFixture(renderer, publishCapture);
   await runRiverAppearanceFixture(renderer, publishCapture);
   await runWaterBodyAppearanceFixture(renderer, publishCapture);
+  await runTerrainCoastAppearanceFixture(renderer, publishCapture);
 } catch (error) { state.report.failure = error.stack; }
 finally {
   owned.forEach(map => map.dispose()); loader.dispose(); frostUniforms.cold.value = 0;

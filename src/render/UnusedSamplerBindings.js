@@ -6,6 +6,7 @@ export function pruneUnusedSamplerBindings(builder) {
   const executable = stages.map(stage => (builder[stage] ?? '').replace(DECLARATION, '')).join('\n');
   const groups = builder.getBindings();
   const remap = new Map();
+  const namedBindings = new Map();
   let removed = 0;
   const nextGroups = groups.map(group => {
     const id = builder.bindingsIndexes[group.name]?.group;
@@ -13,18 +14,34 @@ export function pruneUnusedSamplerBindings(builder) {
     const bindings = [];
     group.bindings.forEach((binding, index) => {
       const unused = binding.isSampler && !new RegExp(`\\b${binding.name}\\b`).test(executable);
+      namedBindings.set(`${id}:${binding.name}`, unused ? null : bindings.length);
       if (unused) { remap.set(`${id}:${index}`, null); removed++; }
       else { remap.set(`${id}:${index}`, bindings.length); bindings.push(binding); }
     });
     return bindings.length === group.bindings.length ? group : new group.constructor(group.name, bindings);
   });
   if (!removed) return 0;
+  // Buffer binding objects have generated CPU names, while WGSL uses the
+  // corresponding NodeUniform name. Include those aliases in the same map.
+  for (const [stage, uniforms] of Object.entries(builder.uniforms ?? {})) {
+    if (!Array.isArray(uniforms)) continue;
+    for (const nodeUniform of uniforms) {
+      if (!['buffer', 'storageBuffer', 'indirectStorageBuffer'].includes(nodeUniform.type)) continue;
+      const gpu = builder.getDataFromNode(nodeUniform.node, stage, builder.globalCache).uniformGPU;
+      const id = builder.bindingsIndexes[nodeUniform.groupNode.name]?.group;
+      const key = `${id}:${gpu.name}`;
+      if (namedBindings.has(key)) namedBindings.set(`${id}:${nodeUniform.name}`, namedBindings.get(key));
+    }
+  }
   for (const stage of stages) {
     if (!builder[stage]) continue;
-    builder[stage] = builder[stage].replace(/^.*@binding\(\s*(\d+)\s*\)\s*@group\(\s*(\d+)\s*\).*$/gm, (line, binding, group) => {
+    // A texture shared by vertex and fragment stages can have two generated
+    // indices although getBindings() deduplicates it. Resolve its symbol first.
+    builder[stage] = builder[stage].replace(/^.*@binding\(\s*(\d+)\s*\)\s*@group\(\s*(\d+)\s*\)(?:\s*var(?:<[^>]+>)?\s+(\w+)\s*:)?[^\n]*$/gm, (line, binding, group, name) => {
       const key = `${group}:${binding}`;
-      if (!remap.has(key)) return line;
-      const index = remap.get(key);
+      const namedKey = `${group}:${name}`;
+      if (!namedBindings.has(namedKey) && !remap.has(key)) return line;
+      const index = namedBindings.has(namedKey) ? namedBindings.get(namedKey) : remap.get(key);
       return index === null ? '' : line.replace(/@binding\(\s*\d+\s*\)/, `@binding( ${index} )`);
     });
   }
