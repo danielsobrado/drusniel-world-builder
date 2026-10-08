@@ -761,7 +761,6 @@ export class StylizedSurfaceView {
     for (const view of this.detailViews) {
       if (view.visibility) this.runDeferredWork?.(() => view.visibility.update(camera, this.shouldYieldWork));
     }
-    // One clock for every swaying plant, advanced once here rather than per layer.
     syncViewRebuildQueue(this.detailBuildQueue, this.detailViews);
     this.detailBuildQueue.flush((job, shouldYield) => {
       for (const view of this.detailViews) {

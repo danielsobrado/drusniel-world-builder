@@ -5,6 +5,7 @@ import {
   captureTerrainMaterialBakeSource,
 } from './TerrainMaterialBakeCpu.js';
 import { createTerrainMaterialBakeDescriptor } from './TerrainMaterialBakeDescriptor.js';
+import { createMeadowGroundPalette } from '../stylized/meadow/meadowGroundPalette.js';
 
 function clockNow() {
   return typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -54,6 +55,7 @@ export class TerrainMaterialBakeRuntime {
     this.terrainView = terrainView;
     this.revisionTracker = revisionTracker;
     this.config = config;
+    this.meadowGroundPalette = createMeadowGroundPalette(terrainView.stylizedConfig);
     this.enabled = Boolean(config?.enabled);
     this.bakePage = bakePage;
     this.onError = onError;
@@ -93,6 +95,7 @@ export class TerrainMaterialBakeRuntime {
     return {
       grassBottomColor: style?.color?.bottom ?? '#ffffff',
       grassBrightness: Number(style?.color?.brightness) || 1,
+      ...(this.meadowGroundPalette ? { meadowGroundColors: this.meadowGroundPalette.roots } : {}),
       dirtColor: style?.dirt?.color ?? '#808080',
       forestColor: style?.trees?.forestFloor?.groundCoreColor ?? '#3b5233',
     };

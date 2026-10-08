@@ -48,6 +48,11 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
     lodThinning: 1,
     lodCompensation: 1,
     lodWidenMax: 2,
+    dryPatchScale: 0.0308,
+    dryStart: 0.56,
+    dryEnd: 0.84,
+    dryStrength: 0,
+    dryColor: '#777455',
   }),
   /**
    * The far meadow: billboard cards past the blades, each a clump of stems
@@ -120,8 +125,17 @@ export function resolveMeadowGrassConfig(source) {
   const lod = source.lod ?? d.lod;
   validateLodBands(lod, `${path}.lod`);
   const appearance = { ...d.appearance, ...(source.appearance ?? {}) };
-  for (const key of ['rootBrightness', 'gradientPower', 'groundTipMix', 'canopyDepth', 'valueJitter', 'backlight', 'fill', 'patchScale', 'lodThinning', 'lodCompensation', 'lodWidenMax']) {
+  for (const key of ['rootBrightness', 'gradientPower', 'groundTipMix', 'canopyDepth', 'valueJitter', 'backlight', 'fill', 'patchScale', 'lodThinning', 'lodCompensation', 'lodWidenMax', 'dryPatchScale']) {
     finite(appearance[key], d.appearance[key], `${path}.appearance.${key}`, { min: 0 });
+  }
+  for (const key of ['dryStart', 'dryEnd', 'dryStrength']) {
+    finite(appearance[key], d.appearance[key], `${path}.appearance.${key}`, { min: 0, max: 1 });
+  }
+  if (appearance.dryEnd <= appearance.dryStart) {
+    throw new Error(`Invalid editor configuration: ${path}.appearance.dryEnd must exceed dryStart.`);
+  }
+  if (typeof appearance.dryColor !== 'string' || !/^#[0-9a-f]{6}$/i.test(appearance.dryColor)) {
+    throw new Error(`Invalid editor configuration: ${path}.appearance.dryColor must be a #rrggbb colour.`);
   }
   const shapes = { ...d.shapes, ...(source.shapes ?? {}) };
   const farSource = { ...d.far, ...(source.far ?? {}) };

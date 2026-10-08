@@ -830,7 +830,9 @@ stylizedSurface:
       maxDistance: 50
       bladeHeight: 0.54
       bladeWidth: 0.071
-      heightScale: [0.88, 1.22]
+      heightScale: [0.72, 1.3]
+      widthScale: 1.15
+      curve: 0.07
       # The donor's golden-hour blade pigment. The shared grass tuning's darker
       # bottom/top pair suits the painted terrain and the clump system; the
       # meadow's lit blades need the paler, yellower field grass.
@@ -848,9 +850,23 @@ stylizedSurface:
           8: { base: '#2f6a2c', tip: '#86b25a' }   # temperate rainforest: deeper
           9: { base: '#34563a', tip: '#8fa77a' }   # taiga: cool sage
           12: { base: '#3a6a2e', tip: '#9ab85e' }  # wetland: lush, reedy
-      # appearance: the donor's defaults (meadowGrassConfig.js). The 0.6 sky fill
-      # this once needed only made up for a 10° sun; under the meadow sky preset's
-      # ~57° sun the donor's 0.06 keeps the depth between roots and tips.
+      # grass-test's final visual-refinement layer, converted at 2.8 units/m.
+      # Keep stand density and streaming distances: depth comes from pigment.
+      appearance:
+        rootBrightness: 0.32
+        canopyDepth: 0.65
+        gradientPower: 2.35
+        groundTipMix: 0.08
+        fill: 0.025
+        backlight: 1.05
+        patchScale: 0.07
+        patchCool: [0.8, 0.98, 0.86]
+        patchWarm: [1.12, 1.02, 0.74]
+        dryPatchScale: 0.0308
+        dryStart: 0.56
+        dryEnd: 0.84
+        dryStrength: 0.22
+        dryColor: '#777455'
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
       shapes:
         default: slender

@@ -48,6 +48,7 @@ import { createFootprintShading } from './stylized/deformation/FootprintShading.
 import { acquirePathTextures, createTerrainPathPaint, resolvePathPaint } from './stylized/path/terrainPathPaint.js';
 import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js';
 import { snowWakeRecorder } from './stylized/deformation/SnowWakeRecorder.js';
+import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
 import { resolveSurfaceWetnessConfig } from './weather/surfaceWetnessConfig.js';
@@ -96,7 +97,8 @@ export function createTerrainMaterial({
   sunDirection = null,
 }) {
   const terrainUv = uv();
-  const tileColor = slotTexture('tileTexture', tileTexture, terrainUv).rgb;
+  const tileSample = slotTexture('tileTexture', tileTexture, terrainUv);
+  const tileColor = tileSample.rgb;
   const terrainHeight = slotTexture('heightTexture', heightTexture, terrainUv).r;
   const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
   const forestFloorSample = slotTexture('forestFloorTexture', forestFloorTexture, terrainUv);
@@ -150,7 +152,8 @@ export function createTerrainMaterial({
   });
   const dirt = max(pathWear.wear, proceduralDirt);
   const patch = stylizedPatchMask(worldXZ, patchSettings);
-  const grassTint = mix(
+  const meadowGround = createMeadowGroundShading(stylizedConfig, tileSample, worldXZ);
+  const grassTint = meadowGround?.root ?? mix(
     colorNode(stylizedConfig.color.bottom),
     mix(
       colorNode(stylizedConfig.patch.lush),
@@ -235,7 +238,7 @@ export function createTerrainMaterial({
     );
     const farGrass = mix(
       grassTint,
-      colorNode(farCover.tipColor),
+      meadowGround?.tip ?? colorNode(farCover.tipColor),
       strand.mul(farCover.tipStrength),
     );
     groundColor = mix(
@@ -273,12 +276,14 @@ export function createTerrainMaterial({
     // side change rebuilds this node graph per slot (see ViewModeSurfacePolicy).
     side: THREE.DoubleSide,
   });
+  if (meadowGround) material.addEventListener('dispose', meadowGround.dispose);
   if (ownBakeGpu) attachTerrainMaterialBakeGpuState(material, ownBakeGpu);
   attachTerrainMaterialFamilyAtlas(material, familyAtlas);
   try {
     const bakedSurface = createTerrainMaterialBakedSurface({
       terrainUv,
       tileColor,
+      grassColorOverride: meadowGround?.root ?? null,
       heightShade,
       cameraDistance,
       proceduralColor,

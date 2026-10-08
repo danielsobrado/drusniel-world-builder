@@ -129,6 +129,7 @@ export function createTerrainMaterialBakedSurface({
   pathMask = float(0),
   localXZ = null,
   transitionPatterns = null,
+  grassColorOverride = null,
 }) {
   const materialBake = stylizedConfig.materialBake;
   const render = materialBake.render;
@@ -207,7 +208,7 @@ export function createTerrainMaterialBakedSurface({
     };
   }
 
-  const grassColor = mix(
+  const grassColor = grassColorOverride ?? mix(
     tileColor,
     colorNode(stylizedConfig.color.bottom).mul(stylizedConfig.color.brightness),
     render.grassTintStrength,

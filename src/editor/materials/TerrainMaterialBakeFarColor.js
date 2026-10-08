@@ -45,6 +45,7 @@ export function createTerrainMaterialFarStyle(materialStyle, render) {
   return Object.freeze({
     grassBottom: hexToLinearRgb(materialStyle.grassBottomColor, 'grassBottomColor'),
     grassBrightness,
+    meadowGroundColors: materialStyle.meadowGroundColors ?? null,
     dirt: hexToLinearRgb(materialStyle.dirtColor, 'dirtColor'),
     forest: hexToLinearRgb(materialStyle.forestColor, 'forestColor'),
     rock: hexToLinearRgb(render.rockColor, 'render.rockColor'),
@@ -78,20 +79,22 @@ export function encodeTerrainMaterialFarColor(
   const tileRed = SRGB_TO_LINEAR[sourcePixels[sourceOffset]];
   const tileGreen = SRGB_TO_LINEAR[sourcePixels[sourceOffset + 1]];
   const tileBlue = SRGB_TO_LINEAR[sourcePixels[sourceOffset + 2]];
+  const meadow = style.meadowGroundColors;
+  const meadowOffset = sourcePixels[sourceOffset + 3] * 3;
   const grassRed = lerp(
     tileRed,
-    style.grassBottom[0] * style.grassBrightness,
-    style.grassTintStrength,
+    meadow ? meadow[meadowOffset] : style.grassBottom[0] * style.grassBrightness,
+    meadow ? 1 : style.grassTintStrength,
   );
   const grassGreen = lerp(
     tileGreen,
-    style.grassBottom[1] * style.grassBrightness,
-    style.grassTintStrength,
+    meadow ? meadow[meadowOffset + 1] : style.grassBottom[1] * style.grassBrightness,
+    meadow ? 1 : style.grassTintStrength,
   );
   const grassBlue = lerp(
     tileBlue,
-    style.grassBottom[2] * style.grassBrightness,
-    style.grassTintStrength,
+    meadow ? meadow[meadowOffset + 2] : style.grassBottom[2] * style.grassBrightness,
+    meadow ? 1 : style.grassTintStrength,
   );
   let red = grassRed * grassWeight
     + style.dirt[0] * dirtWeight

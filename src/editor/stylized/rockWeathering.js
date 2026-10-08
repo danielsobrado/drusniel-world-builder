@@ -144,7 +144,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     .mul(settings.dust);
   weathered = mix(weathered, color(DUST).mul(shade), dust);
 
-  // Wet, dark and glossy up to a ragged splash line at the sea, with the green
+  // Wet, dark and glossy up to a ragged local splash line, with the green
   // that grows just above it. The donor darkens the band; the tint is the half of
   // a waterline that makes it read as a tide mark rather than as shadow.
   if ((localWater || Number.isFinite(seaLevel)) && settings.waterline > 0) {

@@ -70,6 +70,7 @@
     "bake:impostor-mips": "node scripts/bake-impostor-mips.mjs",
     "bake:impostor-ktx2": "node scripts/encode-impostor-ktx2.mjs",
     "qa:environment:parity": "node scripts/run-environment-parity-qa.mjs",
+    "qa:biomes:appearance": "node scripts/run-biome-appearance-qa.mjs",
     "qa:free-flight": "node scripts/run-free-flight-qa.mjs",
     "validate:resident-lods": "node scripts/bake-resident-lods.mjs --check",
     "qa:exploration": "node scripts/run-exploration-qa.mjs",
