@@ -146,3 +146,11 @@ test('city skins follow climate, rank and culture', async () => {
   assert.equal(skinFor({ family: 'Tudor', biome: 6 }), 'heartland');
   assert.deepEqual(bannerColourFor(3, 99), bannerColourFor(3, 7));
 });
+
+test('a share of buildings take the one-story-taller sibling when the kit has one', () => {
+  const prefabs = { Tudor_House_Small: {}, Tudor_House_Small_Tall: {}, Tudor_House_Large: {} };
+  assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs, 0.1), 'Tudor_House_Small_Tall');
+  assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs, 0.9), 'Tudor_House_Small');
+  assert.equal(prefabNameFor('house', 1, 'Tudor', prefabs, 0.1), 'Tudor_House_Large', 'no sibling, no change');
+  assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs), 'Tudor_House_Small', 'no roll keeps the base');
+});

@@ -6,7 +6,7 @@ Families:  Tudor  (stone + half-timber, 50 deg slate gables, dormers)
            Nordic (stone + clapboard, 60 deg gables, crossed finials, pent roofs)
            Med    (stone + ochre render, terracotta hip roofs, loggias, villa)
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from .building_spec import BuildingSpec
 from .config import GRID, HIP_LENGTHS
@@ -56,6 +56,18 @@ BASES = [
 GABLE_FRONTED = {'House_Square', 'Townhouse_Narrow', 'Shop_Small', 'Bakery'}
 TURRETED = {'Manor', 'Tavern_Large', 'Townhouse_Wide'}
 TRADE_SIGNS = {'Shop_Large': 'Key', 'Shop_Small': 'Boot', 'Tavern_Large': 'Mug'}
+# Bases that also get a one-story-taller sibling (<Family>_<Base>_Tall) on the same
+# footprint, so a street steps up and down instead of standing at one height.
+TALLER = ('House_Small', 'House_Square', 'House_Long', 'Townhouse_Narrow', 'Townhouse_Tall',
+          'Shop_Small', 'Bakery')
+TALL_SUFFIX = '_Tall'
+MAX_STORIES = 4
+
+
+def taller(family, base):
+    """The family's spec for `base` raised one story, named <Family>_<Base>_Tall."""
+    spec = family(replace(base, stories=min(MAX_STORIES, base.stories + 1)))
+    return replace(spec, name=spec.name + TALL_SUFFIX, seed=spec.seed + 7)
 
 
 def _stories(ground, upper, count):

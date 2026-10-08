@@ -80,8 +80,22 @@ export function familyForStyle(styleKey) {
   return FAMILY_BY_STYLE[styleKey] ?? DEFAULT_FAMILY;
 }
 
-/** Prefab name for a planned building, or null when the kit has nothing for it. */
-export function prefabNameFor(kind, variant, family, prefabs) {
+/** Share of buildings that use a base's one-story-taller sibling when the kit has one. */
+export const TALL_SHARE = 0.4;
+const TALL_SUFFIX = '_Tall';
+
+/**
+ * Prefab name for a planned building, or null when the kit has nothing for it.
+ * With a per-building `heightRoll` in [0, 1), roughly TALL_SHARE of buildings
+ * whose prefab has a `_Tall` sibling (same footprint, one story more) use it.
+ */
+export function prefabNameFor(kind, variant, family, prefabs, heightRoll = 1) {
+  const name = basePrefabFor(kind, variant, family, prefabs);
+  const tall = name && `${name}${TALL_SUFFIX}`;
+  return tall && heightRoll < TALL_SHARE && prefabs?.[tall] ? tall : name;
+}
+
+function basePrefabFor(kind, variant, family, prefabs) {
   if (DEFENCE_PREFABS[kind]) return DEFENCE_PREFABS[kind];
   const bases = BUILDING_BASES[kind];
   if (!bases) return null;

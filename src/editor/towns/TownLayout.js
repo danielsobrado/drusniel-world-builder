@@ -102,7 +102,8 @@ export class TownLayoutBuilder {
   }
 
   addBuilding(building, index) {
-    const name = prefabNameFor(building.kind, building.variant, this.family, this.kit.prefabs);
+    const name = prefabNameFor(building.kind, building.variant, this.family, this.kit.prefabs,
+      placementSeed(this.settlement.id, index, 37));
     const prefab = name ? this.kit.prefabs[name] : null;
     if (!prefab) return;
     const pad = Number.isFinite(building.pad) ? building.pad : this.groundAt(building.x, -building.z);

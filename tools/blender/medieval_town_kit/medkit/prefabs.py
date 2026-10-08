@@ -13,7 +13,7 @@ import bpy
 
 from .buildings import BuildingAssembler, BuildingSpec
 from .config import GRID
-from .prefab_families import BASES, FAMILIES
+from .prefab_families import BASE_BY_NAME, BASES, FAMILIES, TALLER, taller
 
 
 
@@ -91,6 +91,8 @@ class PrefabBuilder:
         for family in FAMILIES:
             for base in BASES:
                 self.building(family(base))
+            for name in TALLER:
+                self.building(taller(family, BASE_BY_NAME[name]))
         self.city_wall()
         self.round_tower()
         self.gatehouse()

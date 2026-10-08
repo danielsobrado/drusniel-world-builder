@@ -112,6 +112,9 @@ startup.
   - Upper windows may become oriel bays or get balconies.
   - Shops hang trade signs (key, boot, mug).
   - Gables carry turned spikes; towers and chapels carry weathervanes.
+  - Common houses and townhouses also come one story taller (`<Family>_<Base>_Tall`,
+    same footprint). `TownPrefabCatalog.prefabNameFor` picks the taller one for
+    about 40% of buildings from a per-building seed, so streets step up and down.
   - Large towns get a tiered fountain instead of a well. Lamp posts alternate
     with banner lamp posts. Ivy trails from the jetties.
   - Tudor upper timber stories jetty 0.3 m per story over the street, on joist
