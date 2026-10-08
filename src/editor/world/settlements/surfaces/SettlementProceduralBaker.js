@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { dot, mix, mrt, output, smoothstep, texture, uv, vec2, vec3, vec4 } from 'three/tsl';
+import { dot, mix, mrt, output, positionLocal, smoothstep, texture, uv, vec2, vec3, vec4 } from 'three/tsl';
 import { ProceduralMaterial } from 'procedural-texture-lab';
 
 /** Edge length, in texels, of a generated set. */
@@ -28,14 +28,37 @@ function target(size, count = 1) {
   return new THREE.RenderTarget(size, size, { type: THREE.HalfFloatType, depthBuffer: false, generateMipmaps: false, count });
 }
 
-/** The three channel groups of a set, as colours a flat quad can be drawn in. */
-function channelNodes(source) {
+/**
+ * The three channel groups of a set, as colours a flat quad can be drawn in.
+ *
+ * A runtime that offers `createSurfaceNodes` is asked for the surface at the
+ * quad's own position: the layer stack is then compiled once, with no vertex
+ * displacement, and the height comes with it. `heightRange` is the height, in
+ * metres, that maps to the full range of the packed channel.
+ */
+function channelNodes(procedural, heightRange) {
+  if (typeof procedural.createSurfaceNodes === 'function') {
+    const surface = procedural.createSurfaceNodes(positionLocal, vec3(0, 0, 1));
+    const height = surface.displacement;
+    // Slope per metre along each axis of the tile; dividing by the position's
+    // own derivative keeps the sign right whichever way the target is stored.
+    const slope = vec2(height.dFdx().div(positionLocal.x.dFdx()), height.dFdy().div(positionLocal.y.dFdy()));
+    return {
+      positionNode: null,
+      color: surface.color,
+      // Packed as three reads it: occlusion in red, roughness in green, metalness in blue.
+      arm: vec4(surface.ao, surface.roughness.clamp(0.045, 1), surface.metallic.clamp(0, 1), height.div(heightRange).mul(0.5).add(0.5).clamp(0, 1)),
+      normal: vec4(vec3(slope.negate(), 1).normalize().mul(0.5).add(0.5), 1),
+    };
+  }
+  const source = procedural.material;
   return {
+    // The material's position node also feeds the sample position its other nodes read.
+    positionNode: source.positionNode,
     color: source.colorNode,
-    // Packed as three reads it: occlusion in red, roughness in green, metalness in blue.
-    arm: vec3(source.aoNode, source.roughnessNode, source.metalnessNode),
+    arm: vec4(source.aoNode, source.roughnessNode, source.metalnessNode, 1),
     // Seen square-on, the material's view-space normal *is* its tangent-space one.
-    normal: source.normalNode.mul(0.5).add(0.5),
+    normal: vec4(source.normalNode.mul(0.5).add(0.5), 1),
   };
 }
 
@@ -100,21 +123,21 @@ export class SettlementProceduralBaker {
     const finished = {};
     try {
       await procedural.prepare();
-      const source = procedural.material;
-      const nodes = channelNodes(source);
-      // The source's position node also feeds the sample position its other nodes read.
-      paint.positionNode = source.positionNode;
+      const nodes = channelNodes(procedural, Math.max(procedural.displacementExtent, 1e-3));
+      if (nodes.positionNode) paint.positionNode = nodes.positionNode;
       paint.colorNode = nodes.color;
       scene.add(new THREE.Mesh(geometry, paint));
       // One pass fills all three channels, so the recipe's (large) shader is
       // compiled once — and off the frame: a synchronous compile of it stalls
       // the GPU for seconds, and the whole game with it.
-      const outputs = mrt({ color: output, normal: vec4(nodes.normal, 1), arm: vec4(nodes.arm, 1) });
+      const outputs = mrt({ color: output, normal: nodes.normal, arm: nodes.arm });
       await this.draw(raw, outputs, () => this.renderer.compileAsync(scene, camera));
       this.draw(raw, outputs, () => this.renderer.render(scene, camera));
       CHANNELS.forEach((channel, index) => {
         const blend = new THREE.MeshBasicNodeMaterial();
         blend.colorNode = this.resolveNode(raw.textures[index], channel === 'color' ? set.neutralGain : undefined);
+        // The packed map keeps its fourth channel: the height.
+        blend.opacityNode = blend.colorNode.a;
         this.quad.material = blend;
         this.draw(resolved, null, () => this.quad.render(this.renderer));
         blend.dispose();
@@ -174,12 +197,12 @@ export class SettlementProceduralBaker {
     // A render target is stored top row first and `keep` copies it as stored,
     // so the tile is written upside down here to come out upright there.
     const at = vec2(uv().x, uv().y.oneMinus());
-    const sample = (offsetX, offsetY) => texture(raw, at.add(vec2(offsetX, offsetY)).mul(tile)).rgb;
+    const sample = (offsetX, offsetY) => texture(raw, at.add(vec2(offsetX, offsetY)).mul(tile));
     const wrapX = smoothstep(0, SEAM, at.x).oneMinus();
     const wrapY = smoothstep(0, SEAM, at.y).oneMinus();
     const blended = mix(mix(sample(0, 0), sample(1, 0), wrapX), mix(sample(0, 1), sample(1, 1), wrapX), wrapY);
     // A tintable set keeps only its light and dark; the engine supplies the hue.
-    return neutralGain ? vec3(dot(blended, LUMA).mul(neutralGain)) : blended;
+    return neutralGain ? vec4(vec3(dot(blended.rgb, LUMA).mul(neutralGain)), 1) : blended;
   }
 
   dispose() {

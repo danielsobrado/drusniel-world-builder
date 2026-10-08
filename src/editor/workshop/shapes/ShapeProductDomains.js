@@ -3,19 +3,20 @@ export function shapeProductDomains(plan, recipe) {
   return [
     'walls',
     ...(plan.primitive.roof ? ['roof'] : []),
-    ...(plan.primitive.facade === 'timber' || plan.primitive.shutters ? ['facade'] : []),
+    ...(plan.primitive.facade === 'timber' || plan.primitive.shutters || plan.decorations?.some((d) => d.role === 'window-box') ? ['facade'] : []),
     ...(plan.supports?.length ? ['supports'] : []),
     ...(recipe.ivy ? ['ivy'] : []),
   ];
 }
 
 const body = (primitive) => {
-  const { roof, openings, suppressed, facade, shutters, automaticGates, ...fields } = primitive;
+  const { roof, openings, suppressed, facade, shutters, automaticGates, craft, ...fields } = primitive;
   void roof;
   void suppressed;
   void facade;
   void shutters;
   void automaticGates;
+  void craft;
   return { ...fields, openings };
 };
 
@@ -43,6 +44,7 @@ export function shapeProductKey(recipe, plan, domain) {
             taper: p.taper,
             footprint: p.footprint,
             roof: p.roof,
+            decorations: plan.decorations?.filter((d) => d.role === 'chimney'),
             neighbors: (plan.neighbors ?? []).map((n) => ({
               id: n.id,
               boundary: n.boundary,
@@ -56,6 +58,7 @@ export function shapeProductKey(recipe, plan, domain) {
               primitive: body(p),
               facade: p.facade,
               shutters: p.shutters,
+              decorations: plan.decorations?.filter((d) => d.role === 'window-box'),
               roof: p.facade === 'timber' ? p.roof : null,
               neighbors,
             }
@@ -68,12 +71,12 @@ export function shapeProductKey(recipe, plan, domain) {
                 flatCoping: p.roof?.family === 'flat',
               };
   const regions = {
-    walls: ['walls', 'trim', 'inserts', 'glazing'],
-    roof: ['roof', 'walls', 'trim'],
+    walls: ['walls', 'trim', 'inserts', 'glazing', 'metal'],
+    roof: ['roof', 'walls', 'trim', 'metal'],
     supports: ['trim'],
     ivy: ['foliage'],
     traversal: ['deck', 'trim'],
-    facade: ['inserts'],
+    facade: ['inserts', 'foliage'],
   }[domain];
   const overrides = Object.fromEntries(
     Object.entries(recipe.materialAreaOverrides ?? {}).filter(

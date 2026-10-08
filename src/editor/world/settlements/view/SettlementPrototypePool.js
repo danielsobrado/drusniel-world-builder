@@ -1,57 +1,63 @@
+import * as THREE from 'three/webgpu';
 import { createInstancedRenderers, disposeInstancedRenderers } from '../../../stylized/lod/StylizedLodRuntime.js';
-import { createProceduralObjectLodParts } from '../../../workshop/ProceduralAssetManager.js';
-import { createProceduralWorkshopComponentParts } from '../../../workshop/ProceduralWorkshopComponentParts.js';
+import { normalizeProceduralRecipe } from '../../../workshop/ProceduralAssetStore.js';
+import { createWorkshopMaterials } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { withWorkshopSurfaceOverrides } from '../../../workshop/ProceduralWorkshopSurfaceOverrides.js';
 import { buildingRecipe } from '../SettlementBuildingCatalog.js';
+import { isStoneKind } from '../SettlementStones.js';
+import { buildSettlementMeshData } from './SettlementMeshData.js';
+import { SettlementMeshWorkerClient } from './SettlementMeshWorkerClient.js';
+import { createSettlementStoneParts } from './SettlementStoneMesh.js';
 
 /** Material families that still read as a house from across the town. */
 const HOUSE_FAR_SLOTS = Object.freeze(['mortar', 'roof', 'recess']);
 const MIN_CAPACITY = 8;
+/** Variants the worker is asked for at once: enough to keep it busy, few enough to stay re-prioritisable. */
+const WORKER_REQUESTS = 2;
 
-function slotOf(part) {
-  return part.material?.userData?.workshopSlot;
-}
-
-/**
- * The far tier of one pooled mesh.
- *
- * A house's near mesh is already split by material family, so its far tier is
- * simply the plastered shell, the roof and the dark openings — no second
- * generation pass. Masonry (walls, towers, keeps) is nearly all individual
- * stones, so it takes the workshop's own shell tier, which swells the mortar
- * core out to the stone face. Returns null when the mesh has no cheaper form.
- */
-function farParts(recipe, nearParts) {
-  if (recipe.archetype === 'house') {
-    const kept = nearParts.filter((part) => HOUSE_FAR_SLOTS.includes(slotOf(part)));
-    return kept.length > 0 && kept.length < nearParts.length ? { parts: kept, owned: [] } : null;
+function geometryFrom(packed) {
+  const geometry = new THREE.BufferGeometry();
+  for (const [name, { array, itemSize, normalized }] of Object.entries(packed.attributes)) {
+    geometry.setAttribute(name, new THREE.BufferAttribute(array, itemSize, normalized));
   }
-  if (recipe.archetype === 'prop') return null;
-  const lod = createProceduralObjectLodParts({ recipe }, nearParts, {});
-  if (!lod) return null;
-  const owned = [...new Set([...lod.coarse, ...lod.shell])];
-  return { parts: lod.shell, owned };
+  if (packed.index) geometry.setIndex(new THREE.BufferAttribute(packed.index, 1));
+  return geometry;
 }
 
 /**
  * The meshes a settlement style needs, built on demand and shared by every
  * placement: one instanced renderer set per pooled variant and tier.
  *
- * Generating a house takes ~0.1 s of main-thread time, so `advance` builds at
- * most one variant a call and the view simply draws what exists so far.
+ * A variant's geometry is generated in a worker (SettlementMeshData); `advance`
+ * then installs one finished variant a call — materials, instanced renderers,
+ * the upload — and the view draws what exists so far. Without a worker the
+ * generation happens here instead, one variant a call.
+ *
+ * Each variant has two tiers. A house's near mesh is already split by material
+ * family, so its far tier is simply the plastered shell, the roof and the dark
+ * openings. Masonry (walls, towers, keeps) is nearly all individual stones, so
+ * it takes the workshop's own shell tier, which the mesh data carries.
  */
 export class SettlementPrototypePool {
-  constructor({ root, renderer }) {
+  /**
+   * @param {() => void} [options.onMeshesCreated] called when new instanced meshes join the scene,
+   *   so their shader pipelines can be compiled a few a frame instead of all on first draw
+   */
+  constructor({ root, renderer, worker = new SettlementMeshWorkerClient(), onMeshesCreated = null }) {
     this.root = root;
     this.renderer = renderer;
+    this.onMeshesCreated = onMeshesCreated;
+    this.worker = worker;
     this.entries = new Map();
     this.queue = [];
+    /** Generated, not yet installed: `{ entry, data }`. */
+    this.built = [];
   }
 
   /**
-   * Ask for a pooled variant, dressed in `surfaces` (the timber and plaster sets
-   * of the town asking). `key` must already tell two dressings apart. Idempotent;
-   * the nearest requests are built first.
+   * Ask for a pooled variant, dressed in `surfaces` (the sets of the town
+   * asking). `key` must already tell two dressings apart. Idempotent; the
+   * nearest requests are built first.
    */
   request(key, { style, kind, variant, surfaces }, priority) {
     let entry = this.entries.get(key);
@@ -70,58 +76,127 @@ export class SettlementPrototypePool {
     return entry?.state === 'ready' ? entry : null;
   }
 
+  /** Variants asked for and not yet drawable. */
   get pending() {
-    return this.queue.length;
+    return this.queue.length + this.worker.inFlight + this.built.length;
   }
 
-  /** Builds the most wanted queued variant, if any. Returns whether one was built. */
-  advance() {
-    if (this.queue.length === 0) return false;
+  isLive(entry) {
+    return this.entries.get(entry.key) === entry;
+  }
+
+  fail(entry, error) {
+    if (!this.isLive(entry)) return;
+    // One recipe the generator refuses must not empty the town.
+    entry.state = 'failed';
+    entry.failed = error;
+    console.warn(`Settlement variant ${entry.key} could not be generated.`, error);
+  }
+
+  /** The nearest queued entry `accept` takes, removed from the queue. */
+  take(accept) {
     this.queue.sort((left, right) => right.priority - left.priority);
-    const entry = this.queue.pop();
+    for (let index = this.queue.length - 1; index >= 0; index -= 1) {
+      if (accept(this.queue[index])) return this.queue.splice(index, 1)[0];
+    }
+    return null;
+  }
+
+  /** Hands the worker the nearest variants it is not already generating. */
+  dispatch() {
+    while (this.worker.available && this.worker.inFlight < WORKER_REQUESTS) {
+      const entry = this.take((candidate) => !isStoneKind(candidate.kind));
+      if (!entry) return;
+      entry.state = 'building';
+      this.worker.build(entry.style, entry.kind, entry.variant).then(
+        (data) => { if (this.isLive(entry)) this.built.push({ entry, data }); },
+        (error) => {
+          // A worker that died takes nothing with it: the variant is generated here instead.
+          if (!this.isLive(entry)) return;
+          if (this.worker.available) this.fail(entry, error);
+          else {
+            entry.state = 'queued';
+            this.queue.push(entry);
+          }
+        },
+      );
+    }
+  }
+
+  /**
+   * One unit of main-thread work: install a variant the worker finished, or
+   * generate one here (loose stone always; everything, if there is no worker).
+   * Returns whether a variant became drawable.
+   */
+  advance() {
+    this.dispatch();
+    const finished = this.built.shift();
+    if (finished) return this.complete(finished.entry, () => this.install(finished.entry, finished.data));
+    const entry = this.take((candidate) => isStoneKind(candidate.kind) || !this.worker.available);
+    if (!entry) return false;
+    return this.complete(entry, () => (isStoneKind(entry.kind)
+      ? this.installStone(entry)
+      : this.install(entry, buildSettlementMeshData(entry.style, entry.kind, entry.variant).data)));
+  }
+
+  complete(entry, build) {
+    if (!this.isLive(entry)) return false;
     try {
-      this.build(entry);
+      build();
       entry.state = 'ready';
+      return true;
     } catch (error) {
-      // One recipe the generator refuses must not empty the town.
-      entry.state = 'failed';
-      entry.failed = error;
-      console.warn(`Settlement variant ${entry.key} could not be generated.`, error);
+      this.fail(entry, error);
+      return false;
     }
-    return true;
   }
 
-  build(entry) {
-    const recipe = buildingRecipe(entry.style, entry.kind, entry.variant);
-    const nearParts = withWorkshopSurfaceOverrides(entry.surfaces, () => createProceduralWorkshopComponentParts(recipe));
-    let far = null;
+  /** Materials and instanced renderers for generated mesh data. */
+  install(entry, data) {
+    const recipe = normalizeProceduralRecipe(buildingRecipe(entry.style, entry.kind, entry.variant));
+    // The same call the generator makes, here so the materials are born on the
+    // thread that owns the textures — dressed in the town's own surface sets.
+    const materials = withWorkshopSurfaceOverrides(entry.surfaces, () => createWorkshopMaterials(recipe));
+    const part = (packed) => ({ slot: packed.slot, geometry: geometryFrom(packed), material: materials[packed.slot] ?? materials.stone });
+    const near = data.near.map(part);
+    let far = data.far ? data.far.map(part) : null;
+    if (!far && data.archetype === 'house') {
+      const kept = near.filter(({ slot }) => HOUSE_FAR_SLOTS.includes(slot));
+      if (kept.length > 0 && kept.length < near.length) far = kept;
+    }
     try {
-      far = farParts(recipe, nearParts);
-      entry.near = this.createTier(entry, 'near', nearParts, MIN_CAPACITY, true);
+      entry.near = this.createTier(entry, 'near', near, true);
       // Far buildings keep their shadows: a town without them floats.
-      entry.far = far ? this.createTier(entry, 'far', far.parts, MIN_CAPACITY, true) : null;
+      entry.far = far ? this.createTier(entry, 'far', far, true) : null;
     } finally {
-      // The instanced renderers hold their own geometry copies; the sources are
-      // done. Materials and textures stay: the renderers' materials share them.
-      for (const part of new Set([...nearParts, ...(far?.owned ?? [])])) part.geometry.dispose();
+      // The instanced renderers hold their own geometry copies. Materials and
+      // textures stay: the renderers' materials share them.
+      for (const { geometry } of new Set([...near, ...(far ?? [])])) geometry.dispose();
     }
   }
 
-  createTier(entry, tier, parts, capacity, castShadow) {
-    const baked = parts.map((part) => ({ geometry: part.geometry.clone().applyMatrix4(part.matrix), material: part.material }));
+  /** A loose stone is a couple of hundred triangles: one tier serves every distance. */
+  installStone(entry) {
+    const parts = createSettlementStoneParts(entry);
     try {
-      const [meshes] = createInstancedRenderers({
-        root: this.root,
-        renderer: this.renderer,
-        partsByPrototype: [baked],
-        capacity,
-        name: `settlement-${entry.key}-${tier}`,
-        castShadow,
-      });
-      return { meshes, capacity, castShadow, name: `settlement-${entry.key}-${tier}`, materials: baked.map((part) => part.material) };
+      entry.near = this.createTier(entry, 'near', parts, true);
     } finally {
-      for (const part of baked) part.geometry.dispose();
+      for (const { geometry } of parts) geometry.dispose();
     }
+  }
+
+  createTier(entry, tier, parts, castShadow) {
+    const name = `settlement-${entry.key}-${tier}`;
+    const [meshes] = createInstancedRenderers({
+      root: this.root,
+      renderer: this.renderer,
+      partsByPrototype: [parts],
+      capacity: MIN_CAPACITY,
+      name,
+      castShadow,
+    });
+    this.onMeshesCreated?.();
+    return { meshes, capacity: MIN_CAPACITY, castShadow, name, materials: parts.map(({ material }) => material) };
   }
 
   /**
@@ -144,6 +219,7 @@ export class SettlementPrototypePool {
       castShadow: tier.castShadow,
     });
     disposeInstancedRenderers(this.root, [tier.meshes]);
+    this.onMeshesCreated?.();
     tier.meshes = meshes;
     tier.capacity = capacity;
     return tier;
@@ -159,10 +235,17 @@ export class SettlementPrototypePool {
   /** Drop every variant whose key `keep` rejects: the meshes of towns left behind. */
   prune(keep) {
     for (const entry of [...this.entries.values()]) if (!keep(entry.key)) this.release(entry);
-    this.queue = this.queue.filter((entry) => this.entries.has(entry.key));
+    this.queue = this.queue.filter((entry) => this.isLive(entry));
+    this.built = this.built.filter(({ entry }) => this.isLive(entry));
+  }
+
+  /** Forget every variant. The worker stays: the pool is reused across worlds. */
+  clear() {
+    this.prune(() => false);
   }
 
   dispose() {
-    this.prune(() => false);
+    this.clear();
+    this.worker.dispose();
   }
 }

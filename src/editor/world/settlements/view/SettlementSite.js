@@ -5,7 +5,8 @@ import { dressingFor, SETTLEMENT_SURFACE_SETS, TIMBER_TONES } from '../surfaces/
 import { settlementPlacements } from './SettlementPlacements.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
-const UNIT = new THREE.Vector3(1, 1, 1);
+/** Share of a loose stone's size sunk into the ground, so it sits in the soil rather than on it. */
+const STONE_SINK = 0.06;
 
 /**
  * Ground height at a plan-space point, as the terrain mesh draws it: the
@@ -91,10 +92,12 @@ export class SettlementSite {
     const placements = settlementPlacements(this.settlement, this.plan, tileSize, heightAt);
     const position = new THREE.Vector3();
     const rotation = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
     for (const placement of placements) {
-      position.set(placement.x, placement.y, placement.z);
+      const sunk = placement.scale === 1 ? 0 : placement.scale * STONE_SINK;
+      position.set(placement.x, placement.y - sunk, placement.z);
       rotation.setFromAxisAngle(UP, placement.rotationY);
-      const matrix = new THREE.Matrix4().compose(position, rotation, UNIT);
+      const matrix = new THREE.Matrix4().compose(position, rotation, scale.setScalar(placement.scale));
       placement.near = { matrix, fade: 0, seed: placement.seed, ditherDirection: 1 };
       placement.far = { matrix, fade: 0, seed: placement.seed, ditherDirection: -1 };
       placement.blend = 0;

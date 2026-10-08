@@ -3,6 +3,7 @@ import polygonClipping from 'polygon-clipping';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
 import { shapeEnvelopeAtHeight } from './ShapeEnvelope.js';
 import { resolvePathGates } from './ShapePathGateReaction.js';
+import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
 
 export function resolveShapeChemistry(plans) {
   const contacts = [],
@@ -82,5 +83,5 @@ export function resolveShapeChemistry(plans) {
   }
   for (const plan of resolved)
     plan.supports = supports.filter((s) => s.sourceEntityIds.includes(plan.id));
-  return { plans: resolvePathGates(resolved, index, byId), contacts, supports };
+  return { plans: resolvePathGates(resolved, index, byId).map(resolveShapeCraftDetails), contacts, supports };
 }

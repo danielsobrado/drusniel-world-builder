@@ -2,6 +2,19 @@ function isShared(resource) {
   return resource?.userData?.sharedSurface === true;
 }
 
+/** Retire unused material textures without releasing maps still used by material clones. */
+export function disposeUnusedModelMaterials(materials, retained = new Set()) {
+  const retainedTextures = new Set([...retained].flatMap((m) => Object.values(m).filter((v) => v?.isTexture)));
+  const textures = new Set();
+  for (const material of new Set(materials)) {
+    if (retained.has(material) || isShared(material)) continue;
+    for (const value of Object.values(material))
+      if (value?.isTexture && !isShared(value) && !retainedTextures.has(value)) textures.add(value);
+    material.dispose();
+  }
+  textures.forEach((texture) => texture.dispose());
+}
+
 export function disposeModelParts(parts) {
   const geometries = new Set();
   const materials = new Set();

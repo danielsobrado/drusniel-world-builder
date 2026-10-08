@@ -10,6 +10,7 @@ import { terminateChildProcess } from './lib/processLifecycle.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { SHAPE_PRESETS } from '../src/editor/workshop/shapes/ShapePresets.js';
 import { checkWorkshopShapeReview } from './lib/workshopShapesReviewChecks.mjs';
+import { checkWorkshopShapePolish } from './lib/workshopShapesPolishChecks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'tmp', 'workshop-shapes-qa');
@@ -170,7 +171,7 @@ try {
       };
     });
     assert.equal(state.shapeIds.length, item.create().length);
-    assert.ok(state.stats.drawParts <= state.shapeIds.length * 9);
+    assert.ok(state.stats.drawParts <= state.shapeIds.length * 12);
     await page.screenshot({ path: path.join(output, `${item.id}.png`) });
     report.presets.push({ id: item.id, label: item.label, ...state });
     console.log(
@@ -426,12 +427,13 @@ try {
     'The main radial workshop exposes Freeform shapes and its authoring controls.',
   );
   await checkWorkshopShapeReview({ page, report, preset, settle, field });
+  await checkWorkshopShapePolish({ page, report, preset, settle, output });
   assert.deepEqual(report.pageErrors, []);
   assert.deepEqual(report.consoleErrors, []);
   let previousIds = new Set();
   try {
     const previous = JSON.parse(
-      await readFile(path.join(root, 'tmp/workshop-shapes-before/report.json'), 'utf8'),
+      await readFile(path.join(root, 'tmp/workshop-polish-before/report.json'), 'utf8'),
     );
     previousIds = new Set(previous.presets.map((p) => p.id));
   } catch {
@@ -440,12 +442,13 @@ try {
   const cards = report.presets
     .map(
       (p) =>
-        `<figure class="${previousIds.has(p.id) ? 'with-before' : 'new-design'}">${previousIds.has(p.id) ? `<img class="before" src="../workshop-shapes-before/${p.id}.png" loading="lazy">` : ''}<img class="after" src="${p.id}.png" loading="lazy"><figcaption>${p.label} · ${p.stats.drawParts} batches${previousIds.has(p.id) ? '' : ' · New design'}</figcaption></figure>`,
+        `<figure class="${previousIds.has(p.id) ? 'with-before' : 'new-design'}">${previousIds.has(p.id) ? `<img class="before" src="../workshop-polish-before/${p.id}.png" loading="lazy">` : ''}<img class="after" src="${p.id}.png" loading="lazy"><figcaption>${p.label} · ${p.stats.drawParts} batches${previousIds.has(p.id) ? '' : ' · New design'}</figcaption></figure>`,
     )
     .join('');
+  const details = report.details.map((p) => `<figure><img src="${p.id}.png" alt="${p.label}" loading="lazy"><figcaption>${p.label}</figcaption></figure>`).join('');
   await writeFile(
     path.join(output, 'comparison.html'),
-    `<!doctype html><html lang="en"><meta charset="utf-8"><title>Workshop shapes</title><style>body{margin:24px;background:#171b20;color:#eee;font:16px system-ui}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:20px}figure{margin:0}img{width:100%;border-radius:8px}figcaption{padding:10px}.before{display:none}#before:checked~main .with-before .before{display:block}#before:checked~main .with-before .after{display:none}@media(max-width:900px){main{grid-template-columns:1fr}}</style><h1>Procedural workshop shapes</h1><p>Ten editable designs with timber framing, shutters, branching ivy, and path gates.</p><input type="checkbox" id="before"><label for="before">Show previous version where available</label><main>${cards}</main></html>`,
+    `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Workshop visual polish</title><style>body{margin:24px;background:#171b20;color:#eee;font:16px system-ui}main,.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:20px}figure{margin:0}img{width:100%;border-radius:8px}figcaption{padding:10px}.before{display:none}#before:checked~main .with-before .before{display:block}#before:checked~main .with-before .after{display:none}@media(max-width:900px){main,.details{grid-template-columns:1fr}}</style><h1>Procedural workshop visual polish</h1><p>Ten editable designs with dressed masonry, overlapping slate, crafted roof silhouettes, door hardware, timber framing, shutters and planted window boxes.</p><input type="checkbox" id="before"><label for="before">Show previous version where available</label><main>${cards}</main><h2>Craft at close range</h2><section class="details">${details}</section></html>`,
   );
   console.log(
     `Passed ${report.assertions.length} interaction checks. Gallery: ${path.join(output, 'comparison.html')}`,

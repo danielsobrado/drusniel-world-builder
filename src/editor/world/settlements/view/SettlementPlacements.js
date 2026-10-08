@@ -1,4 +1,5 @@
 import { poolKey } from '../SettlementBuildingCatalog.js';
+import { isStoneKind } from '../SettlementStones.js';
 
 /**
  * A settlement plan as things to draw: every building and prop with its pooled
@@ -14,7 +15,7 @@ import { poolKey } from '../SettlementBuildingCatalog.js';
 const SMALL_KINDS = new Set(['lantern', 'planter', 'shrine', 'signpost', 'bench', 'cart', 'barrels', 'fence', 'bollards', 'stall', 'well']);
 
 export function isSmallKind(kind) {
-  return SMALL_KINDS.has(kind);
+  return SMALL_KINDS.has(kind) || isStoneKind(kind);
 }
 
 export function planToWorld(settlement, tileSize, x, z) {
@@ -27,14 +28,15 @@ export function planToWorld(settlement, tileSize, x, z) {
  * @param {number} tileSize metres per cell
  * @param {(x: number, z: number) => number} heightAt ground height at plan (x, z)
  * @returns {Array<{ key: string, kind: string, variant: number, small: boolean,
- *   x: number, y: number, z: number, rotationY: number, seed: number }>}
+ *   x: number, y: number, z: number, rotationY: number, scale: number, seed: number }>}
  */
 export function settlementPlacements(settlement, plan, tileSize, heightAt) {
   const styleKey = plan.profile.style.key;
   const place = (item, index, y, small) => {
     const world = planToWorld(settlement, tileSize, item.x, item.z);
     return {
-      key: poolKey(styleKey, item.kind, item.variant),
+      // Loose stone is pooled beside the workshop meshes, under the same style prefix.
+      key: isStoneKind(item.kind) ? `${styleKey}|${item.kind}|${item.variant}` : poolKey(styleKey, item.kind, item.variant),
       kind: item.kind,
       variant: item.variant,
       small,
@@ -42,6 +44,7 @@ export function settlementPlacements(settlement, plan, tileSize, heightAt) {
       y,
       z: world.z,
       rotationY: Math.PI - item.yaw,
+      scale: item.scale ?? 1,
       // Stable per placement: it seeds the dither pattern of LOD fades.
       seed: ((Math.imul(settlement.id | 0, 9973) ^ Math.imul(index + 1, 0x9e3779b1)) >>> 8) / 16777216,
     };

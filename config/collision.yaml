@@ -55,6 +55,11 @@ constructions:
   enabled: true
   curveSegmentLength: 1.25
 
+# Planned settlements (world/settlements): buildings and heavy street furniture
+# as oriented boxes, read from the same derived plans the view draws.
+settlements:
+  enabled: true
+
 debug:
   colliders: false
   broadphase: false

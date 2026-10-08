@@ -14,6 +14,8 @@ import {
   surfaceSetRecipe,
 } from '../src/editor/world/settlements/surfaces/SettlementDressing.js';
 import { planToWorld, settlementPlacements } from '../src/editor/world/settlements/view/SettlementPlacements.js';
+import { isStoneKind, SETTLEMENT_STONES, stoneSeed } from '../src/editor/world/settlements/SettlementStones.js';
+import { generateStone, STONE_ARCHETYPE_IDS } from '@drusniel/procedural-stone';
 
 const ground = (x, z) => Math.sin(x * 0.01) * 2 + Math.cos(z * 0.013) * 2;
 
@@ -151,5 +153,33 @@ test('every surface set ships what it is made from', () => {
 test('every role falls back to a photographed set', () => {
   for (const role of SETTLEMENT_SURFACE_ROLES) {
     assert.ok(SETTLEMENT_SURFACE_SETS[SETTLEMENT_ROLE_FALLBACK[role]]?.source, `${role} has no photographed fallback`);
+  }
+});
+
+test('a town is dressed with loose stone the stone library can generate', () => {
+  const cityPlan = plan(CITY);
+  const stones = cityPlan.props.filter(({ kind }) => isStoneKind(kind));
+  const kinds = new Set(stones.map(({ kind }) => kind));
+  for (const kind of ['guardStone', 'boulder', 'fieldstone']) assert.ok(kinds.has(kind), `no ${kind} placed`);
+  for (const stone of stones) {
+    assert.ok(stone.variant < SETTLEMENT_STONES[stone.kind].variants);
+    assert.ok(stone.scale > 0.2 && stone.scale < 2.5, `${stone.kind} scaled ${stone.scale}`);
+  }
+  const placements = settlementPlacements(CITY, cityPlan, 2, ground).filter(({ kind }) => isStoneKind(kind));
+  assert.equal(placements.length, stones.length);
+  assert.ok(placements.every(({ key, small, scale }) => key.startsWith(`${cityPlan.profile.style.key}|`) && small && scale !== 1));
+});
+
+test('every stone kind names an archetype that generates a grounded mesh', () => {
+  for (const [kind, { archetype, variants }] of Object.entries(SETTLEMENT_STONES)) {
+    assert.ok(STONE_ARCHETYPE_IDS.includes(archetype), `${kind} names unknown archetype ${archetype}`);
+    for (let variant = 0; variant < variants; variant += 1) {
+      const { mesh } = generateStone({ archetype, seed: stoneSeed(kind, variant) });
+      assert.ok(mesh.indices.length >= 3 && mesh.positions.length === mesh.normals.length);
+      assert.equal(mesh.tones.length, mesh.positions.length / 3);
+      let lowest = Infinity;
+      for (let index = 1; index < mesh.positions.length; index += 3) lowest = Math.min(lowest, mesh.positions[index]);
+      assert.ok(Math.abs(lowest) < 0.05, `${kind} ${variant} floats or sinks by ${lowest}`);
+    }
   }
 });

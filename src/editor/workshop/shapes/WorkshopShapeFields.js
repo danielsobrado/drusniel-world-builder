@@ -38,6 +38,7 @@ export function workshopShapeMarkup() {
         ['timber', 'Half-timber framing'],
       ])}
       <label class="workshop-check"><input type="checkbox" data-shape-field="shutters"/>Window shutters</label>
+      <label class="workshop-check"><input type="checkbox" data-shape-field="craft"/>Chimney &amp; planted window boxes</label>
       ${range('levels', 'Floors', 1, 6, 1)}
       ${select('footprint', 'Footprint', [
         ['rounded', 'Rounded rectangle'],

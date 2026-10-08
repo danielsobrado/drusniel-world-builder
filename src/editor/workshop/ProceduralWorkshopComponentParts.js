@@ -1,7 +1,7 @@
 import { applyWorkshopGeneratedMaps } from './ProceduralWorkshopGeneratedMaps.js';
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { disposeModelParts } from '../assets/modelParts.js';
+import { disposeModelParts, disposeUnusedModelMaterials } from '../assets/modelParts.js';
 import { normalizeProceduralRecipe } from './ProceduralAssetStore.js';
 import { getCastleWallOpenings } from './ProceduralCastleWallLayout.js';
 import {
@@ -910,9 +910,7 @@ export function createProceduralWorkshopComponentParts(input, {
       ? buildPreviewParts(entries, components, recipe.remesh)
       : buildRuntimeParts(entries, components, recipe.remesh);
     const usedMaterials = new Set(parts.map((part) => part.material));
-    new Set(rawParts.map((part) => part.material)).forEach((material) => {
-      if (!usedMaterials.has(material)) material.dispose();
-    });
+    disposeUnusedModelMaterials(rawParts.map((part) => part.material), usedMaterials);
     return attachMetadata(parts, rawParts.stats, components, plan);
   } catch (error) {
     for (const material of resolvedMaterials.values()) material.dispose();

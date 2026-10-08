@@ -35,7 +35,7 @@ export function buildShapeIvy(plan, meshes, recipe) {
       surface.point(b[0] + 0.009, b[1], offset),
       surface.point(a[0] + 0.009, a[1], offset),
     ];
-    meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.4, 0.5, 0.35]);
+    meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.1, 0.17, 0.055]);
   }
   for (const leaf of layout.leaves) {
     const cos = Math.cos(leaf.angle),
@@ -52,9 +52,9 @@ export function buildShapeIvy(plan, meshes, recipe) {
       const a = points[i],
         b = points[(i + 1) % points.length];
       meshes.foliage.triangle(center, ...(surface.clockwise ? [a, b] : [b, a]), [
-        color,
-        color,
-        color,
+        color * 0.16,
+        color * 0.29,
+        color * 0.085,
       ]);
     }
   }

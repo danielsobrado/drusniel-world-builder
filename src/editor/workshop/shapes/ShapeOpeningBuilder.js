@@ -1,5 +1,6 @@
 import { addWallPatch } from './ShapeWallSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
+import { buildShapeOpeningCraft } from './ShapeOpeningCraft.js';
 
 export function buildShapeOpenings(plan, meshes, recipe, surface) {
   const p = plan.primitive;
@@ -15,7 +16,7 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
         offset * side,
         thickness * side,
         color,
-        caps,
+        { bevel: recipe.detail >= 2, ...caps },
       );
   };
   for (const o of plan.openings ?? p.openings ?? []) {
@@ -32,7 +33,7 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
         0.09,
         [1, 1, 1],
       );
-    const steps = 24;
+    const steps = o.role === 'door' ? Math.max(8, Math.ceil(o.width / 0.12)) : 24;
     for (let i = 0; i < steps; i++) {
       const u0 = center - half + (o.width * i) / steps,
         u1 = center - half + (o.width * (i + 1)) / steps;
@@ -41,8 +42,8 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
       );
       if (!(o.profile === 'square' && o.bottom + o.height >= p.height))
         trim(
-          u0,
-          u1,
+          u0 + (o.role === 'door' ? 0.004 : 0),
+          u1 - (o.role === 'door' ? 0.004 : 0),
           top,
           top.map((y) => Math.min(p.height, y + 0.13)),
           p.thickness / 2 + 0.075,
@@ -59,8 +60,8 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
         addWallPatch(
           mesh,
           surface,
-          u0,
-          u1,
+          u0 + (o.role === 'door' ? 0.004 : 0),
+          u1 - (o.role === 'door' ? 0.004 : 0),
           o.bottom + 0.03,
           top.map((y) => y - 0.04),
           0,
@@ -69,6 +70,7 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
         );
       }
     }
+    buildShapeOpeningCraft(o, meshes, surface, recipe);
     if (o.role === 'window') {
       trim(
         center - half - 0.16,

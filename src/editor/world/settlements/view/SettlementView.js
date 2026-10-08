@@ -45,7 +45,12 @@ export class SettlementView {
     this.pavingRoot.name = 'settlement-paving';
     terrainView.scene.add(this.root, this.pavingRoot);
     this.anchor = new InstanceAnchor();
-    this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer });
+    this.pool = new SettlementPrototypePool({
+      root: this.root,
+      renderer: terrainView.renderer,
+      // A variant is nine or so new materials; drawn cold they compile in one frame.
+      onMeshesCreated: () => terrainView.drawPreparation?.discover(),
+    });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
     this.generator = null;
@@ -63,7 +68,7 @@ export class SettlementView {
   reset() {
     for (const site of this.sites.values()) site.dispose();
     this.sites.clear();
-    this.pool.dispose();
+    this.pool.clear();
     this.rows.clear();
     this.nextRefresh = 0;
     this.dirty = true;
@@ -228,6 +233,7 @@ export class SettlementView {
   dispose() {
     this.disposed = true;
     this.reset();
+    this.pool.dispose();
     this.library.dispose();
     this.root.removeFromParent();
     this.pavingRoot.removeFromParent();

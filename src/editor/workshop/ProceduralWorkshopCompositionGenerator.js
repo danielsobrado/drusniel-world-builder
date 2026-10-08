@@ -5,6 +5,8 @@ import {
 } from './ProceduralWorkshopComposition.js';
 import { createSkeletonRoofParts } from './ProceduralWorkshopSkeletonRoof.js';
 import { buildRegisteredShape } from './shapes/ShapeGeometryRegistry.js';
+import { applyShapeSurfaceMaterials } from './shapes/ShapeSurfaceMaterials.js';
+import { disposeUnusedModelMaterials } from '../assets/modelParts.js';
 
 function material(slot, color, options = {}) {
   const result = new THREE.MeshStandardNodeMaterial({
@@ -163,11 +165,14 @@ export function createWorkshopCompositionParts(
     });
     materials.wood = material('wood', '#7c553a', { vertexColors: true });
     materials.foliage = material('foliage', '#648a48', { vertexColors: true });
+    materials.metal = material('metal', '#7f715b', { roughness: 0.52, metalness: 0.35, vertexColors: true });
     materials.recess = material('recess', '#719293', { roughness: 0.55, vertexColors: true });
     materials.walls.color.set(
       recipe.finish === 'ochre' ? '#d3aa71' : recipe.finish === 'rose' ? '#caa395' : '#e2d5b9',
     );
-    materials.roof.color.set(recipe.topStyle === 'terracotta' ? '#a95f42' : '#506b71');
+    materials.roof.color.set(recipe.topStyle === 'terracotta' ? '#a95f42' : '#405563');
+    materials.foliage.color.set('#ffffff');
+    materials.foliage.side = THREE.DoubleSide;
   }
   const parts = [];
   try {
@@ -191,9 +196,9 @@ export function createWorkshopCompositionParts(
       roofOverhang: recipe.roofOverhang,
     });
     parts.push(...roofResult.parts);
-    for (const materialValue of new Set(Object.values(materials))) {
-      if (!parts.some((entry) => entry.material === materialValue)) materialValue.dispose();
-    }
+    const retained = new Set(parts.map((entry) => entry.material));
+    if (shapePlans.size > 0) applyShapeSurfaceMaterials(materials, recipe, retained);
+    disposeUnusedModelMaterials(Object.values(materials), retained);
     const sourceVertices = parts.reduce(
       (total, entry) => total + (entry.geometry.getAttribute('position')?.count ?? 0),
       0,
@@ -211,7 +216,7 @@ export function createWorkshopCompositionParts(
     return parts;
   } catch (error) {
     for (const part of parts) part.geometry.dispose();
-    for (const value of new Set(Object.values(materials))) value.dispose();
+    disposeUnusedModelMaterials(Object.values(materials));
     throw error;
   }
 }

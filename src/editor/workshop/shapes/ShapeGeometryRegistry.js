@@ -30,6 +30,7 @@ const slots = Object.freeze({
   glazing: 'recess',
   deck: 'stone',
   foliage: 'foliage',
+  metal: 'metal',
 });
 
 export function buildRegisteredShape(

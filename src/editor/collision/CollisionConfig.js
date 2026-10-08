@@ -63,6 +63,10 @@ export const COLLISION_CONFIG_DEFAULTS = deepFreeze({
     enabled: true,
     curveSegmentLength: 1.25,
   },
+  // Planned settlements (world/settlements): buildings and heavy street furniture.
+  settlements: {
+    enabled: true,
+  },
   debug: {
     colliders: false,
     broadphase: false,
@@ -216,7 +220,7 @@ export function validateCollisionConfig(config) {
     );
   }
 
-  for (const section of ['trees', 'rocks', 'objects', 'constructions']) {
+  for (const section of ['trees', 'rocks', 'objects', 'constructions', 'settlements']) {
     assertObject(config[section], `collision.${section}`);
     assertBoolean(config[section].enabled, `collision.${section}.enabled`);
   }
@@ -303,6 +307,7 @@ function mergeCollisionConfig(input = {}) {
       ...COLLISION_CONFIG_DEFAULTS.constructions,
       ...(input.constructions ?? {}),
     },
+    settlements: { ...COLLISION_CONFIG_DEFAULTS.settlements, ...(input.settlements ?? {}) },
     debug: { ...COLLISION_CONFIG_DEFAULTS.debug, ...(input.debug ?? {}) },
   };
 }

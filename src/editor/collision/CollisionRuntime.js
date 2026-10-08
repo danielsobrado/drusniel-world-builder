@@ -23,6 +23,7 @@ import { ConstructionCollisionProvider } from './providers/ConstructionCollision
 import { NaturalCollisionProvider } from './providers/NaturalCollisionProvider.js';
 import { ObjectCollisionProvider } from './providers/ObjectCollisionProvider.js';
 import { RockCollisionProvider } from './providers/RockCollisionProvider.js';
+import { SettlementCollisionProvider } from './providers/SettlementCollisionProvider.js';
 import { createRockCollisionSource } from './providers/RockCollisionSource.js';
 import { TreeCollisionProvider } from './providers/TreeCollisionProvider.js';
 import { createTreeCollisionSource } from './providers/TreeCollisionSource.js';
@@ -121,6 +122,10 @@ function createNaturalComponents({
       counterName: 'Construction',
       provider,
     }));
+  }
+  if (collisionConfig.settlements.enabled) {
+    const provider = new SettlementCollisionProvider({ terrainView, chunkWorldSize: terrainView.chunkWorldSize });
+    components.push(Object.freeze({ id: 'settlements', counterName: 'Settlement', provider }));
   }
   return components;
 }

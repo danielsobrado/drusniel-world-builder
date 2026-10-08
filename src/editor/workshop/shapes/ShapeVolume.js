@@ -74,6 +74,7 @@ export function normalizeShapeVolume(source) {
     openings: Object.freeze(normalizedOpenings),
     facade: shapeChoice(source.facade, 'facade treatment', 'plain', ['plain', 'timber']),
     shutters: shapeBoolean(source.shutters, 'Shutters'),
+    craft: shapeBoolean(source.craft, 'Crafted details', true),
     suppressed: shapeSuppression(source),
   });
 }
@@ -118,7 +119,7 @@ export function planShapeVolume(primitive) {
     boundary,
     topBoundary,
     bounds: shapeBounds([...boundary, ...topBoundary], primitive.thickness / 2 + primitive.roof.overhang),
-    regions: ['walls', 'roof', 'trim', 'inserts', 'glazing', 'foliage'].map((family) => ({
+    regions: ['walls', 'roof', 'trim', 'inserts', 'glazing', 'foliage', 'metal'].map((family) => ({
       id: `${primitive.id}:${family}`,
       primitiveId: primitive.id,
       componentId: primitive.id,

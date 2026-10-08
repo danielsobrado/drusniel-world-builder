@@ -45,9 +45,10 @@ function createSkyTexture() {
     }
     for (let x = 0; x < 4; x += 1) {
       const index = (y * 4 + x) * 4;
-      data[index] = Math.round(color.r * 255);
-      data[index + 1] = Math.round(color.g * 255);
-      data[index + 2] = Math.round(color.b * 255);
+      const encoded = color.clone().convertLinearToSRGB();
+      data[index] = Math.round(encoded.r * 255);
+      data[index + 1] = Math.round(encoded.g * 255);
+      data[index + 2] = Math.round(encoded.b * 255);
       data[index + 3] = 255;
     }
   }
@@ -70,8 +71,8 @@ function createTerrain() {
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.getAttribute('position');
   const colors = new Float32Array(positions.count * 3);
-  const lush = new THREE.Color('#76aa4e');
-  const dry = new THREE.Color('#a8c56a');
+  const lush = new THREE.Color('#71975c');
+  const dry = new THREE.Color('#9cb67d');
   const shadow = new THREE.Color('#557e42');
   const color = new THREE.Color();
 
@@ -212,7 +213,7 @@ function addConifer(group, materials, seed, x, z) {
   for (let layer = 0; layer < layers; layer += 1) {
     const progress = layer / Math.max(1, layers - 1);
     const crown = new THREE.Mesh(
-      new THREE.ConeGeometry(0.85 - progress * 0.25, 1.45, 9),
+      new THREE.ConeGeometry(0.85 - progress * 0.25, 1.45, 16),
       materials.conifer,
     );
     crown.position.set(x, y + trunkHeight * 0.62 + layer * 0.58, z);
@@ -238,7 +239,7 @@ function addBroadleaf(group, materials, seed, x, z) {
   const clusters = 3 + Math.round(random01(seed, 3) * 2);
   for (let index = 0; index < clusters; index += 1) {
     const crown = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.82 + random01(seed, 10 + index) * 0.5, 1),
+      new THREE.IcosahedronGeometry(0.82 + random01(seed, 10 + index) * 0.5, 2),
       crownMaterial,
     );
     crown.scale.set(1.05, 0.9 + random01(seed, 20 + index) * 0.4, 1);
@@ -294,11 +295,13 @@ function addDistantHills(group, materials) {
     const x = Math.sin(angle) * radius;
     const z = Math.cos(angle) * radius;
     const hill = new THREE.Mesh(
-      new THREE.ConeGeometry(width, height, 7, 1, false),
+      new THREE.SphereGeometry(width, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
       materials.hills[index % materials.hills.length],
     );
     hill.scale.z = 0.78 + random01(seed, 5) * 0.55;
-    hill.position.set(x, terrainHeightAt(x, z) + height * 0.5 - 1.1, z);
+    hill.scale.y = height / width * 0.65;
+    hill.scale.x = 1.5;
+    hill.position.set(x, terrainHeightAt(x, z) - 1.1, z);
     hill.rotation.y = random01(seed, 6) * Math.PI;
     hill.receiveShadow = true;
     group.add(hill);
@@ -457,7 +460,7 @@ export function createWorkshopStage(scene) {
   const group = new THREE.Group();
   const materials = createMaterials();
   const sky = createSkyTexture();
-  const fog = new THREE.Fog('#bdd8b5', 38, 88);
+  const fog = new THREE.Fog('#c5d7c2', 30, 72);
   let disposed = false;
 
   group.name = 'workshop-stage';
@@ -473,10 +476,10 @@ export function createWorkshopStage(scene) {
     addClouds(group, materials);
     mergeStaticMeshes(group);
 
-    const hemisphere = new THREE.HemisphereLight('#d9edff', '#5c7047', 2.25);
+    const hemisphere = new THREE.HemisphereLight('#dfebf4', '#89775a', 1.6);
     group.add(hemisphere);
 
-    const sun = new THREE.DirectionalLight('#fff1bd', 4.35);
+    const sun = new THREE.DirectionalLight('#fff3dd', 3.5);
     sun.position.set(-11, 19, 13);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -492,7 +495,7 @@ export function createWorkshopStage(scene) {
     sun.target.position.set(0, 3, 0);
     group.add(sun, sun.target);
 
-    const fill = new THREE.DirectionalLight('#9dc9ff', 0.92);
+    const fill = new THREE.DirectionalLight('#b7d1e8', 0.75);
     fill.position.set(11, 8, -11);
     group.add(fill);
   } catch (error) {

@@ -3,8 +3,9 @@ import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
 
 function shade(recipe, plan, domain, key) {
-  const v = 0.84 + shapeRandom(recipe.seed, plan.id, domain, key) * 0.16;
-  return [v, v, v];
+  const v = 0.8 + shapeRandom(recipe.seed, plan.id, domain, key) * 0.2;
+  const warm = shapeRandom(recipe.seed, plan.id, `${domain}-warmth`, key) - 0.5;
+  return [v + warm * 0.04, v, v - warm * 0.04];
 }
 
 export function buildShapeWalls(plan, meshes, recipe) {
@@ -80,6 +81,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
               color,
               {
                 back: false,
+                bevel: detail,
                 start: k === 0 || openingEdges.has(cuts[k]),
                 end: k === cuts.length - 2 || openingEdges.has(cuts[k + 1]),
               },

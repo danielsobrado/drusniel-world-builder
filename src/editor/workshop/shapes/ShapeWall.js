@@ -55,7 +55,7 @@ export function planShapeWall(primitive) {
     openings,
     boundary,
     bounds: shapeBounds(boundary, primitive.thickness),
-    regions: ['walls', 'trim', 'inserts', 'glazing', 'foliage'].map((family) => ({
+    regions: ['walls', 'trim', 'inserts', 'glazing', 'foliage', 'metal'].map((family) => ({
       id: `${primitive.id}:${family}`,
       primitiveId: primitive.id,
       componentId: primitive.id,

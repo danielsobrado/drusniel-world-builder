@@ -388,6 +388,11 @@ desaturated at a fixed brightness, as surfaces the engine tints. The set each
 name maps to is recorded in
 `src/editor/world/settlements/surfaces/SettlementDressing.js`.
 
+## Procedural stone
+
+`@drusniel/procedural-stone` (https://github.com/danielsobrado/drusniel-procedural-stones),
+MIT License. Generates the loose stone settlements are dressed with.
+
 ## Procedural Texture Lab runtime
 
 `procedural-texture-lab` (https://github.com/danielsobrado/drusniel-procedural-textures),

@@ -3,6 +3,7 @@ import { curveSegmentPointAtLength } from '../curves/CurveSegment.js';
 import { placeShapePoint } from './ShapePaths.js';
 import { pointInShape, shapeEnvelopeAtHeight } from './ShapeEnvelope.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
+import { addShapeWallBevel } from './ShapeWallBevel.js';
 
 export function createShapeWallSurface(plan) {
   const p = plan.primitive,
@@ -119,7 +120,12 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
     surface.clockwise !== thickness < 0
       ? mesh.quad(a, b, c, d, color)
       : mesh.quad(d, c, b, a, color);
-  face(a, b, c, d);
+  if (caps.bevel) addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, thickness, color, caps });
+  else {
+    const uv = [[u0, low[0]], [u1, low[1]], [u1, high[1]], [u0, high[0]]];
+    if (surface.clockwise !== thickness < 0) mesh.quad(a, b, c, d, color, uv);
+    else mesh.quad(d, c, b, a, color, uv.toReversed());
+  }
   if (Math.abs(thickness) > 0) {
     const ai = surface.point(u0, low[0], offset - thickness),
       bi = surface.point(u1, low[1], offset - thickness);

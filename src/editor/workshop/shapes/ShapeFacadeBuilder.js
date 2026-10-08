@@ -1,6 +1,7 @@
 import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
+import { buildShapeWindowBoxes } from './ShapeWindowBoxes.js';
 
 /** Timber and shutters share host frames and opening exclusions with the wall shell. */
 export function buildShapeFacade(plan, meshes, recipe) {
@@ -28,6 +29,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
           start: i === 0,
           end: i === steps - 1,
           back: false,
+          bevel: recipe.detail >= 2,
         });
       }
     }
@@ -71,6 +73,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
       }
     }
   }
+  buildShapeWindowBoxes(plan, meshes, recipe, surface);
   if (!p.shutters || recipe.detail < 2) return;
   for (const opening of plan.openings ?? p.openings) {
     if (opening.role !== 'window') continue;

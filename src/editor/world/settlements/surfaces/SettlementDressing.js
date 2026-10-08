@@ -27,8 +27,11 @@
  * a set tintable — its luminance times the gain, with no hue of its own.
  *
  * Only presets that generate in a few seconds belong here: a town waits for its
- * dressing. Measured on a desktop GPU, the three below take 1–4 s; the Lab's
- * cut cobble took 45 s and its limestone gravel 18 s, so paving stays photographed.
+ * dressing. Measured on a desktop GPU, the three below take 1–5 s; the Lab's
+ * cut cobble (nine layers) took 45 s and its limestone gravel (six) 21 s, so
+ * paving stays photographed. The time is the driver optimising the shader:
+ * building the layer stack once instead of per stage, and emitting the noise as
+ * shader functions instead of inline, were both tried and changed nothing.
  */
 export const SETTLEMENT_SURFACE_SETS = Object.freeze({
   'cobble-grey': Object.freeze({ source: 'cobblestone_floor_08', tileMetres: 1.9 }),

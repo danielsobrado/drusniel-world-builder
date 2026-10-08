@@ -16,7 +16,7 @@ export class ShapeMesh {
     this.uvs = [];
   }
 
-  triangle(a, b, c, color = [1, 1, 1]) {
+  triangle(a, b, c, color = [1, 1, 1], uvs) {
     const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
     const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     if (
@@ -28,16 +28,16 @@ export class ShapeMesh {
       tolerance.length * tolerance.length
     )
       return;
-    for (const point of [a, b, c]) {
+    for (const [index, point] of [a, b, c].entries()) {
       this.positions.push(...point);
       this.colors.push(...color);
-      this.uvs.push(point[0], point[2] + point[1]);
+      this.uvs.push(...(uvs?.[index] ?? [point[0], point[2] + point[1]]));
     }
   }
 
-  quad(a, b, c, d, color) {
-    this.triangle(a, b, c, color);
-    this.triangle(a, c, d, color);
+  quad(a, b, c, d, color, uvs) {
+    this.triangle(a, b, c, color, uvs && [uvs[0], uvs[1], uvs[2]]);
+    this.triangle(a, c, d, color, uvs && [uvs[0], uvs[2], uvs[3]]);
   }
 
   box(center, size, color = [1, 1, 1]) {

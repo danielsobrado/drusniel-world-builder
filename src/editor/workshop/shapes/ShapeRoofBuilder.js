@@ -1,6 +1,7 @@
 import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { pointInShape } from './ShapeEnvelope.js';
-import { shapeRandom } from './ShapeMesh.js';
+import { buildShapeRoofTiles } from './ShapeRoofTiles.js';
+import { buildShapeRoofCraft } from './ShapeRoofCraft.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
 
 export function buildShapeRoof(plan, meshes, recipe) {
@@ -67,32 +68,6 @@ export function buildShapeRoof(plan, meshes, recipe) {
       edgeB = surface.point(u1, 1);
     if (!hidden([edgeA, edgeB])) meshes.trim.beam(edgeA, edgeB, 0.1, 0.12, [0.8, 0.8, 0.8]);
   }
-  if (recipe.detail < 2 || p.roof.family === 'flat') return;
-  const rows = Math.max(4, Math.ceil(p.roof.rise / 0.28));
-  for (let row = 0; row < rows; row++) {
-    const t0 = row / rows,
-      t1 = Math.min(1, (row + 1.12) / rows);
-    const cells = Math.max(6, Math.ceil((length * (p.roof.family === 'gable' ? 1 : t1)) / 0.5));
-    for (let cell = 0; cell < cells; cell++) {
-      const phase = (row % 2) / 2;
-      const u0 = ((cell + phase) * length) / cells + 0.015;
-      const u1 = ((cell + phase + 0.95) * length) / cells;
-      const quad = [
-        surface.point(u0, t0, 0.028),
-        surface.point(u0, t1, 0.05),
-        surface.point(u1, t1, 0.05),
-        surface.point(u1, t0, 0.028),
-      ];
-      if (hidden(quad)) continue;
-      const v = 0.78 + shapeRandom(recipe.seed, plan.id, 'roof-tiles', `${row}:${cell}`) * 0.22;
-      if (!roofQuad(quad, [v, v, v])) continue;
-      const a = quad[1],
-        b = quad[2];
-      meshes.roof.quad(a, [a[0], a[1] - 0.035, a[2]], [b[0], b[1] - 0.035, b[2]], b, [
-        v * 0.8,
-        v * 0.8,
-        v * 0.8,
-      ]);
-    }
-  }
+  buildShapeRoofCraft(plan, meshes, recipe, surface, hidden);
+  if (recipe.detail >= 2 && p.roof.family !== 'flat') buildShapeRoofTiles(plan, meshes.roof, surface, recipe, hidden);
 }

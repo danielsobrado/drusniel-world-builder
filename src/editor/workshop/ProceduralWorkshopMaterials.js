@@ -669,25 +669,27 @@ export function createWorkshopMaterials(recipe) {
   const roofSet = roofAlbedo ? null : workshopSurfaceOverride('roof');
   const roofSetTint = ROOF_SET_TINTS[recipe.topStyle] ?? '#ffffff';
 
-  const stoneBump = surfaceBumpTexture(recipe.seed, stoneConfig.bumpTextureScale);
-  const roofBump = roofBumpTexture(recipe.seed);
-  const plasterBump = surfaceBumpTexture(recipe.seed + 913, 0.72);
-  const stoneRoughness = surfaceRoughnessTexture(recipe.seed + 101, {
+  // A family dressed in a supplied set needs none of its synthesised maps, and
+  // synthesising them anyway was most of what installing a settlement mesh cost.
+  const stoneBump = stoneSet ? null : surfaceBumpTexture(recipe.seed, stoneConfig.bumpTextureScale);
+  const roofBump = roofSet ? null : roofBumpTexture(recipe.seed);
+  const plasterBump = plasterSet ? null : surfaceBumpTexture(recipe.seed + 913, 0.72);
+  const stoneRoughness = stoneSet ? null : surfaceRoughnessTexture(recipe.seed + 101, {
     base: stoneConfig.roughnessBase,
     variation: stoneConfig.roughnessVariation,
     broadScale: stoneConfig.roughnessBroadScale,
   });
-  const mortarRoughness = surfaceRoughnessTexture(recipe.seed + 211, {
+  const mortarRoughness = plasterSet ? null : surfaceRoughnessTexture(recipe.seed + 211, {
     base: 242,
     variation: 15,
     broadScale: 13,
   });
-  const woodRoughness = surfaceRoughnessTexture(recipe.seed + 307, {
+  const woodRoughness = timberSet ? null : surfaceRoughnessTexture(recipe.seed + 307, {
     base: 208,
     variation: 32,
     broadScale: 6,
   });
-  const roofRoughness = surfaceRoughnessTexture(recipe.seed + 401, {
+  const roofRoughness = roofSet ? null : surfaceRoughnessTexture(recipe.seed + 401, {
     base: recipe.topStyle === 'slate' ? 210 : 194,
     variation: 36,
     broadScale: 10,
@@ -695,19 +697,19 @@ export function createWorkshopMaterials(recipe) {
   const highQuality = recipe.detail >= 2;
   const stoneNormalKind = stoneConfig.normalKind
     ?? (recipe.style === 'granite' ? 'granite' : 'stoneBlock');
-  const stoneNormal = highQuality
+  const stoneNormal = highQuality && !stoneSet
     ? proceduralNormalTexture(stoneNormalKind, recipe.seed + 503)
     : null;
-  const plasterNormal = highQuality
+  const plasterNormal = highQuality && !plasterSet
     ? proceduralNormalTexture(
       recipe.finish === 'masonry' ? 'rubble' : 'plaster',
       recipe.seed + 601,
     )
     : null;
-  const woodNormal = highQuality
+  const woodNormal = highQuality && !timberSet
     ? proceduralNormalTexture('timber', recipe.seed + 701)
     : null;
-  const roofNormal = highQuality
+  const roofNormal = highQuality && !roofSet
     ? proceduralNormalTexture(
       recipe.topStyle === 'terracotta' ? 'roofTile' : 'shingle',
       recipe.seed + 809,
@@ -717,7 +719,7 @@ export function createWorkshopMaterials(recipe) {
     flatShading: stoneConfig.flatShading,
     color: stoneAlbedo?.tint ?? (recipe.albedo || stoneSet ? '#ffffff' : STONE_PALETTES[recipe.style].color),
     map: stoneAlbedo?.texture ?? stoneSet?.color ?? (recipe.albedo ? stoneTexture(recipe) : null),
-    bumpMap: stoneSet ? null : stoneBump,
+    bumpMap: stoneBump,
     bumpScale: stoneConfig.bumpScale,
     normalMap: stoneSet?.normal ?? stoneNormal,
     normalScale: new THREE.Vector2(
@@ -750,7 +752,7 @@ export function createWorkshopMaterials(recipe) {
   const roof = tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
     color: roofAlbedo?.tint ?? (roofSet ? roofSetTint : '#ffffff'),
     map: roofAlbedo?.texture ?? roofSet?.color ?? roofTexture(recipe.topStyle, recipe.seed),
-    bumpMap: roofSet ? null : roofBump,
+    bumpMap: roofBump,
     bumpScale: 0.095,
     normalMap: roofSet?.normal ?? roofNormal,
     normalScale: new THREE.Vector2(0.68, 0.68),
@@ -772,7 +774,7 @@ export function createWorkshopMaterials(recipe) {
         : plasterSet ? new THREE.Color().setRGB(plasterTint[0] / 255, plasterTint[1] / 255, plasterTint[2] / 255, THREE.SRGBColorSpace)
           : '#ffffff'),
       map: wallAlbedo?.texture ?? plasterSet?.color ?? (recipe.finish === 'masonry' ? null : plasterTexture(recipe)),
-      bumpMap: plasterSet ? null : plasterBump,
+      bumpMap: plasterBump,
       bumpScale: recipe.finish === 'masonry' ? 0.025 : 0.075,
       normalMap: plasterSet?.normal ?? plasterNormal,
       normalScale: new THREE.Vector2(0.48, 0.48),

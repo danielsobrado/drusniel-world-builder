@@ -6,6 +6,10 @@ gold handles or the controls. Ctrl+Z/Shift+Ctrl+Z undo and redo shape edits;
 Escape cancels a handle drag. The material tool assigns existing area presets.
 **Bake game object** saves the authored composition into Objects.
 
+The [visual polish follow-up](workshop-visual-polish-2026-10-08.md) adds bevels,
+overlapping slate, roof craft, door hardware, planted window boxes and refined
+workshop lighting. It records the updated validation and geometry cost.
+
 ## Included designs and controls
 
 - Rounded cottage; bell-roof turret; oval garden pavilion; joined cottage and
