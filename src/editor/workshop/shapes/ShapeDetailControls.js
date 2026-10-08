@@ -6,7 +6,9 @@ export function shapeDetailMarkup() {
 
 export function syncShapeDetailControls(editor) {
   const p = editor.primitive, section = editor.root.querySelector('[data-shape-section="details"]');
-  const details = editor.resolvedPlans.get(p?.id)?.decorations ?? [];
+  const automatic = editor.resolvedPlans.get(p?.id)?.decorations ?? [];
+  const details = [...automatic, ...(p?.suppressed ?? []).filter((key) => key.startsWith('detail:') && !automatic.some((d) => d.id === key))
+    .map((id) => ({ id, role: `Hidden ${id.endsWith(':chimney') ? 'chimney' : 'window-box'}`, openingId: id.split(':box-')[1] }))];
   section.hidden = !p;
   if (!details.some((d) => d.id === editor.detailId)) editor.detailId = details[0]?.id;
   const select = section.querySelector('[data-shape-action="detail-select"]');
@@ -14,8 +16,8 @@ export function syncShapeDetailControls(editor) {
     const option = document.createElement('option'); option.value = d.id; option.textContent = `${d.role} · ${d.openingId ?? 'roof'}`; return option;
   }));
   select.value = editor.detailId ?? '';
-  section.querySelector('[data-shape-action="detail-suppress"]').disabled = !editor.detailId;
-  section.querySelector('[data-shape-action="detail-reset"]').disabled = !p?.detailOverrides?.length && !p?.suppressed.some((key) => key.startsWith('detail:'));
+  section.querySelector('[data-shape-action="detail-suppress"]').disabled = !editor.detailId || p?.suppressed.includes(editor.detailId);
+  section.querySelector('[data-shape-action="detail-reset"]').disabled = !p?.detailOverrides?.some((o) => o.key === editor.detailId) && !p?.suppressed.includes(editor.detailId);
   section.querySelector('[data-shape-action="curve-edit"]').checked = Boolean(editor.curveEditing);
   section.querySelector('[data-shape-action="curve-edit"]').disabled = p?.kind === 'traversal';
 }
@@ -35,7 +37,7 @@ export function applyShapeDetailAction(editor, action) {
   const p = editor.primitive;
   if (action === 'detail-suppress') editor.session.update(p.id, { suppressed: [...p.suppressed, editor.detailId] });
   else if (action === 'detail-reset') editor.session.update(p.id, {
-    detailOverrides: [], suppressed: p.suppressed.filter((key) => !key.startsWith('detail:')),
+    detailOverrides: p.detailOverrides.filter((o) => o.key !== editor.detailId), suppressed: p.suppressed.filter((key) => key !== editor.detailId),
   });
   else return false;
   return true;

@@ -254,6 +254,26 @@ export const SHAPE_PRESETS = Object.freeze(
         features: [0.07, 0.2, 0.53, 0.68].map((at, i) => ({ id: `buttress-${i}`, kind: 'buttress', at, width: 0.6, depth: 0.9, height: 3.8 })),
       })],
     },
+    {
+      id: 'balcony-manor', label: 'Timber manor with a balcony',
+      create: () => [volume('manor', 'Balcony manor', { facade: 'timber', height: 5.8, levels: 2,
+        footprint: { family: 'rounded', width: 7.6, depth: 5.4, cornerRadius: 0.4 },
+        openings: [opening('door', 0.64, 'door', 0), { ...opening('balcony-door', 0.5, 'door', 2.9), width: 1.25 },
+          { ...opening('upper-side', 0.28, 'window', 3.4), shutterPose: 'ajar' }, opening('front-window', 0.49)],
+        features: [{ id: 'front-balcony', kind: 'balcony', at: 0.5, width: 3.7, depth: 1.15, bottom: 2.9, height: 1.05 },
+          { id: 'porch', kind: 'porch', at: 0.64, width: 2.2, depth: 1.5, height: 2.4 }],
+      })],
+    },
+    {
+      id: 'balcony-tower', label: 'Round tower with a curved balcony',
+      create: () => [volume('tower', 'Balcony tower', { surface: 'masonry', height: 6.2, levels: 2, taper: 0.93,
+        footprint: { family: 'oval', width: 5.3, depth: 5.3 },
+        roof: { family: 'bell', rise: 3.4, overhang: 0.55, sweep: 0.75 },
+        openings: [opening('door', 0.18, 'door', 0), opening('balcony-door', 0.18, 'door', 3.1),
+          { ...opening('high-window', 0.45, 'window', 3.9), shutterPose: 'closed' }],
+        features: [{ id: 'curved-balcony', kind: 'balcony', at: 0.18, width: 4.2, depth: 1.05, bottom: 3.1, height: 1.1 }],
+      })],
+    },
   ].map((preset) => Object.freeze(preset)),
 );
 

@@ -2,14 +2,16 @@ import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { buildingEntry } from '../../world/settlements/SettlementBuildingCatalog.js';
 import { SETTLEMENT_PLAN_VERSION } from '../../world/settlements/SettlementPlanner.js';
 import { isStoneKind } from '../../world/settlements/SettlementStones.js';
+import { WALL_STAIR } from '../../world/settlements/SettlementTrim.js';
+import { HOUSE_SHELL, houseShell } from '../../world/settlements/view/SettlementInteriorGeometry.js';
 import { planToWorld } from '../../world/settlements/view/SettlementPlacements.js';
 import { createCollisionSourceId } from '../CollisionIds.js';
 import { collisionChunkCanonicalBounds, collisionChunkForCanonical } from '../colliders/ColliderBounds.js';
+import { COLLISION_LAYERS } from '../CollisionLayers.js';
 import { COLLIDER_TYPE_BOX, createPrimitiveCollider } from '../colliders/ColliderRecords.js';
 
 const SETTLEMENT_COLLISION_SCHEMA = `settlements:v1:plan${SETTLEMENT_PLAN_VERSION}`;
-/** A plot is its mesh plus a hand's breadth (SettlementBuildingCatalog); the wall is inside it. */
-const PLOT_MARGIN = 0.5;
+const PLOT_MARGIN = HOUSE_SHELL.plotMargin;
 /** Walls stand taller than their eaves: roofs, gables and battlements. */
 const HEIGHT_HEADROOM = 3;
 
@@ -25,9 +27,40 @@ const SOLID_SHAPES = Object.freeze({
   wall: [[0, 0, 12, 2.2]],
   tower: [[0, 0, 6.6, 6.6]],
   keep: [[0, 0, 10.3, 8.2]],
-  hall: [[-0.6, 0.45, 14, 8.4]],
+  // Offsets are in the footprint's frame, whose +x is the mesh's −x once placed.
+  hall: [[0.6, 0.45, 14, 8.4]],
   gatehouse: [[-4.7, 0, 5, 6.8], [4.7, 0, 5, 6.8]],
 });
+
+const STAIR_STEPS_PER_TREAD = 2;
+
+/**
+ * A house as four walls with a doorway, instead of one block: the walls stand
+ * where the interior the view draws has them (`houseShell`), the doorway where
+ * the mesh has its door, and the floor inside is plain ground. Boxes are
+ * `[centreX, centreZ, width, depth]` in the footprint's frame, front toward +z.
+ */
+function hollowShapes(shell) {
+  const t = HOUSE_SHELL.wallThickness;
+  const depth = shell.front - shell.back;
+  const middle = (shell.front + shell.back) / 2;
+  const leftRun = shell.doorLeft + shell.halfWidth;
+  const rightRun = shell.halfWidth - shell.doorRight;
+  return [
+    [0, shell.back + t / 2, shell.halfWidth * 2, t],
+    [-shell.halfWidth + t / 2, middle, t, depth],
+    [shell.halfWidth - t / 2, middle, t, depth],
+    [-shell.halfWidth + leftRun / 2, shell.front - t / 2, leftRun, t],
+    [shell.halfWidth - rightRun / 2, shell.front - t / 2, rightRun, t],
+  ];
+}
+
+/**
+ * Kinds whose top is a place to stand: the wall-walk and the tower and keep
+ * roofs. Their boxes stop at the real parapet walk instead of rising clear of
+ * the roofline, and carry the walkable layer as well as the blocking one.
+ */
+const WALKABLE_TOPS = new Set(['wall', 'tower', 'keep', 'gatehouse']);
 
 /** Props a walker cannot pass through, as `[width, depth, height]`; the rest are too slight to matter. */
 const SOLID_PROPS = Object.freeze({
@@ -39,7 +72,7 @@ const SOLID_PROPS = Object.freeze({
   boulder: [1, 1, 0.55],
 });
 
-function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, chunkWorldSize }) {
+function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, walkable, chunkWorldSize }) {
   // A footprint's local +x is (cos yaw, −sin yaw) in plan space and plan z is
   // minus canonical z, so the box is turned by π − yaw (SettlementPlacements).
   const rotationY = Math.PI - yaw;
@@ -51,12 +84,14 @@ function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, chunkWorldSiz
   return createPrimitiveCollider({
     sourceId,
     type: COLLIDER_TYPE_BOX,
+    layers: walkable ? COLLISION_LAYERS.solid : COLLISION_LAYERS.blocking,
     ownerChunkX: owner.chunkX,
     ownerChunkZ: owner.chunkZ,
     aabb: { minX: x - halfX, maxX: x + halfX, minY: y, maxY: y + height, minZ: z - halfZ, maxZ: z + halfZ },
     position: [x, y + height / 2, z],
     rotationY,
-    dimensions: [width / 2, height / 2, depth / 2],
+    // Full extents, as the character contacts read a box.
+    dimensions: [width, height, depth],
     prototypeId: null,
   });
 }
@@ -70,12 +105,14 @@ function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, chunkWorldSiz
  * drawn. Each solid is owned by the chunk its centre falls in.
  */
 export class SettlementCollisionProvider {
-  constructor({ terrainView, chunkWorldSize }) {
+  /** @param {boolean} [options.enterable] build houses as walls with a doorway rather than solid blocks */
+  constructor({ terrainView, chunkWorldSize, enterable = true }) {
     if (!terrainView?.worldStore || !(chunkWorldSize > 0)) {
       throw new Error('Settlement collision provider requires the terrain view and a chunk size.');
     }
     this.terrainView = terrainView;
     this.chunkWorldSize = chunkWorldSize;
+    this.enterable = enterable;
     this.descriptor = Object.freeze({ id: 'production-settlements' });
     this.generators = new WeakMap();
     this.generatorCount = 0;
@@ -98,17 +135,39 @@ export class SettlementCollisionProvider {
     this.solids.set(plan, solids);
     const { settlement } = entry;
     plan.buildings.forEach((building, index) => {
-      const shapes = SOLID_SHAPES[building.kind]
-        ?? [[0, 0, Math.max(1, building.width - PLOT_MARGIN), Math.max(1, building.depth - PLOT_MARGIN)]];
+      const plotWidth = Math.max(1, building.width - PLOT_MARGIN);
+      const plotDepth = Math.max(1, building.depth - PLOT_MARGIN);
+      const shell = this.enterable ? houseShell(building) : null;
+      const shapes = SOLID_SHAPES[building.kind] ?? (shell ? hollowShapes(shell) : [[0, 0, plotWidth, plotDepth]]);
       const sin = Math.sin(building.yaw);
       const cos = Math.cos(building.yaw);
-      const height = buildingEntry(building.kind, building.variant).height + HEIGHT_HEADROOM;
+      const walkable = WALKABLE_TOPS.has(building.kind);
+      const height = buildingEntry(building.kind, building.variant).height + (walkable ? 0 : HEIGHT_HEADROOM);
       shapes.forEach(([localX, localZ, width, depth], part) => {
         const world = planToWorld(settlement, tileSize, building.x + cos * localX + sin * localZ, building.z - sin * localX + cos * localZ);
-        solids.push({ id: `b${index}.${part}`, ...world, y: building.pad, yaw: building.yaw, width, depth, height });
+        solids.push({ id: `b${index}.${part}`, ...world, y: building.pad, yaw: building.yaw, width, depth, height, walkable });
       });
     });
     plan.props.forEach((prop, index) => {
+      if (prop.kind === 'wallStair') {
+        // One box a tread, each solid to the ground, each a little higher: a
+        // flight the character motor climbs, ending level with the wall-walk.
+        // Two drawn steps to a tread: the motor only stands on a box wider than
+        // the character, and a drawn step is not.
+        const steps = Math.round(WALL_STAIR.height / WALL_STAIR.rise) / STAIR_STEPS_PER_TREAD;
+        const run = WALL_STAIR.run * STAIR_STEPS_PER_TREAD;
+        const rise = WALL_STAIR.rise * STAIR_STEPS_PER_TREAD;
+        const sin = Math.sin(prop.yaw);
+        const cos = Math.cos(prop.yaw);
+        const y = field.sampleGround(settlement.cellX + prop.x / tileSize, settlement.cellZ + prop.z / tileSize);
+        for (let step = 0; step < steps; step += 1) {
+          const localX = -steps * run / 2 + run * (step + 0.5);
+          const world = planToWorld(settlement, tileSize, prop.x + cos * localX, prop.z - sin * localX);
+          solids.push({ id: `p${index}.${step}`, ...world, y, yaw: prop.yaw, width: run, depth: WALL_STAIR.width,
+            height: rise * (step + 1), walkable: true });
+        }
+        return;
+      }
       const shape = SOLID_PROPS[prop.kind];
       if (!shape) return;
       const scale = isStoneKind(prop.kind) ? prop.scale : 1;

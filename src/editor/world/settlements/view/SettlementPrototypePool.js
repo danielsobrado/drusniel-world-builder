@@ -5,17 +5,22 @@ import { normalizeProceduralRecipe } from '../../../workshop/ProceduralAssetStor
 import { createWorkshopMaterials } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { withWorkshopSurfaceOverrides } from '../../../workshop/ProceduralWorkshopSurfaceOverrides.js';
 import { buildingRecipe } from '../SettlementBuildingCatalog.js';
+import { isCraftedKind } from '../SettlementCraftedKinds.js';
 import { isStoneKind } from '../SettlementStones.js';
 import { lightSettlementMaterials } from './SettlementDusk.js';
+import { gradeSettlementMaterial } from './SettlementGrade.js';
 import { buildSettlementMeshData } from './SettlementMeshData.js';
 import { SettlementMeshWorkerClient } from './SettlementMeshWorkerClient.js';
 import { createSettlementStoneParts } from './SettlementStoneMesh.js';
+import { createSettlementTrimParts } from './SettlementTrimMesh.js';
 
 /** Material families that still read as a house from across the town. */
 const HOUSE_FAR_SLOTS = Object.freeze(['mortar', 'roof', 'recess']);
 const MIN_CAPACITY = 8;
 /** Variants the worker is asked for at once: enough to keep it busy, few enough to stay re-prioritisable. */
 const WORKER_REQUESTS = 2;
+/** Meshes whose shaders are being built in the background at once. */
+const PRECOMPILE_AT_ONCE = 3;
 
 function geometryFrom(packed) {
   const geometry = new THREE.BufferGeometry();
@@ -44,7 +49,9 @@ export class SettlementPrototypePool {
   constructor({ root, renderer, worker = new SettlementMeshWorkerClient() }) {
     this.root = root;
     this.renderer = renderer;
-    /** New meshes, hidden until `reveal` shows them a few at a time. */
+    /** New meshes, hidden: first waiting for their shaders, then for `reveal` to show them a few at a time. */
+    this.uncompiled = [];
+    this.compiling = 0;
     this.unrevealed = [];
     this.worker = worker;
     this.entries = new Map();
@@ -104,7 +111,7 @@ export class SettlementPrototypePool {
   /** Hands the worker the nearest variants it is not already generating. */
   dispatch() {
     while (this.worker.available && this.worker.inFlight < WORKER_REQUESTS) {
-      const entry = this.take((candidate) => !isStoneKind(candidate.kind));
+      const entry = this.take((candidate) => !isCraftedKind(candidate.kind));
       if (!entry) return;
       entry.state = 'building';
       this.worker.build(entry.style, entry.kind, entry.variant).then(
@@ -131,10 +138,10 @@ export class SettlementPrototypePool {
     this.dispatch();
     const finished = this.built.shift();
     if (finished) return this.complete(finished.entry, () => this.install(finished.entry, finished.data));
-    const entry = this.take((candidate) => isStoneKind(candidate.kind) || !this.worker.available);
+    const entry = this.take((candidate) => isCraftedKind(candidate.kind) || !this.worker.available);
     if (!entry) return false;
-    return this.complete(entry, () => (isStoneKind(entry.kind)
-      ? this.installStone(entry)
+    return this.complete(entry, () => (isCraftedKind(entry.kind)
+      ? this.installCrafted(entry)
       : this.install(entry, buildSettlementMeshData(entry.style, entry.kind, entry.variant).data)));
   }
 
@@ -157,6 +164,7 @@ export class SettlementPrototypePool {
     // thread that owns the textures — dressed in the town's own surface sets.
     const materials = withWorkshopSurfaceOverrides(entry.surfaces, () => createWorkshopMaterials(recipe));
     lightSettlementMaterials(materials);
+    for (const [slot, material] of Object.entries(materials)) gradeSettlementMaterial(material, slot);
     const part = (packed) => ({ slot: packed.slot, geometry: geometryFrom(packed), material: materials[packed.slot] ?? materials.stone });
     const near = data.near.map(part);
     let far = data.far ? data.far.map(part) : null;
@@ -175,9 +183,9 @@ export class SettlementPrototypePool {
     }
   }
 
-  /** A loose stone is a couple of hundred triangles: one tier serves every distance. */
-  installStone(entry) {
-    const parts = createSettlementStoneParts(entry);
+  /** Stone and trim are a few hundred triangles at most: one tier serves every distance. */
+  installCrafted(entry) {
+    const parts = isStoneKind(entry.kind) ? createSettlementStoneParts(entry) : createSettlementTrimParts(entry);
     try {
       entry.near = this.createTier(entry, 'near', parts, true);
     } finally {
@@ -241,12 +249,45 @@ export class SettlementPrototypePool {
     for (const mesh of meshes) {
       mesh.visible = false;
       mesh.userData.skipWarmup = true;
-      this.unrevealed.push(mesh);
+      this.uncompiled.push(mesh);
     }
   }
 
-  /** Show up to `count` of the meshes held back. Call once a frame. */
-  reveal(count) {
+  /**
+   * Ask the renderer to build a held-back mesh's shaders off the frame. The
+   * mesh is shown to the compile pass alone: `compileAsync` gathers what is
+   * visible when it is called and builds pipelines for it in the background.
+   */
+  precompile(mesh, camera, scene) {
+    const ready = () => {
+      this.compiling -= 1;
+      if (mesh.parent) this.unrevealed.push(mesh);
+    };
+    this.compiling += 1;
+    mesh.visible = true;
+    let compiled;
+    try {
+      compiled = this.renderer.compileAsync(mesh, camera, scene);
+    } catch {
+      compiled = null;
+    } finally {
+      mesh.visible = false;
+    }
+    // A renderer that cannot precompile just shows the mesh and compiles it then.
+    Promise.resolve(compiled).then(ready, ready);
+  }
+
+  /**
+   * Show up to `count` of the meshes held back, and start compiling the next
+   * few. Call once a frame.
+   */
+  reveal(count, camera = null, scene = null) {
+    while (this.uncompiled.length > 0 && this.compiling < PRECOMPILE_AT_ONCE) {
+      const mesh = this.uncompiled.shift();
+      if (!mesh.parent) continue;
+      if (camera && scene && typeof this.renderer?.compileAsync === 'function') this.precompile(mesh, camera, scene);
+      else this.unrevealed.push(mesh);
+    }
     for (let shown = 0; shown < count && this.unrevealed.length > 0;) {
       const mesh = this.unrevealed.shift();
       // A mesh grown or released since it was staged is no longer in the scene.
@@ -271,6 +312,7 @@ export class SettlementPrototypePool {
     this.queue = this.queue.filter((entry) => this.isLive(entry));
     this.built = this.built.filter(({ entry }) => this.isLive(entry));
     this.unrevealed = this.unrevealed.filter((mesh) => mesh.parent);
+    this.uncompiled = this.uncompiled.filter((mesh) => mesh.parent);
   }
 
   /** Forget every variant. The worker stays: the pool is reused across worlds. */

@@ -670,7 +670,7 @@ export class ProceduralWorkshopUi {
         throw new Error('The workshop component editor is not ready.');
       }
       const { recipe } = this.readInput();
-      const previewRecipe = draft
+      const previewRecipe = draft && !this.shapeBridge.active
         ? {
           ...recipe,
           detail: 1,
@@ -680,11 +680,11 @@ export class ProceduralWorkshopUi {
       const plan = await this.planner.plan(previewRecipe);
       if (revision !== this.planRevision || (this.overlay.hidden && !allowHidden)) return;
       if (this.shapeBridge.active) {
-        const parts = this.shapeBridge.update(previewRecipe, plan);
+        const parts = this.shapeBridge.update(previewRecipe, plan, { interactive: draft });
         this.previewParts = parts;
         if (frame || !this.hasFramedPreview) { this.framePreview(); this.hasFramedPreview = true; }
         const stats = parts.stats;
-        this.status.textContent = `Final preview · ${stats.components} shapes · drag the gold handles or choose a roof and wall finish.`;
+        this.status.textContent = `${draft ? 'Interactive preview' : 'Final preview'} · ${stats.components} shapes · drag the gold handles or choose a roof and wall finish.`;
         this.status.classList.remove('is-error');
         this.completedPlanRevision = revision;
         return;

@@ -59,6 +59,7 @@ export function createShapeWallSurface(plan) {
   function neighborExcluded(distance, y) {
     const position = point(distance, y);
     return (plan.neighbors ?? []).some((n) => {
+      if (n.roofOnly) return false;
       const t = (position[1] - n.primitive.elevation) / n.primitive.height;
       if (t < 0 || t > 1) return false;
       const boundary = shapeEnvelopeAtHeight(n, position[1]);
@@ -80,7 +81,7 @@ export function createShapeWallSurface(plan) {
 }
 
 /** Clip each material layer against the same continuous opening envelope. */
-export function wallSolidBands(surface, u0, u1, y0, y1) {
+export function wallSolidBands(surface, u0, u1, y0, y1, neighborCuts = true) {
   const center = (u0 + u1) / 2;
   const gaps = surface.gaps(center).sort((a, b) => a.bottom - b.bottom);
   const at = (distance) => new Map(surface.gaps(distance).map((gap) => [gap.opening.id, gap.top]));
@@ -92,7 +93,7 @@ export function wallSolidBands(surface, u0, u1, y0, y1) {
     const top = Math.min(y1, gap.bottom);
     if (
       top > Math.max(...bottom) + tolerance.length &&
-      !surface.excluded(center, (Math.max(...bottom) + top) / 2)
+      (!neighborCuts || !surface.neighborExcluded(center, (Math.max(...bottom) + top) / 2))
     ) {
       bands.push({ bottom: [...bottom], top: [top, top] });
     }

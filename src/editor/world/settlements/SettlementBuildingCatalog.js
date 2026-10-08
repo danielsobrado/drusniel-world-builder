@@ -12,6 +12,8 @@
  * Pure data, safe in terrain workers.
  */
 
+import { SETTLEMENT_DOORS } from './SettlementDoors.generated.js';
+
 const house = (variant, width, depth, height, footprint) => ({ archetype: 'house', variant, width, depth, height, footprint });
 const prop = (variant, width = 2, height = 2, footprint = [1.4, 1.4]) => ({ archetype: 'prop', variant, width, depth: 1, height, footprint });
 const castle = (archetype, width, depth, height, footprint, extra = {}) => ({ archetype, width, depth, height, footprint, ...extra });
@@ -37,9 +39,13 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
   chapel: Object.freeze([house('chapel', 6.5, 11, 6, [8.2, 12.2])]),
   farmhouse: Object.freeze([house('farmhouse', 13, 6.5, 3.4, [14.4, 8]), house('farmhouse', 11, 6, 3, [12.4, 7.6])]),
   barn: Object.freeze([house('barn', 8, 11, 4.8, [9.2, 12.2])]),
-  keep: Object.freeze([castle('square-tower', 9, 3, 12, [16, 16], { style: null, topStyle: 'battlements' })]),
+  keep: Object.freeze([castle('square-tower', 9, 3, 12, [16, 16], { style: null, topStyle: 'battlements', ivy: true })]),
   hall: Object.freeze([castle('manor', 12, 3, 6.5, [18, 14], { towerSide: 'left', shape: 'stepped' })]),
-  wall: Object.freeze([castle('wall', 12, 1.8, 6, [12, 5], { shape: 'classic', topStyle: 'battlements', windows: false })]),
+  wall: Object.freeze([
+    castle('wall', 12, 1.8, 6, [12, 5], { shape: 'classic', topStyle: 'battlements', windows: false }),
+    // The same length, overgrown: the workshop grows ivy on castle archetypes.
+    castle('wall', 12, 1.8, 6, [12, 5], { shape: 'classic', topStyle: 'battlements', windows: false, ivy: true }),
+  ]),
   gatehouse: Object.freeze([castle('gatehouse', 10, 3, 7, [16, 10], { topStyle: 'battlements' })]),
   tower: Object.freeze([castle('tower', 6, 2, 9, [8, 8], { topStyle: 'battlements' })]),
   well: Object.freeze([prop('well', 2, 3, [3.4, 3.4])]),
@@ -54,6 +60,18 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
   fence: Object.freeze([prop('fence', 4, 2, [4.2, 0.6])]),
   bollards: Object.freeze([prop('bollards', 4.5, 2, [4.8, 0.6])]),
 });
+
+/**
+ * A settlement house stands with its door open: the drawn leaf is shrunk and
+ * sunk out of sight — the one transform the workshop allows a door — and the
+ * view draws an open doorway where it was (SettlementInteriorGeometry).
+ */
+const DOOR_PUT_AWAY = Object.freeze({ position: [0, -3, 0], rotation: [0, 0, 0], scale: [0.1, 0.1, 1] });
+
+/** The main door of one pooled house in its footprint's frame, or null (SettlementDoors.generated). */
+export function buildingDoor(styleKey, kind, variantIndex) {
+  return SETTLEMENT_DOORS[poolKey(styleKey, kind, variantIndex)] ?? null;
+}
 
 export function buildingEntry(kind, variantIndex) {
   const entries = SETTLEMENT_BUILDINGS[kind];
@@ -84,7 +102,7 @@ export function poolKey(styleKey, kind, variantIndex) {
  * derive from the pool key, so the same variant is the same building in every
  * town of that style, and different variants differ.
  */
-export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIndex = finishIndexFor(kind, variantIndex) } = {}) {
+export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIndex = finishIndexFor(kind, variantIndex), openDoor = true } = {}) {
   const { footprint: _footprint, ...entry } = buildingEntry(kind, variantIndex);
   let seed = 2166136261;
   for (const character of poolKey(style.key, kind, variantIndex)) {
@@ -92,15 +110,23 @@ export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIn
     seed = Math.imul(seed, 16777619);
   }
   const castleLike = !['house', 'prop'].includes(entry.archetype);
+  const door = SETTLEMENT_DOORS[poolKey(style.key, kind, variantIndex)];
   return {
     style: style.style,
     topStyle: castleLike ? (entry.topStyle ?? 'battlements') : style.topStyle,
-    finish: style.finishes[finishIndex % style.finishes.length],
+    // Walls, towers and keeps are stone through and through: a rendered finish
+    // would paint their core, which shows on every wall top, in house colours.
+    finish: castleLike ? 'masonry' : style.finishes[finishIndex % style.finishes.length],
     roofScale: 1,
     roofOverhang: 0.35,
     roofPitch: 40,
-    weathering: 0.35,
-    irregularity: 0.45,
+    weathering: 0.3,
+    // Coursed and tidy. At the workshop's default (0.45) every stone is turned,
+    // skewed and pushed out by up to a hand's breadth, and a street of such
+    // walls reads as blocks jostling each other. A town is dressed stone: the
+    // bevel on each block and the shadow in each joint draw it, as on the glade
+    // walls (construction/), so the blocks themselves stay in their courses.
+    irregularity: 0.14,
     windows: true,
     ivy: false,
     remesh: true,
@@ -110,5 +136,6 @@ export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIn
     ...(entry.style === null ? { style: style.style } : {}),
     detail,
     seed: (seed >>> 0) & 0x7fffffff,
+    ...(openDoor && door ? { componentTransforms: { [door.id]: DOOR_PUT_AWAY } } : {}),
   };
 }

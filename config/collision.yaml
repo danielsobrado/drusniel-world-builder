@@ -59,6 +59,8 @@ constructions:
 # as oriented boxes, read from the same derived plans the view draws.
 settlements:
   enabled: true
+  # Houses are four walls with a doorway in the front; false makes each one solid.
+  enterable: true
 
 debug:
   colliders: false

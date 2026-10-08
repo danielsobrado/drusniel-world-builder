@@ -8,6 +8,7 @@ import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
 import { resolveShapeStyles } from './ShapeStyles.js';
 import { resolveShapeFeatures } from './ShapeFeatures.js';
 import { resolveShapeGrounding } from './ShapeGrounding.js';
+import { resolveShapeFeatureContacts } from './ShapeFeatureContacts.js';
 
 export function resolveShapeChemistry(plans) {
   const contacts = [],
@@ -87,5 +88,8 @@ export function resolveShapeChemistry(plans) {
   }
   for (const plan of resolved)
     plan.supports = supports.filter((s) => s.sourceEntityIds.includes(plan.id));
-  return { plans: resolveShapeStyles(resolveShapeRoofJunctions(resolvePathGates(resolved, index, byId).map(resolveShapeCraftDetails).map(resolveShapeFeatures))).map(resolveShapeGrounding), contacts, supports };
+  const features = resolveShapeFeatureContacts(resolvePathGates(resolved, index, byId)
+    .map(resolveShapeCraftDetails).map(resolveShapeFeatures));
+  return { plans: resolveShapeStyles(resolveShapeRoofJunctions(features.plans)).map(resolveShapeGrounding),
+    contacts: [...contacts, ...features.contacts], supports };
 }

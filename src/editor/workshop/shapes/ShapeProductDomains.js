@@ -11,7 +11,8 @@ export function shapeProductDomains(plan, recipe) {
   ];
 }
 
-const body = (primitive) => {
+const openingCut = ({ shutterPose, ...fields }) => { void shutterPose; return fields; };
+const body = (primitive, includeOpenings = true, includeShutters = false) => {
   const { roof, openings, suppressed, facade, shutters, automaticGates, craft, features, detailOverrides, age, style, ...fields } = primitive;
   void roof;
   void suppressed;
@@ -22,7 +23,7 @@ const body = (primitive) => {
   void features;
   void detailOverrides;
   void age; void style;
-  return { ...fields, openings };
+  return { ...fields, ...(includeOpenings ? { openings: includeShutters ? openings : openings?.map(openingCut) } : {}) };
 };
 
 /** Keys express consumer dependencies, so roof edits do not rebuild masonry. */
@@ -32,7 +33,8 @@ export function shapeProductKey(recipe, plan, domain) {
     id: n.id,
     boundary: n.boundary,
     topBoundary: n.topBoundary,
-    primitive: body(n.primitive),
+    roofOnly: Boolean(n.roofOnly),
+    primitive: body(n.primitive, false),
   }));
   const shape =
     domain === 'supports'
@@ -40,7 +42,7 @@ export function shapeProductKey(recipe, plan, domain) {
       : domain === 'ground'
         ? { primitive: body(p), ground: plan.ground, neighbors }
       : domain === 'features'
-        ? { features: plan.features, style: plan.resolvedStyle }
+        ? { features: plan.features, style: plan.resolvedStyle, neighbors }
       : domain === 'roof'
         ? {
             id: p.id,
@@ -61,12 +63,14 @@ export function shapeProductKey(recipe, plan, domain) {
               boundary: n.boundary,
               topBoundary: n.topBoundary,
               curve: n.curve,
-              primitive: { ...body(n.primitive), roof: n.primitive.roof },
+              primitive: { ...body(n.primitive, false), roof: n.primitive.roof },
+              roofReplaced: Boolean(n.roofReplaced),
+              roofOnly: Boolean(n.roofOnly),
             })),
           }
         : domain === 'facade'
           ? {
-              primitive: body(p),
+              primitive: body(p, true, true),
               facade: p.facade,
               shutters: p.shutters,
               decorations: plan.decorations?.filter((d) => d.role === 'window-box'),
@@ -77,31 +81,37 @@ export function shapeProductKey(recipe, plan, domain) {
             ? plan
             : {
                 primitive: body(p),
-                openings: plan.openings,
+                openings: plan.openings.map(openingCut),
                 neighbors,
                 flatCoping: p.roof?.family === 'flat',
               };
   const regions = {
     walls: ['walls', 'trim', 'deck', 'inserts', 'glazing', 'metal'],
-    roof: ['roof', 'walls', 'trim', 'metal'],
+    roof: ['roof', 'walls', 'trim', 'metal', 'flashing'],
     supports: ['supports'],
     ivy: ['foliage'],
     traversal: ['deck', 'trim', 'supports', 'rails'],
-    facade: ['inserts', 'foliage'],
-    features: ['walls', 'roof', 'trim', 'deck', 'inserts', 'glazing', 'metal'],
+    facade: ['inserts', 'foliage', 'metal'],
+    features: ['walls', 'roof', 'trim', 'deck', 'inserts', 'glazing', 'metal', 'flashing'],
     ground: ['trim', 'foliage'],
   }[domain];
+  const styleProperties = { walls: ['floor', 'trim'], roof: ['trim'], ground: ['trim'],
+    supports: ['supports'], traversal: ['floor', 'trim', 'supports', 'railing'], features: ['floor', 'trim'] }[domain] ?? [];
+  const style = Object.fromEntries(styleProperties.map((key) => [key, [plan.resolvedStyle?.values[key], plan.resolvedStyle?.sources[key]]]));
   const overrides = Object.fromEntries(
     Object.entries(recipe.materialAreaOverrides ?? {}).filter(
       ([id]) => (id.startsWith(`${p.id}:`) && regions.includes(id.slice(p.id.length + 1))) ||
-        Object.values(plan.resolvedStyle?.sources ?? {}).some((source) => id === `${source}:trim` || id === `${source}:inserts`),
+        styleProperties.some((key) => {
+          const source = plan.resolvedStyle?.sources[key];
+          return source && source !== p.id && (id === `${source}:trim` || id === `${source}:inserts` || id === `${source}:deck`);
+        }),
     ),
   );
   return JSON.stringify([
     domain,
     shape,
     ['walls', 'facade', 'ground', 'features'].includes(domain) ? p.age : null,
-    domain === 'ivy' || domain === 'facade' ? null : plan.resolvedStyle,
+    style,
     recipe.seed,
     recipe.detail,
     recipe.style,

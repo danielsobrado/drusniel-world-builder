@@ -1,12 +1,14 @@
+import { buildingDoor } from './SettlementBuildingCatalog.js';
 import { planDecor } from './SettlementDecor.js';
 import { planDefences } from './SettlementDefences.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
 import { planBuildings, planFarms } from './SettlementPlots.js';
 import { hashInts, settlementProfile } from './SettlementProfile.js';
 import { planStones } from './SettlementStones.js';
+import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 4;
+export const SETTLEMENT_PLAN_VERSION = 6;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -41,7 +43,14 @@ export function planSettlement({ settlement, worldSeed, routeBearings = [], samp
   });
   // Last, so adding or retuning loose stone never reshuffles the town itself.
   const stones = planStones({ profile, occupancy, buildings: [...buildings, ...farms], fields, random });
-  const withPad = (item) => ({ ...item, pad: sampleHeight(item.x, item.z) });
+  const trim = planTrim({ profile, occupancy, buildings: [...buildings, ...farms, ...defences], fields, random });
+  const styleKey = profile.style.key;
+  // A building the plan fronts on a street gets the door its pooled mesh has (SettlementDoors.generated).
+  const withPad = (item) => ({
+    ...item,
+    pad: sampleHeight(item.x, item.z),
+    door: item.front ? buildingDoor(styleKey, item.kind, item.variant) : null,
+  });
   return Object.freeze({
     version: SETTLEMENT_PLAN_VERSION,
     id: settlement.id,
@@ -50,7 +59,7 @@ export function planSettlement({ settlement, worldSeed, routeBearings = [], samp
     squareRadius,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),
-    props: [...props, ...stones],
+    props: [...props, ...stones, ...trim],
     fields,
   });
 }

@@ -1,6 +1,7 @@
 import { createShapeWallSurface, addWallPatch } from './ShapeWallSurface.js';
 import { pointInShape } from './ShapeEnvelope.js';
 import { shapeRandom } from './ShapeMesh.js';
+import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 
 export function resolveShapeGrounding(plan) {
   const p = plan.primitive, paving = [], masks = [];
@@ -23,6 +24,7 @@ export function resolveShapeGrounding(plan) {
     }
     for (const feature of plan.features ?? []) if (feature.child && feature.intent.kind !== 'dormer')
       masks.push({ kind: 'polygon', points: feature.child.boundary });
+    for (const contact of plan.rpg.foundationContacts) if (contact.featureId && contact.footprint?.kind === 'polygon') masks.push(contact.footprint);
   }
   return { ...plan, ground: { paving, masks } };
 }
@@ -54,6 +56,7 @@ export function buildShapeGrounding(plan, meshes, recipe) {
       meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.14, 0.22, 0.06]);
     }
   }
+  const pavingMesh = clipShapeMeshSet(meshes, plan, { roofs: false }).trim;
   for (const paving of plan.ground.paving) {
     const [a, b, c, d] = paving.points, across = Math.max(2, Math.ceil(Math.hypot(b[0] - a[0], b[2] - a[2]) / 0.42));
     const rows = recipe.detail >= 2 ? 5 : 1;
@@ -63,11 +66,10 @@ export function buildShapeGrounding(plan, meshes, recipe) {
       const quad = [point(col / across + gap, row / rows + gap), point((col + 1) / across - gap, row / rows + gap),
         point((col + 1) / across - gap, (row + 1) / rows - gap), point(col / across + gap, (row + 1) / rows - gap)];
       for (const v of quad) v[1] = 0.035 + p.elevation;
-      if (quad.some((v) => (plan.neighbors ?? []).some((n) => pointInShape([v[0], v[2]], n.boundary)))) continue;
       const v = 0.72 + shapeRandom(recipe.seed, p.id, 'entrance-stone', `${paving.id}:${row}:${col}`) * 0.2;
       // Orientation is independent of wall winding.
       const crossY = (quad[1][2] - quad[0][2]) * (quad[2][0] - quad[0][0]) - (quad[1][0] - quad[0][0]) * (quad[2][2] - quad[0][2]);
-      meshes.trim.quad(...(crossY > 0 ? quad : quad.toReversed()), [v, v, v * 0.95]);
+      pavingMesh.quad(...(crossY > 0 ? quad : quad.toReversed()), [v, v, v * 0.95]);
     }
     void c;
   }

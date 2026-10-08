@@ -3,6 +3,7 @@ import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeWindowBoxes } from './ShapeWindowBoxes.js';
 import { shapeAgingSurface } from './ShapeWeathering.js';
+import { buildShapeShutters } from './ShapeShutterBuilder.js';
 
 /** Timber and shutters share host frames and opening exclusions with the wall shell. */
 export function buildShapeFacade(plan, meshes, recipe) {
@@ -20,7 +21,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
     for (let i = 0; i < steps; i++) {
       const a = u0 + ((u1 - u0) * i) / steps,
         b = u0 + ((u1 - u0) * (i + 1)) / steps;
-      for (const band of wallSolidBands(surface, a, b, y0, y1)) {
+      for (const band of wallSolidBands(surface, a, b, y0, y1, false)) {
         const high = band.top.map((y, k) => {
           const base = surface.point(k ? b : a, p.height, offset);
           return roof ? Math.min(y, roof.heightAt(base[0], base[2]) - p.elevation - 0.06) : y;
@@ -68,57 +69,12 @@ export function buildShapeFacade(plan, meshes, recipe) {
       const u = (surface.length * bay) / bays;
       const base = surface.point(u, p.height, offset);
       const top = Math.max(p.height, roof.heightAt(base[0], base[2]) - p.elevation);
-      if (top - p.height > 0.1 && !surface.neighborExcluded(u, p.height - 0.01)) {
+      if (!plan.roofReplaced && top - p.height > 0.1 && !surface.neighborExcluded(u, p.height - 0.01)) {
         const edge = surface.point(u, top - 0.05, offset);
         wood.beam(base, edge, 0.09, 0.09, tint('gable'));
       }
     }
   }
   buildShapeWindowBoxes(plan, meshes, recipe, surface);
-  if (!p.shutters || recipe.detail < 2) return;
-  for (const opening of plan.openings ?? p.openings) {
-    if (opening.role !== 'window') continue;
-    const center = opening.at * surface.length;
-    const height = Math.min(opening.height * 0.76, p.height - opening.bottom - 0.03);
-    for (const side of [-1, 1]) {
-      const hinge = center + side * (opening.width / 2 + 0.16),
-        end = hinge + side * Math.min(0.45, opening.width * 0.44);
-      const u0 = Math.min(hinge, end),
-        u1 = Math.max(hinge, end);
-      if (
-        [u0, u1, (u0 + u1) / 2].some((u) =>
-          [opening.bottom + 0.05, opening.bottom + height].some((y) => surface.excluded(u, y)),
-        )
-      )
-        continue;
-      const planks = 3;
-      for (let i = 0; i < planks; i++) {
-        const a = u0 + ((u1 - u0) * i) / planks + 0.006,
-          b = u0 + ((u1 - u0) * (i + 1)) / planks - 0.006;
-        addWallPatch(
-          wood,
-          surface,
-          a,
-          b,
-          opening.bottom + 0.05,
-          opening.bottom + height,
-          offset + 0.05,
-          0.055,
-          tint(`shutter:${opening.id}:${side}:${i}`),
-        );
-      }
-      for (const y of [opening.bottom + 0.18, opening.bottom + height - 0.13])
-        addWallPatch(
-          wood,
-          surface,
-          u0,
-          u1,
-          y - 0.025,
-          y + 0.025,
-          offset + 0.09,
-          0.03,
-          [0.5, 0.5, 0.5],
-        );
-    }
-  }
+  buildShapeShutters(plan, meshes, recipe, surface);
 }

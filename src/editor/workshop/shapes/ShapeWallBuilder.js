@@ -29,7 +29,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
   for (let i = 0; i < distances.length - 1; i++) {
     const u0 = distances[i],
       u1 = distances[i + 1];
-    for (const band of wallSolidBands(surface, u0, u1, 0, p.height)) {
+    for (const band of wallSolidBands(surface, u0, u1, 0, p.height, false)) {
       addWallPatch(
         meshes.walls,
         surface,
@@ -68,7 +68,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
       for (let k = 1; k < count; k++) cuts.push(u0 + ((u1 - u0) * k) / count);
       cuts.sort((a, b) => a - b);
       for (let k = 0; k < cuts.length - 1; k++) {
-        for (const band of wallSolidBands(surface, cuts[k], cuts[k + 1], y0, y1)) {
+        for (const band of wallSolidBands(surface, cuts[k], cuts[k + 1], y0, y1, false)) {
           for (const side of p.kind === 'curved-wall' ? [-1, 1] : [1]) {
             addWallPatch(
               mesh,

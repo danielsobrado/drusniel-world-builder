@@ -21,8 +21,10 @@ const STATIONS = Object.freeze([[-1, 1], [-0.62, 0.18], [0, 0], [0.62, 0.18], [1
  * Height above the ground, per surface. Surfaces overlap at every junction, so
  * each rides its own level: the higher one wins cleanly instead of z-fighting.
  */
-const LIFT = Object.freeze({ earth: 0.045, cobble: 0.06, flagstone: 0.075 });
-export const PAVING_LAYERS = Object.freeze(Object.keys(LIFT));
+const LIFT = Object.freeze({ earth: 0.045, cobble: 0.06, flagstone: 0.075, shade: 0.09 });
+export const PAVING_LAYERS = Object.freeze(['earth', 'cobble', 'flagstone']);
+/** The occlusion layer: not a surface, a darkening laid over all of them. */
+export const SHADE_LAYER = 'shade';
 
 /** Which surface each street kind is laid in, by settlement rank. */
 function surfaceFor(streetKind, rank) {
@@ -180,9 +182,10 @@ function addDisc(buffer, radius, heightAt, tone) {
 }
 
 /** Metres of trodden ground round a footprint, and how far it tucks under the wall. */
-const APRON = Object.freeze({ reach: 1.5, tuck: 0.35 });
+const APRON = Object.freeze({ reach: 1.9, tuck: 0.35 });
 /** Rings of an apron, from under the wall outward: `[offset, edge, tone]`. */
-const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 0.62], [0.25, 0.08, 0.74], [APRON.reach * 0.6, 0.45, 0.9], [APRON.reach, 1, 1]]);
+// Fraying from the wall outward, with no darkening of its own: the shade layer does that.
+const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 1], [0.2, 0.15, 1], [APRON.reach * 0.45, 0.55, 1], [APRON.reach, 1, 1]]);
 
 /** The perimeter of a footprint grown by `offset`, `perSide` points to a side. */
 function footprintRing(building, offset, perSide) {
@@ -216,6 +219,32 @@ function addApron(buffer, building, heightAt) {
   let previous = null;
   for (const [offset, edge, tone] of APRON_RINGS) {
     const row = footprintRing(building, offset, perSide).map(([x, z]) => buffer.vertex(x, z, edge, heightAt, tone));
+    if (previous) {
+      for (let index = 0; index < row.length; index += 1) {
+        const next = (index + 1) % row.length;
+        buffer.quad(previous[index], row[index], row[next], previous[next]);
+      }
+    }
+    previous = row;
+  }
+}
+
+/** How far the sky is shut out round a building, in metres, and by how much at the wall. */
+const SHADE = Object.freeze({ reach: 2.6, tuck: 0.3 });
+const SHADE_RINGS = Object.freeze([[-SHADE.tuck, 0], [0.5, 0.35], [SHADE.reach * 0.55, 0.8], [SHADE.reach, 1]]);
+
+/**
+ * The ambient occlusion a building casts on the ground it stands on: darkest
+ * against the wall, gone a couple of metres out. Where two houses stand close
+ * their rings overlap, so alleys and yards are the darker for it — the cue a
+ * screen-space pass would give, baked into geometry that costs one draw a town.
+ * `edge` here is how much sky is left: 0 at the wall, 1 at the rim.
+ */
+function addShade(buffer, building, heightAt) {
+  const perSide = Math.max(2, Math.ceil(Math.max(building.width, building.depth) / (STEP * 1.5)));
+  let previous = null;
+  for (const [offset, open] of SHADE_RINGS) {
+    const row = footprintRing(building, offset, perSide).map(([x, z]) => buffer.vertex(x, z, open, heightAt, 1));
     if (previous) {
       for (let index = 0; index < row.length; index += 1) {
         const next = (index + 1) % row.length;
@@ -270,8 +299,11 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), plan.squareRadius + 2.2, heightAt, 1.03);
     yield;
   }
+  const shade = new SurfaceBuffer(SHADE_LAYER, 1);
+  buffers.set(SHADE_LAYER, shade);
   for (const [index, building] of plan.buildings.entries()) {
     addApron(buffers.get('earth'), building, heightAt);
+    addShade(shade, building, heightAt);
     if (index % 12 === 11) yield;
   }
   return [...buffers.values()].filter((buffer) => buffer.indices.length > 0).map((buffer) => buffer.arrays());

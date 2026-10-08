@@ -88,12 +88,12 @@ function abutments(plan, other, roof, neighbor) {
 export function resolveShapeRoofJunctions(plans) {
   const surfaces = new Map(plans.filter((p) => p.primitive.roof).map((p) => [p.id, createShapeRoofSurface(p)]));
   return plans.map((plan) => {
-    if (!plan.primitive.roof) return plan;
+    if (!plan.primitive.roof || plan.roofReplaced) return { ...plan, roofJunctions: [] };
     const roof = surfaces.get(plan.id), junctions = [];
     for (const other of plan.neighbors ?? []) {
       const neighbor = surfaces.get(other.id) ?? createShapeRoofSurface(other);
-      junctions.push(...abutments(plan, other, roof, neighbor));
-      if (plan.id < other.id) junctions.push(...valleys(plan, other, roof, neighbor));
+      if (!other.roofOnly) junctions.push(...abutments(plan, other, roof, neighbor));
+      if (plan.id < other.id && !other.roofReplaced) junctions.push(...valleys(plan, other, roof, neighbor));
     }
     return { ...plan, roofJunctions: junctions };
   });

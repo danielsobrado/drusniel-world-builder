@@ -124,7 +124,11 @@ function createNaturalComponents({
     }));
   }
   if (collisionConfig.settlements.enabled) {
-    const provider = new SettlementCollisionProvider({ terrainView, chunkWorldSize: terrainView.chunkWorldSize });
+    const provider = new SettlementCollisionProvider({
+      terrainView,
+      chunkWorldSize: terrainView.chunkWorldSize,
+      enterable: collisionConfig.settlements.enterable !== false,
+    });
     components.push(Object.freeze({ id: 'settlements', counterName: 'Settlement', provider }));
   }
   return components;

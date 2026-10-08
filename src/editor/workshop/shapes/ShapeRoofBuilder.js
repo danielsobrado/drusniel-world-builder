@@ -12,6 +12,7 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
     length = plan.curve.length;
   const mask = createShapeRoofOcclusion(plan), hidden = mask.hidden;
   const meshes = Object.fromEntries(Object.entries(sourceMeshes).map(([slot, mesh]) => [slot, clipShapeRoofMesh(mesh, mask)]));
+  meshes.trim = clipShapeRoofMesh(sourceMeshes.trim, createShapeRoofOcclusion(plan, { roofMargin: 0.12 }));
   const rings = p.roof.family === 'flat' ? 1 : recipe.detail >= 2 ? 20 : 10;
   const samples = plan.curve.samples.length;
   const roofQuad = (quad, color, solid = false) => {
@@ -62,5 +63,5 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
   }
   buildShapeRoofCraft(plan, meshes, recipe, surface, hidden);
   if (recipe.detail >= 2 && p.roof.family !== 'flat') buildShapeRoofTiles(plan, meshes.roof, surface, recipe, () => false);
-  buildShapeRoofJunctions(plan, meshes.metal, surface);
+  buildShapeRoofJunctions(plan, meshes.flashing, surface);
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { ShapeMesh, shapeRandom } from './shapes/ShapeMesh.js';
 import { shapeGroundExcluded } from './shapes/ShapeGrounding.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /** Soft, asymmetric crowns retain smooth normals after bounded radial deformation. */
 export function stageCrownGeometry(radius, seed, conifer = false) {
@@ -13,8 +14,10 @@ export function stageCrownGeometry(radius, seed, conifer = false) {
     const noise = 1 + Math.sin(x * 2.7 + phase) * Math.cos(z * 3.1 - y * 1.2) * 0.075 + Math.sin(angle * 7 + y * 4 + phase) * 0.045;
     positions.setXYZ(i, x * noise, y * (conifer ? 1 : noise), z * noise);
   }
-  geometry.computeVertexNormals();
-  return geometry;
+  geometry.deleteAttribute('normal'); geometry.deleteAttribute('uv');
+  const smooth = mergeVertices(geometry, 0.0001); geometry.dispose();
+  smooth.computeVertexNormals();
+  return smooth;
 }
 
 export function createStageGrass(heightAt) {
@@ -48,5 +51,24 @@ export function createStageGrass(heightAt) {
       const geometry = batch.geometry() ?? new THREE.BufferGeometry();
       mesh.geometry.dispose(); mesh.geometry = geometry;
     },
+  };
+}
+
+export function stageFlowerMask(points) {
+  const positions = [...points.geometry.getAttribute('position').array], colors = [...points.geometry.getAttribute('color').array];
+  let key;
+  return (plans = []) => {
+    const masks = plans.flatMap((p) => p.ground?.masks ?? []), next = JSON.stringify(masks);
+    if (key === next) return;
+    key = next;
+    const p = [], c = [];
+    for (let i = 0; i < positions.length; i += 3) {
+      if (shapeGroundExcluded([positions[i], positions[i + 2]], masks)) continue;
+      p.push(...positions.slice(i, i + 3)); c.push(...colors.slice(i, i + 3));
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
+    points.geometry.dispose(); points.geometry = geometry;
   };
 }

@@ -27,7 +27,8 @@
  * a set tintable — its luminance times the gain, with no hue of its own.
  *
  * Only presets that generate in a few seconds belong here: a town waits for its
- * dressing. Measured on a desktop GPU, the three below take 1–5 s; the Lab's
+ * dressing. Measured on a desktop GPU, the plaster below takes 4–5 s (the Lab's
+ * two stone fields took 1 s but were too blotchy for dressed masonry); the Lab's
  * cut cobble (nine layers) took 45 s and its limestone gravel (six) 21 s, so
  * paving stays photographed. The time is the driver optimising the shader:
  * building the layer stack once instead of per stage, and emitting the noise as
@@ -39,14 +40,15 @@ export const SETTLEMENT_SURFACE_SETS = Object.freeze({
   'cobble-dark': Object.freeze({ source: 'cobblestone_05', tileMetres: 1.7 }),
   'flag-slate': Object.freeze({ source: 'stone_tiles_02', tileMetres: 2.8 }),
   'flag-pebble': Object.freeze({ source: 'patterned_cobblestone_02', tileMetres: 3 }),
-  'earth-dry': Object.freeze({ source: 'dirt_floor', tileMetres: 3.2 }),
+  // The photograph is an orange clay; a town's trodden ground is duller than its setts.
+  'earth-dry': Object.freeze({ source: 'dirt_floor', tileMetres: 3.2, saturation: 0.22 }),
   'timber-beam': Object.freeze({ source: 'rough_wood', neutralMean: 196, repeat: 1.4 }),
   'plaster-lime': Object.freeze({ source: 'white_plaster_02', neutralMean: 222 }),
-  'stone-rock': Object.freeze({ source: 'rock_boulder_dry', neutralMean: 214, repeat: 0.8 }),
+  // A quiet face: most of the photograph's contrast is taken out, so a block
+  // reads by its bevel and its joints rather than by blotches (see SettlementGrade).
+  'stone-rock': Object.freeze({ source: 'rock_boulder_dry', neutralMean: 226, repeat: 0.8, contrast: 0.4 }),
   'roof-slate': Object.freeze({ source: 'grey_roof_tiles_02', neutralMean: 206, repeat: 0.62 }),
   'roof-clay': Object.freeze({ source: 'roof_09', neutralMean: 206, repeat: 0.62 }),
-  'stone-speckle': Object.freeze({ ptl: 'texture-field-stone', bakeMetres: 1.8, neutralGain: 2.2 }),
-  'stone-mottle': Object.freeze({ ptl: 'texture-field-rock', bakeMetres: 2.2, neutralGain: 2.2 }),
   'plaster-aged': Object.freeze({ ptl: 'designer-aged-plaster', bakeMetres: 2.4, neutralGain: 1.3 }),
 });
 
@@ -72,17 +74,17 @@ export const TIMBER_TONES = Object.freeze({ brown: '#c9925f', grey: '#b9ae9c', d
 
 const ROOF_SETS = Object.freeze({ slate: 'roof-slate', terracotta: 'roof-clay' });
 
-const dressing = (key, cobble, flagstone, timberTone, { stone = 'stone-rock', plaster = 'plaster-lime' } = {}) => (
-  Object.freeze({ key, cobble, flagstone, timberTone, stone, plaster, earth: 'earth-dry' })
+const dressing = (key, cobble, flagstone, timberTone, { plaster = 'plaster-lime' } = {}) => (
+  Object.freeze({ key, cobble, flagstone, timberTone, stone: 'stone-rock', plaster, earth: 'earth-dry' })
 );
 
 const DRESSINGS = Object.freeze([
-  dressing('grey-setts', 'cobble-grey', 'flag-slate', 'brown', { stone: 'stone-speckle', plaster: 'plaster-aged' }),
+  dressing('grey-setts', 'cobble-grey', 'flag-slate', 'brown', { plaster: 'plaster-aged' }),
   dressing('mossy-lanes', 'cobble-mossy', 'flag-pebble', 'grey'),
-  dressing('dark-quarter', 'cobble-dark', 'flag-slate', 'dark', { stone: 'stone-mottle' }),
-  dressing('river-stone', 'cobble-mossy', 'flag-slate', 'dark', { stone: 'stone-speckle' }),
+  dressing('dark-quarter', 'cobble-dark', 'flag-slate', 'dark'),
+  dressing('river-stone', 'cobble-mossy', 'flag-slate', 'dark'),
   dressing('old-market', 'cobble-grey', 'flag-pebble', 'grey', { plaster: 'plaster-aged' }),
-  dressing('black-setts', 'cobble-dark', 'flag-pebble', 'brown', { stone: 'stone-mottle', plaster: 'plaster-aged' }),
+  dressing('black-setts', 'cobble-dark', 'flag-pebble', 'brown', { plaster: 'plaster-aged' }),
 ]);
 
 export const SETTLEMENT_DRESSING_KEYS = Object.freeze(DRESSINGS.map(({ key }) => key));

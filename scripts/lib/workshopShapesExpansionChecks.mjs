@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { checkWorkshopShapeDirectEditing } from './workshopShapesDirectChecks.mjs';
 
 export async function checkWorkshopShapeExpansion({ page, report, preset, settle, field, output, handlePoint }) {
   const read = () => page.evaluate(() => {
@@ -79,8 +80,13 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
     assert.equal((await read()).resolved.features.length, 0);
     await page.locator('[data-shape-action="undo"]').click(); await settle(page);
     assert.equal((await read()).resolved.features.length, 1);
+    const baked = await page.evaluate(() => {
+      const ui = window.__editor.proceduralWorkshop; ui.bake();
+      return { saved: ui.manager.store.toDocument().at(-1).recipe.composition, current: ui.readInput().recipe.composition };
+    });
+    assert.deepEqual(baked.saved, baked.current);
   }
-  report.assertions.push('All five architectural features can be added, resized with their host, removed and restored through authoring controls.');
+  report.assertions.push('All five architectural features can be added, resized with their host, removed, restored and baked through authoring controls.');
 
   await preset(page, 'timber-pavilion');
   await page.locator('[data-shape-action="select"]').selectOption('ramp');
@@ -88,6 +94,7 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
   await page.locator('[data-shape-field="style-railing"]').selectOption('stone'); await settle(page);
   const styled = await read(); assert.equal(styled.resolved.resolvedStyle.values.railing, 'stone'); assert.equal(styled.resolved.resolvedStyle.values.floor, 'timber');
   report.assertions.push('A connected ramp inherits timber while a railing override preserves floor inheritance.');
+  await checkWorkshopShapeDirectEditing({ page, report, preset, settle, handlePoint });
 
   const shots = [
     { id: 'dormer-detail', label: 'Host-aware roof dormers', preset: 'dormer-cottage', target: [0, 4.6, 0], direction: [8, 4.2, 10], distance: 13 },
@@ -122,6 +129,25 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
         bufferBytes: ui.previewParts.reduce((sum, part) => sum + Object.values(part.geometry.attributes).reduce((n, a) => n + a.array.byteLength, 0) + (part.geometry.index?.array.byteLength ?? 0), 0),
         groundMasks: [...ui.shapeBridge.editor.resolvedPlans.values()].reduce((n, p) => n + p.ground.masks.length, 0) };
     }, shot));
+    if (shot.crossed) report.roofSeamSamples = await page.evaluate(() => {
+      const ui = window.__editor.proceduralWorkshop, T = window.__THREE_QA__, ray = new T.Raycaster();
+      return [0.45, 0.5, 0.55, 0.6, 0.65].map((y) => {
+        ray.setFromCamera(new T.Vector2(0.04, 1 - 2 * y), ui.camera);
+        const hit = ray.intersectObjects([...ui.shapeBridge.preview.groups.values()], true)[0];
+        return hit && { y, point: hit.point.toArray(), material: hit.object.material.userData.workshopSlot,
+          region: hit.object.userData.materialRegion, color: hit.object.material.color.getHexString() };
+      });
+    });
+    if (['dormer-detail', 'jetty-detail', 'buttress-detail'].includes(shot.id)) {
+      await page.locator('select[name="detail"]').selectOption('1'); await settle(page);
+      const coarse = await page.evaluate(() => window.__editor.proceduralWorkshop.previewParts.stats);
+      await page.evaluate(() => { window.__editor.proceduralWorkshop.shapeBridge.preview.handles.root.visible = false; });
+      await page.screenshot({ path: path.join(output, `${shot.id}-coarse.png`), clip });
+      report.details.push({ id: `${shot.id}-coarse`, label: `${shot.label} · Coarse detail` });
+      assert.ok(coarse.sourceVertices < report.expansion.at(-1).stats.sourceVertices);
+      report.expansion.at(-1).coarse = coarse;
+      await page.locator('select[name="detail"]').selectOption('2'); await settle(page);
+    }
     await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.sync());
   }
 }

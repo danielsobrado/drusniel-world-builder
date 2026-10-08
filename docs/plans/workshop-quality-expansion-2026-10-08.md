@@ -7,40 +7,51 @@ local invalidation, deterministic variation, batching and persistence rules appl
 
 ## Requirements and completion evidence
 
-- [ ] Roof quality: smooth curved surface normals with crisp physical tile edges;
+- [x] Roof quality: smooth curved surface normals with crisp physical tile edges;
   continuous clipping at connected roofs/walls; valleys, flashing and connected
   trim. Evidence: deterministic seam and normal tests, joined-building close-ups,
   unchanged unrelated domain buffers, near/coarse silhouette checks.
-- [ ] Controlled weathering: chipped masonry, subtly bowed timber, worn thresholds,
+- [x] Controlled weathering: chipped masonry, subtly bowed timber, worn thresholds,
   plaster wear and foundation dampness. Evidence: stable local keys, exclusion and
   undo/replay checks, close-ups across materials and age settings.
-- [ ] Architectural shapes: dormers, bay windows, projecting upper storeys, porches
+- [x] Architectural shapes: dormers, bay windows, projecting upper storeys, porches
   and buttresses, adapting to host curves, openings and roofs. Evidence: semantic
   authoring controls, geometry/contact tests, bake/load and undo/redo, captures of
   every feature and combinations through host resize/rotation.
-- [ ] Grounding and vegetation: foundation transitions, entrance paving, grass
+- [x] Grounding and vegetation: foundation transitions, entrance paving, grass
   clearance around steps, contextual moss, improved ivy leaves and tree silhouettes.
   Evidence: shared foundation/traversal/opening masks, captures at ground level,
   deterministic placement, material/LOD budgets.
-- [ ] Connected style: timber/stone/trim/floor inheritance into attached stairs,
+- [x] Connected style: timber/stone/trim/floor inheritance into attached stairs,
   supports and railings, with explicit overrides. Evidence: semantic resolution
   and persistence tests, local style invalidation, connected composition captures.
-- [ ] Direct manipulation: draggable doors/windows, curve control-point editing,
+- [x] Direct manipulation: draggable doors/windows, curve control-point editing,
   individual generated-detail movement and suppression. Evidence: real browser
   pointer tests, cancel/undo/redo, host adaptation, persistence and recovery.
 
 ## Shared verification
 
-- [ ] Full test suite, lint, production build and diff checks.
-- [ ] Hardware WebGPU browser QA and a reviewable before/after gallery.
-- [ ] Geometry, draw batches, edit latency and cache-reuse measurements for the
+- [x] Full test suite, lint, production build and diff checks.
+- [x] Hardware WebGPU browser QA and a reviewable before/after gallery.
+- [x] Geometry, draw batches, edit latency and cache-reuse measurements for the
   fixed fixtures; reduce detail at distance without losing new silhouettes.
-- [ ] Player movement performance harness comparison if streaming/residency or
+- [x] Player movement performance harness comparison if streaming/residency or
   terrain runtime behavior changes; workshop rendering measurements otherwise.
-- [ ] Final requirement-by-requirement audit against current authoritative state.
+- [x] Final requirement-by-requirement audit against current authoritative state.
 
 ## Progress
 
 The previous polished workshop captures are preserved in
-`tmp/workshop-expansion-before`. Implementation is in progress; no area is claimed
-complete by this plan alone.
+`tmp/workshop-expansion-before`. All six areas are implemented and audited against
+the current code, hardware captures and tests. See
+[the implementation and evidence report](../workshop-quality-expansion-2026-10-08.md)
+for the requirement audit, geometry budgets, measured editing costs and practical
+limits. The shared workspace suite has 3,407 passing tests; the shape suite has
+92; hardware shape QA has 33 passing checks; existing workshop QA has 27.
+
+No terrain, streaming or world residency behavior was changed by this workshop
+pass, so the conditional player movement comparison was not needed. Runtime LOD
+validation accepts all four new architectural presets and preserves their
+envelopes. The gallery contains fourteen designs and thirteen detail captures,
+including coarse comparisons. Interactive opening edits measured 41.5–47.0 ms,
+with neighboring products reused.

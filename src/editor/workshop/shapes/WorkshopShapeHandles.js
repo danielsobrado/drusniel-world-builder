@@ -148,7 +148,7 @@ export class WorkshopShapeHandles {
       dz = -delta.x * Math.sin(angle) + delta.z * Math.cos(angle);
     const clamp = (field, value) => clampShapeField(p, field, value);
     let changes;
-    if (drag.definition.type) {
+    if (drag.definition?.type) {
       try { changes = shapeDirectHandleChanges(p, drag.definition, [delta.x, delta.y, delta.z]); }
       catch (error) { this.editor.onStatus?.(error.message, true); return; }
     } else if (drag.field === 'move')

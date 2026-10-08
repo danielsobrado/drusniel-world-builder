@@ -17,16 +17,16 @@ export function buildShapeRoofJunctions(plan, mesh, surface) {
         return [x, surface.heightAt(x, z) + 0.055, z];
       });
       const inner = junction.points.map(([x, y, z]) => [x, y + 0.055, z]);
-      face(mesh, [inner[0], outer[0], outer[1], inner[1]], [0, 1, 0], [0.65, 0.67, 0.7]);
+      face(mesh, [inner[0], outer[0], outer[1], inner[1]], [0, 1, 0], [0.82, 0.88, 0.91]);
       const top = inner.map(([x, y, z]) => [x, y + 0.12, z]);
-      face(mesh, [inner[0], inner[1], top[1], top[0]], [junction.normals[0][0], 0, junction.normals[0][1]], [0.7, 0.72, 0.75]);
+      face(mesh, [inner[0], inner[1], top[1], top[0]], [junction.normals[0][0], 0, junction.normals[0][1]], [0.86, 0.91, 0.94]);
     } else {
       const dx = b[0] - a[0], dz = b[2] - a[2], length = Math.hypot(dx, dz), neighbor = neighbors.get(junction.otherId);
       const at = (p, side) => {
         const x = p[0] - dz / length * 0.065 * side, z = p[2] + dx / length * 0.065 * side;
         return [x, Math.max(surface.heightAt(x, z), neighbor.heightAt(x, z)) + 0.06, z];
       };
-      for (const side of [-1, 1]) face(mesh, [at(a, 0), at(b, 0), at(b, side), at(a, side)], [0, 1, 0], [0.63, 0.66, 0.7]);
+      for (const side of [-1, 1]) face(mesh, [at(a, 0), at(b, 0), at(b, side), at(a, side)], [0, 1, 0], [0.82, 0.88, 0.91]);
     }
   }
 }

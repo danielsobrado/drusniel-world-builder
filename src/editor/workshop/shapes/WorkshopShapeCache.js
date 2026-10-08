@@ -30,13 +30,15 @@ export class WorkshopShapeCache {
         for (const domain of shapeProductDomains(plan, recipe)) {
           const key = shapeProductKey(recipe, plan, domain),
             previous = old?.domains.get(domain);
-          if (previous?.key === key) {
+          const detail = recipe.shapeInteractive ? Math.min(1, recipe.detail) : recipe.detail;
+          if (previous?.key === key && previous.detail >= detail) {
             domains.set(domain, previous);
             continue;
           }
           const parts = this.build(
             {
               ...recipe,
+              detail,
               componentTransforms: {},
               openingAttachments: {},
               openingAssemblies: {},
@@ -45,7 +47,7 @@ export class WorkshopShapeCache {
             { resolvedShapePlans: [plan], shapeDomains: [domain] },
           );
           created.push(parts);
-          domains.set(domain, { key, parts });
+          domains.set(domain, { key, parts, detail });
           changed = true;
           rebuiltDomains++;
         }

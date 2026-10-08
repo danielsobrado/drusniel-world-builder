@@ -195,6 +195,7 @@ export class WorkshopShapeEditor {
     openingSelect.value = this.openingId ?? '';
     this.root.querySelector('[data-shape-section="opening-fields"]').hidden = !this.openingId;
     const opening = openings.find((o) => o.id === this.openingId);
+    this.root.querySelector('[data-shape-field="opening-shutterPose"]').closest('label').hidden = opening?.role !== 'window' || !p.shutters;
     for (const element of this.root.querySelectorAll('[data-shape-field]')) {
       const field = element.dataset.shapeField,
         value = shapeFieldValue(p, field, opening);

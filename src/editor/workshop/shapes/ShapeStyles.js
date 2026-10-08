@@ -48,8 +48,8 @@ export function resolveShapeStyles(plans) {
     if (resolved.has(id)) return resolved.get(id);
     const plan = byId.get(id), p = plan.primitive, hostId = hosts.get(id);
     const inherited = hostId && !ancestors.has(hostId) ? visit(hostId, new Set([...ancestors, id])) : null;
-    const wood = p.surface === 'planks' || p.facade === 'timber';
-    const own = { floor: wood ? 'timber' : 'stone', trim: 'stone', supports: wood ? 'timber' : 'stone', railing: wood ? 'timber' : 'stone' };
+    const wood = p.surface === 'planks', frame = wood || p.facade === 'timber';
+    const own = { floor: wood ? 'timber' : 'stone', trim: 'stone', supports: frame ? 'timber' : 'stone', railing: frame ? 'timber' : 'stone' };
     const style = { ...own, ...(inherited?.values ?? {}), ...p.style };
     delete style.from;
     const sources = Object.fromEntries(Object.keys(own).map((key) => [key,
@@ -58,7 +58,22 @@ export function resolveShapeStyles(plans) {
     resolved.set(id, result);
     return result;
   }
-  return plans.map((p) => ({ ...p, resolvedStyle: visit(p.id) }));
+  return plans.map((p) => {
+    const plan = { ...p, resolvedStyle: visit(p.id) };
+    const families = new Set(plan.regions.map((r) => r.id.slice(p.id.length + 1)));
+    if (p.supports?.length) families.add('supports');
+    if (p.primitive.kind === 'traversal' && p.primitive.railing) families.add('rails');
+    const regions = [...families].map((family) => {
+      const original = p.regions.find((r) => r.id === `${p.id}:${family}`) ?? {
+        id: `${p.id}:${family}`, primitiveId: p.id, componentId: p.id, label: `${p.primitive.label} · ${family}`, connected: true,
+      };
+      return ['deck', 'trim', 'supports', 'rails'].includes(family) ? {
+        ...original, family: shapeStyleSlot(plan, family), inheritsFrom: shapeStyleSourceRegion(plan, family),
+        inheritFallback: shapeStyleFallbackRegion(plan, family),
+      } : original;
+    });
+    return { ...plan, regions };
+  });
 }
 
 export function shapeStyleSlot(plan, family) {
@@ -70,5 +85,10 @@ export function shapeStyleSourceRegion(plan, family) {
   const property = { deck: 'floor', trim: 'trim', supports: 'supports', rails: 'railing' }[family];
   const owner = plan.resolvedStyle?.sources[property];
   if (!owner || owner === plan.id) return undefined;
-  return `${owner}:${shapeStyleSlot(plan, family) === 'wood' ? 'inserts' : 'trim'}`;
+  return `${owner}:${property === 'floor' ? 'deck' : shapeStyleSlot(plan, family) === 'wood' ? 'inserts' : 'trim'}`;
+}
+
+export function shapeStyleFallbackRegion(plan, family) {
+  const source = shapeStyleSourceRegion(plan, family);
+  return family === 'deck' && source ? `${plan.resolvedStyle.sources.floor}:${shapeStyleSlot(plan, family) === 'wood' ? 'inserts' : 'trim'}` : undefined;
 }

@@ -10,7 +10,7 @@ export class WorkshopShapeUiBridge {
       onChange: ({ frame = false } = {}) => {
         if (frame) ui.hasFramedPreview = false;
         this.syncHistoryToolbar();
-        ui.schedulePreview(24);
+        ui.schedulePreview(24, { draft: Boolean(this.editor.session.transaction) });
       },
       onStatus: (message, error) => {
         ui.status.textContent = message;
@@ -110,9 +110,9 @@ export class WorkshopShapeUiBridge {
         }
       : {};
   }
-  update(recipe, plan) {
+  update(recipe, plan, { interactive = false } = {}) {
     this.activateRenderer();
-    const parts = this.preview.update(recipe, plan);
+    const parts = this.preview.update({ ...recipe, shapeInteractive: interactive }, plan);
     this.ui.stage?.updateShapes(plan.shapePlans);
     this.ui.previewPartsOwnedByShape = true;
     this.ui.materialController.replaceParts(parts);

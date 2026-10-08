@@ -4,20 +4,21 @@ import { shapeRandom } from './ShapeMesh.js';
 export function buildShapeRoofCraft(plan, meshes, recipe, surface, hidden) {
   const p = plan.primitive;
   if (p.roof.family === 'gable') {
-    const half = p.footprint.width * p.taper / 2 + p.thickness / 2 + p.roof.overhang;
+    const depthAxis = p.roof.axis === 'depth';
+    const half = (depthAxis ? p.footprint.depth : p.footprint.width) * p.taper / 2 + p.thickness / 2 + p.roof.overhang;
     const count = Math.ceil(half * 2 / 0.38);
     for (let i = 0; i < count; i++) {
       const x0 = -half + half * 2 * i / count + 0.008, x1 = -half + half * 2 * (i + 1) / count - 0.008;
       const point = (x, t) => {
-        const [wx, wz] = placeShapePoint(p, [x, Math.cos(t) * 0.095]);
-        const [rx, rz] = placeShapePoint(p, [x, 0]);
+        const [wx, wz] = placeShapePoint(p, depthAxis ? [Math.cos(t) * 0.095, x] : [x, Math.cos(t) * 0.095]);
+        const [rx, rz] = placeShapePoint(p, depthAxis ? [0, x] : [x, 0]);
         return [wx, surface.heightAt(rx, rz) + 0.025 + Math.sin(t) * 0.09, wz];
       };
       const v = 0.86 + shapeRandom(recipe.seed, p.id, 'ridge-cap', i) * 0.12;
       for (let arc = 0; arc < 6; arc++) {
         const a = arc * Math.PI / 6, b = (arc + 1) * Math.PI / 6;
         const quad = [point(x0, a), point(x0, b), point(x1, b), point(x1, a)];
-        if (!hidden(quad)) meshes.roof.quad(...quad.toReversed(), [v, v, v]);
+        if (!hidden(quad)) meshes.roof.quad(...(depthAxis ? quad : quad.toReversed()), [v, v, v]);
       }
     }
   }

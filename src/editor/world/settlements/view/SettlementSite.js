@@ -1,9 +1,13 @@
 import * as THREE from 'three/webgpu';
+import { attribute } from 'three/tsl';
 import { settlementPavingJob } from '../paving/SettlementPavingGeometry.js';
-import { createPavingMaterial } from '../paving/SettlementPavingMaterial.js';
+import { SHADE_LAYER } from '../paving/SettlementPavingGeometry.js';
+import { createPavingMaterial, createShadeMaterial } from '../paving/SettlementPavingMaterial.js';
 import { dressingFor, SETTLEMENT_SURFACE_SETS, TIMBER_TONES } from '../surfaces/SettlementDressing.js';
+import { settlementDusk } from './SettlementDusk.js';
+import { settlementInteriorArrays } from './SettlementInteriorGeometry.js';
 import { settlementPlacements } from './SettlementPlacements.js';
-import { createSettlementSmoke } from './SettlementSmoke.js';
+import { createSettlementHaze, createSettlementSmoke } from './SettlementSmoke.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 /** Share of a loose stone's size sunk into the ground, so it sits in the soil rather than on it. */
@@ -54,6 +58,28 @@ function pavingMesh(arrays, material) {
   mesh.userData.skipWarmup = true;
   mesh.receiveShadow = true;
   mesh.castShadow = false;
+  return mesh;
+}
+
+/**
+ * The rooms and open doorways of one town as a mesh. Lit like everything else,
+ * with a little light of its own — a room is never as black as its shadow —
+ * that warms as the evening fires are lit.
+ */
+function interiorMesh(arrays) {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(arrays.positions, 3));
+  geometry.setAttribute('normal', new THREE.BufferAttribute(arrays.normals, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(arrays.colors, 3));
+  geometry.computeBoundingSphere();
+  const material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
+  material.emissiveNode = attribute('color', 'vec3').mul(settlementDusk.mul(0.3).add(0.2));
+  material.name = 'settlement-interiors';
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.name = 'settlement-interiors';
+  mesh.receiveShadow = true;
+  mesh.castShadow = false;
+  mesh.userData.skipWarmup = true;
   return mesh;
 }
 
@@ -113,6 +139,10 @@ export class SettlementSite {
     // Smoke needs only the plan; it rides with the paving, which shares its frame.
     const smoke = createSettlementSmoke(this.plan);
     if (smoke) this.paving.add(smoke);
+    const haze = createSettlementHaze(this.plan, heightAt);
+    if (haze) this.paving.add(haze);
+    const interiors = settlementInteriorArrays(this.plan);
+    if (interiors) this.paving.add(interiorMesh(interiors));
     yield;
     const tileMetres = Object.fromEntries(Object.entries(LAYER_ROLE)
       .map(([layer, role]) => [layer, SETTLEMENT_SURFACE_SETS[this.dressing[role]].tileMetres]));
@@ -136,8 +166,13 @@ export class SettlementSite {
   installPaving() {
     if (this.pavingReady || this.job || !this.pavingArrays || !this.surfaces) return;
     for (const arrays of this.pavingArrays) {
-      const material = createPavingMaterial(arrays.kind, this.surfaces[LAYER_ROLE[arrays.kind]], this.plan.profile.style.style);
-      this.paving.add(pavingMesh(arrays, material));
+      const material = arrays.kind === SHADE_LAYER
+        ? createShadeMaterial()
+        : createPavingMaterial(arrays.kind, this.surfaces[LAYER_ROLE[arrays.kind]], this.plan.profile.style.style);
+      const mesh = pavingMesh(arrays, material);
+      // Occlusion darkens what is under it; it must not take a shadow of its own.
+      if (arrays.kind === SHADE_LAYER) mesh.receiveShadow = false;
+      this.paving.add(mesh);
     }
     this.pavingArrays = null;
     this.pavingReady = true;

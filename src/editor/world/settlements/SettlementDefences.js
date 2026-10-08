@@ -85,7 +85,8 @@ export function planDefences({ profile, occupancy, streets, random }) {
     const probe = rect(x, z, segment * 0.7, box.halfDepth * 2, yaw);
     if (occupancy.conflict(probe, { clearance: 0, ignoreStreets: true }) !== null) continue;
     occupancy.claim(probe, { soft: true });
-    pieces.push(piece('wall', x, z, yaw));
+    // Every third length or so is the overgrown variant; which, is fixed by its place in the ring.
+    pieces.push({ ...piece('wall', x, z, yaw), variant: index % 3 === 1 ? 1 : 0 });
     if (index % TOWER_EVERY === 0) {
       const joint = Math.atan2(ax, az);
       const tower = rect(ax, az, ...buildingEntry('tower', 0).footprint, joint);

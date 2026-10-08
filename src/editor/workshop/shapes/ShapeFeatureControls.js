@@ -26,13 +26,14 @@ export function syncShapeFeatureControls(editor) {
     const field = element.dataset.featureField;
     element.value = String(feature?.[field] ?? element.min);
     section.querySelector(`[data-feature-output="${field}"]`).value = Number(element.value).toFixed(2);
-    element.closest('label').hidden = feature?.kind === 'jetty' && field !== 'depth';
+    element.closest('label').hidden = (feature?.kind === 'jetty' && field !== 'depth') ||
+      (field === 'bottom' && ['porch', 'dormer', 'buttress'].includes(feature?.kind));
   }
 }
 
 export function applyShapeFeatureInput(editor, event, preview) {
   if (event.target.dataset.shapeAction === 'feature-select') {
-    if (!preview) { editor.featureId = event.target.value; editor.sync(); }
+    if (!preview) { editor.featureId = event.target.value; editor.sync(); editor.onSelection?.(editor.selectedId); }
     return true;
   }
   const field = event.target.dataset.featureField;
@@ -54,7 +55,7 @@ export function applyShapeFeatureAction(editor, action) {
     editor.featureId = `${kind}-${n}`;
     const opening = p.openings.find((o) => o.id === editor.openingId);
     editor.session.update(p.id, { features: [...p.features, { id: editor.featureId, kind, at: opening?.at ?? 0.5,
-      width: kind === 'porch' ? 2.6 : 2, depth: kind === 'jetty' ? 0.4 : 1.4, height: kind === 'porch' ? 2.5 : 1.8,
+      width: ['porch', 'balcony'].includes(kind) ? 2.6 : 2, depth: kind === 'jetty' ? 0.4 : 1.4, height: kind === 'porch' ? 2.5 : kind === 'balcony' ? 1.05 : 1.8,
       bottom: opening?.bottom ?? 0.9 }] });
   }
   return true;

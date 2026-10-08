@@ -6,6 +6,7 @@ import { evaluateCurveSegment } from '../curves/CurveSegment.js';
 import { projectPointToCurvePath } from '../curves/CurveProjection.js';
 import { shapeDetailPatch } from './ShapeDetailOverrides.js';
 import { pointInShape } from './ShapeEnvelope.js';
+import { shapeFeatureHandle, shapeFeatureHandleChanges } from './ShapeFeatureHandles.js';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 function localPoint(p, position) {
@@ -23,10 +24,11 @@ export function shapeDirectHandleDefinitions(editor) {
   const p = editor.primitive;
   if (!p || p.kind === 'traversal') return [];
   const plan = planRegisteredShape(p), result = [];
+  result.push(...shapeFeatureHandle(editor, plan));
   const opening = p.openings.find((o) => o.id === editor.openingId);
   if (opening) result.push(wallHandle(plan, opening.at, opening.bottom + opening.height * 0.5,
     { field: 'opening', type: 'opening', id: opening.id, opening }));
-  const decoration = editor.resolvedPlans.get(p.id)?.decorations.find((d) => d.id === editor.detailId);
+  const decoration = editor.resolvedPlans?.get(p.id)?.decorations?.find((d) => d.id === editor.detailId);
   if (decoration?.role === 'window-box') {
     const source = p.openings.find((o) => o.id === decoration.openingId);
     if (source) result.push(wallHandle(plan, decoration.at ?? source.at, (decoration.bottom ?? source.bottom) - 0.15,
@@ -51,6 +53,7 @@ export function shapeDirectHandleDefinitions(editor) {
 
 /** Pointer motion produces only host-local semantic patches. */
 export function shapeDirectHandleChanges(p, handle, delta) {
+  if (handle.type === 'feature') return shapeFeatureHandleChanges(p, planRegisteredShape(p), handle, delta, localPoint);
   const target = handle.position.map((v, k) => v + delta[k]);
   if (handle.type.startsWith('curve-')) {
     const original = new CurvePath(handle.path), path = original.toJSON(), local = localPoint(p, target);

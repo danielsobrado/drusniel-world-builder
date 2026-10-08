@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mixSeed } from './ProceduralRandom.js';
-import { stageCrownGeometry, createStageGrass } from './WorkshopStageVegetation.js';
+import { stageCrownGeometry, createStageGrass, stageFlowerMask } from './WorkshopStageVegetation.js';
 
 const STAGE_SEED = 4_817;
 const PREVIEW_HALF_SIZE = 8;
@@ -463,6 +463,7 @@ export function createWorkshopStage(scene) {
   const sky = createSkyTexture();
   const fog = new THREE.Fog('#c5d7c2', 30, 72);
   const grass = createStageGrass(terrainHeightAt);
+  const flowers = createWildflowers(), updateFlowers = stageFlowerMask(flowers);
   let disposed = false;
 
   group.name = 'workshop-stage';
@@ -471,7 +472,8 @@ export function createWorkshopStage(scene) {
   scene.fog = fog;
 
   try {
-    group.add(createTerrain(), createPath(), createBoundary(), createWildflowers());
+    group.add(flowers);
+    group.add(createTerrain(), createPath(), createBoundary());
     addDistantHills(group, materials);
     addTrees(group, materials);
     addRocks(group, materials);
@@ -502,6 +504,7 @@ export function createWorkshopStage(scene) {
     fill.position.set(11, 8, -11);
     group.add(fill);
   } catch (error) {
+    if (!grass.mesh.parent) { grass.mesh.geometry.dispose(); grass.mesh.material.dispose(); }
     disposeGroup(group, collectStageMaterials(materials));
     group.removeFromParent();
     sky.dispose();
@@ -512,7 +515,7 @@ export function createWorkshopStage(scene) {
 
   return {
     group,
-    updateShapes(plans) { if (!disposed) grass.update(plans); },
+    updateShapes(plans) { if (!disposed) { grass.update(plans); updateFlowers(plans); } },
     dispose() {
       if (disposed) return;
       disposed = true;

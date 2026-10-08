@@ -2,8 +2,9 @@ import { buildShapeWalls } from './ShapeWallBuilder.js';
 import { buildShapeRoof } from './ShapeRoofBuilder.js';
 import { buildShapeFacade } from './ShapeFacadeBuilder.js';
 import { buildShapeFloors } from './ShapeFloorBuilder.js';
-import { createShapeRoofOcclusion, clipShapeRoofMesh } from './ShapeRoofOcclusion.js';
+import { createShapeRoofOcclusion, clipShapeRoofMesh, clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 import { createShapeWallSurface } from './ShapeWallSurface.js';
+import { buildShapeBalcony } from './ShapeBalconyBuilder.js';
 
 const tint = [0.9, 0.9, 0.9];
 function point(frame, x, y, z) {
@@ -27,7 +28,8 @@ function buttress(feature, mesh, host) {
 
 export function buildShapeFeatures(plan, meshes, recipe) {
   for (const feature of plan.features ?? []) {
-    if (feature.solidSupport) { buttress(feature, meshes.trim, plan); continue; }
+    if (feature.balcony) { buildShapeBalcony(plan, feature, meshes, recipe); continue; }
+    if (feature.solidSupport) { buttress(feature, clipShapeMeshSet(meshes, plan).trim, plan); continue; }
     const child = feature.child, occlusion = createShapeRoofOcclusion(child);
     const clipped = Object.fromEntries(Object.entries(meshes).map(([key, mesh]) => [key, clipShapeRoofMesh(mesh, occlusion)]));
     if (!feature.openSides) {
@@ -43,7 +45,7 @@ export function buildShapeFeatures(plan, meshes, recipe) {
         const brace = surface.point(u + 0.42, f.height - 0.04);
         clipped.inserts.beam(surface.point(u, f.height - 0.55), brace, 0.095, 0.095, tint);
       }
-      buildShapeFloors(child, meshes);
+      buildShapeFloors(child, clipped);
     }
     buildShapeRoof(child, meshes, recipe);
     if (feature.intent.kind === 'jetty') {

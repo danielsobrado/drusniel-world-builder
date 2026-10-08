@@ -4,6 +4,7 @@ export const SHAPE_FEATURES = Object.freeze([
   { kind: 'dormer', label: 'Roof dormer' }, { kind: 'bay', label: 'Bay window' },
   { kind: 'jetty', label: 'Projecting upper floor' }, { kind: 'porch', label: 'Timber porch' },
   { kind: 'buttress', label: 'Stone buttress' },
+  { kind: 'balcony', label: 'Curved balcony' },
 ]);
 
 export function normalizeShapeFeatures(value) {

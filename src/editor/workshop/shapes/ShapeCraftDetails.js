@@ -37,7 +37,16 @@ export function resolveShapeCraftDetails(plan) {
     const override = overrides.get(d.id);
     if (!override) return d;
     const provenance = { ...d.provenance, source: 'promoted' };
-    if (d.role === 'window-box') return { ...d, provenance, at: override.at, bottom: override.bottom };
+    if (d.role === 'window-box') {
+      const source = plan.openings.find((o) => o.id === d.openingId), at = override.at ?? source.at;
+      let bottom = Math.min(p.height - 0.1, override.bottom ?? source.bottom);
+      for (const opening of plan.openings) {
+        const dx = Math.min(Math.abs(at - opening.at), 1 - Math.abs(at - opening.at)) * plan.curve.length;
+        if (dx < (source.width + 0.16 + opening.width) / 2 && bottom - 0.08 > opening.bottom && bottom - 0.28 < opening.bottom + opening.height)
+          bottom = Math.min(bottom, opening.bottom + 0.06);
+      }
+      return { ...d, provenance, at, bottom };
+    }
     if (!override.position) return d;
     const [x, z] = placeShapePoint(p, override.position), roof = createShapeRoofSurface(plan);
     if (!pointInShape([x, z], plan.topBoundary)) return d;

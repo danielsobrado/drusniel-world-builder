@@ -65,6 +65,7 @@ export function normalizeShapeVolume(source) {
     taper: shapeNumber(source.taper, 'Wall taper', 1, 0.65, 1.2),
     roof: Object.freeze({
       family: shapeChoice(roof.family, 'roof family', 'gable', SHAPE_ROOF_FAMILIES),
+      axis: shapeChoice(roof.axis, 'ridge direction', 'width', ['width', 'depth']),
       rise: shapeNumber(roof.rise, 'Roof rise', 2.6, 0.2, 12),
       overhang: shapeNumber(roof.overhang, 'Roof overhang', 0.4, 0.05, 1.5),
       sweep: shapeNumber(roof.sweep, 'Roof sweep', 0.45, 0, 1),

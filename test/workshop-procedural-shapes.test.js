@@ -186,7 +186,7 @@ test('local product updates reuse unaffected resources and dispose replaced reso
   assert.equal(cache.entries.get('wall-right').parts, right);
   assert.equal(second.stats.rebuilt, 1);
   assert.equal(second.stats.reused, 1);
-  assert.equal(built.length, 3);
+  assert.equal(built.length, 6, 'Each curved wall owns separate wall and foundation products.');
   assert.equal(disposed.length, 1);
   cache.clear();
   assert.equal(disposed.length, 3);
@@ -273,10 +273,10 @@ test('a failed domain build keeps previous resources and disposes only staged re
     /Roof builder failure/,
   );
   assert.equal(cache.entries, before);
-  assert.equal(disposed.length, 1);
+  assert.equal(disposed.length, 2, 'Staged walls and ground retire after the roof build fails.');
   cache.clear();
-  assert.equal(disposed.length, 4);
-  assert.equal(new Set(disposed).size, 4);
+  assert.equal(disposed.length, 6);
+  assert.equal(new Set(disposed).size, 6);
 });
 
 test('all roof profiles agree between geometry sampling and surface height queries', () => {

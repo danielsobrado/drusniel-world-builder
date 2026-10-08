@@ -4,6 +4,7 @@ import { RoadsideDetailsView } from './editor/roadside/RoadsideDetailsView.js';
 import { RoadsideDetailsUi } from './editor/roadside/RoadsideDetailsUi.js';
 import { SettlementView } from './editor/world/settlements/view/SettlementView.js';
 import { duskFromSky } from './editor/world/settlements/view/SettlementDusk.js';
+import { SettlementAmbience } from './editor/audio/settlement_ambience.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
@@ -659,6 +660,8 @@ async function initializeEditor(restoreState, resources, startup) {
     enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false,
     duskProvider: () => duskFromSky(stylizedSurface?.skyView) });
   resources.own(settlementView);
+  const settlementAmbience = new SettlementAmbience(audioBus);
+  resources.own(settlementAmbience);
   if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
   const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
   resources.own(roadsideDetailsUi);
@@ -1216,6 +1219,7 @@ async function initializeEditor(restoreState, resources, startup) {
       godsEndAssets,
       roadsideDetails,
       settlementView,
+      settlementAmbience,
       worldMapController,
       gameplayOverlayController,
       inventoryController,
@@ -1540,6 +1544,7 @@ async function initializeEditor(restoreState, resources, startup) {
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
     deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera));
+    settlementAmbience.update(frameTimestamp / 1000, settlementView.enabled ? settlementView.nearestTown(canonicalFocus) : null, Boolean(skyLooks?.night));
     if (profiling) perfQa.mark('stylized');
 
     if (weatherController) {

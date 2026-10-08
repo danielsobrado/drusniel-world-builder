@@ -3,7 +3,7 @@ import { ShapeUtils, Vector2 } from 'three/webgpu';
 /** Floors use the same authored footprint and level elevations as gameplay products. */
 export function buildShapeFloors(plan, meshes) {
   const mesh = meshes.deck ?? meshes.trim;
-  for (const floor of plan.rpg.walkableFloors.filter((f) => f.primitiveId === plan.id)) {
+  for (const floor of plan.rpg.walkableFloors.filter((f) => f.primitiveId === plan.id && !f.featureId)) {
     const outline = floor.footprint.points;
     const triangles = ShapeUtils.triangulateShape(
       outline.map(([x, z]) => new Vector2(x, z)),

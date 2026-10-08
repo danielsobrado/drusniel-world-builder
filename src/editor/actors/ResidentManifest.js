@@ -7,7 +7,7 @@ import { hash32 } from '../stylized/scatterMath.js';
  */
 export function residentManifest(settlement, { tileSize, worldSeed, settings, population = settlement.population, spots = null }) {
   if (!(population > 0)) return [];
-  const count = Math.min(settings.maxPerSettlement, Math.max(1, Math.ceil(Math.log2(1 + population)) * 2 + 2));
+  const count = Math.min(settings.maxPerSettlement, Math.max(1, Math.ceil(Math.log2(1 + population)) * 4 + 2));
   return Array.from({ length: count }, (_, index) => {
     const seed = hash32(worldSeed ^ Math.imul(Number(settlement.id) || 1, 977) ^ index);
     const angle = seed / 0xffffffff * Math.PI * 2;

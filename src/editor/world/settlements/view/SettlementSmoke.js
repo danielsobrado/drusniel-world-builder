@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { float, fract, instancedBufferAttribute, mix, sin, smoothstep, time, uv, vec3 } from 'three/tsl';
 import { buildingEntry } from '../SettlementBuildingCatalog.js';
+import { settlementDusk } from './SettlementDusk.js';
 
 /** Kinds with a fire that is always lit; a share of ordinary houses join them. */
 const HEARTH_KINDS = new Set(['tavern', 'smithy', 'bakery']);
@@ -61,5 +62,56 @@ export function createSettlementSmoke(plan) {
   sprite.frustumCulled = false;
   sprite.userData.skipWarmup = true;
   sprite.name = 'settlement-smoke';
+  return sprite;
+}
+
+/** Metres between haze banks along a street, and how high they hang. */
+const HAZE = Object.freeze({ spacing: 14, height: 2.2, size: 13 });
+
+/**
+ * Haze down the streets and over the square: big, faint, slow discs of dust
+ * and woodsmoke that put air between the near houses and the far ones. Thicker
+ * toward evening, when the fires are lit. One draw a town, like the smoke.
+ */
+export function createSettlementHaze(plan, heightAt) {
+  const banks = [];
+  if (plan.squareRadius > 0) banks.push([0, 0]);
+  for (const street of plan.streets) {
+    if (street.kind !== 'main' && street.kind !== 'ring') continue;
+    let travelled = HAZE.spacing / 2;
+    for (let index = 1; index < street.points.length; index += 1) {
+      const [ax, az] = street.points[index - 1];
+      const [bx, bz] = street.points[index];
+      const length = Math.hypot(bx - ax, bz - az);
+      for (; travelled < length; travelled += HAZE.spacing) {
+        const x = ax + (bx - ax) * travelled / length;
+        const z = az + (bz - az) * travelled / length;
+        if (Math.hypot(x, z) < plan.profile.radius) banks.push([x, z]);
+      }
+      travelled -= length;
+    }
+  }
+  if (banks.length === 0) return null;
+  const data = new Float32Array(banks.length * 4);
+  banks.forEach(([x, z], index) => {
+    data[index * 4] = x;
+    data[index * 4 + 1] = heightAt(x, z) + HAZE.height;
+    data[index * 4 + 2] = -z;
+    data[index * 4 + 3] = (index * 0.618) % 1;
+  });
+  const bank = instancedBufferAttribute(new THREE.InstancedBufferAttribute(data, 4));
+  const material = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false });
+  const drift = sin(time.mul(0.11).add(bank.w.mul(6.28)));
+  material.positionNode = bank.xyz.add(vec3(drift.mul(1.6), drift.mul(0.25), drift.mul(0.9)));
+  material.scaleNode = float(HAZE.size).mul(bank.w.mul(0.5).add(0.75));
+  const disc = smoothstep(0.5, 0.05, uv().sub(0.5).length());
+  material.opacityNode = disc.mul(settlementDusk.mul(0.07).add(0.035));
+  material.colorNode = mix(vec3(0.86, 0.84, 0.78), vec3(0.95, 0.72, 0.5), settlementDusk);
+  material.name = 'settlement-haze';
+  const sprite = new THREE.Sprite(material);
+  sprite.count = banks.length;
+  sprite.frustumCulled = false;
+  sprite.userData.skipWarmup = true;
+  sprite.name = 'settlement-haze';
   return sprite;
 }

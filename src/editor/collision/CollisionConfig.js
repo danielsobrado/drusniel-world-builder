@@ -66,6 +66,8 @@ export const COLLISION_CONFIG_DEFAULTS = deepFreeze({
   // Planned settlements (world/settlements): buildings and heavy street furniture.
   settlements: {
     enabled: true,
+    // Houses as four walls with a doorway; false makes each a solid block.
+    enterable: true,
   },
   debug: {
     colliders: false,

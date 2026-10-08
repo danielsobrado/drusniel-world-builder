@@ -2,7 +2,7 @@ import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { clipShapePolygon, convexShapePlanes, convexShapeWallPlanes, interpolateShapeVertex, splitShapeFootprint } from './ShapePolygonClip.js';
 
 const triangles = (polygon) => Array.from({ length: Math.max(0, polygon.length - 2) }, (_, i) => [polygon[0], polygon[i + 1], polygon[i + 2]]);
-const positionKey = (p) => JSON.stringify([p.position, p.rotation, p.elevation, p.height, p.footprint, p.taper, p.thickness, p.roof]);
+const positionKey = (p, roofs) => JSON.stringify([p.position, p.rotation, p.elevation, p.height, p.footprint, p.taper, p.thickness, roofs ? p.roof : null]);
 
 function clipRoofHeight(triangle, signed, depth = 0) {
   const values = triangle.map((v) => signed(v.position));
@@ -30,16 +30,16 @@ function clipRoofHeight(triangle, signed, depth = 0) {
 }
 
 /** Continuous mask evaluated from semantic roof surfaces, never reconstructed from rendered triangles. */
-export function createShapeRoofOcclusion(plan) {
+export function createShapeRoofOcclusion(plan, { roofMargin = 0.001, roofs = true } = {}) {
   const neighbors = (plan.neighbors ?? []).flatMap((n) => {
     // Identical overlapping surfaces have one deterministic owner, without double removal.
-    if (positionKey(plan.primitive) === positionKey(n.primitive) && plan.id < n.id) return [];
+    if (positionKey(plan.primitive, roofs) === positionKey(n.primitive, roofs) && plan.id < n.id) return [];
     const surface = createShapeRoofSurface(n), outline = surface.outline;
     const bottom = n.curve.samples.map((s) => surface.wall.point(s.distance, 0, n.primitive.thickness / 2));
     const top = n.curve.samples.map((s) => surface.wall.point(s.distance, n.primitive.height, n.primitive.thickness / 2));
     const bounds = [...bottom, ...outline];
     return [{ ...n, surface, planes: convexShapePlanes(outline), wallPlanes: convexShapeWallPlanes(bottom, top),
-      coplanar: positionKey(plan.primitive) === positionKey(n.primitive),
+      coplanar: positionKey(plan.primitive, roofs) === positionKey(n.primitive, roofs),
       wallTop: n.primitive.elevation + n.primitive.height,
       minX: Math.min(...bounds.map((v) => v[0])), maxX: Math.max(...bounds.map((v) => v[0])),
       minZ: Math.min(...bounds.map((v) => v[2])), maxZ: Math.max(...bounds.map((v) => v[2])) }];
@@ -56,10 +56,11 @@ export function createShapeRoofOcclusion(plan) {
         const aboveBase = clipShapePolygon(part, (v) => v[1] - n.primitive.elevation);
         const walls = clipShapePolygon(aboveBase, (v) => n.wallTop - v[1] - 1e-8);
         const roof = clipShapePolygon(aboveBase, (v) => v[1] - n.wallTop);
-        const wallPieces = splitShapeFootprint(walls, n.wallPlanes).outside;
+        const wallPieces = n.roofOnly ? [walls] : splitShapeFootprint(walls, n.wallPlanes).outside;
+        if (n.roofReplaced || !roofs) return [under, ...wallPieces, roof].flatMap(triangles);
         const { outside, inside } = splitShapeFootprint(roof, n.planes);
         return [under, ...wallPieces, ...outside].flatMap(triangles).concat(triangles(inside).flatMap((t) =>
-          clipRoofHeight(t, (v) => v[1] - n.surface.heightAt(v[0], v[2]) - 0.001)));
+          clipRoofHeight(t, (v) => v[1] - n.surface.heightAt(v[0], v[2]) - roofMargin)));
       });
       if (!pieces.length) break;
     }
@@ -67,10 +68,15 @@ export function createShapeRoofOcclusion(plan) {
   }
   function hidden(points) {
     return neighbors.some((n) => points.every((p) => p[1] >= n.primitive.elevation &&
-      (p[1] < n.wallTop ? n.wallPlanes.every((plane) => plane(p) <= 0) :
-        n.planes.every((plane) => plane(p) <= 0) && p[1] < n.surface.heightAt(p[0], p[2]))));
+      (p[1] < n.wallTop ? !n.roofOnly && n.wallPlanes.every((plane) => plane(p) <= 0) :
+        roofs && !n.roofReplaced && n.planes.every((plane) => plane(p) <= 0) && p[1] < n.surface.heightAt(p[0], p[2]) + roofMargin)));
   }
   return { clip, hidden, active: neighbors.length > 0 };
+}
+
+export function clipShapeMeshSet(meshes, plan, options) {
+  const mask = createShapeRoofOcclusion(plan, options);
+  return Object.fromEntries(Object.entries(meshes).map(([slot, mesh]) => [slot, clipShapeRoofMesh(mesh, mask)]));
 }
 
 export function clipShapeRoofMesh(mesh, mask) {

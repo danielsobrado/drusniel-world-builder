@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import test from 'node:test';
 import { planSettlement } from '../src/editor/world/settlements/SettlementPlanner.js';
 import { rect, rectsOverlap } from '../src/editor/world/settlements/SettlementGeometry.js';
-import { PAVING_LAYERS, settlementPavingJob, smoothPath } from '../src/editor/world/settlements/paving/SettlementPavingGeometry.js';
+import { PAVING_LAYERS, SHADE_LAYER, settlementPavingJob, smoothPath } from '../src/editor/world/settlements/paving/SettlementPavingGeometry.js';
 import {
   dressingFor,
   SETTLEMENT_DRESSING_KEYS,
@@ -19,6 +19,11 @@ import { waterBearing } from '../src/editor/world/settlements/SettlementStreets.
 import { gatheringSpots } from '../src/editor/world/settlements/SettlementGathering.js';
 import { duskFromSky } from '../src/editor/world/settlements/view/SettlementDusk.js';
 import { residentManifest } from '../src/editor/actors/ResidentManifest.js';
+import { isTrimKind, SETTLEMENT_TRIM, WALL_STAIR } from '../src/editor/world/settlements/SettlementTrim.js';
+import { murmurLevel, settlementPresence } from '../src/editor/audio/settlement_ambience.js';
+import { houseShell, settlementInteriorArrays } from '../src/editor/world/settlements/view/SettlementInteriorGeometry.js';
+import { buildingDoor, buildingRecipe, SETTLEMENT_BUILDINGS } from '../src/editor/world/settlements/SettlementBuildingCatalog.js';
+import { SETTLEMENT_STYLES } from '../src/editor/world/settlements/SettlementProfile.js';
 import { planToWorld, settlementPlacements } from '../src/editor/world/settlements/view/SettlementPlacements.js';
 import { isStoneKind, SETTLEMENT_STONES, stoneSeed } from '../src/editor/world/settlements/SettlementStones.js';
 import { generateStone, STONE_ARCHETYPE_IDS } from '@drusniel/procedural-stone';
@@ -96,7 +101,7 @@ test('a smoothed path keeps its ends and steps finely', () => {
 
 test('paving faces up, hugs the ground and frays only at its border', () => {
   const layers = drain(settlementPavingJob(plan(CITY), ground, TILE_METRES));
-  assert.deepEqual(layers.map(({ kind }) => kind).sort(), [...PAVING_LAYERS].sort());
+  assert.deepEqual(layers.map(({ kind }) => kind).sort(), [...PAVING_LAYERS, SHADE_LAYER].sort());
   for (const { kind, positions, uvs, edges, colors, indices } of layers) {
     assert.equal(uvs.length / 2, positions.length / 3);
     assert.equal(colors.length, positions.length);
@@ -119,7 +124,7 @@ test('paving faces up, hugs the ground and frays only at its border', () => {
 
 test('a hamlet is paved in earth alone', () => {
   const layers = drain(settlementPavingJob(plan(HAMLET, [2]), ground, TILE_METRES));
-  assert.deepEqual(layers.map(({ kind }) => kind), ['earth']);
+  assert.deepEqual(layers.map(({ kind }) => kind), ['earth', SHADE_LAYER]);
 });
 
 test('every settlement gets a complete dressing, and towns differ', () => {
@@ -235,7 +240,8 @@ test('residents gather where the plan has stalls, benches and doors', () => {
   assert.ok(Math.hypot(spots[0].x - centre.x, spots[0].z - centre.z) < cityPlan.squareRadius);
   const settings = { maxPerSettlement: 14, wanderRadius: 18 };
   const manifest = residentManifest(CITY, { tileSize: 2, worldSeed: 7, settings, spots });
-  assert.equal(manifest.length, 12);
+  // Capped by the settings: a city would field more.
+  assert.equal(manifest.length, 14);
   assert.deepEqual(manifest, residentManifest(CITY, { tileSize: 2, worldSeed: 7, settings, spots }));
   manifest.forEach((resident, index) => {
     assert.ok(Math.hypot(resident.x - spots[index].x, resident.z - spots[index].z) < 1e-9);
@@ -249,4 +255,70 @@ test('dusk follows a low sun or a dimmed key light', () => {
   assert.equal(duskFromSky({ sunDirectionValue: { y: 0.8 }, directional: { intensity: 0.08 } }), 1);
   const evening = duskFromSky({ sunDirectionValue: { y: 0.17 }, directional: { intensity: 2 } });
   assert.ok(evening > 0.2 && evening < 0.8);
+});
+
+test('a city is trimmed: signs, awnings, ivy, wall stairs and livestock', () => {
+  const cityPlan = plan(CITY);
+  const trim = cityPlan.props.filter(({ kind }) => isTrimKind(kind));
+  for (const kind of Object.keys(SETTLEMENT_TRIM)) assert.ok(trim.some((prop) => prop.kind === kind), `no ${kind} planned`);
+  assert.ok(trim.every(({ kind, variant }) => variant < SETTLEMENT_TRIM[kind].variants));
+  // A stair stands just inside the wall it climbs, and its flight reaches the wall-walk.
+  const walls = cityPlan.buildings.filter(({ kind }) => kind === 'wall');
+  const span = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+  for (const stair of trim.filter(({ kind }) => kind === 'wallStair')) {
+    const wall = walls.reduce((best, candidate) => (span(candidate, stair) < span(best, stair) ? candidate : best));
+    assert.ok(Math.hypot(stair.x, stair.z) < Math.hypot(wall.x, wall.z), 'a stair is outside its wall');
+    assert.ok(span(wall, stair) < 2.2);
+  }
+  assert.equal(Math.round(WALL_STAIR.height / WALL_STAIR.rise) * WALL_STAIR.rise, 6);
+  assert.ok(walls.some(({ variant }) => variant === 1) && walls.some(({ variant }) => variant === 0), 'no overgrown wall lengths');
+});
+
+test('a town is heard in its streets and not from the next hill', () => {
+  assert.equal(settlementPresence(0, 150), 1);
+  assert.equal(settlementPresence(80, 150), 1);
+  assert.equal(settlementPresence(400, 150), 0);
+  const edge = settlementPresence(150, 150);
+  assert.ok(edge > 0 && edge < 1);
+  assert.equal(settlementPresence(10, 0), 0);
+  assert.ok(murmurLevel(3, false) > murmurLevel(0, false));
+  assert.ok(murmurLevel(3, true) < murmurLevel(3, false));
+  assert.ok(murmurLevel(9, false) <= 1.01);
+});
+
+test('every fronted house of every style knows its door, and its recipe puts the leaf away', () => {
+  let doors = 0;
+  for (const style of SETTLEMENT_STYLES) {
+    for (const [kind, variants] of Object.entries(SETTLEMENT_BUILDINGS)) {
+      variants.forEach((entry, variant) => {
+        const door = buildingDoor(style.key, kind, variant);
+        if (entry.archetype !== 'house') return assert.equal(door, null);
+        if (!door) return undefined;
+        doors += 1;
+        assert.ok(door.width >= 0.8 && door.height >= 1.8 && door.z > 0, `${style.key} ${kind} ${variant}`);
+        assert.ok(Math.abs(door.x) < entry.footprint[0] / 2);
+        assert.deepEqual(Object.keys(buildingRecipe(style, kind, variant).componentTransforms), [door.id]);
+        return assert.equal(buildingRecipe(style, kind, variant, { openDoor: false }).componentTransforms, undefined);
+      });
+    }
+  }
+  assert.ok(doors >= 60);
+});
+
+test('a town has rooms behind its doors', () => {
+  const cityPlan = plan(CITY);
+  const enterable = cityPlan.buildings.filter((building) => houseShell(building));
+  assert.ok(enterable.length > 100);
+  for (const building of enterable) {
+    const shell = houseShell(building);
+    assert.ok(shell.doorRight - shell.doorLeft >= 0.9, 'a doorway too narrow to walk through');
+    assert.ok(shell.doorLeft > -shell.halfWidth && shell.doorRight < shell.halfWidth && shell.front > shell.back + 2);
+  }
+  assert.equal(houseShell(cityPlan.buildings.find(({ kind }) => kind === 'wall')), null);
+  const { positions, normals, colors } = settlementInteriorArrays(cityPlan);
+  assert.equal(normals.length, positions.length);
+  assert.equal(colors.length, positions.length);
+  // Nineteen quads a house: floor, ceiling, walls, reveals, threshold, daylight, opening, frame and leaf.
+  assert.equal(positions.length / 18, enterable.length * 19);
+  assert.equal(settlementInteriorArrays({ buildings: [] }), null);
 });

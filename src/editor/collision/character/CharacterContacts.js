@@ -230,13 +230,23 @@ export function capsuleOverlapsPrimitive(capsule, collider, skinWidth = 0) {
   return findPrimitiveSideContact(capsule, collider, skinWidth, {}) !== null;
 }
 
+/**
+ * How far past a box's edge, in capsule radii, a character is still held up by
+ * its top. A capsule pressed against the face of a box stands a full radius
+ * (plus skin) off it, so a reach under one radius meant the step-up probe never
+ * found the top it was trying to step onto: a step could only be mounted when a
+ * single frame's movement covered the difference, which at speed and frame rate
+ * it does not. Just over one radius is the least that lets a character walk up.
+ */
+const BOX_LEDGE_REACH = 1.1;
+
 function boxTopSupport({ x, z, radius, collider }) {
   const local = worldToBoxLocal(collider, x, z);
   const halfX = collider.dimensions[0] / 2;
   const halfZ = collider.dimensions[2] / 2;
   if (halfX < radius || halfZ < radius) return null;
-  const reachX = halfX + radius * 0.25;
-  const reachZ = halfZ + radius * 0.25;
+  const reachX = halfX + radius * BOX_LEDGE_REACH;
+  const reachZ = halfZ + radius * BOX_LEDGE_REACH;
   if (Math.abs(local.x) > reachX || Math.abs(local.z) > reachZ) return null;
   return {
     sourceId: collider.sourceId,

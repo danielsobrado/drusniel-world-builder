@@ -7,20 +7,21 @@ import { buildShapeIvy } from './ShapeIvyBuilder.js';
 import { shapeProductDomains } from './ShapeProductDomains.js';
 import { buildShapeFloors } from './ShapeFloorBuilder.js';
 import { buildShapeFacade } from './ShapeFacadeBuilder.js';
-import { shapeStyleSlot, shapeStyleSourceRegion } from './ShapeStyles.js';
+import { shapeStyleSlot, shapeStyleSourceRegion, shapeStyleFallbackRegion } from './ShapeStyles.js';
 import { buildShapeFeatures } from './ShapeFeatureBuilder.js';
 import { buildShapeGrounding } from './ShapeGrounding.js';
+import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 
 const builders = new Map([
   [
     'walls',
     (plan, meshes, recipe) => {
-      buildShapeWalls(plan, meshes, recipe);
+      buildShapeWalls(plan, clipShapeMeshSet(meshes, plan, { roofs: false }), recipe);
       if (plan.primitive.roof) buildShapeFloors(plan, meshes);
     },
   ],
   ['roof', buildShapeRoof],
-  ['facade', buildShapeFacade],
+  ['facade', (plan, meshes, recipe) => buildShapeFacade(plan, clipShapeMeshSet(meshes, plan, { roofs: false }), recipe)],
   ['ivy', buildShapeIvy],
   ['supports', (plan, meshes) => buildShapeSupports(plan, meshes.supports)],
   ['traversal', buildShapeTraversal],
@@ -36,6 +37,7 @@ const slots = Object.freeze({
   deck: 'stone',
   foliage: 'foliage',
   metal: 'metal',
+  flashing: 'metal',
   supports: 'stone',
   rails: 'stone',
 });
@@ -74,7 +76,10 @@ export function buildRegisteredShape(
           componentId: plan.id,
           label: `${plan.primitive.label} · ${family}`,
           inheritsFrom: shapeStyleSourceRegion(plan, family),
+          inheritFallback: shapeStyleFallbackRegion(plan, family),
+          ...(family === 'flashing' ? { defaultPresetId: 'weathered-lead' } : {}),
           family: styled ? slot :
+            family === 'flashing' ? 'metal' :
             family === 'trim'
               ? 'stone'
               : family === 'inserts'

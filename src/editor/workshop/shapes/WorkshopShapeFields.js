@@ -66,6 +66,7 @@ export function workshopShapeMarkup() {
         ]),
       )}
       ${range('roof-rise', 'Roof height', 0.2, 8, 0.1)}${range('roof-overhang', 'Roof overhang', 0.05, 1.5, 0.05)}
+      ${select('roof-axis', 'Ridge direction', [['width', 'Along width'], ['depth', 'Along depth']])}
       ${range('roof-sweep', 'Roof sweep', 0, 1, 0.05)}${range('roof-sag', 'Ridge sag', 0, 0.5, 0.02)}
       <label class="workshop-check"><input type="checkbox" data-shape-field="supports"/>Automatic supports</label>
     </div>
@@ -98,6 +99,7 @@ export function workshopShapeMarkup() {
         ])}
         ${range('opening-at', 'Along wall', 0, 0.99, 0.01)}${range('opening-bottom', 'Opening bottom', 0, 5, 0.05)}
         ${range('opening-width', 'Opening width', 0.3, 3, 0.05)}${range('opening-height', 'Opening height', 0.3, 4, 0.05)}
+        ${select('opening-shutterPose', 'Shutter pose', [['auto', 'Natural variation'], ['open', 'Open'], ['ajar', 'Ajar'], ['closed', 'Closed']])}
       </div>
     </div>
     ${shapeFeatureMarkup()}

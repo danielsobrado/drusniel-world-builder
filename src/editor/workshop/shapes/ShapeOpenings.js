@@ -17,6 +17,7 @@ export function normalizeShapeOpenings(input, height) {
         id: shapeId(opening.id, 'Opening id'),
         role: shapeChoice(opening.role, 'opening role', 'window', ['door', 'window', 'arch']),
         profile: shapeChoice(opening.profile, 'opening profile', 'arched', ['arched', 'square']),
+        shutterPose: shapeChoice(opening.shutterPose, 'shutter pose', 'auto', ['auto', 'open', 'ajar', 'closed']),
         at: shapeNumber(opening.at, 'Opening position', 0.5, 0, 1),
         bottom: shapeNumber(opening.bottom, 'Opening bottom', 0, 0, height - 0.3),
         width: shapeNumber(opening.width, 'Opening width', 1, 0.3, 5),

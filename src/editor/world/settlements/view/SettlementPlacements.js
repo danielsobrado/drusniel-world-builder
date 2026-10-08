@@ -1,5 +1,5 @@
 import { poolKey } from '../SettlementBuildingCatalog.js';
-import { isStoneKind } from '../SettlementStones.js';
+import { isCraftedKind } from '../SettlementCraftedKinds.js';
 
 /**
  * A settlement plan as things to draw: every building and prop with its pooled
@@ -15,7 +15,7 @@ import { isStoneKind } from '../SettlementStones.js';
 const SMALL_KINDS = new Set(['lantern', 'planter', 'shrine', 'signpost', 'bench', 'cart', 'barrels', 'fence', 'bollards', 'stall', 'well']);
 
 export function isSmallKind(kind) {
-  return SMALL_KINDS.has(kind) || isStoneKind(kind);
+  return SMALL_KINDS.has(kind) || isCraftedKind(kind);
 }
 
 export function planToWorld(settlement, tileSize, x, z) {
@@ -35,8 +35,8 @@ export function settlementPlacements(settlement, plan, tileSize, heightAt) {
   const place = (item, index, y, small) => {
     const world = planToWorld(settlement, tileSize, item.x, item.z);
     return {
-      // Loose stone is pooled beside the workshop meshes, under the same style prefix.
-      key: isStoneKind(item.kind) ? `${styleKey}|${item.kind}|${item.variant}` : poolKey(styleKey, item.kind, item.variant),
+      // Stone and trim are pooled beside the workshop meshes, under the same style prefix.
+      key: isCraftedKind(item.kind) ? `${styleKey}|${item.kind}|${item.variant}` : poolKey(styleKey, item.kind, item.variant),
       kind: item.kind,
       variant: item.variant,
       small,

@@ -67,6 +67,12 @@ export const BUILTIN_WORKSHOP_MATERIAL_PRESETS = Object.freeze({
     heightStrength: 0.2, weathering: 0.5, mapping: 'local',
     repeat: 2, rotation: 0, alignment: 'local', sources: Object.freeze({}),
   }),
+  'weathered-lead': Object.freeze({
+    id: 'weathered-lead', label: 'Weathered lead', family: 'metal', baseColor: '#53636b',
+    tint: '#ffffff', roughness: 0.92, metalness: 0.12, normalStrength: 0, aoStrength: 1,
+    heightStrength: 0, weathering: 0.6, mapping: 'local',
+    repeat: 1, rotation: 0, alignment: 'local', sources: Object.freeze({}),
+  }),
 });
 
 export const DEFAULT_WORKSHOP_MATERIAL_FAVORITES = Object.freeze([
@@ -313,7 +319,9 @@ export function getWorkshopMaterialPreset(document, presetId) {
 export function resolveWorkshopMaterialRegion(document, region) {
   const presetId = document.materialAreaOverrides[region.id]
     ?? (region.inheritsFrom ? document.materialAreaOverrides[region.inheritsFrom] : undefined)
+    ?? (region.inheritFallback ? document.materialAreaOverrides[region.inheritFallback] : undefined)
     ?? document.materialDefaults[region.family]
+    ?? region.defaultPresetId
     ?? null;
   return Object.freeze({
     ...region,

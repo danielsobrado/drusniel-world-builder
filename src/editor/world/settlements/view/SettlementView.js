@@ -198,6 +198,25 @@ export class SettlementView {
     return fading;
   }
 
+  /**
+   * The nearest adopted town as a listener hears it: metres to its centre, its
+   * radius and rank, and metres to its nearest smithy. Null out of earshot.
+   */
+  nearestTown(focus) {
+    let nearest = null;
+    for (const site of this.sites.values()) {
+      const distance = Math.hypot(site.centre.x - focus.x, site.centre.z - focus.z);
+      if (!nearest || distance < nearest.distance) nearest = { distance, site };
+    }
+    if (!nearest) return null;
+    const { site, distance } = nearest;
+    let smithy = Infinity;
+    for (const placement of site.placements ?? []) {
+      if (placement.kind === 'smithy') smithy = Math.min(smithy, Math.hypot(placement.x - focus.x, placement.z - focus.z));
+    }
+    return { distance, radius: site.plan.profile.radius, rank: site.plan.profile.rank, smithy };
+  }
+
   /** Whether a placement, or the shadow it throws, can reach the view frustum. */
   inView(placement) {
     const radius = placement.small ? SETTLEMENT_VIEW.cullRadius.small : SETTLEMENT_VIEW.cullRadius.building;
@@ -258,7 +277,7 @@ export class SettlementView {
     if (this.sites.size === 0 && this.rows.size === 0) return;
 
     const started = performance.now();
-    this.pool.reveal(SETTLEMENT_VIEW.revealsPerFrame);
+    this.pool.reveal(SETTLEMENT_VIEW.revealsPerFrame, camera, view.scene);
     this.advanceWork(shouldYield);
     for (const site of this.sites.values()) {
       // Textures arrive between frames; the first frame that has them re-selects.

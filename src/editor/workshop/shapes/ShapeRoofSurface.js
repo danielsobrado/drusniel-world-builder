@@ -15,12 +15,14 @@ export function createShapeRoofSurface(plan) {
     wall = createShapeWallSurface(plan);
   const halfWidth = (p.footprint.width * p.taper) / 2,
     halfDepth = (p.footprint.depth * p.taper) / 2;
+  const depthAxis = roof.axis === 'depth';
+  const alongHalf = depthAxis ? halfDepth : halfWidth, acrossHalf = depthAxis ? halfWidth : halfDepth;
   const patch = ['gable', 'hip'].includes(roof.family)
     ? createRoofSurface({
-        x0: -halfWidth - p.thickness / 2,
-        x1: halfWidth + p.thickness / 2,
-        z0: -halfDepth - p.thickness / 2,
-        z1: halfDepth + p.thickness / 2,
+        x0: -alongHalf - p.thickness / 2,
+        x1: alongHalf + p.thickness / 2,
+        z0: -acrossHalf - p.thickness / 2,
+        z1: acrossHalf + p.thickness / 2,
         wallTop: p.height,
         rise: roof.rise,
         overhang: roof.overhang,
@@ -43,7 +45,10 @@ export function createShapeRoofSurface(plan) {
   }
   function heightAt(x, z) {
     const [lx, lz] = local(x, z);
-    if (patch) return p.elevation + patch.height(patch.ridgeDistance(lx, lz), lx);
+    if (patch) {
+      const along = depthAxis ? lz : lx, across = depthAxis ? lx : lz;
+      return p.elevation + patch.height(patch.ridgeDistance(along, across), along);
+    }
     const dx = x - p.position[0],
       dz = z - p.position[1];
     let radius = Infinity;
@@ -69,9 +74,10 @@ export function createShapeRoofSurface(plan) {
     let x = p.position[0] + (outer[0] - p.position[0]) * t;
     let z = p.position[1] + (outer[2] - p.position[1]) * t;
     if (roof.family === 'gable') {
-      const [along, across] = local(outer[0], outer[2]);
-      x = p.position[0] + along * Math.cos(angle) - across * t * Math.sin(angle);
-      z = p.position[1] + along * Math.sin(angle) + across * t * Math.cos(angle);
+      const [lx, lz] = local(outer[0], outer[2]);
+      const localX = depthAxis ? lx * t : lx, localZ = depthAxis ? lz : lz * t;
+      x = p.position[0] + localX * Math.cos(angle) - localZ * Math.sin(angle);
+      z = p.position[1] + localX * Math.sin(angle) + localZ * Math.cos(angle);
     }
     const y = patch
       ? heightAt(x, z)

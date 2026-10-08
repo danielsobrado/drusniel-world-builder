@@ -21,7 +21,7 @@ const CLASS_RANK = Object.freeze(Object.fromEntries(SETTLEMENT_CLASSES.map(({ id
 /** Farm belt, as a multiple of the town radius. */
 export const FARM_BELT = Object.freeze({ inner: 1.12, outer: 1.75 });
 
-const STYLES = Object.freeze([
+export const SETTLEMENT_STYLES = Object.freeze([
   Object.freeze({ key: 'granite-slate', style: 'granite', topStyle: 'slate', finishes: ['limewash', 'ochre', 'masonry'] }),
   Object.freeze({ key: 'limestone-terracotta', style: 'limestone', topStyle: 'terracotta', finishes: ['limewash', 'ochre', 'rose'] }),
   Object.freeze({ key: 'sandstone-terracotta', style: 'sandstone', topStyle: 'terracotta', finishes: ['ochre', 'rose', 'limewash'] }),
@@ -49,7 +49,7 @@ export function classRank(classId) {
 
 export function styleFor(settlement) {
   const culture = Number.isFinite(settlement.culture) ? settlement.culture : settlement.id;
-  return STYLES[hashInts(culture, 0x5717e) % STYLES.length];
+  return SETTLEMENT_STYLES[hashInts(culture, 0x5717e) % SETTLEMENT_STYLES.length];
 }
 
 /**

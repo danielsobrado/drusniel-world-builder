@@ -20,8 +20,8 @@ drawPreparation:
 residents:
   enabled: true
   radiusMeters: 220
-  maxResidents: 24
-  maxPerSettlement: 14
+  maxResidents: 32
+  maxPerSettlement: 22
   wanderRadius: 18
   refreshSeconds: 0.5
 serpents:

@@ -3,6 +3,10 @@ import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { planShapeVolume } from './ShapeVolume.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
+import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
+import { expandShapeFeatureFootprint } from './ShapeFeatureFootprint.js';
+import { shapeFeatureSemantics } from './ShapeFeatureSemantics.js';
+import { resolveShapeBalcony } from './ShapeBalcony.js';
 
 function childVolume(host, f, frame, fields) {
   const p = host.primitive;
@@ -10,7 +14,7 @@ function childVolume(host, f, frame, fields) {
   const primitive = { ...p, id, label: `${p.label} · ${f.kind}`, position: [frame.origin[0], frame.origin[2]],
     rotation: frame.rotation, height: f.height, elevation: frame.origin[1], taper: 1, levels: 1, thickness: 0.16,
     footprint: { family: 'rounded', width: f.width, depth: f.depth, cornerRadius: Math.min(0.18, f.depth * 0.2, f.width * 0.2) },
-    roof: { ...p.roof, family: 'gable', rise: Math.min(0.85, f.width * 0.32), sweep: 0.25, sag: 0.03, overhang: 0.16 },
+    roof: { ...p.roof, family: 'gable', axis: 'depth', rise: Math.min(0.85, f.width * 0.32), sweep: 0.25, sag: 0.03, overhang: 0.16 },
     openings: [], features: [], craft: false, suppressed: [], ...fields };
   const plan = planShapeVolume(primitive);
   if (primitive.openings.some((o) => ['dormer-window', 'bay-window-0'].includes(o.id))) {
@@ -33,10 +37,24 @@ function frameAt(plan, feature) {
   return { origin, tangent, outward, rotation, u };
 }
 
+function supportAnchor(plan, feature) {
+  if (feature.kind !== 'buttress') return feature;
+  const length = plan.curve.length, clearance = Math.min(feature.width, 0.7) / 2 + 0.12;
+  const gaps = plan.openings.filter((o) => o.bottom < Math.min(feature.height, plan.primitive.height * 0.86));
+  const distance = (a, b) => Math.min(Math.abs(a - b), 1 - Math.abs(a - b)) * length;
+  const valid = (at) => gaps.every((o) => distance(at, o.at) >= o.width / 2 + clearance - 1e-6);
+  if (valid(feature.at)) return feature;
+  const candidates = gaps.flatMap((o) => [-1, 1].map((sign) =>
+    ((o.at + sign * (o.width / 2 + clearance) / length) % 1 + 1) % 1)).filter(valid)
+    .sort((a, b) => distance(a, feature.at) - distance(b, feature.at) || a - b);
+  return { ...feature, at: candidates[0] ?? feature.at };
+}
+
 const offset = (frame, distance, y = frame.origin[1]) =>
   [frame.origin[0] + frame.outward[0] * distance, y, frame.origin[2] + frame.outward[2] * distance];
 
 const registry = new Map([
+  ['balcony', (host, f) => ({ balcony: resolveShapeBalcony(host, f) })],
   ['bay', (host, f, frame) => ({ child: childVolume(host, f, { ...frame, origin: offset(frame, f.depth * 0.35) }, {
     height: Math.min(f.height, Math.max(0.5, host.primitive.height - f.bottom - 0.15)),
     roof: { ...host.primitive.roof, family: 'hip', rise: 0.5, overhang: 0.18, sweep: 0.3, sag: 0 },
@@ -57,9 +75,7 @@ const registry = new Map([
   ['jetty', (host, f, frame) => {
     const p = host.primitive, elevation = p.elevation + p.height * (1 - 1 / Math.max(2, p.levels));
     return { replacesRoof: true, child: childVolume(host, f, { ...frame, origin: [p.position[0], elevation, p.position[1]], rotation: p.rotation }, {
-      height: p.elevation + p.height - elevation, footprint: { ...p.footprint,
-        width: p.footprint.width + f.depth * 2, depth: p.footprint.depth + f.depth * 2,
-        cornerRadius: (p.footprint.cornerRadius ?? 0) + Math.min(0.3, f.depth) },
+      height: p.elevation + p.height - elevation, footprint: expandShapeFeatureFootprint(p.footprint, f.depth),
       roof: p.roof, facade: 'timber',
       openings: host.openings.filter((o) => o.bottom + p.elevation >= elevation).map((o) => ({ ...o, bottom: o.bottom + p.elevation - elevation })),
     }) };
@@ -80,14 +96,33 @@ export function resolveShapeFeatures(plan) {
   const features = plan.primitive.features.flatMap((f) => {
     const key = `feature:${plan.id}:${f.id}`;
     if (plan.primitive.suppressed.includes(key)) return [];
-    const frame = frameAt(plan, f), feature = registry.get(f.kind)(plan, f, frame);
-    const child = feature.child ? resolveShapeCraftDetails({ ...feature.child, neighbors: [plan, ...(plan.neighbors ?? [])] }) : null;
+    const anchor = supportAnchor(plan, f), frame = frameAt(plan, anchor), feature = registry.get(f.kind)(plan, f, frame);
+    const child = feature.child ? resolveShapeCraftDetails({ ...feature.child, neighbors: [{ ...plan, roofReplaced: Boolean(feature.replacesRoof) }, ...(plan.neighbors ?? [])] }) : null;
     return [{ ...feature, child, frame: feature.frame ?? frame, intent: f, id: key, derivationKey: key,
       provenance: { source: 'authored', ruleId: 'architectural-feature', generatorVersion: 1, sourceEntityIds: [plan.id], derivationKey: key } }];
   });
-  return { ...plan, features, roofReplaced: features.some((f) => f.replacesRoof),
+  for (const feature of features) if (feature.child) {
+    const siblings = features.filter((other) => other.child && other !== feature &&
+      other.child.bounds.min.every((v, k) => v <= feature.child.bounds.max[k]) &&
+      other.child.bounds.max.every((v, k) => v >= feature.child.bounds.min[k])).map((other) => ({
+        id: other.child.id, primitive: other.child.primitive, curve: other.child.curve,
+        boundary: other.child.boundary, topBoundary: other.child.topBoundary,
+      }));
+    feature.child = resolveShapeRoofJunctions([{ ...feature.child, neighbors: [...feature.child.neighbors, ...siblings] }])[0];
+  }
+  const replacement = features.find((f) => f.replacesRoof);
+  const decorations = !replacement ? plan.decorations : plan.decorations.map((d) => {
+    if (d.role !== 'chimney') return d;
+    const roof = createShapeRoofSurface(replacement.child), [x, , z] = d.position, base = roof.heightAt(x, z) - 0.14;
+    return { ...d, position: [x, base, z], top: base + d.top - d.position[1] };
+  });
+  if (replacement) replacement.child = { ...replacement.child, decorations: decorations.filter((d) => d.role === 'chimney') };
+  const balconies = features.filter((f) => f.balcony).map((f) => f.balcony.bounds);
+  const bounds = balconies.length ? { min: plan.bounds.min.map((v, k) => Math.min(v, ...balconies.map((b) => b.min[k]))),
+    max: plan.bounds.max.map((v, k) => Math.max(v, ...balconies.map((b) => b.max[k]))) } : plan.bounds;
+  return { ...plan, features, decorations, roofReplaced: features.some((f) => f.replacesRoof),
+    bounds,
     neighbors: [...(plan.neighbors ?? []), ...features.filter((f) => f.cutsRoof).map((f) => f.child)],
-    rpg: { ...plan.rpg, ...Object.fromEntries(['collisionSlabs', 'walkableFloors', 'foundationContacts', 'coverSurfaces', 'portals', 'roomBoundaries'].map((key) =>
-      [key, [...plan.rpg[key], ...features.filter((f) => f.child && !f.openSides && f.intent.kind !== 'dormer').flatMap((f) => f.child.rpg[key])]])) },
+    rpg: shapeFeatureSemantics(plan, features),
   };
 }
