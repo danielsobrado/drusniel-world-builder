@@ -48,6 +48,27 @@ export const SKY_PRESETS = Object.freeze({
     shadowRadius: 3.2,
     fogColor: '#e9d8bf',
   }),
+  // The storybook-town reference: a low, honey-coloured sun raking down the
+  // streets, warm fill and a cool high sky, windows starting to glow. The town
+  // kit's Blender previews render with the same values
+  // (tools/blender/medieval_town_kit/medkit/game_look.py, look 'storybook').
+  storybook: Object.freeze({
+    label: 'Storybook (town golden hour)',
+    sunElevation: 16,
+    sunAzimuth: 250,
+    lowColor: '#f6c58f',
+    highColor: '#6f8fc6',
+    sunGlowColor: '#ffcf8a',
+    sunColor: '#fff0cc',
+    sunGlowIntensity: 0.55,
+    cloudEdge: '#ffe2c0',
+    cloudRim: '#ffc27a',
+    directionalColor: '#ffc98a',
+    directionalIntensity: 3.2,
+    ambientIntensity: 1.6,
+    groundLightColor: '#8a6f4e',
+    fogColor: '#e3bf95',
+  }),
   highfield: Object.freeze({
     label: 'Highfield (day)',
     sunElevation: 42,

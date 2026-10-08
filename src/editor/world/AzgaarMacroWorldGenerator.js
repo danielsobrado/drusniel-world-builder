@@ -549,6 +549,14 @@ export class AzgaarMacroWorldGenerator {
     ) <= segment.width * 0.5);
   }
 
+  /** The Azgaar biome tile id under a cell, ignoring paths, streets and rivers; null outside. */
+  sampleBiome(cellX, cellZ) {
+    if (!this.isInside(cellX + 0.5, cellZ + 0.5)) return null;
+    const position = this.toAtlasPosition(cellX + 0.5, cellZ + 0.5);
+    const index = this.atlasIndex(Math.floor(position.x), Math.floor(position.y));
+    return this.biomeBySourceId.get(this.biomeAtlas[index])?.tileId ?? null;
+  }
+
   sampleTile(cellX, cellZ) {
     if (!this.isInside(cellX + 0.5, cellZ + 0.5)) return WATER_TILE_ID;
     const position = this.toAtlasPosition(cellX + 0.5, cellZ + 0.5);

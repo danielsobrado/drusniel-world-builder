@@ -1,4 +1,6 @@
 import { constructionCollisionSource } from './providers/ConstructionCollisionSource.js';
+import { kitTownsEnabled } from '../towns/townMode.js';
+import { townCollisionSource } from './providers/TownCollisionSource.js';
 
 let currentPlayer = null;
 let currentConfig = null;
@@ -15,6 +17,7 @@ function composition() {
     treeSource: currentNaturalSource,
     objectSource: currentObjectSource,
     constructionSource: currentConstructionSource,
+    townSource: kitTownsEnabled() ? townCollisionSource : null,
   });
 }
 

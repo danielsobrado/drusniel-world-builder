@@ -147,6 +147,7 @@ function attach({
   treeSource,
   objectSource,
   constructionSource,
+  townSource,
 }) {
   if (disposed || runtime || !nextPlayer?.terrainView || !nextPlayer.config) return;
   const p8NeedsNatural = qaScenario === 'collision-p8'
@@ -186,6 +187,7 @@ function attach({
     treeSource,
     objectSource,
     constructionSource,
+    townSource,
     search: window.location.search,
   });
   if (!runtime) {

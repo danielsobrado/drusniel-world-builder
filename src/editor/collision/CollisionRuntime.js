@@ -24,6 +24,7 @@ import { NaturalCollisionProvider } from './providers/NaturalCollisionProvider.j
 import { ObjectCollisionProvider } from './providers/ObjectCollisionProvider.js';
 import { RockCollisionProvider } from './providers/RockCollisionProvider.js';
 import { SettlementCollisionProvider } from './providers/SettlementCollisionProvider.js';
+import { TownCollisionProvider } from './providers/TownCollisionProvider.js';
 import { createRockCollisionSource } from './providers/RockCollisionSource.js';
 import { TreeCollisionProvider } from './providers/TreeCollisionProvider.js';
 import { createTreeCollisionSource } from './providers/TreeCollisionSource.js';
@@ -78,6 +79,7 @@ function createNaturalComponents({
   treeSource,
   objectSource,
   constructionSource,
+  townSource,
   collisionConfig,
   terrainView,
 }) {
@@ -123,7 +125,12 @@ function createNaturalComponents({
       provider,
     }));
   }
-  if (collisionConfig.settlements.enabled) {
+  // Kit towns (`?towns=kit`, src/editor/towns/townMode.js) replace the settlement
+  // view, so their colliders replace the settlement colliders too.
+  if (townSource) {
+    const provider = new TownCollisionProvider({ source: townSource, chunkWorldSize: terrainView.chunkWorldSize });
+    components.push(Object.freeze({ id: 'towns', counterName: 'Town', provider }));
+  } else if (collisionConfig.settlements.enabled) {
     const provider = new SettlementCollisionProvider({
       terrainView,
       chunkWorldSize: terrainView.chunkWorldSize,
@@ -142,6 +149,7 @@ function createProvider({
   treeSource,
   objectSource,
   constructionSource,
+  townSource,
   now,
   logger,
 }) {
@@ -156,6 +164,7 @@ function createProvider({
     treeSource,
     objectSource,
     constructionSource,
+    townSource,
     collisionConfig,
     terrainView,
   });
@@ -215,6 +224,7 @@ export function createCollisionRuntime({
   treeSource = null,
   objectSource = null,
   constructionSource = null,
+  townSource = null,
   search = '',
   now = () => performance.now(),
   logger = console,
@@ -232,6 +242,7 @@ export function createCollisionRuntime({
     treeSource,
     objectSource,
     constructionSource,
+    townSource,
     now,
     logger,
   });

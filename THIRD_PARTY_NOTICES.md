@@ -398,3 +398,11 @@ MIT License. Generates the loose stone settlements are dressed with.
 `procedural-texture-lab` (https://github.com/danielsobrado/drusniel-procedural-textures),
 Apache License 2.0. Its runtime regenerates the material recipes under
 `public/assets/materials/settlement/`, which are exported from the Lab's presets.
+
+## Poly Haven textures (CC0)
+
+The medieval town kit's surfaces are built from these Poly Haven textures:
+rustic_stone_wall, medieval_blocks_03, grey_roof_tiles_02, clay_roof_tiles_02,
+reed_roof_04, painted_plaster_wall, old_planks_02, dark_planks and
+cobblestone_floor_01 (https://polyhaven.com). They are released under CC0 1.0,
+so no attribution is required.

@@ -4,6 +4,8 @@ import { RoadsideDetailsView } from './editor/roadside/RoadsideDetailsView.js';
 import { RoadsideDetailsUi } from './editor/roadside/RoadsideDetailsUi.js';
 import { SettlementView } from './editor/world/settlements/view/SettlementView.js';
 import { duskFromSky } from './editor/world/settlements/view/SettlementDusk.js';
+import { createTownRuntime } from './editor/towns/TownRuntime.js';
+import { kitTownsEnabled } from './editor/towns/townMode.js';
 import { SettlementAmbience } from './editor/audio/settlement_ambience.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
@@ -552,6 +554,12 @@ async function initializeEditor(restoreState, resources, startup) {
   let cameraViewKeyHandler = null;
   const detachCameraViewHotkey = attachCaptureHotkey(() => cameraViewKeyHandler);
   resources.defer(() => { detachCameraViewHotkey(); });
+// Doors in kit towns (E); registered before the player controller swallows keys.
+let townKeyHandler = null;
+const detachTownHotkey = attachCaptureHotkey(() => townKeyHandler);
+resources.defer(() => { townKeyHandler = null; detachTownHotkey(); });
+// `?towns=kit` draws burgs with the medieval kit instead of SettlementView (towns/townMode.js).
+const kitTowns = kitTownsEnabled();
 
   playerController = new PlayerController({
     canvas: terrainView.renderer.domElement,
@@ -657,7 +665,7 @@ async function initializeEditor(restoreState, resources, startup) {
     enabled: config.stylizedSurface.enhancements?.roadsideLanterns === true });
   resources.own(roadsideDetails);
   const settlementView = new SettlementView({ terrainView, baseUrl: import.meta.env.BASE_URL,
-    enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false,
+    enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false && !kitTowns,
     duskProvider: () => duskFromSky(stylizedSurface?.skyView) });
   resources.own(settlementView);
   const settlementAmbience = new SettlementAmbience(audioBus);
@@ -1211,6 +1219,50 @@ async function initializeEditor(restoreState, resources, startup) {
   spellKeyHandler = spellRuntime
     ? (event) => spellRuntime.handleKeyDown(event)
     : null;
+  // Azgaar burgs as walkable kit towns (src/editor/towns), when opted in.
+  const townWalkerFooting = { x: 0, z: 0, footY: 0, grounded: false, waterState: PLAYER_WATER_DRY };
+  const townWalker = { x: 0, y: 0, z: 0 };
+  const townFocus = { x: 0, y: 0, z: 0 };
+  const townRuntime = kitTowns ? createTownRuntime({
+    terrainView,
+    getGenerator: () => worldStore.generator,
+    tileSize: config.map.tileSize,
+    baseUrl: import.meta.env.BASE_URL,
+    // Same snow the terrain draws, so a town in snowy country gets the frost skin.
+    sampleSnow: (canonicalX, canonicalZ, height, tileId) => {
+      const bake = config.stylizedSurface.materialBake;
+      return snowAtPoint({
+        height,
+        slope: 0,
+        dx: 0,
+        dz: 0,
+        curvature: 0,
+        tileId,
+        worldX: canonicalX,
+        worldZ: canonicalZ,
+      }, bake.classification, terrainBakeMacroSeed(bake.macro.seedOffset, worldStore.generator?.toMetadata?.().seed));
+    },
+    getFocusCanonical: () => {
+      viewModeController.readFocusWorld(townFocus);
+      return floatingOrigin.toCanonical(townFocus.x, townFocus.z);
+    },
+    // Night skies light the world with the moon; windows still need to know it is night.
+    isNight: () => Boolean(skyLooks?.night),
+    getWalkerCanonical: () => {
+      if (viewModeController.mode !== PLAYER_MODE_WALK || viewModeController.paused) return null;
+      if (gameplayOverlayController.isWorldInputBlocked()) return null;
+      const footing = playerController.readFooting(townWalkerFooting);
+      const canonical = floatingOrigin.toCanonical(footing.x, footing.z);
+      townWalker.x = canonical.x;
+      townWalker.y = footing.footY;
+      townWalker.z = canonical.z;
+      return townWalker;
+    },
+  }) : null;
+  if (townRuntime) {
+    resources.own(townRuntime);
+    townKeyHandler = (event) => townRuntime.handleKey(event);
+  }
   if (import.meta.env.DEV) {
     window.__editor = {
       controller,
@@ -1219,6 +1271,7 @@ async function initializeEditor(restoreState, resources, startup) {
       godsEndAssets,
       roadsideDetails,
       settlementView,
+      towns: townRuntime,
       settlementAmbience,
       worldMapController,
       gameplayOverlayController,
@@ -1458,9 +1511,11 @@ async function initializeEditor(restoreState, resources, startup) {
       worldAmbience.shiftWorld(rebase.shiftX, rebase.shiftZ);
       stylizedSurface.shiftOrigin(rebase.shiftX, rebase.shiftZ);
       exploration.shiftWorld(rebase.shiftX, rebase.shiftZ);
+      townRuntime?.rebase();
       viewModeController.readFocusWorld(renderFocus);
     }
     if (profiling) perfQa.mark('floatingOrigin');
+    townRuntime?.update(frameTimestamp);
 
     if (characterView) {
       const walking = viewModeController.mode === PLAYER_MODE_WALK

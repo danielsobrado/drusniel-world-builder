@@ -1,0 +1,30 @@
+.town-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(14, 12, 10, 0.72);
+  color: #f3e6cf;
+  font: 500 0.95rem/1.2 system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.town-prompt[hidden] {
+  display: none;
+}
+
+.town-prompt kbd {
+  min-width: 1.5rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid rgba(243, 230, 207, 0.6);
+  border-radius: 4px;
+  text-align: center;
+  font: 600 0.85rem/1.2 system-ui, sans-serif;
+}
