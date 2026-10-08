@@ -40,14 +40,14 @@ export function buildShapeTraversal(plan, meshes, recipe) {
       for (const side of [-1, 1]) {
         const railA = point(t0, side * (half + 0.04), 0.95),
           railB = point(t1, side * (half + 0.04), 0.95);
-        meshes.trim.beam(railA, railB, 0.085, 0.085, [0.85, 0.85, 0.85]);
+        (meshes.rails ?? meshes.trim).beam(railA, railB, 0.085, 0.085, [0.85, 0.85, 0.85]);
       }
   }
   if (p.railing) {
     const posts = Math.max(2, Math.ceil(length / 0.9));
     for (let i = 0; i <= posts; i++)
       for (const side of [-1, 1])
-        meshes.trim.beam(
+        (meshes.rails ?? meshes.trim).beam(
           point(i / posts, side * (half + 0.04), 0.02),
           point(i / posts, side * (half + 0.04), 1),
           0.09,
@@ -82,5 +82,5 @@ export function buildShapeTraversal(plan, meshes, recipe) {
       meshes.trim.quad(soffit[0][0], soffit[1][0], soffit[1][1], soffit[0][1], [0.76, 0.76, 0.76]);
     }
   }
-  buildShapeSupports(plan, meshes.trim);
+  buildShapeSupports(plan, meshes.supports ?? meshes.trim);
 }

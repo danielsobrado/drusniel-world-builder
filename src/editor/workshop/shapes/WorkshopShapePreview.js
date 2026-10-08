@@ -122,9 +122,9 @@ export class WorkshopShapePreview {
         },
       },
     });
-    this.handles.sync();
     this.editor.resolvedPlans = new Map(plan.shapePlans.map((p) => [p.id, p]));
     this.editor.sync();
+    this.handles.sync();
     return parts;
   }
   clear() {

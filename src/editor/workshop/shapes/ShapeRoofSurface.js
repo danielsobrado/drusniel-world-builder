@@ -78,5 +78,12 @@ export function createShapeRoofSurface(plan) {
       : p.elevation + p.height + 0.08 + profiles[roof.family](t, roof);
     return [x, y + lift, z];
   }
-  return { point, heightAt, wall };
+  function normalAt(x, z) {
+    const delta = 0.003;
+    const dx = (heightAt(x + delta, z) - heightAt(x - delta, z)) / (2 * delta);
+    const dz = (heightAt(x, z + delta) - heightAt(x, z - delta)) / (2 * delta);
+    const length = Math.hypot(dx, 1, dz);
+    return [-dx / length, 1 / length, -dz / length];
+  }
+  return { point, heightAt, normalAt, uvAt: (x, z) => local(x, z), wall, outline };
 }

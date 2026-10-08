@@ -1,6 +1,7 @@
 import { shapeChoice, shapeCommon, shapeNumber, shapeSuppression } from './ShapeValidation.js';
 import { arcWallPath, sampleShapePath, placeShapePoint, shapeBounds } from './ShapePaths.js';
 import { shapeTraversalHeight, createShapeTraversalSurface } from './ShapeTraversalSurface.js';
+import { normalizeShapeStyle } from './ShapeStyles.js';
 
 export function normalizeShapeTraversal(source) {
   const common = shapeCommon(source);
@@ -11,6 +12,7 @@ export function normalizeShapeTraversal(source) {
     throw new Error('Railings must be a boolean.');
   return Object.freeze({
     ...common,
+    style: normalizeShapeStyle(source.style),
     kind: 'traversal',
     length: shapeNumber(source.length, 'Traversal length', 6, 1, 32),
     width: shapeNumber(source.width, 'Traversal width', 1.6, 0.6, 8),

@@ -2,6 +2,8 @@ import { SHAPE_PRESETS } from './ShapePresets.js';
 import { SHAPE_ROOF_FAMILIES } from './ShapeVolume.js';
 import { shapeGateMarkup } from './ShapeGateControls.js';
 import { adaptShapeHeight, shapeFieldEditable } from './ShapeEditConstraints.js';
+import { shapeFeatureMarkup } from './ShapeFeatureControls.js';
+import { shapeDetailMarkup } from './ShapeDetailControls.js';
 
 const range = (field, label, min, max, step) =>
   `<label>${label}<input type="range" data-shape-field="${field}" min="${min}" max="${max}" step="${step}"/><output data-shape-output="${field}"></output></label>`;
@@ -23,6 +25,7 @@ export function workshopShapeMarkup() {
     <div class="workshop-shape-fields" data-shape-section="common">
       ${range('x', 'Position X', -16, 16, 0.1)}${range('z', 'Position Z', -16, 16, 0.1)}
       ${range('rotation', 'Rotation', -180, 180, 1)}${range('elevation', 'Elevation', 0, 8, 0.1)}
+      ${range('age', 'Weathering', 0, 1, 0.05)}
     </div>
     <div class="workshop-shape-fields" data-shape-section="wall">
       ${range('height', 'Wall height', 1, 14, 0.1)}${range('thickness', 'Wall thickness', 0.15, 1, 0.05)}
@@ -97,12 +100,16 @@ export function workshopShapeMarkup() {
         ${range('opening-width', 'Opening width', 0.3, 3, 0.05)}${range('opening-height', 'Opening height', 0.3, 4, 0.05)}
       </div>
     </div>
+    ${shapeFeatureMarkup()}
+    ${shapeDetailMarkup()}
+    <div class="workshop-shape-fields" data-shape-section="style">${['floor', 'trim', 'supports', 'railing'].map((field) => select(`style-${field}`, `${field[0].toUpperCase()}${field.slice(1)} material`, [['auto', 'Inherit from connected shape'], ['stone', 'Stone'], ['timber', 'Timber']])).join('')}</div>
     ${shapeGateMarkup()}
     <p class="workshop-shape-hint">Click a shape to select it. Pull its gold handles to move, resize, round corners, or lift the roof. Escape cancels a drag.</p>
   </section>`;
 }
 
 export function shapeFieldValue(p, field, opening) {
+  if (field.startsWith('style-')) return p.style[field.slice(6)] ?? 'auto';
   const fields = {
     x: p.position[0],
     z: p.position[1],
@@ -123,6 +130,11 @@ export function shapeFieldValue(p, field, opening) {
 }
 
 export function shapeFieldChanges(p, field, value, openingId) {
+  if (field.startsWith('style-')) {
+    const style = { ...p.style }, key = field.slice(6);
+    if (value === 'auto') delete style[key]; else style[key] = value;
+    return { style };
+  }
   if (!shapeFieldEditable(p, field)) throw new Error('This custom outline does not support that resize.');
   if (field === 'height') return adaptShapeHeight(p, value);
   if (field === 'x' || field === 'z')

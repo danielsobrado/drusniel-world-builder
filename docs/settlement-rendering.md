@@ -45,8 +45,10 @@ dropping frames (worst frame while a town fills in: 160–250 ms → 44–85 ms)
   surface sets then replace — `createWorkshopMaterials` now skips a family's
   synthesised maps when a set is supplied for it;
 - a variant's nine or so new materials all compiling on first draw — new meshes
-  are announced to the streamed draw-preparation queue, which compiles a couple
-  a frame.
+  are held back and shown two a frame (`SettlementPrototypePool.reveal`). They
+  are deliberately kept out of the streamed draw-preparation queue: it runs only
+  on spare frame time and hides what it has not reached, and on a frame slower
+  than `exploration.frameBudget.targetFps` it has none, which hid whole towns.
 
 The view takes its turn from the frame's deferred budget and runs anyway after
 `starvationFrames`, so a busy frame cannot starve it for good.

@@ -113,12 +113,14 @@ export class WorkshopShapeUiBridge {
   update(recipe, plan) {
     this.activateRenderer();
     const parts = this.preview.update(recipe, plan);
+    this.ui.stage?.updateShapes(plan.shapePlans);
     this.ui.previewPartsOwnedByShape = true;
     this.ui.materialController.replaceParts(parts);
     return parts;
   }
   clear() {
     this.preview?.clear();
+    this.ui.stage?.updateShapes([]);
   }
   close() {
     this.editor.session.cancel();

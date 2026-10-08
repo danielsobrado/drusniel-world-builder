@@ -16,6 +16,9 @@ import {
 import { CurvePath } from '../curves/CurvePath.js';
 import { profileFootprintDimensions } from './ShapeProfileFootprint.js';
 import { normalizeShapeOpenings, resolveShapeOpenings, shapeOpeningPortal } from './ShapeOpenings.js';
+import { normalizeShapeStyle } from './ShapeStyles.js';
+import { normalizeShapeFeatures } from './ShapeFeatureSchema.js';
+import { normalizeShapeDetailOverrides } from './ShapeDetailOverrides.js';
 
 export const SHAPE_ROOF_FAMILIES = Object.freeze(['hip', 'gable', 'bell', 'cone', 'spire', 'flat']);
 
@@ -41,6 +44,7 @@ export function normalizeShapeVolume(source) {
   const normalizedOpenings = normalizeShapeOpenings(source.openings, height);
   return Object.freeze({
     ...common,
+    style: normalizeShapeStyle(source.style),
     kind: 'curved-volume',
     footprint: Object.freeze({
       family,
@@ -75,6 +79,8 @@ export function normalizeShapeVolume(source) {
     facade: shapeChoice(source.facade, 'facade treatment', 'plain', ['plain', 'timber']),
     shutters: shapeBoolean(source.shutters, 'Shutters'),
     craft: shapeBoolean(source.craft, 'Crafted details', true),
+    features: normalizeShapeFeatures(source.features),
+    detailOverrides: normalizeShapeDetailOverrides(source.detailOverrides),
     suppressed: shapeSuppression(source),
   });
 }
@@ -119,13 +125,13 @@ export function planShapeVolume(primitive) {
     boundary,
     topBoundary,
     bounds: shapeBounds([...boundary, ...topBoundary], primitive.thickness / 2 + primitive.roof.overhang),
-    regions: ['walls', 'roof', 'trim', 'inserts', 'glazing', 'foliage', 'metal'].map((family) => ({
+    regions: ['walls', 'roof', 'trim', 'deck', 'inserts', 'glazing', 'foliage', 'metal'].map((family) => ({
       id: `${primitive.id}:${family}`,
       primitiveId: primitive.id,
       componentId: primitive.id,
       label: `${primitive.label} · ${family}`,
       family:
-        family === 'trim'
+        family === 'trim' || family === 'deck'
           ? 'stone'
           : family === 'inserts'
             ? 'wood'

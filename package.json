@@ -57,7 +57,7 @@
     "qa:workshop:curves": "node --test test/workshop-curve-config.test.js test/workshop-curve-path.test.js test/workshop-curve-projection.test.js test/workshop-topology-remap.test.js test/workshop-curve-fuzz.test.js",
     "qa:workshop:interaction": "node --test test/workshop-interaction-config.test.js test/workshop-history-replay.test.js test/workshop-tool-interaction.test.js test/workshop-generated-commands.test.js test/workshop-legacy-edit-adapter.test.js test/workshop-live-component-controller.test.js",
     "qa:workshop:locality": "node --test test/workshop-locality-config.test.js test/workshop-composition-locality.test.js test/workshop-relationship-spatial.test.js test/workshop-invalidation-locality.test.js",
-    "qa:workshop:shapes": "node --test test/workshop-procedural-shapes.test.js test/workshop-shape-chemistry-details.test.js test/workshop-shape-review.test.js test/workshop-shape-interaction-review.test.js test/workshop-shape-polish.test.js test/workshop-shape-surface-ownership.test.js",
+    "qa:workshop:shapes": "node --test test/workshop-procedural-shapes.test.js test/workshop-shape-chemistry-details.test.js test/workshop-shape-review.test.js test/workshop-shape-interaction-review.test.js test/workshop-shape-polish.test.js test/workshop-shape-surface-ownership.test.js test/workshop-shape-roof-junctions.test.js",
     "qa:workshop:shapes:browser": "node scripts/run-workshop-shapes-qa.mjs",
     "qa:inventory": "node scripts/run-inventory-qa.mjs",
     "qa:construction:joints": "node scripts/run-construction-joint-width-qa.mjs",

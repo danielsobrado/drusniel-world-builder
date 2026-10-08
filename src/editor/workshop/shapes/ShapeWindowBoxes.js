@@ -5,8 +5,9 @@ export function buildShapeWindowBoxes(plan, meshes, recipe, surface) {
   const p = plan.primitive;
   for (const decoration of plan.decorations ?? []) {
     if (decoration.role !== 'window-box') continue;
-    const opening = plan.openings.find((o) => o.id === decoration.openingId);
-    if (!opening) continue;
+    const source = plan.openings.find((o) => o.id === decoration.openingId);
+    if (!source) continue;
+    const opening = { ...source, at: decoration.at ?? source.at, bottom: decoration.bottom ?? source.bottom };
     const center = opening.at * surface.length, width = opening.width + 0.16;
     const a = center - width / 2, b = center + width / 2;
     const bottom = opening.bottom - 0.28, top = opening.bottom - 0.08;

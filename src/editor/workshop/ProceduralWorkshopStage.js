@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mixSeed } from './ProceduralRandom.js';
+import { stageCrownGeometry, createStageGrass } from './WorkshopStageVegetation.js';
 
 const STAGE_SEED = 4_817;
 const PREVIEW_HALF_SIZE = 8;
@@ -213,7 +214,7 @@ function addConifer(group, materials, seed, x, z) {
   for (let layer = 0; layer < layers; layer += 1) {
     const progress = layer / Math.max(1, layers - 1);
     const crown = new THREE.Mesh(
-      new THREE.ConeGeometry(0.85 - progress * 0.25, 1.45, 16),
+      stageCrownGeometry(0.85 - progress * 0.25, seed + layer, true),
       materials.conifer,
     );
     crown.position.set(x, y + trunkHeight * 0.62 + layer * 0.58, z);
@@ -236,17 +237,17 @@ function addBroadleaf(group, materials, seed, x, z) {
   group.add(trunk);
 
   const crownMaterial = random01(seed, 2) > 0.58 ? materials.brightLeaf : materials.broadleaf;
-  const clusters = 3 + Math.round(random01(seed, 3) * 2);
+  const clusters = 8 + Math.round(random01(seed, 3) * 4);
   for (let index = 0; index < clusters; index += 1) {
     const crown = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.82 + random01(seed, 10 + index) * 0.5, 2),
+      stageCrownGeometry(0.48 + random01(seed, 10 + index) * 0.45, seed + index),
       crownMaterial,
     );
     crown.scale.set(1.05, 0.9 + random01(seed, 20 + index) * 0.4, 1);
     crown.position.set(
-      x + (random01(seed, 30 + index) - 0.5) * 1.1,
+      x + (random01(seed, 30 + index) - 0.5) * 2.1,
       y + trunkHeight + 0.45 + random01(seed, 40 + index) * 0.95,
-      z + (random01(seed, 50 + index) - 0.5) * 1.1,
+      z + (random01(seed, 50 + index) - 0.5) * 2.1,
     );
     crown.rotation.y = random01(seed, 60 + index) * Math.PI;
     crown.castShadow = true;
@@ -461,6 +462,7 @@ export function createWorkshopStage(scene) {
   const materials = createMaterials();
   const sky = createSkyTexture();
   const fog = new THREE.Fog('#c5d7c2', 30, 72);
+  const grass = createStageGrass(terrainHeightAt);
   let disposed = false;
 
   group.name = 'workshop-stage';
@@ -475,6 +477,7 @@ export function createWorkshopStage(scene) {
     addRocks(group, materials);
     addClouds(group, materials);
     mergeStaticMeshes(group);
+    grass.update(); group.add(grass.mesh);
 
     const hemisphere = new THREE.HemisphereLight('#dfebf4', '#89775a', 1.6);
     group.add(hemisphere);
@@ -509,6 +512,7 @@ export function createWorkshopStage(scene) {
 
   return {
     group,
+    updateShapes(plans) { if (!disposed) grass.update(plans); },
     dispose() {
       if (disposed) return;
       disposed = true;

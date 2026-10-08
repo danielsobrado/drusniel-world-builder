@@ -7,6 +7,9 @@ import { buildShapeIvy } from './ShapeIvyBuilder.js';
 import { shapeProductDomains } from './ShapeProductDomains.js';
 import { buildShapeFloors } from './ShapeFloorBuilder.js';
 import { buildShapeFacade } from './ShapeFacadeBuilder.js';
+import { shapeStyleSlot, shapeStyleSourceRegion } from './ShapeStyles.js';
+import { buildShapeFeatures } from './ShapeFeatureBuilder.js';
+import { buildShapeGrounding } from './ShapeGrounding.js';
 
 const builders = new Map([
   [
@@ -19,8 +22,10 @@ const builders = new Map([
   ['roof', buildShapeRoof],
   ['facade', buildShapeFacade],
   ['ivy', buildShapeIvy],
-  ['supports', (plan, meshes) => buildShapeSupports(plan, meshes.trim)],
+  ['supports', (plan, meshes) => buildShapeSupports(plan, meshes.supports)],
   ['traversal', buildShapeTraversal],
+  ['features', buildShapeFeatures],
+  ['ground', buildShapeGrounding],
 ]);
 const slots = Object.freeze({
   walls: 'mortar',
@@ -31,6 +36,8 @@ const slots = Object.freeze({
   deck: 'stone',
   foliage: 'foliage',
   metal: 'metal',
+  supports: 'stone',
+  rails: 'stone',
 });
 
 export function buildRegisteredShape(
@@ -56,15 +63,18 @@ export function buildRegisteredShape(
         kind: 'structure',
         attachmentSurface: null,
       };
+      const styled = ['deck', 'trim', 'supports', 'rails'].includes(family);
+      const slot = styled ? shapeStyleSlot(plan, family) : slots[family];
       parts.push({
         geometry,
-        material: materials[slots[family]],
+        material: materials[slot],
         matrix: new THREE.Matrix4(),
         materialRegion: {
           id: `${plan.id}:${family}`,
           componentId: plan.id,
           label: `${plan.primitive.label} · ${family}`,
-          family:
+          inheritsFrom: shapeStyleSourceRegion(plan, family),
+          family: styled ? slot :
             family === 'trim'
               ? 'stone'
               : family === 'inserts'

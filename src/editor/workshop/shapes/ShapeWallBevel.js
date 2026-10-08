@@ -10,6 +10,11 @@ export function addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, th
     [inset[0], at(low, inset[0]) + size], [inset[1], at(low, inset[1]) + size],
     [inset[1], at(high, inset[1]) - size], [inset[0], at(high, inset[0]) - size],
   ];
+  for (let i = 0; i < inner.length; i++) {
+    const wear = Math.min(caps.wear?.[i] ?? 0, (u1 - u0) * 0.18, (high[i > 1 ? 1 : 0] - low[i > 1 ? 1 : 0]) * 0.18);
+    inner[i][0] += (i === 0 || i === 3 ? 1 : -1) * wear;
+    inner[i][1] += (i < 2 ? 1 : -1) * wear;
+  }
   const points = (coordinates, lift) => coordinates.map(([u, y]) => surface.point(u, y, lift));
   const a = points(outer, offset), b = points(inner, offset + Math.sign(thickness) * size);
   const face = (vertices, uv, tint) => {

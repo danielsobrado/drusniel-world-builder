@@ -4,6 +4,10 @@ import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTole
 import { shapeEnvelopeAtHeight } from './ShapeEnvelope.js';
 import { resolvePathGates } from './ShapePathGateReaction.js';
 import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
+import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
+import { resolveShapeStyles } from './ShapeStyles.js';
+import { resolveShapeFeatures } from './ShapeFeatures.js';
+import { resolveShapeGrounding } from './ShapeGrounding.js';
 
 export function resolveShapeChemistry(plans) {
   const contacts = [],
@@ -83,5 +87,5 @@ export function resolveShapeChemistry(plans) {
   }
   for (const plan of resolved)
     plan.supports = supports.filter((s) => s.sourceEntityIds.includes(plan.id));
-  return { plans: resolvePathGates(resolved, index, byId).map(resolveShapeCraftDetails), contacts, supports };
+  return { plans: resolveShapeStyles(resolveShapeRoofJunctions(resolvePathGates(resolved, index, byId).map(resolveShapeCraftDetails).map(resolveShapeFeatures))).map(resolveShapeGrounding), contacts, supports };
 }

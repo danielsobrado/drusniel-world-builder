@@ -11,6 +11,7 @@ import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { SHAPE_PRESETS } from '../src/editor/workshop/shapes/ShapePresets.js';
 import { checkWorkshopShapeReview } from './lib/workshopShapesReviewChecks.mjs';
 import { checkWorkshopShapePolish } from './lib/workshopShapesPolishChecks.mjs';
+import { checkWorkshopShapeExpansion } from './lib/workshopShapesExpansionChecks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'tmp', 'workshop-shapes-qa');
@@ -428,6 +429,7 @@ try {
   );
   await checkWorkshopShapeReview({ page, report, preset, settle, field });
   await checkWorkshopShapePolish({ page, report, preset, settle, output });
+  await checkWorkshopShapeExpansion({ page, report, preset, settle, field, output, handlePoint });
   assert.deepEqual(report.pageErrors, []);
   assert.deepEqual(report.consoleErrors, []);
   let previousIds = new Set();

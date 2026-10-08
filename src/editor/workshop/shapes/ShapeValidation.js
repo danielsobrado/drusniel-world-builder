@@ -49,6 +49,7 @@ export function shapeCommon(source) {
     position: shapePoint(source.position),
     rotation: shapeNumber(source.rotation, 'Rotation', 0, -360, 360),
     elevation: shapeNumber(source.elevation, 'Elevation', 0, 0, 32),
+    age: shapeNumber(source.age, 'Age', 0.22, 0, 1),
   };
 }
 

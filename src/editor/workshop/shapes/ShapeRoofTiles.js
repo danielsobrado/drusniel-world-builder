@@ -33,7 +33,8 @@ export function buildShapeRoofTiles(plan, mesh, surface, recipe, hidden) {
         const [a, b, c] = [points[0], points[i], points[i + 1]];
         const up = (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]);
         if (Math.abs(up) < 1e-8) continue;
-        mesh.triangle(a, ...(up > 0 ? [b, c] : [c, b]), tint);
+        const triangle = [a, ...(up > 0 ? [b, c] : [c, b])];
+        mesh.triangle(...triangle, tint, triangle.map((v) => surface.uvAt(v[0], v[2])), triangle.map((v) => surface.normalAt(v[0], v[2])));
       }
       for (let i = 3; i < 7; i++) {
         const a = surface.point(...coordinates[i], lift + (coordinates[i][1] - top) / (bottom - top) * 0.025);

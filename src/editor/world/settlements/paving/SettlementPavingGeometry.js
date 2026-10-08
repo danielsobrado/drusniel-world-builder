@@ -179,6 +179,53 @@ function addDisc(buffer, radius, heightAt, tone) {
   }
 }
 
+/** Metres of trodden ground round a footprint, and how far it tucks under the wall. */
+const APRON = Object.freeze({ reach: 1.5, tuck: 0.35 });
+/** Rings of an apron, from under the wall outward: `[offset, edge, tone]`. */
+const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 0.62], [0.25, 0.08, 0.74], [APRON.reach * 0.6, 0.45, 0.9], [APRON.reach, 1, 1]]);
+
+/** The perimeter of a footprint grown by `offset`, `perSide` points to a side. */
+function footprintRing(building, offset, perSide) {
+  const sin = Math.sin(building.yaw);
+  const cos = Math.cos(building.yaw);
+  const halfWidth = building.width / 2 + offset;
+  const halfDepth = building.depth / 2 + offset;
+  const corners = [[-halfWidth, -halfDepth], [halfWidth, -halfDepth], [halfWidth, halfDepth], [-halfWidth, halfDepth]];
+  const ring = [];
+  for (let side = 0; side < 4; side += 1) {
+    const [ax, az] = corners[side];
+    const [bx, bz] = corners[(side + 1) % 4];
+    for (let step = 0; step < perSide; step += 1) {
+      const localX = ax + (bx - ax) * step / perSide;
+      const localZ = az + (bz - az) * step / perSide;
+      // Local +x is (cos, −sin) and local +z is (sin, cos) in plan space.
+      ring.push([building.x + cos * localX + sin * localZ, building.z - sin * localX + cos * localZ]);
+    }
+  }
+  return ring;
+}
+
+/**
+ * The worn ground a building stands in: bare earth from under its walls out to
+ * a ragged rim, darkest against the wall where damp and shadow gather. Without
+ * it a house meets the meadow in a ruled line and reads as set down on the
+ * grass rather than built into the town.
+ */
+function addApron(buffer, building, heightAt) {
+  const perSide = Math.max(2, Math.ceil(Math.max(building.width, building.depth) / STEP));
+  let previous = null;
+  for (const [offset, edge, tone] of APRON_RINGS) {
+    const row = footprintRing(building, offset, perSide).map(([x, z]) => buffer.vertex(x, z, edge, heightAt, tone));
+    if (previous) {
+      for (let index = 0; index < row.length; index += 1) {
+        const next = (index + 1) % row.length;
+        buffer.quad(previous[index], row[index], row[next], previous[next]);
+      }
+    }
+    previous = row;
+  }
+}
+
 /** Split a main street where it leaves the town: setts inside, earth beyond. */
 function splitAtRadius(points, radius) {
   const index = points.findIndex(([x, z]) => Math.hypot(x, z) > radius);
@@ -222,6 +269,10 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     // Out to the house fronts that wall the square (see `squareFrontage`).
     addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), plan.squareRadius + 2.2, heightAt, 1.03);
     yield;
+  }
+  for (const [index, building] of plan.buildings.entries()) {
+    addApron(buffers.get('earth'), building, heightAt);
+    if (index % 12 === 11) yield;
   }
   return [...buffers.values()].filter((buffer) => buffer.indices.length > 0).map((buffer) => buffer.arrays());
 }

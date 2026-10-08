@@ -2,7 +2,7 @@ import { createShapeWallSurface } from './ShapeWallSurface.js';
 import { planShapeIvy } from './ShapeIvyLayout.js';
 
 // Lobed, folded leaf fans avoid the old flat diamond lattice.
-const outline = [
+const lobes = [
   [0, -1],
   [0.65, -0.3],
   [0.5, 0.1],
@@ -14,6 +14,11 @@ const outline = [
   [-0.5, 0.1],
   [-0.65, -0.3],
 ];
+const outline = lobes.flatMap((p, i) => {
+  const previous = lobes[(i + lobes.length - 1) % lobes.length], next = lobes[(i + 1) % lobes.length];
+  return [[p[0] * 0.8 + previous[0] * 0.2, p[1] * 0.8 + previous[1] * 0.2],
+    [p[0] * 0.8 + next[0] * 0.2, p[1] * 0.8 + next[1] * 0.2]];
+});
 
 export function buildShapeIvy(plan, meshes, recipe) {
   if (!recipe.ivy) return;

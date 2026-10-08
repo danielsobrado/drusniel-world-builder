@@ -32,5 +32,16 @@ export function resolveShapeCraftDetails(plan) {
     if (opening.role !== 'window' || opening.bottom < 0.65 || opening.width < 0.45) continue;
     decorations.push(decoration(plan, 'window-box', `box-${opening.id}`, { openingId: opening.id }));
   }
-  return { ...plan, decorations: decorations.filter(Boolean) };
+  const overrides = new Map((p.detailOverrides ?? []).map((o) => [o.key, o]));
+  return { ...plan, decorations: decorations.filter(Boolean).map((d) => {
+    const override = overrides.get(d.id);
+    if (!override) return d;
+    const provenance = { ...d.provenance, source: 'promoted' };
+    if (d.role === 'window-box') return { ...d, provenance, at: override.at, bottom: override.bottom };
+    if (!override.position) return d;
+    const [x, z] = placeShapePoint(p, override.position), roof = createShapeRoofSurface(plan);
+    if (!pointInShape([x, z], plan.topBoundary)) return d;
+    const base = roof.heightAt(x, z) - 0.14;
+    return { ...d, provenance, position: [x, base, z], top: base + (d.top - d.position[1]) };
+  }) };
 }

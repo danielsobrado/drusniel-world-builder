@@ -21,7 +21,7 @@ residents:
   enabled: true
   radiusMeters: 220
   maxResidents: 24
-  maxPerSettlement: 8
+  maxPerSettlement: 14
   wanderRadius: 18
   refreshSeconds: 0.5
 serpents:

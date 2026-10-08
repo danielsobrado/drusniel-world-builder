@@ -71,6 +71,15 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
       }
     }
     buildShapeOpeningCraft(o, meshes, surface, recipe);
+    if (o.role === 'door') {
+      for (let i = 0; i < 12; i++) {
+        const a = center - half + o.width * i / 12, b = a + o.width / 12;
+        const worn = (u) => o.bottom + 0.045 - p.age * 0.026 * Math.sin(Math.PI * (u - center + half) / o.width) ** 2;
+        const points = [surface.point(a, worn(a), p.thickness / 2 + 0.25), surface.point(b, worn(b), p.thickness / 2 + 0.25),
+          surface.point(b, worn(b), -p.thickness / 2), surface.point(a, worn(a), -p.thickness / 2)];
+        meshes.trim.quad(...(surface.clockwise ? points : points.toReversed()), [0.88, 0.88, 0.85]);
+      }
+    }
     if (o.role === 'window') {
       trim(
         center - half - 0.16,

@@ -13,6 +13,12 @@ import {
   surfaceSetFiles,
   surfaceSetRecipe,
 } from '../src/editor/world/settlements/surfaces/SettlementDressing.js';
+import { settlementSkylineArrays } from '../src/editor/world/settlements/view/SettlementSkylineGeometry.js';
+import { planDistricts } from '../src/editor/world/settlements/SettlementPlots.js';
+import { waterBearing } from '../src/editor/world/settlements/SettlementStreets.js';
+import { gatheringSpots } from '../src/editor/world/settlements/SettlementGathering.js';
+import { duskFromSky } from '../src/editor/world/settlements/view/SettlementDusk.js';
+import { residentManifest } from '../src/editor/actors/ResidentManifest.js';
 import { planToWorld, settlementPlacements } from '../src/editor/world/settlements/view/SettlementPlacements.js';
 import { isStoneKind, SETTLEMENT_STONES, stoneSeed } from '../src/editor/world/settlements/SettlementStones.js';
 import { generateStone, STONE_ARCHETYPE_IDS } from '@drusniel/procedural-stone';
@@ -182,4 +188,65 @@ test('every stone kind names an archetype that generates a grounded mesh', () =>
       assert.ok(Math.abs(lowest) < 0.05, `${kind} ${variant} floats or sinks by ${lowest}`);
     }
   }
+});
+
+test('a skyline is a few triangles a building, standing on its pad', () => {
+  const cityPlan = plan(CITY);
+  const colors = { stone: [0.5, 0.5, 0.5], roof: [0.2, 0.2, 0.25], walls: () => [0.8, 0.7, 0.5] };
+  const { positions, colors: vertexColors, indices } = settlementSkylineArrays(cityPlan, colors);
+  assert.equal(vertexColors.length, positions.length);
+  assert.ok(indices.length / 3 <= cityPlan.buildings.length * 14);
+  assert.ok(indices.length / 3 >= cityPlan.buildings.length * 10);
+  assert.ok(indices.every((index) => index < positions.length / 3));
+  const pads = cityPlan.buildings.map(({ pad }) => pad);
+  for (let vertex = 1; vertex < positions.length; vertex += 3) {
+    assert.ok(positions[vertex] >= Math.min(...pads) - 1 && positions[vertex] <= Math.max(...pads) + 30);
+  }
+});
+
+test('a walled town is closed: its wall has no gap wider than a gate', () => {
+  const walls = plan(CITY).buildings.filter(({ kind }) => ['wall', 'gatehouse'].includes(kind));
+  const bearings = walls.map(({ x, z }) => Math.atan2(x, z)).sort((left, right) => left - right);
+  const radii = walls.map(({ x, z }) => Math.hypot(x, z));
+  assert.ok(Math.max(...radii) - Math.min(...radii) > 4, 'the wall is still a circle');
+  let widest = bearings[0] + Math.PI * 2 - bearings.at(-1);
+  for (let index = 1; index < bearings.length; index += 1) widest = Math.max(widest, bearings[index] - bearings[index - 1]);
+  assert.ok(widest * Math.min(...radii) < 26, `the wall has a ${Math.round(widest * Math.min(...radii))} m gap`);
+});
+
+test('a port finds its water, and its quay becomes a district', () => {
+  const profile = { radius: 100, rank: 2 };
+  // Sea to the plan's +x side, beyond 80 m.
+  const bearing = waterBearing(profile, (x) => x < 80);
+  assert.ok(Math.abs(bearing - Math.PI / 2) < 0.3, `quay bearing ${bearing}`);
+  assert.equal(waterBearing(profile, () => true), null);
+  const districts = planDistricts({ profile, bearings: [bearing, bearing + 2, bearing + 4], quayBearing: bearing, keep: null, random: () => 0.5 });
+  assert.deepEqual(districts.map(({ kind }) => kind), ['quay', 'craft']);
+  assert.notEqual(districts[1].bearing, bearing);
+  assert.deepEqual(planDistricts({ profile: { radius: 60, rank: 1 }, bearings: [0], quayBearing: null, keep: null, random: () => 0.5 }), []);
+});
+
+test('residents gather where the plan has stalls, benches and doors', () => {
+  const cityPlan = plan(CITY);
+  const spots = gatheringSpots(CITY, cityPlan, 2);
+  assert.ok(spots.length >= 12);
+  const centre = planToWorld(CITY, 2, 0, 0);
+  // The first spots are the market's: inside the square.
+  assert.ok(Math.hypot(spots[0].x - centre.x, spots[0].z - centre.z) < cityPlan.squareRadius);
+  const settings = { maxPerSettlement: 14, wanderRadius: 18 };
+  const manifest = residentManifest(CITY, { tileSize: 2, worldSeed: 7, settings, spots });
+  assert.equal(manifest.length, 12);
+  assert.deepEqual(manifest, residentManifest(CITY, { tileSize: 2, worldSeed: 7, settings, spots }));
+  manifest.forEach((resident, index) => {
+    assert.ok(Math.hypot(resident.x - spots[index].x, resident.z - spots[index].z) < 1e-9);
+  });
+});
+
+test('dusk follows a low sun or a dimmed key light', () => {
+  assert.equal(duskFromSky(null), 0);
+  assert.equal(duskFromSky({ sunDirectionValue: { y: 0.8 }, directional: { intensity: 2 } }), 0);
+  assert.equal(duskFromSky({ sunDirectionValue: { y: 0.0 }, directional: { intensity: 2 } }), 1);
+  assert.equal(duskFromSky({ sunDirectionValue: { y: 0.8 }, directional: { intensity: 0.08 } }), 1);
+  const evening = duskFromSky({ sunDirectionValue: { y: 0.17 }, directional: { intensity: 2 } });
+  assert.ok(evening > 0.2 && evening < 0.8);
 });

@@ -4,6 +4,8 @@ import { workshopShapeMarkup, shapeFieldValue, shapeFieldChanges } from './Works
 import './workshopShapes.css';
 import { syncShapeGateControls, applyShapeGateAction } from './ShapeGateControls.js';
 import { shapeFieldLimits, shapeFieldEditable } from './ShapeEditConstraints.js';
+import { syncShapeFeatureControls, applyShapeFeatureAction, applyShapeFeatureInput } from './ShapeFeatureControls.js';
+import { syncShapeDetailControls, applyShapeDetailAction, applyShapeDetailInput } from './ShapeDetailControls.js';
 
 export class WorkshopShapeEditor {
   constructor({ form, onChange, onStatus }) {
@@ -49,6 +51,11 @@ export class WorkshopShapeEditor {
   }
   input(event, preview) {
     event.stopPropagation();
+    try {
+      if (applyShapeFeatureInput(this, event, preview) || applyShapeDetailInput(this, event, preview)) return;
+    } catch (error) {
+      this.session.cancel(); this.sync(); this.onStatus?.(error.message, true); return;
+    }
     const action = event.target.dataset.shapeAction;
     if (action) {
       if (preview) return;
@@ -61,6 +68,7 @@ export class WorkshopShapeEditor {
       if (action === 'opening') {
         this.openingId = event.target.value;
         this.sync();
+        this.onSelection?.(this.selectedId);
       }
       if (action === 'gate-select') {
         this.gateKey = event.target.value;
@@ -96,6 +104,12 @@ export class WorkshopShapeEditor {
       this.session.commit();
       if (action === 'undo') this.session.undo();
       else if (action === 'redo') this.session.redo();
+      else if (applyShapeDetailAction(this, action)) {
+        /* Generated output override applied. */
+      }
+      else if (applyShapeFeatureAction(this, action)) {
+        /* Host-local architectural intent applied. */
+      }
       else if (applyShapeGateAction(this, action)) {
         /* Semantic gate override applied. */
       } else if (action === 'remove') {
@@ -203,18 +217,26 @@ export class WorkshopShapeEditor {
     this.root.querySelector('[data-shape-action="remove"]').disabled = primitives.length <= 1;
     this.root.querySelector('[data-shape-action="remove-opening"]').disabled = !this.openingId;
     syncShapeGateControls(this);
+    syncShapeFeatureControls(this);
+    syncShapeDetailControls(this);
   }
   captureRuntimeState() {
     return {
       session: this.session.captureRuntimeState(),
       selectedId: this.selectedId,
       openingId: this.openingId,
+      featureId: this.featureId,
+      detailId: this.detailId,
+      curveEditing: this.curveEditing,
     };
   }
   restoreRuntimeState(state) {
     this.session.restoreRuntimeState(state.session);
     this.selectedId = state.selectedId;
     this.openingId = state.openingId;
+    this.featureId = state.featureId;
+    this.detailId = state.detailId;
+    this.curveEditing = state.curveEditing;
     this.sync();
   }
   dispose() {

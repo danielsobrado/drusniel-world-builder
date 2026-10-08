@@ -3,6 +3,7 @@ import './editor/roadside/roadside.css';
 import { RoadsideDetailsView } from './editor/roadside/RoadsideDetailsView.js';
 import { RoadsideDetailsUi } from './editor/roadside/RoadsideDetailsUi.js';
 import { SettlementView } from './editor/world/settlements/view/SettlementView.js';
+import { duskFromSky } from './editor/world/settlements/view/SettlementDusk.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
@@ -655,7 +656,8 @@ async function initializeEditor(restoreState, resources, startup) {
     enabled: config.stylizedSurface.enhancements?.roadsideLanterns === true });
   resources.own(roadsideDetails);
   const settlementView = new SettlementView({ terrainView, baseUrl: import.meta.env.BASE_URL,
-    enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false });
+    enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false,
+    duskProvider: () => duskFromSky(stylizedSurface?.skyView) });
   resources.own(settlementView);
   if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
   const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
@@ -1537,7 +1539,7 @@ async function initializeEditor(restoreState, resources, startup) {
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
-    deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield));
+    deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera));
     if (profiling) perfQa.mark('stylized');
 
     if (weatherController) {

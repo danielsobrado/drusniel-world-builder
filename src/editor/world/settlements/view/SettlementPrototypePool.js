@@ -1,10 +1,12 @@
 import * as THREE from 'three/webgpu';
+import { materialColor } from 'three/tsl';
 import { createInstancedRenderers, disposeInstancedRenderers } from '../../../stylized/lod/StylizedLodRuntime.js';
 import { normalizeProceduralRecipe } from '../../../workshop/ProceduralAssetStore.js';
 import { createWorkshopMaterials } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { withWorkshopSurfaceOverrides } from '../../../workshop/ProceduralWorkshopSurfaceOverrides.js';
 import { buildingRecipe } from '../SettlementBuildingCatalog.js';
 import { isStoneKind } from '../SettlementStones.js';
+import { lightSettlementMaterials } from './SettlementDusk.js';
 import { buildSettlementMeshData } from './SettlementMeshData.js';
 import { SettlementMeshWorkerClient } from './SettlementMeshWorkerClient.js';
 import { createSettlementStoneParts } from './SettlementStoneMesh.js';
@@ -39,14 +41,11 @@ function geometryFrom(packed) {
  * it takes the workshop's own shell tier, which the mesh data carries.
  */
 export class SettlementPrototypePool {
-  /**
-   * @param {() => void} [options.onMeshesCreated] called when new instanced meshes join the scene,
-   *   so their shader pipelines can be compiled a few a frame instead of all on first draw
-   */
-  constructor({ root, renderer, worker = new SettlementMeshWorkerClient(), onMeshesCreated = null }) {
+  constructor({ root, renderer, worker = new SettlementMeshWorkerClient() }) {
     this.root = root;
     this.renderer = renderer;
-    this.onMeshesCreated = onMeshesCreated;
+    /** New meshes, hidden until `reveal` shows them a few at a time. */
+    this.unrevealed = [];
     this.worker = worker;
     this.entries = new Map();
     this.queue = [];
@@ -157,6 +156,7 @@ export class SettlementPrototypePool {
     // The same call the generator makes, here so the materials are born on the
     // thread that owns the textures — dressed in the town's own surface sets.
     const materials = withWorkshopSurfaceOverrides(entry.surfaces, () => createWorkshopMaterials(recipe));
+    lightSettlementMaterials(materials);
     const part = (packed) => ({ slot: packed.slot, geometry: geometryFrom(packed), material: materials[packed.slot] ?? materials.stone });
     const near = data.near.map(part);
     let far = data.far ? data.far.map(part) : null;
@@ -187,6 +187,9 @@ export class SettlementPrototypePool {
 
   createTier(entry, tier, parts, castShadow) {
     const name = `settlement-${entry.key}-${tier}`;
+    // The dithered instance material scales an explicit colour node by each
+    // instance's variation; this one is the material's own colour, unchanged.
+    for (const { material } of parts) material.colorNode ??= materialColor;
     const [meshes] = createInstancedRenderers({
       root: this.root,
       renderer: this.renderer,
@@ -195,7 +198,7 @@ export class SettlementPrototypePool {
       name,
       castShadow,
     });
-    this.onMeshesCreated?.();
+    this.stage(meshes);
     return { meshes, capacity: MIN_CAPACITY, castShadow, name, materials: parts.map(({ material }) => material) };
   }
 
@@ -219,16 +222,46 @@ export class SettlementPrototypePool {
       castShadow: tier.castShadow,
     });
     disposeInstancedRenderers(this.root, [tier.meshes]);
-    this.onMeshesCreated?.();
+    this.stage(meshes);
     tier.meshes = meshes;
     tier.capacity = capacity;
     return tier;
+  }
+
+  /**
+   * Hold new meshes back from the frame they were made in. A mesh compiles its
+   * shader pipeline the first time it is drawn, and a variant is nine or so new
+   * materials: drawn together they cost one long frame, shown two a frame they
+   * do not. The streamed draw-preparation queue is not used for this — it only
+   * runs on spare frame time and keeps what it has not reached hidden, which on
+   * a frame with none would hide a town for good — so the meshes are also
+   * marked to be left out of it.
+   */
+  stage(meshes) {
+    for (const mesh of meshes) {
+      mesh.visible = false;
+      mesh.userData.skipWarmup = true;
+      this.unrevealed.push(mesh);
+    }
+  }
+
+  /** Show up to `count` of the meshes held back. Call once a frame. */
+  reveal(count) {
+    for (let shown = 0; shown < count && this.unrevealed.length > 0;) {
+      const mesh = this.unrevealed.shift();
+      // A mesh grown or released since it was staged is no longer in the scene.
+      if (!mesh.parent) continue;
+      mesh.visible = true;
+      shown += 1;
+    }
   }
 
   release(entry) {
     for (const tier of [entry.near, entry.far]) if (tier) disposeInstancedRenderers(this.root, [tier.meshes]);
     entry.near = null;
     entry.far = null;
+    // Whoever still holds the entry must see it is gone, not a ready one with no meshes.
+    entry.state = 'released';
     this.entries.delete(entry.key);
   }
 
@@ -237,6 +270,7 @@ export class SettlementPrototypePool {
     for (const entry of [...this.entries.values()]) if (!keep(entry.key)) this.release(entry);
     this.queue = this.queue.filter((entry) => this.isLive(entry));
     this.built = this.built.filter(({ entry }) => this.isLive(entry));
+    this.unrevealed = this.unrevealed.filter((mesh) => mesh.parent);
   }
 
   /** Forget every variant. The worker stays: the pool is reused across worlds. */

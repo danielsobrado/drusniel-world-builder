@@ -14,30 +14,27 @@ export class ShapeMesh {
     this.positions = [];
     this.colors = [];
     this.uvs = [];
+    this.normals = [];
   }
 
-  triangle(a, b, c, color = [1, 1, 1], uvs) {
+  triangle(a, b, c, color = [1, 1, 1], uvs, normals) {
     const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
     const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
-    if (
-      Math.hypot(
-        ab[1] * ac[2] - ab[2] * ac[1],
-        ab[2] * ac[0] - ab[0] * ac[2],
-        ab[0] * ac[1] - ab[1] * ac[0],
-      ) <
-      tolerance.length * tolerance.length
-    )
-      return;
+    const normal = [ab[1] * ac[2] - ab[2] * ac[1], ab[2] * ac[0] - ab[0] * ac[2], ab[0] * ac[1] - ab[1] * ac[0]];
+    const length = Math.hypot(...normal);
+    if (length < tolerance.length * tolerance.length) return;
+    const flat = normal.map((v) => v / length);
     for (const [index, point] of [a, b, c].entries()) {
       this.positions.push(...point);
       this.colors.push(...color);
       this.uvs.push(...(uvs?.[index] ?? [point[0], point[2] + point[1]]));
+      this.normals.push(...(normals?.[index] ?? flat));
     }
   }
 
-  quad(a, b, c, d, color, uvs) {
-    this.triangle(a, b, c, color, uvs && [uvs[0], uvs[1], uvs[2]]);
-    this.triangle(a, c, d, color, uvs && [uvs[0], uvs[2], uvs[3]]);
+  quad(a, b, c, d, color, uvs, normals) {
+    this.triangle(a, b, c, color, uvs && [uvs[0], uvs[1], uvs[2]], normals && [normals[0], normals[1], normals[2]]);
+    this.triangle(a, c, d, color, uvs && [uvs[0], uvs[2], uvs[3]], normals && [normals[0], normals[2], normals[3]]);
   }
 
   box(center, size, color = [1, 1, 1]) {
@@ -96,7 +93,7 @@ export class ShapeMesh {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(this.colors, 3));
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(this.uvs, 2));
-    geometry.computeVertexNormals();
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.normals, 3));
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
     return geometry;

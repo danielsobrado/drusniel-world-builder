@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { placeShapePoint } from './ShapePaths.js';
 import { clampShapeField, shapeFieldEditable } from './ShapeEditConstraints.js';
 import { shapeFieldChanges } from './WorkshopShapeFields.js';
+import { shapeDirectHandleDefinitions, shapeDirectHandleChanges } from './ShapeDirectHandles.js';
 
 export class WorkshopShapeHandles {
   constructor({ canvas, camera, orbitControls, editor, previewRoot, onChange }) {
@@ -83,7 +84,12 @@ export class WorkshopShapeHandles {
         else add('rise', p.length / 2, p.elevation + p.rise + 0.2, 0);
       }
     }
+    if (p && this.enabled) definitions.push(...shapeDirectHandleDefinitions(this.editor));
     this.root.visible = this.enabled;
+    while (this.handles.length < definitions.length) {
+      const mesh = new THREE.Mesh(this.geometry, this.material); mesh.renderOrder = 20;
+      this.root.add(mesh); this.handles.push(mesh);
+    }
     for (let i = 0; i < this.handles.length; i++) {
       const handle = this.handles[i],
         definition = definitions[i];
@@ -91,6 +97,7 @@ export class WorkshopShapeHandles {
       if (definition) {
         handle.position.set(...definition.position);
         handle.userData.field = definition.field;
+        handle.userData.definition = definition;
       }
     }
   }
@@ -105,7 +112,8 @@ export class WorkshopShapeHandles {
     if (!hit) return;
     const field = hit.object.userData.field,
       p = this.editor.primitive;
-    const normal = ['height', 'roof-rise', 'rise'].includes(field)
+    const definition = hit.object.userData.definition;
+    const normal = definition.type ? new THREE.Vector3(...definition.normal).normalize() : ['height', 'roof-rise', 'rise'].includes(field)
       ? this.camera.getWorldDirection(new THREE.Vector3()).setY(0).normalize()
       : new THREE.Vector3(0, 1, 0);
     if (normal.lengthSq() === 0) normal.set(0, 0, 1);
@@ -115,6 +123,7 @@ export class WorkshopShapeHandles {
     this.editor.session.begin('Drag construction handle');
     this.drag = {
       field,
+      definition,
       primitive: p,
       plane,
       point: point.clone(),
@@ -139,7 +148,10 @@ export class WorkshopShapeHandles {
       dz = -delta.x * Math.sin(angle) + delta.z * Math.cos(angle);
     const clamp = (field, value) => clampShapeField(p, field, value);
     let changes;
-    if (drag.field === 'move')
+    if (drag.definition.type) {
+      try { changes = shapeDirectHandleChanges(p, drag.definition, [delta.x, delta.y, delta.z]); }
+      catch (error) { this.editor.onStatus?.(error.message, true); return; }
+    } else if (drag.field === 'move')
       changes = {
         position: [
           clamp('x', p.position[0] + delta.x),

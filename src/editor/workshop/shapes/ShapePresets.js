@@ -224,6 +224,36 @@ export const SHAPE_PRESETS = Object.freeze(
         }),
       ],
     },
+    {
+      id: 'dormer-cottage', label: 'Cottage with roof dormers',
+      create: () => [volume('cottage', 'Dormer cottage', { features: [
+        { id: 'dormer-front', kind: 'dormer', at: 0.56, width: 1.7, depth: 1.6 },
+        { id: 'dormer-back', kind: 'dormer', at: 0.13, width: 1.7, depth: 1.6 },
+      ] })],
+    },
+    {
+      id: 'bay-porch-cottage', label: 'Cottage with a bay and porch',
+      create: () => [volume('cottage', 'Bay and porch cottage', { facade: 'timber', features: [
+        { id: 'bay-front', kind: 'bay', at: 0.49, width: 2.2, depth: 1.1, bottom: 0.8, height: 1.9 },
+        { id: 'porch-door', kind: 'porch', at: 0.64, width: 2.4, depth: 1.7, height: 2.5 },
+      ] })],
+    },
+    {
+      id: 'jettied-townhouse', label: 'Projecting timber townhouse',
+      create: () => [volume('cottage', 'Jettied townhouse', { facade: 'timber', height: 5.5, levels: 2,
+        footprint: { family: 'rounded', width: 5.8, depth: 4.6, cornerRadius: 0.25 },
+        openings: [opening('door', 0.64, 'door', 0), opening('upper-front', 0.5, 'window', 3.4), opening('upper-side', 0.28, 'window', 3.4)],
+        features: [{ id: 'upper-floor', kind: 'jetty', depth: 0.45 }],
+      })],
+    },
+    {
+      id: 'buttressed-chapel', label: 'Buttressed stone chapel',
+      create: () => [volume('chapel', 'Garden chapel', { surface: 'masonry', shutters: false, height: 4.6,
+        footprint: { family: 'rounded', width: 8, depth: 5.3, cornerRadius: 0.3 },
+        roof: { family: 'gable', rise: 3.8, overhang: 0.32, sweep: 0.2, sag: 0.05 },
+        features: [0.07, 0.2, 0.53, 0.68].map((at, i) => ({ id: `buttress-${i}`, kind: 'buttress', at, width: 0.6, depth: 0.9, height: 3.8 })),
+      })],
+    },
   ].map((preset) => Object.freeze(preset)),
 );
 

@@ -6,7 +6,7 @@ import { hashInts, settlementProfile } from './SettlementProfile.js';
 import { planStones } from './SettlementStones.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 3;
+export const SETTLEMENT_PLAN_VERSION = 4;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -25,10 +25,10 @@ export const SETTLEMENT_PLAN_VERSION = 3;
 export function planSettlement({ settlement, worldSeed, routeBearings = [], sampleHeight, isBuildable }) {
   const profile = settlementProfile(settlement);
   const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_PLAN_VERSION));
-  const { streets, squareRadius, bearings } = planStreets({ profile, routeBearings, random, isBuildable });
+  const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, routeBearings, random, isBuildable });
   const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight });
-  const buildings = planBuildings({ profile, occupancy, streets, bearings, random });
-  const defences = planDefences({ profile, occupancy, streets });
+  const buildings = planBuildings({ profile, occupancy, streets, bearings, quayBearing, random });
+  const defences = planDefences({ profile, occupancy, streets, random });
   const { farms, fields } = planFarms({ profile, occupancy, streets, random });
   const { props, walks } = planDecor({
     profile,

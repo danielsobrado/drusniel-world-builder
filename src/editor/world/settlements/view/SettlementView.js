@@ -1,10 +1,12 @@
-import { Group } from 'three/webgpu';
+import { Frustum, Group, Matrix4, Sphere } from 'three/webgpu';
 import { InstanceAnchor } from '../../../stylized/lod/InstanceAnchor.js';
 import { writeInstances } from '../../../stylized/lod/StylizedLodRuntime.js';
 import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 import { SettlementSurfaceLibrary } from '../surfaces/SettlementSurfaceLibrary.js';
 import { SettlementPrototypePool } from './SettlementPrototypePool.js';
+import { settlementDusk } from './SettlementDusk.js';
 import { SettlementSite } from './SettlementSite.js';
+import { SettlementSkyline } from './SettlementSkyline.js';
 
 export const SETTLEMENT_VIEW = Object.freeze({
   /** Settlements whose edge is within this many metres of the camera are drawn. */
@@ -12,6 +14,8 @@ export const SETTLEMENT_VIEW = Object.freeze({
   /** Leave margin, so a town on the boundary does not flicker in and out. */
   siteHysteresis: 60,
   maxSites: 3,
+  /** New meshes shown per frame; each compiles a shader pipeline on its first draw. */
+  revealsPerFrame: 2,
   /** Full-detail meshes inside `nearIn`; they hand over to the far tier past `nearOut`. */
   nearIn: 70,
   nearOut: 84,
@@ -22,6 +26,13 @@ export const SETTLEMENT_VIEW = Object.freeze({
   /** Metres the camera may move before levels of detail are re-chosen. */
   reselectMetres: 2,
   refreshMs: 500,
+  /**
+   * Radius, in metres, a placement is kept for round the view frustum. Generous
+   * for buildings: one just off screen still throws its shadow into the street.
+   */
+  cullRadius: Object.freeze({ building: 34, small: 4 }),
+  /** How far the camera may turn or move, as a change of its matrix, before culling is redone. */
+  cullTolerance: 0.02,
   /** Frames a queued build may be starved of frame budget before it runs anyway. */
   starvationFrames: 8,
 });
@@ -36,8 +47,10 @@ export const SETTLEMENT_VIEW = Object.freeze({
  * the player, nearest buildings first.
  */
 export class SettlementView {
-  constructor({ terrainView, baseUrl = '/', enabled = true }) {
+  /** @param {() => number} [options.duskProvider] how far into evening the sky is, 0–1 (SettlementDusk) */
+  constructor({ terrainView, baseUrl = '/', enabled = true, duskProvider = () => 0 }) {
     this.terrainView = terrainView;
+    this.duskProvider = duskProvider;
     this.enabled = enabled;
     this.root = new Group();
     this.root.name = 'settlement-buildings';
@@ -45,12 +58,8 @@ export class SettlementView {
     this.pavingRoot.name = 'settlement-paving';
     terrainView.scene.add(this.root, this.pavingRoot);
     this.anchor = new InstanceAnchor();
-    this.pool = new SettlementPrototypePool({
-      root: this.root,
-      renderer: terrainView.renderer,
-      // A variant is nine or so new materials; drawn cold they compile in one frame.
-      onMeshesCreated: () => terrainView.drawPreparation?.discover(),
-    });
+    this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer });
+    this.skyline = new SettlementSkyline({ scene: terrainView.scene });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
     this.generator = null;
@@ -62,12 +71,17 @@ export class SettlementView {
     this.fading = false;
     this.starved = 0;
     this.rows = new Map();
+    this.frustum = new Frustum();
+    this.viewProjection = new Matrix4();
+    this.culledWith = new Matrix4().makeScale(0, 0, 0);
+    this.sphere = new Sphere();
     this.disposed = false;
   }
 
   reset() {
     for (const site of this.sites.values()) site.dispose();
     this.sites.clear();
+    this.skyline.clear();
     this.pool.clear();
     this.rows.clear();
     this.nextRefresh = 0;
@@ -155,6 +169,8 @@ export class SettlementView {
         placement.blend = blend;
         placement.shown = visible;
         if (visible <= 0) continue;
+        // Out of view: its fades carry on, it is simply not drawn this frame.
+        if (this.culls && !this.inView(placement)) continue;
         let rows = this.rows.get(placement.key);
         if (!rows) {
           rows = { entry, near: [], far: [] };
@@ -182,15 +198,45 @@ export class SettlementView {
     return fading;
   }
 
+  /** Whether a placement, or the shadow it throws, can reach the view frustum. */
+  inView(placement) {
+    const radius = placement.small ? SETTLEMENT_VIEW.cullRadius.small : SETTLEMENT_VIEW.cullRadius.building;
+    this.sphere.center.set(placement.x - this.origin.x, placement.y, placement.z - this.origin.z);
+    this.sphere.radius = radius;
+    return this.frustum.intersectsSphere(this.sphere);
+  }
+
+  /**
+   * Point the culling frustum at `camera`. Returns whether the view moved enough
+   * since the last cull that the visible set must be chosen again.
+   */
+  aim(camera) {
+    this.culls = Boolean(camera);
+    if (!camera) return false;
+    this.viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    this.frustum.setFromProjectionMatrix(this.viewProjection, camera.coordinateSystem, camera.reversedDepth);
+    const now = camera.matrixWorld.elements;
+    const then = this.culledWith.elements;
+    let change = 0;
+    for (let index = 0; index < 12; index += 1) change = Math.max(change, Math.abs(now[index] - then[index]));
+    // Position is in metres, rotation in unit vectors: weigh a metre like a degree or so.
+    for (let index = 12; index < 15; index += 1) change = Math.max(change, Math.abs(now[index] - then[index]) * 0.02);
+    if (change <= SETTLEMENT_VIEW.cullTolerance) return false;
+    this.culledWith.copy(camera.matrixWorld);
+    return true;
+  }
+
   /**
    * @param {{ x: number, z: number }} focus what the view is centred on, in canonical metres
    * @param {number} timestamp frame time in milliseconds
    * @param {() => boolean} shouldYield whether this frame's deferred budget is spent
+   * @param {?THREE.Camera} camera the active camera, in render space; placements outside its view are not drawn
    */
-  update(focus, timestamp, shouldYield = () => false) {
+  update(focus, timestamp, shouldYield = () => false, camera = null) {
     if (this.disposed) return;
     this.root.visible = this.enabled;
     this.pavingRoot.visible = this.enabled;
+    this.skyline.root.visible = this.enabled;
     if (!this.enabled) return;
     const view = this.terrainView;
     const generator = view.worldStore.generator;
@@ -199,16 +245,20 @@ export class SettlementView {
       this.reset();
     }
     const origin = view.floatingOrigin.readState?.(this.origin) ?? Object.assign(this.origin, view.floatingOrigin.getState());
+    settlementDusk.value = this.duskProvider();
     const dt = this.lastTimestamp === null ? 0 : Math.min(0.1, (timestamp - this.lastTimestamp) / 1000);
     this.lastTimestamp = timestamp;
 
     if (timestamp >= this.nextRefresh) {
       this.nextRefresh = timestamp + SETTLEMENT_VIEW.refreshMs;
       this.refreshSites(focus);
+      this.skyline.refresh(generator?.ensureSettlementField?.() ?? null, focus, view.worldStore.tileSize);
     }
+    this.skyline.update(focus, origin);
     if (this.sites.size === 0 && this.rows.size === 0) return;
 
     const started = performance.now();
+    this.pool.reveal(SETTLEMENT_VIEW.revealsPerFrame);
     this.advanceWork(shouldYield);
     for (const site of this.sites.values()) {
       // Textures arrive between frames; the first frame that has them re-selects.
@@ -220,7 +270,8 @@ export class SettlementView {
       site.paving.position.set(site.centre.x - origin.x, 0, site.centre.z - origin.z);
     }
     const moved = Math.hypot(focus.x - this.selected.x, focus.z - this.selected.z) > SETTLEMENT_VIEW.reselectMetres;
-    if (this.dirty || this.fading || moved) {
+    const turned = this.aim(camera);
+    if (this.dirty || this.fading || moved || turned) {
       this.fading = this.select(focus, dt);
       this.selected.x = focus.x;
       this.selected.z = focus.z;
@@ -234,6 +285,7 @@ export class SettlementView {
     this.disposed = true;
     this.reset();
     this.pool.dispose();
+    this.skyline.dispose();
     this.library.dispose();
     this.root.removeFromParent();
     this.pavingRoot.removeFromParent();

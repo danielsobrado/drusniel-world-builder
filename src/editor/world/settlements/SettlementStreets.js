@@ -23,13 +23,32 @@ function angleGap(a, b) {
 }
 
 /**
- * Main-street bearings: the Azgaar roads that leave the burg, deduplicated,
- * padded with seeded bearings so every class has at least its minimum.
+ * The bearing along which a port reaches its water: the direction in which
+ * unbuildable ground lies nearest, looked for from the middle of the town out
+ * past its edge. Null inland, or where the shore is too far to build to.
  */
-export function mainBearings(profile, routeBearings, random) {
+export function waterBearing(profile, isBuildable) {
+  let best = null;
+  for (let index = 0; index < 24; index += 1) {
+    const bearing = Math.PI * 2 * index / 24;
+    for (let distance = profile.radius * 0.35; distance <= profile.radius * 1.5; distance += 6) {
+      if (isBuildable(Math.sin(bearing) * distance, Math.cos(bearing) * distance)) continue;
+      if (!best || distance < best.distance) best = { bearing, distance };
+      break;
+    }
+  }
+  return best?.bearing ?? null;
+}
+
+/**
+ * Main-street bearings: the quay road of a port first, then the Azgaar roads
+ * that leave the burg, deduplicated, padded with seeded bearings so every class
+ * has at least its minimum.
+ */
+export function mainBearings(profile, routeBearings, random, quayBearing = null) {
   const minimum = [1, 2, 3, 3, 4][profile.rank];
   const maximum = [2, 3, 4, 5, 6][profile.rank];
-  const bearings = [];
+  const bearings = quayBearing === null ? [] : [quayBearing];
   for (const bearing of routeBearings) {
     if (bearings.length >= maximum) break;
     if (bearings.every((existing) => angleGap(existing, bearing) > MIN_ROAD_SEPARATION)) bearings.push(bearing);
@@ -158,7 +177,9 @@ function spokeLanes({ bearings, inner, outer, mains, random, isBuildable }) {
 export function planStreets({ profile, routeBearings, random, isBuildable }) {
   const squareRadius = marketSquareRadius(profile);
   const streets = [];
-  const bearings = mainBearings(profile, routeBearings, random);
+  // A port is planned from its water: the quay road is the first street it has.
+  const quayBearing = profile.port ? waterBearing(profile, isBuildable) : null;
+  const bearings = mainBearings(profile, routeBearings, random, quayBearing);
   const reach = profile.radius * FARM_BELT.outer;
   for (const bearing of bearings) {
     const start = [Math.sin(bearing) * squareRadius, Math.cos(bearing) * squareRadius];
@@ -175,5 +196,5 @@ export function planStreets({ profile, routeBearings, random, isBuildable }) {
     streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable }));
   }
   if (profile.rank >= 1) streets.push(...sideLanes({ profile, mains, random, isBuildable }));
-  return { streets, squareRadius, bearings };
+  return { streets, squareRadius, bearings, quayBearing };
 }

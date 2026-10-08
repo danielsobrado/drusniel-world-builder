@@ -13,6 +13,44 @@ const ZONE_MIX = Object.freeze({
 /** Metres of paved apron between the market square's rim and its house fronts. */
 export const SQUARE_APRON = 1.2;
 
+/**
+ * A town is not one mix of buildings laid in rings. Sectors of it take a
+ * character: craftsmen and stores along one road, the well-to-do toward the
+ * keep, the waterfront given over to trade. A district overrides the zone mix
+ * within its sector, outside the very core, which stays the market's.
+ */
+const DISTRICT_MIX = Object.freeze({
+  craft: Object.freeze([['shop', 3], ['warehouse', 2], ['house', 3]]),
+  wealthy: Object.freeze([['townhouse', 6], ['shop', 1]]),
+  quay: Object.freeze([['warehouse', 4], ['shop', 2], ['tavern', 1], ['house', 1]]),
+});
+/** Half-width of a district's sector, in radians. */
+const DISTRICT_SPREAD = 0.55;
+
+function bearingGap(a, b) {
+  return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+}
+
+/** The districts of one town, as `{ kind, bearing }`; towns and larger only. */
+export function planDistricts({ profile, bearings, quayBearing, keep, random }) {
+  if (profile.rank < 2) return [];
+  const districts = [];
+  if (quayBearing !== null && quayBearing !== undefined) districts.push({ kind: 'quay', bearing: quayBearing });
+  if (keep) districts.push({ kind: 'wealthy', bearing: Math.atan2(keep.x, keep.z) });
+  // Craftsmen take the road that is furthest from everything already spoken for.
+  const free = bearings
+    .map((bearing) => ({ bearing, room: Math.min(Math.PI, ...districts.map((district) => bearingGap(district.bearing, bearing))) }))
+    .sort((left, right) => right.room - left.room)[0];
+  districts.push({ kind: 'craft', bearing: free && free.room > DISTRICT_SPREAD * 1.5 ? free.bearing : random() * Math.PI * 2 });
+  return districts;
+}
+
+function districtAt(districts, anchor, radius) {
+  if (anchor.distance < radius * 0.22) return null;
+  const bearing = Math.atan2(anchor.x, anchor.z);
+  return districts.find((district) => bearingGap(district.bearing, bearing) < DISTRICT_SPREAD) ?? null;
+}
+
 function zoneOf(distance, radius) {
   const ratio = distance / radius;
   if (ratio < 0.38) return 'core';
@@ -136,15 +174,17 @@ function squareFrontage(squareRadius) {
 }
 
 /** Town plots: landmarks first, then a zone-weighted fill up to the class's target. */
-export function planBuildings({ profile, occupancy, streets, bearings, random }) {
+export function planBuildings({ profile, occupancy, streets, bearings, quayBearing = null, random }) {
   const buildings = [];
+  let keep = null;
   if (profile.keep) {
-    const keep = placeKeep(occupancy, profile, bearings, random);
+    keep = placeKeep(occupancy, profile, bearings, random);
     if (keep) {
       buildings.push(keep);
       occupancy.claim(rect(keep.x, keep.z, keep.width, keep.depth, keep.yaw));
     }
   }
+  const districts = planDistricts({ profile, bearings, quayBearing, keep, random });
   const queue = landmarkQueue(profile, random);
   const anchors = frontageAnchors([...squareFrontage(occupancy.squareRadius), ...streets], random, { maxDistance: profile.radius });
   for (const anchor of anchors) {
@@ -152,7 +192,8 @@ export function planBuildings({ profile, occupancy, streets, bearings, random })
     const zone = zoneOf(anchor.distance, profile.radius);
     const landmarkIndex = queue.findIndex((entry) => entry.zone === zone || (zone === 'edge' && entry.zone === 'mid'));
     // Villages and hamlets have no town core: their houses are all dwellings.
-    const mix = profile.rank >= 2 ? ZONE_MIX[zone] : ZONE_MIX.edge;
+    const district = districtAt(districts, anchor, profile.radius);
+    const mix = district ? DISTRICT_MIX[district.kind] : profile.rank >= 2 ? ZONE_MIX[zone] : ZONE_MIX.edge;
     const kind = landmarkIndex >= 0 ? queue[landmarkIndex].kind : weighted(random, mix);
     const variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
     // Hamlets and villages have no terraces: every house keeps a yard.

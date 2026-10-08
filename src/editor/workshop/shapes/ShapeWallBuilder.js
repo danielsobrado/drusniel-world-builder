@@ -1,6 +1,7 @@
 import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
+import { buildShapeWeathering, shapeAgingSurface, shapeCellWear } from './ShapeWeathering.js';
 
 function shade(recipe, plan, domain, key) {
   const v = 0.8 + shapeRandom(recipe.seed, plan.id, domain, key) * 0.2;
@@ -9,7 +10,7 @@ function shade(recipe, plan, domain, key) {
 }
 
 export function buildShapeWalls(plan, meshes, recipe) {
-  const surface = createShapeWallSurface(plan),
+  const surface = shapeAgingSurface(createShapeWallSurface(plan), plan, recipe.seed, plan.primitive.surface === 'planks'),
     p = plan.primitive;
   const boundaries = plan.curve.samples.map((s) => s.distance);
   const openingEdges = new Set();
@@ -82,6 +83,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
               {
                 back: false,
                 bevel: detail,
+                wear: shapeCellWear(plan, recipe.seed, `${row}:${cell}`),
                 start: k === 0 || openingEdges.has(cuts[k]),
                 end: k === cuts.length - 2 || openingEdges.has(cuts[k + 1]),
               },
@@ -113,5 +115,6 @@ export function buildShapeWalls(plan, meshes, recipe) {
       );
   }
   buildShapeOpenings(plan, meshes, recipe, surface);
+  buildShapeWeathering(plan, meshes, recipe, surface);
   return surface;
 }

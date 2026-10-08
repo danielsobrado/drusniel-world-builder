@@ -2,6 +2,7 @@ import { ResidentAssets } from './ResidentAssets.js';
 import { NpcSystem } from './NpcSystem.js';
 import { residentManifest, nearbySettlements } from './ResidentManifest.js';
 import { rectContains } from '../world/settlements/SettlementGeometry.js';
+import { gatheringSpots } from '../world/settlements/SettlementGathering.js';
 
 /** Cosmetic residents project existing burg populations, without authoring entities. */
 export class SettlementResidents {
@@ -31,8 +32,10 @@ export class SettlementResidents {
       const population = this.populationProvider?.(settlement.id) ?? settlement.population;
       const key = `${settlement.id}:${population}`;
       if (!this.manifests.has(key)) {
+        const entry = field.entries.find(candidate => candidate.settlement === settlement);
+        const spots = entry ? gatheringSpots(settlement, field.ensurePlan(entry).plan, field.tileSize) : null;
         const manifest = residentManifest(settlement, { tileSize: this.terrainView.worldStore.tileSize,
-          worldSeed: this.generator.worldSeed ?? this.generator.seed ?? 1, settings: this.settings, population });
+          worldSeed: this.generator.worldSeed ?? this.generator.seed ?? 1, settings: this.settings, population, spots });
         for (const record of manifest) {
           if (this.canStand(record.x, record.z)) continue;
           record.x = (settlement.cellX + 0.5) * field.tileSize;

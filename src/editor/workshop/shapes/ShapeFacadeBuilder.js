@@ -2,11 +2,12 @@ import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWal
 import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeWindowBoxes } from './ShapeWindowBoxes.js';
+import { shapeAgingSurface } from './ShapeWeathering.js';
 
 /** Timber and shutters share host frames and opening exclusions with the wall shell. */
 export function buildShapeFacade(plan, meshes, recipe) {
   const p = plan.primitive,
-    surface = createShapeWallSurface(plan),
+    surface = shapeAgingSurface(createShapeWallSurface(plan), plan, recipe.seed, true),
     wood = meshes.inserts;
   const offset = p.thickness / 2 + 0.11;
   const roof = p.facade === 'timber' ? createShapeRoofSurface(plan) : null;

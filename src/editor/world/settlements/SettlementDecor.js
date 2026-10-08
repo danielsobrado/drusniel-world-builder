@@ -75,6 +75,26 @@ function doorWalks({ buildings, occupancy, props, walks, random }) {
   }
 }
 
+const TRADE_KINDS = new Set(['shop', 'tavern', 'bakery', 'warehouse', 'smithy']);
+
+/** Goods stood out by the door of every place of trade: barrels and crates against the wall. */
+function tradeGoods({ buildings, occupancy, props, random }) {
+  for (const building of buildings) {
+    if (!building.front || !TRADE_KINDS.has(building.kind) || random() > 0.8) continue;
+    const front = [Math.sin(building.yaw), Math.cos(building.yaw)];
+    const across = [front[1], -front[0]];
+    const side = random() < 0.5 ? -1 : 1;
+    const count = 1 + Math.floor(random() * 2);
+    for (let index = 0; index < count; index += 1) {
+      const along = (building.width / 2 - 1.1 - index * 1.5) * side;
+      const out = building.depth / 2 + 0.75;
+      placeProp(occupancy, props, 'barrels', Math.floor(random() * 2),
+        building.x + front[0] * out + across[0] * along, building.z + front[1] * out + across[1] * along,
+        building.yaw + (random() - 0.5) * 0.5, { ignoreStreets: true });
+    }
+  }
+}
+
 /** The market square: a well at its heart, stalls round it facing in, benches and lanterns at the rim. */
 function squareFurniture({ profile, occupancy, squareRadius, props, random }) {
   if (squareRadius <= 0) return;
@@ -159,6 +179,7 @@ export function planDecor({ profile, occupancy, streets, squareRadius, buildings
   squareFurniture({ profile, occupancy, squareRadius, props, random });
   streetLanterns({ profile, occupancy, streets, props, random });
   doorWalks({ buildings, occupancy, props, walks, random });
+  tradeGoods({ buildings, occupancy, props, random });
   roadMarkers({ profile, occupancy, streets, props, random });
   fieldFences({ fields, props });
   return { props, walks };

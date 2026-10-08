@@ -312,6 +312,7 @@ export function getWorkshopMaterialPreset(document, presetId) {
 
 export function resolveWorkshopMaterialRegion(document, region) {
   const presetId = document.materialAreaOverrides[region.id]
+    ?? (region.inheritsFrom ? document.materialAreaOverrides[region.inheritsFrom] : undefined)
     ?? document.materialDefaults[region.family]
     ?? null;
   return Object.freeze({

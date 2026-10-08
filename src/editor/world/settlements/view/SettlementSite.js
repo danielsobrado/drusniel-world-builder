@@ -3,6 +3,7 @@ import { settlementPavingJob } from '../paving/SettlementPavingGeometry.js';
 import { createPavingMaterial } from '../paving/SettlementPavingMaterial.js';
 import { dressingFor, SETTLEMENT_SURFACE_SETS, TIMBER_TONES } from '../surfaces/SettlementDressing.js';
 import { settlementPlacements } from './SettlementPlacements.js';
+import { createSettlementSmoke } from './SettlementSmoke.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 /** Share of a loose stone's size sunk into the ground, so it sits in the soil rather than on it. */
@@ -49,6 +50,8 @@ function pavingMesh(arrays, material) {
   geometry.computeBoundingSphere();
   const mesh = new THREE.Mesh(geometry, material);
   mesh.name = `settlement-paving-${arrays.kind}`;
+  // Not for the streamed draw-preparation queue: it hides what it has not reached.
+  mesh.userData.skipWarmup = true;
   mesh.receiveShadow = true;
   mesh.castShadow = false;
   return mesh;
@@ -98,13 +101,18 @@ export class SettlementSite {
       position.set(placement.x, placement.y - sunk, placement.z);
       rotation.setFromAxisAngle(UP, placement.rotationY);
       const matrix = new THREE.Matrix4().compose(position, rotation, scale.setScalar(placement.scale));
-      placement.near = { matrix, fade: 0, seed: placement.seed, ditherDirection: 1 };
-      placement.far = { matrix, fade: 0, seed: placement.seed, ditherDirection: -1 };
+      // No two houses weathered alike: a stable shade per placement, over the pooled mesh.
+      const colorVariation = placement.small ? 1 : 0.86 + placement.seed * 0.22;
+      placement.near = { matrix, fade: 0, seed: placement.seed, ditherDirection: 1, colorVariation };
+      placement.far = { matrix, fade: 0, seed: placement.seed, ditherDirection: -1, colorVariation };
       placement.blend = 0;
       placement.shown = 0;
       placement.key = `${this.dressing.timberTone}|${placement.key}`;
     }
     this.placements = placements;
+    // Smoke needs only the plan; it rides with the paving, which shares its frame.
+    const smoke = createSettlementSmoke(this.plan);
+    if (smoke) this.paving.add(smoke);
     yield;
     const tileMetres = Object.fromEntries(Object.entries(LAYER_ROLE)
       .map(([layer, role]) => [layer, SETTLEMENT_SURFACE_SETS[this.dressing[role]].tileMetres]));
@@ -138,9 +146,10 @@ export class SettlementSite {
   dispose() {
     this.disposed = true;
     this.job = null;
-    for (const mesh of this.paving.children) {
-      mesh.geometry.dispose();
-      mesh.material.dispose();
+    for (const child of this.paving.children) {
+      // A sprite's quad is three's own, shared by every sprite there is.
+      if (!child.isSprite) child.geometry.dispose();
+      child.material.dispose();
     }
     this.paving.clear();
     this.paving.removeFromParent();

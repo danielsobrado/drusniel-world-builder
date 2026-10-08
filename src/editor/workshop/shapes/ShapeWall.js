@@ -8,11 +8,13 @@ import {
 } from './ShapeValidation.js';
 import { arcWallPath, sampleShapePath, placeShapePoint, shapeBounds } from './ShapePaths.js';
 import { normalizeShapeOpenings, resolveShapeOpenings, shapeOpeningPortal } from './ShapeOpenings.js';
+import { normalizeShapeStyle } from './ShapeStyles.js';
 
 export function normalizeShapeWall(source) {
   const height = shapeNumber(source.height, 'Wall height', 2.4, 0.5, 16);
   return Object.freeze({
     ...shapeCommon(source),
+    style: normalizeShapeStyle(source.style),
     kind: 'curved-wall',
     length: shapeNumber(source.length, 'Wall length', 8, 1, 32),
     bend: shapeNumber(source.bend, 'Wall bend', 3, -16, 16),
