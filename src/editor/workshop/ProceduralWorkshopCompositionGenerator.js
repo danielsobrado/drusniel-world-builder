@@ -1,6 +1,10 @@
 import * as THREE from 'three/webgpu';
-import { normalizeWorkshopComposition } from './ProceduralWorkshopComposition.js';
+import {
+  normalizeWorkshopComposition,
+  planWorkshopComposition,
+} from './ProceduralWorkshopComposition.js';
 import { createSkeletonRoofParts } from './ProceduralWorkshopSkeletonRoof.js';
+import { buildRegisteredShape } from './shapes/ShapeGeometryRegistry.js';
 
 function material(slot, color, options = {}) {
   const result = new THREE.MeshStandardNodeMaterial({
@@ -39,12 +43,7 @@ function rectangleParts(primitive, materials) {
   const [width, depth] = primitive.dimensions;
   const thickness = Math.min(0.32, width * 0.08, depth * 0.08);
   const y = primitive.elevation + primitive.height / 2;
-  const transform = matrixAt(
-    primitive.position[0],
-    y,
-    primitive.position[1],
-    primitive.rotation,
-  );
+  const transform = matrixAt(primitive.position[0], y, primitive.position[1], primitive.rotation);
   const wallSpecs = [
     ['north', width, thickness, 0, depth / 2 - thickness / 2],
     ['south', width, thickness, 0, -depth / 2 + thickness / 2],
@@ -71,43 +70,36 @@ function rectangleParts(primitive, materials) {
 
 function circleParts(primitive, materials) {
   const y = primitive.elevation + primitive.height / 2;
-  const transform = matrixAt(
-    primitive.position[0],
-    y,
-    primitive.position[1],
-    primitive.rotation,
-  );
+  const transform = matrixAt(primitive.position[0], y, primitive.position[1], primitive.rotation);
   const shell = semanticGeometry(
-    new THREE.CylinderGeometry(
-      primitive.radius,
-      primitive.radius,
-      primitive.height,
-      32,
-      1,
-      true,
-    ),
+    new THREE.CylinderGeometry(primitive.radius, primitive.radius, primitive.height, 32, 1, true),
     primitive,
     { type: 'round', radius: primitive.radius, height: primitive.height },
   );
-  const result = [part(shell, materials.walls, transform.clone(), {
-    id: `${primitive.id}:tower-shell`,
-    componentId: primitive.id,
-    label: 'Tower shell',
-    family: 'walls',
-    connected: true,
-  })];
+  const result = [
+    part(shell, materials.walls, transform.clone(), {
+      id: `${primitive.id}:tower-shell`,
+      componentId: primitive.id,
+      label: 'Tower shell',
+      family: 'walls',
+      connected: true,
+    }),
+  ];
   const roofHeight = primitive.roofFamily === 'flat' ? 0.25 : Math.min(4, primitive.radius * 1.25);
-  const roof = primitive.roofFamily === 'flat'
-    ? new THREE.CylinderGeometry(primitive.radius + 0.2, primitive.radius + 0.2, roofHeight, 32)
-    : new THREE.ConeGeometry(primitive.radius + 0.25, roofHeight, 32);
+  const roof =
+    primitive.roofFamily === 'flat'
+      ? new THREE.CylinderGeometry(primitive.radius + 0.2, primitive.radius + 0.2, roofHeight, 32)
+      : new THREE.ConeGeometry(primitive.radius + 0.25, roofHeight, 32);
   roof.translate(0, primitive.height / 2 + roofHeight / 2, 0);
-  result.push(part(roof, materials.roof, transform.clone(), {
-    id: `${primitive.id}:roof:main`,
-    componentId: primitive.id,
-    label: 'Tower roof',
-    family: 'roof',
-    connected: true,
-  }));
+  result.push(
+    part(roof, materials.roof, transform.clone(), {
+      id: `${primitive.id}:roof:main`,
+      componentId: primitive.id,
+      label: 'Tower roof',
+      family: 'roof',
+      connected: true,
+    }),
+  );
   return result;
 }
 
@@ -125,65 +117,101 @@ function wallParts(primitive, materials) {
       primitive,
       { type: 'planar', width: length, height: primitive.height, radius: 0 },
     );
-    result.push(part(
-      geometry,
-      materials.walls,
-      matrixAt(
-        (startX + endX) / 2,
-        primitive.elevation + primitive.height / 2,
-        (startZ + endZ) / 2,
-        -angle,
+    result.push(
+      part(
+        geometry,
+        materials.walls,
+        matrixAt(
+          (startX + endX) / 2,
+          primitive.elevation + primitive.height / 2,
+          (startZ + endZ) / 2,
+          -angle,
+        ),
+        {
+          id: `${primitive.id}:segment-${index + 1}:side-a`,
+          componentId: primitive.id,
+          label: `Wall segment ${index + 1}`,
+          family: 'walls',
+          connected: true,
+        },
       ),
-      {
-        id: `${primitive.id}:segment-${index + 1}:side-a`,
-        componentId: primitive.id,
-        label: `Wall segment ${index + 1}`,
-        family: 'walls',
-        connected: true,
-      },
-    ));
+    );
   }
   return result;
 }
 
-export function createWorkshopCompositionParts(recipe) {
+export function createWorkshopCompositionParts(
+  recipe,
+  resolvedShapePlans = null,
+  shapeDomains = undefined,
+) {
   const composition = normalizeWorkshopComposition(recipe.composition);
+  const shapePlans = new Map(
+    (resolvedShapePlans ?? planWorkshopComposition(recipe).shapePlans).map((plan) => [
+      plan.id,
+      plan,
+    ]),
+  );
   const materials = {
-    walls: material('mortar', '#b69b70'),
+    walls: material('mortar', '#b69b70', { vertexColors: shapePlans.size > 0 }),
     roof: material('roof', '#566864', { roughness: 0.82, vertexColors: true }),
   };
-  const parts = composition.primitives.flatMap((primitive) => (
-    primitive.kind === 'rectangle'
-      ? rectangleParts(primitive, materials)
-      : primitive.kind === 'circle'
-        ? circleParts(primitive, materials)
-        : wallParts(primitive, materials)
-  ));
-  const roofResult = createSkeletonRoofParts({
-    recipe,
-    rectangles: composition.primitives.filter(({ kind }) => kind === 'rectangle'),
-    circles: composition.primitives.filter(({ kind }) => kind === 'circle'),
-    roofMaterial: materials.roof,
-    wallMaterial: materials.walls,
-    roofPitch: recipe.roofPitch,
-    roofOverhang: recipe.roofOverhang,
-  });
-  parts.push(...roofResult.parts);
-  for (const materialValue of Object.values(materials)) {
-    if (!parts.some((entry) => entry.material === materialValue)) materialValue.dispose();
+  if (shapePlans.size > 0) {
+    materials.mortar = materials.walls;
+    materials.stone = material('stone', recipe.style === 'granite' ? '#a29d90' : '#d5c3a1', {
+      vertexColors: true,
+    });
+    materials.wood = material('wood', '#7c553a', { vertexColors: true });
+    materials.foliage = material('foliage', '#648a48', { vertexColors: true });
+    materials.recess = material('recess', '#719293', { roughness: 0.55, vertexColors: true });
+    materials.walls.color.set(
+      recipe.finish === 'ochre' ? '#d3aa71' : recipe.finish === 'rose' ? '#caa395' : '#e2d5b9',
+    );
+    materials.roof.color.set(recipe.topStyle === 'terracotta' ? '#a95f42' : '#506b71');
   }
-  const sourceVertices = parts.reduce((total, entry) => (
-    total + (entry.geometry.getAttribute('position')?.count ?? 0)
-  ), 0);
-  Object.defineProperty(parts, 'stats', {
-    enumerable: false,
-    value: Object.freeze({
-      stones: 0,
-      features: composition.primitives.length,
-      sourceVertices,
-      primitives: composition.primitives.length,
-      ...roofResult.stats,
-    }),
-  });
-  return parts;
+  const parts = [];
+  try {
+    for (const primitive of composition.primitives)
+      parts.push(
+        ...(shapePlans.has(primitive.id)
+          ? buildRegisteredShape(shapePlans.get(primitive.id), materials, recipe, shapeDomains)
+          : primitive.kind === 'rectangle'
+            ? rectangleParts(primitive, materials)
+            : primitive.kind === 'circle'
+              ? circleParts(primitive, materials)
+              : wallParts(primitive, materials)),
+      );
+    const roofResult = createSkeletonRoofParts({
+      recipe,
+      rectangles: composition.primitives.filter(({ kind }) => kind === 'rectangle'),
+      circles: composition.primitives.filter(({ kind }) => kind === 'circle'),
+      roofMaterial: materials.roof,
+      wallMaterial: materials.walls,
+      roofPitch: recipe.roofPitch,
+      roofOverhang: recipe.roofOverhang,
+    });
+    parts.push(...roofResult.parts);
+    for (const materialValue of new Set(Object.values(materials))) {
+      if (!parts.some((entry) => entry.material === materialValue)) materialValue.dispose();
+    }
+    const sourceVertices = parts.reduce(
+      (total, entry) => total + (entry.geometry.getAttribute('position')?.count ?? 0),
+      0,
+    );
+    Object.defineProperty(parts, 'stats', {
+      enumerable: false,
+      value: Object.freeze({
+        stones: 0,
+        features: composition.primitives.length,
+        sourceVertices,
+        primitives: composition.primitives.length,
+        ...roofResult.stats,
+      }),
+    });
+    return parts;
+  } catch (error) {
+    for (const part of parts) part.geometry.dispose();
+    for (const value of new Set(Object.values(materials))) value.dispose();
+    throw error;
+  }
 }

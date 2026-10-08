@@ -1,4 +1,5 @@
 import '../../styles.css';
+import '../ui/radialPalette.css';
 import * as THREE from 'three/webgpu';
 import { ProceduralAssetStore } from './ProceduralAssetStore.js';
 import { createProceduralWorkshopComponentParts } from './ProceduralWorkshopComponentParts.js';

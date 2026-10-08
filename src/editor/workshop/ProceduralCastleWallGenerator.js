@@ -301,7 +301,7 @@ function buildIvy(sets, recipe, relief = null) {
 
 function disposeMaterial(material) {
   for (const value of Object.values(material)) {
-    if (value?.isTexture) value.dispose();
+    if (value?.isTexture && value.userData?.sharedSurface !== true) value.dispose();
   }
   material.dispose();
 }

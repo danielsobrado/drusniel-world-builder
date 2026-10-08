@@ -4,6 +4,7 @@ import { mixSeed } from './ProceduralRandom.js';
 import { getSurfaceTexture } from './ProceduralWorkshopTextureConfig.js';
 import { stoneSurfaceProfile } from './ProceduralWorkshopStoneSurfaceConfig.js';
 import { createStoneTexturePixels } from './ProceduralWorkshopStoneTexture.js';
+import { workshopSurfaceOverride } from './ProceduralWorkshopSurfaceOverrides.js';
 
 /**
  * `base`/`warm`/`color` drive the shared material colour and mortar tint.
@@ -414,6 +415,13 @@ function createImportedAlbedoResolver(recipe) {
   };
 }
 
+/**
+ * Tint over a neutral roof set. The synthesised roof albedo is itself slate- or
+ * clay-coloured, so the per-tile palette lands on a dark base; a neutral photo
+ * needs that depth put back, or every roof bleaches in the sun.
+ */
+const ROOF_SET_TINTS = Object.freeze({ slate: '#a9abba', terracotta: '#cfae9f' });
+
 /** Base colour of the foliage family; per-leaf vertex colours multiply it. */
 export const FOLIAGE_BASE_COLOR = '#4c8a37';
 
@@ -649,6 +657,17 @@ export function createWorkshopMaterials(recipe) {
   const woodAlbedo = importedAlbedo('wood');
   const stoneSurface = stoneSurfaceProfile(recipe.style);
   const stoneConfig = stoneSurface.material;
+  // Photographed sets a caller supplied for this generation (a settlement's
+  // dressing). An imported albedo still wins: it is the author's explicit choice.
+  const timberSet = woodAlbedo ? null : workshopSurfaceOverride('timber');
+  const plasterSet = wallAlbedo || recipe.finish === 'masonry' ? null : workshopSurfaceOverride('plaster');
+  const plasterTint = PLASTER_PALETTES[recipe.finish]?.base;
+  // Stone and roof units already carry their palette as vertex colour, so their
+  // sets are neutral — unlike the synthesised albedo, which repeats the palette
+  // and darkens every wall by multiplying it in twice.
+  const stoneSet = stoneAlbedo ? null : workshopSurfaceOverride('stone');
+  const roofSet = roofAlbedo ? null : workshopSurfaceOverride('roof');
+  const roofSetTint = ROOF_SET_TINTS[recipe.topStyle] ?? '#ffffff';
 
   const stoneBump = surfaceBumpTexture(recipe.seed, stoneConfig.bumpTextureScale);
   const roofBump = roofBumpTexture(recipe.seed);
@@ -696,16 +715,16 @@ export function createWorkshopMaterials(recipe) {
     : null;
   const stone = tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
     flatShading: stoneConfig.flatShading,
-    color: stoneAlbedo?.tint ?? (recipe.albedo ? '#ffffff' : STONE_PALETTES[recipe.style].color),
-    map: stoneAlbedo?.texture ?? (recipe.albedo ? stoneTexture(recipe) : null),
-    bumpMap: stoneBump,
+    color: stoneAlbedo?.tint ?? (recipe.albedo || stoneSet ? '#ffffff' : STONE_PALETTES[recipe.style].color),
+    map: stoneAlbedo?.texture ?? stoneSet?.color ?? (recipe.albedo ? stoneTexture(recipe) : null),
+    bumpMap: stoneSet ? null : stoneBump,
     bumpScale: stoneConfig.bumpScale,
-    normalMap: stoneNormal,
+    normalMap: stoneSet?.normal ?? stoneNormal,
     normalScale: new THREE.Vector2(
       stoneConfig.workshopNormalScale,
       stoneConfig.workshopNormalScale,
     ),
-    roughnessMap: stoneRoughness,
+    roughnessMap: stoneSet?.arm ?? stoneRoughness,
     // Always on. Before 2026-07-25 an imported albedo disabled vertex colours
     // entirely, which contradicted 15-…md line 89 and threw away the baked
     // crevice occlusion. `applyUnitShading` switches to a neutral grey
@@ -729,13 +748,13 @@ export function createWorkshopMaterials(recipe) {
     envMapIntensity: stoneConfig.workshopEnvMapIntensity,
   });
   const roof = tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
-    color: roofAlbedo?.tint ?? '#ffffff',
-    map: roofAlbedo?.texture ?? roofTexture(recipe.topStyle, recipe.seed),
-    bumpMap: roofBump,
+    color: roofAlbedo?.tint ?? (roofSet ? roofSetTint : '#ffffff'),
+    map: roofAlbedo?.texture ?? roofSet?.color ?? roofTexture(recipe.topStyle, recipe.seed),
+    bumpMap: roofSet ? null : roofBump,
     bumpScale: 0.095,
-    normalMap: roofNormal,
+    normalMap: roofSet?.normal ?? roofNormal,
     normalScale: new THREE.Vector2(0.68, 0.68),
-    roughnessMap: roofRoughness,
+    roughnessMap: roofSet?.arm ?? roofRoughness,
     vertexColors: true,
     roughness: 1,
     metalness: 0,
@@ -750,25 +769,26 @@ export function createWorkshopMaterials(recipe) {
           STONE_PALETTES[recipe.style].base[1] / 255 * 0.66,
           STONE_PALETTES[recipe.style].base[2] / 255 * 0.66,
         ))
-        : '#ffffff'),
-      map: wallAlbedo?.texture ?? (recipe.finish === 'masonry' ? null : plasterTexture(recipe)),
-      bumpMap: plasterBump,
+        : plasterSet ? new THREE.Color().setRGB(plasterTint[0] / 255, plasterTint[1] / 255, plasterTint[2] / 255, THREE.SRGBColorSpace)
+          : '#ffffff'),
+      map: wallAlbedo?.texture ?? plasterSet?.color ?? (recipe.finish === 'masonry' ? null : plasterTexture(recipe)),
+      bumpMap: plasterSet ? null : plasterBump,
       bumpScale: recipe.finish === 'masonry' ? 0.025 : 0.075,
-      normalMap: plasterNormal,
+      normalMap: plasterSet?.normal ?? plasterNormal,
       normalScale: new THREE.Vector2(0.48, 0.48),
-      roughnessMap: mortarRoughness,
+      roughnessMap: plasterSet?.arm ?? mortarRoughness,
       roughness: 1,
       metalness: 0,
       envMapIntensity: 0.66,
     }), 'mortar'),
     wood: tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
-      color: woodAlbedo?.tint ?? '#ffffff',
-      map: woodAlbedo?.texture ?? woodTexture(recipe.seed),
-      bumpMap: surfaceBumpTexture(recipe.seed + 317, 0.5),
+      color: woodAlbedo?.tint ?? (timberSet ? workshopSurfaceOverride('timberTint') ?? '#ffffff' : '#ffffff'),
+      map: woodAlbedo?.texture ?? timberSet?.color ?? woodTexture(recipe.seed),
+      bumpMap: timberSet ? null : surfaceBumpTexture(recipe.seed + 317, 0.5),
       bumpScale: 0.035,
-      normalMap: woodNormal,
+      normalMap: timberSet?.normal ?? woodNormal,
       normalScale: new THREE.Vector2(0.6, 0.6),
-      roughnessMap: woodRoughness,
+      roughnessMap: timberSet?.arm ?? woodRoughness,
       roughness: 1,
       metalness: 0,
       envMapIntensity: 0.78,

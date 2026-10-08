@@ -9,6 +9,8 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [compiledYamlPlugin(), contentLibraryPlugin(root)],
   resolve: {
+    // The PTL runtime ships its own three; it must share the app's single copy.
+    dedupe: ['three'],
     alias: [
       { find: /^three$/, replacement: 'three/webgpu' },
     ],

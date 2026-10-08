@@ -2,6 +2,7 @@ import './styles.css';
 import './editor/roadside/roadside.css';
 import { RoadsideDetailsView } from './editor/roadside/RoadsideDetailsView.js';
 import { RoadsideDetailsUi } from './editor/roadside/RoadsideDetailsUi.js';
+import { SettlementView } from './editor/world/settlements/view/SettlementView.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
@@ -653,6 +654,9 @@ async function initializeEditor(restoreState, resources, startup) {
     constructionSpatialIndex,
     enabled: config.stylizedSurface.enhancements?.roadsideLanterns === true });
   resources.own(roadsideDetails);
+  const settlementView = new SettlementView({ terrainView, baseUrl: import.meta.env.BASE_URL,
+    enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false });
+  resources.own(settlementView);
   if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
   const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
   resources.own(roadsideDetailsUi);
@@ -1209,6 +1213,7 @@ async function initializeEditor(restoreState, resources, startup) {
       objectView,
       godsEndAssets,
       roadsideDetails,
+      settlementView,
       worldMapController,
       gameplayOverlayController,
       inventoryController,
@@ -1532,6 +1537,7 @@ async function initializeEditor(restoreState, resources, startup) {
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
+    deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield));
     if (profiling) perfQa.mark('stylized');
 
     if (weatherController) {

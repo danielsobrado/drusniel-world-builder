@@ -21,7 +21,8 @@ export class SettlementOccupancy {
 
   /** Why `box` cannot be placed, or null when it can. */
   conflict(box, { clearance = 1.2, streetClearance = 0.8, ignoreStreets = false, ground = true } = {}) {
-    if (this.squareRadius > 0 && Math.hypot(box.x, box.z) < this.squareRadius + box.radius * 0.7) {
+    // Nothing may reach into the square: its nearest edge must clear the rim.
+    if (this.squareRadius > 0 && Math.hypot(box.x, box.z) < this.squareRadius + Math.min(box.halfWidth, box.halfDepth)) {
       return 'square';
     }
     for (const other of this.grid.near(box.x, box.z, box.radius + clearance + 4)) {

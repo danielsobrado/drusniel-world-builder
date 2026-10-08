@@ -1,0 +1,61 @@
+.workshop-shape-editor {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #bba47666;
+  border-radius: 14px;
+  background: #233128;
+  color: #dce6d9;
+}
+.workshop-shape-editor[hidden],
+.workshop-shape-editor [hidden] {
+  display: none !important;
+}
+.workshop-shape-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.workshop-shape-fields label {
+  min-width: 0;
+  font-size: 12px;
+}
+.workshop-shape-fields input[type='range'] {
+  width: 100%;
+}
+.workshop-shape-fields output {
+  font-size: 11px;
+  color: #bacbb9;
+  font-variant-numeric: tabular-nums;
+}
+.workshop-shape-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.workshop-shape-actions button {
+  border: 1px solid #bba47688;
+  border-radius: 7px;
+  background: #f1e7d3;
+  padding: 5px 8px;
+  color: #544936;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.workshop-shape-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.workshop-shape-hint {
+  margin: 0;
+  color: #bacbb9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.workshop-shape-editor input:focus-visible,
+.workshop-shape-editor select:focus-visible,
+.workshop-shape-editor button:focus-visible {
+  outline: 2px solid #9d7844;
+  outline-offset: 2px;
+}

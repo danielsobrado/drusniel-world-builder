@@ -1510,7 +1510,7 @@ function createGeometrySets(recipe) {
 function createPartsForSet(geometries, material, remesh) {
   if (geometries.length === 0) {
     for (const value of Object.values(material)) {
-      if (value?.isTexture) value.dispose();
+      if (value?.isTexture && value.userData?.sharedSurface !== true) value.dispose();
     }
     material.dispose();
     return [];

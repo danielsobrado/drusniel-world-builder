@@ -1,0 +1,149 @@
+{
+  "format": "ptl-material",
+  "version": 4,
+  "seed": 0,
+  "coordinateSpace": "object",
+  "algorithms": {
+    "version": 1,
+    "simulationSize": 128,
+    "reactionDiffusion": {
+      "iterations": 64,
+      "feed": 0.055,
+      "kill": 0.062,
+      "diffusionA": 0.18,
+      "diffusionB": 0.09
+    },
+    "thermalErosion": {
+      "iterations": 64,
+      "rate": 0.22
+    },
+    "sdf": {
+      "radius": 0.31,
+      "boxSize": 0.25,
+      "edgeSoftness": 0.06
+    }
+  },
+  "physical": {
+    "roughness": 0.46,
+    "metalness": 0,
+    "clearcoat": 0.08,
+    "clearcoatRoughness": 0.32,
+    "specularIntensity": 0.62,
+    "ior": 1.42,
+    "sheen": 0,
+    "sheenRoughness": 0.7,
+    "sheenColor": "#ffffff",
+    "transmission": 0,
+    "thickness": 0,
+    "attenuationDistance": 2,
+    "attenuationColor": "#ffffff"
+  },
+  "synthesis": {
+    "age": 0,
+    "weathering": 0,
+    "gravity": -1,
+    "macro": 1,
+    "meso": 1,
+    "micro": 1,
+    "variation": 0.35,
+    "stochasticTiling": 0
+  },
+  "groups": [],
+  "layers": [
+    {
+      "id": "texture-field-rock:field",
+      "name": "Rock field",
+      "kind": "base",
+      "enabled": true,
+      "blendMode": "normal",
+      "channel": "surface",
+      "opacity": 1,
+      "scale": 3,
+      "strength": 1,
+      "seed": 0,
+      "colorA": "#171a1d",
+      "colorB": "#d9dde1",
+      "roughness": 0,
+      "displacement": 0.025,
+      "groupId": null,
+      "maskSourceLayerId": null,
+      "structureSourceLayerId": null,
+      "maskInvert": false,
+      "maskStrength": 1,
+      "maskMode": "coverage",
+      "maskThreshold": 0.5,
+      "maskSoftness": 0.15,
+      "maskBreakup": 0,
+      "pattern": null,
+      "texture": {
+        "id": "rock.01",
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "offsetX": 0,
+        "offsetY": 0,
+        "contrast": 1,
+        "bias": 0,
+        "invert": false,
+        "clamp": true,
+        "channel": "r",
+        "mode": "replace",
+        "modeAmount": 1
+      }
+    },
+    {
+      "id": "texture-field-rock:surface",
+      "name": "Rock roughness breakup",
+      "kind": "fbm",
+      "enabled": true,
+      "blendMode": "overlay",
+      "channel": "roughness",
+      "opacity": 0.55,
+      "scale": 9,
+      "strength": 1,
+      "seed": 41,
+      "colorA": "#283038",
+      "colorB": "#aab4bd",
+      "roughness": 0.16,
+      "displacement": 0,
+      "groupId": null,
+      "maskSourceLayerId": null,
+      "structureSourceLayerId": null,
+      "maskInvert": false,
+      "maskStrength": 1,
+      "maskMode": "coverage",
+      "maskThreshold": 0.5,
+      "maskSoftness": 0.15,
+      "maskBreakup": 0,
+      "pattern": null,
+      "texture": {
+        "id": "rock.02",
+        "scaleX": 1.27,
+        "scaleY": 0.83,
+        "rotation": -0.41,
+        "offsetX": 0,
+        "offsetY": 0,
+        "contrast": 1.08,
+        "bias": 0,
+        "invert": false,
+        "clamp": true,
+        "channel": "r",
+        "mode": "detail",
+        "modeAmount": 0.45
+      }
+    }
+  ],
+  "surfaceGraph": null,
+  "dependencies": {
+    "textures": [
+      {
+        "id": "rock.01",
+        "version": 1
+      },
+      {
+        "id": "rock.02",
+        "version": 1
+      }
+    ]
+  }
+}

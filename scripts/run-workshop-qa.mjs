@@ -147,7 +147,7 @@ async function workshopState(page) {
           active: workshop.materialController.active,
           hoverRegionId: workshop.materialController.hoverRegionId,
           selectedRegionId: workshop.materialController.selectedRegionId,
-          paletteOpen: !workshop.materialController.palette.hidden,
+          paletteOpen: workshop.materialController.palette.isOpen,
           inspectorOpen: !workshop.materialController.inspector.hidden,
           overrides: input?.recipe?.materialAreaOverrides ?? {},
           favorites: input?.recipe?.materialFavorites ?? [],
@@ -1005,9 +1005,9 @@ async function runMaterialScenario(page, report) {
   const before = await workshopState(page);
   await page.mouse.click(target.point.x, target.point.y);
   await page.waitForFunction(() => (
-    !window.__editor.proceduralWorkshop.materialController.palette.hidden
+    window.__editor.proceduralWorkshop.materialController.palette.isOpen
   ));
-  const paletteBounds = await page.locator('[data-role="material-palette"]').boundingBox();
+  const paletteBounds = await page.locator('.radial-palette--workshop').boundingBox();
   const canvasBounds = await page.locator('[data-role="workshop-canvas"]').boundingBox();
   assert.ok(paletteBounds && canvasBounds, 'Radial palette and canvas must have visible bounds.');
   assert.ok(
@@ -1015,11 +1015,11 @@ async function runMaterialScenario(page, report) {
       && paletteBounds.y >= canvasBounds.y
       && paletteBounds.x + paletteBounds.width <= canvasBounds.x + canvasBounds.width
       && paletteBounds.y + paletteBounds.height <= canvasBounds.y + canvasBounds.height,
-    'Radial palette positioning failure: palette clipped outside the viewport.',
+    `Radial palette positioning failure: ${JSON.stringify({paletteBounds,canvasBounds})}`,
   );
   await captureCheckpoint(page, report, '06-material-radial-palette');
 
-  const firstPreset = page.locator('[data-role="material-palette"] [data-preset-id]').first();
+  const firstPreset = page.locator('.radial-palette--workshop [data-radial-item]').first();
   await firstPreset.hover();
   await delay(40);
   const afterHover = await workshopState(page);
@@ -1042,9 +1042,9 @@ async function runMaterialScenario(page, report) {
   const inspectorTarget = await findMaterialPoint(page);
   await page.mouse.click(inspectorTarget.point.x, inspectorTarget.point.y);
   await page.waitForFunction(() => (
-    !window.__editor.proceduralWorkshop.materialController.palette.hidden
+    window.__editor.proceduralWorkshop.materialController.palette.isOpen
   ));
-  await clickDom(page, '[data-material-action="more"]');
+  await clickDom(page, '.radial-palette--workshop [data-radial-action="more"]');
   await page.waitForFunction(() => (
     !window.__editor.proceduralWorkshop.materialController.inspector.hidden
   ));
@@ -1068,10 +1068,10 @@ async function runMaterialScenario(page, report) {
   const secondTarget = await findMaterialPoint(page);
   await page.mouse.click(secondTarget.point.x, secondTarget.point.y);
   await page.waitForFunction(() => (
-    !window.__editor.proceduralWorkshop.materialController.palette.hidden
+    window.__editor.proceduralWorkshop.materialController.palette.isOpen
   ));
   const beforeCancel = await workshopState(page);
-  await page.locator('[data-role="material-palette"] [data-preset-id]').nth(2).hover();
+  await page.locator('.radial-palette--workshop [data-radial-item]').nth(2).hover();
   await page.keyboard.press('Escape');
   const afterCancel = await workshopState(page);
   assert.equal(afterCancel.material.paletteOpen, false);

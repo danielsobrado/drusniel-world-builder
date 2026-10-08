@@ -250,6 +250,7 @@ export class WorkshopRadialMenus {
   }
 
   laneEnabled(lane) {
+    if (lane.field && this.fieldElement(lane.field)?.closest?.('[data-workshop-field]')?.hidden) return false;
     return !MATERIAL_AREA_SOURCES.has(lane.source) || this.materialAreaReady();
   }
 
@@ -348,6 +349,8 @@ export class WorkshopRadialMenus {
 
   syncLane(view, { rebuild = false } = {}) {
     const { lane } = view;
+    view.element.hidden = Boolean(lane.field && this.fieldElement(lane.field)?.closest?.('[data-workshop-field]')?.hidden);
+    if (view.element.hidden) return;
     const items = this.resolveItems(lane);
     const signature = itemsSignature(items);
     if (rebuild || signature !== view.signature) this.rebuildLaneButtons(view, items);

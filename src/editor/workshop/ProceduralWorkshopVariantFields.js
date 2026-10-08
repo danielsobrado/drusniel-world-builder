@@ -24,6 +24,7 @@ const LABELS = Object.freeze({
 });
 
 function isVisible(field, archetype, variant) {
+  if (archetype === 'composition') return ['finish', 'style', 'topStyle', 'ivy'].includes(field);
   if (archetype === 'house') return !HOUSE_HIDDEN.has(field);
   if (archetype === 'prop') return PROP_ALWAYS.includes(field) || (variant?.uses ?? []).includes(field);
   return true;

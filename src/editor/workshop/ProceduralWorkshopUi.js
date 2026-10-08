@@ -11,6 +11,7 @@ import { createWorkshopStage } from './ProceduralWorkshopStage.js';
 import { ProceduralWorkshopSurfaceEditor } from './ProceduralWorkshopSurfaceEditor.js';
 import { ProceduralWorkshopVariantFields } from './ProceduralWorkshopVariantFields.js';
 import { WorkshopAmbientOcclusion } from './WorkshopAmbientOcclusion.js';
+import { WorkshopShapeUiBridge } from './shapes/WorkshopShapeUiBridge.js';
 
 function randomSeed() {
   const values = new Uint32Array(1);
@@ -115,6 +116,7 @@ export class ProceduralWorkshopUi {
                   <option value="square-tower">Square keep tower</option>
                   <option value="house">Village house</option>
                   <option value="prop">Village prop</option>
+                  <option value="composition">Freeform shapes</option>
                 </select>
               </label>
               <label data-workshop-field="variant" hidden>Design
@@ -227,7 +229,7 @@ export class ProceduralWorkshopUi {
               <div class="workshop-canvas" data-role="workshop-canvas"></div>
               <div class="workshop-material-ui" data-role="workshop-material-ui"></div>
               <div class="workshop-component-editor" data-role="workshop-component-editor"></div>
-              <p>Select an area, then pull its gold edge arrows to reshape it · openings can be placed, duplicated, or repeated · drag empty space to orbit.</p>
+              <p data-role="workshop-preview-hint">Select an area, then pull its gold edge arrows to reshape it · openings can be placed, duplicated, or repeated · drag empty space to orbit.</p>
             </div>
           </div>
         </section>
@@ -249,6 +251,7 @@ export class ProceduralWorkshopUi {
       },
     });
     this.variantFields = new ProceduralWorkshopVariantFields(this.form);
+    this.shapeBridge = new WorkshopShapeUiBridge(this);
     this.bind();
   }
 
@@ -261,8 +264,14 @@ export class ProceduralWorkshopUi {
         this.setTransformMode(action);
       }
       if (action === 'material') this.toggleMaterialMode();
-      if (action === 'reset-component') this.componentController?.resetSelected();
-      if (action === 'reset-all-components') this.componentController?.resetAll();
+      if (action === 'reset-component' || action === 'reset-all-components') {
+        if (this.shapeBridge.active) {
+          if (action === 'reset-component') this.shapeBridge.editor.session.undo();
+          else this.shapeBridge.editor.session.redo();
+          this.shapeBridge.editor.changed();
+        } else if (action === 'reset-component') this.componentController?.resetSelected();
+        else this.componentController?.resetAll();
+      }
       if (action === 'center') this.centerPreview();
       if (action === 'frame') this.framePreview();
       if (action === 'reroll') {
@@ -283,6 +292,7 @@ export class ProceduralWorkshopUi {
         this.hasFramedPreview = false;
         if (event.target.name === 'archetype') this.variantFields.onArchetypeChanged();
         else this.variantFields.onVariantChanged();
+        this.shapeBridge.sync();
       }
       this.schedulePreview(50);
     });
@@ -336,6 +346,7 @@ export class ProceduralWorkshopUi {
         ? 'translate'
         : button.dataset.workshopAction;
       button.disabled = materialActive
+        || this.shapeBridge?.active
         || !(this.componentController?.supportsMode(requestedMode) ?? true);
       button.classList.toggle(
         'is-active',
@@ -352,6 +363,7 @@ export class ProceduralWorkshopUi {
       if (button) button.disabled = active;
     }
     this.syncTransformModeButtons(this.componentController?.mode ?? 'translate');
+    this.shapeBridge.syncHistoryToolbar();
   }
 
   setTransformMode(action) {
@@ -412,17 +424,22 @@ export class ProceduralWorkshopUi {
         componentTransforms: this.componentController?.toDocument() ?? {},
         openingAttachments: this.componentController?.toOpeningAttachmentsDocument() ?? {},
         openingAssemblies: this.componentController?.toOpeningAssembliesDocument() ?? {},
+        ...this.shapeBridge.recipeFields(),
       },
     };
   }
 
   captureRuntimeState() {
+    const shapeState = this.shapeBridge.captureRuntimeState();
+    const input = this.readInput();
+    if (this.shapeBridge.active) input.recipe.composition = shapeState.session.composition;
     return {
       open: !this.overlay.hidden,
       fields: [...this.form.elements].filter(element => element.name).map(element => ({
         name: element.name, value: element.value, checked: element.checked,
       })),
-      input: this.readInput(),
+      input,
+      shapeState,
       componentSession: this.componentController?.semanticEditSession?.captureRuntimeState(),
       materialHistory: this.materialController ? {
         history: [...this.materialController.history], future: [...this.materialController.future],
@@ -440,6 +457,7 @@ export class ProceduralWorkshopUi {
       }
     };
     applyFields(); this.variantFields.onArchetypeChanged(); applyFields(); this.syncRangeOutputs();
+    this.shapeBridge.restoreRuntimeState(state.shapeState);
     this.surfaceEditor.commit(state.input.recipe.surfaceTextures);
     if (!state.componentSession && !state.open) return;
     await this.ensureRenderer();
@@ -477,6 +495,7 @@ export class ProceduralWorkshopUi {
   }
 
   close() {
+    this.shapeBridge.close();
     this.openRevision += 1;
     this.planRevision += 1;
     this.planner.cancel();
@@ -589,6 +608,7 @@ export class ProceduralWorkshopUi {
         },
         onActiveChange: (active) => this.syncMaterialModeButtons(active),
       });
+      this.shapeBridge.initializeRenderer();
       this.ambientOcclusion = new WorkshopAmbientOcclusion({
         renderer,
         scene: this.scene,
@@ -606,6 +626,7 @@ export class ProceduralWorkshopUi {
   }
 
   releaseRendererState() {
+    this.shapeBridge.releaseRenderer();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.componentController?.dispose();
@@ -656,8 +677,18 @@ export class ProceduralWorkshopUi {
           remesh: true,
         }
         : recipe;
-      await this.planner.plan(previewRecipe);
+      const plan = await this.planner.plan(previewRecipe);
       if (revision !== this.planRevision || (this.overlay.hidden && !allowHidden)) return;
+      if (this.shapeBridge.active) {
+        const parts = this.shapeBridge.update(previewRecipe, plan);
+        this.previewParts = parts;
+        if (frame || !this.hasFramedPreview) { this.framePreview(); this.hasFramedPreview = true; }
+        const stats = parts.stats;
+        this.status.textContent = `Final preview · ${stats.components} shapes · drag the gold handles or choose a roof and wall finish.`;
+        this.status.classList.remove('is-error');
+        this.completedPlanRevision = revision;
+        return;
+      }
       const nextParts = this.manager.createPreviewParts(previewRecipe);
       this.clearPreview();
       this.previewParts = nextParts;
@@ -679,6 +710,7 @@ export class ProceduralWorkshopUi {
       const quality = draft ? 'Interactive proxy' : 'Final preview';
       this.status.textContent = `${quality} · ${stats.components} editable components · ${stats.materialRegions} semantic material areas · ${stats.materialCount} materials · ${stats.stones} stones · ${stats.features} semantic details · ${stats.sourceVertices.toLocaleString()} source vertices · ${stats.drawParts}/16 preview parts.`;
       this.status.classList.remove('is-error');
+      this.completedPlanRevision = revision;
     } catch (error) {
       if (error?.name === 'AbortError') return;
       this.status.textContent = error instanceof Error ? error.message : String(error);
@@ -687,7 +719,8 @@ export class ProceduralWorkshopUi {
   }
 
   framePreview() {
-    if (!this.camera || !this.controls || this.componentController?.groups.size === 0) return;
+    if (!this.camera || !this.controls || (this.shapeBridge.active
+      ? this.shapeBridge.preview?.groups.size === 0 : this.componentController?.groups.size === 0)) return;
     const bounds = new THREE.Box3().setFromObject(this.previewRoot);
     if (bounds.isEmpty()) return;
     const center = bounds.getCenter(new THREE.Vector3());
@@ -704,6 +737,10 @@ export class ProceduralWorkshopUi {
 
   bake() {
     try {
+      if (this.shapeBridge.active) {
+        this.shapeBridge.preview?.handles.finish(true);
+        this.shapeBridge.editor.session.commit();
+      }
       const record = this.manager.create(this.readInput());
       this.status.textContent = `${record.label} baked and added to Objects.`;
       this.status.classList.remove('is-error');
@@ -718,7 +755,9 @@ export class ProceduralWorkshopUi {
     this.materialController?.replaceParts([]);
     if (this.componentController) this.componentController.clear();
     else this.previewRoot.clear();
-    disposeModelParts(this.previewParts);
+    if (this.previewPartsOwnedByShape) this.shapeBridge.clear();
+    else disposeModelParts(this.previewParts);
+    this.previewPartsOwnedByShape = false;
     this.previewParts = [];
   }
 
@@ -740,6 +779,7 @@ export class ProceduralWorkshopUi {
     window.removeEventListener('keydown', this.onWindowKeyDown);
     this.clearPreview();
     this.releaseRendererState();
+    this.shapeBridge.dispose();
     this.surfaceEditor?.dispose();
     this.surfaceEditor = null;
     this.planner.dispose();

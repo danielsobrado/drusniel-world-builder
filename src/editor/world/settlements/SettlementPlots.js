@@ -10,6 +10,9 @@ const ZONE_MIX = Object.freeze({
   edge: Object.freeze([['house', 1]]),
 });
 
+/** Metres of paved apron between the market square's rim and its house fronts. */
+export const SQUARE_APRON = 1.2;
+
 function zoneOf(distance, radius) {
   const ratio = distance / radius;
   if (ratio < 0.38) return 'core';
@@ -67,7 +70,17 @@ function frontageAnchors(streets, random, { spacing = 3, maxDistance }) {
   return anchors.sort((left, right) => (left.distance + left.jitter) - (right.distance + right.jitter));
 }
 
-function tryPlace(occupancy, anchor, kind, variant, setback) {
+/**
+ * How tightly each zone builds: a town core is terraced, eave to eave and hard
+ * on the street; the outskirts stand apart in their own yards.
+ */
+const ZONE_DENSITY = Object.freeze({
+  core: Object.freeze({ clearance: 0.3, setback: [0.3, 0.6] }),
+  mid: Object.freeze({ clearance: 0.8, setback: [0.7, 1.6] }),
+  edge: Object.freeze({ clearance: 1.6, setback: [1.5, 3] }),
+});
+
+function tryPlace(occupancy, anchor, kind, variant, setback, clearance) {
   const [width, depth] = buildingEntry(kind, variant).footprint;
   const box = SettlementOccupancy.frontage({
     x: anchor.x,
@@ -79,7 +92,7 @@ function tryPlace(occupancy, anchor, kind, variant, setback) {
     width,
     depth,
   });
-  return occupancy.fits(box) ? box : null;
+  return occupancy.fits(box, clearance === undefined ? undefined : { clearance }) ? box : null;
 }
 
 function building(box, kind, variant, anchor) {
@@ -107,6 +120,21 @@ function placeKeep(occupancy, profile, bearings, random) {
   return null;
 }
 
+/**
+ * The rim of the market square as a street nothing is paved for: plots are
+ * anchored on it like on any other, so the square is walled by house fronts
+ * instead of ringed by a meadow.
+ */
+function squareFrontage(squareRadius) {
+  if (!(squareRadius > 0)) return [];
+  const steps = Math.max(12, Math.round(Math.PI * 2 * squareRadius / 4));
+  const points = Array.from({ length: steps + 1 }, (_, index) => {
+    const angle = Math.PI * 2 * (index % steps) / steps;
+    return [Math.sin(angle) * squareRadius, Math.cos(angle) * squareRadius];
+  });
+  return [{ kind: 'frontage', width: SQUARE_APRON * 2, points }];
+}
+
 /** Town plots: landmarks first, then a zone-weighted fill up to the class's target. */
 export function planBuildings({ profile, occupancy, streets, bearings, random }) {
   const buildings = [];
@@ -118,7 +146,7 @@ export function planBuildings({ profile, occupancy, streets, bearings, random })
     }
   }
   const queue = landmarkQueue(profile, random);
-  const anchors = frontageAnchors(streets, random, { maxDistance: profile.radius });
+  const anchors = frontageAnchors([...squareFrontage(occupancy.squareRadius), ...streets], random, { maxDistance: profile.radius });
   for (const anchor of anchors) {
     if (buildings.length >= profile.buildings) break;
     const zone = zoneOf(anchor.distance, profile.radius);
@@ -127,8 +155,10 @@ export function planBuildings({ profile, occupancy, streets, bearings, random })
     const mix = profile.rank >= 2 ? ZONE_MIX[zone] : ZONE_MIX.edge;
     const kind = landmarkIndex >= 0 ? queue[landmarkIndex].kind : weighted(random, mix);
     const variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
-    const setback = zone === 'core' ? 0.6 + random() * 0.8 : 1.5 + random() * 3;
-    const box = tryPlace(occupancy, anchor, kind, variant, setback);
+    // Hamlets and villages have no terraces: every house keeps a yard.
+    const density = ZONE_DENSITY[profile.rank >= 2 ? zone : 'edge'];
+    const setback = density.setback[0] + random() * density.setback[1];
+    const box = tryPlace(occupancy, anchor, kind, variant, setback, density.clearance);
     if (!box) continue;
     if (landmarkIndex >= 0) queue.splice(landmarkIndex, 1);
     occupancy.claim(box);

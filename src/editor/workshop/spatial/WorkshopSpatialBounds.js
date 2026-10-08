@@ -1,3 +1,5 @@
+import { shapeCapability, planRegisteredShape } from '../shapes/ShapeRegistry.js';
+
 function finite(value, field) {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${field} must be finite.`);
   return value;
@@ -58,6 +60,7 @@ export function workshopEntitySpatialBounds(entity) {
   if (!entity?.type?.startsWith('composition-')) return null;
   const primitive = entity.properties?.primitive;
   if (!primitive) return null;
+  if (shapeCapability(primitive.kind)) return normalizeWorkshopSpatialBounds(planRegisteredShape(primitive).bounds);
   if (primitive.kind === 'rectangle') return rectangleBounds(primitive);
   if (primitive.kind === 'circle') {
     return orderedBounds(

@@ -33,6 +33,7 @@ modes:
           - { value: square-tower, label: Square keep, glyph: '▰' }
           - { value: house, label: Village house, glyph: '⌂' }
           - { value: prop, label: Village prop, glyph: '✦' }
+          - { value: composition, label: Freeform shapes, glyph: '◠' }
       - id: silhouette
         side: right
         label: Silhouette

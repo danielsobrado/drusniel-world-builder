@@ -1,7 +1,8 @@
 /**
  * What kind of place an Azgaar burg is, and what it looks like.
  *
- * Azgaar reports population in thousands. Classes set the town's radius, how
+ * Azgaar reports population in thousands. Classes set the town's radius (kept
+ * tight, so a walled town is built up to its wall rather than camped in a field), how
  * many buildings its plots may hold and which landmarks it earns; the style is
  * chosen from the burg's culture so neighbouring towns of one people share
  * stone, roof and render. Pure data, safe in terrain workers.
@@ -9,10 +10,10 @@
 
 export const SETTLEMENT_CLASSES = Object.freeze([
   Object.freeze({ id: 'hamlet', maxPopulation: 0.6, radius: 55, buildings: 10, farms: 3 }),
-  Object.freeze({ id: 'village', maxPopulation: 2.5, radius: 95, buildings: 26, farms: 5 }),
-  Object.freeze({ id: 'town', maxPopulation: 10, radius: 150, buildings: 60, farms: 7 }),
-  Object.freeze({ id: 'city', maxPopulation: 40, radius: 210, buildings: 105, farms: 9 }),
-  Object.freeze({ id: 'metropolis', maxPopulation: Infinity, radius: 260, buildings: 145, farms: 10 }),
+  Object.freeze({ id: 'village', maxPopulation: 2.5, radius: 85, buildings: 26, farms: 5 }),
+  Object.freeze({ id: 'town', maxPopulation: 10, radius: 115, buildings: 84, farms: 7 }),
+  Object.freeze({ id: 'city', maxPopulation: 40, radius: 150, buildings: 170, farms: 9 }),
+  Object.freeze({ id: 'metropolis', maxPopulation: Infinity, radius: 185, buildings: 240, farms: 10 }),
 ]);
 
 const CLASS_RANK = Object.freeze(Object.fromEntries(SETTLEMENT_CLASSES.map(({ id }, index) => [id, index])));

@@ -19,7 +19,10 @@ function materialSlot(material) {
 
 function disposeMaterial(material) {
   for (const value of Object.values(material ?? {})) {
-    if (value?.isTexture) value.dispose();
+    // A shared surface (see modelParts) belongs to every material that samples
+    // it. Disposing one here re-uploaded a photographed set on every building,
+    // and emptied a GPU-generated one for good: its texels exist nowhere else.
+    if (value?.isTexture && value.userData?.sharedSurface !== true) value.dispose();
   }
   material?.dispose?.();
 }

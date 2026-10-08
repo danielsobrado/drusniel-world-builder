@@ -375,3 +375,21 @@ this port does not grant a new license to those assets.
 The local Draco decoder and Basis transcoder are redistributed from the installed
 Three.js examples. Their upstream licenses remain Apache License 2.0, as covered
 by the Draco and Basis Universal notices above.
+
+## Settlement surface textures
+
+Eleven texture sets from Poly Haven (https://polyhaven.com), CC0 1.0 Universal,
+reduced to 512 px WebP by `scripts/fetch-settlement-textures.mjs` into
+`public/assets/textures/settlement/`: `cobblestone_floor_08`,
+`cobblestone_floor_04`, `cobblestone_05`, `stone_tiles_02`,
+`patterned_cobblestone_02`, `dirt_floor`, `rough_wood`, `white_plaster_02`,
+`rock_boulder_dry`, `grey_roof_tiles_02` and `roof_09`. The last five are stored
+desaturated at a fixed brightness, as surfaces the engine tints. The set each
+name maps to is recorded in
+`src/editor/world/settlements/surfaces/SettlementDressing.js`.
+
+## Procedural Texture Lab runtime
+
+`procedural-texture-lab` (https://github.com/danielsobrado/drusniel-procedural-textures),
+Apache License 2.0. Its runtime regenerates the material recipes under
+`public/assets/materials/settlement/`, which are exported from the Lab's presets.

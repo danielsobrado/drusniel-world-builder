@@ -13,6 +13,8 @@ import { harmonizeVertexColors } from './ProceduralWorkshopGeometry.js';
 import { createProceduralWorkshopParts } from './ProceduralWorkshopGenerator.js';
 import { createWorkshopCompositionParts } from './ProceduralWorkshopCompositionGenerator.js';
 import { planWorkshopComposition } from './ProceduralWorkshopComposition.js';
+import { shapeCapability } from './shapes/ShapeRegistry.js';
+import { createShapeComponents } from './shapes/ShapeComponents.js';
 import {
   MAX_WORKSHOP_MATERIAL_DRAW_PARTS,
   resolveWorkshopMaterialRegion,
@@ -886,10 +888,12 @@ function attachMetadata(parts, rawStats, components, plan) {
 
 export function createProceduralWorkshopComponentParts(input, {
   preserveComponents = false,
+  resolvedShapePlans = null,
+  shapeDomains = undefined,
 } = {}) {
   const recipe = normalizeProceduralRecipe(input);
   const rawParts = recipe.composition.primitives.length > 0
-    ? createWorkshopCompositionParts(recipe)
+    ? createWorkshopCompositionParts(recipe, resolvedShapePlans, shapeDomains)
     : createProceduralWorkshopParts({
       ...recipe,
       remesh: false,
@@ -897,7 +901,9 @@ export function createProceduralWorkshopComponentParts(input, {
   let resolvedMaterials = new Map();
   try {
     const entries = rawParts.map(geometryEntry);
-    const components = classifyComponents(entries, recipe);
+    const components = recipe.composition.primitives.length > 0
+      && recipe.composition.primitives.every(primitive => shapeCapability(primitive.kind))
+      ? createShapeComponents(recipe, entries) : classifyComponents(entries, recipe);
     resolvedMaterials = resolveEntryMaterials(entries, components, recipe);
     const plan = planWorkshopComposition(recipe);
     const parts = preserveComponents

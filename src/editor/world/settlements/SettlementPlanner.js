@@ -5,7 +5,7 @@ import { planBuildings, planFarms } from './SettlementPlots.js';
 import { hashInts, settlementProfile } from './SettlementProfile.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 1;
+export const SETTLEMENT_PLAN_VERSION = 2;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,

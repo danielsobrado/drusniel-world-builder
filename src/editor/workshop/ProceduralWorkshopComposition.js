@@ -1,3 +1,6 @@
+import { shapeCapability, planRegisteredShape } from './shapes/ShapeRegistry.js';
+import { resolveShapeChemistry } from './shapes/ShapeChemistry.js';
+
 const MAX_PRIMITIVES = 48;
 const MAX_WALL_POINTS = 64;
 const VALID_ID = /^[a-z][a-z0-9-]{0,63}$/;
@@ -107,6 +110,8 @@ function normalizeWall(source, field) {
 
 function normalizePrimitive(input, index) {
   const source = requireObject(input, `Composition primitive ${index + 1}`);
+  const capability = shapeCapability(source.kind);
+  if (capability) return capability.normalize(source);
   if (source.kind === 'rectangle' || source.kind === 'circle') {
     return normalizeVolume(source, source.kind, `Composition primitive ${index + 1}`);
   }
@@ -316,7 +321,24 @@ export function planWorkshopComposition(recipe, dirtyIds = []) {
   const roomBoundaries = [];
   const foundationContacts = [];
   const coverSurfaces = [];
+  const portals = [];
+  const stairSockets = [];
+  const shapeResolution = resolveShapeChemistry(composition.primitives
+    .filter(primitive => shapeCapability(primitive.kind)).map(planRegisteredShape));
+  const shapePlans = new Map(shapeResolution.plans.map(plan => [plan.id, plan]));
   for (const primitive of composition.primitives) {
+    const shapePlan = shapePlans.get(primitive.id);
+    if (shapePlan) {
+      materialRegions.push(...shapePlan.regions);
+      collisionSlabs.push(...shapePlan.rpg.collisionSlabs);
+      walkableFloors.push(...shapePlan.rpg.walkableFloors);
+      roomBoundaries.push(...shapePlan.rpg.roomBoundaries);
+      foundationContacts.push(...shapePlan.rpg.foundationContacts);
+      coverSurfaces.push(...shapePlan.rpg.coverSurfaces);
+      portals.push(...shapePlan.rpg.portals);
+      stairSockets.push(...shapePlan.rpg.stairSockets);
+      continue;
+    }
     materialRegions.push(...(
       primitive.kind === 'rectangle'
         ? rectangleSurfaces(primitive)
@@ -344,18 +366,21 @@ export function planWorkshopComposition(recipe, dirtyIds = []) {
     dirtyIds: Object.freeze(normalizedDirtyIds),
     primitives: composition.primitives,
     structural: Object.freeze({
-      contacts: Object.freeze([]),
-      suppressedFaces: Object.freeze([]),
-      supports: Object.freeze([]),
+      contacts: freezeArray(shapeResolution.contacts),
+      suppressedFaces: freezeArray(shapeResolution.plans.flatMap(plan => plan.neighbors.map(neighbor => ({
+        primitiveId: plan.id, neighborId: neighbor.id, ruleId: 'volume-contact', source: 'auto',
+      })))),
+      supports: freezeArray(shapeResolution.supports),
     }),
+    shapePlans: freezeArray(shapeResolution.plans),
     materialRegions: freezeArray(materialRegions.sort((a, b) => a.id.localeCompare(b.id))),
     attachments: Object.freeze([]),
     rpg: Object.freeze({
       collisionSlabs: freezeArray(collisionSlabs),
       walkableFloors: freezeArray(walkableFloors),
       roomBoundaries: freezeArray(roomBoundaries),
-      portals: Object.freeze([]),
-      stairSockets: Object.freeze([]),
+      portals: freezeArray(portals),
+      stairSockets: freezeArray(stairSockets),
       foundationContacts: freezeArray(foundationContacts),
       coverSurfaces: freezeArray(coverSurfaces),
     }),

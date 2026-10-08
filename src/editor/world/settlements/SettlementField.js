@@ -6,6 +6,8 @@ import { settlementProfile } from './SettlementProfile.js';
 const PAD_BLEND = 3;
 /** Ground kept clear (painted as street) round every footprint, in metres. */
 const FOOTPRINT_CLEAR = 0.8;
+/** The square is kept clear this far past its rim, up to the house fronts round it. */
+const SQUARE_PAVED_MARGIN = 2.5;
 const INDEX_BUCKET_METRES = 512;
 /**
  * Coastal burgs often sit in the sea on the coarse terrain atlas, whose pixels
@@ -81,6 +83,22 @@ export class SettlementField {
 
   entriesAt(cellX, cellZ) {
     return this.buckets.get(`${Math.floor(cellX / this.bucketCells)}:${Math.floor(cellZ / this.bucketCells)}`) ?? null;
+  }
+
+  /** Entries whose reach touches a circle, nearest first. Plans nothing. */
+  entriesNear(cellX, cellZ, radiusCells) {
+    const found = new Map();
+    const span = radiusCells / this.bucketCells;
+    for (let bx = Math.floor(cellX / this.bucketCells - span); bx <= Math.floor(cellX / this.bucketCells + span); bx += 1) {
+      for (let bz = Math.floor(cellZ / this.bucketCells - span); bz <= Math.floor(cellZ / this.bucketCells + span); bz += 1) {
+        for (const entry of this.buckets.get(`${bx}:${bz}`) ?? []) {
+          if (found.has(entry)) continue;
+          const distance = Math.hypot(entry.settlement.cellX - cellX, entry.settlement.cellZ - cellZ);
+          if (distance <= radiusCells + entry.reachCells) found.set(entry, distance);
+        }
+      }
+    }
+    return [...found].sort((left, right) => left[1] - right[1]).map(([entry, distance]) => ({ entry, distance }));
   }
 
   /** Settlements whose reach touches a circle, with their plans. */
@@ -172,7 +190,7 @@ export class SettlementField {
     for (const entry of this.candidates(cellX, cellZ)) {
       const { index } = this.ensurePlan(entry);
       const [x, z] = this.local(entry, cellX, cellZ);
-      if (index.squareRadius > 0 && Math.hypot(x, z) <= index.squareRadius) return 1;
+      if (index.squareRadius > 0 && Math.hypot(x, z) <= index.squareRadius + SQUARE_PAVED_MARGIN) return 1;
       for (const item of index.grid.near(x, z, 0)) {
         if (item.street) {
           if (item.distance(x, z) <= item.halfWidth) return 1;
