@@ -26,13 +26,12 @@
  * runtime over `bakeMetres` of its procedural domain. `neutralGain` makes such
  * a set tintable — its luminance times the gain, with no hue of its own.
  *
- * Only presets that generate in a few seconds belong here: a town waits for its
- * dressing. Measured on a desktop GPU, the plaster below takes 4–5 s (the Lab's
- * two stone fields took 1 s but were too blotchy for dressed masonry); the Lab's
- * cut cobble (nine layers) took 45 s and its limestone gravel (six) 21 s, so
- * paving stays photographed. The time is the driver optimising the shader:
- * building the layer stack once instead of per stage, and emitting the noise as
- * shader functions instead of inline, were both tried and changed nothing.
+ * A town waits for its dressing, so a set must generate in seconds. Baked a
+ * layer a pass (SettlementProceduralBaker.bakeStaged) these take 2–4 s on a
+ * desktop GPU; as one shader the cut cobble took 45 s. (The Lab's two stone
+ * fields were dropped as too blotchy for dressed masonry.) Emitting the noise as
+ * shader functions instead of inline was tried first and changed nothing: it
+ * is the size of the one shader, not how it is written.
  */
 export const SETTLEMENT_SURFACE_SETS = Object.freeze({
   'cobble-grey': Object.freeze({ source: 'cobblestone_floor_08', tileMetres: 1.9 }),
@@ -50,6 +49,8 @@ export const SETTLEMENT_SURFACE_SETS = Object.freeze({
   'roof-slate': Object.freeze({ source: 'grey_roof_tiles_02', neutralMean: 206, repeat: 0.62 }),
   'roof-clay': Object.freeze({ source: 'roof_09', neutralMean: 206, repeat: 0.62 }),
   'plaster-aged': Object.freeze({ ptl: 'designer-aged-plaster', bakeMetres: 2.4, neutralGain: 1.3 }),
+  'cobble-cut': Object.freeze({ ptl: 'cut-cobble-stone', bakeMetres: 2.4, tileMetres: 2.4 }),
+  'earth-gravel': Object.freeze({ ptl: 'limestone-gravel', bakeMetres: 3, tileMetres: 3 }),
 });
 
 /** The roles a dressing fills; the roof set follows the settlement style's roofing. */
@@ -74,8 +75,8 @@ export const TIMBER_TONES = Object.freeze({ brown: '#c9925f', grey: '#b9ae9c', d
 
 const ROOF_SETS = Object.freeze({ slate: 'roof-slate', terracotta: 'roof-clay' });
 
-const dressing = (key, cobble, flagstone, timberTone, { plaster = 'plaster-lime' } = {}) => (
-  Object.freeze({ key, cobble, flagstone, timberTone, stone: 'stone-rock', plaster, earth: 'earth-dry' })
+const dressing = (key, cobble, flagstone, timberTone, { plaster = 'plaster-lime', earth = 'earth-dry' } = {}) => (
+  Object.freeze({ key, cobble, flagstone, timberTone, stone: 'stone-rock', plaster, earth })
 );
 
 const DRESSINGS = Object.freeze([
@@ -83,7 +84,7 @@ const DRESSINGS = Object.freeze([
   dressing('mossy-lanes', 'cobble-mossy', 'flag-pebble', 'grey'),
   dressing('dark-quarter', 'cobble-dark', 'flag-slate', 'dark'),
   dressing('river-stone', 'cobble-mossy', 'flag-slate', 'dark'),
-  dressing('old-market', 'cobble-grey', 'flag-pebble', 'grey', { plaster: 'plaster-aged' }),
+  dressing('old-market', 'cobble-cut', 'flag-pebble', 'grey', { plaster: 'plaster-aged', earth: 'earth-gravel' }),
   dressing('black-setts', 'cobble-dark', 'flag-pebble', 'brown', { plaster: 'plaster-aged' }),
 ]);
 

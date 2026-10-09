@@ -1,13 +1,19 @@
 import { buildingEntry } from '../SettlementBuildingCatalog.js';
+import { InteriorBuilder } from './interior/InteriorBuilder.js';
+import { drawPiece } from './interior/RoomFurnitureMesh.js';
+import { planRoom } from './interior/RoomPlan.js';
 
 /**
- * What is behind every open door of a settlement: a floor, four walls and a
- * ceiling, and the doorway itself — the dark opening, its timber frame and the
- * leaf standing open.
+ * What is behind every open door of a settlement: a timber-framed room over a
+ * stone base course, plank floor and beamed ceiling, its windows, its hearth
+ * and furniture (RoomPlan), and the doorway itself — the dark opening, its
+ * frame and the leaf standing open.
  *
  * The pooled house meshes are shells: their walls face outward only and there
- * is nothing inside them. Rooms differ in size with every plot, so they are not
- * pooled; a whole town's worth is one small static mesh, like its paving.
+ * is nothing inside them. A room is the clear floor measured behind each
+ * house's door (SettlementDoors.generated), so it fits inside the shell rather
+ * than through it. Rooms differ with every house, so they are not pooled; a
+ * whole town's worth is one small static mesh, like its paving.
  *
  * Pure geometry in settlement-local space: x is plan x, z is minus plan z, y is
  * absolute. No three.
@@ -21,120 +27,184 @@ export const HOUSE_SHELL = Object.freeze({
   /** Clear width left for the character either side of the door's own. */
   doorwayEase: 0.3,
   ceiling: 2.7,
+  /** Kept between the room's ceiling and the lowest timber of the storey above. */
+  ceilingClearance: 0.06,
 });
 
-const FLOOR = [0.2, 0.13, 0.08];
-const PLASTER = [0.5, 0.46, 0.38];
-const CEILING = [0.09, 0.07, 0.05];
-const TIMBER = [0.16, 0.1, 0.06];
+/** Tints over the town's surface sets (wood, plaster, stone), and plain colours. */
+const PLANKS = [0.46, 0.33, 0.22];
+const BEAM = [0.3, 0.19, 0.12];
+const DAUB = [0.64, 0.53, 0.38];
+const BASE_STONE = [0.36, 0.34, 0.31];
+const HEARTH_FLAGS = [0.3, 0.29, 0.27];
 /** The doorway seen from the street: the room beyond, in shadow. */
 const DARK = [0.035, 0.028, 0.022];
-/** The doorway seen from the room: the bright street outside. */
-const DAYLIGHT = [2.6, 2.7, 2.8];
+const EXTERIOR_TIMBER = [0.16, 0.1, 0.06];
+/** Doorway and windows seen from the room: the bright street outside, ground below the sky, and leaded glass. */
+const STREET = [0.4, 0.36, 0.28];
+const SKY = [0.5, 0.62, 0.85];
+const GLASS = [0.4, 0.5, 0.46];
+/** Height of the stone base course round the room, and spacing of posts and joists. */
+const FRAME = Object.freeze({ base: 0.85, posts: 1.9, joists: 0.95 });
 
 /**
- * The walls of one enterable house in its footprint's frame (x along the
- * frontage, z toward the front): the outer rectangle the collider blocks, and
- * the doorway in its front wall. Null for a building with no door to open.
+ * One enterable house in its footprint's frame (x along the frontage, z toward
+ * the front): the room's floor, and the doorway through its front wall. Null
+ * for a building with no door to open or no room behind it.
  */
 export function houseShell(building) {
   const { door } = building;
-  if (!door) return null;
-  const halfWidth = Math.max(1, building.width - HOUSE_SHELL.plotMargin) / 2;
-  const back = -Math.max(1, building.depth - HOUSE_SHELL.plotMargin) / 2;
-  // The front wall is where the mesh put its door, not where the plot ends.
-  const front = Math.max(back + 2, door.z);
+  if (!door?.room) return null;
+  const [x0, x1, z0, z1] = door.room;
   const clear = Math.max(door.width, 0.9) + HOUSE_SHELL.doorwayEase;
-  const left = Math.max(-halfWidth + HOUSE_SHELL.wallThickness, door.x - clear / 2);
-  const right = Math.min(halfWidth - HOUSE_SHELL.wallThickness, door.x + clear / 2);
-  return right - left >= 0.9 ? { halfWidth, back, front, doorLeft: left, doorRight: right } : null;
+  const doorLeft = Math.max(x0 + 0.1, door.x - clear / 2);
+  const doorRight = Math.min(x1 - 0.1, door.x + clear / 2);
+  if (doorRight - doorLeft < 0.9) return null;
+  // The front wall runs from the room to the outermost stone of the façade.
+  return { x0, x1, back: z0, inner: z1, front: Math.max(z1 + 0.2, door.face ?? door.z), doorLeft, doorRight };
 }
 
-class InteriorBuilder {
-  constructor() {
-    this.positions = [];
-    this.normals = [];
-    this.colors = [];
-  }
-
-  /** A quad through four settlement-local points, wound so that it faces along `facing`. */
-  quad(points, facing, color) {
-    const [a, b, c, d] = points;
-    const normal = [
-      (b[1] - a[1]) * (d[2] - a[2]) - (b[2] - a[2]) * (d[1] - a[1]),
-      (b[2] - a[2]) * (d[0] - a[0]) - (b[0] - a[0]) * (d[2] - a[2]),
-      (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]),
-    ];
-    const along = normal[0] * facing[0] + normal[1] * facing[1] + normal[2] * facing[2];
-    const order = along >= 0 ? [a, b, c, a, c, d] : [a, d, c, a, c, b];
-    const length = Math.hypot(...facing) || 1;
-    for (const point of order) {
-      this.positions.push(...point);
-      this.normals.push(facing[0] / length, facing[1] / length, facing[2] / length);
-      this.colors.push(...color);
-    }
+/**
+ * One wall of the room, from inside: a stone base course, daub above, posts
+ * standing proud of it and a rail where the two meet — a timber frame, drawn in
+ * a few strips. The wall runs from (ax, az) to (bx, bz); `facing` points into
+ * the room.
+ */
+function framedWall(b, ax, az, bx, bz, facing, floor, top) {
+  const base = floor + FRAME.base;
+  b.use('stone').wall(ax, az, bx, bz, floor, base, facing, BASE_STONE, 0.5);
+  b.use('plaster').wall(ax, az, bx, bz, base, top, facing, DAUB, 0.45);
+  const length = Math.hypot(bx - ax, bz - az);
+  if (length < 0.3) return;
+  const [ux, uz] = [(bx - ax) / length, (bz - az) / length];
+  const proud = 0.05;
+  const strip = (from, to, bottom, upper) => {
+    b.wall(ax + ux * from + facing[0] * proud, az + uz * from + facing[1] * proud,
+      ax + ux * to + facing[0] * proud, az + uz * to + facing[1] * proud, bottom, upper, facing, BEAM, 0.9);
+  };
+  b.use('wood');
+  strip(0, length, base - 0.07, base + 0.07);
+  strip(0, length, top - 0.16, top);
+  const posts = Math.max(1, Math.round(length / FRAME.posts));
+  // A knee brace from a post up to the wall plate, where the bay is wide enough to take one.
+  const brace = (at, toward) => {
+    const point = (along, y) => [ax + ux * along + facing[0] * proud, y, az + uz * along + facing[1] * proud];
+    b.quad(point(at, top - 0.76), point(at, top - 0.62), point(at + toward * 0.6, top - 0.16), point(at + toward * 0.7, top - 0.16),
+      [facing[0], 0, facing[1]], BEAM, 0.9);
+  };
+  for (let post = 0; post <= posts; post += 1) {
+    const at = Math.min(length - 0.07, Math.max(0.07, length * post / posts));
+    strip(at - 0.07, at + 0.07, base, top);
+    if (length / posts < 1.5 || top - base < 1.4) continue;
+    if (post > 0) brace(at - 0.07, -1);
+    if (post < posts) brace(at + 0.07, 1);
   }
 }
 
-function addHouse(builder, building, shell) {
-  const sin = Math.sin(building.yaw);
-  const cos = Math.cos(building.yaw);
-  // Footprint frame → settlement-local: +x is (cos, −sin) and +z is (sin, cos) in plan space, and local z is minus plan z.
-  const at = (x, y, z) => [building.x + cos * x + sin * z, y, -(building.z - sin * x + cos * z)];
-  const toward = (x, z) => [cos * x + sin * z, 0, -(-sin * x + cos * z)];
-  const t = HOUSE_SHELL.wallThickness;
+/** A window in a side wall, from inside: daylight behind a leaded frame, over a deep sill. */
+function sideWindow(b, x, facing, shell, sill) {
+  const middle = (shell.back + shell.inner) / 2;
+  const inset = x + facing * 0.07;
+  b.use('sky').wall(inset, middle - 0.45, inset, middle + 0.45, sill, sill + 0.8, [facing, 0], GLASS);
+  b.use('wood');
+  const frame = inset + facing * 0.012;
+  for (const [z0, z1, bottom, top] of [[-0.53, -0.45, -0.08, 0.88], [0.45, 0.53, -0.08, 0.88], [-0.53, 0.53, 0.8, 0.88], [-0.03, 0.03, 0, 0.8], [-0.45, 0.45, 0.37, 0.43]]) {
+    b.wall(frame, middle + z0, frame, middle + z1, sill + bottom, sill + top, [facing, 0], BEAM, 0.9);
+  }
+  b.box(Math.min(x, x + facing * 0.2), Math.max(x, x + facing * 0.2), middle - 0.55, middle + 0.55, sill - 0.12, sill - 0.06, BEAM, { underside: true });
+}
+
+function shade(color, factor) {
+  return color.map((channel) => channel * factor);
+}
+
+/** As high as the shell is clear: a ceiling above its upper floor would be hidden behind it. */
+function roomHeight(building) {
+  const clearTo = (building.door.ceiling ?? HOUSE_SHELL.ceiling) - HOUSE_SHELL.ceilingClearance - 0.05;
+  return Math.min(clearTo, buildingEntry(building.kind, building.variant).height - 0.2);
+}
+
+function addHouse(b, building, shell) {
+  const { x0, x1, back, inner, front, doorLeft, doorRight } = shell;
   const floor = building.pad + 0.05;
-  const top = building.pad + Math.min(HOUSE_SHELL.ceiling, buildingEntry(building.kind, building.variant).height - 0.2);
-  const [x0, x1, z0, z1] = [-shell.halfWidth + t, shell.halfWidth - t, shell.back + t, shell.front - t];
-  const doorTop = Math.min(top - 0.1, building.pad + building.door.height);
-  const wall = (ax, az, bx, bz, bottom, upper, facing, color = PLASTER) => builder.quad(
-    [at(ax, bottom, az), at(bx, bottom, bz), at(bx, upper, bz), at(ax, upper, az)], toward(...facing), color);
+  const height = roomHeight(building);
+  const top = floor + height;
+  const doorTop = Math.min(top - 0.25, building.pad + building.door.height);
+  const plan = planRoom(building, shell, height);
+  b.enter(building, plan.lights.map((light) => ({ ...light, at: [light.at[0], floor + light.at[1], light.at[2]] })));
 
-  builder.quad([at(x0, floor, z0), at(x1, floor, z0), at(x1, floor, z1), at(x0, floor, z1)], [0, 1, 0], FLOOR);
-  builder.quad([at(x0, top, z0), at(x1, top, z0), at(x1, top, z1), at(x0, top, z1)], [0, -1, 0], CEILING);
-  wall(x0, z0, x1, z0, floor, top, [0, 1]);
-  wall(x0, z0, x0, z1, floor, top, [1, 0]);
-  wall(x1, z0, x1, z1, floor, top, [-1, 0]);
-  // The front wall, from inside: either side of the doorway, and over it.
-  wall(x0, z1, shell.doorLeft, z1, floor, top, [0, -1]);
-  wall(shell.doorRight, z1, x1, z1, floor, top, [0, -1]);
-  wall(shell.doorLeft, z1, shell.doorRight, z1, doorTop, top, [0, -1]);
-  // The thickness of the wall in the doorway: both reveals and the soffit.
-  wall(shell.doorLeft, z1, shell.doorLeft, shell.front, floor, doorTop, [1, 0], TIMBER);
-  wall(shell.doorRight, z1, shell.doorRight, shell.front, floor, doorTop, [-1, 0], TIMBER);
-  builder.quad([at(shell.doorLeft, doorTop, z1), at(shell.doorRight, doorTop, z1), at(shell.doorRight, doorTop, shell.front), at(shell.doorLeft, doorTop, shell.front)], [0, -1, 0], TIMBER);
-  builder.quad([at(shell.doorLeft, floor, z1), at(shell.doorRight, floor, z1), at(shell.doorRight, floor, shell.front + 0.3), at(shell.doorLeft, floor, shell.front + 0.3)], [0, 1, 0], FLOOR);
+  b.use('wood').slab(x0, x1, back, inner, floor, true, PLANKS, 0.7);
+  // The ceiling's boards, and the joists that carry them across the room.
+  b.slab(x0, x1, back, inner, top, false, shade(PLANKS, 0.7), 0.7);
+  for (let z = back + FRAME.joists / 2; z < inner; z += FRAME.joists) {
+    b.box(x0, x1, z - 0.08, z + 0.08, top - 0.2, top, BEAM, { underside: true, density: 0.9 });
+  }
+  const hearth = plan.pieces.find(({ type }) => type === 'hearth');
+  if (hearth) b.use('stone').slab(hearth.x - 1.2, hearth.x + 1.2, back, Math.min(inner, back + 1.5), floor + 0.006, true, HEARTH_FLAGS, 0.5);
 
+  framedWall(b, x0, back, x1, back, [0, 1], floor, top);
+  framedWall(b, x0, inner, x0, back, [1, 0], floor, top);
+  framedWall(b, x1, back, x1, inner, [-1, 0], floor, top);
+  // The front wall, either side of the doorway, and the lintel over it.
+  framedWall(b, x0, inner, doorLeft, inner, [0, -1], floor, top);
+  framedWall(b, doorRight, inner, x1, inner, [0, -1], floor, top);
+  b.use('plaster').wall(doorLeft, inner, doorRight, inner, doorTop, top, [0, -1], DAUB, 0.45);
+  b.use('wood');
+  b.wall(doorLeft, inner - 0.05, doorRight, inner - 0.05, doorTop, doorTop + 0.16, [0, -1], BEAM, 0.9);
+  // The thickness of the wall in the doorway: both reveals, the soffit and the threshold.
+  b.wall(doorLeft, inner, doorLeft, front, floor, doorTop, [1, 0], BEAM, 0.9);
+  b.wall(doorRight, inner, doorRight, front, floor, doorTop, [-1, 0], BEAM, 0.9);
+  b.slab(doorLeft, doorRight, inner, front, doorTop, false, BEAM, 0.9);
+  b.use('stone').slab(doorLeft, doorRight, inner, front + 0.3, floor, true, HEARTH_FLAGS, 0.5);
   // From inside: daylight in the doorway. The shell's masonry runs unbroken
   // behind where its door hung, so the opening cannot simply be looked through.
-  wall(shell.doorLeft, z1 + 0.02, shell.doorRight, z1 + 0.02, floor, doorTop, [0, -1], DAYLIGHT);
-  // From the street: the shadowed opening over the wall the shell still draws
-  // there. One-sided, so from inside the doorway looks out on the town.
-  // Just proud of the outermost stone of the wall there (SettlementDoors.generated).
-  const proud = Math.max(shell.front, building.door.face ?? shell.front) + 0.1;
-  wall(shell.doorLeft, proud, shell.doorRight, proud, floor, doorTop, [0, 1], DARK);
-  // Its frame, and the leaf standing open against the wall beside it.
-  const post = 0.12;
-  wall(shell.doorLeft - post, proud + 0.02, shell.doorLeft, proud + 0.02, building.pad, doorTop + post, [0, 1], TIMBER);
-  wall(shell.doorRight, proud + 0.02, shell.doorRight + post, proud + 0.02, building.pad, doorTop + post, [0, 1], TIMBER);
-  wall(shell.doorLeft, proud + 0.02, shell.doorRight, proud + 0.02, doorTop, doorTop + post, [0, 1], TIMBER);
-  const leaf = shell.doorRight - shell.doorLeft;
-  const hinge = shell.doorRight + post;
-  for (const facing of [[1, 0], [-1, 0]]) {
-    wall(hinge + 0.03 * facing[0], proud, hinge + 0.03 * facing[0], proud + leaf * 0.92, floor, doorTop, facing, TIMBER.map((channel) => channel * 1.25));
+  const horizon = floor + (doorTop - floor) * 0.36;
+  b.use('sky').wall(doorLeft, inner + 0.02, doorRight, inner + 0.02, floor, horizon, [0, -1], STREET);
+  b.wall(doorLeft, inner + 0.02, doorRight, inner + 0.02, horizon, doorTop, [0, -1], SKY);
+  if (plan.windows) {
+    sideWindow(b, x0, 1, shell, floor + 1.05);
+    sideWindow(b, x1, -1, shell, floor + 1.05);
   }
+  for (const piece of plan.pieces) drawPiece(b, piece, floor, height);
+
+  // From the street, in the sun like the rest of the house: the shadowed
+  // opening over the wall the shell still draws there, just proud of its
+  // outermost stone, its frame, and the leaf standing open beside it.
+  b.use('exterior');
+  const proud = front + 0.1;
+  b.wall(doorLeft, proud, doorRight, proud, floor, doorTop, [0, 1], DARK);
+  const post = 0.12;
+  b.wall(doorLeft - post, proud + 0.02, doorLeft, proud + 0.02, building.pad, doorTop + post, [0, 1], EXTERIOR_TIMBER);
+  b.wall(doorRight, proud + 0.02, doorRight + post, proud + 0.02, building.pad, doorTop + post, [0, 1], EXTERIOR_TIMBER);
+  b.wall(doorLeft, proud + 0.02, doorRight, proud + 0.02, doorTop, doorTop + post, [0, 1], EXTERIOR_TIMBER);
+  const leaf = doorRight - doorLeft;
+  const hinge = doorRight + post;
+  const boards = shade(EXTERIOR_TIMBER, 1.25);
+  b.wall(hinge + 0.03, proud, hinge + 0.03, proud + leaf * 0.92, floor, doorTop, [1, 0], boards);
+  b.wall(hinge - 0.03, proud, hinge - 0.03, proud + leaf * 0.92, floor, doorTop, [-1, 0], boards);
+}
+
+/**
+ * What blocks inside one room, as boxes in the footprint's frame
+ * (`[x0, x1, z0, z1, height]`): the pieces of its plan too big to walk through.
+ */
+export function roomSolids(building, shell) {
+  return planRoom(building, shell, roomHeight(building)).pieces.filter(({ solid }) => solid).map(({ solid }) => solid);
 }
 
 /**
  * @param {object} plan a settlement plan whose buildings carry `door` and `pad`
- * @returns {?{ positions: Float32Array, normals: Float32Array, colors: Float32Array }} null when no house can be entered
+ * @returns {?Record<string, Record<string, Float32Array>>} the rooms as one set of arrays
+ *   per material (InteriorBuilder), or null when no house can be entered
  */
 export function settlementInteriorArrays(plan) {
   const builder = new InteriorBuilder();
+  let rooms = 0;
   for (const building of plan.buildings) {
     const shell = houseShell(building);
-    if (shell) addHouse(builder, building, shell);
+    if (!shell) continue;
+    addHouse(builder, building, shell);
+    rooms += 1;
   }
-  if (builder.positions.length === 0) return null;
-  return { positions: new Float32Array(builder.positions), normals: new Float32Array(builder.normals), colors: new Float32Array(builder.colors) };
+  return rooms > 0 ? builder.arrays() : null;
 }

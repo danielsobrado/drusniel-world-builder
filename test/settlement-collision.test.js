@@ -109,30 +109,36 @@ function inside(collider, x, z) {
   return Math.abs(dx * cos - dz * sin) <= collider.dimensions[0] / 2 && Math.abs(dx * sin + dz * cos) <= collider.dimensions[2] / 2;
 }
 
-test('a house is four walls with a doorway where the plan put its door', () => {
+test('a house is solid round its room, with a doorway where the mesh has its door', () => {
   const { provider, plan } = fixture();
-  const index = plan.buildings.findIndex((building) => building.kind === 'house' && building.front);
+  const index = plan.buildings.findIndex((building) => building.kind === 'house' && building.door?.room);
   const house = plan.buildings[index];
   const walls = chunksOf(provider, centre).filter(({ sourceId }) => sourceId.includes(`:b${index}.`));
-  assert.equal(walls.length, 5);
+  assert.ok(walls.length >= 4);
   const front = [Math.sin(house.yaw), Math.cos(house.yaw)];
   const across = [Math.cos(house.yaw), -Math.sin(house.yaw)];
   // A point in the footprint's frame (x along the frontage, z toward the front), as canonical metres.
   const at = (x, z) => [CITY.cellX * TILE + house.x + across[0] * x + front[0] * z, -(CITY.cellZ * TILE + house.z + across[1] * x + front[1] * z)];
   const blocked = (x, z) => walls.some((wall) => inside(wall, ...at(x, z)));
   const { door } = house;
-  // Through the doorway where the mesh has its door, and across the floor inside...
-  for (const z of [door.z + 0.5, door.z - 0.2, door.z - 1.5]) assert.ok(!blocked(door.x, z), `the way in is blocked at z ${z}`);
-  // ...but not through the front wall beside the door, nor out of the back.
-  const beside = door.x > 0 ? door.x - 1.6 : door.x + 1.6;
-  assert.ok(blocked(beside, door.z - 0.2), 'the front wall is open beside the door');
-  assert.ok(blocked(0, -(house.depth - 0.5) / 2 + 0.2), 'the back wall is open');
+  const [x0, x1, z0, z1] = door.room;
+  // Through the doorway where the mesh has its door, and anywhere on the room's floor...
+  for (const z of [door.face + 0.4, (z1 + door.face) / 2, z1 - 0.3]) assert.ok(!blocked(door.x, z), `the way in is blocked at z ${z}`);
+  // The room's floor is open, but for what stands on it.
+  const furniture = chunksOf(provider, centre).filter(({ sourceId }) => sourceId.includes(`:r${index}.`));
+  assert.ok(furniture.length >= 2, 'nothing in the room blocks');
+  assert.ok(!blocked(door.x, z1 - 1) && !furniture.some((piece) => inside(piece, ...at(door.x, z1 - 1))), 'the floor inside the door is blocked');
+  // ...but not through the front wall beside the door, nor out of the room any other way.
+  const beside = door.x - x0 > x1 - door.x ? door.x - 1.4 : door.x + 1.4;
+  assert.ok(blocked(beside, (z1 + door.face) / 2), 'the front wall is open beside the door');
+  assert.ok(blocked((x0 + x1) / 2, z0 - 0.2), 'the back wall is open');
+  assert.ok(blocked(x0 - 0.2, (z0 + z1) / 2) && blocked(x1 + 0.2, (z0 + z1) / 2), 'a side wall is open');
 });
 
 test('a solid-house provider leaves no doorway', () => {
   const { provider, plan } = fixture();
   provider.enterable = false;
-  const index = plan.buildings.findIndex((building) => building.kind === 'house' && building.front);
+  const index = plan.buildings.findIndex((building) => building.kind === 'house' && building.door?.room);
   assert.equal(chunksOf(provider, centre).filter(({ sourceId }) => sourceId.includes(`:b${index}.`)).length, 1);
 });
 

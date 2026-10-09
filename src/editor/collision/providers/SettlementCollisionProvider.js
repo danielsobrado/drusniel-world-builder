@@ -3,7 +3,7 @@ import { buildingEntry } from '../../world/settlements/SettlementBuildingCatalog
 import { SETTLEMENT_PLAN_VERSION } from '../../world/settlements/SettlementPlanner.js';
 import { isStoneKind } from '../../world/settlements/SettlementStones.js';
 import { WALL_STAIR } from '../../world/settlements/SettlementTrim.js';
-import { HOUSE_SHELL, houseShell } from '../../world/settlements/view/SettlementInteriorGeometry.js';
+import { HOUSE_SHELL, houseShell, roomSolids } from '../../world/settlements/view/SettlementInteriorGeometry.js';
 import { planToWorld } from '../../world/settlements/view/SettlementPlacements.js';
 import { createCollisionSourceId } from '../CollisionIds.js';
 import { collisionChunkCanonicalBounds, collisionChunkForCanonical } from '../colliders/ColliderBounds.js';
@@ -35,24 +35,26 @@ const SOLID_SHAPES = Object.freeze({
 const STAIR_STEPS_PER_TREAD = 2;
 
 /**
- * A house as four walls with a doorway, instead of one block: the walls stand
- * where the interior the view draws has them (`houseShell`), the doorway where
- * the mesh has its door, and the floor inside is plain ground. Boxes are
- * `[centreX, centreZ, width, depth]` in the footprint's frame, front toward +z.
+ * A house as solid round its room, instead of one block: everything between
+ * the plot's edge and the room the view draws (`houseShell`) blocks, the room's
+ * floor is plain ground, and the front wall is left open where the mesh has
+ * its door. Boxes are `[centreX, centreZ, width, depth]` in the footprint's
+ * frame, front toward +z.
  */
-function hollowShapes(shell) {
+function hollowShapes(shell, plotWidth, plotDepth) {
   const t = HOUSE_SHELL.wallThickness;
-  const depth = shell.front - shell.back;
-  const middle = (shell.front + shell.back) / 2;
-  const leftRun = shell.doorLeft + shell.halfWidth;
-  const rightRun = shell.halfWidth - shell.doorRight;
+  const left = Math.min(-plotWidth / 2, shell.x0 - t);
+  const right = Math.max(plotWidth / 2, shell.x1 + t);
+  const rear = Math.min(-plotDepth / 2, shell.back - t);
+  const { front } = shell;
+  const span = (from, to, near, far) => [(from + to) / 2, (near + far) / 2, to - from, far - near];
   return [
-    [0, shell.back + t / 2, shell.halfWidth * 2, t],
-    [-shell.halfWidth + t / 2, middle, t, depth],
-    [shell.halfWidth - t / 2, middle, t, depth],
-    [-shell.halfWidth + leftRun / 2, shell.front - t / 2, leftRun, t],
-    [shell.halfWidth - rightRun / 2, shell.front - t / 2, rightRun, t],
-  ];
+    span(left, right, rear, shell.back),
+    span(left, shell.x0, shell.back, front),
+    span(shell.x1, right, shell.back, front),
+    span(shell.x0, shell.doorLeft, shell.inner, front),
+    span(shell.doorRight, shell.x1, shell.inner, front),
+  ].filter(([, , width, depth]) => width > 0.05 && depth > 0.05);
 }
 
 /**
@@ -138,7 +140,7 @@ export class SettlementCollisionProvider {
       const plotWidth = Math.max(1, building.width - PLOT_MARGIN);
       const plotDepth = Math.max(1, building.depth - PLOT_MARGIN);
       const shell = this.enterable ? houseShell(building) : null;
-      const shapes = SOLID_SHAPES[building.kind] ?? (shell ? hollowShapes(shell) : [[0, 0, plotWidth, plotDepth]]);
+      const shapes = SOLID_SHAPES[building.kind] ?? (shell ? hollowShapes(shell, plotWidth, plotDepth) : [[0, 0, plotWidth, plotDepth]]);
       const sin = Math.sin(building.yaw);
       const cos = Math.cos(building.yaw);
       const walkable = WALKABLE_TOPS.has(building.kind);
@@ -146,6 +148,18 @@ export class SettlementCollisionProvider {
       shapes.forEach(([localX, localZ, width, depth], part) => {
         const world = planToWorld(settlement, tileSize, building.x + cos * localX + sin * localZ, building.z - sin * localX + cos * localZ);
         solids.push({ id: `b${index}.${part}`, ...world, y: building.pad, yaw: building.yaw, width, depth, height, walkable });
+      });
+    });
+    // What stands in the rooms: a table is not walked through.
+    plan.buildings.forEach((building, index) => {
+      const shell = this.enterable ? houseShell(building) : null;
+      if (!shell) return;
+      const sin = Math.sin(building.yaw);
+      const cos = Math.cos(building.yaw);
+      roomSolids(building, shell).forEach(([x0, x1, z0, z1, height], piece) => {
+        const [localX, localZ] = [(x0 + x1) / 2, (z0 + z1) / 2];
+        const world = planToWorld(settlement, tileSize, building.x + cos * localX + sin * localZ, building.z - sin * localX + cos * localZ);
+        solids.push({ id: `r${index}.${piece}`, ...world, y: building.pad, yaw: building.yaw, width: x1 - x0, depth: z1 - z0, height });
       });
     });
     plan.props.forEach((prop, index) => {

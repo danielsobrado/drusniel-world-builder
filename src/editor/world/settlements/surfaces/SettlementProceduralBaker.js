@@ -62,14 +62,56 @@ function channelNodes(procedural, heightRange) {
   };
 }
 
+/** Accumulators a staged bake carries from one pass to the next, as the targets that hold them. */
+const STAGE_TARGETS = Object.freeze(['stageColor', 'stageSurface', 'stageHeight']);
+
+/** The accumulators of the stages already baked, sampled back from where the last pass left them. */
+function carried(textures) {
+  const at = uv();
+  const surface = texture(textures[1], at);
+  return {
+    color: texture(textures[0], at).rgb,
+    ao: surface.r,
+    roughness: surface.g,
+    metallic: surface.b,
+    displacement: texture(textures[2], at).r,
+  };
+}
+
+/** What one stage writes: the same accumulators, for the next to read. */
+function stageOutputs(surface) {
+  return mrt({
+    stageColor: vec4(surface.color, 1),
+    stageSurface: vec4(surface.ao, surface.roughness, surface.metallic, 1),
+    stageHeight: vec4(surface.displacement, 0, 0, 1),
+  });
+}
+
+/**
+ * The finished surface as the three channel groups of a set. The height's
+ * slope gives the normal; dividing by the position's own derivative keeps its
+ * sign right whichever way the target is stored.
+ */
+function finishedOutputs(procedural, surface) {
+  const physical = procedural.createPhysicalNodes(surface);
+  const height = surface.displacement;
+  const slope = vec2(height.dFdx().div(positionLocal.x.dFdx()), height.dFdy().div(positionLocal.y.dFdy()));
+  const range = Math.max(procedural.displacementExtent, 1e-3);
+  return mrt({
+    color: vec4(surface.color, 1),
+    normal: vec4(vec3(slope.negate(), 1).normalize().mul(0.5).add(0.5), 1),
+    // Packed as three reads it — occlusion, roughness, metalness — with the height in the fourth.
+    arm: vec4(surface.ao, physical.roughness, physical.metalness, height.div(range).mul(0.5).add(0.5).clamp(0, 1)),
+  });
+}
+
 /**
  * Generates settlement surface sets from Procedural Texture Lab recipes, in GPU
  * memory.
  *
  * A recipe is a few kilobytes of layers and graph. The PTL runtime compiles it
- * to a node material; this draws that material's own colour, normal and
- * AO/roughness/metalness nodes onto a square of ground in one pass, slightly
- * oversized, and resolves the overshoot back across the opposite edges so the
+ * to a node material; this draws that material's layers onto a square of
+ * ground a pass at a time (`bakeStaged`), slightly oversized, and resolves the overshoot back across the opposite edges so the
  * tile repeats.
  * Nothing is downloaded but the recipe.
  */
@@ -119,20 +161,29 @@ export class SettlementProceduralBaker {
     const raw = target(Math.round(SIZE * oversize), CHANNELS.length);
     CHANNELS.forEach((channel, index) => { raw.textures[index].name = channel; });
     const paint = new THREE.MeshBasicNodeMaterial();
+    // Two sets of accumulators: each stage reads one and writes the other.
+    const stages = [0, 1].map(() => {
+      const stage = target(Math.round(SIZE * oversize), STAGE_TARGETS.length);
+      STAGE_TARGETS.forEach((name, index) => { stage.textures[index].name = name; });
+      return stage;
+    });
     const resolved = target(SIZE);
     const finished = {};
     try {
       await procedural.prepare();
-      const nodes = channelNodes(procedural, Math.max(procedural.displacementExtent, 1e-3));
-      if (nodes.positionNode) paint.positionNode = nodes.positionNode;
-      paint.colorNode = nodes.color;
-      scene.add(new THREE.Mesh(geometry, paint));
-      // One pass fills all three channels, so the recipe's (large) shader is
-      // compiled once — and off the frame: a synchronous compile of it stalls
-      // the GPU for seconds, and the whole game with it.
-      const outputs = mrt({ color: output, normal: nodes.normal, arm: nodes.arm });
-      await this.draw(raw, outputs, () => this.renderer.compileAsync(scene, camera));
-      this.draw(raw, outputs, () => this.renderer.render(scene, camera));
+      const mesh = new THREE.Mesh(geometry, paint);
+      scene.add(mesh);
+      if (typeof procedural.createPhysicalNodes === 'function') {
+        await this.bakeStaged(procedural, { scene, camera, mesh, raw, stages });
+      } else {
+        // A runtime without staged surfaces: its whole stack in one pass.
+        const nodes = channelNodes(procedural, Math.max(procedural.displacementExtent, 1e-3));
+        if (nodes.positionNode) paint.positionNode = nodes.positionNode;
+        paint.colorNode = nodes.color;
+        const outputs = mrt({ color: output, normal: nodes.normal, arm: nodes.arm });
+        await this.draw(raw, outputs, () => this.renderer.compileAsync(scene, camera));
+        this.draw(raw, outputs, () => this.renderer.render(scene, camera));
+      }
       CHANNELS.forEach((channel, index) => {
         const blend = new THREE.MeshBasicNodeMaterial();
         blend.colorNode = this.resolveNode(raw.textures[index], channel === 'color' ? set.neutralGain : undefined);
@@ -151,6 +202,7 @@ export class SettlementProceduralBaker {
       geometry.dispose();
       paint.dispose();
       raw.dispose();
+      for (const stage of stages) stage.dispose();
       resolved.dispose();
       procedural.dispose();
     }
@@ -164,6 +216,42 @@ export class SettlementProceduralBaker {
         for (const map of Object.values(finished)) map.dispose();
       },
     });
+  }
+
+  /**
+   * Bake the stack a layer a pass.
+   *
+   * One shader for a whole stack costs far more to compile than its layers do
+   * apart: the driver's optimiser sees every layer's noise at once, and a
+   * nine-layer preset took 45 s. A pass that adds one layer to accumulators
+   * read back from the last is a small shader, whatever the stack. Each is
+   * compiled off the frame, then drawn; the last applies the stack's finishing
+   * terms and writes the three channel groups.
+   */
+  async bakeStaged(procedural, { scene, camera, mesh, raw, stages }) {
+    const normal = vec3(0, 0, 1);
+    const layers = procedural.layerCount;
+    let previous = null;
+    for (let layer = 0; layer <= layers; layer += 1) {
+      const last = layer === layers;
+      const surface = procedural.createSurfaceNodes(positionLocal, normal, {
+        from: layer,
+        to: last ? layer : layer + 1,
+        previous: previous ? carried(previous.textures) : null,
+        finish: last,
+      });
+      const paint = new THREE.MeshBasicNodeMaterial();
+      mesh.material = paint;
+      const into = last ? raw : stages[layer % 2];
+      const outputs = last ? finishedOutputs(procedural, surface) : stageOutputs(surface);
+      try {
+        await this.draw(into, outputs, () => this.renderer.compileAsync(scene, camera));
+        this.draw(into, outputs, () => this.renderer.render(scene, camera));
+      } finally {
+        paint.dispose();
+      }
+      previous = into;
+    }
   }
 
   /**

@@ -94,30 +94,37 @@ Some sets are not images but [Procedural Texture Lab](https://github.com/daniels
 recipes: a few kilobytes of `.ptl.json` under `public/assets/materials/settlement/`,
 exported from the Lab's presets by `npm run export:ptl-settlement-recipes` (which
 needs a Lab checkout; the game does not). The game depends on the PTL runtime
-only (`procedural-texture-lab`, installed from git; `vite.config.js` dedupes
+only (`procedural-texture-lab`, pinned to a pushed commit on GitHub; `vite.config.js` dedupes
 `three` so it shares the app's copy).
 
 `SettlementProceduralBaker` compiles a recipe with the runtime's
-`ProceduralMaterial`, draws that material's own colour, normal and
-AO/roughness/metalness nodes onto an oversized square in **one** MRT pass, and
-cross-fades the overshoot back over the opposite edges so the tile repeats. It
-never leaves the GPU: the editor runtime does no readback.
+`ProceduralMaterial` and bakes its stack **a layer a pass** (`bakeStaged`) onto
+an oversized square: each pass adds one layer to accumulators read back from
+the last, and the final pass applies the stack's finishing terms and writes
+colour, normal and AO/roughness/metalness. The overshoot is then cross-faded
+back over the opposite edges so the tile repeats. It never leaves the GPU: the
+editor runtime does no readback.
 
 Two things were learnt the hard way and must stay:
 
-- The recipe's shader is large. Compiled synchronously it stalls the GPU, and
-  the whole game, for seconds per pipeline — three passes froze rendering for
-  ~40 s. It is one pass, compiled with `compileAsync`; frames keep flowing.
+- A whole stack as one shader compiles far slower than its layers do apart:
+  the Lab's cut cobble (nine layers) took 45 s as one pass and takes 3–4 s
+  staged; its gravel went from 21 s to 2 s. Every pass is compiled with
+  `compileAsync` — a synchronous compile stalls the GPU, and the game with it.
+  Staging needs `createSurfaceNodes(…, stage)` from the runtime; without it the
+  baker falls back to one pass.
 - A generated set's texels exist only on the GPU. The workshop disposes the
   textures of every material family a building does not use (a wall has no
   roof); that used to re-upload a photographed set unnoticed and wiped a
   generated one for good, leaving walls discarded. Sets are flagged
   `sharedSurface`, and the workshop's three disposers skip that flag.
 
-A town waits for its whole dressing, so only presets that generate quickly
-belong in `SETTLEMENT_SURFACE_SETS` (stone 1 s, plaster 4 s; the Lab's cut
-cobble took 45 s and is not used). A set that fails to generate falls back to
-its role's photographed set.
+A town waits for its whole dressing, so a set must generate in seconds; staged,
+the three in use take 2–4 s each. One dressing (`old-market`) is paved with the
+generated cut cobble and gravel. They are plainer than the photographed setts —
+the Lab's presets carry their detail in relief, not colour — so the other five
+dressings keep photographs. A set that fails to generate falls back to its
+role's photographed set.
 
 ## Loose stone
 
@@ -129,8 +136,7 @@ not the workshop. The library returns renderer-neutral arrays in ~20 ms and
 palette by the library's tone, cavity and moss channels and maps the town's stone
 surface set over them, so a boulder by the wall is the wall's stone. They are
 planned last, from the same seeded stream, so retuning them never reshuffles a
-town. The dependency is a `file:` link to a sibling checkout until the library
-is installable from git or npm.
+town. The dependency is pinned to a pushed commit on GitHub.
 
 ## Layout, life and light
 
@@ -174,9 +180,8 @@ is installable from git or npm.
   toward the middle of the nearest town, louder for bigger towns and quiet at
   night, and an anvil ringing in runs within 70 m of a smithy by day.
 - **Doorways**: with `collision.settlements.enterable` (default on) a house is
-  four wall boxes with a 1.5 m gap in the middle of its front, where the plan
-  runs its door walk. The mesh has no interior and its door is drawn shut, so
-  this is passage, not a furnished room; set the flag false for solid houses.
+  wall boxes round its measured room with a gap at its door, and the room is
+  furnished (see Doors and rooms); set the flag false for solid houses.
 - **Wall stairs**: one wall length in seven carries a flight on its inner face.
   The mesh has twenty steps; the collider ten treads, because the character
   motor only stands on a box wider than the capsule.
@@ -225,6 +230,51 @@ stale). From that one table:
 The shell's masonry is unbroken behind its door, so the doorway cannot be seen
 through: from the street it is a shadowed opening, from inside a bright one.
 
+The same script grows, from just inside each door, the largest rectangle of
+floor that no part of the house stands in (`room`), and finds the lowest face
+of the house over it (`ceiling`) — by face, not vertex: an upper floor is one
+slab whose corners all lie outside the room. The room the view draws and the
+collider's walls are both that box, so a room fits inside its shell instead of
+having the shell's stones standing in it or its upper floor hiding the beams.
+
+### What a room is
+
+A northern fantasy hall in small: firelit, timber and stone, dark in the
+corners. Four modules under `view/interior/`, each with one job:
+
+- `RoomPlan` (pure data, no three) decides what stands where by the building's
+  trade — a stone hearth with its pot, firewood and a shield over the mantel in
+  a dwelling, with bed, chest, table, rug, banner and stored goods; benches,
+  counter, casks, antlers and a wheel of candles in a tavern; shelves and a
+  counter in a shop; pews and an altar in a chapel; an anvil in a smithy — and
+  lists the room's lights. Pieces too big to walk through carry a `solid` box,
+  which `SettlementCollisionProvider` turns into colliders, and the strip
+  inside the door is kept clear.
+- `InteriorBuilder` gathers a town's rooms into one mesh per material and bakes
+  each room's light into its vertices: `fire` (hearth, candles, sconces — warm,
+  RGB) and `sky` (door and windows). Large faces are cut into 1.1 m cells so
+  light falls off across them. Rooms get no real lights and no sun.
+- `RoomFurnitureMesh` draws each piece; `SettlementInteriorGeometry` the shell
+  round them: plank floor, joists under boards, and walls framed in timber
+  (posts, rails, knee braces) over a stone base course.
+- `InteriorMeshes` makes the materials. Wood, plaster and stone are the town's
+  own surface sets under a vertex tint, unlit, multiplied by ambient + fire ×
+  flicker + sky × day-or-night (`settlementDusk`), so a room is warmest and
+  most itself after dark.
+
+Things to keep when changing this:
+
+- The footprint frame is a mirror image of settlement-local space. A face wound
+  to look along its normal there is back-facing here; `InteriorBuilder` flips
+  for it and a test checks every triangle. Getting this wrong does not look
+  like a winding bug — the room vanishes and the shell's masonry shows instead.
+- Keep light pools tight (`radius` in `RoomPlan.lightsOf`). With a long reach
+  every wall is evenly lit and the room turns beige and flat.
+- Flames are drawn at their own brightness (`glow`); keep them at or under 1 or
+  they burn out to white under the scene's tone mapping.
+- A chandelier hangs 0.95 m below the ceiling, so it is only planned at 2.85 m
+  and over. Measured taverns are lower than that today and are lit by sconces.
+
 ## Loading without the long frames
 
 New meshes are compiled before they are shown: `SettlementPrototypePool`
@@ -234,7 +284,7 @@ from 123–182 ms.
 
 ## Not done yet
 
-- Rooms are bare: no furniture, and no windows from inside.
+- Rooms are flat-coloured boxes: furniture is unlit by its hearth, has no
+  colliders, and the windows are painted light, not openings.
 - Animals amble on the spot; they do not graze, flee or path.
 - The skyline is unlit massing; from flat ground forest hides it.
-- Procedural paving waits on a layered bake in the texture library.

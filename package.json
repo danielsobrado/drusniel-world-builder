@@ -84,11 +84,11 @@
     "qa:recovery": "node scripts/run-renderer-recovery-qa.mjs"
   },
   "dependencies": {
-    "@drusniel/procedural-stone": "file:../drusniel-procedural-stones",
+    "@drusniel/procedural-stone": "github:danielsobrado/drusniel-procedural-stones#94a51a3",
     "js-yaml": "4.3.2",
     "meshoptimizer": "^1.2.0",
     "polygon-clipping": "0.15.7",
-    "procedural-texture-lab": "github:danielsobrado/drusniel-procedural-textures#21c61d1",
+    "procedural-texture-lab": "github:danielsobrado/drusniel-procedural-textures#0611d31",
     "straight-skeleton": "1.1.0",
     "three": "0.186.1",
     "three-mesh-bvh": "0.9.13"

@@ -21,7 +21,9 @@ import { duskFromSky } from '../src/editor/world/settlements/view/SettlementDusk
 import { residentManifest } from '../src/editor/actors/ResidentManifest.js';
 import { isTrimKind, SETTLEMENT_TRIM, WALL_STAIR } from '../src/editor/world/settlements/SettlementTrim.js';
 import { murmurLevel, settlementPresence } from '../src/editor/audio/settlement_ambience.js';
-import { houseShell, settlementInteriorArrays } from '../src/editor/world/settlements/view/SettlementInteriorGeometry.js';
+import { houseShell, roomSolids, settlementInteriorArrays } from '../src/editor/world/settlements/view/SettlementInteriorGeometry.js';
+import { planRoom } from '../src/editor/world/settlements/view/interior/RoomPlan.js';
+import { ROOM_PIECE_TYPES } from '../src/editor/world/settlements/view/interior/RoomFurnitureMesh.js';
 import { buildingDoor, buildingRecipe, SETTLEMENT_BUILDINGS } from '../src/editor/world/settlements/SettlementBuildingCatalog.js';
 import { SETTLEMENT_STYLES } from '../src/editor/world/settlements/SettlementProfile.js';
 import { planToWorld, settlementPlacements } from '../src/editor/world/settlements/view/SettlementPlacements.js';
@@ -312,13 +314,81 @@ test('a town has rooms behind its doors', () => {
   for (const building of enterable) {
     const shell = houseShell(building);
     assert.ok(shell.doorRight - shell.doorLeft >= 0.9, 'a doorway too narrow to walk through');
-    assert.ok(shell.doorLeft > -shell.halfWidth && shell.doorRight < shell.halfWidth && shell.front > shell.back + 2);
+    assert.ok(shell.doorLeft > shell.x0 && shell.doorRight < shell.x1, 'a doorway outside its room');
+    assert.ok(shell.x1 - shell.x0 >= 2.2 && shell.inner - shell.back >= 2.2 && shell.front > shell.inner);
+    // The room lies inside the plot the planner reserved for the house.
+    assert.ok(shell.x0 > -building.width / 2 && shell.x1 < building.width / 2 && shell.back > -building.depth / 2);
   }
   assert.equal(houseShell(cityPlan.buildings.find(({ kind }) => kind === 'wall')), null);
-  const { positions, normals, colors } = settlementInteriorArrays(cityPlan);
-  assert.equal(normals.length, positions.length);
-  assert.equal(colors.length, positions.length);
-  // Nineteen quads a house: floor, ceiling, walls, reveals, threshold, daylight, opening, frame and leaf.
-  assert.equal(positions.length / 18, enterable.length * 19);
+  const groups = settlementInteriorArrays(cityPlan);
+  for (const key of ['wood', 'plaster', 'stone', 'plain', 'glow', 'sky', 'exterior']) assert.ok(groups[key], `no ${key} in the rooms`);
+  for (const [key, group] of Object.entries(groups)) {
+    const vertices = group.positions.length / 3;
+    assert.ok(vertices > 0 && vertices % 3 === 0, key);
+    assert.equal(group.normals.length, vertices * 3);
+    assert.equal(group.colors.length, vertices * 3);
+    assert.equal(group.fire.length, vertices * 3);
+    assert.equal(group.uvs.length, vertices * 2);
+    assert.equal(group.sky.length, vertices);
+    for (const values of Object.values(group)) assert.ok(values.every(Number.isFinite), `${key} has a hole in it`);
+    for (let index = 0; index < group.normals.length; index += 3) {
+      assert.ok(Math.abs(Math.hypot(group.normals[index], group.normals[index + 1], group.normals[index + 2]) - 1) < 1e-6);
+    }
+  }
+  // Every face is wound to look along its normal, as the renderer will cull it.
+  for (const group of Object.values(groups)) {
+    const { positions: p, normals: n } = group;
+    for (let index = 0; index < p.length; index += 9) {
+      const [ux, uy, uz] = [p[index + 3] - p[index], p[index + 4] - p[index + 1], p[index + 5] - p[index + 2]];
+      const [vx, vy, vz] = [p[index + 6] - p[index], p[index + 7] - p[index + 1], p[index + 8] - p[index + 2]];
+      const facing = (uy * vz - uz * vy) * n[index] + (uz * vx - ux * vz) * n[index + 1] + (ux * vy - uy * vx) * n[index + 2];
+      assert.ok(facing > -1e-9, 'a face is wound against its normal');
+    }
+  }
+  // Baked light: a room is brighter by its fire than in its far corners, and never unlit by it.
+  const fire = groups.wood.fire;
+  let [dimmest, brightest] = [Infinity, 0];
+  for (let index = 0; index < fire.length; index += 3) {
+    dimmest = Math.min(dimmest, fire[index]);
+    brightest = Math.max(brightest, fire[index]);
+  }
+  assert.ok(brightest > 0.8 && dimmest < brightest * 0.2, `fire ${dimmest}..${brightest}`);
   assert.equal(settlementInteriorArrays({ buildings: [] }), null);
+});
+
+test('rooms are dressed by trade, lit by their fires, and leave the way in clear', () => {
+  const cityPlan = plan(CITY);
+  const seen = new Set();
+  for (const building of cityPlan.buildings) {
+    const shell = houseShell(building);
+    if (!shell) continue;
+    const room = planRoom(building, shell);
+    assert.deepEqual(room, planRoom(building, shell), 'a room is furnished differently on a second visit');
+    for (const piece of room.pieces) {
+      seen.add(piece.type);
+      assert.ok(ROOM_PIECE_TYPES.includes(piece.type), `nothing draws a ${piece.type}`);
+    }
+    // Daylight at the door always; a hearth or a candle wherever one stands.
+    assert.ok(room.lights.some(({ sky }) => sky));
+    const fires = room.pieces.filter(({ type }) => ['hearth', 'candle', 'sconce', 'chandelier'].includes(type)).length;
+    assert.equal(room.lights.filter(({ sky }) => !sky).length, fires);
+    for (const [x0, x1, z0, z1, height] of roomSolids(building, shell)) {
+      assert.ok(x0 >= shell.x0 - 0.02 && x1 <= shell.x1 + 0.02 && z0 >= shell.back - 0.02 && z1 <= shell.inner + 0.02, 'furniture through a wall');
+      assert.ok(x1 > x0 && z1 > z0 && height > 0.3);
+      const inDoorway = x1 > shell.doorLeft - 0.35 && x0 < shell.doorRight + 0.35 && z1 > shell.inner - 1.5;
+      assert.ok(!inDoorway, 'furniture stands in the doorway');
+    }
+  }
+  for (const type of ['hearth', 'pot', 'shield', 'sconce', 'bed', 'table', 'rug', 'banner', 'candle', 'cask', 'shelves', 'counter']) {
+    assert.ok(seen.has(type), `no room has a ${type}`);
+  }
+  // Each trade its own room, whatever this particular plan happens to hold.
+  const shell = { x0: -4, x1: 4, back: -3, inner: 3, front: 3.4, doorLeft: -0.6, doorRight: 0.6 };
+  const dressed = (kind, ceiling = 3) => planRoom({ kind, x: 10, z: 20 }, shell, ceiling).pieces.map(({ type }) => type);
+  assert.ok(dressed('tavern').includes('bench') && dressed('tavern').includes('counter') && dressed('tavern').includes('chandelier'));
+  // Under a low ceiling a wheel of candles would hang at head height: sconces light it instead.
+  assert.ok(!dressed('tavern', 2.4).includes('chandelier') && dressed('tavern', 2.4).includes('sconce'));
+  assert.ok(dressed('house').includes('bed') && dressed('house').includes('hearth'));
+  assert.ok(dressed('shop').includes('shelves') && !dressed('shop').includes('bed'));
+  assert.ok(dressed('chapel').includes('altar') && dressed('smithy').includes('anvil'));
 });
