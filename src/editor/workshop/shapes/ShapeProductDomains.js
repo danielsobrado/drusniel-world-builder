@@ -26,6 +26,12 @@ const body = (primitive, includeOpenings = true, includeShutters = false) => {
   return { ...fields, ...(includeOpenings ? { openings: includeShutters ? openings : openings?.map(openingCut) } : {}) };
 };
 
+const roofNeighbors = (plan) => (plan.neighbors ?? []).map((n) => ({
+  id: n.id, boundary: n.boundary, topBoundary: n.topBoundary, curve: n.curve,
+  primitive: { ...body(n.primitive, false), roof: n.primitive.roof },
+  roofReplaced: Boolean(n.roofReplaced), roofOnly: Boolean(n.roofOnly),
+}));
+
 /** Keys express consumer dependencies, so roof edits do not rebuild masonry. */
 export function shapeProductKey(recipe, plan, domain) {
   const p = plan.primitive;
@@ -42,7 +48,8 @@ export function shapeProductKey(recipe, plan, domain) {
       : domain === 'ground'
         ? { primitive: body(p), ground: plan.ground, neighbors }
       : domain === 'features'
-        ? { features: plan.features, style: plan.resolvedStyle, neighbors }
+        ? { features: plan.features, style: plan.resolvedStyle,
+            neighbors: plan.features.some((f) => f.solidSupport) ? roofNeighbors(plan) : neighbors }
       : domain === 'roof'
         ? {
             id: p.id,
@@ -58,15 +65,7 @@ export function shapeProductKey(recipe, plan, domain) {
             replaced: plan.roofReplaced,
             decorations: plan.decorations?.filter((d) => d.role === 'chimney'),
             junctions: plan.roofJunctions,
-            neighbors: (plan.neighbors ?? []).map((n) => ({
-              id: n.id,
-              boundary: n.boundary,
-              topBoundary: n.topBoundary,
-              curve: n.curve,
-              primitive: { ...body(n.primitive, false), roof: n.primitive.roof },
-              roofReplaced: Boolean(n.roofReplaced),
-              roofOnly: Boolean(n.roofOnly),
-            })),
+            neighbors: roofNeighbors(plan),
           }
         : domain === 'facade'
           ? {

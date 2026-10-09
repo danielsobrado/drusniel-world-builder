@@ -2,12 +2,16 @@ import { createShapeBalconySurface } from './ShapeBalcony.js';
 import { buildShapeTurnedTimber } from './ShapeTurnedTimber.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
+import { buildShapeProfileRail } from './ShapeProfileRail.js';
 
 function slab(mesh, quad, thickness, tint) {
   const cross = (quad[1][2] - quad[0][2]) * (quad[2][0] - quad[0][0]) - (quad[1][0] - quad[0][0]) * (quad[2][2] - quad[0][2]);
   const top = cross > 0 ? quad : quad.toReversed(), low = top.map(([x, y, z]) => [x, y - thickness, z]);
-  mesh.quad(...top, tint); mesh.quad(...low.toReversed(), tint);
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; mesh.quad(top[i], low[i], low[j], top[j], tint); }
+  const width = Math.hypot(top[1][0] - top[0][0], top[1][2] - top[0][2]), depth = Math.hypot(top[3][0] - top[0][0], top[3][2] - top[0][2]);
+  const uvs = [[0, 0], [width, 0], [width, depth], [0, depth]];
+  mesh.quad(...top, tint, uvs); mesh.quad(...low.toReversed(), tint, uvs.toReversed());
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4, length = Math.hypot(top[j][0] - top[i][0], top[j][2] - top[i][2]);
+    mesh.quad(top[i], low[i], low[j], top[j], tint, [[0, 0], [0, thickness], [length, thickness], [length, 0]]); }
 }
 
 export function buildShapeBalcony(host, feature, meshes, recipe) {
@@ -19,15 +23,23 @@ export function buildShapeBalcony(host, feature, meshes, recipe) {
     const a = b.start + b.width * i / count + gap, c = b.start + b.width * (i + 1) / count - gap;
     slab(wood, [point(a, 0, 0.015), point(c, 0, 0.015), point(c, 0, f.depth), point(a, 0, f.depth)], 0.14, tint('deck', i));
   }
+  const placedPosts = new Set();
   function railing(from, to, length, key) {
-    const sections = Math.max(1, Math.ceil(length / 0.18));
     const sample = (t, y) => point(from[0] + (to[0] - from[0]) * t, y, from[1] + (to[1] - from[1]) * t);
-    for (let i = 0; i < sections; i++) for (const y of [0.13, b.height])
-      wood.beam(sample(i / sections, y), sample((i + 1) / sections, y), y === b.height ? 0.095 : 0.06, 0.075, tint('rail', key));
+    for (const y of [0.13, b.height]) buildShapeProfileRail(wood, (t) => sample(t, y), length, 0.075,
+      y === b.height ? 0.095 : 0.06, recipe.detail, tint('rail', key));
     const posts = Math.max(1, Math.ceil(length / 0.75));
-    for (let i = 0; i <= posts; i++) wood.beam(sample(i / posts, 0), sample(i / posts, b.height + 0.045), 0.105, 0.105, tint('post', `${key}:${i}`));
+    for (let i = 0; i <= posts; i++) {
+      const base = sample(i / posts, 0), identity = base.map((v) => Math.round(v * 1e5)).join(':');
+      if (placedPosts.has(identity)) continue;
+      placedPosts.add(identity); wood.beam(base, sample(i / posts, b.height + 0.045), 0.105, 0.105, tint('post', `${key}:${i}`));
+    }
     const balusters = Math.max(1, Math.ceil(length / 0.22));
-    for (let i = 1; i < balusters; i++) buildShapeTurnedTimber(wood, sample(i / balusters, 0.17), Math.max(0.12, b.height - 0.23), 0.034, recipe.detail, tint('baluster', `${key}:${i}`));
+    for (let i = 1; i < balusters; i++) {
+      const t = i / balusters;
+      if (Math.abs(t * posts - Math.round(t * posts)) * length / posts < 0.085) continue;
+      buildShapeTurnedTimber(wood, sample(t, 0.17), Math.max(0.12, b.height - 0.23), 0.034, recipe.detail, tint('baluster', `${key}:${i}`));
+    }
   }
   const frontLength = b.outer.slice(1).reduce((sum, p, i) => sum + Math.hypot(p[0] - b.outer[i][0], p[2] - b.outer[i][2]), 0);
   railing([b.start, f.depth], [b.end, f.depth], frontLength, 'front');

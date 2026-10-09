@@ -14,6 +14,8 @@ export async function checkWorkshopShapeDirectEditing({ page, report, preset, se
     await settle(page);
     const point = await handlePoint(page, field);
     await page.mouse.move(point.x, point.y); await page.mouse.down();
+    const grabbed = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.drag?.field);
+    assert.equal(grabbed, field, 'The pointer grabs the intended construction handle.');
     await page.mouse.move(point.x + dx, point.y + dy, { steps: 5 }); await page.mouse.up(); await settle(page);
   }
   async function replay(before, after) {
@@ -23,7 +25,8 @@ export async function checkWorkshopShapeDirectEditing({ page, report, preset, se
   await preset(page, 'rounded-cottage');
   await page.locator('[data-shape-action="opening"]').selectOption('door');
   let before = await primitive(); await drag('opening', 25, 0); let after = await primitive();
-  assert.notDeepEqual(after.openings.find((o) => o.id === 'door'), before.openings.find((o) => o.id === 'door'));
+  assert.notDeepEqual(after.openings.find((o) => o.id === 'door'), before.openings.find((o) => o.id === 'door'),
+    `Door drag result: ${JSON.stringify({ before, after })}`);
   assert.deepEqual(after.openings.filter((o) => o.id !== 'door'), before.openings.filter((o) => o.id !== 'door'));
   await replay(before, after);
   report.assertions.push('A real door drag moves its semantic opening, preserves windows and supports undo/redo.');

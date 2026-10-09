@@ -76,9 +76,11 @@ export function shapeDirectHandleChanges(p, handle, delta) {
   }
   const plan = planRegisteredShape(p), bottom = clamp((handle.type === 'opening' ? handle.opening.bottom : handle.bottom) + delta[1], 0,
     handle.type === 'opening' ? p.height - 0.3 : p.height - 0.1);
-  const scale = p.kind === 'curved-volume' ? 1 + (p.taper - 1) * (bottom + (handle.type === 'opening' ? handle.opening.height * 0.5 : -0.15)) / p.height : 1;
-  const projected = projectPointToCurvePath(plan.curve.path, localPoint(p, target).map((v) => v / scale));
-  const at = clamp(projected.pathDistance / plan.curve.length, 0, 1);
+  const anchorY = bottom + (handle.type === 'opening' ? handle.opening.height * 0.5 : -0.15);
+  const scale = p.kind === 'curved-volume' ? 1 + (p.taper - 1) * anchorY / p.height : 1;
+  const source = createShapeWallSurface(plan).point(handle.at * plan.curve.length, anchorY);
+  const projected = projectPointToCurvePath(plan.curve.path, localPoint(p, source.map((v, k) => v + delta[k])).map((v) => v / scale));
+  const at = Math.hypot(delta[0], delta[2]) < 1e-9 ? handle.at : clamp(projected.pathDistance / plan.curve.length, 0, 1);
   if (handle.type === 'box') return shapeDetailPatch(p, handle.key, { at, bottom });
   return { openings: p.openings.map((o) => o.id === handle.id ? { ...o, at, bottom } : o) };
 }

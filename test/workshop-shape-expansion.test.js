@@ -15,6 +15,9 @@ import { roundedFootprint } from '../src/editor/workshop/shapes/ShapePaths.js';
 import { resolveWorkshopMaterialRegion } from '../src/editor/workshop/ProceduralWorkshopMaterialConfig.js';
 import { createShapeRoofSurface } from '../src/editor/workshop/shapes/ShapeRoofSurface.js';
 import { createProceduralObjectLodParts } from '../src/editor/workshop/ProceduralAssetManager.js';
+import { createShapeWallSurface } from '../src/editor/workshop/shapes/ShapeWallSurface.js';
+import { buildShapeFeatures } from '../src/editor/workshop/shapes/ShapeFeatureBuilder.js';
+import { ShapeMesh } from '../src/editor/workshop/shapes/ShapeMesh.js';
 
 const plans = (composition) => planWorkshopComposition({ composition }).shapePlans;
 function editorFor(session, extra = {}) {
@@ -28,6 +31,11 @@ for (const { kind } of SHAPE_FEATURES) test(`${kind} adapts to a rotated host, g
   const before = structuredClone(composition), recipe = normalizeProceduralRecipe({ composition, detail: 2 });
   const resolved = planWorkshopComposition(recipe), feature = resolved.shapePlans[0].features[0];
   assert.equal(feature.provenance.source, 'authored'); assert.ok(feature.frame.origin.every(Number.isFinite));
+  const envelope = feature.child?.bounds ?? feature.solidSupport?.bounds;
+  if (envelope) for (const axis of [0, 1]) {
+    assert.ok(resolved.shapePlans[0].bounds.min[axis] <= envelope.min[axis]);
+    assert.ok(resolved.shapePlans[0].bounds.max[axis] >= envelope.max[axis]);
+  }
   if (feature.child) assert.ok(feature.child.boundary.flat().every(Number.isFinite));
   assert.deepEqual(composition, before);
   const parts = createProceduralWorkshopComponentParts(recipe);
@@ -66,6 +74,27 @@ test('opening drags follow a curved tapered host and preserve other opening iden
     assert.deepEqual(session.getPrimitive(p.id).openings.slice(1), p.openings.slice(1));
     session.undo(); assert.deepEqual(session.getPrimitive(p.id), p);
   } finally { session.dispose(); }
+});
+
+test('vertical opening, planter and feature drags preserve their anchor on a tapered oval', () => {
+  const composition = createShapePreset('rounded-cottage'), source = composition.primitives[0];
+  Object.assign(source, { height: 6, taper: 0.65, rotation: 37,
+    footprint: { family: 'oval', width: 8, depth: 3 },
+    openings: [{ id: 'window', role: 'window', at: 0.13, bottom: 1, height: 1 }],
+    features: [{ id: 'balcony', kind: 'balcony', at: 0.13, bottom: 1 }, { id: 'bay', kind: 'bay', at: 0.13, bottom: 1 }] });
+  const plan = plans(composition)[0], p = plan.primitive;
+  const editor = { primitive: p, openingId: 'window', resolvedPlans: new Map([[p.id, plan]]) };
+  const opening = shapeDirectHandleDefinitions(editor).find((h) => h.type === 'opening');
+  const moved = shapeDirectHandleChanges(p, opening, [0, 0.8, 0]).openings[0];
+  assert.ok(Math.abs(moved.at - p.openings[0].at) < 1e-6, 'A vertical window drag stays at the same perimeter location.');
+  const planter = { ...opening, type: 'box', key: `detail:${p.id}:window-box:window`, bottom: 1, y: 0.85 };
+  const patch = shapeDirectHandleChanges(p, planter, [0, 0.8, 0]).detailOverrides[0];
+  assert.ok(Math.abs(patch.at - p.openings[0].at) < 1e-6, 'A vertical planter drag keeps its anchor.');
+  for (const feature of p.features) {
+    const handle = shapeDirectHandleDefinitions({ ...editor, featureId: feature.id }).find((h) => h.type === 'feature');
+    const movedFeature = shapeDirectHandleChanges(p, handle, [0, 0.8, 0]).features.find((f) => f.id === feature.id);
+    assert.ok(Math.abs(movedFeature.at - feature.at) < 1e-6, `A vertical ${feature.kind} drag keeps its anchor.`);
+  }
 });
 
 test('curve point and control drags publish stable canonical paths and support cancel', () => {
@@ -230,6 +259,56 @@ test('buttresses adapt around authored openings while retaining their requested 
   const requested = door.at * resolved.curve.length;
   assert.ok(Math.abs(feature.frame.u - requested) > door.width / 2);
   assert.deepEqual(p.features, [{ id: 'door-support', kind: 'buttress', at: door.at }]);
+});
+
+test('buttress contacts anchor to ground level on a tapered wall', () => {
+  const composition = createShapePreset('rounded-cottage'), p = composition.primitives[0];
+  Object.assign(p, { taper: 0.65, rotation: 37, openings: [], features: [{ id: 'support', kind: 'buttress', at: 0.12, height: 4 }] });
+  const plan = plans(composition)[0], f = plan.features[0], wall = createShapeWallSurface(plan);
+  const ground = wall.point(f.frame.u, 0, plan.primitive.thickness / 2);
+  assert.deepEqual(f.frame.origin, ground);
+  const mesh = new ShapeMesh(); buildShapeFeatures(plan, { trim: mesh }, { detail: 2 });
+  const top = wall.point(f.frame.u, Math.min(f.intent.height, p.height * 0.86), plan.primitive.thickness / 2);
+  const nearTop = Array.from({ length: mesh.positions.length / 3 }, (_, i) => mesh.positions.slice(i * 3, i * 3 + 3))
+    .filter((v) => Math.abs(v[1] - top[1]) < 1e-7);
+  assert.ok(nearTop.some((v) => Math.abs((v[0] - top[0]) * f.frame.outward[0] + (v[2] - top[2]) * f.frame.outward[2]) < 1e-7),
+    'The inner upper edge also follows the tapered wall.');
+});
+
+test('neighboring roof and host height edits refresh buttresses while distant buffers are reused', () => {
+  const composition = createShapePreset('rounded-cottage'), p = composition.primitives[0];
+  Object.assign(p, { height: 8, openings: [], features: [{ id: 'support', kind: 'buttress', at: 0.12, depth: 1.8, height: 8, bottom: 0 }] });
+  const f = plans(composition)[0].features[0];
+  composition.primitives.push({ ...structuredClone(p), id: 'neighbor', height: 1.2, features: [],
+    position: [f.frame.origin[0] + f.frame.outward[0] * 0.9, f.frame.origin[2] + f.frame.outward[2] * 0.9],
+    footprint: { family: 'rounded', width: 2, depth: 2, cornerRadius: 0.1 },
+    roof: { family: 'hip', rise: 0.4, overhang: 0.1 } },
+  { ...structuredClone(p), id: 'distant', position: [40, 40], features: [] });
+  const cache = new WorkshopShapeCache();
+  const update = () => {
+    const recipe = normalizeProceduralRecipe({ composition }), result = cache.update(recipe, planWorkshopComposition(recipe).shapePlans);
+    cache.releaseRemoved(result);
+  };
+  const vertices = (product) => JSON.stringify(product.parts.map((part) => Array.from(part.geometry.getAttribute('position').array)));
+  try {
+    update(); const before = cache.entries.get(p.id).domains.get('features'), shape = vertices(before), distant = cache.entries.get('distant');
+    composition.primitives.find((v) => v.id === 'neighbor').roof.rise = 5; update();
+    const after = cache.entries.get(p.id).domains.get('features');
+    assert.ok(after !== before, 'A roof edit refreshes support clipping.');
+    assert.ok(vertices(after) !== shape, 'The changed roof actually cuts different support geometry.');
+    assert.ok(cache.entries.get('distant') === distant);
+    p.height = 5; update();
+    assert.ok(cache.entries.get(p.id).domains.get('features') !== after, 'Host height refreshes the resolved support height.');
+    assert.ok(cache.entries.get('distant') === distant);
+  } finally { cache.clear(); }
+});
+
+test('porches choose the nearest door across the closed footprint seam', () => {
+  const composition = createShapePreset('rounded-cottage'), p = composition.primitives[0];
+  p.openings = [{ id: 'near-door', role: 'door', at: 0.02 }, { id: 'far-door', role: 'door', at: 0.7 }];
+  p.features = [{ id: 'porch', kind: 'porch', at: 0.99 }];
+  const plan = plans(composition)[0];
+  assert.ok(Math.abs(plan.features[0].frame.u / plan.curve.length - 0.02) < 1e-8);
 });
 
 test('roof flashing has a matte lead finish with explicit material override priority', () => {

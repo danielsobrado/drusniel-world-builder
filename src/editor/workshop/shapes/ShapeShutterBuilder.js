@@ -10,8 +10,11 @@ export function shapeShutterAngle(seed, hostId, opening, side) {
 }
 
 function prism(mesh, front, back, tint) {
-  mesh.quad(...front, tint); mesh.quad(...back.toReversed(), tint);
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; mesh.quad(front[i], back[i], back[j], front[j], tint); }
+  const edge = front[1].map((v, k) => v - front[0][k]), length = Math.hypot(edge[0], edge[2]) || 1;
+  const uv = (p) => [((p[0] - front[0][0]) * edge[0] + (p[2] - front[0][2]) * edge[2]) / length, p[1] - front[0][1]];
+  mesh.quad(...front, tint, front.map(uv)); mesh.quad(...back.toReversed(), tint, back.toReversed().map(uv));
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4;
+    const side = [front[i], back[i], back[j], front[j]]; mesh.quad(...side, tint, side.map(uv)); }
 }
 
 function closedPanel(plan, opening, side, meshes, recipe, surface) {

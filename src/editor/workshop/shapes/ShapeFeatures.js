@@ -7,6 +7,10 @@ import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
 import { expandShapeFeatureFootprint } from './ShapeFeatureFootprint.js';
 import { shapeFeatureSemantics } from './ShapeFeatureSemantics.js';
 import { resolveShapeBalcony } from './ShapeBalcony.js';
+import { resolveShapeButtress } from './ShapeButtress.js';
+import { shapeFeatureBounds } from './ShapeFeatureBounds.js';
+
+const distanceAt = (a, b) => Math.min(Math.abs(a - b), 1 - Math.abs(a - b));
 
 function childVolume(host, f, frame, fields) {
   const p = host.primitive;
@@ -41,7 +45,7 @@ function supportAnchor(plan, feature) {
   if (feature.kind !== 'buttress') return feature;
   const length = plan.curve.length, clearance = Math.min(feature.width, 0.7) / 2 + 0.12;
   const gaps = plan.openings.filter((o) => o.bottom < Math.min(feature.height, plan.primitive.height * 0.86));
-  const distance = (a, b) => Math.min(Math.abs(a - b), 1 - Math.abs(a - b)) * length;
+  const distance = (a, b) => distanceAt(a, b) * length;
   const valid = (at) => gaps.every((o) => distance(at, o.at) >= o.width / 2 + clearance - 1e-6);
   if (valid(feature.at)) return feature;
   const candidates = gaps.flatMap((o) => [-1, 1].map((sign) =>
@@ -81,13 +85,14 @@ const registry = new Map([
     }) };
   }],
   ['porch', (host, f, frame) => {
-    const p = host.primitive, door = host.openings.filter((o) => o.role === 'door').sort((a, b) => Math.abs(a.at - f.at) - Math.abs(b.at - f.at))[0];
+    const p = host.primitive, door = host.openings.filter((o) => o.role === 'door')
+      .sort((a, b) => distanceAt(a.at, f.at) - distanceAt(b.at, f.at) || a.id.localeCompare(b.id))[0];
     const anchored = frameAt(host, { ...f, at: door?.at ?? f.at, bottom: 0 });
     return { frame: anchored, child: childVolume(host, f, { ...anchored, origin: offset(anchored, f.depth * 0.45, p.elevation) }, {
       height: Math.min(p.height - 0.15, Math.max(2.2, f.height)), footprint: { family: 'rounded', width: Math.max(f.width, (door?.width ?? 1) + 0.7), depth: f.depth, cornerRadius: 0.08 },
     }), openSides: true };
   }],
-  ['buttress', (host, f, frame) => ({ frame: { ...frame, origin: offset(frame, 0, host.primitive.elevation) }, solidSupport: true })],
+  ['buttress', resolveShapeButtress],
 ]);
 
 /** Features are semantic modifiers expanded through shared volume/roof builders. */
@@ -117,11 +122,8 @@ export function resolveShapeFeatures(plan) {
     return { ...d, position: [x, base, z], top: base + d.top - d.position[1] };
   });
   if (replacement) replacement.child = { ...replacement.child, decorations: decorations.filter((d) => d.role === 'chimney') };
-  const balconies = features.filter((f) => f.balcony).map((f) => f.balcony.bounds);
-  const bounds = balconies.length ? { min: plan.bounds.min.map((v, k) => Math.min(v, ...balconies.map((b) => b.min[k]))),
-    max: plan.bounds.max.map((v, k) => Math.max(v, ...balconies.map((b) => b.max[k]))) } : plan.bounds;
   return { ...plan, features, decorations, roofReplaced: features.some((f) => f.replacesRoof),
-    bounds,
+    bounds: shapeFeatureBounds(plan, features),
     neighbors: [...(plan.neighbors ?? []), ...features.filter((f) => f.cutsRoof).map((f) => f.child)],
     rpg: shapeFeatureSemantics(plan, features),
   };

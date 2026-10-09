@@ -14,10 +14,34 @@ import { shapeShutterAngle, buildShapeShutters } from '../src/editor/workshop/sh
 import { buildShapeBalcony } from '../src/editor/workshop/shapes/ShapeBalconyBuilder.js';
 import { buildShapeFloors } from '../src/editor/workshop/shapes/ShapeFloorBuilder.js';
 import { ShapeMesh } from '../src/editor/workshop/shapes/ShapeMesh.js';
+import { buildShapeProfileRail } from '../src/editor/workshop/shapes/ShapeProfileRail.js';
 
 const resolve = (recipe) => planWorkshopComposition(recipe).shapePlans;
 const recipeFor = (id) => structuredClone(normalizeProceduralRecipe({ composition: createShapePreset(id), detail: 2, ivy: true }));
 const buffers = () => Object.fromEntries(['inserts', 'metal', 'deck', 'trim'].map((key) => [key, new ShapeMesh()]));
+
+test('curved handrail profile rings share joint vertices and shade their bevels with finite outward normals', () => {
+  const mesh = new ShapeMesh(), sample = (t) => [Math.cos(t * 0.8) * 2, 1, Math.sin(t * 0.8) * 2];
+  buildShapeProfileRail(mesh, sample, 1.6, 0.075, 0.095, 2, [1, 1, 1]);
+  const edges = new Map();
+  const key = (p) => p.map((v) => Math.round(v * 1e6)).join(':');
+  for (let i = 0; i < mesh.positions.length; i += 9) {
+    const triangle = [0, 3, 6].map((offset) => mesh.positions.slice(i + offset, i + offset + 3));
+    for (let j = 0; j < 3; j++) { const identity = [key(triangle[j]), key(triangle[(j + 1) % 3])].sort().join('|'); edges.set(identity, (edges.get(identity) ?? 0) + 1); }
+    const [a, b, c] = triangle, ab = b.map((v, k) => v - a[k]), ac = c.map((v, k) => v - a[k]);
+    const cross = [ab[1] * ac[2] - ab[2] * ac[1], ab[2] * ac[0] - ab[0] * ac[2], ab[0] * ac[1] - ab[1] * ac[0]];
+    assert.ok(cross.reduce((sum, v, k) => sum + v * mesh.normals[i + k], 0) > 0);
+  }
+  assert.ok([...edges.values()].every((uses) => uses === 2), 'Every handrail edge is shared by two faces, including its ends.');
+  assert.ok(mesh.normals.every(Number.isFinite));
+});
+
+test('wood UVs on profiled rails remain attached when their host moves and rotates', () => {
+  const a = new ShapeMesh(), b = new ShapeMesh(), sample = (t) => [t * 2, 1, Math.sin(t) * 0.3];
+  buildShapeProfileRail(a, sample, 2.1, 0.075, 0.095, 2, [1, 1, 1]);
+  buildShapeProfileRail(b, (t) => { const [x, y, z] = sample(t); return [z + 4, y + 2, -x - 3]; }, 2.1, 0.075, 0.095, 2, [1, 1, 1]);
+  assert.deepEqual(a.uvs, b.uvs);
+});
 
 test('curved balcony deck, vertical rails and published floor use the same rotated tapered host frame', () => {
   const recipe = recipeFor('balcony-tower');
@@ -30,6 +54,10 @@ test('curved balcony deck, vertical rails and published floor use the same rotat
   const mesh = buffers(); buildShapeBalcony(plan, feature, mesh, recipe);
   assert.ok(mesh.inserts.positions.length > 0);
   assert.ok(mesh.inserts.positions.every(Number.isFinite));
+  for (let i = 0; i < mesh.inserts.positions.length; i++) {
+    const axis = i % 3;
+    assert.ok(mesh.inserts.positions[i] >= b.bounds.min[axis] && mesh.inserts.positions[i] <= b.bounds.max[axis], 'The balcony bounds contain all deck, rail and corbel geometry.');
+  }
   for (let i = 1; i < mesh.inserts.positions.length; i += 3)
     assert.ok(mesh.inserts.positions[i] <= floor.elevation + b.height + 0.11);
   assert.ok(!plan.rpg.roomBoundaries.some((r) => r.featureId === feature.intent.id));
@@ -158,4 +186,39 @@ test('a projecting balcony discovers a neighboring wall without a root footprint
     const x = (triangle[0] + triangle[3] + triangle[6]) / 3, z = (triangle[2] + triangle[5] + triangle[8]) / 3;
     assert.ok(x <= tip[0] - 1 + 0.03 || x >= tip[0] + 1 - 0.03 || z <= tip[2] - 0.65 + 0.03 || z >= tip[2] + 1.35 - 0.03);
   }
+});
+
+test('balcony spatial bounds use XZ coordinates at every side and elevation', () => {
+  for (const rotation of [0, 90, 180, 270]) {
+    const recipe = recipeFor('balcony-manor'), p = recipe.composition.primitives[0];
+    Object.assign(p, { position: [11, -17], rotation, elevation: 12, features: [p.features[0]] });
+    const plan = resolve(recipe)[0], b = plan.features[0].balcony;
+    for (const [axis, worldAxis] of [[0, 0], [1, 2]]) {
+      assert.ok(plan.bounds.min[axis] <= b.bounds.min[worldAxis], `Rotation ${rotation}: lower spatial bound contains balcony`);
+      assert.ok(plan.bounds.max[axis] >= b.bounds.max[worldAxis], `Rotation ${rotation}: upper spatial bound contains balcony`);
+    }
+  }
+});
+
+test('a balcony finds a neighboring body beyond its negative Z projection', () => {
+  const recipe = recipeFor('balcony-manor'), owner = recipe.composition.primitives[0];
+  owner.position = [0, -20]; owner.rotation = 180; owner.features = [owner.features[0]];
+  owner.features[0].depth = 3;
+  let plan = resolve(recipe)[0];
+  const b = plan.features[0].balcony, tip = b.outer[Math.floor(b.outer.length / 2)];
+  recipe.composition.primitives.push({ id: 'neighbor', kind: 'curved-volume',
+    position: [tip[0], tip[2]], footprint: { family: 'rounded', width: 2, depth: 2 }, height: 6,
+    roof: { family: 'flat', overhang: 0.05 } });
+  plan = resolve(recipe).find((p) => p.id === owner.id);
+  assert.ok(plan.neighbors.some((n) => n.id === 'neighbor'), 'Projected contact is discovered below the root Z minimum.');
+});
+
+test('overlapping bodies retain an exposed balcony on the second deterministic owner', () => {
+  const recipe = recipeFor('balcony-manor'), owner = recipe.composition.primitives[0];
+  owner.id = 'b'; owner.features = [owner.features[0]];
+  recipe.composition.primitives.push({ ...structuredClone(owner), id: 'a', features: [] });
+  const plan = resolve(recipe).find((p) => p.id === 'b'), mesh = buffers();
+  buildShapeBalcony(plan, plan.features[0], mesh, recipe);
+  assert.ok(mesh.inserts.positions.length > 0, 'The exposed deck and railing survive identical neighboring bodies.');
+  assert.ok(mesh.inserts.positions.every(Number.isFinite));
 });

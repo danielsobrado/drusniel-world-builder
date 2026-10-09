@@ -17,7 +17,7 @@ export function resolveShapeBalcony(host, intent) {
     inner.push(point(u, 0, 0.015)); outer.push(point(u, 0, intent.depth));
   }
   const height = Math.min(intent.height, 1.4), points = [...inner, ...outer];
-  const bounds = { min: [Math.min(...points.map((v) => v[0])) - 0.08, p.elevation + Math.max(-0.16, bottom - 0.96), Math.min(...points.map((v) => v[2])) - 0.08],
+  const bounds = { min: [Math.min(...points.map((v) => v[0])) - 0.08, Math.max(-0.26, p.elevation + bottom - 1.03), Math.min(...points.map((v) => v[2])) - 0.08],
     max: [Math.max(...points.map((v) => v[0])) + 0.08, p.elevation + bottom + height + 0.12, Math.max(...points.map((v) => v[2])) + 0.08] };
   return { bottom, width, start, end, height, bounds,
     footprint: [...outer, ...inner.toReversed()].map(([x, , z]) => [x, z]),

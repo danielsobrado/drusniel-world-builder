@@ -31,12 +31,10 @@ export function shapeFeatureSemantics(plan, features) {
         rpg.foundationContacts.push(annotate({ id: `${f.id}:post-${i}:contact`, primitiveId: plan.id, elevation: y, footprint: { kind: 'polygon', points } }));
       }
     } else if (f.solidSupport) {
-      const { frame, intent } = f, half = Math.min(intent.width, 0.7) / 2;
-      const points = [[-half, 0], [half, 0], [half, intent.depth], [-half, intent.depth]].map(([x, z]) =>
-        [frame.origin[0] + frame.tangent[0] * x + frame.outward[0] * z, frame.origin[2] + frame.tangent[2] * x + frame.outward[2] * z]);
-      const footprint = { kind: 'polygon', points };
+      const { frame, solidSupport } = f;
+      const footprint = { kind: 'polygon', points: solidSupport.footprint };
       rpg.collisionSlabs.push(annotate({ id: f.id, primitiveId: plan.id, elevation: frame.origin[1],
-        height: Math.min(intent.height, plan.primitive.height * 0.86), thickness: half * 2, footprint, gaps: [] }));
+        height: solidSupport.height, thickness: solidSupport.width, footprint, gaps: [] }));
       rpg.foundationContacts.push(annotate({ id: `${f.id}:contact`, primitiveId: plan.id, elevation: frame.origin[1], footprint }));
     }
   }

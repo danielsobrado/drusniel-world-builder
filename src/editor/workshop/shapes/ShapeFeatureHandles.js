@@ -22,8 +22,8 @@ export function shapeFeatureHandleChanges(p, plan, handle, delta, localPoint) {
   const scale = 1 + (p.taper - 1) * anchorY / p.height;
   // The offset handle is projected from the wall's original anchor, so a curved
   // facade does not jump around its perimeter when the pointer first moves.
-  const wall = createShapeWallSurface(plan), source = wall.point(handle.at * wall.length, handle.anchorY);
+  const wall = createShapeWallSurface(plan), source = wall.point(handle.at * wall.length, anchorY);
   const projected = projectPointToCurvePath(plan.curve.path, localPoint(p, source.map((v, k) => v + delta[k])).map((v) => v / scale));
-  const at = clamp(projected.pathDistance / plan.curve.length, 0, 1);
+  const at = Math.hypot(delta[0], delta[2]) < 1e-9 ? feature.at : clamp(projected.pathDistance / plan.curve.length, 0, 1);
   return { features: p.features.map((f) => f.id === feature.id ? { ...f, at, bottom } : f) };
 }

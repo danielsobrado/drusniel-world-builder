@@ -7,9 +7,11 @@ function neighbor(plan, roofOnly = false) {
     roofReplaced: Boolean(plan.roofReplaced), roofOnly };
 }
 
+const hasProjection = (plan) => plan.features?.some((f) => f.balcony || f.solidSupport);
+
 /** Projected envelopes participate in the same spatial contact layer as authored volumes. */
 export function resolveShapeFeatureContacts(plans) {
-  if (!plans.some((p) => p.features?.some((f) => f.child || f.balcony))) return { plans, contacts: [] };
+  if (!plans.some((p) => p.features?.some((f) => f.child) || hasProjection(p))) return { plans, contacts: [] };
   const entries = new Map();
   for (const plan of plans) {
     if (plan.primitive.kind !== 'curved-volume') continue;
@@ -32,9 +34,9 @@ export function resolveShapeFeatureContacts(plans) {
     for (const id of index.queryBounds(plan.bounds, { excludeIds: [plan.id] })) {
       const entry = entries.get(id);
       // Root/root contacts already have exact envelope tests in the base chemistry.
-      if (!child && entry.ownerId === id && entry.ownerId !== ownerId && !plan.features?.some((f) => f.balcony)) continue;
+      if (!child && entry.ownerId === id && entry.ownerId !== ownerId && !hasProjection(plan)) continue;
       neighbors.set(id, neighbor(entry.plan, entry.roofOnly));
-      if (entry.ownerId !== ownerId && (child || entry.ownerId !== id || plan.features?.some((f) => f.balcony))) {
+      if (entry.ownerId !== ownerId && (child || entry.ownerId !== id || hasProjection(plan))) {
         const pair = [plan.id, id].sort(), key = `feature-join:${pair.join(':')}`;
         contacts.set(key, { id: key, derivationKey: key, source: 'auto',
           ruleId: 'feature-contact', generatorVersion: 1,

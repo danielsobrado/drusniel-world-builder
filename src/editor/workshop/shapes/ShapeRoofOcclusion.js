@@ -47,7 +47,6 @@ export function createShapeRoofOcclusion(plan, { roofMargin = 0.001, roofs = tru
   function clip(triangle) {
     let pieces = [triangle];
     for (const n of neighbors) {
-      if (n.coplanar) return [];
       pieces = pieces.flatMap((part) => {
         const points = part.map((v) => v.position);
         if (points.every((v) => v[0] < n.minX) || points.every((v) => v[0] > n.maxX) ||
@@ -59,6 +58,8 @@ export function createShapeRoofOcclusion(plan, { roofMargin = 0.001, roofs = tru
         const wallPieces = n.roofOnly ? [walls] : splitShapeFootprint(walls, n.wallPlanes).outside;
         if (n.roofReplaced || !roofs) return [under, ...wallPieces, roof].flatMap(triangles);
         const { outside, inside } = splitShapeFootprint(roof, n.planes);
+        // Duplicate roof relief belongs to one owner; exterior projections remain visible.
+        if (n.coplanar) return [under, ...wallPieces, ...outside].flatMap(triangles);
         return [under, ...wallPieces, ...outside].flatMap(triangles).concat(triangles(inside).flatMap((t) =>
           clipRoofHeight(t, (v) => v[1] - n.surface.heightAt(v[0], v[2]) - roofMargin)));
       });
