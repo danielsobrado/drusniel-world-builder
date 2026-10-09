@@ -7,6 +7,7 @@ import { createSkeletonRoofParts } from './ProceduralWorkshopSkeletonRoof.js';
 import { buildRegisteredShape } from './shapes/ShapeGeometryRegistry.js';
 import { applyShapeSurfaceMaterials } from './shapes/ShapeSurfaceMaterials.js';
 import { disposeUnusedModelMaterials } from '../assets/modelParts.js';
+import { semanticWallPlanMap, createSemanticWallParts } from './geometry/wall/WallCompositionParts.js';
 
 function material(slot, color, options = {}) {
   const result = new THREE.MeshStandardNodeMaterial({
@@ -144,12 +145,15 @@ function wallParts(primitive, materials) {
 
 export function createWorkshopCompositionParts(
   recipe,
-  resolvedShapePlans = null,
+  plansOrOptions = null,
   shapeDomains = undefined,
 ) {
   const composition = normalizeWorkshopComposition(recipe.composition);
+  const options = Array.isArray(plansOrOptions) || plansOrOptions === null
+    ? { resolvedShapePlans: plansOrOptions, shapeDomains } : plansOrOptions;
+  const semanticWalls = semanticWallPlanMap(options.wallPlans ?? [], composition);
   const shapePlans = new Map(
-    (resolvedShapePlans ?? planWorkshopComposition(recipe).shapePlans).map((plan) => [
+    (options.resolvedShapePlans ?? planWorkshopComposition(recipe).shapePlans).map((plan) => [
       plan.id,
       plan,
     ]),
@@ -179,12 +183,14 @@ export function createWorkshopCompositionParts(
     for (const primitive of composition.primitives)
       parts.push(
         ...(shapePlans.has(primitive.id)
-          ? buildRegisteredShape(shapePlans.get(primitive.id), materials, recipe, shapeDomains)
+          ? buildRegisteredShape(shapePlans.get(primitive.id), materials, recipe, options.shapeDomains ?? shapeDomains)
           : primitive.kind === 'rectangle'
             ? rectangleParts(primitive, materials)
             : primitive.kind === 'circle'
               ? circleParts(primitive, materials)
-              : wallParts(primitive, materials)),
+              : semanticWalls.has(primitive.id)
+                ? createSemanticWallParts(primitive, materials.walls, semanticWalls.get(primitive.id), semanticGeometry)
+                : wallParts(primitive, materials)),
       );
     const roofResult = createSkeletonRoofParts({
       recipe,

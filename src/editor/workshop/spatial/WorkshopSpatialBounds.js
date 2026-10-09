@@ -1,4 +1,5 @@
 import { shapeCapability, planRegisteredShape } from '../shapes/ShapeRegistry.js';
+import { planWallEntity } from '../geometry/wall/WallPlanner.js';
 
 function finite(value, field) {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${field} must be finite.`);
@@ -47,6 +48,11 @@ function wallBounds(primitive) {
   );
 }
 
+function semanticWallBounds(entity) {
+  const bounds = planWallEntity(entity).bounds;
+  return orderedBounds([bounds.min[0], bounds.min[2]], [bounds.max[0], bounds.max[2]]);
+}
+
 export function normalizeWorkshopSpatialBounds(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     throw new Error('Workshop spatial bounds must be an object.');
@@ -58,6 +64,7 @@ export function workshopEntitySpatialBounds(entity) {
   const explicit = entity?.properties?.spatialBounds;
   if (explicit) return normalizeWorkshopSpatialBounds(explicit);
   if (!entity?.type?.startsWith('composition-')) return null;
+  if (entity.type === 'composition-wall' && entity.properties?.wall) return semanticWallBounds(entity);
   const primitive = entity.properties?.primitive;
   if (!primitive) return null;
   if (shapeCapability(primitive.kind)) return normalizeWorkshopSpatialBounds(planRegisteredShape(primitive).bounds);
