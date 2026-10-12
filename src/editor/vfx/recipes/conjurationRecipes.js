@@ -32,10 +32,13 @@ export function acidSplashImpact(fx, ctx) {
   fx.at(0, () => {
     fx.sound('acid', ground, { duration });
     fx.shake(0.12, ground, 8);
-    fx.burst('acid.flash', 1, { kind: 'point', center: addScaled(ground, UP, 0.8) }, { sizeScale: 1.6 });
+    fx.burst('acid.flash', 1, { kind: 'point', center: addScaled(ground, UP, 1.2) }, { sizeScale: 2.4 });
     fx.burst('acid.drop', 160, { kind: 'sphere', center: addScaled(ground, UP, 0.4), radius: 0.4, speed: [5, 11], up: 1.1, hemisphere: true });
     // The crown: a tall ring of fat droplets thrown up and out, readable at range.
     fx.burst('acid.drop', 70, { kind: 'ring', center: addScaled(ground, UP, 0.3), radius: 0.7, speed: [2.5, 5], lift: [5, 8] }, { sizeScale: 2.2 });
+    // A geyser: a column of acid thrown high, the silhouette that reads at range.
+    fx.burst('acid.drop', 90, { kind: 'cone', origin: addScaled(ground, UP, 0.3), direction: UP, angle: 0.22, speed: [8, 14] }, { sizeScale: 2.4 });
+    fx.burst('acid.fume', 14, { kind: 'cone', origin: addScaled(ground, UP, 0.5), direction: UP, angle: 0.3, speed: [3, 7] }, { sizeScale: 2.2 });
     fx.burst('acid.sizzle', 26, { kind: 'disk', center: ground, radius: 2, ground: fx.groundHeight, height: 0.45, lift: [0.6, 1.4] }, { sizeScale: 2 });
     fx.burst('acid.puddle.glow', 1, { kind: 'point', center: addScaled(ground, UP, 0.45) });
     fx.decal({
