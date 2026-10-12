@@ -59,6 +59,8 @@ const DEFAULTS = Object.freeze({
   additive: 1,
   additiveEnd: null,
   opacity: 1,
+  /** Opacity multiplier reached at the end of life: smoke thins as it spreads. */
+  opacityEnd: 1,
   fadeIn: 0.05,
   fadeOut: 0.6,
   tint: [1, 1, 1],
@@ -76,6 +78,8 @@ const DEFAULTS = Object.freeze({
   cameraFade: true,
   swirl: 0,
   attract: 0,
+  /** 0..1: how readily the particle's horizontal motion relaxes to the wind's. */
+  windDrift: 0,
   trail: null,
   onDeath: null,
   onImpact: null,
@@ -84,9 +88,11 @@ const DEFAULTS = Object.freeze({
 });
 
 function isPuffTile(tile) {
-  return (tile >= TILE.SMOKE_FIRST && tile <= TILE.FIRE_LAST)
+  return (tile >= TILE.SMOKE_FIRST && tile <= TILE.SMOKE_LAST)
+    || (tile >= TILE.FIRE_FIRST && tile <= TILE.FIRE_LAST)
     || (tile >= TILE.FLAME_FIRST && tile <= TILE.FLAME_LAST)
-    || tile === TILE.CLOUD;
+    || tile === TILE.CLOUD
+    || tile === TILE.FOG_BANK;
 }
 
 function asPair(value) {

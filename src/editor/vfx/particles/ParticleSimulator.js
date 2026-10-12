@@ -63,6 +63,8 @@ export function createParticleSimulator(deps) {
   const arrays = [...FLOAT_FIELDS, ...INT_FIELDS].map((field) => state[field]);
   const subSpawn = createSpawnParams();
   const turbulence = { x: 0, y: 0, z: 0 };
+  // A light breeze that rising smoke leans into, in metres per second.
+  const wind = { x: deps.wind?.x ?? 1.1, z: deps.wind?.z ?? 0.45 };
   let count = 0;
   let frame = 0;
   let time = 0;
@@ -153,6 +155,13 @@ export function createParticleSimulator(deps) {
       state.vx[i] += (-dz / distance * type.swirl - dx / distance * type.attract) * dt;
       state.vz[i] += (dx / distance * type.swirl - dz / distance * type.attract) * dt;
       if (type.attract !== 0) state.vy[i] += (state.anchorY[i] - state.py[i]) * type.attract * 0.3 * dt;
+    }
+    if (type.windDrift > 0) {
+      // Stronger with height, as the breeze is above the grass.
+      const rise = Math.min(1, Math.max(0.2, (state.py[i] - state.groundY[i]) * 0.15));
+      const pull = type.windDrift * rise * dt;
+      state.vx[i] += (wind.x - state.vx[i]) * pull;
+      state.vz[i] += (wind.z - state.vz[i]) * pull;
     }
     if (type.drag > 0) {
       const damping = Math.exp(-type.drag * dt);
@@ -270,6 +279,7 @@ export function createParticleSimulator(deps) {
     out.heat = state.heat0[i] + (state.heat1[i] - state.heat0[i]) * heatT;
     out.additive = type.additive + (type.additiveEnd - type.additive) * heatT;
     out.alpha = state.opacity[i]
+      * (1 + (type.opacityEnd - 1) * t)
       * (type.fadeIn > 0 ? smoothstep(0, type.fadeIn, t) : 1)
       * (1 - smoothstep(type.fadeOut, 1, t));
     if (type.groundFade) {
@@ -310,6 +320,8 @@ export function createParticleSimulator(deps) {
     get count() { return count; },
     get capacity() { return capacity; },
     get dropped() { return dropped; },
+    /** The breeze smoke leans into; recipes and tests may change it. */
+    wind,
     random,
   };
 }

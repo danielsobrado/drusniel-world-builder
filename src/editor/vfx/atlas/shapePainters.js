@@ -32,6 +32,35 @@ export function paintFlare(surface) {
   }), 3);
 }
 
+/**
+ * A structured flash: a hot point inside a short halo, and rays of uneven
+ * length and width thrown out round it. Read with a ramp, the core goes white
+ * and the rays keep their colour, so a flash has a shape instead of a disc.
+ */
+export function paintStarburst(surface, noise, random) {
+  const rays = Array.from({ length: 22 }, (_, index) => ({
+    angle: (index + random.range(-0.35, 0.35)) / 22 * Math.PI * 2,
+    length: random.range(0.45, 1),
+    width: random.range(0.016, 0.034),
+    weight: random.range(0.45, 1),
+  }));
+  writeEmissive(surface, sampleGrid(surface.size, (u, v) => {
+    const x = (u - 0.5) / 0.46;
+    const y = (v - 0.5) / 0.46;
+    const r = Math.hypot(x, y);
+    let streaks = 0;
+    for (const ray of rays) {
+      const along = x * Math.cos(ray.angle) + y * Math.sin(ray.angle);
+      if (along <= 0) continue;
+      const across = Math.abs(-x * Math.sin(ray.angle) + y * Math.cos(ray.angle));
+      const fade = saturate(1 - along / ray.length);
+      streaks += gaussian(across, ray.width * (1 + along * 2.5)) * fade * ray.weight;
+    }
+    const core = Math.exp(-r * r * 45) + Math.exp(-r * r * 6) * 0.3;
+    return saturate((core + streaks * 1.3) * smooth(1, 0.85, r));
+  }), 1.6);
+}
+
 /** A capsule streak along v; sparks stretch it along their velocity. */
 export function paintStreak(surface) {
   writeEmissive(surface, sampleGrid(surface.size, (u, v) => {

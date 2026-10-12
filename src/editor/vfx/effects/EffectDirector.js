@@ -102,14 +102,31 @@ export function createEffectDirector(services) {
        * A growing radius makes a blast wave; a steady one keeps a scorch,
        * puddle or rune visible in a meadow.
        */
-      press(start, end, discAt) {
+      press(start, end, discAt, interval = 0) {
         if (!services.pressGround) return fx;
-        fx.during(start, end, (t) => {
+        fx.during(start, end, throttled(interval, (t) => {
           const disc = discAt(t);
           if (disc && disc.radius > 0 && disc.strength > 0) {
             services.pressGround(disc.x, disc.z, disc.radius, disc.strength, disc.inner ?? 0.6);
           }
-        });
+        }));
+        return fx;
+      },
+      /**
+       * Marks the grass over [start, end): `discAt(t)` returns
+       * { x, z, radius, strength, inner } and `mark` names what the spell left —
+       * 'scorch', 'singe', 'wither', 'frost', 'acid', 'moon', 'bloom', 'sickly'.
+       * Stamped every `interval` seconds (every frame at 0); the meadow fades
+       * it on its own once the window ends.
+       */
+      mark(start, end, mark, discAt, interval = 0) {
+        if (!services.markGround) return fx;
+        fx.during(start, end, throttled(interval, (t) => {
+          const disc = discAt(t);
+          if (disc && disc.radius > 0 && disc.strength > 0) {
+            services.markGround(disc.x, disc.z, disc.radius, mark, disc.strength, disc.inner ?? 0.5);
+          }
+        }));
         return fx;
       },
       sound(name, origin, options) {
@@ -121,6 +138,10 @@ export function createEffectDirector(services) {
         return fx;
       },
       groundHeight: services.groundHeight,
+      /** The camera's position this frame (the audio listener), for view-dependent placement. */
+      get camera() {
+        return services.getListener();
+      },
       /** Effects can extend their own life (lingering clouds, walls). */
       keepAliveUntil(time) {
         effect.until = Math.max(effect.until, time);
@@ -162,6 +183,18 @@ export function createEffectDirector(services) {
     clear() {
       effects.clear();
     },
+  };
+}
+
+/** A `during` callback run on its first frame and then at most every `interval` seconds. */
+function throttled(interval, run) {
+  if (!(interval > 0)) return run;
+  let since = Infinity;
+  return (t, dt, elapsed) => {
+    since += dt;
+    if (since < interval) return;
+    since = 0;
+    run(t, dt, elapsed);
   };
 }
 

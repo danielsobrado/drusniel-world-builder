@@ -19,6 +19,7 @@ import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { applyCloudShadow } from '../CloudShadow.js';
+import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowPigment } from './meadowPigment.js';
@@ -49,7 +50,7 @@ export function createMeadowBladeMaterial({
   material.receivedShadowPositionNode = position;
 
   const blade = meadowInstance(uniforms.origin);
-  const { pigment, bladeValue, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade });
+  const { pigment, bladeValue, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade, marks: true });
   material.colorNode = albedo;
 
   // Normal: world-up leaned toward the blade's facing at the tip, so a blade's
@@ -78,11 +79,17 @@ export function createMeadowBladeMaterial({
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);
-  material.emissiveNode = pigment.mul(bladeValue).mul(uniforms.sunColor)
+  const emissive = pigment.mul(bladeValue).mul(uniforms.sunColor)
     .mul(transmission).mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength)
     .mul(smoothstep(0.35, 1, height))
     .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill))
     .add(sheen);
+  // A spell's light warming the meadow round it (one uniform light, no scene light).
+  // Evaluated per vertex: blades are thin, and the meadow's overdraw makes a
+  // per-fragment term cost far more than it shows.
+  material.emissiveNode = spellWorldEnabled
+    ? emissive.add(albedo.mul(spellLightIrradiance(positionWorld, worldNormal).toVarying('meadowSpellLight')))
+    : emissive;
 
   if (handoff) applyHandoff(material, { base: blade.base, fadeIn: null, fadeOut: uniforms.handoff });
   applyPublicationFade(material, { instance: blade, time: uniforms.time });

@@ -15,7 +15,13 @@ export const TILE_PADDING_PX = 2;
 
 export const TILE = Object.freeze({
   SMOKE_FIRST: 0,
-  SMOKE_LAST: 11,
+  SMOKE_LAST: 8,
+  /** Radial rays round a hot point: structured flashes instead of a white disc. */
+  STARBURST: 9,
+  /** A wide, flat-bottomed, very soft fog lens for ground-hugging banks. */
+  FOG_BANK: 10,
+  /** A cluster of ice spikes rising from v = 0, stood on the ground. */
+  CRYSTAL: 11,
   FIRE_FIRST: 12,
   FIRE_LAST: 19,
   GLOW: 20,

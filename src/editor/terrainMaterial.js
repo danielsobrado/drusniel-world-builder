@@ -50,6 +50,7 @@ import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js
 import { snowWakeRecorder } from './stylized/deformation/SnowWakeRecorder.js';
 import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
+import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
 import { resolveSurfaceWetnessConfig } from './weather/surfaceWetnessConfig.js';
 import {
@@ -423,6 +424,12 @@ export function createTerrainMaterial({
     if (frost) {
       material.colorNode = frost.applyColor(material.colorNode);
       material.roughnessNode = frost.applyRoughness(material.roughnessNode);
+    }
+    // A spell's light on the ground round it: one uniform light rather than a
+    // scene light, skipped behind a uniform branch while no spell is lit.
+    if (spellWorldEnabled) {
+      const spellLight = material.colorNode.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0)));
+      material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(spellLight) : spellLight;
     }
     // Valley mist pooling in the gorges below the view, marched against the
     // camera-local height patch. It blends last, over everything, because it sits

@@ -25,6 +25,7 @@ import {
 import { assignGrassMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
+import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
@@ -105,9 +106,12 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   material.normalNode = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
   const view = normalize(cameraPosition.sub(positionWorld));
   const transmission = pow(dot(view.negate(), normalize(sunDirection)).max(0), 2.2);
-  material.emissiveNode = pigment.mul(uniforms.sunColor).mul(transmission)
+  const emissive = pigment.mul(uniforms.sunColor).mul(transmission)
     .mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength).mul(0.6).mul(height)
     .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill));
+  material.emissiveNode = spellWorldEnabled
+    ? emissive.add(albedo.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0))))
+    : emissive;
 
   applyHandoff(material, { base: card.base, fadeIn: uniforms.handoff, fadeOut: uniforms.farFade });
   applyPublicationFade(material, { instance: card, time: uniforms.time });

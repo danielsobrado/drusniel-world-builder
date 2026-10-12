@@ -37,6 +37,8 @@ function findSceneLights(scene) {
  * @param {number} [deps.sceneLights] real point lights lighting the world (default 0)
  * @param {(x: number, z: number, radius: number, strength: number, inner: number) => void} [deps.pressGround]
  *   flattens grass over a render-space disc (meadow interaction), so blasts bend it and decals show
+ * @param {(x: number, z: number, radius: number, mark: string, strength: number, inner: number) => void} [deps.markGround]
+ *   tints the grass over a render-space disc: 'scorch', 'singe', 'wither', 'frost', 'acid', 'moon', 'bloom', 'sickly'
  */
 export function createVfxSystem(deps) {
   const { scene } = deps;
@@ -77,6 +79,7 @@ export function createVfxSystem(deps) {
     sound: deps.sound,
     groundHeight,
     pressGround: deps.pressGround,
+    markGround: deps.markGround,
     getListener: () => listener,
     play: (recipeId, context) => play(recipeId, context),
   });
@@ -103,7 +106,8 @@ export function createVfxSystem(deps) {
       poolParams.x = x; poolParams.y = ground + 0.45; poolParams.z = z;
       poolParams.reset();
       poolParams.sizeScale = Math.min(range * 1.4, 3 + height * 2.2);
-      poolParams.emissiveScale = Math.min(4, reach * 0.06);
+      // The terrain and grass are lit by the world light now; the pool is the haze over them.
+      poolParams.emissiveScale = Math.min(2, reach * 0.03);
       poolParams.opacityScale = 1;
       poolParams.tintR = r; poolParams.tintG = g; poolParams.tintB = b;
       poolParams.rotation = 0;
@@ -165,6 +169,11 @@ export function createVfxSystem(deps) {
       renderer.update(simulator, camera);
       deps.sound?.setListener?.(camera);
       cpuMs += (performance.now() - started - cpuMs) * 0.1;
+    },
+    /** Stops every running effect and drops its particles; decals and lights fade out. */
+    clear() {
+      director.clear();
+      simulator.clear();
     },
     shiftOrigin(shiftX, shiftZ) {
       simulator.shiftOrigin(shiftX, shiftZ);

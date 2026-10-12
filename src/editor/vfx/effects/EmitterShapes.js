@@ -50,11 +50,19 @@ const SHAPES = {
     params.vz = dz * speed;
   },
 
-  /** Expanding ring in the plane of `normal` (default ground). */
+  /**
+   * Expanding ring in the plane of `normal` (default ground). `arc` limits it to
+   * a sector, `{ toward: {x, z}, half }` on the ground: a burst thrown forward only.
+   */
   ring(shape, params, random, index, count) {
     const normal = shape.normal ?? { x: 0, y: 1, z: 0 };
     const frame = basis(normal);
-    const angle = (index / Math.max(1, count)) * Math.PI * 2 + random() * (shape.jitter ?? 0.3);
+    const fraction = index / Math.max(1, count);
+    const jitter = random() * (shape.jitter ?? 0.3);
+    // On the ground the frame's tangent is +z and its bitangent +x.
+    const angle = shape.arc
+      ? Math.atan2(shape.arc.toward.x, shape.arc.toward.z) + (fraction * 2 - 1) * shape.arc.half + jitter * 0.5
+      : fraction * Math.PI * 2 + jitter;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
     const dx = frame.tx * cos + frame.bx * sin;

@@ -138,8 +138,11 @@ export function createParticleMaterial({ atlas, lighting }) {
   // Puffs keep a gentler relief; their volume comes from the density cues below.
   const relief = mix(1, 0.7, vBillow);
   const bumped = vBasisX.mul(nxy.x.mul(relief)).add(vBasisY.mul(nxy.y.mul(relief))).add(vBasisZ.mul(nz));
-  // Thin fringes face the camera: overlapping puffs then blend instead of outlining each other.
-  const normal = normalize(mix(vBasisZ, bumped, smoothstep(0.35, 0.9, texel.a)));
+  // Solid sprites flatten toward the camera at their thin fringe. Puffs keep one
+  // blend everywhere: a fringe that turns back to the camera catches the sun
+  // differently from the body just inside it, and draws a ring round every puff.
+  const facing = mix(smoothstep(0.35, 0.9, texel.a), 0.6, vBillow);
+  const normal = normalize(mix(vBasisZ, bumped, facing));
 
   // Per-texel heat: hot cores, cooler fringes.
   const heat = clamp(vHeat.mul(detail.mul(0.8).add(0.3)), 0, 1);

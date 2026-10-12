@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { evaluateRamp, RAMP_KEYS } from '../atlas/rampPainter.js';
+import { setSpellWorldLight } from './SpellWorldLight.js';
 import { VFX_SHADER_LIGHT_COUNT } from './VfxLightingUniforms.js';
+
+/** Light a smoke puff can take from one effect light (the shader term saturates toward it). */
+const SHADER_LIGHT_CEILING = 2;
 
 /**
  * Effect lights that spells borrow. There are two kinds:
@@ -110,19 +114,29 @@ export function createEffectLightPool({ scene, lighting, count = VFX_SHADER_LIGH
       const [r, g, b] = spec.ramp !== undefined ? colour : spec.color;
       slot.r = r; slot.g = g; slot.b = b;
       slot.power = spec.intensity * level;
-      // The shader term is unitless; scale so a 1-candela light reads sensibly.
-      const shaderScale = spec.intensity * level * 0.004;
+      // The shader term is unitless; scale so a 1-candela light reads sensibly,
+      // easing toward a ceiling so a meteor's blast lights its smoke orange
+      // instead of washing it out to cream.
+      const shaderScale = SHADER_LIGHT_CEILING * (1 - Math.exp(-spec.intensity * level * 0.004 / SHADER_LIGHT_CEILING));
       position.set(slot.x, slot.y, slot.z, spec.range);
       shaderColour.set(r * shaderScale, g * shaderScale, b * shaderScale, 0);
     }
     assignWorldLights();
   };
 
+  const brightest = { x: 0, y: 0, z: 0, power: 0, range: 0, r: 0, g: 0, b: 0 };
+
   /** The world's lights follow the brightest slots this frame. */
   const assignWorldLights = () => {
     ranked.length = 0;
     for (const slot of slots) if (slot.spec && slot.power > 0) ranked.push(slot);
     ranked.sort((a, b) => b.power - a.power);
+    // Terrain and grass see the brightest one through the shader-level world light.
+    const top = ranked[0];
+    if (top) {
+      Object.assign(brightest, { x: top.x, y: top.y, z: top.z, power: top.power, range: top.spec.range, r: top.r, g: top.g, b: top.b });
+    }
+    setSpellWorldLight(top ? brightest : null);
     worldLights.forEach((light, index) => {
       const slot = ranked[index];
       if (!slot) {
@@ -157,6 +171,7 @@ export function createEffectLightPool({ scene, lighting, count = VFX_SHADER_LIGH
       }
     },
     dispose() {
+      setSpellWorldLight(null);
       for (const light of worldLights) scene.remove(light);
     },
   };

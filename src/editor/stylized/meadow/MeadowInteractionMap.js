@@ -12,7 +12,34 @@ import * as THREE from 'three/webgpu';
  *
  * The donor's optimisations are kept: recovery and scrolling touch only the
  * rectangle that has ink, and once the peak decays to zero nothing is uploaded.
+ *
+ * Channels: R is the press (blades fold over); G is how strongly a spell has
+ * marked the grass — scorched, frosted, withered — and B which mark it is
+ * (`GRASS_MARK`), so the meadow itself carries a spell's aftermath instead of
+ * a decal hidden under it. Marks fade on their own, slow clock — one step every
+ * few frames, by kind — so a spell stamps a mark while it spreads and then only
+ * refreshes it now and then, instead of every frame.
  */
+/** Mark kinds in the B channel; the blade shader holds the matching colours. */
+export const GRASS_MARK = Object.freeze({
+  SCORCH: 0,
+  SINGE: 1,
+  WITHER: 2,
+  FROST: 3,
+  ACID: 4,
+  MOON: 5,
+  BLOOM: 6,
+  SICKLY: 7,
+});
+export const GRASS_MARK_KINDS = 8;
+
+/**
+ * Frames per one-step fade of a mark, by kind (255 steps to clear): moonlight
+ * leaves within seconds, frost in ~20 s, burnt and withered grass in ~40 s.
+ */
+const MARK_FADE_FRAMES = Object.freeze([10, 9, 10, 5, 9, 1, 2, 6]);
+const MARK_KIND_SHIFT = 5;
+
 export class MeadowInteractionMap {
   /**
    * @param {object} options
@@ -30,6 +57,7 @@ export class MeadowInteractionMap {
     this.resolution = resolution;
     this.worldSize = worldSize;
     this.recoverySpeed = recoverySpeed;
+    this.markFrame = 0;
     this.strength = strength;
     this.bodyRadius = bodyRadius;
     this.uploadIntervalFrames = Math.max(1, Math.round(uploadIntervalFrames));
@@ -40,9 +68,10 @@ export class MeadowInteractionMap {
     this.lastCenter = new THREE.Vector2();
     this.started = false;
     this.peak = 0;
+    this.markPeak = 0;
     this.ink = { minX: 0, minY: 0, maxX: -1, maxY: -1 };
     this.pixels = new Uint8Array(resolution * resolution * 4);
-    this.scratch = new Uint8Array(resolution * resolution);
+    this.scratch = new Uint8Array(resolution * resolution * 3);
     this.clearPixels();
     this.texture = new THREE.DataTexture(this.pixels, resolution, resolution, THREE.RGBAFormat, THREE.UnsignedByteType);
     this.texture.colorSpace = THREE.NoColorSpace;
@@ -87,27 +116,29 @@ export class MeadowInteractionMap {
   /**
    * @param {{ x: number, y: number, z: number } | null} body render-space point to
    *   stamp (the player's feet), or null to only let the meadow recover
+   * @param {{ stamp?: boolean }} [options] `stamp: false` only follows the point:
+   *   the spell map keeps its window round the player without pressing a body in
    */
-  update(body) {
+  update(body, { stamp = true } = {}) {
     if (body) {
       if (!this.started) {
         this.lastCenter.set(body.x, body.z);
         this.started = true;
       }
-      if (this.peak > 0) this.scroll(body.x - this.lastCenter.x, body.z - this.lastCenter.y);
+      if (this.hasMarksOrPress()) this.scroll(body.x - this.lastCenter.x, body.z - this.lastCenter.y);
       this.lastCenter.set(body.x, body.z);
       this.center.set(body.x, body.z);
     }
-    const hadInk = this.peak > 0;
+    const hadInk = this.hasMarksOrPress();
     this.recover();
-    if (body) this.paintSphere(body.x, body.y, body.z, this.bodyRadius, this.strength);
-    if (hadInk || body) this.textureDirty = true;
+    if (body && stamp) this.paintSphere(body.x, body.y, body.z, this.bodyRadius, this.strength);
+    if (hadInk || (body && stamp)) this.textureDirty = true;
     this.uploadFrame += 1;
     if (
       this.textureDirty
       && (
         this.uploadFrame % this.uploadIntervalFrames === 0
-        || this.peak === 0
+        || !this.hasMarksOrPress()
       )
     ) {
       this.texture.needsUpdate = true;
@@ -115,18 +146,36 @@ export class MeadowInteractionMap {
     }
   }
 
+  hasMarksOrPress() {
+    return this.peak > 0 || this.markPeak > 0;
+  }
+
   recover() {
-    if (this.peak === 0) return;
+    if (!this.hasMarksOrPress()) return;
     const { minX, minY, maxX, maxY } = this.ink;
     const stride = this.resolution * 4;
+    const pressing = this.peak > 0;
+    const marking = this.markPeak > 0;
+    const frame = this.markFrame;
+    this.markFrame += 1;
+    let markPeak = 0;
     for (let y = minY; y <= maxY; y += 1) {
       for (let x = minX; x <= maxX; x += 1) {
         const index = y * stride + x * 4;
-        this.pixels[index] = Math.floor(this.pixels[index] * this.recoverySpeed);
+        if (pressing) this.pixels[index] = Math.floor(this.pixels[index] * this.recoverySpeed);
+        if (marking) {
+          let mark = this.pixels[index + 1];
+          if (mark > 0 && frame % MARK_FADE_FRAMES[this.pixels[index + 2] >> MARK_KIND_SHIFT] === 0) {
+            mark -= 1;
+            this.pixels[index + 1] = mark;
+          }
+          if (mark > markPeak) markPeak = mark;
+        }
       }
     }
     this.peak = Math.floor(this.peak * this.recoverySpeed);
-    if (this.peak === 0) this.clearInk();
+    this.markPeak = markPeak;
+    if (!this.hasMarksOrPress()) this.clearInk();
   }
 
   /** Scrolls the ink so it stays put in the world as the window follows the player. */
@@ -140,8 +189,11 @@ export class MeadowInteractionMap {
     for (let y = oldMinY; y <= oldMaxY; y += 1) {
       for (let x = oldMinX; x <= oldMaxX; x += 1) {
         const offset = (y * this.resolution + x) * 4;
-        this.scratch[(y - oldMinY) * width + (x - oldMinX)] = this.pixels[offset];
-        this.pixels[offset] = 0;
+        const cell = ((y - oldMinY) * width + (x - oldMinX)) * 3;
+        for (let channel = 0; channel < 3; channel += 1) {
+          this.scratch[cell + channel] = this.pixels[offset + channel];
+          this.pixels[offset + channel] = 0;
+        }
       }
     }
     const last = this.resolution - 1;
@@ -152,12 +204,15 @@ export class MeadowInteractionMap {
     if (maxX < minX || maxY < minY) {
       this.clearInk();
       this.peak = 0;
+      this.markPeak = 0;
       return;
     }
     Object.assign(this.ink, { minX, minY, maxX, maxY });
     for (let y = minY; y <= maxY; y += 1) {
       for (let x = minX; x <= maxX; x += 1) {
-        this.pixels[(y * this.resolution + x) * 4] = this.scratch[(y + shiftY - oldMinY) * width + (x + shiftX - oldMinX)];
+        const offset = (y * this.resolution + x) * 4;
+        const cell = ((y + shiftY - oldMinY) * width + (x + shiftX - oldMinX)) * 3;
+        for (let channel = 0; channel < 3; channel += 1) this.pixels[offset + channel] = this.scratch[cell + channel];
       }
     }
   }
@@ -207,16 +262,9 @@ export class MeadowInteractionMap {
    * @param {number} [innerFraction] 0..1
    */
   pressDisc(x, z, radius, strength = 1, innerFraction = 0.6) {
-    const perMetre = this.resolution / this.worldSize;
-    const centerX = ((x - this.center.x) / this.worldSize + 0.5) * this.resolution;
-    const centerY = ((z - this.center.y) / this.worldSize + 0.5) * this.resolution;
-    const pixelRadius = radius * perMetre;
-    if (pixelRadius < 0.5 || !(strength > 0)) return;
-    const minX = Math.max(0, Math.floor(centerX - pixelRadius));
-    const maxX = Math.min(this.resolution - 1, Math.ceil(centerX + pixelRadius));
-    const minY = Math.max(0, Math.floor(centerY - pixelRadius));
-    const maxY = Math.min(this.resolution - 1, Math.ceil(centerY + pixelRadius));
-    if (maxX < minX || maxY < minY) return;
+    const rect = this.discRect(x, z, radius);
+    if (!rect || !(strength > 0)) return;
+    const { centerX, centerY, pixelRadius, minX, minY, maxX, maxY } = rect;
     this.addInk(minX, minY, maxX, maxY);
     const inner = Math.min(0.99, Math.max(0, innerFraction));
     const peak = 255 * Math.min(1, strength);
@@ -233,10 +281,73 @@ export class MeadowInteractionMap {
         if (next > this.peak) this.peak = next;
       }
     }
-    this.texture.needsUpdate = true;
+    // Uploaded on the map's own cadence (uploadIntervalFrames), not once per stamp.
+    this.textureDirty = true;
+  }
+
+  /**
+   * Marks the grass over a ground disc — scorched, frosted, withered — at full
+   * strength inside `innerFraction` of the radius, easing out to the rim. Like
+   * the press, a mark that must last is restamped every frame and recovers once
+   * the spell stops. Where marks overlap, the clearly stronger one sets the kind.
+   *
+   * @param {number} x render-space metres
+   * @param {number} z render-space metres
+   * @param {number} radius metres
+   * @param {number} kind GRASS_MARK
+   * @param {number} [strength] 0..1
+   * @param {number} [innerFraction] 0..1
+   */
+  markDisc(x, z, radius, kind, strength = 1, innerFraction = 0.5) {
+    const rect = this.discRect(x, z, radius);
+    if (!rect || !(strength > 0)) return;
+    const { centerX, centerY, pixelRadius, minX, minY, maxX, maxY } = rect;
+    this.addInk(minX, minY, maxX, maxY);
+    const inner = Math.min(0.99, Math.max(0, innerFraction));
+    const peak = 255 * Math.min(1, strength);
+    const code = grassMarkCode(kind);
+    for (let py = minY; py <= maxY; py += 1) {
+      const dy = (py + 0.5 - centerY) / pixelRadius;
+      for (let px = minX; px <= maxX; px += 1) {
+        const dx = (px + 0.5 - centerX) / pixelRadius;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 1) continue;
+        const edge = distance <= inner ? 1 : 1 - (distance - inner) / (1 - inner);
+        const value = Math.floor(peak * edge * edge * (3 - 2 * edge));
+        const offset = (py * this.resolution + px) * 4;
+        const current = this.pixels[offset + 1];
+        if (value <= current) continue;
+        if (current < 24 || value >= current * 1.5) this.pixels[offset + 2] = code;
+        this.pixels[offset + 1] = value;
+        if (value > this.markPeak) this.markPeak = value;
+      }
+    }
+    // Uploaded on the map's own cadence (uploadIntervalFrames), not once per stamp.
+    this.textureDirty = true;
+  }
+
+  /** Texel rectangle of a render-space disc, or null when it misses the window. */
+  discRect(x, z, radius) {
+    const perMetre = this.resolution / this.worldSize;
+    const centerX = ((x - this.center.x) / this.worldSize + 0.5) * this.resolution;
+    const centerY = ((z - this.center.y) / this.worldSize + 0.5) * this.resolution;
+    const pixelRadius = radius * perMetre;
+    if (pixelRadius < 0.5) return null;
+    const minX = Math.max(0, Math.floor(centerX - pixelRadius));
+    const maxX = Math.min(this.resolution - 1, Math.ceil(centerX + pixelRadius));
+    const minY = Math.max(0, Math.floor(centerY - pixelRadius));
+    const maxY = Math.min(this.resolution - 1, Math.ceil(centerY + pixelRadius));
+    if (maxX < minX || maxY < minY) return null;
+    return { centerX, centerY, pixelRadius, minX, minY, maxX, maxY };
   }
 
   dispose() {
     this.texture.dispose();
   }
+}
+
+/** B-channel byte for a mark kind: the middle of its band, so filtering stays inside it. */
+export function grassMarkCode(kind) {
+  const clamped = Math.max(0, Math.min(GRASS_MARK_KINDS - 1, Math.round(kind)));
+  return Math.round((clamped + 0.5) * (255 / GRASS_MARK_KINDS));
 }

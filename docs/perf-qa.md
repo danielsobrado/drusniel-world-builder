@@ -101,6 +101,7 @@ When a run finishes, the report is available as:
 | `duration` | `12` (`20` for `chunk-cross`) | Measured motion seconds |
 | `speed` | `run` | `walk` or `run` |
 | `explorationBoost` | off | `1` enables the configured fast-travel multiplier; recorded with effective player settings |
+| `spellWorld` | on | `0` compiles the terrain and meadow without the spell world light, the spell press-and-mark map and grass marks — the A/B control for spell work that touches world shaders (see [spell VFX](spell-vfx.md)) |
 | `seaPolish` | on | `0` disables the new surf and crossing ripple layers for A/B controls; resolved settings remain in the report |
 | `hitchMs` | `~33.3` | Frame-dt threshold that counts as a hitch |
 | `autostart` | `1` | Start as soon as stylized assets are ready |

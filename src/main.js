@@ -64,6 +64,7 @@ import {
   raycastTerrainHeightfield,
 } from './editor/weather/weather_terrain_adapters.js';
 import { attachSpellHotkeys, createSpellRuntime } from './editor/spells/spell_runtime.js';
+import { GRASS_MARK } from './editor/stylized/meadow/MeadowInteractionMap.js';
 import { attachCaptureHotkey } from './editor/input/attachCaptureHotkey.js';
 import { ThirdPersonCamera } from './editor/player/ThirdPersonCamera.js';
 import { createCharacterView } from './editor/character/createCharacterView.js';
@@ -1240,8 +1241,13 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       groundHeight: (x, z) => terrainView.getWorldHeight(x, z),
       subscribeOriginShift: (listener) => terrainView.floatingOrigin.subscribe(listener),
       pressGround: (x, z, radius, strength, inner) => (
-        stylizedSurface.meadowGrass?.interaction?.pressDisc(x, z, radius, strength, inner)
+        stylizedSurface.meadowGrass?.spellGround?.pressDisc(x, z, radius, strength, inner)
       ),
+      // Scorched, frosted or withered blades: the meadow carries the spell's mark.
+      markGround: (x, z, radius, mark, strength, inner) => {
+        const kind = GRASS_MARK[String(mark).toUpperCase()];
+        if (kind !== undefined) stylizedSurface.meadowGrass?.spellGround?.markDisc(x, z, radius, kind, strength, inner);
+      },
       getSceneLights: () => ({
         directional: stylizedSurface.skyView?.directional ?? null,
         hemisphere: stylizedSurface.skyView?.hemisphere ?? null,

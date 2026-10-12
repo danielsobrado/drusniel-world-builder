@@ -18,7 +18,7 @@ import {
   TILE_SIZE,
   TILES_PER_ROW,
 } from './ParticleAtlasLayout.js';
-import { paintCloud, paintFireFrame, paintFlameTongue, paintSmoke } from './puffPainters.js';
+import { paintCloud, paintFireFrame, paintFlameTongue, paintFogBank, paintSmoke } from './puffPainters.js';
 import { evaluateRamp, RAMP_KEYS } from './rampPainter.js';
 import {
   paintBeam,
@@ -30,11 +30,12 @@ import {
   paintMote,
   paintRing,
   paintSnowflake,
+  paintStarburst,
   paintStreak,
   paintTwinkle,
   paintWisp,
 } from './shapePainters.js';
-import { paintAsh, paintChunk, paintShard } from './solidPainters.js';
+import { paintAsh, paintChunk, paintCrystal, paintShard } from './solidPainters.js';
 import { createTileSurface } from './tileSurface.js';
 
 /**
@@ -73,6 +74,9 @@ function tilePainters() {
   painters.set(TILE.CLOUD, (s, n) => paintCloud(s, n));
   painters.set(TILE.SNOWFLAKE, (s) => paintSnowflake(s));
   painters.set(TILE.TWINKLE, (s) => paintTwinkle(s));
+  painters.set(TILE.STARBURST, (s, n, r) => paintStarburst(s, n, r));
+  painters.set(TILE.FOG_BANK, (s, n) => paintFogBank(s, n));
+  painters.set(TILE.CRYSTAL, (s, n, r) => paintCrystal(s, n, r));
   return painters;
 }
 

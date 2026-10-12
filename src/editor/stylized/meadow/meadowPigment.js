@@ -2,6 +2,7 @@ import { color, dot, fract, mix, pow, smoothstep, uv, vec3 } from 'three/tsl';
 
 import { stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { meadowPatchColors } from './meadowColorNodes.js';
+import { applyGrassMarks } from './meadowGrassMarks.js';
 import { MEADOW_GRASS_DEFAULTS } from './meadowGrassConfig.js';
 
 const DEFAULT_PATH_FRINGE_COLOR = '#c2ad62';
@@ -13,9 +14,10 @@ const DEFAULT_PATH_FRINGE_STRENGTH = 0.55;
  * patches across the field; contact shade and soil at the base so blades meet
  * the ground rather than float on a painted lawn; a per-blade value spread that
  * separates overlapping blades into layers instead of one flat sheet; straw tips
- * along a path's verge.
+ * along a path's verge; and, with `marks`, the scorch, frost or blight a spell
+ * left on the blades.
  */
-export function meadowPigment({ uniforms, tuning, config, blade }) {
+export function meadowPigment({ uniforms, tuning, config, blade, marks = false }) {
   const appearance = uniforms.appearance;
   const height = uv().y.clamp(0, 1);
   const patchSettings = { ...MEADOW_GRASS_DEFAULTS.appearance, ...config.grass?.meadow?.appearance };
@@ -29,8 +31,7 @@ export function meadowPigment({ uniforms, tuning, config, blade }) {
   const brightness = palette?.brightness ?? tuning.brightness;
   // These fields are constant along a stem. Evaluate their noise at vertices,
   // then interpolate pigment instead of repeating it in every covered fragment.
-  const root = mix(mix(bottom, top, appearance.groundTipMix).mul(tint), dryColor, dry)
-    .toVarying('meadowRootPigment');
+  let root = mix(mix(bottom, top, appearance.groundTipMix).mul(tint), dryColor, dry);
   let tip = mix(top.mul(tint), dryColor.mul(1.06), dry.mul(0.45));
   const fringe = config.path?.fringe ?? {};
   if (fringe.enabled !== false) {
@@ -44,6 +45,8 @@ export function meadowPigment({ uniforms, tuning, config, blade }) {
       .mul(dot(tip, vec3(0.3, 0.59, 0.11)).mul(1.6).add(0.35));
     tip = mix(tip, straw, wear.verge.mul(fringe.strength ?? DEFAULT_PATH_FRINGE_STRENGTH).clamp(0, 1));
   }
+  if (marks && uniforms.spellGround) ({ root, tip } = applyGrassMarks(uniforms.spellGround, blade.base, root, tip));
+  root = root.toVarying('meadowRootPigment');
   tip = tip.toVarying('meadowTipPigment');
   const pigment = mix(root, tip, pow(height, appearance.gradientPower));
   const rootShade = mix(appearance.rootBrightness, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height));

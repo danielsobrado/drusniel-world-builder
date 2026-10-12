@@ -9,8 +9,9 @@ import { lodBandVectors } from './meadowGrassLayout.js';
  *
  * @param {object} settings resolveMeadowGrassConfig()
  * @param {object | null} [interaction] MeadowInteractionMap, when the field has one
+ * @param {object | null} [spellGround] the spells' press-and-mark MeadowInteractionMap
  */
-export function createMeadowUniforms(settings, interaction = null) {
+export function createMeadowUniforms(settings, interaction = null, spellGround = null) {
   const appearance = settings.appearance;
   return {
     // The player's body stamp and its render-space window. The centre is the
@@ -21,6 +22,16 @@ export function createMeadowUniforms(settings, interaction = null) {
         texture: interaction.texture,
         center: uniform(interaction.center),
         worldSize: uniform(interaction.worldSize),
+      }
+      : null,
+    // Spells: blasts pressing the meadow (R) and the marks they leave (G, B).
+    spellGround: spellGround
+      ? {
+        texture: spellGround.texture,
+        center: uniform(spellGround.center),
+        worldSize: uniform(spellGround.worldSize),
+        /** 1 while a spell has ink in the map; at 0 the blades skip reading it. */
+        active: uniform(0),
       }
       : null,
     time: uniform(0),

@@ -114,3 +114,48 @@ export function paintAsh(surface, noise, random) {
     saturate(smooth(0.6, 1, hit.edge) * (0.6 + noise.noise2(u * 14, v * 14) * 0.6))
   ));
 }
+
+/**
+ * A cluster of ice spikes growing from the bottom of the tile, for crystals
+ * left standing on the ground. Each spike is two bevelled faces, so the sun
+ * catches one side; detail is the glint along the ridges and tips.
+ */
+export function paintCrystal(surface, noise, random) {
+  const { size } = surface;
+  const spikes = Array.from({ length: 6 }, (_, index) => ({
+    lean: (index / 5 - 0.5) * 1.1 + random.range(-0.15, 0.15),
+    root: 0.5 + (index / 5 - 0.5) * 0.28 + random.range(-0.03, 0.03),
+    length: random.range(0.45, 0.9) * (1 - Math.abs(index / 5 - 0.5) * 0.7),
+    width: random.range(0.05, 0.085),
+  }));
+  const coverage = new Float32Array(size * size);
+  const detail = new Float32Array(size * size);
+  const normals = new Float32Array(size * size * 2);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const u = (x + 0.5) / size;
+      const v = (y + 0.5) / size;
+      const index = y * size + x;
+      let best = 0;
+      for (const spike of spikes) {
+        const dirX = Math.sin(spike.lean);
+        const dirY = Math.cos(spike.lean);
+        const px = u - spike.root;
+        const py = v - 0.04;
+        const along = (px * dirX + py * dirY) / spike.length;
+        if (along < 0 || along > 1) continue;
+        const across = (px * dirY - py * dirX) / (spike.width * (1 - along));
+        const inside = 1 - Math.abs(across);
+        if (inside <= best) continue;
+        best = inside;
+        const face = Math.sign(across) || 1;
+        normals[index * 2] = face * dirY * 0.7;
+        normals[index * 2 + 1] = -face * dirX * 0.7 + 0.25;
+        detail[index] = saturate(Math.exp(-across * across * 30) * 0.7 + smooth(0.75, 1, along) * 0.6
+          + noise.noise2(u * 24, v * 24) * 0.15);
+      }
+      coverage[index] = smooth(0, 0.18, best);
+    }
+  }
+  writeShadedTile(surface, coverage, detail, { normals });
+}

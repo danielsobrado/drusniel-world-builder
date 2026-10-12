@@ -8,6 +8,7 @@ import {
 } from './meadowGrassLayout.js';
 import { MeadowGroundSampler } from './MeadowGroundSampler.js';
 import { MeadowInteractionMap } from './MeadowInteractionMap.js';
+import { spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { MeadowTileLayer } from './MeadowTileLayer.js';
 import { createMeadowUniforms } from './meadowUniforms.js';
 import { meadowBladeBoundsPadding, meadowCardBoundsPadding } from './MeadowPageBounds.js';
@@ -29,6 +30,10 @@ const CARD_ATLAS = 'assets/ground/meadow/meadow-grass-cards.webp';
  *
  * Both layers compact tiles nearest-first under one per-frame time budget.
  */
+/** The spell press-and-mark map: 4 texels a metre over 64 m round the player. */
+const SPELL_GROUND_RESOLUTION = 256;
+const SPELL_GROUND_WORLD_SIZE_M = 64;
+
 export class MeadowGrassField {
   /**
    * @param {object} options
@@ -73,7 +78,19 @@ export class MeadowGrassField {
         ),
       })
       : null;
-    this.uniforms = createMeadowUniforms(settings, this.interaction);
+    // Spells press and mark the meadow in their own, wider and coarser map: a
+    // blast 30 m out is outside the body stamp's window, and the body's trail
+    // should not pay for a bigger texture every frame. It only uploads while a
+    // spell has ink in it.
+    this.spellGround = this.interaction && spellWorldEnabled
+      ? new MeadowInteractionMap({
+        resolution: SPELL_GROUND_RESOLUTION,
+        worldSize: SPELL_GROUND_WORLD_SIZE_M,
+        recoverySpeed: settings.interaction.recoverySpeed,
+        uploadIntervalFrames: settings.interaction.uploadIntervalFrames,
+      })
+      : null;
+    this.uniforms = createMeadowUniforms(settings, this.interaction, this.spellGround);
     this.ground = new MeadowGroundSampler({
       terrainView,
       tileIds: config.grass.tileIds,
@@ -184,6 +201,9 @@ export class MeadowGrassField {
     this.blades.batches.setBoundsPadding(meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut));
     this.cards?.batches.setBoundsPadding(meadowCardBoundsPadding(this.uniforms));
     this.interaction?.update(body);
+    this.spellGround?.update(body ?? camera.position, { stamp: false });
+    // While no spell has ink in the map the blades skip reading it altogether.
+    if (this.uniforms.spellGround) this.uniforms.spellGround.active.value = this.spellGround.hasMarksOrPress() ? 1 : 0;
     this.ground.beginFrame();
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
@@ -228,6 +248,7 @@ export class MeadowGrassField {
    */
   shiftOrigin(dx, dz) {
     this.interaction?.shiftOrigin(dx, dz);
+    this.spellGround?.shiftOrigin(dx, dz);
   }
 
   dispose() {
@@ -237,5 +258,6 @@ export class MeadowGrassField {
     this.cardMaterial?.dispose();
     this.atlas?.dispose();
     this.interaction?.dispose();
+    this.spellGround?.dispose();
   }
 }

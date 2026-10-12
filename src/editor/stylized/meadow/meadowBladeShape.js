@@ -137,17 +137,24 @@ function lodCoverage({ bands, bandCount, distance, rank, appearance }) {
  * blade's width afterwards; in metres that is exactly `bladeHeight × width`, with the
  * height read in donor units. The arc itself is the donor's, unchanged.
  */
-function foldUnderBody(blade, local, strength, uniforms, interaction) {
-  const windowUv = blade.base.xz
-    .sub(interaction.center)
-    .div(interaction.worldSize)
-    .add(0.5);
-  const inside = windowUv.x.greaterThanEqual(0).and(windowUv.x.lessThanEqual(1))
+function pressAt(base, map) {
+  const windowUv = base.xz.sub(map.center).div(map.worldSize).add(0.5);
+  let inside = windowUv.x.greaterThanEqual(0).and(windowUv.x.lessThanEqual(1))
     .and(windowUv.y.greaterThanEqual(0)).and(windowUv.y.lessThanEqual(1));
-  const influence = float(0).toVar();
+  // The spell map is read only while a spell has ink in it.
+  if (map.active) inside = inside.and(map.active.greaterThan(0));
+  const press = float(0).toVar();
   If(inside, () => {
-    influence.assign(texture(interaction.texture, windowUv.clamp(0, 1)).r);
+    press.assign(texture(map.texture, windowUv.clamp(0, 1)).r);
   });
+  return press;
+}
+
+function foldUnderBody(blade, local, strength, uniforms, interaction) {
+  // The body's own stamp, and spells pressing the meadow in their wider map.
+  const influence = uniforms.spellGround
+    ? max(pressAt(blade.base, interaction), pressAt(blade.base, uniforms.spellGround))
+    : pressAt(blade.base, interaction);
 
   const amount = smoothstep(0, 0.15, influence);
   const directionX = float(0).toVar();

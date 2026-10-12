@@ -1,7 +1,9 @@
 import { blight, cureWounds } from './lifeRecipes.js';
 import { acidSplash, acidSplashImpact, fogCloud, stinkingCloud } from './conjurationRecipes.js';
 import { magicMissile, magicMissileImpact, shatter } from './arcaneRecipes.js';
-import { fireball, fireballExplosion, meteorSwarm, wallOfFire } from './fireRecipes.js';
+import { fireball, fireballExplosion } from './fireRecipes.js';
+import { wallOfFire } from './fireWallRecipes.js';
+import { meteorSwarm } from './meteorRecipes.js';
 import { coneOfCold, iceStorm } from './frostRecipes.js';
 import { moonbeam, sunbeam } from './radianceRecipes.js';
 import { lightningBolt, thunderwave } from './stormRecipes.js';

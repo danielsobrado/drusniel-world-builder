@@ -110,7 +110,7 @@ test('effect events fire in timeline order, including ones scheduled late', () =
 function createRecipeHarness() {
   const types = createSpellParticleTypes();
   const simulator = createParticleSimulator({ types, groundHeight: flat, capacity: 8192 });
-  const calls = { lights: 0, decals: 0, sounds: 0, shake: 0, presses: 0, maxPressRadius: 0 };
+  const calls = { lights: 0, decals: 0, sounds: 0, shake: 0, presses: 0, maxPressRadius: 0, marks: {} };
   let director = null;
   const services = {
     simulator,
@@ -124,6 +124,9 @@ function createRecipeHarness() {
     pressGround: (x, z, radius) => {
       calls.presses += 1;
       calls.maxPressRadius = Math.max(calls.maxPressRadius, radius);
+    },
+    markGround: (x, z, radius, mark) => {
+      calls.marks[mark] = (calls.marks[mark] ?? 0) + 1;
     },
     play: (id, context) => director.play(EFFECT_RECIPES[id], context),
   };
@@ -200,4 +203,38 @@ test('Thunderwave blows the grass flat in a widening wave', () => {
   }
   assert.ok(calls.presses > 10);
   assert.ok(calls.maxPressRadius > 9);
+});
+
+test('spells mark the meadow, and held marks are refreshed sparingly rather than every frame', () => {
+  const { director, simulator, calls } = createRecipeHarness();
+  director.play(EFFECT_RECIPES.fireballExplosion, { ...CONTEXT });
+  for (let frame = 0; frame < 60 * 14; frame += 1) {
+    director.update(1 / 60);
+    simulator.update(1 / 60);
+  }
+  assert.ok(calls.marks.scorch > 0 && calls.marks.singe > 0, 'a fireball chars and singes the grass');
+  // Twelve seconds held: every frame would be ~720 stamps per mark.
+  assert.ok(calls.marks.scorch < 90, `scorch restamped ${calls.marks.scorch} times`);
+  for (const [recipe, mark] of [['blight', 'wither'], ['coneOfCold', 'frost'], ['acidSplashImpact', 'acid'], ['moonbeam', 'moon']]) {
+    const harness = createRecipeHarness();
+    harness.director.play(EFFECT_RECIPES[recipe], { ...CONTEXT });
+    for (let frame = 0; frame < 60 * 4; frame += 1) harness.director.update(1 / 60);
+    assert.ok(harness.calls.marks[mark] > 0, `${recipe} leaves no ${mark} mark`);
+  }
+});
+
+test('smoke thins as it ages and leans into the breeze', () => {
+  const types = createParticleTypeRegistry({
+    smoke: { life: 4, opacity: 0.8, opacityEnd: 0.25, fadeIn: 0, fadeOut: 1, windDrift: 0.8 },
+  });
+  const simulator = createParticleSimulator({ types, groundHeight: flat, capacity: 4, wind: { x: 2, z: 0 } });
+  spawnAt(simulator, types, 'smoke');
+  const look = {};
+  simulator.evaluate(0, look);
+  const early = look.alpha;
+  for (let frame = 0; frame < 180; frame += 1) simulator.update(1 / 60);
+  simulator.evaluate(0, look);
+  assert.ok(look.alpha < early * 0.7, `opacity should fall toward opacityEnd (${early} → ${look.alpha})`);
+  assert.ok(simulator.state.vx[0] > 1.2, `horizontal motion should relax toward the wind (${simulator.state.vx[0]})`);
+  assert.ok(simulator.state.px[0] > 1, 'the puff drifted downwind');
 });

@@ -32,15 +32,46 @@ function puffField(noise, variant, frequency, u, v) {
   return { r, lumps, dome };
 }
 
+/**
+ * Smoke puff. The silhouette is a soft dome eroded by noise rather than a
+ * disc with a rim: overlapping puffs must melt into one another, so coverage
+ * rises gently over a wide band and the edge normals stay weak (a steep edge
+ * gradient lights every puff's outline as a ring).
+ */
 export function paintSmoke(surface, noise, variant) {
   const { size } = surface;
   const detail = new Float32Array(size * size);
   const coverage = sampleGrid(size, (u, v, x, y) => {
     const { r, lumps, dome } = puffField(noise, variant, 2.8, u, v);
+    const ragged = noise.fbm2(u * 5.2 + variant * 3.1, v * 5.2 - variant * 1.7, 3) - 0.5;
     detail[y * size + x] = saturate(dome * 0.6 + lumps * 0.7 - 0.3);
-    return saturate((dome - 0.12 + (lumps - 0.5) * 0.85) * 2.2) * smooth(1.0, 0.72, r);
+    const body = saturate((dome - 0.08 + (lumps - 0.5) * 0.7) * 1.45);
+    return body * smooth(1.0, 0.45, r + ragged * 0.4);
   });
-  writeShadedTile(surface, coverage, detail, { bulge: 0.45, bump: 7 });
+  writeShadedTile(surface, coverage, detail, { bulge: 0.32, bump: 2.5 });
+}
+
+/**
+ * A bank of ground fog, much wider than tall: a soft flat underside and a
+ * lumpy, rolling top that thins into wisps, so a bank of these overlapping low
+ * over the ground has a silhouette instead of reading as a blurred band.
+ */
+export function paintFogBank(surface, noise) {
+  const { size } = surface;
+  const detail = new Float32Array(size * size);
+  const coverage = sampleGrid(size, (u, v, x, y) => {
+    const dx = (u - 0.5) / 0.46;
+    const wisps = noise.fbm2(u * 4.2 + 11, v * 6 + 3, 4);
+    const crest = noise.fbm2(u * 2.4 + 5, 1.7, 3);
+    const top = 0.36 + 0.34 * crest * (1 - dx * dx * 0.7) + (wisps - 0.5) * 0.06;
+    const bottom = 0.12;
+    const ends = smooth(1, 0.55, Math.abs(dx) + (wisps - 0.5) * 0.35);
+    const vertical = smooth(bottom, bottom + 0.14, v) * smooth(top + 0.06, top - 0.2, v);
+    const body = billow(noise, u * 5 + 21, v * 5 + 2, 3);
+    detail[y * size + x] = saturate(0.3 + body * 0.45 + (v - bottom) * 0.4);
+    return saturate(ends * vertical * (0.65 + body * 0.5));
+  });
+  writeShadedTile(surface, coverage, detail, { bulge: 0.15, bump: 1.6 });
 }
 
 /** The cloud deck over Ice Storm: broader, softer, flatter underside. */
@@ -89,7 +120,8 @@ export function paintFlameTongue(surface, noise, variant) {
     const lateral = Math.abs(u - 0.5 + sway);
     const width = 0.27 * Math.pow(saturate(1 - v * 1.05), 0.75) * (0.55 + 0.45 * smooth(0, 0.22, v));
     const tear = (noise.fbm2(u * 5.5 + offset, v * 4.5 - offset * 0.5, 4) - 0.5) * 0.75 * v;
-    const body = smooth(width, width * 0.3, lateral) * smooth(0.02, 0.1, v);
+    // Past the tip the width reaches zero, and smooth(0, 0, x) would cover the whole row.
+    const body = width > 1e-3 ? smooth(width, width * 0.3, lateral) * smooth(0.02, 0.1, v) : 0;
     const core = saturate(1 - lateral / Math.max(1e-3, width));
     detail[y * size + x] = saturate(core * core * (1.15 - v));
     return saturate(body + tear * body);

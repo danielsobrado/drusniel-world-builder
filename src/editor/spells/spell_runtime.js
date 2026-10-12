@@ -147,6 +147,7 @@ export function createSpellRuntime(deps) {
     groundHeight: deps.groundHeight,
     getSceneLights: deps.getSceneLights,
     pressGround: deps.pressGround,
+    markGround: deps.markGround,
     sound: createSpellSoundSynth(),
   }) : null;
   const unsubscribeOrigin = effects && typeof deps.subscribeOriginShift === 'function'

@@ -9,20 +9,25 @@ import { RAMP, TILE, TILE_SPANS } from '../atlas/ParticleAtlasLayout.js';
  * on the ramp; the bloom threshold is ~2, so anything past ~3 blooms.
  */
 // Fire smoke: warm charcoal near the fire, cooling to ash grey as it rises.
-const SMOKE_DARK = [0.19, 0.165, 0.145];
-const SMOKE_GREY = [0.46, 0.45, 0.44];
+const SMOKE_DARK = [0.17, 0.162, 0.155];
+const SMOKE_GREY = [0.5, 0.495, 0.49];
 const DUST = [0.45, 0.38, 0.29];
 const DIRT = [0.24, 0.19, 0.14];
 
 export const EXPLOSION_TYPES = Object.freeze({
   // 1. Flash — 2–4 frames, huge, blooming.
   'explosion.flash': {
-    tiles: [TILE.GLOW, TILE.GLOW], life: [0.11, 0.14], size: [11, 13], sizeEnd: 1.5, sizeEase: 'outExpo',
-    heat: 1, heatEnd: 0.8, emissive: 45, fadeIn: 0, fadeOut: 0.15, cameraFade: false,
+    tiles: [TILE.GLOW, TILE.GLOW], life: [0.08, 0.11], size: [6, 7.5], sizeEnd: 1.5, sizeEase: 'outExpo',
+    heat: 0.95, heatEnd: 0.55, emissive: 18, fadeIn: 0, fadeOut: 0.15, cameraFade: false,
   },
   'explosion.flare': {
-    tiles: [TILE.FLARE, TILE.FLARE], life: [0.16, 0.2], size: [7, 8], sizeEnd: 1.8, sizeEase: 'outExpo',
-    heat: 1, heatEnd: 0.9, emissive: 60, fadeIn: 0, fadeOut: 0.1, cameraFade: false,
+    tiles: [TILE.FLARE, TILE.FLARE], life: [0.14, 0.18], size: [6, 7], sizeEnd: 1.6, sizeEase: 'outExpo',
+    heat: 1, heatEnd: 0.7, emissive: 26, fadeIn: 0, fadeOut: 0.1, cameraFade: false,
+  },
+  // Rays thrown out round the flash: the shape of the blast, not a white disc.
+  'explosion.starburst': {
+    tiles: [TILE.STARBURST, TILE.STARBURST], life: [0.16, 0.22], size: [5, 6], sizeEnd: 2.2, sizeEase: 'outExpo',
+    heat: 0.98, heatEnd: 0.5, emissive: 16, fadeIn: 0, fadeOut: 0.2, cameraFade: false,
   },
 
   // 2. Shockwave — a thin bright ring racing over the ground, and a pale air shell.
@@ -42,14 +47,14 @@ export const EXPLOSION_TYPES = Object.freeze({
 
   // 3. Fireball — eroding flipbook puffs that cool from additive fire into lit smoke.
   'explosion.fireball': {
-    tiles: TILE_SPANS.fire, tileMode: 'life', lit: 1, life: [1.2, 1.9], size: [2.2, 3.2],
-    sizeEnd: [1.8, 2.4], sizeEase: 'outExpo', heat: [0.95, 1.08], heatEnd: 0, heatEase: 'outQuad',
+    tiles: TILE_SPANS.fire, tileMode: 'life', lit: 1, life: [1.3, 2.1], size: [3, 4.3],
+    sizeEnd: [1.7, 2.2], sizeEase: 'outExpo', heat: [0.95, 1.08], heatEnd: 0, heatEase: 'outQuad',
     emissive: 8, additive: 1, additiveEnd: 0, tint: SMOKE_DARK, tintEnd: SMOKE_GREY,
     fadeIn: 0.02, fadeOut: 0.5, drag: 3.2, gravity: -2.6, turbulence: 1.6, spin: [0.2, 0.9],
     spinDrag: 0.6, groundFade: true,
   },
   'explosion.core': {
-    tiles: TILE_SPANS.fire, tileMode: 'life', life: [0.35, 0.6], size: [1.6, 2.3], sizeEnd: 1.9,
+    tiles: TILE_SPANS.fire, tileMode: 'life', life: [0.4, 0.7], size: [2.2, 3], sizeEnd: 1.9,
     sizeEase: 'outExpo', heat: [1.05, 1.2], heatEnd: 0.45, emissive: 12, fadeIn: 0, fadeOut: 0.4,
     drag: 4, gravity: -2, spin: [0.4, 1.2],
   },
@@ -100,24 +105,37 @@ export const EXPLOSION_TYPES = Object.freeze({
 
   // 7. Smoke column — slow, lit, rising and curling; capped like a mushroom.
   'explosion.smoke': {
-    tiles: TILE_SPANS.smoke, lit: 1, life: [6, 10], size: [2.4, 3.6], sizeEnd: [2.3, 3.1], sizeEase: 'outQuad',
+    tiles: TILE_SPANS.smoke, lit: 1, life: [5.5, 8.5], size: [2.4, 3.6], sizeEnd: [3.2, 4.4], sizeEase: 'outQuad',
     heat: [0.25, 0.4], heatEnd: 0, heatEase: 'outExpo', emissive: 7, additive: 0.15, additiveEnd: 0,
-    tint: SMOKE_DARK, tintEnd: [0.42, 0.41, 0.4], opacity: 0.95, fadeIn: 0.1, fadeOut: 0.6,
+    tint: SMOKE_DARK, tintEnd: [0.56, 0.555, 0.55], opacity: 0.84, opacityEnd: 0.15, fadeIn: 0.1, fadeOut: 0.55,
     drag: 0.9, gravity: -1.5, turbulence: 1, turbulenceScale: 0.12, spin: [0.05, 0.25],
-    groundFade: true,
+    windDrift: 0.45, groundFade: true,
   },
   // The stem keeps feeding from the ground for seconds, rising slower than the cap.
   'explosion.smoke.stem': {
-    tiles: TILE_SPANS.smoke, lit: 1, life: [5, 8], size: [1.6, 2.4], sizeEnd: [2, 2.8], sizeEase: 'outQuad',
-    heat: [0.15, 0.3], heatEnd: 0, heatEase: 'outExpo', emissive: 6, additive: 0, tint: SMOKE_DARK,
-    tintEnd: [0.43, 0.42, 0.41], opacity: 0.88, fadeIn: 0.1, fadeOut: 0.6, drag: 1.3, gravity: -1.1,
-    turbulence: 0.8, turbulenceScale: 0.15, spin: [0.05, 0.25], groundFade: true,
+    tiles: TILE_SPANS.smoke, lit: 1, life: [6, 9], size: [1.6, 2.4], sizeEnd: [2.2, 3], sizeEase: 'outQuad',
+    heat: [0.15, 0.3], heatEnd: 0, heatEase: 'outExpo', emissive: 6, additive: 0, tint: [0.24, 0.23, 0.22],
+    tintEnd: [0.62, 0.615, 0.61], opacity: 0.66, opacityEnd: 0.3, fadeIn: 0.1, fadeOut: 0.6, drag: 1.3,
+    gravity: -1.1, turbulence: 0.8, turbulenceScale: 0.15, spin: [0.05, 0.25], windDrift: 0.3, groundFade: true,
   },
+  // The cap rolls outward and thins as it spreads, rather than ending as a dark ball.
   'explosion.smoke.cap': {
-    tiles: TILE_SPANS.smoke, lit: 1, life: [5, 8], size: [3, 4.2], sizeEnd: 2.4, sizeEase: 'outQuad',
+    tiles: TILE_SPANS.smoke, lit: 1, life: [5, 8], size: [3, 4.2], sizeEnd: 3.6, sizeEase: 'outQuad',
     heat: [0.2, 0.35], heatEnd: 0, heatEase: 'outExpo', emissive: 6, additive: 0, tint: SMOKE_DARK,
-    tintEnd: [0.48, 0.46, 0.44], opacity: 0.92, fadeIn: 0.15, fadeOut: 0.55, drag: 1.3, gravity: -0.45,
-    turbulence: 0.8, turbulenceScale: 0.1, spin: [0.05, 0.2],
+    tintEnd: [0.58, 0.575, 0.57], opacity: 0.7, opacityEnd: 0.12, fadeIn: 0.15, fadeOut: 0.4, drag: 0.8,
+    gravity: -0.4, turbulence: 0.8, turbulenceScale: 0.1, spin: [0.05, 0.2], windDrift: 0.6,
+  },
+  // Thin wisps curling off the scorch long after the blast.
+  'explosion.smoulder': {
+    tiles: TILE_SPANS.smoke, lit: 1, life: [3, 5], size: [0.35, 0.6], sizeEnd: [4, 6], sizeEase: 'outQuad',
+    heat: [0.15, 0.25], heatEnd: 0, heatEase: 'outExpo', emissive: 5, additive: 0, tint: [0.26, 0.25, 0.24],
+    tintEnd: [0.55, 0.55, 0.55], opacity: 0.32, opacityEnd: 0.3, fadeIn: 0.2, fadeOut: 0.5, drag: 1.2,
+    gravity: -0.9, turbulence: 0.9, turbulenceScale: 0.4, spin: [0.1, 0.4], windDrift: 0.8,
+  },
+  // Coals glowing among the burnt stubble, dimming over seconds.
+  'explosion.coal': {
+    tiles: [TILE.MOTE, TILE.MOTE], life: [3, 7], size: [0.1, 0.22], sizeEnd: 0.6, heat: [0.6, 0.82], heatEnd: 0.18,
+    emissive: 12, fadeIn: 0.05, fadeOut: 0.5, cameraFade: false,
   },
 
   // An effect light's pool on the ground, redrawn every frame by VfxSystem.
@@ -128,7 +146,7 @@ export const EXPLOSION_TYPES = Object.freeze({
 
   // After-burn: small licking flames on the scorch.
   'explosion.groundfire': {
-    tiles: TILE_SPANS.flame, orient: 'axis', aspect: 1.9, life: [0.45, 0.85], size: [0.35, 0.75],
+    tiles: TILE_SPANS.flame, orient: 'axis', aspect: 2.1, life: [0.45, 0.9], size: [0.4, 0.95],
     sizeEnd: 0.55, heat: [0.85, 1], heatEnd: 0.45, emissive: 12, fadeIn: 0.12, fadeOut: 0.45,
     gravity: -2.5, drag: 1.5,
   },
