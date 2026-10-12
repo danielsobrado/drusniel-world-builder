@@ -1,11 +1,10 @@
 import * as THREE from 'three/webgpu';
-import { attribute } from 'three/tsl';
 import { settlementPavingJob } from '../paving/SettlementPavingGeometry.js';
 import { SHADE_LAYER } from '../paving/SettlementPavingGeometry.js';
 import { createPavingMaterial, createShadeMaterial } from '../paving/SettlementPavingMaterial.js';
 import { dressingFor, SETTLEMENT_SURFACE_SETS, TIMBER_TONES } from '../surfaces/SettlementDressing.js';
-import { settlementDusk } from './SettlementDusk.js';
 import { settlementInteriorArrays } from './SettlementInteriorGeometry.js';
+import { createInteriorMesh, dressInteriorTimber } from './SettlementInteriorMesh.js';
 import { settlementPlacements } from './SettlementPlacements.js';
 import { createSettlementHaze, createSettlementSmoke } from './SettlementSmoke.js';
 
@@ -61,28 +60,6 @@ function pavingMesh(arrays, material) {
   return mesh;
 }
 
-/**
- * The rooms and open doorways of one town as a mesh. Lit like everything else,
- * with a little light of its own — a room is never as black as its shadow —
- * that warms as the evening fires are lit.
- */
-function interiorMesh(arrays) {
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(arrays.positions, 3));
-  geometry.setAttribute('normal', new THREE.BufferAttribute(arrays.normals, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(arrays.colors, 3));
-  geometry.computeBoundingSphere();
-  const material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
-  material.emissiveNode = attribute('color', 'vec3').mul(settlementDusk.mul(0.3).add(0.2));
-  material.name = 'settlement-interiors';
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.name = 'settlement-interiors';
-  mesh.receiveShadow = true;
-  mesh.castShadow = false;
-  mesh.userData.skipWarmup = true;
-  return mesh;
-}
-
 /** Which role of a dressing each paving layer is laid in. */
 const LAYER_ROLE = Object.freeze({ earth: 'earth', cobble: 'cobble', flagstone: 'flagstone' });
 
@@ -113,6 +90,7 @@ export class SettlementSite {
     this.paving = new THREE.Group();
     this.paving.name = `settlement-paving-${this.id}`;
     this.pavingReady = false;
+    this.interior = null;
     this.job = this.prepare(generator, tileSize);
   }
 
@@ -142,7 +120,10 @@ export class SettlementSite {
     const haze = createSettlementHaze(this.plan, heightAt);
     if (haze) this.paving.add(haze);
     const interiors = settlementInteriorArrays(this.plan);
-    if (interiors) this.paving.add(interiorMesh(interiors));
+    if (interiors) {
+      this.interior = createInteriorMesh(interiors);
+      this.paving.add(this.interior);
+    }
     yield;
     const tileMetres = Object.fromEntries(Object.entries(LAYER_ROLE)
       .map(([layer, role]) => [layer, SETTLEMENT_SURFACE_SETS[this.dressing[role]].tileMetres]));
@@ -174,6 +155,7 @@ export class SettlementSite {
       if (arrays.kind === SHADE_LAYER) mesh.receiveShadow = false;
       this.paving.add(mesh);
     }
+    dressInteriorTimber(this.interior, this.surfaces.timber);
     this.pavingArrays = null;
     this.pavingReady = true;
   }
@@ -185,6 +167,7 @@ export class SettlementSite {
       // A sprite's quad is three's own, shared by every sprite there is.
       if (!child.isSprite) child.geometry.dispose();
       child.material.dispose();
+      child.userData.windowTable?.dispose();
     }
     this.paving.clear();
     this.paving.removeFromParent();

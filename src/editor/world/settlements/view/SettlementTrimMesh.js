@@ -1,16 +1,37 @@
 import * as THREE from 'three/webgpu';
-import { attribute, positionLocal, sin, time, vec3 } from 'three/tsl';
+import { attribute, mx_noise_float, positionLocal, sin, smoothstep, time, uv, vec3, vertexColor } from 'three/tsl';
 import { STONE_PALETTES } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { projectedUvAt } from '../../../workshop/WorkshopProjectedUv.js';
 import { WALL_STAIR } from '../SettlementTrim.js';
 
 const WOOD = [0.2, 0.12, 0.07];
 const IRON = [0.07, 0.07, 0.08];
-/** Painted boards, cloth and fleece, as linear colours. */
-const SIGN_BOARDS = [[0.5, 0.1, 0.08], [0.1, 0.22, 0.42], [0.42, 0.33, 0.08], [0.12, 0.3, 0.14]];
-const AWNING_CLOTH = [[0.55, 0.12, 0.1], [0.12, 0.25, 0.45], [0.5, 0.42, 0.2]];
-const CLOTH_STRIPE = [0.82, 0.78, 0.66];
-const LEAF = [[0.09, 0.22, 0.06], [0.14, 0.3, 0.08], [0.07, 0.17, 0.06]];
+/**
+ * Painted boards, cloth and fleece, as linear colours. Paint and dye are aged:
+ * earth pigments gone chalky in the weather, never a primary — the boards also
+ * wear the town's timber grain under them.
+ */
+const SIGN_BOARDS = [[0.36, 0.11, 0.07], [0.1, 0.13, 0.17], [0.36, 0.28, 0.11], [0.12, 0.18, 0.1]];
+const AWNING_CLOTH = [[0.36, 0.12, 0.09], [0.12, 0.15, 0.2], [0.4, 0.33, 0.17]];
+const CLOTH_STRIPE = [0.62, 0.58, 0.48];
+/** Trim built of wood, which wears the town's timber set. */
+const WOODEN = new Set(['shopSign']);
+/** Trim of canvas, which is woven and weathered in the shader. */
+const CLOTH = new Set(['awning']);
+/**
+ * Canvas over the dye in its vertex colour: darker where rain runs off and dirt
+ * gathers, bleached in broad patches where the sun has had it. No weave: at
+ * street distance a thread-scale pattern only shimmers.
+ */
+function canvasColour() {
+  const at = uv();
+  const stain = smoothstep(0.1, 0.6, mx_noise_float(vec3(at.x.mul(2.2), at.y.mul(5.5), 1.3))).mul(0.24);
+  const bleach = smoothstep(0, 0.5, mx_noise_float(vec3(at.mul(0.9), 7.1))).mul(0.025);
+  return vertexColor().rgb.mul(stain.oneMinus()).add(bleach);
+}
+const LEAF = [[0.05, 0.13, 0.035], [0.09, 0.2, 0.05], [0.04, 0.1, 0.03], [0.12, 0.24, 0.06]];
+const IVY_YELLOWED = [0.26, 0.24, 0.07];
+const IVY_STEM = [0.07, 0.05, 0.035];
 const FLEECE = [[0.82, 0.8, 0.72], [0.3, 0.26, 0.22]];
 const FEATHER = [[0.5, 0.26, 0.1], [0.82, 0.8, 0.74]];
 
@@ -103,20 +124,51 @@ function awning(builder, variant) {
   for (const x of [-width / 2 + 0.05, width / 2 - 0.05]) builder.box(x, 1.1, 1.26, 0.07, 2.2, 0.07, WOOD);
 }
 
-/** Leaves climbing a wall at z = 0, thickest low down and thinning as they rise. */
+/**
+ * Ivy climbing a wall at z = 0: woody stems branching up from the foot, and
+ * small leaves clustered along them, thickest low down. Leaves are pointed
+ * (a diamond, broad at its base), in deep and sunlit greens with a few
+ * yellowed, each turned out from the wall by its own amount — a sheet of
+ * same-coloured squares read as paper, not foliage.
+ */
 function ivyPatch(builder, variant) {
   const random = seeded(variant + 11);
   const spread = 2.4 + variant * 0.5;
   const height = 3 + variant * 0.6;
-  for (let leaf = 0; leaf < 150; leaf += 1) {
-    const up = random() ** 1.6 * height;
-    const x = (random() - 0.5) * spread * (1 - up / height * 0.55);
-    const size = 0.16 + random() * 0.14;
-    const out = 0.04 + random() * 0.06;
-    const tilt = (random() - 0.5) * 0.12;
-    builder.quad([x - size, up, out - tilt], [x + size, up, out + tilt], [x + size, up + size * 1.3, out + tilt + 0.03], [x - size, up + size * 1.3, out - tilt + 0.03],
-      LEAF[Math.floor(random() * LEAF.length)]);
+  const stems = 5 + variant;
+  for (let stem = 0; stem < stems; stem += 1) {
+    let x = (random() - 0.5) * spread * 0.6;
+    let y = 0;
+    const top = height * (0.45 + random() * 0.55);
+    while (y < top) {
+      const step = 0.22 + random() * 0.12;
+      const nx = x + (random() - 0.5) * 0.28;
+      const ny = y + step;
+      // The stem, a dark woody strip on the wall.
+      builder.quad([x - 0.012, y, 0.015], [x + 0.012, y, 0.015], [nx + 0.012, ny, 0.015], [nx - 0.012, ny, 0.015], IVY_STEM);
+      const leaves = Math.max(1, Math.round((1 - y / height) * 5 + random() * 2));
+      for (let leaf = 0; leaf < leaves; leaf += 1) ivyLeaf(builder, random, nx + (random() - 0.5) * 0.4, ny + (random() - 0.5) * 0.2);
+      x = nx;
+      y = ny;
+    }
   }
+}
+
+function ivyLeaf(builder, random, x, y) {
+  const size = 0.06 + random() * 0.06;
+  const out = 0.03 + random() * 0.1;
+  const lean = (random() - 0.5) * 0.08;
+  const pick = random();
+  const colour = pick < 0.06 ? IVY_YELLOWED : LEAF[Math.floor(random() * LEAF.length)];
+  const tone = 0.75 + random() * 0.45;
+  const shade = colour.map((channel) => channel * tone);
+  builder.quad(
+    [x, y - size * 0.7, out - 0.02],
+    [x + size, y, out + lean],
+    [x, y + size * 1.2, out + 0.02],
+    [x - size, y, out - lean],
+    shade,
+  );
 }
 
 /** A straight flight rising along +x, each step solid down to the ground. */
@@ -171,9 +223,9 @@ function amble([range, pace, lift]) {
 }
 
 /**
- * One pooled piece of trim as a part the instanced renderers can draw. All
- * colour is per vertex; only the wall stair, which is the wall's own stone,
- * wears the town's stone surface set.
+ * One pooled piece of trim as a part the instanced renderers can draw. Colour
+ * is per vertex; the wall stair wears the town's stone surface set (it is the
+ * wall's own stone) and wooden trim its timber set, the vertex colour tinting it.
  *
  * @param {{ kind: string, variant: number, style: { style: string }, surfaces?: { stone?: object } }} entry
  */
@@ -182,7 +234,8 @@ export function createSettlementTrimParts(entry) {
   const stair = entry.kind === 'wallStair';
   if (stair) wallStair(builder, (STONE_PALETTES[entry.style.style] ?? STONE_PALETTES.granite).base.map((channel) => channel / 255));
   else BUILDERS[entry.kind](builder, entry.variant);
-  const set = stair ? entry.surfaces?.stone ?? null : null;
+  const wooden = WOODEN.has(entry.kind);
+  const set = stair ? entry.surfaces?.stone ?? null : wooden ? entry.surfaces?.timber ?? null : null;
   const material = new THREE.MeshStandardNodeMaterial({
     color: '#ffffff',
     map: set?.color ?? null,
@@ -196,5 +249,11 @@ export function createSettlementTrimParts(entry) {
   });
   if (GAIT[entry.kind]) material.positionNode = amble(GAIT[entry.kind]);
   material.userData.workshopSlot = stair ? 'stone' : 'wood';
-  return [{ geometry: builder.geometry({ uvDensity: stair ? 0.58 : 0 }), material, matrix: new THREE.Matrix4() }];
+  const cloth = CLOTH.has(entry.kind);
+  if (cloth) {
+    material.colorNode = canvasColour();
+    material.vertexColors = false;
+  }
+  const uvDensity = stair ? 0.58 : set ? 1.1 : cloth ? 1 : 0;
+  return [{ geometry: builder.geometry({ uvDensity }), material, matrix: new THREE.Matrix4() }];
 }

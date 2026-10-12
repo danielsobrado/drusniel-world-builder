@@ -101,6 +101,16 @@ export class TownStreamer {
     }
   }
 
+  /** The resident town nearest `focus` (canonical), as SettlementView.nearestTown reports it, or null. */
+  nearestTown(focus) {
+    let nearest = null;
+    for (const town of this.towns.values()) {
+      const distance = Math.hypot(town.layout.anchor.x - focus.x, town.layout.anchor.z - focus.z);
+      if (!nearest || distance < nearest.distance) nearest = { distance, radius: town.radius };
+    }
+    return nearest;
+  }
+
   distanceTo(settlement, focus) {
     return Math.hypot(settlement.cellX * this.tileSize - focus.x, -settlement.cellZ * this.tileSize - focus.z);
   }
@@ -129,6 +139,7 @@ export class TownStreamer {
       layout,
       mesh,
       reach: best.plan.profile?.reach ?? 0,
+      radius: best.plan.profile?.radius ?? 0,
       doorAngles: new Float32Array(layout.doors.length),
       doorTargets: new Float32Array(layout.doors.length),
     };

@@ -1832,12 +1832,23 @@ stylizedSurface:
         fogBaseHeight: 2
         fogHeightFalloff: 0.035
         fogMaxDistance: 180
+        # Contact occlusion (GTAO over this pipeline's depth, normals rebuilt
+        # from it): darkens room corners, wall feet and the gaps under
+        # furniture, which the post-processing graph's AO cannot reach while
+        # volumetric rays own the frame. Half resolution, built only when on.
+        contactOcclusion:
+          enabled: true
+          resolutionScale: 0.5
+          samples: 8
+          radius: 0.5
+          thickness: 1
+          intensity: 0.6
     radius: 5000
     # Atmospheric perspective is pale at the horizon and deepens toward the
     # zenith. The former values were reversed, making cloud gaps look like blue
     # holes cut into a nearly white sky.
-    lowColor: '#9cc9e2'
-    highColor: '#3f83c2'
+    lowColor: '#b4d2e2'
+    highColor: '#4a80b8'
     horizonLine: 0.05
     horizonSpread: 0.15
     sunElevation: 10
@@ -1854,10 +1865,12 @@ stylizedSurface:
     # walking changes the cloud perspective and stays continuous across
     # floating-origin snaps. The wind rate resolves to roughly 6 m/s.
     cloudSpeed: 0.035
-    cloudScale: 10.5
+    # Fewer, larger, softer-edged cumulus: at 10.5 / 0.16 the field broke into
+    # dozens of hard blotches with blue holes, which read as cartoon sky.
+    cloudScale: 6.5
     cloudWorldScale: 180
-    cloudDensity: 0.56
-    cloudSharpness: 0.16
+    cloudDensity: 0.58
+    cloudSharpness: 0.24
     cloudCore: '#b8c6d2'
     cloudEdge: '#f7fbff'
     cloudRim: '#fff3dc'
@@ -1878,7 +1891,7 @@ stylizedSurface:
     # lighting authority, and a paused or disabled cycle is a no-op, so the manual
     # Time selector and capture tools that set the lights directly keep their look.
     cycle:
-      enabled: false
+      enabled: true
       hour: 6
       # Real seconds a full 24 h turn takes. Ten minutes by default.
       dayLengthSeconds: 600
@@ -1937,6 +1950,32 @@ stylizedSurface:
     # meeting it at a visible colour seam.
     fogColor: '#91bfd9'
     fogDensity: 0.0015
+    # Sun-facing aerial perspective (src/editor/stylized/sky/sunHaze.js): haze is
+    # warm and bright toward the sun and a deeper blue away from it, on the fog
+    # and the sky's horizon band alike. The exp² fog above only reaches the far
+    # horizon; the aerial term hazes ridges a few kilometres out, thinning with
+    # altitude so ranges layer front to back.
+    sunHaze:
+      enabled: true
+      tightStrength: 0.55
+      tightFalloff: 10
+      broadStrength: 0.22
+      broadFalloff: 2
+      awayShade: 0.12
+      aerialDistance: 2200
+      aerialMax: 0.85
+      aerialHeightScale: 1500
+    # Lit clouds (src/editor/stylized/sky/cloudLighting.js): the sunward side of
+    # each billow lit and the far side in shade, a silver lining on thin cloud
+    # in front of the sun, and low clouds sinking into the horizon haze.
+    cloudLighting:
+      enabled: true
+      sunShading: 0.8
+      slopeScale: 0.1
+      silverStrength: 0.9
+      silverFalloff: 5
+      horizonHaze: 0.65
+      horizonFade: 0.22
     # Image-based light, as grass-test ships it (Poly Haven "Zwartkops Straight
     # Morning", CC0): standard materials take their soft fill and reflections from
     # it. Without it the hero's armour read black against the light.

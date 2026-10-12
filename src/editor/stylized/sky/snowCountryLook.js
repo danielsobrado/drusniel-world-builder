@@ -12,6 +12,12 @@ const COOL_FOG = [0.95, 1.0, 1.06];
 const WARM_SUN = [1.04, 1.0, 0.94];
 /** How far the horizon and fog pale toward their own luminance. */
 const PALING = 0.35;
+/**
+ * Exposure deep in snow country, as a share of the configured exposure: the
+ * eye (and a camera) stops down for a snowfield. At full exposure sunlit snow
+ * clipped to flat white at midday and its shade and blue never showed.
+ */
+const SNOW_EXPOSURE = 0.74;
 
 const scratch = new THREE.Color();
 
@@ -37,5 +43,6 @@ export function snowCountryLook(look, weight) {
     directionalColor: tinted(look.directionalColor, WARM_SUN, w),
     ambientIntensity: look.ambientIntensity * (1 + 0.15 * w),
     fogDensityScale: look.fogDensityScale * (1 + 0.35 * w),
+    exposure: (look.exposure ?? 1) * (1 + (SNOW_EXPOSURE - 1) * w),
   };
 }

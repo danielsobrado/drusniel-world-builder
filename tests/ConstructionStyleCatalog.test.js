@@ -40,23 +40,29 @@ test('new walls default to rounded fieldstone; older styles keep their order', (
   assert.deepEqual(Object.keys(CONSTRUCTION_STYLES).slice(-2), ['rounded-fieldstone', 'glade-sandstone']);
 });
 
-test('glade-sandstone matches the reference scale: small near-square blocks, restrained caps', () => {
+test('glade-sandstone matches the reference scale: big blocks lying on their beds', () => {
   const candidate = constructionStyle('glade-sandstone');
   assert.equal(candidate.geometry, 'rounded');
   assert.equal(candidate.stonePalette, 'glade-sandstone');
   assert.equal(candidate.coarseLayout, 'preserve');
   assert.throws(() => defineConstructionStyle({ ...candidate, coarseLayout: 'shuffle' }), /coarseLayout/);
-  // Taller whole blocks interleave with thin horizontal pairs in each course.
-  assert.ok(candidate.courseHeight >= 0.35 && candidate.courseHeight <= 0.45);
-  assert.ok(candidate.targetWidth >= 0.35 && candidate.targetWidth <= 0.5);
-  assert.ok(candidate.targetWidth / candidate.courseHeight < 1.6, 'near square, not brick');
-  assert.ok(candidate.coping.oversail >= 1.0 && candidate.coping.oversail <= 1.12);
+  // About five courses to a 3.5 m wall, and blocks wider than they are tall.
+  assert.ok(candidate.courseHeight >= 0.5 && candidate.courseHeight <= 0.75);
+  assert.ok(candidate.targetWidth >= 0.8 && candidate.targetWidth <= 1.2);
+  assert.ok(candidate.splitMinAspect >= 1, 'no upright slivers');
+  assert.ok(candidate.splitHorizontalChance >= 0.75, 'cuts run along the bed');
+  // The crown is a course of blocks, not a thin overhanging cap.
+  assert.ok(candidate.coping.oversail >= 1.0 && candidate.coping.oversail <= 1.05);
+  assert.ok(candidate.coping.height >= candidate.courseHeight * 0.5);
   assert.ok(candidate.footing.heightRatio >= 1.0 && candidate.footing.heightRatio <= 1.25);
-  // Its own stone budget, so small blocks do not truncate a wall; other styles
-  // keep the shared caps.
-  assert.ok(candidate.stoneBudget.module > 280);
+  // One block per merlon, varied per tooth.
+  assert.equal(candidate.merlonMaxColumns, 1);
+  assert.ok(candidate.merlonVariation > 0);
   assert.equal(constructionStyle('rounded-fieldstone').stoneBudget ?? null, null);
   assert.throws(() => defineConstructionStyle({ ...candidate, splitHorizontalChance: 1.1 }), /splitHorizontalChance/);
+  assert.throws(() => defineConstructionStyle({ ...candidate, splitMinAspect: 9 }), /splitMinAspect/);
+  assert.throws(() => defineConstructionStyle({ ...candidate, merlonMaxColumns: 0 }), /merlonMaxColumns/);
+  assert.throws(() => defineConstructionStyle({ ...candidate, geometry: 'soft' }), /curveWidthTolerance/);
 });
 
 test('rounded fieldstone declares its mesher, top, footing and coping', () => {
@@ -86,6 +92,11 @@ test('styles without the new fields keep the behaviour they always had', () => {
     assert.equal(style.coarseLayout, 'merge', key);
     assert.equal(style.footing, null, key);
     assert.equal(style.coping, DEFAULT_COPING, key);
+    assert.equal(style.splitMinAspect, null, key);
+    assert.equal(style.merlonVariation, 0, key);
+    assert.equal(style.merlonMaxColumns, 3, key);
+    assert.equal(style.openingBlockScale, 1, key);
+    assert.equal(style.curveWidthTolerance, null, key);
   }
   assert.deepEqual({ ...DEFAULT_COPING }, { height: 0.16, oversail: 1.14, widthRatio: 1.15, crownVariation: 0 });
 });

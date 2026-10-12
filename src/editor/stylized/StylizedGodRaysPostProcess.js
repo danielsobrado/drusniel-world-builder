@@ -18,6 +18,7 @@ import { buildDustGodRays } from './GodRaysScreenScattering.js';
 import { setPipelineOutput } from './pipelineOutput.js';
 import { createFinishUniforms } from './cinematicFinish.js';
 import { GodsEndLightShafts } from './GodsEndLightShafts.js';
+import { createContactOcclusion } from './GodRaysContactOcclusion.js';
 export {
   advectedDustDensityReference,
   dustModulationReference,
@@ -363,8 +364,10 @@ export class StylizedGodRaysPostProcess {
       .mul(cloudTransmissionFactor)
       .mul(this.volumetricIntensity);
 
+    this.volumetricOcclusion = createContactOcclusion({ depth, camera, settings: volumetric.contactOcclusion });
+    const lit = this.volumetricOcclusion ? beauty.rgb.mul(this.volumetricOcclusion.factor) : beauty.rgb;
     this.volumetricPipeline = setPipelineOutput(new THREE.RenderPipeline(this.renderer), vec4(
-      beauty.rgb.add(this.tint.mul(this.lightScale).mul(rayAmount)),
+      lit.add(this.tint.mul(this.lightScale).mul(rayAmount)),
       beauty.a,
     ), { fxaa: this.config.fxaa !== false, finish: this.finishFor(beauty) }).pipeline;
     this.volumetricCamera = camera;
@@ -566,6 +569,8 @@ export class StylizedGodRaysPostProcess {
     this.volumetricPipeline?.dispose();
     this.volumetricRays?.dispose();
     this.volumetricBlur?.dispose();
+    this.volumetricOcclusion?.dispose();
+    this.volumetricOcclusion = null;
     this.volumetricPipeline = null;
     this.volumetricRays = null;
     this.volumetricBlur = null;

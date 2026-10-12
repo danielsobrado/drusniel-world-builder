@@ -75,6 +75,10 @@ export class TownMesh {
 
   instanced(geometry, material, count, glass) {
     const mesh = new THREE.InstancedMesh(geometry, material, count);
+    // Streamed draw preparation hides what it has not reached and only runs on
+    // spare frame time: below its target FPS it hid whole towns. Every module
+    // shares one kit material, so its first draw compiles once.
+    mesh.userData.skipWarmup = true;
     mesh.castShadow = !glass;
     mesh.receiveShadow = !glass;
     if (glass) mesh.renderOrder = 2;

@@ -297,8 +297,10 @@ test('every fronted house of every style knows its door, and its recipe puts the
         doors += 1;
         assert.ok(door.width >= 0.8 && door.height >= 1.8 && door.z > 0, `${style.key} ${kind} ${variant}`);
         assert.ok(Math.abs(door.x) < entry.footprint[0] / 2);
-        assert.deepEqual(Object.keys(buildingRecipe(style, kind, variant).componentTransforms), [door.id]);
-        return assert.equal(buildingRecipe(style, kind, variant, { openDoor: false }).componentTransforms, undefined);
+        // The door stands open as a clear void: the recipe names it, nothing is shrunk.
+        assert.equal(buildingRecipe(style, kind, variant).openDoorId, door.id);
+        assert.equal(buildingRecipe(style, kind, variant).componentTransforms, undefined);
+        return assert.equal(buildingRecipe(style, kind, variant, { openDoor: false }).openDoorId, undefined);
       });
     }
   }
@@ -315,10 +317,31 @@ test('a town has rooms behind its doors', () => {
     assert.ok(shell.doorLeft > -shell.halfWidth && shell.doorRight < shell.halfWidth && shell.front > shell.back + 2);
   }
   assert.equal(houseShell(cityPlan.buildings.find(({ kind }) => kind === 'wall')), null);
-  const { positions, normals, colors } = settlementInteriorArrays(cityPlan);
+  const { positions, normals, colors, surfaces, rooms } = settlementInteriorArrays(cityPlan);
+  // [wood, firelight, room] per vertex: floors, furniture and door leaves wear the grain;
+  // hearths glow at night; each vertex knows its room's row of windows for the light through them.
+  assert.equal(surfaces.length, positions.length / 3 * 3);
+  const tagged = (channel) => surfaces.filter((_, index) => index % 3 === channel && surfaces[index] === 1).length;
+  assert.ok(tagged(0) > enterable.length * 100, 'rooms are mostly wood');
+  assert.ok(tagged(1) > 0, 'hearths take the light of their fires');
+  assert.equal(rooms.length, enterable.length, 'one window row a room');
+  const roomIndex = surfaces.filter((_, index) => index % 3 === 2);
+  assert.ok(roomIndex.every((room) => Number.isInteger(room) && room >= 0 && room < rooms.length));
+  const windows = rooms.flat();
+  assert.ok(windows.length > enterable.length, 'most rooms have more than one window');
+  for (const window of windows) {
+    assert.ok(Math.abs(Math.hypot(window.nx, window.nz) - 1) < 1e-6, 'a window normal is horizontal and unit');
+    assert.ok(window.head > window.sill + 0.4 && window.halfWidth > 0.2);
+  }
   assert.equal(normals.length, positions.length);
   assert.equal(colors.length, positions.length);
-  // Nineteen quads a house: floor, ceiling, walls, reveals, threshold, daylight, opening, frame and leaf.
-  assert.equal(positions.length / 18, enterable.length * 19);
+  assert.ok(colors.every(Number.isFinite), 'every interior vertex has a colour');
+  // Seventeen quads a house (floor, ceiling, walls, reveals, threshold, daylight, opening, frame),
+  // then the leaf's two faces: at least three boards and three iron straps each.
+  const quads = positions.length / 18;
+  assert.ok(Number.isInteger(quads) && quads >= enterable.length * (17 + 2 * (3 + 3)));
   assert.equal(settlementInteriorArrays({ buildings: [] }), null);
+  // Furnished, a hearth burning in it, and still a small static mesh (one draw a town, no shadows).
+  assert.ok(colors.some((channel) => channel > 1), 'a hearth glows');
+  assert.ok(positions.length / 3 / enterable.length < 2800, `${positions.length / 3 / enterable.length} vertices a room`);
 });

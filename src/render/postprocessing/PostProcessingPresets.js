@@ -5,10 +5,11 @@ import {
 } from './PostProcessingSettings.js';
 
 /**
- * Quality presets. Artistic options (DOF, grain, vignette) and diagnostics are
+ * Quality presets. Artistic options (AO, DOF, grain, vignette) and diagnostics are
  * never modified. God-ray technique is also preserved (Phase 10 owns that UI).
  */
 const ARTISTIC_KEYS = Object.freeze([
+  'ambientOcclusion',
   'depthOfField',
   'vignette',
   'grain',

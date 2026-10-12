@@ -40,6 +40,7 @@ def furnish_story(kit, coll, story, spec, k):
         return
     if k == 0:
         _place(kit, coll, story, 'Hearth', width - 1.1, back - 0.3, z)
+        _place(kit, coll, story, 'Stool', width - 2.1, back - 1.1, z)
         _place(kit, coll, story, 'Rug', width - 1.1, back - 1.6, z)
         if spec.d >= 3:
             _place(kit, coll, story, 'Shelf', 1.0, back - 0.15, z)

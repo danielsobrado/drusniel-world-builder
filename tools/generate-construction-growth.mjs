@@ -15,8 +15,12 @@ for (const [key, profile] of Object.entries(source.styles)) {
   for (const field of ['stems', 'nodes', 'leavesPerNode', 'maxLeavesPerModule']) {
     if (!Number.isInteger(profile[field])) throw new Error(`Non-integer ${key}.${field}`);
   }
+  for (const [field, [min, max]] of Object.entries({ zigzag: [0, 0.6], leafChance: [0, 1], stemRadius: [0.004, 0.04] })) {
+    const value = profile[field];
+    if (value !== undefined && (!Number.isFinite(value) || value < min || value > max)) throw new Error(`Invalid ${key}.${field}`);
+  }
   if (!Array.isArray(profile.leafRadius) || profile.leafRadius.length !== 2
-    || !profile.leafRadius.every(v => Number.isFinite(v) && v >= 0.02 && v <= 0.25)
+    || !profile.leafRadius.every(v => Number.isFinite(v) && v >= 0.02 && v <= 0.3)
     || profile.leafRadius[0] > profile.leafRadius[1]) throw new Error(`Invalid ${key}.leafRadius`);
   if (!Array.isArray(profile.palette) || !profile.palette.length
     || !profile.palette.every(v => /^#[0-9a-f]{6}$/i.test(v))) throw new Error(`Invalid ${key}.palette`);

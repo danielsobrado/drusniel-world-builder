@@ -8,3 +8,6 @@ debug.log
 !public/assets/gods-end/**/*.glb
 .commandcode/
 __pycache__/
+
+# Blender auto-save backups
+*.blend1

@@ -28,7 +28,14 @@ def _slopes(b, x0, x1, span, pitch, barge=False):
     back = Matrix.Translation((x0 + x1, span, 0)) @ Matrix.Rotation(math.pi, 4, 'Z') @ front
     length = (span / 2 + OV) / cos + 0.05
     for m in (front, back):
-        b.box((x0, 0, 0), (x1, length, ROOF_THICK), 'timber', m=m, mats=SLAB_MATS)
+        # One tone and square ends: neighbouring sections must read as one roof, not
+        # 2 m tiles with a chamfer groove and a shade step at every joint.
+        b.box((x0, 0, 0), (x1, length, ROOF_THICK), 'timber', m=m, mats=SLAB_MATS, tone=1.0,
+              bevel=0, skip=() if barge else ('-x', '+x'))
+        if detailed():
+            # A chunky fascia along the eave gives the roof its thickness from the street.
+            b.box((x0, -0.07, -0.14), (x1, 0.03, ROOF_THICK + 0.05), 'timber', m=m, tone=1.0,
+                  skip=() if barge else ('-x', '+x'))
     if barge:
         b.box((x0, 0, -0.12), (x0 + 0.06, length, ROOF_THICK + 0.05), 'timber', m=front)
         b.box((x1 - 0.06, 0, -0.12), (x1, length, ROOF_THICK + 0.05), 'timber', m=back)

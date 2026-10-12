@@ -5,6 +5,7 @@ import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 import { SettlementSurfaceLibrary } from '../surfaces/SettlementSurfaceLibrary.js';
 import { SettlementPrototypePool } from './SettlementPrototypePool.js';
 import { settlementDusk } from './SettlementDusk.js';
+import { updateSettlementSunlight } from './SettlementWindowLight.js';
 import { SettlementSite } from './SettlementSite.js';
 import { SettlementSkyline } from './SettlementSkyline.js';
 
@@ -47,8 +48,13 @@ export const SETTLEMENT_VIEW = Object.freeze({
  * the player, nearest buildings first.
  */
 export class SettlementView {
-  /** @param {() => number} [options.duskProvider] how far into evening the sky is, 0–1 (SettlementDusk) */
-  constructor({ terrainView, baseUrl = '/', enabled = true, duskProvider = () => 0 }) {
+  /**
+   * @param {() => number} [options.duskProvider] how far into evening the sky is, 0–1 (SettlementDusk)
+   * @param {() => ?{ direction: object, color: object, intensity: number }} [options.sunlightProvider]
+   *   the sky's key light (sun by day, moon by night), for the light through the rooms' windows
+   */
+  constructor({ terrainView, baseUrl = '/', enabled = true, duskProvider = () => 0, sunlightProvider = () => null }) {
+    this.sunlightProvider = sunlightProvider;
     this.terrainView = terrainView;
     this.duskProvider = duskProvider;
     this.enabled = enabled;
@@ -265,6 +271,8 @@ export class SettlementView {
     }
     const origin = view.floatingOrigin.readState?.(this.origin) ?? Object.assign(this.origin, view.floatingOrigin.getState());
     settlementDusk.value = this.duskProvider();
+    const sunlight = this.sunlightProvider();
+    if (sunlight) updateSettlementSunlight(sunlight);
     const dt = this.lastTimestamp === null ? 0 : Math.min(0.1, (timestamp - this.lastTimestamp) / 1000);
     this.lastTimestamp = timestamp;
 

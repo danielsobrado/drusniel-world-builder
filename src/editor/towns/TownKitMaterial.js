@@ -28,6 +28,7 @@ import {
   vec4,
 } from 'three/tsl';
 
+import { WEATHER_FAMILIES, treadPaving, weatherTownSurface } from '../../render/materials/townWeathering.js';
 import { sampleWorldWind } from '../weather/wind/worldWindState.js';
 import { KIT_DATA_ATTRIBUTE } from './TownKitGeometry.js';
 import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
@@ -47,7 +48,8 @@ import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
  *  - relief (TownKitSurfaces): strengthened normal maps, crevices darkened from
  *    the normal maps, and parallax so stones and slates stand proud;
  *  - per place, from town-space noise: broad tone drift, render worn back to
- *    the stone beneath, moss on sky-facing stone and slate;
+ *    the stone beneath, and the shared town weathering (render/materials/
+ *    townWeathering): moss on ledges and slates, rain runs down faces;
  *  - snow on sky-facing stone, timber and roof in frost towns;
  *  - banners and awnings sway in the world wind;
  *  - a few centimetres of town-space wobble, so long ridges, beams and walls are
@@ -56,7 +58,6 @@ import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
  */
 
 const SNOW = vec3(0.9, 0.93, 0.98);
-const MOSS = vec3(0.24, 0.3, 0.12);
 
 export const townKitShared = Object.freeze({
   /** Sun elevation in radians, written each frame by the town runtime. */
@@ -171,9 +172,12 @@ export function createTownKitMaterial(atlas, look) {
   colour = colour.mul(houseTint).mul(drift).mul(data.x);
 
   const up = normalWorld.y;
-  const mossy = smoothstep(0.25, 0.8, up).mul(smoothstep(0.1, 0.45, drift.sub(1).mul(12)))
-    .mul(isRole(ROLE.stone).add(isRole(ROLE.roof)).clamp(0, 1)).mul(0.3);
-  colour = mix(colour, MOSS.mul(data.x), mossy);
+  // The same weather as SettlementView's houses: moss on ledges and slates, rain runs down faces.
+  const amount = (key) => [[ROLE.stone, 'stone'], [ROLE.plaster, 'plaster'], [ROLE.timber, 'timber'], [ROLE.roof, 'roof']]
+    .reduce((sum, [value, family]) => sum.add(isRole(value).mul(WEATHER_FAMILIES[family][key])), float(0));
+  colour = weatherTownSurface(colour, { place, up, family: { moss: amount('moss'), streaks: amount('streaks') } });
+  // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
+  colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving));
   const snowCover = smoothstep(0.38, 0.72, up).mul(snow).mul(kind.y);
   colour = mix(colour, SNOW.mul(data.x.mul(0.3).add(0.7)), snowCover);
 

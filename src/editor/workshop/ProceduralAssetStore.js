@@ -196,6 +196,10 @@ export function normalizeProceduralRecipe(input = {}) {
       1,
     ),
     windows: optionalBoolean(source.windows, 'Doors and windows', true),
+    // A door standing open: its void and frame are built, its leaf is not (a
+    // settlement draws its own leaf swung back, and a room behind it). Present
+    // only when set, so authored and saved recipes are unchanged.
+    ...(source.openDoorId == null ? {} : { openDoorId: requireString(source.openDoorId, 'Open door') }),
     ivy: optionalBoolean(source.ivy, 'Procedural ivy', false),
     remesh: optionalBoolean(source.remesh, 'Remeshing', true),
     albedo: optionalBoolean(source.albedo, 'Procedural albedo', true),

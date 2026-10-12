@@ -569,6 +569,19 @@ function validateStylizedSurface(config) {
       'Invalid editor configuration: volumetric resolutionScale and maxDensity must be within (0, 1].',
     );
   }
+  const occlusion = volumetric.contactOcclusion;
+  if (occlusion !== undefined) {
+    const valid = occlusion && typeof occlusion.enabled === 'boolean'
+      && [occlusion.resolutionScale, occlusion.radius, occlusion.thickness, occlusion.intensity].every(Number.isFinite)
+      && occlusion.resolutionScale > 0 && occlusion.resolutionScale <= 1
+      && occlusion.intensity >= 0 && occlusion.intensity <= 1
+      && Number.isInteger(occlusion.samples) && occlusion.samples >= 4 && occlusion.samples <= 32;
+    if (!valid) {
+      throw new Error(
+        'Invalid editor configuration: stylizedSurface.sky.godRays.volumetric.contactOcclusion needs enabled, resolutionScale in (0, 1], integer samples 4-32, finite radius and thickness, and intensity in [0, 1].',
+      );
+    }
+  }
   if (volumetric.intensity < 0 || volumetric.blurSoftness < 0) {
     throw new Error(
       'Invalid editor configuration: volumetric intensity and blurSoftness must be non-negative.',

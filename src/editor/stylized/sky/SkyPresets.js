@@ -42,9 +42,10 @@ export const SKY_PRESETS = Object.freeze({
     sunGlowIntensity: 0.35,
     directionalColor: '#ffe0b1',
     directionalIntensity: 3.1,
-    ambientIntensity: 2.4,
-    ambientSaturation: 0.45,
-    groundLightColor: '#99916f',
+    // Less, warmer fill: shaded faces stay a deep warm brown instead of grey.
+    ambientIntensity: 1.9,
+    ambientSaturation: 0.25,
+    groundLightColor: '#a8936a',
     shadowRadius: 3.2,
     fogColor: '#e9d8bf',
   }),

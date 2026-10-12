@@ -18,10 +18,23 @@ export const SKY_LOOK_NUMBERS = Object.freeze([
   'cloudOpacity', 'cloudDensity',
   'ambientIntensity', 'ambientSaturation', 'directionalIntensity', 'fogDensityScale',
   'cloudShadowStrength', 'shadowRadius',
+  'cloudSharpness', 'cloudDetail', 'mist', 'snowBrightness', 'snowShade', 'snowBlue', 'nightness',
+  'exposure',
 ]);
+/**
+ * Look values with a fixed neutral default when neither the preset nor the
+ * config names them: the cloud form (detail 1 is the plain fbm), how misty the
+ * air is (valley fog), and how snow takes the light — `snowBrightness` scales its
+ * albedo, `snowShade` how far faces turned from the sun fall into shade, and
+ * `snowBlue` how blue that shade is (0 grey, 1 cold blue).
+ */
+const LOOK_NUMBER_DEFAULTS = Object.freeze({
+  cloudSharpness: 0.24, cloudDetail: 1, mist: 0, exposure: 1, snowBrightness: 0.82, snowShade: 0.35, snowBlue: 0.6,
+});
 /** The look values the sky material reads, which become its uniforms. */
 const MATERIAL_COLORS = Object.freeze(['lowColor', 'highColor', 'sunColor', 'sunGlowColor', 'cloudCore', 'cloudEdge', 'cloudRim']);
-const MATERIAL_NUMBERS = Object.freeze(['sunEmission', 'sunGlowIntensity', 'cloudOpacity', 'cloudDensity']);
+const MATERIAL_NUMBERS = Object.freeze(['sunEmission', 'sunGlowIntensity', 'cloudOpacity', 'cloudDensity',
+  'cloudSharpness', 'cloudDetail']);
 
 export function skyPresetNames() {
   return Object.keys(SKY_PRESETS);
@@ -33,6 +46,12 @@ export function resolveSkyLook(sky, presetName = DEFAULT_SKY_PRESET) {
   const look = { night: Boolean(preset.night) };
   for (const key of SKY_LOOK_COLORS) look[key] = preset[key] ?? sky[key];
   for (const key of SKY_LOOK_NUMBERS) look[key] = preset[key] ?? sky[key];
+  for (const [key, value] of Object.entries(LOOK_NUMBER_DEFAULTS)) {
+    if (!Number.isFinite(look[key])) look[key] = value;
+  }
+  // `night` flips halfway through a blend; `nightness` eases with it, for
+  // anything that must not pop at dusk (stars, moonlit clouds).
+  look.nightness = preset.night ? 1 : 0;
   look.ambientSaturation = preset.ambientSaturation ?? sky.ambientSaturation ?? 1;
   look.shadowRadius = preset.shadowRadius ?? sky.shadowRadius ?? 2.4;
   look.fogDensityScale = preset.fogDensityScale ?? 1;
@@ -88,6 +107,12 @@ export function overcastSkyLook(look, amount) {
   result.cloudOpacity = Math.min(1, look.cloudOpacity + 0.3 * t);
   result.cloudShadowStrength = look.cloudShadowStrength * (1 - 0.7 * t);
   result.fogDensityScale = look.fogDensityScale * (1 + 0.6 * t);
+  // A grey lid: soft-edged, smooth stratus rather than broken cumulus, and the
+  // flat light takes the modelling out of the snow.
+  result.cloudSharpness = look.cloudSharpness + 0.2 * t;
+  result.cloudDetail = look.cloudDetail * (1 - 0.4 * t);
+  result.mist = Math.min(1, look.mist + 0.3 * t);
+  result.snowShade = look.snowShade * (1 - 0.5 * t);
   return result;
 }
 

@@ -67,6 +67,8 @@ export function resolveLook(look) {
   const tints = {
     M_stone: stone,
     M_stone_ashlar: stone,
+    // Quoins, copings, sills and voussoirs: the town's own stone, dressed.
+    M_stone_dressed: stone,
     M_timber: timber,
     M_planks: timber,
     M_clapboard: timber,

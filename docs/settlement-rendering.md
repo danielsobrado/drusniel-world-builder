@@ -198,13 +198,54 @@ joint shadow do the drawing.
 - **Coursed masonry.** Settlement recipes use `irregularity: 0.14`. At the
   workshop default (0.45) every stone is turned, skewed and pushed out of its
   course, which across a street reads as blocks jostling.
-- **Quiet stone.** The stone set is flattened to 40% of its contrast at fetch
-  time (`contrast` in `SETTLEMENT_SURFACE_SETS`); the two procedural stone
-  fields were dropped as too blotchy for dressed masonry.
-- **`SettlementGrade`.** Every building material is pulled toward one warm
-  daylight per family, and washed toward `TOWN_GROUND` over its bottom 1.5 m.
-  The paving's earth layer is tinted to the same `TOWN_GROUND`, so a wall rises
-  out of its ground instead of meeting it in a line.
+- **Close-up sets.** Building surfaces and street setts are fetched at 1K
+  without the painterly median (`CLOSE_UP` in `SettlementDressing`), so a
+  wall a stride away shows pitting and grain instead of a smear; the stone
+  keeps 75% of its contrast, and `SettlementGrade` strengthens photographed
+  normals per family (`RELIEF`). Paving samples its set twice, turned and
+  rescaled, blended by noise with a broad tone drift, so a square never shows
+  the tile repeat (`SettlementPavingMaterial`). The patterned cobble set was
+  dropped: its strips printed a grid across every square.
+- **`SettlementGrade`.** Every building material is pulled toward one daylight
+  per family, then weathered by `render/materials/townWeathering.js`, the same
+  node the medieval kit's towns use: moss on sky-facing ledges and slates, rain
+  runs down faces, and a damp foot over the bottom metre. Renders keep 55% of
+  their hue and stone 45% (the workshop's finishes are paint-box bright, its
+  stone palettes lean teal), bare masonry's joint mortar is darkened below its
+  stone, and vertex colours are folded into the graded colour: three applies
+  them after `colorNode`, which would undo the grade. The paving's earth layer
+  is tinted to `TOWN_GROUND`.
+- **Kit parity.** Both town renderers share one material language:
+  - plaster dressings use `plaster-painted` and masonry-finished houses are
+    walled in `stone-rubble` (the `rubble` role), the kit's own scans; one
+    dressing paves with the kit's setts (`cobble-kit`);
+  - `SettlementGrade` grades each family toward the kit's hue at its own
+    brightness (`KIT_HUE`: warm grey stone, cream render, dark brown timber)
+    and turns the workshop's brass fittings to forged iron;
+  - window recesses are leaded glass (`SettlementDusk`): diamond quarries from
+    the recess face's position (it has no UVs), each quarry its own piece of
+    crown glass, glossy, faintly lit by day and warm at dusk;
+  - wooden trim (shop signs) wears the town's timber set under aged paint, and
+    awning canvas is stained and sun-bleached in the shader;
+  - stone keeps half of its style's own hue (granite cool, sandstone warm) and
+    terracotta roofs are tinted the kit's weathered orange clay;
+  - ivy is woody stems with pointed leaves in mixed greens, not a sheet of
+    same-coloured squares.
+- **Night.** `settlementDusk` is 1 on a night look (`skyLooks.night`), since a
+  moonlit preset keeps its "sun" high and the sky alone never read as dusk;
+  windows burn with the same firelight (`#ff9a3d`) as the kit's glass.
+- **Paving.** Squares are laid in `flag-monastery` (irregular old flags with
+  deep joints) and some lanes in `cobble-old`; joints are darkened in the
+  colour from each set's occlusion map, since three's AO map only touches
+  ambient light and sunlit setts read as one flat sheet. Grime and the
+  untiling sample are shared with the kit's cobbles (`treadPaving`).
+- **Sky.** The configured day sky has fewer, larger, softer cumulus
+  (`cloudScale` 6.5, `cloudSharpness` 0.24) over a hazier blue; cloud bodies
+  are shaded from their own density, with no second noise sample (a sunward
+  sample looked the same and cost 0.4 ms of a full-screen sky).
+- **Ground bounce.** Inside a town the sky light's ground colour is drawn from
+  the look's meadow green to trodden earth (`SettlementGroundBounce`, kit towns
+  too). Green bounce turned every face out of the sun teal.
 - **Soft ground edges.** Paving is cut by a world-fixed grain as well as by the
   surface's joints, so layers thin out into grass and into each other over a
   metre. Aprons carry no darkening of their own; the shade layer does that.
@@ -216,14 +257,46 @@ pooled house's main door, and how far the wall's stones stand proud there, into
 `SettlementDoors.generated.js` (`npm run check:settlement-doors` fails if it is
 stale). From that one table:
 
-- the recipe shrinks and sinks the drawn door leaf — the only transform the
-  workshop allows a door (`buildingRecipe`, `openDoor`);
-- `SettlementInteriorGeometry` draws, as one mesh a town, an open doorway on the
-  stone face (dark opening, frame, leaf standing open) and a room behind it;
+- the recipe names that door `openDoorId`, and the workshop builds it as a clear
+  void with its frame, dressings and step but no leaf (`buildDoor`). It used to
+  shrink the door with a component transform, which shrank the opening too and
+  filled every doorway with stone;
+- `SettlementRoomDressing` furnishes each room: a plank floor, a stone base
+  course, corner posts and ceiling joists, a hearth set forward of the shell's
+  inner stones (`HEARTH_INSET`; against the room line it was buried in them)
+  with logs, emissive embers and flames, a bed, a shelf of crockery, a cask,
+  a trestle table with a planked top and a splay-legged bench clear of the
+  doorway's walk line, a stool by the fire, a posted bed and a chest
+  (`SettlementFurniture`, built from chamfered boxes in `SettlementRoomParts`).
+  It stays in the one interior mesh a town (about 2600 vertices a room, no
+  shadows), so it costs no draw calls;
+- `SettlementInteriorMesh` shades that mesh: each vertex carries
+  `interiorSurface` [wood, firelight] (`SettlementInteriorSurface`). Wood takes
+  the town's timber set through a box projection once its dressing loads
+  (one recompile a town); each hearth's stone glows with its fire after dark;
+- `SettlementInteriorGeometry` draws, as one mesh a town, each room and its
+  doorway's reveals, timber frame, and boarded, iron-strapped leaf standing open;
 - the collider's walls and doorway come from the same `houseShell`.
 
-The shell's masonry is unbroken behind its door, so the doorway cannot be seen
-through: from the street it is a shadowed opening, from inside a bright one.
+The doorway is a real opening: the furnished room shows through it, and its
+hearth glows after dark.
+
+Sun and moonlight fall through each room's ground-floor windows as leaded
+patches on the floor and walls (`SettlementWindowLight`), a light cookie
+computed in the interior shader rather than lit:
+
+- `scripts/generate-settlement-doors.mjs` also records every pooled house's
+  ground-floor windows (`SettlementWindows.generated.js`); the planner hands
+  them to the building as `windows`, and the interior builder writes one row a
+  room into a small float table (6 windows a room at most).
+- Each interior fragment traces toward the sky's key light (`settlementSunlight`,
+  set by `SettlementView` from the sky every frame, so the moon takes over at
+  night) and asks whether the ray leaves through a window opening and through
+  glass rather than lead. The patch softens with distance from the window.
+- No lights, no shadow passes, no extra draws: still one interior mesh a town.
+  The room is lifted by the sky's fill light no real room gets, so the patch is
+  brightened (`COOKIE_GAIN`) to stand out as a sunbeam does. The table's `x` is in the footprint's frame, which is
+the mesh's −x once placed (`scripts/generate-settlement-doors.mjs`).
 
 ## Loading without the long frames
 
@@ -234,7 +307,7 @@ from 123–182 ms.
 
 ## Not done yet
 
-- Rooms are bare: no furniture, and no windows from inside.
+- Window light ignores cloud shadow and other houses in the way; lanterns cast no cookie.
 - Animals amble on the spot; they do not graze, flee or path.
 - The skyline is unlit massing; from flat ground forest hides it.
 - Procedural paving waits on a layered bake in the texture library.

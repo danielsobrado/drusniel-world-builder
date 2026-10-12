@@ -215,8 +215,10 @@ def window(n, seed):
     lead = np.minimum(line((u + v * 1.4) * 3.5), line((u - v * 1.4) * 3.5))
     border = np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v))
     bar = np.minimum(lead, border * 2.5)
-    glass = tint(lerp((1.0, 0.8, 0.42), (1.0, 0.56, 0.2), v), 0.8 + 0.25 * fine)
-    glass = lerp(glass, (1.0, 0.92, 0.66), smooth(0.6, 0.0, np.hypot(u - 0.5, v - 0.35)) * 0.35)
+    # Crown glass, pale and faintly green-cream: by day a window is lit by the sky, not a
+    # fire. The game's glass material adds the warm glow as the sun goes down.
+    glass = tint(lerp((0.86, 0.85, 0.74), (0.72, 0.72, 0.6), v), 0.8 + 0.25 * fine)
+    glass = lerp(glass, (0.95, 0.93, 0.82), smooth(0.6, 0.0, np.hypot(u - 0.5, v - 0.35)) * 0.35)
     albedo = lerp((0.08, 0.06, 0.05), glass, smooth(0.02, 0.04, bar))
     return albedo, smooth(0.02, 0.04, bar), 1.0
 

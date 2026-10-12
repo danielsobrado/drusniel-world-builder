@@ -100,28 +100,28 @@ defaults:
 
 # Per-style overrides of any of the keys above.
 styles:
-  # Reference look (docs/reference/tiny-glade): flat faces, small bevels, pale
-  # seams, stones varying in depth. Lower tessellation, since there are about
-  # five times as many stones as the default.
+  # Reference look (docs/reference/tiny-glade): big blocks with flat faces and
+  # wide, flat chamfers that take the sun on top and fall into shadow below.
   glade-sandstone:
-    # Seen head-on, the rim is a band as wide as its radius; the references'
-    # bevels are narrow chamfers that catch the light.
+    # A single arc segment makes the rim one flat facet: a chamfer, not a roll.
     edgeRadius:
-      ratioMin: 0.06
-      ratioMax: 0.11
-      minimum: 0.009
-      maximum: 0.033
-    rimVariation: 0.65
-    minimumEdgeRadius: 0.006
+      ratioMin: 0.1
+      ratioMax: 0.15
+      # Big blocks reach their chamfer through the ratio; the floor stays low
+      # so a thin sliver of a unit cannot fold over its own rim.
+      minimum: 0.01
+      maximum: 0.065
+    rimVariation: 0.55
+    minimumEdgeRadius: 0.012
     cornerRadius:
-      ratioMin: 0.06
-      ratioMax: 0.12
+      ratioMin: 0.1
+      ratioMax: 0.17
       # Each corner wears differently; dressings inherit their calmer scale.
-      variation: 0.4
+      variation: 0.45
     bulge:
-      ratioMin: 0.004
-      ratioMax: 0.014
-      maximum: 0.003
+      ratioMin: 0.006
+      ratioMax: 0.018
+      maximum: 0.008
     faceFlatness: 0.95
     protrusionScale: 0.8
     # Trade a corner subdivision for an edge midpoint: the same near triangle
@@ -140,7 +140,10 @@ styles:
     # Bevels are shaded by the light, bright on top and darker underneath, as
     # in the references; baked crevice darkening made every rim a dark band.
     occlusion:
-      crevice: 0
-      creviceReach: 1.0
-      # A thin shaded line under each block, as the references draw.
-      down: 0.12
+      # Only the deepest part of each chamfer darkens, so rims stay lit by
+      # the sun and the joint itself reads as a crevice.
+      crevice: 0.38
+      creviceReach: 0.8
+      # A shaded band under each block, as the references draw.
+      down: 0.22
+      face: 0.3

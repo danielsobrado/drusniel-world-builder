@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { MasonryVertexWriter } from './MasonryVertexWriter.js';
 import { planWallGrowth } from '../masonry/WallGrowth.js';
+import { CONSTRUCTION_GROWTH_PROFILES } from '../config/ConstructionGrowthProfiles.generated.js';
 import { CONSTRUCTION_MATERIAL_SLOT } from '../render/ConstructionMaterialSlots.js';
 import { createGrowthSurfaceSampler } from './ConstructionGrowthSurface.js';
 import { writeIvyLeaf, writeIvyStem } from './ConstructionIvyMesher.js';
@@ -16,6 +17,8 @@ export function buildConstructionGrowth({ record, materials, arcTable, moduleOri
   const writer = new MasonryVertexWriter({ vertices: leaves.length * 60, indices: leaves.length * 90 });
   const faceAt = createGrowthSurfaceSampler({ record, placements, arcTable });
   const color = new THREE.Color();
+  const profile = CONSTRUCTION_GROWTH_PROFILES[record.style.key];
+  const stemOptions = { radius: profile?.stemRadius ?? 0.01, outward: Math.max(0.014, (profile?.stemRadius ?? 0.01) * 1.2) };
   for (const leaf of leaves) {
     const surface = faceAt(leaf.s, leaf.y, leaf.radius, leaf.side);
     const pointAt = (s, y, outward, rooted = false, face = surface) => {
@@ -28,7 +31,7 @@ export function buildConstructionGrowth({ record, materials, arcTable, moduleOri
     if (leaf.stem) {
       color.set('#657143');
       writeIvyStem(writer, leaf.stem, (s, y, outward, rooted) => pointAt(s, y, outward, rooted,
-        faceAt(s, y, 0.012, leaf.side)), color);
+        faceAt(s, y, 0.012, leaf.side)), color, stemOptions);
     }
     color.set('#71804a');
     const { from, to } = leaf.petiole;

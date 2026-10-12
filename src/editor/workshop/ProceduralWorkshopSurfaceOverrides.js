@@ -11,10 +11,11 @@
 let active = null;
 
 /**
- * @param {?{ timber?: object, plaster?: object, stone?: object, roof?: object, timberTint?: string }} surfaces
- *   sets of `{ color, normal, arm }` textures, by family. Plaster, stone and
- *   roof sets must be neutral: the finish, the per-stone and the per-tile
- *   colours tint them. `timberTint` colours the timber set.
+ * @param {?{ timber?: object, plaster?: object, stone?: object, rubble?: object, roof?: object, timberTint?: string }} surfaces
+ *   sets of `{ color, normal, arm }` textures, by family. Plaster, stone,
+ *   rubble and roof sets must be neutral: the finish, the per-stone and the
+ *   per-tile colours tint them. `rubble` is the wall of a masonry finish.
+ *   `timberTint` colours the timber set.
  * @param {() => T} generate
  * @returns {T}
  * @template T
@@ -29,7 +30,7 @@ export function withWorkshopSurfaceOverrides(surfaces, generate) {
   }
 }
 
-/** The override for one family (`timber`, `plaster`, `stone`, `roof`) or value (`timberTint`), or null. */
+/** The override for one family (`timber`, `plaster`, `stone`, `rubble`, `roof`) or value (`timberTint`), or null. */
 export function workshopSurfaceOverride(family) {
   return active?.[family] ?? null;
 }

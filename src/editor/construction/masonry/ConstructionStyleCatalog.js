@@ -57,6 +57,8 @@ const DEFAULT_STYLE_TUNING = Object.freeze({
   splitMaxDepth: 2,
   // Null prefers the longer axis. A style can favour stacked thin inserts.
   splitHorizontalChance: null,
+  // Narrowest width:height a vertical split may leave; null allows uprights.
+  splitMinAspect: null,
 
   jointInsetMin: 0.012,
   jointInsetMax: 0.03,
@@ -68,6 +70,17 @@ const DEFAULT_STYLE_TUNING = Object.freeze({
   faceOffsetCoherence: 0,
   merlonHeight: null,
   merlonCourseHeight: null,
+  // 0 keeps a regular crown; up to 1 varies each tooth's width, spacing and
+  // height (a stacked second stone) from its own hashed cell.
+  merlonVariation: 0,
+  merlonMaxColumns: 3,
+  // Lengthens jamb rows and voussoirs so an opening surround matches the
+  // style's block size.
+  openingBlockScale: 1,
+  // Chord sagitta a stone may span on a curve, in metres; null keeps the
+  // packer's joint tolerance. Only styles whose mesher bends stones to the
+  // arc can afford more.
+  curveWidthTolerance: null,
 
   // Shortest leaf a horizontal split may leave, in metres. Matches
   // `CourseLattice`'s MIN_SPLIT_HEIGHT, which every style used before.
@@ -184,8 +197,22 @@ export function defineConstructionStyle(input) {
     finiteInRange(style.splitHorizontalChance, `${style.key} splitHorizontalChance`, 0, 1);
   }
   finiteInRange(style.splitMaxDepth, `${style.key} splitMaxDepth`, 0, 2);
+  if (style.splitMinAspect != null) {
+    finiteInRange(style.splitMinAspect, `${style.key} splitMinAspect`, 0.2, 3);
+  }
   finiteInRange(style.faceOffsetCoherence, `${style.key} faceOffsetCoherence`, 0, 1);
   if (style.merlonHeight != null) finiteInRange(style.merlonHeight, `${style.key} merlonHeight`, 0.2, 2);
+  if (style.curveWidthTolerance != null) {
+    finiteInRange(style.curveWidthTolerance, `${style.key} curveWidthTolerance`, 0.005, 0.2);
+    if (style.geometry !== 'rounded') {
+      throw new Error(`${style.key} curveWidthTolerance needs arc-bent (rounded) geometry.`);
+    }
+  }
+  finiteInRange(style.openingBlockScale, `${style.key} openingBlockScale`, 0.5, 3);
+  finiteInRange(style.merlonVariation, `${style.key} merlonVariation`, 0, 1);
+  if (!Number.isInteger(style.merlonMaxColumns) || style.merlonMaxColumns < 1 || style.merlonMaxColumns > 3) {
+    throw new Error(`${style.key} merlonMaxColumns must be 1, 2 or 3.`);
+  }
   if (style.merlonCourseHeight != null) finiteInRange(style.merlonCourseHeight, `${style.key} merlonCourseHeight`, 0.1, 1);
   if (!Number.isInteger(style.coursesPerBand) || style.coursesPerBand < 1 || style.coursesPerBand > 2) {
     throw new Error(`${style.key} coursesPerBand must be 1 or 2.`);
@@ -381,64 +408,72 @@ export const CONSTRUCTION_STYLES = Object.freeze({
     },
   }),
   /**
-   * The reference look (docs/reference/tiny-glade): small, near-square blocks,
-   * 0.15–0.35 m, laid in rough courses with the odd larger block; flat faces
-   * with small bevels; a few stones proud of the face; hairline pale seams
-   * rather than dark mortar; one warm sandstone hue. Blocks are upright, so
-   * joints barely lean. New wall strokes use this style.
+   * The reference look (docs/reference/tiny-glade): a few big blocks, about
+   * five courses to a wall, lying on their beds rather than standing up; wide
+   * flat chamfers that catch the sun; joints deep enough to sit in shadow;
+   * saturated apricot sandstone. The odd unsplit two-course block breaks the
+   * bed lines. New wall strokes use this style.
    */
   'glade-sandstone': defineConstructionStyle({
     key: 'glade-sandstone',
     label: 'Glade sandstone',
     coarseLayout: 'preserve',
-    courseHeight: 0.4,
-    targetWidth: 0.46,
-    minWidth: 0.14,
+    courseHeight: 0.6,
+    targetWidth: 0.95,
+    minWidth: 0.36,
     // Neat, aligned blocks: jitter's shrink, skew and turn opened visible
-    // slots between these small stones.
+    // slots between neighbours.
     irregularity: 0.12,
     detail: 2,
-    merlonSpacing: 0.9,
+    merlonSpacing: 1.7,
     stonePalette: 'glade-sandstone',
-    bedAmplitude: 0.12,
-    jointTilt: 0.065,
-    // Split two-course cells at different local heights. Unsplit cells become
-    // uprights; neighboring stacks supply fitted smaller stones and break seams.
+    bedAmplitude: 0.1,
+    jointTilt: 0.06,
+    // Two-course cells are mostly cut along the bed at an uneven height, so
+    // neighbouring stacks do not share a seam; the uncut ones stay as tall
+    // blocks. `splitMinAspect` turns any cut that would stand a stone upright
+    // into a bed cut.
     coursesPerBand: 2,
-    splitChance: 0.88,
-    splitHorizontalChance: 0.65,
+    splitChance: 0.86,
+    splitHorizontalChance: 0.85,
     splitMaxDepth: 2,
-    splitMinHeight: 0.13,
-    depthScaleMin: 0.96,
+    splitMinHeight: 0.28,
+    splitMinAspect: 1.05,
+    depthScaleMin: 0.94,
     depthScaleMax: 1.0,
     // Some blocks stand proud of the face, a few sit back.
-    faceOffsetAmplitude: 0.032,
-    faceOffsetCoherence: 0.65,
-    merlonHeight: 0.4,
-    merlonCourseHeight: 0.4,
+    faceOffsetAmplitude: 0.045,
+    faceOffsetCoherence: 0.55,
+    // One block per tooth, varied in width, spacing and height.
+    merlonHeight: 0.6,
+    merlonCourseHeight: 0.6,
+    merlonVariation: 0.7,
+    merlonMaxColumns: 1,
+    openingBlockScale: 1.7,
+    // Stones are bent to the arc, so curves keep big blocks.
+    curveWidthTolerance: 0.06,
     // Blocks meet at the joint width: no in-plane shrink or turn.
     exactFit: true,
     // Real units supply the joints and worn bevels; broad faces stay calm.
     geometry: 'rounded',
     defaultTop: 'flat',
     footing: {
-      heightRatio: 1.2,
-      widthRatio: 1.3,
+      heightRatio: 1.15,
+      widthRatio: 1.25,
       splitChance: 0.1,
       plinth: 0.02,
       burialMargin: 0.06,
       burialMax: 0.4,
     },
-    // About five times the default's stones per square metre: a 12 m, 4 m
-    // module needs ~650, over the shared 280 cap. At 96 near triangles a
-    // stone a full module stays near a default module's triangle count.
-    stoneBudget: { module: 900, construction: 12000 },
-    // Caps are blocks of the wall's own scale, barely overhanging.
+    // About 1.5 stones per square metre: a 12 m, 4 m module needs ~75.
+    stoneBudget: { module: 280, construction: 6000 },
+    // The crown is a course of the wall's own blocks, stepped by wear rather
+    // than a thin overhanging cap.
     coping: {
-      height: 0.24,
-      oversail: 1.04,
-      widthRatio: 1.1,
-      crownVariation: 0.22,
+      height: 0.36,
+      oversail: 1.0,
+      widthRatio: 1.0,
+      crownVariation: 0.25,
     },
   }),
 });

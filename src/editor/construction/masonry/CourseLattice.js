@@ -160,6 +160,10 @@ export function splitCell(cell, {
   minHeight = MIN_SPLIT_HEIGHT,
   courseHeight = 1,
   horizontalChance = null,
+  // Narrowest width:height a vertical split may leave. Null keeps the former
+  // behaviour; a style that wants blocks lying on their beds sets it, and a
+  // vertical cut that would stand a stone upright becomes a bed cut instead.
+  minAspect = null,
 }) {
   const leaves = [];
 
@@ -193,16 +197,24 @@ export function splitCell(cell, {
       || (horizontalChance !== 1 && lane(hash, 16) < verticalChance);
     if (vertical) {
       const mid = node.s0 + width * (0.35 + lane(hash, 24) * 0.3);
-      if (mid - node.s0 < minWidth || node.s1 - mid < minWidth) {
-        leaves.push(node);
+      const narrowest = Math.min(mid - node.s0, node.s1 - mid);
+      const upright = minAspect != null && narrowest < minAspect * height;
+      if (!upright) {
+        if (narrowest < minWidth) {
+          leaves.push(node);
+          return;
+        }
+        visit({ ...node, s1: mid }, depth + 1);
+        visit({ ...node, s0: mid }, depth + 1);
         return;
       }
-      visit({ ...node, s1: mid }, depth + 1);
-      visit({ ...node, s0: mid }, depth + 1);
-      return;
     }
 
-    const fraction = 0.4 + lane(hash, 24) * 0.2;
+    // Aspect-limited styles cut further from the middle, so two stacked
+    // leaves in neighbouring cells rarely share a bed line.
+    const fraction = minAspect != null
+      ? 0.3 + lane(hash, 24) * 0.4
+      : 0.4 + lane(hash, 24) * 0.2;
     const mid = node.v0 + (node.v1 - node.v0) * fraction;
     if ((mid - node.v0) * courseHeight < minHeight
       || (node.v1 - mid) * courseHeight < minHeight) {

@@ -165,14 +165,19 @@ export function angularSeparationDegrees(a, b) {
  */
 export const TIME_PRESET_ANCHORS = Object.freeze([
   Object.freeze({ preset: 'moonrise', hour: 0 }), // night
+  // Night holds from dusk to before dawn: anchored only at midnight, a 22:00
+  // sky was still 40 % golden hour and its clouds glowed pink in the dark.
+  Object.freeze({ preset: 'moonrise', hour: 4.5 }), // last of the night
   Object.freeze({ preset: 'stillmeadow', hour: 7 }), // soft morning
   Object.freeze({ preset: 'highfield', hour: 12 }), // full day
   Object.freeze({ preset: 'galewind', hour: 14.5 }), // bright, windy afternoon
   Object.freeze({ preset: 'lowsway', hour: 16.5 }), // low sun
   Object.freeze({ preset: 'emberfall', hour: 19 }), // golden hour
+  Object.freeze({ preset: 'moonrise', hour: 21 }), // nightfall
 ]);
 
-export const TIME_PRESET_NAMES = Object.freeze(TIME_PRESET_ANCHORS.map((a) => a.preset));
+/** Each anchored preset once (moonrise anchors the whole night). */
+export const TIME_PRESET_NAMES = Object.freeze([...new Set(TIME_PRESET_ANCHORS.map((a) => a.preset))]);
 
 /** The pair of anchors an hour sits between, and how far across it is. */
 function segmentFor(hour) {

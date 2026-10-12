@@ -82,8 +82,10 @@ export const CONSTRUCTION_MORTAR_PROFILES = Object.freeze({
   }),
   // Hairline seams in the references read as thin shadowed lines of the stone's
   // own hue, not as grey cement.
+  // Deep, warm shadow: the references read their joints as dark crevices
+  // between chamfered blocks, never as pale seams.
   'glade-sandstone': Object.freeze({
-    color: '#bd935f',
+    color: '#5a3f27',
     roughness: 1,
     metalness: 0,
   }),
@@ -104,9 +106,9 @@ export function mortarProfile(styleKey) {
  */
 const FACE_RECESS_BY_STYLE = Object.freeze({
   'rounded-fieldstone': 0.07,
-  // Behind the deepest recessed block (face relief reaches ~5 cm), so the
-  // core never shows in front of a stone; the 3–7 mm seams hide its depth.
-  'glade-sandstone': 0.075,
+  // Behind the deepest recessed block (face offsets reach ~5 cm) and below
+  // the wide chamfers, so each joint reads as a deep shadowed crevice.
+  'glade-sandstone': 0.11,
 });
 
 const styleConfigCache = new Map();

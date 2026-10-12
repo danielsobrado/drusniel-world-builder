@@ -45,9 +45,23 @@ export function planWallGrowth(record, arcTable, pathInterval) {
         const nodeCount = Math.min(profile.nodes, Math.max(2, Math.floor(height / (profile.leafRadius[1] * 1.5)) + 1));
         let previous = [root, 0.015];
         let connected = false;
+        // Angular growth: each node jogs sideways by a hashed step, mostly
+        // reversing direction, so the stem climbs in straight zig-zag runs.
+        let lateral = 0;
+        let heading = random() < 0.5 ? -1 : 1;
         for (let node = 0; node < nodeCount; node += 1) {
           const t = node / (nodeCount - 1);
-          const s = root + Math.sin(t * 4 + phase) * profile.spread * (0.25 + t * 0.75);
+          let s;
+          if (profile.zigzag > 0) {
+            if (node > 0) {
+              if (random() < 0.75) heading = -heading;
+              const jog = profile.zigzag * (0.45 + random() * 0.55);
+              lateral = Math.max(-profile.spread, Math.min(profile.spread, lateral + heading * jog));
+            }
+            s = root + lateral;
+          } else {
+            s = root + Math.sin(t * 4 + phase) * profile.spread * (0.25 + t * 0.75);
+          }
           const y = 0.07 + height * t;
           if (!clear(s, y, profile.leafRadius[1])) break;
           const range = [Math.min(previous[0], s) - 0.015, Math.max(previous[0], s) + 0.015];
@@ -56,6 +70,9 @@ export function planWallGrowth(record, arcTable, pathInterval) {
           const branch = Object.freeze({ from: Object.freeze(previous), to: Object.freeze([s, y]), rooted: !connected });
           let stemAttached = false;
           for (let leaf = 0; leaf < profile.leavesPerNode; leaf += 1) {
+            // Sparse styles leave bare stem between leaves; the draw is taken
+            // either way so the stream stays aligned.
+            if (random() > (profile.leafChance ?? 1) && leaf > 0) continue;
             const radius = profile.leafRadius[0] + random() * (profile.leafRadius[1] - profile.leafRadius[0]);
             const angle = random() * Math.PI * 2;
             const leafS = s + Math.cos(angle) * radius * 1.1;
