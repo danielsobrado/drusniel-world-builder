@@ -61,6 +61,7 @@
     "qa:workshop:locality": "node --test test/workshop-locality-config.test.js test/workshop-composition-locality.test.js test/workshop-relationship-spatial.test.js test/workshop-invalidation-locality.test.js",
     "qa:workshop:shapes": "node --test test/workshop-procedural-shapes.test.js test/workshop-shape-chemistry-details.test.js test/workshop-shape-review.test.js test/workshop-shape-interaction-review.test.js test/workshop-shape-polish.test.js test/workshop-shape-surface-ownership.test.js test/workshop-shape-roof-junctions.test.js test/workshop-shape-expansion.test.js test/workshop-shape-balcony.test.js",
     "qa:workshop:shapes:browser": "node scripts/run-workshop-shapes-qa.mjs",
+    "qa:workshop:walls": "node --test test/workshop-wall-config.test.js test/workshop-wall-compat.test.js test/workshop-wall-curves.test.js test/workshop-wall-surface.test.js",
     "qa:inventory": "node scripts/run-inventory-qa.mjs",
     "qa:construction:joints": "node scripts/run-construction-joint-width-qa.mjs",
     "qa:construction:relief": "node scripts/run-construction-stone-relief-qa.mjs",
