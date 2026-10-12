@@ -79,7 +79,16 @@ export function sunbeam(fx, ctx) {
         emissive: 6, heat: 1, coolSeconds: 2.5, opacity: 0.7, hold: 10, fadeOut: 6,
       });
     }
+    // The far end is what reads from the caster's eye: a radiant burst, a
+    // pillar of light standing where it lands, and a ring racing over the ground.
+    fx.burst('holy.flash', 1, { kind: 'point', center: to }, { sizeScale: 2.4 });
+    fx.burst('sun.spark', 70, { kind: 'sphere', center: to, radius: 0.3, speed: [4, 12], up: 0.4 });
+    fx.burst('holy.column', 1, { kind: 'point', center: addScaled(ground, UP, 3) }, { axisLength: 6, sizeScale: 1.3 });
+    fx.burst('holy.ground', 1, { kind: 'point', center: addScaled(ground, UP, 0.45) }, { sizeScale: 1.6, lifeScale: 0.6 });
+    fx.burst('sun.ground.ring', 1, { kind: 'point', center: addScaled(ground, UP, 0.5) });
   });
+  // Sparks flung sideways off the beam make its length read even end-on.
+  fx.stream('sun.spark', 0, 0.8, 160, { kind: 'line', from, to, jitter: 0.2, spread: 6, lift: [-1, 3] });
   fx.stream('holy.twinkle', 0, 1, 90, { kind: 'line', from, to, jitter: 0.5, spread: 0.6, lift: [0.2, 1] });
   fx.stream('sun.mote', 0, 0.9, 50, { kind: 'line', from, to, jitter: 0.3, spread: 1, lift: [0.3, 1.2] });
   // A helix of sparks winding along the beam.

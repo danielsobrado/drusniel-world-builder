@@ -175,6 +175,10 @@ export const ELEMENTAL_TYPES = Object.freeze({
     tiles: [TILE.GLOW, TILE.GLOW], ramp: RAMP.ACID, life: 0.3, size: 3.5, sizeEnd: 1.4, sizeEase: 'outExpo',
     heat: 0.95, heatEnd: 0.6, emissive: 12, fadeIn: 0, fadeOut: 0.3,
   },
+  'acid.puddle.glow': {
+    tiles: [TILE.GLOW, TILE.GLOW], orient: 'plane', ramp: RAMP.ACID, life: 6, size: 6.5, heat: 0.85,
+    heatEnd: 0.45, emissive: 3.5, opacity: 0.9, fadeIn: 0.03, fadeOut: 0.6,
+  },
   'acid.pop': {
     tiles: [TILE.RING_THIN, TILE.RING_THIN], ramp: RAMP.ACID, life: 0.18, size: 0.15, sizeEnd: 3,
     sizeEase: 'outQuart', heat: 0.8, heatEnd: 0.5, emissive: 4, fadeIn: 0, fadeOut: 0.3,
