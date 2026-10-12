@@ -147,6 +147,15 @@ export const MAGIC_TYPES = Object.freeze({
     sizeEnd: 2.4, sizeEase: 'outQuad', heat: 0.9, heatEnd: 0.5, emissive: 4, opacity: 0.75, fadeIn: 0.08,
     fadeOut: 0.4,
   },
+  'sun.spark': {
+    tiles: [TILE.STREAK, TILE.STREAK], orient: 'velocity', stretch: 0.05, aspect: 2, ramp: RAMP.HOLY,
+    life: [0.3, 0.7], size: [0.04, 0.08], heat: 1, heatEnd: 0.5, emissive: 26, fadeIn: 0, fadeOut: 0.5,
+    drag: 2.5, gravity: 3, cameraFade: false,
+  },
+  'sun.ground.ring': {
+    tiles: [TILE.RING_THIN, TILE.RING_THIN], orient: 'plane', ramp: RAMP.HOLY, life: 0.6, size: 1,
+    sizeEnd: 9, sizeEase: 'outQuart', heat: 0.95, heatEnd: 0.5, emissive: 7, fadeIn: 0, fadeOut: 0.3,
+  },
   'sun.mote': {
     tiles: [TILE.MOTE, TILE.MOTE], ramp: RAMP.HOLY, life: [0.6, 1.3], size: [0.06, 0.14], heat: 0.95,
     heatEnd: 0.4, emissive: 18, fadeIn: 0, fadeOut: 0.5, drag: 2, turbulence: 2.5, turbulenceScale: 0.7,
