@@ -1,5 +1,5 @@
 /*
- * Spell dock: six compact tiles on a light tray, matching the editor's tool
+ * Spell dock: pages of compact tiles on a light tray, matching the editor's tool
  * tiles (tokens in player/hud/gladeTheme.css). It springs up from the bottom
  * edge when casting becomes possible and slides away when it stops. A tile
  * inverts while its spell runs and an accent border drains over the cast;
@@ -75,6 +75,48 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 .spell-menu-slots {
   display: flex;
   gap: 4px;
+}
+
+/* Spell pages: Elements, then the grimoire's schools. One page shows at a time. */
+.spell-menu-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-right: 2px;
+}
+
+.spell-menu-tab {
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--glade-ink-faint, rgb(74 64 54 / 62%));
+  font: 800 9px/1.1 var(--glade-font, system-ui, sans-serif);
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.spell-menu-tab:hover,
+.spell-menu-tab:focus-visible {
+  outline: none;
+  background: rgb(96 76 52 / 8%);
+  color: var(--glade-ink, #4a4036);
+}
+
+.spell-menu-tab[aria-selected='true'] {
+  background: var(--glade-ink, #4a4036);
+  color: var(--glade-cream, #fff9ee);
+}
+
+.spell-menu-page {
+  display: flex;
+  gap: 4px;
+}
+
+.spell-menu-page[hidden] {
+  display: none;
 }
 
 .spell-slot {

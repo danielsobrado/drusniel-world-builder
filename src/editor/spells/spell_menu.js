@@ -1,9 +1,11 @@
 import { emitAudio } from '../_clod_shims/audio.js';
+import { grimoireGlyph } from './grimoire/grimoire_icons.js';
 import { defaultSpellConfig } from './spell_config.js';
 import { spellGlyph } from './spell_icons.js';
 
 const MISS_FLASH_MS = 280;
 const CAST_LABEL_MS = 1100;
+const PAGE_STORAGE_KEY = 'simcity-dnd.spell-dock.page';
 const SPELL_BUTTONS = Object.freeze([
   { id: 'fire', key: 1, method: 'playFire' },
   { id: 'water', key: 2, method: 'playWater' },
@@ -27,7 +29,23 @@ function stopUiPropagation(event) {
   event.stopPropagation();
 }
 
-function createSpellButton({ id, key, label, onClick }) {
+function readStoredPage() {
+  try {
+    return window.localStorage.getItem(PAGE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storePage(pageId) {
+  try {
+    window.localStorage.setItem(PAGE_STORAGE_KEY, pageId);
+  } catch {
+    // Private windows keep the page for this session only.
+  }
+}
+
+function createSpellButton({ id, key, label, glyph, onClick }) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'spell-slot';
@@ -36,14 +54,14 @@ function createSpellButton({ id, key, label, onClick }) {
   button.setAttribute('aria-label', `${label} spell, key ${key}`);
   button.setAttribute('aria-pressed', 'false');
   button.innerHTML = `
-    <span class="spell-slot__glyph">${spellGlyph(id)}</span>
+    <span class="spell-slot__glyph">${glyph}</span>
     <svg class="spell-slot__channel" viewBox="0 0 48 48" aria-hidden="true">
       <rect x="2" y="2" width="44" height="44" rx="13" pathLength="100"/>
     </svg>
     <kbd class="spell-slot__key">${key}</kbd>
     <span class="spell-slot__label"></span>
   `;
-  // Labels come from spells YAML, so they are set as text.
+  // Labels come from spells YAML and the grimoire catalog, so they are set as text.
   button.querySelector('.spell-slot__label').textContent = label;
   button.addEventListener('click', onClick);
   return button;
@@ -80,9 +98,41 @@ function playCastFeedback(button, durationMs) {
 }
 
 /**
- * The spell dock: six compact tiles on a light tray, dragged by its grip.
- * Casting from a slot and casting from the number keys (`cast`) share one
- * path, so both get the same ring, miss flash and cast sound.
+ * The page of the six elemental spells, from spells YAML and the VFX
+ * controller's play methods.
+ */
+function elementsPage(config, controller) {
+  return {
+    id: 'elements',
+    title: 'Elements',
+    spells: SPELL_BUTTONS.map((descriptor) => {
+      const entry = config[descriptor.id];
+      return {
+        id: descriptor.id,
+        label: entry.label,
+        glyph: spellGlyph(descriptor.id),
+        castDurationMs: entry.castDurationMs,
+        audio: { event: `spell.${descriptor.id}.cast`, volume: entry.audio.volume },
+        play: (durationMs) => {
+          const play = controller[descriptor.method];
+          return typeof play === 'function' && play(durationMs) !== false;
+        },
+      };
+    }),
+  };
+}
+
+/**
+ * The spell dock: compact tiles on a light tray, dragged by its grip, paged
+ * by tabs (or `[` and `]`). Casting from a slot and casting from the number
+ * keys (`castSlot`) share one path, so both get the same ring, miss flash and
+ * cast sound.
+ *
+ * @param {object} deps
+ * @param {object} [deps.config] spells YAML config
+ * @param {object} [deps.controller] elemental play methods
+ * @param {Array<{ id: string, title: string, spells: Array<{ id: string, label: string, castMs: number }> }>} [deps.extraPages]
+ * @param {(spellId: string) => boolean} [deps.castExtra] casts a spell from an extra page
  */
 export function createSpellMenu(deps = {}) {
   const config = deps.config ?? defaultSpellConfig;
@@ -92,15 +142,36 @@ export function createSpellMenu(deps = {}) {
   let missFlashTimer = 0;
   let dragOffset = null;
 
+  const pages = [
+    elementsPage(config, controller),
+    ...(deps.extraPages ?? []).map((page) => ({
+      id: page.id,
+      title: page.title,
+      spells: page.spells.map((spell) => ({
+        id: spell.id,
+        label: spell.label,
+        glyph: grimoireGlyph(spell.id),
+        castDurationMs: spell.castMs,
+        audio: null,
+        play: () => deps.castExtra?.(spell.id) === true,
+      })),
+    })),
+  ];
+  let activePage = Math.max(0, pages.findIndex((page) => page.id === readStoredPage()));
+
   root.replaceChildren();
   root.classList.add('spell-dock');
   root.setAttribute('aria-label', 'Spell menu');
 
   const grip = createGrip(config.menu.title);
-
+  const tabs = document.createElement('div');
+  tabs.className = 'spell-menu-tabs';
+  tabs.setAttribute('role', 'tablist');
   const slots = document.createElement('div');
   slots.className = 'spell-menu-slots';
   const buttons = new Map();
+  const pageSlots = [];
+  const tabButtons = [];
 
   const flashMiss = (button) => {
     window.clearTimeout(missFlashTimer);
@@ -113,14 +184,12 @@ export function createSpellMenu(deps = {}) {
   };
 
   const castSpell = (descriptor) => {
-    const entry = config[descriptor.id];
-    const button = buttons.get(descriptor.id);
-    if (!entry || !button) return false;
+    const button = buttons.get(descriptor.slotKey);
+    if (!button) return false;
 
-    window.clearTimeout(resetTimers.get(descriptor.id));
-    const play = controller[descriptor.method];
-    const fired = typeof play === 'function'
-      && play(entry.castDurationMs) !== false;
+    window.clearTimeout(resetTimers.get(descriptor.slotKey));
+    const fired = typeof descriptor.play === 'function'
+      && descriptor.play(descriptor.castDurationMs) !== false;
     if (!fired) {
       button.setAttribute('aria-pressed', 'false');
       flashMiss(button);
@@ -128,31 +197,64 @@ export function createSpellMenu(deps = {}) {
     }
 
     button.setAttribute('aria-pressed', 'true');
-    playCastFeedback(button, entry.castDurationMs);
-    emitAudio(`spell.${descriptor.id}.cast`, {
-      volume: entry.audio.volume,
-      durationMs: entry.castDurationMs,
-    });
-    resetTimers.set(descriptor.id, window.setTimeout(() => {
+    playCastFeedback(button, descriptor.castDurationMs);
+    if (descriptor.audio) {
+      emitAudio(descriptor.audio.event, {
+        volume: descriptor.audio.volume,
+        durationMs: descriptor.castDurationMs,
+      });
+    }
+    resetTimers.set(descriptor.slotKey, window.setTimeout(() => {
       button.setAttribute('aria-pressed', 'false');
-      resetTimers.delete(descriptor.id);
-    }, entry.castDurationMs));
+      resetTimers.delete(descriptor.slotKey);
+    }, descriptor.castDurationMs));
     return true;
   };
 
-  for (const descriptor of SPELL_BUTTONS) {
-    const entry = config[descriptor.id];
-    const button = createSpellButton({
-      id: descriptor.id,
-      key: descriptor.key,
-      label: entry.label,
-      onClick: () => castSpell(descriptor),
+  const showPage = (index) => {
+    activePage = ((index % pages.length) + pages.length) % pages.length;
+    pageSlots.forEach((group, pageIndex) => {
+      group.hidden = pageIndex !== activePage;
     });
-    buttons.set(descriptor.id, button);
-    slots.append(button);
-  }
+    tabButtons.forEach((tab, pageIndex) => {
+      tab.setAttribute('aria-selected', pageIndex === activePage ? 'true' : 'false');
+    });
+    storePage(pages[activePage].id);
+  };
 
-  root.append(grip, slots);
+  pages.forEach((page, pageIndex) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'spell-menu-tab';
+    tab.setAttribute('role', 'tab');
+    tab.title = `${page.title} ([ / ] to switch)`;
+    tab.textContent = page.title;
+    tab.addEventListener('click', () => showPage(pageIndex));
+    tabButtons.push(tab);
+    tabs.append(tab);
+
+    const group = document.createElement('div');
+    group.className = 'spell-menu-page';
+    group.dataset.page = page.id;
+    page.spells.forEach((descriptor, slotIndex) => {
+      // Pages may share a spell id (Elements and Evocation both hold a fireball).
+      descriptor.slotKey = `${page.id}:${descriptor.id}`;
+      const button = createSpellButton({
+        id: descriptor.id,
+        key: slotIndex + 1,
+        label: descriptor.label,
+        glyph: descriptor.glyph,
+        onClick: () => castSpell(descriptor),
+      });
+      buttons.set(descriptor.slotKey, button);
+      group.append(button);
+    });
+    pageSlots.push(group);
+    slots.append(group);
+  });
+  showPage(activePage);
+
+  root.append(grip, tabs, slots);
   root.addEventListener('pointerdown', stopUiPropagation);
   root.addEventListener('click', stopUiPropagation);
 
@@ -190,17 +292,35 @@ export function createSpellMenu(deps = {}) {
 
   grip.addEventListener('pointerdown', onDragStart);
 
+  const findDescriptor = (spellId) => {
+    for (const page of pages) {
+      const descriptor = page.spells.find(({ id }) => id === spellId);
+      if (descriptor) return descriptor;
+    }
+    return null;
+  };
+
   return {
     cast: (spellId) => {
-      const descriptor = SPELL_BUTTONS.find(({ id }) => id === spellId);
+      const descriptor = findDescriptor(spellId);
       return descriptor ? castSpell(descriptor) : false;
     },
-    castFire: () => castSpell(SPELL_BUTTONS[0]),
-    castWater: () => castSpell(SPELL_BUTTONS[1]),
-    castAir: () => castSpell(SPELL_BUTTONS[2]),
-    castEarth: () => castSpell(SPELL_BUTTONS[3]),
-    castLightning: () => castSpell(SPELL_BUTTONS[4]),
-    castFireball: () => castSpell(SPELL_BUTTONS[5]),
+    /** Casts slot `index` (0-based) of the page on show. */
+    castSlot: (index) => {
+      const descriptor = pages[activePage].spells[index];
+      return descriptor ? castSpell(descriptor) : false;
+    },
+    hasSlot: (index) => Boolean(pages[activePage].spells[index]),
+    cyclePage: (delta) => showPage(activePage + delta),
+    get activePageId() {
+      return pages[activePage].id;
+    },
+    castFire: () => castSpell(pages[0].spells[0]),
+    castWater: () => castSpell(pages[0].spells[1]),
+    castAir: () => castSpell(pages[0].spells[2]),
+    castEarth: () => castSpell(pages[0].spells[3]),
+    castLightning: () => castSpell(pages[0].spells[4]),
+    castFireball: () => castSpell(pages[0].spells[5]),
     dispose() {
       for (const timer of resetTimers.values()) window.clearTimeout(timer);
       resetTimers.clear();
