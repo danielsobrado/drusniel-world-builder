@@ -18,10 +18,18 @@ def tile(mat):
     return b
 
 
+# Paving stands this far proud of the ground, and reaches this far past its own cell
+# into its neighbours', so slabs on a slope meet without a step between them.
+PAVING_PROUD = 0.03
+PAVING_LAP = 0.03
+
+
 def paving():
-    """2 m paving slab centred on its origin; its top sits 5 cm proud of the ground."""
+    """2 m paving slab centred on its origin. Its sides are setts too, so a street's
+    edge reads as stones bedded in the ground rather than a plate laid on it."""
     b = MeshBuilder()
-    b.box((-1, -1, -0.3), (1, 1, 0.05), 'stone', mats={'+z': 'cobble'}, skip=('-z',))
+    r = 1 + PAVING_LAP
+    b.box((-r, -r, -0.3), (r, r, PAVING_PROUD), 'cobble', skip=('-z',), bevel=0)
     return b
 
 

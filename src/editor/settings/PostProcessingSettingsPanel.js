@@ -19,6 +19,7 @@ const TOPOLOGY_RANGE_PATHS = new Set([
   'screenSpaceShafts.resolutionScale',
   'screenSpaceShafts.samples',
   'depthOfField.taps',
+  'ambientOcclusion.resolutionScale',
 ]);
 
 const SECTIONS = Object.freeze([
@@ -80,6 +81,14 @@ const SECTIONS = Object.freeze([
     ['Decay', 'screenSpaceShafts.decay', 'range', 0.5, 1, 0.001, 3],
     ['High-sun fade start (°)', 'screenSpaceShafts.highSunFadeStartDegrees', 'range', 0, 90, 1, 0],
     ['High-sun fade end (°)', 'screenSpaceShafts.highSunFadeEndDegrees', 'range', 0, 90, 1, 0],
+  ]],
+  ['Ambient occlusion', [
+    ['Enabled', 'ambientOcclusion.enabled', 'boolean'],
+    ['Resolution scale', 'ambientOcclusion.resolutionScale', 'range', 0.25, 1, 0.05, 2],
+    ['Samples', 'ambientOcclusion.samples', 'range', 4, 16, 1, 0],
+    ['Radius (m)', 'ambientOcclusion.radius', 'range', 0.05, 2, 0.05, 2],
+    ['Thickness', 'ambientOcclusion.thickness', 'range', 0.1, 4, 0.05, 2],
+    ['Intensity', 'ambientOcclusion.intensity', 'range', 0, 1, 0.01, 2],
   ]],
   ['Depth of field', [
     ['Enabled', 'depthOfField.enabled', 'boolean'],

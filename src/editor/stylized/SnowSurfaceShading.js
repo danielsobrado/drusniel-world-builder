@@ -27,7 +27,7 @@ import {
 } from 'three/tsl';
 import { latticeHashNode } from '../weather/wind/windNoise.js';
 import { directionFromAngles } from './StylizedGodRaysPostProcess.js';
-import { skyLightUniforms } from './sky/skyLight.js';
+import { skyLightUniforms, snowLightUniforms } from './sky/skyLight.js';
 import { resolveSnowSurfaceConfig } from './SnowSurfaceConfig.js';
 
 /**
@@ -137,7 +137,9 @@ export function createSnowSurfaceNodes({
   })();
 
   const shade = float(1).sub(smoothstep(0.05, 0.6, max(dot(normal, sun), 0)));
-  const backscatter = snow.mul(shade).mul(0.35);
+  // How deep and how blue the shade goes is the place's (snowLightUniforms):
+  // dry cold powder falls into deep blue, damp snow into shallow grey.
+  const backscatter = snow.mul(shade).mul(snowLightUniforms.shade);
   // Backlit powder transmits a small blue lobe. Use direct light radiance so
   // ambient light alone cannot make the ground glow when the sun is gone.
   const thickness = mix(float(1), float(0.35), pathMask.clamp(0, 1));
@@ -148,9 +150,13 @@ export function createSnowSurfaceNodes({
   const subsurface = transmissionTint.mul(lobe).mul(settings.subsurfaceStrength).mul(snow);
 
   return {
-    /** Cool blue on snow turned from the sun. */
+    /**
+     * Snow's albedo for this place — kept below white so the lit side still
+     * models — and its shade on faces turned from the sun.
+     */
     apply(color) {
-      return mix(color, color.mul(vec3(0.78, 0.88, 1.08)), backscatter);
+      const albedo = mix(color, color.mul(snowLightUniforms.brightness), snow);
+      return mix(albedo, albedo.mul(snowLightUniforms.shadeTint), backscatter);
     },
     /**
      * Sparkle, added as emission so it survives the lit shading — and so it

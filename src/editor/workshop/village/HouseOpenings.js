@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { archedPanel, beveledBox, leaf } from '../ProceduralWorkshopGeometry.js';
+import { FOLIAGE_BASE_COLOR } from '../ProceduralWorkshopMaterials.js';
 import { tagOpeningGeometry } from '../ProceduralWorkshopSemantics.js';
 import { facadeBeam, facadeMatrix, facadePoint } from './HouseFacade.js';
 
@@ -168,6 +169,15 @@ function shutterPair(facade, frame, d) {
   return shutters;
 }
 
+/** Window-box blossoms as linear colour: geranium, rose, cream and violet, weathered rather than bright. */
+const BLOSSOMS = Object.freeze([[0.55, 0.07, 0.05], [0.6, 0.22, 0.28], [0.72, 0.66, 0.5], [0.3, 0.16, 0.42]]);
+const FOLIAGE_BASE = new THREE.Color(FOLIAGE_BASE_COLOR);
+
+/** A blossom's vertex colour: the foliage material multiplies its green base in, so divide it out. */
+function blossomColour(rgb) {
+  return [rgb[0] / FOLIAGE_BASE.r, rgb[1] / FOLIAGE_BASE.g, rgb[2] / FOLIAGE_BASE.b];
+}
+
 function flowerBox(kit, facade, frame, d) {
   const width = Math.max(0.45, frame.width * 0.95);
   const y = frame.bottom - 0.16;
@@ -188,6 +198,14 @@ function flowerBox(kit, facade, frame, d) {
       position: facadePoint(facade, u, y + 0.12 + kit.random() * 0.1, d + 0.1 + kit.random() * 0.08),
       rotation: [kit.random(), kit.random() + facade.yaw, kit.random() * Math.PI],
       color: [0.36 + kit.random() * 0.2, 0.55 + kit.random() * 0.2, 0.25],
+    })]);
+    // Every plant is in flower, as the kit towns' window boxes are.
+    const blossom = BLOSSOMS[(index + Math.floor(kit.random() * 2)) % BLOSSOMS.length];
+    pieces.push(['foliage', leaf({
+      radius: 0.07,
+      position: facadePoint(facade, u, y + 0.21 + kit.random() * 0.06, d + 0.17),
+      rotation: [Math.PI / 2 - 0.5, facade.yaw, kit.random() * Math.PI],
+      color: blossomColour(blossom),
     })]);
   }
   return pieces;
@@ -242,12 +260,19 @@ export function buildWindow(kit, facade, opening, {
   emit(kit, pieces, { ...opening, door: false });
 }
 
-/** A ledged plank door with strap hinges, set in a timber frame or a dressed stone void. */
+/**
+ * A ledged plank door with strap hinges, set in a timber frame or a dressed
+ * stone void. The recipe's `openDoorId` door is built open: frame, dressings,
+ * step and void, but no leaf.
+ */
 export function buildDoor(kit, facade, opening, { wall = 'plaster', thickness = 0.22, step = true } = {}) {
   const frame = frameOf(facade, opening);
   const d = wall === 'stone' ? -thickness * 0.55 : 0.03;
   const pieces = [];
-  if (frame.arched) {
+  const open = Boolean(opening.componentId) && opening.componentId === kit.recipe.openDoorId;
+  if (open) {
+    // No leaf, no hinges: the doorway is left clear.
+  } else if (frame.arched) {
     pieces.push(['wood', panel(facade, frame, d, 0.06)]);
   } else {
     const boards = Math.max(3, Math.round(frame.width / 0.2));
@@ -264,7 +289,7 @@ export function buildDoor(kit, facade, opening, { wall = 'plaster', thickness = 
       })]);
     }
   }
-  for (const ratio of [0.2, 0.72]) {
+  for (const ratio of open ? [] : [0.2, 0.72]) {
     const y = frame.bottom + (frame.springY - frame.bottom) * ratio;
     pieces.push(['metal', facadeBeam(
       facade,
@@ -274,14 +299,16 @@ export function buildDoor(kit, facade, opening, { wall = 'plaster', thickness = 
       { proud: 0.02 },
     )]);
   }
-  pieces.push(['metal', beveledBox({
-    width: 0.06,
-    height: 0.14,
-    depth: 0.05,
-    position: facadePoint(facade, frame.u + frame.width * 0.32, frame.bottom + 1.0, d + 0.05),
-    rotation: [0, facade.yaw, 0],
-    detail: 1,
-  })]);
+  if (!open) {
+    pieces.push(['metal', beveledBox({
+      width: 0.06,
+      height: 0.14,
+      depth: 0.05,
+      position: facadePoint(facade, frame.u + frame.width * 0.32, frame.bottom + 1.0, d + 0.05),
+      rotation: [0, facade.yaw, 0],
+      detail: 1,
+    })]);
+  }
   if (wall === 'stone') {
     stoneDressings(kit, facade, frame, thickness, { sill: false });
   } else {

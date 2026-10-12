@@ -4,9 +4,12 @@
  *
  * Every set in `SETTLEMENT_SURFACE_SETS` comes from Poly Haven
  * (https://polyhaven.com, CC0 1.0 Universal): colour, OpenGL normal and the
- * packed AO/roughness/metalness map, taken at 1K
- * and reduced to 512 px WebP, which is all a street or a wall needs at the
- * texel density they are drawn at. Outputs land in
+ * packed AO/roughness/metalness map, taken at 1K. By default a set is reduced
+ * to 512 px WebP and its colour softened by a median pass, to sit with the
+ * painted grass. Sets a walker sees from a stride away — building surfaces and
+ * street cobbles — keep 1K colour and normals and their photographic detail
+ * (`size`, `median: 0`), as close-up assets need; their packed map stays at
+ * 512 px, where roughness and occlusion lose nothing. Outputs land in
  * `public/assets/textures/settlement/<set>-{color,normal,arm}.webp`; the
  * sources are listed in THIRD_PARTY_NOTICES.md.
  *
@@ -38,17 +41,21 @@ async function download(url) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-async function fetchSurface(name, assetId, outDir, { neutralMean = 0, saturation = PAINTERLY_SATURATION, contrast = 1 } = {}) {
+async function fetchSurface(name, assetId, outDir, {
+  neutralMean = 0, saturation = PAINTERLY_SATURATION, contrast = 1, size = SIZE, median = PAINTERLY_MEDIAN,
+} = {}) {
   const files = JSON.parse((await download(`https://api.polyhaven.com/files/${assetId}`)).toString('utf8'));
   for (const [suffix, map] of Object.entries(MAPS)) {
     const url = files[map]?.['1k']?.jpg?.url;
     if (!url) throw new Error(`Poly Haven asset ${assetId} has no 1K ${map} map.`);
     const output = path.join(outDir, `${name}-${suffix}.webp`);
-    let image = sharp(await download(url)).resize(SIZE, SIZE, { kernel: 'lanczos3' });
+    const side = suffix === 'arm' ? Math.min(size, SIZE) : size;
+    let image = sharp(await download(url)).resize(side, side, { kernel: 'lanczos3' });
     // The world's grass and trees are painted, not photographed. A median pass
     // takes the camera grain out of a surface and keeps its shapes — stones stay
     // stones, the speckle between them goes — so paving sits in the same picture.
-    if (suffix === 'color') image = image.median(PAINTERLY_MEDIAN);
+    // Sets seen up close (`median: 0`) keep their photographic detail instead.
+    if (suffix === 'color' && median > 0) image = image.median(median);
     // A surface its material tints is stored neutral at a fixed mean brightness,
     // so the tint lands as authored instead of a shade darker.
     if (suffix === 'color' && neutralMean > 0) {

@@ -82,12 +82,15 @@ function pack(context, { arcRange, seedOffset = 0, courseHeight = context.style.
 }
 
 test('sandstone crowns retain a partial course below its nominal centre', () => {
-  const context = setup({ height: 0.8, key: 'glade-sandstone' });
+  const style = constructionStyle('glade-sandstone');
+  // A 0.3 m slice of the band above the footing, well below that band's centre.
+  const bodyTop = style.courseHeight * style.footing.heightRatio + 0.3;
+  const context = setup({ height: bodyTop + style.coping.height, key: 'glade-sandstone' });
   const { stones } = pack(context);
   const crown = stones.filter((stone) => stone.category === 'field' && stone.courseIndex === 1);
-  assert.ok(crown.length > 0, 'the 0.16 m crown slice must survive');
-  assert.ok(crown.some((stone) => Math.abs(stone.support.top - 0.56) < 1e-9));
-  assert.ok(crown.every((stone) => stone.support.top <= 0.56 + 1e-9));
+  assert.ok(crown.length > 0, 'the 0.3 m crown slice must survive');
+  assert.ok(crown.some((stone) => Math.abs(stone.support.top - bodyTop) < 1e-9));
+  assert.ok(crown.every((stone) => stone.support.top <= bodyTop + 1e-9));
 });
 
 test('bounded course fitting seats low sandstone caps without thin crown remnants', () => {

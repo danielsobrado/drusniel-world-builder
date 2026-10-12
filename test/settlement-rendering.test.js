@@ -299,8 +299,10 @@ test('every fronted house of every style knows its door, and its recipe puts the
         doors += 1;
         assert.ok(door.width >= 0.8 && door.height >= 1.8 && door.z > 0, `${style.key} ${kind} ${variant}`);
         assert.ok(Math.abs(door.x) < entry.footprint[0] / 2);
-        assert.deepEqual(Object.keys(buildingRecipe(style, kind, variant).componentTransforms), [door.id]);
-        return assert.equal(buildingRecipe(style, kind, variant, { openDoor: false }).componentTransforms, undefined);
+        // The door stands open as a clear void: the recipe names it, nothing is shrunk.
+        assert.equal(buildingRecipe(style, kind, variant).openDoorId, door.id);
+        assert.equal(buildingRecipe(style, kind, variant).componentTransforms, undefined);
+        return assert.equal(buildingRecipe(style, kind, variant, { openDoor: false }).openDoorId, undefined);
       });
     }
   }

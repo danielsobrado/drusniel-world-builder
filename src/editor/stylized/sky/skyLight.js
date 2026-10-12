@@ -15,6 +15,37 @@ export const skyLightUniforms = {
   sunColor: uniform(new THREE.Color(1, 1, 1)),
 };
 
+/**
+ * How snow takes the light in this place (regionalSkyLook): `brightness`
+ * scales its albedo so the lit side keeps headroom below white, `shade` is how
+ * far faces turned from the sun fall into shade, `shadeTint` that shade's colour
+ * (grey for damp snow, cold blue for dry powder).
+ */
+export const snowLightUniforms = {
+  brightness: uniform(0.82),
+  shade: uniform(0.35),
+  shadeTint: uniform(new THREE.Color(0.78, 0.88, 1.08)),
+};
+const SNOW_GREY_SHADE = [0.84, 0.86, 0.9];
+const SNOW_BLUE_SHADE = [0.66, 0.8, 1.1];
+
+/** Snow's light for `look` (snowBrightness, snowShade, snowBlue). */
+export function snowLightFor(look) {
+  const blue = Math.max(0, Math.min(1, look.snowBlue ?? 0.6));
+  return {
+    brightness: look.snowBrightness ?? 0.82,
+    shade: look.snowShade ?? 0.35,
+    shadeTint: SNOW_GREY_SHADE.map((grey, i) => grey + (SNOW_BLUE_SHADE[i] - grey) * blue),
+  };
+}
+
+export function updateSnowLight(look) {
+  const { brightness, shade, shadeTint } = snowLightFor(look);
+  snowLightUniforms.brightness.value = brightness;
+  snowLightUniforms.shade.value = shade;
+  snowLightUniforms.shadeTint.value.setRGB(shadeTint[0], shadeTint[1], shadeTint[2]);
+}
+
 const base = new THREE.Color();
 const current = new THREE.Color();
 

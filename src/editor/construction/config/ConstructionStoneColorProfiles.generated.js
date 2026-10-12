@@ -158,18 +158,18 @@ export const CONSTRUCTION_STONE_COLOR_PROFILES = freeze({
     "warmChance": 0.6,
     "neutralChance": 0.4,
     "value": {
-      "min": 0.9,
-      "max": 1.06
+      "min": 0.86,
+      "max": 1.04
     },
     "warm": [
       1.05,
-      0.97,
-      0.9
+      0.96,
+      0.88
     ],
     "cool": [
       1,
-      0.99,
-      0.975
+      0.98,
+      0.95
     ],
     "outlier": {
       "chance": 0.08,
@@ -193,9 +193,9 @@ export const CONSTRUCTION_STONE_COLOR_PROFILES = freeze({
       "span": 2.4,
       "rise": 1.8,
       "pale": [
-        0.88,
-        0.92,
-        0.99
+        0.97,
+        0.9,
+        0.82
       ],
       "ochre": [
         0.78,

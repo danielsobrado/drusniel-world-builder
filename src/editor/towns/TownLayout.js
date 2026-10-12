@@ -23,6 +23,8 @@ const STORY = 3;
 const DOOR_CENTRE = Object.freeze([0.42, 1.04, 0]);
 const FENCE_SEGMENT = 2;
 const PAVING_MODULE = 'Paving_Stone';
+/** Ground samples under a paving slab, inside its 2 m square whichever way it turns. */
+const PAVING_CORNERS = Object.freeze([[0.7, 0.7], [0.7, -0.7], [-0.7, 0.7], [-0.7, -0.7]]);
 
 function rotate(x, z, angle) {
   const cos = Math.cos(angle);
@@ -99,6 +101,17 @@ export class TownLayoutBuilder {
   groundAt(x, z) {
     const height = this.sampleHeight(this.anchor.x + x, this.anchor.z + z);
     return Number.isFinite(height) ? height : 0;
+  }
+
+  /**
+   * Where a flat 2 m paving slab sits: on the lowest ground under it, so on a
+   * slope it never stands proud as a plate. The ground runs over its uphill
+   * edge instead, as dirt does over setts.
+   */
+  pavingHeight(x, z) {
+    let low = this.groundAt(x, z);
+    for (const [dx, dz] of PAVING_CORNERS) low = Math.min(low, this.groundAt(x + dx, z + dz));
+    return low;
   }
 
   addBuilding(building, index) {
@@ -203,7 +216,7 @@ export class TownLayoutBuilder {
       .forEach((prop, index) => this.addProp(prop, props + index));
     for (const tile of planPaving(this.plan)) {
       const z = -tile.z;
-      this.addPart(PAVING_MODULE, [tile.x, this.groundAt(tile.x, z), z], Math.PI - tile.yaw);
+      this.addPart(PAVING_MODULE, [tile.x, this.pavingHeight(tile.x, z), z], Math.PI - tile.yaw);
     }
     const parts = new Map([...this.parts].map(([module, values]) => [module, Float32Array.from(values)]));
     const partSeeds = new Map([...this.seeds].map(([module, values]) => [module, Float32Array.from(values)]));

@@ -5,6 +5,7 @@ export const POST_PROCESSING_EFFECT_KEYS = Object.freeze([
   'sharpen',
   'ssr',
   'screenSpaceShafts',
+  'ambientOcclusion',
   'depthOfField',
   'vignette',
   'grain',
@@ -68,6 +69,12 @@ export function createPostProcessingTopologySignature(settings) {
     ? Math.max(8, Math.min(48, Math.round(settings.screenSpaceShafts.samples)))
     : 'off';
   signature += `|shaftSamples:${shaftSamples}`;
+
+  const aoEnabled = enabled && settings?.ambientOcclusion?.enabled === true;
+  const aoScale = aoEnabled
+    ? topologyScale(settings.ambientOcclusion.resolutionScale, 0.5, 0.25, 1)
+    : 'off';
+  signature += `|aoScale:${aoScale}`;
 
   const dofTaps = enabled && settings?.depthOfField?.enabled === true
     ? Math.max(4, Math.min(32, Math.round(settings.depthOfField.taps ?? 16)))

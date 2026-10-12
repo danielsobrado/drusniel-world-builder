@@ -14,14 +14,16 @@
  * Pure data.
  */
 
-export const ROLE = Object.freeze({ other: 0, stone: 1, timber: 2, roof: 3, plaster: 4, banner: 5 });
+export const ROLE = Object.freeze({ other: 0, stone: 1, timber: 2, roof: 3, plaster: 4, banner: 5, paving: 6 });
 
 const DEFAULT = Object.freeze({ role: ROLE.other, normal: 1, cavity: 0.2, parallax: 0, gain: 1 });
 
 export const SURFACES = Object.freeze({
   M_stone: { role: ROLE.stone, normal: 2.2, cavity: 0.75, parallax: 0.035 },
   M_stone_ashlar: { role: ROLE.stone, normal: 1.8, cavity: 0.6, parallax: 0.02 },
-  M_cobble: { role: ROLE.other, normal: 2.0, cavity: 0.7, parallax: 0.03 },
+  // One tooled block per piece: its chamfer and tone draw it, not joints in the texture.
+  M_stone_dressed: { role: ROLE.stone, normal: 1.3, cavity: 0.3, parallax: 0 },
+  M_cobble: { role: ROLE.paving, normal: 2.0, cavity: 0.7, parallax: 0.03 },
   M_roof: { role: ROLE.roof, normal: 2.0, cavity: 0.7, parallax: 0.025 },
   M_roof_terracotta: { role: ROLE.roof, normal: 1.6, cavity: 0.55, parallax: 0.02 },
   M_thatch: { role: ROLE.roof, normal: 1.6, cavity: 0.5, parallax: 0.02 },

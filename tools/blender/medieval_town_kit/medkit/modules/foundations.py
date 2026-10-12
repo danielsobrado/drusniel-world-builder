@@ -18,14 +18,14 @@ BURY = 0.4
 def plinth(height):
     b = MeshBuilder()
     b.box((0, -T - 0.18, -BURY), (GRID, T, height - 0.08), 'stone', skip=('-x', '+x', '-z'))
-    b.box((0, -T - 0.24, height - 0.08), (GRID, -T + 0.05, height), 'stone', skip=('-x', '+x'))
+    b.box((0, -T - 0.24, height - 0.08), (GRID, -T + 0.05, height), 'stone_dressed', skip=('-x', '+x'))
     return b
 
 
 def plinth_corner(height):
     b = MeshBuilder()
     b.box((-T - 0.18, -T - 0.18, -BURY), (T, T, height - 0.08), 'stone', skip=('-z',))
-    b.box((-T - 0.24, -T - 0.24, height - 0.08), (T, T, height), 'stone', bevel=0)
+    b.box((-T - 0.24, -T - 0.24, height - 0.08), (T, T, height), 'stone_dressed', bevel=0)
     return b
 
 
@@ -38,27 +38,28 @@ def entry_steps(height, width=1.5):
     face = -T - 0.18
     for i in range(count):
         top = height - i * rise
-        b.box((x0, face - (i + 1) * STEP_RUN, -BURY), (x1, face, top), 'stone',
+        b.box((x0, face - (i + 1) * STEP_RUN, -BURY), (x1, face, top), 'stone_dressed',
               skip=('-z',) if i else ())
     for x in (x0 - 0.22, x1):
-        b.box((x, face - count * STEP_RUN, -BURY), (x + 0.22, face, height + 0.1), 'stone',
+        b.box((x, face - count * STEP_RUN, -BURY), (x + 0.22, face, height + 0.1), 'stone_dressed',
               skip=('-z',))
     return b
 
 
-def quoins(story=STORY, course=0.375):
-    """Long-and-short corner stones; arms run along +X and +Y walls, exterior on -X/-Y."""
+def quoins(story=STORY, course=0.5):
+    """Long-and-short dressed corner stones; arms run along +X and +Y walls, exterior on -X/-Y.
+    Big and pale against the rubble, as the corners of a hold's stone houses are."""
     b = MeshBuilder()
     out = -T - 0.08
     b.box((out + 0.03, out + 0.03, 0), (T, T, story), 'stone', bevel=0, skip=('-z', '+z'))
     for k in range(int(story / course)):
         z0, z1 = k * course + 0.01, (k + 1) * course - 0.01
         if k % 2 == 0:
-            b.box((out, out, z0), (0.62, -T + 0.02, z1), 'stone')
-            b.box((out, out, z0), (-T + 0.02, 0.3, z1), 'stone')
+            b.box((out, out, z0), (0.5, -T + 0.02, z1), 'stone_dressed')
+            b.box((out, out, z0), (-T + 0.02, 0.28, z1), 'stone_dressed')
         else:
-            b.box((out, out, z0), (0.3, -T + 0.02, z1), 'stone')
-            b.box((out, out, z0), (-T + 0.02, 0.62, z1), 'stone')
+            b.box((out, out, z0), (0.28, -T + 0.02, z1), 'stone_dressed')
+            b.box((out, out, z0), (-T + 0.02, 0.5, z1), 'stone_dressed')
     return b
 
 

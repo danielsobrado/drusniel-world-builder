@@ -46,13 +46,45 @@ export function addStone(target, recipe, params, stableIndex, heightRatio, categ
   return shaped;
 }
 
+/** A run narrower than this beside an opening is left as void rather than a sliver stone. */
+const MIN_RUN_WIDTH = MIN_COURSE_STONE_WIDTH * 0.5;
+
+/**
+ * The stretches of one course left between its openings, along the wall.
+ *
+ * A course whose centre line crosses an opening stops exactly at its reveal.
+ * Packing the full span and dropping stones whose centre fell inside an
+ * opening left every stone straddling a jamb half in the void, so window and
+ * door edges read as ragged steps.
+ */
+function courseRuns(width, y, openings) {
+  const half = width / 2;
+  const cuts = openings
+    .map((opening) => {
+      const halfWidth = openingHalfWidth(opening, y);
+      return halfWidth > 0 ? [opening.centerX - halfWidth, opening.centerX + halfWidth] : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a[0] - b[0]);
+  const runs = [];
+  let cursor = -half;
+  for (const [start, end] of cuts) {
+    if (start > cursor) runs.push([cursor, Math.min(start, half)]);
+    cursor = Math.max(cursor, end);
+    if (cursor >= half) break;
+  }
+  if (cursor < half) runs.push([cursor, half]);
+  return runs.filter(([start, end]) => end - start >= MIN_RUN_WIDTH);
+}
+
 /**
  * Lay packed field-stone courses along one planar wall.
  *
  * The wall runs along its local X, centred on (`centerX`, `centerZ`) and turned
  * by `yaw`; courses start at y = 0. `openings` are in the same along-wall
- * coordinate, and stones whose centre falls inside one are omitted so the
- * opening is a real void rather than a panel over solid masonry.
+ * coordinate: a course crossing one is packed as separate runs that stop at
+ * its reveal, so the opening is a real, clean-edged void rather than a panel
+ * over solid masonry.
  */
 export function buildWallCourses(recipe, {
   width = recipe.width,
@@ -79,13 +111,20 @@ export function buildWallCourses(recipe, {
 
   for (let course = 0; course < courses; course += 1) {
     const y = (course + 0.5) * actualCourseHeight;
-    const { stones, joints } = packCourse({
-      span: width,
-      targetWidth: targetStoneWidth,
-      minWidth: MIN_COURSE_STONE_WIDTH,
-      random,
-      forbiddenJoints: previousJoints,
-    });
+    const stones = [];
+    const joints = [];
+    for (const [start, end] of courseRuns(width, y, openings)) {
+      const middle = (start + end) / 2;
+      const run = packCourse({
+        span: end - start,
+        targetWidth: targetStoneWidth,
+        minWidth: MIN_COURSE_STONE_WIDTH,
+        random,
+        forbiddenJoints: previousJoints.filter((joint) => joint > start && joint < end).map((joint) => joint - middle),
+      });
+      for (const stone of run.stones) stones.push({ center: stone.center + middle, width: stone.width });
+      for (const joint of run.joints) joints.push(joint + middle);
+    }
     previousJoints = joints;
 
     if (stones.length > 256) {
@@ -93,25 +132,20 @@ export function buildWallCourses(recipe, {
     }
 
     for (const stone of stones) {
-      const insideOpening = openings.some((opening) => (
-        isInsideOpening(opening, stone.center, y, stone.width / 2)
-      ));
-      if (!insideOpening) {
-        const inset = 0.014 + random() * 0.016;
-        const shaped = addStone(geometries, recipe, {
-          width: Math.max(0.12, stone.width - inset),
-          height: Math.max(0.12, actualCourseHeight - inset * 0.72),
-          depth: depth * (0.96 + random() * 0.025),
-          position: [
-            centerX + Math.cos(yaw) * stone.center,
-            y + (random() - 0.5) * 0.028,
-            centerZ - Math.sin(yaw) * stone.center,
-          ],
-          rotation: [0, yaw + (random() - 0.5) * 0.012, 0],
-        }, stableIndex, y / height);
-        // Facade space on a planar wall is simply the along-wall coordinate.
-        relief?.record(stone.center, y, shaped.protrusion);
-      }
+      const inset = 0.014 + random() * 0.016;
+      const shaped = addStone(geometries, recipe, {
+        width: Math.max(0.12, stone.width - inset),
+        height: Math.max(0.12, actualCourseHeight - inset * 0.72),
+        depth: depth * (0.96 + random() * 0.025),
+        position: [
+          centerX + Math.cos(yaw) * stone.center,
+          y + (random() - 0.5) * 0.028,
+          centerZ - Math.sin(yaw) * stone.center,
+        ],
+        rotation: [0, yaw + (random() - 0.5) * 0.012, 0],
+      }, stableIndex, y / height);
+      // Facade space on a planar wall is simply the along-wall coordinate.
+      relief?.record(stone.center, y, shaped.protrusion);
       stableIndex += 1;
     }
   }

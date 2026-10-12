@@ -46,6 +46,9 @@ export function layoutMerlon(merlon, {
   seed,
   index,
   courseHeight = null,
+  // Most stones a merlon row may be laid in. Large-block styles set 1, so a
+  // tooth is one block rather than a pair of slabs.
+  maxColumns = 3,
 }) {
   const shape = mixSeed(seed ^ MERLON_HASH, index);
   const spurHash = mixSeed(seed ^ SPUR_HASH, index);
@@ -64,7 +67,7 @@ export function layoutMerlon(merlon, {
   // How many stones will actually course across this merlon. A fine-grained
   // style crenellates on a tighter spacing, and three columns across a 0.5 m
   // merlon would be splinters, not masonry.
-  const columns = merlon.width >= 0.6 ? 3 : merlon.width >= 0.36 ? 2 : 1;
+  const columns = Math.min(maxColumns, merlon.width >= 0.6 ? 3 : merlon.width >= 0.36 ? 2 : 1);
   // "The central polygon is deleted." Only the tall variant, only where there is
   // a pier to leave either side of the void, and not always — so a crown reads
   // as a run of plain merlons with the odd arrow loop in it.

@@ -71,6 +71,20 @@ def ashlar(n, seed):
     return _weather(albedo, n, seed, 0.25, moss), height, 2.6
 
 
+def dressed(n, seed):
+    """Tooled limestone for quoins, copings, sills and voussoirs: one stone per face, so no
+    joints. Pale against the rubble it frames, with fine pitting, faint claw-tool
+    striations and rain staining; the piece chamfer and per-piece tone draw each block."""
+    fine, mid, big = fbm(n, seed, 1.0), fbm(n, seed + 1, 1.9), fbm(n, seed + 2, 2.7)
+    tool = fbm(n, seed + 3, 1.2, sx=1, sy=22)
+    pits = smooth(0.8, 0.9, fbm(n, seed + 4, 0.6))
+    shade = (0.9 + 0.12 * fine) * (0.94 + 0.08 * tool) * (1 - 0.18 * smooth(0.5, 0.95, big)) * (1 - 0.3 * pits)
+    albedo = tint((0.55, 0.53, 0.49), shade)
+    moss = smooth(0.66, 0.86, big) * 0.45
+    height = 0.35 * mid + 0.25 * tool + 0.15 * fine - 0.5 * pits
+    return _weather(albedo, n, seed, 0.3, moss), height, 1.6
+
+
 def planks(n, seed):
     rng = np.random.default_rng(seed)
     block, dx, dy, _, count = courses(n, rng, 8, 0.35 * n, 0.8 * n)
@@ -122,4 +136,5 @@ def render(n, seed):
 WEATHERED_PATTERNS = {
     'stone': (rubble, 1024), 'ashlar': (ashlar, 1024), 'planks': (planks, 1024),
     'timber': (timber, 512), 'roof': (shingles, 1024), 'plaster': (render, 512),
+    'dressed': (dressed, 512),
 }

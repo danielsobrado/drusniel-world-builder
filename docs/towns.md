@@ -44,8 +44,9 @@ because both draw houses on the same plots.
        normal maps, and parallax on stone, slate and cobbles.
      - Each house varies its render tone, timber and roof. The seed comes from
        `layout.partSeeds` and reaches the shader as `instanceColor`.
-     - Noise in town space wears render back to stone, adds moss and drifts
-       the tone.
+     - Noise in town space wears render back to stone and drifts the tone.
+       Moss and rain runs come from `render/materials/townWeathering.js`,
+       shared with SettlementView so both renderers weather alike.
      - Frost towns get snow; banners and awnings sway in the world wind.
      - A few centimetres of wobble keep lines from looking ruler-straight.
        Shadow passes skip it.

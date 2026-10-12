@@ -1,4 +1,4 @@
-import { buildingDoor } from './SettlementBuildingCatalog.js';
+import { buildingDoor, buildingWindows } from './SettlementBuildingCatalog.js';
 import { planDecor } from './SettlementDecor.js';
 import { planDefences } from './SettlementDefences.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
@@ -50,6 +50,8 @@ export function planSettlement({ settlement, worldSeed, routeBearings = [], samp
     ...item,
     pad: sampleHeight(item.x, item.z),
     door: item.front ? buildingDoor(styleKey, item.kind, item.variant) : null,
+    // Cut into the room behind the door and lit by the sun through them.
+    windows: item.front ? buildingWindows(styleKey, item.kind, item.variant) : [],
   });
   return Object.freeze({
     version: SETTLEMENT_PLAN_VERSION,

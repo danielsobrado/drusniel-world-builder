@@ -76,6 +76,29 @@ jettied building uses `Wall_Timber_J<level>*` on its front and
 `building_spec.jetty_level`. The roof group moves forward by the top story's
 jetty and uses the widened `Roof_Gable_S<span>J<level>` set.
 
+## Dressed stone
+
+Quoins, plinth copings, entry steps, sills, voussoirs and thresholds use
+`stone_dressed` (`texture_patterns_weathered.dressed`): one tooled block per
+piece, with no joints in the texture, chamfered and toned per piece. It is the
+pale frame that makes the rubble between read as built, as on a Skyrim hold's
+houses. Keep quoin arms clear of the corner cell's shutters (0.5 m / 0.28 m).
+Roof slabs take one tone and square inner ends, so sections join without a
+groove or a shade step, and a fascia along each eave gives the roof its
+thickness.
+
+## Shared look with SettlementView
+
+The kit and the game's default town renderer share one material language
+(docs/settlement-rendering.md, "Kit parity"): the slate tint (`roof`), aged
+cloth dyes, pale crown glass that the game lights with firelight at dusk, and
+paving bedded 3 cm proud with cobble sides (`PAVING_PROUD`, `PAVING_LAP`).
+Interior furniture (`modules/interior.py`) is built the way SettlementView's
+rooms are (`SettlementFurniture.js`): a planked trestle table, benches on
+splayed legs, a stool by the hearth and a posted bed; the far kit keeps the
+plain versions.
+Change one side's tone and change the other's with it.
+
 ## Tuning live with Blender MCP
 
 The MCP for Blender add-on (v1.8) listens on `localhost:9876` while Blender's
@@ -83,6 +106,9 @@ UI is open. Any client that speaks its JSON protocol can rebuild the kit from
 source in the running Blender and render a QA street. For example, send
 `{"type": "execute_code", "params": {"code": ...}}` with code that purges
 `medkit.*` from `sys.modules` and re-imports it.
+`live_closeups.py` does exactly that for named prefabs and renders them at
+street eye level and three-quarter, lit like the game; its docstring shows the
+call.
 
 ## Scans, accents and previews
 

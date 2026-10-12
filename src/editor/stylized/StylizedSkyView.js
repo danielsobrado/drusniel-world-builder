@@ -15,14 +15,26 @@ import {
 } from 'three/tsl';
 import { cloudMotionCoordinatesNode } from './AtmosphereMotion.js';
 import { directionFromAngles } from './StylizedGodRaysPostProcess.js';
-import { stylizedFbm } from './StylizedNoiseNodes.js';
+import { cloudFbmBands } from './sky/cloudNoise.js';
 import { updateCloudShadows, wrapCloudCoordinate } from './CloudShadow.js';
 import { createSkyLookUniforms, resolveSkyLook, writeSkyLookUniforms } from './sky/SkyLook.js';
 import { createHeatShimmerNodes, resolveHeatShimmerConfig } from './ambient/HeatShimmer.js';
 import { createMoonDiscNode, createStarFieldNode, STAR_FIELD_DEFAULTS } from './sky/starField.js';
 import { skyAmbientColor } from './sky/skyAmbient.js';
-import { updateSkyLight } from './sky/skyLight.js';
+import { updateSkyLight, updateSnowLight } from './sky/skyLight.js';
 import { applySceneEnvironment } from './sky/sceneEnvironment.js';
+import { sceneExposure } from '../../render/sceneExposure.js';
+import { resolveSunHazeConfig, sunHazeColor, SunHazeFog } from './sky/sunHaze.js';
+import { litCloudColorNode, resolveCloudLightingConfig } from './sky/cloudLighting.js';
+
+/** How far past the cloud threshold the noise must climb for a cloud's body to be fully in its own shade. */
+const CLOUD_BODY_DEPTH = 0.32;
+/** The deepest a cloud's own shadow takes it from its lit colour toward its core colour. */
+const CLOUD_SELF_SHADOW = 0.85;
+/** How much of a scene exposure change the sky follows (a little, so the eye still adapts). */
+const SKY_EXPOSURE_FOLLOW = 0.25;
+/** How strongly the moon lights clouds and haze, as a share of the sun. */
+const MOONLIGHT_SHARE = 0.25;
 
 function cloudCoverageNode({
   config,
@@ -40,10 +52,14 @@ function cloudCoverageNode({
     speed: config.sky.cloudSpeed,
     worldScale: config.sky.cloudWorldScale,
   });
-  const cloudNoise = stylizedFbm(cloudUv);
+  // The look weights the ragged detail octaves: below 1 the field is rounded
+  // masses (cumulus), above 1 broken wisps. At 1 it is the plain fbm.
+  const { low, detail } = cloudFbmBands(cloudUv);
+  const cloudNoise = low.add(detail.mul(look.cloudDetail))
+    .div(look.cloudDetail.mul(0.1875).add(0.75));
   const cloudShape = smoothstep(
     look.cloudDensity,
-    look.cloudDensity.add(config.sky.cloudSharpness),
+    look.cloudDensity.add(look.cloudSharpness),
     cloudNoise,
   );
   const cloudFloor = smoothstep(
@@ -56,10 +72,17 @@ function cloudCoverageNode({
     config.sky.cloudCeiling,
     direction.y,
   ));
-  return {
-    coverage: cloudShape.mul(cloudFloor).mul(cloudCeiling),
-    shape: cloudShape,
-  };
+  const coverage = cloudShape.mul(cloudFloor).mul(cloudCeiling);
+  // Self-shadow from the same noise sample: where the field climbs well past the
+  // threshold the cloud is thick and its body is in its own shade; its thin
+  // edges stay lit. A second noise sample toward the sun looked the same and
+  // cost 0.4 ms a frame, the sky being full screen.
+  const body = smoothstep(
+    look.cloudDensity.add(look.cloudSharpness),
+    look.cloudDensity.add(look.cloudSharpness).add(CLOUD_BODY_DEPTH),
+    cloudNoise,
+  );
+  return { coverage, shape: cloudShape, shadow: body.mul(CLOUD_SELF_SHADOW), body, noise: cloudNoise };
 }
 
 /**
@@ -82,14 +105,37 @@ function createSkyMaterial({
   night,
   moonDirection,
   moonIllumination,
+  exposureCompensation,
 }) {
   const direction = shimmeredRay(config.ambientEffects);
+  const sunHaze = resolveSunHazeConfig(config.sky);
+  const cloudLighting = resolveCloudLightingConfig(config.sky);
+  // How much the sun is out: dimmed by overcast (which lowers its emission) and
+  // gone once it sets.
+  // Under a night look the "sun" is the moon: it lights clouds and haze far
+  // more faintly than the sun (MOONLIGHT_SHARE, matched in update()).
+  const sunOut = clamp(look.sunEmission.div(Math.max(1e-4, config.sky.sunEmission)), 0, 1)
+    .mul(oneMinus(night.mul(1 - MOONLIGHT_SHARE)));
+  const sunPresence = sunOut.mul(smoothstep(-0.1, 0.06, sunDirection.y));
   const horizon = smoothstep(
     config.sky.horizonLine - config.sky.horizonSpread,
     config.sky.horizonLine + config.sky.horizonSpread,
     direction.y,
   );
   let color = mix(look.lowColor, look.highColor, horizon);
+  if (sunHaze.enabled) {
+    // The fog's sun-facing haze, on the horizon band it fades the terrain into.
+    const hazed = sunHazeColor({
+      baseColor: color,
+      glowColor: look.sunGlowColor,
+      direction,
+      sunDirection,
+      settings: sunHaze,
+      // Matches SunHazeFog.sync, so the terrain meets the sky without a seam.
+      presence: sunOut,
+    });
+    color = mix(hazed, color, horizon);
+  }
 
   const sunAlignment = clamp(dot(direction, sunDirection), 0, 1);
   const sunInner = Math.cos(config.sky.sunSize);
@@ -100,23 +146,30 @@ function createSkyMaterial({
   color = color.add(look.sunGlowColor.mul(sunGlow));
   color = mix(color, look.sunColor.mul(look.sunEmission), sunDisc);
 
-  const {
-    coverage: cloudCoverage,
-    shape: cloudShape,
-  } = cloudCoverageNode({
+  const cloud = cloudCoverageNode({
     config,
     look,
     time,
     direction,
     cameraWorldPosition,
   });
-  const cloudMask = cloudCoverage.mul(look.cloudOpacity);
-  const cloudEdge = smoothstep(0.15, 0.85, cloudShape);
-  const cloudColor = mix(look.cloudCore, look.cloudEdge, cloudEdge);
+  const cloudMask = cloud.coverage.mul(look.cloudOpacity);
+  const cloudEdge = smoothstep(0.15, 0.85, cloud.shape);
   const cloudRim = pow(sunAlignment, config.sky.cloudRimFalloff)
     .mul(config.sky.cloudRimStrength)
     .mul(cloudEdge);
-  const litCloud = cloudColor.add(look.cloudRim.mul(cloudRim));
+  const litCloud = litCloudColorNode({
+    cloud,
+    look,
+    direction,
+    sunDirection,
+    sunAlignment,
+    presence: sunPresence,
+    horizonColor: color,
+    rim: look.cloudRim.mul(cloudRim),
+    cloudFloor: config.sky.cloudFloor,
+    settings: cloudLighting,
+  });
   color = mix(color, litCloud, cloudMask);
 
   // Night bodies: a star field and a moon disc, added over the gradient and hidden
@@ -156,7 +209,9 @@ function createSkyMaterial({
   }
 
   const material = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide });
-  material.colorNode = max(color, vec3(0));
+  // Snow country stops the exposure down for the ground; the sky keeps most of
+  // its brightness, or the alpine zenith turned a garish saturated blue.
+  material.colorNode = max(color, vec3(0)).mul(exposureCompensation);
   material.depthTest = false;
   material.depthWrite = false;
   material.fog = false;
@@ -213,7 +268,7 @@ export class StylizedSkyView {
     // and phase are driven by the day/night cycle when it runs, and otherwise
     // stand at the fixed angles in the config so a manually chosen night still has
     // a moon.
-    this.night = uniform(this.look.night ? 1 : 0);
+    this.night = uniform(this.look.nightness ?? (this.look.night ? 1 : 0));
     const moonConfig = config.sky?.stars?.moon ?? {};
     this.moonDirectionValue = directionFromAngles(
       moonConfig.elevation ?? 25,
@@ -222,7 +277,11 @@ export class StylizedSkyView {
     this.moonDirection = uniform(this.moonDirectionValue);
     this.moonIllumination = uniform(moonConfig.illumination ?? 1);
     this.fogDensityScale = 1;
+    /** The configured exposure; a look scales it (snow country stops down). */
+    this.baseExposure = terrainView.renderer?.toneMappingExposure ?? 1;
     this.baseFogDensity = config.sky.fogDensity;
+    /** 1 / the scene exposure scale, mostly (SKY_EXPOSURE_FOLLOW): see createSkyMaterial. */
+    this.exposureCompensation = uniform(1);
     this.geometry = new THREE.SphereGeometry(1, 64, 32);
     this.material = createSkyMaterial({
       config,
@@ -233,6 +292,7 @@ export class StylizedSkyView {
       night: this.night,
       moonDirection: this.moonDirection,
       moonIllumination: this.moonIllumination,
+      exposureCompensation: this.exposureCompensation,
     });
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.scale.setScalar(config.sky.radius);
@@ -291,6 +351,14 @@ export class StylizedSkyView {
       ? new CascadedSunShadows(this.directional, config.sky.shadowDistance) : null;
     terrainView.godRays.setVolumetricLight(this.directional);
     terrainView.scene.fog = new THREE.FogExp2(config.sky.fogColor, config.sky.fogDensity);
+    const sunHaze = resolveSunHazeConfig(config.sky);
+    this.sunHazeFog = sunHaze.enabled ? new SunHazeFog({
+      scene: terrainView.scene,
+      skyFog: terrainView.scene.fog,
+      sunDirection: this.sunDirection,
+      glowColor: this.lookUniforms.sunGlowColor,
+      settings: sunHaze,
+    }) : null;
     // The soft outdoor HDR standard materials take their fill and reflections from.
     this.environment = applySceneEnvironment(terrainView.scene, config.sky.environment);
   }
@@ -336,7 +404,7 @@ export class StylizedSkyView {
    */
   applyLook(look) {
     this.look = look;
-    this.night.value = look.night ? 1 : 0;
+    this.night.value = look.nightness ?? (look.night ? 1 : 0);
     writeSkyLookUniforms(this.lookUniforms, look);
     this.sunDirectionValue.copy(directionFromAngles(look.sunElevation, look.sunAzimuth));
     this.terrainView.godRays.sunDirection?.copy(this.sunDirectionValue);
@@ -355,6 +423,16 @@ export class StylizedSkyView {
     this.setFogDensity();
     this.setCloudShadowStrength(look.cloudShadowStrength);
     updateSkyLight(look, this.configuredLook);
+    updateSnowLight(look);
+    // Snow country stops the exposure down (sceneExposure). While the post
+    // graph owns the output it reads the scale itself and the renderer stays
+    // at its neutral 1, so only write the renderer when it tone-maps.
+    sceneExposure.scale = Number.isFinite(look.exposure) ? look.exposure : 1;
+    this.exposureCompensation.value = sceneExposure.scale ** -(1 - SKY_EXPOSURE_FOLLOW);
+    const renderer = this.terrainView.renderer;
+    if (renderer && renderer.toneMapping !== THREE.NoToneMapping) {
+      renderer.toneMappingExposure = this.baseExposure * sceneExposure.scale;
+    }
   }
 
   update(timestamp, camera) {
@@ -382,6 +460,12 @@ export class StylizedSkyView {
       sunDirection: this.sunDirectionValue,
       sky: this.config.sky,
       cloudDensity: this.look.cloudDensity,
+      cloudSharpness: this.look.cloudSharpness,
+    });
+    this.sunHazeFog?.sync({
+      sunPresence: Math.min(1, this.look.sunEmission / Math.max(1e-4, this.config.sky.sunEmission))
+        * (1 - (1 - MOONLIGHT_SHARE) * (this.look.nightness ?? (this.look.night ? 1 : 0))),
+      densityScale: this.fogDensityScale,
     });
     this.mesh.position.copy(camera.position);
     this.cloudMaskMesh.position.copy(camera.position);
@@ -405,6 +489,7 @@ export class StylizedSkyView {
     this.geometry.dispose();
     this.material.dispose();
     this.cloudMaskMaterial.dispose();
+    this.sunHazeFog?.dispose();
     this.terrainView.scene.fog = null;
     this.directional.dispose();
   }

@@ -163,20 +163,21 @@ export const STONE_PALETTES = Object.freeze({
    * as-is displayed as a pale cream the cool sky light turned grey; fully
    * converted to linear it turned muddy brown, because the references also owe
    * their brightness to warm bounce light this scene does not have. These are
-   * the sRGB values raised to 1.4 — warm and still high-key.
+   * the sRGB values raised to 1.4 — warm and still high-key. A little below
+   * full value, so the tone mapper keeps their saturation in sunlight.
    */
   'glade-sandstone': defineStonePalette({
-    base: [250, 168, 94],
-    warm: [252, 176, 100],
-    color: '#faa85e',
+    base: [242, 152, 78],
+    warm: [246, 160, 84],
+    color: '#f2984e',
     ramp: [
-      [250, 172, 98],
-      [244, 162, 90],
-      [252, 180, 106],
-      [248, 166, 94],
-      [240, 158, 88],
+      [244, 156, 82],
+      [236, 146, 74],
+      [248, 166, 92],
+      [240, 152, 80],
+      [230, 140, 70],
     ],
-    outlier: [252, 188, 114],
+    outlier: [250, 178, 102],
     outlierChance: 0.06,
   }),
 });
@@ -420,7 +421,9 @@ function createImportedAlbedoResolver(recipe) {
  * clay-coloured, so the per-tile palette lands on a dark base; a neutral photo
  * needs that depth put back, or every roof bleaches in the sun.
  */
-const ROOF_SET_TINTS = Object.freeze({ slate: '#a9abba', terracotta: '#cfae9f' });
+// Weathered slate is near neutral, a shade cool, and fired clay a weathered orange; the
+// medieval kit's slate and terracotta read the same (medkit/materials.py).
+const ROOF_SET_TINTS = Object.freeze({ slate: '#a7a8ac', terracotta: '#d2875f' });
 
 /** Base colour of the foliage family; per-leaf vertex colours multiply it. */
 export const FOLIAGE_BASE_COLOR = '#4c8a37';
@@ -660,7 +663,9 @@ export function createWorkshopMaterials(recipe) {
   // Photographed sets a caller supplied for this generation (a settlement's
   // dressing). An imported albedo still wins: it is the author's explicit choice.
   const timberSet = woodAlbedo ? null : workshopSurfaceOverride('timber');
-  const plasterSet = wallAlbedo || recipe.finish === 'masonry' ? null : workshopSurfaceOverride('plaster');
+  // A masonry finish is walled in rubble rather than rendered, when a caller supplies one.
+  const plasterSet = wallAlbedo ? null
+    : workshopSurfaceOverride(recipe.finish === 'masonry' ? 'rubble' : 'plaster');
   const plasterTint = PLASTER_PALETTES[recipe.finish]?.base;
   // Stone and roof units already carry their palette as vertex colour, so their
   // sets are neutral — unlike the synthesised albedo, which repeats the palette
@@ -766,7 +771,9 @@ export function createWorkshopMaterials(recipe) {
     stone,
     mortar: tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
       color: wallAlbedo?.tint ?? (recipe.finish === 'masonry'
-        ? (stoneConfig.mortarColor ?? new THREE.Color(
+        // Rubble is the stone itself, at the style's own tone; bare joint mortar is darker.
+        ? plasterSet ? new THREE.Color().setRGB(...STONE_PALETTES[recipe.style].base.map((channel) => channel / 255), THREE.SRGBColorSpace)
+          : (stoneConfig.mortarColor ?? new THREE.Color(
           STONE_PALETTES[recipe.style].base[0] / 255 * 0.66,
           STONE_PALETTES[recipe.style].base[1] / 255 * 0.66,
           STONE_PALETTES[recipe.style].base[2] / 255 * 0.66,

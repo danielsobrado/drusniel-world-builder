@@ -35,12 +35,12 @@ def window_dressing(b, hole, stone):
                    ((x0 + f, -0.06, z1 - f), (x1 - f, 0.06, z1))):
         b.box(lo, hi, 'timber')
     b.box((x0 + f, -0.02, z0 + f), (x1 - f, 0.02, z1 - f), 'glass', skip=('-x', '+x', '-z', '+z'))
-    sill_mat = 'stone' if stone else 'timber'
+    sill_mat = 'stone_dressed' if stone else 'timber'
     b.box((x0 - 0.1, -T - 0.12, z0 - 0.1), (x1 + 0.1, 0.0, z0 + 0.02), sill_mat)
     if stone and detailed():
         arched_head(b, (x0 + x1) / 2, z1, (x1 - x0) / 2)
     elif stone:
-        b.box((x0 - 0.14, -T - 0.05, z1), (x1 + 0.14, -T + 0.04, z1 + 0.24), 'stone')
+        b.box((x0 - 0.14, -T - 0.05, z1), (x1 + 0.14, -T + 0.04, z1 + 0.24), 'stone_dressed')
     for sx0, sx1 in ((x0 - 0.36, x0 - 0.04), (x1 + 0.04, x1 + 0.36)):
         b.box((sx0, -T - 0.07, z0 + 0.03), (sx1, -T - 0.03, z1 - 0.03), 'planks')
 
@@ -71,7 +71,7 @@ def voussoir_arch(b, cx, base_z, r0, r1, y0, y1, count=7):
                (cx + outer * math.cos(a0), y0, base_z + outer * math.sin(a0)),
                (cx + outer * math.cos(a1), y0, base_z + outer * math.sin(a1)),
                (cx + r0 * math.cos(a1), y0, base_z + r0 * math.sin(a1))]
-        b.extrude(pts, (0, y1 - y0 - (0.03 if i == count // 2 else 0), 0), 'stone')
+        b.extrude(pts, (0, y1 - y0 - (0.03 if i == count // 2 else 0), 0), 'stone_dressed')
 
 
 def door_frame(b, stone):
@@ -79,7 +79,7 @@ def door_frame(b, stone):
     b.box((x0, -0.1, 0), (x0 + 0.08, 0.1, z1), 'timber')
     b.box((x1 - 0.08, -0.1, 0), (x1, 0.1, z1), 'timber')
     b.box((x0 + 0.08, -0.1, z1 - 0.08), (x1 - 0.08, 0.1, z1), 'timber')
-    b.box((x0 - 0.1, -T - 0.3, 0), (x1 + 0.1, -T + 0.02, 0.12), 'stone', skip=('-z',))
+    b.box((x0 - 0.1, -T - 0.3, 0), (x1 + 0.1, -T + 0.02, 0.12), 'stone_dressed', skip=('-z',))
     if stone:
         voussoir_arch(b, (x0 + x1) / 2, z1 - 0.12, 0.52, 0.8, -T - 0.07, -T + 0.04)
 
@@ -169,7 +169,7 @@ def bracket(b, x, wall_y, tip_y, drop=0.8):
         pts.append((x, y, z))
     for p, q in zip(pts, pts[1:]):
         b.beam(p, q, (1, 0, 0), (-0.06, 0.06), 0.14, 'timber', bevel=0)
-    b.box((x - 0.08, wall_y - 0.1, -drop - 0.3), (x + 0.08, wall_y, -drop - 0.12), 'stone')
+    b.box((x - 0.08, wall_y - 0.1, -drop - 0.3), (x + 0.08, wall_y, -drop - 0.12), 'stone_dressed')
 
 
 def jetty_corner(level, axis):

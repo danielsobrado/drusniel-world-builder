@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { materialColor } from 'three/tsl';
 import { createInstancedRenderers, disposeInstancedRenderers } from '../../../stylized/lod/StylizedLodRuntime.js';
 import { normalizeProceduralRecipe } from '../../../workshop/ProceduralAssetStore.js';
-import { createWorkshopMaterials } from '../../../workshop/ProceduralWorkshopMaterials.js';
+import { createWorkshopMaterials, hasPlasterWalls } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { withWorkshopSurfaceOverrides } from '../../../workshop/ProceduralWorkshopSurfaceOverrides.js';
 import { buildingRecipe } from '../SettlementBuildingCatalog.js';
 import { isCraftedKind } from '../SettlementCraftedKinds.js';
@@ -164,7 +164,8 @@ export class SettlementPrototypePool {
     // thread that owns the textures — dressed in the town's own surface sets.
     const materials = withWorkshopSurfaceOverrides(entry.surfaces, () => createWorkshopMaterials(recipe));
     lightSettlementMaterials(materials);
-    for (const [slot, material] of Object.entries(materials)) gradeSettlementMaterial(material, slot);
+    const plastered = hasPlasterWalls(recipe);
+    for (const [slot, material] of Object.entries(materials)) gradeSettlementMaterial(material, slot, { plastered });
     const part = (packed) => ({ slot: packed.slot, geometry: geometryFrom(packed), material: materials[packed.slot] ?? materials.stone });
     const near = data.near.map(part);
     let far = data.far ? data.far.map(part) : null;

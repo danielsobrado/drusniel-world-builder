@@ -1,5 +1,13 @@
 # Project guidance
 
+## Branches
+
+Work only in `main`: commit there and push `main`. Do not create feature
+branches or worktrees, and do not leave work on one — several sessions share
+this checkout, and work parked on a side branch has ended up diverging from
+`main` and needing hand-merged conflicts. Pull before starting, and commit
+in-progress work rather than leaving it uncommitted for the next session.
+
 ## Azgaar terrain compatibility
 
 Azgaar is the canonical terrain format. Keep its 13 standard biome IDs as the

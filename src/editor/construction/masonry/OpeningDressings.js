@@ -43,13 +43,22 @@ function dressing(points, thickness) {
   };
 }
 
-/** Dress the same sampled contour used to cut field stones, through the wall. */
-export function layoutOpening(opening, { thickness, minWidth = 0.2 }) {
+const JAMB_ROW = 0.27;
+const VOUSSOIR_LENGTH = 0.28;
+
+/**
+ * Dress the same sampled contour used to cut field stones, through the wall.
+ *
+ * `blockScale` lengthens jamb rows and voussoirs for large-block styles so the
+ * surround is laid in stones of the wall's own scale. The band width (`TRIM`)
+ * is shared with the void and does not scale.
+ */
+export function layoutOpening(opening, { thickness, minWidth = 0.2, blockScale = 1 }) {
   if (!opening.dressed) return { jambs: [], voussoirs: [], keystone: null };
   const right = openingArchContour(opening);
   const spring = right[0][1] - opening.sill;
   const jambs = [];
-  const rows = Math.max(1, Math.round(spring / 0.27));
+  const rows = Math.max(1, Math.round(spring / (JAMB_ROW * blockScale)));
   const jambHeight = spring / rows;
   if (jambHeight > 0.01) for (const side of [-1, 1]) for (let row = 0; row < rows; row += 1) {
     const rectangle = (bottom, top, left = -TRIM / 2, right = TRIM / 2) => [
@@ -69,7 +78,8 @@ export function layoutOpening(opening, { thickness, minWidth = 0.2 }) {
   } };
   const arch = [...right.map(([s, y]) => [2 * opening.s - s, y]), ...right.slice().reverse()];
   const line = polylineSamples(arch);
-  const targetCount = Math.max(9, Math.ceil(line.length / Math.max(0.2, minWidth, 0.28)));
+  const voussoirLength = VOUSSOIR_LENGTH * blockScale;
+  const targetCount = Math.max(blockScale > 1 ? 5 : 9, Math.ceil(line.length / Math.max(0.2, minWidth, voussoirLength)));
   const count = targetCount % 2 ? targetCount : targetCount + 1;
   const voussoirs = [];
   for (let i = 0; i < count; i += 1) {

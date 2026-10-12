@@ -27,20 +27,25 @@ class Spec:
 SPEC = {
     'stone': Spec('stone', 2.0, 0.9, normal=2.2),
     'stone_ashlar': Spec('ashlar', 2.0, 0.85, normal=1.8),
+    # Dressed stone (quoins, copings, sills, voussoirs): one tooled block per piece.
+    'stone_dressed': Spec('dressed', 1.2, 0.88, normal=1.3),
     'cobble': Spec('cobble', 2.0, 0.85, normal=2.0),
     'plaster': Spec('plaster', 2.0, 0.95, normal=1.4, tint=(1.0, 0.93, 0.8)),
     'timber': Spec('timber', 1.5, 0.8, grain=True, normal=1.6),
     'planks': Spec('planks', 2.0, 0.8, grain=True, normal=1.6),
-    'roof': Spec('roof', 2.0, 0.85, tint=(0.58, 0.6, 0.66), normal=2.0),
+    # Near-neutral weathered slate; the game's workshop houses tint the same scan alike.
+    'roof': Spec('roof', 2.0, 0.85, tint=(0.6, 0.6, 0.62), normal=2.0),
     'roof_terracotta': Spec('terracotta', 2.0, 0.8, normal=1.6),
     'thatch': Spec('thatch', 2.0, 0.95, normal=1.6),
     'clapboard': Spec('clapboard', 2.0, 0.85, normal=1.6),
     'grass': Spec('grass', 2.0, 0.95),
     'iron': Spec('iron', 1.0, 0.45, metal=0.85),
     'glass': Spec('window', fit=True, rough=0.3, emission=1.6),
-    'cloth_cream': Spec('cloth', 1.0, 0.95, tint=(1.0, 0.93, 0.80)),
-    'cloth_blue': Spec('cloth', 1.0, 0.95, tint=(0.18, 0.26, 0.62)),
-    'cloth_red': Spec('cloth', 1.0, 0.95, tint=(0.62, 0.16, 0.12)),
+    # Weathered dyes: earth pigments gone chalky in the sun, never primaries
+    # (the game's SettlementView trim uses the same aged palette).
+    'cloth_cream': Spec('cloth', 1.0, 0.95, tint=(0.86, 0.8, 0.68)),
+    'cloth_blue': Spec('cloth', 1.0, 0.95, tint=(0.16, 0.22, 0.4)),
+    'cloth_red': Spec('cloth', 1.0, 0.95, tint=(0.46, 0.15, 0.11)),
     'foliage': Spec('foliage', 1.5, 0.9),
     'bark': Spec('bark', 1.0, 0.9),
     'flowers': Spec('flowers', 1.0, 0.9),

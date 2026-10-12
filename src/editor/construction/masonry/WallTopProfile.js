@@ -207,11 +207,18 @@ export function createWallTopProfile(record, arcTable, { style = null } = {}) {
   function crenellationsOver(s0, s1, { merlonHeight = style?.merlonHeight ?? DEFAULT_MERLON_HEIGHT } = {}) {
     if (top.style !== 'crenellated') return [];
     const merlons = [];
-    const width = merlonSpacing * MERLON_DUTY;
-    const first = Math.floor(s0 / merlonSpacing);
-    const last = Math.ceil(s1 / merlonSpacing);
+    const variation = style?.merlonVariation ?? 0;
+    const nominalWidth = merlonSpacing * MERLON_DUTY;
+    // Jitter never moves a tooth past half the gap, so neighbours cannot touch.
+    const reach = merlonSpacing * (1 - MERLON_DUTY) * 0.5;
+    const first = Math.floor(s0 / merlonSpacing) - 1;
+    const last = Math.ceil(s1 / merlonSpacing) + 1;
     for (let cell = first; cell <= last; cell += 1) {
-      const center = (cell + 0.5) * merlonSpacing;
+      // Keyed on the absolute cell, so every module agrees about each tooth.
+      const width = nominalWidth * (1 + (hashUnit(mixSeed(seed, 0x91), cell) - 0.5) * variation);
+      const shift = (hashUnit(mixSeed(seed, 0x92), cell) - 0.5) * 2 * variation * Math.max(0, reach - (width - nominalWidth) / 2);
+      const tall = variation > 0 && hashUnit(mixSeed(seed, 0x93), cell) < variation * 0.6;
+      const center = (cell + 0.5) * merlonSpacing + shift;
       if (center + width / 2 <= s0 || center - width / 2 >= s1) continue;
       // The final tooth must stand on the wall, including a partial spacing at
       // an endpoint. Every module derives the same clipped footprint.
@@ -223,7 +230,8 @@ export function createWallTopProfile(record, arcTable, { style = null } = {}) {
         s,
         width: right - left,
         base: heightAt(s),
-        height: merlonHeight,
+        // A tall tooth carries a second, narrower stone on top.
+        height: tall ? merlonHeight * 1.75 : merlonHeight,
       }));
     }
     return Object.freeze(merlons);

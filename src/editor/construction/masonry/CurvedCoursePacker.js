@@ -346,7 +346,12 @@ export function packCurvedWall({
 
   // Cap the stone width from the tightest curvature anywhere in the module, and
   // leave headroom for the packer's widest draw rather than for its mean.
-  const curvatureLimit = curvatureLimitedWidth(arcTable.maxCurvatureOver(s0, s1));
+  // A style meshed with arc bending keeps its joints on a curve and only
+  // needs the chord to stay within its own face tessellation.
+  const curvatureLimit = curvatureLimitedWidth(
+    arcTable.maxCurvatureOver(s0, s1),
+    style.curveWidthTolerance ?? JOINT_TOLERANCE,
+  );
   const targetWidth = Math.max(
     style.minWidth * 1.35,
     Math.min(style.targetWidth, curvatureLimit / WIDTH_SAFETY),
@@ -417,7 +422,11 @@ export function packCurvedWall({
   // boundary, so no two modules have to agree about how one is cut. A course the
   // curvature has already narrowed has small cells, and cutting those again would
   // only make splinters.
-  const splitChance = (style.splitChance ?? 0) * Math.min(1, targetWidth / style.targetWidth);
+  // An aspect-limited style is the exception: its cuts run along the bed, and
+  // a narrowed cell left whole would stand upright.
+  const splitChance = (style.splitChance ?? 0) * (style.splitMinAspect != null
+    ? 1
+    : Math.min(1, targetWidth / style.targetWidth));
 
   const wall = wallRange ?? [s0, s1];
   const [wallStart, wallEnd] = wall;
@@ -528,6 +537,7 @@ export function packCurvedWall({
           minHeight: style.splitMinHeight ?? MIN_SPLIT_HEIGHT,
           courseHeight: splitHeight,
           horizontalChance: style.splitHorizontalChance,
+          minAspect: style.splitMinAspect,
         },
       );
 
@@ -858,6 +868,7 @@ export function packCurvedWall({
         seed,
         index: merlonIndex,
         courseHeight: style.merlonCourseHeight,
+        maxColumns: style.merlonMaxColumns,
       });
       for (let unitIndex = 0; unitIndex < ornament.units.length; unitIndex += 1) {
         const unit = ornament.units[unitIndex];
@@ -895,7 +906,11 @@ export function packCurvedWall({
   let dressingIndex = baseIndex + INDEX_DRESSING;
   for (const opening of openings) {
     if (!ownsOpeningDressing(opening)) continue;
-    const { jambs, voussoirs, keystone } = layoutOpening(opening, { thickness, minWidth: style.minWidth });
+    const { jambs, voussoirs, keystone } = layoutOpening(opening, {
+      thickness,
+      minWidth: style.minWidth,
+      blockScale: style.openingBlockScale,
+    });
     const openingId = opening.id ?? `opening@${opening.s}`;
     let jambOrdinal = 0;
     for (const unit of jambs) {

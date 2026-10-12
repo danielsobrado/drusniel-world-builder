@@ -1,12 +1,14 @@
 import * as THREE from 'three/webgpu';
-import { attribute, dot, fract, positionWorld, sin, smoothstep, step, texture, uv, vec2 } from 'three/tsl';
+import { attribute, color, dot, float, fract, mix, mx_noise_float, positionWorld, sin, smoothstep, step, texture, uv, vec2, vec3 } from 'three/tsl';
+import { treadPaving } from '../../../../render/materials/townWeathering.js';
 import { TOWN_GROUND } from '../view/SettlementGrade.js';
 
 /** Paving wears a hint of the town's own stone over the photographed surface. */
 const STONE_TINT = Object.freeze({
   granite: '#f4f0e8',
   limestone: '#fff4dc',
-  sandstone: '#ffe2c6',
+  // Warm enough to belong to its town, short of turning grey flags orange.
+  sandstone: '#f8e8d4',
 });
 /**
  * Polygon offset per layer, on top of its geometric lift: distant paving
@@ -49,8 +51,8 @@ export function createPavingMaterial(layer, set, stoneStyle) {
       : (STONE_TINT[stoneStyle] ?? '#ffffff'),
     map: set.color,
     normalMap: set.normal,
-    // Relief enough to read each stone, short of a photograph's every pore.
-    normalScale: new THREE.Vector2(0.95, 0.95),
+    // Relief enough to read each stone under a raking sun.
+    normalScale: new THREE.Vector2(1.35, 1.35),
     // Packed AO / roughness / metalness: three reads AO from red, roughness from green.
     roughnessMap: set.arm,
     aoMap: set.arm,
@@ -72,6 +74,38 @@ export function createPavingMaterial(layer, set, stoneStyle) {
   const grain = fract(sin(dot(positionWorld.xz.mul(31), vec2(12.9898, 78.233))).mul(43758.5453));
   material.opacityNode = step(cut, texture(set.arm, uv()).r.mul(0.38).add(grain.mul(0.58)).add(0.04));
   material.alphaTest = 0.5;
+  material.colorNode = untiledColour(set.color, set.arm, material.color);
   material.name = `settlement-paving-${layer}-${set.name}`;
   return material;
+}
+
+/**
+ * How dark a joint gets in the colour itself. Three applies the occlusion map
+ * to ambient light only, so under sun a joint between setts was as bright as
+ * the stones and a square read as one flat sheet.
+ */
+const JOINT_SHADE = 0.42;
+/** The second sample's frame: turned, rescaled and shifted against the first, so their repeats never align. */
+const ALT_TURN = 1.13;
+const ALT_SCALE = 0.83;
+
+
+/**
+ * A photographed set repeats every tile, and across a square the repeat reads
+ * as a grid. Two samples — the set as laid, and the set turned and rescaled —
+ * are blended by noise a few tiles across, and a broad drift moves the tone, so
+ * no two tiles of a street are alike. Trodden grime gathers in patches over
+ * that. Joints darken from the laid sample's occlusion, so the stones read
+ * in sun as well as shade. Normals stay on the laid sample: the repeat is seen
+ * in colour, not in relief.
+ */
+function untiledColour(map, arm, tint) {
+  const laid = uv();
+  const [cos, sin_] = [Math.cos(ALT_TURN), Math.sin(ALT_TURN)];
+  const turned = vec2(laid.x.mul(cos).sub(laid.y.mul(sin_)), laid.x.mul(sin_).add(laid.y.mul(cos))).mul(ALT_SCALE).add(vec2(0.37, 0.71));
+  const blend = smoothstep(-0.28, 0.28, mx_noise_float(vec3(laid.mul(0.31), 0.5)));
+  const drift = mx_noise_float(vec3(laid.mul(0.11), 3.7)).mul(0.16).add(1);
+  const joints = mix(float(JOINT_SHADE), float(1), smoothstep(0.25, 0.85, texture(arm, laid).r));
+  const surface = mix(texture(map, laid).rgb, texture(map, turned).rgb, blend).mul(color(tint)).mul(drift).mul(joints);
+  return treadPaving(surface, laid);
 }

@@ -7,6 +7,7 @@ import { duskFromSky } from './editor/world/settlements/view/SettlementDusk.js';
 import { createTownRuntime } from './editor/towns/TownRuntime.js';
 import { kitTownsEnabled } from './editor/towns/townMode.js';
 import { SettlementAmbience } from './editor/audio/settlement_ambience.js';
+import { SettlementGroundBounce } from './editor/world/settlements/view/SettlementGroundBounce.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
@@ -71,8 +72,9 @@ import { WorldSoundscape } from './editor/audio/world_soundscape.js';
 import { SurfaceWetness } from './editor/weather/surfaceWetness.js';
 import { SkyLookController } from './editor/stylized/sky/SkyLookController.js';
 import { DEFAULT_SKY_PRESET, SKY_PRESETS } from './editor/stylized/sky/SkyPresets.js';
-import { DayNightCycle } from './editor/stylized/sky/dayNightCycle.js';
+import { DayNightCycle, TIME_PRESET_ANCHORS } from './editor/stylized/sky/dayNightCycle.js';
 import { SnowCountryWeight } from './editor/stylized/sky/SnowCountryWeight.js';
+import { SkyRegionSampler } from './editor/stylized/sky/SkyRegionSampler.js';
 import { FallingLeaves } from './editor/stylized/leaves/FallingLeaves.js';
 import { SnowPowderKicks } from './editor/stylized/powder/SnowPowderKicks.js';
 import { WorldAmbience } from './editor/stylized/ambient/WorldAmbience.js';
@@ -666,9 +668,19 @@ const kitTowns = kitTownsEnabled();
   resources.own(roadsideDetails);
   const settlementView = new SettlementView({ terrainView, baseUrl: import.meta.env.BASE_URL,
     enabled: config.stylizedSurface.enhancements?.settlementBuildings !== false && !kitTowns,
-    duskProvider: () => duskFromSky(stylizedSurface?.skyView) });
+    // A night look keeps its "sun" high as moonlight, so the sky alone never reads as dusk:
+    // the look's own night flag lights the windows, as it does for the kit towns.
+    // (`skyLooks` is declared further down; the view first asks once the frame loop runs.)
+    duskProvider: () => (skyLooks?.night ? 1 : duskFromSky(stylizedSurface?.skyView)),
+    // The key light, sun or moon, that falls through the rooms' windows (SettlementWindowLight).
+    sunlightProvider: () => {
+      const sky = stylizedSurface?.skyView;
+      return sky ? { direction: sky.sunDirectionValue, color: sky.directional.color, intensity: sky.directional.intensity } : null;
+    } });
   resources.own(settlementView);
   const settlementAmbience = new SettlementAmbience(audioBus);
+// Inside a town, the sky light's ground bounce is its setts and earth, not meadow green.
+const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?.skyView?.hemisphere ?? null);
   resources.own(settlementAmbience);
   if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
   const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
@@ -985,6 +997,19 @@ const kitTowns = kitTownsEnabled();
     snowLine: config.stylizedSurface.materialBake.classification.snowLine,
     snowFade: config.stylizedSurface.materialBake.classification.snowFade,
   });
+  // Each part of the map gets its own air: biomes kilometres out set the region's
+  // sky, the ground close by only nudges it (stylized/sky/skyRegionClimate.js).
+  const skyRegion = new SkyRegionSampler({
+    getBiome: (cellX, cellZ) => {
+      const generator = worldStore.generator;
+      return generator?.sampleBiome?.(cellX, cellZ) ?? generator?.sampleTile?.(cellX, cellZ) ?? null;
+    },
+    getTileSize: () => config.map.tileSize,
+    getOrigin: () => terrainView.floatingOrigin.getState(),
+    getGroundHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
+    getSeaLevel: () => worldStore.generator?.seaLevel ?? 0,
+    getSeed: () => worldStore.generator?.toMetadata?.().seed ?? 0,
+  });
   const worldAmbience = new WorldAmbience({
     settings: config.stylizedSurface.ambientEffects,
     terrainView,
@@ -1171,6 +1196,15 @@ const kitTowns = kitTownsEnabled();
         : null,
       timePreset: skyLooks?.preset,
       onTimeChange: (preset) => {
+        // With the clock running, a time-of-day preset moves the clock to its
+        // hour; any other look (meadow, glade…) stops the clock on it.
+        const anchor = TIME_PRESET_ANCHORS.find((entry) => entry.preset === preset);
+        if (dayNightCycle && anchor) {
+          dayNightCycle.setHour(anchor.hour);
+          dayNightCycle.setPaused(false);
+        } else {
+          dayNightCycle?.setPaused(true);
+        }
         skyLooks?.setPreset(preset);
         try {
           window.localStorage.setItem(SKY_PRESET_STORAGE_KEY, preset);
@@ -1446,6 +1480,12 @@ const kitTowns = kitTownsEnabled();
   document.addEventListener('visibilitychange', onVisibilityChange);
   resources.defer(() => { document.removeEventListener('visibilitychange', onVisibilityChange); });
 
+  if (import.meta.env.DEV && window.__editor) {
+    window.__editor.skyRegion = skyRegion;
+    window.__editor.skyLooks = skyLooks;
+    window.__editor.dayNightCycle = dayNightCycle;
+  }
+
   let lastWeatherTimestamp = null;
   let lastCharacterTimestamp = null;
   const characterCentre = { x: 0, y: 0, z: 0 };
@@ -1618,7 +1658,9 @@ const kitTowns = kitTownsEnabled();
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody);
     deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera));
-    settlementAmbience.update(frameTimestamp / 1000, settlementView.enabled ? settlementView.nearestTown(canonicalFocus) : null, Boolean(skyLooks?.night));
+    const nearestTown = settlementView.enabled ? settlementView.nearestTown(canonicalFocus) : null;
+    settlementAmbience.update(frameTimestamp / 1000, nearestTown, Boolean(skyLooks?.night));
+    settlementGroundBounce.update(nearestTown ?? townRuntime?.streamer.nearestTown(canonicalFocus) ?? null);
     if (profiling) perfQa.mark('stylized');
 
     if (weatherController) {
@@ -1681,24 +1723,29 @@ const kitTowns = kitTownsEnabled();
     skyLooks?.setOvercast(weatherOvercast());
     const snowCountryWeight = snowCountry.update(frameDelta, viewModeController.camera);
     skyLooks?.setSnowCountry(snowCountryWeight);
+    skyLooks?.setRegion(skyRegion.update(frameDelta, viewModeController.camera));
     weatherController?.setRegionalSnow(snowCountryWeight);
     terrainView.godRays.setShaftAtmosphere(snowCountryWeight);
     if (dayNightCycle) {
-      // A paused cycle reports the same preset every frame and `setPreset` ignores
-      // a repeat, so this is a genuine no-op. The moon follows the clock's own
+      // The clock blends the two presets the hour lies between, so the sun moves
+      // on continuously; `setTimeBlend` ignores a repeat. Paused, the sky keeps
+      // whatever look was chosen by hand. The moon follows the clock's own
       // astronomy; the sky still writes the light.
-      skyLooks?.setPreset(dayNightCycle.update(frameDelta));
+      dayNightCycle.update(frameDelta);
+      if (!dayNightCycle.paused) skyLooks?.setTimeBlend(dayNightCycle.weights);
       stylizedSurface.skyView?.setCelestial(dayNightCycle.evaluate());
     }
     skyLooks?.update(frameDelta);
     // The gorge mist's local height patch and colours, from the sky the look just
-    // wrote. Weighted by the snow country the sky is also tinted by, so it appears
-    // in the gorges and fades out of the lowlands.
+    // wrote. Weighted by how misty the place's air is (regionalSkyLook): snow
+    // country keeps a little of it in its gorges even in dry air, and damp
+    // country anywhere fills its valleys.
+    const valleyMist = skyLooks?.current?.mist ?? 0;
     terrainView.updateValleyFog({
       focus: viewModeController.camera.position,
       origin: frameOrigin,
       timeSeconds: frameSeconds,
-      weight: snowCountryWeight,
+      weight: Math.max(snowCountryWeight * (0.35 + 0.65 * valleyMist), valleyMist * 0.85),
       sunDirection: stylizedSurface.skyView?.sunDirectionValue,
       sunColor: skyLooks?.current?.directionalColor,
       fogColor: skyLooks?.current?.fogColor,

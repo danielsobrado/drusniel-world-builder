@@ -11,6 +11,7 @@ import {
 import { packMaterialDataNode } from './PostProcessingMaterialData.js';
 import { createPostProcessingTopologySignature } from './nodes/PostCommon.js';
 import { createDebugViewNode } from './nodes/DebugViewNode.js';
+import { AmbientOcclusionNode } from './nodes/AmbientOcclusionNode.js';
 import { BloomNode } from './nodes/BloomNode.js';
 import { CinematicDofNode } from './nodes/CinematicDofNode.js';
 import { ContrastSharpenNode } from './nodes/ContrastSharpenNode.js';
@@ -23,6 +24,7 @@ import { ScreenSpaceShaftNode } from './nodes/ScreenSpaceShaftNode.js';
 import { SelectiveSsrNode } from './nodes/SelectiveSsrNode.js';
 import { TaaResolveNode } from './nodes/TaaResolveNode.js';
 import { ToneMappingNode } from './nodes/ToneMappingNode.js';
+import { scaledToneMapping } from '../sceneExposure.js';
 
 export { createPostProcessingTopologySignature };
 
@@ -84,16 +86,27 @@ export class PostProcessingGraph {
       depth: this.scenePass.getTextureNode('depth'),
     });
 
+    this.ambientOcclusion = settings?.ambientOcclusion?.enabled === true
+      ? new AmbientOcclusionNode({
+        sourceNode: this.inputs.output,
+        depthNode: this.inputs.depth,
+        normalNode: this.inputs.normal,
+        camera,
+        settings: settings.ambientOcclusion,
+      })
+      : null;
+    const occludedOutput = this.ambientOcclusion?.outputNode ?? this.inputs.output;
+
     this.screenSpaceShafts = settings?.screenSpaceShafts?.enabled === true
       ? new ScreenSpaceShaftNode({
-        sourceNode: this.inputs.output,
+        sourceNode: occludedOutput,
         depthNode: this.inputs.depth,
         settings: settings.screenSpaceShafts,
         sunDirection,
         sunColor,
       })
       : null;
-    const postShaftOutput = this.screenSpaceShafts?.outputNode ?? this.inputs.output;
+    const postShaftOutput = this.screenSpaceShafts?.outputNode ?? occludedOutput;
     this.hierarchicalDepth = settings?.ssr?.enabled === true
       ? new HierarchicalDepthNode({
         rawDepthNode: this.inputs.depth,
@@ -184,6 +197,7 @@ export class PostProcessingGraph {
 
     this.gpuPasses = Object.freeze([
       'sceneMrt',
+      ...(this.ambientOcclusion ? ['ambientOcclusion'] : []),
       ...(this.screenSpaceShafts ? ['volumetricOrShafts'] : []),
       ...(this.hierarchicalDepth ? ['ssrDepthHierarchy'] : []),
       ...(this.ssr ? ['ssrTrace', 'ssrTemporal'] : []),
@@ -227,6 +241,10 @@ export class PostProcessingGraph {
       );
       this.screenSpaceShafts.resize(outputWidth, outputHeight);
     }
+    this.ambientOcclusion?.updateUniforms(
+      frameState,
+      settings?.ambientOcclusion ?? this.ambientOcclusion.settings,
+    );
     this.screenSpaceShafts?.updateUniforms(
       frameState,
       settings?.screenSpaceShafts ?? this.screenSpaceShafts.settings,
@@ -257,12 +275,13 @@ export class PostProcessingGraph {
       frameState,
       settings?.depthOfField ?? this.depthOfField.settings,
     );
+    const toneMapping = scaledToneMapping(settings?.toneMapping);
     this.bloom?.updateUniforms(
       settings?.bloom ?? this.bloom.settings,
-      settings?.toneMapping?.exposure ?? 1,
+      toneMapping?.exposure ?? 1,
     );
     this.toneMapping.updateUniforms(
-      settings?.toneMapping,
+      toneMapping,
       settings?.bloom?.intensity ?? 0,
     );
     this.vignette?.updateUniforms(settings?.vignette);
@@ -272,6 +291,10 @@ export class PostProcessingGraph {
 
   resize(width, height, pixelRatio = 1) {
     this.scenePass.setSize(
+      Math.max(1, Math.floor(width * pixelRatio)),
+      Math.max(1, Math.floor(height * pixelRatio)),
+    );
+    this.ambientOcclusion?.resize(
       Math.max(1, Math.floor(width * pixelRatio)),
       Math.max(1, Math.floor(height * pixelRatio)),
     );
@@ -329,6 +352,7 @@ export class PostProcessingGraph {
     this.sharpen?.dispose();
     this.bloom?.dispose();
     this.depthOfField?.dispose();
+    this.ambientOcclusion?.dispose();
     this.taaResolve?.dispose();
     this.ssr?.dispose();
     this.hierarchicalDepth?.dispose();

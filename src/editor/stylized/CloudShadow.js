@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { float, positionWorld, smoothstep, uniform } from 'three/tsl';
 
 import { cloudMotionCoordinatesNode } from './AtmosphereMotion.js';
-import { stylizedFbm2 } from './StylizedNoiseNodes.js';
+import { cloudFbm2 } from './sky/cloudNoise.js';
 
 /**
  * Cloud units the sky's canonical sampling position wraps at. The cloud noise
@@ -35,6 +35,8 @@ export const cloudShadowUniforms = {
   /** 0..1 how much of the cloud band the sun sits in. */
   sunBand: uniform(0),
   cloudDensity: uniform(0.56),
+  /** The look's cloud edge softness, which the region varies (cumulus vs wisps). */
+  cloudSharpness: uniform(0.24),
 };
 
 /**
@@ -43,8 +45,9 @@ export const cloudShadowUniforms = {
  * `cloudDensity` follow the current look.
  */
 export function updateCloudShadows({
-  timeSeconds, cameraRender, cameraCanonical, worldScale, strength, sunDirection, sky, cloudDensity,
+  timeSeconds, cameraRender, cameraCanonical, worldScale, strength, sunDirection, sky, cloudDensity, cloudSharpness,
 }) {
+  if (Number.isFinite(cloudSharpness)) cloudShadowUniforms.cloudSharpness.value = cloudSharpness;
   if (sunDirection && sky) {
     const sun = cloudSunGeometry(sunDirection, sky);
     cloudShadowUniforms.sunProjected.value.set(sun.projectedX, sun.projectedZ);
@@ -96,7 +99,7 @@ function cloudSunlightNode(sky) {
     speed: sky.cloudSpeed,
     worldScale: sky.cloudWorldScale,
   });
-  const cover = smoothstep(u.cloudDensity, u.cloudDensity.add(sky.cloudSharpness), stylizedFbm2(uv));
+  const cover = smoothstep(u.cloudDensity, u.cloudDensity.add(u.cloudSharpness), cloudFbm2(uv));
   return float(1).sub(cover.mul(u.sunBand).mul(u.strength));
 }
 

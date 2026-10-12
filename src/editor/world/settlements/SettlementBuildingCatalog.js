@@ -13,6 +13,7 @@
  */
 
 import { SETTLEMENT_DOORS } from './SettlementDoors.generated.js';
+import { SETTLEMENT_WINDOWS } from './SettlementWindows.generated.js';
 
 const house = (variant, width, depth, height, footprint) => ({ archetype: 'house', variant, width, depth, height, footprint });
 const prop = (variant, width = 2, height = 2, footprint = [1.4, 1.4]) => ({ archetype: 'prop', variant, width, depth: 1, height, footprint });
@@ -61,16 +62,14 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
   bollards: Object.freeze([prop('bollards', 4.5, 2, [4.8, 0.6])]),
 });
 
-/**
- * A settlement house stands with its door open: the drawn leaf is shrunk and
- * sunk out of sight — the one transform the workshop allows a door — and the
- * view draws an open doorway where it was (SettlementInteriorGeometry).
- */
-const DOOR_PUT_AWAY = Object.freeze({ position: [0, -3, 0], rotation: [0, 0, 0], scale: [0.1, 0.1, 1] });
-
 /** The main door of one pooled house in its footprint's frame, or null (SettlementDoors.generated). */
 export function buildingDoor(styleKey, kind, variantIndex) {
   return SETTLEMENT_DOORS[poolKey(styleKey, kind, variantIndex)] ?? null;
+}
+
+/** The ground-floor windows of one pooled house in its footprint's frame (SettlementWindows.generated). */
+export function buildingWindows(styleKey, kind, variantIndex) {
+  return SETTLEMENT_WINDOWS[poolKey(styleKey, kind, variantIndex)] ?? [];
 }
 
 export function buildingEntry(kind, variantIndex) {
@@ -101,6 +100,12 @@ export function poolKey(styleKey, kind, variantIndex) {
  * The workshop recipe for one pooled variant, in one settlement style. Seeds
  * derive from the pool key, so the same variant is the same building in every
  * town of that style, and different variants differ.
+ *
+ * A settlement house stands with its door open: the recipe names its main door
+ * (`openDoorId`) and the workshop builds that doorway as a clear void with no
+ * leaf; the view draws the leaf swung back and the room beyond
+ * (SettlementInteriorGeometry). Shrinking the door with a component transform,
+ * as this used to, shrank the opening too and filled the doorway with stone.
  */
 export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIndex = finishIndexFor(kind, variantIndex), openDoor = true } = {}) {
   const { footprint: _footprint, ...entry } = buildingEntry(kind, variantIndex);
@@ -136,6 +141,6 @@ export function buildingRecipe(style, kind, variantIndex, { detail = 2, finishIn
     ...(entry.style === null ? { style: style.style } : {}),
     detail,
     seed: (seed >>> 0) & 0x7fffffff,
-    ...(openDoor && door ? { componentTransforms: { [door.id]: DOOR_PUT_AWAY } } : {}),
+    ...(openDoor && door ? { openDoorId: door.id } : {}),
   };
 }

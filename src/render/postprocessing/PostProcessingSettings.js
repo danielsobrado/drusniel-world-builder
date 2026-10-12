@@ -57,6 +57,11 @@ export const POST_PROCESSING_RANGES = Object.freeze({
   shaftResolutionScale: Object.freeze({ min: 0.25, max: 0.75 }),
   shaftSamples: Object.freeze({ min: 8, max: 48, integer: true }),
   shaftIntensity: Object.freeze({ min: 0.0, max: 2.0 }),
+  aoResolutionScale: Object.freeze({ min: 0.25, max: 1.0 }),
+  aoSamples: Object.freeze({ min: 4, max: 16, integer: true }),
+  aoRadius: Object.freeze({ min: 0.05, max: 2.0 }),
+  aoThickness: Object.freeze({ min: 0.1, max: 4.0 }),
+  aoIntensity: Object.freeze({ min: 0.0, max: 1.0 }),
   dofManualFocusMeters: Object.freeze({ min: 0.5, max: 2000 }),
   dofMaxCoCPixels: Object.freeze({ min: 0, max: 8 }),
   vignetteIntensity: Object.freeze({ min: 0.0, max: 0.50 }),
@@ -119,6 +124,15 @@ export const DEFAULT_POST_PROCESSING_SETTINGS = Object.freeze({
     decay: 0.955,
     highSunFadeStartDegrees: 35,
     highSunFadeEndDegrees: 55,
+  }),
+  // Off by default: a whole-frame pass for close building views and photos.
+  ambientOcclusion: Object.freeze({
+    enabled: false,
+    resolutionScale: 0.5,
+    samples: 8,
+    radius: 0.45,
+    thickness: 1.0,
+    intensity: 0.65,
   }),
   depthOfField: Object.freeze({
     enabled: false,
@@ -297,6 +311,21 @@ export function normalizePostProcessingSettings(input = {}, {
     decay: clampNumber(shafts.decay, { min: 0.5, max: 1 }, base.screenSpaceShafts.decay),
     highSunFadeStartDegrees: clampNumber(shafts.highSunFadeStartDegrees, { min: 0, max: 90 }, base.screenSpaceShafts.highSunFadeStartDegrees),
     highSunFadeEndDegrees: clampNumber(shafts.highSunFadeEndDegrees, { min: 0, max: 90 }, base.screenSpaceShafts.highSunFadeEndDegrees),
+  };
+
+  const occlusion = source.ambientOcclusion && typeof source.ambientOcclusion === 'object'
+    ? source.ambientOcclusion
+    : {};
+  for (const key of Object.keys(occlusion)) {
+    if (!(key in base.ambientOcclusion)) warnUnknown('postProcessing.ambientOcclusion', key, warnings);
+  }
+  base.ambientOcclusion = {
+    enabled: clampBoolean(occlusion.enabled, base.ambientOcclusion.enabled),
+    resolutionScale: clampNumber(occlusion.resolutionScale, POST_PROCESSING_RANGES.aoResolutionScale, base.ambientOcclusion.resolutionScale),
+    samples: clampNumber(occlusion.samples, POST_PROCESSING_RANGES.aoSamples, base.ambientOcclusion.samples),
+    radius: clampNumber(occlusion.radius, POST_PROCESSING_RANGES.aoRadius, base.ambientOcclusion.radius),
+    thickness: clampNumber(occlusion.thickness, POST_PROCESSING_RANGES.aoThickness, base.ambientOcclusion.thickness),
+    intensity: clampNumber(occlusion.intensity, POST_PROCESSING_RANGES.aoIntensity, base.ambientOcclusion.intensity),
   };
 
   const dof = source.depthOfField && typeof source.depthOfField === 'object'
