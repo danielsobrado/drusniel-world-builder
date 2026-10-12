@@ -1,13 +1,18 @@
 import * as THREE from 'three';
 import { attachCaptureHotkey } from '../input/attachCaptureHotkey.js';
+import { createSpellSoundSynth } from '../vfx/audio/SpellSoundSynth.js';
+import { createVfxSystem } from '../vfx/VfxSystem.js';
 import { earthSpellGameplayConfig } from './earth_spell_gameplay_config.js';
+import { createGrimoireCaster } from './grimoire/createGrimoireCaster.js';
+import { GRIMOIRE_PAGES } from './grimoire/grimoireCatalog.js';
 import { defaultSpellConfig } from './spell_config.js';
 import { createSpellMenu } from './spell_menu.js';
 import { createSpellVfxController } from './spell_vfx_controller.js';
 
 const FIREBALL_COLLISION_PROBE_PADDING_M = 1.5;
 const FIREBALL_COLLISION_PROBE_SECONDS = 0.075;
-const SPELL_IDS = Object.freeze(['fire', 'water', 'air', 'earth', 'lightning', 'fireball']);
+const PAGE_KEYS = Object.freeze({ BracketLeft: -1, BracketRight: 1 });
+const MAX_FRAME_DELTA_S = 0.1;
 
 function meshConfig(vfx) {
   return {
@@ -136,9 +141,38 @@ export function createSpellRuntime(deps) {
     return started;
   };
 
+  // The grimoire: procedural VFX spells (src/editor/vfx), on their own dock pages.
+  const effects = deps.groundHeight ? createVfxSystem({
+    scene,
+    groundHeight: deps.groundHeight,
+    getSceneLights: deps.getSceneLights,
+    pressGround: deps.pressGround,
+    sound: createSpellSoundSynth(),
+  }) : null;
+  const unsubscribeOrigin = effects && typeof deps.subscribeOriginShift === 'function'
+    ? deps.subscribeOriginShift((event) => effects.shiftOrigin(event.shiftX, event.shiftZ))
+    : null;
+  const grimoire = effects ? createGrimoireCaster({
+    vfx: effects,
+    getCamera,
+    raycastTerrain: (ray, maxRange) => deps.raycastTerrain?.(ray, maxRange) ?? null,
+    groundHeight: deps.groundHeight,
+    getCasterFeet: deps.getCasterFeet,
+  }) : null;
+  let lastUpdateMs = null;
+
+  const castGrimoire = (spellId) => {
+    if (disposed || !grimoire || !isCastMode() || deps.isInputBlocked?.()) return false;
+    const started = grimoire.cast(spellId);
+    if (started) deps.onCast?.(spellId);
+    return started;
+  };
+
   const menu = createSpellMenu({
     config,
     root: deps.menuRoot,
+    extraPages: grimoire ? GRIMOIRE_PAGES : [],
+    castExtra: castGrimoire,
     controller: {
       playFire: (durationMs) => cast('fire', durationMs),
       playWater: (durationMs) => cast('water', durationMs),
@@ -175,17 +209,23 @@ export function createSpellRuntime(deps) {
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return false;
     if (consumesGameplayShortcut(event.target)) return false;
 
+    const pageDelta = PAGE_KEYS[event.code];
+    if (pageDelta) {
+      event.preventDefault();
+      menu.cyclePage(pageDelta);
+      return true;
+    }
     const numericCode = event.code.startsWith('Digit')
       ? Number(event.code.slice(5))
       : event.code.startsWith('Numpad')
         ? Number(event.code.slice(6))
         : 0;
-    const spellId = SPELL_IDS[numericCode - 1];
-    if (!spellId) return false;
+    const slot = numericCode - 1;
+    if (slot < 0 || !menu.hasSlot(slot)) return false;
     event.preventDefault();
     // Through the dock, so a key cast lights its slot and plays the cast sound
-    // exactly like a click; the dock calls back into `cast`.
-    menu.cast(spellId);
+    // exactly like a click; the dock calls back into `cast` or `castGrimoire`.
+    menu.castSlot(slot);
     return true;
   };
 
@@ -202,14 +242,25 @@ export function createSpellRuntime(deps) {
 
   return {
     cast,
+    castGrimoire,
     handleKeyDown,
     syncMenuVisibility,
+    /** The procedural VFX stack, for QA probes. */
+    effects,
     update(nowMs) {
-      if (!disposed) vfx.update(nowMs);
+      if (disposed) return;
+      vfx.update(nowMs);
+      if (effects) {
+        const deltaSeconds = lastUpdateMs === null ? 0 : (nowMs - lastUpdateMs) / 1000;
+        lastUpdateMs = nowMs;
+        effects.update(Math.min(MAX_FRAME_DELTA_S, Math.max(0, deltaSeconds)), getCamera());
+      }
     },
-    precompile(renderer) {
-      if (!disposed) return vfx.precompile(renderer);
-      return false;
+    async precompile(renderer) {
+      if (disposed) return false;
+      const compiled = await vfx.precompile(renderer);
+      if (effects) await effects.precompile(renderer, getCamera());
+      return compiled;
     },
     dispose() {
       if (disposed) return;
@@ -218,8 +269,10 @@ export function createSpellRuntime(deps) {
         window.removeEventListener('keydown', onKeyDown, true);
       }
       unsubscribeMode?.();
+      unsubscribeOrigin?.();
       menu.dispose();
       vfx.dispose();
+      effects?.dispose();
     },
   };
 }

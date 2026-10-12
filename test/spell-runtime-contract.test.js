@@ -22,11 +22,12 @@ test('Earth commits gameplay before playing VFX at the same target', () => {
   assert.match(runtimeSource, /return vfx\.playEarth\(durationMs\) !== false;/);
 });
 
-test('all six spell slots route through one guarded cast API', () => {
-  assert.match(runtimeSource, /const SPELL_IDS = Object\.freeze\(\['fire', 'water', 'air', 'earth', 'lightning', 'fireball'\]\);/);
+test('elemental and grimoire casts route through guarded cast APIs', () => {
   assert.match(runtimeSource, /const cast = \(spellId, durationMs\) => \{/);
   assert.match(runtimeSource, /disposed \|\| !isCastMode\(\) \|\| deps\.isInputBlocked\?\.\(\)/);
-  assert.match(runtimeSource, /return \{\s*cast,\s*handleKeyDown,/);
+  assert.match(runtimeSource, /const castGrimoire = \(spellId\) => \{/);
+  assert.match(runtimeSource, /disposed \|\| !grimoire \|\| !isCastMode\(\) \|\| deps\.isInputBlocked\?\.\(\)/);
+  assert.match(runtimeSource, /return \{\s*cast,\s*castGrimoire,\s*handleKeyDown,/);
 });
 
 test('casting and menu visibility stop while player mode is paused', () => {
@@ -39,8 +40,9 @@ test('casting and menu visibility stop while player mode is paused', () => {
 test('spell keyboard handling covers top-row and numpad digits', () => {
   assert.match(runtimeSource, /event\.code\.startsWith\('Digit'\)/);
   assert.match(runtimeSource, /event\.code\.startsWith\('Numpad'\)/);
-  assert.match(runtimeSource, /const spellId = SPELL_IDS\[numericCode - 1\];/);
-  assert.match(runtimeSource, /if \(!spellId\) return false;/);
+  assert.match(runtimeSource, /if \(slot < 0 \|\| !menu\.hasSlot\(slot\)\) return false;/);
+  assert.match(runtimeSource, /menu\.castSlot\(slot\);/);
+  assert.match(runtimeSource, /BracketLeft: -1, BracketRight: 1/);
   assert.match(runtimeSource, /export function attachSpellHotkeys/);
   assert.match(runtimeSource, /deps\.registerKeys !== false/);
 });

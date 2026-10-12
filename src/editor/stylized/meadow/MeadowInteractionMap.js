@@ -194,6 +194,48 @@ export class MeadowInteractionMap {
     }
   }
 
+  /**
+   * Presses the grass flat over a ground disc — a blast, a scorch, a puddle.
+   * Unlike `paintSphere` it does not ask the terrain per texel, so a spell can
+   * hold a several-metre patch down every frame for next to nothing. Full
+   * strength inside `innerFraction` of the radius, fading to the rim.
+   *
+   * @param {number} x render-space metres
+   * @param {number} z render-space metres
+   * @param {number} radius metres
+   * @param {number} [strength] 0..1
+   * @param {number} [innerFraction] 0..1
+   */
+  pressDisc(x, z, radius, strength = 1, innerFraction = 0.6) {
+    const perMetre = this.resolution / this.worldSize;
+    const centerX = ((x - this.center.x) / this.worldSize + 0.5) * this.resolution;
+    const centerY = ((z - this.center.y) / this.worldSize + 0.5) * this.resolution;
+    const pixelRadius = radius * perMetre;
+    if (pixelRadius < 0.5 || !(strength > 0)) return;
+    const minX = Math.max(0, Math.floor(centerX - pixelRadius));
+    const maxX = Math.min(this.resolution - 1, Math.ceil(centerX + pixelRadius));
+    const minY = Math.max(0, Math.floor(centerY - pixelRadius));
+    const maxY = Math.min(this.resolution - 1, Math.ceil(centerY + pixelRadius));
+    if (maxX < minX || maxY < minY) return;
+    this.addInk(minX, minY, maxX, maxY);
+    const inner = Math.min(0.99, Math.max(0, innerFraction));
+    const peak = 255 * Math.min(1, strength);
+    for (let py = minY; py <= maxY; py += 1) {
+      const dy = (py + 0.5 - centerY) / pixelRadius;
+      for (let px = minX; px <= maxX; px += 1) {
+        const dx = (px + 0.5 - centerX) / pixelRadius;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 1) continue;
+        const falloff = distance <= inner ? 1 : 1 - (distance - inner) / (1 - inner);
+        const offset = (py * this.resolution + px) * 4;
+        const next = Math.max(this.pixels[offset], Math.floor(peak * falloff));
+        this.pixels[offset] = next;
+        if (next > this.peak) this.peak = next;
+      }
+    }
+    this.texture.needsUpdate = true;
+  }
+
   dispose() {
     this.texture.dispose();
   }

@@ -1202,6 +1202,25 @@ const kitTowns = kitTownsEnabled();
       subscribeViewMode: (listener) => viewModeController.subscribe(listener),
       isInputBlocked: () => gameplayOverlayController.isWorldInputBlocked(),
       raycastTerrain: (ray, maxRange) => raycastTerrainHeightfield(terrainView, ray, maxRange),
+      // The grimoire's procedural VFX: terrain contact, origin snaps, sun and caster.
+      groundHeight: (x, z) => terrainView.getWorldHeight(x, z),
+      subscribeOriginShift: (listener) => terrainView.floatingOrigin.subscribe(listener),
+      pressGround: (x, z, radius, strength, inner) => (
+        stylizedSurface.meadowGrass?.interaction?.pressDisc(x, z, radius, strength, inner)
+      ),
+      getSceneLights: () => ({
+        directional: stylizedSurface.skyView?.directional ?? null,
+        hemisphere: stylizedSurface.skyView?.hemisphere ?? null,
+      }),
+      getCasterFeet: () => {
+        const status = viewModeController.getPlayerFrameStatus();
+        if (!status) return null;
+        return {
+          x: status.position.x,
+          y: Number.isFinite(status.footY) ? status.footY : status.position.y,
+          z: status.position.z,
+        };
+      },
       onCast: () => {
         postProcessingController.notifyReactive(
           POST_PROCESSING_REACTIVE_EVENTS.SPELL_STARTED,

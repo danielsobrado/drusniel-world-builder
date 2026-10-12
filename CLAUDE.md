@@ -32,6 +32,14 @@ those nodes into the material — keep them behind a build-time flag and compile
 variant without them for anything that does not need them
 (`docs/perf-investigation-2026-07-28.md`).
 
+## Spell VFX
+
+Grimoire spells are procedural particles from one startup-baked atlas — see
+[spell VFX](docs/spell-vfx.md). Keep the particle path to one instanced draw,
+and do not add scene lights for effects: even one dimmed point light measurably
+slows every lit material. Effect lights stay virtual (shader uniforms plus
+ground light pools) unless a task explicitly measures otherwise.
+
 ## Asset startup
 
 Only the trees and the shared scene may block the first frame.

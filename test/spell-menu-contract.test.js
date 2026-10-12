@@ -7,17 +7,24 @@ const source = await readFile(
   'utf8',
 );
 
-test('spell menu declares all six slots from one descriptor table', () => {
+test('spell menu declares all six elemental slots from one descriptor table', () => {
   for (const id of ['fire', 'water', 'air', 'earth', 'lightning', 'fireball']) {
     assert.match(source, new RegExp(`id: '${id}'`));
   }
-  assert.match(source, /for \(const descriptor of SPELL_BUTTONS\)/);
+  assert.match(source, /spells: SPELL_BUTTONS\.map\(\(descriptor\) =>/);
+});
+
+test('grimoire pages join the dock after Elements and are keyed per page', () => {
+  assert.match(source, /elementsPage\(config, controller\),\s*\.\.\.\(deps\.extraPages \?\? \[\]\)/);
+  assert.match(source, /descriptor\.slotKey = `\$\{page\.id\}:\$\{descriptor\.id\}`;/);
+  assert.match(source, /castSlot: \(index\) =>/);
+  assert.match(source, /cyclePage: \(delta\) => showPage\(activePage \+ delta\)/);
 });
 
 test('failed casts flash as misses and do not emit cast audio', () => {
-  const firedIndex = source.indexOf("const fired = typeof play === 'function'");
+  const firedIndex = source.indexOf("const fired = typeof descriptor.play === 'function'");
   const missIndex = source.indexOf('if (!fired)');
-  const audioIndex = source.indexOf('emitAudio(`spell.${descriptor.id}.cast`');
+  const audioIndex = source.indexOf('emitAudio(descriptor.audio.event');
   assert.ok(firedIndex >= 0);
   assert.ok(missIndex > firedIndex);
   assert.ok(audioIndex > missIndex);
