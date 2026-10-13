@@ -1,0 +1,30 @@
+import * as THREE from 'three';
+import { dot, max, mix, smoothstep, vec3 } from 'three/tsl';
+import { resolveCanopyGrade } from './canopyGrade.js';
+
+/** Understory bridges the meadow and canopy, using their configured pigments. */
+export function resolveFoliagePalette(config = {}, tileId = null) {
+  const meadow = config.grass?.meadow?.palette;
+  const grass = meadow?.byTileId?.[tileId] ?? meadow;
+  const canopy = resolveCanopyGrade(config.trees?.canopyGrade);
+  const base = new THREE.Color(grass?.base ?? config.color?.bottom ?? '#50852b');
+  const tip = new THREE.Color(grass?.tip ?? config.color?.top ?? '#a6bf65');
+  base.lerp(new THREE.Color(canopy?.shadow ?? config.trees?.leafBottom ?? '#286746'), 0.3);
+  tip.lerp(new THREE.Color(canopy?.light ?? config.trees?.leafTop ?? '#8cb75a'), 0.55);
+  return { base, tip, exposure: canopy?.exposure ?? 3.5 };
+}
+
+export function fallingLeafPalette(config = {}, tileId = null) {
+  const { base, tip } = resolveFoliagePalette(config, tileId);
+  // Fresh, mature and pale green leaves from one stand; no unrelated white/gold.
+  return [base.clone().lerp(tip, 0.35), base.clone().lerp(tip, 0.75), tip];
+}
+
+/** Keep painted veins, stems and blossoms while grading green foliage. */
+export function gradeUnderstory(sample, palette) {
+  const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
+  const green = smoothstep(0.005, 0.06, sample.g.sub(max(sample.r, sample.b)));
+  const ramp = mix(vec3(...palette.base.toArray()), vec3(...palette.tip.toArray()),
+    smoothstep(0.025, 0.8, luminance.mul(palette.exposure)));
+  return mix(sample, ramp, green.mul(0.9));
+}

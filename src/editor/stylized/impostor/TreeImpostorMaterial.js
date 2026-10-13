@@ -28,6 +28,7 @@ import {
 } from '../forest/TreeAppearance.js';
 import { orientedScreenDitherThreshold } from '../lod/screenDither.js';
 import { assignTreeFoliageMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
+import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 
 const TWO_PI = Math.PI * 2;
 
@@ -46,13 +47,19 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance }
   const up = normalize(mix(vec3(0, 1, 0), cameraUp, sphericalBlend));
   const backward = normalize(cross(right, up));
   const local = positionLocal;
-  const canopyOffset = sin(time.mul(0.55).add(parameters.z.mul(TWO_PI)))
+  const field = sampleWorldWind(transform.xz);
+  const wave = windWaveCoordinates(canonicalFromRender(transform.xz));
+  const crownWeight = local.y.add(0.5).clamp(0, 1).pow(2);
+  const canopyOffset = sin(wave.along.mul(0.47).add(time.mul(1.3)).add(parameters.z.mul(0.9)))
     .mul(windStrength)
-    .mul(scale);
+    .mul(field.envelope.clamp(0.35, 3.5))
+    .mul(scale).mul(crownWeight);
   const worldPosition = transform.xyz
     .add(right.mul(local.x.mul(atlas.width).mul(scale).mul(widthScale)))
     .add(up.mul(local.y.mul(atlas.height).mul(scale)))
-    .add(right.mul(canopyOffset));
+    // Keep the foot planted. Wind moves the crown in world axes; the old
+    // screen-right offset slid the whole tree and turned whenever the camera did.
+    .add(vec3(field.direction.x, 0, field.direction.y).mul(canopyOffset));
 
   const viewDelta = cameraPosition.sub(transform.xyz);
   const localAzimuth = mod(atan(viewDelta.x, viewDelta.z).sub(parameters.x).add(TWO_PI), TWO_PI);

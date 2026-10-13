@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 
 import { createFallingLeavesMaterial, createFallingLeavesUniforms } from './fallingLeavesMaterial.js';
 import { sampleTilesAround, tileShare } from '../../world/sampleTilesAround.js';
+import { fallingLeafPalette } from '../forest/foliagePalette.js';
 
 export const DEFAULT_FALLING_LEAVES = Object.freeze({
   enabled: true,
@@ -13,7 +14,7 @@ export const DEFAULT_FALLING_LEAVES = Object.freeze({
   fallSpeed: 0.9,
   /** Biomes whose canopy sheds: temperate deciduous forest and temperate rainforest. */
   tileIds: [6, 8],
-  /** Null uses the donor green/gold/pale leaves; three linear RGB colors override them. */
+  /** Null follows the meadow/canopy palette; three linear RGB colors override it. */
   palette: null,
 });
 
@@ -62,8 +63,12 @@ export function sheddingCanopyShare(tiles, tileIds) {
  * thins them rather than cutting them off.
  */
 export class FallingLeaves {
-  constructor({ scene, config = {}, getTile, getTileSize, getOrigin }) {
+  constructor({ scene, config = {}, foliageConfig = {}, getTile, getTileSize, getOrigin }) {
     this.config = { ...DEFAULT_FALLING_LEAVES, ...config };
+    this.config.palette ??= fallingLeafPalette(foliageConfig).map(color => color.toArray());
+    this.followsFoliagePalette = config.palette == null;
+    this.palettesByTile = new Map(this.config.tileIds.map(id => [id, fallingLeafPalette(foliageConfig, id)]));
+    this.paletteTargets = this.config.palette.map(rgb => new THREE.Color().fromArray(rgb));
     this.getTile = getTile;
     this.getTileSize = getTileSize;
     this.getOrigin = getOrigin;
@@ -89,7 +94,19 @@ export class FallingLeaves {
       rings: SAMPLE_RINGS,
       directions: SAMPLE_DIRECTIONS,
     });
-    return sheddingCanopyShare(tiles, this.config.tileIds);
+    const share = sheddingCanopyShare(tiles, this.config.tileIds);
+    if (this.followsFoliagePalette && share > 0) {
+      this.paletteTargets.forEach(color => color.setRGB(0, 0, 0));
+      let count = 0;
+      for (const id of tiles) {
+        const palette = this.palettesByTile.get(id);
+        if (!palette) continue;
+        palette.forEach((color, index) => this.paletteTargets[index].add(color));
+        count += 1;
+      }
+      this.paletteTargets.forEach(color => color.multiplyScalar(1 / count));
+    }
+    return share;
   }
 
   /**
@@ -109,7 +126,9 @@ export class FallingLeaves {
       this.target = this.sampleCanopy(camera);
     }
     const amount = this.uniforms.amount;
-    amount.value += (this.target - amount.value) * Math.min(1, dt * 0.8);
+    const blend = Math.min(1, dt * 0.8);
+    amount.value += (this.target - amount.value) * blend;
+    this.uniforms.palette.forEach((color, index) => color.value.lerp(this.paletteTargets[index], blend));
     this.mesh.visible = amount.value > 0.01;
     if (!this.mesh.visible) return;
     this.uniforms.time.value = seconds;

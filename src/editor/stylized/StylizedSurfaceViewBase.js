@@ -35,6 +35,7 @@ import {
 } from './StylizedGrassSlot.js';
 import { GrassBladeProfilePool } from './GrassBladeProfilePool.js';
 import { StylizedRockView } from './StylizedRockView.js';
+import { syncFoliageLight } from './forest/foliageLight.js';
 import { StylizedSceneAssetCache } from './StylizedSceneAssetCache.js';
 import { StylizedSkyView } from './StylizedSkyView.js';
 import { StylizedTreeView } from './StylizedTreeView.js';
@@ -711,6 +712,7 @@ export class StylizedSurfaceView {
     // frame's rebuild scheduling rather than waiting for the next one.
     this.variantResidency?.update(this.frameStartedAt);
     this.skyView?.update(timestamp, camera);
+    syncFoliageLight(this.skyView);
     this.wildlifeView?.update(timestamp, camera);
     // Aquatic plants remain visible while land preparation stands down. Their
     // clock must keep matching the water surface during swimming and diving.

@@ -3,10 +3,8 @@ import {
   attribute,
   clamp,
   dot,
-  float,
   max,
   mix,
-  modelWorldMatrix,
   normalView,
   normalWorld,
   oneMinus,
@@ -16,23 +14,19 @@ import {
   positionViewDirection,
   pow,
   saturate,
-  sin,
   texture,
   triplanarTexture,
   uv,
-  vec2,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { stylizedFbm } from './StylizedNoiseNodes.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
-import { sampleWorldWind } from '../weather/wind/worldWindState.js';
+import { foliageWindPosition } from './forest/foliageWind.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyBarkWeathering } from './barkWeathering.js';
 
-const TWO_PI = Math.PI * 2;
 function colorNode(value) {
   const color = new THREE.Color(value);
   return vec3(color.r, color.g, color.b);
@@ -74,35 +68,7 @@ export function createStylizedLeafMaterial({
     0,
     1,
   );
-  const heightMask = normalizedHeight.mul(normalizedHeight);
-  const localXZ = positionLocal.xz;
-  // Direction and gusts from the shared world wind field, like the grass below,
-  // so a gust front bends the canopy and the sward together.
-  const worldWind = sampleWorldWind(modelWorldMatrix.mul(vec4(positionLocal, 1)).xz);
-  const windDirection = worldWind.direction;
-  const gustScale = worldWind.envelope.clamp(0.35, 3.5);
-  const windPerpendicular = vec2(windDirection.y.negate(), windDirection.x);
-  const phase = attribute('instanceDither', 'vec3').y.mul(TWO_PI);
-  const primary = sin(dot(localXZ, windDirection).mul(config.wind.frequency)
-    .add(time.mul(config.wind.speed))
-    .add(phase));
-  const flutter = sin(time.mul(config.wind.speed * config.trees.flutterSpeed)
-    .add(positionLocal.y.mul(2.3))
-    .add(positionLocal.x)
-    .add(phase.mul(1.73)))
-    .mul(config.trees.flutterAmplitude);
-  const turbulence = sin(dot(localXZ, windPerpendicular).mul(config.wind.frequency * 1.9)
-    .add(time.mul(config.wind.speed * 0.7))
-    .add(phase.mul(0.61)))
-    .mul(config.wind.turbulence * 0.25);
-  // Soft stiffness from per-instance morphology.z (trunk scale channel): thicker /
-  // flare trunks sway less. Keeps wind response in the same range as clod trees.
-  const stiffness = clamp(attribute('instanceMorphology', 'vec3').z, 0.65, 1.35);
-  const windScale = float(1).div(stiffness).mul(0.95).mul(gustScale);
-  const wave = primary.add(flutter).add(turbulence);
-  const sway = windDirection.mul(wave.mul(config.trees.windStrength).mul(heightMask).mul(windScale));
-  const dip = wave.abs().mul(config.trees.windStrength).mul(config.trees.dip).mul(heightMask).mul(windScale);
-  const finalPosition = positionLocal.add(vec3(sway.x, dip.negate(), sway.y));
+  const finalPosition = foliageWindPosition({ config, time, minimumY: bounds.minY, maximumY: bounds.maxY });
 
   const gradient = pow(normalizedHeight, config.trees.gradientPower);
   const map = leafMap ?? source?.map ?? null;

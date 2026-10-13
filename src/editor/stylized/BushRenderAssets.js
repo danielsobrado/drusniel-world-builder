@@ -3,13 +3,14 @@ import {
   clamp,
   float,
   mix,
-  positionLocal,
+  positionGeometry,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
-import { authoredTexture } from './AuthoredTextureNode.js';
+import { applyUnderstoryPalette, authoredFoliageColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
+import { groundDetailWindPosition } from './groundDetailWind.js';
+import { resolveFoliagePalette } from './forest/foliagePalette.js';
 
 export const BUSH_CAST_SHADOW = false;
 export const BUSH_PROXY_TRIANGLES = 60;
@@ -34,34 +35,15 @@ function usesCutout(material) {
   );
 }
 
-function createNodeMaterial(source) {
-  if (source.isNodeMaterial) return source.clone();
-  let material;
-  if (source.isMeshPhysicalMaterial) material = new THREE.MeshPhysicalNodeMaterial();
-  else if (source.isMeshStandardMaterial) material = new THREE.MeshStandardNodeMaterial();
-  else if (source.isMeshPhongMaterial) material = new THREE.MeshPhongNodeMaterial();
-  else if (source.isMeshLambertMaterial) material = new THREE.MeshLambertNodeMaterial();
-  else if (source.isMeshBasicMaterial) material = new THREE.MeshBasicNodeMaterial();
-  else material = new THREE.MeshStandardNodeMaterial();
-  return material.copy(source);
-}
-
-function authoredColorNode(material) {
-  const value = new THREE.Color(material.color ?? '#ffffff');
-  const baseColor = vec3(value.r, value.g, value.b);
-  const rgb = material.map
-    ? authoredTexture(material.map).rgb.mul(baseColor)
-    : baseColor;
-  return vec4(rgb, 1);
-}
-
-export function cloneBushMaterial(source) {
+export function cloneBushMaterial(source, { config = null, height = 0, tileId = null } = {}) {
   if (!source?.isMaterial) throw new Error('Bush prototypes require an authored material.');
-  const material = createNodeMaterial(source);
+  const material = cloneAuthoredNodeMaterial(source);
   if (material.map?.colorSpace !== undefined) {
     material.map.colorSpace = THREE.SRGBColorSpace;
   }
-  material.colorNode = authoredColorNode(material);
+  material.colorNode = authoredFoliageColor(material);
+  if (config) applyUnderstoryPalette(material, config, tileId);
+  if (config?.wind && height > 0) material.positionNode = groundDetailWindPosition(config.wind, height);
   material.side = THREE.DoubleSide;
   if (usesCutout(material)) {
     material.alphaTest = Math.max(0.35, material.alphaTest ?? 0);
@@ -137,12 +119,15 @@ export function createBushProxyMaterial(sourceMaterial, {
   color = DEFAULT_PROXY_COLOR,
   minimumHeight = 0,
   maximumHeight = 1,
+  config = null,
+  tileId = null,
 } = {}) {
   const value = proxyColor(sourceMaterial, color);
-  const bottom = value.clone().multiplyScalar(0.72);
-  const top = value.clone().lerp(new THREE.Color('#d7ef9a'), 0.22);
+  const palette = config ? resolveFoliagePalette(config, tileId) : null;
+  const bottom = palette?.base ?? value.clone().multiplyScalar(0.72);
+  const top = palette?.tip ?? value.clone().lerp(new THREE.Color('#d7ef9a'), 0.22);
   const height = Math.max(MIN_PROXY_EXTENT, maximumHeight - minimumHeight);
-  const heightMix = clamp(positionLocal.y.sub(float(minimumHeight)).div(float(height)), 0, 1);
+  const heightMix = clamp(positionGeometry.y.sub(float(minimumHeight)).div(float(height)), 0, 1);
   const material = new THREE.MeshLambertNodeMaterial({ flatShading: true });
   material.colorNode = mix(
     vec3(bottom.r, bottom.g, bottom.b),
@@ -151,6 +136,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   );
   material.transparent = false;
   material.depthWrite = true;
+  if (config?.wind) material.positionNode = groundDetailWindPosition(config.wind, height);
   return assignBushFoliageMaterialData(material);
 }
 

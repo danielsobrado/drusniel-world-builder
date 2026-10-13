@@ -18,6 +18,7 @@ import { acceptsStrategicDetailPlacement } from './StrategicDetailPlacement.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { groundDetailWindPosition } from './groundDetailWind.js';
+import { applyUnderstoryPalette, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
@@ -29,8 +30,9 @@ const DETAIL_SCRATCH = {
   yaw: new THREE.Quaternion(),
 };
 
-function cloneDetailMaterial(source, { wind = null, height = 0 } = {}) {
-  const material = source.clone();
+function cloneDetailMaterial(source, { wind = null, height = 0, foliageConfig = null, tileId = null } = {}) {
+  const material = foliageConfig ? cloneAuthoredNodeMaterial(source) : source.clone();
+  if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId);
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
   if (wind && height > 0) material.positionNode = groundDetailWindPosition(wind, height);
@@ -161,6 +163,9 @@ export class StylizedGroundDetailView {
                 ? null
                 : (this.config.wind ?? null),
               height: geometry.boundingBox.max.y - Math.min(0, geometry.boundingBox.min.y),
+              foliageConfig: ['groundDetail', 'tropicalPlant'].includes(this.layerName) && definition.sway !== false
+                ? this.config : null,
+              tileId: definition.tileIds?.[0],
             }),
             kind: 'detail',
           };

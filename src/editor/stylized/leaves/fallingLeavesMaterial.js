@@ -19,11 +19,12 @@ import {
 } from 'three/tsl';
 
 import { skyLightUniforms } from '../sky/skyLight.js';
+import { fallingLeafPalette } from '../forest/foliagePalette.js';
 
 const TAU = Math.PI * 2;
 
 /** Shared uniforms: the camera-centred box the leaves wrap in, time, wind, how many fall. */
-export function createFallingLeavesUniforms({ boxSize, boxHeight }) {
+export function createFallingLeavesUniforms({ boxSize, boxHeight, palette = fallingLeafPalette().map(color => color.toArray()) }) {
   return {
     time: uniform(0),
     center: uniform(new THREE.Vector3()),
@@ -31,6 +32,7 @@ export function createFallingLeavesUniforms({ boxSize, boxHeight }) {
     amount: uniform(0),
     boxSize: uniform(boxSize),
     boxHeight: uniform(boxHeight),
+    palette: palette.map(rgb => uniform(new THREE.Color().fromArray(rgb))),
   };
 }
 
@@ -50,7 +52,7 @@ function rotateAbout(v, axis, angle) {
  *
  * Unlit, and dimmed by the sky's light like the water.
  */
-export function createFallingLeavesMaterial(uniforms, { size, fallSpeed, palette }) {
+export function createFallingLeavesMaterial(uniforms, { size, fallSpeed }) {
   const corner = attribute('leafCorner', 'vec2');
   const seed = attribute('leafSeed', 'vec4');
   const { time, center, wind, amount, boxSize, boxHeight } = uniforms;
@@ -76,11 +78,15 @@ export function createFallingLeavesMaterial(uniforms, { size, fallSpeed, palette
   const material = new THREE.MeshBasicNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = origin.add(rotateAbout(scaled, axis, angle));
 
-  const leafTexture = createFallingLeafTexture(palette);
-  const leaf = texture(leafTexture, uv()).depth(seed.z.mul(3).floor().min(2));
+  // A neutral painted leaf supplies veins and shading. Pigment is a uniform,
+  // so entering a different grove changes hue without rebuilding its texture.
+  const leafTexture = createFallingLeafTexture([[1, 1, 1], [1, 1, 1], [1, 1, 1]]);
+  const layer = seed.z.mul(3).floor().min(2);
+  const leaf = texture(leafTexture, uv()).depth(layer);
+  const pigment = mix(mix(uniforms.palette[0], uniforms.palette[1], step(1, layer)), uniforms.palette[2], step(2, layer));
   material.alphaTest = 0.5;
   material.opacityNode = leaf.a;
-  material.colorNode = leaf.rgb.mul(mix(0.8, 1.05, seed.y)).mul(skyLightUniforms.brightness);
+  material.colorNode = leaf.rgb.mul(pigment).mul(mix(0.8, 1.05, seed.y)).mul(skyLightUniforms.brightness);
   material.userData.leafTexture = leafTexture;
   const dispose = () => {
     leafTexture.dispose();

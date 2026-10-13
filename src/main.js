@@ -985,6 +985,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const fallingLeaves = new FallingLeaves({
     scene: terrainView.scene,
     config: config.stylizedSurface.fallingLeaves,
+    foliageConfig: config.stylizedSurface,
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),
     getTileSize: () => config.map.tileSize,
     getOrigin: () => terrainView.floatingOrigin.readState(fallingLeavesOrigin),
