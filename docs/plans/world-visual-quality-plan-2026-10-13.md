@@ -10,11 +10,85 @@ or higher texture resolution alone will not deliver that result.
 
 ## Capture method and limits
 
-<!-- CAPTURE_METHOD -->
+Review started on **October 13** and completed on **October 14, 2026**. The
+original twelve land-biome images were captured on October 13 at revision
+`9fb5ba6b`, using the default procedural world, seed **918273**, and unchanged
+`editor.config.yaml`. The existing in-progress screenshots were subsequently
+committed in `209f89d1`; this document completes their review.
+
+Locations were selected reproducibly: LCG seed **20261013**, 250,000 random cell
+pairs in `[-8000, 8000)` on each axis, retaining the first occurrence of each
+biome. A random yaw was drawn when a biome was first encountered. Cells are
+2 metres wide; the conversion is `X = (cellX + 0.5) * 2`,
+`Z = -(cellZ + 0.5) * 2`. This is deliberately broad, stratified sampling, not
+an area-weighted assessment or a search for the best views.
+
+The captures use headed Windows Chromium, **hardware WebGPU on NVIDIA Lovelace**,
+1600 × 900 CSS pixels at device scale 1, first-person FOV 68°, pitch −0.08 radians,
+and the **Highfield** day preset with the clock paused at 12:00. Manual weather
+is off. Regional atmosphere, snow particles, wind and foliage animation remain
+live, so these are qualitative observations, not deterministic pixel comparisons.
+The HUD is retained as evidence of the current exploration presentation.
+
+**Readiness limitation:** all twelve images have 49 resident terrain chunks,
+zero pending terrain loads/commits, ready player collision, and zero pending
+material/field/meadow/draw/variant tasks. However, **none passed the complete
+scenery settle gate**: one build-queue entry remained pending. Spot checks
+identified `bushBuildQueue`. The harness waited 16 seconds after entering each
+pose, then up to 30 seconds for 60 consecutive ready frames. An earlier desert
+inspection also retained that queue entry after a longer wait. Keep the images
+for visible material and composition findings, but treat exact vegetation
+population and absence claims as provisional. Browser page/console errors were
+zero during the retained procedural capture run. These are not accepted
+performance baselines; the HUD FPS numbers are not benchmark results.
+
+An initial Eldara jump failed with `Object spatial operation exceeds 262144
+buckets`; those failed attempts are excluded from the image set. Subsequent
+capture navigation resets the terrain predictor and requests the destination
+resident set before allowing a frame at the new pose. This is a capture-harness
+workaround, not an engine fix or evidence that ordinary teleporting is correct.
+
+Full coordinates, camera state, biome verification, resolved sky values and
+readiness snapshots are in
+[procedural-captures.json](../qa/visual-audit-2026-10-13/procedural-captures.json).
+The [provenance record](../qa/visual-audit-2026-10-13/provenance.json) includes
+the source revision, sampling counts, configuration hash and image hashes.
+An additional marine/imported-world capture attempt after resuming the review
+was interrupted by a live application reload and shader initialization. No
+loading-screen images are retained. Marine, imported mountain and settlement
+views remain explicit follow-up coverage; the twelve linked images are the
+evidence for this pass.
+The review does not establish animation quality, audio quality, settlement or
+workshop appearance, or coverage at other quality tiers.
 
 ## Screenshot inventory and observations
 
-<!-- SCREENSHOT_INVENTORY -->
+Each link opens the original **1600 × 900** browser capture. The ID is the
+canonical biome at the camera, not a claim that the whole frame contains only
+one biome. Border cases are retained rather than replaced with beauty shots.
+
+| ID / screenshot | Canonical X, Z (metres) | What is visible |
+| --- | --- | --- |
+| [01 · Hot desert](../qa/visual-audit-2026-10-13/procedural-01.jpg) | -5,667, 93 | Broad white streaks and pale, low-contrast sand dominate; little foreground or horizon structure. |
+| [02 · Cold desert](../qa/visual-audit-2026-10-13/procedural-02.jpg) | 501, -2,833 | Bright streaks on bare ground; a dense grass wall creates a hard habitat edge; cyan water beyond. |
+| [03 · Savanna](../qa/visual-audit-2026-10-13/procedural-03.jpg) | -14,373, -3,467 | Gold palette reads as dry grassland, but nearly uniform tall blades resemble a crop; little foreground variation. |
+| [04 · Grassland](../qa/visual-audit-2026-10-13/procedural-04.jpg) | -8,957, 7,737 | Greener than savanna, with similar blade height and rhythm; repeated broadleaf silhouettes along the horizon. |
+| [05 · Tropical seasonal forest](../qa/visual-audit-2026-10-13/procedural-05.jpg) | -15,817, -3,703 | Useful close bark and root silhouette; bright turf reaches the trunk; cyan shallows and a dark water band need integration. |
+| [06 · Temperate deciduous forest](../qa/visual-audit-2026-10-13/procedural-06.jpg) | -1,945, 7,795 | Strong tree/grass shapes, but the woodland floor stays meadow-like; little visible litter or shaded understory. |
+| [07 · Tropical rainforest](../qa/visual-audit-2026-10-13/procedural-07.jpg) | 2,005, 2,941 | Nearby trees become pale cutouts in front of a darker distant tree line; inconsistent depth and vegetation appearance. |
+| [08 · Temperate rainforest](../qa/visual-audit-2026-10-13/procedural-08.jpg) | -1,997, -2,889 | Bare foreground patch contains triangular grass remnants; investigate deformation/coverage before altering density. |
+| [09 · Taiga](../qa/visual-audit-2026-10-13/procedural-09.jpg) | -15,631, -11,255 | Cooler grass palette, but sparse, nearly bare conifers provide weak taiga identity; sharp snow boundary at right. |
+| [10 · Tundra](../qa/visual-audit-2026-10-13/procedural-10.jpg) | -4,803, 14,351 | Snow surface has some relief, but broad white coverage and sparse conifers leave little tundra-specific structure. |
+| [11 · Glacier](../qa/visual-audit-2026-10-13/procedural-11.jpg) | 75, -7,561 | Thin white glacier patch meets lush turf and broadleaf forest abruptly; a procedural biome-classification issue as well as a blend issue. |
+| [12 · Wetland](../qa/visual-audit-2026-10-13/procedural-12.jpg) | 9,647, 1,483 | This direction reads much like meadow/woodland; wetland identity is weak in the facing view, with water only on the minimap. |
+
+Representative evidence:
+
+![Cold desert: bright streaks and a hard grass boundary](../qa/visual-audit-2026-10-13/procedural-02.jpg)
+
+![Tropical rainforest: pale nearby tree silhouettes and darker distant trees](../qa/visual-audit-2026-10-13/procedural-07.jpg)
+
+![Procedural glacier: narrow snow patch beside dense grass and broadleaf trees](../qa/visual-audit-2026-10-13/procedural-11.jpg)
 
 ## Highest-impact findings
 
@@ -27,7 +101,19 @@ or higher texture resolution alone will not deliver that result.
 | P1 | Capture 05 places bright turf right up to a large trunk and a saturated cyan shore. | Connect forest floor, roots, bank material, shallows and vegetation through local habitat rules. |
 | P2 | The HUD competes with the terrain at the bottom of every shot; pale labels lose contrast against pale ground. | Separate exploration and editing presentation, improve contrast, and provide clean capture mode. |
 
-<!-- ADDITIONAL_FINDINGS -->
+Capture 08 also exposes a bare patch filled with small triangular grass remnants;
+identify whether interaction deformation, placement or a detail transition owns
+it before changing density. Captures 09–10 have unusually sparse conifer crowns;
+check crown assets, alpha coverage and LOD before adding more trees. In capture 12,
+the wetland's facing view reads much like meadow. Check its shore-facing view and
+habitat weights before concluding that water or wetland assets are absent.
+
+**Another P0 boundary issue:** capture 11 shows a narrow white glacier patch next
+to lush green grass and broadleaf trees. This is a procedural low-elevation
+sample, not an alpine panorama. `ProceduralWorldGenerator.sampleBaseTile` assigns
+glacier above `heightScale * 0.9`, or **21.6 m** at the captured default, before
+its climate tests. Revisit that classification and its neighborhood continuity;
+adding snow detail alone cannot fix the resulting landscape transition.
 
 The current renderer already has useful foundations: biome-dependent palettes,
 authored tree silhouettes, detailed bark, dense groundcover, water depth color,
@@ -135,6 +221,10 @@ ground coverage and crown color without a rectangular density edge.
 - [ ] Give cold terrain its own forms: exposed rock, sheltered snow pockets,
   wind-scoured ridges and occasional ice. Tundra should remain visually distinct
   from glacier. Extend the existing slope/snow system instead of replacing it.
+- [ ] Review procedural glacier classification against climate and surrounding
+  terrain. Retain ID 11, but avoid isolated snow strips in otherwise warm,
+  low-elevation vegetation. Keep imported Azgaar biome identity authoritative;
+  this procedural-generator correction must not reclassify imported biomes.
 
 **Likely owners:** canonical guidance, `ProceduralWorldGenerator`,
 `AzgaarMacroWorldGenerator`, `MountainRidges`, `MacroFarTerrainView`, scatter

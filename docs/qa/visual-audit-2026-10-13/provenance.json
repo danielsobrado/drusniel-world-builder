@@ -1,0 +1,109 @@
+{
+  "reviewStarted": "2026-10-13",
+  "reviewCompleted": "2026-10-14",
+  "timezone": "Asia/Dubai",
+  "sourceRevision": "9fb5ba6b8fe3b2b12ab008546f14c015cc57f4de",
+  "configSha256": "68dcdcdc11d5745595ee7f146db89232c5f93acb854bccb633171d3027147eab",
+  "worldSeed": 918273,
+  "samplingSeed": 20261013,
+  "samplingDraws": 250000,
+  "selection": "First observed cell per biome; LCG state = (imul(state, 1664525) + 1013904223) >>> 0; divide by 4294967296; draw X and Z within [-8000,8000); draw yaw only on first encounter of an ID, including marine.",
+  "candidateCounts": {
+    "0": 102988,
+    "1": 90,
+    "2": 1581,
+    "3": 2888,
+    "4": 67480,
+    "5": 1020,
+    "6": 47294,
+    "7": 14,
+    "8": 391,
+    "9": 7532,
+    "10": 18385,
+    "11": 4,
+    "12": 333
+  },
+  "sampledCameraBiomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "fallback": false,
+    "renderer": "webgpu"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 900,
+    "deviceScaleFactor": 1
+  },
+  "skyPreset": "highfield",
+  "clockHour": 12,
+  "clockPaused": true,
+  "manualWeather": "off",
+  "animationFrozen": false,
+  "browserErrors": [],
+  "performanceBaseline": false,
+  "readinessNote": "All 12 complete terrain, collision and material preparation; all 12 retain one scenery queue entry. Bush queue identified in spot checks. No shot passed full settle.",
+  "artifacts": [
+    {
+      "file": "procedural-01.jpg",
+      "sha256": "3a93dba082a2b0c86ce46775e4491f1fab99ad91e3a68689db588ac1008c9493"
+    },
+    {
+      "file": "procedural-02.jpg",
+      "sha256": "68e54189659164650fa811da44d79d778cd45357ad0edc2802264afbf7b97de1"
+    },
+    {
+      "file": "procedural-03.jpg",
+      "sha256": "4fab8ffd5283e029c2ae8dea7da64454dfefd75034c425bacd03e235a3179431"
+    },
+    {
+      "file": "procedural-04.jpg",
+      "sha256": "1a2688e93f9a03b984d574a13fd44842cac9ff27e347872f84d06ec5235e451b"
+    },
+    {
+      "file": "procedural-05.jpg",
+      "sha256": "8f11cddb40d26f34eac9afddc7d62babf3c36a9545221b1efd010c5df7d047c4"
+    },
+    {
+      "file": "procedural-06.jpg",
+      "sha256": "ab304d71b4f2b63b6a3cc4af076a84536b228e7c47007b83380839fc0ab8366d"
+    },
+    {
+      "file": "procedural-07.jpg",
+      "sha256": "30d9f4cefa6cefb0aa6148035a434f4682c12222596c9094398f75ef2f0fc9f1"
+    },
+    {
+      "file": "procedural-08.jpg",
+      "sha256": "eaef4483d1c9155ea29c3702672b7d2fbea7cb05f8a06a2db89b585065f41920"
+    },
+    {
+      "file": "procedural-09.jpg",
+      "sha256": "831d994da82cafa5146dce4bf5ca14e359754c80d0fcd66420a291d7d5a25982"
+    },
+    {
+      "file": "procedural-10.jpg",
+      "sha256": "df631d965df26dab5f81ea19e47ffa641c2fee46ad86b7b0d68ad2bc6407eddf"
+    },
+    {
+      "file": "procedural-11.jpg",
+      "sha256": "54403b52b2d57d73aafb1401c89a2fd5913f212510c96c59bee70bf901dd58f8"
+    },
+    {
+      "file": "procedural-12.jpg",
+      "sha256": "02f0470aefb7042a9afed6874fab38e594bc960d25d6a8a05140ab731fb205e9"
+    }
+  ]
+}
