@@ -1,6 +1,7 @@
 import { COLLIDER_TYPE_MESH_INSTANCE } from './colliders/ColliderRecords.js';
 
 const HASH_QUANTUM = 1e5;
+const compositionCache = new WeakMap();
 
 function createHasher() {
   let hash = 0x811c9dc5;
@@ -46,17 +47,23 @@ function writeCollider(hasher, collider) {
 }
 
 export function getCollisionWorldComposition(world) {
-  let primitiveColliders = 0;
-  let meshInstances = 0;
-  for (const entry of world?.registry?.values?.() ?? []) {
-    if (entry.collider.type === COLLIDER_TYPE_MESH_INSTANCE) meshInstances += 1;
-    else primitiveColliders += 1;
+  let counts = world && compositionCache.get(world);
+  if (!counts || counts.revision !== world.revision || counts.registry !== world.registry) {
+    let primitiveColliders = 0;
+    let meshInstances = 0;
+    for (const entry of world?.registry?.values?.() ?? []) {
+      if (entry.collider.type === COLLIDER_TYPE_MESH_INSTANCE) meshInstances += 1;
+      else primitiveColliders += 1;
+    }
+    counts = { revision: world?.revision, registry: world?.registry, primitiveColliders, meshInstances };
+    if (Number.isSafeInteger(world?.revision)) compositionCache.set(world, counts);
   }
+  // Resource disposal can change without a world edit; keep this small live scan.
   let prototypeBvhs = 0;
   for (const prototype of world?.prototypes?.values?.() ?? []) {
     if (prototype.resource?.bvh && !prototype.resource.disposed) prototypeBvhs += 1;
   }
-  return Object.freeze({ primitiveColliders, meshInstances, prototypeBvhs });
+  return Object.freeze({ primitiveColliders: counts.primitiveColliders, meshInstances: counts.meshInstances, prototypeBvhs });
 }
 
 export function canonicalCollisionSignature(world) {

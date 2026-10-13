@@ -6,6 +6,7 @@ import {
   MAX_COLLISION_BINS_PER_CHUNK,
 } from './CollisionLimits.js';
 import { CollisionChunk } from './CollisionChunk.js';
+import { queryCollisionChunks } from './CollisionCandidateQuery.js';
 import {
   canonicalAabbsIntersect,
   collisionChunkCanonicalBounds,
@@ -158,13 +159,13 @@ export class CollisionWorld {
       }
     }
 
-    const nextRegistry = new Map(this.registry);
-    for (const sourceId of previousState?.sourceIds ?? []) nextRegistry.delete(sourceId);
+    const previousIds = new Set(previousState?.sourceIds ?? []);
+    const replacements = new Map();
     for (const collider of colliders) {
-      if (nextRegistry.has(collider.sourceId)) {
+      if (this.registry.has(collider.sourceId) && !previousIds.has(collider.sourceId)) {
         throw new Error(`Collider source id is already owned elsewhere: ${collider.sourceId}.`);
       }
-      nextRegistry.set(collider.sourceId, { collider, lastQueryStamp: 0 });
+      replacements.set(collider.sourceId, { collider, lastQueryStamp: 0 });
     }
 
     const affected = new Set(previousState?.referenceKeys ?? []);
@@ -192,7 +193,8 @@ export class CollisionWorld {
       const chunkColliders = [];
       for (const contribution of contributionMap.values()) {
         for (const sourceId of contribution.sourceIds) {
-          const entry = nextRegistry.get(sourceId);
+          const entry = replacements.get(sourceId)
+            ?? (previousIds.has(sourceId) ? null : this.registry.get(sourceId));
           if (!entry) throw new Error(`Missing collider registry entry: ${sourceId}.`);
           chunkColliders.push(entry.collider);
         }
@@ -209,7 +211,10 @@ export class CollisionWorld {
       }));
     }
 
-    this.registry = nextRegistry;
+    // Publish only after every affected chunk has been built successfully. The
+    // staging maps contain local changes, not a copy of every resident collider.
+    for (const sourceId of previousIds) this.registry.delete(sourceId);
+    for (const [sourceId, entry] of replacements) this.registry.set(sourceId, entry);
     for (const key of affected) {
       const contributionMap = nextContributionMaps.get(key);
       const chunk = nextChunks.get(key);
@@ -232,8 +237,6 @@ export class CollisionWorld {
     const ownerKey = collisionChunkKey(chunkX, chunkZ);
     const previousState = this.ownerStates.get(ownerKey);
     if (!previousState) return false;
-    const nextRegistry = new Map(this.registry);
-    for (const sourceId of previousState.sourceIds) nextRegistry.delete(sourceId);
     const nextContributionMaps = new Map();
     const nextChunks = new Map();
 
@@ -249,7 +252,7 @@ export class CollisionWorld {
       const colliders = [];
       for (const contribution of contributionMap.values()) {
         for (const sourceId of contribution.sourceIds) {
-          const entry = nextRegistry.get(sourceId);
+          const entry = this.registry.get(sourceId);
           if (entry) colliders.push(entry.collider);
         }
       }
@@ -265,7 +268,7 @@ export class CollisionWorld {
       }));
     }
 
-    this.registry = nextRegistry;
+    for (const sourceId of previousState.sourceIds) this.registry.delete(sourceId);
     for (const key of previousState.referenceKeys) {
       const contributionMap = nextContributionMaps.get(key);
       const chunk = nextChunks.get(key);
@@ -300,12 +303,7 @@ export class CollisionWorld {
     if (!Array.isArray(out)) throw new Error('Collision candidate output must be an array.');
     out.length = 0;
     const stamp = this.nextQueryStamp();
-    let queriedChunks = 0;
-    for (const chunk of this.chunks.values()) {
-      if (!canonicalAabbsIntersect(chunk.bounds, aabb)) continue;
-      queriedChunks += 1;
-      chunk.query(aabb, stamp, this.registry, out, layers);
-    }
+    const queriedChunks = queryCollisionChunks(this, aabb, stamp, out, layers);
     out.sort(compareColliderSourceIds);
     this.lastQueryChunkCount = queriedChunks;
     this.lastQueryCandidateCount = out.length;

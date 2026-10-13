@@ -293,12 +293,11 @@ export function buildOpportunityVisibilityViewModel(queries, actorId = 'player')
     if (o.data.visibility === 'discovered' && (o.data.discoveredBy ?? []).includes(actorId)) return true;
     return false;
   });
-  const hidden = all.filter((o) => !visible.some((v) => v.id === o.id));
   return freezeDto({
     kind: 'opportunityVisibility',
     visible: visible.map((o) => ({ id: o.id, type: o.data.type, visibility: o.data.visibility }))
       .sort((a, b) => a.id.localeCompare(b.id)),
-    hiddenCount: hidden.length,
+    hiddenCount: all.length - visible.length,
   });
 }
 

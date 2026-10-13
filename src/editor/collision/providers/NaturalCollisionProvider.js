@@ -154,6 +154,7 @@ export class NaturalCollisionProvider {
       components: Object.freeze(this.components.map((component) => component.id)),
     });
     this.chunkStates = new Map();
+    this.aggregateCache = null;
     this.pendingRefresh = [];
     this.pendingRefreshKeys = new Set();
     this.retryByKey = new Map();
@@ -225,6 +226,7 @@ export class NaturalCollisionProvider {
   unloadOwnerChunk(chunkX, chunkZ) {
     const key = collisionChunkKey(chunkX, chunkZ);
     this.chunkStates.delete(key);
+    this.aggregateCache = null;
     this.pendingRefreshKeys.delete(key);
     this.retryByKey.delete(key);
     this.pendingRefresh = this.pendingRefresh.filter((candidate) => candidate !== key);
@@ -233,6 +235,7 @@ export class NaturalCollisionProvider {
   }
 
   recordChunk(key, revision, data) {
+    this.aggregateCache = null;
     this.chunkStates.set(key, Object.freeze({
       revision,
       signature: data.signature,
@@ -374,6 +377,7 @@ export class NaturalCollisionProvider {
   }
 
   aggregateComponents() {
+    if (this.aggregateCache) return this.aggregateCache;
     const aggregates = Object.fromEntries(
       this.components.map((component) => [component.id, createAggregate()]),
     );
@@ -383,7 +387,9 @@ export class NaturalCollisionProvider {
         if (data) addStats(aggregates[component.id], data);
       }
     }
-    return aggregates;
+    for (const aggregate of Object.values(aggregates)) Object.freeze(aggregate);
+    this.aggregateCache = Object.freeze(aggregates);
+    return this.aggregateCache;
   }
 
   updateCounters() {
@@ -428,8 +434,7 @@ export class NaturalCollisionProvider {
     return Object.freeze({
       id: this.descriptor.id,
       loadedChunks: this.chunkStates.size,
-      colliderCount: [...this.chunkStates.values()]
-        .reduce((sum, state) => sum + state.colliderCount, 0),
+      colliderCount: Object.values(aggregates).reduce((sum, aggregate) => sum + aggregate.colliders, 0),
       queuedRefreshes: this.pendingRefresh.length,
       deferredRetries: this.retryByKey.size + (this.sourceRetry ? 1 : 0),
       refreshBuilds: this.refreshBuilds,
@@ -442,6 +447,7 @@ export class NaturalCollisionProvider {
 
   dispose() {
     this.chunkStates.clear();
+    this.aggregateCache = null;
     this.pendingRefresh.length = 0;
     this.pendingRefreshKeys.clear();
     this.retryByKey.clear();
