@@ -182,6 +182,9 @@ const ENVELOPE_TOLERANCE_FLOOR = 0.08;
  */
 const ENVELOPE_TOLERANCE_RATIO = 0.02;
 
+/** Archetypes whose silhouette is not their core's: they use the coarse tier for the shell band. */
+const SHELL_UNREPRESENTABLE = new Set(['gatehouse']);
+
 function envelopeTolerance(bounds) {
   const size = bounds.getSize(new THREE.Vector3());
   return Math.max(
@@ -240,7 +243,12 @@ export function createProceduralObjectLodParts(record, nearParts, config = {}) {
   });
   const nearTriangles = partTriangleCount(nearParts);
   const coarseTriangles = partTriangleCount(coarse);
-  const shell = buildShellParts(coarse, nearParts);
+  // A composite whose masonry envelope comes from parts the core does not
+  // contain cannot be drawn as a scaled core, however close the bounds land: a
+  // gatehouse's core stretched over its flanking towers is a box where two round
+  // towers stand. Bounds alone let one through once the towers were sized
+  // sensibly, so these archetypes never build a shell.
+  const shell = SHELL_UNREPRESENTABLE.has(record.recipe.archetype) ? [] : buildShellParts(coarse, nearParts);
 
   const nearBounds = partBounds(nearParts, { structuralOnly: true });
   const tolerance = envelopeTolerance(nearBounds);

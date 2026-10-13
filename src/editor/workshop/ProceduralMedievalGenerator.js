@@ -19,7 +19,6 @@ import {
   shingledSlopeGeometries,
   shinglesEnabled,
 } from './ProceduralWorkshopShingles.js';
-import { createWorkshopMaterials } from './ProceduralWorkshopMaterials.js';
 import { resolveWorkshopOpeningLayout } from './ProceduralWorkshopOpeningLayout.js';
 import {
   addStone,
@@ -29,6 +28,8 @@ import {
 import { createRandom, mixSeed } from './ProceduralRandom.js';
 import { tagOpeningGeometry, tagStructureGeometry } from './ProceduralWorkshopSemantics.js';
 import { buildArchetypeSets, hasArchetypeGenerator } from './ProceduralWorkshopArchetypes.js';
+import { gatehouseTowerDimensions, roundTowerDimensions } from './ProceduralWorkshopTowerDimensions.js';
+import { createGradedWorkshopMaterials } from './ProceduralWorkshopGradedMaterials.js';
 
 const TAU = Math.PI * 2;
 
@@ -773,8 +774,7 @@ function buildWall(recipe) {
 
 function buildTower(recipe) {
   const sets = createEmptySets();
-  const depth = Math.max(0.5, recipe.depth * 0.58);
-  const radius = Math.max(1, recipe.width / 2 - depth * 0.22);
+  const { depth, radius } = roundTowerDimensions(recipe);
   const host = {
     id: 'structure-main',
     label: 'Round tower',
@@ -1007,9 +1007,7 @@ function buildSquareTower(recipe) {
 function buildGatehouse(recipe) {
   const sets = createEmptySets();
   const gateWidth = Math.min(recipe.width * 0.32, 2.8);
-  const towerDepth = Math.max(0.48, recipe.depth * 0.55);
-  const towerRadius = Math.max(1.05, recipe.depth * 0.72);
-  const towerHeight = recipe.height * 1.16;
+  const { depth: towerDepth, radius: towerRadius, height: towerHeight } = gatehouseTowerDimensions(recipe);
   const hosts = [
     {
       id: 'structure-main',
@@ -1518,7 +1516,10 @@ function createPartsForSet(geometries, material, remesh) {
   // Before branching: the un-remeshed path renders these geometries directly
   // with the same material, so a missing `color` attribute would render black
   // there too, not only break the merge.
-  harmonizeVertexColors(geometries, { required: material.vertexColors === true });
+  harmonizeVertexColors(geometries, {
+    required: material.vertexColors === true,
+    fill: material.userData?.vertexColorFill,
+  });
   if (!remesh) {
     return geometries.map((geometry) => ({
       geometry,
@@ -1538,7 +1539,7 @@ function createPartsForSet(geometries, material, remesh) {
 }
 
 function buildParts(recipe, sets) {
-  const materials = createWorkshopMaterials(recipe);
+  const materials = createGradedWorkshopMaterials(recipe);
   return [
     ...createPartsForSet(sets.stone, materials.stone, recipe.remesh),
     ...createPartsForSet(sets.mortar, materials.mortar, recipe.remesh),

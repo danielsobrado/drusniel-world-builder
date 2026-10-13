@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { archedPanel, beveledBox, leaf } from '../ProceduralWorkshopGeometry.js';
+import { archedPanel, beveledBox, leaf, quarterTurnUv } from '../ProceduralWorkshopGeometry.js';
 import { FOLIAGE_BASE_COLOR } from '../ProceduralWorkshopMaterials.js';
 import { tagOpeningGeometry } from '../ProceduralWorkshopSemantics.js';
 import { facadeBeam, facadeMatrix, facadePoint } from './HouseFacade.js';
@@ -44,7 +44,8 @@ function panel(facade, frame, d, depth, { inset = 0 } = {}) {
       detail: 1,
       bevelRatio: 0.06,
     });
-  return geometry.applyMatrix4(facadeMatrix(facade));
+  // Door and shutter leaves are upright boards: grain up the leaf.
+  return quarterTurnUv(geometry.applyMatrix4(facadeMatrix(facade)));
 }
 
 /** Timber members around the opening, with the arch head as a segmented curve. */
@@ -278,7 +279,7 @@ export function buildDoor(kit, facade, opening, { wall = 'plaster', thickness = 
     const boards = Math.max(3, Math.round(frame.width / 0.2));
     const boardWidth = frame.width / boards;
     for (let index = 0; index < boards; index += 1) {
-      pieces.push(['wood', beveledBox({
+      pieces.push(['wood', quarterTurnUv(beveledBox({
         width: boardWidth * 0.97,
         height: frame.height,
         depth: 0.06,
@@ -286,7 +287,7 @@ export function buildDoor(kit, facade, opening, { wall = 'plaster', thickness = 
         rotation: [0, facade.yaw, 0],
         detail: 1,
         bevelRatio: 0.12,
-      })]);
+      }))]);
     }
   }
   for (const ratio of open ? [] : [0.2, 0.72]) {

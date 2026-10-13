@@ -204,6 +204,12 @@ export const ROOF_PALETTES = Object.freeze({
   }),
 });
 
+/** Mean of a roof style's ramp, as a 0..1 vertex colour. */
+export function roofPaletteMean(topStyle) {
+  const { ramp } = ROOF_PALETTES[topStyle] ?? ROOF_PALETTES.terracotta;
+  return [0, 1, 2].map((channel) => ramp.reduce((sum, colour) => sum + colour[channel], 0) / ramp.length / 255);
+}
+
 export const PLASTER_PALETTES = Object.freeze({
   masonry: Object.freeze({ base: [134, 132, 121], shadow: [96, 99, 91] }),
   ochre: Object.freeze({ base: [218, 161, 61], shadow: [173, 112, 39] }),
@@ -316,9 +322,17 @@ export function surfaceRoughnessTexture(seed, {
   }, { colorSpace: THREE.NoColorSpace });
 }
 
+/**
+ * The roof's tile detail — seams, per-tile value noise, the shaded lower lip —
+ * over a muted multiplier. Each tile's hue is its vertex colour
+ * (`ROOF_PALETTES`, read as linear), and roof decks take the palette's mean
+ * (`vertexColorFill`); the map only deepens it to fired clay or slate. The old
+ * map was the full terracotta again, which squared the palette into one
+ * saturated orange that drowned the per-tile variation.
+ */
 function roofTexture(topStyle, seed) {
   const slate = topStyle === 'slate';
-  const base = slate ? [86, 101, 91] : [177, 87, 51];
+  const base = slate ? [137, 140, 147] : [196, 150, 124];
   return createTexture(256, (x, y) => {
     const rowHeight = 20;
     const tileWidth = 30;
@@ -767,6 +781,9 @@ export function createWorkshopMaterials(recipe) {
     metalness: 0,
     envMapIntensity: 0.82,
   }), 'roof');
+  // Roof decks carry no per-tile colour; they take the palette's mean, so the
+  // neutral tile map reads as terracotta or slate on decks and shingles alike.
+  roof.userData.vertexColorFill = roofAlbedo ? null : roofPaletteMean(recipe.topStyle);
   return Object.freeze({
     stone,
     mortar: tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({

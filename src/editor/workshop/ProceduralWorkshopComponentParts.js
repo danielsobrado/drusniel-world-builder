@@ -769,6 +769,7 @@ function buildPreviewParts(entries, components, remesh) {
       const metadata = componentMetadata(group.component);
       harmonizeVertexColors(group.geometries, {
         required: group.material.vertexColors === true,
+        fill: group.material.userData?.vertexColorFill,
       });
       if (remesh) {
         parts.push({
@@ -823,6 +824,7 @@ function buildRuntimeParts(entries, components, remesh) {
     for (const group of groups.values()) {
       harmonizeVertexColors(group.geometries, {
         required: group.material.vertexColors === true,
+        fill: group.material.userData?.vertexColorFill,
       });
       if (remesh) {
         parts.push({

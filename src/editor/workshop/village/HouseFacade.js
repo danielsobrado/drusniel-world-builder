@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { beveledBox } from '../ProceduralWorkshopGeometry.js';
+import { beveledBox, quarterTurnUv } from '../ProceduralWorkshopGeometry.js';
 
 /**
  * A planar wall face and its local frame.
@@ -119,7 +119,7 @@ export function beamBetween(a, b, size, { depth = size, side = null, bevelRatio 
     new THREE.Matrix4().makeBasis(widthAxis, axis, depthAxis),
   );
   const center = start.add(end).multiplyScalar(0.5);
-  return beveledBox({
+  const beam = beveledBox({
     width: size,
     height: length,
     depth,
@@ -128,6 +128,8 @@ export function beamBetween(a, b, size, { depth = size, side = null, bevelRatio 
     detail,
     bevelRatio,
   });
+  // Grain along the member: studs, posts and steep braces turn theirs upright.
+  return Math.abs(axis.y) > Math.SQRT1_2 ? quarterTurnUv(beam) : beam;
 }
 
 /**

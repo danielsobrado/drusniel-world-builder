@@ -34,19 +34,28 @@ export function normalizeGeometry(input) {
  * black. Otherwise only mixed groups are touched, so families that use no
  * vertex colours at all do not pay for an unused attribute.
  *
- * Fills with white, the identity for a multiplied vertex colour.
+ * Fills with white, the identity for a multiplied vertex colour — or with
+ * `fill`, the colour the target material says an unshaded member means (a roof
+ * deck under per-tile shingles takes the roof palette, not white). A material
+ * that declares a fill always gets the attribute.
  */
-export function harmonizeVertexColors(geometries, { required = false } = {}) {
+export function harmonizeVertexColors(geometries, { required = false, fill = null } = {}) {
   let withColor = 0;
   for (const geometry of geometries) {
     if (geometry.getAttribute('color')) withColor += 1;
   }
   if (withColor === geometries.length) return geometries;
-  if (withColor === 0 && !required) return geometries;
+  if (withColor === 0 && !required && !fill) return geometries;
+  const [red, green, blue] = fill ?? [1, 1, 1];
   for (const geometry of geometries) {
     if (geometry.getAttribute('color')) continue;
     const count = geometry.getAttribute('position').count;
-    const colors = new Float32Array(count * 3).fill(1);
+    const colors = new Float32Array(count * 3);
+    for (let offset = 0; offset < colors.length; offset += 3) {
+      colors[offset] = red;
+      colors[offset + 1] = green;
+      colors[offset + 2] = blue;
+    }
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   }
   return geometries;
@@ -67,6 +76,22 @@ export function transformGeometry(geometry, {
 }
 
 export { projectedUvAt, WORKSHOP_UV_DENSITY };
+
+/**
+ * Turns a geometry's UVs a quarter, so a texture's horizontal grain runs up the
+ * part instead: timber is grained along its length, and the box projection
+ * lays every member's grain horizontally, across a stud, post or board.
+ */
+export function quarterTurnUv(geometry) {
+  const uv = geometry?.getAttribute('uv');
+  if (!uv) return geometry;
+  for (let index = 0; index < uv.count; index += 1) {
+    const u = uv.getX(index);
+    uv.setXY(index, uv.getY(index), -u);
+  }
+  uv.needsUpdate = true;
+  return geometry;
+}
 
 export function applyWorkshopProjectedUv(geometry, density = WORKSHOP_UV_DENSITY) {
   if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();

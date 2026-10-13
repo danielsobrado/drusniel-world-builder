@@ -3,6 +3,7 @@ import {
   applyWorkshopProjectedUv,
   beveledBox,
   normalizeGeometry,
+  quarterTurnUv,
 } from '../ProceduralWorkshopGeometry.js';
 import { beamBetween, facadeBeam, facadeAt } from './HouseFacade.js';
 import { createRoofSurface } from './HouseRoofSurface.js';
@@ -257,7 +258,9 @@ function gablePanel(kit, surface, end, material, thickness = 0.2) {
   geometry.applyMatrix4(new THREE.Matrix4()
     .makeBasis(across, new THREE.Vector3(0, 1, 0), along)
     .setPosition(origin[0], 0, origin[2]));
-  kit.add(material === 'boards' ? 'wood' : 'mortar', applyWorkshopProjectedUv(normalizeGeometry(geometry)));
+  const infill = applyWorkshopProjectedUv(normalizeGeometry(geometry));
+  // Boarded gables are upright boards, grained up the gable like the walls below.
+  kit.add(material === 'boards' ? 'wood' : 'mortar', material === 'boards' ? quarterTurnUv(infill) : infill);
 }
 
 /** King post, collar and raking members on a plastered gable. */

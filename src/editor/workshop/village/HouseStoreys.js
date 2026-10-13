@@ -1,4 +1,4 @@
-import { beveledBox } from '../ProceduralWorkshopGeometry.js';
+import { beveledBox, quarterTurnUv } from '../ProceduralWorkshopGeometry.js';
 import { buildWallCourses } from '../ProceduralWorkshopMasonry.js';
 import { boxFacades, facadeBeam, facadePoint } from './HouseFacade.js';
 import { buildOpenings } from './HouseOpenings.js';
@@ -152,7 +152,8 @@ export function layPlasterWall(kit, facade, { thickness }) {
 export function layBoardWall(kit, facade, { thickness, openings = [] }) {
   const span = wallSpan(facade, thickness);
   const height = facade.y1 - facade.y0;
-  kit.add('wood', beveledBox({
+  // The boards stand upright, so their grain does too.
+  kit.add('wood', quarterTurnUv(beveledBox({
     width: span.end - span.start,
     height,
     depth: thickness,
@@ -160,7 +161,7 @@ export function layBoardWall(kit, facade, { thickness, openings = [] }) {
     rotation: [0, facade.yaw, 0],
     detail: 1,
     bevelRatio: 0.02,
-  }));
+  })));
   const extents = openings.map((opening) => {
     const u = facade.length / 2 + opening.centerX;
     return {

@@ -2,6 +2,7 @@ import {
   defaultWorkshopVariant,
   getWorkshopVariant,
   isVariantArchetype,
+  WORKSHOP_ARCHETYPE_DEFAULTS,
   WORKSHOP_VARIANT_ARCHETYPES,
 } from './ProceduralWorkshopArchetypeCatalog.js';
 
@@ -82,6 +83,8 @@ export class ProceduralWorkshopVariantFields {
     if (entry) {
       this.select.value = defaultWorkshopVariant(this.archetype);
       this.applyDefaults();
+    } else {
+      this.applyValues(WORKSHOP_ARCHETYPE_DEFAULTS[this.archetype] ?? {});
     }
     this.sync();
   }
@@ -92,7 +95,10 @@ export class ProceduralWorkshopVariantFields {
   }
 
   applyDefaults() {
-    const defaults = this.variant?.defaults ?? {};
+    this.applyValues(this.variant?.defaults ?? {});
+  }
+
+  applyValues(defaults) {
     for (const [name, value] of Object.entries(defaults)) {
       const element = this.form.elements[name];
       if (element) element.value = String(value);

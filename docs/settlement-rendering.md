@@ -220,6 +220,15 @@ joint shadow do the drawing.
   stone, and vertex colours are folded into the graded colour: three applies
   them after `colorNode`, which would undo the grade. The paving's earth layer
   is tinted to `TOWN_GROUND`.
+- **One grade everywhere.** The grade itself lives in
+  `render/materials/townGrade.js` (`gradeTownMaterial`) and the leaded glass in
+  `render/materials/townGlass.js` (`glazeWindowRecess`). `SettlementGrade` and
+  `SettlementDusk` apply them per pooled instance; the workshop generators use
+  them through `createGradedWorkshopMaterials`, with a fixed per-recipe seed, so
+  a house looks the same while authored, when baked and placed, and in a town.
+  Roof decks take the roof palette's mean through the material's
+  `vertexColorFill` (`harmonizeVertexColors`), and the synthesised roof map is a
+  muted multiplier: the old terracotta map squared the palette into flat orange.
 - **Kit parity.** Both town renderers share one material language:
   - plaster dressings use `plaster-painted` and masonry-finished houses are
     walled in `stone-rubble` (the `rubble` role), the kit's own scans; one

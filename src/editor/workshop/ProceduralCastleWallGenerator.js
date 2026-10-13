@@ -9,10 +9,7 @@ import { buildProceduralFacadeIvy } from './ProceduralWorkshopIvy.js';
 import { packCourse } from './ProceduralWorkshopCoursePacker.js';
 import { createSurfaceRelief } from './ProceduralWorkshopSurfaceRelief.js';
 import { stoneJitter } from './ProceduralWorkshopIrregularity.js';
-import {
-  applyUnitShading,
-  createWorkshopMaterials,
-} from './ProceduralWorkshopMaterials.js';
+import { applyUnitShading } from './ProceduralWorkshopMaterials.js';
 import { createRandom, mixSeed } from './ProceduralRandom.js';
 import {
   getCastleWallButtressPositions,
@@ -20,6 +17,7 @@ import {
   getCastleWallTopHeight,
   intersectsCastleOpening,
 } from './ProceduralCastleWallLayout.js';
+import { createGradedWorkshopMaterials } from './ProceduralWorkshopGradedMaterials.js';
 
 const MAX_STONES = 1800;
 const MIN_STONE_WIDTH = 0.26;
@@ -311,7 +309,10 @@ function createPartsForSet(geometries, material, remesh) {
     disposeMaterial(material);
     return [];
   }
-  harmonizeVertexColors(geometries, { required: material.vertexColors === true });
+  harmonizeVertexColors(geometries, {
+    required: material.vertexColors === true,
+    fill: material.userData?.vertexColorFill,
+  });
   if (!remesh) {
     return geometries.map((geometry) => ({
       geometry,
@@ -347,7 +348,7 @@ function disposeUnprocessedSlots(sets, materials, startIndex) {
 }
 
 function buildParts(recipe, sets) {
-  const materials = createWorkshopMaterials(recipe);
+  const materials = createGradedWorkshopMaterials(recipe);
   const parts = [];
   for (let index = 0; index < MATERIAL_SLOTS.length; index += 1) {
     const slot = MATERIAL_SLOTS[index];

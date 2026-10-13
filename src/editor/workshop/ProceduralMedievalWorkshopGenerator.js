@@ -6,6 +6,7 @@ import { createProceduralMedievalParts } from './ProceduralMedievalGenerator.js'
 import { harmonizeVertexColors } from './ProceduralWorkshopGeometry.js';
 import { estimateConeShingles, shinglesEnabled } from './ProceduralWorkshopShingles.js';
 import { estimateArchetypeParts, hasArchetypeGenerator } from './ProceduralWorkshopArchetypes.js';
+import { gatehouseTowerDimensions, roundTowerDimensions } from './ProceduralWorkshopTowerDimensions.js';
 
 const MAX_SOURCE_PARTS = 7_500;
 const MAX_STONE_PARTS = 6_500;
@@ -72,8 +73,7 @@ function estimatedStoneParts(recipe) {
       + Math.ceil(recipe.width / 1.25);
   }
   if (recipe.archetype === 'tower') {
-    const wallDepth = Math.max(0.5, recipe.depth * 0.58);
-    const radius = Math.max(1, recipe.width / 2 - wallDepth * 0.22);
+    const { radius } = roundTowerDimensions(recipe);
     return towerBodyEstimate(radius, recipe.height, recipe.detail)
       + towerTopEstimate(radius, recipe.topStyle);
   }
@@ -84,8 +84,7 @@ function estimatedStoneParts(recipe) {
     return walls + Math.ceil((recipe.width + depth) * 4 / 0.7);
   }
   if (recipe.archetype === 'gatehouse') {
-    const towerRadius = Math.max(1.05, recipe.depth * 0.72);
-    const towerHeight = recipe.height * 1.16;
+    const { radius: towerRadius, height: towerHeight } = gatehouseTowerDimensions(recipe);
     const tower = towerBodyEstimate(towerRadius, towerHeight, recipe.detail)
       + towerTopEstimate(towerRadius, recipe.topStyle);
     return wallCourseEstimate(recipe.width, recipe.height, recipe.detail) + tower * 2;
@@ -245,9 +244,7 @@ function gatehouseOpenings(recipe) {
     radius: gateWidth / 2,
     minimumStructuralDepth: Math.max(0.38, recipe.depth * 0.62),
   }];
-  const wallDepth = Math.max(0.48, recipe.depth * 0.55);
-  const radius = Math.max(1.05, recipe.depth * 0.72);
-  const height = recipe.height * 1.16;
+  const { depth: wallDepth, radius, height } = gatehouseTowerDimensions(recipe);
   for (const side of [-1, 1]) {
     openings.push(...roundTowerOpenings(recipe, {
       centerX: side * recipe.width * 0.39,
@@ -264,8 +261,7 @@ function gatehouseOpenings(recipe) {
 function structuralOpenings(recipe) {
   if (recipe.archetype === 'wall') return classicWallOpenings(recipe);
   if (recipe.archetype === 'tower') {
-    const wallDepth = Math.max(0.5, recipe.depth * 0.58);
-    const radius = Math.max(1, recipe.width / 2 - wallDepth * 0.22);
+    const { depth: wallDepth, radius } = roundTowerDimensions(recipe);
     return roundTowerOpenings(recipe, {
       radius,
       wallDepth,
@@ -342,7 +338,10 @@ function mergeParts(parts) {
   try {
     for (const [material, group] of groupPartsByMaterial(parts)) {
       const geometries = group.map(cloneTransformedGeometry);
-      harmonizeVertexColors(geometries, { required: material.vertexColors === true });
+      harmonizeVertexColors(geometries, {
+    required: material.vertexColors === true,
+    fill: material.userData?.vertexColorFill,
+  });
       let merged = null;
       try {
         merged = mergeGeometries(geometries, false);

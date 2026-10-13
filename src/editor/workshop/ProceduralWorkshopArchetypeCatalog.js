@@ -279,6 +279,19 @@ const PROP_VARIANTS = Object.freeze([
   }),
 ]);
 
+/**
+ * Proportions the castle archetypes start from when chosen. Their `depth` is a
+ * factor rather than metres, so a house's 6 m depth carried across the switch
+ * built a tower of 3.5 m-deep stones under a roof twice its width.
+ */
+export const WORKSHOP_ARCHETYPE_DEFAULTS = Object.freeze({
+  manor: Object.freeze({ width: 8, depth: 2.5, height: 5.5 }),
+  wall: Object.freeze({ width: 10, depth: 2, height: 4.5, topStyle: 'battlements', shape: 'classic' }),
+  gatehouse: Object.freeze({ width: 8, depth: 2.2, height: 6 }),
+  tower: Object.freeze({ width: 6.5, depth: 2, height: 8 }),
+  'square-tower': Object.freeze({ width: 6, depth: 2.2, height: 8 }),
+});
+
 export const WORKSHOP_VARIANT_ARCHETYPES = Object.freeze({
   house: Object.freeze({ label: 'Village house', defaultVariant: 'cottage', variants: HOUSE_VARIANTS }),
   prop: Object.freeze({ label: 'Village prop', defaultVariant: 'lantern-post', variants: PROP_VARIANTS }),

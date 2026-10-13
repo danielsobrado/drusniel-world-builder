@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
 import { disposeModelParts } from '../src/editor/assets/modelParts.js';
+import { gatehouseTowerDimensions, roundTowerDimensions } from '../src/editor/workshop/ProceduralWorkshopTowerDimensions.js';
 import {
   createProceduralMedievalWorkshopParts,
   getProceduralMedievalWorkshopStats,
@@ -116,10 +117,10 @@ test('stats preserve requested remesh draw-part semantics', () => {
   assert.ok(raw.drawParts > merged.drawParts);
 });
 
-test('extreme gatehouse dimensions fail before unbounded masonry generation', () => {
+test('extreme dimensions fail before unbounded masonry generation', () => {
   assert.throws(
     () => createProceduralMedievalWorkshopParts(recipe({
-      archetype: 'gatehouse',
+      archetype: 'square-tower',
       width: 16,
       depth: 12,
       height: 14,
@@ -127,4 +128,14 @@ test('extreme gatehouse dimensions fail before unbounded masonry generation', ()
     })),
     /reduce its width, depth, height, or detail/,
   );
+});
+
+test('a gatehouse depth factor carried over from a house cannot bloat its flanking towers', () => {
+  const extreme = gatehouseTowerDimensions(recipe({ archetype: 'gatehouse', depth: 12 }));
+  assert.ok(extreme.radius <= 2.6 && extreme.depth <= 1.2, JSON.stringify(extreme));
+  const round = roundTowerDimensions(recipe({ archetype: 'tower', width: 9, depth: 6 }));
+  assert.ok(round.depth <= 1.25, `round tower wall ${round.depth} m deep`);
+  const parts = createProceduralMedievalWorkshopParts(recipe({ archetype: 'gatehouse', width: 16, depth: 12, height: 14, detail: 3 }));
+  assert.ok(parts.length > 0);
+  disposeModelParts(parts);
 });
