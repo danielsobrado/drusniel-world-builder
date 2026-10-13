@@ -20,12 +20,18 @@ const PORT = 5179;
 const HOST = '127.0.0.1';
 const OUTPUT_DIRECTORY = resolve('public/assets/impostors/trees');
 const DOWNLOAD_NAME = 'tree-impostors.bundle.json';
-const BAKE_TIMEOUT_MS = 180_000;
+const DEFAULT_BAKE_TIMEOUT_MS = 180_000;
 const COMMAND_TIMEOUT_MS = 15_000;
 const FILE_TIMEOUT_MS = 30_000;
 const POLL_MS = 250;
 const DEBUG_PORT = 9237;
 const MAX_DIAGNOSTIC_LINES = 240;
+
+/** `--timeout <seconds>`: a busy machine can spend minutes compiling the world first. */
+function bakeTimeoutMs() {
+  const seconds = Number(optionValue('--timeout'));
+  return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : DEFAULT_BAKE_TIMEOUT_MS;
+}
 
 function optionValue(name) {
   const index = process.argv.indexOf(name);
@@ -246,7 +252,14 @@ async function evaluateValue(cdp, expression) {
 async function waitForBakeStatus(cdp, timeoutMs) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
-    const status = await evaluateValue(cdp, 'window.__treeImpostorBakeStatus ?? null');
+    let status = null;
+    try {
+      status = await evaluateValue(cdp, 'window.__treeImpostorBakeStatus ?? null');
+    } catch (error) {
+      // Compiling the world's pipelines can block the page for longer than one
+      // DevTools call; a timed-out poll means busy, not failed.
+      if (!/timed out/i.test(error.message)) throw error;
+    }
     if (status === 'done') return;
     if (status === 'failed') {
       const error = await evaluateValue(
@@ -387,13 +400,13 @@ async function bakeWithPlaywright(url, downloadDirectory, diagnostics) {
       appendDiagnostic(diagnostics, `Browser exception: ${error.message}`);
     });
     const downloadPromise = page.waitForEvent('download', {
-      timeout: BAKE_TIMEOUT_MS + FILE_TIMEOUT_MS,
+      timeout: bakeTimeoutMs() + FILE_TIMEOUT_MS,
     });
     await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: COMMAND_TIMEOUT_MS });
     await page.waitForFunction(
       () => ['done', 'failed'].includes(window.__treeImpostorBakeStatus),
       null,
-      { timeout: BAKE_TIMEOUT_MS },
+      { timeout: bakeTimeoutMs() },
     );
     const state = await page.evaluate(() => ({
       status: window.__treeImpostorBakeStatus,
@@ -516,7 +529,7 @@ async function main() {
     if (navigation.errorText) throw new Error(`Page navigation failed: ${navigation.errorText}`);
 
     try {
-      await waitForBakeStatus(cdp, BAKE_TIMEOUT_MS);
+      await waitForBakeStatus(cdp, bakeTimeoutMs());
       await waitForFile(join(downloadDirectory, DOWNLOAD_NAME), FILE_TIMEOUT_MS);
     } catch (error) {
       await collectPageSnapshot(cdp, diagnostics);

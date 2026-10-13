@@ -828,7 +828,7 @@ stylizedSurface:
     meadow:
       tileSize: 8
       maxDistance: 50
-      bladeHeight: 0.54
+      bladeHeight: 0.64
       bladeWidth: 0.071
       heightScale: [0.72, 1.3]
       widthScale: 1.15
@@ -867,6 +867,7 @@ stylizedSurface:
         dryEnd: 0.84
         dryStrength: 0.22
         dryColor: '#777455'
+        lodWidenMax: 3.5
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
       shapes:
         default: slender

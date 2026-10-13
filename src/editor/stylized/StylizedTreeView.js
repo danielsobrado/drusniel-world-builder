@@ -187,6 +187,7 @@ export class StylizedTreeView {
     this.prototypeTileIds = null;
     this.prototypePreferredTileIds = null;
     this.preservePrototypeLeafColor = [];
+    this.gradedPrototypeLeaf = [];
     this.leafTints = createForestLeafTintTable({ config });
     this.proxyPrototypes = [];
     this.renderers = [];
@@ -382,6 +383,8 @@ export class StylizedTreeView {
     this.prototypePreferredTileIds = prototypePreferredTileIds;
     this.preservePrototypeLeafColor = this.prototypes.map(parts => parts.some(part =>
       part.kind === 'leaf' && Boolean(part.geometry.getAttribute('color'))));
+    this.gradedPrototypeLeaf = this.prototypes.map(parts => parts.some(part =>
+      part.kind === 'leaf' && part.material?.userData?.gradedCanopy === true));
     this.prototypeSignature = createTreeImpostorSourceSignature(this.prototypes, this.config);
     this.createRenderResources();
   }
@@ -834,11 +837,13 @@ export class StylizedTreeView {
    * read differently from a rainforest when both draw the same authored crown.
    */
   resolveLeafTint(record) {
+    const prototypeIndex = this.resolvePalettePrototypeIndex(record);
     return this.leafTints.tintFor(
       record.speciesId,
       record.groveSeed ?? 0,
       this.tileIdAt(record.x, record.z),
-      this.preservePrototypeLeafColor[this.resolvePalettePrototypeIndex(record)] ?? false,
+      this.preservePrototypeLeafColor[prototypeIndex] ?? false,
+      this.gradedPrototypeLeaf?.[prototypeIndex] ?? false,
     );
   }
 

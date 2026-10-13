@@ -17,6 +17,12 @@ export const DEFAULT_CANOPY_GRADE = Object.freeze({
   shadow: '#286746',
   light: '#8cb75a',
   tint: 0.9,
+  /**
+   * Gain on the leaf luminance before it picks a point on the ramp. Our KTX2
+   * leaf atlases average ~0.12 linear luminance, which at 1 parks every crown on
+   * the dark shadow colour; the donor's crowns sit across the whole ramp.
+   */
+  exposure: 3.5,
 });
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
@@ -33,6 +39,9 @@ export function resolveCanopyGrade(source) {
   if (!Number.isFinite(grade.tint) || grade.tint < 0 || grade.tint > 1) {
     throw new Error('Invalid editor configuration: stylizedSurface.trees.canopyGrade.tint must be in [0, 1].');
   }
+  if (!Number.isFinite(grade.exposure) || grade.exposure <= 0) {
+    throw new Error('Invalid editor configuration: stylizedSurface.trees.canopyGrade.exposure must be positive.');
+  }
   return grade;
 }
 
@@ -43,6 +52,7 @@ export function resolveCanopyGrade(source) {
 export function gradeCanopy(sample, grade) {
   if (!grade) return sample;
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
-  const ramp = mix(colorNode(grade.shadow), colorNode(grade.light), smoothstep(0.03, 0.8, luminance));
+  const ramp = mix(colorNode(grade.shadow), colorNode(grade.light), smoothstep(0.03, 0.8, luminance.mul(grade.exposure)));
+  // The dark-texel guard stays on the raw luminance: painted branch detail keeps its colour.
   return mix(sample, ramp, smoothstep(0.025, 0.14, luminance).mul(grade.tint));
 }

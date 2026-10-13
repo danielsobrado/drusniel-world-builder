@@ -15,6 +15,12 @@ test('the canopy grade defaults to the donor palette and can be turned off', () 
 test('the canopy grade rejects bad colours and tints', () => {
   assert.throws(() => resolveCanopyGrade({ shadow: 'green' }), /canopyGrade\.shadow/);
   assert.throws(() => resolveCanopyGrade({ tint: 2 }), /canopyGrade\.tint/);
+  assert.throws(() => resolveCanopyGrade({ exposure: 0 }), /canopyGrade\.exposure/);
+});
+
+test('the grade lifts our dark leaf atlases up the ramp by default', () => {
+  assert.ok(resolveCanopyGrade(undefined).exposure > 1);
+  assert.equal(resolveCanopyGrade({ exposure: 1 }).exposure, 1);
 });
 
 test('an ungraded canopy passes its sample through', () => {

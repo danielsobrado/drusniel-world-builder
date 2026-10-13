@@ -143,3 +143,21 @@ test('biomes outside the table and unknown species stay untinted', () => {
   }
   assert.equal(table.tintFor('not_a_species', 0.5, 6), FOREST_LEAF_TINT_UNTINTED);
 });
+
+test('textured crowns take their tints against the canopy grade, and only a nudge of biome hue', () => {
+  const table = createForestLeafTintTable({ config: config(1) });
+  const gradeLight = new THREE.Color('#8cb75a');
+  // Autumn still lands exactly on its target from the grade's light colour.
+  const autumn = table.tintFor('broadleaf_tall', 0.1, null, false, true);
+  const target = new THREE.Color(FOREST_AUTUMN_TARGETS.broadleaf_tall[0]);
+  assert.ok(Math.abs(gradeLight.r * autumn[0] - target.r) < 0.01);
+  // A biome tint on a graded crown stays near neutral; the palette crown's is a full recolour.
+  const greenTable = createForestLeafTintTable({ config: config(0) });
+  for (const tileId of Object.keys(FOREST_BIOME_TARGETS).map(Number)) {
+    const graded = greenTable.tintFor('broadleaf_tall', 0.5, tileId, false, true);
+    for (const channel of graded) assert.ok(channel > 0.55 && channel < 1.6, `tile ${tileId}: ${graded}`);
+  }
+  const palette = greenTable.tintFor('broadleaf_tall', 0.5, 9);
+  const graded = greenTable.tintFor('broadleaf_tall', 0.5, 9, false, true);
+  assert.notDeepEqual(palette, graded);
+});

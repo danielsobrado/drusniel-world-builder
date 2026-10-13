@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FOREST_SPECIES_PALETTES } from './ForestSpeciesGeometry.js';
+import { resolveCanopyGrade } from './canopyGrade.js';
 
 /**
  * Per-grove autumn colour for tree canopies.
@@ -21,6 +22,11 @@ import { FOREST_SPECIES_PALETTES } from './ForestSpeciesGeometry.js';
  * target is the crown's ceiling, so no channel is driven past it and the shaded
  * underside stays proportionally darker; anchoring on the midpoint needed
  * multipliers above 4 and blew the top of the gradient out to white.
+ *
+ * Textured (authored) crowns do not wear the species palette: the canopy grade
+ * has already moved them onto its own shade→light ramp. Their ratios are anchored
+ * on the grade's light colour instead; divided by `leafTop` they turned graded
+ * crowns teal or brown rather than onto the biome's hue.
  */
 
 /**
@@ -63,6 +69,8 @@ const UNTINTED = Object.freeze([1, 1, 1]);
 // Headroom for turning a saturated green into a warm hue. Anchoring on `leafTop`
 // keeps the required ratios near 3, so this only guards a near-black palette.
 const MAX_CHANNEL_RATIO = 6;
+/** Exponent on a graded crown's biome ratio: how far its hue follows the biome. */
+const GRADED_BIOME_STRENGTH = 0.3;
 
 /** Brightest colour the species' crown reaches, which the ratio divides by. */
 function litCrownColor(speciesId, config, palettes) {
@@ -94,31 +102,39 @@ export function createForestLeafTintTable({
   biomeTargets = BIOME_TARGETS,
 } = {}) {
   const autumnShare = Math.min(1, Math.max(0, Number(config?.trees?.autumnGroves) || 0));
-  const tintsBySpecies = new Map();
-  for (const [speciesId, targets] of Object.entries(autumnTargets)) {
-    if (targets.length === 0) continue;
-    const base = litCrownColor(speciesId, config, palettes);
-    tintsBySpecies.set(
-      speciesId,
-      Object.freeze(targets.map((target) => tintRatio(new THREE.Color(target), base))),
-    );
-  }
-
-  // Every species crosses every biome, so this is at most a few dozen ratios.
-  // Precomputing them keeps the per-instance lookup two map reads.
-  const biomeTintsBySpecies = new Map();
+  const grade = resolveCanopyGrade(config?.trees?.canopyGrade);
+  const gradedCrown = grade ? new THREE.Color(grade.light) : null;
   const speciesIds = new Set([
     ...Object.keys(autumnTargets),
     ...Object.keys(palettes),
   ]);
-  for (const speciesId of speciesIds) {
-    const base = litCrownColor(speciesId, config, palettes);
-    const byTile = new Map();
-    for (const [tileId, target] of Object.entries(biomeTargets)) {
-      byTile.set(Number(tileId), tintRatio(new THREE.Color(target), base));
+  // One set of ratios per anchor: the species palette, and the graded crown.
+  // A graded crown already carries its donor's look; its biome hue is a nudge
+  // (ratio^0.3), not a recolour — at full strength the saturated biome greens
+  // stripped the grade's warm light end back to kelly green.
+  const soften = (ratio) => Object.freeze(ratio.map((channel) => channel ** GRADED_BIOME_STRENGTH));
+  const buildTables = (baseFor, biomeShape = (ratio) => ratio) => {
+    const autumn = new Map();
+    for (const [speciesId, targets] of Object.entries(autumnTargets)) {
+      if (targets.length === 0) continue;
+      const base = baseFor(speciesId);
+      autumn.set(speciesId, Object.freeze(targets.map((target) => tintRatio(new THREE.Color(target), base))));
     }
-    biomeTintsBySpecies.set(speciesId, byTile);
-  }
+    // Every species crosses every biome, so this is at most a few dozen ratios.
+    // Precomputing them keeps the per-instance lookup two map reads.
+    const biome = new Map();
+    for (const speciesId of speciesIds) {
+      const base = baseFor(speciesId);
+      const byTile = new Map();
+      for (const [tileId, target] of Object.entries(biomeTargets)) {
+        byTile.set(Number(tileId), biomeShape(tintRatio(new THREE.Color(target), base)));
+      }
+      biome.set(speciesId, byTile);
+    }
+    return { autumn, biome };
+  };
+  const palette = buildTables((speciesId) => litCrownColor(speciesId, config, palettes));
+  const graded = gradedCrown ? buildTables(() => gradedCrown, soften) : palette;
 
   return {
     autumnShare,
@@ -131,19 +147,20 @@ export function createForestLeafTintTable({
      * both are absolute target colours expressed as ratios, so multiplying them
      * would land on neither. A turned grove is already saying what colour it is.
      */
-    tintFor(speciesId, groveSeed, tileId = null, preserveAuthoredColor = false) {
+    tintFor(speciesId, groveSeed, tileId = null, preserveAuthoredColor = false, gradedCrown = false) {
       // Painted snow and needles share a crown. A biome's green multiplier
       // would recolor the settled snow too, across mesh and impostor bands.
       if (preserveAuthoredColor) return UNTINTED;
+      const tables = gradedCrown ? graded : palette;
       if (autumnShare > 0 && groveSeed < autumnShare) {
-        const tints = tintsBySpecies.get(speciesId);
+        const tints = tables.autumn.get(speciesId);
         if (tints) {
           const position = groveSeed / autumnShare;
           return tints[Math.min(tints.length - 1, Math.floor(position * tints.length))];
         }
       }
       if (tileId === null) return UNTINTED;
-      return biomeTintsBySpecies.get(speciesId)?.get(tileId) ?? UNTINTED;
+      return tables.biome.get(speciesId)?.get(tileId) ?? UNTINTED;
     },
   };
 }

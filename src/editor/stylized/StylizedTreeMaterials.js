@@ -23,10 +23,13 @@ import { authoredTexture } from './AuthoredTextureNode.js';
 import { stylizedFbm } from './StylizedNoiseNodes.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
+import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyBarkWeathering } from './barkWeathering.js';
 
+/** Share of the sky fill a textured crown takes (the donor's `foliageFill`). */
+const FOLIAGE_FILL = 0.28;
 function colorNode(value) {
   const color = new THREE.Color(value);
   return vec3(color.r, color.g, color.b);
@@ -106,7 +109,19 @@ export function createStylizedLeafMaterial({
 
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = finalPosition;
-  material.colorNode = applyCanopyRim(leafColor, config, palette);
+  if (authoredColor && map) {
+    // A textured crown is lit the way its donor lit it: the graded leaf colour,
+    // sky fill in the shaded interior and sun through the leaves. No rim and no
+    // noise variation — on a crown of flat cards both key to each card's own
+    // facing and paint it in cream and dark-green camouflage patches.
+    const crown = authoredColor.mul(paletteValue(palette, config, 'brightness'));
+    material.colorNode = crown;
+    material.emissiveNode = foliageBacklight(crown, 0.8).add(crown.mul(foliageLight.fill).mul(FOLIAGE_FILL));
+    // Its biome and autumn tints are ratios against the grade, not the palette.
+    material.userData.gradedCanopy = true;
+  } else {
+    material.colorNode = applyCanopyRim(leafColor, config, palette);
+  }
   if (map) {
     material.opacityNode = authoredTexture(map).a;
     material.alphaTest = alphaTest > 0

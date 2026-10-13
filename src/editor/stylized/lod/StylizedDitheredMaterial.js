@@ -71,6 +71,8 @@ export function createDitheredMaterial(sourceMaterial, {
   // A classic material's clone() drops node properties; keep a position node the
   // source layer gave it (ground-detail wind).
   if (sourceMaterial.positionNode && !material.positionNode) material.positionNode = sourceMaterial.positionNode;
+  // …and its emission: a textured crown's sky fill and backlight live there.
+  if (sourceMaterial.emissiveNode && !material.emissiveNode) material.emissiveNode = sourceMaterial.emissiveNode;
   // Packed per-instance scalars; see createGeometry in StylizedLodRuntime for why these
   // share one attribute rather than taking a vertex buffer each.
   const dither = attribute('instanceDither', 'vec3');
@@ -92,6 +94,7 @@ export function createDitheredMaterial(sourceMaterial, {
       ? attribute('instanceLeafTint', 'vec3').mul(colorVariation)
       : colorVariation;
     material.colorNode = material.colorNode.mul(variation);
+    if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(variation);
   }
   applyMorphology(
     material,
