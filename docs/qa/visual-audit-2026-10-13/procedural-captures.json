@@ -1,0 +1,1536 @@
+{
+  "source": "procedural",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "timePreset": "highfield",
+  "hour": 12,
+  "weather": "off",
+  "shots": [
+    {
+      "id": 1,
+      "name": "Hot desert",
+      "cellX": -2834,
+      "cellZ": -47,
+      "x": -5667,
+      "z": 93,
+      "yaw": 2.510927532930373,
+      "pitch": -0.08,
+      "height": 4.000561087193763,
+      "file": "procedural-01.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -5667,
+          "z": 93
+        },
+        "player": {
+          "x": -35,
+          "y": 5.683767036369107,
+          "footY": 3.983767036369107,
+          "z": 93,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0.029133847421616538,
+            "y": 0.999152212575571,
+            "z": 0.029087369075856604
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": -35,
+            "y": 3.983767036369107,
+            "z": 93
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          -35,
+          5.683767036369107,
+          93
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -5632,
+          "z": 0
+        },
+        "biome": 1,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#9dd5fc",
+          "highColor": "#4274da",
+          "sunColor": "#fbf9e0",
+          "sunGlowColor": "#f9d781",
+          "cloudCore": "#b4c6d7",
+          "cloudEdge": "#f3fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a9cbd4",
+          "groundLightColor": "#6e794e",
+          "directionalColor": "#fae7bc",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.29142,
+          "cloudOpacity": 0.6281580201063883,
+          "cloudDensity": 0.657769209767607,
+          "ambientIntensity": 2.034305882352941,
+          "ambientSaturation": 0.42297075000000006,
+          "directionalIntensity": 3.2404188235294122,
+          "fogDensityScale": 1.5525176271384888,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.17913303804150738,
+          "cloudDetail": 0.8097907438797105,
+          "mist": 0,
+          "snowBrightness": 0.8043388235294117,
+          "snowShade": 0.33148551470588233,
+          "snowBlue": 0.5386323529411764,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-45:-1|-45:-1",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -5632,
+            "z": 0
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Cold desert",
+      "cellX": 250,
+      "cellZ": 1416,
+      "x": 501,
+      "z": -2833,
+      "yaw": 1.2516472670126653,
+      "pitch": -0.08,
+      "height": 6.163113539642521,
+      "file": "procedural-02.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": 501,
+          "z": -2833
+        },
+        "player": {
+          "x": 117,
+          "y": 7.8995999344385845,
+          "footY": 6.199599934438584,
+          "z": -17,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.01252058366402586,
+            "y": 0.99939150604083,
+            "z": 0.032555378021977305
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 117,
+            "y": 6.199599934438584,
+            "z": -17
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          117,
+          7.8995999344385845,
+          -17
+        ],
+        "fov": 68,
+        "origin": {
+          "x": 384,
+          "z": -2816
+        },
+        "biome": 2,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#98d6ff",
+          "highColor": "#4074dd",
+          "sunColor": "#faf9e1",
+          "sunGlowColor": "#fad781",
+          "cloudCore": "#b4c6d7",
+          "cloudEdge": "#f3fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a9ccd7",
+          "groundLightColor": "#6d784f",
+          "directionalColor": "#fae7bd",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.31240063283668074,
+          "cloudOpacity": 0.6865867871958626,
+          "cloudDensity": 0.5799852066804394,
+          "ambientIntensity": 2.051458823529412,
+          "ambientSaturation": 0.4413774044117648,
+          "directionalIntensity": 3.092367236150621,
+          "fogDensityScale": 1.9455850636835959,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.205952767846909,
+          "cloudDetail": 0.8070849028596578,
+          "mist": 0.12584363150826602,
+          "snowBrightness": 0.7874451470588234,
+          "snowShade": 0.2983971682683228,
+          "snowBlue": 0.45640112663952326,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "3:22|3:22",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 384,
+            "z": -2816
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "Savanna",
+      "cellX": -7187,
+      "cellZ": 1733,
+      "x": -14373,
+      "z": -3467,
+      "yaw": 4.799565424433502,
+      "pitch": -0.08,
+      "height": 6.102771771433913,
+      "file": "procedural-03.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -14373,
+          "z": -3467
+        },
+        "player": {
+          "x": -37,
+          "y": 7.8566889152037325,
+          "footY": 6.156688915203732,
+          "z": -11,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.043457912630846265,
+            "y": 0.9990533449741534,
+            "z": -0.0019554349196310556
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": -37,
+            "y": 6.156688915203732,
+            "z": -11
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          -37,
+          7.8566889152037325,
+          -11
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -14336,
+          "z": -3456
+        },
+        "biome": 3,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#98d6fe",
+          "highColor": "#4274da",
+          "sunColor": "#fdf9de",
+          "sunGlowColor": "#fbd780",
+          "cloudCore": "#b6c6d5",
+          "cloudEdge": "#f5fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a8ccd3",
+          "groundLightColor": "#6f794d",
+          "directionalColor": "#fce7ba",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.2911094117647059,
+          "cloudOpacity": 0.6218800198297614,
+          "cloudDensity": 0.660078147733081,
+          "ambientIntensity": 2.0312,
+          "ambientSaturation": 0.42453377205882353,
+          "directionalIntensity": 3.2342352941176475,
+          "fogDensityScale": 1.3324374586181091,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.18393270296558625,
+          "cloudDetail": 0.8247896967674571,
+          "mist": 0,
+          "snowBrightness": 0.8096986764705882,
+          "snowShade": 0.33654018382352935,
+          "snowBlue": 0.5571933823529411,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-113:27|-113:27",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -14336,
+            "z": -3456
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "Grassland",
+      "cellX": -4479,
+      "cellZ": -3869,
+      "x": -8957,
+      "z": 7737,
+      "yaw": 4.4532042246192685,
+      "pitch": -0.08,
+      "height": 0.30000000000000004,
+      "file": "procedural-04.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -8957,
+          "z": 7737
+        },
+        "player": {
+          "x": 3,
+          "y": 2,
+          "footY": 0.30000000000000004,
+          "z": 57,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0,
+            "y": 1,
+            "z": 0
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 3,
+            "y": 0.30000000000000004,
+            "z": 57
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          3,
+          2,
+          57
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -8960,
+          "z": 7680
+        },
+        "biome": 4,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#96d6ff",
+          "highColor": "#3e74df",
+          "sunColor": "#fcf9df",
+          "sunGlowColor": "#fbd780",
+          "cloudCore": "#b5c6d6",
+          "cloudEdge": "#f4fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a9ccd6",
+          "groundLightColor": "#6e784e",
+          "directionalColor": "#fbe7bc",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.3162537568761301,
+          "cloudOpacity": 0.692341197471976,
+          "cloudDensity": 0.5508663014206602,
+          "ambientIntensity": 2.0499058823529412,
+          "ambientSaturation": 0.43947,
+          "directionalIntensity": 3.002433208409609,
+          "fogDensityScale": 2.0297911384975382,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.23421581879066602,
+          "cloudDetail": 0.8404377991183378,
+          "mist": 0.20579874123999073,
+          "snowBrightness": 0.7904549999999999,
+          "snowShade": 0.3039897842160409,
+          "snowBlue": 0.4810564282225901,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-70:-61|-70:-61",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -8960,
+            "z": 7680
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "Tropical seasonal forest",
+      "cellX": -7909,
+      "cellZ": 1851,
+      "x": -15817,
+      "z": -3703,
+      "yaw": 5.887332314542098,
+      "pitch": -0.08,
+      "height": 0.5139514206550831,
+      "file": "procedural-05.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -15817,
+          "z": -3703
+        },
+        "player": {
+          "x": -73,
+          "y": 2.1560871878516945,
+          "footY": 0.45608718785169455,
+          "z": -119,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0.01836075167482446,
+            "y": 0.9990219961783985,
+            "z": -0.04022354968999253
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": -73,
+            "y": 0.45608718785169455,
+            "z": -119
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          -73,
+          2.1560871878516945,
+          -119
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -15744,
+          "z": -3584
+        },
+        "biome": 5,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#91d7ff",
+          "highColor": "#4074dd",
+          "sunColor": "#fcf9df",
+          "sunGlowColor": "#fbd780",
+          "cloudCore": "#b5c6d5",
+          "cloudEdge": "#f4fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a4cdd7",
+          "groundLightColor": "#6e794e",
+          "directionalColor": "#fce7bb",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.29414999999999997,
+          "cloudOpacity": 0.6507602121571444,
+          "cloudDensity": 0.634376123981412,
+          "ambientIntensity": 2.046764705882353,
+          "ambientSaturation": 0.4423645588235294,
+          "directionalIntensity": 3.1888188235294117,
+          "fogDensityScale": 1.2438623461126883,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.17562744328507823,
+          "cloudDetail": 0.7988357602658694,
+          "mist": 0,
+          "snowBrightness": 0.7848248529411764,
+          "snowShade": 0.3193011397058823,
+          "snowBlue": 0.4829007352941176,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-124:28|-124:28",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -15744,
+            "z": -3584
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 6,
+      "name": "Temperate deciduous forest",
+      "cellX": -973,
+      "cellZ": -3898,
+      "x": -1945,
+      "z": 7795,
+      "yaw": 0.3536528063046259,
+      "pitch": -0.08,
+      "height": 1.029200351904458,
+      "file": "procedural-06.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -1945,
+          "z": 7795
+        },
+        "player": {
+          "x": 103,
+          "y": 2.8573652106314613,
+          "footY": 1.1573652106314614,
+          "z": 115,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.053313292816053945,
+            "y": 0.9953780305736972,
+            "z": 0.0798765864339317
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 103,
+            "y": 1.1573652106314614,
+            "z": 115
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          103,
+          2.8573652106314613,
+          115
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -2048,
+          "z": 7680
+        },
+        "biome": 6,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#95d6ff",
+          "highColor": "#3f74df",
+          "sunColor": "#fbf9e1",
+          "sunGlowColor": "#f9d781",
+          "cloudCore": "#b4c6d7",
+          "cloudEdge": "#f3fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a7ccd7",
+          "groundLightColor": "#6d784f",
+          "directionalColor": "#fae7bd",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.3138519607113986,
+          "cloudOpacity": 0.6487619117531179,
+          "cloudDensity": 0.59662188461943,
+          "ambientIntensity": 2.0451764705882356,
+          "ambientSaturation": 0.436764375,
+          "directionalIntensity": 3.0280536999196235,
+          "fogDensityScale": 1.926895243591376,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.24355319586381013,
+          "cloudDetail": 0.8837447108159663,
+          "mist": 0.1852494927395498,
+          "snowBrightness": 0.790743088235294,
+          "snowShade": 0.30181325050650304,
+          "snowBlue": 0.4746861308638547,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-16:-61|-16:-61",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -2048,
+            "z": 7680
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 7,
+      "name": "Tropical rainforest",
+      "cellX": 1002,
+      "cellZ": -1471,
+      "x": 2005,
+      "z": 2941,
+      "yaw": 0.23151061303772338,
+      "pitch": -0.08,
+      "height": 7.559178684024874,
+      "file": "procedural-07.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": 2005,
+          "z": 2941
+        },
+        "player": {
+          "x": 85,
+          "y": 9.257266729428498,
+          "footY": 7.557266729428497,
+          "z": -3,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.008365577513243629,
+            "y": 0.9998949002238698,
+            "z": -0.011840845373847381
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 85,
+            "y": 7.557266729428497,
+            "z": -3
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          85,
+          9.257266729428498,
+          -3
+        ],
+        "fov": 68,
+        "origin": {
+          "x": 1920,
+          "z": 2944
+        },
+        "biome": 7,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#95d7ff",
+          "highColor": "#4074dd",
+          "sunColor": "#fbf9e1",
+          "sunGlowColor": "#fbd780",
+          "cloudCore": "#b4c6d6",
+          "cloudEdge": "#f3fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a7ccd6",
+          "groundLightColor": "#6c794e",
+          "directionalColor": "#fbe7bc",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.31471656163872147,
+          "cloudOpacity": 0.6844446999090139,
+          "cloudDensity": 0.5763602250097627,
+          "ambientIntensity": 2.0499058823529412,
+          "ambientSaturation": 0.45377338235294123,
+          "directionalIntensity": 2.99670009426244,
+          "fogDensityScale": 2.085725398378817,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.22382107494612413,
+          "cloudDetail": 0.8414331021456619,
+          "mist": 0.15710219208869233,
+          "snowBrightness": 0.7791294117647058,
+          "snowShade": 0.2828879314819222,
+          "snowBlue": 0.4136207380528497,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "15:-23|15:-23",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 1920,
+            "z": 2944
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 8,
+      "name": "Temperate rainforest",
+      "cellX": -999,
+      "cellZ": 1444,
+      "x": -1997,
+      "z": -2889,
+      "yaw": 1.5062487428603664,
+      "pitch": -0.08,
+      "height": 4.792982786142905,
+      "file": "procedural-08.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -1997,
+          "z": -2889
+        },
+        "player": {
+          "x": -77,
+          "y": 6.53529219409987,
+          "footY": 4.835292194099869,
+          "z": -73,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0.04123390675793813,
+            "y": 0.9958920932764086,
+            "z": 0.08061453642495797
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": -77,
+            "y": 4.835292194099869,
+            "z": -73
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          -77,
+          6.53529219409987,
+          -73
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -1920,
+          "z": -2816
+        },
+        "biome": 8,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#99d5ff",
+          "highColor": "#4174dc",
+          "sunColor": "#faf9e1",
+          "sunGlowColor": "#f9d781",
+          "cloudCore": "#b4c6d7",
+          "cloudEdge": "#f2fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a8cbd6",
+          "groundLightColor": "#6d784f",
+          "directionalColor": "#fae7bd",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.2981401965890683,
+          "cloudOpacity": 0.6483978325723954,
+          "cloudDensity": 0.6131483179885181,
+          "ambientIntensity": 2.0304058823529414,
+          "ambientSaturation": 0.4396009632352942,
+          "directionalIntensity": 3.173400669638562,
+          "fogDensityScale": 1.550589704962815,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.19831628888887803,
+          "cloudDetail": 0.8503752906197608,
+          "mist": 0.028164526775248194,
+          "snowBrightness": 0.7950719117647059,
+          "snowShade": 0.31757974826424523,
+          "snowBlue": 0.4988325358214209,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-16:22|-16:22",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -1920,
+            "z": -2816
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "name": "Taiga",
+      "cellX": -7816,
+      "cellZ": 5627,
+      "x": -15631,
+      "z": -11255,
+      "yaw": 0.6979141569145686,
+      "pitch": -0.08,
+      "height": 4.772920535704053,
+      "file": "procedural-09.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -15631,
+          "z": -11255
+        },
+        "player": {
+          "x": -15,
+          "y": 6.475280024503892,
+          "footY": 4.775280024503892,
+          "z": -119,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.05762090417662599,
+            "y": 0.9969579293820331,
+            "z": -0.05248541172704333
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": -15,
+            "y": 4.775280024503892,
+            "z": -119
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          -15,
+          6.475280024503892,
+          -119
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -15616,
+          "z": -11136
+        },
+        "biome": 9,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#99d4fd",
+          "highColor": "#3c71e1",
+          "sunColor": "#fdf9df",
+          "sunGlowColor": "#f8d681",
+          "cloudCore": "#b4c5d6",
+          "cloudEdge": "#f5fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a4c9d7",
+          "groundLightColor": "#6e784e",
+          "directionalColor": "#fbe6bb",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.2735294117647059,
+          "cloudOpacity": 0.5956159540815668,
+          "cloudDensity": 0.6581608131429337,
+          "ambientIntensity": 2.1040398442906576,
+          "ambientSaturation": 0.408853455882353,
+          "directionalIntensity": 3.2124800000000002,
+          "fogDensityScale": 1.196973655868626,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.19610887869999385,
+          "cloudDetail": 0.8628402459374809,
+          "mist": 0,
+          "snowBrightness": 0.8139583823529412,
+          "snowShade": 0.3786091544117647,
+          "snowBlue": 0.6444242647058823,
+          "nightness": 0,
+          "exposure": 0.9357647058823529
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-123:87|-123:87",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -15616,
+            "z": -11136
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 10,
+      "name": "Tundra",
+      "cellX": -2402,
+      "cellZ": -7176,
+      "x": -4803,
+      "z": 14351,
+      "yaw": 2.338503439414784,
+      "pitch": -0.08,
+      "height": 6.349882399374919,
+      "file": "procedural-10.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": -4803,
+          "z": 14351
+        },
+        "player": {
+          "x": 61,
+          "y": 8.055403592106957,
+          "footY": 6.355403592106957,
+          "z": 15,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": -0.027197838452609098,
+            "y": 0.9994091881187054,
+            "z": -0.021013145585940585
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 61,
+            "y": 6.355403592106957,
+            "z": 15
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          61,
+          8.055403592106957,
+          15
+        ],
+        "fov": 68,
+        "origin": {
+          "x": -4864,
+          "z": 14336
+        },
+        "biome": 10,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#9cd3fb",
+          "highColor": "#3970e7",
+          "sunColor": "#fdf9de",
+          "sunGlowColor": "#f9d681",
+          "cloudCore": "#b4c5d6",
+          "cloudEdge": "#f5fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#aac8d6",
+          "groundLightColor": "#6e784e",
+          "directionalColor": "#fde6b9",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.3107951008001512,
+          "cloudOpacity": 0.6169091238120732,
+          "cloudDensity": 0.5499986201734716,
+          "ambientIntensity": 2.218259,
+          "ambientSaturation": 0.41112,
+          "directionalIntensity": 2.849600877874768,
+          "fogDensityScale": 2.3024217074852142,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.3293146078782372,
+          "cloudDetail": 1.0338055339670182,
+          "mist": 0.36499908554711685,
+          "snowBrightness": 0.8141225,
+          "snowShade": 0.3290876937537713,
+          "snowBlue": 0.6005626828905766,
+          "nightness": 0,
+          "exposure": 0.8440000000000001
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "-38:-113|-38:-113",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -4864,
+            "z": 14336
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 11,
+      "name": "Glacier",
+      "cellX": 37,
+      "cellZ": 3780,
+      "x": 75,
+      "z": -7561,
+      "yaw": 2.3971680489741036,
+      "pitch": -0.08,
+      "height": 21.873302650083556,
+      "file": "procedural-11.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": 75,
+          "z": -7561
+        },
+        "player": {
+          "x": 75,
+          "y": 23.515460124121784,
+          "footY": 21.815460124121785,
+          "z": -9,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0.03093742687686497,
+            "y": 0.9993026211296291,
+            "z": -0.020908061165297136
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 75,
+            "y": 21.815460124121785,
+            "z": -9
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          75,
+          23.515460124121784,
+          -9
+        ],
+        "fov": 68,
+        "origin": {
+          "x": 0,
+          "z": -7552
+        },
+        "biome": 11,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#99d5fe",
+          "highColor": "#3f74e0",
+          "sunColor": "#faf9e2",
+          "sunGlowColor": "#f9d781",
+          "cloudCore": "#b3c6d9",
+          "cloudEdge": "#f2fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a7cbd8",
+          "groundLightColor": "#6c784f",
+          "directionalColor": "#fae7bd",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.293926431296306,
+          "cloudOpacity": 0.6452474471448396,
+          "cloudDensity": 0.6301678279546169,
+          "ambientIntensity": 2.0710135294117644,
+          "ambientSaturation": 0.4410542647058824,
+          "directionalIntensity": 3.19547687712126,
+          "fogDensityScale": 1.4510103163121757,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.18309911293791564,
+          "cloudDetail": 0.8189455123277217,
+          "mist": 0.0047115863320214,
+          "snowBrightness": 0.7918175,
+          "snowShade": 0.33144089163125834,
+          "snowBlue": 0.5180775356747722,
+          "nightness": 0,
+          "exposure": 0.9694117647058823
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "0:59|0:59",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 0,
+            "z": -7552
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    },
+    {
+      "id": 12,
+      "name": "Wetland",
+      "cellX": 4823,
+      "cellZ": -742,
+      "x": 9647,
+      "z": 1483,
+      "yaw": 3.5175117620952805,
+      "pitch": -0.08,
+      "height": 1.6789121032569043,
+      "file": "procedural-12.jpg",
+      "settled": false,
+      "minimumWarmupSeconds": 16,
+      "settleTimeoutSeconds": 30,
+      "state": {
+        "canonical": {
+          "x": 9647,
+          "z": 1483
+        },
+        "player": {
+          "x": 47,
+          "y": 3.2662868079965053,
+          "footY": 1.5662868079965053,
+          "z": 75,
+          "verticalVelocity": 0,
+          "grounded": true,
+          "supportSourceId": "terrain",
+          "supportNormal": {
+            "x": 0.011763420614143743,
+            "y": 0.9941668797237365,
+            "z": -0.1072093148743357
+          },
+          "collisionReady": true,
+          "collisionBlocked": false,
+          "collisionStepped": false,
+          "collisionContacts": [],
+          "previousValidPosition": {
+            "x": 47,
+            "y": 1.5662868079965053,
+            "z": 75
+          },
+          "waterState": "dry",
+          "waterDepth": 0,
+          "waterSurfaceHeight": null,
+          "waterBodyId": 0,
+          "waterKind": 0,
+          "waterFlowX": 0,
+          "waterFlowZ": 0,
+          "headSubmerged": false
+        },
+        "camera": [
+          47,
+          3.2662868079965053,
+          75
+        ],
+        "fov": 68,
+        "origin": {
+          "x": 9600,
+          "z": 1408
+        },
+        "biome": 12,
+        "skyPreset": "highfield",
+        "sky": {
+          "night": false,
+          "lowColor": "#95d6ff",
+          "highColor": "#4074dd",
+          "sunColor": "#faf9e2",
+          "sunGlowColor": "#fad781",
+          "cloudCore": "#b3c5d7",
+          "cloudEdge": "#f2fbff",
+          "cloudRim": "#fff3dc",
+          "fogColor": "#a9cbd6",
+          "groundLightColor": "#6c794f",
+          "directionalColor": "#f9e7bd",
+          "sunElevation": 42,
+          "sunAzimuth": 235,
+          "sunEmission": 1.4,
+          "sunGlowIntensity": 0.33608670534383633,
+          "cloudOpacity": 0.7203607343602466,
+          "cloudDensity": 0.5274857046797966,
+          "ambientIntensity": 2.0405176470588238,
+          "ambientSaturation": 0.4497233823529411,
+          "directionalIntensity": 2.809421053887739,
+          "fogDensityScale": 2.7131776134725434,
+          "cloudShadowStrength": 0.45,
+          "shadowRadius": 2.4,
+          "cloudSharpness": 0.2706501415121675,
+          "cloudDetail": 0.8508588322586745,
+          "mist": 0.35625143267905307,
+          "snowBrightness": 0.78309,
+          "snowShade": 0.26013362945324137,
+          "snowBlue": 0.3906585369936012,
+          "nightness": 0,
+          "exposure": 1
+        },
+        "streaming": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1555.199999988079,
+          "capacity": 49,
+          "focusChunk": "75:-12|75:-12",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 9600,
+            "z": 1408
+          }
+        },
+        "preparation": {
+          "ready": false,
+          "queueDepth": 1,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "materials": 0
+        }
+      }
+    }
+  ]
+}
