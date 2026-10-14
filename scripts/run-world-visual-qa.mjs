@@ -9,10 +9,11 @@ import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 const root=new URL('../',import.meta.url),repo=fileURLToPath(root),args=parseVisualArguments(process.argv.slice(2));
 const out=path.resolve(args.out);await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
-const report={schemaVersion:1,...repositoryState(repo),startedAt:new Date().toISOString(),viewport:{width:1600,height:900},
+const report={schemaVersion:1,startedAt:new Date().toISOString(),viewport:{width:1600,height:900},
   poses:[],checks:[],artifacts:[],configHashes:{},suite:args.suite};
 let browser,page,errors;
 try {
+  Object.assign(report,repositoryState(repo));
   for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml'])report.configHashes[file]=await fileHash(new URL(file,root));
   report.mapHash=await fileHash(new URL('maps/Eldara Full 2026-07-23-20-37.json',root));
   browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});

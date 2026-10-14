@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 export const sha256=data=>createHash('sha256').update(data).digest('hex');
 export function repositoryState(root) {
-  const git=args=>execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,...args],{cwd:root,encoding:'utf8'}).trim();
+  const git=args=>execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/').replace(/\/$/,'')}`,...args],{cwd:root,encoding:'utf8'}).trim();
   return {sourceSha:git(['rev-parse','HEAD']),dirtyFiles:git(['status','--porcelain']).split('\n').filter(Boolean)};
 }
 export async function fileHash(file) {return sha256(await readFile(file));}
