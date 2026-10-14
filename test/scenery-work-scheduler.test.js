@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SCENERY_WORK_ORDER, SceneryWorkScheduler } from '../src/editor/stylized/SceneryWorkScheduler.js';
-test('every runnable consumer receives its first turn within six frames on the same allowance',()=>{
+test('every runnable consumer receives its first turn within one rotation on the same allowance',()=>{
  const scheduler=new SceneryWorkScheduler(),seen=[];let spent=false;
  const consumers=Object.fromEntries(SCENERY_WORK_ORDER.map(name=>[name,{pending:()=>true,run:()=>{seen.push(name);spent=true;}}]));
- for(let frame=0;frame<6;frame++){spent=false;scheduler.beginFrame(consumers,()=>spent);}
+ for(let frame=0;frame<SCENERY_WORK_ORDER.length;frame++){spent=false;scheduler.beginFrame(consumers,()=>spent);}
  assert.deepEqual(seen,SCENERY_WORK_ORDER);
 });
 test('blocked consumers and exhausted budget do not impede other turns',()=>{

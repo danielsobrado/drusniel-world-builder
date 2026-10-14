@@ -191,6 +191,28 @@ The existing eight-range bound remains. Upload diagnostics count newly queued
 bytes. Two regressions fail before the fix and pass afterward; the repeated-write
 fixture transfers 80 bytes once instead of four copies totaling 320 bytes.
 
+### Manifest preparation fairness
+
+The frozen matrix at `398fd077` completed with zero browser errors and all
+movement scenes settled. Standard, forest, construction and water passed;
+high grass and dense mixed still failed the hitch gate (3.36% and 3.18%).
+Their frame p95 values were 27.14 and 26.1 ms. This is a failed acceptance
+checkpoint, retained in `tmp/performance-review/matrix-coalesced.json`.
+
+A separate instrumented 1 MiB publication experiment did not settle and is
+excluded from performance acceptance. It exposed 120 queued tree manifests
+while the tree draw-rebuild queue was empty; collision only had one of nine
+required chunks ready. Lowering the publication allowance has not been applied
+to production based on that invalid experiment.
+
+The fair scheduler previously considered visible rebuild queues, leaving
+manifest-only work to later opportunistic calls. Tree and rock manifests and
+completed placement fields now receive independent turns on the same shared
+allowance. Early tree completions are retained until the view consumes their
+notification, ensuring newly prepared trees are actually published. Two new
+regressions reproduce starvation and lost completion notifications before the
+fix, then verify bounded progress and exactly-once reporting afterward.
+
 Commands used:
 
 ```sh

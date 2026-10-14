@@ -1,4 +1,4 @@
-export const SCENERY_WORK_ORDER = Object.freeze(['meadow', 'rock', 'tree', 'bush', 'detail', 'flower']);
+export const SCENERY_WORK_ORDER = Object.freeze(['fields', 'meadow', 'rockManifest', 'treeManifest', 'rock', 'tree', 'bush', 'detail', 'flower']);
 /** Rotate the first preparation turn without granting another frame allowance. */
 export class SceneryWorkScheduler {
   constructor() { this.cursor = 0; this.first = 0; }
@@ -30,10 +30,19 @@ export function createSceneryConsumers(surface) {
     },
   });
   const sync = (layer, views, property) => surface.syncSceneryQueue(surface[`${layer}BuildQueue`], views, property);
+  const manifestConsumer = layer => ({
+    pending: () => (surface[`${layer}View`]?.manifestStore?.queue.size ?? 0) > 0,
+    run: () => surface[`${layer}View`].manifestStore.flush({ consumeCompleted: false }),
+  });
   return {
+    fields: {
+      pending: () => (surface.preparedPlacement?.completed?.length ?? 0) > (surface.preparedPlacement?.completedHead ?? 0),
+      run: () => surface.preparedPlacement.flush(surface.shouldYieldWork),
+    },
     meadow: { pending: () => Boolean(surface.meadowGrass?.frameInputs) &&
       (surface.meadowGrass.blades.staleTiles.length + (surface.meadowGrass.cards?.staleTiles.length ?? 0) > 0),
       run: () => surface.meadowGrass?.prepareFrame(surface.shouldYieldWork, surface.workBudgetProvider) },
+    rockManifest: manifestConsumer('rock'), treeManifest: manifestConsumer('tree'),
     rock: viewConsumer('rock'), tree: viewConsumer('tree', 'pendingLodRebuild'), bush: viewConsumer('bush'),
     detail: { pending: () => surface.detailViews.some(view => view.pendingRebuild), run: () => {
       sync('detail', surface.detailViews);

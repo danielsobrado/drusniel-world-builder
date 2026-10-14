@@ -509,7 +509,7 @@ export class TreeManifestStore {
     }
   }
 
-  flush() {
+  flush({ consumeCompleted = true } = {}) {
     let completed = 0;
     const result = this.queue.flush((job, shouldYield) => {
       if (!this.activeKeys.has(job.key)) {
@@ -537,7 +537,12 @@ export class TreeManifestStore {
     PerfCounters.set('treeManifestQueueDepth', result.remaining);
     PerfCounters.set('treeManifestOldestJobMs', this.queue.size
       ? performance.now() - Math.min(...this.queue.queue.map(job => job.requestedAt)) : 0);
-    return { ...result, completed };
+    // Preparation may receive an early scheduler turn before the view updates.
+    // Retain those completions so the view still publishes newly ready trees.
+    this.completedSinceUpdate = (this.completedSinceUpdate ?? 0) + completed;
+    const reported = this.completedSinceUpdate;
+    if (consumeCompleted) this.completedSinceUpdate = 0;
+    return { ...result, completed: reported };
   }
 
   dispose() {
