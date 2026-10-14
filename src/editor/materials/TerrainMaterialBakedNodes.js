@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { terrainMaterialAnalysisChannels } from './TerrainMaterialAnalysisTexture.js';
 import {
   Fn,
   clamp,
@@ -52,9 +53,9 @@ function sampleBakeTextures(gpuState, terrainUv) {
     : texture(gpuState.textures[name], terrainUv));
   // The macro tint is the smoothest bake, so it is read without a sampler: the
   // terrain's fragment stage has used all 16 (TerrainSlotBindings.loadTexture).
-  const load = (name) => (gpuState.loadTexture
+  const load = (name) => terrainMaterialAnalysisChannels((gpuState.loadTexture
     ? gpuState.loadTexture(name, terrainUv)
-    : bilinearLoad(gpuState.textures[name], terrainUv));
+    : bilinearLoad(gpuState.textures[name], terrainUv)),name);
   return {
     macroTint: load('macroTint'),
     terrainShape: load('terrainShape'),

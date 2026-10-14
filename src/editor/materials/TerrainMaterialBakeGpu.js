@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
+import { createTerrainMaterialAnalysisTexture,writeTerrainMaterialAnalysisTexture } from './TerrainMaterialAnalysisTexture.js';
 
 const MATERIAL_BAKE_GPU_KEY = 'terrainMaterialBakeGpu';
 
@@ -99,8 +100,9 @@ export function createTerrainMaterialBakeGpuState(config) {
   }
 
   const textures = {};
+  const analysis=createTerrainMaterialAnalysisTexture(resolution);
   for (const [name, layout] of Object.entries(CHANNEL_LAYOUTS)) {
-    textures[name] = createTexture(layout, resolution);
+    textures[name] = ['wetnessShoreline','canopyWater'].includes(name) ? analysis : createTexture(layout, resolution);
   }
 
   return {
@@ -120,7 +122,7 @@ export function attachTerrainMaterialBakeGpuState(material, state) {
   const dispose = () => {
     if (state.disposed) return;
     state.disposed = true;
-    for (const texture of Object.values(state.textures)) texture.dispose();
+    for (const texture of new Set(Object.values(state.textures))) texture.dispose();
     state.ready.value = 0;
     state.stale.value = 0;
     state.blend.value = 0;
@@ -150,11 +152,14 @@ export function uploadTerrainMaterialBakeGpu(material, page, { stale = false } =
   let uploadedBytes = 0;
   if (state.key !== page.descriptor.key) {
     for (const [name, texture] of Object.entries(state.textures)) {
+      if(name==='wetnessShoreline'||name==='canopyWater')continue;
       const source = page.channels[name];
       texture.image.data.set(source);
       texture.needsUpdate = true;
       uploadedBytes += source.byteLength;
     }
+    uploadedBytes+=writeTerrainMaterialAnalysisTexture(state.textures.wetnessShoreline,
+      page.channels.wetnessShoreline,page.channels.canopyWater);
     state.key = page.descriptor.key;
     state.blend.value = 0;
   }

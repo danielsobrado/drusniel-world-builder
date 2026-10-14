@@ -4,7 +4,7 @@ import {loadEditorConfig} from '/src/config/loadEditorConfig.js';
 import {createTerrainMaterial} from '/src/editor/terrainMaterial.js';
 import {getTerrainMaterialBakeGpuState} from '/src/editor/materials/TerrainMaterialBakeGpu.js';
 import {resolveBlownStreaks,blownStreakUniforms,advanceBlownStreaks} from '/src/editor/stylized/ambient/BlownStreaks.js';
-import {worldWindTarget,worldWindUniforms} from '/src/editor/weather/wind/worldWindState.js';
+import {worldWindUniforms} from '/src/editor/weather/wind/worldWindState.js';
 import {installUnusedSamplerPruning} from '/src/render/UnusedSamplerBindings.js';
 import {raiseDeviceLimits} from '/src/render/deviceLimits.js';
 const backend=new URLSearchParams(location.search).get('backend')??'webgpu';
@@ -48,7 +48,8 @@ function fillChannels(gpu,kind,base) {
   map.name=`terrain-bake-${name}`;
   const channels=map.format===THREE.RGFormat?2:4;
   const value=name==='materialWeights'?(kind==='sand'?[0,255,0,0]:[0,0,0,255]):
-   name==='macroTint'?[128,128,128,255]:name==='farColor'?[...base,255]:[0,0,0,255];
+   name==='macroTint'?[128,128,128,255]:name==='farColor'?[...base,255]:
+   ['wetnessShoreline','canopyWater'].includes(name)?[0,0,0,0]:[0,0,0,255];
   for(let i=0;i<map.image.data.length;i++)map.image.data[i]=value[i%channels];
   map.needsUpdate=true;
  }
@@ -56,11 +57,11 @@ function fillChannels(gpu,kind,base) {
 }
 try {
  if(state.report.backend!==backend)throw new Error('Unexpected fixture backend.');
- // A fixed render target is the production wind field's ordinary input, filled once.
+ // Fixed wind goes through the production drift dependency; no fixture wind pass is needed.
  worldWindUniforms.prevailing.value.set(1,0);worldWindUniforms.prevailingStrength.value=.18;
  worldWindUniforms.referenceStrength.value=.18;worldWindUniforms.windowCenter.value.set(0,0);
  worldWindUniforms.windowCenterCanonical.value.set(0,0);
- renderer.setRenderTarget(worldWindTarget);renderer.setClearColor(new THREE.Color().setRGB(.18,0,.5),.18);renderer.clear();renderer.setRenderTarget(null);renderer.setClearColor(0,1);
+ renderer.setClearColor(0,1);
  const raw=loadEditorConfig().stylizedSurface,settings=resolveBlownStreaks(raw.ambientEffects);
  blownStreakUniforms.sand.value=settings.sand.strength;blownStreakUniforms.snow.value=settings.snow.strength;
  blownStreakUniforms.sandTravel.value=0;blownStreakUniforms.snowTravel.value=0;advanceBlownStreaks({delta:10,envelope:1,gust:.5});

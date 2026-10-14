@@ -68,6 +68,9 @@ test('GPU state preserves packed channel formats and uploads one page without re
   assert.equal(state.textures.terrainShape.type, THREE.HalfFloatType);
   assert.equal(state.textures.farNormal.type, THREE.ByteType);
   assert.deepEqual(state.textures.farNormal.image.data, baked.channels.farNormal);
+  assert.strictEqual(state.textures.wetnessShoreline,state.textures.canopyWater);
+  assert.deepEqual(Array.from(state.textures.wetnessShoreline.image.data.slice(0,4)),[32,32,48,48]);
+  assert.equal([...new Set(Object.values(state.textures))].reduce((n,t)=>n+t.image.data.byteLength,0),uploaded);
 
   assert.equal(uploadTerrainMaterialBakeGpu(material, baked), 0);
   for (const [name, texture] of Object.entries(textureReferences)) {
@@ -83,7 +86,7 @@ test('GPU state preserves packed channel formats and uploads one page without re
 test('material disposal releases every owned bake texture exactly once', () => {
   const { material, state } = materialWithState();
   let disposed = 0;
-  for (const texture of Object.values(state.textures)) {
+  for (const texture of new Set(Object.values(state.textures))) {
     texture.addEventListener('dispose', () => {
       disposed += 1;
     });
@@ -91,7 +94,7 @@ test('material disposal releases every owned bake texture exactly once', () => {
 
   material.dispatchEvent({ type: 'dispose' });
   material.dispatchEvent({ type: 'dispose' });
-  assert.equal(disposed, 7);
+  assert.equal(disposed, 6);
   assert.equal(state.disposed, true);
   assert.equal(state.ready.value, 0);
   assert.equal(state.blend.value, 0);
