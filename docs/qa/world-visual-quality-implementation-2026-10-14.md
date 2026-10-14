@@ -270,3 +270,10 @@ inside the unchanged 0.85–1.15 gate. Every material luminance/RGB comparison,
 neutral-card mist check, colour round-trip and camera-normal check passes.
 The full suite passes 6,691 tests. The five prescribed real-world atmosphere
 views remain the final VQ-06 capture step before biome composition.
+
+The [five real-world atmosphere views](world-visual-quality-2026-10-14/fixtures/trees-world/report.json)
+pass readiness and source-stability gates with zero browser errors. They include
+original 07 in both prescribed directions and originals 06/08/09. Inspection shows
+consistent lit canopies and distance atmosphere; the former washed-out cutout
+contrast is reduced without retuning exposure. The current production build also
+passes. VQ-06 acceptance is complete; VQ-07–13 remain to be implemented.
