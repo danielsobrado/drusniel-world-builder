@@ -300,3 +300,12 @@ The existing atlas signature includes variant eligibility, so all original asset
 were refreshed with its new signature; every albedo/normal PNG is bit-identical
 to the accepted VQ-06 pixels. No source asset or atlas dimension changes.
 The frozen additional manifest and grounded classification captures are next.
+
+The [classification captures](world-visual-quality-2026-10-14/biomes/classification-world/report.json)
+pass readiness and frozen expected-biome checks at original 11 (now biome 6) and
+additional-11-1 (glacier 11), without browser errors. Inspection confirms that
+the warm lowland ice patch has become ordinary vegetation; the new cold-climate
+patch remains snowy. The [frozen review manifest](world-visual-quality-2026-10-14/biomes/procedural-review-poses.json)
+contains 24 additional views, selected after 22,842 candidates, giving three
+views per land biome with the required 512-metre additional-view separation.
+The full suite passes 6,695 tests. VQ-07 acceptance is complete.
