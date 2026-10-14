@@ -162,7 +162,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
   }
 
   pageEditState(chunkX, chunkZ) {
-    const radius = Math.max(2, getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells));
+    const radius = Math.max(2, getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells, this.tileSize));
     const minX = chunkX * this.chunkSize - radius;
     const maxX = (chunkX + 1) * this.chunkSize + radius;
     const minZ = chunkZ * this.chunkSize - radius;

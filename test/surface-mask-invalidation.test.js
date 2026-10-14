@@ -7,7 +7,8 @@ import {
 } from '../src/editor/world/ChunkRenderPixels.js';
 
 test('surface mask chunk invalidation covers the full configured halo', () => {
-  assert.equal(getSurfaceMaskSearchRadius(2.5), 4);
+  assert.equal(getSurfaceMaskSearchRadius(2.5), 6);
+  assert.equal(getSurfaceMaskSearchRadius(2.5, 1), 10);
   assert.equal(getSurfaceMaskChunkRadius(2.5, 64), 1);
   assert.equal(getSurfaceMaskChunkRadius(64, 64), 2);
   assert.equal(getSurfaceMaskChunkRadius(130, 64), 3);

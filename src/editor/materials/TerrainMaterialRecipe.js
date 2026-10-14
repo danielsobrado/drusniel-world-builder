@@ -1,4 +1,4 @@
-export const TERRAIN_MATERIAL_RECIPE_REVISION = 4;
+export const TERRAIN_MATERIAL_RECIPE_REVISION = 5;
 function canonical(value) {
  if(Array.isArray(value))return value.map(canonical);
  if(value && typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])]));

@@ -1,3 +1,4 @@
+import { sampleSurfaceMaskChannel } from '../world/SurfaceMaskSampling.js';
 import { floatToHalf } from './HalfFloat.js';
 import {
   createTerrainMaterialFarStyle,
@@ -255,7 +256,8 @@ export async function bakeTerrainMaterialPage({
       const sourceZ = Math.floor(sourceIndex / chunkSize);
       const sourceOffset = sourceIndex * 4;
       const path = source.surfaceMaskPixels[sourceOffset] / 255;
-      const grassCoverage = source.surfaceMaskPixels[sourceOffset + 1] / 255;
+      const grassCoverage = sampleSurfaceMaskChannel(source.surfaceMaskPixels,chunkSize,chunkSize,
+        (x+.5)*chunkSize/resolution,(z+.5)*chunkSize/resolution,1);
       const waterByte = source.surfaceMaskPixels[sourceOffset + 2];
       const waterCoverage = waterByte / 255;
       const slope = slopes[index];

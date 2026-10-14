@@ -40,6 +40,7 @@ function resolveMaskConfig(request) {
     && Array.isArray(provided.grassTileIds)
   ) {
     return {
+      tileSize: provided.tileSize ?? provided.snow?.tileSize ?? 2,
       blendCells: provided.blendCells,
       roadTileId: provided.roadTileId,
       waterTileId: provided.waterTileId ?? 0,
@@ -104,6 +105,7 @@ export function generateBaseWorldChunk(request) {
       worldSeed: generator.toMetadata?.().seed ?? 0,
     },
     (tileId) => generator.getTileDefinition?.(tileId),
+    sampling,
   );
   // enrichPageRenderPixels builds both tile + surface mask; split isn't
   // exposed, so attribute the whole render-pixel pass to surfaceMask for QA

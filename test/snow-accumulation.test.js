@@ -58,6 +58,7 @@ test('grass is kept off snow in the surface mask, following the bake', async () 
     originZ: 0,
     chunkSize,
     sampleTile: () => 6,
+    sampleHeight: () => height,
     maskConfig: {
       blendCells: 2.5,
       roadTileId: 13,

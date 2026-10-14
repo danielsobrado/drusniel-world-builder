@@ -1,10 +1,11 @@
+import { sampleSurfaceMaskChannel } from '../../world/SurfaceMaskSampling.js';
+import { acceptsMeadowHabitat } from './meadowHabitat.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
 import { sampleHeight } from '../scatterMath.js';
 import { hash2d } from './meadowGrassGeometry.js';
 
 /** Surface mask channels, as the terrain page bakes them (see SurfaceMaskNodes.js). */
-const CLASSIFICATION = 0.5;
 /** Below this strength a stem is not worth drawing: compaction drops it. */
 export const MIN_GRASS_STRENGTH = 0.02;
 
@@ -13,21 +14,7 @@ function smoothstep(edge0, edge1, value) {
   return t * t * (3 - 2 * t);
 }
 
-/** Bilinear read of one RGBA channel at continuous cell coordinates (cell centres at +0.5). */
-function sampleMask(pixels, chunkSize, localX, localZ, channel) {
-  const u = Math.max(0, Math.min(chunkSize - 1, localX - 0.5));
-  const v = Math.max(0, Math.min(chunkSize - 1, localZ - 0.5));
-  const x0 = Math.floor(u);
-  const z0 = Math.floor(v);
-  const x1 = Math.min(chunkSize - 1, x0 + 1);
-  const z1 = Math.min(chunkSize - 1, z0 + 1);
-  const tx = u - x0;
-  const tz = v - z0;
-  const at = (x, z) => pixels[(z * chunkSize + x) * 4 + channel];
-  const north = at(x0, z0) + (at(x1, z0) - at(x0, z0)) * tx;
-  const south = at(x0, z1) + (at(x1, z1) - at(x0, z1)) * tx;
-  return (north + (south - north) * tz) / 255;
-}
+const sampleMask=(pixels,size,x,z,channel)=>sampleSurfaceMaskChannel(pixels,size,size,x,z,channel);
 
 /**
  * The ground under the meadow grass: height, whether grass grows, and which
@@ -50,12 +37,13 @@ export class MeadowGroundSampler {
    */
   constructor({
     terrainView, tileIds, shapeTable, forestFieldProvider = () => null, forestFloorConfig = null,
-    rockPlacementsProvider = () => [], rocks = null,
+    rockPlacementsProvider = () => [], rocks = null, growth = null,
   }) {
     this.terrainView = terrainView;
     this.eligible = new Uint8Array(256);
     for (const id of tileIds) this.eligible[id] = 1;
     this.shapeTable = shapeTable;
+    this.growth=growth;
     this.forestFieldProvider = forestFieldProvider;
     this.forestFloorConfig = forestFloorConfig;
     this.forestSamplers = new Map();
@@ -194,7 +182,8 @@ export class MeadowGroundSampler {
     const descriptor = slot.descriptor;
     const mask = page.surfaceMaskPixels;
     const forest = this.forestSampler(slot);
-    const { eligible, shapeTable } = this;
+    const { eligible, shapeTable, growth } = this;
+    const worldSeed=this.terrainView.worldStore.generator?.toMetadata?.().seed ?? 0;
     // Only the rocks that can reach this tile are tested per stem.
     const rocks = this.rocksNear(descriptor, centerX, centerZ, tileHalf);
     const flatten = this.rocks?.flatten ?? 0;
@@ -204,11 +193,13 @@ export class MeadowGroundSampler {
       if (localX < 0 || localZ < 0 || localX >= chunkSize || localZ >= chunkSize) return false;
       const tile = page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)];
       if (!eligible[tile]) return false;
-      let strength = 1;
+      const coverage=mask?sampleMask(mask,chunkSize,localX,localZ,1):1;
+      const density=growth?growth.profiles[growth.table[tile]].density:1;
+      if(!acceptsMeadowHabitat(x,z,worldSeed,coverage,density))return false;
+      let strength=.30+.70*coverage;
       let path = 0;
       if (mask) {
-        if (sampleMask(mask, chunkSize, localX, localZ, 1) < CLASSIFICATION) return false;
-        strength = 1 - smoothstep(0.15, 0.6, sampleMask(mask, chunkSize, localX, localZ, 2));
+        strength *= 1 - smoothstep(0.15, 0.6, sampleMask(mask, chunkSize, localX, localZ, 2));
         path = sampleMask(mask, chunkSize, localX, localZ, 0);
       }
       // Canopy suppression, as the clump scatter did it: a stem survives where its

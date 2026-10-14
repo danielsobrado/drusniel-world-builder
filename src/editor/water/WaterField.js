@@ -8,7 +8,7 @@ const conversionBuffer = new ArrayBuffer(4);
 const conversionFloat = new Float32Array(conversionBuffer);
 const conversionBits = new Uint32Array(conversionBuffer);
 
-function floatToHalf(value) {
+export function floatToHalf(value) {
   if (Number.isNaN(value)) return 0x7e00;
   if (value === Number.POSITIVE_INFINITY) return 0x7c00;
   if (value === Number.NEGATIVE_INFINITY) return 0xfc00;
