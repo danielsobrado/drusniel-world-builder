@@ -34,7 +34,8 @@ import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/win
  *   the wind field is sampled, so the streaks are stable across a floating-origin
  *   snap instead of re-rolling with the render origin. The near fade, which is a
  *   difference of two render-space points, stays exact.
- * - *Strength is the ground's give, not one number.* Loose snow lifts readily and
+ * - The ambient driver folds configured strength into the published region
+ *   weight once. Loose snow lifts readily and
  *   packed sand does not, so each surface carries its own `strength` (how much of
  *   it lifts) and `hardness` (how packed it reads, 0 loose … 1 hard), and the
  *   material may add a per-pixel `packing` node (wet sand, compressed snow) on
@@ -67,21 +68,25 @@ export const DEFAULT_BLOWN_STREAKS = Object.freeze({
   enabled: true,
   snow: Object.freeze({
     // Loose snow lofts easily: near the reference give and almost no packing.
-    strength: 1,
-    hardness: 0.1,
-    length: 7,
-    width: 0.45,
-    patch: 38,
-    reach: 90,
+    strength: 0.45,
+    hardness: 0.25,
+    length: 3,
+    width: 0.18,
+    patch: 30,
+    reach: 75,
+    maxOpacity: 0.22,
+    color: '#dce6ea',
   }),
   sand: Object.freeze({
     // Dry sand is harder ground and lofts less of itself for the same wind.
-    strength: 0.75,
-    hardness: 0.45,
-    length: 2.6,
-    width: 0.3,
-    patch: 26,
-    reach: 80,
+    strength: 0.30,
+    hardness: 0.65,
+    length: 1.4,
+    width: 0.12,
+    patch: 18,
+    reach: 55,
+    maxOpacity: 0.16,
+    color: '#c7b18a',
   }),
 });
 
@@ -120,7 +125,11 @@ function numberInRange(value, fallback, path, max) {
 
 function resolveSurface(defaults, source, path) {
   const configured = source !== null && typeof source === 'object' ? source : {};
+  const tint = configured.color ?? defaults.color;
+  if (!/^#[0-9a-f]{6}$/i.test(tint)) throw new Error(`Invalid editor configuration: ${path}.color must be #rrggbb.`);
   return {
+    color: tint,
+    maxOpacity: numberInRange(configured.maxOpacity, defaults.maxOpacity, `${path}.maxOpacity`, 1),
     enabled: configured.enabled !== false,
     strength: numberInRange(configured.strength, defaults.strength, `${path}.strength`, 4),
     hardness: numberInRange(configured.hardness, defaults.hardness, `${path}.hardness`, 1),
@@ -164,6 +173,20 @@ export function resolveBlownStreaks(ambientEffects) {
  */
 export function streakLift({ weight, strength = 1, hardness = 0, packing = 0 }) {
   return clamp01(weight) * clamp01(strength) * (1 - clamp01(hardness)) * (1 - clamp01(packing));
+}
+
+/** CPU twin of shader composition; driver weight already includes strength. */
+export function streakMaskReference({ fine, patch, distance, envelope, gust, region, weight, hardness, packing = 0, reach }) {
+  const smooth = (a, b, value) => {
+    const t = clamp01((value - a) / (b - a));
+    return t * t * (3 - 2 * t);
+  };
+  const wind = Math.max(0, Math.min(4, envelope));
+  const activity = smooth(CALM_ENVELOPE[0], CALM_ENVELOPE[1], wind)
+    * Math.max(wind, 0.2) * (1 + clamp01(gust) * GUST_RESPONSE);
+  return clamp01(smooth(0.85, 1.15, fine) * smooth(0.3, 0.7, patch)
+    * (1 - smooth(reach * 0.4, reach, distance)) * clamp01(region)
+    * streakLift({ weight, strength: 1, hardness, packing }) * activity);
 }
 
 /**
@@ -231,6 +254,7 @@ export function blownStreaks({
   packing = null,
   settings,
   travel = null,
+  wind: fixedWind = null,
 }) {
   const surface = settings?.enabled ? settings[kind] : null;
   if (!surface) return null;
@@ -239,11 +263,11 @@ export function blownStreaks({
 
   // The shared field, sampled at the canonical point so it agrees with the gust
   // the grass and the wind particles are riding in this frame.
-  const wind = sampleWorldWindCanonical(worldXZ);
+  const wind = fixedWind ?? sampleWorldWindCanonical(worldXZ);
   const envelope = wind.envelope.clamp(0, 4);
-  // The surface's own give, times the per-pixel packing the material reports.
+  // Strength is in the driver weight. Apply only substrate give and packing here.
   const soft = packing ? float(1).sub(packing.clamp(0, 1)) : float(1);
-  const give = float(surface.strength * (1 - surface.hardness))
+  const give = float(1 - surface.hardness)
     .mul(weight.clamp(0, 1))
     .mul(soft);
   // A still day does not lift, and a gust leans on it: the steady wind scales the
@@ -271,7 +295,7 @@ export function blownStreaks({
         stylizedFbm2(vec2(along.sub(drift.mul(0.6)), across).div(surface.patch)));
       const near = smoothstep(surface.reach * 0.4, surface.reach,
         cameraPosition.distance(positionWorld)).oneMinus();
-      value.assign(streak.mul(gusts).mul(near).mul(amount));
+      value.assign(streak.mul(gusts).mul(near).mul(amount).clamp(0, 1));
     });
     return value;
   })();

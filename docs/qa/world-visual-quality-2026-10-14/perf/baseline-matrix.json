@@ -1,0 +1,3843 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-14T04:40:19.306Z",
+  "config": {
+    "baseUrl": "http://localhost:5174",
+    "durationSeconds": 12,
+    "warmupSeconds": 8,
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "headed": true,
+    "includeWater": true,
+    "waterOnlyRefresh": false
+  },
+  "cases": [
+    {
+      "id": "standard",
+      "execution": {
+        "code": 0,
+        "signal": null
+      },
+      "report": {
+        "scenario": {
+          "id": "diagonal",
+          "label": "Diagonal run",
+          "spawn": {
+            "x": 0,
+            "z": 0
+          },
+          "yawDegrees": 0,
+          "pitchDegrees": 0,
+          "warmupSeconds": 8,
+          "settle": {
+            "settled": true,
+            "waitedSeconds": 18.3,
+            "blockers": []
+          },
+          "durationSeconds": 12,
+          "warmupFrames": null,
+          "measureFrames": null,
+          "speed": "run",
+          "explorationBoost": false,
+          "keys": [
+            "KeyW",
+            "KeyD",
+            "ShiftLeft"
+          ],
+          "hitchMs": 33.3,
+          "buildingCount": null,
+          "densityProfile": "standard",
+          "captureId": null
+        },
+        "summary": {
+          "frameCount": 1588,
+          "retainedFrameCount": 1589,
+          "droppedFrameCount": 0,
+          "frameBufferComplete": true,
+          "durationMs": 11990,
+          "avgFps": 132.44,
+          "dt": {
+            "minMs": 1.9,
+            "p50Ms": 6.9,
+            "p95Ms": 12.3,
+            "p99Ms": 16.2,
+            "maxMs": 32.6,
+            "meanMs": 7.554
+          },
+          "hitchMs": 33.3,
+          "hitchCount": 0,
+          "hitchRate": 0,
+          "phases": {
+            "placementPreparation": {
+              "totalMs": 410.9,
+              "avgMs": 0.259,
+              "p95Ms": 1.065,
+              "maxMs": 13.3
+            },
+            "terrainCommit": {
+              "totalMs": 22.9,
+              "avgMs": 0.014,
+              "p95Ms": 0.1,
+              "maxMs": 0.6
+            },
+            "player": {
+              "totalMs": 269.2,
+              "avgMs": 0.17,
+              "p95Ms": 0.3,
+              "maxMs": 14.6
+            },
+            "floatingOrigin": {
+              "totalMs": 1.9,
+              "avgMs": 0.001,
+              "p95Ms": 0,
+              "maxMs": 0.1
+            },
+            "character": {
+              "totalMs": 172.4,
+              "avgMs": 0.109,
+              "p95Ms": 0.2,
+              "maxMs": 1.5
+            },
+            "streaming": {
+              "totalMs": 12.3,
+              "avgMs": 0.008,
+              "p95Ms": 0.1,
+              "maxMs": 0.3
+            },
+            "stylized": {
+              "totalMs": 1651.2,
+              "avgMs": 1.04,
+              "p95Ms": 2.2,
+              "maxMs": 18.4
+            },
+            "objects": {
+              "totalMs": 88.8,
+              "avgMs": 0.056,
+              "p95Ms": 0.1,
+              "maxMs": 0.5
+            },
+            "voxel": {
+              "totalMs": 8.2,
+              "avgMs": 0.005,
+              "p95Ms": 0,
+              "maxMs": 0.4
+            },
+            "render": {
+              "totalMs": 7994.7,
+              "avgMs": 5.034,
+              "p95Ms": 7.965,
+              "maxMs": 13.9
+            }
+          },
+          "originSnapCount": 0
+        },
+        "collision": {
+          "enabled": true,
+          "timingsMs": {
+            "total": {
+              "samples": 1588,
+              "totalMs": 50.4,
+              "meanMs": 0.032,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.2,
+              "maxMs": 2.3
+            },
+            "broadphase": {
+              "samples": 1588,
+              "totalMs": 10.3,
+              "meanMs": 0.006,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "narrowPhase": {
+              "samples": 1588,
+              "totalMs": 4.3,
+              "meanMs": 0.003,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.3
+            },
+            "support": {
+              "samples": 1588,
+              "totalMs": 3.4,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "chunkBuild": {
+              "samples": 1588,
+              "totalMs": 3.8,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 2.2
+            }
+          },
+          "counts": {
+            "candidates": 0,
+            "broadphaseQueries": 3023,
+            "primitiveTests": 0,
+            "bvhQueries": 0,
+            "triangleTests": 0,
+            "contacts": 0,
+            "stepAttempts": 0,
+            "stepSuccesses": 0,
+            "activeChunks": 16,
+            "activePrimitiveColliders": 200,
+            "activeMeshInstances": 33,
+            "prototypeBvhs": 8,
+            "readinessMisses": 708,
+            "failedChunks": 0,
+            "finalQueueDepth": 0
+          },
+          "readiness": {
+            "ready": true,
+            "policy": "retain-previous-valid-position",
+            "desiredChunks": 9,
+            "readyDesiredChunks": 9,
+            "failure": null
+          },
+          "canonicalSignature": "35d20c90",
+          "provider": {
+            "id": "production-natural-props",
+            "loadedChunks": 14,
+            "colliderCount": 233,
+            "queuedRefreshes": 0,
+            "deferredRetries": 0,
+            "refreshBuilds": 0,
+            "lastError": null,
+            "sample": {
+              "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+              "prototypeId": "/assets/trees/meadow/tree3.glb",
+              "x": -82.37832112681845,
+              "y": 9.96015612384609,
+              "z": 86.2826042826098,
+              "radius": 0.1819939446177107,
+              "height": 8.682452336568337
+            },
+            "rockSample": {
+              "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+              "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+              "tier": "walkable",
+              "x": -119.34283083708557,
+              "y": 11.008807266195756,
+              "z": 72.97784864785565,
+              "radius": 1.3033413382132342,
+              "height": 3.305332525922638,
+              "generatedProxy": true
+            },
+            "components": {
+              "trees": {
+                "id": "trees",
+                "profileCount": 29,
+                "chunks": 14,
+                "colliders": 189,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+                  "prototypeId": "/assets/trees/meadow/tree3.glb",
+                  "x": -82.37832112681845,
+                  "y": 9.96015612384609,
+                  "z": 86.2826042826098,
+                  "radius": 0.1819939446177107,
+                  "height": 8.682452336568337
+                },
+                "details": {
+                  "id": "production-tree-trunks",
+                  "profileCount": 29,
+                  "loadedChunks": 0,
+                  "colliderCount": 0,
+                  "queuedRefreshes": 0,
+                  "refreshBuilds": 0,
+                  "lastError": null,
+                  "sample": null
+                }
+              },
+              "rocks": {
+                "id": "rocks",
+                "profileCount": 11,
+                "chunks": 14,
+                "colliders": 44,
+                "decorative": 0,
+                "blocking": 11,
+                "walkable": 33,
+                "walkablePending": 0,
+                "generatedProxies": 33,
+                "sample": {
+                  "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+                  "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+                  "tier": "walkable",
+                  "x": -119.34283083708557,
+                  "y": 11.008807266195756,
+                  "z": 72.97784864785565,
+                  "radius": 1.3033413382132342,
+                  "height": 3.305332525922638,
+                  "generatedProxy": true
+                },
+                "details": {
+                  "id": "production-rock-collision",
+                  "profileCount": 11,
+                  "meshPrototypes": {
+                    "count": 8,
+                    "triangles": 534,
+                    "generated": 8
+                  }
+                }
+              },
+              "objects": {
+                "id": "objects",
+                "profileCount": 166,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              },
+              "constructions": {
+                "id": "constructions",
+                "profileCount": 0,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": {
+                  "id": "production-constructions",
+                  "plans": 0,
+                  "source": {
+                    "id": "construction-collision-source",
+                    "activeRecords": 0,
+                    "plans": 0,
+                    "stalePlans": 0,
+                    "appliedPlans": 0,
+                    "unchangedPlans": 0,
+                    "rejectedPlans": 0,
+                    "spatialRevision": 0,
+                    "config": {
+                      "curveSegmentLength": 1.25
+                    }
+                  }
+                }
+              },
+              "settlements": {
+                "id": "settlements",
+                "profileCount": 0,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              }
+            }
+          },
+          "gate": {
+            "provisionalP95TargetMs": 0.83,
+            "measuredP95Ms": 0.1,
+            "sampleCount": 1588,
+            "samplePassed": true,
+            "timingPassed": true,
+            "readinessPassed": true,
+            "passed": true
+          }
+        },
+        "preparation": {
+          "start": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 160,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 89,
+                "advanced": 163,
+                "blocked": 2,
+                "cancelled": 14
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 25,
+                "blocked": 448,
+                "cancelled": 5
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 26,
+                "blocked": 335,
+                "cancelled": 7
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 19,
+                "blocked": 170,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 340,
+                "blocked": 112,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 916,
+                "blocked": 1077,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "end": {
+            "ready": false,
+            "queueDepth": 30,
+            "fields": 0,
+            "meadow": 91,
+            "draws": 0,
+            "variants": 0,
+            "staged": 5,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 2,
+                "oldestAgeMs": 832.5,
+                "completed": 44,
+                "advanced": 44,
+                "blocked": 160,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 91,
+                "advanced": 173,
+                "blocked": 2,
+                "cancelled": 21
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 33,
+                "blocked": 448,
+                "cancelled": 11
+              },
+              "bush": {
+                "depth": 1,
+                "oldestAgeMs": 27.5,
+                "completed": 2,
+                "advanced": 35,
+                "blocked": 354,
+                "cancelled": 14
+              },
+              "detail": {
+                "depth": 4,
+                "oldestAgeMs": 166.2999999821186,
+                "completed": 4,
+                "advanced": 23,
+                "blocked": 183,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 21,
+                "oldestAgeMs": 833.1999999880791,
+                "completed": 121,
+                "advanced": 340,
+                "blocked": 115,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 2,
+                "oldestAgeMs": 297.7999999821186,
+                "completed": 172,
+                "advanced": 921,
+                "blocked": 1084,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [
+              {
+                "key": "bush-lod:1:1:e0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0:-2:-2:culled:ready:culled:8:1|-1:-2:culled:ready:culled:8:1|0:-2:culled:ready:culled:8:1|1:-2:culled:ready:culled:8:1|2:-2:culled:ready:culled:8:1|3:-2:culled:ready:culled:8:1|4:-2:culled:ready:culled:8:1|-2:-1:culled:ready:culled:8:1|-1:-1:proxy:ready:proxy:8:1|0:-1:proxy:ready:proxy:8:1|1:-1:proxy:ready:proxy:8:1|2:-1:proxy:ready:proxy:8:1|3:-1:proxy:ready:proxy:8:1|4:-1:culled:ready:culled:8:1|-2:0:culled:ready:culled:8:1|-1:0:proxy:ready:proxy:8:1|0:0:near:ready:near:8:1|1:0:near:ready:near:8:1|2:0:near:ready:near:8:1|3:0:proxy:ready:proxy:8:1|4:0:culled:ready:culled:8:1|-2:1:culled:ready:culled:8:1|-1:1:proxy:ready:proxy:8:1|0:1:near:ready:near:8:1|1:1:near:ready:near:8:1|2:1:near:ready:near:8:1|3:1:proxy:ready:proxy:8:1|4:1:culled:ready:culled:8:1|-2:2:culled:ready:culled:8:1|-1:2:proxy:ready:proxy:8:1|0:2:near:ready:near:8:1|1:2:near:ready:near:8:1|2:2:near:ready:near:8:1|3:2:proxy:ready:proxy:8:1|4:2:culled:ready:culled:8:1|-2:3:culled:ready:culled:8:1|-1:3:proxy:ready:proxy:8:1|0:3:proxy:ready:proxy:8:1|1:3:proxy:ready:proxy:8:1|2:3:proxy:ready:proxy:8:1|3:3:proxy:ready:proxy:8:1|4:3:culled:ready:culled:8:1|-2:4:culled:ready:culled:8:1|-1:4:culled:ready:culled:8:1|0:4:culled:ready:culled:8:1|1:4:culled:ready:culled:8:1|2:4:culled:ready:culled:8:1|3:4:culled:ready:culled:8:1|4:4:culled:ready:culled:8:1:0:p5:r1",
+                "focus": {
+                  "chunkX": 1,
+                  "chunkZ": 1
+                },
+                "revision": 0,
+                "lastProgressAt": 175453.90000000596,
+                "reason": "prepared-field",
+                "dependencyType": "prepared-field",
+                "chunkKeys": [
+                  "3:2"
+                ]
+              }
+            ],
+            "materials": 0
+          },
+          "workerCount": 8,
+          "cacheLimit": 625
+        },
+        "sceneryUpdateCpu": {
+          "includesPlacementPreparation": true,
+          "avgMs": 1.299,
+          "p95Ms": 2.5,
+          "p99Ms": 3.5,
+          "maxMs": 18.5
+        },
+        "adapter": {
+          "ok": true,
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "fallback": false
+        },
+        "capture": {
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "deviceScaleFactor": 1
+          },
+          "rendererBackend": {
+            "webgpu": true,
+            "webgl2": false,
+            "reason": null
+          },
+          "screenshot": null,
+          "cpuProfile": null,
+          "browserErrors": {
+            "count": 0,
+            "errors": [],
+            "truncated": false
+          }
+        },
+        "density": {
+          "treesPerChunk": 12,
+          "candidateBudgetPerChunk": 144,
+          "maxAcceptedPerChunk": 72,
+          "bladesPerCell": 576,
+          "grassSystem": "meadow",
+          "meadowHighDensity": 12.6,
+          "meadowFarDensity": 1.3
+        },
+        "counters": {
+          "rendererWebGPUBackend": 1,
+          "rendererWebGLBackend": 0,
+          "treeRebuilds": 92,
+          "treeManifestBuilds": 121,
+          "treeImpostorInstances": 528,
+          "grassLastChunkEffectiveBlades": 0,
+          "grassLastChunkTriangles": 0,
+          "waterChunksWet": 17,
+          "waterChunksRefractive": 7,
+          "constructionModulesResident": 0,
+          "constructionStones": 0,
+          "attributeBytesUploaded": 339317812
+        }
+      }
+    },
+    {
+      "id": "dense-forest",
+      "execution": {
+        "code": 0,
+        "signal": null
+      },
+      "report": {
+        "scenario": {
+          "id": "diagonal",
+          "label": "Diagonal run",
+          "spawn": {
+            "x": 0,
+            "z": 0
+          },
+          "yawDegrees": 0,
+          "pitchDegrees": 0,
+          "warmupSeconds": 8,
+          "settle": {
+            "settled": true,
+            "waitedSeconds": 21,
+            "blockers": []
+          },
+          "durationSeconds": 12,
+          "warmupFrames": null,
+          "measureFrames": null,
+          "speed": "run",
+          "explorationBoost": false,
+          "keys": [
+            "KeyW",
+            "KeyD",
+            "ShiftLeft"
+          ],
+          "hitchMs": 33.3,
+          "buildingCount": null,
+          "densityProfile": "dense-forest",
+          "captureId": null
+        },
+        "summary": {
+          "frameCount": 1826,
+          "retainedFrameCount": 1827,
+          "droppedFrameCount": 0,
+          "frameBufferComplete": true,
+          "durationMs": 11987.7,
+          "avgFps": 152.32,
+          "dt": {
+            "minMs": 2.8,
+            "p50Ms": 6.3,
+            "p95Ms": 8.5,
+            "p99Ms": 11.8,
+            "maxMs": 27.6,
+            "meanMs": 6.568
+          },
+          "hitchMs": 33.3,
+          "hitchCount": 0,
+          "hitchRate": 0,
+          "phases": {
+            "placementPreparation": {
+              "totalMs": 347.7,
+              "avgMs": 0.19,
+              "p95Ms": 1.1,
+              "maxMs": 15.5
+            },
+            "terrainCommit": {
+              "totalMs": 21.3,
+              "avgMs": 0.012,
+              "p95Ms": 0.1,
+              "maxMs": 1.1
+            },
+            "player": {
+              "totalMs": 274.8,
+              "avgMs": 0.15,
+              "p95Ms": 0.2,
+              "maxMs": 18.7
+            },
+            "floatingOrigin": {
+              "totalMs": 2,
+              "avgMs": 0.001,
+              "p95Ms": 0,
+              "maxMs": 0.1
+            },
+            "character": {
+              "totalMs": 172.1,
+              "avgMs": 0.094,
+              "p95Ms": 0.2,
+              "maxMs": 1.7
+            },
+            "streaming": {
+              "totalMs": 14.1,
+              "avgMs": 0.008,
+              "p95Ms": 0.1,
+              "maxMs": 0.5
+            },
+            "stylized": {
+              "totalMs": 1543.7,
+              "avgMs": 0.845,
+              "p95Ms": 1.8,
+              "maxMs": 3.3
+            },
+            "objects": {
+              "totalMs": 84.3,
+              "avgMs": 0.046,
+              "p95Ms": 0.1,
+              "maxMs": 1
+            },
+            "voxel": {
+              "totalMs": 8.7,
+              "avgMs": 0.005,
+              "p95Ms": 0,
+              "maxMs": 0.7
+            },
+            "render": {
+              "totalMs": 8182.2,
+              "avgMs": 4.481,
+              "p95Ms": 5.6,
+              "maxMs": 25.2
+            }
+          },
+          "originSnapCount": 0
+        },
+        "collision": {
+          "enabled": true,
+          "timingsMs": {
+            "total": {
+              "samples": 1826,
+              "totalMs": 47.9,
+              "meanMs": 0.026,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.1,
+              "maxMs": 0.9
+            },
+            "broadphase": {
+              "samples": 1826,
+              "totalMs": 8.1,
+              "meanMs": 0.004,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "narrowPhase": {
+              "samples": 1826,
+              "totalMs": 4.1,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "support": {
+              "samples": 1826,
+              "totalMs": 3.9,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "chunkBuild": {
+              "samples": 1826,
+              "totalMs": 2.2,
+              "meanMs": 0.001,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0.9
+            }
+          },
+          "counts": {
+            "candidates": 0,
+            "broadphaseQueries": 3580,
+            "primitiveTests": 0,
+            "bvhQueries": 0,
+            "triangleTests": 0,
+            "contacts": 0,
+            "stepAttempts": 0,
+            "stepSuccesses": 0,
+            "activeChunks": 16,
+            "activePrimitiveColliders": 352,
+            "activeMeshInstances": 33,
+            "prototypeBvhs": 8,
+            "readinessMisses": 785,
+            "failedChunks": 0,
+            "finalQueueDepth": 0
+          },
+          "readiness": {
+            "ready": true,
+            "policy": "retain-previous-valid-position",
+            "desiredChunks": 9,
+            "readyDesiredChunks": 9,
+            "failure": null
+          },
+          "canonicalSignature": "73836e69",
+          "provider": {
+            "id": "production-natural-props",
+            "loadedChunks": 14,
+            "colliderCount": 385,
+            "queuedRefreshes": 0,
+            "deferredRetries": 0,
+            "refreshBuilds": 0,
+            "lastError": null,
+            "sample": {
+              "sourceId": "tree:tree%3A-1%3A-1%3A105:trunk",
+              "prototypeId": "/assets/trees/meadow/tree7.glb",
+              "x": -23.996099936718,
+              "y": 7.478114391322837,
+              "z": 25.160284523255193,
+              "radius": 0.47985312382348205,
+              "height": 12.328592289686032
+            },
+            "rockSample": {
+              "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+              "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+              "tier": "walkable",
+              "x": -119.34283083708557,
+              "y": 11.008807266195756,
+              "z": 72.97784864785565,
+              "radius": 1.3033413382132342,
+              "height": 3.305332525922638,
+              "generatedProxy": true
+            },
+            "components": {
+              "trees": {
+                "id": "trees",
+                "profileCount": 29,
+                "chunks": 14,
+                "colliders": 341,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "tree:tree%3A-1%3A-1%3A105:trunk",
+                  "prototypeId": "/assets/trees/meadow/tree7.glb",
+                  "x": -23.996099936718,
+                  "y": 7.478114391322837,
+                  "z": 25.160284523255193,
+                  "radius": 0.47985312382348205,
+                  "height": 12.328592289686032
+                },
+                "details": {
+                  "id": "production-tree-trunks",
+                  "profileCount": 29,
+                  "loadedChunks": 0,
+                  "colliderCount": 0,
+                  "queuedRefreshes": 0,
+                  "refreshBuilds": 0,
+                  "lastError": null,
+                  "sample": null
+                }
+              },
+              "rocks": {
+                "id": "rocks",
+                "profileCount": 11,
+                "chunks": 14,
+                "colliders": 44,
+                "decorative": 0,
+                "blocking": 11,
+                "walkable": 33,
+                "walkablePending": 0,
+                "generatedProxies": 33,
+                "sample": {
+                  "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+                  "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+                  "tier": "walkable",
+                  "x": -119.34283083708557,
+                  "y": 11.008807266195756,
+                  "z": 72.97784864785565,
+                  "radius": 1.3033413382132342,
+                  "height": 3.305332525922638,
+                  "generatedProxy": true
+                },
+                "details": {
+                  "id": "production-rock-collision",
+                  "profileCount": 11,
+                  "meshPrototypes": {
+                    "count": 8,
+                    "triangles": 534,
+                    "generated": 8
+                  }
+                }
+              },
+              "objects": {
+                "id": "objects",
+                "profileCount": 166,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              },
+              "constructions": {
+                "id": "constructions",
+                "profileCount": 0,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": {
+                  "id": "production-constructions",
+                  "plans": 0,
+                  "source": {
+                    "id": "construction-collision-source",
+                    "activeRecords": 0,
+                    "plans": 0,
+                    "stalePlans": 0,
+                    "appliedPlans": 0,
+                    "unchangedPlans": 0,
+                    "rejectedPlans": 0,
+                    "spatialRevision": 0,
+                    "config": {
+                      "curveSegmentLength": 1.25
+                    }
+                  }
+                }
+              },
+              "settlements": {
+                "id": "settlements",
+                "profileCount": 0,
+                "chunks": 14,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              }
+            }
+          },
+          "gate": {
+            "provisionalP95TargetMs": 0.83,
+            "measuredP95Ms": 0.1,
+            "sampleCount": 1826,
+            "samplePassed": true,
+            "timingPassed": true,
+            "readinessPassed": true,
+            "passed": true
+          }
+        },
+        "preparation": {
+          "start": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 121,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 116,
+                "advanced": 265,
+                "blocked": 2,
+                "cancelled": 14
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 29,
+                "blocked": 495,
+                "cancelled": 4
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 26,
+                "blocked": 329,
+                "cancelled": 8
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 20,
+                "blocked": 166,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 626,
+                "blocked": 105,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 920,
+                "blocked": 1132,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "end": {
+            "ready": false,
+            "queueDepth": 31,
+            "fields": 2,
+            "meadow": 45,
+            "draws": 0,
+            "variants": 0,
+            "staged": 5,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 2,
+                "oldestAgeMs": 831.8000000119209,
+                "completed": 44,
+                "advanced": 44,
+                "blocked": 121,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 118,
+                "advanced": 276,
+                "blocked": 2,
+                "cancelled": 21
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 5,
+                "advanced": 40,
+                "blocked": 495,
+                "cancelled": 8
+              },
+              "bush": {
+                "depth": 1,
+                "oldestAgeMs": 15.800000011920929,
+                "completed": 1,
+                "advanced": 34,
+                "blocked": 348,
+                "cancelled": 16
+              },
+              "detail": {
+                "depth": 4,
+                "oldestAgeMs": 149.90000000596046,
+                "completed": 4,
+                "advanced": 22,
+                "blocked": 181,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 21,
+                "oldestAgeMs": 832.9000000059605,
+                "completed": 121,
+                "advanced": 626,
+                "blocked": 110,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 3,
+                "oldestAgeMs": 142.2000000178814,
+                "completed": 173,
+                "advanced": 926,
+                "blocked": 1140,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [
+              {
+                "key": "bush-lod:1:1:e0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0:-2:-2:culled:ready:culled:8:1|-1:-2:culled:ready:culled:8:1|0:-2:culled:ready:culled:8:1|1:-2:culled:ready:culled:8:1|2:-2:culled:ready:culled:8:1|3:-2:culled:ready:culled:8:1|4:-2:culled:ready:culled:8:1|-2:-1:culled:ready:culled:8:1|-1:-1:proxy:ready:proxy:8:1|0:-1:proxy:ready:proxy:8:1|1:-1:proxy:ready:proxy:8:1|2:-1:proxy:ready:proxy:8:1|3:-1:proxy:ready:proxy:8:1|4:-1:culled:ready:culled:8:1|-2:0:culled:ready:culled:8:1|-1:0:proxy:ready:proxy:8:1|0:0:near:ready:near:8:1|1:0:near:ready:near:8:1|2:0:near:ready:near:8:1|3:0:proxy:ready:proxy:8:1|4:0:culled:ready:culled:8:1|-2:1:culled:ready:culled:8:1|-1:1:proxy:ready:proxy:8:1|0:1:near:ready:near:8:1|1:1:near:ready:near:8:1|2:1:near:ready:near:8:1|3:1:proxy:ready:proxy:8:1|4:1:culled:ready:culled:8:1|-2:2:culled:ready:culled:8:1|-1:2:proxy:ready:proxy:8:1|0:2:near:ready:near:8:1|1:2:near:ready:near:8:1|2:2:near:ready:near:8:1|3:2:proxy:ready:proxy:8:1|4:2:culled:ready:culled:8:1|-2:3:culled:ready:culled:8:1|-1:3:proxy:ready:proxy:8:1|0:3:proxy:ready:proxy:8:1|1:3:proxy:ready:proxy:8:1|2:3:proxy:ready:proxy:8:1|3:3:proxy:ready:proxy:8:1|4:3:culled:ready:culled:8:1|-2:4:culled:ready:culled:8:1|-1:4:culled:ready:culled:8:1|0:4:culled:ready:culled:8:1|1:4:culled:ready:culled:8:1|2:4:culled:ready:culled:8:1|3:4:culled:ready:culled:8:1|4:4:culled:ready:culled:8:1:0:p5:r1",
+                "focus": {
+                  "chunkX": 1,
+                  "chunkZ": 1
+                },
+                "revision": 0,
+                "lastProgressAt": 186740,
+                "reason": "prepared-field",
+                "dependencyType": "prepared-field",
+                "chunkKeys": [
+                  "3:2"
+                ]
+              }
+            ],
+            "materials": 0
+          },
+          "workerCount": 8,
+          "cacheLimit": 625
+        },
+        "sceneryUpdateCpu": {
+          "includesPlacementPreparation": true,
+          "avgMs": 1.036,
+          "p95Ms": 2.1,
+          "p99Ms": 2.675,
+          "maxMs": 16.6
+        },
+        "adapter": {
+          "ok": true,
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "fallback": false
+        },
+        "capture": {
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "deviceScaleFactor": 1
+          },
+          "rendererBackend": {
+            "webgpu": true,
+            "webgl2": false,
+            "reason": null
+          },
+          "screenshot": null,
+          "cpuProfile": null,
+          "browserErrors": {
+            "count": 0,
+            "errors": [],
+            "truncated": false
+          }
+        },
+        "density": {
+          "treesPerChunk": 24,
+          "candidateBudgetPerChunk": 288,
+          "maxAcceptedPerChunk": 144,
+          "bladesPerCell": 576,
+          "grassSystem": "meadow",
+          "meadowHighDensity": 12.6,
+          "meadowFarDensity": 1.3
+        },
+        "counters": {
+          "rendererWebGPUBackend": 1,
+          "rendererWebGLBackend": 0,
+          "treeRebuilds": 119,
+          "treeManifestBuilds": 121,
+          "treeImpostorInstances": 963,
+          "grassLastChunkEffectiveBlades": 0,
+          "grassLastChunkTriangles": 0,
+          "waterChunksWet": 17,
+          "waterChunksRefractive": 7,
+          "constructionModulesResident": 0,
+          "constructionStones": 0,
+          "attributeBytesUploaded": 354984540
+        }
+      }
+    },
+    {
+      "id": "high-grass",
+      "execution": {
+        "code": 0,
+        "signal": null
+      },
+      "report": {
+        "scenario": {
+          "id": "diagonal",
+          "label": "Diagonal run",
+          "spawn": {
+            "x": 0,
+            "z": 0
+          },
+          "yawDegrees": 0,
+          "pitchDegrees": 0,
+          "warmupSeconds": 8,
+          "settle": {
+            "settled": true,
+            "waitedSeconds": 102.4,
+            "blockers": []
+          },
+          "durationSeconds": 12,
+          "warmupFrames": null,
+          "measureFrames": null,
+          "speed": "run",
+          "explorationBoost": false,
+          "keys": [
+            "KeyW",
+            "KeyD",
+            "ShiftLeft"
+          ],
+          "hitchMs": 33.3,
+          "buildingCount": null,
+          "densityProfile": "high-grass",
+          "captureId": null
+        },
+        "summary": {
+          "frameCount": 1096,
+          "retainedFrameCount": 1097,
+          "droppedFrameCount": 0,
+          "frameBufferComplete": true,
+          "durationMs": 11996.1,
+          "avgFps": 91.36,
+          "dt": {
+            "minMs": 0.9,
+            "p50Ms": 7,
+            "p95Ms": 23.55,
+            "p99Ms": 110.815,
+            "maxMs": 329,
+            "meanMs": 10.947
+          },
+          "hitchMs": 33.3,
+          "hitchCount": 37,
+          "hitchRate": 0.0338,
+          "phases": {
+            "placementPreparation": {
+              "totalMs": 508.4,
+              "avgMs": 0.464,
+              "p95Ms": 1.1,
+              "maxMs": 14.5
+            },
+            "terrainCommit": {
+              "totalMs": 9.3,
+              "avgMs": 0.008,
+              "p95Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "player": {
+              "totalMs": 165.3,
+              "avgMs": 0.151,
+              "p95Ms": 0.2,
+              "maxMs": 20.4
+            },
+            "floatingOrigin": {
+              "totalMs": 1.1,
+              "avgMs": 0.001,
+              "p95Ms": 0,
+              "maxMs": 0.1
+            },
+            "character": {
+              "totalMs": 109.1,
+              "avgMs": 0.1,
+              "p95Ms": 0.2,
+              "maxMs": 1.4
+            },
+            "streaming": {
+              "totalMs": 6.1,
+              "avgMs": 0.006,
+              "p95Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "stylized": {
+              "totalMs": 1012.2,
+              "avgMs": 0.924,
+              "p95Ms": 1.8,
+              "maxMs": 6.4
+            },
+            "objects": {
+              "totalMs": 45.4,
+              "avgMs": 0.041,
+              "p95Ms": 0.1,
+              "maxMs": 1.1
+            },
+            "voxel": {
+              "totalMs": 6.1,
+              "avgMs": 0.006,
+              "p95Ms": 0.025,
+              "maxMs": 0.5
+            },
+            "render": {
+              "totalMs": 8965.3,
+              "avgMs": 8.18,
+              "p95Ms": 17.3,
+              "maxMs": 311.9
+            }
+          },
+          "originSnapCount": 0
+        },
+        "collision": {
+          "enabled": true,
+          "timingsMs": {
+            "total": {
+              "samples": 1096,
+              "totalMs": 27.4,
+              "meanMs": 0.025,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "broadphase": {
+              "samples": 1096,
+              "totalMs": 4.6,
+              "meanMs": 0.004,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "narrowPhase": {
+              "samples": 1096,
+              "totalMs": 1.9,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "support": {
+              "samples": 1096,
+              "totalMs": 1.5,
+              "meanMs": 0.001,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "chunkBuild": {
+              "samples": 1096,
+              "totalMs": 0.2,
+              "meanMs": 0,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0.2
+            }
+          },
+          "counts": {
+            "candidates": 0,
+            "broadphaseQueries": 5262,
+            "primitiveTests": 0,
+            "bvhQueries": 0,
+            "triangleTests": 0,
+            "contacts": 0,
+            "stepAttempts": 0,
+            "stepSuccesses": 0,
+            "activeChunks": 11,
+            "activePrimitiveColliders": 108,
+            "activeMeshInstances": 29,
+            "prototypeBvhs": 8,
+            "readinessMisses": 5247,
+            "failedChunks": 0,
+            "finalQueueDepth": 0
+          },
+          "readiness": {
+            "ready": true,
+            "policy": "retain-previous-valid-position",
+            "desiredChunks": 9,
+            "readyDesiredChunks": 9,
+            "failure": null
+          },
+          "canonicalSignature": "1d8808ed",
+          "provider": {
+            "id": "production-natural-props",
+            "loadedChunks": 10,
+            "colliderCount": 137,
+            "queuedRefreshes": 0,
+            "deferredRetries": 0,
+            "refreshBuilds": 0,
+            "lastError": null,
+            "sample": {
+              "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+              "prototypeId": "/assets/trees/meadow/tree3.glb",
+              "x": -82.37832112681845,
+              "y": 9.96015612384609,
+              "z": 86.2826042826098,
+              "radius": 0.1819939446177107,
+              "height": 8.682452336568337
+            },
+            "rockSample": {
+              "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+              "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+              "tier": "walkable",
+              "x": -119.34283083708557,
+              "y": 11.008807266195756,
+              "z": 72.97784864785565,
+              "radius": 1.3033413382132342,
+              "height": 3.305332525922638,
+              "generatedProxy": true
+            },
+            "components": {
+              "trees": {
+                "id": "trees",
+                "profileCount": 29,
+                "chunks": 10,
+                "colliders": 100,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+                  "prototypeId": "/assets/trees/meadow/tree3.glb",
+                  "x": -82.37832112681845,
+                  "y": 9.96015612384609,
+                  "z": 86.2826042826098,
+                  "radius": 0.1819939446177107,
+                  "height": 8.682452336568337
+                },
+                "details": {
+                  "id": "production-tree-trunks",
+                  "profileCount": 29,
+                  "loadedChunks": 0,
+                  "colliderCount": 0,
+                  "queuedRefreshes": 0,
+                  "refreshBuilds": 0,
+                  "lastError": null,
+                  "sample": null
+                }
+              },
+              "rocks": {
+                "id": "rocks",
+                "profileCount": 11,
+                "chunks": 10,
+                "colliders": 37,
+                "decorative": 0,
+                "blocking": 8,
+                "walkable": 29,
+                "walkablePending": 0,
+                "generatedProxies": 29,
+                "sample": {
+                  "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+                  "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+                  "tier": "walkable",
+                  "x": -119.34283083708557,
+                  "y": 11.008807266195756,
+                  "z": 72.97784864785565,
+                  "radius": 1.3033413382132342,
+                  "height": 3.305332525922638,
+                  "generatedProxy": true
+                },
+                "details": {
+                  "id": "production-rock-collision",
+                  "profileCount": 11,
+                  "meshPrototypes": {
+                    "count": 8,
+                    "triangles": 534,
+                    "generated": 8
+                  }
+                }
+              },
+              "objects": {
+                "id": "objects",
+                "profileCount": 166,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              },
+              "constructions": {
+                "id": "constructions",
+                "profileCount": 0,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": {
+                  "id": "production-constructions",
+                  "plans": 0,
+                  "source": {
+                    "id": "construction-collision-source",
+                    "activeRecords": 0,
+                    "plans": 0,
+                    "stalePlans": 0,
+                    "appliedPlans": 0,
+                    "unchangedPlans": 0,
+                    "rejectedPlans": 0,
+                    "spatialRevision": 0,
+                    "config": {
+                      "curveSegmentLength": 1.25
+                    }
+                  }
+                }
+              },
+              "settlements": {
+                "id": "settlements",
+                "profileCount": 0,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              }
+            }
+          },
+          "gate": {
+            "provisionalP95TargetMs": 0.83,
+            "measuredP95Ms": 0.1,
+            "sampleCount": 1096,
+            "samplePassed": true,
+            "timingPassed": true,
+            "readinessPassed": true,
+            "passed": true
+          }
+        },
+        "preparation": {
+          "start": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 104,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 357,
+                "advanced": 1401,
+                "blocked": 5,
+                "cancelled": 18
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 35,
+                "blocked": 853,
+                "cancelled": 6
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 27,
+                "blocked": 1065,
+                "cancelled": 8
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 21,
+                "blocked": 489,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 1438,
+                "blocked": 118,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 2522,
+                "blocked": 573,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "end": {
+            "ready": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 185,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 104,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 357,
+                "advanced": 1401,
+                "blocked": 5,
+                "cancelled": 18
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 35,
+                "blocked": 853,
+                "cancelled": 6
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 27,
+                "blocked": 1065,
+                "cancelled": 8
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 21,
+                "blocked": 489,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 1438,
+                "blocked": 118,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 2522,
+                "blocked": 573,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "workerCount": 8,
+          "cacheLimit": 625
+        },
+        "sceneryUpdateCpu": {
+          "includesPlacementPreparation": true,
+          "avgMs": 1.387,
+          "p95Ms": 2.3,
+          "p99Ms": 3.205,
+          "maxMs": 17.7
+        },
+        "adapter": {
+          "ok": true,
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "fallback": false
+        },
+        "capture": {
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "deviceScaleFactor": 1
+          },
+          "rendererBackend": {
+            "webgpu": true,
+            "webgl2": false,
+            "reason": null
+          },
+          "screenshot": null,
+          "cpuProfile": null,
+          "browserErrors": {
+            "count": 0,
+            "errors": [],
+            "truncated": false
+          }
+        },
+        "density": {
+          "treesPerChunk": 12,
+          "candidateBudgetPerChunk": 144,
+          "maxAcceptedPerChunk": 72,
+          "bladesPerCell": 1152,
+          "grassSystem": "meadow",
+          "meadowHighDensity": 25.2,
+          "meadowFarDensity": 2.6
+        },
+        "counters": {
+          "rendererWebGPUBackend": 1,
+          "rendererWebGLBackend": 0,
+          "treeRebuilds": 358,
+          "treeManifestBuilds": 121,
+          "treeImpostorInstances": 662,
+          "grassLastChunkEffectiveBlades": 0,
+          "grassLastChunkTriangles": 0,
+          "waterChunksWet": 10,
+          "waterChunksRefractive": 0,
+          "constructionModulesResident": 0,
+          "constructionStones": 0,
+          "attributeBytesUploaded": 785542308
+        }
+      }
+    },
+    {
+      "id": "dense-mixed",
+      "execution": {
+        "code": 0,
+        "signal": null
+      },
+      "report": {
+        "scenario": {
+          "id": "diagonal",
+          "label": "Diagonal run",
+          "spawn": {
+            "x": 0,
+            "z": 0
+          },
+          "yawDegrees": 0,
+          "pitchDegrees": 0,
+          "warmupSeconds": 8,
+          "settle": {
+            "settled": false,
+            "waitedSeconds": 120,
+            "blockers": [
+              "vegetation"
+            ]
+          },
+          "durationSeconds": 12,
+          "warmupFrames": null,
+          "measureFrames": null,
+          "speed": "run",
+          "explorationBoost": false,
+          "keys": [
+            "KeyW",
+            "KeyD",
+            "ShiftLeft"
+          ],
+          "hitchMs": 33.3,
+          "buildingCount": null,
+          "densityProfile": "dense-mixed",
+          "captureId": null
+        },
+        "summary": {
+          "frameCount": 1087,
+          "retainedFrameCount": 1088,
+          "droppedFrameCount": 0,
+          "frameBufferComplete": true,
+          "durationMs": 11986.4,
+          "avgFps": 90.69,
+          "dt": {
+            "minMs": 0.7,
+            "p50Ms": 6.7,
+            "p95Ms": 32.81,
+            "p99Ms": 100.228,
+            "maxMs": 316.3,
+            "meanMs": 11.038
+          },
+          "hitchMs": 33.3,
+          "hitchCount": 54,
+          "hitchRate": 0.0497,
+          "phases": {
+            "placementPreparation": {
+              "totalMs": 576.6,
+              "avgMs": 0.53,
+              "p95Ms": 1.3,
+              "maxMs": 2.1
+            },
+            "terrainCommit": {
+              "totalMs": 8.8,
+              "avgMs": 0.008,
+              "p95Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "player": {
+              "totalMs": 150.7,
+              "avgMs": 0.139,
+              "p95Ms": 0.2,
+              "maxMs": 20.1
+            },
+            "floatingOrigin": {
+              "totalMs": 1.6,
+              "avgMs": 0.001,
+              "p95Ms": 0,
+              "maxMs": 0.1
+            },
+            "character": {
+              "totalMs": 123,
+              "avgMs": 0.113,
+              "p95Ms": 0.2,
+              "maxMs": 1.5
+            },
+            "streaming": {
+              "totalMs": 5.8,
+              "avgMs": 0.005,
+              "p95Ms": 0.07,
+              "maxMs": 0.4
+            },
+            "stylized": {
+              "totalMs": 1016.1,
+              "avgMs": 0.935,
+              "p95Ms": 1.9,
+              "maxMs": 19.8
+            },
+            "objects": {
+              "totalMs": 43.2,
+              "avgMs": 0.04,
+              "p95Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "voxel": {
+              "totalMs": 6,
+              "avgMs": 0.006,
+              "p95Ms": 0,
+              "maxMs": 0.7
+            },
+            "render": {
+              "totalMs": 8977.1,
+              "avgMs": 8.259,
+              "p95Ms": 23.7,
+              "maxMs": 309.9
+            }
+          },
+          "originSnapCount": 0
+        },
+        "collision": {
+          "enabled": true,
+          "timingsMs": {
+            "total": {
+              "samples": 1087,
+              "totalMs": 23.3,
+              "meanMs": 0.021,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "broadphase": {
+              "samples": 1087,
+              "totalMs": 4.2,
+              "meanMs": 0.004,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "narrowPhase": {
+              "samples": 1087,
+              "totalMs": 2.3,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "support": {
+              "samples": 1087,
+              "totalMs": 1.6,
+              "meanMs": 0.001,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "chunkBuild": {
+              "samples": 1087,
+              "totalMs": 0.2,
+              "meanMs": 0,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0.2
+            }
+          },
+          "counts": {
+            "candidates": 0,
+            "broadphaseQueries": 6616,
+            "primitiveTests": 0,
+            "bvhQueries": 0,
+            "triangleTests": 0,
+            "contacts": 0,
+            "stepAttempts": 0,
+            "stepSuccesses": 0,
+            "activeChunks": 12,
+            "activePrimitiveColliders": 206,
+            "activeMeshInstances": 29,
+            "prototypeBvhs": 8,
+            "readinessMisses": 5016,
+            "failedChunks": 0,
+            "finalQueueDepth": 0
+          },
+          "readiness": {
+            "ready": true,
+            "policy": "retain-previous-valid-position",
+            "desiredChunks": 9,
+            "readyDesiredChunks": 9,
+            "failure": null
+          },
+          "canonicalSignature": "c06b7cc6",
+          "provider": {
+            "id": "production-natural-props",
+            "loadedChunks": 10,
+            "colliderCount": 235,
+            "queuedRefreshes": 0,
+            "deferredRetries": 0,
+            "refreshBuilds": 0,
+            "lastError": null,
+            "sample": {
+              "sourceId": "tree:tree%3A-1%3A-1%3A105:trunk",
+              "prototypeId": "/assets/trees/meadow/tree7.glb",
+              "x": -23.996099936718,
+              "y": 7.478114391322837,
+              "z": 25.160284523255193,
+              "radius": 0.47985312382348205,
+              "height": 12.328592289686032
+            },
+            "rockSample": {
+              "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+              "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+              "tier": "walkable",
+              "x": -119.34283083708557,
+              "y": 11.008807266195756,
+              "z": 72.97784864785565,
+              "radius": 1.3033413382132342,
+              "height": 3.305332525922638,
+              "generatedProxy": true
+            },
+            "components": {
+              "trees": {
+                "id": "trees",
+                "profileCount": 29,
+                "chunks": 10,
+                "colliders": 198,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "tree:tree%3A-1%3A-1%3A105:trunk",
+                  "prototypeId": "/assets/trees/meadow/tree7.glb",
+                  "x": -23.996099936718,
+                  "y": 7.478114391322837,
+                  "z": 25.160284523255193,
+                  "radius": 0.47985312382348205,
+                  "height": 12.328592289686032
+                },
+                "details": {
+                  "id": "production-tree-trunks",
+                  "profileCount": 29,
+                  "loadedChunks": 0,
+                  "colliderCount": 0,
+                  "queuedRefreshes": 0,
+                  "refreshBuilds": 0,
+                  "lastError": null,
+                  "sample": null
+                }
+              },
+              "rocks": {
+                "id": "rocks",
+                "profileCount": 11,
+                "chunks": 10,
+                "colliders": 37,
+                "decorative": 0,
+                "blocking": 8,
+                "walkable": 29,
+                "walkablePending": 0,
+                "generatedProxies": 29,
+                "sample": {
+                  "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+                  "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+                  "tier": "walkable",
+                  "x": -119.34283083708557,
+                  "y": 11.008807266195756,
+                  "z": 72.97784864785565,
+                  "radius": 1.3033413382132342,
+                  "height": 3.305332525922638,
+                  "generatedProxy": true
+                },
+                "details": {
+                  "id": "production-rock-collision",
+                  "profileCount": 11,
+                  "meshPrototypes": {
+                    "count": 8,
+                    "triangles": 534,
+                    "generated": 8
+                  }
+                }
+              },
+              "objects": {
+                "id": "objects",
+                "profileCount": 166,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              },
+              "constructions": {
+                "id": "constructions",
+                "profileCount": 0,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": {
+                  "id": "production-constructions",
+                  "plans": 0,
+                  "source": {
+                    "id": "construction-collision-source",
+                    "activeRecords": 0,
+                    "plans": 0,
+                    "stalePlans": 0,
+                    "appliedPlans": 0,
+                    "unchangedPlans": 0,
+                    "rejectedPlans": 0,
+                    "spatialRevision": 0,
+                    "config": {
+                      "curveSegmentLength": 1.25
+                    }
+                  }
+                }
+              },
+              "settlements": {
+                "id": "settlements",
+                "profileCount": 0,
+                "chunks": 10,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              }
+            }
+          },
+          "gate": {
+            "provisionalP95TargetMs": 0.83,
+            "measuredP95Ms": 0.1,
+            "sampleCount": 1087,
+            "samplePassed": true,
+            "timingPassed": true,
+            "readinessPassed": true,
+            "passed": true
+          }
+        },
+        "preparation": {
+          "start": {
+            "ready": false,
+            "queueDepth": 6,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 1,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 155,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 1,
+                "oldestAgeMs": 11.400000005960464,
+                "completed": 477,
+                "advanced": 2030,
+                "blocked": 8,
+                "cancelled": 2
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 33,
+                "blocked": 780,
+                "cancelled": 4
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 30,
+                "blocked": 991,
+                "cancelled": 6
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 23,
+                "blocked": 382,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 5,
+                "oldestAgeMs": 128470,
+                "completed": 116,
+                "advanced": 2330,
+                "blocked": 120,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 2415,
+                "blocked": 617,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "end": {
+            "ready": false,
+            "queueDepth": 5,
+            "fields": 0,
+            "meadow": 183,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 155,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 480,
+                "advanced": 2042,
+                "blocked": 8,
+                "cancelled": 4
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 33,
+                "blocked": 780,
+                "cancelled": 4
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 30,
+                "blocked": 991,
+                "cancelled": 6
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 23,
+                "blocked": 382,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 5,
+                "oldestAgeMs": 140471.79999998212,
+                "completed": 116,
+                "advanced": 2330,
+                "blocked": 120,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 2415,
+                "blocked": 617,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "workerCount": 8,
+          "cacheLimit": 625
+        },
+        "sceneryUpdateCpu": {
+          "includesPlacementPreparation": true,
+          "avgMs": 1.465,
+          "p95Ms": 2.5,
+          "p99Ms": 3.214,
+          "maxMs": 20.5
+        },
+        "adapter": {
+          "ok": true,
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "fallback": false
+        },
+        "capture": {
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "deviceScaleFactor": 1
+          },
+          "rendererBackend": {
+            "webgpu": true,
+            "webgl2": false,
+            "reason": null
+          },
+          "screenshot": null,
+          "cpuProfile": null,
+          "browserErrors": {
+            "count": 0,
+            "errors": [],
+            "truncated": false
+          }
+        },
+        "density": {
+          "treesPerChunk": 24,
+          "candidateBudgetPerChunk": 288,
+          "maxAcceptedPerChunk": 144,
+          "bladesPerCell": 1152,
+          "grassSystem": "meadow",
+          "meadowHighDensity": 25.2,
+          "meadowFarDensity": 2.6
+        },
+        "counters": {
+          "rendererWebGPUBackend": 1,
+          "rendererWebGLBackend": 0,
+          "treeRebuilds": 481,
+          "treeManifestBuilds": 116,
+          "treeImpostorInstances": 1017,
+          "grassLastChunkEffectiveBlades": 0,
+          "grassLastChunkTriangles": 0,
+          "waterChunksWet": 10,
+          "waterChunksRefractive": 0,
+          "constructionModulesResident": 0,
+          "constructionStones": 0,
+          "attributeBytesUploaded": 864799416
+        }
+      }
+    },
+    {
+      "id": "construction-ring",
+      "execution": {
+        "code": 0,
+        "signal": null
+      },
+      "report": {
+        "scenario": {
+          "id": "construction-ring",
+          "label": "Dense construction wall corridor",
+          "spawn": {
+            "x": 0,
+            "z": -100
+          },
+          "yawDegrees": 180,
+          "pitchDegrees": 0,
+          "warmupSeconds": 8,
+          "settle": {
+            "settled": true,
+            "waitedSeconds": 55.8,
+            "blockers": []
+          },
+          "durationSeconds": 12,
+          "warmupFrames": null,
+          "measureFrames": null,
+          "speed": "run",
+          "explorationBoost": false,
+          "keys": [
+            "KeyW",
+            "ShiftLeft"
+          ],
+          "hitchMs": 33.3,
+          "buildingCount": null,
+          "densityProfile": "standard",
+          "captureId": null
+        },
+        "summary": {
+          "frameCount": 1184,
+          "retainedFrameCount": 1185,
+          "droppedFrameCount": 0,
+          "frameBufferComplete": true,
+          "durationMs": 11990.2,
+          "avgFps": 98.75,
+          "dt": {
+            "minMs": 0.4,
+            "p50Ms": 8.5,
+            "p95Ms": 16.885,
+            "p99Ms": 33.617,
+            "maxMs": 184.6,
+            "meanMs": 10.134
+          },
+          "hitchMs": 33.3,
+          "hitchCount": 14,
+          "hitchRate": 0.0118,
+          "phases": {
+            "placementPreparation": {
+              "totalMs": 651.7,
+              "avgMs": 0.55,
+              "p95Ms": 1.1,
+              "maxMs": 7.7
+            },
+            "terrainCommit": {
+              "totalMs": 61.5,
+              "avgMs": 0.052,
+              "p95Ms": 0.3,
+              "maxMs": 1.4
+            },
+            "player": {
+              "totalMs": 247.6,
+              "avgMs": 0.209,
+              "p95Ms": 0.4,
+              "maxMs": 22.9
+            },
+            "floatingOrigin": {
+              "totalMs": 2.4,
+              "avgMs": 0.002,
+              "p95Ms": 0,
+              "maxMs": 0.1
+            },
+            "character": {
+              "totalMs": 140.6,
+              "avgMs": 0.119,
+              "p95Ms": 0.3,
+              "maxMs": 1.5
+            },
+            "streaming": {
+              "totalMs": 12.1,
+              "avgMs": 0.01,
+              "p95Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "stylized": {
+              "totalMs": 1284.4,
+              "avgMs": 1.085,
+              "p95Ms": 2,
+              "maxMs": 6.4
+            },
+            "objects": {
+              "totalMs": 73.2,
+              "avgMs": 0.062,
+              "p95Ms": 0.2,
+              "maxMs": 0.9
+            },
+            "voxel": {
+              "totalMs": 7.3,
+              "avgMs": 0.006,
+              "p95Ms": 0.1,
+              "maxMs": 0.4
+            },
+            "render": {
+              "totalMs": 8247.7,
+              "avgMs": 6.966,
+              "p95Ms": 11.9,
+              "maxMs": 186.3
+            }
+          },
+          "originSnapCount": 0
+        },
+        "collision": {
+          "enabled": true,
+          "timingsMs": {
+            "total": {
+              "samples": 1184,
+              "totalMs": 49,
+              "meanMs": 0.041,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.2,
+              "maxMs": 1.5
+            },
+            "broadphase": {
+              "samples": 1184,
+              "totalMs": 13.1,
+              "meanMs": 0.011,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.1,
+              "p99Ms": 0.1,
+              "maxMs": 0.2
+            },
+            "narrowPhase": {
+              "samples": 1184,
+              "totalMs": 3.8,
+              "meanMs": 0.003,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 1.1
+            },
+            "support": {
+              "samples": 1184,
+              "totalMs": 2.6,
+              "meanMs": 0.002,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.1,
+              "maxMs": 0.1
+            },
+            "chunkBuild": {
+              "samples": 1184,
+              "totalMs": 5.9,
+              "meanMs": 0.005,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 1.4
+            }
+          },
+          "counts": {
+            "candidates": 0,
+            "broadphaseQueries": 5717,
+            "primitiveTests": 0,
+            "bvhQueries": 0,
+            "triangleTests": 0,
+            "contacts": 0,
+            "stepAttempts": 0,
+            "stepSuccesses": 0,
+            "activeChunks": 18,
+            "activePrimitiveColliders": 201,
+            "activeMeshInstances": 51,
+            "prototypeBvhs": 10,
+            "readinessMisses": 1729,
+            "failedChunks": 0,
+            "finalQueueDepth": 0
+          },
+          "readiness": {
+            "ready": true,
+            "policy": "retain-previous-valid-position",
+            "desiredChunks": 9,
+            "readyDesiredChunks": 9,
+            "failure": null
+          },
+          "canonicalSignature": "ada93aec",
+          "provider": {
+            "id": "production-natural-props",
+            "loadedChunks": 16,
+            "colliderCount": 252,
+            "queuedRefreshes": 0,
+            "deferredRetries": 0,
+            "refreshBuilds": 0,
+            "lastError": null,
+            "sample": {
+              "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+              "prototypeId": "/assets/trees/meadow/tree3.glb",
+              "x": -82.37832112681845,
+              "y": 9.96015612384609,
+              "z": 86.2826042826098,
+              "radius": 0.1819939446177107,
+              "height": 8.682452336568337
+            },
+            "rockSample": {
+              "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+              "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+              "tier": "walkable",
+              "x": -119.34283083708557,
+              "y": 11.008807266195756,
+              "z": 72.97784864785565,
+              "radius": 1.3033413382132342,
+              "height": 3.305332525922638,
+              "generatedProxy": true
+            },
+            "components": {
+              "trees": {
+                "id": "trees",
+                "profileCount": 29,
+                "chunks": 16,
+                "colliders": 167,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "tree:tree%3A-1%3A-1%3A9:trunk",
+                  "prototypeId": "/assets/trees/meadow/tree3.glb",
+                  "x": -82.37832112681845,
+                  "y": 9.96015612384609,
+                  "z": 86.2826042826098,
+                  "radius": 0.1819939446177107,
+                  "height": 8.682452336568337
+                },
+                "details": {
+                  "id": "production-tree-trunks",
+                  "profileCount": 29,
+                  "loadedChunks": 0,
+                  "colliderCount": 0,
+                  "queuedRefreshes": 0,
+                  "refreshBuilds": 0,
+                  "lastError": null,
+                  "sample": null
+                }
+              },
+              "rocks": {
+                "id": "rocks",
+                "profileCount": 11,
+                "chunks": 16,
+                "colliders": 61,
+                "decorative": 1,
+                "blocking": 10,
+                "walkable": 51,
+                "walkablePending": 0,
+                "generatedProxies": 51,
+                "sample": {
+                  "sourceId": "rock:rock%3A-1%3A-1%3A53:walkable-mesh",
+                  "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%234:g4",
+                  "tier": "walkable",
+                  "x": -119.34283083708557,
+                  "y": 11.008807266195756,
+                  "z": 72.97784864785565,
+                  "radius": 1.3033413382132342,
+                  "height": 3.305332525922638,
+                  "generatedProxy": true
+                },
+                "details": {
+                  "id": "production-rock-collision",
+                  "profileCount": 11,
+                  "meshPrototypes": {
+                    "count": 10,
+                    "triangles": 666,
+                    "generated": 10
+                  }
+                }
+              },
+              "objects": {
+                "id": "objects",
+                "profileCount": 166,
+                "chunks": 16,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              },
+              "constructions": {
+                "id": "constructions",
+                "profileCount": 12,
+                "chunks": 16,
+                "colliders": 24,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": {
+                  "sourceId": "construction:construction-ring-wall-0:construction-ring-wall-0-segment%3A48000%3A96000%3Aband-1",
+                  "constructionId": "construction-ring-wall-0",
+                  "x": -36,
+                  "y": 6.616273079970734,
+                  "z": 23.8875,
+                  "radius": 24.1125,
+                  "height": 5.830407638185557
+                },
+                "details": {
+                  "id": "production-constructions",
+                  "plans": 12,
+                  "source": {
+                    "id": "construction-collision-source",
+                    "activeRecords": 12,
+                    "plans": 12,
+                    "stalePlans": 0,
+                    "appliedPlans": 12,
+                    "unchangedPlans": 0,
+                    "rejectedPlans": 0,
+                    "spatialRevision": 12,
+                    "config": {
+                      "curveSegmentLength": 1.25
+                    }
+                  }
+                }
+              },
+              "settlements": {
+                "id": "settlements",
+                "profileCount": 0,
+                "chunks": 16,
+                "colliders": 0,
+                "decorative": 0,
+                "blocking": 0,
+                "walkable": 0,
+                "walkablePending": 0,
+                "generatedProxies": 0,
+                "sample": null,
+                "details": null
+              }
+            }
+          },
+          "gate": {
+            "provisionalP95TargetMs": 0.83,
+            "measuredP95Ms": 0.1,
+            "sampleCount": 1184,
+            "samplePassed": true,
+            "timingPassed": true,
+            "readinessPassed": true,
+            "passed": true
+          }
+        },
+        "preparation": {
+          "start": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 178,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 270,
+                "advanced": 977,
+                "blocked": 7,
+                "cancelled": 24
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 42,
+                "blocked": 763,
+                "cancelled": 4
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 29,
+                "blocked": 586,
+                "cancelled": 4
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 20,
+                "blocked": 430,
+                "cancelled": 19
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 1427,
+                "blocked": 108,
+                "cancelled": 20
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 2166,
+                "blocked": 740,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "end": {
+            "ready": false,
+            "queueDepth": 26,
+            "fields": 3,
+            "meadow": 11,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 51,
+                "advanced": 51,
+                "blocked": 178,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 274,
+                "advanced": 1007,
+                "blocked": 7,
+                "cancelled": 34
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 6,
+                "advanced": 65,
+                "blocked": 763,
+                "cancelled": 14
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 46,
+                "blocked": 932,
+                "cancelled": 21
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 8,
+                "advanced": 47,
+                "blocked": 689,
+                "cancelled": 29
+              },
+              "treeManifest": {
+                "depth": 21,
+                "oldestAgeMs": 12006.5,
+                "completed": 121,
+                "advanced": 1427,
+                "blocked": 114,
+                "cancelled": 21
+              },
+              "rockManifest": {
+                "depth": 5,
+                "oldestAgeMs": 337.90000000596046,
+                "completed": 172,
+                "advanced": 2187,
+                "blocked": 771,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "workerCount": 8,
+          "cacheLimit": 625
+        },
+        "sceneryUpdateCpu": {
+          "includesPlacementPreparation": true,
+          "avgMs": 1.635,
+          "p95Ms": 2.7,
+          "p99Ms": 5.051,
+          "maxMs": 8.5
+        },
+        "adapter": {
+          "ok": true,
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "fallback": false
+        },
+        "capture": {
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "deviceScaleFactor": 1
+          },
+          "rendererBackend": {
+            "webgpu": true,
+            "webgl2": false,
+            "reason": null
+          },
+          "screenshot": null,
+          "cpuProfile": null,
+          "browserErrors": {
+            "count": 0,
+            "errors": [],
+            "truncated": false
+          }
+        },
+        "density": {
+          "treesPerChunk": 12,
+          "candidateBudgetPerChunk": 144,
+          "maxAcceptedPerChunk": 72,
+          "bladesPerCell": 576,
+          "grassSystem": "meadow",
+          "meadowHighDensity": 12.6,
+          "meadowFarDensity": 1.3
+        },
+        "counters": {
+          "rendererWebGPUBackend": 1,
+          "rendererWebGLBackend": 0,
+          "treeRebuilds": 274,
+          "treeManifestBuilds": 121,
+          "treeImpostorInstances": 579,
+          "grassLastChunkEffectiveBlades": 0,
+          "grassLastChunkTriangles": 0,
+          "waterChunksWet": 12,
+          "waterChunksRefractive": 3,
+          "constructionModulesResident": 96,
+          "constructionStones": 2694,
+          "attributeBytesUploaded": 182827804
+        }
+      }
+    }
+  ],
+  "water": {
+    "execution": {
+      "code": 0,
+      "signal": null
+    },
+    "report": {
+      "scenario": {
+        "id": "water-acceptance",
+        "label": "Dry-to-deep water acceptance",
+        "spawn": {
+          "x": 238,
+          "z": 416
+        },
+        "yawDegrees": 90,
+        "pitchDegrees": 0,
+        "warmupSeconds": 4,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 24.9,
+          "blockers": []
+        },
+        "durationSeconds": 51.4,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "walk",
+        "explorationBoost": false,
+        "keys": [],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "summary": {
+        "frameCount": 8362,
+        "retainedFrameCount": 8363,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 51392.2,
+        "avgFps": 162.71,
+        "dt": {
+          "minMs": 0.7,
+          "p50Ms": 5.9,
+          "p95Ms": 8.5,
+          "p99Ms": 12.8,
+          "maxMs": 73.4,
+          "meanMs": 6.146
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 2,
+        "hitchRate": 0.0002,
+        "phases": {
+          "placementPreparation": {
+            "totalMs": 243.4,
+            "avgMs": 0.029,
+            "p95Ms": 0.1,
+            "maxMs": 1.5
+          },
+          "terrainCommit": {
+            "totalMs": 109.4,
+            "avgMs": 0.013,
+            "p95Ms": 0.1,
+            "maxMs": 2
+          },
+          "player": {
+            "totalMs": 1065.9,
+            "avgMs": 0.127,
+            "p95Ms": 0.2,
+            "maxMs": 20.2
+          },
+          "floatingOrigin": {
+            "totalMs": 11.1,
+            "avgMs": 0.001,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 791.6,
+            "avgMs": 0.095,
+            "p95Ms": 0.2,
+            "maxMs": 1.4
+          },
+          "streaming": {
+            "totalMs": 58.3,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 1
+          },
+          "stylized": {
+            "totalMs": 5411.3,
+            "avgMs": 0.647,
+            "p95Ms": 1.4,
+            "maxMs": 4
+          },
+          "objects": {
+            "totalMs": 385.1,
+            "avgMs": 0.046,
+            "p95Ms": 0.1,
+            "maxMs": 1.1
+          },
+          "voxel": {
+            "totalMs": 29.8,
+            "avgMs": 0.004,
+            "p95Ms": 0,
+            "maxMs": 0.3
+          },
+          "render": {
+            "totalMs": 38147.2,
+            "avgMs": 4.562,
+            "p95Ms": 6.3,
+            "maxMs": 70.7
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collision": {
+        "enabled": true,
+        "timingsMs": {
+          "total": {
+            "samples": 8362,
+            "totalMs": 196.2,
+            "meanMs": 0.023,
+            "minMs": 0,
+            "p50Ms": 0,
+            "p95Ms": 0.1,
+            "p99Ms": 0.1,
+            "maxMs": 0.9
+          },
+          "broadphase": {
+            "samples": 8362,
+            "totalMs": 35.2,
+            "meanMs": 0.004,
+            "minMs": 0,
+            "p50Ms": 0,
+            "p95Ms": 0,
+            "p99Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "narrowPhase": {
+            "samples": 8362,
+            "totalMs": 22.7,
+            "meanMs": 0.003,
+            "minMs": 0,
+            "p50Ms": 0,
+            "p95Ms": 0,
+            "p99Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "support": {
+            "samples": 8362,
+            "totalMs": 17.5,
+            "meanMs": 0.002,
+            "minMs": 0,
+            "p50Ms": 0,
+            "p95Ms": 0,
+            "p99Ms": 0.1,
+            "maxMs": 0.9
+          },
+          "chunkBuild": {
+            "samples": 8362,
+            "totalMs": 0,
+            "meanMs": 0,
+            "minMs": 0,
+            "p50Ms": 0,
+            "p95Ms": 0,
+            "p99Ms": 0,
+            "maxMs": 0
+          }
+        },
+        "counts": {
+          "candidates": 3795,
+          "broadphaseQueries": 9935,
+          "primitiveTests": 12454,
+          "bvhQueries": 0,
+          "triangleTests": 0,
+          "contacts": 2074,
+          "stepAttempts": 1050,
+          "stepSuccesses": 0,
+          "activeChunks": 10,
+          "activePrimitiveColliders": 132,
+          "activeMeshInstances": 48,
+          "prototypeBvhs": 7,
+          "readinessMisses": 403,
+          "failedChunks": 0,
+          "finalQueueDepth": 0
+        },
+        "readiness": {
+          "ready": true,
+          "policy": "retain-previous-valid-position",
+          "desiredChunks": 9,
+          "readyDesiredChunks": 9,
+          "failure": null
+        },
+        "canonicalSignature": "758c4fa2",
+        "provider": {
+          "id": "production-natural-props",
+          "loadedChunks": 9,
+          "colliderCount": 180,
+          "queuedRefreshes": 0,
+          "deferredRetries": 0,
+          "refreshBuilds": 0,
+          "lastError": null,
+          "sample": {
+            "sourceId": "tree:tree%3A0%3A-4%3A10:trunk",
+            "prototypeId": "/assets/trees/meadow/tree8.glb",
+            "x": 84.21295192448052,
+            "y": -0.22512761449214694,
+            "z": 485.9514130834083,
+            "radius": 0.47429455018613903,
+            "height": 17.936868294732864
+          },
+          "rockSample": {
+            "sourceId": "rock:coast-rock%3A33%3A156:walkable-mesh",
+            "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%233:g2",
+            "tier": "walkable",
+            "x": 99.42422797344625,
+            "y": -1.0766385876812967,
+            "z": 470.6276202101726,
+            "radius": 0.8617968241864995,
+            "height": 1.5378318647062963,
+            "generatedProxy": true
+          },
+          "components": {
+            "trees": {
+              "id": "trees",
+              "profileCount": 29,
+              "chunks": 9,
+              "colliders": 16,
+              "decorative": 0,
+              "blocking": 0,
+              "walkable": 0,
+              "walkablePending": 0,
+              "generatedProxies": 0,
+              "sample": {
+                "sourceId": "tree:tree%3A0%3A-4%3A10:trunk",
+                "prototypeId": "/assets/trees/meadow/tree8.glb",
+                "x": 84.21295192448052,
+                "y": -0.22512761449214694,
+                "z": 485.9514130834083,
+                "radius": 0.47429455018613903,
+                "height": 17.936868294732864
+              },
+              "details": {
+                "id": "production-tree-trunks",
+                "profileCount": 29,
+                "loadedChunks": 0,
+                "colliderCount": 0,
+                "queuedRefreshes": 0,
+                "refreshBuilds": 0,
+                "lastError": null,
+                "sample": null
+              }
+            },
+            "rocks": {
+              "id": "rocks",
+              "profileCount": 11,
+              "chunks": 9,
+              "colliders": 164,
+              "decorative": 155,
+              "blocking": 116,
+              "walkable": 48,
+              "walkablePending": 0,
+              "generatedProxies": 48,
+              "sample": {
+                "sourceId": "rock:coast-rock%3A33%3A156:walkable-mesh",
+                "prototypeId": "rock-walkable:%2Fassets%2Frocks%2Fdonor%2Frocks.glb%233:g2",
+                "tier": "walkable",
+                "x": 99.42422797344625,
+                "y": -1.0766385876812967,
+                "z": 470.6276202101726,
+                "radius": 0.8617968241864995,
+                "height": 1.5378318647062963,
+                "generatedProxy": true
+              },
+              "details": {
+                "id": "production-rock-collision",
+                "profileCount": 11,
+                "meshPrototypes": {
+                  "count": 7,
+                  "triangles": 504,
+                  "generated": 7
+                }
+              }
+            },
+            "objects": {
+              "id": "objects",
+              "profileCount": 166,
+              "chunks": 9,
+              "colliders": 0,
+              "decorative": 0,
+              "blocking": 0,
+              "walkable": 0,
+              "walkablePending": 0,
+              "generatedProxies": 0,
+              "sample": null,
+              "details": null
+            },
+            "constructions": {
+              "id": "constructions",
+              "profileCount": 0,
+              "chunks": 9,
+              "colliders": 0,
+              "decorative": 0,
+              "blocking": 0,
+              "walkable": 0,
+              "walkablePending": 0,
+              "generatedProxies": 0,
+              "sample": null,
+              "details": {
+                "id": "production-constructions",
+                "plans": 0,
+                "source": {
+                  "id": "construction-collision-source",
+                  "activeRecords": 0,
+                  "plans": 0,
+                  "stalePlans": 0,
+                  "appliedPlans": 0,
+                  "unchangedPlans": 0,
+                  "rejectedPlans": 0,
+                  "spatialRevision": 0,
+                  "config": {
+                    "curveSegmentLength": 1.25
+                  }
+                }
+              }
+            },
+            "settlements": {
+              "id": "settlements",
+              "profileCount": 0,
+              "chunks": 9,
+              "colliders": 0,
+              "decorative": 0,
+              "blocking": 0,
+              "walkable": 0,
+              "walkablePending": 0,
+              "generatedProxies": 0,
+              "sample": null,
+              "details": null
+            }
+          }
+        },
+        "gate": {
+          "provisionalP95TargetMs": 0.83,
+          "measuredP95Ms": 0.1,
+          "sampleCount": 8362,
+          "samplePassed": true,
+          "timingPassed": true,
+          "readinessPassed": true,
+          "passed": true
+        }
+      },
+      "preparation": {
+        "start": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 25,
+              "advanced": 25,
+              "blocked": 130,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 107,
+              "advanced": 145,
+              "blocked": 3,
+              "cancelled": 21
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 18,
+              "blocked": 355,
+              "cancelled": 5
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 1,
+              "advanced": 19,
+              "blocked": 273,
+              "cancelled": 6
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 4,
+              "advanced": 30,
+              "blocked": 144,
+              "cancelled": 27
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 121,
+              "advanced": 294,
+              "blocked": 119,
+              "cancelled": 22
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 169,
+              "advanced": 903,
+              "blocked": 1035,
+              "cancelled": 0
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 25,
+              "advanced": 25,
+              "blocked": 130,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 107,
+              "advanced": 145,
+              "blocked": 3,
+              "cancelled": 21
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 18,
+              "blocked": 355,
+              "cancelled": 5
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 1,
+              "advanced": 19,
+              "blocked": 273,
+              "cancelled": 6
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 4,
+              "advanced": 30,
+              "blocked": 144,
+              "cancelled": 27
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 121,
+              "advanced": 294,
+              "blocked": 119,
+              "cancelled": 22
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 169,
+              "advanced": 903,
+              "blocked": 1035,
+              "cancelled": 0
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "workerCount": 8,
+        "cacheLimit": 625
+      },
+      "sceneryUpdateCpu": {
+        "includesPlacementPreparation": true,
+        "avgMs": 0.676,
+        "p95Ms": 1.4,
+        "p99Ms": 2.2,
+        "maxMs": 4.1
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "density": {
+        "treesPerChunk": 12,
+        "candidateBudgetPerChunk": 144,
+        "maxAcceptedPerChunk": 72,
+        "bladesPerCell": 576,
+        "grassSystem": "meadow",
+        "meadowHighDensity": 12.6,
+        "meadowFarDensity": 1.3
+      },
+      "counters": {
+        "rendererWebGPUBackend": 1,
+        "rendererWebGLBackend": 0,
+        "treeRebuilds": 108,
+        "treeManifestBuilds": 121,
+        "treeImpostorInstances": 705,
+        "grassLastChunkEffectiveBlades": 0,
+        "grassLastChunkTriangles": 0,
+        "waterChunksWet": 32,
+        "waterChunksRefractive": 16,
+        "constructionModulesResident": 0,
+        "constructionStones": 0,
+        "attributeBytesUploaded": 98749748
+      }
+    },
+    "acceptance": {
+      "pass": true,
+      "gates": {
+        "routeFound": true,
+        "measuredFrames": true,
+        "enteredWater": true,
+        "reachedSwimming": true,
+        "submerged": true,
+        "surfaced": true,
+        "returnedDry": true,
+        "stableBodyIdentity": true,
+        "originStable": true,
+        "projectedCausticsActive": true,
+        "projectedCausticsCpuBounded": true,
+        "frameP95Bounded": true,
+        "hitchRateBounded": true
+      },
+      "route": {
+        "start": {
+          "x": 238,
+          "z": 416
+        },
+        "target": {
+          "x": 152,
+          "z": 416
+        },
+        "yawDegrees": 90,
+        "distance": 86,
+        "bodyId": 1,
+        "kind": 1,
+        "surfaceHeight": -1.6943720249071068,
+        "targetDepth": 8.439116768149018
+      },
+      "qualityTier": "high",
+      "states": [
+        "dry",
+        "wading",
+        "swimming",
+        "submerged"
+      ],
+      "bodyIds": [
+        1
+      ],
+      "transitions": [
+        {
+          "from": "dry",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "dive"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "surface"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "surface"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "surface"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "surface"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "dry",
+          "phaseId": "exit-water"
+        }
+      ],
+      "metrics": {
+        "frameCount": 539,
+        "wetFrames": 456,
+        "submergedFrames": 103,
+        "maxDepth": 8.58237871433265,
+        "maxUnderwaterBlend": 1,
+        "projectedCausticFrames": 2413,
+        "maximumProjectedCausticCpuMs": 0.29999998211860657,
+        "maximumProjectedCausticPipelineCpuMs": 70.60000002384186,
+        "projectedCausticCpuScope": "post-effect excluding scene pass",
+        "originSnapCount": 0,
+        "originSnapViolations": 0
+      },
+      "thresholds": {
+        "maximumFrameP95Ms": 33.3,
+        "maximumHitchRate": 0.02,
+        "maximumProjectedCausticCpuMs": 4
+      }
+    }
+  },
+  "gate": {
+    "passed": false,
+    "maximumP95Ms": 33.3,
+    "maximumHitchRate": 0.02,
+    "failures": [
+      "high-grass: hitch rate 0.0338 exceeds 0.02",
+      "dense-mixed: preparation did not settle before measurement",
+      "dense-mixed: scenery preparation was incomplete at measurement start",
+      "dense-mixed: hitch rate 0.0497 exceeds 0.02"
+    ]
+  }
+}

@@ -39,6 +39,9 @@ try {
       const files=[`${pose.id}-hud.png`,`${pose.id}.png`];
       await page.screenshot({path:path.join(out,files[0])});
       if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Clean capture mode was blocked.');
+      const leaked=await page.evaluate(()=>[...document.querySelectorAll('[data-capture-ui]')]
+        .filter(root=>getComputedStyle(root).visibility!=='hidden'&&!root.hidden).map(root=>root.className));
+      if(leaked.length)throw new Error(`Capture UI is still visible: ${leaked.join(', ')}`);
       await page.locator('canvas').first().screenshot({path:path.join(out,files[1])});
       await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(false));
       for(const file of files)report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});

@@ -1846,7 +1846,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     console.warn('Renderer device lost; restoring editor state.', info);
     void recovery.recover(config.renderer.forceWebGL ? 'webgl' : 'auto', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
   };
-  const hudVisibility = new HudVisibilityController({ root,
+  const hudVisibility = new HudVisibilityController({ root: document,
     isBlocked: () => gameplayOverlayController.isWorldInputBlocked(),
     isReady: () => terrainView.getStreamingStatus().loading === 0 && stylizedSurface.getPreparationStatus().ready,
   });

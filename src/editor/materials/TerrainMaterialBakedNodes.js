@@ -327,6 +327,7 @@ export function createTerrainMaterialBakedSurface({
     snow: select(gpuState.ready.greaterThan(0.5), weights.a, float(0)),
     /** 0..1 baked canopy over the ground, which shelters it from rain. */
     canopy: select(gpuState.ready.greaterThan(0.5), samples.canopyWater.r, float(0)),
+    wetness: select(gpuState.ready.greaterThan(0.5), samples.wetnessShoreline.r, float(0)),
   };
 }
 

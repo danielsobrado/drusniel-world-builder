@@ -40,7 +40,7 @@ import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './stylized/CoastSwas
 import { createCoastSandNodes } from './stylized/CoastSandShading.js';
 import { createTerrainOceanMask } from './stylized/TerrainOceanMask.js';
 import { createSnowSurfaceNodes } from './stylized/SnowSurfaceShading.js';
-import { blownStreaks } from './stylized/ambient/BlownStreaks.js';
+import { createTerrainDriftNodes } from './materials/TerrainDriftNodes.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
 import { applyJungleMist } from './stylized/ambient/jungleMistOutput.js';
 import { createValleyFogNodes } from './stylized/mist/ValleyFogShading.js';
@@ -377,7 +377,10 @@ export function createTerrainMaterial({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, stylizedConfig, sunDirection,
       baseNormal: snowNormal, pathMask: snowPressed, settings: snowSettings,
     }) : null;
-    const detailedSnowColor = snowDetail ? snowDetail.color(surface.color) : surface.color;
+    const drift = createTerrainDriftNodes({worldXZ,grassCoverage,snow:bakedSurface.snow,
+      wetness:bakedSurface.wetness,pathMask,pressed:footprints.pressed,settings:surfaceEffects?.blownStreaks});
+    const driftColor = drift ? drift.apply(surface.color) : surface.color;
+    const detailedSnowColor = snowDetail ? snowDetail.color(driftColor) : driftColor;
     const printed = footprints.apply(snowSurface ? snowSurface.apply(detailedSnowColor) : detailedSnowColor);
     material.colorNode = wake ? wake.apply(printed) : printed;
     material.roughnessNode = surface.roughness;
@@ -386,29 +389,6 @@ export function createTerrainMaterial({
     if (snowDetail) {
       material.roughnessNode = snowDetail.roughness(surface.roughness);
       if (snowNormal) material.normalNode = snowNormal;
-    }
-    // Wind-blown snow and sand streaming across the ground, behind the ambient
-    // layer's own weights. The snow streak keys on the baked snow the terrain
-    // already draws (so a material with no snow field adds none) and the sand
-    // streak on open, bare ground — the region gate in the shared uniform keeps
-    // that to beaches and deserts.
-    const streaks = surfaceEffects?.blownStreaks ?? null;
-    const airStreak = streaks?.enabled
-      ? max(
-        streaks.snow && bakedSurface.snow
-          ? blownStreaks({ worldXZ, kind: 'snow', weight: bakedSurface.snow, settings: streaks })
-          : float(0),
-        streaks.sand
-          ? blownStreaks({ worldXZ, kind: 'sand', weight: oneMinus(grassCoverage), settings: streaks })
-          : float(0),
-      )
-      : null;
-    if (airStreak) {
-      // Airborne snow and sand scatter their own light, so they add rather than
-      // lighten the ground they cross.
-      material.emissiveNode = material.emissiveNode
-        ? max(material.emissiveNode, airStreak)
-        : airStreak;
     }
     // Rime on the up-facing faces, keyed on the same baked snow: the deposition the
     // terrain would otherwise wash out. Needs a surface normal, so it too compiles

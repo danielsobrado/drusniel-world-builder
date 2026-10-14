@@ -407,13 +407,27 @@ ambientEffects:
     presets:
       rainy: 0.7
   snowStreaks:
-    strength: 1
+    strength: 0.45
+    hardness: 0.25
+    length: 3
+    width: 0.18
+    patch: 30
+    reach: 75
+    maxOpacity: 0.22
+    color: '#dce6ea'
     windResponse: 1
     presets:
       calm: 0.3
       windy: 1.2
   sandStreaks:
-    strength: 1
+    strength: 0.30
+    hardness: 0.65
+    length: 1.4
+    width: 0.12
+    patch: 18
+    reach: 55
+    maxOpacity: 0.16
+    color: '#c7b18a'
     windResponse: 1
     presets:
       calm: 0.2

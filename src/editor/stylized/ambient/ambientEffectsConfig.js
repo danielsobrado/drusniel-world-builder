@@ -198,8 +198,8 @@ export function resolveAmbientEffectsConfig(config) {
     fields,
     plumes,
     breath,
-    snowStreaks: resolveWeighted(config.snowStreaks, 'snowStreaks', { strength: 1, windResponse: 1 }),
-    sandStreaks: resolveWeighted(config.sandStreaks, 'sandStreaks', { strength: 1, windResponse: 1 }),
+    snowStreaks: resolveWeighted(config.snowStreaks, 'snowStreaks', { strength: 0.45, windResponse: 1 }),
+    sandStreaks: resolveWeighted(config.sandStreaks, 'sandStreaks', { strength: 0.30, windResponse: 1 }),
     grassGustSheen: resolveWeighted(config.grassGustSheen, 'grassGustSheen', { strength: 0.3 }),
     frost: resolveWeighted(config.frost, 'frost', { strength: 0.5 }),
     // Heat shimmer and jungle mist are blended inside materials rather than drawn by

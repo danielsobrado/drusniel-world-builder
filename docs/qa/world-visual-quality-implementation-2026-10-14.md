@@ -43,10 +43,11 @@ pending; no visual or frame-rate improvement is claimed yet.
 
 | Task | State |
 | --- | --- |
-| VQ-01 | Implemented; long-cut browser acceptance pending |
-| VQ-02 | Implemented; twelve-pose settle/revisit gate pending |
-| VQ-03 | Original capture runner implemented; settled baseline pending |
-| VQ-04–06 | Pending prerequisite baseline |
+| VQ-01 | Implemented; 20 alternating long cuts passed |
+| VQ-02 | Implemented; both fresh twelve-pose runs settled with matching placements |
+| VQ-03 | Runtime baseline collected; clean-capture correction and resource accounting still being validated |
+| VQ-04 | Drift material implemented; production browser fixture pending |
+| VQ-05–06 | Pending surface gate |
 | VQ-07–10 | Pending surface/atmosphere gates |
 | VQ-11 | Capture visibility core implemented; public HUD settings/finish pending |
 | VQ-12–13 | Pending implementation and release verification |
@@ -73,3 +74,47 @@ clean capture. Both owners now register capture visibility explicitly. The first
 run and failed repeat are retained under local `tmp/world-visual-quality/pre-window-fix/`;
 they are **not the accepted appearance baseline**. Fresh captures are required
 at the corrected source revision.
+
+## Settled runtime and baseline performance
+
+At `ff5b9339`, both fresh original-pose contexts reached complete readiness at
+all twelve locations, with matching biome IDs and sorted tree/rock/bush identities.
+The [20-cut report](world-visual-quality-2026-10-14/runtime-cuts/report.json)
+passed with valid destination collision and zero browser errors.
+
+The three [baseline route reports](world-visual-quality-2026-10-14/perf/baseline-run-1.json)
+recorded zero post-warmup hitches, no sampling misses and post-stop recovery below
+2 seconds. The full [baseline matrix](world-visual-quality-2026-10-14/perf/baseline-matrix.json)
+**failed**: high-grass hitch rate 3.38%; dense-mixed did not settle before
+measurement and recorded 4.97% hitches. Those failures remain required release
+checks. Dense-mixed retained five old manifest jobs despite prepared fields
+being ready; manifest consumers are being checked for scheduling starvation.
+
+The original-suite images still exposed a capture-root scope bug: the spell dock
+is mounted outside `#app`. The visibility owner now registers from the document,
+and the runner asserts that every registered root is hidden. The earlier images
+are retained locally but are not represented as fully clean final captures.
+The full suite at this foundation passed 6,667 Node tests and the production build.
+
+## Dry-ground streak correction (VQ-04)
+
+The user identified the repeated foam-like streaks on cold-desert ground.
+The [pre-change diagnostic views](world-visual-quality-2026-10-14/fixtures/drift-before/report.json)
+include default, drift-off, direct-light-off and flat-normal states at original
+01/02. Turning drift off removes the long bright lines. Source inspection confirms
+that the old combined drift mask fed white emission, independently of surface light.
+The direct-light/flat-normal captures are descriptive diagnostics: ambient weights
+were easing after the preceding switch, so they do not establish an isolated
+quantitative lighting contribution.
+
+The new graph clamps separate sand/snow masks, blends their configured colours
+into albedo after rain shading, and retains footprints and frost above the blend.
+The ambient driver owns strength once. Fully wet or snowy ground excludes sand;
+packed paths suppress snow drift. Other spell and snow-scattering emission remains
+independent. The production noise uses continuous canonical wind coordinates,
+not chunk-relative repeating tile coordinates. No texture, particle, mesh or
+render pass is added to the world.
+
+The focused surface/ambient tests pass (31 tests). Production WebGPU/WebGL
+bounded-albedo and night-darkness fixtures are the next gate; no browser pass
+or appearance outcome is claimed before those finish.

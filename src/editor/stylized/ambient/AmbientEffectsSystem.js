@@ -206,13 +206,14 @@ export class AmbientEffectsSystem {
     // steady does the uniform stop changing. The streaks also slide downwind by the
     // wind that blew this frame, integrated on the CPU so a change of wind speed
     // cannot make them jump.
+    // Streak materials apply hardness/packing; this driver owns strength once.
     blownStreakUniforms.snow.value = this.step(
       blownStreakUniforms.snow.value,
-      this.surfaceEffectWeight(this.settings.snowStreaks, 'snow', presetName),
+      this.strengthWeight(this.settings.snowStreaks, 'snow', presetName),
     );
     blownStreakUniforms.sand.value = this.step(
       blownStreakUniforms.sand.value,
-      this.surfaceEffectWeight(this.settings.sandStreaks, 'sand', presetName),
+      this.strengthWeight(this.settings.sandStreaks, 'sand', presetName),
     );
     frostUniforms.cold.value = this.step(
       frostUniforms.cold.value,
