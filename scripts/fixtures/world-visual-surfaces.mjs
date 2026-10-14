@@ -14,6 +14,18 @@ installUnusedSamplerPruning(renderer);await renderer.init();renderer.setSize(800
 renderer.toneMapping=THREE.NoToneMapping;document.body.append(renderer.domElement);
 const state={report:{backend:renderer.backend.isWebGPUBackend?'webgpu':'webgl',cases:[],checks:[]},pendingCapture:null};
 window.__worldSurfaceFixture=state;
+state.report.shaders=[];
+const previousBuilderHook=renderer.debug.onNodeBuilderCreated;
+renderer.debug.onNodeBuilderCreated=(builder,...args)=>{
+ previousBuilderHook?.(builder,...args);
+ const record=()=>state.report.shaders.push({material:builder.material?.name,
+  textures:(builder.uniforms.fragment??[]).filter(u=>u.node?.value?.isTexture)
+   .map(u=>({uniform:u.name,name:u.node.value.name,uuid:u.node.value.uuid})),
+  samplerDeclarations:[...(builder.fragmentShader??'').matchAll(/uniform\s+\w*sampler\w*\s+(\w+)/g)].map(m=>m[1])});
+ const build=builder.build;builder.build=function(...params){const result=build.apply(this,params);record();return result;};
+ const buildAsync=builder.buildAsync;
+ if(buildAsync)builder.buildAsync=async function(...params){const result=await buildAsync.apply(this,params);record();return result;};
+};
 const scene=new THREE.Scene();scene.background=new THREE.Color(0);
 const camera=new THREE.PerspectiveCamera(68,800/600,.01,1000);camera.position.set(0,1.7,8);camera.lookAt(0,0,0);camera.updateMatrixWorld();
 const sun=new THREE.DirectionalLight('#ffffff',1);sun.position.set(0,10,10);scene.add(sun);
@@ -33,6 +45,7 @@ function texture(data,size,format,type=THREE.UnsignedByteType) {
 }
 function fillChannels(gpu,kind,base) {
  for(const [name,map] of Object.entries(gpu.textures)) {
+  map.name=`terrain-bake-${name}`;
   const channels=map.format===THREE.RGFormat?2:4;
   const value=name==='materialWeights'?(kind==='sand'?[0,255,0,0]:[0,0,0,255]):
    name==='macroTint'?[128,128,128,255]:name==='farColor'?[...base,255]:[0,0,0,255];
@@ -71,6 +84,7 @@ try {
   const materials={};
   for(const enabled of [false,true]) {
    const material=createTerrainMaterial({...options,surfaceEffects:{blownStreaks:enabled?settings:null}});
+   material.name=`surface-${kind}-${enabled?'on':'off'}`;
    fillChannels(getTerrainMaterialBakeGpuState(material),kind,base);
    material.emissiveNode=float(0);materials[enabled?'on':'off']=material;
   }
