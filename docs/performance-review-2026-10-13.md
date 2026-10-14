@@ -135,7 +135,7 @@ uploads that publication triggers. CPU compaction timing alone did not bound
 this work.
 
 Meadow publication now admits up to 4 MiB of new source attributes per layer per
-update, preferring in-view, nearer tiles. Already-prepared LOD changes use this
+frame, preferring in-view, nearer tiles. Already-prepared LOD changes use this
 same allowance. A single oversized tile is allowed to progress; repacking and
 retirement writes can add to the total GPU bytes, so this is not a hard cap on
 all renderer uploads. Waiting transitions retain the previous grass and
@@ -149,6 +149,30 @@ buffers never overwrite grass still awaiting replacement. The failed matrix
 and original high-grass report are preserved in
 `tmp/performance-review/matrix-before-upload-fix.json` and
 `high-grass-before-upload-fix.json`.
+
+The first capture with the upload bound settled in 71.2 seconds and measured
+110.96 FPS, 13.055 ms p95, and 19 hitches (1.43%), with no browser errors.
+Sampled peak marked grass uploads fell from 13.28 MB to 7.89 MB. Its scenery
+queue had not fully recovered within the separate 15-second observation.
+The subsequent long-recovery capture did not settle before measurement; the
+repeat matrix also failed preparation and encountered browser/startup errors.
+These later captures are not valid acceptance results. Concurrent source
+changes and an unresolved merge occurred during this QA period.
+
+### Integration with incoming scenery scheduling
+
+The remote scenery scheduler and manifest cancellation changes were merged
+with the grass fixes on `main`. The scheduler can prepare meadow work several
+times per frame, so each layer now shares one publication allowance across the
+early preparation turn, layout update, and later preparation turns. Layout-only
+updates do not publish pending replacements. The publication regression now
+exercises this sequence and verifies that repeated calls cannot renew the
+allowance. Existing grass remains visible until replacements can publish.
+
+The merged checkout passes the complete `npm run verify`: **3,574 tests**,
+lint, generated UI checks, production asset validation, and the production
+build. Hardware acceptance is being repeated against this merged runtime;
+the earlier failed captures are not treated as passes.
 
 Commands used:
 
