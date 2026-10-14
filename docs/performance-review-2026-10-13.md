@@ -110,6 +110,46 @@ retained 299,805 blades, 215,734 cards and 2,083,515 grass triangles. Images and
 state are retained in `tmp/performance-review/grass-{before,after}-*.png` and
 `grass-visual-final.json`. These are visual checks, not FPS benchmarks.
 
+The first final NVIDIA Lovelace WebGPU diagonal capture (`after-2.json`) settled
+in 23.1 seconds and measured **157.66 FPS, 8.3 ms frame p95, zero hitches** over
+12 seconds, with no browser errors. Collision retained signature `35d20c90`.
+At the movement endpoint 55 meadow tiles still needed preparation, as in both
+baselines; the complete scenery queue drained 2.255 seconds after stopping
+(baseline 5.710/8.994 seconds). Persistent distance-coverage gaps and transient
+streaming lag are distinct: this change does not eliminate the latter.
+
+The earlier baselines were 117.63/109.64 FPS with 13.6/14.8 ms p95. These figures
+show that the final capture meets the frame gate, but do not isolate a percentage
+FPS gain from these changes: browser/GPU contention from other sessions is not
+controlled. The isolated work-count regressions and benchmark above establish
+the collision/query scaling improvement independently.
+
+### Dense grass upload bursts
+
+The first full matrix passed standard, dense forest, dense mixed, construction,
+and water, but high grass failed the hitch-rate gate: 35 hitches / 1,256 frames
+(2.79%), 17.375 ms p95. Its hitch frames included roughly 10.5 MB of grass
+attribute updates and 4.0–4.5 MB of new buffers in a single frame. Cached LOD
+prefixes were published during layout refresh with no allowance for the GPU
+uploads that publication triggers. CPU compaction timing alone did not bound
+this work.
+
+Meadow publication now admits up to 4 MiB of new source attributes per layer per
+update, preferring in-view, nearer tiles. Already-prepared LOD changes use this
+same allowance. A single oversized tile is allowed to progress; repacking and
+retirement writes can add to the total GPU bytes, so this is not a hard cap on
+all renderer uploads. Waiting transitions retain the previous grass and
+completed rebuilds retain ownership of their old buffers until publication.
+Density, sampling, and draw distance are unchanged.
+
+The regression reproduces a 93,184-byte publication burst against a 14,336-byte
+test allowance, then verifies bounded publication and eventual full readiness.
+It also exercises ground revisions and an oversized tile, checking that pooled
+buffers never overwrite grass still awaiting replacement. The failed matrix
+and original high-grass report are preserved in
+`tmp/performance-review/matrix-before-upload-fix.json` and
+`high-grass-before-upload-fix.json`.
+
 Commands used:
 
 ```sh

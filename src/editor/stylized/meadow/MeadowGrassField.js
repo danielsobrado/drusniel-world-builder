@@ -131,6 +131,7 @@ export class MeadowGrassField {
       reach: settings.maxDistance + preparationLead,
       ground: this.ground,
       boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
+      maxPublicationBytes: 4 * 1024 * 1024,
     });
     this.cards = null;
     if (far) {
@@ -154,6 +155,7 @@ export class MeadowGrassField {
         reach: far.distance,
         ground: this.ground,
         boundsPadding: meadowCardBoundsPadding(this.uniforms),
+        maxPublicationBytes: 4 * 1024 * 1024,
       });
     }
     this.stats = {};

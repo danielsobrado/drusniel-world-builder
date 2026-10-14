@@ -42,12 +42,14 @@ export class MeadowTileLayer {
    * @param {object} options.ground MeadowGroundSampler
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null }) {
+  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null, maxPublicationBytes = Infinity }) {
     this.tileSize = tileSize;
     this.templates = templates;
     this.selectBand = selectBand;
     this.reach = reach;
     this.ground = ground;
+    this.maxPublicationBytes = maxPublicationBytes;
+    this.publicationBytes = 0;
     const definitions = Object.values(templates).map(template => template.userData?.meadow);
     this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
       && definition.cards === definitions[0].cards);
@@ -87,6 +89,7 @@ export class MeadowTileLayer {
    */
   update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null) {
     this.time = time;
+    this.publicationBytes = 0;
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
       ? this.ground.revision
@@ -104,6 +107,12 @@ export class MeadowTileLayer {
         );
       }
       this.sortStaleTiles();
+    }
+    // Cached prefixes are cheap on the CPU but still upload full GPU attributes
+    // on a band change. Publish nearest/in-view first under the byte allowance.
+    for (const tile of this.staleTiles) {
+      if (this.stablePrefixes && tile.band !== null && tile.prepared?.revision === tile.revision
+        && tile.prepared.capacity >= this.templates[tile.band].instanceCount) this.publishPrepared(tile);
     }
     this.build(deadline, layoutChanged);
     this.commit();
@@ -182,14 +191,6 @@ export class MeadowTileLayer {
           this.batchDirty = true;
         }
         tile.revision = this.ground.revisionAt(centerX, centerZ);
-        if (this.stablePrefixes && tile.band !== null && tile.revision !== null
-          && tile.prepared?.revision === tile.revision
-          && tile.prepared.capacity >= this.templates[tile.band].instanceCount) {
-          if (!tile.output || tile.builtBand !== tile.band || tile.builtRevision !== tile.revision) {
-            this.publishPrepared(tile);
-            PerfCounters.inc('meadowCompactionReuses');
-          }
-        }
       }
     }
     for (const [key, tile] of this.tiles) {
@@ -272,8 +273,7 @@ export class MeadowTileLayer {
         && tile.prepared.capacity >= capacity) {
         this.release(tile.job?.band, tile.job?.compaction.output);
         tile.job = null;
-        this.publishPrepared(tile);
-        PerfCounters.inc('meadowCompactionReuses');
+        if (!this.publishPrepared(tile)) stale[write++] = tile;
         continue;
       }
       if (!tile.job) {
@@ -306,6 +306,13 @@ export class MeadowTileLayer {
         stale[write++] = tile;
         continue;
       }
+      const publication = this.stablePrefixes && tile.band !== null
+        ? compactionPrefix(compaction.output, this.templates[tile.band].instanceCount)
+        : compaction.output;
+      if (tile.band !== null && !this.canPublish(publication)) {
+        stale[write++] = tile;
+        continue;
+      }
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
       if (this.stablePrefixes) {
         tile.prepared = {
@@ -326,6 +333,8 @@ export class MeadowTileLayer {
   }
 
   publish(tile, output, band, revision) {
+    if (!this.canPublish(output)) return false;
+    this.publicationBytes += output.count * 14 * 4;
     const previousCapacity = tile.output?.count ? this.templates[tile.builtBand].instanceCount : 0;
     if (!previousCapacity || this.templates[band].instanceCount > previousCapacity) {
       // Keep an active arrival fade across a rapid second promotion. A ground
@@ -340,12 +349,22 @@ export class MeadowTileLayer {
     tile.builtRevision = revision;
     tile.buildId = ++this.buildSerial;
     this.batchDirty = true;
+    return true;
+  }
+
+  canPublish(output) {
+    // One unusually large tile must still make progress. The bound covers new
+    // source publications; page compaction and retired ranges may also upload.
+    return this.publicationBytes === 0
+      || this.publicationBytes + output.count * 14 * 4 <= this.maxPublicationBytes;
   }
 
   publishPrepared(tile, force = false) {
     if (tile.band === null || (!force && tile.output
-      && tile.builtBand === tile.band && tile.builtRevision === tile.revision)) return;
-    this.publish(tile, compactionPrefix(tile.prepared.output, this.templates[tile.band].instanceCount), tile.band, tile.revision);
+      && tile.builtBand === tile.band && tile.builtRevision === tile.revision)) return true;
+    const published = this.publish(tile, compactionPrefix(tile.prepared.output, this.templates[tile.band].instanceCount), tile.band, tile.revision);
+    if (published && !force) PerfCounters.inc('meadowCompactionReuses');
+    return published;
   }
 
   commit() {
