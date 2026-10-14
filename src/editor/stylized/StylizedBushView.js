@@ -391,7 +391,7 @@ export class StylizedBushView {
     this.pendingRebuild = {
       key: `bush-lod:${updateKey}`,
       updateKey,
-      focus,
+      focus: { ...focus },
       placementRadius: renderRadius + 1,
       plan,
       rockSource,
@@ -455,7 +455,12 @@ export class StylizedBushView {
         while (manifest === null) {
           const blockers = this.blockersFor(chunkX, chunkZ, rockSource);
           if (blockers) manifest = this.manifestForChunk(chunkX, chunkZ, blockers, this.currentShouldYield);
-          if (manifest === null) yield ITERATOR_PENDING;
+          if (manifest === null) {
+            this.blockedDependency = { reason: blockers ? 'prepared-field' : 'rock-manifest',
+              dependencyType: blockers ? 'prepared-field' : 'rock-manifest',
+              chunkKeys: [`${chunkX}:${chunkZ}`] };
+            yield ITERATOR_PENDING;
+          }
         }
         placements.push(...manifest);
         for (const representation of entry.representations) {

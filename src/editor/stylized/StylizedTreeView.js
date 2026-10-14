@@ -771,6 +771,7 @@ export class StylizedTreeView {
       this.pendingLodRebuild = {
         key: `tree-lod:${key}`,
         updateKey: key,
+        focus: { ...focus },
         plan,
         rockSource,
         timestamp,

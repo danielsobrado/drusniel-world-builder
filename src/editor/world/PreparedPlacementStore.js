@@ -181,7 +181,7 @@ export class PreparedPlacementStore {
       })
       .catch(error => {
         if (this.pending.get(key) === token) this.pending.delete(key);
-        if (!error.cancelled && !this.disposed) console.error('Placement preparation failed.', error);
+        if (!error.cancelled && !this.disposed) { this.error = error; console.error('Placement preparation failed.', error); }
       });
   }
 

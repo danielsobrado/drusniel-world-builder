@@ -45,7 +45,7 @@ export class CameraCutCoordinator {
       }
       this.refreshObjects();
       this.notifyCut();
-      while (mode === 'player' && !player.getStatus().collisionReady) {
+      while (mode === 'player' && !player.getStatus().collision.ready) {
         if (generation !== this.generation || this.disposed) return { cancelled: true };
         if (this.now() - startedAt >= this.timeoutMs) throw new Error('Camera cut collision preparation timed out.');
         await this.nextFrame();

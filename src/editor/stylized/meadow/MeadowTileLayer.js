@@ -85,7 +85,7 @@ export class MeadowTileLayer {
    * @param {{ x: number, z: number }} origin floating origin
    * @param {number} deadline performance.now() by which this frame's builds stop
    */
-  update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null) {
+  update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null, buildEnabled = true) {
     this.time = time;
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
@@ -105,7 +105,7 @@ export class MeadowTileLayer {
       }
       this.sortStaleTiles();
     }
-    this.build(deadline, layoutChanged);
+    if (buildEnabled) this.build(deadline, layoutChanged);
     this.commit();
   }
 

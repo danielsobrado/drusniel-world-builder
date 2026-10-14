@@ -88,6 +88,7 @@ export class StylizedVariantResidency {
     this.pendingLoads = [];
     this.pendingApplies = [];
     this.inFlight = 0;
+    this.inFlightIds = new Set();
     this.lastScanAt = -Infinity;
     this.lastScanKey = null;
     this.disposed = false;
@@ -164,6 +165,7 @@ export class StylizedVariantResidency {
         tileIds,
         pinnedKeys: this.pinnedKeysForLayer(layer, tileIds),
       });
+      layer.requiredKeys = required;
       for (const definition of layer.definitions ?? []) {
         const key = variantKey(definition);
         if (!required.has(key)) continue;
@@ -180,14 +182,17 @@ export class StylizedVariantResidency {
     while (this.inFlight < this.maxConcurrentLoads && this.pendingLoads.length > 0) {
       const job = this.pendingLoads.shift();
       this.inFlight += 1;
+      this.inFlightIds.add(job.id);
       job.layer.acquire(job.definition.scene).then(
         (scene) => {
           this.inFlight -= 1;
+          this.inFlightIds.delete(job.id);
           if (this.disposed) return;
           this.pendingApplies.push({ ...job, scene });
         },
         (error) => {
           this.inFlight -= 1;
+          this.inFlightIds.delete(job.id);
           // Marked failed rather than retried: a missing or malformed variant
           // fails the same way every time, and retrying it each rescan would
           // turn one bad path into a permanent fetch loop.
@@ -218,6 +223,22 @@ export class StylizedVariantResidency {
     }
   }
 
+  getLayerState(layerId) {
+    const prefix = `${layerId}|`;
+    const pending = this.pendingLoads.filter(job => job.layer.id === layerId).length
+      + this.pendingApplies.filter(job => job.layer.id === layerId).length
+      + [...this.inFlightIds].filter(id => id.startsWith(prefix)).length;
+    const errors = [...this.failed].filter(id => id.startsWith(prefix));
+    const layer = this.layers.find(layer => layer.id === layerId);
+    return { ready: this.lastScanKey !== null && pending === 0 && errors.length === 0,
+      pending, errors, requiredCount: layer?.requiredKeys?.size ?? 0 };
+  }
+
+  getPreparationStatus() {
+    return { pending: this.pendingLoads.length + this.pendingApplies.length + this.inFlight,
+      errors: [...this.failed] };
+  }
+
   update(now = performance.now()) {
     if (this.disposed || !this.terrainView.focusChunkKey) return;
     // Applies come first so a variant that landed during the previous frame is
@@ -231,6 +252,7 @@ export class StylizedVariantResidency {
       this.rescan();
     }
     this.pumpLoads();
+    PerfCounters.set('stylizedVariantsPendingLoad', this.getPreparationStatus().pending);
   }
 
   dispose() {

@@ -380,7 +380,7 @@ export class StylizedGroundDetailView {
     this.pendingRebuild = {
       key: `${this.layerName}:${updateKey}`,
       updateKey,
-      focus,
+      focus: { ...focus },
     };
   }
 

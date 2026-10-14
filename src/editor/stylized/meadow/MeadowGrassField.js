@@ -177,6 +177,11 @@ export class MeadowGrassField {
    *   render space, or null to let the pressed grass stand back up
    */
   update(timestamp, camera, body = null, shouldYield = null, budgetProvider = null) {
+    this.updateFrame(timestamp, camera, body);
+    this.prepareFrame(shouldYield, budgetProvider);
+  }
+
+  updateFrame(timestamp, camera, body = null) {
     if (!camera) return;
     const origin = this.terrainView.floatingOrigin.getState();
     this.interactionOrigin.x = origin.x;
@@ -205,6 +210,16 @@ export class MeadowGrassField {
     // While no spell has ink in the map the blades skip reading it altogether.
     if (this.uniforms.spellGround) this.uniforms.spellGround.active.value = this.spellGround.hasMarksOrPress() ? 1 : 0;
     this.ground.beginFrame();
+    const noBuildDeadline = performance.now();
+    this.blades.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false);
+    this.cards?.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false);
+    this.frameInputs ??= {};
+    Object.assign(this.frameInputs, { canonical, origin, timestamp, viewCone });
+  }
+
+  prepareFrame(shouldYield = null, budgetProvider = null) {
+    if (!this.frameInputs) return;
+    const { canonical, origin, timestamp, viewCone } = this.frameInputs;
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
     for (const layer of [this.blades, this.cards]) if (layer) {

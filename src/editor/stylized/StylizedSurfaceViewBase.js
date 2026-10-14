@@ -1,6 +1,7 @@
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
 import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
-import { advancePendingScenery } from './advancePendingScenery.js';
+import { SceneryWorkScheduler, createSceneryConsumers } from './SceneryWorkScheduler.js';
+import { sceneryPreparationStatus } from './SceneryPreparationStatus.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
 import { PreparedPlacementStore } from '../world/PreparedPlacementStore.js';
 import { placementPreparationRadius } from '../world/PlacementPreparationWindow.js';
@@ -376,11 +377,16 @@ export class StylizedSurfaceView {
       buildsPerFrame: config.streaming?.detailBuildsPerFrame ?? 1,
       budgetMs: config.streaming?.heavyBuildBudgetMs ?? 3,
     });
+    this.sceneryScheduler = new SceneryWorkScheduler();
+    this.syncSceneryQueue = syncViewRebuildQueue;
+    this.sceneryConsumers = createSceneryConsumers(this);
+    this.preparationVariants = () => this.variantResidency?.getPreparationStatus().pending ?? 0;
     this.chunkWorldSize = terrainView.worldStore.chunkSize * terrainView.worldStore.tileSize;
     this.tileSize = terrainView.worldStore.tileSize;
     this.variantResidency = this.enabled && !this.impostorBakeMode
       ? this.createVariantResidency(config)
       : null;
+    if (this.rockView) this.rockView.assetReadiness = () => this.variantResidency?.getLayerState('rocks');
   }
 
   /**
@@ -655,17 +661,7 @@ export class StylizedSurfaceView {
   }
 
   getPreparationStatus() {
-    const queues = [this.grassBuildQueue, this.flowerBuildQueue, this.treeBuildQueue,
-      this.rockBuildQueue, this.bushBuildQueue, this.detailBuildQueue];
-    const queueDepth = queues.reduce((sum, queue) => sum + (queue?.size ?? 0), 0)
-      + (this.treeView?.manifestStore?.queue.size ?? 0)
-      + (this.rockView?.manifestStore?.queue.size ?? 0);
-    const fields = this.preparedPlacement?.pending.size ?? 0;
-    const meadow = this.meadowGrass?.getState().building ?? 0;
-    const draws = this.terrainView.drawPreparation?.pending.size ?? 0;
-    const variants = PerfCounters.get('stylizedVariantsPendingLoad');
-    return { ready: queueDepth + fields + meadow + draws + variants === 0,
-      queueDepth, fields, meadow, draws, variants };
+    return sceneryPreparationStatus(this);
   }
 
   /** Share one preparation allowance between player collision and rendering. */
@@ -686,12 +682,13 @@ export class StylizedSurfaceView {
       this.preparedPlacement.setWindow(focus.chunkX, focus.chunkZ, radius);
       this.rockView?.manifestStore.setWindow(focus.chunkX, focus.chunkZ, radius - 2);
     }
-    this.preparedPlacement?.flush(this.shouldYieldWork);
-    this.rockView?.beginFrame(timestamp);
     if (this.earlySceneryTimestamp !== timestamp && !isLandStreamingSuspended()) {
       this.earlySceneryTimestamp = timestamp;
-      advancePendingScenery(this);
+      this.sceneryScheduler.beginFrame(this.sceneryConsumers, this.shouldYieldWork);
     }
+    this.preparedPlacement?.flush(this.shouldYieldWork);
+    this.rockView?.beginFrame(timestamp);
+
   }
 
   /**
@@ -728,54 +725,23 @@ export class StylizedSurfaceView {
       for (const slot of this.waterSlots) slot.update(timestamp);
       return;
     }
-    // Grass gets first access most frames, but continuous streaming must not
-    // starve rock/tree publication. All turns consume the same allowance.
-    // Collision fields and blockers have already received their turn in beginFrame.
-    this.sceneryFrame = (this.sceneryFrame ?? 0) + 1;
-    const meadowFirst = this.sceneryFrame % 4 !== 0;
-    if (meadowFirst) this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
+    this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     syncViewRebuildQueue(this.rockBuildQueue, [this.rockView]);
-    this.rockBuildQueue.flush((job, shouldYield) => {
-      void job;
-      return this.rockView?.applyPendingRebuild(shouldYield) ?? false;
-    });
-
     const rockPlacements = this.rockView?.getPlacements() ?? [];
     this.treeView?.update(timestamp, camera, this.rockView);
     syncViewRebuildQueue(this.treeBuildQueue, [this.treeView], 'pendingLodRebuild');
-    this.treeBuildQueue.flush((job, shouldYield) => {
-      void job;
-      return this.treeView?.applyPendingRebuild(shouldYield) ?? false;
-    });
-    // Bush blockers cover the complete local rock ring. Keep the previous bush
-    // publication until that ring is ready so bush rebuilds cannot force a cold
-    // rock manifest to finish synchronously and reintroduce the boundary hitch.
     this.bushView?.update(timestamp, camera, this.rockView);
     syncViewRebuildQueue(this.bushBuildQueue, [this.bushView]);
-    if (!this.rockView?.pendingRebuild) {
-      this.bushBuildQueue.flush((job, shouldYield) => {
-        void job;
-        return this.bushView?.applyPendingRebuild(shouldYield) ?? false;
-      });
-    }
     for (const view of this.detailViews) view.update();
     for (const view of this.detailViews) {
       if (view.visibility) this.runDeferredWork?.(() => view.visibility.update(camera, this.shouldYieldWork));
     }
     syncViewRebuildQueue(this.detailBuildQueue, this.detailViews);
-    this.detailBuildQueue.flush((job, shouldYield) => {
-      for (const view of this.detailViews) {
-        if (job.key.startsWith(`${view.layerName}:`)) {
-          return view.applyPendingRebuild(shouldYield) ?? false;
-        }
-      }
-      return false;
-    });
+    this.sceneryScheduler.flush(this.sceneryConsumers, this.shouldYieldWork);
     if (this.runDeferredWork) this.runDeferredWork(() => this.updateForestGroundTextures());
     else this.updateForestGroundTextures();
     this.flowerView?.update(timestamp);
-    if (!meadowFirst) this.meadowGrass?.update(timestamp, camera, body, this.shouldYieldWork, this.workBudgetProvider);
     for (const slot of this.waterSlots) slot.update(timestamp);
     this.prewarmOneDistantWaterSlot();
 
@@ -873,7 +839,7 @@ export class StylizedSurfaceView {
     }
 
     this.grassBuildQueue.flush((job) => job.slot.applyPendingRebuild());
-    this.flowerBuildQueue.flush((job, shouldYield) => job.slot.applyPendingRebuild(shouldYield));
+    this.sceneryScheduler.flush(this.sceneryConsumers, this.shouldYieldWork);
   }
 
   updateForestGroundTextures() {
