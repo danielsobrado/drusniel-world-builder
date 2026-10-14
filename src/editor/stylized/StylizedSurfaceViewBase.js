@@ -681,6 +681,7 @@ export class StylizedSurfaceView {
       const radius = placementPreparationRadius(this.config, this.terrainView.loadRadius ?? 0);
       this.preparedPlacement.setWindow(focus.chunkX, focus.chunkZ, radius);
       this.rockView?.manifestStore.setWindow(focus.chunkX, focus.chunkZ, radius - 2);
+      this.treeView?.manifestStore?.setWindow(focus.chunkX, focus.chunkZ, radius - 2);
     }
     if (this.earlySceneryTimestamp !== timestamp && !isLandStreamingSuspended()) {
       this.earlySceneryTimestamp = timestamp;

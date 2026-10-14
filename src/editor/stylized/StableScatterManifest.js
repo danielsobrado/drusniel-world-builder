@@ -241,6 +241,7 @@ function createCandidate({
 
 function completedBuilder(result) {
   return Object.freeze({
+    get progress() { return 0; },
     get done() {
       return true;
     },
@@ -291,6 +292,7 @@ export function createStableChunkManifestBuilder({
   const minimumChunkX = chunkX - haloChunks;
   const maximumChunkX = chunkX + haloChunks;
   const maximumChunkZ = chunkZ + haloChunks;
+  const minimumChunkZ = chunkZ - haloChunks;
   let candidateChunkX = minimumChunkX;
   let candidateChunkZ = chunkZ - haloChunks;
   let candidateIndex = 0;
@@ -322,6 +324,11 @@ export function createStableChunkManifestBuilder({
       return result !== null;
     },
 
+    get progress() {
+      return ((candidateChunkZ - minimumChunkZ) * (maximumChunkX - minimumChunkX + 1)
+        + candidateChunkX - minimumChunkX) * perChunk + candidateIndex
+        + preprocessing.progress + acceptanceIndex;
+    },
     step({ shouldYield = null } = {}) {
       if (result !== null) return result;
       const yieldRequested = typeof shouldYield === 'function' ? shouldYield : null;

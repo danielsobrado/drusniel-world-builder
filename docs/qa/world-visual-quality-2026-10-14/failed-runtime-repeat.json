@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-14T03:25:43.628Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "poses": [],
+  "checks": [],
+  "artifacts": [],
+  "configHashes": {
+    "editor.config.yaml": "3fff558dbe837f38f4342ee060bbcf15db157a4c68defd1a058c892f107b4e71",
+    "config/terrain-material-bake.yaml": "416ec78a01866f5967995d9ba8cc085b552454488282c7b9d58ddb4cbc400aac",
+    "config/ambient-effects.yaml": "d454ed890c2408f7ed86f843535ff955510f39325e98840ff04109252d048fcc",
+    "config/water-visual.yaml": "05ead9770dde428b660db5487e061533a56e926e75d3157c39cda020d9d2bd54",
+    "config/exploration.yaml": "224178675de622acbf282b91aa46842112c44f77849533b0d7d2925593ec3897"
+  },
+  "suite": "original",
+  "sourceSha": "1460f951e69c4abb672248fe94265b5655eba746",
+  "dirtyFiles": [],
+  "mapHash": "dcd1ae3575ccf5cdde064580d0f033755d575e6054d7a9d1d5e64403570bd388",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "failurePose": {
+    "id": "original-01",
+    "historicalBiomeId": 1,
+    "x": -5667,
+    "z": 93,
+    "yaw": 2.510927532930373,
+    "pitch": -0.08,
+    "mode": "player"
+  },
+  "failureReadiness": {
+    "ready": false,
+    "terrain": {
+      "resident": 49,
+      "loading": 0,
+      "pendingCommits": 0,
+      "maxQueuedCommitAgeMs": 12857.40000000596,
+      "capacity": 49,
+      "focusChunk": "-45:-1|-45:-1",
+      "unavailableReason": null,
+      "cache": {
+        "cacheSize": 81,
+        "cacheLimit": 81,
+        "tileOverrideCount": 0,
+        "heightOverrideCount": 0,
+        "revision": 0,
+        "baseTerrainKind": null
+      },
+      "origin": {
+        "x": -5632,
+        "z": 0
+      }
+    },
+    "scenery": {
+      "ready": false,
+      "queueDepth": 84,
+      "fields": 0,
+      "meadow": 0,
+      "draws": 0,
+      "variants": 0,
+      "staged": 0,
+      "queues": {
+        "grass": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 0,
+          "advanced": 0,
+          "blocked": 0,
+          "cancelled": 0
+        },
+        "flower": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 25,
+          "advanced": 25,
+          "blocked": 50,
+          "cancelled": 0
+        },
+        "tree": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 448,
+          "advanced": 2203,
+          "blocked": 13,
+          "cancelled": 33
+        },
+        "rock": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 1,
+          "advanced": 45,
+          "blocked": 2591,
+          "cancelled": 3
+        },
+        "bush": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 1,
+          "advanced": 34,
+          "blocked": 2334,
+          "cancelled": 3
+        },
+        "detail": {
+          "depth": 0,
+          "oldestAgeMs": 0,
+          "completed": 4,
+          "advanced": 36,
+          "blocked": 1658,
+          "cancelled": 23
+        },
+        "treeManifest": {
+          "depth": 40,
+          "oldestAgeMs": 137703.5,
+          "completed": 2659,
+          "advanced": 2659,
+          "blocked": 0,
+          "cancelled": 110
+        },
+        "rockManifest": {
+          "depth": 44,
+          "oldestAgeMs": 2921.2000000178814,
+          "completed": 11520,
+          "advanced": 11520,
+          "blocked": 28,
+          "cancelled": 0
+        }
+      },
+      "errors": [],
+      "blockedJobs": [],
+      "materials": 0
+    },
+    "collision": true,
+    "construction": true
+  },
+  "failure": "page.evaluate: Error: Visual scenery did not settle: {\"ready\":false,\"terrain\":{\"resident\":49,\"loading\":0,\"pendingCommits\":0,\"maxQueuedCommitAgeMs\":12857.40000000596,\"capacity\":49,\"focusChunk\":\"-45:-1|-45:-1\",\"unavailableReason\":null,\"cache\":{\"cacheSize\":81,\"cacheLimit\":81,\"tileOverrideCount\":0,\"heightOverrideCount\":0,\"revision\":0,\"baseTerrainKind\":null},\"origin\":{\"x\":-5632,\"z\":0}},\"scenery\":{\"ready\":false,\"queueDepth\":86,\"fields\":0,\"meadow\":0,\"draws\":0,\"variants\":0,\"staged\":0,\"queues\":{\"grass\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":0,\"advanced\":0,\"blocked\":0,\"cancelled\":0},\"flower\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":25,\"advanced\":25,\"blocked\":50,\"cancelled\":0},\"tree\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":448,\"advanced\":2203,\"blocked\":13,\"cancelled\":33},\"rock\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":1,\"advanced\":45,\"blocked\":2591,\"cancelled\":3},\"bush\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":1,\"advanced\":34,\"blocked\":2334,\"cancelled\":3},\"detail\":{\"depth\":0,\"oldestAgeMs\":0,\"completed\":4,\"advanced\":36,\"blocked\":1658,\"cancelled\":23},\"treeManifest\":{\"depth\":40,\"oldestAgeMs\":137117,\"completed\":2658,\"advanced\":2658,\"blocked\":0,\"cancelled\":110},\"rockManifest\":{\"depth\":46,\"oldestAgeMs\":2334.7000000178814,\"completed\":11470,\"advanced\":11470,\"blocked\":28,\"cancelled\":0}},\"errors\":[],\"blockedJobs\":[],\"materials\":0},\"collision\":true,\"construction\":true}\n    at WorldVisualQa.settle (http://localhost:5174/src/editor/performance/qa/WorldVisualQa.js:51:11)\n    at async <anonymous>:337:30\n    at wsl.localhost\\Ubuntu\\home\\drusniel\\drusniel-world-builder\\scripts\\run-world-visual-qa.mjs:37:18",
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-10-14T03:29:23.454Z",
+  "passed": false,
+  "failures": [
+    "No captured poses."
+  ]
+}

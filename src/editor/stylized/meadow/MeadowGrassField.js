@@ -220,6 +220,10 @@ export class MeadowGrassField {
   prepareFrame(shouldYield = null, budgetProvider = null) {
     if (!this.frameInputs) return;
     const { canonical, origin, timestamp, viewCone } = this.frameInputs;
+    const focus = this.terrainView.focusChunk;
+    const chunkMeters = this.terrainView.chunkWorldSize;
+    if (focus && chunkMeters && (Math.floor(canonical.x / chunkMeters) !== focus.chunkX
+      || Math.floor(-canonical.z / chunkMeters) !== focus.chunkZ)) return;
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
     for (const layer of [this.blades, this.cards]) if (layer) {

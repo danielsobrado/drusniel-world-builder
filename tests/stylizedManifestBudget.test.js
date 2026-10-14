@@ -13,6 +13,7 @@ test('tree manifest jobs remain queued while their blocker halo is preparing', (
   const store = Object.create(TreeManifestStore.prototype);
   store.queue = new StylizedBuildQueue({ buildsPerFrame: 1, budgetMs: 100 });
   store.pendingKeys = new Set(['2:3']);
+  store.pendingBuilds = new Map();
   store.activeKeys = new Set(['2:3']);
   let attempts = 0;
   let notifications = 0;
@@ -31,7 +32,9 @@ test('tree manifest jobs remain queued while their blocker halo is preparing', (
     priority: 0,
   });
 
-  assert.deepEqual(store.flush(), { built: 1, remaining: 1, completed: 0 });
+  assert.deepEqual(store.flush(), { built: 0, remaining: 1, completed: 0 });
+  assert.equal(store.queue.getDiagnostics().completed, 0);
+  assert.equal(store.queue.getDiagnostics().blocked, 1);
   assert.equal(store.pendingKeys.has('2:3'), true);
   assert.equal(notifications, 0);
 

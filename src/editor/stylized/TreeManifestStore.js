@@ -1,6 +1,7 @@
 import { createIteratorBuilder } from './ResumableIterator.js';
 import { finalizeTreeManifest } from './TreeManifestFinalizer.js';
 import { ForestEditRevisions } from './forest/ForestEditRevisions.js';
+import { withinPreparationWindow } from '../world/PlacementPreparationWindow.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { cellCenterToWorld } from '../world/WorldCoordinates.js';
 import { StylizedBuildQueue } from './StylizedBuildQueue.js';
@@ -454,7 +455,17 @@ export class TreeManifestStore {
     this.version++;
   }
 
+  setWindow(x, z, radius) {
+    if (this.window?.x === x && this.window.z === z && this.window.radius === radius) return;
+    this.window = { x, z, radius };
+    this.setActive(new Set([...this.activeKeys].filter(key => {
+      const [cx,cz] = key.split(':').map(Number);
+      return withinPreparationWindow(cx,cz,this.window);
+    })));
+  }
+
   schedule(chunkX, chunkZ, rockSource) {
+    if (!withinPreparationWindow(chunkX,chunkZ,this.window)) return;
     const key = `${chunkX}:${chunkZ}`;
     this.activeKeys.add(key);
     const focus = this.terrainView.focusChunk;
@@ -472,6 +483,10 @@ export class TreeManifestStore {
   }
 
   setActive(keys) {
+    keys = new Set([...keys].filter(key => {
+      const [x,z] = key.split(':').map(Number);
+      return withinPreparationWindow(x,z,this.window);
+    }));
     this.activeKeys = keys;
     this.queue.retain(job => {
       if (keys.has(job.key)) return true;
@@ -502,12 +517,16 @@ export class TreeManifestStore {
         this.pendingBuilds.delete(job.key);
         return false;
       }
+      const before = this.pendingBuilds.get(job.key);
+      const progressBefore = (before?.builder.progress ?? 0) + (before?.finalizer?.progress ?? 0);
       const placements = this.build(job.chunkX, job.chunkZ, job.rockSource, shouldYield);
       if (!placements) {
         // Rock blocker preparation and tree candidate generation are both
         // resumable; keep this job until the complete deterministic result exists.
-        this.queue.enqueue(job);
-        return true;
+        const after = this.pendingBuilds.get(job.key);
+        const progressAfter = (after?.builder.progress ?? 0) + (after?.finalizer?.progress ?? 0);
+        return { completed: false, advanced: progressAfter > progressBefore,
+          blocked: progressAfter <= progressBefore, reason: after ? 'budget' : 'rock-manifest' };
       }
       PerfCounters.set('treeManifestReadyLatencyMs', performance.now() - job.requestedAt);
       this.pendingKeys.delete(job.key);

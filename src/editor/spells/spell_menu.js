@@ -161,6 +161,7 @@ export function createSpellMenu(deps = {}) {
 
   root.replaceChildren();
   root.classList.add('spell-dock');
+  root.dataset.captureUi = '';
   root.setAttribute('aria-label', 'Spell menu');
 
   const grip = createGrip(config.menu.title);
