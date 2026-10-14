@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "selectionSourceSha": "d379616759e1552f8d8f3b706a931774de7a9dce",
+  "configSha256": "57861b34616014d55097642c6f2f1084e0fc626035c0d3416a7f145b89501405",
+  "seed": 20261014,
+  "sampledCandidates": 22842,
+  "generator": {
+    "seed": 918273,
+    "version": 1,
+    "heightScale": 24,
+    "seaLevel": -1.5,
+    "waterDomainVersion": 3,
+    "waterDomain": {
+      "version": 3,
+      "cellSizeMeters": 1,
+      "shoreDistanceMeters": 48,
+      "ocean": {
+        "coastalShelfMeters": 20,
+        "shelfDepth": 4,
+        "maximumDepth": 24,
+        "maximumBedSlope": 0.75,
+        "beachHeight": 1.8,
+        "beachWidthMeters": 30
+      },
+      "river": {
+        "minimumDepth": 0.8,
+        "maximumDepth": 8,
+        "widthDepthRatio": 0.18,
+        "bankExponent": 1.8,
+        "minimumGradient": 0.0002,
+        "profileStepMeters": 100,
+        "valleySlope": 0.7,
+        "valleyReachMeters": 1500,
+        "leveeHeight": 1,
+        "leveeWidthMeters": 12
+      },
+      "lake": {
+        "minimumDepth": 1.5,
+        "maximumDepth": 18,
+        "shoreDepthMeters": 300,
+        "bankHeight": 1.5,
+        "bankWidthMeters": 60,
+        "shoreSlope": 0.3,
+        "shoreReachMeters": 3000,
+        "shorelineNoiseMeters": 400,
+        "shorelineNoiseScaleMeters": 2500
+      },
+      "falls": {
+        "enabled": true,
+        "minimumHeight": 4,
+        "maximumHeight": 30,
+        "faceSlope": 1.2,
+        "plungeDecayMeters": 40
+      }
+    }
+  },
+  "original": [
+    {
+      "id": "original-01",
+      "historicalBiomeId": 1,
+      "x": -5667,
+      "z": 93,
+      "yaw": 2.510927532930373,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 1
+    },
+    {
+      "id": "original-02",
+      "historicalBiomeId": 2,
+      "x": 501,
+      "z": -2833,
+      "yaw": 1.2516472670126653,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 2
+    },
+    {
+      "id": "original-03",
+      "historicalBiomeId": 3,
+      "x": -14373,
+      "z": -3467,
+      "yaw": 4.799565424433502,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 3
+    },
+    {
+      "id": "original-04",
+      "historicalBiomeId": 4,
+      "x": -8957,
+      "z": 7737,
+      "yaw": 4.4532042246192685,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 4
+    },
+    {
+      "id": "original-05",
+      "historicalBiomeId": 5,
+      "x": -15817,
+      "z": -3703,
+      "yaw": 5.887332314542098,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 5
+    },
+    {
+      "id": "original-06",
+      "historicalBiomeId": 6,
+      "x": -1945,
+      "z": 7795,
+      "yaw": 0.3536528063046259,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 6
+    },
+    {
+      "id": "original-07",
+      "historicalBiomeId": 7,
+      "x": 2005,
+      "z": 2941,
+      "yaw": 0.23151061303772338,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 7
+    },
+    {
+      "id": "original-08",
+      "historicalBiomeId": 8,
+      "x": -1997,
+      "z": -2889,
+      "yaw": 1.5062487428603664,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 8
+    },
+    {
+      "id": "original-09",
+      "historicalBiomeId": 9,
+      "x": -15631,
+      "z": -11255,
+      "yaw": 0.6979141569145686,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 9
+    },
+    {
+      "id": "original-10",
+      "historicalBiomeId": 10,
+      "x": -4803,
+      "z": 14351,
+      "yaw": 2.338503439414784,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 10
+    },
+    {
+      "id": "original-11",
+      "historicalBiomeId": 11,
+      "x": 75,
+      "z": -7561,
+      "yaw": 2.3971680489741036,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 6
+    },
+    {
+      "id": "original-12",
+      "historicalBiomeId": 12,
+      "x": 9647,
+      "z": 1483,
+      "yaw": 3.5175117620952805,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 12
+    }
+  ],
+  "additional": [
+    {
+      "id": "additional-06-3",
+      "historicalBiomeId": 6,
+      "x": 6763,
+      "z": -8825,
+      "yaw": 3.5389249504519547,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 6
+    },
+    {
+      "id": "additional-04-2",
+      "historicalBiomeId": 4,
+      "x": 3997,
+      "z": -14333,
+      "yaw": 1.972197032482616,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 4
+    },
+    {
+      "id": "additional-04-3",
+      "historicalBiomeId": 4,
+      "x": -6421,
+      "z": 3605,
+      "yaw": 3.722580411730521,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 4
+    },
+    {
+      "id": "additional-09-2",
+      "historicalBiomeId": 9,
+      "x": 733,
+      "z": 13987,
+      "yaw": 1.4739508281054332,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 9
+    },
+    {
+      "id": "additional-10-2",
+      "historicalBiomeId": 10,
+      "x": -15733,
+      "z": -13445,
+      "yaw": 1.9265230988942368,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 10
+    },
+    {
+      "id": "additional-10-3",
+      "historicalBiomeId": 10,
+      "x": 6115,
+      "z": 15577,
+      "yaw": 0.7313510675018214,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 10
+    },
+    {
+      "id": "additional-09-3",
+      "historicalBiomeId": 9,
+      "x": -11219,
+      "z": 9187,
+      "yaw": 2.9439276845989975,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 9
+    },
+    {
+      "id": "additional-05-2",
+      "historicalBiomeId": 5,
+      "x": 15339,
+      "z": 2163,
+      "yaw": 3.7622050093626336,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 5
+    },
+    {
+      "id": "additional-05-3",
+      "historicalBiomeId": 5,
+      "x": 5031,
+      "z": -9297,
+      "yaw": 1.2552008062089792,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 5
+    },
+    {
+      "id": "additional-03-2",
+      "historicalBiomeId": 3,
+      "x": -9375,
+      "z": -2671,
+      "yaw": 4.4371262297405325,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 3
+    },
+    {
+      "id": "additional-03-3",
+      "historicalBiomeId": 3,
+      "x": -9459,
+      "z": 945,
+      "yaw": 5.305585442358366,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 3
+    },
+    {
+      "id": "additional-02-2",
+      "historicalBiomeId": 2,
+      "x": -11959,
+      "z": 411,
+      "yaw": 5.419732131471855,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 2
+    },
+    {
+      "id": "additional-11-1",
+      "historicalBiomeId": 11,
+      "x": 6929,
+      "z": 8891,
+      "yaw": 0.9508503609284421,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 11
+    },
+    {
+      "id": "additional-08-2",
+      "historicalBiomeId": 8,
+      "x": -13373,
+      "z": 1409,
+      "yaw": 4.200944756268438,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 8
+    },
+    {
+      "id": "additional-08-3",
+      "historicalBiomeId": 8,
+      "x": -7695,
+      "z": 7819,
+      "yaw": 5.479959873387626,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 8
+    },
+    {
+      "id": "additional-12-2",
+      "historicalBiomeId": 12,
+      "x": -14951,
+      "z": -1929,
+      "yaw": 2.7520568133213428,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 12
+    },
+    {
+      "id": "additional-02-3",
+      "historicalBiomeId": 2,
+      "x": -3753,
+      "z": -2425,
+      "yaw": 0.4539942564202129,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 2
+    },
+    {
+      "id": "additional-12-3",
+      "historicalBiomeId": 12,
+      "x": -1963,
+      "z": -2839,
+      "yaw": 1.5089744415852304,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 12
+    },
+    {
+      "id": "additional-07-2",
+      "historicalBiomeId": 7,
+      "x": -1833,
+      "z": -2423,
+      "yaw": 4.2502919191587045,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 7
+    },
+    {
+      "id": "additional-11-2",
+      "historicalBiomeId": 11,
+      "x": 10929,
+      "z": -9087,
+      "yaw": 4.972774187708022,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 11
+    },
+    {
+      "id": "additional-11-3",
+      "historicalBiomeId": 11,
+      "x": -12211,
+      "z": -14623,
+      "yaw": 3.109077817342066,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 11
+    },
+    {
+      "id": "additional-01-2",
+      "historicalBiomeId": 1,
+      "x": 10761,
+      "z": 3645,
+      "yaw": 0.4996242673561801,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 1
+    },
+    {
+      "id": "additional-07-3",
+      "historicalBiomeId": 7,
+      "x": 12931,
+      "z": -1403,
+      "yaw": 1.0864159101319995,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 7
+    },
+    {
+      "id": "additional-01-3",
+      "historicalBiomeId": 1,
+      "x": 13445,
+      "z": 87,
+      "yaw": 5.708883112456553,
+      "pitch": -0.08,
+      "mode": "player",
+      "expectedBiomeId": 1
+    }
+  ]
+}
