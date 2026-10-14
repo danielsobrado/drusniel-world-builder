@@ -152,3 +152,16 @@ or saved edits. The focused material/cache tests pass (35 tests).
 The six production swatches are being compared at 3, 20, 60 and 140 metres on
 both backends; independent stochastic/genome/weather offsets are disabled only
 in the numerical recipe fixture to isolate substrate and quantization parity.
+
+The [substrate fixture](world-visual-quality-2026-10-14/fixtures/substrates/report.json)
+passed 108 numerical checks across WebGPU and WebGL, with zero browser errors.
+The [twelve original map views](world-visual-quality-2026-10-14/fixtures/substrates-world/report.json)
+also reached full readiness with zero browser errors at `dec9f127`; all selected
+camera poses matched the baseline and every HUD root was hidden for clean images.
+The earlier interrupted twelve-view attempt produced no report and remains local;
+it is not used as acceptance evidence.
+
+Before VQ-06, concurrent commit `8f236795` supplied fair early preparation turns
+for placement fields and manifest queues. Its completion accounting is preserved;
+the redundant local draft of that repair was not applied. Final performance
+acceptance still requires fresh measurements.
