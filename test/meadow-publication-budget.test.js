@@ -26,7 +26,14 @@ test('prepared LOD changes spread source uploads across frames and retain the pr
     for (let i = 0; i < 100; i++) update(0);
     assert.equal(layer.getState().building, 0);
     const before = new Map([...layer.tiles.values()].map(tile => [tile, { buildId: tile.buildId, output: tile.output }]));
-    update(8);
+    layer.beginFrame(1);
+    const scheduledUpdate = build => layer.update({ x: 8, z: 0 }, { x: 0, z: 0 }, Infinity, 10, null, build, 1);
+    scheduledUpdate(false);
+    assert.equal(layer.publicationBytes, 0, 'the layout-only pass leaves publication to scheduled work');
+    scheduledUpdate(true);
+    scheduledUpdate(false);
+    scheduledUpdate(true);
+    scheduledUpdate(true);
     const changed = [...layer.tiles.values()].filter(tile => tile.output && before.get(tile)?.buildId !== tile.buildId);
     const bytes = changed.reduce((sum, tile) => sum + tile.output.count * 14 * 4, 0);
     assert.ok(bytes > 0 && bytes <= maxPublicationBytes, `one frame published ${bytes} source bytes`);

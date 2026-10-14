@@ -17,6 +17,7 @@ export class StylizedBuildQueue {
     // the frame three separately "cheap" queues can still stack into one hitch.
     this.shouldYield = typeof shouldYield === 'function' ? shouldYield : null;
     this.budgetProvider = budgetProvider;
+    this.stats = { completed: 0, advanced: 0, blocked: 0, cancelled: 0 };
     this.queue = [];
     this.entriesByKey = new Map();
     this.sortDirty = false;
@@ -28,6 +29,7 @@ export class StylizedBuildQueue {
   }
 
   clear() {
+    this.stats.cancelled += this.queue.length;
     this.queue.length = 0;
     this.entriesByKey.clear();
     this.sortDirty = false;
@@ -42,6 +44,7 @@ export class StylizedBuildQueue {
         this.queue[writeIndex++] = job;
       } else {
         this.entriesByKey.delete(job.key);
+        this.stats.cancelled += 1;
       }
     }
     this.queue.length = writeIndex;
@@ -74,6 +77,13 @@ export class StylizedBuildQueue {
     return true;
   }
 
+  getDiagnostics() {
+    let oldestAgeMs = 0;
+    const now = this.now();
+    for (const job of this.queue) oldestAgeMs = Math.max(oldestAgeMs, now - job.requestedAt);
+    return { depth: this.size, oldestAgeMs, ...this.stats };
+  }
+
   sortQueue() {
     if (!this.sortDirty) return;
     this.queue.sort((left, right) => {
@@ -103,9 +113,14 @@ export class StylizedBuildQueue {
       const job = this.queue.pop();
       this.entriesByKey.delete(job.key);
       // Only count successful work so stale/no-op jobs cannot starve real rebuilds.
+      const before = job.progressProbe?.() ?? 0;
       const completed = this.workRunner
         ? this.workRunner(() => run(job, shouldYield)) : run(job, shouldYield);
+      const after = job.progressProbe?.() ?? before;
+      if (completed || after > before) this.stats.advanced += 1;
+      else this.stats.blocked += 1;
       if (completed) {
+        this.stats.completed += 1;
         built += 1;
       }
     }

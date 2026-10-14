@@ -87,9 +87,16 @@ export class MeadowTileLayer {
    * @param {{ x: number, z: number }} origin floating origin
    * @param {number} deadline performance.now() by which this frame's builds stop
    */
-  update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null) {
-    this.time = time;
+  beginFrame(frameId) {
+    if (this.publicationFrameId === frameId) return;
+    this.publicationFrameId = frameId;
     this.publicationBytes = 0;
+  }
+
+  update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null, buildEnabled = true, frameId = null) {
+    this.time = time;
+    if (frameId === null) this.publicationBytes = 0;
+    else this.beginFrame(frameId);
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
       ? this.ground.revision
@@ -108,13 +115,15 @@ export class MeadowTileLayer {
       }
       this.sortStaleTiles();
     }
-    // Cached prefixes are cheap on the CPU but still upload full GPU attributes
-    // on a band change. Publish nearest/in-view first under the byte allowance.
-    for (const tile of this.staleTiles) {
-      if (this.stablePrefixes && tile.band !== null && tile.prepared?.revision === tile.revision
-        && tile.prepared.capacity >= this.templates[tile.band].instanceCount) this.publishPrepared(tile);
+    if (buildEnabled) {
+      // Cached prefixes are cheap on the CPU but still upload full GPU attributes
+      // on a band change. Publish nearest/in-view first under the byte allowance.
+      for (const tile of this.staleTiles) {
+        if (this.stablePrefixes && tile.band !== null && tile.prepared?.revision === tile.revision
+          && tile.prepared.capacity >= this.templates[tile.band].instanceCount) this.publishPrepared(tile);
+      }
+      this.build(deadline, layoutChanged);
     }
-    this.build(deadline, layoutChanged);
     this.commit();
   }
 

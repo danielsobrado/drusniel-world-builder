@@ -520,6 +520,8 @@ export class InfiniteTerrainView {
   }
 
   render(camera) {
+    this.finishApplications = 0;
+    this.activeRenderPath = 'direct';
     this.beforeMainRender?.(camera);
     const draw = () => {
       if (
@@ -527,9 +529,11 @@ export class InfiniteTerrainView {
         && ['volumetric', 'cinematic'].includes(this.godRays.technique)
         && this.godRays.render(camera)
       ) {
+        this.activeRenderPath = `${this.godRays.technique}-god-rays`;
+        this.finishApplications = this.godRays.technique === 'cinematic' ? 1 : 0;
         return;
       }
-      if (this.postProcessing?.render(camera)) return;
+      if (this.postProcessing?.render(camera)) { this.activeRenderPath = 'post-processing'; return; }
       if (!this.godRays.render(camera)) {
         this.renderer.render(this.scene, camera);
       }

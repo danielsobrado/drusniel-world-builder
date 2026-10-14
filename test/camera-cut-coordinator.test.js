@@ -6,7 +6,7 @@ import { InfiniteTerrainView } from '../src/editor/InfiniteTerrainView.js';
 test('cuts replace residency before origin/pose, and superseded cuts cannot release input', async () => {
   const events=[],frames=[]; let ready=false;
   const origin=new FloatingOrigin({threshold:100,snapSize:64});
-  const player={resetInput(){},setPose(p){events.push(['pose',p.x]);},getStatus:()=>({collisionReady:ready})};
+  const player={resetInput(){},setPose(p){events.push(['pose',p.x]);},getStatus:()=>({collision:{ready}})};
   const terrain={floatingOrigin:origin,cutToCanonical:p=>events.push(['resident',p.x]),updateFloatingOrigin:p=>origin.update(p)};
   const coordinator=new CameraCutCoordinator({terrainView:terrain,playerController:player,
     viewModeController:{setMode(){}},shiftWorld:()=>events.push(['shift']),nextFrame:()=>new Promise(r=>frames.push(r))});

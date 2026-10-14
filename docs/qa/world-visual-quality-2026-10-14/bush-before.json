@@ -1,0 +1,3486 @@
+{
+  "sourceSha": "b9cbea08",
+  "timeline": [
+    {
+      "time": 248914.19999998808,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 249929.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 250940.69999998808,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 251961.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 252975,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 253989.19999998808,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 255008.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 256025,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 257044.69999998808,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 258067.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 259082.19999998808,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 260106.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 261132,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 262150.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 263162.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 264176.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 265190.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 266203.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 267216.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 268238,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 269242.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 270258.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 271275.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 272294,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 273317.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 274359.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 275379,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 276412.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 277456.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 278474.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 279501.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 280523.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 281533.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 282545.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 283559.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 284574.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 285591,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 286600.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 287626.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 288649.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 289670.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 290683.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 291696.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 292710.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 293735.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 294757.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 295768.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 296782.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 297794.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 298822.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 299841.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 300863.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 301884.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 302893.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 303913.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 304926.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 305945.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 306965.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 307975.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 308987.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 310003.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 311024.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 312044.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 313065.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 314081,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 315103.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 316132.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 317154.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 318179.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 319190.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 320200,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 321230,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 322257.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 323284.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 324288.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 325316.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 326335.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 327364.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 328386.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 329404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 330424.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 331440.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 332455.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 333467.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 334478.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 335491,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 336495.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 337510,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 338521.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 339535.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 340549.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 341576.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 342599.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 343623.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 344648.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 345678.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 346692.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 347701.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 348716.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 349741.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 350759.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 351783.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 352801.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 353820.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 354832.6999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 355846,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 356863,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 357875.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 358899,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 359914,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 360932.3000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 361953.5,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 363000.59999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 364038.09999999404,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 365044.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 366064.40000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 367081.90000000596,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 368103.1999999881,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 369126.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    },
+    {
+      "time": 370131.8000000119,
+      "prep": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "materials": 0
+      },
+      "bushFocus": {},
+      "stagedFocus": {},
+      "rockPending": false,
+      "rockCount": 11,
+      "bushCount": 5,
+      "rockWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 7
+      },
+      "preparedWindow": {
+        "x": 3,
+        "z": 22,
+        "radius": 9
+      },
+      "bushManifests": [],
+      "rocksPending": []
+    }
+  ],
+  "errors": []
+}

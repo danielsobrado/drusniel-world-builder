@@ -1,3 +1,4 @@
+const EMPTY_BLOCKERS = Object.freeze({ signature: 'disabled-rocks', placements: Object.freeze([]) });
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { StylizedBuildQueue } from './StylizedBuildQueue.js';
 import { createStableChunkManifestBuilder, placementSignature } from './StableScatterManifest.js';
@@ -46,6 +47,10 @@ export class RockManifestStore {
   }
 
   blockerSnapshot(x, z, halo = 1) {
+    const assets = this.view.assetReadiness?.();
+    if (assets?.errors.length) throw new Error(`Required rock assets failed: ${assets.errors.join(', ')}`);
+    if (this.view.config?.rocks?.enabled === false
+        || this.view.prototypes.length === 0 && assets?.ready && assets.requiredCount === 0) return EMPTY_BLOCKERS;
     const key = `${x}:${z}:${halo}`;
     const token = `${this.version}:${this.view.revisionTracker?.revision ?? 0}:${this.view.prototypeRevision ?? 0}:${this.view.biomeAssetPalette?.revision ?? 0}`;
     const existing = this.halos.get(key);

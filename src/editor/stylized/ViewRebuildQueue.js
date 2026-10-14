@@ -8,6 +8,9 @@ export function syncViewRebuildQueue(queue, views, pendingProperty = 'pendingReb
   queue.retain(job => keys.has(job.key));
   for (const view of views) {
     const job = view?.[pendingProperty];
-    if (job) queue.enqueue(job);
+    if (job) {
+      job.progressProbe ??= () => view.workProgress ?? 0;
+      queue.enqueue(job);
+    }
   }
 }

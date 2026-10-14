@@ -179,7 +179,19 @@ export class MeadowGrassField {
    *   render space, or null to let the pressed grass stand back up
    */
   update(timestamp, camera, body = null, shouldYield = null, budgetProvider = null) {
+    this.updateFrame(timestamp, camera, body);
+    this.prepareFrame(shouldYield, budgetProvider);
+  }
+
+  beginFrame(timestamp) {
+    this.publicationFrame = timestamp;
+    this.blades.beginFrame(timestamp);
+    this.cards?.beginFrame(timestamp);
+  }
+
+  updateFrame(timestamp, camera, body = null) {
     if (!camera) return;
+    this.beginFrame(timestamp);
     const origin = this.terrainView.floatingOrigin.getState();
     this.interactionOrigin.x = origin.x;
     this.interactionOrigin.z = origin.z;
@@ -207,6 +219,16 @@ export class MeadowGrassField {
     // While no spell has ink in the map the blades skip reading it altogether.
     if (this.uniforms.spellGround) this.uniforms.spellGround.active.value = this.spellGround.hasMarksOrPress() ? 1 : 0;
     this.ground.beginFrame();
+    const noBuildDeadline = performance.now();
+    this.blades.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false, timestamp);
+    this.cards?.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false, timestamp);
+    this.frameInputs ??= {};
+    Object.assign(this.frameInputs, { canonical, origin, timestamp, viewCone });
+  }
+
+  prepareFrame(shouldYield = null, budgetProvider = null) {
+    if (!this.frameInputs) return;
+    const { canonical, origin, timestamp, viewCone } = this.frameInputs;
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
     for (const layer of [this.blades, this.cards]) if (layer) {
@@ -215,8 +237,8 @@ export class MeadowGrassField {
       layer.workRunner = this.workRunner;
     }
     // Blades first: the ground under the player matters more than the horizon.
-    this.blades.update(canonical, origin, deadline, timestamp / 1000, viewCone);
-    this.cards?.update(canonical, origin, deadline, timestamp / 1000, viewCone);
+    this.blades.update(canonical, origin, deadline, timestamp / 1000, viewCone, true, this.publicationFrame);
+    this.cards?.update(canonical, origin, deadline, timestamp / 1000, viewCone, true, this.publicationFrame);
     PerfCounters.set('meadowVisibleMissingTiles', this.blades.stats.visibleMissing + (this.cards?.stats.visibleMissing ?? 0));
     PerfCounters.set('meadowVisibleCapacityLagTiles', this.blades.stats.visibleCapacityLag + (this.cards?.stats.visibleCapacityLag ?? 0));
     PerfCounters.set('meadowInViewMissingTiles', this.blades.stats.inViewMissing + (this.cards?.stats.inViewMissing ?? 0));

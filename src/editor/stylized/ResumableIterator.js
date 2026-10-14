@@ -5,7 +5,9 @@ export const ITERATOR_PENDING = Symbol('iterator-pending');
 export function createIteratorBuilder(factory) {
   let iterator = null;
   let result = null;
+  let progress = 0;
   return {
+    get progress() { return progress; },
     get done() { return result !== null; },
     step({ shouldYield = null } = {}) {
       if (result !== null) return result;
@@ -14,6 +16,7 @@ export function createIteratorBuilder(factory) {
       while (!shouldYield?.()) {
         const next = iterator.next();
         if (next.value === ITERATOR_PENDING) return null;
+        progress += 1;
         if (next.done) {
           result = next.value;
           return result;

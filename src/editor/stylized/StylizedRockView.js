@@ -330,7 +330,7 @@ export class StylizedRockView {
     this.pendingRebuild = {
       key: `rock-lod:${updateKey}`,
       updateKey,
-      focus,
+      focus: { ...focus },
       placementRadius,
       plan,
     };

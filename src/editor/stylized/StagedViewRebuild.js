@@ -2,18 +2,25 @@ import { createIteratorBuilder } from './ResumableIterator.js';
 
 /** Retain a complete publication while assembling its replacement in small units. */
 export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty = 'pendingRebuild') {
-  if (!job || shouldYield?.()) return false;
+  if (!job) { view.stagedRebuild = null; return false; }
+  if (shouldYield?.()) return false;
   const revision = view.revisionTracker?.revision ?? 0;
-  const prototypes = view.prototypeRevision ?? 0;
+  const prototypes = `${view.prototypeRevision ?? 0}:${job.rockSource?.prototypeRevision ?? 0}:${view.biomeAssetPalette?.revision ?? 0}`;
   let state = view.stagedRebuild;
   const moved = state?.job.focus && job.focus
     && (state.job.focus.chunkX !== job.focus.chunkX || state.job.focus.chunkZ !== job.focus.chunkZ);
   if (!state || moved || state.revision !== revision || state.prototypes !== prototypes) {
-    state = { job, revision, prototypes, builder: createIteratorBuilder(() => factory(job)) };
+    state = { job, revision, prototypes, lastProgressAt: performance.now(), builder: createIteratorBuilder(() => factory(job)) };
     view.stagedRebuild = state;
   }
   view.currentShouldYield = shouldYield;
+  const progress = state.builder.progress;
+  view.blockedDependency = null;
   const result = state.builder.step({ shouldYield });
+  if (state.builder.progress > progress) {
+    state.lastProgressAt = performance.now();
+    view.workProgress = (view.workProgress ?? 0) + state.builder.progress - progress;
+  }
   if (result === null) return false;
   view.stagedRebuild = null;
   view.lastUpdateKey = state.job.updateKey;

@@ -46,6 +46,8 @@ import { FrameRateMeter } from './editor/performance/FrameRateMeter.js';
 import { FRAME_RATE_DISPLAY_INTERVAL_MS } from './editor/performance/frameRateConstants.js';
 import { assetStartupTelemetry } from './editor/performance/AssetStartupTelemetry.js';
 import { PerfCounters } from './editor/performance/qa/PerfCounters.js';
+import { HudVisibilityController } from './editor/player/hud/HudVisibilityController.js';
+import { WorldVisualQa } from './editor/performance/qa/WorldVisualQa.js';
 import { PerfQaHarness } from './editor/performance/qa/PerfQaHarness.js';
 import { createObjectTownQaScene } from './editor/performance/qa/ObjectTownQaScene.js';
 import { applyPerfQaDensityProfile } from './editor/performance/qa/PerfQaDensityProfiles.js';
@@ -1844,6 +1846,18 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     console.warn('Renderer device lost; restoring editor state.', info);
     void recovery.recover(config.renderer.forceWebGL ? 'webgl' : 'auto', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
   };
+  const hudVisibility = new HudVisibilityController({ root,
+    isBlocked: () => gameplayOverlayController.isWorldInputBlocked(),
+    isReady: () => terrainView.getStreamingStatus().loading === 0 && stylizedSurface.getPreparationStatus().ready,
+  });
+  resources.own(hudVisibility);
+  if (import.meta.env.DEV && window.__editor) window.__editor.hudVisibility = hudVisibility;
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qaVisual') === '1') {
+    const visualQa = new WorldVisualQa(window.__editor);
+    window.__worldVisualQa = visualQa;
+    resources.own(visualQa);
+    resources.defer(() => { if (window.__worldVisualQa === visualQa) delete window.__worldVisualQa; });
+  }
   if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { recovery, captureRecoveryState: runtime.capture });
   return runtime;
 }
