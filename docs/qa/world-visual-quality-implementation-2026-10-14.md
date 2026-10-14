@@ -261,3 +261,12 @@ focused supersample/coverage/baker/manifest checks pass 26 tests.
 The corrected supersampled rebake passes the required validator for all 29
 original prototypes (`tree-impostor-v7-855b7394`). Runtime atlas dimensions and
 source identities match the original manifest. Final browser parity is pending.
+
+The [final compressed-atlas fixture](world-visual-quality-2026-10-14/fixtures/trees/report.json)
+passes all 276 checks: 161 on hardware NVIDIA Lovelace WebGPU and 115 on WebGL,
+with zero browser errors. Both backends use compressed albedo. Alpha coverage
+ratios are 1.05391 (broadleaf), 0.97984 (narrow conifer), and 0.96756 (alpine),
+inside the unchanged 0.85–1.15 gate. Every material luminance/RGB comparison,
+neutral-card mist check, colour round-trip and camera-normal check passes.
+The full suite passes 6,691 tests. The five prescribed real-world atmosphere
+views remain the final VQ-06 capture step before biome composition.

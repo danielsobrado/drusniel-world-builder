@@ -35,7 +35,9 @@ try {
   }
   await page.close();
  }
- report.passed=report.dirtyFiles.length===0 && Object.values(report.backends).every(r=>r.passed&&r.errors.count===0);
+ const end=repositoryState(repo);
+ report.sourceStable=end.sourceSha===report.sourceSha&&end.dirtyFiles.length===0;
+ report.passed=report.sourceStable&&report.dirtyFiles.length===0 && Object.values(report.backends).every(r=>r.passed&&r.errors.count===0);
  if(!report.passed)process.exitCode=1;
 }catch(error){report.failure=error.stack;report.passed=false;process.exitCode=1;}
 finally {await browser?.close();release();report.finishedAt=new Date().toISOString();await writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));}
