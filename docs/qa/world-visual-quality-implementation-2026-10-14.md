@@ -223,3 +223,21 @@ The production tree fixture now additionally bakes a known linear-colour swatch
 and samples its resulting tagged texture; this checks actual colour round-trip
 rather than relying only on target configuration. A stopped stale-server launch
 and the earlier pre-seed bake are retained locally and are not final evidence.
+
+The [first rebaked fixture](world-visual-quality-2026-10-14/fixtures/trees-first-rebake/report.json)
+still fails some material ratios. It exposed missing authored-crown lighting on
+impostors and a reconstruction basis that used the upright billboard axis rather
+than the bake camera's up direction. Both paths now share the unchanged near
+fill/transmission function; derived atlas metadata marks textured graded crowns,
+so vertex-painted alpine foliage does not receive a different lighting recipe.
+Normal reconstruction uses the camera basis independently of billboard geometry.
+
+The same fixture's WebGPU bake swatch revealed padded readback rows: central
+colour bytes were correct, but raw GPU row padding was treated as image pixels,
+producing diagonal black lines. The shared pixel helper now packs those rows
+before atlas dilation; a synthetic three-row test checks every byte. WebGL's
+tightly packed data is returned unchanged. The fixture's alpha gate now uses the
+baker's matching orthographic view; perspective FOV 35 remains the material
+comparison view. Thresholds, source identities and appearances are unchanged.
+Rotating-normal checks additionally cover elevations 0, 12 and 58 degrees.
+The focused baker/manifest/LOD checks pass 31 tests before the final rebake.

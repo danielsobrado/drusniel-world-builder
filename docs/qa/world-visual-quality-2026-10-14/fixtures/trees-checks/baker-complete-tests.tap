@@ -1,0 +1,196 @@
+TAP version 13
+# Subtest: existing output is composed once and every CPU/GPU factory receives atmosphere
+ok 1 - existing output is composed once and every CPU/GPU factory receives atmosphere
+  ---
+  duration_ms: 3.074237
+  type: 'test'
+  ...
+# Subtest: authored and proxy bushes use the shared composer without changing source alpha
+ok 2 - authored and proxy bushes use the shared composer without changing source alpha
+  ---
+  duration_ms: 1.123685
+  type: 'test'
+  ...
+# Subtest: density is linear in region weight before exponentiation and bounded after it
+ok 3 - density is linear in region weight before exponentiation and bounded after it
+  ---
+  duration_ms: 2.416065
+  type: 'test'
+  ...
+# Subtest: atlas dilation fills gutter RGB without expanding coverage alpha
+ok 4 - atlas dilation fills gutter RGB without expanding coverage alpha
+  ---
+  duration_ms: 0.781626
+  type: 'test'
+  ...
+# Subtest: normal dilation uses albedo coverage when trunk mask alpha is zero
+ok 5 - normal dilation uses albedo coverage when trunk mask alpha is zero
+  ---
+  duration_ms: 0.158681
+  type: 'test'
+  ...
+# Subtest: foliage mask alpha remains inside the rendered tile
+ok 6 - foliage mask alpha remains inside the rendered tile
+  ---
+  duration_ms: 0.087749
+  type: 'test'
+  ...
+# Subtest: RGBA readback removes GPU row padding and keeps tightly packed GL bytes
+ok 7 - RGBA readback removes GPU row padding and keeps tightly packed GL bytes
+  ---
+  duration_ms: 1.108451
+  type: 'test'
+  ...
+# Subtest: bake targets encode PNG albedo once while normals remain linear
+ok 8 - bake targets encode PNG albedo once while normals remain linear
+  ---
+  duration_ms: 0.672812
+  type: 'test'
+  ...
+# Subtest: bake geometry supplies neutral authored appearance without changing source geometry
+ok 9 - bake geometry supplies neutral authored appearance without changing source geometry
+  ---
+  duration_ms: 1.40158
+  type: 'test'
+  ...
+# Subtest: each baked elevation occupies the canvas row selected by its texture UV
+ok 10 - each baked elevation occupies the canvas row selected by its texture UV
+  ---
+  duration_ms: 0.235735
+  type: 'test'
+  ...
+# Subtest: normal bake writes foliage classification through material opacity
+ok 11 - normal bake writes foliage classification through material opacity
+  ---
+  duration_ms: 0.555494
+  type: 'test'
+  ...
+# Subtest: dilates opaque RGB into transparent gutter without changing alpha
+ok 12 - dilates opaque RGB into transparent gutter without changing alpha
+  ---
+  duration_ms: 0.561407
+  type: 'test'
+  ...
+# Subtest: validates a compatible contiguous manifest
+ok 13 - validates a compatible contiguous manifest
+  ---
+  duration_ms: 1.848965
+  type: 'test'
+  ...
+# Subtest: normalises encoding metadata produced by the bundle writer
+ok 14 - normalises encoding metadata produced by the bundle writer
+  ---
+  duration_ms: 0.240497
+  type: 'test'
+  ...
+# Subtest: accepts legacy atlases only as runtime-bake migration inputs
+ok 15 - accepts legacy atlases only as runtime-bake migration inputs
+  ---
+  duration_ms: 0.146697
+  type: 'test'
+  ...
+# Subtest: rejects legacy migration atlases when current offline assets are required
+ok 16 - rejects legacy migration atlases when current offline assets are required
+  ---
+  duration_ms: 0.311609
+  type: 'test'
+  ...
+# Subtest: rejects stale source signatures for renderable v3 assets
+ok 17 - rejects stale source signatures for renderable v3 assets
+  ---
+  duration_ms: 0.129596
+  type: 'test'
+  ...
+# Subtest: rejects unsupported manifest versions and incompatible normal encodings
+ok 18 - rejects unsupported manifest versions and incompatible normal encodings
+  ---
+  duration_ms: 0.129345
+  type: 'test'
+  ...
+# Subtest: rejects missing or non-contiguous prototypes
+ok 19 - rejects missing or non-contiguous prototypes
+  ---
+  duration_ms: 0.093523
+  type: 'test'
+  ...
+# Subtest: source signature changes with geometry or bake configuration
+ok 20 - source signature changes with geometry or bake configuration
+  ---
+  duration_ms: 0.558693
+  type: 'test'
+  ...
+# Subtest: source signature changes with authored tree material configuration
+ok 21 - source signature changes with authored tree material configuration
+  ---
+  duration_ms: 0.843742
+  type: 'test'
+  ...
+# Subtest: source signature ignores runtime-only impostor policy
+ok 22 - source signature ignores runtime-only impostor policy
+  ---
+  duration_ms: 0.830526
+  type: 'test'
+  ...
+# Subtest: source signature ignores runtime tree density and residency policy
+ok 23 - source signature ignores runtime tree density and residency policy
+  ---
+  duration_ms: 0.496995
+  type: 'test'
+  ...
+# Subtest: biome prototype preference preserves the existing baked atlas signature
+ok 24 - biome prototype preference preserves the existing baked atlas signature
+  ---
+  duration_ms: 0.2532
+  type: 'test'
+  ...
+# Subtest: source signature changes when wind affecting the baked silhouette changes
+ok 25 - source signature changes when wind affecting the baked silhouette changes
+  ---
+  duration_ms: 0.140637
+  type: 'test'
+  ...
+# Subtest: leaf morphology scales around the canopy base instead of pulling crowns to ground
+ok 26 - leaf morphology scales around the canopy base instead of pulling crowns to ground
+  ---
+  duration_ms: 2.993474
+  type: 'test'
+  ...
+# Subtest: tree morphology uses one trunk-axis pivot for offset crown and trunk parts
+ok 27 - tree morphology uses one trunk-axis pivot for offset crown and trunk parts
+  ---
+  duration_ms: 0.804652
+  type: 'test'
+  ...
+# Subtest: mapped foliage keeps source alpha outside the stochastic LOD fade
+ok 28 - mapped foliage keeps source alpha outside the stochastic LOD fade
+  ---
+  duration_ms: 0.421326
+  type: 'test'
+  ...
+# Subtest: impostor projection fits the tree silhouette instead of its bounding sphere
+ok 29 - impostor projection fits the tree silhouette instead of its bounding sphere
+  ---
+  duration_ms: 0.686293
+  type: 'test'
+  ...
+# Subtest: disconnected showroom trees become independent grounded prototypes
+ok 30 - disconnected showroom trees become independent grounded prototypes
+  ---
+  duration_ms: 2.775105
+  type: 'test'
+  ...
+# Subtest: overlapping broadleaf branch meshes remain one prototype
+ok 31 - overlapping broadleaf branch meshes remain one prototype
+  ---
+  duration_ms: 0.477506
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 116.337811

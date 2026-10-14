@@ -1,3 +1,4 @@
+import { runTreeAlphaCoverage } from './world-visual-tree-alpha.mjs';
 import * as THREE from 'three/webgpu';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 import { StylizedTreeView } from '/src/editor/stylized/StylizedTreeView.js';
@@ -42,7 +43,8 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
   for(const definition of config.assets.treeVariants)variants.push({definition,scene:await cache.acquire(definition.scene)});
   await view.buildFromScene(primary,variants);view.time.value=0;
   const signature=createTreeImpostorSourceSignature(view.prototypes,original);
-  atlases=await new TreeImpostorAssetLoader({renderer,compressed:false,expectedPrototypeCount:view.prototypes.length,expectedSourceSignature:signature}).load(config.lod.impostor.manifest);
+  atlases=await new TreeImpostorAssetLoader({renderer,compressed:config.lod.impostor.compressed!==false,
+   expectedPrototypeCount:view.prototypes.length,expectedSourceSignature:signature}).load(config.lod.impostor.manifest);
   if(!atlases)throw new Error('Required checked-in impostor atlas is unavailable.');
   state.report.prototypeSignature=signature;jungleMistUniforms.weight.value=0;
   camera.fov=35;camera.updateProjectionMatrix();sun.intensity=1;fill.intensity=.4;
@@ -50,6 +52,9 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
    const index=view.prototypeIndicesByAsset.get(asset)?.[0];
    if(!Number.isInteger(index))throw new Error(`No production prototype for ${asset}.`);
    const parts=view.prototypes[index],atlas=atlases.find(a=>a.prototypeIndex===index),bounds=new THREE.Box3();
+   const foliageLighting=parts.some(part=>part.kind==='leaf'&&part.material.userData?.gradedCanopy===true);
+   state.report.checks.push({id:`tree-foliage-lighting-metadata-${index}`,expected:foliageLighting,actual:atlas.foliageLighting,
+    passed:foliageLighting===atlas.foliageLighting});
    bounds.makeEmpty();for(const part of parts){part.geometry.computeBoundingBox();bounds.union(part.geometry.boundingBox);}
    const height=bounds.max.y-bounds.min.y,center=bounds.getCenter(new THREE.Vector3());
    const elevation=THREE.MathUtils.degToRad(atlas.lowElevationDegrees);
@@ -61,7 +66,8 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
    for(let i=0;i<40;i++){const distance=(lower+upper)/2;place(distance);if(projected()>240)lower=distance;else upper=distance;}
    const distance=(lower+upper)/2;place(distance);
    const metadata={asset,prototypeIndex:index,bounds:{min:bounds.min.toArray(),max:bounds.max.toArray()},distance,
-    fov:35,projectedHeightPixels:projected(),elevationDegrees:atlas.lowElevationDegrees,wind:0,phase:0,appearance:[1,1,1,1]};
+    fov:35,projectedHeightPixels:projected(),elevationDegrees:atlas.lowElevationDegrees,wind:0,phase:0,appearance:[1,1,1,1],
+    compressedAlbedo:Boolean(atlas.albedo.isCompressedTexture),foliageLighting};
    const root=new THREE.Group();scene.add(root);
    const near=createInstancedRenderers({root,partsByPrototype:[parts],capacity:1,name:'fixture-near',tintLeaves:true,renderer});
    const proxy=createInstancedRenderers({root,partsByPrototype:[view.proxyPrototypes[index]],capacity:1,name:'fixture-proxy',tintLeaves:true,renderer});
@@ -87,10 +93,9 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
       const stats=compare(images.near,images[representation]);
       state.report.checks.push({id:`tree-material-${index}-${azimuth}-${representation}`,...stats,
        passed:stats.sharedInterior>=1000&&stats.medianLuminanceRatio>=.8&&stats.medianLuminanceRatio<=1.25&&stats.medianRgbError<=.12});
-      state.report.checks.push({id:`tree-alpha-${index}-${azimuth}-${representation}`,ratio:stats.coverageRatio,nearCoverage:stats.nearCoverage,
-       passed:stats.nearCoverage>=1000&&stats.coverageRatio>=.85&&stats.coverageRatio<=1.15});
      }
     }
+    await runTreeAlphaCoverage({atlas,center,draw,metadata,cpu,gpu,groups,state});
    }finally {
     disposeInstancedRenderers(root,near);disposeInstancedRenderers(root,proxy);scene.remove(root);cpu.dispose();gpu?.dispose();
    }

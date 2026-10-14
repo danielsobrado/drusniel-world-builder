@@ -38,3 +38,8 @@ export function foliageBacklight(leafColor, amount) {
   const transmission = dot(view.negate(), foliageLight.direction).max(0).pow(2.2);
   return leafColor.mul(foliageLight.color).mul(transmission).mul(foliageLight.strength).mul(amount);
 }
+
+/** Shared authored-crown fill and transmission for meshes and their atlases. */
+export function treeFoliageEmission(crown) {
+  return foliageBacklight(crown, 0.8).add(crown.mul(foliageLight.fill).mul(0.28));
+}

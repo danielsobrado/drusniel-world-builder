@@ -21,6 +21,8 @@ test('existing output is composed once and every CPU/GPU factory receives atmosp
  const gpu=createGpuTreeImpostorMaterial({atlas,ambientEffects:ambient,transformRead:read,parameterRead:read,appearanceRead:read,
   visibleRead:{element:()=>float(0)},instanceIndex:float(0),originUniform:vec4(0).xyz});
  for(const {material} of [cpu,gpu]){assert.equal(material.userData.jungleMistApplied,true);assert.equal(material.alphaTest,.5);material.dispose();}
+ const lit=createCpuTreeImpostorMaterial({...atlas,foliageLighting:true},ambient);
+ assert.ok(lit.material.emissiveNode,'textured crown retains the near material fill and transmission');lit.material.dispose();
 });
 test('authored and proxy bushes use the shared composer without changing source alpha',()=>{
  const source=new THREE.MeshStandardMaterial({alphaTest:.47});

@@ -4,7 +4,7 @@ import {
   normalView,
 } from 'three/tsl';
 import { authoredTexture } from '../AuthoredTextureNode.js';
-import { createDilatedAtlasTile } from './TreeImpostorAtlasPixels.js';
+import { createDilatedAtlasTile, tightlyPackRgbaReadback } from './TreeImpostorAtlasPixels.js';
 import { createCaptureDirections, impostorCanvasRow } from './impostorFrame.js';
 import { TREE_IMPOSTOR_NORMAL_ENCODING } from './TreeImpostorManifest.js';
 
@@ -279,13 +279,13 @@ export class TreeImpostorBaker {
         renderer.setRenderTarget(targets.albedo);
         renderer.clear();
         await renderScene(renderer, albedoScene, camera);
-        const albedoPixels = await renderer.readRenderTargetPixelsAsync(
+        const albedoPixels = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
           targets.albedo,
           0,
           0,
           renderSize,
           renderSize,
-        );
+        ), renderSize, renderSize);
         writeTile(
           albedoContext,
           createDilatedAtlasTile(
@@ -302,13 +302,13 @@ export class TreeImpostorBaker {
         renderer.setRenderTarget(targets.normal);
         renderer.clear();
         await renderScene(renderer, normalScene, camera);
-        const normalPixels = await renderer.readRenderTargetPixelsAsync(
+        const normalPixels = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
           targets.normal,
           0,
           0,
           renderSize,
           renderSize,
-        );
+        ), renderSize, renderSize);
         writeTile(
           normalContext,
           createDilatedAtlasTile(
@@ -349,6 +349,7 @@ export class TreeImpostorBaker {
       depth: Math.max(0.1, size.z),
       centerY: center.y,
       radius,
+      foliageLighting: parts.some(part => part.kind === 'leaf' && part.material.userData?.gradedCanopy === true),
       normalEncoding: TREE_IMPOSTOR_NORMAL_ENCODING,
       albedoCanvas,
       normalCanvas,

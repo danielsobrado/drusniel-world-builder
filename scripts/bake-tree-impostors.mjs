@@ -321,6 +321,7 @@ async function writeAssets(bundle) {
       depth: source.depth,
       centerY: source.centerY,
       radius: source.radius,
+      foliageLighting: source.foliageLighting === true,
       albedo: `/assets/impostors/trees/${albedoFilename}`,
       normal: `/assets/impostors/trees/${normalFilename}`,
     });

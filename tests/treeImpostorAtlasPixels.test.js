@@ -38,3 +38,15 @@ test('foliage mask alpha remains inside the rendered tile', () => {
   assert.equal(pixel(tile, 3, 1, 1)[3], 255);
   assert.equal(pixel(tile, 3, 0, 0)[3], 0);
 });
+
+test('RGBA readback removes GPU row padding and keeps tightly packed GL bytes', async()=>{
+ const {tightlyPackRgbaReadback}=await import('../src/editor/stylized/impostor/TreeImpostorAtlasPixels.js');
+ const width=120,height=3,stride=512,rowBytes=480;
+ const padded=new Uint8Array((height-1)*stride+rowBytes);
+ for(let y=0;y<height;y++)padded.fill(y+1,y*stride,y*stride+rowBytes);
+ const tight=tightlyPackRgbaReadback(padded,width,height);
+ assert.equal(tight.length,width*height*4);
+ for(let y=0;y<height;y++)assert.ok(tight.subarray(y*rowBytes,(y+1)*rowBytes).every(value=>value===y+1));
+ assert.equal(tightlyPackRgbaReadback(tight,width,height),tight);
+ assert.throws(()=>tightlyPackRgbaReadback(new Uint8Array(7),width,height),/readback dimensions/);
+});

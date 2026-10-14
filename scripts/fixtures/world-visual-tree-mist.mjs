@@ -84,15 +84,15 @@ export async function runNormalRotation({renderer,scene,camera,draw,state,sun,fi
  jungleMistUniforms.weight.value=0;sun.intensity=1;fill.intensity=.4;
  sun.position.set(3,4,2);sun.target.position.set(0,0,0);sun.target.updateMatrixWorld();
  const worldNormal=new THREE.Vector3(.3,.8,.5).normalize(),measurements=[];
- for(const azimuth of [0,90,180,270]) {
-  const angle=THREE.MathUtils.degToRad(azimuth);
-  camera.position.set(Math.sin(angle)*10,0,Math.cos(angle)*10);camera.lookAt(0,0,0);camera.updateMatrixWorld();
+ for(const elevation of [0,12,58])for(const azimuth of [0,90,180,270]) {
+  const angle=THREE.MathUtils.degToRad(azimuth),el=THREE.MathUtils.degToRad(elevation);
+  camera.position.set(Math.sin(angle)*Math.cos(el)*10,Math.sin(el)*10,Math.cos(angle)*Math.cos(el)*10);camera.lookAt(0,0,0);camera.updateMatrixWorld();
   const e=camera.matrixWorld.elements,right=new THREE.Vector3(e[0],e[1],e[2]),up=new THREE.Vector3(e[4],e[5],e[6]),back=new THREE.Vector3(e[8],e[9],e[10]);
   const encoded=[right,up,back].map(axis=>Math.round((worldNormal.dot(axis)*.5+.5)*255));
   const atlas=solidAtlas(3,3,[...encoded,0]);
   const batch=new CpuTreeImpostorBatch({scene,atlas,capacity:1,name:'normal-rotation'});batch.uniforms.windStrength.value=0;
   batch.setRecords([{x:0,y:0,z:0,scale:1,yaw:0,fade:1,seed:.5,radius:atlas.radius}]);batch.update(camera,{x:0,z:0},0);
-  measurements.push(mean(await draw(`normal-rotation-${azimuth}`,{azimuth,worldNormal:worldNormal.toArray(),encoded},true)));
+  measurements.push(mean(await draw(`normal-rotation-${elevation}-${azimuth}`,{azimuth,elevation,worldNormal:worldNormal.toArray(),encoded},true)));
   batch.dispose();atlas.albedo.dispose();atlas.normal.dispose();
  }
  const error=Math.max(...measurements.map(m=>difference(m.rgb,measurements[0].rgb)));

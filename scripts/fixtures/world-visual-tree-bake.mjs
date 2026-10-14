@@ -14,12 +14,13 @@ export async function runBakerSwatch({renderer,scene,camera,draw,state}) {
  camera.position.set(0,0,10);camera.lookAt(0,0,0);camera.updateMatrixWorld();
  const bakedSample=Array.from(atlas.albedoCanvas.getContext('2d').getImageData(64,64,1,1).data);
  const pixels=await draw('baker-linear-albedo-roundtrip',{expected,atlasColorSpace:atlas.albedo.colorSpace,bakedSample},true);
- const actual=[0,0,0];let count=0;
+ const actual=[0,0,0],range={minimum:Infinity,maximum:-Infinity,alphaMinimum:Infinity};let count=0;
  for(let y=270;y<330;y++)for(let x=370;x<430;x++){
-  const i=(y*800+x)*4;for(let c=0;c<3;c++)actual[c]+=pixels[i+c];count++;
+  const i=(y*800+x)*4;for(let c=0;c<3;c++)actual[c]+=pixels[i+c];
+  range.minimum=Math.min(range.minimum,pixels[i]);range.maximum=Math.max(range.maximum,pixels[i]);range.alphaMinimum=Math.min(range.alphaMinimum,pixels[i+3]);count++;
  }
  for(let c=0;c<3;c++)actual[c]/=count;
  const error=Math.max(...actual.map((v,i)=>Math.abs(v-expected[i])));
- state.report.checks.push({id:'production-baker-linear-albedo-roundtrip',expected,actual,bakedSample,error,passed:error<=2/255});
+ state.report.checks.push({id:'production-baker-linear-albedo-roundtrip',expected,actual,bakedSample,range,center:Array.from(pixels.subarray((300*800+400)*4,(300*800+400)*4+4)),error,passed:error<=2/255});
  scene.remove(mesh);geometry.dispose();source.dispose();material.dispose();atlas.albedo.dispose();atlas.normal.dispose();
 }

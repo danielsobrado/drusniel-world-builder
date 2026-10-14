@@ -23,13 +23,11 @@ import { authoredTexture } from './AuthoredTextureNode.js';
 import { stylizedFbm } from './StylizedNoiseNodes.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
-import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
+import { treeFoliageEmission } from './forest/foliageLight.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyBarkWeathering } from './barkWeathering.js';
 
-/** Share of the sky fill a textured crown takes (the donor's `foliageFill`). */
-const FOLIAGE_FILL = 0.28;
 function colorNode(value) {
   const color = new THREE.Color(value);
   return vec3(color.r, color.g, color.b);
@@ -116,7 +114,7 @@ export function createStylizedLeafMaterial({
     // facing and paint it in cream and dark-green camouflage patches.
     const crown = authoredColor.mul(paletteValue(palette, config, 'brightness'));
     material.colorNode = crown;
-    material.emissiveNode = foliageBacklight(crown, 0.8).add(crown.mul(foliageLight.fill).mul(FOLIAGE_FILL));
+    material.emissiveNode = treeFoliageEmission(crown);
     // Its biome and autumn tints are ratios against the grade, not the palette.
     material.userData.gradedCanopy = true;
   } else {

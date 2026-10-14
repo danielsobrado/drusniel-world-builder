@@ -1,6 +1,21 @@
 const ALPHA_OFFSET = 3;
 const CHANNELS = 4;
 
+/** WebGPU readback includes 256-byte row padding; WebGL returns tight rows. */
+export function tightlyPackRgbaReadback(pixels, width, height) {
+  const rowBytes = width * CHANNELS;
+  if (pixels.length === rowBytes * height) return pixels;
+  const stride = Math.ceil(rowBytes / 256) * 256;
+  if (pixels.length !== (height - 1) * stride + rowBytes) {
+    throw new Error('Unexpected tree atlas RGBA readback dimensions.');
+  }
+  const result = new Uint8Array(rowBytes * height);
+  for (let row = 0; row < height; row++) {
+    result.set(pixels.subarray(row * stride, row * stride + rowBytes), row * rowBytes);
+  }
+  return result;
+}
+
 function sourceOffset(sourceSize, x, y) {
   return ((sourceSize - y - 1) * sourceSize + x) * CHANNELS;
 }

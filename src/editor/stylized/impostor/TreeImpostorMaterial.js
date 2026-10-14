@@ -1,4 +1,5 @@
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
+import { treeFoliageEmission } from '../forest/foliageLight.js';
 import * as THREE from 'three/webgpu';
 import {
   atan,
@@ -47,7 +48,8 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const widthScale = appearance.x;
   const right = normalize(cameraRight);
   const up = normalize(mix(vec3(0, 1, 0), cameraUp, sphericalBlend));
-  const backward = normalize(cross(right, up));
+  const normalUp = normalize(cameraUp);
+  const backward = normalize(cross(right, normalUp));
   const local = positionLocal;
   const field = sampleWorldWind(transform.xz);
   const wave = windWaveCoordinates(canonicalFromRender(transform.xz));
@@ -98,7 +100,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const viewNormal = normalSample.rgb.mul(2).sub(1);
   const worldNormal = normalize(
     right.mul(viewNormal.x)
-      .add(up.mul(viewNormal.y))
+      .add(normalUp.mul(viewNormal.y))
       .add(backward.mul(viewNormal.z)),
   );
   const variation = parameters.z
@@ -118,6 +120,9 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = worldPosition;
   material.colorNode = albedo.rgb.mul(colorMultiplier);
+  if (atlas.foliageLighting) {
+    material.emissiveNode = treeFoliageEmission(material.colorNode).mul(normalSample.a);
+  }
   material.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   // Keep atlas alpha stable at full coverage. Feeding it into the stochastic
   // fade threshold re-dithered every soft foliage edge in screen space and made
