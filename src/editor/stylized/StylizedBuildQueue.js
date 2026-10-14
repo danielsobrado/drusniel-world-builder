@@ -77,11 +77,14 @@ export class StylizedBuildQueue {
     return true;
   }
 
-  getDiagnostics() {
+  getDiagnostics({ includeJobs = false } = {}) {
     let oldestAgeMs = 0;
     const now = this.now();
     for (const job of this.queue) oldestAgeMs = Math.max(oldestAgeMs, now - job.requestedAt);
-    return { depth: this.size, oldestAgeMs, ...this.stats };
+    return { depth: this.size, oldestAgeMs, ...this.stats,
+      ...(includeJobs ? { jobs: this.queue.map(job => ({ key: job.key, focus: job.focus,
+        chunkX: job.chunkX, chunkZ: job.chunkZ, requestedAt: job.requestedAt, reason: job.blockedReason })) } : {}) };
+
   }
 
   sortQueue() {
@@ -99,6 +102,8 @@ export class StylizedBuildQueue {
     const startedAt = this.now();
     const budgetMs = this.budgetProvider?.(this.budgetMs) ?? this.budgetMs;
     let built = 0;
+    let turns = 0;
+    const deferred = [];
     const shouldYield = () => (
       this.now() - startedAt >= budgetMs
       || Boolean(this.shouldYield?.())
@@ -107,23 +112,29 @@ export class StylizedBuildQueue {
     this.sortQueue();
     while (
       this.queue.length > 0
-      && built < this.buildsPerFrame
+      && turns < this.buildsPerFrame
       && !shouldYield()
     ) {
       const job = this.queue.pop();
       this.entriesByKey.delete(job.key);
       // Only count successful work so stale/no-op jobs cannot starve real rebuilds.
       const before = job.progressProbe?.() ?? 0;
-      const completed = this.workRunner
+      const outcome = this.workRunner
         ? this.workRunner(() => run(job, shouldYield)) : run(job, shouldYield);
+      const structured = outcome !== null && typeof outcome === 'object' && 'completed' in outcome;
+      const completed = structured ? outcome.completed : Boolean(outcome);
       const after = job.progressProbe?.() ?? before;
-      if (completed || after > before) this.stats.advanced += 1;
-      else this.stats.blocked += 1;
-      if (completed) {
-        this.stats.completed += 1;
-        built += 1;
+      const advanced = structured ? outcome.advanced : completed || after > before;
+      if (advanced) this.stats.advanced += 1;
+      if (!completed && !advanced) this.stats.blocked += 1;
+      if (completed) { this.stats.completed += 1; built += 1; }
+      if (completed || advanced || structured) turns += 1;
+      if (structured && !completed) {
+        job.blockedReason = outcome.reason;
+        deferred.push(job);
       }
     }
+    for (const job of deferred) this.enqueue(job);
     return { built, remaining: this.queue.length };
   }
 }

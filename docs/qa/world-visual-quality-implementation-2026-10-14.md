@@ -50,3 +50,26 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-07–10 | Pending surface/atmosphere gates |
 | VQ-11 | Capture visibility core implemented; public HUD settings/finish pending |
 | VQ-12–13 | Pending implementation and release verification |
+
+## Repeat-capture failure and correction
+
+The first twelve-location run at `1460f951` completed scenery preparation on
+hardware NVIDIA Lovelace WebGPU, with zero browser errors. A second fresh-context
+run failed at original pose 01 after the 120-second settle deadline. Terrain and
+collision were ready, but 40 tree manifest jobs and 44 rock manifest jobs remained
+queued. [Raw failed report](world-visual-quality-2026-10-14/failed-runtime-repeat.json).
+
+The repeat exposed work from an obsolete terrain focus being advanced by an
+early preparation turn. The old tree plan could schedule or reactivate manifests
+whose blocker dependencies lay outside the new window. Resumable publications
+now reject an obsolete terrain focus before invoking their iterator. Tree
+manifest scheduling and activation are constrained to the dependency window,
+which cancels old pending builds on a camera cut. Pending manifest outcomes are
+now distinct from completions; a blocked job runs once per flush rather than
+immediately polling the same dependency again.
+
+Image inspection also found the spell dock and Scenic tour button in the supposed
+clean capture. Both owners now register capture visibility explicitly. The first
+run and failed repeat are retained under local `tmp/world-visual-quality/pre-window-fix/`;
+they are **not the accepted appearance baseline**. Fresh captures are required
+at the corrected source revision.

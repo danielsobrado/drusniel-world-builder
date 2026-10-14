@@ -1,4 +1,4 @@
-const CAPTURE_ROOTS = '.player-hud, .spell-menu, .free-flight-hints, .perf-qa-overlay, .view-mode-switcher, .sidebar, .natural-toolbar, .viewport-toolbar, .fps-average';
+const CAPTURE_ROOTS = '.player-hud, .spell-dock, .scenic-tour-button, .free-flight-hints, .perf-qa-overlay, .view-mode-switcher, .sidebar, .natural-toolbar, .viewport-toolbar, .fps-average';
 /** Presentation-only visibility; component hidden state and the world continue unchanged. */
 export class HudVisibilityController {
   constructor({ root = document, isBlocked = () => false, isReady = () => true }) {

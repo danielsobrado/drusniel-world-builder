@@ -32,3 +32,17 @@ test('staged work and known errors keep readiness false even with no queued entr
 test('bush and detail dependency radii are covered',()=>{
  assert.equal(placementPreparationRadius({trees:{residentRadius:1},rocks:{residentRadius:1},bushes:{residentRadius:10},lod:{enabled:false}},1),14);
 });
+
+test('early turns cancel a publication from the old terrain focus before it can schedule dependencies',()=>{
+ const view={terrainView:{focusChunk:{chunkX:30,chunkZ:40}},pendingRebuild:{key:'old',updateKey:'old',focus:{chunkX:0,chunkZ:0}}};
+ const factory=function*(){assert.fail('obsolete iterator must not run');};
+ assert.equal(stepViewRebuild(view,view.pendingRebuild,()=>false,factory),false);
+ assert.equal(view.pendingRebuild,null);assert.equal(view.stagedRebuild,null);
+});
+test('pending dependencies retain their job but consume only one turn per flush',()=>{
+ const queue=new StylizedBuildQueue({now:()=>0,buildsPerFrame:16});let calls=0;
+ queue.enqueue({key:'waiting'});queue.enqueue({key:'runnable'});
+ queue.flush(job=>{calls++;return job.key==='waiting'?{completed:false,advanced:false,blocked:true,reason:'rock-manifest'}:true;});
+ assert.equal(calls,2);assert.equal(queue.size,1);
+ assert.deepEqual(queue.getDiagnostics(),{depth:1,oldestAgeMs:0,completed:1,advanced:1,blocked:1,cancelled:0});
+});

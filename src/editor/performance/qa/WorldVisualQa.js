@@ -36,7 +36,10 @@ export class WorldVisualQa {
     }
     return {canonical,origin:origin.getState(),camera:camera.position.toArray(),yaw:e.playerController.yaw,pitch:e.playerController.pitch,
       actualBiomeId:e.terrainView.worldStore.getTile(Math.floor(canonical.x/cell),Math.floor(-canonical.z/cell)),
-      readiness:this.readiness(),placements,resources:trackedWorldResources(e),counters:PerfCounters.snapshot(),
+      readiness:this.readiness(),placements,preparationJobs:Object.fromEntries([
+        ...['grass','flower','tree','rock','bush','detail'].map(name=>[name,e.stylizedSurface[`${name}BuildQueue`]]),
+        ['treeManifest',e.stylizedSurface.treeView?.manifestStore?.queue],['rockManifest',e.stylizedSurface.rockView?.manifestStore?.queue],
+      ].map(([name,queue])=>[name,queue?.getDiagnostics({includeJobs:true})??null])),resources:trackedWorldResources(e),counters:PerfCounters.snapshot(),
       sky:e.skyLooks?.current,wind:e.worldWind?.getState?.()??null,weather:{...e.weatherSettings},
       renderPath:e.terrainView.activeRenderPath??'unknown',finishApplications:e.terrainView.finishApplications??0,
       backend:e.terrainView.rendererBackendStatus?.mode,clock:{hour:e.dayNightCycle?.hour,paused:e.dayNightCycle?.paused}};

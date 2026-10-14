@@ -9,6 +9,7 @@ export class ScenicTour {
     this.active = false; this.elapsed = 0; this.point = new Vector3(); this.ahead = new Vector3();
     this.targetRotation = new Quaternion(); this.generator = null;
     this.button = document.createElement('button'); this.button.type = 'button';
+    this.button.dataset.captureUi = '';
     this.button.className = 'scenic-tour-button'; this.button.textContent = 'Scenic tour';
     this.button.title = 'Fly around nearby terrain; Escape returns to your view';
     this.button.style.cssText = 'position:absolute;top:12px;right:12px;z-index:104;padding:8px 12px;border-radius:8px;background:#243027;color:#f0eedf;border:1px solid #81937a;';

@@ -45,7 +45,8 @@ try {
       report.poses.push({...pose,...state});
     } catch(error) {
       await page.screenshot({path:path.join(out,`failed-${pose.id}.png`)});
-      report.failurePose=pose;report.failureReadiness=await page.evaluate(()=>window.__worldVisualQa.readiness());throw error;
+      report.failurePose=pose;report.failureReadiness=await page.evaluate(()=>window.__worldVisualQa.readiness());
+      report.failureDiagnostics=await page.evaluate(()=>window.__worldVisualQa.diagnostics());throw error;
     }
   }
   if(args.baseline) {

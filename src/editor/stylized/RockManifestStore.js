@@ -83,11 +83,10 @@ export class RockManifestStore {
   step(job, shouldYield) {
     const { chunkX: x, chunkZ: z, key: cacheKey } = job;
     if (this.get(x, z) !== null) return false;
-    if (shouldYield()) return false;
+    if (shouldYield()) return { completed: false, advanced: false, blocked: true, reason: 'budget' };
     const prepared = this.view.terrainView.preparedPlacement;
     if (prepared && !prepared.ensureChunk(x, z, 2, job.priority)) {
-      this.queue.enqueue(job);
-      return true;
+      return { completed: false, advanced: false, blocked: true, reason: 'prepared-field' };
     }
     const key = this.view.manifestKey(x, z);
     let state = this.pending.get(cacheKey);
@@ -95,6 +94,7 @@ export class RockManifestStore {
       state = this.createState(x, z, key);
       this.pending.set(cacheKey, state);
     }
+    const before = state.stage * 10000000 + state.builder.progress;
     const stageNames = ['Scatter', 'Riverbank', 'Coast', 'Seabed', 'GroundFit'];
     while (state.stage < 5 && !shouldYield()) {
       const started = performance.now();
@@ -114,8 +114,8 @@ export class RockManifestStore {
     }
     PerfCounters.inc('rockManifestBuildSlices');
     if (state.stage < 5 || shouldYield()) {
-      this.queue.enqueue(job);
-      return true;
+      const after = state.stage * 10000000 + state.builder.progress;
+      return { completed: false, advanced: after > before, blocked: after <= before, reason: 'budget' };
     }
     const placements = Object.freeze(state.placements);
     this.cache.set(cacheKey, {

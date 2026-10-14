@@ -3,6 +3,12 @@ import { createIteratorBuilder } from './ResumableIterator.js';
 /** Retain a complete publication while assembling its replacement in small units. */
 export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty = 'pendingRebuild') {
   if (!job) { view.stagedRebuild = null; return false; }
+  const focus = view.terrainView?.focusChunk;
+  if (focus && job.focus && (focus.chunkX !== job.focus.chunkX || focus.chunkZ !== job.focus.chunkZ)) {
+    view.stagedRebuild = null;
+    if (view[pendingProperty] === job) view[pendingProperty] = null;
+    return false;
+  }
   if (shouldYield?.()) return false;
   const revision = view.revisionTracker?.revision ?? 0;
   const prototypes = `${view.prototypeRevision ?? 0}:${job.rockSource?.prototypeRevision ?? 0}:${view.biomeAssetPalette?.revision ?? 0}`;
