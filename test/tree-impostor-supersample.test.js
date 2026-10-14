@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { downsampleTreeImpostorCapture } from '../src/editor/stylized/impostor/TreeImpostorSupersample.js';
+test('offline downsampling preserves linear colour, normal direction and foliage class',()=>{
+ const size=4,scale=4,albedo=new Uint8Array(size*size*scale*scale*4),normal=new Uint8Array(albedo.length);
+ for(let i=0;i<albedo.length;i+=4){albedo.set([118,80,48,255],i);normal.set([128,128,255,255],i);}
+ const result=downsampleTreeImpostorCapture(albedo,normal,size);
+ for(let i=0;i<result.albedo.length;i+=4){assert.deepEqual(Array.from(result.albedo.subarray(i,i+4)),[118,80,48,255]);assert.deepEqual(Array.from(result.normal.subarray(i,i+4)),[128,128,255,255]);}
+});
+test('thin foliage coverage survives the fixed 0.5 atlas cutoff',()=>{
+ const size=8,sourceSize=size*4,albedo=new Uint8Array(sourceSize*sourceSize*4),normal=new Uint8Array(albedo.length);let covered=0;
+ for(let y=0;y<sourceSize;y++)for(let x=0;x<sourceSize;x++)if((x+2*y)%7<2){const i=(y*sourceSize+x)*4;albedo.set([118,80,48,255],i);normal.set([128,128,255,255],i);covered++;}
+ const result=downsampleTreeImpostorCapture(albedo,normal,size);let retained=0;
+ for(let i=3;i<result.albedo.length;i+=4){
+  if(result.albedo[i]>=128)retained++;
+  if(result.normal[i]>=128)assert.ok(result.albedo[i]>=128,'foliage class must be inside visible tree coverage');
+ }
+ assert.ok(retained/(size*size)>=covered/(sourceSize*sourceSize));
+ assert.throws(()=>downsampleTreeImpostorCapture(new Uint8Array(3),normal,size),/capture/);
+});

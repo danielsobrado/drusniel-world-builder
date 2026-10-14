@@ -16,7 +16,8 @@ export function foliageMipmaps(data, width, height, cutoff = 0.35) {
       for (let c = 0; c < 3; c++) next[i + c] = alpha ? Math.round(rgb[c] / alpha) : 0;
       next[i + 3] = Math.round(alpha / 4);
     }
-    let lo = 0, hi = 8;
+    // Correct coverage lost to downsampling; keep already opaque pixels opaque.
+    let lo = 1, hi = 8;
     for (let step = 0; step < 12; step++) {
       const scale = (lo + hi) / 2;
       // Measure the alpha that actually ships (clamped and rounded), not the raw

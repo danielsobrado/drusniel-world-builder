@@ -241,3 +241,23 @@ baker's matching orthographic view; perspective FOV 35 remains the material
 comparison view. Thresholds, source identities and appearances are unchanged.
 Rotating-normal checks additionally cover elevations 0, 12 and 58 degrees.
 The focused baker/manifest/LOD checks pass 31 tests before the final rebake.
+
+The [compressed-atlas fixture before supersampling](world-visual-quality-2026-10-14/fixtures/trees-before-supersample/report.json)
+passes all atmosphere, rotating-normal and actual baker colour round-trip checks
+on both backends without errors. Remaining failures are broadleaf prototype 16
+alpha coverage (0.80489 of the matching mesh), and alpine prototype 27 at sun
+azimuth zero (median luminance ratio 0.72329). Other material/alpha cases pass.
+The full suite at that source passes 6,689 tests and the build passes.
+
+Offline capture now renders four samples per axis and downsamples premultiplied
+linear albedo and normalized normals into the unchanged 128-pixel atlas tiles.
+It uses the existing coverage-preserving foliage rule at cutoff 0.5. A new test
+found that the old mip search could reduce opaque alpha to 128; the lower bound
+now prevents that reduction. Foliage classification is zero outside the visible
+alpha footprint. An intermediate supersampled bake failed the required mask
+validator and is retained locally; the validator was not relaxed. The corrected
+focused supersample/coverage/baker/manifest checks pass 26 tests.
+
+The corrected supersampled rebake passes the required validator for all 29
+original prototypes (`tree-impostor-v7-855b7394`). Runtime atlas dimensions and
+source identities match the original manifest. Final browser parity is pending.

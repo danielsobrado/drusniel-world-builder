@@ -1,3 +1,4 @@
+import { downsampleTreeImpostorCapture, TREE_IMPOSTOR_CAPTURE_SCALE } from './TreeImpostorSupersample.js';
 import * as THREE from 'three/webgpu';
 import {
   float,
@@ -241,7 +242,8 @@ export class TreeImpostorBaker {
     albedoContext.clearRect(0, 0, atlasWidth, atlasHeight);
     normalContext.clearRect(0, 0, atlasWidth, atlasHeight);
 
-    const targets = createTreeImpostorBakeTargets(renderSize);
+    const captureSize = renderSize * TREE_IMPOSTOR_CAPTURE_SCALE;
+    const targets = createTreeImpostorBakeTargets(captureSize);
     const directions = createCaptureDirections(settings);
     const projection = measureTreeImpostorProjection(parts, directions);
     const camera = new THREE.OrthographicCamera(
@@ -279,52 +281,23 @@ export class TreeImpostorBaker {
         renderer.setRenderTarget(targets.albedo);
         renderer.clear();
         await renderScene(renderer, albedoScene, camera);
-        const albedoPixels = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
-          targets.albedo,
-          0,
-          0,
-          renderSize,
-          renderSize,
-        ), renderSize, renderSize);
-        writeTile(
-          albedoContext,
-          createDilatedAtlasTile(
-            albedoPixels,
-            renderSize,
-            settings.tileSize,
-            gutter,
-          ),
-          settings.tileSize,
-          direction.column,
-          impostorCanvasRow(direction.row, settings.rows),
-        );
-
+        const albedoReadback = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
+          targets.albedo, 0, 0, captureSize, captureSize,
+        ), captureSize, captureSize);
         renderer.setRenderTarget(targets.normal);
         renderer.clear();
         await renderScene(renderer, normalScene, camera);
-        const normalPixels = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
-          targets.normal,
-          0,
-          0,
-          renderSize,
-          renderSize,
-        ), renderSize, renderSize);
-        writeTile(
-          normalContext,
-          createDilatedAtlasTile(
-            normalPixels,
-            renderSize,
-            settings.tileSize,
-            gutter,
-            {
-              coveragePixels: albedoPixels,
-              alphaPixels: normalPixels,
-            },
-          ),
-          settings.tileSize,
-          direction.column,
-          impostorCanvasRow(direction.row, settings.rows),
-        );
+        const normalReadback = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
+          targets.normal, 0, 0, captureSize, captureSize,
+        ), captureSize, captureSize);
+        const captured = downsampleTreeImpostorCapture(albedoReadback,normalReadback,renderSize);
+        writeTile(albedoContext,
+          createDilatedAtlasTile(captured.albedo,renderSize,settings.tileSize,gutter),
+          settings.tileSize,direction.column,impostorCanvasRow(direction.row,settings.rows));
+        writeTile(normalContext,
+          createDilatedAtlasTile(captured.normal,renderSize,settings.tileSize,gutter,
+            {coveragePixels:captured.albedo,alphaPixels:captured.normal}),
+          settings.tileSize,direction.column,impostorCanvasRow(direction.row,settings.rows));
       }
     } finally {
       renderer.setRenderTarget(previousTarget);
