@@ -886,9 +886,9 @@ stylizedSurface:
         # CPU recovery still runs every frame; upload the small stamp texture at
         # half rate to avoid redundant 256x256 transfers at high refresh rates.
         uploadIntervalFrames: 2
-      # Billboard clumps past the blades (grass-test's far grass): 64 m tiles, a
-      # screen-door handoff from 40 to 50 m, dissolving out by 180 m where the
-      # terrain's painted ground cover has taken over.
+      # Billboard clumps on 64 m tiles fill the first blade density reduction
+      # (9.2-14 m). Blades remain until their 40-50 m dissolve; cards fade out by
+      # 180 m where the terrain's painted ground cover has taken over.
       far:
         tileSize: 64
         density: 1.3

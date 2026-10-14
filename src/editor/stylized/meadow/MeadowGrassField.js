@@ -141,15 +141,15 @@ export class MeadowGrassField {
       const cardTemplate = createMeadowTemplate({
         detail: 1, count: bandStemCount(far.tileSize, far.density), tileSize: far.tileSize, cards: true,
       });
-      const start = settings.maxDistance * far.transitionStart;
+      const start = this.uniforms.cardFadeIn.value.x;
       this.cards = new MeadowTileLayer({
         scene,
         name: 'meadow-grass-cards',
         tileSize: far.tileSize,
         templates: { cards: cardTemplate },
         material: this.cardMaterial,
-        // A card tile is wanted where any of it lies between the handoff and the
-        // far edge.
+        // Include tiles in the incoming overlap, including small card tiles
+        // entirely inside the blade range.
         selectBand: (nearest, farthest) => (nearest < far.distance ** 2 && farthest > start ** 2 ? 'cards' : null),
         reach: far.distance,
         ground: this.ground,

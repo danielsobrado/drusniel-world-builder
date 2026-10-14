@@ -1506,7 +1506,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const frameTimestamp = Number.isFinite(timestamp) ? timestamp : performance.now();
     deferredWork.beginFrame();
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
-    drawPreparation.revealPending();
+    drawPreparation.beginFrame(deferredWork);
     exploration.beforeMovement(frameTimestamp);
     // Optional roadside dressing gets one budget-gated turn near the start of the frame.
     // Its own revision gate makes unchanged frames effectively free.
@@ -1783,10 +1783,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         : { x: 0.3, z: 0.1 },
       viewModeController.mode === PLAYER_MODE_WALK,
     );
-    deferredWork.tryRun(
-      () => drawPreparation.flush(viewModeController.camera, deferredWork.shouldYield),
-      6,
-    );
+    drawPreparation.flushBudgeted(viewModeController.camera, deferredWork);
     drawPreparation.hidePending();
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
     roadsideDetailsUi.update();

@@ -113,7 +113,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
     ? emissive.add(albedo.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0))))
     : emissive;
 
-  applyHandoff(material, { base: card.base, fadeIn: uniforms.handoff, fadeOut: uniforms.farFade });
+  applyHandoff(material, { base: card.base, fadeIn: uniforms.cardFadeIn, fadeOut: uniforms.farFade });
   applyPublicationFade(material, { instance: card, time: uniforms.time });
   applyCloudShadow(material, config.sky);
   applyJungleMist(material, config.ambientEffects);

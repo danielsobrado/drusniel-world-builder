@@ -70,6 +70,46 @@ A subsequent stationary capture settled and recovered successfully. Investigatio
 continues alongside the persistent grass-coverage issue reported on October 14;
 no end-to-end FPS improvement is claimed from these captures.
 
+## October 14: persistent grass coverage and preparation fairness
+
+The reported middle-distance gaps remained while standing still. A settled
+world capture also showed thin bands with zero missing tiles or capacity-lag
+tiles. The blade population falls from 10,000 to 1,936 stems per tile at 14 m
+and to 484 at 30 m; widening is capped at 3.5. Previously the card layer only
+started appearing at 40 m. Matching screen-door masks do not preserve coverage
+between independently placed blades and cards with different silhouettes.
+
+Cards now arrive across the first blade density reduction (9.2–14 m with the
+shipped settings), while blades retain their 40–50 m outgoing fade. Both shader
+uniforms and card-tile selection use the incoming range, including configurations
+with smaller card tiles. Blade counts, geometry detail, draw distances, wind,
+and terrain/biome sampling are unchanged. The existing card geometry supplies
+the additional coverage; earlier visibility does increase fragment work.
+
+The timed-out performance capture also exposed draw-preparation starvation:
+84 draws remained pending while earlier queues repeatedly consumed the shared
+allowance. Draw preparation now reserves a turn after waiting four frames,
+before the earlier queues run, and uses that reservation in the late render
+phase. This spends the same shared allowance rather than granting another
+per-queue minimum. Existing publications stay visible while replacement
+materials prepare.
+
+The scheduling regression reproduced zero publications under sustained earlier
+work before the fix, then three publications in twelve frames after it, with
+the same 0.25 ms shared allowance. Grass tests evaluate the actual material mask
+graph, verify full card coverage in the sparse bands, exercise small-tile
+selection, and cover custom distances and endpoint transitions.
+
+The complete `npm run verify` passed again: **3,555 tests**, lint, generated UI
+checks, production asset validation, and the production build.
+
+Frozen-camera/wind A/B captures in three directions show the incoming cards
+filling the thin middle-distance coverage. The scene settled in 24 seconds,
+with no browser errors, missing tiles, or density-lag tiles. The same scene
+retained 299,805 blades, 215,734 cards and 2,083,515 grass triangles. Images and
+state are retained in `tmp/performance-review/grass-{before,after}-*.png` and
+`grass-visual-final.json`. These are visual checks, not FPS benchmarks.
+
 Commands used:
 
 ```sh

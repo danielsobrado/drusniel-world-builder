@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { load } from 'js-yaml';
+import { Scene, Texture, TextureLoader } from 'three/webgpu';
 import { float, vec2, vec3 } from 'three/tsl';
 import { applyHandoff, applyPublicationFade } from '../src/editor/stylized/meadow/meadowFade.js';
+import { resolveMeadowGrassConfig } from '../src/editor/stylized/meadow/meadowGrassConfig.js';
+import { createMeadowUniforms } from '../src/editor/stylized/meadow/meadowUniforms.js';
+import { MeadowGrassField } from '../src/editor/stylized/meadow/MeadowGrassField.js';
+import { GrassTuning } from '../src/editor/stylized/GrassTuning.js';
 
 // Evaluate the actual mask graph at a fixed distance and screen-noise value.
 // This reaches applyHandoff's material assignment, not a parallel CPU formula.
@@ -68,6 +75,52 @@ test('far cards fade away completely and a lone blade layer keeps its ordinary d
     assert.equal(evaluate(blades, 39, noise), true);
     assert.equal(evaluate(blades, 50, noise), false);
   }
+});
+
+test('cards cover the sparse blade bands before the outgoing blades begin dissolving', () => {
+  const uniforms = createMeadowUniforms(resolveMeadowGrassConfig({}));
+  const cards = mask(uniforms.cardFadeIn, uniforms.farFade);
+  const blades = mask(null, uniforms.handoff);
+  for (const distance of [14.01, 20, 30, 39, 40, 45, 49, 51]) {
+    for (let sample = 0; sample < 100; sample++) {
+      const noise = sample / 100;
+      assert.equal(evaluate(cards, distance, noise), true, `card coverage at ${distance} m`);
+      if (distance < 40) assert.equal(evaluate(blades, distance, noise), true, 'blades retain their original range');
+    }
+  }
+  assert.equal(evaluate(cards, 8, 0.99), false, 'close grass stays blade geometry');
+});
+
+test('the field streams small card tiles inside the overlap and its material uses that incoming range', t => {
+  t.mock.method(TextureLoader.prototype, 'load', () => new Texture());
+  const config = load(readFileSync(new URL('../editor.config.yaml', import.meta.url), 'utf8')).stylizedSurface;
+  const settings = resolveMeadowGrassConfig({ ...config.grass.meadow, far: { tileSize: 8 }, interaction: { enabled: false } });
+  const field = new MeadowGrassField({ scene: new Scene(), terrainView: {}, config, settings,
+    tuning: new GrassTuning(config), sunDirection: vec3(0, 1, 0) });
+  try {
+    assert.equal(field.cards.selectBand(12 ** 2, 24 ** 2), 'cards');
+    assert.equal(field.cards.selectBand(0, 8 ** 2), null);
+    // Publication fade wraps the actual material's distance mask. Inspect that
+    // graph, so wiring the card material back to the blade range fails here.
+    let publishedMask = field.cardMaterial.maskNode;
+    while (publishedMask.isVarNode || publishedMask.isConvertNode) publishedMask = publishedMask.node;
+    const distanceMask = publishedMask.aNode;
+    for (let sample = 0; sample < 100; sample++) {
+      assert.equal(evaluate(distanceMask, 20, sample / 100), true);
+      assert.equal(evaluate(distanceMask, 180, sample / 100), false);
+    }
+  } finally { field.dispose(); }
+});
+
+test('card overlap follows custom LOD distances and stays finite for endpoint handoffs', () => {
+  for (const transitionStart of [0, 0.1, 1]) {
+    const settings = resolveMeadowGrassConfig({ far: { transitionStart }, maxDistance: 100 });
+    const range = createMeadowUniforms(settings).cardFadeIn.value;
+    assert.ok(range.x >= 0 && range.y > range.x);
+    assert.ok(range.y <= Math.max(0.001, transitionStart * 100));
+  }
+  const settings = resolveMeadowGrassConfig({ maxDistance: 100 });
+  assert.ok(Math.abs(createMeadowUniforms(settings).cardFadeIn.value.y - 28) < 1e-9);
 });
 
 test('arriving grass fades in while retained ranks stay visible and distance handoff still applies', () => {

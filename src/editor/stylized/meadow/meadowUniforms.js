@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { uniform, uniformArray, vec3 } from 'three/tsl';
 
-import { lodBandVectors } from './meadowGrassLayout.js';
+import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
 
 /**
  * The meadow's shared uniforms: one set for every band's batch, written once a
@@ -50,7 +50,9 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       lodBandVectors(settings).map((vector) => new THREE.Vector4(...vector)),
       'vec4',
     ),
-    // Where the near blades dissolve into the far cards: (start, end) metres.
+    // Cards arrive during blade thinning; the blades dissolve later.
+    cardFadeIn: uniform(new THREE.Vector2(...meadowCardFadeRange(settings))),
+    // Where the near blades dissolve out: (start, end) metres.
     handoff: uniform(new THREE.Vector2(settings.maxDistance * (settings.far?.transitionStart ?? 0.8), settings.maxDistance)),
     // Where the far cards dissolve out: (start, end) metres.
     farFade: uniform(new THREE.Vector2(

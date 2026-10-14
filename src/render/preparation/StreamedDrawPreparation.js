@@ -1,6 +1,8 @@
 import { withDrawPreparation, withPreparationFrame } from './DrawPreparation.js';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 
+const MAX_WAIT_FRAMES = 4;
+
 /** New renderers are staged on the same scene/pass cache before publication. */
 export class StreamedDrawPreparation {
   constructor({ scene, renderer, settings, render, invalidateHistory }) {
@@ -11,6 +13,27 @@ export class StreamedDrawPreparation {
     this.pending = new Set();
     this.hidden = new Map();
     this.disposed = false;
+    this.waitFrames = 0;
+    this.reservation = null;
+  }
+  beginFrame(budget) {
+    this.revealPending();
+    this.reservation?.cancel();
+    this.reservation = null;
+    if (this.disposed || !this.settings.enabled || this.pending.size === 0) {
+      this.waitFrames = 0;
+      return;
+    }
+    // Compilation runs late, after simulation and scene updates. Reserve a
+    // turn before earlier queues spend the shared allowance; a perpetually
+    // busy scene must not leave these meshes hidden indefinitely.
+    if (++this.waitFrames >= MAX_WAIT_FRAMES) this.reservation = budget.reserve(6);
+  }
+  flushBudgeted(camera, budget) {
+    const reservation = this.reservation;
+    this.reservation = null;
+    if (reservation) reservation.run(() => this.flush(camera));
+    else budget.tryRun(() => this.flush(camera, budget.shouldYield), 6);
   }
   discover() {
     if (!this.settings.enabled || this.disposed) return;
@@ -52,6 +75,7 @@ export class StreamedDrawPreparation {
       if (targets.length >= this.settings.meshesPerFrame) break;
     }
     if (targets.length === 0) return;
+    this.waitFrames = 0;
     const started = performance.now();
     const materials = new Map(targets.map(mesh => [mesh, mesh.material]));
     try {
@@ -84,5 +108,8 @@ export class StreamedDrawPreparation {
     for (const [mesh, visible] of this.hidden) mesh.visible = visible;
     this.hidden.clear();
   }
-  dispose() { this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); }
+  dispose() {
+    this.reservation?.cancel(); this.reservation = null;
+    this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear();
+  }
 }
