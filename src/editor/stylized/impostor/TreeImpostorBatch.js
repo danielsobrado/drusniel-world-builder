@@ -2,22 +2,22 @@ import { CpuTreeImpostorBatch } from './CpuTreeImpostorBatch.js';
 import { GpuTreeImpostorBatch } from './GpuTreeImpostorBatch.js';
 
 export class TreeImpostorBatch {
-  constructor({ renderer, scene, atlas, capacity, name, gpuCulling, auxiliaryViews = false }) {
+  constructor({ renderer, scene, atlas, capacity, name, gpuCulling, auxiliaryViews = false, ambientEffects = null }) {
     this.mode = 'cpu';
     this.batch = null;
     this.acceptedRecords = 0;
     if (gpuCulling && renderer.backend?.isWebGPUBackend) {
       try {
-        this.batch = new GpuTreeImpostorBatch({ renderer, scene, atlas, capacity, name });
+        this.batch = new GpuTreeImpostorBatch({ renderer, scene, atlas, capacity, name, ambientEffects });
         this.mode = 'gpu';
       } catch (error) {
         console.warn('GPU tree impostor batch unavailable; using CPU culling.', error);
       }
     }
     if (!this.batch) {
-      this.batch = new CpuTreeImpostorBatch({ scene, atlas, capacity, name });
+      this.batch = new CpuTreeImpostorBatch({ scene, atlas, capacity, name, ambientEffects });
     }
-    this.auxiliary = auxiliaryViews ? new CpuTreeImpostorBatch({ scene, atlas, capacity, name: `${name}-reflection` }) : null;
+    this.auxiliary = auxiliaryViews ? new CpuTreeImpostorBatch({ scene, atlas, capacity, name: `${name}-reflection`, ambientEffects }) : null;
     if (this.auxiliary) this.auxiliary.mesh.visible = false;
   }
 

@@ -41,12 +41,12 @@ function createGeometry(capacity) {
 }
 
 export class CpuTreeImpostorBatch {
-  constructor({ scene, atlas, capacity, name }) {
+  constructor({ scene, atlas, capacity, name, ambientEffects = null }) {
     this.atlas = atlas;
     this.capacity = capacity;
     this.records = [];
     this.geometry = createGeometry(capacity);
-    const built = createCpuTreeImpostorMaterial(atlas);
+    const built = createCpuTreeImpostorMaterial(atlas, ambientEffects);
     this.material = built.material;
     this.uniforms = built.uniforms;
     this.mesh = new THREE.Mesh(this.geometry, this.material);

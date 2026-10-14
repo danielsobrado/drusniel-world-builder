@@ -554,7 +554,7 @@ export class StylizedTreeView {
     const proxyCapacity = capacityFor(settings.proxyRadius);
     const impostorCapacity = capacityFor(settings.impostorRadius);
     const proxies = this.prototypes.map((parts) => createTreeProxyPrototype(parts, this.config));
-    this.proxyPrototypes = proxies.map((prototype) => prototype.proxyParts);
+    this.proxyPrototypes = proxies.map((prototype) => this.withCloudShadow(prototype.proxyParts));
     this.prototypeHeight = Math.max(...proxies.map((prototype) => prototype.height));
     this.prototypeWidth = Math.max(...proxies.map((prototype) => prototype.width));
     this.renderers = createInstancedRenderers({
@@ -588,7 +588,7 @@ export class StylizedTreeView {
     // sizes itself for the cluster radius, so an unreachable band still cost about
     // a megabyte of instance buffers.
     this.clusterPrototypes = settings.thresholds.clusterPixels > 0
-      ? [[createCanopyClusterPart(this.config)]]
+      ? [this.withCloudShadow([createCanopyClusterPart(this.config)])]
       : [];
     this.clusterRenderers = createInstancedRenderers({
       root: this.root,
@@ -599,7 +599,7 @@ export class StylizedTreeView {
       castShadow: false,
       tintLeaves: true,
     });
-    this.understoryPrototypes = createForestUnderstoryPrototypes(this.config);
+    this.understoryPrototypes = createForestUnderstoryPrototypes(this.config).map(parts => this.withCloudShadow(parts));
     this.understoryRenderers = createInstancedRenderers({
       root: this.root,
       renderer: this.terrainView.renderer,
@@ -674,6 +674,7 @@ export class StylizedTreeView {
       atlas,
       capacity,
       name: `stylized-pine-impostor-${atlas.prototypeIndex}`,
+      ambientEffects: this.config.ambientEffects,
       gpuCulling: this.config.lod?.gpuCulling?.enabled !== false,
       auxiliaryViews: this.config.enhancements?.waterReflections?.enabled === true,
     }));

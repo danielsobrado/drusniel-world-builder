@@ -1,8 +1,10 @@
+import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import * as THREE from 'three/webgpu';
 import {
   atan,
   attribute,
   cameraPosition,
+  cameraViewMatrix,
   clamp,
   cross,
   floor,
@@ -32,7 +34,7 @@ import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../..
 
 const TWO_PI = Math.PI * 2;
 
-function createMaterial({ atlas, readTransform, readParameters, readAppearance }) {
+function createMaterial({ atlas, readTransform, readParameters, readAppearance, ambientEffects }) {
   const cameraRight = uniform(new THREE.Vector3(1, 0, 0));
   const cameraUp = uniform(new THREE.Vector3(0, 1, 0));
   const sphericalBlend = uniform(0);
@@ -116,7 +118,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance }
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = worldPosition;
   material.colorNode = albedo.rgb.mul(colorMultiplier);
-  material.normalNode = worldNormal;
+  material.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   // Keep atlas alpha stable at full coverage. Feeding it into the stochastic
   // fade threshold re-dithered every soft foliage edge in screen space and made
   // distant crowns shimmer during camera motion.
@@ -125,6 +127,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance }
   material.transparent = false;
   material.depthWrite = true;
   material.fog = true;
+  applyJungleMist(material, ambientEffects);
   assignTreeFoliageMaterialData(material);
   return {
     material,
@@ -132,9 +135,10 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance }
   };
 }
 
-export function createCpuTreeImpostorMaterial(atlas) {
+export function createCpuTreeImpostorMaterial(atlas, ambientEffects = null) {
   return createMaterial({
     atlas,
+    ambientEffects,
     readTransform: () => attribute('instanceTransform', 'vec4'),
     readParameters: () => attribute('instanceImpostorParams', 'vec4'),
     readAppearance: () => attribute('instanceImpostorAppearance', 'vec4'),
@@ -149,9 +153,11 @@ export function createGpuTreeImpostorMaterial({
   visibleRead,
   instanceIndex,
   originUniform,
+  ambientEffects = null,
 }) {
   return createMaterial({
     atlas,
+    ambientEffects,
     readTransform: () => {
       const transform = transformRead.element(visibleRead.element(instanceIndex));
       return vec4(transform.xyz.sub(originUniform), transform.w);

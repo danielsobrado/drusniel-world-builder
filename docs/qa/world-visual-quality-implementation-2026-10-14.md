@@ -165,3 +165,34 @@ Before VQ-06, concurrent commit `8f236795` supplied fair early preparation turns
 for placement fields and manifest queues. Its completion accounting is preserved;
 the redundant local draft of that repair was not applied. Final performance
 acceptance still requires fresh measurements.
+
+## VQ-06 atmosphere and representation implementation
+
+Jungle optical depth now scales with the validated region weight. The selected
+mist defaults and YAML settings agree; colour remains lit by the existing sun
+and hemisphere and is nonnegative. Output composition wraps prior effects once
+and preserves their alpha. Near trees, proxies, clusters, understory, CPU/GPU
+impostors, rocks, bushes and opaque ground/aquatic detail receive that composer.
+Water sheets retain their own atmosphere path. Impostor normals are converted
+from reconstructed world space into view space through their shared factory.
+Pocket coordinates remain canonical across render-origin shifts.
+
+The permanent tree fixture uses the existing production prototype extractor,
+LOD mesh factories and checked-in atlas loader, with the complete prototype
+order and source-signature validation. Wind is zero only in this prescribed
+fixture. It records fitted camera distance, alpha coverage, shared interior
+pixel counts and linear RGB/luminance errors. Neutral cards isolate mist from
+geometry; a separate fixed-world-normal card tests rotating camera views.
+Browser acceptance is pending; no tree-parity pass is claimed yet.
+
+The [pre-change fixture](world-visual-quality-2026-10-14/fixtures/trees-before/report.json)
+reproduced both defects on WebGPU/WebGL without browser errors: nonzero weights
+0.25, 0.5 and 1 yielded identical optical depth; rotating the fixed-normal card
+changed linear brightness by 0.068864. Its failed verdict is intentional baseline
+evidence, not an acceptance pass.
+
+Focused atmosphere/LOD checks pass (27 tests), and the required atlas validator
+accepts all 29 existing prototypes. A new authored-cutoff check exposed that
+Three's node-material copy skips the inherited `alphaTest` accessor. The shared
+authored-material adapter now preserves that cutoff explicitly when composing
+effects; no cutoff values are lowered. Production browser acceptance follows.

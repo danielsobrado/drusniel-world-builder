@@ -4,6 +4,16 @@ import * as THREE from 'three/webgpu';
 import { rebuildTreeLod } from '../src/editor/stylized/TreeLodAssembler.js';
 import { TreeImpostorAssetLoader } from '../src/editor/stylized/impostor/TreeImpostorAssets.js';
 import { TREE_IMPOSTOR_MANIFEST_VERSION } from '../src/editor/stylized/impostor/TreeImpostorManifest.js';
+import { TreeImpostorBatch } from '../src/editor/stylized/impostor/TreeImpostorBatch.js';
+
+test('CPU fallback and auxiliary views both receive the ambient composer',()=>{
+  const atlas={...prototype(0),albedo:new THREE.Texture(),normal:new THREE.Texture()};
+  const batch=new TreeImpostorBatch({renderer:{backend:{isWebGLBackend:true}},scene:new THREE.Scene(),atlas,
+    capacity:1,name:'atmosphere-test',gpuCulling:true,auxiliaryViews:true,ambientEffects:{enabled:true,jungleMist:{}}});
+  assert.equal(batch.batch.material.userData.jungleMistApplied,true);
+  assert.equal(batch.auxiliary.material.userData.jungleMistApplied,true);
+  batch.dispose();atlas.albedo.dispose();atlas.normal.dispose();
+});
 
 function createRenderer(capacity = 4) {
   const geometry = new THREE.BoxGeometry(1, 1, 1);

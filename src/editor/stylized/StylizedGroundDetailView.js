@@ -1,3 +1,4 @@
+import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { ITERATOR_PENDING } from './ResumableIterator.js';
 import { BudgetedDetailVisibility } from './lod/BudgetedDetailVisibility.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
@@ -30,8 +31,8 @@ const DETAIL_SCRATCH = {
   yaw: new THREE.Quaternion(),
 };
 
-function cloneDetailMaterial(source, { wind = null, height = 0, foliageConfig = null, tileId = null } = {}) {
-  const material = foliageConfig ? cloneAuthoredNodeMaterial(source) : source.clone();
+function cloneDetailMaterial(source, { wind = null, height = 0, foliageConfig = null, tileId = null, ambientEffects = null } = {}) {
+  const material = cloneAuthoredNodeMaterial(source);
   if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId);
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
@@ -47,6 +48,7 @@ function cloneDetailMaterial(source, { wind = null, height = 0, foliageConfig = 
     material.depthWrite = true;
     material.side = THREE.DoubleSide;
   }
+  applyJungleMist(material, ambientEffects);
   material.needsUpdate = true;
   return material;
 }
@@ -166,6 +168,7 @@ export class StylizedGroundDetailView {
               foliageConfig: ['groundDetail', 'tropicalPlant'].includes(this.layerName) && definition.sway !== false
                 ? this.config : null,
               tileId: definition.tileIds?.[0],
+              ambientEffects: this.config.ambientEffects,
             }),
             kind: 'detail',
           };

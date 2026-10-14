@@ -40,7 +40,7 @@ function createGeometry() {
 }
 
 export class GpuTreeImpostorBatch {
-  constructor({ renderer, scene, atlas, capacity, name }) {
+  constructor({ renderer, scene, atlas, capacity, name, ambientEffects = null }) {
     if (!renderer.backend?.isWebGPUBackend) {
       throw new Error('GPU impostor culling requires the WebGPU backend.');
     }
@@ -116,6 +116,7 @@ export class GpuTreeImpostorBatch {
       visibleRead,
       instanceIndex: uint(instanceIndex),
       originUniform,
+      ambientEffects,
     });
     const mesh = new THREE.Mesh(geometry, built.material);
     mesh.name = name;

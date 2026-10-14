@@ -14,6 +14,7 @@ import {
   vec3,
 } from 'three/tsl';
 
+import { canonicalFromRender } from '../../weather/wind/worldWindState.js';
 import { Color } from 'three/webgpu';
 
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
@@ -84,7 +85,7 @@ export const DEFAULT_JUNGLE_MIST = Object.freeze({
   // windy: 0.5 } with the default weight (1).
   presetDefault: 1,
   // Optical depth per metre at full density, before the region weight.
-  density: 0.012,
+  density: 0.006,
   // Metres above the mist's ground at which the density has fallen by 1/e.
   height: 6,
   // Metres. The mist fades out by here; no height field is marched, so this is
@@ -92,18 +93,18 @@ export const DEFAULT_JUNGLE_MIST = Object.freeze({
   maxDistance: 260,
   // Metres along the ray: the first span stays clear so the player is never
   // fogged in, the mist reaches full density by the second (donor nearStart/nearEnd).
-  nearClear: Object.freeze([6, 30]),
+  nearClear: Object.freeze([12, 45]),
   // 1/m: the scale of the drifting pocket noise that breaks the sheet into banks.
   pocketScale: 0.02,
   // 0..1: how much the pockets vary the sheet from empty gaps to thick banks.
-  pocketStrength: 0.55,
+  pocketStrength: 0.35,
   // m/s: how fast the pockets slide across and along.
   drift: Object.freeze([0.6, 0.25]),
   // The most of the pixel the mist may take, so a view into thick mist still
   // shows what is behind it (the donor's factor clamp).
-  ceiling: 0.92,
+  ceiling: 0.50,
   // The cool, green-lit ground mist colour (donor '#c9d6c4').
-  color: '#c9d6c4',
+  color: '#b7c6bc',
 });
 
 /**
@@ -258,6 +259,20 @@ export function jungleMistBanks({ noise, strength }) {
  * @param {number} options.opticalDepth
  * @param {number} [options.ceiling] the most it may take, 0..1
  */
+export function jungleMistOpticalDepth({start,end,reach,weight,density=DEFAULT_JUNGLE_MIST.density,
+  quality=1,noise=0,settings=DEFAULT_JUNGLE_MIST}) {
+  for(const [key,value] of Object.entries({start,end,reach,weight,density,quality,noise})) {
+    if(!Number.isFinite(value))throw new Error(`Jungle mist ${key} must be finite.`);
+  }
+  if(weight<0||density<0||quality<0||reach<0)throw new Error('Jungle mist density, weight, quality and reach must be nonnegative.');
+  if(weight<=ACTIVE_WEIGHT)return 0;
+  const length=Math.min(reach,settings.maxDistance);
+  return jungleMistIntegral({start,end,scale:settings.height,reach:length})
+    * jungleMistBanks({noise,strength:settings.pocketStrength})
+    * smoothstepNumber(settings.nearClear[0],settings.nearClear[1],length)
+    * density * quality * Math.min(4,weight);
+}
+
 export function jungleMistFactor({ opticalDepth, ceiling = DEFAULT_JUNGLE_MIST.ceiling }) {
   return Math.max(0, Math.min(1 - Math.exp(-Math.max(Number(opticalDepth) || 0, 0)), ceiling));
 }
@@ -326,11 +341,11 @@ export function createJungleMistNodes({
       const banks = mix(
         float(1 - settings.pocketStrength),
         float(1 + settings.pocketStrength),
-        smoothstep(-0.45, 0.45, stylizedFbm2(point.add(time.mul(drift)).mul(settings.pocketScale)).mul(2).sub(1)),
+        smoothstep(-0.45, 0.45, stylizedFbm2(canonicalFromRender(point).add(time.mul(drift)).mul(settings.pocketScale)).mul(2).sub(1)),
       );
       // The first metres stay clear so the player is never fogged in.
       const clear = smoothstep(settings.nearClear[0], settings.nearClear[1], reach);
-      depth.assign(integral.mul(banks).mul(clear).mul(settings.density).mul(quality));
+      depth.assign(integral.mul(banks).mul(clear).mul(settings.density).mul(quality).mul(weight.clamp(0, 4)));
     });
     return depth;
   })();
@@ -341,5 +356,5 @@ export function createJungleMistNodes({
   // little ambient, leaned toward the scene fog so it does not read as a
   // separate layer sitting in front of it.
   const lit = color(settings.color).mul((sunColor ?? vec3(0)).mul(0.6).add(fill ?? float(0)).add(0.15));
-  return { amount, color: fogColor ? mix(fogColor, lit, 0.7) : lit };
+  return { opticalDepth, amount, color: (fogColor ? mix(fogColor, lit, 0.7) : lit).max(0) };
 }

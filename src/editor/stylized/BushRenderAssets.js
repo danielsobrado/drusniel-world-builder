@@ -1,3 +1,4 @@
+import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import * as THREE from 'three/webgpu';
 import {
   clamp,
@@ -51,6 +52,7 @@ export function cloneBushMaterial(source, { config = null, height = 0, tileId = 
   }
   material.depthWrite = true;
   material.needsUpdate = true;
+  applyJungleMist(material, config?.ambientEffects);
   return assignBushFoliageMaterialData(material);
 }
 
@@ -137,6 +139,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   material.transparent = false;
   material.depthWrite = true;
   if (config?.wind) material.positionNode = groundDetailWindPosition(config.wind, height);
+  applyJungleMist(material, config?.ambientEffects);
   return assignBushFoliageMaterialData(material);
 }
 

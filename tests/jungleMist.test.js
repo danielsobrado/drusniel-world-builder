@@ -177,6 +177,16 @@ test('the factor saturates to the ceiling and never takes the whole pixel', () =
   assert.equal(jungleMistFactor({ opticalDepth: 0 }), 0);
   assert.ok(jungleMistFactor({ opticalDepth: 100 }) <= DEFAULT_JUNGLE_MIST.ceiling);
   // Monotonic in the optical depth, and clamped below 1 so the scene shows through.
-  assert.ok(jungleMistFactor({ opticalDepth: 2 }) > jungleMistFactor({ opticalDepth: 1 }));
+  assert.ok(jungleMistFactor({ opticalDepth: 0.2 }) > jungleMistFactor({ opticalDepth: 0.1 }));
+  assert.equal(jungleMistFactor({ opticalDepth: 2 }), DEFAULT_JUNGLE_MIST.ceiling);
   assert.ok(jungleMistFactor({ opticalDepth: 100 }) < 1);
+});
+
+
+test('selected humid atmosphere defaults retain the prescribed clear range and cap',()=>{
+ assert.equal(DEFAULT_JUNGLE_MIST.density,.006);
+ assert.deepEqual(DEFAULT_JUNGLE_MIST.nearClear,[12,45]);
+ assert.equal(DEFAULT_JUNGLE_MIST.pocketStrength,.35);
+ assert.equal(DEFAULT_JUNGLE_MIST.ceiling,.5);
+ assert.equal(DEFAULT_JUNGLE_MIST.color,'#b7c6bc');
 });

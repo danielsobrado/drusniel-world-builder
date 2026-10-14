@@ -50,8 +50,11 @@ test('the mist blends over a material\'s lit output, and only when configured', 
   const owned = new THREE.MeshLambertNodeMaterial();
   const before = vec4(1);
   owned.outputNode = before;
-  assert.equal(applyJungleMist(owned, SETTINGS), false, 'an existing output node is left alone');
-  assert.equal(owned.outputNode, before);
+  assert.equal(applyJungleMist(owned, SETTINGS), true, 'an existing output is composed');
+  assert.notEqual(owned.outputNode, before);
+  const composed=owned.outputNode;
+  assert.equal(applyJungleMist(owned, SETTINGS), false, 'a second application is a no-op');
+  assert.equal(owned.outputNode, composed);
 });
 
 test('the jungle raises the mist and lays it on the ground under the view', () => {

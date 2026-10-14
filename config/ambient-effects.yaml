@@ -465,11 +465,12 @@ ambientEffects:
       goldenHour: 1.1
       moonlight: 1.2
       windy: 0.5
-    density: 0.012
+    density: 0.006
     height: 6
     maxDistance: 260
-    nearStart: 6
-    nearEnd: 30
+    nearStart: 12
+    nearEnd: 45
     pocketScale: 0.02
-    pocketStrength: 0.55
-    color: '#c9d6c4'
+    pocketStrength: 0.35
+    ceiling: 0.50
+    color: '#b7c6bc'

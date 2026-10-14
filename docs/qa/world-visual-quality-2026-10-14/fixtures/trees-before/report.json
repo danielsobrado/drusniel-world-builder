@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "4b9818c3cf7921df1db835d00953720687b4a01a",
+  "dirtyFiles": [],
+  "startedAt": "2026-10-14T18:35:58.642Z",
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "phase": "before",
+      "cases": [
+        {
+          "id": "mist-optical-depth-0",
+          "weight": 0
+        },
+        {
+          "id": "mist-optical-depth-0.25",
+          "weight": 0.25
+        },
+        {
+          "id": "mist-optical-depth-0.5",
+          "weight": 0.5
+        },
+        {
+          "id": "mist-optical-depth-1",
+          "weight": 1
+        },
+        {
+          "id": "mist-optical-depth-4",
+          "weight": 4
+        },
+        {
+          "id": "normal-rotation-0",
+          "azimuth": 0,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            166,
+            231,
+            192
+          ]
+        },
+        {
+          "id": "normal-rotation-90",
+          "azimuth": 90,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            63,
+            231,
+            166
+          ]
+        },
+        {
+          "id": "normal-rotation-180",
+          "azimuth": 180,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            89,
+            231,
+            63
+          ]
+        },
+        {
+          "id": "normal-rotation-270",
+          "azimuth": 270,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            192,
+            231,
+            89
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "gpu-optical-depth-weight-linearity",
+          "samples": [
+            {
+              "weight": 0,
+              "depth": 0,
+              "amount": 0,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.25,
+              "depth": 0.9714446663856506,
+              "amount": 0.6214642524719238,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.5,
+              "depth": 0.9714446663856506,
+              "amount": 0.6214642524719238,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 1,
+              "depth": 0.9714446663856506,
+              "amount": 0.6214642524719238,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 4,
+              "depth": 0.9714446663856506,
+              "amount": 0.6214642524719238,
+              "alphaError": 4.768371586472142e-9
+            }
+          ],
+          "passed": false
+        },
+        {
+          "id": "fixed-world-normal-rotating-view",
+          "error": 0.06886406242847443,
+          "means": [
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.1135023832321167,
+                0.1135023832321167,
+                0.1135023832321167
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.06266407668590546,
+                0.06266407668590546,
+                0.06266407668590546
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.08068984746932983,
+                0.08068984746932983,
+                0.08068984746932983
+              ],
+              "count": 81796
+            }
+          ],
+          "passed": false
+        }
+      ],
+      "done": true,
+      "opticalDepthSource": "inverted production amount",
+      "passed": false,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "phase": "before",
+      "cases": [
+        {
+          "id": "mist-optical-depth-0",
+          "weight": 0
+        },
+        {
+          "id": "mist-optical-depth-0.25",
+          "weight": 0.25
+        },
+        {
+          "id": "mist-optical-depth-0.5",
+          "weight": 0.5
+        },
+        {
+          "id": "mist-optical-depth-1",
+          "weight": 1
+        },
+        {
+          "id": "mist-optical-depth-4",
+          "weight": 4
+        },
+        {
+          "id": "normal-rotation-0",
+          "azimuth": 0,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            166,
+            231,
+            192
+          ]
+        },
+        {
+          "id": "normal-rotation-90",
+          "azimuth": 90,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            63,
+            231,
+            166
+          ]
+        },
+        {
+          "id": "normal-rotation-180",
+          "azimuth": 180,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            89,
+            231,
+            63
+          ]
+        },
+        {
+          "id": "normal-rotation-270",
+          "azimuth": 270,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            192,
+            231,
+            89
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "gpu-optical-depth-weight-linearity",
+          "samples": [
+            {
+              "weight": 0,
+              "depth": 0,
+              "amount": 0,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.25,
+              "depth": 0.40676507353782654,
+              "amount": 0.3341994285583496,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.5,
+              "depth": 0.40676507353782654,
+              "amount": 0.3341994285583496,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 1,
+              "depth": 0.40676507353782654,
+              "amount": 0.3341994285583496,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 4,
+              "depth": 0.40676507353782654,
+              "amount": 0.3341994285583496,
+              "alphaError": 4.768371586472142e-9
+            }
+          ],
+          "passed": false
+        },
+        {
+          "id": "fixed-world-normal-rotating-view",
+          "error": 0.06886406242847443,
+          "means": [
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.1135023832321167,
+                0.1135023832321167,
+                0.1135023832321167
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.06266407668590546,
+                0.06266407668590546,
+                0.06266407668590546
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.08068984001874924,
+                0.08068984001874924,
+                0.08068984001874924
+              ],
+              "count": 81796
+            }
+          ],
+          "passed": false
+        }
+      ],
+      "done": true,
+      "opticalDepthSource": "inverted production amount",
+      "passed": false,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "webgpu-normal-rotation-0.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgpu-normal-rotation-90.png",
+      "sha256": "0a2a336eb102323c722acee1dfdffd57024d832ecc4ebec3cee9ad744f1863f9"
+    },
+    {
+      "path": "webgpu-normal-rotation-180.png",
+      "sha256": "7abbaa73a5240c7832f531b64f4047a30f8e97015fe0f1f52a20837ab175824f"
+    },
+    {
+      "path": "webgpu-normal-rotation-270.png",
+      "sha256": "0cb37adce6dfd873c7b8aac034293d712b8127a933b0c89672de60881738a12b"
+    },
+    {
+      "path": "webgl-normal-rotation-0.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgl-normal-rotation-90.png",
+      "sha256": "0a2a336eb102323c722acee1dfdffd57024d832ecc4ebec3cee9ad744f1863f9"
+    },
+    {
+      "path": "webgl-normal-rotation-180.png",
+      "sha256": "7abbaa73a5240c7832f531b64f4047a30f8e97015fe0f1f52a20837ab175824f"
+    },
+    {
+      "path": "webgl-normal-rotation-270.png",
+      "sha256": "0cb37adce6dfd873c7b8aac034293d712b8127a933b0c89672de60881738a12b"
+    }
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": false,
+  "finishedAt": "2026-10-14T18:36:02.082Z"
+}

@@ -1,3 +1,5 @@
+import { applyJungleMist } from './ambient/jungleMistOutput.js';
+import { cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import { ITERATOR_PENDING } from './ResumableIterator.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
@@ -51,7 +53,7 @@ const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
  */
 function cloneMaterial(mesh, config, weathering) {
   const source = materialList(mesh)[0];
-  const material = source.clone();
+  const material = cloneAuthoredNodeMaterial(source);
   if ('roughness' in material) material.roughness = 1;
   if ('metalness' in material) material.metalness = 0;
   if (config?.rocks?.color && 'color' in material) {
@@ -67,6 +69,7 @@ function cloneMaterial(mesh, config, weathering) {
       localWater: true,
     });
   }
+  applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
   return material;
 }

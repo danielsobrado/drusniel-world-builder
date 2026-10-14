@@ -25,18 +25,22 @@ function mistSettings(ambientEffects) {
  * so the added cost is one uniform compare per fragment.
  *
  * Leaves the material alone (and returns false) when there is no ambient block,
- * the mist is off, or the material already owns its output node.
+ * the mist is off, or this composer has already been applied. Existing output
+ * effects are composed once and their alpha is preserved exactly.
  *
  * @param {import('three/webgpu').NodeMaterial} material
  * @param {object | null | undefined} ambientEffects resolved `stylizedSurface.ambientEffects`
  */
-export function applyJungleMist(material, ambientEffects) {
-  if (material.outputNode) return false;
+export function applyJungleMist(material, ambientEffects, nodeOptions = {}) {
+  if (material.userData?.jungleMistApplied) return false;
   const settings = mistSettings(ambientEffects);
   const mist = settings
-    ? createJungleMistNodes({ settings, sunColor: jungleMistUniforms.sun, fill: jungleMistUniforms.fill })
+    ? createJungleMistNodes({ settings, sunColor: jungleMistUniforms.sun, fill: jungleMistUniforms.fill, ...nodeOptions })
     : null;
   if (!mist) return false;
-  material.outputNode = vec4(mix(output.rgb, mist.color, mist.amount), output.a);
+  const input = material.outputNode ?? output;
+  material.outputNode = vec4(mix(input.rgb, mist.color, mist.amount), input.a);
+  material.userData ??= {};
+  material.userData.jungleMistApplied = true;
   return true;
 }

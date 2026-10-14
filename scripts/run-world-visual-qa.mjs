@@ -29,7 +29,10 @@ try {
     ||/swiftshader|lavapipe|llvmpipe|warp|basic render/i.test(JSON.stringify(report.adapter)))throw new Error('Hardware WebGPU required.');
   await page.evaluate(()=>window.__worldVisualQa.setLighting());
   let poses=await originalVisualPoses(root);
-  if(args.suite!=='original')throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
+  if(args.suite==='atmosphere') {
+    poses=[poses[5],poses[6],{...poses[6],id:'original-07-reverse',yaw:poses[6].yaw+Math.PI},poses[7],poses[8]];
+  }
+  if(!['original','atmosphere'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
   for(const pose of poses) {
     console.log(`Visual QA: ${pose.id}`);
     try {
