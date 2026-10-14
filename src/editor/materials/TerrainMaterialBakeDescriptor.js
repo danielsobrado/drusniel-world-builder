@@ -46,7 +46,8 @@ export function terrainMaterialBakeKey(descriptor) {
     .map((field) => descriptor.revisions[field])
     .join('.');
   return `terrain-material:v${TERRAIN_MATERIAL_BAKE_SCHEMA_VERSION}`
-    + `:${descriptor.quality}:${descriptor.chunkX}:${descriptor.chunkZ}:${revisionKey}`;
+    + `:${descriptor.quality}:${descriptor.chunkX}:${descriptor.chunkZ}:${revisionKey}`
+    + (descriptor.recipe ? `:${descriptor.recipe}` : '');
 }
 
 export function createTerrainMaterialBakeDescriptor({
@@ -54,13 +55,16 @@ export function createTerrainMaterialBakeDescriptor({
   chunkZ,
   quality,
   revisions,
+  recipe = '',
 }) {
   assertCoordinate(chunkX, 'chunkX');
   assertCoordinate(chunkZ, 'chunkZ');
   assertQuality(quality);
 
+  if(typeof recipe!=='string'||!/^[a-zA-Z0-9.-]*$/.test(recipe))throw new Error('Invalid terrain material recipe fingerprint.');
   const descriptor = {
     schemaVersion: TERRAIN_MATERIAL_BAKE_SCHEMA_VERSION,
+    recipe,
     chunkX,
     chunkZ,
     quality,
@@ -76,7 +80,8 @@ export function sameTerrainMaterialBakeSource(left, right) {
   if (left.schemaVersion !== right.schemaVersion
       || left.chunkX !== right.chunkX
       || left.chunkZ !== right.chunkZ
-      || left.quality !== right.quality) {
+      || left.quality !== right.quality
+      || (left.recipe ?? '') !== (right.recipe ?? '')) {
     return false;
   }
   return TERRAIN_MATERIAL_BAKE_REVISION_FIELDS.every(

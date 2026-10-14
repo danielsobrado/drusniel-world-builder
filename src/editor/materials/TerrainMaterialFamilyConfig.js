@@ -1,3 +1,4 @@
+import { resolveTerrainSubstrates } from './TerrainSubstrateConfig.js';
 import { TERRAIN_MATERIAL_FAMILIES } from './TerrainMaterialFamilyConstants.js';
 import { resolveTerrainTransitionConfig } from './TerrainTransitionConfig.js';
 
@@ -266,5 +267,6 @@ export function normalizeTerrainMaterialFamilies(source) {
     projection: Object.freeze({ ...source.projection }),
     environment: Object.freeze({ ...source.environment }),
     profiles,
+    substrates: resolveTerrainSubstrates(source.substrates),
   });
 }

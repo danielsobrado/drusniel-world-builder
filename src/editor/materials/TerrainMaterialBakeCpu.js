@@ -219,7 +219,7 @@ export async function bakeTerrainMaterialPage({
   const sourceIndices = new Uint32Array(texelCount);
   const waterSource = waterDistanceSource(source, chunkSize);
   const rowsPerYield = config.build.rowsPerYield;
-  const farStyle = createTerrainMaterialFarStyle(materialStyle, config.render);
+  const farStyle = createTerrainMaterialFarStyle(materialStyle, config.render, config.families?.substrates);
 
   for (let z = 0; z < resolution; z += 1) {
     const sourceZ = outputToSource(z, resolution, chunkSize);
@@ -341,6 +341,7 @@ export async function bakeTerrainMaterialPage({
           wetness,
           canopy,
           heightShade,
+          path,
         );
       } else {
         const wetShade = 1 - wetness * macro.wetDarkening;

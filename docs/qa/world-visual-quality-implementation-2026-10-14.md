@@ -46,8 +46,9 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-01 | Implemented; 20 alternating long cuts passed |
 | VQ-02 | Implemented; both fresh twelve-pose runs settled with matching placements |
 | VQ-03 | Runtime baseline collected; clean-capture correction and resource accounting still being validated |
-| VQ-04 | Drift material implemented; production browser fixture pending |
-| VQ-05–06 | Pending surface gate |
+| VQ-04 | Passed production drift fixtures on hardware WebGPU and WebGL |
+| VQ-05 | Substrate responses implemented; CPU/shader swatch parity pending |
+| VQ-06 | Pending substrate gate |
 | VQ-07–10 | Pending surface/atmosphere gates |
 | VQ-11 | Capture visibility core implemented; public HUD settings/finish pending |
 | VQ-12–13 | Pending implementation and release verification |
@@ -118,3 +119,36 @@ render pass is added to the world.
 The focused surface/ambient tests pass (31 tests). Production WebGPU/WebGL
 bounded-albedo and night-darkness fixtures are the next gate; no browser pass
 or appearance outcome is claimed before those finish.
+
+## VQ-04 browser acceptance and compatibility repair
+
+The [production surface fixture](world-visual-quality-2026-10-14/fixtures/drift/report.json)
+passed on hardware NVIDIA Lovelace WebGPU and WebGL, with zero browser errors.
+Both sand and snow stayed exactly black with lighting and independent emission
+off. Maximum linear albedo changes were 0.002036 for sand and 0.001639 for snow
+on WebGPU, below their 0.16/0.22 bounds; both backends exercised a nonzero drift
+mask. [Full-world post-change pairs](world-visual-quality-2026-10-14/fixtures/drift-world/report.json)
+retained original 01/02 and reached complete readiness without browser errors.
+The broad white bands are absent in their ordinary post-change views.
+
+The first fixture run was invalid because optional fixture configuration was
+missing. A later run exposed the existing physical-material DFG lookup pushing
+WebGL to 17 texture units. The diagnostic fixed-wind dependency uses the same
+production drift graph. Wetness/shoreline and canopy/water now share an RGBA8 GPU
+allocation and restore their original logical RG channels in the node reader.
+All seven CPU bake channels remain unchanged; allocation and upload bytes remain
+22 bytes per texel, while one texture binding is removed. Disposal deduplicates
+the shared allocation. The final report above retains actual shader bindings.
+Earlier invalid fixture runs remain local under `tmp/world-visual-quality/after/fixtures/`.
+
+## VQ-05 exposed-ground responses
+
+The four substrate profiles and selected detail settings are implemented.
+Selection uses exact terrain IDs, canopy, wetness and shoreline; tint applies
+only to the exposed dirt share and excludes painted paths. Near/mid composition
+and the CPU far-colour encoder consume the same profiles. A recipe/config/pigment
+fingerprint changes derived material cache keys without changing source terrain
+or saved edits. The focused material/cache tests pass (35 tests).
+The six production swatches are being compared at 3, 20, 60 and 140 metres on
+both backends; independent stochastic/genome/weather offsets are disabled only
+in the numerical recipe fixture to isolate substrate and quantization parity.

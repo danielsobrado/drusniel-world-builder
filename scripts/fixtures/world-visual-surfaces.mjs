@@ -7,6 +7,7 @@ import {resolveBlownStreaks,blownStreakUniforms,advanceBlownStreaks} from '/src/
 import {worldWindUniforms} from '/src/editor/weather/wind/worldWindState.js';
 import {installUnusedSamplerPruning} from '/src/render/UnusedSamplerBindings.js';
 import {raiseDeviceLimits} from '/src/render/deviceLimits.js';
+import {runTerrainSubstrateSwatches} from './world-visual-substrates.mjs';
 const backend=new URLSearchParams(location.search).get('backend')??'webgpu';
 const requiredLimits=backend==='webgpu'?await raiseDeviceLimits({}, {powerPreference:'high-performance'}):{};
 const renderer=new THREE.WebGPURenderer({antialias:false,forceWebGL:backend==='webgl',requiredLimits,powerPreference:'high-performance'});
@@ -117,6 +118,10 @@ try {
    state.report.checks.push({id:`${kind}-bounded-albedo`,maximumChange,alpha,clipped,nonfinite,
     passed:maximumChange>1e-6&&maximumChange<=alpha+1e-5&&clipped===0&&nonfinite===0});
   }finally {scene.remove(mesh);geometry.dispose();Object.values(materials).forEach(m=>m.dispose());maps.forEach(t=>t.dispose());}
+ }
+ if(raw.materialBake.families.substrates) {
+  sun.intensity=1;fill.intensity=.4;
+  await runTerrainSubstrateSwatches({raw,scene,camera,draw,state});
  }
  state.report.passed=state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}

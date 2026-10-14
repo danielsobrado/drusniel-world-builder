@@ -1,3 +1,4 @@
+import { createTerrainSubstrateNodes } from './TerrainSubstrateNodes.js';
 import * as THREE from 'three/webgpu';
 import { terrainMaterialAnalysisChannels } from './TerrainMaterialAnalysisTexture.js';
 import {
@@ -119,6 +120,7 @@ function debugColor({ view, samples }) {
 export function createTerrainMaterialBakedSurface({
   terrainUv,
   tileColor,
+  tileId = float(-1),
   heightShade,
   cameraDistance,
   proceduralColor,
@@ -174,8 +176,12 @@ export function createTerrainMaterialBakedSurface({
     cameraDistance,
     weathering: families.weathering,
   });
+  const substrate = createTerrainSubstrateNodes({tileId,canopy:samples.canopyWater.r,
+    wetness:samples.wetnessShoreline.r,shoreline:samples.wetnessShoreline.g,profiles:families.substrates});
   const roughness = clamp(
     materialRoughness(weights, samples.wetnessShoreline.r, families.profiles)
+      .add(weights.g.mul(substrate.roughness.sub(float(families.profiles.dirt.roughness)
+        .add(samples.wetnessShoreline.r.mul(families.profiles.dirt.wetRoughness-families.profiles.dirt.roughness)))))
       .add(genome.roughnessOffset)
       .add(featureState.roughnessOffset)
       .add(weatheringState.roughnessOffset),
@@ -258,6 +264,7 @@ export function createTerrainMaterialBakedSurface({
     normalViewGeometry.mul(faceDirection),
   );
   const macroMultiplier = clamp(samples.macroTint.rgb.mul(2), vec3(0.65), vec3(1.35));
+  midColor = substrate.applyColor(midColor,weights.g,pathMask);
   midColor = midColor
     .mul(familyMultiplier)
     .mul(macroMultiplier)
@@ -282,7 +289,7 @@ export function createTerrainMaterialBakedSurface({
 
   const nearMacro = mix(vec3(1), macroMultiplier, render.nearMacroStrength);
   const nearFamily = mix(vec3(1), familyMultiplier, families.nearStrength);
-  let nearProcedural = proceduralColor
+  let nearProcedural = substrate.applyColor(proceduralColor,weights.g,pathMask)
     .mul(genome.colorMultiplier)
     .mul(nearMacro)
     .mul(nearFamily)

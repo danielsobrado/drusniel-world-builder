@@ -1,0 +1,3610 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "24b619862d1330da25a0fc95714fa8223235baf7",
+  "dirtyFiles": [],
+  "startedAt": "2026-10-14T13:26:20.729Z",
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "cases": [
+        {
+          "id": "sand-noon-off",
+          "kind": "sand",
+          "light": "noon",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-noon-on",
+          "kind": "sand",
+          "light": "noon",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-night-off",
+          "kind": "sand",
+          "light": "night",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-night-on",
+          "kind": "sand",
+          "light": "night",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-albedo-off",
+          "kind": "sand",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "sand-albedo-on",
+          "kind": "sand",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "snow-noon-off",
+          "kind": "snow",
+          "light": "noon",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-noon-on",
+          "kind": "snow",
+          "light": "noon",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-night-off",
+          "kind": "snow",
+          "light": "night",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-night-on",
+          "kind": "snow",
+          "light": "night",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-albedo-off",
+          "kind": "snow",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "snow-albedo-on",
+          "kind": "snow",
+          "debug": "linear albedo"
+        }
+      ],
+      "checks": [
+        {
+          "id": "sand-off-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "sand-on-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "sand-bounded-albedo",
+          "maximumChange": 0.002035796642303467,
+          "alpha": 0.16,
+          "clipped": 0,
+          "nonfinite": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-off-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-on-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-bounded-albedo",
+          "maximumChange": 0.0016390085220336914,
+          "alpha": 0.22,
+          "clipped": 0,
+          "nonfinite": 0,
+          "passed": true
+        }
+      ],
+      "shaders": [
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "416ee2b1-fe92-4212-b7a2-bd03829b1071"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "7c4a55ca-bb9e-4c98-a940-7f8dff75bed2"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "fdf04e82-b954-434b-b130-3b4c56080a1c"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "3ed61af1-538f-4778-a717-d866d01b7194"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "8c8732bd-28d5-4e90-8ecc-c18c2cad4b8f"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "7b85a0c1-5040-4e0f-9380-4b100b5d6839"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "416ee2b1-fe92-4212-b7a2-bd03829b1071"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "7c4a55ca-bb9e-4c98-a940-7f8dff75bed2"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "fdf04e82-b954-434b-b130-3b4c56080a1c"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "3ed61af1-538f-4778-a717-d866d01b7194"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "8c8732bd-28d5-4e90-8ecc-c18c2cad4b8f"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "7b85a0c1-5040-4e0f-9380-4b100b5d6839"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "outputColorTransform",
+          "textures": [
+            {
+              "uniform": "nodeUniform0",
+              "name": "",
+              "uuid": "d17f213a-bd44-4790-934e-5d4bc8ac8adb"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "fb0dfddb-b1fd-4df1-ab0e-84138651b0ff"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "483a9f92-1d77-4a43-a876-a90b7a56911a"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "73d321ea-6cc6-47bd-ad4a-5a985c6e4ea6"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "0662cdd6-abf0-4f52-8d2c-967e2bf88ce1"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b71e668b-315a-442a-83d0-0e3a6385e566"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "1bf1c961-9f6c-440d-95d4-d019bd604c5c"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "fb0dfddb-b1fd-4df1-ab0e-84138651b0ff"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "483a9f92-1d77-4a43-a876-a90b7a56911a"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "73d321ea-6cc6-47bd-ad4a-5a985c6e4ea6"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "0662cdd6-abf0-4f52-8d2c-967e2bf88ce1"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b71e668b-315a-442a-83d0-0e3a6385e566"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "1bf1c961-9f6c-440d-95d4-d019bd604c5c"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "416ee2b1-fe92-4212-b7a2-bd03829b1071"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "7c4a55ca-bb9e-4c98-a940-7f8dff75bed2"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "fdf04e82-b954-434b-b130-3b4c56080a1c"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "3ed61af1-538f-4778-a717-d866d01b7194"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "8c8732bd-28d5-4e90-8ecc-c18c2cad4b8f"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "7b85a0c1-5040-4e0f-9380-4b100b5d6839"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "416ee2b1-fe92-4212-b7a2-bd03829b1071"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "7c4a55ca-bb9e-4c98-a940-7f8dff75bed2"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "fdf04e82-b954-434b-b130-3b4c56080a1c"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "3ed61af1-538f-4778-a717-d866d01b7194"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "8c8732bd-28d5-4e90-8ecc-c18c2cad4b8f"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "7b85a0c1-5040-4e0f-9380-4b100b5d6839"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "fb0dfddb-b1fd-4df1-ab0e-84138651b0ff"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "483a9f92-1d77-4a43-a876-a90b7a56911a"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "73d321ea-6cc6-47bd-ad4a-5a985c6e4ea6"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "0662cdd6-abf0-4f52-8d2c-967e2bf88ce1"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b71e668b-315a-442a-83d0-0e3a6385e566"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "1bf1c961-9f6c-440d-95d4-d019bd604c5c"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "e8973ae0-5dae-4999-822e-61ce9cf59765"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "d47a0bb3-ae05-42cb-ac8d-cc8603a02ad2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "b0ce86fe-2773-419f-9903-400731cec3c3"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "7b34d8bb-dbb4-4bf2-9af7-c6fcc61967a8"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "fb0dfddb-b1fd-4df1-ab0e-84138651b0ff"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "4a3299ae-ee08-4631-b481-6868931ea6e0"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "483a9f92-1d77-4a43-a876-a90b7a56911a"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "73d321ea-6cc6-47bd-ad4a-5a985c6e4ea6"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "0662cdd6-abf0-4f52-8d2c-967e2bf88ce1"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b71e668b-315a-442a-83d0-0e3a6385e566"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "1bf1c961-9f6c-440d-95d4-d019bd604c5c"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "be0047b3-5196-4bf5-8296-5da2deffc205"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "dcc8bcdb-0ddd-45aa-a76d-d19fefbf636e"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "c8e64a51-ce38-4480-8c32-8dcb73549152"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "f75272fa-1272-4172-be12-e7f6bfc02077"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "a91ef189-35cd-44be-a918-4bcab3077cef"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "b5f7daf2-af7b-491f-9efd-580f752283f8"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "68d67a73-1269-4ad7-b8c1-5970658cd611"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "4f8824e3-ccf6-4b41-bc9f-5735c94fe922"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "e0cdc9d5-5dac-4449-9579-4b67a9c61b2c"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "f75272fa-1272-4172-be12-e7f6bfc02077"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "a91ef189-35cd-44be-a918-4bcab3077cef"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "b5f7daf2-af7b-491f-9efd-580f752283f8"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "68d67a73-1269-4ad7-b8c1-5970658cd611"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "4f8824e3-ccf6-4b41-bc9f-5735c94fe922"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "e0cdc9d5-5dac-4449-9579-4b67a9c61b2c"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "31dfb7dd-8c62-4215-815b-47cebc6acef2"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "ce82d674-f601-420e-9c77-4738895ee240"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "a82c8dcf-9f8f-43d3-a8dd-ae579f7e0354"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "30adf9f9-f1eb-4403-b393-ab70dfd3c355"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "f8fdf723-6b6f-482d-96e3-4d0dddde2f25"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "f51ae044-c07e-4a23-8650-916bfc0ecea6"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "31dfb7dd-8c62-4215-815b-47cebc6acef2"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "ce82d674-f601-420e-9c77-4738895ee240"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "a82c8dcf-9f8f-43d3-a8dd-ae579f7e0354"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "30adf9f9-f1eb-4403-b393-ab70dfd3c355"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "f8fdf723-6b6f-482d-96e3-4d0dddde2f25"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "f51ae044-c07e-4a23-8650-916bfc0ecea6"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "f75272fa-1272-4172-be12-e7f6bfc02077"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "a91ef189-35cd-44be-a918-4bcab3077cef"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "b5f7daf2-af7b-491f-9efd-580f752283f8"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "68d67a73-1269-4ad7-b8c1-5970658cd611"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "4f8824e3-ccf6-4b41-bc9f-5735c94fe922"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "e0cdc9d5-5dac-4449-9579-4b67a9c61b2c"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "f75272fa-1272-4172-be12-e7f6bfc02077"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "a91ef189-35cd-44be-a918-4bcab3077cef"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "b5f7daf2-af7b-491f-9efd-580f752283f8"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "68d67a73-1269-4ad7-b8c1-5970658cd611"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "4f8824e3-ccf6-4b41-bc9f-5735c94fe922"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "e0cdc9d5-5dac-4449-9579-4b67a9c61b2c"
+            },
+            {
+              "uniform": "nodeUniform29",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform31",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform34",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "31dfb7dd-8c62-4215-815b-47cebc6acef2"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "ce82d674-f601-420e-9c77-4738895ee240"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "a82c8dcf-9f8f-43d3-a8dd-ae579f7e0354"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "30adf9f9-f1eb-4403-b393-ab70dfd3c355"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "f8fdf723-6b6f-482d-96e3-4d0dddde2f25"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "f51ae044-c07e-4a23-8650-916bfc0ecea6"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform2",
+              "name": "",
+              "uuid": "4ce6fad2-8cfa-4e53-83e6-cca67ad3c51a"
+            },
+            {
+              "uniform": "nodeUniform5",
+              "name": "",
+              "uuid": "084b1b7c-a0f7-45f8-b26f-d406f807683f"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "3c277b64-8a47-4e2e-8195-bda96a380ea1"
+            },
+            {
+              "uniform": "nodeUniform9",
+              "name": "",
+              "uuid": "1928a5b2-9090-48f7-8798-5e38ad3a1768"
+            },
+            {
+              "uniform": "nodeUniform11",
+              "name": "terrain-bake-macroTint",
+              "uuid": "31dfb7dd-8c62-4215-815b-47cebc6acef2"
+            },
+            {
+              "uniform": "nodeUniform12",
+              "name": "",
+              "uuid": "ef17c859-adde-4d84-a48a-0722d89b97ca"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "ce82d674-f601-420e-9c77-4738895ee240"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-farNormal",
+              "uuid": "a82c8dcf-9f8f-43d3-a8dd-ae579f7e0354"
+            },
+            {
+              "uniform": "nodeUniform17",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "30adf9f9-f1eb-4403-b393-ab70dfd3c355"
+            },
+            {
+              "uniform": "nodeUniform18",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "f8fdf723-6b6f-482d-96e3-4d0dddde2f25"
+            },
+            {
+              "uniform": "nodeUniform19",
+              "name": "terrain-bake-farColor",
+              "uuid": "f51ae044-c07e-4a23-8650-916bfc0ecea6"
+            },
+            {
+              "uniform": "nodeUniform28",
+              "name": "ground-deformation",
+              "uuid": "1c348634-2bce-4c97-9b68-e774afa592b7"
+            },
+            {
+              "uniform": "nodeUniform37",
+              "name": "Gods End snow color",
+              "uuid": "55500470-1c58-4e18-a11f-56fd380259cf"
+            },
+            {
+              "uniform": "nodeUniform38",
+              "name": "Gods End snow packed",
+              "uuid": "62cd94ea-9034-4394-b026-a55f4161cb83"
+            },
+            {
+              "uniform": "nodeUniform41",
+              "name": "Gods End snow normal",
+              "uuid": "7fb1ff4d-9d4b-4573-9cbe-19e540902661"
+            },
+            {
+              "uniform": "nodeUniform45",
+              "name": "DFG_LUT",
+              "uuid": "983850ca-c071-4fca-a591-c4465e90929d"
+            }
+          ],
+          "samplerDeclarations": []
+        }
+      ],
+      "passed": true,
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "cases": [
+        {
+          "id": "sand-noon-off",
+          "kind": "sand",
+          "light": "noon",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-noon-on",
+          "kind": "sand",
+          "light": "noon",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-night-off",
+          "kind": "sand",
+          "light": "night",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-night-on",
+          "kind": "sand",
+          "light": "night",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "sand-albedo-off",
+          "kind": "sand",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "sand-albedo-on",
+          "kind": "sand",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "snow-noon-off",
+          "kind": "snow",
+          "light": "noon",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-noon-on",
+          "kind": "snow",
+          "light": "noon",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-night-off",
+          "kind": "snow",
+          "light": "night",
+          "effect": "off",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-night-on",
+          "kind": "snow",
+          "light": "night",
+          "effect": "on",
+          "planeMeters": 20,
+          "camera": [
+            0,
+            1.7,
+            8
+          ],
+          "time": 10,
+          "wind": [
+            1,
+            0
+          ],
+          "envelope": 1,
+          "gust": 0.5
+        },
+        {
+          "id": "snow-albedo-off",
+          "kind": "snow",
+          "debug": "linear albedo"
+        },
+        {
+          "id": "snow-albedo-on",
+          "kind": "snow",
+          "debug": "linear albedo"
+        }
+      ],
+      "checks": [
+        {
+          "id": "sand-off-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "sand-on-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "sand-bounded-albedo",
+          "maximumChange": 0.0020358264446258545,
+          "alpha": 0.16,
+          "clipped": 0,
+          "nonfinite": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-off-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-on-night-emission",
+          "maximum": 0,
+          "passed": true
+        },
+        {
+          "id": "snow-bounded-albedo",
+          "maximumChange": 0.0005554556846618652,
+          "alpha": 0.22,
+          "clipped": 0,
+          "nonfinite": 0,
+          "passed": true
+        }
+      ],
+      "shaders": [
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "68c4e7ab-9d5e-4ab0-b47b-4b32ad3ac615"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "4d34052f-0915-4eaf-8120-1a97ba8fec70"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "0d6c26d3-4617-4728-ac42-335e8541491b"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "bf7eb34b-5bc0-4b9c-a057-4db056e76345"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "50039916-aaff-45cb-aa24-c97c3182efdb"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a620c771-3828-4c8e-a5b2-ecc896f6cc96"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "68c4e7ab-9d5e-4ab0-b47b-4b32ad3ac615"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "4d34052f-0915-4eaf-8120-1a97ba8fec70"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "0d6c26d3-4617-4728-ac42-335e8541491b"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "bf7eb34b-5bc0-4b9c-a057-4db056e76345"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "50039916-aaff-45cb-aa24-c97c3182efdb"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a620c771-3828-4c8e-a5b2-ecc896f6cc96"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "outputColorTransform",
+          "textures": [
+            {
+              "uniform": "nodeUniform0",
+              "name": "",
+              "uuid": "5cd6cc36-263c-418b-997f-b2464e70e3cd"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform0"
+          ]
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "1d33987f-7f6d-4226-908e-ae262c0109cf"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "2d7862f1-1ef1-4641-a957-0869033bed75"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "28cb346f-a583-4790-8c1c-b1cbbb287bd0"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "051c964d-25b6-44de-b9d8-5991f738ec7e"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b80dfd88-9057-43dd-863b-23c1ce30719c"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "6a974831-fd8f-4545-8491-7cc92af46682"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "1d33987f-7f6d-4226-908e-ae262c0109cf"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "2d7862f1-1ef1-4641-a957-0869033bed75"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "28cb346f-a583-4790-8c1c-b1cbbb287bd0"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "051c964d-25b6-44de-b9d8-5991f738ec7e"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b80dfd88-9057-43dd-863b-23c1ce30719c"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "6a974831-fd8f-4545-8491-7cc92af46682"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "68c4e7ab-9d5e-4ab0-b47b-4b32ad3ac615"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "4d34052f-0915-4eaf-8120-1a97ba8fec70"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "0d6c26d3-4617-4728-ac42-335e8541491b"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "bf7eb34b-5bc0-4b9c-a057-4db056e76345"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "50039916-aaff-45cb-aa24-c97c3182efdb"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a620c771-3828-4c8e-a5b2-ecc896f6cc96"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-sand-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "68c4e7ab-9d5e-4ab0-b47b-4b32ad3ac615"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "4d34052f-0915-4eaf-8120-1a97ba8fec70"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "0d6c26d3-4617-4728-ac42-335e8541491b"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "bf7eb34b-5bc0-4b9c-a057-4db056e76345"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "50039916-aaff-45cb-aa24-c97c3182efdb"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a620c771-3828-4c8e-a5b2-ecc896f6cc96"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "1d33987f-7f6d-4226-908e-ae262c0109cf"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "2d7862f1-1ef1-4641-a957-0869033bed75"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "28cb346f-a583-4790-8c1c-b1cbbb287bd0"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "051c964d-25b6-44de-b9d8-5991f738ec7e"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b80dfd88-9057-43dd-863b-23c1ce30719c"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "6a974831-fd8f-4545-8491-7cc92af46682"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-sand-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "d14086bb-332e-4a0b-a610-14e82395e8f2"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "c1b20970-862f-4ab4-a708-f6e2a52777f5"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "6d979485-512f-469d-a9ee-765e8c73c557"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "086263be-6868-4088-9464-65c60a5e8b92"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "1d33987f-7f6d-4226-908e-ae262c0109cf"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "f2bf2e0c-1122-4afe-aa64-8bf80a526303"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "2d7862f1-1ef1-4641-a957-0869033bed75"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "28cb346f-a583-4790-8c1c-b1cbbb287bd0"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "051c964d-25b6-44de-b9d8-5991f738ec7e"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "b80dfd88-9057-43dd-863b-23c1ce30719c"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "6a974831-fd8f-4545-8491-7cc92af46682"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "f51d0cf5-2544-4de7-a0c5-5be78f6ff2cc"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "4c657c4d-6d47-4f38-9305-1ad489bbe754"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "ab895355-968f-4116-8e6a-1f9e880efd3f"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "7ccdb2b1-a74c-4511-bd2a-78a2642efc04"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "53a8accb-44e3-4002-88c8-fc14096646b4"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "359c2ae7-c31a-4860-a18a-8434cf82ce2c"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "ce243a21-a07f-4fa6-8b70-ab6ccd1d2497"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "3c9009f4-3f96-4d76-8ab7-a55f051b6009"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "9cc1c110-a58d-441b-89f1-e1d4fe712646"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "7ccdb2b1-a74c-4511-bd2a-78a2642efc04"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "53a8accb-44e3-4002-88c8-fc14096646b4"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "359c2ae7-c31a-4860-a18a-8434cf82ce2c"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "ce243a21-a07f-4fa6-8b70-ab6ccd1d2497"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "3c9009f4-3f96-4d76-8ab7-a55f051b6009"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "9cc1c110-a58d-441b-89f1-e1d4fe712646"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "0ef755f6-3ed6-4270-bab1-76d1aa07dc7d"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "568fd625-2524-490e-98a9-677c1d797f5a"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "401caebb-f062-45ae-8106-d351725953fb"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "07b5d72a-45eb-472f-9e5d-3088fecb30c6"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "d4490132-2a28-4abd-ac3b-c7a5aff33b7e"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a3d6e956-2e82-46dc-95ac-d8d2e734d75e"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "0ef755f6-3ed6-4270-bab1-76d1aa07dc7d"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "568fd625-2524-490e-98a9-677c1d797f5a"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "401caebb-f062-45ae-8106-d351725953fb"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "07b5d72a-45eb-472f-9e5d-3088fecb30c6"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "d4490132-2a28-4abd-ac3b-c7a5aff33b7e"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a3d6e956-2e82-46dc-95ac-d8d2e734d75e"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "7ccdb2b1-a74c-4511-bd2a-78a2642efc04"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "53a8accb-44e3-4002-88c8-fc14096646b4"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "359c2ae7-c31a-4860-a18a-8434cf82ce2c"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "ce243a21-a07f-4fa6-8b70-ab6ccd1d2497"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "3c9009f4-3f96-4d76-8ab7-a55f051b6009"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "9cc1c110-a58d-441b-89f1-e1d4fe712646"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-snow-off",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "7ccdb2b1-a74c-4511-bd2a-78a2642efc04"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "53a8accb-44e3-4002-88c8-fc14096646b4"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "359c2ae7-c31a-4860-a18a-8434cf82ce2c"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "ce243a21-a07f-4fa6-8b70-ab6ccd1d2497"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "3c9009f4-3f96-4d76-8ab7-a55f051b6009"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "9cc1c110-a58d-441b-89f1-e1d4fe712646"
+            },
+            {
+              "uniform": "nodeUniform64",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform74",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform78",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform89",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform133",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform64",
+            "nodeUniform74",
+            "nodeUniform78",
+            "nodeUniform89",
+            "nodeUniform133"
+          ]
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "0ef755f6-3ed6-4270-bab1-76d1aa07dc7d"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "568fd625-2524-490e-98a9-677c1d797f5a"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "401caebb-f062-45ae-8106-d351725953fb"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "07b5d72a-45eb-472f-9e5d-3088fecb30c6"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "d4490132-2a28-4abd-ac3b-c7a5aff33b7e"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a3d6e956-2e82-46dc-95ac-d8d2e734d75e"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        },
+        {
+          "material": "surface-snow-on",
+          "textures": [
+            {
+              "uniform": "nodeUniform3",
+              "name": "",
+              "uuid": "01287bce-a344-4deb-804a-711c3859e9dc"
+            },
+            {
+              "uniform": "nodeUniform7",
+              "name": "",
+              "uuid": "d71e6d38-e40f-428c-b412-00c00ceb3d41"
+            },
+            {
+              "uniform": "nodeUniform10",
+              "name": "",
+              "uuid": "11a70894-b86f-4962-8e6d-2681c3efc542"
+            },
+            {
+              "uniform": "nodeUniform13",
+              "name": "",
+              "uuid": "b6a8fe89-15f6-4d67-b075-e0519b4353f7"
+            },
+            {
+              "uniform": "nodeUniform16",
+              "name": "terrain-bake-macroTint",
+              "uuid": "0ef755f6-3ed6-4270-bab1-76d1aa07dc7d"
+            },
+            {
+              "uniform": "nodeUniform21",
+              "name": "",
+              "uuid": "2dd35d9d-89ad-418d-afbe-8c9a737874ca"
+            },
+            {
+              "uniform": "nodeUniform23",
+              "name": "terrain-bake-materialWeights",
+              "uuid": "568fd625-2524-490e-98a9-677c1d797f5a"
+            },
+            {
+              "uniform": "nodeUniform33",
+              "name": "terrain-bake-farNormal",
+              "uuid": "401caebb-f062-45ae-8106-d351725953fb"
+            },
+            {
+              "uniform": "nodeUniform39",
+              "name": "terrain-bake-terrainShape",
+              "uuid": "07b5d72a-45eb-472f-9e5d-3088fecb30c6"
+            },
+            {
+              "uniform": "nodeUniform44",
+              "name": "terrain-bake-canopyWater",
+              "uuid": "d4490132-2a28-4abd-ac3b-c7a5aff33b7e"
+            },
+            {
+              "uniform": "nodeUniform53",
+              "name": "terrain-bake-farColor",
+              "uuid": "a3d6e956-2e82-46dc-95ac-d8d2e734d75e"
+            },
+            {
+              "uniform": "nodeUniform63",
+              "name": "ground-deformation",
+              "uuid": "4f63e926-298d-428c-81a2-3ece5bac9cd4"
+            },
+            {
+              "uniform": "nodeUniform73",
+              "name": "Gods End snow color",
+              "uuid": "eb9fcef5-4f56-45a5-91fd-39a55b84d927"
+            },
+            {
+              "uniform": "nodeUniform82",
+              "name": "Gods End snow packed",
+              "uuid": "fb2f7304-1c7e-4a22-a4c6-6a1f9c899d2d"
+            },
+            {
+              "uniform": "nodeUniform93",
+              "name": "Gods End snow normal",
+              "uuid": "44cd4aa3-454e-404a-90c8-5e08f83f1aa1"
+            },
+            {
+              "uniform": "nodeUniform137",
+              "name": "DFG_LUT",
+              "uuid": "57582696-2625-404e-a14e-5bac1f9ed8ec"
+            }
+          ],
+          "samplerDeclarations": [
+            "nodeUniform3",
+            "nodeUniform7",
+            "nodeUniform10",
+            "nodeUniform13",
+            "nodeUniform16",
+            "nodeUniform21",
+            "nodeUniform23",
+            "nodeUniform33",
+            "nodeUniform39",
+            "nodeUniform44",
+            "nodeUniform53",
+            "nodeUniform63",
+            "nodeUniform73",
+            "nodeUniform82",
+            "nodeUniform93",
+            "nodeUniform137"
+          ]
+        }
+      ],
+      "passed": true,
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "webgpu-sand-noon-off.png",
+      "sha256": "a23ca2719729e9ff933574274a7e7bdcf9eea7b43f72f433add62a51dd2775cb"
+    },
+    {
+      "path": "webgpu-sand-noon-on.png",
+      "sha256": "ddf0a02be597945e41e1d04946431db5edadb84d270f7e3df25e18d7b6028a31"
+    },
+    {
+      "path": "webgpu-sand-night-off.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgpu-sand-night-on.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgpu-sand-albedo-off.png",
+      "sha256": "c10c8b045268b528f570d518dd2c5c3352f76b44059be78e1ad1e54dd9d69a23"
+    },
+    {
+      "path": "webgpu-sand-albedo-on.png",
+      "sha256": "e73a5606c2ed2045d4598adb3f7667099b9888f337ddb0da41ab79ddb3ffb2f2"
+    },
+    {
+      "path": "webgpu-snow-noon-off.png",
+      "sha256": "4c760e294fe8bcbe1b1c9e8c792a4652c8ca06a47c2739f16c67b32115cc50b5"
+    },
+    {
+      "path": "webgpu-snow-noon-on.png",
+      "sha256": "4e1ffa6452f883fd73283b5ab128550dd744e481fbd0d77a25d711b2c423527d"
+    },
+    {
+      "path": "webgpu-snow-night-off.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgpu-snow-night-on.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgpu-snow-albedo-off.png",
+      "sha256": "58ea46c160f306a05b300ac41f2f04c370c4c5b86d08e1bb4a27aaa55637c2aa"
+    },
+    {
+      "path": "webgpu-snow-albedo-on.png",
+      "sha256": "0875359bb94a2e433dab330ff42e0596c34c19ca7932f56111c0300e571d9b05"
+    },
+    {
+      "path": "webgl-sand-noon-off.png",
+      "sha256": "59a53beaa2b074765c0733f6e3c3bf618b08ce0f8510cedd55408c4ae2bbe166"
+    },
+    {
+      "path": "webgl-sand-noon-on.png",
+      "sha256": "3bc90cfc3da105a8f9bc640fa7dc12cde12722b7990e8de31f5bd888f3c02d35"
+    },
+    {
+      "path": "webgl-sand-night-off.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgl-sand-night-on.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgl-sand-albedo-off.png",
+      "sha256": "7252d15081f7ac4e61f42518d1270b86023fcb2495f45af411c23ff90145c797"
+    },
+    {
+      "path": "webgl-sand-albedo-on.png",
+      "sha256": "aae9071d72671ed2f37de86e60d7a1b6e3a94f217f61dddacfffd1287abef586"
+    },
+    {
+      "path": "webgl-snow-noon-off.png",
+      "sha256": "17b0bde00127c982308ad21993edf69cb308e631ee8109f4c418a350a79886bb"
+    },
+    {
+      "path": "webgl-snow-noon-on.png",
+      "sha256": "916cd47c18f46b7ec15dc3ea65a83c339884afa38c02dd85b5c45060dd96df66"
+    },
+    {
+      "path": "webgl-snow-night-off.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgl-snow-night-on.png",
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "webgl-snow-albedo-off.png",
+      "sha256": "b6404eea7525509a31a27eae4beebedcb1cd5525c502fadf249d14cd9900a412"
+    },
+    {
+      "path": "webgl-snow-albedo-on.png",
+      "sha256": "badb2b54bf66ce0f682e25577ad99c71a77bcc95bdd73e328ecc4db483794bc5"
+    }
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": true,
+  "finishedAt": "2026-10-14T13:26:45.136Z"
+}

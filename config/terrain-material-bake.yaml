@@ -59,7 +59,7 @@ classification:
 
 macro:
   scaleMeters: 120
-  strength: 0.14
+  strength: 0.10
   seedOffset: 2401
   heightShadeScale: 0.018
   minHeightShade: 0.72
@@ -82,10 +82,10 @@ families:
   secondaryBlendStrength: 0.85
   secondaryMinWeight: 0.08
   contrastPreservation: 0.62
-  mesoStrength: 0.24
-  microStrength: 0.06
-  microFadeStartDistance: 28
-  microFadeEndDistance: 85
+  mesoStrength: 0.26
+  microStrength: 0.08
+  microFadeStartDistance: 18
+  microFadeEndDistance: 70
   normalStrength: 0.72
   normalFadeStartDistance: 45
   normalFadeEndDistance: 150
@@ -113,14 +113,14 @@ families:
     detailScaleMeters: 3.2
     fadeStartDistance: 85
     fadeEndDistance: 230
-    lichenStrength: 0.18
-    litterStrength: 0.12
+    lichenStrength: 0.20
+    litterStrength: 0.22
     crackStrength: 0.14
     mineralStrength: 0.10
     roughnessResponse: 0.08
     heightResponse: 0.035
     lichenColor: '#66745a'
-    litterColor: '#66533b'
+    litterColor: '#63513d'
     crackColor: '#58483c'
     mineralColor: '#8a908a'
   weathering:
@@ -141,6 +141,11 @@ families:
     # Wet and shaded ground retains structure but suppresses harsh high-frequency contrast.
     wetDetailScale: 0.72
     canopyDetailScale: 0.86
+  substrates:
+    sand: {roughness: 0.93, wetRoughness: 0.78, color: '#b8a27c', tintMix: 0.18}
+    mineral: {roughness: 0.90, wetRoughness: 0.64, color: '#8a8170', tintMix: 0.10}
+    litter: {roughness: 0.97, wetRoughness: 0.72, color: '#63513d', tintMix: 0.22}
+    mud: {roughness: 0.87, wetRoughness: 0.43, color: '#555747', tintMix: 0.22}
   profiles:
     grass:
       contrast: 0.26
@@ -192,8 +197,8 @@ families:
       directionalStrength: 0.06
       direction: [0.40, 0.92]
       colorSpread: 0.012
-      roughness: 0.92
-      wetRoughness: 0.76
+      roughness: 0.94
+      wetRoughness: 0.80
 
 render:
   # Near keeps full procedural detail; mid uses baked material classes; far uses baked color.

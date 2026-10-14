@@ -1,3 +1,4 @@
+import { terrainMaterialRecipeFingerprint } from './TerrainMaterialRecipe.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { TerrainMaterialBakeCache } from './TerrainMaterialBakeCache.js';
 import {
@@ -56,6 +57,7 @@ export class TerrainMaterialBakeRuntime {
     this.revisionTracker = revisionTracker;
     this.config = config;
     this.meadowGroundPalette = createMeadowGroundPalette(terrainView.stylizedConfig);
+    this.recipeFingerprint=terrainMaterialRecipeFingerprint(config,this.materialStyle());
     this.enabled = Boolean(config?.enabled);
     this.bakePage = bakePage;
     this.onError = onError;
@@ -154,6 +156,7 @@ export class TerrainMaterialBakeRuntime {
       chunkX,
       chunkZ,
       quality: this.config.quality,
+      recipe: this.recipeFingerprint,
       revisions: this.revisionTracker.materialRevisionsFor(chunkX, chunkZ, {
         tileHalo: this.terrainView.surfaceMaskChunkRadius ?? 0,
         waterHalo: this.waterHaloChunkRadius(),

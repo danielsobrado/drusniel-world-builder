@@ -1,3 +1,4 @@
+import { terrainSubstrateResponse } from './TerrainSubstrateMath.js';
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const SRGB_TO_LINEAR = new Float32Array(256);
 
@@ -36,13 +37,14 @@ function hexToLinearRgb(value, field) {
   ]);
 }
 
-export function createTerrainMaterialFarStyle(materialStyle, render) {
+export function createTerrainMaterialFarStyle(materialStyle, render, substrates = null) {
   if (!materialStyle) return null;
   const grassBrightness = Number(materialStyle.grassBrightness);
   if (!Number.isFinite(grassBrightness) || grassBrightness < 0) {
     throw new Error('Terrain material bake grass brightness must be non-negative and finite.');
   }
   return Object.freeze({
+    substrates,
     grassBottom: hexToLinearRgb(materialStyle.grassBottomColor, 'grassBottomColor'),
     grassBrightness,
     meadowGroundColors: materialStyle.meadowGroundColors ?? null,
@@ -75,6 +77,7 @@ export function encodeTerrainMaterialFarColor(
   wetness,
   canopy,
   heightShade,
+  path = 0,
 ) {
   const tileRed = SRGB_TO_LINEAR[sourcePixels[sourceOffset]];
   const tileGreen = SRGB_TO_LINEAR[sourcePixels[sourceOffset + 1]];
@@ -108,6 +111,10 @@ export function encodeTerrainMaterialFarColor(
     + style.dirt[2] * dirtWeight
     + style.rock[2] * rockWeight
     + style.snow[2] * snowWeight;
+  if (style.substrates) {
+    const response=terrainSubstrateResponse({tileId:sourcePixels[sourceOffset+3],canopy,wetness,shoreline},style.substrates);
+    [red,green,blue]=response.applyColor([red,green,blue],dirtWeight,path);
+  }
   red *= macroRed;
   green *= macroGreen;
   blue *= macroBlue;

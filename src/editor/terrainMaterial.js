@@ -285,6 +285,7 @@ export function createTerrainMaterial({
     const bakedSurface = createTerrainMaterialBakedSurface({
       terrainUv,
       tileColor,
+      tileId: tileSample.a.mul(255).round(),
       grassColorOverride: meadowGround?.root ?? null,
       heightShade,
       cameraDistance,
