@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { runMistCards,runNormalRotation,runOpticalDepth } from './world-visual-tree-mist.mjs';
 import { runTreeRepresentations } from './world-visual-tree-representations.mjs';
+import { runBakerSwatch } from './world-visual-tree-bake.mjs';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 const params=new URLSearchParams(location.search),backend=params.get('backend')??'webgpu',phase=params.get('phase')??'after';
 const state=window.__worldTreeFixture={pendingCapture:null,continue:null,report:{backend,phase,cases:[],checks:[],done:false}};
@@ -23,7 +24,7 @@ try {
  if(state.report.backend!==backend)throw new Error('Unexpected tree fixture backend.');
  const context={renderer,scene,camera,draw,state,sun,fill,ambient:loadEditorConfig().stylizedSurface.ambientEffects};
  await runOpticalDepth(context);await runNormalRotation(context);
- if(phase!=='before'){await runMistCards(context);await runTreeRepresentations(context);}
+ if(phase!=='before'){await runBakerSwatch(context);await runMistCards(context);await runTreeRepresentations(context);}
  state.report.passed=state.report.checks.length>0&&state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally{target.dispose();state.report.done=true;}

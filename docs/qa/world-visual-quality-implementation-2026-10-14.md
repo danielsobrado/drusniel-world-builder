@@ -196,3 +196,30 @@ accepts all 29 existing prototypes. A new authored-cutoff check exposed that
 Three's node-material copy skips the inherited `alphaTest` accessor. The shared
 authored-material adapter now preserves that cutoff explicitly when composing
 effects; no cutoff values are lowered. Production browser acceptance follows.
+
+The [first post-fix tree fixture](world-visual-quality-2026-10-14/fixtures/trees-prebake/report.json)
+passes all atmosphere, output-composition and normal-rotation checks on both
+backends with zero browser errors. The fixed-normal rotation error is now zero;
+the large-origin mist difference is 0.0000302 linear RGB on WebGPU. It fails
+actual tree atlas parity: prototypes 16/15 retain only 62.6%/66.1% alpha coverage,
+and all three impostors are too dark. Inspection found two baker contract bugs:
+linear albedo bytes were labelled sRGB, and canvas elevation rows were written
+top-down while runtime atlas UV rows are bottom-up. The repair uses a dedicated
+sRGB albedo target, a separate linear normal target, and reverses canvas row
+placement. Runtime alpha thresholds and atlas dimensions remain unchanged.
+The bake recipe signature is incremented to reject old derived atlases.
+
+The full suite before this baker repair passes 6,685 tests and the production
+build passes. An earlier broad run also discovered temporary draft test files;
+those drafts were renamed so they are not auto-discovered. Their import failures
+were harness noise, not production test failures; the clean rerun is the result
+quoted above. The focused baker/manifest/pixel suite passes 20 checks. Existing
+assets are backed up locally before rebaking all 29 original prototypes.
+
+The first rebake also warned that authored bark lacked its `instanceDither`
+input. Offline bake geometry now supplies the neutral `[1,0.5,1]` appearance
+record without modifying source meshes. The final rebake includes this repair.
+The production tree fixture now additionally bakes a known linear-colour swatch
+and samples its resulting tagged texture; this checks actual colour round-trip
+rather than relying only on target configuration. A stopped stale-server launch
+and the earlier pre-seed bake are retained locally and are not final evidence.

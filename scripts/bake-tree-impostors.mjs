@@ -380,9 +380,10 @@ async function cleanupTemporaryRoot(path) {
 }
 
 async function bakeWithPlaywright(url, downloadDirectory, diagnostics) {
+  const headed = process.argv.includes('--headed');
   const browser = await chromium.launch({
-    headless: true,
-    args: [
+    headless: !headed,
+    args: headed ? ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] : [
       '--disable-gpu-sandbox',
       '--enable-webgl',
       '--ignore-gpu-blocklist',

@@ -3,7 +3,7 @@ export const TREE_IMPOSTOR_LEGACY_MANIFEST_VERSION = 2;
 export const TREE_IMPOSTOR_NORMAL_ENCODING = 'view-normal-rgb-foliage-mask-a';
 export const TREE_IMPOSTOR_LEGACY_NORMAL_ENCODING = 'view-normal-rgb-coverage-a';
 
-const SOURCE_SIGNATURE_VERSION = 4;
+const SOURCE_SIGNATURE_VERSION = 5;
 const RUNTIME_TREE_FIELDS = new Set([
   'enabled',
   'residentRadius',

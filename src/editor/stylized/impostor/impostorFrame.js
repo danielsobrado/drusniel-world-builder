@@ -1,5 +1,10 @@
 const TWO_PI = Math.PI * 2;
 
+/** Canvas rows start at the top; atlas UV rows start at the bottom. */
+export function impostorCanvasRow(row, rows) {
+  return rows - 1 - row;
+}
+
 function normalizeAngle(value) {
   const result = value % TWO_PI;
   return result < 0 ? result + TWO_PI : result;

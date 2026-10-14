@@ -5,10 +5,23 @@ import {
 } from 'three/tsl';
 import { authoredTexture } from '../AuthoredTextureNode.js';
 import { createDilatedAtlasTile } from './TreeImpostorAtlasPixels.js';
-import { createCaptureDirections } from './impostorFrame.js';
+import { createCaptureDirections, impostorCanvasRow } from './impostorFrame.js';
 import { TREE_IMPOSTOR_NORMAL_ENCODING } from './TreeImpostorManifest.js';
 
 export { createDilatedAtlasTile as createDilatedTile } from './TreeImpostorAtlasPixels.js';
+
+export function createTreeImpostorBakeTargets(size) {
+  const make = colorSpace => {
+    const target = new THREE.RenderTarget(size, size, {
+      format: THREE.RGBAFormat, type: THREE.UnsignedByteType,
+      depthBuffer: true, stencilBuffer: false,
+    });
+    target.texture.colorSpace = colorSpace;
+    return target;
+  };
+  // PNG albedo must contain sRGB bytes. Normals and foliage masks stay linear.
+  return { albedo: make(THREE.SRGBColorSpace), normal: make(THREE.NoColorSpace) };
+}
 
 function createCanvas(width, height) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
@@ -114,14 +127,17 @@ export function createTreeImpostorBakeMaterial(part, normalPass) {
   return material;
 }
 
-function createBakeGeometry(sourceGeometry) {
+export function createBakeGeometry(sourceGeometry) {
   const cloned = sourceGeometry.clone();
-  if (!cloned.index) return cloned;
-  const nonIndexed = cloned.toNonIndexed();
-  cloned.dispose();
-  nonIndexed.computeBoundingBox();
-  nonIndexed.computeBoundingSphere();
-  return nonIndexed;
+  const geometry = cloned.index ? cloned.toNonIndexed() : cloned;
+  if (geometry !== cloned) cloned.dispose();
+  // Authored bark reads the same neutral seed as the representation fixture.
+  const dither = new Float32Array(geometry.getAttribute('position').count * 3);
+  for (let index = 0; index < dither.length; index += 3) dither.set([1, 0.5, 1], index);
+  geometry.setAttribute('instanceDither', new THREE.BufferAttribute(dither, 3));
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  return geometry;
 }
 
 function createPrototypeScene(parts, normalPass) {
@@ -225,13 +241,7 @@ export class TreeImpostorBaker {
     albedoContext.clearRect(0, 0, atlasWidth, atlasHeight);
     normalContext.clearRect(0, 0, atlasWidth, atlasHeight);
 
-    const target = new THREE.RenderTarget(renderSize, renderSize, {
-      format: THREE.RGBAFormat,
-      type: THREE.UnsignedByteType,
-      depthBuffer: true,
-      stencilBuffer: false,
-    });
-    target.texture.colorSpace = THREE.NoColorSpace;
+    const targets = createTreeImpostorBakeTargets(renderSize);
     const directions = createCaptureDirections(settings);
     const projection = measureTreeImpostorProjection(parts, directions);
     const camera = new THREE.OrthographicCamera(
@@ -266,11 +276,11 @@ export class TreeImpostorBaker {
         camera.lookAt(center);
         camera.updateMatrixWorld(true);
 
-        renderer.setRenderTarget(target);
+        renderer.setRenderTarget(targets.albedo);
         renderer.clear();
         await renderScene(renderer, albedoScene, camera);
         const albedoPixels = await renderer.readRenderTargetPixelsAsync(
-          target,
+          targets.albedo,
           0,
           0,
           renderSize,
@@ -286,14 +296,14 @@ export class TreeImpostorBaker {
           ),
           settings.tileSize,
           direction.column,
-          direction.row,
+          impostorCanvasRow(direction.row, settings.rows),
         );
 
-        renderer.setRenderTarget(target);
+        renderer.setRenderTarget(targets.normal);
         renderer.clear();
         await renderScene(renderer, normalScene, camera);
         const normalPixels = await renderer.readRenderTargetPixelsAsync(
-          target,
+          targets.normal,
           0,
           0,
           renderSize,
@@ -313,14 +323,15 @@ export class TreeImpostorBaker {
           ),
           settings.tileSize,
           direction.column,
-          direction.row,
+          impostorCanvasRow(direction.row, settings.rows),
         );
       }
     } finally {
       renderer.setRenderTarget(previousTarget);
       renderer.autoClear = previousAutoClear;
       renderer.setClearColor(previousClearColor, previousClearAlpha);
-      target.dispose();
+      targets.albedo.dispose();
+      targets.normal.dispose();
       disposeSceneResources(albedoScene);
       disposeSceneResources(normalScene);
     }

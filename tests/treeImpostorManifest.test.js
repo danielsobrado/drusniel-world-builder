@@ -139,7 +139,7 @@ test('source signature changes with geometry or bake configuration', () => {
   const configChanged = createTreeImpostorSourceSignature([
     [{ kind: 'leaf', geometry: geometry(1), sourceMap: null }],
   ], { ...config, lod: { impostor: { columns: 16 } } });
-  assert.match(first, /^tree-impostor-v4-/);
+  assert.match(first, /^tree-impostor-v5-/);
   assert.notEqual(first, geometryChanged);
   assert.notEqual(first, configChanged);
 });

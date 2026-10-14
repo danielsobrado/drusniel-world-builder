@@ -1,0 +1,5 @@
+
+> simcity-dnd@0.11.0 validate:impostors:required
+> node scripts/validate-impostors.mjs --required
+
+validated 29 tree impostor prototypes (tree-impostor-v5-855b7394; view-normal-rgb-foliage-mask-a)

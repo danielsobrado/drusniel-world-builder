@@ -1,0 +1,6153 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "8efc797cd8a76665ba9877bc02453358b618bd2c",
+  "dirtyFiles": [],
+  "startedAt": "2026-10-14T18:39:02.367Z",
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "phase": "after",
+      "cases": [
+        {
+          "id": "mist-optical-depth-0",
+          "weight": 0
+        },
+        {
+          "id": "mist-optical-depth-0.25",
+          "weight": 0.25
+        },
+        {
+          "id": "mist-optical-depth-0.5",
+          "weight": 0.5
+        },
+        {
+          "id": "mist-optical-depth-1",
+          "weight": 1
+        },
+        {
+          "id": "mist-optical-depth-4",
+          "weight": 4
+        },
+        {
+          "id": "normal-rotation-0",
+          "azimuth": 0,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            166,
+            231,
+            192
+          ]
+        },
+        {
+          "id": "normal-rotation-90",
+          "azimuth": 90,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            63,
+            231,
+            166
+          ]
+        },
+        {
+          "id": "normal-rotation-180",
+          "azimuth": 180,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            89,
+            231,
+            63
+          ]
+        },
+        {
+          "id": "normal-rotation-270",
+          "azimuth": 270,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            192,
+            231,
+            89
+          ]
+        },
+        {
+          "id": "mist-near-10-unmisted",
+          "representation": "near",
+          "depth": 10
+        },
+        {
+          "id": "mist-near-10-0",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-0.25",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-0.5",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-1",
+          "representation": "near",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-unmisted",
+          "representation": "proxy",
+          "depth": 10
+        },
+        {
+          "id": "mist-proxy-10-0",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-0.25",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-0.5",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-1",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0.25",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0.5",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-1",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-10-unmisted",
+          "representation": "gpu-impostor",
+          "depth": 10
+        },
+        {
+          "id": "mist-gpu-impostor-10-0",
+          "representation": "gpu-impostor",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-10-0.25",
+          "representation": "gpu-impostor",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-10-0.5",
+          "representation": "gpu-impostor",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-10-1",
+          "representation": "gpu-impostor",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-unmisted",
+          "representation": "near",
+          "depth": 40
+        },
+        {
+          "id": "mist-near-40-0",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-0.25",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-0.5",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-1",
+          "representation": "near",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-unmisted",
+          "representation": "proxy",
+          "depth": 40
+        },
+        {
+          "id": "mist-proxy-40-0",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-0.25",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-0.5",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-1",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 40
+        },
+        {
+          "id": "mist-cpu-impostor-40-0",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-0.25",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-0.5",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-1",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-40-unmisted",
+          "representation": "gpu-impostor",
+          "depth": 40
+        },
+        {
+          "id": "mist-gpu-impostor-40-0",
+          "representation": "gpu-impostor",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-40-0.25",
+          "representation": "gpu-impostor",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-40-0.5",
+          "representation": "gpu-impostor",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-40-1",
+          "representation": "gpu-impostor",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-unmisted",
+          "representation": "near",
+          "depth": 100
+        },
+        {
+          "id": "mist-near-100-0",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-0.25",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-0.5",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-1",
+          "representation": "near",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-unmisted",
+          "representation": "proxy",
+          "depth": 100
+        },
+        {
+          "id": "mist-proxy-100-0",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-0.25",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-0.5",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-1",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 100
+        },
+        {
+          "id": "mist-cpu-impostor-100-0",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-0.25",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-0.5",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-1",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-100-unmisted",
+          "representation": "gpu-impostor",
+          "depth": 100
+        },
+        {
+          "id": "mist-gpu-impostor-100-0",
+          "representation": "gpu-impostor",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-100-0.25",
+          "representation": "gpu-impostor",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-100-0.5",
+          "representation": "gpu-impostor",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-100-1",
+          "representation": "gpu-impostor",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-unmisted",
+          "representation": "near",
+          "depth": 240
+        },
+        {
+          "id": "mist-near-240-0",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-0.25",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-0.5",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-1",
+          "representation": "near",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-unmisted",
+          "representation": "proxy",
+          "depth": 240
+        },
+        {
+          "id": "mist-proxy-240-0",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-0.25",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-0.5",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-1",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 240
+        },
+        {
+          "id": "mist-cpu-impostor-240-0",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-0.25",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-0.5",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-1",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-240-unmisted",
+          "representation": "gpu-impostor",
+          "depth": 240
+        },
+        {
+          "id": "mist-gpu-impostor-240-0",
+          "representation": "gpu-impostor",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-240-0.25",
+          "representation": "gpu-impostor",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-240-0.5",
+          "representation": "gpu-impostor",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-gpu-impostor-240-1",
+          "representation": "gpu-impostor",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-origin-0",
+          "canonical": {
+            "x": -350,
+            "z": -910
+          },
+          "origin": {
+            "x": 0,
+            "z": 0
+          },
+          "time": 10
+        },
+        {
+          "id": "mist-origin-8000000",
+          "canonical": {
+            "x": -350,
+            "z": -910
+          },
+          "origin": {
+            "x": 8000000,
+            "z": -3000000
+          },
+          "time": 10
+        },
+        {
+          "id": "tree-16-0-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-0-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-0-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-0-gpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-16-90-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-90-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-90-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-90-gpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-16-180-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-180-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-180-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-180-gpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-16-270-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-270-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-270-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-270-gpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-15-0-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-0-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-0-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-0-gpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-15-90-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-90-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-90-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-90-gpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-15-180-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-180-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-180-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-180-gpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-15-270-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-270-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-270-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-270-gpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-27-0-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-0-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-0-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-0-gpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-27-90-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-90-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-90-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-90-gpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-27-180-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-180-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-180-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-180-gpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "gpu-impostor"
+        },
+        {
+          "id": "tree-27-270-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-270-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-270-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-270-gpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "gpu-impostor"
+        }
+      ],
+      "checks": [
+        {
+          "id": "gpu-optical-depth-weight-linearity",
+          "samples": [
+            {
+              "weight": 0,
+              "depth": 0,
+              "amount": 0,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.25,
+              "depth": 0.0734436884522438,
+              "amount": 0.07081156969070435,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.5,
+              "depth": 0.1468873769044876,
+              "amount": 0.1366087794303894,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 1,
+              "depth": 0.2937747538089752,
+              "amount": 0.2545555830001831,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 4,
+              "depth": 1.1750990152359009,
+              "amount": 0.5,
+              "alphaError": 4.768371586472142e-9
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": "fixed-world-normal-rotating-view",
+          "error": 0,
+          "means": [
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-near-10",
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-10",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-10",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-gpu-impostor-10",
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-gpu-impostor-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "composer-near-40",
+          "passed": true
+        },
+        {
+          "id": "clear-near-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-40",
+          "changes": [
+            0,
+            0.004272746517736903,
+            0.008306777939821264,
+            0.015712583477401898
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-40",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-40",
+          "changes": [
+            0,
+            0.004272746517736903,
+            0.008306777939821264,
+            0.015712583477401898
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-40",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-40",
+          "changes": [
+            0,
+            0.004272746303532693,
+            0.008306777495373452,
+            0.015712582675947107
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-gpu-impostor-40",
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-gpu-impostor-40",
+          "changes": [
+            0,
+            0.004272746303532693,
+            0.008306777495373452,
+            0.015712582675947107
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-1",
+          "error": 2.1420420992512845e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-2",
+          "error": 4.4444781188701654e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-3",
+          "error": 8.014547914214631e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-40-1",
+          "error": 2.1420420992512845e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-40-2",
+          "error": 4.4444781188701654e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-40-3",
+          "error": 8.014547914214631e-10,
+          "passed": true
+        },
+        {
+          "id": "composer-near-100",
+          "passed": true
+        },
+        {
+          "id": "clear-near-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-100",
+          "changes": [
+            0,
+            0.005030260621570026,
+            0.009710038721871872,
+            0.01811962112473947
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-100",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-100",
+          "changes": [
+            0,
+            0.005030260621570026,
+            0.009710038721871872,
+            0.01811962112473947
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-100",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-100",
+          "changes": [
+            0,
+            0.005030260183848445,
+            0.009710037874368305,
+            0.01811961967446324
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-gpu-impostor-100",
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-gpu-impostor-100",
+          "changes": [
+            0,
+            0.005030260183848445,
+            0.009710037874368305,
+            0.01811961967446324
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-1",
+          "error": 4.3772158120347626e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-2",
+          "error": 8.47503567324992e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-3",
+          "error": 1.4502762324397622e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-100-1",
+          "error": 4.3772158120347626e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-100-2",
+          "error": 8.47503567324992e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-100-3",
+          "error": 1.4502762324397622e-9,
+          "passed": true
+        },
+        {
+          "id": "composer-near-240",
+          "passed": true
+        },
+        {
+          "id": "clear-near-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-240",
+          "changes": [
+            0,
+            0.018645305404336066,
+            0.029750035771479222,
+            0.035271841576322904
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-240",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-240",
+          "changes": [
+            0,
+            0.018645305404336066,
+            0.029750035771479222,
+            0.035271841576322904
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-240",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-240",
+          "changes": [
+            0,
+            0.018645303912667777,
+            0.02975003398592685,
+            0.035271840886626826
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-gpu-impostor-240",
+          "passed": true
+        },
+        {
+          "id": "clear-gpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-gpu-impostor-240",
+          "changes": [
+            0,
+            0.018645303912667777,
+            0.02975003398592685,
+            0.035271840886626826
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-1",
+          "error": 1.4916682888888033e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-2",
+          "error": 1.7855523726240108e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-3",
+          "error": 6.896960780267136e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-240-1",
+          "error": 1.4916682888888033e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-240-2",
+          "error": 1.7855523726240108e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-gpu-impostor-240-3",
+          "error": 6.896960780267136e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-negative-coordinate-origin-invariance",
+          "error": 0.000030158442883065906,
+          "passed": true
+        },
+        {
+          "id": "tree-material-16-0-cpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.24309941064682955,
+          "medianRgbError": 0.08046761047876612,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-0-cpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-0-gpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.24309943057557604,
+          "medianRgbError": 0.08046761047876612,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-0-gpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-90-cpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.24570127134343345,
+          "medianRgbError": 0.07274514525128976,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-90-cpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-90-gpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.24570131418959662,
+          "medianRgbError": 0.0727451444477858,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-90-gpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-180-cpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.22844451602526236,
+          "medianRgbError": 0.08558297144603103,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-180-cpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-180-gpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.22844451602526236,
+          "medianRgbError": 0.08558297144603103,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-180-gpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-270-cpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.2732129961205383,
+          "medianRgbError": 0.0704933466293203,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-270-cpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-270-gpu-impostor",
+          "sharedInterior": 6441,
+          "nearCoverage": 13212,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.62632455343627,
+          "medianLuminanceRatio": 0.27321301910494783,
+          "medianRgbError": 0.0704933466293203,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-270-gpu-impostor",
+          "ratio": 0.62632455343627,
+          "nearCoverage": 13212,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-0-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.06046536453907268,
+          "medianRgbError": 0.01970951390757676,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-0-cpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-0-gpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.060465371864580245,
+          "medianRgbError": 0.01970951390757676,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-0-gpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-90-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.060929562527479594,
+          "medianRgbError": 0.018834921717759294,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-90-cpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-90-gpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.060929573050629474,
+          "medianRgbError": 0.018834921630977854,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-90-gpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-180-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.05644728668596486,
+          "medianRgbError": 0.021700364064942662,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-180-cpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-180-gpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.05644728668596486,
+          "medianRgbError": 0.02170036402132325,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-180-gpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-270-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.07191362009370082,
+          "medianRgbError": 0.01768512528815059,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-270-cpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-270-gpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12122,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611120277181983,
+          "medianLuminanceRatio": 0.07191362009370082,
+          "medianRgbError": 0.017685125246749363,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-270-gpu-impostor",
+          "ratio": 0.6611120277181983,
+          "nearCoverage": 12122,
+          "passed": false
+        },
+        {
+          "id": "tree-material-27-0-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.23149644264951563,
+          "medianRgbError": 0.06659200579070408,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-0-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-0-gpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.2314964636711734,
+          "medianRgbError": 0.06659200579070408,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-0-gpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-90-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.262495235028233,
+          "medianRgbError": 0.05850301145463409,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-90-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-90-gpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.262495235028233,
+          "medianRgbError": 0.05850301145463409,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-90-gpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-180-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.3579842399168079,
+          "medianRgbError": 0.048342210791327916,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-180-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-180-gpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.3579842399168079,
+          "medianRgbError": 0.048342210791327916,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-180-gpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-270-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.2891753491472823,
+          "medianRgbError": 0.05858803411726239,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-270-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-270-gpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.2891753491472823,
+          "medianRgbError": 0.05858803411726239,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-270-gpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "opticalDepthSource": "production optical depth",
+      "prototypeSignature": "tree-impostor-v4-855b7394",
+      "passed": false,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "phase": "after",
+      "cases": [
+        {
+          "id": "mist-optical-depth-0",
+          "weight": 0
+        },
+        {
+          "id": "mist-optical-depth-0.25",
+          "weight": 0.25
+        },
+        {
+          "id": "mist-optical-depth-0.5",
+          "weight": 0.5
+        },
+        {
+          "id": "mist-optical-depth-1",
+          "weight": 1
+        },
+        {
+          "id": "mist-optical-depth-4",
+          "weight": 4
+        },
+        {
+          "id": "normal-rotation-0",
+          "azimuth": 0,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            166,
+            231,
+            192
+          ]
+        },
+        {
+          "id": "normal-rotation-90",
+          "azimuth": 90,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            63,
+            231,
+            166
+          ]
+        },
+        {
+          "id": "normal-rotation-180",
+          "azimuth": 180,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            89,
+            231,
+            63
+          ]
+        },
+        {
+          "id": "normal-rotation-270",
+          "azimuth": 270,
+          "worldNormal": [
+            0.3030457633656632,
+            0.8081220356417685,
+            0.5050762722761053
+          ],
+          "encoded": [
+            192,
+            231,
+            89
+          ]
+        },
+        {
+          "id": "mist-near-10-unmisted",
+          "representation": "near",
+          "depth": 10
+        },
+        {
+          "id": "mist-near-10-0",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-0.25",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-0.5",
+          "representation": "near",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-10-1",
+          "representation": "near",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-unmisted",
+          "representation": "proxy",
+          "depth": 10
+        },
+        {
+          "id": "mist-proxy-10-0",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-0.25",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-0.5",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-10-1",
+          "representation": "proxy",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0.25",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-0.5",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-10-1",
+          "representation": "cpu-impostor",
+          "depth": 10,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-unmisted",
+          "representation": "near",
+          "depth": 40
+        },
+        {
+          "id": "mist-near-40-0",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-0.25",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-0.5",
+          "representation": "near",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-40-1",
+          "representation": "near",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-unmisted",
+          "representation": "proxy",
+          "depth": 40
+        },
+        {
+          "id": "mist-proxy-40-0",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-0.25",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-0.5",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-40-1",
+          "representation": "proxy",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 40
+        },
+        {
+          "id": "mist-cpu-impostor-40-0",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-0.25",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-0.5",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-40-1",
+          "representation": "cpu-impostor",
+          "depth": 40,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-unmisted",
+          "representation": "near",
+          "depth": 100
+        },
+        {
+          "id": "mist-near-100-0",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-0.25",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-0.5",
+          "representation": "near",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-100-1",
+          "representation": "near",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-unmisted",
+          "representation": "proxy",
+          "depth": 100
+        },
+        {
+          "id": "mist-proxy-100-0",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-0.25",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-0.5",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-100-1",
+          "representation": "proxy",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 100
+        },
+        {
+          "id": "mist-cpu-impostor-100-0",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-0.25",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-0.5",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-100-1",
+          "representation": "cpu-impostor",
+          "depth": 100,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-unmisted",
+          "representation": "near",
+          "depth": 240
+        },
+        {
+          "id": "mist-near-240-0",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-0.25",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-0.5",
+          "representation": "near",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-near-240-1",
+          "representation": "near",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-unmisted",
+          "representation": "proxy",
+          "depth": 240
+        },
+        {
+          "id": "mist-proxy-240-0",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-0.25",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-0.5",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-proxy-240-1",
+          "representation": "proxy",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-unmisted",
+          "representation": "cpu-impostor",
+          "depth": 240
+        },
+        {
+          "id": "mist-cpu-impostor-240-0",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-0.25",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0.25,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-0.5",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 0.5,
+          "time": 10
+        },
+        {
+          "id": "mist-cpu-impostor-240-1",
+          "representation": "cpu-impostor",
+          "depth": 240,
+          "weight": 1,
+          "time": 10
+        },
+        {
+          "id": "mist-origin-0",
+          "canonical": {
+            "x": -350,
+            "z": -910
+          },
+          "origin": {
+            "x": 0,
+            "z": 0
+          },
+          "time": 10
+        },
+        {
+          "id": "mist-origin-8000000",
+          "canonical": {
+            "x": -350,
+            "z": -910
+          },
+          "origin": {
+            "x": 8000000,
+            "z": -3000000
+          },
+          "time": 10
+        },
+        {
+          "id": "tree-16-0-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-0-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-0-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-90-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-90-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-90-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-180-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-180-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-180-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-16-270-near",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-16-270-proxy",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-16-270-cpu-impostor",
+          "asset": "/assets/trees/tree-scene/tree-02.glb",
+          "prototypeIndex": 16,
+          "bounds": {
+            "min": [
+              -3.144345760345459,
+              0,
+              -3.4719860553741455
+            ],
+            "max": [
+              3.144345760345459,
+              8.724381446838379,
+              3.4719860553741455
+            ]
+          },
+          "distance": 39.71162151917618,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999949074,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-0-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-0-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-0-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-90-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-90-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-90-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-180-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-180-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-180-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-15-270-near",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-15-270-proxy",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-15-270-cpu-impostor",
+          "asset": "/assets/trees/forest-pack/tree-narrow-01.glb",
+          "prototypeIndex": 15,
+          "bounds": {
+            "min": [
+              -3.3077392578125,
+              0,
+              -3.8310546875
+            ],
+            "max": [
+              3.3077392578125,
+              11.86592960357666,
+              3.8310546875
+            ]
+          },
+          "distance": 52.450496150542904,
+          "fov": 35,
+          "projectedHeightPixels": 239.99999999772638,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-0-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-0-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-0-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 0,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-90-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-90-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-90-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 90,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-180-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-180-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-180-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 180,
+          "representation": "cpu-impostor"
+        },
+        {
+          "id": "tree-27-270-near",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "near"
+        },
+        {
+          "id": "tree-27-270-proxy",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "proxy"
+        },
+        {
+          "id": "tree-27-270-cpu-impostor",
+          "asset": "/assets/trees/alpine/tree10.glb",
+          "prototypeIndex": 27,
+          "bounds": {
+            "min": [
+              -1.6969571113586426,
+              -0.07112109661102295,
+              -1.6566976308822632
+            ],
+            "max": [
+              1.2747890949249268,
+              5.586143493652344,
+              1.6729201078414917
+            ]
+          },
+          "distance": 24.726334853711723,
+          "fov": 35,
+          "projectedHeightPixels": 240.000000002471,
+          "elevationDegrees": 12,
+          "wind": 0,
+          "phase": 0,
+          "appearance": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "azimuth": 270,
+          "representation": "cpu-impostor"
+        }
+      ],
+      "checks": [
+        {
+          "id": "gpu-optical-depth-weight-linearity",
+          "samples": [
+            {
+              "weight": 0,
+              "depth": 0,
+              "amount": 0,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.25,
+              "depth": 0.0734436884522438,
+              "amount": 0.07081156969070435,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 0.5,
+              "depth": 0.1468873769044876,
+              "amount": 0.1366087794303894,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 1,
+              "depth": 0.2937747538089752,
+              "amount": 0.2545555830001831,
+              "alphaError": 4.768371586472142e-9
+            },
+            {
+              "weight": 4,
+              "depth": 1.1750990152359009,
+              "amount": 0.5,
+              "alphaError": 4.768371586472142e-9
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": "fixed-world-normal-rotating-view",
+          "error": 0,
+          "means": [
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            },
+            {
+              "rgb": [
+                0.13152813911437988,
+                0.13152813911437988,
+                0.13152813911437988
+              ],
+              "count": 81796
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-near-10",
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-near-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-10",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-10",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0.25",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-0.5",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-10",
+          "changes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-10-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "composer-near-40",
+          "passed": true
+        },
+        {
+          "id": "clear-near-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-40",
+          "changes": [
+            0,
+            0.004272746562750784,
+            0.008306778051579977,
+            0.015712583717993556
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-40",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-40",
+          "changes": [
+            0,
+            0.004272746562750784,
+            0.008306778051579977,
+            0.015712583717993556
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-40",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-40",
+          "changes": [
+            0,
+            0.004272746401838945,
+            0.008306777688881606,
+            0.01571258308055501
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-40-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-40-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-1",
+          "error": 1.60911839408584e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-2",
+          "error": 3.6269837133673377e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-40-3",
+          "error": 6.374385463914223e-10,
+          "passed": true
+        },
+        {
+          "id": "composer-near-100",
+          "passed": true
+        },
+        {
+          "id": "clear-near-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-100",
+          "changes": [
+            0,
+            0.005030261049978446,
+            0.0097100395579926,
+            0.01811962269401801
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-100",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-100",
+          "changes": [
+            0,
+            0.005030261049978446,
+            0.0097100395579926,
+            0.01811962269401801
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-100",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-100",
+          "changes": [
+            0,
+            0.005030260588973767,
+            0.009710038692380019,
+            0.018119621039368206
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-100-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-100-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-1",
+          "error": 4.6100467887555396e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-2",
+          "error": 8.656125816131066e-10,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-100-3",
+          "error": 1.6546498060598935e-9,
+          "passed": true
+        },
+        {
+          "id": "composer-near-240",
+          "passed": true
+        },
+        {
+          "id": "clear-near-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-near-240",
+          "changes": [
+            0,
+            0.01864530725404623,
+            0.029750038805521184,
+            0.035271844190752355
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-proxy-240",
+          "passed": true
+        },
+        {
+          "id": "clear-proxy-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-proxy-240",
+          "changes": [
+            0,
+            0.01864530725404623,
+            0.029750038805521184,
+            0.035271844190752355
+          ],
+          "passed": true
+        },
+        {
+          "id": "composer-cpu-impostor-240",
+          "passed": true
+        },
+        {
+          "id": "clear-cpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-monotonic-cpu-impostor-240",
+          "changes": [
+            0,
+            0.01864530481294624,
+            0.02975003519923325,
+            0.03527184136418832
+          ],
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-near-240-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-1",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-2",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-proxy-240-3",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-0",
+          "error": 0,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-1",
+          "error": 2.441099988814699e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-2",
+          "error": 3.6062879349429977e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-parity-cpu-impostor-240-3",
+          "error": 2.826564038382884e-9,
+          "passed": true
+        },
+        {
+          "id": "mist-negative-coordinate-origin-invariance",
+          "error": 0.000029550971440028828,
+          "passed": true
+        },
+        {
+          "id": "tree-material-16-0-cpu-impostor",
+          "sharedInterior": 6440,
+          "nearCoverage": 13211,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.6263719627583074,
+          "medianLuminanceRatio": 0.24308521604178118,
+          "medianRgbError": 0.08046759399238433,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-0-cpu-impostor",
+          "ratio": 0.6263719627583074,
+          "nearCoverage": 13211,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-90-cpu-impostor",
+          "sharedInterior": 6440,
+          "nearCoverage": 13211,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.6263719627583074,
+          "medianLuminanceRatio": 0.2459372630512262,
+          "medianRgbError": 0.07263994778877303,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-90-cpu-impostor",
+          "ratio": 0.6263719627583074,
+          "nearCoverage": 13211,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-180-cpu-impostor",
+          "sharedInterior": 6440,
+          "nearCoverage": 13211,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.6263719627583074,
+          "medianLuminanceRatio": 0.22856589960449783,
+          "medianRgbError": 0.08557977095733373,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-180-cpu-impostor",
+          "ratio": 0.6263719627583074,
+          "nearCoverage": 13211,
+          "passed": false
+        },
+        {
+          "id": "tree-material-16-270-cpu-impostor",
+          "sharedInterior": 6440,
+          "nearCoverage": 13211,
+          "otherCoverage": 8275,
+          "coverageRatio": 0.6263719627583074,
+          "medianLuminanceRatio": 0.27312932533679396,
+          "medianRgbError": 0.07049334462640836,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-16-270-cpu-impostor",
+          "ratio": 0.6263719627583074,
+          "nearCoverage": 13211,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-0-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12121,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611665704149823,
+          "medianLuminanceRatio": 0.06046844285408866,
+          "medianRgbError": 0.019697658788479365,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-0-cpu-impostor",
+          "ratio": 0.6611665704149823,
+          "nearCoverage": 12121,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-90-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12121,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611665704149823,
+          "medianLuminanceRatio": 0.06093533858991083,
+          "medianRgbError": 0.018832347889565802,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-90-cpu-impostor",
+          "ratio": 0.6611665704149823,
+          "nearCoverage": 12121,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-180-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12121,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611665704149823,
+          "medianLuminanceRatio": 0.05643044400652538,
+          "medianRgbError": 0.021705548911627078,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-180-cpu-impostor",
+          "ratio": 0.6611665704149823,
+          "nearCoverage": 12121,
+          "passed": false
+        },
+        {
+          "id": "tree-material-15-270-cpu-impostor",
+          "sharedInterior": 7336,
+          "nearCoverage": 12121,
+          "otherCoverage": 8014,
+          "coverageRatio": 0.6611665704149823,
+          "medianLuminanceRatio": 0.07193707029020051,
+          "medianRgbError": 0.01769370485078157,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-15-270-cpu-impostor",
+          "ratio": 0.6611665704149823,
+          "nearCoverage": 12121,
+          "passed": false
+        },
+        {
+          "id": "tree-material-27-0-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.23168341484576807,
+          "medianRgbError": 0.06659199359683855,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-0-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-90-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.26249512866590524,
+          "medianRgbError": 0.05842428833540245,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-90-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-180-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.35798416829636326,
+          "medianRgbError": 0.048336479925408946,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-180-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        },
+        {
+          "id": "tree-material-27-270-cpu-impostor",
+          "sharedInterior": 5614,
+          "nearCoverage": 7978,
+          "otherCoverage": 8883,
+          "coverageRatio": 1.1134369516169467,
+          "medianLuminanceRatio": 0.28922910676679753,
+          "medianRgbError": 0.05852085142136932,
+          "passed": false
+        },
+        {
+          "id": "tree-alpha-27-270-cpu-impostor",
+          "ratio": 1.1134369516169467,
+          "nearCoverage": 7978,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "opticalDepthSource": "production optical depth",
+      "prototypeSignature": "tree-impostor-v4-855b7394",
+      "passed": false,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "webgpu-normal-rotation-0.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgpu-normal-rotation-90.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgpu-normal-rotation-180.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgpu-normal-rotation-270.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgpu-mist-near-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgpu-mist-near-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgpu-mist-proxy-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgpu-mist-proxy-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgpu-mist-cpu-impostor-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgpu-mist-cpu-impostor-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgpu-mist-gpu-impostor-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgpu-mist-gpu-impostor-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgpu-mist-origin-0.png",
+      "sha256": "d661e7a6a892287fe2240d34e3e783c170323c26ed0dc604dc288dd3b1899643"
+    },
+    {
+      "path": "webgpu-mist-origin-8000000.png",
+      "sha256": "49875e3502d667add122ec4c4deb26a4e9d35cc39766a7c45be53a717fe6ecdb"
+    },
+    {
+      "path": "webgpu-tree-16-0-near.png",
+      "sha256": "64c246589e49679582dee8b11af2b1e2855a6cbc6d004e0cf7d63fc1bdac3f08"
+    },
+    {
+      "path": "webgpu-tree-16-0-proxy.png",
+      "sha256": "51ccd1bc66bfe7b2a299c5c121e521d4494fa3131b9a4f5a3e05a29f3d709ba4"
+    },
+    {
+      "path": "webgpu-tree-16-0-cpu-impostor.png",
+      "sha256": "65d40bb4cfa713f5ec1283737725a25b2d3d9e3a7e543b3ea6af8d60986eb9a2"
+    },
+    {
+      "path": "webgpu-tree-16-0-gpu-impostor.png",
+      "sha256": "65d40bb4cfa713f5ec1283737725a25b2d3d9e3a7e543b3ea6af8d60986eb9a2"
+    },
+    {
+      "path": "webgpu-tree-16-90-near.png",
+      "sha256": "ac9c50d183d80fe21f3275b3c1f2869aca5e90954f718cc18aed9eeea490b43a"
+    },
+    {
+      "path": "webgpu-tree-16-90-proxy.png",
+      "sha256": "29f69d247613b02e1f8c7a8a3526469ae93eaefa52b3d1c51f3975572606ec91"
+    },
+    {
+      "path": "webgpu-tree-16-90-cpu-impostor.png",
+      "sha256": "b06017d07d9a9a2a191ec39e1115fc1eb7cf9991f507e86f7af9c2d1163f363e"
+    },
+    {
+      "path": "webgpu-tree-16-90-gpu-impostor.png",
+      "sha256": "b06017d07d9a9a2a191ec39e1115fc1eb7cf9991f507e86f7af9c2d1163f363e"
+    },
+    {
+      "path": "webgpu-tree-16-180-near.png",
+      "sha256": "a99d0e4c470b0f19a7ebcfe6e05e175ee11257268dc40e45c133b9a4e6ae795a"
+    },
+    {
+      "path": "webgpu-tree-16-180-proxy.png",
+      "sha256": "143ba66fda95fee24a830585ae7df1d343dee0a7a9505d1656f8f2f6c823bbb8"
+    },
+    {
+      "path": "webgpu-tree-16-180-cpu-impostor.png",
+      "sha256": "ee57a88d50f9ae5acf59516436b2ad17bd9ccd5aa9b0748a16603d1ecaa2084f"
+    },
+    {
+      "path": "webgpu-tree-16-180-gpu-impostor.png",
+      "sha256": "ee57a88d50f9ae5acf59516436b2ad17bd9ccd5aa9b0748a16603d1ecaa2084f"
+    },
+    {
+      "path": "webgpu-tree-16-270-near.png",
+      "sha256": "aa5d2c8bc8261ad077bf9e24f1f5706ba071b260f9d0c1603ac642ee790db737"
+    },
+    {
+      "path": "webgpu-tree-16-270-proxy.png",
+      "sha256": "70438e4f8c74cdd2211d8926ca9d6cbc0b925ea8b64c700c01fd0f5d07aaf78f"
+    },
+    {
+      "path": "webgpu-tree-16-270-cpu-impostor.png",
+      "sha256": "49864194c3295be7d217d6bce9b1c938dcd4cd89a80419d55261a534c637925b"
+    },
+    {
+      "path": "webgpu-tree-16-270-gpu-impostor.png",
+      "sha256": "431898d2ecad2bc8acb1f0ff32de9e60c95b45a8e2f5561ba0e7d90cab6746bd"
+    },
+    {
+      "path": "webgpu-tree-15-0-near.png",
+      "sha256": "27a2dce432787e4fcae832b6ae16c870ff79bc2d6cb7029e2dcaf1616662df16"
+    },
+    {
+      "path": "webgpu-tree-15-0-proxy.png",
+      "sha256": "62b8d84da0d493fe1ad65f881fd901b2a77ed870ae9af40167b7fcf4126bfbd9"
+    },
+    {
+      "path": "webgpu-tree-15-0-cpu-impostor.png",
+      "sha256": "f079eeac2a84f4021cd9208701361c60f0bcb7321c07848d573a4997cf42814a"
+    },
+    {
+      "path": "webgpu-tree-15-0-gpu-impostor.png",
+      "sha256": "f079eeac2a84f4021cd9208701361c60f0bcb7321c07848d573a4997cf42814a"
+    },
+    {
+      "path": "webgpu-tree-15-90-near.png",
+      "sha256": "77a37cc6e2726fcca1744820cfd5bc69cc195535eea1e02104a6bc9916ec3cec"
+    },
+    {
+      "path": "webgpu-tree-15-90-proxy.png",
+      "sha256": "17631150d9d00ce43d4175d8419b1b889f94969fc06b03aa691c534128e21581"
+    },
+    {
+      "path": "webgpu-tree-15-90-cpu-impostor.png",
+      "sha256": "c02883ea11d8a0b6e896bf362bbd70c37fbe085257a470482b34b70d1679a553"
+    },
+    {
+      "path": "webgpu-tree-15-90-gpu-impostor.png",
+      "sha256": "c02883ea11d8a0b6e896bf362bbd70c37fbe085257a470482b34b70d1679a553"
+    },
+    {
+      "path": "webgpu-tree-15-180-near.png",
+      "sha256": "fc509495e5a15aebb9935890c4f92d403dfc8110f9adb6139609ff8074b682d4"
+    },
+    {
+      "path": "webgpu-tree-15-180-proxy.png",
+      "sha256": "8efcf213ae51f1bc7fbe60ba580e4bc5c422be467be3c267b15b4bc519790fa0"
+    },
+    {
+      "path": "webgpu-tree-15-180-cpu-impostor.png",
+      "sha256": "643d07a68017f1b8d106932218796ee2930457a74a5c90372adac7dca02d0d87"
+    },
+    {
+      "path": "webgpu-tree-15-180-gpu-impostor.png",
+      "sha256": "643d07a68017f1b8d106932218796ee2930457a74a5c90372adac7dca02d0d87"
+    },
+    {
+      "path": "webgpu-tree-15-270-near.png",
+      "sha256": "38c0b39a731dc49d0f728b61839d82b69e65e41ffb2f65d155b6efeb277b4db8"
+    },
+    {
+      "path": "webgpu-tree-15-270-proxy.png",
+      "sha256": "d7eb99cf96631d2d5fbf8d5ffeea9e1d87a1b662c60c045d0f55ab5267cf50db"
+    },
+    {
+      "path": "webgpu-tree-15-270-cpu-impostor.png",
+      "sha256": "bf181265d2b6bf1e449a257683d69e0e5ae660e73d5dad45718399c800e05ca7"
+    },
+    {
+      "path": "webgpu-tree-15-270-gpu-impostor.png",
+      "sha256": "bf181265d2b6bf1e449a257683d69e0e5ae660e73d5dad45718399c800e05ca7"
+    },
+    {
+      "path": "webgpu-tree-27-0-near.png",
+      "sha256": "dae8e3a3e447f8a3947355d1daba5bb90e1f221ed0b9a0c85cc9db0b51300178"
+    },
+    {
+      "path": "webgpu-tree-27-0-proxy.png",
+      "sha256": "0bd61115e6b67fe58cfec1ed1f6cf8691a410c3cd42d7ad7aac9843c7fc32d61"
+    },
+    {
+      "path": "webgpu-tree-27-0-cpu-impostor.png",
+      "sha256": "7ad8eff6a8b0cb0760d0d6b0737f21ffb608c8893d263bd05d781326ee14f94c"
+    },
+    {
+      "path": "webgpu-tree-27-0-gpu-impostor.png",
+      "sha256": "7ad8eff6a8b0cb0760d0d6b0737f21ffb608c8893d263bd05d781326ee14f94c"
+    },
+    {
+      "path": "webgpu-tree-27-90-near.png",
+      "sha256": "1941f2cb4a6d13f197d9feef86c7a06415e1289d6bec135c5e1642e4d0e16e46"
+    },
+    {
+      "path": "webgpu-tree-27-90-proxy.png",
+      "sha256": "2b0563c3d6dbb2e00036f11ac2821b29a603fb147bf5c7c8fb82f7a338097914"
+    },
+    {
+      "path": "webgpu-tree-27-90-cpu-impostor.png",
+      "sha256": "14aa8955cb428da8fbf89fbb10f4677718ffef55a41d12d44d047b63e8767f46"
+    },
+    {
+      "path": "webgpu-tree-27-90-gpu-impostor.png",
+      "sha256": "14aa8955cb428da8fbf89fbb10f4677718ffef55a41d12d44d047b63e8767f46"
+    },
+    {
+      "path": "webgpu-tree-27-180-near.png",
+      "sha256": "46b46620443dd62872ad63b2dc7cabd9dbf966243a21332a242e1142768a32d3"
+    },
+    {
+      "path": "webgpu-tree-27-180-proxy.png",
+      "sha256": "0efeb3a3e0ac43e03a69d0327cf7ccd822f64f06f212c7b23641832f7c7d8322"
+    },
+    {
+      "path": "webgpu-tree-27-180-cpu-impostor.png",
+      "sha256": "a2a5d8b1147e0040a7d1f80738373099fe81ebdd104da5fd244890c511161750"
+    },
+    {
+      "path": "webgpu-tree-27-180-gpu-impostor.png",
+      "sha256": "a2a5d8b1147e0040a7d1f80738373099fe81ebdd104da5fd244890c511161750"
+    },
+    {
+      "path": "webgpu-tree-27-270-near.png",
+      "sha256": "65baecfeabdea62c7f216586372ae620b3af06841a7675d5258c842a3f3e3dac"
+    },
+    {
+      "path": "webgpu-tree-27-270-proxy.png",
+      "sha256": "40f7990a99da41d709097dd92f1158625269c61e4fb34a571d3e77d0d9786c3b"
+    },
+    {
+      "path": "webgpu-tree-27-270-cpu-impostor.png",
+      "sha256": "2bf99eeb39dd63c1cb016cb40734a5a9932b5c7aae6ff0165f417713f1890951"
+    },
+    {
+      "path": "webgpu-tree-27-270-gpu-impostor.png",
+      "sha256": "2bf99eeb39dd63c1cb016cb40734a5a9932b5c7aae6ff0165f417713f1890951"
+    },
+    {
+      "path": "webgl-normal-rotation-0.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgl-normal-rotation-90.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgl-normal-rotation-180.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgl-normal-rotation-270.png",
+      "sha256": "e915968ee5395399f170bc34510218b0f62a270f723f24f07f9d3bab37285543"
+    },
+    {
+      "path": "webgl-mist-near-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgl-mist-near-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgl-mist-proxy-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgl-mist-proxy-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgl-mist-cpu-impostor-100-0.png",
+      "sha256": "31c335e73edd764116a15dfe4cf2affdd303f5a27f571fbf12854169d2f11a5d"
+    },
+    {
+      "path": "webgl-mist-cpu-impostor-100-1.png",
+      "sha256": "2dde4cadd541ea1ce84aff79a849ad31e17f5212847fcab66db3c116301abab7"
+    },
+    {
+      "path": "webgl-mist-origin-0.png",
+      "sha256": "d661e7a6a892287fe2240d34e3e783c170323c26ed0dc604dc288dd3b1899643"
+    },
+    {
+      "path": "webgl-mist-origin-8000000.png",
+      "sha256": "21fea74fa34bb7ac7e7ac8595c068cd96afcea026f00c8d37950e9aa4c7e70fd"
+    },
+    {
+      "path": "webgl-tree-16-0-near.png",
+      "sha256": "a19b4184cc45e8b81725fb98055c04b935da610cce3750bae5afe9d526b0a49a"
+    },
+    {
+      "path": "webgl-tree-16-0-proxy.png",
+      "sha256": "ce9d0f80186fffdd80f7dca93d0529d464c472c1a9c762ef27141c0f5de66742"
+    },
+    {
+      "path": "webgl-tree-16-0-cpu-impostor.png",
+      "sha256": "65d40bb4cfa713f5ec1283737725a25b2d3d9e3a7e543b3ea6af8d60986eb9a2"
+    },
+    {
+      "path": "webgl-tree-16-90-near.png",
+      "sha256": "80e0568a39cd3768e44385cde49ebda5b9f7e1ee5d49e0441c6e03e44a3f4689"
+    },
+    {
+      "path": "webgl-tree-16-90-proxy.png",
+      "sha256": "c9c2522a0797ffd5ee8e8fed02b5d8520cba1e324faa4d49b9c84359b39cde7f"
+    },
+    {
+      "path": "webgl-tree-16-90-cpu-impostor.png",
+      "sha256": "9b70a9355cc5fc68b33bf8795e8cc26a40ef97577be391551936ee064a5648a9"
+    },
+    {
+      "path": "webgl-tree-16-180-near.png",
+      "sha256": "f07c7fe3f6e0ff684a83e3f6561897efec9881aabd58ef32e240d03bc5f3466f"
+    },
+    {
+      "path": "webgl-tree-16-180-proxy.png",
+      "sha256": "fb17999d40b45ba4baebc634024047bfed51a05436f731e7e146f991a43a0f3a"
+    },
+    {
+      "path": "webgl-tree-16-180-cpu-impostor.png",
+      "sha256": "ee57a88d50f9ae5acf59516436b2ad17bd9ccd5aa9b0748a16603d1ecaa2084f"
+    },
+    {
+      "path": "webgl-tree-16-270-near.png",
+      "sha256": "5ed8f8d4fd4d356260ff70e731a25e5c21ffa9b86640888a535c7b8e4b5e7ce3"
+    },
+    {
+      "path": "webgl-tree-16-270-proxy.png",
+      "sha256": "564906d7dd06ac02515f6824688fcfcc26b59542d1ad87fc9b5023dd3908df73"
+    },
+    {
+      "path": "webgl-tree-16-270-cpu-impostor.png",
+      "sha256": "d7333020d5b8030075360bb8d45455c65492edcc344a829820dfa8714dc7608d"
+    },
+    {
+      "path": "webgl-tree-15-0-near.png",
+      "sha256": "796a2ca50aec6dc9e25bb34415c68498812a4da890c548188832eb4149231e61"
+    },
+    {
+      "path": "webgl-tree-15-0-proxy.png",
+      "sha256": "771988e439de0dd21fa8d9b4ba5f9c86544794dcdbf9b00a5e76d4799cb48ff1"
+    },
+    {
+      "path": "webgl-tree-15-0-cpu-impostor.png",
+      "sha256": "b15efe974962d7423fd2a90bd942120f4664650befa7f25d4a19a6fa5627351e"
+    },
+    {
+      "path": "webgl-tree-15-90-near.png",
+      "sha256": "e358ca3cd8acc71154bef8844fe77ac991ee7e9213d356171ece785cee56ffd3"
+    },
+    {
+      "path": "webgl-tree-15-90-proxy.png",
+      "sha256": "5e4723404f519418d4cd871ee03f953eac04f0ee92034eed7910527546c95de6"
+    },
+    {
+      "path": "webgl-tree-15-90-cpu-impostor.png",
+      "sha256": "a65c7dab871061affba3b2a8f1bfe82c0ffc67cb7c23d2cf2eed018d42772684"
+    },
+    {
+      "path": "webgl-tree-15-180-near.png",
+      "sha256": "12605cdecdd055b08e0c1326d575184d8142235df727ed3ce0dd8bd847476d08"
+    },
+    {
+      "path": "webgl-tree-15-180-proxy.png",
+      "sha256": "db71804cbf2cdf330bcc499ba436b45b1f6e1cccf5cf78fc307d763b5525546b"
+    },
+    {
+      "path": "webgl-tree-15-180-cpu-impostor.png",
+      "sha256": "c0d94b28251167d260cbb0a4579de4291ad5cb6e1d1000c65c768d0d9e9a7254"
+    },
+    {
+      "path": "webgl-tree-15-270-near.png",
+      "sha256": "516da11ea3240170b1027fccaa0eb80d6ae334ff4273a9a04fa89b62c2e0be3f"
+    },
+    {
+      "path": "webgl-tree-15-270-proxy.png",
+      "sha256": "63fe709dfb0251306d3bd1dcd0400ce567dbf1ae27243f597cb6f5d85f094499"
+    },
+    {
+      "path": "webgl-tree-15-270-cpu-impostor.png",
+      "sha256": "bf181265d2b6bf1e449a257683d69e0e5ae660e73d5dad45718399c800e05ca7"
+    },
+    {
+      "path": "webgl-tree-27-0-near.png",
+      "sha256": "fe6c4536a8276d7d42fe4bebc885e9a5a4a8c833185c2d82a29a0f85e4b65cbe"
+    },
+    {
+      "path": "webgl-tree-27-0-proxy.png",
+      "sha256": "642e9bd219afe5c30ea202e67f3ce7713569a798a961d9fa7796a70feb964c46"
+    },
+    {
+      "path": "webgl-tree-27-0-cpu-impostor.png",
+      "sha256": "606e2ba5adef0dcf40e40be5f88a654a63ed24903633e0c93df8ac581468dcb2"
+    },
+    {
+      "path": "webgl-tree-27-90-near.png",
+      "sha256": "d84cdfe7452c05bfef76ba8aaf96980301f47cb4e4d2caef822fb28e29ad97f6"
+    },
+    {
+      "path": "webgl-tree-27-90-proxy.png",
+      "sha256": "23e5dfe6ad60cec5d53963623738c3d638ca1081ce2e1ede6459ac69021c9bf0"
+    },
+    {
+      "path": "webgl-tree-27-90-cpu-impostor.png",
+      "sha256": "e4ff1224b4af9799a0735c558d5e098fd5741be34bc219b8ac358d0954b59c53"
+    },
+    {
+      "path": "webgl-tree-27-180-near.png",
+      "sha256": "222dc8cd1898353c0b5144cfac37f0a9d8f6c5e07b61c96137a040b5c0a3cddb"
+    },
+    {
+      "path": "webgl-tree-27-180-proxy.png",
+      "sha256": "0efeb3a3e0ac43e03a69d0327cf7ccd822f64f06f212c7b23641832f7c7d8322"
+    },
+    {
+      "path": "webgl-tree-27-180-cpu-impostor.png",
+      "sha256": "ca63647f428e5a36d8c50e75f6d62b4900d06ce5b6215e7b4e154054ba5dd035"
+    },
+    {
+      "path": "webgl-tree-27-270-near.png",
+      "sha256": "d21e28e1163d73bda6e6265c3519c409388932b0ae0d1ac20744850162f1146d"
+    },
+    {
+      "path": "webgl-tree-27-270-proxy.png",
+      "sha256": "518161b0ca401f023a22bca95b3d94c055c520501aa7c29a675583a32c9667bc"
+    },
+    {
+      "path": "webgl-tree-27-270-cpu-impostor.png",
+      "sha256": "fa37f7a24f180587d9df1008e297aaff2cbee79e1dec5def03f757a5cbdcd805"
+    }
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": false,
+  "finishedAt": "2026-10-14T18:39:27.401Z"
+}
