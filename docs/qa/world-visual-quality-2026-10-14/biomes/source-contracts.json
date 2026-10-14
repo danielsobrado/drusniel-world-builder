@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "id": "heights-1",
+      "count": 4096,
+      "baseMismatch": 0,
+      "finalMismatch": 0,
+      "version": 1,
+      "passed": true
+    },
+    {
+      "id": "heights-918273",
+      "count": 4096,
+      "baseMismatch": 0,
+      "finalMismatch": 0,
+      "version": 1,
+      "passed": true
+    },
+    {
+      "id": "heights-20261014",
+      "count": 4096,
+      "baseMismatch": 0,
+      "finalMismatch": 0,
+      "version": 1,
+      "passed": true
+    },
+    {
+      "id": "imported-biome-ids",
+      "count": 4096,
+      "mismatches": 0,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

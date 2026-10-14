@@ -32,13 +32,21 @@ try {
   if(args.suite==='atmosphere') {
     poses=[poses[5],poses[6],{...poses[6],id:'original-07-reverse',yaw:poses[6].yaw+Math.PI},poses[7],poses[8]];
   }
-  if(!['original','atmosphere'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
+  if(['biome-classification','extended'].includes(args.suite)) {
+    const manifest=JSON.parse(await readFile(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json',root),'utf8'));
+    poses=args.suite==='extended'?manifest.additional:
+      [manifest.original[10],manifest.additional.find(p=>p.expectedBiomeId===11)];
+    if(poses.some(p=>!p))throw new Error('Frozen biome manifest is incomplete.');
+  }
+  if(!['original','atmosphere','biome-classification','extended'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
   for(const pose of poses) {
     console.log(`Visual QA: ${pose.id}`);
     try {
       await page.evaluate(p=>window.__worldVisualQa.cut(p),pose);
       await page.evaluate(()=>window.__worldVisualQa.settle());
       const state=await page.evaluate(()=>window.__worldVisualQa.diagnostics());
+      if(pose.expectedBiomeId!==undefined&&state.actualBiomeId!==pose.expectedBiomeId)
+        throw new Error(`Frozen biome ${pose.id} expected ${pose.expectedBiomeId}, got ${state.actualBiomeId}.`);
       const files=[`${pose.id}-hud.png`,`${pose.id}.png`];
       await page.screenshot({path:path.join(out,files[0])});
       if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Clean capture mode was blocked.');

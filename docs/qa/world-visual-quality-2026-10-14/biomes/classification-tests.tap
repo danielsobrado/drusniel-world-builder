@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: glaciers require cold humid elevated climate with strict boundaries
+ok 1 - glaciers require cold humid elevated climate with strict boundaries
+  ---
+  duration_ms: 0.506665
+  type: 'test'
+  ...
+# Subtest: all standard imported terrain IDs and custom 32 retain their source identities
+ok 2 - all standard imported terrain IDs and custom 32 retain their source identities
+  ---
+  duration_ms: 1.899825
+  type: 'test'
+  ...
+# Subtest: custom definitions and explicit edits survive save/load across the old glacier pose
+ok 3 - custom definitions and explicit edits survive save/load across the old glacier pose
+  ---
+  duration_ms: 16.031933
+  type: 'test'
+  ...
+# Subtest: lowland grass carries no snow; high ground above the band is white
+ok 4 - lowland grass carries no snow; high ground above the band is white
+  ---
+  duration_ms: 0.457317
+  type: 'test'
+  ...
+# Subtest: glacier and tundra hold snow at any height
+ok 5 - glacier and tundra hold snow at any height
+  ---
+  duration_ms: 0.167943
+  type: 'test'
+  ...
+# Subtest: steep faces shed snow and windward faces lose it to the lee
+ok 6 - steep faces shed snow and windward faces lose it to the lee
+  ---
+  duration_ms: 0.096009
+  type: 'test'
+  ...
+# Subtest: hollows hold more than ridges
+ok 7 - hollows hold more than ridges
+  ---
+  duration_ms: 0.131498
+  type: 'test'
+  ...
+# Subtest: grass is kept off snow in the surface mask, following the bake
+ok 8 - grass is kept off snow in the surface mask, following the bake
+  ---
+  duration_ms: 2.757641
+  type: 'test'
+  ...
+# Subtest: taiga keeps green conifers while tundra selects the existing snowy alpine crowns
+ok 9 - taiga keeps green conifers while tundra selects the existing snowy alpine crowns
+  ---
+  duration_ms: 10.990565
+  type: 'test'
+  ...
+# Subtest: alpine profiles permit sparse mountain trees and fade out before bare glacier
+ok 10 - alpine profiles permit sparse mountain trees and fade out before bare glacier
+  ---
+  duration_ms: 1.275912
+  type: 'test'
+  ...
+# Subtest: authored snowfall matches reference coverage tuning and rejects inverted coverage bands
+ok 11 - authored snowfall matches reference coverage tuning and rejects inverted coverage bands
+  ---
+  duration_ms: 0.820456
+  type: 'test'
+  ...
+# Subtest: forest-pack crowns prefer taiga while alpine assets are limited to tundra
+ok 12 - forest-pack crowns prefer taiga while alpine assets are limited to tundra
+  ---
+  duration_ms: 0.113264
+  type: 'test'
+  ...
+# Subtest: inland water classifies as water even though its cells keep a land biome
+ok 13 - inland water classifies as water even though its cells keep a land biome
+  ---
+  duration_ms: 1.55544
+  type: 'test'
+  ...
+# Subtest: the land class retreats to the waterline, not to the tile boundary
+ok 14 - the land class retreats to the waterline, not to the tile boundary
+  ---
+  duration_ms: 0.427509
+  type: 'test'
+  ...
+# Subtest: a page without a water field still classifies marine tiles
+ok 15 - a page without a water field still classifies marine tiles
+  ---
+  duration_ms: 0.672976
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 92.037137

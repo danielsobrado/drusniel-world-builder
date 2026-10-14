@@ -9,7 +9,7 @@ import { DEFAULT_WEATHER_EFFECTS, resolveWeatherEffects } from '../src/editor/we
 
 const surface = yaml.load(readFileSync(new URL('../editor.config.yaml', import.meta.url), 'utf8')).stylizedSurface;
 
-test('shipped cold biome palettes always pick snowy alpine crowns and keep generic conifers elsewhere', () => {
+test('taiga keeps green conifers while tundra selects the existing snowy alpine crowns', () => {
   const variants = surface.assets.treeVariants.filter(variant => variant.scene.includes('/alpine/'));
   const additional = new Map(), allowed = new Map(), preferred = new Map();
   variants.forEach((variant, i) => {
@@ -26,7 +26,7 @@ test('shipped cold biome palettes always pick snowy alpine crowns and keep gener
       const candidate = { stableId: `snow:${i}`, scale: 1 };
       const habitat = { tileId, profileKey, patchCoverage: 0.8, patchEdge: 0.2, slope: 0.1, waterWeight: 1 };
       const record = registry.select(candidate, habitat);
-      assert.ok(record.prototypeIndex >= 2, 'a generic green conifer entered snow country');
+      assert.ok(tileId===9?record.prototypeIndex<2:record.prototypeIndex>=2, 'cold biome asset eligibility disagrees with the selected ecology');
       assert.deepEqual(registry.select(candidate, habitat), record, 'selection is deterministic');
     }
   }
@@ -53,4 +53,15 @@ test('authored snowfall matches reference coverage tuning and rejects inverted c
   assert.deepEqual(resolveWeatherEffects(source), DEFAULT_WEATHER_EFFECTS);
   assert.throws(() => resolveWeatherEffects({ snowfall: { regionalFullCoverage: 0.1 } }), /must exceed/);
   assert.throws(() => resolveWeatherEffects({ snowfall: { regionalFadeRate: 0 } }), /regionalFadeRate/);
+});
+
+
+test('forest-pack crowns prefer taiga while alpine assets are limited to tundra',()=>{
+ for(const name of ['tree-wide-01','tree-wide-02','tree-wide-03','tree-narrow-01']) {
+  const variant=surface.assets.treeVariants.find(v=>v.scene===`/assets/trees/forest-pack/${name}.glb`);
+  assert.deepEqual(variant.preferredTileIds,[9]);
+ }
+ for(const variant of surface.assets.treeVariants.filter(v=>v.scene.includes('/alpine/'))) {
+  assert.deepEqual(variant.tileIds,[10]);assert.deepEqual(variant.preferredTileIds,[10]);
+ }
 });

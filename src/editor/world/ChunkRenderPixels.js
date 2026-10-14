@@ -76,7 +76,7 @@ export function createSurfaceMaskConfig(stylizedConfig, { tileSize = null } = {}
     blendCells: Math.max(0.5, stylizedConfig?.path?.blendCells ?? 2.5),
     roadTileId: stylizedConfig?.path?.tileId ?? 13,
     waterTileId: stylizedConfig?.water?.tileId ?? 0,
-    grassTileIds: [...(stylizedConfig?.grass?.tileIds ?? [3, 4, 5, 6, 7, 8, 9, 12, 14])],
+    grassTileIds: [...(stylizedConfig?.grass?.tileIds ?? [3, 4, 5, 6, 7, 8, 9, 10, 12, 14])],
     // Depth at which a cell counts as fully wet for surface classification.
     // Roughly a grass blade's height: shallower than this and blades still
     // read as bank growth standing in the margin rather than drowned ones.

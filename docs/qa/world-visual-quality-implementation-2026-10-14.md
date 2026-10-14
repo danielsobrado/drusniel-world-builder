@@ -277,3 +277,26 @@ original 07 in both prescribed directions and originals 06/08/09. Inspection sho
 consistent lit canopies and distance atmosphere; the former washed-out cutout
 contrast is reduced without retuning exposure. The current production build also
 passes. VQ-06 acceptance is complete; VQ-07–13 remain to be implemented.
+
+## VQ-07 climate and cold-biome composition
+
+Procedural glaciers now require the prescribed cold, humid and elevated climate.
+The remaining climate branches, base heights, river/sea geometry and imported
+classification are unchanged. Tundra cover is 0.35, with meadow eligibility added;
+glacier remains fully snowy and bare. Existing green forest-pack crowns prefer
+taiga, and snow-painted alpine assets are limited to tundra. Terrain-material
+recipe revision 4 invalidates derived pages without rewriting saved terrain.
+Unedited procedural cells regenerate with the corrected current recipe on load.
+The actual checkout's world format stays at version 6 and generator at version 1.
+
+The focused classification/snow/persistence suite passes 15 tests.
+[Source-contract verification](world-visual-quality-2026-10-14/biomes/source-contracts.json)
+finds zero base/final height mismatches across 4,096 samples for each of the three
+seeds and zero changes to 4,096 real imported IDs. Synthetic tests cover all
+thirteen standard IDs, custom 32, its definition, and explicit height/tile edits
+across the old glacier pose through save/load. Of the twelve old views, only
+original 11 changes: glacier 11 becomes temperate deciduous forest 6.
+The existing atlas signature includes variant eligibility, so all original assets
+were refreshed with its new signature; every albedo/normal PNG is bit-identical
+to the accepted VQ-06 pixels. No source asset or atlas dimension changes.
+The frozen additional manifest and grounded classification captures are next.

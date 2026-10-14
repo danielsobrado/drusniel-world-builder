@@ -1,3 +1,4 @@
+import { classifyProceduralBiome } from './proceduralBiomeClassification.js';
 import {
   WORLD_DEFAULT_HEIGHT_SCALE,
   WORLD_DEFAULT_SEED,
@@ -111,31 +112,8 @@ export class ProceduralWorldGenerator {
     ) * 0.25;
     const { temperature, moisture } = this.sampleClimate(cellX, cellZ);
 
-    if (height <= this.seaLevel) {
-      return 0;
-    }
-    if (height > this.heightScale * 0.9) {
-      return 11;
-    }
-    if (temperature < -0.62) {
-      return moisture < 0.15 ? 10 : 9;
-    }
-    if (temperature > 0.52 && moisture < -0.18) {
-      return 1;
-    }
-    if (moisture < -0.52) {
-      return temperature < 0 ? 2 : 3;
-    }
-    if (moisture > 0.58 && height < this.seaLevel + 4) {
-      return 12;
-    }
-    if (moisture > 0.6) {
-      return temperature > 0.35 ? 7 : 8;
-    }
-    if (moisture > 0.08) {
-      return temperature > 0.3 ? 5 : 6;
-    }
-    return temperature > 0.25 ? 3 : 4;
+    return classifyProceduralBiome({height,temperature,moisture,
+      heightScale:this.heightScale,seaLevel:this.seaLevel});
   }
 
   sampleTile(cellX, cellZ) {

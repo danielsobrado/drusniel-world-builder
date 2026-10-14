@@ -6,7 +6,7 @@ const classification = Object.freeze({
   snowLine: 700,
   snowFade: 250,
   snowSlopeMax: 0.55,
-  snowBiomeCover: Object.freeze({ 10: 0.7, 11: 1 }),
+  snowBiomeCover: Object.freeze({ 10: 0.35, 11: 1 }),
   snowPatchScale: 60,
   snowPatchStrength: 0.45,
   snowWindShift: 0.25,
@@ -25,7 +25,10 @@ test('lowland grass carries no snow; high ground above the band is white', () =>
 test('glacier and tundra hold snow at any height', () => {
   assert.equal(snowAccumulation({ ...flat, height: 20, tileId: 11 }, classification), 1);
   const tundra = snowAccumulation({ ...flat, height: 20, tileId: 10 }, classification);
-  assert.ok(tundra > 0.5 && tundra < 1);
+  assert.equal(tundra, 0.35);
+  assert.equal(snowAccumulation({ ...flat, height: 950, tileId: 10 }, classification), 1);
+  assert.equal(snowAccumulation({ ...flat, height: 950, tileId: 11 }, classification), 1);
+  for(const tileId of [10,11])assert.equal(snowAccumulation({ ...flat, height: 20, slope: .55, tileId }, classification), 0);
 });
 
 test('steep faces shed snow and windward faces lose it to the lee', () => {

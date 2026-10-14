@@ -1,0 +1,88 @@
+{
+  "poses": [
+    {
+      "id": "original-01",
+      "x": -5667,
+      "z": 93,
+      "before": 1,
+      "after": 1
+    },
+    {
+      "id": "original-02",
+      "x": 501,
+      "z": -2833,
+      "before": 2,
+      "after": 2
+    },
+    {
+      "id": "original-03",
+      "x": -14373,
+      "z": -3467,
+      "before": 3,
+      "after": 3
+    },
+    {
+      "id": "original-04",
+      "x": -8957,
+      "z": 7737,
+      "before": 4,
+      "after": 4
+    },
+    {
+      "id": "original-05",
+      "x": -15817,
+      "z": -3703,
+      "before": 5,
+      "after": 5
+    },
+    {
+      "id": "original-06",
+      "x": -1945,
+      "z": 7795,
+      "before": 6,
+      "after": 6
+    },
+    {
+      "id": "original-07",
+      "x": 2005,
+      "z": 2941,
+      "before": 7,
+      "after": 7
+    },
+    {
+      "id": "original-08",
+      "x": -1997,
+      "z": -2889,
+      "before": 8,
+      "after": 8
+    },
+    {
+      "id": "original-09",
+      "x": -15631,
+      "z": -11255,
+      "before": 9,
+      "after": 9
+    },
+    {
+      "id": "original-10",
+      "x": -4803,
+      "z": 14351,
+      "before": 10,
+      "after": 10
+    },
+    {
+      "id": "original-11",
+      "x": 75,
+      "z": -7561,
+      "before": 11,
+      "after": 6
+    },
+    {
+      "id": "original-12",
+      "x": 9647,
+      "z": 1483,
+      "before": 12,
+      "after": 12
+    }
+  ]
+}

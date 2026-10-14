@@ -47,7 +47,7 @@ classification:
   snowSlopeMax: 0.55
   # Snow at any height by terrain tile (Azgaar biome id): tundra, glacier.
   snowBiomeCover:
-    10: 0.7
+    10: 0.35
     11: 1
   # Drifts break the snow edge; windward faces lose snow, hollows gain it.
   snowPatchScale: 60

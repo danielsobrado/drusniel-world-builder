@@ -90,7 +90,7 @@ world:
     snowFade: 250
     snowSlopeMax: 0.55
     snowBiomeCover:
-      10: 0.7
+      10: 0.35
       11: 1
     rockSlopeStart: 0.18
     rockSlopeFull: 0.62
@@ -362,6 +362,7 @@ stylizedSurface:
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
+        preferredTileIds: [9]
       # Two more distinct conifer crowns from the same pack, 630 and 624
       # triangles. Verified distinct rather than transforms of tree-wide-01.
       - scene: /assets/trees/forest-pack/tree-wide-02.glb
@@ -369,16 +370,19 @@ stylizedSurface:
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
+        preferredTileIds: [9]
       - scene: /assets/trees/forest-pack/tree-wide-03.glb
         trunkMaterial: Tree_Trunk_01
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
+        preferredTileIds: [9]
       - scene: /assets/trees/forest-pack/tree-narrow-01.glb
         trunkMaterial: Tree_Trunk_02
         leafMaterial: Tree_Branches_02
         species: conifer_narrow
         scale: 1
+        preferredTileIds: [9]
       # Two genuinely distinct tree geometries extracted from the 42.8 MB whole
       # scene. Its other placements remain saved as individual offline GLBs.
       # These two carry every broadleaf species. `species` is a list because one
@@ -486,14 +490,14 @@ stylizedSurface:
       # scripts/prepare-alpine-tree-assets.mjs: billboards stripped, needles and
       # settled snow merged into one vertex-coloured leaf part, leaves decimated to
       # 2 000 triangles (5 666 and 3 596 in all). The crown keeps its painted snow
-      # (COLOR_0), so they stay in the cold biomes: taiga and tundra.
+      # (COLOR_0), so they stay in tundra; green forest-pack crowns serve taiga.
       - scene: /assets/trees/alpine/tree10.glb
         trunkMaterial: Alpine bark
         leafMaterial: Evergreen needles
         species: conifer_narrow
         scale: 0.357
-        tileIds: [9, 10]
-        preferredTileIds: [9, 10]
+        tileIds: [10]
+        preferredTileIds: [10]
         # Its crown sits ~0.5 m off the stem; enough, at a chunk edge, to put the
         # trunk collider in the neighbouring chunk.
         pivot: trunk
@@ -502,8 +506,8 @@ stylizedSurface:
         leafMaterial: Evergreen needles
         species: [conifer_narrow, conifer_wide]
         scale: 0.357
-        tileIds: [9, 10]
-        preferredTileIds: [9, 10]
+        tileIds: [10]
+        preferredTileIds: [10]
         # Windswept: the crown streams ~3 m downwind of the stem, so a bounds pivot
         # would stand the trunk (and its collider) that far off the placement.
         pivot: trunk
@@ -959,7 +963,7 @@ stylizedSurface:
         # half-width a blade costs more in fill than the instances it replaced.
         compensation: 1
         maximumWiden: 1.35
-    tileIds: [3, 4, 5, 6, 7, 8, 9, 12, 14]
+    tileIds: [3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
     # Blade silhouette, matched to grass-test's meadow (2026-09-28): its blades are
     # 1.5 × 0.2 donor units, about 0.54 × 0.07 m, and together they read as one
     # knee-high field rather than a short sward of separate blades. The earlier

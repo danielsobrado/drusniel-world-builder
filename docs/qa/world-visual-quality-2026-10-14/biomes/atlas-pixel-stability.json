@@ -1,0 +1,295 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "path": "public/assets/impostors/trees/prototype-0-albedo.png",
+      "sha256": "65fafec001dd2559c2cb6c5f1be8ee6f235fcb2d4c3a5ec27fba08529f1ccecd",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-0-normal.png",
+      "sha256": "eb1e69a92ab7ba275ede55e3f5aed3b21cb259c1aff9f69f2bc186b998907ff7",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-1-albedo.png",
+      "sha256": "4733345e74e3e053a317aa476b488a2d3b2b5d38947fb331b83bf4d554bace25",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-1-normal.png",
+      "sha256": "ff95c68fdc3c9b2af2b19e1cddf754c9bcedddb36adb56a6ebda633eddd87281",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-10-albedo.png",
+      "sha256": "2bc7c0daee81962aa22d929f8efa9252eec867902e4ab493cf9615fab7a57f83",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-10-normal.png",
+      "sha256": "e6f3ed2806aa871a4f00a8b76fd50e75339e9c435b45fb6dc7df028b9bcfe95f",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-11-albedo.png",
+      "sha256": "6c870f719e0bf1e9c69c723c5e19a97615553c333203aea239bc835c08409f01",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-11-normal.png",
+      "sha256": "daa7d273b2de94028b22872017ce30af9925dca3d0d900f440965f14c8f83dfe",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-12-albedo.png",
+      "sha256": "1bfa3d7fee940e69b83b2018d6a4b4b1a2eb62ac5fe4405f4f580b482f1aee32",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-12-normal.png",
+      "sha256": "bbe90adf52f83e80e4a8b05624bdd991d9d130e91e69f0381ea225c9ee747c1c",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-13-albedo.png",
+      "sha256": "6f624bf1eea6e3676476fd56fbdf13e5e928c983e94bc6dbd3335b497edf2ac1",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-13-normal.png",
+      "sha256": "7f1f28af498ae929016469f68ce92be4cbea19816e5e37245f2ef44140cc28c0",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-14-albedo.png",
+      "sha256": "08d45bd7e14aeded1c9d65105f56b286159042a6c5e82742e46fac89ee4a3423",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-14-normal.png",
+      "sha256": "f7f8653cded0c57ba31e83b5126bcaa26bebce43402408d776313cf88c29fa87",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-15-albedo.png",
+      "sha256": "7f8849735b63b2f99917fbb7b4acbb13267a7ee131a7289678886c1120e0e5cf",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-15-normal.png",
+      "sha256": "34e0c7f9113163935ae9d49c04f036ac148d576558c85221c2fff26878cce34b",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-16-albedo.png",
+      "sha256": "f996c48c9ff9f72f3473678e8e90a74f2dc626e526cb6ba390fda65b933aad42",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-16-normal.png",
+      "sha256": "9779382d78dac83ceac9a69d678ec6d2f9bb15876214ddbe8e03692cb6ec2b4c",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-17-albedo.png",
+      "sha256": "067dc28d3d6b3a8bb2605a55b90f3d6294e1acd6ebe255b0da456e86b9cb726d",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-17-normal.png",
+      "sha256": "d423f9cd6c08eb200d840e0a900c21c433c6ff9a371fcc9584c7c6cf86642e9d",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-18-albedo.png",
+      "sha256": "e86d451ff4fce20fee7cdd9c87830a62940fcd0289609bfd53a9bb0811256c7f",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-18-normal.png",
+      "sha256": "726951b3aba9b23b788a325317c6db2d7daf953dc77942b4689fef7828c5d510",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-19-albedo.png",
+      "sha256": "98a96014ba9af294b61c6a0c01536c30d534a40f3091a69726229ab04f38158e",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-19-normal.png",
+      "sha256": "d067a06680194951a39137d83de8327333f9f4058c88529c165ef87bdbe467e9",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-2-albedo.png",
+      "sha256": "d325a585f01a8626b3cc682368ce12623982de14d846c920ffaf4672b5e9eb1e",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-2-normal.png",
+      "sha256": "92ebf9fcff0e0f471af795e00ce35fe0d198f579810ae150c2c0b4695e955b62",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-20-albedo.png",
+      "sha256": "34b491b73d5a42f87544c6fecd3a4180040e0444a4caadca7c990ae1987ef22d",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-20-normal.png",
+      "sha256": "45ec52b824b99f4c0e5383569d44f5ad622cc4d0126261bd9dd70bf6c1314078",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-21-albedo.png",
+      "sha256": "42db72e66943e46d732d1217174dd042409f7b39674193d28f6f9c8622a41893",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-21-normal.png",
+      "sha256": "c6ee2c05199eb14071aba0777b8db604375c8f1fbf4ed9ba1b3c5f686f7fa9a3",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-22-albedo.png",
+      "sha256": "de1d50d125de8a057af29c90b8843fa5c633b8c51f7022ff6d1b2c0cff111e69",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-22-normal.png",
+      "sha256": "552b29d66e5eda1a45965169e8a49e48fe41c701f71df651684cafbf944098e2",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-23-albedo.png",
+      "sha256": "f6625e803c534757b8183f486761ad4d35f3be1090119f21fe930e620fe737b1",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-23-normal.png",
+      "sha256": "a9556f819b2c0d547caa38bfbe9383e9bab8f477a54beffcd7c52713458137b8",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-24-albedo.png",
+      "sha256": "bcf83a875d397e33a452c41b0a8341d065dabb436dd98f4c205efca889c4b21f",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-24-normal.png",
+      "sha256": "9b9b16eb5f9d00aa55aec9ef0fdf228bc7d2bf4f27bc01bf9290c0bc157f26e1",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-25-albedo.png",
+      "sha256": "2b7ff7c419142106f4e2f3bf58464e0fdd43e7ee7807a04f684294537c45e2f5",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-25-normal.png",
+      "sha256": "7fc57586e0f698d99564e29bec02bf8484fc02b34220a55c9ba02dff9013cffb",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-26-albedo.png",
+      "sha256": "e006aadb62f5aed61a7c62d5691e551a814e10e0101c47bd8b7074ac9fd392c6",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-26-normal.png",
+      "sha256": "1651bea67eafbdb8394faa6b203252685f3a2295882e9872e3efaaa08671ae5d",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-27-albedo.png",
+      "sha256": "46dff311131a70a61886fd2c31bccacd04ca555e569b92c741daddd076077e39",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-27-normal.png",
+      "sha256": "9a3710cb53a2c1c12ab788af36b3b8ebdabb79ca67a8314beb4db805c63e6f06",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-28-albedo.png",
+      "sha256": "dc77fccb3c4fa0ac37e42a408ee7287d2ccc2c10ef3554edac92cea4ef0e51cb",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-28-normal.png",
+      "sha256": "41c4574b1aa7ac19bfb8a9ae0f25c86e0e1cdfbdb7dfa8ec3b99c1fcd3994f28",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-3-albedo.png",
+      "sha256": "dccb1384ab10a85c32f65f58c1d29027461d92a6b8aed620ac159512ac3c93aa",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-3-normal.png",
+      "sha256": "8b380100142b0a066dd7bfd8e8077440a247ee891b9d8da3a3a65b0f3996e1d0",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-4-albedo.png",
+      "sha256": "27fdbdd9dd3adb9dbea2ac31467061e194d03776cbc1a415dd7b110168e5f0b0",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-4-normal.png",
+      "sha256": "e321aba3a33890f2f7b7e741a823102fd31e7d1de8f18f51f617a101a47256a1",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-5-albedo.png",
+      "sha256": "4ec46678bd05876a13b39c771787cd838eeb07fa1f9ed17072571af4cd0a1528",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-5-normal.png",
+      "sha256": "3142ee42eaac874e5fbe1f8a9500139432b88f1842a73f59c5e908ef6cec294d",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-6-albedo.png",
+      "sha256": "4ea87d67a083048d0367a04384d04b4ab3341a1375e032ecf17e71c8916e9835",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-6-normal.png",
+      "sha256": "14b98076f524965dfa1750afe88b0193bd2766b23ba502700ba5aafd8947ded7",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-7-albedo.png",
+      "sha256": "d0a47793c2b1c7c6c1add328e55c019fe15ac2874cfed9d6e5c7ed7b826afd41",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-7-normal.png",
+      "sha256": "e1e9bd08fcc600ee5b2c5ba4e128241852b4f324e71f5b0edca1dd0a6f339b0c",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-8-albedo.png",
+      "sha256": "8a05d18f5d401153480e6da5ada39d4c421ee1d6f1d706b68f750e6f2f6afd94",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-8-normal.png",
+      "sha256": "fa4ffc2cadd9112af56a4b897722c1e58e50c4a68829984a185367285d87a0fc",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-9-albedo.png",
+      "sha256": "b66c8f0e6526e5e5e6955073c20e85c47bc4092e2138bb1dbf960a3e06303ccc",
+      "unchanged": true
+    },
+    {
+      "path": "public/assets/impostors/trees/prototype-9-normal.png",
+      "sha256": "7e7266b641adeb5ee587b79c7342c118e9addaeadeab348dca3c098757ee30ea",
+      "unchanged": true
+    }
+  ]
+}
