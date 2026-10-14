@@ -54,8 +54,10 @@ try {
  for(const kind of ['sand','snow']) {
   const config=structuredClone(raw);config.ambientEffects=null;config.sky.cloudShadows.enabled=false;
   config.grass.system='clumps';config.groundCover.enabled=false;config.contactShade.enabled=false;
-  config.path.paint.enabled=false;config.path.naturalTrail.enabled=false;config.snowSurface.enabled=false;
-  config.snowWake.enabled=false;
+  config.path.paint={...(config.path.paint??{}),enabled:false};
+  config.path.naturalTrail={...(config.path.naturalTrail??{}),enabled:false};
+  config.snowSurface={...(config.snowSurface??{}),enabled:false};
+  config.snowWake={...(config.snowWake??{}),enabled:false};
   const base=kind==='sand'?[184,162,124]:[220,230,234],id=kind==='sand'?1:11,maps=[];
   const map=(data,size,format,type)=>{const t=texture(data,size,format,type);maps.push(t);return t;};
   const tileTexture=map(new Uint8Array([...base,id]),1,THREE.RGBAFormat);tileTexture.colorSpace=THREE.SRGBColorSpace;
