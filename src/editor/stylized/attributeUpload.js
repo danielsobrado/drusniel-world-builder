@@ -44,9 +44,10 @@ const MAX_PENDING_RANGES = 8;
  * re-dirties them and trees behind you stay wrong — usually invisible, because a
  * fade left at 0 is what the dithered material reads.
  *
- * They are appended rather than unioned into one span. The backend issues one
- * `writeBuffer` per range, so two far-apart chunks stay two small uploads instead of
- * the hundred-kilobyte span between them. Past `MAX_PENDING_RANGES` the span wins:
+ * Overlapping writes are coalesced before the draw: the CPU array already holds
+ * the latest values, so uploading an intersection twice only repeats GPU work.
+ * Disjoint ranges remain separate, keeping distant chunks as small uploads.
+ * Past `MAX_PENDING_RANGES` the span wins:
  * a mesh that has gone that many rebuilds without being drawn is cheaper to
  * re-upload whole than to describe.
  */
@@ -58,21 +59,29 @@ export function markAttributeSubrangeUpdated(
 ) {
   if (!attribute || maxIndex < minIndex) return 0;
   const itemSize = attribute.itemSize;
-  let start = minIndex * itemSize;
-  let length = (maxIndex - minIndex + 1) * itemSize;
+  const start = minIndex * itemSize;
+  const length = (maxIndex - minIndex + 1) * itemSize;
   const pending = attribute.updateRanges ?? [];
-  if (pending.length >= MAX_PENDING_RANGES) {
-    let end = start + length;
-    for (const range of pending) {
-      if (range.start < start) start = range.start;
-      if (range.start + range.count > end) end = range.start + range.count;
-    }
-    length = end - start;
-    attribute.clearUpdateRanges();
-  }
+  const previousFloats = pending.reduce((sum, range) => sum + range.count, 0);
   attribute.addUpdateRange(start, length);
+  pending.sort((left, right) => left.start - right.start);
+  let write = 0;
+  for (const range of pending) {
+    const previous = pending[write - 1];
+    if (previous && range.start <= previous.start + previous.count) {
+      previous.count = Math.max(previous.start + previous.count, range.start + range.count) - previous.start;
+    } else {
+      pending[write++] = range;
+    }
+  }
+  pending.length = write;
+  if (pending.length > MAX_PENDING_RANGES) {
+    pending[0].count = pending.at(-1).start + pending.at(-1).count - pending[0].start;
+    pending.length = 1;
+  }
   attribute.needsUpdate = true;
-  const bytes = length * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
+  const queuedFloats = pending.reduce((sum, range) => sum + range.count, 0);
+  const bytes = Math.max(0, queuedFloats - previousFloats) * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
   if (bytes > 0) {
     PerfCounters.inc(counter, bytes);
   }

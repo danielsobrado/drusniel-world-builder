@@ -71,6 +71,32 @@ test('an uploaded range is not re-sent by the next mark', () => {
   assert.deepEqual(attribute.updateRanges, [{ start: 1, count: 3 }]);
 });
 
+test('repeated writes before a draw upload the latest values once', () => {
+  const attribute = createAttribute(4);
+  let queuedBytes = 0;
+  for (let revision = 1; revision <= 12; revision++) {
+    attribute.array.fill(revision, 8, 28);
+    queuedBytes += markAttributeSubrangeUpdated(attribute, 2, 6);
+  }
+  const gpu = new Float32Array(attribute.array.length);
+  let transferred = 0;
+  for (const range of attribute.upload()) {
+    gpu.set(attribute.array.subarray(range.start, range.start + range.count), range.start);
+    transferred += range.count * 4;
+  }
+  assert.equal(transferred, 20 * 4, 'overlapping queued writes transfer only one copy');
+  assert.equal(queuedBytes, transferred, 'diagnostics count newly queued bytes');
+  assert.deepEqual([...gpu.subarray(8, 28)], Array(20).fill(12));
+});
+
+test('an overlapping write joins pending ranges without resending their intersections', () => {
+  const attribute = createAttribute(1);
+  for (const [start, end] of [[10, 20], [40, 45], [0, 5], [4, 42]]) {
+    markAttributeSubrangeUpdated(attribute, start, end);
+  }
+  assert.deepEqual(attribute.upload(), [{ start: 0, count: 46 }]);
+});
+
 test('two far-apart chunks stay two small ranges, not the span between them', () => {
   const attribute = createAttribute(16);
   markAttributeSubrangeUpdated(attribute, 0, 1);

@@ -174,6 +174,23 @@ lint, generated UI checks, production asset validation, and the production
 build. Hardware acceptance is being repeated against this merged runtime;
 the earlier failed captures are not treated as passes.
 
+The fixed-source dense-grass capture at `f6f8922b` settled in 78.1 seconds,
+recovered to complete scenery readiness 19.576 seconds after stopping, and
+reported no browser errors. It measured 106.91 FPS and 15.6 ms p95, but its
+29 hitches (2.26%) still exceeded the 2% gate. A separately profiled repeat
+settled and measured 17 hitches (1.35%); profiling adds overhead and that run
+does not replace uninstrumented acceptance. The final twelve seconds of its
+CPU profile attributed about 369 ms to attribute `writeBuffer` calls and
+486 ms to uniform-binding `writeBuffer` calls.
+
+The upload helper also retained overlapping pending ranges independently.
+Repeated writes before a draw could therefore resend the same latest array
+contents several times. Pending intervals now coalesce on overlap or adjacency,
+while separated ranges remain separate and culled-frame updates remain queued.
+The existing eight-range bound remains. Upload diagnostics count newly queued
+bytes. Two regressions fail before the fix and pass afterward; the repeated-write
+fixture transfers 80 bytes once instead of four copies totaling 320 bytes.
+
 Commands used:
 
 ```sh
