@@ -402,7 +402,7 @@ export class PlayerController {
     if (this.forward.lengthSq() > 0) this.forward.normalize();
     this.right.crossVectors(this.forward, this.up).normalize();
 
-    const acceptsMovement = !this.uiBlocked && (this.pointerLocked || this.harnessActive || this.mobile.enabled);
+    const acceptsMovement = !this.uiBlocked && !this.cutBlocked && (this.pointerLocked || this.harnessActive || this.mobile.enabled);
     const ascend = acceptsMovement && (this.keys.has('Space') || this.mobile.ascend) ? 1 : 0;
     const descend = acceptsMovement && (
       this.keys.has('ControlLeft')

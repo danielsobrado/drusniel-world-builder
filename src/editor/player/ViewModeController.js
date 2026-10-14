@@ -41,7 +41,7 @@ export class ViewModeController {
     this.canvas = terrainView.renderer.domElement;
     this.mode = PLAYER_MODE_EDIT;
     this.freeFly = new FreeFlyController({ canvas: this.canvas, settings: freeFlySettings,
-      isBlocked: () => this.playerController.uiBlocked || Boolean(this.cameraOverride) });
+      isBlocked: () => this.playerController.uiBlocked || this.playerController.cutBlocked || Boolean(this.cameraOverride) });
     /**
      * Walking suspended for in-world editing.
      *

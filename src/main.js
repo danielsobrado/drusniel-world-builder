@@ -27,6 +27,7 @@ import { EditorCamera } from './editor/EditorCamera.js';
 import { EditorUi } from './editor/EditorUi.js';
 import { InfiniteTerrainView } from './editor/InfiniteTerrainView.js';
 import { MacroFarTerrainView } from './editor/world/MacroFarTerrainView.js';
+import { CameraCutCoordinator } from './editor/world/CameraCutCoordinator.js';
 import { WorldMapController } from './editor/map/WorldMapController.js';
 import { WorldMapUi } from './editor/map/WorldMapUi.js';
 import { GameplayOverlayController } from './editor/ui/GameplayOverlayController.js';
@@ -547,6 +548,7 @@ async function initializeEditor(restoreState, resources, startup) {
     tileSize: config.map.tileSize,
     getViewModeController: () => viewModeController,
     getPlayerController: () => playerController,
+    getCameraCutCoordinator: () => cameraCutCoordinator,
     getCampaign: () => controller?.campaign ?? null,
     overlayController: gameplayOverlayController,
   });
@@ -593,6 +595,23 @@ const kitTowns = kitTownsEnabled();
     freeFlySettings: config.exploration.freeFly,
   });
   resources.own(viewModeController);
+  const shiftWorldForOrigin = (rebase) => {
+    viewModeController.shiftWorld(rebase.shiftX, rebase.shiftZ);
+    controller.refreshObjects();
+    constructionView.rebase();
+    characterView?.shiftWorld(rebase.shiftX, rebase.shiftZ);
+    snowPowder.shiftWorld(rebase.shiftX, rebase.shiftZ);
+    worldAmbience.shiftWorld(rebase.shiftX, rebase.shiftZ);
+    stylizedSurface.shiftOrigin(rebase.shiftX, rebase.shiftZ);
+    exploration.shiftWorld(rebase.shiftX, rebase.shiftZ);
+    townRuntime?.rebase();
+  };
+  const cameraCutCoordinator = new CameraCutCoordinator({ terrainView, playerController,
+    viewModeController, shiftWorld: shiftWorldForOrigin,
+    refreshObjects: () => objectView.syncResidency(true),
+    notifyCut: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.CAMERA_TELEPORT),
+  });
+  resources.own(cameraCutCoordinator);
   cameraViewKeyHandler = (event) => viewModeController.handleCameraViewKey(event);
   let previousViewMode = viewModeController.mode;
   let previousActiveCamera = viewModeController.camera;
@@ -613,7 +632,11 @@ const kitTowns = kitTownsEnabled();
       }
       previousActiveCamera = activeCamera;
     }),
-    playerController.subscribeTeleports(() => {
+    playerController.subscribeTeleports((pose, previous) => {
+      if (!cameraCutCoordinator.active && (pose.x !== previous.x || pose.z !== previous.z)) {
+        const canonical = terrainView.floatingOrigin.toCanonical(pose.x, pose.z);
+        terrainView.cutToCanonical(canonical, performance.now());
+      }
       postProcessingController.invalidate(
         POST_PROCESSING_RESET_REASONS.CAMERA_TELEPORT,
       );
@@ -1349,6 +1372,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       sceneSettingsRuntime,
       terrainView,
       viewModeController,
+      cameraCutCoordinator,
       playerController,
       thirdPersonCamera,
       characterView,
@@ -1569,15 +1593,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const rebase = terrainView.updateFloatingOrigin(renderFocus);
     if (rebase) {
       PerfCounters.inc('floatingOriginSnaps');
-      viewModeController.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      controller.refreshObjects();
-      constructionView.rebase();
-      characterView?.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      snowPowder.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      worldAmbience.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      stylizedSurface.shiftOrigin(rebase.shiftX, rebase.shiftZ);
-      exploration.shiftWorld(rebase.shiftX, rebase.shiftZ);
-      townRuntime?.rebase();
+      shiftWorldForOrigin(rebase);
       viewModeController.readFocusWorld(renderFocus);
     }
     if (profiling) perfQa.mark('floatingOrigin');

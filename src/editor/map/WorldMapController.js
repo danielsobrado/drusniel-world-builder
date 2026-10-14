@@ -16,6 +16,7 @@ export class WorldMapController {
     tileSize,
     getViewModeController,
     getPlayerController,
+    getCameraCutCoordinator = () => null,
     getCampaign,
     overlayController = null,
   }) {
@@ -24,6 +25,7 @@ export class WorldMapController {
     this.tileSize = tileSize;
     this.getViewModeController = getViewModeController;
     this.getPlayerController = getPlayerController;
+    this.getCameraCutCoordinator = getCameraCutCoordinator;
     this.getCampaign = getCampaign;
     this.overlayController = overlayController;
 
@@ -172,6 +174,14 @@ export class WorldMapController {
 
     // Close first so uiBlocked clears before requesting pointer lock.
     this.close();
+
+    const cuts = this.getCameraCutCoordinator();
+    if (cuts) {
+      void cuts.cut({ x: target.x, z: target.z, yaw: playerController.yaw,
+        pitch: playerController.pitch, mode: 'player' }).catch(error => console.error('World map camera cut failed.', error));
+      playerController.requestPointerLock();
+      return;
+    }
 
     if (viewModeController.mode === PLAYER_MODE_WALK) {
       playerController.setPose({ x: render.x, z: render.z });

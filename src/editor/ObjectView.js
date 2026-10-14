@@ -3,6 +3,7 @@ import { disposeModelParts } from './assets/modelParts.js';
 import { createObjectModelParts } from './ObjectModelLibrary.js';
 import { ObjectLodController } from './ObjectLodController.js';
 import { PerfCounters } from './performance/qa/PerfCounters.js';
+import { collectResidentObjects, residentDescriptorSignature } from './world/residentObjectQueries.js';
 import { ObjectPlacementResolver } from './placement/ObjectPlacementResolver.js';
 import {
   createInstancedRenderers,
@@ -221,20 +222,13 @@ export class ObjectView {
   }
 
   collectResidentObjects() {
-    const slots = this.terrainView.slots;
-    if (!Array.isArray(slots)) return this.objectMap.list();
-    const chunkSize = this.terrainView.worldStore?.chunkSize;
-    const bounds = residentObjectCellBounds(slots, chunkSize);
-    const objects = bounds ? this.objectMap.queryBounds(bounds) : [];
-    if (this.selectedObjectId && !objects.some((object) => object.id === this.selectedObjectId)) {
-      const selected = this.objectMap.getById(this.selectedObjectId);
-      if (selected) objects.push(selected);
-    }
-    return objects;
+    return collectResidentObjects({ slots: this.terrainView.slots,
+      chunkSize: this.terrainView.worldStore?.chunkSize, objectMap: this.objectMap,
+      selectedObjectId: this.selectedObjectId });
   }
 
   syncResidency(force = false) {
-    const focusKey = this.terrainView.focusChunkKey ?? null;
+    const focusKey = residentDescriptorSignature(this.terrainView.slots);
     const objectRevision = this.objectMap.revision;
     if (!force
         && focusKey === this.lastResidencyFocusKey
@@ -325,7 +319,7 @@ export class ObjectView {
       this.refreshFoundations(renderer, foundationPlacements);
     }
 
-    this.lastResidencyFocusKey = this.terrainView.focusChunkKey ?? null;
+    this.lastResidencyFocusKey = residentDescriptorSignature(this.terrainView.slots);
     this.lastResidencyObjectRevision = this.objectMap.revision;
     this.lastResidencySelection = this.selectedObjectId;
     this.updatePerformanceCounters(grouped);

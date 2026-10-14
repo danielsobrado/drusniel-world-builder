@@ -577,6 +577,16 @@ export class InfiniteTerrainView {
     });
   }
 
+  cutToCanonical({ x, z }, timestamp = performance.now()) {
+    if (![x, z, timestamp].every(Number.isFinite)) throw new Error('Camera cut coordinates and timestamp must be finite.');
+    this.lastFocus = { x, z };
+    this.lastFocusTimestamp = timestamp;
+    this.focusVelocity.x = 0;
+    this.focusVelocity.z = 0;
+    this.streamingChunkState?.fill(Number.POSITIVE_INFINITY);
+    this.updateStreamingFrame({ x, z }, timestamp, true);
+  }
+
   async updateStreaming(focusWorld, timestamp = performance.now(), force = false) {
     this.updateStreamingFrame(focusWorld, timestamp, force);
   }
@@ -686,8 +696,12 @@ export class InfiniteTerrainView {
     velocity.z = 0;
     if (this.lastFocus && Number.isFinite(this.lastFocusTimestamp)) {
       const deltaSeconds = Math.max(0.001, (timestamp - this.lastFocusTimestamp) / 1000);
-      velocity.x = (focusWorld.x - this.lastFocus.x) / deltaSeconds;
-      velocity.z = (focusWorld.z - this.lastFocus.z) / deltaSeconds;
+      const dx = focusWorld.x - this.lastFocus.x;
+      const dz = focusWorld.z - this.lastFocus.z;
+      if (Math.hypot(dx, dz) <= Math.max(2 * this.chunkWorldSize, 250 * deltaSeconds)) {
+        velocity.x = dx / deltaSeconds;
+        velocity.z = dz / deltaSeconds;
+      }
     }
     if (this.lastFocus) {
       this.lastFocus.x = focusWorld.x;
