@@ -93,6 +93,7 @@ export function createTerrainMaterial({
   // The ambient surface terms (blown snow/sand streaks, rime), resolved once by
   // the caller from the ambient layer's block. Null (or disabled) adds no nodes.
   surfaceEffects = null,
+  surfaceDriftWind = null,
   // The live sun (a Vector3 the sky turns in place for each time of day), for
   // snow shading. Without it, the configured sun.
   sunDirection = null,
@@ -378,7 +379,7 @@ export function createTerrainMaterial({
       baseNormal: snowNormal, pathMask: snowPressed, settings: snowSettings,
     }) : null;
     const drift = createTerrainDriftNodes({worldXZ,grassCoverage,snow:bakedSurface.snow,
-      wetness:bakedSurface.wetness,pathMask,pressed:footprints.pressed,settings:surfaceEffects?.blownStreaks});
+      wetness:bakedSurface.wetness,pathMask,pressed:footprints.pressed,settings:surfaceEffects?.blownStreaks,wind:surfaceDriftWind});
     const driftColor = drift ? drift.apply(surface.color) : surface.color;
     const detailedSnowColor = snowDetail ? snowDetail.color(driftColor) : driftColor;
     const printed = footprints.apply(snowSurface ? snowSurface.apply(detailedSnowColor) : detailedSnowColor);

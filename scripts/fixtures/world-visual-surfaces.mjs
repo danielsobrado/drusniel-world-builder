@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import {float,vec4} from 'three/tsl';
+import {float,vec2,vec4} from 'three/tsl';
 import {loadEditorConfig} from '/src/config/loadEditorConfig.js';
 import {createTerrainMaterial} from '/src/editor/terrainMaterial.js';
 import {getTerrainMaterialBakeGpuState} from '/src/editor/materials/TerrainMaterialBakeGpu.js';
@@ -64,7 +64,8 @@ try {
   const options={tileTexture,heightTexture:map(new Float32Array(4),2,THREE.RedFormat,THREE.FloatType),
    surfaceMaskTexture:map(new Uint8Array([0,0,0,255]),1,THREE.RGBAFormat),
    forestFloorTexture:map(new Uint8Array([0,0,0,255]),1,THREE.RGBAFormat),
-   chunkCenter:{value:new THREE.Vector2()},chunkWorldSize:20,width:1,stylizedConfig:config};
+   chunkCenter:{value:new THREE.Vector2()},chunkWorldSize:20,width:1,stylizedConfig:config,
+   surfaceDriftWind:{direction:vec2(1,0),envelope:float(1),gust:float(.5)}};
   // chunkCenter is a real uniform supplied through the material's slot binding.
   const {uniform}=await import('three/tsl');options.chunkCenter=uniform(new THREE.Vector2());
   const materials={};
@@ -98,7 +99,8 @@ try {
     if(values.on[i]>1&&values.off[i]<=1)clipped++;
    }
    const alpha=settings[kind].maxOpacity;
-   state.report.checks.push({id:`${kind}-bounded-albedo`,maximumChange,alpha,clipped,nonfinite,passed:maximumChange<=alpha+1e-5&&clipped===0&&nonfinite===0});
+   state.report.checks.push({id:`${kind}-bounded-albedo`,maximumChange,alpha,clipped,nonfinite,
+    passed:maximumChange>1e-6&&maximumChange<=alpha+1e-5&&clipped===0&&nonfinite===0});
   }finally {scene.remove(mesh);geometry.dispose();Object.values(materials).forEach(m=>m.dispose());maps.forEach(t=>t.dispose());}
  }
  state.report.passed=state.report.checks.every(c=>c.passed);
