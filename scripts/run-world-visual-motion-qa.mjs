@@ -7,6 +7,7 @@ import {fileHash} from './lib/world-visual-report.mjs';
 import {motionChecks,videoMetadata,selectMotionFrames,motionContactSheet} from './lib/world-visual-motion-report.mjs';
 import {createBrowserErrorMonitor} from './lib/perf-browser-errors.mjs';
 import {waitForPerfRunLock} from './perf-run-lock.mjs';
+import {observeVisualAudio,beginVisualFunctionalCheck,finishVisualFunctionalCheck} from './lib/world-visual-functional.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/motion'));
 const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
@@ -20,7 +21,7 @@ try {
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const c of cases.filter(c=>!only||only.includes(c.id))) {
   console.log(`Motion QA: ${c.id}`);
-  const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});page=await context.newPage();errors=createBrowserErrorMonitor(page);
+  const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});await observeVisualAudio(context);page=await context.newPage();errors=createBrowserErrorMonitor(page);
   const clipDir=path.join(out,c.id),framesDir=path.join(clipDir,'frames');await mkdir(framesDir,{recursive:true});
   let recording=false;
   try {
@@ -37,6 +38,7 @@ try {
    const preparation=await page.evaluate(request=>window.__worldVisualQa.prepareMotion(request),request);
    const beforeIdentity=synthetic?await page.evaluate(()=>window.__worldVisualQa.syntheticIdentity()):null;
    const beforeResidency=synthetic?await page.evaluate(()=>window.__worldVisualQa.syntheticResidency()):null;
+   const functionalBefore=await beginVisualFunctionalCheck(page);
    if(preparation.diagnostics.actualBiomeId!==c.startPose.expectedBiomeId)throw new Error('Motion start biome changed.');
    if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Motion capture UI refused entry.');
    const captured=[],video=path.join(clipDir,'capture.webm');let lastSaved=-Infinity;
@@ -50,8 +52,9 @@ try {
    await page.screencast.stop();recording=false;
    await writeFile(path.join(clipDir,'raw-motion.json'),JSON.stringify({request,motion,captured},null,2));
    const inputReleased=await page.evaluate(()=>window.__editor.playerController.keys.size===0);
+   const functional=await finishVisualFunctionalCheck(page,functionalBefore);
    const metadata=await videoMetadata(video),analysis=motionChecks(motion),contacts=selectMotionFrames(motion,captured);
-   const checks=[...analysis.checks,{id:'input released at completion',passed:inputReleased},
+   const checks=[...analysis.checks,...functional.checks,{id:'input released at completion',passed:inputReleased},
     {id:'recorded dimensions and actual output cadence verified',passed:metadata.width===1600&&metadata.height===900&&metadata.framesPerSecond>0,detail:metadata},
     {id:'contact frames align to actual simulation states',passed:contacts.every(f=>f.alignmentErrorMs<250),detail:contacts.map(f=>({marker:f.marker,errorMs:f.alignmentErrorMs}))}];
    let eviction=null;
@@ -72,7 +75,7 @@ try {
      {id:'synthetic feet stay on flat terrain',passed:motion.frames.every(f=>f.position.footY>=synthetic.height-.05)},
      {id:'synthetic path remains unobstructed',passed:analysis.travel.every(segment=>Math.abs(segment.distance-4*motion.settings.walkSpeed*(segment.start===6?motion.settings.runMultiplier:1))<1)});
    }
-   const state={...c,...motion,synthetic,eviction,preparation,analysis,metadata,capturedFrames:captured,contacts,checks,adapter};
+   const state={...c,...motion,synthetic,eviction,functional,preparation,analysis,metadata,capturedFrames:captured,contacts,checks,adapter};
    const stateFile=path.join(clipDir,'state.json');await writeFile(stateFile,JSON.stringify(state,null,2));
    report.clips.push({id:c.id,cameraMode:c.cameraMode,startPose:c.startPose,contacts,analysis,metadata,state:path.relative(out,stateFile),video:path.relative(out,video)});
    report.checks.push(...checks.map(check=>({...check,id:`${c.id}: ${check.id}`})));
