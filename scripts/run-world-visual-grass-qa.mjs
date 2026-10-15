@@ -10,7 +10,7 @@ const option=(name,fallback)=>process.argv.includes(name)?process.argv[process.a
 const repo=fileURLToPath(new URL('../',import.meta.url));
 const out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/grass'));
 const fixture=option('--fixture','grass');
-if(!['grass','paths'].includes(fixture))throw new Error('Unknown meadow fixture.');
+if(!['grass','paths','lod'].includes(fixture))throw new Error('Unknown meadow fixture.');
 const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
