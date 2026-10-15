@@ -1,0 +1,1135 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "9e1751c0c6e866d0d0058006ac8822fb67b4a5f1",
+  "dirtyFiles": [],
+  "startedAt": "2026-10-15T06:35:04.391Z",
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "cases": [
+        {
+          "id": "border-16-distance-2",
+          "border": 16,
+          "distance": 2,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 136463,
+            "cards": 124801,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 226466,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 238543
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 78,
+              "building": 0,
+              "stems": 136463,
+              "bands": {
+                "high": 9915,
+                "medium": 69929,
+                "low": 34859,
+                "veryLow": 21760
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 20,
+              "building": 0,
+              "stems": 124801,
+              "bands": {
+                "cards": 124801
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 36
+            },
+            "tiles": 98,
+            "building": 0,
+            "stems": 136463,
+            "triangles": 928057,
+            "bladeTriangles": 678455,
+            "cardTriangles": 249602
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-8",
+          "border": 16,
+          "distance": 8,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 169047,
+            "cards": 131690,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 265939,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 513026
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 88,
+              "building": 0,
+              "stems": 169047,
+              "bands": {
+                "high": 29889,
+                "medium": 69955,
+                "low": 46475,
+                "veryLow": 22728
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 200
+            },
+            "cards": {
+              "tiles": 21,
+              "building": 0,
+              "stems": 131690,
+              "bands": {
+                "cards": 131690
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 37
+            },
+            "tiles": 109,
+            "building": 0,
+            "stems": 169047,
+            "triangles": 1182715,
+            "bladeTriangles": 919335,
+            "cardTriangles": 263380
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-30",
+          "border": 16,
+          "distance": 30,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 278189,
+            "cards": 138579,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 402100,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 613037
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 122,
+              "building": 0,
+              "stems": 278189,
+              "bands": {
+                "high": 40000,
+                "medium": 139974,
+                "low": 67717,
+                "veryLow": 30498
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 22,
+              "building": 0,
+              "stems": 138579,
+              "bands": {
+                "cards": 138579
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 36
+            },
+            "tiles": 144,
+            "building": 0,
+            "stems": 278189,
+            "triangles": 1767107,
+            "bladeTriangles": 1489949,
+            "cardTriangles": 277158
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-70",
+          "border": 16,
+          "distance": 70,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 298096,
+            "cards": 173024,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 467869,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.00531005859375,
+            "visibleGrassPixels": 648361
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 148,
+              "building": 0,
+              "stems": 298096,
+              "bands": {
+                "high": 40000,
+                "medium": 140000,
+                "low": 73568,
+                "veryLow": 44528
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 27,
+              "building": 0,
+              "stems": 173024,
+              "bands": {
+                "cards": 173024
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 37
+            },
+            "tiles": 175,
+            "building": 0,
+            "stems": 298096,
+            "triangles": 1907472,
+            "bladeTriangles": 1561424,
+            "cardTriangles": 346048
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-2",
+          "border": 64,
+          "distance": 2,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 136458,
+            "cards": 114555,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 216155,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 265451
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 78,
+              "building": 0,
+              "stems": 136458,
+              "bands": {
+                "high": 9981,
+                "medium": 69897,
+                "low": 34816,
+                "veryLow": 21764
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 17,
+              "building": 0,
+              "stems": 114555,
+              "bands": {
+                "cards": 114555
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 34
+            },
+            "tiles": 95,
+            "building": 0,
+            "stems": 136458,
+            "triangles": 907796,
+            "bladeTriangles": 678686,
+            "cardTriangles": 229110
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-8",
+          "border": 64,
+          "distance": 8,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 169042,
+            "cards": 114555,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 248739,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 540874
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 88,
+              "building": 0,
+              "stems": 169042,
+              "bands": {
+                "high": 29952,
+                "medium": 69926,
+                "low": 46432,
+                "veryLow": 22732
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 200
+            },
+            "cards": {
+              "tiles": 17,
+              "building": 0,
+              "stems": 114555,
+              "bands": {
+                "cards": 114555
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 33
+            },
+            "tiles": 105,
+            "building": 0,
+            "stems": 169042,
+            "triangles": 1148664,
+            "bladeTriangles": 919554,
+            "cardTriangles": 229110
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-30",
+          "border": 64,
+          "distance": 30,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 278178,
+            "cards": 149000,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 412456,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 641489
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 122,
+              "building": 0,
+              "stems": 278178,
+              "bands": {
+                "high": 40000,
+                "medium": 139971,
+                "low": 67704,
+                "veryLow": 30503
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 22,
+              "building": 0,
+              "stems": 149000,
+              "bands": {
+                "cards": 149000
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 38
+            },
+            "tiles": 144,
+            "building": 0,
+            "stems": 278178,
+            "triangles": 1787884,
+            "bladeTriangles": 1489884,
+            "cardTriangles": 298000
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-70",
+          "border": 64,
+          "distance": 70,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 298096,
+            "cards": 155889,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 450669,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.008554458618164,
+            "visibleGrassPixels": 626228
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 148,
+              "building": 0,
+              "stems": 298096,
+              "bands": {
+                "high": 40000,
+                "medium": 140000,
+                "low": 73568,
+                "veryLow": 44528
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 23,
+              "building": 0,
+              "stems": 155889,
+              "bands": {
+                "cards": 155889
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 34
+            },
+            "tiles": 171,
+            "building": 0,
+            "stems": 298096,
+            "triangles": 1873202,
+            "bladeTriangles": 1561424,
+            "cardTriangles": 311778
+          },
+          "wind": 0
+        }
+      ],
+      "checks": [
+        {
+          "id": "border-16-distance-2",
+          "blades": 136463,
+          "cards": 124801,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 226466,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 238543,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-8",
+          "blades": 169047,
+          "cards": 131690,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 265939,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 513026,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-30",
+          "blades": 278189,
+          "cards": 138579,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 402100,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 613037,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-70",
+          "blades": 298096,
+          "cards": 173024,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 467869,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.00531005859375,
+          "visibleGrassPixels": 648361,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-2",
+          "blades": 136458,
+          "cards": 114555,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 216155,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 265451,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-8",
+          "blades": 169042,
+          "cards": 114555,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 248739,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 540874,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-30",
+          "blades": 278178,
+          "cards": 149000,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 412456,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 641489,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-70",
+          "blades": 298096,
+          "cards": 155889,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 450669,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.008554458618164,
+          "visibleGrassPixels": 626228,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "passed": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "cases": [
+        {
+          "id": "border-16-distance-2",
+          "border": 16,
+          "distance": 2,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 136463,
+            "cards": 124801,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 226466,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 238559
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 78,
+              "building": 0,
+              "stems": 136463,
+              "bands": {
+                "high": 9915,
+                "medium": 69929,
+                "low": 34859,
+                "veryLow": 21760
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 20,
+              "building": 0,
+              "stems": 124801,
+              "bands": {
+                "cards": 124801
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 36
+            },
+            "tiles": 98,
+            "building": 0,
+            "stems": 136463,
+            "triangles": 928057,
+            "bladeTriangles": 678455,
+            "cardTriangles": 249602
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-8",
+          "border": 16,
+          "distance": 8,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 169047,
+            "cards": 131690,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 265939,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 513049
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 88,
+              "building": 0,
+              "stems": 169047,
+              "bands": {
+                "high": 29889,
+                "medium": 69955,
+                "low": 46475,
+                "veryLow": 22728
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 200
+            },
+            "cards": {
+              "tiles": 21,
+              "building": 0,
+              "stems": 131690,
+              "bands": {
+                "cards": 131690
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 37
+            },
+            "tiles": 109,
+            "building": 0,
+            "stems": 169047,
+            "triangles": 1182715,
+            "bladeTriangles": 919335,
+            "cardTriangles": 263380
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-30",
+          "border": 16,
+          "distance": 30,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 278189,
+            "cards": 138579,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 402100,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 612864
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 122,
+              "building": 0,
+              "stems": 278189,
+              "bands": {
+                "high": 40000,
+                "medium": 139974,
+                "low": 67717,
+                "veryLow": 30498
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 22,
+              "building": 0,
+              "stems": 138579,
+              "bands": {
+                "cards": 138579
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 36
+            },
+            "tiles": 144,
+            "building": 0,
+            "stems": 278189,
+            "triangles": 1767107,
+            "bladeTriangles": 1489949,
+            "cardTriangles": 277158
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-16-distance-70",
+          "border": 16,
+          "distance": 70,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 298096,
+            "cards": 173024,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 467869,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.00531005859375,
+            "visibleGrassPixels": 648323
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 148,
+              "building": 0,
+              "stems": 298096,
+              "bands": {
+                "high": 40000,
+                "medium": 140000,
+                "low": 73568,
+                "veryLow": 44528
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 27,
+              "building": 0,
+              "stems": 173024,
+              "bands": {
+                "cards": 173024
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 37
+            },
+            "tiles": 175,
+            "building": 0,
+            "stems": 298096,
+            "triangles": 1907472,
+            "bladeTriangles": 1561424,
+            "cardTriangles": 346048
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-2",
+          "border": 64,
+          "distance": 2,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 136458,
+            "cards": 114555,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 216155,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 265439
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 78,
+              "building": 0,
+              "stems": 136458,
+              "bands": {
+                "high": 9981,
+                "medium": 69897,
+                "low": 34816,
+                "veryLow": 21764
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 17,
+              "building": 0,
+              "stems": 114555,
+              "bands": {
+                "cards": 114555
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 34
+            },
+            "tiles": 95,
+            "building": 0,
+            "stems": 136458,
+            "triangles": 907796,
+            "bladeTriangles": 678686,
+            "cardTriangles": 229110
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-8",
+          "border": 64,
+          "distance": 8,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 169042,
+            "cards": 114555,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 248739,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 540888
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 88,
+              "building": 0,
+              "stems": 169042,
+              "bands": {
+                "high": 29952,
+                "medium": 69926,
+                "low": 46432,
+                "veryLow": 22732
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 200
+            },
+            "cards": {
+              "tiles": 17,
+              "building": 0,
+              "stems": 114555,
+              "bands": {
+                "cards": 114555
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 33
+            },
+            "tiles": 105,
+            "building": 0,
+            "stems": 169042,
+            "triangles": 1148664,
+            "bladeTriangles": 919554,
+            "cardTriangles": 229110
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-30",
+          "border": 64,
+          "distance": 30,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 278178,
+            "cards": 149000,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 412456,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.000901222229004,
+            "visibleGrassPixels": 641502
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 122,
+              "building": 0,
+              "stems": 278178,
+              "bands": {
+                "high": 40000,
+                "medium": 139971,
+                "low": 67704,
+                "veryLow": 30503
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 22,
+              "building": 0,
+              "stems": 149000,
+              "bands": {
+                "cards": 149000
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 38
+            },
+            "tiles": 144,
+            "building": 0,
+            "stems": 278178,
+            "triangles": 1787884,
+            "bladeTriangles": 1489884,
+            "cardTriangles": 298000
+          },
+          "wind": 0
+        },
+        {
+          "id": "border-64-distance-70",
+          "border": 64,
+          "distance": 70,
+          "eyeHeight": 1.7,
+          "counts": {
+            "blades": 298096,
+            "cards": 155889,
+            "ineligibleRoots": 0,
+            "fullStrengthRoots": 450669,
+            "fullStrengthTooNear": 0,
+            "minimumFullStrengthDistance": 9.008554458618164,
+            "visibleGrassPixels": 626268
+          },
+          "readiness": {
+            "blades": {
+              "tiles": 148,
+              "building": 0,
+              "stems": 298096,
+              "bands": {
+                "high": 40000,
+                "medium": 140000,
+                "low": 73568,
+                "veryLow": 44528
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 194
+            },
+            "cards": {
+              "tiles": 23,
+              "building": 0,
+              "stems": 155889,
+              "bands": {
+                "cards": 155889
+              },
+              "visibleMissing": 0,
+              "visibleCapacityLag": 0,
+              "inViewMissing": 0,
+              "inViewCapacityLag": 0,
+              "resident": 34
+            },
+            "tiles": 171,
+            "building": 0,
+            "stems": 298096,
+            "triangles": 1873202,
+            "bladeTriangles": 1561424,
+            "cardTriangles": 311778
+          },
+          "wind": 0
+        }
+      ],
+      "checks": [
+        {
+          "id": "border-16-distance-2",
+          "blades": 136463,
+          "cards": 124801,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 226466,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 238559,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-8",
+          "blades": 169047,
+          "cards": 131690,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 265939,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 513049,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-30",
+          "blades": 278189,
+          "cards": 138579,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 402100,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 612864,
+          "passed": true
+        },
+        {
+          "id": "border-16-distance-70",
+          "blades": 298096,
+          "cards": 173024,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 467869,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.00531005859375,
+          "visibleGrassPixels": 648323,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-2",
+          "blades": 136458,
+          "cards": 114555,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 216155,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 265439,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-8",
+          "blades": 169042,
+          "cards": 114555,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 248739,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 540888,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-30",
+          "blades": 278178,
+          "cards": 149000,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 412456,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.000901222229004,
+          "visibleGrassPixels": 641502,
+          "passed": true
+        },
+        {
+          "id": "border-64-distance-70",
+          "blades": 298096,
+          "cards": 155889,
+          "ineligibleRoots": 0,
+          "fullStrengthRoots": 450669,
+          "fullStrengthTooNear": 0,
+          "minimumFullStrengthDistance": 9.008554458618164,
+          "visibleGrassPixels": 626268,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "passed": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "webgpu-border-16-distance-2.png",
+      "sha256": "32c3b5cd314c4428ec43d836c01a0b4868d4f09634108d5ab09e012473fed754"
+    },
+    {
+      "path": "webgpu-border-16-distance-8.png",
+      "sha256": "17fe0e3a97b7d32059b227e8c37732d41b72dee35aef8bb7ff354e26fdb1f438"
+    },
+    {
+      "path": "webgpu-border-16-distance-30.png",
+      "sha256": "8245773cbb15e88833397c3f56d65e325a2d183eae0cfa21685335098e51f8f8"
+    },
+    {
+      "path": "webgpu-border-16-distance-70.png",
+      "sha256": "b345e72ff0ae79d8ee506b767d5a9259104a8d87998bf7d7cca7644309822ded"
+    },
+    {
+      "path": "webgpu-border-64-distance-2.png",
+      "sha256": "f56ec8242f44a8626ad45a0f011c14d084ea7235c18d82848a9d7035ac7e30be"
+    },
+    {
+      "path": "webgpu-border-64-distance-8.png",
+      "sha256": "053052e7a1163c4c5d9261615a511ba7604e196e455593c3914366257c7578f2"
+    },
+    {
+      "path": "webgpu-border-64-distance-30.png",
+      "sha256": "d3bcd4584d3596a0735fb3dc38d5d070aa3af059a1b5c25e617c67077085ce70"
+    },
+    {
+      "path": "webgpu-border-64-distance-70.png",
+      "sha256": "a779dc7274b1ff242d687ab05ca7ba7acb220094293e9dce9a3a1a4a721bfe06"
+    },
+    {
+      "path": "webgl-border-16-distance-2.png",
+      "sha256": "46533794ab534dbc15d3b8b506ca360ba05672106effeaf38d4ff1fa65e23634"
+    },
+    {
+      "path": "webgl-border-16-distance-8.png",
+      "sha256": "22128abded23738b28207bc4e1cf4a50e74095ab16cb3cbb6301a89eb8002d35"
+    },
+    {
+      "path": "webgl-border-16-distance-30.png",
+      "sha256": "0f1121026de2cb23546907b4e9143968b4ba43cf8ad47807c0c560385599504c"
+    },
+    {
+      "path": "webgl-border-16-distance-70.png",
+      "sha256": "a7fe29da7a8608c05d8004b8cba9d299f48c8518d41c2ebfff7b27f75a24a812"
+    },
+    {
+      "path": "webgl-border-64-distance-2.png",
+      "sha256": "8423eef9072193c73f23272a13642bf10cfef01e8a66acc295655af10dd1bba7"
+    },
+    {
+      "path": "webgl-border-64-distance-8.png",
+      "sha256": "b6a784cc928fc47b03cd451ca43e09e7bbcbbb5169a80698fd42f90656f47e7d"
+    },
+    {
+      "path": "webgl-border-64-distance-30.png",
+      "sha256": "fd90321b6c561cd8e1a0bb846093fee0448e6d2d4e8bee5be3887529dcc752d4"
+    },
+    {
+      "path": "webgl-border-64-distance-70.png",
+      "sha256": "37cd6ba92b92d6a0a374db28477c2757116bfd277f47d9c6d67a809f88ef641f"
+    }
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "sourceStable": true,
+  "passed": true,
+  "finishedAt": "2026-10-15T06:35:22.492Z"
+}

@@ -309,3 +309,34 @@ patch remains snowy. The [frozen review manifest](world-visual-quality-2026-10-1
 contains 24 additional views, selected after 22,842 candidates, giving three
 views per land biome with the required 512-metre additional-view separation.
 The full suite passes 6,695 tests. VQ-07 acceptance is complete.
+
+VQ-08 is implemented and accepted. Surface-mask G now stores the prescribed
+8 m inward chamfer fringe; core and halo share snow classification, float32
+height precision and half-float water precision. Worker preparation and the
+synchronous fallback use that field, and edit invalidation includes its halo.
+Meadow compaction bilinearly reads G and rejects candidates with the canonical
+integer hash channel 1201 before writing buffers; accepted strength starts at
+0.30 + 0.70 E. The far terrain bake reads the same bilinear coverage. The derived
+material recipe is revision 5; canonical terrain and mask channel layout remain
+unchanged.
+
+The new coverage and compaction tests exercise half-plane/diagonal/island,
+uniform, snow, water, negative-coordinate and edited-corner fixtures, exact
+worker/fallback/overlapping-page bytes, 100000 candidates at four coverage
+levels, reversed traversal, rebasing and independent forest rejection. The full
+suite passes **6703/6703**, and the production build passes.
+
+The [hardware boundary fixture](world-visual-quality-2026-10-14/fixtures/grass-boundary/report.json)
+passes eight poses on each of WebGPU and WebGL (interior/edge boundaries,
+2/8/30/70 m, eye height 1.7 m), with zero browser errors. Both production
+blade/card layers are fully prepared. Counts show zero ineligible roots and
+zero full-strength roots inside the 8 m fringe; the closest full-strength root
+is 9.0009 m inside eligibility. A separate grass-hidden render proves actual
+visible grass in every screenshot (238543–648361 changed pixels on WebGPU).
+An initial local capture incorrectly reset publication time to zero; those
+invisible images are not acceptance evidence. The final fixture preserves the
+publication fade and includes this visibility check.
+
+The [original cold-desert revisit](world-visual-quality-2026-10-14/fixtures/grass-world/report.json)
+also passes complete readiness with zero browser errors at the unchanged pose.
+VQ-09 through VQ-13 and final performance/resource acceptance remain outstanding.
