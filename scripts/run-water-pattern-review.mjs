@@ -21,7 +21,10 @@ try {
  if(report.adapter.backend!=='webgpu'||report.adapter.fallback||!report.adapter.vendor||/swiftshader|lavapipe|llvmpipe|warp|basic render/i.test(JSON.stringify(report.adapter)))throw new Error('Hardware WebGPU required.');
  const poses=JSON.parse(await readFile(path.join(repo,'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'),'utf8'));
  report.pose=poses.marine.find(p=>p.id==='marine-coast-overview');
- await page.evaluate(()=>window.__worldVisualQa.setLighting());await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle());
+ await page.evaluate(()=>window.__worldVisualQa.setLighting());
+ // Enter at the same ground point so the ordinary player path prepares destination collision.
+ await page.evaluate(p=>window.__worldVisualQa.cut({...p,mode:'player',heightAboveGround:1.7}),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle());
+ await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
  if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  for(const variant of ['default','foam-off','reflections-off','surf-off','detail-off']) {
   console.log(`Water pattern review: ${variant}`);
