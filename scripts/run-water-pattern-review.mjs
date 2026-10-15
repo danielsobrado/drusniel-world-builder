@@ -37,8 +37,7 @@ try {
    const pool=new SharedWaterMaterials(variant==='reflections-off'?null:surface.reflections),previous=surface.sharedWaterMaterials;
    surface.sharedWaterMaterials=pool;
    for(const slot of surface.waterSlots) {
-    const clock=slot.time.clone();clock.value=123.4;
-    slot.materialOptions={...slot.materialOptions,config,time:clock};
+    slot.materialOptions={...slot.materialOptions,config,time:{value:123.4}};
     slot.mesh.userData[WATER_SLOT_OPTIONS]=slot.materialOptions;slot.sharedMaterials=pool;
     slot.material=slot.createMaterial(false);slot.refractiveMaterial=null;slot.refractionPrewarmed=false;slot.mesh.material=slot.material;
    }
