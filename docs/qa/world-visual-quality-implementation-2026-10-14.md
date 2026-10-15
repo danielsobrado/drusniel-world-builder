@@ -387,3 +387,35 @@ policy, modal/loading/error guards, presentation-only visibility, specified
 legend/metrics backing and the fixed vignette/grain values. The focused state
 checks pass; the new real-browser HUD suite verifies actual input, layout,
 contrast, state preservation and cleanup. Browser acceptance is pending.
+
+VQ-09's [isolated biome appearance fixture](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json)
+passes all 49 existing rebase/backend/distinction checks, without relaxed
+thresholds, and 13 numerical growth checks per backend. Each numerical check
+reads 10000 actual production-node evaluations: height/width remain within the
+specified row, density uniform matches the CPU profile, and card height equals
+near height ×1.125. IDs 5/6/10 are included. The tree atlas refresh validates all
+29 prototypes with signature `tree-impostor-v7-2e68faa7`; 54 of 58 PNGs are bit
+identical. Four albedos differ in only 44 of 4194304 decoded channels in total
+([raw differences](world-visual-quality-2026-10-14/fixtures/growth-biomes/atlas-pixel-differences.json));
+there is no claim of an entirely bit-identical rebake. Final tree/LOD/world
+acceptance still applies to these refreshed assets.
+
+VQ-11's [real-world HUD suite](world-visual-quality-2026-10-14/fixtures/hud/report.json)
+passes **25/25 checks** with zero browser errors on hardware WebGPU. Twelve
+screenshots cover sand, snow, woodland and the frozen marine coast at 1600×900,
+1280×720 and 760×600. No legend/minimap/spell-dock/metrics boxes overlap; minimum
+composited contrast is **7.1726:1** over white, black, sand and water backgrounds.
+The actual DOM tests cover metrics persistence and zero sampling while disabled,
+F8/repeat/text-focus rules, Escape restoring then pausing, edit-mode restoration,
+modal/loading/error refusal, capture state preservation and listener disposal.
+Metrics restore the renderer's original reset method when disabled. The existing
+8-second introduction remains; the tagline is removed. The full suite passes
+**6726/6726**, lint passes and production build passes. The separate legacy
+post-processing command was attempted against an absent default server at 5173
+and timed out before launching a browser; this is not an accepted render test.
+Its required native-browser run remains pending.
+
+The previously failing tundra pose settles successfully in a fresh session at
+`282d1958`. That does not erase the failed ordered review: an ordered rerun now
+records prepared-field windows/missing dependencies and resumable manifest
+stages, so a cache/order-dependent stall can be distinguished from cold loading.

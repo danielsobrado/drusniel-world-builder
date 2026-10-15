@@ -1,0 +1,33 @@
+{
+  "baseline": "4af73877",
+  "checks": [
+    {
+      "id": 12,
+      "channels": 1048576,
+      "changedChannels": 13,
+      "maximumByteError": 16,
+      "meanByteError": 0.0000286102294921875
+    },
+    {
+      "id": 13,
+      "channels": 1048576,
+      "changedChannels": 6,
+      "maximumByteError": 16,
+      "meanByteError": 0.00002002716064453125
+    },
+    {
+      "id": 14,
+      "channels": 1048576,
+      "changedChannels": 6,
+      "maximumByteError": 16,
+      "meanByteError": 0.000026702880859375
+    },
+    {
+      "id": 15,
+      "channels": 1048576,
+      "changedChannels": 19,
+      "maximumByteError": 2,
+      "meanByteError": 0.00002002716064453125
+    }
+  ]
+}

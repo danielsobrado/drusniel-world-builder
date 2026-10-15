@@ -1,0 +1,1436 @@
+{
+  "url": "http://localhost:5174",
+  "mode": "acceptance",
+  "checks": [
+    {
+      "id": "webgpu: 3 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152449748
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152446762
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.43919753086419755,
+      "brightnessRatio": 0.999980413217869
+    },
+    {
+      "id": "webgpu: 4 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148904549
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148901867
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.36722993827160494,
+      "brightnessRatio": 0.9999819884616151
+    },
+    {
+      "id": "webgpu: 5 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154075099
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154072540
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.21304108796296295,
+      "brightnessRatio": 0.9999833912162536
+    },
+    {
+      "id": "webgpu: 6 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147353895
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147356166
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.27808931327160497,
+      "brightnessRatio": 1.000015411876286
+    },
+    {
+      "id": "webgpu: 7 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146979693
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146977813
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.21393904320987656,
+      "brightnessRatio": 0.9999872091173847
+    },
+    {
+      "id": "webgpu: 8 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137540002
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137540813
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.21004533179012347,
+      "brightnessRatio": 1.0000058964663967
+    },
+    {
+      "id": "webgpu: 9 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133140359
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133136539
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.19745756172839507,
+      "brightnessRatio": 0.99997130847454
+    },
+    {
+      "id": "webgpu: 10 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147528059
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147528783
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.038462577160493824,
+      "brightnessRatio": 1.0000049075410122
+    },
+    {
+      "id": "webgpu: 12 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144707541
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144714071
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.42519483024691357,
+      "brightnessRatio": 1.0000451254990228
+    },
+    {
+      "id": "webgl: 3 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152432954
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152434363
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.4203501157407407,
+      "brightnessRatio": 1.0000092434080887
+    },
+    {
+      "id": "webgl: 4 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148894810
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148893335
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.37003568672839504,
+      "brightnessRatio": 0.9999900936775432
+    },
+    {
+      "id": "webgl: 5 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154072447
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154071776
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.2113088348765432,
+      "brightnessRatio": 0.9999956449059318
+    },
+    {
+      "id": "webgl: 6 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147333498
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147337120
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.2735744598765432,
+      "brightnessRatio": 1.0000245836829313
+    },
+    {
+      "id": "webgl: 7 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146960294
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146965205
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.2164130015432099,
+      "brightnessRatio": 1.0000334171895437
+    },
+    {
+      "id": "webgl: 8 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137520817
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137524172
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.205024112654321,
+      "brightnessRatio": 1.0000243963064879
+    },
+    {
+      "id": "webgl: 9 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133126283
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133129373
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.1858641975308642,
+      "brightnessRatio": 1.0000232110439078
+    },
+    {
+      "id": "webgl: 10 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147523960
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147525597
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.039790702160493824,
+      "brightnessRatio": 1.0000110965025613
+    },
+    {
+      "id": "webgl: 12 rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144693889
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144696152
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.4234326774691358,
+      "brightnessRatio": 1.0000156399141362
+    },
+    {
+      "id": "biome-3 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152449748
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152432954
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.371678240740741,
+      "brightnessRatio": 0.9998898391094749
+    },
+    {
+      "id": "biome-3-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152446762
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 152434363
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.3694762731481482,
+      "brightnessRatio": 0.9999186666883748
+    },
+    {
+      "id": "biome-3-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 150015083
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 150062940
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.47551601080246914,
+      "brightnessRatio": 1.0003190145886864
+    },
+    {
+      "id": "biome-4 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148904549
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148894810
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.1702633101851854,
+      "brightnessRatio": 0.9999345956851862
+    },
+    {
+      "id": "biome-4-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148901867
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 148893335
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.171809413580247,
+      "brightnessRatio": 0.9999427005169788
+    },
+    {
+      "id": "biome-4-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147150831
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147151095
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.16570023148148147,
+      "brightnessRatio": 1.0000017940775339
+    },
+    {
+      "id": "biome-5 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154075099
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154072447
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.491929012345679,
+      "brightnessRatio": 0.9999827876144995
+    },
+    {
+      "id": "biome-5-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154072540
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 154071776
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.49399112654321,
+      "brightnessRatio": 0.9999950412967814
+    },
+    {
+      "id": "biome-5-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147845198
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147864579
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.5378346836419753,
+      "brightnessRatio": 1.0001310898173372
+    },
+    {
+      "id": "biome-6 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147353895
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147333498
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.7995360725308642,
+      "brightnessRatio": 0.9998615781415211
+    },
+    {
+      "id": "biome-6-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147356166
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147337120
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.7920273919753087,
+      "brightnessRatio": 0.999870748537255
+    },
+    {
+      "id": "biome-6-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147461862
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147448523
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.3350414737654321,
+      "brightnessRatio": 0.9999095427128134
+    },
+    {
+      "id": "biome-7 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146979693
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146960294
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.548010223765432,
+      "brightnessRatio": 0.9998680157809283
+    },
+    {
+      "id": "biome-7-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146977813
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 146965205
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.551766975308642,
+      "brightnessRatio": 0.9999142183453227
+    },
+    {
+      "id": "biome-7-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 139448265
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 139464513
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.4833757716049383,
+      "brightnessRatio": 1.0001165163295507
+    },
+    {
+      "id": "biome-8 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137540002
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137520817
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.5287663966049383,
+      "brightnessRatio": 0.9998605133072486
+    },
+    {
+      "id": "biome-8-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137540813
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 137524172
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.5355989583333334,
+      "brightnessRatio": 0.9998790104577905
+    },
+    {
+      "id": "biome-8-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 134192441
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 134202885
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.4197164351851852,
+      "brightnessRatio": 1.0000778285268692
+    },
+    {
+      "id": "biome-9 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133140359
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133126283
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.392860725308642,
+      "brightnessRatio": 0.9998942769862893
+    },
+    {
+      "id": "biome-9-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133136539
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 133129373
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 1.3923244598765432,
+      "brightnessRatio": 0.9999461755574103
+    },
+    {
+      "id": "biome-9-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 132977238
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 132986995
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.25114679783950616,
+      "brightnessRatio": 1.0000733734595992
+    },
+    {
+      "id": "biome-10 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147528059
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147523960
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.3449199459876543,
+      "brightnessRatio": 0.9999722154549596
+    },
+    {
+      "id": "biome-10-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147528783
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147525597
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.3435358796296296,
+      "brightnessRatio": 0.9999784042141797
+    },
+    {
+      "id": "biome-10-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147849884
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 147844043
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.05456693672839506,
+      "brightnessRatio": 0.9999604937126633
+    },
+    {
+      "id": "biome-12 backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144707541
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144693889
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.407716049382716,
+      "brightnessRatio": 0.9999056579919356
+    },
+    {
+      "id": "biome-12-rebased backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144714071
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 144696152
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 2.4123061342592593,
+      "brightnessRatio": 0.9998761765191444
+    },
+    {
+      "id": "biome-12-cards backend parity",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 135781815
+      },
+      "actual": {
+        "pixels": 345600,
+        "covered": 345600,
+        "brightness": 135817358
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.8331510416666666,
+      "brightnessRatio": 1.0002617655390746
+    },
+    {
+      "id": "3/4 biome distinction",
+      "passed": true,
+      "meanColorError": 11.218097029320989
+    },
+    {
+      "id": "4/7 biome distinction",
+      "passed": true,
+      "meanColorError": 8.678616898148148
+    },
+    {
+      "id": "8/9 biome distinction",
+      "passed": true,
+      "meanColorError": 10.834048032407408
+    },
+    {
+      "id": "9/12 biome distinction",
+      "passed": true,
+      "meanColorError": 17.44998070987654
+    }
+  ],
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "cases": [
+        {
+          "id": "biome-3",
+          "biome": "Savanna",
+          "stems": 17978
+        },
+        {
+          "id": "biome-3-rebased",
+          "stems": 17978
+        },
+        {
+          "id": "biome-3-cards",
+          "stems": 185
+        },
+        {
+          "id": "biome-4",
+          "biome": "Grassland",
+          "stems": 22896
+        },
+        {
+          "id": "biome-4-rebased",
+          "stems": 22896
+        },
+        {
+          "id": "biome-4-cards",
+          "stems": 234
+        },
+        {
+          "id": "biome-5",
+          "biome": "Tropical seasonal forest",
+          "stems": 21182
+        },
+        {
+          "id": "biome-5-rebased",
+          "stems": 21182
+        },
+        {
+          "id": "biome-5-cards",
+          "stems": 220
+        },
+        {
+          "id": "biome-6",
+          "biome": "Temperate deciduous forest",
+          "stems": 21182
+        },
+        {
+          "id": "biome-6-rebased",
+          "stems": 21182
+        },
+        {
+          "id": "biome-6-cards",
+          "stems": 220
+        },
+        {
+          "id": "biome-7",
+          "biome": "Tropical rainforest",
+          "stems": 20437
+        },
+        {
+          "id": "biome-7-rebased",
+          "stems": 20437
+        },
+        {
+          "id": "biome-7-cards",
+          "stems": 213
+        },
+        {
+          "id": "biome-8",
+          "biome": "Temperate rainforest",
+          "stems": 19479
+        },
+        {
+          "id": "biome-8-rebased",
+          "stems": 19479
+        },
+        {
+          "id": "biome-8-cards",
+          "stems": 197
+        },
+        {
+          "id": "biome-9",
+          "biome": "Taiga",
+          "stems": 16209
+        },
+        {
+          "id": "biome-9-rebased",
+          "stems": 16209
+        },
+        {
+          "id": "biome-9-cards",
+          "stems": 166
+        },
+        {
+          "id": "biome-10",
+          "biome": "Tundra",
+          "stems": 6889
+        },
+        {
+          "id": "biome-10-rebased",
+          "stems": 6889
+        },
+        {
+          "id": "biome-10-cards",
+          "stems": 75
+        },
+        {
+          "id": "biome-12",
+          "biome": "Wetland",
+          "stems": 20437
+        },
+        {
+          "id": "biome-12-rebased",
+          "stems": 20437
+        },
+        {
+          "id": "biome-12-cards",
+          "stems": 213
+        }
+      ],
+      "growthChecks": [
+        {
+          "id": "biome-0-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-1-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-2-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-3-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.25,
+          "maximum": 0.8500000238418579,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 2.8610229518832853e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-4-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.18000000715255737,
+          "maximum": 0.550000011920929,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 1.6689300497141346e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-5-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.1599999964237213,
+          "maximum": 0.5,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-6-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.11999999731779099,
+          "maximum": 0.3799999952316284,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-7-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.14000000059604645,
+          "maximum": 0.47999995946884155,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 7.152557324197062e-9,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-8-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.11999999731779099,
+          "maximum": 0.36000001430511475,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.8610229518832853e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-9-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.10000000149011612,
+          "maximum": 0.2800000011920929,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-10-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.05999999865889549,
+          "maximum": 0.1599999964237213,
+          "ratioError": 7.450580596923828e-9,
+          "widthError": 0,
+          "densityError": 1.19209286886246e-9,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-11-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-12-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.2800000011920929,
+          "maximum": 0.9499999284744263,
+          "ratioError": 5.960464477539063e-8,
+          "widthError": 0,
+          "densityError": 7.152557324197062e-9,
+          "invalid": 0,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "cases": [
+        {
+          "id": "biome-3",
+          "biome": "Savanna",
+          "stems": 17978
+        },
+        {
+          "id": "biome-3-rebased",
+          "stems": 17978
+        },
+        {
+          "id": "biome-3-cards",
+          "stems": 185
+        },
+        {
+          "id": "biome-4",
+          "biome": "Grassland",
+          "stems": 22896
+        },
+        {
+          "id": "biome-4-rebased",
+          "stems": 22896
+        },
+        {
+          "id": "biome-4-cards",
+          "stems": 234
+        },
+        {
+          "id": "biome-5",
+          "biome": "Tropical seasonal forest",
+          "stems": 21182
+        },
+        {
+          "id": "biome-5-rebased",
+          "stems": 21182
+        },
+        {
+          "id": "biome-5-cards",
+          "stems": 220
+        },
+        {
+          "id": "biome-6",
+          "biome": "Temperate deciduous forest",
+          "stems": 21182
+        },
+        {
+          "id": "biome-6-rebased",
+          "stems": 21182
+        },
+        {
+          "id": "biome-6-cards",
+          "stems": 220
+        },
+        {
+          "id": "biome-7",
+          "biome": "Tropical rainforest",
+          "stems": 20437
+        },
+        {
+          "id": "biome-7-rebased",
+          "stems": 20437
+        },
+        {
+          "id": "biome-7-cards",
+          "stems": 213
+        },
+        {
+          "id": "biome-8",
+          "biome": "Temperate rainforest",
+          "stems": 19479
+        },
+        {
+          "id": "biome-8-rebased",
+          "stems": 19479
+        },
+        {
+          "id": "biome-8-cards",
+          "stems": 197
+        },
+        {
+          "id": "biome-9",
+          "biome": "Taiga",
+          "stems": 16209
+        },
+        {
+          "id": "biome-9-rebased",
+          "stems": 16209
+        },
+        {
+          "id": "biome-9-cards",
+          "stems": 166
+        },
+        {
+          "id": "biome-10",
+          "biome": "Tundra",
+          "stems": 6889
+        },
+        {
+          "id": "biome-10-rebased",
+          "stems": 6889
+        },
+        {
+          "id": "biome-10-cards",
+          "stems": 75
+        },
+        {
+          "id": "biome-12",
+          "biome": "Wetland",
+          "stems": 20437
+        },
+        {
+          "id": "biome-12-rebased",
+          "stems": 20437
+        },
+        {
+          "id": "biome-12-cards",
+          "stems": 213
+        }
+      ],
+      "growthChecks": [
+        {
+          "id": "biome-0-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-1-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-2-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-3-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.25,
+          "maximum": 0.8500000238418579,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 2.8610229518832853e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-4-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.18000000715255737,
+          "maximum": 0.550000011920929,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 1.6689300497141346e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-5-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.1599999964237213,
+          "maximum": 0.5,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-6-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.11999999731779099,
+          "maximum": 0.3799999952316284,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-7-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.14000000059604645,
+          "maximum": 0.47999995946884155,
+          "ratioError": 2.9802322387695312e-8,
+          "widthError": 0,
+          "densityError": 7.152557324197062e-9,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-8-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.11999999731779099,
+          "maximum": 0.36000001430511475,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.8610229518832853e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-9-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.10000000149011612,
+          "maximum": 0.2800000011920929,
+          "ratioError": 1.4901161193847656e-8,
+          "widthError": 0,
+          "densityError": 2.384185793236071e-8,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-10-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.05999999865889549,
+          "maximum": 0.1599999964237213,
+          "ratioError": 7.450580596923828e-9,
+          "widthError": 0,
+          "densityError": 1.19209286886246e-9,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-11-growth-nodes",
+          "samples": 10000,
+          "minimum": 0,
+          "maximum": 0,
+          "ratioError": 0,
+          "widthError": 0,
+          "densityError": 0,
+          "invalid": 0,
+          "passed": true
+        },
+        {
+          "id": "biome-12-growth-nodes",
+          "samples": 10000,
+          "minimum": 0.2800000011920929,
+          "maximum": 0.9499999284744263,
+          "ratioError": 5.960464477539063e-8,
+          "widthError": 0,
+          "densityError": 7.152557324197062e-9,
+          "invalid": 0,
+          "passed": true
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    }
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": true
+}
