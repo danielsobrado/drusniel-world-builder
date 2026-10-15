@@ -1,0 +1,12 @@
+{
+  "valid": true,
+  "poses": 18,
+  "images": 36,
+  "imageMiB": 63.3,
+  "checkedLinks": 138,
+  "readyWaitMs": {
+    "min": 16408.5,
+    "max": 59612.5
+  },
+  "gallery": "18 images decoded; HUD/clean toggle and mobile layout passed"
+}
