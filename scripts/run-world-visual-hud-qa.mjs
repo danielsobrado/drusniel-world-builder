@@ -1,3 +1,4 @@
+import {captureVisualHarness} from './lib/world-visual-harness.mjs';
 import {chromium} from 'playwright';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -11,7 +12,7 @@ import {waitForPerfRunLock} from './perf-run-lock.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/hud'));
 await mkdir(out,{recursive:true});const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
-const report={...await captureVisualSource(url,repo),startedAt:new Date().toISOString(),checks:[],artifacts:[],poses:[]};let browser,errors;
+const report={...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),checks:[],artifacts:[],poses:[]};let browser,errors;
 try {
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  const page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});errors=createBrowserErrorMonitor(page);

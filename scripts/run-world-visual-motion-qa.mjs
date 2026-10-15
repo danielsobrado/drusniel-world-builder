@@ -1,3 +1,4 @@
+import {captureVisualHarness} from './lib/world-visual-harness.mjs';
 import {chromium} from 'playwright';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -12,7 +13,7 @@ const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.arg
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/motion'));
 const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
-const report={schemaVersion:1,...await captureVisualSource(url,repo),startedAt:new Date().toISOString(),clips:[],checks:[],artifacts:[],errors:{count:0,errors:[]},videoOverheadExcludedFromPerformance:true};let browser,page,errors;
+const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),clips:[],checks:[],artifacts:[],errors:{count:0,errors:[]},videoOverheadExcludedFromPerformance:true};let browser,page,errors;
 try {
  const manifest=JSON.parse(await readFile(path.join(repo,'docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json'),'utf8'));
  const poses=[...[3,5,4,9].map(i=>manifest.original[i]),{id:'synthetic-open-ground',synthetic:true}];

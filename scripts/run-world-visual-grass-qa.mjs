@@ -1,3 +1,4 @@
+import {captureVisualHarness} from './lib/world-visual-harness.mjs';
 import { chromium } from 'playwright';
 import { mkdir,writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -14,7 +15,7 @@ const fixture=option('--fixture','grass');
 if(!['grass','paths','lod','temporal'].includes(fixture))throw new Error('Unknown meadow fixture.');
 const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
-const report={schemaVersion:1,...await captureVisualSource(url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
+const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
 try {
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const backend of ['webgpu','webgl']) {

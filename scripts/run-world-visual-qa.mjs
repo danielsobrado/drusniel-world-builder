@@ -1,3 +1,4 @@
+import {captureVisualHarness} from './lib/world-visual-harness.mjs';
 import { chromium } from 'playwright';
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -16,6 +17,7 @@ const report={schemaVersion:1,startedAt:new Date().toISOString(),viewport:{width
 let browser,page,errors;
 try {
   Object.assign(report,await captureVisualSource(args.url,repo));
+  report.harness=await captureVisualHarness(import.meta.url,repo);
   for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml','config/water-domain.yaml','config/azgaar-guidance.yaml'])report.configHashes[file]=report.sourceSnapshot?.files[file]??await fileHash(new URL(file,root));
   report.mapHash=await fileHash(new URL('maps/Eldara Full 2026-07-23-20-37.json',root));
   browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
