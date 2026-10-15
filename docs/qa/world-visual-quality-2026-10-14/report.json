@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "world-visual-quality-status",
+  "generatedAt": "2026-10-15T12:38:53.612320+00:00",
+  "applicationSourceSha": "9b768d9a22d50cee2cbf8c3ebc540546b7337597",
+  "generatedFromGitSha": "c47160c1d911ec61b95bac229c7335fe2d2e7898",
+  "aggregateExecutionComplete": false,
+  "passed": false,
+  "scope": "Status index; this is not a completed all-suite execution. Individual raw reports retain their own source revisions and verdicts.",
+  "implementationReport": "../world-visual-quality-implementation-2026-10-14.md",
+  "tasks": [
+    {
+      "id": "VQ-01",
+      "status": "passed",
+      "evidence": "runtime-cuts/report.json"
+    },
+    {
+      "id": "VQ-02",
+      "status": "passed"
+    },
+    {
+      "id": "VQ-03",
+      "status": "incomplete",
+      "evidence": "perf/baseline-matrix.json"
+    },
+    {
+      "id": "VQ-04",
+      "status": "passed",
+      "evidence": "fixtures/drift/report.json"
+    },
+    {
+      "id": "VQ-05",
+      "status": "passed",
+      "evidence": "fixtures/substrates/report.json"
+    },
+    {
+      "id": "VQ-06",
+      "status": "partial",
+      "evidence": "fixtures/trees/report.json"
+    },
+    {
+      "id": "VQ-07",
+      "status": "passed",
+      "evidence": "biomes/procedural-review-poses.json"
+    },
+    {
+      "id": "VQ-08",
+      "status": "passed",
+      "evidence": "fixtures/grass-boundary/report.json"
+    },
+    {
+      "id": "VQ-09",
+      "status": "partial",
+      "evidence": "fixtures/meadow-lod/report.json"
+    },
+    {
+      "id": "VQ-10",
+      "status": "partial"
+    },
+    {
+      "id": "VQ-11",
+      "status": "partial",
+      "evidence": "fixtures/hud/report.json"
+    },
+    {
+      "id": "VQ-12",
+      "status": "failed",
+      "evidence": "motion/smoke-v2/report.json"
+    },
+    {
+      "id": "VQ-13",
+      "status": "blocked"
+    }
+  ],
+  "focusedOceanReview": {
+    "status": "implemented and focused checks passed",
+    "evidence": "ocean/README.md",
+    "manifest": "ocean/manifest.json"
+  },
+  "blockingGates": [
+    {
+      "id": "motion-scenery-recovery",
+      "state": "failed",
+      "detail": "Original-04, both camera modes: requested scenery never becomes fully ready during the 10\u201312 s stop. Required limit: 2 s.",
+      "evidence": "motion/smoke-v2/report.json"
+    },
+    {
+      "id": "baseline-performance-matrix",
+      "state": "failed",
+      "detail": "Baseline high-grass hitch rate 3.38%; dense-mixed did not settle and recorded 4.97% hitches.",
+      "evidence": "perf/baseline-matrix.json"
+    },
+    {
+      "id": "tracked-resource-peak-comparison",
+      "state": "missing",
+      "detail": "Same-scope VQ-03 peak resource baseline and final route comparison are not established."
+    },
+    {
+      "id": "remaining-release-runs",
+      "state": "not accepted",
+      "detail": "Final original/composition aggregate, four-light numeric surface/tree reruns, interaction browser sequence, native postprocessing and listed legacy suites, three final performance routes, full matrix and final manifest acceptance remain required."
+    },
+    {
+      "id": "performance-isolation",
+      "state": "pending information",
+      "detail": "The project performance guide requires other rendering tabs closed. No confirmation of that state was received during this review."
+    }
+  ]
+}
