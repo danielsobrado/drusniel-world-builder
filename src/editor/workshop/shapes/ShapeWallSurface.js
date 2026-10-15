@@ -117,10 +117,12 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
     b = surface.point(u1, low[1], offset);
   const c = surface.point(u1, high[1], offset),
     d = surface.point(u0, high[0], offset);
-  const face = (a, b, c, d) =>
+  // Reveals, soffits and ends may belong to a different slot than the face (stone jambs in mortar).
+  const face = (a, b, c, d, target = mesh, tone = color) =>
     surface.clockwise !== thickness < 0
-      ? mesh.quad(a, b, c, d, color)
-      : mesh.quad(d, c, b, a, color);
+      ? target.quad(a, b, c, d, tone)
+      : target.quad(d, c, b, a, tone);
+  const side = (a, b, c, d) => face(a, b, c, d, caps.sideMesh ?? mesh, caps.sideColor ?? color);
   if (caps.bevel) addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, thickness, color, caps });
   else {
     const uv = [[u0, low[0]], [u1, low[1]], [u1, high[1]], [u0, high[0]]];
@@ -133,9 +135,9 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
     const ci = surface.point(u1, high[1], offset - thickness),
       di = surface.point(u0, high[0], offset - thickness);
     if (caps.back !== false) face(bi, ai, di, ci);
-    face(a, ai, bi, b);
-    face(d, c, ci, di);
-    if (caps.start !== false) face(a, d, di, ai);
-    if (caps.end !== false) face(b, bi, ci, c);
+    side(a, ai, bi, b);
+    side(d, c, ci, di);
+    if (caps.start !== false) side(a, d, di, ai);
+    if (caps.end !== false) side(b, bi, ci, c);
   }
 }

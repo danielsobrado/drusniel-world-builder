@@ -19,7 +19,9 @@ function childVolume(host, f, frame, fields) {
     rotation: frame.rotation, height: f.height, elevation: frame.origin[1], taper: 1, levels: 1, thickness: 0.16,
     footprint: { family: 'rounded', width: f.width, depth: f.depth, cornerRadius: Math.min(0.18, f.depth * 0.2, f.width * 0.2) },
     roof: { ...p.roof, family: 'gable', axis: 'depth', rise: Math.min(0.85, f.width * 0.32), sweep: 0.25, sag: 0.03, overhang: 0.16 },
-    openings: [], features: [], craft: false, suppressed: [], ...fields };
+    openings: [], features: [], craft: false, suppressed: [],
+    // A volume carried by its host (jetty, dormer, oriel) has no footing course of its own.
+    grounded: frame.origin[1] <= p.elevation + 0.05, ...fields };
   const plan = planShapeVolume(primitive);
   if (primitive.openings.some((o) => ['dormer-window', 'bay-window-0'].includes(o.id))) {
     const at = (primitive.footprint.width / 2 - primitive.footprint.cornerRadius) / plan.curve.length;
@@ -62,6 +64,8 @@ const registry = new Map([
   ['bay', (host, f, frame) => ({ child: childVolume(host, f, { ...frame, origin: offset(frame, f.depth * 0.35) }, {
     height: Math.min(f.height, Math.max(0.5, host.primitive.height - f.bottom - 0.15)),
     roof: { ...host.primitive.roof, family: 'hip', rise: 0.5, overhang: 0.18, sweep: 0.3, sag: 0 },
+    // A bay is glazed between narrow mullion piers; there is no wall for a leaf to open against.
+    shutters: false,
     openings: [0.07, 0.3, 0.94].map((at, i) => ({ id: `bay-window-${i}`, role: 'window', profile: 'square', at,
       width: Math.min(0.9, f.width * 0.3, f.depth * 0.65), bottom: 0.2, height: Math.max(0.3, Math.min(f.height - 0.4, 1.3)) })),
   }) })],

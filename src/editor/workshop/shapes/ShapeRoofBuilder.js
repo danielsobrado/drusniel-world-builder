@@ -4,7 +4,7 @@ import { buildShapeRoofTiles } from './ShapeRoofTiles.js';
 import { buildShapeRoofCraft } from './ShapeRoofCraft.js';
 import { buildShapeRoofJunctions } from './ShapeRoofJunctionBuilder.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
-import { shapeWallCoreMesh, SHAPE_COARSE_MASONRY_TONE } from './ShapeMasonryCourses.js';
+import { shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
 
 // Overhangs show boarded sarking from below; bare slate there reads as a hole in the roof.
 const SOFFIT_TONE = Object.freeze([0.78, 0.74, 0.7]);
@@ -51,7 +51,7 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
   }
   // Close the wall up to the roof surface; especially visible on rounded gable ends.
   const core = shapeWallCoreMesh(plan, meshes, recipe);
-  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_COARSE_MASONRY_TONE;
+  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_MASONRY_CORE_TONE;
   for (let i = 0; i < samples; i++) {
     const u0 = plan.curve.samples[i].distance,
       u1 = i + 1 < samples ? plan.curve.samples[i + 1].distance : length;

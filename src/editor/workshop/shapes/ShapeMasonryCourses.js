@@ -18,7 +18,7 @@ export function shapeWallCoreMesh(plan, meshes, recipe) {
   return plan.primitive.surface === 'masonry' && recipe.detail < 2 ? meshes.trim : meshes.walls;
 }
 
-export const SHAPE_COARSE_MASONRY_TONE = Object.freeze([0.9, 0.88, 0.84]);
+export const SHAPE_MASONRY_CORE_TONE = Object.freeze([0.9, 0.88, 0.84]);
 
 /**
  * Local height of the roof underside above the outer face of a course, or the wall top
@@ -44,7 +44,7 @@ export function buildShapeMasonryCourses(plan, meshes, recipe, surface, distance
   const courseCount = Math.ceil(peak / course - tolerance.length);
   for (let row = 0; row < courseCount; row++) {
     if (!detail && row > 0) continue;
-    if (p.surface === 'plaster' && row > 1) continue;
+    if (p.surface === 'plaster' && (row > 1 || p.grounded === false)) continue;
     const y0 = row * course + 0.012,
       y1 = Math.min(peak - 0.012, (row + 1) * course - 0.012);
     const shift = p.surface === 'planks' ? 0 : ((row % 2) * cellWidth) / 2;

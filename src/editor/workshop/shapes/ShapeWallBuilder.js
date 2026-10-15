@@ -1,7 +1,7 @@
 import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
 import { buildShapeWeathering, shapeAgingSurface } from './ShapeWeathering.js';
-import { buildShapeMasonryCourses, shapeWallCoreMesh, SHAPE_COARSE_MASONRY_TONE } from './ShapeMasonryCourses.js';
+import { buildShapeMasonryCourses, shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
 
 export function buildShapeWalls(plan, meshes, recipe) {
   const surface = shapeAgingSurface(createShapeWallSurface(plan), plan, recipe.seed, plan.primitive.surface === 'planks'),
@@ -21,7 +21,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
   }
   const distances = [...new Set(boundaries)].sort((a, b) => a - b);
   const core = shapeWallCoreMesh(plan, meshes, recipe);
-  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_COARSE_MASONRY_TONE;
+  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_MASONRY_CORE_TONE;
   for (let i = 0; i < distances.length - 1; i++) {
     const u0 = distances[i],
       u1 = distances[i + 1];
@@ -37,6 +37,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
         p.thickness,
         coreTone,
         {
+          ...(p.surface === 'masonry' ? { sideMesh: meshes.trim, sideColor: SHAPE_MASONRY_CORE_TONE } : {}),
           start: openingEdges.has(u0) || (!plan.curve.closed && i === 0),
           end: openingEdges.has(u1) || (!plan.curve.closed && i === distances.length - 2),
         },

@@ -37,6 +37,29 @@ function closedPanel(plan, opening, side, meshes, recipe, surface) {
   }
 }
 
+// A flat leaf may stand this far off a curving wall at its tip before it reads as floating.
+const MAX_LEAF_LIFT = 0.15;
+const LEAF_CLEARANCE = 0.05;
+
+/** An opened leaf must lie on flat, uninterrupted wall: not past an end, a corner or another opening. */
+export function shapeShutterLeafFits(plan, surface, opening, side) {
+  const length = surface.length, reach = side * (opening.width / 2 + LEAF_CLEARANCE);
+  const hinge = opening.at * length + side * opening.width / 2, tip = hinge + reach;
+  if (!surface.closed && (tip < 0 || tip > length)) return false;
+  const y = opening.bottom + opening.height * 0.5;
+  const a = surface.point(hinge - 0.01, y), b = surface.point(hinge + 0.01, y), at = surface.point(hinge, y);
+  const chord = Math.hypot(b[0] - a[0], b[2] - a[2]) || 1, wall = surface.point(tip, y);
+  const lift = Math.hypot(at[0] + ((b[0] - a[0]) / chord) * reach - wall[0], at[2] + ((b[2] - a[2]) / chord) * reach - wall[2]);
+  if (lift > MAX_LEAF_LIFT || surface.neighborExcluded(tip, y)) return false;
+  const span = [Math.min(hinge, tip), Math.max(hinge, tip)];
+  return (plan.openings ?? plan.primitive.openings).every((other) => {
+    if (other.id === opening.id || other.bottom > opening.bottom + opening.height || other.bottom + other.height < opening.bottom) return true;
+    let center = other.at * length;
+    if (surface.closed) center += Math.round(((span[0] + span[1]) / 2 - center) / length) * length;
+    return center + other.width / 2 + LEAF_CLEARANCE <= span[0] || center - other.width / 2 - LEAF_CLEARANCE >= span[1];
+  });
+}
+
 export function buildShapeShutters(plan, meshes, recipe, surface) {
   const p = plan.primitive;
   if (!p.shutters) return;
@@ -46,6 +69,10 @@ export function buildShapeShutters(plan, meshes, recipe, surface) {
     const radius = opening.profile === 'square' ? 0 : Math.min(opening.width / 2, opening.height * 0.4);
     const top = (distance) => Math.min(p.height - 0.02, opening.bottom + opening.height - radius +
       radius * Math.sqrt(Math.max(0, 1 - (distance / (opening.width / 2)) ** 2))) - 0.045;
+    // Leaves that would swing onto a corner or another window are omitted as a pair.
+    if (opening.shutterPose !== 'closed' &&
+      [-1, 1].some((side) => shapeShutterAngle(recipe.seed, plan.id, opening, side) > Math.PI / 2 &&
+        !shapeShutterLeafFits(plan, surface, opening, side))) continue;
     for (const side of [-1, 1]) {
       const u = center + side * opening.width / 2;
       if (surface.neighborExcluded(u, opening.bottom + opening.height * 0.5)) continue;
