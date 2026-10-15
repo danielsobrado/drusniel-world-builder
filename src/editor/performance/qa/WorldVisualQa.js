@@ -1,4 +1,4 @@
-import { WorldVisualMotion } from './WorldVisualMotion.js';
+import { WorldVisualMotion,WORLD_VISUAL_MOTION_SCHEMA_VERSION } from './WorldVisualMotion.js';
 import { staticLightingComponents,staticLightingChange } from './WorldVisualLighting.js';
 import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
@@ -7,7 +7,7 @@ const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
 export class WorldVisualQa {
-  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0; }
+  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION; }
   async loadWorld(name) {
     if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
     const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');

@@ -9,6 +9,7 @@ import {motionChecks,videoMetadata,selectMotionFrames,motionContactSheet} from '
 import {createBrowserErrorMonitor} from './lib/perf-browser-errors.mjs';
 import {waitForPerfRunLock} from './perf-run-lock.mjs';
 import {observeVisualAudio,beginVisualFunctionalCheck,finishVisualFunctionalCheck} from './lib/world-visual-functional.mjs';
+import {WORLD_VISUAL_MOTION_SCHEMA_VERSION} from '../src/editor/performance/qa/WorldVisualMotion.js';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/motion'));
 const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
@@ -28,6 +29,7 @@ try {
   try {
    await page.goto(new URL('/?qaVisual=1',url).href,{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>!!window.__worldVisualQa,null,{timeout:180000});
+   if(await page.evaluate(()=>window.__worldVisualQa.motionSchemaVersion)!==WORLD_VISUAL_MOTION_SCHEMA_VERSION)throw new Error('Motion runtime and harness schemas differ; this capture is invalid.');
    const adapter=await page.evaluate(async()=>{const a=await navigator.gpu.requestAdapter({powerPreference:'high-performance',featureLevel:'compatibility'});
     return {vendor:a?.info.vendor,architecture:a?.info.architecture,fallback:!!(a?.info.isFallbackAdapter??a?.isFallbackAdapter),backend:window.__editor.terrainView.rendererBackendStatus.mode};});
    if(adapter.backend!=='webgpu'||adapter.fallback||!adapter.vendor||/swiftshader|lavapipe|llvmpipe|warp|basic render/i.test(JSON.stringify(adapter)))throw new Error('Hardware WebGPU required.');
@@ -45,9 +47,9 @@ try {
    const captured=[],video=path.join(clipDir,'capture.webm');let lastSaved=-Infinity;
    await page.screencast.start({path:video,size:{width:1600,height:900},quality:90,onFrame:async frame=>{
     // Save contact-sheet candidates at <=29 Hz; the video keeps its independent output cadence.
-    if(frame.timestamp-lastSaved<.035)return;lastSaved=frame.timestamp;
+    if(frame.timestamp-lastSaved<35)return;lastSaved=frame.timestamp;
     const file=path.join(framesDir,`${String(captured.length).padStart(5,'0')}.jpg`);
-    captured.push({file,wallTimeMs:frame.timestamp*1000,width:frame.viewportWidth,height:frame.viewportHeight});await writeFile(file,frame.data);
+    captured.push({file,wallTimeMs:frame.timestamp,timestampUnit:'milliseconds since Unix epoch',width:frame.viewportWidth,height:frame.viewportHeight});await writeFile(file,frame.data);
    }});recording=true;
    const motion=await page.evaluate(request=>window.__worldVisualQa.runMotion({...request,prepared:true}),request);
    await page.screencast.stop();recording=false;

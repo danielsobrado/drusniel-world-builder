@@ -1,6 +1,7 @@
 import {PLAYER_MAX_DELTA_SECONDS,PLAYER_MODE_WALK} from '../../player/playerConstants.js';
 import {tileDistanceSquared} from '../../stylized/meadow/meadowGrassLayout.js';
 import {sampleSurfaceMaskChannel} from '../../world/SurfaceMaskSampling.js';
+export const WORLD_VISUAL_MOTION_SCHEMA_VERSION=2;
 
 export function visualMotionInput(elapsed,startYaw) {
  const moving=elapsed>=2&&elapsed<10||elapsed>=13&&elapsed<17;

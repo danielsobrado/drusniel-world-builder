@@ -233,16 +233,19 @@ export class MeadowGrassField {
     this.blades.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false, timestamp);
     this.cards?.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false, timestamp);
     this.frameInputs ??= {};
-    Object.assign(this.frameInputs, { canonical, origin, timestamp, viewCone });
+    const focus=this.terrainView.focusChunk;
+    Object.assign(this.frameInputs, { canonical, origin, timestamp, viewCone,
+      focusX:focus?.chunkX??null,focusZ:focus?.chunkZ??null });
   }
 
   prepareFrame(shouldYield = null, budgetProvider = null) {
     if (!this.frameInputs) return;
     const { canonical, origin, timestamp, viewCone } = this.frameInputs;
     const focus = this.terrainView.focusChunk;
-    const chunkMeters = this.terrainView.chunkWorldSize;
-    if (focus && chunkMeters && (Math.floor(canonical.x / chunkMeters) !== focus.chunkX
-      || Math.floor(-canonical.z / chunkMeters) !== focus.chunkZ)) return;
+    // A following camera and predictive streaming can legitimately occupy
+    // different chunks. Reject only inputs from a superseded terrain focus.
+    if ((focus?.chunkX??null)!==this.frameInputs.focusX
+      || (focus?.chunkZ??null)!==this.frameInputs.focusZ) return;
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
     for (const layer of [this.blades, this.cards]) if (layer) {
