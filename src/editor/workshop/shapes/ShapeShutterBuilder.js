@@ -39,6 +39,8 @@ function closedPanel(plan, opening, side, meshes, recipe, surface) {
 
 // A flat leaf may stand this far off a curving wall at its tip before it reads as floating.
 const MAX_LEAF_LIFT = 0.15;
+// A tight corner within the leaf's reach folds it into the return wall even when the lift is small.
+const MIN_LEAF_TANGENT_DOT = Math.SQRT1_2; // 45 degrees
 const LEAF_CLEARANCE = 0.05;
 
 /** An opened leaf must lie on flat, uninterrupted wall: not past an end, a corner or another opening. */
@@ -50,7 +52,10 @@ export function shapeShutterLeafFits(plan, surface, opening, side) {
   const a = surface.point(hinge - 0.01, y), b = surface.point(hinge + 0.01, y), at = surface.point(hinge, y);
   const chord = Math.hypot(b[0] - a[0], b[2] - a[2]) || 1, wall = surface.point(tip, y);
   const lift = Math.hypot(at[0] + ((b[0] - a[0]) / chord) * reach - wall[0], at[2] + ((b[2] - a[2]) / chord) * reach - wall[2]);
-  if (lift > MAX_LEAF_LIFT || surface.neighborExcluded(tip, y)) return false;
+  const c = surface.point(tip - 0.01, y), d = surface.point(tip + 0.01, y);
+  const tipChord = Math.hypot(d[0] - c[0], d[2] - c[2]) || 1;
+  const tangentDot = ((b[0] - a[0]) * (d[0] - c[0]) + (b[2] - a[2]) * (d[2] - c[2])) / (chord * tipChord);
+  if (lift > MAX_LEAF_LIFT || tangentDot < MIN_LEAF_TANGENT_DOT || surface.neighborExcluded(tip, y)) return false;
   const span = [Math.min(hinge, tip), Math.max(hinge, tip)];
   return (plan.openings ?? plan.primitive.openings).every((other) => {
     if (other.id === opening.id || other.bottom > opening.bottom + opening.height || other.bottom + other.height < opening.bottom) return true;

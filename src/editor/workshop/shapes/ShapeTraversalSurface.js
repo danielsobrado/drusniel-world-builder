@@ -8,7 +8,7 @@ export function shapeTraversalHeight(primitive, mode, steps, fraction) {
   const t = clamp01(fraction);
   const tread = steps ? Math.max(0, Math.ceil(t * steps - tolerance.parameter)) / steps : t;
   return primitive.elevation + primitive.rise * tread +
-    (mode === 'bridge' ? Math.sin(Math.PI * t) * Math.min(1.4, primitive.length * 0.12) : 0);
+    (mode === 'bridge' ? Math.sin(Math.PI * t) * Math.min(1.5, primitive.length * 0.14) : 0);
 }
 
 export function createShapeTraversalSurface(plan) {

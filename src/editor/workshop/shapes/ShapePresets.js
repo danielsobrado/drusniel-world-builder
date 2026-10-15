@@ -78,7 +78,8 @@ export const SHAPE_PRESETS = Object.freeze(
           footprint: { family: 'oval', width: 7, depth: 5 },
           height: 3.1,
           shutters: false,
-          roof: { family: 'hip', rise: 2.1, overhang: 0.6, sweep: 0.5 },
+          // The rectangular hip solver lifts an oval eave; a bell roof follows its outline.
+          roof: { family: 'bell', rise: 2.3, overhang: 0.6, sweep: 0.55 },
           openings: [0.2, 0.45, 0.7].map((at, i) => ({
             ...opening(`arch-${i}`, at, 'arch', 0),
             width: 2,

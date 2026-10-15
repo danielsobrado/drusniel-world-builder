@@ -37,13 +37,15 @@ export function buildShapeFacade(plan, meshes, recipe) {
     }
   }
   if (p.facade === 'timber') {
-    const belts = [0.8, p.height - 0.12];
+    // A grounded frame stands on its plinth; a carried storey's sill beam sits at its own base.
+    const sill = p.grounded === false ? 0.1 : 0.8;
+    const belts = [sill, p.height - 0.12];
     for (let level = 1; level < p.levels; level++) belts.push((p.height * level) / p.levels);
     for (const y of belts) patch(0, surface.length, y - 0.08, y + 0.08, tint(`belt:${y}`));
     const bays = Math.max(4, Math.round(surface.length / 2));
     for (let bay = 0; bay < bays; bay++) {
       const u = (surface.length * bay) / bays;
-      patch(u - 0.065, u + 0.065, 0.7, p.height, tint(`post:${bay}`));
+      patch(u - 0.065, u + 0.065, sill - 0.1, p.height, tint(`post:${bay}`));
       const end = (surface.length * (bay + 1)) / bays;
       const startY = p.height - Math.min(1.15, p.height * 0.3),
         endY = p.height - 0.2;

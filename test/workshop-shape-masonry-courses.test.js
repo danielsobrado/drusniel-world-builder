@@ -83,3 +83,15 @@ test('shutters only open onto flat, free wall and never onto a bay', () => {
   const front = cottage.openings.find((o) => o.id === 'window-front'), wall = createShapeWallSurface(cottage);
   assert.ok([-1, 1].every((side) => shapeShutterLeafFits(cottage, wall, front, side)));
 });
+
+test('the arch bridge is coursed stone with parapets instead of thin rails', async () => {
+  const { buildShapeTraversal } = await import('../src/editor/workshop/shapes/ShapeTraversalBuilder.js');
+  const plan = planWorkshopComposition({ composition: createShapePreset('garden-bridge') }).shapePlans[0];
+  const meshes = { deck: new ShapeMesh(), trim: new ShapeMesh(), supports: new ShapeMesh(), rails: new ShapeMesh() };
+  buildShapeTraversal(plan, meshes, { seed: 1848, detail: 3 });
+  assert.equal(meshes.rails.positions.length, 0);
+  const crown = plan.route.reduce((max, node) => Math.max(max, node.position[1]), 0);
+  const stones = vertices(meshes.trim);
+  assert.ok(stones.length > 10_000);
+  assert.ok(stones.every(([, y]) => y >= -0.15 && y <= crown + 0.62), 'Stone escapes the bridge envelope.');
+});
