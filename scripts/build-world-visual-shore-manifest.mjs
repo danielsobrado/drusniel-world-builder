@@ -1,8 +1,8 @@
 import {readFile,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import yaml from 'js-yaml';
-import {ProceduralWorldGenerator} from '../src/editor/world/ProceduralWorldGenerator.js';
-import {AzgaarMacroWorldGenerator} from '../src/editor/world/AzgaarMacroWorldGenerator.js';
+import {createWorldGenerator} from '../src/editor/world/WorldGeneratorFactory.js';
+import {applyWaterDomainConfig} from '../src/editor/water/WaterConfig.js';
 import {importAzgaarFullJson} from '../src/editor/import/AzgaarJsonImporter.js';
 import {originalVisualPoses} from './lib/world-visual-poses.mjs';
 import {repositoryState,fileHash} from './lib/world-visual-report.mjs';
@@ -11,9 +11,10 @@ if(state.dirtyFiles.length)throw new Error('Commit sources before freezing the s
 const config=yaml.load(await readFile(new URL('editor.config.yaml',root),'utf8'));
 config.import.azgaarGuidance=yaml.load(await readFile(new URL('config/azgaar-guidance.yaml',root),'utf8'));
 const map='maps/Eldara Full 2026-07-23-20-37.json';
+applyWaterDomainConfig(config,yaml.load(await readFile(new URL('config/water-domain.yaml',root),'utf8')));
 const document=importAzgaarFullJson(JSON.parse(await readFile(new URL(map,root),'utf8')),config);
-const imported=new AzgaarMacroWorldGenerator(document.world.baseTerrain,document.world.generator);
-const procedural=new ProceduralWorldGenerator({seed:config.world.seed,version:config.world.generatorVersion,heightScale:config.world.heightScale,seaLevel:config.world.seaLevel,waterDomain:config.waterDomain});
+const imported=createWorldGenerator(document.world.generator,document.world.baseTerrain);
+const procedural=createWorldGenerator({seed:config.world.seed,version:config.world.generatorVersion,heightScale:config.world.heightScale,seaLevel:config.world.seaLevel,waterDomain:config.world.waterDomain});
 function offsets(radius) {
  const cells=radius/8,points=[];
  for(let z=-cells;z<=cells;z++)for(let x=-cells;x<=cells;x++)if(x*x+z*z<=cells*cells)points.push({x:x*8,z:z*8,distanceSquared:(x*x+z*z)*64});
