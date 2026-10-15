@@ -27,7 +27,6 @@ try {
   console.log(`Water pattern review: ${variant}`);
   const controls=await page.evaluate(async variant=>{
    const {SharedWaterMaterials,WATER_SLOT_OPTIONS}=await import('/src/editor/stylized/SharedWaterMaterials.js');
-   const {uniform}=await import('three/tsl');
    const e=window.__editor,surface=e.stylizedSurface,config=structuredClone(e.config.stylizedSurface);
    if(variant==='foam-off')config.water.foam.enabled=false;
    if(variant==='surf-off')config.water.sea.surf.enabled=false;
@@ -35,7 +34,8 @@ try {
    const pool=new SharedWaterMaterials(variant==='reflections-off'?null:surface.reflections),previous=surface.sharedWaterMaterials;
    surface.sharedWaterMaterials=pool;
    for(const slot of surface.waterSlots) {
-    slot.materialOptions={...slot.materialOptions,config,time:uniform(123.4)};
+    const clock=slot.time.clone();clock.value=123.4;
+    slot.materialOptions={...slot.materialOptions,config,time:clock};
     slot.mesh.userData[WATER_SLOT_OPTIONS]=slot.materialOptions;slot.sharedMaterials=pool;
     slot.material=slot.createMaterial(false);slot.refractiveMaterial=null;slot.refractionPrewarmed=false;slot.mesh.material=slot.material;
    }
