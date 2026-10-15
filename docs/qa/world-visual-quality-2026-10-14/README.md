@@ -10,6 +10,8 @@ The fixed requirements remain in the [original implementation specification](../
 - [Meadow LOD checks](fixtures/meadow-lod/report.json): 27 comparisons per backend.
 - [Temporal checks](fixtures/temporal/report.json): actual production tree and
   cinematic owner, timed pan and recovery, both backends.
+- [Remaining aerial/imported composition views](biomes/composition-remaining/README.md):
+  all 17 passed on the current application source, including the final source check.
 - [Valid motion recovery failure](motion/smoke-v2/README.md): both camera modes
   complete, but requested scenery misses the two-second stop limit.
 - [Original aerial capture-selector failure](biomes/capture-selector-failure/README.md)

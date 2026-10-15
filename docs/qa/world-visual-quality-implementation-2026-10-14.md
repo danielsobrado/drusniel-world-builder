@@ -51,7 +51,7 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-06 | Passed 276 tree/atmosphere checks and five world views | `5ae86e1f`; current VQ-09 atlas refresh still needs the final rerun |
 | VQ-07 | Passed classification, import, height and persistence checks | `74bc616d`; frozen review manifest retained |
 | VQ-08 | Passed 16 boundary captures and original-02 revisit | `c039c336`; [boundary evidence](world-visual-quality-2026-10-14/fixtures/grass-boundary/report.json) |
-| VQ-09 | Growth and both-backend LOD checks passed; complete imported/coast acceptance pending | [Growth](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json), [LOD](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json) |
+| VQ-09 | Growth, both-backend LOD and remaining imported/coast views passed; final aggregate pending | [Growth](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json), [LOD](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json), [17-view repeat](world-visual-quality-2026-10-14/biomes/composition-remaining/README.md) |
 | VQ-10 | Implemented; bend/recovery units passed; original-08 browser sequence pending | `3e399cd2`, `e4bb82e4` |
 | VQ-11 | Passed 25 HUD checks and 12 layouts; post-processing regression suites pending | `d032b386`; [HUD evidence](world-visual-quality-2026-10-14/fixtures/hud/report.json) |
 | VQ-12 | Lighting/temporal passed; valid motion rerun failed the two-second scenery gate | [Lighting](world-visual-quality-2026-10-14/lighting/report.json), [temporal](world-visual-quality-2026-10-14/fixtures/temporal/report.json), [motion failure](world-visual-quality-2026-10-14/motion/smoke-v2/README.md) |
@@ -563,3 +563,11 @@ fixtures pass on both backends. The existing environment parity suite passes
 78 checks. Repository verification passes **6,742 tests**, zero skipped, lint,
 production asset validation and production build. These results do not clear
 the outstanding movement recovery or complete release acceptance gates.
+
+The [remaining composition repeat](world-visual-quality-2026-10-14/biomes/composition-remaining/README.md)
+passes all 17 aerial/imported views at `9b768d9a`, with zero browser errors,
+correct biome IDs and a successful final source check. The first attempt captured
+all views but lost its server before that source check; its failed report and
+34 images are retained separately. A detached server supports the accepted
+repeat. The complete final all-suite aggregate and the independent release gates
+remain outstanding.
