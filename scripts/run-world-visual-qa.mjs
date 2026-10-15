@@ -39,6 +39,11 @@ try {
     if(poses.some(p=>!p))throw new Error('Frozen biome manifest is incomplete.');
   }
   if(!['original','atmosphere','biome-classification','extended'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
+  if(args.only) {
+    const ids=args.only.split(',');
+    if(ids.some(id=>!poses.some(p=>p.id===id)))throw new Error(`Unknown requested pose: ${args.only}`);
+    poses=poses.filter(p=>ids.includes(p.id));report.only=ids;
+  }
   for(const pose of poses) {
     console.log(`Visual QA: ${pose.id}`);
     try {

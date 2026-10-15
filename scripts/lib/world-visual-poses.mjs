@@ -25,7 +25,7 @@ export function selectAdditionalPoses({sampleTile,original=[],seed=20261014,maxC
 export function parseVisualArguments(args) {
   const result={suite:'all',url:'http://localhost:5173'};
   for(let i=0;i<args.length;i++) {
-    const key=args[i];if(!['--out','--suite','--baseline','--url'].includes(key)||!args[i+1]||args[i+1].startsWith('--'))throw new Error(`Invalid visual QA argument: ${key}`);
+    const key=args[i];if(!['--out','--suite','--baseline','--url','--only'].includes(key)||!args[i+1]||args[i+1].startsWith('--'))throw new Error(`Invalid visual QA argument: ${key}`);
     result[key.slice(2)]=args[++i];
   }
   if(!result.out||!['original','atmosphere','biome-classification','extended','lighting','motion','all'].includes(result.suite))throw new Error('Visual QA requires --out PATH and a valid suite.');
