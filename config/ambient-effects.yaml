@@ -145,6 +145,9 @@ ambientEffects:
       soft: 0.0893
     surfSpray:
       region: surf
+      # Emit in the breaking-depth band, rather than carpeting the open sea.
+      # Matches water.sea.surf's 0.25/0.7/2.4/4.5 m envelope.
+      waterDepth: [0.25, 0.7, 2.4, 4.5]
       presets:
         calm: 0.4
         moonlight: 0.6

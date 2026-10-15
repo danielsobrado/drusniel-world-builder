@@ -1,10 +1,12 @@
 import * as THREE from 'three/webgpu';
 import {
-  abs, atan, cameraPosition, cameraWorldMatrix, color, cos, cross, dot, exp, float, floor, fract, hash,
-  instanceIndex, max, mix, normalize, positionGeometry, positionWorld, sin, smoothstep, texture, time,
+  abs, cameraPosition, cameraWorldMatrix, color, cos, cross, dot, float, floor, fract, hash,
+  instanceIndex, max, mix, normalize, positionGeometry, positionWorld, sin, smoothstep, time,
   uniform, uv, vec2, vec3,
 } from 'three/tsl';
 
+import { ambientParticleShapeAlpha } from './AmbientParticleShapes.js';
+import { particleWaterDepthMask } from './ParticleWaterDepth.js';
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
 
 const TWO_PI = Math.PI * 2;
@@ -17,6 +19,7 @@ const EDGE_FADE_START = 0.36;
 const HASH_OFFSETS = Object.freeze({
   x: 11.31, z: 57.17, y: 23.93, size: 91.71, phase: 131.07, speed: 171.39, tone: 211.53, variant: 251.9,
   jitterX: 293.1, jitterY: 331.7, jitterZ: 373.3, blink: 419.9,
+  rotation: 463.3, aspect: 503.7,
 });
 /** Cornette-Shanks forward-scatter asymmetry, as the waterfall mist uses. */
 const MIE_G = 0.6;
@@ -60,53 +63,6 @@ function cornetteShanks(mu) {
     .div(mu.mul(-2 * MIE_G).add(1 + g2).pow(1.5));
 }
 
-function shapeAlpha(shape, local, seed, puffTexture) {
-  const r2 = dot(local, local);
-  const r = r2.sqrt();
-  const disc = smoothstep(0.75, 1, r).oneMinus();
-  switch (shape) {
-    case 'glint': {
-      // A pinpoint with a faint four-point flare, like ice catching the sun.
-      const core = exp(r2.mul(-26));
-      const flare = exp(abs(local.x).mul(-9)).mul(exp(local.y.mul(local.y).mul(-160)))
-        .add(exp(abs(local.y).mul(-9)).mul(exp(local.x.mul(local.x).mul(-160))));
-      return core.add(flare.mul(0.45)).mul(disc);
-    }
-    case 'streak': {
-      // Stretched along the wind (local.x); the leading end is the densest.
-      const along = abs(local.x);
-      const body = smoothstep(0.25, 1, along).oneMinus().mul(exp(local.y.mul(local.y).mul(-5)));
-      return body.mul(mix(float(0.45), float(1), local.x.mul(0.5).add(0.5)));
-    }
-    case 'firefly':
-      return exp(r2.mul(-34)).add(exp(r2.mul(-5)).mul(0.28)).mul(disc);
-    case 'fluff': {
-      // A seed head: a small core and fine radial filaments.
-      const angle = atan(local.y, local.x);
-      const spokes = abs(cos(angle.mul(9).add(seed.mul(TWO_PI)))).pow(24);
-      return exp(r2.mul(-60)).add(spokes.mul(r.oneMinus().max(0)).mul(0.55))
-        .add(exp(r2.mul(-3)).mul(0.12)).mul(disc);
-    }
-    case 'shaft': {
-      // local.x across the beam, local.y along it (from the ground up).
-      const across = exp(local.x.mul(local.x).mul(-7));
-      const ends = smoothstep(-1, -0.35, local.y).mul(smoothstep(0.2, 1, local.y).oneMinus());
-      const dust = signedNoise(vec2(local.x.mul(1.6), local.y.mul(5).sub(time.mul(0.12))).add(seed.mul(40)))
-        .mul(0.5).add(0.75).clamp(0.25, 1.25);
-      return across.mul(ends).mul(dust);
-    }
-    case 'puff': {
-      if (!puffTexture) return exp(r2.mul(-3.5)).mul(disc);
-      const sample = texture(puffTexture, uv());
-      const variant = floor(seed.mul(4));
-      return variant.lessThan(1).select(sample.r, variant.lessThan(2).select(sample.g,
-        variant.lessThan(3).select(sample.b, sample.a)));
-    }
-    default:
-      // 'soft': a round mote.
-      return exp(r2.mul(-4.5)).mul(disc);
-  }
-}
 
 /**
  * One ambient particle population (after grass-test's AmbientParticleField),
@@ -230,6 +186,9 @@ export class AmbientParticleField {
     const center = vec3(x, y, z);
 
     let weight = regionMask(s.regions, groundHeight, levels).mul(edgeFade).mul(verticalFade).mul(this.intensity);
+    if (s.waterDepth) {
+      weight = weight.mul(particleWaterDepthMask(this.levelNode(s.base, levels).sub(groundHeight), s.waterDepth));
+    }
     if (s.gusts) {
       // Gust patches sweep downwind: the surface lifts in waves, not evenly.
       const drift = vec2(this.windAxis.x, this.windAxis.z).mul(time.mul(s.gusts.speed));
@@ -256,7 +215,15 @@ export class AmbientParticleField {
     } else {
       const right = cameraWorldMatrix.element(0).xyz;
       const up = cameraWorldMatrix.element(1).xyz;
-      offset = right.mul(positionGeometry.x.mul(size)).add(up.mul(positionGeometry.y.mul(size)));
+      let horizontal = positionGeometry.x.mul(size), vertical = positionGeometry.y.mul(size);
+      if (s.shape === 'puff') {
+        // Preserve quad area while varying silhouette and orientation per puff.
+        const aspect = mix(float(0.65), float(1.35), random('aspect'));
+        const angle = random('rotation').mul(TWO_PI), c = cos(angle), n = sin(angle);
+        const x = horizontal.mul(aspect), y = vertical.div(aspect);
+        horizontal = x.mul(c).sub(y.mul(n)); vertical = x.mul(n).add(y.mul(c));
+      }
+      offset = right.mul(horizontal).add(up.mul(vertical));
     }
 
     const additive = s.blending === 'additive';
@@ -273,7 +240,7 @@ export class AmbientParticleField {
     material.positionNode = center.add(offset);
 
     const local = uv().sub(0.5).mul(2);
-    let alpha = shapeAlpha(s.shape, local, random('variant'), puffTexture);
+    let alpha = ambientParticleShapeAlpha(s.shape, local, random('variant'), puffTexture);
     const distance = cameraPosition.distance(positionWorld);
     alpha = alpha.mul(smoothstep(s.nearFade, s.nearFade * 3, distance));
     if (additive) alpha = alpha.mul(smoothstep(s.area * 0.3, s.area * 0.5, distance).oneMinus());

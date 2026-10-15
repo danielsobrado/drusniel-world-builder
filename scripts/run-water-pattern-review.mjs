@@ -27,14 +27,16 @@ try {
  await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
  if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  const variants=option('--variants','default,foam-off,reflections-off,surf-off,detail-off').split(',');
- if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
+ if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off','surf-spray-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
  for(const variant of variants) {
   console.log(`Water pattern review: ${variant}`);
   const controls=await page.evaluate(async variant=>{
    const {SharedWaterMaterials,WATER_SLOT_OPTIONS}=await import('/src/editor/stylized/SharedWaterMaterials.js');
    const {skyLightUniforms}=await import('/src/editor/stylized/sky/skyLight.js');
    const e=window.__editor,surface=e.stylizedSurface,config=structuredClone(e.config.stylizedSurface);
-   const black=skyLightUniforms.sunColor.value.clone().setRGB(0,0,0);skyLightUniforms.sunColor.onObjectUpdate(()=>variant==='sun-highlights-off'?black:skyLightUniforms.sunColor.value);
+   const spray=e.terrainView.scene.getObjectByName('ambient-surfSpray');
+   if(spray)spray.layers.mask=variant==='surf-spray-off'?0:1;
+   const black=skyLightUniforms.sunColor.value.clone();skyLightUniforms.sunColor.onObjectUpdate(()=>variant==='sun-highlights-off'?black.setRGB(0,0,0):skyLightUniforms.sunColor.value);
    if(variant==='foam-off')config.water.foam.enabled=false;
    if(variant==='surf-off')config.water.sea.surf.enabled=false;
    if(variant==='detail-off')config.water.sea.detail.enabled=false;
