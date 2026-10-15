@@ -124,6 +124,16 @@ test('volume bounds contain the roof perimeter including thick walls', () => {
   }
 });
 
+test('the oval pavilion roof has a level eave around its entire perimeter', () => {
+  const p = createShapePreset('courtyard-pavilion').primitives[0];
+  for (const rotation of [0, 63]) {
+    const host = plan({ ...p, rotation, elevation: 2 }), surface = createShapeRoofSurface(host);
+    const heights = host.curve.samples.map((sample) => surface.point(sample.distance, 1)[1]);
+    assert.ok(Math.max(...heights) - Math.min(...heights) < 1e-6, 'The oval edge must not rise away from the wall.');
+    assert.ok(Math.abs(heights[0] - (host.primitive.elevation + host.primitive.height)) < 0.1);
+  }
+});
+
 test('all valid maximum-length shape IDs produce bounded deterministic curve IDs', () => {
   const id = `a${'b'.repeat(63)}`;
   for (const input of [

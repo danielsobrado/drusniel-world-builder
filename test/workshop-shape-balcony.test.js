@@ -10,7 +10,7 @@ import { createShapeWallSurface } from '../src/editor/workshop/shapes/ShapeWallS
 import { WorkshopShapeSession } from '../src/editor/workshop/shapes/WorkshopShapeSession.js';
 import { WorkshopShapeCache } from '../src/editor/workshop/shapes/WorkshopShapeCache.js';
 import { shapeDirectHandleDefinitions, shapeDirectHandleChanges } from '../src/editor/workshop/shapes/ShapeDirectHandles.js';
-import { shapeShutterAngle, buildShapeShutters } from '../src/editor/workshop/shapes/ShapeShutterBuilder.js';
+import { shapeShutterAngle, shapeShutterLeafFits, buildShapeShutters } from '../src/editor/workshop/shapes/ShapeShutterBuilder.js';
 import { buildShapeBalcony } from '../src/editor/workshop/shapes/ShapeBalconyBuilder.js';
 import { buildShapeFloors } from '../src/editor/workshop/shapes/ShapeFloorBuilder.js';
 import { ShapeMesh } from '../src/editor/workshop/shapes/ShapeMesh.js';
@@ -124,6 +124,25 @@ for (const pose of ['auto', 'open', 'ajar', 'closed']) test(`${pose} shutters re
     const values = (mesh) => mesh.positions.filter((v, i) => i % 3 === axis);
     assert.ok(Math.abs(Math.max(...values(near.inserts)) - Math.max(...values(coarse.inserts))) < 0.06);
     assert.ok(Math.abs(Math.min(...values(near.inserts)) - Math.min(...values(coarse.inserts))) < 0.06);
+  }
+});
+
+test('dormer shutters do not fold around a tight return even when their tips remain close to the wall', () => {
+  for (const rotation of [0, 67]) {
+    const recipe = recipeFor('dormer-cottage');
+    recipe.composition.primitives[0].rotation = rotation;
+    const host = resolve(recipe)[0];
+    const dormers = host.features.filter((feature) => feature.intent.kind === 'dormer');
+    assert.ok(dormers.length > 0);
+    for (const { child } of dormers) {
+      const surface = createShapeWallSurface(child), opening = child.openings[0];
+      for (const side of [-1, 1]) assert.equal(shapeShutterLeafFits(child, surface, opening, side), false);
+      for (const pose of ['auto', 'open', 'ajar', 'closed']) for (const detail of [1, 2]) {
+        const posed = { ...child, openings: [{ ...opening, shutterPose: pose }] }, mesh = buffers();
+        buildShapeShutters(posed, mesh, { ...recipe, detail }, createShapeWallSurface(posed));
+        assert.equal(mesh.inserts.positions.length > 0, pose === 'ajar' || pose === 'closed', `${pose}, detail ${detail}`);
+      }
+    }
   }
 });
 
