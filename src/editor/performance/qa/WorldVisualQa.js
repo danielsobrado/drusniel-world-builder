@@ -16,6 +16,19 @@ export class WorldVisualQa {
     const document=importAzgaarFullJson(await response.json(),this.editor.config);
     await this.editor.controller.loadDocument(document);
   }
+  async loadSynthetic() {
+    const {createVisualSyntheticDocument,selectVisualSyntheticRoute,VISUAL_SYNTHETIC}=await import('./WorldVisualSynthetic.js');
+    this.editor.controller.loadDocument(createVisualSyntheticDocument(this.editor.controller.toDocument()));
+    const {centerX,centerZ}=VISUAL_SYNTHETIC;
+    await this.cut({x:centerX-64,z:centerZ+40,yaw:0,pitch:-.08,mode:'player'});await this.settle();
+    return {...VISUAL_SYNTHETIC,...selectVisualSyntheticRoute(this.editor)};
+  }
+  async syntheticIdentity() {
+    const {visualSyntheticIdentity}=await import('./WorldVisualSynthetic.js');return visualSyntheticIdentity(this.editor);
+  }
+  async syntheticResidency() {
+    const {visualSyntheticResidency}=await import('./WorldVisualSynthetic.js');return visualSyntheticResidency(this.editor);
+  }
   async cut(pose) {
     this.preparedMotion=null;this.motion?.stop(new Error('Visual motion interrupted by a camera cut.'));
     this.editor.playerController.setHarnessActive(true);
