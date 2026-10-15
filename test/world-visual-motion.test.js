@@ -3,6 +3,7 @@ import test from 'node:test';
 import {WorldVisualMotion,visualMotionInput,visualMotionDelta} from '../src/editor/performance/qa/WorldVisualMotion.js';
 import {staticLightingChange} from '../src/editor/performance/qa/WorldVisualLighting.js';
 import {stepPlayerPhysics,createPlayerState} from '../src/editor/player/PlayerPhysics.js';
+import {WorldVisualQa} from '../src/editor/performance/qa/WorldVisualQa.js';
 
 test('motion sequence has the exact stationary walk sprint turn and recovery intervals',()=>{
  for(const [t,keys] of [[0,[]],[1.999,[]],[2,['KeyW']],[5.999,['KeyW']],[6,['KeyW','ShiftLeft']],[9.999,['KeyW','ShiftLeft']],[10,[]],[12,[]],[12.5,[]],[13,['KeyW']],[16.999,['KeyW']],[17,[]],[20,[]]])assert.deepEqual(visualMotionInput(t,.25).keys,keys);
@@ -31,4 +32,12 @@ test('motion failure releases input and cannot reapply it on the next frame',asy
  await assert.rejects(motion.finished,/lost ordinary player simulation/);
  motion.beforeMovement(2);motion.stop();
  assert.deepEqual(inputs,[[]]);assert.equal(motion.frames.length,0);
+});
+test('a recording cannot skip preparation or reuse it after a camera mode change',async()=>{
+ const startPose={x:5,z:8,yaw:0,pitch:0,mode:'player'},editor={
+  terrainView:{floatingOrigin:{toCanonical:(x,z)=>({x,z})}},playerController:{state:{x:5,z:8}},viewModeController:{isThirdPerson:false}};
+ const qa=new WorldVisualQa(editor);qa.readiness=()=>({ready:true});
+ await assert.rejects(qa.runMotion({startPose,prepared:true}),/fully prepared/);
+ qa.preparedMotion={startPose,cameraMode:'first-person',sequenceId:'walk-sprint-turn-v1'};editor.viewModeController.isThirdPerson=true;
+ await assert.rejects(qa.runMotion({startPose,prepared:true}),/became stale/);
 });

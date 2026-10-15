@@ -12,10 +12,10 @@ export function visualMotionDelta(previous,current) {
 }
 function nearMeadow(editor,canonical) {
  const field=editor.stylizedSurface.meadowGrass;if(!field)return {eligible:[],published:[],missing:[]};
- const ground=field.ground,eligible=[],published=[];
+ const ground=field.ground,eligible=[],published=[],unavailable=[];
  for(const tile of field.blades.tiles.values()) {
   if(tile.band===null||!tile.inView||tileDistanceSquared(canonical.x,canonical.z,tile.centerX,tile.centerZ,field.blades.tileSize)>144)continue;
-  const slot=ground.slotFor(...ground.chunkOf(tile.centerX,tile.centerZ));if(!slot)continue;
+  const slot=ground.slotFor(...ground.chunkOf(tile.centerX,tile.centerZ));if(!slot){unavailable.push(tile.key);continue;}
   let potential=false;
   const half=field.blades.tileSize/2;
   for(let z=-half+ground.tileSize/2;z<half&&!potential;z+=ground.tileSize)for(let x=-half+ground.tileSize/2;x<half;x+=ground.tileSize) {
@@ -29,7 +29,7 @@ function nearMeadow(editor,canonical) {
   if(potential){eligible.push(tile.key);if(tile.output)published.push(tile.key);}
  }
  const present=new Set(published);
- return {eligible:eligible.sort(),published:published.sort(),missing:eligible.filter(key=>!present.has(key)).sort()};
+ return {eligible:eligible.sort(),published:published.sort(),missing:eligible.filter(key=>!present.has(key)).sort(),unavailable:unavailable.sort()};
 }
 /** Input is applied before the actual player update; samples follow the successful render. */
 export class WorldVisualMotion {
