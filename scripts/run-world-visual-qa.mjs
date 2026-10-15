@@ -38,13 +38,20 @@ try {
       [manifest.original[10],manifest.additional.find(p=>p.expectedBiomeId===11)];
     if(poses.some(p=>!p))throw new Error('Frozen biome manifest is incomplete.');
   }
-  if(!['original','atmosphere','biome-classification','extended'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
+  if(['shore','imported'].includes(args.suite)) {
+    const manifest=JSON.parse(await readFile(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json',root),'utf8'));
+    if(report.mapHash!==manifest.mapSha256)throw new Error('Frozen imported map hash changed.');
+    poses=args.suite==='imported'?manifest.imported.map(p=>({...p,world:'eldara'})):[...manifest.shore.filter(p=>p.world==='procedural'),...manifest.marine,...manifest.shore.filter(p=>p.world==='eldara')];
+  }
+  if(!['original','atmosphere','biome-classification','extended','shore','imported'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
   if(args.only) {
     const ids=args.only.split(',');
     if(ids.some(id=>!poses.some(p=>p.id===id)))throw new Error(`Unknown requested pose: ${args.only}`);
     poses=poses.filter(p=>ids.includes(p.id));report.only=ids;
   }
+  let activeWorld='procedural';
   for(const pose of poses) {
+    if(pose.world&&pose.world!==activeWorld) {await page.evaluate(name=>window.__worldVisualQa.loadWorld(name),pose.world);activeWorld=pose.world;}
     console.log(`Visual QA: ${pose.id}`);
     try {
       await page.evaluate(p=>window.__worldVisualQa.cut(p),pose);

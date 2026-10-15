@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-14T19:13:46.338Z",
-  "sourceSignature": "tree-impostor-v7-2efca4a8",
+  "generatedAt": "2026-10-15T06:44:59.244Z",
+  "sourceSignature": "tree-impostor-v7-2e68faa7",
   "normalEncoding": "view-normal-rgb-foliage-mask-a",
   "requiresRuntimeBake": false,
   "prototypes": [
@@ -374,8 +374,8 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-12-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "1bfa3d7fee940e69b83b2018d6a4b4b1a2eb62ac5fe4405f4f580b482f1aee32",
-        "sha256": "d3e7df78e2e43afec770d5c9873c0aa8fcbdea787bcb25d0319b6e1a2f07b30c",
+        "sourceSha256": "70a3be731d83847513cb120dffb0ed9846d8f13ccbbf101de5a20b7be3971bad",
+        "sha256": "ee4d0fcb32c901c1d75e34ffa3b27668bd468b2abcd02d2c3ae66f4a8cba3529",
         "width": 1024,
         "height": 256,
         "levels": 6,
@@ -403,7 +403,7 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-13-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "6f624bf1eea6e3676476fd56fbdf13e5e928c983e94bc6dbd3335b497edf2ac1",
+        "sourceSha256": "31113f494d2904688482c4aa5bf70b72f8c72e51639b379914a088ed90616800",
         "sha256": "de04718f9326e499e2a5f6253016221eaa858a7e8c95146f3e850550a10c4aa9",
         "width": 1024,
         "height": 256,
@@ -432,8 +432,8 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-14-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "08d45bd7e14aeded1c9d65105f56b286159042a6c5e82742e46fac89ee4a3423",
-        "sha256": "e235e5e1b1391b66eb28430fa42014c21eaf1fc3d8135808b1e874afe436b76f",
+        "sourceSha256": "087bf9404a3a1d281dc8c3a2a0cdf7438b9c0f65160f17e7c45d8d5b196af411",
+        "sha256": "875383ad2bdb86b74b04244f69e99ecf63fd2a2e445b338f055b66c4f4b5b3d9",
         "width": 1024,
         "height": 256,
         "levels": 6,
@@ -461,8 +461,8 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-15-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "7f8849735b63b2f99917fbb7b4acbb13267a7ee131a7289678886c1120e0e5cf",
-        "sha256": "25dede28ff4084fbabd7785bdcf911fa1e881ee8492c5d499fbc2d1dabdf918a",
+        "sourceSha256": "6da55ce99623acb364e0837d86b9854f5ff48eb2170db7947a9cc9928b8d07d2",
+        "sha256": "9dd6208d6141c74e0dc4b5cc897d50d8152bdfbe17bb29380712dbf4141c7985",
         "width": 1024,
         "height": 256,
         "levels": 6,

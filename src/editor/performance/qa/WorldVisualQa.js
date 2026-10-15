@@ -5,9 +5,18 @@ const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
 export class WorldVisualQa {
   constructor(editor) { this.editor=editor; this.disposed=false; }
+  async loadWorld(name) {
+    if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
+    const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');
+    const response=await fetch('/maps/Eldara%20Full%202026-07-23-20-37.json');
+    if(!response.ok)throw new Error('Cannot fetch the frozen imported map.');
+    const document=importAzgaarFullJson(await response.json(),this.editor.config);
+    await this.editor.controller.loadDocument(document);
+  }
   async cut(pose) {
     this.editor.playerController.setHarnessActive(true);
     const result=await this.editor.cameraCutCoordinator.cut(pose);
+    if(pose.fov) {this.editor.viewModeController.camera.fov=pose.fov;this.editor.viewModeController.camera.updateProjectionMatrix();}
     if(result.cancelled) throw new Error('Visual camera cut superseded.');
     return this.diagnostics();
   }
