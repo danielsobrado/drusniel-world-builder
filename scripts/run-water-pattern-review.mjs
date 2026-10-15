@@ -6,6 +6,7 @@ import {captureVisualSource,visualSourceStayedFixed} from './lib/world-visual-so
 import {captureVisualHarness} from './lib/world-visual-harness.mjs';
 import {fileHash} from './lib/world-visual-report.mjs';
 import {captureWorldCanvas} from './lib/world-visual-canvas.mjs';
+import {prepareVisualPose} from './lib/world-visual-prepare-pose.mjs';
 import {createBrowserErrorMonitor} from './lib/perf-browser-errors.mjs';
 import {waitForPerfRunLock} from './perf-run-lock.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
@@ -23,9 +24,7 @@ try {
  report.pose=poses.marine.find(p=>p.id===option('--pose','marine-coast-overview'));
  if(!report.pose)throw new Error('Unknown frozen marine pose.');
  await page.evaluate(()=>window.__worldVisualQa.setLighting());
- // Enter at the same ground point so the ordinary player path prepares destination collision.
- await page.evaluate(p=>window.__worldVisualQa.cut({...p,mode:'player',heightAboveGround:1.7}),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle());
- await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
+ report.preparation=await prepareVisualPose(page,report.pose);
  if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  const variants=option('--variants','default,foam-off,reflections-off,surf-off,detail-off').split(',');
  if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off','surf-spray-off','reflections-and-glint-off','crest-light-off','crest-transmission-off','slope-shading-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');

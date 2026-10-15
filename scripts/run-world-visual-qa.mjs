@@ -9,6 +9,7 @@ import { fileHash,validateVisualReport } from './lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
+import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 const root=new URL('../',import.meta.url),repo=fileURLToPath(root),args=parseVisualArguments(process.argv.slice(2));
 const out=path.resolve(args.out);await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
@@ -67,8 +68,7 @@ try {
     if(pose.world&&pose.world!==activeWorld) {await page.evaluate(name=>window.__worldVisualQa.loadWorld(name),pose.world);activeWorld=pose.world;}
     console.log(`Visual QA: ${pose.id}`);
     try {
-      await page.evaluate(p=>window.__worldVisualQa.cut(p),pose);
-      await page.evaluate(()=>window.__worldVisualQa.settle());
+      const preparation=await prepareVisualPose(page,pose);
       const state=await page.evaluate(()=>window.__worldVisualQa.diagnostics());
       if(pose.expectedBiomeId!==undefined&&state.actualBiomeId!==pose.expectedBiomeId)
         throw new Error(`Frozen biome ${pose.id} expected ${pose.expectedBiomeId}, got ${state.actualBiomeId}.`);
@@ -81,7 +81,7 @@ try {
       await captureWorldCanvas(page,path.join(out,files[1]));
       await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(false));
       for(const file of files)report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
-      report.poses.push({...pose,...state});
+      report.poses.push({...pose,...state,preparation});
     } catch(error) {
       await page.screenshot({path:path.join(out,`failed-${pose.id}.png`)});
       report.failurePose=pose;report.failureReadiness=await page.evaluate(()=>window.__worldVisualQa.readiness());
