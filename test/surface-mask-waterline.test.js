@@ -47,6 +47,7 @@ function buildMask() {
     chunkSize: CHUNK_SIZE,
     sampleTile: () => GRASSLAND_TILE,
     maskConfig: createSurfaceMaskConfig(null),
+    sampleWater: (cellX) => lakeWater(cellX),
     waterField: { pixels: field.pixels, width: field.width, height: field.height },
   });
 }

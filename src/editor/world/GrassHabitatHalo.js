@@ -9,7 +9,8 @@ export function prepareGrassHabitatHalo({halo,haloSize,searchRadius,chunkSize,he
   originX,originZ,maskConfig,sampleHeight=null,sampleWater=null,coreWater}) {
   const tileSize = maskConfig.tileSize ?? maskConfig.snow?.tileSize ?? 2;
   const tileIds = new Set(maskConfig.grassTileIds);
-  const seed = maskConfig.snow ? terrainBakeMacroSeed(maskConfig.snow.seedOffset,maskConfig.worldSeed) : 0;
+  const snowSettings = maskConfig.snow?.classification ? maskConfig.snow : null;
+  const seed = snowSettings ? terrainBakeMacroSeed(snowSettings.seedOffset,maskConfig.worldSeed) : 0;
   const eligibility = new Uint8Array(halo.length);
   const water = new Float32Array(halo.length);
   const hCache = new Map(), wCache = new Map();
@@ -18,7 +19,7 @@ export function prepareGrassHabitatHalo({halo,haloSize,searchRadius,chunkSize,he
     if(heights && lx>=0 && lz>=0 && lx<=chunkSize && lz<=chunkSize)return Math.fround(heights[lz*(chunkSize+1)+lx]);
     const key=`${x}:${z}`;
     if(!hCache.has(key)) {
-      if(!sampleHeight && maskConfig.snow) throw new Error('Grass habitat snow halo requires height sampling.');
+      if(!sampleHeight && snowSettings) throw new Error('Grass habitat snow halo requires height sampling.');
       hCache.set(key,Math.fround(sampleHeight?.(x,z) ?? 0));
     }
     return hCache.get(key);
@@ -39,11 +40,11 @@ export function prepareGrassHabitatHalo({halo,haloSize,searchRadius,chunkSize,he
     }
     water[i]=occupancy;
     let snow=0;
-    if(maskConfig.snow && tileIds.has(tileId) && occupancy<1) {
+    if(snowSettings && tileIds.has(tileId) && occupancy<1) {
       const a=heightAt(cx,cz),b=heightAt(cx+1,cz),c=heightAt(cx,cz+1),d=heightAt(cx+1,cz+1);
       const dx=(b+d-a-c)/(2*tileSize),dz=(c+d-a-b)/(2*tileSize);
       snow=snowAtPoint({height:(a+b+c+d)*.25,slope:Math.hypot(dx,dz),dx,dz,curvature:0,tileId,
-        worldX:(cx+.5)*tileSize,worldZ:-(cz+.5)*tileSize},maskConfig.snow.classification,seed);
+        worldX:(cx+.5)*tileSize,worldZ:-(cz+.5)*tileSize},snowSettings.classification,seed);
     }
     eligibility[i]=grassHabitatEligible({tileId,snow,water:occupancy},tileIds)?1:0;
   }

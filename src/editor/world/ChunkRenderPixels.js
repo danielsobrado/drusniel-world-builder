@@ -207,7 +207,6 @@ export function buildSurfaceMaskPixels({
   const tileSize = maskConfig.tileSize ?? maskConfig.snow?.tileSize ?? 2;
   const searchRadius = getSurfaceMaskSearchRadius(blendCells, tileSize);
   const roadTileId = maskConfig.roadTileId;
-  const waterTileId = maskConfig.waterTileId;
   const { halo, haloSize } = buildHaloTiles({
     tiles,
     originX,
