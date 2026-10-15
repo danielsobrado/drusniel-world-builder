@@ -7,6 +7,7 @@ import { captureVisualSource,visualSourceStayedFixed } from './lib/world-visual-
 import { fileHash,validateVisualReport } from './lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
+import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
 const root=new URL('../',import.meta.url),repo=fileURLToPath(root),args=parseVisualArguments(process.argv.slice(2));
 const out=path.resolve(args.out);await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
@@ -75,7 +76,7 @@ try {
       const leaked=await page.evaluate(()=>[...document.querySelectorAll('[data-capture-ui]')]
         .filter(root=>getComputedStyle(root).visibility!=='hidden'&&!root.hidden).map(root=>root.className));
       if(leaked.length)throw new Error(`Capture UI is still visible: ${leaked.join(', ')}`);
-      await page.locator('canvas').first().screenshot({path:path.join(out,files[1])});
+      await captureWorldCanvas(page,path.join(out,files[1]));
       await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(false));
       for(const file of files)report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
       report.poses.push({...pose,...state});

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {visualMotionInput,visualMotionDelta} from '../src/editor/performance/qa/WorldVisualMotion.js';
+import {WorldVisualMotion,visualMotionInput,visualMotionDelta} from '../src/editor/performance/qa/WorldVisualMotion.js';
 import {staticLightingChange} from '../src/editor/performance/qa/WorldVisualLighting.js';
 import {stepPlayerPhysics,createPlayerState} from '../src/editor/player/PlayerPhysics.js';
 
@@ -23,4 +23,12 @@ test('static convergence rejects missing or changed components at the specified 
  assert.equal(staticLightingChange(null,[1]),Infinity);assert.equal(staticLightingChange([1],[1,2]),Infinity);
  assert.equal(staticLightingChange([.5,1],[.5005,1]),.0004999999999999449);
  assert.ok(staticLightingChange([.5,1],[.502,1])>.001);
+});
+test('motion failure releases input and cannot reapply it on the next frame',async()=>{
+ const inputs=[],editor={playerController:{enabled:true,setHarnessKeys:keys=>inputs.push(keys)},viewModeController:{mode:'edit'}};
+ const motion=new WorldVisualMotion(editor,{startPose:{yaw:0},cameraMode:'first-person',readiness:()=>({})});
+ motion.beforeMovement(1);
+ await assert.rejects(motion.finished,/lost ordinary player simulation/);
+ motion.beforeMovement(2);motion.stop();
+ assert.deepEqual(inputs,[[]]);assert.equal(motion.frames.length,0);
 });

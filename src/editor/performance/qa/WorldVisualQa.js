@@ -17,6 +17,7 @@ export class WorldVisualQa {
     await this.editor.controller.loadDocument(document);
   }
   async cut(pose) {
+    this.preparedMotion=null;this.motion?.stop(new Error('Visual motion interrupted by a camera cut.'));
     this.editor.playerController.setHarnessActive(true);
     const result=await this.editor.cameraCutCoordinator.cut(pose);
     if(pose.fov) {this.editor.viewModeController.camera.fov=pose.fov;this.editor.viewModeController.camera.updateProjectionMatrix();}
@@ -71,14 +72,26 @@ export class WorldVisualQa {
     e.weatherSettings.weatherMode=weather;e.weatherSettings.weatherIntensity=weather==='off'?0:1;
     e.weatherController?.applySettings();
   }
-  async runMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
+  async prepareMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
     if(sequenceId!=='walk-sprint-turn-v1'||!['first-person','third-person'].includes(cameraMode)) throw new Error('Invalid visual motion sequence.');
     await this.cut(startPose);await this.settle();
     const e=this.editor,view=e.viewModeController;
     const wantThird=cameraMode==='third-person';
     if(view.isThirdPerson!==wantThird&&!view.toggleCameraView())throw new Error('Requested motion camera is unavailable.');
     view.thirdPersonCamera?.reset();
-    await this.settle({minimumMs:0});
+    const readiness=await this.settle({minimumMs:0});
+    this.preparedMotion={startPose,cameraMode,sequenceId};
+    return {readiness,diagnostics:this.diagnostics()};
+  }
+  async runMotion(options) {
+    const {prepared=false,startPose:requestedPose,cameraMode:requestedMode='first-person',sequenceId:requestedSequence='walk-sprint-turn-v1'}=options;
+    const request={startPose:requestedPose,cameraMode:requestedMode,sequenceId:requestedSequence};
+    if(!prepared)await this.prepareMotion(request);
+    const {startPose,cameraMode,sequenceId}=this.preparedMotion??{};
+    if(!startPose||JSON.stringify(request)!==JSON.stringify({startPose,cameraMode,sequenceId}))throw new Error('Motion recording needs the same fully prepared request.');
+    const e=this.editor,view=e.viewModeController,canonical=e.terrainView.floatingOrigin.toCanonical(e.playerController.state.x,e.playerController.state.z);
+    if(!this.readiness().ready||view.isThirdPerson!==(cameraMode==='third-person')||Math.hypot(canonical.x-startPose.x,canonical.z-startPose.z)>.01)throw new Error('Motion preparation became stale.');
+    this.preparedMotion=null;
     const motion=new WorldVisualMotion(e,{startPose,cameraMode,readiness:()=>this.readiness()});
     this.motion=motion;
     try{return await motion.finished;}finally{if(this.motion===motion)this.motion=null;e.playerController.setHarnessKeys([]);}

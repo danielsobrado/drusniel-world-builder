@@ -6,6 +6,7 @@ import {captureVisualSource,visualSourceStayedFixed} from './lib/world-visual-so
 import {fileHash} from './lib/world-visual-report.mjs';
 import {createBrowserErrorMonitor} from './lib/perf-browser-errors.mjs';
 import {waitForPerfRunLock} from './perf-run-lock.mjs';
+import {captureWorldCanvas} from './lib/world-visual-canvas.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/lighting'));
 const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
@@ -48,7 +49,7 @@ try {
     &&(!diagnostics.renderPath.includes('cinematic')||diagnostics.finishApplications===1)});
    report.poses.push({...c,freshWetness,warmup,convergence,readiness,resolvedWeather,diagnostics,adapter});
    if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Lighting capture UI refused entry.');
-   const file=`${c.id}.png`;await page.locator('canvas').first().screenshot({path:path.join(out,file)});
+   const file=`${c.id}.png`;await captureWorldCanvas(page,path.join(out,file));
    report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
    const observed=errors.snapshot();report.errors.count+=observed.count;report.errors.errors.push(...observed.errors);
    if(observed.count)throw new Error(`Browser errors in ${c.id}.`);

@@ -39,6 +39,7 @@ export class WorldVisualMotion {
   this.finished=new Promise((resolve,reject)=>{this.resolve=resolve;this.reject=reject;});
  }
  beforeMovement(timestamp) {
+  if(this.done)return;
   const {playerController:player,viewModeController:view}=this.editor;
   if(view.mode!==PLAYER_MODE_WALK||view.paused||!player.enabled||view.cameraOverride){this.stop(new Error('Motion lost ordinary player simulation.'));return;}
   const input=visualMotionInput(this.elapsed,this.startPose.yaw);this.keys=input.keys;
