@@ -6,26 +6,30 @@ import { captureVisualSource,visualSourceStayedFixed } from './lib/world-visual-
 import { fileHash } from './lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
+import sharp from 'sharp';
 const option=(name,fallback)=>process.argv.includes(name)?process.argv[process.argv.indexOf(name)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url));
 const out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/grass'));
 const fixture=option('--fixture','grass');
-if(!['grass','paths','lod'].includes(fixture))throw new Error('Unknown meadow fixture.');
+if(!['grass','paths','lod','temporal'].includes(fixture))throw new Error('Unknown meadow fixture.');
 const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
 try {
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const backend of ['webgpu','webgl']) {
-  const page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);
+  const viewport=['lod','temporal'].includes(fixture)?{width:800,height:600}:{width:1600,height:900};
+  const page=await browser.newPage({viewport,deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);
   await page.goto(new URL(`/scripts/fixtures/world-visual-${fixture}.html?backend=${backend}`,url).href,{waitUntil:'domcontentloaded'});
   let previous=null;
   for(;;) {
    await page.waitForFunction(last=>window.__worldGrassFixture?.report.done ||
      window.__worldGrassFixture?.pendingCapture&&window.__worldGrassFixture.pendingCapture!==last,previous,{timeout:180000});
-   const state=await page.evaluate(()=>({id:window.__worldGrassFixture.pendingCapture,report:window.__worldGrassFixture.report}));
+   const state=await page.evaluate(()=>({id:window.__worldGrassFixture.pendingCapture,report:window.__worldGrassFixture.report,pixels:window.__worldGrassFixture.capturePixels??null}));
    if(!state.id){report.backends[backend]=state.report;break;}
-   const file=`${backend}-${state.id}.png`;await page.screenshot({path:path.join(out,file)});
+   const file=`${backend}-${state.id}.png`;
+   if(state.pixels){let png=sharp(Buffer.from(state.pixels),{raw:{width:800,height:600,channels:4}});if(backend==='webgl')png=png.flip();await png.png().toFile(path.join(out,file));}
+   else await page.screenshot({path:path.join(out,file)});
    report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
    previous=state.id;await page.evaluate(()=>window.__worldGrassFixture.continue());
   }
