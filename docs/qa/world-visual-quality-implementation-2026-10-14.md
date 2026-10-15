@@ -41,17 +41,21 @@ pending; no visual or frame-rate improvement is claimed yet.
 
 ## Task status
 
-| Task | State |
-| --- | --- |
-| VQ-01 | Implemented; 20 alternating long cuts passed |
-| VQ-02 | Implemented; both fresh twelve-pose runs settled with matching placements |
-| VQ-03 | Runtime baseline collected; clean-capture correction and resource accounting still being validated |
-| VQ-04 | Passed production drift fixtures on hardware WebGPU and WebGL |
-| VQ-05 | Substrate responses implemented; CPU/shader swatch parity pending |
-| VQ-06 | Pending substrate gate |
-| VQ-07–10 | Pending surface/atmosphere gates |
-| VQ-11 | Capture visibility core implemented; public HUD settings/finish pending |
-| VQ-12–13 | Pending implementation and release verification |
+| Task | Current result | Implementation / evidence |
+| --- | --- | --- |
+| VQ-01 | Passed focused tests and 20 long cuts | `ff5b9339`; [cuts](world-visual-quality-2026-10-14/runtime-cuts/report.json) |
+| VQ-02 | Passed two fresh twelve-pose preparation runs | Runtime preparation and placement identity checks retained below |
+| VQ-03 | Incomplete: resource peak baseline and final aggregate acceptance remain | Baseline route passed; baseline matrix failed and remains visible |
+| VQ-04 | Passed hardware WebGPU and WebGL drift checks | [Surface evidence](world-visual-quality-2026-10-14/fixtures/drift/report.json) |
+| VQ-05 | Passed 108 CPU/shader substrate checks | `4b9818c3`; evidence retained below |
+| VQ-06 | Passed 276 tree/atmosphere checks and five world views | `5ae86e1f`; current VQ-09 atlas refresh still needs the final rerun |
+| VQ-07 | Passed classification, import, height and persistence checks | `74bc616d`; frozen review manifest retained |
+| VQ-08 | Passed 16 boundary captures and original-02 revisit | `c039c336`; [boundary evidence](world-visual-quality-2026-10-14/fixtures/grass-boundary/report.json) |
+| VQ-09 | Implemented; numeric growth passed; LOD and complete imported/coast acceptance pending | `9e6385da`; [growth evidence](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json) |
+| VQ-10 | Implemented; bend/recovery units passed; original-08 browser sequence pending | `3e399cd2`, `e4bb82e4` |
+| VQ-11 | Passed 25 HUD checks and 12 layouts; post-processing regression suites pending | `d032b386`; [HUD evidence](world-visual-quality-2026-10-14/fixtures/hud/report.json) |
+| VQ-12 | Lighting capture running; motion, temporal and streaming harnesses implemented but not browser-accepted | `8411c8e2` through `e4bb82e4` |
+| VQ-13 | Incomplete; final verify, performance, resources and aggregate evidence required | No release-complete claim |
 
 ## Repeat-capture failure and correction
 
@@ -430,3 +434,51 @@ The new lighting runner creates a fresh context for each of 36 pose/light pairs,
 advances the real wetness clock for 20 seconds, checks static sky/light/fog
 convergence for 60 frames below 0.001, then requires full scenery readiness.
 These new motion/lighting captures have not yet passed browser acceptance.
+
+## October 15 capture and movement validation progress
+
+The ordered composition rerun at frozen runtime `282d1958` reached 36 settled
+poses, including the previously failing tundra location. It then failed at the
+aerial coast capture because the first DOM canvas was hidden. Terrain, scenery,
+collision and browser-error gates were all clear at that failure. The [raw
+failure report and screenshot](world-visual-quality-2026-10-14/biomes/capture-selector-failure/README.md)
+are preserved. This is a capture-selector correction, not a proven explanation
+for the earlier manifest-queue timeout. `40bfb889` captures the renderer's actual
+canvas. The 17 remaining aerial/imported cases still require a rerun.
+
+The permanent movement runner records after full preparation, using Playwright's
+late-start screencast. It saves actual recorder frame times and verifies output
+codec, dimensions and frame rate through FFmpeg metadata. Contact sheets select
+recorded frames nearest the player simulation markers; wall-clock stalls do not
+shift the simulation sequence. Unit tests reject stale setup, unreleased input,
+nonfinite poses, disabled collision and scenery recovery beyond two seconds.
+
+The authored synthetic fixture is exactly 256 m square, with flat height 24 m,
+grassland ID 4 and temperate forest ID 6. It loads through ordinary document
+overrides and real workers, residency and collision. It selects the first clear
+straight lane from ascending 2 m candidates using production collision queries
+with a conservative 1 m capsule. It does not disable colliders or raise budgets.
+The runner visits distant regions until original terrain and source manifests
+are evicted, then returns and compares sorted placement IDs and growth profiles.
+These browser gates are implemented, not yet accepted.
+
+New isolated fixtures measure the production meadow handoff over a fixed 8×8 m
+projected ground rectangle at 40/45/50 m, and production cinematic output after
+a one-second 180-degree tree pan. The temporal fixture collects both timed frames
+before file/screenshot handshakes, freezes only wind/grain/particles, and compares
+against a newly constructed stationary owner outside the prescribed two-pixel
+silhouette dilation. Numerical surface/tree runners now support all four lighting
+states without changing their existing thresholds.
+
+The original-08 interaction runner retains untouched, cleared, stamped and
+one-second recovery captures, published strength and habitat distributions, and
+CPU patch-height references. Its controlled stamp uses the configured body
+radius. Production settings are restored in a finally block. Motion also
+observes the existing AudioContext and ambience owner, stored mute state, and
+finite advancing wind; listening quality is explicitly not automatically graded.
+
+New reports identify Node harness source hashes separately from the immutable
+browser runtime source. A frozen server now rejects source modules absent from
+its archive, preventing a newly added live file from masquerading as old source.
+The focused motion/synthetic tests pass 10/10; lint and whitespace checks pass.
+Full repository verification and the browser gates above remain outstanding.
