@@ -54,7 +54,7 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-09 | Growth and both-backend LOD checks passed; complete imported/coast acceptance pending | [Growth](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json), [LOD](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json) |
 | VQ-10 | Implemented; bend/recovery units passed; original-08 browser sequence pending | `3e399cd2`, `e4bb82e4` |
 | VQ-11 | Passed 25 HUD checks and 12 layouts; post-processing regression suites pending | `d032b386`; [HUD evidence](world-visual-quality-2026-10-14/fixtures/hud/report.json) |
-| VQ-12 | 36 lighting views and both-backend temporal checks passed; motion acceptance pending | [Lighting](world-visual-quality-2026-10-14/lighting/report.json), [temporal](world-visual-quality-2026-10-14/fixtures/temporal/report.json) |
+| VQ-12 | Lighting/temporal passed; valid motion rerun failed the two-second scenery gate | [Lighting](world-visual-quality-2026-10-14/lighting/report.json), [temporal](world-visual-quality-2026-10-14/fixtures/temporal/report.json), [motion failure](world-visual-quality-2026-10-14/motion/smoke-v2/README.md) |
 | VQ-13 | Incomplete; final verify, performance, resources and aggregate evidence required | No release-complete claim |
 
 ## Repeat-capture failure and correction
@@ -518,6 +518,16 @@ player. `b58043b0` checks the captured streaming-focus generation instead of
 requiring the camera and focus chunks to match. The actual field regression test
 passes, including cancellation after a focus mutation; hardware motion and
 performance acceptance still require fresh captures.
+
+The [fresh schema-2 motion rerun](world-visual-quality-2026-10-14/motion/smoke-v2/README.md)
+at `6f5f8985` completes both 20-second original-04 clips, including third-person
+initial preparation. All collision/feet/FOV/input and recorder-alignment checks
+pass, with zero browser errors. Both fail the requested-scenery recovery limit
+at the 10–12-second stop. Near grass returns before the end of the stop, but
+requested meadow preparation continues. The final stop settles within 0.396 s.
+This is a valid unmet gate, distinct from the earlier invalid schema/timestamp
+capture. The required VQ-12/13 acceptance remains blocked; no timeout, scenery
+definition or budget was changed.
 
 ## Ocean repetition follow-up
 
