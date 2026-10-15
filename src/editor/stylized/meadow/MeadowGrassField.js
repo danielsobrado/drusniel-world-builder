@@ -221,8 +221,10 @@ export class MeadowGrassField {
     this.syncLight();
     this.blades.batches.setBoundsPadding(meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut));
     this.cards?.batches.setBoundsPadding(meadowCardBoundsPadding(this.uniforms));
-    this.interaction?.update(body);
-    this.spellGround?.update(body ?? camera.position, { stamp: false });
+    const dtSeconds = this.lastInteractionTime == null ? 0 : Math.max(0,(timestamp-this.lastInteractionTime)/1000);
+    this.lastInteractionTime=timestamp;
+    this.interaction?.update(body,{dtSeconds});
+    this.spellGround?.update(body ?? camera.position, { stamp: false,dtSeconds });
     // While no spell has ink in the map the blades skip reading it altogether.
     if (this.uniforms.spellGround) this.uniforms.spellGround.active.value = this.spellGround.hasMarksOrPress() ? 1 : 0;
     this.ground.beginFrame();
@@ -281,6 +283,10 @@ export class MeadowGrassField {
    * so re-basing is not the player moving: scrolling the ink here would smear the
    * trail the player never touched.
    */
+  clearTransientInteraction() {
+    this.interaction?.clearPress();this.lastInteractionTime=null;
+  }
+
   shiftOrigin(dx, dz) {
     this.interaction?.shiftOrigin(dx, dz);
     this.spellGround?.shiftOrigin(dx, dz);

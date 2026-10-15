@@ -611,7 +611,10 @@ const kitTowns = kitTownsEnabled();
   const cameraCutCoordinator = new CameraCutCoordinator({ terrainView, playerController,
     viewModeController, shiftWorld: shiftWorldForOrigin,
     refreshObjects: () => objectView.syncResidency(true),
-    notifyCut: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.CAMERA_TELEPORT),
+    notifyCut: () => {
+      stylizedSurface.meadowGrass?.clearTransientInteraction();
+      postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.CAMERA_TELEPORT);
+    },
   });
   resources.own(cameraCutCoordinator);
   cameraViewKeyHandler = (event) => viewModeController.handleCameraViewKey(event);

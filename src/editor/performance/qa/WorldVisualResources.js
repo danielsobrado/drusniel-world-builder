@@ -26,9 +26,9 @@ export function trackedWorldResources(editor) {
     }
   });
   const placementBytes = editor.stylizedSurface.preparedPlacement?.arrayBytes ?? 0;
-  const interactionBytes = countArray(editor.stylizedSurface.meadowGrass?.interaction?.pixels)
-    + countArray(editor.stylizedSurface.meadowGrass?.spellGround?.pixels);
+  const interactionBytes = [editor.stylizedSurface.meadowGrass?.interaction,editor.stylizedSurface.meadowGrass?.spellGround]
+    .reduce((bytes,map)=>bytes+[map?.pixels,map?.scratch,map?.press,map?.pressScratch].reduce((n,array)=>n+countArray(array),0),0);
   return { label:'tracked resource bytes', geometryBytes, textureBytes, placementBytes, interactionBytes,
     total:geometryBytes+textureBytes+placementBytes+interactionBytes,
-    included:['scene geometry attributes','instance matrices/colors','material texture sources/mips','prepared placement arrays','interaction pixels'] };
+    included:['scene geometry attributes','instance matrices/colors','material texture sources/mips','prepared placement arrays','interaction pixels, scroll scratch and float press buffers'] };
 }

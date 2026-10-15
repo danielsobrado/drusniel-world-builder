@@ -1,3 +1,4 @@
+import { meadowPressRecoveryFactor } from './meadowInteractionBend.js';
 import * as THREE from 'three/webgpu';
 
 /**
@@ -72,6 +73,8 @@ export class MeadowInteractionMap {
     this.ink = { minX: 0, minY: 0, maxX: -1, maxY: -1 };
     this.pixels = new Uint8Array(resolution * resolution * 4);
     this.scratch = new Uint8Array(resolution * resolution * 3);
+    this.press = new Float32Array(resolution * resolution);
+    this.pressScratch = new Float32Array(resolution * resolution);
     this.clearPixels();
     this.texture = new THREE.DataTexture(this.pixels, resolution, resolution, THREE.RGBAFormat, THREE.UnsignedByteType);
     this.texture.colorSpace = THREE.NoColorSpace;
@@ -82,6 +85,8 @@ export class MeadowInteractionMap {
 
   clearPixels() {
     this.pixels.fill(0);
+    this.press.fill(0);
+    this.pressScratch.fill(0);
     for (let index = 3; index < this.pixels.length; index += 4) this.pixels[index] = 255;
   }
 
@@ -119,7 +124,7 @@ export class MeadowInteractionMap {
    * @param {{ stamp?: boolean }} [options] `stamp: false` only follows the point:
    *   the spell map keeps its window round the player without pressing a body in
    */
-  update(body, { stamp = true } = {}) {
+  update(body, { stamp = true, dtSeconds = 1/60 } = {}) {
     if (body) {
       if (!this.started) {
         this.lastCenter.set(body.x, body.z);
@@ -130,7 +135,7 @@ export class MeadowInteractionMap {
       this.center.set(body.x, body.z);
     }
     const hadInk = this.hasMarksOrPress();
-    this.recover();
+    this.recover(dtSeconds);
     if (body && stamp) this.paintSphere(body.x, body.y, body.z, this.bodyRadius, this.strength);
     if (hadInk || (body && stamp)) this.textureDirty = true;
     this.uploadFrame += 1;
@@ -150,7 +155,7 @@ export class MeadowInteractionMap {
     return this.peak > 0 || this.markPeak > 0;
   }
 
-  recover() {
+  recover(dtSeconds = 1/60) {
     if (!this.hasMarksOrPress()) return;
     const { minX, minY, maxX, maxY } = this.ink;
     const stride = this.resolution * 4;
@@ -158,11 +163,19 @@ export class MeadowInteractionMap {
     const marking = this.markPeak > 0;
     const frame = this.markFrame;
     this.markFrame += 1;
+    const factor = meadowPressRecoveryFactor(dtSeconds,this.recoverySpeed);
+    let pressPeak = 0;
     let markPeak = 0;
     for (let y = minY; y <= maxY; y += 1) {
       for (let x = minX; x <= maxX; x += 1) {
         const index = y * stride + x * 4;
-        if (pressing) this.pixels[index] = Math.floor(this.pixels[index] * this.recoverySpeed);
+        if (pressing) {
+          const cell=y*this.resolution+x;
+          const value=this.press[cell]*factor;
+          this.press[cell]=value;
+          this.pixels[index]=Math.round(value);
+          pressPeak=Math.max(pressPeak,this.pixels[index]);
+        }
         if (marking) {
           let mark = this.pixels[index + 1];
           if (mark > 0 && frame % MARK_FADE_FRAMES[this.pixels[index + 2] >> MARK_KIND_SHIFT] === 0) {
@@ -173,7 +186,8 @@ export class MeadowInteractionMap {
         }
       }
     }
-    this.peak = Math.floor(this.peak * this.recoverySpeed);
+    this.peak = pressPeak;
+    if (pressing && pressPeak === 0) this.press.fill(0);
     this.markPeak = markPeak;
     if (!this.hasMarksOrPress()) this.clearInk();
   }
@@ -190,6 +204,8 @@ export class MeadowInteractionMap {
       for (let x = oldMinX; x <= oldMaxX; x += 1) {
         const offset = (y * this.resolution + x) * 4;
         const cell = ((y - oldMinY) * width + (x - oldMinX)) * 3;
+        this.pressScratch[cell/3]=this.press[y*this.resolution+x];
+        this.press[y*this.resolution+x]=0;
         for (let channel = 0; channel < 3; channel += 1) {
           this.scratch[cell + channel] = this.pixels[offset + channel];
           this.pixels[offset + channel] = 0;
@@ -213,6 +229,7 @@ export class MeadowInteractionMap {
         const offset = (y * this.resolution + x) * 4;
         const cell = ((y + shiftY - oldMinY) * width + (x + shiftX - oldMinX)) * 3;
         for (let channel = 0; channel < 3; channel += 1) this.pixels[offset + channel] = this.scratch[cell + channel];
+        this.press[y*this.resolution+x]=this.pressScratch[cell/3];
       }
     }
   }
@@ -240,11 +257,12 @@ export class MeadowInteractionMap {
         const ground = this.getHeight?.(worldX, worldZ);
         const reach = Math.sqrt(Math.max(0, radiusSquared - distanceSquared));
         if (Number.isFinite(ground) && y - reach > ground + 0.3) continue;
-        const value = Math.floor(255 * strength * (1 - Math.sqrt(distanceSquared) / radius));
+        const value = 255 * Math.min(1,strength) * (1 - Math.sqrt(distanceSquared) / radius);
         const offset = (py * this.resolution + px) * 4;
-        const next = Math.max(this.pixels[offset], value);
-        this.pixels[offset] = next;
-        if (next > this.peak) this.peak = next;
+        const cell=py*this.resolution+px;
+        const next=Math.max(this.press[cell],value);
+        this.press[cell]=next;this.pixels[offset]=Math.round(next);
+        this.peak=Math.max(this.peak,this.pixels[offset]);
       }
     }
   }
@@ -276,9 +294,10 @@ export class MeadowInteractionMap {
         if (distance > 1) continue;
         const falloff = distance <= inner ? 1 : 1 - (distance - inner) / (1 - inner);
         const offset = (py * this.resolution + px) * 4;
-        const next = Math.max(this.pixels[offset], Math.floor(peak * falloff));
-        this.pixels[offset] = next;
-        if (next > this.peak) this.peak = next;
+        const cell=py*this.resolution+px;
+        const next=Math.max(this.press[cell],peak*falloff);
+        this.press[cell]=next;this.pixels[offset]=Math.round(next);
+        this.peak=Math.max(this.peak,this.pixels[offset]);
       }
     }
     // Uploaded on the map's own cadence (uploadIntervalFrames), not once per stamp.
@@ -339,6 +358,13 @@ export class MeadowInteractionMap {
     const maxY = Math.min(this.resolution - 1, Math.ceil(centerY + pixelRadius));
     if (maxX < minX || maxY < minY) return null;
     return { centerX, centerY, pixelRadius, minX, minY, maxX, maxY };
+  }
+
+  clearPress() {
+    this.press.fill(0);this.pressScratch.fill(0);this.peak=0;
+    for(let i=0;i<this.pixels.length;i+=4)this.pixels[i]=0;
+    if(!this.markPeak)this.clearInk();
+    this.textureDirty=false;this.texture.needsUpdate=true;
   }
 
   dispose() {

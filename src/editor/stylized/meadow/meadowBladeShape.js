@@ -6,7 +6,6 @@ import {
   cameraPosition,
   clamp,
   cos,
-  dot,
   float,
   floor,
   fract,
@@ -29,16 +28,13 @@ import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/win
 import { groundDeformationNode } from '../deformation/groundDeformationNode.js';
 import { stylizedDirtMask, stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
+import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 
 const HALF_PI = Math.PI * 0.5;
-const TWO_PI = Math.PI * 2;
 const HIDDEN = 1e9;
 /** The donor's hash and its guard for a degenerate fold direction. */
-const HASH_SCALE = 43758.5453;
-const INTERACTION_EPSILON = 0.00201;
 /** Donor units per metre, the conversion meadowGrassConfig's defaults were built on. */
-const DONOR_UNITS_PER_METRE = 2.8;
 
 /**
  * The instance inputs every meadow stage reads. Each call builds fresh nodes:
@@ -153,35 +149,22 @@ function pressAt(base, map) {
   return press;
 }
 
-function foldUnderBody(blade, local, strength, uniforms, interaction) {
-  // The body's own stamp, and spells pressing the meadow in their wider map.
-  const influence = uniforms.spellGround
-    ? max(pressAt(blade.base, interaction), pressAt(blade.base, uniforms.spellGround))
-    : pressAt(blade.base, interaction);
-
-  const amount = smoothstep(0, 0.15, influence);
-  const directionX = float(0).toVar();
-  const directionZ = float(0).toVar();
-  const bendAngle = float(0).toVar();
-  If(amount.greaterThan(0), () => {
-    const angle = fract(sin(dot(blade.base.xz, vec2(0.9898, 0.2330))).mul(HASH_SCALE)).mul(TWO_PI);
-    directionX.assign(cos(angle));
-    directionZ.assign(sin(angle));
-    bendAngle.assign(amount.mul(HALF_PI));
-  });
-
-  // Normalised outside the `If`, as the donor has it: with no stamp the direction is
-  // the zero vector, so the fold contributes nothing rather than reading an
-  // unassigned variable.
-  const directionLength = sqrt(directionX.mul(directionX).add(directionZ.mul(directionZ)));
-  const safeLength = max(directionLength, INTERACTION_EPSILON);
-  const curve = bendAngle.mul(3);
-  const heightRatio = local.y.div(uniforms.bladeHeight).clamp(0, 1);
-  const reach = uniforms.bladeHeight.mul(DONOR_UNITS_PER_METRE).mul(uniforms.bladeWidth);
-  const horizontal = reach.mul(strength).mul(sin(curve.mul(heightRatio))).mul(heightRatio);
-  local.x.addAssign(directionX.div(safeLength).mul(horizontal));
-  local.z.addAssign(directionZ.div(safeLength).mul(horizontal));
-  local.y.assign(local.y.mul(cos(curve.mul(heightRatio))));
+function foldUnderBody(blade, local, ribbon, height, ratio, uniforms, interaction) {
+  const press = (uniforms.spellGround
+    ? max(pressAt(blade.base,interaction),pressAt(blade.base,uniforms.spellGround))
+    : pressAt(blade.base,interaction)).clamp(0,1);
+  const angle = press.mul(MEADOW_MAX_BODY_BEND);
+  const safeAngle = angle.max(1e-4);
+  const upright = angle.lessThan(1e-4);
+  const horizontal = upright.select(float(0),height.mul(oneMinus(cos(angle.mul(ratio)))).div(safeAngle));
+  const vertical = upright.select(height.mul(ratio),height.mul(sin(angle.mul(ratio))).div(safeAngle)).clamp(0,height);
+  // phase is baked from canonical stem identity in double precision, unchanged by rebases.
+  const direction = vec2(cos(blade.phase),sin(blade.phase));
+  const arc = vec3(direction.x.mul(horizontal),vertical,direction.y.mul(horizontal));
+  const centre = local.sub(ribbon);
+  const folded = mix(centre,arc,smoothstep(0,.15,press)).toVar();
+  folded.y.assign(folded.y.clamp(0,height));
+  local.assign(folded.add(ribbon));
 }
 
 /**
@@ -251,6 +234,9 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       local.x.assign(x.mul(blade.rotation.y).sub(z.mul(blade.rotation.x)));
       local.z.assign(x.mul(blade.rotation.x).add(z.mul(blade.rotation.y)));
 
+      const ribbon = vec3(positionLocal.x.mul(width).mul(blade.rotation.y),0,
+        positionLocal.x.mul(width).mul(blade.rotation.x)).toVar();
+
       // A resting bend toward the stem's own random side.
       const bendPower = pow(r, uniforms.stiffness);
       const restDirection = vec2(cos(blade.phase), sin(blade.phase));
@@ -291,7 +277,7 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       local.z.addAssign(across.y.mul(flutter));
 
       // The player's body, last so it folds whatever the wind has already done.
-      if (interaction) foldUnderBody(blade, local, blade.strength, uniforms, interaction);
+      if (interaction) foldUnderBody(blade,local,ribbon,height,r,uniforms,interaction);
 
       local.assign(local.mul(clamp(lod.shrink, 0, 1)).add(blade.base));
     });
