@@ -8,6 +8,11 @@ The fixed requirements remain in the [original implementation specification](../
   application source `9b768d9a`, both renderer backends, full repository checks.
 - [Lighting matrix](lighting/report.json): 36 views, zero browser errors.
 - [Meadow LOD checks](fixtures/meadow-lod/report.json): 27 comparisons per backend.
+- [Four-light surfaces](fixtures/surfaces-four-lights/README.md): 432 checks passed;
+  [four-light trees](fixtures/trees-four-lights/README.md): 15 alpine impostor
+  luminance failures, retained with their near/impostor image pairs.
+- [Original-08 interaction](fixtures/interaction/README.md): five checks passed,
+  stable root population and measured one-second recovery.
 - [Temporal checks](fixtures/temporal/report.json): actual production tree and
   cinematic owner, timed pan and recovery, both backends.
 - [Remaining aerial/imported composition views](biomes/composition-remaining/README.md):
@@ -31,8 +36,8 @@ that stop, while other requested meadow work continues. The third-person
 initial preparation deadlock was corrected separately. Preserve the current
 density, budgets, timeout and readiness definition when investigating recovery.
 
-The resource peak baseline, final comparative performance, four-light numerical
-surface/tree reruns, complete aggregate execution and listed legacy regressions
+The resource peak baseline, final comparative performance, the all-light alpine
+impostor correction, complete aggregate execution and listed legacy regressions
 also remain required. See the implementation report for the exact completed
 evidence and outstanding gates. Passing ocean or unit checks does not clear
 those release requirements.

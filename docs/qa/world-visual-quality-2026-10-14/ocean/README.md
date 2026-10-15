@@ -1,8 +1,8 @@
 # Ocean repetition review — October 15
 
 The three visible causes are implemented and tested. This is a focused ocean
-follow-up; the full thirteen-task release is still blocked by the movement
-recovery gate recorded in the [implementation report](../../world-visual-quality-implementation-2026-10-14.md).
+follow-up; the full thirteen-task release is still blocked by movement recovery
+and alpine impostor luminance recorded in the [implementation report](../../world-visual-quality-implementation-2026-10-14.md).
 
 ![Same-pose ocean comparison](comparison.png)
 
@@ -78,8 +78,9 @@ only because their browser runner exited successfully.
   the evidence for a separate contour diagnosis.
 - Distant trees remain strongly attenuated by the configured haze. Global fog,
   exposure, sun/fill and cloud settings were fixed by the original plan and were
-  preserved. The outstanding four-light tree/atmosphere acceptance must decide
-  whether attenuation is correct before any change to those systems.
+  preserved. The [four-light tree run](../fixtures/trees-four-lights/README.md)
+  found alpine impostor luminance failures; their cause is not yet isolated and
+  must not be attributed to global fog without further evidence.
 - Valid first/third-person motion still fails full requested-scenery recovery
   within two seconds after the sprint. [Failure evidence](../motion/smoke-v2/README.md)
   is retained. This prevents a release-complete claim.

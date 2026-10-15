@@ -205,7 +205,8 @@ Execution status and retained pass/failure evidence are maintained in the
 [implementation report](../qa/world-visual-quality-implementation-2026-10-14.md)
 and [evidence index](../qa/world-visual-quality-2026-10-14/README.md).
 The thirteen-task release is not complete; the valid motion rerun misses the
-two-second requested-scenery recovery gate. The October 15 ocean follow-up is
+two-second requested-scenery recovery gate and the current four-light tree run
+fails alpine impostor luminance. The October 15 ocean follow-up is
 implemented and independently verified in the [ocean review](../qa/world-visual-quality-2026-10-14/ocean/README.md).
 
 The [biome appearance review](../reviews/biome-reference-review-2026-10-07.md)

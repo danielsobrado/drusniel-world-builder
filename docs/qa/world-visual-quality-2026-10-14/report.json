@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "world-visual-quality-status",
-  "generatedAt": "2026-10-15T12:38:53.612320+00:00",
+  "generatedAt": "2026-10-15T12:54:42.260414+00:00",
   "applicationSourceSha": "9b768d9a22d50cee2cbf8c3ebc540546b7337597",
   "generatedFromGitSha": "c47160c1d911ec61b95bac229c7335fe2d2e7898",
   "aggregateExecutionComplete": false,
@@ -35,8 +35,8 @@
     },
     {
       "id": "VQ-06",
-      "status": "partial",
-      "evidence": "fixtures/trees/report.json"
+      "status": "failed",
+      "evidence": "fixtures/trees-four-lights/report.json"
     },
     {
       "id": "VQ-07",
@@ -55,7 +55,8 @@
     },
     {
       "id": "VQ-10",
-      "status": "partial"
+      "status": "passed",
+      "evidence": "fixtures/interaction/report.json"
     },
     {
       "id": "VQ-11",
@@ -85,6 +86,12 @@
       "evidence": "motion/smoke-v2/report.json"
     },
     {
+      "id": "alpine-impostor-luminance",
+      "state": "failed",
+      "detail": "Prototype 27, day/low-sun/night: interior median impostor/near luminance ratio below the unchanged 0.8 lower gate. 15 failed comparisons across both backends.",
+      "evidence": "fixtures/trees-four-lights/report.json"
+    },
+    {
       "id": "baseline-performance-matrix",
       "state": "failed",
       "detail": "Baseline high-grass hitch rate 3.38%; dense-mixed did not settle and recorded 4.97% hitches.",
@@ -98,12 +105,35 @@
     {
       "id": "remaining-release-runs",
       "state": "not accepted",
-      "detail": "Final original/composition aggregate, four-light numeric surface/tree reruns, interaction browser sequence, native postprocessing and listed legacy suites, three final performance routes, full matrix and final manifest acceptance remain required."
+      "detail": "Final original/composition aggregate, native postprocessing and listed legacy suites, three final performance routes, full matrix and final manifest acceptance remain required; all-light tree acceptance needs a correction and rerun."
     },
     {
       "id": "performance-isolation",
       "state": "pending information",
       "detail": "The project performance guide requires other rendering tabs closed. No confirmation of that state was received during this review."
     }
-  ]
+  ],
+  "completedOctober15Checks": {
+    "remainingComposition": {
+      "poses": 17,
+      "passed": true,
+      "evidence": "biomes/composition-remaining/report.json"
+    },
+    "fourLightSurfaces": {
+      "checks": 432,
+      "passed": true,
+      "evidence": "fixtures/surfaces-four-lights/report.json"
+    },
+    "original08Interaction": {
+      "checks": 5,
+      "passed": true,
+      "evidence": "fixtures/interaction/report.json"
+    },
+    "fourLightTrees": {
+      "checks": 1104,
+      "failedChecks": 15,
+      "passed": false,
+      "evidence": "fixtures/trees-four-lights/report.json"
+    }
+  }
 }

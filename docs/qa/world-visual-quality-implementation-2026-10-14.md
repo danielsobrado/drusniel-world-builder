@@ -1,6 +1,7 @@
 # World visual quality implementation — 2026-10-14
 
-Status: implementation in progress. Release acceptance is not yet established.
+Status: implementation in progress. Release acceptance is blocked by motion
+recovery and current all-light alpine impostor luminance failures.
 Specification: [world visual quality plan](../plans/world-visual-quality-plan-2026-10-13.md).
 Original evidence: [biome screenshot audit](visual-audit-2026-10-13/README.md).
 
@@ -48,14 +49,14 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-03 | Incomplete: resource peak baseline and final aggregate acceptance remain | Baseline route passed; baseline matrix failed and remains visible |
 | VQ-04 | Passed hardware WebGPU and WebGL drift checks | [Surface evidence](world-visual-quality-2026-10-14/fixtures/drift/report.json) |
 | VQ-05 | Passed 108 CPU/shader substrate checks | `4b9818c3`; evidence retained below |
-| VQ-06 | Passed 276 tree/atmosphere checks and five world views | `5ae86e1f`; current VQ-09 atlas refresh still needs the final rerun |
+| VQ-06 | Earlier neutral tests passed; current four-light rerun fails alpine impostor luminance | [Current failure](world-visual-quality-2026-10-14/fixtures/trees-four-lights/README.md) |
 | VQ-07 | Passed classification, import, height and persistence checks | `74bc616d`; frozen review manifest retained |
 | VQ-08 | Passed 16 boundary captures and original-02 revisit | `c039c336`; [boundary evidence](world-visual-quality-2026-10-14/fixtures/grass-boundary/report.json) |
 | VQ-09 | Growth, both-backend LOD and remaining imported/coast views passed; final aggregate pending | [Growth](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json), [LOD](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json), [17-view repeat](world-visual-quality-2026-10-14/biomes/composition-remaining/README.md) |
-| VQ-10 | Implemented; bend/recovery units passed; original-08 browser sequence pending | `3e399cd2`, `e4bb82e4` |
+| VQ-10 | Bend/recovery units and original-08 browser sequence passed | [Interaction evidence](world-visual-quality-2026-10-14/fixtures/interaction/README.md) |
 | VQ-11 | Passed 25 HUD checks and 12 layouts; post-processing regression suites pending | `d032b386`; [HUD evidence](world-visual-quality-2026-10-14/fixtures/hud/report.json) |
 | VQ-12 | Lighting/temporal passed; valid motion rerun failed the two-second scenery gate | [Lighting](world-visual-quality-2026-10-14/lighting/report.json), [temporal](world-visual-quality-2026-10-14/fixtures/temporal/report.json), [motion failure](world-visual-quality-2026-10-14/motion/smoke-v2/README.md) |
-| VQ-13 | Incomplete; final verify, performance, resources and aggregate evidence required | No release-complete claim |
+| VQ-13 | Blocked by motion/tree gates; final performance, resources and aggregate evidence required | No release-complete claim |
 
 ## Repeat-capture failure and correction
 
@@ -571,3 +572,22 @@ all views but lost its server before that source check; its failed report and
 34 images are retained separately. A detached server supports the accepted
 repeat. The complete final all-suite aggregate and the independent release gates
 remain outstanding.
+
+## Final October 15 numerical results
+
+The [four-light surface rerun](world-visual-quality-2026-10-14/fixtures/surfaces-four-lights/README.md)
+passes all 432 checks with zero browser errors across both backends. The
+[original-08 interaction sequence](world-visual-quality-2026-10-14/fixtures/interaction/README.md)
+passes all five checks: 52,619 stable roots, zero cleared press, configured sphere
+press 0.85645 and recovery to 0.02038 after 1.0069 simulation seconds, preserving
+spell marks.
+
+The [current four-light tree rerun](world-visual-quality-2026-10-14/fixtures/trees-four-lights/README.md)
+**fails 15 of 1,104 comparisons**, all on alpine prototype 27. The near/impostor
+median interior luminance ratio falls to 0.760 day, 0.680 low-sun and 0.652 night
+at light azimuth 0, against the unchanged 0.8 lower limit. Overcast passes.
+Both renderer backends complete with zero browser errors; CPU and GPU impostors
+agree. The precise physical cause is not established. This supersedes any
+interpretation of the earlier neutral-light result as current all-light
+acceptance. The full release remains blocked, and the failed images/values are
+retained without raising exposure or changing the asset/threshold.
