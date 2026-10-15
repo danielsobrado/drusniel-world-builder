@@ -1,3 +1,5 @@
+import { WorldVisualMotion } from './WorldVisualMotion.js';
+import { staticLightingComponents,staticLightingChange } from './WorldVisualLighting.js';
 import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
 import { trackedWorldResources } from './WorldVisualResources.js';
@@ -5,7 +7,7 @@ const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
 export class WorldVisualQa {
-  constructor(editor) { this.editor=editor; this.disposed=false; }
+  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0; }
   async loadWorld(name) {
     if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
     const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');
@@ -72,23 +74,37 @@ export class WorldVisualQa {
   async runMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
     if(sequenceId!=='walk-sprint-turn-v1'||!['first-person','third-person'].includes(cameraMode)) throw new Error('Invalid visual motion sequence.');
     await this.cut(startPose);await this.settle();
-    const e=this.editor,player=e.playerController,view=e.viewModeController,frames=[];
-    view.cameraView=cameraMode==='third-person'?'third':'first';view.thirdPersonCamera?.reset();
-    const started=performance.now();
-    try {
-      while(!this.disposed) {
-        await frame();const elapsed=(performance.now()-started)/1000;if(elapsed>20)break;
-        const keys=elapsed>=2&&elapsed<6||elapsed>=13&&elapsed<17?['KeyW']:elapsed>=6&&elapsed<10?['KeyW','ShiftLeft']:[];
-        player.setHarnessKeys(keys);
-        if(elapsed>=12) { player.yaw=startPose.yaw+Math.PI*Math.min(1,elapsed-12);player.applyCameraState(); }
-        const status=player.getStatus();
-        frames.push({elapsed,keys,position:e.terrainView.floatingOrigin.toCanonical(status.position.x,status.position.z),
-          camera:e.terrainView.floatingOrigin.toCanonical(view.camera.position.x,view.camera.position.z),yaw:player.yaw,
-          collision:status.collision.ready,scenery:this.readiness().scenery,
-          missing:PerfCounters.get('meadowInViewMissingTiles')});
-      }
-    } finally { player.setHarnessKeys([]); }
-    return {sequenceId,cameraMode,frames};
+    const e=this.editor,view=e.viewModeController;
+    const wantThird=cameraMode==='third-person';
+    if(view.isThirdPerson!==wantThird&&!view.toggleCameraView())throw new Error('Requested motion camera is unavailable.');
+    view.thirdPersonCamera?.reset();
+    await this.settle({minimumMs:0});
+    const motion=new WorldVisualMotion(e,{startPose,cameraMode,readiness:()=>this.readiness()});
+    this.motion=motion;
+    try{return await motion.finished;}finally{if(this.motion===motion)this.motion=null;e.playerController.setHarnessKeys([]);}
   }
-  dispose() {this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
+  beforeMovement(timestamp) {this.motion?.beforeMovement(timestamp);}
+  afterFrame(timestamp,wetnessDeltaSeconds) {
+    this.weatherSimulationSeconds+=Math.max(0,wetnessDeltaSeconds);
+    this.motion?.afterFrame(timestamp);
+  }
+  async warmWeather(seconds=20) {
+    const start=this.weatherSimulationSeconds,wall=performance.now();
+    while(this.weatherSimulationSeconds-start<seconds&&!this.disposed) {
+      if(performance.now()-wall>120000)throw new Error('Weather simulation did not advance.');
+      await frame();
+    }
+    return {simulationSeconds:this.weatherSimulationSeconds-start,wetness:this.editor.surfaceWetness.value,wallMs:performance.now()-wall};
+  }
+  async settleLighting({timeoutMs=120000}={}) {
+    const start=performance.now();let previous=null,stableFrames=0,maximumChange=Infinity;
+    while(performance.now()-start<timeoutMs&&!this.disposed) {
+      await frame();const current=staticLightingComponents(this.editor);maximumChange=staticLightingChange(previous,current);
+      stableFrames=maximumChange<.001?stableFrames+1:0;previous=current;
+      if(stableFrames>=60)return {stableFrames,maximumChange,components:current,wallMs:performance.now()-start};
+    }
+    throw new Error('Static sky, lights and fog failed to converge.');
+  }
+
+  dispose() {this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
 }

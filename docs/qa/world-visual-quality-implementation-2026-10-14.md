@@ -419,3 +419,14 @@ The previously failing tundra pose settles successfully in a fresh session at
 `282d1958`. That does not erase the failed ordered review: an ordered rerun now
 records prepared-field windows/missing dependencies and resumable manifest
 stages, so a cache/order-dependent stall can be distinguished from cold loading.
+
+VQ-12 harness work is in progress. Motion input now runs immediately before the
+real player update and samples after the successful world render. Its elapsed
+clock uses the owner's actual update timestamp and the same 0.05 s delta clamp
+as `stepPlayerPhysics`, with tests against actual movement distance. It records
+canonical player/camera poses, contacts, input, queues, near eligible/published
+meadow keys and interaction peak; it does not replace collision or movement.
+The new lighting runner creates a fresh context for each of 36 pose/light pairs,
+advances the real wetness clock for 20 seconds, checks static sky/light/fog
+convergence for 60 frames below 0.001, then requires full scenery readiness.
+These new motion/lighting captures have not yet passed browser acceptance.

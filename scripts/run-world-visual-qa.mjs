@@ -15,7 +15,7 @@ const report={schemaVersion:1,startedAt:new Date().toISOString(),viewport:{width
 let browser,page,errors;
 try {
   Object.assign(report,await captureVisualSource(args.url,repo));
-  for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml'])report.configHashes[file]=report.sourceSnapshot?.files[file]??await fileHash(new URL(file,root));
+  for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml','config/water-domain.yaml','config/azgaar-guidance.yaml'])report.configHashes[file]=report.sourceSnapshot?.files[file]??await fileHash(new URL(file,root));
   report.mapHash=await fileHash(new URL('maps/Eldara Full 2026-07-23-20-37.json',root));
   browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
   page=await browser.newPage({viewport:report.viewport,deviceScaleFactor:1});errors=createBrowserErrorMonitor(page);

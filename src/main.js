@@ -1590,6 +1590,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     PerfCounters.set('constructionLodTransitions', constructionView.stats.lodTransitions);
     if (profiling) perfQa.mark('terrainCommit');
 
+    if (import.meta.env.DEV) window.__worldVisualQa?.beforeMovement(frameTimestamp);
     viewModeController.update(frameTimestamp);
     ui.setMinimapHeading(viewModeController.getHeading());
     viewModeUi.update();
@@ -1813,6 +1814,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     terrainView.render(viewModeController.camera);
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();
+    if (import.meta.env.DEV) window.__worldVisualQa?.afterFrame(frameTimestamp,frameDelta);
     assetStartupTelemetry.markFirstFrame();
     if (profiling) {
       perfQa.mark('render');
