@@ -28,6 +28,6 @@ export function parseVisualArguments(args) {
     const key=args[i];if(!['--out','--suite','--baseline','--url','--only'].includes(key)||!args[i+1]||args[i+1].startsWith('--'))throw new Error(`Invalid visual QA argument: ${key}`);
     result[key.slice(2)]=args[++i];
   }
-  if(!result.out||!['original','atmosphere','biome-classification','extended','shore','imported','lighting','motion','all'].includes(result.suite))throw new Error('Visual QA requires --out PATH and a valid suite.');
+  if(!result.out||!['original','atmosphere','biome-classification','extended','composition','shore','imported','lighting','motion','all'].includes(result.suite))throw new Error('Visual QA requires --out PATH and a valid suite.');
   return result;
 }
