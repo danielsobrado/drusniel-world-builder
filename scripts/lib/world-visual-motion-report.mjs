@@ -3,6 +3,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {homedir} from 'node:os';
 import sharp from 'sharp';
+import {PLAYER_MODE_WALK} from '../../src/editor/player/playerConstants.js';
 
 export const MOTION_MARKERS=[0,6,10,12,13,17,20];
 export function motionChecks(motion) {
@@ -10,7 +11,7 @@ export function motionChecks(motion) {
  const add=(id,passed,detail)=>checks.push({id,passed,detail});
  add('20 simulation seconds recorded',motion.elapsedSimulationSeconds>=20&&frames.length>1,motion.elapsedSimulationSeconds);
  add('finite canonical camera and player poses',frames.every(f=>[f.position.x,f.position.y,f.position.z,f.position.footY,f.camera.x,f.camera.y,f.camera.z,f.yaw,f.pitch,f.fov].every(Number.isFinite)));
- add('ordinary player mode throughout',frames.every(f=>f.mode==='walk'));
+ add('ordinary player mode throughout',frames.every(f=>f.mode===PLAYER_MODE_WALK));
  add('collision ready without query errors',frames.every(f=>f.collision.ready&&!f.collision.error&&!f.collision.queryError));
  add('prescribed movement settings',motion.settings.walkSpeed===9&&motion.settings.firstPersonFov===68&&motion.settings.thirdPersonFov===45,motion.settings);
  add('camera field of view',frames.every(f=>Math.abs(f.fov-(motion.cameraMode==='first-person'?68:45))<.001));
