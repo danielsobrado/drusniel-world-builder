@@ -6,6 +6,7 @@ import {resolveSeaSurf,seaSurfPatternFrames} from '/src/editor/water/SeaSurf.js'
 import {createSeaSurfaceNodes} from '/src/editor/stylized/SeaSurfaceShading.js';
 import {loadEditorConfig} from '/src/config/loadEditorConfig.js';
 import {SEA_SWELL_COMPONENTS} from '/src/editor/water/SeaSwell.js';
+import {seaStateUniforms} from '/src/editor/water/seaState.js';
 
 // Measure the production shader itself; a CPU approximation cannot catch GPU
 // integer-hash, interpolation, or large-origin precision regressions.
@@ -68,7 +69,7 @@ try {
  // Sample the actual crest-lighting graph at the peak of every wave component.
  // Black must remain black; coloured water may brighten but cannot bleach.
  const config=structuredClone(loadEditorConfig().stylizedSurface.water.sea);config.surf.enabled=false;
- const sea=createSeaSurfaceNodes({terrainUv:uv(),chunkWorldSize:.000001,surfaceWorldHeight:float(0),
+ const sea=createSeaSurfaceNodes({terrainUv:uv(),chunkWorldSize:.000001,surfaceWorldHeight:seaStateUniforms.seaLevel,
   waterDepth:float(10),waterCoverage:float(1),currentStrength:float(0),time:float(0),
   phaseOrigin:SEA_SWELL_COMPONENTS.map(()=>float(Math.PI/2)),sunDirection:vec3(0,1,0),config});
  for(const base of [[0,0,0],[.02,.08,.12],[.08,.3,.28]]) {
