@@ -21,13 +21,17 @@ try {
   return {vendor:a?.info.vendor,architecture:a?.info.architecture,fallback:!!(a?.info.isFallbackAdapter??a?.isFallbackAdapter),backend:window.__editor.terrainView.rendererBackendStatus.mode};});
  if(report.adapter.backend!=='webgpu'||report.adapter.fallback||!report.adapter.vendor||/swiftshader|lavapipe|llvmpipe|warp|basic render/i.test(JSON.stringify(report.adapter)))throw new Error('Hardware WebGPU required.');
  const poses=JSON.parse(await readFile(path.join(repo,'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'),'utf8'));
- report.pose=poses.marine.find(p=>p.id===option('--pose','marine-coast-overview'));
- if(!report.pose)throw new Error('Unknown frozen marine pose.');
+ const requested=option('--pose','marine-coast-overview').split(',');
+ if(requested.some(id=>!poses.marine.some(p=>p.id===id)))throw new Error('Unknown frozen marine pose.');
+ report.poses=requested.map(id=>poses.marine.find(p=>p.id===id));
+ if(report.poses.length===1)report.pose=report.poses[0];
+ report.preparations=[];
  await page.evaluate(()=>window.__worldVisualQa.setLighting());
- report.preparation=await prepareVisualPose(page,report.pose);
- if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  const variants=option('--variants','default,foam-off,reflections-off,surf-off,detail-off').split(',');
  if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off','surf-spray-off','reflections-and-glint-off','crest-light-off','crest-transmission-off','slope-shading-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
+ for(const pose of report.poses) {
+ report.preparations.push({id:pose.id,...await prepareVisualPose(page,pose)});
+ if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  for(const variant of variants) {
   console.log(`Water pattern review: ${variant}`);
   const controls=await page.evaluate(async variant=>{
@@ -68,8 +72,10 @@ try {
     waterSlots:s.waterSlots.length,visibleSlots:s.waterSlots.filter(slot=>slot.mesh.visible&&slot.mesh.parent).length,
     foam:s.sharedWaterMaterials.bindings.config.water.foam.enabled,clock:s.sharedWaterMaterials.bindings.time.value};
   });
-  const file=`${variant}.png`;await captureWorldCanvas(page,path.join(out,file));
-  report.cases.push({...controls,readiness});report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
+  const file=`${report.poses.length>1?`${pose.id}-`:''}${variant}.png`;await captureWorldCanvas(page,path.join(out,file));
+  report.cases.push({poseId:pose.id,...controls,readiness});report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
+ }
+ await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(false));
  }
  report.errors=errors.snapshot();report.sourceStable=visualSourceStayedFixed(report,await captureVisualSource(url,repo));
  report.passed=report.sourceStable&&!report.dirtyFiles.length&&report.errors.count===0&&report.cases.every(c=>c.readiness.ready);if(!report.passed)process.exitCode=1;
