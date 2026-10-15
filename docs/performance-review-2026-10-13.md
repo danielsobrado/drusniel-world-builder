@@ -2,9 +2,10 @@
 
 Reviewed the frame loop, streaming and preparation paths, collision residency,
 and simulation queries on `main`, starting from clean commit
-`9fb5ba6b8fe3b2b12ab008546f14c015cc57f4de`. This review fixes five verified
-sources of unnecessary work. It does not establish that all frame-time targets
-are met throughout the application.
+`9fb5ba6b8fe3b2b12ab008546f14c015cc57f4de`. The initial five scaling fixes and
+subsequent grass-coverage, upload, and preparation fixes are detailed below.
+This review does not establish that all frame-time targets are met throughout
+the application.
 
 ## Findings and fixes
 
@@ -212,6 +213,53 @@ allowance. Early tree completions are retained until the view consumes their
 notification, ensuring newly prepared trees are actually published. Two new
 regressions reproduce starvation and lost completion notifications before the
 fix, then verify bounded progress and exactly-once reporting afterward.
+
+### October 15: integrated verification and isolated hardware follow-up
+
+The manifest-fairness revision `8f236795` passed the full `npm run verify`
+with **3,585 tests**. Its high-grass diagnostic capture reached all nine required
+collision chunks and recovered to complete scenery readiness 18.328 seconds
+after movement stopped, with zero browser errors. However, vegetation had not
+settled within the 120-second startup limit. The reported 110.56 FPS and 1.89%
+hitch rate do not make that capture valid acceptance.
+
+The user confirmed that another game session was open during the October 14
+captures. Those frame timings remain diagnostic observations with uncontrolled
+GPU contention; they cannot establish an isolated before/after improvement or
+explain all remaining hitches. The deterministic regression tests, isolated
+query benchmark, and frozen-camera grass coverage checks remain separate
+evidence for the fixes.
+
+After pulling the incoming terrain/tree changes, `8efc797c` passed the complete
+`npm run verify`: **3,591 tests**, zero failures or skips, lint, generated UI
+checks, production asset validation, and the production build. Existing large
+bundle and plugin timing warnings remain. The user then stopped the other game
+session and requested a fresh hardware measurement. The repeat uses frozen
+sources from `8efc797c`, NVIDIA Lovelace WebGPU, a 1280 x 720 viewport, eight
+seconds warmup, readiness settling, and twelve seconds measured movement.
+
+That isolated matrix passed standard, forest, high grass, construction and
+water. Dense mixed settled with zero browser errors but narrowly failed the
+hitch gate: 27 hitches in 1,237 frames (2.18%), 103.12 FPS and 16.5 ms p95.
+Reducing source publication to 1 MiB did not help: the controlled repeat had
+36 hitches (2.86%) and recovered in 15.405 seconds with no missing grass.
+The production allowance remains 4 MiB. An instrumented repeat attributed
+about 1.32 seconds of the final twelve seconds to attribute `writeBuffer`
+calls; its timings are diagnostic, not acceptance.
+
+Dense high and medium blade bands both contain up to 40,401 stems per tile.
+Changing detail moved each tile into a different GPU page and uploaded the
+same prepared instances again. Compatible single-tile pages now move between
+bands, keeping their instance attributes while changing the blade template.
+Prepared-generation identity distinguishes those transitions from actual
+ground rebuilds, including reuse of pooled CPU arrays. Empty compatible pages
+are shared too, preventing repeated teleports from accumulating allocations.
+
+Two regressions failed on the original page behavior and now retain the same
+GPU attributes with unchanged versions through LOD transitions. A third guards
+bounded page counts through repeated teleports. Ground revisions, simultaneous
+opposite transitions, and floating-origin changes remain covered. The fixture
+avoids 2,262,456 bytes of repeated instance uploads per 40,401-stem transition.
 
 Commands used:
 

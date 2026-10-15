@@ -9,6 +9,7 @@ class MeadowBandPages {
     this.slots = new Map();
     this.present = new Set();
     this.pages = [];
+    this.peers = [];
     this.addPage();
   }
 
@@ -21,7 +22,34 @@ class MeadowBandPages {
     return page;
   }
 
-  update(tiles) {
+  takeTilePageFrom(previous, tile) {
+    if (!this.peers.includes(previous)) return;
+    const page = previous.slots.get(tile);
+    if (!page) return;
+    previous.slots.delete(tile);
+    this.takePageFrom(previous, page);
+    this.slots.set(tile, page);
+  }
+
+  takePageFrom(previous, page) {
+    previous.pages.splice(previous.pages.indexOf(page), 1);
+    page.setTemplate(this.options.template);
+    page.mesh.name = `${this.options.name}-${page.geometry.id}`;
+    this.pages.push(page);
+    return page;
+  }
+
+  availablePage() {
+    const own = this.pages.find(page => page.memberCount < this.pageTileCapacity);
+    if (own) return own;
+    for (const peer of this.peers) {
+      const empty = peer.pages.find(page => page.memberCount === 0);
+      if (empty) return this.takePageFrom(peer, empty);
+    }
+    return this.addPage();
+  }
+
+  retireTiles(tiles) {
     this.present.clear();
     for (const tile of tiles) this.present.add(tile);
     for (const [tile, page] of this.slots) {
@@ -29,12 +57,14 @@ class MeadowBandPages {
       page.memberCount -= 1;
       this.slots.delete(tile);
     }
+  }
+
+  update(tiles) {
     for (const page of this.pages) page.members.length = 0;
     for (const tile of tiles) {
       let page = this.slots.get(tile);
       if (!page) {
-        page = this.pages.find(candidate => candidate.memberCount < this.pageTileCapacity)
-          ?? this.addPage();
+        page = this.availablePage();
         this.slots.set(tile, page);
         page.memberCount += 1;
       }
@@ -79,9 +109,16 @@ export class MeadowGrassBatches {
   constructor({ scene, templates, material, name, renderOrder = 0, boundsPadding = null }) {
     this.batches = new Map();
     this.members = new Map();
+    this.singleTileOwners = new Map();
     for (const [band, template] of Object.entries(templates)) {
       this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding }));
       this.members.set(band, []);
+    }
+    for (const batch of this.batches.values()) {
+      if (batch.pageTileCapacity !== 1) continue;
+      batch.peers = [...this.batches.values()].filter(peer => peer !== batch
+        && peer.pageTileCapacity === 1 && peer.stride === batch.stride
+        && peer.options.template.userData.meadow.tileSize === batch.options.template.userData.meadow.tileSize);
     }
   }
 
@@ -95,6 +132,25 @@ export class MeadowGrassBatches {
 
   /** @returns {Record<string, number>} stems drawn per band */
   commit() {
+    // High/medium dense bands have equal populations and one tile per page.
+    // Move ownership before either band retires its old members, retaining the
+    // populated GPU attributes when only the blade template changes.
+    this.singleTileOwners.clear();
+    for (const batch of this.batches.values()) {
+      if (batch.pageTileCapacity === 1) {
+        for (const tile of batch.slots.keys()) this.singleTileOwners.set(tile, batch);
+      }
+    }
+    for (const [band, batch] of this.batches) {
+      if (batch.pageTileCapacity !== 1) continue;
+      for (const tile of this.members.get(band)) {
+        batch.takeTilePageFrom(this.singleTileOwners.get(tile), tile);
+      }
+    }
+    this.singleTileOwners.clear();
+    // Retire every band before allocating, so a teleport can reuse an empty
+    // compatible page even when its previous band is later in the update order.
+    for (const [band, batch] of this.batches) batch.retireTiles?.(this.members.get(band));
     const stems = {};
     for (const [band, batch] of this.batches) stems[band] = batch.update(this.members.get(band));
     return stems;
@@ -112,5 +168,6 @@ export class MeadowGrassBatches {
     for (const batch of this.batches.values()) batch.dispose();
     this.batches.clear();
     this.members.clear();
+    this.singleTileOwners.clear();
   }
 }

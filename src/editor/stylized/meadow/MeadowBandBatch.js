@@ -64,6 +64,13 @@ export class MeadowBandBatch {
     PerfCounters.inc('meadowAttributeBytesUploaded', bytes);
   }
 
+  setTemplate(template) {
+    for (const name of ['position', 'uv', 'bladeSide']) {
+      this.geometry.setAttribute(name, template.getAttribute(name));
+    }
+    this.geometry.index = template.index;
+  }
+
   writeTile(start, tile, count, writeSource) {
     if (writeSource) {
       for (const [name, source, width] of INSTANCE_ATTRIBUTES) {
@@ -93,8 +100,11 @@ export class MeadowBandBatch {
     for (const tile of tiles) {
       const count = Math.min(tile.output.count, this.stride);
       let slot = this.slots.get(tile);
+      // Detail-only LOD publications have a new build ID but reuse the same
+      // prepared generation. A new generation still invalidates pooled arrays.
+      const source = tile.prepared ?? tile.buildId;
       const writeSource = !slot || slot.start !== start || slot.count !== count
-        || slot.buildId !== tile.buildId;
+        || slot.source !== source;
       if (writeSource || slot.renderX !== tile.renderX || slot.renderZ !== tile.renderZ) {
         this.writeTile(start, tile, count, writeSource);
       }
@@ -104,7 +114,7 @@ export class MeadowBandBatch {
       }
       slot.start = start;
       slot.count = count;
-      slot.buildId = tile.buildId;
+      slot.source = source;
       slot.renderX = tile.renderX;
       slot.renderZ = tile.renderZ;
       start += count;
