@@ -1,8 +1,11 @@
 import * as THREE from 'three/webgpu';
-import {uniform,uv,vec3} from 'three/tsl';
+import {float,uniform,uv,vec3} from 'three/tsl';
 import {PatternOrigins} from '/src/editor/stylized/PatternOrigins.js';
 import {createSeaFoamNoise} from '/src/editor/stylized/SeaSurfNodes.js';
 import {resolveSeaSurf,seaSurfPatternFrames} from '/src/editor/water/SeaSurf.js';
+import {createSeaSurfaceNodes} from '/src/editor/stylized/SeaSurfaceShading.js';
+import {loadEditorConfig} from '/src/config/loadEditorConfig.js';
+import {SEA_SWELL_COMPONENTS} from '/src/editor/water/SeaSwell.js';
 
 // Measure the production shader itself; a CPU approximation cannot catch GPU
 // integer-hash, interpolation, or large-origin precision regressions.
@@ -62,6 +65,22 @@ try {
   const later=await draw(`${id}-later`,center,[0,0],124.4),change=difference(base,later);
   state.report.checks.push({id:`${id}-animation`,...change,passed:change.max>.005});
  }
- state.report.passed=state.report.checks.length===27&&state.report.checks.every(c=>c.passed);
+ // Sample the actual crest-lighting graph at the peak of every wave component.
+ // Black must remain black; coloured water may brighten but cannot bleach.
+ const config=structuredClone(loadEditorConfig().stylizedSurface.water.sea);config.surf.enabled=false;
+ const sea=createSeaSurfaceNodes({terrainUv:uv(),chunkWorldSize:.000001,surfaceWorldHeight:float(0),
+  waterDepth:float(10),waterCoverage:float(1),currentStrength:float(0),time:float(0),
+  phaseOrigin:SEA_SWELL_COMPONENTS.map(()=>float(Math.PI/2)),sunDirection:vec3(0,1,0),config});
+ for(const base of [[0,0,0],[.02,.08,.12],[.08,.3,.28]]) {
+  material.colorNode=sea.shade(vec3(...base));material.needsUpdate=true;
+  renderer.setRenderTarget(target);await renderer.render(scene,camera);
+  const pixels=await renderer.readRenderTargetPixelsAsync(target,0,0,size,size),expected=base.map(v=>v*(1+config.crestLift));
+  let error=0;for(let i=0;i<pixels.length;i++)if(i%4!==3)error=Math.max(error,Math.abs(pixels[i]-expected[i%4]));
+  renderer.setRenderTarget(null);await renderer.render(scene,camera);
+  const id=`crest-chroma-${base.join('_')}`;state.report.cases.push({id,base,expected,crestLift:config.crestLift});
+  state.report.checks.push({id,maxError:error,limit:.001,passed:Number.isFinite(error)&&error<=.001});
+  state.pendingCapture=id;await new Promise(resolve=>{state.continue=resolve;});state.pendingCapture=null;
+ }
+ state.report.passed=state.report.checks.length===30&&state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally{renderer.setRenderTarget(null);target.dispose();mesh.geometry.dispose();material.dispose();state.report.done=true;}

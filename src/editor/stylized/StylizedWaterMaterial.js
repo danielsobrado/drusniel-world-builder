@@ -498,7 +498,7 @@ export function createStylizedWaterMaterial({
     color = color.add(colorNode(water.highlightColor).mul(causticAmount));
   }
 
-  if (sea) color = sea.shade(color, colorNode(water.highlightColor));
+  if (sea) color = sea.shade(color);
 
   if (water.rainRipples?.enabled && quality.flow && rippleOrigin) {
     const ripple = createRainRippleNode({

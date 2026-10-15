@@ -130,9 +130,11 @@ export function createSeaSurfaceNodes({
     // How much of this water is sea, 0..1: at sea level and without a current.
     mask: seaMask,
     surfFoam: surf?.foam.mul(seaMask),
-    shade(color, highlight) {
+    shade(color) {
       const shaded = color.mul(float(1).add(lit.mul(config.slopeShading)));
-      return mix(shaded, highlight, crest.mul(config.crestLift));
+      // A lit crest retains the water's chroma. Blending every carrier peak
+      // toward white painted broad, repeating foam-like stamps on calm water.
+      return shaded.mul(float(1).add(crest.mul(config.crestLift)));
     },
     whitecap() {
       return smoothstep(threshold, 1, height).mul(strength).mul(breakup);
