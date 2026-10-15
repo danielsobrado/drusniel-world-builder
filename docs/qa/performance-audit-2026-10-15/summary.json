@@ -1,0 +1,2552 @@
+{
+  "scope": "Performance investigation only; gameplay, density, distance, appearance and interaction settings unchanged.",
+  "captures": [
+    {
+      "name": "standard",
+      "revision": "2d1f832d",
+      "rawPath": "tmp/performance-audit-2026-10-15/standard.json",
+      "sha256": "64ec4febd9911f07d3be037a9b5af0a4b852d61828a43c5a0d87db20d07dadde",
+      "generatedAt": "2026-10-15T15:48:45.682Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 29.4,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1418,
+        "retainedFrameCount": 1419,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11987.2,
+        "avgFps": 118.29,
+        "dt": {
+          "minMs": 0.4,
+          "p50Ms": 7.5,
+          "p95Ms": 14.9,
+          "p99Ms": 26.466,
+          "maxMs": 57.9,
+          "meanMs": 8.458
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 5,
+        "hitchRate": 0.0035,
+        "phases": {
+          "placementPreparation": {
+            "totalMs": 617.7,
+            "avgMs": 0.436,
+            "p95Ms": 0.9,
+            "maxMs": 5.5
+          },
+          "terrainCommit": {
+            "totalMs": 24,
+            "avgMs": 0.017,
+            "p95Ms": 0.1,
+            "maxMs": 0.6
+          },
+          "player": {
+            "totalMs": 250.5,
+            "avgMs": 0.177,
+            "p95Ms": 0.3,
+            "maxMs": 14.1
+          },
+          "floatingOrigin": {
+            "totalMs": 2.1,
+            "avgMs": 0.001,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 169.7,
+            "avgMs": 0.12,
+            "p95Ms": 0.3,
+            "maxMs": 1.5
+          },
+          "streaming": {
+            "totalMs": 12.7,
+            "avgMs": 0.009,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "stylized": {
+            "totalMs": 1503.9,
+            "avgMs": 1.061,
+            "p95Ms": 2.3,
+            "maxMs": 5
+          },
+          "objects": {
+            "totalMs": 80.4,
+            "avgMs": 0.057,
+            "p95Ms": 0.1,
+            "maxMs": 1.8
+          },
+          "voxel": {
+            "totalMs": 8.8,
+            "avgMs": 0.006,
+            "p95Ms": 0.1,
+            "maxMs": 0.6
+          },
+          "render": {
+            "totalMs": 7926.9,
+            "avgMs": 5.59,
+            "p95Ms": 9.6,
+            "maxMs": 43.8
+          }
+        },
+        "originSnapCount": 0
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 8,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "frameDeltas": {
+        "meadowStemsCompacted": {
+          "total": 1581640,
+          "maximumPerFrame": 6656
+        },
+        "meadowAttributeBytesUploaded": {
+          "total": 160240280,
+          "maximumPerFrame": 3172096
+        },
+        "meadowBufferAllocationBytes": {
+          "total": 24690176,
+          "maximumPerFrame": 24690176
+        },
+        "meadowCompactionReuses": {
+          "total": 1036,
+          "maximumPerFrame": 14
+        },
+        "meadowGrassMs": {
+          "total": 601.4999998509884,
+          "maximumPerFrame": 5.5
+        },
+        "meadowBatchCommitMs": {
+          "total": 72.39999957382679,
+          "maximumPerFrame": 5.199999988079071
+        },
+        "streamedDrawPreparationMs": {
+          "total": 11.5,
+          "maximumPerFrame": 7.5999999940395355
+        }
+      },
+      "preparation": {
+        "start": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "errors": [],
+          "materials": 0
+        },
+        "end": {
+          "ready": false,
+          "queueDepth": 54,
+          "fields": 5,
+          "meadow": 128,
+          "draws": 0,
+          "variants": 0,
+          "staged": 7,
+          "errors": [],
+          "materials": 0
+        }
+      },
+      "grass": {
+        "state": {
+          "blades": {
+            "tiles": 68,
+            "building": 123,
+            "stems": 74156,
+            "bands": {
+              "high": 19250,
+              "medium": 25562,
+              "low": 15461,
+              "veryLow": 13883
+            },
+            "visibleMissing": 61,
+            "visibleCapacityLag": 27,
+            "inViewMissing": 38,
+            "inViewCapacityLag": 15,
+            "resident": 199
+          },
+          "cards": {
+            "tiles": 30,
+            "building": 3,
+            "stems": 136886,
+            "bands": {
+              "cards": 136886
+            },
+            "visibleMissing": 3,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 3,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 98,
+          "building": 126,
+          "stems": 74156,
+          "triangles": 693786,
+          "bladeTriangles": 420014,
+          "cardTriangles": 273772
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 3,
+            "capacity": 32,
+            "stride": 10000,
+            "eligibleInstances": 70000,
+            "retainedBytes": 17920000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 4,
+            "capacity": 32,
+            "stride": 10000,
+            "eligibleInstances": 70000,
+            "retainedBytes": 17920000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 14,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 75504,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 47,
+            "capacity": 128,
+            "stride": 484,
+            "eligibleInstances": 38720,
+            "retainedBytes": 3469312
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 30,
+            "capacity": 64,
+            "stride": 6889,
+            "eligibleInstances": 268671,
+            "retainedBytes": 24690176
+          }
+        ]
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 13018.5,
+        "waitedMs": 13426.39999999106
+      },
+      "recoveryEnd": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "staged": 0,
+        "errors": [],
+        "materials": 0
+      },
+      "gpuRender": null,
+      "config": {
+        "player": {
+          "fovDegrees": 68,
+          "walkSpeed": 9,
+          "runMultiplier": 1.8,
+          "jumpSpeed": 8,
+          "gravity": 24,
+          "eyeHeight": 1.7,
+          "stepHeight": 1.1,
+          "groundSnapDistance": 0.6,
+          "mouseSensitivity": 0.0022,
+          "maxPitchDegrees": 85,
+          "water": {
+            "wadeDepth": 0.7,
+            "swimDepth": 1.35,
+            "transitionHysteresis": 0.12,
+            "wadeDrag": 0.35,
+            "swimSpeed": 5,
+            "verticalSwimSpeed": 3,
+            "buoyancy": 18,
+            "swimDrag": 4,
+            "currentDriftSpeed": 0.65,
+            "underwater": {
+              "backgroundColor": "#0b3342",
+              "fogColor": "#1b6070",
+              "fogDensity": 0.055,
+              "lightScale": 0.38,
+              "transitionSeconds": 0.28,
+              "nearPlane": 0.15,
+              "optics": {
+                "enabled": true,
+                "extinction": [
+                  0.1,
+                  0.038,
+                  0.045
+                ],
+                "dimming": [
+                  0.11,
+                  0.04,
+                  0.035
+                ],
+                "causticTileMeters": 5.5,
+                "causticStrength": 1.4,
+                "shaftStrength": 1.1,
+                "distortion": 0.0016,
+                "surfaceRefraction": 0.09,
+                "surfaceMirror": 0.62
+              }
+            }
+          }
+        },
+        "world": {
+          "seed": 918273,
+          "chunkSize": 64,
+          "loadRadius": 2,
+          "floatingOriginThreshold": 4096,
+          "exploration": {
+            "speedBoost": {
+              "enabled": true,
+              "speedMultiplier": 3,
+              "doubleTapWindowMs": 300
+            },
+            "freeFly": {
+              "enabled": true,
+              "moveSpeed": 24,
+              "fastMultiplier": 4,
+              "lookSensitivity": 0.003
+            },
+            "frameBudget": {
+              "enabled": true,
+              "targetFps": 144,
+              "reserveMs": 0.5,
+              "minimumMs": 0.25,
+              "maximumMs": 1.2
+            },
+            "drawPreparation": {
+              "enabled": true,
+              "meshesPerFrame": 2
+            },
+            "residents": {
+              "enabled": true,
+              "radiusMeters": 220,
+              "maxResidents": 32,
+              "maxPerSettlement": 22,
+              "wanderRadius": 18,
+              "refreshSeconds": 0.5
+            },
+            "serpents": {
+              "enabled": true,
+              "maxResident": 2,
+              "regionSize": 256,
+              "loadRadius": 180,
+              "unloadRadius": 260,
+              "spawnChance": 0.12,
+              "tileIds": [
+                5,
+                7
+              ],
+              "sizeScale": 0.06,
+              "entries": []
+            },
+            "tour": {
+              "enabled": true,
+              "durationSeconds": 45,
+              "radiusMeters": 180,
+              "clearanceMeters": 18,
+              "lookAheadMeters": 12,
+              "preloadMeters": 40
+            },
+            "mobile": {
+              "enabled": true,
+              "maxShortSide": 900,
+              "requireCoarsePointer": true,
+              "pixelRatioCap": 1,
+              "initialQuality": "low",
+              "lookSensitivity": 0.006
+            },
+            "recovery": {
+              "enabled": true
+            },
+            "treeRoots": {
+              "enabled": true,
+              "rootHeight": 0.25,
+              "conformHeight": 3,
+              "maxSlope": 1.2,
+              "maxSink": 2,
+              "bury": 0.05,
+              "maxOverhang": 1
+            }
+          }
+        },
+        "grass": {
+          "system": "meadow",
+          "meadow": {
+            "tileSize": 8,
+            "maxDistance": 50,
+            "growth": {
+              "byTileId": {
+                "0": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "1": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "2": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "3": {
+                  "shortHeight": 0.25,
+                  "tallHeight": 0.85,
+                  "width": 0.038,
+                  "density": 0.72,
+                  "patchMeters": 14,
+                  "shape": "slender"
+                },
+                "4": {
+                  "shortHeight": 0.18,
+                  "tallHeight": 0.55,
+                  "width": 0.045,
+                  "density": 0.92,
+                  "patchMeters": 9,
+                  "shape": "slender"
+                },
+                "5": {
+                  "shortHeight": 0.16,
+                  "tallHeight": 0.5,
+                  "width": 0.06,
+                  "density": 0.85,
+                  "patchMeters": 11,
+                  "shape": "broadleaf"
+                },
+                "6": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.38,
+                  "width": 0.042,
+                  "density": 0.85,
+                  "patchMeters": 10,
+                  "shape": "slender"
+                },
+                "7": {
+                  "shortHeight": 0.14,
+                  "tallHeight": 0.48,
+                  "width": 0.065,
+                  "density": 0.82,
+                  "patchMeters": 12,
+                  "shape": "broadleaf"
+                },
+                "8": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.36,
+                  "width": 0.046,
+                  "density": 0.78,
+                  "patchMeters": 10,
+                  "shape": "broadleaf"
+                },
+                "9": {
+                  "shortHeight": 0.1,
+                  "tallHeight": 0.28,
+                  "width": 0.035,
+                  "density": 0.65,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "10": {
+                  "shortHeight": 0.06,
+                  "tallHeight": 0.16,
+                  "width": 0.028,
+                  "density": 0.28,
+                  "patchMeters": 7,
+                  "shape": "slender"
+                },
+                "11": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "12": {
+                  "shortHeight": 0.28,
+                  "tallHeight": 0.95,
+                  "width": 0.042,
+                  "density": 0.82,
+                  "patchMeters": 13,
+                  "shape": "reed"
+                }
+              }
+            },
+            "bladeHeight": 0.64,
+            "bladeWidth": 0.071,
+            "heightScale": [
+              0.72,
+              1.3
+            ],
+            "widthScale": 1.15,
+            "curve": 0.07,
+            "palette": {
+              "base": "#50852b",
+              "tip": "#a6bf65",
+              "brightness": 1,
+              "byTileId": {
+                "3": {
+                  "base": "#6a7a2c",
+                  "tip": "#c9bd6a"
+                },
+                "7": {
+                  "base": "#357a26",
+                  "tip": "#98c255"
+                },
+                "8": {
+                  "base": "#2f6a2c",
+                  "tip": "#86b25a"
+                },
+                "9": {
+                  "base": "#34563a",
+                  "tip": "#8fa77a"
+                },
+                "10": {
+                  "base": "#666746",
+                  "tip": "#a3a07a"
+                },
+                "12": {
+                  "base": "#3a6a2e",
+                  "tip": "#9ab85e"
+                }
+              }
+            },
+            "appearance": {
+              "rootBrightness": 0.48,
+              "canopyDepth": 0.5,
+              "gradientPower": 2.35,
+              "groundTipMix": 0.08,
+              "fill": 0.025,
+              "backlight": 1.05,
+              "patchScale": 0.07,
+              "patchCool": [
+                0.8,
+                0.98,
+                0.86
+              ],
+              "patchWarm": [
+                1.12,
+                1.02,
+                0.74
+              ],
+              "dryPatchScale": 0.0308,
+              "dryStart": 0.56,
+              "dryEnd": 0.84,
+              "dryStrength": 0.22,
+              "dryColor": "#777455",
+              "lodWidenMax": 2
+            },
+            "shapes": {
+              "default": "slender",
+              "byTileId": {
+                "5": "broadleaf",
+                "7": "broadleaf",
+                "8": "broadleaf",
+                "12": "reed"
+              }
+            },
+            "lod": {
+              "high": {
+                "detail": 5,
+                "density": 12.6,
+                "distance": 0.12
+              },
+              "medium": {
+                "detail": 3,
+                "density": 12.6,
+                "distance": 0.28
+              },
+              "low": {
+                "detail": 3,
+                "density": 5.6,
+                "distance": 0.6
+              },
+              "veryLow": {
+                "detail": 2,
+                "density": 2.8,
+                "distance": 1
+              }
+            },
+            "interaction": {
+              "uploadIntervalFrames": 2
+            },
+            "far": {
+              "tileSize": 64,
+              "density": 1.3,
+              "distance": 180,
+              "width": 1.2,
+              "height": 0.72,
+              "transitionStart": 0.8,
+              "fadeStart": 0.9
+            }
+          },
+          "residentRadius": 1,
+          "nearRadius": 0,
+          "bladesPerCell": 576,
+          "bladesPerClump": 96,
+          "influenceTextureSize": 32,
+          "outerRingDensity": 0.45,
+          "lod": {
+            "enabled": true,
+            "coverage": {
+              "enabled": true,
+              "outerFadeMeters": 64,
+              "presenceWindow": 0.06,
+              "compensation": 1,
+              "maximumWiden": 1.35
+            }
+          },
+          "tileIds": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14
+          ],
+          "minWidth": 0.027,
+          "maxWidth": 0.061,
+          "minLength": 0.32,
+          "maxLength": 0.62,
+          "lengthSkew": 1.2,
+          "bladeWidthSpread": 0.45,
+          "widthLengthCorrelation": 0.6,
+          "clumpRadius": 0.75,
+          "tiltMax": 0.28,
+          "bladeProfiles": {
+            "manifest": "/assets/ground/grass-blade-profiles.json",
+            "set": "authored",
+            "sets": {
+              "generated": {
+                "label": "Generated taper (baseline)",
+                "profiles": [
+                  "generated"
+                ]
+              },
+              "authored": {
+                "label": "Authored mix",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01"
+                ]
+              },
+              "stylized": {
+                "label": "Stylized clump only",
+                "profiles": [
+                  "stylized-01"
+                ]
+              },
+              "arched": {
+                "label": "Arched meadow blade",
+                "profiles": [
+                  "meadow-01"
+                ]
+              },
+              "slender": {
+                "label": "Slender field blade",
+                "profiles": [
+                  "field-01"
+                ]
+              },
+              "mixedWithBaseline": {
+                "label": "Authored mix + baseline",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01",
+                  "generated"
+                ]
+              },
+              "familySlender": {
+                "label": "Slender blades (generated)",
+                "profiles": [
+                  "slender"
+                ]
+              },
+              "familyReed": {
+                "label": "Reeds",
+                "profiles": [
+                  "reed"
+                ]
+              },
+              "familyBroadleaf": {
+                "label": "Broadleaves",
+                "profiles": [
+                  "broadleaf"
+                ]
+              },
+              "familyMeadow": {
+                "label": "Meadow mix (slender + broadleaf)",
+                "profiles": [
+                  "slender",
+                  "broadleaf"
+                ]
+              }
+            },
+            "biomeSets": {
+              "byTileId": {
+                "3": "familySlender",
+                "4": "familyMeadow",
+                "5": "familyBroadleaf",
+                "6": "familySlender",
+                "7": "familyBroadleaf",
+                "8": "familySlender",
+                "9": "familySlender",
+                "12": "familyReed"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "high-grass",
+      "revision": "2d1f832d",
+      "rawPath": "tmp/performance-audit-2026-10-15/high-grass.json",
+      "sha256": "7d1b3ff23889972783be51b6fcc1bd9718ef594aa6a37c3fbb77ead666e7a339",
+      "generatedAt": "2026-10-15T15:51:54.749Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 65.3,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "high-grass",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1229,
+        "retainedFrameCount": 1230,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11990.6,
+        "avgFps": 102.5,
+        "dt": {
+          "minMs": 0.8,
+          "p50Ms": 9.1,
+          "p95Ms": 15.3,
+          "p99Ms": 23.62,
+          "maxMs": 36.5,
+          "meanMs": 9.762
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 2,
+        "hitchRate": 0.0016,
+        "phases": {
+          "placementPreparation": {
+            "totalMs": 509.2,
+            "avgMs": 0.414,
+            "p95Ms": 0.8,
+            "maxMs": 3.1
+          },
+          "terrainCommit": {
+            "totalMs": 21.5,
+            "avgMs": 0.017,
+            "p95Ms": 0.1,
+            "maxMs": 0.4
+          },
+          "player": {
+            "totalMs": 256.4,
+            "avgMs": 0.209,
+            "p95Ms": 0.3,
+            "maxMs": 17.2
+          },
+          "floatingOrigin": {
+            "totalMs": 2.4,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 161.8,
+            "avgMs": 0.132,
+            "p95Ms": 0.3,
+            "maxMs": 1.8
+          },
+          "streaming": {
+            "totalMs": 9.4,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "stylized": {
+            "totalMs": 1677.8,
+            "avgMs": 1.365,
+            "p95Ms": 2.7,
+            "maxMs": 6.9
+          },
+          "objects": {
+            "totalMs": 79.9,
+            "avgMs": 0.065,
+            "p95Ms": 0.2,
+            "maxMs": 0.4
+          },
+          "voxel": {
+            "totalMs": 8.9,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 0.6
+          },
+          "render": {
+            "totalMs": 8008.4,
+            "avgMs": 6.516,
+            "p95Ms": 10.2,
+            "maxMs": 17.4
+          }
+        },
+        "originSnapCount": 0
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 12,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "frameDeltas": {
+        "meadowStemsCompacted": {
+          "total": 971438,
+          "maximumPerFrame": 4352
+        },
+        "meadowAttributeBytesUploaded": {
+          "total": 133219248,
+          "maximumPerFrame": 5171208
+        },
+        "meadowBufferAllocationBytes": {
+          "total": 16216368,
+          "maximumPerFrame": 4524912
+        },
+        "meadowCompactionReuses": {
+          "total": 203,
+          "maximumPerFrame": 7
+        },
+        "meadowGrassMs": {
+          "total": 442.19999998807907,
+          "maximumPerFrame": 3.0999999940395355
+        },
+        "meadowBatchCommitMs": {
+          "total": 112.99999998509884,
+          "maximumPerFrame": 2.699999988079071
+        },
+        "streamedDrawPreparationMs": {
+          "total": 0,
+          "maximumPerFrame": 0
+        }
+      },
+      "preparation": {
+        "start": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "errors": [],
+          "materials": 0
+        },
+        "end": {
+          "ready": false,
+          "queueDepth": 56,
+          "fields": 0,
+          "meadow": 209,
+          "draws": 0,
+          "variants": 0,
+          "staged": 7,
+          "errors": [],
+          "materials": 0
+        }
+      },
+      "grass": {
+        "state": {
+          "blades": {
+            "tiles": 6,
+            "building": 190,
+            "stems": 59236,
+            "bands": {
+              "high": 0,
+              "medium": 52548,
+              "low": 5223,
+              "veryLow": 1465
+            },
+            "visibleMissing": 146,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 59,
+            "inViewCapacityLag": 0,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 14,
+            "building": 19,
+            "stems": 240560,
+            "bands": {
+              "cards": 240560
+            },
+            "visibleMissing": 19,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 14,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 20,
+          "building": 209,
+          "stems": 59236,
+          "triangles": 774370,
+          "bladeTriangles": 293250,
+          "cardTriangles": 481120
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 0,
+            "capacity": 9,
+            "stride": 40401,
+            "eligibleInstances": 0,
+            "retainedBytes": 20362104
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 2,
+            "capacity": 13,
+            "stride": 40401,
+            "eligibleInstances": 52548,
+            "retainedBytes": 29411928
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 1,
+            "capacity": 48,
+            "stride": 7921,
+            "eligibleInstances": 5223,
+            "retainedBytes": 21291648
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 3,
+            "capacity": 96,
+            "stride": 1936,
+            "eligibleInstances": 1465,
+            "retainedBytes": 10407936
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 14,
+            "capacity": 32,
+            "stride": 27556,
+            "eligibleInstances": 240560,
+            "retainedBytes": 49380352
+          }
+        ]
+      },
+      "recovery": {
+        "ready": false,
+        "firstReadyMs": null,
+        "waitedMs": 20005.09999999404
+      },
+      "recoveryEnd": {
+        "ready": false,
+        "queueDepth": 11,
+        "fields": 0,
+        "meadow": 135,
+        "draws": 0,
+        "variants": 0,
+        "staged": 1,
+        "errors": [],
+        "materials": 0
+      },
+      "gpuRender": null,
+      "config": {
+        "player": {
+          "fovDegrees": 68,
+          "walkSpeed": 9,
+          "runMultiplier": 1.8,
+          "jumpSpeed": 8,
+          "gravity": 24,
+          "eyeHeight": 1.7,
+          "stepHeight": 1.1,
+          "groundSnapDistance": 0.6,
+          "mouseSensitivity": 0.0022,
+          "maxPitchDegrees": 85,
+          "water": {
+            "wadeDepth": 0.7,
+            "swimDepth": 1.35,
+            "transitionHysteresis": 0.12,
+            "wadeDrag": 0.35,
+            "swimSpeed": 5,
+            "verticalSwimSpeed": 3,
+            "buoyancy": 18,
+            "swimDrag": 4,
+            "currentDriftSpeed": 0.65,
+            "underwater": {
+              "backgroundColor": "#0b3342",
+              "fogColor": "#1b6070",
+              "fogDensity": 0.055,
+              "lightScale": 0.38,
+              "transitionSeconds": 0.28,
+              "nearPlane": 0.15,
+              "optics": {
+                "enabled": true,
+                "extinction": [
+                  0.1,
+                  0.038,
+                  0.045
+                ],
+                "dimming": [
+                  0.11,
+                  0.04,
+                  0.035
+                ],
+                "causticTileMeters": 5.5,
+                "causticStrength": 1.4,
+                "shaftStrength": 1.1,
+                "distortion": 0.0016,
+                "surfaceRefraction": 0.09,
+                "surfaceMirror": 0.62
+              }
+            }
+          }
+        },
+        "world": {
+          "seed": 918273,
+          "chunkSize": 64,
+          "loadRadius": 2,
+          "floatingOriginThreshold": 4096,
+          "exploration": {
+            "speedBoost": {
+              "enabled": true,
+              "speedMultiplier": 3,
+              "doubleTapWindowMs": 300
+            },
+            "freeFly": {
+              "enabled": true,
+              "moveSpeed": 24,
+              "fastMultiplier": 4,
+              "lookSensitivity": 0.003
+            },
+            "frameBudget": {
+              "enabled": true,
+              "targetFps": 144,
+              "reserveMs": 0.5,
+              "minimumMs": 0.25,
+              "maximumMs": 1.2
+            },
+            "drawPreparation": {
+              "enabled": true,
+              "meshesPerFrame": 2
+            },
+            "residents": {
+              "enabled": true,
+              "radiusMeters": 220,
+              "maxResidents": 32,
+              "maxPerSettlement": 22,
+              "wanderRadius": 18,
+              "refreshSeconds": 0.5
+            },
+            "serpents": {
+              "enabled": true,
+              "maxResident": 2,
+              "regionSize": 256,
+              "loadRadius": 180,
+              "unloadRadius": 260,
+              "spawnChance": 0.12,
+              "tileIds": [
+                5,
+                7
+              ],
+              "sizeScale": 0.06,
+              "entries": []
+            },
+            "tour": {
+              "enabled": true,
+              "durationSeconds": 45,
+              "radiusMeters": 180,
+              "clearanceMeters": 18,
+              "lookAheadMeters": 12,
+              "preloadMeters": 40
+            },
+            "mobile": {
+              "enabled": true,
+              "maxShortSide": 900,
+              "requireCoarsePointer": true,
+              "pixelRatioCap": 1,
+              "initialQuality": "low",
+              "lookSensitivity": 0.006
+            },
+            "recovery": {
+              "enabled": true
+            },
+            "treeRoots": {
+              "enabled": true,
+              "rootHeight": 0.25,
+              "conformHeight": 3,
+              "maxSlope": 1.2,
+              "maxSink": 2,
+              "bury": 0.05,
+              "maxOverhang": 1
+            }
+          }
+        },
+        "grass": {
+          "system": "meadow",
+          "meadow": {
+            "tileSize": 8,
+            "maxDistance": 50,
+            "growth": {
+              "byTileId": {
+                "0": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "1": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "2": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "3": {
+                  "shortHeight": 0.25,
+                  "tallHeight": 0.85,
+                  "width": 0.038,
+                  "density": 0.72,
+                  "patchMeters": 14,
+                  "shape": "slender"
+                },
+                "4": {
+                  "shortHeight": 0.18,
+                  "tallHeight": 0.55,
+                  "width": 0.045,
+                  "density": 0.92,
+                  "patchMeters": 9,
+                  "shape": "slender"
+                },
+                "5": {
+                  "shortHeight": 0.16,
+                  "tallHeight": 0.5,
+                  "width": 0.06,
+                  "density": 0.85,
+                  "patchMeters": 11,
+                  "shape": "broadleaf"
+                },
+                "6": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.38,
+                  "width": 0.042,
+                  "density": 0.85,
+                  "patchMeters": 10,
+                  "shape": "slender"
+                },
+                "7": {
+                  "shortHeight": 0.14,
+                  "tallHeight": 0.48,
+                  "width": 0.065,
+                  "density": 0.82,
+                  "patchMeters": 12,
+                  "shape": "broadleaf"
+                },
+                "8": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.36,
+                  "width": 0.046,
+                  "density": 0.78,
+                  "patchMeters": 10,
+                  "shape": "broadleaf"
+                },
+                "9": {
+                  "shortHeight": 0.1,
+                  "tallHeight": 0.28,
+                  "width": 0.035,
+                  "density": 0.65,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "10": {
+                  "shortHeight": 0.06,
+                  "tallHeight": 0.16,
+                  "width": 0.028,
+                  "density": 0.28,
+                  "patchMeters": 7,
+                  "shape": "slender"
+                },
+                "11": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "12": {
+                  "shortHeight": 0.28,
+                  "tallHeight": 0.95,
+                  "width": 0.042,
+                  "density": 0.82,
+                  "patchMeters": 13,
+                  "shape": "reed"
+                }
+              }
+            },
+            "bladeHeight": 0.64,
+            "bladeWidth": 0.071,
+            "heightScale": [
+              0.72,
+              1.3
+            ],
+            "widthScale": 1.15,
+            "curve": 0.07,
+            "palette": {
+              "base": "#50852b",
+              "tip": "#a6bf65",
+              "brightness": 1,
+              "byTileId": {
+                "3": {
+                  "base": "#6a7a2c",
+                  "tip": "#c9bd6a"
+                },
+                "7": {
+                  "base": "#357a26",
+                  "tip": "#98c255"
+                },
+                "8": {
+                  "base": "#2f6a2c",
+                  "tip": "#86b25a"
+                },
+                "9": {
+                  "base": "#34563a",
+                  "tip": "#8fa77a"
+                },
+                "10": {
+                  "base": "#666746",
+                  "tip": "#a3a07a"
+                },
+                "12": {
+                  "base": "#3a6a2e",
+                  "tip": "#9ab85e"
+                }
+              }
+            },
+            "appearance": {
+              "rootBrightness": 0.48,
+              "canopyDepth": 0.5,
+              "gradientPower": 2.35,
+              "groundTipMix": 0.08,
+              "fill": 0.025,
+              "backlight": 1.05,
+              "patchScale": 0.07,
+              "patchCool": [
+                0.8,
+                0.98,
+                0.86
+              ],
+              "patchWarm": [
+                1.12,
+                1.02,
+                0.74
+              ],
+              "dryPatchScale": 0.0308,
+              "dryStart": 0.56,
+              "dryEnd": 0.84,
+              "dryStrength": 0.22,
+              "dryColor": "#777455",
+              "lodWidenMax": 2
+            },
+            "shapes": {
+              "default": "slender",
+              "byTileId": {
+                "5": "broadleaf",
+                "7": "broadleaf",
+                "8": "broadleaf",
+                "12": "reed"
+              }
+            },
+            "lod": {
+              "high": {
+                "detail": 5,
+                "density": 25.2,
+                "distance": 0.12
+              },
+              "medium": {
+                "detail": 3,
+                "density": 25.2,
+                "distance": 0.28
+              },
+              "low": {
+                "detail": 3,
+                "density": 11.2,
+                "distance": 0.6
+              },
+              "veryLow": {
+                "detail": 2,
+                "density": 5.6,
+                "distance": 1
+              }
+            },
+            "interaction": {
+              "uploadIntervalFrames": 2
+            },
+            "far": {
+              "tileSize": 64,
+              "density": 2.6,
+              "distance": 180,
+              "width": 1.2,
+              "height": 0.72,
+              "transitionStart": 0.8,
+              "fadeStart": 0.9
+            }
+          },
+          "residentRadius": 1,
+          "nearRadius": 0,
+          "bladesPerCell": 1152,
+          "bladesPerClump": 96,
+          "influenceTextureSize": 32,
+          "outerRingDensity": 0.45,
+          "lod": {
+            "enabled": true,
+            "coverage": {
+              "enabled": true,
+              "outerFadeMeters": 64,
+              "presenceWindow": 0.06,
+              "compensation": 1,
+              "maximumWiden": 1.35
+            }
+          },
+          "tileIds": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14
+          ],
+          "minWidth": 0.027,
+          "maxWidth": 0.061,
+          "minLength": 0.32,
+          "maxLength": 0.62,
+          "lengthSkew": 1.2,
+          "bladeWidthSpread": 0.45,
+          "widthLengthCorrelation": 0.6,
+          "clumpRadius": 0.75,
+          "tiltMax": 0.28,
+          "bladeProfiles": {
+            "manifest": "/assets/ground/grass-blade-profiles.json",
+            "set": "authored",
+            "sets": {
+              "generated": {
+                "label": "Generated taper (baseline)",
+                "profiles": [
+                  "generated"
+                ]
+              },
+              "authored": {
+                "label": "Authored mix",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01"
+                ]
+              },
+              "stylized": {
+                "label": "Stylized clump only",
+                "profiles": [
+                  "stylized-01"
+                ]
+              },
+              "arched": {
+                "label": "Arched meadow blade",
+                "profiles": [
+                  "meadow-01"
+                ]
+              },
+              "slender": {
+                "label": "Slender field blade",
+                "profiles": [
+                  "field-01"
+                ]
+              },
+              "mixedWithBaseline": {
+                "label": "Authored mix + baseline",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01",
+                  "generated"
+                ]
+              },
+              "familySlender": {
+                "label": "Slender blades (generated)",
+                "profiles": [
+                  "slender"
+                ]
+              },
+              "familyReed": {
+                "label": "Reeds",
+                "profiles": [
+                  "reed"
+                ]
+              },
+              "familyBroadleaf": {
+                "label": "Broadleaves",
+                "profiles": [
+                  "broadleaf"
+                ]
+              },
+              "familyMeadow": {
+                "label": "Meadow mix (slender + broadleaf)",
+                "profiles": [
+                  "slender",
+                  "broadleaf"
+                ]
+              }
+            },
+            "biomeSets": {
+              "byTileId": {
+                "3": "familySlender",
+                "4": "familyMeadow",
+                "5": "familyBroadleaf",
+                "6": "familySlender",
+                "7": "familyBroadleaf",
+                "8": "familySlender",
+                "9": "familySlender",
+                "12": "familyReed"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "standard-profile",
+      "revision": "b159ad22",
+      "rawPath": "tmp/performance-audit-2026-10-15/standard-profile.json",
+      "sha256": "5fb4b47260a8d353812c75bb97880f9e4b660fbf5dbbbdf850929f57c2073ea7",
+      "generatedAt": "2026-10-15T16:42:26.326Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 25.3,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": "tmp/performance-audit-2026-10-15/standard.cpuprofile",
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1201,
+        "retainedFrameCount": 1202,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11986.8,
+        "avgFps": 100.19,
+        "dt": {
+          "minMs": 1.1,
+          "p50Ms": 8.4,
+          "p95Ms": 21.7,
+          "p99Ms": 33,
+          "maxMs": 37.9,
+          "meanMs": 9.986
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 10,
+        "hitchRate": 0.0083,
+        "phases": {
+          "placementPreparation": {
+            "totalMs": 510.9,
+            "avgMs": 0.425,
+            "p95Ms": 0.9,
+            "maxMs": 3.7
+          },
+          "terrainCommit": {
+            "totalMs": 24,
+            "avgMs": 0.02,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "player": {
+            "totalMs": 279.7,
+            "avgMs": 0.233,
+            "p95Ms": 0.5,
+            "maxMs": 27.6
+          },
+          "floatingOrigin": {
+            "totalMs": 2.6,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 158.7,
+            "avgMs": 0.132,
+            "p95Ms": 0.3,
+            "maxMs": 1.7
+          },
+          "streaming": {
+            "totalMs": 15.7,
+            "avgMs": 0.013,
+            "p95Ms": 0.1,
+            "maxMs": 2.6
+          },
+          "stylized": {
+            "totalMs": 1575.3,
+            "avgMs": 1.312,
+            "p95Ms": 3.3,
+            "maxMs": 6.2
+          },
+          "objects": {
+            "totalMs": 85,
+            "avgMs": 0.071,
+            "p95Ms": 0.2,
+            "maxMs": 0.7
+          },
+          "voxel": {
+            "totalMs": 9.5,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 0.6
+          },
+          "render": {
+            "totalMs": 7899.6,
+            "avgMs": 6.578,
+            "p95Ms": 13.1,
+            "maxMs": 28.2
+          }
+        },
+        "originSnapCount": 0
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 10,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "frameDeltas": {
+        "meadowStemsCompacted": {
+          "total": 1090981,
+          "maximumPerFrame": 4100
+        },
+        "meadowAttributeBytesUploaded": {
+          "total": 133710352,
+          "maximumPerFrame": 3169592
+        },
+        "meadowBufferAllocationBytes": {
+          "total": 24690176,
+          "maximumPerFrame": 24690176
+        },
+        "meadowCompactionReuses": {
+          "total": 633,
+          "maximumPerFrame": 13
+        },
+        "meadowGrassMs": {
+          "total": 463.2999999523163,
+          "maximumPerFrame": 3.7000000029802322
+        },
+        "meadowBatchCommitMs": {
+          "total": 61.000000074505806,
+          "maximumPerFrame": 3.6000000089406967
+        },
+        "streamedDrawPreparationMs": {
+          "total": 0,
+          "maximumPerFrame": 0
+        }
+      },
+      "preparation": {
+        "start": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "errors": [],
+          "materials": 0
+        },
+        "end": {
+          "ready": false,
+          "queueDepth": 51,
+          "fields": 0,
+          "meadow": 184,
+          "draws": 0,
+          "variants": 0,
+          "staged": 7,
+          "errors": [],
+          "materials": 0
+        }
+      },
+      "grass": {
+        "state": {
+          "blades": {
+            "tiles": 20,
+            "building": 173,
+            "stems": 59001,
+            "bands": {
+              "high": 25656,
+              "medium": 25562,
+              "low": 6137,
+              "veryLow": 1646
+            },
+            "visibleMissing": 131,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 54,
+            "inViewCapacityLag": 0,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 23,
+            "building": 10,
+            "stems": 102763,
+            "bands": {
+              "cards": 102763
+            },
+            "visibleMissing": 10,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 7,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 43,
+          "building": 183,
+          "stems": 59001,
+          "triangles": 599863,
+          "bladeTriangles": 394337,
+          "cardTriangles": 205526
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 4,
+            "capacity": 32,
+            "stride": 10000,
+            "eligibleInstances": 80000,
+            "retainedBytes": 17920000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 4,
+            "capacity": 32,
+            "stride": 10000,
+            "eligibleInstances": 50000,
+            "retainedBytes": 17920000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 5,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 13552,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 7,
+            "capacity": 128,
+            "stride": 484,
+            "eligibleInstances": 7744,
+            "retainedBytes": 3469312
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 23,
+            "capacity": 64,
+            "stride": 6889,
+            "eligibleInstances": 268671,
+            "retainedBytes": 24690176
+          }
+        ]
+      },
+      "recovery": null,
+      "recoveryEnd": null,
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "source": "WebGPU timestamp queries",
+        "sampleEvery": 8,
+        "total": {
+          "samples": 134,
+          "avgMs": 2.0257198805970154,
+          "p50Ms": 1.9496959999999997,
+          "p95Ms": 3.0965759999999998,
+          "maxMs": 4.34176
+        },
+        "passes": {
+          "world-wind-field (context 1)": {
+            "samples": 134,
+            "avgMs": 0.0045774328358208945,
+            "p50Ms": 0.004096,
+            "p95Ms": 0.008192,
+            "maxMs": 0.01024
+          },
+          "screen (context 4)": {
+            "samples": 134,
+            "avgMs": 0.026792119402985065,
+            "p50Ms": 0.023552,
+            "p95Ms": 0.041984,
+            "maxMs": 0.060416
+          },
+          "offscreen (context 87)": {
+            "samples": 134,
+            "avgMs": 0.014389492537313421,
+            "p50Ms": 0.012288,
+            "p95Ms": 0.0256,
+            "maxMs": 0.031744
+          },
+          "output (context 88)": {
+            "samples": 134,
+            "avgMs": 1.8792310447761198,
+            "p50Ms": 1.796096,
+            "p95Ms": 2.774016,
+            "maxMs": 3.980288
+          },
+          "ShadowMap (context 12)": {
+            "samples": 134,
+            "avgMs": 0.05146746268656717,
+            "p50Ms": 0.04096,
+            "p95Ms": 0.167936,
+            "maxMs": 0.181248
+          },
+          "UnrealBloomPass.bright (context 18)": {
+            "samples": 134,
+            "avgMs": 0.005540298507462691,
+            "p50Ms": 0.00512,
+            "p95Ms": 0.011264,
+            "maxMs": 0.013312
+          },
+          "UnrealBloomPass.h0 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.011118805970149257,
+            "p50Ms": 0.01024,
+            "p95Ms": 0.019456,
+            "maxMs": 0.027648
+          },
+          "UnrealBloomPass.v0 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.005303402985074625,
+            "p50Ms": 0.00512,
+            "p95Ms": 0.008192,
+            "maxMs": 0.009216
+          },
+          "UnrealBloomPass.h1 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.004317611940298503,
+            "p50Ms": 0.004096,
+            "p95Ms": 0.007168,
+            "maxMs": 0.008192
+          },
+          "UnrealBloomPass.v1 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.004117253731343281,
+            "p50Ms": 0.004096,
+            "p95Ms": 0.006144,
+            "maxMs": 0.008192
+          },
+          "UnrealBloomPass.h2 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.0036298507462686528,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.007168,
+            "maxMs": 0.008192
+          },
+          "UnrealBloomPass.v2 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.003161074626865668,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.00512,
+            "maxMs": 0.006144
+          },
+          "UnrealBloomPass.h3 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.0030337910447761174,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.00512,
+            "maxMs": 0.006144
+          },
+          "UnrealBloomPass.v3 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.002896238805970147,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.004096,
+            "maxMs": 0.00512
+          },
+          "UnrealBloomPass.h4 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.0032019104477611906,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.006144,
+            "maxMs": 0.007168
+          },
+          "UnrealBloomPass.v4 (context 18)": {
+            "samples": 134,
+            "avgMs": 0.002942089552238803,
+            "p50Ms": 0.003072,
+            "p95Ms": 0.004096,
+            "maxMs": 0.00512
+          }
+        },
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work."
+      },
+      "config": {
+        "player": {
+          "fovDegrees": 68,
+          "walkSpeed": 9,
+          "runMultiplier": 1.8,
+          "jumpSpeed": 8,
+          "gravity": 24,
+          "eyeHeight": 1.7,
+          "stepHeight": 1.1,
+          "groundSnapDistance": 0.6,
+          "mouseSensitivity": 0.0022,
+          "maxPitchDegrees": 85,
+          "water": {
+            "wadeDepth": 0.7,
+            "swimDepth": 1.35,
+            "transitionHysteresis": 0.12,
+            "wadeDrag": 0.35,
+            "swimSpeed": 5,
+            "verticalSwimSpeed": 3,
+            "buoyancy": 18,
+            "swimDrag": 4,
+            "currentDriftSpeed": 0.65,
+            "underwater": {
+              "backgroundColor": "#0b3342",
+              "fogColor": "#1b6070",
+              "fogDensity": 0.055,
+              "lightScale": 0.38,
+              "transitionSeconds": 0.28,
+              "nearPlane": 0.15,
+              "optics": {
+                "enabled": true,
+                "extinction": [
+                  0.1,
+                  0.038,
+                  0.045
+                ],
+                "dimming": [
+                  0.11,
+                  0.04,
+                  0.035
+                ],
+                "causticTileMeters": 5.5,
+                "causticStrength": 1.4,
+                "shaftStrength": 1.1,
+                "distortion": 0.0016,
+                "surfaceRefraction": 0.09,
+                "surfaceMirror": 0.62
+              }
+            }
+          }
+        },
+        "world": {
+          "seed": 918273,
+          "chunkSize": 64,
+          "loadRadius": 2,
+          "floatingOriginThreshold": 4096,
+          "exploration": {
+            "speedBoost": {
+              "enabled": true,
+              "speedMultiplier": 3,
+              "doubleTapWindowMs": 300
+            },
+            "freeFly": {
+              "enabled": true,
+              "moveSpeed": 24,
+              "fastMultiplier": 4,
+              "lookSensitivity": 0.003
+            },
+            "frameBudget": {
+              "enabled": true,
+              "targetFps": 144,
+              "reserveMs": 0.5,
+              "minimumMs": 0.25,
+              "maximumMs": 1.2
+            },
+            "drawPreparation": {
+              "enabled": true,
+              "meshesPerFrame": 2
+            },
+            "residents": {
+              "enabled": true,
+              "radiusMeters": 220,
+              "maxResidents": 32,
+              "maxPerSettlement": 22,
+              "wanderRadius": 18,
+              "refreshSeconds": 0.5
+            },
+            "serpents": {
+              "enabled": true,
+              "maxResident": 2,
+              "regionSize": 256,
+              "loadRadius": 180,
+              "unloadRadius": 260,
+              "spawnChance": 0.12,
+              "tileIds": [
+                5,
+                7
+              ],
+              "sizeScale": 0.06,
+              "entries": []
+            },
+            "tour": {
+              "enabled": true,
+              "durationSeconds": 45,
+              "radiusMeters": 180,
+              "clearanceMeters": 18,
+              "lookAheadMeters": 12,
+              "preloadMeters": 40
+            },
+            "mobile": {
+              "enabled": true,
+              "maxShortSide": 900,
+              "requireCoarsePointer": true,
+              "pixelRatioCap": 1,
+              "initialQuality": "low",
+              "lookSensitivity": 0.006
+            },
+            "recovery": {
+              "enabled": true
+            },
+            "treeRoots": {
+              "enabled": true,
+              "rootHeight": 0.25,
+              "conformHeight": 3,
+              "maxSlope": 1.2,
+              "maxSink": 2,
+              "bury": 0.05,
+              "maxOverhang": 1
+            }
+          }
+        },
+        "grass": {
+          "system": "meadow",
+          "meadow": {
+            "tileSize": 8,
+            "maxDistance": 50,
+            "growth": {
+              "byTileId": {
+                "0": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "1": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "2": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "3": {
+                  "shortHeight": 0.25,
+                  "tallHeight": 0.85,
+                  "width": 0.038,
+                  "density": 0.72,
+                  "patchMeters": 14,
+                  "shape": "slender"
+                },
+                "4": {
+                  "shortHeight": 0.18,
+                  "tallHeight": 0.55,
+                  "width": 0.045,
+                  "density": 0.92,
+                  "patchMeters": 9,
+                  "shape": "slender"
+                },
+                "5": {
+                  "shortHeight": 0.16,
+                  "tallHeight": 0.5,
+                  "width": 0.06,
+                  "density": 0.85,
+                  "patchMeters": 11,
+                  "shape": "broadleaf"
+                },
+                "6": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.38,
+                  "width": 0.042,
+                  "density": 0.85,
+                  "patchMeters": 10,
+                  "shape": "slender"
+                },
+                "7": {
+                  "shortHeight": 0.14,
+                  "tallHeight": 0.48,
+                  "width": 0.065,
+                  "density": 0.82,
+                  "patchMeters": 12,
+                  "shape": "broadleaf"
+                },
+                "8": {
+                  "shortHeight": 0.12,
+                  "tallHeight": 0.36,
+                  "width": 0.046,
+                  "density": 0.78,
+                  "patchMeters": 10,
+                  "shape": "broadleaf"
+                },
+                "9": {
+                  "shortHeight": 0.1,
+                  "tallHeight": 0.28,
+                  "width": 0.035,
+                  "density": 0.65,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "10": {
+                  "shortHeight": 0.06,
+                  "tallHeight": 0.16,
+                  "width": 0.028,
+                  "density": 0.28,
+                  "patchMeters": 7,
+                  "shape": "slender"
+                },
+                "11": {
+                  "shortHeight": 0,
+                  "tallHeight": 0,
+                  "width": 0,
+                  "density": 0,
+                  "patchMeters": 12,
+                  "shape": "slender"
+                },
+                "12": {
+                  "shortHeight": 0.28,
+                  "tallHeight": 0.95,
+                  "width": 0.042,
+                  "density": 0.82,
+                  "patchMeters": 13,
+                  "shape": "reed"
+                }
+              }
+            },
+            "bladeHeight": 0.64,
+            "bladeWidth": 0.071,
+            "heightScale": [
+              0.72,
+              1.3
+            ],
+            "widthScale": 1.15,
+            "curve": 0.07,
+            "palette": {
+              "base": "#50852b",
+              "tip": "#a6bf65",
+              "brightness": 1,
+              "byTileId": {
+                "3": {
+                  "base": "#6a7a2c",
+                  "tip": "#c9bd6a"
+                },
+                "7": {
+                  "base": "#357a26",
+                  "tip": "#98c255"
+                },
+                "8": {
+                  "base": "#2f6a2c",
+                  "tip": "#86b25a"
+                },
+                "9": {
+                  "base": "#34563a",
+                  "tip": "#8fa77a"
+                },
+                "10": {
+                  "base": "#666746",
+                  "tip": "#a3a07a"
+                },
+                "12": {
+                  "base": "#3a6a2e",
+                  "tip": "#9ab85e"
+                }
+              }
+            },
+            "appearance": {
+              "rootBrightness": 0.48,
+              "canopyDepth": 0.5,
+              "gradientPower": 2.35,
+              "groundTipMix": 0.08,
+              "fill": 0.025,
+              "backlight": 1.05,
+              "patchScale": 0.07,
+              "patchCool": [
+                0.8,
+                0.98,
+                0.86
+              ],
+              "patchWarm": [
+                1.12,
+                1.02,
+                0.74
+              ],
+              "dryPatchScale": 0.0308,
+              "dryStart": 0.56,
+              "dryEnd": 0.84,
+              "dryStrength": 0.22,
+              "dryColor": "#777455",
+              "lodWidenMax": 2
+            },
+            "shapes": {
+              "default": "slender",
+              "byTileId": {
+                "5": "broadleaf",
+                "7": "broadleaf",
+                "8": "broadleaf",
+                "12": "reed"
+              }
+            },
+            "lod": {
+              "high": {
+                "detail": 5,
+                "density": 12.6,
+                "distance": 0.12
+              },
+              "medium": {
+                "detail": 3,
+                "density": 12.6,
+                "distance": 0.28
+              },
+              "low": {
+                "detail": 3,
+                "density": 5.6,
+                "distance": 0.6
+              },
+              "veryLow": {
+                "detail": 2,
+                "density": 2.8,
+                "distance": 1
+              }
+            },
+            "interaction": {
+              "uploadIntervalFrames": 2
+            },
+            "far": {
+              "tileSize": 64,
+              "density": 1.3,
+              "distance": 180,
+              "width": 1.2,
+              "height": 0.72,
+              "transitionStart": 0.8,
+              "fadeStart": 0.9
+            }
+          },
+          "residentRadius": 1,
+          "nearRadius": 0,
+          "bladesPerCell": 576,
+          "bladesPerClump": 96,
+          "influenceTextureSize": 32,
+          "outerRingDensity": 0.45,
+          "lod": {
+            "enabled": true,
+            "coverage": {
+              "enabled": true,
+              "outerFadeMeters": 64,
+              "presenceWindow": 0.06,
+              "compensation": 1,
+              "maximumWiden": 1.35
+            }
+          },
+          "tileIds": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14
+          ],
+          "minWidth": 0.027,
+          "maxWidth": 0.061,
+          "minLength": 0.32,
+          "maxLength": 0.62,
+          "lengthSkew": 1.2,
+          "bladeWidthSpread": 0.45,
+          "widthLengthCorrelation": 0.6,
+          "clumpRadius": 0.75,
+          "tiltMax": 0.28,
+          "bladeProfiles": {
+            "manifest": "/assets/ground/grass-blade-profiles.json",
+            "set": "authored",
+            "sets": {
+              "generated": {
+                "label": "Generated taper (baseline)",
+                "profiles": [
+                  "generated"
+                ]
+              },
+              "authored": {
+                "label": "Authored mix",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01"
+                ]
+              },
+              "stylized": {
+                "label": "Stylized clump only",
+                "profiles": [
+                  "stylized-01"
+                ]
+              },
+              "arched": {
+                "label": "Arched meadow blade",
+                "profiles": [
+                  "meadow-01"
+                ]
+              },
+              "slender": {
+                "label": "Slender field blade",
+                "profiles": [
+                  "field-01"
+                ]
+              },
+              "mixedWithBaseline": {
+                "label": "Authored mix + baseline",
+                "profiles": [
+                  "stylized-01",
+                  "meadow-01",
+                  "field-01",
+                  "generated"
+                ]
+              },
+              "familySlender": {
+                "label": "Slender blades (generated)",
+                "profiles": [
+                  "slender"
+                ]
+              },
+              "familyReed": {
+                "label": "Reeds",
+                "profiles": [
+                  "reed"
+                ]
+              },
+              "familyBroadleaf": {
+                "label": "Broadleaves",
+                "profiles": [
+                  "broadleaf"
+                ]
+              },
+              "familyMeadow": {
+                "label": "Meadow mix (slender + broadleaf)",
+                "profiles": [
+                  "slender",
+                  "broadleaf"
+                ]
+              }
+            },
+            "biomeSets": {
+              "byTileId": {
+                "3": "familySlender",
+                "4": "familyMeadow",
+                "5": "familyBroadleaf",
+                "6": "familySlender",
+                "7": "familyBroadleaf",
+                "8": "familySlender",
+                "9": "familySlender",
+                "12": "familyReed"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "profileAnalysis": {
+    "method": "Approximate final 12 seconds of sampled CPU profile; includes small post-measure report/diagnostic overhead. Inclusive categories overlap.",
+    "rawPath": "tmp/performance-audit-2026-10-15/standard.cpuprofile",
+    "sha256": "32e9743fb41f3de7dc662f07fd418db52e9d19ea5898529e46a5c0517890f9fa",
+    "sampledMs": {
+      "bindingsInclusiveMs": 2642.412999999992,
+      "uniformGroupsInclusiveMs": 1244.0729999999983,
+      "meadowCompactionInclusiveMs": 319.4510000000001,
+      "uniformWriteBufferSelfMs": 446.17899999999986,
+      "gcSelfMs": 111.08900000000001,
+      "attributeWriteBufferSelfMs": 85.24900000000002
+    },
+    "sourceBeforeHead": "b159ad22bbe10f9af7ed9f302a31b46500c9cf28",
+    "sourceFilesChecked": 1454,
+    "changedRuntimeFiles": []
+  },
+  "partialPromotionProbe": {
+    "kind": "meadow-partial-promotion-work-probe",
+    "partialDiscarded": true,
+    "currentSamples": 2304,
+    "resumedSamples": 2048,
+    "repeatedSamples": 256,
+    "survivingStems": 1365,
+    "outputByteIdentical": true,
+    "scope": "One synthetic unchanged-ground promotion; no FPS or route-wide savings claim."
+  },
+  "runtimeHotpaths": {
+    "node": "v22.22.3",
+    "result": [
+      {
+        "name": "local-query-16384-colliders",
+        "iterations": 20000,
+        "medianMs": 0.00018547119999999992,
+        "samplesMs": [
+          0.0001286240999999997,
+          0.0001290647,
+          0.00018547119999999992,
+          0.00022410920000000018,
+          0.0003858570999999998
+        ]
+      },
+      {
+        "name": "composition-16384-colliders",
+        "iterations": 2000,
+        "medianMs": 0.00014861150000000122,
+        "samplesMs": [
+          0.00011814300000000344,
+          0.00013967949999999974,
+          0.00014861150000000122,
+          0.0001511314999999982,
+          0.0001720435000000009
+        ]
+      },
+      {
+        "name": "replace-64-of-16384-colliders",
+        "iterations": 100,
+        "medianMs": 0.12064648000000006,
+        "samplesMs": [
+          0.08894543999999996,
+          0.11651014000000004,
+          0.12064648000000006,
+          0.13517704999999977,
+          0.15261829000000005
+        ]
+      },
+      {
+        "name": "visibility-10000-opportunities",
+        "iterations": 5,
+        "medianMs": 2.4750162000000047,
+        "samplesMs": [
+          2.3072968000000005,
+          2.4465190000000008,
+          2.4750162000000047,
+          2.478215,
+          2.547749200000004
+        ]
+      }
+    ]
+  }
+}
