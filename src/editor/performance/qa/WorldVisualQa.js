@@ -1,3 +1,4 @@
+import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
 import { trackedWorldResources } from './WorldVisualResources.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
@@ -45,7 +46,7 @@ export class WorldVisualQa {
     }
     return {canonical,origin:origin.getState(),camera:camera.position.toArray(),yaw:e.playerController.yaw,pitch:e.playerController.pitch,
       actualBiomeId:e.terrainView.worldStore.getTile(Math.floor(canonical.x/cell),Math.floor(-canonical.z/cell)),
-      readiness:this.readiness(),placements,preparationJobs:Object.fromEntries([
+      readiness:this.readiness(),placements,preparationDetail:worldVisualPreparation(e),preparationJobs:Object.fromEntries([
         ...['grass','flower','tree','rock','bush','detail'].map(name=>[name,e.stylizedSurface[`${name}BuildQueue`]]),
         ['treeManifest',e.stylizedSurface.treeView?.manifestStore?.queue],['rockManifest',e.stylizedSurface.rockView?.manifestStore?.queue],
       ].map(([name,queue])=>[name,queue?.getDiagnostics({includeJobs:true})??null])),resources:trackedWorldResources(e),counters:PerfCounters.snapshot(),
