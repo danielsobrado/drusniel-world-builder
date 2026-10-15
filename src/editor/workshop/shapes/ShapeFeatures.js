@@ -74,10 +74,12 @@ const registry = new Map([
     const center = offset(frame, -Math.min(f.depth * 0.4, Math.min(p.footprint.width, p.footprint.depth) * 0.22));
     const front = [center[0] + frame.outward[0] * f.depth * 0.5, center[2] + frame.outward[2] * f.depth * 0.5];
     const elevation = Math.max(p.elevation + p.height + 0.02, roof.heightAt(...front) - 0.1);
+    const height = Math.min(f.height, Math.max(0.65, p.elevation + p.height + p.roof.rise - elevation - 0.25));
+    // The window fills the dormer face up to a lintel band, so no blank cheek rises above it.
     return { cutsRoof: true, child: childVolume(host, f, { ...frame, origin: [center[0], elevation, center[2]] }, {
-      height: Math.min(f.height, Math.max(0.65, p.elevation + p.height + p.roof.rise - elevation - 0.25)),
-      openings: [{ id: 'dormer-window', role: 'window', profile: 'arched', at: 0.06, width: f.width * 0.48,
-        bottom: 0.16, height: Math.max(0.3, Math.min(0.85, f.height * 0.65)) }],
+      height,
+      openings: [{ id: 'dormer-window', role: 'window', profile: 'arched', at: 0.06, width: f.width * 0.5,
+        bottom: 0.16, height: Math.max(0.3, Math.min(1.35, height - 0.4)) }],
     }) };
   }],
   ['jetty', (host, f, frame) => {
