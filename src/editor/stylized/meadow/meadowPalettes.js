@@ -6,7 +6,7 @@ import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
  * grass-test paints one field, so it has one blade base and tip. A world of
  * biomes wants its taiga cooler and its savanna drier than that meadow, without
  * a draw per colour. So each biome's palette index rides in the stem's look code
- * beside its silhouette — `code = shape + MEADOW_SHAPE_COUNT × palette`, one
+ * beside its silhouette — `code = shape + 3 × (palette + 8 × growth)`, one
  * small integer per tile id — and the pigment reads its base and tip from a
  * uniform array by that index. No attribute is added; the batch stays one draw.
  */
@@ -65,12 +65,13 @@ export function resolveMeadowPalettes(source, path) {
  *
  * @param {Uint8Array} shapeTable shape id per tile id
  * @param {Uint8Array | null} paletteTable palette index per tile id
+ * @param {Uint8Array | null} growthTable growth profile index per tile id
  */
-export function encodeLookTable(shapeTable, paletteTable) {
-  if (!paletteTable) return shapeTable;
-  const table = new Uint8Array(256);
+export function encodeLookTable(shapeTable, paletteTable, growthTable = null) {
+  if (!paletteTable && !growthTable) return Uint16Array.from(shapeTable);
+  const table = new Uint16Array(256);
   for (let tile = 0; tile < 256; tile += 1) {
-    table[tile] = shapeTable[tile] + MEADOW_SHAPE_COUNT * paletteTable[tile];
+    table[tile] = shapeTable[tile] + MEADOW_SHAPE_COUNT * ((paletteTable?.[tile] ?? 0) + MAX_MEADOW_PALETTES * (growthTable?.[tile] ?? 0));
   }
   return table;
 }

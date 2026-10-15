@@ -1,3 +1,4 @@
+import { measureMeadowGrowth } from './MeadowGrowthFixture.js';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import { loadEditorConfig } from '../../../config/loadEditorConfig.js';
@@ -10,6 +11,7 @@ import { GrassTuning } from '../../stylized/GrassTuning.js';
 import { createMeadowUniforms } from '../../stylized/meadow/meadowUniforms.js';
 import { resolveMeadowGrassConfig } from '../../stylized/meadow/meadowGrassConfig.js';
 import { createMeadowTemplate } from '../../stylized/meadow/meadowGrassGeometry.js';
+import { acceptsMeadowHabitat } from '../../stylized/meadow/meadowHabitat.js';
 import { createCompaction } from '../../stylized/meadow/meadowGrassCompaction.js';
 import { MeadowGrassBatches } from '../../stylized/meadow/MeadowGrassBatches.js';
 import { createMeadowBladeMaterial } from '../../stylized/meadow/meadowBladeMaterial.js';
@@ -40,7 +42,9 @@ async function draw(scene, camera, id, details) {
 
 try {
   if (backend !== actualBackend) throw new Error(`Requested ${backend}, received ${actualBackend}.`);
-  for (const id of [3, 4, 7, 8, 9, 12]) {
+  state.report.growthChecks=await measureMeadowGrowth(renderer,resolveMeadowGrassConfig(loadEditorConfig().stylizedSurface.grass.meadow));
+  if(state.report.growthChecks.some(c=>!c.passed))throw new Error('Meadow growth node measurement failed.');
+  for (const id of [3, 4, 5, 6, 7, 8, 9, 10, 12]) {
     const config = structuredClone(loadEditorConfig().stylizedSurface);
     config.materialBake.enabled = false; config.groundCover.enabled = false;
     config.sky.cloudShadows.enabled = false;
@@ -89,7 +93,8 @@ try {
     for (const x of [-4, 4]) for (const z of [-4, 4]) {
       const job = createCompaction({ template, centerX: x, centerZ: z, sample: (px, pz, _rank, out) => {
         out.height = 0; out.strength = 1 - pathAt(px, pz);
-        out.path = pathAt(px, pz); out.shape = settings.shapeTable[id]; return out.strength > 0.25;
+        out.path = pathAt(px, pz); out.shape = settings.shapeTable[id];
+        return out.strength > 0.25 && acceptsMeadowHabitat(px,pz,918273,1,settings.growth.profiles[settings.growth.table[id]].density);
       } });
       job.advance(); stems += job.output.count;
       batches.add('high', { buildId: 1, renderX: x, renderZ: z, output: job.output });
@@ -111,7 +116,8 @@ try {
       for (const mesh of batches.meshes) mesh.visible = false;
       const cardTemplate = createMeadowTemplate({ detail: 1, count: 256, tileSize: 16, cards: true });
       const cardJob = createCompaction({ template: cardTemplate, centerX: 0, centerZ: 0,
-        sample: (_x, _z, _rank, out) => { out.height = 0; out.strength = 1; out.shape = settings.shapeTable[id]; return true; } });
+        sample: (x, z, _rank, out) => { out.height = 0; out.strength = 1; out.shape = settings.shapeTable[id];
+          return acceptsMeadowHabitat(x,z,918273,1,settings.growth.profiles[settings.growth.table[id]].density); } });
       cardJob.advance();
       const cardBatches = new MeadowGrassBatches({ scene, templates: { high: cardTemplate }, material: cards, name: 'card-qa' });
       cardBatches.begin(); cardBatches.add('high', { buildId: 1, renderX: -4096, renderZ: 2048, output: cardJob.output });

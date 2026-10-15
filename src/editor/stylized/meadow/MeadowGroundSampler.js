@@ -1,3 +1,4 @@
+import { meadowPageGrowthKey } from './MeadowGrowthUpdates.js';
 import { sampleSurfaceMaskChannel } from '../../world/SurfaceMaskSampling.js';
 import { acceptsMeadowHabitat } from './meadowHabitat.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
@@ -56,6 +57,20 @@ export class MeadowGroundSampler {
     this.lastRockPlacements = null;
   }
 
+  setGrowth(growth,shapeTable) {
+    this.growth=growth;this.shapeTable=shapeTable;
+    this.growthPageKeys=new WeakMap();this.revision++;
+  }
+
+  growthKey(slot) {
+    if(!this.growth)return '';
+    this.growthPageKeys??=new WeakMap();
+    const cached=this.growthPageKeys.get(slot.page);
+    if(cached?.revision===slot.pageRevision)return cached.key;
+    const key=':'+meadowPageGrowthKey(slot.page.tiles,this.growth,this.shapeTable);
+    this.growthPageKeys.set(slot.page,{revision:slot.pageRevision,key});return key;
+  }
+
   get chunkSize() {
     return this.terrainView.worldStore.chunkSize;
   }
@@ -104,7 +119,7 @@ export class MeadowGroundSampler {
   revisionAt(centerX, centerZ) {
     const slot = this.slotFor(...this.chunkOf(centerX, centerZ));
     if (!slot) return null;
-    return `${slot.descriptor.key}:${slot.pageRevision}:${this.rockSignature(slot.descriptor)}`;
+    return `${slot.descriptor.key}:${slot.pageRevision}:${this.rockSignature(slot.descriptor)}${this.growthKey(slot)}`;
   }
 
   rockSignature(descriptor) {
@@ -223,6 +238,6 @@ export class MeadowGroundSampler {
     // The same key `revisionAt` gives the tile, rocks included: a job whose
     // revision differs from its tile's is abandoned, so a mismatch here would
     // restart every build every frame.
-    return { sample, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}` };
+    return { sample, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}${this.growthKey(slot)}` };
   }
 }

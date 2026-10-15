@@ -832,6 +832,21 @@ stylizedSurface:
     meadow:
       tileSize: 8
       maxDistance: 50
+      growth:
+        byTileId:
+          0: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
+          1: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
+          2: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
+          3: {shortHeight: 0.25, tallHeight: 0.85, width: 0.038, density: 0.72, patchMeters: 14, shape: slender}
+          4: {shortHeight: 0.18, tallHeight: 0.55, width: 0.045, density: 0.92, patchMeters: 9, shape: slender}
+          5: {shortHeight: 0.16, tallHeight: 0.5, width: 0.06, density: 0.85, patchMeters: 11, shape: broadleaf}
+          6: {shortHeight: 0.12, tallHeight: 0.38, width: 0.042, density: 0.85, patchMeters: 10, shape: slender}
+          7: {shortHeight: 0.14, tallHeight: 0.48, width: 0.065, density: 0.82, patchMeters: 12, shape: broadleaf}
+          8: {shortHeight: 0.12, tallHeight: 0.36, width: 0.046, density: 0.78, patchMeters: 10, shape: broadleaf}
+          9: {shortHeight: 0.1, tallHeight: 0.28, width: 0.035, density: 0.65, patchMeters: 12, shape: slender}
+          10: {shortHeight: 0.06, tallHeight: 0.16, width: 0.028, density: 0.28, patchMeters: 7, shape: slender}
+          11: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
+          12: {shortHeight: 0.28, tallHeight: 0.95, width: 0.042, density: 0.82, patchMeters: 13, shape: reed}
       bladeHeight: 0.64
       bladeWidth: 0.071
       heightScale: [0.72, 1.3]
@@ -852,13 +867,14 @@ stylizedSurface:
           3: { base: '#6a7a2c', tip: '#c9bd6a' }   # savanna: dry, golden tips
           7: { base: '#357a26', tip: '#98c255' }   # tropical rainforest: richer
           8: { base: '#2f6a2c', tip: '#86b25a' }   # temperate rainforest: deeper
+          10: { base: '#666746', tip: '#a3a07a' }  # sparse tundra
           9: { base: '#34563a', tip: '#8fa77a' }   # taiga: cool sage
           12: { base: '#3a6a2e', tip: '#9ab85e' }  # wetland: lush, reedy
       # grass-test's final visual-refinement layer, converted at 2.8 units/m.
       # Keep stand density and streaming distances: depth comes from pigment.
       appearance:
-        rootBrightness: 0.32
-        canopyDepth: 0.65
+        rootBrightness: 0.48
+        canopyDepth: 0.50
         gradientPower: 2.35
         groundTipMix: 0.08
         fill: 0.025
@@ -871,7 +887,7 @@ stylizedSurface:
         dryEnd: 0.84
         dryStrength: 0.22
         dryColor: '#777455'
-        lodWidenMax: 3.5
+        lodWidenMax: 2.0
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
       shapes:
         default: slender
@@ -879,6 +895,7 @@ stylizedSurface:
           12: reed
           5: broadleaf
           7: broadleaf
+          8: broadleaf
       # grass-test's "high" profile in metres: detail is blade segments, density
       # stems per metre along a tile side, distance a share of maxDistance.
       lod:
@@ -1687,17 +1704,17 @@ stylizedSurface:
       # Core densities are how much ground cover survives under closed canopy.
       # These were low enough (0.18 grass, 0.08 flowers) that a wood interior was
       # bare dark earth; a real forest floor is shaded, not swept.
-      grassCoreDensity: 0.45
-      grassEdgeDensity: 0.82
-      flowerCoreDensity: 0.18
-      flowerEdgeDensity: 0.58
+      grassCoreDensity: 0.28
+      grassEdgeDensity: 0.78
+      flowerCoreDensity: 0.10
+      flowerEdgeDensity: 0.48
       bushCoreDensity: 0.28
       bushEdgeDensity: 0.95
       # Tint the ground takes under canopy. The old '#273c25' at 0.68 landed the
       # wood interior near black once Lambert shading and canopy shadow stacked on
       # top of it — this keeps the floor shaded but still readable.
-      groundCoreColor: '#3b5233'
-      groundStrength: 0.45
+      groundCoreColor: '#46503a'
+      groundStrength: 0.38
     minScale: 0.85
     maxScale: 1.15
     # Share of trees that ignore their grove's dominant species. 0 gives strict

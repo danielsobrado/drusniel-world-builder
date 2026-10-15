@@ -2,14 +2,14 @@ import { Box3, Sphere } from 'three/webgpu';
 
 /** Shader displacement envelopes, including live tuning and body interaction. */
 export function meadowBladeBoundsPadding(uniforms, tuning, dirtCut = 0) {
-  const height = Math.abs(uniforms.bladeHeight.value)
-    * Math.max(Math.abs(uniforms.heightScale.value.x), Math.abs(uniforms.heightScale.value.y))
+  const height = (uniforms.growth?.maxHeight ?? (Math.abs(uniforms.bladeHeight.value)
+    * Math.max(Math.abs(uniforms.heightScale.value.x), Math.abs(uniforms.heightScale.value.y))))
     * Math.max(1, Math.abs(1 - dirtCut));
   const restAngle = Math.abs(uniforms.baseBend.value) * Math.PI / 2;
   const windAngle = 1.3; // The blade shader clamps wind before applying bend power.
   const vertical = height * (1
     + 1 - Math.cos(Math.min(restAngle, Math.PI)) + 1 - Math.cos(windAngle));
-  const width = Math.abs(uniforms.bladeWidth.value * uniforms.widthScale.value * tuning.widthScale.value)
+  const width = Math.abs((uniforms.growth?.maxWidth ?? uniforms.bladeWidth.value) * uniforms.widthScale.value * tuning.widthScale.value)
     * Math.max(1, Math.abs(uniforms.taper.value)) * 1.12
     * Math.max(1, uniforms.appearance.lodWidenMax.value)
     * Math.max(1, Math.abs(1 - uniforms.appearance.lodThinning.value));
@@ -22,7 +22,7 @@ export function meadowBladeBoundsPadding(uniforms, tuning, dirtCut = 0) {
 }
 
 export function meadowCardBoundsPadding(uniforms) {
-  return Math.abs(uniforms.cardWidth.value) / 2 + Math.abs(uniforms.cardHeight.value) * 1.25 + 0.01;
+  return Math.abs(uniforms.cardWidth.value) / 2 + (uniforms.growth?.maxHeight ? uniforms.growth.maxHeight * 1.125 : Math.abs(uniforms.cardHeight.value) * 1.25) + 0.01;
 }
 
 /** Render-space bounds; each camera can cull the page independently. */

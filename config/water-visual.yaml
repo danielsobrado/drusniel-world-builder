@@ -82,7 +82,7 @@ water:
     # Clear salt water has its own depth palette and RGB absorption, rather
     # than inheriting the silty inland response. Values are per metre.
     optics:
-      sunny: { lagoon: '#4fd3cf', shallow: '#259eac', deep: '#073c58' }
+      sunny: { lagoon: '#3caca8', shallow: '#25858e', deep: '#123d50' }
       storm: { lagoon: '#2f8a80', shallow: '#176662', deep: '#032d48' }
       absorptionCoefficients: [0.896, 0.182, 0.14]
       absorptionDensity: 0.22

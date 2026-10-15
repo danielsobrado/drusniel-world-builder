@@ -8,7 +8,6 @@ import {
   cos,
   dot,
   floor,
-  mix,
   normalize,
   positionLocal,
   positionWorld,
@@ -29,7 +28,7 @@ import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellW
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
-import { meadowNoise } from './meadowNoise.js';
+import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 import { meadowPigment } from './meadowPigment.js';
 
 /** The card atlas: three silhouettes side by side, each a 2 × 2 block of clumps. */
@@ -66,8 +65,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
     If(card.strength.greaterThan(0), () => {
       const toward = cameraPosition.xz.sub(card.base.xz).normalize();
       // Clumps stand patchier than single blades (the donor's 0.5..1.25).
-      const patch = meadowNoise(card.canonical.mul(uniforms.heightNoiseScale)).clamp(0, 1);
-      const height = uniforms.cardHeight.mul(mix(0.5, 1.25, patch)).mul(card.strength);
+      const height = meadowGrowthNodes(uniforms,card,true).height.mul(card.strength);
       const width = uniforms.cardWidth.mul(sqrt(card.strength));
       local.x.assign(positionLocal.x.mul(toward.y).mul(width));
       local.z.assign(positionLocal.x.mul(toward.x.negate()).mul(width));

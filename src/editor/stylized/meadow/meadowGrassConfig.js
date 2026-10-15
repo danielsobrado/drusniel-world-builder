@@ -1,3 +1,4 @@
+import { resolveMeadowGrowth } from './meadowGrowthProfiles.js';
 import { validateLodBands } from './meadowGrassLayout.js';
 import { resolveShapeTable } from './meadowGrassShapes.js';
 import { encodeLookTable, resolveMeadowPalettes } from './meadowPalettes.js';
@@ -138,6 +139,7 @@ export function resolveMeadowGrassConfig(source) {
     throw new Error(`Invalid editor configuration: ${path}.appearance.dryColor must be a #rrggbb colour.`);
   }
   const shapes = { ...d.shapes, ...(source.shapes ?? {}) };
+  resolveShapeTable(shapes.byTileId, shapes.default);
   const farSource = { ...d.far, ...(source.far ?? {}) };
   const far = farSource.enabled === false ? null : {
     enabled: true,
@@ -149,6 +151,7 @@ export function resolveMeadowGrassConfig(source) {
     transitionStart: finite(farSource.transitionStart, d.far.transitionStart, `${path}.far.transitionStart`, { min: 0, max: 1 }),
     fadeStart: finite(farSource.fadeStart, d.far.fadeStart, `${path}.far.fadeStart`, { min: 0, max: 1 }),
   };
+  const growth = resolveMeadowGrowth(source.growth);
   const palette = resolveMeadowPalettes(source.palette ?? d.palette, `${path}.palette`);
   const interactionSource = { ...d.interaction, ...(source.interaction ?? {}) };
   const interaction = interactionSource.enabled === false ? null : {
@@ -172,6 +175,7 @@ export function resolveMeadowGrassConfig(source) {
   };
   return {
     enabled: true,
+    growth,
     tileSize: finite(source.tileSize, d.tileSize, `${path}.tileSize`, { min: 2, max: 64 }),
     maxDistance: finite(source.maxDistance, d.maxDistance, `${path}.maxDistance`, { min: 4, max: 400 }),
     bladeHeight: finite(source.bladeHeight, d.bladeHeight, `${path}.bladeHeight`, { min: 0.01, max: 4 }),
@@ -190,6 +194,6 @@ export function resolveMeadowGrassConfig(source) {
     palette: palette ? { palettes: palette.palettes, brightness: palette.brightness } : null,
     buildBudgetMs: finite(source.buildBudgetMs, d.buildBudgetMs, `${path}.buildBudgetMs`, { min: 0.1, max: 50 }),
     // Shape and palette per tile id, as one look code (meadowPalettes.js).
-    shapeTable: encodeLookTable(resolveShapeTable(shapes.byTileId, shapes.default), palette?.table ?? null),
+    shapeTable: encodeLookTable(growth.shapes, palette?.table ?? null, growth.table),
   };
 }

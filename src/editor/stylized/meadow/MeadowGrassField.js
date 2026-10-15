@@ -1,3 +1,5 @@
+import { applyMeadowGrowth } from './MeadowGrowthUpdates.js';
+import { resolveMeadowGrowth } from './meadowGrowthProfiles.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { Vector3 } from 'three/webgpu';
 import { createMeadowBladeMaterial } from './meadowBladeMaterial.js';
@@ -95,6 +97,7 @@ export class MeadowGrassField {
       terrainView,
       tileIds: config.grass.tileIds,
       shapeTable: settings.shapeTable,
+      growth: settings.growth,
       forestFieldProvider,
       forestFloorConfig: config.trees?.forestFloor ?? null,
       rockPlacementsProvider,
@@ -159,6 +162,10 @@ export class MeadowGrassField {
       });
     }
     this.stats = {};
+  }
+
+  setGrowth(source) {
+    applyMeadowGrowth(this,resolveMeadowGrowth(source));
   }
 
   get meshes() {

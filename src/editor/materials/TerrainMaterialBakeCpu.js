@@ -1,3 +1,4 @@
+import { terrainWetlandWetness } from './TerrainWetlandWetness.js';
 import { sampleSurfaceMaskChannel } from '../world/SurfaceMaskSampling.js';
 import { floatToHalf } from './HalfFloat.js';
 import {
@@ -297,10 +298,10 @@ export async function bakeTerrainMaterialPage({
         + sourceX + waterSource.radius;
       const waterDistanceCells = waterSource.distance[waterIndex];
       const shoreline = clamp01(1 - waterDistanceCells / classification.shorelineRadiusCells);
-      const wetness = Math.max(
+      const wetness = terrainWetlandWetness(Math.max(
         waterCoverage,
         clamp01(1 - waterDistanceCells / classification.wetnessRadiusCells),
-      );
+      ), source.tilePixels[sourceOffset + 3], slope);
       const canopy = sampleCanopy(source, x, z, resolution);
       wetnessShoreline[index * 2] = Math.round(wetness * 255);
       wetnessShoreline[index * 2 + 1] = Math.round(shoreline * 255);

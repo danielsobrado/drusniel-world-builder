@@ -29,7 +29,7 @@ import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/win
 import { groundDeformationNode } from '../deformation/groundDeformationNode.js';
 import { stylizedDirtMask, stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
-import { meadowNoise } from './meadowNoise.js';
+import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 
 const HALF_PI = Math.PI * 0.5;
 const TWO_PI = Math.PI * 2;
@@ -51,10 +51,12 @@ export function meadowInstance(originUniform, { cards = false } = {}) {
   const tile = publication.xy;
   const data = attribute('instanceData', 'vec4');
   const base = vec3(tile.x.add(position.x), position.y, tile.y.add(position.z));
-  // The look code: shape + MEADOW_SHAPE_COUNT × palette (meadowPalettes.js).
+  // The look code: shape + 3 × (palette + 8 × growth).
   const code = cards ? floor(data.x.div(4)) : floor(data.x);
-  const palette = floor(code.div(MEADOW_SHAPE_COUNT));
-  const shape = code.sub(palette.mul(MEADOW_SHAPE_COUNT));
+  const combined = floor(code.div(MEADOW_SHAPE_COUNT));
+  const growth = floor(combined.div(8));
+  const palette = combined.mod(8);
+  const shape = code.mod(MEADOW_SHAPE_COUNT);
   return {
     base,
     tile,
@@ -68,7 +70,8 @@ export function meadowInstance(originUniform, { cards = false } = {}) {
     // variant; `cell` is the atlas cell, shape × 4 + variant, palette peeled off.
     shape,
     palette,
-    cell: cards ? data.x.sub(palette.mul(MEADOW_SHAPE_COUNT * 4)) : float(0),
+    growth,
+    cell: cards ? shape.mul(4).add(data.x.mod(4)) : float(0),
     path: cards ? float(0) : fract(data.x),
     rank: data.y,
     phase: data.z,
@@ -228,11 +231,9 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       const growth = blade.strength.mul(oneMinus(dirt.mul(config.dirt.bladeCut))).mul(oneMinus(trodden.mul(0.75)));
       // Patchy stand height, as the donor's cinematic meadow: a slow noise sets
       // each patch's scale so the field has swells and hollows, not one level.
-      const patch = meadowNoise(blade.canonical.mul(uniforms.heightNoiseScale)).clamp(0, 1);
-      const height = uniforms.bladeHeight
-        .mul(mix(uniforms.heightScale.x, uniforms.heightScale.y, patch))
-        .mul(growth);
-      const width = uniforms.bladeWidth
+      const profile = meadowGrowthNodes(uniforms,blade);
+      const height = profile.height.mul(growth);
+      const width = profile.width
         .mul(tuning.widthScale)
         .mul(sqrt(blade.strength))
         .mul(uniforms.widthScale)

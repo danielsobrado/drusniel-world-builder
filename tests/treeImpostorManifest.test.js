@@ -263,3 +263,9 @@ test('source signature changes when wind affecting the baked silhouette changes'
 
   assert.notEqual(first, changed);
 });
+
+test('forest-floor shading and density do not invalidate tree crown atlases',()=>{
+ const parts=[[{kind:'leaf',geometry:geometry(1),sourceMap:null}]];
+ const signature=floor=>createTreeImpostorSourceSignature(parts,{trees:{leafTop:'#ffffff',forestFloor:floor},lod:{impostor:{columns:8}}});
+ assert.equal(signature({grassCoreDensity:.45,groundCoreColor:'#3b5233'}),signature({grassCoreDensity:.28,groundCoreColor:'#46503a'}));
+});

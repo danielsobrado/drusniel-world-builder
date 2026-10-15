@@ -15,6 +15,7 @@ const RUNTIME_TREE_FIELDS = new Set([
   'groveMix',
   'habitat',
   'rootFit',
+  'forestFloor',
 ]);
 const REQUIRED_NUMERIC_FIELDS = Object.freeze([
   'columns',

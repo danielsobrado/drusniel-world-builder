@@ -13,7 +13,16 @@ import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
  */
 export function createMeadowUniforms(settings, interaction = null, spellGround = null) {
   const appearance = settings.appearance;
+  const growth = settings.growth;
   return {
+    growth: {
+      dimensions: uniformArray(Array.from({length:16},(_,i)=>{
+        const p=growth.profiles[i] ?? growth.profiles[0];
+        return new THREE.Vector4(p.shortHeight,p.tallHeight,p.width,p.patchMeters);
+      }),'vec4'),
+      density: uniformArray(Array.from({length:16},(_,i)=>new THREE.Vector4((growth.profiles[i] ?? growth.profiles[0]).density,0,0,0)),'vec4'),
+      maxHeight: growth.maxHeight, maxWidth: growth.maxWidth,
+    },
     // The player's body stamp and its render-space window. The centre is the
     // map's own Vector2, so the fold reads wherever the map last stamped without
     // a copy per frame.

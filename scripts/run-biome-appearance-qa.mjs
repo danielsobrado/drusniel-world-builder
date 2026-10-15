@@ -52,7 +52,7 @@ try {
     await page.close();
   }
   if (!captureOnly) {
-  for (const backend of ['webgpu', 'webgl']) for (const biome of [3, 4, 7, 8, 9, 12]) {
+  for (const backend of ['webgpu', 'webgl']) for (const biome of [3, 4, 5, 6, 7, 8, 9, 10, 12]) {
     const comparison = compareRenderedImages(images.get(`${backend}-biome-${biome}`), images.get(`${backend}-biome-${biome}-rebased`),
       { maximumMeanColorError: 0.6, maximumCoverageDelta: 0.01, maximumMaskDifference: 0.01 });
     report.checks.push({ id: `${backend}: ${biome} rebase`, ...comparison }); assert.equal(comparison.passed, true);
