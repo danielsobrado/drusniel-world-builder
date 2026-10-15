@@ -2,7 +2,6 @@ import { HUD_PHASE } from './hudState.js';
 
 /** How long the controls stay up once the player has taken the mouse. */
 const REST_AFTER_MS = 8000;
-const TAGLINE = 'Explore at your own pace';
 
 function hintColumns({ canToggleCamera, canBoost }) {
   return [
@@ -37,7 +36,7 @@ export class HudKeyHints {
     this.element.className = 'hud-legend';
     this.element.hidden = true;
     this.element.innerHTML = `
-      <div class="hud-legend__scene"><strong></strong><span>${TAGLINE}</span></div>
+      <div class="hud-legend__scene"><strong></strong></div>
       <dl class="hud-keys" aria-label="Controls"></dl>
     `;
     this.sceneName = this.element.querySelector('.hud-legend__scene strong');

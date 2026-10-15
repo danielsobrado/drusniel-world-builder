@@ -1,4 +1,4 @@
-const CAPTURE_ROOTS = '.player-hud, .spell-dock, .scenic-tour-button, .free-flight-hints, .perf-qa-overlay, .view-mode-switcher, .sidebar, .natural-toolbar, .viewport-toolbar, .fps-average';
+const CAPTURE_ROOTS = '.natural-chrome, .natural-context-toolbar, .natural-build-strip, .natural-world-menu, .player-hud, .spell-dock, .scenic-tour-button, .free-flight-hints, .perf-qa-overlay, .view-mode-switcher, .sidebar, .natural-toolbar, .viewport-toolbar, .fps-average';
 /** Presentation-only visibility; component hidden state and the world continue unchanged. */
 export class HudVisibilityController {
   constructor({ root = document, isBlocked = () => false, isReady = () => true }) {
@@ -9,6 +9,8 @@ export class HudVisibilityController {
     if(hidden===this.captured)return true;
     if(hidden&&(this.isBlocked()||!this.isReady()))return false;
     this.captured=hidden;
+    const stateRoot=this.root.documentElement ?? this.root;
+    stateRoot.toggleAttribute('data-world-capture',hidden);
     if(hidden) {
       for(const node of this.root.querySelectorAll('[data-capture-ui]')) {
         this.previous.set(node,{visibility:node.style.visibility,inert:node.inert,aria:node.getAttribute('aria-hidden')});

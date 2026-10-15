@@ -1,3 +1,5 @@
+import { HUD_METRICS_EVENT,readHudMetricsPreference } from './HudMetricsPreference.js';
+
 /** How often the numbers change: often enough to follow, slow enough to read. */
 const REFRESH_MS = 500;
 
@@ -14,11 +16,17 @@ function snapshotOnReset(renderer) {
   const info = renderer?.info;
   if (!info || info.__hudSnapshot) return info?.__hudSnapshot ?? null;
   const snapshot = { triangles: 0, draws: 0 };
-  const reset = info.reset.bind(info);
+  const reset = info.reset;
   info.reset = () => {
     snapshot.triangles = info.render.triangles;
     snapshot.draws = info.render.drawCalls ?? info.render.calls;
-    reset();
+    reset.call(info);
+  };
+  const wrapped=info.reset;
+  snapshot.release=()=>{
+    if(info.__hudSnapshot!==snapshot)return;
+    if(info.reset===wrapped)info.reset=reset;
+    delete info.__hudSnapshot;
   };
   info.__hudSnapshot = snapshot;
   return snapshot;
@@ -39,6 +47,9 @@ export class HudMetrics {
    */
   constructor({ getRenderer }) {
     this.getRenderer = getRenderer;
+    this.enabled=readHudMetricsPreference();this.requestedVisible=false;
+    this.onPreference=event=>this.setEnabled(event.detail.enabled);
+    document.addEventListener(HUD_METRICS_EVENT,this.onPreference);
     this.element = document.createElement('section');
     this.element.className = 'hud-metrics';
     this.element.hidden = true;
@@ -59,8 +70,15 @@ export class HudMetrics {
   }
 
   setVisible(visible) {
-    this.element.hidden = !visible;
-    if (!visible) this.windowStart = null;
+    this.requestedVisible=visible;
+    this.element.hidden = !visible || !this.enabled;
+    if (this.element.hidden) this.windowStart = null;
+  }
+
+  setEnabled(enabled) {
+    this.enabled=Boolean(enabled);
+    if(!this.enabled){this.snapshot?.release?.();this.snapshot=null;}
+    this.setVisible(this.requestedVisible);
   }
 
   update(nowMs) {
@@ -74,6 +92,7 @@ export class HudMetrics {
     const elapsed = nowMs - this.windowStart;
     if (elapsed < REFRESH_MS) return;
     const last = snapshotOnReset(this.getRenderer?.());
+    this.snapshot=last;
     this.write('fps', String(Math.round((this.frames * 1000) / elapsed)));
     if (last) {
       this.write('tris', formatCount(last.triangles));
@@ -90,6 +109,8 @@ export class HudMetrics {
   }
 
   dispose() {
+    this.setEnabled(false);
+    document.removeEventListener(HUD_METRICS_EVENT,this.onPreference);
     this.element.remove();
   }
 }

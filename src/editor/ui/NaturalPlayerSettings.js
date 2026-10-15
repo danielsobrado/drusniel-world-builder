@@ -1,4 +1,5 @@
 import './NaturalPlayerSettings.css';
+import { readHudMetricsPreference,writeHudMetricsPreference } from '../player/hud/HudMetricsPreference.js';
 import {
   getAudioState,
   setAudioEnabled,
@@ -36,7 +37,7 @@ function applyReducedMotion(enabled) {
   );
 }
 
-function settingsMarkup({ audioEnabled, masterVolume, reducedMotion }) {
+function settingsMarkup({ audioEnabled, masterVolume, reducedMotion, metrics }) {
   const volumePercent = Math.round(masterVolume * 100);
   return `
     <section class="natural-player-settings" aria-label="Player settings">
@@ -75,6 +76,14 @@ function settingsMarkup({ audioEnabled, masterVolume, reducedMotion }) {
         </span>
         <input type="checkbox" data-natural-setting="reduced-motion" ${reducedMotion ? 'checked' : ''} />
       </label>
+      <label class="natural-player-setting natural-player-setting--toggle">
+        <span><strong>Show performance counters</strong></span>
+        <input type="checkbox" data-natural-setting="metrics" ${metrics ? 'checked' : ''} />
+      </label>
+      <div class="natural-player-setting">
+        <button type="button" data-natural-setting="capture">Hide HUD for screenshots <kbd>F8</kbd></button>
+        <small>Press F8 or Escape to show the HUD again.</small>
+      </div>
       <div class="natural-controls-hint" aria-label="Essential controls">
         <span><kbd>Drag</kbd> manipulate</span>
         <span><kbd>R</kbd> rotate</span>
@@ -99,6 +108,7 @@ class NaturalPlayerSettings {
       audioEnabled: audio.enabled,
       masterVolume: audio.masterVolume,
       reducedMotion: this.reducedMotion,
+      metrics: readHudMetricsPreference(),
     }).trim();
     this.host = this.host.firstElementChild;
 
@@ -114,6 +124,11 @@ class NaturalPlayerSettings {
   }
 
   bind() {
+    this.host.querySelector('[data-natural-setting="metrics"]').addEventListener('change',event=>writeHudMetricsPreference(event.target.checked));
+    this.host.querySelector('[data-natural-setting="capture"]').addEventListener('click',()=>{
+      this.root.querySelector('.natural-drawer-close')?.click();
+      document.dispatchEvent(new CustomEvent('world:hide-hud'));
+    });
     this.sound.addEventListener('change', () => {
       setAudioEnabled(this.sound.checked);
       this.volume.disabled = !this.sound.checked;

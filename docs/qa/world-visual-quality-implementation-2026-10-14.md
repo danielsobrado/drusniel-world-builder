@@ -359,3 +359,31 @@ Focused tests pass, including 100000 near/card candidates with zero trail-core
 roots, stable canonical identities after rebasing, and canonical contour parity
 at large coordinates. Browser proof and streaming-sensitive performance remain
 pending; this is not yet release acceptance.
+
+The [path-clearing browser fixture](world-visual-quality-2026-10-14/fixtures/path-clearance/report.json)
+now passes all six natural/painted-path views on each backend, with zero browser
+errors. At 8, 30 and 70 m, both published representations contain zero roots in
+natural or painted treads, with more than 199000 blades and 217000 cards where
+eligible ground remains. The production terrain material and grass materials
+are used in these controlled flat scenes; the screenshots show the clear tread.
+
+The [first full VQ-09 composition attempt](world-visual-quality-2026-10-14/biomes/composition-before-path-fix/report.json)
+is **failed**, preserved with its complete captured artifacts. It used immutable
+source/atlas snapshot `7a7242b9`, before the user's subsequent path correction.
+Thirteen poses settled, then `additional-10-2` exceeded 120 seconds with 112 tree
+and 19 rock manifest jobs outstanding. Terrain and collision were ready and no
+browser error was recorded. The readiness timeout is not waived; the remaining
+composition/imported/marine acceptance still needs a successful run.
+
+VQ-10's arc/recovery implementation is committed at `3e399cd2`. All 101×101
+press/height sweeps for every profile, root/upright/rebase checks, equal-time
+30/60/144 Hz recovery, float scrolling, final-empty upload and spell preservation
+checks pass. The full suite at that stage passed **6720/6720**. Its real-world
+stamped/recovered captures and final movement/performance gates remain pending.
+
+VQ-11's presentation code is implemented: metrics default off with persistent
+preference and no renderer sampling while disabled; F8/Escape/edit-mode capture
+policy, modal/loading/error guards, presentation-only visibility, specified
+legend/metrics backing and the fixed vignette/grain values. The focused state
+checks pass; the new real-browser HUD suite verifies actual input, layout,
+contrast, state preservation and cleanup. Browser acceptance is pending.

@@ -203,8 +203,8 @@ stylizedSurface:
     lift: [0.004, 0.006, 0.012]
     gain: [1.02, 1.0, 0.97]
     highlightDesaturation: 0.35
-    vignette: 0.14
-    grain: 0.012
+    vignette: 0.10
+    grain: 0.006
     bloom:
       strength: 0.09
       radius: 0.3

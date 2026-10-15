@@ -46,6 +46,7 @@ import { FrameRateMeter } from './editor/performance/FrameRateMeter.js';
 import { FRAME_RATE_DISPLAY_INTERVAL_MS } from './editor/performance/frameRateConstants.js';
 import { assetStartupTelemetry } from './editor/performance/AssetStartupTelemetry.js';
 import { PerfCounters } from './editor/performance/qa/PerfCounters.js';
+import { HudPresentationBindings, hasCaptureBlockingOverlay } from './editor/player/hud/HudPresentationBindings.js';
 import { HudVisibilityController } from './editor/player/hud/HudVisibilityController.js';
 import { WorldVisualQa } from './editor/performance/qa/WorldVisualQa.js';
 import { PerfQaHarness } from './editor/performance/qa/PerfQaHarness.js';
@@ -1354,6 +1355,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   if (import.meta.env.DEV) {
     window.__editor = {
       controller,
+      playerHud: viewModeUi.hud,
       objectMap,
       objectView,
       godsEndAssets,
@@ -1850,11 +1852,14 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     void recovery.recover(config.renderer.forceWebGL ? 'webgl' : 'auto', terrainView.rendererBackendStatus.mode, info).catch(showStartupError);
   };
   const hudVisibility = new HudVisibilityController({ root: document,
-    isBlocked: () => gameplayOverlayController.isWorldInputBlocked(),
+    isBlocked: () => gameplayOverlayController.isWorldInputBlocked()
+      || hasCaptureBlockingOverlay(document),
     isReady: () => terrainView.getStreamingStatus().loading === 0 && stylizedSurface.getPreparationStatus().ready,
   });
   resources.own(hudVisibility);
-  if (import.meta.env.DEV && window.__editor) window.__editor.hudVisibility = hudVisibility;
+  const hudPresentation = new HudPresentationBindings({visibility:hudVisibility,viewMode:viewModeController,escapeStack,viewport:terrainView.renderer.domElement});
+  resources.own(hudPresentation);
+  if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor,{hudVisibility,hudPresentation});
   if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qaVisual') === '1') {
     const visualQa = new WorldVisualQa(window.__editor);
     window.__worldVisualQa = visualQa;
@@ -1872,6 +1877,7 @@ function showStartupError(error) {
   if (!root) return;
 
   const container = document.createElement('main');
+  container.dataset.worldError = '';
   Object.assign(container.style, {
     padding: '24px',
     fontFamily: 'system-ui',
