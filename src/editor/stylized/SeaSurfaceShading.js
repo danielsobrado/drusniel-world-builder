@@ -33,7 +33,7 @@ function displacedSurfaceSlope() {
  * how that reads on an unlit material: `normal` tilts the reflection, which at
  * the grazing angles a sea is mostly seen at is what makes waves visible;
  * slopes turned toward the sun brighten and those turned away darken; crests
- * lift toward the highlight colour; and steep crests break into whitecaps,
+ * lift the existing water colour; and steep crests break into whitecaps,
  * more of them in a storm.
  *
  * Only sea water swells. The water field has no kind channel, so the sea is
