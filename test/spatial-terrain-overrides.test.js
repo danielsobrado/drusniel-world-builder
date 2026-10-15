@@ -79,7 +79,8 @@ test('worker sparse halo edits produce the same height, water and surface pixels
   const reference = { ...page };
   enrichPageWaterField(reference, (x, z) => sampleWorldStoreWater(store, x, z));
   enrichPageRenderPixels(reference, (x, z) => store.getTile(x, z),
-    { ...store.surfaceMaskConfig, worldSeed: 73 }, id => store.generator.getTileDefinition?.(id));
+    { ...store.surfaceMaskConfig, worldSeed: 73 }, id => store.generator.getTileDefinition?.(id),
+    { sampleHeight: (x,z) => store.getHeight(x,z), sampleWater: (x,z) => sampleWorldStoreWater(store,x,z) });
   assert.deepEqual(page.waterFieldPixels, reference.waterFieldPixels);
   assert.deepEqual(page.waterFlowPixels, reference.waterFlowPixels);
   assert.deepEqual(page.surfaceMaskPixels, reference.surfaceMaskPixels);

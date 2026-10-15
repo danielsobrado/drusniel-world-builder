@@ -18,6 +18,20 @@ const scene=new THREE.Scene();scene.background=new THREE.Color('#b2c9d2');
 const camera=new THREE.PerspectiveCamera(68,1600/900,.1,1000);
 const sun=new THREE.DirectionalLight('#fff2d9',2.5);sun.position.set(-80,100,20);scene.add(sun,new THREE.HemisphereLight('#b9daff','#7b7560',1.2));
 const raw=loadEditorConfig().stylizedSurface;
+async function visibleGrassPixels(field) {
+ const target=new THREE.RenderTarget(1600,900);
+ try {
+  renderer.setRenderTarget(target);await renderer.render(scene,camera);
+  const withGrass=await renderer.readRenderTargetPixelsAsync(target,0,0,1600,900);
+  const meshes=field.meshes,visibility=meshes.map(m=>m.visible);meshes.forEach(m=>{m.visible=false;});
+  await renderer.render(scene,camera);
+  const withoutGrass=await renderer.readRenderTargetPixelsAsync(target,0,0,1600,900);
+  meshes.forEach((m,i)=>{m.visible=visibility[i];});
+  let changed=0;
+  for(let i=0;i<withGrass.length;i+=4)if(Math.max(...[0,1,2].map(c=>Math.abs(withGrass[i+c]-withoutGrass[i+c])))>8)changed++;
+  return changed;
+ }finally{renderer.setRenderTarget(null);target.dispose();}
+}
 async function capture(id,metadata) {
  await renderer.compileAsync(scene,camera);await renderer.render(scene,camera);
  if(renderer.backend.isWebGPUBackend)await renderer.backend.device.queue.onSubmittedWorkDone();
@@ -72,10 +86,11 @@ try {
      if(performance.now()-start>120000)throw new Error(`Grass fixture preparation timeout: ${JSON.stringify(stats)}`);
      await new Promise(requestAnimationFrame);
     }
-    // Freeze wind and finish normal publication fading before the measured still.
-    field.uniforms.time.value=0;
+    // Keep time beyond every publication's fade; wind amplitudes are zero.
+    field.uniforms.time.value=Math.max(...[...field.blades.tiles.values(),...field.cards.tiles.values()].map(t=>t.revealTime??0))+2;
     const counts=inspect(field,border),id=`border-${border}-distance-${distance}`;
-    state.report.checks.push({id,...counts,passed:counts.blades>0&&counts.cards>0&&counts.ineligibleRoots===0&&counts.fullStrengthRoots>0&&counts.fullStrengthTooNear===0});
+    counts.visibleGrassPixels=await visibleGrassPixels(field);
+    state.report.checks.push({id,...counts,passed:counts.visibleGrassPixels>1000&&counts.blades>0&&counts.cards>0&&counts.ineligibleRoots===0&&counts.fullStrengthRoots>0&&counts.fullStrengthTooNear===0});
     await capture(id,{border,distance,eyeHeight:1.7,counts,readiness:field.getState(),wind:0});
    }
   }finally{field.dispose();scene.remove(floor);floor.geometry.dispose();floorMaterial.dispose();groundTexture.dispose();}

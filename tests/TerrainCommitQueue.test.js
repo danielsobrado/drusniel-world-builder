@@ -19,9 +19,10 @@ import {
 import { StylizedBuildQueue } from '../src/editor/stylized/StylizedBuildQueue.js';
 import { TILE_BY_KEY } from '../src/editor/tileCatalog.js';
 
-test('getSurfaceMaskSearchRadius matches prior CPU blend search', () => {
-  assert.equal(getSurfaceMaskSearchRadius(2.5), 4);
-  assert.equal(getSurfaceMaskSearchRadius(0.5), 2);
+test('getSurfaceMaskSearchRadius covers grass fringe and wider road search', () => {
+  assert.equal(getSurfaceMaskSearchRadius(2.5), 6);
+  assert.equal(getSurfaceMaskSearchRadius(0.5), 6);
+  assert.equal(getSurfaceMaskSearchRadius(9), 10);
 });
 
 test('buildTilePixels writes RGBA color + tile id', () => {
@@ -76,7 +77,7 @@ test('buildSurfaceMaskPixels samples halo exterior at most O(halo² - chunk²)',
   });
   const exteriorCells = haloSize * haloSize - chunkSize * chunkSize;
   assert.equal(sampleCalls, exteriorCells);
-  assert.ok(sampleCalls <= 144);
+  assert.equal(sampleCalls, 336, 'one sample per exterior cell of the six-cell halo');
 });
 
 test('TerrainCommitQueue commits at most one job per flush by default', () => {
