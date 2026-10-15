@@ -5,6 +5,8 @@ import { jungleMistUniforms,createJungleMistNodes,resolveJungleMistConfig } from
 import { CpuTreeImpostorBatch } from '/src/editor/stylized/impostor/CpuTreeImpostorBatch.js';
 import { GpuTreeImpostorBatch } from '/src/editor/stylized/impostor/GpuTreeImpostorBatch.js';
 import { worldWindUniforms } from '/src/editor/weather/wind/worldWindState.js';
+import { applyFixtureLighting } from './world-visual-fixture-lighting.mjs';
+import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 
 export function solidAtlas(width=1,height=1,normal=[128,128,255,0]) {
  const make=(data,colorSpace)=>{const t=new THREE.DataTexture(new Uint8Array(data),1,1,THREE.RGBAFormat);
@@ -19,9 +21,10 @@ function mean(pixels) {
  return {rgb:sum.map(v=>v/count),count};
 }
 const difference=(a,b)=>Math.max(...a.map((v,i)=>Math.abs(v-b[i])));
-export async function runMistCards({renderer,scene,camera,draw,state,ambient}) {
+export async function runMistCards({renderer,scene,camera,draw,state,ambient,sun,fill,fixtureLight='neutral'}) {
  camera.fov=35;camera.position.set(0,1.7,0);camera.lookAt(0,1.7,-1);camera.updateProjectionMatrix();camera.updateMatrixWorld();
  jungleMistUniforms.ground.value=0;jungleMistUniforms.sun.value.setRGB(.35,.32,.28);jungleMistUniforms.fill.value.setRGB(.2,.24,.28);
+ applyFixtureLighting(loadEditorConfig().stylizedSurface,sun,fill,fixtureLight);
  const paths=['near','proxy','cpu-impostor',...(renderer.backend.isWebGPUBackend?['gpu-impostor']:[])];
  for(const depth of [10,40,100,240]) {
   const size=depth*2*Math.tan(THREE.MathUtils.degToRad(35)/2)*.4;
@@ -99,11 +102,11 @@ export async function runNormalRotation({renderer,scene,camera,draw,state,sun,fi
  state.report.checks.push({id:'fixed-world-normal-rotating-view',error,means:measurements,passed:error<=.01});
 }
 
-export async function runOpticalDepth({scene,camera,draw,state,ambient}) {
+export async function runOpticalDepth({scene,camera,draw,state,ambient,fixtureLight='neutral'}) {
  camera.position.set(0,0,10);camera.lookAt(0,0,0);camera.updateMatrixWorld();
  const geometry=new THREE.PlaneGeometry(3,3),material=new THREE.MeshBasicNodeMaterial(),mesh=new THREE.Mesh(geometry,material);scene.add(mesh);
  const settings=resolveJungleMistConfig(ambient),nodes=createJungleMistNodes({settings,time:float(10),
-  cameraPosition:vec3(0,1.7,0),worldPosition:vec3(0,1.7,-100),sunColor:vec3(.3),fill:vec3(.2)});
+  cameraPosition:vec3(0,1.7,0),worldPosition:vec3(0,1.7,-100),sunColor:fixtureLight==='neutral'?vec3(.3):jungleMistUniforms.sun,fill:fixtureLight==='neutral'?vec3(.2):jungleMistUniforms.fill});
  state.report.opticalDepthSource=nodes.opticalDepth?'production optical depth':'inverted production amount';
  material.outputNode=vec4(nodes.opticalDepth??log(nodes.amount.oneMinus()).negate(),nodes.amount,0,.37);
  const samples=[];

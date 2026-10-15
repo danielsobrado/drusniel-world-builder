@@ -11,6 +11,7 @@ import { CpuTreeImpostorBatch } from '/src/editor/stylized/impostor/CpuTreeImpos
 import { GpuTreeImpostorBatch } from '/src/editor/stylized/impostor/GpuTreeImpostorBatch.js';
 import { syncFoliageLight } from '/src/editor/stylized/forest/foliageLight.js';
 import { jungleMistUniforms } from '/src/editor/stylized/ambient/JungleMist.js';
+import { applyFixtureLighting } from './world-visual-fixture-lighting.mjs';
 
 const assets=['/assets/trees/tree-scene/tree-02.glb','/assets/trees/forest-pack/tree-narrow-01.glb','/assets/trees/alpine/tree10.glb'];
 class FixtureTreeView extends StylizedTreeView {
@@ -32,7 +33,7 @@ function compare(near,other) {
  return {sharedInterior:errors.length,nearCoverage,otherCoverage,coverageRatio:otherCoverage/nearCoverage,
   medianLuminanceRatio:median(ratios),medianRgbError:median(errors)};
 }
-export async function runTreeRepresentations({renderer,scene,camera,draw,state,sun,fill}) {
+export async function runTreeRepresentations({renderer,scene,camera,draw,state,sun,fill,fixtureLight='neutral'}) {
  const original=loadEditorConfig().stylizedSurface,config=structuredClone(original);
  config.trees.windStrength=0;config.sky.cloudShadows.enabled=false;
  const terrainView={scene,renderer,worldStore:{tileSize:2,chunkSize:32,revision:0},getCanonicalHeight:()=>0};
@@ -48,6 +49,7 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
   if(!atlases)throw new Error('Required checked-in impostor atlas is unavailable.');
   state.report.prototypeSignature=signature;jungleMistUniforms.weight.value=0;
   camera.fov=35;camera.updateProjectionMatrix();sun.intensity=1;fill.intensity=.4;
+  const lighting=applyFixtureLighting(original,sun,fill,fixtureLight);
   for(const asset of assets) {
    const index=view.prototypeIndicesByAsset.get(asset)?.[0];
    if(!Number.isInteger(index))throw new Error(`No production prototype for ${asset}.`);
@@ -87,7 +89,7 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
      for(const [representation,meshes] of Object.entries(groups)) {
       for(const all of Object.values(groups))for(const mesh of all)mesh.visible=false;
       for(const mesh of meshes)mesh.visible=true;
-      images[representation]=await draw(`tree-${index}-${azimuth}-${representation}`,{...metadata,azimuth,representation},true);
+      images[representation]=await draw(`tree-${index}-${azimuth}-${representation}`,{...metadata,azimuth,representation,lighting},true);
      }
      for(const representation of ['cpu-impostor',...(gpu?['gpu-impostor']:[])]) {
       const stats=compare(images.near,images[representation]);

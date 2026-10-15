@@ -24,7 +24,11 @@ const manifest={schemaVersion:1,frozen:true,sourceSha:revision,sha256:digest.dig
 const mime=file=>file.endsWith('.png')?'image/png':file.endsWith('.json')?'application/json':file.endsWith('.ktx2')?'image/ktx2':'application/octet-stream';
 const snapshot={name:'immutable-world-visual-snapshot',enforce:'pre',
  load(id) {
-  const [filename,query='']=id.split('?'),bytes=files.get(normalize(filename));if(!bytes)return null;
+  const [filename,query='']=id.split('?'),resolved=normalize(filename),bytes=files.get(resolved);
+  if(!bytes) {
+   if(['src','config','scripts'].some(dir=>resolved.startsWith(`${normalize(root)}/${dir}/`)))throw new Error(`Source is absent from frozen revision ${revision}: ${filename}`);
+   return null;
+  }
   const source=bytes.toString();
   if(query.includes('compiled')&&filename.endsWith('.yaml'))return compileYamlModule(source,filename);
   if(query.includes('raw'))return `export default ${JSON.stringify(source)};`;

@@ -3,6 +3,7 @@ import { runMistCards,runNormalRotation,runOpticalDepth } from './world-visual-t
 import { runTreeRepresentations } from './world-visual-tree-representations.mjs';
 import { runBakerSwatch } from './world-visual-tree-bake.mjs';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
+import { applyFixtureLighting } from './world-visual-fixture-lighting.mjs';
 const params=new URLSearchParams(location.search),backend=params.get('backend')??'webgpu',phase=params.get('phase')??'after';
 const state=window.__worldTreeFixture={pendingCapture:null,continue:null,report:{backend,phase,cases:[],checks:[],done:false}};
 const renderer=new THREE.WebGPURenderer({forceWebGL:backend==='webgl',antialias:false,alpha:true});
@@ -22,7 +23,9 @@ async function draw(id,metadata={},capture=true,activeCamera=camera) {
 }
 try {
  if(state.report.backend!==backend)throw new Error('Unexpected tree fixture backend.');
- const context={renderer,scene,camera,draw,state,sun,fill,ambient:loadEditorConfig().stylizedSurface.ambientEffects};
+ const raw=loadEditorConfig().stylizedSurface;
+ const context={renderer,scene,camera,draw,state,sun,fill,ambient:raw.ambientEffects,fixtureLight:params.get('light')??'neutral'};
+ state.report.lighting=applyFixtureLighting(raw,sun,fill,context.fixtureLight);
  await runOpticalDepth(context);await runNormalRotation(context);
  if(phase!=='before')await runBakerSwatch(context);
  if(phase==='after'){await runMistCards(context);await runTreeRepresentations(context);}

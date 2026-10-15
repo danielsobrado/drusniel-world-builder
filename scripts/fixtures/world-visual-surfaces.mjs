@@ -8,6 +8,7 @@ import {worldWindUniforms} from '/src/editor/weather/wind/worldWindState.js';
 import {installUnusedSamplerPruning} from '/src/render/UnusedSamplerBindings.js';
 import {raiseDeviceLimits} from '/src/render/deviceLimits.js';
 import {runTerrainSubstrateSwatches} from './world-visual-substrates.mjs';
+import {applyFixtureLighting} from './world-visual-fixture-lighting.mjs';
 const backend=new URLSearchParams(location.search).get('backend')??'webgpu';
 const requiredLimits=backend==='webgpu'?await raiseDeviceLimits({}, {powerPreference:'high-performance'}):{};
 const renderer=new THREE.WebGPURenderer({antialias:false,forceWebGL:backend==='webgl',requiredLimits,powerPreference:'high-performance'});
@@ -64,6 +65,8 @@ try {
  worldWindUniforms.windowCenterCanonical.value.set(0,0);
  renderer.setClearColor(0,1);
  const raw=loadEditorConfig().stylizedSurface,settings=resolveBlownStreaks(raw.ambientEffects);
+ const fixtureLight=new URLSearchParams(location.search).get('light')??'neutral';
+ state.report.lighting=applyFixtureLighting(raw,sun,fill,fixtureLight);
  blownStreakUniforms.sand.value=settings.sand.strength;blownStreakUniforms.snow.value=settings.snow.strength;
  blownStreakUniforms.sandTravel.value=0;blownStreakUniforms.snowTravel.value=0;advanceBlownStreaks({delta:10,envelope:1,gust:.5});
  for(const kind of ['sand','snow']) {
@@ -95,6 +98,7 @@ try {
   try {
    for(const light of ['noon','night']) {
     sun.intensity=light==='noon'?1:0;fill.intensity=light==='noon'?.4:0;
+    if(light==='noon')applyFixtureLighting(raw,sun,fill,fixtureLight);
     for(const effect of ['off','on']) {
      mesh.material=materials[effect];const pixels=await draw(`${kind}-${light}-${effect}`,{kind,light,effect,planeMeters:20,camera:camera.position.toArray(),time:10,wind:[1,0],envelope:1,gust:.5});
      if(light==='night') {
@@ -121,6 +125,7 @@ try {
  }
  if(raw.materialBake.families.substrates) {
   sun.intensity=1;fill.intensity=.4;
+  applyFixtureLighting(raw,sun,fill,fixtureLight);
   await runTerrainSubstrateSwatches({raw,scene,camera,draw,state});
  }
  state.report.passed=state.report.checks.every(c=>c.passed);
