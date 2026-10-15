@@ -33,9 +33,8 @@ try {
   const controls=await page.evaluate(async variant=>{
    const {SharedWaterMaterials,WATER_SLOT_OPTIONS}=await import('/src/editor/stylized/SharedWaterMaterials.js');
    const {skyLightUniforms}=await import('/src/editor/stylized/sky/skyLight.js');
-   const {Color}=await import('three/webgpu');
    const e=window.__editor,surface=e.stylizedSurface,config=structuredClone(e.config.stylizedSurface);
-   const black=new Color(0);skyLightUniforms.sunColor.onObjectUpdate(()=>variant==='sun-highlights-off'?black:skyLightUniforms.sunColor.value);
+   const black=skyLightUniforms.sunColor.value.clone().setRGB(0,0,0);skyLightUniforms.sunColor.onObjectUpdate(()=>variant==='sun-highlights-off'?black:skyLightUniforms.sunColor.value);
    if(variant==='foam-off')config.water.foam.enabled=false;
    if(variant==='surf-off')config.water.sea.surf.enabled=false;
    if(variant==='detail-off')config.water.sea.detail.enabled=false;
