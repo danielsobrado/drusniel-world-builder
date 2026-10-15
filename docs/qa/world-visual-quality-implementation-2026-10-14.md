@@ -340,3 +340,22 @@ publication fade and includes this visibility check.
 The [original cold-desert revisit](world-visual-quality-2026-10-14/fixtures/grass-world/report.json)
 also passes complete readiness with zero browser errors at the unchanged pose.
 VQ-09 through VQ-13 and final performance/resource acceptance remain outstanding.
+
+The user's 2026-10-15 path review exposed another meadow integration defect:
+terrain renders the configured natural-trail contour, but the meadow's sampler
+only read painted-road R. Near blades and far cards therefore survived in the
+visible trail. The reference Gods' End repository removes excluded candidates
+in `src/grass/compactGrassGeometry.js`, using a 0.5 m path clearance from
+`src/grass/vegetationPolicy.js`.
+
+Meadow placement now evaluates the existing canonical natural-trail contour,
+uses its configured 0.42 clearing threshold, and applies that 0.5 m clearance
+before publishing either representation. Painted tread is also rejected. The
+remaining verge potential is passed to near-blade wear/pigment. No density,
+terrain distribution, sampler texture or instance attribute is added. Sampling
+normalizes settings once and reuses its result object; a gradient bound skips
+clearance probes away from trails. The revision key includes this policy.
+Focused tests pass, including 100000 near/card candidates with zero trail-core
+roots, stable canonical identities after rebasing, and canonical contour parity
+at large coordinates. Browser proof and streaming-sensitive performance remain
+pending; this is not yet release acceptance.

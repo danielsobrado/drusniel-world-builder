@@ -3,7 +3,8 @@ import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath,pathToFileURL } from 'node:url';
 import { originalVisualPoses,parseVisualArguments } from './lib/world-visual-poses.mjs';
-import { repositoryState,fileHash,validateVisualReport } from './lib/world-visual-report.mjs';
+import { captureVisualSource,visualSourceStayedFixed } from './lib/world-visual-source.mjs';
+import { fileHash,validateVisualReport } from './lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 const root=new URL('../',import.meta.url),repo=fileURLToPath(root),args=parseVisualArguments(process.argv.slice(2));
@@ -13,14 +14,7 @@ const report={schemaVersion:1,startedAt:new Date().toISOString(),viewport:{width
   poses:[],checks:[],artifacts:[],configHashes:{},suite:args.suite};
 let browser,page,errors;
 try {
-  Object.assign(report,repositoryState(repo));
-  const snapshotResponse=await fetch(new URL('/__worldVisualSource',args.url));
-  if(snapshotResponse.ok&&snapshotResponse.headers.get('content-type')?.includes('application/json')) {
-    const snapshot=await snapshotResponse.json();
-    if(snapshot.frozen&&/^[0-9a-f]{40}$/.test(snapshot.sourceSha)&&snapshot.files?.['editor.config.yaml']) {
-      report.sourceSnapshot=snapshot;report.sourceSha=snapshot.sourceSha;report.dirtyFiles=[];
-    }
-  }
+  Object.assign(report,await captureVisualSource(args.url,repo));
   for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml'])report.configHashes[file]=report.sourceSnapshot?.files[file]??await fileHash(new URL(file,root));
   report.mapHash=await fileHash(new URL('maps/Eldara Full 2026-07-23-20-37.json',root));
   browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
@@ -99,8 +93,8 @@ try {
         passed:!!old&&old.x===pose.x&&old.z===pose.z&&old.yaw===pose.yaw&&old.pitch===pose.pitch});
     }
   }
-  const end=report.sourceSnapshot?await fetch(new URL('/__worldVisualSource',args.url)).then(r=>r.json()):repositoryState(repo);
-  const stable=end.sourceSha===report.sourceSha&&(report.sourceSnapshot?end.sha256===report.sourceSnapshot.sha256:end.dirtyFiles.length===0);
+  const end=await captureVisualSource(args.url,repo);
+  const stable=visualSourceStayedFixed(report,end);
   report.checks.push({id:'source stayed fixed',task:'VQ-03',expected:report.sourceSha,actual:end.sourceSha,passed:stable});
 } catch(error) {report.failure=error.stack;process.exitCode=1;}
 finally {

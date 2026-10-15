@@ -35,7 +35,10 @@ export function normalizeNaturalTrailConfig(config = {}) {
  * so streamed chunks and CPU prop placement agree without storing another map.
  */
 export function naturalTrailFieldAt(worldX, worldZ, config = {}) {
-  const settings = normalizeNaturalTrailConfig(config);
+  return fieldAt(worldX,worldZ,normalizeNaturalTrailConfig(config));
+}
+
+function fieldAt(worldX,worldZ,settings) {
   const x = worldX * settings.scale;
   const z = worldZ * settings.scale;
   const warpedX = x + Math.sin(z * 0.73 + 1.7) * settings.warp;
@@ -46,10 +49,13 @@ export function naturalTrailFieldAt(worldX, worldZ, config = {}) {
 }
 
 export function naturalTrailMaskAt(worldX, worldZ, config = {}) {
-  const settings = normalizeNaturalTrailConfig(config);
+  return maskAt(worldX,worldZ,normalizeNaturalTrailConfig(config));
+}
+
+function maskAt(worldX,worldZ,settings) {
   if (!settings.enabled) return 0;
   const distance = Math.abs(
-    naturalTrailFieldAt(worldX, worldZ, settings) - settings.level,
+    fieldAt(worldX, worldZ, settings) - settings.level,
   );
   const transition = Math.min(1, Math.max(
     0,
@@ -57,4 +63,10 @@ export function naturalTrailMaskAt(worldX, worldZ, config = {}) {
   ));
   const smoothTransition = transition * transition * (3 - 2 * transition);
   return 1 - smoothTransition;
+}
+
+/** Placement loops normalize once, and never query terrain to clear a trail. */
+export function createNaturalTrailSampler(config={}) {
+  const settings=normalizeNaturalTrailConfig(config);
+  return {settings,fieldAt:(x,z)=>fieldAt(x,z,settings),maskAt:(x,z)=>maskAt(x,z,settings)};
 }

@@ -98,6 +98,7 @@ export class MeadowGrassField {
       tileIds: config.grass.tileIds,
       shapeTable: settings.shapeTable,
       growth: settings.growth,
+      pathConfig: config.path,
       forestFieldProvider,
       forestFloorConfig: config.trees?.forestFloor ?? null,
       rockPlacementsProvider,

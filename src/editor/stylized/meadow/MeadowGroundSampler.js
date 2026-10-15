@@ -1,4 +1,5 @@
 import { meadowPageGrowthKey } from './MeadowGrowthUpdates.js';
+import { createMeadowPathSampler } from './MeadowPathSampler.js';
 import { sampleSurfaceMaskChannel } from '../../world/SurfaceMaskSampling.js';
 import { acceptsMeadowHabitat } from './meadowHabitat.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
@@ -38,13 +39,14 @@ export class MeadowGroundSampler {
    */
   constructor({
     terrainView, tileIds, shapeTable, forestFieldProvider = () => null, forestFloorConfig = null,
-    rockPlacementsProvider = () => [], rocks = null, growth = null,
+    rockPlacementsProvider = () => [], rocks = null, growth = null, pathConfig = null,
   }) {
     this.terrainView = terrainView;
     this.eligible = new Uint8Array(256);
     for (const id of tileIds) this.eligible[id] = 1;
     this.shapeTable = shapeTable;
     this.growth=growth;
+    this.paths=createMeadowPathSampler(pathConfig);
     this.forestFieldProvider = forestFieldProvider;
     this.forestFloorConfig = forestFloorConfig;
     this.forestSamplers = new Map();
@@ -119,7 +121,7 @@ export class MeadowGroundSampler {
   revisionAt(centerX, centerZ) {
     const slot = this.slotFor(...this.chunkOf(centerX, centerZ));
     if (!slot) return null;
-    return `${slot.descriptor.key}:${slot.pageRevision}:${this.rockSignature(slot.descriptor)}${this.growthKey(slot)}`;
+    return `${slot.descriptor.key}:${slot.pageRevision}:${this.rockSignature(slot.descriptor)}${this.growthKey(slot)}${this.paths.signature}`;
   }
 
   rockSignature(descriptor) {
@@ -202,6 +204,7 @@ export class MeadowGroundSampler {
     // Only the rocks that can reach this tile are tested per stem.
     const rocks = this.rocksNear(descriptor, centerX, centerZ, tileHalf);
     const flatten = this.rocks?.flatten ?? 0;
+    const pathResult={path:0,blocked:false};
     const sample = (x, z, rank, out) => {
       const localX = x / tileSize - descriptor.originCellX;
       const localZ = -z / tileSize - descriptor.originCellZ;
@@ -217,6 +220,9 @@ export class MeadowGroundSampler {
         strength *= 1 - smoothstep(0.15, 0.6, sampleMask(mask, chunkSize, localX, localZ, 2));
         path = sampleMask(mask, chunkSize, localX, localZ, 0);
       }
+      const pathSample=this.paths.sample(x,z,coverage,path,pathResult);
+      if(pathSample.blocked)return false;
+      path=pathSample.path;
       // Canopy suppression, as the clump scatter did it: a stem survives where its
       // own roll is under the forest floor's grass density.
       if (forest && hash2d(rank, 91) >= forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ)) return false;
@@ -238,6 +244,6 @@ export class MeadowGroundSampler {
     // The same key `revisionAt` gives the tile, rocks included: a job whose
     // revision differs from its tile's is abandoned, so a mismatch here would
     // restart every build every frame.
-    return { sample, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}${this.growthKey(slot)}` };
+    return { sample, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}${this.growthKey(slot)}${this.paths.signature}` };
   }
 }
