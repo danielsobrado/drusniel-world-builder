@@ -54,7 +54,7 @@ export class WorldVisualMotion {
   const canonical=e.terrainView.floatingOrigin.toCanonical(status.position.x,status.position.z),ready=this.readiness();
   this.frames.push({elapsed:this.elapsed,deltaSeconds:dt,frameTimestamp:timestamp,wallTimeMs:performance.timeOrigin+performance.now(),keys:this.keys,
    position:{...canonical,y:status.position.y,footY:status.footY},camera:{...e.terrainView.floatingOrigin.toCanonical(e.viewModeController.camera.position.x,e.viewModeController.camera.position.z),y:e.viewModeController.camera.position.y},
-   origin:e.terrainView.floatingOrigin.getState(),grounded:status.grounded,
+   origin:e.terrainView.floatingOrigin.getState(),grounded:status.grounded,terrainHeight:e.terrainView.getWorldHeight(status.position.x,status.position.z),
    streaming:{resident:ready.terrain.resident,loading:ready.terrain.loading,pendingCommits:ready.terrain.pendingCommits,focusChunk:ready.terrain.focusChunk},
    yaw:p.yaw,pitch:p.pitch,mode:e.viewModeController.mode,fov:e.viewModeController.camera.fov,collision:status.collision,waterState:status.waterState,
    scenery:{ready:ready.scenery.ready,queueDepth:ready.scenery.queueDepth,fields:ready.scenery.fields,meadow:ready.scenery.meadow,draws:ready.scenery.draws,variants:ready.scenery.variants,staged:ready.scenery.staged},
@@ -67,6 +67,7 @@ export class WorldVisualMotion {
   if(error){this.reject(error);return;}
   const player=this.editor.playerController;
   this.resolve({sequenceId:'walk-sprint-turn-v1',cameraMode:this.cameraMode,wallStartMs:this.wallStartMs,wallDurationMs:performance.now()-this.startedAt,
-   elapsedSimulationSeconds:this.elapsed,settings:{walkSpeed:player.config.walkSpeed,runMultiplier:player.config.runMultiplier,firstPersonFov:player.camera.fov,thirdPersonFov:this.editor.viewModeController.thirdPersonCamera?.camera.fov},frames:this.frames});
+   elapsedSimulationSeconds:this.elapsed,settings:{walkSpeed:player.config.walkSpeed,runMultiplier:player.config.runMultiplier,effectiveWalkSpeed:player.speedMode.config.walkSpeed,explorationBoost:player.speedMode.active,
+    collisionSkinWidth:this.editor.config.collision.player.skinWidth,firstPersonFov:player.camera.fov,thirdPersonFov:this.editor.viewModeController.thirdPersonCamera?.camera.fov},frames:this.frames});
  }
 }

@@ -6,9 +6,9 @@ function report(recovery) {
  const frames=[];
  for(let i=0;i<=200;i++){const elapsed=i/10;frames.push({elapsed,wallTimeMs:1700000000000+elapsed*1000,
   position:{x:elapsed,y:1.7,z:0,footY:0},camera:{x:elapsed,y:1.7,z:0},yaw:0,pitch:0,fov:68,mode:'player',
-  collision:{ready:true,contacts:[]},nearMeadow:{missing:[]},
+  collision:{ready:true,contacts:[]},terrainHeight:0,nearMeadow:{missing:[]},
   scenery:{ready:!(elapsed>=10&&elapsed<10+recovery),queueDepth:0}});}
- return {cameraMode:'first-person',elapsedSimulationSeconds:20,settings:{walkSpeed:9,firstPersonFov:68,thirdPersonFov:45},frames};
+ return {cameraMode:'first-person',elapsedSimulationSeconds:20,settings:{walkSpeed:9,effectiveWalkSpeed:9,explorationBoost:false,collisionSkinWidth:.03,firstPersonFov:68,thirdPersonFov:45},frames};
 }
 test('motion gate fails scenery that remains pending beyond the two second stop',()=>{
  const pass=motionChecks(report(1.8));assert.ok(pass.checks.every(c=>c.passed));
