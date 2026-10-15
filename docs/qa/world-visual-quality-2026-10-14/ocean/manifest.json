@@ -1,0 +1,1263 @@
+{
+  "schemaVersion": 1,
+  "kind": "focused-ocean-review",
+  "applicationSourceSha": "9b768d9a22d50cee2cbf8c3ebc540546b7337597",
+  "overallReleaseAccepted": false,
+  "artifacts": [
+    {
+      "path": "README.md",
+      "bytes": 6560,
+      "sha256": "24a46637ac561b157a3c4eb9e3f15cc9f025417aa6b5b0dcbdcc99a938adfdf0"
+    },
+    {
+      "path": "before/default.png",
+      "bytes": 1344415,
+      "sha256": "6e703635670ce7c01e263a2bd6c997f071d6be6389e7b865f912515ec6f2efb1"
+    },
+    {
+      "path": "before/detail-off.png",
+      "bytes": 1380290,
+      "sha256": "834c8fe7b509e103e72d5cd116672914330a6a6cdc0b3294766b7a6bfc0d3c3a"
+    },
+    {
+      "path": "before/foam-off.png",
+      "bytes": 1313398,
+      "sha256": "e30ec2a48c03ef208d79eafd97ac9dae1a234e0b57526b6576d796c33b7c3836"
+    },
+    {
+      "path": "before/reflections-off.png",
+      "bytes": 1378305,
+      "sha256": "348ec639089a3f829544a3e753ede077030db5fe08b2aa35d10a87271d499088"
+    },
+    {
+      "path": "before/report.json",
+      "bytes": 226994,
+      "sha256": "329c14a3aaef64bbcfe3536d7e3bd72c6e813cb33a1dfb1eb84ba609a41882bc"
+    },
+    {
+      "path": "before/surf-off.png",
+      "bytes": 1296188,
+      "sha256": "95a68a803a45d145ad0f260c4e10b8e60be1db764aea2b41fc6b0774715cb7d5"
+    },
+    {
+      "path": "comparison.png",
+      "bytes": 962648,
+      "sha256": "8527576d1af0fd4c3fc64463bc3f367fca12bf18a0dffc70fa4eda4de7b12003"
+    },
+    {
+      "path": "crest-candidate/crest-light-off.png",
+      "bytes": 1319479,
+      "sha256": "58990db461d2a48f949515eee85bf45ddaca03b31cabc4fd3f35854bf5c51896"
+    },
+    {
+      "path": "crest-candidate/default.png",
+      "bytes": 1291747,
+      "sha256": "e9f65e274ca23c43955083fda069fe6093474008d52cd21fc6960dde3db67a39"
+    },
+    {
+      "path": "crest-candidate/foam-off.png",
+      "bytes": 1250064,
+      "sha256": "ef574fbf5824581e3e1bfc68035ff69907035014ed79878f71daefd7ffe6e914"
+    },
+    {
+      "path": "crest-candidate/report.json",
+      "bytes": 222797,
+      "sha256": "06925da4a5913c092406e2709fd10ef3d77ac201290069bb66b8ae1baaa9779d"
+    },
+    {
+      "path": "crest-candidate-player/default.png",
+      "bytes": 1321410,
+      "sha256": "918154e579258e4ea4bea7532be1d74758893c6e8056a1b563d648242b0b975a"
+    },
+    {
+      "path": "crest-candidate-player/report.json",
+      "bytes": 215798,
+      "sha256": "9f8c06c175bd3eace9fd206ad1fa0b1f79e8f81cfaec9e27dbd177443bd29719"
+    },
+    {
+      "path": "environment-parity/report.json",
+      "bytes": 38719,
+      "sha256": "ddc3c894aec74c80897b532426ac3316fb1a0bea433cb9032d18ff0958cc49db"
+    },
+    {
+      "path": "environment-parity/source.json",
+      "bytes": 211001,
+      "sha256": "b8d5420e88d0da4feaed0b77cfdb774e77f63c09b85db8d3cd483aef83598168"
+    },
+    {
+      "path": "environment-parity/webgl-beach-moving.png",
+      "bytes": 154070,
+      "sha256": "139613a6aae0230710d11e5e264e6e1cf9671a2bcb144afabdb1287196baefb7"
+    },
+    {
+      "path": "environment-parity/webgl-beach-rebased.png",
+      "bytes": 153702,
+      "sha256": "806e5027745cc6ecc5a5bdab3406fb52d5cf32aa96364c797a37e9567d02eaf3"
+    },
+    {
+      "path": "environment-parity/webgl-beach.png",
+      "bytes": 153566,
+      "sha256": "b1e537ffac793f8899eb75fb29d8c646fb4a7fa0fb4503645461c7bc2db2ce03"
+    },
+    {
+      "path": "environment-parity/webgl-deep-sea-storm.png",
+      "bytes": 122605,
+      "sha256": "e8a2d867ff8e9ad2c2c43dcd3a489726cc7e8dc82c33dd8afe9ec641f92be3ca"
+    },
+    {
+      "path": "environment-parity/webgl-deep-sea.png",
+      "bytes": 118271,
+      "sha256": "751cf942785d38f9ced88eb8a9c4e01ec48c6b0c5a6483c039b22dfd9734d7fd"
+    },
+    {
+      "path": "environment-parity/webgl-foliage-compressed-far.png",
+      "bytes": 6696,
+      "sha256": "7651b4c2dff03ec608392887807125635655e597de2b03cd3d786276e0722cb0"
+    },
+    {
+      "path": "environment-parity/webgl-foliage-compressed-near.png",
+      "bytes": 55011,
+      "sha256": "06d0ad500c76e8d17460bb3ce62e77936a7fb9b64bcadfdf7fbf836fbcaa7118"
+    },
+    {
+      "path": "environment-parity/webgl-foliage-raw-far.png",
+      "bytes": 6696,
+      "sha256": "ba3c3a4541161cfdc74a3d0edcdc78e5e496d05d0fa00457cb486cc3602454b4"
+    },
+    {
+      "path": "environment-parity/webgl-foliage-raw-near.png",
+      "bytes": 51429,
+      "sha256": "347c9ac2758e9317265a1d59f83641e5db99e307f874cf2aee388a8b6fc30b49"
+    },
+    {
+      "path": "environment-parity/webgl-frost-off.png",
+      "bytes": 1981,
+      "sha256": "dcc417cccf508d884b4d302af481cc5d21216925f8bde9695027e2b83728af48"
+    },
+    {
+      "path": "environment-parity/webgl-frost-on.png",
+      "bytes": 65443,
+      "sha256": "8d1bf7ee7dbd77c1ca96f9338140ceb31fb8ea68d4ddc2a4dea7eaa7379b755e"
+    },
+    {
+      "path": "environment-parity/webgl-lake-moving.png",
+      "bytes": 99743,
+      "sha256": "a7004345e19c6ae8d6fbe17a9911fac8739df46162cee55f1e7782a8bbd6c775"
+    },
+    {
+      "path": "environment-parity/webgl-lake-planar-off.png",
+      "bytes": 98653,
+      "sha256": "c79233caf6174468bfaacd764486f4402a56d69f80c00eed5dc7e0a816e98f41"
+    },
+    {
+      "path": "environment-parity/webgl-lake-reflections-off.png",
+      "bytes": 100233,
+      "sha256": "5a9879edced782544bcf31d98f6addd56b26bece7cb54da319160673ef737f5a"
+    },
+    {
+      "path": "environment-parity/webgl-lake.png",
+      "bytes": 100359,
+      "sha256": "d312302f42e9777214206358992585ef79eb8d38d88a9b5761c28b37ce079e9b"
+    },
+    {
+      "path": "environment-parity/webgl-reflection-cached-turn.png",
+      "bytes": 39854,
+      "sha256": "9d0fd17357080d600d4422aa00a3a104ef87cd9c6ce5325b1b85fd2cda800676"
+    },
+    {
+      "path": "environment-parity/webgl-reflection-orbit-off.png",
+      "bytes": 2169,
+      "sha256": "b00791f56cbd6d92b85ebb1e947e2087f575c6d894ec13d0dff3cf01382498e5"
+    },
+    {
+      "path": "environment-parity/webgl-reflection-orbit-on.png",
+      "bytes": 17400,
+      "sha256": "42eb49363b2f2cf89bd08d79c7f351a63e01fa598460e3431cd347a9226e0535"
+    },
+    {
+      "path": "environment-parity/webgl-reflection-rebased.png",
+      "bytes": 40483,
+      "sha256": "92280e23fff730dd9e299d7e7b2fcf05aa5b5c5f8f9a581044337aed56c12a1a"
+    },
+    {
+      "path": "environment-parity/webgl-reflection-refreshed-turn.png",
+      "bytes": 40401,
+      "sha256": "525ed2d3a5da5dffe7a7a095c574ada3764aa5daf23b3395d0f6d2ffffdd48a9"
+    },
+    {
+      "path": "environment-parity/webgl-river-fall.png",
+      "bytes": 193216,
+      "sha256": "49123621ef938f09b64d4d51fb15317378f4c9a4c2798a6fd25ce4050bd4409b"
+    },
+    {
+      "path": "environment-parity/webgl-river-foam-composite.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity/webgl-river-foam-layers.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity/webgl-river-high.png",
+      "bytes": 163100,
+      "sha256": "f01837dde45116b2e9f7482d8b93219efeb88d0c3a3ff8ee5bbb0f63e39dcc36"
+    },
+    {
+      "path": "environment-parity/webgl-river-medium.png",
+      "bytes": 153108,
+      "sha256": "dafb31cb017b5c63aa092cbe39a10d39793dd98fc2b869bb6af0ddf3c1f5c6ab"
+    },
+    {
+      "path": "environment-parity/webgl-river-moving.png",
+      "bytes": 161495,
+      "sha256": "c9cdfb425df4aea8db9a1c11693878e02432d2fbf85cb64eb4fe3d9932108439"
+    },
+    {
+      "path": "environment-parity/webgl-river-rebased.png",
+      "bytes": 163185,
+      "sha256": "b16fadde0b32dcad48a7179c7db56c36b073b1e3e78b988b67225dcce75de783"
+    },
+    {
+      "path": "environment-parity/webgl-surf-moving.png",
+      "bytes": 82373,
+      "sha256": "6acd81eb373ff643b73f65755e115b358328cb52009897147c16541fa9b38017"
+    },
+    {
+      "path": "environment-parity/webgl-surf-off.png",
+      "bytes": 80293,
+      "sha256": "5b7409f4aa1003c3d42d11cd585cc5ff12824b8f780cffabac95080f9347dd39"
+    },
+    {
+      "path": "environment-parity/webgl-surf-on.png",
+      "bytes": 80352,
+      "sha256": "f13361bb06fe53fce87a26498c8531f753c912335f83228b86c99ae31dd0fc31"
+    },
+    {
+      "path": "environment-parity/webgl-surf-rebased.png",
+      "bytes": 80332,
+      "sha256": "4edafc8e333b658326545c9dc1001e02e44a20eff52ba7de2c2e2c9dc98441a7"
+    },
+    {
+      "path": "environment-parity/webgl-terrain-coast.png",
+      "bytes": 128206,
+      "sha256": "1bb0c34cfc230a8d4c6ae2b5a1096db4f17433d3b573b3af61557f571f848118"
+    },
+    {
+      "path": "environment-parity/webgl-terrain-inland.png",
+      "bytes": 10437,
+      "sha256": "5725de21af014045958780a0096c13276cb79c9d823a68fd7dd2925ce1575e59"
+    },
+    {
+      "path": "environment-parity/webgl-underwater-deep.png",
+      "bytes": 76359,
+      "sha256": "63f836f36fa3e4b45a05b37207b27b7d38d3cbde75fa22a94eb8c7709e065fc1"
+    },
+    {
+      "path": "environment-parity/webgl-underwater-rebased.png",
+      "bytes": 71180,
+      "sha256": "34bd1dc5a59c71fc4839440c82afa1a19dc55f3f0cbef615804f0144a4950c1d"
+    },
+    {
+      "path": "environment-parity/webgl-underwater-shelf.png",
+      "bytes": 217156,
+      "sha256": "653058177968b4319e281b86c94d145a93befc6cff74e8a682908e5010343e75"
+    },
+    {
+      "path": "environment-parity/webgl-underwater-snell.png",
+      "bytes": 73044,
+      "sha256": "433b568c0179bf923cd5a3fe7bc8ff82b0c66e3f9a6a2ab546d5c36485485f5d"
+    },
+    {
+      "path": "environment-parity/webgpu-beach-moving.png",
+      "bytes": 153955,
+      "sha256": "18065b3d270da4739f1ba3d93698fd90332e96d08b1d37d0f92d8db6602ca773"
+    },
+    {
+      "path": "environment-parity/webgpu-beach-rebased.png",
+      "bytes": 153462,
+      "sha256": "057dc1ec91dea049b930eade70241f5f3a34bfe0d36c3b2f348f45510d44ecaa"
+    },
+    {
+      "path": "environment-parity/webgpu-beach.png",
+      "bytes": 153493,
+      "sha256": "90537375d75f19f0d5a8ddd82b40e9d1c0d5672d9d85b802f9f0e5bd6653a322"
+    },
+    {
+      "path": "environment-parity/webgpu-deep-sea-storm.png",
+      "bytes": 122595,
+      "sha256": "e705f4a537ef03db256eb253974e8fcc59102843d43575d7db220fd04fd864c4"
+    },
+    {
+      "path": "environment-parity/webgpu-deep-sea.png",
+      "bytes": 118457,
+      "sha256": "d816287534e814f3eda3d1624b20a82fdee5ee063b8a25f582799fff3d755b5b"
+    },
+    {
+      "path": "environment-parity/webgpu-foliage-compressed-far.png",
+      "bytes": 6696,
+      "sha256": "7651b4c2dff03ec608392887807125635655e597de2b03cd3d786276e0722cb0"
+    },
+    {
+      "path": "environment-parity/webgpu-foliage-compressed-near.png",
+      "bytes": 55011,
+      "sha256": "06d0ad500c76e8d17460bb3ce62e77936a7fb9b64bcadfdf7fbf836fbcaa7118"
+    },
+    {
+      "path": "environment-parity/webgpu-foliage-raw-far.png",
+      "bytes": 6696,
+      "sha256": "ba3c3a4541161cfdc74a3d0edcdc78e5e496d05d0fa00457cb486cc3602454b4"
+    },
+    {
+      "path": "environment-parity/webgpu-foliage-raw-near.png",
+      "bytes": 51429,
+      "sha256": "347c9ac2758e9317265a1d59f83641e5db99e307f874cf2aee388a8b6fc30b49"
+    },
+    {
+      "path": "environment-parity/webgpu-frost-off.png",
+      "bytes": 1981,
+      "sha256": "dcc417cccf508d884b4d302af481cc5d21216925f8bde9695027e2b83728af48"
+    },
+    {
+      "path": "environment-parity/webgpu-frost-on.png",
+      "bytes": 65451,
+      "sha256": "83a453b32d96d04f8ec21aa30091c653a6552424277c7547c1a0c0dd79037b27"
+    },
+    {
+      "path": "environment-parity/webgpu-lake-moving.png",
+      "bytes": 99774,
+      "sha256": "bf4173a44c22c709cac1d35a9dd9d9c687369434e028eab9be133fcc2dfc36b0"
+    },
+    {
+      "path": "environment-parity/webgpu-lake-planar-off.png",
+      "bytes": 98567,
+      "sha256": "52b6e819719bd899fedc4ca9821577b550ed39e6788061215dc779c883e137ad"
+    },
+    {
+      "path": "environment-parity/webgpu-lake-reflections-off.png",
+      "bytes": 100276,
+      "sha256": "67426bd57a2155a7e58e697d56b3d0d29c7ed61ef59db39f1f446fe7677d469f"
+    },
+    {
+      "path": "environment-parity/webgpu-lake.png",
+      "bytes": 100359,
+      "sha256": "a42f35199582c5677d0cf442cd49698cc241304645bf846c70e90676c372a0b9"
+    },
+    {
+      "path": "environment-parity/webgpu-reflection-cached-turn.png",
+      "bytes": 39864,
+      "sha256": "6a4b929ca3a3fd035853ddba10e02ec0e26cacc61d51616e1e2914002c99d616"
+    },
+    {
+      "path": "environment-parity/webgpu-reflection-orbit-off.png",
+      "bytes": 2169,
+      "sha256": "b00791f56cbd6d92b85ebb1e947e2087f575c6d894ec13d0dff3cf01382498e5"
+    },
+    {
+      "path": "environment-parity/webgpu-reflection-orbit-on.png",
+      "bytes": 17315,
+      "sha256": "509ab80e0b726384028019c67f9467bae1c103960ade78bdb2dfcc915f9f7014"
+    },
+    {
+      "path": "environment-parity/webgpu-reflection-rebased.png",
+      "bytes": 40421,
+      "sha256": "084e9b37d03c65cdadfc13a65cebc94d9ea91924869cff935450ec2b1b56692f"
+    },
+    {
+      "path": "environment-parity/webgpu-reflection-refreshed-turn.png",
+      "bytes": 40376,
+      "sha256": "0869d82ef5edcd456b180ab56ee886ebf6f2afb705ca091b17bdf642a3801f02"
+    },
+    {
+      "path": "environment-parity/webgpu-river-fall.png",
+      "bytes": 193445,
+      "sha256": "30ef20f65a316e145abcb3fd0ced7b70d23bb7d1dc56c80b01d7c506855e440b"
+    },
+    {
+      "path": "environment-parity/webgpu-river-foam-composite.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity/webgpu-river-foam-layers.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity/webgpu-river-high.png",
+      "bytes": 162954,
+      "sha256": "83f4dc637cbe40fe3e7bfd724697520cace41ad89fd87af173ecebe5f90f112a"
+    },
+    {
+      "path": "environment-parity/webgpu-river-medium.png",
+      "bytes": 152695,
+      "sha256": "3296410e7ed8b76d279aeebdfa4846e4eeeff4ee76aa26dcf2828cfb057babad"
+    },
+    {
+      "path": "environment-parity/webgpu-river-moving.png",
+      "bytes": 161490,
+      "sha256": "e9dde4f680aa0eff640a4b32af710f71acbb22005d988b852ab596972999f0e1"
+    },
+    {
+      "path": "environment-parity/webgpu-river-rebased.png",
+      "bytes": 162965,
+      "sha256": "6db508622040ed293fedeba5634fdc2dd00e444589f9f629b17c885c35dbd48f"
+    },
+    {
+      "path": "environment-parity/webgpu-surf-moving.png",
+      "bytes": 82357,
+      "sha256": "fdb917e01989358de862933fcb0108d243260030aa7ef9ff6c1963f681267c7f"
+    },
+    {
+      "path": "environment-parity/webgpu-surf-off.png",
+      "bytes": 80252,
+      "sha256": "3cf61d18d303116d967f1a38797f52c51aa14053c9f7b7452952ed0a237e27db"
+    },
+    {
+      "path": "environment-parity/webgpu-surf-on.png",
+      "bytes": 80357,
+      "sha256": "e3a4f3e2e76ad5b76ef71077bef0a02abbe72005f85a497878f2b65200427d6b"
+    },
+    {
+      "path": "environment-parity/webgpu-surf-rebased.png",
+      "bytes": 80373,
+      "sha256": "6869dc7ed20c0aca45732215911b13c35afbe0134b9f0a5bcd9006d506127405"
+    },
+    {
+      "path": "environment-parity/webgpu-terrain-coast.png",
+      "bytes": 126893,
+      "sha256": "92a62a86ca16c1b9ef16d8946665101a398e03148036f7932b75ab037fa42c8a"
+    },
+    {
+      "path": "environment-parity/webgpu-terrain-full-coast.png",
+      "bytes": 128520,
+      "sha256": "c5cfe997b4f78f6275d525ae0c2bb92125e1a7b5dfc517dd7a6db2af659de670"
+    },
+    {
+      "path": "environment-parity/webgpu-terrain-full-inland.png",
+      "bytes": 10424,
+      "sha256": "6c7c4f87e4c4e77c5a1f9f7f6d451fed001a8786218eced30eb09c6eb887cc05"
+    },
+    {
+      "path": "environment-parity/webgpu-terrain-inland.png",
+      "bytes": 10424,
+      "sha256": "6c7c4f87e4c4e77c5a1f9f7f6d451fed001a8786218eced30eb09c6eb887cc05"
+    },
+    {
+      "path": "environment-parity/webgpu-underwater-deep.png",
+      "bytes": 76392,
+      "sha256": "bd0f748d8df072611358ed67e64571ea10330f45e829083d96c5c4d9b6df6954"
+    },
+    {
+      "path": "environment-parity/webgpu-underwater-rebased.png",
+      "bytes": 71224,
+      "sha256": "d4705e94fa7f61a45b8a369fa1a14a264c3484090e2ac329fc7d12c18b13b335"
+    },
+    {
+      "path": "environment-parity/webgpu-underwater-shelf.png",
+      "bytes": 217128,
+      "sha256": "da75656f1736beaa35e9db7f7853cfd5a9b6c2fc731cb3264bafd0cfc07f93db"
+    },
+    {
+      "path": "environment-parity/webgpu-underwater-snell.png",
+      "bytes": 72991,
+      "sha256": "0bbed2a99cc275e9db01c2b3856716f730f511b318ecc48acd8cfec495d3fec0"
+    },
+    {
+      "path": "environment-parity-current/report.json",
+      "bytes": 38714,
+      "sha256": "d99a5667c8e4f64c7e1324bba5ebe74e5568b4dbd08afba87260a3995f33fca6"
+    },
+    {
+      "path": "environment-parity-current/source.json",
+      "bytes": 211020,
+      "sha256": "261dfef5790e78b2c0eb738a63659162638d6227692780ce32162cee8c4fc187"
+    },
+    {
+      "path": "environment-parity-current/webgl-beach-moving.png",
+      "bytes": 154070,
+      "sha256": "139613a6aae0230710d11e5e264e6e1cf9671a2bcb144afabdb1287196baefb7"
+    },
+    {
+      "path": "environment-parity-current/webgl-beach-rebased.png",
+      "bytes": 153702,
+      "sha256": "806e5027745cc6ecc5a5bdab3406fb52d5cf32aa96364c797a37e9567d02eaf3"
+    },
+    {
+      "path": "environment-parity-current/webgl-beach.png",
+      "bytes": 153566,
+      "sha256": "b1e537ffac793f8899eb75fb29d8c646fb4a7fa0fb4503645461c7bc2db2ce03"
+    },
+    {
+      "path": "environment-parity-current/webgl-deep-sea-storm.png",
+      "bytes": 122605,
+      "sha256": "e8a2d867ff8e9ad2c2c43dcd3a489726cc7e8dc82c33dd8afe9ec641f92be3ca"
+    },
+    {
+      "path": "environment-parity-current/webgl-deep-sea.png",
+      "bytes": 118271,
+      "sha256": "751cf942785d38f9ced88eb8a9c4e01ec48c6b0c5a6483c039b22dfd9734d7fd"
+    },
+    {
+      "path": "environment-parity-current/webgl-foliage-compressed-far.png",
+      "bytes": 6696,
+      "sha256": "7651b4c2dff03ec608392887807125635655e597de2b03cd3d786276e0722cb0"
+    },
+    {
+      "path": "environment-parity-current/webgl-foliage-compressed-near.png",
+      "bytes": 55011,
+      "sha256": "06d0ad500c76e8d17460bb3ce62e77936a7fb9b64bcadfdf7fbf836fbcaa7118"
+    },
+    {
+      "path": "environment-parity-current/webgl-foliage-raw-far.png",
+      "bytes": 6696,
+      "sha256": "ba3c3a4541161cfdc74a3d0edcdc78e5e496d05d0fa00457cb486cc3602454b4"
+    },
+    {
+      "path": "environment-parity-current/webgl-foliage-raw-near.png",
+      "bytes": 51429,
+      "sha256": "347c9ac2758e9317265a1d59f83641e5db99e307f874cf2aee388a8b6fc30b49"
+    },
+    {
+      "path": "environment-parity-current/webgl-frost-off.png",
+      "bytes": 1981,
+      "sha256": "dcc417cccf508d884b4d302af481cc5d21216925f8bde9695027e2b83728af48"
+    },
+    {
+      "path": "environment-parity-current/webgl-frost-on.png",
+      "bytes": 65443,
+      "sha256": "8d1bf7ee7dbd77c1ca96f9338140ceb31fb8ea68d4ddc2a4dea7eaa7379b755e"
+    },
+    {
+      "path": "environment-parity-current/webgl-lake-moving.png",
+      "bytes": 99743,
+      "sha256": "a7004345e19c6ae8d6fbe17a9911fac8739df46162cee55f1e7782a8bbd6c775"
+    },
+    {
+      "path": "environment-parity-current/webgl-lake-planar-off.png",
+      "bytes": 98653,
+      "sha256": "c79233caf6174468bfaacd764486f4402a56d69f80c00eed5dc7e0a816e98f41"
+    },
+    {
+      "path": "environment-parity-current/webgl-lake-reflections-off.png",
+      "bytes": 100233,
+      "sha256": "5a9879edced782544bcf31d98f6addd56b26bece7cb54da319160673ef737f5a"
+    },
+    {
+      "path": "environment-parity-current/webgl-lake.png",
+      "bytes": 100359,
+      "sha256": "d312302f42e9777214206358992585ef79eb8d38d88a9b5761c28b37ce079e9b"
+    },
+    {
+      "path": "environment-parity-current/webgl-reflection-cached-turn.png",
+      "bytes": 39854,
+      "sha256": "9d0fd17357080d600d4422aa00a3a104ef87cd9c6ce5325b1b85fd2cda800676"
+    },
+    {
+      "path": "environment-parity-current/webgl-reflection-orbit-off.png",
+      "bytes": 2169,
+      "sha256": "b00791f56cbd6d92b85ebb1e947e2087f575c6d894ec13d0dff3cf01382498e5"
+    },
+    {
+      "path": "environment-parity-current/webgl-reflection-orbit-on.png",
+      "bytes": 17400,
+      "sha256": "42eb49363b2f2cf89bd08d79c7f351a63e01fa598460e3431cd347a9226e0535"
+    },
+    {
+      "path": "environment-parity-current/webgl-reflection-rebased.png",
+      "bytes": 40483,
+      "sha256": "92280e23fff730dd9e299d7e7b2fcf05aa5b5c5f8f9a581044337aed56c12a1a"
+    },
+    {
+      "path": "environment-parity-current/webgl-reflection-refreshed-turn.png",
+      "bytes": 40401,
+      "sha256": "525ed2d3a5da5dffe7a7a095c574ada3764aa5daf23b3395d0f6d2ffffdd48a9"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-fall.png",
+      "bytes": 193216,
+      "sha256": "49123621ef938f09b64d4d51fb15317378f4c9a4c2798a6fd25ce4050bd4409b"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-foam-composite.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-foam-layers.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-high.png",
+      "bytes": 163100,
+      "sha256": "f01837dde45116b2e9f7482d8b93219efeb88d0c3a3ff8ee5bbb0f63e39dcc36"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-medium.png",
+      "bytes": 153108,
+      "sha256": "dafb31cb017b5c63aa092cbe39a10d39793dd98fc2b869bb6af0ddf3c1f5c6ab"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-moving.png",
+      "bytes": 161495,
+      "sha256": "c9cdfb425df4aea8db9a1c11693878e02432d2fbf85cb64eb4fe3d9932108439"
+    },
+    {
+      "path": "environment-parity-current/webgl-river-rebased.png",
+      "bytes": 163185,
+      "sha256": "b16fadde0b32dcad48a7179c7db56c36b073b1e3e78b988b67225dcce75de783"
+    },
+    {
+      "path": "environment-parity-current/webgl-surf-moving.png",
+      "bytes": 82373,
+      "sha256": "6acd81eb373ff643b73f65755e115b358328cb52009897147c16541fa9b38017"
+    },
+    {
+      "path": "environment-parity-current/webgl-surf-off.png",
+      "bytes": 80293,
+      "sha256": "5b7409f4aa1003c3d42d11cd585cc5ff12824b8f780cffabac95080f9347dd39"
+    },
+    {
+      "path": "environment-parity-current/webgl-surf-on.png",
+      "bytes": 80352,
+      "sha256": "f13361bb06fe53fce87a26498c8531f753c912335f83228b86c99ae31dd0fc31"
+    },
+    {
+      "path": "environment-parity-current/webgl-surf-rebased.png",
+      "bytes": 80332,
+      "sha256": "4edafc8e333b658326545c9dc1001e02e44a20eff52ba7de2c2e2c9dc98441a7"
+    },
+    {
+      "path": "environment-parity-current/webgl-terrain-coast.png",
+      "bytes": 127115,
+      "sha256": "ce9d154109501728b4348d95d7cffbbf4bf3be4d0ab0df8d5aa08971ae19c64e"
+    },
+    {
+      "path": "environment-parity-current/webgl-terrain-inland.png",
+      "bytes": 10437,
+      "sha256": "5725de21af014045958780a0096c13276cb79c9d823a68fd7dd2925ce1575e59"
+    },
+    {
+      "path": "environment-parity-current/webgl-underwater-deep.png",
+      "bytes": 76359,
+      "sha256": "63f836f36fa3e4b45a05b37207b27b7d38d3cbde75fa22a94eb8c7709e065fc1"
+    },
+    {
+      "path": "environment-parity-current/webgl-underwater-rebased.png",
+      "bytes": 71180,
+      "sha256": "34bd1dc5a59c71fc4839440c82afa1a19dc55f3f0cbef615804f0144a4950c1d"
+    },
+    {
+      "path": "environment-parity-current/webgl-underwater-shelf.png",
+      "bytes": 217156,
+      "sha256": "653058177968b4319e281b86c94d145a93befc6cff74e8a682908e5010343e75"
+    },
+    {
+      "path": "environment-parity-current/webgl-underwater-snell.png",
+      "bytes": 73044,
+      "sha256": "433b568c0179bf923cd5a3fe7bc8ff82b0c66e3f9a6a2ab546d5c36485485f5d"
+    },
+    {
+      "path": "environment-parity-current/webgpu-beach-moving.png",
+      "bytes": 153955,
+      "sha256": "18065b3d270da4739f1ba3d93698fd90332e96d08b1d37d0f92d8db6602ca773"
+    },
+    {
+      "path": "environment-parity-current/webgpu-beach-rebased.png",
+      "bytes": 153462,
+      "sha256": "057dc1ec91dea049b930eade70241f5f3a34bfe0d36c3b2f348f45510d44ecaa"
+    },
+    {
+      "path": "environment-parity-current/webgpu-beach.png",
+      "bytes": 153493,
+      "sha256": "90537375d75f19f0d5a8ddd82b40e9d1c0d5672d9d85b802f9f0e5bd6653a322"
+    },
+    {
+      "path": "environment-parity-current/webgpu-deep-sea-storm.png",
+      "bytes": 122595,
+      "sha256": "e705f4a537ef03db256eb253974e8fcc59102843d43575d7db220fd04fd864c4"
+    },
+    {
+      "path": "environment-parity-current/webgpu-deep-sea.png",
+      "bytes": 118457,
+      "sha256": "d816287534e814f3eda3d1624b20a82fdee5ee063b8a25f582799fff3d755b5b"
+    },
+    {
+      "path": "environment-parity-current/webgpu-foliage-compressed-far.png",
+      "bytes": 6696,
+      "sha256": "7651b4c2dff03ec608392887807125635655e597de2b03cd3d786276e0722cb0"
+    },
+    {
+      "path": "environment-parity-current/webgpu-foliage-compressed-near.png",
+      "bytes": 55011,
+      "sha256": "06d0ad500c76e8d17460bb3ce62e77936a7fb9b64bcadfdf7fbf836fbcaa7118"
+    },
+    {
+      "path": "environment-parity-current/webgpu-foliage-raw-far.png",
+      "bytes": 6696,
+      "sha256": "ba3c3a4541161cfdc74a3d0edcdc78e5e496d05d0fa00457cb486cc3602454b4"
+    },
+    {
+      "path": "environment-parity-current/webgpu-foliage-raw-near.png",
+      "bytes": 51429,
+      "sha256": "347c9ac2758e9317265a1d59f83641e5db99e307f874cf2aee388a8b6fc30b49"
+    },
+    {
+      "path": "environment-parity-current/webgpu-frost-off.png",
+      "bytes": 1981,
+      "sha256": "dcc417cccf508d884b4d302af481cc5d21216925f8bde9695027e2b83728af48"
+    },
+    {
+      "path": "environment-parity-current/webgpu-frost-on.png",
+      "bytes": 65451,
+      "sha256": "83a453b32d96d04f8ec21aa30091c653a6552424277c7547c1a0c0dd79037b27"
+    },
+    {
+      "path": "environment-parity-current/webgpu-lake-moving.png",
+      "bytes": 99774,
+      "sha256": "bf4173a44c22c709cac1d35a9dd9d9c687369434e028eab9be133fcc2dfc36b0"
+    },
+    {
+      "path": "environment-parity-current/webgpu-lake-planar-off.png",
+      "bytes": 98567,
+      "sha256": "52b6e819719bd899fedc4ca9821577b550ed39e6788061215dc779c883e137ad"
+    },
+    {
+      "path": "environment-parity-current/webgpu-lake-reflections-off.png",
+      "bytes": 100276,
+      "sha256": "67426bd57a2155a7e58e697d56b3d0d29c7ed61ef59db39f1f446fe7677d469f"
+    },
+    {
+      "path": "environment-parity-current/webgpu-lake.png",
+      "bytes": 100359,
+      "sha256": "a42f35199582c5677d0cf442cd49698cc241304645bf846c70e90676c372a0b9"
+    },
+    {
+      "path": "environment-parity-current/webgpu-reflection-cached-turn.png",
+      "bytes": 39864,
+      "sha256": "6a4b929ca3a3fd035853ddba10e02ec0e26cacc61d51616e1e2914002c99d616"
+    },
+    {
+      "path": "environment-parity-current/webgpu-reflection-orbit-off.png",
+      "bytes": 2169,
+      "sha256": "b00791f56cbd6d92b85ebb1e947e2087f575c6d894ec13d0dff3cf01382498e5"
+    },
+    {
+      "path": "environment-parity-current/webgpu-reflection-orbit-on.png",
+      "bytes": 17315,
+      "sha256": "509ab80e0b726384028019c67f9467bae1c103960ade78bdb2dfcc915f9f7014"
+    },
+    {
+      "path": "environment-parity-current/webgpu-reflection-rebased.png",
+      "bytes": 40421,
+      "sha256": "084e9b37d03c65cdadfc13a65cebc94d9ea91924869cff935450ec2b1b56692f"
+    },
+    {
+      "path": "environment-parity-current/webgpu-reflection-refreshed-turn.png",
+      "bytes": 40376,
+      "sha256": "0869d82ef5edcd456b180ab56ee886ebf6f2afb705ca091b17bdf642a3801f02"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-fall.png",
+      "bytes": 193445,
+      "sha256": "30ef20f65a316e145abcb3fd0ced7b70d23bb7d1dc56c80b01d7c506855e440b"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-foam-composite.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-foam-layers.png",
+      "bytes": 2087,
+      "sha256": "f8899c065b9f0655bb01205327596810165179575de741b8fe43853d9bb1b2eb"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-high.png",
+      "bytes": 162954,
+      "sha256": "83f4dc637cbe40fe3e7bfd724697520cace41ad89fd87af173ecebe5f90f112a"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-medium.png",
+      "bytes": 152695,
+      "sha256": "3296410e7ed8b76d279aeebdfa4846e4eeeff4ee76aa26dcf2828cfb057babad"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-moving.png",
+      "bytes": 161490,
+      "sha256": "e9dde4f680aa0eff640a4b32af710f71acbb22005d988b852ab596972999f0e1"
+    },
+    {
+      "path": "environment-parity-current/webgpu-river-rebased.png",
+      "bytes": 162965,
+      "sha256": "6db508622040ed293fedeba5634fdc2dd00e444589f9f629b17c885c35dbd48f"
+    },
+    {
+      "path": "environment-parity-current/webgpu-surf-moving.png",
+      "bytes": 82357,
+      "sha256": "fdb917e01989358de862933fcb0108d243260030aa7ef9ff6c1963f681267c7f"
+    },
+    {
+      "path": "environment-parity-current/webgpu-surf-off.png",
+      "bytes": 80252,
+      "sha256": "3cf61d18d303116d967f1a38797f52c51aa14053c9f7b7452952ed0a237e27db"
+    },
+    {
+      "path": "environment-parity-current/webgpu-surf-on.png",
+      "bytes": 80357,
+      "sha256": "e3a4f3e2e76ad5b76ef71077bef0a02abbe72005f85a497878f2b65200427d6b"
+    },
+    {
+      "path": "environment-parity-current/webgpu-surf-rebased.png",
+      "bytes": 80373,
+      "sha256": "6869dc7ed20c0aca45732215911b13c35afbe0134b9f0a5bcd9006d506127405"
+    },
+    {
+      "path": "environment-parity-current/webgpu-terrain-coast.png",
+      "bytes": 130706,
+      "sha256": "a0ccce6010793aac91a47fba85e6d4fb8fb049c6b741efd8fd2e7470e946472f"
+    },
+    {
+      "path": "environment-parity-current/webgpu-terrain-full-coast.png",
+      "bytes": 127136,
+      "sha256": "d9fe620321579f5d376c93f57b76031f8d54c82ac87bac4fe618e1d181af9c65"
+    },
+    {
+      "path": "environment-parity-current/webgpu-terrain-full-inland.png",
+      "bytes": 10424,
+      "sha256": "6c7c4f87e4c4e77c5a1f9f7f6d451fed001a8786218eced30eb09c6eb887cc05"
+    },
+    {
+      "path": "environment-parity-current/webgpu-terrain-inland.png",
+      "bytes": 10424,
+      "sha256": "6c7c4f87e4c4e77c5a1f9f7f6d451fed001a8786218eced30eb09c6eb887cc05"
+    },
+    {
+      "path": "environment-parity-current/webgpu-underwater-deep.png",
+      "bytes": 76392,
+      "sha256": "bd0f748d8df072611358ed67e64571ea10330f45e829083d96c5c4d9b6df6954"
+    },
+    {
+      "path": "environment-parity-current/webgpu-underwater-rebased.png",
+      "bytes": 71224,
+      "sha256": "d4705e94fa7f61a45b8a369fa1a14a264c3484090e2ac329fc7d12c18b13b335"
+    },
+    {
+      "path": "environment-parity-current/webgpu-underwater-shelf.png",
+      "bytes": 217128,
+      "sha256": "da75656f1736beaa35e9db7f7853cfd5a9b6c2fc731cb3264bafd0cfc07f93db"
+    },
+    {
+      "path": "environment-parity-current/webgpu-underwater-snell.png",
+      "bytes": 72991,
+      "sha256": "0bbed2a99cc275e9db01c2b3856716f730f511b318ecc48acd8cfec495d3fec0"
+    },
+    {
+      "path": "final/marine-coast-default.png",
+      "bytes": 1255987,
+      "sha256": "fe44bee62cae065aefda243920afeb201990b29e7321ea662c0c7e31f8de4ff9"
+    },
+    {
+      "path": "final/marine-coast-foam-off.png",
+      "bytes": 1273590,
+      "sha256": "dd0fe2d10abd8de479892495da8f4f172085f25c95aa5a67494cd0f68dce0296"
+    },
+    {
+      "path": "final/marine-coast-overview-default.png",
+      "bytes": 1304351,
+      "sha256": "097d9b24eb943f47fe7166aef0e87c3f332b2bda4a7b7a82f9ddbcb938f0c848"
+    },
+    {
+      "path": "final/marine-coast-overview-foam-off.png",
+      "bytes": 1296179,
+      "sha256": "7e0c547f12b01d4ee7ee2aa399c4289c3dee15eedb0efcb65caf68e5aad9f4b1"
+    },
+    {
+      "path": "final/report.json",
+      "bytes": 235652,
+      "sha256": "66a3ce02de9d35eb8cf6bf4120d66ef2a55ccb96eead79933baece2a122e2e22"
+    },
+    {
+      "path": "foam-fixture-invalid/report.json",
+      "bytes": 242512,
+      "sha256": "d164460fe2cb26f59215fea2bdd066c2a6af53bf2bf3ae2ac309194e3112395f"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl--4226432_278528-base.png",
+      "bytes": 197195,
+      "sha256": "06730a6f4f173521cf10d601db354c97c861bb376a743fbb41eae331d10db584"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl--9000000_6000000-base.png",
+      "bytes": 196540,
+      "sha256": "11f4adff85222b7900007794b4fa609175ba767aa13ba2cd05c790d4fd41b535"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl-0_0-base.png",
+      "bytes": 194527,
+      "sha256": "d0dfc444bc2e52ba0cfc783952f79f6ce13ba45cb7413fbd3feae486ba91341a"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "d2335979bebcbcb520d281540a8d4e2a3bfb471f811583a2374a33c7463132ae"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "86f9fc9e4bdebf7b59c0af591732a729c17461ba82c9d6e7b6c5df57776cc39f"
+    },
+    {
+      "path": "foam-fixture-invalid/webgl-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu--4226432_278528-base.png",
+      "bytes": 197184,
+      "sha256": "ba58539df26eac951a245a8d55c1ddd982f2b4fc176433d619ce5d0d46a47e41"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu--9000000_6000000-base.png",
+      "bytes": 196536,
+      "sha256": "b43961092e809241ea50e0bab219087c71d2e55f2fc973c59d53d0b688d560d8"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu-0_0-base.png",
+      "bytes": 194534,
+      "sha256": "86dc3165d0a8c90eb58b5fc4fe5b1a9bc3d3b85372dad6224c36437d66e70d13"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "d2335979bebcbcb520d281540a8d4e2a3bfb471f811583a2374a33c7463132ae"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "86f9fc9e4bdebf7b59c0af591732a729c17461ba82c9d6e7b6c5df57776cc39f"
+    },
+    {
+      "path": "foam-fixture-invalid/webgpu-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "foam-shader/report.json",
+      "bytes": 242507,
+      "sha256": "2060c71bd0757cf8ab2a3b706c8d268df0d42cfacefadc548b295ca7e50732b2"
+    },
+    {
+      "path": "foam-shader/webgl--4226432_278528-base.png",
+      "bytes": 197195,
+      "sha256": "06730a6f4f173521cf10d601db354c97c861bb376a743fbb41eae331d10db584"
+    },
+    {
+      "path": "foam-shader/webgl--9000000_6000000-base.png",
+      "bytes": 196540,
+      "sha256": "11f4adff85222b7900007794b4fa609175ba767aa13ba2cd05c790d4fd41b535"
+    },
+    {
+      "path": "foam-shader/webgl-0_0-base.png",
+      "bytes": 194527,
+      "sha256": "d0dfc444bc2e52ba0cfc783952f79f6ce13ba45cb7413fbd3feae486ba91341a"
+    },
+    {
+      "path": "foam-shader/webgl-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "1722bc537557fc58f9dcc78106653b171f1cbe9579768194a080f4d7f6a4d7c3"
+    },
+    {
+      "path": "foam-shader/webgl-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "e866fda021153d52e6a2c0c677fe7bfeb680c3b58bdefa54ded55437a13a7955"
+    },
+    {
+      "path": "foam-shader/webgl-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "foam-shader/webgpu--4226432_278528-base.png",
+      "bytes": 197184,
+      "sha256": "ba58539df26eac951a245a8d55c1ddd982f2b4fc176433d619ce5d0d46a47e41"
+    },
+    {
+      "path": "foam-shader/webgpu--9000000_6000000-base.png",
+      "bytes": 196536,
+      "sha256": "b43961092e809241ea50e0bab219087c71d2e55f2fc973c59d53d0b688d560d8"
+    },
+    {
+      "path": "foam-shader/webgpu-0_0-base.png",
+      "bytes": 194534,
+      "sha256": "86dc3165d0a8c90eb58b5fc4fe5b1a9bc3d3b85372dad6224c36437d66e70d13"
+    },
+    {
+      "path": "foam-shader/webgpu-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "1722bc537557fc58f9dcc78106653b171f1cbe9579768194a080f4d7f6a4d7c3"
+    },
+    {
+      "path": "foam-shader/webgpu-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "e866fda021153d52e6a2c0c677fe7bfeb680c3b58bdefa54ded55437a13a7955"
+    },
+    {
+      "path": "foam-shader/webgpu-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "foam-shader-current/report.json",
+      "bytes": 242626,
+      "sha256": "162f6b76eb1b9c74ac246464d8f6acae97d5c7e7fd5f029f07fb8645a79e9b25"
+    },
+    {
+      "path": "foam-shader-current/webgl--4226432_278528-base.png",
+      "bytes": 197195,
+      "sha256": "06730a6f4f173521cf10d601db354c97c861bb376a743fbb41eae331d10db584"
+    },
+    {
+      "path": "foam-shader-current/webgl--9000000_6000000-base.png",
+      "bytes": 196540,
+      "sha256": "11f4adff85222b7900007794b4fa609175ba767aa13ba2cd05c790d4fd41b535"
+    },
+    {
+      "path": "foam-shader-current/webgl-0_0-base.png",
+      "bytes": 194527,
+      "sha256": "d0dfc444bc2e52ba0cfc783952f79f6ce13ba45cb7413fbd3feae486ba91341a"
+    },
+    {
+      "path": "foam-shader-current/webgl-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "1722bc537557fc58f9dcc78106653b171f1cbe9579768194a080f4d7f6a4d7c3"
+    },
+    {
+      "path": "foam-shader-current/webgl-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "e866fda021153d52e6a2c0c677fe7bfeb680c3b58bdefa54ded55437a13a7955"
+    },
+    {
+      "path": "foam-shader-current/webgl-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "foam-shader-current/webgpu--4226432_278528-base.png",
+      "bytes": 197184,
+      "sha256": "ba58539df26eac951a245a8d55c1ddd982f2b4fc176433d619ce5d0d46a47e41"
+    },
+    {
+      "path": "foam-shader-current/webgpu--9000000_6000000-base.png",
+      "bytes": 196536,
+      "sha256": "b43961092e809241ea50e0bab219087c71d2e55f2fc973c59d53d0b688d560d8"
+    },
+    {
+      "path": "foam-shader-current/webgpu-0_0-base.png",
+      "bytes": 194534,
+      "sha256": "86dc3165d0a8c90eb58b5fc4fe5b1a9bc3d3b85372dad6224c36437d66e70d13"
+    },
+    {
+      "path": "foam-shader-current/webgpu-crest-chroma-0.02_0.08_0.12.png",
+      "bytes": 2731,
+      "sha256": "1722bc537557fc58f9dcc78106653b171f1cbe9579768194a080f4d7f6a4d7c3"
+    },
+    {
+      "path": "foam-shader-current/webgpu-crest-chroma-0.08_0.3_0.28.png",
+      "bytes": 2730,
+      "sha256": "e866fda021153d52e6a2c0c677fe7bfeb680c3b58bdefa54ded55437a13a7955"
+    },
+    {
+      "path": "foam-shader-current/webgpu-crest-chroma-0_0_0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "layer-isolation/caustics-off.png",
+      "bytes": 1342940,
+      "sha256": "a47bc18342494bb40e82cc031f52247db3cf25e9cb657623f71d5570772ee3da"
+    },
+    {
+      "path": "layer-isolation/default.png",
+      "bytes": 1340991,
+      "sha256": "324c4e46aa0ded70afc48afa877724fc898bb091baf9279e7a70d92a8355f294"
+    },
+    {
+      "path": "layer-isolation/reflections-off.png",
+      "bytes": 1376545,
+      "sha256": "123676b1e2a498f0aa6fc7e75bf2277589eed3874eb26a93055093ed72466d21"
+    },
+    {
+      "path": "layer-isolation/refraction-off.png",
+      "bytes": 1376357,
+      "sha256": "a401012f54aa87e5e983a8c94e6a190230206868d8b1e98294704eb6dc47d230"
+    },
+    {
+      "path": "layer-isolation/report.json",
+      "bytes": 233876,
+      "sha256": "f9f19af4c3ca25ec0efcee08e8e50cbe27aa42b672fd9fa57a51aae352eb223c"
+    },
+    {
+      "path": "layer-isolation/sea-off.png",
+      "bytes": 1205626,
+      "sha256": "fffab90d8f60c8e9935749a05c1139b6e1dd95d5e6770720c81dae452d8632ca"
+    },
+    {
+      "path": "layer-isolation/sun-highlights-off.png",
+      "bytes": 1311081,
+      "sha256": "86146c0a741c7db7c3810d012083c7af3b249d1d6535d7837017a02fb655d9cf"
+    },
+    {
+      "path": "layer-isolation/water-off.png",
+      "bytes": 998140,
+      "sha256": "21ed0eadf5c6cf45cf780b99ae3a270898c53c3bd192d98ba01eb60c6295e56c"
+    },
+    {
+      "path": "spray-depth-candidate/crest-light-off.png",
+      "bytes": 1255477,
+      "sha256": "f4c8b884975b6205b1b0494a583889ae102a6a04a3796215f4a46efea1b6fdb6"
+    },
+    {
+      "path": "spray-depth-candidate/crest-transmission-off.png",
+      "bytes": 1322856,
+      "sha256": "e35bde2b10595c8d2b695f989efdb8b8c2464993fda1e635f1078070d7de2cd3"
+    },
+    {
+      "path": "spray-depth-candidate/default.png",
+      "bytes": 1297673,
+      "sha256": "65a15596e1b046bc63c0e34280e0c3b62f7285f81d0f4f94b3935bf201c68b28"
+    },
+    {
+      "path": "spray-depth-candidate/foam-off.png",
+      "bytes": 1295148,
+      "sha256": "0f0abed584db2b910920e4242d17d9fdd5b9db15736926da7d9d5d4ccac8f6d6"
+    },
+    {
+      "path": "spray-depth-candidate/reflections-and-glint-off.png",
+      "bytes": 1261525,
+      "sha256": "448df01db4fb8725676998b1a5fc6fea5d5953675dbc182343de7c36d2ea7706"
+    },
+    {
+      "path": "spray-depth-candidate/report.json",
+      "bytes": 240064,
+      "sha256": "1722057c42d0dbbda2f21599383e6bd8a338cd3649fee8c4c9c69e6c331c2065"
+    },
+    {
+      "path": "spray-depth-candidate/slope-shading-off.png",
+      "bytes": 1326340,
+      "sha256": "92721003e3185d845bc1645bb1d609acf6fc0e1feb559450ba4350b43e8a8142"
+    },
+    {
+      "path": "spray-depth-candidate/sun-highlights-off.png",
+      "bytes": 1284837,
+      "sha256": "771c70dda54356f6f88a888443ce62a7d2b44eea4dc4a97a8af436a631e11740"
+    },
+    {
+      "path": "spray-depth-candidate/surf-spray-off.png",
+      "bytes": 1324533,
+      "sha256": "a570162363013fca1ed69ef70ae69c32acce8eb212e075fec91c0e4f21b7c112"
+    },
+    {
+      "path": "spray-isolation/default.png",
+      "bytes": 1349469,
+      "sha256": "6ceb347bd22a81f54c293cdeff926db735b5a919e2c850c41464b2e012859438"
+    },
+    {
+      "path": "spray-isolation/report.json",
+      "bytes": 217987,
+      "sha256": "083bde5ab867d2bd91898b3d819de7c406b75e620019db70a67a2a5fffc79d76"
+    },
+    {
+      "path": "spray-isolation/surf-spray-off.png",
+      "bytes": 1313900,
+      "sha256": "31e4c9b2defe3a85a87d7a0a105babdaaa7ac9bd588baf11b4df05f0044de134"
+    },
+    {
+      "path": "spray-small/report.json",
+      "bytes": 219255,
+      "sha256": "649a52aa4a7d1b6d0b7929acb1424b4f3a540e35bd6a2a13af82f3dc61653814"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth--1.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-0.25.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-1.png",
+      "bytes": 39189,
+      "sha256": "7bab259f9d03649f9482df6ab5da0698584d8196bfd0a90e5125e9e7566f44dc"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-20.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-3.png",
+      "bytes": 39116,
+      "sha256": "394d092858f810f3ffbf837859a7ef653aca79cfcac565d7c9e76ea45c802cca"
+    },
+    {
+      "path": "spray-small/webgl-spray-depth-4.5.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth--1.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-0.25.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-0.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-1.png",
+      "bytes": 39691,
+      "sha256": "7a1102b3c47f7c7f3e392f7f1d6f8253898d669e316b379017c9e6880fc73409"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-20.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-3.png",
+      "bytes": 39107,
+      "sha256": "2355082d1de5b38284aa7ccba5fe8e878e9bfd128649ce4aa28713885d12d7e9"
+    },
+    {
+      "path": "spray-small/webgpu-spray-depth-4.5.png",
+      "bytes": 2724,
+      "sha256": "f5b4333bc4b8545d4a762dec53c3208755bafee48c703f7e8ed1e989138715ec"
+    },
+    {
+      "path": "verify.json",
+      "bytes": 646,
+      "sha256": "33da288b1423a522b19eaa4be59c88fd8d2ff89e31ba66fce952aaf4ee53f763"
+    },
+    {
+      "path": "verify.log.gz",
+      "bytes": 267706,
+      "sha256": "54f7431997d4910d22ec6d7cc1a4f163463fb053d00142b60c8bb7e4f101f3ff"
+    }
+  ]
+}
