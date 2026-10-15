@@ -27,7 +27,7 @@ try {
  await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
  if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
  const variants=option('--variants','default,foam-off,reflections-off,surf-off,detail-off').split(',');
- if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off','surf-spray-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
+ if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off','surf-spray-off','reflections-and-glint-off','crest-light-off','crest-transmission-off','slope-shading-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
  for(const variant of variants) {
   console.log(`Water pattern review: ${variant}`);
   const controls=await page.evaluate(async variant=>{
@@ -43,6 +43,10 @@ try {
    if(variant==='sea-off')config.water.sea.enabled=false;
    if(variant==='refraction-off')config.water.refraction.enabled=false;
    if(variant==='caustics-off')config.water.caustics.intensity=0;
+   if(variant==='reflections-and-glint-off')config.water.fadeDistance=.1;
+   if(variant==='crest-light-off')config.water.sea.crestLift=0;
+   if(variant==='crest-transmission-off')config.water.sea.crestTransmission=0;
+   if(variant==='slope-shading-off')config.water.sea.slopeShading=0;
    // Preserve the water reflection classification when replacing its capture.
    const pool=new SharedWaterMaterials(variant==='reflections-off'?{sample:(_direction,fallback)=>fallback}:surface.reflections),previous=surface.sharedWaterMaterials;
    surface.sharedWaterMaterials=pool;
@@ -57,6 +61,13 @@ try {
    return {variant,clock:123.4,foam:config.water.foam.enabled,surf:config.water.sea.surf.enabled,detail:config.water.sea.detail.enabled,reflections:variant!=='reflections-off',water:variant!=='water-off',sea:config.water.sea.enabled,refraction:config.water.refraction.enabled,caustics:config.water.caustics.intensity,sunHighlights:variant!=='sun-highlights-off'};
   },variant);
   const readiness=await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
+  controls.actual=await page.evaluate(async()=>{
+   const {skyLightUniforms}=await import('/src/editor/stylized/sky/skyLight.js');
+   const s=window.__editor.stylizedSurface;
+   return {sunHighlightColor:skyLightUniforms.sunColor.value.toArray(),materialVariants:s.sharedWaterMaterials.materials.size,
+    waterSlots:s.waterSlots.length,visibleSlots:s.waterSlots.filter(slot=>slot.mesh.visible&&slot.mesh.parent).length,
+    foam:s.sharedWaterMaterials.bindings.config.water.foam.enabled,clock:s.sharedWaterMaterials.bindings.time.value};
+  });
   const file=`${variant}.png`;await captureWorldCanvas(page,path.join(out,file));
   report.cases.push({...controls,readiness});report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
  }
