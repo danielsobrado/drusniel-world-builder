@@ -4,6 +4,10 @@ import { buildShapeRoofTiles } from './ShapeRoofTiles.js';
 import { buildShapeRoofCraft } from './ShapeRoofCraft.js';
 import { buildShapeRoofJunctions } from './ShapeRoofJunctionBuilder.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
+import { shapeWallCoreMesh, SHAPE_COARSE_MASONRY_TONE } from './ShapeMasonryCourses.js';
+
+// Overhangs show boarded sarking from below; bare slate there reads as a hole in the roof.
+const SOFFIT_TONE = Object.freeze([0.78, 0.74, 0.7]);
 
 export function buildShapeRoof(plan, sourceMeshes, recipe) {
   if (plan.roofReplaced) return;
@@ -25,8 +29,8 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
     meshes.roof.quad(...top, color, top.map((v) => surface.uvAt(v[0], v[2])), top.map((v) => surface.normalAt(v[0], v[2])));
     if (solid) {
       const underside = quad.map(([x, y, z]) => [x, y - 0.06, z]);
-      if (surface.wall.clockwise) meshes.roof.quad(...underside.toReversed(), [0.65, 0.65, 0.65]);
-      else meshes.roof.quad(...underside, [0.65, 0.65, 0.65]);
+      if (surface.wall.clockwise) meshes.inserts.quad(...underside.toReversed(), SOFFIT_TONE);
+      else meshes.inserts.quad(...underside, SOFFIT_TONE);
     }
     return true;
   };
@@ -46,6 +50,8 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
     }
   }
   // Close the wall up to the roof surface; especially visible on rounded gable ends.
+  const core = shapeWallCoreMesh(plan, meshes, recipe);
+  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_COARSE_MASONRY_TONE;
   for (let i = 0; i < samples; i++) {
     const u0 = plan.curve.samples[i].distance,
       u1 = i + 1 < samples ? plan.curve.samples[i + 1].distance : length;
@@ -54,8 +60,8 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
     const c = [b[0], Math.max(b[1], surface.heightAt(b[0], b[2])), b[2]];
     const d = [a[0], Math.max(a[1], surface.heightAt(a[0], a[2])), a[2]];
     if (c[1] > b[1] + tolerance.length || d[1] > a[1] + tolerance.length) {
-      if (surface.wall.clockwise) meshes.walls.quad(a, b, c, d, [1, 1, 1]);
-      else meshes.walls.quad(d, c, b, a, [1, 1, 1]);
+      if (surface.wall.clockwise) core.quad(a, b, c, d, coreTone);
+      else core.quad(d, c, b, a, coreTone);
     }
     const edgeA = surface.point(u0, 1),
       edgeB = surface.point(u1, 1);

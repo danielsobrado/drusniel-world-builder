@@ -61,6 +61,7 @@ export function shapeProductKey(recipe, plan, domain) {
             thickness: p.thickness,
             taper: p.taper,
             footprint: p.footprint,
+            surface: p.surface,
             roof: p.roof,
             replaced: plan.roofReplaced,
             decorations: plan.decorations?.filter((d) => d.role === 'chimney'),
@@ -83,10 +84,12 @@ export function shapeProductKey(recipe, plan, domain) {
                 openings: plan.openings.map(openingCut),
                 neighbors,
                 flatCoping: p.roof?.family === 'flat',
+                // Masonry courses follow the roof underside, so they rebuild with the roof.
+                roof: p.surface === 'masonry' ? [p.roof, Boolean(plan.roofReplaced)] : null,
               };
   const regions = {
     walls: ['walls', 'trim', 'deck', 'inserts', 'glazing', 'metal'],
-    roof: ['roof', 'walls', 'trim', 'metal', 'flashing'],
+    roof: ['roof', 'walls', 'trim', 'inserts', 'metal', 'flashing'],
     supports: ['supports'],
     ivy: ['foliage'],
     traversal: ['deck', 'trim', 'supports', 'rails'],

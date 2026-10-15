@@ -1,13 +1,7 @@
 import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
-import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
-import { buildShapeWeathering, shapeAgingSurface, shapeCellWear } from './ShapeWeathering.js';
-
-function shade(recipe, plan, domain, key) {
-  const v = 0.8 + shapeRandom(recipe.seed, plan.id, domain, key) * 0.2;
-  const warm = shapeRandom(recipe.seed, plan.id, `${domain}-warmth`, key) - 0.5;
-  return [v + warm * 0.04, v, v - warm * 0.04];
-}
+import { buildShapeWeathering, shapeAgingSurface } from './ShapeWeathering.js';
+import { buildShapeMasonryCourses, shapeWallCoreMesh, SHAPE_COARSE_MASONRY_TONE } from './ShapeMasonryCourses.js';
 
 export function buildShapeWalls(plan, meshes, recipe) {
   const surface = shapeAgingSurface(createShapeWallSurface(plan), plan, recipe.seed, plan.primitive.surface === 'planks'),
@@ -26,12 +20,14 @@ export function buildShapeWalls(plan, meshes, recipe) {
     }
   }
   const distances = [...new Set(boundaries)].sort((a, b) => a - b);
+  const core = shapeWallCoreMesh(plan, meshes, recipe);
+  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_COARSE_MASONRY_TONE;
   for (let i = 0; i < distances.length - 1; i++) {
     const u0 = distances[i],
       u1 = distances[i + 1];
     for (const band of wallSolidBands(surface, u0, u1, 0, p.height, false)) {
       addWallPatch(
-        meshes.walls,
+        core,
         surface,
         u0,
         u1,
@@ -39,7 +35,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
         band.top,
         p.thickness / 2,
         p.thickness,
-        [1, 1, 1],
+        coreTone,
         {
           start: openingEdges.has(u0) || (!plan.curve.closed && i === 0),
           end: openingEdges.has(u1) || (!plan.curve.closed && i === distances.length - 2),
@@ -47,52 +43,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
       );
     }
   }
-  const course = p.surface === 'planks' ? p.height : 0.34;
-  const cellWidth = p.surface === 'planks' ? 0.24 : 0.62;
-  const courseCount = Math.ceil(p.height / course);
-  const detail = recipe.detail >= 2;
-  for (let row = 0; row < courseCount; row++) {
-    if (!detail && row > 0) continue;
-    if (p.surface === 'plaster' && row > 1) continue;
-    const y0 = row * course + 0.012,
-      y1 = Math.min(p.height - 0.012, (row + 1) * course - 0.012);
-    const shift = p.surface === 'planks' ? 0 : ((row % 2) * cellWidth) / 2;
-    for (let cell = -1; cell < Math.ceil(surface.length / cellWidth); cell++) {
-      const u0 = Math.max(0, cell * cellWidth + shift + 0.012),
-        u1 = Math.min(surface.length, (cell + 1) * cellWidth + shift - 0.012);
-      if (u1 - u0 < 0.08) continue;
-      const mesh = p.surface === 'planks' ? meshes.inserts : meshes.trim;
-      const count = Math.max(1, Math.ceil((u1 - u0) / 0.18));
-      const color = shade(recipe, plan, p.surface, `${row}:${cell}`);
-      const cuts = [u0, ...distances.filter((d) => d > u0 && d < u1), u1];
-      for (let k = 1; k < count; k++) cuts.push(u0 + ((u1 - u0) * k) / count);
-      cuts.sort((a, b) => a - b);
-      for (let k = 0; k < cuts.length - 1; k++) {
-        for (const band of wallSolidBands(surface, cuts[k], cuts[k + 1], y0, y1, false)) {
-          for (const side of p.kind === 'curved-wall' ? [-1, 1] : [1]) {
-            addWallPatch(
-              mesh,
-              surface,
-              cuts[k],
-              cuts[k + 1],
-              band.bottom,
-              band.top,
-              side * (p.thickness / 2 + 0.045),
-              side * 0.055,
-              color,
-              {
-                back: false,
-                bevel: detail,
-                wear: shapeCellWear(plan, recipe.seed, `${row}:${cell}`),
-                start: k === 0 || openingEdges.has(cuts[k]),
-                end: k === cuts.length - 2 || openingEdges.has(cuts[k + 1]),
-              },
-            );
-          }
-        }
-      }
-    }
-  }
+  buildShapeMasonryCourses(plan, meshes, recipe, surface, distances, openingEdges);
   // Continuous coping/eave band follows the same surface as the wall.
   for (
     let i = 0;

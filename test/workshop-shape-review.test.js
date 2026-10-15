@@ -143,7 +143,7 @@ test('opening at the top of a gable wall does not remove the wall above it', () 
   p.footprint.cornerRadius = 0;
   p.openings = [];
   const build = (primitive) => {
-    const meshes = { roof: new ShapeMesh(), walls: new ShapeMesh(), trim: new ShapeMesh() };
+    const meshes = { roof: new ShapeMesh(), walls: new ShapeMesh(), trim: new ShapeMesh(), inserts: new ShapeMesh() };
     buildShapeRoof(plan(primitive), meshes, { seed: 1848, detail: 1 });
     return meshes.walls.positions;
   };

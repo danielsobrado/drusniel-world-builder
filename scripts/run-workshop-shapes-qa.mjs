@@ -446,7 +446,7 @@ try {
   const cards = report.presets
     .map(
       (p) =>
-        `<figure class="${previousIds.has(p.id) ? 'with-before' : 'new-design'}">${previousIds.has(p.id) ? `<img class="before" src="../workshop-next-before/${p.id}.png" loading="lazy">` : ''}<img class="after" src="${p.id}.png" loading="lazy"><figcaption>${p.label} · ${p.stats.drawParts} batches${previousIds.has(p.id) ? '' : ' · New design'}</figcaption></figure>`,
+        `<figure class="${previousIds.has(p.id) ? 'with-before' : 'new-design'}">${previousIds.has(p.id) ? `<img class="before" src="../workshop-next-before/${p.id}.png" alt="${p.label}, previous version" loading="lazy">` : ''}<img class="after" src="${p.id}.png" alt="${p.label}" loading="lazy"><figcaption>${p.label} · ${p.stats.drawParts} ${p.stats.drawParts === 1 ? 'batch' : 'batches'}${previousIds.has(p.id) ? '' : ' · New design'}</figcaption></figure>`,
     )
     .join('');
   const details = report.details.map((p) => `<figure><img src="${p.id}.png" alt="${p.label}" loading="lazy"><figcaption>${p.label}</figcaption></figure>`).join('');

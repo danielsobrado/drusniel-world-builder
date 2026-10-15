@@ -135,7 +135,8 @@ export const SHAPE_PRESETS = Object.freeze(
         traversal('bridge', 'Garden bridge', {
           length: 8,
           width: 2,
-          elevation: 1.1,
+          // Both ends land on the garden; the arch alone carries the span.
+          elevation: 0.12,
           rise: 0,
           mode: 'bridge',
           support: 'arch',
