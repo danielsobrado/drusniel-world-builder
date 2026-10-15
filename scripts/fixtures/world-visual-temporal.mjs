@@ -50,7 +50,9 @@ try {
  const finalYaw=camera.rotation.y;owner=createOwner();
  if(owner.technique!=='cinematic')throw new Error('Fixture must exercise the production cinematic owner.');
  await renderer.compileAsync(scene,camera);for(let i=0;i<5;i++){owner.render(camera);await new Promise(requestAnimationFrame);}
- const frames=[],start=performance.now();let stoppedAt;
+ camera.rotation.y=finalYaw+Math.PI;camera.updateMatrixWorld();
+ for(let i=0;i<5;i++){owner.render(camera);await new Promise(requestAnimationFrame);}
+ const start=performance.now(),frames=[{elapsed:0,yaw:camera.rotation.y,timestamp:start}];let stoppedAt;
  while(true) {
   const now=await new Promise(requestAnimationFrame),elapsed=Math.min(1,(now-start)/1000);
   camera.rotation.y=finalYaw+Math.PI*(1-elapsed);camera.updateMatrixWorld();owner.render(camera);frames.push({elapsed,yaw:camera.rotation.y,timestamp:now});
@@ -73,6 +75,9 @@ try {
    passed:stats.silhouettePixels>1000&&stats.outsidePixels>1000&&stats.changedFrameFraction<.01});
  }
  state.report.panFrames=frames;state.report.frozen={wind:0,grain:0,particles:0};
- state.report.passed=state.report.checks.length===2&&state.report.checks.every(c=>c.passed);
+ const duration=(frames.at(-1).timestamp-start)/1000;
+ state.report.checks.push({id:'actual deterministic 180 degree pan over one second',durationSeconds:duration,frames:frames.length,
+  passed:frames.length>10&&duration>=1&&duration<=1.1&&Math.abs(frames[0].yaw-frames.at(-1).yaw-Math.PI)<1e-8});
+ state.report.passed=state.report.checks.length===3&&state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally{renderer.setRenderTarget(null);owner?.dispose();if(draws)disposeInstancedRenderers(root,draws);view.dispose();cache.dispose();target.dispose();state.report.done=true;}
