@@ -51,10 +51,10 @@ pending; no visual or frame-rate improvement is claimed yet.
 | VQ-06 | Passed 276 tree/atmosphere checks and five world views | `5ae86e1f`; current VQ-09 atlas refresh still needs the final rerun |
 | VQ-07 | Passed classification, import, height and persistence checks | `74bc616d`; frozen review manifest retained |
 | VQ-08 | Passed 16 boundary captures and original-02 revisit | `c039c336`; [boundary evidence](world-visual-quality-2026-10-14/fixtures/grass-boundary/report.json) |
-| VQ-09 | Implemented; numeric growth passed; LOD and complete imported/coast acceptance pending | `9e6385da`; [growth evidence](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json) |
+| VQ-09 | Growth and both-backend LOD checks passed; complete imported/coast acceptance pending | [Growth](world-visual-quality-2026-10-14/fixtures/growth-biomes/report.json), [LOD](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json) |
 | VQ-10 | Implemented; bend/recovery units passed; original-08 browser sequence pending | `3e399cd2`, `e4bb82e4` |
 | VQ-11 | Passed 25 HUD checks and 12 layouts; post-processing regression suites pending | `d032b386`; [HUD evidence](world-visual-quality-2026-10-14/fixtures/hud/report.json) |
-| VQ-12 | Lighting capture running; motion, temporal and streaming harnesses implemented but not browser-accepted | `8411c8e2` through `e4bb82e4` |
+| VQ-12 | 36 lighting views and both-backend temporal checks passed; motion acceptance pending | [Lighting](world-visual-quality-2026-10-14/lighting/report.json), [temporal](world-visual-quality-2026-10-14/fixtures/temporal/report.json) |
 | VQ-13 | Incomplete; final verify, performance, resources and aggregate evidence required | No release-complete claim |
 
 ## Repeat-capture failure and correction
@@ -482,3 +482,63 @@ browser runtime source. A frozen server now rejects source modules absent from
 its archive, preventing a newly added live file from masquerading as old source.
 The focused motion/synthetic tests pass 10/10; lint and whitespace checks pass.
 Full repository verification and the browser gates above remain outstanding.
+
+## October 15 completed lighting, LOD and temporal checks
+
+The [lighting run](world-visual-quality-2026-10-14/lighting/report.json) passed all
+36 fixed pose/light pairs on hardware WebGPU with zero browser errors. Its
+immutable runtime is `8411c8e2`; the Node runner was launched at `40bfb889`, before
+separate harness provenance was added. Each pair used a fresh context, the actual
+20-second wetness response, 60 stable lighting frames and complete scenery
+readiness. These images establish successful capture and convergence; they do
+not replace the four-light numeric surface/tree checks still required.
+
+The [meadow LOD fixture](world-visual-quality-2026-10-14/fixtures/meadow-lod/report.json)
+passed 27 comparisons on each backend at runtime `dc13a2e8`. It renders the actual
+production blades/cards for all nine growth biomes over the same projected
+8×8 m ground rectangle at 40, 45 and 50 m. Every comparison satisfies the original
+five-percentage-point occupancy and 12-byte median RGB limits. The 54 images and
+raw per-comparison values are retained.
+
+The [temporal fixture](world-visual-quality-2026-10-14/fixtures/temporal/report.json)
+also passed both backends at `dc13a2e8`, with zero browser errors. A measured
+180-degree pan takes one second; samples at 0.25 and 1 second after stopping
+compare the actual cinematic owner against a new stationary owner. Both have
+zero changed pixels outside the prescribed two-pixel tree silhouette dilation.
+The pan timing check is recorded separately. Wind, grain and particles alone are
+frozen for this measurement.
+
+The initial motion smoke run is not accepted. Its browser revision predates
+new foot-height fields expected by the runner, and its screencast timestamps
+were incorrectly treated as seconds rather than milliseconds. Schema version 2
+now rejects that mismatch and contact-frame alignment uses the recorder's actual
+millisecond timestamps. The run also exposed a real meadow preparation bug:
+third-person cameras can occupy a neighbouring chunk while streaming follows the
+player. `b58043b0` checks the captured streaming-focus generation instead of
+requiring the camera and focus chunks to match. The actual field regression test
+passes, including cancellation after a focus mutation; hardware motion and
+performance acceptance still require fresh captures.
+
+## Ocean repetition follow-up
+
+The user's aerial ocean image prompted fixed-pose layer isolation at
+`(-2077,1731)`, with the water clock held at 123.4 seconds. Inspection found that
+the sea foam sampled the periodic wave-height channel of the normal texture,
+repeating it every 5.263 m. Whitecap breakup also sampled sub-four-metre sine
+patterns at vertices on the two-metre water grid. `1eb2203b` gives surf and
+whitecaps a shared, domain-warped world field evaluated per fragment. It uses
+bounded chunk origins, adds no texture, geometry or pass, and preserves the CPU
+and rendered wave-height formulas.
+
+The [production shader fixture](world-visual-quality-2026-10-14/fixtures/water-foam/report.json)
+passed 27 checks on each hardware backend with zero browser errors. Checks cover
+range/variation, both former tile offsets and twice those offsets, adjacent
+chunk origins, an eight-million-metre render-origin shift and animation. Maximum
+absolute correlation at the former repeat offsets is 0.209; maximum seam error
+is 0.000112, below the fixed 0.001 limit. Origin shifts change no sampled values.
+
+The first full-scene isolation shows the small white shapes remain with foam
+disabled. They must not be reported as fixed by the foam-field tests. Expanded
+water, sea, reflection, refraction, caustic and sun-highlight controls are being
+captured to identify their visible source. Scene-level acceptance and performance
+checks for this follow-up remain pending.
