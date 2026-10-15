@@ -22,6 +22,21 @@ export function buildShapeRoofCraft(plan, meshes, recipe, surface, hidden) {
       }
     }
   }
+  // Hip and ridge caps cover the creases that flat tiles cannot follow.
+  for (const [index, line] of surface.ridgeLines().entries()) {
+    for (let i = 0; i < line.length - 1; i++) {
+      const a = line[i], b = line[i + 1], dx = b[0] - a[0], dz = b[2] - a[2], run = Math.hypot(dx, dz) || 1;
+      const n = [-dz / run, dx / run];
+      const gap = Math.min(0.008, run * 0.05), from = a.map((v, k) => v + (b[k] - v) * (gap / run)), to = b.map((v, k) => v - (v - a[k]) * (gap / run));
+      const at = (base, t) => [base[0] + n[0] * Math.cos(t) * 0.095, base[1] + 0.025 + Math.sin(t) * 0.09, base[2] + n[1] * Math.cos(t) * 0.095];
+      const v = 0.86 + shapeRandom(recipe.seed, p.id, 'hip-cap', `${index}:${i}`) * 0.12;
+      for (let arc = 0; arc < 6; arc++) {
+        const t0 = (arc * Math.PI) / 6, t1 = ((arc + 1) * Math.PI) / 6;
+        const quad = [at(from, t0), at(from, t1), at(to, t1), at(to, t0)];
+        if (!hidden(quad)) meshes.roof.quad(...quad.toReversed(), [v, v, v]);
+      }
+    }
+  }
   if (['cone', 'bell', 'spire'].includes(p.roof.family)) {
     const top = surface.point(0, 0);
     const profile = [[0, 0.055], [0.045, 0.08], [0.085, 0.042], [0.17, 0.028], [0.29, 0]];

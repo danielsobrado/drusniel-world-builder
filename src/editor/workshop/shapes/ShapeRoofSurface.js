@@ -1,5 +1,7 @@
 import { createRoofSurface } from '../village/HouseRoofSurface.js';
 import { createShapeWallSurface } from './ShapeWallSurface.js';
+import { placeShapePoint } from './ShapePaths.js';
+import { pointInShape } from './ShapeEnvelope.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
 
 const profiles = Object.freeze({
@@ -91,5 +93,30 @@ export function createShapeRoofSurface(plan) {
     const length = Math.hypot(dx, 1, dz);
     return [-dx / length, 1 / length, -dz / length];
   }
-  return { point, heightAt, normalAt, uvAt: (x, z) => local(x, z), wall, outline };
+  /**
+   * Convex creases a capping row must cover: a hip roof's ridge and its four hips, clipped to
+   * the real eaves outline, as world polylines sampled every `step` metres along the plan.
+   */
+  function ridgeLines(step = 0.2) {
+    if (!patch || roof.family !== 'hip') return [];
+    const eaves = outline.map((v) => [v[0], v[2]]);
+    const world = (along, across) => placeShapePoint(p, depthAxis ? [across, along] : [along, across]);
+    const trace = (count, at) => {
+      const line = [];
+      for (let i = 0; i <= count; i++) {
+        const [x, z] = world(...at(i / count));
+        if (!pointInShape([x, z], eaves)) break;
+        line.push([x, heightAt(x, z), z]);
+      }
+      return line;
+    };
+    const lines = [];
+    if (patch.ridgeHalf > step) lines.push(trace(Math.ceil((patch.ridgeHalf * 2) / step), (s) => [-patch.ridgeHalf + 2 * patch.ridgeHalf * s, 0]));
+    const hipLength = Math.hypot(patch.hipRun, patch.eaves);
+    for (const sa of [-1, 1]) for (const sc of [-1, 1]) {
+      lines.push(trace(Math.ceil(hipLength / step), (r) => [sa * (patch.ridgeHalf + r * patch.hipRun), sc * r * patch.eaves]));
+    }
+    return lines.filter((line) => line.length > 1);
+  }
+  return { point, heightAt, normalAt, uvAt: (x, z) => local(x, z), wall, outline, ridgeLines };
 }

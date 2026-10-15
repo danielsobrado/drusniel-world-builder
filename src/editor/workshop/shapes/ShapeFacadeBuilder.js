@@ -5,6 +5,8 @@ import { buildShapeWindowBoxes } from './ShapeWindowBoxes.js';
 import { shapeAgingSurface } from './ShapeWeathering.js';
 import { buildShapeShutters } from './ShapeShutterBuilder.js';
 
+const SURROUND = 0.16;
+
 /** Timber and shutters share host frames and opening exclusions with the wall shell. */
 export function buildShapeFacade(plan, meshes, recipe) {
   const p = plan.primitive,
@@ -50,21 +52,15 @@ export function buildShapeFacade(plan, meshes, recipe) {
       const startY = p.height - Math.min(1.15, p.height * 0.3),
         endY = p.height - 0.2;
       const count = Math.ceil((end - u) / 0.15);
-      for (let i = 0; i < count; i++) {
-        const a = u + ((end - u) * i) / count,
-          b = u + ((end - u) * (i + 1)) / count;
-        const y0 = startY + ((endY - startY) * i) / count,
-          y1 = startY + ((endY - startY) * (i + 1)) / count;
-        if ([a, b, (a + b) / 2].some((d, k) => surface.excluded(d, [y0, y1, (y0 + y1) / 2][k])))
-          continue;
-        wood.beam(
-          surface.point(a, y0, offset - 0.03),
-          surface.point(b, y1, offset - 0.03),
-          0.085,
-          0.09,
-          tint(`brace:${bay}`),
-        );
-      }
+      const segments = Array.from({ length: count }, (_, i) => ({
+        a: u + ((end - u) * i) / count, b: u + ((end - u) * (i + 1)) / count,
+        y0: startY + ((endY - startY) * i) / count, y1: startY + ((endY - startY) * (i + 1)) / count,
+      }));
+      // A brace is one member: it is omitted whole if any part would cross an opening or its surround.
+      if (segments.some(({ a, b, y0, y1 }) => [a, b, (a + b) / 2].some((d, k) => [-SURROUND, 0, SURROUND].some((m) =>
+        surface.excluded(d + m, [y0, y1, (y0 + y1) / 2][k] + (k === 2 ? m : 0)))))) continue;
+      for (const { a, b, y0, y1 } of segments)
+        wood.beam(surface.point(a, y0, offset - 0.03), surface.point(b, y1, offset - 0.03), 0.085, 0.09, tint(`brace:${bay}`));
     }
     // Gable posts follow the actual profiled roof rather than a guessed triangle.
     for (let bay = 0; bay < bays; bay++) {

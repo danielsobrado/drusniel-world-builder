@@ -61,14 +61,19 @@ const offset = (frame, distance, y = frame.origin[1]) =>
 
 const registry = new Map([
   ['balcony', (host, f) => ({ balcony: resolveShapeBalcony(host, f) })],
-  ['bay', (host, f, frame) => ({ child: childVolume(host, f, { ...frame, origin: offset(frame, f.depth * 0.35) }, {
-    height: Math.min(f.height, Math.max(0.5, host.primitive.height - f.bottom - 0.15)),
+  ['bay', (host, f, frame) => {
+    // A bay that starts at the ground stands on its own base with raised sills; a higher one is an oriel.
+    const sill = f.bottom < 0.05 ? 0.85 : 0.2;
+    const height = Math.min(f.height, Math.max(0.5, host.primitive.height - f.bottom - 0.15));
+    return { child: childVolume(host, f, { ...frame, origin: offset(frame, f.depth * 0.35) }, {
+    height,
     roof: { ...host.primitive.roof, family: 'hip', rise: 0.5, overhang: 0.18, sweep: 0.3, sag: 0 },
     // A bay is glazed between narrow mullion piers; there is no wall for a leaf to open against.
     shutters: false,
     openings: [0.07, 0.3, 0.94].map((at, i) => ({ id: `bay-window-${i}`, role: 'window', profile: 'square', at,
-      width: Math.min(0.9, f.width * 0.3, f.depth * 0.65), bottom: 0.2, height: Math.max(0.3, Math.min(f.height - 0.4, 1.3)) })),
-  }) })],
+      width: Math.min(0.9, f.width * 0.3, f.depth * 0.65), bottom: sill, height: Math.max(0.3, Math.min(height - sill - 0.25, 1.3)) })),
+  }) };
+  }],
   ['dormer', (host, f, frame) => {
     const p = host.primitive, roof = createShapeRoofSurface(host);
     const center = offset(frame, -Math.min(f.depth * 0.4, Math.min(p.footprint.width, p.footprint.depth) * 0.22));

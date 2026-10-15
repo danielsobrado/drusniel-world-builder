@@ -95,3 +95,20 @@ test('the arch bridge is coursed stone with parapets instead of thin rails', asy
   assert.ok(stones.length > 10_000);
   assert.ok(stones.every(([, y]) => y >= -0.15 && y <= crown + 0.62), 'Stone escapes the bridge envelope.');
 });
+
+test('hip roofs cap their ridge and hips along the real eaves outline', () => {
+  const plan = planWorkshopComposition({ composition: createShapePreset('timber-pavilion') }).shapePlans
+    .find((p) => p.primitive.roof?.family === 'hip');
+  const lines = createShapeRoofSurface(plan).ridgeLines();
+  assert.equal(lines.length, 5);
+  for (const line of lines) for (const [x, y, z] of line) {
+    assert.ok(Math.abs(y - createShapeRoofSurface(plan).heightAt(x, z)) < 1e-9);
+  }
+});
+
+test('a bay that starts at the ground stands on its own base with raised sills', () => {
+  const host = planWorkshopComposition({ composition: createShapePreset('bay-porch-cottage') }).shapePlans[0];
+  const bay = host.features.find((f) => f.intent.kind === 'bay').child;
+  assert.equal(bay.primitive.grounded, true);
+  assert.ok(bay.openings.every((o) => o.bottom >= 0.8));
+});

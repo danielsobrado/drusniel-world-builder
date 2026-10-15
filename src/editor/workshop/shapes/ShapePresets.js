@@ -236,7 +236,7 @@ export const SHAPE_PRESETS = Object.freeze(
     {
       id: 'bay-porch-cottage', label: 'Cottage with a bay and porch',
       create: () => [volume('cottage', 'Bay and porch cottage', { facade: 'timber', features: [
-        { id: 'bay-front', kind: 'bay', at: 0.49, width: 2.2, depth: 1.1, bottom: 0.8, height: 1.9 },
+        { id: 'bay-front', kind: 'bay', at: 0.49, width: 2.2, depth: 1.1, bottom: 0, height: 2.6 },
         { id: 'porch-door', kind: 'porch', at: 0.64, width: 2.4, depth: 1.7, height: 2.5 },
       ] })],
     },
