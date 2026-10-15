@@ -14,7 +14,7 @@ const map='maps/Eldara Full 2026-07-23-20-37.json';
 applyWaterDomainConfig(config,yaml.load(await readFile(new URL('config/water-domain.yaml',root),'utf8')));
 const document=importAzgaarFullJson(JSON.parse(await readFile(new URL(map,root),'utf8')),config);
 const imported=createWorldGenerator(document.world.generator,document.world.baseTerrain);
-const procedural=createWorldGenerator({seed:config.world.seed,version:config.world.generatorVersion,heightScale:config.world.heightScale,seaLevel:config.world.seaLevel,waterDomain:config.world.waterDomain});
+const procedural=createWorldGenerator({seed:config.world.seed,version:config.world.generatorVersion,heightScale:config.world.heightScale,seaLevel:config.world.seaLevel,waterDomain:config.waterDomain});
 function offsets(radius) {
  const cells=radius/8,points=[];
  for(let z=-cells;z<=cells;z++)for(let x=-cells;x<=cells;x++)if(x*x+z*z<=cells*cells)points.push({x:x*8,z:z*8,distanceSquared:(x*x+z*z)*64});

@@ -14,7 +14,14 @@ const report={schemaVersion:1,startedAt:new Date().toISOString(),viewport:{width
 let browser,page,errors;
 try {
   Object.assign(report,repositoryState(repo));
-  for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml'])report.configHashes[file]=await fileHash(new URL(file,root));
+  const snapshotResponse=await fetch(new URL('/__worldVisualSource',args.url));
+  if(snapshotResponse.ok&&snapshotResponse.headers.get('content-type')?.includes('application/json')) {
+    const snapshot=await snapshotResponse.json();
+    if(snapshot.frozen&&/^[0-9a-f]{40}$/.test(snapshot.sourceSha)&&snapshot.files?.['editor.config.yaml']) {
+      report.sourceSnapshot=snapshot;report.sourceSha=snapshot.sourceSha;report.dirtyFiles=[];
+    }
+  }
+  for(const file of ['editor.config.yaml','config/terrain-material-bake.yaml','config/ambient-effects.yaml','config/water-visual.yaml','config/exploration.yaml'])report.configHashes[file]=report.sourceSnapshot?.files[file]??await fileHash(new URL(file,root));
   report.mapHash=await fileHash(new URL('maps/Eldara Full 2026-07-23-20-37.json',root));
   browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
   page=await browser.newPage({viewport:report.viewport,deviceScaleFactor:1});errors=createBrowserErrorMonitor(page);
@@ -40,6 +47,7 @@ try {
   }
   if(['shore','imported'].includes(args.suite)) {
     const manifest=JSON.parse(await readFile(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json',root),'utf8'));
+    report.poseManifestHash=await fileHash(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json',root));
     if(report.mapHash!==manifest.mapSha256)throw new Error('Frozen imported map hash changed.');
     poses=args.suite==='imported'?manifest.imported.map(p=>({...p,world:'eldara'})):[...manifest.shore.filter(p=>p.world==='procedural'),...manifest.marine,...manifest.shore.filter(p=>p.world==='eldara')];
   }
@@ -83,8 +91,9 @@ try {
         passed:!!old&&old.x===pose.x&&old.z===pose.z&&old.yaw===pose.yaw&&old.pitch===pose.pitch});
     }
   }
-  const end=repositoryState(repo);
-  report.checks.push({id:'source stayed fixed',task:'VQ-03',expected:report.sourceSha,actual:end.sourceSha,passed:end.sourceSha===report.sourceSha&&end.dirtyFiles.length===0});
+  const end=report.sourceSnapshot?await fetch(new URL('/__worldVisualSource',args.url)).then(r=>r.json()):repositoryState(repo);
+  const stable=end.sourceSha===report.sourceSha&&(report.sourceSnapshot?end.sha256===report.sourceSnapshot.sha256:end.dirtyFiles.length===0);
+  report.checks.push({id:'source stayed fixed',task:'VQ-03',expected:report.sourceSha,actual:end.sourceSha,passed:stable});
 } catch(error) {report.failure=error.stack;process.exitCode=1;}
 finally {
   report.errors=errors?.snapshot()??{count:0,errors:[]};report.finishedAt=new Date().toISOString();

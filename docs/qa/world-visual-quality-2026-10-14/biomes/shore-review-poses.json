@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "selectionSourceSha": "3df8032175cf14fa27bc493283b61ca242ea4c26",
+  "configSha256": "61668d09ae1317662e9b9cc1c9e57392b18e865fa8db4a7d3bd73469d5b3e341",
+  "map": "maps/Eldara Full 2026-07-23-20-37.json",
+  "mapSha256": "dcd1ae3575ccf5cdde064580d0f033755d575e6054d7a9d1d5e64403570bd388",
+  "gridMeters": 8,
+  "tieBreak": [
+    "distanceSquared",
+    "z",
+    "x"
+  ],
+  "imported": [
+    {
+      "id": "eldara-forest",
+      "expectedBiomeId": 6,
+      "x": -7134127,
+      "z": 1081563,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-forest-reverse",
+      "expectedBiomeId": 6,
+      "x": -7134127,
+      "z": 1081563,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-forest-overview",
+      "expectedBiomeId": 6,
+      "x": -7134127,
+      "z": 1081563,
+      "yaw": 0,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 80,
+      "fov": 60
+    },
+    {
+      "id": "eldara-taiga",
+      "expectedBiomeId": 9,
+      "x": -982683,
+      "z": 371387,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-taiga-reverse",
+      "expectedBiomeId": 9,
+      "x": -982683,
+      "z": 371387,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-taiga-overview",
+      "expectedBiomeId": 9,
+      "x": -982683,
+      "z": 371387,
+      "yaw": 0,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 80,
+      "fov": 60
+    },
+    {
+      "id": "eldara-tundra",
+      "expectedBiomeId": 10,
+      "x": -4995717,
+      "z": 970835,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-tundra-reverse",
+      "expectedBiomeId": 10,
+      "x": -4995717,
+      "z": 970835,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-tundra-overview",
+      "expectedBiomeId": 10,
+      "x": -4995717,
+      "z": 970835,
+      "yaw": 0,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 80,
+      "fov": 60
+    },
+    {
+      "id": "eldara-glacier",
+      "expectedBiomeId": 11,
+      "x": -2747061,
+      "z": 316061,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-glacier-reverse",
+      "expectedBiomeId": 11,
+      "x": -2747061,
+      "z": 316061,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-glacier-overview",
+      "expectedBiomeId": 11,
+      "x": -2747061,
+      "z": 316061,
+      "yaw": 0,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 80,
+      "fov": 60
+    },
+    {
+      "id": "eldara-wetland",
+      "expectedBiomeId": 12,
+      "x": 993673,
+      "z": 1701497,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-wetland-reverse",
+      "expectedBiomeId": 12,
+      "x": 993673,
+      "z": 1701497,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7
+    },
+    {
+      "id": "eldara-wetland-overview",
+      "expectedBiomeId": 12,
+      "x": 993673,
+      "z": 1701497,
+      "yaw": 0,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 80,
+      "fov": 60
+    }
+  ],
+  "shore": [
+    {
+      "id": "original-05-shore",
+      "historicalBiomeId": 5,
+      "x": -15817,
+      "z": -3703,
+      "yaw": -0.7853981633974483,
+      "pitch": -0.08,
+      "mode": "player",
+      "world": "procedural",
+      "expectedBiomeId": 5,
+      "shoreTarget": {
+        "x": -15793,
+        "z": -3727,
+        "depth": 1.0115600673035825,
+        "distanceSquared": 1152
+      }
+    },
+    {
+      "id": "original-12-shore",
+      "historicalBiomeId": 12,
+      "x": 9647,
+      "z": 1483,
+      "yaw": -0.5404195002705842,
+      "pitch": -0.08,
+      "mode": "player",
+      "world": "procedural",
+      "expectedBiomeId": 12,
+      "shoreTarget": {
+        "x": 9671,
+        "z": 1443,
+        "depth": 1.2685858610394902,
+        "distanceSquared": 2176
+      }
+    },
+    {
+      "id": "eldara-wetland-shore",
+      "expectedBiomeId": 12,
+      "x": 993673,
+      "z": 1701497,
+      "yaw": 0,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "world": "eldara",
+      "shoreTarget": null
+    }
+  ],
+  "marine": [
+    {
+      "id": "marine-coast",
+      "x": -2077,
+      "z": 1731,
+      "yaw": -1.5707963267948966,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "expectedBiomeId": 4,
+      "shoreTarget": {
+        "x": -2069,
+        "z": 1731,
+        "depth": 1.3221811586174619,
+        "distanceSquared": 64
+      }
+    },
+    {
+      "id": "marine-coast-overview",
+      "x": -2077,
+      "z": 1731,
+      "yaw": -1.5707963267948966,
+      "pitch": -0.45,
+      "mode": "fly",
+      "heightAboveGround": 30,
+      "expectedBiomeId": 4,
+      "shoreTarget": {
+        "x": -2069,
+        "z": 1731,
+        "depth": 1.3221811586174619,
+        "distanceSquared": 64
+      },
+      "fov": 60
+    }
+  ]
+}
