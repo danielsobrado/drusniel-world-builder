@@ -157,24 +157,24 @@ ambientEffects:
       area: 64.2857
       base: sea
       height:
-      - 0.0
-      - 2.1429
-      rise: 0.1786
+      - 0.02
+      - 0.72
+      rise: 0.55
       wind:
         speed: 0.5357
       wander:
         radius: 0.7143
         frequency: 0.15
       size:
-      - 1.0714
-      - 2.8571
+      - 0.24
+      - 0.72
       shape: puff
       color: '#eef5f8'
       brightness: 1.6
       opacity: 0.16
       scatter: 1.6
       nearFade: 1.4286
-      soft: 0.4286
+      soft: 0.12
     pollen:
       region: meadow
       presets:

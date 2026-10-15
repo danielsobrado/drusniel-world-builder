@@ -9,6 +9,8 @@ test('authored surf spray is confined to the same shallow breaking band as sea s
   const raw=yaml.load(readFileSync(new URL('../config/ambient-effects.yaml',import.meta.url),'utf8')).ambientEffects;
   const sea=yaml.load(readFileSync(new URL('../config/water-visual.yaml',import.meta.url),'utf8')).water.sea.surf;
   const settings=resolveAmbientEffectsConfig(raw),spray=settings.fields.find(f=>f.name==='surfSpray');
+  assert.deepEqual(spray.size,[.24,.72]);assert.deepEqual(spray.height,[.02,.72]);assert.equal(spray.rise,.55);
+  assert.equal(spray.count,420,'silhouette correction preserves the instance budget');
   assert.deepEqual(spray.waterDepth,[sea.breakDepthStart,sea.breakDepthFull,sea.breakDepthFade,sea.breakDepthEnd]);
   for(const depth of [-100,-1,0,.25,4.5,5,50])assert.equal(particleWaterDepthWeight(depth,spray.waterDepth),0,`depth ${depth}`);
   for(const depth of [.7,1,2,2.4])assert.equal(particleWaterDepthWeight(depth,spray.waterDepth),1,`depth ${depth}`);
