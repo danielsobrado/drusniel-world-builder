@@ -1,0 +1,20 @@
+{
+  "command": "npm run verify",
+  "runtimeSourceSha": "9b768d9a22d50cee2cbf8c3ebc540546b7337597",
+  "node": "v22.22.3",
+  "tests": 6742,
+  "passed": 6742,
+  "failed": 0,
+  "skipped": 0,
+  "exitCode": 0,
+  "log": {
+    "path": "tmp/world-visual-quality/verify-ocean-2026-10-15.log",
+    "sha256": "5c503554e078ef5b88dd27845ad5d21c9eee23b8870585546e9f145d65c0f3b5"
+  },
+  "scope": "Application source/config at 9b768d9a; Node-only review runner changes da27790e additionally linted.",
+  "retainedCompressed": {
+    "path": "verify.log.gz",
+    "sha256": "54f7431997d4910d22ec6d7cc1a4f163463fb053d00142b60c8bb7e4f101f3ff",
+    "bytes": 267706
+  }
+}

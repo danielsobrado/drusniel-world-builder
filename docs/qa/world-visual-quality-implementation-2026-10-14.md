@@ -552,3 +552,14 @@ disabled. They must not be reported as fixed by the foam-field tests. Expanded
 water, sea, reflection, refraction, caustic and sun-highlight controls are being
 captured to identify their visible source. Scene-level acceptance and performance
 checks for this follow-up remain pending.
+
+The completed [ocean review](world-visual-quality-2026-10-14/ocean/README.md)
+identifies the white foreground stamps as coastal spray and the broad pale
+carrier bands as additive crest colour blending. Spray now emits only in
+shallow breaking water, with varied silhouettes and smaller player-scale wisps.
+Crest lighting preserves water chroma. The final ocean scene is captured at
+both original aerial and player poses, and the production foam/crest and spray
+fixtures pass on both backends. The existing environment parity suite passes
+78 checks. Repository verification passes **6,742 tests**, zero skipped, lint,
+production asset validation and production build. These results do not clear
+the outstanding movement recovery or complete release acceptance gates.
