@@ -26,23 +26,34 @@ try {
  await page.evaluate(p=>window.__worldVisualQa.cut({...p,mode:'player',heightAboveGround:1.7}),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle());
  await page.evaluate(p=>window.__worldVisualQa.cut(p),report.pose);await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
  if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Water capture UI refused entry.');
- for(const variant of ['default','foam-off','reflections-off','surf-off','detail-off']) {
+ const variants=option('--variants','default,foam-off,reflections-off,surf-off,detail-off').split(',');
+ if(variants.some(v=>!['default','foam-off','reflections-off','surf-off','detail-off','sea-off','water-off','sun-highlights-off','refraction-off','caustics-off'].includes(v)))throw new Error('Unknown water diagnostic variant.');
+ for(const variant of variants) {
   console.log(`Water pattern review: ${variant}`);
   const controls=await page.evaluate(async variant=>{
    const {SharedWaterMaterials,WATER_SLOT_OPTIONS}=await import('/src/editor/stylized/SharedWaterMaterials.js');
+   const {skyLightUniforms}=await import('/src/editor/stylized/sky/skyLight.js');
+   const {Color}=await import('three/webgpu');
    const e=window.__editor,surface=e.stylizedSurface,config=structuredClone(e.config.stylizedSurface);
+   const black=new Color(0);skyLightUniforms.sunColor.onObjectUpdate(()=>variant==='sun-highlights-off'?black:skyLightUniforms.sunColor.value);
    if(variant==='foam-off')config.water.foam.enabled=false;
    if(variant==='surf-off')config.water.sea.surf.enabled=false;
    if(variant==='detail-off')config.water.sea.detail.enabled=false;
-   const pool=new SharedWaterMaterials(variant==='reflections-off'?null:surface.reflections),previous=surface.sharedWaterMaterials;
+   if(variant==='sea-off')config.water.sea.enabled=false;
+   if(variant==='refraction-off')config.water.refraction.enabled=false;
+   if(variant==='caustics-off')config.water.caustics.intensity=0;
+   // Preserve the water reflection classification when replacing its capture.
+   const pool=new SharedWaterMaterials(variant==='reflections-off'?{sample:(_direction,fallback)=>fallback}:surface.reflections),previous=surface.sharedWaterMaterials;
    surface.sharedWaterMaterials=pool;
    for(const slot of surface.waterSlots) {
+    if(variant==='water-off')e.terrainView.scene.remove(slot.mesh);
+    else if(!slot.mesh.parent)e.terrainView.scene.add(slot.mesh);
     slot.materialOptions={...slot.materialOptions,config,time:{value:123.4}};
     slot.mesh.userData[WATER_SLOT_OPTIONS]=slot.materialOptions;slot.sharedMaterials=pool;
     slot.material=slot.createMaterial(false);slot.refractiveMaterial=null;slot.refractionPrewarmed=false;slot.mesh.material=slot.material;
    }
    previous?.dispose();await e.terrainView.renderer.compileAsync(e.terrainView.scene,e.viewModeController.camera);
-   return {variant,clock:123.4,foam:config.water.foam.enabled,surf:config.water.sea.surf.enabled,detail:config.water.sea.detail.enabled,reflections:variant!=='reflections-off'};
+   return {variant,clock:123.4,foam:config.water.foam.enabled,surf:config.water.sea.surf.enabled,detail:config.water.sea.detail.enabled,reflections:variant!=='reflections-off',water:variant!=='water-off',sea:config.water.sea.enabled,refraction:config.water.refraction.enabled,caustics:config.water.caustics.intensity,sunHighlights:variant!=='sun-highlights-off'};
   },variant);
   const readiness=await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
   const file=`${variant}.png`;await captureWorldCanvas(page,path.join(out,file));

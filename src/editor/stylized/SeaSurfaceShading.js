@@ -13,7 +13,6 @@ import {
   positionWorld,
   pow,
   select,
-  sin,
   smoothstep,
   sqrt,
   vec2,
@@ -93,7 +92,7 @@ export function createSeaSurfaceNodes({
     patternXZ, time, choppiness: config.choppiness, strength, patterns, localXZ,
     phases: swell.phases, amplitude, settings: config.detail,
   }) : null;
-  const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time, laceTexture: detail?.map,
+  const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time,
     settings: resolveSeaSurf(config.surf) });
   const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
   const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
@@ -103,16 +102,12 @@ export function createSeaSurfaceNodes({
   const sun = normalize(sunDirection);
   const lit = dot(normal, sun).sub(sun.y);
   const crest = smoothstep(0.3, 0.95, height).mul(strength);
-  // Whitecaps break into streaks along the crests. The breakup is built from the
-  // swell's own phases, which are exact at any distance from the world origin:
-  // a noise of canonical coordinates degrades into a regular lattice at
-  // planet scale in float32.
-  const [, , p2, p3, p4] = swell.phases;
-  const breakup = smoothstep(0.25, 0.85, sin(p3.mul(3.3).add(p2.mul(1.7)))
-    .mul(sin(p4.mul(2.1).sub(p2.mul(0.9))))
-    .mul(0.5)
-    .add(0.5))
-    .toVarying('seaWhitecapBreakup');
+  // Whitecaps share the surf's bounded world field, independently of the
+  // periodic normal texture. Chunk-local coordinates preserve planet precision.
+  const foamNoise=surf?.foamNoise??(patterns?createSeaFoamNoise(patterns,localXZ,time):float(1));
+  // Evaluate breakup per fragment. The old sub-4 m vertex sine pattern aliased
+  // against the 2 m water grid and repeated along every carrier crest.
+  const breakup=smoothstep(0.25,0.85,foamNoise);
   const threshold = mix(
     float(config.whitecapThreshold),
     float(config.stormWhitecapThreshold),
@@ -123,7 +118,7 @@ export function createSeaSurfaceNodes({
     displacement: height.mul(amplitude),
     release: detail?.release,
     normal,
-    foamNoise: surf?.foamNoise ?? (detail?.map ? createSeaFoamNoise(detail.map, patterns, localXZ, time) : float(1)),
+    foamNoise,
     glint(viewDirection) {
       const roughness = float(0.055).add(storm.mul(0.09))
         .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);

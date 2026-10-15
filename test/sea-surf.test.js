@@ -42,6 +42,26 @@ test('every rotated ripple train preserves UV phase across a wrap and an origin 
   assert.equal(layers.length, 6); assert.notEqual(layers[0].speed, layers[2].speed);
 });
 
+test('foam lattice and independent warp phases agree at both chunk borders at planet scale', () => {
+  const frames = seaSurfPatternFrames(settings);
+  for (const center of [[0, 0], [-4226432, 278528], [-9000000, 6000000]]) {
+    for (const delta of [[64, 0], [0, 64]]) {
+      const a = new PatternOrigins(frames), b = new PatternOrigins(frames);
+      a.update(...center); b.update(center[0] + delta[0], center[1] + delta[1]);
+      for (const name of ['surfLaceWarpX', 'surfLaceWarpZ']) {
+        const wave = frames[name].wave;
+        const phaseA = a.uniforms[name].value + delta[0] * .5 * wave[0] + delta[1] * .5 * wave[1];
+        const phaseB = b.uniforms[name].value - delta[0] * .5 * wave[0] - delta[1] * .5 * wave[1];
+        assert.ok(Math.abs(Math.sin(phaseA) - Math.sin(phaseB)) < 1e-8, name);
+      }
+      for (let axis = 0; axis < 2; axis++) {
+        const gap = a.uniforms.surfLace.value.getComponent(axis) - b.uniforms.surfLace.value.getComponent(axis) + delta[axis] * settings.laceScale;
+        assert.ok(Math.abs(wrapPeriodic(gap + 256, 512) - 256) < 1e-8);
+      }
+    }
+  }
+});
+
 test('surf and ripple policies reject malformed or unbounded input', () => {
   assert.throws(() => resolveSeaSurf({ fadeEnd: 1 }), /fadeEnd/);
   assert.throws(() => resolveSeaSurf({ setDepth: 1 }), /bounds/);

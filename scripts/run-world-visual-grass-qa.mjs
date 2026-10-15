@@ -12,14 +12,14 @@ const option=(name,fallback)=>process.argv.includes(name)?process.argv[process.a
 const repo=fileURLToPath(new URL('../',import.meta.url));
 const out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/grass'));
 const fixture=option('--fixture','grass');
-if(!['grass','paths','lod','temporal'].includes(fixture))throw new Error('Unknown meadow fixture.');
+if(!['grass','paths','lod','temporal','water-foam'].includes(fixture))throw new Error('Unknown world visual fixture.');
 const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
 try {
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const backend of ['webgpu','webgl']) {
-  const viewport=['lod','temporal'].includes(fixture)?{width:800,height:600}:{width:1600,height:900};
+  const viewport=['lod','temporal','water-foam'].includes(fixture)?{width:800,height:600}:{width:1600,height:900};
   const page=await browser.newPage({viewport,deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);
   await page.goto(new URL(`/scripts/fixtures/world-visual-${fixture}.html?backend=${backend}`,url).href,{waitUntil:'domcontentloaded'});
   let previous=null;

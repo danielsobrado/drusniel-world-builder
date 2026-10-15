@@ -33,6 +33,8 @@ export function seaSurfPatternFrames(settings) {
     surfGroup: { wave: [wave.x * wave.waveNumber * settings.setGroup, wave.z * wave.waveNumber * settings.setGroup] },
     surfAlong: { wave: [-wave.z * settings.alongFrequency, wave.x * settings.alongFrequency] },
     surfLace: { scale: settings.laceScale },
+    surfLaceWarpX: { wave: [0.071, 0.043] },
+    surfLaceWarpZ: { wave: [-0.037, 0.061] },
   };
 }
 
