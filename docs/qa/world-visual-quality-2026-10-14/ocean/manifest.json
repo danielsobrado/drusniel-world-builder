@@ -3,11 +3,12 @@
   "kind": "focused-ocean-review",
   "applicationSourceSha": "9b768d9a22d50cee2cbf8c3ebc540546b7337597",
   "overallReleaseAccepted": false,
+  "generatedAt": "2026-10-15T12:55:52.084850+00:00",
   "artifacts": [
     {
       "path": "README.md",
-      "bytes": 6560,
-      "sha256": "24a46637ac561b157a3c4eb9e3f15cc9f025417aa6b5b0dcbdcc99a938adfdf0"
+      "bytes": 6658,
+      "sha256": "3c4a017c8fc36971280cb9a49e8e258ae2131ef32edd119c6dee521240a9116b"
     },
     {
       "path": "before/default.png",
@@ -1259,5 +1260,6 @@
       "bytes": 267706,
       "sha256": "54f7431997d4910d22ec6d7cc1a4f163463fb053d00142b60c8bb7e4f101f3ff"
     }
-  ]
+  ],
+  "scope": "Historical before/after and diagnostic artifacts; individual raw reports identify their own revisions. Current application source is listed separately."
 }
