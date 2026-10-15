@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { float, uv, vec2, vec4 } from 'three/tsl';
-import { meadowGrowthNodes } from '../../stylized/meadow/meadowGrowthNodes.js';
-import { createMeadowUniforms } from '../../stylized/meadow/meadowUniforms.js';
+import { meadowGrowthNodes } from '/src/editor/stylized/meadow/meadowGrowthNodes.js';
+import { createMeadowUniforms } from '/src/editor/stylized/meadow/meadowUniforms.js';
 
 /** Numerical readback of the production node recipe at 10000 canonical points. */
 export async function measureMeadowGrowth(renderer,settings) {

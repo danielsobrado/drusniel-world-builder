@@ -1,4 +1,4 @@
-import { measureMeadowGrowth } from './MeadowGrowthFixture.js';
+import { measureMeadowGrowth } from '/scripts/fixtures/world-visual-meadow-growth.mjs';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import { loadEditorConfig } from '../../../config/loadEditorConfig.js';
