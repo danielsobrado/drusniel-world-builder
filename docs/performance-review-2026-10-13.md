@@ -240,7 +240,7 @@ seconds warmup, readiness settling, and twelve seconds measured movement.
 
 That isolated matrix passed standard, forest, high grass, construction and
 water. Dense mixed settled with zero browser errors but narrowly failed the
-hitch gate: 27 hitches in 1,237 frames (2.18%), 103.12 FPS and 16.5 ms p95.
+hitch gate: 27 hitches in 1,236 frames (2.18%), 103.12 FPS and 16.5 ms p95.
 Reducing source publication to 1 MiB did not help: the controlled repeat had
 36 hitches (2.86%) and recovered in 15.405 seconds with no missing grass.
 The production allowance remains 4 MiB. An instrumented repeat attributed
@@ -260,6 +260,8 @@ GPU attributes with unchanged versions through LOD transitions. A third guards
 bounded page counts through repeated teleports. Ground revisions, simultaneous
 opposite transitions, and floating-origin changes remain covered. The fixture
 avoids 2,262,456 bytes of repeated instance uploads per 40,401-stem transition.
+The full `npm run verify` passes at `ce42354f`: **3,594 tests**, lint, generated
+UI checks, production asset validation, and the production build.
 
 Commands used:
 
