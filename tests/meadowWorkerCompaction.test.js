@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { MeshBasicMaterial, Scene } from 'three/webgpu';
 import { MeadowCompactionPool } from '../src/editor/stylized/meadow/MeadowCompactionPool.js';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
+import { MeadowTileLayer } from '../src/editor/stylized/meadow/MeadowTileLayer.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
 import { buildMeadowCompaction } from '../src/editor/stylized/meadow/buildMeadowCompaction.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
@@ -32,7 +34,7 @@ function fixture(t, { centerX = 4, centerZ = -4 } = {}) {
   const low = createMeadowTemplate({ detail: 2, count: 512, tileSize: 8 });
   const high = createMeadowTemplate({ detail: 5, count: 2048, tileSize: 8 });
   t.after(() => { low.dispose(); high.dispose(); });
-  return { low, high, sampled, options: { template: high, centerX, centerZ,
+  return { low, high, ground, sampled, options: { template: high, centerX, centerZ,
     sample: sampled.sample, snapshot: sampled.snapshot } };
 }
 
@@ -142,4 +144,31 @@ test('cards retain a worker turn while blade preparation is continuously busy', 
   workers[1].respond();
   const expected = createCompaction({ ...options, template: card }); expected.advance();
   assertOutput(task.output, expected.output);
+});
+
+test('edits retain published grass and reject a superseded worker result arriving late', t => {
+  const { high, ground } = fixture(t), { pool, workers } = poolFixture(t);
+  const material = new MeshBasicMaterial();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'edit', tileSize: 8,
+    templates: { high }, material, reach: 0, selectBand: nearest => nearest === 0 ? 'high' : null,
+    ground, preparer: pool });
+  t.after(() => { layer.dispose(); material.dispose(); });
+  const update = () => layer.update({ x: 4, z: -4 }, { x: 0, z: 0 }, Infinity, 1);
+  update(); workers[0].respond(); update();
+  const tile = layer.tiles.get('0:-1'), publication = tile.output;
+  const previousPositions = publication.position.slice();
+  const edit = height => {
+    const view = ground.terrainView;
+    view.slots[0].page.heights.fill(height);
+    view.slots[0].pageRevision++;
+    view.contentRevision++;
+    ground.beginFrame(); update();
+  };
+  edit(7); edit(11);
+  workers[0].respond(); update();
+  assert.equal(tile.output, publication, 'the late result cannot replace visible grass');
+  assert.deepEqual(publication.position, previousPositions, 'pooled results cannot overwrite a live publication');
+  workers[1].respond(); update();
+  assert.equal(tile.builtRevision, tile.revision);
+  for (let i = 0; i < tile.output.count; i++) assert.equal(tile.output.position[i * 4 + 1], 11);
 });

@@ -1,5 +1,6 @@
 import { FrameSlack } from './FrameSlack.js';
 import { PerfCounters } from './qa/PerfCounters.js';
+import { PreparationPressure, hasPreparationBacklog } from './PreparationPressure.js';
 
 /** One shared allowance; collision/physics remain mandatory work. */
 export class DeferredWorkBudget {
@@ -8,15 +9,19 @@ export class DeferredWorkBudget {
     this.provider = max => this.available(max);
     this.runner = work => this.run(work);
     this.maximumMs = settings.maximumMs ?? 1.2;
+    this.pressure = new PreparationPressure({ minimumMs: settings.minimumMs, maximumMs: this.maximumMs });
     this.shouldYield = () => this.peek(Number.POSITIVE_INFINITY) <= 0;
     this.boundQueues = new WeakSet();
     this.slack = new FrameSlack({ targetMs: 1000 / settings.targetFps,
       reserveMs: settings.reserveMs, maximumMs: this.maximumMs });
   }
-  beginFrame() { this.slack.beginFrame(); }
+  beginFrame() {
+    this.pressure.update(this.slack.now(), hasPreparationBacklog(this.preparationSurface));
+    this.slack.beginFrame();
+  }
   available(maxMs) {
     return this.settings.enabled
-      ? this.slack.available(Math.min(this.settings.minimumMs, maxMs), maxMs)
+      ? this.slack.available(Math.min(this.pressure.floorMs, maxMs), maxMs)
       : maxMs;
   }
   run(work) { return this.slack.defer(work); }
@@ -25,7 +30,7 @@ export class DeferredWorkBudget {
     return this.run(work);
   }
   reserve(maxMs) {
-    if (this.settings.enabled) return this.slack.reserve(Math.min(this.settings.minimumMs, maxMs), maxMs);
+    if (this.settings.enabled) return this.slack.reserve(Math.min(this.pressure.floorMs, maxMs), maxMs);
     return this.unbudgetedReservation();
   }
   reserveStrict(maxMs) {
@@ -42,9 +47,11 @@ export class DeferredWorkBudget {
   }
   peek(maxMs) {
     return this.settings.enabled
-      ? this.slack.peek(Math.min(this.settings.minimumMs, maxMs), maxMs) : maxMs;
+      ? this.slack.peek(Math.min(this.pressure.floorMs, maxMs), maxMs) : maxMs;
   }
   endFrame() {
+    PerfCounters.set('framePreparationBacklogAgeMs', this.pressure.ageMs);
+    PerfCounters.set('frameDeferredPressureFloorMs', this.pressure.floorMs);
     PerfCounters.set('frameFixedCpuMs', this.slack.endFrame());
     PerfCounters.set('frameDeferredCpuMs', this.slack.deferredMs);
     PerfCounters.set('frameDeferredBudgetMs', this.settings.enabled
@@ -65,6 +72,7 @@ export class DeferredWorkBudget {
 
   attachSurface(surface) {
     if (!surface) return;
+    this.preparationSurface = surface;
     const shouldYield = this.shouldYield;
     const queues = ['grassBuildQueue', 'flowerBuildQueue', 'treeBuildQueue', 'rockBuildQueue',
       'bushBuildQueue', 'detailBuildQueue', 'aquaticBuildQueue', 'tropicalBuildQueue'];
