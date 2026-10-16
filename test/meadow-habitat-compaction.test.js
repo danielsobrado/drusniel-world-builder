@@ -3,7 +3,7 @@ import test from 'node:test';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
-import { grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
+import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
 
 function fixture(coverage,density=1,forest=false) {
   const size=32,mask=new Uint8Array(size*size*4);
@@ -28,12 +28,12 @@ function accepted(sampler,source,reverse=false) {
 
 // Thin biomes pack their stems into islands and tussocks (GrassPatchiness.js),
 // so a stem's acceptance is coverage times the island and stand density there.
-function meanStandDensity(template,density) {
+function meanStandDensity(template,density,seed=918273) {
   const p=template.getAttribute('instancePosition').array;
   let total=0;
   for(let i=0;i<template.instanceCount;i++) {
     const x=-32+p[i*4],z=32+p[i*4+2];
-    total+=grassPatchCover(x/2,-z/2,density,918273)*grassStandDensity(x,z,density,918273);
+    total+=grassPatchCover(x/2,-z/2,density,seed)*grassStandDensity(x,z,density,seed);
   }
   return total/template.instanceCount;
 }
@@ -71,10 +71,13 @@ test('reverse order, origin rebasing, and near/card queries preserve accepted ca
   }finally{template.dispose();}
 });
 
-test('forest and edge probabilities use independent channels: half of each retains one quarter', () => {
+// The canopy floor thins in islands of its own (CANOPY_FLOOR_PATCH_SALT), so
+// half coverage under a half-density floor keeps half of that floor's law.
+test('forest and edge probabilities use independent channels: half coverage keeps half the canopy floor', () => {
   const template=createMeadowTemplate({detail:2,count:100000,tileSize:64});
   try {
+    const floor=meanStandDensity(template,.5,918273^CANOPY_FLOOR_PATCH_SALT);
     const {sampler}=fixture(.5,1,true),count=accepted(sampler,template).length;
-    assert.ok(Math.abs(count/100000-.25)<.01,`${count} survivors`);
+    assert.ok(Math.abs(count/100000-.5*floor)<.01,`${count} survivors, expected ${Math.round(.5*floor*100000)}`);
   }finally{template.dispose();}
 });
