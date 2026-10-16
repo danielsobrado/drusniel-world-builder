@@ -32,7 +32,8 @@ import {
   writeForestFloorCanopy,
   writeForestFloorLitter,
 } from './forestFloorTexture.js';
-import { createForestDensitySampler } from './forest/ForestFloor.js';
+import { forestFloorDensity } from './forest/ForestFloor.js';
+import { bilinearSample } from './forest/bilinearGrid.js';
 import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover } from '../world/GrassPatchiness.js';
 import { isLandStreamingSuspended } from '../water/underwaterState.js';
 import {
@@ -862,6 +863,11 @@ export class StylizedSurfaceView {
       if (this.preparedPlacement && !this.preparedPlacement.ensureChunk(descriptor.chunkX, descriptor.chunkZ, 1, 0)) continue;
       const samples = FOREST_FLOOR_CANOPY_SAMPLES;
       const half = this.chunkWorldSize * 0.5;
+      // The canopy's grass density, from the same habitat samples: the litter
+      // pass reads it rather than sampling the forest field a second time.
+      const floorConfig = this.config.trees?.forestFloor;
+      const grassFloor = (this.grassFloorScratch ??= new Float32Array(samples * samples));
+      let thinned = false;
       // R is the canopy, G the contact shade: writing the canopy clears the
       // previous shade with it, so the contact pass below starts from a clean
       // texture instead of compounding on the last one.
@@ -875,10 +881,13 @@ export class StylizedSurfaceView {
             descriptor.centerWorldX - half + (x + 0.5) / samples * this.chunkWorldSize,
             descriptor.centerWorldZ + half - (z + 0.5) / samples * this.chunkWorldSize,
           );
+          const floor = forestFloorDensity(habitat, 'grass', floorConfig);
+          grassFloor[z * samples + x] = floor;
+          if (floor < 1) thinned = true;
           return habitat.patchCoverage * habitat.suitability * 1.35;
         },
       });
-      this.paintForestLitter(terrainSlot, descriptor, field);
+      if (thinned) this.paintForestLitter(terrainSlot, descriptor, grassFloor, samples);
       this.paintContactShade(terrainSlot, descriptor);
       terrainSlot.forestFloorTexture.needsUpdate = true;
       terrainSlot.forestFloorKey = key;
@@ -891,34 +900,29 @@ export class StylizedSurfaceView {
 
   /**
    * Bare litter between the canopy's grass islands, in the ground texture's
-   * third channel. It reads the same grass density and island field the meadow
-   * sampler thins stems with, so soil shows exactly where the blades are not.
+   * third channel: the island field the meadow sampler thins stems with, at
+   * the canopy's grass density, so soil shows where the blades are not.
    */
-  paintForestLitter(terrainSlot, descriptor, field) {
-    const density = createForestDensitySampler({
-      descriptor,
-      field,
-      kind: 'grass',
-      config: this.config.trees?.forestFloor,
-      chunkWorldSize: this.chunkWorldSize,
-    });
-    if (!density) return;
+  paintForestLitter(terrainSlot, descriptor, grassFloor, samples) {
     const size = terrainSlot.forestFloorSize;
     const texel = this.chunkWorldSize / size;
     const half = this.chunkWorldSize * 0.5;
     const tileSize = this.terrainView.worldStore.tileSize;
     const seed = (this.terrainView.worldStore.generator?.toMetadata?.().seed ?? 0) ^ CANOPY_FLOOR_PATCH_SALT;
+    const ratio = samples / size;
+    const at = (sample) => Math.min(samples - 1, Math.max(0, sample));
     writeForestFloorLitter({
       pixels: terrainSlot.forestFloorPixels,
       size,
       bareAt: (x, z) => {
-        const localX = (x + 0.5) * texel - half;
-        const localZ = half - (z + 0.5) * texel;
-        const floor = density(localX, localZ);
+        // Texel centre in sample space, as the canopy is upsampled.
+        const sx = at((x + 0.5) * ratio - 0.5);
+        const sz = at((z + 0.5) * ratio - 0.5);
+        const floor = bilinearSample(grassFloor, samples, sx, sz);
         if (floor >= 1) return 0;
         return 1 - grassPatchCover(
-          (descriptor.centerWorldX + localX) / tileSize,
-          -(descriptor.centerWorldZ + localZ) / tileSize,
+          (descriptor.centerWorldX - half + (x + 0.5) * texel) / tileSize,
+          -(descriptor.centerWorldZ + half - (z + 0.5) * texel) / tileSize,
           floor,
           seed,
         );

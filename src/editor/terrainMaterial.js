@@ -5,6 +5,7 @@ import {
   abs,
   cameraPosition,
   clamp,
+  cos,
   distance,
   dot,
   float,
@@ -79,11 +80,12 @@ function ecotoneTileUv({ terrainUv, transitionPatterns, chunkWorldSize, cellsPer
     terrainUv.x.sub(0.5).mul(chunkWorldSize),
     float(0.5).sub(terrainUv.y).mul(chunkWorldSize),
   );
-  const point = transitionPatterns.latticePoint('broad', localXZ);
-  const offset = vec2(
-    periodicFbm2(point),
-    periodicFbm2(point.add(vec2(37, 11))),
-  ).sub(0.5).mul(2 * reachCells / cellsPerChunk);
+  // One noise drives both the direction and the length of the nudge: half the
+  // cost of two independent offsets, and still a smooth field.
+  const noise = periodicFbm2(transitionPatterns.latticePoint('broad', localXZ));
+  const angle = noise.mul(4 * Math.PI);
+  const offset = vec2(cos(angle), sin(angle))
+    .mul(abs(noise.sub(0.5)).mul(2 * reachCells / cellsPerChunk));
   // UV v runs against canonical z, as localXZ above.
   return terrainUv.add(vec2(offset.x, offset.y.negate()));
 }
