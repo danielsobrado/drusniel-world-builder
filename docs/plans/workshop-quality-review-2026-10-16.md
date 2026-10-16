@@ -1,6 +1,18 @@
 # Workshop improvement plan — 2026-10-16
 
-Status: proposed implementation sequence; analysis only.
+Status: implemented and validated on 2026-10-16.
+
+Implementation progress:
+
+- [x] Capture recipes, cameras, lighting, renderer and source fingerprints.
+- [x] Correct curved crossbars and attach UVs to geometry.
+- [x] Physical slate courses and continuous eaves.
+- [x] Clustered vegetation, connected paving and optional resolved interiors.
+- [x] Contextual controls, exact values, keyboard precision and independent dressing.
+- [x] Profile and optimize derived curve sampling; instrument real pointer gestures.
+- [x] Complete the final hardware interaction run and matched capture matrix.
+
+See [the implementation and validation record](../workshop-quality-improvements-2026-10-16.md).
 
 The next pass should make the existing designs look consistently constructed and
 feel easier to edit. The strongest gains are fixing curved window assemblies and

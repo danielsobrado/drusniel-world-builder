@@ -1,0 +1,337 @@
+{
+  "source": {
+    "commit": "45c9c389653a0aa01c5331c8250fb75727ef47a0",
+    "hash": "f06d91df5004695b6606639de5930c900f2f97bbb0a9c202920930cb91a53bcd"
+  },
+  "verifiedAgainstCommit": "f47f54f6f72f075843f218d59242f689cdd2aa1b",
+  "renderer": {
+    "webgpu": true,
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": ""
+  },
+  "captureCount": 160,
+  "matchingNearViews": 64,
+  "checks": [
+    "Context tabs, exact numeric dimensions, fine keyboard increments and Escape cancellation use semantic history.",
+    "Chimneys, planting and interior finishes have independent controls; generated benches can be hidden and reset.",
+    "Real window drags on four fixtures report frame intervals, render submission, long tasks and memory with explicit latency limits.",
+    "Generated path gates remain derived and can be hidden and undone.",
+    "Keeping a generated gate makes an editable opening that survives moving the path.",
+    "Automatic gate creation can be disabled and restored from the wall controls.",
+    "Facade and shutter controls preserve existing wall, roof, and ivy buffers.",
+    "An isolated wall edit preserves the other shape and its GPU buffers.",
+    "Roof-only reshaping preserves the wall geometry buffers.",
+    "Pointer reshaping commits one undoable edit; Escape restores the prior shape.",
+    "Opening authoring, movement, and removal update the preview.",
+    "The existing area material inspector assigns a finish to the new roof.",
+    "Bake saves the authored shape composition and material overrides.",
+    "Runtime restoration preserves the semantic composition.",
+    "Switching back to the existing workshop preserves freeform work.",
+    "The main radial workshop exposes Freeform shapes and its authoring controls.",
+    "Wall sliders support the complete legal height range.",
+    "Lowering a turret adapts elevated windows and undo restores both.",
+    "Descending traversal retains its negative rise in the visible controls.",
+    "Custom outlines remain visible and editable without ineffective resize controls.",
+    "Custom wall paths disable length and bend controls that cannot reshape the path.",
+    "Recovery cancels an unfinished edit and restores consistent committed history.",
+    "Baking completes a pending gesture once and saves the committed construction.",
+    "Craft dressing toggles locally without rebuilding masonry or ivy.",
+    "Bake saves the craft preference and keeps generated dressing out of authoring state.",
+    "Undo and redo deterministically restore and remove the crafted details.",
+    "Weathering changes reuse roof and ivy buffers.",
+    "Real window pointer drags commit once; undo, redo and Escape restore semantic cuts.",
+    "Curve handles author stable control points through real pointer events and replay.",
+    "Moving and hiding an individual chimney preserves other buffers and survives bake and renderer recovery.",
+    "All five architectural features can be added, resized with their host, removed, restored and baked through authoring controls.",
+    "A connected ramp inherits timber while a railing override preserves floor inheritance.",
+    "A real door drag moves its semantic opening, preserves windows and supports undo/redo.",
+    "Individual planters move and hide through pointer and authoring controls with semantic replay.",
+    "A footprint point drag authors a custom curve and survives undo/redo.",
+    "Five measured interactive opening edits and the settled upgrade preserve neighboring GPU products.",
+    "Four shutter poses edit through the UI, rebuild only the facade and replay correctly.",
+    "Balconies, bays and dormers move through real pointer drags, with one history command and Escape cancellation.",
+    "A curved balcony can be added, removed and restored using authoring controls.",
+    "Balcony intent and authored shutter poses survive bake and renderer recovery.",
+    "Both balcony presets retain their structural silhouette with fewer vertices at coarse detail."
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "tests": [
+    {
+      "file": "tmp/workshop-quality-tests.log",
+      "tests": null,
+      "passed": null,
+      "failed": null
+    },
+    {
+      "file": "tmp/workshop-quality-full-tests.log",
+      "tests": null,
+      "passed": null,
+      "failed": null
+    }
+  ],
+  "cpu": [
+    {
+      "file": "tmp/workshop-quality-before-2026-10-16/cpu.json",
+      "sourceHash": "c5990a38d60c0f00b1ebbe1f68e88095c60e5111e6e8da30b793a34f8cd1c82f",
+      "fixtures": [
+        {
+          "id": "rounded-cottage",
+          "p50": 22.2503999999999,
+          "p95": 40.80049999999994,
+          "sampleCount": 15
+        },
+        {
+          "id": "buttressed-chapel",
+          "p50": 32.78890000000001,
+          "p95": 49.950000000000045,
+          "sampleCount": 15
+        },
+        {
+          "id": "balcony-tower",
+          "p50": 198.1896000000006,
+          "p95": 225.72239999999965,
+          "sampleCount": 15
+        },
+        {
+          "id": "cottage-turret",
+          "p50": 59.769500000000335,
+          "p95": 66.09749999999985,
+          "sampleCount": 15
+        }
+      ],
+      "beams": [
+        28.647499999999127,
+        25.4445999999989,
+        24.488600000000588,
+        20.2487000000001,
+        24.71730000000025
+      ]
+    },
+    {
+      "file": "tmp/workshop-quality-after-cpu.json",
+      "sourceHash": "9b88a85230f020d341efa36caf68a88964bc63f1b067308c1fe57e294b12de68",
+      "fixtures": [
+        {
+          "id": "rounded-cottage",
+          "p50": 39.84820000000013,
+          "p95": 47.086900000000014,
+          "sampleCount": 15
+        },
+        {
+          "id": "buttressed-chapel",
+          "p50": 33.590999999999894,
+          "p95": 47.184499999999844,
+          "sampleCount": 15
+        },
+        {
+          "id": "balcony-tower",
+          "p50": 39.57930000000033,
+          "p95": 48.57139999999981,
+          "sampleCount": 15
+        },
+        {
+          "id": "cottage-turret",
+          "p50": 41.41889999999967,
+          "p95": 67.42070000000058,
+          "sampleCount": 15
+        }
+      ],
+      "beams": [
+        22.906299999999646,
+        23.14890000000014,
+        21.204999999999927,
+        17.360599999999977,
+        23.09859999999935
+      ]
+    },
+    {
+      "file": "tmp/workshop-quality-after-cpu-repeat.json",
+      "sourceHash": "a38af7edafacb030539e7163cd8ec2211e9e6ee4584723f8774ea91110336092",
+      "fixtures": [
+        {
+          "id": "rounded-cottage",
+          "p50": 20.446800000000167,
+          "p95": 25.010099999999966,
+          "sampleCount": 15
+        },
+        {
+          "id": "buttressed-chapel",
+          "p50": 27.21640000000025,
+          "p95": 42.741199999999935,
+          "sampleCount": 15
+        },
+        {
+          "id": "balcony-tower",
+          "p50": 29.55749999999989,
+          "p95": 35.25469999999996,
+          "sampleCount": 15
+        },
+        {
+          "id": "cottage-turret",
+          "p50": 47.14040000000023,
+          "p95": 80.59540000000015,
+          "sampleCount": 15
+        }
+      ],
+      "beams": [
+        22.363799999999173,
+        23.09979999999996,
+        15.82930000000033,
+        10.947800000000825,
+        16.327799999999115
+      ]
+    }
+  ],
+  "responsiveness": [
+    {
+      "id": "rounded-cottage",
+      "units": "ms",
+      "meaning": "Pointer event to render submission proxy; not physical display latency.",
+      "frameInterval": {
+        "count": 64,
+        "p50": 6.5999999940395355,
+        "p95": 68.19999998807907,
+        "max": 85.7999999821186
+      },
+      "submission": {
+        "count": 65,
+        "p50": 1.100000023841858,
+        "p95": 39.5,
+        "max": 56
+      },
+      "pointerFeedbackProxy": {
+        "count": 8,
+        "p50": 2.5,
+        "p95": 7.799999982118607,
+        "max": 7.799999982118607
+      },
+      "geometrySubmissionProxy": {
+        "count": 8,
+        "p50": 91.69999998807907,
+        "p95": 107.5,
+        "max": 107.5
+      },
+      "longTasks": [
+        59
+      ],
+      "geometryBytes": 4525092
+    },
+    {
+      "id": "buttressed-chapel",
+      "units": "ms",
+      "meaning": "Pointer event to render submission proxy; not physical display latency.",
+      "frameInterval": {
+        "count": 63,
+        "p50": 6.600000023841858,
+        "p95": 73.5,
+        "max": 170.5
+      },
+      "submission": {
+        "count": 64,
+        "p50": 1.0999999940395355,
+        "p95": 39,
+        "max": 53.19999998807907
+      },
+      "pointerFeedbackProxy": {
+        "count": 8,
+        "p50": 2.5,
+        "p95": 4.799999982118607,
+        "max": 4.799999982118607
+      },
+      "geometrySubmissionProxy": {
+        "count": 8,
+        "p50": 96.59999999403954,
+        "p95": 106.69999998807907,
+        "max": 106.69999998807907
+      },
+      "longTasks": [
+        56,
+        142
+      ],
+      "geometryBytes": 10984116
+    },
+    {
+      "id": "balcony-tower",
+      "units": "ms",
+      "meaning": "Pointer event to render submission proxy; not physical display latency.",
+      "frameInterval": {
+        "count": 66,
+        "p50": 6.700000017881393,
+        "p95": 58.099999994039536,
+        "max": 119.2000000178814
+      },
+      "submission": {
+        "count": 67,
+        "p50": 1.199999988079071,
+        "p95": 30,
+        "max": 32.79999998211861
+      },
+      "pointerFeedbackProxy": {
+        "count": 8,
+        "p50": 3.199999988079071,
+        "p95": 4.199999988079071,
+        "max": 4.199999988079071
+      },
+      "geometrySubmissionProxy": {
+        "count": 8,
+        "p50": 82.59999999403954,
+        "p95": 87.09999999403954,
+        "max": 87.09999999403954
+      },
+      "longTasks": [
+        100
+      ],
+      "geometryBytes": 9360780
+    },
+    {
+      "id": "cottage-turret",
+      "units": "ms",
+      "meaning": "Pointer event to render submission proxy; not physical display latency.",
+      "frameInterval": {
+        "count": 66,
+        "p50": 6.700000017881393,
+        "p95": 60.20000001788139,
+        "max": 68.2000000178814
+      },
+      "submission": {
+        "count": 67,
+        "p50": 1.5,
+        "p95": 22.599999994039536,
+        "max": 26.69999998807907
+      },
+      "pointerFeedbackProxy": {
+        "count": 8,
+        "p50": 2.5999999940395355,
+        "p95": 3.5,
+        "max": 3.5
+      },
+      "geometrySubmissionProxy": {
+        "count": 8,
+        "p50": 88.2999999821186,
+        "p95": 97.09999999403954,
+        "max": 97.09999999403954
+      },
+      "longTasks": [
+        59
+      ],
+      "geometryBytes": 9428892
+    }
+  ],
+  "reviewCeilings": {
+    "scope": "The measured NVIDIA Lovelace workstation and four fixtures; advisory, not a universal hardware SLA.",
+    "cpuP50Ms": 60,
+    "cpuP95Ms": 120,
+    "pointerSubmissionP95Ms": 60,
+    "geometrySubmissionP95Ms": 150,
+    "frameIntervalP95Ms": 100,
+    "geometryBytes": 12582912,
+    "previewBatches": 32
+  },
+  "limits": [
+    "Submission proxies do not measure physical display latency.",
+    "Eight pointer samples per fixture do not establish a long-run latency percentile.",
+    "The neutral-light before capture was unavailable; stage and grazing comparisons retain the baseline cameras."
+  ]
+}
