@@ -18,10 +18,24 @@ import { curvePathMetrics } from '../src/editor/workshop/curves/CurveSampling.js
 import { curveSegmentPointAtLength } from '../src/editor/workshop/curves/CurveSegment.js';
 import { buildShapeProfileRail } from '../src/editor/workshop/shapes/ShapeProfileRail.js';
 import { resolveVolumePath } from '../src/editor/workshop/shapes/ShapeVolume.js';
+import { shapeAlbedoTexture } from '../src/editor/workshop/shapes/ShapeAlbedo.js';
 
 const meshSet = () => Object.fromEntries(['walls', 'trim', 'inserts', 'glazing', 'metal', 'deck', 'foliage'].map(key => [key, new ShapeMesh()]));
 const plan = primitive => planWorkshopComposition({ composition: { primitives: [primitive] } }).shapePlans[0];
 const uvArea = (uv, i) => (uv[i + 2] - uv[i]) * (uv[i + 5] - uv[i + 1]) - (uv[i + 3] - uv[i + 1]) * (uv[i + 4] - uv[i]);
+
+test('surface grain preserves the existing material palette instead of multiplying in a second wood or slate hue', () => {
+  for (const slot of ['wood','roof']) {
+    const texture = shapeAlbedoTexture(slot, 1848, 'slate');
+    try {
+      const data = texture.image.data;
+      for (let i = 0; i < data.length; i += 4) {
+        assert.ok(Math.min(data[i],data[i+1],data[i+2]) > 220);
+        assert.ok(Math.max(data[i],data[i+1],data[i+2])-Math.min(data[i],data[i+1],data[i+2]) < 12);
+      }
+    } finally { texture.dispose(); }
+  }
+});
 
 test('compiled workshop sampling matches the curve kernel through rounded and oval segments', () => {
   for (const id of ['rounded-cottage', 'courtyard-pavilion']) {

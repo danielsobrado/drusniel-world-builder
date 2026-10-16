@@ -168,6 +168,8 @@ try {
   assert.doesNotMatch(JSON.stringify(report.renderer), /swiftshader|lavapipe|llvmpipe|microsoft basic|warp/i);
   await shapeLocator(page, 'select[name="archetype"]').selectOption('composition');
   await settle(page);
+  await checkWorkshopShapeInspector({ page, report, preset, settle });
+  await checkWorkshopShapeResponsiveness({ page, report, preset, settle, handlePoint });
   for (const item of SHAPE_PRESETS) {
     await preset(page, item.id);
     const state = await page.evaluate(() => {
@@ -438,8 +440,6 @@ try {
   await checkWorkshopShapePolish({ page, report, preset, settle, output });
   await checkWorkshopShapeExpansion({ page, report, preset, settle, field, output, handlePoint });
   await checkWorkshopShapeBalconies({ page, report, preset, settle, field, output, handlePoint });
-  await checkWorkshopShapeInspector({ page, report, preset, settle });
-  await checkWorkshopShapeResponsiveness({ page, report, preset, settle, handlePoint });
   assert.deepEqual(report.pageErrors, []);
   assert.deepEqual(report.consoleErrors, []);
   report.sourceAfter = await workshopReviewSource(root);

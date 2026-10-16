@@ -4,7 +4,9 @@ import { shapeRandom } from './ShapeMesh.js';
 /** Quiet material grain; tile joints and timber edges are already real geometry. */
 export function shapeAlbedoTexture(slot, seed, topStyle) {
   const size = 128, data = new Uint8Array(size * size * 4);
-  const base = slot === 'wood' ? [110, 76, 49] : topStyle === 'terracotta' ? [190, 146, 119] : [137, 144, 153];
+  // Composition materials already carry the authored wood/roof hue. A second
+  // coloured albedo would multiply that palette into near-black timber/slate.
+  const base = slot === 'wood' ? [241, 238, 234] : [245, 245, 245];
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const grain = slot === 'wood' ? Math.sin(x * 0.82 + Math.sin(y * Math.PI / 64) * 0.55) * 4 : 0;
     const noise = (shapeRandom(seed, slot, 'grain', `${x}:${y}`) - 0.5) * 5;
