@@ -1,5 +1,6 @@
 # QA evidence
 
+- [October 16 random biome visual audit](visual-audit-2026-10-16/README.md) — 18 fresh views, original clean/HUD screenshots, confirmed tree-atlas fallback, and a detailed [AAA look-and-feel plan](../plans/aaa-look-and-feel-plan-2026-10-16.md).
 - [Random biome visual audit](visual-audit-2026-10-13/README.md) — twelve natural land-biome screenshots, capture limitations, and a prioritized [world visual quality plan](../plans/world-visual-quality-plan-2026-10-13.md).
 - [World visual quality implementation](world-visual-quality-implementation-2026-10-14.md) — task status, retained evidence and outstanding release gates; [ocean repetition review](world-visual-quality-2026-10-14/ocean/README.md) includes the October 15 comparison and shader checks.
 - [`prop-collision-p0-baseline-2026-07-27.md`](prop-collision-p0-baseline-2026-07-27.md) — trusted no-collision movement control and deterministic P0 fixture contract.

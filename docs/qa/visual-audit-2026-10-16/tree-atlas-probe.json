@@ -1,0 +1,120 @@
+{
+  "startedAt": "2026-10-16T17:10:30.976Z",
+  "warnings": [
+    {
+      "text": "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+      "location": {
+        "url": "http://localhost:5182/src/render/deviceLimits.js",
+        "line": 29,
+        "column": 0,
+        "lineNumber": 29,
+        "columnNumber": 0
+      }
+    },
+    {
+      "text": "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+      "location": {
+        "url": "http://localhost:5182/tmp/world-visual-quality/vite-52914b15-5182/deps/three.webgpu-Buy3e8Vp.js?v=9dcebf31",
+        "line": 100783,
+        "column": 0,
+        "lineNumber": 100783,
+        "columnNumber": 0
+      }
+    },
+    {
+      "text": "Tree impostor assets could not be loaded; runtime bake will be attempted. Error: Tree impostor manifest does not match the current tree source assets.\n    at validateTreeImpostorManifest (http://localhost:5182/src/editor/stylized/impostor/TreeImpostorManifest.js:226:11)\n    at TreeImpostorAssetLoader.load (http://localhost:5182/src/editor/stylized/impostor/TreeImpostorAssets.js:123:22)\n    at async StylizedTreeView.initializeImpostors (http://localhost:5182/src/editor/stylized/StylizedTreeView.js:672:38)",
+      "location": {
+        "url": "http://localhost:5182/@vite/client",
+        "line": 524,
+        "column": 3,
+        "lineNumber": 524,
+        "columnNumber": 3
+      }
+    },
+    {
+      "text": "THREE.Source: \"Source\" has been renamed to \"TextureSource\". Please update your code to use \"THREE.TextureSource\" instead.",
+      "location": {
+        "url": "http://localhost:5182/@vite/client",
+        "line": 524,
+        "column": 3,
+        "lineNumber": 524,
+        "columnNumber": 3
+      }
+    },
+    {
+      "text": "Calling [RenderPassEncoder (unlabeled)].Draw with an index count of 0 is unusual.",
+      "location": {
+        "url": "http://localhost:5182/?qaVisual=1",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "text": "Calling [RenderPassEncoder (unlabeled)].Draw with a vertex count of 0 is unusual.",
+      "location": {
+        "url": "http://localhost:5182/?qaVisual=1",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "errors": [],
+  "worlds": [
+    {
+      "world": "procedural",
+      "backend": "webgpu",
+      "settings": {
+        "enabled": true,
+        "compressed": true,
+        "manifest": "/assets/impostors/trees/manifest.json",
+        "runtimeBake": false,
+        "columns": 8,
+        "rows": 2,
+        "tileSize": 128,
+        "gutter": 4,
+        "lowElevationDegrees": 12,
+        "highElevationDegrees": 58
+      },
+      "runtimeSignature": "tree-impostor-v7-ddf715ab",
+      "manifestSignature": "tree-impostor-v7-edb495ec",
+      "signaturesMatch": false,
+      "prototypeCount": 29,
+      "manifestPrototypeCount": 29,
+      "loadedAtlasCount": 0,
+      "impostorBatchCount": 0,
+      "atlasSources": []
+    },
+    {
+      "world": "eldara",
+      "backend": "webgpu",
+      "settings": {
+        "enabled": true,
+        "compressed": true,
+        "manifest": "/assets/impostors/trees/manifest.json",
+        "runtimeBake": false,
+        "columns": 8,
+        "rows": 2,
+        "tileSize": 128,
+        "gutter": 4,
+        "lowElevationDegrees": 12,
+        "highElevationDegrees": 58
+      },
+      "runtimeSignature": "tree-impostor-v7-ddf715ab",
+      "manifestSignature": "tree-impostor-v7-edb495ec",
+      "signaturesMatch": false,
+      "prototypeCount": 29,
+      "manifestPrototypeCount": 29,
+      "loadedAtlasCount": 0,
+      "impostorBatchCount": 0,
+      "atlasSources": []
+    }
+  ],
+  "sourceSha": "52914b1559ceda00526ca027b83a89775ced63a4",
+  "scriptSha256": "8cbd6b273e1cd7944d5846d0c306fc465b09994fcf5f417d2f1539721844a0d7",
+  "sourceStayedFixed": true,
+  "finishedAt": "2026-10-16T17:11:11.251Z"
+}
