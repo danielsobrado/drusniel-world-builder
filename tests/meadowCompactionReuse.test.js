@@ -60,3 +60,65 @@ test('band changes reuse ground until its revision changes, preserving complete 
   assert.equal(layer.getState().building, 0);
   layer.dispose(); material.dispose();
 });
+
+test('unfinished promotions retain rejected ranks and exact output through repeated LOD changes', t => {
+  const templates = Object.fromEntries([['low', 512], ['medium', 2048], ['high', 4096]]
+    .map(([band, count]) => [band, createMeadowTemplate({ detail: 3, count, tileSize: 8 })]));
+  let samples = 0;
+  const sample = (x, z, rank, out) => {
+    samples++;
+    Object.assign(out, { height: x * 0.2 + z * 0.3, strength: 0.8, shape: 2, path: 0.2 });
+    return rank % 3 !== 0;
+  };
+  const material = new MeshBasicMaterial();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'promotion', tileSize: 8,
+    templates, material, reach: 0, selectBand: () => 'high',
+    ground: { revisionAt: () => 1, forTile: () => ({ revision: 1, sample }) } });
+  t.after(() => { layer.dispose(); material.dispose(); Object.values(templates).forEach(g => g.dispose()); });
+  const compaction = createCompaction({ template: templates.low, centerX: 4, centerZ: 4, sample });
+  compaction.advance(257);
+  const tile = { centerX: 4, centerZ: 4, renderX: 4, renderZ: 4, band: 'medium',
+    preparationBand: 'medium', preparationCapacity: 2048, revision: 1,
+    job: { band: 'low', revision: 1, compaction } };
+  layer.tiles.set('0:0', tile);
+  layer.rebuildStaleTiles();
+  assert.equal(tile.job.compaction, compaction);
+  assert.equal(compaction.processedCount, 257);
+  compaction.advance(311);
+  Object.assign(tile, { band: 'high', preparationBand: 'high', preparationCapacity: 4096 });
+  layer.rebuildStaleTiles();
+  layer.time = 1;
+  layer.buildTiles(layer.staleTiles, Infinity);
+  assert.equal(samples, 4096, 'each rank is sampled once, including rejected ranks');
+  const expected = createCompaction({ template: templates.high, centerX: 4, centerZ: 4, sample });
+  expected.advance();
+  assertOutput(tile.output, expected.output);
+  assert.equal(tile.output.minHeight, expected.output.minHeight);
+  assert.equal(tile.output.maxHeight, expected.output.maxHeight);
+});
+
+test('a ground revision discards partial results before a promoted build publishes', t => {
+  const low = createMeadowTemplate({ detail: 2, count: 512, tileSize: 8 });
+  const high = createMeadowTemplate({ detail: 3, count: 2048, tileSize: 8 });
+  let height = 1;
+  const sample = (_x, _z, _rank, out) => {
+    Object.assign(out, { height, strength: 1, shape: 0, path: 0 }); return true;
+  };
+  const material = new MeshBasicMaterial();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'revision', tileSize: 8,
+    templates: { low, high }, material, reach: 0, selectBand: () => 'high',
+    ground: { revisionAt: () => 2, forTile: () => ({ revision: 2, sample }) } });
+  t.after(() => { layer.dispose(); material.dispose(); low.dispose(); high.dispose(); });
+  const compaction = createCompaction({ template: low, centerX: 4, centerZ: 4, sample });
+  compaction.advance(257);
+  height = 7;
+  const tile = { centerX: 4, centerZ: 4, renderX: 4, renderZ: 4, band: 'high',
+    preparationBand: 'high', preparationCapacity: 2048, revision: 2,
+    job: { band: 'low', revision: 1, compaction } };
+  layer.tiles.set('0:0', tile);
+  layer.rebuildStaleTiles();
+  assert.equal(tile.job, null);
+  layer.time = 1;
+  layer.buildTiles(layer.staleTiles, Infinity);
+  for (let i = 0; i < tile.output.count; i++) assert.equal(tile.output.position[i * 4 + 1], 7);
+});

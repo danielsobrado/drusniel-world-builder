@@ -10,6 +10,7 @@ import {
 } from './meadowGrassLayout.js';
 import { MeadowGroundSampler } from './MeadowGroundSampler.js';
 import { MeadowInteractionMap } from './MeadowInteractionMap.js';
+import { MeadowCompactionPool } from './MeadowCompactionPool.js';
 import { spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { MeadowTileLayer } from './MeadowTileLayer.js';
 import { createMeadowUniforms } from './meadowUniforms.js';
@@ -22,7 +23,7 @@ const CARD_ATLAS = 'assets/ground/meadow/meadow-grass-cards.webp';
  *
  *  - *Blades* to `maxDistance`: individual blades at the meadow's real scale on
  *    chunk-aligned tiles, four LOD bands that cut segments and thin the stand,
- *    stable sparse batches or packed dense pages per band. The donor measured
+ *    bounded packed pages per band. The donor measured
  *    its whole near meadow at 0.29 M
  *    triangles.
  *  - *Cards* beyond, to `far.distance`: billboard clumps of ~180 stems at two
@@ -62,6 +63,7 @@ export class MeadowGrassField {
     this.viewCone = { x: 0, z: 0, tangent: 1 };
     this.canonical = { x: 0, z: 0 };
     this.skyView = skyView;
+    this.preparer = typeof Worker === 'function' ? new MeadowCompactionPool() : null;
     // The player's body stamp, built before the uniforms that read it. Its window is
     // render space, like the blades, but the ground it tests the body sphere against
     // is asked in canonical coordinates, because that is how the terrain answers.
@@ -134,6 +136,7 @@ export class MeadowGrassField {
       selectPreparationBand: (nearest) => selectLod(Math.max(0, Math.sqrt(nearest) - preparationLead) ** 2, thresholds),
       reach: settings.maxDistance + preparationLead,
       ground: this.ground,
+      preparer: this.preparer,
       boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
       maxPublicationBytes: 4 * 1024 * 1024,
     });
@@ -158,6 +161,7 @@ export class MeadowGrassField {
         selectBand: (nearest, farthest) => (nearest < far.distance ** 2 && farthest > start ** 2 ? 'cards' : null),
         reach: far.distance,
         ground: this.ground,
+        preparer: this.preparer,
         boundsPadding: meadowCardBoundsPadding(this.uniforms),
         maxPublicationBytes: 4 * 1024 * 1024,
       });
@@ -297,6 +301,7 @@ export class MeadowGrassField {
   }
 
   dispose() {
+    this.preparer?.dispose();
     this.blades.dispose();
     this.cards?.dispose();
     this.bladeMaterial.dispose();

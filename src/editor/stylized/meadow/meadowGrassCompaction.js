@@ -37,19 +37,20 @@ export function createCompactionOutput(capacity) {
  * @param {object} [options.output] a recycled createCompactionOutput() of the band's capacity
  */
 export function createCompaction({ template, centerX, centerZ, sample, output: recycled = null, previous = null }) {
-  const source = {
-    position: template.getAttribute('instancePosition').array,
-    rotation: template.getAttribute('instanceRotation').array,
-    data: template.getAttribute('instanceData').array,
-  };
-  const output = recycled ?? createCompactionOutput(template.instanceCount);
+  const readSource = geometry => ({
+    position: geometry.getAttribute('instancePosition').array,
+    rotation: geometry.getAttribute('instanceRotation').array,
+    data: geometry.getAttribute('instanceData').array,
+  });
+  let source = readSource(template);
+  let output = recycled ?? createCompactionOutput(template.instanceCount);
   output.count = 0;
   output.minHeight = previous?.output.minHeight ?? Infinity;
   output.maxHeight = previous?.output.maxHeight ?? -Infinity;
   const ground = { height: 0, strength: 1, shape: 0, path: 0 };
   const cards = Boolean(template.userData.meadow?.cards);
   const writeWind = createMeadowWindVariationWriter(centerX, centerZ, template.userData.meadow.tileSize);
-  const total = template.instanceCount;
+  let total = template.instanceCount;
   let cursor = previous ? Math.min(previous.capacity, total) : 0;
   if (previous) {
     const prefix = compactionPrefix(previous.output, total);
@@ -66,7 +67,24 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
     }
   }
   return {
-    output,
+    get output() { return output; },
+    get processedCount() { return cursor; },
+    // Compatible templates share the same rank sequence. Keep the exact cursor,
+    // including rejected ranks, rather than resampling an unfinished prefix.
+    promote(nextTemplate, nextOutput = null) {
+      if (nextTemplate.instanceCount <= total) return null;
+      const previousOutput = output;
+      output = nextOutput ?? createCompactionOutput(nextTemplate.instanceCount);
+      output.count = previousOutput.count;
+      output.minHeight = previousOutput.minHeight;
+      output.maxHeight = previousOutput.maxHeight;
+      for (const [name, width] of [['position', 4], ['rotation', 2], ['data', 4]]) {
+        output[name].set(previousOutput[name].subarray(0, output.count * width));
+      }
+      source = readSource(nextTemplate);
+      total = nextTemplate.instanceCount;
+      return previousOutput;
+    },
     get done() {
       return cursor >= total;
     },

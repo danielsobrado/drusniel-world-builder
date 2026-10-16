@@ -16,8 +16,7 @@ import { meadowTileInView } from './meadowTileVisibility.js';
  *  - Builds run nearest-first until the caller's deadline, in slices of
  *    `SLICE_STEMS`, and a tile keeps drawing its previous band until the new one
  *    is ready, so nothing blinks.
- *  - Stable sparse batches avoid copying neighbors; packed dense pages avoid
- *    drawing unused stems.
+ *  - Bounded packed pages retain local uploads and avoid drawing unused stems.
  *  - No garbage in steady state: a band's compaction outputs (up to ~0.5 MB each)
  *    are pooled and reused as tiles leave and rebuild. Allocating them fresh
  *    showed up as 40–230 ms collector pauses while running across the meadow.
@@ -42,12 +41,14 @@ export class MeadowTileLayer {
    * @param {object} options.ground MeadowGroundSampler
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null, maxPublicationBytes = Infinity }) {
+  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null, maxPublicationBytes = Infinity, preparer = null }) {
     this.tileSize = tileSize;
     this.templates = templates;
     this.selectBand = selectBand;
     this.reach = reach;
     this.ground = ground;
+    this.preparer = preparer;
+    for (const template of Object.values(templates)) preparer?.register(template);
     this.maxPublicationBytes = maxPublicationBytes;
     this.publicationBytes = 0;
     const definitions = Object.values(templates).map(template => template.userData?.meadow);
@@ -206,6 +207,7 @@ export class MeadowTileLayer {
       if (tile.seenFrame === frameSerial) continue;
       if (tile.output) this.batchDirty = true;
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
+      tile.job?.compaction.cancel?.();
       this.release(tile.job?.band, tile.job?.compaction.output);
       this.tiles.delete(key);
     }
@@ -216,14 +218,25 @@ export class MeadowTileLayer {
     const stale = this.staleTiles;
     stale.length = 0;
     for (const tile of this.tiles.values()) {
-      if (tile.job && ((tile.job.band !== tile.preparationBand
-        && this.templates[tile.job.band].instanceCount < tile.preparationCapacity)
-        || tile.job.revision !== tile.revision)) {
+      if (tile.job && tile.job.revision === tile.revision && this.stablePrefixes
+          && this.templates[tile.job.band].instanceCount < tile.preparationCapacity) {
+        const reused = tile.job.compaction.processedCount;
+        const previous = tile.job.compaction.promote(this.templates[tile.preparationBand],
+          this.pools.get(tile.preparationBand).pop() ?? null);
+        this.release(tile.job.band, previous);
+        tile.job.band = tile.preparationBand;
+        PerfCounters.inc('meadowPartialRanksReused', reused);
+      }
+      if (tile.job && (tile.job.revision !== tile.revision || (!this.stablePrefixes
+          && this.templates[tile.job.band].instanceCount < tile.preparationCapacity))) {
+        PerfCounters.inc('meadowRanksDiscarded', tile.job.compaction.processedCount);
+        tile.job.compaction.cancel?.();
         this.release(tile.job.band, tile.job.compaction.output);
         tile.job = null;
       }
       if (MeadowTileLayer.isStale(tile)) stale.push(tile);
       else if (tile.job) {
+        tile.job.compaction.cancel?.();
         this.release(tile.job.band, tile.job.compaction.output);
         tile.job = null;
       }
@@ -286,30 +299,36 @@ export class MeadowTileLayer {
         continue;
       }
       if (!tile.job) {
+        if (this.preparer && !this.preparer.hasCapacity(this.templates[tile.preparationBand])) {
+          stale[write++] = tile;
+          continue;
+        }
         const ground = this.ground.forTile(tile.centerX, tile.centerZ, this.tileSize / 2);
         if (!ground) {
           stale[write++] = tile;
           continue;
         }
+        const options = {
+          template: this.templates[tile.preparationBand],
+          centerX: tile.centerX, centerZ: tile.centerZ, sample: ground.sample,
+          output: this.pools.get(tile.preparationBand).pop() ?? null,
+          previous: this.stablePrefixes && tile.prepared?.revision === ground.revision ? tile.prepared : null,
+        };
         tile.job = {
           band: tile.preparationBand,
           revision: ground.revision,
-          compaction: createCompaction({
-            template: this.templates[tile.preparationBand],
-            centerX: tile.centerX,
-            centerZ: tile.centerZ,
-            sample: ground.sample,
-            output: this.pools.get(tile.preparationBand).pop() ?? null,
-            previous: this.stablePrefixes && tile.prepared?.revision === ground.revision
-              ? tile.prepared
-              : null,
-          }),
+          compaction: this.preparer && ground.snapshot && !this.preparer.failed
+            ? this.preparer.create({ ...options, snapshot: ground.snapshot,
+              recycle: (output, template) => this.release(Object.keys(this.templates)
+                .find(band => this.templates[band] === template), output) })
+            : createCompaction(options),
         };
       }
       const { compaction } = tile.job;
       const total = this.templates[tile.job.band].instanceCount;
       const before = compaction.progress;
-      while (!compaction.done && performance.now() < deadline) compaction.advance(SLICE_STEMS);
+      if (compaction.asynchronous) compaction.advance(SLICE_STEMS);
+      else while (!compaction.done && performance.now() < deadline) compaction.advance(SLICE_STEMS);
       compacted += Math.round((compaction.progress - before) * total);
       if (!compaction.done) {
         stale[write++] = tile;
@@ -418,6 +437,7 @@ export class MeadowTileLayer {
   }
 
   dispose() {
+    for (const tile of this.tiles.values()) tile.job?.compaction.cancel?.();
     this.batches.dispose();
     this.tiles.clear();
     this.pools.clear();

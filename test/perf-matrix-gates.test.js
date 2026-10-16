@@ -124,3 +124,22 @@ test('performance matrix rejects timed-out preparation and incomplete captures',
   assert.ok(result.failures.some(f => f.includes('preparation was incomplete')));
   assert.ok(result.failures.some(f => f.includes('frame buffer was incomplete')));
 });
+
+test('meadow matrix cases require coverage recovery even when frame gates pass', () => {
+  const matrix = passingMatrix();
+  const entry = matrix.cases[0].report;
+  entry.density.grassSystem = 'meadow';
+  Object.assign(entry.density, { meadowHighDensity: 1, meadowFarDensity: 1 });
+  for (const id of ['high-grass', 'dense-mixed']) {
+    Object.assign(matrix.cases.find(c => c.id === id).report.density,
+      { meadowHighDensity: 2, meadowFarDensity: 2 });
+  }
+  Object.assign(entry.counters, { meadowInViewMissingTiles: 3, meadowInViewCapacityLagTiles: 2 });
+  entry.recovery = { ready: true, firstReadyMs: 1900,
+    counters: { meadowInViewMissingTiles: 0, meadowInViewCapacityLagTiles: 0 } };
+  assert.equal(evaluatePerfMatrix(matrix).passed, true);
+  entry.recovery.firstReadyMs = 2500;
+  const gate = evaluatePerfMatrix(matrix);
+  assert.equal(gate.passed, false);
+  assert.ok(gate.failures.some(f => f.includes('recover within 2000 ms')));
+});
