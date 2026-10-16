@@ -1,0 +1,389 @@
+{
+  "reviewedOn": "2026-10-16",
+  "sourceRevisionAtStart": "617d1df7",
+  "sourceRevisionAtReviewCompletion": "124c8ed0",
+  "scope": "Read-only workshop analysis; historical browser report plus current geometry probes. No new browser or performance run.",
+  "workingChangesAtStart": [
+    "scripts/review-workshop-shapes.mjs",
+    "src/editor/workshop/shapes/ShapeWallBuilder.js",
+    "test/workshop-shape-masonry-courses.test.js",
+    "src/editor/workshop/shapes/ShapePavilionInterior.js"
+  ],
+  "transomDiagnostic": {
+    "method": "Project the midpoint of the straight horizontal bar onto the outward normal at the curved glass center. Report centerlines deeper behind the glass than the 0.0275 m half-thickness.",
+    "candidateCount": 24,
+    "candidates": [
+      {
+        "preset": "rounded-cottage",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "rounded-cottage",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "cottage-turret",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "cottage-turret",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "terraced-cottage",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "terraced-cottage",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "timber-cottage",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.1571
+      },
+      {
+        "preset": "timber-cottage",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.1585
+      },
+      {
+        "preset": "timber-cottage",
+        "host": "cottage",
+        "opening": "window-upper",
+        "centerBehindGlassMeters": 0.0705
+      },
+      {
+        "preset": "timber-pavilion",
+        "host": "pavilion",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "timber-pavilion",
+        "host": "pavilion",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "dormer-cottage",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "dormer-cottage",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "bay-porch-cottage",
+        "host": "cottage",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.0478
+      },
+      {
+        "preset": "bay-porch-cottage",
+        "host": "cottage",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0557
+      },
+      {
+        "preset": "bay-porch-cottage",
+        "host": "cottage-f-1hx85rz",
+        "opening": "bay-window-1",
+        "centerBehindGlassMeters": 0.1245
+      },
+      {
+        "preset": "bay-porch-cottage",
+        "host": "cottage-f-1hx85rz",
+        "opening": "bay-window-2",
+        "centerBehindGlassMeters": 0.0382
+      },
+      {
+        "preset": "jettied-townhouse",
+        "host": "cottage",
+        "opening": "upper-front",
+        "centerBehindGlassMeters": 0.1062
+      },
+      {
+        "preset": "jettied-townhouse",
+        "host": "cottage",
+        "opening": "upper-side",
+        "centerBehindGlassMeters": 0.1002
+      },
+      {
+        "preset": "jettied-townhouse",
+        "host": "cottage-f-1vhlstg",
+        "opening": "upper-front",
+        "centerBehindGlassMeters": 0.0303
+      },
+      {
+        "preset": "buttressed-chapel",
+        "host": "chapel",
+        "opening": "window-front",
+        "centerBehindGlassMeters": 0.1712
+      },
+      {
+        "preset": "buttressed-chapel",
+        "host": "chapel",
+        "opening": "window-side",
+        "centerBehindGlassMeters": 0.0361
+      },
+      {
+        "preset": "balcony-manor",
+        "host": "manor",
+        "opening": "front-window",
+        "centerBehindGlassMeters": 0.1424
+      },
+      {
+        "preset": "balcony-manor",
+        "host": "manor",
+        "opening": "upper-side",
+        "centerBehindGlassMeters": 0.1454
+      }
+    ]
+  },
+  "uvDiagnostic": {
+    "beamTranslation": [
+      3.25,
+      0,
+      0
+    ],
+    "beamUVsUnchanged": false,
+    "wallTrim": [
+      {
+        "preset": "rounded-cottage",
+        "trimTriangles": 7054,
+        "degenerateUVTriangles": 168
+      },
+      {
+        "preset": "balcony-tower",
+        "trimTriangles": 44816,
+        "degenerateUVTriangles": 0
+      }
+    ],
+    "caveat": "These checks establish coordinate defects; they do not attribute every visible texture stripe to this one cause."
+  },
+  "historicalBrowserReport": {
+    "renderer": {
+      "webgpu": true,
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": ""
+    },
+    "assertionCount": 38,
+    "detailViews": 19,
+    "presets": [
+      {
+        "id": "rounded-cottage",
+        "batches": 14,
+        "sourceVertices": 100800
+      },
+      {
+        "id": "bell-turret",
+        "batches": 14,
+        "sourceVertices": 201846
+      },
+      {
+        "id": "courtyard-pavilion",
+        "batches": 9,
+        "sourceVertices": 69873
+      },
+      {
+        "id": "cottage-turret",
+        "batches": 28,
+        "sourceVertices": 209913
+      },
+      {
+        "id": "terraced-cottage",
+        "batches": 16,
+        "sourceVertices": 103242
+      },
+      {
+        "id": "garden-bridge",
+        "batches": 1,
+        "sourceVertices": 23004
+      },
+      {
+        "id": "curved-courtyard",
+        "batches": 8,
+        "sourceVertices": 85176
+      },
+      {
+        "id": "timber-cottage",
+        "batches": 14,
+        "sourceVertices": 131538
+      },
+      {
+        "id": "garden-gateway",
+        "batches": 6,
+        "sourceVertices": 87204
+      },
+      {
+        "id": "timber-pavilion",
+        "batches": 15,
+        "sourceVertices": 93522
+      },
+      {
+        "id": "dormer-cottage",
+        "batches": 20,
+        "sourceVertices": 147387
+      },
+      {
+        "id": "bay-porch-cottage",
+        "batches": 20,
+        "sourceVertices": 161736
+      },
+      {
+        "id": "jettied-townhouse",
+        "batches": 12,
+        "sourceVertices": 117624
+      },
+      {
+        "id": "buttressed-chapel",
+        "batches": 14,
+        "sourceVertices": 252276
+      },
+      {
+        "id": "balcony-manor",
+        "batches": 20,
+        "sourceVertices": 157680
+      },
+      {
+        "id": "balcony-tower",
+        "batches": 17,
+        "sourceVertices": 208065
+      }
+    ],
+    "editMeasurements": [
+      {
+        "phase": "drag",
+        "planningMs": 8,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 43.70000000298023,
+        "totalMs": 51.79999999701977,
+        "neighborReused": true
+      },
+      {
+        "phase": "drag",
+        "planningMs": 8,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 41.099999994039536,
+        "totalMs": 49.099999994039536,
+        "neighborReused": true
+      },
+      {
+        "phase": "drag",
+        "planningMs": 7.5999999940395355,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 36.70000000298023,
+        "totalMs": 44.29999999701977,
+        "neighborReused": true
+      },
+      {
+        "phase": "drag",
+        "planningMs": 7.899999991059303,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 37.6000000089407,
+        "totalMs": 45.599999994039536,
+        "neighborReused": true
+      },
+      {
+        "phase": "drag",
+        "planningMs": 7.200000002980232,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 37.20000000298023,
+        "totalMs": 44.400000005960464,
+        "neighborReused": true
+      },
+      {
+        "phase": "settle",
+        "planningMs": 8.299999997019768,
+        "rebuilt": 1,
+        "reused": 1,
+        "rebuiltDomains": 4,
+        "generationMs": 71.79999999701977,
+        "totalMs": 80.09999999403954,
+        "neighborReused": true
+      }
+    ]
+  },
+  "sources": [
+    {
+      "path": "src/editor/workshop/shapes/ShapeMesh.js",
+      "sha256": "96c914f247058f32eeddb23191eb68933d6d46044b100c0d8a5ee0c6c0a1beca",
+      "modifiedAt": "2026-10-08T13:54:29.354Z"
+    },
+    {
+      "path": "src/editor/workshop/shapes/ShapeOpeningBuilder.js",
+      "sha256": "e5fc1ef12cb29a7c35506f523c80484286e3c57e1d3f069e7fc192e7ed32b9cb",
+      "modifiedAt": "2026-10-08T14:22:11.011Z"
+    },
+    {
+      "path": "src/editor/workshop/shapes/ShapeRoofTiles.js",
+      "sha256": "b2709b75471affdc484c1fc16bce78ed87c72ef539fb77dc7cd820133aef65d9",
+      "modifiedAt": "2026-10-08T14:29:09.807Z"
+    },
+    {
+      "path": "src/editor/workshop/shapes/ShapeGrounding.js",
+      "sha256": "50d84f3955583b6cfaa63b9a08efadc690702d8d5c479a4cbee4135581974c0a",
+      "modifiedAt": "2026-10-08T15:31:57.032Z"
+    },
+    {
+      "path": "src/editor/workshop/shapes/ShapeIvyLayout.js",
+      "sha256": "07f87396b0ca126f5bb6e4e6f6fa9ac93ce15590a3f327d427b31fe9cdf9b4d4",
+      "modifiedAt": "2026-10-08T01:48:16.010Z"
+    },
+    {
+      "path": "src/editor/workshop/shapes/ShapePavilionInterior.js",
+      "sha256": "7909dec7eefae43193a86f38e93f1368bf9011379326fb328c03678292e8721f",
+      "modifiedAt": "2026-10-16T01:00:03.766Z"
+    },
+    {
+      "path": "tmp/workshop-shapes-qa/report.json",
+      "sha256": "f55d0e93b3e4467c5315c34cf365e3f48f1dda45857d78fe9f4a16cc0ab5e4e3",
+      "modifiedAt": "2026-10-16T01:02:41.678Z"
+    },
+    {
+      "path": "tmp/workshop-shapes-qa/weathering-ground-detail.png",
+      "sha256": "342970f8a824d8c6ec68c4b530d45c2fca42831d80996326c0f654bbecbfd274",
+      "modifiedAt": "2026-10-16T01:02:28.520Z"
+    },
+    {
+      "path": "tmp/workshop-shapes-qa/roof-valley-detail.png",
+      "sha256": "2c84119dcea68d7d5ccccb7ffe97fc373e4a65af09d44397dc17b48522a1de7b",
+      "modifiedAt": "2026-10-16T01:02:29.968Z"
+    },
+    {
+      "path": "tmp/workshop-shapes-qa/balcony-tower-detail.png",
+      "sha256": "5a55e6ae6a08bb09a7296fe68642e4c18e0031416853db067b65faf92f6b5581",
+      "modifiedAt": "2026-10-16T01:02:39.652Z"
+    }
+  ]
+}
