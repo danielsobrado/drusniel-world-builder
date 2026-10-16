@@ -1,6 +1,7 @@
 import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
 import { buildShapeWeathering, shapeAgingSurface } from './ShapeWeathering.js';
+import { buildShapePavilionInterior } from './ShapePavilionInterior.js';
 import { buildShapeMasonryCourses, shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
 
 export function buildShapeWalls(plan, meshes, recipe) {
@@ -67,6 +68,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
       );
   }
   buildShapeOpenings(plan, meshes, recipe, surface);
+  buildShapePavilionInterior(plan, meshes, recipe, surface, distances);
   buildShapeWeathering(plan, meshes, recipe, surface);
   return surface;
 }

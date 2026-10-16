@@ -26,6 +26,7 @@ const VIEWS = [
   { id: 'b', azimuth: 110, distance: 1, lift: 1 },
   { id: 'c', azimuth: -110, distance: 1, lift: 1 },
   { id: 'close', azimuth: 25, distance: 0.55, lift: 0.35 },
+  ...(process.argv.includes('--inside') ? [{ id: 'inside', azimuth: 45, distance: 0.42, lift: 0.18 }] : []),
 ];
 
 async function settle(page) {

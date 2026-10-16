@@ -112,3 +112,27 @@ test('a bay that starts at the ground stands on its own base with raised sills',
   assert.equal(bay.primitive.grounded, true);
   assert.ok(bay.openings.every((o) => o.bottom >= 0.8));
 });
+
+test('an open pavilion is paved to its walls and has a bench broken at every archway', () => {
+  const plan = planWorkshopComposition({ composition: createShapePreset('courtyard-pavilion') }).shapePlans[0];
+  const near = build(plan, 3, buildShapeWalls), coarse = build(plan, 1, buildShapeWalls);
+  const floor = vertices(near.deck);
+  assert.ok(floor.length > 1000 && floor.every(([, y]) => y >= 0.05 - 1e-9 && y < 0.08), 'Paving sits above the ground.');
+  assert.ok(vertices(coarse.deck).length > 0 && vertices(coarse.deck).length < floor.length);
+  const surface = createShapeWallSurface(plan), length = surface.length;
+  // Every seat-top vertex, projected onto the wall, lies outside each archway's span.
+  const seat = vertices(near.trim).filter(([, y]) => Math.abs(y - 0.44) < 1e-6);
+  assert.ok(seat.length > 0);
+  const stations = Array.from({ length: Math.ceil(length / 0.01) }, (_, i) => i * 0.01);
+  const along = ([x, , z]) => stations.reduce((best, u) => {
+    const q = surface.point(u, 0.44, -plan.primitive.thickness / 2 - 0.2), d = Math.hypot(q[0] - x, q[2] - z);
+    return d < best.d ? { u, d } : best;
+  }, { u: 0, d: Infinity }).u;
+  const spans = seat.filter((_, i) => i % 7 === 0).map(along);
+  for (const arch of plan.openings) {
+    const gap = (u) => Math.abs(((u - arch.at * length + length / 2) % length + length) % length - length / 2);
+    assert.ok(spans.every((u) => gap(u) >= arch.width / 2 - 0.02), `Bench blocks ${arch.id}.`);
+  }
+  const cottage = planWorkshopComposition({ composition: createShapePreset('rounded-cottage') }).shapePlans[0];
+  assert.equal(build(cottage, 3, buildShapeWalls).deck.positions.length, 0);
+});
