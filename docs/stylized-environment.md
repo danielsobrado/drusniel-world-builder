@@ -64,7 +64,12 @@ stylizedSurface:
   as a neighbouring cell's biome (`ECOTONE_REACH_CELLS`), and the terrain reads its
   biome colour through a small noise dither (`ground.ecotoneReachCells`), so grass
   height, pigment and ground colour interleave over a few metres instead of
-  stepping at a 2 m cell edge.
+  stepping at a 2 m cell edge. Measured 2026-10-16 against the same commit without
+  these changes, ecotones, grass islands and litter together (`qa:perf`
+  chunk-cross, warmup 8, `--settle`): median dt p50 unchanged at 6.3 ms, median
+  avgFps 144 vs 151, inside the baseline's own 134–155 run-to-run spread. With
+  the dither and litter switched off the numbers did not move, so the shader terms
+  are not the cost.
 - **Thin grass grows in islands.** `world/GrassPatchiness.js` turns low meadow
   density (tundra, taiga, savanna, and the floor under canopy) into islands and
   tussocks over bare ground instead of an even speckle. The surface mask bakes the
