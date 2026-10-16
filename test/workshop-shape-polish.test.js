@@ -121,13 +121,17 @@ test('ridge caps and roof tile tops face upward after rotation', () => {
     buildShapeRoofTiles(resolved, mesh, surface, { detail: 2, seed: 1848 }, () => false);
     assert.ok(triangles > 100);
     if (preset === 'rounded-cottage') {
-      const roof = new ShapeMesh();
+      let tops = 0;
+      const roof = {
+        quad(a,b,c,d) {
+          // Seated skirts, the underside and closed end faces need outward normals of their own.
+          if (![a,b,c,d].every(([x,y,z]) => y > surface.heightAt(x,z) + 0.02)) return;
+          assert.ok(cross(a,b,c)[1] > 0); assert.ok(cross(a,c,d)[1] > 0); tops++;
+        },
+        triangle() {},
+      };
       buildShapeRoofCraft({ ...resolved, decorations: [] }, { roof }, { seed: 1848 }, surface, () => false);
-      const geometry = roof.geometry();
-      try {
-        const normals = geometry.getAttribute('normal');
-        for (let i = 0; i < normals.count; i++) assert.ok(normals.getY(i) > 0);
-      } finally { geometry.dispose(); }
+      assert.ok(tops > 0);
     }
   }
 });

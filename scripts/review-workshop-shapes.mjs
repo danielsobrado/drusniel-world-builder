@@ -132,7 +132,8 @@ try {
       }, prior.camera);
       await settle(page);
       const file = path.join(output, `${preset.id}-${view.id}${coarse ? '-coarse' : ''}${lighting === 'stage' ? '' : `-${lighting}`}.png`);
-      await page.screenshot({ path: file, clip });
+      await page.screenshot({ path: file, clip,
+        style: '.workshop-preview__badge,.workshop-gizmo-tools,.workshop-preview [data-role="workshop-preview-hint"],.workshop-close,.workshop-handle-label{visibility:hidden!important}' });
       const camera = await page.evaluate(() => { const ui = window.__editor.proceduralWorkshop;
         return { position: ui.camera.position.toArray(), target: ui.controls.target.toArray(), fov: ui.camera.fov }; });
       report.captures.push({ preset: preset.id, view, camera, recipe, lighting, detail: recipe.detail, kind: 'model', file: path.basename(file) });

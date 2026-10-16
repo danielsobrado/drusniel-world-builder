@@ -18,7 +18,9 @@ export async function checkWorkshopShapeInspector({ page, report, preset, settle
   await number.focus(); await number.press('Shift+ArrowUp'); await number.press('Tab'); await settle(page);
   state = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.primitive.openings.find(o => o.id === 'window-front').width);
   assert.equal(state, 1.155);
-  await number.fill('1.7'); await number.press('Escape'); await number.press('Tab'); await settle(page);
+  await number.fill('1.7'); await number.press('Escape');
+  assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.overlay.hidden), false, 'Cancelling a numeric edit keeps the workshop open.');
+  await number.press('Tab'); await settle(page);
   assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.primitive.openings.find(o => o.id === 'window-front').width), 1.155);
   report.assertions.push('Context tabs, exact numeric dimensions, fine keyboard increments and Escape cancellation use semantic history.');
   await context('details').click();

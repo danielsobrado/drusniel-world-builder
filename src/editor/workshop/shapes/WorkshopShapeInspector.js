@@ -42,9 +42,10 @@ export class WorkshopShapeInspector {
       if (context) { event.stopPropagation(); this.show(context); } };
     this.key = event => {
       if (event.key === 'Escape' && editor.session.transaction) {
-        event.preventDefault(); editor.session.cancel();
+        event.preventDefault(); event.stopPropagation(); editor.session.cancel();
         if (event.target.type === 'number') { event.target.value = ''; event.target.blur(); }
         editor.changed();
+        return;
       }
       const number = event.target;
       if (number.type !== 'number' || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;

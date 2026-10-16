@@ -33,6 +33,10 @@ const roofNeighbors = (plan) => (plan.neighbors ?? []).map((n) => ({
   roofReplaced: Boolean(n.roofReplaced), roofOnly: Boolean(n.roofOnly),
 }));
 
+const featureProducts = (plan) => plan.features.map(({ child, ...feature }) => child
+  ? { ...feature, child: { ...child, neighbors: roofNeighbors(child) } }
+  : feature);
+
 /** Keys express consumer dependencies, so roof edits do not rebuild masonry. */
 export function shapeProductKey(recipe, plan, domain) {
   const p = plan.primitive;
@@ -49,7 +53,7 @@ export function shapeProductKey(recipe, plan, domain) {
       : domain === 'ground'
         ? { primitive: body(p), ground: plan.ground, neighbors }
       : domain === 'features'
-        ? { features: plan.features, style: plan.resolvedStyle,
+        ? { features: featureProducts(plan), style: plan.resolvedStyle,
             neighbors: plan.features.some((f) => f.solidSupport) ? roofNeighbors(plan) : neighbors }
       : domain === 'roof'
         ? {

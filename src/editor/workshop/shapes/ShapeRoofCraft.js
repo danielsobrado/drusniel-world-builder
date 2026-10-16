@@ -1,5 +1,6 @@
 import { placeShapePoint } from './ShapePaths.js';
 import { shapeRandom } from './ShapeMesh.js';
+import { buildShapeRoofCap } from './ShapeRoofCap.js';
 
 export function buildShapeRoofCraft(plan, meshes, recipe, surface, hidden) {
   const p = plan.primitive;
@@ -7,35 +8,21 @@ export function buildShapeRoofCraft(plan, meshes, recipe, surface, hidden) {
     const depthAxis = p.roof.axis === 'depth';
     const half = (depthAxis ? p.footprint.depth : p.footprint.width) * p.taper / 2 + p.thickness / 2 + p.roof.overhang;
     const count = Math.ceil(half * 2 / 0.38);
-    for (let i = 0; i < count; i++) {
-      const x0 = -half + half * 2 * i / count + 0.008, x1 = -half + half * 2 * (i + 1) / count - 0.008;
-      const point = (x, t) => {
-        const [wx, wz] = placeShapePoint(p, depthAxis ? [Math.cos(t) * 0.095, x] : [x, Math.cos(t) * 0.095]);
-        const [rx, rz] = placeShapePoint(p, depthAxis ? [0, x] : [x, 0]);
-        return [wx, surface.heightAt(rx, rz) + 0.025 + Math.sin(t) * 0.09, wz];
-      };
+    const line = Array.from({ length: count + 1 }, (_, i) => {
+      const x = -half + half * 2 * i / count, [wx, wz] = placeShapePoint(p, depthAxis ? [0, x] : [x, 0]);
+      return [wx, surface.heightAt(wx, wz), wz];
+    });
+    buildShapeRoofCap(meshes.roof, line, surface, i => {
       const v = 0.86 + shapeRandom(recipe.seed, p.id, 'ridge-cap', i) * 0.12;
-      for (let arc = 0; arc < 6; arc++) {
-        const a = arc * Math.PI / 6, b = (arc + 1) * Math.PI / 6;
-        const quad = [point(x0, a), point(x0, b), point(x1, b), point(x1, a)];
-        if (!hidden(quad)) meshes.roof.quad(...(depthAxis ? quad : quad.toReversed()), [v, v, v]);
-      }
-    }
+      return [v, v, v];
+    }, hidden);
   }
   // Hip and ridge caps cover the creases that flat tiles cannot follow.
   for (const [index, line] of surface.ridgeLines().entries()) {
-    for (let i = 0; i < line.length - 1; i++) {
-      const a = line[i], b = line[i + 1], dx = b[0] - a[0], dz = b[2] - a[2], run = Math.hypot(dx, dz) || 1;
-      const n = [-dz / run, dx / run];
-      const gap = Math.min(0.008, run * 0.05), from = a.map((v, k) => v + (b[k] - v) * (gap / run)), to = b.map((v, k) => v - (v - a[k]) * (gap / run));
-      const at = (base, t) => [base[0] + n[0] * Math.cos(t) * 0.095, base[1] + 0.025 + Math.sin(t) * 0.09, base[2] + n[1] * Math.cos(t) * 0.095];
+    buildShapeRoofCap(meshes.roof, line, surface, i => {
       const v = 0.86 + shapeRandom(recipe.seed, p.id, 'hip-cap', `${index}:${i}`) * 0.12;
-      for (let arc = 0; arc < 6; arc++) {
-        const t0 = (arc * Math.PI) / 6, t1 = ((arc + 1) * Math.PI) / 6;
-        const quad = [at(from, t0), at(from, t1), at(to, t1), at(to, t0)];
-        if (!hidden(quad)) meshes.roof.quad(...quad.toReversed(), [v, v, v]);
-      }
-    }
+      return [v, v, v];
+    }, hidden);
   }
   if (['cone', 'bell', 'spire'].includes(p.roof.family)) {
     const top = surface.point(0, 0);

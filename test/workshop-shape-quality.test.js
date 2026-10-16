@@ -19,6 +19,7 @@ import { curveSegmentPointAtLength } from '../src/editor/workshop/curves/CurveSe
 import { buildShapeProfileRail } from '../src/editor/workshop/shapes/ShapeProfileRail.js';
 import { resolveVolumePath } from '../src/editor/workshop/shapes/ShapeVolume.js';
 import { shapeAlbedoTexture } from '../src/editor/workshop/shapes/ShapeAlbedo.js';
+import { buildShapeRoofCap } from '../src/editor/workshop/shapes/ShapeRoofCap.js';
 
 const meshSet = () => Object.fromEntries(['walls', 'trim', 'inserts', 'glazing', 'metal', 'deck', 'foliage'].map(key => [key, new ShapeMesh()]));
 const plan = primitive => planWorkshopComposition({ composition: { primitives: [primitive] } }).shapePlans[0];
@@ -61,6 +62,22 @@ test('a closed swept eave has no open seam or overlapping end caps', () => {
     for (let j = 0; j < 3; j++) { const id = [key(t[j]), key(t[(j+1)%3])].sort().join('|'); edges.set(id,(edges.get(id)??0)+1); }
   }
   assert.ok([...edges.values()].every(n => n === 2));
+});
+
+test('ridge cap stations meet continuously with seated sides, closed ends and outward winding', () => {
+  const mesh = new ShapeMesh(), line = [[0,2,0],[0.4,2.05,0],[0.8,2.1,0]];
+  const surface = { heightAt: (x,z) => 2 + x * 0.125 - Math.abs(z) * 0.7 };
+  buildShapeRoofCap(mesh, line, surface, () => [1,1,1]);
+  const edges = new Map(), key = p => p.map(v => Math.round(v * 1e6)).join(':');
+  let volume = 0;
+  for (let i = 0; i < mesh.positions.length; i += 9) {
+    const [a,b,c] = [0,3,6].map(k => mesh.positions.slice(i+k,i+k+3));
+    volume += (a[0]*(b[1]*c[2]-b[2]*c[1]) + a[1]*(b[2]*c[0]-b[0]*c[2]) + a[2]*(b[0]*c[1]-b[1]*c[0]))/6;
+    for (const [p,q] of [[a,b],[b,c],[c,a]]) { const id = [key(p),key(q)].sort().join('|'); edges.set(id,(edges.get(id)??0)+1); }
+  }
+  assert.ok([...edges.values()].every(n => n === 2), 'No open station, side or end seam.');
+  assert.ok(volume > 0, 'The closed cap has outward faces.');
+  for (const x of [0,0.4,0.8]) assert.ok(mesh.positions.some((value,i) => i % 3 === 0 && value === x && mesh.positions[i+1] < surface.heightAt(x, mesh.positions[i+2])), 'Every station has a skirt seated below its roof.');
 });
 
 test('curved window crossbar faces remain in front of the actual glass at every point', () => {
@@ -112,15 +129,18 @@ test('ivy density retains existing growth keys and positions while unrelated wal
   const byKey = new Map(b.leaves.map(leaf => [leaf.key, leaf]));
   assert.ok(a.leaves.length > 0 && b.leaves.length > a.leaves.length);
   for (const leaf of a.leaves) assert.deepEqual(leaf, byKey.get(leaf.key));
-  const recipe = structuredClone(normalizeProceduralRecipe({ detail: 2, ivy: true, composition: { primitives: [{ ...p, ivyDensity: 0.4 }] } }));
-  const cache = new WorkshopShapeCache();
-  try {
-    cache.update(recipe, planWorkshopComposition(recipe).shapePlans); const before = cache.entries.get(p.id);
-    recipe.composition.primitives[0].ivyDensity = 0.9;
-    const result = cache.update(recipe, planWorkshopComposition(recipe).shapePlans), after = cache.entries.get(p.id);
-    for (const domain of ['walls', 'roof', 'ground', 'facade']) assert.equal(before.domains.get(domain), after.domains.get(domain));
-    assert.notEqual(before.domains.get('ivy'), after.domains.get('ivy')); cache.releaseRemoved(result);
-  } finally { cache.clear(); }
+  for (const id of ['rounded-cottage', 'bay-porch-cottage']) {
+    const primitive = createShapePreset(id).primitives[0];
+    const recipe = structuredClone(normalizeProceduralRecipe({ detail: 2, ivy: true, composition: { primitives: [{ ...primitive, ivyDensity: 0.4 }] } }));
+    const cache = new WorkshopShapeCache();
+    try {
+      cache.update(recipe, planWorkshopComposition(recipe).shapePlans); const before = cache.entries.get(primitive.id);
+      recipe.composition.primitives[0].ivyDensity = 0.9;
+      const result = cache.update(recipe, planWorkshopComposition(recipe).shapePlans), after = cache.entries.get(primitive.id);
+      for (const domain of ['walls', 'roof', 'ground', 'facade', 'features']) assert.ok(before.domains.get(domain) === after.domains.get(domain), `${id}/${domain}`);
+      assert.notEqual(before.domains.get('ivy'), after.domains.get('ivy')); cache.releaseRemoved(result);
+    } finally { cache.clear(); }
+  }
 });
 
 test('entrance paving gives a connected ground-level path its full width without overlapping it', () => {

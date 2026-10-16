@@ -14,6 +14,7 @@ export async function checkWorkshopShapeResponsiveness({ page, report, preset, s
       const position = h.getWorldPosition(new T.Vector3()), direction = new T.Vector3(...h.userData.definition.normal).normalize();
       ui.controls.enableDamping = false; ui.controls.target.copy(position);
       ui.camera.position.copy(position).addScaledVector(direction, 12).add(new T.Vector3(0, 4, 0)); ui.controls.update();
+      ui.camera.updateMatrixWorld(true);
       const samples = { frames: [], submissions: [], feedbackProxy: [], geometrySubmission: [], longTasks: [] };
       const host = ui.ambientOcclusion ?? ui.renderer, original = host.render;
       let previous, feedback, geometry;
@@ -40,7 +41,9 @@ export async function checkWorkshopShapeResponsiveness({ page, report, preset, s
     const start = await handlePoint(page, 'opening');
     try {
       await page.mouse.move(start.x, start.y); await page.mouse.down();
-      assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.drag?.field), 'opening');
+      const drag = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.drag?.field);
+      if (drag !== 'opening') await page.screenshot({ path: `tmp/workshop-shapes-qa/responsiveness-${id}-failure.png` });
+      assert.equal(drag, 'opening', `${id}: the real pointer must acquire its opening handle.`);
       for (let step = 1; step <= 8; step++) {
         await page.mouse.move(start.x + step * 2, start.y - step * 0.5);
         await page.waitForTimeout(35);
