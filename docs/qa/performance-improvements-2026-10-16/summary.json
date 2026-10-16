@@ -1,0 +1,4048 @@
+{
+  "version": 1,
+  "purpose": "Measured implementation evidence; the final matrix verdict is retained even when it fails.",
+  "runtimeSource": {
+    "head": "78f4e5b8e65f44a28b492736aa85e9adffba6aba",
+    "fingerprint": {
+      "path": "tmp/performance-improvements-2026-10-16/frozen-source.json",
+      "sha256": "6be6a636123d8aff7bc7dd511aff98759f31f817f6201beb14fb6c854dd9d588",
+      "bytes": 174504
+    },
+    "fileCount": 1457,
+    "unchangedAfterMatrix": true,
+    "servedCopy": "tmp/performance-improvements-2026-10-16/runtime",
+    "serverOnlyChange": "Vite fs.allow permits shared Basis decoders; runtime/config sources are frozen.",
+    "publicAssets": "Shared with the checkout; no runtime reloads during capture."
+  },
+  "method": {
+    "browser": "Native Windows headed Playwright Chromium",
+    "gpu": "NVIDIA RTX 4080 / Lovelace, nonfallback WebGPU",
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "deviceScaleFactor": 1
+    },
+    "movementSeconds": 12,
+    "warmupSeconds": 8,
+    "initialReadiness": "60 consecutive ready frames before measuring",
+    "maximumRecoverySeconds": 20,
+    "grassOnlyReadiness": "60 consecutive frames with zero in-view missing/capacity-lag tiles",
+    "acceptance": "Full scenery ready within 2000 ms, complete recovered in-view grass, p95 <=33.3 ms, hitch rate <=2%, density/collision/construction/water gates.",
+    "limitations": [
+      "Other desktop/GPU activity was not controlled; these runs do not establish an isolated FPS speedup.",
+      "Movement-end counters and shortly-later grass diagnostics are separate observations.",
+      "Endpoint memory and submitted-slot comparisons have different populated scenes.",
+      "Marked upload bytes describe attribute ranges, not driver transfer measurements."
+    ]
+  },
+  "verification": {
+    "command": "npm run verify",
+    "passed": true,
+    "testCount": 6775,
+    "log": {
+      "path": "tmp/performance-improvements-2026-10-16/verify-release.log",
+      "sha256": "6257c1d3472df665d5aa150fe349cf09bde171f423a1814889185e2cd3c8614c",
+      "bytes": 1348087
+    },
+    "includes": [
+      "ESLint",
+      "generated UI checks",
+      "production asset validation",
+      "tests",
+      "production build"
+    ],
+    "warnings": "Existing bundle-size and ineffective-dynamic-import warnings remain."
+  },
+  "exactOutputProbe": {
+    "artifact": {
+      "path": "tmp/performance-improvements-2026-10-16/meadow-work-after.json",
+      "sha256": "f4eb436278fee1544271049552cc131d065a54951218afb51cc39849658cc1a6",
+      "bytes": 306
+    },
+    "ranks": 2048,
+    "beforeGroundSamples": 2304,
+    "afterGroundSamples": 2048,
+    "survivingStems": 1365,
+    "usedArraysByteIdentical": true,
+    "repeatedSamples": 0
+  },
+  "baseline": {
+    "artifact": {
+      "path": "tmp/performance-improvements-2026-10-16/before-standard.json",
+      "sha256": "a7acd0f033f83e152650c07954b5c6f03dcf8c5e51a4b1219febd4294f02f028",
+      "bytes": 2813275
+    },
+    "generatedAt": "2026-10-16T01:03:42.744Z",
+    "scenario": {
+      "id": "diagonal",
+      "label": "Diagonal run",
+      "spawn": {
+        "x": 0,
+        "z": 0
+      },
+      "yawDegrees": 0,
+      "pitchDegrees": 0,
+      "warmupSeconds": 8,
+      "settle": {
+        "settled": true,
+        "waitedSeconds": 28.7,
+        "blockers": []
+      },
+      "durationSeconds": 12,
+      "warmupFrames": null,
+      "measureFrames": null,
+      "speed": "run",
+      "explorationBoost": false,
+      "keys": [
+        "KeyW",
+        "KeyD",
+        "ShiftLeft"
+      ],
+      "hitchMs": 33.3,
+      "buildingCount": null,
+      "densityProfile": "standard",
+      "captureId": null
+    },
+    "adapter": {
+      "ok": true,
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "fallback": false
+    },
+    "capture": {
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "deviceScaleFactor": 1
+      },
+      "rendererBackend": {
+        "webgpu": true,
+        "webgl2": false,
+        "reason": null
+      },
+      "screenshot": null,
+      "cpuProfile": null,
+      "browserErrors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "summary": {
+      "frameCount": 1552,
+      "retainedFrameCount": 1553,
+      "droppedFrameCount": 0,
+      "frameBufferComplete": true,
+      "durationMs": 11989.2,
+      "avgFps": 129.45,
+      "dt": {
+        "minMs": 0.5,
+        "p50Ms": 7.3,
+        "p95Ms": 10.5,
+        "p99Ms": 16.149,
+        "maxMs": 33.9,
+        "meanMs": 7.729
+      },
+      "hitchMs": 33.3,
+      "hitchCount": 1,
+      "hitchRate": 0.0006,
+      "phases": {
+        "placementPreparation": {
+          "totalMs": 611.5,
+          "avgMs": 0.394,
+          "p95Ms": 0.945,
+          "maxMs": 3.8
+        },
+        "terrainCommit": {
+          "totalMs": 20.8,
+          "avgMs": 0.013,
+          "p95Ms": 0.1,
+          "maxMs": 1
+        },
+        "player": {
+          "totalMs": 263.9,
+          "avgMs": 0.17,
+          "p95Ms": 0.3,
+          "maxMs": 20.3
+        },
+        "floatingOrigin": {
+          "totalMs": 2.5,
+          "avgMs": 0.002,
+          "p95Ms": 0,
+          "maxMs": 0.1
+        },
+        "character": {
+          "totalMs": 160.4,
+          "avgMs": 0.103,
+          "p95Ms": 0.2,
+          "maxMs": 1.7
+        },
+        "streaming": {
+          "totalMs": 14,
+          "avgMs": 0.009,
+          "p95Ms": 0.1,
+          "maxMs": 0.2
+        },
+        "stylized": {
+          "totalMs": 1500.4,
+          "avgMs": 0.967,
+          "p95Ms": 1.9,
+          "maxMs": 4.6
+        },
+        "objects": {
+          "totalMs": 81.6,
+          "avgMs": 0.053,
+          "p95Ms": 0.1,
+          "maxMs": 1
+        },
+        "voxel": {
+          "totalMs": 9.7,
+          "avgMs": 0.006,
+          "p95Ms": 0.1,
+          "maxMs": 0.4
+        },
+        "render": {
+          "totalMs": 8024.2,
+          "avgMs": 5.17,
+          "p95Ms": 6.9,
+          "maxMs": 22.1
+        }
+      },
+      "originSnapCount": 0
+    },
+    "collisionGate": {
+      "provisionalP95TargetMs": 0.83,
+      "measuredP95Ms": 0.1,
+      "sampleCount": 1552,
+      "samplePassed": true,
+      "timingPassed": true,
+      "readinessPassed": true,
+      "passed": true
+    },
+    "measuredCounters": {
+      "mainProceduralTileMisses": 0,
+      "mainProceduralHeightMisses": 0,
+      "collisionReadinessMisses": 0,
+      "placementPreparedChunks": 12,
+      "rockManifestBuilds": 0,
+      "treeManifestBuilds": 0
+    },
+    "samplingMisses": [],
+    "movementEndCounters": {
+      "meadowVisibleMissingTiles": 49,
+      "meadowVisibleCapacityLagTiles": 26,
+      "meadowInViewMissingTiles": 27,
+      "meadowInViewCapacityLagTiles": 15,
+      "rendererDrawCalls": 171,
+      "rendererTriangles": 5324837,
+      "meadowCompactionReuses": 1065
+    },
+    "grassDiagnostic": {
+      "state": {
+        "blades": {
+          "tiles": 73,
+          "building": 112,
+          "stems": 107485,
+          "bands": {
+            "high": 25656,
+            "medium": 51016,
+            "low": 17010,
+            "veryLow": 13803
+          },
+          "visibleMissing": 52,
+          "visibleCapacityLag": 25,
+          "inViewMissing": 29,
+          "inViewCapacityLag": 14,
+          "resident": 197
+        },
+        "cards": {
+          "tiles": 32,
+          "building": 1,
+          "stems": 148683,
+          "bands": {
+            "cards": 148683
+          },
+          "visibleMissing": 1,
+          "visibleCapacityLag": 0,
+          "inViewMissing": 1,
+          "inViewCapacityLag": 0,
+          "resident": 33
+        },
+        "tiles": 105,
+        "building": 113,
+        "stems": 107485,
+        "triangles": 909809,
+        "bladeTriangles": 612443,
+        "cardTriangles": 297366
+      },
+      "batches": [
+        {
+          "layer": "blades",
+          "band": "high",
+          "tiles": 4,
+          "capacity": 32,
+          "stride": 10000,
+          "eligibleInstances": 70000,
+          "retainedBytes": 17920000
+        },
+        {
+          "layer": "blades",
+          "band": "medium",
+          "tiles": 8,
+          "capacity": 32,
+          "stride": 10000,
+          "eligibleInstances": 100000,
+          "retainedBytes": 17920000
+        },
+        {
+          "layer": "blades",
+          "band": "low",
+          "tiles": 16,
+          "capacity": 64,
+          "stride": 1936,
+          "eligibleInstances": 79376,
+          "retainedBytes": 6938624
+        },
+        {
+          "layer": "blades",
+          "band": "veryLow",
+          "tiles": 45,
+          "capacity": 128,
+          "stride": 484,
+          "eligibleInstances": 38720,
+          "retainedBytes": 3469312
+        },
+        {
+          "layer": "cards",
+          "band": "cards",
+          "tiles": 32,
+          "capacity": 64,
+          "stride": 6889,
+          "eligibleInstances": 268671,
+          "retainedBytes": 24690176
+        }
+      ],
+      "retainedInstanceArrayBytes": 70938112,
+      "submittedInstanceSlots": 556767
+    },
+    "maximumSampledFrameDeltas": {
+      "meadowBufferAllocationBytes": 24690176,
+      "meadowAttributeBytesUploaded": 3184264
+    },
+    "recovery": {
+      "ready": true,
+      "firstReadyMs": 7426.9000000059605,
+      "grass": null,
+      "waitedMs": 7830.20000000298,
+      "start": {
+        "ready": false,
+        "queueDepth": 56,
+        "fields": 1,
+        "meadow": 113,
+        "draws": 0,
+        "variants": 0,
+        "staged": 7,
+        "materials": 0
+      },
+      "end": {
+        "ready": true,
+        "queueDepth": 0,
+        "fields": 0,
+        "meadow": 0,
+        "draws": 0,
+        "variants": 0,
+        "staged": 0,
+        "materials": 0
+      },
+      "endCounters": {
+        "meadowVisibleMissingTiles": 0,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 0,
+        "meadowInViewCapacityLagTiles": 0,
+        "rendererDrawCalls": 212,
+        "rendererTriangles": 5552963,
+        "meadowCompactionReuses": 1067
+      }
+    },
+    "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+    "activeGrassDensity": {
+      "system": "meadow",
+      "bladesPerCell": 576,
+      "meadowBands": {
+        "high": {
+          "detail": 5,
+          "density": 12.6,
+          "distance": 0.12
+        },
+        "medium": {
+          "detail": 3,
+          "density": 12.6,
+          "distance": 0.28
+        },
+        "low": {
+          "detail": 3,
+          "density": 5.6,
+          "distance": 0.6
+        },
+        "veryLow": {
+          "detail": 2,
+          "density": 2.8,
+          "distance": 1
+        }
+      },
+      "meadowFar": {
+        "tileSize": 64,
+        "density": 1.3,
+        "distance": 180,
+        "width": 1.2,
+        "height": 0.72,
+        "transitionStart": 0.8,
+        "fadeStart": 0.9
+      }
+    }
+  },
+  "finalCases": {
+    "standard": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/matrix-release/standard.json",
+        "sha256": "89b66e0cdff125e1e5d0bc476a4b81d074de4524d102f233bfc1fdd8f56e952a",
+        "bytes": 2403680
+      },
+      "generatedAt": "2026-10-16T02:08:08.443Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 36.9,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 927,
+        "retainedFrameCount": 928,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11985.5,
+        "avgFps": 77.34,
+        "dt": {
+          "minMs": 0.4,
+          "p50Ms": 12.3,
+          "p95Ms": 19.45,
+          "p99Ms": 34.048,
+          "maxMs": 51.1,
+          "meanMs": 12.941
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 13,
+        "hitchRate": 0.014,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 7.7,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 0.8
+          },
+          "placementPreparation": {
+            "totalMs": 574.9,
+            "avgMs": 0.62,
+            "p95Ms": 1.3,
+            "maxMs": 3.3
+          },
+          "construction": {
+            "totalMs": 24.2,
+            "avgMs": 0.026,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "player": {
+            "totalMs": 265.7,
+            "avgMs": 0.287,
+            "p95Ms": 0.4,
+            "maxMs": 24.3
+          },
+          "floatingOrigin": {
+            "totalMs": 1.6,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 158.6,
+            "avgMs": 0.171,
+            "p95Ms": 0.3,
+            "maxMs": 2.1
+          },
+          "streaming": {
+            "totalMs": 14.5,
+            "avgMs": 0.016,
+            "p95Ms": 0.1,
+            "maxMs": 0.4
+          },
+          "stylized": {
+            "totalMs": 1969.2,
+            "avgMs": 2.124,
+            "p95Ms": 3.6,
+            "maxMs": 5.8
+          },
+          "objects": {
+            "totalMs": 78.7,
+            "avgMs": 0.085,
+            "p95Ms": 0.2,
+            "maxMs": 1.9
+          },
+          "voxel": {
+            "totalMs": 10.3,
+            "avgMs": 0.011,
+            "p95Ms": 0.1,
+            "maxMs": 0.9
+          },
+          "render": {
+            "totalMs": 7458.3,
+            "avgMs": 8.046,
+            "p95Ms": 11.5,
+            "maxMs": 19.2
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 927,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 13,
+        "rockManifestBuilds": 1,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 20,
+        "meadowVisibleCapacityLagTiles": 28,
+        "meadowInViewMissingTiles": 12,
+        "meadowInViewCapacityLagTiles": 11,
+        "rendererDrawCalls": 208,
+        "rendererTriangles": 4275155,
+        "meadowWorkerRequests": 1183,
+        "meadowWorkerRanksPrepared": 3105109,
+        "meadowWorkerCompleteMs": 16193.000000342727,
+        "meadowCompactionReuses": 920,
+        "meadowPartialRanksReused": 112772
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 102,
+            "building": 105,
+            "stems": 156741,
+            "bands": {
+              "high": 44807,
+              "medium": 70320,
+              "low": 19877,
+              "veryLow": 21737
+            },
+            "visibleMissing": 17,
+            "visibleCapacityLag": 25,
+            "inViewMissing": 8,
+            "inViewCapacityLag": 8,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 33,
+            "building": 0,
+            "stems": 155060,
+            "bands": {
+              "cards": 155060
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 135,
+          "building": 105,
+          "stems": 156741,
+          "triangles": 1229579,
+          "bladeTriangles": 919459,
+          "cardTriangles": 310120
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 7,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 44807,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 11,
+            "capacity": 18,
+            "stride": 10000,
+            "eligibleInstances": 70320,
+            "retainedBytes": 10080000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 20,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 19877,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 64,
+            "capacity": 112,
+            "stride": 484,
+            "eligibleInstances": 21737,
+            "retainedBytes": 3035648
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 33,
+            "capacity": 45,
+            "stride": 6889,
+            "eligibleInstances": 155060,
+            "retainedBytes": 17360280
+          }
+        ],
+        "retainedInstanceArrayBytes": 44134552,
+        "submittedInstanceSlots": 311801
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3472056,
+        "meadowAttributeBytesUploaded": 4506320
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 5890.5,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 2064.5
+        },
+        "waitedMs": 6551.9000000059605,
+        "start": {
+          "ready": false,
+          "queueDepth": 55,
+          "fields": 3,
+          "meadow": 105,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 222,
+          "rendererTriangles": 4376425,
+          "meadowWorkerRequests": 1233,
+          "meadowWorkerRanksPrepared": 3191245,
+          "meadowWorkerCompleteMs": 16766.40000040829,
+          "meadowCompactionReuses": 956,
+          "meadowPartialRanksReused": 112772
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "dense-forest": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/matrix-release/dense-forest.json",
+        "sha256": "4462dd1d32a8dcdd71e668a743571d0a48b7ac75e21c21cb0700bb4c9abd2b0d",
+        "bytes": 2881190
+      },
+      "generatedAt": "2026-10-16T02:11:37.960Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 61.1,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "dense-forest",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1006,
+        "retainedFrameCount": 1007,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11962.4,
+        "avgFps": 84.1,
+        "dt": {
+          "minMs": 0.5,
+          "p50Ms": 10.6,
+          "p95Ms": 24.375,
+          "p99Ms": 34,
+          "maxMs": 37.3,
+          "meanMs": 11.901
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 17,
+        "hitchRate": 0.0169,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 7.2,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 1.2
+          },
+          "placementPreparation": {
+            "totalMs": 569.5,
+            "avgMs": 0.566,
+            "p95Ms": 1.2,
+            "maxMs": 26.2
+          },
+          "construction": {
+            "totalMs": 24.6,
+            "avgMs": 0.024,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "player": {
+            "totalMs": 258.2,
+            "avgMs": 0.257,
+            "p95Ms": 0.4,
+            "maxMs": 17.4
+          },
+          "floatingOrigin": {
+            "totalMs": 2.7,
+            "avgMs": 0.003,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 159,
+            "avgMs": 0.158,
+            "p95Ms": 0.375,
+            "maxMs": 2.1
+          },
+          "streaming": {
+            "totalMs": 17.1,
+            "avgMs": 0.017,
+            "p95Ms": 0.1,
+            "maxMs": 0.7
+          },
+          "stylized": {
+            "totalMs": 1765.6,
+            "avgMs": 1.755,
+            "p95Ms": 3.5,
+            "maxMs": 4.9
+          },
+          "objects": {
+            "totalMs": 79,
+            "avgMs": 0.079,
+            "p95Ms": 0.2,
+            "maxMs": 1.9
+          },
+          "voxel": {
+            "totalMs": 9.6,
+            "avgMs": 0.01,
+            "p95Ms": 0.1,
+            "maxMs": 1.3
+          },
+          "render": {
+            "totalMs": 7618.5,
+            "avgMs": 7.573,
+            "p95Ms": 13,
+            "maxMs": 20.7
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 1006,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 3,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 19,
+        "meadowVisibleCapacityLagTiles": 27,
+        "meadowInViewMissingTiles": 8,
+        "meadowInViewCapacityLagTiles": 15,
+        "rendererDrawCalls": 211,
+        "rendererTriangles": 5146272,
+        "meadowWorkerRequests": 1178,
+        "meadowWorkerRanksPrepared": 3102689,
+        "meadowWorkerCompleteMs": 16999.09999975562,
+        "meadowCompactionReuses": 918,
+        "meadowPartialRanksReused": 94380
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 98,
+            "building": 106,
+            "stems": 156064,
+            "bands": {
+              "high": 44807,
+              "medium": 63895,
+              "low": 29105,
+              "veryLow": 18257
+            },
+            "visibleMissing": 21,
+            "visibleCapacityLag": 24,
+            "inViewMissing": 8,
+            "inViewCapacityLag": 12,
+            "resident": 199
+          },
+          "cards": {
+            "tiles": 33,
+            "building": 0,
+            "stems": 155060,
+            "bands": {
+              "cards": 155060
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 131,
+          "building": 106,
+          "stems": 156064,
+          "triangles": 1233154,
+          "bladeTriangles": 923034,
+          "cardTriangles": 310120
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 7,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 44807,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 10,
+            "capacity": 18,
+            "stride": 10000,
+            "eligibleInstances": 63895,
+            "retainedBytes": 10080000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 28,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 29105,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 53,
+            "capacity": 128,
+            "stride": 484,
+            "eligibleInstances": 18257,
+            "retainedBytes": 3469312
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 33,
+            "capacity": 45,
+            "stride": 6889,
+            "eligibleInstances": 155060,
+            "retainedBytes": 17360280
+          }
+        ],
+        "retainedInstanceArrayBytes": 44568216,
+        "submittedInstanceSlots": 311124
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3472056,
+        "meadowAttributeBytesUploaded": 4508000
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 9138.39999999106,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 3688.5
+        },
+        "waitedMs": 9819.20000000298,
+        "start": {
+          "ready": false,
+          "queueDepth": 55,
+          "fields": 2,
+          "meadow": 106,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 224,
+          "rendererTriangles": 5174916,
+          "meadowWorkerRequests": 1230,
+          "meadowWorkerRanksPrepared": 3187857,
+          "meadowWorkerCompleteMs": 17810.099999800324,
+          "meadowCompactionReuses": 957,
+          "meadowPartialRanksReused": 94380
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "high-grass": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/matrix-release/high-grass.json",
+        "sha256": "c35d8081a8866dd4ebbf51a2d63c7d565b18192582d9dd1c9933c0ead39d8bca",
+        "bytes": 2507576
+      },
+      "generatedAt": "2026-10-16T02:14:21.781Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 38.2,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "high-grass",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 964,
+        "retainedFrameCount": 965,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11990,
+        "avgFps": 80.4,
+        "dt": {
+          "minMs": 0.3,
+          "p50Ms": 11.3,
+          "p95Ms": 22.98,
+          "p99Ms": 33.774,
+          "maxMs": 35.6,
+          "meanMs": 12.446
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 13,
+        "hitchRate": 0.0135,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 6.4,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 0.4
+          },
+          "placementPreparation": {
+            "totalMs": 732.5,
+            "avgMs": 0.76,
+            "p95Ms": 1.4,
+            "maxMs": 18.4
+          },
+          "construction": {
+            "totalMs": 24.2,
+            "avgMs": 0.025,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "player": {
+            "totalMs": 258.8,
+            "avgMs": 0.268,
+            "p95Ms": 0.4,
+            "maxMs": 18
+          },
+          "floatingOrigin": {
+            "totalMs": 2.7,
+            "avgMs": 0.003,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 151,
+            "avgMs": 0.157,
+            "p95Ms": 0.3,
+            "maxMs": 1.9
+          },
+          "streaming": {
+            "totalMs": 14.2,
+            "avgMs": 0.015,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "stylized": {
+            "totalMs": 1898.9,
+            "avgMs": 1.97,
+            "p95Ms": 3.5,
+            "maxMs": 10.1
+          },
+          "objects": {
+            "totalMs": 71.4,
+            "avgMs": 0.074,
+            "p95Ms": 0.2,
+            "maxMs": 1.5
+          },
+          "voxel": {
+            "totalMs": 8.7,
+            "avgMs": 0.009,
+            "p95Ms": 0.1,
+            "maxMs": 0.6
+          },
+          "render": {
+            "totalMs": 7561.9,
+            "avgMs": 7.844,
+            "p95Ms": 12.57,
+            "maxMs": 20.2
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 964,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 19,
+        "rockManifestBuilds": 3,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 17,
+        "meadowVisibleCapacityLagTiles": 19,
+        "meadowInViewMissingTiles": 7,
+        "meadowInViewCapacityLagTiles": 12,
+        "rendererDrawCalls": 222,
+        "rendererTriangles": 6192046,
+        "meadowWorkerRequests": 1170,
+        "meadowWorkerRanksPrepared": 12488126,
+        "meadowWorkerCompleteMs": 23168.300000056624,
+        "meadowCompactionReuses": 912,
+        "meadowPartialRanksReused": 395696
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 103,
+            "building": 99,
+            "stems": 732419,
+            "bands": {
+              "high": 182000,
+              "medium": 337776,
+              "low": 143805,
+              "veryLow": 68838
+            },
+            "visibleMissing": 17,
+            "visibleCapacityLag": 15,
+            "inViewMissing": 5,
+            "inViewCapacityLag": 8,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 33,
+            "building": 0,
+            "stems": 621154,
+            "bands": {
+              "cards": 621154
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 136,
+          "building": 99,
+          "stems": 732419,
+          "triangles": 5494727,
+          "bladeTriangles": 4252419,
+          "cardTriangles": 1242308
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 7,
+            "capacity": 9,
+            "stride": 40401,
+            "eligibleInstances": 182000,
+            "retainedBytes": 20362104
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 13,
+            "capacity": 15,
+            "stride": 40401,
+            "eligibleInstances": 337776,
+            "retainedBytes": 33936840
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 33,
+            "capacity": 56,
+            "stride": 7921,
+            "eligibleInstances": 143805,
+            "retainedBytes": 24840256
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 50,
+            "capacity": 128,
+            "stride": 1936,
+            "eligibleInstances": 68838,
+            "retainedBytes": 13877248
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 33,
+            "capacity": 40,
+            "stride": 27556,
+            "eligibleInstances": 621154,
+            "retainedBytes": 61725440
+          }
+        ],
+        "retainedInstanceArrayBytes": 154741888,
+        "submittedInstanceSlots": 1353573
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3548608,
+        "meadowAttributeBytesUploaded": 6276592
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 3829.699999988079,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 1971.3999999910593
+        },
+        "waitedMs": 4352.899999991059,
+        "start": {
+          "ready": false,
+          "queueDepth": 57,
+          "fields": 3,
+          "meadow": 97,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 239,
+          "rendererTriangles": 7009679,
+          "meadowWorkerRequests": 1218,
+          "meadowWorkerRanksPrepared": 12829102,
+          "meadowWorkerCompleteMs": 23734.0000000149,
+          "meadowCompactionReuses": 953,
+          "meadowPartialRanksReused": 395696
+        }
+      },
+      "grassConfigSha256": "8804420a70ab197731aeca9897b23b0d88030c32de82c3c22fe31a973d92c28c",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 1152,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 25.2,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 25.2,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 11.2,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 5.6,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 2.6,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "dense-mixed": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/matrix-release/dense-mixed.json",
+        "sha256": "a1fa5755fa25f5e94e537cae0b7f29e9cc857c8fb8024cb91f98c439771c83c2",
+        "bytes": 2316744
+      },
+      "generatedAt": "2026-10-16T02:16:30.437Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 33.8,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "dense-mixed",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 900,
+        "retainedFrameCount": 901,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11973.1,
+        "avgFps": 75.17,
+        "dt": {
+          "minMs": 0.2,
+          "p50Ms": 12.5,
+          "p95Ms": 21.105,
+          "p99Ms": 33.604,
+          "maxMs": 51.2,
+          "meanMs": 13.317
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 12,
+        "hitchRate": 0.0133,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 7,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 1.3
+          },
+          "placementPreparation": {
+            "totalMs": 691.6,
+            "avgMs": 0.768,
+            "p95Ms": 1.4,
+            "maxMs": 2.5
+          },
+          "construction": {
+            "totalMs": 26.1,
+            "avgMs": 0.029,
+            "p95Ms": 0.1,
+            "maxMs": 0.5
+          },
+          "player": {
+            "totalMs": 247.4,
+            "avgMs": 0.275,
+            "p95Ms": 0.4,
+            "maxMs": 17.9
+          },
+          "floatingOrigin": {
+            "totalMs": 2.7,
+            "avgMs": 0.003,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 168,
+            "avgMs": 0.187,
+            "p95Ms": 0.4,
+            "maxMs": 2.1
+          },
+          "streaming": {
+            "totalMs": 14,
+            "avgMs": 0.016,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "stylized": {
+            "totalMs": 1857,
+            "avgMs": 2.063,
+            "p95Ms": 3.3,
+            "maxMs": 5.2
+          },
+          "objects": {
+            "totalMs": 72.2,
+            "avgMs": 0.08,
+            "p95Ms": 0.2,
+            "maxMs": 0.7
+          },
+          "voxel": {
+            "totalMs": 8.8,
+            "avgMs": 0.01,
+            "p95Ms": 0.1,
+            "maxMs": 0.4
+          },
+          "render": {
+            "totalMs": 7626.8,
+            "avgMs": 8.474,
+            "p95Ms": 12.1,
+            "maxMs": 38.9
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 900,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 8,
+        "rockManifestBuilds": 1,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 13,
+        "meadowVisibleCapacityLagTiles": 31,
+        "meadowInViewMissingTiles": 5,
+        "meadowInViewCapacityLagTiles": 17,
+        "rendererDrawCalls": 223,
+        "rendererTriangles": 6643484,
+        "meadowWorkerRequests": 1178,
+        "meadowWorkerRanksPrepared": 12516734,
+        "meadowWorkerCompleteMs": 22917.30000023544,
+        "meadowCompactionReuses": 899,
+        "meadowPartialRanksReused": 516447
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 107,
+            "building": 103,
+            "stems": 552204,
+            "bands": {
+              "high": 155730,
+              "medium": 208548,
+              "low": 97120,
+              "veryLow": 90806
+            },
+            "visibleMissing": 13,
+            "visibleCapacityLag": 31,
+            "inViewMissing": 3,
+            "inViewCapacityLag": 17,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 33,
+            "building": 0,
+            "stems": 621154,
+            "bands": {
+              "cards": 621154
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 140,
+          "building": 103,
+          "stems": 552204,
+          "triangles": 4444636,
+          "bladeTriangles": 3202328,
+          "cardTriangles": 1242308
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 6,
+            "capacity": 9,
+            "stride": 40401,
+            "eligibleInstances": 155730,
+            "retainedBytes": 20362104
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 8,
+            "capacity": 18,
+            "stride": 40401,
+            "eligibleInstances": 208548,
+            "retainedBytes": 40724208
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 24,
+            "capacity": 56,
+            "stride": 7921,
+            "eligibleInstances": 97120,
+            "retainedBytes": 24840256
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 69,
+            "capacity": 112,
+            "stride": 1936,
+            "eligibleInstances": 90806,
+            "retainedBytes": 12142592
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 33,
+            "capacity": 40,
+            "stride": 27556,
+            "eligibleInstances": 621154,
+            "retainedBytes": 61725440
+          }
+        ],
+        "retainedInstanceArrayBytes": 159794600,
+        "submittedInstanceSlots": 1173358
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3548608,
+        "meadowAttributeBytesUploaded": 5889520
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 5198.5999999940395,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 1951.7999999970198
+        },
+        "waitedMs": 5780.899999991059,
+        "start": {
+          "ready": false,
+          "queueDepth": 51,
+          "fields": 4,
+          "meadow": 103,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 241,
+          "rendererTriangles": 7750534,
+          "meadowWorkerRequests": 1229,
+          "meadowWorkerRanksPrepared": 12828925,
+          "meadowWorkerCompleteMs": 23525.90000024438,
+          "meadowCompactionReuses": 927,
+          "meadowPartialRanksReused": 516447
+        }
+      },
+      "grassConfigSha256": "8804420a70ab197731aeca9897b23b0d88030c32de82c3c22fe31a973d92c28c",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 1152,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 25.2,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 25.2,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 11.2,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 5.6,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 2.6,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "construction-ring": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/matrix-release/construction-ring.json",
+        "sha256": "1af218b471572379382d942bc2b0ed634b1b2aa4bc8d268ad4f3c2466ef93065",
+        "bytes": 2269386
+      },
+      "generatedAt": "2026-10-16T02:18:54.348Z",
+      "scenario": {
+        "id": "construction-ring",
+        "label": "Dense construction wall corridor",
+        "spawn": {
+          "x": 0,
+          "z": -100
+        },
+        "yawDegrees": 180,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 38.3,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 790,
+        "retainedFrameCount": 791,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11956,
+        "avgFps": 66.08,
+        "dt": {
+          "minMs": 0.4,
+          "p50Ms": 13.5,
+          "p95Ms": 31.8,
+          "p99Ms": 45.917,
+          "maxMs": 330.8,
+          "meanMs": 15.172
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 26,
+        "hitchRate": 0.0329,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 6.6,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "placementPreparation": {
+            "totalMs": 1084.6,
+            "avgMs": 1.373,
+            "p95Ms": 3.375,
+            "maxMs": 12.8
+          },
+          "construction": {
+            "totalMs": 81.6,
+            "avgMs": 0.103,
+            "p95Ms": 0.4,
+            "maxMs": 2
+          },
+          "player": {
+            "totalMs": 244.7,
+            "avgMs": 0.31,
+            "p95Ms": 0.4,
+            "maxMs": 23.8
+          },
+          "floatingOrigin": {
+            "totalMs": 2.3,
+            "avgMs": 0.003,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 129.2,
+            "avgMs": 0.164,
+            "p95Ms": 0.3,
+            "maxMs": 2.5
+          },
+          "streaming": {
+            "totalMs": 13.4,
+            "avgMs": 0.017,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "stylized": {
+            "totalMs": 1353.3,
+            "avgMs": 1.713,
+            "p95Ms": 3,
+            "maxMs": 7.5
+          },
+          "objects": {
+            "totalMs": 68.7,
+            "avgMs": 0.087,
+            "p95Ms": 0.2,
+            "maxMs": 0.5
+          },
+          "voxel": {
+            "totalMs": 7.9,
+            "avgMs": 0.01,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "render": {
+            "totalMs": 7730.9,
+            "avgMs": 9.786,
+            "p95Ms": 12.3,
+            "maxMs": 314.3
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 790,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 34,
+        "rockManifestBuilds": 26,
+        "treeManifestBuilds": 21
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 74,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 22,
+        "meadowInViewCapacityLagTiles": 0,
+        "rendererDrawCalls": 216,
+        "rendererTriangles": 3912307,
+        "meadowWorkerRequests": 729,
+        "meadowWorkerRanksPrepared": 2835352,
+        "meadowWorkerCompleteMs": 13039.199999928474,
+        "meadowCompactionReuses": 227,
+        "meadowPartialRanksReused": 144232
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 114,
+            "building": 54,
+            "stems": 211402,
+            "bands": {
+              "high": 33211,
+              "medium": 99142,
+              "low": 60584,
+              "veryLow": 18465
+            },
+            "visibleMissing": 34,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 200
+          },
+          "cards": {
+            "tiles": 38,
+            "building": 0,
+            "stems": 175404,
+            "bands": {
+              "cards": 175404
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 38
+          },
+          "tiles": 152,
+          "building": 54,
+          "stems": 211402,
+          "triangles": 1503732,
+          "bladeTriangles": 1152924,
+          "cardTriangles": 350808
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 4,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 33211,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 12,
+            "capacity": 18,
+            "stride": 10000,
+            "eligibleInstances": 99142,
+            "retainedBytes": 10080000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 44,
+            "capacity": 48,
+            "stride": 1936,
+            "eligibleInstances": 60584,
+            "retainedBytes": 5203968
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 54,
+            "capacity": 96,
+            "stride": 484,
+            "eligibleInstances": 18465,
+            "retainedBytes": 2601984
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 38,
+            "capacity": 45,
+            "stride": 6889,
+            "eligibleInstances": 175404,
+            "retainedBytes": 17360280
+          }
+        ],
+        "retainedInstanceArrayBytes": 41966232,
+        "submittedInstanceSlots": 386806
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3360000,
+        "meadowAttributeBytesUploaded": 4635064
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 311.70000000298023,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 9.200000002980232
+        },
+        "waitedMs": 859,
+        "start": {
+          "ready": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 50,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 224,
+          "rendererTriangles": 4058466,
+          "meadowWorkerRequests": 789,
+          "meadowWorkerRanksPrepared": 2871652,
+          "meadowWorkerCompleteMs": 13671.599999964237,
+          "meadowCompactionReuses": 227,
+          "meadowPartialRanksReused": 144232
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    }
+  },
+  "unchangedStandardGrassConfig": true,
+  "matrix": {
+    "artifact": {
+      "path": "tmp/performance-improvements-2026-10-16/matrix-release.json",
+      "sha256": "2b5ccc2caea8fb49832fabcdd78e45971333307f5101f18aba5f8b02dd0001e7",
+      "bytes": 214146
+    },
+    "gate": {
+      "passed": false,
+      "maximumP95Ms": 33.3,
+      "maximumHitchRate": 0.02,
+      "maximumGrassRecoveryMs": 2000,
+      "failures": [
+        "standard: scenery did not recover within 2000 ms",
+        "dense-forest: scenery did not recover within 2000 ms",
+        "high-grass: scenery did not recover within 2000 ms",
+        "dense-mixed: scenery did not recover within 2000 ms",
+        "construction-ring: hitch rate 0.0329 exceeds 0.02"
+      ]
+    }
+  },
+  "water": {
+    "artifact": {
+      "path": "tmp/performance-improvements-2026-10-16/water-release.json",
+      "sha256": "02b9d79fc2b7af5bf38abb315f78a4c7202b1cf55bc0c3e17eee370b24a7d2c5",
+      "bytes": 7680552
+    },
+    "acceptance": {
+      "pass": true,
+      "gates": {
+        "routeFound": true,
+        "measuredFrames": true,
+        "enteredWater": true,
+        "reachedSwimming": true,
+        "submerged": true,
+        "surfaced": true,
+        "returnedDry": true,
+        "stableBodyIdentity": true,
+        "originStable": true,
+        "projectedCausticsActive": true,
+        "projectedCausticsCpuBounded": true,
+        "frameP95Bounded": true,
+        "hitchRateBounded": true
+      },
+      "route": {
+        "start": {
+          "x": 238,
+          "z": 416
+        },
+        "target": {
+          "x": 152,
+          "z": 416
+        },
+        "yawDegrees": 90,
+        "distance": 86,
+        "bodyId": 1,
+        "kind": 1,
+        "surfaceHeight": -1.6943720249071068,
+        "targetDepth": 8.439116768149018
+      },
+      "qualityTier": "high",
+      "states": [
+        "dry",
+        "wading",
+        "swimming",
+        "submerged"
+      ],
+      "bodyIds": [
+        1
+      ]
+    },
+    "execution": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "precedingCandidate": {
+    "sourceHead": "66176d41",
+    "artifact": {
+      "path": "tmp/performance-improvements-2026-10-16/matrix-before-final-scheduling.json",
+      "sha256": "4aea40d1ddaa6712420499dff8702d96d2d4f0a2a2ecf9dfb008fb31fe0a9642",
+      "bytes": 213616
+    },
+    "gate": {
+      "passed": false,
+      "maximumP95Ms": 33.3,
+      "maximumHitchRate": 0.02,
+      "maximumGrassRecoveryMs": 2000,
+      "failures": [
+        "standard: scenery did not recover within 2000 ms",
+        "dense-forest: scenery did not recover within 2000 ms",
+        "high-grass: scenery did not recover within 2000 ms",
+        "dense-mixed: hitch rate 0.0222 exceeds 0.02",
+        "dense-mixed: scenery did not recover within 2000 ms",
+        "construction-ring: p95 34.7 ms exceeds 33.3 ms",
+        "construction-ring: hitch rate 0.0936 exceeds 0.02"
+      ]
+    }
+  },
+  "intermediateEvidence": {
+    "after-standard-1": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/after-standard-1.json",
+        "sha256": "7d9237da56f826725ad74079f835b60014efbc9aa6222b7adaef60a912014b90",
+        "bytes": 5581038
+      },
+      "generatedAt": "2026-10-16T01:13:27.264Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 28,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": null,
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1590,
+        "retainedFrameCount": 1591,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11992.7,
+        "avgFps": 132.58,
+        "dt": {
+          "minMs": 0.5,
+          "p50Ms": 7.3,
+          "p95Ms": 9.3,
+          "p99Ms": 11.922,
+          "maxMs": 31.3,
+          "meanMs": 7.546
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 0,
+        "hitchRate": 0,
+        "phases": {
+          "placementPreparation": {
+            "totalMs": 227.6,
+            "avgMs": 0.143,
+            "p95Ms": 0.4,
+            "maxMs": 2
+          },
+          "terrainCommit": {
+            "totalMs": 23.2,
+            "avgMs": 0.015,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "player": {
+            "totalMs": 258.2,
+            "avgMs": 0.162,
+            "p95Ms": 0.2,
+            "maxMs": 14.1
+          },
+          "floatingOrigin": {
+            "totalMs": 2.1,
+            "avgMs": 0.001,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 159.5,
+            "avgMs": 0.1,
+            "p95Ms": 0.2,
+            "maxMs": 1.8
+          },
+          "streaming": {
+            "totalMs": 13.1,
+            "avgMs": 0.008,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "stylized": {
+            "totalMs": 1522.2,
+            "avgMs": 0.957,
+            "p95Ms": 1.7,
+            "maxMs": 3.4
+          },
+          "objects": {
+            "totalMs": 79.5,
+            "avgMs": 0.05,
+            "p95Ms": 0.1,
+            "maxMs": 0.5
+          },
+          "voxel": {
+            "totalMs": 7.2,
+            "avgMs": 0.005,
+            "p95Ms": 0,
+            "maxMs": 0.4
+          },
+          "render": {
+            "totalMs": 8442,
+            "avgMs": 5.309,
+            "p95Ms": 6.5,
+            "maxMs": 11.6
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 1590,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 12,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 4,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 2,
+        "meadowInViewCapacityLagTiles": 0,
+        "rendererDrawCalls": 206,
+        "rendererTriangles": 4535257,
+        "meadowWorkerRequests": 1191,
+        "meadowWorkerRanksPrepared": 3120156,
+        "meadowWorkerCompleteMs": 9085.5,
+        "meadowCompactionReuses": 1171
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 115,
+            "building": 33,
+            "stems": 168141,
+            "bands": {
+              "high": 25656,
+              "medium": 76639,
+              "low": 45786,
+              "veryLow": 20060
+            },
+            "visibleMissing": 4,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 2,
+            "inViewCapacityLag": 0,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 32,
+            "building": 1,
+            "stems": 148683,
+            "bands": {
+              "cards": 148683
+            },
+            "visibleMissing": 1,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 1,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 147,
+          "building": 34,
+          "stems": 168141,
+          "triangles": 1200575,
+          "bladeTriangles": 903209,
+          "cardTriangles": 297366
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 4,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 25656,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 12,
+            "capacity": 16,
+            "stride": 10000,
+            "eligibleInstances": 76639,
+            "retainedBytes": 8960000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 37,
+            "capacity": 48,
+            "stride": 1936,
+            "eligibleInstances": 45786,
+            "retainedBytes": 5203968
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 62,
+            "capacity": 96,
+            "stride": 484,
+            "eligibleInstances": 20060,
+            "retainedBytes": 2601984
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 32,
+            "capacity": 40,
+            "stride": 6889,
+            "eligibleInstances": 148683,
+            "retainedBytes": 15431360
+          }
+        ],
+        "retainedInstanceArrayBytes": 38917312,
+        "submittedInstanceSlots": 316824
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 2673664,
+        "meadowAttributeBytesUploaded": 7713272
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 11011.5,
+        "grass": null,
+        "waitedMs": 11407.29999999702,
+        "start": {
+          "ready": false,
+          "queueDepth": 54,
+          "fields": 0,
+          "meadow": 34,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 245,
+          "rendererTriangles": 4387918,
+          "meadowWorkerRequests": 1233,
+          "meadowWorkerRanksPrepared": 3181245,
+          "meadowWorkerCompleteMs": 9438.400000020862,
+          "meadowCompactionReuses": 1175
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "after-standard-2": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/after-standard-2.json",
+        "sha256": "ef5c3a868ed5ef839256bd2fd97d3e94bf02d07b42e911cc66541f06f5a6444c",
+        "bytes": 3048951
+      },
+      "generatedAt": "2026-10-16T01:21:56.592Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 93.5,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": "tmp/performance-improvements-2026-10-16/after-standard-2.png",
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1202,
+        "retainedFrameCount": 1203,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11983.8,
+        "avgFps": 100.3,
+        "dt": {
+          "minMs": 0.4,
+          "p50Ms": 8.9,
+          "p95Ms": 16.495,
+          "p99Ms": 31.495,
+          "maxMs": 35.6,
+          "meanMs": 9.978
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 7,
+        "hitchRate": 0.0058,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 7.6,
+            "avgMs": 0.006,
+            "p95Ms": 0.095,
+            "maxMs": 0.7
+          },
+          "placementPreparation": {
+            "totalMs": 291.7,
+            "avgMs": 0.243,
+            "p95Ms": 0.7,
+            "maxMs": 2.5
+          },
+          "construction": {
+            "totalMs": 23.3,
+            "avgMs": 0.019,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "player": {
+            "totalMs": 252.7,
+            "avgMs": 0.21,
+            "p95Ms": 0.3,
+            "maxMs": 15.3
+          },
+          "floatingOrigin": {
+            "totalMs": 2.4,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 162.8,
+            "avgMs": 0.135,
+            "p95Ms": 0.3,
+            "maxMs": 1.9
+          },
+          "streaming": {
+            "totalMs": 14.3,
+            "avgMs": 0.012,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "stylized": {
+            "totalMs": 1792.9,
+            "avgMs": 1.492,
+            "p95Ms": 3,
+            "maxMs": 6.2
+          },
+          "objects": {
+            "totalMs": 76.2,
+            "avgMs": 0.063,
+            "p95Ms": 0.2,
+            "maxMs": 1.1
+          },
+          "voxel": {
+            "totalMs": 8.9,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 0.4
+          },
+          "render": {
+            "totalMs": 8050.7,
+            "avgMs": 6.698,
+            "p95Ms": 10.9,
+            "maxMs": 22
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 1202,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 8,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 7,
+        "meadowVisibleCapacityLagTiles": 2,
+        "meadowInViewMissingTiles": 3,
+        "meadowInViewCapacityLagTiles": 2,
+        "rendererDrawCalls": 230,
+        "rendererTriangles": 3803014,
+        "meadowWorkerRequests": 1178,
+        "meadowWorkerRanksPrepared": 3101444,
+        "meadowWorkerCompleteMs": 12370.50000013411,
+        "meadowCompactionReuses": 1164
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 108,
+            "building": 47,
+            "stems": 165782,
+            "bands": {
+              "high": 25656,
+              "medium": 76639,
+              "low": 45786,
+              "veryLow": 17701
+            },
+            "visibleMissing": 11,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 5,
+            "inViewCapacityLag": 0,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 32,
+            "building": 1,
+            "stems": 148683,
+            "bands": {
+              "cards": 148683
+            },
+            "visibleMissing": 1,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 1,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 140,
+          "building": 48,
+          "stems": 165782,
+          "triangles": 1193498,
+          "bladeTriangles": 896132,
+          "cardTriangles": 297366
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 4,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 25656,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 12,
+            "capacity": 16,
+            "stride": 10000,
+            "eligibleInstances": 76639,
+            "retainedBytes": 8960000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 37,
+            "capacity": 48,
+            "stride": 1936,
+            "eligibleInstances": 45786,
+            "retainedBytes": 5203968
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 55,
+            "capacity": 96,
+            "stride": 484,
+            "eligibleInstances": 17701,
+            "retainedBytes": 2601984
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 32,
+            "capacity": 40,
+            "stride": 6889,
+            "eligibleInstances": 148683,
+            "retainedBytes": 15431360
+          }
+        ],
+        "retainedInstanceArrayBytes": 38917312,
+        "submittedInstanceSlots": 314465
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 2240000,
+        "meadowAttributeBytesUploaded": 7417760
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 13332.70000000298,
+        "grass": null,
+        "waitedMs": 13886.09999999404,
+        "start": {
+          "ready": false,
+          "queueDepth": 53,
+          "fields": 0,
+          "meadow": 48,
+          "draws": 0,
+          "variants": 0,
+          "staged": 6,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 242,
+          "rendererTriangles": 4359963,
+          "meadowWorkerRequests": 1233,
+          "meadowWorkerRanksPrepared": 3181245,
+          "meadowWorkerCompleteMs": 12810.900000050664,
+          "meadowCompactionReuses": 1167
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    }
+  },
+  "excludedFromFinalAcceptance": [
+    {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/invalid-frozen-standard.json",
+        "sha256": "6e637c9a8b5d807e32934665ddc91f0db6a74fde2fa75d39c38427aea92997be",
+        "bytes": 3186416
+      },
+      "reason": "96 browser errors: test server denied Basis decoder files; corrected fs.allow before final matrix."
+    },
+    {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/floor-limited-standard.json",
+        "sha256": "55dae51b62a0179ade9f269fadff05019b6b1fc85403a89f2ad5299f26ff7cb6",
+        "bytes": 2848206
+      },
+      "reason": "Initial preparation timed out; excluded from FPS acceptance."
+    },
+    {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/broad-uniform-standard.json",
+        "sha256": "0cce7cb7ff863077863c6d6c7c1d1da16c3d0ebcfcc2649bc0616147280f9468",
+        "bytes": 2904746
+      },
+      "reason": "Valid discarded implementation experiment, not final runtime source."
+    }
+  ],
+  "revisit": {
+    "firstRun": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/revisit-release.json",
+        "sha256": "60aebe6919bfd974ab6d1464e7bace77856d05747d086a17969d358b2ea7dbb1",
+        "bytes": 4841488
+      },
+      "generatedAt": "2026-10-16T02:24:37.962Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 25.9,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": "tmp/performance-improvements-2026-10-16/revisit-release.png",
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1165,
+        "retainedFrameCount": 1166,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11988.4,
+        "avgFps": 97.18,
+        "dt": {
+          "minMs": 0.9,
+          "p50Ms": 9.4,
+          "p95Ms": 15.1,
+          "p99Ms": 28.688,
+          "maxMs": 45.6,
+          "meanMs": 10.299
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 3,
+        "hitchRate": 0.0026,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 8.1,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 1
+          },
+          "placementPreparation": {
+            "totalMs": 539.7,
+            "avgMs": 0.463,
+            "p95Ms": 1.1,
+            "maxMs": 3.2
+          },
+          "construction": {
+            "totalMs": 25.6,
+            "avgMs": 0.022,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "player": {
+            "totalMs": 269.1,
+            "avgMs": 0.231,
+            "p95Ms": 0.4,
+            "maxMs": 24.2
+          },
+          "floatingOrigin": {
+            "totalMs": 2.1,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 157,
+            "avgMs": 0.135,
+            "p95Ms": 0.3,
+            "maxMs": 1.7
+          },
+          "streaming": {
+            "totalMs": 16.8,
+            "avgMs": 0.014,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "stylized": {
+            "totalMs": 1795.1,
+            "avgMs": 1.541,
+            "p95Ms": 2.9,
+            "maxMs": 20.2
+          },
+          "objects": {
+            "totalMs": 77,
+            "avgMs": 0.066,
+            "p95Ms": 0.2,
+            "maxMs": 0.8
+          },
+          "voxel": {
+            "totalMs": 8.7,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 0.7
+          },
+          "render": {
+            "totalMs": 7758.6,
+            "avgMs": 6.66,
+            "p95Ms": 9.78,
+            "maxMs": 29.2
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 1165,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 7,
+        "rockManifestBuilds": 1,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 25,
+        "meadowVisibleCapacityLagTiles": 20,
+        "meadowInViewMissingTiles": 12,
+        "meadowInViewCapacityLagTiles": 11,
+        "rendererDrawCalls": 209,
+        "rendererTriangles": 4459482,
+        "meadowWorkerRequests": 1177,
+        "meadowWorkerRanksPrepared": 3099785,
+        "meadowWorkerCompleteMs": 14120.599999934435,
+        "meadowCompactionReuses": 1026,
+        "meadowPartialRanksReused": 32912
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 100,
+            "building": 104,
+            "stems": 174047,
+            "bands": {
+              "high": 32134,
+              "medium": 89373,
+              "low": 36498,
+              "veryLow": 16042
+            },
+            "visibleMissing": 19,
+            "visibleCapacityLag": 18,
+            "inViewMissing": 6,
+            "inViewCapacityLag": 9,
+            "resident": 197
+          },
+          "cards": {
+            "tiles": 33,
+            "building": 0,
+            "stems": 155060,
+            "bands": {
+              "cards": 155060
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 33
+          },
+          "tiles": 133,
+          "building": 104,
+          "stems": 174047,
+          "triangles": 1276807,
+          "bladeTriangles": 966687,
+          "cardTriangles": 310120
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 5,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 32134,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 14,
+            "capacity": 18,
+            "stride": 10000,
+            "eligibleInstances": 89373,
+            "retainedBytes": 10080000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 34,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 36498,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 47,
+            "capacity": 112,
+            "stride": 484,
+            "eligibleInstances": 16042,
+            "retainedBytes": 3035648
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 33,
+            "capacity": 45,
+            "stride": 6889,
+            "eligibleInstances": 155060,
+            "retainedBytes": 17360280
+          }
+        ],
+        "retainedInstanceArrayBytes": 44134552,
+        "submittedInstanceSlots": 329107
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 3472056,
+        "meadowAttributeBytesUploaded": 5903488
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 7529,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 1952.5999999940395
+        },
+        "waitedMs": 8234.79999999702,
+        "start": {
+          "ready": false,
+          "queueDepth": 54,
+          "fields": 7,
+          "meadow": 104,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 224,
+          "rendererTriangles": 4456826,
+          "meadowWorkerRequests": 1231,
+          "meadowWorkerRanksPrepared": 3178341,
+          "meadowWorkerCompleteMs": 14702.399999946356,
+          "meadowCompactionReuses": 1064,
+          "meadowPartialRanksReused": 32912
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "sameBrowserTurn": {
+      "artifact": {
+        "path": "tmp/performance-improvements-2026-10-16/revisit-release.json",
+        "sha256": "60aebe6919bfd974ab6d1464e7bace77856d05747d086a17969d358b2ea7dbb1",
+        "bytes": 4841488
+      },
+      "generatedAt": "2026-10-16T02:25:07.552Z",
+      "scenario": {
+        "id": "diagonal",
+        "label": "Diagonal run",
+        "spawn": {
+          "x": 0,
+          "z": 0
+        },
+        "yawDegrees": 0,
+        "pitchDegrees": 0,
+        "warmupSeconds": 8,
+        "settle": {
+          "settled": true,
+          "waitedSeconds": 0.5,
+          "blockers": []
+        },
+        "durationSeconds": 12,
+        "warmupFrames": null,
+        "measureFrames": null,
+        "speed": "run",
+        "explorationBoost": false,
+        "keys": [
+          "KeyW",
+          "KeyD",
+          "ShiftLeft"
+        ],
+        "hitchMs": 33.3,
+        "buildingCount": null,
+        "densityProfile": "standard",
+        "captureId": null
+      },
+      "adapter": {
+        "ok": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": "",
+        "fallback": false
+      },
+      "capture": {
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "deviceScaleFactor": 1
+        },
+        "rendererBackend": {
+          "webgpu": true,
+          "webgl2": false,
+          "reason": null
+        },
+        "screenshot": "tmp/performance-improvements-2026-10-16/revisit-release.png",
+        "cpuProfile": null,
+        "browserErrors": {
+          "count": 0,
+          "errors": [],
+          "truncated": false
+        }
+      },
+      "summary": {
+        "frameCount": 1096,
+        "retainedFrameCount": 1097,
+        "droppedFrameCount": 0,
+        "frameBufferComplete": true,
+        "durationMs": 11985.4,
+        "avgFps": 91.44,
+        "dt": {
+          "minMs": 0.5,
+          "p50Ms": 10.3,
+          "p95Ms": 16.4,
+          "p99Ms": 28.81,
+          "maxMs": 38.8,
+          "meanMs": 10.943
+        },
+        "hitchMs": 33.3,
+        "hitchCount": 6,
+        "hitchRate": 0.0055,
+        "phases": {
+          "terrainCommit": {
+            "totalMs": 4.9,
+            "avgMs": 0.004,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "placementPreparation": {
+            "totalMs": 580.6,
+            "avgMs": 0.53,
+            "p95Ms": 1.1,
+            "maxMs": 2
+          },
+          "construction": {
+            "totalMs": 25.6,
+            "avgMs": 0.023,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "player": {
+            "totalMs": 239.7,
+            "avgMs": 0.219,
+            "p95Ms": 0.3,
+            "maxMs": 21.5
+          },
+          "floatingOrigin": {
+            "totalMs": 1.8,
+            "avgMs": 0.002,
+            "p95Ms": 0,
+            "maxMs": 0.1
+          },
+          "character": {
+            "totalMs": 144.1,
+            "avgMs": 0.131,
+            "p95Ms": 0.3,
+            "maxMs": 0.9
+          },
+          "streaming": {
+            "totalMs": 14.6,
+            "avgMs": 0.013,
+            "p95Ms": 0.1,
+            "maxMs": 0.3
+          },
+          "stylized": {
+            "totalMs": 1864.1,
+            "avgMs": 1.701,
+            "p95Ms": 3,
+            "maxMs": 5.5
+          },
+          "objects": {
+            "totalMs": 77.1,
+            "avgMs": 0.07,
+            "p95Ms": 0.2,
+            "maxMs": 0.3
+          },
+          "voxel": {
+            "totalMs": 7.5,
+            "avgMs": 0.007,
+            "p95Ms": 0.1,
+            "maxMs": 0.2
+          },
+          "render": {
+            "totalMs": 7651.5,
+            "avgMs": 6.981,
+            "p95Ms": 10.025,
+            "maxMs": 18.9
+          }
+        },
+        "originSnapCount": 0
+      },
+      "collisionGate": {
+        "provisionalP95TargetMs": 0.83,
+        "measuredP95Ms": 0.1,
+        "sampleCount": 1096,
+        "samplePassed": true,
+        "timingPassed": true,
+        "readinessPassed": true,
+        "passed": true
+      },
+      "measuredCounters": {
+        "mainProceduralTileMisses": 0,
+        "mainProceduralHeightMisses": 0,
+        "collisionReadinessMisses": 0,
+        "placementPreparedChunks": 0,
+        "rockManifestBuilds": 0,
+        "treeManifestBuilds": 0
+      },
+      "samplingMisses": [],
+      "movementEndCounters": {
+        "meadowVisibleMissingTiles": 5,
+        "meadowVisibleCapacityLagTiles": 33,
+        "meadowInViewMissingTiles": 2,
+        "meadowInViewCapacityLagTiles": 13,
+        "rendererDrawCalls": 182,
+        "rendererTriangles": 3135361,
+        "meadowWorkerRequests": 984,
+        "meadowWorkerRanksPrepared": 2291141,
+        "meadowWorkerCompleteMs": 10439.300000175834,
+        "meadowCompactionReuses": 942,
+        "meadowPartialRanksReused": 112288
+      },
+      "grassDiagnostic": {
+        "state": {
+          "blades": {
+            "tiles": 146,
+            "building": 31,
+            "stems": 204978,
+            "bands": {
+              "high": 32215,
+              "medium": 96356,
+              "low": 40207,
+              "veryLow": 36200
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 18,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 200
+          },
+          "cards": {
+            "tiles": 32,
+            "building": 0,
+            "stems": 153563,
+            "bands": {
+              "cards": 153563
+            },
+            "visibleMissing": 0,
+            "visibleCapacityLag": 0,
+            "inViewMissing": 0,
+            "inViewCapacityLag": 0,
+            "resident": 32
+          },
+          "tiles": 178,
+          "building": 31,
+          "stems": 204978,
+          "triangles": 1388476,
+          "bladeTriangles": 1081350,
+          "cardTriangles": 307126
+        },
+        "batches": [
+          {
+            "layer": "blades",
+            "band": "high",
+            "tiles": 4,
+            "capacity": 12,
+            "stride": 10000,
+            "eligibleInstances": 32215,
+            "retainedBytes": 6720000
+          },
+          {
+            "layer": "blades",
+            "band": "medium",
+            "tiles": 12,
+            "capacity": 18,
+            "stride": 10000,
+            "eligibleInstances": 96356,
+            "retainedBytes": 10080000
+          },
+          {
+            "layer": "blades",
+            "band": "low",
+            "tiles": 26,
+            "capacity": 64,
+            "stride": 1936,
+            "eligibleInstances": 40207,
+            "retainedBytes": 6938624
+          },
+          {
+            "layer": "blades",
+            "band": "veryLow",
+            "tiles": 104,
+            "capacity": 128,
+            "stride": 484,
+            "eligibleInstances": 36200,
+            "retainedBytes": 3469312
+          },
+          {
+            "layer": "cards",
+            "band": "cards",
+            "tiles": 32,
+            "capacity": 45,
+            "stride": 6889,
+            "eligibleInstances": 153563,
+            "retainedBytes": 17360280
+          }
+        ],
+        "retainedInstanceArrayBytes": 44568216,
+        "submittedInstanceSlots": 358541
+      },
+      "maximumSampledFrameDeltas": {
+        "meadowBufferAllocationBytes": 433664,
+        "meadowAttributeBytesUploaded": 4963504
+      },
+      "recovery": {
+        "ready": true,
+        "firstReadyMs": 450.09999999403954,
+        "grass": {
+          "ready": true,
+          "firstReadyMs": 13.799999997019768
+        },
+        "waitedMs": 1242.4000000059605,
+        "start": {
+          "ready": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 29,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "end": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "materials": 0
+        },
+        "endCounters": {
+          "meadowVisibleMissingTiles": 0,
+          "meadowVisibleCapacityLagTiles": 0,
+          "meadowInViewMissingTiles": 0,
+          "meadowInViewCapacityLagTiles": 0,
+          "rendererDrawCalls": 188,
+          "rendererTriangles": 3561576,
+          "meadowWorkerRequests": 994,
+          "meadowWorkerRanksPrepared": 2296949,
+          "meadowWorkerCompleteMs": 10613.000000149012,
+          "meadowCompactionReuses": 953,
+          "meadowPartialRanksReused": 112288
+        }
+      },
+      "grassConfigSha256": "ecf4353596daa10c068818c2f1bedd0dada2a265aa9f4d063232b7f2e6fded14",
+      "activeGrassDensity": {
+        "system": "meadow",
+        "bladesPerCell": 576,
+        "meadowBands": {
+          "high": {
+            "detail": 5,
+            "density": 12.6,
+            "distance": 0.12
+          },
+          "medium": {
+            "detail": 3,
+            "density": 12.6,
+            "distance": 0.28
+          },
+          "low": {
+            "detail": 3,
+            "density": 5.6,
+            "distance": 0.6
+          },
+          "veryLow": {
+            "detail": 2,
+            "density": 2.8,
+            "distance": 1
+          }
+        },
+        "meadowFar": {
+          "tileSize": 64,
+          "density": 1.3,
+          "distance": 180,
+          "width": 1.2,
+          "height": 0.72,
+          "transitionStart": 0.8,
+          "fadeStart": 0.9
+        }
+      }
+    },
+    "conditions": {
+      "sameBrowser": true,
+      "midpointCameraTurnDegrees": 180
+    },
+    "screenshot": {
+      "path": "tmp/performance-improvements-2026-10-16/revisit-release.png",
+      "sha256": "3f0c270261e969b7fbb60638c52c51501348e9d7b16f348245f93daf6426812d",
+      "bytes": 1400267
+    }
+  },
+  "standardGrassConfig": {
+    "system": "meadow",
+    "meadow": {
+      "tileSize": 8,
+      "maxDistance": 50,
+      "growth": {
+        "byTileId": {
+          "0": {
+            "shortHeight": 0,
+            "tallHeight": 0,
+            "width": 0,
+            "density": 0,
+            "patchMeters": 12,
+            "shape": "slender"
+          },
+          "1": {
+            "shortHeight": 0,
+            "tallHeight": 0,
+            "width": 0,
+            "density": 0,
+            "patchMeters": 12,
+            "shape": "slender"
+          },
+          "2": {
+            "shortHeight": 0,
+            "tallHeight": 0,
+            "width": 0,
+            "density": 0,
+            "patchMeters": 12,
+            "shape": "slender"
+          },
+          "3": {
+            "shortHeight": 0.25,
+            "tallHeight": 0.85,
+            "width": 0.038,
+            "density": 0.72,
+            "patchMeters": 14,
+            "shape": "slender"
+          },
+          "4": {
+            "shortHeight": 0.18,
+            "tallHeight": 0.55,
+            "width": 0.045,
+            "density": 0.92,
+            "patchMeters": 9,
+            "shape": "slender"
+          },
+          "5": {
+            "shortHeight": 0.16,
+            "tallHeight": 0.5,
+            "width": 0.06,
+            "density": 0.85,
+            "patchMeters": 11,
+            "shape": "broadleaf"
+          },
+          "6": {
+            "shortHeight": 0.12,
+            "tallHeight": 0.38,
+            "width": 0.042,
+            "density": 0.85,
+            "patchMeters": 10,
+            "shape": "slender"
+          },
+          "7": {
+            "shortHeight": 0.14,
+            "tallHeight": 0.48,
+            "width": 0.065,
+            "density": 0.82,
+            "patchMeters": 12,
+            "shape": "broadleaf"
+          },
+          "8": {
+            "shortHeight": 0.12,
+            "tallHeight": 0.36,
+            "width": 0.046,
+            "density": 0.78,
+            "patchMeters": 10,
+            "shape": "broadleaf"
+          },
+          "9": {
+            "shortHeight": 0.1,
+            "tallHeight": 0.28,
+            "width": 0.035,
+            "density": 0.65,
+            "patchMeters": 12,
+            "shape": "slender"
+          },
+          "10": {
+            "shortHeight": 0.06,
+            "tallHeight": 0.16,
+            "width": 0.028,
+            "density": 0.28,
+            "patchMeters": 7,
+            "shape": "slender"
+          },
+          "11": {
+            "shortHeight": 0,
+            "tallHeight": 0,
+            "width": 0,
+            "density": 0,
+            "patchMeters": 12,
+            "shape": "slender"
+          },
+          "12": {
+            "shortHeight": 0.28,
+            "tallHeight": 0.95,
+            "width": 0.042,
+            "density": 0.82,
+            "patchMeters": 13,
+            "shape": "reed"
+          }
+        }
+      },
+      "bladeHeight": 0.64,
+      "bladeWidth": 0.071,
+      "heightScale": [
+        0.72,
+        1.3
+      ],
+      "widthScale": 1.15,
+      "curve": 0.07,
+      "palette": {
+        "base": "#50852b",
+        "tip": "#a6bf65",
+        "brightness": 1,
+        "byTileId": {
+          "3": {
+            "base": "#6a7a2c",
+            "tip": "#c9bd6a"
+          },
+          "7": {
+            "base": "#357a26",
+            "tip": "#98c255"
+          },
+          "8": {
+            "base": "#2f6a2c",
+            "tip": "#86b25a"
+          },
+          "9": {
+            "base": "#34563a",
+            "tip": "#8fa77a"
+          },
+          "10": {
+            "base": "#666746",
+            "tip": "#a3a07a"
+          },
+          "12": {
+            "base": "#3a6a2e",
+            "tip": "#9ab85e"
+          }
+        }
+      },
+      "appearance": {
+        "rootBrightness": 0.48,
+        "canopyDepth": 0.5,
+        "gradientPower": 2.35,
+        "groundTipMix": 0.08,
+        "fill": 0.025,
+        "backlight": 1.05,
+        "patchScale": 0.07,
+        "patchCool": [
+          0.8,
+          0.98,
+          0.86
+        ],
+        "patchWarm": [
+          1.12,
+          1.02,
+          0.74
+        ],
+        "dryPatchScale": 0.0308,
+        "dryStart": 0.56,
+        "dryEnd": 0.84,
+        "dryStrength": 0.22,
+        "dryColor": "#777455",
+        "lodWidenMax": 2
+      },
+      "shapes": {
+        "default": "slender",
+        "byTileId": {
+          "5": "broadleaf",
+          "7": "broadleaf",
+          "8": "broadleaf",
+          "12": "reed"
+        }
+      },
+      "lod": {
+        "high": {
+          "detail": 5,
+          "density": 12.6,
+          "distance": 0.12
+        },
+        "medium": {
+          "detail": 3,
+          "density": 12.6,
+          "distance": 0.28
+        },
+        "low": {
+          "detail": 3,
+          "density": 5.6,
+          "distance": 0.6
+        },
+        "veryLow": {
+          "detail": 2,
+          "density": 2.8,
+          "distance": 1
+        }
+      },
+      "interaction": {
+        "uploadIntervalFrames": 2
+      },
+      "far": {
+        "tileSize": 64,
+        "density": 1.3,
+        "distance": 180,
+        "width": 1.2,
+        "height": 0.72,
+        "transitionStart": 0.8,
+        "fadeStart": 0.9
+      }
+    },
+    "residentRadius": 1,
+    "nearRadius": 0,
+    "bladesPerCell": 576,
+    "bladesPerClump": 96,
+    "influenceTextureSize": 32,
+    "outerRingDensity": 0.45,
+    "lod": {
+      "enabled": true,
+      "coverage": {
+        "enabled": true,
+        "outerFadeMeters": 64,
+        "presenceWindow": 0.06,
+        "compensation": 1,
+        "maximumWiden": 1.35
+      }
+    },
+    "tileIds": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      14
+    ],
+    "minWidth": 0.027,
+    "maxWidth": 0.061,
+    "minLength": 0.32,
+    "maxLength": 0.62,
+    "lengthSkew": 1.2,
+    "bladeWidthSpread": 0.45,
+    "widthLengthCorrelation": 0.6,
+    "clumpRadius": 0.75,
+    "tiltMax": 0.28,
+    "bladeProfiles": {
+      "manifest": "/assets/ground/grass-blade-profiles.json",
+      "set": "authored",
+      "sets": {
+        "generated": {
+          "label": "Generated taper (baseline)",
+          "profiles": [
+            "generated"
+          ]
+        },
+        "authored": {
+          "label": "Authored mix",
+          "profiles": [
+            "stylized-01",
+            "meadow-01",
+            "field-01"
+          ]
+        },
+        "stylized": {
+          "label": "Stylized clump only",
+          "profiles": [
+            "stylized-01"
+          ]
+        },
+        "arched": {
+          "label": "Arched meadow blade",
+          "profiles": [
+            "meadow-01"
+          ]
+        },
+        "slender": {
+          "label": "Slender field blade",
+          "profiles": [
+            "field-01"
+          ]
+        },
+        "mixedWithBaseline": {
+          "label": "Authored mix + baseline",
+          "profiles": [
+            "stylized-01",
+            "meadow-01",
+            "field-01",
+            "generated"
+          ]
+        },
+        "familySlender": {
+          "label": "Slender blades (generated)",
+          "profiles": [
+            "slender"
+          ]
+        },
+        "familyReed": {
+          "label": "Reeds",
+          "profiles": [
+            "reed"
+          ]
+        },
+        "familyBroadleaf": {
+          "label": "Broadleaves",
+          "profiles": [
+            "broadleaf"
+          ]
+        },
+        "familyMeadow": {
+          "label": "Meadow mix (slender + broadleaf)",
+          "profiles": [
+            "slender",
+            "broadleaf"
+          ]
+        }
+      },
+      "biomeSets": {
+        "byTileId": {
+          "3": "familySlender",
+          "4": "familyMeadow",
+          "5": "familyBroadleaf",
+          "6": "familySlender",
+          "7": "familyBroadleaf",
+          "8": "familySlender",
+          "9": "familySlender",
+          "12": "familyReed"
+        }
+      }
+    }
+  }
+}

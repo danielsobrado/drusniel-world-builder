@@ -189,6 +189,9 @@ The matrix is a gate, not only a batch runner. It exits non-zero unless:
 - collision readiness and its p95 gate passed in every movement case;
 - measured p95 stayed at or below 33.3 ms and hitch rate at or below 2%;
 - the report proves the requested tree/candidate/grass multipliers were applied;
+- meadow cases record movement-end coverage, reach full scenery readiness within
+  two seconds after stopping, and finish recovery with no missing or
+  below-density in-view grass tiles;
 - the construction corridor had at least 12 resident wall modules and non-zero masonry;
 - the water route passed entry, swim, dive, surface, dry-exit, caustic, origin, and frame gates.
 
@@ -197,6 +200,12 @@ The verdict and any failure messages are stored in `gate` inside
 `tmp/perf-matrix.lock`; a concurrent matrix exits immediately instead of
 silently sharing the GPU and corrupting both measurements. A stale lock is
 recovered when its recorded PID is no longer alive.
+
+Matrix movement cases observe up to 20 seconds of recovery and record
+`recovery.grass` separately from full scenery readiness. Grass-only recovery
+does not replace the two-second full recovery gate. Implementation and retained
+hardware evidence are documented in
+[performance-improvements-2026-10-16.md](performance-improvements-2026-10-16.md).
 
 Performance, water-acceptance, and Gods’ End asset browser runners also share
 `tmp/perf-browser-<platform>.lock`. They wait for the previous hardware browser
