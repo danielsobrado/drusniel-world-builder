@@ -1,0 +1,211 @@
+{
+  "kind": "grass-performance-plan-baseline",
+  "date": "2026-10-16",
+  "runtimeCommit": "6214f270c3ad1d811c590358ef5c7393bf5a986e",
+  "scope": "One unprofiled current-baseline diagnostic; no candidate, A/B gain, or full matrix claim.",
+  "command": "npm run qa:perf:windows -- --url http://localhost:5175 --qa diagonal --warmup 8 --duration 12 --settle --drain-seconds 20 --grass-diagnostics --out /home/drusniel/drusniel-world-builder/tmp/performance-followup-2026-10-16/standard.json",
+  "sourceCheck": {
+    "roots": [
+      "src",
+      "config",
+      "settings"
+    ],
+    "fileCount": 1467,
+    "changedFiles": [],
+    "fingerprintPath": "tmp/performance-followup-2026-10-16/source-before.json",
+    "fingerprintSha256": "33a051be58cf0a3613b0fde1f791a6a98141319b646b24d96bc8470759206335",
+    "limitations": "Root configuration and public assets were not in this before/after hash set. Tracked checkout was clean before capture; only handoff documentation was added during capture. Other desktop/GPU activity was not controlled."
+  },
+  "rawReport": {
+    "path": "tmp/performance-followup-2026-10-16/standard.json",
+    "sha256": "4c73007880506fd06ec0d9d9b795709e472802346b49f39ac89e3689b0e0dbd4"
+  },
+  "adapter": {
+    "ok": true,
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "capture": {
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "deviceScaleFactor": 1
+    },
+    "rendererBackend": {
+      "webgpu": true,
+      "webgl2": false,
+      "reason": null
+    },
+    "screenshot": null,
+    "cpuProfile": null,
+    "browserErrors": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    }
+  },
+  "scenario": {
+    "id": "diagonal",
+    "label": "Diagonal run",
+    "spawn": {
+      "x": 0,
+      "z": 0
+    },
+    "yawDegrees": 0,
+    "pitchDegrees": 0,
+    "warmupSeconds": 8,
+    "settle": {
+      "settled": true,
+      "waitedSeconds": 36.5,
+      "blockers": []
+    },
+    "durationSeconds": 12,
+    "warmupFrames": null,
+    "measureFrames": null,
+    "speed": "run",
+    "explorationBoost": false,
+    "keys": [
+      "KeyW",
+      "KeyD",
+      "ShiftLeft"
+    ],
+    "hitchMs": 33.3,
+    "buildingCount": null,
+    "densityProfile": "standard",
+    "captureId": null
+  },
+  "summary": {
+    "frameCount": 1291,
+    "retainedFrameCount": 1292,
+    "droppedFrameCount": 0,
+    "frameBufferComplete": true,
+    "durationMs": 11973.5,
+    "avgFps": 107.82,
+    "dt": {
+      "minMs": 0.5,
+      "p50Ms": 8.2,
+      "p95Ms": 18.3,
+      "p99Ms": 28.42,
+      "maxMs": 36,
+      "meanMs": 9.282
+    },
+    "hitchMs": 33.3,
+    "hitchCount": 4,
+    "hitchRate": 0.0031,
+    "phases": {
+      "terrainCommit": {
+        "totalMs": 7.8,
+        "avgMs": 0.006,
+        "p95Ms": 0,
+        "maxMs": 1.1
+      },
+      "placementPreparation": {
+        "totalMs": 493.2,
+        "avgMs": 0.382,
+        "p95Ms": 0.9,
+        "maxMs": 3.5
+      },
+      "construction": {
+        "totalMs": 25,
+        "avgMs": 0.019,
+        "p95Ms": 0.1,
+        "maxMs": 0.3
+      },
+      "player": {
+        "totalMs": 265.4,
+        "avgMs": 0.206,
+        "p95Ms": 0.3,
+        "maxMs": 18.1
+      },
+      "floatingOrigin": {
+        "totalMs": 3.7,
+        "avgMs": 0.003,
+        "p95Ms": 0,
+        "maxMs": 0.1
+      },
+      "character": {
+        "totalMs": 161.1,
+        "avgMs": 0.125,
+        "p95Ms": 0.3,
+        "maxMs": 2.5
+      },
+      "streaming": {
+        "totalMs": 14.3,
+        "avgMs": 0.011,
+        "p95Ms": 0.1,
+        "maxMs": 0.4
+      },
+      "stylized": {
+        "totalMs": 1694.6,
+        "avgMs": 1.313,
+        "p95Ms": 2.9,
+        "maxMs": 7.4
+      },
+      "objects": {
+        "totalMs": 84.1,
+        "avgMs": 0.065,
+        "p95Ms": 0.2,
+        "maxMs": 1.4
+      },
+      "voxel": {
+        "totalMs": 9.5,
+        "avgMs": 0.007,
+        "p95Ms": 0.1,
+        "maxMs": 0.5
+      },
+      "render": {
+        "totalMs": 7889,
+        "avgMs": 6.111,
+        "p95Ms": 11.7,
+        "maxMs": 24.1
+      }
+    },
+    "originSnapCount": 0
+  },
+  "sceneryUpdateCpu": {
+    "includesPlacementPreparation": true,
+    "avgMs": 1.695,
+    "p95Ms": 3.7,
+    "p99Ms": 5.8,
+    "maxMs": 8.7
+  },
+  "measuredCounters": {
+    "mainProceduralTileMisses": 0,
+    "mainProceduralHeightMisses": 0,
+    "collisionReadinessMisses": 0,
+    "placementPreparedChunks": 3,
+    "rockManifestBuilds": 0,
+    "treeManifestBuilds": 0
+  },
+  "collisionGate": {
+    "provisionalP95TargetMs": 0.83,
+    "measuredP95Ms": 0.1,
+    "sampleCount": 1291,
+    "samplePassed": true,
+    "timingPassed": true,
+    "readinessPassed": true,
+    "passed": true
+  },
+  "movementEnd": {
+    "meadowVisibleMissingTiles": 24,
+    "meadowVisibleCapacityLagTiles": 29,
+    "meadowInViewMissingTiles": 6,
+    "meadowInViewCapacityLagTiles": 17
+  },
+  "recovery": {
+    "ready": true,
+    "firstReadyMs": 7612.5,
+    "grass": {
+      "ready": true,
+      "firstReadyMs": 3262.0999999940395
+    },
+    "waitedMs": 8487
+  },
+  "recoveryEnd": {
+    "meadowInViewMissingTiles": 0,
+    "meadowInViewCapacityLagTiles": 0
+  },
+  "gateNote": "Frame p95, hitch rate and collision gates pass for this capture; full scenery recovery exceeds the unchanged 2000 ms target."
+}
