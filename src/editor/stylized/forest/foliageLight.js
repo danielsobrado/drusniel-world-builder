@@ -1,6 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { cameraPosition, dot, normalize, positionWorld } from 'three/tsl';
-import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
+import { cameraPosition, dot, normalize, positionWorld, uniform } from 'three/tsl';
 
 /**
  * The sun and sky as foliage sees them, after grass-test's `foliageLight`

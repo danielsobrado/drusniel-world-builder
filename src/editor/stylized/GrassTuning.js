@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { frameUniform as uniform } from '../../render/FrameUniforms.js';
+import { uniform } from 'three/tsl';
 
 /**
  * Live-tunable grass parameters, held as uniforms shared by every grass slot.
