@@ -168,3 +168,22 @@ test('a sward fades wide into barren land but keeps its grass to the water and t
   assert.equal(coverageAt(13, 5), 1, 'a road verge has its own blend');
   assert.ok(coverageAt(1, 5) < 0.7, 'still thinning 10 m from a desert');
 });
+
+test('a thin biome\'s grass islands thin in across the border, not at it', () => {
+  const maskConfig = {
+    ...createSurfaceMaskConfig({ grass: { tileIds: [4, 10], meadow: {} } }, { tileSize: 2 }),
+    worldSeed: 9,
+  };
+  const chunkSize = 64;
+  const tileAt = (cellX) => (cellX < 32 ? GRASSLAND : 10);
+  const tiles = Uint8Array.from({ length: chunkSize * chunkSize }, (_, i) => tileAt(i % chunkSize));
+  const mask = buildSurfaceMaskPixels({ tiles, originX: 0, originZ: 0, chunkSize, sampleTile: tileAt, maskConfig });
+  const column = (x) => {
+    let sum = 0;
+    for (let z = 0; z < chunkSize; z += 1) sum += mask[(z * chunkSize + x) * 4 + 1];
+    return sum / chunkSize / 255;
+  };
+  // Grassland just before the border, tundra just after it, and deep tundra.
+  assert.ok(column(30) > 0.9, 'grassland stays full up to the border');
+  assert.ok(column(33) > column(44) + 0.15, `tundra thins in (${column(33).toFixed(2)} vs ${column(44).toFixed(2)})`);
+});

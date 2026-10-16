@@ -7,6 +7,7 @@
 import { grassHabitatCoverage, grassHabitatHaloCells } from './GrassHabitatCoverage.js';
 import { prepareGrassHabitatHalo } from './GrassHabitatHalo.js';
 import { grassPatchCover } from './GrassPatchiness.js';
+import { blurTileField } from './BiomeFieldBlur.js';
 import { SNOW_BIOME_BLUR_CELLS, snowBiomeCoverField } from '../materials/SnowAccumulation.js';
 import { resolveMeadowGrowth } from '../stylized/meadow/meadowGrowthProfiles.js';
 import { TILE_BY_ID, hexToRgbBytes } from '../tileCatalog.js';
@@ -252,6 +253,16 @@ export function buildSurfaceMaskPixels({
   const coverage = grassHabitatCoverage(habitat.eligibility,haloSize,haloSize,tileSize,barren);
   const densityByTile = maskConfig.grassDensityByTile ?? null;
   const worldSeed = maskConfig.worldSeed ?? 0;
+  // Stand density blurred across biome borders over grass cells only (water,
+  // roads and barren land drop out: the coverage fringe already thins toward
+  // them), so a thin biome's islands thin in rather than starting at a line.
+  let blurredDensity = null;
+  if (densityByTile) {
+    const grassTiles = new Set(maskConfig.grassTileIds);
+    const weighted = blurTileField(halo, haloSize, (t) => (grassTiles.has(t) ? densityByTile[t] ?? 1 : 0));
+    const share = blurTileField(halo, haloSize, (t) => (grassTiles.has(t) ? 1 : 0));
+    blurredDensity = weighted.map((value, i) => (share[i] > 1e-6 ? value / share[i] : 1));
+  }
 
   for (let localZ = 0; localZ < chunkSize; localZ += 1) {
     for (let localX = 0; localX < chunkSize; localX += 1) {
@@ -267,7 +278,7 @@ export function buildSurfaceMaskPixels({
       // thins the same way, so a sward dissolves into a desert in patches.
       let grass = coverage[haloIndex];
       if (densityByTile && grass > 0) {
-        const density = (densityByTile[tiles[cellIndex]] ?? 1) * (grass / 255);
+        const density = blurredDensity[haloIndex] * (grass / 255);
         grass = Math.round(grass * grassPatchCover(originX + localX + 0.5, originZ + localZ + 0.5, density, worldSeed));
       }
       mask[offset + 1] = grass;

@@ -4,6 +4,7 @@ import { sampleHeight } from '../scatterMath.js';
 import { hash2d } from './meadowGrassGeometry.js';
 import { createMeadowPathSampler } from './MeadowPathSampler.js';
 import { forestDensitySamplerFromGrid } from '../forest/ForestFloor.js';
+import { BIOME_BLUR_CELLS } from '../../world/BiomeFieldBlur.js';
 import {
   CANOPY_FLOOR_PATCH_SALT,
   ecotoneJitter,
@@ -13,6 +14,8 @@ import {
 
 /** Cells a stem may reach across to mix neighboring biome silhouettes. */
 const ECOTONE_REACH_CELLS = 0.9;
+/** Decorrelates the density tap's jitter from the silhouette's. */
+const DENSITY_TAP_SHIFT = 311.7;
 
 export const MIN_GRASS_STRENGTH = 0.02;
 const sampleMask = (pixels, size, x, z, channel) => sampleSurfaceMaskChannel(pixels, size, size, x, z, channel);
@@ -43,8 +46,16 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
     const reached = page.tiles[reachZ * chunkSize + reachX];
     const tile = eligible[reached] ? reached : ownTile;
     const coverage=mask?sampleMask(mask,chunkSize,localX,localZ,1):1;
-    // Read the live density so settings affect islands before pages rebuild.
-    const biomeDensity=growth?growth.profiles[growth.table[tile]].density:1;
+    // Density from a wider tap (BIOME_BLUR_CELLS): averaged over stems it is
+    // the blurred density the surface mask bakes its islands from, so a thin
+    // biome's stand thins in over ~10 m instead of at the border. Read live,
+    // so settings affect islands before pages rebuild.
+    ecotoneJitter(x + DENSITY_TAP_SHIFT, z - DENSITY_TAP_SHIFT, BIOME_BLUR_CELLS, jitter);
+    const tapX = Math.min(last, Math.max(0, Math.floor(localX + jitter.x)));
+    const tapZ = Math.min(last, Math.max(0, Math.floor(localZ + jitter.z)));
+    const tapped = page.tiles[tapZ * chunkSize + tapX];
+    const densityTile = eligible[tapped] ? tapped : tile;
+    const biomeDensity=growth?growth.profiles[growth.table[densityTile]].density:1;
     const density=growth
       ?grassPatchCover(x/tileSize,-z/tileSize,biomeDensity,worldSeed)*grassStandDensity(x,z,biomeDensity,worldSeed)
       :1;

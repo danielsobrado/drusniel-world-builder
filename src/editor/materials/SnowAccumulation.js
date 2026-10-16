@@ -19,6 +19,7 @@
  */
 
 import { terrainBakeValueNoise } from './TerrainBakeNoise.js';
+import { BIOME_BLUR_CELLS, blurTileField, blurTileValueAt } from '../world/BiomeFieldBlur.js';
 
 const PREVAILING_WIND = Object.freeze([0.8, 0.6]);
 /** Offset of the snow drift noise from the bake's macro seed. */
@@ -33,59 +34,22 @@ function smoothstep(edge0, edge1, value) {
   return t * t * (3 - 2 * t);
 }
 
-/**
- * Cells either side of a biome border over which its snow cover ramps. A
- * snowy biome's cover is a step on the tile id; blurred with this triangular
- * kernel it fades over ~20 m, and the drift noise breaks that ramp up.
- */
-export const SNOW_BIOME_BLUR_CELLS = 5;
-const BLUR_WEIGHTS = Array.from({ length: SNOW_BIOME_BLUR_CELLS * 2 + 1 },
-  (_, index) => SNOW_BIOME_BLUR_CELLS + 1 - Math.abs(index - SNOW_BIOME_BLUR_CELLS));
-const BLUR_TOTAL = BLUR_WEIGHTS.reduce((sum, weight) => sum + weight, 0);
+/** Cells either side of a biome border over which its snow cover ramps. */
+export const SNOW_BIOME_BLUR_CELLS = BIOME_BLUR_CELLS;
 
 /**
- * Blurred biome snow cover over a halo of tile ids, `size × size`. Only cells
- * at least `SNOW_BIOME_BLUR_CELLS` inside the halo are exact; callers read the
- * core. Null when no biome carries snow.
+ * Blurred biome snow cover over a halo of tile ids (BiomeFieldBlur.js), or null
+ * when no biome carries snow.
  */
 export function snowBiomeCoverField(halo, size, coverByTile) {
   if (!coverByTile || Object.keys(coverByTile).length === 0) return null;
-  const cover = Float32Array.from(halo, (tileId) => coverByTile[tileId] ?? 0);
-  const rows = new Float32Array(cover.length);
-  const r = SNOW_BIOME_BLUR_CELLS;
-  for (let z = 0; z < size; z += 1) {
-    for (let x = 0; x < size; x += 1) {
-      let sum = 0;
-      for (let k = -r; k <= r; k += 1) sum += cover[z * size + Math.min(size - 1, Math.max(0, x + k))] * BLUR_WEIGHTS[k + r];
-      rows[z * size + x] = sum / BLUR_TOTAL;
-    }
-  }
-  for (let z = 0; z < size; z += 1) {
-    for (let x = 0; x < size; x += 1) {
-      let sum = 0;
-      for (let k = -r; k <= r; k += 1) sum += rows[Math.min(size - 1, Math.max(0, z + k)) * size + x] * BLUR_WEIGHTS[k + r];
-      cover[z * size + x] = sum / BLUR_TOTAL;
-    }
-  }
-  return cover;
+  return blurTileField(halo, size, (tileId) => coverByTile[tileId] ?? 0);
 }
 
-/**
- * The same blurred cover at one cell, read straight from tiles: for point
- * queries (a footstep, a town) that agree with the page field.
- * @param {(cellX: number, cellZ: number) => number} tileAt
- */
+/** The same blurred cover at one cell, for point queries (a footstep, a town). */
 export function snowBiomeCoverAt(tileAt, cellX, cellZ, coverByTile) {
   if (!coverByTile) return 0;
-  const r = SNOW_BIOME_BLUR_CELLS;
-  let sum = 0;
-  for (let dz = -r; dz <= r; dz += 1) {
-    for (let dx = -r; dx <= r; dx += 1) {
-      const cover = coverByTile[tileAt(cellX + dx, cellZ + dz)] ?? 0;
-      if (cover) sum += cover * BLUR_WEIGHTS[dx + r] * BLUR_WEIGHTS[dz + r];
-    }
-  }
-  return sum / (BLUR_TOTAL * BLUR_TOTAL);
+  return blurTileValueAt(tileAt, cellX, cellZ, (tileId) => coverByTile[tileId] ?? 0);
 }
 
 /**
