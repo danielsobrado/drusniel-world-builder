@@ -12,14 +12,21 @@ top story's jetty, which a short fill section closes.
 import math
 
 from .config import GRID, HIP_LENGTHS, JETTY, ROOF_PITCH, jetty_key
+from .modules.goblin import GOBLIN_PITCH
 from .modules.roof_shapes import HIP_PITCH
 from .modules.roofs import END_LEN, PYRAMID_PITCH, STEEP_PITCH, ridge_height
 
 GABLE_SETS = {
     'gable': ('Roof_Gable', 'Roof_Gable_End', 'Gable_Wall', ROOF_PITCH),
     'steep': ('Roof_Steep', 'Roof_Steep_End', 'Gable_Wall_Steep', STEEP_PITCH),
+    'goblin': ('Roof_Goblin', 'Roof_Goblin_End', 'Gable_Wall_Goblin', GOBLIN_PITCH),
 }
-TOWER_TOPS = {'pyramid': 'Roof_Pyramid', 'spire': 'Roof_Spire', 'battlements': 'Roof_Battlements'}
+TOWER_TOPS = {
+    'pyramid': 'Roof_Pyramid',
+    'spire': 'Roof_Spire',
+    'battlements': 'Roof_Battlements',
+    'goblin_hut': 'Roof_Goblin_Hut',
+}
 
 
 class RoofAssembler:
@@ -100,6 +107,6 @@ class RoofAssembler:
                 self.kit.place('Dormer', self.coll, roof, (i * GRID + 1.0, 0.55, 0.55 * tan + 0.12))
 
     def _chimney(self, spec, roof, span, pitch):
-        if self.chimney:
+        if self.chimney and spec.roof != 'goblin':
             self.kit.place('Chimney', self.coll, roof,
                            (0.75, span / 2 + 0.75, ridge_height(span, pitch) - 3.6))

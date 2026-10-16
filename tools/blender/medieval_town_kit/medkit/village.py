@@ -22,15 +22,22 @@ def _stairs(kit, plan, coll, covered, open_edges):
 
 
 def _bridges(kit, plan, coll, open_edges):
-    for cx, cy in plan.BRIDGES:
-        group = kit.group(f'Bridge_{cx}_{cy}', coll, loc=(cx * GRID, cy * GRID, 0))
-        kit.place('Arch_Bridge', coll, group, (0, 0, 0))
-        top = 2 * TERRACE
-        for i in range(2):
-            kit.place('Railing_Wood', coll, group, (i * GRID, 0, top))
-            kit.place_q('Railing_Wood', coll, group, ((i + 1) * GRID, GRID, top), 2)
-        open_edges.add((cx - 1, cy, 'E'))
-        open_edges.add((cx + 2, cy, 'W'))
+    goblin = getattr(plan, 'STYLE', '') == 'goblin'
+    for item in plan.BRIDGES:
+        cx, cy = item[0], item[1]
+        z_lvl = item[2] if len(item) > 2 else 0
+        group = kit.group(f'Bridge_{cx}_{cy}_{z_lvl}', coll, loc=(cx * GRID, cy * GRID, z_lvl * TERRACE))
+        if goblin:
+            kit.place('Rope_Bridge', coll, group, (0, 0, 0))
+        else:
+            kit.place('Arch_Bridge', coll, group, (0, 0, 0))
+            top = 2 * TERRACE
+            for i in range(2):
+                kit.place('Railing_Wood', coll, group, (i * GRID, 0, top))
+                kit.place_q('Railing_Wood', coll, group, ((i + 1) * GRID, GRID, top), 2)
+        if z_lvl == 0:
+            open_edges.add((cx - 1, cy, 'E'))
+            open_edges.add((cx + 2, cy, 'W'))
 
 
 def _buildings(kit, plan, coll, lights_coll):
@@ -44,6 +51,7 @@ def _buildings(kit, plan, coll, lights_coll):
 
 
 def _props(kit, plan, coll, lights_coll):
+    goblin = getattr(plan, 'STYLE', '') == 'goblin'
     root = kit.group('Props', coll)
     for name, x, y, rot in plan.PROPS:
         z = _z(plan, x, y)
@@ -52,10 +60,19 @@ def _props(kit, plan, coll, lights_coll):
             lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.15), energy=65.0)
         elif name == 'Lamp_Post_Banner':
             lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.8), energy=80.0)
+        elif name == 'Cauldron_Fire':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.1), energy=110.0)
+        elif name == 'Torch_Pole':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.65), energy=90.0)
+        elif name == 'Goblin_Totem':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.65), energy=60.0)
+        elif name == 'Goblin_Skiff':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.05), energy=50.0)
+    lamp_mod = 'Torch_Pole' if goblin else 'Lamp_Post'
     for x, y in plan.LAMPS:
         z = _z(plan, x, y)
-        kit.place('Lamp_Post', coll, root, (x * GRID, y * GRID, z))
-        lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.8), energy=80.0)
+        kit.place(lamp_mod, coll, root, (x * GRID, y * GRID, z))
+        lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.7), energy=85.0)
 
 
 def build(kit, plan=village_plan):

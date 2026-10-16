@@ -9,10 +9,14 @@
   "Bake_Oven",
   "Balcony",
   "Banner_Blue",
+  "Banner_Goblin_Skull",
   "Barrel",
+  "Basket_Cluster",
   "Bed",
   "Bench",
+  "Boardwalk_Edge",
   "Bollards",
+  "Bone_Throne",
   "Bookcase",
   "Brazier",
   "Bush",
@@ -20,6 +24,7 @@
   "Cargo_Pile",
   "Cart",
   "Cask_Rack",
+  "Cauldron_Fire",
   "Chandelier",
   "Chest",
   "Chimney",
@@ -34,6 +39,7 @@
   "Chimney_Stack_Gable_S6J2",
   "Chimney_Stack_Steep_S4",
   "Chimney_Stack_Steep_S6",
+  "Corner_Goblin",
   "Corner_Quoins",
   "Corner_Stone",
   "Corner_Timber",
@@ -47,8 +53,10 @@
   "Cross_Gable_4",
   "Door_Leaf",
   "Dormer",
+  "Drying_Rack",
   "Entry_Steps_High",
   "Entry_Steps_Low",
+  "Entry_Steps_Stilts",
   "Fence_Wood",
   "Floor_Ground",
   "Floor_Landing_L",
@@ -62,6 +70,8 @@
   "Fountain",
   "Gable_Finial",
   "Gable_Spike",
+  "Gable_Wall_Goblin_S4",
+  "Gable_Wall_Goblin_S6",
   "Gable_Wall_S4",
   "Gable_Wall_S4J1",
   "Gable_Wall_S4J2",
@@ -70,6 +80,11 @@
   "Gable_Wall_S6J2",
   "Gable_Wall_Steep_S4",
   "Gable_Wall_Steep_S6",
+  "Goblin_Awning",
+  "Goblin_Firepit",
+  "Goblin_Nest",
+  "Goblin_Skiff",
+  "Goblin_Totem",
   "Grindstone",
   "Hearth",
   "Horse_Trough",
@@ -77,10 +92,12 @@
   "Lamp_Post",
   "Lamp_Post_Banner",
   "Lectern",
+  "Loot_Pile",
   "Market_Stall_Blue",
   "Market_Stall_Cream",
   "Market_Stall_Red",
   "Material_Swatch",
+  "Meat_Rack",
   "Notice_Board",
   "Oriel_Window",
   "Paving_Stone",
@@ -90,6 +107,9 @@
   "Plinth_High_Corner",
   "Plinth_Low",
   "Plinth_Low_Corner",
+  "Plinth_Stilts",
+  "Plinth_Stilts_Corner",
+  "Railing_Goblin",
   "Railing_Wood",
   "Roof_Battlements_4",
   "Roof_Battlements_6",
@@ -109,6 +129,12 @@
   "Roof_Gable_S6",
   "Roof_Gable_S6J1",
   "Roof_Gable_S6J2",
+  "Roof_Goblin_End_S4",
+  "Roof_Goblin_End_S6",
+  "Roof_Goblin_Hut_4",
+  "Roof_Goblin_Hut_6",
+  "Roof_Goblin_S4",
+  "Roof_Goblin_S6",
   "Roof_Hip_S4_L10",
   "Roof_Hip_S4_L12",
   "Roof_Hip_S4_L4",
@@ -125,7 +151,9 @@
   "Roof_Steep_End_S6",
   "Roof_Steep_S4",
   "Roof_Steep_S6",
+  "Rope_Bridge",
   "Rug",
+  "Shaman_Altar",
   "Shelf",
   "Sign_Anvil",
   "Sign_Book",
@@ -137,18 +165,27 @@
   "Sign_Potion",
   "Sign_Shield",
   "Signpost",
+  "Spike_Barricade",
+  "Stairs_Boardwalk_1",
+  "Stairs_Boardwalk_2",
   "Stairs_Interior_L",
   "Stairs_Interior_R",
   "Stairs_Stone_1",
   "Stairs_Stone_2",
+  "Stilt_Wall",
+  "Stilt_Wall_Pillar",
   "Stone_Altar",
   "Stool",
+  "Swamp_Tree",
   "Table",
   "Terrace_Coping",
   "Terrace_Wall",
   "Terrace_Wall_Pillar",
+  "Tile_Boardwalk",
   "Tile_Cobble",
   "Tile_Grass",
+  "Tile_Swamp",
+  "Torch_Pole",
   "Tower_Round",
   "Town_Cross",
   "Tree_Cypress",
@@ -157,6 +194,10 @@
   "Vine_Hanging",
   "Wall_Arcade",
   "Wall_Curtain",
+  "Wall_Goblin",
+  "Wall_Goblin_Arcade",
+  "Wall_Goblin_Door",
+  "Wall_Goblin_Window",
   "Wall_Lantern",
   "Wall_Plank",
   "Wall_Plank_Door",
@@ -280,7 +321,7 @@
    ]
   },
   {
-   "name": "Bridge_9_5",
+   "name": "Bridge_9_5_0",
    "position": [
     18.0,
     10.0,
@@ -23999,11 +24040,11 @@
      "position": [
       11.0,
       2.4,
-      4.3
+      4.2
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24016,11 +24057,11 @@
      "position": [
       27.0,
       2.0,
-      4.3
+      4.2
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24033,11 +24074,11 @@
      "position": [
       37.0,
       5.2,
-      4.3
+      4.2
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24050,11 +24091,11 @@
      "position": [
       10.4,
       16.6,
-      5.8
+      5.7
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24067,11 +24108,11 @@
      "position": [
       35.2,
       14.6,
-      5.8
+      5.7
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24084,11 +24125,11 @@
      "position": [
       10.0,
       22.0,
-      7.3
+      7.2
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24101,11 +24142,11 @@
      "position": [
       29.2,
       22.0,
-      7.3
+      7.2
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,
@@ -24118,11 +24159,11 @@
      "position": [
       20.8,
       25.0,
-      8.8
+      8.7
      ],
      "rotationZDeg": 0.0,
      "light": {
-      "energyW": 80.0,
+      "energyW": 85.0,
       "color": [
        1.0,
        0.6200000047683716,

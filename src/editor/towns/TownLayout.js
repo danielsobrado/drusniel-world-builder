@@ -212,7 +212,7 @@ export class TownLayoutBuilder {
     (this.plan.props ?? []).forEach((prop, index) => this.addProp(prop, index));
     (this.plan.fields ?? []).forEach((field, index) => this.addField(field, index));
     const props = this.plan.props?.length ?? 0;
-    planDressing({ plan: this.plan, seed: this.settlement.id, placed: this.placed })
+    planDressing({ plan: this.plan, seed: this.settlement.id, placed: this.placed, family: this.family })
       .forEach((prop, index) => this.addProp(prop, props + index));
     for (const tile of planPaving(this.plan)) {
       const z = -tile.z;

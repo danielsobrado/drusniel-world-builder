@@ -18,6 +18,9 @@ const FAMILY_BY_STYLE = Object.freeze({
   'limestone-slate': 'Tudor',
   'limestone-terracotta': 'Med',
   'sandstone-terracotta': 'Med',
+  'timber-thatch': 'Goblin',
+  'swamp-thatch': 'Goblin',
+  'goblin': 'Goblin',
 });
 
 export const DEFAULT_FAMILY = 'Tudor';
@@ -80,6 +83,14 @@ const PROP_CLUSTERS = Object.freeze({
   bollards: [[['Bollards', 0, 0, 0, 0]]],
   woodpile: [[['Woodpile', 0, 0, 0, 0]]],
   bush: [[['Bush', 0, 0, 0, 0]], [['Bush', 0, 0, 0.8, 0], ['Bush', 0.6, 0.3, 2, 0]]],
+  cauldron: [[['Cauldron_Fire', 0, 0, 0, 0]]],
+  drying_rack: [[['Drying_Rack', 0, 0, 0, 0]]],
+  baskets: [[['Basket_Cluster', 0, 0, 0, 0]]],
+  torch_pole: [[['Torch_Pole', 0, 0, 0, 0]]],
+  totem: [[['Goblin_Totem', 0, 0, 0, 0]]],
+  barricade: [[['Spike_Barricade', 0, 0, 0, 0]]],
+  skiff: [[['Goblin_Skiff', 0, 0, 0, 0]]],
+  swamp_tree: [[['Swamp_Tree', 0, 0, 0, 0]]],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */

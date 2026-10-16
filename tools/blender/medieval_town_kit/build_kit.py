@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import bpy  # noqa: E402
 
-from medkit import catalog, config, export, materials, prefab_export, render, textures, village  # noqa: E402
+from medkit import catalog, config, export, goblin_plan, materials, prefab_export, render, textures, village  # noqa: E402
 from medkit import village_plan  # noqa: E402
 from medkit.prefabs import PrefabBuilder  # noqa: E402
 from medkit.village_generator import GeneratedVillage  # noqa: E402
@@ -28,7 +28,8 @@ def _args():
     closeups = argv[argv.index('--prefabs') + 1].split(',') if '--prefabs' in argv else []
     seed = int(argv[argv.index('--seed') + 1]) if '--seed' in argv else None
     family = argv[argv.index('--family') + 1] if '--family' in argv else 'Tudor'
-    return '--no-render' not in argv, '--no-export' not in argv, shots, closeups, seed, family
+    goblin = '--goblin' in argv
+    return '--no-render' not in argv, '--no-export' not in argv, shots, closeups, seed, family, goblin
 
 
 def _reset():
@@ -49,17 +50,24 @@ def main():
     if '--lod1' in sys.argv:
         far_kit()
         return
-    do_render, do_export, shots, closeups, seed, family = _args()
-    plan = village_plan if seed is None else GeneratedVillage(seed, family)
-    stem = 'medieval_town' if seed is None else f'medieval_town_{family.lower()}_{seed}'
-    blend = config.BLEND_PATH if seed is None else config.BLEND_PATH.replace('.blend', f'_{family.lower()}_{seed}.blend')
+    do_render, do_export, shots, closeups, seed, family, is_goblin = _args()
+    if is_goblin:
+        plan = goblin_plan
+        stem = 'goblin_town'
+        blend = config.BLEND_PATH.replace('medieval_town.blend', 'goblin_town.blend')
+        look = 'swamp'
+    else:
+        plan = village_plan if seed is None else GeneratedVillage(seed, family)
+        stem = 'medieval_town' if seed is None else f'medieval_town_{family.lower()}_{seed}'
+        blend = config.BLEND_PATH if seed is None else config.BLEND_PATH.replace('.blend', f'_{family.lower()}_{seed}.blend')
+        look = 'storybook'
     _reset()
     images = textures.generate(config.TEXTURE_DIR)
     materials.build(images)
     kit = catalog.build_kit()
     village.build(kit, plan)
     prefabs = PrefabBuilder(kit).build_all()
-    render.setup_scene()
+    render.setup_scene(look=look)
     os.makedirs(config.SOURCE_DIR, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=blend, relative_remap=True)
     if do_export:
@@ -68,7 +76,9 @@ def main():
         export.town_glb(kit, config.EXPORT_DIR, stem)
         export.layout_json(kit, config.EXPORT_DIR, stem)
         prefab_export.export(prefabs, kit.modules.keys(), config.EXPORT_DIR)
-    if do_render and seed is not None:
+    if do_render and is_goblin:
+        render.previews(config.PREVIEW_DIR, shots, shot_table=render.GOBLIN_SHOTS)
+    elif do_render and seed is not None:
         render.town_overview(config.PREVIEW_DIR, f'{family.lower()}_{seed}')
     elif do_render:
         render.previews(config.PREVIEW_DIR, shots)

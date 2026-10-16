@@ -41,12 +41,16 @@ test('burg culture styles map to regional families', () => {
   assert.equal(familyForStyle('granite-slate'), 'Nordic');
   assert.equal(familyForStyle('sandstone-terracotta'), 'Med');
   assert.equal(familyForStyle('limestone-slate'), 'Tudor');
+  assert.equal(familyForStyle('timber-thatch'), 'Goblin');
+  assert.equal(familyForStyle('swamp-thatch'), 'Goblin');
+  assert.equal(familyForStyle('goblin'), 'Goblin');
   assert.equal(familyForStyle('unknown'), 'Tudor');
 });
 
 test('building kinds resolve to family prefabs with a Tudor fallback', () => {
   const prefabs = {
     Nordic_House_Small: {},
+    Goblin_House_Small: {},
     Tudor_Tavern: {},
     Tudor_Apothecary: {},
     Tudor_Guildhall: {},
@@ -54,6 +58,7 @@ test('building kinds resolve to family prefabs with a Tudor fallback', () => {
     CityWall: {},
   };
   assert.equal(prefabNameFor('house', 0, 'Nordic', prefabs), 'Nordic_House_Small');
+  assert.equal(prefabNameFor('house', 0, 'Goblin', prefabs), 'Goblin_House_Small');
   assert.equal(prefabNameFor('tavern', 0, 'Nordic', prefabs), 'Tudor_Tavern');
   assert.equal(prefabNameFor('apothecary', 0, 'Nordic', prefabs), 'Tudor_Apothecary');
   assert.equal(prefabNameFor('guildhall', 0, 'Tudor', prefabs), 'Tudor_Guildhall');
@@ -63,6 +68,9 @@ test('building kinds resolve to family prefabs with a Tudor fallback', () => {
   assert.deepEqual(propClusterFor('signpost', 0), [['Signpost', 0, 0, 0, 0]]);
   assert.deepEqual(propClusterFor('shrine', 0), [['Wayside_Shrine', 0, 0, 0, 0]]);
   assert.deepEqual(propClusterFor('bollards', 0), [['Bollards', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('cauldron', 0), [['Cauldron_Fire', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('drying_rack', 0), [['Drying_Rack', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('skiff', 0), [['Goblin_Skiff', 0, 0, 0, 0]]);
   assert.deepEqual(propClusterFor('unknown_prop', 0), []);
 });
 
@@ -154,6 +162,7 @@ test('city skins follow climate, rank and culture', async () => {
   assert.equal(skinFor({ family: 'Tudor', biome: 6, citadel: true, rank: 1 }), 'heartland');
   assert.equal(skinFor({ family: 'Tudor', biome: 1 }), 'sun');
   assert.equal(skinFor({ family: 'Tudor', biome: 12 }), 'marsh');
+  assert.equal(skinFor({ family: 'Goblin', biome: 6, capital: true }), 'marsh');
   assert.equal(skinFor({ family: 'Nordic', biome: 6 }), 'plains');
   assert.equal(skinFor({ family: 'Tudor', biome: 6 }), 'heartland');
   assert.deepEqual(bannerColourFor(3, 99), bannerColourFor(3, 7));
@@ -167,16 +176,16 @@ test('a share of buildings take the one-story-taller sibling when the kit has on
   assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs), 'Tudor_House_Small', 'no roll keeps the base');
 });
 
-test('exported medieval_kit_prefabs.json includes all new DnD prefabs, landings, and colliders', async () => {
+test('exported medieval_kit_prefabs.json includes all new DnD and Goblin prefabs, landings, and colliders', async () => {
   const fs = await import('node:fs');
   const kit = JSON.parse(fs.readFileSync('public/assets/environment/medieval-kit/medieval_kit_prefabs.json', 'utf8'));
-  for (const family of ['Tudor', 'Nordic', 'Med']) {
+  for (const family of ['Tudor', 'Nordic', 'Med', 'Goblin']) {
     for (const kind of ['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'apothecary', 'guildhall', 'guardhouse', 'library']) {
       const name = prefabNameFor(kind, 0, family, kit.prefabs);
       assert.ok(name && kit.prefabs[name], `Missing prefab for ${family} ${kind}`);
     }
   }
-  for (const propKind of ['well', 'fountain', 'stall', 'lantern', 'shrine', 'signpost', 'notice_board', 'brazier', 'trough', 'grindstone', 'cargo', 'bollards']) {
+  for (const propKind of ['well', 'fountain', 'stall', 'lantern', 'shrine', 'signpost', 'notice_board', 'brazier', 'trough', 'grindstone', 'cargo', 'bollards', 'cauldron', 'drying_rack', 'baskets', 'torch_pole', 'totem', 'barricade', 'skiff', 'swamp_tree']) {
     const cluster = propClusterFor(propKind, 0);
     assert.ok(cluster.length > 0, `Empty cluster for ${propKind}`);
     for (const [module] of cluster) {
@@ -189,4 +198,11 @@ test('exported medieval_kit_prefabs.json includes all new DnD prefabs, landings,
   assert.ok(modules.has('Floor_Landing_L'), 'Multi-story tavern must include Floor_Landing_L');
   assert.ok(modules.has('Counter') && modules.has('Cask_Rack') && modules.has('Chandelier'),
     'Tavern must include specialized interior furnishings');
+
+  const goblinManor = kit.prefabs.Goblin_Manor;
+  const goblinModules = new Set(goblinManor.parts.map((p) => p.m));
+  assert.ok(goblinModules.has('Plinth_Stilts') && goblinModules.has('Wall_Goblin') && goblinModules.has('Roof_Goblin_S6'),
+    'Goblin manor must use stilt foundations, lashed timber walls, and reed-thatch roofs');
+  assert.ok(goblinModules.has('Bone_Throne') && goblinModules.has('Goblin_Firepit') && goblinModules.has('Floor_Landing_L'),
+    'Goblin manor must include playable Chieftain Hall interior and stairwell landings');
 });

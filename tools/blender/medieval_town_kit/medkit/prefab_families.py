@@ -126,6 +126,19 @@ def mediterranean(base):
                         balcony_odds=0.25, **extra)
 
 
-FAMILIES = (tudor, nordic, mediterranean)
-FAMILY_BY_NAME = {'Tudor': tudor, 'Nordic': nordic, 'Med': mediterranean}
+def goblin(base):
+    extra = {k: v for k, v in base.extra.items() if k not in ('dormers', 'chimney')}
+    if base.tower:
+        return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, ('goblin',) * base.stories,
+                            roof='goblin_hut', plinth='Stilts', chimney=False, **extra)
+    stories = ('goblin',) * base.stories
+    has_awning = base.shopfront or base.name in ('Manor', 'Tavern_Large', 'House_Large', 'Farmhouse')
+    has_banner = extra.pop('banner', False) or base.name in ('Tavern', 'Tavern_Large', 'Chapel', 'Apothecary')
+    return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, stories, roof='goblin',
+                        plinth='Stilts', pent=has_awning, arcade=base.shopfront,
+                        banner=has_banner, chimney=False, **extra)
+
+
+FAMILIES = (tudor, nordic, mediterranean, goblin)
+FAMILY_BY_NAME = {'Tudor': tudor, 'Nordic': nordic, 'Med': mediterranean, 'Goblin': goblin}
 BASE_BY_NAME = {base.name: base for base in BASES}

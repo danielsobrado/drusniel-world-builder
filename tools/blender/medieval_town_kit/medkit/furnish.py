@@ -239,12 +239,57 @@ def _furnish_upper_living(kit, coll, story, spec, k, z, x0, x1, back):
         _place(kit, coll, story, spec, k, 'Bookcase', x1 - 1.85, back - 0.2, z)
 
 
+def _furnish_goblin(kit, coll, story, spec, k, z, x0, x1, back):
+    mid = (x0 + x1) / 2
+    depth = spec.d * GRID
+    if k > 0:
+        _place(kit, coll, story, spec, k, 'Goblin_Nest', x0 + 0.8, back - 0.65, z)
+        if x1 - x0 >= 3.2:
+            _place(kit, coll, story, spec, k, 'Goblin_Nest', x1 - 0.8, back - 0.65, z)
+            _place(kit, coll, story, spec, k, 'Loot_Pile', mid, back - 0.45, z)
+        _place(kit, coll, story, spec, k, 'Weapon_Rack', x0 + 0.85, 1.35, z)
+        return
+    role = spec.furnish
+    if role == 'keep':
+        _place(kit, coll, story, spec, k, 'Bone_Throne', mid, back - 0.55, z)
+        _place(kit, coll, story, spec, k, 'Goblin_Firepit', mid, max(1.85, depth / 2), z)
+        _place(kit, coll, story, spec, k, 'Loot_Pile', x0 + 0.85, back - 0.45, z)
+        _place(kit, coll, story, spec, k, 'Meat_Rack', x1 - 0.85, back - 0.45, z)
+        _place(kit, coll, story, spec, k, 'Weapon_Rack', x0 + 0.85, 1.45, z)
+        if x1 - x0 >= 5.2:
+            _dining(kit, coll, story, spec, k, x0 + 1.85, max(1.95, depth / 2), z)
+    elif role in ('church', 'apothecary', 'library'):
+        _place(kit, coll, story, spec, k, 'Shaman_Altar', mid, back - 0.55, z)
+        _place(kit, coll, story, spec, k, 'Goblin_Firepit', mid, max(1.85, back - 1.75), z)
+        _place(kit, coll, story, spec, k, 'Shelf', x0 + 0.85, back - 0.2, z)
+        _place(kit, coll, story, spec, k, 'Loot_Pile', x1 - 0.75, back - 0.45, z)
+        _place(kit, coll, story, spec, k, 'Goblin_Nest', x0 + 0.8, 1.45, z)
+    elif role == 'inn':
+        _place(kit, coll, story, spec, k, 'Goblin_Firepit', x1 - 1.0, back - 0.55, z)
+        _place(kit, coll, story, spec, k, 'Cask_Rack', x0 + 0.9, back - 0.38, z)
+        _place(kit, coll, story, spec, k, 'Meat_Rack', mid - 0.8, back - 0.45, z)
+        _dining(kit, coll, story, spec, k, mid + 0.3, max(1.95, depth / 2), z)
+        _place(kit, coll, story, spec, k, 'Loot_Pile', x1 - 0.75, 1.35, z)
+    elif role == 'smithy':
+        _furnish_smithy(kit, coll, story, spec, k, z, x0, x1, back)
+    else:
+        _place(kit, coll, story, spec, k, 'Goblin_Firepit', mid, max(1.85, depth / 2), z)
+        _place(kit, coll, story, spec, k, 'Goblin_Nest', x1 - 0.75, back - 0.65, z)
+        _place(kit, coll, story, spec, k, 'Meat_Rack', x0 + 0.85, back - 0.45, z)
+        _place(kit, coll, story, spec, k, 'Loot_Pile', x1 - 0.75, 1.35, z)
+
+
 def furnish_story(kit, coll, story, spec, k):
     if spec.furnish == 'none':
         return
     width, depth = spec.w * GRID, spec.d * GRID
     back = depth - T
     z = FLOOR_Z if k == 0 else 0.0
+    if 'goblin' in spec.stories:
+        x0, x1 = _room_span(spec, k)
+        if x1 - x0 >= 1.5:
+            _furnish_goblin(kit, coll, story, spec, k, z, x0, x1, back)
+        return
     if spec.furnish == 'church':
         if k == 0:
             _furnish_church(kit, coll, story, spec, z, back)

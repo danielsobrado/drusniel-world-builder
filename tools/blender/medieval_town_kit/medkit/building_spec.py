@@ -34,9 +34,9 @@ class BuildingSpec:
 
 
 WALL_PREFIX = {'stone': 'Wall_Stone', 'timber': 'Wall_Timber', 'plank': 'Wall_Plank',
-               'plaster': 'Wall_Plaster'}
+               'plaster': 'Wall_Plaster', 'goblin': 'Wall_Goblin'}
 CORNER = {'stone': 'Corner_Quoins', 'plaster': 'Corner_Quoins', 'timber': 'Corner_Timber',
-          'plank': 'Corner_Timber'}
+          'plank': 'Corner_Timber', 'goblin': 'Corner_Goblin'}
 
 
 def jetty_level(spec, k):

@@ -9,7 +9,7 @@ two walls they join.
 from ..config import GRID, HALF_T as T, STORY
 from ..mesh import MeshBuilder
 
-PLINTHS = {'Low': 0.3, 'High': 0.6}
+PLINTHS = {'Low': 0.3, 'High': 0.6, 'Stilts': 0.6}
 STEP_RISE = 0.15
 STEP_RUN = 0.32
 BURY = 0.4
@@ -65,6 +65,8 @@ def quoins(story=STORY, course=0.5):
 
 def define(kit):
     for name, height in PLINTHS.items():
+        if name == 'Stilts':
+            continue
         kit.define(f'Plinth_{name}', 'foundations', plinth(height))
         kit.define(f'Plinth_{name}_Corner', 'foundations', plinth_corner(height))
         kit.define(f'Entry_Steps_{name}', 'foundations', entry_steps(height))

@@ -2,11 +2,12 @@
 from mathutils import Vector
 
 from .kit import Kit
-from .modules import (accents, defences, floors, foundations, interior, interior_trade, nature, props,
-                      roof_shapes, roofs, terrain, towers, walls, walls_regional)
+from .modules import (accents, defences, floors, foundations, goblin, goblin_props, interior,
+                      interior_trade, nature, props, roof_shapes, roofs, terrain, towers, walls,
+                      walls_regional)
 
 FAMILIES = (walls, walls_regional, foundations, floors, roofs, roof_shapes, terrain, defences, towers, props,
-            nature, interior, interior_trade, accents)
+            nature, interior, interior_trade, accents, goblin, goblin_props)
 CATALOG_ORIGIN = Vector((0.0, -24.0, 0.0))
 # Modules only seen from inside a building; the game draws them only near the viewer.
 INTERIOR = {
@@ -16,7 +17,8 @@ INTERIOR = {
     'Bookcase', 'Writing_Desk', 'Wardrobe', 'Counter', 'Cask_Rack', 'Chandelier',
     'Wall_Sconce', 'Wall_Shield', 'Wall_Tapestry', 'Anvil_Block', 'Forge_Hood',
     'Bake_Oven', 'Stone_Altar', 'Lectern', 'Candelabra', 'Weapon_Rack',
-    'Flour_Sacks', 'Alchemist_Table',
+    'Flour_Sacks', 'Alchemist_Table', 'Goblin_Firepit', 'Goblin_Nest',
+    'Bone_Throne', 'Shaman_Altar', 'Loot_Pile', 'Meat_Rack',
 }
 
 

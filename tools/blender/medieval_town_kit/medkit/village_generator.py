@@ -15,7 +15,7 @@ from dataclasses import replace
 
 from .prefab_families import BASE_BY_NAME, FAMILY_BY_NAME
 
-STAIR_CELLS = {'Stairs_Stone_1': 2, 'Stairs_Stone_2': 3}
+STAIR_CELLS = {'Stairs_Stone_1': 2, 'Stairs_Stone_2': 3, 'Stairs_Boardwalk_1': 2, 'Stairs_Boardwalk_2': 3}
 TOWN_POOL = ('House_Small', 'House_Small', 'House_Large', 'House_Cottage', 'House_Square',
              'House_Long', 'Townhouse_Narrow', 'Townhouse_Tall', 'Shop_Small', 'Shop_Large',
              'Bakery', 'Smithy', 'Apothecary', 'Guardhouse', 'Library', 'Warehouse')
@@ -31,6 +31,7 @@ class GeneratedVillage:
         if family not in FAMILY_BY_NAME:
             raise ValueError(f'Unknown family {family}; use one of {sorted(FAMILY_BY_NAME)}.')
         self.seed, self.family = seed, family
+        self.STYLE = 'goblin' if family == 'Goblin' else 'medieval'
         self.rng = random.Random(seed)
         self.dress = FAMILY_BY_NAME[family]
         self._terraces()
@@ -88,6 +89,7 @@ class GeneratedVillage:
         options = self._stair_columns(level)
         self.rng.shuffle(options)
         placed = []
+        stair_mod = 'Stairs_Boardwalk_1' if self.family == 'Goblin' else 'Stairs_Stone_1'
         for x, y in options:
             if len(placed) >= count or any(abs(x - px) < 4 for px, _ in placed):
                 continue
@@ -95,14 +97,15 @@ class GeneratedVillage:
             if level and any(c in self.occupied for c in run | {(x, y + 2)}):
                 continue
             placed.append((x, y))
-            self.STAIRS.append(('Stairs_Stone_1', x, y))
+            self.STAIRS.append((stair_mod, x, y))
             self.occupied |= run
             self.streets |= {(x, y - 1), (x, y + 2), (x, y + 3)}
         return placed
 
     def _stairs(self):
+        stair_mod = 'Stairs_Boardwalk_1' if self.family == 'Goblin' else 'Stairs_Stone_1'
         for x in self.rng.sample(range(2, self.W - 2), 2):
-            self.STAIRS.append(('Stairs_Stone_1', x, -2))
+            self.STAIRS.append((stair_mod, x, -2))
             self.streets |= {(x, 0), (x, 1)}
         for level in (1, 2):
             self._place_stairs(level, 2)

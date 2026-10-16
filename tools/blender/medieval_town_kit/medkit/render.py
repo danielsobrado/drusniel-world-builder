@@ -67,6 +67,18 @@ SHOTS = {
     'prefabs': 'Prefabs',
 }
 
+GOBLIN_SHOTS = {
+    'goblin_overview': dict(loc=(-24, -46, 64), target=(22, 18, 5), ortho_scale=62),
+    'goblin_hero': dict(loc=(5.4, -1.6, 3.65), target=(18.5, 12.5, 4.8), lens=22),
+    'goblin_bridge': dict(loc=(19.2, 0.8, 1.95), target=(19.8, 15.0, 6.2), lens=24),
+    'goblin_interior_hall': dict(building='BLD_Chieftain_Hall', loc=(2.2, 0.85, 2.35),
+                                 target=(5.2, 5.2, 1.65), lens=18),
+    'goblin_interior_shaman': dict(building='BLD_Shaman_Hut', loc=(2.2, 0.85, 2.35),
+                                   target=(5.2, 5.2, 1.65), lens=18),
+    'goblin_interior_tavern': dict(building='BLD_Bog_Tavern', loc=(2.2, 0.85, 2.35),
+                                   target=(5.8, 5.2, 1.65), lens=18),
+}
+
 
 def _collection_shot(name):
     pts = [o.matrix_world @ Vector(c) for o in bpy.data.collections[name].all_objects
@@ -118,10 +130,11 @@ def prefab_closeups(out_dir, names):
     _set_visible('Prefabs', False)
 
 
-def previews(out_dir, shots=None):
+def previews(out_dir, shots=None, shot_table=None):
     os.makedirs(out_dir, exist_ok=True)
     bpy.context.view_layer.update()
-    for name, shot in SHOTS.items():
+    table = shot_table or SHOTS
+    for name, shot in table.items():
         if shots and name not in shots:
             continue
         framed = shot if isinstance(shot, str) else None

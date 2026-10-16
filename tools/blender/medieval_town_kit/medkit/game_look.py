@@ -24,6 +24,8 @@ LOOKS = {
                        sky='#cfe1f2', ground='#6f784d', ambient=2.0),
     'storybook': dict(elevation=16, azimuth=250, sun='#ffc98a', sun_intensity=3.2,
                       sky='#b9c9e6', ground='#8a6f4e', ambient=1.6),
+    'swamp': dict(elevation=18, azimuth=235, sun='#ffd29d', sun_intensity=2.4,
+                  sky='#9fb6c6', ground='#495748', ambient=1.85),
 }
 
 # three's ACESFilmicToneMapping (nodes/display/ToneMappingFunctions.js), rows.

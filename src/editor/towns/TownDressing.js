@@ -74,7 +74,8 @@ function yardFence(occupancy, out, building, size) {
  * @param {number} options.seed per-town seed
  * @param {Array<{building:object, size:number[]}>} options.placed buildings with their prefab footprint
  */
-export function planDressing({ plan, seed, placed }) {
+export function planDressing({ plan, seed, placed, family = null }) {
+  const isGoblin = family === 'Goblin' || ['timber-thatch', 'swamp-thatch', 'goblin'].includes(plan.profile?.style?.key);
   const occupancy = new Occupancy(plan.streets ?? []);
   for (const { building, size } of placed) {
     occupancy.claim(rect(building.x, building.z, size[0] + 0.6, size[1] + 0.6, building.yaw));
@@ -89,7 +90,14 @@ export function planDressing({ plan, seed, placed }) {
     const roll = (salt) => hash(seed, index, salt);
     // Offsets clear the house's own 0.3 m claim plus the 0.15 m fit clearance.
     const beside = (side, width) => side * (w / 2 + 0.5 + width / 2);
-    const candidates = [
+    const candidates = isGoblin ? [
+      { kind: 'baskets', lx: beside(-1, 1.3), lz: d / 2 - 0.8, w: 1.3, d: 1.0, turn: 0 },
+      { kind: 'cauldron', lx: beside(1, 1.5), lz: d / 2 - 0.5, w: 1.5, d: 1.5, turn: 0 },
+      { kind: 'drying_rack', lx: beside(1, 2.4), lz: -0.4, w: 2.4, d: 1.2, turn: Math.PI / 2 },
+      { kind: 'totem', lx: beside(-1, 0.8), lz: d / 2 + 0.6, w: 0.8, d: 0.8, turn: 0 },
+      { kind: 'torch_pole', lx: w / 2 - 0.3, lz: d / 2 + 0.8, w: 0.6, d: 0.6, turn: 0 },
+      { kind: 'barricade', lx: beside(-1, 2.0), lz: -d / 2 + 0.8, w: 2.0, d: 0.9, turn: 0.2 },
+    ] : [
       { kind: 'barrels', variant: roll(1) < 0.5 ? 0 : 1, lx: beside(-1, 1.4), lz: d / 2 - 0.9, w: 1.4, d: 1.4, turn: 0 },
       { kind: 'planter', lx: beside(1, 1.0), lz: d / 2 - 0.4, w: 1.0, d: 0.4, turn: 0 },
       { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
@@ -122,7 +130,7 @@ export function planDressing({ plan, seed, placed }) {
     for (const [salt, candidate] of candidates.entries()) {
       if (roll(10 + salt) < 0.62) tryProp(occupancy, out, building, candidate);
     }
-    if (!['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
+    if (!isGoblin && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
       yardFence(occupancy, out, building, size);
     }
   });

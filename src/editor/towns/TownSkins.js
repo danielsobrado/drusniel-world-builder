@@ -68,9 +68,9 @@ export const SNOW_THRESHOLD = 0.3;
  */
 export function skinFor({ family, biome = null, snow = 0, capital = false, citadel = false, rank = 0 }) {
   if (snow >= SNOW_THRESHOLD || COLD_BIOMES.has(biome)) return 'frost';
+  if (family === 'Goblin' || WET_BIOMES.has(biome)) return 'marsh';
   if (capital || (citadel && rank >= 3)) return 'imperial';
   if (family === 'Med' || HOT_BIOMES.has(biome)) return 'sun';
-  if (WET_BIOMES.has(biome)) return 'marsh';
   if (family === 'Nordic') return 'plains';
   return 'heartland';
 }

@@ -9,8 +9,9 @@ because both draw houses on the same plots.
 
 ## Pipeline
 
-1. **Kit (Blender).** `tools/blender/medieval_town_kit` builds 183 snap-together
-   modules and 106 building prefabs in three regional families, and exports:
+1. **Kit (Blender).** `tools/blender/medieval_town_kit` builds 224 snap-together
+   modules and 140 building prefabs across four regional/faction families (`Tudor`,
+   `Nordic`, `Med`, and `Goblin`), and exports:
    - `public/assets/environment/medieval-kit/medieval_kit.glb`: one node per module.
    - `medieval_kit_prefabs.json`: per prefab, its module placements, collision
      boxes, doors (hinge, closed yaw, open yaw) and lights, in glTF space
@@ -21,14 +22,17 @@ because both draw houses on the same plots.
 
    GLBs are git-ignored. Regenerate both with
    `blender -b --factory-startup --python tools/blender/medieval_town_kit/build_kit.py -- --no-render`
-   and then `... build_kit.py -- --lod1`.
+   and then `... build_kit.py -- --lod1`. Pass `--goblin` to build and render the
+   Goblin Swamp Village diorama (`goblin_town.glb`, `goblin_town_layout.json`, and
+   `goblin_*.png` previews).
 2. **Plans (existing).** `src/editor/world/settlements` plans each burg
    deterministically: streets, plots by kind/variant, pads, props and farm fields.
    The terrain already grades those pads and paints the streets.
 3. **Towns (`src/editor/towns`).**
    - `TownPrefabCatalog`: maps plan kinds and variants to prefabs, and the burg's
      culture style to a family: `granite-slate` is Nordic, `limestone-slate` is
-     Tudor, and `*-terracotta` is Med.
+     Tudor, `*-terracotta` is Med, and `timber-thatch` / `swamp-thatch` / `goblin`
+     is Goblin.
    - `TownLayout`: pure. Turns a plan into instance transforms, canonical
      collision boxes, doors, lights and interior volumes.
    - `TownStreamer`: queries `generator.settlementsNear` around the view. It loads

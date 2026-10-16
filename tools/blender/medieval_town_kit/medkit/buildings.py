@@ -96,14 +96,15 @@ class BuildingAssembler:
                 lights.point(self.lights_coll, story,
                              _wall_point(loc, rotq, (0.2, -0.6, 2.0)), energy=40.0)
             elif spec.arcade and k == 0 and side == 'front':
-                self.kit.place_q('Wall_Arcade', self.coll, story, (*loc, 0), rotq)
+                arc = 'Wall_Goblin_Arcade' if kind == 'goblin' else 'Wall_Arcade'
+                self.kit.place_q(arc, self.coll, story, (*loc, 0), rotq)
             elif (not self.accents.keeps_plain(self.plan, side, k, i)
                   and not (side == 'back' and spec.furnish != 'none'
                            and (spec.furnish != 'church' or (k == 0 and 0 < i < spec.w - 1)))
                   and rng.random() < odds):
                 self.kit.place_q(f'{prefix}_Window', self.coll, story, (*loc, 0), rotq)
                 accent = side == 'front' and self.accents.front_window(spec, k, story, loc, rotq, out)
-                if side == 'front' and rng.random() < 0.45 and not accent:
+                if kind != 'goblin' and side == 'front' and rng.random() < 0.45 and not accent:
                     self.kit.place_q('Flower_Box', self.coll, story,
                                      _wall_point(loc, rotq, (1.0, -0.36 - out, 1.02)), rotq)
             else:
@@ -113,13 +114,15 @@ class BuildingAssembler:
                                      _wall_point(loc, rotq, (1.0, -0.15, 0)), rotq)
             if side == 'front' and out:
                 self.accents.under_jetty(spec, k, story, loc, rotq, level)
-            if spec.pent and upper and side == 'front':
-                self.kit.place_q('Pent_Roof', self.coll, story,
+            if spec.pent and side == 'front' and (k == 0 if kind == 'goblin' else upper):
+                pent_mod = 'Goblin_Awning' if kind == 'goblin' else 'Pent_Roof'
+                self.kit.place_q(pent_mod, self.coll, story,
                                  _wall_point(loc, rotq, (0, -0.15 - out, STORY - 0.12)), rotq)
         mid = spec.w * GRID / 2
         if spec.banner and k == min(1, len(spec.stories) - 1):
-            self.kit.place('Banner_Blue', self.coll, story, (mid, -0.21 - level * JETTY, 2.7))
-        if spec.sign and k == 0:
+            banner_mod = 'Banner_Goblin_Skull' if kind == 'goblin' else 'Banner_Blue'
+            self.kit.place(banner_mod, self.coll, story, (mid, -0.21 - level * JETTY, 2.7))
+        if spec.sign and k == 0 and kind != 'goblin':
             self.kit.place('Sign_Inn', self.coll, story, (spec.door * GRID - 0.2, -0.15, 2.75))
 
     def _corners(self, spec, kind, story, level=0):
@@ -143,7 +146,8 @@ class BuildingAssembler:
 
     def _floor(self, spec, k, story):
         if k == 0:
-            module = lambda i, j: 'Floor_Ground'  # noqa: E731
+            ground_floor = 'Floor_Planks' if spec.stories[0] == 'goblin' else 'Floor_Ground'
+            module = lambda i, j: ground_floor  # noqa: E731
         elif not spec.floors:
             return
         else:
