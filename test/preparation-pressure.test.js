@@ -41,4 +41,6 @@ test('manifest-only and meadow-only preparation participate in pressure detectio
   assert.equal(hasPreparationBacklog({}), false);
   assert.equal(hasPreparationBacklog({ treeView: { manifestStore: { queue: { size: 1 } } } }), true);
   assert.equal(hasPreparationBacklog({ meadowGrass: { blades: { staleTiles: [1] } } }), true);
+  assert.equal(hasPreparationBacklog({ treeView: { pendingLodRebuild: {} } }), true);
+  assert.equal(hasPreparationBacklog({ detailViews: [{ stagedRebuild: {} }] }), true);
 });

@@ -69,3 +69,42 @@ test('prepared LOD changes spread source uploads across frames and retain the pr
     layer.dispose(); material.dispose();
   }
 });
+
+test('one publication turn bounds repacking bursts and repeated preparation cannot renew it', () => {
+  const template = createMeadowTemplate({ detail: 2, count: 64, tileSize: 8 });
+  const material = new MeshBasicNodeMaterial();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'turns', tileSize: 8,
+    templates: { low: template }, material, reach: 24, maxPublicationsPerFrame: 1,
+    selectBand: nearest => nearest < 24 ** 2 ? 'low' : null,
+    ground: { revision: 1, revisionAt: () => 1, forTile: () => ({ revision: 1,
+      sample: (_x, _z, _rank, out) => { Object.assign(out, { height: 2, strength: 1, shape: 0, path: 0 }); return true; } }) } });
+  const update = frame => layer.update({ x: 0, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, true, frame);
+  try {
+    update(1); update(1); update(1);
+    assert.equal(layer.buildSerial, 1, 'cached and completed jobs share the same frame turn');
+    assert.ok(layer.getState().building > 0);
+    for (let frame = 2; frame < 100; frame++) update(frame);
+    assert.equal(layer.getState().building, 0);
+    assert.equal(layer.getState().visibleMissing, 0);
+    for (const tile of layer.tiles.values()) assert.equal(tile.output.count, 64, 'every requested stem eventually publishes');
+  } finally { layer.dispose(); material.dispose(); template.dispose(); }
+});
+
+test('empty ground does not consume a GPU publication turn', () => {
+  const template = createMeadowTemplate({ detail: 2, count: 16, tileSize: 8 });
+  const material = new MeshBasicNodeMaterial();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'empty', tileSize: 8,
+    templates: { low: template }, material, reach: 24, maxPublicationsPerFrame: 1,
+    selectBand: nearest => nearest < 24 ** 2 ? 'low' : null,
+    ground: { revision: 1, revisionAt: () => 1, forTile: () => ({ revision: 1, sample: () => false }) } });
+  try {
+    layer.update({ x: 0, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, true, 1);
+    assert.equal(layer.getState().building, 0);
+    assert.ok(layer.buildSerial > 1);
+    assert.equal(layer.publications, 0);
+    assert.equal(layer.canPublish({ count: 0 }, { output: { count: 8 } }), true);
+    layer.publications = 1;
+    assert.equal(layer.canPublish({ count: 0 }, { output: { count: 8 } }), false,
+      'retiring a live tile still requires its buffer update turn');
+  } finally { layer.dispose(); material.dispose(); template.dispose(); }
+});

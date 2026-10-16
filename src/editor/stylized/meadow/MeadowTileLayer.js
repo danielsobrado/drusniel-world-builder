@@ -41,7 +41,7 @@ export class MeadowTileLayer {
    * @param {object} options.ground MeadowGroundSampler
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null, maxPublicationBytes = Infinity, preparer = null }) {
+  constructor({ scene, name, tileSize, templates, material, selectBand, selectPreparationBand = null, reach, ground, renderOrder = 0, boundsPadding = null, maxPublicationBytes = Infinity, maxPublicationsPerFrame = Infinity, preparer = null }) {
     this.tileSize = tileSize;
     this.templates = templates;
     this.selectBand = selectBand;
@@ -50,7 +50,9 @@ export class MeadowTileLayer {
     this.preparer = preparer;
     for (const template of Object.values(templates)) preparer?.register(template);
     this.maxPublicationBytes = maxPublicationBytes;
+    this.maxPublicationsPerFrame = maxPublicationsPerFrame;
     this.publicationBytes = 0;
+    this.publications = 0;
     const definitions = Object.values(templates).map(template => template.userData?.meadow);
     this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
       && definition.cards === definitions[0].cards);
@@ -92,11 +94,12 @@ export class MeadowTileLayer {
     if (this.publicationFrameId === frameId) return;
     this.publicationFrameId = frameId;
     this.publicationBytes = 0;
+    this.publications = 0;
   }
 
   update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null, buildEnabled = true, frameId = null) {
     this.time = time;
-    if (frameId === null) this.publicationBytes = 0;
+    if (frameId === null) { this.publicationBytes = 0; this.publications = 0; }
     else this.beginFrame(frameId);
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
@@ -125,7 +128,8 @@ export class MeadowTileLayer {
       }
       this.build(deadline, layoutChanged);
     }
-    this.commit();
+    if (this.batchDirty && this.workRunner) this.workRunner(() => this.commit());
+    else this.commit();
   }
 
   updateLayoutState(camera, origin, groundRevision) {
@@ -207,8 +211,7 @@ export class MeadowTileLayer {
       if (tile.seenFrame === frameSerial) continue;
       if (tile.output) this.batchDirty = true;
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
-      tile.job?.compaction.cancel?.();
-      this.release(tile.job?.band, tile.job?.compaction.output);
+      this.releaseJob(tile);
       this.tiles.delete(key);
     }
     this.rebuildStaleTiles();
@@ -230,15 +233,11 @@ export class MeadowTileLayer {
       if (tile.job && (tile.job.revision !== tile.revision || (!this.stablePrefixes
           && this.templates[tile.job.band].instanceCount < tile.preparationCapacity))) {
         PerfCounters.inc('meadowRanksDiscarded', tile.job.compaction.processedCount);
-        tile.job.compaction.cancel?.();
-        this.release(tile.job.band, tile.job.compaction.output);
-        tile.job = null;
+        this.releaseJob(tile);
       }
       if (MeadowTileLayer.isStale(tile)) stale.push(tile);
       else if (tile.job) {
-        tile.job.compaction.cancel?.();
-        this.release(tile.job.band, tile.job.compaction.output);
-        tile.job = null;
+        this.releaseJob(tile);
       }
     }
     this.sortStaleTiles();
@@ -253,6 +252,13 @@ export class MeadowTileLayer {
   release(band, output) {
     const pool = this.pools.get(band);
     if (output && pool && pool.length < POOL_LIMIT) pool.push(output);
+  }
+
+  releaseJob(tile) {
+    if (!tile.job) return;
+    tile.job.compaction.cancel?.();
+    this.release(tile.job.band, tile.job.compaction.output);
+    tile.job = null;
   }
 
   /** A tile needs a build when its ground is resident and its band or page moved on. */
@@ -282,7 +288,10 @@ export class MeadowTileLayer {
     let write = 0;
     for (let read = 0; read < stale.length; read += 1) {
       const tile = stale[read];
-      if (!MeadowTileLayer.isStale(tile)) continue;
+      if (!MeadowTileLayer.isStale(tile)) {
+        this.releaseJob(tile);
+        continue;
+      }
       if (performance.now() >= deadline) {
         for (let remaining = read; remaining < stale.length; remaining += 1) {
           const pending = stale[remaining];
@@ -293,8 +302,7 @@ export class MeadowTileLayer {
       const capacity = tile.preparationCapacity;
       if (this.stablePrefixes && tile.prepared?.revision === tile.revision
         && tile.prepared.capacity >= capacity) {
-        this.release(tile.job?.band, tile.job?.compaction.output);
-        tile.job = null;
+        this.releaseJob(tile);
         if (!this.publishPrepared(tile)) stale[write++] = tile;
         continue;
       }
@@ -337,7 +345,7 @@ export class MeadowTileLayer {
       const publication = this.stablePrefixes && tile.band !== null
         ? compactionPrefix(compaction.output, this.templates[tile.band].instanceCount)
         : compaction.output;
-      if (tile.band !== null && !this.canPublish(publication)) {
+      if (tile.band !== null && !this.canPublish(publication, tile)) {
         stale[write++] = tile;
         continue;
       }
@@ -361,8 +369,9 @@ export class MeadowTileLayer {
   }
 
   publish(tile, output, band, revision) {
-    if (!this.canPublish(output)) return false;
+    if (!this.canPublish(output, tile)) return false;
     this.publicationBytes += output.count * 14 * 4;
+    if (output.count || tile.output?.count) this.publications++;
     const previousCapacity = tile.output?.count ? this.templates[tile.builtBand].instanceCount : 0;
     if (!previousCapacity || this.templates[band].instanceCount > previousCapacity) {
       // Keep an active arrival fade across a rapid second promotion. A ground
@@ -380,11 +389,12 @@ export class MeadowTileLayer {
     return true;
   }
 
-  canPublish(output) {
+  canPublish(output, tile = null) {
     // One unusually large tile must still make progress. The bound covers new
     // source publications; page compaction and retired ranges may also upload.
-    return this.publicationBytes === 0
-      || this.publicationBytes + output.count * 14 * 4 <= this.maxPublicationBytes;
+    if (!output.count && !tile?.output?.count) return true;
+    return this.publications < this.maxPublicationsPerFrame && (this.publicationBytes === 0
+      || this.publicationBytes + output.count * 14 * 4 <= this.maxPublicationBytes);
   }
 
   publishPrepared(tile, force = false) {
@@ -437,7 +447,7 @@ export class MeadowTileLayer {
   }
 
   dispose() {
-    for (const tile of this.tiles.values()) tile.job?.compaction.cancel?.();
+    for (const tile of this.tiles.values()) this.releaseJob(tile);
     this.batches.dispose();
     this.tiles.clear();
     this.pools.clear();

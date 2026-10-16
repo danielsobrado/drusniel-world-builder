@@ -172,3 +172,30 @@ test('edits retain published grass and reject a superseded worker result arrivin
   assert.equal(tile.builtRevision, tile.revision);
   for (let i = 0; i < tile.output.count; i++) assert.equal(tile.output.position[i * 4 + 1], 11);
 });
+
+test('a cached lower LOD cancels an in-flight promotion before its output can recycle', t => {
+  const { low, high, ground } = fixture(t), { pool, workers } = poolFixture(t);
+  const tiny = createMeadowTemplate({ detail: 1, count: 128, tileSize: 8 });
+  const material = new MeshBasicMaterial();
+  let band = 'low', preparation = 'low';
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'demotion', tileSize: 8,
+    templates: { tiny, low, high }, material, reach: 0,
+    selectBand: nearest => nearest === 0 ? band : null,
+    selectPreparationBand: nearest => nearest === 0 ? preparation : null,
+    ground, preparer: pool });
+  t.after(() => { layer.dispose(); material.dispose(); tiny.dispose(); });
+  const update = x => layer.update({ x, z: -4 }, { x: 0, z: 0 }, Infinity, 1);
+  update(4); workers[0].respond(); update(4);
+  const tile = layer.tiles.get('0:-1');
+  preparation = 'high'; update(4.25);
+  const promotion = tile.job.compaction;
+  assert.equal(promotion.pending, true);
+  band = 'tiny'; preparation = 'low'; update(4.5);
+  assert.equal(promotion.cancelled, true);
+  assert.equal(tile.builtBand, 'tiny');
+  const published = tile.output.position.slice();
+  workers[0].respond(); update(4.5);
+  assert.deepEqual(tile.output.position, published);
+  assert.equal(layer.pools.get('high').length, 1, 'the late output returns exactly once');
+  for (const outputs of layer.pools.values()) assert.ok(!outputs.includes(tile.prepared.output));
+});

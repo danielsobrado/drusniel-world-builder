@@ -5,9 +5,9 @@ export class SceneryWorkScheduler {
   beginFrame(consumers, shouldYield = null) {
     this.first = this.cursor;
     this.cursor = (this.cursor + 1) % SCENERY_WORK_ORDER.length;
-    return this.flush(consumers, shouldYield, true);
+    return this.flush(consumers, shouldYield);
   }
-  flush(consumers, shouldYield = null, oneTurn = false) {
+  flush(consumers, shouldYield = null) {
     const visited = [];
     for (let offset = 0; offset < SCENERY_WORK_ORDER.length; offset++) {
       if (shouldYield?.()) break;
@@ -15,7 +15,6 @@ export class SceneryWorkScheduler {
       const consumer = consumers[name];
       if (!consumer?.pending() || consumer.blocked?.()) continue;
       consumer.run(); visited.push(name);
-      if (oneTurn) break;
     }
     return visited;
   }

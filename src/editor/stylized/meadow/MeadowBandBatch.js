@@ -3,7 +3,9 @@ import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { MeadowPageBounds } from './MeadowPageBounds.js';
 
-export const MEADOW_TILES_PER_PAGE = 4;
+// Sparse bands can share more tiles without enlarging a dense page. This keeps
+// CPU draw submission bounded while the stem ceiling still bounds allocation.
+export const MEADOW_TILES_PER_PAGE = 16;
 // Dense bands need smaller pages: otherwise first use of a new page allocates
 // and uploads several megabytes in one render, even for a single live tile.
 const PAGE_STEMS = 65536;
