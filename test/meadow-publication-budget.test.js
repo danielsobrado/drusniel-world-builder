@@ -108,3 +108,27 @@ test('empty ground does not consume a GPU publication turn', () => {
       'retiring a live tile still requires its buffer update turn');
   } finally { layer.dispose(); material.dispose(); template.dispose(); }
 });
+
+test('several small ready tiles share a frame within the byte allowance; a dense tile publishes alone', () => {
+  const template = createMeadowTemplate({ detail: 2, count: 64, tileSize: 8 });
+  const material = new MeshBasicNodeMaterial();
+  const tileBytes = 64 * 14 * 4;
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'shared-frame', tileSize: 8,
+    templates: { low: template }, material, reach: 24, maxPublicationsPerFrame: 4,
+    maxPublicationBytes: tileBytes * 3,
+    selectBand: nearest => nearest < 24 ** 2 ? 'low' : null,
+    ground: { revision: 1, revisionAt: () => 1, forTile: () => ({ revision: 1,
+      sample: (_x, _z, _rank, out) => { Object.assign(out, { height: 2, strength: 1, shape: 0, path: 0 }); return true; } }) } });
+  try {
+    layer.update({ x: 0, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, true, 1);
+    assert.equal(layer.publications, 3, 'the byte allowance, not a one-tile turn, bounds the frame');
+    assert.ok(layer.publicationBytes <= tileBytes * 3);
+    layer.beginFrame(2);
+    layer.maxPublicationBytes = tileBytes / 2;
+    layer.update({ x: 0, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, true, 2);
+    assert.equal(layer.publications, 1, 'one tile larger than the allowance still progresses, alone');
+    for (let frame = 3; frame < 100; frame++) layer.update({ x: 0, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, true, frame);
+    assert.equal(layer.getState().visibleMissing, 0);
+    for (const tile of layer.tiles.values()) assert.equal(tile.output.count, 64);
+  } finally { layer.dispose(); material.dispose(); template.dispose(); }
+});

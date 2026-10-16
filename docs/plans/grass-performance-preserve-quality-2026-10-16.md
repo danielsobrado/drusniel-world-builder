@@ -2,7 +2,7 @@
 
 Date: October 16, 2026
 
-Status: implementation handoff; runtime changes have not been made for this plan.
+Status: Phases 0–3 implemented on October 16; see the [results](../grass-performance-results-2026-10-16.md). Phases 4–5 and full-scenery recovery remain open.
 
 Reviewed baseline: `6214f270c3ad1d811c590358ef5c7393bf5a986e` on `main`.
 

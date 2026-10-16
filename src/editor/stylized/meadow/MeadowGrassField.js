@@ -16,6 +16,11 @@ import { MeadowTileLayer } from './MeadowTileLayer.js';
 import { createMeadowUniforms } from './meadowUniforms.js';
 import { meadowBladeBoundsPadding, meadowCardBoundsPadding } from './MeadowPageBounds.js';
 
+// Per layer and frame. A dense tile (~560 KB) still publishes alone, and one
+// oversized tile may always progress; several small sparse or card tiles may
+// share a frame instead of each waiting a full frame for its turn.
+const MAX_PUBLICATION_BYTES = 768 * 1024;
+const MAX_PUBLICATIONS_PER_FRAME = 4;
 const CARD_ATLAS = 'assets/ground/meadow/meadow-grass-cards.webp';
 
 /**
@@ -138,8 +143,8 @@ export class MeadowGrassField {
       ground: this.ground,
       preparer: this.preparer,
       boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
-      maxPublicationBytes: 4 * 1024 * 1024,
-      maxPublicationsPerFrame: 1,
+      maxPublicationBytes: MAX_PUBLICATION_BYTES,
+      maxPublicationsPerFrame: MAX_PUBLICATIONS_PER_FRAME,
     });
     this.cards = null;
     if (far) {
@@ -164,8 +169,8 @@ export class MeadowGrassField {
         ground: this.ground,
         preparer: this.preparer,
         boundsPadding: meadowCardBoundsPadding(this.uniforms),
-        maxPublicationBytes: 4 * 1024 * 1024,
-        maxPublicationsPerFrame: 1,
+        maxPublicationBytes: MAX_PUBLICATION_BYTES,
+        maxPublicationsPerFrame: MAX_PUBLICATIONS_PER_FRAME,
       });
     }
     this.stats = {};
