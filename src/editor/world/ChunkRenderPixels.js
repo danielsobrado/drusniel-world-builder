@@ -216,6 +216,8 @@ export function buildSurfaceMaskPixels({
   sampleHeight = null,
   sampleWater = null,
   snowCoverOut = null,
+  tilePixelsOut = null,
+  tileColor = null,
 }) {
   const blendCells = Math.max(0.5, maskConfig.blendCells);
   const waterlineDepth = Math.max(0.01, maskConfig.waterlineDepth ?? 0.35);
@@ -256,6 +258,26 @@ export function buildSurfaceMaskPixels({
   // Stand density blurred across biome borders over grass cells only (water,
   // roads and barren land drop out: the coverage fringe already thins toward
   // them), so a thin biome's islands thin in rather than starting at a line.
+  // Biome ground colour blurred across borders the same way: the terrain draws
+  // a cell's own swatch wherever grass thins out, and stepping from one biome's
+  // swatch to the next at a cell edge left a notched line around every border.
+  // Water and roads neither give nor take colour; the tile id in alpha stays.
+  if (tilePixelsOut && tileColor) {
+    const blends = (t) => t !== maskConfig.waterTileId && t !== roadTileId;
+    const share = blurTileField(halo, haloSize, (t) => (blends(t) ? 1 : 0));
+    const channels = [0, 1, 2].map((channel) => blurTileField(halo, haloSize,
+      (t) => (blends(t) ? tileColor(t)[channel] : 0)));
+    for (let localZ = 0; localZ < chunkSize; localZ += 1) {
+      for (let localX = 0; localX < chunkSize; localX += 1) {
+        const cellIndex = localZ * chunkSize + localX;
+        const haloIndex = (localZ + searchRadius) * haloSize + (localX + searchRadius);
+        if (!blends(tiles[cellIndex]) || share[haloIndex] < 1e-6) continue;
+        for (let channel = 0; channel < 3; channel += 1) {
+          tilePixelsOut[cellIndex * 4 + channel] = Math.round(channels[channel][haloIndex] / share[haloIndex]);
+        }
+      }
+    }
+  }
   let blurredDensity = null;
   if (densityByTile) {
     const grassTiles = new Set(maskConfig.grassTileIds);
@@ -302,8 +324,20 @@ export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinit
   page.tilePixels = buildTilePixels(page.tiles, tileDefinitions);
   // Biome snow blurred across borders, for the material bake's snow.
   page.snowBiomeCover = new Uint8Array(chunkSize * chunkSize);
+  const colors = new Map();
+  const tileColor = (tileId) => {
+    let color = colors.get(tileId);
+    if (!color) {
+      const tile = resolveTile(tileId, tileDefinitions);
+      color = tile ? hexToRgbBytes(tile.color) : [0, 0, 0];
+      colors.set(tileId, color);
+    }
+    return color;
+  };
   page.surfaceMaskPixels = buildSurfaceMaskPixels({
     snowCoverOut: page.snowBiomeCover,
+    tilePixelsOut: page.tilePixels,
+    tileColor,
     tiles: page.tiles,
     heights: page.heights ?? null,
     originX: page.originX,

@@ -187,3 +187,26 @@ test('a thin biome\'s grass islands thin in across the border, not at it', () =>
   assert.ok(column(30) > 0.9, 'grassland stays full up to the border');
   assert.ok(column(33) > column(44) + 0.15, `tundra thins in (${column(33).toFixed(2)} vs ${column(44).toFixed(2)})`);
 });
+
+test('biome ground colour ramps across a border, and water lends none to the bank', async () => {
+  const { enrichPageRenderPixels } = await import('../src/editor/world/ChunkRenderPixels.js');
+  const { TILE_BY_ID, hexToRgbBytes } = await import('../src/editor/tileCatalog.js');
+  const chunkSize = 32;
+  const page = (neighbour) => {
+    const tileAt = (cellX) => (cellX < 16 ? GRASSLAND : neighbour);
+    const tiles = Uint8Array.from({ length: chunkSize * chunkSize }, (_, i) => tileAt(i % chunkSize));
+    return enrichPageRenderPixels({ tiles, originX: 0, originZ: 0 }, tileAt,
+      { ...createSurfaceMaskConfig({ grass: { tileIds: [4, 6] } }, { tileSize: 2 }), worldSeed: 1 });
+  };
+  const red = (p, x) => p.tilePixels[(16 * chunkSize + x) * 4];
+  const grassRed = hexToRgbBytes(TILE_BY_ID.get(GRASSLAND).color)[0];
+  const forestRed = hexToRgbBytes(TILE_BY_ID.get(DECIDUOUS).color)[0];
+  const forest = page(DECIDUOUS);
+  const ramp = [13, 15, 16, 18].map((x) => red(forest, x));
+  assert.equal(red(forest, 8), grassRed, 'deep grassland keeps its swatch');
+  assert.equal(red(forest, 24), forestRed, 'deep forest keeps its swatch');
+  assert.ok(new Set(ramp).size === ramp.length, `a ramp across the border: ${ramp}`);
+  assert.equal(forest.tilePixels[(16 * chunkSize + 15) * 4 + 3], GRASSLAND, 'the tile id stays the cell\'s own');
+  const shore = page(WATER);
+  assert.equal(red(shore, 15), grassRed, 'the bank takes no colour from the water');
+});
