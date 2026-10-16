@@ -77,6 +77,15 @@ stylizedSurface:
   sampler reads the same field at the live density. Under canopy the forest-floor
   texture's B channel carries the bare share, tinted `forestFloor.litterColor`.
   Densities near 1 are untouched.
+- **Per-biome values blend across borders.** Anything keyed on a cell's biome id
+  is a step at every border, so `world/BiomeFieldBlur.js` blurs it over ±5 cells
+  (±10 m) on the surface-mask halo: tundra/glacier snow cover (kept on the page as
+  `snowBiomeCover` for the bake; footsteps and towns evaluate the same kernel from
+  tiles), grass stand density, and the biome ground swatch in `tilePixels` RGB
+  (water and roads neither give nor take colour; alpha keeps the cell's own id).
+  Grass also fades into barren land (desert, glacier) over 20 m
+  (`GRASS_BARREN_EDGE_METERS`), while shores keep 8 m. The mask halo is 17 cells
+  to hold both, about 30 ms of worker time per 64-cell chunk.
 - **Undergrowth is biome- and shade-aware.** Bush variants carry `tileIds`
   (bamboo only in the tropics), `canopy` (the low shrub is the shade-tolerant floor
   of a wood, the rounded bush its fringe) and `bushes.densityByTile`. The first
