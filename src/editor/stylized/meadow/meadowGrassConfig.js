@@ -2,6 +2,7 @@ import { resolveMeadowGrowth } from './meadowGrowthProfiles.js';
 import { validateLodBands } from './meadowGrassLayout.js';
 import { resolveShapeTable } from './meadowGrassShapes.js';
 import { encodeLookTable, resolveMeadowPalettes } from './meadowPalettes.js';
+import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
 
 /**
  * Meadow grass settings (`stylizedSurface.grass.meadow`), resolved.
@@ -97,7 +98,27 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
   /** Milliseconds a frame may spend compacting tiles: the streaming budget. */
   buildBudgetMs: 2,
   shapes: Object.freeze({ default: 'slender', byTileId: Object.freeze({}) }),
+  /** Plants and gaps inside a stand (meadowTuftField.js). */
+  tufts: MEADOW_TUFT_DEFAULTS,
 });
+
+const TUFT_LIMITS = Object.freeze({
+  height: [0, 1], lean: [0, 1], bendIsolated: [0, 6], bendCore: [0, 6],
+  widthFloor: [0.05, 1], widthPower: [0, 2], windShort: [0, 1], rootLift: [0, 1], valueSpread: [0, 0.5],
+});
+/** The settings that leave stems as they stood before tufts. */
+const UNTUFTED = Object.freeze({
+  height: 0, lean: 0, bendIsolated: 1, bendCore: 1, widthFloor: 1, windShort: 1, rootLift: 0, valueSpread: 0,
+});
+
+function resolveTufts(source, path) {
+  if (source?.enabled === false) return Object.freeze({ ...MEADOW_TUFT_DEFAULTS, ...UNTUFTED });
+  const tufts = {};
+  for (const [key, [min, max]] of Object.entries(TUFT_LIMITS)) {
+    tufts[key] = finite(source?.[key], MEADOW_TUFT_DEFAULTS[key], `${path}.tufts.${key}`, { min, max });
+  }
+  return Object.freeze(tufts);
+}
 
 function finite(value, fallback, path, { min = -Infinity, max = Infinity } = {}) {
   const resolved = value ?? fallback;
@@ -189,6 +210,7 @@ export function resolveMeadowGrassConfig(source) {
     stiffness: finite(source.stiffness, d.stiffness, `${path}.stiffness`, { min: 0.1, max: 8 }),
     lod,
     appearance,
+    tufts: resolveTufts(source.tufts, path),
     far,
     interaction,
     palette: palette ? { palettes: palette.palettes, brightness: palette.brightness } : null,

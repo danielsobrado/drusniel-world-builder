@@ -85,6 +85,11 @@ function periodicFbmOctaves(position, count) {
   return sum.div(weight);
 }
 
+/** One octave of value noise in [0, 1], periodic over PATTERN_PERIOD: four hashes. */
+export function periodicNoise(position) {
+  return periodicValueNoise(position, PATTERN_PERIOD);
+}
+
 /** Two-octave FBM in [0, 1], periodic over PATTERN_PERIOD. */
 export function periodicFbm2(position) {
   return periodicFbmOctaves(position, 2);

@@ -895,7 +895,10 @@ stylizedSurface:
       # grass-test's final visual-refinement layer, converted at 2.8 units/m.
       # Keep stand density and streaming distances: depth comes from pigment.
       appearance:
-        rootBrightness: 0.48
+        # Was 0.48 with a 0.75 soil share: isolated roots landed near 0.36 of the
+        # ground's own value and read as black dots on sparse turf. Tuft cores
+        # keep this depth; stragglers are lifted further by tufts.rootLift.
+        rootBrightness: 0.6
         canopyDepth: 0.50
         gradientPower: 2.35
         groundTipMix: 0.08
@@ -910,6 +913,38 @@ stylizedSurface:
         dryStrength: 0.22
         dryColor: '#777455'
         lodWidenMax: 2.0
+      # Plants and gaps inside a stand (meadow/meadowTuftField.js): sub-metre
+      # tufts share height, lean and value; short stems narrow with their height
+      # instead of standing as broad wedges. Reshapes stems only — population,
+      # LOD prefixes and page bounds are unchanged. `enabled: false` restores
+      # the untufted stand for A/B.
+      tufts:
+        height: 0.32
+        lean: 0.55
+        bendIsolated: 2.2
+        bendCore: 1.25
+        widthFloor: 0.5
+        widthPower: 0.6
+        windShort: 0.6
+        rootLift: 0.28
+        valueSpread: 0.07
+      # The ground between stems (meadow/meadowGroundDetailConfig.js): litter
+      # drifts, moss hollows, soil pockets and fallen-blade streaks, procedural on
+      # the terrain's transition lattice (no sampler), fading to plain turf by
+      # fadeEnd so the mid-distance bake still matches.
+      groundDetail:
+        fadeStart: 14
+        fadeEnd: 34
+        fineEnd: 10
+        strength: 1
+        default: { litter: '#9a9156', litterAmount: 0.65, moss: 0.25, soil: 0.35, streaks: 0.8 }
+        byTileId:
+          3: { litter: '#b39a5f', litterAmount: 0.6, moss: 0.0, soil: 0.45, streaks: 0.7 }   # savanna: straw, warm earth
+          7: { litter: '#5e4c31', litterAmount: 0.5, moss: 0.45, soil: 0.2, streaks: 0.3 }   # tropical rainforest: leaf litter
+          8: { litter: '#5a4a30', litterAmount: 0.5, moss: 0.5, soil: 0.2, streaks: 0.3 }    # temperate rainforest
+          9: { litter: '#6b543a', litterAmount: 0.6, moss: 0.55, soil: 0.35, streaks: 0.5 }  # taiga: needle duff, moss
+          10: { litter: '#8f8d72', litterAmount: 0.45, moss: 0.3, soil: 0.5, streaks: 0.25 } # tundra: lichen, mineral soil
+          12: { litter: '#6f7a48', litterAmount: 0.35, moss: 0.5, soil: 0.15, streaks: 0.4 } # wetland: damp sedge
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
       shapes:
         default: slender

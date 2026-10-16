@@ -1,9 +1,13 @@
-import { color, dot, fract, mix, pow, smoothstep, uv, vec3 } from 'three/tsl';
+import { color, dot, float, fract, mix, pow, smoothstep, uv, vec3, vec4 } from 'three/tsl';
 
 import { stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { meadowPatchColors } from './meadowColorNodes.js';
 import { applyGrassMarks } from './meadowGrassMarks.js';
 import { MEADOW_GRASS_DEFAULTS } from './meadowGrassConfig.js';
+import { meadowTuftNodes } from './meadowTuftNodes.js';
+
+/** Share of the root pigment the stem's foot keeps where it meets the soil. */
+const SOIL_SHARE = 0.88;
 
 const DEFAULT_PATH_FRINGE_COLOR = '#c2ad62';
 const DEFAULT_PATH_FRINGE_STRENGTH = 0.55;
@@ -11,7 +15,8 @@ const DEFAULT_PATH_FRINGE_STRENGTH = 0.55;
 /**
  * The meadow pigment, after grass-test's `#configureMeadowMaterial`: a root that
  * stays dark most of the way up and a lit tip, drifting between cool and warm
- * patches across the field; contact shade and soil at the base so blades meet
+ * patches across the field; a value shared by each tuft's stems so plants read
+ * as one; contact shade and soil at the base so blades meet
  * the ground rather than float on a painted lawn; a per-blade value spread that
  * separates overlapping blades into layers instead of one flat sheet; straw tips
  * along a path's verge; and, with `marks`, the scorch, frost or blight a spell
@@ -45,12 +50,22 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false }
       .mul(dot(tip, vec3(0.3, 0.59, 0.11)).mul(1.6).add(0.35));
     tip = mix(tip, straw, wear.verge.mul(fringe.strength ?? DEFAULT_PATH_FRINGE_STRENGTH).clamp(0, 1));
   }
+  const tufts = uniforms.tufts;
+  const occupancy = meadowTuftNodes(blade.canonical).occupancy;
+  const tuftValue = occupancy.sub(0.5).mul(tufts.valueSpread.mul(2)).add(1);
+  root = root.mul(tuftValue);
+  tip = tip.mul(tuftValue);
   if (marks && uniforms.spellGround) ({ root, tip } = applyGrassMarks(uniforms.spellGround, blade.base, root, tip));
-  root = root.toVarying('meadowRootPigment');
+  // Occupancy rides in the root varying's fourth lane: no extra vertex output.
+  const rootData = vec4(root, occupancy).toVarying('meadowRootPigment');
+  root = rootData.xyz;
   tip = tip.toVarying('meadowTipPigment');
   const pigment = mix(root, tip, pow(height, appearance.gradientPower));
-  const rootShade = mix(appearance.rootBrightness, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height));
-  const soil = root.mul(0.75);
+  // Contact darkening belongs to dense interiors; an isolated stem's foot stays
+  // near the ground's own value instead of punching a dark dot into it.
+  const rootFloor = mix(appearance.rootBrightness, float(1), float(1).sub(rootData.w).mul(tufts.rootLift));
+  const rootShade = mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height));
+  const soil = root.mul(SOIL_SHARE);
   const based = mix(soil, pigment, smoothstep(0, 0.18, height));
   const variation = mix(vec3(0.93, 1, 0.9), vec3(1.07, 1, 0.86), blade.variation);
   const bladeValue = fract(blade.rank.mul(0.618034)).sub(0.5).mul(appearance.valueJitter).add(1);

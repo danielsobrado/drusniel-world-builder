@@ -50,6 +50,7 @@ import { acquirePathTextures, createTerrainPathPaint, resolvePathPaint } from '.
 import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js';
 import { snowWakeRecorder } from './stylized/deformation/SnowWakeRecorder.js';
 import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading.js';
+import { applyMeadowGroundDetail } from './stylized/meadow/meadowGroundDetail.js';
 import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
@@ -196,6 +197,19 @@ export function createTerrainMaterial({
     stylizedConfig.patch.strength,
   ).mul(stylizedConfig.color.brightness);
   let groundColor = mix(tileColor, grassTint, grassCoverage);
+  // Litter, moss and soil between the meadow's stems, before paths and duff paint over it.
+  if (meadowGround?.detail && transitionPatterns) {
+    groundColor = applyMeadowGroundDetail({
+      color: groundColor,
+      root: grassTint,
+      soil: colorNode(stylizedConfig.dirt.color),
+      coverage: grassCoverage,
+      cameraDistance,
+      patterns: transitionPatterns,
+      localXZ,
+      ...meadowGround.detail,
+    });
+  }
   groundColor = mix(
     groundColor,
     mix(grassTint, colorNode(stylizedConfig.dirt.color), pathConfig.vergeBlend ?? 0.55),

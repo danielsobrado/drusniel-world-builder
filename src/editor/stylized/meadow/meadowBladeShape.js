@@ -215,8 +215,15 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       // Patchy stand height, as the donor's cinematic meadow: a slow noise sets
       // each patch's scale so the field has swells and hollows, not one level.
       const profile = meadowGrowthNodes(uniforms,blade);
-      const height = profile.height.mul(growth);
+      const tufts = uniforms.tufts;
+      const occupancy = profile.tuft.occupancy.toVar();
+      const height = profile.height.mul(growth).toVar();
+      // A short plant is a narrow one: width follows the stem's own height, so
+      // short growth and worn ground read as slender blades, not broad wedges.
+      const stature = height.div(profile.tallHeight.max(1e-3)).clamp(0, 1).toVar();
+      const proportion = pow(stature, tufts.widthPower).max(tufts.widthFloor);
       const width = profile.width
+        .mul(proportion)
         .mul(tuning.widthScale)
         .mul(sqrt(blade.strength))
         .mul(uniforms.widthScale)
@@ -239,8 +246,11 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
 
       // A resting bend toward the stem's own random side.
       const bendPower = pow(r, uniforms.stiffness);
-      const restDirection = vec2(cos(blade.phase), sin(blade.phase));
-      const restAngle = uniforms.baseBend.mul(blade.strength).mul(HALF_PI).mul(bendPower);
+      // A tuft's stems share a lean and splay together; stragglers lie further over.
+      const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, tufts.lean).toVar();
+      const restDirection = restMix.div(restMix.length().max(1e-3));
+      const restAngle = uniforms.baseBend.mul(blade.strength).mul(HALF_PI).mul(bendPower)
+        .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy));
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));
@@ -261,7 +271,9 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       const turbulence = sin(wave.across.mul(tuning.windFrequency.mul(1.9))
         .add(uniforms.time.mul(tuning.windSpeed.mul(0.7))).add(blade.phase.mul(0.6)).add(2.6))
         .mul(tuning.windTurbulence);
-      const compliance = oneMinus(blade.variation.mul(tuning.windStiffnessRange));
+      // Short stems ride the gust with less swing than the tall stand round them.
+      const compliance = oneMinus(blade.variation.mul(tuning.windStiffnessRange))
+        .mul(mix(tufts.windShort, float(1), stature));
       const windAngle = tuning.windLean.add(primary.add(secondary).add(turbulence).mul(tuning.windStrength))
         .mul(compliance).mul(gust).mul(blade.strength).mul(2).clamp(-1.3, 1.3)
         .mul(bendPower);

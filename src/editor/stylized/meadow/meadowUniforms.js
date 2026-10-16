@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { vec3 } from 'three/tsl';
 import { frameUniform as uniform, frameUniformArray as uniformArray } from '../../../render/FrameUniforms.js';
 import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
+import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
 
 
 /**
@@ -86,6 +87,9 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       lodCompensation: uniform(appearance.lodCompensation),
       lodWidenMax: uniform(appearance.lodWidenMax),
     },
+    // The tuft field's shaping (meadowTuftField.js), live.
+    tufts: Object.fromEntries(Object.entries(settings.tufts ?? MEADOW_TUFT_DEFAULTS)
+      .map(([key, value]) => [key, uniform(value)])),
     // Base and tip per palette index, live, so a look can repaint the meadow
     // without a rebuild.
     palette: settings.palette

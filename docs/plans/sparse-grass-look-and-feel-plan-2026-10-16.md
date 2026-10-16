@@ -1,6 +1,9 @@
 # Sparse grass: visual improvement plan
 
-Date: October 16, 2026. Status: investigation and proposed implementation.
+Date: October 16, 2026. Status: first slice (G1 ground detail and root contact,
+G2 tufts and short-blade proportions) implemented as defaults — see the
+[implementation A/B](../qa/sparse-grass-implementation-2026-10-16/README.md).
+G0 diagnostics, G3 and G4 remain open.
 
 **Make the ground between blades an attractive surface, and make the surviving
 grass read as coherent plants.** The strongest improvement will come from richer

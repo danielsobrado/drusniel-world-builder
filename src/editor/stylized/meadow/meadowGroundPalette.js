@@ -1,7 +1,7 @@
 import { MEADOW_GRASS_DEFAULTS } from './meadowGrassConfig.js';
 import { resolveMeadowPalettes } from './meadowPalettes.js';
 
-function linearColor(hex) {
+export function linearColor(hex) {
   const packed = Number.parseInt(hex.slice(1), 16);
   return [16, 8, 0].map(shift => {
     const value = ((packed >>> shift) & 255) / 255;
