@@ -56,8 +56,13 @@ def _set_visible(coll_name, visible):
 SHOTS = {
     'overview': dict(loc=(-24, -46, 64), target=(22, 18, 5), ortho_scale=62),
     'street': dict(loc=(10.5, 7.0, 5.4), target=(26, 16, 6.0), lens=26),
+    'plaza': dict(loc=(15.2, 9.2, 5.0), target=(25.5, 13.8, 4.7), lens=24),
     'lane': dict(loc=(19.8, -4.0, 1.7), target=(20, 12, 2.6), lens=24),
-    'interior': dict(loc=(22.9, 14.9, 4.75), target=(28.8, 19.2, 4.1), lens=18),
+    'interior': dict(loc=(24.1, 14.9, 4.65), target=(28.6, 19.2, 4.1), lens=18),
+    'interior_upper': dict(building='BLD_Inn', loc=(2.3, 1.1, 4.55), target=(6.8, 5.2, 3.8), lens=18),
+    'interior_smithy': dict(building='BLD_Smithy', loc=(2.15, 0.75, 1.75), target=(5.0, 3.4, 1.15), lens=18),
+    'interior_apothecary': dict(building='BLD_Merchant', loc=(2.3, 0.9, 1.65), target=(5.8, 5.2, 1.05), lens=18),
+    'interior_chapel': dict(building='BLD_Chapel', loc=(5.0, 0.75, 1.85), target=(5.0, 5.3, 1.25), lens=18),
     'catalog': 'Kit',      # framed from the collection's bounds
     'prefabs': 'Prefabs',
 }
@@ -115,14 +120,22 @@ def prefab_closeups(out_dir, names):
 
 def previews(out_dir, shots=None):
     os.makedirs(out_dir, exist_ok=True)
+    bpy.context.view_layer.update()
     for name, shot in SHOTS.items():
         if shots and name not in shots:
             continue
         framed = shot if isinstance(shot, str) else None
         for coll in ('Kit', 'Prefabs', 'Town'):
             _set_visible(coll, coll == framed if framed else coll == 'Town')
+        bpy.context.view_layer.update()
         shot = _collection_shot(framed) if framed else shot
-        cam = _camera(f'CAM_{name}', shot['loc'], shot['target'], shot.get('ortho_scale'),
+        loc, target = shot['loc'], shot['target']
+        if isinstance(shot, dict) and 'building' in shot:
+            bld = bpy.data.objects.get(shot['building'])
+            if bld is not None:
+                loc = bld.matrix_world @ Vector(loc)
+                target = bld.matrix_world @ Vector(target)
+        cam = _camera(f'CAM_{name}', loc, target, shot.get('ortho_scale'),
                       shot.get('lens', 32))
         _render(cam, os.path.join(out_dir, f'{name}.png'))
     _set_visible('Kit', True)

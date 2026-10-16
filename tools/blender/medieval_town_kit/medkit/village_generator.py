@@ -18,8 +18,8 @@ from .prefab_families import BASE_BY_NAME, FAMILY_BY_NAME
 STAIR_CELLS = {'Stairs_Stone_1': 2, 'Stairs_Stone_2': 3}
 TOWN_POOL = ('House_Small', 'House_Small', 'House_Large', 'House_Cottage', 'House_Square',
              'House_Long', 'Townhouse_Narrow', 'Townhouse_Tall', 'Shop_Small', 'Shop_Large',
-             'Bakery', 'Smithy', 'Warehouse')
-LANDMARKS = ('Tavern', 'Manor', 'Townhouse_Wide')
+             'Bakery', 'Smithy', 'Apothecary', 'Guardhouse', 'Library', 'Warehouse')
+LANDMARKS = ('Tavern', 'Manor', 'Guildhall', 'Townhouse_Wide')
 FACINGS = (0, 0, 0, 1, 3)        # mostly facing down the slope, some across it
 
 
@@ -184,12 +184,13 @@ class GeneratedVillage:
         if not cells:
             return
         wx, wy = max(cells, key=lambda c: (openness(c), -abs(c[0] - self.W / 2)))
-        self.PROPS.append(('Well', wx + 0.5, wy + 0.5, 0))
+        centerpiece = self.rng.choice(('Well', 'Fountain', 'Town_Cross'))
+        self.PROPS.append((centerpiece, wx + 0.5, wy + 0.5, 0))
         self.occupied.add((wx, wy))
-        stalls = ('Market_Stall_Cream', 'Market_Stall_Blue', 'Market_Stall_Red')
+        stalls = ('Market_Stall_Cream', 'Market_Stall_Blue', 'Market_Stall_Red', 'Notice_Board')
         for i, (dx, dy) in enumerate(((-2, 0), (2, 0), (0, -2), (0, 2))):
             cell = (wx + dx, wy + dy)
-            if i < 3 and self._free({cell}) and self.height(*cell) == 2:
+            if i < len(stalls) and self._free({cell}) and self.height(*cell) == 2:
                 self.PROPS.append((stalls[i], cell[0] + 0.5, cell[1] + 0.5, 0))
                 self.occupied.add(cell)
         bench = (wx + 1, wy + 1)
@@ -214,6 +215,7 @@ class GeneratedVillage:
         rng.shuffle(streets)
         for x, y in streets[: max(4, len(streets) // 6)]:
             self.LAMPS.append((x + 0.15, y + 0.15))
-        for x, y in streets[len(streets) // 6: len(streets) // 6 + 8]:
-            kind = rng.choice(('Barrel', 'Crate', 'Cart', 'Woodpile', 'Barrel'))
+        for x, y in streets[len(streets) // 6: len(streets) // 6 + 10]:
+            kind = rng.choice(('Barrel', 'Crate', 'Cart', 'Woodpile', 'Horse_Trough',
+                               'Brazier', 'Cargo_Pile', 'Signpost', 'Wayside_Shrine'))
             self.PROPS.append((kind, x + 0.8, y + 0.5, rng.uniform(0, 360)))

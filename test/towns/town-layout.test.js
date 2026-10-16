@@ -45,13 +45,25 @@ test('burg culture styles map to regional families', () => {
 });
 
 test('building kinds resolve to family prefabs with a Tudor fallback', () => {
-  const prefabs = { Nordic_House_Small: {}, Tudor_Tavern: {}, Med_Villa: {}, CityWall: {} };
+  const prefabs = {
+    Nordic_House_Small: {},
+    Tudor_Tavern: {},
+    Tudor_Apothecary: {},
+    Tudor_Guildhall: {},
+    Med_Villa: {},
+    CityWall: {},
+  };
   assert.equal(prefabNameFor('house', 0, 'Nordic', prefabs), 'Nordic_House_Small');
   assert.equal(prefabNameFor('tavern', 0, 'Nordic', prefabs), 'Tudor_Tavern');
+  assert.equal(prefabNameFor('apothecary', 0, 'Nordic', prefabs), 'Tudor_Apothecary');
+  assert.equal(prefabNameFor('guildhall', 0, 'Tudor', prefabs), 'Tudor_Guildhall');
   assert.equal(prefabNameFor('hall', 0, 'Med', prefabs), 'Med_Villa');
   assert.equal(prefabNameFor('wall', 0, 'Med', prefabs), 'CityWall');
   assert.equal(prefabNameFor('bollards', 0, 'Med', prefabs), null);
-  assert.deepEqual(propClusterFor('signpost', 0), []);
+  assert.deepEqual(propClusterFor('signpost', 0), [['Signpost', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('shrine', 0), [['Wayside_Shrine', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('bollards', 0), [['Bollards', 0, 0, 0, 0]]);
+  assert.deepEqual(propClusterFor('unknown_prop', 0), []);
 });
 
 test('a building facing plan +z faces canonical -z, at its pad, with its door in front', () => {
@@ -153,4 +165,28 @@ test('a share of buildings take the one-story-taller sibling when the kit has on
   assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs, 0.9), 'Tudor_House_Small');
   assert.equal(prefabNameFor('house', 1, 'Tudor', prefabs, 0.1), 'Tudor_House_Large', 'no sibling, no change');
   assert.equal(prefabNameFor('house', 0, 'Tudor', prefabs), 'Tudor_House_Small', 'no roll keeps the base');
+});
+
+test('exported medieval_kit_prefabs.json includes all new DnD prefabs, landings, and colliders', async () => {
+  const fs = await import('node:fs');
+  const kit = JSON.parse(fs.readFileSync('public/assets/environment/medieval-kit/medieval_kit_prefabs.json', 'utf8'));
+  for (const family of ['Tudor', 'Nordic', 'Med']) {
+    for (const kind of ['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'apothecary', 'guildhall', 'guardhouse', 'library']) {
+      const name = prefabNameFor(kind, 0, family, kit.prefabs);
+      assert.ok(name && kit.prefabs[name], `Missing prefab for ${family} ${kind}`);
+    }
+  }
+  for (const propKind of ['well', 'fountain', 'stall', 'lantern', 'shrine', 'signpost', 'notice_board', 'brazier', 'trough', 'grindstone', 'cargo', 'bollards']) {
+    const cluster = propClusterFor(propKind, 0);
+    assert.ok(cluster.length > 0, `Empty cluster for ${propKind}`);
+    for (const [module] of cluster) {
+      assert.ok(Array.isArray(kit.moduleColliders[module]) && kit.moduleColliders[module].length > 0,
+        `Missing collider for outdoor module ${module}`);
+    }
+  }
+  const tavern = kit.prefabs.Tudor_Tavern;
+  const modules = new Set(tavern.parts.map((p) => p.m));
+  assert.ok(modules.has('Floor_Landing_L'), 'Multi-story tavern must include Floor_Landing_L');
+  assert.ok(modules.has('Counter') && modules.has('Cask_Rack') && modules.has('Chandelier'),
+    'Tavern must include specialized interior furnishings');
 });

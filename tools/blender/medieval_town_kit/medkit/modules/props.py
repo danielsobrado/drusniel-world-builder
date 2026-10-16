@@ -7,8 +7,10 @@ import math
 import bpy
 from mathutils import Matrix
 
+from ..config import detailed
 from ..mesh import MeshBuilder
-from .street_props import banner, flower_box, lamp_post, market_stall, wall_lantern
+from .street_props import (banner, brazier, flower_box, lamp_post, market_stall, notice_board,
+                           signpost, town_cross, wall_lantern, wayside_shrine)
 
 R90Y = Matrix.Rotation(math.pi / 2, 4, 'Y')
 
@@ -78,6 +80,76 @@ def woodpile():
     return b
 
 
+def horse_trough():
+    """Stone & timber water trough paired with a hitching rail for taverns and inns."""
+    b = MeshBuilder()
+    b.box((-0.82, -0.34, 0), (0.42, 0.34, 0.52), 'stone', skip=('-z',))
+    b.box((-0.72, -0.24, 0.44), (0.32, 0.24, 0.48), 'water')
+    # Hitching posts and tie rail on the right (+X / +Y)
+    for x in (-0.75, 0.75):
+        b.box((x - 0.05, 0.38, 0), (x + 0.05, 0.48, 1.08), 'timber')
+    b.box((-0.82, 0.39, 0.92), (0.82, 0.47, 1.0), 'timber')
+    if detailed():
+        for x in (-0.35, 0.25):
+            b.box((x - 0.02, 0.35, 0.88), (x + 0.02, 0.39, 0.94), 'iron')
+    return b
+
+
+def grindstone():
+    """Blacksmith's timber-framed grindstone wheel over a water trough."""
+    b = MeshBuilder()
+    for x in (-0.48, 0.4):
+        for y in (-0.28, 0.2):
+            b.box((x, y, 0), (x + 0.08, y + 0.08, 0.78), 'timber')
+    b.box((-0.52, -0.28, 0.58), (0.52, -0.2, 0.72), 'timber')
+    b.box((-0.52, 0.2, 0.58), (0.52, 0.28, 0.72), 'timber')
+    b.box((-0.38, -0.2, 0.42), (0.38, 0.2, 0.58), 'planks')
+    # Dressed stone wheel rotating in XZ plane (axis along Y)
+    wheel_m = Matrix.Translation((0, 0, 0.74)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
+    b.lathe([(0.0, -0.08), (0.34, -0.08), (0.34, 0.08), (0.0, 0.08)], 12, 'stone_dressed',
+            m=wheel_m, smooth=False)
+    b.box((-0.03, -0.34, 0.71), (0.03, 0.34, 0.77), 'iron')
+    if detailed():
+        b.box((-0.02, -0.36, 0.52), (0.02, -0.32, 0.74), 'iron')
+    return b
+
+
+def cargo_pile():
+    """Dock & market pallet stacked with crates, a cask, and tied grain sacks."""
+    b = MeshBuilder()
+    b.box((-0.82, -0.68, 0), (0.82, 0.68, 0.08), 'planks', skip=('-z',))
+    b.box((-0.76, -0.58, 0.08), (-0.12, 0.06, 0.72), 'planks')
+    for x in (-0.77, -0.17):
+        for y in (-0.59, 0.01):
+            b.box((x, y, 0.08), (x + 0.05, y + 0.05, 0.73), 'timber')
+    cask_m = Matrix.Translation((0.36, -0.22, 0.08))
+    b.lathe([(0.0, 0.0), (0.23, 0.0), (0.28, 0.34), (0.23, 0.68), (0.0, 0.68)], 10, 'planks',
+            m=cask_m)
+    b.lathe([(0.26, 0.12), (0.26, 0.17)], 10, 'iron', m=cask_m)
+    b.lathe([(0.26, 0.51), (0.26, 0.56)], 10, 'iron', m=cask_m)
+    for x, y, r, s in ((-0.32, 0.35, 0.24, 51), (0.18, 0.34, 0.22, 52), (-0.44, -0.25, 0.2, 53)):
+        z = 0.86 if y < 0 else 0.26
+        b.blob((x, y, z), r, 'cloth_cream', subdiv=1, squash=(1.1, 0.9, 0.85), jitter=0.14, seed=s)
+    return b
+
+
+def bollards():
+    """Pair of iron-capped timber street & quay bollards linked by a catenary rope."""
+    b = MeshBuilder()
+    for x in (-1.1, 1.1):
+        m = Matrix.Translation((x, 0, 0))
+        b.lathe([(0.16, 0.0), (0.15, 0.18), (0.12, 0.22), (0.12, 0.78), (0.14, 0.82),
+                 (0.11, 0.92), (0.0, 0.95)], 8, 'timber', m=m)
+        b.lathe([(0.125, 0.7), (0.132, 0.7), (0.132, 0.76), (0.125, 0.76)], 8, 'iron', m=m)
+    # Catenary rope between the two bollards
+    segs = 6 if detailed() else 3
+    pts = [(-1.1 + 2.2 * i / segs, 0.0, 0.73 - 0.18 * math.sin(math.pi * i / segs))
+           for i in range(segs + 1)]
+    for p, q in zip(pts, pts[1:]):
+        b.beam(p, q, (0, 1, 0), (-0.018, 0.018), 0.036, 'cloth_cream', bevel=0)
+    return b
+
+
 def sign_board():
     b = MeshBuilder()
     b.box((-0.04, -0.95, -0.03), (0.04, 0.0, 0.04), 'iron')
@@ -130,5 +202,15 @@ def define(kit):
     kit.define('Banner_Blue', 'props', banner())
     kit.define('Flower_Box', 'props', flower_box())
     kit.define('Woodpile', 'props', woodpile())
+    kit.define('Wayside_Shrine', 'props', wayside_shrine())
+    kit.define('Town_Cross', 'props', town_cross())
+    kit.define('Signpost', 'props', signpost())
+    kit.define('Notice_Board', 'props', notice_board())
+    kit.define('Brazier', 'props', brazier())
+    kit.define('Horse_Trough', 'props', horse_trough())
+    kit.define('Grindstone', 'props', grindstone())
+    kit.define('Cargo_Pile', 'props', cargo_pile())
+    kit.define('Bollards', 'props', bollards())
     sign = kit.define('Sign_Inn', 'props', sign_board())
     add_text(sign, 'INN')
+

@@ -32,34 +32,49 @@ BASES = [
     Base('Townhouse_Narrow', 2, 3, 3, {'seed': 111}),
     Base('Townhouse_Wide', 5, 3, 3, {'dormers': True, 'seed': 112}),
     Base('Townhouse_Tall', 4, 3, 3, {'seed': 113}),
-    Base('Shop_Large', 4, 3, 2, {'furnish': 'store', 'seed': 121}, shopfront=True),
-    Base('Shop_Small', 3, 2, 2, {'furnish': 'store', 'seed': 122}, shopfront=True),
+    Base('Shop_Large', 4, 3, 2, {'furnish': 'shop', 'seed': 121}, shopfront=True),
+    Base('Shop_Small', 3, 2, 2, {'furnish': 'shop', 'seed': 122}, shopfront=True),
     Base('Tavern', 4, 3, 3, {'dormers': True, 'sign': True, 'furnish': 'inn', 'seed': 131},
          shopfront=True),
     Base('Tavern_Large', 5, 3, 3, {'dormers': True, 'sign': True, 'furnish': 'inn', 'seed': 132}),
-    Base('Smithy', 4, 2, 1, {'furnish': 'store', 'seed': 141}),
-    Base('Bakery', 3, 2, 2, {'seed': 142}),
+    Base('Smithy', 4, 2, 1, {'furnish': 'smithy', 'seed': 141}),
+    Base('Bakery', 3, 2, 2, {'furnish': 'bakery', 'seed': 142}),
     Base('Warehouse', 4, 3, 2, {'furnish': 'store', 'seed': 143}),
+    Base('Apothecary', 3, 2, 2, {'furnish': 'apothecary', 'seed': 144}, shopfront=True),
     Base('Chapel', 4, 3, 2, {'door': 1, 'floors': False, 'furnish': 'church', 'chimney': False,
                              'window_odds': 0.9, 'seed': 151}),
     Base('Farmhouse', 6, 2, 2, {'door': 2, 'seed': 161}),
     Base('Farmhouse_Small', 5, 2, 1, {'door': 2, 'seed': 162}),
     Base('Barn', 4, 3, 1, {'floors': False, 'furnish': 'store', 'chimney': False, 'seed': 163}),
-    Base('Keep', 3, 3, 4, {'banner': True, 'chimney': False, 'furnish': 'store', 'seed': 171},
+    Base('Keep', 3, 3, 4, {'banner': True, 'chimney': False, 'furnish': 'keep', 'seed': 171},
          tower=True),
-    Base('Manor', 6, 3, 3, {'door': 2, 'dormers': True, 'banner': True, 'seed': 172}),
+    Base('Manor', 6, 3, 3, {'door': 2, 'dormers': True, 'banner': True, 'furnish': 'keep', 'seed': 172}),
     Base('Tower', 2, 2, 3, {'banner': True, 'chimney': False, 'furnish': 'none', 'seed': 173},
-         tower=True),
+          tower=True),
+    Base('Guildhall', 5, 3, 3, {'door': 2, 'dormers': True, 'banner': True, 'furnish': 'library',
+                                'seed': 174}, shopfront=True),
+    Base('Guardhouse', 4, 2, 2, {'door': 1, 'banner': True, 'furnish': 'keep', 'seed': 175}),
+    Base('Library', 4, 3, 2, {'door': 1, 'dormers': True, 'furnish': 'library', 'seed': 176}),
 ]
 
 
-GABLE_FRONTED = {'House_Square', 'Townhouse_Narrow', 'Shop_Small', 'Bakery'}
-TURRETED = {'Manor', 'Tavern_Large', 'Townhouse_Wide'}
-TRADE_SIGNS = {'Shop_Large': 'Key', 'Shop_Small': 'Boot', 'Tavern_Large': 'Mug'}
+GABLE_FRONTED = {'House_Square', 'Townhouse_Narrow', 'Shop_Small', 'Bakery', 'Apothecary'}
+TURRETED = {'Manor', 'Tavern_Large', 'Townhouse_Wide', 'Guildhall'}
+TRADE_SIGNS = {
+    'Shop_Large': 'Key',
+    'Shop_Small': 'Boot',
+    'Tavern_Large': 'Mug',
+    'Smithy': 'Anvil',
+    'Bakery': 'Loaf',
+    'Apothecary': 'Potion',
+    'Guardhouse': 'Shield',
+    'Library': 'Book',
+    'Guildhall': 'Key',
+}
 # Bases that also get a one-story-taller sibling (<Family>_<Base>_Tall) on the same
 # footprint, so a street steps up and down instead of standing at one height.
 TALLER = ('House_Small', 'House_Square', 'House_Long', 'Townhouse_Narrow', 'Townhouse_Tall',
-          'Shop_Small', 'Bakery')
+          'Shop_Small', 'Bakery', 'Apothecary')
 TALL_SUFFIX = '_Tall'
 MAX_STORIES = 4
 

@@ -4,7 +4,7 @@ Procedurally builds a modular, game-ready medieval town kit in Blender 5.2 and
 assembles a sample terraced town from it.
 
 ```
-"F:\Blender 5.2\blender.exe" -b --factory-startup --python tools/blender/medieval_town_kit/build_kit.py -- [--no-render] [--no-export] [--shots overview,street,lane,interior,catalog]
+"F:\Blender 5.2\blender.exe" -b --factory-startup --python tools/blender/medieval_town_kit/build_kit.py -- [--no-render] [--no-export] [--shots overview,street,plaza,lane,interior,interior_upper,interior_smithy,interior_apothecary,interior_chapel,catalog,prefabs]
 ```
 
 About 20 s end to end. Outputs:
@@ -12,10 +12,10 @@ About 20 s end to end. Outputs:
 | Path | What |
 |---|---|
 | `assets-src/medieval-town-kit/medieval_town_kit.blend` | Kit catalog (`Kit/*`) + assembled town (`Town/*`) |
-| `assets-src/medieval-town-kit/textures/` | 13 shared tileable albedo+normal PNGs |
-| `assets-src/medieval-town-kit/previews/` | Overview, street, lane, interior and catalog renders |
-| `public/assets/environment/medieval-kit/medieval_kit.glb` | Every module once, at its origin, named by module |
-| `public/assets/environment/medieval-kit/medieval_town.glb` | The town; ~2k nodes instancing 57 shared meshes |
+| `assets-src/medieval-town-kit/textures/` | 18 shared tileable albedo+normal PNGs |
+| `assets-src/medieval-town-kit/previews/` | Outdoor (`overview`, `street`, `plaza`, `lane`), indoor (`interior`, `interior_upper`, `interior_smithy`, `interior_apothecary`, `interior_chapel`), `catalog`, and `prefabs` renders |
+| `public/assets/environment/medieval-kit/medieval_kit.glb` | Every module once (183 modules), at its origin, named by module |
+| `public/assets/environment/medieval-kit/medieval_town.glb` | The town; ~2.5k nodes instancing shared kit meshes |
 | `public/assets/environment/medieval-kit/medieval_town_layout.json` | Group/placement tree to rebuild the town from the kit |
 
 ## Lego contract
@@ -23,7 +23,7 @@ About 20 s end to end. Outputs:
 - 2 m grid, 3 m stories, 1.5 m terrace steps (`medkit/config.py`).
 - Walls span local X 0..2 m, centred on y=0, exterior −Y. Corner posts cover joints.
 - Floor slabs cover one cell with their top at the story base.
-- Stairs climb +Y over two cells (interior: one story; stone: one/two terraces).
+- Stairs climb +Y over two cells (interior: `Stairs_Interior_L/R` paired with `Floor_Stairwell_L/R` at `j=0` and walkable `Floor_Landing_L/R` at `j=1`; stone: one/two terraces).
 - Placed pieces are linked duplicates parented to empties:
   `BLD_<name>` → `<name>_Story<k>` / `<name>_Roof`. Move a building, lift a story
   or swap a roof by moving its empty. `Door_Leaf` pivots on its hinge (`interactable: door`).
@@ -38,8 +38,8 @@ colours are tints (`baseColorFactor`) over one cloth texture.
 
 - `medkit/texture_patterns.py` — numpy texture generators
 - `medkit/mesh.py` — geometry builder (box/beam/extrude/lathe/blob)
-- `medkit/modules/*` — module families: walls, floors, roofs, terrain, props, nature, interior
-- `medkit/buildings.py`, `furnish.py` — enterable buildings from specs
+- `medkit/modules/*` — module families: walls, floors, roofs, terrain, props, street_props, nature, interior, interior_trade, accents
+- `medkit/buildings.py`, `furnish.py` — enterable buildings with role-specific DnD interiors (`inn`, `shop`, `apothecary`, `smithy`, `bakery`, `church`, `keep`, `library`, `store`, `house`)
 - `medkit/village_plan.py` — the sample town as data (height map, stairs, buildings, props)
 - `medkit/terrain_builder.py`, `village.py` — assembly
 - `medkit/render.py`, `export.py` — previews and glTF and layout export
@@ -50,8 +50,8 @@ colours are tints (`baseColorFactor`) over one cloth texture.
   - Tudor: half-timber with slate gables.
   - Nordic: clapboard, 60° gables, crossed finials and pent roofs.
   - Med: render over stone, terracotta hip roofs, loggias and a courtyard villa.
-- **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 70 buildings sized to
-  the game planner's plots. They are exported as `medieval_kit_prefabs.json`,
+- **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 106 buildings sized to
+  the game planner's plots (including `Apothecary`, `Guildhall`, `Guardhouse`, and `Library`). They are exported as `medieval_kit_prefabs.json`,
   which holds parts, collision boxes, doors and lights. The game instances them
   per Azgaar burg (see `docs/towns.md`).
 - **Generated towns** (`medkit/village_generator.py`): `-- --seed 11 --family Nordic`

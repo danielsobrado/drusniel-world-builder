@@ -63,7 +63,9 @@ class BuildingAssembler:
                 col = 0 if side == 'L' else spec.w - 1
                 self.kit.place(f'Stairs_Interior_{side}', self.coll, story, (col * GRID, 0, 0))
             furnish.furnish_story(self.kit, self.coll, story, spec, k)
-        lights.interior(self.lights_coll, root, (spec.w * GRID / 2, spec.d * GRID / 2, base + 2.3))
+        for k in range(n if spec.floors else 1):
+            lights.interior(self.lights_coll, root,
+                            (spec.w * GRID / 2, spec.d * GRID / 2, base + k * STORY + 2.3))
         wall_top = base + n * STORY
         if spec.gable_front:
             # Turned a quarter: the roof's ridge (its local +X) runs back from the front.
@@ -95,7 +97,10 @@ class BuildingAssembler:
                              _wall_point(loc, rotq, (0.2, -0.6, 2.0)), energy=40.0)
             elif spec.arcade and k == 0 and side == 'front':
                 self.kit.place_q('Wall_Arcade', self.coll, story, (*loc, 0), rotq)
-            elif not self.accents.keeps_plain(self.plan, side, k, i) and rng.random() < odds:
+            elif (not self.accents.keeps_plain(self.plan, side, k, i)
+                  and not (side == 'back' and spec.furnish != 'none'
+                           and (spec.furnish != 'church' or (k == 0 and 0 < i < spec.w - 1)))
+                  and rng.random() < odds):
                 self.kit.place_q(f'{prefix}_Window', self.coll, story, (*loc, 0), rotq)
                 accent = side == 'front' and self.accents.front_window(spec, k, story, loc, rotq, out)
                 if side == 'front' and rng.random() < 0.45 and not accent:
@@ -146,7 +151,11 @@ class BuildingAssembler:
             col = 0 if side == 'L' else spec.w - 1
 
             def module(i, j):
-                return f'Floor_Stairwell_{side}' if i == col and j < 2 else 'Floor_Planks'
+                if i == col and j == 0:
+                    return f'Floor_Stairwell_{side}'
+                if i == col and j == 1:
+                    return f'Floor_Landing_{side}'
+                return 'Floor_Planks'
         for i in range(spec.w):
             for j in range(spec.d):
                 self.kit.place(module(i, j), self.coll, story, (i * GRID, j * GRID, 0))

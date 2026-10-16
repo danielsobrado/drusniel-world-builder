@@ -25,17 +25,21 @@ export const DEFAULT_FAMILY = 'Tudor';
 /** Prefab base names per planner building kind, indexed by the plan's variant. */
 const BUILDING_BASES = Object.freeze({
   house: ['House_Small', 'House_Large', 'House_Cottage', 'House_Square', 'House_Long'],
-  townhouse: ['Townhouse_Narrow', 'Townhouse_Wide', 'Townhouse_Tall'],
-  shop: ['Shop_Large', 'Shop_Small'],
+  townhouse: ['Townhouse_Narrow', 'Townhouse_Wide', 'Townhouse_Tall', 'Library'],
+  shop: ['Shop_Large', 'Shop_Small', 'Apothecary'],
   tavern: ['Tavern', 'Tavern_Large'],
   smithy: ['Smithy'],
   bakery: ['Bakery'],
+  apothecary: ['Apothecary'],
   warehouse: ['Warehouse'],
   chapel: ['Chapel'],
   farmhouse: ['Farmhouse', 'Farmhouse_Small'],
   barn: ['Barn'],
-  keep: ['Keep'],
-  hall: ['Manor'],
+  keep: ['Keep', 'Guardhouse'],
+  hall: ['Manor', 'Guildhall'],
+  guildhall: ['Guildhall'],
+  guardhouse: ['Guardhouse'],
+  library: ['Library'],
 });
 
 /** Shared, family-less pieces. */
@@ -50,7 +54,7 @@ const FAMILY_OVERRIDES = Object.freeze({ Med: Object.freeze({ Manor: 'Med_Villa'
  */
 const PROP_CLUSTERS = Object.freeze({
   well: [[['Well', 0, 0, 0, 0]]],
-  fountain: [[['Fountain', 0, 0, 0, 0]]],
+  fountain: [[['Fountain', 0, 0, 0, 0]], [['Town_Cross', 0, 0, 0, 0]]],
   stall: [
     [['Market_Stall_Cream', 0, 0, 0, 0], ['Barrel', 1.5, 0.5, 0, 0]],
     [['Market_Stall_Blue', 0, 0, 0, 0], ['Crate', -1.5, 0.3, 0.3, 0]],
@@ -63,15 +67,23 @@ const PROP_CLUSTERS = Object.freeze({
   barrels: [
     [['Barrel', -0.35, 0, 0, 0], ['Barrel', 0.35, 0.1, 0.6, 0], ['Barrel', 0, -0.55, 1.1, 0]],
     [['Crate', 0, 0, 0, 0], ['Crate', 0.05, 0.02, 0.4, 0.7]],
+    [['Cargo_Pile', 0, 0, 0, 0]],
   ],
   fence: [[['Fence_Wood', -2, 0, 0, 0], ['Fence_Wood', 0, 0, 0, 0]]],
-  shrine: [[['Bush', 0, 0, 0, 0]], [['Flower_Box', 0, 0, 0, 0]]],
+  shrine: [[['Wayside_Shrine', 0, 0, 0, 0]], [['Town_Cross', 0, 0, 0, 0]]],
+  signpost: [[['Signpost', 0, 0, 0, 0]], [['Notice_Board', 0, 0, 0, 0]]],
+  notice_board: [[['Notice_Board', 0, 0, 0, 0]]],
+  brazier: [[['Brazier', 0, 0, 0, 0]]],
+  trough: [[['Horse_Trough', 0, 0, 0, 0]]],
+  grindstone: [[['Grindstone', 0, 0, 0, 0]]],
+  cargo: [[['Cargo_Pile', 0, 0, 0, 0]]],
+  bollards: [[['Bollards', 0, 0, 0, 0]]],
   woodpile: [[['Woodpile', 0, 0, 0, 0]]],
   bush: [[['Bush', 0, 0, 0, 0]], [['Bush', 0, 0, 0.8, 0], ['Bush', 0.6, 0.3, 2, 0]]],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */
-const SALTED_PROPS = new Set(['stall', 'lantern']);
+const SALTED_PROPS = new Set(['stall', 'lantern', 'shrine', 'signpost']);
 
 /** Towns of this rank and up build a tiered fountain where the plan asks for a well. */
 const FOUNTAIN_RANK = 2;

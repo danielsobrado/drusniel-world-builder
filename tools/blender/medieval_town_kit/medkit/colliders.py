@@ -6,7 +6,7 @@ exactly what the game's primitive box colliders take. Purely decorative pieces
 (roofs, gables, chimneys, dormers, ivy) have none: nobody can reach them.
 """
 from .config import GRID, HALF_T as T, JETTY_LEVELS, STORY
-from .modules.floors import RAIL_X, STAIR_X, WELL_X
+from .modules.floors import LANDING_Y, RAIL_X, STAIR_X, STAIR_Y0, STAIR_Y1, WELL_X
 from .modules.walls import DOOR, TIMBER_WINDOW, WINDOW
 from .modules.walls_regional import ARCADE
 from .modules import foundations as F
@@ -25,7 +25,7 @@ def _panel(hole):
 
 def _stairs(side, steps=15):
     x0, x1 = STAIR_X[side]
-    y0, y1 = T, 2 * GRID
+    y0, y1 = STAIR_Y0, STAIR_Y1
     run, rise = (y1 - y0) / steps, STORY / steps
     return [((x0, y0 + i * run, 0), (x1, y1, (i + 1) * rise)) for i in range(steps)]
 
@@ -34,6 +34,14 @@ def _stairwell(side):
     x0, x1 = WELL_X[side]
     rail = RAIL_X[side]
     return [((x0, 0, -0.2), (x1, GRID, 0)), ((rail - 0.04, 0.15, 0), (rail + 0.04, GRID, 1.0))]
+
+
+def _landing(side):
+    x0, x1 = WELL_X[side]
+    return [
+        ((x0, 0, -0.2), (x1, LANDING_Y, 0)),
+        ((0, LANDING_Y, -0.2), (GRID, GRID, 0)),
+    ]
 
 
 def _stone_stairs(units):
@@ -76,6 +84,8 @@ COLLIDERS = {
     'Floor_Ground': [((0, 0, 0), (GRID, GRID, 0.06))],
     'Floor_Stairwell_L': _stairwell('L'),
     'Floor_Stairwell_R': _stairwell('R'),
+    'Floor_Landing_L': _landing('L'),
+    'Floor_Landing_R': _landing('R'),
     'Stairs_Interior_L': _stairs('L'),
     'Stairs_Interior_R': _stairs('R'),
     'Stairs_Stone_1': _stone_stairs(1),
@@ -97,9 +107,35 @@ COLLIDERS = {
     'Railing_Wood': [((0, 0.12, 0), (GRID, 0.26, 1.0))],
     'Table': _centred(1.8, 1.0, 0.8),
     'Bench': _centred(1.6, 0.34, 0.48),
+    'Pew': _centred(1.7, 0.5, 0.95),
+    'Stool': _centred(0.38, 0.38, 0.45),
     'Bed': [((-0.52, -1.0, 0), (0.52, 1.05, 0.55))],
     'Hearth': [((-0.85, -0.45, 0), (0.85, 0.3, 1.42))],
     'Shelf': _centred(1.2, 0.3, 1.8),
+    'Chest': _centred(0.84, 0.48, 0.54),
+    'Bookcase': [((-0.68, -0.18, 0), (0.68, 0.2, 2.08))],
+    'Writing_Desk': [((-0.62, -0.36, 0), (0.62, 0.36, 1.08))],
+    'Wardrobe': [((-0.58, -0.26, 0), (0.58, 0.26, 2.02))],
+    'Counter': _centred(1.86, 0.62, 0.96),
+    'Cask_Rack': [((-0.76, -0.36, 0), (0.76, 0.36, 1.35))],
+    'Anvil_Block': _centred(0.68, 0.68, 0.88),
+    'Forge_Hood': [((-0.92, -0.62, 0), (0.92, 0.32, 2.4))],
+    'Bake_Oven': [((-0.86, -0.66, 0), (0.86, 0.32, 2.4))],
+    'Stone_Altar': _centred(1.72, 0.84, 1.0),
+    'Lectern': _centred(0.56, 0.56, 1.32),
+    'Candelabra': _centred(0.52, 0.52, 1.62),
+    'Weapon_Rack': [((-0.68, -0.26, 0), (0.68, 0.24, 1.56))],
+    'Flour_Sacks': [((-0.55, -0.4, 0), (0.55, 0.38, 0.8))],
+    'Alchemist_Table': _centred(1.66, 0.78, 1.25),
+    'Wayside_Shrine': _centred(1.16, 1.04, 2.2),
+    'Town_Cross': _centred(1.5, 1.5, 3.15),
+    'Signpost': _centred(0.5, 0.5, 2.55),
+    'Notice_Board': _centred(1.64, 0.5, 2.24),
+    'Brazier': _centred(0.68, 0.68, 1.02),
+    'Horse_Trough': [((-0.88, -0.4, 0), (0.88, 0.42, 1.08))],
+    'Grindstone': _centred(0.84, 0.56, 1.06),
+    'Cargo_Pile': [((-0.82, -0.65, 0), (0.82, 0.62, 1.15))],
+    'Bollards': [((-0.75, -0.15, 0), (0.75, 0.15, 0.86))],
     'Tree_Oak': _centred(0.5, 0.5, 2.5),
     'Tree_Cypress': _centred(0.6, 0.6, 3.0),
     'Arch_Bridge': [((0, 0, 0), (0.6, 2.0, 3.0)), ((3.4, 0, 0), (4.0, 2.0, 3.0)),

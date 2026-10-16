@@ -2,15 +2,22 @@
 from mathutils import Vector
 
 from .kit import Kit
-from .modules import (accents, defences, floors, foundations, interior, nature, props, roof_shapes, roofs,
-                      terrain, towers, walls, walls_regional)
+from .modules import (accents, defences, floors, foundations, interior, interior_trade, nature, props,
+                      roof_shapes, roofs, terrain, towers, walls, walls_regional)
 
 FAMILIES = (walls, walls_regional, foundations, floors, roofs, roof_shapes, terrain, defences, towers, props,
-            nature, interior, accents)
+            nature, interior, interior_trade, accents)
 CATALOG_ORIGIN = Vector((0.0, -24.0, 0.0))
 # Modules only seen from inside a building; the game draws them only near the viewer.
-INTERIOR = {'Floor_Ground', 'Floor_Planks', 'Floor_Stairwell_L', 'Floor_Stairwell_R',
-            'Stairs_Interior_L', 'Stairs_Interior_R', 'Table', 'Bed', 'Hearth', 'Shelf', 'Rug'}
+INTERIOR = {
+    'Floor_Ground', 'Floor_Planks', 'Floor_Stairwell_L', 'Floor_Stairwell_R',
+    'Floor_Landing_L', 'Floor_Landing_R', 'Stairs_Interior_L', 'Stairs_Interior_R',
+    'Table', 'Bed', 'Hearth', 'Shelf', 'Rug', 'Pew', 'Stool', 'Chest',
+    'Bookcase', 'Writing_Desk', 'Wardrobe', 'Counter', 'Cask_Rack', 'Chandelier',
+    'Wall_Sconce', 'Wall_Shield', 'Wall_Tapestry', 'Anvil_Block', 'Forge_Hood',
+    'Bake_Oven', 'Stone_Altar', 'Lectern', 'Candelabra', 'Weapon_Rack',
+    'Flour_Sacks', 'Alchemist_Table',
+}
 
 
 def _layout(kit):

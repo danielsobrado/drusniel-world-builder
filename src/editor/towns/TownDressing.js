@@ -82,7 +82,8 @@ export function planDressing({ plan, seed, placed }) {
   for (const prop of plan.props ?? []) occupancy.claim(rect(prop.x, prop.z, 1.6, 1.6, prop.yaw ?? 0));
   const out = [];
   placed.forEach(({ building, size }, index) => {
-    if (!['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'farmhouse', 'warehouse']
+    if (!['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'apothecary', 'farmhouse', 'warehouse',
+      'chapel', 'keep', 'hall', 'guildhall', 'guardhouse', 'library']
       .includes(building.kind)) return;
     const [w, d] = size;
     const roll = (salt) => hash(seed, index, salt);
@@ -95,10 +96,35 @@ export function planDressing({ plan, seed, placed }) {
       { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
       { kind: 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
     ];
+    if (building.kind === 'smithy') {
+      candidates.push({ kind: 'grindstone', lx: beside(1, 1.0), lz: d / 2 - 0.8, w: 1.0, d: 0.8, turn: 0 });
+    } else if (building.kind === 'tavern') {
+      candidates.push(
+        { kind: 'trough', lx: beside(1, 1.8), lz: d / 2 - 0.6, w: 1.8, d: 0.8, turn: 0 },
+        { kind: 'notice_board', lx: beside(-1, 1.7), lz: d / 2 - 0.4, w: 1.7, d: 0.6, turn: 0 },
+        { kind: 'brazier', lx: w / 2 - 0.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
+      );
+    } else if (building.kind === 'chapel') {
+      candidates.push(
+        { kind: 'shrine', lx: beside(-1, 1.3), lz: d / 2 - 0.6, w: 1.3, d: 1.2, turn: 0 },
+        { kind: 'brazier', lx: -1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
+        { kind: 'brazier', lx: 1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
+      );
+    } else if (['keep', 'hall', 'guildhall', 'guardhouse'].includes(building.kind)) {
+      candidates.push(
+        { kind: 'brazier', lx: -1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
+        { kind: 'brazier', lx: 1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
+        { kind: 'notice_board', lx: beside(1, 1.7), lz: d / 2 - 0.5, w: 1.7, d: 0.6, turn: 0 },
+      );
+    } else if (['warehouse', 'shop'].includes(building.kind)) {
+      candidates.push({ kind: 'cargo', lx: beside(1, 1.7), lz: -0.2, w: 1.7, d: 1.4, turn: 0.2 });
+    }
     for (const [salt, candidate] of candidates.entries()) {
       if (roll(10 + salt) < 0.62) tryProp(occupancy, out, building, candidate);
     }
-    if (roll(20) < 0.55) yardFence(occupancy, out, building, size);
+    if (!['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
+      yardFence(occupancy, out, building, size);
+    }
   });
   return out;
 }

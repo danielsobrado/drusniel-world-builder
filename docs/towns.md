@@ -9,8 +9,8 @@ because both draw houses on the same plots.
 
 ## Pipeline
 
-1. **Kit (Blender).** `tools/blender/medieval_town_kit` builds 88 snap-together
-   modules and 70 building prefabs in three regional families, and exports:
+1. **Kit (Blender).** `tools/blender/medieval_town_kit` builds 183 snap-together
+   modules and 106 building prefabs in three regional families, and exports:
    - `public/assets/environment/medieval-kit/medieval_kit.glb`: one node per module.
    - `medieval_kit_prefabs.json`: per prefab, its module placements, collision
      boxes, doors (hinge, closed yaw, open yaw) and lights, in glTF space
@@ -107,26 +107,43 @@ startup.
   ACES curve, `medkit/game_look.py`):
   - Narrow Tudor and Nordic houses are gable-fronted: the ridge runs front to
     back, so a full gable faces the street.
-  - Tudor manors, large taverns and wide townhouses get a corbelled corner
-    turret.
+  - Tudor manors, guildhalls, large taverns and wide townhouses get a corbelled
+    corner turret.
   - Many chimneys climb the gable wall as stone stacks.
   - Upper windows may become oriel bays or get balconies.
-  - Shops hang trade signs (key, boot, mug).
+  - Shops, workshops and civic halls hang trade signs (`Key`, `Boot`, `Mug`,
+    `Anvil`, `Loaf`, `Potion`, `Shield`, `Book`).
   - Gables carry turned spikes; towers and chapels carry weathervanes.
-  - Common houses and townhouses also come one story taller (`<Family>_<Base>_Tall`,
-    same footprint). `TownPrefabCatalog.prefabNameFor` picks the taller one for
-    about 40% of buildings from a per-building seed, so streets step up and down.
-  - Large towns get a tiered fountain instead of a well. Lamp posts alternate
-    with banner lamp posts. Ivy trails from the jetties.
+  - Common houses, shops, bakeries, apothecaries and townhouses also come one
+    story taller (`<Family>_<Base>_Tall`, same footprint). `TownPrefabCatalog.prefabNameFor`
+    picks the taller one for about 40% of buildings from a per-building seed, so
+    streets step up and down.
+  - Large towns get a tiered fountain or town cross instead of a well. Lamp posts
+    alternate with banner lamp posts. Ivy trails from the jetties.
   - Tudor upper timber stories jetty 0.3 m per story over the street, on joist
     ends, a bressumer and curved brackets. Their roofs widen forward to match
     (`Roof_Gable_S6J2` and so on).
   - Wide Tudor houses get a front cross-gable (`Cross_Gable_3` / `_4`).
   - Stone and render windows have glazed round-arched heads under voussoirs.
   - Chimneys are tall stacks with a corbelled band and clay pots.
-  - Street furniture lives in `modules/street_props.py`: flared iron lanterns,
-    striped scalloped stall awnings, fleur-de-lis banners (also on
-    `Lamp_Post_Banner`), and flower boxes.
+  - Street and outdoor DnD furniture lives in `modules/street_props.py` and
+    `modules/props.py`: flared iron lanterns, striped scalloped stall awnings,
+    fleur-de-lis banners (also on `Lamp_Post_Banner`), flower boxes, notice
+    boards (`Notice_Board`), wayside shrines (`Wayside_Shrine`), stepped stone
+    market crosses (`Town_Cross`), direction signposts (`Signpost`), iron
+    braziers (`Brazier`), horse troughs with hitching rails (`Horse_Trough`),
+    smith grindstones (`Grindstone`), tarp-covered cargo piles (`Cargo_Pile`),
+    and chain-linked harbour bollards (`Bollards`).
+  - Role-specific interiors (`modules/interior.py`, `modules/interior_trade.py`,
+    `furnish.py`) populate taverns (`Counter`, `Cask_Rack`, `Hearth`, `Table`,
+    `Chandelier`, `Wall_Shield`, upstairs guest beds/wardrobes/chests), smithies
+    (`Forge_Hood`, `Anvil_Block`, `Weapon_Rack`), bakeries (`Bake_Oven`,
+    `Flour_Sacks`, `Counter`), apothecaries (`Alchemist_Table`, `Bookcase`,
+    `Shelf`), libraries/guildhalls (`Bookcase`, `Writing_Desk`, `Lectern`,
+    `Candelabra`), chapels (`Stone_Altar`, `Pew`, `Lectern`, `Candelabra`,
+    `Wall_Tapestry`), and keeps/guardhouses (`Weapon_Rack`, `Wall_Shield`,
+    `Hearth`), while keeping doorways and upper stairwell landings
+    (`Floor_Landing_L/R`) completely clear for walking.
   - Timber and dressed stone are chamfered.
   - Stone corners have long-and-short quoins.
   - Nordic and Tudor houses stand on stone plinths with entry steps.
@@ -148,8 +165,10 @@ startup.
   - heartland: everything else.
   - Banners take a colour per culture, and hamlets get thatch.
 - **Dressing and paving** (`TownDressing.js`):
-  - Barrels, planters, woodpiles, bushes and fenced back yards are placed round
-    houses. Each one is checked against buildings, streets and props.
+  - Barrels, planters, woodpiles, bushes, fenced back yards, smith grindstones,
+    tavern troughs/notice boards, chapel shrines/braziers, and warehouse cargo
+    piles are placed round buildings. Each one is checked against buildings,
+    streets and props.
   - Village-or-larger streets and squares are paved with `Paving_Stone`.
 - **Plots:** `SettlementBuildingCatalog` footprints now match the kit prefab
   sizes plus eaves and steps. Towns are therefore denser, and less ground is

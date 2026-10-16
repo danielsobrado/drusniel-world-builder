@@ -46,7 +46,12 @@ def _buildings(kit, plan, coll, lights_coll):
 def _props(kit, plan, coll, lights_coll):
     root = kit.group('Props', coll)
     for name, x, y, rot in plan.PROPS:
-        kit.place(name, coll, root, (x * GRID, y * GRID, _z(plan, x, y)), math.radians(rot))
+        z = _z(plan, x, y)
+        kit.place(name, coll, root, (x * GRID, y * GRID, z), math.radians(rot))
+        if name == 'Brazier':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.15), energy=65.0)
+        elif name == 'Lamp_Post_Banner':
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.8), energy=80.0)
     for x, y in plan.LAMPS:
         z = _z(plan, x, y)
         kit.place('Lamp_Post', coll, root, (x * GRID, y * GRID, z))
