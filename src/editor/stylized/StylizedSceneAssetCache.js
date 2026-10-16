@@ -63,11 +63,23 @@ function instrumentAssetLoads(loader, telemetry) {
   };
 }
 
-export function createStylizedSceneLoader({ renderer, telemetry = assetStartupTelemetry }) {
+/** The Basis transcoder every KTX2 loader in the app shares. */
+const BASIS_TRANSCODER_PATH = 'assets/gods-end/decoders/basis/';
+
+export function createStylizedSceneLoader({ renderer, baseUrl = '/', telemetry = assetStartupTelemetry }) {
   if (!renderer) {
     throw new Error('A renderer is required to initialize KTX2 texture support.');
   }
-  const ktx2Loader = new KTX2Loader().detectSupport(renderer);
+  // An empty transcoder path makes three load its bundled transcoder relative to
+  // KTX2Loader's own module. Vite pre-bundles that module into
+  // node_modules/.vite/deps, so in dev the URL lands on the SPA fallback,
+  // the transcoder never starts, and GLTFLoader drops every KTX2 texture: the
+  // forest-pack crowns lost their leaf atlas and fell back to palette or vertex
+  // colours (lilac AO data on two of them, which read as pale cream). The
+  // vendored copy is byte-identical to three r186's.
+  const ktx2Loader = new KTX2Loader()
+    .setTranscoderPath(resolveAssetUrl(normalizeBaseUrl(baseUrl), BASIS_TRANSCODER_PATH))
+    .detectSupport(renderer);
   telemetry.setKtx2Support(ktx2Loader.workerConfig);
   instrumentKtx2Loader(ktx2Loader, telemetry);
   const loader = new GLTFLoader()

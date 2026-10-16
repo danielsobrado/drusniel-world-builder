@@ -46,7 +46,9 @@ test('stylized GLTF loader enables meshopt and renderer-aware KTX2 decoding', ()
 
   assert.ok(loader.meshoptDecoder);
   assert.equal(loader.ktx2Loader, ktx2Loader);
-  assert.equal(ktx2Loader.transcoderPath, '');
+  // Explicit, base-relative: the bundled default resolves relative to the
+  // pre-bundled loader in dev and lands on the SPA fallback.
+  assert.equal(ktx2Loader.transcoderPath, '/game/assets/gods-end/decoders/basis/');
   ktx2Loader.dispose();
 });
 

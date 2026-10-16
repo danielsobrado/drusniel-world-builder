@@ -199,14 +199,21 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
-const ktx2Loader = new KTX2Loader().detectSupport(renderer);
+const ktx2Loader = new KTX2Loader()
+  .setTranscoderPath(resolveAssetUrl(baseUrl, 'assets/gods-end/decoders/basis/'))
+  .detectSupport(renderer);
 const loader = new GLTFLoader()
   .setMeshoptDecoder(MeshoptDecoder)
   .setKTX2Loader(ktx2Loader);
 ```
 
-Vite bundles the Basis Universal JavaScript/WASM transcoder from the pinned
-Three.js 0.186.1 dependency, so runtime loading has no CDN dependency.
+The Basis Universal JavaScript/WASM transcoder is vendored under
+`public/assets/gods-end/decoders/basis/`, byte-identical to the pinned Three.js
+0.186.1 copy, so runtime loading has no CDN dependency. Set the path explicitly:
+left empty, `KTX2Loader` resolves its bundled transcoder relative to its own
+module, which Vite pre-bundles into `node_modules/.vite/deps` in dev — the URL
+falls through to the SPA fallback and every KTX2 texture silently fails to load
+(found 2026-10-16: forest-pack conifer crowns had no leaf atlas).
 
 Three.js r186 in this repository supports both `EXT_meshopt_compression` and
 `KHR_meshopt_compression`. Use the established `EXT`/`-cc` path first. Evaluate
