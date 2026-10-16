@@ -16,6 +16,8 @@ function colorNode(value) {
 
 export function createTerrainMaterialFeatureState({
   worldXZ,
+  localXZ = null,
+  patterns = null,
   materialWeights,
   terrainShape,
   wetness,
@@ -26,6 +28,9 @@ export function createTerrainMaterialFeatureState({
 }) {
   const masks = createTerrainMaterialFeatureMasks({
     worldXZ,
+    localXZ,
+    patterns,
+    cameraDistance,
     materialWeights,
     terrainShape,
     wetness,

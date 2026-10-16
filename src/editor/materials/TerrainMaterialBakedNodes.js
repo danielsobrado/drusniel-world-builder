@@ -160,6 +160,9 @@ export function createTerrainMaterialBakedSurface({
   });
   const featureState = createTerrainMaterialFeatureState({
     worldXZ,
+    localXZ,
+    // Feature lattices exist only on pattern sets built with the features.
+    patterns: transitionPatterns?.frames?.crackPlates ? transitionPatterns : null,
     materialWeights: weights,
     terrainShape: samples.terrainShape,
     wetness: samples.wetnessShoreline.r,

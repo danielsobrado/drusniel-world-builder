@@ -1,6 +1,7 @@
 import { Fn, If, float, mix, smoothstep, vec4 } from 'three/tsl';
 import { PatternOrigins } from '../stylized/PatternOrigins.js';
 import { periodicFbm2 } from '../stylized/PeriodicNoiseNodes.js';
+import { terrainFeaturePatternFrames } from './TerrainMaterialFeatureNodes.js';
 
 /** Gods' End surfaceDetailNodes.heightBlend; exact endpoint-preserving blend. */
 export function heightBlend(mask, baseHeight, layerHeight, { contrast, width, strength, noise = null }) {
@@ -13,8 +14,16 @@ export function heightBlend(mask, baseHeight, layerHeight, { contrast, width, st
   return mix(mask, sharp, strength).clamp(0, 1);
 }
 
-export function createTerrainTransitionPatterns() {
-  return new PatternOrigins({ broad: { scale: 0.35 }, fine: { scale: 1.3 } });
+/**
+ * The slot's terrain pattern origins: the transition relief lattices, plus the
+ * surface features' (`materialBake.families.features`) when configured.
+ */
+export function createTerrainTransitionPatterns(features = null) {
+  return new PatternOrigins({
+    broad: { scale: 0.35 },
+    fine: { scale: 1.3 },
+    ...(features?.enabled ? terrainFeaturePatternFrames(features) : {}),
+  });
 }
 
 /**

@@ -201,7 +201,7 @@ function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sh
 
   const chunkCenter = uniform(new THREE.Vector2());
   const coastPatterns = createCoastPatternOrigins();
-  const transitionPatterns = createTerrainTransitionPatterns();
+  const transitionPatterns = createTerrainTransitionPatterns(stylizedConfig.materialBake?.families?.features);
   const slotData = {
     tileTexture,
     heightTexture,
