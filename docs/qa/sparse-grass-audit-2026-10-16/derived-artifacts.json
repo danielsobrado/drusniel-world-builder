@@ -1,0 +1,17 @@
+{
+  "kind": "Downscaled labeled browsing aid; original captures unchanged",
+  "artifacts": [
+    {
+      "path": "contact-sheet.jpg",
+      "sha256": "da375b6ca04f1aad57507e0d9dd42ff8123b54379ca5c551aee42f46468d3de1",
+      "inputs": [
+        "random-03.png",
+        "random-04.png",
+        "random-09.png",
+        "random-10.png",
+        "random-04-ground.png",
+        "random-09-ground.png"
+      ]
+    }
+  ]
+}

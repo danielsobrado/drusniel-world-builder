@@ -1,0 +1,42 @@
+{
+  "kind": "CPU mathematical probes; not rendered coverage or final blade-population measurements",
+  "sourceSha": "f75420e129f423f2aa279d67ffe9ca2a71ba020f",
+  "sourceHashes": {
+    "src/editor/world/GrassPatchiness.js": "9fe6cd975c9df6c7849511e6636e346171b4ffc721768200cd45a3862d8df00d",
+    "src/editor/stylized/meadow/meadowGrowthMath.js": "ea86bb1a713fd8173d6932c12ec69c68bdf32d83db05894f6d202b16947efdba"
+  },
+  "patchBounds": [
+    {
+      "biome": "savanna",
+      "density": 0.72,
+      "minimumPatchCover": 0.8124132908511605
+    },
+    {
+      "biome": "grassland",
+      "density": 0.92,
+      "minimumPatchCover": 1
+    },
+    {
+      "biome": "deciduous forest",
+      "density": 0.85,
+      "minimumPatchCover": 0.9831588529813382
+    },
+    {
+      "biome": "taiga",
+      "density": 0.65,
+      "minimumPatchCover": 0.6700045516613564
+    },
+    {
+      "biome": "tundra",
+      "density": 0.28,
+      "minimumPatchCover": 0.006193900773782457
+    }
+  ],
+  "heightNoise": {
+    "sampleDomain": "noise-space x,z in [-30,30), increments .071 and .067 respectively",
+    "samples": 758016,
+    "shortPlateauFraction": 0.5921550468591692,
+    "tallPlateauFraction": 0.12361612419790612,
+    "intermediateFraction": 0.28422882894292467
+  }
+}

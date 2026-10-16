@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "kind": "visual-audit",
+  "startedAt": "2026-10-16T09:19:11.134Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "seed": 20261015,
+  "selection": "Five fixed procedural poses replayed from the October 15 manifest; two additional downward inspection views at the same coordinates.",
+  "sampledCandidates": 3776,
+  "generator": {
+    "seed": 918273,
+    "version": 1,
+    "heightScale": 24,
+    "seaLevel": -1.5,
+    "waterDomainVersion": 3,
+    "waterDomain": {
+      "version": 3,
+      "cellSizeMeters": 1,
+      "shoreDistanceMeters": 48,
+      "ocean": {
+        "coastalShelfMeters": 20,
+        "shelfDepth": 4,
+        "maximumDepth": 24,
+        "maximumBedSlope": 0.75,
+        "beachHeight": 1.8,
+        "beachWidthMeters": 30
+      },
+      "river": {
+        "minimumDepth": 0.8,
+        "maximumDepth": 8,
+        "widthDepthRatio": 0.18,
+        "bankExponent": 1.8,
+        "minimumGradient": 0.0002,
+        "profileStepMeters": 100,
+        "valleySlope": 0.7,
+        "valleyReachMeters": 1500,
+        "leveeHeight": 1,
+        "leveeWidthMeters": 12
+      },
+      "lake": {
+        "minimumDepth": 1.5,
+        "maximumDepth": 18,
+        "shoreDepthMeters": 300,
+        "bankHeight": 1.5,
+        "bankWidthMeters": 60,
+        "shoreSlope": 0.3,
+        "shoreReachMeters": 3000,
+        "shorelineNoiseMeters": 400,
+        "shorelineNoiseScaleMeters": 2500
+      },
+      "falls": {
+        "enabled": true,
+        "minimumHeight": 4,
+        "maximumHeight": 30,
+        "faceSlope": 1.2,
+        "plungeDecayMeters": 40
+      }
+    }
+  },
+  "lighting": {
+    "preset": "highfield",
+    "hour": 12,
+    "weather": "off"
+  },
+  "requestedPoses": [
+    {
+      "id": "random-03",
+      "name": "Savanna",
+      "world": "procedural",
+      "expectedBiomeId": 3,
+      "x": 10087,
+      "z": -4015,
+      "yaw": 2.5416777520404272,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-04",
+      "name": "Grassland",
+      "world": "procedural",
+      "expectedBiomeId": 4,
+      "x": -1869,
+      "z": -4003,
+      "yaw": 2.488355322855792,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-06",
+      "name": "Temperate deciduous forest",
+      "world": "procedural",
+      "expectedBiomeId": 6,
+      "x": 3135,
+      "z": 7229,
+      "yaw": 1.7816226913706468,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-09",
+      "name": "Taiga",
+      "world": "procedural",
+      "expectedBiomeId": 9,
+      "x": -2847,
+      "z": -6683,
+      "yaw": 0.30508836602932676,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-10",
+      "name": "Tundra",
+      "world": "procedural",
+      "expectedBiomeId": 10,
+      "x": -4117,
+      "z": -14839,
+      "yaw": 2.3948468968373717,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-04-ground",
+      "name": "Grassland ground inspection",
+      "world": "procedural",
+      "expectedBiomeId": 4,
+      "x": -1869,
+      "z": -4003,
+      "yaw": 2.488355322855792,
+      "pitch": -0.65,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-09-ground",
+      "name": "Taiga ground inspection",
+      "world": "procedural",
+      "expectedBiomeId": 9,
+      "x": -2847,
+      "z": -6683,
+      "yaw": 0.30508836602932676,
+      "pitch": -0.65,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    }
+  ],
+  "poses": [],
+  "failures": [],
+  "artifacts": []
+}
