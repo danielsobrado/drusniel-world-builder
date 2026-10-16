@@ -50,6 +50,9 @@ self.addEventListener('message', async (event) => {
     if (page.surfaceMaskPixels?.buffer) {
       transfer.push(page.surfaceMaskPixels.buffer);
     }
+    if (page.snowBiomeCover?.buffer) {
+      transfer.push(page.snowBiomeCover.buffer);
+    }
     if (page.grassScatter?.base?.buffer) {
       transfer.push(page.grassScatter.base.buffer, page.grassScatter.parameters.buffer);
     }

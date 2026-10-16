@@ -171,6 +171,7 @@ export function captureTerrainMaterialBakeSource({
     tilePixels: page.tilePixels.slice(),
     // Tile ids are the Azgaar biome ids: snow cover follows glacier and tundra.
     tiles: page.tiles ? Uint8Array.from(page.tiles) : null,
+    snowBiomeCover: page.snowBiomeCover instanceof Uint8Array ? page.snowBiomeCover.slice() : null,
     surfaceMaskPixels: page.surfaceMaskPixels.slice(),
     heights: page.heights.slice(),
     canopyPixels: canopyPixels instanceof Uint8Array ? canopyPixels.slice() : null,
@@ -274,6 +275,7 @@ export async function bakeTerrainMaterialPage({
         dz: gradientsZ[index],
         curvature: curvatures[index],
         tileId: source.tiles ? source.tiles[sourceIndex] : -1,
+        biomeCover: source.snowBiomeCover ? source.snowBiomeCover[sourceIndex] / 255 : undefined,
         worldX,
         worldZ,
       }, classification, macroSeed) * land;

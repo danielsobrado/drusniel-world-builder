@@ -91,7 +91,7 @@ import { createRiverFallSiteSource } from './editor/water/RiverFallSites.js';
 import { resolveWaterQualityFeatures } from './editor/water/WaterQuality.js';
 import { configureSea, updateSeaState } from './editor/water/seaState.js';
 import { classifyFootstepSurface } from './editor/audio/footstep_surface.js';
-import { snowAtPoint } from './editor/materials/SnowAccumulation.js';
+import { snowAtPoint, snowBiomeCoverAt } from './editor/materials/SnowAccumulation.js';
 import { terrainBakeMacroSeed } from './editor/materials/TerrainBakeNoise.js';
 import {
   stampFootprint,
@@ -1145,7 +1145,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const tileSize = config.map.tileSize;
     const generator = worldStore.generator;
     const bake = config.stylizedSurface.materialBake;
-    const tileId = worldStore.getTile(Math.floor(canonicalX / tileSize), Math.floor(-canonicalZ / tileSize));
+    const cellX = Math.floor(canonicalX / tileSize);
+    const cellZ = Math.floor(-canonicalZ / tileSize);
+    const tileId = worldStore.getTile(cellX, cellZ);
     const snow = snowAtPoint({
       height: footstep.y,
       slope: 0,
@@ -1153,6 +1155,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       dz: 0,
       curvature: 0,
       tileId,
+      biomeCover: snowBiomeCoverAt((x, z) => worldStore.getTile(x, z), cellX, cellZ, bake.classification.snowBiomeCover),
       worldX: canonicalX,
       worldZ: canonicalZ,
     }, bake.classification, terrainBakeMacroSeed(bake.macro.seedOffset, generator?.toMetadata?.().seed));
@@ -1320,6 +1323,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     // Same snow the terrain draws, so a town in snowy country gets the frost skin.
     sampleSnow: (canonicalX, canonicalZ, height, tileId) => {
       const bake = config.stylizedSurface.materialBake;
+      const tileSize = config.map.tileSize;
       return snowAtPoint({
         height,
         slope: 0,
@@ -1327,6 +1331,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         dz: 0,
         curvature: 0,
         tileId,
+        biomeCover: snowBiomeCoverAt((x, z) => worldStore.getTile(x, z), Math.floor(canonicalX / tileSize),
+          Math.floor(-canonicalZ / tileSize), bake.classification.snowBiomeCover),
         worldX: canonicalX,
         worldZ: canonicalZ,
       }, bake.classification, terrainBakeMacroSeed(bake.macro.seedOffset, worldStore.generator?.toMetadata?.().seed));

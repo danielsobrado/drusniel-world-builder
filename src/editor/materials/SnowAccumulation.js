@@ -3,7 +3,9 @@
  *
  *   altitude   snow from `snowLine`, full `snowFade` metres above it;
  *   biome      glacier and tundra carry snow at any height (`snowBiomeCover`,
- *              by terrain tile id, which is the Azgaar biome id);
+ *              by terrain tile id, which is the Azgaar biome id), blurred over
+ *              ±`SNOW_BIOME_BLUR_CELLS` so the snow fades across a biome border
+ *              instead of starting at a cell edge;
  *   slope      steep faces shed it (`snowSlopeMax`);
  *   wind       faces turned into the prevailing wind are scoured and lee faces
  *              loaded (`snowWindShift`);
@@ -32,6 +34,61 @@ function smoothstep(edge0, edge1, value) {
 }
 
 /**
+ * Cells either side of a biome border over which its snow cover ramps. A
+ * snowy biome's cover is a step on the tile id; blurred with this triangular
+ * kernel it fades over ~20 m, and the drift noise breaks that ramp up.
+ */
+export const SNOW_BIOME_BLUR_CELLS = 5;
+const BLUR_WEIGHTS = Array.from({ length: SNOW_BIOME_BLUR_CELLS * 2 + 1 },
+  (_, index) => SNOW_BIOME_BLUR_CELLS + 1 - Math.abs(index - SNOW_BIOME_BLUR_CELLS));
+const BLUR_TOTAL = BLUR_WEIGHTS.reduce((sum, weight) => sum + weight, 0);
+
+/**
+ * Blurred biome snow cover over a halo of tile ids, `size × size`. Only cells
+ * at least `SNOW_BIOME_BLUR_CELLS` inside the halo are exact; callers read the
+ * core. Null when no biome carries snow.
+ */
+export function snowBiomeCoverField(halo, size, coverByTile) {
+  if (!coverByTile || Object.keys(coverByTile).length === 0) return null;
+  const cover = Float32Array.from(halo, (tileId) => coverByTile[tileId] ?? 0);
+  const rows = new Float32Array(cover.length);
+  const r = SNOW_BIOME_BLUR_CELLS;
+  for (let z = 0; z < size; z += 1) {
+    for (let x = 0; x < size; x += 1) {
+      let sum = 0;
+      for (let k = -r; k <= r; k += 1) sum += cover[z * size + Math.min(size - 1, Math.max(0, x + k))] * BLUR_WEIGHTS[k + r];
+      rows[z * size + x] = sum / BLUR_TOTAL;
+    }
+  }
+  for (let z = 0; z < size; z += 1) {
+    for (let x = 0; x < size; x += 1) {
+      let sum = 0;
+      for (let k = -r; k <= r; k += 1) sum += rows[Math.min(size - 1, Math.max(0, z + k)) * size + x] * BLUR_WEIGHTS[k + r];
+      cover[z * size + x] = sum / BLUR_TOTAL;
+    }
+  }
+  return cover;
+}
+
+/**
+ * The same blurred cover at one cell, read straight from tiles: for point
+ * queries (a footstep, a town) that agree with the page field.
+ * @param {(cellX: number, cellZ: number) => number} tileAt
+ */
+export function snowBiomeCoverAt(tileAt, cellX, cellZ, coverByTile) {
+  if (!coverByTile) return 0;
+  const r = SNOW_BIOME_BLUR_CELLS;
+  let sum = 0;
+  for (let dz = -r; dz <= r; dz += 1) {
+    for (let dx = -r; dx <= r; dx += 1) {
+      const cover = coverByTile[tileAt(cellX + dx, cellZ + dz)] ?? 0;
+      if (cover) sum += cover * BLUR_WEIGHTS[dx + r] * BLUR_WEIGHTS[dz + r];
+    }
+  }
+  return sum / (BLUR_TOTAL * BLUR_TOTAL);
+}
+
+/**
  * @param {object} sample
  * @param {number} sample.height world metres
  * @param {number} sample.slope rise over run
@@ -39,12 +96,14 @@ function smoothstep(edge0, edge1, value) {
  * @param {number} sample.dz height gradient along z
  * @param {number} sample.curvature Laplacian per square metre (positive in hollows)
  * @param {number} sample.tileId terrain tile id (Azgaar biome id)
+ * @param {number} [sample.biomeCover] blurred biome cover, read instead of the
+ *   tile id's own step when given (snowBiomeCoverField / snowBiomeCoverAt)
  * @param {number} sample.patch 0..1 low-frequency noise at the point
  * @param {object} classification `terrainMaterialBake.classification`
  */
-export function snowAccumulation({ height, slope, dx, dz, curvature, tileId, patch }, classification) {
+export function snowAccumulation({ height, slope, dx, dz, curvature, tileId, biomeCover, patch }, classification) {
   const altitude = smoothstep(classification.snowLine, classification.snowLine + classification.snowFade, height);
-  const biome = classification.snowBiomeCover?.[tileId] ?? 0;
+  const biome = biomeCover ?? classification.snowBiomeCover?.[tileId] ?? 0;
   const base = Math.max(altitude, biome);
   if (base <= 0) return 0;
 

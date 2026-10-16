@@ -133,3 +133,23 @@ test('the surface mask bakes bare ground between thin grass, not under a sward',
   const tundra = coverageOf(10);
   assert.ok(tundra.some((value) => value < 40) && tundra.some((value) => value > 230), 'tundra is patchy');
 });
+
+test('biome snow fades across a border, and the page field matches point queries', async () => {
+  const { snowBiomeCoverField, snowBiomeCoverAt, SNOW_BIOME_BLUR_CELLS } = await import('../src/editor/materials/SnowAccumulation.js');
+  const cover = { 10: 0.35, 11: 1 };
+  const tileAt = (x) => (x >= 20 ? 11 : 4);
+  const size = 40;
+  const halo = Uint8Array.from({ length: size * size }, (_, i) => tileAt(i % size));
+  const field = snowBiomeCoverField(halo, size, cover);
+  const row = 20;
+  const ramp = [];
+  for (let x = SNOW_BIOME_BLUR_CELLS; x < size - SNOW_BIOME_BLUR_CELLS; x += 1) {
+    const value = field[row * size + x];
+    assert.ok(Math.abs(value - snowBiomeCoverAt(tileAt, x, row, cover)) < 1e-6, `cell ${x} agrees`);
+    ramp.push(value);
+  }
+  assert.ok(ramp.every((value, i) => i === 0 || value >= ramp[i - 1] - 1e-9), 'monotonic ramp');
+  assert.equal(ramp[0], 0);
+  assert.ok(Math.abs(ramp.at(-1) - 1) < 1e-9);
+  assert.ok(ramp.filter((value) => value > 0.05 && value < 0.95).length >= 6, 'a ramp, not a step');
+});

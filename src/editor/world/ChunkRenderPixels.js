@@ -7,6 +7,7 @@
 import { grassHabitatCoverage, grassHabitatHaloCells } from './GrassHabitatCoverage.js';
 import { prepareGrassHabitatHalo } from './GrassHabitatHalo.js';
 import { grassPatchCover } from './GrassPatchiness.js';
+import { SNOW_BIOME_BLUR_CELLS, snowBiomeCoverField } from '../materials/SnowAccumulation.js';
 import { resolveMeadowGrowth } from '../stylized/meadow/meadowGrowthProfiles.js';
 import { TILE_BY_ID, hexToRgbBytes } from '../tileCatalog.js';
 import { halfToFloat } from '../water/WaterField.js';
@@ -49,8 +50,13 @@ function sampleCellWaterOccupancy(field, localX, localZ, waterlineDepth) {
   return occupancy;
 }
 
+/**
+ * Halo cells a page's surface mask reads around its chunk. The grass fringe's
+ * snow gate reads the biome snow cover blurred over SNOW_BIOME_BLUR_CELLS, so
+ * that blur widens the halo too — and with it how far an edit invalidates.
+ */
 export function getSurfaceMaskSearchRadius(blendCells, tileSize = 2) {
-  return Math.max(Math.ceil(Math.max(0.5, blendCells) + 1), grassHabitatHaloCells(tileSize));
+  return Math.max(Math.ceil(Math.max(0.5, blendCells) + 1), grassHabitatHaloCells(tileSize) + SNOW_BIOME_BLUR_CELLS);
 }
 
 export function getSurfaceMaskChunkRadius(blendCells, chunkSize, tileSize = 2) {
@@ -208,6 +214,7 @@ export function buildSurfaceMaskPixels({
   waterField = null,
   sampleHeight = null,
   sampleWater = null,
+  snowCoverOut = null,
 }) {
   const blendCells = Math.max(0.5, maskConfig.blendCells);
   const waterlineDepth = Math.max(0.01, maskConfig.waterlineDepth ?? 0.35);
@@ -232,8 +239,11 @@ export function buildSurfaceMaskPixels({
   });
   const distances = computeRoadDistanceField(halo, haloSize, haloSize, roadTileId);
   const mask = new Uint8Array(chunkSize * chunkSize * 4);
+  const snowCover = maskConfig.snow
+    ? snowBiomeCoverField(halo, haloSize, maskConfig.snow.classification.snowBiomeCover)
+    : null;
   const habitat = prepareGrassHabitatHalo({halo,haloSize,searchRadius,chunkSize,heights,
-    originX,originZ,maskConfig,sampleHeight,sampleWater,
+    originX,originZ,maskConfig,sampleHeight,sampleWater,snowCover,
     coreWater:usableWaterField ? (x,z)=>sampleCellWaterOccupancy(usableWaterField,x,z,waterlineDepth) : null});
   const coverage = grassHabitatCoverage(habitat.eligibility,haloSize,haloSize,tileSize);
   const densityByTile = maskConfig.grassDensityByTile ?? null;
@@ -259,6 +269,7 @@ export function buildSurfaceMaskPixels({
       mask[offset + 1] = grass;
       mask[offset + 2] = Math.round(habitat.water[haloIndex] * 255);
       mask[offset + 3] = 255;
+      if (snowCoverOut) snowCoverOut[cellIndex] = Math.round((snowCover?.[haloIndex] ?? 0) * 255);
     }
   }
 
@@ -274,7 +285,10 @@ export function buildSurfaceMaskPixels({
 export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinitions = null, sampling = {}) {
   const chunkSize = Math.sqrt(page.tiles.length) | 0;
   page.tilePixels = buildTilePixels(page.tiles, tileDefinitions);
+  // Biome snow blurred across borders, for the material bake's snow.
+  page.snowBiomeCover = new Uint8Array(chunkSize * chunkSize);
   page.surfaceMaskPixels = buildSurfaceMaskPixels({
+    snowCoverOut: page.snowBiomeCover,
     tiles: page.tiles,
     heights: page.heights ?? null,
     originX: page.originX,

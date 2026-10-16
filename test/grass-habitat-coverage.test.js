@@ -16,7 +16,8 @@ function fallback(g, x, z, size, maskConfig = config) {
   const heights = Float32Array.from({ length: (size + 1) ** 2 }, (_, i) => g.sampleHeight(x + i % (size + 1), z + Math.floor(i / (size + 1))));
   return buildSurfaceMaskPixels({ tiles, heights, originX: x, originZ: z, chunkSize: size,
     sampleTile: (a,b) => g.sampleTile(a,b), sampleHeight: (a,b) => g.sampleHeight(a,b),
-    sampleWater: (a,b) => g.sampleWater(a,b), maskConfig });
+    // The world seed rides in the mask config, as both production paths pass it.
+    sampleWater: (a,b) => g.sampleWater(a,b), maskConfig: { ...maskConfig, worldSeed: g.toMetadata?.().seed ?? 0 } });
 }
 const grass = (pixels, size, x, z) => pixels[(z * size + x) * 4 + 1];
 
