@@ -425,6 +425,7 @@ export class StylizedTreeView {
           }
         }
         if (pivot === 'trunk') pivotOnTrunkBase(baked);
+        const sway = this.treeSway(baked);
         const parts = baked.map((part) => {
           const source = firstMaterial(
             part.source,
@@ -446,6 +447,7 @@ export class StylizedTreeView {
                 minY: part.geometry.boundingBox.min.y,
                 maxY: part.geometry.boundingBox.max.y,
               },
+              treeTopY: sway.topY,
               time: this.time,
               config: this.config,
               preserveSourceColor: preserveSourceAppearance,
@@ -458,8 +460,9 @@ export class StylizedTreeView {
                 barkTextures: authoredBarkTextures,
                 barkScale: authoredBarkScale,
                 barkWeathering: this.barkWeatheringSettings,
+                sway,
               })
-              : createStylizedTrunkMaterial({ textures: barkTextures, config: this.config }));
+              : createStylizedTrunkMaterial({ textures: barkTextures, config: this.config, sway }));
           return {
             geometry: part.geometry,
             material,
@@ -475,6 +478,16 @@ export class StylizedTreeView {
       }
     }
     return this.prototypes.length - firstIndex;
+  }
+
+  /** Bark and crown bend about the ground through the tree's full height. */
+  treeSway(parts) {
+    let topY = 0.001;
+    for (const { geometry } of parts) {
+      if (!geometry.boundingBox) geometry.computeBoundingBox();
+      topY = Math.max(topY, geometry.boundingBox.max.y);
+    }
+    return { time: this.time, config: this.config, topY };
   }
 
   /**
@@ -493,6 +506,7 @@ export class StylizedTreeView {
     });
     for (const prototype of generated) {
       const palette = FOREST_SPECIES_PALETTES[prototype.speciesId] ?? null;
+      const sway = this.treeSway(prototype.parts);
       const parts = prototype.parts.map((part) => ({
         geometry: part.geometry,
         kind: part.kind,
@@ -508,6 +522,7 @@ export class StylizedTreeView {
               minY: part.geometry.boundingBox.min.y,
               maxY: part.geometry.boundingBox.max.y,
             },
+            treeTopY: sway.topY,
             time: this.time,
             config: this.config,
             palette,
@@ -516,6 +531,7 @@ export class StylizedTreeView {
             textures: barkTextures,
             config: this.config,
             palette,
+            sway,
           }),
       }));
       // No attachRootCollar here: these prototypes already carry a root flare,

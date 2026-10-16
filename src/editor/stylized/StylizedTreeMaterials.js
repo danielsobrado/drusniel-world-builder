@@ -25,6 +25,7 @@ import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
 import { treeFoliageEmission } from './forest/foliageLight.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
+import { treeBendPosition } from './forest/treeSway.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyBarkWeathering } from './barkWeathering.js';
 
@@ -53,6 +54,7 @@ export function createStylizedLeafMaterial({
   source,
   leafMap,
   bounds,
+  treeTopY = bounds.maxY,
   time,
   config,
   palette = null,
@@ -69,7 +71,9 @@ export function createStylizedLeafMaterial({
     0,
     1,
   );
-  const finalPosition = foliageWindPosition({ config, time, minimumY: bounds.minY, maximumY: bounds.maxY });
+  // The crown bends with the whole tree from the ground, not from its own base;
+  // pivoting at the crown's lowest leaf sheared every canopy like a grass blade.
+  const finalPosition = foliageWindPosition({ config, time, topY: treeTopY });
 
   const gradient = pow(normalizedHeight, config.trees.gradientPower);
   const map = leafMap ?? source?.map ?? null;
@@ -144,12 +148,22 @@ function bumpNormal(height) {
   return determinant.abs().mul(normalView).sub(gradient).normalize();
 }
 
+/**
+ * Bark takes the same ground-pivoted bend as its crown (`sway` = { time, config,
+ * topY }), so the trunk curves with the canopy instead of standing still under it.
+ */
+function withTrunkSway(material, sway) {
+  if (sway?.time) material.positionNode = treeBendPosition(sway);
+  return material;
+}
+
 export function createAuthoredTrunkMaterial({
   source,
   sourceMap = null,
   barkTextures = null,
   barkScale = 0.8,
   barkWeathering = null,
+  sway = null,
 }) {
   if (!barkTextures) {
     const material = new THREE.MeshLambertNodeMaterial({
@@ -159,7 +173,7 @@ export function createAuthoredTrunkMaterial({
     material.colorNode = sourceMap
       ? authoredTexture(sourceMap).rgb.mul(baseColor)
       : baseColor;
-    return applyBarkWeathering(material, { settings: barkWeathering });
+    return withTrunkSway(applyBarkWeathering(material, { settings: barkWeathering }), sway);
   }
 
   const albedoHeight = triplanarTexture(
@@ -186,10 +200,10 @@ export function createAuthoredTrunkMaterial({
   material.normalNode = bumpNormal(albedoHeight.a.mul(0.045));
   material.roughnessNode = normalRoughness.b;
   material.metalness = 0;
-  return applyBarkWeathering(material, { settings: barkWeathering });
+  return withTrunkSway(applyBarkWeathering(material, { settings: barkWeathering }), sway);
 }
 
-export function createStylizedTrunkMaterial({ textures, config, palette = null }) {
+export function createStylizedTrunkMaterial({ textures, config, palette = null, sway = null }) {
   const bark = texture(textures.color, uv().mul(config.trees.barkScale)).rgb;
   const ao = texture(textures.ao, uv().mul(config.trees.barkScale)).r;
   const relief = texture(textures.height, uv().mul(config.trees.barkScale)).r;
@@ -200,5 +214,5 @@ export function createStylizedTrunkMaterial({ textures, config, palette = null }
     .mul(paletteValue(palette, config, 'barkBrightness'));
   const material = new THREE.MeshLambertNodeMaterial();
   material.colorNode = barkColor;
-  return material;
+  return withTrunkSway(material, sway);
 }

@@ -54,7 +54,12 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const field = sampleWorldWind(transform.xz);
   const wave = windWaveCoordinates(canonicalFromRender(transform.xz));
   const crownWeight = local.y.add(0.5).clamp(0, 1).pow(2);
-  const canopyOffset = sin(wave.along.mul(0.47).add(time.mul(1.3)).add(parameters.z.mul(0.9)))
+  // Same slow, lean-dominated sway as the live crown (treeSway.js), so a tree
+  // does not change rhythm when it hands over to its impostor.
+  const seedPhase = parameters.z.mul(TWO_PI);
+  const sway = sin(time.mul(0.85).add(seedPhase).add(wave.along.mul(0.06))).mul(0.65)
+    .add(sin(time.mul(0.85 * 1.73).add(seedPhase.mul(1.9)).add(1.3)).mul(0.35));
+  const canopyOffset = sway.mul(0.35).add(0.65)
     .mul(windStrength)
     .mul(field.envelope.clamp(0.35, 3.5))
     .mul(scale).mul(crownWeight);

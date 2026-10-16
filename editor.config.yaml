@@ -1819,9 +1819,18 @@ stylizedSurface:
     # Alpha cut for the baked impostor atlas. The live LOD bands dither instead,
     # so this does not change what you see at close range.
     cardAlphaTest: 0.32
+    # Tree wind is layered (forest/treeSway.js, forest/foliageWind.js): the whole
+    # tree bends from the ground, mostly a steady lean with a slow sway of a degree
+    # or two; outer branches bob on their own phase; leaves flutter fast and small.
+    # It deliberately shares nothing with the meadow's wave but its gusts.
     windStrength: 0.12
+    windLean: 0.35
+    swayAmplitude: 0.2
+    swaySpeed: 0.85
+    branchAmplitude: 0.06
+    branchSpeed: 1.9
     flutterAmplitude: 0.35
-    flutterSpeed: 3.2
+    flutterSpeed: 7
     dip: 0.25
     barkScale: 5.6
     barkTint: '#8a6a4a'

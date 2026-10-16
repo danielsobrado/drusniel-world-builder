@@ -1,51 +1,50 @@
 import {
-  attribute, cameraPosition, cos, float, modelWorldMatrix, positionGeometry,
-  positionLocal, sin, smoothstep, uniform, vec2, vec3, vec4,
+  atan, cameraPosition, positionGeometry, positionLocal, sin, smoothstep, vec2, vec3,
 } from 'three/tsl';
-import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
+import { treeSwayField } from './treeSway.js';
 
 /**
- * Rooted canopy bend driven by the meadow's travelling wind. Bounds are uniforms
- * so prototypes share shader programs. Phase uses canonical world coordinates;
- * changing the instance anchor or render origin cannot reset a crown's motion.
+ * Crown wind in three layers, the way production tree shaders split it:
+ *
+ * 1. The whole-tree bend from `treeSwayField`, pivoted at the ground and shared
+ *    with the bark, so the crown rides its trunk.
+ * 2. Branches: outer foliage bobs on its own phase, keyed to the branch's
+ *    azimuth around the trunk and its height, so one side of a crown can rise
+ *    while the other settles. Foliage near the trunk barely moves.
+ * 3. Leaves: a small, fast flutter with a per-card phase, faded out with
+ *    distance before it turns into temporal noise.
+ *
+ * Phase uses canonical world coordinates and the instance seed; changing the
+ * instance anchor or render origin cannot reset a crown's motion.
  */
-export function foliageWindPosition({ config, time, minimumY = 0, maximumY = 1, flutter = true, stiffness = true }) {
-  const minimum = uniform(minimumY);
-  const height = uniform(Math.max(0.001, maximumY - minimumY));
-  const r = positionGeometry.y.sub(minimum).div(height).clamp(0, 1);
-  const world = modelWorldMatrix.mul(vec4(positionLocal, 1));
-  const field = sampleWorldWind(world.xz);
-  const wave = windWaveCoordinates(canonicalFromRender(world.xz));
-  const phase = attribute('instanceDither', 'vec3').y.mul(0.9);
-  const wind = config.wind;
-  const frequency = wind.frequency ?? 0.47;
-  const speed = wind.speed ?? 1.3;
-  const primary = sin(wave.along.mul(frequency).add(time.mul(speed)).add(phase));
-  const turbulence = sin(wave.across.mul(frequency * 1.9)
-    .add(time.mul(speed * 0.7)).add(phase.mul(0.6)).add(2.6)).mul((wind.turbulence ?? 0.04) * 0.25);
-  const compliance = stiffness ? float(1).div(attribute('instanceMorphology', 'vec3').z.clamp(0.65, 1.35)) : float(1);
-  const gust = field.envelope.clamp(0.35, 3.5);
-  // Trees are stiffer than grass. A bounded angle makes the upper crown arc
-  // gently instead of sliding the cards and pumping them vertically with abs(sin).
-  const angle = primary.add(turbulence).mul(config.trees.windStrength * 0.45)
-    .add((wind.lean ?? 0) * config.trees.windStrength * 0.65)
-    .mul(compliance).mul(gust).clamp(-0.22, 0.22).mul(r.mul(r));
-  const reach = sin(angle).mul(height).mul(r);
+export function foliageWindPosition({ config, time, rootY = 0, topY = 1, flutter = true }) {
+  const { offset, r, height, field, gust, phase, world } = treeSwayField({ config, time, rootY, topY });
+  const trees = config.trees;
+  const strength = trees.windStrength;
   const direction = field.direction;
-  let lateral = vec2(0);
+  const local = positionGeometry;
+  // Prototypes are pivoted on the trunk axis, so distance from it in xz is how
+  // far out along a branch this foliage hangs.
+  const outward = smoothstep(0.04, 0.45, local.xz.length().div(height));
+  const branchWeight = outward.mul(r);
+  // sin(2θ) wraps cleanly across atan's ±π seam.
+  const branchPhase = atan(local.z, local.x).mul(2).add(r.mul(4.1)).add(phase);
+  const branchSpeed = trees.branchSpeed ?? 1.9;
+  const branchWave = sin(time.mul(branchSpeed).add(branchPhase)).mul(0.7)
+    .add(sin(time.mul(branchSpeed * 2.3).add(branchPhase.mul(1.4)).add(0.7)).mul(0.3));
+  const branchReach = branchWave.mul(strength * (trees.branchAmplitude ?? 0.06))
+    .mul(height).mul(branchWeight).mul(gust);
+  // Branch tips mostly bob vertically and give a little downwind.
+  let displaced = offset.add(vec3(direction.x.mul(0.4), 1, direction.y.mul(0.4)).mul(branchReach));
   if (flutter) {
     const across = vec2(direction.y.negate(), direction.x);
-    const distanceFade = smoothstep(wind.flutter?.fadeStart ?? 22, wind.flutter?.fadeEnd ?? 38,
+    const distanceFade = smoothstep(config.wind?.flutter?.fadeStart ?? 22, config.wind?.flutter?.fadeEnd ?? 38,
       world.xyz.sub(cameraPosition).length()).oneMinus();
-    const flutterWave = sin(wave.across.mul(wind.flutter?.frequency ?? 1.9)
-      .add(time.mul(wind.flutter?.speed ?? 3.4)).add(phase.mul(3.1))
-      .add(positionGeometry.y.mul(2.3)).add(positionGeometry.x));
-    lateral = across.mul(flutterWave.mul(config.trees.windStrength * config.trees.flutterAmplitude * 0.18)
-      .mul(r.pow(3)).mul(distanceFade).mul(gust.sqrt()));
+    const leafPhase = local.x.mul(5.3).add(local.y.mul(3.1)).add(local.z.mul(4.7)).add(phase.mul(3));
+    const leafWave = sin(time.mul(trees.flutterSpeed ?? 7).add(leafPhase));
+    const leaf = leafWave.mul(strength * (trees.flutterAmplitude ?? 0.35) * 0.4)
+      .mul(branchWeight).mul(distanceFade).mul(gust);
+    displaced = displaced.add(vec3(across.x.mul(leaf), leaf.mul(0.6), across.y.mul(leaf)));
   }
-  return positionLocal.add(vec3(
-    direction.x.mul(reach).add(lateral.x),
-    cos(angle).sub(1).mul(height).mul(r),
-    direction.y.mul(reach).add(lateral.y),
-  ));
+  return positionLocal.add(displaced);
 }
