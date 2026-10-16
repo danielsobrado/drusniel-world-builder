@@ -1,5 +1,4 @@
-import { curvePathMetrics } from '../curves/CurveSampling.js';
-import { curveSegmentPointAtLength } from '../curves/CurveSegment.js';
+import { createShapeCurveSampler } from './ShapeCurveSampler.js';
 import { placeShapePoint } from './ShapePaths.js';
 import { pointInShape, shapeEnvelopeAtHeight } from './ShapeEnvelope.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
@@ -8,7 +7,7 @@ import { addShapeWallBevel } from './ShapeWallBevel.js';
 export function createShapeWallSurface(plan) {
   const p = plan.primitive,
     length = plan.curve.length;
-  const metrics = curvePathMetrics(plan.curve.path),
+  const sampler = createShapeCurveSampler(plan.curve.path),
     samples = new Map();
   const clockwise =
     plan.curve.closed &&
@@ -21,12 +20,7 @@ export function createShapeWallSurface(plan) {
       ? ((distance % length) + length) % length
       : Math.max(0, Math.min(length, distance));
     if (!samples.has(d)) {
-      const metric =
-        metrics.segments.find((segment) => d <= segment.end) ?? metrics.segments.at(-1);
-      samples.set(
-        d,
-        curveSegmentPointAtLength(metrics.path.getSegment(metric.id), d - metric.offset),
-      );
+      samples.set(d, sampler.point(d));
     }
     return samples.get(d);
   }
@@ -118,14 +112,17 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
   const c = surface.point(u1, high[1], offset),
     d = surface.point(u0, high[0], offset);
   // Reveals, soffits and ends may belong to a different slot than the face (stone jambs in mortar).
-  const face = (a, b, c, d, target = mesh, tone = color, uv) =>
-    surface.clockwise !== thickness < 0
+  const textureUv = uv => caps.grainAlong === 'u' ? uv.map(([u, v]) => [v, u]) : uv;
+  const face = (a, b, c, d, target = mesh, tone = color, uv) => {
+    if (uv) uv = textureUv(uv);
+    return surface.clockwise !== thickness < 0
       ? target.quad(a, b, c, d, tone, uv)
       : target.quad(d, c, b, a, tone, uv?.toReversed());
+  };
   const side = (a, b, c, d, uv) => face(a, b, c, d, caps.sideMesh ?? mesh, caps.sideColor ?? color, uv);
   if (caps.bevel) addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, thickness, color, caps });
   else {
-    const uv = [[u0, low[0]], [u1, low[1]], [u1, high[1]], [u0, high[0]]];
+    const uv = textureUv([[u0, low[0]], [u1, low[1]], [u1, high[1]], [u0, high[0]]]);
     if (surface.clockwise !== thickness < 0) mesh.quad(a, b, c, d, color, uv);
     else mesh.quad(d, c, b, a, color, uv.toReversed());
   }

@@ -13,7 +13,7 @@ export function shapeProductDomains(plan, recipe) {
 
 const openingCut = ({ shutterPose, ...fields }) => { void shutterPose; return fields; };
 const body = (primitive, includeOpenings = true, includeShutters = false) => {
-  const { roof, openings, suppressed, facade, shutters, automaticGates, craft, features, detailOverrides, age, style, ...fields } = primitive;
+  const { roof, openings, suppressed, facade, shutters, automaticGates, craft, chimney, windowBoxes, interior, ivyDensity, features, detailOverrides, age, style, ...fields } = primitive;
   void roof;
   void suppressed;
   void facade;
@@ -23,6 +23,7 @@ const body = (primitive, includeOpenings = true, includeShutters = false) => {
   void features;
   void detailOverrides;
   void age; void style;
+  void chimney; void windowBoxes; void interior; void ivyDensity;
   return { ...fields, ...(includeOpenings ? { openings: includeShutters ? openings : openings?.map(openingCut) } : {}) };
 };
 
@@ -77,13 +78,16 @@ export function shapeProductKey(recipe, plan, domain) {
               roof: p.facade === 'timber' ? p.roof : null,
               neighbors,
             }
-          : domain === 'traversal'
+      : domain === 'ivy'
+        ? { primitive: body(p), ivyDensity: p.ivyDensity, openings: plan.openings.map(openingCut), neighbors }
+      : domain === 'traversal'
             ? plan
             : {
                 primitive: body(p),
                 openings: plan.openings.map(openingCut),
                 neighbors,
                 flatCoping: p.roof?.family === 'flat',
+                interior: plan.interior,
                 // Masonry courses follow the roof underside, so they rebuild with the roof.
                 roof: p.surface === 'masonry' ? [p.roof, Boolean(plan.roofReplaced)] : null,
               };

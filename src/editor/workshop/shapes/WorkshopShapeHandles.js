@@ -31,6 +31,11 @@ export class WorkshopShapeHandles {
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
     this.drag = null;
+    this.label = canvas.ownerDocument?.createElement('div');
+    if (this.label) {
+      this.label.className = 'workshop-handle-label'; this.label.setAttribute('aria-live', 'polite'); this.label.hidden = true;
+      canvas.parentElement?.append(this.label);
+    }
     this.enabled = true;
     this.down = (e) => this.pointerDown(e);
     this.move = (e) => this.pointerMove(e);
@@ -113,6 +118,9 @@ export class WorkshopShapeHandles {
     const field = hit.object.userData.field,
       p = this.editor.primitive;
     const definition = hit.object.userData.definition;
+    this.editor.inspector?.show(definition.type === 'opening' ? 'opening' : definition.type === 'feature' ? 'feature' :
+      ['window-box', 'chimney', 'curve-point'].includes(definition.type) ? 'details' : field.startsWith('roof-') ? 'roof' : 'building');
+    this.describeHandle(hit.object);
     const normal = definition.type ? new THREE.Vector3(...definition.normal).normalize() : ['height', 'roof-rise', 'rise'].includes(field)
       ? this.camera.getWorldDirection(new THREE.Vector3()).setY(0).normalize()
       : new THREE.Vector3(0, 1, 0);
@@ -136,7 +144,13 @@ export class WorkshopShapeHandles {
     event.stopImmediatePropagation();
   }
   pointerMove(event) {
-    if (!this.drag || event.pointerId !== this.drag.pointerId) return;
+    if (!this.drag) {
+      if (!this.enabled) return;
+      this.ray(event); this.root.updateWorldMatrix(true, true);
+      const hit = this.raycaster.intersectObjects(this.handles.filter(h => h.visible), false)[0];
+      this.describeHandle(hit?.object); return;
+    }
+    if (event.pointerId !== this.drag.pointerId) return;
     const drag = this.drag,
       p = drag.primitive;
     this.ray(event);
@@ -184,6 +198,7 @@ export class WorkshopShapeHandles {
     if (!this.drag || (event && event.pointerId !== this.drag.pointerId)) return;
     const { pointerId, orbitEnabled } = this.drag;
     this.drag = null;
+    this.describeHandle(null);
     if (this.canvas.hasPointerCapture(pointerId)) this.canvas.releasePointerCapture(pointerId);
     this.orbitControls.enabled = orbitEnabled;
     if (commit) this.editor.session.commit();
@@ -197,11 +212,21 @@ export class WorkshopShapeHandles {
     this.root.removeFromParent();
     this.geometry.dispose();
     this.material.dispose();
+    this.label?.remove();
     this.canvas.removeEventListener('pointerdown', this.down, true);
     this.canvas.removeEventListener('pointermove', this.move, true);
     this.canvas.removeEventListener('pointerup', this.up, true);
     this.canvas.removeEventListener('pointercancel', this.up, true);
     this.canvas.removeEventListener('lostpointercapture', this.lostCapture, true);
     window.removeEventListener('keydown', this.key, true);
+  }
+  describeHandle(handle) {
+    const field = handle?.userData.field;
+    if (this.label) {
+      this.label.hidden = !field;
+      if (field) this.label.textContent = `${field.replaceAll('-', ' ')} · drag to adjust · Escape cancels`;
+    }
+    if (this.canvas.style) this.canvas.style.cursor = field ? (this.drag ? 'grabbing' : 'grab') : '';
+    for (const h of this.handles) h.scale.setScalar(h === handle ? 1.2 : 1);
   }
 }

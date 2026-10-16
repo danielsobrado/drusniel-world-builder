@@ -6,16 +6,17 @@ function orientedQuad(mesh, points, normal, tint, normals, uvs) {
 }
 
 /** Shared profile rings close curved handrail joints without overlapping end caps. */
-export function buildShapeProfileRail(mesh, sample, length, width, height, detail, tint) {
+export function buildShapeProfileRail(mesh, sample, length, width, height, detail, tint, { closed = false, step = 0.16 } = {}) {
   const w = width / 2, h = height / 2, bevel = detail >= 2 ? Math.min(width, height) * 0.16 : 0;
   const profile = bevel ? [[-w + bevel, -h], [w - bevel, -h], [w, -h + bevel], [w, h - bevel],
     [w - bevel, h], [-w + bevel, h], [-w, h - bevel], [-w, -h + bevel]] : [[-w, -h], [w, -h], [w, h], [-w, h]];
-  const count = Math.max(1, Math.ceil(length / 0.16)), rings = [];
+  const count = Math.max(1, Math.ceil(length / step)), rings = [];
   const distances = [0];
   for (let j = 0; j < profile.length; j++) { const k = (j + 1) % profile.length;
     distances.push(distances.at(-1) + Math.hypot(profile[k][0] - profile[j][0], profile[k][1] - profile[j][1])); }
   for (let i = 0; i <= count; i++) {
-    const t = i / count, center = sample(t), a = sample(Math.max(0, t - 0.001)), b = sample(Math.min(1, t + 0.001));
+    const t = i / count, center = sample(t), a = sample(closed ? (t - 0.001 + 1) % 1 : Math.max(0, t - 0.001)),
+      b = sample(closed ? (t + 0.001) % 1 : Math.min(1, t + 0.001));
     const distance = Math.hypot(b[0] - a[0], b[2] - a[2]) || 1;
     const lateral = [-(b[2] - a[2]) / distance, 0, (b[0] - a[0]) / distance];
     rings.push({ center, lateral, points: profile.map(([x, y]) => [center[0] + lateral[0] * x, center[1] + y, center[2] + lateral[2] * x]) });
@@ -28,6 +29,7 @@ export function buildShapeProfileRail(mesh, sample, length, width, height, detai
       [[i * length / count, distances[j]], [(i + 1) * length / count, distances[j]],
         [(i + 1) * length / count, distances[j + 1]], [i * length / count, distances[j + 1]]]);
   }
+  if (closed) return;
   for (const [index, ring] of [rings[0], rings.at(-1)].entries()) {
     const next = index ? rings.at(-2) : rings[1], direction = ring.center.map((v, k) => v - next.center[k]);
     for (let j = 1; j < profile.length - 1; j++) {

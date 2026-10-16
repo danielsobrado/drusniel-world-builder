@@ -19,7 +19,7 @@ function childVolume(host, f, frame, fields) {
     rotation: frame.rotation, height: f.height, elevation: frame.origin[1], taper: 1, levels: 1, thickness: 0.16,
     footprint: { family: 'rounded', width: f.width, depth: f.depth, cornerRadius: Math.min(0.18, f.depth * 0.2, f.width * 0.2) },
     roof: { ...p.roof, family: 'gable', axis: 'depth', rise: Math.min(0.85, f.width * 0.32), sweep: 0.25, sag: 0.03, overhang: 0.16 },
-    openings: [], features: [], craft: false, suppressed: [],
+    openings: [], features: [], craft: false, chimney: false, windowBoxes: false, interior: 'none', suppressed: [],
     // A volume carried by its host (jetty, dormer, oriel) has no footing course of its own.
     grounded: frame.origin[1] <= p.elevation + 0.05, ...fields };
   const plan = planShapeVolume(primitive);

@@ -680,6 +680,7 @@ function validateStylizedSurface(config) {
       assertVariantPlacementSteering(variant, path);
     });
   }
+  assertDensityByTile(surface.bushes?.densityByTile, 'stylizedSurface.bushes.densityByTile');
 
   const treeVariants = surface.assets?.treeVariants ?? [];
   if (!Array.isArray(treeVariants)) {
@@ -908,26 +909,7 @@ function validateStylizedSurface(config) {
         `Invalid editor configuration: stylizedSurface.${layerName}.castShadow must be boolean.`,
       );
     }
-    const densityByTile = surface[layerName].densityByTile;
-    if (densityByTile !== undefined) {
-      const densityPath = `stylizedSurface.${layerName}.densityByTile`;
-      if (!densityByTile || typeof densityByTile !== 'object' || Array.isArray(densityByTile)) {
-        throw new Error(`Invalid editor configuration: ${densityPath} must be an object.`);
-      }
-      for (const [rawTileId, density] of Object.entries(densityByTile)) {
-        const tileId = Number(rawTileId);
-        if (!Number.isInteger(tileId) || tileId < 0 || tileId > 255) {
-          throw new Error(
-            `Invalid editor configuration: ${densityPath} keys must be unsigned-byte tile ids.`,
-          );
-        }
-        if (!Number.isFinite(density) || density <= 0 || density > 1) {
-          throw new Error(
-            `Invalid editor configuration: ${densityPath}.${rawTileId} must be within (0, 1].`,
-          );
-        }
-      }
-    }
+    assertDensityByTile(surface[layerName].densityByTile, `stylizedSurface.${layerName}.densityByTile`);
   }
 }
 
@@ -937,6 +919,27 @@ export function validatePostProcessing(config) {
   config.stylizedSurface.postProcessing = postProcessingSettingsToPlain(
     normalizePostProcessingSettings(postProcessing),
   );
+}
+
+/** Share of a scatter layer's candidates a biome keeps; absent tiles keep all. */
+function assertDensityByTile(densityByTile, densityPath) {
+  if (densityByTile === undefined) return;
+  if (!densityByTile || typeof densityByTile !== 'object' || Array.isArray(densityByTile)) {
+    throw new Error(`Invalid editor configuration: ${densityPath} must be an object.`);
+  }
+  for (const [rawTileId, density] of Object.entries(densityByTile)) {
+    const tileId = Number(rawTileId);
+    if (!Number.isInteger(tileId) || tileId < 0 || tileId > 255) {
+      throw new Error(
+        `Invalid editor configuration: ${densityPath} keys must be unsigned-byte tile ids.`,
+      );
+    }
+    if (!Number.isFinite(density) || density <= 0 || density > 1) {
+      throw new Error(
+        `Invalid editor configuration: ${densityPath}.${rawTileId} must be within (0, 1].`,
+      );
+    }
+  }
 }
 
 export function validateEditorConfig(config) {

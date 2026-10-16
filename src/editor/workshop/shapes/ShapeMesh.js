@@ -27,11 +27,15 @@ export class ShapeMesh {
     const length = Math.hypot(...normal);
     if (length < tolerance.length * tolerance.length) return;
     const flat = normal.map((v) => v / length);
-    uvs ??= shapeFaceUvs([a, b, c]);
+    if (!uvs) {
+      const edge = Math.hypot(...ab) || 1, ux = ab[0] / edge, uy = ab[1] / edge, uz = ab[2] / edge;
+      const vx = flat[1] * uz - flat[2] * uy, vy = flat[2] * ux - flat[0] * uz, vz = flat[0] * uy - flat[1] * ux;
+      this.uvs.push(0, 0, edge, 0, ac[0] * ux + ac[1] * uy + ac[2] * uz, ac[0] * vx + ac[1] * vy + ac[2] * vz);
+    }
     for (const [index, point] of [a, b, c].entries()) {
       this.positions.push(...point);
       this.colors.push(...color);
-      this.uvs.push(...uvs[index]);
+      if (uvs) this.uvs.push(...uvs[index]);
       this.normals.push(...(normals?.[index] ?? flat));
     }
   }

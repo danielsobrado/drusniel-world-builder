@@ -8,7 +8,7 @@ export function syncShapeDetailControls(editor) {
   const p = editor.primitive, section = editor.root.querySelector('[data-shape-section="details"]');
   const automatic = editor.resolvedPlans.get(p?.id)?.decorations ?? [];
   const details = [...automatic, ...(p?.suppressed ?? []).filter((key) => key.startsWith('detail:') && !automatic.some((d) => d.id === key))
-    .map((id) => ({ id, role: `Hidden ${id.endsWith(':chimney') ? 'chimney' : 'window-box'}`, openingId: id.split(':box-')[1] }))];
+    .map((id) => ({ id, role: `Hidden ${id.split(':').at(-1).replaceAll('-', ' ')}`, openingId: id.split(':box-')[1] }))];
   section.hidden = !p;
   if (!details.some((d) => d.id === editor.detailId)) editor.detailId = details[0]?.id;
   const select = section.querySelector('[data-shape-action="detail-select"]');
@@ -28,7 +28,7 @@ export function applyShapeDetailInput(editor, event, preview) {
   if (!preview) {
     if (action === 'detail-select') editor.detailId = event.target.value;
     else editor.curveEditing = event.target.checked;
-    editor.sync(); editor.onSelection?.(editor.selectedId);
+    editor.inspector?.show('details'); editor.sync(); editor.onSelection?.(editor.selectedId);
   }
   return true;
 }

@@ -6,6 +6,7 @@ import { syncShapeGateControls, applyShapeGateAction } from './ShapeGateControls
 import { shapeFieldLimits, shapeFieldEditable } from './ShapeEditConstraints.js';
 import { syncShapeFeatureControls, applyShapeFeatureAction, applyShapeFeatureInput } from './ShapeFeatureControls.js';
 import { syncShapeDetailControls, applyShapeDetailAction, applyShapeDetailInput } from './ShapeDetailControls.js';
+import { WorkshopShapeInspector } from './WorkshopShapeInspector.js';
 
 export class WorkshopShapeEditor {
   constructor({ form, onChange, onStatus }) {
@@ -21,6 +22,7 @@ export class WorkshopShapeEditor {
       .querySelector('[data-workshop-field="variant"]')
       .insertAdjacentHTML('afterend', workshopShapeMarkup());
     this.root = form.querySelector('[data-role="shape-editor"]');
+    this.inspector = new WorkshopShapeInspector(this);
     this.listeners = [];
     this.listen('input', (e) => this.input(e, true));
     this.listen('change', (e) => this.input(e, false));
@@ -51,6 +53,10 @@ export class WorkshopShapeEditor {
   }
   input(event, preview) {
     event.stopPropagation();
+    if (event.target.type === 'number' && (event.target.value === '' || !event.target.validity.valid)) {
+      if (!preview) { this.session.cancel(); event.target.blur(); this.sync(); }
+      return;
+    }
     try {
       if (applyShapeFeatureInput(this, event, preview) || applyShapeDetailInput(this, event, preview)) return;
     } catch (error) {
@@ -60,6 +66,7 @@ export class WorkshopShapeEditor {
     if (action) {
       if (preview) return;
       if (action === 'preset') {
+        this.inspector.show('building');
         this.session.replace(createShapePreset(event.target.value));
         this.select(this.session.primitives[0].id);
         this.changed({ frame: true });
@@ -67,6 +74,7 @@ export class WorkshopShapeEditor {
       if (action === 'select') this.select(event.target.value);
       if (action === 'opening') {
         this.openingId = event.target.value;
+        this.inspector.show('opening');
         this.sync();
         this.onSelection?.(this.selectedId);
       }
@@ -76,7 +84,7 @@ export class WorkshopShapeEditor {
       }
       return;
     }
-    const field = event.target.dataset.shapeField,
+    const field = event.target.dataset.shapeField ?? event.target.dataset.shapeNumber,
       p = this.primitive;
     if (!field || !p || event.target.disabled) return;
     try {
@@ -84,7 +92,7 @@ export class WorkshopShapeEditor {
       const value =
         event.target.type === 'checkbox'
           ? event.target.checked
-          : event.target.type === 'range'
+          : ['range', 'number'].includes(event.target.type)
             ? Number(event.target.value)
             : event.target.value;
       this.session.update(p.id, shapeFieldChanges(p, field, value, this.openingId));
@@ -196,8 +204,8 @@ export class WorkshopShapeEditor {
     this.root.querySelector('[data-shape-section="opening-fields"]').hidden = !this.openingId;
     const opening = openings.find((o) => o.id === this.openingId);
     this.root.querySelector('[data-shape-field="opening-shutterPose"]').closest('label').hidden = opening?.role !== 'window' || !p.shutters;
-    for (const element of this.root.querySelectorAll('[data-shape-field]')) {
-      const field = element.dataset.shapeField,
+    for (const element of this.root.querySelectorAll('[data-shape-field], [data-shape-number]')) {
+      const field = element.dataset.shapeField ?? element.dataset.shapeNumber,
         value = shapeFieldValue(p, field, opening);
       if (value === undefined) continue;
       if (field === 'radius') {
@@ -205,11 +213,11 @@ export class WorkshopShapeEditor {
         element.closest('label').hidden = p.footprint.family !== 'rounded';
       }
       const limits = shapeFieldLimits(p, field);
-      if (limits && element.type === 'range') [element.min, element.max] = limits.map(String);
+      if (limits && ['range', 'number'].includes(element.type)) [element.min, element.max] = limits.map(String);
       element.disabled = !shapeFieldEditable(p, field);
       if (field === 'footprint') element.querySelector('[value="custom"]').disabled = value !== 'custom';
       if (element.type === 'checkbox') element.checked = value === true;
-      else element.value = String(value);
+      else if (!(element.type === 'number' && element === document.activeElement)) element.value = String(value);
       const output = this.root.querySelector(`[data-shape-output="${field}"]`);
       if (output) output.value = Number(value).toFixed(2);
     }
@@ -220,6 +228,7 @@ export class WorkshopShapeEditor {
     syncShapeGateControls(this);
     syncShapeFeatureControls(this);
     syncShapeDetailControls(this);
+    this.inspector.sync();
   }
   captureRuntimeState() {
     return {
@@ -229,6 +238,7 @@ export class WorkshopShapeEditor {
       featureId: this.featureId,
       detailId: this.detailId,
       curveEditing: this.curveEditing,
+      inspectorContext: this.inspector.context,
     };
   }
   restoreRuntimeState(state) {
@@ -238,10 +248,12 @@ export class WorkshopShapeEditor {
     this.featureId = state.featureId;
     this.detailId = state.detailId;
     this.curveEditing = state.curveEditing;
+    this.inspector.context = state.inspectorContext ?? 'building';
     this.sync();
   }
   dispose() {
     this.session.dispose();
+    this.inspector.dispose();
     for (const [type, listener] of this.listeners) this.root.removeEventListener(type, listener);
   }
 }

@@ -49,6 +49,7 @@ import { acquirePathTextures, createTerrainPathPaint, resolvePathPaint } from '.
 import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js';
 import { snowWakeRecorder } from './stylized/deformation/SnowWakeRecorder.js';
 import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading.js';
+import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
@@ -63,6 +64,29 @@ import {
 const HEIGHT_SHADE_SCALE = 0.018;
 const MINIMUM_HEIGHT_SHADE = 0.72;
 const MAXIMUM_HEIGHT_SHADE = 1.22;
+
+/**
+ * Where the nearest-sampled biome tile is read from: the pixel's own cell,
+ * nudged by up to `reachCells` along a smooth canonical noise. The biome
+ * colour and the meadow ground pigment (both keyed off this one sample) then
+ * interlock across a cell border in organic lobes instead of stepping in 2 m
+ * squares. Pattern coordinates come from the slot's transition lattice, which
+ * stays exact at planet scale; no lattice, or a zero reach, reads in place.
+ */
+function ecotoneTileUv({ terrainUv, transitionPatterns, chunkWorldSize, cellsPerChunk, reachCells }) {
+  if (!transitionPatterns || !(reachCells > 0)) return terrainUv;
+  const localXZ = vec2(
+    terrainUv.x.sub(0.5).mul(chunkWorldSize),
+    float(0.5).sub(terrainUv.y).mul(chunkWorldSize),
+  );
+  const point = transitionPatterns.latticePoint('broad', localXZ);
+  const offset = vec2(
+    periodicFbm2(point),
+    periodicFbm2(point.add(vec2(37, 11))),
+  ).sub(0.5).mul(2 * reachCells / cellsPerChunk);
+  // UV v runs against canonical z, as localXZ above.
+  return terrainUv.add(vec2(offset.x, offset.y.negate()));
+}
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -99,7 +123,12 @@ export function createTerrainMaterial({
   sunDirection = null,
 }) {
   const terrainUv = uv();
-  const tileSample = slotTexture('tileTexture', tileTexture, terrainUv);
+  const transitionPatterns = transitionPatternsTemplate
+    && slotPatternOrigins('transitionPatterns', transitionPatternsTemplate);
+  const tileSample = slotTexture('tileTexture', tileTexture, ecotoneTileUv({
+    terrainUv, transitionPatterns, chunkWorldSize, cellsPerChunk: width,
+    reachCells: stylizedConfig.ground?.ecotoneReachCells ?? 0,
+  }));
   const tileColor = tileSample.rgb;
   const terrainHeight = slotTexture('heightTexture', heightTexture, terrainUv).r;
   const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
@@ -193,6 +222,15 @@ export function createTerrainMaterial({
     colorNode(forestFloorConfig.groundCoreColor ?? '#273c25'),
     forestFloorTint,
   );
+  // Leaf litter between the canopy's grass islands (forestFloorTexture B).
+  const litterStrength = forestFloorConfig.litterStrength ?? 0;
+  if (litterStrength > 0) {
+    groundColor = mix(
+      groundColor,
+      colorNode(forestFloorConfig.litterColor ?? '#5c4a30'),
+      forestFloorSample.b.mul(litterStrength).mul(oneMinus(dirt)),
+    );
+  }
 
   const variation = stylizedFbm(worldXZ.mul(stylizedConfig.ground.variationScale)).sub(0.5);
   const grain = stylizedFbm(worldXZ.mul(stylizedConfig.ground.grainScale)).sub(0.5);
@@ -297,7 +335,7 @@ export function createTerrainMaterial({
       stylizedConfig,
       pathMask,
       localXZ,
-      transitionPatterns: transitionPatternsTemplate && slotPatternOrigins('transitionPatterns', transitionPatternsTemplate),
+      transitionPatterns,
     });
     // grass-test's path surface over the baked ground: textured dirt with a
     // broken contour and a worn verge (stylized/path/terrainPathPaint.js).

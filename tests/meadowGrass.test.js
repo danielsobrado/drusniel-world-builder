@@ -204,8 +204,19 @@ test('the ground sampler reads height, grass, water and shape from the resident 
   assert.equal(ground.sample(1, -1, 0, out), true);
   assert.ok(Math.abs(out.height - 3) < 1e-9, 'bilinear over the vertex grid');
   assert.equal(out.shape, meadowShapeId('slender'));
-  assert.equal(ground.sample(3, -3, 0, out), true);
-  assert.equal(out.shape, meadowShapeId('reed'), 'wetland wears reeds');
+  // Stems near a border may grow as the neighbouring biome (the ecotone), but
+  // a wetland cell's own stand stays mostly reeds.
+  let reeds = 0;
+  let stems = 0;
+  for (let x = 2.05; x < 4; x += 0.1) {
+    for (let z = -3.95; z < -2; z += 0.1) {
+      if (!ground.sample(x, z, 0, out)) continue;
+      stems += 1;
+      if (out.shape === meadowShapeId('reed')) reeds += 1;
+      else assert.equal(out.shape, meadowShapeId('slender'), 'only the two biomes present mix');
+    }
+  }
+  assert.ok(stems > 0 && reeds / stems > 0.4, `wetland wears reeds (${reeds}/${stems})`);
   assert.equal(ground.sample(7, -7, 0, out), false, 'a road is not grass');
   assert.equal(ground.sample(7.9, -0.1, 0, out), false, 'the surface mask says no grass there');
 

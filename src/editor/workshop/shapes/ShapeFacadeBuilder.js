@@ -18,7 +18,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
     const v = 0.72 + shapeRandom(recipe.seed, p.id, 'timber-frame', key) * 0.22;
     return [v, v, v];
   };
-  function patch(u0, u1, y0, y1, color) {
+  function patch(u0, u1, y0, y1, color, along = false) {
     const steps = Math.max(1, Math.ceil((u1 - u0) / 0.18));
     for (let i = 0; i < steps; i++) {
       const a = u0 + ((u1 - u0) * i) / steps,
@@ -34,6 +34,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
           end: i === steps - 1,
           back: false,
           bevel: recipe.detail >= 2,
+          grainAlong: along ? 'u' : 'y',
         });
       }
     }
@@ -43,7 +44,7 @@ export function buildShapeFacade(plan, meshes, recipe) {
     const sill = p.grounded === false ? 0.1 : 0.8;
     const belts = [sill, p.height - 0.12];
     for (let level = 1; level < p.levels; level++) belts.push((p.height * level) / p.levels);
-    for (const y of belts) patch(0, surface.length, y - 0.08, y + 0.08, tint(`belt:${y}`));
+    for (const y of belts) patch(0, surface.length, y - 0.08, y + 0.08, tint(`belt:${y}`), true);
     const bays = Math.max(4, Math.round(surface.length / 2));
     for (let bay = 0; bay < bays; bay++) {
       const u = (surface.length * bay) / bays;

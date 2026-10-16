@@ -40,7 +40,8 @@ export function buildShapeIvy(plan, meshes, recipe) {
       surface.point(b[0] + 0.009, b[1], offset),
       surface.point(a[0] + 0.009, a[1], offset),
     ];
-    meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.1, 0.17, 0.055]);
+    const ordered = a[1] > b[1] ? points.toReversed() : points;
+    meshes.foliage.quad(...(surface.clockwise ? ordered.toReversed() : ordered), [0.1, 0.17, 0.055]);
   }
   for (const leaf of layout.leaves) {
     const cos = Math.cos(leaf.angle),

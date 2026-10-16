@@ -11,6 +11,14 @@
 .workshop-shape-editor [hidden] {
   display: none !important;
 }
+.workshop-shape-editor [data-inspector-visible='false'] { display: none !important; }
+.workshop-inspector-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.workshop-inspector-tabs button { border: 1px solid #89947c; border-radius: 6px; padding: 6px 8px; background: #334538; color: #edf0e4; cursor: pointer; }
+.workshop-inspector-tabs button[aria-selected='true'] { background: #f1e7d3; color: #443b2c; }
+.workshop-exact-value { width: calc(100% - 35px); padding: 4px !important; font-variant-numeric: tabular-nums; }
+.workshop-unit { margin-left: 4px; font-size: 10px; color: #c5d2c0; }
+.workshop-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.workshop-handle-label { position: absolute; left: 12px; bottom: 14px; pointer-events: none; padding: 7px 10px; border-radius: 7px; background: #17271fed; color: #f4ead1; font: 12px system-ui; z-index: 6; }
 .workshop-shape-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;

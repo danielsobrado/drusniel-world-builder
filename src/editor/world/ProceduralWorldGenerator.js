@@ -1,4 +1,5 @@
 import { classifyProceduralBiome } from './proceduralBiomeClassification.js';
+import { createBiomeBoundaryWarp } from './BiomeBoundaryWarp.js';
 import {
   WORLD_DEFAULT_HEIGHT_SCALE,
   WORLD_DEFAULT_SEED,
@@ -10,6 +11,9 @@ import {
   serializeWaterDomainConfig,
 } from '../water/WaterConfig.js';
 import { WaterTerrainModel } from '../water/WaterTerrainModel.js';
+
+/** The warp's coarsest wavelength is 1.5 of these: ~48 m, reaching ~25 m. */
+const PROCEDURAL_BIOME_WARP_CELLS = 16;
 
 function fade(value) {
   return value * value * (3 - 2 * value);
@@ -110,7 +114,12 @@ export class ProceduralWorldGenerator {
       + this.sampleBaseHeight(cellX, cellZ + 1)
       + this.sampleBaseHeight(cellX + 1, cellZ + 1)
     ) * 0.25;
-    const { temperature, moisture } = this.sampleClimate(cellX, cellZ);
+    // Climate is read through a short fractal warp: its own noise is smooth
+    // below ~30 m, so without it a biome border is a clean curve rather than
+    // the ragged, lobed edge of a real ecotone. Height is read in place.
+    this.biomeWarp ??= createBiomeBoundaryWarp({ seed: this.seed, cellsPerTexel: PROCEDURAL_BIOME_WARP_CELLS });
+    const offset = this.biomeWarp(cellX + 0.5, cellZ + 0.5, this.biomeWarpScratch ??= { x: 0, z: 0 });
+    const { temperature, moisture } = this.sampleClimate(cellX + offset.x, cellZ + offset.z);
 
     return classifyProceduralBiome({height,temperature,moisture,
       heightScale:this.heightScale,seaLevel:this.seaLevel});

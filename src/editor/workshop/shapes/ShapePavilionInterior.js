@@ -2,6 +2,8 @@ import { addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { pointInShape } from './ShapeEnvelope.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { clipShapePolygon } from './ShapePolygonClip.js';
+import { ShapeUtils, Vector2 } from 'three/webgpu';
+import polygonClipping from 'polygon-clipping';
 
 const FLAG = 0.56;
 const JOINT = 0.022;
@@ -9,7 +11,7 @@ const BENCH = { height: 0.44, depth: 0.38, seat: 0.07, nosing: 0.05 };
 
 /** A building entered through open archways is seen inside: it gets paving and a wall bench. */
 export function shapeHasOpenInterior(plan) {
-  return plan.primitive.kind === 'curved-volume' && (plan.openings ?? []).some((o) => o.role === 'arch');
+  return Boolean(plan.interior?.paving || plan.interior?.bench);
 }
 
 function stoneTone(recipe, plan, domain, key) {
@@ -48,11 +50,13 @@ function isConvex(room) {
   return turns.every((t) => t > 0) || turns.every((t) => t < 0);
 }
 
-/** Upward-facing fan, whatever the polygon's winding. */
+/** Ear clipping covers concave rooms without bridging their re-entrant corners. */
 function fan(mesh, points, y, tone) {
-  const ordered = signedArea(points) > 0 ? points.toReversed() : points;
-  for (let i = 1; i < ordered.length - 1; i++)
-    mesh.triangle([ordered[0][0], y, ordered[0][1]], [ordered[i][0], y, ordered[i][1]], [ordered[i + 1][0], y, ordered[i + 1][1]], tone);
+  for (const indices of ShapeUtils.triangulateShape(points.map(p => new Vector2(...p)), [])) {
+    const triangle = indices.map(i => points[i]);
+    if (signedArea(triangle) > 0) triangle.reverse();
+    mesh.triangle(...triangle.map(([x, z]) => [x, y, z]), tone);
+  }
 }
 
 /** Staggered flags clipped to the room, set in a darker mortar bedding that shows in the joints. */
@@ -70,10 +74,13 @@ function buildFlagstones(plan, mesh, recipe, room) {
     for (let col = -rows - 1; col <= rows; col++) {
       const u0 = col * FLAG + shift + JOINT / 2, u1 = (col + 1) * FLAG + shift - JOINT / 2;
       const v0 = row * FLAG + JOINT / 2, v1 = (row + 1) * FLAG - JOINT / 2;
-      const flag = clipToRoom([[u0, v0], [u0, v1], [u1, v1], [u1, v0]].map(([u, v]) => toWorld(u, v)), room, convex);
-      if (flag.length < 3 || Math.abs(signedArea(flag)) < 0.01) continue;
-      const lift = 0.012 + shapeRandom(recipe.seed, plan.id, 'flag-lift', `${row}:${col}`) * 0.008;
-      fan(mesh, flag, base + lift, stoneTone(recipe, plan, 'flag', `${row}:${col}`));
+      const square = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]].map(([u, v]) => toWorld(u, v));
+      const flags = convex ? [clipToRoom(square, room, true)] : polygonClipping.intersection([square], [room]).map(p => p[0].slice(0, -1));
+      for (const flag of flags) {
+        if (flag.length < 3 || Math.abs(signedArea(flag)) < 0.01) continue;
+        const lift = 0.012 + shapeRandom(recipe.seed, plan.id, 'flag-lift', `${row}:${col}`) * 0.008;
+        fan(mesh, flag, base + lift, stoneTone(recipe, plan, 'flag', `${row}:${col}`));
+      }
     }
   }
 }
@@ -99,10 +106,7 @@ function buildWallBench(plan, meshes, recipe, surface, distances) {
 export function buildShapePavilionInterior(plan, meshes, recipe, surface, distances) {
   if (!shapeHasOpenInterior(plan)) return;
   // Paving runs under the bench to the wall's inner face, so the archways are paved too.
-  const room = plan.curve.samples.map((s) => {
-    const [x, , z] = surface.point(s.distance, 0, -(plan.primitive.thickness / 2 + 0.02));
-    return [x, z];
-  });
-  buildFlagstones(plan, meshes.deck, recipe, room);
-  buildWallBench(plan, meshes, recipe, surface, distances);
+  const room = plan.interior.room;
+  if (plan.interior.paving) buildFlagstones(plan, meshes.deck, recipe, room);
+  if (plan.interior.bench) buildWallBench(plan, meshes, recipe, surface, distances);
 }

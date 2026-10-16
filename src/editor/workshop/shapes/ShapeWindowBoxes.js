@@ -16,7 +16,7 @@ export function buildShapeWindowBoxes(plan, meshes, recipe, surface) {
     const divisions = Math.max(1, Math.ceil(width / 0.12));
     for (let segment = 0; segment < divisions; segment++) {
       const u0 = a + width * segment / divisions, u1 = a + width * (segment + 1) / divisions;
-      const caps = { start: segment === 0, end: segment === divisions - 1 };
+      const caps = { start: segment === 0, end: segment === divisions - 1, grainAlong: 'u' };
       addWallPatch(meshes.inserts, surface, u0, u1, bottom, top, offset, 0.05, [0.84, 0.85, 0.83],
         { ...caps, bevel: recipe.detail >= 2 });
       addWallPatch(meshes.inserts, surface, u0, u1, bottom, bottom + 0.04, offset, 0.33, [0.66, 0.65, 0.59], caps);

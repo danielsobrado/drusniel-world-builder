@@ -1,6 +1,7 @@
 /**
  * The per-chunk forest-floor texture: R the forest canopy's shading of the
- * ground, G the contact shade under trunks and stones (contactShade.js).
+ * ground, G the contact shade under trunks and stones (contactShade.js), B the
+ * bare litter between the canopy's grass islands (writeForestFloorLitter).
  *
  * 64 texels over a 128 m chunk, two metres each, so the donor's contact shade
  * can sit at trunk scale — a 4 m patch round a trunk, 2–3 m round a stone. At
@@ -65,4 +66,23 @@ export function writeForestFloorCanopy({
     }
   }
   return scratch;
+}
+
+/**
+ * Writes the bare woodland floor into B: the share of each texel the canopy
+ * leaves without grass. Under a wood the meadow grows in islands
+ * (GrassPatchiness.js); without this the ground between them stayed meadow
+ * green and read as a lawn with a few blades on it.
+ *
+ * @param {object} options
+ * @param {Uint8Array} options.pixels RGBA bytes, `size * size`
+ * @param {number} options.size texels per side
+ * @param {(texelX: number, texelZ: number) => number} options.bareAt 0..1
+ */
+export function writeForestFloorLitter({ pixels, size, bareAt }) {
+  for (let z = 0; z < size; z += 1) {
+    for (let x = 0; x < size; x += 1) {
+      pixels[(z * size + x) * 4 + 2] = Math.round(Math.min(1, Math.max(0, bareAt(x, z))) * 255);
+    }
+  }
 }

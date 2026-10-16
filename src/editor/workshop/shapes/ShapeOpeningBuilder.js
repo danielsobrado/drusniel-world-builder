@@ -102,7 +102,7 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
       for (let i = 0; i < count; i++) {
         const a = center - half + o.width * i / count, b = center - half + o.width * (i + 1) / count;
         addWallPatch(meshes.inserts, surface, a, b, y - 0.0275, y + 0.0275, 0.075, 0.055, [1, 1, 1],
-          { start: i === 0, end: i === count - 1 });
+          { start: i === 0, end: i === count - 1, grainAlong: 'u' });
       }
     }
   }

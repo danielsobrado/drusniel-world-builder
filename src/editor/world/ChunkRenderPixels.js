@@ -6,6 +6,8 @@
 
 import { grassHabitatCoverage, grassHabitatHaloCells } from './GrassHabitatCoverage.js';
 import { prepareGrassHabitatHalo } from './GrassHabitatHalo.js';
+import { grassPatchCover } from './GrassPatchiness.js';
+import { resolveMeadowGrowth } from '../stylized/meadow/meadowGrowthProfiles.js';
 import { TILE_BY_ID, hexToRgbBytes } from '../tileCatalog.js';
 import { halfToFloat } from '../water/WaterField.js';
 
@@ -65,9 +67,22 @@ export function getSurfaceMaskChunkRadius(blendCells, chunkSize, tileSize = 2) {
  * @param {number} [options.tileSize] metres per cell; with the bake's snow
  *   classification it lets the mask keep grass off snow
  */
+/**
+ * Meadow stand density per tile id, or null without a meadow: the share of a
+ * biome's grass habitat that grows grass (GrassPatchiness.js). A plain array so
+ * it crosses into the chunk workers.
+ */
+function grassDensityByTile(stylizedConfig) {
+  const meadow = stylizedConfig?.grass?.meadow;
+  if (!meadow || meadow.enabled === false) return null;
+  const growth = resolveMeadowGrowth(meadow.growth);
+  return Array.from(growth.table, (index) => growth.profiles[index].density);
+}
+
 export function createSurfaceMaskConfig(stylizedConfig, { tileSize = null } = {}) {
   const bake = stylizedConfig?.materialBake;
   return {
+    grassDensityByTile: grassDensityByTile(stylizedConfig),
     tileSize: tileSize ?? 2,
     snow: bake?.classification && Number.isFinite(tileSize)
       ? { classification: bake.classification, seedOffset: bake.macro.seedOffset, tileSize }
@@ -221,6 +236,8 @@ export function buildSurfaceMaskPixels({
     originX,originZ,maskConfig,sampleHeight,sampleWater,
     coreWater:usableWaterField ? (x,z)=>sampleCellWaterOccupancy(usableWaterField,x,z,waterlineDepth) : null});
   const coverage = grassHabitatCoverage(habitat.eligibility,haloSize,haloSize,tileSize);
+  const densityByTile = maskConfig.grassDensityByTile ?? null;
+  const worldSeed = maskConfig.worldSeed ?? 0;
 
   for (let localZ = 0; localZ < chunkSize; localZ += 1) {
     for (let localX = 0; localX < chunkSize; localX += 1) {
@@ -232,7 +249,14 @@ export function buildSurfaceMaskPixels({
         : 0;
       const offset = cellIndex * 4;
       mask[offset] = Math.round(pathInfluence * 255);
-      mask[offset + 1] = coverage[haloIndex];
+      // Thin biomes grow islands of grass over bare ground; the habitat edge
+      // thins the same way, so a sward dissolves into a desert in patches.
+      let grass = coverage[haloIndex];
+      if (densityByTile && grass > 0) {
+        const density = (densityByTile[tiles[cellIndex]] ?? 1) * (grass / 255);
+        grass = Math.round(grass * grassPatchCover(originX + localX + 0.5, originZ + localZ + 0.5, density, worldSeed));
+      }
+      mask[offset + 1] = grass;
       mask[offset + 2] = Math.round(habitat.water[haloIndex] * 255);
       mask[offset + 3] = 255;
     }

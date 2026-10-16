@@ -22,7 +22,7 @@ if (!['stage', 'neutral', 'grazing'].includes(lighting)) throw new Error('Unknow
 const output = path.resolve(root, arg('out') ?? 'tmp/workshop-review');
 const presets = SHAPE_PRESETS.filter((p) => !only || only.includes(p.id));
 if (only?.some((id) => !SHAPE_PRESETS.some((p) => p.id === id))) throw new Error('Unknown preset in --only.');
-const report = { coarse, lighting, captures: [], pageErrors: [], source: await workshopReviewSource(root) };
+const report = { coarse, lighting, captures: [], pageErrors: [] };
 const reportName = `report${coarse ? '-coarse' : ''}${lighting === 'stage' ? '' : `-${lighting}`}.json`;
 const reference = arg('reference') ? JSON.parse(await readFile(path.join(root, arg('reference'), reportName), 'utf8')) : null;
 // Azimuth (degrees) around the framed target, distance scale, and height scale of the frame offset.
@@ -53,6 +53,7 @@ await mkdir(output, { recursive: true });
 const releaseLock = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 let server, browser;
 try {
+  report.source = await workshopReviewSource(root);
   server = spawn(process.execPath, [path.join(root, 'scripts/lib/workshopShapesQaServer.mjs'), String(port)],
     { cwd: root, windowsHide: true, stdio: 'ignore' });
   let serverError;

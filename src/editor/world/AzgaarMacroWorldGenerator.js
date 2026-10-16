@@ -5,6 +5,7 @@ import {
 import { WorldGuidanceField } from './WorldGuidanceField.js';
 import { ridgeHeight, validateMountainRidges } from './MountainRidges.js';
 import { valueNoise } from './valueNoise2d.js';
+import { createBiomeBoundaryWarp } from './BiomeBoundaryWarp.js';
 import { TrailGrading, validateTrailGrading } from './TrailGrading.js';
 import { validateRouteMetadata } from '../import/AzgaarRoutes.js';
 import { SettlementField } from './settlements/SettlementField.js';
@@ -278,6 +279,14 @@ export class AzgaarMacroWorldGenerator {
     this.version = proceduralMetadata.version;
     this.heightScale = proceduralMetadata.heightScale;
     this.seaLevel = proceduralMetadata.seaLevel;
+    this.biomeWarp = createBiomeBoundaryWarp({
+      seed: this.seed,
+      cellsPerTexel: source.bounds.widthCells / source.atlas.width,
+    });
+    this.biomeWarpScratch = { x: 0, z: 0 };
+    // Per texel: 0 unknown, 1 its land neighbours share its biome (no border in
+    // warp reach, so the warp is skipped), 2 a border is within reach.
+    this.biomeTexelMixed = this.biomeWarp ? new Uint8Array(source.atlas.width * source.atlas.height) : null;
     this.riverIndex = createRiverIndex(
       source.rivers,
       source.atlas.width,
@@ -554,7 +563,49 @@ export class AzgaarMacroWorldGenerator {
     if (!this.isInside(cellX + 0.5, cellZ + 0.5)) return null;
     const position = this.toAtlasPosition(cellX + 0.5, cellZ + 0.5);
     const index = this.atlasIndex(Math.floor(position.x), Math.floor(position.y));
-    return this.biomeBySourceId.get(this.biomeAtlas[index])?.tileId ?? null;
+    return this.biomeBySourceId.get(this.biomeAtlas[this.biomeIndexAt(cellX, cellZ, index)])?.tileId ?? null;
+  }
+
+  /**
+   * Whether a biome border lies within warp reach of a texel. The warp's
+   * octaves sum to under one texel, so only the 3×3 neighbourhood can be read;
+   * deep inside a biome — most cells — the warp is skipped entirely.
+   */
+  biomeBorderNear(index) {
+    const cached = this.biomeTexelMixed[index];
+    if (cached) return cached === 2;
+    const { width, height } = this.source.atlas;
+    const tx = index % width;
+    const ty = (index - tx) / width;
+    const own = this.biomeAtlas[index];
+    let mixed = false;
+    for (let y = Math.max(0, ty - 1); y <= Math.min(height - 1, ty + 1) && !mixed; y += 1) {
+      for (let x = Math.max(0, tx - 1); x <= Math.min(width - 1, tx + 1); x += 1) {
+        const neighbour = y * width + x;
+        if (this.heights[neighbour] >= LAND_HEIGHT && this.biomeAtlas[neighbour] !== own) {
+          mixed = true;
+          break;
+        }
+      }
+    }
+    this.biomeTexelMixed[index] = mixed ? 2 : 1;
+    return mixed;
+  }
+
+  /**
+   * The atlas texel whose biome a land cell wears: its own texel read through
+   * the boundary warp (BiomeBoundaryWarp.js), so borders follow no grid. Water
+   * stays where the unwarped heights put it — a warped read that lands in the
+   * sea or on a lake keeps the cell's own biome rather than drowning it.
+   */
+  biomeIndexAt(cellX, cellZ, landIndex) {
+    if (!this.biomeWarp || !this.biomeBorderNear(landIndex)) return landIndex;
+    const offset = this.biomeWarp(cellX + 0.5, cellZ + 0.5, this.biomeWarpScratch);
+    const position = this.toAtlasPosition(cellX + 0.5 + offset.x, cellZ + 0.5 + offset.z);
+    const index = this.atlasIndex(Math.floor(position.x), Math.floor(position.y));
+    if (index === landIndex || this.heights[index] < LAND_HEIGHT) return landIndex;
+    const definition = this.biomeBySourceId.get(this.biomeAtlas[index]);
+    return definition && definition.tileId !== WATER_TILE_ID ? index : landIndex;
   }
 
   sampleTile(cellX, cellZ) {
@@ -566,6 +617,6 @@ export class AzgaarMacroWorldGenerator {
     if (rawHeight < LAND_HEIGHT) return WATER_TILE_ID;
     if ((this.ensureTrailGrading()?.pathCover(cellX + 0.5, cellZ + 0.5) ?? 0) >= 0.5) return PATH_TILE_ID;
     if ((this.ensureSettlementField()?.cover(cellX + 0.5, cellZ + 0.5) ?? 0) >= 0.5) return PATH_TILE_ID;
-    return this.biomeBySourceId.get(this.biomeAtlas[index]).tileId;
+    return this.biomeBySourceId.get(this.biomeAtlas[this.biomeIndexAt(cellX, cellZ, index)]).tileId;
   }
 }

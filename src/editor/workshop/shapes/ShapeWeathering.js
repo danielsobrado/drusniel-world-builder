@@ -27,9 +27,12 @@ export function buildShapeWeathering(plan, meshes, recipe, surface) {
   const random = (domain, key) => shapeRandom(recipe.seed, p.id, domain, key);
   for (let cell = 0; cell * 0.65 < surface.length; cell++) {
     const u = cell * 0.65 + 0.12;
-    const damp = age * (0.1 + random('damp-height', cell) * 0.38);
+    const grounded = p.grounded !== false && p.elevation < 0.2;
+    const a0 = surface.point(u, 0.1), n0 = surface.point(u, 0.1, 1);
+    const shelter = 0.5 + 0.5 * Math.max(0, (n0[2] - a0[2]) * 0.8 - (n0[0] - a0[0]) * 0.6);
+    const damp = grounded ? age * shelter * (0.1 + random('damp-height', cell) * 0.38) : 0;
     // Dampness stays near the foundation, with breaks at doors and neighboring shells.
-    for (let strip = 0; strip < 3; strip++) {
+    for (let strip = 0; strip < (grounded ? 3 : 0); strip++) {
       const a = u + strip * 0.19, b = Math.min(surface.length, a + 0.2);
       const y = damp * (0.55 + random('damp-edge', `${cell}:${strip}`) * 0.45);
       if ([a, b, (a + b) / 2].some((d) => [0.025, y].some((h) => surface.excluded(d, h)))) continue;

@@ -323,17 +323,39 @@ stylizedSurface:
     #     scale: 1
     #   - scene: /assets/rocks/forest-pack/rock-08.glb
     #     scale: 1
+    # Undergrowth by biome and by light. Without tileIds every shrub grew
+    # everywhere — bamboo thickets in taiga — and every variant blocked on load.
+    # `canopy` sorts them by shade: the low shrub is the shade-tolerant floor of
+    # a wood's interior, the rounded bush rings its sunlit fringe, and the open
+    # scrub stands out in glades and on savanna. The first tile id picks the
+    # foliage grade (forest/foliagePalette.js), so shared shrubs lead with a
+    # temperate biome rather than wearing savanna gold everywhere.
     bushVariants:
       - scene: /assets/bushes/stylized_bush.glb
         scale: 1
+        weight: 1.2
+        tileIds: [6, 3, 4, 5, 8, 12, 14]
+        canopy: edge
       - scene: /assets/bushes/small_bush.glb
         scale: 2
+        weight: 1.3
+        tileIds: [6, 3, 4, 5, 7, 8, 9, 12, 14]
+        canopy: core
       - scene: /assets/bushes/bush2.glb
         scale: 0.5
+        weight: 1
+        tileIds: [4, 5, 6, 7, 8, 14]
+        character: forest
       - scene: /assets/bushes/bush.glb
         scale: 1
+        weight: 1
+        tileIds: [4, 3, 6, 9, 12, 14]
+        character: scrub
+        canopy: open
       - scene: /assets/bushes/bamboo_bush.glb
         scale: 0.006
+        weight: 1.4
+        tileIds: [7, 5]
     # Additional authored tree prototypes. Their embedded textures are retained
     # and each entry joins the configured species' deterministic prototype pool.
     treeVariants:
@@ -1397,6 +1419,15 @@ stylizedSurface:
     preferredSlope: 0.3
     maximumSlope: 1.5
     flatBias: 0.85
+    # Share of the cluster density a biome keeps. Absent means 1: the forest
+    # biomes keep full thickets. Savanna and farmland carry scattered scrub, a
+    # grassland its hedgerow clumps, a taiga a thin shrub layer.
+    densityByTile:
+      3: 0.45
+      4: 0.6
+      9: 0.6
+      12: 0.7
+      14: 0.35
   groundDetails:
     enabled: true
     # Authored accents stay in the walking ring; distant coverage remains the
@@ -1708,13 +1739,19 @@ stylizedSurface:
       grassEdgeDensity: 0.78
       flowerCoreDensity: 0.10
       flowerEdgeDensity: 0.48
-      bushCoreDensity: 0.28
+      # Raised from 0.28 so a wood's interior keeps a shaded shrub layer; the
+      # shade-tolerant variant (canopy: core) is what grows there.
+      bushCoreDensity: 0.42
       bushEdgeDensity: 0.95
       # Tint the ground takes under canopy. The old '#273c25' at 0.68 landed the
       # wood interior near black once Lambert shading and canopy shadow stacked on
       # top of it — this keeps the floor shaded but still readable.
       groundCoreColor: '#46503a'
       groundStrength: 0.38
+      # Under canopy the meadow grows in islands (world/GrassPatchiness.js); the
+      # ground between them takes this leaf-litter tone instead of meadow green.
+      litterColor: '#5c4a30'
+      litterStrength: 0.62
     minScale: 0.85
     maxScale: 1.15
     # Share of trees that ignore their grove's dominant species. 0 gives strict
@@ -1785,6 +1822,10 @@ stylizedSurface:
     variationStrength: 0.9
     grainScale: 6.7
     grainStrength: 0.95
+    # Cells the terrain may read its biome colour from, along a smooth noise:
+    # two biomes' ground interlocks in lobes at their border instead of stepping
+    # in 2 m squares. 0 reads every pixel's own cell.
+    ecotoneReachCells: 1.4
   groundCover:
     enabled: true
     # Shader impostor under the meadow's far cards: the ground between cards reads

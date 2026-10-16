@@ -1,7 +1,7 @@
 import { CurvePath } from '../curves/CurvePath.js';
+import { createShapeCurveSampler } from './ShapeCurveSampler.js';
 import {
   curveSegmentLength,
-  curveSegmentPointAtLength,
   evaluateCurveSegment,
 } from '../curves/CurveSegment.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
@@ -114,6 +114,7 @@ export function arcWallPath(id, length, bend) {
 
 export function sampleShapePath(pathInput, spacing = 0.25) {
   const path = new CurvePath(pathInput);
+  const sampler = createShapeCurveSampler(path);
   const samples = [];
   let offset = 0;
   for (const segment of path.listSegments()) {
@@ -121,7 +122,7 @@ export function sampleShapePath(pathInput, spacing = 0.25) {
     const count = Math.max(1, Math.ceil(length / spacing));
     for (let index = 0; index < count; index++) {
       const t = index / count;
-      const evaluated = curveSegmentPointAtLength(segment, length * t);
+      const evaluated = sampler.segmentPoint(segment.id, length * t);
       samples.push({
         ...evaluated,
         distance: offset + length * t,

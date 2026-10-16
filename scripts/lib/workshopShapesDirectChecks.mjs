@@ -1,3 +1,4 @@
+import { shapeLocator } from './workshopShapeControls.mjs';
 import assert from 'node:assert/strict';
 
 export async function checkWorkshopShapeDirectEditing({ page, report, preset, settle, handlePoint }) {
@@ -19,11 +20,11 @@ export async function checkWorkshopShapeDirectEditing({ page, report, preset, se
     await page.mouse.move(point.x + dx, point.y + dy, { steps: 5 }); await page.mouse.up(); await settle(page);
   }
   async function replay(before, after) {
-    await page.locator('[data-shape-action="undo"]').click(); await settle(page); assert.deepEqual(await primitive(), before);
-    await page.locator('[data-shape-action="redo"]').click(); await settle(page); assert.deepEqual(await primitive(), after);
+    await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page); assert.deepEqual(await primitive(), before);
+    await shapeLocator(page, '[data-shape-action="redo"]').click(); await settle(page); assert.deepEqual(await primitive(), after);
   }
   await preset(page, 'rounded-cottage');
-  await page.locator('[data-shape-action="opening"]').selectOption('door');
+  await shapeLocator(page, '[data-shape-action="opening"]').selectOption('door');
   let before = await primitive(); await drag('opening', 25, 0); let after = await primitive();
   assert.notDeepEqual(after.openings.find((o) => o.id === 'door'), before.openings.find((o) => o.id === 'door'),
     `Door drag result: ${JSON.stringify({ before, after })}`);
@@ -33,20 +34,20 @@ export async function checkWorkshopShapeDirectEditing({ page, report, preset, se
 
   await preset(page, 'rounded-cottage');
   const boxId = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.resolvedPlans.get('cottage').decorations.find((d) => d.role === 'window-box').id);
-  await page.locator('[data-shape-action="detail-select"]').selectOption(boxId);
+  await shapeLocator(page, '[data-shape-action="detail-select"]').selectOption(boxId);
   before = await primitive(); await drag('detail', 24, 8); after = await primitive();
   assert.ok(after.detailOverrides.some((d) => d.key === boxId)); await replay(before, after);
-  await page.locator('[data-shape-action="detail-suppress"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="detail-suppress"]').click(); await settle(page);
   assert.ok((await primitive()).suppressed.includes(boxId));
-  await page.locator('[data-shape-action="undo"]').click(); await settle(page); assert.deepEqual(await primitive(), after);
+  await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page); assert.deepEqual(await primitive(), after);
   report.assertions.push('Individual planters move and hide through pointer and authoring controls with semantic replay.');
 
-  await preset(page, 'rounded-cottage'); await page.locator('[data-shape-action="curve-edit"]').check();
+  await preset(page, 'rounded-cottage'); await shapeLocator(page, '[data-shape-action="curve-edit"]').check();
   const pointField = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.handles
     .filter((h) => h.visible && h.userData.definition.type === 'curve-point').sort((a, b) => b.position.z - a.position.z)[0].userData.field);
   before = await primitive(); await drag(pointField, 14, 9); after = await primitive();
   assert.equal(after.footprint.family, 'custom'); assert.ok(after.footprint.path);
-  await replay(before, after); await page.locator('[data-shape-action="curve-edit"]').uncheck();
+  await replay(before, after); await shapeLocator(page, '[data-shape-action="curve-edit"]').uncheck();
   report.assertions.push('A footprint point drag authors a custom curve and survives undo/redo.');
 
   await preset(page, 'cottage-turret');

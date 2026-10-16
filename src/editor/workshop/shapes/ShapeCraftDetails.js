@@ -18,7 +18,7 @@ export function resolveShapeCraftDetails(plan) {
   const p = plan.primitive;
   if (p.kind !== 'curved-volume' || !p.craft) return { ...plan, decorations: [] };
   const decorations = [];
-  if (['gable', 'hip'].includes(p.roof.family) && plan.openings.some((o) => o.role === 'door')) {
+  if (p.chimney !== false && ['gable', 'hip'].includes(p.roof.family) && plan.openings.some((o) => o.role === 'door')) {
     const roof = createShapeRoofSurface(plan);
     const [x, z] = placeShapePoint(p, [-p.footprint.width * p.taper * 0.23, p.footprint.depth * p.taper * 0.12]);
     const base = roof.heightAt(x, z) - 0.14;
@@ -29,7 +29,7 @@ export function resolveShapeCraftDetails(plan) {
     }
   }
   for (const opening of plan.openings) {
-    if (opening.role !== 'window' || opening.bottom < 0.65 || opening.width < 0.45) continue;
+    if (p.windowBoxes === false || opening.role !== 'window' || opening.bottom < 0.65 || opening.width < 0.45) continue;
     decorations.push(decoration(plan, 'window-box', `box-${opening.id}`, { openingId: opening.id }));
   }
   const overrides = new Map((p.detailOverrides ?? []).map((o) => [o.key, o]));

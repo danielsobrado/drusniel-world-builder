@@ -22,9 +22,9 @@ export function syncShapeFeatureControls(editor) {
   section.querySelector('[data-role="feature-fields"]').hidden = !feature;
   section.querySelector('[data-shape-action="feature-remove"]').disabled = !feature;
   section.querySelector('[data-shape-action="feature-add-jetty"]').disabled = p.features.some((f) => f.kind === 'jetty');
-  for (const element of section.querySelectorAll('[data-feature-field]')) {
-    const field = element.dataset.featureField;
-    element.value = String(feature?.[field] ?? element.min);
+  for (const element of section.querySelectorAll('[data-feature-field], [data-feature-number]')) {
+    const field = element.dataset.featureField ?? element.dataset.featureNumber;
+    if (!(element.type === 'number' && element === document.activeElement)) element.value = String(feature?.[field] ?? element.min);
     section.querySelector(`[data-feature-output="${field}"]`).value = Number(element.value).toFixed(2);
     element.closest('label').hidden = (feature?.kind === 'jetty' && field !== 'depth') ||
       (field === 'bottom' && ['porch', 'dormer', 'buttress'].includes(feature?.kind));
@@ -33,10 +33,10 @@ export function syncShapeFeatureControls(editor) {
 
 export function applyShapeFeatureInput(editor, event, preview) {
   if (event.target.dataset.shapeAction === 'feature-select') {
-    if (!preview) { editor.featureId = event.target.value; editor.sync(); editor.onSelection?.(editor.selectedId); }
+    if (!preview) { editor.featureId = event.target.value; editor.inspector?.show('feature'); editor.sync(); editor.onSelection?.(editor.selectedId); }
     return true;
   }
-  const field = event.target.dataset.featureField;
+  const field = event.target.dataset.featureField ?? event.target.dataset.featureNumber;
   if (!field) return false;
   const p = editor.primitive;
   editor.session.begin('Reshape architectural feature');

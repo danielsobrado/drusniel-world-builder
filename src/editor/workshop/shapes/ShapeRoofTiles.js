@@ -1,16 +1,11 @@
 import { shapeRandom } from './ShapeMesh.js';
+import { planShapeRoofTiles } from './ShapeRoofLayout.js';
 
 /** Chamfered, overlapping tiles have real shaded edges, without separate scene objects. */
 export function buildShapeRoofTiles(plan, mesh, surface, recipe, hidden) {
-  const p = plan.primitive, length = plan.curve.length;
-  const rows = Math.max(4, Math.ceil(p.roof.rise / 0.28));
-  for (let row = 0; row < rows; row++) {
-    const top = row / rows + 0.002, bottom = Math.min(1, (row + 1.12) / rows);
-    const cells = Math.max(6, Math.ceil(length * (p.roof.family === 'gable' ? 1 : bottom) / 0.5));
-    for (let cell = 0; cell < cells; cell++) {
-      const key = `${row}:${cell}`;
-      const phase = (row % 2) / 2, width = length / cells;
-      const left = (cell + phase) * width + 0.012, right = (cell + phase + 0.96) * width;
+  const p = plan.primitive;
+  for (const tile of planShapeRoofTiles(plan, surface, recipe.seed)) {
+      const { key, u0: left, u1: right, t0: top, t1: bottom } = tile;
       const cut = 0.045 + shapeRandom(recipe.seed, p.id, 'tile-corner', key) * 0.025;
       const du = (right - left) * cut, dt = (bottom - top) * cut;
       const coordinates = [
@@ -24,7 +19,7 @@ export function buildShapeRoofTiles(plan, mesh, surface, recipe, hidden) {
         return sum + a[0] * b[2] - b[0] * a[2];
       }, 0);
       if (Math.abs(area) < 1e-8 || hidden(points)) continue;
-      const value = 0.72 + shapeRandom(recipe.seed, p.id, 'roof-tiles', key) * 0.26;
+      const value = 0.82 + shapeRandom(recipe.seed, p.id, 'roof-tiles', key) * 0.15;
       const tint = recipe.topStyle === 'terracotta' ? [value * 1.04, value, value * 0.94]
         : [value * 0.93, value, value * 1.05];
       // The host can fold a tile around a rounded gable end; each triangle retains upward winding.
@@ -42,6 +37,5 @@ export function buildShapeRoofTiles(plan, mesh, surface, recipe, hidden) {
         const lip = [a, [a[0], a[1] - 0.024, a[2]], [b[0], b[1] - 0.024, b[2]], b];
         mesh.quad(...(area > 0 ? lip.toReversed() : lip), tint.map((v) => v * 0.64));
       }
-    }
   }
 }

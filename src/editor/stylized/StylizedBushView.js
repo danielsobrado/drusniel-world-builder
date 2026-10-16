@@ -252,7 +252,10 @@ export class StylizedBushView {
         candidate.z,
         'scrub',
       ) ?? 1;
-      const density = Math.min(1, cluster.density * canopy * fringe * regionalScrub);
+      // How thick a biome's undergrowth runs: a rainforest floor is a thicket,
+      // a taiga's is thin, a savanna's is scattered scrub.
+      const biome = bushes.densityByTile?.[candidate.tileId] ?? 1;
+      const density = Math.min(1, cluster.density * canopy * fringe * regionalScrub * biome);
       if (candidate.priority >= density) return null;
       return {
         clusterId: cluster.clusterId,

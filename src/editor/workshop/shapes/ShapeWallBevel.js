@@ -18,6 +18,7 @@ export function addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, th
   const points = (coordinates, lift) => coordinates.map(([u, y]) => surface.point(u, y, lift));
   const a = points(outer, offset), b = points(inner, offset + Math.sign(thickness) * size);
   const face = (vertices, uv, tint) => {
+    if (caps.grainAlong === 'u') uv = uv.map(([u, v]) => [v, u]);
     if (surface.clockwise !== thickness < 0) mesh.quad(...vertices, tint, uv);
     else mesh.quad(...vertices.toReversed(), tint, uv.toReversed());
   };

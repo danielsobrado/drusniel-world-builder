@@ -6,6 +6,19 @@ import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignat
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
 import { sampleHeight } from '../scatterMath.js';
 import { hash2d } from './meadowGrassGeometry.js';
+import {
+  CANOPY_FLOOR_PATCH_SALT,
+  ecotoneJitter,
+  grassPatchCover,
+  grassStandDensity,
+} from '../../world/GrassPatchiness.js';
+
+/**
+ * Cells a stem may reach across for the biome it grows as. Two biomes' grass
+ * then interleaves across a few metres at their border — heights, silhouettes
+ * and pigment mixing stem by stem — instead of switching at a cell edge.
+ */
+const ECOTONE_REACH_CELLS = 0.9;
 
 /** Surface mask channels, as the terrain page bakes them (see SurfaceMaskNodes.js). */
 /** Below this strength a stem is not worth drawing: compaction drops it. */
@@ -205,14 +218,28 @@ export class MeadowGroundSampler {
     const rocks = this.rocksNear(descriptor, centerX, centerZ, tileHalf);
     const flatten = this.rocks?.flatten ?? 0;
     const pathResult={path:0,blocked:false};
+    const jitter={x:0,z:0};
+    const last=chunkSize-1;
     const sample = (x, z, rank, out) => {
       const localX = x / tileSize - descriptor.originCellX;
       const localZ = -z / tileSize - descriptor.originCellZ;
       if (localX < 0 || localZ < 0 || localX >= chunkSize || localZ >= chunkSize) return false;
-      const tile = page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)];
-      if (!eligible[tile]) return false;
+      if (!eligible[page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)]]) return false;
+      // The biome this stem grows as: a neighbour's, near a border (clamped to
+      // the page, so the read never depends on which chunks are resident).
+      ecotoneJitter(x, z, ECOTONE_REACH_CELLS, jitter);
+      const reachX = Math.min(last, Math.max(0, Math.floor(localX + jitter.x)));
+      const reachZ = Math.min(last, Math.max(0, Math.floor(localZ + jitter.z)));
+      const reached = page.tiles[reachZ * chunkSize + reachX];
+      const tile = eligible[reached] ? reached : page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)];
       const coverage=mask?sampleMask(mask,chunkSize,localX,localZ,1):1;
-      const density=growth?growth.profiles[growth.table[tile]].density:1;
+      // Thin biomes grow in islands: the same canonical field the surface mask
+      // bakes, read here at the live density so a Settings change thins the
+      // stand at once (the baked ground follows when its page rebuilds).
+      const biomeDensity=growth?growth.profiles[growth.table[tile]].density:1;
+      const density=growth
+        ?grassPatchCover(x/tileSize,-z/tileSize,biomeDensity,worldSeed)*grassStandDensity(x,z,biomeDensity,worldSeed)
+        :1;
       if(!acceptsMeadowHabitat(x,z,worldSeed,coverage,density))return false;
       let strength=.30+.70*coverage;
       let path = 0;
@@ -223,9 +250,18 @@ export class MeadowGroundSampler {
       const pathSample=this.paths.sample(x,z,coverage,path,pathResult);
       if(pathSample.blocked)return false;
       path=pathSample.path;
-      // Canopy suppression, as the clump scatter did it: a stem survives where its
-      // own roll is under the forest floor's grass density.
-      if (forest && hash2d(rank, 91) >= forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ)) return false;
+      // Canopy suppression: a stem survives where its own roll is under the
+      // forest floor's grass density — gathered into islands and tussocks like
+      // any thin stand (its own field, so they do not echo the biome's), rather
+      // than an even speckle of blades over the woodland floor.
+      if (forest) {
+        const floor = forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ);
+        if (floor < 1) {
+          const keep = grassPatchCover(x / tileSize, -z / tileSize, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT)
+            * grassStandDensity(x, z, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT);
+          if (hash2d(rank, 91) >= keep) return false;
+        }
+      }
       // Nothing grows under a rock; round its foot the stand is pressed flatter.
       for (const rock of rocks) {
         const distance = Math.hypot(x - rock.x, z - rock.z);

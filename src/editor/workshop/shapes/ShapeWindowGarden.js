@@ -7,7 +7,7 @@ export function buildShapeWindowGarden(mesh, surface, { seed, id, opening, a, wi
   const count = Math.max(5, Math.ceil(width / 0.09));
   for (let i = 0; i < count; i++) {
     const random = (key) => shapeRandom(seed, id, 'window-garden', `${opening.id}:${i}:${key}`);
-    const u = a + 0.08 + (width - 0.16) * (i + 0.5) / count;
+    const u = a + 0.08 + (width - 0.16) * (i + 0.25 + random('spacing') * 0.5) / count;
     const y = top + 0.08 + random('height') * 0.12, depth = offset - 0.08 - random('depth') * 0.16;
     const stem = surface.point(u, top - 0.025, depth), head = surface.point(u, y, depth);
     mesh.beam(stem, head, 0.009, 0.009, [0.055, 0.22, 0.04]);
@@ -23,7 +23,9 @@ export function buildShapeWindowGarden(mesh, surface, { seed, id, opening, a, wi
       for (const points of [[base, left, mid], [left, tip, mid], [tip, right, mid], [right, base, mid]])
         mesh.triangle(...points, tint);
     }
-    const tint = flowers[Math.floor(random('flower') * flowers.length)];
+    if (random('blossom') > 0.7) continue;
+    const group = Math.floor(i / 3);
+    const tint = flowers[Math.floor(shapeRandom(seed, id, 'window-garden-group', `${opening.id}:${group}`) * flowers.length)];
     const radius = 0.035 + random('size') * 0.017;
     for (let petal = 0; petal < 5; petal++) {
       const angle = petal * Math.PI * 2 / 5;

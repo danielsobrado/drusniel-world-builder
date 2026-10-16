@@ -1,3 +1,4 @@
+import { shapeLocator } from './workshopShapeControls.mjs';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 
@@ -17,7 +18,7 @@ export async function checkWorkshopShapePolish({ page, report, preset, settle, o
   assert.ok(before.decorations.some((d) => d.role === 'chimney'));
   assert.ok(before.decorations.some((d) => d.role === 'window-box'));
   assert.equal(before.primitive.decorations, undefined);
-  await page.locator('[data-shape-field="craft"]').uncheck();
+  await shapeLocator(page, '[data-shape-field="craft"]').uncheck();
   await settle(page);
   const plain = await read();
   assert.equal(plain.primitive.craft, false);
@@ -33,10 +34,10 @@ export async function checkWorkshopShapePolish({ page, report, preset, settle, o
   assert.equal(saved.craft, false);
   assert.equal(saved.decorations, undefined);
   report.assertions.push('Bake saves the craft preference and keeps generated dressing out of authoring state.');
-  await page.locator('[data-shape-action="undo"]').click();
+  await shapeLocator(page, '[data-shape-action="undo"]').click();
   await settle(page);
   assert.deepEqual((await read()).decorations, before.decorations);
-  await page.locator('[data-shape-action="redo"]').click();
+  await shapeLocator(page, '[data-shape-action="redo"]').click();
   await settle(page);
   assert.equal((await read()).decorations.length, 0);
   report.assertions.push('Undo and redo deterministically restore and remove the crafted details.');

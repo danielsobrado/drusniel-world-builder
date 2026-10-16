@@ -7,8 +7,9 @@ import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
 import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
 import { resolveShapeStyles } from './ShapeStyles.js';
 import { resolveShapeFeatures } from './ShapeFeatures.js';
-import { resolveShapeGrounding } from './ShapeGrounding.js';
+import { resolveShapeGroundings } from './ShapeGrounding.js';
 import { resolveShapeFeatureContacts } from './ShapeFeatureContacts.js';
+import { resolveShapeInterior } from './ShapeInterior.js';
 
 export function resolveShapeChemistry(plans) {
   const contacts = [],
@@ -90,6 +91,6 @@ export function resolveShapeChemistry(plans) {
     plan.supports = supports.filter((s) => s.sourceEntityIds.includes(plan.id));
   const features = resolveShapeFeatureContacts(resolvePathGates(resolved, index, byId)
     .map(resolveShapeCraftDetails).map(resolveShapeFeatures));
-  return { plans: resolveShapeStyles(resolveShapeRoofJunctions(features.plans)).map(resolveShapeGrounding),
+  return { plans: resolveShapeGroundings(resolveShapeStyles(resolveShapeRoofJunctions(features.plans))).map(resolveShapeInterior),
     contacts: [...contacts, ...features.contacts], supports };
 }

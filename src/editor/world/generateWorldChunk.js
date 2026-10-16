@@ -47,6 +47,7 @@ function resolveMaskConfig(request) {
       grassTileIds: [...provided.grassTileIds],
       waterlineDepth: provided.waterlineDepth,
       snow: provided.snow ?? null,
+      grassDensityByTile: provided.grassDensityByTile ?? null,
     };
   }
   return createSurfaceMaskConfig(null);

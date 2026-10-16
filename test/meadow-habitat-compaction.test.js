@@ -3,6 +3,7 @@ import test from 'node:test';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
+import { grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
 
 function fixture(coverage,density=1,forest=false) {
   const size=32,mask=new Uint8Array(size*size*4);
@@ -25,13 +26,26 @@ function accepted(sampler,source,reverse=false) {
   return ids.sort((a,b)=>a-b);
 }
 
-test('100000 real compaction candidates follow coverage times density with no rejected output entries', () => {
+// Thin biomes pack their stems into islands and tussocks (GrassPatchiness.js),
+// so a stem's acceptance is coverage times the island and stand density there.
+function meanStandDensity(template,density) {
+  const p=template.getAttribute('instancePosition').array;
+  let total=0;
+  for(let i=0;i<template.instanceCount;i++) {
+    const x=-32+p[i*4],z=32+p[i*4+2];
+    total+=grassPatchCover(x/2,-z/2,density,918273)*grassStandDensity(x,z,density,918273);
+  }
+  return total/template.instanceCount;
+}
+
+test('100000 real compaction candidates follow coverage times stand density with no rejected output entries', () => {
   const template=createMeadowTemplate({detail:2,count:100000,tileSize:64});
   try {
+    const stand=meanStandDensity(template,.65);
     for(const E of [0,.25,.5,1]) {
       const {sampler}=fixture(E,.65),sample=sampler.forTile(-32,32,32).sample;
       const job=createCompaction({template,centerX:-32,centerZ:32,sample});job.advance();
-      const ids=accepted(sampler,template),expected=Math.round(E*255)/255*.65;
+      const ids=accepted(sampler,template),expected=Math.round(E*255)/255*stand;
       assert.ok(Math.abs(job.output.count/100000-expected)<.01);
       assert.equal(job.output.count,ids.length);
       for(let i=0;i<ids.length;i++) {

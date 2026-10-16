@@ -42,6 +42,10 @@ export function workshopShapeMarkup() {
       ])}
       <label class="workshop-check"><input type="checkbox" data-shape-field="shutters"/>Window shutters</label>
       <label class="workshop-check"><input type="checkbox" data-shape-field="craft"/>Chimney &amp; planted window boxes</label>
+      <label class="workshop-check"><input type="checkbox" data-shape-field="chimney"/>Chimney</label>
+      <label class="workshop-check"><input type="checkbox" data-shape-field="windowBoxes"/>Planted window boxes</label>
+      ${range('ivyDensity', 'Ivy density', 0, 1, 0.05)}
+      ${select('interior', 'Interior finish', [['auto', 'Automatic'], ['none', 'No interior finish'], ['paving', 'Paving'], ['bench', 'Paving and wall bench']])}
       ${range('levels', 'Floors', 1, 6, 1)}
       ${select('footprint', 'Footprint', [
         ['rounded', 'Rounded rectangle'],
@@ -111,6 +115,7 @@ export function workshopShapeMarkup() {
 }
 
 export function shapeFieldValue(p, field, opening) {
+  if (['chimney', 'windowBoxes'].includes(field)) return p.craft && p[field];
   if (field.startsWith('style-')) return p.style[field.slice(6)] ?? 'auto';
   const fields = {
     x: p.position[0],
@@ -132,6 +137,7 @@ export function shapeFieldValue(p, field, opening) {
 }
 
 export function shapeFieldChanges(p, field, value, openingId) {
+  if (['chimney', 'windowBoxes'].includes(field)) return { craft: true, ...(p.craft ? {} : { chimney: false, windowBoxes: false }), [field]: value };
   if (field.startsWith('style-')) {
     const style = { ...p.style }, key = field.slice(6);
     if (value === 'auto') delete style[key]; else style[key] = value;

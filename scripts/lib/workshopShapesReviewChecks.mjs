@@ -1,3 +1,4 @@
+import { shapeLocator } from './workshopShapeControls.mjs';
 import assert from 'node:assert/strict';
 
 export async function checkWorkshopShapeReview({ page, report, preset, settle, field }) {
@@ -13,7 +14,7 @@ export async function checkWorkshopShapeReview({ page, report, preset, settle, f
   await field(page, 'height', 1);
   const short = await read();
   assert.ok(short.openings.every((o) => o.bottom + o.height <= short.height));
-  await page.locator('[data-shape-action="undo"]').click();
+  await shapeLocator(page, '[data-shape-action="undo"]').click();
   await settle(page);
   assert.ok((await read()).height > 1);
   report.assertions.push('Lowering a turret adapts elevated windows and undo restores both.');
@@ -22,8 +23,8 @@ export async function checkWorkshopShapeReview({ page, report, preset, settle, f
   await field(page, 'elevation', 4);
   await field(page, 'rise', -2);
   assert.equal((await read()).rise, -2);
-  assert.equal(await page.locator('[data-shape-field="rise"]').inputValue(), '-2');
-  assert.equal(await page.locator('[data-shape-field="rise"]').getAttribute('min'), '-4');
+  assert.equal(await shapeLocator(page, '[data-shape-field="rise"]').inputValue(), '-2');
+  assert.equal(await shapeLocator(page, '[data-shape-field="rise"]').getAttribute('min'), '-4');
   report.assertions.push('Descending traversal retains its negative rise in the visible controls.');
 
   await preset(page, 'rounded-cottage');
@@ -35,9 +36,9 @@ export async function checkWorkshopShapeReview({ page, report, preset, settle, f
   });
   await settle(page);
   const outline = (await read()).footprint.path;
-  assert.equal(await page.locator('[data-shape-field="footprint"]').inputValue(), 'custom');
+  assert.equal(await shapeLocator(page, '[data-shape-field="footprint"]').inputValue(), 'custom');
   for (const name of ['width', 'depth'])
-    assert.equal(await page.locator(`[data-shape-field="${name}"]`).isDisabled(), true);
+    assert.equal(await shapeLocator(page, `[data-shape-field="${name}"]`).isDisabled(), true);
   await field(page, 'height', 5);
   await field(page, 'x', 2);
   assert.deepEqual((await read()).footprint.path, outline);
@@ -55,7 +56,7 @@ export async function checkWorkshopShapeReview({ page, report, preset, settle, f
   });
   await settle(page);
   for (const name of ['length', 'bend'])
-    assert.equal(await page.locator(`[data-shape-field="${name}"]`).isDisabled(), true);
+    assert.equal(await shapeLocator(page, `[data-shape-field="${name}"]`).isDisabled(), true);
   report.assertions.push('Custom wall paths disable length and bend controls that cannot reshape the path.');
 
   await preset(page, 'rounded-cottage');

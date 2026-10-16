@@ -1,5 +1,5 @@
 /** Derived recipe only: source format and authored biome IDs remain unchanged. */
-export const PROCEDURAL_BIOME_RECIPE_REVISION = 2;
+export const PROCEDURAL_BIOME_RECIPE_REVISION = 3;
 export function classifyProceduralBiome({height, temperature, moisture, heightScale, seaLevel}) {
     if (height <= seaLevel) {
       return 0;

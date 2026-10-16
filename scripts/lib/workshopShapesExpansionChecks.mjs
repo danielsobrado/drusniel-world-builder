@@ -1,3 +1,4 @@
+import { shapeLocator } from './workshopShapeControls.mjs';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { checkWorkshopShapeDirectEditing } from './workshopShapesDirectChecks.mjs';
@@ -17,16 +18,16 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
   report.assertions.push('Weathering changes reuse roof and ivy buffers.');
 
   await preset(page, 'rounded-cottage');
-  await page.locator('[data-shape-action="opening"]').selectOption('window-front');
+  await shapeLocator(page, '[data-shape-action="opening"]').selectOption('window-front');
   let start = await read(), point = await handlePoint(page, 'opening');
   await page.mouse.move(point.x, point.y); await page.mouse.down();
   await page.mouse.move(point.x - 24, point.y - 26, { steps: 6 }); await page.mouse.up(); await settle(page);
   let moved = await read();
   assert.equal(moved.history, start.history + 1);
   assert.notDeepEqual(moved.primitive.openings, start.primitive.openings);
-  await page.locator('[data-shape-action="undo"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page);
   assert.deepEqual((await read()).primitive.openings, start.primitive.openings);
-  await page.locator('[data-shape-action="redo"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="redo"]').click(); await settle(page);
   assert.deepEqual((await read()).primitive.openings, moved.primitive.openings);
   point = await handlePoint(page, 'opening');
   await page.mouse.move(point.x, point.y); await page.mouse.down();
@@ -35,30 +36,30 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
   report.assertions.push('Real window pointer drags commit once; undo, redo and Escape restore semantic cuts.');
 
   await preset(page, 'curved-courtyard');
-  await page.locator('[data-shape-action="curve-edit"]').check();
+  await shapeLocator(page, '[data-shape-action="curve-edit"]').check();
   start = await read(); point = await handlePoint(page, 'curve-control:edge-main');
   await page.mouse.move(point.x, point.y); await page.mouse.down();
   await page.mouse.move(point.x + 22, point.y + 10, { steps: 5 }); await page.mouse.up(); await settle(page);
   moved = await read(); assert.ok(moved.primitive.path);
   assert.notDeepEqual(moved.primitive.path, start.primitive.path);
-  await page.locator('[data-shape-action="undo"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page);
   assert.deepEqual((await read()).primitive, start.primitive);
-  await page.locator('[data-shape-action="redo"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="redo"]').click(); await settle(page);
   assert.deepEqual((await read()).primitive.path, moved.primitive.path);
-  await page.locator('[data-shape-action="curve-edit"]').uncheck();
+  await shapeLocator(page, '[data-shape-action="curve-edit"]').uncheck();
   report.assertions.push('Curve handles author stable control points through real pointer events and replay.');
 
   await preset(page, 'rounded-cottage');
-  await page.locator('[data-shape-action="detail-select"]').selectOption('detail:cottage:chimney');
+  await shapeLocator(page, '[data-shape-action="detail-select"]').selectOption('detail:cottage:chimney');
   start = await read(); point = await handlePoint(page, 'detail');
   await page.mouse.move(point.x, point.y); await page.mouse.down();
   await page.mouse.move(point.x + 18, point.y + 5, { steps: 4 }); await page.mouse.up(); await settle(page);
   moved = await read(); assert.equal(moved.primitive.detailOverrides.length, 1);
   assert.equal(moved.resolved.decorations.find((d) => d.role === 'chimney').provenance.source, 'promoted');
   assert.deepEqual(moved.buffers.walls, start.buffers.walls); assert.deepEqual(moved.buffers.facade, start.buffers.facade);
-  await page.locator('[data-shape-action="detail-suppress"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="detail-suppress"]').click(); await settle(page);
   assert.ok(!(await read()).resolved.decorations.some((d) => d.role === 'chimney'));
-  await page.locator('[data-shape-action="undo"]').click(); await settle(page);
+  await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page);
   assert.deepEqual((await read()).primitive.detailOverrides, moved.primitive.detailOverrides);
   const recovery = await page.evaluate(async () => {
     const ui = window.__editor.proceduralWorkshop, state = ui.captureRuntimeState();
@@ -72,13 +73,13 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
 
   for (const kind of ['dormer', 'bay', 'jetty', 'porch', 'buttress']) {
     await preset(page, 'timber-cottage');
-    await page.locator(`[data-shape-action="feature-add-${kind}"]`).click(); await settle(page);
+    await shapeLocator(page, `[data-shape-action="feature-add-${kind}"]`).click(); await settle(page);
     const state = await read(); assert.equal(state.primitive.features.length, 1); assert.equal(state.resolved.features[0].intent.kind, kind);
     await field(page, 'rotation', 27); await field(page, 'width', 8.1);
     assert.ok((await read()).resolved.features.length > 0);
-    await page.locator('[data-shape-action="feature-remove"]').click(); await settle(page);
+    await shapeLocator(page, '[data-shape-action="feature-remove"]').click(); await settle(page);
     assert.equal((await read()).resolved.features.length, 0);
-    await page.locator('[data-shape-action="undo"]').click(); await settle(page);
+    await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page);
     assert.equal((await read()).resolved.features.length, 1);
     const baked = await page.evaluate(() => {
       const ui = window.__editor.proceduralWorkshop; ui.bake();
@@ -89,9 +90,9 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
   report.assertions.push('All five architectural features can be added, resized with their host, removed, restored and baked through authoring controls.');
 
   await preset(page, 'timber-pavilion');
-  await page.locator('[data-shape-action="select"]').selectOption('ramp');
+  await shapeLocator(page, '[data-shape-action="select"]').selectOption('ramp');
   assert.equal((await read()).resolved.resolvedStyle.values.floor, 'timber');
-  await page.locator('[data-shape-field="style-railing"]').selectOption('stone'); await settle(page);
+  await shapeLocator(page, '[data-shape-field="style-railing"]').selectOption('stone'); await settle(page);
   const styled = await read(); assert.equal(styled.resolved.resolvedStyle.values.railing, 'stone'); assert.equal(styled.resolved.resolvedStyle.values.floor, 'timber');
   report.assertions.push('A connected ramp inherits timber while a railing override preserves floor inheritance.');
   await checkWorkshopShapeDirectEditing({ page, report, preset, settle, handlePoint });
@@ -139,14 +140,14 @@ export async function checkWorkshopShapeExpansion({ page, report, preset, settle
       });
     });
     if (['dormer-detail', 'jetty-detail', 'buttress-detail'].includes(shot.id)) {
-      await page.locator('select[name="detail"]').selectOption('1'); await settle(page);
+      await shapeLocator(page, 'select[name="detail"]').selectOption('1'); await settle(page);
       const coarse = await page.evaluate(() => window.__editor.proceduralWorkshop.previewParts.stats);
       await page.evaluate(() => { window.__editor.proceduralWorkshop.shapeBridge.preview.handles.root.visible = false; });
       await page.screenshot({ path: path.join(output, `${shot.id}-coarse.png`), clip });
       report.details.push({ id: `${shot.id}-coarse`, label: `${shot.label} · Coarse detail` });
       assert.ok(coarse.sourceVertices < report.expansion.at(-1).stats.sourceVertices);
       report.expansion.at(-1).coarse = coarse;
-      await page.locator('select[name="detail"]').selectOption('2'); await settle(page);
+      await shapeLocator(page, 'select[name="detail"]').selectOption('2'); await settle(page);
     }
     await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.preview.handles.sync());
   }

@@ -2,6 +2,32 @@ import { createShapeWallSurface, addWallPatch } from './ShapeWallSurface.js';
 import { pointInShape } from './ShapeEnvelope.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
+import polygonClipping from 'polygon-clipping';
+import { buildShapePaving } from './ShapePaving.js';
+
+/** Group already-resolved attachment relationships without a whole-document scan per host. */
+export function resolveShapeGroundings(plans) {
+  const connections = new Map();
+  for (const path of plans) if (path.primitive.kind === 'traversal' && path.resolvedStyle?.hostId) {
+    const hostId = path.resolvedStyle.hostId;
+    if (!connections.has(hostId)) connections.set(hostId, []);
+    connections.get(hostId).push(path);
+  }
+  return plans.map(plan => {
+    const resolved = resolveShapeGrounding(plan), prior = [];
+    const porchCuts = (plan.features ?? []).filter(f => f.openSides).map(f => f.child.boundary);
+    for (const paving of resolved.ground.paving) {
+      const outline = paving.points.map(([x, , z]) => [x, z]);
+      const paths = (connections.get(plan.id) ?? []).filter(path => [path.route[0], path.route.at(-1)]
+        .some(node => node.position[1] < 0.2 && pointInShape([node.position[0], node.position[2]], outline)));
+      const cuts = [...porchCuts, ...paths.map(path => path.rpg.walkableFloors[0].footprint.points), ...prior];
+      paving.polygons = cuts.length ? polygonClipping.difference([outline], ...cuts.map(c => [c])) : [[outline]];
+      paving.connectedTo = paths.map(path => path.id).sort();
+      prior.push(outline);
+    }
+    return resolved;
+  });
+}
 
 export function resolveShapeGrounding(plan) {
   const p = plan.primitive, paving = [], masks = [];
@@ -57,20 +83,5 @@ export function buildShapeGrounding(plan, meshes, recipe) {
     }
   }
   const pavingMesh = clipShapeMeshSet(meshes, plan, { roofs: false }).trim;
-  for (const paving of plan.ground.paving) {
-    const [a, b, c, d] = paving.points, across = Math.max(2, Math.ceil(Math.hypot(b[0] - a[0], b[2] - a[2]) / 0.42));
-    const rows = recipe.detail >= 2 ? 5 : 1;
-    const point = (u, v) => a.map((n, k) => n + (b[k] - n) * u + (d[k] - n) * v);
-    for (let row = 0; row < rows; row++) for (let col = 0; col < across; col++) {
-      const gap = recipe.detail >= 2 ? 0.01 : 0;
-      const quad = [point(col / across + gap, row / rows + gap), point((col + 1) / across - gap, row / rows + gap),
-        point((col + 1) / across - gap, (row + 1) / rows - gap), point(col / across + gap, (row + 1) / rows - gap)];
-      for (const v of quad) v[1] = 0.035 + p.elevation;
-      const v = 0.72 + shapeRandom(recipe.seed, p.id, 'entrance-stone', `${paving.id}:${row}:${col}`) * 0.2;
-      // Orientation is independent of wall winding.
-      const crossY = (quad[1][2] - quad[0][2]) * (quad[2][0] - quad[0][0]) - (quad[1][0] - quad[0][0]) * (quad[2][2] - quad[0][2]);
-      pavingMesh.quad(...(crossY > 0 ? quad : quad.toReversed()), [v, v, v * 0.95]);
-    }
-    void c;
-  }
+  for (const paving of plan.ground.paving) buildShapePaving(paving, pavingMesh, recipe, p);
 }

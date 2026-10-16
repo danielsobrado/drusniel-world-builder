@@ -27,7 +27,13 @@ import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
 import { advancePlantSway } from './plantSway.js';
 import { contactShadeRadius, paintContactShade, resolveContactShade } from './contactShade.js';
-import { FOREST_FLOOR_CANOPY_SAMPLES, writeForestFloorCanopy } from './forestFloorTexture.js';
+import {
+  FOREST_FLOOR_CANOPY_SAMPLES,
+  writeForestFloorCanopy,
+  writeForestFloorLitter,
+} from './forestFloorTexture.js';
+import { createForestDensitySampler } from './forest/ForestFloor.js';
+import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover } from '../world/GrassPatchiness.js';
 import { isLandStreamingSuspended } from '../water/underwaterState.js';
 import {
   GRASS_BLADE_SEGMENTS,
@@ -872,6 +878,7 @@ export class StylizedSurfaceView {
           return habitat.patchCoverage * habitat.suitability * 1.35;
         },
       });
+      this.paintForestLitter(terrainSlot, descriptor, field);
       this.paintContactShade(terrainSlot, descriptor);
       terrainSlot.forestFloorTexture.needsUpdate = true;
       terrainSlot.forestFloorKey = key;
@@ -880,6 +887,43 @@ export class StylizedSurfaceView {
       // per frame so chunk streaming cannot trigger an unbounded rebuild burst.
       return;
     }
+  }
+
+  /**
+   * Bare litter between the canopy's grass islands, in the ground texture's
+   * third channel. It reads the same grass density and island field the meadow
+   * sampler thins stems with, so soil shows exactly where the blades are not.
+   */
+  paintForestLitter(terrainSlot, descriptor, field) {
+    const density = createForestDensitySampler({
+      descriptor,
+      field,
+      kind: 'grass',
+      config: this.config.trees?.forestFloor,
+      chunkWorldSize: this.chunkWorldSize,
+    });
+    if (!density) return;
+    const size = terrainSlot.forestFloorSize;
+    const texel = this.chunkWorldSize / size;
+    const half = this.chunkWorldSize * 0.5;
+    const tileSize = this.terrainView.worldStore.tileSize;
+    const seed = (this.terrainView.worldStore.generator?.toMetadata?.().seed ?? 0) ^ CANOPY_FLOOR_PATCH_SALT;
+    writeForestFloorLitter({
+      pixels: terrainSlot.forestFloorPixels,
+      size,
+      bareAt: (x, z) => {
+        const localX = (x + 0.5) * texel - half;
+        const localZ = half - (z + 0.5) * texel;
+        const floor = density(localX, localZ);
+        if (floor >= 1) return 0;
+        return 1 - grassPatchCover(
+          (descriptor.centerWorldX + localX) / tileSize,
+          -(descriptor.centerWorldZ + localZ) / tileSize,
+          floor,
+          seed,
+        );
+      },
+    });
   }
 
   /**

@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import { shapeLocator } from './workshopShapeControls.mjs';
+
+export async function checkWorkshopShapeInspector({ page, report, preset, settle }) {
+  await preset(page, 'rounded-cottage');
+  const context = name => page.locator(`[data-inspector-context="${name}"]`);
+  await context('roof').click();
+  assert.equal(await page.locator('[data-shape-number="roof-rise"]').isVisible(), true);
+  assert.equal(await page.locator('[data-shape-number="width"]').isVisible(), false);
+  await context('opening').click();
+  await shapeLocator(page, '[data-shape-action="opening"]').selectOption('window-front');
+  const before = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.session.history.undoDepth);
+  const number = page.locator('[data-shape-number="opening-width"]');
+  await number.fill('1.15'); await number.press('Tab'); await settle(page);
+  let state = await page.evaluate(() => { const e = window.__editor.proceduralWorkshop.shapeBridge.editor;
+    return { width: e.primitive.openings.find(o => o.id === 'window-front').width, history: e.session.history.undoDepth }; });
+  assert.equal(state.width, 1.15); assert.equal(state.history, before + 1);
+  await number.focus(); await number.press('Shift+ArrowUp'); await number.press('Tab'); await settle(page);
+  state = await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.primitive.openings.find(o => o.id === 'window-front').width);
+  assert.equal(state, 1.155);
+  await number.fill('1.7'); await number.press('Escape'); await number.press('Tab'); await settle(page);
+  assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.primitive.openings.find(o => o.id === 'window-front').width), 1.155);
+  report.assertions.push('Context tabs, exact numeric dimensions, fine keyboard increments and Escape cancellation use semantic history.');
+  await context('details').click();
+  await page.locator('[data-shape-field="chimney"]').uncheck(); await settle(page);
+  const craft = await page.evaluate(() => { const e = window.__editor.proceduralWorkshop.shapeBridge.editor;
+    return e.resolvedPlans.get(e.primitive.id).decorations.map(d => d.role); });
+  assert.ok(!craft.includes('chimney') && craft.includes('window-box'));
+  await shapeLocator(page, '[data-shape-action="undo"]').click(); await settle(page);
+  await preset(page, 'courtyard-pavilion'); await context('details').click();
+  await page.locator('[data-shape-field="interior"]').selectOption('paving'); await settle(page);
+  assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.resolvedPlans.get('pavilion').interior.bench), null);
+  await page.locator('[data-shape-field="interior"]').selectOption('bench'); await settle(page);
+  await shapeLocator(page, '[data-shape-action="detail-select"]').selectOption('detail:pavilion:interior-bench');
+  await shapeLocator(page, '[data-shape-action="detail-suppress"]').click(); await settle(page);
+  assert.equal(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.resolvedPlans.get('pavilion').interior.bench), null);
+  await shapeLocator(page, '[data-shape-action="detail-reset"]').click(); await settle(page);
+  assert.ok(await page.evaluate(() => window.__editor.proceduralWorkshop.shapeBridge.editor.resolvedPlans.get('pavilion').interior.bench));
+  report.assertions.push('Chimneys, planting and interior finishes have independent controls; generated benches can be hidden and reset.');
+}

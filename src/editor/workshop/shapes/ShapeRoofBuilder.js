@@ -5,6 +5,7 @@ import { buildShapeRoofCraft } from './ShapeRoofCraft.js';
 import { buildShapeRoofJunctions } from './ShapeRoofJunctionBuilder.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
 import { shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
+import { buildShapeProfileRail } from './ShapeProfileRail.js';
 
 // Overhangs show boarded sarking from below; bare slate there reads as a hole in the roof.
 const SOFFIT_TONE = Object.freeze([0.78, 0.74, 0.7]);
@@ -63,10 +64,9 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
       if (surface.wall.clockwise) core.quad(a, b, c, d, coreTone);
       else core.quad(d, c, b, a, coreTone);
     }
-    const edgeA = surface.point(u0, 1),
-      edgeB = surface.point(u1, 1);
-    meshes.trim.beam(edgeA, edgeB, 0.1, 0.12, [0.8, 0.8, 0.8]);
   }
+  buildShapeProfileRail(meshes.trim, t => surface.point(t * length, 1), length, 0.1, 0.12,
+    recipe.detail, [0.8, 0.8, 0.8], { closed: true, step: recipe.detail >= 2 ? 0.32 : 0.55 });
   buildShapeRoofCraft(plan, meshes, recipe, surface, hidden);
   if (recipe.detail >= 2 && p.roof.family !== 'flat') buildShapeRoofTiles(plan, meshes.roof, surface, recipe, () => false);
   buildShapeRoofJunctions(plan, meshes.flashing, surface);

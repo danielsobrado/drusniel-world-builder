@@ -1,3 +1,4 @@
+import { shapeLocator } from './lib/workshopShapeControls.mjs';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import net from 'node:net';
@@ -13,6 +14,9 @@ import { checkWorkshopShapeReview } from './lib/workshopShapesReviewChecks.mjs';
 import { checkWorkshopShapePolish } from './lib/workshopShapesPolishChecks.mjs';
 import { checkWorkshopShapeExpansion } from './lib/workshopShapesExpansionChecks.mjs';
 import { checkWorkshopShapeBalconies } from './lib/workshopShapesBalconyChecks.mjs';
+import { checkWorkshopShapeInspector } from './lib/workshopShapesInspectorChecks.mjs';
+import { checkWorkshopShapeResponsiveness } from './lib/workshopShapesResponsivenessChecks.mjs';
+import { workshopReviewSource } from './lib/workshopReviewManifest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'tmp', 'workshop-shapes-qa');
@@ -42,13 +46,15 @@ async function settle(page) {
   await page.waitForFunction(() => {
     const ui = window.__editor.proceduralWorkshop;
     return (
-      !ui.previewTimer &&
+      ui.status.classList.contains('is-error') || (!ui.previewTimer &&
       ui.completedPlanRevision === ui.planRevision &&
       ui.shapeBridge.preview?.groups.size > 0 &&
       ui.status.textContent.startsWith('Final preview') &&
-      !ui.status.classList.contains('is-error')
+      !ui.status.classList.contains('is-error'))
     );
   });
+  const failure = await page.evaluate(() => { const s = window.__editor.proceduralWorkshop.status; return s.classList.contains('is-error') ? s.textContent : null; });
+  if (failure) throw new Error(failure);
   // Allow the renderer to submit and present the new buffers.
   await page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
@@ -56,12 +62,12 @@ async function settle(page) {
 }
 
 async function preset(page, id) {
-  await page.locator('[data-shape-action="preset"]').selectOption(id);
+  await shapeLocator(page, '[data-shape-action="preset"]').selectOption(id);
   await settle(page);
 }
 
 async function field(page, name, value) {
-  await page.locator(`[data-shape-field="${name}"]`).evaluate((element, v) => {
+  await shapeLocator(page, `[data-shape-field="${name}"]`).evaluate((element, v) => {
     element.value = String(v);
     element.dispatchEvent(new Event('input', { bubbles: true }));
     element.dispatchEvent(new Event('change', { bubbles: true }));
@@ -85,6 +91,7 @@ async function handlePoint(page, fieldName) {
 }
 
 try {
+  report.source = await workshopReviewSource(root);
   server = spawn(process.execPath, [path.join(root, 'scripts/lib/workshopShapesQaServer.mjs'), String(port)],
     { cwd: root, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   let serverError;
@@ -126,7 +133,7 @@ try {
     waitUntil: 'domcontentloaded',
   });
   await page.waitForFunction(() => window.__editor?.proceduralWorkshop);
-  await page.locator('[data-tool="workshop"]').click();
+  await shapeLocator(page, '[data-tool="workshop"]').click();
   await page.waitForFunction(() =>
     window.__editor.proceduralWorkshop.status.textContent.startsWith('Final preview'),
   );
@@ -159,7 +166,7 @@ try {
   assert.equal(report.renderer.webgpu, true, 'QA requires the actual renderer to use WebGPU.');
   assert.ok(report.renderer.vendor, 'QA requires adapter information from the renderer device.');
   assert.doesNotMatch(JSON.stringify(report.renderer), /swiftshader|lavapipe|llvmpipe|microsoft basic|warp/i);
-  await page.locator('select[name="archetype"]').selectOption('composition');
+  await shapeLocator(page, 'select[name="archetype"]').selectOption('composition');
   await settle(page);
   for (const item of SHAPE_PRESETS) {
     await preset(page, item.id);
@@ -182,7 +189,7 @@ try {
   }
 
   await preset(page, 'garden-gateway');
-  await page.locator('[data-shape-action="select"]').selectOption('garden-wall');
+  await shapeLocator(page, '[data-shape-action="select"]').selectOption('garden-wall');
   const gateState = () =>
     page.evaluate(() => {
       const editor = window.__editor.proceduralWorkshop.shapeBridge.editor;
@@ -196,31 +203,31 @@ try {
     });
   assert.equal((await gateState()).auto, 1);
   assert.equal((await gateState()).authored, 0);
-  await page.locator('[data-shape-action="hide-gate"]').click();
+  await shapeLocator(page, '[data-shape-action="hide-gate"]').click();
   await settle(page);
   assert.equal((await gateState()).auto, 0);
-  await page.locator('[data-shape-action="undo"]').click();
+  await shapeLocator(page, '[data-shape-action="undo"]').click();
   await settle(page);
   assert.equal((await gateState()).auto, 1);
   report.assertions.push('Generated path gates remain derived and can be hidden and undone.');
-  await page.locator('[data-shape-action="pin-gate"]').click();
+  await shapeLocator(page, '[data-shape-action="pin-gate"]').click();
   await settle(page);
   assert.equal((await gateState()).authored, 1);
   assert.ok((await gateState()).promotedFrom);
-  await page.locator('[data-shape-action="select"]').selectOption('garden-path');
+  await shapeLocator(page, '[data-shape-action="select"]').selectOption('garden-path');
   await field(page, 'x', 10);
-  await page.locator('[data-shape-action="select"]').selectOption('garden-wall');
+  await shapeLocator(page, '[data-shape-action="select"]').selectOption('garden-wall');
   assert.equal((await gateState()).authored, 1);
   assert.equal((await gateState()).auto, 0);
   report.assertions.push(
     'Keeping a generated gate makes an editable opening that survives moving the path.',
   );
   await preset(page, 'garden-gateway');
-  await page.locator('[data-shape-action="select"]').selectOption('garden-wall');
-  await page.locator('[data-shape-field="automaticGates"]').uncheck();
+  await shapeLocator(page, '[data-shape-action="select"]').selectOption('garden-wall');
+  await shapeLocator(page, '[data-shape-field="automaticGates"]').uncheck();
   await settle(page);
   assert.equal((await gateState()).auto, 0);
-  await page.locator('[data-shape-field="automaticGates"]').check();
+  await shapeLocator(page, '[data-shape-field="automaticGates"]').check();
   await settle(page);
   assert.equal((await gateState()).auto, 1);
   report.assertions.push(
@@ -239,9 +246,9 @@ try {
       );
     });
   const facadeBefore = await facadeBuffers();
-  await page.locator('[data-shape-field="facade"]').selectOption('timber');
+  await shapeLocator(page, '[data-shape-field="facade"]').selectOption('timber');
   await settle(page);
-  await page.locator('[data-shape-field="shutters"]').uncheck();
+  await shapeLocator(page, '[data-shape-field="shutters"]').uncheck();
   await settle(page);
   assert.deepEqual(await facadeBuffers(), facadeBefore);
   report.assertions.push(
@@ -303,7 +310,7 @@ try {
     dragged > original + 0.2,
     'Dragging the height handle must reshape the canonical volume.',
   );
-  await page.locator('[data-shape-action="undo"]').click();
+  await shapeLocator(page, '[data-shape-action="undo"]').click();
   await settle(page);
   assert.equal(
     await page.evaluate(
@@ -311,7 +318,7 @@ try {
     ),
     original,
   );
-  await page.locator('[data-shape-action="redo"]').click();
+  await shapeLocator(page, '[data-shape-action="redo"]').click();
   await settle(page);
   assert.equal(
     await page.evaluate(
@@ -336,13 +343,13 @@ try {
     'Pointer reshaping commits one undoable edit; Escape restores the prior shape.',
   );
 
-  await page.locator('[data-shape-action="add-arch"]').click();
+  await shapeLocator(page, '[data-shape-action="add-arch"]').click();
   await settle(page);
   await field(page, 'opening-at', 0.85);
-  await page.locator('[data-shape-action="remove-opening"]').click();
+  await shapeLocator(page, '[data-shape-action="remove-opening"]').click();
   await settle(page);
   report.assertions.push('Opening authoring, movement, and removal update the preview.');
-  await page.locator('[data-workshop-action="material"]').click();
+  await shapeLocator(page, '[data-workshop-action="material"]').click();
   const roofPoint = await page.evaluate(() => {
     const ui = window.__editor.proceduralWorkshop;
     const rect = ui.renderer.domElement.getBoundingClientRect();
@@ -361,9 +368,9 @@ try {
   await page.waitForFunction(
     () => window.__editor.proceduralWorkshop.materialController.palette.isOpen,
   );
-  await page.locator('.radial-palette--workshop [data-radial-item]').first().click();
+  await shapeLocator(page, '.radial-palette--workshop [data-radial-item]').first().click();
   await settle(page);
-  await page.locator('[data-workshop-action="material"]').click();
+  await shapeLocator(page, '[data-workshop-action="material"]').click();
   assert.ok(
     await page.evaluate(
       () =>
@@ -371,7 +378,7 @@ try {
     ),
   );
   report.assertions.push('The existing area material inspector assigns a finish to the new roof.');
-  await page.locator('.workshop-bake').click();
+  await shapeLocator(page, '.workshop-bake').click();
   const baked = await page.evaluate(() => {
     const ui = window.__editor.proceduralWorkshop;
     return {
@@ -395,7 +402,7 @@ try {
   await settle(page);
   assert.equal(saved.restored, saved.expected);
   report.assertions.push('Runtime restoration preserves the semantic composition.');
-  await page.locator('select[name="archetype"]').selectOption('manor');
+  await shapeLocator(page, 'select[name="archetype"]').selectOption('manor');
   await page.waitForFunction(() => {
     const ui = window.__editor.proceduralWorkshop;
     return (
@@ -404,7 +411,7 @@ try {
       ui.status.textContent.startsWith('Final preview')
     );
   });
-  await page.locator('select[name="archetype"]').selectOption('composition');
+  await shapeLocator(page, 'select[name="archetype"]').selectOption('composition');
   await settle(page);
   assert.equal(
     await page.evaluate(() =>
@@ -417,10 +424,9 @@ try {
     await import('/src/editor/workshop/WorkshopRadialMenus.js');
   });
   await page.waitForSelector('[data-role="workshop-radial-menus"]');
-  assert.equal(await page.locator('[data-shape-action="preset"]').isVisible(), true);
+  assert.equal(await shapeLocator(page, '[data-shape-action="preset"]').isVisible(), true);
   assert.equal(
-    await page
-      .locator('[data-radial-lane="archetype"][data-radial-item="composition"]')
+    await shapeLocator(page, '[data-radial-lane="archetype"][data-radial-item="composition"]')
       .isVisible(),
     true,
   );
@@ -432,8 +438,12 @@ try {
   await checkWorkshopShapePolish({ page, report, preset, settle, output });
   await checkWorkshopShapeExpansion({ page, report, preset, settle, field, output, handlePoint });
   await checkWorkshopShapeBalconies({ page, report, preset, settle, field, output, handlePoint });
+  await checkWorkshopShapeInspector({ page, report, preset, settle });
+  await checkWorkshopShapeResponsiveness({ page, report, preset, settle, handlePoint });
   assert.deepEqual(report.pageErrors, []);
   assert.deepEqual(report.consoleErrors, []);
+  report.sourceAfter = await workshopReviewSource(root);
+  assert.equal(report.source.hash, report.sourceAfter.hash, 'Workshop source changed during QA; repeat this run.');
   let previousIds = new Set();
   try {
     const previous = JSON.parse(
