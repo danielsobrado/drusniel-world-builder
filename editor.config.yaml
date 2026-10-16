@@ -385,6 +385,7 @@ stylizedSurface:
         species: conifer_wide
         scale: 1
         preferredTileIds: [9]
+        leafGain: 2
       # Two more distinct conifer crowns from the same pack, 630 and 624
       # triangles. Verified distinct rather than transforms of tree-wide-01.
       - scene: /assets/trees/forest-pack/tree-wide-02.glb
@@ -393,18 +394,27 @@ stylizedSurface:
         species: conifer_wide
         scale: 1
         preferredTileIds: [9]
+        leafGain: 2
       - scene: /assets/trees/forest-pack/tree-wide-03.glb
         trunkMaterial: Tree_Trunk_01
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
         preferredTileIds: [9]
+        leafGain: 2
       - scene: /assets/trees/forest-pack/tree-narrow-01.glb
         trunkMaterial: Tree_Trunk_02
         leafMaterial: Tree_Branches_02
         species: conifer_narrow
         scale: 1
         preferredTileIds: [9]
+        # The forest-pack crowns tile a small leaf texture ~16x per card, so
+        # they read as the texture's average: grey sage (wide) and brown
+        # (narrow), ~0.05 linear luminance, under the canopy grade's dark-texel
+        # guard and kept their raw hue. Brightened they take the shared green
+        # ramp; the wide crowns at 2x stay a darker taiga green, the brown
+        # narrow one needs 3x to lose its brown.
+        leafGain: 3
       # Two genuinely distinct tree geometries extracted from the 42.8 MB whole
       # scene. Its other placements remain saved as individual offline GLBs.
       # These two carry every broadleaf species. `species` is a list because one

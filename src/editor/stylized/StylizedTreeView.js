@@ -327,6 +327,7 @@ export class StylizedTreeView {
         scale: definition.scale,
         authoredBarkTextures,
         authoredBarkScale: definition.barkScale,
+        leafGain: definition.leafGain,
         prototypeGroups: definition.prototypeGroups,
         sourceLabel: `Tree variant ${definition.scene}`,
         pivot: definition.pivot,
@@ -398,6 +399,7 @@ export class StylizedTreeView {
       scale = 1,
       authoredBarkTextures = null,
       authoredBarkScale = 0.8,
+      leafGain = 1,
       prototypeGroups = null,
       sourceLabel = 'Tree prototype',
       pivot = 'bounds',
@@ -452,6 +454,7 @@ export class StylizedTreeView {
               config: this.config,
               preserveSourceColor: preserveSourceAppearance,
               vertexColor: Boolean(part.geometry.getAttribute('color')),
+              leafGain,
             })
             : (preserveSourceAppearance
               ? createAuthoredTrunkMaterial({

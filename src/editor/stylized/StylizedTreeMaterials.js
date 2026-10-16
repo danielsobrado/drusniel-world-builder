@@ -61,6 +61,11 @@ export function createStylizedLeafMaterial({
   alphaTest = 0,
   preserveSourceColor = false,
   vertexColor = false,
+  // Brightens an authored leaf texture before the canopy grade reads it. A dark
+  // atlas falls under the grade's dark-texel guard and keeps its raw hue — the
+  // forest-pack narrow conifer's brown leaf cards stayed brown and, under
+  // foliage lighting and haze, read as pale cream columns in the taiga.
+  leafGain = 1,
 }) {
   registerTreeWindTime(config, time);
   // Height within the crown from the prototype's own geometry: `positionLocal`
@@ -89,7 +94,7 @@ export function createStylizedLeafMaterial({
   let authoredColor = null;
   if (preserveSourceColor && map) {
     authoredColor = gradeCanopy(
-      authoredTexture(map).rgb.mul(colorNode(source?.color ?? '#ffffff')),
+      authoredTexture(map).rgb.mul(colorNode(source?.color ?? '#ffffff')).mul(leafGain),
       resolveCanopyGrade(config.trees?.canopyGrade),
     );
   } else if (preserveSourceColor && vertexColor) {

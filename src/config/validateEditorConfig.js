@@ -730,6 +730,10 @@ function validateStylizedSurface(config) {
     ) {
       throw new Error(`Invalid editor configuration: ${path}.barkScale must be positive.`);
     }
+    if (variant.leafGain !== undefined
+        && (!Number.isFinite(variant.leafGain) || variant.leafGain <= 0 || variant.leafGain > 8)) {
+      throw new Error(`Invalid editor configuration: ${path}.leafGain must be in (0, 8].`);
+    }
     if (variant.barkSeed !== undefined && !Number.isSafeInteger(variant.barkSeed)) {
       throw new Error(`Invalid editor configuration: ${path}.barkSeed must be a safe integer.`);
     }
