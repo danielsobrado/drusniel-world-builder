@@ -1,3 +1,5 @@
+import { evaluateGrassCoverage, GRASS_RECOVERY_TARGET_MS } from './grass-coverage-gates.mjs';
+
 export const PERF_MATRIX_MAX_P95_MS = 33.3;
 export const PERF_MATRIX_MAX_HITCH_RATE = 0.02;
 
@@ -87,6 +89,9 @@ export function evaluatePerfMatrix(
         continue;
       }
       addCaseFailures(entry, failures);
+      if (entry.report?.density?.grassSystem === 'meadow') {
+        for (const failure of evaluateGrassCoverage(entry.report).failures) failures.push(`${id}: ${failure}`);
+      }
       const expectedProfile = id === 'construction-ring' ? 'standard' : id;
       if (entry.report?.scenario?.densityProfile !== expectedProfile) {
         failures.push(
@@ -138,6 +143,7 @@ export function evaluatePerfMatrix(
     passed: failures.length === 0,
     maximumP95Ms: PERF_MATRIX_MAX_P95_MS,
     maximumHitchRate: PERF_MATRIX_MAX_HITCH_RATE,
+    maximumGrassRecoveryMs: GRASS_RECOVERY_TARGET_MS,
     failures: Object.freeze(failures),
   });
 }

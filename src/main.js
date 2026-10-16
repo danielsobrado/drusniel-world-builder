@@ -1538,6 +1538,18 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     deferredWork.beginFrame();
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
     drawPreparation.beginFrame(deferredWork);
+    // Terrain pages unblock collision and scenery dependencies. Spend their
+    // existing shared allowance before optional preparation can consume its floor.
+    if (terrainView.commitQueue.size > 0) {
+      const commitBudgetMs = deferredWork.available(terrainView.commitQueue.commitBudgetMs);
+      if (commitBudgetMs > 0) {
+        deferredWork.run(() => terrainView.flushUploadQueue({
+          maxCommits: terrainView.adaptiveCommitBudget(),
+          budgetMs: commitBudgetMs,
+        }));
+      }
+    }
+    if (profiling) perfQa.mark('terrainCommit');
     exploration.beforeMovement(frameTimestamp);
     // Optional roadside dressing gets one budget-gated turn near the start of the frame.
     // Its own revision gate makes unchanged frames effectively free.
@@ -1558,15 +1570,6 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       nextFrameRateDisplayAt = frameTimestamp + FRAME_RATE_DISPLAY_INTERVAL_MS;
     }
 
-    if (terrainView.commitQueue.size > 0) {
-      const commitBudgetMs = deferredWork.available(terrainView.commitQueue.commitBudgetMs);
-      if (commitBudgetMs > 0) {
-        deferredWork.run(() => terrainView.flushUploadQueue({
-          maxCommits: terrainView.adaptiveCommitBudget(),
-          budgetMs: commitBudgetMs,
-        }));
-      }
-    }
     constructionView.updateLod(viewModeController.camera, terrainView.viewportHeight);
     const constructionBudgetMs = constructionView.buildQueue.length > 0
       ? deferredWork.available(Number.POSITIVE_INFINITY)
@@ -1588,7 +1591,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     PerfCounters.set('constructionModulesCoarse', constructionView.stats.modulesCoarse);
     PerfCounters.set('constructionModulesShell', constructionView.stats.modulesShell);
     PerfCounters.set('constructionLodTransitions', constructionView.stats.lodTransitions);
-    if (profiling) perfQa.mark('terrainCommit');
+    if (profiling) perfQa.mark('construction');
 
     if (import.meta.env.DEV) window.__worldVisualQa?.beforeMovement(frameTimestamp);
     viewModeController.update(frameTimestamp);

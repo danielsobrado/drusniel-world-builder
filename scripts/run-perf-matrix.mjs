@@ -38,6 +38,7 @@ function reportSummary(report) {
     summary: report.summary,
     collision: report.collision,
     preparation: report.preparation,
+    recovery: report.recovery,
     sceneryUpdateCpu: report.sceneryUpdateCpu,
     adapter: report.adapter,
     capture: report.capture,
@@ -67,6 +68,9 @@ function reportSummary(report) {
         report.counters?.constructionModulesResident ?? 0,
       constructionStones: report.counters?.constructionStones ?? 0,
       attributeBytesUploaded: report.counters?.attributeBytesUploaded ?? 0,
+      meadowInViewMissingTiles: report.counters?.meadowInViewMissingTiles,
+      meadowInViewCapacityLagTiles: report.counters?.meadowInViewCapacityLagTiles,
+      meadowWorkerFailures: report.counters?.meadowWorkerFailures ?? 0,
     },
   };
 }
@@ -102,6 +106,8 @@ for (const entry of waterOnly ? [] : cases) {
     '--duration', duration,
     '--warmup', warmup,
     '--settle',
+    '--drain-seconds', '20',
+    '--grass-diagnostics',
     '--viewportWidth', viewportWidth,
     '--viewportHeight', viewportHeight,
     '--out', outPath,

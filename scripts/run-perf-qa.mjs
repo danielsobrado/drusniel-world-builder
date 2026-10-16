@@ -334,14 +334,23 @@ const fs = require('fs');
         const start = surface.getPreparationStatus();
         let readyFrames = 0;
         let firstReadyMs = null;
+        let grassReadyFrames = 0;
+        let grassFirstReadyMs = null;
         while (performance.now() - started < seconds * 1000 && readyFrames < 60) {
           await new Promise(resolve => requestAnimationFrame(resolve));
+          const missing = PerfCounters.get('meadowInViewMissingTiles');
+          const lag = PerfCounters.get('meadowInViewCapacityLagTiles');
+          if (missing === 0 && lag === 0) {
+            grassFirstReadyMs ??= performance.now() - started;
+            grassReadyFrames++;
+          } else { grassReadyFrames = 0; grassFirstReadyMs = null; }
           if (surface.getPreparationStatus().ready) {
             firstReadyMs ??= performance.now() - started;
             readyFrames++;
           } else { readyFrames = 0; firstReadyMs = null; }
         }
         return { ready: readyFrames >= 60, firstReadyMs,
+          grass: { ready: grassReadyFrames >= 60, firstReadyMs: grassFirstReadyMs },
           waitedMs: performance.now() - started, start,
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
     }, ${drainSeconds});

@@ -1,7 +1,8 @@
 import * as THREE from 'three/webgpu';
-import { uniform, uniformArray, vec3 } from 'three/tsl';
-
+import { vec3 } from 'three/tsl';
+import { frameUniform as uniform, frameUniformArray as uniformArray } from '../../../render/FrameUniforms.js';
 import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
+
 
 /**
  * The meadow's shared uniforms: one set for every band's batch, written once a

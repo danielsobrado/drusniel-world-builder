@@ -1,5 +1,4 @@
 import { meadowPageTileCapacity, MeadowBandBatch } from './MeadowBandBatch.js';
-import { MeadowStableBandBatch } from './MeadowStableBandBatch.js';
 
 /** Keep tile assignments stable and bound the buffers affected by an update. */
 class MeadowBandPages {
@@ -80,10 +79,8 @@ export class MeadowGrassBatches {
   constructor({ scene, templates, material, name, renderOrder = 0, boundsPadding = null }) {
     this.batches = new Map();
     this.members = new Map();
-    const familyStride = Math.max(1, ...Object.values(templates).map(template => template.instanceCount));
-    const Batch = familyStride > 16384 ? MeadowBandPages : MeadowStableBandBatch;
     for (const [band, template] of Object.entries(templates)) {
-      this.batches.set(band, new Batch({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding }));
+      this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding }));
       this.members.set(band, []);
     }
   }

@@ -175,7 +175,7 @@ test('dense meadow pages keep allocation below one large tile plus the stem ceil
   assert.equal(band.slots.get(tiles[2]), band.pages[2], 'a retained tile does not move or rewrite its buffer');
 });
 
-test('sparse meadow retirement and slot reuse leave neighboring stems resident', t => {
+test('sparse pages draw only surviving stems after retirement and slot reuse', t => {
   const f = fixture(t, { dense: false });
   const a = f.tile(7), b = f.tile(5);
   b.output.position.fill(5);
@@ -183,27 +183,18 @@ test('sparse meadow retirement and slot reuse leave neighboring stems resident',
   b.output.data.fill(7);
   f.commit([a, b]);
   f.flush();
-  const band = f.batches.batches.get('low');
-  const slot = band.slots.get(b).index;
-  const versions = f.attributes.slice(1).map(attribute => attribute.version);
   f.commit([b]);
-  assert.equal(band.slots.get(b).index, slot);
-  assert.deepEqual(f.attributes.slice(1).map(attribute => attribute.version), versions);
-  assert.deepEqual(f.attributes[0].updateRanges, [{ start: 0, count: 28 }]);
   f.flush();
-  for (let i = 0; i < 7; i += 1) {
-    assert.equal(f.uploaded[0][i * 4], 1e7);
-    assert.equal(f.uploaded[0][i * 4 + 3], 0);
-  }
-  assert.deepEqual(f.uploaded[0].subarray(slot * 16 * 4, slot * 16 * 4 + 20), b.output.position);
+  assert.equal(f.geometry.instanceCount, 5, 'retired slots and unused tails never enter the draw');
+  assert.deepEqual(f.uploaded[0].subarray(0, 20), b.output.position);
   const c = f.tile(4);
   f.commit([b, c]);
-  assert.equal(band.slots.get(c).index, 0);
   f.flush();
-  assert.deepEqual(f.uploaded[2].subarray(0, 16), c.output.data);
+  assert.equal(f.geometry.instanceCount, 9);
+  assert.deepEqual(f.uploaded[2].subarray(5 * 4, 9 * 4), c.output.data);
 });
 
-test('sparse meadow density shrink retires tails and rebases upload metadata alone', t => {
+test('sparse page density shrink and rebase retain exact populated data', t => {
   const f = fixture(t, { dense: false });
   const tile = f.tile(7);
   f.commit([tile]);
@@ -212,17 +203,17 @@ test('sparse meadow density shrink retires tails and rebases upload metadata alo
   tile.output = f.tile(3).output;
   f.commit([tile]);
   f.flush();
+  assert.equal(f.geometry.instanceCount, 3);
   assert.deepEqual(f.uploaded[0].subarray(0, 12), tile.output.position);
-  for (let i = 3; i < 7; i += 1) assert.equal(f.uploaded[0][i * 4 + 3], 0);
-  const versions = f.attributes.slice(0, 3).map(attribute => attribute.version);
+  const versions = f.attributes.slice(0, 3).map(a => a.version);
   tile.renderX -= 4096;
   f.commit([tile]);
-  assert.deepEqual(f.attributes.slice(0, 3).map(attribute => attribute.version), versions);
+  assert.deepEqual(f.attributes.slice(0, 3).map(a => a.version), versions);
   f.flush();
   assert.equal(f.uploaded[3][0], tile.renderX);
 });
 
-test('sparse meadow preserves pending writes and grows by replacing geometry bindings', t => {
+test('sparse growth adds bounded pages while retaining existing geometry and pending writes', t => {
   const f = fixture(t, { dense: false });
   const tiles = Array.from({ length: 33 }, () => f.tile(5));
   f.commit(tiles.slice(0, 2));
@@ -235,16 +226,18 @@ test('sparse meadow preserves pending writes and grows by replacing geometry bin
   f.commit(tiles.slice(0, 2));
   f.flush();
   assert.deepEqual(f.uploaded[0].subarray(0, 20), tiles[0].output.position);
-  assert.deepEqual(f.uploaded[0].subarray(64, 84), tiles[1].output.position);
+  assert.deepEqual(f.uploaded[0].subarray(20, 40), tiles[1].output.position);
   let disposed = 0;
   f.geometry.addEventListener('dispose', () => { disposed += 1; });
   f.commit(tiles);
   const band = f.batches.batches.get('low');
-  assert.notEqual(band.geometry, f.geometry);
-  assert.equal(disposed, 1);
-  assert.equal(band.geometry.instanceCount, 33 * 16);
+  assert.equal(band.pages[0].geometry, f.geometry);
+  assert.equal(disposed, 0);
+  assert.equal(band.pages.length, 9);
+  assert.equal(band.meshes.reduce((sum, mesh) => sum + mesh.geometry.instanceCount, 0), 33 * 5);
+  assert.ok(band.pages.every(page => page.geometry.getAttribute('instancePosition').count === 4 * 16));
   for (const tile of tiles) {
-    const start = band.slots.get(tile).index * 16 * 4;
-    assert.deepEqual(band.geometry.getAttribute('instancePosition').array.subarray(start, start + 20), tile.output.position);
+    const page = band.slots.get(tile), start = page.slots.get(tile).start * 4;
+    assert.deepEqual(page.geometry.getAttribute('instancePosition').array.subarray(start, start + 20), tile.output.position);
   }
 });

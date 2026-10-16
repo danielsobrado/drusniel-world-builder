@@ -63,12 +63,20 @@ export function createForestDensitySampler({
     }
   }
   if (uniform) return null;
-  return (localX, localZ) => bilinearSample(
-    densityGrid,
-    size,
+  return forestDensitySamplerFromGrid({ densityGrid, size, worldSize });
+}
+
+/** Serializable canopy data shared by main-thread and worker grass sampling. */
+export function forestDensitySamplerFromGrid(snapshot) {
+  const { densityGrid, size, worldSize } = snapshot;
+  const half = worldSize * 0.5;
+  const sampler = (localX, localZ) => bilinearSample(
+    densityGrid, size,
     clamp01((localX + half) / worldSize) * (size - 1),
     clamp01((half - localZ) / worldSize) * (size - 1),
   );
+  sampler.snapshot = snapshot;
+  return sampler;
 }
 
 export function filterScatterByForest({

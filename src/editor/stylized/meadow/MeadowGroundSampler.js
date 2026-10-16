@@ -1,35 +1,10 @@
 import { meadowPageGrowthKey } from './MeadowGrowthUpdates.js';
 import { createMeadowPathSampler } from './MeadowPathSampler.js';
-import { sampleSurfaceMaskChannel } from '../../world/SurfaceMaskSampling.js';
-import { acceptsMeadowHabitat } from './meadowHabitat.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
-import { sampleHeight } from '../scatterMath.js';
-import { hash2d } from './meadowGrassGeometry.js';
-import {
-  CANOPY_FLOOR_PATCH_SALT,
-  ecotoneJitter,
-  grassPatchCover,
-  grassStandDensity,
-} from '../../world/GrassPatchiness.js';
 
-/**
- * Cells a stem may reach across for the biome it grows as. Two biomes' grass
- * then interleaves across a few metres at their border — heights, silhouettes
- * and pigment mixing stem by stem — instead of switching at a cell edge.
- */
-const ECOTONE_REACH_CELLS = 0.9;
-
-/** Surface mask channels, as the terrain page bakes them (see SurfaceMaskNodes.js). */
-/** Below this strength a stem is not worth drawing: compaction drops it. */
-export const MIN_GRASS_STRENGTH = 0.02;
-
-function smoothstep(edge0, edge1, value) {
-  const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
-
-const sampleMask=(pixels,size,x,z,channel)=>sampleSurfaceMaskChannel(pixels,size,size,x,z,channel);
+import { createMeadowGroundSample } from './MeadowGroundSample.js';
+export { MIN_GRASS_STRENGTH } from './MeadowGroundSample.js';
 
 /**
  * The ground under the meadow grass: height, whether grass grows, and which
@@ -59,6 +34,7 @@ export class MeadowGroundSampler {
     for (const id of tileIds) this.eligible[id] = 1;
     this.shapeTable = shapeTable;
     this.growth=growth;
+    this.pathConfig = pathConfig;
     this.paths=createMeadowPathSampler(pathConfig);
     this.forestFieldProvider = forestFieldProvider;
     this.forestFloorConfig = forestFloorConfig;
@@ -217,69 +193,15 @@ export class MeadowGroundSampler {
     // Only the rocks that can reach this tile are tested per stem.
     const rocks = this.rocksNear(descriptor, centerX, centerZ, tileHalf);
     const flatten = this.rocks?.flatten ?? 0;
-    const pathResult={path:0,blocked:false};
-    const jitter={x:0,z:0};
-    const last=chunkSize-1;
-    const sample = (x, z, rank, out) => {
-      const localX = x / tileSize - descriptor.originCellX;
-      const localZ = -z / tileSize - descriptor.originCellZ;
-      if (localX < 0 || localZ < 0 || localX >= chunkSize || localZ >= chunkSize) return false;
-      if (!eligible[page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)]]) return false;
-      // The biome this stem grows as: a neighbour's, near a border (clamped to
-      // the page, so the read never depends on which chunks are resident).
-      ecotoneJitter(x, z, ECOTONE_REACH_CELLS, jitter);
-      const reachX = Math.min(last, Math.max(0, Math.floor(localX + jitter.x)));
-      const reachZ = Math.min(last, Math.max(0, Math.floor(localZ + jitter.z)));
-      const reached = page.tiles[reachZ * chunkSize + reachX];
-      const tile = eligible[reached] ? reached : page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)];
-      const coverage=mask?sampleMask(mask,chunkSize,localX,localZ,1):1;
-      // Thin biomes grow in islands: the same canonical field the surface mask
-      // bakes, read here at the live density so a Settings change thins the
-      // stand at once (the baked ground follows when its page rebuilds).
-      const biomeDensity=growth?growth.profiles[growth.table[tile]].density:1;
-      const density=growth
-        ?grassPatchCover(x/tileSize,-z/tileSize,biomeDensity,worldSeed)*grassStandDensity(x,z,biomeDensity,worldSeed)
-        :1;
-      if(!acceptsMeadowHabitat(x,z,worldSeed,coverage,density))return false;
-      let strength=.30+.70*coverage;
-      let path = 0;
-      if (mask) {
-        strength *= 1 - smoothstep(0.15, 0.6, sampleMask(mask, chunkSize, localX, localZ, 2));
-        path = sampleMask(mask, chunkSize, localX, localZ, 0);
-      }
-      const pathSample=this.paths.sample(x,z,coverage,path,pathResult);
-      if(pathSample.blocked)return false;
-      path=pathSample.path;
-      // Canopy suppression: a stem survives where its own roll is under the
-      // forest floor's grass density — gathered into islands and tussocks like
-      // any thin stand (its own field, so they do not echo the biome's), rather
-      // than an even speckle of blades over the woodland floor.
-      if (forest) {
-        const floor = forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ);
-        if (floor < 1) {
-          const keep = grassPatchCover(x / tileSize, -z / tileSize, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT)
-            * grassStandDensity(x, z, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT);
-          if (hash2d(rank, 91) >= keep) return false;
-        }
-      }
-      // Nothing grows under a rock; round its foot the stand is pressed flatter.
-      for (const rock of rocks) {
-        const distance = Math.hypot(x - rock.x, z - rock.z);
-        if (distance < rock.radius) return false;
-        if (distance < rock.reach) {
-          strength *= 1 - flatten * (1 - smoothstep(rock.radius, rock.reach, distance));
-        }
-      }
-      if (strength < MIN_GRASS_STRENGTH) return false;
-      out.height = sampleHeight(page, localX, localZ, chunkSize);
-      out.strength = strength;
-      out.shape = shapeTable[tile];
-      out.path = path;
-      return true;
+    const snapshot = {
+      page: { tiles: page.tiles, heights: page.heights, surfaceMaskPixels: mask },
+      descriptor, chunkSize, tileSize, eligible, shapeTable, growth, worldSeed, rocks, flatten,
+      pathConfig: this.pathConfig, forest: forest?.snapshot ?? null,
     };
+    const sample = createMeadowGroundSample(snapshot, { forest, paths: this.paths });
     // The same key `revisionAt` gives the tile, rocks included: a job whose
     // revision differs from its tile's is abandoned, so a mismatch here would
     // restart every build every frame.
-    return { sample, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}${this.growthKey(slot)}${this.paths.signature}` };
+    return { sample, snapshot, revision: `${descriptor.key}:${slot.pageRevision}:${this.rockSignature(descriptor)}${this.growthKey(slot)}${this.paths.signature}` };
   }
 }
