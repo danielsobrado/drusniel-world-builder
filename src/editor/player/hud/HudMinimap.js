@@ -29,10 +29,10 @@ const MARKUP = `
 /**
  * Heading-up minimap in the top-right corner while walking.
  *
- * It docks the editor's own minimap frame rather than drawing a second map:
- * EditorUi keeps rendering the bitmap and the settlement markers, and this
- * widget only frames it, keeps the player at the centre between redraws, and
- * hands the frame back when walking stops.
+ * It docks a minimap frame it does not draw — the nearby Azgaar map for
+ * imported worlds, otherwise the editor's own cell bitmap — and only frames it,
+ * keeps the player at the centre between redraws, and hands the frame back
+ * when walking stops.
  *
  * The bitmap is drawn with cell z growing downwards, which is the world's
  * top-down view flipped (cell z runs towards -Z). The dial therefore mirrors
@@ -42,14 +42,15 @@ const MARKUP = `
 export class HudMinimap {
   /**
    * @param {object} source
-   * @param {HTMLElement | null} source.frame the editor's `.minimap-frame`
+   * @param {() => HTMLElement | null} source.getFrame the `.minimap-frame` to dock, chosen per dock
    * @param {() => { center: { x: number, z: number }, cells: number }} source.getWindow
    * @param {(cell: { x: number, z: number }) => void} source.recenter
    * @param {() => { x: number, z: number } | null} source.getFocusPoint fractional cell
    * @param {(cellX: number, cellZ: number) => { label: string, color: string } | null} [source.describeCell]
    */
-  constructor({ frame = null, getWindow, recenter, getFocusPoint, describeCell = null }) {
-    this.frame = frame;
+  constructor({ getFrame, getWindow, recenter, getFocusPoint, describeCell = null }) {
+    this.getFrame = getFrame;
+    this.frame = null;
     this.getWindow = getWindow;
     this.recenter = recenter;
     this.getFocusPoint = getFocusPoint;
@@ -70,10 +71,13 @@ export class HudMinimap {
   }
 
   render(phase) {
-    const docked = phase === HUD_PHASE.walking && this.frame != null;
-    this.element.hidden = !docked;
-    if (docked) this.dock();
-    else this.undock();
+    if (phase !== HUD_PHASE.walking) {
+      this.element.hidden = true;
+      this.undock();
+      return;
+    }
+    this.dock();
+    this.element.hidden = !this.home;
   }
 
   update(heading, nowMs) {
@@ -90,20 +94,30 @@ export class HudMinimap {
 
   dock() {
     if (this.home) return;
+    this.frame = this.getFrame?.() ?? null;
+    if (!this.frame) return;
     this.home = { parent: this.frame.parentNode, next: this.frame.nextSibling };
     this.dial.prepend(this.frame);
     this.resetReadout();
+    // A freshly docked frame may still show another place (or nothing), so it
+    // is drawn around the player at once rather than on the next drift.
+    const point = this.getFocusPoint?.();
+    if (point && Number.isFinite(point.x) && Number.isFinite(point.z)) {
+      this.recenter({ x: Math.floor(point.x), z: Math.floor(point.z) });
+    }
   }
 
   undock() {
     if (!this.home) return;
     const { parent, next } = this.home;
+    const frame = this.frame;
     this.home = null;
+    this.frame = null;
     if (!parent) {
-      this.frame.remove();
+      frame.remove();
       return;
     }
-    parent.insertBefore(this.frame, next?.parentNode === parent ? next : null);
+    parent.insertBefore(frame, next?.parentNode === parent ? next : null);
   }
 
   resetReadout() {

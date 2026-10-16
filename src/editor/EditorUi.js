@@ -10,6 +10,7 @@ import {
   saveToBrowser,
 } from './storage.js';
 import { selectMinimapBurgs } from './map/minimapBurgs.js';
+import { createMinimapBurgElements } from './map/minimapBurgMarkers.js';
 import { normalizeSceneSettings } from './settings/SceneSettings.js';
 import { createPostProcessingSettingsPanel } from './settings/PostProcessingSettingsPanel.js';
 import { assetFileName, formatBytes, trackStreamingSettle } from './ui/loadingSources.js';
@@ -33,12 +34,6 @@ const CATEGORY_LABELS = Object.freeze({
   nature: 'Nature',
   workshop: 'Workshop',
 });
-
-function formatDistance(meters) {
-  return meters >= 1000
-    ? `${(meters / 1000).toFixed(meters >= 10000 ? 0 : 1)} km`
-    : `${Math.round(meters)} m`;
-}
 
 function categoryLabel(category) {
   return CATEGORY_LABELS[category] ?? category.replace(/^\w/, (first) => first.toUpperCase());
@@ -1919,29 +1914,7 @@ export class EditorUi {
       center: this.minimapCenter,
       cells: this.minimapCells,
     });
-    const tileSize = this.tileMap?.tileSize ?? 1;
-    this.minimapBurgs.replaceChildren(...markers.map((marker) => {
-      const element = document.createElement('span');
-      element.className = 'minimap-burg';
-      element.classList.toggle('is-capital', marker.capital);
-      element.classList.toggle('is-offscreen', marker.offscreen);
-      element.style.left = `${marker.u * 100}%`;
-      element.style.top = `${marker.v * 100}%`;
-
-      const dot = document.createElement('span');
-      dot.className = 'minimap-burg__dot';
-      dot.style.background = marker.color;
-
-      const name = document.createElement('span');
-      name.className = 'minimap-burg__name';
-      // Burg names come from the imported map, so they are set as text.
-      name.textContent = marker.offscreen
-        ? `${marker.name} · ${formatDistance(marker.distanceCells * tileSize)}`
-        : marker.name;
-
-      element.append(dot, name);
-      return element;
-    }));
+    this.minimapBurgs.replaceChildren(...createMinimapBurgElements(markers, this.tileMap?.tileSize ?? 1));
   }
 
   showToast(message, isError = false) {

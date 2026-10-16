@@ -1,4 +1,3 @@
-import { decodeAzgaarCartographySource } from '../import/AzgaarCartographySource.js';
 import { decodeMacroAtlas } from '../import/AzgaarMacroWorldSource.js';
 import { hexToRgbBytes } from '../tileCatalog.js';
 import {
@@ -10,7 +9,6 @@ import {
   DEFAULT_WORLD_MAP_PRESET,
   WORLD_MAP_LAYER_TOGGLES,
   WORLD_MAP_PRESETS,
-  createVectorMapModel,
   createVectorView,
   findVectorMapCell,
   getVectorCellDetails,
@@ -22,6 +20,7 @@ import {
   vectorViewBox,
   zoomVectorView,
 } from './worldMapVector.js';
+import { getWorldVectorModel } from './worldMapModelCache.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const LEGACY_MAX_ZOOM_FACTOR = 24;
@@ -278,12 +277,7 @@ export class WorldMapUi {
 
     if (campaign?.cartography) {
       try {
-        const cartography = decodeAzgaarCartographySource(campaign.cartography);
-        this.vectorModel = createVectorMapModel(
-          cartography,
-          campaign,
-          this.controller.getBaseTerrain(),
-        );
+        this.vectorModel = getWorldVectorModel(campaign, this.controller.getBaseTerrain());
         this.mode = 'vector';
         return;
       } catch (error) {

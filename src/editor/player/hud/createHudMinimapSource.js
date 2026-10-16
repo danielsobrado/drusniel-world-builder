@@ -1,16 +1,23 @@
 import { worldToCellPoint } from '../../world/WorldCoordinates.js';
+import { HudRegionMap } from './HudRegionMap.js';
 
 /**
  * Adapts the editor's minimap and tile lookups to what `HudMinimap` needs, so
  * the HUD never reaches into EditorUi or the editor controller itself.
  *
+ * Worlds imported from Azgaar dock the nearby area of the Azgaar map; other
+ * worlds dock the editor's own cell-scale minimap. The choice is made each
+ * time the dial docks a frame, so importing a world while walking takes effect
+ * the next time walking starts.
+ *
  * @param {object} deps
  * @param {import('../../EditorUi.js').EditorUi} deps.ui owner of the minimap bitmap
- * @param {{ focusProvider?: () => { x: number, z: number } }} deps.controller
+ * @param {{ focusProvider?: () => { x: number, z: number }, campaign?: object | null }} deps.controller
  * @param {{ tileSize: number, get: Function, getTileDefinition: Function }} deps.tileMap
+ * @param {() => object | null} [deps.getBaseTerrain]
  */
-export function createHudMinimapSource({ ui, controller, tileMap }) {
-  return Object.freeze({
+export function createHudMinimapSource({ ui, controller, tileMap, getBaseTerrain = () => null }) {
+  const editorMap = Object.freeze({
     frame: ui.minimapFrame ?? null,
     getWindow: () => ({ center: ui.minimapCenter, cells: ui.minimapCells }),
     // Drawn at once rather than queued, so the new bitmap and the offset the
@@ -19,6 +26,26 @@ export function createHudMinimapSource({ ui, controller, tileMap }) {
       ui.minimapCenter = cell;
       ui.updateMinimap();
     },
+  });
+  const regionMap = new HudRegionMap({
+    getCampaign: () => controller.campaign ?? null,
+    getBaseTerrain,
+    tileSize: tileMap.tileSize,
+  });
+  const regionAdapter = Object.freeze({
+    frame: regionMap.frame,
+    getWindow: () => regionMap.getWindow(),
+    recenter: (cell) => regionMap.recenter(cell),
+  });
+  let active = editorMap;
+
+  return Object.freeze({
+    getFrame: () => {
+      active = regionMap.isAvailable() ? regionAdapter : editorMap;
+      return active.frame;
+    },
+    getWindow: () => active.getWindow(),
+    recenter: (cell) => active.recenter(cell),
     getFocusPoint: () => {
       const canonical = controller.focusProvider?.();
       return canonical ? worldToCellPoint(canonical.x, canonical.z, tileMap.tileSize) : null;

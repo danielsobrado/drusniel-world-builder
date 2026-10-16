@@ -889,7 +889,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     root,
     controller: viewModeController,
     hud: {
-      minimap: createHudMinimapSource({ ui, controller, tileMap }),
+      minimap: createHudMinimapSource({
+        ui, controller, tileMap, getBaseTerrain: () => worldMapController.getBaseTerrain(),
+      }),
       getRenderer: () => terrainView.renderer,
       // The time of day titles the legend, as the donor's scene preset did:
       // "Emberfall (golden hour)" reads as "Emberfall". Read lazily — the sky
