@@ -4044,5 +4044,26 @@
         }
       }
     }
+  },
+  "integrationVerification": {
+    "sourceHead": "4788d37df100385cb9e9983ef0dd0d554a7c9ac5",
+    "concurrentRuntimeCommitsThrough": "0ba5312a",
+    "command": "npm run verify",
+    "passed": true,
+    "testCount": 6792,
+    "log": {
+      "path": "tmp/performance-improvements-2026-10-16/verify-integration.log",
+      "sha256": "c4a17e16f6ee044ab9e50c9eae5ca921c335e04816017b148a186c9f7b5751c1",
+      "bytes": 1351906
+    },
+    "includes": [
+      "ESLint",
+      "generated UI checks",
+      "production asset validation",
+      "tests",
+      "production build"
+    ],
+    "workerParity": "Also covers newer mixed biome shapes, thin grass islands and canopy patches.",
+    "hardwareCaptureScope": "Hardware metrics apply to frozen 78f4e5b8; later environment/workshop changes are excluded."
   }
 }

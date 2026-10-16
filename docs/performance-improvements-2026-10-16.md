@@ -54,8 +54,9 @@ counts, companion-attribute alignment, pending writes across culled frames,
 origin shifts and reuse of bounded pages through churn. Existing displacement
 bounds tests cover auxiliary cameras, wind, live tuning and rebasing.
 
-The complete `npm run verify` passed on the final runtime: lint, generated UI
-checks, production asset validation, **6,775 tests**, and the production build.
+The complete `npm run verify` passed on the measured performance runtime
+(`78f4e5b8`): lint, generated UI checks, production asset validation,
+**6,775 tests**, and the production build.
 All eight worker integration tests pass, including edited terrain retaining its
 current publication while rejecting an older result delivered after a newer
 edit, and cancellation when a cached lower LOD supersedes an in-flight
@@ -63,9 +64,15 @@ promotion. Publication tests require eventual complete density under the
 per-frame turn limit and exempt initially empty ground. Existing bundle-size
 and ineffective-dynamic-import build warnings remain.
 
+After concurrent environment/workshop commits were integrated, the complete
+verification passed again at `4788d37d`, with **6,792 tests**. This includes
+worker parity for mixed biome silhouettes, thin grass islands and canopy
+patches introduced by the newer environment work.
+
 ## Final hardware matrix
 
-The final runtime is `78f4e5b8`. Captures use native Windows headed Chromium,
+The performance runtime measured here is `78f4e5b8`. Captures use native Windows
+headed Chromium,
 NVIDIA RTX 4080 / Lovelace nonfallback WebGPU, 1280×720, DPR 1, 8 seconds warmup,
 initial settle, 12 seconds movement, and up to 20 seconds recovery. All five
 movement cases settled, with zero browser errors, worker failures, measured
@@ -110,7 +117,8 @@ grass; it is not a fixed-camera pixel comparison or a motion-quality assessment.
 
 ## Buffer and output evidence
 
-The standard grass configuration is exactly equal to the same-day baseline,
+The captured standard grass configuration is exactly equal to the same-day
+baseline,
 including every meadow band, far cards, geometry detail, growth, colour,
 interaction and distance setting. The final detailed endpoint contains
 311,801 populated blade/card instances and submits exactly 311,801 slots.
@@ -137,6 +145,10 @@ only compatible meadow frame uniforms remain shared.
 The matrix ran against an immutable ordinary copy of runtime/config sources at
 `tmp/performance-improvements-2026-10-16/runtime/`; public assets were shared.
 All 1,457 fingerprinted files remained unchanged through the matrix and revisit.
+Concurrent environment and workshop commits through `0ba5312a` arrived in the
+shared checkout during those captures. Their biome appearance and sampling
+changes are outside the frozen performance measurements; the numbers above do
+not describe that newer combined runtime.
 The test server alone permits the shared Basis decoder dependency path. The first
 frozen-server attempt lacked that permission and produced 96 browser errors;
 it is preserved and excluded from acceptance. A separate initial-settle timeout
