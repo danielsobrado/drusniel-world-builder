@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { grassHabitatCoverage, grassHabitatEligible } from '../src/editor/world/GrassHabitatCoverage.js';
+import {
+  GRASS_BARREN_EDGE_METERS,
+  grassHabitatCoverage,
+  grassHabitatEdge,
+  grassHabitatEligible,
+} from '../src/editor/world/GrassHabitatCoverage.js';
 import { buildSurfaceMaskPixels, createSurfaceMaskConfig } from '../src/editor/world/ChunkRenderPixels.js';
 import { generateBaseWorldChunk } from '../src/editor/world/generateWorldChunk.js';
 import { createEditedChunkSampling } from '../src/editor/world/EditedChunkSampling.js';
@@ -21,9 +26,11 @@ function fallback(g, x, z, size, maskConfig = config) {
 }
 const grass = (pixels, size, x, z) => pixels[(z * size + x) * 4 + 1];
 
-test('half-plane has the specified inward eight metre fringe and a bare desert side', () => {
+test('half-plane has the inward barren-land fringe and a bare desert side', () => {
   const pixels = fallback(generator(), -8, -8, 16);
-  const expected = [.043, .316, .684, .957, 1];
+  // A desert is barren land: the sward thins over GRASS_BARREN_EDGE_METERS, not the shore's 8 m.
+  const expected = Array.from({ length: 8 }, (_, x) => grassHabitatEdge(x + 1, 2, GRASS_BARREN_EDGE_METERS));
+  assert.ok(expected[3] < 0.5, 'still thinning eight metres in');
   for (let z = 0; z < 16; z++) {
     for (let x = 0; x < 8; x++) assert.equal(grass(pixels,16,x,z), 0);
     for (let x = 0; x < expected.length; x++) assert.ok(Math.abs(grass(pixels,16,x+8,z)/255-expected[x]) <= 1/255);

@@ -153,3 +153,18 @@ test('biome snow fades across a border, and the page field matches point queries
   assert.ok(Math.abs(ramp.at(-1) - 1) < 1e-9);
   assert.ok(ramp.filter((value) => value > 0.05 && value < 0.95).length >= 6, 'a ramp, not a step');
 });
+
+test('a sward fades wide into barren land but keeps its grass to the water and the road', () => {
+  const maskConfig = { ...createSurfaceMaskConfig({ grass: { tileIds: [4] } }, { tileSize: 2 }), worldSeed: 5 };
+  const chunkSize = 32;
+  const coverageAt = (neighbour, x) => {
+    const tileAt = (cellX) => (cellX < 0 ? neighbour : GRASSLAND);
+    const tiles = Uint8Array.from({ length: chunkSize * chunkSize }, (_, i) => tileAt(i % chunkSize - 8));
+    const mask = buildSurfaceMaskPixels({ tiles, originX: -8, originZ: 0, chunkSize, sampleTile: tileAt, maskConfig });
+    return mask[(16 * chunkSize + 8 + x) * 4 + 1] / 255;
+  };
+  // Five cells (10 m) in from the edge.
+  assert.equal(coverageAt(WATER, 5), 1, 'shore grass is full 10 m from the water');
+  assert.equal(coverageAt(13, 5), 1, 'a road verge has its own blend');
+  assert.ok(coverageAt(1, 5) < 0.7, 'still thinning 10 m from a desert');
+});
