@@ -139,6 +139,7 @@ export class MeadowGrassField {
       preparer: this.preparer,
       boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
       maxPublicationBytes: 4 * 1024 * 1024,
+      maxPublicationsPerFrame: 1,
     });
     this.cards = null;
     if (far) {
@@ -164,6 +165,7 @@ export class MeadowGrassField {
         preparer: this.preparer,
         boundsPadding: meadowCardBoundsPadding(this.uniforms),
         maxPublicationBytes: 4 * 1024 * 1024,
+        maxPublicationsPerFrame: 1,
       });
     }
     this.stats = {};

@@ -2,7 +2,12 @@ const QUEUES = ['grass', 'flower', 'tree', 'rock', 'bush', 'detail', 'aquatic', 
 
 export function hasPreparationBacklog(surface) {
   if (!surface) return false;
-  for (const name of QUEUES) if (surface[`${name}BuildQueue`]?.size > 0) return true;
+  for (const name of QUEUES) {
+    if (surface[`${name}BuildQueue`]?.size > 0) return true;
+    const view = surface[`${name}View`];
+    if (view?.pendingRebuild || view?.pendingLodRebuild || view?.stagedRebuild) return true;
+  }
+  if (surface.detailViews?.some(view => view.pendingRebuild || view.stagedRebuild)) return true;
   if (surface.treeView?.manifestStore?.queue?.size > 0 || surface.rockView?.manifestStore?.queue?.size > 0) return true;
   if (surface.preparedPlacement?.pending?.size > 0 || surface.terrainView?.commitQueue?.size > 0) return true;
   if (surface.terrainView?.drawPreparation?.pending?.size > 0) return true;

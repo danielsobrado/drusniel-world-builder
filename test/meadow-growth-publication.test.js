@@ -17,15 +17,22 @@ test('a live density change rebuilds only pages containing the affected biome an
  const settings=resolveMeadowGrassConfig({...config.grass.meadow,far:{enabled:false},interaction:{enabled:false}});
  const field=new MeadowGrassField({scene:new Scene(),terrainView,config,settings,tuning:new GrassTuning(config),sunDirection:vec3(0,1,0)});
  const layer=field.blades,origin={x:0,z:0};
+ const settle=time=>{
+  for(let frame=0;frame<256;frame++) {
+   layer.update({x:12,z:-8},origin,Infinity,time+frame/60);
+   if(layer.getState().building===0)return;
+  }
+  assert.fail('requested grass did not finish publishing');
+ };
  try {
-  field.ground.beginFrame();layer.update({x:12,z:-8},origin,Infinity,1);
+  field.ground.beginFrame();settle(1);
   const changed=[...layer.tiles.values()].filter(t=>t.output?.count&&t.centerX<16),unchanged=[...layer.tiles.values()].filter(t=>t.output?.count&&t.centerX>=16&&t.centerX<32);
   assert.ok(changed.length&&unchanged.length);
   const retained=new Map([...changed,...unchanged].map(t=>[t.key,{output:t.output,buildId:t.buildId}]));
   field.setGrowth({byTileId:{9:{density:.2}}});
   layer.update({x:12,z:-8},origin,performance.now()-1,2);
   for(const tile of [...changed,...unchanged])assert.equal(tile.output,retained.get(tile.key).output,'old publication survives pending work');
-  layer.update({x:12,z:-8},origin,Infinity,3);
+  settle(3);
   for(const tile of changed) {assert.ok(tile.buildId>retained.get(tile.key).buildId);assert.ok(tile.output.count<retained.get(tile.key).output.count);}
   for(const tile of unchanged)assert.equal(tile.buildId,retained.get(tile.key).buildId);
   assert.equal(field.uniforms.growth.density.array[field.settings.growth.table[9]].x,.2);

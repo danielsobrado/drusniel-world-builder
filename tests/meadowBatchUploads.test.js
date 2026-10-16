@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { MeshBasicNodeMaterial, Scene } from 'three/webgpu';
 import { MeadowGrassBatches } from '../src/editor/stylized/meadow/MeadowGrassBatches.js';
+import { meadowPageTileCapacity } from '../src/editor/stylized/meadow/MeadowBandBatch.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 
 function fixture(t, { dense = true } = {}) {
@@ -128,8 +129,8 @@ test('meadow pages bound buffer capacity and reuse storage through tile churn', 
   f.commit(tiles);
   const band = f.batches.batches.get('low');
   const pages = band.meshes.map(mesh => mesh.geometry);
-  assert.equal(pages.length, 4);
-  assert.ok(pages.every(geometry => geometry.getAttribute('instancePosition').count === 4 * 16));
+  assert.equal(pages.length, Math.ceil(tiles.length / meadowPageTileCapacity(16)));
+  assert.ok(pages.every(geometry => geometry.getAttribute('instancePosition').count === meadowPageTileCapacity(16) * 16));
   assert.equal(band.pages.reduce((sum, page) => sum + page.members.length, 0), tiles.length);
   // Each publication keeps its origin and all three companion attributes in
   // the same slot, irrespective of which page owns it.
@@ -165,7 +166,7 @@ test('dense meadow pages keep allocation below one large tile plus the stem ceil
   for (const tile of tiles) batches.add('high', tile);
   assert.equal(batches.commit().high, 6);
   const band = batches.batches.get('high');
-  assert.equal(batches.batches.get('low').pageTileCapacity, 4, 'dense families retain the bounded repacking policy in every band');
+  assert.equal(batches.batches.get('low').pageTileCapacity, meadowPageTileCapacity(16), 'dense families retain the bounded repacking policy in every band');
   assert.equal(band.pages.length, 3);
   assert.ok(band.pages.every(page => page.slotCapacity === 1));
   assert.ok(band.meshes.every(mesh => mesh.geometry.getAttribute('instancePosition').count === 40401));
@@ -233,9 +234,9 @@ test('sparse growth adds bounded pages while retaining existing geometry and pen
   const band = f.batches.batches.get('low');
   assert.equal(band.pages[0].geometry, f.geometry);
   assert.equal(disposed, 0);
-  assert.equal(band.pages.length, 9);
+  assert.equal(band.pages.length, Math.ceil(tiles.length / meadowPageTileCapacity(16)));
   assert.equal(band.meshes.reduce((sum, mesh) => sum + mesh.geometry.instanceCount, 0), 33 * 5);
-  assert.ok(band.pages.every(page => page.geometry.getAttribute('instancePosition').count === 4 * 16));
+  assert.ok(band.pages.every(page => page.geometry.getAttribute('instancePosition').count === meadowPageTileCapacity(16) * 16));
   for (const tile of tiles) {
     const page = band.slots.get(tile), start = page.slots.get(tile).start * 4;
     assert.deepEqual(page.geometry.getAttribute('instancePosition').array.subarray(start, start + 20), tile.output.position);
