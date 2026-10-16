@@ -284,6 +284,7 @@ export class MeadowTileLayer {
   }
 
   buildTiles(stale, deadline) {
+    PerfCounters.inc('meadowBuildTurns');
     let compacted = 0;
     let write = 0;
     for (let read = 0; read < stale.length; read += 1) {
@@ -293,10 +294,13 @@ export class MeadowTileLayer {
         continue;
       }
       if (performance.now() >= deadline) {
+        let ready = 0;
         for (let remaining = read; remaining < stale.length; remaining += 1) {
           const pending = stale[remaining];
           if (MeadowTileLayer.isStale(pending)) stale[write++] = pending;
+          if (pending.job?.compaction.done) ready++;
         }
+        PerfCounters.inc('meadowDeadlineDeferredResults', ready);
         break;
       }
       const capacity = tile.preparationCapacity;
@@ -346,8 +350,13 @@ export class MeadowTileLayer {
         ? compactionPrefix(compaction.output, this.templates[tile.band].instanceCount)
         : compaction.output;
       if (tile.band !== null && !this.canPublish(publication, tile)) {
+        PerfCounters.inc('meadowPublicationDeferredResults');
         stale[write++] = tile;
         continue;
+      }
+      if (Number.isFinite(compaction.completedAt)) {
+        PerfCounters.inc('meadowResultPublishWaitMs', performance.now() - compaction.completedAt);
+        PerfCounters.inc('meadowWorkerResultsPublished');
       }
       this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
       if (this.stablePrefixes) {
@@ -372,6 +381,8 @@ export class MeadowTileLayer {
     if (!this.canPublish(output, tile)) return false;
     this.publicationBytes += output.count * 14 * 4;
     if (output.count || tile.output?.count) this.publications++;
+    PerfCounters.inc('meadowPublications');
+    PerfCounters.inc('meadowPublicationBytes', output.count * 14 * 4);
     const previousCapacity = tile.output?.count ? this.templates[tile.builtBand].instanceCount : 0;
     if (!previousCapacity || this.templates[band].instanceCount > previousCapacity) {
       // Keep an active arrival fade across a rapid second promotion. A ground

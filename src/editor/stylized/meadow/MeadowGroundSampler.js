@@ -4,6 +4,7 @@ import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignat
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
 
 import { createMeadowGroundSample } from './MeadowGroundSample.js';
+import { identityOf } from './MeadowSharedGroundInputs.js';
 export { MIN_GRASS_STRENGTH } from './MeadowGroundSample.js';
 
 /**
@@ -198,6 +199,10 @@ export class MeadowGroundSampler {
       descriptor, chunkSize, tileSize, eligible, shapeTable, growth, worldSeed, rocks, flatten,
       pathConfig: this.pathConfig, forest: forest?.snapshot ?? null,
     };
+    // Every input a worker may cache, by identity: a replaced page, canopy grid
+    // or settings object, or a page revision, gets a new key.
+    snapshot.sharedKey = [identityOf(page), slot.pageRevision, identityOf(snapshot.forest), identityOf(growth),
+      identityOf(shapeTable), identityOf(eligible), identityOf(this.pathConfig), worldSeed, chunkSize, tileSize].join(':');
     const sample = createMeadowGroundSample(snapshot, { forest, paths: this.paths });
     // The same key `revisionAt` gives the tile, rocks included: a job whose
     // revision differs from its tile's is abandoned, so a mismatch here would

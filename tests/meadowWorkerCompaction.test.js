@@ -8,6 +8,7 @@ import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompa
 import { buildMeadowCompaction } from '../src/editor/stylized/meadow/buildMeadowCompaction.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { resolveMeadowGrassConfig } from '../src/editor/stylized/meadow/meadowGrassConfig.js';
+import { resolveGroundSnapshot } from '../src/editor/stylized/meadow/MeadowSharedGroundInputs.js';
 
 function fixture(t, { centerX = 4, centerZ = -4 } = {}) {
   const chunkSize = 16, tileSize = 2, originX = Math.floor(centerX / 32) * 32;
@@ -49,7 +50,7 @@ function assertOutput(actual, expected) {
 }
 
 class FakeWorker {
-  constructor() { this.listeners = {}; this.templates = new Map(); this.jobs = []; }
+  constructor() { this.listeners = {}; this.templates = new Map(); this.grounds = new Map(); this.jobs = []; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
   postMessage(message, transfer = []) {
     const copy = structuredClone(message, { transfer });
@@ -57,7 +58,8 @@ class FakeWorker {
     else this.jobs.push(copy);
   }
   respond() {
-    const request = this.jobs.shift();
+    const message = this.jobs.shift();
+    const request = { ...message, snapshot: resolveGroundSnapshot(this.grounds, message) };
     const result = buildMeadowCompaction(request, this.templates.get(request.templateId));
     this.listeners.message({ data: structuredClone(result, { transfer: ['position', 'rotation', 'data'].map(name => result.output[name].buffer) }) });
   }
@@ -108,19 +110,39 @@ test('worker snapshots preserve mixed biome shapes, thin grass islands and canop
 test('worker promotion keeps its completed prefix and has a bounded number of dispatched jobs', t => {
   const { options, low, high } = fixture(t), { pool, workers } = poolFixture(t);
   const task = pool.create({ ...options, template: low });
-  const second = pool.create(options), third = pool.create(options);
-  task.advance(); second.advance(); third.advance();
-  assert.equal(pool.pending.size, 2);
-  assert.equal(third.pending, false);
+  task.advance();
+  const others = Array.from({ length: 4 }, () => pool.create(options));
+  for (const other of others) other.advance();
+  assert.equal(pool.pending.size, 4, 'two jobs per worker, no further queue');
+  assert.equal(others[3].pending, false);
+  assert.deepEqual(workers.map(worker => worker.jobs.length), [2, 2]);
   task.promote(high);
   workers[0].respond();
   assert.equal(task.done, false, 'the smaller in-flight result cannot publish as a denser tile');
   assert.equal(task.processedCount, 512);
-  task.advance(); workers[0].respond();
+  others[3].advance();
+  assert.equal(others[3].pending, true, 'a finished job frees its slot');
+  workers[0].respond(); workers[1].respond(); workers[1].respond(); workers[0].respond();
+  task.advance();
+  const worker = workers.find(candidate => candidate.jobs.length);
+  worker.respond();
   assert.equal(task.done, true);
   const expected = createCompaction(options); expected.advance();
   assertOutput(task.output, expected.output);
-  third.advance(); assert.equal(third.pending, true);
+});
+
+test('a queued second job starts without waiting for another layer turn and reuses the cached page', t => {
+  const { options } = fixture(t), { pool, workers } = poolFixture(t);
+  const first = pool.create(options), second = pool.create(options), third = pool.create(options);
+  first.advance(); second.advance(); third.advance();
+  const queued = workers[0].jobs;
+  assert.equal(queued.length, 2, 'the least-loaded worker takes the next job, ties stay home');
+  assert.ok(queued[0].shared, 'the first job on a worker carries the page');
+  assert.equal(queued[1].shared, undefined, 'the queued job references it');
+  assert.ok(workers[1].jobs[0].shared, 'each worker receives the page once');
+  workers[0].respond(); workers[0].respond(); workers[1].respond();
+  const expected = createCompaction(options); expected.advance();
+  for (const task of [first, second, third]) assertOutput(task.output, expected.output);
 });
 
 test('cancellation recycles each private result once and leaves published prefixes intact', t => {
@@ -156,16 +178,21 @@ test('worker failure resumes bounded main-thread compaction and clears pending w
   assertOutput(task.output, expected.output);
 });
 
-test('cards retain a worker turn while blade preparation is continuously busy', t => {
+test('cards retain a worker turn while blades borrow idle capacity', t => {
   const { options } = fixture(t), { pool, workers } = poolFixture(t);
   const card = createMeadowTemplate({ detail: 1, count: 128, tileSize: 8, cards: true });
   t.after(() => card.dispose());
   pool.register(card);
-  pool.create(options).advance(); pool.create(options).advance();
+  const blades = Array.from({ length: 4 }, () => pool.create(options));
+  for (const blade of blades) blade.advance();
+  assert.deepEqual(blades.map(blade => blade.pending), [true, true, true, false],
+    'blades use both workers but leave one slot for cards');
+  assert.equal(pool.hasCapacity(options.template), false);
+  assert.equal(pool.hasCapacity(card), true);
   const task = pool.create({ ...options, template: card }); task.advance();
-  assert.equal(workers[0].jobs.length, 1);
-  assert.equal(workers[1].jobs.length, 1);
-  workers[1].respond();
+  assert.equal(task.pending, true);
+  assert.equal(workers[1].jobs.length, 2, 'the card waits behind at most one blade job');
+  workers[1].respond(); workers[1].respond();
   const expected = createCompaction({ ...options, template: card }); expected.advance();
   assertOutput(task.output, expected.output);
 });

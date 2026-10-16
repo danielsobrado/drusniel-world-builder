@@ -45,6 +45,7 @@ export class MeadowWorkerCompaction {
 
   complete(output, capacity) {
     this.pending = false;
+    this.completedAt = performance.now();
     // The previous published prefix is owned by the layer. Intermediate worker
     // results have never been published and can return to its pool immediately.
     if (this.result && this.result !== this.options.previous) this.options.recycle?.(this.result.output, this.result.template);

@@ -262,7 +262,12 @@ export function buildPerfReport({
     counters,
     preparation,
     measuredCounters: Object.fromEntries(['mainProceduralTileMisses', 'mainProceduralHeightMisses',
-      'collisionReadinessMisses', 'placementPreparedChunks', 'rockManifestBuilds', 'treeManifestBuilds']
+      'collisionReadinessMisses', 'placementPreparedChunks', 'rockManifestBuilds', 'treeManifestBuilds',
+      'meadowWorkerRequests', 'meadowWorkerExecMs', 'meadowWorkerPostMs', 'meadowWorkerClonedBytes',
+      'meadowWorkerIdleGapMs', 'meadowWorkerRanksPrepared', 'meadowWorkerResultsPublished',
+      'meadowResultPublishWaitMs', 'meadowStemsCompacted', 'meadowRanksDiscarded', 'meadowBatchCommitMs', 'meadowBuildTurns',
+      'meadowDeadlineDeferredResults', 'meadowPublicationDeferredResults', 'meadowAttributeBytesUploaded',
+      'meadowCompactionReuses', 'meadowRepackBytes', 'meadowPublications', 'meadowPublicationBytes']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,

@@ -105,6 +105,9 @@ export class MeadowBandBatch {
       const source = tile.prepared ?? tile.buildId;
       const writeSource = !slot || slot.start !== start || slot.count !== count
         || slot.source !== source;
+      if (slot && slot.start !== start && slot.count === count && slot.source === source) {
+        PerfCounters.inc('meadowRepackBytes', count * 14 * 4);
+      }
       if (writeSource || slot.renderX !== tile.renderX || slot.renderZ !== tile.renderZ) {
         this.writeTile(start, tile, count, writeSource);
       }
