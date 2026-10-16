@@ -118,11 +118,11 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
   const c = surface.point(u1, high[1], offset),
     d = surface.point(u0, high[0], offset);
   // Reveals, soffits and ends may belong to a different slot than the face (stone jambs in mortar).
-  const face = (a, b, c, d, target = mesh, tone = color) =>
+  const face = (a, b, c, d, target = mesh, tone = color, uv) =>
     surface.clockwise !== thickness < 0
-      ? target.quad(a, b, c, d, tone)
-      : target.quad(d, c, b, a, tone);
-  const side = (a, b, c, d) => face(a, b, c, d, caps.sideMesh ?? mesh, caps.sideColor ?? color);
+      ? target.quad(a, b, c, d, tone, uv)
+      : target.quad(d, c, b, a, tone, uv?.toReversed());
+  const side = (a, b, c, d, uv) => face(a, b, c, d, caps.sideMesh ?? mesh, caps.sideColor ?? color, uv);
   if (caps.bevel) addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, thickness, color, caps });
   else {
     const uv = [[u0, low[0]], [u1, low[1]], [u1, high[1]], [u0, high[0]]];
@@ -134,10 +134,11 @@ export function addWallPatch(mesh, surface, u0, u1, y0, y1, offset, thickness, c
       bi = surface.point(u1, low[1], offset - thickness);
     const ci = surface.point(u1, high[1], offset - thickness),
       di = surface.point(u0, high[0], offset - thickness);
-    if (caps.back !== false) face(bi, ai, di, ci);
-    side(a, ai, bi, b);
-    side(d, c, ci, di);
-    if (caps.start !== false) side(a, d, di, ai);
-    if (caps.end !== false) side(b, bi, ci, c);
+    const inner = offset - thickness;
+    if (caps.back !== false) face(bi, ai, di, ci, mesh, color, [[u1, low[1]], [u0, low[0]], [u0, high[0]], [u1, high[1]]]);
+    side(a, ai, bi, b, [[u0, offset], [u0, inner], [u1, inner], [u1, offset]]);
+    side(d, c, ci, di, [[u0, offset], [u1, offset], [u1, inner], [u0, inner]]);
+    if (caps.start !== false) side(a, d, di, ai, [[offset, low[0]], [offset, high[0]], [inner, high[0]], [inner, low[0]]]);
+    if (caps.end !== false) side(b, bi, ci, c, [[offset, low[1]], [inner, low[1]], [inner, high[1]], [offset, high[1]]]);
   }
 }

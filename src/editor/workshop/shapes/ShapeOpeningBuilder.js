@@ -97,13 +97,13 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
         0.06,
         [1, 1, 1],
       );
-      meshes.inserts.beam(
-        surface.point(center - half, o.bottom + o.height * 0.5, 0.045),
-        surface.point(center + half, o.bottom + o.height * 0.5, 0.045),
-        0.055,
-        0.055,
-        [1, 1, 1],
-      );
+      // Glass follows the host curve, so its crossbar follows that same surface.
+      const count = Math.max(2, Math.ceil(o.width / 0.065)), y = o.bottom + o.height * 0.5;
+      for (let i = 0; i < count; i++) {
+        const a = center - half + o.width * i / count, b = center - half + o.width * (i + 1) / count;
+        addWallPatch(meshes.inserts, surface, a, b, y - 0.0275, y + 0.0275, 0.075, 0.055, [1, 1, 1],
+          { start: i === 0, end: i === count - 1 });
+      }
     }
   }
 }
