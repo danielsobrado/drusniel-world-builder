@@ -24,6 +24,14 @@ export async function workshopReviewSource(root) {
 export function applyWorkshopReviewLighting(ui, mode) {
   const lights = [];
   ui.scene.traverse(object => { if (object.isLight) lights.push(object); });
+  ui.__reviewLightDefaults ??= lights.map(light => ({ id: light.uuid, color: light.color.getHex(), intensity: light.intensity,
+    position: light.position.toArray(), ground: light.groundColor?.getHex() }));
+  for (const light of lights) {
+    const base = ui.__reviewLightDefaults.find(item => item.id === light.uuid);
+    if (!base) continue;
+    light.color.setHex(base.color); light.intensity = base.intensity; light.position.fromArray(base.position);
+    if (light.groundColor) light.groundColor.setHex(base.ground);
+  }
   if (mode !== 'stage') {
     const directional = lights.filter(light => light.isDirectionalLight);
     for (const light of lights) {

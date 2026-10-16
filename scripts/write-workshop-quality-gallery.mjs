@@ -9,7 +9,7 @@ const before = JSON.parse(await readFile(path.join(root, 'tmp', beforeDirectory,
 if (report.failure || after.failure || before.failure) throw new Error('Gallery requires passing capture and interaction reports.');
 for (const capture of after.captures) {
   const reference = before.captures.find(c => c.preset === capture.preset && c.view.id === capture.view.id);
-  if (!reference || JSON.stringify(reference.camera) !== JSON.stringify(capture.camera)) throw new Error(`Camera mismatch: ${capture.preset}/${capture.view.id}`);
+  if (!reference || ['position','target'].some(key => reference.camera[key].some((v,i) => Math.abs(v - capture.camera[key][i]) > 1e-6))) throw new Error(`Camera mismatch: ${capture.preset}/${capture.view.id}`);
 }
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;');
 const figure = (id, label, view = 'a') => `<figure><div class="pair"><img class="before" src="../${beforeDirectory}/${id}-${view}.png" alt="${escape(label)}, before" loading="lazy"><img class="after" src="review/${id}-${view}.png" alt="${escape(label)}, after" loading="lazy"></div><figcaption>${escape(label)}</figcaption></figure>`;

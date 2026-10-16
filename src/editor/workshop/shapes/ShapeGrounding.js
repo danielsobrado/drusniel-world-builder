@@ -4,6 +4,18 @@ import { shapeRandom } from './ShapeMesh.js';
 import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 import polygonClipping from 'polygon-clipping';
 import { buildShapePaving } from './ShapePaving.js';
+import { createShapeTraversalSurface } from './ShapeTraversalSurface.js';
+
+function groundPathStrips(plan) {
+  const point = createShapeTraversalSurface(plan), half = plan.primitive.width / 2, strips = [];
+  for (let i = 1; i < plan.route.length; i++) {
+    const a = plan.route[i-1], b = plan.route[i];
+    if (Math.min(a.position[1], b.position[1]) > 0.2) continue;
+    const t0 = a.distance / plan.curve.length, t1 = b.distance / plan.curve.length;
+    strips.push([point(t0,-half), point(t1,-half), point(t1,half), point(t0,half)].map(([x,,z]) => [x,z]));
+  }
+  return strips;
+}
 
 /** Group already-resolved attachment relationships without a whole-document scan per host. */
 export function resolveShapeGroundings(plans) {
@@ -20,7 +32,7 @@ export function resolveShapeGroundings(plans) {
       const outline = paving.points.map(([x, , z]) => [x, z]);
       const paths = (connections.get(plan.id) ?? []).filter(path => [path.route[0], path.route.at(-1)]
         .some(node => node.position[1] < 0.2 && pointInShape([node.position[0], node.position[2]], outline)));
-      const cuts = [...porchCuts, ...paths.map(path => path.rpg.walkableFloors[0].footprint.points), ...prior];
+      const cuts = [...porchCuts, ...paths.flatMap(groundPathStrips), ...prior];
       paving.polygons = cuts.length ? polygonClipping.difference([outline], ...cuts.map(c => [c])) : [[outline]];
       paving.connectedTo = paths.map(path => path.id).sort();
       prior.push(outline);

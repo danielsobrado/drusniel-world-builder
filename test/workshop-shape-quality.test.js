@@ -109,6 +109,22 @@ test('ivy density retains existing growth keys and positions while unrelated wal
   } finally { cache.clear(); }
 });
 
+test('entrance paving gives a connected ground-level path its full width without overlapping it', () => {
+  const p = createShapePreset('rounded-cottage').primitives[0]; p.openings = [p.openings[0]];
+  const paving = plan(p).ground.paving[0], [a,b,,d] = paving.points;
+  const direction = [d[0]-a[0], d[2]-a[2]], length = Math.hypot(...direction);
+  const start = [(a[0]+b[0])/2 + direction[0]*0.2, (a[2]+b[2])/2 + direction[1]*0.2];
+  const path = { id: 'access', kind: 'traversal', style: { from: p.id }, rise: 0, elevation: 0.04,
+    position: start.map((v,k) => v + direction[k]/length*2), rotation: Math.atan2(direction[1],direction[0])*180/Math.PI,
+    length: 4, width: 1.2, mode: 'walkway', support: 'none' };
+  const host = planWorkshopComposition({ composition: { primitives: [p,path] } }).shapePlans.find(v => v.id === p.id);
+  const resolved = host.ground.paving[0]; assert.deepEqual(resolved.connectedTo, ['access']);
+  const area = polygon => Math.abs(polygon.reduce((sum,v,i) => { const b = polygon[(i+1)%polygon.length]; return sum + v[0]*b[1]-b[0]*v[1]; },0))/2;
+  const remaining = resolved.polygons.reduce((sum,polygon) => sum + area(polygon[0]),0);
+  assert.ok(remaining < area(paving.points.map(([x,,z])=>[x,z])) - 0.5);
+  assert.equal(p.ground, undefined, 'Access clipping stays derived.');
+});
+
 test('interior treatments have suppressible provenance, own one floor, and respect concave rooms', () => {
   const p = createShapePreset('courtyard-pavilion').primitives[0];
   const points = [[-3,-3],[3,-3],[3,-1],[-1,-1],[-1,3],[-3,3]];

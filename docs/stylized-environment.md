@@ -54,6 +54,29 @@ stylizedSurface:
   rock trampling, and sun-based translucency run in the WebGPU material.
 - Flowers are streamed crossed billboards using the source alpha masks, RGB palette
   zones and base-to-tip gradients.
+- **Biome borders are ecotones, not ruled lines.** An imported Azgaar atlas texel
+  spans kilometres (Eldara ≈ 8 km), so a nearest-texel biome read drew every border
+  as a straight staircase along the atlas grid. `world/BiomeBoundaryWarp.js` reads
+  the biome through a fractal domain warp, from the texel down to ~6 m; water and
+  coasts stay on the unwarped heights, and texels whose 3×3 neighbourhood shares
+  one biome skip the warp. The procedural generator reads its climate through a
+  short version of the same warp (6–48 m). Finer still, each meadow stem may grow
+  as a neighbouring cell's biome (`ECOTONE_REACH_CELLS`), and the terrain reads its
+  biome colour through a small noise dither (`ground.ecotoneReachCells`), so grass
+  height, pigment and ground colour interleave over a few metres instead of
+  stepping at a 2 m cell edge.
+- **Thin grass grows in islands.** `world/GrassPatchiness.js` turns low meadow
+  density (tundra, taiga, savanna, and the floor under canopy) into islands and
+  tussocks over bare ground instead of an even speckle. The surface mask bakes the
+  biome islands into coverage, so the ground shows soil between them; the meadow
+  sampler reads the same field at the live density. Under canopy the forest-floor
+  texture's B channel carries the bare share, tinted `forestFloor.litterColor`.
+  Densities near 1 are untouched.
+- **Undergrowth is biome- and shade-aware.** Bush variants carry `tileIds`
+  (bamboo only in the tropics), `canopy` (the low shrub is the shade-tolerant floor
+  of a wood, the rounded bush its fringe) and `bushes.densityByTile`. The first
+  tile id picks a variant's foliage grade, so shared shrubs lead with a temperate
+  biome.
 - Rocks and pine-tree parts are extracted from the source GLB for streaming:
   - **Rocks:** scale-only bake (demo placement tumble is stripped) + y=0 ground pivot,
     unique meshes only. Instances use Y-spin only. Tinted toward `rocks.color`, spread by

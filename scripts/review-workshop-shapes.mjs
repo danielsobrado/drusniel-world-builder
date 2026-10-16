@@ -16,15 +16,17 @@ import { workshopReviewSource, applyWorkshopReviewLighting } from './lib/worksho
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const only = arg('only')?.split(',');
-const coarse = process.argv.includes('--coarse');
-const lighting = arg('lighting') ?? 'stage';
+let coarse = process.argv.includes('--coarse');
+let lighting = arg('lighting') ?? 'stage';
+const matrix = process.argv.includes('--matrix');
 if (!['stage', 'neutral', 'grazing'].includes(lighting)) throw new Error('Unknown lighting preset.');
 const output = path.resolve(root, arg('out') ?? 'tmp/workshop-review');
 const presets = SHAPE_PRESETS.filter((p) => !only || only.includes(p.id));
 if (only?.some((id) => !SHAPE_PRESETS.some((p) => p.id === id))) throw new Error('Unknown preset in --only.');
 const report = { coarse, lighting, captures: [], pageErrors: [] };
-const reportName = `report${coarse ? '-coarse' : ''}${lighting === 'stage' ? '' : `-${lighting}`}.json`;
-const reference = arg('reference') ? JSON.parse(await readFile(path.join(root, arg('reference'), reportName), 'utf8')) : null;
+const variantName = (coarse, lighting) => `report${coarse ? '-coarse' : ''}${lighting === 'stage' ? '' : `-${lighting}`}.json`;
+const reportName = matrix ? 'report-matrix.json' : variantName(coarse, lighting);
+let reference = !matrix && arg('reference') ? JSON.parse(await readFile(path.join(root, arg('reference'), reportName), 'utf8')) : null;
 // Azimuth (degrees) around the framed target, distance scale, and height scale of the frame offset.
 const VIEWS = [
   { id: 'a', azimuth: 0, distance: 1, lift: 1 },
@@ -85,11 +87,22 @@ try {
   assert.ok(report.renderer.vendor, 'The renderer must identify its hardware adapter.');
   assert.notEqual(report.renderer.fallback, true);
   assert.doesNotMatch(JSON.stringify(report.renderer), /swiftshader|lavapipe|llvmpipe|microsoft basic|warp/i);
+  const variants = matrix ? [{ coarse: false, lighting: 'stage' }, { coarse: true, lighting: 'stage' },
+    { coarse: false, lighting: 'neutral' }, { coarse: false, lighting: 'grazing' }] : [{ coarse, lighting }];
+  report.lightingVariants = {};
+  for (const variant of variants) {
+  coarse = variant.coarse; lighting = variant.lighting;
+  if (matrix && arg('reference')) {
+    try { reference = JSON.parse(await readFile(path.join(root, arg('reference'), variantName(coarse, lighting)), 'utf8')); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; reference = null; }
+  }
   report.lights = await page.evaluate(({ source, lighting }) =>
     new Function(`return (${source})`)()(window.__editor.proceduralWorkshop, lighting),
   { source: applyWorkshopReviewLighting.toString(), lighting });
-  if (coarse) { await page.locator('select[name="detail"]').selectOption('1'); await settle(page); }
-  for (const preset of presets) {
+  report.lightingVariants[lighting] = report.lights;
+  await page.locator('select[name="detail"]').selectOption(coarse ? '1' : '2'); await settle(page);
+  const selected = matrix && lighting !== 'stage' ? presets.filter(p => ['timber-cottage','balcony-tower','bay-porch-cottage','buttressed-chapel'].includes(p.id)) : presets;
+  for (const preset of selected) {
     await page.locator('[data-shape-action="preset"]').selectOption(preset.id);
     await settle(page);
     const recipe = await page.evaluate(() => window.__editor.proceduralWorkshop.readInput().recipe);
@@ -126,6 +139,7 @@ try {
     }
     console.log(`Captured ${preset.id}`);
   }
+  }
   assert.deepEqual(report.pageErrors, []);
   report.sourceAfter = await workshopReviewSource(root);
   assert.equal(report.sourceAfter.hash, report.source.hash, 'Workshop sources changed during capture; repeat this run.');
@@ -136,6 +150,11 @@ try {
 } finally {
   try {
     await writeFile(path.join(output, reportName), JSON.stringify(report, null, 2));
+    if (matrix) for (const [coarse, lighting] of [[false,'stage'],[true,'stage'],[false,'neutral'],[false,'grazing']]) {
+      const subset = { ...report, coarse, lighting, lights: report.lightingVariants?.[lighting],
+        captures: report.captures.filter(c => c.lighting === lighting && (c.detail === 1) === coarse) };
+      await writeFile(path.join(output, variantName(coarse, lighting)), JSON.stringify(subset, null, 2));
+    }
   } finally {
     try {
       const cleanup = await Promise.allSettled([browser?.close(), server ? terminateChildProcess(server) : null]);
