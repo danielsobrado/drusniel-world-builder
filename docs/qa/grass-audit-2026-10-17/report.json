@@ -1,0 +1,1253 @@
+{
+  "seed": 20261017,
+  "sampled": 68514,
+  "startedAt": "2026-10-17T01:33:52.943Z",
+  "url": "http://localhost:5191",
+  "spots": [
+    {
+      "id": "b01",
+      "name": "Hot desert",
+      "expectedBiomeId": 1,
+      "x": -5845,
+      "z": -71,
+      "yaw": 0.13440100058114715
+    },
+    {
+      "id": "b02",
+      "name": "Cold desert",
+      "expectedBiomeId": 2,
+      "x": 9589,
+      "z": -11521,
+      "yaw": 2.0302566332523195
+    },
+    {
+      "id": "b03",
+      "name": "Savanna",
+      "expectedBiomeId": 3,
+      "x": 15053,
+      "z": -2791,
+      "yaw": 4.276618000431374
+    },
+    {
+      "id": "b04",
+      "name": "Grassland",
+      "expectedBiomeId": 4,
+      "x": -10233,
+      "z": 4237,
+      "yaw": 6.062452340788392
+    },
+    {
+      "id": "b05",
+      "name": "Tropical seasonal forest",
+      "expectedBiomeId": 5,
+      "x": -829,
+      "z": 441,
+      "yaw": 5.473836807823083
+    },
+    {
+      "id": "b06",
+      "name": "Temperate deciduous forest",
+      "expectedBiomeId": 6,
+      "x": 8025,
+      "z": -8293,
+      "yaw": 5.7701442421485005
+    },
+    {
+      "id": "b07",
+      "name": "Tropical rainforest",
+      "expectedBiomeId": 7,
+      "x": 12951,
+      "z": -1421,
+      "yaw": 1.5582460008691603
+    },
+    {
+      "id": "b08",
+      "name": "Temperate rainforest",
+      "expectedBiomeId": 8,
+      "x": -11351,
+      "z": -11019,
+      "yaw": 2.9555075253001286
+    },
+    {
+      "id": "b09",
+      "name": "Taiga",
+      "expectedBiomeId": 9,
+      "x": 15727,
+      "z": 8687,
+      "yaw": 4.311258951114587
+    },
+    {
+      "id": "b10",
+      "name": "Tundra",
+      "expectedBiomeId": 10,
+      "x": -9757,
+      "z": 14475,
+      "yaw": 4.182892557830485
+    },
+    {
+      "id": "b11",
+      "name": "Glacier",
+      "expectedBiomeId": 11,
+      "x": 13703,
+      "z": -14213,
+      "yaw": 0.04321294988995848
+    },
+    {
+      "id": "b12",
+      "name": "Wetland",
+      "expectedBiomeId": 12,
+      "x": 2919,
+      "z": -12433,
+      "yaw": 1.619917057761936
+    }
+  ],
+  "shots": [
+    {
+      "id": "b01-eye",
+      "name": "Hot desert",
+      "x": -5845,
+      "z": -71,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 0.13440100058114715,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 1,
+      "ready": true,
+      "pose": [
+        -85,
+        4.686202430260639,
+        -71
+      ]
+    },
+    {
+      "id": "b01-eye-rev",
+      "name": "Hot desert",
+      "x": -5845,
+      "z": -71,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 3.2759936541709402,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 1,
+      "ready": true,
+      "pose": [
+        -85,
+        4.686202430260639,
+        -71
+      ]
+    },
+    {
+      "id": "b01-down",
+      "name": "Hot desert",
+      "x": -5845,
+      "z": -71,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 1.7051973273760437,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 1,
+      "ready": true,
+      "pose": [
+        -85,
+        4.686202430260639,
+        -71
+      ]
+    },
+    {
+      "id": "b01-low",
+      "name": "Hot desert",
+      "x": -5845,
+      "z": -71,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 0.13440100058114715,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 1,
+      "ready": true,
+      "pose": [
+        -85,
+        3.4362024302606398,
+        -71
+      ]
+    },
+    {
+      "id": "b01-aerial",
+      "name": "Hot desert",
+      "x": -5845,
+      "z": -71,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 0.13440100058114715,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 1,
+      "ready": true,
+      "pose": [
+        -85,
+        47.98620243026064,
+        -71
+      ]
+    },
+    {
+      "id": "b02-eye",
+      "name": "Cold desert",
+      "x": 9589,
+      "z": -11521,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 2.0302566332523195,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 2,
+      "ready": true,
+      "pose": [
+        117,
+        3.0310433871581672,
+        -1
+      ]
+    },
+    {
+      "id": "b02-eye-rev",
+      "name": "Cold desert",
+      "x": 9589,
+      "z": -11521,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.171849286842113,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 2,
+      "ready": true,
+      "pose": [
+        117,
+        3.0310433871581672,
+        -1
+      ]
+    },
+    {
+      "id": "b02-down",
+      "name": "Cold desert",
+      "x": 9589,
+      "z": -11521,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 3.601052960047216,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 2,
+      "ready": true,
+      "pose": [
+        117,
+        3.0310433871581672,
+        -1
+      ]
+    },
+    {
+      "id": "b02-low",
+      "name": "Cold desert",
+      "x": 9589,
+      "z": -11521,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 2.0302566332523195,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 2,
+      "ready": true,
+      "pose": [
+        117,
+        1.781043387158167,
+        -1
+      ]
+    },
+    {
+      "id": "b02-aerial",
+      "name": "Cold desert",
+      "x": 9589,
+      "z": -11521,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 2.0302566332523195,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 2,
+      "ready": true,
+      "pose": [
+        117,
+        46.33104338715817,
+        -1
+      ]
+    },
+    {
+      "id": "b03-eye",
+      "name": "Savanna",
+      "x": 15053,
+      "z": -2791,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.276618000431374,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 3,
+      "ready": true,
+      "pose": [
+        77,
+        11.941824245483312,
+        25
+      ]
+    },
+    {
+      "id": "b03-eye-rev",
+      "name": "Savanna",
+      "x": 15053,
+      "z": -2791,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.418210654021167,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 3,
+      "ready": true,
+      "pose": [
+        77,
+        11.941824245483312,
+        25
+      ]
+    },
+    {
+      "id": "b03-down",
+      "name": "Savanna",
+      "x": 15053,
+      "z": -2791,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.847414327226271,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 3,
+      "ready": true,
+      "pose": [
+        77,
+        11.941824245483312,
+        25
+      ]
+    },
+    {
+      "id": "b03-low",
+      "name": "Savanna",
+      "x": 15053,
+      "z": -2791,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 4.276618000431374,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 3,
+      "ready": true,
+      "pose": [
+        77,
+        10.691824245483312,
+        25
+      ]
+    },
+    {
+      "id": "b03-aerial",
+      "name": "Savanna",
+      "x": 15053,
+      "z": -2791,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 4.276618000431374,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 3,
+      "ready": true,
+      "pose": [
+        77,
+        55.241824245483315,
+        25
+      ]
+    },
+    {
+      "id": "b04-eye",
+      "name": "Grassland",
+      "x": -10233,
+      "z": 4237,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 6.062452340788392,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 4,
+      "ready": true,
+      "pose": [
+        -121,
+        10.591547296879614,
+        13
+      ]
+    },
+    {
+      "id": "b04-eye-rev",
+      "name": "Grassland",
+      "x": -10233,
+      "z": 4237,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 9.204044994378185,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 4,
+      "ready": true,
+      "pose": [
+        -121,
+        10.591547296879614,
+        13
+      ]
+    },
+    {
+      "id": "b04-down",
+      "name": "Grassland",
+      "x": -10233,
+      "z": 4237,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.633248667583288,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 4,
+      "ready": true,
+      "pose": [
+        -121,
+        10.591547296879614,
+        13
+      ]
+    },
+    {
+      "id": "b04-low",
+      "name": "Grassland",
+      "x": -10233,
+      "z": 4237,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 6.062452340788392,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 4,
+      "ready": true,
+      "pose": [
+        -121,
+        9.341547296879614,
+        13
+      ]
+    },
+    {
+      "id": "b04-aerial",
+      "name": "Grassland",
+      "x": -10233,
+      "z": 4237,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 6.062452340788392,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 4,
+      "ready": true,
+      "pose": [
+        -121,
+        53.891547296879615,
+        13
+      ]
+    },
+    {
+      "id": "b05-eye",
+      "name": "Tropical seasonal forest",
+      "x": -829,
+      "z": 441,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.473836807823083,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 5,
+      "ready": true,
+      "pose": [
+        67,
+        5.585904968341591,
+        -71
+      ]
+    },
+    {
+      "id": "b05-eye-rev",
+      "name": "Tropical seasonal forest",
+      "x": -829,
+      "z": 441,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 8.615429461412877,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 5,
+      "ready": true,
+      "pose": [
+        67,
+        5.585904968341591,
+        -71
+      ]
+    },
+    {
+      "id": "b05-down",
+      "name": "Tropical seasonal forest",
+      "x": -829,
+      "z": 441,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.044633134617979,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 5,
+      "ready": true,
+      "pose": [
+        67,
+        5.585904968341591,
+        -71
+      ]
+    },
+    {
+      "id": "b05-low",
+      "name": "Tropical seasonal forest",
+      "x": -829,
+      "z": 441,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 5.473836807823083,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 5,
+      "ready": true,
+      "pose": [
+        67,
+        4.335904968341591,
+        -71
+      ]
+    },
+    {
+      "id": "b05-aerial",
+      "name": "Tropical seasonal forest",
+      "x": -829,
+      "z": 441,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 5.473836807823083,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 5,
+      "ready": true,
+      "pose": [
+        67,
+        48.88590496834159,
+        -71
+      ]
+    },
+    {
+      "id": "b06-eye",
+      "name": "Temperate deciduous forest",
+      "x": 8025,
+      "z": -8293,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.7701442421485005,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 6,
+      "ready": true,
+      "pose": [
+        89,
+        3.0946882866412473,
+        -101
+      ]
+    },
+    {
+      "id": "b06-eye-rev",
+      "name": "Temperate deciduous forest",
+      "x": 8025,
+      "z": -8293,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 8.911736895738294,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 6,
+      "ready": true,
+      "pose": [
+        89,
+        3.0946882866412473,
+        -101
+      ]
+    },
+    {
+      "id": "b06-down",
+      "name": "Temperate deciduous forest",
+      "x": 8025,
+      "z": -8293,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.340940568943397,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 6,
+      "ready": true,
+      "pose": [
+        89,
+        3.0946882866412473,
+        -101
+      ]
+    },
+    {
+      "id": "b06-low",
+      "name": "Temperate deciduous forest",
+      "x": 8025,
+      "z": -8293,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 5.7701442421485005,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 6,
+      "ready": true,
+      "pose": [
+        89,
+        1.844688286641247,
+        -101
+      ]
+    },
+    {
+      "id": "b06-aerial",
+      "name": "Temperate deciduous forest",
+      "x": 8025,
+      "z": -8293,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 5.7701442421485005,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 6,
+      "ready": true,
+      "pose": [
+        89,
+        46.39468828664125,
+        -101
+      ]
+    },
+    {
+      "id": "b07-eye",
+      "name": "Tropical rainforest",
+      "x": 12951,
+      "z": -1421,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 1.5582460008691603,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 7,
+      "ready": true,
+      "pose": [
+        23,
+        6.4841711530064865,
+        115
+      ]
+    },
+    {
+      "id": "b07-eye-rev",
+      "name": "Tropical rainforest",
+      "x": 12951,
+      "z": -1421,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.699838654458953,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 7,
+      "ready": true,
+      "pose": [
+        23,
+        6.4841711530064865,
+        115
+      ]
+    },
+    {
+      "id": "b07-down",
+      "name": "Tropical rainforest",
+      "x": 12951,
+      "z": -1421,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 3.129042327664057,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 7,
+      "ready": true,
+      "pose": [
+        23,
+        6.4841711530064865,
+        115
+      ]
+    },
+    {
+      "id": "b07-low",
+      "name": "Tropical rainforest",
+      "x": 12951,
+      "z": -1421,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 1.5582460008691603,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 7,
+      "ready": true,
+      "pose": [
+        23,
+        5.2341711530064865,
+        115
+      ]
+    },
+    {
+      "id": "b07-aerial",
+      "name": "Tropical rainforest",
+      "x": 12951,
+      "z": -1421,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 1.5582460008691603,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 7,
+      "ready": true,
+      "pose": [
+        23,
+        49.78417115300648,
+        115
+      ]
+    },
+    {
+      "id": "b08-eye",
+      "name": "Temperate rainforest",
+      "x": -11351,
+      "z": -11019,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 2.9555075253001286,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 8,
+      "ready": true,
+      "pose": [
+        -87,
+        11.091972689244288,
+        -11
+      ]
+    },
+    {
+      "id": "b08-eye-rev",
+      "name": "Temperate rainforest",
+      "x": -11351,
+      "z": -11019,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 6.097100178889922,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 8,
+      "ready": true,
+      "pose": [
+        -87,
+        11.091972689244288,
+        -11
+      ]
+    },
+    {
+      "id": "b08-down",
+      "name": "Temperate rainforest",
+      "x": -11351,
+      "z": -11019,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.526303852095025,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 8,
+      "ready": true,
+      "pose": [
+        -87,
+        11.091972689244288,
+        -11
+      ]
+    },
+    {
+      "id": "b08-low",
+      "name": "Temperate rainforest",
+      "x": -11351,
+      "z": -11019,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 2.9555075253001286,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 8,
+      "ready": true,
+      "pose": [
+        -87,
+        9.841972689244288,
+        -11
+      ]
+    },
+    {
+      "id": "b08-aerial",
+      "name": "Temperate rainforest",
+      "x": -11351,
+      "z": -11019,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 2.9555075253001286,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 8,
+      "ready": true,
+      "pose": [
+        -87,
+        54.39197268924429,
+        -11
+      ]
+    },
+    {
+      "id": "b09-eye",
+      "name": "Taiga",
+      "x": 15727,
+      "z": 8687,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.311258951114587,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 9,
+      "ready": true,
+      "pose": [
+        111,
+        2.4679889096486765,
+        111
+      ]
+    },
+    {
+      "id": "b09-eye-rev",
+      "name": "Taiga",
+      "x": 15727,
+      "z": 8687,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.45285160470438,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 9,
+      "ready": true,
+      "pose": [
+        111,
+        2.4679889096486765,
+        111
+      ]
+    },
+    {
+      "id": "b09-down",
+      "name": "Taiga",
+      "x": 15727,
+      "z": 8687,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.882055277909483,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 9,
+      "ready": true,
+      "pose": [
+        111,
+        2.4679889096486765,
+        111
+      ]
+    },
+    {
+      "id": "b09-low",
+      "name": "Taiga",
+      "x": 15727,
+      "z": 8687,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 4.311258951114587,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 9,
+      "ready": true,
+      "pose": [
+        111,
+        1.2179889096486762,
+        111
+      ]
+    },
+    {
+      "id": "b09-aerial",
+      "name": "Taiga",
+      "x": 15727,
+      "z": 8687,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 4.311258951114587,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 9,
+      "ready": true,
+      "pose": [
+        111,
+        45.76798890964868,
+        111
+      ]
+    },
+    {
+      "id": "b10-eye",
+      "name": "Tundra",
+      "x": -9757,
+      "z": 14475,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.182892557830485,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 10,
+      "ready": true,
+      "pose": [
+        -29,
+        3.60241958608622,
+        11
+      ]
+    },
+    {
+      "id": "b10-eye-rev",
+      "name": "Tundra",
+      "x": -9757,
+      "z": 14475,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 7.324485211420278,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 10,
+      "ready": true,
+      "pose": [
+        -29,
+        3.60241958608622,
+        11
+      ]
+    },
+    {
+      "id": "b10-down",
+      "name": "Tundra",
+      "x": -9757,
+      "z": 14475,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 5.753688884625381,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 10,
+      "ready": true,
+      "pose": [
+        -29,
+        3.60241958608622,
+        11
+      ]
+    },
+    {
+      "id": "b10-low",
+      "name": "Tundra",
+      "x": -9757,
+      "z": 14475,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 4.182892557830485,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 10,
+      "ready": true,
+      "pose": [
+        -29,
+        2.35241958608622,
+        11
+      ]
+    },
+    {
+      "id": "b10-aerial",
+      "name": "Tundra",
+      "x": -9757,
+      "z": 14475,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 4.182892557830485,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 10,
+      "ready": true,
+      "pose": [
+        -29,
+        46.90241958608622,
+        11
+      ]
+    },
+    {
+      "id": "b11-eye",
+      "name": "Glacier",
+      "x": 13703,
+      "z": -14213,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 0.04321294988995848,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 11,
+      "ready": true,
+      "pose": [
+        7,
+        15.8676568236723,
+        -5
+      ]
+    },
+    {
+      "id": "b11-eye-rev",
+      "name": "Glacier",
+      "x": 13703,
+      "z": -14213,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 3.1848056034797514,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 11,
+      "ready": true,
+      "pose": [
+        7,
+        15.8676568236723,
+        -5
+      ]
+    },
+    {
+      "id": "b11-down",
+      "name": "Glacier",
+      "x": 13703,
+      "z": -14213,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 1.614009276684855,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 11,
+      "ready": true,
+      "pose": [
+        7,
+        15.8676568236723,
+        -5
+      ]
+    },
+    {
+      "id": "b11-low",
+      "name": "Glacier",
+      "x": 13703,
+      "z": -14213,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 0.04321294988995848,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 11,
+      "ready": true,
+      "pose": [
+        7,
+        14.6176568236723,
+        -5
+      ]
+    },
+    {
+      "id": "b11-aerial",
+      "name": "Glacier",
+      "x": 13703,
+      "z": -14213,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 0.04321294988995848,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 11,
+      "ready": true,
+      "pose": [
+        7,
+        59.1676568236723,
+        -5
+      ]
+    },
+    {
+      "id": "b12-eye",
+      "name": "Wetland",
+      "x": 2919,
+      "z": -12433,
+      "tag": "eye",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 1.619917057761936,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 12,
+      "ready": true,
+      "pose": [
+        -25,
+        2,
+        111
+      ]
+    },
+    {
+      "id": "b12-eye-rev",
+      "name": "Wetland",
+      "x": 2919,
+      "z": -12433,
+      "tag": "eye-rev",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 4.761509711351729,
+      "pitch": -0.08,
+      "fov": 68,
+      "biome": 12,
+      "ready": true,
+      "pose": [
+        -25,
+        2,
+        111
+      ]
+    },
+    {
+      "id": "b12-down",
+      "name": "Wetland",
+      "x": 2919,
+      "z": -12433,
+      "tag": "down",
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "yaw": 3.1907133845568323,
+      "pitch": -0.62,
+      "fov": 68,
+      "biome": 12,
+      "ready": true,
+      "pose": [
+        -25,
+        2,
+        111
+      ]
+    },
+    {
+      "id": "b12-low",
+      "name": "Wetland",
+      "x": 2919,
+      "z": -12433,
+      "tag": "low",
+      "mode": "fly",
+      "heightAboveGround": 0.45,
+      "yaw": 1.619917057761936,
+      "pitch": 0.03,
+      "fov": 55,
+      "biome": 12,
+      "ready": true,
+      "pose": [
+        -25,
+        0.75,
+        111
+      ]
+    },
+    {
+      "id": "b12-aerial",
+      "name": "Wetland",
+      "x": 2919,
+      "z": -12433,
+      "tag": "aerial",
+      "mode": "fly",
+      "heightAboveGround": 45,
+      "yaw": 1.619917057761936,
+      "pitch": -0.42,
+      "fov": 60,
+      "biome": 12,
+      "ready": true,
+      "pose": [
+        -25,
+        45.3,
+        111
+      ]
+    }
+  ],
+  "failures": [],
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-10-17T01:44:59.861Z"
+}
