@@ -225,7 +225,8 @@ export function createStylizedWaterMaterial({
     surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
     currentStrength,
   }));
-  const seaOptics = sea ? createSeaOpticsNodes(waterDepth, water.sea.optics) : null;
+  const oceanWeight = appearance?.ocean ?? sea?.mask ?? float(0);
+  const seaOptics = water.sea?.enabled && quality.depthOptics ? createSeaOpticsNodes(waterDepth, water.sea.optics) : null;
   const distort = surfaceNoise.sub(0.5).mul(water.distortAmount);
   const sampleUv = surfacePatterns.latticePoint('cells', localXZ)
     .add(surfaceOffset)
@@ -296,10 +297,10 @@ export function createStylizedWaterMaterial({
     const verticalDistance = mix(waterDepth, cameraSubmersionDepth, underwaterBlend);
     opticalDistance = min(
       verticalDistance.div(viewCosine),
-      seaOptics ? mix(float(optics.maximumOpticalDistance), float(seaOptics.settings.maximumOpticalDistance), sea.mask)
+      seaOptics ? mix(float(optics.maximumOpticalDistance), float(seaOptics.settings.maximumOpticalDistance), oceanWeight)
         : optics.maximumOpticalDistance,
     );
-    let density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), sea.mask)
+    let density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), oceanWeight)
       : float(optics.absorptionDensity);
     if (appearance) density = appearance.density(density);
     const transmission = exp(opticalDistance.mul(density).negate());
@@ -311,7 +312,7 @@ export function createStylizedWaterMaterial({
       colorNode(optics.deepColor),
       depthMix,
     );
-    let depthColor = seaOptics ? mix(inlandColor, seaOptics.color, sea.mask) : inlandColor;
+    let depthColor = seaOptics ? mix(inlandColor, seaOptics.color, oceanWeight) : inlandColor;
     if (appearance) depthColor = appearance.color(depthColor, waterDepth);
     bodyColor = mix(
       depthColor,
@@ -334,7 +335,7 @@ export function createStylizedWaterMaterial({
     if (seaOptics) {
       const seaFresnel = pow(oneMinus(reflectionCosine), 3).mul(0.96).add(0.04)
         .mul(Math.min(1, seaOptics.settings.fresnelStrength * quality.fresnelStrength / 0.42));
-      surfaceReflection = mix(surfaceReflection, seaFresnel.mul(reflectionVisibility), sea.mask);
+      surfaceReflection = mix(surfaceReflection, seaFresnel.mul(reflectionVisibility), oceanWeight);
     }
     color = mix(bodyColor, legacyColor, surfaceDetailMix);
     alpha = mix(
@@ -450,7 +451,7 @@ export function createStylizedWaterMaterial({
       refraction.absorptionCoefficients[1],
       refraction.absorptionCoefficients[2],
     );
-    let coefficients = seaOptics ? mix(inlandCoefficients, seaOptics.absorption, sea.mask) : inlandCoefficients;
+    let coefficients = seaOptics ? mix(inlandCoefficients, seaOptics.absorption, oceanWeight) : inlandCoefficients;
     if (appearance) coefficients = appearance.absorption(coefficients);
     const channelTransmission = exp(coefficients.mul(opticalDistance).negate());
     const refractedBody = sceneColor.mul(channelTransmission)
@@ -534,7 +535,7 @@ export function createStylizedWaterMaterial({
     color = mix(
       color,
       reflections ? reflections.sample(reflected, sky, float(0.65),
-        sea ? waterRippleRefraction(sea.normal, vec3(0, 1, 0)).mul(0.014) : vec2(0)) : sky,
+        sea ? waterRippleRefraction(sea.normal, vec3(0, 1, 0)).mul(0.014) : vec2(0), sea?.roughness ?? float(.15)) : sky,
       clamp(river ? surfaceReflection.mul(oneMinus(inland)) : surfaceReflection, 0, 1),
     );
   }
@@ -544,7 +545,7 @@ export function createStylizedWaterMaterial({
       color,
       reflections ? reflections.sample(river.reflected, river.sky.mul(skyLightUniforms.reflectionTint),
         oneMinus(smoothstep(0.05, 0.2, currentStrength)).mul(oneMinus(fall)),
-        waterRippleRefraction(river.normal, river.baseNormal).mul(0.014))
+        waterRippleRefraction(river.normal, river.baseNormal).mul(0.014), river.roughness)
         : river.sky.mul(skyLightUniforms.reflectionTint),
       river.fresnel.mul(oneMinus(fall.mul(0.85))).mul(reflectionVisibility).mul(inland),
     );

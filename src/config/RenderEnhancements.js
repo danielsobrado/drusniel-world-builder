@@ -4,6 +4,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   waterReflections: Object.freeze({
     enabled: true,
     planar: true,
+    roughnessFiltering: true,
     resolution: 128,
     intervalMs: 500,
     reachMeters: 96,
@@ -35,7 +36,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
-  for (const key of ['enabled', 'planar']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
+  for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
   if (![1, 2].includes(value.shadowCascades)) throw new RangeError('shadowCascades must be 1 or 2.');
   if (!Number.isFinite(value.detailTurnMarginDegrees) || value.detailTurnMarginDegrees < 8 || value.detailTurnMarginDegrees > 45) {
     throw new RangeError('detailTurnMarginDegrees must be within [8, 45] to cover pending camera turns.');

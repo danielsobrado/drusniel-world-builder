@@ -23,7 +23,7 @@ const FEATURES_BY_TIER = Object.freeze({
     flow: false,
     cellularSurface: false,
     fresnelStrength: 0,
-    depthOptics: false,
+    depthOptics: true,
     refraction: false,
     refractionStrength: 0,
     foam: false,
@@ -107,6 +107,7 @@ export function validateWaterVisualConfig(waterConfig) {
   }
   assertFiniteRange(waterConfig.currentAnimationSpeed, 'stylizedSurface.water.currentAnimationSpeed', 0, 4);
   assertFiniteRange(waterConfig.currentInfluence, 'stylizedSurface.water.currentInfluence', 0, 2);
+  if (waterConfig.interaction && typeof waterConfig.interaction.enabled !== 'boolean') throw new Error('water.interaction.enabled must be boolean.');
   validateWaterOpticsConfig(waterConfig.optics);
   validateWaterRefractionConfig(waterConfig.refraction);
   validateWaterFoamConfig(waterConfig.foam);

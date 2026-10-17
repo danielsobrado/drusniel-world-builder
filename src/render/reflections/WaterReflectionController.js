@@ -6,6 +6,7 @@ import { preparePlanarCamera } from './PlanarCamera.js';
 import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
 import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js';
+import { filteredWaterCube, filteredWaterPlanar } from './WaterReflectionFilter.js';
 
 const OVERLAY_REFRESH_CAPTURES = 32;
 
@@ -32,6 +33,7 @@ export class WaterReflectionController {
     this.face = 0;
     this.nextCapture = 0;
     this.lastPlanar = -Infinity;
+    this.lastCube = -Infinity;
     this.sceneRevisionState = new Float64Array(4);
     this.sceneRevisionState.fill(Number.NaN);
     this.disposed = false;
@@ -48,17 +50,31 @@ export class WaterReflectionController {
     this.lastCaptureCpuMs = 0;
   }
 
-  sample(direction, fallback, allowPlanar = float(1), distortion = vec2(0)) {
+  sample(direction, fallback, allowPlanar = float(1), distortion = vec2(0), roughness = float(0)) {
     const local = this.valid.mul(smoothstep(this.config.reachMeters * 0.7, this.config.reachMeters,
       distance(positionWorld, this.origin)).oneMinus());
-    let result = mix(fallback, this.cube.sample(direction).rgb, local);
+    const cube = this.config.roughnessFiltering === false ? this.cube.sample(direction).rgb
+      : filteredWaterCube(this.cube, direction, roughness);
+    let result = mix(fallback, cube, local);
     if (this.planar) {
       const { uv, weight: projectionWeight } = this.reprojection.uvNode();
       const weight = projectionWeight.mul(local).mul(allowPlanar)
         .mul(smoothstep(0.1, 0.3, abs(positionWorld.y.sub(this.planarHeight))).oneMinus());
-      result = mix(result, this.planar.sample(uv.add(distortion).clamp(0, 1)).rgb, weight);
+      const point = uv.add(distortion);
+      const planar = this.config.roughnessFiltering === false ? this.planar.sample(point.clamp(0, 1)).rgb
+        : filteredWaterPlanar(this.planar, point, roughness, this.config.resolution);
+      result = mix(result, planar, weight);
     }
     return result;
+  }
+
+  getDiagnostics(now = performance.now()) {
+    return { cubeValid: this.valid.value, planarValid: this.planarValid.value,
+      cubeAgeMs: Number.isFinite(this.lastCube) ? now - this.lastCube : null,
+      planarAgeMs: Number.isFinite(this.lastPlanar) ? now - this.lastPlanar : null,
+      facePending: this.face, canonicalProbe: { ...this.canonicalProbe },
+      poolTargets: this.targets.length + (this.planarTarget ? 1 : 0),
+      roughnessFiltering: this.config.roughnessFiltering !== false };
   }
 
   invalidate() {
@@ -164,6 +180,7 @@ export class WaterReflectionController {
         this.face += 1;
         PerfCounters.inc('waterProbeFaces');
         if (this.face === 6) {
+          this.lastCube = now;
           this.front = 1 - this.front;
           this.cube.value = this.targets[this.front].texture;
           this.canonicalProbe.x = this.pendingProbe.x;

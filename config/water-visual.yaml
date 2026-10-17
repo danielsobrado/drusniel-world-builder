@@ -2,6 +2,8 @@ water:
   qualityTier: high
   currentAnimationSpeed: 0.22
   currentInfluence: 0.85
+  interaction:
+    enabled: true
   # Inland water after grass-test's (`WaterMaterial`, river and lake branch): a
   # dark, clear teal — `#246d70` lit, `#164e52` deep — over a bed it absorbs red
   # from first. The former bright cyan (#72d8e8 → #0b4a68) with a white cell

@@ -116,15 +116,16 @@ export function createSeaSurfaceNodes({
     float(config.stormWhitecapThreshold),
     storm,
   );
+  const roughness = float(0.055).add(storm.mul(0.09))
+    .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
 
   return {
     displacement: height.mul(amplitude),
     release: detail?.release,
     normal,
     foamNoise,
+    roughness,
     glint(viewDirection) {
-      const roughness = float(0.055).add(storm.mul(0.09))
-        .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
       const specular = dot(sun.negate().reflect(normal), viewDirection).max(0);
       const exponent = mix(float(190), float(18), smoothstep(0.05, 0.48, roughness));
       return pow(specular, exponent).mul(1.55)

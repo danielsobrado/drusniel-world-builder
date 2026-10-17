@@ -69,6 +69,7 @@ export class WorldVisualQa {
       ].map(([name,queue])=>[name,queue?.getDiagnostics({includeJobs:true})??null])),resources:trackedWorldResources(e),counters:PerfCounters.snapshot(),
       sky:e.skyLooks?.current,wind:e.worldWind?.getState?.()??null,weather:{...e.weatherSettings},
       renderPath:e.terrainView.activeRenderPath??'unknown',finishApplications:e.terrainView.finishApplications??0,
+      waterReflections:e.stylizedSurface.reflections?.getDiagnostics?.()??null,
       backend:e.terrainView.rendererBackendStatus?.mode,clock:{hour:e.dayNightCycle?.hour,paused:e.dayNightCycle?.paused}};
   }
   async settle({minimumMs=16000,timeoutMs=120000}={}) {

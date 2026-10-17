@@ -144,11 +144,17 @@ export function createRiverSurfaceNodes({
   const macro = patterns && localXZ ? periodicFbm2(patterns.latticePoint('riverMacro', localXZ)).toVar('riverMacro') : float(.5);
   const warp = vec2(macro.sub(.5).mul(2.6), macro.mul(macro).sub(.25).mul(1.9));
   const detailUv = patternXZ.mul(DETAIL_SCALE).add(warp);
+  const geometric = positionWorld.dFdx().cross(positionWorld.dFdy());
+  const baseNormal = normalize(geometric.mul(select(geometric.y.lessThan(0), -1, 1))).toVar('riverBaseNormal');
+  const gradient = baseNormal.xz.length().div(max(baseNormal.y, .05));
+  const energy = smoothstep(.002, .08, gradient).max(fall);
+  const margin = smoothstep(.2, 3.5, shoreDistance);
   // Drift per cross-fade cycle, in detail tiles. Still water keeps the donor's
   // lake drift (0.13, 0.07 of a tile per cycle), rivers move with the current.
   const cycle = float(config.cycleSeconds);
   const lakeDrift = vec2(0.13, 0.07).normalize().mul(config.stillDrift);
-  const riverDrift = direction.mul(currentStrength.mul(config.currentDrift));
+  const visualSpeed = energy.mul(.75).add(.25).mul(margin.mul(.7).add(.3));
+  const riverDrift = direction.mul(visualSpeed.mul(config.currentDrift));
   const drift = mix(lakeDrift, riverDrift, current).mul(cycle.mul(DETAIL_SCALE));
 
   // Two phases half a cycle apart, each faded out as it jumps back.
@@ -173,9 +179,6 @@ export function createRiverSurfaceNodes({
 
   // The terrain-grid water sheet has displaced positions but flat geometry
   // normals. Recover its actual incline so falls do not reflect a level lake.
-  const geometric = positionWorld.dFdx().cross(positionWorld.dFdy());
-  const baseNormal = normalize(geometric.mul(select(geometric.y.lessThan(0), -1, 1)))
-    .toVar('riverBaseNormal');
   const downhill = dot(baseNormal.xz, direction).negate().div(max(baseNormal.y, 0.01));
   const downstream = normalize(vec3(direction.x, downhill, direction.y));
   const across = normalize(downstream.cross(baseNormal));
@@ -201,9 +204,6 @@ export function createRiverSurfaceNodes({
   const foamNoise = mix(a.b, b.b, blend);
   // Current is normalized direction, not a measured speed. Fast-looking foam
   // must be earned by local slope/drop energy rather than every river texel.
-  const gradient = baseNormal.xz.length().div(max(baseNormal.y, .05));
-  const energy = smoothstep(.002, .08, gradient).max(fall);
-  const margin = smoothstep(.2, 3.5, shoreDistance);
   const turbulence = energy.mul(.34).mul(current).mul(margin);
   const shore = smoothstep(0.02, 0.13, waterDepth).mul(oneMinus(smoothstep(0.22, 0.75, waterDepth)));
   const streaks = smoothstep(.48, .8, foamNoise).mul(macro.mul(.7).add(.3));
@@ -213,5 +213,6 @@ export function createRiverSurfaceNodes({
     .mul(smoothstep(0.48, 0.82, foamNoise)).mul(0.22);
   const foam = riverShore.add(bankFoam).mul(oneMinus(fall)).clamp(0, 0.94);
 
-  return { fresnel, sky, glint, foam, foamNoise, reflected, normal, baseNormal };
+  return { fresnel, sky, glint, foam, foamNoise, reflected, normal, baseNormal,
+    roughness: energy.mul(.15).add(.12), visualSpeed, energy };
 }

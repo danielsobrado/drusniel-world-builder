@@ -34,6 +34,7 @@ function createPage(chunkX, chunkZ) {
     surfaceMaskPixels: new Uint8Array((CHUNK_SIZE + 1) ** 2 * 4),
     waterFieldPixels: new Uint16Array((CHUNK_SIZE + 1) ** 2 * 4),
     waterFlowPixels: new Uint8Array((CHUNK_SIZE + 1) ** 2 * 4),
+    waterAppearancePixels: new Uint8Array((CHUNK_SIZE + 1) ** 2 * 4),
   };
 }
 

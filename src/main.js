@@ -87,6 +87,7 @@ import { HeroSelectUi } from './editor/character/HeroSelectUi.js';
 import { updateCharacterOcclusion } from './editor/character/CharacterOcclusion.js';
 import { WorldWindPass } from './editor/weather/wind/WorldWindPass.js';
 import { WaterfallMist } from './editor/stylized/mist/WaterfallMist.js';
+import { WaterInteractionSurface } from './editor/stylized/WaterInteractionSurface.js';
 import { createRiverFallSiteSource } from './editor/water/RiverFallSites.js';
 import { resolveWaterQualityFeatures } from './editor/water/WaterQuality.js';
 import { configureSea, updateSeaState } from './editor/water/seaState.js';
@@ -1081,6 +1082,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     getFallSites: fallSites,
   });
   resources.own(worldSoundscape);
+  const waterInteraction = resources.own(new WaterInteractionSurface({ terrainView,
+    player: playerController, config: config.stylizedSurface.water }));
   const weatherController = weatherEnabled
     ? createWeatherController({
       scene: terrainView.scene,
@@ -1757,6 +1760,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       rain: frameWeatherAudio.rain,
       seaLevel: worldStore.generator?.seaLevel,
     });
+    waterInteraction.update(frameTimestamp / 1000, viewModeController.mode === PLAYER_MODE_WALK && !viewModeController.paused);
     worldSoundscape.update(frameTimestamp / 1000, viewModeController.camera);
     const frameSeconds = frameTimestamp / 1000;
     const frameDelta = lastWetnessSeconds === null ? 0 : Math.min(1, frameSeconds - lastWetnessSeconds);
