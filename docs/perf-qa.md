@@ -208,8 +208,11 @@ hardware evidence are documented in
 [performance-improvements-2026-10-16.md](performance-improvements-2026-10-16.md).
 
 Recovery now uses the last retained movement frame as a conservative time
-origin. `recovery.observerDelayMs` includes the report/diagnostic handoff before
-observation begins; this delay is no longer free recovery time. Older captures
+origin. Movement-end detail/grass snapshots stay in the page while recovery is
+observed; the large frame report transfers afterward, so its serialization
+cannot block the recovery it measures. `recovery.observerDelayMs` records the
+remaining handoff before observation begins. This delay is no longer free
+recovery time. Older captures
 timed only from observer entry, so compare their recovery figures with that
 limitation. Frame pacing statistics still include only measured movement.
 

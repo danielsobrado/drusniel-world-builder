@@ -279,8 +279,7 @@ const fs = require('fs');
     await page.waitForFunction(() => window.__perfQa?.status === 'done', null, {
       timeout: ${timeoutMs},
     });
-    const report = await page.evaluate(() => window.__perfQa.getReport());
-    report.detailVisibilityAtStop = await page.evaluate(() => window.__editor.stylizedSurface.detailViews
+    const detailVisibilityAtStop = await page.evaluate(() => window.__editor.stylizedSurface.detailViews
       .filter(view => view.visibility).map(view => {
         const visibility = view.visibility;
         const eligible = visibility.instances?.reduce((sum, rows) => sum + rows.length, 0) ?? 0;
@@ -288,13 +287,20 @@ const fs = require('fs');
         return { layer: view.layerName, eligible, full, pending: Boolean(visibility.job),
           submitted: full ? eligible : view.meshes.reduce((sum, parts) => sum + (parts[0]?.count ?? 0), 0) };
       }));
+    if (${hasFlag('grass-diagnostics')}) await readGrassDiagnostics(true);
+    // Observe recovery before transferring the multi-megabyte frame report.
+    // Its protocol serialization otherwise blocks the very work being timed.
+    const recovery = ${drainSeconds} > 0 ? await observeRecovery() : null;
+    const report = await page.evaluate(() => window.__perfQa.getReport());
+    report.detailVisibilityAtStop = detailVisibilityAtStop;
     report.preparationQueuesDuringWarmup = await page.evaluate(() => window.__perfQaWarmupQueues);
     report.preparationQueuesAtStart = preparationQueuesAtStart;
-    const readGrassDiagnostics = () => page.evaluate(async () => {
+    async function readGrassDiagnostics(hold = false) { return page.evaluate(async hold => {
+        if (!hold && Object.hasOwn(window, '__perfGrassAtStop')) return window.__perfGrassAtStop;
         const field = window.__editor.stylizedSurface.meadowGrass;
         if (!field) return null;
         const { MeadowTileLayer } = await import('/src/editor/stylized/meadow/MeadowTileLayer.js');
-        return { state: field.getState(), batches: ['blades', 'cards'].flatMap(name => {
+        const result = { state: field.getState(), batches: ['blades', 'cards'].flatMap(name => {
           const layer = field[name];
           if (!layer) return [];
           return [...layer.batches.batches].map(([band, batch]) => ({
@@ -318,7 +324,9 @@ const fs = require('fs');
             jobBand: tile.job?.band, jobRevision: tile.job?.revision, progress: tile.job?.compaction.progress,
           }));
         }) };
-    });
+        if (hold) { window.__perfGrassAtStop = structuredClone(result); return null; }
+        return result;
+    }, hold); }
     if (${hasFlag('grass-diagnostics')}) report.grass = await readGrassDiagnostics();
     if (cpuProfiling) {
       const { profile } = await cdp.send('Profiler.stop');
@@ -329,7 +337,7 @@ const fs = require('fs');
       );
     }
     // Separate from measured movement: finish() has already released the keys.
-    const observeRecovery = () => page.evaluate(async seconds => {
+    async function observeRecovery() { return page.evaluate(async seconds => {
         const { PerfCounters } = await import('/src/editor/performance/qa/PerfCounters.js');
         const surface = window.__editor.stylizedSurface;
         const observedAt = performance.now();
@@ -373,8 +381,8 @@ const fs = require('fs');
           grass: { ready: grassReadyFrames >= 60, firstReadyMs: grassFirstReadyMs },
           waitedMs: performance.now() - started, start,
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
-    }, ${drainSeconds});
-    if (${drainSeconds} > 0) report.recovery = await observeRecovery();
+    }, ${drainSeconds}); }
+    if (${drainSeconds} > 0) report.recovery = recovery;
     if (${hasFlag('revisit')}) {
       await page.evaluate(() => window.__perfQa.restart());
       if (${hasFlag('turn-on-revisit')}) {
@@ -388,11 +396,13 @@ const fs = require('fs');
       }
       await page.waitForFunction(() => window.__perfQa?.status === 'done'
         && window.__perfQa.getReport() !== null);
+      if (${hasFlag('grass-diagnostics')}) await readGrassDiagnostics(true);
+      const revisitRecovery = ${drainSeconds} > 0 ? await observeRecovery() : null;
       report.revisit = await page.evaluate(() => window.__perfQa.getReport());
       report.revisit.conditions = { sameBrowser: true,
         midpointCameraTurnDegrees: ${hasFlag('turn-on-revisit') ? 180 : 0} };
       if (${hasFlag('grass-diagnostics')}) report.revisit.grass = await readGrassDiagnostics();
-      if (${drainSeconds} > 0) report.revisit.recovery = await observeRecovery();
+      if (${drainSeconds} > 0) report.revisit.recovery = revisitRecovery;
     }
     report.adapter = adapter;
     report.capture = {
