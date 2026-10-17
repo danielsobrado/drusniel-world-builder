@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
 import { writeInstances } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
+import { withDrawPreparation } from '../src/render/preparation/DrawPreparation.js';
 
 function createMesh() {
   const geometry = new THREE.BufferGeometry();
@@ -55,4 +56,20 @@ test('a changed LOD fade uploads only dither data for the affected instance', ()
   attributes.forEach((attribute, index) => {
     assert.equal(attribute.version, versions[index] + (attribute === dither ? 1 : 0));
   });
+});
+
+test('empty prototype pools stay absent from rendering and can still prewarm and repopulate', () => {
+  const scene = new THREE.Scene();
+  const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial(), 2);
+  mesh.geometry.setAttribute('instanceDither', new THREE.InstancedBufferAttribute(new Float32Array(6), 3));
+  scene.add(mesh);
+  writeInstances([[mesh]], [[]]);
+  assert.equal(mesh.visible, false);
+  withDrawPreparation(scene, [mesh], () => { assert.equal(mesh.visible, true); assert.equal(mesh.count, 1); });
+  assert.equal(mesh.visible, false); assert.equal(mesh.count, 0);
+  writeInstances([[mesh]], [[instance()]]);
+  assert.equal(mesh.visible, true); assert.equal(mesh.count, 1);
+  writeInstances([[mesh]], [[]]);
+  assert.equal(mesh.visible, false);
+  mesh.geometry.dispose(); mesh.material.dispose(); mesh.dispose();
 });

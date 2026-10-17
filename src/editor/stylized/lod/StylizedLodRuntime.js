@@ -109,6 +109,7 @@ export function createInstancedRenderers({
       mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
     }
     mesh.count = 0;
+    mesh.visible = false;
     mesh.matrixAutoUpdate = false;
     mesh.castShadow = Boolean(castShadow && part.kind !== 'leaf');
     mesh.receiveShadow = true;
@@ -215,6 +216,9 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       if (dropped > 0) PerfCounters.inc('stylizedInstancesDroppedByCapacity', dropped);
       const previousCount = mesh.count;
       mesh.count = writableCount;
+      // Three updates object/material bindings before rejecting a zero-count
+      // draw. Empty prototype pools should not reach that work every frame.
+      mesh.visible = writableCount > 0;
       const dither = mesh.geometry.getAttribute('instanceDither');
       const tints = mesh.geometry.getAttribute('instanceLeafTint');
       const morphologies = mesh.geometry.getAttribute('instanceMorphology');
