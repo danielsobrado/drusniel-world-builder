@@ -24,11 +24,14 @@ async function draw(id,metadata={},capture=true,activeCamera=camera) {
 try {
  if(state.report.backend!==backend)throw new Error('Unexpected tree fixture backend.');
  const raw=loadEditorConfig().stylizedSurface;
- const context={renderer,scene,camera,draw,state,sun,fill,ambient:raw.ambientEffects,fixtureLight:params.get('light')??'neutral'};
+ const treeDiagnostic=params.get('diagnostic');
+ if(treeDiagnostic&&!['albedo','normals'].includes(treeDiagnostic))throw new Error('Unknown tree diagnostic.');
+ state.report.diagnostic=treeDiagnostic;
+ const context={renderer,scene,camera,draw,state,sun,fill,ambient:raw.ambientEffects,fixtureLight:params.get('light')??'neutral',treeDiagnostic};
  state.report.lighting=applyFixtureLighting(raw,sun,fill,context.fixtureLight);
- await runOpticalDepth(context);await runNormalRotation(context);
- if(phase!=='before')await runBakerSwatch(context);
- if(phase==='after'){await runMistCards(context);await runTreeRepresentations(context);}
+ if(!treeDiagnostic){await runOpticalDepth(context);await runNormalRotation(context);
+  if(phase!=='before')await runBakerSwatch(context);if(phase==='after')await runMistCards(context);}
+ if(phase==='after')await runTreeRepresentations(context);
  state.report.passed=state.report.checks.length>0&&state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally{target.dispose();state.report.done=true;}

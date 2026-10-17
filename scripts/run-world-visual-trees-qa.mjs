@@ -12,6 +12,8 @@ const repo=fileURLToPath(new URL('../',import.meta.url));
 const out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/trees'));
 const phase=option('--phase','after');
 const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:true});
+const diagnostic=option('--diagnostic','');
+if(diagnostic&&!['albedo','normals'].includes(diagnostic))throw new Error('Unknown tree diagnostic.');
 const lights=option('--lights','neutral')==='all'?['day','low-sun','overcast','night']:option('--lights','neutral').split(',');
 if(lights.some(l=>!['neutral','day','low-sun','overcast','night'].includes(l)))throw new Error('Unknown fixture lighting.');
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
@@ -21,7 +23,7 @@ try {
  for(const light of lights)for(const backend of ['webgpu','webgl']) {
   const key=light==='neutral'?backend:`${light}-${backend}`;console.log(`Tree fixture QA: ${key}`);
   const page=await browser.newPage({viewport:{width:800,height:600},deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);
-  await page.goto(new URL(`/scripts/fixtures/world-visual-trees.html?backend=${backend}&phase=${phase}&light=${light}`,url).href,{waitUntil:'domcontentloaded'});
+  await page.goto(new URL(`/scripts/fixtures/world-visual-trees.html?backend=${backend}&phase=${phase}&light=${light}&diagnostic=${diagnostic}`,url).href,{waitUntil:'domcontentloaded'});
   let previous=null;
   for(;;) {
    await page.waitForFunction(last=>window.__worldTreeFixture?.report.done ||

@@ -1,5 +1,6 @@
 import { runTreeAlphaCoverage } from './world-visual-tree-alpha.mjs';
 import * as THREE from 'three/webgpu';
+import { normalWorld, vec3 } from 'three/tsl';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 import { StylizedTreeView } from '/src/editor/stylized/StylizedTreeView.js';
 import { StylizedSceneAssetCache } from '/src/editor/stylized/StylizedSceneAssetCache.js';
@@ -33,7 +34,7 @@ function compare(near,other) {
  return {sharedInterior:errors.length,nearCoverage,otherCoverage,coverageRatio:otherCoverage/nearCoverage,
   medianLuminanceRatio:median(ratios),medianRgbError:median(errors)};
 }
-export async function runTreeRepresentations({renderer,scene,camera,draw,state,sun,fill,fixtureLight='neutral'}) {
+export async function runTreeRepresentations({renderer,scene,camera,draw,state,sun,fill,fixtureLight='neutral',treeDiagnostic=null}) {
  const original=loadEditorConfig().stylizedSurface,config=structuredClone(original);
  config.trees.windStrength=0;config.sky.cloudShadows.enabled=false;
  const terrainView={scene,renderer,worldStore:{tileSize:2,chunkSize:32,revision:0},getCanonicalHeight:()=>0};
@@ -50,7 +51,7 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
   state.report.prototypeSignature=signature;jungleMistUniforms.weight.value=0;
   camera.fov=35;camera.updateProjectionMatrix();sun.intensity=1;fill.intensity=.4;
   const lighting=applyFixtureLighting(original,sun,fill,fixtureLight);
-  for(const asset of assets) {
+  for(const asset of treeDiagnostic ? assets.slice(-1) : assets) {
    const index=view.prototypeIndicesByAsset.get(asset)?.[0];
    if(!Number.isInteger(index))throw new Error(`No production prototype for ${asset}.`);
    const parts=view.prototypes[index],atlas=atlases.find(a=>a.prototypeIndex===index),bounds=new THREE.Box3();
@@ -80,6 +81,11 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
    const records=[{x:center.x,y:atlas.centerY,z:center.z,scale:1,yaw:0,fade:1,seed:.5,radius:atlas.radius,appearance:[1,1,1,1]}];
    for(const batch of [cpu,gpu].filter(Boolean)){batch.uniforms.windStrength.value=0;batch.setRecords(records);batch.update(camera,{x:0,z:0},0);}
    const groups={near:near.flat(),proxy:proxy.flat(),'cpu-impostor':[cpu.mesh],...(gpu?{'gpu-impostor':[gpu.mesh]}:{})};
+   if(treeDiagnostic)for(const mesh of Object.values(groups).flat()) {
+    const material=mesh.material;
+    material.emissiveNode=treeDiagnostic==='normals'?normalWorld.mul(.5).add(.5):material.colorNode;
+    material.colorNode=vec3(0);
+   }
    try {
     for(const azimuth of [0,90,180,270]) {
      const angle=THREE.MathUtils.degToRad(azimuth),sunElevation=THREE.MathUtils.degToRad(42);

@@ -36,7 +36,7 @@ try {
     if (source.sourceSnapshot?.files[file] && source.sourceSnapshot.files[file] !== await fileHash(path.join(root, file))) throw new Error(`Selection source changed: ${file}`);
   }
   report.configSha256 = await fileHash(path.join(root, 'editor.config.yaml'));
-  report.mapSha256 = await fileHash(path.join(root, 'public/maps/Eldara Full 2026-07-23-20-37.json'));
+  report.mapSha256 = await fileHash(path.join(root, 'maps/Eldara Full 2026-07-23-20-37.json'));
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   browser = await chromium.launch({ headless: false,
     args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
