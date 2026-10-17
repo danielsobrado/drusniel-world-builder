@@ -1,7 +1,7 @@
 import { evaluateAquaticPlacement } from '../water/AquaticPlacement.js';
 import { evaluateStrandPlacement } from './strandPlacement.js';
 import { evaluateShoreHabitat } from './shoreHabitat.js';
-import { staticWaterAt } from '../water/StaticWaterSample.js';
+import { staticWaterContactAt } from '../water/StaticWaterSample.js';
 import { lakeWavePhases } from '../water/LakeSurfaceWaves.js';
 import { resolveWaterQualityFeatures } from '../water/WaterQuality.js';
 
@@ -9,6 +9,11 @@ import { resolveWaterQualityFeatures } from '../water/WaterQuality.js';
 export function evaluateDetailSurfacePlacement(view, candidate, heightAt) {
   let metadata = null;
   if (view.layerName === 'aquaticPlant') {
+    // Most candidates are on dry land. Establish identity before paying for
+    // bed interpolation and shore distance; wet plants still use the complete
+    // canonical sample below, including flow, edits and animated surface rise.
+    if (typeof view.terrainView.worldStore?.generator?.sampleWaterSurface === 'function'
+        && !staticWaterContactAt(view.terrainView, candidate.x, candidate.z)?.kind) return null;
     const waterSample = view.terrainView.getCanonicalWater?.(candidate.x, candidate.z);
     metadata = evaluateAquaticPlacement({
       waterSample,
@@ -40,7 +45,7 @@ export function evaluateDetailSurfacePlacement(view, candidate, heightAt) {
       const habitat = evaluateShoreHabitat(candidate, shoreRule, {
         distanceAt: (x, z) => view.oceanDistance.worldDistanceAt(x, z),
         heightAt: heightAt,
-        waterAt: (x, z) => staticWaterAt(view.terrainView, x, z),
+        waterAt: (x, z) => staticWaterContactAt(view.terrainView, x, z),
         seaLevel: view.terrainView.worldStore.generator.seaLevel,
       });
       if (!habitat) return null;
