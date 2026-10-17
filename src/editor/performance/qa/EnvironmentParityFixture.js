@@ -11,6 +11,7 @@ import { runRiverAppearanceFixture } from './RiverAppearanceFixture.js';
 import { runWaterBodyAppearanceFixture } from './WaterBodyAppearanceFixture.js';
 import { runTerrainCoastAppearanceFixture } from './TerrainCoastAppearanceFixture.js';
 import { runShoreDetailsAppearanceFixture } from './ShoreDetailsAppearanceFixture.js';
+import { runUnderwaterWaterlineFixture } from './UnderwaterWaterlineFixture.js';
 
 // A bounded render fixture. The world movement harness remains the performance authority.
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
@@ -41,7 +42,9 @@ async function publishCapture(id, extra = {}) {
 }
 try {
   if (actualBackend !== backend) throw new Error(`Requested ${backend}, renderer selected ${actualBackend}.`);
-  if (new URLSearchParams(location.search).has('shoreDetails')) {
+  if (new URLSearchParams(location.search).has('waterline')) {
+    await runUnderwaterWaterlineFixture(renderer, publishCapture);
+  } else if (new URLSearchParams(location.search).has('shoreDetails')) {
     await runShoreDetailsAppearanceFixture(renderer, publishCapture);
   } else {
   const manifest = await (await fetch('/assets/impostors/trees/manifest.json')).json();
@@ -84,6 +87,7 @@ try {
   await runSeaSurfFixture(renderer, publishCapture);
   await runRiverAppearanceFixture(renderer, publishCapture);
   await runWaterBodyAppearanceFixture(renderer, publishCapture);
+  await runUnderwaterWaterlineFixture(renderer, publishCapture);
   await runTerrainCoastAppearanceFixture(renderer, publishCapture);
   }
 } catch (error) { state.report.failure = error.stack; }

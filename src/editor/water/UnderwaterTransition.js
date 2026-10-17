@@ -15,3 +15,10 @@ export function advanceUnderwaterBlend(current, submerged, deltaSeconds, transit
 export function mixNumber(left, right, amount) {
   return left + (right - left) * clamp01(amount);
 }
+
+/** Keep submerged pixels coloured while the eye straddles the surface. */
+export function resolveWaterlineBlend({ enabled, surfaceHeight, eyeY, range }) {
+  if (!enabled || !Number.isFinite(surfaceHeight)
+      || !Number.isFinite(eyeY) || !Number.isFinite(range) || range <= 0) return 0;
+  return 1 - clamp01(Math.max(0, eyeY - surfaceHeight) / range);
+}

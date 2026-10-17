@@ -67,6 +67,7 @@ export class UnderwaterViewController {
         optics: config.optics,
         floatingOrigin: terrainView.floatingOrigin,
         waterSlots: () => terrainView.stylizedSurface?.waterSlots ?? [],
+        waterlineRange: waterVisual.optics?.surfaceTransitionDepth,
       })
       : null;
     this.originalTerrainRender = terrainView.render;
@@ -75,7 +76,7 @@ export class UnderwaterViewController {
     this.causticsPrewarmHook = null;
     if (this.causticsPostProcess) {
       this.causticsRenderHook = (camera) => {
-        if (this.causticsPostProcess.active) {
+        if (this.causticsPostProcess.isActiveForCamera(camera)) {
           terrainView.beforeMainRender?.(camera);
           this.causticsPostProcess.render(camera);
           terrainView.afterMainRender?.(camera);
@@ -184,6 +185,8 @@ export class UnderwaterViewController {
       this.config.transitionSeconds,
     );
     const causticsState = { blend: this.blend };
+    causticsState.waterlineEnabled = Boolean(status.enabled && status.waterDepth > 0
+      && Number.isFinite(status.waterSurfaceHeight));
     causticsState.waterKind = status.waterKind;
     if (status.headSubmerged || status.waterDepth > 0) {
       causticsState.surfaceHeight = status.waterSurfaceHeight;

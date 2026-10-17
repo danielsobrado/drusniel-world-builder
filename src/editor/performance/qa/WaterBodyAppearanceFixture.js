@@ -118,7 +118,6 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
     clock.value += 2.4; await draw('lake-moving');
     height = 0; oceanMask.value = 1; updateBed(0); mesh.material = build(false);
     surface.waterSlots[0].material = build(false, false);
-    underwater.update({ blend: 1, surfaceHeight: 0, waterKind: 1 });
     const submerged = async id => {
       updateSeaState({ timeSeconds: clock.value, seaLevel: 0, storm: 0, rain: 0 });
       let viewportCopies = 0;
@@ -132,6 +131,14 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
       if (renderer.backend.isWebGPUBackend) await renderer.backend.device.queue.onSubmittedWorkDone();
       await capture(id, { time: clock.value, eyeDepth: underwater.opticsState.depth.value, viewportCopies });
     };
+    camera.position.set(12, .04, 25); camera.lookAt(12, .04, -15); camera.updateMatrixWorld();
+    underwater.update({ blend: 0, surfaceHeight: 0, waterKind: 1 });
+    await draw('water-split-off');
+    underwater.update({ blend: 0, surfaceHeight: 0, waterKind: 1, waterlineEnabled: true });
+    await submerged('water-split');
+    camera.position.y = -.04; camera.lookAt(12, -.04, -15); camera.updateMatrixWorld();
+    await submerged('water-split-below');
+    underwater.update({ blend: 1, surfaceHeight: 0, waterKind: 1 });
     camera.position.set(12, -1.1, 25); camera.lookAt(20, -3, -5); camera.updateMatrixWorld();
     underwater.prewarm(camera); await submerged('underwater-shelf');
     camera.lookAt(12, 12, 0); camera.updateMatrixWorld(); await submerged('underwater-snell');

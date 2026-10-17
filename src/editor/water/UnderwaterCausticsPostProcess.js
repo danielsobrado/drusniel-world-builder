@@ -26,6 +26,7 @@ import { validateProjectedWaterCausticsConfig } from './ProjectedWaterCaustics.j
 import { UnderwaterOpticsState } from './UnderwaterOpticsState.js';
 import { createUnderwaterOpticsNodes } from './UnderwaterOpticsNodes.js';
 import { UnderwaterWaterScene } from './UnderwaterWaterScene.js';
+import { resolveWaterlineBlend } from './UnderwaterTransition.js';
 
 const SKY_DEPTH_THRESHOLD = 0.9999;
 
@@ -90,7 +91,7 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [] }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [], waterlineRange = 0 }) {
     this.renderer = renderer;
     this.scene = scene;
     this.clock = clock;
@@ -102,6 +103,9 @@ export class UnderwaterCausticsPostProcess {
     this.waterScene = this.opticsState ? new UnderwaterWaterScene(waterSlots) : null;
     this.disposed = false;
     this.blend = uniform(0);
+    this.waterline = uniform(0);
+    this.waterlineEnabled = false;
+    this.waterlineRange = Math.max(0, Number(waterlineRange) || 0);
     this.surfaceHeight = uniform(0);
     this.color = uniform(colorVector(this.config.color));
     this.cameraMatrixWorld = uniform(new THREE.Matrix4());
@@ -112,8 +116,10 @@ export class UnderwaterCausticsPostProcess {
     this.sceneCpuMs = 0;
   }
 
-  update({ blend = 0, surfaceHeight, waterKind } = {}) {
+  update({ blend = 0, surfaceHeight, waterKind, waterlineEnabled = false } = {}) {
     this.blend.value = THREE.MathUtils.clamp(Number(blend) || 0, 0, 1);
+    this.waterlineEnabled = waterlineEnabled && Number.isFinite(surfaceHeight);
+    if (!this.waterlineEnabled) this.waterline.value = 0;
     if (Number.isFinite(surfaceHeight)) this.surfaceHeight.value = surfaceHeight;
     this.opticsState?.update({ waterKind });
   }
@@ -145,6 +151,7 @@ export class UnderwaterCausticsPostProcess {
         cameraPosition: this.cameraPosition,
         surfaceHeight: this.surfaceHeight,
         blend: this.blend,
+        waterline: this.waterline,
         color: this.color,
         config: {
           ...this.config,
@@ -165,10 +172,20 @@ export class UnderwaterCausticsPostProcess {
     this.opticsState?.updateCamera(camera, this.surfaceHeight.value);
   }
 
-  get active() { return this.enabled && !this.disposed && this.blend.value > 0; }
+  get active() { return this.enabled && !this.disposed && (this.blend.value > 0 || this.waterline?.value > 0); }
+
+  isActiveForCamera(camera) {
+    if (this.opticsState && this.waterlineEnabled && this.enabled && !this.disposed) {
+      camera.getWorldPosition(this.cameraPosition.value);
+      this.waterline.value = resolveWaterlineBlend({ enabled: true,
+        surfaceHeight: this.surfaceHeight.value, eyeY: this.cameraPosition.value.y,
+        range: Math.max(camera.near, this.waterlineRange) });
+    }
+    return this.active;
+  }
 
   render(camera) {
-    if (!this.active) return false;
+    if (!this.isActiveForCamera(camera)) return false;
     this.ensurePipeline(camera);
     this.updateCamera(camera);
     const startedAt = performance.now();
@@ -201,6 +218,7 @@ export class UnderwaterCausticsPostProcess {
       enabled: this.enabled,
       active: this.active,
       blend: this.blend.value,
+      waterlineBlend: this.waterline.value,
       surfaceHeight: this.surfaceHeight.value,
       optics: Boolean(this.opticsState),
     });

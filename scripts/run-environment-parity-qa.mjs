@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { compareRenderedImages } from './lib/rendered-image-metrics.mjs';
+import { checkUnderwaterWaterline } from './lib/underwater-waterline-checks.mjs';
 
 const option = (flag, fallback) => {
   const index = process.argv.indexOf(flag);
@@ -15,6 +16,7 @@ const option = (flag, fallback) => {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const baseUrl = option('--url', 'http://localhost:5173');
 const output = path.resolve(option('--out', 'tmp/environment-parity'));
+const waterlineOnly = process.argv.includes('--waterline');
 await mkdir(output, { recursive: true });
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 const report = { url: baseUrl, checks: [], backends: {} };
@@ -26,6 +28,7 @@ try {
     const page = await browser.newPage({ viewport: { width: 640, height: 480 }, deviceScaleFactor: 1 });
     const errors = createBrowserErrorMonitor(page);
     const url = new URL('/scripts/fixtures/environment-parity.html', baseUrl); url.searchParams.set('backend', backend);
+    if (waterlineOnly) url.searchParams.set('waterline', '1');
     await page.goto(url.href, { waitUntil: 'domcontentloaded' });
     let lastId = null;
     for (;;) {
@@ -70,6 +73,7 @@ try {
     report.checks.push({ id, ...result });
     assert.equal(result.passed, true, `${id}: ${result.failures.join(' ')}`);
   };
+  if (!waterlineOnly) {
   const fullTerrain = compareRenderedImages(images.get('webgpu-terrain-full-coast'), images.get('webgpu-terrain-full-inland'), { maximumMeanColorError: 255 });
   assert.ok(fullTerrain.meanColorError > 0.2, 'full WebGPU terrain must distinguish coastal sand from inland terrain');
   report.checks.push({ id: 'full WebGPU terrain distinguishes ocean from inland water', passed: true, meanColorError: fullTerrain.meanColorError });
@@ -125,6 +129,8 @@ try {
     'underwater-shelf', 'underwater-snell', 'underwater-deep', 'underwater-rebased']) {
     check(`backend parity ${id}`, `webgpu-${id}`, `webgl-${id}`, { minimumBrightnessRatio: 0.9, maximumBrightnessRatio: 1.1 });
   }
+  }
+  checkUnderwaterWaterline(images, report);
   }
   report.passed = true;
 } catch (error) { report.passed = false; report.failure = error.stack; process.exitCode = 1; }

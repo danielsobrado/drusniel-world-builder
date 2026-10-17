@@ -6,10 +6,10 @@ import { godsEndCausticLattice, godsEndSurfaceRipple } from './GodsEndWaterPatte
 
 /**
  * Gods' End CinematicPipeline underwater optics, using one existing scene pass.
- * Depth and beauty share the refracted coordinate. No viewport copies or passes
- * run above water; the owning postprocess prewarms once and bypasses at blend 0.
+ * Depth and beauty share the refracted coordinate. Away from the surface the
+ * owning postprocess bypasses at blend 0; split views colour only wet pixels.
  */
-export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, state, qualityStrength = 1, clock = time }) {
+export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, waterline = float(0), state, qualityStrength = 1, clock = time }) {
   const settings = state.settings;
   const coord = screenUV;
   const wobble = vec2(
@@ -28,13 +28,14 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
   };
   return Fn(() => {
     const result = lit.toVar();
-    If(blend.greaterThan(0), () => {
+    If(blend.greaterThan(0).or(waterline.greaterThan(0)), () => {
       const viewRay = getViewPosition(warped, float(0.5), cameraProjectionMatrixInverse).normalize().toVar();
       const viewZ = perspectiveDepthToViewZ(depth, state.near, state.far);
       const sceneDistance = viewZ.div(viewRay.z.min(-1e-4)).toVar();
       const ray = cameraMatrixWorld.mul(vec4(viewRay, 0)).xyz.normalize().toVar();
       const toSurface = state.depth.div(ray.y.max(1e-4)).toVar();
-      const surface = ray.y.greaterThan(0).and(toSurface.lessThan(sceneDistance));
+      const cameraBelow = state.eye.y.lessThan(surfaceHeight);
+      const surface = cameraBelow.and(ray.y.greaterThan(0)).and(toSurface.lessThan(sceneDistance));
       const distance = surface.select(toSurface, sceneDistance).min(400).toVar();
       const hit = state.eye.xz.add(ray.xz.mul(toSurface.min(400)));
       const slope = godsEndSurfaceRipple(hit, toSurface.min(400), state.ripplePhases, clock).toVar();
@@ -57,6 +58,13 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const underside = mix(mirrored, above.mul(vec3(0.8, 0.95, 0.95)), inWindow).toVar();
       const point = state.eye.add(ray.mul(distance)).toVar();
       const pointDepth = surfaceHeight.sub(point.y).max(0).toVar();
+      // A surface-level camera can see wet bed and dry shore in the same frame.
+      // Only the ray segment below this body's level absorbs light; its air
+      // segment and above-water geometry must retain their original colours.
+      const entryDistance = state.eye.y.sub(surfaceHeight).max(0).div(ray.y.negate().max(1e-4));
+      const waterDistance = cameraBelow.select(distance, distance.sub(entryDistance).max(0));
+      const belowWaterline = pointDepth.greaterThan(0).and(surface.not());
+      const pixelBlend = max(blend, waterline.mul(belowWaterline.select(float(1), float(0))));
       const dimming = exp(vec3(...settings.dimming).mul(pointDepth.negate()));
       const causticReach = exp(pointDepth.mul(-0.12))
         .mul(smoothstep(0, 1, float(45).sub(distance).div(25)))
@@ -64,7 +72,7 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const caustics = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters, clock)
         .mul(causticReach).mul(settings.causticStrength * qualityStrength);
       const bed = lit.mul(dimming).mul(caustics.add(1));
-      const transmittance = exp(vec3(...settings.extinction).mul(distance.negate())).toVar();
+      const transmittance = exp(vec3(...settings.extinction).mul(waterDistance.negate())).toVar();
       const seen = surface.select(underside, bed);
       const angle = atan(dot(ray, state.beamV), dot(ray, state.beamU));
       const fan = sin(angle.mul(29).add(sin(angle.mul(7).add(clock.mul(0.35))).mul(2.2)).add(clock.mul(0.15)))
@@ -74,7 +82,7 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const beams = fan.pow(3).mul(mix(float(0.3), float(1), smoothstep(-0.3, 1, alongSun)))
         .mul(smoothstep(0, 0.02, alongSun.oneMinus())).mul(transmittance.g.oneMinus()).mul(state.sun);
       const inWater = mix(murk, seen, transmittance).add(murk.mul(beams).mul(settings.shaftStrength));
-      result.assign(mix(lit, inWater, blend));
+      result.assign(mix(lit, inWater, pixelBlend));
     });
     return vec4(result, 1);
   })();
