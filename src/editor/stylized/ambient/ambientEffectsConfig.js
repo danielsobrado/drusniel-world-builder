@@ -5,6 +5,7 @@
  * scene colour or depth, are not part of this port yet.
  */
 import {resolveParticleWaterDepth} from './ParticleWaterDepth.js';
+import { resolveParticleBurst } from './ParticleBurst.js';
 const PREFIX = 'ambientEffects';
 const SHAPES = new Set(['soft', 'glint', 'streak', 'firefly', 'fluff', 'shaft', 'puff']);
 const REGIONS = new Set(['any', 'snow', 'sand', 'surf', 'jungle', 'water', 'lake', 'meadow']);
@@ -86,6 +87,7 @@ function resolveField(source, name) {
     area: finiteNumber(source.area, `${path}.area`, { min: 0, exclusiveMin: true }),
     base,
     waterDepth: resolveParticleWaterDepth(source.waterDepth, base, `${path}.waterDepth`),
+    burst: resolveParticleBurst(source.burst, `${path}.burst`),
     floor: level(source.floor, `${path}.floor`),
     height: range(source.height ?? [0.5, 6], `${path}.height`),
     rise: finiteNumber(source.rise ?? 0, `${path}.rise`),

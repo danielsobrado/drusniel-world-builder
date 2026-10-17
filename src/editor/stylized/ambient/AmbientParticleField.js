@@ -1,13 +1,15 @@
 import * as THREE from 'three/webgpu';
 import {
   abs, cameraPosition, cameraWorldMatrix, color, cos, cross, dot, float, floor, fract, hash,
-  instanceIndex, max, mix, normalize, positionGeometry, positionWorld, sin, smoothstep, time,
+  instanceIndex, max, mix, normalize, positionGeometry, positionWorld, sin, smoothstep, time as globalTime,
   uniform, uv, vec2, vec3,
 } from 'three/tsl';
 
 import { ambientParticleShapeAlpha } from './AmbientParticleShapes.js';
 import { particleWaterDepthMask } from './ParticleWaterDepth.js';
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
+import { particleBurstNodes } from './ParticleBurst.js';
+import { waterVisualClock } from '../../water/WaterVisualClock.js';
 
 const TWO_PI = Math.PI * 2;
 /** Below this a field is not drawn at all. */
@@ -78,9 +80,10 @@ function cornetteShanks(mu) {
  * direction node.
  */
 export class AmbientParticleField {
-  constructor({ name, settings, ground, levels, light, sun, puffTexture = null }) {
+  constructor({ name, settings, ground, levels, light, sun, puffTexture = null, clock = null }) {
     this.name = name;
     this.settings = settings;
+    this.clock = clock ?? (settings.burst && settings.waterDepth ? waterVisualClock : globalTime);
     this.intensity = uniform(0);
     this.current = 0;
     this.target = 0;
@@ -111,6 +114,7 @@ export class AmbientParticleField {
 
   createMaterial({ ground, levels, light, sun, puffTexture }) {
     const s = this.settings;
+    const time = this.clock;
     const index = instanceIndex.toFloat();
     // Swarms share their placement; each member jitters around it.
     const group = s.swarm ? floor(index.div(s.swarm.members)) : index;
@@ -170,9 +174,14 @@ export class AmbientParticleField {
 
     const range = Math.max(s.height[1] - s.height[0], 1e-3);
     const seedY = random('y', group);
+    const burst = s.burst ? particleBurstNodes(time, seedPhase, seedSpeed,
+      mix(range * 0.25, range, seedY), s.burst) : null;
     let height;
     let verticalFade = hopFade;
-    if (hopArc) {
+    if (burst) {
+      height = burst.height;
+      verticalFade = burst.fade;
+    } else if (hopArc) {
       height = hopArc;
     } else if (s.rise !== 0) {
       const speed = mix(float(0.6), float(1.4), seedSpeed).mul(s.rise / range);
@@ -197,6 +206,7 @@ export class AmbientParticleField {
       weight = weight.mul(smoothstep(s.gusts.threshold, s.gusts.threshold + 0.35, gust));
     }
     const size = mix(float(s.size[0]), float(s.size[1]), random('size'))
+      .mul(burst?.scale ?? 1)
       .mul(weight.greaterThan(PARTICLE_CUTOFF).select(float(1), float(0)));
 
     const toParticle = center.sub(cameraPosition);
@@ -240,7 +250,7 @@ export class AmbientParticleField {
     material.positionNode = center.add(offset);
 
     const local = uv().sub(0.5).mul(2);
-    let alpha = ambientParticleShapeAlpha(s.shape, local, random('variant'), puffTexture);
+    let alpha = ambientParticleShapeAlpha(s.shape, local, random('variant'), puffTexture, burst?.erosion);
     const distance = cameraPosition.distance(positionWorld);
     alpha = alpha.mul(smoothstep(s.nearFade, s.nearFade * 3, distance));
     if (additive) alpha = alpha.mul(smoothstep(s.area * 0.3, s.area * 0.5, distance).oneMinus());

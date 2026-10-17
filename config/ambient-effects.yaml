@@ -160,6 +160,10 @@ ambientEffects:
       - 0.02
       - 0.72
       rise: 0.55
+      burst:
+        lifetime: 1.4
+        activeShare: 0.7
+        expansion: 1.4
       wind:
         speed: 0.5357
       wander:

@@ -5,7 +5,7 @@ const TWO_PI = Math.PI * 2;
 /** Value noise in [-1,1], matching the original shaft dust term. */
 function signedNoise(point) { return stylizedFbm2(point).mul(2).sub(1); }
 
-export function ambientParticleShapeAlpha(shape, local, seed, puffTexture) {
+export function ambientParticleShapeAlpha(shape, local, seed, puffTexture, erosion = null) {
   const r2 = dot(local, local);
   const r = r2.sqrt();
   const disc = smoothstep(0.75, 1, r).oneMinus();
@@ -44,8 +44,11 @@ export function ambientParticleShapeAlpha(shape, local, seed, puffTexture) {
       if (!puffTexture) return exp(r2.mul(-3.5)).mul(disc);
       const sample = texture(puffTexture, uv());
       const variant = floor(seed.mul(4));
-      return variant.lessThan(1).select(sample.r, variant.lessThan(2).select(sample.g,
+      const density = variant.lessThan(1).select(sample.r, variant.lessThan(2).select(sample.g,
         variant.lessThan(3).select(sample.b, sample.a)));
+      // Erode the density itself as a burst disperses, instead of retaining
+      // the same opaque-looking stamp throughout its flight.
+      return erosion ? density.mul(smoothstep(erosion, erosion.add(0.25), density)) : density;
     }
     default:
       // 'soft': a round mote.
