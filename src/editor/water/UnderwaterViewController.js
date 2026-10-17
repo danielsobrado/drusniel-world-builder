@@ -65,6 +65,7 @@ export class UnderwaterViewController {
         qualityStrength: quality.projectedCausticStrength,
         optics: config.optics,
         floatingOrigin: terrainView.floatingOrigin,
+        waterSlots: () => terrainView.stylizedSurface?.waterSlots ?? [],
       })
       : null;
     this.originalTerrainRender = terrainView.render;

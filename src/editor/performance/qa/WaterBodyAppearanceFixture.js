@@ -73,9 +73,11 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
   const origin = { x: center[0], z: center[1] };
   const underwater = new UnderwaterCausticsPostProcess({ renderer, scene, config: config.water.projectedCaustics,
     optics: loadEditorConfig().player.water.underwater.optics, clock,
+    waterSlots: surface.waterSlots,
     floatingOrigin: { getState: () => origin } });
-  const build = reflective => {
+  const build = (reflective, enableRefraction = true) => {
     const material = createStylizedWaterMaterial({ config, surfaceMaskTexture: maps[2], waterFieldTexture: maps[0],
+      enableRefraction,
       waterFlowTexture: maps[1], waterAppearanceTexture: maps[3], waterFieldSize: size, waterSurfaceOrigin: level,
       chunkCenter: uniform(new THREE.Vector2(...center)), chunkWorldSize: meters, time: clock,
       surfacePatterns: patterns, seaPhaseOrigin: seaSwellPhaseOrigin(...center).map(phase => uniform(phase)),
@@ -115,12 +117,20 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
     reflections.planarValid.value = 1; await draw('lake');
     clock.value += 2.4; await draw('lake-moving');
     height = 0; oceanMask.value = 1; updateBed(0); mesh.material = build(false);
+    surface.waterSlots[0].material = build(false, false);
     underwater.update({ blend: 1, surfaceHeight: 0, waterKind: 1 });
     const submerged = async id => {
       updateSeaState({ timeSeconds: clock.value, seaLevel: 0, storm: 0, rain: 0 });
-      underwater.render(camera);
+      let viewportCopies = 0;
+      const copy = renderer.copyFramebufferToTexture;
+      const originalMaterial = mesh.material;
+      renderer.copyFramebufferToTexture = function (...args) { viewportCopies++; return copy.apply(this, args); };
+      try { underwater.render(camera); }
+      finally { renderer.copyFramebufferToTexture = copy; }
+      if (viewportCopies) throw new Error(`Optical underwater pass made ${viewportCopies} redundant viewport copies.`);
+      if (mesh.material !== originalMaterial) throw new Error('Underwater pass did not restore the surface material.');
       if (renderer.backend.isWebGPUBackend) await renderer.backend.device.queue.onSubmittedWorkDone();
-      await capture(id, { time: clock.value, eyeDepth: underwater.opticsState.depth.value });
+      await capture(id, { time: clock.value, eyeDepth: underwater.opticsState.depth.value, viewportCopies });
     };
     camera.position.set(12, -1.1, 25); camera.lookAt(20, -3, -5); camera.updateMatrixWorld();
     underwater.prewarm(camera); await submerged('underwater-shelf');

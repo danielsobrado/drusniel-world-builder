@@ -25,6 +25,7 @@ import {
 import { validateProjectedWaterCausticsConfig } from './ProjectedWaterCaustics.js';
 import { UnderwaterOpticsState } from './UnderwaterOpticsState.js';
 import { createUnderwaterOpticsNodes } from './UnderwaterOpticsNodes.js';
+import { UnderwaterWaterScene } from './UnderwaterWaterScene.js';
 
 const SKY_DEPTH_THRESHOLD = 0.9999;
 
@@ -89,7 +90,7 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [] }) {
     this.renderer = renderer;
     this.scene = scene;
     this.clock = clock;
@@ -98,6 +99,7 @@ export class UnderwaterCausticsPostProcess {
     this.enabled = this.config.enabled && this.qualityStrength > 0;
     this.opticsState = this.enabled && optics?.enabled
       ? new UnderwaterOpticsState({ settings: optics, scene, floatingOrigin }) : null;
+    this.waterScene = this.opticsState ? new UnderwaterWaterScene(waterSlots) : null;
     this.disposed = false;
     this.blend = uniform(0);
     this.surfaceHeight = uniform(0);
@@ -123,7 +125,9 @@ export class UnderwaterCausticsPostProcess {
       const renderScene = this.scenePass.updateBefore.bind(this.scenePass);
       this.scenePass.updateBefore = frame => {
         const started = performance.now();
-        try { return renderScene(frame); }
+        try {
+          return this.waterScene ? this.waterScene.render(() => renderScene(frame)) : renderScene(frame);
+        }
         finally { this.sceneCpuMs += performance.now() - started; }
       };
     }
