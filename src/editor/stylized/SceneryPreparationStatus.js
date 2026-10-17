@@ -10,10 +10,11 @@ export function sceneryPreparationStatus(surface) {
   const meadow = surface.meadowGrass?.getState().building ?? 0;
   const draws = surface.terrainView.drawPreparation?.pending.size ?? 0;
   const variants = surface.preparationVariants?.() ?? 0;
+  const waterObstacles = surface.waterObstacleUpdates?.pending ?? 0;
   const errors = [surface.preparedPlacement?.error,surface.rockView?.assetError].filter(Boolean).map(error => String(error.message ?? error));
   errors.push(...(surface.variantResidency?.getPreparationStatus().errors ?? []));
-  return { ready: queueDepth+fields+meadow+draws+variants+staged.length === 0 && errors.length === 0,
-    queueDepth, fields, meadow, draws, variants, staged: staged.length, queues, errors,
+  return { ready: queueDepth+fields+meadow+draws+variants+staged.length+waterObstacles === 0 && errors.length === 0,
+    queueDepth, fields, meadow, draws, variants, waterObstacles, staged: staged.length, queues, errors,
     blockedJobs: staged.filter(view => view.blockedDependency).map(view => ({
       key: (view.pendingRebuild ?? view.pendingLodRebuild ?? view.stagedRebuild?.job)?.key,
       focus: view.stagedRebuild?.job.focus, revision: view.stagedRebuild?.revision,

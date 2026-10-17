@@ -26,9 +26,15 @@ export function trackedWorldResources(editor) {
     }
   });
   const placementBytes = editor.stylizedSurface.preparedPlacement?.arrayBytes ?? 0;
+  let waterTextureBytes = 0;
+  const waterSlots = editor.stylizedSurface.waterSlots ?? [];
+  for (const slot of waterSlots) for (const texture of [slot.waterFieldTexture, slot.waterFlowTexture, slot.waterAppearanceTexture, slot.waterObstacleTexture]) {
+    if (!texture || textures.has(texture)) continue;
+    textures.add(texture); waterTextureBytes += countArray(texture.image?.data);
+  }
   const interactionBytes = [editor.stylizedSurface.meadowGrass?.interaction,editor.stylizedSurface.meadowGrass?.spellGround]
     .reduce((bytes,map)=>bytes+[map?.pixels,map?.scratch,map?.press,map?.pressScratch].reduce((n,array)=>n+countArray(array),0),0);
-  return { label:'tracked resource bytes', geometryBytes, textureBytes, placementBytes, interactionBytes,
-    total:geometryBytes+textureBytes+placementBytes+interactionBytes,
+  return { label:'tracked resource bytes', geometryBytes, textureBytes, waterTextureBytes, waterSlots: waterSlots.length, placementBytes, interactionBytes,
+    total:geometryBytes+textureBytes+waterTextureBytes+placementBytes+interactionBytes,
     included:['scene geometry attributes','instance matrices/colors','material texture sources/mips','prepared placement arrays','interaction pixels, scroll scratch and float press buffers'] };
 }

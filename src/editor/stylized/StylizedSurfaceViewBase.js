@@ -1,4 +1,5 @@
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
+import { WaterObstacleUpdates } from './WaterObstacleUpdates.js';
 import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
 import { SceneryWorkScheduler, createSceneryConsumers } from './SceneryWorkScheduler.js';
 import { sceneryPreparationStatus } from './SceneryPreparationStatus.js';
@@ -340,6 +341,7 @@ export class StylizedSurfaceView {
         sharedMaterials: this.sharedWaterMaterials,
       }))
       : [];
+    this.waterObstacleUpdates = new WaterObstacleUpdates(this);
     for (const slot of this.slots) slot.mesh.receiveShadow = true;
     // Shared per-frame ceiling for the heavy scatter rebuilds. Rocks, trees and
     // bushes each flush in the same update, so once the frame has already spent
@@ -578,6 +580,7 @@ export class StylizedSurfaceView {
       textures.add(waterSlot.waterFieldTexture);
       textures.add(waterSlot.waterFlowTexture);
       textures.add(waterSlot.waterAppearanceTexture);
+      textures.add(waterSlot.waterObstacleTexture);
     }
     for (const grassSlot of this.slots) {
       grassSlot.pinResources();
@@ -753,6 +756,10 @@ export class StylizedSurfaceView {
     else this.updateForestGroundTextures();
     this.flowerView?.update(timestamp);
     for (const slot of this.waterSlots) slot.update(timestamp);
+    this.waterObstacleUpdates.schedule();
+    const updateObstacles = () => this.waterObstacleUpdates.flush(this.shouldYieldWork);
+    if (this.runDeferredWork) this.runDeferredWork(updateObstacles);
+    else updateObstacles();
     this.prewarmOneDistantWaterSlot();
 
     const focusChunk = this.terrainView.focusChunkKey ? this.terrainView.focusChunk : null;
@@ -1033,6 +1040,7 @@ export class StylizedSurfaceView {
     this.bushBuildQueue.clear();
     this.detailBuildQueue.clear();
     for (const slot of this.waterSlots) slot.dispose();
+    this.waterObstacleUpdates.dispose();
     this.sharedWaterMaterials.dispose();
     this.reflectionReservation?.cancel();
     this.reflections?.dispose();

@@ -45,6 +45,8 @@ try {
   if (option('--manifest', null)) replay = JSON.parse(await readFile(option('--manifest'), 'utf8'));
   const manifest = { schemaVersion: 1, sourceSha: report.sourceSha, selections: [], requestedPoses: [] };
   for (const world of ['procedural', 'eldara']) {
+    const requestedIds = option('--poses', null)?.split(',');
+    if (replay && !replay.requestedPoses.some(pose => pose.world === world && (!requestedIds || requestedIds.includes(pose.id)))) continue;
     if (world === 'eldara') { console.log('Loading Eldara imported map'); await page.evaluate(() => window.__worldVisualQa.loadWorld('eldara')); }
     await page.evaluate(() => window.__worldVisualQa.setLighting());
     const selection = replay ? { poses: replay.requestedPoses.filter(p => p.world === world), replay: true }

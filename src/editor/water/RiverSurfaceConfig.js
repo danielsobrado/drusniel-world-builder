@@ -19,6 +19,7 @@ export function validateRiverSurfaceConfig(config) {
     throw new Error('stylizedSurface.water.riverSurface.enabled must be a boolean.');
   }
   const field = (name) => `stylizedSurface.water.riverSurface.${name}`;
+  if (config.obstacles !== undefined && typeof config.obstacles !== 'boolean') throw new Error(`${field('obstacles')} must be boolean.`);
   assertFiniteRange(config.normalStrength, field('normalStrength'), 0, 4);
   assertFiniteRange(config.cycleSeconds, field('cycleSeconds'), 0.25, 30);
   assertFiniteRange(config.stillDrift, field('stillDrift'), 0, 2);

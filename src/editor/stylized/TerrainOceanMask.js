@@ -1,5 +1,5 @@
 import { DataTexture, HalfFloatType, RGBAFormat, DataUtils } from 'three/webgpu';
-import { Fn, If, float, floor, smoothstep, texture, textureSize, uniform, vec2, vec4 } from 'three/tsl';
+import { Fn, If, float, smoothstep, uniform, vec4 } from 'three/tsl';
 import { bilinearLoad, TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
 
 // Neutral stand-in until the existing water slot is available. Shared by all terrain.
@@ -22,19 +22,19 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize) {
   const origin = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.surfaceOrigin.value ?? 0);
   const wet = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.hasWaterCoverage ? 1 : 0);
   const readAppearance = object => waterSlot(object)?.waterAppearanceTexture ?? emptyAppearance;
-  const filtered = bilinearLoad(emptyAppearance, fieldUv, readAppearance);
-  const dimensions = vec2(textureSize(texture(emptyAppearance).setSampler(false)
-    .setUpdateMatrix(true).onObjectUpdate(({ object }) => readAppearance(object))));
-  const nearest = texture(emptyAppearance, floor(fieldUv.mul(dimensions))).setSampler(false)
-    .setUpdateMatrix(true).onObjectUpdate(({ object }) => readAppearance(object));
+  // Decode each discrete texel before filtering its coverage. Interpolating IDs
+  // could turn a none/lake boundary (0/2) into a fictional ocean (1).
+  const filtered = bilinearLoad(emptyAppearance, fieldUv, readAppearance, value => {
+    const kind = value.r.mul(255).round();
+    return vec4(float(kind.equal(1)), value.g, value.b, float(kind.greaterThan(0)));
+  });
   const context = Fn(() => {
     const result = vec4(0).toVar();
     If(wet.greaterThan(0), () => {
       const height = groundHeight.sub(field.g.add(origin));
       If(height.greaterThan(-16).and(height.lessThan(2.8)), () => {
-        const kind = nearest.r.mul(255).round();
-        result.assign(vec4(float(kind.equal(1)), filtered.g, filtered.b,
-          smoothstep(-.1, .85, height).oneMinus().mul(float(kind.greaterThan(0)))));
+        result.assign(vec4(filtered.r, filtered.g, filtered.b,
+          smoothstep(-.1, .85, height).oneMinus().mul(filtered.a)));
       });
     });
     return result;

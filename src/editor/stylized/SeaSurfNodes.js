@@ -34,9 +34,9 @@ export function createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time,
     .mul(oneMinus(smoothstep(settings.breakDepthFade, settings.breakDepthEnd, waterDepth)))
     .mul(smoothstep(1 - settings.setDepth * 0.6 - 0.001, 1 - settings.setDepth * 0.1, set))
     .mul(oneMinus(offshore));
-  const roll = smoothstep(0.86, 0.985, age).mul(smoothstep(0.12, 0.3, lace));
+  const roll = smoothstep(0.92, 0.985, age).mul(smoothstep(0.5, 0.8, lace));
   const trail = exp(age.mul(-settings.trail))
-    .mul(smoothstep(age.mul(0.9).add(0.12), age.mul(0.9).add(0.3), lace));
+    .mul(smoothstep(age.mul(0.5).add(0.45), age.mul(0.5).add(0.7), lace));
   return {
     foamNoise: lace,
     height: mix(near, swell.height, offshore),

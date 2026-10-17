@@ -82,6 +82,10 @@ export class StylizedWaterSlot {
     this.waterAppearanceTexture.minFilter = this.waterAppearanceTexture.magFilter = THREE.NearestFilter;
     this.waterAppearanceTexture.generateMipmaps = false;
     this.waterAppearanceTexture.needsUpdate = true;
+    this.waterObstaclePixels = new Uint8Array(this.fieldSize * this.fieldSize * 2);
+    this.waterObstacleTexture = new THREE.DataTexture(this.waterObstaclePixels, this.fieldSize, this.fieldSize, THREE.RGFormat);
+    this.waterObstacleTexture.minFilter = this.waterObstacleTexture.magFilter = THREE.LinearFilter;
+    this.waterObstacleTexture.generateMipmaps = false; this.waterObstacleTexture.needsUpdate = true;
     this.uploadedPage = null;
     this.uploadedFieldRevision = -1;
     this.hasWaterCoverage = false;
@@ -92,6 +96,7 @@ export class StylizedWaterSlot {
       waterFieldTexture: this.waterFieldTexture,
       waterFlowTexture: this.waterFlowTexture,
       waterAppearanceTexture: this.waterAppearanceTexture,
+      waterObstacleTexture: this.waterObstacleTexture,
       waterFieldSize: this.fieldSize,
       waterSurfaceOrigin: this.surfaceOrigin,
       chunkCenter: terrainSlot.chunkCenter,
@@ -189,6 +194,7 @@ export class StylizedWaterSlot {
     // Recomputed per upload rather than carried on the page, so a runtime edit
     // that floods or drains this chunk re-decides whether it draws.
     this.hasWaterCoverage = waterFieldHasCoverage(this.waterFieldPixels);
+    this.hasRiverWater = this.waterAppearancePixels.some((value, index) => index % 4 === 0 && value === 3);
     const uploadedBytes = page.waterFieldPixels.byteLength + page.waterFlowPixels.byteLength + page.waterAppearancePixels.byteLength;
     PerfCounters.inc(PERF_COUNTER_WATER_UPLOAD_BYTES, uploadedBytes);
     PerfCounters.inc('textureBytesUploaded', uploadedBytes);
@@ -233,6 +239,7 @@ export class StylizedWaterSlot {
     }
     this.mesh.position.copy(this.terrainSlot.mesh.position);
     if (descriptor !== this.seaPhaseDescriptor) {
+      this.waterObstaclePixels.fill(0); this.waterObstacleTexture.needsUpdate = true;
       this.seaPhaseDescriptor = descriptor;
       seaSwellPhaseOrigin(descriptor.centerWorldX, descriptor.centerWorldZ)
         .forEach((phase, index) => { this.seaPhaseOrigin[index].value = phase; });
@@ -254,6 +261,7 @@ export class StylizedWaterSlot {
     this.waterFieldTexture.dispose();
     this.waterFlowTexture.dispose();
     this.waterAppearanceTexture.dispose();
+    this.waterObstacleTexture.dispose();
     if (!this.sharedMaterials) {
       this.material.dispose();
       this.refractiveMaterial?.dispose();

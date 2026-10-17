@@ -24,21 +24,24 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
   const bed = geometry.clone();
   const field = new Float32Array(size * size * 4), flow = new Float32Array(field.length);
   const coverage = new Uint8Array(field.length);
+  const appearance = new Uint8Array(field.length);
   const makeTexture = (data, type) => {
     const map = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, type);
     map.minFilter = map.magFilter = THREE.LinearFilter; map.needsUpdate = true; return map;
   };
   const maps = [makeTexture(field, THREE.FloatType), makeTexture(flow, THREE.FloatType),
-    makeTexture(coverage, THREE.UnsignedByteType)];
-  const updateBed = (height, deep = false) => {
+    makeTexture(coverage, THREE.UnsignedByteType), makeTexture(appearance, THREE.UnsignedByteType)];
+  maps[3].minFilter = maps[3].magFilter = THREE.NearestFilter;
+  const updateBed = (height, deep = false, kind = height ? 2 : 1) => {
     for (let row = 0; row < size; row++) for (let col = 0; col < size; col++) {
       const x = col - meters / 2, index = row * size + col;
-      const depth = deep ? 28 : Math.max(0, x * 0.18);
+      const depth = deep ? 28 : x * 0.18;
       bed.attributes.position.setZ(index, height + (deep ? -28 : -x * 0.18));
       const pixel = ((size - 1 - row) * size + col) * 4;
       field.set([deep || x > 0 ? 1 : 0, height, depth, deep ? 96 : Math.max(0, x)], pixel);
       flow.set([0.5, 0.5, 0, 0], pixel);
       coverage.set([0, 0, deep || x > 0 ? 255 : 0, 255], pixel);
+      appearance.set([kind, 0, 0, kind === 1 ? 255 : 0], pixel);
     }
     bed.attributes.position.needsUpdate = true; bed.computeVertexNormals();
     maps.forEach(map => { map.needsUpdate = true; });
@@ -73,7 +76,7 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
     floatingOrigin: { getState: () => origin } });
   const build = reflective => {
     const material = createStylizedWaterMaterial({ config, surfaceMaskTexture: maps[2], waterFieldTexture: maps[0],
-      waterFlowTexture: maps[1], waterFieldSize: size, waterSurfaceOrigin: level,
+      waterFlowTexture: maps[1], waterAppearanceTexture: maps[3], waterFieldSize: size, waterSurfaceOrigin: level,
       chunkCenter: uniform(new THREE.Vector2(...center)), chunkWorldSize: meters, time: clock,
       surfacePatterns: patterns, seaPhaseOrigin: seaSwellPhaseOrigin(...center).map(phase => uniform(phase)),
       sunDirection: uniform(new THREE.Vector3(-0.4, 0.8, 0.3).normalize()), reflections: reflective ? reflections : null });
@@ -91,6 +94,8 @@ export async function runWaterBodyAppearanceFixture(renderer, capture) {
     camera.position.set(-9, 13, 35); camera.lookAt(12, 0, -7); camera.updateMatrixWorld();
     mesh.material = build(false); await draw('beach');
     clock.value += 0.8; await draw('beach-moving'); clock.value -= 0.8;
+    oceanMask.value = 0; updateBed(0, false, 2); await draw('sea-level-lake');
+    oceanMask.value = 1; updateBed(0);
     const offset = new THREE.Vector3(-4096, 0, 4096);
     ground.position.copy(offset); mesh.position.copy(offset); camera.position.add(offset); camera.updateMatrixWorld();
     await draw('beach-rebased'); ground.position.set(0, 0, 0); mesh.position.set(0, 0, 0); camera.position.sub(offset);

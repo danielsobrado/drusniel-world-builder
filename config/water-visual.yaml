@@ -184,6 +184,7 @@ water:
   # replaces the shore and flow-band foam above; the sea keeps its own shading.
   riverSurface:
     enabled: true
+    obstacles: true
     # Scales the donor's detail slopes (0.15 lake, 0.16 river, 0.025 micro).
     normalStrength: 0.5
     # Seconds per cross-fade of the two advected detail phases.

@@ -85,6 +85,7 @@ export function createStylizedWaterMaterial({
   waterFieldTexture,
   waterFlowTexture,
   waterAppearanceTexture = null,
+  waterObstacleTexture = null,
   waterFieldSize,
   waterSurfaceOrigin,
   chunkCenter,
@@ -214,6 +215,8 @@ export function createStylizedWaterMaterial({
       fall,
       waterDepth,
       shoreDistance,
+      obstacles: waterObstacleTexture && water.riverSurface.obstacles !== false
+        ? sampleTexture('waterObstacleTexture', waterObstacleTexture, fieldUv).rg : vec2(0),
       time,
       sunDirection: normalize(sunDirection),
       viewDirection: normalize(cameraPosition.sub(positionWorld)),
@@ -473,6 +476,9 @@ export function createStylizedWaterMaterial({
         sceneGap,
       ));
       const intersectionFoam = contact
+        // The shared swash already owns the bed contact. Intersection foam
+        // accents objects in water instead of tracing a second white bank.
+        .mul(smoothstep(.35, .9, waterDepth))
         .mul(foam.intersectionStrength * quality.intersectionFoamStrength)
         .mul(river ? mix(float(1), smoothstep(0.25, 0.7, river.foamNoise), inland) : float(1))
         .mul(sea ? mix(float(1), smoothstep(0.25, 0.7, sea.foamNoise), sea.mask) : float(1))

@@ -20,6 +20,7 @@ import {
   vec3,
 } from 'three/tsl';
 import { periodicFbm2 } from './PeriodicNoiseNodes.js';
+import { surfaceGradient } from './ShoreContactNodes.js';
 
 /**
  * grass-test's lake and river surface (`WaterMaterial`, inland branch): its
@@ -131,6 +132,7 @@ export function createRiverSurfaceNodes({
   fall,
   waterDepth,
   shoreDistance,
+  obstacles = vec2(0),
   time,
   sunDirection,
   viewDirection,
@@ -140,20 +142,25 @@ export function createRiverSurfaceNodes({
   // The donor's `current`: 1 on a river, 0 on a lake. Our current is a field.
   const current = clamp(currentStrength.mul(4), 0, 1);
   const flowLength = length(flow);
-  const direction = select(flowLength.greaterThan(1e-4), flow.div(max(flowLength, 1e-4)), vec2(0, 1));
+  let direction = select(flowLength.greaterThan(1e-4), flow.div(max(flowLength, 1e-4)), vec2(0, 1));
+  if (localXZ) {
+    const across = vec2(direction.y.negate(), direction.x);
+    const split = dot(surfaceGradient(obstacles.y, localXZ), across).mul(-1.6).clamp(-.45, .45);
+    direction = normalize(direction.add(across.mul(split)));
+  }
   const macro = patterns && localXZ ? periodicFbm2(patterns.latticePoint('riverMacro', localXZ)).toVar('riverMacro') : float(.5);
   const warp = vec2(macro.sub(.5).mul(2.6), macro.mul(macro).sub(.25).mul(1.9));
   const detailUv = patternXZ.mul(DETAIL_SCALE).add(warp);
   const geometric = positionWorld.dFdx().cross(positionWorld.dFdy());
   const baseNormal = normalize(geometric.mul(select(geometric.y.lessThan(0), -1, 1))).toVar('riverBaseNormal');
   const gradient = baseNormal.xz.length().div(max(baseNormal.y, .05));
-  const energy = smoothstep(.002, .08, gradient).max(fall);
+  const energy = smoothstep(.002, .08, gradient).max(fall).max(obstacles.x.mul(.65));
   const margin = smoothstep(.2, 3.5, shoreDistance);
   // Drift per cross-fade cycle, in detail tiles. Still water keeps the donor's
   // lake drift (0.13, 0.07 of a tile per cycle), rivers move with the current.
   const cycle = float(config.cycleSeconds);
   const lakeDrift = vec2(0.13, 0.07).normalize().mul(config.stillDrift);
-  const visualSpeed = energy.mul(.75).add(.25).mul(margin.mul(.7).add(.3));
+  const visualSpeed = energy.mul(.75).add(.25).mul(margin.mul(.7).add(.3)).mul(oneMinus(obstacles.y.mul(.65)));
   const riverDrift = direction.mul(visualSpeed.mul(config.currentDrift));
   const drift = mix(lakeDrift, riverDrift, current).mul(cycle.mul(DETAIL_SCALE));
 

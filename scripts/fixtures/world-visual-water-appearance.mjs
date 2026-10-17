@@ -1,8 +1,13 @@
 import * as THREE from 'three/webgpu';
-import { float, uniform, uv, vec2, vec3 } from 'three/tsl';
+import { float, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
 import { createRiverSurfaceNodes } from '/src/editor/stylized/RiverSurfaceShading.js';
 import { createWaterPatternOrigins } from '/src/editor/stylized/WaterPatternOrigins.js';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
+import { createSeaSurfNodes } from '/src/editor/stylized/SeaSurfNodes.js';
+import { resolveSeaSurf } from '/src/editor/water/SeaSurf.js';
+import { createWaterAppearanceNodes } from '/src/editor/stylized/WaterAppearanceNodes.js';
+import { createSeaSurfaceNodes } from '/src/editor/stylized/SeaSurfaceShading.js';
+import { SEA_SWELL_COMPONENTS } from '/src/editor/water/SeaSwell.js';
 
 // Read back production shader output: this catches texture repeat, float32
 // origin seams and advection resets that CPU copies of the maths would miss.
@@ -69,6 +74,34 @@ try {
     current.value = 0; shore.value = 1; depth.value = .6;
     await draw(`${id}-lake`, center, [0, 0], 12.4, true);
     current.value = 1; shore.value = 12; depth.value = 6;
+  }
+  patterns.update(0, 0); offset.value.set(0, 0);
+  const surf = createSeaSurfNodes({ swell: { height: float(0) }, waterDepth: uv().x.mul(6),
+    localXZ: local, patterns, time: clock, settings: resolveSeaSurf(water.sea.surf) });
+  material.colorNode = vec3(surf.foam); material.needsUpdate = true;
+  for (let i = 0; i < 12; i++) {
+    clock.value = i * 2;
+    renderer.setRenderTarget(target); await renderer.render(scene, camera);
+    const pixels = await renderer.readRenderTargetPixelsAsync(target, 0, 0, size, size);
+    let covered = 0, mean = 0;
+    for (let p = 0; p < pixels.length; p += 4) { mean += pixels[p]; if (pixels[p] > .12) covered++; }
+    covered /= size * size; mean /= size * size;
+    // This known calm 0–6 m shelf must retain broad clear-water gaps at every
+    // sampled phase. Measure the foam mask itself, never sky/white pixel counts.
+    check(`calm surf coverage at ${clock.value}s`, covered < .2 && mean < .08, { covered, mean, coveredLimit: .2, meanLimit: .08 });
+    if (i === 3) { renderer.setRenderTarget(null); await renderer.render(scene, camera); await capture('calm-surf-mask'); }
+  }
+  for (const kind of [1, 2, 3]) {
+    const appearance = createWaterAppearanceNodes(vec4(kind / 255, 0, 0, 1), vec4(kind / 255, 0, 0, 1));
+    const sea = createSeaSurfaceNodes({ terrainUv: uv(), chunkWorldSize: 64, waterDepth: float(8),
+      surfaceWorldHeight: float(0), waterCoverage: float(1), currentStrength: float(0), time: clock,
+      phaseOrigin: SEA_SWELL_COMPONENTS.map(() => float(.7)), sunDirection: vec3(0, 1, 0),
+      config: water.sea, oceanMask: appearance.ocean });
+    material.colorNode = vec3(sea.mask); material.needsUpdate = true;
+    renderer.setRenderTarget(target); await renderer.render(scene, camera);
+    const pixels = await renderer.readRenderTargetPixelsAsync(target, 0, 0, size, size);
+    check(`explicit water kind ${kind} at identical sea level and zero current`,
+      pixels.every((v, i) => i % 4 === 3 || Math.abs(v - (kind === 1 ? 1 : 0)) < .001));
   }
   state.report.passed = state.report.checks.every(check => check.passed);
 } catch (error) { state.report.failure = error.stack; state.report.passed = false; }

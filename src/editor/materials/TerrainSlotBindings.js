@@ -47,7 +47,7 @@ function perObjectTexture(template, uvNode, read) {
  * coordinates pass through the node's identity uv matrix as whole numbers, which
  * is what keeps `onObjectUpdate` alive (see perObjectTexture).
  */
-export function bilinearLoad(template, uvNode, read = null) {
+export function bilinearLoad(template, uvNode, read = null, transform = null) {
   const node = (coords) => {
     const load = texture(template, coords).setSampler(false);
     return read
@@ -60,7 +60,10 @@ export function bilinearLoad(template, uvNode, read = null) {
   const base = floor(texel);
   const weight = fract(texel);
   const limit = size.sub(1);
-  const load = (dx, dy) => node(base.add(vec2(dx, dy)).clamp(vec2(0), limit));
+  const load = (dx, dy) => {
+    const value = node(base.add(vec2(dx, dy)).clamp(vec2(0), limit));
+    return transform ? transform(value) : value;
+  };
   return mix(
     mix(load(0, 0), load(1, 0), weight.x),
     mix(load(0, 1), load(1, 1), weight.x),

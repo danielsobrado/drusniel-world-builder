@@ -131,6 +131,7 @@ function resolveDryFlow(samples, sampleWidth, localX, localZ) {
   let weightedFall = 0;
   let weightedPlunge = 0;
   let totalWeight = 0;
+  let kind = 0, bestKindWeight = 0;
   const centerX = localX + WATER_FIELD_HALO;
   const centerZ = localZ + WATER_FIELD_HALO;
   for (let offsetZ = -1; offsetZ <= 1; offsetZ += 1) {
@@ -144,6 +145,7 @@ function resolveDryFlow(samples, sampleWidth, localX, localZ) {
       if (!(neighbor.coverage > 0)) continue;
       const distanceWeight = offsetX !== 0 && offsetZ !== 0 ? DIAGONAL_WEIGHT : 1;
       const weight = neighbor.coverage * distanceWeight;
+      if (weight > bestKindWeight) { bestKindWeight = weight; kind = neighbor.kind ?? 0; }
       weightedX += (Number.isFinite(neighbor.flowX) ? neighbor.flowX : 0) * weight;
       weightedZ += (Number.isFinite(neighbor.flowZ) ? neighbor.flowZ : 0) * weight;
       weightedFall += (neighbor.fall ?? 0) * weight;
@@ -151,25 +153,15 @@ function resolveDryFlow(samples, sampleWidth, localX, localZ) {
       totalWeight += weight;
     }
   }
-  if (totalWeight <= 0) return { x: 0, z: 0, fall: 0, plunge: 0 };
+  if (totalWeight <= 0) return { x: 0, z: 0, fall: 0, plunge: 0, kind: 0 };
   const x = weightedX / totalWeight;
   const z = weightedZ / totalWeight;
   const length = Math.hypot(x, z);
   const fall = weightedFall / totalWeight;
   const plunge = weightedPlunge / totalWeight;
   return length > 1e-8
-    ? { x: x / length, z: z / length, fall, plunge }
-    : { x: 0, z: 0, fall, plunge };
-}
-
-function resolveDryKind(samples, sampleWidth, x, z) {
-  let kind = 0, best = 0;
-  for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
-    const neighbor = samples[sampleIndex(x + WATER_FIELD_HALO + dx, z + WATER_FIELD_HALO + dz, sampleWidth)];
-    const weight = neighbor.coverage * (dx && dz ? DIAGONAL_WEIGHT : 1);
-    if (weight > best) { best = weight; kind = neighbor.kind ?? 0; }
-  }
-  return kind;
+    ? { x: x / length, z: z / length, fall, plunge, kind }
+    : { x: 0, z: 0, fall, plunge, kind };
 }
 
 export function createWaterField({
@@ -265,7 +257,7 @@ export function createWaterField({
       flowPixels[flowIndex + 1] = encodeWaterFlowComponent(flow.z);
       flowPixels[flowIndex + 2] = encodeWaterUnit(flow.fall);
       flowPixels[flowIndex + 3] = encodeWaterUnit(flow.plunge);
-      const kind = sample.coverage > 0 ? sample.kind ?? 0 : resolveDryKind(samples, sampleWidth, localX, localZ);
+      const kind = sample.coverage > 0 ? sample.kind ?? 0 : flow.kind;
       const appearance = kind ? appearanceAt(originX + localX, originZ + localZ, kind, sample.shoreDistance) : null;
       appearancePixels[index] = kind;
       appearancePixels[index + 1] = encodeWaterUnit(appearance?.organic ?? 0);
