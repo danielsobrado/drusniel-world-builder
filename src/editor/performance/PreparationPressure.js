@@ -1,4 +1,7 @@
 const QUEUES = ['grass', 'flower', 'tree', 'rock', 'bush', 'detail', 'aquatic', 'tropical'];
+const PRESSURE_DELAY_MS = 150;
+const PRESSURE_RAMP_MS = 450;
+const QUIET_GRACE_MS = 150;
 
 export function hasPreparationBacklog(surface) {
   if (!surface) return false;
@@ -22,14 +25,23 @@ export class PreparationPressure {
     this.minimumMs = minimumMs;
     this.maximumMs = maximumMs;
     this.since = null;
+    this.quietSince = null;
     this.ageMs = 0;
     this.floorMs = minimumMs;
   }
 
   update(now, pending) {
-    this.since = pending ? this.since ?? now : null;
+    if (pending) {
+      this.quietSince = null;
+      this.since ??= now;
+    } else if (this.since !== null) {
+      // A completed manifest often publishes its dependent draw next frame.
+      // Do not restart the ramp in that brief gap between preparation stages.
+      this.quietSince ??= now;
+      if (now - this.quietSince >= QUIET_GRACE_MS) this.since = null;
+    }
     this.ageMs = this.since === null ? 0 : Math.max(0, now - this.since);
-    const pressure = Math.min(1, Math.max(0, (this.ageMs - 500) / 1000));
+    const pressure = Math.min(1, Math.max(0, (this.ageMs - PRESSURE_DELAY_MS) / PRESSURE_RAMP_MS));
     this.floorMs = Math.min(this.maximumMs,
       this.minimumMs + pressure * (this.maximumMs - this.minimumMs));
   }

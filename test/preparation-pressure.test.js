@@ -6,12 +6,13 @@ import { PreparationPressure, hasPreparationBacklog } from '../src/editor/perfor
 test('sustained backlog reaches the existing ceiling and resets once preparation clears', () => {
   const pressure = new PreparationPressure();
   pressure.update(0, true); assert.equal(pressure.floorMs, 0.25);
-  pressure.update(500, true); assert.equal(pressure.floorMs, 0.25);
-  pressure.update(1000, true); assert.equal(pressure.floorMs, 0.725);
-  pressure.update(1500, true); assert.equal(pressure.floorMs, 1.2);
+  pressure.update(150, true); assert.equal(pressure.floorMs, 0.25);
+  pressure.update(375, true); assert.equal(pressure.floorMs, 0.725);
+  pressure.update(600, true); assert.equal(pressure.floorMs, 1.2);
   pressure.update(10000, true); assert.equal(pressure.floorMs, 1.2);
-  pressure.update(10001, false); assert.equal(pressure.floorMs, 0.25);
-  pressure.update(10002, true); assert.equal(pressure.ageMs, 0);
+  pressure.update(10001, false); assert.equal(pressure.floorMs, 1.2);
+  pressure.update(10151, false); assert.equal(pressure.floorMs, 0.25);
+  pressure.update(10152, true); assert.equal(pressure.ageMs, 0);
 });
 
 test('pressure grants one bounded frame allowance across queues and reservations', () => {
@@ -33,7 +34,19 @@ test('pressure grants one bounded frame allowance across queues and reservations
   assert.ok(budget.slack.deferredMs <= 1.2 + 1e-9);
   assert.ok(budget.peek(3) < 1e-9);
   queue.size = 0; now += 10;
+  budget.beginFrame(); assert.equal(budget.available(3), 1.2);
+  now += 151;
   budget.beginFrame(); assert.equal(budget.available(3), 0.25);
+});
+
+test('one quiet frame between a manifest and its dependent publication preserves bounded pressure', () => {
+  const pressure = new PreparationPressure();
+  pressure.update(0, true); pressure.update(800, true);
+  pressure.update(810, false); pressure.update(826, true);
+  assert.equal(pressure.floorMs, 1.2);
+  assert.equal(pressure.ageMs, 826);
+  pressure.update(900, false); pressure.update(1100, false);
+  assert.equal(pressure.floorMs, .25);
 });
 
 test('manifest-only and meadow-only preparation participate in pressure detection', () => {
