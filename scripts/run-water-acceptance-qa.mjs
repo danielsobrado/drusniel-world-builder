@@ -372,11 +372,11 @@ async function main() {
     const measuredUrl = new URL(baseUrl);
     for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
     await page.goto(measuredUrl.href, { waitUntil: 'domcontentloaded' });
-    const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(({ x, z }) => {
       const focus = window.__editor?.controller?.focusProvider?.();
       return focus && Math.hypot(focus.x - x, focus.z - z) < 2;
     }, discovery.route.start);
+    const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(() => window.__perfQa?.recording, null, { timeout: 180_000 });
 
     const tracker = new WaterAcceptanceTracker({
@@ -449,14 +449,15 @@ async function main() {
       .sort((left, right) => right.count - left.count);
     const gpuValidationErrorCount = gpuValidationErrors
       .reduce((total, entry) => total + entry.count, 0);
+    const browserFocus = await captureFocus();
     const report = {
       ...perfReport,
       adapter,
-      performanceAuthoritative: authoritativePerformance,
+      performanceAuthoritative: authoritativePerformance && browserFocus.passed,
       waterAcceptance: acceptance,
       gpuValidationErrorCount,
       gpuValidationErrors,
-      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot(), focus: await captureFocus() },
+      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot(), focus: browserFocus },
       phases: {
         enterSeconds: entry.elapsedSeconds,
         entryReachedTarget: entry.reached,
@@ -473,7 +474,7 @@ async function main() {
     console.log(JSON.stringify({
       outPath: OUT_PATH,
       adapter,
-      performanceAuthoritative: authoritativePerformance,
+      performanceAuthoritative: report.performanceAuthoritative,
       pass: acceptance.pass && gpuValidationErrorCount === 0 && report.capture.browserErrors.count === 0 && report.capture.focus.passed,
       gates: acceptance.gates,
       metrics: acceptance.metrics,
