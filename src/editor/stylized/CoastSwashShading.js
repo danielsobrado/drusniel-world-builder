@@ -6,11 +6,12 @@ import {
   oneMinus,
   sin,
   smoothstep,
+  vec2,
   vec3,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import { seaStateUniforms } from '../water/seaState.js';
-import { periodicFbm } from './PeriodicNoiseNodes.js';
+import { periodicFbm, periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { PatternOrigins } from './PatternOrigins.js';
 import { shoreContactDistance } from './ShoreContactNodes.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
@@ -74,6 +75,7 @@ export const COAST_SWASH_PATTERN_FRAMES = Object.freeze({
   drift: { scale: DRIFT_SCALE },
   frontBreakup: { wave: FRONT_BREAKUP_WAVE },
   foamBreakup: { wave: FOAM_BREAKUP_WAVE },
+  foamLace: { scale: 0.85 },
 });
 
 export const COAST_PATTERN_FRAMES = Object.freeze({
@@ -91,6 +93,18 @@ export const COAST_PATTERN_FRAMES = Object.freeze({
 function colorNode(value) {
   const color = new THREE.Color(value);
   return vec3(color.r, color.g, color.b);
+}
+
+/** Shared by the ground and water front. Real gaps replace the old sine's
+ * positive opacity floor, which painted a continuous stripe on flat beaches. */
+export function createCoastFoamBreakup(patterns, localXZ, clock, strength) {
+  if (!(strength > 0)) return float(1);
+  const point = patterns.latticePoint('foamLace', localXZ)
+    .add(vec2(clock.mul(.025).mod(512), clock.mul(-.017).mod(512)));
+  const lace = periodicFbm2(point);
+  const threshold = strength * .65;
+  const filter = lace.fwidth().min(.15);
+  return smoothstep(float(threshold - .1).sub(filter), float(threshold + .1).add(filter), lace);
 }
 
 /**
@@ -118,7 +132,6 @@ export function createCoastSwashNodes({
   // Slow drift of the wave timing along the shore.
   const drift = periodicFbm(patternOrigins.latticePoint('drift', localXZ)).mul(TAU * 1.6);
   const frontBreakupPhase = patternOrigins.wavePhase('frontBreakup', localXZ);
-  const foamBreakupPhase = patternOrigins.wavePhase('foamBreakup', localXZ);
   const phase = clock.mul(TAU / config.period).add(drift);
   const frontAt = (samplePhase) => {
     const excursion = oneMinus(cos(samplePhase)).mul(0.5);
@@ -132,12 +145,11 @@ export function createCoastSwashNodes({
   };
   const front = frontAt(phase);
   const film = coverageAt(phase).mul(band);
-  const foamBreakup = smoothstep(0.2, 0.8, sin(foamBreakupPhase.add(phase))
-    .mul(0.5).add(0.5));
+  const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength);
   const contact = shoreContactDistance(height.sub(front), localXZ);
   const foam = oneMinus(smoothstep(config.foamCoreMeters ?? .06,
     max(float(config.foamWidthMeters ?? .45), contact.footprint), contact.distance))
-    .mul(float(1 - config.breakupStrength).add(foamBreakup.mul(config.breakupStrength)))
+    .mul(foamBreakup)
     .mul(film.max(0.3))
     .mul(band);
   let memory = film;

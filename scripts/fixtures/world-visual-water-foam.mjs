@@ -7,6 +7,7 @@ import {createSeaSurfaceNodes} from '/src/editor/stylized/SeaSurfaceShading.js';
 import {loadEditorConfig} from '/src/config/loadEditorConfig.js';
 import {SEA_SWELL_COMPONENTS} from '/src/editor/water/SeaSwell.js';
 import {seaStateUniforms} from '/src/editor/water/seaState.js';
+import {COAST_SWASH_PATTERN_FRAMES,createCoastFoamBreakup} from '/src/editor/stylized/CoastSwashShading.js';
 
 // Measure the production shader itself; a CPU approximation cannot catch GPU
 // integer-hash, interpolation, or large-origin precision regressions.
@@ -16,7 +17,7 @@ const renderer=new THREE.WebGPURenderer({forceWebGL:backend==='webgl',antialias:
 await renderer.init();renderer.setPixelRatio(1);renderer.setSize(800,600);renderer.toneMapping=THREE.NoToneMapping;document.body.append(renderer.domElement);
 state.report.backend=renderer.backend.isWebGPUBackend?'webgpu':'webgl';
 const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1,1,1,-1,.1,10);camera.position.z=2;
-const settings=resolveSeaSurf(),patterns=new PatternOrigins(seaSurfPatternFrames(settings));
+const settings=resolveSeaSurf(),patterns=new PatternOrigins({...seaSurfPatternFrames(settings),...COAST_SWASH_PATTERN_FRAMES});
 const localOffset=uniform(new THREE.Vector2()),clock=uniform(123.4);
 const material=new THREE.MeshBasicNodeMaterial({toneMapped:false});
 material.colorNode=vec3(createSeaFoamNoise(patterns,uv().sub(.5).mul(128).add(localOffset),clock));
@@ -82,6 +83,21 @@ try {
   state.report.checks.push({id,maxError:error,limit:.001,passed:Number.isFinite(error)&&error<=.001});
   state.pendingCapture=id;await new Promise(resolve=>{state.continue=resolve;});state.pendingCapture=null;
  }
- state.report.passed=state.report.checks.length===30&&state.report.checks.every(c=>c.passed);
+ // The actual shared shoreline field must have transparent gaps and solid
+ // patches at both local and imported-world coordinates, with no chunk seam.
+ material.colorNode=vec3(createCoastFoamBreakup(patterns,uv().sub(.5).mul(128).add(localOffset),clock,.8));
+ material.needsUpdate=true;
+ for(const center of [[0,0],[-4226432,278528],[-9000000,6000000]]) {
+  const id=`swash-${center.join('_')}`,base=await draw(id,center,[0,0],123.4,true);
+  const gaps=base.filter(v=>v<.01).length/base.length,solid=base.filter(v=>v>.99).length/base.length;
+  const finite=base.every(v=>Number.isFinite(v)&&v>=0&&v<=1);
+  state.report.checks.push({id:`${id}-broken-coverage`,gaps,solid,passed:finite&&gaps>.1&&solid>.1});
+  for(const delta of [[64,0],[0,64]]) {
+   const adjacent=await draw(`${id}-adjacent-${delta.join('_')}`,center.map((v,i)=>v+delta[i]),delta.map(v=>-v));
+   const error=difference(base,adjacent);
+   state.report.checks.push({id:`${id}-seam-${delta.join('_')}`,...error,passed:error.max<=.001});
+  }
+ }
+ state.report.passed=state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally{renderer.setRenderTarget(null);target.dispose();mesh.geometry.dispose();material.dispose();state.report.done=true;}
