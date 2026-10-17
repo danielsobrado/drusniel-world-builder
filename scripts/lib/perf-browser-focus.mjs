@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { monitorWindowsBrowserForeground } from './perf-browser-foreground-win32.mjs';
 
 /** Foreground is part of a headed benchmark's workload. Activate only the
  * browser returned by this Playwright connection; never search other windows. */
@@ -6,7 +6,8 @@ export async function focusPerfBrowser(browser, page, { headed }) {
   if (!headed) return async () => ({ required: false, passed: true });
   await page.bringToFront();
   let method = 'playwright';
-  if (!await page.evaluate(() => document.hasFocus()) && process.platform === 'win32') {
+  let nativeMonitor = null;
+  if (process.platform === 'win32') {
     const session = await browser.newBrowserCDPSession();
     let pid;
     try {
@@ -14,12 +15,12 @@ export async function focusPerfBrowser(browser, page, { headed }) {
       pid = processInfo.find(p => p.type === 'browser')?.id;
     } finally { await session.detach(); }
     if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error('Cannot identify the owned benchmark browser.');
-    execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      `$qaShell = New-Object -ComObject WScript.Shell; $qaShell.AppActivate(${pid}) | Out-Null`],
-    { windowsHide: true, timeout: 10000, stdio: 'pipe' });
-    method = 'windows-app-activate';
+    nativeMonitor = await monitorWindowsBrowserForeground(pid);
+    browser.once('disconnected', () => { nativeMonitor().catch(() => {}); });
+    method = 'windows-native-foreground';
   }
-  await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 });
+  try { await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 }); }
+  catch (error) { await nativeMonitor?.(); throw error; }
   await page.evaluate(() => {
     const state = window.__perfBrowserFocus = { events: [], lostFocus: false };
     state.listener = event => {
@@ -32,6 +33,7 @@ export async function focusPerfBrowser(browser, page, { headed }) {
     document.addEventListener('visibilitychange', state.listener);
   });
   return async () => {
+    const native = await nativeMonitor?.();
     const result = await page.evaluate(() => {
       const state = window.__perfBrowserFocus;
       window.removeEventListener('blur', state.listener);
@@ -39,6 +41,7 @@ export async function focusPerfBrowser(browser, page, { headed }) {
       document.removeEventListener('visibilitychange', state.listener);
       return { focusedAtEnd: document.hasFocus(), lostFocus: state.lostFocus, events: state.events };
     });
-    return { required: true, method, ...result, passed: result.focusedAtEnd && !result.lostFocus };
+    return { required: true, method, ...result, ...(native ? { native } : {}),
+      passed: result.focusedAtEnd && !result.lostFocus && (!native || native.passed) };
   };
 }

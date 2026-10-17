@@ -263,10 +263,19 @@ caches during a run.
 Headed performance captures also activate their own test window and retain
 `capture.focus`. Losing foreground focus invalidates the capture. A background
 window can produce different CPU/render scheduling despite the frame-rate and
-background-throttling flags. The Windows fallback activates only the browser
-identified through the current Playwright connection. It does not close or
-modify other windows. Keep that test window foreground during movement and
-recovery; a failed focus record is not an engine timing result.
+background-throttling flags. On Windows, `capture.focus.native` verifies the
+foreground window's process ID every 100 ms. DOM focus alone is insufficient:
+Chromium can report `document.hasFocus() === true` while another application owns
+the Windows foreground. The monitor activates only the browser PID identified
+through the current Playwright connection. It does not close or modify other
+windows. Keep that test window foreground during movement and recovery; a failed
+focus record is not an engine timing result. Older DOM-only focus records cannot
+establish native foreground ownership.
+
+Run `node scripts/check-perf-browser-focus.mjs` with Windows Node to verify the
+monitor. Its two owned test windows check both successful activation and rejection
+of a background browser whose emulated DOM focus still reports true. The control
+records native samples and exits non-zero if either check fails.
 
 The runner rejects software/fallback adapters. Headless Chromium commonly fails
 that gate on Windows, so use `--headed` for comparisons. `--cpu-profile` writes
