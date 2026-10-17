@@ -207,6 +207,12 @@ does not replace the two-second full recovery gate. Implementation and retained
 hardware evidence are documented in
 [performance-improvements-2026-10-16.md](performance-improvements-2026-10-16.md).
 
+Recovery now uses the last retained movement frame as a conservative time
+origin. `recovery.observerDelayMs` includes the report/diagnostic handoff before
+observation begins; this delay is no longer free recovery time. Older captures
+timed only from observer entry, so compare their recovery figures with that
+limitation. Frame pacing statistics still include only measured movement.
+
 Performance, water-acceptance, and Gods’ End asset browser runners also share
 `tmp/perf-browser-<platform>.lock`. They wait for the previous hardware browser
 run to close before launching Chromium; waiting times out after five minutes.

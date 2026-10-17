@@ -1170,7 +1170,8 @@ stylizedSurface:
     # frame; 64x64 cells at 256 is sixteen frames of steady work instead of a hitch.
     grassScatterGroupsPerSlice: 256
     inactiveReleaseFrames: 30
-    treeManifestBuildsPerFrame: 1
+    # Several cheap manifests can share the single bounded frame allowance.
+    treeManifestBuildsPerFrame: 4
     manifestBuildBudgetMs: 3
     # Authored prop variants are streamed per biome rather than loaded at boot.
     # The prefetch window is this many chunks beyond each layer's residency, so a

@@ -332,7 +332,11 @@ const fs = require('fs');
     const observeRecovery = () => page.evaluate(async seconds => {
         const { PerfCounters } = await import('/src/editor/performance/qa/PerfCounters.js');
         const surface = window.__editor.stylizedSurface;
-        const started = performance.now();
+        const observedAt = performance.now();
+        const lastMovementFrame = window.__perfQa.getReport()?.samples?.at(-1)?.timestamp;
+        // A conservative clock: the retained movement frame precedes key
+        // release. Report transfer/diagnostics must not give recovery free time.
+        const started = Number.isFinite(lastMovementFrame) ? Math.min(observedAt, lastMovementFrame) : observedAt;
         const start = surface.getPreparationStatus();
         let readyFrames = 0;
         let firstReadyMs = null;
@@ -364,6 +368,8 @@ const fs = require('fs');
           } else { readyFrames = 0; firstReadyMs = null; }
         }
         return { ready: readyFrames >= 60, firstReadyMs, timeline,
+          timingOrigin: Number.isFinite(lastMovementFrame) ? 'last-retained-movement-frame' : 'observer-entry',
+          observerDelayMs: observedAt - started,
           grass: { ready: grassReadyFrames >= 60, firstReadyMs: grassFirstReadyMs },
           waitedMs: performance.now() - started, start,
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };
