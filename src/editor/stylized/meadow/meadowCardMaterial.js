@@ -103,7 +103,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   material.colorNode = albedo;
   material.normalNode = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
   const view = normalize(cameraPosition.sub(positionWorld));
-  const transmission = pow(dot(view.negate(), normalize(sunDirection)).max(0), 2.2);
+  const transmission = pow(dot(view.negate(), normalize(sunDirection)).max(0), tuning.translucencyPower);
   const emissive = pigment.mul(uniforms.sunColor).mul(transmission)
     .mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength).mul(0.6).mul(height)
     .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill));

@@ -4,6 +4,7 @@ import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
 import { trackedWorldResources } from './WorldVisualResources.js';
 import { treeImpostorIntegrity } from '../../stylized/impostor/TreeImpostorIntegrity.js';
+import { worldVisualNeighborhood } from './WorldVisualNeighborhood.js';
 import { setWaterTimeOverride } from '../../water/WaterVisualClock.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -90,6 +91,7 @@ export class WorldVisualQa {
     e.weatherController?.applySettings();
   }
   setWaterTime(seconds = null) { setWaterTimeOverride(seconds); }
+  neighborhood() { return worldVisualNeighborhood(this.editor); }
   async prepareMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
     if(sequenceId!=='walk-sprint-turn-v1'||!['first-person','third-person'].includes(cameraMode)) throw new Error('Invalid visual motion sequence.');
     await this.cut(startPose);await this.settle();

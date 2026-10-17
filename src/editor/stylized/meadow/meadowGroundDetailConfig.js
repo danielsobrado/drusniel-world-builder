@@ -1,4 +1,4 @@
-import { linearColor } from './meadowGroundPalette.js';
+import { linearColor } from './meadowColorSpace.js';
 
 /**
  * What the ground between meadow stems is made of (`grass.meadow.groundDetail`).

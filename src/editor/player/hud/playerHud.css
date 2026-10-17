@@ -214,6 +214,7 @@
 .hud-keys.is-resting {
   opacity: 0;
   translate: 0 6px;
+  display: none;
 }
 
 /* ── Frame-rate readout, beside the minimap ──────────────────────────────── */

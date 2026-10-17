@@ -12,6 +12,7 @@ import { chromium } from 'playwright';
 import { bakeFoliageMips } from './lib/bake-foliage-mips.mjs';
 import { requireKtx2Encoder } from './lib/ktx2-encoder.mjs';
 import { treeImpostorSourceInputs } from './lib/tree-impostor-source-inputs.mjs';
+import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import {
   TREE_IMPOSTOR_MANIFEST_VERSION,
   validateTreeImpostorManifest,
@@ -563,7 +564,9 @@ async function main() {
   }
 }
 
+await mkdir(resolve('tmp'), { recursive: true });
+const releaseBrowser = await waitForPerfRunLock(resolve('tmp', `perf-browser-${process.platform}.lock`));
 main().catch((error) => {
   console.error('[impostor-bake] Failed.', error);
   process.exitCode = 1;
-});
+}).finally(releaseBrowser);

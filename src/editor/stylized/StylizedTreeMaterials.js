@@ -6,7 +6,6 @@ import {
   max,
   mix,
   normalView,
-  normalWorld,
   oneMinus,
   positionGeometry,
   positionLocal,
@@ -41,7 +40,7 @@ function paletteValue(palette, config, key) {
 function applyCanopyRim(baseColor, config, palette) {
   const strength = paletteValue(palette, config, 'rimStrength');
   if (!(strength > 0)) return baseColor;
-  const facing = saturate(dot(normalWorld, positionViewDirection));
+  const facing = saturate(dot(normalView, positionViewDirection));
   const rim = pow(oneMinus(facing), paletteValue(palette, config, 'rimPower'));
   return mix(
     baseColor,

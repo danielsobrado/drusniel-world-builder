@@ -1,6 +1,6 @@
 const unit=v=>Math.max(0,Math.min(1,v));
 export function terrainSubstrateWeights({tileId,canopy=0,wetness=0,shoreline=0}) {
- const S=tileId===1||tileId===2?1:0,M=Math.max(unit(wetness),unit(shoreline)*.75),L=unit(canopy)*(1-M)*(1-S);
+ const S=tileId===1?1:0,M=Math.max(unit(wetness),unit(shoreline)*.75),L=unit(canopy)*(1-M)*(1-S);
  return {sand:S*(1-M),litter:L,mud:M,mineral:Math.max(0,1-S*(1-M)-L-M)};
 }
 export function terrainSubstrateResponse(input,profiles) {

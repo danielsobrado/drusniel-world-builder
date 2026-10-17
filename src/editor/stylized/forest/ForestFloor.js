@@ -17,13 +17,37 @@ const FLOOR_DEFAULTS = Object.freeze({
 
 export const FOREST_FLOOR_KINDS = Object.freeze(Object.keys(FLOOR_DEFAULTS));
 
+function floorValue(profile, config, name, fallback) {
+  const value = profile[name] ?? config[name];
+  return clamp01(Number.isFinite(value) ? value : fallback);
+}
+
+export function validateForestFloorDensities(config = {}) {
+  const validate = (profile, path) => {
+    for (const kind of FOREST_FLOOR_KINDS) for (const location of ['Core', 'Edge']) {
+      const key = `${kind}${location}Density`, value = profile[key];
+      if (value !== undefined && (!Number.isFinite(value) || value < 0 || value > 1)) {
+        throw new Error(`Invalid editor configuration: ${path}.${key} must be in [0, 1].`);
+      }
+    }
+  };
+  validate(config, 'trees.forestFloor');
+  for (const [id, profile] of Object.entries(config.byTileId ?? {})) {
+    if (!Number.isInteger(Number(id)) || Number(id) < 0 || Number(id) > 254 || !profile || typeof profile !== 'object') {
+      throw new Error(`Invalid editor configuration: trees.forestFloor.byTileId.${id} needs a terrain ID and profile.`);
+    }
+    validate(profile, `trees.forestFloor.byTileId.${id}`);
+  }
+}
+
 export function forestFloorDensity(habitat, kind, config = {}) {
   if (!habitat?.patchId || habitat.patchCoverage <= 0) return 1;
   const coverage = clamp01(habitat.patchCoverage);
   const edge = clamp01(habitat.patchEdge);
   const defaults = FLOOR_DEFAULTS[kind] ?? FLOOR_DEFAULTS.grass;
-  const coreDensity = clamp01(Number(config[`${kind}CoreDensity`]) || defaults.core);
-  const edgeDensity = clamp01(Number(config[`${kind}EdgeDensity`]) || defaults.edge);
+  const profile = config.byTileId?.[habitat.tileId] ?? config;
+  const coreDensity = floorValue(profile, config, `${kind}CoreDensity`, defaults.core);
+  const edgeDensity = floorValue(profile, config, `${kind}EdgeDensity`, defaults.edge);
   const woodedDensity = coreDensity + (edgeDensity - coreDensity) * edge;
   return clamp01(1 - coverage * (1 - woodedDensity));
 }

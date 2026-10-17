@@ -8,12 +8,11 @@ import {
   positionGeometry,
   positionWorld,
   sin,
-  texture,
   uniform,
-  uv,
   vec3,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
+import { authoredTexture } from './AuthoredTextureNode.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -115,7 +114,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     .mul(sin(donor.z.mul(0.97).add(sin(donor.x.mul(0.61)).mul(1.2))))
     .mul(sin(donor.y.mul(0.71).add(donor.z.mul(0.37))))
     .mul(0.5).add(0.5);
-  const albedo = (sourceMap ? texture(sourceMap, uv()).rgb : vec3(1))
+  const albedo = (sourceMap ? authoredTexture(sourceMap).rgb : vec3(1))
     .mul(color(material.color.getHex()))
     .mul(settings.toning)
     .mul(mix(0.74, 1.06, tone));
@@ -134,7 +133,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   const underside = up.smoothstep(-0.7, 0.15).mul(0.45).add(0.55);
   let weathered = mix(albedo, mossColor, mossMask).mul(underside);
   let roughness = material.roughnessMap
-    ? texture(material.roughnessMap, uv()).g.mul(material.roughness ?? 1).max(mossMask.mul(0.95))
+    ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1).max(mossMask.mul(0.95))
     : float(material.roughness ?? 0.85).max(mossMask.mul(0.95));
 
   // Dust settles on the bare tops the moss has not claimed.

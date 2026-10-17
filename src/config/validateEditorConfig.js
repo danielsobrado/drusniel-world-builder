@@ -5,6 +5,7 @@ import {
   postProcessingSettingsToPlain,
 } from '../render/postprocessing/PostProcessingSettings.js';
 import { assertCharacterConfig } from './validateCharacterConfig.js';
+import { validateForestFloorDensities } from '../editor/stylized/forest/ForestFloor.js';
 
 const REQUIRED_POSITIVE_PATHS = Object.freeze([
   Object.freeze(['map', 'tileSize']),
@@ -447,6 +448,7 @@ function validateStylizedSurface(config) {
   assertTileIds(surface.rocks.tileIds, 'stylizedSurface.rocks.tileIds');
   assertTileIds(surface.flowers.tileIds, 'stylizedSurface.flowers.tileIds');
   assertTileIds(surface.trees.tileIds, 'stylizedSurface.trees.tileIds');
+  validateForestFloorDensities(surface.trees.forestFloor);
   assertTileIds(surface.groundDetails.tileIds, 'stylizedSurface.groundDetails.tileIds');
   assertTileIds(surface.aquaticPlants.tileIds, 'stylizedSurface.aquaticPlants.tileIds');
   if (!Number.isInteger(surface.water.tileId) || surface.water.tileId < 0 || surface.water.tileId > 255) {

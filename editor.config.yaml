@@ -922,7 +922,7 @@ stylizedSurface:
         dryEnd: 0.84
         dryStrength: 0.22
         dryColor: '#777455'
-        lodWidenMax: 2.0
+        lodWidenMax: 1.35
       # Plants and gaps inside a stand (meadow/meadowTuftField.js): sub-metre
       # tufts share height, lean and value; short stems narrow with their height
       # instead of standing as broad wedges. Reshapes stems only — population,
@@ -950,6 +950,8 @@ stylizedSurface:
         default: { litter: '#9a9156', litterAmount: 0.65, moss: 0.25, soil: 0.35, streaks: 0.8 }
         byTileId:
           3: { litter: '#b39a5f', litterAmount: 0.6, moss: 0.0, soil: 0.45, streaks: 0.7 }   # savanna: straw, warm earth
+          5: { litter: '#78613f', litterAmount: 0.65, moss: 0.2, soil: 0.3, streaks: 0.25 }
+          6: { litter: '#806642', litterAmount: 0.7, moss: 0.35, soil: 0.3, streaks: 0.35 }
           7: { litter: '#5e4c31', litterAmount: 0.5, moss: 0.45, soil: 0.2, streaks: 0.3 }   # tropical rainforest: leaf litter
           8: { litter: '#5a4a30', litterAmount: 0.5, moss: 0.5, soil: 0.2, streaks: 0.3 }    # temperate rainforest
           9: { litter: '#6b543a', litterAmount: 0.6, moss: 0.55, soil: 0.35, streaks: 0.5 }  # taiga: needle duff, moss
@@ -1777,9 +1779,18 @@ stylizedSurface:
         9: { elevationMax: 550, elevationFade: 100 }
         10: { elevationMax: 620, elevationFade: 80 }
     forestFloor:
+      # Sparse forest-floor plants and shaded margins use the same canopy field
+      # as litter. Open meadows retain the default population.
+      byTileId:
+        5: { grassCoreDensity: 0.24, flowerCoreDensity: 0.06 }
+        6: { grassCoreDensity: 0.25, flowerCoreDensity: 0.08 }
+        7: { grassCoreDensity: 0.18, flowerCoreDensity: 0.04 }
+        8: { grassCoreDensity: 0.2, flowerCoreDensity: 0.04 }
+        9: { grassCoreDensity: 0.24, flowerCoreDensity: 0.04 }
+        12: { grassCoreDensity: 0.22, flowerCoreDensity: 0.04 }
       # Core densities are how much ground cover survives under closed canopy.
-      # These were low enough (0.18 grass, 0.08 flowers) that a wood interior was
-      # bare dark earth; a real forest floor is shaded, not swept.
+      # Forest overrides leave room for the shared litter/moss substrate and
+      # shade-tolerant understory. Edges and open meadow keep their growth.
       grassCoreDensity: 0.28
       grassEdgeDensity: 0.78
       flowerCoreDensity: 0.10

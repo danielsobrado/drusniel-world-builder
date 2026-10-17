@@ -9,10 +9,11 @@ export function treeImpostorIntegrity(view) {
     && indices.size === prototypeCount
     && [...indices].every(index => Number.isInteger(index) && index >= 0 && index < prototypeCount);
   const offline = atlases.every(atlas => atlas.source === 'asset');
-  const ready = !expected || (complete && (settings.runtimeBake !== false || offline));
+  const batchCount = view?.impostorBatches?.length ?? 0;
+  const ready = !expected || (complete && batchCount === prototypeCount && (settings.runtimeBake !== false || offline));
   return {
     ready, expected, prototypeCount, atlasCount: atlases.length,
-    batchCount: view?.impostorBatches?.length ?? 0,
+    batchCount,
     runtimeSignature: view?.prototypeSignature ?? null,
     sources: [...new Set(atlases.map(atlas => atlas.source ?? 'runtime'))],
     failure: ready ? null : view?.impostorFailure ?? 'Tree atlases are incomplete or still loading.',

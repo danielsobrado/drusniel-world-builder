@@ -4,7 +4,7 @@ import { treeImpostorIntegrity } from '../src/editor/stylized/impostor/TreeImpos
 
 const view = atlases => ({
   config: { trees: { enabled: true }, lod: { impostor: { enabled: true, runtimeBake: false } } },
-  prototypes: [{}, {}], impostorAtlases: atlases, prototypeSignature: 'actual',
+  prototypes: [{}, {}], impostorBatches: [{}, {}], impostorAtlases: atlases, prototypeSignature: 'actual',
 });
 
 test('visual integrity rejects missing, duplicate and runtime fallback atlases', () => {
@@ -18,6 +18,9 @@ test('visual integrity rejects missing, duplicate and runtime fallback atlases',
 test('complete offline assets pass and preserve useful failure diagnostics', () => {
   const tree = view([{ prototypeIndex: 0, source: 'asset' }, { prototypeIndex: 1, source: 'asset' }]);
   assert.equal(treeImpostorIntegrity(tree).ready, true);
+  tree.impostorBatches = [];
+  assert.equal(treeImpostorIntegrity(tree).ready, false);
+  tree.impostorBatches = [{}, {}];
   tree.impostorAtlases = []; tree.impostorFailure = 'source signature mismatch';
   assert.equal(treeImpostorIntegrity(tree).failure, 'source signature mismatch');
   tree.config.lod.impostor.enabled = false;

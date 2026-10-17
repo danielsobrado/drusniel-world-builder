@@ -13,8 +13,10 @@ const config = {
   } },
 };
 
-test('terrain roots match blade pigment in linear light for standard and custom biome IDs', () => {
-  const palette = createMeadowGroundPalette(config);
+test('without substrate detail terrain roots match blade pigment in linear light for standard and custom biome IDs', () => {
+  const plain = structuredClone(config);
+  plain.grass.meadow.groundDetail = { enabled: false };
+  const palette = createMeadowGroundPalette(plain);
   for (const id of [0, 3, 4, 12, 32, 254]) {
     const colors = config.grass.meadow.palette.byTileId[id] ?? config.grass.meadow.palette;
     const expected = new Color(colors.base).lerp(new Color(colors.tip), 0.08).multiplyScalar(1.2);

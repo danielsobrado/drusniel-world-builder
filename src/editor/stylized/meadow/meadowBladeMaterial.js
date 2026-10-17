@@ -60,14 +60,14 @@ export function createMeadowBladeMaterial({
   const forward = vec3(blade.rotation.x, 0, blade.rotation.y);
   const tip = smoothstep(0.15, 1, height);
   const worldNormal = normalize(vec3(0, 1, 0)
-    .add(sideDirection.mul(side).mul(tip).mul(0.18))
+    .add(sideDirection.mul(side).mul(tip.mul(0.25).add(0.12)))
     .add(forward.mul(tip).mul(0.3)));
   material.normalNode = cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz.normalize();
 
   // Sun through the thin tip, carrying the blade's own colour, and a small shared
   // fill so roots and terrain stay together without bleaching the field.
   const view = normalize(cameraPosition.sub(positionWorld));
-  const transmission = pow(dot(view.negate(), normalize(sunDirection)).max(0), 2.2);
+  const transmission = pow(dot(view.negate(), normalize(sunDirection)).max(0), tuning.translucencyPower);
   // Gust fronts crossing the meadow (grass-test's gust sheen): where the travelling
   // wave bends the tips over, their paler side turns up and catches the light.
   // Computed per stem in the vertex stage; the ambient layer sets how much shows.
