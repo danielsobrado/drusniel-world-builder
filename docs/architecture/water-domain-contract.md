@@ -2,21 +2,21 @@
 
 ## Status
 
-Proposed architecture. No runtime behaviour is implemented by this document.
+Implemented domain contract. Runtime inventory updated October 17, 2026. Some later design sections retain proposed extensions; the current representation is described below.
 
 This contract defines the shared water representation required by terrain generation, rendering, player movement, simulation, aquatic vegetation, and future boats. Water geography must be authoritative outside the shader. Rendering consumes the water domain; it must not infer geography from colours or visual masks.
 
-## Current limitation
+## Current runtime
 
-The current runtime represents water as a flat, masked visual overlay:
+- `WaterTerrainModel`, `RiverChannel`, `RiverReachProfile` and `LakeBodies` resolve deterministic beds, local levels, kinds, body IDs, current direction, falls and plunge pools. Imported river courses remain source geography.
+- `TerrainWaterQueries` adapts canonical world meters and render coordinates to generator cell coordinates. Player wading, swimming and submersion consume these queries. Marine surface queries share the render wave equations and bounded local exposure estimate.
+- Worker-generated water fields belong to terrain pages. `StylizedWaterSlot` uploads them to a fixed resident slot pool and shares material graphs through `SharedWaterMaterials`. Dry chunks draw no water; only nearby water receives the refraction variant.
+- `StylizedWaterMaterial` consumes depth, flow and explicit water-kind data. A lake at sea level remains inland water even when its current is zero. Depth optics remain enabled on low quality; expensive flow, reflection and refraction work can be omitted.
+- `WaterAppearance` resolves continuous organic/cold priors from a coarse, world-aligned biome context. These are presentation values, not new terrain categories or replacements for the 13 Azgaar IDs.
+- `WaterObstacleUpdates` derives local river disturbance from already resident rock manifests, under the shared scenery budget. Player ripple impulses use a bounded pooled batch and validate their body contact through CPU queries.
+- `WaterVisualClock` synchronizes the water sheet, ground swash and CPU wave phase. The development visual QA adapter can freeze it while leaving the rest of the world active.
 
-- `StylizedWaterSlot` resolves one world sea level and creates one water plane per resident terrain slot.
-- `StylizedWaterMaterial` uses the blue channel of `surfaceMaskTexture` as a binary water mask.
-- Water colour and opacity come from animated FBM and Voronoi patterns rather than physical water depth.
-- Player movement only queries the CPU heightfield through `InfiniteTerrainView.getWorldHeight`.
-- Azgaar river centre lines classify cells as water, but do not yet provide a carved bed or a local river surface elevation.
-
-A shader-only upgrade would therefore improve appearance while leaving water depth, river geometry, underwater movement, and simulation inconsistent.
+The [water appearance implementation record](../qa/water-aaa-implementation-2026-10-17/README.md) records visual and performance evidence. Rendered mesh interpolation and field quantization must be assessed separately from agreement between the shared CPU/shader equations.
 
 ## Design rules
 
@@ -59,19 +59,20 @@ Required invariants:
 - `bodyId` is deterministic and stable for the same imported or generated body.
 - `shoreDistance` is zero at the water boundary, positive in water, and may be clamped to a configured maximum range.
 
-The first implementation may omit meaningful `bodyId` and flow for oceans, but their fields should exist from the start to avoid changing every consumer later.
+Body IDs and flow are implemented. Rendering appearance data does not replace or truncate the canonical CPU body ID.
 
 ## Runtime query API
 
-The world generator should expose a canonical query:
+The world generator exposes a query on canonical **cell axes**:
 
 ```ts
-sampleWater(worldX: number, worldZ: number): WaterSample
+sampleWater(cellX: number, cellZ: number): WaterSample
 ```
 
-The terrain view should expose a render-space adapter:
+The terrain view exposes canonical world-meter and render-space adapters:
 
 ```ts
+getCanonicalWater(worldX: number, worldZ: number): WaterSample
 getWorldWater(renderX: number, renderZ: number): WaterSample
 ```
 
@@ -83,27 +84,35 @@ Physics must use the CPU query. The shader uses worker-generated chunk textures 
 
 Do not overload `surfaceMaskTexture`. Its channels already represent path influence, grass classification, and binary water classification.
 
-Each terrain slot should receive a dedicated `waterFieldTexture` generated with the page data in the chunk worker.
+Each terrain slot receives a dedicated `waterFieldTexture` generated with the page data in the chunk worker.
 
-Recommended first layout: `RGBA16F`.
+Current primary layout: `RGBA16F`, with `(chunkSize + 1)` vertices on each axis.
 
 | Channel | Meaning |
 |---|---|
 | R | Water coverage |
-| G | Water surface height |
-| B | Water depth |
+| G | Water surface height relative to the page's double-precision surface origin |
+| B | Signed surface-minus-bed distance, including negative dry-side samples |
 | A | Shore distance |
 
-A later flow texture can use `RG8_SNORM`:
+The signed render field retains the true zero crossing between wet and dry vertices. Shading clamps it to nonnegative depth for optics. Canonical CPU samples still obey the clamped `depth` invariant above.
+
+The current flow texture is `RGBA8`, with normalized encoded direction and independent whitewater channels:
 
 | Channel | Meaning |
 |---|---|
 | R | Flow X |
 | G | Flow Z |
+| B | Fall weight |
+| A | Plunge weight |
 
-For a `64 × 64` page, `RGBA16F` costs 32 KiB. With 49 resident terrain slots, the steady resident allocation is approximately 1.53 MiB before upload staging.
+An additional `RGBA8` appearance field carries nearest-sampled kind, organic response, cold response and marine exposure. Numeric context is filtered continuously; discrete kinds are decoded before any coverage filtering. No free channel in the flow texture is repurposed.
 
-The water field must include enough halo data during generation to calculate boundary-safe shore distance, river profiles, and interpolation. Only the owned `64 × 64` result is uploaded.
+The optional local rock response uses a separate `RG8` field for downstream disturbance and upstream slowing. Its producer is resumable, works only near river water, and never requests additional rock residency. It has an explicit opt-out at `water.riverSurface.obstacles`.
+
+The fixed slot set costs `(chunkSize + 1)^2 × 18` source bytes per slot: 8 primary, 4 flow, 4 appearance and 2 obstacle. At chunk size 64 and 49 slots this is 3,726,450 bytes (3.55 MiB), before CPU page storage, staging and driver overhead. The previous primary+flow set was 2.37 MiB at these dimensions. Textures and typed arrays are reused and disposed with their slots.
+
+The sampling halo preserves shared-edge values. The owned `(chunkSize + 1)²` vertex field is uploaded; the coarse biome context is aligned to global cell coordinates so independently generated chunks resolve the same edge.
 
 ## Water-body rules
 

@@ -1,6 +1,6 @@
 # Water, rivers and sea: visual quality plan
 
-Captured: October 16, 2026. Review completed: October 17, 2026. Status: **proposal; rendering changes are not implemented by this document**.
+Captured: October 16, 2026. Review completed: October 17, 2026. Status: **core implementation landed; final acceptance in progress**. See the [implementation and verification record](../qa/water-aaa-implementation-2026-10-17/README.md).
 
 This plan targets a polished, stylized AAA presentation that belongs in Drusniel's world: convincing scale, readable depth and currents, coherent shore materials, restrained foam, and stable movement. Extra simulation complexity is justified only when it improves those qualities in the actual streamed world.
 
