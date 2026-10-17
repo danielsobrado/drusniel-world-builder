@@ -92,7 +92,10 @@ export function createSeaSurfaceNodes({
   const strength = amplitude.div(offshore.max(1e-4));
 
   const detail = patternXZ ? createSeaDetailNodes({
-    patternXZ, time, choppiness: config.choppiness, strength, patterns, localXZ,
+    // Wind ripples survive in sheltered shallows even when large swell cannot.
+    // Reusing the displacement envelope erased all surface structure there.
+    patternXZ, time, choppiness: config.choppiness,
+    strength: smoothstep(.04, .5, waterDepth).mul(mix(float(.35), float(1), exposure)), patterns, localXZ,
     phases: swell.phases, amplitude, settings: config.detail,
   }) : null;
   const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time,

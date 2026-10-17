@@ -754,7 +754,7 @@ stylizedSurface:
         prototypeGroups:
           - [elephant_ear]
     # The same authored wet plants are reused as short submerged silhouettes.
-    # The water surface follows terrain at +0.12 m, so these remain visible below
+    # The water surface follows the domain with a thin depth-tapered lift, so these remain visible below
     # it instead of becoming reeds floating at an unrelated sea plane.
     aquaticVariants:
       # 4 975 and 6 145 triangles — heavier than every runtime tree except the
@@ -785,7 +785,7 @@ stylizedSurface:
       - scene: /assets/ground/aquatic/lotus-04.glb
         scale: 1
         weight: 1
-        heightOffset: 0.125
+        heightOffset: 0.03
         placement: &lotusPlacement
           strategy: shoreline-colonies
           # Selected 16 m gardens recur only in roughly one third of broad
@@ -801,7 +801,7 @@ stylizedSurface:
       - scene: /assets/ground/aquatic/lotus-11.glb
         scale: 1
         weight: 1
-        heightOffset: 0.125
+        heightOffset: 0.03
         placement: *lotusPlacement
         prototypeGroups:
           - [lotus-11]

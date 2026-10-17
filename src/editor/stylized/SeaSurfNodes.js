@@ -12,7 +12,9 @@ export function createSeaFoamNoise(patterns, localXZ, time) {
     sin(patterns.wavePhase('surfLaceWarpX',localXZ).add(time.mul(0.031).mod(Math.PI*2))),
     sin(patterns.wavePhase('surfLaceWarpZ',localXZ).sub(time.mul(0.023).mod(Math.PI*2))),
   ).mul(0.85);
-  return periodicFbm2(point.add(warp)).toVar('seaFoamField');
+  const warped = point.add(warp);
+  return periodicFbm2(warped).mul(.7)
+    .add(periodicFbm2(warped.mul(4).add(vec2(19.3, 7.1))).mul(.3)).toVar('seaFoamField');
 }
 
 export function createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time, settings }) {

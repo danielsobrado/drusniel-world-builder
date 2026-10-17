@@ -1,5 +1,7 @@
 water:
   qualityTier: high
+  # A thin anti-z-fighting lift; the former 12 cm lift read as a raised rim.
+  heightOffset: 0.025
   currentAnimationSpeed: 0.22
   currentInfluence: 0.85
   interaction:

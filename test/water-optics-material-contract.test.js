@@ -7,7 +7,7 @@ const source = await readFile(
   'utf8',
 );
 
-test('medium and higher tiers derive opacity from semantic water depth', () => {
+test('depth optics derive opacity from semantic water depth', () => {
   assert.match(source, /const waterDepth = max\(waterField\.b, 0\);/);
   assert.match(source, /if \(quality\.depthOptics\)/);
   // Assignment, not declaration: `opticalDistance` is declared `let` outside the
@@ -33,7 +33,7 @@ test('underwater optical distance blends to camera submersion', () => {
   );
 });
 
-test('the low-tier legacy opacity path remains available', () => {
+test('the configured base surface color remains available for detail blending', () => {
   assert.match(
     source,
     /let alpha = mix\(float\(water\.deepOpacity\), float\(water\.opacity\), ramp\)/,

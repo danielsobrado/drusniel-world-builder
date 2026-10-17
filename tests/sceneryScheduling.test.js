@@ -12,6 +12,7 @@ function fixture() {
     terrainView:{floatingOrigin:{toCanonical:()=>({x:0,z:0})}},
     config:{rocks:{radius:1,falloff:1}},objectMap:{list:()=>[]},slots:[],detailViews:[],
     waterSlots:[{update:record('water')}],skyView:{update:record('sky')},
+    waterObstacleUpdates:{schedule:record('water obstacle schedule'),flush:record('water obstacle work')},
     meadowGrass:{updateFrame:record('grass frame'),prepareFrame:record('grass work'),frameInputs:{},blades:{staleTiles:[{}]}},
     updateForestGroundTextures:record('ground'),prewarmOneDistantWaterSlot(){},
   });
@@ -33,6 +34,7 @@ test('animation and layout run every frame before budgeted publications',()=>{
   assert.equal(calls.filter(name=>name==='grass frame').length,1);
   assert.ok(calls.indexOf('grass work')>calls.indexOf('bush'));
   for(const name of ['rock work','tree work','bush work'])assert.ok(calls.indexOf(name)>calls.indexOf('grass frame'));
+  assert.ok(calls.indexOf('water obstacle work')>calls.indexOf('water obstacle schedule'));
 });
 test('submerged suspension preserves collision/water updates without grass work',()=>{
   const {surface,calls}=fixture();try{setUnderwaterBlend(1);surface.update(1000,{position:{x:0,z:0}});

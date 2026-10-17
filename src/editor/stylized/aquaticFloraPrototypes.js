@@ -4,7 +4,7 @@ import { GODS_END_AQUATIC_SPECIES as KINDS } from '../assets/godsEnd/aquatic/aqu
 import { createGodsEndAquaticGeometry } from '../assets/godsEnd/aquatic/aquaticGeometry.js';
 import { applyAquaticSway } from './aquaticSway.js';
 import { attribute, positionLocal, vec3 } from 'three/tsl';
-import { plantSwayTime } from './plantSway.js';
+import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { lakeWaveRise } from '../water/LakeSurfaceWaves.js';
 
 /**
@@ -55,7 +55,7 @@ function materialFor(kind, entry, height, clock) {
  *
  * @param {object} layer `stylizedSurface.aquaticPlants`
  */
-export function createAquaticFloraPrototypes(layer = {}, water = {}, { clock = plantSwayTime } = {}) {
+export function createAquaticFloraPrototypes(layer = {}, water = {}, { clock = waterVisualClock } = {}) {
   const definitions = [];
   for (const [id, entry] of Object.entries(layer.proceduralVariants ?? {})) {
     const spec = entry?.kind ?? id;
