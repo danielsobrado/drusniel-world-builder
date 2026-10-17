@@ -7,7 +7,10 @@ import { validateImpostorKtx2 } from './lib/impostor-ktx2-validation.mjs';
 import { validateTreeImpostorSourceInputs } from './lib/tree-impostor-source-inputs.mjs';
 import {
   validateTreeImpostorManifest,
+  TREE_IMPOSTOR_MANIFEST_VERSION,
 } from '../src/editor/stylized/impostor/TreeImpostorManifest.js';
+import { TREE_NORMAL_MASK_FLOOR_BYTE } from '../src/editor/stylized/impostor/TreeImpostorNormalEncoding.js';
+import { validateTreeNormalPixels } from './lib/tree-impostor-normal-validation.mjs';
 
 const CONFIG_PATH = resolve('editor.config.yaml');
 const MANIFEST_PATH = resolve('public/assets/impostors/trees/manifest.json');
@@ -38,7 +41,7 @@ function pngSize(buffer, label) {
   };
 }
 
-async function alphaCoverage(buffer, label) {
+async function alphaCoverage(buffer, label, cutoff = VISIBLE_ALPHA) {
   const { data, info } = await sharp(buffer, { failOn: 'error' })
     .ensureAlpha()
     .raw()
@@ -48,7 +51,7 @@ async function alphaCoverage(buffer, label) {
   }
   let visible = 0;
   for (let offset = 3; offset < data.length; offset += info.channels) {
-    if (data[offset] > VISIBLE_ALPHA) visible += 1;
+    if (data[offset] > cutoff) visible += 1;
   }
   return visible;
 }
@@ -115,7 +118,10 @@ async function main() {
     }
 
     const albedoPixels = await alphaCoverage(buffers.albedo, `albedo atlas ${prototype.albedo}`);
-    const foliagePixels = await alphaCoverage(buffers.normal, `normal atlas ${prototype.normal}`);
+    const foliagePixels = await alphaCoverage(buffers.normal, `normal atlas ${prototype.normal}`, TREE_NORMAL_MASK_FLOOR_BYTE);
+    const decode = buffer => sharp(buffer).ensureAlpha().raw().toBuffer();
+    const pixels = await Promise.all([decode(buffers.albedo), decode(buffers.normal)]);
+    validateTreeNormalPixels(...pixels, `normal atlas ${prototype.prototypeIndex}`);
     if (albedoPixels === 0) {
       throw new Error(`Albedo atlas ${prototype.albedo} contains no visible tree pixels.`);
     }
@@ -127,7 +133,7 @@ async function main() {
   }
 
   const mode = manifest.requiresRuntimeBake
-    ? `legacy v${manifest.version}; exact runtime v3 bake enabled`
+    ? `legacy v${manifest.version}; exact runtime v${TREE_IMPOSTOR_MANIFEST_VERSION} bake enabled`
     : manifest.normalEncoding;
   console.log(
     `validated ${manifest.prototypes.length} tree impostor prototypes (${manifest.sourceSignature}; ${mode})`,

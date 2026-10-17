@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { downsampleTreeImpostorCapture } from '../src/editor/stylized/impostor/TreeImpostorSupersample.js';
+test('trunk normals survive premultiplied canvas transport without becoming foliage',()=>{
+ const albedo=new Uint8Array(4*4*4),normal=new Uint8Array(albedo.length);
+ for(let i=0;i<albedo.length;i+=4){albedo.set([118,80,48,255],i);normal.set([90,180,230,0],i);}
+ const result=downsampleTreeImpostorCapture(albedo,normal,1);
+ assert.equal(result.normal[3],128);
+ // Simulate the 8-bit premultiplication used by a canvas/PNG image path.
+ for(let c=0;c<3;c++){
+  const transported=Math.round(Math.round(result.normal[c]*128/255)*255/128);
+  assert.ok(Math.abs(transported-result.normal[c])<=1);
+ }
+});
 test('offline downsampling preserves linear colour, normal direction and foliage class',()=>{
  const size=4,scale=4,albedo=new Uint8Array(size*size*scale*scale*4),normal=new Uint8Array(albedo.length);
  for(let i=0;i<albedo.length;i+=4){albedo.set([118,80,48,255],i);normal.set([128,128,255,255],i);}

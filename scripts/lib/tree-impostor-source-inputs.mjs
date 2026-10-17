@@ -16,6 +16,9 @@ const SOURCES = [
   'src/editor/stylized/barkWeathering.js',
   'src/editor/stylized/impostor/TreeImpostorBaker.js',
   'src/editor/stylized/impostor/TreeImpostorAtlasPixels.js',
+  'src/editor/stylized/impostor/TreeImpostorSupersample.js',
+  'src/editor/stylized/impostor/TreeImpostorNormalEncoding.js',
+  'src/editor/stylized/impostor/impostorFrame.js',
 ];
 const hash = value => createHash('sha256').update(value).digest('hex');
 

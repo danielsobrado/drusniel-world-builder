@@ -1,4 +1,5 @@
 import { foliageMipmaps } from './alphaCoverage.js';
+import { encodeTreeFoliageMask } from './TreeImpostorNormalEncoding.js';
 export const TREE_IMPOSTOR_CAPTURE_SCALE = 4;
 const decode=v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;};
 const encode=v=>Math.round(255*(v<=.0031308?v*12.92:1.055*v**(1/2.4)-.055));
@@ -19,7 +20,7 @@ export function downsampleTreeImpostorCapture(albedo,normal,size,scale=TREE_IMPO
   const i=(y*size+x)*4,length=Math.hypot(...n)||1;
   for(let c=0;c<3;c++){colour[i+c]=weight?encode(rgb[c]/weight):0;normals[i+c]=Math.round((n[c]/length*.5+.5)*255);}
   colour[i+3]=coverage[i+3];
-  normals[i+3]=colour[i+3]>=128&&weight?Math.round(leaf/weight):0;
+  normals[i+3]=colour[i+3]>=128&&weight?encodeTreeFoliageMask(leaf/weight/255):0;
  }
  return {albedo:colour,normal:normals};
 }

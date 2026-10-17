@@ -1,5 +1,6 @@
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { treeFoliageEmission } from '../forest/foliageLight.js';
+import { decodeTreeFoliageMaskNode } from './TreeImpostorNormalEncoding.js';
 import * as THREE from 'three/webgpu';
 import {
   atan,
@@ -102,6 +103,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   );
   const albedo = blendAtlas(atlas.albedo);
   const normalSample = blendAtlas(atlas.normal);
+  const foliageMask = decodeTreeFoliageMaskNode(normalSample.a);
   const viewNormal = normalSample.rgb.mul(2).sub(1);
   const worldNormal = normalize(
     right.mul(viewNormal.x)
@@ -114,7 +116,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const colorMultiplier = mix(
     vec3(variation),
     appearance.yzw.mul(variation),
-    normalSample.a,
+    foliageMask,
   );
   const signedFade = parameters.y;
   const fadeMask = step(
@@ -126,7 +128,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   material.positionNode = worldPosition;
   material.colorNode = albedo.rgb.mul(colorMultiplier);
   if (atlas.foliageLighting) {
-    material.emissiveNode = treeFoliageEmission(material.colorNode).mul(normalSample.a);
+    material.emissiveNode = treeFoliageEmission(material.colorNode).mul(foliageMask);
   }
   material.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   // Keep atlas alpha stable at full coverage. Feeding it into the stochastic

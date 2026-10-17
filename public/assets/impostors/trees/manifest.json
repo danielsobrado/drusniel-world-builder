@@ -1,10 +1,10 @@
 {
-  "version": 3,
-  "generatedAt": "2026-10-17T05:26:56.621Z",
-  "sourceSignature": "tree-impostor-v7-ddf715ab",
+  "version": 4,
+  "generatedAt": "2026-10-17T05:44:36.618Z",
+  "sourceSignature": "tree-impostor-v8-cb03408f",
   "sourceInputs": {
     "version": 1,
-    "configuration": "1165bafe3916109900de703a1710630bd2bdc08e25ea4c7adb0cd827aba28f97",
+    "configuration": "44f44ec1261b3ef23da8a32f97002fcb3e783c9257bc4da4a9783e04ef7e583f",
     "files": {
       "public/assets/grass-scene.glb": "7b0c6932643aca545bb04584c242c932bd48bc127d1a54266817e60662b572b4",
       "public/assets/textures/bark/bark_AO.png": "d71fd24119c330e8e54ca7138e86e80779c7b72a7ba27de74c2a4e1ec8b71524",
@@ -39,10 +39,13 @@
       "src/editor/stylized/forest/ProceduralBarkTextures.js": "cb07f1b23961721c26dfcc7d4f3ba8d8834540d22955b113a554d51987ec5b4c",
       "src/editor/stylized/forest/canopyGrade.js": "53e7583cd5c2ccc417e76a57f4290a175e69336c14ad2ddae86ba7573f29349f",
       "src/editor/stylized/impostor/TreeImpostorAtlasPixels.js": "4963dff32beb7d5845a5a11fc4162f781572202325f6734b788a072243e5fbc7",
-      "src/editor/stylized/impostor/TreeImpostorBaker.js": "2101fb29e0930c49ede11e555057a0ca869a097bcaecfd7b75e81e4b93470740"
+      "src/editor/stylized/impostor/TreeImpostorBaker.js": "2101fb29e0930c49ede11e555057a0ca869a097bcaecfd7b75e81e4b93470740",
+      "src/editor/stylized/impostor/TreeImpostorNormalEncoding.js": "5ef3d4ac07c95b1d2919bb2571cd65b821f34ec2ed823db15b8c02389aabf145",
+      "src/editor/stylized/impostor/TreeImpostorSupersample.js": "08f132a732840c9202093694283c2c3dd042c76b89ab09f883681584125f4434",
+      "src/editor/stylized/impostor/impostorFrame.js": "5ea400ea20fa8460d722794873432fe1f48b70e3bbd689e45ea74268858a5454"
     }
   },
-  "normalEncoding": "view-normal-rgb-foliage-mask-a",
+  "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
   "requiresRuntimeBake": false,
   "prototypes": [
     {
@@ -61,7 +64,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-0-albedo.png",
       "normal": "/assets/impostors/trees/prototype-0-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-0-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-0-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -90,7 +93,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-1-albedo.png",
       "normal": "/assets/impostors/trees/prototype-1-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-1-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-1-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -119,7 +122,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-2-albedo.png",
       "normal": "/assets/impostors/trees/prototype-2-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-2-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-2-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -148,7 +151,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-3-albedo.png",
       "normal": "/assets/impostors/trees/prototype-3-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-3-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-3-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -177,7 +180,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-4-albedo.png",
       "normal": "/assets/impostors/trees/prototype-4-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-4-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-4-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -206,7 +209,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-5-albedo.png",
       "normal": "/assets/impostors/trees/prototype-5-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-5-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-5-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -235,7 +238,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-6-albedo.png",
       "normal": "/assets/impostors/trees/prototype-6-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-6-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-6-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -264,7 +267,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-7-albedo.png",
       "normal": "/assets/impostors/trees/prototype-7-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-7-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-7-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -293,7 +296,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-8-albedo.png",
       "normal": "/assets/impostors/trees/prototype-8-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-8-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-8-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -322,7 +325,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-9-albedo.png",
       "normal": "/assets/impostors/trees/prototype-9-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-9-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-9-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -351,7 +354,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-10-albedo.png",
       "normal": "/assets/impostors/trees/prototype-10-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-10-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-10-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -380,7 +383,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-11-albedo.png",
       "normal": "/assets/impostors/trees/prototype-11-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-11-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-11-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -409,7 +412,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-12-albedo.png",
       "normal": "/assets/impostors/trees/prototype-12-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-12-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-12-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -438,7 +441,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-13-albedo.png",
       "normal": "/assets/impostors/trees/prototype-13-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-13-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-13-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -467,7 +470,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-14-albedo.png",
       "normal": "/assets/impostors/trees/prototype-14-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-14-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-14-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -496,7 +499,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-15-albedo.png",
       "normal": "/assets/impostors/trees/prototype-15-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-15-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-15-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -525,7 +528,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-16-albedo.png",
       "normal": "/assets/impostors/trees/prototype-16-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-16-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-16-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -554,7 +557,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-17-albedo.png",
       "normal": "/assets/impostors/trees/prototype-17-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-17-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-17-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -583,7 +586,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-18-albedo.png",
       "normal": "/assets/impostors/trees/prototype-18-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-18-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-18-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -612,7 +615,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-19-albedo.png",
       "normal": "/assets/impostors/trees/prototype-19-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-19-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-19-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -641,7 +644,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-20-albedo.png",
       "normal": "/assets/impostors/trees/prototype-20-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-20-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-20-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -670,7 +673,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-21-albedo.png",
       "normal": "/assets/impostors/trees/prototype-21-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-21-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-21-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -699,7 +702,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-22-albedo.png",
       "normal": "/assets/impostors/trees/prototype-22-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-22-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-22-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -728,7 +731,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-23-albedo.png",
       "normal": "/assets/impostors/trees/prototype-23-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-23-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-23-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -757,7 +760,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-24-albedo.png",
       "normal": "/assets/impostors/trees/prototype-24-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-24-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-24-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -786,7 +789,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-25-albedo.png",
       "normal": "/assets/impostors/trees/prototype-25-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-25-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-25-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -815,7 +818,7 @@
       "foliageLighting": true,
       "albedo": "/assets/impostors/trees/prototype-26-albedo.png",
       "normal": "/assets/impostors/trees/prototype-26-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-26-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-26-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -844,7 +847,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-27-albedo.png",
       "normal": "/assets/impostors/trees/prototype-27-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-27-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-27-albedo.ktx2",
       "albedoKtx2Metadata": {
@@ -873,7 +876,7 @@
       "foliageLighting": false,
       "albedo": "/assets/impostors/trees/prototype-28-albedo.png",
       "normal": "/assets/impostors/trees/prototype-28-normal.png",
-      "normalEncoding": "view-normal-rgb-foliage-mask-a",
+      "normalEncoding": "view-normal-rgb-foliage-mask-half-a",
       "albedoMips": "/assets/impostors/trees/prototype-28-albedo-mips.bin.gz",
       "albedoKtx2": "/assets/impostors/trees/prototype-28-albedo.ktx2",
       "albedoKtx2Metadata": {

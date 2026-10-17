@@ -23,4 +23,16 @@ export async function runBakerSwatch({renderer,scene,camera,draw,state}) {
  const error=Math.max(...actual.map((v,i)=>Math.abs(v-expected[i])));
  state.report.checks.push({id:'production-baker-linear-albedo-roundtrip',expected,actual,bakedSample,range,center:Array.from(pixels.subarray((300*800+400)*4,(300*800+400)*4+4)),error,passed:error<=2/255});
  scene.remove(mesh);geometry.dispose();source.dispose();material.dispose();atlas.albedo.dispose();atlas.normal.dispose();
+ const trunkGeometry=new THREE.PlaneGeometry(3,3),trunkSource=new THREE.MeshLambertNodeMaterial();
+ trunkSource.colorNode=vec3(...expected);
+ const trunk=await baker.bakePrototype([{kind:'trunk',geometry:trunkGeometry,material:trunkSource}],0,settings,renderer);
+ const trunkMaterial=new THREE.MeshBasicNodeMaterial({side:THREE.DoubleSide});
+ trunkMaterial.colorNode=texture(trunk.normal).rgb;
+ const trunkMesh=new THREE.Mesh(trunkGeometry,trunkMaterial);scene.add(trunkMesh);
+ const normalPixels=await draw('baker-trunk-normal-roundtrip',{normalEncoding:trunk.normalEncoding},true);
+ const center=(300*800+400)*4,actualNormal=Array.from(normalPixels.subarray(center,center+3));
+ const encoded=Array.from(trunk.normalCanvas.getContext('2d').getImageData(64,64,1,1).data);
+ state.report.checks.push({id:'production-baker-trunk-normal-roundtrip',actualNormal,encoded,
+  passed:encoded[3]===128&&Math.max(...actualNormal.map((v,i)=>Math.abs(v-[.5,.5,1][i])))<2/255});
+ scene.remove(trunkMesh);trunkGeometry.dispose();trunkSource.dispose();trunkMaterial.dispose();trunk.albedo.dispose();trunk.normal.dispose();
 }

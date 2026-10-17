@@ -15,15 +15,15 @@ test('atlas dilation fills gutter RGB without expanding coverage alpha', () => {
   assert.deepEqual(pixel(tile, 3, 0, 0), [10, 20, 30, 0]);
 });
 
-test('normal dilation uses albedo coverage when trunk mask alpha is zero', () => {
-  const normal = new Uint8ClampedArray([128, 128, 255, 0]);
+test('normal dilation uses albedo coverage while retaining the encoded trunk mask', () => {
+  const normal = new Uint8ClampedArray([128, 128, 255, 128]);
   const albedo = new Uint8ClampedArray([80, 60, 40, 255]);
   const tile = createDilatedAtlasTile(normal, 1, 3, 1, {
     coveragePixels: albedo,
     alphaPixels: normal,
   });
 
-  assert.deepEqual(pixel(tile, 3, 1, 1), [128, 128, 255, 0]);
+  assert.deepEqual(pixel(tile, 3, 1, 1), [128, 128, 255, 128]);
   assert.deepEqual(pixel(tile, 3, 0, 0), [128, 128, 255, 0]);
 });
 
