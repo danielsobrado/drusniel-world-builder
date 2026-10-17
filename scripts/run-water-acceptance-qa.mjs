@@ -484,7 +484,8 @@ async function main() {
       gpuValidationErrors: gpuValidationErrors.slice(0, 4),
     }, null, 2));
 
-    if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0 || !report.capture.focus.passed) process.exitCode = 1;
+    if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0) process.exitCode = 1;
+    if (!report.capture.focus.passed) process.exitCode = 1;
   } finally {
     await browser?.close();
     releaseBrowserLock();
