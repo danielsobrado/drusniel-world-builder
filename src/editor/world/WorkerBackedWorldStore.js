@@ -297,7 +297,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     const current = this.cache.get(page.key);
     if (current && !current.renderPixelsDirty
         && this.pageEditsMatch(current.editState, page.chunkX, page.chunkZ)) return current;
-    if (!page.tilePixels || !page.surfaceMaskPixels || !page.waterFieldPixels || !page.waterFlowPixels
+    if (!page.tilePixels || !page.surfaceMaskPixels || !page.waterFieldPixels || !page.waterFlowPixels || !page.waterAppearancePixels
         || page.renderPixelsDirty) {
       throw new Error('World chunk worker must return a complete render-ready terrain page.');
     }

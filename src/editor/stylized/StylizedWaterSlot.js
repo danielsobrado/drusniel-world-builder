@@ -14,6 +14,7 @@ import { createStylizedWaterMaterial } from './StylizedWaterMaterial.js';
 import { SEA_SWELL_COMPONENTS, seaSwellPhaseOrigin } from '../water/SeaSwell.js';
 import { waterfallPatternOrigin } from './WaterfallShading.js';
 import { createWaterPatternOrigins } from './WaterPatternOrigins.js';
+import { updateWaterVisualClock } from '../water/WaterVisualClock.js';
 
 const WATER_FIELD_CHANNELS = 4;
 // Chebyshev radius, in chunks around the focus chunk, within which water is
@@ -76,6 +77,11 @@ export class StylizedWaterSlot {
     this.waterFlowTexture.colorSpace = THREE.NoColorSpace;
     this.waterFlowTexture.unpackAlignment = 1;
     this.waterFlowTexture.needsUpdate = true;
+    this.waterAppearancePixels = new Uint8Array(this.fieldSize * this.fieldSize * 4);
+    this.waterAppearanceTexture = new THREE.DataTexture(this.waterAppearancePixels, this.fieldSize, this.fieldSize);
+    this.waterAppearanceTexture.minFilter = this.waterAppearanceTexture.magFilter = THREE.NearestFilter;
+    this.waterAppearanceTexture.generateMipmaps = false;
+    this.waterAppearanceTexture.needsUpdate = true;
     this.uploadedPage = null;
     this.uploadedFieldRevision = -1;
     this.hasWaterCoverage = false;
@@ -85,6 +91,7 @@ export class StylizedWaterSlot {
       surfaceMaskTexture: terrainSlot.surfaceMaskTexture,
       waterFieldTexture: this.waterFieldTexture,
       waterFlowTexture: this.waterFlowTexture,
+      waterAppearanceTexture: this.waterAppearanceTexture,
       waterFieldSize: this.fieldSize,
       waterSurfaceOrigin: this.surfaceOrigin,
       chunkCenter: terrainSlot.chunkCenter,
@@ -166,20 +173,23 @@ export class StylizedWaterSlot {
     if (page.waterFieldWidth !== this.fieldSize || page.waterFieldHeight !== this.fieldSize
         || page.waterFieldPixels?.length !== this.waterFieldPixels.length
         || page.waterFlowWidth !== this.fieldSize || page.waterFlowHeight !== this.fieldSize
-        || page.waterFlowPixels?.length !== this.waterFlowPixels.length) {
+        || page.waterFlowPixels?.length !== this.waterFlowPixels.length
+        || page.waterAppearancePixels?.length !== this.waterAppearancePixels.length) {
       throw new Error('Terrain page water fields do not match their render slot.');
     }
     this.waterFieldPixels.set(page.waterFieldPixels);
     this.waterFlowPixels.set(page.waterFlowPixels);
+    this.waterAppearancePixels.set(page.waterAppearancePixels);
     this.waterFieldTexture.needsUpdate = true;
     this.waterFlowTexture.needsUpdate = true;
+    this.waterAppearanceTexture.needsUpdate = true;
     this.surfaceOrigin.value = page.waterFieldSurfaceOrigin ?? 0;
     this.uploadedPage = page;
     this.uploadedFieldRevision = page.waterFieldRevision ?? 0;
     // Recomputed per upload rather than carried on the page, so a runtime edit
     // that floods or drains this chunk re-decides whether it draws.
     this.hasWaterCoverage = waterFieldHasCoverage(this.waterFieldPixels);
-    const uploadedBytes = page.waterFieldPixels.byteLength + page.waterFlowPixels.byteLength;
+    const uploadedBytes = page.waterFieldPixels.byteLength + page.waterFlowPixels.byteLength + page.waterAppearancePixels.byteLength;
     PerfCounters.inc(PERF_COUNTER_WATER_UPLOAD_BYTES, uploadedBytes);
     PerfCounters.inc('textureBytesUploaded', uploadedBytes);
   }
@@ -189,7 +199,7 @@ export class StylizedWaterSlot {
       this.mesh.visible = false;
       return;
     }
-    this.time.value = timestamp / 1000;
+    this.time.value = updateWaterVisualClock(timestamp / 1000);
     const descriptor = this.terrainSlot.descriptor;
     const page = this.terrainSlot.page;
     const ready = Boolean(
@@ -243,6 +253,7 @@ export class StylizedWaterSlot {
     this.terrainView.scene.remove(this.mesh);
     this.waterFieldTexture.dispose();
     this.waterFlowTexture.dispose();
+    this.waterAppearanceTexture.dispose();
     if (!this.sharedMaterials) {
       this.material.dispose();
       this.refractiveMaterial?.dispose();

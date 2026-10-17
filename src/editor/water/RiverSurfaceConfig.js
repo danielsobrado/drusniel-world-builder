@@ -28,5 +28,6 @@ export function validateRiverSurfaceConfig(config) {
   if (config.foamStrength !== undefined) {
     assertFiniteRange(config.foamStrength, field('foamStrength'), 0, 4);
   }
+  if (config.glintStrength !== undefined) assertFiniteRange(config.glintStrength, field('glintStrength'), 0, 2);
   return config;
 }

@@ -69,6 +69,8 @@ export function createSeaSurfaceNodes({
   phaseOrigin,
   sunDirection,
   config,
+  oceanMask = null,
+  exposure = float(1),
 }) {
   const { storm } = seaStateUniforms;
   // Metres from the chunk centre on canonical axes, matching the chunk's world position.
@@ -78,12 +80,13 @@ export function createSeaSurfaceNodes({
   );
   const sharpness = float(config.choppiness * 0.075).mul(storm.mul(0.5).add(1));
   const swell = createSeaSwellNodes({ localXZ, phaseOrigin, time, sharpness });
-  const seaMask = seaWaterMask({ surfaceWorldHeight, currentStrength });
+  const seaMask = oceanMask ?? seaWaterMask({ surfaceWorldHeight, currentStrength });
   const offshore = float(config.amplitude).mul(storm.mul(config.stormScale - 1).add(1));
   const amplitude = min(offshore, waterDepth.mul(config.depthRatio))
     .mul(smoothstep(0, config.shallowDepth, waterDepth))
     .mul(seaMask)
     .mul(waterCoverage)
+    .mul(exposure)
     .toVarying('seaSwellAmplitude');
   // Share of full offshore height, so crests and whitecaps fade in the shallows.
   const strength = amplitude.div(offshore.max(1e-4));

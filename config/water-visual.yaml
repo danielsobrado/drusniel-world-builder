@@ -20,7 +20,7 @@ water:
     surfaceTransitionDepth: 0.75
     # Thickness over which the sheet fades out at the bank. Keep it under the
     # ~0.12 m the surface sits above terrain, or the waterline reads as a step.
-    shorelineFadeDepth: 0.35
+    shorelineFadeDepth: 0.2
     # The cell pattern the donor never had.
     surfaceDetailStrength: 0
     underwaterTintStrength: 0.35
@@ -50,9 +50,9 @@ water:
     flowBandScale: 0.58
     flowBandSpeed: 0.42
     flowBandContrast: 2.4
-    intersectionDepth: 0.28
-    intersectionSoftness: 0.38
-    intersectionStrength: 0.82
+    intersectionDepth: 0.08
+    intersectionSoftness: 0.2
+    intersectionStrength: 0.4
   # River falls and their plunge pools (placed by waterDomain.falls). Drawn with
   # the foam, so only at the qualities that draw foam.
   waterfall:
@@ -115,7 +115,7 @@ water:
       enabled: true
       fadeStart: 2.5
       fadeEnd: 7
-      depthPhaseScale: 1.4
+      depthPhaseScale: 0.45
       setDepth: 0.5
       setGroup: 0.29
       alongFrequency: 0.031
@@ -124,8 +124,8 @@ water:
       breakDepthFull: 0.7
       breakDepthFade: 2.4
       breakDepthEnd: 4.5
-      strength: 0.8
-      trail: 4.5
+      strength: 0.52
+      trail: 7
       laceScale: 0.19
     # Crossing ripple trains ride the broad swell and disperse at their own speeds.
     detail:
@@ -156,13 +156,15 @@ water:
       causticStrength: 0.65
     # Seconds per wave, and how far above still water it runs up the sand.
     period: 7.5
-    runupHeight: 1.1
+    runupHeight: 0.5
     # Depth in the shallows where the foam line forms.
     breakDepth: 0.5
     frontBand: 0.08
     foamCore: 0.02
     foamWidth: 0.12
-    breakupStrength: 0.3
+    foamCoreMeters: 0.06
+    foamWidthMeters: 0.45
+    breakupStrength: 0.8
     # How fast the wash memory of earlier waves dries, and the always-damp band.
     washDecay: 4
     dampHeight: 0.9
@@ -172,7 +174,7 @@ water:
     filmTint: '#8ccad0'
     filmTintStrength: 0.18
     foamColor: '#edf8fb'
-    foamStrength: 0.85
+    foamStrength: 0.55
   # grass-test's lake and river surface (`WaterMaterial`, inland branch): its detail
   # normals advected along the current, its Fresnel against its sky, its sun glint
   # (pow 170 × 1.8 + pow 20 × 0.08), and its foam — noise foam in the 0.02–0.75 m

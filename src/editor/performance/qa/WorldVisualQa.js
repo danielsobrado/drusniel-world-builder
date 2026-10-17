@@ -3,6 +3,7 @@ import { staticLightingComponents,staticLightingChange } from './WorldVisualLigh
 import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
 import { trackedWorldResources } from './WorldVisualResources.js';
+import { setWaterTimeOverride } from '../../water/WaterVisualClock.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
@@ -85,6 +86,7 @@ export class WorldVisualQa {
     e.weatherSettings.weatherMode=weather;e.weatherSettings.weatherIntensity=weather==='off'?0:1;
     e.weatherController?.applySettings();
   }
+  setWaterTime(seconds = null) { setWaterTimeOverride(seconds); }
   async prepareMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
     if(sequenceId!=='walk-sprint-turn-v1'||!['first-person','third-person'].includes(cameraMode)) throw new Error('Invalid visual motion sequence.');
     await this.cut(startPose);await this.settle();
@@ -132,5 +134,5 @@ export class WorldVisualQa {
     throw new Error('Static sky, lights and fog failed to converge.');
   }
 
-  dispose() {this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
+  dispose() {setWaterTimeOverride(null);this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
 }

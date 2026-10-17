@@ -35,5 +35,6 @@ export function createWaterPatternOrigins(water) {
     flowReference: { scale: 1, period: WATER_FLOW_REFERENCE_METERS },
     // Metres, wrapped by a whole number of every river detail tile.
     riverDetail: { scale: 1, period: RIVER_DETAIL_PATTERN_PERIOD_METERS },
+    riverMacro: { scale: 1 / 32 },
   });
 }

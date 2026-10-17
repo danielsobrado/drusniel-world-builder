@@ -10,7 +10,8 @@ function colorNode(value) {
 }
 
 /** grass-test's warm beach, pale submerged sand and mottled reef shelf. */
-export function createCoastSandNodes({ localXZ, patterns, groundHeight, sandMask, waterCoverage, oceanMask = float(1), config = {}, clock = time }) {
+export function createCoastSandNodes({ localXZ, patterns, groundHeight, sandMask, waterCoverage, oceanMask = float(1),
+  organic = float(0), cold = float(0), config = {}, clock = time }) {
   const settings = resolveCoastSand(config);
   if (!settings.enabled) return null;
   const height = groundHeight.sub(seaStateUniforms.seaLevel);
@@ -29,12 +30,16 @@ export function createCoastSandNodes({ localXZ, patterns, groundHeight, sandMask
           const meso = sin(phase('sandMesoX').add(sin(phase('sandMesoWarp'))))
             .mul(sin(phase('sandMesoZ'))).mul(0.5).add(0.5);
           const ripples = sin(phase('sandRippleX').add(sin(phase('sandRippleWarp')).mul(0.8))).mul(0.025).add(1);
-          const dry = mix(colorNode(settings.dryDark), colorNode(settings.dryLight), macro)
+          const warm = mix(colorNode(settings.dryDark), colorNode(settings.dryLight), macro);
+          const gravel = mix(colorNode('#686f6b'), colorNode('#a8aaa1'), macro);
+          const mud = mix(colorNode('#424a36'), colorNode('#82785b'), macro);
+          const dry = mix(mix(warm, gravel, cold.mul(.8)), mud, organic.mul(.75))
             .mul(ripples).mul(mix(float(0.93), float(1.06), meso));
-          const bedSand = mix(dry, colorNode(settings.seabedColor).mul(ripples), settings.seabedColorWeight);
+          const bedSand = mix(dry, colorNode(settings.seabedColor).mul(ripples),
+            float(settings.seabedColorWeight).mul(oneMinus(cold.mul(.65))).mul(oneMinus(organic.mul(.7))));
           const reefBand = smoothstep(0.6, 1.6, bedDepth).mul(oneMinus(smoothstep(4.5, 6.5, bedDepth)));
           const reef = smoothstep(0.52, 0.68, periodicFbm2(patterns.latticePoint('sandReef', localXZ)))
-            .mul(reefBand).mul(settings.reefStrength);
+            .mul(reefBand).mul(settings.reefStrength).mul(oneMinus(cold)).mul(oneMinus(organic));
           const reefColor = mix(colorNode(settings.reefColor), colorNode(settings.reefRockColor), meso);
           const bedColor = mix(bedSand, reefColor, reef);
           const causticFade = smoothstep(0.25, 0.65, bedDepth)

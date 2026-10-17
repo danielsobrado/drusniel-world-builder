@@ -39,7 +39,7 @@ import {
 } from './stylized/StylizedNoiseNodes.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './stylized/CoastSwashShading.js';
 import { createCoastSandNodes } from './stylized/CoastSandShading.js';
-import { createTerrainOceanMask } from './stylized/TerrainOceanMask.js';
+import { createTerrainWaterContext } from './stylized/TerrainOceanMask.js';
 import { createSnowSurfaceNodes } from './stylized/SnowSurfaceShading.js';
 import { createTerrainDriftNodes } from './materials/TerrainDriftNodes.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
@@ -373,14 +373,22 @@ export function createTerrainMaterial({
     // The interpolated mesh height keeps narrow wash fronts smooth between
     // vertices; the nearest-filtered height texture would make texel terraces.
     const coastalHeight = positionWorld.y;
-    const oceanMask = coastPatterns ? createTerrainOceanMask(terrainUv, coastalHeight, width + 1) : float(0);
+    const waterContext = coastPatterns ? createTerrainWaterContext(terrainUv, coastalHeight, width + 1) : null;
+    const oceanMask = waterContext?.ocean ?? float(0);
     const sand = coastPatterns && createCoastSandNodes({
       localXZ, patterns: coastPatterns, groundHeight: coastalHeight,
       sandMask: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0))),
       waterCoverage: surfaceMask.b, config: stylizedConfig.water?.coast?.sand,
       oceanMask,
+      organic: waterContext?.organic,
+      cold: waterContext?.cold,
     });
     const beachSurface = sand ? sand.apply(paintedSurface.color, paintedSurface.roughness) : paintedSurface;
+    if (waterContext) {
+      const wet = waterContext.wet.mul(oneMinus(grassCoverage).max(.15));
+      beachSurface.color = beachSurface.color.mul(float(1).sub(wet.mul(.22)));
+      beachSurface.roughness = mix(beachSurface.roughness, float(.38), wet);
+    }
     // Swash, foam and wet sand where the ground meets the sea.
     const swash = coastPatternsTemplate && createCoastSwashNodes({
       localXZ,

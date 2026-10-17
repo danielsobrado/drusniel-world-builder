@@ -19,6 +19,7 @@ import {
   vec2,
   vec3,
 } from 'three/tsl';
+import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 
 /**
  * grass-test's lake and river surface (`WaterMaterial`, inland branch): its
@@ -37,8 +38,6 @@ import {
 const DETAIL_SCALE = 0.25;
 /** The donor's micro layer (×3.7), rounded so it tiles the pattern period whole. */
 const MICRO_SCALE = 4;
-/** Turbulence streaks, the donor's (0.7, 2.4) of its current coordinates, taken isotropic. */
-const STREAK_SCALE = 1.5;
 /**
  * Detail coordinates are chunk-local metres plus the chunk centre wrapped to
  * this period in double precision (the water's `riverDetail` PatternOrigins
@@ -55,8 +54,10 @@ function colorNode(value) {
 }
 
 /**
- * The donor's `createWaterDetailTexture`, verbatim: RG a tileable slope field
- * of four crossed cosines, B three octaves of periodic value noise for foam.
+ * Tileable stochastic slopes. Crossed cosine trains previously turned the
+ * sun highlight into a crosshatched grid, particularly on wide river reaches.
+ * Foam has an independent noise field so highlights and bubbles do not stamp
+ * the same shapes onto the surface.
  */
 export function createWaterDetailTexture() {
   const size = 256, data = new Uint8Array(size * size * 4);
@@ -75,15 +76,11 @@ export function createWaterDetailTexture() {
     );
   };
   for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
-    const u = x / size * Math.PI * 2, v = y / size * Math.PI * 2;
-    const dx = Math.cos(u * 3 + v * 4 + Math.sin(v * 2)) * 0.28
-      + Math.cos(u * 5 - v * 2) * 0.19
-      + Math.cos(u * 7 + v * 9 + Math.sin(u * 3)) * 0.09
-      + Math.cos(u * 13 - v * 7) * 0.05;
-    const dz = Math.cos(u * 3 + v * 4 + Math.sin(v * 2)) * 0.24
-      - Math.cos(u * 5 - v * 2) * 0.12
-      + Math.cos(u * 7 + v * 9 + Math.sin(u * 3)) * 0.13
-      - Math.cos(u * 13 - v * 7) * 0.03;
+    const heightAt = (px, py) => noise(px / size * 8, py / size * 8, 8) * .65
+      + noise(px / size * 16 + 3.1, py / size * 16 + 7.7, 16) * .25
+      + noise(px / size * 32 + 9.3, py / size * 32 + 2.7, 32) * .1;
+    const dx = (heightAt(x + 1, y) - heightAt(x - 1, y)) * 5;
+    const dz = (heightAt(x, y + 1) - heightAt(x, y - 1)) * 5;
     const k = (y * size + x) * 4;
     data[k] = Math.round((dx * 0.5 + 0.5) * 255);
     data[k + 1] = Math.round((dz * 0.5 + 0.5) * 255);
@@ -127,6 +124,8 @@ export function getWaterDetailTexture() {
  */
 export function createRiverSurfaceNodes({
   patternXZ,
+  patterns = null,
+  localXZ = null,
   flow,
   currentStrength,
   fall,
@@ -142,7 +141,9 @@ export function createRiverSurfaceNodes({
   const current = clamp(currentStrength.mul(4), 0, 1);
   const flowLength = length(flow);
   const direction = select(flowLength.greaterThan(1e-4), flow.div(max(flowLength, 1e-4)), vec2(0, 1));
-  const detailUv = patternXZ.mul(DETAIL_SCALE);
+  const macro = patterns && localXZ ? periodicFbm2(patterns.latticePoint('riverMacro', localXZ)).toVar('riverMacro') : float(.5);
+  const warp = vec2(macro.sub(.5).mul(2.6), macro.mul(macro).sub(.25).mul(1.9));
+  const detailUv = patternXZ.mul(DETAIL_SCALE).add(warp);
   // Drift per cross-fade cycle, in detail tiles. Still water keeps the donor's
   // lake drift (0.13, 0.07 of a tile per cycle), rivers move with the current.
   const cycle = float(config.cycleSeconds);
@@ -154,8 +155,14 @@ export function createRiverSurfaceNodes({
   const phase = fract(time.div(cycle));
   const phaseB = fract(phase.add(0.5));
   const blend = abs(phase.mul(2).sub(1));
-  const a = texture(detail, detailUv.sub(drift.mul(phase)));
-  const b = texture(detail, detailUv.sub(drift.mul(phaseB)));
+  // Rational basis closes exactly over the 320 m detail period. Its differently
+  // oriented/advected second sample removes the former 4 m and 8 m repeats.
+  const secondaryUv = vec2(patternXZ.x.mul(.15).add(patternXZ.y.mul(.2)),
+    patternXZ.y.mul(.15).sub(patternXZ.x.mul(.2))).add(vec2(19.3, 7.1)).sub(warp.mul(.7));
+  const secondaryDrift = vec2(drift.x.mul(.6).add(drift.y.mul(.8)), drift.y.mul(.6).sub(drift.x.mul(.8)));
+  const detailAt = p => mix(texture(detail, detailUv.sub(drift.mul(p))),
+    texture(detail, secondaryUv.sub(secondaryDrift.mul(p))), macro.mul(.35).add(.25));
+  const a = detailAt(phase), b = detailAt(phaseB);
   const micro = texture(detail, detailUv.mul(MICRO_SCALE).add(vec2(time.mul(-0.018), time.mul(0.013))))
     .rg.mul(2).sub(1);
   const slope = mix(a.rg.mul(2).sub(1), b.rg.mul(2).sub(1), blend)
@@ -183,27 +190,27 @@ export function createRiverSurfaceNodes({
   const sky = mix(colorNode('#81a8b4'), colorNode('#38658a'), smoothstep(0, 0.7, reflected.y));
 
   const spec = max(dot(reflect(sunDirection.negate(), normal), viewDirection), 0);
-  const glint = pow(spec, 170).mul(1.8).add(pow(spec, 20).mul(0.08))
+  const glint = pow(spec, 110).mul(.8).add(pow(spec, 24).mul(.06))
     .mul(oneMinus(fall.mul(0.8)))
+    .mul(config.glintStrength ?? 1)
     .mul(max(sunDirection.y, 0).smoothstep(0, 0.08));
 
   // Foam: noise in the shallow band, streaks where the current runs fast,
   // and a fringe along the banks. Constants are the donor's; its depth band is
   // read in metres.
   const foamNoise = mix(a.b, b.b, blend);
-  const turbulence = currentStrength.mul(config.fullCurrentSpeed).sub(0.7).mul(0.34)
-    .clamp(0, 0.65).mul(current);
+  // Current is normalized direction, not a measured speed. Fast-looking foam
+  // must be earned by local slope/drop energy rather than every river texel.
+  const gradient = baseNormal.xz.length().div(max(baseNormal.y, .05));
+  const energy = smoothstep(.002, .08, gradient).max(fall);
+  const margin = smoothstep(.2, 3.5, shoreDistance);
+  const turbulence = energy.mul(.34).mul(current).mul(margin);
   const shore = smoothstep(0.02, 0.13, waterDepth).mul(oneMinus(smoothstep(0.22, 0.75, waterDepth)));
-  const streakUv = detailUv.mul(STREAK_SCALE).add(vec2(0.3, 0.1));
-  const streaks = mix(
-    texture(detail, streakUv.sub(drift.mul(phase).mul(STREAK_SCALE))).b,
-    texture(detail, streakUv.sub(drift.mul(phaseB).mul(STREAK_SCALE))).b,
-    blend,
-  );
-  const riverShore = smoothstep(0.48, 0.78, foamNoise)
-    .mul(shore.mul(0.6).add(turbulence.mul(pow(streaks, 3))));
+  const streaks = smoothstep(.48, .8, foamNoise).mul(macro.mul(.7).add(.3));
+  const riverShore = smoothstep(0.52, 0.82, foamNoise)
+    .mul(shore.mul(0.22).add(turbulence.mul(streaks)));
   const bankFoam = oneMinus(smoothstep(0.1, config.bankFoamWidth, shoreDistance)).mul(current)
-    .mul(smoothstep(0.3, 0.75, foamNoise)).mul(0.5);
+    .mul(smoothstep(0.48, 0.82, foamNoise)).mul(0.22);
   const foam = riverShore.add(bankFoam).mul(oneMinus(fall)).clamp(0, 0.94);
 
   return { fresnel, sky, glint, foam, foamNoise, reflected, normal, baseNormal };

@@ -1,5 +1,7 @@
 import { uniform } from 'three/tsl';
 import { resolveSeaSurf, sampleSeaHeightCpu } from './SeaSurf.js';
+import { seaExposure } from './WaterAppearance.js';
+import { updateWaterVisualClock } from './WaterVisualClock.js';
 
 /**
  * The sea's shared, per-frame state, read by every water material and by
@@ -28,7 +30,7 @@ export function configureSea(config) {
 
 export function updateSeaState({ timeSeconds, storm, seaLevel, rain }) {
   if (Number.isFinite(rain)) seaStateUniforms.rain.value = Math.max(0, Math.min(1, rain));
-  if (Number.isFinite(timeSeconds)) seaTime = timeSeconds;
+  if (Number.isFinite(timeSeconds)) seaTime = updateWaterVisualClock(timeSeconds);
   if (Number.isFinite(storm)) seaStateUniforms.storm.value = Math.max(0, Math.min(1, storm));
   if (Number.isFinite(seaLevel)) seaStateUniforms.seaLevel.value = seaLevel;
 }
@@ -47,10 +49,10 @@ export function seaAmplitude(config, storm, depth) {
 }
 
 /** The drawn swell's height, in metres, over canonical sea water `depth` deep. */
-export function seaSurfaceOffset(x, z, depth) {
+export function seaSurfaceOffset(x, z, depth, shoreDistance = 48) {
   if (!seaConfig) return 0;
   const storm = seaStateUniforms.storm.value;
-  const amplitude = seaAmplitude(seaConfig, storm, depth);
+  const amplitude = seaAmplitude(seaConfig, storm, depth) * seaExposure(shoreDistance);
   if (amplitude <= 0) return 0;
   return amplitude * sampleSeaHeightCpu(x, z, depth, seaTime, seaSharpness(seaConfig, storm), surfSettings);
 }

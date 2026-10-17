@@ -43,6 +43,7 @@ self.addEventListener('message', async (event) => {
       page.heights.buffer,
       page.waterFieldPixels.buffer,
       page.waterFlowPixels.buffer,
+      page.waterAppearancePixels.buffer,
     ];
     if (page.tilePixels?.buffer) {
       transfer.push(page.tilePixels.buffer);

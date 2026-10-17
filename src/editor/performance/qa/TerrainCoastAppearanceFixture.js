@@ -36,6 +36,9 @@ export async function runTerrainCoastAppearanceFixture(renderer, capture) {
   const surfaceMaskTexture = texture(mask, THREE.RGBAFormat, THREE.UnsignedByteType);
   const forestFloorTexture = texture(new Uint8Array(4), THREE.RGBAFormat, THREE.UnsignedByteType, 1);
   const waterFieldTexture = texture(water, THREE.RGBAFormat, THREE.HalfFloatType);
+  const appearance = new Uint8Array(size * size * 4);
+  for (let i = 0; i < appearance.length; i += 4) appearance[i] = 1;
+  const waterAppearanceTexture = texture(appearance, THREE.RGBAFormat, THREE.UnsignedByteType);
   const chunkCenter = uniform(new THREE.Vector2(-4226432, 278528));
   const coastPatterns = createCoastPatternOrigins(); coastPatterns.update(chunkCenter.value.x, chunkCenter.value.y);
   const inputs = { tileTexture, heightTexture, surfaceMaskTexture, forestFloorTexture, chunkCenter, coastPatterns };
@@ -46,7 +49,7 @@ export async function runTerrainCoastAppearanceFixture(renderer, capture) {
   };
   const geometry = new THREE.PlaneGeometry(meters, meters, width, width);
   const mesh = new THREE.Mesh(geometry); mesh.rotation.x = -Math.PI / 2; scene.add(mesh);
-  const waterSlot = { waterFieldTexture, surfaceOrigin: uniform(0), hasWaterCoverage: true };
+  const waterSlot = { waterFieldTexture, waterAppearanceTexture, surfaceOrigin: uniform(0), hasWaterCoverage: true };
   mesh.userData[TERRAIN_SLOT_KEY] = { ...inputs, waterSlot };
   scene.add(new THREE.HemisphereLight('#d9edff', '#716046', 2.3));
   const sun = new THREE.DirectionalLight('#fff2d8', 2.2); sun.position.set(-20, 50, 35); scene.add(sun, sun.target);
@@ -60,13 +63,19 @@ export async function runTerrainCoastAppearanceFixture(renderer, capture) {
     if (renderer.backend.isWebGPUBackend) {
       mesh.material = build();
       await draw('terrain-full-coast'); waterSlot.surfaceOrigin.value = 4;
+      for (let i = 0; i < appearance.length; i += 4) appearance[i] = 2;
+      waterAppearanceTexture.needsUpdate = true;
       await draw('terrain-full-inland'); waterSlot.surfaceOrigin.value = 0;
     }
     // WebGL has 16 texture units, below the complete terrain bake graph's
     // existing budget. Compare the production fallback and coast graph on both.
+    for (let i = 0; i < appearance.length; i += 4) appearance[i] = 1;
+    waterAppearanceTexture.needsUpdate = true;
     config.materialBake.enabled = false; mesh.material = build();
     await draw('terrain-coast');
     waterSlot.surfaceOrigin.value = 4;
+    for (let i = 0; i < appearance.length; i += 4) appearance[i] = 2;
+    waterAppearanceTexture.needsUpdate = true;
     await draw('terrain-inland');
   } finally {
     materials.forEach(material => material.dispose()); geometry.dispose(); maps.forEach(map => map.dispose()); configureSea(null);

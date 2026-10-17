@@ -1,6 +1,7 @@
 import { DoubleSide } from 'three/webgpu';
 import { texture, uniform } from 'three/tsl';
 import { createStylizedWaterMaterial } from './StylizedWaterMaterial.js';
+import { bilinearLoad } from '../materials/TerrainSlotBindings.js';
 
 export const WATER_SLOT_OPTIONS = 'waterSlotOptions';
 
@@ -29,6 +30,7 @@ export class SharedWaterMaterials {
       bindings.surfacePatterns = options.surfacePatterns.perObject(object => read(object).surfacePatterns);
       bindings.sampleTexture = (name, template, uv) => texture(template, uv)
         .setUpdateMatrix(true).onObjectUpdate(({ object }) => read(object)[name]);
+      bindings.loadTexture = (name, template, uv) => bilinearLoad(template, uv, object => read(object)[name]);
       this.bindings = bindings;
     }
     const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, reflections: this.reflections });

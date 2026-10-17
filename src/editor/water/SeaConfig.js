@@ -74,6 +74,10 @@ export function validateCoastConfig(config) {
   assertFiniteRange(config.frontBand, field('frontBand'), 0.005, 1);
   assertFiniteRange(config.foamCore, field('foamCore'), 0, 1);
   assertFiniteRange(config.foamWidth, field('foamWidth'), 0.01, 2);
+  if (config.foamWidthMeters !== undefined) {
+    assertFiniteRange(config.foamWidthMeters, field('foamWidthMeters'), .05, 3);
+    assertFiniteRange(config.foamCoreMeters, field('foamCoreMeters'), 0, config.foamWidthMeters - .001);
+  }
   if (config.foamCore >= config.foamWidth) {
     throw new Error('stylizedSurface.water.coast.foamWidth must exceed foamCore.');
   }

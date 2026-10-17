@@ -577,6 +577,7 @@ export class StylizedSurfaceView {
     for (const waterSlot of this.waterSlots) {
       textures.add(waterSlot.waterFieldTexture);
       textures.add(waterSlot.waterFlowTexture);
+      textures.add(waterSlot.waterAppearanceTexture);
     }
     for (const grassSlot of this.slots) {
       grassSlot.pinResources();

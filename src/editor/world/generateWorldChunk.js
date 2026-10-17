@@ -93,7 +93,8 @@ export function generateBaseWorldChunk(request) {
   };
   const timings = {};
   const waterStartedAt = performance.now();
-  enrichPageWaterField(page, (cellX, cellZ) => sampling.sampleWater(cellX, cellZ));
+  enrichPageWaterField(page, (cellX, cellZ) => sampling.sampleWater(cellX, cellZ),
+    (cellX, cellZ) => sampling.sampleTile(cellX, cellZ));
   timings.waterGenerationMs = performance.now() - waterStartedAt;
 
   const maskConfig = resolveMaskConfig(request);

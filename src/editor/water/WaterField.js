@@ -1,4 +1,8 @@
+import { createWaterAppearanceSampler } from './WaterAppearance.js';
+
 const WATER_FIELD_CHANNELS = 4;
+/** RGBA8: discrete kind, organic tint, cold substrate, local sea exposure. */
+export const WATER_APPEARANCE_CHANNELS = 4;
 /** Flow texture texels: RG the current, B the fall weight, A the plunge weight. */
 export const WATER_FLOW_CHANNELS = 4;
 const WATER_FIELD_HALO = 1;
@@ -158,11 +162,22 @@ function resolveDryFlow(samples, sampleWidth, localX, localZ) {
     : { x: 0, z: 0, fall, plunge };
 }
 
+function resolveDryKind(samples, sampleWidth, x, z) {
+  let kind = 0, best = 0;
+  for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
+    const neighbor = samples[sampleIndex(x + WATER_FIELD_HALO + dx, z + WATER_FIELD_HALO + dz, sampleWidth)];
+    const weight = neighbor.coverage * (dx && dz ? DIAGONAL_WEIGHT : 1);
+    if (weight > best) { best = weight; kind = neighbor.kind ?? 0; }
+  }
+  return kind;
+}
+
 export function createWaterField({
   originX,
   originZ,
   chunkSize,
   sampleWater,
+  sampleBiome,
 }) {
   if (!Number.isSafeInteger(originX) || !Number.isSafeInteger(originZ)) {
     throw new Error('Water field origin must use safe integer cell coordinates.');
@@ -222,6 +237,8 @@ export function createWaterField({
 
   const pixels = new Uint16Array(vertexCount * WATER_FIELD_CHANNELS);
   const flowPixels = new Uint8Array(vertexCount * WATER_FLOW_CHANNELS);
+  const appearancePixels = new Uint8Array(vertexCount * WATER_APPEARANCE_CHANNELS);
+  const appearanceAt = createWaterAppearanceSampler(sampleBiome);
   for (let localZ = 0; localZ < height; localZ += 1) {
     for (let localX = 0; localX < width; localX += 1) {
       const sample = samples[sampleIndex(
@@ -232,9 +249,11 @@ export function createWaterField({
       const vertexIndex = localZ * width + localX;
       const index = vertexIndex * WATER_FIELD_CHANNELS;
       const flowIndex = vertexIndex * WATER_FLOW_CHANNELS;
-      const depth = sample.coverage > 0 || !Number.isFinite(sample.bedHeight)
-        ? sample.depth
-        : Math.max(0, surfaceHeights[vertexIndex] - sample.bedHeight);
+      // Keep the dry side negative. Clamping each vertex to zero before
+      // interpolation moved the contour to grid edges and widened foam bands.
+      const depth = Number.isFinite(sample.bedHeight)
+        ? surfaceHeights[vertexIndex] - sample.bedHeight
+        : sample.depth;
       const flow = sample.coverage > 0
         ? { x: sample.flowX, z: sample.flowZ, fall: sample.fall, plunge: sample.plunge }
         : resolveDryFlow(samples, sampleWidth, localX, localZ);
@@ -246,9 +265,15 @@ export function createWaterField({
       flowPixels[flowIndex + 1] = encodeWaterFlowComponent(flow.z);
       flowPixels[flowIndex + 2] = encodeWaterUnit(flow.fall);
       flowPixels[flowIndex + 3] = encodeWaterUnit(flow.plunge);
+      const kind = sample.coverage > 0 ? sample.kind ?? 0 : resolveDryKind(samples, sampleWidth, localX, localZ);
+      const appearance = kind ? appearanceAt(originX + localX, originZ + localZ, kind, sample.shoreDistance) : null;
+      appearancePixels[index] = kind;
+      appearancePixels[index + 1] = encodeWaterUnit(appearance?.organic ?? 0);
+      appearancePixels[index + 2] = encodeWaterUnit(appearance?.cold ?? 0);
+      appearancePixels[index + 3] = encodeWaterUnit(appearance?.exposure ?? 0);
     }
   }
-  return Object.freeze({ pixels, flowPixels, width, height, surfaceOrigin });
+  return Object.freeze({ pixels, flowPixels, appearancePixels, width, height, surfaceOrigin });
 }
 
 function resolveChunkSize(page) {
@@ -266,12 +291,13 @@ function resolveChunkSize(page) {
   return chunkSize;
 }
 
-export function enrichPageWaterField(page, sampleWater) {
+export function enrichPageWaterField(page, sampleWater, sampleBiome) {
   const field = createWaterField({
     originX: page.originX,
     originZ: page.originZ,
     chunkSize: resolveChunkSize(page),
     sampleWater,
+    sampleBiome,
   });
   page.waterFieldPixels = field.pixels;
   page.waterFieldWidth = field.width;
@@ -280,6 +306,7 @@ export function enrichPageWaterField(page, sampleWater) {
   page.waterFlowPixels = field.flowPixels;
   page.waterFlowWidth = field.width;
   page.waterFlowHeight = field.height;
+  page.waterAppearancePixels = field.appearancePixels;
   const previousRevision = Number.isSafeInteger(page.waterFieldRevision)
     ? page.waterFieldRevision
     : 0;

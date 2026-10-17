@@ -55,6 +55,8 @@ import { compositeWaterFoam, waterRippleRefraction } from './WaterSurfaceRespons
 import { seaStateUniforms } from '../water/seaState.js';
 import { skyLightUniforms } from './sky/skyLight.js';
 import { LAKE_WAVES, lakeWaveRise } from '../water/LakeSurfaceWaves.js';
+import { bilinearLoad } from '../materials/TerrainSlotBindings.js';
+import { createWaterAppearanceNodes } from './WaterAppearanceNodes.js';
 
 const CAUSTIC_RING_RADIUS = 0.4;
 const CAUSTIC_AA_SCALE = 1.25;
@@ -82,6 +84,7 @@ export function createStylizedWaterMaterial({
   surfaceMaskTexture,
   waterFieldTexture,
   waterFlowTexture,
+  waterAppearanceTexture = null,
   waterFieldSize,
   waterSurfaceOrigin,
   chunkCenter,
@@ -112,6 +115,7 @@ export function createStylizedWaterMaterial({
   // branch so a player away from water pays nothing.
   enableRefraction = true,
   sampleTexture = (_name, value, uvNode) => texture(value, uvNode),
+  loadTexture = (_name, value, uvNode) => bilinearLoad(value, uvNode),
 }) {
   const water = config.water;
   const quality = resolveWaterQualityFeatures(water);
@@ -122,6 +126,10 @@ export function createStylizedWaterMaterial({
   const surface = sampleTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
   const exactCoverage = createSurfaceClassNodes(surface).waterCoverage;
   const waterField = sampleTexture('waterFieldTexture', waterFieldTexture, fieldUv);
+  const appearance = waterAppearanceTexture ? createWaterAppearanceNodes(
+    sampleTexture('waterAppearanceTexture', waterAppearanceTexture, fieldUv),
+    loadTexture('waterAppearanceTexture', waterAppearanceTexture, fieldUv),
+  ) : null;
   const waterCoverage = max(exactCoverage, clamp(waterField.r, 0, 1));
   const waterDepth = max(waterField.b, 0);
   const shoreDistance = max(waterField.a, 0);
@@ -189,6 +197,8 @@ export function createStylizedWaterMaterial({
       time,
       phaseOrigin: seaPhaseOrigin,
       sunDirection,
+      oceanMask: appearance?.ocean,
+      exposure: appearance?.exposure,
       config: water.sea,
     })
     : null;
@@ -197,6 +207,8 @@ export function createStylizedWaterMaterial({
   const river = water.riverSurface?.enabled && quality.flow && quality.depthOptics && sunDirection
     ? createRiverSurfaceNodes({
       patternXZ: surfacePatterns.latticePoint('riverDetail', localXZ),
+      patterns: surfacePatterns,
+      localXZ,
       flow: currentFlow,
       currentStrength,
       fall,
@@ -209,7 +221,7 @@ export function createStylizedWaterMaterial({
     })
     : null;
   // The sea keeps its own shading, with or without its swell.
-  const inland = !river ? float(1) : oneMinus(sea ? sea.mask : seaWaterMask({
+  const inland = appearance ? oneMinus(appearance.ocean) : !river ? float(1) : oneMinus(sea ? sea.mask : seaWaterMask({
     surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
     currentStrength,
   }));
@@ -287,8 +299,9 @@ export function createStylizedWaterMaterial({
       seaOptics ? mix(float(optics.maximumOpticalDistance), float(seaOptics.settings.maximumOpticalDistance), sea.mask)
         : optics.maximumOpticalDistance,
     );
-    const density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), sea.mask)
+    let density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), sea.mask)
       : float(optics.absorptionDensity);
+    if (appearance) density = appearance.density(density);
     const transmission = exp(opticalDistance.mul(density).negate());
     const absorbed = oneMinus(transmission);
     bedVisibility = transmission;
@@ -298,7 +311,8 @@ export function createStylizedWaterMaterial({
       colorNode(optics.deepColor),
       depthMix,
     );
-    const depthColor = seaOptics ? mix(inlandColor, seaOptics.color, sea.mask) : inlandColor;
+    let depthColor = seaOptics ? mix(inlandColor, seaOptics.color, sea.mask) : inlandColor;
+    if (appearance) depthColor = appearance.color(depthColor, waterDepth);
     bodyColor = mix(
       depthColor,
       colorNode(optics.underwaterColor),
@@ -436,7 +450,8 @@ export function createStylizedWaterMaterial({
       refraction.absorptionCoefficients[1],
       refraction.absorptionCoefficients[2],
     );
-    const coefficients = seaOptics ? mix(inlandCoefficients, seaOptics.absorption, sea.mask) : inlandCoefficients;
+    let coefficients = seaOptics ? mix(inlandCoefficients, seaOptics.absorption, sea.mask) : inlandCoefficients;
+    if (appearance) coefficients = appearance.absorption(coefficients);
     const channelTransmission = exp(coefficients.mul(opticalDistance).negate());
     const refractedBody = sceneColor.mul(channelTransmission)
       .add(bodyColor.mul(oneMinus(channelTransmission)));
@@ -537,7 +552,7 @@ export function createStylizedWaterMaterial({
 
   if (sea && quality.foam && water.foam.enabled) {
     const coast = createCoastSwashNodes({ localXZ, patternOrigins: surfacePatterns,
-      groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterDepth),
+      groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterField.b),
       config: { ...DEFAULT_COAST_SWASH, ...water.coast }, clock: time,
       shorelineFadeDepth: water.optics.shorelineFadeDepth });
     const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask) : float(0);

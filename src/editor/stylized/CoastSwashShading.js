@@ -1,20 +1,19 @@
 import {
-  abs,
   cos,
   float,
-  fwidth,
   max,
   mix,
   oneMinus,
   sin,
   smoothstep,
-  time,
   vec3,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import { seaStateUniforms } from '../water/seaState.js';
 import { periodicFbm } from './PeriodicNoiseNodes.js';
 import { PatternOrigins } from './PatternOrigins.js';
+import { shoreContactDistance } from './ShoreContactNodes.js';
+import { waterVisualClock } from '../water/WaterVisualClock.js';
 
 /**
  * Swash on the ground at the sea's edge (after grass-test's coast field).
@@ -107,7 +106,7 @@ export function createCoastSwashNodes({
   patternOrigins,
   groundHeight,
   config = DEFAULT_COAST_SWASH,
-  clock = time,
+  clock = waterVisualClock,
   shorelineFadeDepth = 0.35,
   oceanMask = float(1),
 }) {
@@ -135,8 +134,9 @@ export function createCoastSwashNodes({
   const film = coverageAt(phase).mul(band);
   const foamBreakup = smoothstep(0.2, 0.8, sin(foamBreakupPhase.add(phase))
     .mul(0.5).add(0.5));
-  const foamDistance = abs(height.sub(front));
-  const foam = oneMinus(smoothstep(config.foamCore, max(float(config.foamWidth), fwidth(foamDistance)), foamDistance))
+  const contact = shoreContactDistance(height.sub(front), localXZ);
+  const foam = oneMinus(smoothstep(config.foamCoreMeters ?? .06,
+    max(float(config.foamWidthMeters ?? .45), contact.footprint), contact.distance))
     .mul(float(1 - config.breakupStrength).add(foamBreakup.mul(config.breakupStrength)))
     .mul(film.max(0.3))
     .mul(band);

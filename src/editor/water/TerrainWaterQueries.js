@@ -35,7 +35,7 @@ function assertTerrainView(terrainView) {
 function toCanonicalWorldSample(sample, worldX, worldZ) {
   if (sample.kind === WATER_KIND_NONE) return sample;
   const swell = sample.kind === WATER_KIND_OCEAN
-    ? seaSurfaceOffset(worldX, worldZ, sample.depth)
+    ? seaSurfaceOffset(worldX, worldZ, sample.depth, sample.shoreDistance)
     : 0;
   if (swell === 0 && sample.flowX === 0 && sample.flowZ === 0) return sample;
   return createWaterSample({
