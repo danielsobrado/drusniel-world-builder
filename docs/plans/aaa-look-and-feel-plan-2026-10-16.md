@@ -9,7 +9,7 @@
 > this plan is not an assertion that every optional expansion shipped.
 
 
-Status: **review and implementation plan; no production changes in this task.**
+Status: **historical review and detailed plan; October 17 implementation and current validation are linked above.**
 
 The highest-value next step is to restore the intended tree representations,
 then improve the relationships between ground, vegetation, water and distance.

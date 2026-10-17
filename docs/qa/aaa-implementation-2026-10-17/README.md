@@ -1,6 +1,6 @@
 # Landscape appearance implementation — October 17, 2026
 
-Implementation and acceptance record for the [18-view visual audit and plan](../../plans/aaa-look-and-feel-plan-2026-10-16.md). Final validation is in progress; this record does not yet certify the release gates.
+Implementation and acceptance record for the [18-view visual audit and plan](../../plans/aaa-look-and-feel-plan-2026-10-16.md). The original 18 views and the material, HUD and movement checks are complete. Coastal refinement and scenery recovery are receiving a final follow-up; this record does not yet certify the performance release gate.
 
 ## Changes
 
@@ -9,12 +9,12 @@ Implementation and acceptance record for the [18-view visual audit and plan](../
 | Q0 — tree assets | Offline atlases rebuilt from current prototypes. Both procedural and Eldara runtime signatures match the manifest, with 29 prototypes, 29 loaded asset atlases and 29 render batches. Production validation now hashes relevant configuration, source geometry, textures and bake shaders. Visual QA rejects incomplete, duplicate, runtime-fallback or batch-less atlas sets. |
 | Q1 — ground and grass | Litter/soil average color persists into the CPU far-material palette, including custom biome IDs. Near detail is normalized around that shared mean as its pattern fades. Loose sand and mineral desert no longer inherit polygonal dried-mud cracks. Hot desert receives filtered directional ripples; cold desert receives irregular mineral relief. Both use bounded canonical pattern coordinates, mean-preserving color gains and distance filtering. Grass gets a rounded cross-section, a restrained midrib/edge profile, configured transmission in near/card stages and less distant widening. Q1 adds no stems or residency radius. |
 | Q2 — forest floor | Seasonal/temperate forest gets explicit litter/moss balances. Canopy suppression accepts validated per-biome overrides and honors zero values; open meadow and forest margins retain their existing populations. Existing instanced fern, shrub, sapling, deadwood and rooted/floating wetland asset systems remain the content kit. |
-| Q3 — water | Includes the existing October 17 signed shoreline, stochastic slope, body/context, rock wake, reflection filtering, foam, wet bank and pooled interaction work. See the [water implementation](../water-aaa-implementation-2026-10-17/README.md) for its source and resource budgets. |
+| Q3 — water | Includes the existing October 17 signed shoreline, stochastic slope, body/context, rock wake, reflection filtering, foam, wet bank and pooled interaction work. The follow-up gives coastal puffs short ballistic flight, growth and density erosion on the shared water clock. It preserves the 420-instance budget and breaking-depth habitat. The swash front uses filtered, bounded two-octave breakup with actual transparent gaps, shared by terrain and water; its authored feather narrows from 45 to 24 cm. See the [water implementation](../water-aaa-implementation-2026-10-17/README.md) for the earlier source and resource budgets. |
 | Q4 — rocks | Weathered albedo and roughness use authored texture transforms, preserving the source material's UV mapping. The current mid-value painted pack uses 0.92 toning and restrained 0.2 underside darkening, so lighting/AO do not stack the old artificial darkening into black stones. Existing slope fit, deterministic groups, partial burial and local water contact remain authoritative. |
 | Q5 — composition | A QA neighborhood survey records source height, biome and terrain elevation angles at eight headings over 16–4096 m, plus local forest habitat. This separates actual geography from fog/representation failures without rewriting imported worlds. New opt-in geography remains a separately versioned generation project, as specified in the plan. |
 | Q6 — canopy light | Corrects a world/view coordinate mismatch in canopy rim shading. The offline atlas is regenerated with the same corrected material as near trees. It also fixes PNG transport of normal-atlas classification: zero-alpha trunk pixels lost their RGB normals through canvas premultiplication. Manifest v4 stores the classification in alpha 128–255 and decodes it explicitly. Production validation rejects missing/non-unit normals at covered pixels. Scene exposure and finishing values remain unchanged. |
 | Q7 — HUD | The resting controls block leaves layout after its existing idle delay, so the scene label panel shrinks to its content. Existing keyboard, capture visibility and status behavior remain. |
-| Q8 — QA | Retained-pose replay now requires loaded assets and stores neighborhood surveys. A production-node GPU fixture measures ground mean through 4/8/16/24/34/60 m fades on WebGPU and WebGL at local and million-meter pattern origins. Baking shares the hardware-browser lock with QA. Empty instanced prototype pools no longer enter renderer object/material work; preparation can still temporarily draw them and restore their empty state. |
+| Q8 — QA | Retained-pose replay now requires loaded assets and stores neighborhood surveys. A production-node GPU fixture measures ground mean through 4/8/16/24/34/60 m fades on WebGPU and WebGL at local and million-meter pattern origins. Baking shares the hardware-browser lock with QA. Empty instanced prototype pools no longer enter renderer object/material work; preparation can still temporarily draw them and restore their empty state. A blocked dependency no longer consumes the single tree-manifest build turn before another ready job can run. Blocked scans still obey the same shared time ceiling and defer each waiting job until the next flush. |
 
 ## Source and baseline
 
@@ -26,13 +26,23 @@ Standard Azgaar IDs 0–12 and persisted custom IDs 32–254 are unchanged. No s
 
 ## Validation
 
-- `npm run verify` passes: lint, UI generation check, production asset validation, **6,828 tests** and production build.
+- `npm run verify` passes on `669f53dd`: lint, UI generation check, production asset validation, **6,836 tests** and production build.
 - [Ground GPU fixture](fixtures/ground/report.json): **136 checks per backend**. Across eleven ground biomes, average linear luminance stays between 0.99545 and 1.00479 of its distant reference. Arid relief normals remain finite/unit-length at local and million-meter origins.
 - [Four-light tree fixture](fixtures/trees/report.json): **1,112 passing checks**, 162 WebGPU and 116 WebGL checks under each of day, low sun, overcast and night. The formerly failing alpine variant passes every light direction. The new actual-baker trunk-normal round trip guards the premultiplication failure.
 - [Albedo diagnostic](diagnosis/alpine-albedo/report.json) and [normal diagnostic](diagnosis/alpine-normals/report.json) isolate the old alpine failure. Their deliberately isolated views reuse lit comparison thresholds and are diagnostic records, not release approval reports.
 - [Restored asset probe](diagnosis/tree-atlas-probe.json) verifies the initial repair on both worlds. [Source comparison](diagnosis/tree-source-comparison.json) separates the stale shipped signature from backend nondeterminism.
 
-Final map replay, grass LOD/temporal, four-light surface/rock, HUD, movement and paired matrix results are added after their serialized hardware runs finish. Historical captures remain unchanged. Full-scenery recovery, frame pacing and artistic approval are separate from asset integrity.
+- [Map replay](worlds/report.json): all **18 poses / 36 PNGs**, matching biomes, 29 loaded asset atlases and batches, full preparation, stable source, zero browser errors. [Contact sheet](contact-sheet.jpg).
+- [Grass LOD](fixtures/grass-lod/report.json): **54 checks** across both backends; [temporal](fixtures/grass-temporal/report.json): **6 checks**.
+- [Four-light surface/rock review](fixtures/surfaces/report.json): **456 checks** across both backends, including all eleven production rock prototypes in dry, wet and albedo views.
+- [HUD](fixtures/hud/report.json): **25 checks**, four habitats and three viewport sizes, including resting layout, capture visibility and input/modal behavior.
+- [Motion](motion/report.json): **32 checks** on the original grassland route in first and third person. Walk, sprint, turns/stops, collision, audio ownership and interaction state pass. Recorded video overhead is excluded from performance numbers. These are functional checks, not listening or subjective comfort approval.
+- [Coastal spray](fixtures/water-spray/report.json): **12 checks per backend**, retaining dry/deep rejection controls, four eye-level time samples, and actual GPU birth/apex/landing/quiet-state probes.
+
+- [Coastal foam](fixtures/water-foam/report.json): **39 checks per backend**, including genuine gaps/patches at three origins and adjacent-chunk equality. The authored breakup field has about 11.6–11.8% fully clear pixels and 11.6–11.7% solid pixels at the tested footprint, with soft coverage between.
+- [Water parity](diagnosis/water-sample-parity.json): **3,600 complete water samples match the previous implementation exactly**, covering dry land, ocean, imported lake/river and incomplete river beds. The static contact query avoids dry bed interpolation; it preserves edited water identity and contact levels.
+
+The final post-scheduling performance comparison is recorded below after its serialized run completes. Historical captures remain unchanged. Full-scenery recovery, frame pacing and artistic approval are separate from asset integrity.
 
 Hardware: NVIDIA GeForce RTX 4080, 16,376 MiB reported memory, driver 617.14. Headed Windows Chromium uses hardware WebGPU; WebGL fixture runs verify fallback functionality and appearance, not authoritative frame time.
 
@@ -41,7 +51,7 @@ Hardware: NVIDIA GeForce RTX 4080, 16,376 MiB reported memory, driver 617.14. He
 Serve the desired committed revision in one terminal; run captures in a second terminal:
 
 ```sh
-node scripts/serve-world-visual-snapshot.mjs 84399aef 5248
+node scripts/serve-world-visual-snapshot.mjs 669f53dd 5248
 node scripts/capture-aaa-review.mjs --url http://localhost:5248 --out tmp/aaa-review
 node scripts/run-world-visual-grass-qa.mjs --fixture ground-continuity --url http://localhost:5248 --out tmp/aaa-ground
 node scripts/run-world-visual-trees-qa.mjs --lights all --url http://localhost:5248 --out tmp/aaa-trees
@@ -53,4 +63,20 @@ Use native Windows Node from WSL for the hardware browser, as described in [perf
 
 ## Remaining conditional work
 
-A new procedural landform family, additional species/art packs, spectral ocean, hydraulic bank erosion and new sound assets require their own content and generation decisions. They were conditional follow-ups in the plan, not established defects in the screenshots. Existing movement, water traversal, soundscape and comfort behavior still require their functional review; no listening or manual interaction approval is inferred from still images.
+A new procedural landform family, additional species/art packs, spectral ocean, hydraulic bank erosion and new sound assets require their own content and generation decisions. They were conditional follow-ups in the plan, not established defects in the screenshots. Existing movement and water traversal have automated functional evidence. New sound assets, listening approval and subjective comfort approval are not inferred from still images or automated state checks.
+
+## Performance acceptance in progress
+
+The restored-atlas baseline and first candidate used identical 1280 × 720 hardware WebGPU matrix settings: 8-second warmup, complete settle, 12-second movement, 20-second recovery observation. Both retained production density, collision, ranges and the original gates.
+
+| Case | Baseline p95 / hitch rate | First candidate p95 / hitch rate | Baseline / candidate full recovery |
+| --- | --- | --- | --- |
+| Standard | 10.20 ms / 0.06% | 9.00 ms / 0.06% | 2.65 / 2.27 s |
+| Dense forest | 22.13 ms / 3.54% | 9.23 ms / 0.06% | 11.50 / 2.43 s |
+| High grass | 13.17 ms / 0.34% | 12.72 ms / 0.26% | 2.65 / 2.90 s |
+| Dense mixed | 35.73 ms / 7.02% | 10.83 ms / 0.38% | 11.13 / 2.56 s |
+| Construction corridor | 16.40 ms / 1.14% | 15.80 ms / 0.71% | 0.010 / 0.006 s |
+
+The first candidate is `203c77a7`. Its frame pacing and water acceptance pass; its **matrix fails** because four scenery recoveries exceed two seconds. Grass-only recovery does not replace that gate. These are individual paired observations, not a repeated-round speedup claim. Compressed full reports and immutable runtime source identities are retained under [performance/](performance/). A fresh standard-route control measured 2.15 s recovery; the dependency-wait correction alone measured 2.35 s. Both pass frame pacing. That was not accepted as closing the recovery issue. Recovery traces attribute about 200 ms of queued CPU work to rock fitting/contact. The subsequent static contact-plane query avoids unnecessary dry bed sampling; its complete water-query parity and edited-world contact equivalence pass. A new full matrix against `669f53dd` is in progress.
+
+Capture artifacts are retained in this workspace. New files under `docs/qa/` follow the checkout's `.gitignore`; large captures and videos are not forced into Git. The tracked report and runtime changes remain on `main`.

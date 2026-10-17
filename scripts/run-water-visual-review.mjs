@@ -82,6 +82,7 @@ try {
           d.fov = e.viewModeController.camera.fov;
           return d;
         }, pose.target);
+        if (!state.assetIntegrity.ready) throw new Error(`Incomplete tree assets: ${JSON.stringify(state.assetIntegrity)}`);
         if (!state.readiness.ready || state.actualBiomeId !== pose.expectedBiomeId || state.targetWater.kind !== pose.expectedWaterKind) throw new Error(`Readiness/biome/water mismatch: biome ${state.actualBiomeId}, water ${state.targetWater.kind}`);
         await page.screenshot({ path: path.join(out, `${pose.id}-hud.png`) });
         if (!await page.evaluate(() => window.__worldVisualQa.setCaptureUi(true))) throw new Error('Capture UI blocked.');
