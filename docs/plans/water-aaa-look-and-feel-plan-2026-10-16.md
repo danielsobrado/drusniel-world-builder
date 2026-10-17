@@ -16,7 +16,7 @@ Capture conditions: native Windows headed Chromium, hardware NVIDIA Lovelace Web
 
 Biome labels mean **the camera's actual Azgaar terrain ID**, not every visible bank or tree. Water labels use the canonical query at the recorded target. In particular, the procedural generator currently classifies its sampled water as ocean; a narrow inlet in a screenshot must not be mislabeled a river or lake. Rivers and the lake are sampled from imported Eldara geography.
 
-The gallery records accepted and rejected views separately. A failed readiness attempt is evidence of a capture/preparation problem and must not become an accepted visual baseline. This pass does not establish FPS, audio quality, temporal stability, underwater quality, weather transitions, or cross-backend parity.
+The gallery records accepted and rejected views separately. A failed readiness attempt is evidence of a capture/preparation problem and must not become an accepted visual baseline. Server-console warnings announced a tree-impostor asset mismatch/runtime-bake fallback and a Three.js deprecation; zero browser errors does not mean zero warnings. Record or resolve the asset fallback before authoritative performance comparison. This pass does not establish FPS, audio quality, temporal stability, underwater quality, weather transitions, or cross-backend parity.
 
 ## 2. What is already implemented
 
