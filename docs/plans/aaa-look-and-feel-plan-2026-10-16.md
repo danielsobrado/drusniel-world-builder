@@ -2,8 +2,10 @@
 
 > October 17 implementation: tree loading/provenance, normal-atlas transport,
 > ground continuity/arid relief, biome floor controls, rock response, canopy
-> shading and the resting HUD are implemented. The integrated water work is
-> retained. See the [implementation and validation record](../qa/aaa-implementation-2026-10-17/README.md)
+> shading, coastal foam/spray and the resting HUD are implemented. Full
+> density/construction/water performance gates pass with native Windows focus
+> monitoring; the integrated water work is retained. See the
+> [implementation and validation record](../qa/aaa-implementation-2026-10-17/README.md)
 > for source identities, captures, GPU checks and the separate performance gates.
 > Conditional new landform/content/audio projects below remain conditional;
 > this plan is not an assertion that every optional expansion shipped.
