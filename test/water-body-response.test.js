@@ -35,7 +35,7 @@ test('sand grain, reefs, caustics and swash retain phase on distant neighbouring
   const coast = createCoastPatternOrigins();
   const water = createWaterPatternOrigins({ noiseScale: 1, scale: 1 });
   coast.update(-4226432, 278528); water.update(-4226432, 278528);
-  for (const name of ['drift', 'frontBreakup', 'foamBreakup']) {
+  for (const name of ['drift', 'frontBreakup', 'foamLace']) {
     assert.deepEqual(coast.uniforms[name].value, water.uniforms[name].value, `shared ${name}`);
   }
 });

@@ -181,54 +181,65 @@ export class WaterTerrainModel {
     return this.sampleHeight(cellX, cellZ);
   }
 
-  sampleWater(cellX, cellZ) {
-    const bedHeight = this.interpolatedHeight(cellX, cellZ);
+  /** Static contact plane only. Dry probes need no terrain interpolation. */
+  sampleWaterSurface(cellX, cellZ, knownBedHeight = undefined) {
     const lake = this.lakes?.sample(cellX, cellZ) ?? null;
     const river = this.riverChannel?.sample(cellX, cellZ) ?? null;
     // A river still above the lake is falling into it: the river owns that water,
     // so the face of a fall at the shore runs down to the lake unbroken.
     if (lake && !(river && river.surfaceHeight > lake.surfaceHeight + LAKE_INFLOW_MARGIN)) {
-      return createWaterSample({
+      return {
         kind: WATER_KIND_LAKE,
         bodyId: lake.bodyId,
         surfaceHeight: lake.surfaceHeight,
-        bedHeight,
+        coverage: 1,
         shoreDistance: lake.shoreDistance,
-      });
+      };
     }
     if (river) {
-      return createWaterSample({
+      return {
         kind: WATER_KIND_RIVER,
         bodyId: river.bodyId,
         coverage: river.coverage,
         surfaceHeight: river.surfaceHeight,
-        bedHeight,
         shoreDistance: river.shoreDistance,
         flowX: river.flowX,
         flowZ: river.flowZ,
         fall: river.fall,
         plunge: river.plunge,
-      });
+      };
     }
     if (!this.riverChannel && this.isBaseRiverCell?.(Math.floor(cellX), Math.floor(cellZ))) {
-      return createWaterSample({
+      return {
         kind: WATER_KIND_RIVER,
         bodyId: WATER_BODY_ID_NONE,
-        surfaceHeight: Math.max(this.seaLevel, bedHeight),
-        bedHeight,
+        surfaceHeight: Math.max(this.seaLevel, knownBedHeight ?? this.interpolatedHeight(cellX, cellZ)),
+        coverage: 1,
         flags: WATER_SAMPLE_FLAG_INCOMPLETE_BED,
-      });
+      };
     }
 
     if (!this.isOceanCell(Math.floor(cellX), Math.floor(cellZ))) {
-      return createNoWaterSample(bedHeight);
+      return null;
     }
-    return createWaterSample({
+    return {
       kind: WATER_KIND_OCEAN,
       bodyId: WATER_BODY_ID_PROCEDURAL_OCEAN,
       surfaceHeight: this.seaLevel,
-      bedHeight,
-      shoreDistance: this.oceanDistance.sample(cellX, cellZ) * this.config.cellSizeMeters,
+      coverage: 1,
+    };
+  }
+
+  sampleWater(cellX, cellZ) {
+    const bedHeight = this.interpolatedHeight(cellX, cellZ);
+    const surface = this.sampleWaterSurface(cellX, cellZ, bedHeight);
+    if (!surface) return createNoWaterSample(bedHeight);
+    return createWaterSample({
+      ...surface, bedHeight,
+      surfaceHeight: surface.flags & WATER_SAMPLE_FLAG_INCOMPLETE_BED
+        ? Math.max(surface.surfaceHeight, bedHeight) : surface.surfaceHeight,
+      shoreDistance: surface.kind === WATER_KIND_OCEAN
+        ? this.oceanDistance.sample(cellX, cellZ) * this.config.cellSizeMeters : surface.shoreDistance,
     });
   }
 }

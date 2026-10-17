@@ -81,6 +81,11 @@ export function ensureWaterDomainGenerator(generator, metadata = {}) {
         return model.sampleWater(cellX, cellZ);
       },
     },
+    sampleWaterSurface: {
+      value(cellX, cellZ) {
+        return model.sampleWaterSurface(cellX, cellZ);
+      },
+    },
     sampleTile: {
       value(cellX, cellZ) {
         return model.isLakeCell(cellX, cellZ) ? WATER_TILE_ID : baseSampleTile(cellX, cellZ);

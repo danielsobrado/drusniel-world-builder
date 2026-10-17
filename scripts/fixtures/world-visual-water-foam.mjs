@@ -85,7 +85,8 @@ try {
  }
  // The actual shared shoreline field must have transparent gaps and solid
  // patches at both local and imported-world coordinates, with no chunk seam.
- material.colorNode=vec3(createCoastFoamBreakup(patterns,uv().sub(.5).mul(128).add(localOffset),clock,.8));
+ material.colorNode=vec3(createCoastFoamBreakup(patterns,uv().sub(.5).mul(128).add(localOffset),clock,
+  loadEditorConfig().stylizedSurface.water.coast.breakupStrength));
  material.needsUpdate=true;
  for(const center of [[0,0],[-4226432,278528],[-9000000,6000000]]) {
   const id=`swash-${center.join('_')}`,base=await draw(id,center,[0,0],123.4,true);

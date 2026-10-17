@@ -41,7 +41,7 @@ import { iterateSeabedRocks, DEFAULT_SEABED_ROCKS } from './seabedRocks.js';
 import { applyRockWeathering, resolveRockWeathering } from './rockWeathering.js';
 import { fitRockToGround } from './rockGroundFit.js';
 import { rockWaterContact } from './localRockWater.js';
-import { staticWaterAt } from '../water/StaticWaterSample.js';
+import { staticWaterContactAt } from '../water/StaticWaterSample.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
@@ -403,7 +403,7 @@ export class StylizedRockView {
 
   *resolveGroundPlacements(placements) {
     const heightAt = (x, z) => this.terrainView.getCanonicalHeight(x, z);
-    const waterAt = (x, z) => staticWaterAt(this.terrainView, x, z);
+    const waterAt = (x, z) => staticWaterContactAt(this.terrainView, x, z);
     const resolved = [];
     for (const placement of placements) {
       yield;

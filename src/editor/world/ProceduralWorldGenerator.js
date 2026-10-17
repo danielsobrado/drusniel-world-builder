@@ -133,6 +133,10 @@ export class ProceduralWorldGenerator {
     return this.waterTerrainModel.sampleWater(cellX, cellZ);
   }
 
+  sampleWaterSurface(cellX, cellZ) {
+    return this.waterTerrainModel.sampleWaterSurface(cellX, cellZ);
+  }
+
   toMetadata() {
     return Object.freeze({
       seed: this.seed,

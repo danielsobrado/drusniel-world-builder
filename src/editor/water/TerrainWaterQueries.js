@@ -28,6 +28,26 @@ function assertTerrainView(terrainView) {
   assertWorldStore(terrainView.worldStore);
 }
 
+function hasExplicitTileOverride(world, x, z) {
+  return world.tileOverrides instanceof Map && world.tileOverrides.size > 0
+    && (world.tileOverrides.hasAt ? world.tileOverrides.hasAt(x, z) : world.tileOverrides.has(cellKey(x, z)));
+}
+
+/** Effects needing a static contact plane, not depth or navigation. Preserves
+ * painted water, erased rivers, lake levels and unresolved river-bed policy. */
+export function sampleWorldStoreWaterSurface(world, cellX, cellZ) {
+  assertWorldStore(world);
+  if (typeof world.generator.sampleWaterSurface !== 'function') return sampleWorldStoreWater(world, cellX, cellZ);
+  const x = Math.floor(cellX), z = Math.floor(cellZ), tile = world.getTile(x, z);
+  const base = world.generator.sampleWaterSurface(cellX, cellZ);
+  if (tile !== WATER_TILE_ID
+      && (base?.kind !== WATER_KIND_RIVER || hasExplicitTileOverride(world, x, z))) return null;
+  if (!base) return { kind: WATER_KIND_OCEAN, coverage: 1, surfaceHeight: world.generator.seaLevel, fall: 0 };
+  const incomplete = base.kind === WATER_KIND_RIVER && (base.flags & WATER_SAMPLE_FLAG_INCOMPLETE_BED) !== 0;
+  return { kind: base.kind, coverage: base.coverage, fall: base.fall ?? 0,
+    surfaceHeight: incomplete ? Math.max(base.surfaceHeight, world.sampleHeight(cellX, cellZ)) : base.surfaceHeight };
+}
+
 /**
  * The water as the player meets it, in canonical space: flow turned to world
  * axes, and the open sea riding the same swell the water material draws.
@@ -59,12 +79,7 @@ export function sampleWorldStoreWater(worldStore, cellX, cellZ) {
   const tileZ = Math.floor(cellZ);
   const tileId = worldStore.getTile(tileX, tileZ);
   const base = worldStore.generator.sampleWater(cellX, cellZ);
-  const hasExplicitTileOverrides = worldStore.tileOverrides instanceof Map
-    && worldStore.tileOverrides.size > 0;
-  const explicitTileOverride = hasExplicitTileOverrides
-    && (worldStore.tileOverrides.hasAt
-      ? worldStore.tileOverrides.hasAt(tileX, tileZ)
-      : worldStore.tileOverrides.has(cellKey(tileX, tileZ)));
+  const explicitTileOverride = hasExplicitTileOverride(worldStore, tileX, tileZ);
   const canUseBaseBed = worldStore.heightOverrides instanceof Map
     && (worldStore.heightOverrides.size === 0 || (worldStore.heightOverrides.hasAt
       && !worldStore.heightOverrides.hasAt(tileX, tileZ)
