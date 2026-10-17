@@ -185,11 +185,14 @@ export class TreeManifestStore {
     const cacheKey = `${chunkX}:${chunkZ}`;
     const previous = this.contextCache.get(cacheKey);
     const version = rockSource?.manifestStore?.version;
+    const rockStore = rockSource?.manifestStore;
+    const sourceWindow = rockStore?.window;
     const worldRevision = this.revisionTracker.revision;
     const objectRevision = this.objectMap?.revision ?? 0;
     const prototypeRevision = rockSource?.prototypeRevision ?? 0;
     const paletteRevision = rockSource?.biomeAssetPalette?.revision ?? 0;
     if (version !== undefined && previous?.version === version
+      && previous.rockStore === rockStore && previous.sourceWindow === sourceWindow
       && previous.worldRevision === worldRevision && previous.objectRevision === objectRevision
       && previous.prototypeRevision === prototypeRevision && previous.paletteRevision === paletteRevision
       && previous.editRevision === this.editStore.revision && previous.prototypeCount === this.prototypeCount) {
@@ -204,7 +207,15 @@ export class TreeManifestStore {
       : rockSource?.getPreparedBlockersForChunk
         ? rockSource.getPreparedBlockersForChunk(chunkX, chunkZ, 1)
         : rockSource?.getBlockersForChunk?.(chunkX, chunkZ, 1) ?? [];
-    if (rocks === null) return null;
+    if (rocks === null) {
+      // Keep a failed dependency lookup too. Scanning the same nine rock
+      // manifests and prepared-field halo every frame cannot make it ready.
+      // Completion, edits, assets or a moved preparation window invalidate it.
+      this.contextCache.set(cacheKey, { context: null, version, rockStore, sourceWindow,
+        worldRevision, objectRevision, prototypeRevision, paletteRevision,
+        editRevision: this.editStore.revision, prototypeCount: this.prototypeCount });
+      return null;
+    }
     const constructionBounds = this.constructionQueryBounds(chunkX, chunkZ, clearRadius);
     const constructionRevision = this.objectMap?.signatureForBounds?.(constructionBounds)
       ?? this.objectMap?.revision
@@ -222,7 +233,7 @@ export class TreeManifestStore {
     ].join('|');
     const cached = this.contextCache.get(key);
     if (cached?.inputSignature === inputSignature) {
-      Object.assign(cached, { version, worldRevision, objectRevision, prototypeRevision,
+      Object.assign(cached, { version, rockStore, sourceWindow, worldRevision, objectRevision, prototypeRevision,
         paletteRevision, editRevision: this.editStore.revision, prototypeCount: this.prototypeCount });
       return cached.context;
     }
@@ -240,7 +251,7 @@ export class TreeManifestStore {
       blockers,
       signature: `${inputSignature}|${placementSignature(blockers)}`,
     });
-    this.contextCache.set(key, { inputSignature, context, version, worldRevision, objectRevision,
+    this.contextCache.set(key, { inputSignature, context, version, rockStore, sourceWindow, worldRevision, objectRevision,
       prototypeRevision, paletteRevision, editRevision: this.editStore.revision, prototypeCount: this.prototypeCount });
     return context;
   }
@@ -366,10 +377,10 @@ export class TreeManifestStore {
 
   build(chunkX, chunkZ, rockSource, shouldYield = null) {
     if (shouldYield?.()) return null;
-    const prepared = this.terrainView.preparedPlacement;
-    if (prepared && !prepared.ensureChunk(chunkX, chunkZ, 2, 0)) return null;
     const context = this.context(chunkX, chunkZ, rockSource);
     if (!context) return null;
+    const prepared = this.terrainView.preparedPlacement;
+    if (prepared && !prepared.ensureChunk(chunkX, chunkZ, 2, 0)) return null;
     const key = `${chunkX}:${chunkZ}`;
     let state = this.pendingBuilds.get(key);
     if (!state || state.signature !== context.signature) {
