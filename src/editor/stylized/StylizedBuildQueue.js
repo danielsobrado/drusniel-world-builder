@@ -128,7 +128,11 @@ export class StylizedBuildQueue {
       if (advanced) this.stats.advanced += 1;
       if (!completed && !advanced) this.stats.blocked += 1;
       if (completed) { this.stats.completed += 1; built += 1; }
-      if (completed || advanced || structured) turns += 1;
+      // A dependency wait consumes time, but not a build turn. In particular,
+      // the one-turn tree queue must still reach another ready manifest when
+      // its nearest job is waiting on rocks or a prepared field. Deferred jobs
+      // are held aside until the end, so each is visited at most once.
+      if (completed || advanced) turns += 1;
       if (structured && !completed) {
         job.blockedReason = outcome.reason;
         deferred.push(job);
