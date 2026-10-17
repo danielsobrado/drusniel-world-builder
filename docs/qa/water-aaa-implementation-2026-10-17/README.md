@@ -23,6 +23,8 @@ The runtime introduces no terrain-ID remapping or imported-geography migration. 
 
 ## Root-cause evidence
 
+[Fixed-time coast control report](controls/report.json) · [Water foam enabled](controls/coast-09.png) · [Water foam disabled](controls/coast-09-foam-off.png) · [Original inland repeat diagnostic](diagnosis/inland-repeat-baseline.json)
+
 The production-shader diagnostic reproduced almost perfect correlation at the old 4 m and 8 m inland offsets on both WebGPU and WebGL. The candidate correlations are approximately 0.04–0.16. Shared-edge and advection-reset checks pass at local and million-meter coordinates. The initial fixture also had a favicon 404; its HTML was repaired, and the retained final fixtures have zero browser errors.
 
 Fixed-time world controls showed that disabling water foam removed the broad pale coastal bands. Reflection/refraction controls were retained separately. This led to foam coverage/lifetime changes rather than changing sky exposure to hide them.
@@ -30,6 +32,8 @@ Fixed-time world controls showed that disabling water foam removed the broad pal
 The original audit ran live water, while the implementation replay freezes shared water time at 123.4 seconds. Original-to-implementation screenshots therefore compare appearance and spatial defects, not identical animation frames. Controlled shader readbacks and fixed-time layer comparisons provide the narrower causal checks.
 
 ## Verification
+
+[Machine-readable summary](verification-summary.json) · [Appearance fixture](fixtures/appearance/report.json) · [Ocean foam fixture](fixtures/ocean-foam/report.json) · [Environment parity](fixtures/environment-parity/report.json)
 
 - All **3,722 automated tests pass**, including signed bank crossings, explicit body kinds, negative-coordinate context continuity, rock wake direction/seams and bounded interaction state.
 - Production build passes. Targeted lint passes for changed code. Full lint reports four pre-existing unused imports in the two archived sparse-grass capture scripts; those files are unchanged from the frozen baseline and are preserved as evidence.

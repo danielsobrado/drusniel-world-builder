@@ -1,0 +1,1636 @@
+{
+  "url": "http://localhost:5238",
+  "checks": [
+    {
+      "id": "full WebGPU terrain distinguishes ocean from inland water",
+      "passed": true,
+      "meanColorError": 10.757599826388889
+    },
+    {
+      "id": "webgpu surf visibly changes pixels",
+      "passed": true,
+      "meanColorError": 1.1719140625
+    },
+    {
+      "id": "webgpu surf animates",
+      "passed": true,
+      "meanColorError": 1.0583246527777779
+    },
+    {
+      "id": "webgpu surf survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126982851
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126982785
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0014865451388888888,
+      "brightnessRatio": 0.9999994802447773
+    },
+    {
+      "id": "webgpu river animates",
+      "passed": true,
+      "meanColorError": 1.468869357638889
+    },
+    {
+      "id": "webgpu river survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111145015
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111144913
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.003927951388888889,
+      "brightnessRatio": 0.9999990822800284
+    },
+    {
+      "id": "webgpu river foam composites like separate layers",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "webgpu beach survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136433032
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136433011
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.002731119791666667,
+      "brightnessRatio": 0.9999998460783309
+    },
+    {
+      "id": "webgpu underwater survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80852903
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80277631
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.6242556423611111,
+      "brightnessRatio": 0.9928849555346206
+    },
+    {
+      "id": "webgpu terrain distinguishes ocean from inland water",
+      "passed": true,
+      "meanColorError": 10.707059461805555
+    },
+    {
+      "id": "webgpu beach animates",
+      "passed": true,
+      "meanColorError": 2.338207465277778
+    },
+    {
+      "id": "webgpu lake animates",
+      "passed": true,
+      "meanColorError": 0.40411241319444446
+    },
+    {
+      "id": "webgpu lake reflects scenery",
+      "passed": true,
+      "meanColorError": 1.840002170138889
+    },
+    {
+      "id": "webgpu lake uses planar reflections",
+      "passed": true,
+      "meanColorError": 0.47351671006944446
+    },
+    {
+      "id": "webgpu sea responds to storm",
+      "passed": true,
+      "meanColorError": 5.360912543402778
+    },
+    {
+      "id": "webgpu compressed near",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 22946,
+        "brightness": 7490881
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 22950,
+        "brightness": 7494983
+      },
+      "coverageDelta": 0.0001743223219733287,
+      "maskDifference": 0.035648914843545716,
+      "meanColorError": 0.46442274305555553,
+      "brightnessRatio": 1.0005475991408754
+    },
+    {
+      "id": "webgpu compressed far",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 1406,
+        "brightness": 462620
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 1380,
+        "brightness": 455529
+      },
+      "coverageDelta": 0.01849217638691323,
+      "maskDifference": 0.03840682788051209,
+      "meanColorError": 0.03114474826388889,
+      "brightnessRatio": 0.9846720850806278
+    },
+    {
+      "id": "webgpu frost visibly changes pixels",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 17376000
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 48512830
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 33.78562282986111,
+      "brightnessRatio": 2.7919446362799265
+    },
+    {
+      "id": "webgpu cached reflection follows camera motion",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561613
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111713035
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.7335026041666667,
+      "brightnessRatio": 1.0013572948250578
+    },
+    {
+      "id": "webgpu reflection survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561613
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561710
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.002553168402777778,
+      "brightnessRatio": 1.0000008694747
+    },
+    {
+      "id": "webgpu orbit reflection visibly changes pixels",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 31640198
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 109083129
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 84.03095811631944,
+      "brightnessRatio": 3.447612085107685
+    },
+    {
+      "id": "webgl surf visibly changes pixels",
+      "passed": true,
+      "meanColorError": 1.1720182291666668
+    },
+    {
+      "id": "webgl surf animates",
+      "passed": true,
+      "meanColorError": 1.0583951822916666
+    },
+    {
+      "id": "webgl surf survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126983086
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126983013
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0014138454861111112,
+      "brightnessRatio": 0.9999994251202873
+    },
+    {
+      "id": "webgl river animates",
+      "passed": true,
+      "meanColorError": 1.4706456163194443
+    },
+    {
+      "id": "webgl river survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111148368
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111148493
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.005194227430555556,
+      "brightnessRatio": 1.0000011246229004
+    },
+    {
+      "id": "webgl river foam composites like separate layers",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "webgl beach survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136432637
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136432622
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0028266059027777777,
+      "brightnessRatio": 0.9999998900556324
+    },
+    {
+      "id": "webgl underwater survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80852909
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80277619
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.6242686631944444,
+      "brightnessRatio": 0.9928847334361216
+    },
+    {
+      "id": "webgl terrain distinguishes ocean from inland water",
+      "passed": true,
+      "meanColorError": 10.777661675347222
+    },
+    {
+      "id": "webgl beach animates",
+      "passed": true,
+      "meanColorError": 2.3375965711805557
+    },
+    {
+      "id": "webgl lake animates",
+      "passed": true,
+      "meanColorError": 0.40417100694444447
+    },
+    {
+      "id": "webgl lake reflects scenery",
+      "passed": true,
+      "meanColorError": 1.8400054253472222
+    },
+    {
+      "id": "webgl lake uses planar reflections",
+      "passed": true,
+      "meanColorError": 0.47348741319444443
+    },
+    {
+      "id": "webgl sea responds to storm",
+      "passed": true,
+      "meanColorError": 5.360770399305555
+    },
+    {
+      "id": "webgl compressed near",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 22946,
+        "brightness": 7490881
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 22950,
+        "brightness": 7494983
+      },
+      "coverageDelta": 0.0001743223219733287,
+      "maskDifference": 0.035648914843545716,
+      "meanColorError": 0.46442274305555553,
+      "brightnessRatio": 1.0005475991408754
+    },
+    {
+      "id": "webgl compressed far",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 1406,
+        "brightness": 462620
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 1380,
+        "brightness": 455529
+      },
+      "coverageDelta": 0.01849217638691323,
+      "maskDifference": 0.03840682788051209,
+      "meanColorError": 0.03114474826388889,
+      "brightnessRatio": 0.9846720850806278
+    },
+    {
+      "id": "webgl frost visibly changes pixels",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 17376000
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 48512828
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 33.78562065972222,
+      "brightnessRatio": 2.791944521178637
+    },
+    {
+      "id": "webgl cached reflection follows camera motion",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561609
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111713028
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.7335036892361111,
+      "brightnessRatio": 1.001357267982752
+    },
+    {
+      "id": "webgl reflection survives rebase",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561609
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561903
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0013302951388888889,
+      "brightnessRatio": 1.0000026353151648
+    },
+    {
+      "id": "webgl orbit reflection visibly changes pixels",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 31640198
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 109082212
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 84.02996310763889,
+      "brightnessRatio": 3.447583102988167
+    },
+    {
+      "id": "backend parity foliage-raw-near",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 22946,
+        "brightness": 7490881
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 22946,
+        "brightness": 7490881
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity foliage-compressed-near",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 22950,
+        "brightness": 7494983
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 22950,
+        "brightness": 7494983
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity foliage-raw-far",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 1406,
+        "brightness": 462620
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 1406,
+        "brightness": 462620
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity foliage-compressed-far",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 1380,
+        "brightness": 455529
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 1380,
+        "brightness": 455529
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity frost-off",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 17376000
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 17376000
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity frost-on",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 48512830
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 96000,
+        "brightness": 48512828
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.000010850694444444445,
+      "brightnessRatio": 0.9999999587737924
+    },
+    {
+      "id": "backend parity reflection-cached-turn",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111713035
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111713028
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.00008355034722222222,
+      "brightnessRatio": 0.9999999373394519
+    },
+    {
+      "id": "backend parity reflection-refreshed-turn",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561613
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561609
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.000078125,
+      "brightnessRatio": 0.9999999641453732
+    },
+    {
+      "id": "backend parity reflection-rebased",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561710
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111561903
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0020540364583333335,
+      "brightnessRatio": 1.0000017299842392
+    },
+    {
+      "id": "backend parity reflection-orbit-on",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 109083129
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 109082212
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.001164279513888889,
+      "brightnessRatio": 0.9999915935671408
+    },
+    {
+      "id": "backend parity reflection-orbit-off",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 31640198
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 31640198
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity surf-off",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 127277123
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 127277208
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0030392795138888887,
+      "brightnessRatio": 1.0000006678340774
+    },
+    {
+      "id": "backend parity surf-on",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126982851
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126983086
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0030718315972222223,
+      "brightnessRatio": 1.000001850643596
+    },
+    {
+      "id": "backend parity surf-rebased",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126982785
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126983013
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0032183159722222222,
+      "brightnessRatio": 1.0000017955189753
+    },
+    {
+      "id": "backend parity surf-moving",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126874213
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 126874267
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.004071180555555555,
+      "brightnessRatio": 1.0000004256184036
+    },
+    {
+      "id": "backend parity terrain-coast",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 147374538
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 147547076
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.8011588541666667,
+      "brightnessRatio": 1.0011707449763134
+    },
+    {
+      "id": "backend parity terrain-inland",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 149401942
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 149401947
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.000007595486111111111,
+      "brightnessRatio": 1.0000000334667671
+    },
+    {
+      "id": "backend parity river-medium",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111873939
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111877220
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.09875108506944444,
+      "brightnessRatio": 1.0000293276524392
+    },
+    {
+      "id": "backend parity river-high",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111145015
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111148368
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.10228407118055556,
+      "brightnessRatio": 1.0000301677947498
+    },
+    {
+      "id": "backend parity river-moving",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111034233
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111036287
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.10786892361111111,
+      "brightnessRatio": 1.0000184987993748
+    },
+    {
+      "id": "backend parity river-rebased",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111144913
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 111148493
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.10523003472222223,
+      "brightnessRatio": 1.0000322102011092
+    },
+    {
+      "id": "backend parity river-fall",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 127042020
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 127035291
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.4097211371527778,
+      "brightnessRatio": 0.9999470332729281
+    },
+    {
+      "id": "backend parity river-foam-composite",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity river-foam-layers",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 130270464
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0,
+      "brightnessRatio": 1
+    },
+    {
+      "id": "backend parity beach",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136433032
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136432637
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.008434244791666667,
+      "brightnessRatio": 0.999997104806701
+    },
+    {
+      "id": "backend parity beach-moving",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135438194
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135438160
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.00812717013888889,
+      "brightnessRatio": 0.9999997489629846
+    },
+    {
+      "id": "backend parity beach-rebased",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136433011
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 136432622
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.00887478298611111,
+      "brightnessRatio": 0.9999971487838819
+    },
+    {
+      "id": "backend parity deep-sea",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 115842020
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 115842353
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.003933376736111111,
+      "brightnessRatio": 1.0000028746045693
+    },
+    {
+      "id": "backend parity deep-sea-storm",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 115075853
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 115076061
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0034874131944444445,
+      "brightnessRatio": 1.0000018075034387
+    },
+    {
+      "id": "backend parity lake",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135557117
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135557143
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0006401909722222222,
+      "brightnessRatio": 1.0000001918010695
+    },
+    {
+      "id": "backend parity lake-moving",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135469435
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135469399
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0006575520833333333,
+      "brightnessRatio": 0.9999997342573991
+    },
+    {
+      "id": "backend parity lake-reflections-off",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 134810887
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 134810872
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0007584635416666666,
+      "brightnessRatio": 0.999999888733022
+    },
+    {
+      "id": "backend parity lake-planar-off",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135900912
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 135900943
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0007584635416666666,
+      "brightnessRatio": 1.0000002281073728
+    },
+    {
+      "id": "backend parity underwater-shelf",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 137052662
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 137052591
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0016395399305555555,
+      "brightnessRatio": 0.9999994819509599
+    },
+    {
+      "id": "backend parity underwater-snell",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 94204843
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 94204864
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0004568142361111111,
+      "brightnessRatio": 1.0000002229184757
+    },
+    {
+      "id": "backend parity underwater-deep",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80852903
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80852909
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0003125,
+      "brightnessRatio": 1.0000000742088382
+    },
+    {
+      "id": "backend parity underwater-rebased",
+      "passed": true,
+      "failures": [],
+      "reference": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80277631
+      },
+      "actual": {
+        "pixels": 307200,
+        "covered": 307200,
+        "brightness": 80277619
+      },
+      "coverageDelta": 0,
+      "maskDifference": 0,
+      "meanColorError": 0.0005989583333333333,
+      "brightnessRatio": 0.9999998505187578
+    }
+  ],
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "requestedBackend": "webgpu",
+      "cases": [
+        {
+          "id": "foliage-raw-near",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-near",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "foliage-raw-far",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-far",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "frost-off"
+        },
+        {
+          "id": "frost-on"
+        },
+        {
+          "id": "reflection-cached-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-refreshed-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-rebased",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-orbit-on",
+          "planarValid": 1,
+          "perspective": 0
+        },
+        {
+          "id": "reflection-orbit-off",
+          "planarValid": 0,
+          "perspective": 0
+        },
+        {
+          "id": "surf-off",
+          "calls": 56,
+          "time": 127.3
+        },
+        {
+          "id": "surf-on",
+          "calls": 58,
+          "time": 127.3
+        },
+        {
+          "id": "surf-rebased",
+          "calls": 60,
+          "time": 127.3
+        },
+        {
+          "id": "surf-moving",
+          "calls": 62,
+          "time": 129.3
+        },
+        {
+          "id": "river-medium",
+          "time": 12.3,
+          "calls": 64
+        },
+        {
+          "id": "river-high",
+          "time": 12.3,
+          "calls": 66
+        },
+        {
+          "id": "river-moving",
+          "time": 13.05,
+          "calls": 68
+        },
+        {
+          "id": "river-rebased",
+          "time": 12.3,
+          "calls": 70
+        },
+        {
+          "id": "river-fall",
+          "time": 12.3,
+          "calls": 72
+        },
+        {
+          "id": "river-foam-composite"
+        },
+        {
+          "id": "river-foam-layers"
+        },
+        {
+          "id": "beach",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-moving",
+          "time": 13.100000000000001,
+          "planarValid": 0
+        },
+        {
+          "id": "sea-level-lake",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-rebased",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea-storm",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-reflections-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-planar-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake",
+          "time": 12.3,
+          "planarValid": 1
+        },
+        {
+          "id": "lake-moving",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "underwater-shelf",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1
+        },
+        {
+          "id": "underwater-snell",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1
+        },
+        {
+          "id": "underwater-deep",
+          "time": 14.700000000000001,
+          "eyeDepth": 9
+        },
+        {
+          "id": "underwater-rebased",
+          "time": 14.700000000000001,
+          "eyeDepth": 9
+        },
+        {
+          "id": "terrain-full-coast"
+        },
+        {
+          "id": "terrain-full-inland"
+        },
+        {
+          "id": "terrain-coast"
+        },
+        {
+          "id": "terrain-inland"
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "requestedBackend": "webgl",
+      "cases": [
+        {
+          "id": "foliage-raw-near",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-near",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "foliage-raw-far",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-far",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "frost-off"
+        },
+        {
+          "id": "frost-on"
+        },
+        {
+          "id": "reflection-cached-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-refreshed-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-rebased",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-orbit-on",
+          "planarValid": 1,
+          "perspective": 0
+        },
+        {
+          "id": "reflection-orbit-off",
+          "planarValid": 0,
+          "perspective": 0
+        },
+        {
+          "id": "surf-off",
+          "calls": 56,
+          "time": 127.3
+        },
+        {
+          "id": "surf-on",
+          "calls": 58,
+          "time": 127.3
+        },
+        {
+          "id": "surf-rebased",
+          "calls": 60,
+          "time": 127.3
+        },
+        {
+          "id": "surf-moving",
+          "calls": 62,
+          "time": 129.3
+        },
+        {
+          "id": "river-medium",
+          "time": 12.3,
+          "calls": 64
+        },
+        {
+          "id": "river-high",
+          "time": 12.3,
+          "calls": 66
+        },
+        {
+          "id": "river-moving",
+          "time": 13.05,
+          "calls": 68
+        },
+        {
+          "id": "river-rebased",
+          "time": 12.3,
+          "calls": 70
+        },
+        {
+          "id": "river-fall",
+          "time": 12.3,
+          "calls": 72
+        },
+        {
+          "id": "river-foam-composite"
+        },
+        {
+          "id": "river-foam-layers"
+        },
+        {
+          "id": "beach",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-moving",
+          "time": 13.100000000000001,
+          "planarValid": 0
+        },
+        {
+          "id": "sea-level-lake",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-rebased",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea-storm",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-reflections-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-planar-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake",
+          "time": 12.3,
+          "planarValid": 1
+        },
+        {
+          "id": "lake-moving",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "underwater-shelf",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1
+        },
+        {
+          "id": "underwater-snell",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1
+        },
+        {
+          "id": "underwater-deep",
+          "time": 14.700000000000001,
+          "eyeDepth": 9
+        },
+        {
+          "id": "underwater-rebased",
+          "time": 14.700000000000001,
+          "eyeDepth": 9
+        },
+        {
+          "id": "terrain-coast"
+        },
+        {
+          "id": "terrain-inland"
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      },
+      "adapter": {
+        "vendor": "Google Inc. (NVIDIA)",
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 (0x00002704) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      }
+    }
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": true
+}

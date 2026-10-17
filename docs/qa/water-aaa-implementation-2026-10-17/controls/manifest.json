@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "cad0309a017d5ab2db5b0efe4f3607091ba67174",
+  "selections": [
+    {
+      "world": "procedural",
+      "poses": [
+        {
+          "id": "coast-09",
+          "name": "Taiga coast",
+          "world": "procedural",
+          "x": -5441,
+          "z": 13581,
+          "yaw": -0.7853981633974483,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 9,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": -5419,
+            "z": 13559,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.407460192995447,
+              "depth": 0.9074601929954471,
+              "shoreDistance": 4,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        }
+      ],
+      "replay": true
+    },
+    {
+      "world": "eldara",
+      "poses": [],
+      "replay": true
+    }
+  ],
+  "requestedPoses": [
+    {
+      "id": "coast-09",
+      "name": "Taiga coast",
+      "world": "procedural",
+      "x": -5441,
+      "z": 13581,
+      "yaw": -0.7853981633974483,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 9,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": -5419,
+        "z": 13559,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.407460192995447,
+          "depth": 0.9074601929954471,
+          "shoreDistance": 4,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    }
+  ]
+}

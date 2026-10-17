@@ -1,0 +1,41 @@
+{
+  "sourceSha": "ad7ffb49185914a2fa5039c18bc047ebf4e3c289",
+  "fixtures": {
+    "appearance": {
+      "passed": true,
+      "checks": 100,
+      "errors": 0
+    },
+    "ocean-foam": {
+      "passed": true,
+      "checks": 60,
+      "errors": 0
+    },
+    "environment-parity": {
+      "passed": true,
+      "checks": 78,
+      "errors": 0
+    }
+  },
+  "tests": {
+    "count": 3722,
+    "passed": 3722,
+    "failed": 0,
+    "durationMs": 34550.6986
+  },
+  "build": {
+    "sourceSha": "ad7ffb49185914a2fa5039c18bc047ebf4e3c289",
+    "passed": true,
+    "exitCode": 0,
+    "verifiedAt": "2026-10-17T02:08:12.652Z"
+  },
+  "lint": {
+    "changedWaterCodePassed": true,
+    "fullLintPassed": false,
+    "preexistingErrors": 4,
+    "paths": [
+      "docs/qa/sparse-grass-audit-2026-10-16/capture-script.mjs",
+      "docs/qa/sparse-grass-implementation-2026-10-16/capture-sparse-grass-ab.mjs"
+    ]
+  }
+}
