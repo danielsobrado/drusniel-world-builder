@@ -11,3 +11,4 @@ __pycache__/
 
 # Blender auto-save backups
 *.blend1
+docs/qa/
