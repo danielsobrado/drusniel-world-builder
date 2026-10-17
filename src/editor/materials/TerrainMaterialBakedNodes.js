@@ -170,6 +170,7 @@ export function createTerrainMaterialBakedSurface({
     shoreline: samples.wetnessShoreline.g,
     cameraDistance,
     features: families.features,
+    crackEligibility: tileId.equal(1).or(tileId.equal(2)).select(float(0), float(1)),
   });
   const weatheringState = createTerrainWeatheringState({
     terrainShape: samples.terrainShape,

@@ -33,7 +33,7 @@ function surfaceTexture() {
 test('the shipped config resolves, and disabling it resolves to nothing', () => {
   const settings = resolveRockWeathering(shippedRocks().weathering);
   assert.equal(settings.enabled, true);
-  assert.equal(settings.toning, 0.72);
+  assert.equal(settings.toning, 0.92);
   assert.equal(settings.waterlineHeight, 1.2);
   assert.equal(resolveRockWeathering({ enabled: false }), null);
   // Absent config means the defaults, not no weathering — a world that never
@@ -46,6 +46,7 @@ test('an out-of-range strength fails loudly rather than washing the rocks out', 
   // are the only thing keeping a typo out of a material.
   assert.throws(() => resolveRockWeathering({ moss: 2 }), /must be within \[0, 1\]/);
   assert.throws(() => resolveRockWeathering({ toning: -0.1 }), /must be within \[0, 1\]/);
+  assert.throws(() => resolveRockWeathering({ undersideShade: 1.1 }), /must be within \[0, 1\]/);
   assert.throws(() => resolveRockWeathering({ waterlineHeight: 0 }), /must be positive/);
 });
 

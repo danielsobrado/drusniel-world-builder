@@ -25,6 +25,7 @@ export function createTerrainMaterialFeatureState({
   shoreline,
   cameraDistance,
   features,
+  crackEligibility,
 }) {
   const masks = createTerrainMaterialFeatureMasks({
     worldXZ,
@@ -37,6 +38,7 @@ export function createTerrainMaterialFeatureState({
     canopy,
     shoreline,
     features,
+    crackEligibility,
   });
   const visibility = features?.enabled
     ? oneMinus(smoothstep(features.fadeStartDistance, features.fadeEndDistance, cameraDistance))

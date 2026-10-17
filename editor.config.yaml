@@ -1410,17 +1410,17 @@ stylizedSurface:
     colorVariation: 0.08
     burial: 0.06
     # Weathering for the authored rock pack, after grass-test's rockWeathering.
-    # The pack's albedo is near-white and uniform, so bare stones read as plastic
-    # set on the grass; moss on the up-facing faces, shaded undersides and a toned
-    # albedo are what make them sit in the world. All ALU, no extra texture.
+    # Moss, dust and restrained contact darkening integrate the painted map.
+    # Preserve its mid-value planes under the existing scene lighting.
     #
     # `waterline` is the wet, glossy band above the sea, ragged by noise, and it
-    # keys on sea level because that is the only water level this world has
-    # globally — a lake's surface belongs to its own body, so a stone on a lake
-    # shore keeps its dry band.
+    # uses each stone's resolved local body, including raised lakes and rivers.
     weathering:
       enabled: true
-      toning: 0.72
+      # The current painted map is mid-value. Preserve its planes under scene
+      # lighting instead of stacking the old near-white donor correction.
+      toning: 0.92
+      undersideShade: 0.2
       moss: 0.85
       dust: 0.35
       waterline: 0.7

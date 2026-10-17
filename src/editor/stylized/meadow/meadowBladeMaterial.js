@@ -51,18 +51,23 @@ export function createMeadowBladeMaterial({
 
   const blade = meadowInstance(uniforms.origin);
   const { pigment, bladeValue, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade, marks: true });
-  material.colorNode = albedo;
 
-  // Normal: world-up leaned toward the blade's facing at the tip, so a blade's
-  // top turns with it while the roots stay lit like the ground they stand on.
+  // Rounded width at walking distance, with only the first 12% rooted to
+  // terrain-up. A very weak, tip-only tilt made every stem a flat green strip.
   const side = attribute('bladeSide', 'float').clamp(-1, 1);
   const sideDirection = vec3(blade.rotation.y, 0, blade.rotation.x.negate());
   const forward = vec3(blade.rotation.x, 0, blade.rotation.y);
   const tip = smoothstep(0.15, 1, height);
+  const rooted = smoothstep(0, .12, height);
   const worldNormal = normalize(vec3(0, 1, 0)
-    .add(sideDirection.mul(side).mul(tip.mul(0.25).add(0.12)))
-    .add(forward.mul(tip).mul(0.3)));
+    .add(sideDirection.mul(side).mul(mix(.6, .25, tip)).mul(rooted))
+    .add(forward.mul(tip).mul(0.45)));
   material.normalNode = cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz.normalize();
+  const detailReach = cameraPosition.distance(blade.base).smoothstep(6, 14).oneMinus();
+  const edge = side.abs();
+  const rib = blade.shape.greaterThan(.5).select(
+    edge.smoothstep(.04, .18).mul(.06).add(.94), edge.mul(.04).add(.98));
+  material.colorNode = albedo.mul(mix(1, rib, detailReach));
 
   // Sun through the thin tip, carrying the blade's own colour, and a small shared
   // fill so roots and terrain stay together without bleaching the field.

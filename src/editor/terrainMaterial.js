@@ -22,6 +22,7 @@ import {
 } from 'three/tsl';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
+import { createAridSubstrateNodes } from './materials/AridSubstrateNodes.js';
 import {
   attachTerrainMaterialBakeGpuState,
   createTerrainMaterialBakeGpuState,
@@ -353,6 +354,13 @@ export function createTerrainMaterial({
       localXZ,
       transitionPatterns,
     });
+    if (transitionPatterns && bakedSurface.normal) {
+      const arid = createAridSubstrateNodes({ tileId: tileSample.a.mul(255).round(),
+        bare: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0)))
+          .mul(oneMinus(pathMask)).mul(oneMinus(surfaceMask.b)),
+        patterns: transitionPatterns, localXZ, cameraDistance });
+      Object.assign(bakedSurface, arid.apply(bakedSurface.color, bakedSurface.roughness, bakedSurface.normal));
+    }
     // grass-test's path surface over the baked ground: textured dirt with a
     // broken contour and a worn verge (stylized/path/terrainPathPaint.js).
     const bakedRoughness = bakedSurface.roughness

@@ -134,6 +134,7 @@ export function createTerrainMaterialFeatureMasks({
   canopy,
   shoreline,
   features,
+  crackEligibility = float(1),
 }) {
   if (!features?.enabled) {
     const zero = materialWeights.r.mul(0);
@@ -160,7 +161,7 @@ export function createTerrainMaterialFeatureMasks({
       .mul(canopy)
       .mul(oneMinus(wetness.mul(0.45)))
       .mul(smoothstep(0.58, 0.82, fields.patchB)),
-    cracks: gatedCracks(materialWeights.g.mul(dry).mul(oneMinus(smoothstep(.05, .55, shoreline)))
+    cracks: gatedCracks(materialWeights.g.mul(crackEligibility).mul(dry).mul(oneMinus(smoothstep(.05, .55, shoreline)))
       .mul(flat).mul(crackReach), fields.crackLine),
     mineral: materialWeights.b
       .mul(max(wetness, shoreline.mul(0.7)))

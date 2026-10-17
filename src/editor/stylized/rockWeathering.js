@@ -17,10 +17,9 @@ import { authoredTexture } from './AuthoredTextureNode.js';
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
  *
- * The stylized rock albedo is near-white and uniform, so bare stones read as
- * plastic dropped on the grass. Moss on the up-facing faces in broken patches,
- * shaded undersides and a toned-down albedo are what make them sit in the world
- * instead, and it is a handful of ALU ops with no extra texture.
+ * Broken moss, dust and local wetness integrate authored stones with the ground.
+ * Toning is configurable because source packs have different painted values;
+ * contact darkening stays modest alongside Lambert lighting and scene AO.
  *
  * The streamed rock view resolves each stone's nearest water body once during
  * placement. Its packed instance attribute supplies level and eligibility, so
@@ -60,11 +59,11 @@ const ALGAE = '#4a5a2a';
 
 export const DEFAULT_ROCK_WEATHERING = Object.freeze({
   enabled: true,
-  // Multiplies the albedo. The pack is painted bright, and stones that arrive at
-  // full brightness are the ones that read as plastic.
+  // Multiplies source albedo; the current mid-value pack overrides this to .92.
   toning: 0.72,
   moss: 0.85,
   dust: 0.35,
+  undersideShade: 0.2,
   waterline: 0.7,
   // Metres above the water the splash line reaches, ragged by the noise.
   waterlineHeight: 1.2,
@@ -80,7 +79,7 @@ export const DEFAULT_ROCK_WEATHERING = Object.freeze({
 export function resolveRockWeathering(configured) {
   if (configured?.enabled === false) return null;
   const settings = { ...DEFAULT_ROCK_WEATHERING, ...(configured ?? {}) };
-  for (const key of ['toning', 'moss', 'dust', 'waterline', 'algae']) {
+  for (const key of ['toning', 'moss', 'dust', 'waterline', 'algae', 'undersideShade']) {
     const value = Number(settings[key]);
     if (!Number.isFinite(value) || value < 0 || value > 1) {
       throw new Error(`Invalid editor configuration: rocks.weathering.${key} must be within [0, 1].`);
@@ -129,8 +128,8 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     .mul(settings.moss);
   const shade = dot(albedo, vec3(0.3, 0.59, 0.11)).mul(0.9).add(0.55);
   const mossColor = mix(color(MOSS_DARK), color(MOSS_LIGHT), patches).mul(shade);
-  // Undersides sit in the ground's shade.
-  const underside = up.smoothstep(-0.7, 0.15).mul(0.45).add(0.55);
+  // Keep a modest contact cue; Lambert lighting and scene AO supply the shade.
+  const underside = mix(float(1 - settings.undersideShade), float(1), up.smoothstep(-0.7, 0.15));
   let weathered = mix(albedo, mossColor, mossMask).mul(underside);
   let roughness = material.roughnessMap
     ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1).max(mossMask.mul(0.95))

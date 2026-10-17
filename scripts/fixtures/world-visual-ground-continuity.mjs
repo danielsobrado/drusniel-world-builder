@@ -1,9 +1,10 @@
 import * as THREE from 'three/webgpu';
-import { float, positionWorld, uniform, vec4 } from 'three/tsl';
+import { float, mix, normalViewGeometry, positionWorld, uniform, vec4 } from 'three/tsl';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 import { createTerrainTransitionPatterns } from '/src/editor/materials/TerrainTransitionNodes.js';
 import { createMeadowGroundShading } from '/src/editor/stylized/meadow/MeadowGroundShading.js';
 import { applyMeadowGroundDetail } from '/src/editor/stylized/meadow/meadowGroundDetail.js';
+import { createAridSubstrateNodes } from '/src/editor/materials/AridSubstrateNodes.js';
 
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
 const state = window.__worldGrassFixture = { report: { backend, checks: [], cases: [], done: false }, pendingCapture: null };
@@ -23,7 +24,10 @@ const ground = createMeadowGroundShading(config, vec4(0, 0, 0, biome.div(255)), 
 const soil = new THREE.Color(config.dirt.color);
 const color = applyMeadowGroundDetail({ color: ground.root, root: ground.root, soil: vec4(soil.r, soil.g, soil.b, 1).rgb,
   coverage: float(1), cameraDistance: distance, patterns, localXZ: local, ...ground.detail });
-const material = new THREE.MeshBasicNodeMaterial(); material.fragmentNode = vec4(color, 1);
+const arid = createAridSubstrateNodes({ tileId: biome, bare: float(1), patterns, localXZ: local, cameraDistance: distance });
+const surface = arid.apply(color, float(.9), normalViewGeometry), normalMode = uniform(0);
+const material = new THREE.MeshBasicNodeMaterial();
+material.fragmentNode = vec4(mix(surface.color, surface.normal.mul(.5).add(.5), normalMode), 1);
 const mesh = new THREE.Mesh(new THREE.PlaneGeometry(32, 24).rotateX(-Math.PI / 2), material); scene.add(mesh);
 const luminance = pixels => {
   let total = 0, finite = true;
@@ -46,7 +50,7 @@ async function capture(id) {
 try {
   if (state.report.backend !== backend) throw new Error('Unexpected ground fixture backend.');
   await renderer.compileAsync(scene, camera);
-  for (const id of [3, 4, 5, 6, 7, 8, 9, 10, 12]) {
+  for (const id of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]) {
     biome.value = id;
     for (const origin of [[0, 0], [7134127, -1081563]]) {
       patterns.update(...origin); offset.value.set(0, 0); distance.value = 60;
@@ -58,6 +62,18 @@ try {
         state.report.cases.push({ id: name, origin, meters, ...stats, relativeMean });
         state.report.checks.push({ id: name, relativeMean, passed: stats.finite && relativeMean >= .94 && relativeMean <= 1.06 });
         if (origin[0] === 0 && [4, 34].includes(meters)) await capture(name);
+      }
+      if (id <= 2) {
+        normalMode.value = 1; distance.value = 4;
+        const pixels = await draw(); let error = 0, span = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const x = pixels[i] * 2 - 1, y = pixels[i + 1] * 2 - 1, z = pixels[i + 2] * 2 - 1;
+          error = Math.max(error, Math.abs(Math.hypot(x, y, z) - 1)); span = Math.max(span, Math.hypot(x, y));
+        }
+        state.report.checks.push({ id: `arid-normal-${id}-${origin[0]}`, error, span,
+          passed: Number.isFinite(error) && error < .001 && span > .005 && span < .6 });
+        if (origin[0] === 0) await capture(`biome-${id}-relief-normal`);
+        normalMode.value = 0;
       }
     }
   }
