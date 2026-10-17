@@ -12,7 +12,7 @@ function regionMean(image, [left, top, width, height]) {
 
 export function checkUnderwaterWaterline(images, report) {
   const record = (id, passed, metrics) => {
-    report.checks.push({ id, passed, ...metrics });
+    report.checks.push({ ...metrics, id, passed });
     assert.ok(passed, `${id}: ${JSON.stringify(metrics)}`);
   };
   for (const backend of ['webgpu', 'webgl']) {

@@ -126,7 +126,8 @@ try {
     'surf-off', 'surf-on', 'surf-rebased', 'surf-moving', 'terrain-coast', 'terrain-inland',
     'river-medium', 'river-high', 'river-moving', 'river-rebased', 'river-fall', 'river-foam-composite', 'river-foam-layers',
     'beach', 'beach-moving', 'beach-rebased', 'deep-sea', 'deep-sea-storm', 'lake', 'lake-moving', 'lake-reflections-off', 'lake-planar-off',
-    'underwater-shelf', 'underwater-snell', 'underwater-deep', 'underwater-rebased']) {
+    'underwater-shelf', 'underwater-snell', 'underwater-deep', 'underwater-rebased',
+    'water-split-off', 'water-split', 'water-split-below']) {
     check(`backend parity ${id}`, `webgpu-${id}`, `webgl-${id}`, { minimumBrightnessRatio: 0.9, maximumBrightnessRatio: 1.1 });
   }
   }
