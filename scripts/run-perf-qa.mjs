@@ -336,6 +336,8 @@ const fs = require('fs');
         let firstReadyMs = null;
         let grassReadyFrames = 0;
         let grassFirstReadyMs = null;
+        const timeline = [];
+        let nextSampleMs = 0;
         while (performance.now() - started < seconds * 1000 && readyFrames < 60) {
           await new Promise(resolve => requestAnimationFrame(resolve));
           const missing = PerfCounters.get('meadowInViewMissingTiles');
@@ -344,12 +346,22 @@ const fs = require('fs');
             grassFirstReadyMs ??= performance.now() - started;
             grassReadyFrames++;
           } else { grassReadyFrames = 0; grassFirstReadyMs = null; }
-          if (surface.getPreparationStatus().ready) {
+          const status = surface.getPreparationStatus();
+          if (performance.now() - started >= nextSampleMs) {
+            timeline.push({ elapsedMs: performance.now() - started, ready: status.ready,
+              fields: status.fields, meadow: status.meadow, staged: status.staged,
+              queues: Object.fromEntries(Object.entries(status.queues ?? {}).map(([name, queue]) =>
+                [name, { depth: queue.depth, completed: queue.completed, advanced: queue.advanced }])),
+              deferredMs: PerfCounters.get('frameDeferredCpuMs'),
+              pressureFloorMs: PerfCounters.get('frameDeferredPressureFloorMs') });
+            nextSampleMs += 250;
+          }
+          if (status.ready) {
             firstReadyMs ??= performance.now() - started;
             readyFrames++;
           } else { readyFrames = 0; firstReadyMs = null; }
         }
-        return { ready: readyFrames >= 60, firstReadyMs,
+        return { ready: readyFrames >= 60, firstReadyMs, timeline,
           grass: { ready: grassReadyFrames >= 60, firstReadyMs: grassFirstReadyMs },
           waitedMs: performance.now() - started, start,
           end: surface.getPreparationStatus(), counters: PerfCounters.snapshot() };

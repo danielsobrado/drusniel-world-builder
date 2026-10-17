@@ -88,11 +88,14 @@ try {
         await captureWorldCanvas(page, path.join(out, `${pose.id}.png`));
         state.controls = [];
         for (const variant of option('--variants', '').split(',').filter(Boolean)) {
-          if (!['foam-off', 'glint-off', 'normals-off', 'reflections-off', 'refraction-off', 'swell-off', 'height-offset-off'].includes(variant)) throw new Error(`Unknown variant ${variant}`);
+          if (!['foam-off', 'surf-off', 'swash-off', 'intersection-off', 'glint-off', 'normals-off', 'reflections-off', 'refraction-off', 'swell-off', 'height-offset-off'].includes(variant)) throw new Error(`Unknown variant ${variant}`);
           const controls = await page.evaluate(async variant => {
             const { SharedWaterMaterials, WATER_SLOT_OPTIONS } = await import('/src/editor/stylized/SharedWaterMaterials.js');
             const e = window.__editor, surface = e.stylizedSurface, config = structuredClone(e.config.stylizedSurface);
             if (variant === 'foam-off') config.water.foam.enabled = false;
+            if (variant === 'surf-off') config.water.sea.surf.enabled = false;
+            if (variant === 'swash-off') config.water.coast.enabled = false;
+            if (variant === 'intersection-off') config.water.foam.intersectionStrength = 0;
             if (variant === 'glint-off') config.water.riverSurface.glintStrength = 0;
             if (variant === 'normals-off') config.water.riverSurface.normalStrength = 0;
             if (variant === 'refraction-off') config.water.refraction.enabled = false;
