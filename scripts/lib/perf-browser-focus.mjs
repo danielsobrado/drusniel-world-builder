@@ -18,9 +18,13 @@ export async function focusPerfBrowser(browser, page, { headed }) {
     nativeMonitor = await monitorWindowsBrowserForeground(pid);
     browser.once('disconnected', () => { nativeMonitor().catch(() => {}); });
     method = 'windows-native-foreground';
+    // AppActivate can focus browser chrome (for example the address bar).
+    // Re-select the owned page after native activation, without a canvas click.
+    await page.bringToFront();
+    await page.evaluate(() => window.focus());
   }
   try { await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 }); }
-  catch (error) { await nativeMonitor?.(); throw error; }
+  catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }
   await page.evaluate(() => {
     const state = window.__perfBrowserFocus = { events: [], lostFocus: false };
     state.listener = event => {
