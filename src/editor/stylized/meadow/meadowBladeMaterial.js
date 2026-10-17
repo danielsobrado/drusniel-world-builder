@@ -63,7 +63,7 @@ export function createMeadowBladeMaterial({
     .add(sideDirection.mul(side).mul(mix(.6, .25, tip)).mul(rooted))
     .add(forward.mul(tip).mul(0.45)));
   material.normalNode = cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz.normalize();
-  const detailReach = cameraPosition.distance(blade.base).smoothstep(6, 14).oneMinus();
+  const detailReach = cameraPosition.distance(blade.base).smoothstep(6, 14).oneMinus().toVarying('meadowBladeDetailReach');
   const edge = side.abs();
   const rib = blade.shape.greaterThan(.5).select(
     edge.smoothstep(.04, .18).mul(.06).add(.94), edge.mul(.04).add(.98));
