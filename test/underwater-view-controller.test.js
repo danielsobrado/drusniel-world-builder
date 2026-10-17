@@ -77,6 +77,26 @@ test('underwater draws keep the main-camera hooks and dry draws call them once',
   controller.dispose();
 });
 
+test('surface and optical warmups use distinct node frames so shadow variants are prepared', () => {
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera();
+  const frame = { frameId: 10, time: 7, deltaTime: .016 }, observed = [];
+  const terrainView = { scene, renderer: { isRenderer: true, _nodes: { nodeFrame: frame } },
+    prewarmPostProcessing() { observed.push(['surface', frame.frameId]); return true; },
+    stylizedConfig: { water: { qualityTier: 'high', projectedCaustics: {
+      enabled: true, color: '#b9f4e5', intensity: .16, scale: .42, speed: .55,
+      contrast: 2.6, depthFadeStart: .15, depthFadeEnd: 6, maxDistance: 45,
+    } } } };
+  const controller = new UnderwaterViewController({ terrainView,
+    playerController: { camera, getStatus: () => ({ enabled: true, headSubmerged: false }) }, config: underwaterConfig });
+  controller.causticsPostProcess.prewarm = () => { observed.push(['underwater', frame.frameId]); return true; };
+  assert.equal(terrainView.prewarmPostProcessing(camera), true);
+  assert.deepEqual(observed, [['surface', 10], ['underwater', 11], ['underwater', 13]]);
+  assert.equal(frame.frameId, 14);
+  assert.equal(frame.time, 7, 'preparation must not advance animation time');
+  assert.equal(frame.deltaTime, .016);
+  controller.dispose();
+});
+
 test('fog-less worlds restore null fog after a dive cycle', () => {
   const { controller, scene, playerController } = createHarness({ fog: null });
   assert.equal(controller.originalFogExists, false);

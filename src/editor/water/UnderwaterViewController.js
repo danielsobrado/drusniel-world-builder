@@ -4,6 +4,7 @@ import { advanceUnderwaterBlend, mixNumber } from './UnderwaterTransition.js';
 import { resolveWaterQualityFeatures } from './WaterQuality.js';
 import { UnderwaterCausticsPostProcess } from './UnderwaterCausticsPostProcess.js';
 import { setUnderwaterBlend } from './underwaterState.js';
+import { withPreparationFrame } from '../../render/preparation/DrawPreparation.js';
 
 const MAX_DELTA_SECONDS = 0.1;
 const SKY_HIDE_THRESHOLD = 0.98;
@@ -84,15 +85,20 @@ export class UnderwaterViewController {
       };
       this.causticsPrewarmHook = (camera) => {
         const original = this.originalTerrainPrewarm?.call(terrainView, camera) ?? false;
+        // ShadowNode caches by camera + node-frame ID. Surface and underwater
+        // warmups must not share that ID, or the latter skips its shadow draws
+        // and their material variants compile on the first dive instead.
+        const prewarmProjected = () => withPreparationFrame(terrainView.renderer, null,
+          () => this.causticsPostProcess.prewarm(camera));
         const previousFog = this.scene.fog;
         let projected;
         try {
           if (!previousFog?.isFogExp2) this.scene.fog = this.underwaterFog;
-          projected = this.causticsPostProcess.prewarm(camera);
+          projected = prewarmProjected();
           const skyVisible = this.skyMesh?.visible;
           try {
             if (this.skyMesh) this.skyMesh.visible = false;
-            this.causticsPostProcess.prewarm(camera);
+            prewarmProjected();
           } finally {
             if (this.skyMesh) this.skyMesh.visible = skyVisible;
           }
