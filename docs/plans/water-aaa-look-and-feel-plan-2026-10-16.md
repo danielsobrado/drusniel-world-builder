@@ -1,14 +1,16 @@
 # Water, rivers and sea: visual quality plan
 
-Date: October 16, 2026. Status: **proposal; rendering changes are not implemented by this document**.
+Captured: October 16, 2026. Review completed: October 17, 2026. Status: **proposal; rendering changes are not implemented by this document**.
 
 This plan targets a polished, stylized AAA presentation that belongs in Drusniel's world: convincing scale, readable depth and currents, coherent shore materials, restrained foam, and stable movement. Extra simulation complexity is justified only when it improves those qualities in the actual streamed world.
+
+The first implementation pass should address **stepped shorelines and serrated crests, repeated inland surface patterns, and broad opaque foam**. These are visible defects in the new captures. Biome-specific banks, local river dynamics and reflection polish follow; a more expensive ocean simulation is a later option.
 
 [Screenshot gallery and capture record](../qa/water-aaa-audit-2026-10-16/README.md) · [Contact sheet](../qa/water-aaa-audit-2026-10-16/contact-sheet.jpg) · [Exact poses](../qa/water-aaa-audit-2026-10-16/manifest.json) · [Raw capture report](../qa/water-aaa-audit-2026-10-16/report.json)
 
 ## 1. Evidence and scope
 
-New screenshots were requested from seeded random locations, stratified to cover distinct coast biomes and imported rivers. These are production-world captures, not material preview scenes. Source/configuration are frozen at `52914b1559ceda00526ca027b83a89775ced63a4`; the frozen server's declared files and hashes are retained with the evidence. Other public assets and the imported map remain shared checkout files; the map hash is recorded separately.
+**Thirteen new views are accepted:** six procedural coast biomes, a player-height coast companion, a deep-sea view, four Eldara river biomes, and an Eldara lake bank. All passed readiness, expected biome and canonical water-kind checks; source integrity held and browser errors were zero. Locations were selected by seeded random sampling, stratified to cover distinct coast biomes and imported rivers. These are production-world captures, not material preview scenes. Source/configuration are frozen at `52914b1559ceda00526ca027b83a89775ced63a4`; the frozen server's declared files and hashes are retained with the evidence. Other public assets and the imported map remain shared checkout files; the map hash is recorded separately.
 
 Capture conditions: native Windows headed Chromium, hardware NVIDIA Lovelace WebGPU, 1600 × 900, DPR 1, FOV 68°, Highfield at paused noon, manual weather off. Production camera cuts and the existing preparation helper require complete terrain, scenery and collision readiness, followed by 60 ready frames. Regional atmosphere, wind, particles and water animation remain active. Consecutive HUD and clean screenshots are different frames. Exact animated pixels are not reproducible from the pose alone.
 
@@ -47,6 +49,15 @@ The final per-view observations and acceptance status are recorded in the linked
 | [Grassland coast overview](../qa/water-aaa-audit-2026-10-16/coast-04.png) | The shoreline has long angular/stepped sections; broad white foam covers much of the near-water strip. Large reflected sky shapes sit above a dark trough, with little intermediate roughness structure. | P0 contact and individual foam-source controls; P1 reflection/normal-scale review. |
 | [Temperate forest coast](../qa/water-aaa-audit-2026-10-16/coast-06.png) | The inlet has a nearly uniform turquoise shelf, a sharp dark-blue transition, smooth bulky waves and a pale outlined bank. Its broad bare bank has little localized shore detail. It is canonically ocean, despite its lake-like framing. | P1 depth/bed calibration and shoreline ecology; P2 shelter-aware wave energy. Preserve canonical classification. |
 | [Taiga coast](../qa/water-aaa-audit-2026-10-16/coast-09.png) | The mid-right wave crest has a clearly serrated triangular outline. The shelf is bright cyan with a sharp transition to a dark trough, and the near bank still has angular contour segments. | P0 displaced-grid/normal diagnosis in WQ-01; P1 cold-shore optical calibration. White airborne specks need particle-layer isolation before attribution to spray. |
+| [Tundra coast](../qa/water-aaa-audit-2026-10-16/coast-10.png) | Pale/snow-covered ground and airborne snow coexist with a strongly aquamarine pool-like inlet. Shore outlines turn through hard corners, and foam obscures some of the shallow bed. | P0 contact/foam; P1 cold substrate, snow/wetness handoff and water optical profile. The visible water is canonically ocean. |
+| [Wetland coast](../qa/water-aaa-audit-2026-10-16/coast-12.png) | The foreground shows the strongest stepped contact contour, including multiple bright angular bands. The curved swell also exposes regular facets. | Primary P0 shoreline and swash-ownership hero view; P1 wetland bank integration. |
+| [Player-height coast](../qa/water-aaa-audit-2026-10-16/coast-04-player.png) | Near grass hides much of the contact edge. The visible water reads as long horizontal cyan/dark bands with large smooth swells. | Keep as a gameplay composition check; use the overview for contact diagnosis. It is not a strong close-up of the waterline. |
+| [Deep sea](../qa/water-aaa-audit-2026-10-16/open-sea.png) | Fine dark ripples are present, but large soft cloud-reflection patches dominate parts of the crest field. Distant land is visible; this is a deep ocean-kind point, not proof of a land-free offshore horizon. | P1 reflection roughness/normal-scale integration; P2 wave hierarchy. Do not infer reflection shimmer from a still. |
+| [Taiga river](../qa/water-aaa-audit-2026-10-16/river-09.png) | Repeated small bright motifs form strongly regular rows across a broad, straight reach. The smooth pale banks have little local roughness or shore structure. | P0 inland pattern isolation; P1 local current variation and bank detail. |
+| [Temperate rainforest river](../qa/water-aaa-audit-2026-10-16/river-08.png) | Dense white mottling covers most of the channel; the near stones and edge lack a clear quieter surrounding pool/wake contrast. Banks read as broad uniform strips. | P0 distinguish foam from specular detail; P1 obstacle-aware flow and substrate variation. A static frame does not establish actual current direction. |
+| [Wetland river](../qa/water-aaa-audit-2026-10-16/river-12.png) | Similar turquoise water and dense repeated bright mottling to the wooded river, despite a different environment. Long straight, smooth bank bands dominate the composition. | P0 pattern density; P1 sediment/organic-water profile and more varied local bank treatment. |
+| [Deciduous forest river](../qa/water-aaa-audit-2026-10-16/river-06.png) | A distinct crosshatched grid appears in the bright central highlight. Dense small surface motifs repeat across the channel. Straight pale banks transition abruptly to green material. | Primary P0 inland normal/foam/glint isolation view; P1 wet bank material transition. |
+| [Wetland lake](../qa/water-aaa-audit-2026-10-16/lake-bank.png) | Cloud reflection is present. A highly regular fine ripple pattern and broad bright near-bank mottling reduce the impression of clear, quiet shallows. The foreground edge is angular and sparsely dressed. | P0 inland pattern/contact controls; P1 roughness, depth cues and rooted shore ecology. No falling water is shown. |
 | [Earlier desert phase](../qa/water-aaa-audit-2026-10-16/initial-attempt/coast-01.png) | At the same location, a different live wave phase produces a much broader white band than the retained retry image. | Review complete wave cycles. The two images are evidence of phase variation, not a before/after implementation comparison. |
 
 The central review questions are:
@@ -85,7 +96,7 @@ Each item should be a small reviewable change or sequence of changes on `main`. 
 | --- | --- | --- | --- | --- |
 | WQ-00 | P0 | Reproducible diagnosis and trustworthy captures | — | Small |
 | WQ-01 | P0 | Thin, coherent water/ground contact | WQ-00 | Medium |
-| WQ-02 | P0 | Restrained foam with visible breakup and age | WQ-00, WQ-01 | Medium |
+| WQ-02 | P0 | Suppress inland repetition; restrain foam and give it age | WQ-00, WQ-01 for contact | Medium |
 | WQ-03 | P1 | Explicit water identity and continuous visual profiles | WQ-00 | Medium |
 | WQ-04 | P1 | Rivers with readable local current and disturbances | WQ-03 | Large |
 | WQ-05 | P1 | Coherent reflections, highlights and shallow optics | WQ-01, WQ-03 | Medium |
@@ -126,21 +137,23 @@ Each item should be a small reviewable change or sequence of changes on `main`. 
 
 **Acceptance:** at player height and 9 m overview, sand meets the water without a continuous raised slab, opaque overhang or exposed gap; the swash crosses the contact without double foam; below-surface rocks remain correctly occluded. The taiga crest must no longer show a repeated sawtooth silhouette through a complete wave cycle. Test beach slopes 1:4, 1:16 and 1:64, curved shorelines, terrain edits, chunk corners and a large origin rebase. Numeric domain agreement remains within the existing field-encoding tolerance.
 
-### WQ-02 — Give foam structure, limits and lifespan
+### WQ-02 — Break inland repetition and give foam structure and lifespan
 
 **Steps**
 
 1. Attribute the broad white areas to surf, swash, whitecaps, intersection foam, or spray using WQ-00 controls. Do not assume all pale areas are foam; glint and crest transmission can contribute.
-2. Give each source a distinct role: narrow new breaker, irregular retreating trail, short contact accent, and sparse offshore whitecap. Avoid every source independently saturating the same area.
-3. Retune the existing world-stable foam field thresholds and age decay to expose clear-water holes. Preserve coherent structures at a few meters, then add finer breakup within them. Keep the October 15 short-repeat and precision fixes.
-4. Let generation depend on local wave/current energy; calm shallows should not foam simply because they fall inside a depth interval. Fade old foam by lifetime and travel distance.
-5. For moving rivers, advect foam along the resolved local flow. Accumulate it only in justified slow pockets and downstream of disturbances. Start with analytic age/phase using existing fields; evaluate a small near-camera history field only if that cannot meet the visual target.
-6. Shade foam as an aerated surface with softer highlights than clear water. Keep it readable in shadow and backlight without making it luminous at night.
-7. Make spray intermittent at breaking zones, with depth-aware placement and short lifetimes. Retain the existing shallow-only emission rules and small particle sizes.
+2. Isolate the forest river's crosshatched highlight and the taiga river's rows with inland foam off, detail normals off, sun glint off, and diagnostic UVs. `RiverSurfaceShading.js` samples one repeat-wrapped detail texture at `DETAIL_SCALE = 0.25` (a 4 m base tile), plus its micro and streak layers. That is a concrete repetition candidate, not proof that every bright mark has the same cause. The 320 m bounded origin prevents precision loss; it does not remove the smaller texture repeat.
+3. For the responsible inland layers, separate low-frequency structure from fine detail. Evaluate world-stable macro modulation, independently phased/scaled detail samples and a nonidentical foam breakup field. Preserve downstream orientation; random rotation must not reverse visible flow. Start with the existing shared texture and bounded noise before adding new texture/compute passes. Apply the normal/glint correction to lakes as well as rivers.
+4. Give each source a distinct role: narrow new breaker, irregular retreating trail, short contact accent, and sparse offshore whitecap. Avoid every source independently saturating the same area.
+5. Retune the existing world-stable foam field thresholds and age decay to expose clear-water holes. Preserve coherent structures at a few meters, then add finer breakup within them. Keep the October 15 short-repeat and precision fixes.
+6. Let generation depend on local wave/current energy; calm shallows should not foam simply because they fall inside a depth interval. Fade old foam by lifetime and travel distance.
+7. For moving rivers, advect foam along the resolved local flow. Accumulate it only in justified slow pockets and downstream of disturbances. Start with analytic age/phase using existing fields; evaluate a small near-camera history field only if that cannot meet the visual target.
+8. Shade foam as an aerated surface with softer highlights than clear water. Keep it readable in shadow and backlight without making it luminous at night.
+9. Make spray intermittent at breaking zones, with depth-aware placement and short lifetimes. Retain the existing shallow-only emission rules and small particle sizes.
 
 **Ownership:** `SeaSurfNodes.js`, `SeaSurfaceShading.js`, `RiverSurfaceShading.js`, `WaterSurfaceResponse.js`, `ambient/ParticleWaterDepth.js`, `config/water-visual.yaml`.
 
-**Acceptance:** clear-water gaps are visible throughout sheltered swash; opaque white bands do not cover an entire shallow bay; large whitecaps do not tile in obvious rows. Review 20 seconds of animation, slow pans and paused frames at near/mid distance. Use labeled foam masks to measure coverage before/after; agree a per-scene target after isolation, rather than using a universal “white pixel” threshold that also counts sky and reflections.
+**Acceptance:** the forest river's crosshatched highlight and taiga river's repeated rows are no longer visible at the same poses. Check spatial repetition at the original tile offsets and multiple offsets in controlled normal/foam fixtures, together with chunk-seam and million-meter-origin controls. Clear-water gaps are visible throughout sheltered swash; opaque white bands do not cover an entire shallow bay; large whitecaps do not tile in obvious rows. Review 20 seconds of animation, slow pans and paused frames at near/mid distance. Use labeled foam masks to measure coverage before/after; agree a per-scene target after isolation, rather than using a universal “white pixel” threshold that also counts sky and reflections.
 
 ### WQ-03 — Resolve water profiles from explicit semantics
 
@@ -168,6 +181,7 @@ Each item should be a small reviewable change or sequence of changes on `main`. 
 5. Add a bounded obstacle influence field from nearby eligible rocks/structures: upstream split, side acceleration and downstream wake. Build it from spatially local source data; no per-fragment search through arbitrary scene objects and no full-world simulation.
 6. Place gravel bars and grouped bank stones by bank side, depth, slope and flow. Leave open reaches. An evenly spaced line of identical rocks would make the river look more procedural.
 7. For falls, connect the upper lip, face, aerated impact patch and downstream recovery. Mist must emerge from the impact/face, not substitute for missing water geometry. Reuse `RiverFallSites` and existing whitewater channels.
+8. Review why the sampled imported banks read as long, uniform channels. Start with bank materials and placement; if geometry is responsible, derive bounded width/asymmetry/erosion variation along a shared reach profile. Preserve the imported course, downstream continuity, tributary joins and collision agreement. Do not add independent per-chunk random bank displacement, and do not infer that every river on the map has this cross-section from these four views.
 
 **Suggested module boundaries:** extend the domain/reach derivation separately from a `RiverVisualEnergy` resolver, an optional local obstacle-field producer, and small material nodes. Keep `RiverSurfaceShading.js` responsible for consuming fields, not querying world geography.
 
@@ -227,6 +241,21 @@ Static screenshots do not assess these items. They are follow-up look-and-feel t
 
 **Acceptance:** one entry produces one appropriate event; a stationary swimmer does not emit a full-speed wake; exiting onto dry land stops new impulses; effects survive a rebase without jumping to the origin. Audio transitions do not click or restart at borders. Test dry → wade → swim → dive → surface → dry.
 
+### WQ-09 — Verify cost, residency and quality fallback at every milestone
+
+**Steps**
+
+1. Before implementation, name the reference device, browser/backend, viewport, quality tier and frozen baseline. Record the existing water-route timings and resident resource counts. Keep capture readiness time separate from steady-state frame time.
+2. After each milestone, replay the affected accepted poses and record shader/browser errors, preparation status and source hashes. Add a 20-second stationary sequence and a moving camera pass wherever animation, reflections or geometry changed.
+3. Run sequential baseline/candidate performance pairs under the shared QA lock. Include a dry route, shoreline approach, river crossing and lake visit. Use the full movement/density matrix for generation, streaming or residency changes, following the repository guide rather than replacing its gates.
+4. Repeat coast → river → lake → dry visits, unload/revisit and large-coordinate rebases. Record field textures, reflection targets, material variants and interaction-effect counts before and after. Explain legitimate warmup growth; reject continued resource growth.
+5. Compare representative high, medium and low scenes. Keep body identity, shoreline contact and useful depth cues at every tier; reduce reflection refresh, surface detail and particles through explicit bounded options. Test supported backends and document any existing fixture/runtime limitation precisely.
+6. Attach an acceptance record to each implementation change: evidence links, measured cost delta, domain/field checks, relevant movement checks, tier differences and remaining defects. Keep feature opt-outs during evaluation and remove temporary diagnostic cost from production defaults.
+
+**Ownership:** existing visual QA and deterministic performance harnesses, material quality/variant bindings, field-slot lifetime and reflection/effect pools. No new global benchmark framework is needed.
+
+**Acceptance:** all applicable repository gates below pass; no new dry-route water pass, growing resource count, missing collision/scenery or unresolved shader error. The final comparison identifies which visual targets improved and which were deferred. A prettier still cannot waive a streaming regression.
+
 ## 6. Architecture and performance guardrails
 
 Follow [player movement performance QA](../perf-qa.md) before implementation. Visual inspection is not a performance result.
@@ -280,7 +309,7 @@ Confirm each runner's options and output paths at implementation time. Never quo
 ## 8. Suggested delivery sequence
 
 1. **Diagnosis milestone:** finish WQ-00 controls at a sandy coast, a cold coast, a river and a lake. Resolve capture readiness failures. Agree four hero comparison views and retain the randomized audit as the broader regression set.
-2. **Contact milestone:** implement WQ-01 and WQ-02 in separate small changes. Success is thinner shoreline contact and more readable shallows without losing the existing ocean anti-repetition fixes.
+2. **Contact and repetition milestone:** implement WQ-01 and WQ-02 in separate small changes. First remove the forest river's crosshatched highlight, the wetland coast's stepped bands and the taiga crest's serration; then tune foam density/lifetime. Success is thinner shoreline contact and more readable water without losing the existing ocean anti-repetition fixes.
 3. **Identity milestone:** introduce WQ-03 with explicit metadata/field budgets; implement WQ-06's substrate responses and WQ-05's calibrated optics against it. Review all sampled biomes before tuning one showcase scene further.
 4. **Motion milestone:** implement WQ-04's local current variation, then WQ-07's exposure response. Introduce simulation history or spectral waves only if cheaper changes fail the agreed target.
 5. **Experience milestone:** WQ-08 interaction/audio and underwater review, followed by cross-tier/backend checks and WQ-09 performance/resource acceptance.

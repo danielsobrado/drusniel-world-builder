@@ -1,0 +1,666 @@
+{
+  "verifiedAt": "2026-10-17T00:36:30.800Z",
+  "sourceSha": "52914b1559ceda00526ca027b83a89775ced63a4",
+  "passed": true,
+  "cleanScreenshots": 13,
+  "pngArtifacts": 26,
+  "contactSheetSha256": "2c2e8411f2ddb9b1fe095e115ba44ff1b138e10d4c01b697dd105ca189e39097",
+  "checks": [
+    {
+      "id": "capture valid with no errors or failures",
+      "passed": true
+    },
+    {
+      "id": "all requested poses retained",
+      "passed": true
+    },
+    {
+      "id": "frozen source matches capture",
+      "passed": true
+    },
+    {
+      "id": "capture script hash",
+      "passed": true
+    },
+    {
+      "id": "selector hash",
+      "passed": true
+    },
+    {
+      "id": "imported map hash",
+      "passed": true
+    },
+    {
+      "id": "coast-01: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-01: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-01: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-04: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-04: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-04: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-06: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-06: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-06: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-09: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-09: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-09: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-10: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-10: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-10: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-12: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-12: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-12: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player: canonical position",
+      "passed": true
+    },
+    {
+      "id": "open-sea: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "open-sea: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "open-sea: canonical position",
+      "passed": true
+    },
+    {
+      "id": "river-09: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "river-09: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "river-09: canonical position",
+      "passed": true
+    },
+    {
+      "id": "river-08: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "river-08: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "river-08: canonical position",
+      "passed": true
+    },
+    {
+      "id": "river-12: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "river-12: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "river-12: canonical position",
+      "passed": true
+    },
+    {
+      "id": "river-06: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "river-06: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "river-06: canonical position",
+      "passed": true
+    },
+    {
+      "id": "lake-bank: ready, biome and water kind",
+      "passed": true
+    },
+    {
+      "id": "lake-bank: 60 consecutive ready frames",
+      "passed": true
+    },
+    {
+      "id": "lake-bank: canonical position",
+      "passed": true
+    },
+    {
+      "id": "coast-01.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-01.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-01-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-01-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-04.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-04.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-04-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-04-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-06.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-06.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-06-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-06-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-09.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-09.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-09-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-09-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-10.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-10.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-10-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-10-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-12.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-12.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-12-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-12-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "coast-04-player-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "open-sea.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "open-sea.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "open-sea-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "open-sea-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-09.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-09.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-09-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-09-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-08.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-08.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-08-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-08-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-12.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-12.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-12-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-12-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-06.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-06.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "river-06-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "river-06-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "lake-bank.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "lake-bank.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "lake-bank-hud.png: SHA-256",
+      "passed": true
+    },
+    {
+      "id": "lake-bank-hud.png: dimensions",
+      "passed": true
+    },
+    {
+      "id": "ocean, lake and river coverage",
+      "passed": true
+    },
+    {
+      "id": "six coastal biomes",
+      "passed": true
+    },
+    {
+      "id": "scripts/lib/world-visual-prepare-pose.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "scripts/lib/world-visual-canvas.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "scripts/lib/world-visual-source.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "scripts/lib/world-visual-report.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "scripts/lib/perf-browser-errors.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "scripts/perf-run-lock.mjs: current helper matches frozen revision",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\plans\\water-aaa-look-and-feel-plan-2026-10-16.md",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\contact-sheet.jpg",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\manifest.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\report.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\source-snapshot.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\contact-sheet.jpg",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-01.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-01-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-06.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-06-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-09.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-09-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-10.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-10-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-12.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-12-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04-player.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04-player-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\open-sea.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\open-sea-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-09.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-09-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-08.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-08-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-12.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-12-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-06.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-06-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\lake-bank.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\lake-bank-hud.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\plans\\water-aaa-look-and-feel-plan-2026-10-16.md",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\report.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\failed-coast-04.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\failed-coast-06.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\failed-coast-09.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\coast-01.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\README.md",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\contact-sheet.jpg",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\manifest.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\report.json",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\architecture\\water-domain-contract.md",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\world-visual-quality-2026-10-14\\ocean\\README.md",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-01.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-06.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-09.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-10.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-12.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\coast-04-player.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\open-sea.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-09.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-08.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-12.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\river-06.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\lake-bank.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\qa\\water-aaa-audit-2026-10-16\\initial-attempt\\coast-01.png",
+      "passed": true
+    },
+    {
+      "id": "local link: docs\\perf-qa.md",
+      "passed": true
+    }
+  ]
+}
