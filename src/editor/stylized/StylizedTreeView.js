@@ -183,6 +183,7 @@ export class StylizedTreeView {
     this.time = uniform(0);
     this.prototypes = [];
     this.prototypeSignature = null;
+    this.impostorFailure = null;
     this.speciesPrototypeIndex = null;
     this.prototypeTileIds = null;
     this.prototypePreferredTileIds = null;
@@ -651,6 +652,7 @@ export class StylizedTreeView {
       },
     });
     this.impostorReady = this.initializeImpostors(impostorCapacity).catch((error) => {
+      this.impostorFailure = error.message;
       console.warn('Tree impostor initialization failed; low-poly proxy fallback remains active.', error);
       return null;
     });
@@ -670,7 +672,10 @@ export class StylizedTreeView {
       expectedSourceSignature: this.prototypeSignature,
     });
     let atlases = forceBake ? null : await loader.load(settings.manifest).catch((error) => {
-      console.warn('Tree impostor assets could not be loaded; runtime bake will be attempted.', error);
+      this.impostorFailure = error.message;
+      console.warn(settings.runtimeBake !== false
+        ? 'Tree impostor assets could not be loaded; runtime bake will be attempted.'
+        : 'Tree impostor assets could not be loaded; low-poly proxy fallback remains active.', error);
       return null;
     });
     if (!atlases && (forceBake || settings.runtimeBake !== false)) {
@@ -687,6 +692,7 @@ export class StylizedTreeView {
     }
 
     this.impostorAtlases = [...atlases];
+    this.impostorFailure = null;
     this.impostorBatches = this.impostorAtlases.map((atlas) => new TreeImpostorBatch({
       renderer: this.terrainView.renderer,
       scene: this.terrainView.scene,

@@ -70,6 +70,7 @@ try {
     try {
       const preparation=await prepareVisualPose(page,pose);
       const state=await page.evaluate(()=>window.__worldVisualQa.diagnostics());
+      if(!state.assetIntegrity?.ready)throw new Error(`Required visual assets are degraded: ${JSON.stringify(state.assetIntegrity)}`);
       if(pose.expectedBiomeId!==undefined&&state.actualBiomeId!==pose.expectedBiomeId)
         throw new Error(`Frozen biome ${pose.id} expected ${pose.expectedBiomeId}, got ${state.actualBiomeId}.`);
       const files=[`${pose.id}-hud.png`,`${pose.id}.png`];

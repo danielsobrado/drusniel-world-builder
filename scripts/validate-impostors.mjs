@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 import { gunzipSync } from 'node:zlib';
 import sharp from 'sharp';
 import { validateImpostorKtx2 } from './lib/impostor-ktx2-validation.mjs';
+import { validateTreeImpostorSourceInputs } from './lib/tree-impostor-source-inputs.mjs';
 import {
   validateTreeImpostorManifest,
 } from '../src/editor/stylized/impostor/TreeImpostorManifest.js';
@@ -78,6 +79,8 @@ async function main() {
       `Tree impostor manifest v${manifest.version} requires runtime bake, but runtimeBake is disabled.`,
     );
   }
+
+  if (REQUIRED) await validateTreeImpostorSourceInputs(manifest);
 
   for (const prototype of manifest.prototypes) {
     if (prototype.albedoMips) {

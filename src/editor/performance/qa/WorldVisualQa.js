@@ -3,6 +3,7 @@ import { staticLightingComponents,staticLightingChange } from './WorldVisualLigh
 import { worldVisualPreparation } from './WorldVisualPreparation.js';
 import { PerfCounters } from './PerfCounters.js';
 import { trackedWorldResources } from './WorldVisualResources.js';
+import { treeImpostorIntegrity } from '../../stylized/impostor/TreeImpostorIntegrity.js';
 import { setWaterTimeOverride } from '../../water/WaterVisualClock.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -62,6 +63,7 @@ export class WorldVisualQa {
       placements[name]=values.map(p=>p.stableId??`${p.x}:${p.z}`).sort();
     }
     return {canonical,origin:origin.getState(),camera:camera.position.toArray(),yaw:e.playerController.yaw,pitch:e.playerController.pitch,
+      assetIntegrity:treeImpostorIntegrity(e.stylizedSurface.treeView),
       actualBiomeId:e.terrainView.worldStore.getTile(Math.floor(canonical.x/cell),Math.floor(-canonical.z/cell)),
       readiness:this.readiness(),placements,preparationDetail:worldVisualPreparation(e),preparationJobs:Object.fromEntries([
         ...['grass','flower','tree','rock','bush','detail'].map(name=>[name,e.stylizedSurface[`${name}BuildQueue`]]),

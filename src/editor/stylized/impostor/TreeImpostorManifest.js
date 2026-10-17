@@ -110,10 +110,7 @@ function treeBakeConfiguration(trees) {
   );
 }
 
-export function createTreeImpostorSourceSignature(prototypes, config) {
-  if (!Array.isArray(prototypes) || prototypes.length === 0) {
-    throw new Error('Tree impostor source signature requires at least one prototype.');
-  }
+export function treeImpostorBakeConfiguration(config) {
   const {
     enabled: _enabled,
     manifest: _manifest,
@@ -121,7 +118,7 @@ export function createTreeImpostorSourceSignature(prototypes, config) {
     compressed: _compressed,
     ...impostorBakeConfig
   } = config?.lod?.impostor ?? {};
-  const configuration = JSON.stringify({
+  return {
     trees: treeBakeConfiguration(config?.trees),
     wind: config?.wind ?? null,
     // Biome preference only selects existing prototypes; their baked pixels
@@ -129,7 +126,14 @@ export function createTreeImpostorSourceSignature(prototypes, config) {
     treeVariants: config?.assets?.treeVariants?.map(({ preferredTileIds: _preferred, ...variant }) => variant) ?? null,
     impostor: impostorBakeConfig,
     normalEncoding: TREE_IMPOSTOR_NORMAL_ENCODING,
-  });
+  };
+}
+
+export function createTreeImpostorSourceSignature(prototypes, config) {
+  if (!Array.isArray(prototypes) || prototypes.length === 0) {
+    throw new Error('Tree impostor source signature requires at least one prototype.');
+  }
+  const configuration = JSON.stringify(treeImpostorBakeConfiguration(config));
   let hash = hashText(0x811c9dc5, configuration);
   prototypes.forEach((parts, prototypeIndex) => {
     hash = hashText(hash, `${prototypeIndex}:${prototypeToken(parts)};`);
@@ -223,7 +227,7 @@ export function validateTreeImpostorManifest(manifest, {
     throw new Error('Tree impostor manifest sourceSignature is invalid.');
   }
   if (!legacy && expectedSourceSignature && manifest.sourceSignature !== expectedSourceSignature) {
-    throw new Error('Tree impostor manifest does not match the current tree source assets.');
+    throw new Error(`Tree impostor manifest does not match the current tree source assets (expected ${expectedSourceSignature}, received ${manifest.sourceSignature}).`);
   }
   if (!Array.isArray(manifest.prototypes) || manifest.prototypes.length === 0) {
     throw new Error('Tree impostor manifest contains no prototypes.');
@@ -249,6 +253,7 @@ export function validateTreeImpostorManifest(manifest, {
     version: manifest.version,
     generatedAt: manifest.generatedAt ?? null,
     sourceSignature: manifest.sourceSignature,
+    sourceInputs: manifest.sourceInputs ?? null,
     normalEncoding,
     requiresRuntimeBake: legacy,
     prototypes: Object.freeze(prototypes),
