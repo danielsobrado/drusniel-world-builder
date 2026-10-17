@@ -48,6 +48,8 @@ export const DEFAULT_COAST_SWASH = Object.freeze({
   frontBand: 0.08,
   foamCore: 0.02,
   foamWidth: 0.12,
+  foamCoreMeters: 0.025,
+  foamWidthMeters: 0.24,
   breakupStrength: 0.3,
   washDecay: 4,
   dampHeight: 0.9,
@@ -64,7 +66,6 @@ const TAU = Math.PI * 2;
 const MEMORY_CYCLES = Object.freeze([0.15, 0.3, 0.45, 0.6]);
 const DRIFT_SCALE = 0.021;
 const FRONT_BREAKUP_WAVE = Object.freeze([0.13, 0.09]);
-const FOAM_BREAKUP_WAVE = Object.freeze([0.27, -0.21]);
 
 /** The per-chunk pattern origins the swash reads; re-centre them with the terrain chunk. */
 export function createCoastPatternOrigins() {
@@ -74,7 +75,6 @@ export function createCoastPatternOrigins() {
 export const COAST_SWASH_PATTERN_FRAMES = Object.freeze({
   drift: { scale: DRIFT_SCALE },
   frontBreakup: { wave: FRONT_BREAKUP_WAVE },
-  foamBreakup: { wave: FOAM_BREAKUP_WAVE },
   foamLace: { scale: 0.85 },
 });
 
@@ -102,7 +102,7 @@ export function createCoastFoamBreakup(patterns, localXZ, clock, strength) {
   const point = patterns.latticePoint('foamLace', localXZ)
     .add(vec2(clock.mul(.025).mod(512), clock.mul(-.017).mod(512)));
   const lace = periodicFbm2(point);
-  const threshold = strength * .65;
+  const threshold = strength * .625;
   const filter = lace.fwidth().min(.15);
   return smoothstep(float(threshold - .1).sub(filter), float(threshold + .1).add(filter), lace);
 }
@@ -147,8 +147,8 @@ export function createCoastSwashNodes({
   const film = coverageAt(phase).mul(band);
   const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength);
   const contact = shoreContactDistance(height.sub(front), localXZ);
-  const foam = oneMinus(smoothstep(config.foamCoreMeters ?? .06,
-    max(float(config.foamWidthMeters ?? .45), contact.footprint), contact.distance))
+  const foam = oneMinus(smoothstep(config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
+    max(float(config.foamWidthMeters ?? DEFAULT_COAST_SWASH.foamWidthMeters), contact.footprint), contact.distance))
     .mul(foamBreakup)
     .mul(film.max(0.3))
     .mul(band);
