@@ -68,21 +68,23 @@ SHOTS = {
 }
 
 GOBLIN_SHOTS = {
+    'goblin_catalog': 'Kit_Goblin',
     'goblin_overview': dict(loc=(-24, -46, 64), target=(22, 18, 5), ortho_scale=62),
-    'goblin_hero': dict(loc=(5.4, -1.6, 3.65), target=(18.5, 12.5, 4.8), lens=22),
-    'goblin_bridge': dict(loc=(19.2, 0.8, 1.95), target=(19.8, 15.0, 6.2), lens=24),
-    'goblin_interior_hall': dict(building='BLD_Chieftain_Hall', loc=(2.2, 0.85, 2.35),
-                                 target=(5.2, 5.2, 1.65), lens=18),
-    'goblin_interior_shaman': dict(building='BLD_Shaman_Hut', loc=(2.2, 0.85, 2.35),
-                                   target=(5.2, 5.2, 1.65), lens=18),
-    'goblin_interior_tavern': dict(building='BLD_Bog_Tavern', loc=(2.2, 0.85, 2.35),
-                                   target=(5.8, 5.2, 1.65), lens=18),
+    'goblin_hero': dict(loc=(5.8, -2.2, 3.55), target=(19.5, 13.0, 5.2), lens=21),
+    'goblin_bridge': dict(loc=(19.6, 0.2, 2.10), target=(19.8, 15.0, 6.2), lens=22),
+    'goblin_interior_hall': dict(building='BLD_Chieftain_Hall', loc=(2.3, 1.35, 2.15),
+                                 target=(3.3, 5.0, 1.45), lens=18),
+    'goblin_interior_shaman': dict(building='BLD_Shaman_Hut', loc=(2.3, 1.35, 2.15),
+                                   target=(3.3, 5.0, 1.45), lens=18),
+    'goblin_interior_tavern': dict(building='BLD_Bog_Tavern', loc=(2.3, 1.35, 2.15),
+                                   target=(3.6, 4.8, 1.45), lens=18),
 }
 
 
 def _collection_shot(name):
-    pts = [o.matrix_world @ Vector(c) for o in bpy.data.collections[name].all_objects
-           if o.type == 'MESH' for c in o.bound_box]
+    coll = bpy.data.collections[name]
+    pts = [o.matrix_world @ Vector(c) for o in coll.all_objects
+           if o.type == 'MESH' and not o.hide_render for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), 0))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), 0))
     centre = (lo + hi) / 2
@@ -90,6 +92,48 @@ def _collection_shot(name):
     top = max(p.z for p in pts)
     centre.z = top * 0.35
     return dict(loc=centre + view * 150, target=centre, ortho_scale=max(hi - lo) * 1.05 + top * 0.6)
+
+
+def _stage_goblin_catalog():
+    """Temporarily pack only the Goblin Lego modules into a compact 4-row grid for goblin_catalog."""
+    kit_coll = bpy.data.collections['Kit']
+    saved = []
+    groups = {0: [], 1: [], 2: [], 3: []}
+    row_map = {
+        'walls': 0, 'foundations': 0,
+        'roofs': 1, 'accents': 1,
+        'terrain': 2, 'nature': 2,
+        'props': 3, 'interior': 3,
+    }
+    for o in kit_coll.all_objects:
+        if o.type != 'MESH':
+            continue
+        saved.append((o, o.location.copy(), o.hide_render))
+        if o.get('kit_goblin', False):
+            o.hide_render = False
+            groups[row_map.get(o.get('kit_category', 'props'), 3)].append(o)
+        else:
+            o.hide_render = True
+    y = 0.0
+    for row_idx in sorted(groups.keys()):
+        x, depth = 0.0, 0.0
+        for obj in groups[row_idx]:
+            xs = [v.co.x for v in obj.data.vertices]
+            ys = [v.co.y for v in obj.data.vertices]
+            obj.location = (x - min(xs), y - max(ys), 0)
+            x += max(xs) - min(xs) + 1.1
+            depth = max(depth, max(ys) - min(ys))
+        if groups[row_idx]:
+            y -= depth + 2.2
+    bpy.context.view_layer.update()
+    return saved
+
+
+def _restore_goblin_catalog(saved):
+    for o, loc, hide in saved:
+        o.location = loc
+        o.hide_render = hide
+    bpy.context.view_layer.update()
 
 
 def town_overview(out_dir, name):
@@ -110,21 +154,28 @@ def prefab_closeups(out_dir, names):
     for coll in ('Kit', 'Town'):
         _set_visible(coll, False)
     _set_visible('Prefabs', True)
+    prefabs_coll = bpy.data.collections.get('Prefabs')
+    all_prefab_objs = [o for o in prefabs_coll.all_objects if o.type == 'MESH'] if prefabs_coll else []
     for name in names:
         root = bpy.data.objects.get(f'BLD_{name}')
         if root is None:
             print(f'[kit] no prefab {name}')
             continue
-        pts = [o.matrix_world @ Vector(c) for o in root.children_recursive if o.type == 'MESH'
-               for c in o.bound_box]
+        own = {o for o in root.children_recursive if o.type == 'MESH'}
+        for o in all_prefab_objs:
+            o.hide_render = o not in own
+        bpy.context.view_layer.update()
+        pts = [o.matrix_world @ Vector(c) for o in own for c in o.bound_box]
         lo = Vector([min(p[i] for p in pts) for i in range(3)])
         hi = Vector([max(p[i] for p in pts) for i in range(3)])
         centre = (lo + hi) / 2
         reach = (hi - lo).length
-        target = centre - Vector((0, 0, (hi.z - lo.z) * 0.12))
-        loc = target + Vector((-0.5, -1.0, 0.22)).normalized() * reach * 0.95
+        target = centre - Vector((0, 0, (hi.z - lo.z) * 0.08))
+        loc = target + Vector((-0.5, -1.0, 0.24)).normalized() * reach * 1.12
         cam = _camera(f'CAM_{name}', loc, target, lens=35)
         _render(cam, os.path.join(out_dir, f'prefab_{name}.png'), res=(960, 720))
+    for o in all_prefab_objs:
+        o.hide_render = False
     _set_visible('Kit', True)
     _set_visible('Town', True)
     _set_visible('Prefabs', False)
@@ -137,9 +188,16 @@ def previews(out_dir, shots=None, shot_table=None):
     for name, shot in table.items():
         if shots and name not in shots:
             continue
-        framed = shot if isinstance(shot, str) else None
-        for coll in ('Kit', 'Prefabs', 'Town'):
-            _set_visible(coll, coll == framed if framed else coll == 'Town')
+        saved_goblin = None
+        if shot == 'Kit_Goblin':
+            framed = 'Kit'
+            for coll in ('Kit', 'Prefabs', 'Town'):
+                _set_visible(coll, coll == 'Kit')
+            saved_goblin = _stage_goblin_catalog()
+        else:
+            framed = shot if isinstance(shot, str) else None
+            for coll in ('Kit', 'Prefabs', 'Town'):
+                _set_visible(coll, coll == framed if framed else coll == 'Town')
         bpy.context.view_layer.update()
         shot = _collection_shot(framed) if framed else shot
         loc, target = shot['loc'], shot['target']
@@ -151,6 +209,8 @@ def previews(out_dir, shots=None, shot_table=None):
         cam = _camera(f'CAM_{name}', loc, target, shot.get('ortho_scale'),
                       shot.get('lens', 32))
         _render(cam, os.path.join(out_dir, f'{name}.png'))
+        if saved_goblin is not None:
+            _restore_goblin_catalog(saved_goblin)
     _set_visible('Kit', True)
     _set_visible('Town', True)
     _set_visible('Prefabs', False)

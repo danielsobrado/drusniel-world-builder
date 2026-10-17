@@ -1,0 +1,594 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "52914b1559ceda00526ca027b83a89775ced63a4",
+  "selections": [
+    {
+      "world": "procedural",
+      "seed": 20261016,
+      "sampled": 20165,
+      "generator": {
+        "seed": 918273,
+        "version": 1,
+        "heightScale": 24,
+        "seaLevel": -1.5,
+        "waterDomainVersion": 3,
+        "waterDomain": {
+          "version": 3,
+          "cellSizeMeters": 2,
+          "shoreDistanceMeters": 48,
+          "ocean": {
+            "coastalShelfMeters": 20,
+            "shelfDepth": 4,
+            "maximumDepth": 24,
+            "maximumBedSlope": 0.75,
+            "beachHeight": 1.8,
+            "beachWidthMeters": 30
+          },
+          "river": {
+            "minimumDepth": 0.8,
+            "maximumDepth": 8,
+            "widthDepthRatio": 0.18,
+            "bankExponent": 1.8,
+            "minimumGradient": 0.0002,
+            "profileStepMeters": 100,
+            "valleySlope": 0.7,
+            "valleyReachMeters": 1500,
+            "leveeHeight": 1,
+            "leveeWidthMeters": 12
+          },
+          "lake": {
+            "minimumDepth": 1.5,
+            "maximumDepth": 18,
+            "shoreDepthMeters": 300,
+            "bankHeight": 1.5,
+            "bankWidthMeters": 60,
+            "shoreSlope": 0.3,
+            "shoreReachMeters": 3000,
+            "shorelineNoiseMeters": 400,
+            "shorelineNoiseScaleMeters": 2500
+          },
+          "falls": {
+            "enabled": true,
+            "minimumHeight": 4,
+            "maximumHeight": 30,
+            "faceSlope": 1.2,
+            "plungeDecayMeters": 40
+          }
+        }
+      },
+      "tileSize": 2,
+      "poses": [
+        {
+          "id": "coast-01",
+          "name": "Hot desert coast",
+          "world": "procedural",
+          "x": 9453,
+          "z": -4353,
+          "yaw": 0.7853981633974483,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 1,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": 9431,
+            "z": -4375,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.446765607901218,
+              "depth": 0.9467656079012179,
+              "shoreDistance": 6,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-04",
+          "name": "Grassland coast",
+          "world": "procedural",
+          "x": -1313,
+          "z": 6119,
+          "yaw": -1.5707963267948966,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 4,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": -1281,
+            "z": 6119,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.933878694647426,
+              "depth": 1.4338786946474258,
+              "shoreDistance": 6,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-06",
+          "name": "Temperate deciduous forest coast",
+          "world": "procedural",
+          "x": 9767,
+          "z": 9179,
+          "yaw": 0,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 6,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": 9767,
+            "z": 9131,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -3.5675411880250545,
+              "depth": 2.0675411880250545,
+              "shoreDistance": 10.485280990600586,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-09",
+          "name": "Taiga coast",
+          "world": "procedural",
+          "x": -5441,
+          "z": 13581,
+          "yaw": -0.7853981633974483,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 9,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": -5419,
+            "z": 13559,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.407460192995447,
+              "depth": 0.9074601929954471,
+              "shoreDistance": 4,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-10",
+          "name": "Tundra coast",
+          "world": "procedural",
+          "x": -6947,
+          "z": -12037,
+          "yaw": -2.356194490192345,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 10,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": -6925,
+            "z": -12015,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.4865102769827425,
+              "depth": 0.9865102769827425,
+              "shoreDistance": 5.656854152679443,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-12",
+          "name": "Wetland coast",
+          "world": "procedural",
+          "x": 9131,
+          "z": -3875,
+          "yaw": 2.356194490192345,
+          "pitch": -0.32,
+          "mode": "fly",
+          "heightAboveGround": 9,
+          "fov": 68,
+          "expectedBiomeId": 12,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": 9119,
+            "z": -3863,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.2750828616574537,
+              "depth": 0.7750828616574537,
+              "shoreDistance": 5.656854152679443,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+        },
+        {
+          "id": "coast-04-player",
+          "name": "Grassland coast at player height",
+          "world": "procedural",
+          "x": -1313,
+          "z": 6119,
+          "yaw": -1.5707963267948966,
+          "pitch": -0.08,
+          "mode": "player",
+          "heightAboveGround": 1.7,
+          "fov": 68,
+          "expectedBiomeId": 4,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": -1281,
+            "z": 6119,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -2.933878694647426,
+              "depth": 1.4338786946474258,
+              "shoreDistance": 6,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "Player-height companion to seeded grassland coast."
+        },
+        {
+          "id": "open-sea",
+          "name": "Open sea",
+          "world": "procedural",
+          "x": 14509,
+          "z": -11641,
+          "yaw": 2.7876557705379446,
+          "pitch": -0.14,
+          "mode": "fly",
+          "heightAboveGround": 28,
+          "fov": 68,
+          "expectedBiomeId": 0,
+          "expectedWaterKind": 1,
+          "target": {
+            "x": 14509,
+            "z": -11641,
+            "water": {
+              "kind": 1,
+              "bodyId": 1,
+              "coverage": 1,
+              "surfaceHeight": -1.5,
+              "bedHeight": -25.5,
+              "depth": 24,
+              "shoreDistance": 48,
+              "flowX": 0,
+              "flowZ": 0,
+              "fall": 0,
+              "plunge": 0,
+              "flags": 0
+            }
+          },
+          "selection": "First independently sampled ocean point deeper than 10 m."
+        }
+      ]
+    }
+  ],
+  "requestedPoses": [
+    {
+      "id": "coast-01",
+      "name": "Hot desert coast",
+      "world": "procedural",
+      "x": 9453,
+      "z": -4353,
+      "yaw": 0.7853981633974483,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 1,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": 9431,
+        "z": -4375,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.446765607901218,
+          "depth": 0.9467656079012179,
+          "shoreDistance": 6,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-04",
+      "name": "Grassland coast",
+      "world": "procedural",
+      "x": -1313,
+      "z": 6119,
+      "yaw": -1.5707963267948966,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 4,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": -1281,
+        "z": 6119,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.933878694647426,
+          "depth": 1.4338786946474258,
+          "shoreDistance": 6,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-06",
+      "name": "Temperate deciduous forest coast",
+      "world": "procedural",
+      "x": 9767,
+      "z": 9179,
+      "yaw": 0,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 6,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": 9767,
+        "z": 9131,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.5675411880250545,
+          "depth": 2.0675411880250545,
+          "shoreDistance": 10.485280990600586,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-09",
+      "name": "Taiga coast",
+      "world": "procedural",
+      "x": -5441,
+      "z": 13581,
+      "yaw": -0.7853981633974483,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 9,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": -5419,
+        "z": 13559,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.407460192995447,
+          "depth": 0.9074601929954471,
+          "shoreDistance": 4,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-10",
+      "name": "Tundra coast",
+      "world": "procedural",
+      "x": -6947,
+      "z": -12037,
+      "yaw": -2.356194490192345,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 10,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": -6925,
+        "z": -12015,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.4865102769827425,
+          "depth": 0.9865102769827425,
+          "shoreDistance": 5.656854152679443,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-12",
+      "name": "Wetland coast",
+      "world": "procedural",
+      "x": 9131,
+      "z": -3875,
+      "yaw": 2.356194490192345,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 12,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": 9119,
+        "z": -3863,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.2750828616574537,
+          "depth": 0.7750828616574537,
+          "shoreDistance": 5.656854152679443,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+    },
+    {
+      "id": "coast-04-player",
+      "name": "Grassland coast at player height",
+      "world": "procedural",
+      "x": -1313,
+      "z": 6119,
+      "yaw": -1.5707963267948966,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68,
+      "expectedBiomeId": 4,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": -1281,
+        "z": 6119,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.933878694647426,
+          "depth": 1.4338786946474258,
+          "shoreDistance": 6,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "Player-height companion to seeded grassland coast."
+    },
+    {
+      "id": "open-sea",
+      "name": "Open sea",
+      "world": "procedural",
+      "x": 14509,
+      "z": -11641,
+      "yaw": 2.7876557705379446,
+      "pitch": -0.14,
+      "mode": "fly",
+      "heightAboveGround": 28,
+      "fov": 68,
+      "expectedBiomeId": 0,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": 14509,
+        "z": -11641,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -25.5,
+          "depth": 24,
+          "shoreDistance": 48,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First independently sampled ocean point deeper than 10 m."
+    }
+  ]
+}

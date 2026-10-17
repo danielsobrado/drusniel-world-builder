@@ -354,14 +354,65 @@ def meat_rack():
     return b
 
 
+def mud_bank(seed=43):
+    """Sloped muddy bayou bank with mossy clumps, river stones, mooring stakes, and swamp reeds."""
+    b = MeshBuilder()
+    # Low muddy earth bank mound + mossy grass patches
+    b.blob((0.0, 0.0, 0.08), 1.05, 'cobble', subdiv=2 if detailed() else 1,
+           squash=(1.25, 0.88, 0.24), jitter=0.14, seed=seed)
+    b.blob((-0.25, 0.12, 0.20), 0.68, 'grass', subdiv=1,
+           squash=(1.15, 0.85, 0.22), jitter=0.12, seed=seed + 3)
+    # Half-submerged river boulders along the water edge
+    for rx, ry, rr in ((-0.78, -0.35, 0.26), (0.65, -0.28, 0.22), (0.18, -0.48, 0.18)):
+        b.blob((rx, ry, 0.10), rr, 'stone', subdiv=1, squash=(1.2, 1.0, 0.65), jitter=0.12, seed=seed + 7)
+    # Crooked wooden mooring stakes with rope coil
+    b.beam((-0.48, -0.22, -0.05), (-0.54, -0.28, 0.92), (0, 1, 0), (-0.055, 0.055), 0.11, 'bark')
+    b.beam((0.42, -0.18, -0.05), (0.48, -0.12, 0.76), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+    b.box((-0.60, -0.34, 0.56), (-0.44, -0.18, 0.70), 'cloth_cream')
+    b.beam((-0.52, -0.25, 0.62), (0.45, -0.15, 0.52), (0, 0, 1), (-0.025, 0.025), 0.05, 'cloth_cream')
+    # Tall marsh reed & cattail clusters
+    reed_clusters = [(-0.62, 0.24), (-0.18, 0.36), (0.52, 0.22), (0.78, -0.05)]
+    for cx, cy in reed_clusters:
+        for dx, dy, h in ((-0.06, 0.0, 1.05), (0.05, 0.04, 1.24), (0.0, -0.05, 0.92)):
+            b.beam((cx + dx, cy + dy, 0.05), (cx + dx * 1.6, cy + dy * 1.6, h),
+                   (0, 1, 0), (-0.02, 0.02), 0.04, 'foliage')
+        b.box((cx + 0.02, cy + 0.01, 0.96), (cx + 0.08, cy + 0.07, 1.18), 'bark')
+    return b
+
+
+def fishing_net_rack():
+    """Crooked bark A-frame rack with draped swamp fishing net, wooden floats, and fish trap."""
+    b = MeshBuilder()
+    for sx in (-0.92, 0.92):
+        b.beam((sx, -0.36, 0.0), (sx * 0.95, -0.04, 1.72), (1, 0, 0), (-0.045, 0.045), 0.09, 'bark')
+        b.beam((sx, 0.36, 0.0), (sx * 0.95, 0.04, 1.72), (1, 0, 0), (-0.045, 0.045), 0.09, 'bark')
+        b.box((sx * 0.95 - 0.07, -0.09, 1.48), (sx * 0.95 + 0.07, 0.09, 1.62), 'cloth_cream')
+    b.beam((-1.08, 0.0, 1.64), (1.08, 0.0, 1.60), (0, 0, 1), (-0.045, 0.045), 0.09, 'bark')
+    # Draped fishing net sheets & criss-cross cord ribs
+    b.extrude([(-0.82, -0.03, 1.60), (0.82, -0.03, 1.56),
+               (0.74, -0.22, 0.34), (-0.76, -0.18, 0.38)], (0, 0.03, 0), 'thatch')
+    for x in (-0.64, -0.32, 0.0, 0.32, 0.64):
+        b.beam((x, -0.04, 1.58), (x * 0.92, -0.22, 0.36), (1, 0, 0), (-0.015, 0.015), 0.03, 'cloth_cream')
+        b.box((x - 0.04, -0.07, 1.52), (x + 0.04, 0.05, 1.64), 'planks')
+    for z in (0.58, 0.92, 1.26):
+        b.beam((-0.78, -0.14, z), (0.78, -0.14, z - 0.03), (0, 0, 1), (-0.015, 0.015), 0.03, 'cloth_cream')
+    # Conical woven reed fish-trap basket at the foot of the rack
+    trap_m = _at(0.45, 0.32, 0.22) @ Matrix.Rotation(math.radians(78), 4, 'Y')
+    b.lathe([(0.0, 0.0), (0.24, 0.0), (0.18, 0.42), (0.08, 0.78), (0.0, 0.84)],
+            8, 'thatch', m=trap_m)
+    return b
+
+
 def define(kit):
     kit.define('Cauldron_Fire', 'props', cauldron_fire())
     kit.define('Drying_Rack', 'props', drying_rack())
+    kit.define('Fishing_Net_Rack', 'props', fishing_net_rack())
     kit.define('Basket_Cluster', 'props', basket_cluster())
     kit.define('Torch_Pole', 'props', torch_pole())
     kit.define('Goblin_Totem', 'props', goblin_totem())
     kit.define('Spike_Barricade', 'props', spike_barricade())
     kit.define('Goblin_Skiff', 'props', goblin_skiff())
+    kit.define('Mud_Bank', 'nature', mud_bank())
     kit.define('Swamp_Tree', 'nature', swamp_tree())
 
     kit.define('Goblin_Firepit', 'interior', goblin_firepit())
@@ -370,3 +421,4 @@ def define(kit):
     kit.define('Shaman_Altar', 'interior', shaman_altar())
     kit.define('Loot_Pile', 'interior', loot_pile())
     kit.define('Meat_Rack', 'interior', meat_rack())
+

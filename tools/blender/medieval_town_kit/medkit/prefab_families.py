@@ -129,14 +129,23 @@ def mediterranean(base):
 def goblin(base):
     extra = {k: v for k, v in base.extra.items() if k not in ('dormers', 'chimney')}
     if base.tower:
-        return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, ('goblin',) * base.stories,
+        if base.name == 'Tower':
+            stories = ('goblin_frame',) * max(2, base.stories - 1)
+        else:
+            stories = ('goblin',) + ('goblin_frame',) * max(1, base.stories - 2)
+        return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, stories,
                             roof='goblin_hut', plinth='Stilts', chimney=False, **extra)
-    stories = ('goblin',) * base.stories
-    has_awning = base.shopfront or base.name in ('Manor', 'Tavern_Large', 'House_Large', 'Farmhouse')
-    has_banner = extra.pop('banner', False) or base.name in ('Tavern', 'Tavern_Large', 'Chapel', 'Apothecary')
+    n_stories = 1 if base.stories <= 2 else 2
+    stories = ('goblin',) * n_stories
+    gable_front = base.w in (2, 3) and (base.name in GABLE_FRONTED or base.name == 'House_Small')
+    has_awning = (base.shopfront or gable_front
+                  or base.name in ('Manor', 'Tavern_Large', 'House_Large', 'Farmhouse'))
+    has_banner = (extra.pop('banner', False) or gable_front
+                  or base.name in ('Tavern', 'Tavern_Large', 'Chapel', 'Apothecary'))
     return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, stories, roof='goblin',
-                        plinth='Stilts', pent=has_awning, arcade=base.shopfront,
-                        banner=has_banner, chimney=False, **extra)
+                        plinth='Stilts', gable_front=gable_front, pent=has_awning,
+                        arcade=base.shopfront, banner=has_banner, chimney=False, **extra)
+
 
 
 FAMILIES = (tudor, nordic, mediterranean, goblin)

@@ -26,11 +26,12 @@ def _bridges(kit, plan, coll, open_edges):
     for item in plan.BRIDGES:
         cx, cy = item[0], item[1]
         z_lvl = item[2] if len(item) > 2 else 0
+        mod = item[3] if len(item) > 3 else ('Rope_Bridge' if goblin else 'Arch_Bridge')
         group = kit.group(f'Bridge_{cx}_{cy}_{z_lvl}', coll, loc=(cx * GRID, cy * GRID, z_lvl * TERRACE))
         if goblin:
-            kit.place('Rope_Bridge', coll, group, (0, 0, 0))
+            kit.place(mod, coll, group, (0, 0, 0))
         else:
-            kit.place('Arch_Bridge', coll, group, (0, 0, 0))
+            kit.place(mod, coll, group, (0, 0, 0))
             top = 2 * TERRACE
             for i in range(2):
                 kit.place('Railing_Wood', coll, group, (i * GRID, 0, top))

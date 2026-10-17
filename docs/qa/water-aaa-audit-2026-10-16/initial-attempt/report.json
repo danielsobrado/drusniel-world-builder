@@ -1,0 +1,1572 @@
+{
+  "schemaVersion": 1,
+  "kind": "visual-investigation",
+  "startedAt": "2026-10-16T17:04:22.730Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "lighting": {
+    "preset": "highfield",
+    "hour": 12,
+    "weather": "off"
+  },
+  "poses": [
+    {
+      "id": "coast-01",
+      "name": "Hot desert coast",
+      "world": "procedural",
+      "x": 9453,
+      "z": -4353,
+      "yaw": 0.7853981633974483,
+      "pitch": -0.32,
+      "mode": "fly",
+      "heightAboveGround": 9,
+      "fov": 68,
+      "expectedBiomeId": 1,
+      "expectedWaterKind": 1,
+      "target": {
+        "x": 9431,
+        "z": -4375,
+        "water": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.446765607901218,
+          "depth": 0.9467656079012179,
+          "shoreDistance": 6,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius.",
+      "canonical": {
+        "x": 9453,
+        "z": -4353
+      },
+      "origin": {
+        "x": 9344,
+        "z": -4352
+      },
+      "camera": [
+        109,
+        8.95205439813733,
+        -1
+      ],
+      "actualBiomeId": 1,
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1156.0999999940395,
+          "capacity": 49,
+          "focusChunk": "73:34|73:34",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 9344,
+            "z": -4352
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 25,
+              "advanced": 25,
+              "blocked": 707,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 118,
+              "advanced": 216,
+              "blocked": 2,
+              "cancelled": 41
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 1,
+              "advanced": 16,
+              "blocked": 239,
+              "cancelled": 2
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 24,
+              "blocked": 473,
+              "cancelled": 2
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 4,
+              "advanced": 37,
+              "blocked": 330,
+              "cancelled": 17
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 121,
+              "advanced": 528,
+              "blocked": 235,
+              "cancelled": 110
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 169,
+              "advanced": 1102,
+              "blocked": 1294,
+              "cancelled": 1
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "preparationDetail": {
+        "fields": {
+          "window": {
+            "x": 73,
+            "z": 34,
+            "radius": 9
+          },
+          "entries": 289,
+          "pending": 0,
+          "completed": 0,
+          "arrayBytes": 100784576,
+          "missingFields": []
+        },
+        "rock": {
+          "window": {
+            "x": 73,
+            "z": 34,
+            "radius": 7
+          },
+          "cache": 169,
+          "states": []
+        },
+        "tree": {
+          "window": {
+            "x": 73,
+            "z": 34,
+            "radius": 7
+          },
+          "cache": 121,
+          "states": []
+        },
+        "budget": {
+          "fixedMs": 7.558346748303827,
+          "allowanceMs": 0.25,
+          "deferredMs": 0.30000001192092896,
+          "deadline": 118512.44444444444
+        }
+      },
+      "resources": {
+        "label": "tracked resource bytes",
+        "geometryBytes": 193945350,
+        "textureBytes": 9921312,
+        "placementBytes": 100784576,
+        "interactionBytes": 1966080,
+        "total": 306617318,
+        "included": [
+          "scene geometry attributes",
+          "instance matrices/colors",
+          "material texture sources/mips",
+          "prepared placement arrays",
+          "interaction pixels, scroll scratch and float press buffers"
+        ]
+      },
+      "counters": {
+        "terrainMaterialFamilyAtlasEntries": 1,
+        "terrainMaterialFamilyAtlasBytes": 349526,
+        "rendererWebGPUBackend": 1,
+        "rendererWebGLBackend": 0,
+        "terrainAssignSlots": 98,
+        "waterGenerationMs": 2684.100000143051,
+        "waterGeneration": 41.599999994039536,
+        "terrainUploadPages": 98,
+        "textureCommitMs": 7.499999970197678,
+        "textureCommit": 0.10000002384185791,
+        "workerCompleteMs": 19414.499999940395,
+        "workerComplete": 187,
+        "queueWaitMs": 60906.40000009537,
+        "queueWait": 1082.9000000059605,
+        "tilePixelsMs": 6668.699999719858,
+        "tilePixels": 57.69999998807907,
+        "surfaceMaskMs": 6668.699999719858,
+        "surfaceMask": 57.69999998807907,
+        "grassScatterMs": 418.7000001370907,
+        "grassScatter": 4.4000000059604645,
+        "flowerScatterMs": 48.099999994039536,
+        "flowerScatter": 0.4000000059604645,
+        "textureBytesUploaded": 9836064,
+        "objectInstances": 0,
+        "objectDrawMeshes": 0,
+        "objectTriangles": 0,
+        "objectGeometryBytes": 295328,
+        "objectRefreshes": 4,
+        "objectRefreshMs": 2.800000011920929,
+        "meadowBufferAllocationBytes": 23210208,
+        "mainProceduralHeightMisses": 78765,
+        "mainProceduralTileMisses": 131996,
+        "collisionTreeProfiles": 29,
+        "collisionTreeChunks": 9,
+        "collisionTreeColliders": 8,
+        "collisionTreeRefreshQueueDepth": 0,
+        "collisionRockChunks": 9,
+        "collisionRockColliders": 444,
+        "collisionRockRefreshQueueDepth": 0,
+        "collisionRockDecorativeInstances": 359,
+        "collisionRockBlockingInstances": 312,
+        "collisionRockWalkableInstances": 132,
+        "collisionRockWalkablePendingInstances": 0,
+        "collisionRockGeneratedProxyInstances": 132,
+        "collisionObjectChunks": 9,
+        "collisionObjectColliders": 0,
+        "collisionObjectRefreshQueueDepth": 0,
+        "collisionConstructionChunks": 9,
+        "collisionConstructionColliders": 0,
+        "collisionConstructionRefreshQueueDepth": 0,
+        "collisionSettlementChunks": 9,
+        "collisionSettlementColliders": 0,
+        "collisionSettlementRefreshQueueDepth": 0,
+        "collisionNaturalRefreshQueueDepth": 0,
+        "collisionNaturalDeferredRetries": 0,
+        "collisionTreeChunkRefreshes": 0,
+        "collisionRockChunkRefreshes": 0,
+        "collisionObjectChunkRefreshes": 0,
+        "collisionConstructionChunkRefreshes": 0,
+        "collisionSettlementChunkRefreshes": 0,
+        "collisionDesiredChunks": 9,
+        "collisionReadyDesiredChunks": 9,
+        "collisionBuildQueueDepth": 0,
+        "collisionBuildDeferredRetries": 0,
+        "collisionFailedChunks": 0,
+        "collisionLoadedOwnerChunks": 9,
+        "collisionBuilds": 9,
+        "collisionBuildMs": 33.599999874830246,
+        "collisionActivePrimitiveColliders": 320,
+        "collisionActiveMeshInstances": 132,
+        "collisionPrototypeBvhs": 9,
+        "streamingTexturesPrewarmed": 588,
+        "grassSlotsPinned": 0,
+        "treeManifestQueueDepth": 0,
+        "treeManifestOldestJobMs": 0,
+        "placementPreparedEntries": 289,
+        "placementPreparedPending": 0,
+        "placementPreparedArrayBytes": 100784576,
+        "placementOldestRequestMs": 0,
+        "rockManifestBuildMs": 1755.3000026643276,
+        "rockManifestQueueDepth": 0,
+        "rockManifestCacheEntries": 169,
+        "rockManifestOldestJobMs": 0,
+        "constructionModulesResident": 0,
+        "constructionModulesRebuilt": 0,
+        "constructionModulesSkippedByHash": 0,
+        "constructionQueueDepth": 0,
+        "constructionStones": 0,
+        "constructionBuildMs": 0,
+        "constructionMaxBuildStepMs": 0,
+        "constructionRecordsResident": 0,
+        "constructionRecordsCandidates": 0,
+        "constructionModulesNear": 0,
+        "constructionModulesCoarse": 0,
+        "constructionModulesShell": 0,
+        "constructionLodTransitions": 0,
+        "waterChunksWet": 30,
+        "waterChunksDry": 19,
+        "waterChunksRefractive": 20,
+        "stylizedVariantsPendingLoad": 0,
+        "distantBirdInstances": 0,
+        "meadowBatchCommitMs": 20.700000017881393,
+        "treeImpostorSubmittedKnown.cpu": 1,
+        "treeImpostorSubmitted.cpu": 0,
+        "treeImpostorSubmittedKnown.gpu": 1,
+        "treeImpostorSubmitted.gpu": 0,
+        "waterUploadBytes": 4968600,
+        "waterRefractionSlotsPrewarmed": 15,
+        "terrainMaterialBakeEntries": 25,
+        "terrainMaterialBakeResidentBytes": 2252800,
+        "terrainMaterialBakeInFlight": 0,
+        "terrainMaterialBakeActiveLeases": 25,
+        "terrainMaterialBakeHits": 0,
+        "terrainMaterialBakeMisses": 25,
+        "terrainMaterialBakeBuildFailures": 0,
+        "terrainMaterialBakeGpuReadySlots": 25,
+        "terrainMaterialBakeGpuStaleSlots": 0,
+        "terrainMaterialBakeGpuTransitioningSlots": 0,
+        "residentNpcCount": 0,
+        "residentSerpentCount": 0,
+        "objectLodNear": 0,
+        "objectLodCoarse": 0,
+        "objectLodShell": 0,
+        "objectLodTransitions": 0,
+        "objectLodSelectionMs": 31.599999725818634,
+        "rendererDrawCalls": 205,
+        "rendererTriangles": 2491993,
+        "rendererLines": 0,
+        "rendererPoints": 0,
+        "rendererGeometries": 475,
+        "rendererTextures": 1257,
+        "framePreparationBacklogAgeMs": 0,
+        "frameDeferredPressureFloorMs": 0.25,
+        "frameFixedCpuMs": 7.558346748303827,
+        "frameDeferredCpuMs": 0.30000001192092896,
+        "frameDeferredBudgetMs": 0,
+        "meadowBuildTurns": 220,
+        "meadowWorkerRequests": 459,
+        "meadowWorkerPostMs": 10.90000006556511,
+        "meadowWorkerClonedBytes": 753996,
+        "meadowDeadlineDeferredResults": 12,
+        "meadowStemsCompacted": 0,
+        "meadowVisibleMissingTiles": 0,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 0,
+        "meadowInViewCapacityLagTiles": 0,
+        "meadowGrassMs": 193.19999998807907,
+        "stylizedVariantsApplied": 33,
+        "stylizedVariantApplyMs": 123.99999988079071,
+        "distantBirdFlockSpawns": 2,
+        "meadowWorkerRanksPrepared": 1534800,
+        "meadowWorkerCompleteMs": 4356.600000292063,
+        "meadowWorkerExecMs": 343.4000000655651,
+        "rockRebuilds": 2,
+        "treeRebuilds": 118,
+        "forestInstancesDroppedByCapacity": 0,
+        "treeImpostorRecordsRequested.cpu": 0,
+        "treeImpostorRecordsAccepted.cpu": 0,
+        "treeImpostorRecordsDropped.cpu": 0,
+        "treeImpostorRecordsRequested.gpu": 0,
+        "treeImpostorRecordsAccepted.gpu": 0,
+        "treeImpostorRecordsDropped.gpu": 0,
+        "treeNearInstances": 8,
+        "treeProxyInstances": 0,
+        "treeImpostorInstances": 0,
+        "treeFallbackImpostorInstances": 1280,
+        "treeCanopyClusters": 0,
+        "forestUnderstoryInstances": 0,
+        "streamedDrawsPrepared": 114,
+        "streamedDrawPreparationMs": 2730.499999910593,
+        "placementCancelledRequests": 25,
+        "placementStaleResults": 25,
+        "collisionNotReadyStops": 367,
+        "collisionReadinessMisses": 367,
+        "collisionPrimitiveTests": 0,
+        "collisionTotalMs": 100.59999963641167,
+        "bushRebuilds": 2,
+        "bushNearInstances": 67,
+        "bushProxyInstances": 208,
+        "bushPlacementInstances": 275,
+        "bushClusterFieldBuilds": 9769,
+        "bushClusterFieldCacheHits": 43831,
+        "aquaticPlantRebuilds": 6,
+        "shoreLifeRebuilds": 1,
+        "commitQueueWaitMs": 25240.499999970198,
+        "commitQueueWait": 716.0999999940395,
+        "maxQueuedCommitAgeMs": 1156.0999999940395,
+        "meadowWorkerIdleGapMs": 50092.19999963045,
+        "placementPreparedChunks": 289,
+        "placementPreparedLatencyMs": 168,
+        "meadowResultPublishWaitMs": 32227.599999964237,
+        "meadowWorkerResultsPublished": 458,
+        "meadowPublications": 370,
+        "meadowPublicationBytes": 8564080,
+        "groundDetailRebuilds": 3,
+        "tropicalPlantRebuilds": 3,
+        "attributeBytesUploaded": 21594724,
+        "meadowAttributeBytesUploaded": 20526672,
+        "flowerRebuilds": 25,
+        "flowerBufferUploadMs": 1.300000011920929,
+        "flowerLastChunkInstances": 120,
+        "meadowRepackBytes": 15471960,
+        "rockScatterMs": 625.3000010550022,
+        "rockManifestBuildSlices": 1112,
+        "rockRiverbankMs": 2.3000000715255737,
+        "rockCoastMs": 246.20000073313713,
+        "tropicalPlantInstances": 0,
+        "rockSeabedMs": 18.899999886751175,
+        "rockGroundFitMs": 746.6000002324581,
+        "rockManifestBuilds": 169,
+        "rockManifestReadyLatencyMs": 1790.5999999940395,
+        "aquaticPlantInstances": 13,
+        "treeManifestBuildSlices": 523,
+        "treeManifestBuilds": 121,
+        "forestLastChunkCandidatesEvaluated": 776,
+        "forestLastChunkCandidatesRejectedHabitat": 173,
+        "forestLastChunkCandidatesRejectedEdits": 0,
+        "forestLastChunkCandidatesRejectedSpacing": 557,
+        "forestLastChunkTreesAccepted": 46,
+        "forestFieldBuilds": 0,
+        "forestFieldCacheHits": 86717,
+        "forestPatchGridBuilds": 0,
+        "forestPatchGridCacheHits": 0,
+        "forestLastChunkPatchCount": 2,
+        "treeManifestReadyLatencyMs": 31335.30000001192,
+        "collisionRockProfiles": 11,
+        "collisionRockMeshPrototypes": 9,
+        "collisionRockMeshTriangles": 612,
+        "collisionRockGeneratedPrototypes": 9,
+        "collisionObjectProfiles": 166,
+        "collisionObjectChunkBuilds": 18,
+        "collisionConstructionPlans": 0,
+        "collisionConstructionChunkBuilds": 18,
+        "collisionSettlementChunkBuilds": 18,
+        "collisionActiveChunks": 12,
+        "collisionReadyChunks": 9,
+        "collisionActiveColliders": 452,
+        "collisionActiveBins": 269,
+        "collisionLargeColliders": 0,
+        "collisionTreeChunkBuilds": 9,
+        "collisionRockChunkBuilds": 9,
+        "collisionCandidates": 0,
+        "collisionQueryChunks": 1,
+        "collisionBroadphaseMs": 19.399999797344208,
+        "collisionBroadphaseQueries": 2007,
+        "collisionCandidatesTotal": 0,
+        "collisionNarrowPhaseMs": 1.2000000178813934,
+        "collisionSupportMs": 7.000000059604645,
+        "collisionContacts": 0,
+        "collisionContactsTotal": 0,
+        "collisionSolverIterations": 0,
+        "collisionSubsteps": 0,
+        "shoreLifeInstances": 198,
+        "groundDetailInstances": 748,
+        "treeRootsFitted": 1288,
+        "forestSpecies.broadleaf_round": 2,
+        "forestSpecies.broadleaf_tall": 44,
+        "rockNearInstances": 2031,
+        "rockProxyInstances": 0,
+        "rockPlacementInstances": 2586,
+        "contactShadeSlotsPainted": 2424,
+        "forestFloorTextureUploads": 49,
+        "forestSpecies.conifer_wide": 1,
+        "terrainMaterialBakeWorkerWallMs": 124.30000004172325,
+        "terrainMaterialBakeGpuUploads": 25,
+        "terrainMaterialBakeGpuUploadBytes": 2252800,
+        "waterProbeFaces": 72,
+        "waterReflectionCpuMs": 1739.699999898672,
+        "waterPlanarCaptures": 11
+      },
+      "sky": {
+        "night": false,
+        "lowColor": "#96d6ff",
+        "highColor": "#4174dd",
+        "sunColor": "#faf9e2",
+        "sunGlowColor": "#f8d782",
+        "cloudCore": "#b3c6d8",
+        "cloudEdge": "#f2fbff",
+        "cloudRim": "#fff3dc",
+        "fogColor": "#a7ccd7",
+        "groundLightColor": "#6d794f",
+        "directionalColor": "#f9e7be",
+        "sunElevation": 42,
+        "sunAzimuth": 235,
+        "sunEmission": 1.4,
+        "sunGlowIntensity": 0.3085803940393249,
+        "cloudOpacity": 0.6640685775101928,
+        "cloudDensity": 0.6025868084645783,
+        "ambientIntensity": 2.0444176470588236,
+        "ambientSaturation": 0.43041672794117647,
+        "directionalIntensity": 3.0869079712334813,
+        "fogDensityScale": 1.8660885509265766,
+        "cloudShadowStrength": 0.45,
+        "shadowRadius": 2.4,
+        "cloudSharpness": 0.21409659026936007,
+        "cloudDetail": 0.8227007075106765,
+        "mist": 0.14014710848156187,
+        "snowBrightness": 0.7944966176470587,
+        "snowShade": 0.3046722368070714,
+        "snowBlue": 0.48218896065662864,
+        "nightness": 0,
+        "exposure": 1
+      },
+      "wind": null,
+      "weather": {
+        "weatherMode": "off",
+        "weatherIntensity": 0,
+        "weatherWindX": -0.42,
+        "weatherWindZ": 0.18
+      },
+      "renderPath": "cinematic-god-rays",
+      "finishApplications": 1,
+      "backend": "webgpu",
+      "clock": {
+        "hour": 12,
+        "paused": true
+      },
+      "placementCounts": {
+        "tree": 1288,
+        "rock": 2586,
+        "bush": 275
+      },
+      "targetWater": {
+        "kind": 1,
+        "bodyId": 1,
+        "coverage": 1,
+        "surfaceHeight": -1.662433219004486,
+        "bedHeight": -2.446765607901218,
+        "depth": 0.784332388896732,
+        "shoreDistance": 6,
+        "flowX": 0,
+        "flowZ": 0,
+        "fall": 0,
+        "plunge": 0,
+        "flags": 0
+      },
+      "cameraWater": {
+        "kind": 0,
+        "bodyId": 0,
+        "coverage": 0,
+        "surfaceHeight": -0.04794560186267022,
+        "bedHeight": -0.04794560186267022,
+        "depth": 0,
+        "shoreDistance": 0,
+        "flowX": 0,
+        "flowZ": 0,
+        "fall": 0,
+        "plunge": 0,
+        "flags": 0
+      },
+      "waterConfig": {
+        "enabled": true,
+        "tileId": 0,
+        "heightOffset": 0.12,
+        "scale": 0.23,
+        "cellSmoothness": 0.46,
+        "edgeThreshold": 0.09,
+        "edgeSoftness": 0.1,
+        "flowX": 0.07,
+        "flowZ": -0.23,
+        "cellSpeed": 0.55,
+        "noiseScale": 0.87,
+        "noiseFlowSpeed": 0.11,
+        "distortAmount": 0.26,
+        "deepColor": "#27a3d8",
+        "midColor": "#59c0e8",
+        "midPos": 0.31,
+        "highlightColor": "#ffffff",
+        "opacity": 1,
+        "deepOpacity": 0.37,
+        "fadeDistance": 275,
+        "fadeStrength": 1.3,
+        "qualityTier": "high",
+        "currentAnimationSpeed": 0.22,
+        "currentInfluence": 0.85,
+        "optics": {
+          "shallowColor": "#246d70",
+          "deepColor": "#164e52",
+          "underwaterColor": "#10303d",
+          "absorptionDensity": 0.42,
+          "minimumOpacity": 0.08,
+          "maximumOpacity": 0.94,
+          "shallowDepth": 0.2,
+          "deepDepth": 6,
+          "maximumOpticalDistance": 14,
+          "minimumViewCosine": 0.22,
+          "surfaceTransitionDepth": 0.75,
+          "shorelineFadeDepth": 0.35,
+          "surfaceDetailStrength": 0,
+          "underwaterTintStrength": 0.35
+        },
+        "refraction": {
+          "enabled": true,
+          "strength": 0.012,
+          "coarseScale": 0.045,
+          "fineScale": 0.16,
+          "coarseSpeed": 0.05,
+          "fineSpeed": 0.13,
+          "depthFadeStart": 0.08,
+          "depthFadeEnd": 1.8,
+          "depthBiasMeters": 0.15,
+          "mipLevel": 0,
+          "sceneColorStrength": 0.94,
+          "absorptionCoefficients": [
+            0.62,
+            0.24,
+            0.17
+          ]
+        },
+        "foam": {
+          "enabled": true,
+          "color": "#d6e7db",
+          "intensity": 0.6,
+          "shoreWidth": 1.6,
+          "noiseStrength": 0.42,
+          "flowStrength": 0.12,
+          "flowBandScale": 0.58,
+          "flowBandSpeed": 0.42,
+          "flowBandContrast": 2.4,
+          "intersectionDepth": 0.28,
+          "intersectionSoftness": 0.38,
+          "intersectionStrength": 0.82
+        },
+        "waterfall": {
+          "enabled": true,
+          "fallSpeed": 6,
+          "strandWidthMeters": 10,
+          "strandLengthMeters": 4,
+          "faceCoverage": 0.75,
+          "faceAeration": 0.35,
+          "plungeCoverage": 0.7,
+          "plungeSpeed": 0.8,
+          "plungeScaleMeters": 3,
+          "mistEnabled": true,
+          "mistDrawDistance": 650,
+          "mistMaxActive": 6,
+          "mistIntensity": 1
+        },
+        "sea": {
+          "enabled": true,
+          "optics": {
+            "sunny": {
+              "lagoon": "#3caca8",
+              "shallow": "#25858e",
+              "deep": "#123d50"
+            },
+            "storm": {
+              "lagoon": "#2f8a80",
+              "shallow": "#176662",
+              "deep": "#032d48"
+            },
+            "absorptionCoefficients": [
+              0.896,
+              0.182,
+              0.14
+            ],
+            "absorptionDensity": 0.22,
+            "lagoonStart": 0.18,
+            "lagoonEnd": 2.5,
+            "deepStart": 0.71,
+            "deepEnd": 8.6,
+            "maximumOpticalDistance": 43,
+            "fresnelStrength": 0.85
+          },
+          "amplitude": 0.9,
+          "stormScale": 1.65,
+          "choppiness": 4,
+          "shallowDepth": 1.5,
+          "depthRatio": 0.42,
+          "slopeShading": 0.55,
+          "crestLift": 0.12,
+          "whitecapThreshold": 0.8,
+          "stormWhitecapThreshold": 0.45,
+          "crestTransmission": 0.5,
+          "crestColor": "#8fd0a8",
+          "surf": {
+            "enabled": true,
+            "fadeStart": 2.5,
+            "fadeEnd": 7,
+            "depthPhaseScale": 1.4,
+            "setDepth": 0.5,
+            "setGroup": 0.29,
+            "alongFrequency": 0.031,
+            "phaseWarp": 0.32,
+            "breakDepthStart": 0.25,
+            "breakDepthFull": 0.7,
+            "breakDepthFade": 2.4,
+            "breakDepthEnd": 4.5,
+            "strength": 0.8,
+            "trail": 4.5,
+            "laceScale": 0.19
+          },
+          "detail": {
+            "enabled": true,
+            "textureWorldScale": 8,
+            "mediumScale": 2.1,
+            "fineScale": 5.7,
+            "mediumDistance": 120,
+            "fineDistance": 28,
+            "mediumStrength": 0.14,
+            "fineStrength": 0.055,
+            "orbitalAdvection": 0.8,
+            "advectionRatio": 0.9
+          }
+        },
+        "coast": {
+          "enabled": true,
+          "sand": {
+            "enabled": true,
+            "dryDark": "#b39a72",
+            "dryLight": "#d6be96",
+            "seabedColor": "#efe6cf",
+            "seabedColorWeight": 0.55,
+            "reefColor": "#426356",
+            "reefRockColor": "#6d7b68",
+            "reefStrength": 0.55,
+            "causticStrength": 0.65
+          },
+          "period": 7.5,
+          "runupHeight": 1.1,
+          "breakDepth": 0.5,
+          "frontBand": 0.08,
+          "foamCore": 0.02,
+          "foamWidth": 0.12,
+          "breakupStrength": 0.3,
+          "washDecay": 4,
+          "dampHeight": 0.9,
+          "wetDarkening": 0.5,
+          "wetRoughness": 0.28,
+          "filmRoughness": 0.08,
+          "filmTint": "#8ccad0",
+          "filmTintStrength": 0.18,
+          "foamColor": "#edf8fb",
+          "foamStrength": 0.85
+        },
+        "riverSurface": {
+          "enabled": true,
+          "normalStrength": 0.5,
+          "cycleSeconds": 3,
+          "stillDrift": 0.07,
+          "currentDrift": 1.2,
+          "fullCurrentSpeed": 3,
+          "foamStrength": 1,
+          "bankFoamWidth": 1.15
+        },
+        "rainRipples": {
+          "enabled": true,
+          "strength": 0.45
+        },
+        "caustics": {
+          "intensity": 0,
+          "scale": 0.45,
+          "speed": 0.34,
+          "contrast": 5,
+          "depthFadeStart": 0.35,
+          "depthFadeEnd": 4.5
+        },
+        "projectedCaustics": {
+          "enabled": true,
+          "color": "#b9f4e5",
+          "intensity": 0,
+          "scale": 0.42,
+          "speed": 0.55,
+          "contrast": 2.6,
+          "depthFadeStart": 0.15,
+          "depthFadeEnd": 6,
+          "maxDistance": 45
+        }
+      },
+      "preparation": {
+        "groundPreparation": {
+          "waitedMs": 25603.09999999404,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 1156.0999999940395,
+            "capacity": 49,
+            "focusChunk": "73:34|73:34",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": 9344,
+              "z": -4352
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 707,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 118,
+                "advanced": 216,
+                "blocked": 2,
+                "cancelled": 41
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 16,
+                "blocked": 239,
+                "cancelled": 2
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 24,
+                "blocked": 473,
+                "cancelled": 2
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 37,
+                "blocked": 330,
+                "cancelled": 17
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 528,
+                "blocked": 235,
+                "cancelled": 110
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 1102,
+                "blocked": 1294,
+                "cancelled": 1
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        },
+        "readiness": {
+          "waitedMs": 16503.59999999404,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 1156.0999999940395,
+            "capacity": 49,
+            "focusChunk": "73:34|73:34",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": 9344,
+              "z": -4352
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 707,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 118,
+                "advanced": 216,
+                "blocked": 2,
+                "cancelled": 41
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 16,
+                "blocked": 239,
+                "cancelled": 2
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 24,
+                "blocked": 473,
+                "cancelled": 2
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 37,
+                "blocked": 330,
+                "cancelled": 17
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 121,
+                "advanced": 528,
+                "blocked": 235,
+                "cancelled": 110
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 169,
+                "advanced": 1102,
+                "blocked": 1294,
+                "cancelled": 1
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "lighting": {
+        "stableFrames": 60,
+        "maximumChange": 0,
+        "components": [
+          42,
+          235,
+          1.4,
+          0.3085803940393249,
+          0.6640685775101928,
+          0.6025868084645783,
+          2.0444176470588236,
+          0.43041672794117647,
+          3.0869079712334813,
+          1.8660885509265766,
+          0.45,
+          2.4,
+          0.21409659026936007,
+          0.8227007075106765,
+          0.14014710848156187,
+          0.7944966176470587,
+          0.3046722368070714,
+          0.48218896065662864,
+          0,
+          1,
+          0.3049873140591091,
+          0.6724431569510133,
+          1,
+          0.05286064701616471,
+          0.174647403645279,
+          0.7230551289161951,
+          0.9559733532482866,
+          0.9473065367320066,
+          0.76052450467022,
+          0.9386857284565036,
+          0.6795424696265424,
+          0.22322795730611386,
+          0.450785782828426,
+          0.5647115056965487,
+          0.6866853124288864,
+          0.8879231178794776,
+          0.9646862478936612,
+          1,
+          1,
+          0.8962693533719567,
+          0.7156935005005721,
+          0.38642943377667954,
+          0.6038273388475408,
+          0.6795424696265424,
+          0.15292615198613213,
+          0.1912016827303171,
+          0.07818742179702069,
+          0.9473065367320066,
+          0.7991027380100881,
+          0.514917665367466,
+          3.0869079712334813,
+          0.9473065367320066,
+          0.7991027380100881,
+          0.514917665367466,
+          2.0444176470588236,
+          0.13003344463917815,
+          0.1824525019340499,
+          0.41849636062282125,
+          0.0027991328263898647,
+          0,
+          0.38642943377667954,
+          0.6038273388475408,
+          0.6795424696265424
+        ],
+        "wallMs": 539.1999999880791
+      }
+    }
+  ],
+  "failures": [
+    {
+      "pose": {
+        "id": "coast-04",
+        "name": "Grassland coast",
+        "world": "procedural",
+        "x": -1313,
+        "z": 6119,
+        "yaw": -1.5707963267948966,
+        "pitch": -0.32,
+        "mode": "fly",
+        "heightAboveGround": 9,
+        "fov": 68,
+        "expectedBiomeId": 4,
+        "expectedWaterKind": 1,
+        "target": {
+          "x": -1281,
+          "z": 6119,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.5,
+            "bedHeight": -2.933878694647426,
+            "depth": 1.4338786946474258,
+            "shoreDistance": 6,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          }
+        },
+        "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+      },
+      "error": "page.evaluate: Error: Camera cut collision preparation timed out.\n    at CameraCutCoordinator.cut (http://localhost:5189/src/editor/world/CameraCutCoordinator.js:50:61)\n    at async WorldVisualQa.cut (http://localhost:5189/src/editor/performance/qa/WorldVisualQa.js:35:18)\n    at async <anonymous>:337:30\n    at prepareVisualPose (F:\\Development\\drusniel-world-builder\\scripts\\lib\\world-visual-prepare-pose.mjs:9:16)\n    at F:\\Development\\drusniel-world-builder\\docs\\qa\\water-aaa-audit-2026-10-16\\capture.mjs:56:35",
+      "readiness": {
+        "ready": false,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 14340.200000017881,
+          "capacity": 49,
+          "focusChunk": "-11:-48|-11:-48",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -1280,
+            "z": 6016
+          }
+        },
+        "scenery": {
+          "ready": false,
+          "queueDepth": 150,
+          "fields": 22,
+          "meadow": 197,
+          "draws": 0,
+          "variants": 0,
+          "staged": 6,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 6,
+              "oldestAgeMs": 30232.80000001192,
+              "completed": 44,
+              "advanced": 44,
+              "blocked": 1179,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 119,
+              "advanced": 218,
+              "blocked": 2,
+              "cancelled": 41
+            },
+            "rock": {
+              "depth": 1,
+              "oldestAgeMs": 7066.9000000059605,
+              "completed": 1,
+              "advanced": 16,
+              "blocked": 268,
+              "cancelled": 3
+            },
+            "bush": {
+              "depth": 1,
+              "oldestAgeMs": 5066.800000011921,
+              "completed": 2,
+              "advanced": 24,
+              "blocked": 525,
+              "cancelled": 3
+            },
+            "detail": {
+              "depth": 4,
+              "oldestAgeMs": 5066.800000011921,
+              "completed": 4,
+              "advanced": 39,
+              "blocked": 488,
+              "cancelled": 17
+            },
+            "treeManifest": {
+              "depth": 121,
+              "oldestAgeMs": 119885.90000000596,
+              "completed": 121,
+              "advanced": 528,
+              "blocked": 252,
+              "cancelled": 110
+            },
+            "rockManifest": {
+              "depth": 17,
+              "oldestAgeMs": 117869.09999999404,
+              "completed": 170,
+              "advanced": 1115,
+              "blocked": 1337,
+              "cancelled": 1
+            }
+          },
+          "errors": [],
+          "blockedJobs": [
+            {
+              "key": "bush-lod:-11:-48:e0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0:-14:-51:culled:ready:culled:8:1|-13:-51:culled:ready:culled:8:1|-12:-51:culled:ready:culled:8:1|-11:-51:culled:ready:culled:8:1|-10:-51:culled:ready:culled:8:1|-9:-51:culled:ready:culled:8:1|-8:-51:culled:ready:culled:8:1|-14:-50:culled:ready:culled:8:1|-13:-50:proxy:ready:proxy:8:1|-12:-50:proxy:ready:proxy:8:1|-11:-50:proxy:ready:proxy:8:1|-10:-50:proxy:ready:proxy:8:1|-9:-50:proxy:ready:proxy:8:1|-8:-50:culled:ready:culled:8:1|-14:-49:culled:ready:culled:8:1|-13:-49:proxy:ready:proxy:8:1|-12:-49:near:ready:near:8:1|-11:-49:near:ready:near:8:1|-10:-49:near:ready:near:8:1|-9:-49:proxy:ready:proxy:8:1|-8:-49:culled:ready:culled:8:1|-14:-48:culled:ready:culled:8:1|-13:-48:proxy:ready:proxy:8:1|-12:-48:near:ready:near:8:1|-11:-48:near:ready:near:8:1|-10:-48:near:ready:near:8:1|-9:-48:proxy:ready:proxy:8:1|-8:-48:culled:ready:culled:8:1|-14:-47:culled:ready:culled:8:1|-13:-47:proxy:ready:proxy:8:1|-12:-47:near:ready:near:8:1|-11:-47:near:ready:near:8:1|-10:-47:near:ready:near:8:1|-9:-47:proxy:ready:proxy:8:1|-8:-47:culled:ready:culled:8:1|-14:-46:culled:ready:culled:8:1|-13:-46:proxy:ready:proxy:8:1|-12:-46:proxy:ready:proxy:8:1|-11:-46:proxy:ready:proxy:8:1|-10:-46:proxy:ready:proxy:8:1|-9:-46:proxy:ready:proxy:8:1|-8:-46:culled:ready:culled:8:1|-14:-45:culled:ready:culled:8:1|-13:-45:culled:ready:culled:8:1|-12:-45:culled:ready:culled:8:1|-11:-45:culled:ready:culled:8:1|-10:-45:culled:ready:culled:8:1|-9:-45:culled:ready:culled:8:1|-8:-45:culled:ready:culled:8:1:0:p5:r1",
+              "focus": {
+                "chunkX": -11,
+                "chunkZ": -48
+              },
+              "revision": 0,
+              "lastProgressAt": 127490.80000001192,
+              "reason": "rock-manifest",
+              "dependencyType": "rock-manifest",
+              "chunkKeys": [
+                "-13:-50"
+              ]
+            }
+          ],
+          "materials": 0
+        },
+        "collision": false,
+        "construction": true
+      }
+    },
+    {
+      "pose": {
+        "id": "coast-06",
+        "name": "Temperate deciduous forest coast",
+        "world": "procedural",
+        "x": 9767,
+        "z": 9179,
+        "yaw": 0,
+        "pitch": -0.32,
+        "mode": "fly",
+        "heightAboveGround": 9,
+        "fov": 68,
+        "expectedBiomeId": 6,
+        "expectedWaterKind": 1,
+        "target": {
+          "x": 9767,
+          "z": 9131,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.5,
+            "bedHeight": -3.5675411880250545,
+            "depth": 2.0675411880250545,
+            "shoreDistance": 10.485280990600586,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          }
+        },
+        "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+      },
+      "error": "page.evaluate: Error: Camera cut collision preparation timed out.\n    at CameraCutCoordinator.cut (http://localhost:5189/src/editor/world/CameraCutCoordinator.js:50:61)\n    at async WorldVisualQa.cut (http://localhost:5189/src/editor/performance/qa/WorldVisualQa.js:35:18)\n    at async <anonymous>:337:30\n    at prepareVisualPose (F:\\Development\\drusniel-world-builder\\scripts\\lib\\world-visual-prepare-pose.mjs:9:16)\n    at F:\\Development\\drusniel-world-builder\\docs\\qa\\water-aaa-audit-2026-10-16\\capture.mjs:56:35",
+      "readiness": {
+        "ready": false,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 14340.200000017881,
+          "capacity": 49,
+          "focusChunk": "76:-72|76:-72",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 9728,
+            "z": 9088
+          }
+        },
+        "scenery": {
+          "ready": false,
+          "queueDepth": 151,
+          "fields": 19,
+          "meadow": 186,
+          "draws": 0,
+          "variants": 0,
+          "staged": 6,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 7,
+              "oldestAgeMs": 30244,
+              "completed": 64,
+              "advanced": 64,
+              "blocked": 1734,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 120,
+              "advanced": 219,
+              "blocked": 2,
+              "cancelled": 41
+            },
+            "rock": {
+              "depth": 1,
+              "oldestAgeMs": 7077.300000011921,
+              "completed": 1,
+              "advanced": 16,
+              "blocked": 300,
+              "cancelled": 4
+            },
+            "bush": {
+              "depth": 1,
+              "oldestAgeMs": 5052.800000011921,
+              "completed": 2,
+              "advanced": 24,
+              "blocked": 585,
+              "cancelled": 4
+            },
+            "detail": {
+              "depth": 4,
+              "oldestAgeMs": 7076.800000011921,
+              "completed": 4,
+              "advanced": 42,
+              "blocked": 669,
+              "cancelled": 17
+            },
+            "treeManifest": {
+              "depth": 121,
+              "oldestAgeMs": 120028.5,
+              "completed": 121,
+              "advanced": 528,
+              "blocked": 270,
+              "cancelled": 231
+            },
+            "rockManifest": {
+              "depth": 17,
+              "oldestAgeMs": 116996.90000000596,
+              "completed": 171,
+              "advanced": 1129,
+              "blocked": 1379,
+              "cancelled": 18
+            }
+          },
+          "errors": [],
+          "blockedJobs": [
+            {
+              "key": "bush-lod:76:-72:e0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0:73:-75:culled:ready:culled:8:1|74:-75:culled:ready:culled:8:1|75:-75:culled:ready:culled:8:1|76:-75:culled:ready:culled:8:1|77:-75:culled:ready:culled:8:1|78:-75:culled:ready:culled:8:1|79:-75:culled:ready:culled:8:1|73:-74:culled:ready:culled:8:1|74:-74:proxy:ready:proxy:8:1|75:-74:proxy:ready:proxy:8:1|76:-74:proxy:ready:proxy:8:1|77:-74:proxy:ready:proxy:8:1|78:-74:proxy:ready:proxy:8:1|79:-74:culled:ready:culled:8:1|73:-73:culled:ready:culled:8:1|74:-73:proxy:ready:proxy:8:1|75:-73:near:ready:near:8:1|76:-73:near:ready:near:8:1|77:-73:near:ready:near:8:1|78:-73:proxy:ready:proxy:8:1|79:-73:culled:ready:culled:8:1|73:-72:culled:ready:culled:8:1|74:-72:proxy:ready:proxy:8:1|75:-72:near:ready:near:8:1|76:-72:near:ready:near:8:1|77:-72:near:ready:near:8:1|78:-72:proxy:ready:proxy:8:1|79:-72:culled:ready:culled:8:1|73:-71:culled:ready:culled:8:1|74:-71:proxy:ready:proxy:8:1|75:-71:near:ready:near:8:1|76:-71:near:ready:near:8:1|77:-71:near:ready:near:8:1|78:-71:proxy:ready:proxy:8:1|79:-71:culled:ready:culled:8:1|73:-70:culled:ready:culled:8:1|74:-70:proxy:ready:proxy:8:1|75:-70:proxy:ready:proxy:8:1|76:-70:proxy:ready:proxy:8:1|77:-70:proxy:ready:proxy:8:1|78:-70:proxy:ready:proxy:8:1|79:-70:culled:ready:culled:8:1|73:-69:culled:ready:culled:8:1|74:-69:culled:ready:culled:8:1|75:-69:culled:ready:culled:8:1|76:-69:culled:ready:culled:8:1|77:-69:culled:ready:culled:8:1|78:-69:culled:ready:culled:8:1|79:-69:culled:ready:culled:8:1:0:p5:r1",
+              "focus": {
+                "chunkX": 76,
+                "chunkZ": -72
+              },
+              "revision": 0,
+              "lastProgressAt": 250458.60000002384,
+              "reason": "rock-manifest",
+              "dependencyType": "rock-manifest",
+              "chunkKeys": [
+                "74:-74"
+              ]
+            }
+          ],
+          "materials": 0
+        },
+        "collision": false,
+        "construction": true
+      }
+    },
+    {
+      "pose": {
+        "id": "coast-09",
+        "name": "Taiga coast",
+        "world": "procedural",
+        "x": -5441,
+        "z": 13581,
+        "yaw": -0.7853981633974483,
+        "pitch": -0.32,
+        "mode": "fly",
+        "heightAboveGround": 9,
+        "fov": 68,
+        "expectedBiomeId": 9,
+        "expectedWaterKind": 1,
+        "target": {
+          "x": -5419,
+          "z": 13559,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.5,
+            "bedHeight": -2.407460192995447,
+            "depth": 0.9074601929954471,
+            "shoreDistance": 4,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          }
+        },
+        "selection": "First qualifying land point for this biome in seeded random candidates; first ocean neighbour in increasing search radius."
+      },
+      "error": "page.evaluate: Error: Camera cut collision preparation timed out.\n    at CameraCutCoordinator.cut (http://localhost:5189/src/editor/world/CameraCutCoordinator.js:50:61)\n    at async WorldVisualQa.cut (http://localhost:5189/src/editor/performance/qa/WorldVisualQa.js:35:18)\n    at async <anonymous>:337:30\n    at prepareVisualPose (F:\\Development\\drusniel-world-builder\\scripts\\lib\\world-visual-prepare-pose.mjs:9:16)\n    at F:\\Development\\drusniel-world-builder\\docs\\qa\\water-aaa-audit-2026-10-16\\capture.mjs:56:35",
+      "readiness": {
+        "ready": false,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 14340.200000017881,
+          "capacity": 49,
+          "focusChunk": "-43:-107|-43:-107",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -5376,
+            "z": 13568
+          }
+        },
+        "scenery": {
+          "ready": false,
+          "queueDepth": 144,
+          "fields": 2,
+          "meadow": 180,
+          "draws": 0,
+          "variants": 0,
+          "staged": 5,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 1,
+              "oldestAgeMs": 48426.30000001192,
+              "completed": 89,
+              "advanced": 89,
+              "blocked": 2042,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 121,
+              "advanced": 221,
+              "blocked": 2,
+              "cancelled": 41
+            },
+            "rock": {
+              "depth": 1,
+              "oldestAgeMs": 7078,
+              "completed": 1,
+              "advanced": 16,
+              "blocked": 334,
+              "cancelled": 5
+            },
+            "bush": {
+              "depth": 1,
+              "oldestAgeMs": 5060.4000000059605,
+              "completed": 2,
+              "advanced": 24,
+              "blocked": 645,
+              "cancelled": 5
+            },
+            "detail": {
+              "depth": 3,
+              "oldestAgeMs": 6077.199999988079,
+              "completed": 5,
+              "advanced": 48,
+              "blocked": 811,
+              "cancelled": 17
+            },
+            "treeManifest": {
+              "depth": 121,
+              "oldestAgeMs": 120079.09999999404,
+              "completed": 121,
+              "advanced": 528,
+              "blocked": 290,
+              "cancelled": 352
+            },
+            "rockManifest": {
+              "depth": 17,
+              "oldestAgeMs": 118046.59999999404,
+              "completed": 172,
+              "advanced": 1148,
+              "blocked": 1425,
+              "cancelled": 35
+            }
+          },
+          "errors": [],
+          "blockedJobs": [
+            {
+              "key": "bush-lod:-43:-107:e0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0|e0:0:0:0:0:0:0:0:0:0:-46:-110:culled:ready:culled:8:1|-45:-110:culled:ready:culled:8:1|-44:-110:culled:ready:culled:8:1|-43:-110:culled:ready:culled:8:1|-42:-110:culled:ready:culled:8:1|-41:-110:culled:ready:culled:8:1|-40:-110:culled:ready:culled:8:1|-46:-109:culled:ready:culled:8:1|-45:-109:proxy:ready:proxy:8:1|-44:-109:proxy:ready:proxy:8:1|-43:-109:proxy:ready:proxy:8:1|-42:-109:proxy:ready:proxy:8:1|-41:-109:proxy:ready:proxy:8:1|-40:-109:culled:ready:culled:8:1|-46:-108:culled:ready:culled:8:1|-45:-108:proxy:ready:proxy:8:1|-44:-108:near:ready:near:8:1|-43:-108:near:ready:near:8:1|-42:-108:near:ready:near:8:1|-41:-108:proxy:ready:proxy:8:1|-40:-108:culled:ready:culled:8:1|-46:-107:culled:ready:culled:8:1|-45:-107:proxy:ready:proxy:8:1|-44:-107:near:ready:near:8:1|-43:-107:near:ready:near:8:1|-42:-107:near:ready:near:8:1|-41:-107:proxy:ready:proxy:8:1|-40:-107:culled:ready:culled:8:1|-46:-106:culled:ready:culled:8:1|-45:-106:proxy:ready:proxy:8:1|-44:-106:near:ready:near:8:1|-43:-106:near:ready:near:8:1|-42:-106:near:ready:near:8:1|-41:-106:proxy:ready:proxy:8:1|-40:-106:culled:ready:culled:8:1|-46:-105:culled:ready:culled:8:1|-45:-105:proxy:ready:proxy:8:1|-44:-105:proxy:ready:proxy:8:1|-43:-105:proxy:ready:proxy:8:1|-42:-105:proxy:ready:proxy:8:1|-41:-105:proxy:ready:proxy:8:1|-40:-105:culled:ready:culled:8:1|-46:-104:culled:ready:culled:8:1|-45:-104:culled:ready:culled:8:1|-44:-104:culled:ready:culled:8:1|-43:-104:culled:ready:culled:8:1|-42:-104:culled:ready:culled:8:1|-41:-104:culled:ready:culled:8:1|-40:-104:culled:ready:culled:8:1:0:p5:r1",
+              "focus": {
+                "chunkX": -43,
+                "chunkZ": -107
+              },
+              "revision": 0,
+              "lastProgressAt": 374560,
+              "reason": "rock-manifest",
+              "dependencyType": "rock-manifest",
+              "chunkKeys": [
+                "-45:-109"
+              ]
+            }
+          ],
+          "materials": 0
+        },
+        "collision": false,
+        "construction": true
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "coast-01.png",
+      "sha256": "d71c32355bd245cb35203a0e9b0e25131af54fbc6b6ce5560ea48c71efdad7fa"
+    },
+    {
+      "path": "coast-01-hud.png",
+      "sha256": "54a8390d9a4fee2817104d38ffd858a4b70156f4b5ac394878d49bf63c5709c6"
+    }
+  ],
+  "sourceSha": "52914b1559ceda00526ca027b83a89775ced63a4",
+  "sourceSnapshotSha256": "cdda35cb1e611b17b247584cd6f26d7feb45ac309dd311978db41ac4d0447c10",
+  "captureScriptSha256": "02e0986c4f2a8f1d6949e22eb27c31b1c88a74de6ce0d90d726f80c797b016af",
+  "selectorSha256": "b4f9194d88530c569defebb7c8186ea5e9d292d237131b10cd15b736063cc2d6",
+  "mapSha256": "dcd1ae3575ccf5cdde064580d0f033755d575e6054d7a9d1d5e64403570bd388",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "failure": "page.evaluate: Target page, context or browser has been closed\n    at F:\\Development\\drusniel-world-builder\\docs\\qa\\water-aaa-audit-2026-10-16\\capture.mjs:80:80",
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-10-16T17:13:48.981Z",
+  "captureValid": false
+}

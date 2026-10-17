@@ -56,17 +56,23 @@ class BuildingAssembler:
             level = jetty_level(spec, k)
             self._walls(spec, k, kind, story, rng, level)
             self._corners(spec, kind, story, level)
+            if kind == 'goblin_frame':
+                continue
             self.accents.story(spec, self.plan, k, story, top)
             self._floor(spec, k, story)
-            if spec.floors and k + 1 < n:
+            if spec.floors and k + 1 < n and spec.stories[k + 1] != 'goblin_frame':
                 side = stair_side(k)
                 col = 0 if side == 'L' else spec.w - 1
                 self.kit.place(f'Stairs_Interior_{side}', self.coll, story, (col * GRID, 0, 0))
             furnish.furnish_story(self.kit, self.coll, story, spec, k)
         for k in range(n if spec.floors else 1):
-            lights.interior(self.lights_coll, root,
-                            (spec.w * GRID / 2, spec.d * GRID / 2, base + k * STORY + 2.3))
+            if spec.stories[min(k, n - 1)] != 'goblin_frame':
+                lights.interior(self.lights_coll, root,
+                                (spec.w * GRID / 2, spec.d * GRID / 2, base + k * STORY + 2.3))
         wall_top = base + n * STORY
+        if spec.roof == 'goblin_hut':
+            lights.point(self.lights_coll, root,
+                         (spec.w * GRID / 2, spec.d * GRID / 2, wall_top + 1.8), energy=150.0)
         if spec.gable_front:
             # Turned a quarter: the roof's ridge (its local +X) runs back from the front.
             roof = self.kit.group(f'{spec.name}_Roof', self.coll, root,
@@ -79,6 +85,14 @@ class BuildingAssembler:
 
     def _walls(self, spec, k, kind, story, rng, level=0):
         plain = WALL_PREFIX[kind]
+        mid = spec.w * GRID / 2
+        if kind == 'goblin_frame':
+            for _side, _i, loc, rotq in _segments(spec.w, spec.d):
+                self.kit.place_q(plain, self.coll, story, (*loc, 0), rotq)
+            self.kit.place('Goblin_Ladder', self.coll, story, (mid, -0.18, 0))
+            if spec.banner and k == len(spec.stories) - 1:
+                self.kit.place('Banner_Goblin_Skull', self.coll, story, (mid, -0.22, 2.75))
+            return
         jettied = f'{plain}_J{level}' if level and kind == 'timber' else plain
         upper = k + 1 < len(spec.stories)
         for side, i, loc, rotq in _segments(spec.w, spec.d):
@@ -94,7 +108,7 @@ class BuildingAssembler:
                 self.kit.place_q('Wall_Lantern', self.coll, story,
                                  _wall_point(loc, rotq, (0.2, -0.15, 2.35)), rotq)
                 lights.point(self.lights_coll, story,
-                             _wall_point(loc, rotq, (0.2, -0.6, 2.0)), energy=40.0)
+                             _wall_point(loc, rotq, (0.2, -0.6, 2.0)), energy=45.0)
             elif spec.arcade and k == 0 and side == 'front':
                 arc = 'Wall_Goblin_Arcade' if kind == 'goblin' else 'Wall_Arcade'
                 self.kit.place_q(arc, self.coll, story, (*loc, 0), rotq)
@@ -114,14 +128,19 @@ class BuildingAssembler:
                                      _wall_point(loc, rotq, (1.0, -0.15, 0)), rotq)
             if side == 'front' and out:
                 self.accents.under_jetty(spec, k, story, loc, rotq, level)
-            if spec.pent and side == 'front' and (k == 0 if kind == 'goblin' else upper):
+            if spec.pent and side == 'front' and (
+                (k == 0 and not spec.gable_front) if kind == 'goblin' else upper
+            ):
                 pent_mod = 'Goblin_Awning' if kind == 'goblin' else 'Pent_Roof'
                 self.kit.place_q(pent_mod, self.coll, story,
                                  _wall_point(loc, rotq, (0, -0.15 - out, STORY - 0.12)), rotq)
-        mid = spec.w * GRID / 2
-        if spec.banner and k == min(1, len(spec.stories) - 1):
+        if spec.pent and kind == 'goblin' and spec.gable_front and k == 0:
+            self.kit.place('Goblin_Tarp_Canopy', self.coll, story, (mid, -1.25, 0))
+            lights.point(self.lights_coll, story, (mid, -1.5, 2.0), energy=65.0)
+        if spec.banner and k == len(spec.stories) - 1:
             banner_mod = 'Banner_Goblin_Skull' if kind == 'goblin' else 'Banner_Blue'
-            self.kit.place(banner_mod, self.coll, story, (mid, -0.21 - level * JETTY, 2.7))
+            bz = STORY + 0.85 if (kind == 'goblin' and spec.gable_front) else 2.7
+            self.kit.place(banner_mod, self.coll, story, (mid, -0.21 - level * JETTY, bz))
         if spec.sign and k == 0 and kind != 'goblin':
             self.kit.place('Sign_Inn', self.coll, story, (spec.door * GRID - 0.2, -0.15, 2.75))
 
@@ -138,7 +157,7 @@ class BuildingAssembler:
         """Stone plinth under every wall, corner blocks, and steps up to the door."""
         for side, i, loc, rotq in _segments(spec.w, spec.d):
             self.kit.place_q(f'Plinth_{spec.plinth}', self.coll, root, (*loc, 0), rotq)
-            if side == 'front' and i == spec.door:
+            if side == 'front' and i == spec.door and spec.stories[0] != 'goblin_frame':
                 self.kit.place_q(f'Entry_Steps_{spec.plinth}', self.coll, root, (*loc, 0), rotq)
         for rotq, (x, y) in enumerate(((0, 0), (spec.w, 0), (spec.w, spec.d), (0, spec.d))):
             self.kit.place_q(f'Plinth_{spec.plinth}_Corner', self.coll, root,

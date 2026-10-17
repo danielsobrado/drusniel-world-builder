@@ -1,9 +1,18 @@
-"""Goblin swamp-town architecture, stilt foundations, boardwalks and rope bridges.
+"""Goblin swamp-town Lego kit: modular stilt frames, boardwalks, open-frame watchtowers,
+shanty walls, shaggy reed-thatch roofs, tarp canopies, and sagging rope suspension bridges.
 
-Inspired by the murky bayou stilt-village reference: peeled bark pilings lashed
-with rope, uneven plank boardwalks over dark water, shaggy reed-thatch roofs
-with protruding ridge poles and hide patches, slanted porch awnings, skull clan
-banners, high X-braced watchtowers, and sagging rope suspension bridges.
+Every module snaps to the 2 m grid (GRID = 2.0, STORY = 3.0, TERRACE = 1.5) so a
+Goblin bayou town can be assembled like Lego from interchangeable components:
+  - Foundations & Stilts : Plinth_Stilts, Plinth_Stilts_Corner, Entry_Steps_Stilts,
+                           Stilt_Wall, Stilt_Wall_Pillar, Goblin_Stilt_Frame
+  - Boardwalks & Ramps   : Tile_Swamp, Tile_Boardwalk, Boardwalk_Edge, Railing_Goblin,
+                           Stairs_Boardwalk_1, Stairs_Boardwalk_2, Goblin_Ladder
+  - Bridges & Catwalks   : Rope_Bridge (4 m), Rope_Bridge_Long (8 m), Goblin_Catwalk
+  - Shanty Wall Panels   : Wall_Goblin, Wall_Goblin_Window, Wall_Goblin_Door,
+                           Wall_Goblin_Arcade, Wall_Goblin_Frame, Corner_Goblin
+  - Roofs & Canopies     : Roof_Goblin_S4/S6, Roof_Goblin_End_S4/S6,
+                           Gable_Wall_Goblin_S4/S6, Roof_Goblin_Hut_4/6,
+                           Goblin_Awning, Goblin_Tarp_Canopy, Banner_Goblin_Skull
 """
 import math
 
@@ -15,7 +24,7 @@ from ..mesh import MeshBuilder
 from .foundations import BURY
 from .roofs import END_LEN, ridge_height
 
-GOBLIN_PITCH = math.radians(48)
+GOBLIN_PITCH = math.radians(46)
 
 
 def _at(x, y, z=0.0):
@@ -29,409 +38,562 @@ def _lash(b, x, y, z, r=0.11, h=0.14):
             m=_at(x, y), smooth=False)
 
 
-# -- Shanty walls & corners ---------------------------------------------------
+# ---------------------------------------------------------------------------
+# Shanty Walls, Open Watchtower Scaffolding & Corners (span X 0..GRID, exterior -Y)
+# ---------------------------------------------------------------------------
 
-def wall_goblin(window=False, door=False, open_front=False):
-    """Rough plank-and-log shanty wall (span X 0..GRID, centred on y=0, exterior -Y)."""
+def wall_goblin(window=False, door=False, arcade=False):
+    """Rough-hewn timber-and-plank shanty wall with crooked bark posts, diagonal
+    cross-bracing, wattle patches, and firelit barred shutters."""
     b = MeshBuilder()
-    # Heavy bark corner/mid posts and horizontal sill/top logs
-    for x in (0.08, GRID - 0.08):
-        b.beam((x, -0.02, 0.0), (x, 0.02, STORY), (0, 1, 0), (-0.09, 0.09), 0.18, 'bark', bevel=0)
-    b.box((0.0, -T - 0.02, 0.0), (GRID, T + 0.02, 0.16), 'bark')
-    b.box((0.0, -T - 0.03, STORY - 0.18), (GRID, T + 0.03, STORY), 'bark')
-
-    if open_front:
-        # Open cookhouse/market bay with diagonal braces and a tattered hide valance
-        b.beam((0.1, -0.02, 2.15), (0.65, -0.02, STORY - 0.12), (0, 1, 0), (-0.06, 0.06), 0.12, 'bark', bevel=0)
-        b.beam((GRID - 0.1, -0.02, 2.15), (GRID - 0.65, -0.02, STORY - 0.12), (0, 1, 0),
-               (-0.06, 0.06), 0.12, 'bark', bevel=0)
-        b.box((0.12, -T - 0.04, 2.35), (GRID - 0.12, -T + 0.04, STORY - 0.16), 'cloth_cream')
-        return b
-
-    if door:
-        # Left and right plank panels around a 0.9 m doorway (0.55..1.45, z 0..2.12)
-        b.box((0.0, -T, 0.16), (0.55, T, STORY - 0.18), 'planks', skip=('-z', '+z'))
-        b.box((1.45, -T, 0.16), (GRID, T, STORY - 0.18), 'planks', skip=('-z', '+z'))
-        b.box((0.55, -T, 2.12), (1.45, T, STORY - 0.18), 'planks', skip=('+z',))
-        for x in (0.52, 1.48):
-            b.beam((x, -0.02, 0.0), (x, 0.0, 2.22), (0, 1, 0), (-0.08, 0.08), 0.18, 'bark', bevel=0)
-        b.beam((0.46, -0.03, 2.14), (1.54, 0.01, 2.20), (0, 0, 1), (-0.09, 0.09), 0.18, 'bark', bevel=0)
+    if arcade:
+        # Open post-and-brace porch bay so firelight and interior props are visible
+        for px in (0.12, GRID - 0.12):
+            b.beam((px, 0, 0), (px, 0, STORY), (0, 1, 0), (-T - 0.04, T + 0.04), 0.18, 'bark')
+            _lash(b, px, -T, 0.25, r=0.11)
+            _lash(b, px, -T, STORY - 0.28, r=0.11)
+        b.box((0, -T - 0.04, STORY - 0.24), (GRID, T + 0.04, STORY), 'bark')
+        b.beam((0.14, -T, 1.85), (0.68, -T, STORY - 0.18), (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
+        b.beam((GRID - 0.14, -T, 1.85), (GRID - 0.68, -T, STORY - 0.18),
+               (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
         if detailed():
-            _lash(b, 0.52, -0.06, 2.15, 0.11, 0.14)
-            _lash(b, 1.48, -0.06, 2.15, 0.11, 0.14)
+            for hx in (0.65, 1.35):
+                b.box((hx - 0.015, -T - 0.02, STORY - 0.56), (hx + 0.015, -T + 0.02, STORY - 0.22),
+                      'cloth_cream')
+                b.blob((hx, -T - 0.02, STORY - 0.62), 0.07, 'plaster', subdiv=1,
+                       squash=(0.8, 0.8, 1.2), jitter=0.04, seed=int(hx * 10))
         return b
 
-    if window:
-        # Crooked window opening (0.55..1.45, z 0.95..2.05) with warm glowing pane & lashed bars
-        b.box((0.0, -T, 0.16), (0.55, T, STORY - 0.18), 'planks', skip=('-z', '+z'))
-        b.box((1.45, -T, 0.16), (GRID, T, STORY - 0.18), 'planks', skip=('-z', '+z'))
-        b.box((0.55, -T, 0.16), (1.45, T, 0.95), 'planks', skip=('-z',))
-        b.box((0.55, -T, 2.05), (1.45, T, STORY - 0.18), 'planks', skip=('+z',))
-        b.box((0.55, -0.02, 0.95), (1.45, 0.02, 2.05), 'glass', bevel=0)
-        for x in (0.53, 1.47):
-            b.beam((x, -0.02, 0.88), (x, 0.0, 2.12), (0, 1, 0), (-0.06, 0.06), 0.15, 'bark', bevel=0)
-        for z in (0.92, 2.08):
-            b.beam((0.48, -0.03, z), (1.52, 0.0, z + 0.03), (0, 0, 1), (-0.06, 0.06), 0.16, 'bark', bevel=0)
-        b.beam((1.0, -0.04, 0.95), (1.02, -0.04, 2.05), (0, 1, 0), (-0.025, 0.025), 0.05, 'bark', bevel=0)
-        b.beam((0.55, -0.04, 1.48), (1.45, -0.04, 1.52), (0, 0, 1), (-0.025, 0.025), 0.05, 'bark', bevel=0)
+    # Base rough plank & wattle core
+    if door:
+        b.box((0, -T, 0), (0.55, T, STORY), 'planks', skip=('-x', '-z', '+z'))
+        b.box((1.45, -T, 0), (GRID, T, STORY), 'planks', skip=('+x', '-z', '+z'))
+        b.box((0.55, -T, 2.1), (1.45, T, STORY), 'planks', skip=('-z', '+z'))
+    elif window:
+        b.box((0, -T, 0), (0.58, T, STORY), 'planks', skip=('-x', '-z', '+z'))
+        b.box((1.42, -T, 0), (GRID, T, STORY), 'planks', skip=('+x', '-z', '+z'))
+        b.box((0.58, -T, 0), (1.42, T, 0.95), 'planks', skip=('-z',))
+        b.box((0.58, -T, 1.95), (1.42, T, STORY), 'planks', skip=('+z',))
+        # Warm fire-lit interior backing + crooked iron/bark bars (no white Tudor glass)
+        b.box((0.60, -0.03, 0.97), (1.40, 0.03, 1.93), 'iron')
+        b.box((0.64, -0.04, 1.02), (1.36, 0.02, 1.88), 'glow')
+        for bx in (0.82, 1.02, 1.20):
+            b.beam((bx, -T - 0.01, 0.95), (bx + 0.02, -T - 0.01, 1.95),
+                   (0, 1, 0), (-0.025, 0.025), 0.04, 'bark')
     else:
-        b.box((0.0, -T, 0.16), (GRID, T, STORY - 0.18), 'planks', skip=('-z', '+z'))
+        b.box((0, -T, 0), (GRID, T, STORY), 'planks', skip=('-x', '+x', '-z', '+z'))
 
-    if detailed():
-        # Diagonal rough pole braces and mismatched patch boards on the exterior face
-        b.beam((0.12, -T - 0.02, 0.18), (0.98, -T - 0.02, 1.45), (0, 1, 0), (-0.05, 0.05), 0.08, 'bark', bevel=0)
-        b.beam((GRID - 0.12, -T - 0.02, 0.18), (1.02, -T - 0.02, 1.45), (0, 1, 0),
-               (-0.05, 0.05), 0.08, 'bark', bevel=0)
-        b.box((0.0, -T - 0.03, 1.42), (GRID, -T + 0.01, 1.54), 'bark')
+    # Heavy bark sill, mid-rail, and top plate
+    out = -T - 0.04
+    b.box((0, out, 0), (GRID, -T + 0.02, 0.16), 'bark', skip=('-x', '+x', '-z'))
+    b.box((0, out, STORY - 0.18), (GRID, -T + 0.02, STORY), 'bark', skip=('-x', '+x', '+z'))
+    if not door:
+        b.box((0, out, 0.88), (GRID, -T + 0.02, 1.00), 'bark', skip=('-x', '+x'))
+
+    # Diagonal X-bracing poles & crooked vertical battens
+    if not door and not window:
+        b.beam((0.08, out, 0.14), (0.98, out, 0.92), (0, 1, 0), (-0.03, 0.04), 0.09, 'bark')
+        b.beam((1.92, out, 0.14), (1.02, out, 0.92), (0, 1, 0), (-0.03, 0.04), 0.09, 'bark')
+        b.beam((0.10, out, 0.96), (0.96, out, STORY - 0.16), (0, 1, 0), (-0.03, 0.04), 0.09, 'bark')
+        b.beam((1.90, out, 0.96), (1.04, out, STORY - 0.16), (0, 1, 0), (-0.03, 0.04), 0.09, 'bark')
+        # Woven reed/thatch patch over planks
+        if detailed():
+            b.box((0.24, out - 0.01, 1.25), (0.86, -T + 0.01, 2.35), 'thatch')
+    elif window:
+        for x0, x1 in ((0.50, 0.62), (1.38, 1.50)):
+            b.box((x0, out - 0.02, 0.88), (x1, T + 0.02, 2.02), 'bark')
+        b.box((0.46, out - 0.04, 1.94), (1.54, T + 0.03, 2.08), 'bark')
+        # Propped-open wooden plank shutter on the right side
+        if detailed():
+            b.beam((1.44, out - 0.02, 1.00), (1.82, out - 0.18, 1.04),
+                   (0, 0, 1), (0.0, 0.88), 0.04, 'planks')
+            _lash(b, 0.56, out, 1.98, r=0.08, h=0.10)
+            _lash(b, 1.44, out, 1.98, r=0.08, h=0.10)
+    elif door:
+        b.beam((0.50, 0, 0), (0.54, 0, 2.22), (0, 1, 0), (out - 0.03, T + 0.03), 0.14, 'bark')
+        b.beam((1.50, 0, 0), (1.46, 0, 2.22), (0, 1, 0), (out - 0.03, T + 0.03), 0.14, 'bark')
+        b.beam((0.38, 0, 2.14), (1.62, 0, 2.20), (0, 1, 0), (out - 0.05, T + 0.04), 0.16, 'bark')
+        _lash(b, 0.52, out, 2.16, r=0.10, h=0.14)
+        _lash(b, 1.48, out, 2.16, r=0.10, h=0.14)
+        if detailed():
+            # Horned skull trophy mounted above the door lintel
+            b.blob((1.0, out - 0.08, 2.48), 0.12, 'plaster', subdiv=1,
+                   squash=(0.85, 0.9, 1.1), jitter=0.05, seed=11)
+            for sx in (-1, 1):
+                b.beam((1.0 + sx * 0.06, out - 0.08, 2.52),
+                       (1.0 + sx * 0.24, out - 0.14, 2.74),
+                       (0, 1, 0), (-0.02, 0.02), 0.04, 'plaster')
+    return b
+
+
+def wall_goblin_frame():
+    """Open X-braced log scaffolding panel (2 m wide x STORY tall). Used to build
+    see-through stilt watchtower legs and elevated platform substructures."""
+    b = MeshBuilder()
+    for px in (0.10, GRID - 0.10):
+        b.beam((px, 0, 0), (px, 0, STORY), (0, 1, 0), (-0.09, 0.09), 0.18, 'bark')
+    # Horizontal ledger logs + heavy X-brace poles
+    for z in (0.12, STORY / 2, STORY - 0.12):
+        b.beam((0, 0, z), (GRID, 0, z), (0, 1, 0), (-0.07, 0.07), 0.14, 'bark')
+        _lash(b, 0.12, 0, z, r=0.11, h=0.14)
+        _lash(b, GRID - 0.12, 0, z, r=0.11, h=0.14)
+    b.beam((0.12, -0.04, 0.12), (GRID - 0.12, -0.04, STORY / 2), (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
+    b.beam((GRID - 0.12, 0.04, 0.12), (0.12, 0.04, STORY / 2), (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
+    b.beam((0.12, -0.04, STORY / 2), (GRID - 0.12, -0.04, STORY - 0.12),
+           (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
+    b.beam((GRID - 0.12, 0.04, STORY / 2), (0.12, 0.04, STORY - 0.12),
+           (0, 1, 0), (-0.05, 0.05), 0.11, 'bark')
+    _lash(b, GRID / 2, 0, STORY * 0.26, r=0.09, h=0.12)
+    _lash(b, GRID / 2, 0, STORY * 0.74, r=0.09, h=0.12)
     return b
 
 
 def corner_goblin():
-    """Heavy peeled-bark corner post with rope lashings at base, mid and top."""
+    """Heavy peeled-bark log corner post with triple rope lashings."""
     b = MeshBuilder()
-    seg = 8 if detailed() else 5
-    b.lathe([(0.16, 0.0), (0.14, 1.5), (0.15, STORY)], seg, 'bark', smooth=False)
-    if detailed():
-        for z in (0.22, 1.48, STORY - 0.22):
-            _lash(b, 0.0, 0.0, z, 0.16, 0.16)
+    b.lathe([(0.13, 0.0), (0.12, STORY * 0.5), (0.13, STORY)], 7 if detailed() else 5,
+            'bark', smooth=False)
+    for z in (0.22, STORY * 0.5, STORY - 0.22):
+        _lash(b, 0, 0, z, r=0.135, h=0.16)
     return b
 
 
-# -- Stilt foundations & entry ramps ------------------------------------------
+# ---------------------------------------------------------------------------
+# Stilt Foundations (Plinth_Stilts = 0.6 m high above deck/ground, buried -BURY)
+# ---------------------------------------------------------------------------
 
-def plinth_stilts(height=0.6):
-    """Peeled-bark stilt pilings driven into the mud under a 2 m wall segment."""
+STILT_H = 0.6
+
+
+def plinth_stilts():
+    """Open timber stilt foundation under a 2 m wall segment with cross-bracing and
+    deck beam so buildings stand raised on wooden pilings."""
     b = MeshBuilder()
-    seg = 7 if detailed() else 5
-    for x in (0.45, 1.55):
-        b.lathe([(0.11, -BURY), (0.10, height)], seg, 'bark', m=_at(x, -0.04), smooth=False)
-        if detailed():
-            _lash(b, x, -0.04, height - 0.14, 0.11, 0.12)
-    # Top bearer log and diagonal cross-brace
-    b.box((0.0, -T - 0.12, height - 0.14), (GRID, T + 0.06, height), 'bark')
-    if detailed():
-        b.beam((0.45, -0.05, -0.15), (1.55, -0.05, height - 0.14), (0, 1, 0),
-               (-0.045, 0.045), 0.08, 'bark', bevel=0)
-        b.beam((1.55, -0.05, -0.15), (0.45, -0.05, height - 0.14), (0, 1, 0),
-               (-0.045, 0.045), 0.08, 'bark', bevel=0)
+    b.box((0, -T - 0.16, STILT_H - 0.14), (GRID, T + 0.04, STILT_H), 'bark', skip=('-x', '+x'))
+    b.box((0, -T - 0.22, STILT_H - 0.06), (GRID, -T - 0.14, STILT_H + 0.02), 'planks', skip=('-x', '+x'))
+    for x in (0.35, 1.65):
+        b.lathe([(0.11, -BURY), (0.10, STILT_H - 0.1)], 6, 'bark', m=_at(x, -T - 0.04), smooth=False)
+        _lash(b, x, -T - 0.04, STILT_H - 0.18, r=0.115, h=0.12)
+    b.beam((0.35, -T - 0.04, -0.15), (1.65, -T - 0.04, STILT_H - 0.16),
+           (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
+    b.beam((1.65, -T - 0.04, -0.15), (0.35, -T - 0.04, STILT_H - 0.16),
+           (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
     return b
 
 
-def plinth_stilts_corner(height=0.6):
-    """Cluster of three lashed corner pilings."""
+def plinth_stilts_corner():
+    """Cluster of bound log pilings supporting a building corner."""
     b = MeshBuilder()
-    seg = 7 if detailed() else 5
-    for dx, dy, r in ((0.0, 0.0, 0.13), (-0.14, -0.12, 0.09), (0.12, -0.14, 0.09)):
-        b.lathe([(r, -BURY), (r * 0.92, height)], seg, 'bark', m=_at(dx, dy), smooth=False)
-    _lash(b, -0.02, -0.06, height - 0.16, 0.22, 0.16)
+    b.box((-T - 0.18, -T - 0.18, STILT_H - 0.14), (T, T, STILT_H), 'bark')
+    b.lathe([(0.14, -BURY), (0.13, STILT_H)], 7 if detailed() else 5,
+            'bark', m=_at(-0.06, -0.06), smooth=False)
+    _lash(b, -0.06, -0.06, STILT_H - 0.18, r=0.145, h=0.15)
     return b
 
 
-def entry_steps_stilts(height=0.6, width=1.45):
-    """Rough log-and-plank ramp with half-log cleats descending from a goblin doorway."""
+def entry_steps_stilts(width=1.5):
+    """Notched-log and plank gangway steps descending from a stilt-raised doorway."""
     b = MeshBuilder()
-    run = 1.35
     x0, x1 = 1.0 - width / 2, 1.0 + width / 2
-    face = -T - 0.10
-    # Two inclined stringer logs
-    for x in (x0 + 0.12, x1 - 0.12):
-        b.beam((x, face, height - 0.06), (x, face - run, -0.04), (1, 0, 0),
-               (-0.06, 0.06), 0.12, 'bark', bevel=0)
-        b.lathe([(0.08, -BURY), (0.08, 0.15)], 6, 'bark', m=_at(x, face - run + 0.08), smooth=False)
-    # Plank steps / log cleats along the ramp
-    steps = 5
+    face = -T - 0.16
+    steps = 4
+    run = 0.34
+    for sy in (x0 + 0.08, x1 - 0.08):
+        b.beam((sy, face, STILT_H - 0.06), (sy, face - steps * run, -0.05),
+               (1, 0, 0), (-0.05, 0.05), 0.12, 'bark')
     for i in range(steps):
-        t0, t1 = i / steps, (i + 0.92) / steps
-        y_hi = face - t0 * run
-        y_lo = face - t1 * run
-        z_top = height * (1.0 - i / steps)
-        b.box((x0, y_lo, z_top - 0.08), (x1, y_hi, z_top), 'planks')
+        z = STILT_H - (i + 0.5) * (STILT_H / steps)
+        y = face - (i + 0.85) * run
+        b.box((x0, y - 0.14, z - 0.04), (x1, y + 0.14, z + 0.03), 'planks')
+    for sx in (x0 + 0.06, x1 - 0.06):
+        b.beam((sx, face - steps * run, -BURY), (sx, face - steps * run, 0.65),
+               (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+        _lash(b, sx, face - steps * run, 0.48, r=0.07, h=0.10)
     return b
 
 
-# -- Shaggy thatched roofs & watchtower tops ----------------------------------
+# ---------------------------------------------------------------------------
+# Shaggy Swamp-Reed Thatched Roofs & Open-Frame Watchtower Crow's Nests
+# ---------------------------------------------------------------------------
 
-def roof_goblin_section(span, length=GRID, end=False):
-    """Shaggy swamp-reed thatch roof section with protruding rafter poles and hide patches."""
-    b = MeshBuilder()
+def _shaggy_slope(b, x0, x1, span, pitch):
+    """Thick layered swamp-reed thatch roof with exposed dark rafter poles."""
     half = span / 2
+    apex = ridge_height(span, pitch)
+    c, s = math.cos(pitch), math.sin(pitch)
+    drop = OVERHANG * math.tan(pitch)
+    for side, y_in, y_out, n_y in (
+        ('front', half, -OVERHANG, -s),
+        ('back', half, span + OVERHANG, s),
+    ):
+        pts = [
+            (x0, y_out, -drop),
+            (x1, y_out, -drop),
+            (x1, y_in, apex),
+            (x0, y_in, apex),
+        ]
+        b.extrude(pts, (0, n_y * THICK * 1.35, c * THICK * 1.35), 'thatch')
+        # Stepped lower eave fringe bundle for a thick shaggy silhouette
+        fringe_y = y_out + (0.45 if side == 'front' else -0.45)
+        fringe_z = -drop + 0.45 * math.tan(pitch) + THICK * 1.15
+        f_pts = [
+            (x0, y_out, -drop + THICK * 0.4),
+            (x1, y_out, -drop + THICK * 0.4),
+            (x1, fringe_y, fringe_z),
+            (x0, fringe_y, fringe_z),
+        ]
+        b.extrude(f_pts, (0, 0, 0.08), 'thatch')
+        # Exposed crooked bark rafter poles running down the thatch
+        if detailed():
+            for rx in (x0 + 0.35, (x0 + x1) / 2, x1 - 0.35):
+                b.beam((rx, y_in, apex + THICK * 1.25),
+                       (rx, y_out + (-0.18 if side == 'front' else 0.18), -drop - 0.08),
+                       (1, 0, 0), (-0.04, 0.04), 0.08, 'bark')
+
+
+def roof_goblin_section(span):
+    """2 m section of shaggy reed-thatch roof with bound ridge pole."""
+    b = MeshBuilder()
+    _shaggy_slope(b, 0.0, GRID, span, GOBLIN_PITCH)
     apex = ridge_height(span, GOBLIN_PITCH)
-    drop = OVERHANG * math.tan(GOBLIN_PITCH)
-    rise = THICK / math.cos(GOBLIN_PITCH)
-    profile = [(0, -OVERHANG, -drop), (0, half, apex), (0, span + OVERHANG, -drop),
-               (0, span + OVERHANG, -drop + rise), (0, half, apex + rise), (0, -OVERHANG, -drop + rise)]
-    b.extrude(profile, (length, 0, 0), 'thatch')
-    # Protruding peeled-bark ridge pole
-    b.beam((-0.12 if end else 0.0, half, apex + rise - 0.02),
-           (length + (0.12 if end else 0.0), half, apex + rise + 0.02),
-           (0, 1, 0), (-0.09, 0.09), 0.18, 'bark', bevel=0)
+    b.beam((-0.05, span / 2, apex + THICK * 1.35),
+           (GRID + 0.05, span / 2, apex + THICK * 1.35),
+           (0, 1, 0), (-0.08, 0.08), 0.16, 'bark')
+    for rx in (0.45, 1.55):
+        _lash(b, rx, span / 2, apex + THICK * 1.35, r=0.09, h=0.12)
+    return b
+
+
+def roof_goblin_end(span):
+    """Gable overhang eave with protruding ridge pole, crossed horn-poles, and skull."""
+    b = MeshBuilder()
+    _shaggy_slope(b, 0.0, END_LEN, span, GOBLIN_PITCH)
+    apex = ridge_height(span, GOBLIN_PITCH)
+    b.beam((-0.55, span / 2, apex + THICK * 1.35),
+           (END_LEN + 0.1, span / 2, apex + THICK * 1.35),
+           (0, 1, 0), (-0.09, 0.09), 0.18, 'bark')
+    _lash(b, 0.0, span / 2, apex + THICK * 1.35, r=0.11, h=0.14)
+    # Crossed gable horn-poles (X-horns at the roof peak, matching reference image)
+    for sy in (-1, 1):
+        b.beam((-0.18, span / 2 - sy * 0.45, apex - 0.25),
+               (-0.18, span / 2 + sy * 0.38, apex + THICK * 1.35 + 0.52),
+               (1, 0, 0), (-0.04, 0.04), 0.08, 'bark')
     if detailed():
-        # Crooked rafter poles poking past the eaves and a patched hide tarp on the slope
-        poles = (0.2,) if end else (0.35, 1.35)
-        for x in poles:
-            b.beam((x, half, apex + rise), (x + 0.04, -OVERHANG - 0.22, -drop - 0.08),
-                   (1, 0, 0), (-0.045, 0.045), 0.09, 'bark', bevel=0)
-            b.beam((x, half, apex + rise), (x - 0.04, span + OVERHANG + 0.22, -drop - 0.08),
-                   (1, 0, 0), (-0.045, 0.045), 0.09, 'bark', bevel=0)
-        if not end:
-            z0 = 0.25 * apex + rise + 0.01
-            z1 = 0.72 * apex + rise + 0.01
-            y0, y1 = 0.25 * half, 0.72 * half
-            b.poly([(0.25, y0, z0), (1.65, y0, z0), (1.55, y1, z1), (0.35, y1, z1)],
-                   'cloth_cream', outward=(0, -1, 1))
+        b.blob((-0.48, span / 2, apex + THICK * 1.12), 0.11, 'plaster', subdiv=1,
+               squash=(0.8, 0.9, 1.15), jitter=0.05, seed=int(span) + 3)
     return b
 
 
 def gable_wall_goblin(span):
-    """Plank-and-wattle gable triangle with rough vertical bark poles."""
+    """Rough vertical-plank gable triangle with bark king-post and struts."""
     b = MeshBuilder()
-    half = span / 2
     apex = ridge_height(span, GOBLIN_PITCH)
-    b.extrude([(T, 0, 0), (T, span, 0), (T, half, apex)], (-2 * T, 0, 0), 'planks')
-    b.beam((0, 0, 0), (0, span, 0), (0, 0, 1), (-T - 0.03, T + 0.03), 0.14, 'bark', bevel=0)
-    b.beam((-0.02, half, 0.0), (-0.02, half, apex), (0, 1, 0), (-0.07, 0.07), 0.14, 'bark', bevel=0)
-    if detailed():
-        # Crossed horn/branch apex poles with a skull trophy at the peak
-        b.beam((-0.08, half - 0.45, apex - 0.35), (-0.08, half + 0.35, apex + 0.48),
-               (1, 0, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-        b.beam((-0.08, half + 0.45, apex - 0.35), (-0.08, half - 0.35, apex + 0.48),
-               (1, 0, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-        b.blob((-0.14, half, apex + 0.05), 0.14, 'plaster', subdiv=1, squash=(0.8, 0.9, 1.1), seed=19)
+    pts = [(0, 0, 0), (0, span, 0), (0, span / 2, apex)]
+    b.extrude(pts, (2 * T, 0, 0), 'planks')
+    b.beam((0.0, span / 2, 0), (0.0, span / 2, apex), (0, 1, 0), (-0.07, 0.07), 0.14, 'bark')
+    b.beam((0.0, 0.15, 0.08), (0.0, span - 0.15, 0.08), (0, 0, 1), (-0.06, 0.06), 0.12, 'bark')
+    for sy in (-1, 1):
+        b.beam((0.0, span / 2, 0.15), (0.0, span / 2 + sy * (span * 0.26), apex * 0.52),
+               (1, 0, 0), (-0.05, 0.05), 0.10, 'bark')
     return b
 
 
 def roof_goblin_hut(size):
-    """Open-sided stilt watchtower crown: railed lookout deck, four corner poles,
-    blazing corner torches, and a shaggy conical thatch roof above."""
+    """Watchtower Crow's Nest Module: cantilevered timber lookout platform with
+    crooked railings, corner blazing torches, a central shuttered sentry cabin,
+    and an overhanging conical reed-thatch roof."""
     b = MeshBuilder()
-    c = size / 2
-    deck_h = 2.25
-    # Four corner support poles and X-braced guardrail around the open lookout platform
-    for x in (0.18, size - 0.18):
-        for y in (0.18, size - 0.18):
-            b.beam((x, y, 0.0), (x, y, deck_h + 0.15), (1, 0, 0), (-0.09, 0.09), 0.18, 'bark', bevel=0)
-            if detailed():
-                _lash(b, x, y, 0.95, 0.11, 0.12)
-                _lash(b, x, y, deck_h - 0.1, 0.11, 0.12)
-    # Guardrails on all 4 sides
-    for y in (0.18, size - 0.18):
-        b.beam((0.1, y, 0.95), (size - 0.1, y, 0.98), (0, 1, 0), (-0.05, 0.05), 0.1, 'bark', bevel=0)
-        b.beam((0.1, y, 0.48), (size - 0.1, y, 0.45), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-    for x in (0.18, size - 0.18):
-        b.beam((x, 0.1, 0.95), (x, size - 0.1, 0.98), (1, 0, 0), (-0.05, 0.05), 0.1, 'bark', bevel=0)
-        b.beam((x, 0.1, 0.48), (x, size - 0.1, 0.45), (1, 0, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-    # Flaming corner torch poles on the two front corners
-    for x in (-0.15, size + 0.15):
-        b.beam((x, -0.15, 0.0), (x, -0.15, deck_h + 0.55), (1, 0, 0), (-0.05, 0.05), 0.1, 'bark', bevel=0)
-        b.lathe([(0.05, deck_h + 0.45), (0.14, deck_h + 0.65), (0.11, deck_h + 0.68)], 6, 'iron',
-                m=_at(x, -0.15), smooth=False)
-        b.blob((x, -0.15, deck_h + 0.72), 0.13, 'glow', subdiv=1, squash=(0.9, 0.9, 1.5), jitter=0.15, seed=7)
-    # Conical shaggy thatched roof above the lookout poles
-    r_eave = size * 0.68
-    apex = deck_h + 1.85 + size * 0.22
-    seg = 10 if detailed() else 6
-    b.lathe([(0.0, deck_h), (r_eave, deck_h), (0.16, apex), (0.0, apex + 0.35)], seg, 'thatch',
-            m=_at(c, c), smooth=False)
-    b.lathe([(0.09, deck_h), (0.05, apex + 0.75), (0.0, apex + 0.8)], 6, 'bark', m=_at(c, c), smooth=False)
+    cx = cy = size / 2
+    out = 0.48
+    # Cantilevered lookout platform deck & heavy support joists
+    b.box((-out, -out, -0.14), (size + out, size + out, 0.08), 'planks')
+    for d in (0.2, size / 2, size - 0.2):
+        b.beam((-out - 0.12, d, -0.18), (size + out + 0.12, d, -0.18),
+               (0, 1, 0), (-0.08, 0.08), 0.16, 'bark')
+    # Perimeter lookout railing + 4 corner posts + blazing corner torches
+    corners = [(-out + 0.12, -out + 0.12), (size + out - 0.12, -out + 0.12),
+               (size + out - 0.12, size + out - 0.12), (-out + 0.12, size + out - 0.12)]
+    for i, (px, py) in enumerate(corners):
+        b.beam((px, py, 0.0), (px, py, 1.15), (0, 1, 0), (-0.06, 0.06), 0.12, 'bark')
+        nx, ny = corners[(i + 1) % 4]
+        b.beam((px, py, 0.88), (nx, ny, 0.88), (0, 0, 1), (-0.04, 0.04), 0.08, 'bark')
+        b.beam((px, py, 0.44), (nx, ny, 0.44), (0, 0, 1), (-0.03, 0.03), 0.06, 'cloth_cream')
+        # Tall corner torch pole with blazing fire basket
+        if i < 2:
+            tx = px + (-0.15 if px < cx else 0.15)
+            ty = py - 0.15
+            b.beam((px, py, 0.1), (tx, ty, 2.55), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+            b.lathe([(0.0, 2.48), (0.14, 2.52), (0.18, 2.72), (0.0, 2.68)], 7, 'iron',
+                    m=_at(tx, ty))
+            b.lathe([(0.0, 2.64), (0.14, 2.72), (0.0, 3.05)], 6, 'glow', m=_at(tx, ty))
+
+    # Compact central sentry cabin on the platform (inset so guards can walk around it)
+    inset = 0.55
+    hut_h = 2.05
+    b.box((inset, inset, 0.08), (size - inset, size - inset, hut_h), 'planks')
+    for hx in (inset, size - inset):
+        for hy in (inset, size - inset):
+            b.beam((hx, hy, 0.08), (hx, hy, hut_h + 0.15), (0, 1, 0), (-0.08, 0.08), 0.16, 'bark')
+            _lash(b, hx, hy, hut_h - 0.15, r=0.10, h=0.14)
+    # Warm fire-lit lookout slit windows on all 4 sides of the sentry cabin
+    w_half = 0.34
+    for side_y in (inset - 0.03, size - inset + 0.03):
+        b.box((cx - w_half, side_y - 0.03, 0.92), (cx + w_half, side_y + 0.03, 1.58), 'glow')
+        b.box((cx - w_half - 0.06, side_y - 0.05, 1.54),
+              (cx + w_half + 0.06, side_y + 0.05, 1.66), 'bark')
+    for side_x in (inset - 0.03, size - inset + 0.03):
+        b.box((side_x - 0.03, cy - w_half, 0.92), (side_x + 0.03, cy + w_half, 1.58), 'glow')
+
+    # Shaggy conical 8-sided reed-thatch roof overhanging the sentry cabin
+    r_eave = size * 0.66
+    r_mid = size * 0.36
+    apex = hut_h + size * 0.52
+    seg = 8
+    for i in range(seg):
+        a0 = 2 * math.pi * i / seg
+        a1 = 2 * math.pi * (i + 1) / seg
+        p0 = (cx + math.cos(a0) * r_eave, cy + math.sin(a0) * r_eave, hut_h - 0.22)
+        p1 = (cx + math.cos(a1) * r_eave, cy + math.sin(a1) * r_eave, hut_h - 0.22)
+        pm0 = (cx + math.cos(a0) * r_mid, cy + math.sin(a0) * r_mid, hut_h + (apex - hut_h) * 0.5)
+        pm1 = (cx + math.cos(a1) * r_mid, cy + math.sin(a1) * r_mid, hut_h + (apex - hut_h) * 0.5)
+        top = (cx, cy, apex)
+        b.extrude([p0, p1, pm1, pm0], (0, 0, 0.22), 'thatch')
+        b.extrude([pm0, pm1, top], (0, 0, 0.24), 'thatch')
+        if detailed():
+            b.beam(top, p0, (0, 0, 1), (-0.04, 0.04), 0.08, 'bark')
+    # Central spiked finial pole
+    b.lathe([(0.09, apex - 0.2), (0.06, apex + 0.65), (0.01, apex + 1.05)], 6,
+            'bark', m=_at(cx, cy), smooth=False)
+    _lash(b, cx, cy, apex + 0.25, r=0.09, h=0.14)
     return b
 
 
-def goblin_awning(width=2.0, depth=1.35):
-    """Slanted tattered hide/cloth porch awning propped on crooked poles with hanging dried fish."""
+# ---------------------------------------------------------------------------
+# Accents: Slanted Porch Awning, Open Tarp Canopy & Goblin Skull Clan Banner
+# ---------------------------------------------------------------------------
+
+def goblin_awning():
+    """Slanted reed-thatch porch awning propped on angled bark struts with hanging cured meat."""
     b = MeshBuilder()
-    # Slanted canopy from wall (y=0, z=2.55) out to front pole (y=-depth, z=1.85)
-    z_wall, z_front = 2.55, 1.85
-    b.poly([(0.0, 0.0, z_wall), (width, 0.0, z_wall),
-            (width, -depth, z_front), (0.0, -depth, z_front)],
-           'cloth_cream', outward=(0, -1, 2))
-    b.poly([(0.0, -depth, z_front), (width, -depth, z_front),
-            (width, 0.0, z_wall - 0.03), (0.0, 0.0, z_wall - 0.03)],
-           'cloth_cream', outward=(0, 1, -2))
-    # Front cross-pole and angled prop struts back to the wall
-    b.beam((-0.08, -depth + 0.05, z_front), (width + 0.08, -depth + 0.05, z_front + 0.03),
-           (0, 0, 1), (-0.045, 0.045), 0.09, 'bark', bevel=0)
-    for x in (0.12, width - 0.12):
-        b.beam((x, 0.0, 1.05), (x, -depth + 0.08, z_front), (1, 0, 0),
-               (-0.04, 0.04), 0.08, 'bark', bevel=0)
-        b.beam((x, 0.0, z_wall), (x, -depth, z_front), (1, 0, 0),
-               (-0.035, 0.035), 0.07, 'bark', bevel=0)
+    b.extrude([(0.0, 0.0, 0.08), (GRID, 0.0, 0.08),
+               (GRID, -0.95, -0.42), (0.0, -0.95, -0.42)], (0, 0, 0.11), 'thatch')
+    for x in (0.12, 1.0, GRID - 0.12):
+        b.beam((x, 0.02, 0.12), (x, -1.02, -0.46), (1, 0, 0), (-0.04, 0.04), 0.08, 'bark')
+    for x in (0.14, GRID - 0.14):
+        b.beam((x, 0.0, -0.92), (x, -0.78, -0.36), (1, 0, 0), (-0.035, 0.035), 0.07, 'bark')
+    b.beam((-0.06, -0.92, -0.40), (GRID + 0.06, -0.92, -0.40),
+           (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
     if detailed():
-        # Hanging dried fish / bone charms under the front eave
-        for i, x in enumerate((0.45, 1.0, 1.55)):
-            b.box((x - 0.01, -depth + 0.12, z_front - 0.35), (x + 0.01, -depth + 0.14, z_front), 'cloth_cream', bevel=0)
-            b.blob((x, -depth + 0.13, z_front - 0.42), 0.10, 'cloth_red' if i == 1 else 'plaster',
-                   subdiv=1, squash=(0.55, 0.35, 1.6), jitter=0.2, seed=41 + i)
+        for bx in (0.55, 1.45):
+            b.lathe([(0.0, -0.78), (0.045, -0.68), (0.035, -0.50), (0.0, -0.42)],
+                    6, 'cloth_red', m=_at(bx, -0.88))
+    return b
+
+
+def goblin_tarp_canopy():
+    """Large 4 x 2.6 m sagging hide-and-thatch porch canopy stretched out on crooked
+    bark poles in front of a longhouse or cooking deck (matches right-hand hut in reference)."""
+    b = MeshBuilder()
+    # Four crooked support poles (-2.0..2.0 along X, -1.2..1.2 along Y)
+    poles = [
+        ((-1.85, -1.15, 0.0), (-1.78, -1.10, 2.15)),
+        ((1.85, -1.15, 0.0), (1.80, -1.08, 2.10)),
+        ((-1.85, 1.10, 0.0), (-1.82, 1.05, 2.75)),
+        ((1.85, 1.10, 0.0), (1.82, 1.05, 2.72)),
+    ]
+    for p0, p1 in poles:
+        b.beam(p0, p1, (0, 1, 0), (-0.065, 0.065), 0.13, 'bark')
+    # Perimeter cross-poles & diagonal braces
+    b.beam((-1.95, -1.10, 2.10), (1.95, -1.08, 2.06), (0, 0, 1), (-0.05, 0.05), 0.10, 'bark')
+    b.beam((-1.95, 1.05, 2.70), (1.95, 1.05, 2.68), (0, 0, 1), (-0.05, 0.05), 0.10, 'bark')
+    for sx in (-1.80, 0.0, 1.80):
+        b.beam((sx, 1.12, 2.72), (sx, -1.18, 2.06), (1, 0, 0), (-0.045, 0.045), 0.09, 'bark')
+    # Sagging two-panel hide & reed-thatch canopy roof + hanging lantern
+    b.extrude([(-1.98, 1.15, 2.74), (1.98, 1.15, 2.72),
+               (1.98, -0.05, 2.32), (-1.98, -0.05, 2.34)], (0, 0, 0.08), 'thatch')
+    b.extrude([(-1.92, 0.05, 2.36), (1.92, 0.05, 2.34),
+               (1.92, -1.22, 2.08), (-1.92, -1.22, 2.10)], (0, 0, 0.06), 'cloth_cream')
+    b.box((-0.08, -0.95, 1.68), (0.08, -0.79, 1.94), 'iron')
+    b.box((-0.06, -0.93, 1.71), (0.06, -0.81, 1.90), 'glow')
     return b
 
 
 def banner_goblin_skull():
-    """Ragged crimson goblin clan banner with a bleached skull-and-crossbones emblem."""
+    """Ragged red war-banner on a lashed crossbar bearing a white goblin skull & crossbones."""
     b = MeshBuilder()
-    # Lashed horizontal crossbar pole
-    b.beam((-0.55, -0.08, 0.0), (0.55, -0.08, 0.03), (0, 0, 1), (-0.035, 0.035), 0.07, 'bark', bevel=0)
-    # Tattered twin-tail red cloth banner
-    pts = [(-0.44, -0.08, 0.0), (0.44, -0.08, 0.0), (0.42, -0.10, -1.35),
-           (0.18, -0.10, -1.08), (0.0, -0.10, -1.42), (-0.20, -0.10, -1.10), (-0.42, -0.10, -1.32)]
-    b.extrude(pts, (0, -0.02, 0), 'cloth_red')
-    # Bleached skull & crossed bones emblem on the front face
-    y = -0.115
-    # Cranium + jaw
-    skull = [(-0.14, -0.32), (0.14, -0.32), (0.18, -0.46), (0.12, -0.60),
-             (0.08, -0.72), (-0.08, -0.72), (-0.12, -0.60), (-0.18, -0.46)]
-    b.extrude([(u, y, v) for u, v in skull], (0, -0.015, 0), 'plaster')
-    # Dark eye sockets and nasal cavity
-    for ex in (-0.065, 0.065):
-        b.box((ex - 0.035, y - 0.02, -0.50), (ex + 0.035, y - 0.005, -0.42), 'iron', bevel=0)
-    b.box((-0.02, y - 0.02, -0.58), (0.02, y - 0.005, -0.52), 'iron', bevel=0)
-    # Crossed bones below skull
-    b.beam((-0.24, y - 0.01, -0.92), (0.24, y - 0.01, -0.66), (0, 1, 0),
-           (-0.022, 0.022), 0.02, 'plaster', bevel=0)
-    b.beam((-0.24, y - 0.01, -0.66), (0.24, y - 0.01, -0.92), (0, 1, 0),
-           (-0.022, 0.022), 0.02, 'plaster', bevel=0)
+    b.beam((-0.52, -0.06, 0.0), (0.52, -0.06, 0.0), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
+    _lash(b, -0.38, -0.06, 0.0, r=0.055, h=0.09)
+    _lash(b, 0.38, -0.06, 0.0, r=0.055, h=0.09)
+    pts = [
+        (-0.42, -0.07, -0.02), (0.42, -0.07, -0.02),
+        (0.40, -0.09, -1.18), (0.22, -0.08, -0.98),
+        (0.0, -0.09, -1.32), (-0.22, -0.08, -0.98),
+        (-0.40, -0.09, -1.18),
+    ]
+    b.extrude(pts, (0, -0.03, 0), 'cloth_red')
+    # Skull & crossbones emblem on the front face
+    b.box((-0.13, -0.115, -0.52), (0.13, -0.095, -0.26), 'plaster')
+    b.box((-0.08, -0.115, -0.62), (0.08, -0.095, -0.50), 'plaster')
+    for eye_x in (-0.055, 0.055):
+        b.box((eye_x - 0.025, -0.12, -0.44), (eye_x + 0.025, -0.09, -0.36), 'iron')
+    b.beam((-0.24, -0.11, -0.86), (0.24, -0.11, -0.58), (0, 1, 0), (-0.015, 0.015), 0.04, 'plaster')
+    b.beam((-0.24, -0.11, -0.58), (0.24, -0.11, -0.86), (0, 1, 0), (-0.015, 0.015), 0.04, 'plaster')
     return b
 
 
-# -- Swamp terrain, stilt boardwalks & rope bridges ---------------------------
+# ---------------------------------------------------------------------------
+# Swamp Water, Stilt Boardwalks, Ramps, Ladders & Rope Suspension Bridges
+# ---------------------------------------------------------------------------
 
 def tile_swamp():
-    """2 x 2 m murky swamp water tile over dark mud with reed tufts and rotten stakes."""
+    """2x2 m murky swamp water tile with marsh reed clumps and floating lily pads."""
     b = MeshBuilder()
-    b.box((0, 0, -0.25), (GRID, GRID, -0.04), 'bark', bevel=0, skip=('-z',))
-    b.box((0, 0, -0.04), (GRID, GRID, 0.0), 'water', bevel=0, skip=('-x', '+x', '-y', '+y', '-z'))
+    b.poly([(0, 0, 0), (GRID, 0, 0), (GRID, GRID, 0), (0, GRID, 0)], 'water', outward=(0, 0, 1))
+    reeds = [(0.32, 0.38, 0.55), (0.42, 0.30, 0.48), (1.62, 1.48, 0.62), (1.70, 1.36, 0.45)]
+    for rx, ry, rh in reeds:
+        b.beam((rx, ry, -0.05), (rx + 0.04, ry - 0.03, rh),
+               (0, 1, 0), (-0.015, 0.015), 0.03, 'foliage')
     if detailed():
-        # Swamp reed clump and lily pads
-        for rx, ry in ((0.32, 0.38), (0.42, 0.28), (1.65, 1.55)):
-            b.beam((rx, ry, -0.05), (rx + 0.04, ry - 0.03, 0.55), (1, 0, 0),
-                   (-0.015, 0.015), 0.03, 'grass', bevel=0)
-        b.blob((1.35, 0.65, 0.005), 0.18, 'foliage', subdiv=1, squash=(1.2, 1.0, 0.08), jitter=0.1, seed=13)
+        for lx, ly, lr in ((0.85, 1.35, 0.16), (1.35, 0.55, 0.13)):
+            b.lathe([(0.0, 0.01), (lr, 0.01), (lr, 0.025), (0.0, 0.025)], 7,
+                    'grass', m=_at(lx, ly), smooth=False)
     return b
 
 
 def tile_boardwalk():
-    """2 x 2 m goblin boardwalk deck: uneven weathered planks over heavy log bearers."""
+    """2x2 m uneven weathered plank boardwalk deck laid over heavy log stringers."""
     b = MeshBuilder()
-    # Two cross-bearer logs
-    for y in (0.35, 1.65):
-        b.beam((0.0, y, -0.18), (GRID, y, -0.18), (0, 1, 0), (-0.08, 0.08), 0.14, 'bark', bevel=0)
-    # 6 uneven deck planks running across Y
-    plank_w = GRID / 6
-    for i in range(6):
-        x0 = i * plank_w + 0.015
-        x1 = (i + 1) * plank_w - 0.015
-        z_off = 0.01 if i % 2 == 0 else 0.0
-        b.box((x0, 0.02, -0.08), (x1, GRID - 0.02, z_off), 'planks')
+    for y in (0.28, 1.72):
+        b.box((0, y - 0.08, -0.16), (GRID, y + 0.08, -0.02), 'bark', skip=('-x', '+x'))
+    n_planks = 6
+    step = GRID / n_planks
+    for i in range(n_planks):
+        x0 = i * step + 0.015
+        x1 = (i + 1) * step - 0.015
+        dy = (0.04 if i % 2 == 0 else -0.03)
+        dz = (0.012 if i % 3 == 0 else 0.0)
+        b.box((x0, max(0.0, dy), -0.04 + dz), (x1, min(GRID, GRID + dy), 0.02 + dz), 'planks')
     return b
 
 
 def stilt_wall(pillar=False):
-    """Open timber stilt pilings supporting a terrace edge (span X 0..GRID, height TERRACE).
-    When `pillar` is True, hangs a warm iron lantern under the boardwalk edge."""
+    """Open timber stilt pilings and diagonal cross-braces supporting a boardwalk terrace edge."""
     b = MeshBuilder()
-    seg = 7 if detailed() else 5
-    for x in (0.18, 1.82):
-        b.lathe([(0.12, 0.0), (0.10, TERRACE)], seg, 'bark', m=_at(x, 0.16), smooth=False)
-        if detailed():
-            _lash(b, x, 0.16, TERRACE - 0.18, 0.12, 0.14)
-    # Top ledger log and diagonal cross-bracing poles
-    b.beam((0.0, 0.16, TERRACE - 0.14), (GRID, 0.16, TERRACE - 0.14), (0, 1, 0),
-           (-0.08, 0.08), 0.14, 'bark', bevel=0)
-    b.beam((0.18, 0.16, 0.1), (1.82, 0.16, TERRACE - 0.14), (0, 1, 0),
-           (-0.05, 0.05), 0.09, 'bark', bevel=0)
-    b.beam((1.82, 0.16, 0.1), (0.18, 0.16, TERRACE - 0.14), (0, 1, 0),
-           (-0.05, 0.05), 0.09, 'bark', bevel=0)
+    b.box((0, -0.08, TERRACE - 0.16), (GRID, 0.24, TERRACE), 'bark', skip=('-x', '+x'))
+    for x in (0.25, 1.75):
+        b.lathe([(0.11, -0.35), (0.10, TERRACE)], 6, 'bark', m=_at(x, 0.06), smooth=False)
+        _lash(b, x, 0.06, TERRACE - 0.22, r=0.115, h=0.14)
+    b.beam((0.25, 0.06, 0.05), (1.75, 0.06, TERRACE - 0.18), (0, 1, 0), (-0.04, 0.04), 0.09, 'bark')
+    b.beam((1.75, 0.06, 0.05), (0.25, 0.06, TERRACE - 0.18), (0, 1, 0), (-0.04, 0.04), 0.09, 'bark')
     if pillar:
-        # Protruding log arm with hanging swamp lantern (matches left foreground of reference!)
-        b.beam((1.0, 0.25, TERRACE - 0.18), (1.0, -0.22, TERRACE - 0.22), (1, 0, 0),
-               (-0.045, 0.045), 0.09, 'bark', bevel=0)
-        b.box((0.99, -0.18, TERRACE - 0.48), (1.01, -0.16, TERRACE - 0.20), 'cloth_cream', bevel=0)
-        b.lathe([(0.08, TERRACE - 0.78), (0.12, TERRACE - 0.62), (0.09, TERRACE - 0.48)],
-                6, 'iron', m=_at(1.0, -0.17), smooth=False)
-        b.blob((1.0, -0.17, TERRACE - 0.64), 0.075, 'glow', subdiv=1, jitter=0, seed=5)
+        b.lathe([(0.14, -0.35), (0.12, TERRACE + 0.85)], 7 if detailed() else 5,
+                'bark', m=_at(1.0, -0.12), smooth=False)
+        _lash(b, 1.0, -0.12, TERRACE - 0.10, r=0.135, h=0.16)
+        b.beam((1.0, -0.12, TERRACE + 0.45), (1.0, -0.46, TERRACE + 0.35),
+               (1, 0, 0), (-0.03, 0.03), 0.06, 'bark')
+        b.lathe([(0.0, TERRACE + 0.02), (0.09, TERRACE + 0.06),
+                 (0.11, TERRACE + 0.24), (0.0, TERRACE + 0.32)], 6,
+                'iron', m=_at(1.0, -0.44))
+        b.lathe([(0.0, TERRACE + 0.08), (0.07, TERRACE + 0.12),
+                 (0.07, TERRACE + 0.22), (0.0, TERRACE + 0.25)], 6,
+                'glow', m=_at(1.0, -0.44))
     return b
 
 
 def boardwalk_edge():
-    """Lashed log curb along the edge of an elevated boardwalk platform."""
+    """Bound log curb along the outer edge of an elevated stilt boardwalk."""
     b = MeshBuilder()
-    b.beam((0.0, 0.12, 0.0), (GRID, 0.12, 0.02), (0, 1, 0), (-0.09, 0.09), 0.14, 'bark', bevel=0)
-    if detailed():
-        _lash(b, 0.22, 0.12, 0.05, 0.10, 0.12)
-        _lash(b, GRID - 0.22, 0.12, 0.05, 0.10, 0.12)
+    b.beam((0, 0.08, 0.04), (GRID, 0.08, 0.04), (0, 1, 0), (-0.09, 0.09), 0.14, 'bark')
+    for x in (0.45, 1.55):
+        _lash(b, x, 0.08, 0.04, r=0.095, h=0.12)
     return b
 
 
 def railing_goblin():
-    """Crooked bark posts with lashed pole rail and sagging rope line."""
+    """Crooked peeled-bark stake and sagging rope railing along boardwalks."""
     b = MeshBuilder()
-    for x, tilt in ((0.12, -0.03), (1.0, 0.02), (GRID - 0.12, -0.02)):
-        b.beam((x, 0.18, 0.0), (x + tilt, 0.16, 1.02), (0, 1, 0), (-0.055, 0.055), 0.11, 'bark', bevel=0)
-        if detailed():
-            _lash(b, x + tilt * 0.8, 0.16, 0.86, 0.07, 0.10)
-    # Top pole rail and sagging middle rope
-    b.beam((0.0, 0.16, 0.86), (GRID, 0.16, 0.88), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-    b.beam((0.0, 0.16, 0.48), (1.0, 0.16, 0.38), (0, 1, 0), (-0.02, 0.02), 0.04, 'cloth_cream', bevel=0)
-    b.beam((1.0, 0.16, 0.38), (GRID, 0.16, 0.48), (0, 1, 0), (-0.02, 0.02), 0.04, 'cloth_cream', bevel=0)
+    for x, tilt in ((0.12, 0.04), (1.05, -0.05), (GRID - 0.12, 0.03)):
+        b.beam((x, 0.16, -0.08), (x + tilt, 0.14, 0.96), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+        _lash(b, x + tilt * 0.8, 0.15, 0.80, r=0.065, h=0.10)
+    b.beam((0.0, 0.15, 0.80), (1.05, 0.14, 0.72), (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
+    b.beam((1.05, 0.14, 0.72), (GRID, 0.15, 0.80), (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
+    b.beam((0.0, 0.15, 0.42), (GRID, 0.15, 0.38), (0, 1, 0), (-0.02, 0.02), 0.04, 'cloth_cream')
     return b
 
 
 def stairs_boardwalk(units):
-    """Rough log-and-plank boardwalk stair ramp climbing `units` terrace levels (+Y)."""
+    """Sloped log-and-plank boardwalk ramp climbing `units * TERRACE` over `(units + 1) * GRID`."""
     b = MeshBuilder()
-    run = (units + 1) * GRID
     rise = units * TERRACE
-    steps = units * 9
-    # Two heavy inclined log stringers + support pilings
-    for x in (0.14, GRID - 0.14):
-        b.beam((x, 0.0, 0.0), (x, run, rise), (1, 0, 0), (-0.08, 0.08), 0.16, 'bark', bevel=0)
-        b.beam((x, 0.1, 0.95), (x, run - 0.1, rise + 0.95), (1, 0, 0), (-0.04, 0.04), 0.08, 'bark', bevel=0)
-        for p_y, p_z in ((0.15, 0.95), (run / 2, rise / 2 + 0.95), (run - 0.15, rise + 0.95)):
-            b.beam((x, p_y, p_z - 0.98), (x, p_y, p_z + 0.06), (1, 0, 0),
-                   (-0.045, 0.045), 0.09, 'bark', bevel=0)
+    run = (units + 1) * GRID
+    steps = units * 8
+    for sx in (0.18, GRID - 0.18):
+        b.beam((sx, 0.0, -0.05), (sx, run, rise - 0.05), (1, 0, 0), (-0.08, 0.08), 0.18, 'bark')
+        b.beam((sx, run * 0.5, -0.35), (sx, run * 0.5, rise * 0.5),
+               (0, 1, 0), (-0.07, 0.07), 0.14, 'bark')
+        b.beam((sx, 0.08, 0.0), (sx, 0.08, 0.92), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+        b.beam((sx, run - 0.08, rise), (sx, run - 0.08, rise + 0.92),
+               (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
+        b.beam((sx, 0.08, 0.78), (sx, run - 0.08, rise + 0.78),
+               (1, 0, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
     for i in range(steps):
-        y0 = i * (run / steps)
-        y1 = y0 + (run / steps) * 0.92
-        z1 = (i + 1) * (rise / steps)
-        b.box((0.10, y0, z1 - 0.10), (GRID - 0.10, y1, z1), 'planks')
+        t0 = i / steps
+        t1 = (i + 0.82) / steps
+        y0, y1 = t0 * run, t1 * run
+        z = (i + 0.5) / steps * rise
+        b.box((0.06, y0, z - 0.04), (GRID - 0.06, y1, z + 0.04), 'planks')
     return b
 
 
-def rope_bridge(cells=3):
-    """Sagging rope-and-plank suspension bridge spanning `cells * GRID` m along +X,
-    width GRID (2 m) along Y, with tall lashed anchor posts at both ends."""
+def goblin_ladder():
+    """3 m lashed bark-pole ladder for climbing stilt frames and watchtower decks."""
     b = MeshBuilder()
-    span = cells * GRID
-    # End anchor posts with rope lashings and torches
-    for x in (0.12, span - 0.12):
-        for y in (0.16, GRID - 0.16):
-            b.beam((x, y, -0.4), (x, y, 1.45), (1, 0, 0), (-0.08, 0.08), 0.16, 'bark', bevel=0)
-            _lash(b, x, y, 1.15, 0.10, 0.14)
-    # Catenary sag curve along X
-    slats = cells * 7
-    dx = span / slats
-    def sag(x):
-        u = (x / span) * 2.0 - 1.0
-        return -0.32 * (1.0 - u * u)
+    for sx in (-0.28, 0.28):
+        b.beam((sx, 0.0, 0.0), (sx, 0.0, STORY + 0.35), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
+    for i in range(9):
+        z = 0.25 + i * 0.34
+        b.beam((-0.32, -0.04, z), (0.32, -0.04, z + (i % 2 - 0.5) * 0.03),
+               (0, 0, 1), (-0.025, 0.025), 0.05, 'bark')
+    return b
 
-    for i in range(slats):
-        x0 = i * dx + 0.03
-        x1 = (i + 1) * dx - 0.03
-        xm = (x0 + x1) / 2
-        z = sag(xm)
-        # Plank slat
-        b.box((x0, 0.18, z - 0.05), (x1, GRID - 0.18, z + 0.01), 'planks')
-        # Twin bottom suspension ropes, handrail ropes, and vertical hangers
-        if i + 1 < slats:
-            xn = xm + dx
-            zn = sag(xn)
-            for y in (0.22, GRID - 0.22):
-                b.beam((xm, y, z - 0.06), (xn, y, zn - 0.06), (0, 1, 0),
-                       (-0.022, 0.022), 0.04, 'cloth_cream', bevel=0)
-                b.beam((xm, y, z + 0.92), (xn, y, zn + 0.92), (0, 1, 0),
-                       (-0.025, 0.025), 0.05, 'cloth_cream', bevel=0)
-        if detailed() and i % 2 == 1:
-            for y in (0.22, GRID - 0.22):
-                b.box((xm - 0.012, y - 0.012, z - 0.04), (xm + 0.012, y + 0.012, z + 0.92),
-                      'cloth_cream', bevel=0)
+
+def rope_bridge(span=4.0, depth=2.0, height=3.0):
+    """Sagging rope-and-plank suspension bridge spanning `span` m along X at z=height."""
+    b = MeshBuilder()
+    sag_max = 0.28 if span <= 4.0 else 0.55
+
+    def sag_z(x):
+        u = (x / span) * 2.0 - 1.0
+        return height - sag_max * (1.0 - u * u)
+
+    for px in (0.14, span - 0.14):
+        for py in (0.14, depth - 0.14):
+            b.lathe([(0.13, -0.3), (0.11, height + 1.35)], 6, 'bark', m=_at(px, py), smooth=False)
+            _lash(b, px, py, height + 0.92, r=0.12, h=0.16)
+            if detailed():
+                b.blob((px, py, height + 1.44), 0.10, 'plaster', subdiv=1,
+                       squash=(0.85, 0.9, 1.15), jitter=0.04, seed=int(px * 10 + py))
+
+    n_planks = int(span * 3.5)
+    dx = span / n_planks
+    for i in range(n_planks):
+        xm = (i + 0.5) * dx
+        z = sag_z(xm)
+        b.box((xm - dx * 0.38, 0.16, z - 0.04), (xm + dx * 0.38, depth - 0.16, z + 0.03), 'planks')
+
+    segs = 8 if span <= 4.0 else 14
+    for k in range(segs):
+        x0 = k * span / segs
+        x1 = (k + 1) * span / segs
+        z0, z1 = sag_z(x0), sag_z(x1)
+        for py in (0.14, depth - 0.14):
+            b.beam((x0, py, z0 - 0.04), (x1, py, z1 - 0.04),
+                   (0, 1, 0), (-0.03, 0.03), 0.06, 'cloth_cream')
+            b.beam((x0, py, z0 + 0.92), (x1, py, z1 + 0.92),
+                   (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
+            if k > 0:
+                b.beam((x0, py, z0 - 0.02), (x0, py, z0 + 0.92),
+                       (0, 1, 0), (-0.015, 0.015), 0.03, 'cloth_cream')
     return b
 
 
@@ -439,18 +601,25 @@ def define(kit):
     kit.define('Wall_Goblin', 'walls', wall_goblin())
     kit.define('Wall_Goblin_Window', 'walls', wall_goblin(window=True))
     kit.define('Wall_Goblin_Door', 'walls', wall_goblin(door=True))
-    kit.define('Wall_Goblin_Arcade', 'walls', wall_goblin(open_front=True))
+    kit.define('Wall_Goblin_Arcade', 'walls', wall_goblin(arcade=True))
+    kit.define('Wall_Goblin_Frame', 'walls', wall_goblin_frame())
     kit.define('Corner_Goblin', 'walls', corner_goblin())
-    kit.define('Plinth_Stilts', 'foundations', plinth_stilts(0.6))
-    kit.define('Plinth_Stilts_Corner', 'foundations', plinth_stilts_corner(0.6))
-    kit.define('Entry_Steps_Stilts', 'foundations', entry_steps_stilts(0.6))
+
+    kit.define('Plinth_Stilts', 'foundations', plinth_stilts())
+    kit.define('Plinth_Stilts_Corner', 'foundations', plinth_stilts_corner())
+    kit.define('Entry_Steps_Stilts', 'foundations', entry_steps_stilts())
+
     for span in (4, 6):
-        kit.define(f'Roof_Goblin_S{span}', 'roofs', roof_goblin_section(span))
-        kit.define(f'Roof_Goblin_End_S{span}', 'roofs', roof_goblin_section(span, END_LEN, end=True))
-        kit.define(f'Gable_Wall_Goblin_S{span}', 'roofs', gable_wall_goblin(span))
+        key = f'S{span}'
+        kit.define(f'Roof_Goblin_{key}', 'roofs', roof_goblin_section(span))
+        kit.define(f'Roof_Goblin_End_{key}', 'roofs', roof_goblin_end(span))
+        kit.define(f'Gable_Wall_Goblin_{key}', 'roofs', gable_wall_goblin(span))
         kit.define(f'Roof_Goblin_Hut_{span}', 'roofs', roof_goblin_hut(span))
+
     kit.define('Goblin_Awning', 'accents', goblin_awning())
+    kit.define('Goblin_Tarp_Canopy', 'accents', goblin_tarp_canopy())
     kit.define('Banner_Goblin_Skull', 'accents', banner_goblin_skull())
+
     kit.define('Tile_Swamp', 'terrain', tile_swamp())
     kit.define('Tile_Boardwalk', 'terrain', tile_boardwalk())
     kit.define('Stilt_Wall', 'terrain', stilt_wall(pillar=False))
@@ -459,4 +628,6 @@ def define(kit):
     kit.define('Railing_Goblin', 'terrain', railing_goblin())
     kit.define('Stairs_Boardwalk_1', 'terrain', stairs_boardwalk(1))
     kit.define('Stairs_Boardwalk_2', 'terrain', stairs_boardwalk(2))
-    kit.define('Rope_Bridge', 'terrain', rope_bridge(3))
+    kit.define('Goblin_Ladder', 'terrain', goblin_ladder())
+    kit.define('Rope_Bridge', 'terrain', rope_bridge(span=4.0))
+    kit.define('Rope_Bridge_Long', 'terrain', rope_bridge(span=8.0))

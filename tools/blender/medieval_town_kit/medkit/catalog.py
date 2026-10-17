@@ -40,10 +40,16 @@ def _layout(kit):
 
 def build_kit():
     kit = Kit()
+    goblin_names = {'Plinth_Stilts', 'Plinth_Stilts_Corner', 'Entry_Steps_Stilts'}
     for family in FAMILIES:
+        before = set(kit.modules.keys())
         family.define(kit)
+        if family in (goblin, goblin_props):
+            goblin_names |= set(kit.modules.keys()) - before
     for name in INTERIOR & kit.modules.keys():
         kit.modules[name]['kit_interior'] = True
+    for name in goblin_names & kit.modules.keys():
+        kit.modules[name]['kit_goblin'] = True
     _layout(kit)
-    print(f'[kit] {len(kit.modules)} modules defined')
+    print(f'[kit] {len(kit.modules)} modules defined ({len(goblin_names)} goblin lego modules)')
     return kit
