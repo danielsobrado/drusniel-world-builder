@@ -251,6 +251,14 @@ loading can change the scene to a cheaper or more expensive fallback. Capture
 against frozen runtime sources: an HMR reload can change the workload and clear
 caches during a run.
 
+Headed performance captures also activate their own test window and retain
+`capture.focus`. Losing foreground focus invalidates the capture. A background
+window can produce different CPU/render scheduling despite the frame-rate and
+background-throttling flags. The Windows fallback activates only the browser
+identified through the current Playwright connection. It does not close or
+modify other windows. Keep that test window foreground during movement and
+recovery; a failed focus record is not an engine timing result.
+
 The runner rejects software/fallback adapters. Headless Chromium commonly fails
 that gate on Windows, so use `--headed` for comparisons. `--cpu-profile` writes
 a Chrome sampled CPU profile alongside the JSON without making profiling the

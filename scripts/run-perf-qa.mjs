@@ -145,6 +145,8 @@ const fs = require('fs');
     page.on('pageerror', error => console.error('Perf QA browser error:', error.stack ?? error.message));
     await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
+    const { focusPerfBrowser } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
+    const captureFocus = await focusPerfBrowser(browser, page, { headed: ${hasFlag('headed')} });
 
     const rendererBackend = await page.evaluate(() => {
       const canvas = document.querySelector(
@@ -399,9 +401,14 @@ const fs = require('fs');
     };
     ${screenshotPath === null ? '' : `await page.screenshot({ path: ${JSON.stringify(screenshotPath.replace(/\\/g, '/'))} });`}
     report.capture.browserErrors = browserErrors.snapshot();
+    report.capture.focus = await captureFocus();
     fs.writeFileSync(${JSON.stringify(outPath.replace(/\\/g, '/'))}, JSON.stringify(report, null, 2) + '\\n');
     if (report.capture.browserErrors.count > 0) {
       console.error('Perf QA invalid: browser errors occurred; inspect capture.browserErrors in the saved report.');
+      process.exitCode = 1;
+    }
+    if (!report.capture.focus.passed) {
+      console.error('Perf QA invalid: the headed browser lost foreground focus; inspect capture.focus.');
       process.exitCode = 1;
     }
     console.log(JSON.stringify({

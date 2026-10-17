@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 import { WaterAcceptanceTracker } from '../src/editor/performance/qa/WaterAcceptance.js';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
+import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'tmp');
@@ -371,6 +372,7 @@ async function main() {
     const measuredUrl = new URL(baseUrl);
     for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
     await page.goto(measuredUrl.href, { waitUntil: 'domcontentloaded' });
+    const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(({ x, z }) => {
       const focus = window.__editor?.controller?.focusProvider?.();
       return focus && Math.hypot(focus.x - x, focus.z - z) < 2;
@@ -454,7 +456,7 @@ async function main() {
       waterAcceptance: acceptance,
       gpuValidationErrorCount,
       gpuValidationErrors,
-      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot() },
+      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot(), focus: await captureFocus() },
       phases: {
         enterSeconds: entry.elapsedSeconds,
         entryReachedTarget: entry.reached,
@@ -472,7 +474,7 @@ async function main() {
       outPath: OUT_PATH,
       adapter,
       performanceAuthoritative: authoritativePerformance,
-      pass: acceptance.pass && gpuValidationErrorCount === 0 && report.capture.browserErrors.count === 0,
+      pass: acceptance.pass && gpuValidationErrorCount === 0 && report.capture.browserErrors.count === 0 && report.capture.focus.passed,
       gates: acceptance.gates,
       metrics: acceptance.metrics,
       frameP95Ms: perfReport.summary.dt.p95Ms,
@@ -481,7 +483,7 @@ async function main() {
       gpuValidationErrors: gpuValidationErrors.slice(0, 4),
     }, null, 2));
 
-    if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0) process.exitCode = 1;
+    if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0 || !report.capture.focus.passed) process.exitCode = 1;
   } finally {
     await browser?.close();
     releaseBrowserLock();
