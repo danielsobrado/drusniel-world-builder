@@ -8,6 +8,7 @@ import {worldWindUniforms} from '/src/editor/weather/wind/worldWindState.js';
 import {installUnusedSamplerPruning} from '/src/render/UnusedSamplerBindings.js';
 import {raiseDeviceLimits} from '/src/render/deviceLimits.js';
 import {runTerrainSubstrateSwatches} from './world-visual-substrates.mjs';
+import {runRockSwatches} from './world-visual-rocks.mjs';
 import {applyFixtureLighting} from './world-visual-fixture-lighting.mjs';
 const backend=new URLSearchParams(location.search).get('backend')??'webgpu';
 const requiredLimits=backend==='webgpu'?await raiseDeviceLimits({}, {powerPreference:'high-performance'}):{};
@@ -128,6 +129,7 @@ try {
   applyFixtureLighting(raw,sun,fill,fixtureLight);
   await runTerrainSubstrateSwatches({raw,scene,camera,draw,state});
  }
+ await runRockSwatches({raw,renderer,scene,camera,draw,state});
  state.report.passed=state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}
 finally {target.dispose();state.report.done=true;}

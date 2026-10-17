@@ -51,7 +51,7 @@ const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
  * PBR response (roughness, metalness and flat shading); deleting the map turns
  * its warm, painted rocks into featureless silhouettes.
  */
-function cloneMaterial(mesh, config, weathering) {
+export function createStylizedRockMaterial(mesh, config, weathering) {
   const source = materialList(mesh)[0];
   const material = cloneAuthoredNodeMaterial(source);
   if ('roughness' in material) material.roughness = 1;
@@ -60,8 +60,7 @@ function cloneMaterial(mesh, config, weathering) {
     material.color = new THREE.Color(config.rocks.color);
   }
   material.flatShading = true;
-  // Moss, shaded undersides and a toned albedo, so the near-white pack stops
-  // reading as plastic dropped on the grass.
+  // Preserve painted planes while adding moss, local wetness and contact tone.
   if (weathering) {
     applyRockWeathering(material, {
       settings: weathering.settings,
@@ -206,7 +205,7 @@ export class StylizedRockView {
     this.prototypeBiomeRulesSignature = JSON.stringify(this.prototypeBiomeRules);
     const newPrototypes = extracted.map(({ geometry, source }) => ({
       geometry,
-      material: cloneMaterial(source, this.config, this.rockWeathering()),
+      material: createStylizedRockMaterial(source, this.config, this.rockWeathering()),
       kind: 'rock',
       instanceSurface: Boolean(this.rockWeatheringSettings),
     }));
