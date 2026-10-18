@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {createVisualSyntheticDocument,selectVisualSyntheticRoute,VISUAL_SYNTHETIC} from '../src/editor/performance/qa/WorldVisualSynthetic.js';
 import {InfiniteWorldStore} from '../src/editor/world/InfiniteWorldStore.js';
+import {createSweptCapsuleAabb} from '../src/editor/collision/colliders/ColliderBounds.js';
 
 test('synthetic fixture is a bounded 256 m authored grass/forest world with exact flat heights',()=>{
  const store=new InfiniteWorldStore({chunkSize:64,tileSize:2}),original={...store.toDocument(),objects:[]};
@@ -14,7 +15,7 @@ test('synthetic fixture is a bounded 256 m authored grass/forest world with exac
 });
 test('synthetic corridor selection checks production collision readiness and rejects occupied lanes',()=>{
  const seen=[],editor={playerController:{config:{walkSpeed:9,runMultiplier:1.8},collisionRuntime:{
-  checkMovementReadiness:()=>({ready:true}),querySweptCapsule:query=>{seen.push(query);return seen.length===1?[{sourceId:'rock'}]:[];}}}};
+  checkMovementReadiness:query=>{assert.doesNotThrow(()=>createSweptCapsuleAabb(query));return {ready:true};},querySweptCapsule:query=>{seen.push(query);return seen.length===1?[{sourceId:'rock'}]:[];}}}};
  const route=selectVisualSyntheticRoute(editor);
  assert.equal(route.startPose.x,VISUAL_SYNTHETIC.centerX-110);assert.equal(route.attempts.length,2);
  assert.equal(route.length,100.8);assert.equal(seen[1].radius,1);

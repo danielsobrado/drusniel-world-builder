@@ -24,6 +24,15 @@ try {
  for(const c of cases.filter(c=>!only||only.includes(c.id))) {
   console.log(`Motion QA: ${c.id}`);
   const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});await observeVisualAudio(context);page=await context.newPage();errors=createBrowserErrorMonitor(page);
+  if(c.startPose.synthetic) {
+   // QA setup is supplied independently of frozen production imports. Record
+   // the exact helper so a harness correction does not alter the tested engine.
+   const file='src/editor/performance/qa/WorldVisualSynthetic.js';
+   report.fixtureOverrides??={};report.fixtureOverrides[file]=await fileHash(path.join(repo,file));
+   await page.route('**/src/editor/performance/qa/WorldVisualSynthetic.js*',async route=>{
+    await route.fulfill({body:await readFile(path.join(repo,file),'utf8'),contentType:'text/javascript'});
+   });
+  }
   const clipDir=path.join(out,c.id),framesDir=path.join(clipDir,'frames');await mkdir(framesDir,{recursive:true});
   let recording=false;
   try {

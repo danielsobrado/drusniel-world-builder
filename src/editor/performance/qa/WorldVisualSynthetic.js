@@ -25,8 +25,11 @@ export function selectVisualSyntheticRoute(editor) {
  const length=player.config.walkSpeed*4*(1+player.config.runMultiplier),attempts=[];
  for(let x=centerX-112;x<=centerX-16;x+=2) {
   const start={x,y:height,z:centerZ+100},end={x,y:height,z:start.z-length-2};
-  const readiness=runtime.checkMovementReadiness({start,end,radius:1,bodyHeight:2});
-  const colliders=runtime.querySweptCapsule({start,end,radius:1,bodyHeight:2,layers:COLLISION_LAYERS.blocking|COLLISION_LAYERS.walkable});
+  // Keep the conservative one-metre clearance, with a valid capsule whose
+  // height exceeds its diameter (the production collider rejects a sphere).
+  const capsule={start,end,radius:1,bodyHeight:2.2};
+  const readiness=runtime.checkMovementReadiness(capsule);
+  const colliders=runtime.querySweptCapsule({...capsule,layers:COLLISION_LAYERS.blocking|COLLISION_LAYERS.walkable});
   attempts.push({x,ready:readiness.ready,candidates:colliders.map(c=>c.sourceId)});
   if(readiness.ready&&colliders.length===0)return {startPose:{id:'synthetic-open-ground',x,z:start.z,yaw:0,pitch:-.08,mode:'player',expectedBiomeId:4},length,clearanceMeters:1,attempts};
  }
