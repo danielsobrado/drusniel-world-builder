@@ -1,3 +1,4 @@
+import { TownDoorIndex } from './TownDoorIndex.js';
 const OPEN_SPEED = Math.PI * 1.2;
 const DEFAULT_REACH = 2.4;
 const VERTICAL_REACH = 1.6;
@@ -15,6 +16,8 @@ export class TownDoorController {
     this.collisionSource = collisionSource;
     this.reach = reach;
     this.focused = null;
+    this.indices = new WeakMap();
+    this.moving = new Map();
   }
 
   /** Nearest door within reach of a canonical position, or null. */
@@ -22,14 +25,17 @@ export class TownDoorController {
     let best = null;
     for (const town of this.streamer.towns.values()) {
       const { anchor } = town.layout;
-      town.layout.doors.forEach((door, index) => {
+      let spatial = this.indices.get(town);
+      if (!spatial) this.indices.set(town, spatial = new TownDoorIndex(town.layout.doors));
+      for (const index of spatial.near(position.x - anchor.x, position.z - anchor.z, this.reach)) {
+        const door = town.layout.doors[index];
         const dx = anchor.x + door.centre[0] - position.x;
         const dz = anchor.z + door.centre[2] - position.z;
         const dy = door.centre[1] - 1 - position.y;
         const distance = Math.hypot(dx, dz);
-        if (distance > this.reach || Math.abs(dy) > VERTICAL_REACH) return;
+        if (distance > this.reach || Math.abs(dy) > VERTICAL_REACH) continue;
         if (!best || distance < best.distance) best = { town, index, distance };
-      });
+      }
     }
     return best;
   }
@@ -50,6 +56,8 @@ export class TownDoorController {
     const door = town.layout.doors[index];
     const opening = !this.isOpen(target);
     town.doorTargets[index] = opening ? door.openYaw : 0;
+    if (!this.moving.has(town)) this.moving.set(town, new Set());
+    this.moving.get(town).add(index);
     if (opening) {
       this.collisionSource?.setBoxEnabled(this.streamer.ownerId(town.id), door.box, false);
     }
@@ -58,20 +66,23 @@ export class TownDoorController {
 
   update(deltaSeconds) {
     const step = OPEN_SPEED * Math.max(0, deltaSeconds);
-    for (const town of this.streamer.towns.values()) {
+    for (const [town, indices] of this.moving) {
+      if (this.streamer.towns.get(town.id) !== town) { this.moving.delete(town); continue; }
       const { doorAngles, doorTargets } = town;
-      for (let index = 0; index < doorAngles.length; index += 1) {
+      for (const index of indices) {
         const target = doorTargets[index];
         const angle = doorAngles[index];
-        if (angle === target) continue;
+        if (angle === target) { indices.delete(index); continue; }
         const next = angle < target ? Math.min(target, angle + step) : Math.max(target, angle - step);
         doorAngles[index] = next;
+        if (next === target) indices.delete(index);
         town.mesh.setDoorAngle(index, next);
         if (next === 0 && target === 0) {
           const door = town.layout.doors[index];
           this.collisionSource?.setBoxEnabled(this.streamer.ownerId(town.id), door.box, true);
         }
       }
+      if (indices.size === 0) this.moving.delete(town);
     }
   }
 }

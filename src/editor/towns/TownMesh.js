@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
 import { TOWN_LOD_NEAR } from './TownLod.js';
 import { townLook } from './TownMaterialPalette.js';
@@ -108,7 +109,7 @@ export class TownMesh {
     const matrix = composePlacement(door.hinge[0], door.hinge[1], door.hinge[2], door.yaw + angle);
     for (const mesh of this.doorMeshes) {
       mesh.setMatrixAt(index, matrix);
-      mesh.instanceMatrix.needsUpdate = true;
+      markAttributeSubrangeUpdated(mesh.instanceMatrix, index, index);
     }
   }
 

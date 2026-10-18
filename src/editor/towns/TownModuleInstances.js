@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
 import { TOWN_LOD_FAR, TOWN_LOD_NEAR, placementsWithin } from './TownLod.js';
 
@@ -70,6 +71,8 @@ export class TownModuleInstances {
     this.nearMeshes = build(near, 'near');
     this.farMeshes = far && !interior ? build(far, 'far') : [];
     this.visibleIndices = interior ? new Uint32Array(this.count) : null;
+    this.previousIndices = interior ? new Uint32Array(this.count).fill(0xffffffff) : null;
+    this.visibleCount = -1;
     this.lod = TOWN_LOD_NEAR;
     this.setLod(TOWN_LOD_NEAR);
   }
@@ -100,18 +103,25 @@ export class TownModuleInstances {
   cull(x, z, radius) {
     if (!this.interior) return;
     const count = placementsWithin(this.values, x, z, radius, this.visibleIndices);
+    let first = count, last = -1;
+    for (let k = 0; k < count; k++) {
+      if (this.previousIndices[k] === this.visibleIndices[k] && k < this.visibleCount) continue;
+      first = Math.min(first, k); last = k;
+    }
     for (const mesh of this.nearMeshes) {
       const matrices = mesh.instanceMatrix.array;
       const colours = mesh.instanceColor?.array;
-      for (let k = 0; k < count; k += 1) {
+      for (let k = first; k <= last; k += 1) {
         const i = this.visibleIndices[k];
         matrices.set(this.matrices.subarray(i * 16, i * 16 + 16), k * 16);
         colours?.set(this.colours.subarray(i * 3, i * 3 + 3), k * 3);
       }
       mesh.count = count;
-      mesh.instanceMatrix.needsUpdate = true;
-      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      markAttributeSubrangeUpdated(mesh.instanceMatrix, first, last);
+      markAttributeSubrangeUpdated(mesh.instanceColor, first, last);
     }
     this.setLod(this.lod);
+    this.previousIndices.set(this.visibleIndices.subarray(0, count));
+    this.visibleCount = count;
   }
 }

@@ -372,14 +372,19 @@ export function matchTradeOffers(state, definition, { commandId, config, ordinal
   const shipments = [];
   let ordinal = ordinalBase;
   const used = new Set();
+  const sellsByCommodity = new Map();
+  for (const sell of sells) {
+    const commodity = sell.data.commodityId;
+    if (!sellsByCommodity.has(commodity)) sellsByCommodity.set(commodity, []);
+    sellsByCommodity.get(commodity).push(sell);
+  }
 
   for (const buy of buys) {
     if (used.has(buy.id)) continue;
-    for (const sell of sells) {
+    for (const sell of sellsByCommodity.get(buy.data.commodityId) ?? []) {
       if (used.has(sell.id)) continue;
-      if (buy.data.commodityId !== sell.data.commodityId) continue;
       if (buy.data.settlementId === sell.data.settlementId) continue;
-      if (buy.data.limitPrice < sell.data.limitPrice) continue;
+      if (buy.data.limitPrice < sell.data.limitPrice) break;
       const quantity = Math.min(buy.data.quantity, sell.data.quantity);
       if (quantity <= 0) continue;
       try {

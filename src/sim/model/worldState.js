@@ -1,5 +1,6 @@
 import { ENTITY_KINDS } from './entityKinds.js';
 import { createEntityEnvelope } from './entityEnvelope.js';
+import { RevisionedMap } from './RevisionedMap.js';
 
 const entityListCache = new WeakMap();
 const cloneBaseState = new WeakMap();
@@ -41,7 +42,7 @@ export function createEmptyWorldState({
 } = {}) {
   const collections = {};
   for (const kind of ENTITY_KINDS) {
-    collections[collectionNameForKind(kind)] = new Map();
+    collections[collectionNameForKind(kind)] = kind === 'graphEdge' ? new RevisionedMap() : new Map();
   }
   return {
     calendar: { ...calendar },
@@ -83,7 +84,8 @@ function invalidateEntityList(state, kind) {
 function writableCollection(state, kind) {
   const key = collectionNameForKind(kind);
   const base = cloneBaseState.get(state);
-  if (base && state[key] === base[key]) state[key] = new Map(base[key]);
+  if (base && state[key] === base[key]) state[key] = kind === 'graphEdge'
+    ? new RevisionedMap(base[key]) : new Map(base[key]);
   return state[key];
 }
 

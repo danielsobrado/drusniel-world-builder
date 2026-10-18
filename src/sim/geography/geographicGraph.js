@@ -1,3 +1,4 @@
+import { graphAdjacency } from './GraphAdjacency.js';
 import { createAndPutEntity, listEntities, getEntity, upsertEntity } from '../model/worldState.js';
 import { bumpEntity } from '../model/entityEnvelope.js';
 import { generatedEntityId } from '../model/ids.js';
@@ -390,13 +391,7 @@ class PathMinHeap {
 }
 
 export function shortestPath(state, fromNodeId, toNodeId, options = {}) {
-  const edges = listEntities(state, 'graphEdge', { includeDestroyed: false })
-    .filter((e) => e.data.enabled !== false);
-  const adjacency = new Map();
-  for (const edge of edges) {
-    if (!adjacency.has(edge.data.fromNodeId)) adjacency.set(edge.data.fromNodeId, []);
-    adjacency.get(edge.data.fromNodeId).push(edge);
-  }
+  const adjacency = graphAdjacency(state.graphEdges);
 
   const distMap = new Map([[fromNodeId, 0]]);
   const prev = new Map();
@@ -409,6 +404,7 @@ export function shortestPath(state, fromNodeId, toNodeId, options = {}) {
     if (current.id === toNodeId) break;
     if (current.cost > (distMap.get(current.id) ?? Infinity)) continue;
     for (const edge of adjacency.get(current.id) ?? []) {
+      if (edge.data.enabled === false) continue;
       const cost = edgeTravelCost(edge, options);
       if (!Number.isFinite(cost)) continue;
       const nextCost = current.cost + cost;
