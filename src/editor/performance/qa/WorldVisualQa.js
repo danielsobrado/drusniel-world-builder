@@ -6,11 +6,12 @@ import { trackedWorldResources } from './WorldVisualResources.js';
 import { treeImpostorIntegrity } from '../../stylized/impostor/TreeImpostorIntegrity.js';
 import { worldVisualNeighborhood } from './WorldVisualNeighborhood.js';
 import { setWaterTimeOverride } from '../../water/WaterVisualClock.js';
+import { WorldVisualLayerControls, worldVisualVegetation } from './WorldVisualVegetation.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
 export class WorldVisualQa {
-  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION; }
+  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION;this.layers=new WorldVisualLayerControls(editor); }
   async loadWorld(name) {
     if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
     const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');
@@ -33,6 +34,7 @@ export class WorldVisualQa {
     const {visualSyntheticResidency}=await import('./WorldVisualSynthetic.js');return visualSyntheticResidency(this.editor);
   }
   async cut(pose) {
+    this.layers.restore();
     this.preparedMotion=null;this.motion?.stop(new Error('Visual motion interrupted by a camera cut.'));
     this.editor.playerController.setHarnessActive(true);
     const result=await this.editor.cameraCutCoordinator.cut(pose);
@@ -70,7 +72,9 @@ export class WorldVisualQa {
         ...['grass','flower','tree','rock','bush','detail'].map(name=>[name,e.stylizedSurface[`${name}BuildQueue`]]),
         ['treeManifest',e.stylizedSurface.treeView?.manifestStore?.queue],['rockManifest',e.stylizedSurface.rockView?.manifestStore?.queue],
       ].map(([name,queue])=>[name,queue?.getDiagnostics({includeJobs:true})??null])),resources:trackedWorldResources(e),counters:PerfCounters.snapshot(),
-      sky:e.skyLooks?.current,wind:e.worldWind?.getState?.()??null,weather:{...e.weatherSettings},
+      sky:e.skyLooks?.current,wind:e.worldWind?.getState?.()??(e.worldWind?{
+        time:e.worldWind.time,directionDegrees:e.worldWind.directionDegrees,intensity:e.worldWind.intensity,
+        centerCanonical:{...e.worldWind.centerCanonical},params:{...e.worldWind.params}}:null),weather:{...e.weatherSettings},
       renderPath:e.terrainView.activeRenderPath??'unknown',finishApplications:e.terrainView.finishApplications??0,
       waterReflections:e.stylizedSurface.reflections?.getDiagnostics?.()??null,
       backend:e.terrainView.rendererBackendStatus?.mode,clock:{hour:e.dayNightCycle?.hour,paused:e.dayNightCycle?.paused}};
@@ -92,6 +96,8 @@ export class WorldVisualQa {
   }
   setWaterTime(seconds = null) { setWaterTimeOverride(seconds); }
   neighborhood() { return worldVisualNeighborhood(this.editor); }
+  vegetation(options) { return worldVisualVegetation(this.editor, options); }
+  setLayers(values) { return this.layers.set(values); }
   async prepareMotion({startPose,cameraMode='first-person',sequenceId='walk-sprint-turn-v1'}) {
     if(sequenceId!=='walk-sprint-turn-v1'||!['first-person','third-person'].includes(cameraMode)) throw new Error('Invalid visual motion sequence.');
     await this.cut(startPose);await this.settle();
@@ -139,5 +145,5 @@ export class WorldVisualQa {
     throw new Error('Static sky, lights and fog failed to converge.');
   }
 
-  dispose() {setWaterTimeOverride(null);this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
+  dispose() {this.layers.restore();setWaterTimeOverride(null);this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
 }

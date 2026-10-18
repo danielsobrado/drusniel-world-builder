@@ -19,9 +19,9 @@ attempt in its report. Capture validity is separate from visual acceptance.
 | R2 plant appearance | Explicit material roles for authored flowers; restrained understory grading; procedural flowers use terrain stem pigments and world-space bent normals, cloud shadow and mist | Mixed-light GPU review pending |
 | R3 grass/ground | Persistent stand-weighted substrate occlusion; lighter sparse roots | Ground palette unit tests pass; combined/distance GPU review pending |
 | R4 tree shapes | Leafless dead state; living crown height retained; authored species no longer receive a second narrow/wide squeeze | Morphology/LOD tests pass; same-instance GPU review pending |
-| R5 surfaces/contact | Pending | Pending |
-| R6 habitat composition | Pending | Pending |
-| R7 atmosphere/composition | Pending | Pending |
+| R5 surfaces/contact | Coherent sand ripple districts with quiet gaps; stronger cool mineral substrate in near/far recipes | Backend surface review pending |
+| R6 habitat composition | World-stable flower colonies, biome petal palettes; meadow bouquets excluded from taiga/rainforest | Worker/main parity and custom-palette tests pass; biome rollout pending |
+| R7 atmosphere/composition | Restrained daytime dust glints/pollen; neighborhood/ID survey and persistent layer controls | Air/landscape diagnosis pending; source geography retained |
 | R8 motion/interaction/HUD/sound | Pending | Pending |
 | R9 release/performance | Frozen baseline hardware matrix running | Final matrix and verify pending |
 
@@ -60,6 +60,11 @@ remain unchanged; per-instance appearance is applied at runtime.
 
 ## Validation
 
+- Initial `npm run verify` passes: 6,854 tests, lint, production asset validation
+  and build. This precedes the R5–R7 follow-up and is not final release approval.
+- R1–R4 candidate replay passes all 18 views, readiness, atlas integrity and
+  biome checks with zero browser errors. The targeted candidate motion record
+  also passes with twelve sampled frames.
 - Focused CPU tests currently pass for rigid root/shape preservation, stable
   instance anchors, substrate means/custom IDs and tree morphology/LOD.
 - Repository ESLint passes for the initial R1–R4 implementation.

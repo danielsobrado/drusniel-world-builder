@@ -40,6 +40,7 @@ export function createMeadowGroundShading(config, tileSample, worldXZ) {
     root: mix(root, dryPigment, dry),
     tip: mix(tip, dryPigment.mul(1.06), dry.mul(0.45)),
     detail: detail ? { litter: row(2), amounts: row(3), settings: detail } : null,
+    map,
     dispose: () => map.dispose(),
   };
 }

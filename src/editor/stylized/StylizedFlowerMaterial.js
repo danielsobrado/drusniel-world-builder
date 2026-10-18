@@ -30,6 +30,7 @@ import { createMeadowGroundShading } from './meadow/MeadowGroundShading.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
+import { createFlowerPalette } from './FlowerPalette.js';
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -57,7 +58,9 @@ export function createStylizedFlowerMaterial({
   );
   const worldXZ = base.xz.add(chunkCenter);
   const surface = texture(surfaceMaskTexture, localUv);
-  const ground = tileTexture ? createMeadowGroundShading(config, texture(tileTexture, localUv), worldXZ) : null;
+  const tile = tileTexture ? texture(tileTexture, localUv) : null;
+  const ground = tile ? createMeadowGroundShading(config, tile, worldXZ) : null;
+  const petals = tile ? createFlowerPalette(config, tile) : null;
   const stem = ground?.root ?? colorNode(config.flowers.colorStem);
   const surfaceClass = createSurfaceClassNodes(surface);
   const naturalTrailConfig = config.path?.naturalTrail;
@@ -133,9 +136,10 @@ export function createStylizedFlowerMaterial({
   const isBlue = max(0, zones.b.sub(max(zones.r, zones.g)));
   const isWhite = min(zones.r, min(zones.g, zones.b));
   const total = isRed.add(isGreen).add(isBlue).add(isWhite);
-  const weighted = colorNode(config.flowers.colorR).mul(isRed)
-    .add(colorNode(config.flowers.colorG).mul(isGreen))
-    .add(colorNode(config.flowers.colorB).mul(isBlue))
+  const petalColors = petals?.colors ?? [colorNode(config.flowers.colorR), colorNode(config.flowers.colorG), colorNode(config.flowers.colorB)];
+  const weighted = petalColors[0].mul(isRed)
+    .add(petalColors[1].mul(isGreen))
+    .add(petalColors[2].mul(isBlue))
     .add(stem.mul(isWhite));
   const palette = mix(
     stem,
@@ -163,5 +167,8 @@ export function createStylizedFlowerMaterial({
   applyCloudShadow(material, config.sky);
   applyJungleMist(material, config.ambientEffects);
   if (ground) material.addEventListener('dispose', () => ground.dispose());
+  if (petals) material.addEventListener('dispose', () => petals.dispose());
+  // On-demand QA accounting includes node-only lookup textures explicitly.
+  material.resourceTextures = [ground?.map, petals?.map].filter(Boolean);
   return material;
 }

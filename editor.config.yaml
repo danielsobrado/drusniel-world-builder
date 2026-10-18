@@ -1723,7 +1723,8 @@ stylizedSurface:
     residentRadius: 2
     perChunk: 480
     outerRingDensity: 0.5
-    tileIds: [3, 4, 5, 6, 7, 8, 9, 12, 14]
+    tileIds: [3, 4, 5, 6, 8, 12, 14]
+    colonies: { enabled: true, patchMeters: 18 }
     minSize: 0.45
     maxSize: 0.6
     dirtMax: 0.2
@@ -1736,6 +1737,14 @@ stylizedSurface:
     colorG: '#cbb36a'
     colorB: '#9287ff'
     colorStem: '#648029'
+    # Habitat palettes preserve distinct petal hues with restrained value/chroma.
+    byTileId:
+      3: { colorR: '#b49780', colorG: '#b9a96e', colorB: '#9f89a4' }
+      5: { colorR: '#a7869d', colorG: '#baa77a', colorB: '#9685a8' }
+      6: { colorR: '#9d83ad', colorG: '#c1b283', colorB: '#8d91b8' }
+      8: { colorR: '#9b82a7', colorG: '#ada37f', colorB: '#818ba8' }
+      12: { colorR: '#ab8faa', colorG: '#c3b58f', colorB: '#919fbc' }
+
   # Contact shade: the soft dark patch where trunks and boulders meet the ground,
   # after grass-test's writeContactShade — ambient occlusion rather than shadow, so
   # it does not move with the sun and holds past the shadow map. Under it the

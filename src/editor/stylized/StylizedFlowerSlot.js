@@ -126,6 +126,7 @@ export class StylizedFlowerSlot {
         tileIds: this.config.flowers.tileIds,
         minSize: this.config.flowers.minSize,
         maxSize: this.config.flowers.maxSize,
+        colonies: this.config.flowers.colonies,
       });
     }
     scatter = filterScatterByForest({

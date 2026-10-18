@@ -92,6 +92,8 @@ try {
       const lighting = await page.evaluate(() => window.__worldVisualQa.settleLighting());
       const state = await page.evaluate(() => {
         const d = window.__worldVisualQa.diagnostics();
+        d.vegetation = window.__worldVisualQa.vegetation?.() ?? null;
+        d.neighborhood = window.__worldVisualQa.neighborhood();
         d.placementCounts = Object.fromEntries(Object.entries(d.placements).map(([k, v]) => [k, v.length]));
         delete d.placements; delete d.counters; delete d.preparationJobs;
         return d;

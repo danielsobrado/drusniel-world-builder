@@ -5,6 +5,7 @@ import {
   scatterRandom01,
 } from './scatterMath.js';
 import { clumpsPerCell } from './grassLodMath.js';
+import { flowerColony } from './FlowerColonies.js';
 
 const TWO_PI = Math.PI * 2;
 
@@ -37,6 +38,7 @@ export function createVegetationScatterConfig(stylizedConfig, tileSize) {
         tileIds: [...(flowers.tileIds ?? [])],
         minSize: flowers.minSize,
         maxSize: flowers.maxSize,
+        colonies: flowers.colonies ? { ...flowers.colonies } : null,
       }
       : null,
   };
@@ -118,6 +120,7 @@ export function buildFlowerScatter({
   tileIds,
   minSize,
   maxSize,
+  colonies = null,
 }) {
   const eligible = new Set(tileIds);
   const base = new Float32Array(sampleLimit * 3);
@@ -134,6 +137,9 @@ export function buildFlowerScatter({
     const cellZ = Math.min(chunkSize - 1, Math.floor(localZ));
     const cellIndex = cellZ * chunkSize + cellX;
     if (!eligible.has(page.tiles[cellIndex])) continue;
+    const colony = flowerColony((page.chunkX * chunkSize + localX) * tileSize,
+      -(page.chunkZ * chunkSize + localZ) * tileSize, colonies ?? {});
+    if (scatterRandom01(page.chunkX, page.chunkZ, index, 6) >= colony.coverage) continue;
     const localWorldX = -chunkWorldSize / 2 + localX * tileSize;
     const localWorldZ = chunkWorldSize / 2 - localZ * tileSize;
     const height = sampleHeight(page, localX, localZ, chunkSize);
@@ -146,7 +152,8 @@ export function buildFlowerScatter({
     parameters[parameterOffset + 1] = minSize
       + scatterRandom01(page.chunkX, page.chunkZ, index, 3) * (maxSize - minSize);
     parameters[parameterOffset + 2] = scatterRandom01(page.chunkX, page.chunkZ, index, 4);
-    parameters[parameterOffset + 3] = scatterRandom01(page.chunkX, page.chunkZ, index, 5) < 0.5 ? 0 : 1;
+    parameters[parameterOffset + 3] = colony.variety
+      ?? (scatterRandom01(page.chunkX, page.chunkZ, index, 5) < 0.5 ? 0 : 1);
     minimumHeight = Math.min(minimumHeight, height);
     maximumHeight = Math.max(maximumHeight, height);
     count += 1;
@@ -203,6 +210,7 @@ export function enrichPageVegetationScatter(page, scatterConfig) {
       tileIds: flowers.tileIds,
       minSize: flowers.minSize,
       maxSize: flowers.maxSize,
+      colonies: flowers.colonies,
     });
     timings.flowerScatterMs = performance.now() - startedAt;
   }

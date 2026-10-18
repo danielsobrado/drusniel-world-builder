@@ -21,7 +21,18 @@ export async function focusPerfBrowser(browser, page, { headed }) {
     // AppActivate can focus browser chrome (for example the address bar).
     // Re-select the owned page after native activation, without a canvas click.
     await page.bringToFront();
-    await page.evaluate(() => window.focus());
+    await page.evaluate(() => {
+      window.focus();
+      // Native activation may leave focus in browser chrome. Select the owned
+      // renderer without clicking (which could interact with the world).
+      const canvas = window.__editor?.terrainView?.renderer?.domElement;
+      if (canvas) {
+        const tabIndex = canvas.getAttribute('tabindex');
+        if (tabIndex === null) canvas.tabIndex = -1;
+        canvas.focus({ preventScroll: true });
+        if (tabIndex === null) canvas.removeAttribute('tabindex');
+      }
+    });
   }
   try { await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 }); }
   catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }

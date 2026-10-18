@@ -16,10 +16,16 @@ export function createAridSubstrateNodes({ tileId, bare, patterns, localXZ, came
       const macro = periodicFbm2(patterns.latticePoint('broad', localXZ));
       const grain = periodicNoise(p.mul(8).add(31.7));
       const warp = periodicNoise(p.add(17.3));
+      const drift = periodicNoise(p.div(8).add(7.3));
       // Integer lattice frequencies close over PatternOrigins' 512-cell wrap.
       const phase = p.x.mul(4).add(p.y).mul(Math.PI * 2).add(warp.mul(2));
       const filtered = oneMinus(smoothstep(.6, 2.4, phase.fwidth())).mul(reach);
-      const ripple = sin(phase).mul(filtered);
+      const secondaryPhase = p.x.mul(3).sub(p.y.mul(2)).mul(Math.PI * 2).add(warp.mul(1.7));
+      // Two coherent ripple districts with quiet ground between them. Integer
+      // lattice frequencies preserve the bounded pattern's chunk/rebase seams.
+      const direction = smoothstep(.3, .7, drift);
+      const ripple = mix(sin(phase), sin(secondaryPhase), direction)
+        .mul(mix(float(.2), float(1), smoothstep(.22, .64, macro))).mul(filtered);
       const sandMean = mix(pigment('#b39a72'), pigment('#d6be96'), .5);
       const mineralMean = mix(pigment('#787b76'), pigment('#b6b7a5'), .5);
       const sand = mix(pigment('#b39a72'), pigment('#d6be96'), macro).div(sandMean)

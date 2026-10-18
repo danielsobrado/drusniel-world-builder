@@ -16,7 +16,7 @@ export function trackedWorldResources(editor) {
     geometryBytes += countArray(object.instanceMatrix?.array) + countArray(object.instanceColor?.array);
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
       if (!material) continue;
-      for (const value of Object.values(material)) {
+      for (const value of [...Object.values(material), ...(material.resourceTextures ?? [])]) {
         if (!value?.isTexture || textures.has(value)) continue;
         textures.add(value);
         textureBytes += value.mipmaps?.length

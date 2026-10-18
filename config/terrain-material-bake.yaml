@@ -143,7 +143,7 @@ families:
     canopyDetailScale: 0.86
   substrates:
     sand: {roughness: 0.93, wetRoughness: 0.78, color: '#b8a27c', tintMix: 0.18}
-    mineral: {roughness: 0.90, wetRoughness: 0.64, color: '#8a8170', tintMix: 0.10}
+    mineral: {roughness: 0.90, wetRoughness: 0.64, color: '#7e8585', tintMix: 0.24}
     litter: {roughness: 0.97, wetRoughness: 0.72, color: '#63513d', tintMix: 0.22}
     mud: {roughness: 0.87, wetRoughness: 0.43, color: '#555747', tintMix: 0.22}
   profiles:
