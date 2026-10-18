@@ -99,6 +99,9 @@ const previousMatrix = waterOnly && fs.existsSync(matrixPath)
 const results = waterOnly ? (previousMatrix?.cases ?? []) : [];
 for (const entry of waterOnly ? [] : cases) {
   const outPath = path.join(outDir, `${entry.id}.json`);
+  // A runner can stop before writing (for example at the focus gate). Never
+  // present a previous execution's measurements as this execution's report.
+  fs.rmSync(outPath, { force: true });
   const args = [
     '--url', baseUrl,
     '--qa', entry.qa,
@@ -123,10 +126,11 @@ for (const entry of waterOnly ? [] : cases) {
 
 let water = null;
 if (includeWater) {
+  const source = path.join(root, 'tmp', 'water-acceptance-latest.json');
+  fs.rmSync(source, { force: true });
   const args = ['--existing-server', '--url', baseUrl];
   if (headed) args.push('--headed');
   const execution = await runScript('scripts/run-water-acceptance-qa.mjs', args);
-  const source = path.join(root, 'tmp', 'water-acceptance-latest.json');
   water = {
     execution,
     report: fs.existsSync(source)
