@@ -1,5 +1,8 @@
 import { WORKSHOP_DOCUMENT_VERSION } from './WorkshopKernelConstants.js';
 import { normalizeWorkshopEntity } from './WorkshopEntity.js';
+import { PersistentMap } from './PersistentMap.js';
+import { WorkshopTopology } from './WorkshopTopology.js';
+const DERIVED = Symbol('derived workshop document');
 
 function requireRevision(value) {
   const revision = value ?? 0;
@@ -48,9 +51,19 @@ function assertParentAcyclic(entities) {
 
 export class WorkshopDocument {
   #entities;
+  #ordered = null;
 
   constructor(input = {}) {
     if (input instanceof WorkshopDocument) return input;
+    if (input?.[DERIVED]) {
+      const { base, entities, topology } = input[DERIVED];
+      this.version = base.version;
+      this.revision = requireRevision(base.revision + 1);
+      this.#entities = entities;
+      this.topology = topology;
+      Object.freeze(this);
+      return;
+    }
     if (input === null || typeof input !== 'object' || Array.isArray(input)) {
       throw new Error('Workshop document must be an object.');
     }
@@ -70,7 +83,8 @@ export class WorkshopDocument {
 
     this.version = version;
     this.revision = requireRevision(input.revision);
-    this.#entities = entities;
+    this.#entities = PersistentMap.from(entities);
+    this.topology = new WorkshopTopology(this.#entities);
     Object.freeze(this);
   }
 
@@ -87,7 +101,21 @@ export class WorkshopDocument {
   }
 
   listEntities() {
-    return [...this.#entities.values()].sort((left, right) => left.id.localeCompare(right.id));
+    this.#ordered ??= Object.freeze([...this.#entities.values()].sort((left, right) => left.id.localeCompare(right.id)));
+    return this.#ordered.slice();
+  }
+
+  withEntities(updates) {
+    let entities = this.#entities;
+    const normalized = new Map();
+    for (const [id, value] of updates) {
+      const entity = value === null ? null : normalizeWorkshopEntity(value);
+      if (entity && entity.id !== id) throw new Error('Workshop update id does not match entity id.');
+      normalized.set(id, entity);
+      entities = entity ? entities.set(id, entity) : entities.delete(id);
+    }
+    const topology = this.topology.derive(entities, normalized);
+    return new WorkshopDocument({ [DERIVED]: { base: this, entities, topology } });
   }
 
   rootIds() {

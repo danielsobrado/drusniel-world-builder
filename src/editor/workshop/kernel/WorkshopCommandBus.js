@@ -4,7 +4,6 @@ import { WorkshopDependencyGraph } from './WorkshopDependencyGraph.js';
 import { normalizeWorkshopEntity } from './WorkshopEntity.js';
 import {
   applyWorkshopPatch,
-  diffWorkshopDocuments,
   WorkshopPatch,
 } from './WorkshopPatch.js';
 import { WORKSHOP_COMMAND_TYPE_PATTERN } from './WorkshopKernelConstants.js';
@@ -74,8 +73,8 @@ function defaultHandlers() {
 
 function impactedIds(beforeGraph, afterGraph, touchedIds) {
   const impacted = new Set(touchedIds);
-  beforeGraph.affected(touchedIds).forEach((id) => impacted.add(id));
-  afterGraph.affected(touchedIds).forEach((id) => impacted.add(id));
+  beforeGraph.affectedIds(touchedIds).forEach((id) => impacted.add(id));
+  afterGraph.affectedIds(touchedIds).forEach((id) => impacted.add(id));
   return Object.freeze([...impacted].sort());
 }
 
@@ -90,11 +89,19 @@ export class WorkshopCommandBus {
     this.#handlers.set('document.batch', ({ command, document, bus }) => {
       if (!Array.isArray(command.commands)) throw new Error('Workshop batch command requires commands.');
       let working = document;
+      const targets = new Set();
       for (const child of command.commands) {
         const patch = bus.plan(child, working);
+        for (const operation of patch.operations) targets.add(operation.op === 'put' ? operation.entity.id : operation.id);
         working = applyWorkshopPatch(working, patch).document;
       }
-      return diffWorkshopDocuments(document, working, command.label ?? 'Batch edit');
+      const operations = [];
+      for (const id of [...targets].sort()) {
+        const before = document.getEntity(id), after = working.getEntity(id);
+        if (before === after || JSON.stringify(before) === JSON.stringify(after)) continue;
+        operations.push(after ? { op: 'put', entity: after } : { op: 'remove', id });
+      }
+      return new WorkshopPatch({ label: command.label ?? 'Batch edit', operations });
     });
   }
 

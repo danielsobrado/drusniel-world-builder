@@ -63,8 +63,8 @@ export function planWorkshopInvalidation(beforeInput, afterInput, touchedIds = [
   }
 
   const graphs = graphUnion(before, after);
-  while (queue.length > 0) {
-    const sourceId = queue.shift();
+  for (let head = 0; head < queue.length; head++) {
+    const sourceId = queue[head];
     const sourceDomains = normalizeDirtyDomains([...(dirty.get(sourceId) ?? [])]);
     const edgeKeys = new Set();
     const edges = [];

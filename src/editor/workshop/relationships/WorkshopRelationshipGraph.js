@@ -25,6 +25,7 @@ export class WorkshopRelationshipGraph {
 
   constructor(documentInput) {
     this.document = normalizeDocument(documentInput);
+    if (this.document.topology) { Object.freeze(this); return; }
     const edges = [];
     for (const entity of this.document.listEntities()) {
       this.#outgoing.set(entity.id, []);
@@ -47,18 +48,22 @@ export class WorkshopRelationshipGraph {
   }
 
   edges(type = null) {
+    this.#edges ??= Object.freeze(this.document.listEntities()
+      .flatMap(entity => this.document.topology.incoming(entity.id)).sort(compareEdges));
     if (type === null) return this.#edges;
     if (!TYPE_ORDER.has(type)) throw new Error(`Unknown workshop relationship type: ${type}.`);
     return Object.freeze(this.#edges.filter((edge) => edge.type === type));
   }
 
   outgoing(entityId, type = null) {
-    const edges = this.#outgoing.get(entityId) ?? [];
+    const edges = this.document.topology ? [...this.document.topology.outgoing(entityId)].sort(compareEdges)
+      : this.#outgoing.get(entityId) ?? [];
     return Object.freeze(type === null ? [...edges] : edges.filter((edge) => edge.type === type));
   }
 
   incoming(entityId, type = null) {
-    const edges = this.#incoming.get(entityId) ?? [];
+    const edges = this.document.topology ? [...this.document.topology.incoming(entityId)].sort(compareEdges)
+      : this.#incoming.get(entityId) ?? [];
     return Object.freeze(type === null ? [...edges] : edges.filter((edge) => edge.type === type));
   }
 

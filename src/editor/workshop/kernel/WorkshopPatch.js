@@ -1,4 +1,4 @@
-import { WorkshopDocument, normalizeWorkshopDocument } from './WorkshopDocument.js';
+import { normalizeWorkshopDocument } from './WorkshopDocument.js';
 import { normalizeWorkshopEntity } from './WorkshopEntity.js';
 
 function normalizeOperation(input, index) {
@@ -58,23 +58,18 @@ export function applyWorkshopPatch(documentInput, patchInput) {
     });
   }
 
-  const entities = new Map(document.listEntities().map((entity) => [entity.id, entity]));
+  const updates = new Map();
   const inverse = [];
   for (const operation of patch.operations) {
     const id = targetId(operation);
-    const previous = entities.get(id) ?? null;
+    const previous = document.getEntity(id);
     inverse.unshift(previous
       ? { op: 'put', entity: previous }
       : { op: 'remove', id });
-    if (operation.op === 'put') entities.set(id, operation.entity);
-    else entities.delete(id);
+    updates.set(id, operation.op === 'put' ? operation.entity : null);
   }
 
-  const next = new WorkshopDocument({
-    version: document.version,
-    revision: document.revision + 1,
-    entities: [...entities.values()],
-  });
+  const next = document.withEntities(updates);
   return Object.freeze({
     document: next,
     inverse: new WorkshopPatch({ label: patch.label, operations: inverse }),
