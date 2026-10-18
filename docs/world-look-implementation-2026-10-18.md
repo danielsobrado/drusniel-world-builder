@@ -65,12 +65,15 @@ Dead trees retain their existing identity and trunk/collision geometry. Species
 selection and Azgaar IDs are preserved. Tree atlas source geometry/materials
 remain unchanged; per-instance appearance is applied at runtime.
 
-The final rainforest pose records 449,230,428 tracked bytes versus 446,659,674
+The final rainforest pose records 449,225,116 tracked bytes versus 446,659,674
 in the baseline (about +2.45 MiB, +0.58%). These are bounded resource-accounting
 snapshots, not driver VRAM measurements or proof of a leak. Flower resource
 accounting now includes its previously uncounted node-only textures. Both
 captures use `cinematic-god-rays`, one finishing application and 49 water slots.
 Streaming and recovery acceptance remains a separate movement gate.
+Across all eighteen matched views, tracked totals increase by 2.16–4.74 MiB
+(0.51–1.39%). The first desert view's larger difference is mostly retained
+placement arrays. All eighteen tree placement counts match the baseline.
 
 ## World review and scope
 

@@ -11,6 +11,8 @@ import {createBrowserErrorMonitor} from './lib/perf-browser-errors.mjs';
 import {waitForPerfRunLock} from './perf-run-lock.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/fixtures/hud'));
+const sizes=option('--sizes','1600x900,1280x720,760x600').split(',').map(value=>value.split('x').map(Number));
+if(!sizes.length||sizes.some(size=>size.length!==2||size.some(n=>!Number.isSafeInteger(n)||n<320||n>3840)))throw new Error('Invalid HUD viewport sizes.');
 await mkdir(out,{recursive:true});const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),checks:[],artifacts:[],poses:[]};let browser,errors;
 try {
@@ -28,7 +30,7 @@ try {
  await page.evaluate(async()=>{const {writeHudMetricsPreference}=await import('/src/editor/player/hud/HudMetricsPreference.js');writeHudMetricsPreference(true);});
  for(const pose of poses) {
   await page.evaluate(p=>window.__worldVisualQa.cut(p),pose);await page.evaluate(()=>window.__worldVisualQa.settle());
-  for(const size of [[1600,900],[1280,720],[760,600]]) {
+  for(const size of sizes) {
    await page.setViewportSize({width:size[0],height:size[1]});await page.evaluate(()=>window.__worldVisualQa.settle({minimumMs:0}));
    const layout=await measureHudLayout(page),id=`${pose.id}-${size[0]}`;
    report.checks.push({id,...layout,passed:layout.overlaps.length===0&&layout.contrasts.every(r=>r>=4.5)&&(size[0]!==760||layout.keysHidden)});
