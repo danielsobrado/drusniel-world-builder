@@ -9,11 +9,29 @@ const planLink = path.relative(out, path.resolve('docs/plans/aaa-look-and-feel-p
 if (!report.poses?.length) throw new Error('The report contains no captured poses.');
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+const annotated = new Set();
+for (const pose of report.poses.filter(p => ['random-06', 'random-07', 'random-08', 'random-09'].includes(p.id))) {
+  const trees = pose.vegetation?.trees.filter(t => t.screen.visible).slice(0, 3);
+  if (!trees?.length) continue;
+  const labels = trees.map((tree, index) => {
+    const x = tree.screen.x * report.viewport.width, y = tree.screen.y * report.viewport.height;
+    const top = 20 + index * 64;
+    return `<path d="M 600 ${top + 26} L ${x} ${y}" stroke="#ffe49b" stroke-width="2" fill="none"/>
+      <circle cx="${x}" cy="${y}" r="6" fill="#ffe49b" stroke="#132229"/>
+      <rect x="20" y="${top}" width="580" height="56" rx="5" fill="#132229" fill-opacity=".92"/>
+      <text x="32" y="${top + 22}" fill="white" font-family="sans-serif" font-size="17">${index + 1}. ${escape(tree.stableId)} · prototype ${tree.prototype} · ${escape(tree.ageClass)}</text>
+      <text x="32" y="${top + 43}" fill="#c8ded6" font-family="sans-serif" font-size="14">${escape(path.basename(tree.asset))} · ${escape(tree.speciesId)} · cell ID ${tree.tileId}</text>`;
+  }).join('');
+  const svg = `<svg width="${report.viewport.width}" height="${report.viewport.height}" xmlns="http://www.w3.org/2000/svg">${labels}</svg>`;
+  await sharp(path.join(out, `${pose.id}.png`)).composite([{ input: Buffer.from(svg) }])
+    .png().toFile(path.join(out, `${pose.id}-identities.png`));
+  annotated.add(pose.id);
+}
 const cards = report.poses.map(p => `<article>
   <a href="${escape(p.id)}.png"><img src="${escape(p.id)}.png" loading="lazy" alt="${escape(p.name)}"></a>
   <h2>${escape(p.id)} · ${escape(p.name)}</h2>
   <p>${escape(p.world)} · camera biome ${p.actualBiomeId} · X ${p.x}, Z ${p.z} · ${escape(p.mode)}</p>
-  <p><a href="${escape(p.id)}.png">Original clean PNG</a> · <a href="${escape(p.id)}-hud.png">Original HUD PNG</a></p>
+  <p><a href="${escape(p.id)}.png">Original clean PNG</a> · <a href="${escape(p.id)}-hud.png">Original HUD PNG</a>${annotated.has(p.id) ? ` · <a href="${escape(p.id)}-identities.png">Tree identities (QA overlay)</a>` : ''}</p>
 </article>`).join('\n');
 await writeFile(path.join(out, 'index.html'), `<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
