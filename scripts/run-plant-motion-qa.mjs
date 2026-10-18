@@ -19,6 +19,18 @@ report.fixture = fixture;
 report.harness = {};
 for (const ext of ['html', 'mjs']) report.harness[`plant-${fixture}.${ext}`] = await fileHash(path.join(root, `scripts/fixtures/plant-${fixture}.${ext}`));
 try {
+  const importMap = {};
+  if (fixture === 'appearance') {
+    const response = await fetch(`${url}/scripts/fixtures/plant-motion.mjs`);
+    if (!response.ok) throw new Error('Cannot resolve the frozen fixture dependencies');
+    const transformed = await response.text();
+    for (const [bare, module] of [['three/webgpu', 'three_webgpu'], ['three/tsl', 'three_tsl']]) {
+      const resolved = transformed.match(new RegExp(`from ["']([^"']*/${module}\\.js[^"']*)["']`))?.[1];
+      if (!resolved) throw new Error(`Cannot resolve frozen ${bare}`);
+      importMap[bare] = resolved;
+    }
+    report.harnessImportMap = importMap;
+  }
   browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
   for (const backend of ['webgpu', 'webgl']) {
     const page = await browser.newPage({ viewport: { width: 384, height: 384 }, deviceScaleFactor: 1 });
@@ -28,7 +40,9 @@ try {
       // recorded harness files are supplied locally; all production imports
       // still come from the immutable server and its source manifest.
       for (const ext of ['html', 'mjs']) await page.route(`**/scripts/fixtures/plant-appearance.${ext}*`, async route => {
-        await route.fulfill({ body: await readFile(path.join(root, `scripts/fixtures/plant-appearance.${ext}`)),
+        let body = await readFile(path.join(root, `scripts/fixtures/plant-appearance.${ext}`), 'utf8');
+        if (ext === 'mjs') for (const [bare, resolved] of Object.entries(importMap)) body = body.replaceAll(`from '${bare}'`, `from '${resolved}'`);
+        await route.fulfill({ body,
           contentType: ext === 'html' ? 'text/html' : 'text/javascript' });
       });
       report.fixtureTransport = 'recorded local harness; frozen production imports';
