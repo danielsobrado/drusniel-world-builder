@@ -41,6 +41,9 @@ export class PerfQaHarness {
     this.viewModeController = viewModeController;
     this.playerController = playerController;
     this.terrainView = terrainView;
+    this.configuredSpawn = config.spawn;
+    this.canonicalSpawn = terrainView?.floatingOrigin?.toCanonical?.(config.spawn.x, config.spawn.z)
+      ?? { ...config.spawn };
     this.objectView = objectView;
     this.stylizedSurface = stylizedSurface;
     this.voxelPrototype = voxelPrototype;
@@ -127,6 +130,13 @@ export class PerfQaHarness {
   }
 
   start() {
+    if (this.config.spawn !== this.configuredSpawn) {
+      this.configuredSpawn = this.config.spawn;
+      this.canonicalSpawn = this.terrainView?.floatingOrigin?.toCanonical?.(this.config.spawn.x, this.config.spawn.z)
+        ?? { ...this.config.spawn };
+    }
+    const origin = this.terrainView?.floatingOrigin?.getState?.() ?? { x: 0, z: 0 };
+    const spawn = { x: this.canonicalSpawn.x - origin.x, z: this.canonicalSpawn.z - origin.z };
     this.gpuProfiler.reset();
     PerfCounters.reset();
     this.objectView?.updatePerformanceCounters();
@@ -155,12 +165,12 @@ export class PerfQaHarness {
 
     this.playerController.setHarnessActive(true);
     this.playerController.speedMode?.setActive(this.config.explorationBoost);
-    this.viewModeController.enterWalkMode(this.config.spawn, {
+    this.viewModeController.enterWalkMode(spawn, {
       requestPointerLock: false,
     });
     this.playerController.setPose({
-      x: this.config.spawn.x,
-      z: this.config.spawn.z,
+      x: spawn.x,
+      z: spawn.z,
       yaw: degreesToRadians(this.config.yawDegrees),
       pitch: degreesToRadians(this.config.pitchDegrees),
     });
@@ -175,7 +185,7 @@ export class PerfQaHarness {
       }
       world.setTile(8192, -8192, 9);
     }
-    this.log(`Started ${this.config.scenarioId} at (${this.config.spawn.x}, ${this.config.spawn.z})`);
+    this.log(`Started ${this.config.scenarioId} at canonical (${this.canonicalSpawn.x}, ${this.canonicalSpawn.z})`);
     this.renderOverlay();
   }
 
