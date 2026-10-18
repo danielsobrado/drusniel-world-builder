@@ -332,27 +332,32 @@ stylizedSurface:
     # temperate biome rather than wearing savanna gold everywhere.
     bushVariants:
       - scene: /assets/bushes/stylized_bush.glb
+        motion: woody-shrub
         scale: 1
         weight: 1.2
         tileIds: [6, 3, 4, 5, 8, 12, 14]
         canopy: edge
       - scene: /assets/bushes/small_bush.glb
+        motion: woody-shrub
         scale: 2
         weight: 1.3
         tileIds: [6, 3, 4, 5, 7, 8, 9, 12, 14]
         canopy: core
       - scene: /assets/bushes/bush2.glb
+        motion: woody-shrub
         scale: 0.5
         weight: 1
         tileIds: [4, 5, 6, 7, 8, 14]
         character: forest
       - scene: /assets/bushes/bush.glb
+        motion: woody-shrub
         scale: 1
         weight: 1
         tileIds: [4, 3, 6, 9, 12, 14]
         character: scrub
         canopy: open
       - scene: /assets/bushes/bamboo_bush.glb
+        motion: flexible-stem
         scale: 0.006
         weight: 1.4
         tileIds: [7, 5]
@@ -555,6 +560,7 @@ stylizedSurface:
     groundDetailVariants:
       # --- Lush tufts: meadow districts of the temperate and grass biomes. -----
       - scene: /assets/ground/stylized-grass/clump-01.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.2
         tileIds: [4, 6, 8, 9, 14]
@@ -563,6 +569,7 @@ stylizedSurface:
         prototypeGroups:
           - [clump-01]
       - scene: /assets/ground/stylized-grass/clump-02.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.2
         tileIds: [4, 6, 14]
@@ -571,6 +578,7 @@ stylizedSurface:
         prototypeGroups:
           - [clump-02]
       - scene: /assets/ground/stylized-grass/clump-03.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.2
         tileIds: [4, 6, 8]
@@ -581,6 +589,7 @@ stylizedSurface:
       # 32 and 96 triangles. These are the clumps' own source shapes, so a taiga
       # floor and a tundra read as the same plant thinned out, not another plant.
       - scene: /assets/ground/stylized-grass/source-01.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.4
         tileIds: [2, 7, 8, 9, 10]
@@ -589,6 +598,7 @@ stylizedSurface:
         prototypeGroups:
           - [source-01]
       - scene: /assets/ground/stylized-grass/source-02.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.1
         tileIds: [2, 4, 5, 6, 7, 9, 10, 14]
@@ -596,6 +606,7 @@ stylizedSurface:
           - [source-02]
       # --- Broad low patches: 80 triangles for a 2.9 m footprint, scaled down.
       - scene: /assets/ground/tree-scene/grass-dense.glb
+        motion: grass-tuft
         scale: 0.4
         weight: 1.3
         tileIds: [3, 5, 7, 8]
@@ -603,6 +614,7 @@ stylizedSurface:
         prototypeGroups:
           - [grass-dense]
       - scene: /assets/ground/tree-scene/grass-small.glb
+        motion: grass-tuft
         scale: 0.55
         weight: 1
         tileIds: [4, 5, 6, 14]
@@ -613,18 +625,21 @@ stylizedSurface:
       # which is what lets a wetland be lush and a savanna dry without new
       # geometry. Green stays full height as reeds; dry is scaled to tuft height.
       - scene: /assets/ground/weeds/grass-blade-01.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.2
         tileIds: [12]
         prototypeGroups:
           - [grass-blade-01]
       - scene: /assets/ground/weeds/grass-blade-03.glb
+        motion: grass-tuft
         scale: 1
         weight: 1.2
         tileIds: [12]
         prototypeGroups:
           - [grass-blade-03]
       - scene: /assets/ground/weeds/grass-blade-04.glb
+        motion: grass-tuft
         scale: 0.55
         weight: 1.4
         tileIds: [1, 2, 3]
@@ -632,6 +647,7 @@ stylizedSurface:
         prototypeGroups:
           - [grass-blade-04]
       - scene: /assets/ground/weeds/grass-blade-05.glb
+        motion: grass-tuft
         scale: 0.55
         weight: 1.4
         tileIds: [1, 3]
@@ -641,6 +657,7 @@ stylizedSurface:
       # Mixed brown and green in one clump: the transitional shape, so scrub
       # districts of a grassland do not switch to dry grass all at once.
       - scene: /assets/ground/weeds/grass-blade-02.glb
+        motion: grass-tuft
         scale: 0.6
         weight: 1
         tileIds: [3, 4, 5, 12, 14]
@@ -651,6 +668,8 @@ stylizedSurface:
       # --- Blossoms: meadow districts and woodland fringes only. Rainforest,
       # taiga, tundra and desert get none, which is most of what separates them.
       - scene: /assets/ground/weeds/flower-01.glb
+        materialRoles: { Stem: stem, 'Material.001': petal, Material: center }
+        motion: flexible-stem
         scale: 1.3
         weight: 0.7
         tileIds: [4, 14]
@@ -659,6 +678,8 @@ stylizedSurface:
         prototypeGroups:
           - [flower-01]
       - scene: /assets/ground/weeds/flower-02.glb
+        materialRoles: { Stem: stem, 'Material.002': petal, Material: center }
+        motion: flexible-stem
         scale: 1.3
         weight: 0.7
         tileIds: [4, 6]
@@ -668,6 +689,7 @@ stylizedSurface:
           - [flower-02]
       # --- Leafy weeds and sprouts: shaded floor and cold thin ground. --------
       - scene: /assets/ground/grass-chunks/chunk-01.glb
+        motion: broadleaf
         scale: 1
         weight: 1.3
         tileIds: [5, 6, 7, 8]
@@ -678,12 +700,14 @@ stylizedSurface:
       # 12 triangles each. Small enough that a tundra or a cold desert can be
       # given cover without it reading as vegetation cover at all.
       - scene: /assets/ground/grass-chunks/chunk-05.glb
+        motion: broadleaf
         scale: 4
         weight: 1.5
         tileIds: [1, 2, 9, 10]
         prototypeGroups:
           - [chunk-05]
       - scene: /assets/ground/grass-chunks/chunk-06.glb
+        motion: broadleaf
         scale: 4
         weight: 1.5
         tileIds: [1, 2, 9, 10]
@@ -698,6 +722,7 @@ stylizedSurface:
       # path is strong, they keep off its edge cells, where the meadow still grows
       # over them (`path-interior`).
       - scene: /assets/rocks/donor/pebbles.glb
+        motion: rigid
         scale: 0.357
         weight: 1
         tileIds: [13]
@@ -723,24 +748,28 @@ stylizedSurface:
     # the broad leaves stand clear of the grass.
     tropicalKitVariants:
       - scene: /assets/ground/tropical/jungle-grass-short.glb
+        motion: grass-tuft
         scale: 1.4
         weight: 1.4
         tileIds: [5, 7]
         prototypeGroups:
           - [jungle_grass_short]
       - scene: /assets/ground/tropical/jungle-grass-tall.glb
+        motion: grass-tuft
         scale: 1.4
         weight: 1
         tileIds: [5, 7]
         prototypeGroups:
           - [jungle_grass_tall]
       - scene: /assets/ground/tropical/jungle-grass-broad.glb
+        motion: grass-tuft
         scale: 1.4
         weight: 1
         tileIds: [5, 7]
         prototypeGroups:
           - [jungle_grass_broad]
       - scene: /assets/ground/tropical/jungle-groundcover.glb
+        motion: broadleaf
         scale: 1.4
         weight: 1.2
         tileIds: [5, 7]
@@ -748,6 +777,7 @@ stylizedSurface:
           - [jungle_groundcover]
       # The rainforest's own: the broad leaves belong under a closed canopy.
       - scene: /assets/ground/tropical/elephant-ear.glb
+        motion: broadleaf
         scale: 1.6
         weight: 0.8
         tileIds: [7]
@@ -905,13 +935,14 @@ stylizedSurface:
       # grass-test's final visual-refinement layer, converted at 2.8 units/m.
       # Keep stand density and streaming distances: depth comes from pigment.
       appearance:
-        # Was 0.48 with a 0.75 soil share: isolated roots landed near 0.36 of the
-        # ground's own value and read as black dots on sparse turf. Tuft cores
-        # keep this depth; stragglers are lifted further by tufts.rootLift.
-        rootBrightness: 0.6
-        canopyDepth: 0.50
+        # Sparse roots approach the substrate value; dense stands keep depth
+        # through persistent coverage-weighted ground shading. Both near and
+        # far substrate use groundOcclusion, so this adds no distance ring.
+        rootBrightness: 0.8
+        canopyDepth: 0.35
         gradientPower: 2.35
         groundTipMix: 0.08
+        groundOcclusion: 0.14
         fill: 0.025
         backlight: 1.05
         patchScale: 0.07
@@ -936,7 +967,7 @@ stylizedSurface:
         widthFloor: 0.5
         widthPower: 0.6
         windShort: 0.6
-        rootLift: 0.28
+        rootLift: 0.60
         valueSpread: 0.07
       # The ground between stems (meadow/meadowGroundDetailConfig.js): litter
       # drifts, moss hollows, soil pockets and fallen-blade streaks, procedural on

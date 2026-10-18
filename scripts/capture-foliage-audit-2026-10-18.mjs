@@ -10,10 +10,10 @@ import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { fileHash } from './lib/world-visual-report.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const out = path.join(root, 'docs/qa/visual-audit-2026-10-18/foliage-motion');
-const url = 'http://localhost:5267';
+const out = path.resolve(root, process.env.FOLIAGE_AUDIT_OUT ?? 'docs/qa/visual-audit-2026-10-18/foliage-motion');
+const url = process.env.FOLIAGE_AUDIT_URL ?? 'http://localhost:5267';
 await mkdir(out, { recursive: true });
-const manifest = JSON.parse(await readFile(path.join(out, '../manifest.json'), 'utf8'));
+const manifest = JSON.parse(await readFile(path.join(root, 'docs/plans/aaa-look-and-feel-2026-10-18-poses.json'), 'utf8'));
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`), { timeoutMs: 900000 });
 const report = { kind: 'foliage-motion-review', frames: [], surveys: [], startedAt: new Date().toISOString() };
 let browser, context, monitor, video;
@@ -67,7 +67,7 @@ try {
   report.motionStartedAt = new Date(start).toISOString();
   for (let i = 0; i < 12; i++) {
     const file = `frame-${String(i).padStart(2, '0')}.png`;
-    const state = await page.evaluate(() => ({ time: performance.now(), wind: window.__editor.worldWind.getState(),
+    const state = await page.evaluate(() => ({ time: performance.now(), wind: window.__worldVisualQa.diagnostics().wind,
       ready: window.__worldVisualQa.readiness().ready }));
     await captureWorldCanvas(page, path.join(out, file));
     report.frames.push({ file, elapsedMs: Date.now() - start, ...state, sha256: await fileHash(path.join(out, file)) });

@@ -18,7 +18,7 @@ import { extractAuthoredGroupedPrototypes } from './StylizedPrototypeBake.js';
 import { acceptsStrategicDetailPlacement } from './StrategicDetailPlacement.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
-import { groundDetailWindPosition } from './groundDetailWind.js';
+import { applyPlantMotion } from './PlantMotionNodes.js';
 import { applyUnderstoryPalette, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
@@ -31,12 +31,12 @@ const DETAIL_SCRATCH = {
   yaw: new THREE.Quaternion(),
 };
 
-function cloneDetailMaterial(source, { wind = null, height = 0, foliageConfig = null, tileId = null, ambientEffects = null } = {}) {
+function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
   const material = cloneAuthoredNodeMaterial(source);
-  if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId);
+  if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId, role);
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
-  if (wind && height > 0) material.positionNode = groundDetailWindPosition(wind, height);
+  applyPlantMotion(material, { wind, height, profile: motion });
   if ('roughness' in material) material.roughness = Math.max(0.72, material.roughness ?? 1);
   if ('metalness' in material) material.metalness = 0;
   if (material.map?.colorSpace !== undefined) {
@@ -165,6 +165,8 @@ export class StylizedGroundDetailView {
                 ? null
                 : (this.config.wind ?? null),
               height: geometry.boundingBox.max.y - Math.min(0, geometry.boundingBox.min.y),
+              motion: definition.motion,
+              role: definition.materialRoles?.[sourceMaterial.name],
               foliageConfig: ['groundDetail', 'tropicalPlant'].includes(this.layerName) && definition.sway !== false
                 ? this.config : null,
               tileId: definition.tileIds?.[0],

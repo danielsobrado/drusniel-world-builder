@@ -34,3 +34,16 @@ test('cold deserts retain mineral substrate while hot deserts retain sand', () =
   assert.equal(terrainSubstrateWeights({ tileId: 1 }).sand, 1);
   assert.equal(terrainSubstrateWeights({ tileId: 2 }).mineral, 1);
 });
+
+test('stand occlusion follows habitat density in the persistent substrate, including custom IDs', () => {
+  const config = { grass: { system: 'meadow', meadow: {
+    palette: { base: '#50852b', tip: '#a6bf65' }, groundDetail: { enabled: false },
+    appearance: { groundOcclusion: .2 },
+    growth: { byTileId: { 32: { density: 0 }, 33: { density: 1 } } },
+  } } };
+  const { roots } = createMeadowGroundPalette(config);
+  for (let c = 0; c < 3; c++) {
+    assert.ok(roots[32 * 3 + c] > roots[33 * 3 + c]);
+    assert.ok(Math.abs(roots[33 * 3 + c] / roots[32 * 3 + c] - .8) < 1e-6);
+  }
+});

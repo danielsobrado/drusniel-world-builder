@@ -39,6 +39,7 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
     rootBrightness: 0.9,
     gradientPower: 2.6,
     groundTipMix: 0.12,
+    groundOcclusion: 0,
     canopyDepth: 0.3,
     valueJitter: 0.35,
     backlight: 1.1,
@@ -147,6 +148,7 @@ export function resolveMeadowGrassConfig(source) {
   const lod = source.lod ?? d.lod;
   validateLodBands(lod, `${path}.lod`);
   const appearance = { ...d.appearance, ...(source.appearance ?? {}) };
+  finite(appearance.groundOcclusion, d.appearance.groundOcclusion, `${path}.appearance.groundOcclusion`, { min: 0, max: 1 });
   for (const key of ['rootBrightness', 'gradientPower', 'groundTipMix', 'canopyDepth', 'valueJitter', 'backlight', 'fill', 'patchScale', 'lodThinning', 'lodCompensation', 'lodWidenMax', 'dryPatchScale']) {
     finite(appearance[key], d.appearance[key], `${path}.appearance.${key}`, { min: 0 });
   }

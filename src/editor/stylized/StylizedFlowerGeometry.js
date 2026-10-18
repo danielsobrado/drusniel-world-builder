@@ -17,6 +17,7 @@ export function createFlowerCrossGeometry(maxInstances) {
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(CROSS_POSITIONS), 3));
   geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(CROSS_UVS), 2));
   geometry.setIndex(CROSS_INDICES);
+  geometry.computeVertexNormals();
   geometry.setAttribute(
     'instanceBase',
     new THREE.InstancedBufferAttribute(new Float32Array(maxInstances * 3), 3),

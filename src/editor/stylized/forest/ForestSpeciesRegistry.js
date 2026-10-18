@@ -245,6 +245,9 @@ export class ForestSpeciesRegistry {
       spacingRadius,
       radius: spacingRadius,
       crownAspect,
+      // Authored species meshes already contain their narrow/wide silhouette.
+      // Apply ecological variation once instead of narrowing a narrow pine twice.
+      crownAspectScale: this.prototypeIndexBySpecies ? morphology.crownFlattening : crownAspect,
       leanX: morphology.leanX,
       leanZ: morphology.leanZ,
       branchDroop: morphology.branchDroop,

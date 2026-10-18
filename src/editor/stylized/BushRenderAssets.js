@@ -10,7 +10,7 @@ import {
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyUnderstoryPalette, authoredFoliageColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
-import { groundDetailWindPosition } from './groundDetailWind.js';
+import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
 
 export const BUSH_CAST_SHADOW = false;
@@ -36,7 +36,7 @@ function usesCutout(material) {
   );
 }
 
-export function cloneBushMaterial(source, { config = null, height = 0, tileId = null } = {}) {
+export function cloneBushMaterial(source, { config = null, height = 0, tileId = null, motion = 'woody-shrub' } = {}) {
   if (!source?.isMaterial) throw new Error('Bush prototypes require an authored material.');
   const material = cloneAuthoredNodeMaterial(source);
   if (material.map?.colorSpace !== undefined) {
@@ -44,7 +44,7 @@ export function cloneBushMaterial(source, { config = null, height = 0, tileId = 
   }
   material.colorNode = authoredFoliageColor(material);
   if (config) applyUnderstoryPalette(material, config, tileId);
-  if (config?.wind && height > 0) material.positionNode = groundDetailWindPosition(config.wind, height);
+  applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
   material.side = THREE.DoubleSide;
   if (usesCutout(material)) {
     material.alphaTest = Math.max(0.35, material.alphaTest ?? 0);
@@ -123,6 +123,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   maximumHeight = 1,
   config = null,
   tileId = null,
+  motion = 'woody-shrub',
 } = {}) {
   const value = proxyColor(sourceMaterial, color);
   const palette = config ? resolveFoliagePalette(config, tileId) : null;
@@ -138,7 +139,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   );
   material.transparent = false;
   material.depthWrite = true;
-  if (config?.wind) material.positionNode = groundDetailWindPosition(config.wind, height);
+  applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
   applyJungleMist(material, config?.ambientEffects);
   return assignBushFoliageMaterialData(material);
 }
@@ -152,6 +153,7 @@ export function createBushProxyPrototype(prototype, options = {}) {
     geometry: createBushProxyGeometry(prototype.geometry),
     material: createBushProxyMaterial(prototype.material, {
       ...options,
+      motion: prototype.material.userData.plantMotionProfile,
       minimumHeight: bounds.min.y,
       maximumHeight: bounds.max.y,
     }),

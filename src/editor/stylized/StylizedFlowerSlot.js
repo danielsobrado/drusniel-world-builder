@@ -30,6 +30,7 @@ export class StylizedFlowerSlot {
     this.material = createStylizedFlowerMaterial({
       textures,
       surfaceMaskTexture: terrainSlot.surfaceMaskTexture,
+      tileTexture: terrainSlot.tileTexture,
       chunkCenter: this.chunkCenter,
       chunkWorldSize: this.chunkWorldSize,
       time: this.time,

@@ -31,13 +31,14 @@ function finite(value, fallback) {
 
 export function treeMorphology(placement) {
   const crownScale = finite(placement.crownScale, 1);
-  const crownAspect = finite(placement.crownAspect, 1);
+  const crownAspect = finite(placement.crownAspectScale, finite(placement.crownAspect, 1));
   const foliageDensity = Math.max(0, finite(placement.foliageDensity, 1));
+  if (placement.ageClass === 'dead') return [1, 0, finite(placement.trunkScale, 1)];
   // Horizontal crown carries aspect and foliage density so sparse/wetland stands
   // thin in silhouette without a second material path.
   return [
     crownScale * crownAspect * Math.sqrt(foliageDensity),
-    crownScale * foliageDensity,
+    Math.max(1, crownScale * foliageDensity),
     finite(placement.trunkScale, 1),
   ];
 }
@@ -52,6 +53,7 @@ export function treeMorphology(placement) {
  */
 export function treeProxyMorphology(placement) {
   const [horizontal, vertical, trunk] = treeMorphology(placement);
+  if (placement.ageClass === 'dead') return [horizontal, 0, trunk];
   return [
     Math.max(0.55, horizontal),
     Math.max(1, vertical),

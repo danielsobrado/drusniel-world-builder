@@ -14,7 +14,7 @@ test('tree morphology separates horizontal crown, vertical crown, and trunk scal
     crownScale: 0.8,
     crownAspect: 0.5,
     trunkScale: 1.2,
-  }), [0.4, 0.8, 1.2]);
+  }), [0.4, 1, 1.2]);
 });
 
 test('tree morphology thins crowns with foliage density', () => {
@@ -26,7 +26,18 @@ test('tree morphology thins crowns with foliage density', () => {
   });
   assert.equal(trunk, 1);
   assert.ok(Math.abs(horizontal - 0.8) < 1e-12);
-  assert.ok(Math.abs(vertical - 0.64) < 1e-12);
+  assert.equal(vertical, 1, 'thinning cannot expose the full-height branch skeleton');
+});
+
+test('dead trees have no green crown in near and proxy representations', () => {
+  const dead = { ageClass: 'dead', crownScale: .42, crownAspect: .78, trunkScale: .94 };
+  assert.deepEqual(treeMorphology(dead), [1, 0, .94]);
+  assert.deepEqual(treeProxyMorphology(dead), [1, 0, .94]);
+});
+
+test('authored silhouettes take ecological width variation without a second species squeeze', () => {
+  assert.deepEqual(treeMorphology({ crownScale: 1, crownAspect: .48, crownAspectScale: 1,
+    foliageDensity: 1, trunkScale: 1 }), [1, 1, 1]);
 });
 
 test('tree proxy morphology keeps the abstract crown connected to its trunk', () => {

@@ -1,8 +1,9 @@
 # World look and feel: fresh screenshot review and detailed plan
 
-Date: **October 18, 2026**. Status: **proposed implementation backlog**.
-This task captures and reviews the current world; it does not change production
-rendering, assets, generation, vegetation populations, or gameplay.
+Date: **October 18, 2026**. Status: **implementation in progress**.
+The original review and its evidence remain below. The
+[implementation record](../world-look-implementation-2026-10-18.md) tracks current
+changes, validation and remaining work.
 
 The first delivery should address the four problems raised during this review:
 **leafy understory moves like grass, flower colors feel disconnected, grass and

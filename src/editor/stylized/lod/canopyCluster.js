@@ -13,6 +13,8 @@ export function aggregateCanopyCluster({
   minimumHeight = 4,
 }) {
   if (!Array.isArray(placements) || placements.length === 0) return null;
+  placements = placements.filter(p => p.ageClass !== 'dead');
+  if (placements.length === 0) return null;
 
   let minimumX = Number.POSITIVE_INFINITY;
   let maximumX = Number.NEGATIVE_INFINITY;
@@ -144,6 +146,7 @@ export function aggregateCanopyClusters({
   if (!Array.isArray(placements) || placements.length === 0) return Object.freeze([]);
   const byPatch = new Map();
   for (const placement of placements) {
+    if (placement.ageClass === 'dead') continue;
     const key = placement.patchId ?? `unpatched:${placement.stableId}`;
     const group = byPatch.get(key) ?? [];
     group.push(placement);

@@ -11,7 +11,7 @@ export function resolveFoliagePalette(config = {}, tileId = null) {
   const tip = new THREE.Color(grass?.tip ?? config.color?.top ?? '#a6bf65');
   base.lerp(new THREE.Color(canopy?.shadow ?? config.trees?.leafBottom ?? '#286746'), 0.3);
   tip.lerp(new THREE.Color(canopy?.light ?? config.trees?.leafTop ?? '#8cb75a'), 0.55);
-  return { base, tip, exposure: canopy?.exposure ?? 3.5 };
+  return { base, tip, exposure: config.understory?.paletteExposure ?? 1.25 };
 }
 
 export function fallingLeafPalette(config = {}, tileId = null) {
@@ -27,4 +27,15 @@ export function gradeUnderstory(sample, palette) {
   const ramp = mix(vec3(...palette.base.toArray()), vec3(...palette.tip.toArray()),
     smoothstep(0.025, 0.8, luminance.mul(palette.exposure)));
   return mix(sample, ramp, green.mul(0.9));
+}
+
+/** Explicit parts protect yellow petals from the foliage green-pixel mask. */
+export function gradePlantPart(sample, palette, role = 'auto') {
+  if (role === 'auto' || role === 'leaf') return gradeUnderstory(sample, palette);
+  if (role === 'stem') return mix(sample, vec3(...palette.base.toArray()), .65);
+  if (role === 'petal' || role === 'center') {
+    const luminance = dot(sample, vec3(.2126, .7152, .0722));
+    return mix(vec3(luminance), sample, .82).mul(.94);
+  }
+  throw new Error(`Unknown plant material role: ${role}`);
 }

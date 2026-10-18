@@ -170,7 +170,8 @@ export function isTreeImpostorMorphologyCompatible(placement) {
   // beat a generic geometry proxy at distance. Dead trees and truly extreme
   // crown envelopes retain the connected fallback.
   if (placement.ageClass === 'dead') return false;
-  const verticalCrownScale = treeMorphology(placement)[1];
+  const verticalCrownScale = (placement.crownScale ?? 1) * (placement.foliageDensity ?? 1);
+  if ((placement.foliageDensity ?? 1) < .35) return false;
   return verticalCrownScale >= IMPOSTOR_VERTICAL_MORPH_MIN
     && verticalCrownScale <= IMPOSTOR_VERTICAL_MORPH_MAX;
 }

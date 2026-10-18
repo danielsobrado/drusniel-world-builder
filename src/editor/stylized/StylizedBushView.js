@@ -153,7 +153,7 @@ export class StylizedBushView {
       if (variants.length === 0) {
         throw new Error(`Bush variant ${definition.scene} produced no prototypes.`);
       }
-      extracted.push(...variants);
+      extracted.push(...variants.map(part => ({ ...part, motion: definition.motion })));
       for (let index = 0; index < variants.length; index += 1) {
         this.prototypeBiomeRules.push({
           tileIds: definition.tileIds ?? null,
@@ -174,7 +174,7 @@ export class StylizedBushView {
       rules: this.prototypeBiomeRules,
       regionalCharacterField: this.regionalCharacterField,
     });
-    const newPrototypes = extracted.map(({ geometry, source }, index) => {
+    const newPrototypes = extracted.map(({ geometry, source, motion }, index) => {
       const sourceMaterial = materialList(source)[0];
       if (!sourceMaterial) {
         geometry.dispose();
@@ -184,6 +184,7 @@ export class StylizedBushView {
         geometry,
         material: cloneBushMaterial(sourceMaterial, {
           config: this.config,
+          motion,
           height: geometry.boundingBox.max.y - geometry.boundingBox.min.y,
           tileId: this.prototypeBiomeRules[firstNewPrototype + index]?.tileIds?.[0],
         }),

@@ -1,11 +1,13 @@
 import * as THREE from 'three/webgpu';
 import {
   attribute,
+  cameraViewMatrix,
   cos,
   float,
   max,
   min,
   mix,
+  normalGeometry,
   oneMinus,
   positionLocal,
   sin,
@@ -15,6 +17,7 @@ import {
   uv,
   vec2,
   vec3,
+  vec4,
 } from 'three/tsl';
 import {
   stylizedDirtMask,
@@ -23,6 +26,10 @@ import {
 } from './StylizedNoiseNodes.js';
 import { createSurfaceClassNodes } from './SurfaceMaskNodes.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../weather/wind/worldWindState.js';
+import { createMeadowGroundShading } from './meadow/MeadowGroundShading.js';
+import { applyCloudShadow } from './CloudShadow.js';
+import { applyJungleMist } from './ambient/jungleMistOutput.js';
+import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -32,6 +39,7 @@ function colorNode(value) {
 export function createStylizedFlowerMaterial({
   textures,
   surfaceMaskTexture,
+  tileTexture = null,
   chunkCenter,
   chunkWorldSize,
   time,
@@ -49,6 +57,8 @@ export function createStylizedFlowerMaterial({
   );
   const worldXZ = base.xz.add(chunkCenter);
   const surface = texture(surfaceMaskTexture, localUv);
+  const ground = tileTexture ? createMeadowGroundShading(config, texture(tileTexture, localUv), worldXZ) : null;
+  const stem = ground?.root ?? colorNode(config.flowers.colorStem);
   const surfaceClass = createSurfaceClassNodes(surface);
   const naturalTrailConfig = config.path?.naturalTrail;
   const naturalTrail = naturalTrailConfig?.enabled
@@ -126,24 +136,32 @@ export function createStylizedFlowerMaterial({
   const weighted = colorNode(config.flowers.colorR).mul(isRed)
     .add(colorNode(config.flowers.colorG).mul(isGreen))
     .add(colorNode(config.flowers.colorB).mul(isBlue))
-    .add(colorNode(config.flowers.colorStem).mul(isWhite));
+    .add(stem.mul(isWhite));
   const palette = mix(
-    colorNode(config.flowers.colorStem),
+    stem,
     weighted.div(max(total, 0.001)),
     step(0.01, total),
   );
   const flowerColor = mix(
-    colorNode(config.color.bottom),
+    stem,
     palette,
     gradient,
   ).mul(config.flowers.brightness);
 
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = finalPosition;
-  material.normalNode = vec3(0, 1, 0);
+  const nx = cos(angle).mul(normalGeometry.x).sub(sin(angle).mul(normalGeometry.z));
+  const nz = sin(angle).mul(normalGeometry.x).add(cos(angle).mul(normalGeometry.z));
+  const slope = wind.add(vec2(bend, 0)).mul(2).div(localHeight.max(.05));
+  const normal = vec3(nx, nx.mul(slope.x).add(nz.mul(slope.y)).negate(), nz).normalize();
+  material.normalNode = cameraViewMatrix.mul(vec4(normal, 0)).xyz.toVarying('flowerBentNormal').normalize();
   material.colorNode = flowerColor;
+  material.emissiveNode = flowerColor.mul(foliageLight.fill).mul(.1).add(foliageBacklight(flowerColor, .18));
   material.opacityNode = mask.mul(alive);
   material.alphaTest = 0.5;
   material.transparent = false;
+  applyCloudShadow(material, config.sky);
+  applyJungleMist(material, config.ambientEffects);
+  if (ground) material.addEventListener('dispose', () => ground.dispose());
   return material;
 }

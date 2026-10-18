@@ -105,7 +105,7 @@ export function createDitheredMaterial(sourceMaterial, {
   // the player's silhouette. Leaves only: they cast no shadow, so the shadow
   // pass's fallback to maskNode never sees the view-space cut.
   if (kind === 'leaf') {
-    const keep = characterOcclusionKeep();
+    const keep = characterOcclusionKeep().and(attribute('instanceMorphology', 'vec3').y.greaterThan(0));
     material.maskNode = material.maskNode ? material.maskNode.and(keep) : keep;
   }
   material.alphaTest = sourceOpacity
