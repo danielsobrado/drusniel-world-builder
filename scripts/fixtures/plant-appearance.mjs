@@ -109,6 +109,10 @@ try {
         state.pendingCapture = `authored-${index}-${light}`;
         await new Promise(resolve => { state.resume = resolve; }); state.pendingCapture = null;
       }
+      sun.intensity = fill.intensity = 0; syncFoliageLight({ directional: sun, hemisphere: fill });
+      const dark = await draw();
+      state.report.checks.push({ id: `authored-${index}-ordinary-plant-blackout`, ...dark,
+        passed: dark.pixels > 100 && dark.luminance < 1e-6 });
     }
   } finally { view.dispose(); cache.dispose(); }
   state.report.passed = state.report.checks.every(c => c.passed);

@@ -72,7 +72,10 @@ try {
           store.set(postProcessingSettingsToPlain(applyPostProcessingPreset(preset, store.get())), { markCustom: false });
           await window.__worldVisualQa.settle({ minimumMs: 4000 });
           const d = window.__worldVisualQa.diagnostics();
-          if (d.finishApplications !== 1 || store.get().preset !== preset) throw new Error('Quality preset or finishing mismatch');
+          const knownPath = ['cinematic-god-rays', 'volumetric-god-rays', 'post-processing', 'direct'].includes(d.renderPath);
+          const expectedFinishing = d.renderPath === 'cinematic-god-rays' ? 1 : 0;
+          if (!knownPath || d.finishApplications !== expectedFinishing || store.get().preset !== preset)
+            throw new Error(`Quality preset or finishing mismatch: ${JSON.stringify({ preset: store.get().preset, path: d.renderPath, count: d.finishApplications })}`);
           return { preset: store.get().preset, renderPath: d.renderPath, finishApplications: d.finishApplications };
         }, preset);
         state.qualities.push(settings); await capture(preset);

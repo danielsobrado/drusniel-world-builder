@@ -32,7 +32,7 @@ const DETAIL_SCRATCH = {
 };
 
 function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
-  const material = cloneAuthoredNodeMaterial(source);
+  const material = cloneAuthoredNodeMaterial(source, { lit: !!foliageConfig });
   if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId, role);
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).

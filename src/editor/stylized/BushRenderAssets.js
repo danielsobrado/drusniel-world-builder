@@ -38,7 +38,7 @@ function usesCutout(material) {
 
 export function cloneBushMaterial(source, { config = null, height = 0, tileId = null, motion = 'woody-shrub' } = {}) {
   if (!source?.isMaterial) throw new Error('Bush prototypes require an authored material.');
-  const material = cloneAuthoredNodeMaterial(source);
+  const material = cloneAuthoredNodeMaterial(source, { lit: true });
   if (material.map?.colorSpace !== undefined) {
     material.map.colorSpace = THREE.SRGBColorSpace;
   }

@@ -5,16 +5,21 @@ import { gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.j
 import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
 
 /** Clone authored channels into a node material before assigning foliage nodes. */
-export function cloneAuthoredNodeMaterial(source) {
+export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
   let material;
-  if (source.isNodeMaterial) material = source.clone();
+  const promote = lit && (source.isMeshBasicMaterial || source.isMeshBasicNodeMaterial);
+  if (promote) material = new THREE.MeshLambertNodeMaterial();
+  else if (source.isNodeMaterial) material = source.clone();
   else if (source.isMeshPhysicalMaterial) material = new THREE.MeshPhysicalNodeMaterial();
   else if (source.isMeshStandardMaterial) material = new THREE.MeshStandardNodeMaterial();
   else if (source.isMeshPhongMaterial) material = new THREE.MeshPhongNodeMaterial();
   else if (source.isMeshLambertMaterial) material = new THREE.MeshLambertNodeMaterial();
   else if (source.isMeshBasicMaterial) material = new THREE.MeshBasicNodeMaterial();
   else material = new THREE.MeshStandardNodeMaterial();
-  if (!source.isNodeMaterial) material.copy(source);
+  if (promote || !source.isNodeMaterial) material.copy(source);
+  // Several authored plant GLBs declare KHR_materials_unlit. Their albedo and
+  // cutouts belong to the asset; their lighting belongs to the outdoor scene.
+  if (promote) material.lights = true;
   // NodeMaterial.copy skips inherited accessors such as Material.alphaTest.
   // Keep the authored cutoff when adding output effects or foliage nodes.
   material.alphaTest = source.alphaTest ?? 0;
