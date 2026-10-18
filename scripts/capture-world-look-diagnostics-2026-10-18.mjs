@@ -16,10 +16,11 @@ const url = process.env.AAA_DIAGNOSTIC_URL ?? 'http://localhost:5269';
 const out = path.resolve(root, process.env.AAA_DIAGNOSTIC_OUT ?? 'docs/qa/world-look-implementation-2026-10-18/diagnostics');
 const manifest = JSON.parse(await readFile(path.join(root, 'docs/plans/aaa-look-and-feel-2026-10-18-poses.json'), 'utf8'));
 const original = manifest.poses ?? manifest.requestedPoses;
-const ids = ['random-01', 'random-04', 'random-05', 'random-06', 'random-07', 'random-10', 'random-12'];
+const qualityReview = process.env.AAA_DIAGNOSTIC_QUALITY === '1';
+const ids = qualityReview ? ['random-07', 'random-10'] : ['random-01', 'random-04', 'random-05', 'random-06', 'random-07', 'random-10', 'random-12'];
 const poses = ids.map(id => original.find(p => p.id === id));
 if (poses.some(p => !p)) throw new Error('Required diagnostic poses are missing.');
-poses.push({ id: 'marine-cell', name: 'True marine cell', world: 'procedural', expectedBiomeId: 0,
+if (!qualityReview) poses.push({ id: 'marine-cell', name: 'True marine cell', world: 'procedural', expectedBiomeId: 0,
   x: -2045, z: 1731, yaw: -Math.PI / 2, pitch: -.45, mode: 'fly', heightAboveGround: 30, fov: 60 });
 await mkdir(out, { recursive: true });
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
@@ -61,7 +62,22 @@ try {
       report.artifacts.push({ path: file, sha256: await fileHash(path.join(out, file)) });
     };
     await capture('normal');
-    if (['random-01', 'random-04', 'random-05'].includes(pose.id)) {
+    if (qualityReview) {
+      state.qualities = [];
+      for (const preset of ['low', 'balanced', 'high']) {
+        const settings = await page.evaluate(async preset => {
+          const { applyPostProcessingPreset } = await import('/src/render/postprocessing/PostProcessingPresets.js');
+          const { postProcessingSettingsToPlain } = await import('/src/render/postprocessing/PostProcessingSettings.js');
+          const store = window.__editor.postProcessingStore;
+          store.set(postProcessingSettingsToPlain(applyPostProcessingPreset(preset, store.get())), { markCustom: false });
+          await window.__worldVisualQa.settle({ minimumMs: 4000 });
+          const d = window.__worldVisualQa.diagnostics();
+          if (d.finishApplications !== 1 || store.get().preset !== preset) throw new Error('Quality preset or finishing mismatch');
+          return { preset: store.get().preset, renderPath: d.renderPath, finishApplications: d.finishApplications };
+        }, preset);
+        state.qualities.push(settings); await capture(preset);
+      }
+    } else if (['random-01', 'random-04', 'random-05'].includes(pose.id)) {
       await page.evaluate(() => {
         const fog = window.__editor.terrainView.scene.fog;
         if (!fog?.isFogExp2) throw new Error('Expected exponential distance fog.');

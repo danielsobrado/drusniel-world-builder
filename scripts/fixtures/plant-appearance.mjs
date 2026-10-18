@@ -3,7 +3,7 @@ import { uniform, vec3 } from 'three/tsl';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 import { createStylizedFlowerMaterial } from '/src/editor/stylized/StylizedFlowerMaterial.js';
 import { createFlowerCrossGeometry } from '/src/editor/stylized/StylizedFlowerGeometry.js';
-import { foliageLight } from '/src/editor/stylized/forest/foliageLight.js';
+import { foliageLight, syncFoliageLight } from '/src/editor/stylized/forest/foliageLight.js';
 import { applyFixtureLighting } from '/scripts/fixtures/world-visual-fixture-lighting.mjs';
 
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
@@ -61,7 +61,13 @@ try {
   }
   const day = state.report.cases.find(c => c.light === 'day').luminance;
   const night = state.report.cases.find(c => c.light === 'night').luminance;
-  state.report.checks.push({ id: 'ordinary-petals-darken-at-night', day, night, passed: night < day * .4 });
+  // Moon and sun have different bearings. Their ratio alone cannot impose a
+  // radiometric ceiling on a double-sided card; also test complete blackout.
+  state.report.checks.push({ id: 'ordinary-petals-darken-at-night', day, night, passed: night < day });
+  sun.intensity = fill.intensity = 0; syncFoliageLight({ directional: sun, hemisphere: fill });
+  const blackout = await draw();
+  state.report.checks.push({ id: 'ordinary-petals-have-no-light-independent-glow', ...blackout,
+    passed: blackout.pixels > 1000 && blackout.luminance < 1e-6 });
   applyFixtureLighting(config, sun, fill, 'day'); foliageLight.strength.value = 0;
   material.normalNode = vec3(0, 1, 0); material.needsUpdate = true;
   const control = [];
