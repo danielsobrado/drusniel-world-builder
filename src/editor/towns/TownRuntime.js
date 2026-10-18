@@ -53,6 +53,7 @@ export function createTownRuntime({
     palette,
     collisionSource: townCollisionSource,
     sampleSnow,
+    getDrawPreparation: () => terrainView.drawPreparation,
   });
   const doors = new TownDoorController({ streamer, collisionSource: townCollisionSource });
   const atmosphere = new TownInteriorAtmosphere({

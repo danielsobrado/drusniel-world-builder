@@ -1,6 +1,8 @@
 import { TownLayoutBuilder } from './TownLayout.js';
 import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance } from './TownLod.js';
 import { TownMesh } from './TownMesh.js';
+import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../render/preparation/StagedDrawPublication.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 /**
  * Streams the Azgaar burgs around the viewer into the scene.
@@ -25,6 +27,7 @@ export class TownStreamer {
     palette,
     collisionSource,
     sampleSnow = null,
+    getDrawPreparation = () => null,
     loadRadius = 650,
     unloadRadius = 900,
     queryIntervalMs = 700,
@@ -38,6 +41,7 @@ export class TownStreamer {
     this.palette = palette;
     this.collisionSource = collisionSource;
     this.sampleSnow = sampleSnow;
+    this.getDrawPreparation = getDrawPreparation;
     this.loadRadius = loadRadius;
     this.unloadRadius = unloadRadius;
     this.queryIntervalMs = queryIntervalMs;
@@ -48,7 +52,7 @@ export class TownStreamer {
     this.nextQueryAt = 0;
     this.buildJob = null;
     this.buildErrors = new Map();
-    this.stats = { resident: 0, instances: 0, colliders: 0, buildMs: 0 };
+    this.stats = { resident: 0, instances: 0, colliders: 0, buildMs: 0, buildLatencyMs: 0 };
   }
 
   update(nowMs, focus, budget = null) {
@@ -132,17 +136,24 @@ export class TownStreamer {
       }
       this.pending.delete(best.settlement.id);
       this.buildJob = { entry: best, iterator: this.prepareTown(best, generator), mesh: null };
+      this.stats.buildMs = 0;
     }
+    const started = performance.now();
     try {
       for (;;) {
         const step = this.buildJob.iterator.next();
         if (step.done) { this.buildJob = null; return; }
+        if (step.value === WAIT_FOR_DRAW_PREPARATION) return;
         if (shouldYield()) return;
       }
     } catch (error) {
       this.buildErrors.set(this.buildJob.entry.settlement.id, error);
       this.cancelBuild();
       console.warn('Town preparation failed.', error);
+    } finally {
+      const elapsed = performance.now() - started;
+      this.stats.buildMs += elapsed;
+      PerfCounters.inc('townPreparationCpuMs', elapsed);
     }
   }
 
@@ -167,6 +178,7 @@ export class TownStreamer {
     yield* mesh.preparation;
     mesh.preparation = null;
     mesh.setOrigin(this.floatingOrigin.getState());
+    yield* stagedDrawPublication(this.scene, [mesh.group], this.getDrawPreparation());
     const town = {
       id: best.settlement.id,
       layout,
@@ -179,9 +191,10 @@ export class TownStreamer {
     const boxes = [...layout.boxes, ...layout.doors.map((door) => door.box)];
     if (this.collisionSource?.setOwnerJob) yield* this.collisionSource.setOwnerJob(this.ownerId(town.id), boxes);
     else this.collisionSource?.setOwner(this.ownerId(town.id), boxes);
+    mesh.setOrigin(this.floatingOrigin.getState());
     this.scene.add(mesh.group);
     this.towns.set(town.id, town);
-    this.stats.buildMs = performance.now() - startedAt;
+    this.stats.buildLatencyMs = performance.now() - startedAt;
     this.updateStats();
   }
 

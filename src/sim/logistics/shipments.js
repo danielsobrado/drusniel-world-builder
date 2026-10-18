@@ -375,14 +375,18 @@ export function matchTradeOffers(state, definition, { commandId, config, ordinal
   const sellsByCommodity = new Map();
   for (const sell of sells) {
     const commodity = sell.data.commodityId;
-    if (!sellsByCommodity.has(commodity)) sellsByCommodity.set(commodity, []);
-    sellsByCommodity.get(commodity).push(sell);
+    let book = sellsByCommodity.get(commodity);
+    if (!book) sellsByCommodity.set(commodity, book = { head: null, tail: null });
+    const node = { offer: sell, next: null };
+    if (book.tail) book.tail.next = node; else book.head = node;
+    book.tail = node;
   }
 
   for (const buy of buys) {
     if (used.has(buy.id)) continue;
-    for (const sell of sellsByCommodity.get(buy.data.commodityId) ?? []) {
-      if (used.has(sell.id)) continue;
+    const book = sellsByCommodity.get(buy.data.commodityId);
+    for (let previous = null, node = book?.head; node; previous = node, node = node.next) {
+      const sell = node.offer;
       if (buy.data.settlementId === sell.data.settlementId) continue;
       if (buy.data.limitPrice < sell.data.limitPrice) break;
       const quantity = Math.min(buy.data.quantity, sell.data.quantity);
@@ -423,7 +427,10 @@ export function matchTradeOffers(state, definition, { commandId, config, ordinal
           },
         });
         if (buyRemaining <= 0) used.add(buy.id);
-        if (sellRemaining <= 0) used.add(sell.id);
+        if (sellRemaining <= 0) {
+          if (previous) previous.next = node.next; else book.head = node.next;
+          if (book.tail === node) book.tail = previous;
+        }
         shipments.push(planned.shipmentId);
         reasonCodes.push({
           code: 'trade_matched',

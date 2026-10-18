@@ -8,6 +8,7 @@ import { settlementInteriorJob } from './SettlementInteriorGeometry.js';
 import { settlementPlacementsJob } from './SettlementPlacements.js';
 import { prepareSurfaceJob } from './SettlementPreparationJobs.js';
 import { createSettlementHaze, createSettlementSmoke } from './SettlementSmoke.js';
+import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../../../render/preparation/StagedDrawPublication.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 /** Share of a loose stone's size sunk into the ground, so it sits in the soil rather than on it. */
@@ -71,7 +72,8 @@ const LAYER_ROLE = Object.freeze({ earth: 'earth', cobble: 'cobble', flagstone: 
  * because each needs terrain height samples.
  */
 export class SettlementSite {
-  constructor({ entry, plan, generator, tileSize, library }) {
+  constructor({ entry, plan, generator, tileSize, library, getDrawPreparation = () => null }) {
+    this.getDrawPreparation = getDrawPreparation;
     this.id = entry.settlement.id;
     this.settlement = entry.settlement;
     this.plan = plan;
@@ -163,6 +165,7 @@ export class SettlementSite {
       this.stagedMeshes.push(...createInteriorMeshes({ [key]: arrays }, this.surfaces));
       yield;
     }
+    yield* stagedDrawPublication(this.paving, this.stagedMeshes, this.getDrawPreparation());
     this.paving.add(...this.stagedMeshes);
     this.stagedMeshes = null;
     this.interiorArrays = null;
@@ -175,13 +178,16 @@ export class SettlementSite {
     if (this.job || !this.pavingArrays || !this.surfaces) return false;
     this.installJob ??= this.installation();
     for (;;) {
-      if (this.installJob.next().done) { this.installJob = null; return true; }
+      const step = this.installJob.next();
+      if (step.done) { this.installJob = null; return true; }
+      if (step.value === WAIT_FOR_DRAW_PREPARATION) return false;
       if (shouldYield()) return false;
     }
   }
 
   dispose() {
     this.disposed = true;
+    this.installJob?.return();
     this.job = null;
     this.installJob = null;
     for (const mesh of this.stagedMeshes ?? []) { mesh.geometry.dispose(); mesh.material.dispose(); }

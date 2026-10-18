@@ -4,6 +4,7 @@ import { BoxGeometry, MeshBasicMaterial, Scene } from 'three/webgpu';
 import { TownStreamer } from '../../src/editor/towns/TownStreamer.js';
 import { TownCollisionSource } from '../../src/editor/collision/providers/TownCollisionSource.js';
 import { layoutTown } from '../../src/editor/towns/TownLayout.js';
+import { StreamedDrawPreparation } from '../../src/render/preparation/StreamedDrawPreparation.js';
 
 function fixture() {
   const geometry = new BoxGeometry(), material = new MeshBasicMaterial();
@@ -58,6 +59,31 @@ test('leaving during town preparation cancels staged resources without publicati
     assert.equal(f.streamer.pending.size, 0);
     assert.equal(f.scene.children.length, 0); assert.equal(f.source.owners.size, 0);
   } finally { f.streamer.dispose(); f.geometry.dispose(); f.material.dispose(); }
+});
+
+test('kit town waits for draw preparation before publishing collision and follows an intervening rebase', () => {
+  const f = fixture();
+  const preparation = new StreamedDrawPreparation({ scene: f.scene, renderer: {},
+    settings: { enabled: true, meshesPerFrame: 1 }, render: () => {} });
+  f.streamer.getDrawPreparation = () => preparation;
+  let origin = { x: 0, z: 0 };
+  f.streamer.floatingOrigin.getState = () => origin;
+  try {
+    f.streamer.generator = f.generator;
+    f.streamer.refresh(f.generator, { x: 0, z: 0 });
+    f.streamer.buildNearest(f.generator, { x: 0, z: 0 });
+    assert.equal(f.streamer.towns.size, 0);
+    assert.equal(f.source.owners.size, 0);
+    assert.equal(f.scene.children[0].visible, false);
+    origin = { x: 1024, z: -1024 };
+    while (preparation.pending.size) preparation.flush({});
+    f.streamer.buildNearest(f.generator, { x: 0, z: 0 });
+    assert.equal(f.streamer.towns.size, 1);
+    assert.equal(f.source.owners.size, 1);
+    assert.equal(f.scene.children.length, 1);
+    assert.equal(f.scene.children[0].position.x, -1024);
+    assert.equal(f.scene.children[0].position.z, 1024);
+  } finally { f.streamer.dispose(); preparation.dispose(); f.geometry.dispose(); f.material.dispose(); }
 });
 
 test('a door update while a town owner stages cannot be lost at publication', () => {

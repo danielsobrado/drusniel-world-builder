@@ -116,7 +116,8 @@ export class SettlementView {
       if (!this.sites.has(id) && edge > SETTLEMENT_VIEW.siteRadius) continue;
       keep.add(id);
       if (this.sites.has(id)) continue;
-      const site = new SettlementSite({ entry, plan: field.ensurePlan(entry).plan, generator: this.generator, tileSize, library: this.library });
+      const site = new SettlementSite({ entry, plan: field.ensurePlan(entry).plan, generator: this.generator, tileSize,
+        library: this.library, getDrawPreparation: () => this.terrainView.drawPreparation });
       this.pavingRoot.add(site.paving);
       this.sites.set(id, site);
       this.dirty = true;
@@ -146,11 +147,15 @@ export class SettlementView {
     const gate = () => units++ > 0 && shouldYield();
     for (const site of this.sites.values()) {
       if (site.job) {
+        const started = performance.now();
         if (site.advance(gate)) this.dirty = true;
+        PerfCounters.inc('settlementPreparationCpuMs', performance.now() - started);
         return;
       }
       if (!site.pavingReady && site.surfaces) {
+        const started = performance.now();
         if (site.installPaving(gate)) this.dirty = true;
+        PerfCounters.inc('settlementInstallationCpuMs', performance.now() - started);
         return;
       }
     }
