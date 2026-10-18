@@ -1,5 +1,6 @@
 import { Matrix4, Vector3 } from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
+import { prepareObjectCapacity, cancelObjectCapacity } from './ObjectCapacityPublication.js';
 const scratch = new Matrix4();
 function writeMatrices(mesh, matrices) {
   const previousCount = mesh.count;
@@ -48,9 +49,11 @@ export function* prepareObjectInstances(view, renderer, objects, invalidation = 
 }
 
 export function publishObjectInstances(view, renderer, next) {
+  const records = [...next.values()];
+  const foundations = records.filter(record => record.foundationMatrix);
+  if (!prepareObjectCapacity(view, renderer, next.size, foundations.length, next)) return false;
   renderer.placementRecords = next;
   view.ensureCapacity(renderer, next.size);
-  const records = [...next.values()];
   if (renderer.lodSources) {
     renderer.lodPlacements = records;
     renderer.lodController.seed(records);
@@ -70,7 +73,6 @@ export function publishObjectInstances(view, renderer, next) {
       mesh.userData.objectIds = records.map(record => record.object.id);
     }
   }
-  const foundations = records.filter(record => record.foundationMatrix);
   view.ensureFoundationCapacity(renderer, foundations.length);
   if (renderer.foundationMesh) {
     writeMatrices(renderer.foundationMesh, foundations.map(record => record.foundationMatrix));
@@ -83,6 +85,11 @@ export function updateObjectInstances(view, renderer, objects) {
   const job = prepareObjectInstances(view, renderer, objects);
   for (;;) {
     const step = job.next();
-    if (step.done) return step.value ? publishObjectInstances(view, renderer, step.value) : false;
+    if (step.done) {
+      if (!step.value) { cancelObjectCapacity(view, renderer); return false; }
+      const published = publishObjectInstances(view, renderer, step.value);
+      if (!published) view.pendingObjectUpdates.set(renderer.definition.key, { renderer, next: step.value });
+      return published;
+    }
   }
 }

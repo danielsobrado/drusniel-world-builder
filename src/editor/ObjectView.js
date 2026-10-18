@@ -6,6 +6,7 @@ import { PerfCounters } from './performance/qa/PerfCounters.js';
 import { collectResidentObjects } from './world/residentObjectQueries.js';
 import { updateObjectInstances, prepareObjectInstances, publishObjectInstances } from './placement/ObjectInstanceUpdates.js';
 import { objectResidencyState, invalidateObjectPlacements } from './placement/ObjectResidencyState.js';
+import { cancelObjectCapacity } from './placement/ObjectCapacityPublication.js';
 import { ObjectPlacementResolver } from './placement/ObjectPlacementResolver.js';
 import {
   createInstancedRenderers,
@@ -253,7 +254,9 @@ export class ObjectView {
     if (!this.unsubscribePlacements && this.heightField?.heights) this.allPlacementsDirty = true;
     let updated = false;
     for (const [key, renderer] of this.renderers) {
-      if (!grouped.has(key) && !renderer.placementRecords?.size) continue;
+      if (!grouped.has(key) && !renderer.placementRecords?.size) {
+        this.pendingObjectUpdates.delete(key); cancelObjectCapacity(this, renderer); continue;
+      }
       const members = grouped.get(key) ?? [];
       if (members.length > 32) {
         const invalidation = { all: this.allPlacementsDirty, dirty: new Set(this.dirtyPlacements),
@@ -285,10 +288,11 @@ export class ObjectView {
     for (const [key, entry] of this.pendingObjectUpdates) {
       if (shouldYield()) return;
       for (;;) {
-        const step = entry.job.next();
+        const step = entry.next ? { done: true, value: entry.next } : entry.job.next();
         if (step.done) {
+          if (!step.value) cancelObjectCapacity(this, entry.renderer);
           if (step.value && this.renderers.get(key) === entry.renderer) {
-            publishObjectInstances(this, entry.renderer, step.value);
+            if (!publishObjectInstances(this, entry.renderer, step.value)) { entry.next = step.value; break; }
             this.pickMeshes = [...this.renderers.values()].flatMap(renderer => [
               ...(renderer.lodMeshes ? Object.values(renderer.lodMeshes).flat() : renderer.meshes),
               ...(renderer.foundationMesh?.count ? [renderer.foundationMesh] : []),
@@ -631,6 +635,7 @@ export class ObjectView {
   }
 
   disposeRendererRecord(renderer) {
+    cancelObjectCapacity(this, renderer);
     for (const mesh of renderer.meshes) {
       this.root.remove(mesh);
       mesh.dispose?.();

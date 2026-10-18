@@ -33,9 +33,16 @@ test('one object edit preserves unrelated matrices and only marks the changed in
     assert.deepEqual(a.instanceMatrix.updateRanges, [{ start: 4 * 16, count: 16 }]);
     assert.equal(b.instanceMatrix.version, bVersion);
     objects = Array.from({ length: 64 }, (_, i) => ({ id: i + 1, x: i, z: 0, rotation: 0, definitionKey: 'a' }));
+    const staged = [], prepared = new WeakSet();
+    view.terrainView.drawPreparation = { settings: { enabled: true }, prepared, register: mesh => staged.push(mesh) };
     map.revision++; view.refreshAll();
     assert.equal(a.count, 10, 'previous complete publication remains while replacement is staged');
     assert.equal(view.pendingObjectUpdates.size, 1);
+    view.advancePreparation(() => false);
+    assert.equal(a.count, 10, 'uncompiled replacement capacity cannot hide the old draw');
+    assert.ok(a.parent, 'old complete buffers remain attached during warmup');
+    assert.equal(view.pendingObjectUpdates.size, 1);
+    for (const mesh of staged) prepared.add(mesh);
     view.advancePreparation(() => false);
     const grown = view.renderers.get('a').meshes[0];
     assert.equal(grown.count, 64);
