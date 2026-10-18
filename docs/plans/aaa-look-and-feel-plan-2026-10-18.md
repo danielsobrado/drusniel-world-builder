@@ -1,9 +1,20 @@
 # World look and feel: fresh screenshot review and detailed plan
 
-Date: **October 18, 2026**. Status: **implementation in progress**.
+Date: **October 18, 2026**. Status: **visual implementation and automated acceptance complete**.
 The original review and its evidence remain below. The
 [implementation record](../world-look-implementation-2026-10-18.md) tracks current
 changes, validation and remaining work.
+
+Implementation checkpoint: all four reported defects have production fixes.
+The final 18 poses, 24 additional biome poses, four-light material fixtures,
+quality presets and ten ordinary/synthetic movement clips pass their checks.
+Rendering is frozen at `3e20d115`; complete source and artifact provenance is in
+the implementation record. Complete baseline/candidate performance matrices now
+pass after invalid foreground attempts were retained and repeated. R7's conditional
+versioned geography stage remains separate; automated audio checks establish
+lifecycle behavior, while subjective sound balance still needs listening.
+The original observations and detailed delivery briefs below remain the audit
+record rather than a claim that every example calls for new content.
 
 The first delivery should address the four problems raised during this review:
 **leafy understory moves like grass, flower colors feel disconnected, grass and

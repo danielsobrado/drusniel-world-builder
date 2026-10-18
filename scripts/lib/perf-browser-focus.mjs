@@ -34,6 +34,26 @@ export async function focusPerfBrowser(browser, page, { headed }) {
       }
     });
   }
+  if (!await page.evaluate(() => document.hasFocus())) {
+    // Some Windows Chromium launches leave keyboard focus in browser chrome.
+    // A real input event selects the renderer; programmatic canvas.focus()
+    // alone cannot do that. Consume the click on a temporary inert target so
+    // setup cannot click a world tool or request pointer lock.
+    await page.evaluate(() => {
+      const target = document.createElement('button');
+      target.dataset.perfFocusTarget = '';
+      target.type = 'button';
+      target.tabIndex = -1;
+      target.style.cssText = 'position:fixed;left:0;top:0;width:8px;height:8px;padding:0;border:0;opacity:0.01;z-index:2147483647';
+      for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click']) {
+        target.addEventListener(type, event => event.stopPropagation());
+      }
+      document.body.append(target);
+    });
+    try { await page.locator('[data-perf-focus-target]').click({ timeout: 5000 }); }
+    catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }
+    finally { await page.evaluate(() => document.querySelector('[data-perf-focus-target]')?.remove()); }
+  }
   try { await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 }); }
   catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }
   await page.evaluate(() => {
