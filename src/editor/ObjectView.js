@@ -395,7 +395,9 @@ export class ObjectView {
         })[0],
       };
       renderer.capacity = capacity;
-      this.terrainView.drawPreparation?.discover();
+      for (const meshes of Object.values(renderer.lodMeshes)) {
+        for (const mesh of meshes) this.terrainView.drawPreparation?.register(mesh);
+      }
       return;
     }
     for (const mesh of renderer.meshes) {
@@ -409,7 +411,7 @@ export class ObjectView {
       mesh.receiveShadow = true;
       mesh.userData.objectIds = [];
       this.root.add(mesh);
-      this.terrainView.drawPreparation?.discover();
+      this.terrainView.drawPreparation?.register(mesh);
       return mesh;
     });
     renderer.capacity = capacity;
@@ -479,7 +481,7 @@ export class ObjectView {
     renderer.foundationMesh.receiveShadow = true;
     renderer.foundationMesh.userData.objectIds = [];
     this.root.add(renderer.foundationMesh);
-    this.terrainView.drawPreparation?.discover();
+    this.terrainView.drawPreparation?.register(renderer.foundationMesh);
   }
 
   refreshFoundations(renderer, placements) {

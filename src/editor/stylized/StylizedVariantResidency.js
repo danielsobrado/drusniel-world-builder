@@ -211,8 +211,10 @@ export class StylizedVariantResidency {
       applied += 1;
       const startedAt = performance.now();
       try {
-        job.layer.apply([{ definition: job.definition, scene: job.scene }]);
-        this.terrainView.drawPreparation?.discover();
+        const installed = job.layer.apply([{ definition: job.definition, scene: job.scene }]);
+        if (Array.isArray(installed)) {
+          for (const root of installed) this.terrainView.drawPreparation?.register(root);
+        } else this.terrainView.drawPreparation?.discover();
         PerfCounters.inc('stylizedVariantsApplied');
       } catch (error) {
         this.requested.delete(job.id);

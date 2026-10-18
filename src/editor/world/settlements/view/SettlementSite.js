@@ -84,7 +84,10 @@ export class SettlementSite {
     this.releaseSurfaces = release;
     loading.then((surfaces) => {
       if (!this.disposed) this.surfaces = Object.freeze({ ...surfaces, timberTint: TIMBER_TONES[this.dressing.timberTone] });
-    }, (error) => console.warn(`Settlement ${this.id} could not load its surface textures.`, error));
+    }, (error) => {
+      this.surfaceError = error;
+      console.warn(`Settlement ${this.id} could not load its surface textures.`, error);
+    });
     this.centre = { x: entry.settlement.cellX * tileSize, z: -entry.settlement.cellZ * tileSize };
     this.placements = null;
     this.paving = new THREE.Group();

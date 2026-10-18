@@ -8,6 +8,7 @@ import { settlementDusk } from './SettlementDusk.js';
 import { updateSettlementSunlight } from './SettlementWindowLight.js';
 import { SettlementSite } from './SettlementSite.js';
 import { SettlementSkyline } from './SettlementSkyline.js';
+import { settlementPreparationStatus } from './SettlementPreparationStatus.js';
 
 export const SETTLEMENT_VIEW = Object.freeze({
   /** Settlements whose edge is within this many metres of the camera are drawn. */
@@ -93,6 +94,8 @@ export class SettlementView {
     this.nextRefresh = 0;
     this.dirty = true;
   }
+
+  getPreparationStatus() { return settlementPreparationStatus(this); }
 
   /** Adopt the settlements round `focus` (canonical metres) and drop the ones left behind. */
   refreshSites(focus) {

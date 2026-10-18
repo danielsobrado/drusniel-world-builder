@@ -35,10 +35,11 @@ export class StreamedDrawPreparation {
     if (reservation) reservation.run(() => this.flush(camera));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield), 6);
   }
-  discover() {
+  register(root) { this.discover(root); }
+  discover(root = this.scene) {
     if (!this.settings.enabled || this.disposed) return;
     // Called after a variant/actor is installed, never scans the scene per frame.
-    this.scene.traverse(object => {
+    root.traverse(object => {
       if (!object.isMesh || this.prepared.has(object) || object.userData.skipWarmup) return;
       this.pending.add(object);
     });

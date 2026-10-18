@@ -709,6 +709,7 @@ const kitTowns = kitTownsEnabled();
       return sky ? { direction: sky.sunDirectionValue, color: sky.directional.color, intensity: sky.directional.intensity } : null;
     } });
   resources.own(settlementView);
+  terrainView.settlementView = settlementView;
   const settlementAmbience = new SettlementAmbience(audioBus);
 // Inside a town, the sky light's ground bounce is its setts and earth, not meadow green.
 const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?.skyView?.hemisphere ?? null);
@@ -1360,6 +1361,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     },
   }) : null;
   if (townRuntime) {
+    terrainView.townRuntime = townRuntime;
     resources.own(townRuntime);
     townKeyHandler = (event) => townRuntime.handleKey(event);
   }
@@ -1480,7 +1482,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   drawPreparation.markInitialScene(); terrainView.drawPreparation = drawPreparation;
   const exploration = new ExplorationRuntime({ config, terrainView, viewModeController, container: ui.viewport,
     sceneLoader: stylizedSurface.sceneAssets?.loader,
-    onInstalled: () => drawPreparation.discover(),
+    onInstalled: (root) => drawPreparation.register(root),
     invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.ACTIVE_CAMERA_REPLACED) });
   resources.own(exploration);
   if (import.meta.env.DEV && window.__editor) Object.assign(window.__editor, { exploration, deferredWork, drawPreparation });
@@ -1620,6 +1622,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     }
     if (profiling) perfQa.mark('floatingOrigin');
     townRuntime?.update(frameTimestamp);
+    if (profiling) perfQa.mark('towns');
 
     if (characterView) {
       const walking = viewModeController.mode === PLAYER_MODE_WALK
@@ -1723,6 +1726,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       );
     }
     spellRuntime?.update(frameTimestamp);
+    if (profiling) perfQa.mark('weatherSpells');
 
     objectView.update(frameTimestamp, viewModeController.camera);
     if (profiling) perfQa.mark('objects');
@@ -1823,6 +1827,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       viewModeController.mode === PLAYER_MODE_WALK,
     );
     drawPreparation.flushBudgeted(viewModeController.camera, deferredWork);
+    if (profiling) perfQa.mark('ambiencePreparation');
     drawPreparation.hidePending();
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
     roadsideDetailsUi.update();

@@ -70,6 +70,12 @@ export function createTownRuntime({
     doors,
     /** Live town shading knobs (albedo lift, saturation, crevice depth, relief) for tuning. */
     shading: townKitShared,
+    getPreparationStatus() {
+      const pending = streamer.pending.size + Number(Boolean(streamer.buildJob));
+      const errors = assets.failed ? [String(assets.failed.message ?? assets.failed)] : [];
+      return { ready: pending === 0 && errors.length === 0, pending,
+        resident: streamer.towns.size, instances: streamer.stats.instances, errors };
+    },
     update(timestamp) {
       const delta = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
       lastTimestamp = timestamp;

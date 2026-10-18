@@ -453,7 +453,11 @@ export class StylizedSurfaceView {
         paths.push(scene);
         return loaded;
       },
-      apply: (variants) => view.appendVariants(variants),
+      apply: (variants) => {
+        const previous = new Set(view.root.children);
+        view.appendVariants(variants);
+        return view.root.children.filter(child => !previous.has(child));
+      },
     });
     const streaming = config.streaming ?? {};
     return new StylizedVariantResidency({
