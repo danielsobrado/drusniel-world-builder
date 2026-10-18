@@ -14,13 +14,13 @@ attempt in its report. Capture validity is separate from visual acceptance.
 
 | Item | Implementation | Acceptance |
 | --- | --- | --- |
-| R0 evidence | Eighteen baseline world poses; source/config/map hashes; targeted tree surveys | Baseline and intermediate stills pass, 18/18 each; final replay follows the authored-lighting fix |
+| R0 evidence | Eighteen baseline world poses; source/config/map hashes; targeted tree surveys and labeled identity overlays | Baseline and final stills pass, 18/18 each, fixed source and zero browser errors |
 | R1 plant motion | Explicit asset motion profiles; rooted rigid fallback for leaves/shrubs; matching normals and conservative bounds | CPU tests and 48 GPU comparisons pass; final movement review pending |
 | R2 plant appearance | Lit conversion for unlit natural plant GLBs; explicit flower roles; restrained grading; procedural flowers use terrain stem pigments and correct normals, cloud shadow and mist | Final authored/procedural four-light review passes 44 checks across both backends, including blackout controls |
-| R3 grass/ground | Persistent stand-weighted substrate occlusion; lighter sparse roots | Unit tests and 284 ground continuity checks pass; combined controls and LOD review pending |
+| R3 grass/ground | Persistent stand-weighted substrate occlusion; lighter sparse roots | CPU tests, 284 ground checks, 54 LOD checks, 6 temporal checks and combined layer controls pass |
 | R4 tree shapes | Leafless dead state; living crown height retained; authored species no longer receive a second narrow/wide squeeze | CPU tests and 1,112 representation/alpha/lighting GPU checks pass; same-instance world replay passes |
 | R5 surfaces/contact | Coherent sand ripple districts with quiet gaps; stronger cool mineral substrate in near/far recipes | 456 GPU surface checks pass across four lights and both backends |
-| R6 habitat composition | World-stable flower colonies, biome petal palettes; meadow bouquets excluded from taiga/rainforest | Worker/main tests and 18-view rollout pass; expanded positions and true marine check pending |
+| R6 habitat composition | World-stable flower colonies, biome petal palettes; meadow bouquets excluded from taiga/rainforest | Worker/main tests, 18-view rollout and true marine check pass; expanded positions pending |
 | R7 atmosphere/composition | Restrained daytime dust glints/pollen; neighborhood/ID survey and persistent layer controls | Eight diagnostic views pass, including a true marine cell; source geography retained |
 | R8 motion/interaction/HUD/sound | Pending | Pending |
 | R9 release/performance | Frozen hardware baseline; strict native focus control | Final verify passes, 6,861 tests; hardware movement matrix pending |
@@ -65,7 +65,7 @@ Dead trees retain their existing identity and trunk/collision geometry. Species
 selection and Azgaar IDs are preserved. Tree atlas source geometry/materials
 remain unchanged; per-instance appearance is applied at runtime.
 
-The intermediate rainforest pose records 449,230,428 tracked bytes versus 446,659,674
+The final rainforest pose records 449,230,428 tracked bytes versus 446,659,674
 in the baseline (about +2.45 MiB, +0.58%). These are bounded resource-accounting
 snapshots, not driver VRAM measurements or proof of a leak. Flower resource
 accounting now includes its previously uncounted node-only textures. Both
@@ -87,6 +87,15 @@ tundra includes trees rooted in neighboring ID 4 cells. Imported Eldara taiga
 is ID 9 in all forty neighborhood samples, with configured conifer prototypes.
 The rainforest's conspicuous pale trunk is authored `tree-scene/tree-02.glb`,
 placement `tree:101:12:21`, species `tropical_tall`, not a terrain-ID migration.
+
+The final diagnostic set passes all eight poses, nineteen captures and zero
+browser errors. `marine-cell` is at X −2045, Z 1731, camera cell ID 0. Its aerial
+camera stays above the water; the original two coast cameras remain on ID 4.
+Distance-fog controls at 01/04/05 improve tree separation but do not reveal new
+ridges. At radius 1,024 m, sampled source maxima are 4.98, 14.46 and 10.81 m
+respectively. These forty-point neighborhood surveys are directional samples,
+not an exhaustive terrain search. Regional mist and sky haze remain active in
+the distance-fog control, and wind/particles remain live.
 
 R7's opt-in geography extension is explicitly a separate, conditional versioned
 stage in the plan. This pass preserves procedural generator version 1, imported
@@ -123,3 +132,6 @@ their existing systems are not silently replaced on the strength of stills.
   tests, lint, generated UI, production assets and build. The added tests cover
   paint/cutout preservation, Basic-node promotion, intentional unlit callers and
   agreement between authored bush and proxy lighting.
+- Final source `75fbb126` passes the repeated 18-view world capture, eight-view
+  diagnostic set and low/balanced/high preset review at rainforest and tundra.
+  Original media and earlier attempts remain retained separately.
