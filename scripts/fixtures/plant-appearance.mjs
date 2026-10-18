@@ -5,6 +5,9 @@ import { createStylizedFlowerMaterial } from '/src/editor/stylized/StylizedFlowe
 import { createFlowerCrossGeometry } from '/src/editor/stylized/StylizedFlowerGeometry.js';
 import { foliageLight, syncFoliageLight } from '/src/editor/stylized/forest/foliageLight.js';
 import { applyFixtureLighting } from '/scripts/fixtures/world-visual-fixture-lighting.mjs';
+import { StylizedGroundDetailView } from '/src/editor/stylized/StylizedGroundDetailView.js';
+import { StylizedSceneAssetCache } from '/src/editor/stylized/StylizedSceneAssetCache.js';
+import { writeInstances } from '/src/editor/stylized/lod/StylizedLodRuntime.js';
 
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
 const state = window.__plantAppearanceFixture = { pendingCapture: null,
@@ -77,6 +80,37 @@ try {
   }
   const controlChange = Math.abs(control[1].luminance / control[0].luminance - 1);
   state.report.checks.push({ id: 'old-view-space-normal-negative-control-rejected', controlChange, passed: controlChange > .02 });
+  scene.remove(mesh);
+  const plantConfig = structuredClone(config); plantConfig.wind = null;
+  plantConfig.enhancements.detailVisibility = false;
+  const view = new StylizedGroundDetailView({ terrainView: { scene, renderer }, config: plantConfig,
+    revisionTracker: { revision: 0 }, layerConfig: { enabled: true, residentRadius: 0, perChunk: 1 }, layerName: 'groundDetail' });
+  const cache = new StylizedSceneAssetCache({ renderer });
+  try {
+    const definitions = plantConfig.assets.groundDetailVariants.filter(d => d.materialRoles || d.scene.endsWith('/grass-chunks/chunk-01.glb'));
+    const variants = [];
+    for (const definition of definitions) variants.push({ definition, scene: await cache.acquire(definition.scene) });
+    view.appendVariants(variants);
+    camera.position.set(0, 1, 4); camera.lookAt(0, 1, 0); camera.updateMatrixWorld();
+    for (const [index, parts] of view.prototypes.entries()) {
+      const bounds = new THREE.Box3();
+      for (const part of parts) { part.geometry.computeBoundingBox(); bounds.union(part.geometry.boundingBox); }
+      const height = bounds.max.y - bounds.min.y, scale = 2 / height;
+      const center = bounds.getCenter(new THREE.Vector3());
+      const matrix = new THREE.Matrix4().makeScale(scale, scale, scale);
+      matrix.setPosition(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      writeInstances(view.meshes, view.prototypes.map((_, p) => p === index ? [{ matrix, fade: 1, seed: .3 }] : []));
+      for (const light of ['day', 'low-sun', 'overcast', 'night']) {
+        const lighting = applyFixtureLighting(config, sun, fill, light), value = await draw();
+        const asset = definitions[index].scene;
+        state.report.cases.push({ asset, height, previewScale: scale, materialRoles: definitions[index].materialRoles ?? 'auto', light, lighting, ...value });
+        state.report.checks.push({ id: `authored-${index}-${light}-production-material-visible`,
+          passed: value.pixels > 100 && Number.isFinite(value.luminance) && value.luminance > 0 });
+        state.pendingCapture = `authored-${index}-${light}`;
+        await new Promise(resolve => { state.resume = resolve; }); state.pendingCapture = null;
+      }
+    }
+  } finally { view.dispose(); cache.dispose(); }
   state.report.passed = state.report.checks.every(c => c.passed);
   target.dispose(); geometry.dispose(); material.dispose(); surfaceMaskTexture.dispose(); tileTexture.dispose();
   Object.values(textures).forEach(t => t.dispose());
