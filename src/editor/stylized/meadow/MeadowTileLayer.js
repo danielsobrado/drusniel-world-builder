@@ -379,10 +379,12 @@ export class MeadowTileLayer {
 
   publish(tile, output, band, revision) {
     if (!this.canPublish(output, tile)) return false;
-    this.publicationBytes += output.count * 14 * 4;
+    const predictedBytes = this.batches.publicationBytes(tile, band, output);
+    this.publicationBytes += predictedBytes;
     if (output.count || tile.output?.count) this.publications++;
     PerfCounters.inc('meadowPublications');
     PerfCounters.inc('meadowPublicationBytes', output.count * 14 * 4);
+    PerfCounters.inc('meadowPublicationPredictedBytes', predictedBytes);
     const previousCapacity = tile.output?.count ? this.templates[tile.builtBand].instanceCount : 0;
     if (!previousCapacity || this.templates[band].instanceCount > previousCapacity) {
       // Keep an active arrival fade across a rapid second promotion. A ground
@@ -405,7 +407,7 @@ export class MeadowTileLayer {
     // source publications; page compaction and retired ranges may also upload.
     if (!output.count && !tile?.output?.count) return true;
     return this.publications < this.maxPublicationsPerFrame && (this.publicationBytes === 0
-      || this.publicationBytes + output.count * 14 * 4 <= this.maxPublicationBytes);
+      || this.publicationBytes + this.batches.publicationBytes(tile, tile?.band, output) <= this.maxPublicationBytes);
   }
 
   publishPrepared(tile, force = false) {

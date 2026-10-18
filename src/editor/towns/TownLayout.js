@@ -1,4 +1,5 @@
-import { planDressing, planPaving } from './TownDressing.js';
+import { drainJob, typedArrayJob } from '../world/settlements/SettlementArrayJobs.js';
+import { planDressingJob, planPavingJob } from './TownDressing.js';
 import { familyForStyle, prefabNameFor, propClusterFor } from './TownPrefabCatalog.js';
 import { townHash as placementSeed } from './townHash.js';
 
@@ -207,19 +208,24 @@ export class TownLayoutBuilder {
     return index;
   }
 
-  build() {
-    this.plan.buildings.forEach((building, index) => this.addBuilding(building, index));
-    (this.plan.props ?? []).forEach((prop, index) => this.addProp(prop, index));
-    (this.plan.fields ?? []).forEach((field, index) => this.addField(field, index));
+  build() { return drainJob(this.buildJob()); }
+
+  *buildJob() {
+    for (const [index, building] of this.plan.buildings.entries()) { this.addBuilding(building, index); yield; }
+    for (const [index, prop] of (this.plan.props ?? []).entries()) { this.addProp(prop, index); yield; }
+    for (const [index, field] of (this.plan.fields ?? []).entries()) { this.addField(field, index); yield; }
     const props = this.plan.props?.length ?? 0;
-    planDressing({ plan: this.plan, seed: this.settlement.id, placed: this.placed, family: this.family })
-      .forEach((prop, index) => this.addProp(prop, props + index));
-    for (const tile of planPaving(this.plan)) {
+    const dressing = yield* planDressingJob({ plan: this.plan, seed: this.settlement.id, placed: this.placed, family: this.family });
+    for (const [index, prop] of dressing.entries()) { this.addProp(prop, props + index); yield; }
+    const paving = yield* planPavingJob(this.plan);
+    for (const tile of paving) {
       const z = -tile.z;
       this.addPart(PAVING_MODULE, [tile.x, this.pavingHeight(tile.x, z), z], Math.PI - tile.yaw);
+      yield;
     }
-    const parts = new Map([...this.parts].map(([module, values]) => [module, Float32Array.from(values)]));
-    const partSeeds = new Map([...this.seeds].map(([module, values]) => [module, Float32Array.from(values)]));
+    const parts = new Map(), partSeeds = new Map();
+    for (const [module, values] of this.parts) parts.set(module, yield* typedArrayJob(values));
+    for (const [module, values] of this.seeds) partSeeds.set(module, yield* typedArrayJob(values));
     return Object.freeze({
       settlementId: this.settlement.id,
       name: this.plan.name ?? '',

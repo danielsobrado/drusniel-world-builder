@@ -227,6 +227,7 @@ export function buildPerfReport({
       id: config.scenarioId,
       label: config.scenarioLabel,
       spawn: config.spawn,
+      settlementFixture: config.settlementFixture ?? null,
       yawDegrees: config.yawDegrees,
       pitchDegrees: config.pitchDegrees,
       warmupSeconds: config.warmupSeconds,

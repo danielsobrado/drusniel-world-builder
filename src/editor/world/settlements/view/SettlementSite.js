@@ -4,8 +4,9 @@ import { SHADE_LAYER } from '../paving/SettlementPavingGeometry.js';
 import { createPavingMaterial, createShadeMaterial } from '../paving/SettlementPavingMaterial.js';
 import { dressingFor, SETTLEMENT_SURFACE_SETS, TIMBER_TONES } from '../surfaces/SettlementDressing.js';
 import { createInteriorMeshes } from './interior/InteriorMeshes.js';
-import { settlementInteriorArrays } from './SettlementInteriorGeometry.js';
-import { settlementPlacements } from './SettlementPlacements.js';
+import { settlementInteriorJob } from './SettlementInteriorGeometry.js';
+import { settlementPlacementsJob } from './SettlementPlacements.js';
+import { prepareSurfaceJob } from './SettlementPreparationJobs.js';
 import { createSettlementHaze, createSettlementSmoke } from './SettlementSmoke.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -49,8 +50,8 @@ function pavingMesh(arrays, material) {
   geometry.setAttribute('color', new THREE.BufferAttribute(arrays.colors, 3));
   geometry.setAttribute('pavingEdge', new THREE.BufferAttribute(arrays.edges, 1));
   geometry.setIndex(new THREE.BufferAttribute(arrays.indices, 1));
-  geometry.computeVertexNormals();
-  geometry.computeBoundingSphere();
+  geometry.setAttribute('normal', new THREE.BufferAttribute(arrays.normals, 3));
+  geometry.boundingSphere = arrays.boundingSphere;
   const mesh = new THREE.Mesh(geometry, material);
   mesh.name = `settlement-paving-${arrays.kind}`;
   // Not for the streamed draw-preparation queue: it hides what it has not reached.
@@ -98,11 +99,11 @@ export class SettlementSite {
 
   *prepare(generator, tileSize) {
     const heightAt = terrainHeightSampler(generator, this.settlement, tileSize);
-    const placements = settlementPlacements(this.settlement, this.plan, tileSize, heightAt);
+    const placements = yield* settlementPlacementsJob(this.settlement, this.plan, tileSize, heightAt);
     const position = new THREE.Vector3();
     const rotation = new THREE.Quaternion();
     const scale = new THREE.Vector3();
-    for (const placement of placements) {
+    for (const [index, placement] of placements.entries()) {
       const sunk = placement.scale === 1 ? 0 : placement.scale * STONE_SINK;
       position.set(placement.x, placement.y - sunk, placement.z);
       rotation.setFromAxisAngle(UP, placement.rotationY);
@@ -114,6 +115,7 @@ export class SettlementSite {
       placement.blend = 0;
       placement.shown = 0;
       placement.key = `${this.dressing.timberTone}|${placement.key}`;
+      if (index % 16 === 15) yield;
     }
     this.placements = placements;
     // Smoke needs only the plan; it rides with the paving, which shares its frame.
@@ -122,11 +124,13 @@ export class SettlementSite {
     const haze = createSettlementHaze(this.plan, heightAt);
     if (haze) this.paving.add(haze);
     // Rooms wear the town's own timber, plaster and stone: built once those are in.
-    this.interiorArrays = settlementInteriorArrays(this.plan);
+    this.interiorArrays = yield* settlementInteriorJob(this.plan);
     yield;
     const tileMetres = Object.fromEntries(Object.entries(LAYER_ROLE)
       .map(([layer, role]) => [layer, SETTLEMENT_SURFACE_SETS[this.dressing[role]].tileMetres]));
     this.pavingArrays = yield* settlementPavingJob(this.plan, heightAt, tileMetres);
+    for (const arrays of this.pavingArrays) yield* prepareSurfaceJob(arrays, true);
+    for (const arrays of Object.values(this.interiorArrays ?? {})) yield* prepareSurfaceJob(arrays);
   }
 
   /** Runs preparation until `shouldYield`. Returns true once paving geometry exists. */
@@ -143,8 +147,8 @@ export class SettlementSite {
   }
 
   /** Turns finished paving geometry into meshes, once the dressing's textures are in. */
-  installPaving() {
-    if (this.pavingReady || this.job || !this.pavingArrays || !this.surfaces) return;
+  *installation() {
+    this.stagedMeshes = [];
     for (const arrays of this.pavingArrays) {
       const material = arrays.kind === SHADE_LAYER
         ? createShadeMaterial()
@@ -152,17 +156,36 @@ export class SettlementSite {
       const mesh = pavingMesh(arrays, material);
       // Occlusion darkens what is under it; it must not take a shadow of its own.
       if (arrays.kind === SHADE_LAYER) mesh.receiveShadow = false;
-      this.paving.add(mesh);
+      this.stagedMeshes.push(mesh);
+      yield;
     }
-    if (this.interiorArrays) this.paving.add(...createInteriorMeshes(this.interiorArrays, this.surfaces));
+    for (const [key, arrays] of Object.entries(this.interiorArrays ?? {})) {
+      this.stagedMeshes.push(...createInteriorMeshes({ [key]: arrays }, this.surfaces));
+      yield;
+    }
+    this.paving.add(...this.stagedMeshes);
+    this.stagedMeshes = null;
     this.interiorArrays = null;
     this.pavingArrays = null;
     this.pavingReady = true;
   }
 
+  installPaving(shouldYield = () => false) {
+    if (this.pavingReady) return true;
+    if (this.job || !this.pavingArrays || !this.surfaces) return false;
+    this.installJob ??= this.installation();
+    for (;;) {
+      if (this.installJob.next().done) { this.installJob = null; return true; }
+      if (shouldYield()) return false;
+    }
+  }
+
   dispose() {
     this.disposed = true;
     this.job = null;
+    this.installJob = null;
+    for (const mesh of this.stagedMeshes ?? []) { mesh.geometry.dispose(); mesh.material.dispose(); }
+    this.stagedMeshes = null;
     for (const child of this.paving.children) {
       // A sprite's quad is three's own, shared by every sprite there is.
       if (!child.isSprite) child.geometry.dispose();

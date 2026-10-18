@@ -1,3 +1,4 @@
+import { typedArrayJob } from '../SettlementArrayJobs.js';
 /**
  * Paving draped over a settlement's ground: a ribbon along every street and
  * walk, and a disc for the market square.
@@ -110,19 +111,16 @@ class SurfaceBuffer {
     this.indices.push(a, b, c, a, c, d);
   }
 
-  arrays() {
-    return {
-      kind: this.kind,
-      positions: new Float32Array(this.positions),
-      uvs: new Float32Array(this.uvs),
-      colors: new Float32Array(this.colors),
-      edges: new Float32Array(this.edges),
-      indices: new Uint32Array(this.indices),
-    };
+  *arraysJob() {
+    const arrays = { kind: this.kind };
+    for (const name of ['positions', 'uvs', 'colors', 'edges', 'indices']) {
+      arrays[name] = yield* typedArrayJob(this[name], name === 'indices' ? Uint32Array : Float32Array);
+    }
+    return arrays;
   }
 }
 
-function addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, heightAt) {
+function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, heightAt) {
   const half = width / 2 + BORDER;
   let previous = null;
   const last = path.length - 1;
@@ -143,10 +141,11 @@ function addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, he
       }
     }
     previous = row;
+    yield;
   }
 }
 
-function addDisc(buffer, radius, heightAt, tone) {
+function* addDisc(buffer, radius, heightAt, tone) {
   const outer = radius + BORDER * 1.6;
   const rings = Math.max(2, Math.ceil(outer / STEP));
   const centre = buffer.vertex(0, 0, 0, heightAt, tone);
@@ -178,6 +177,7 @@ function addDisc(buffer, radius, heightAt, tone) {
       }
     }
     previous = row;
+    yield;
   }
 }
 
@@ -281,22 +281,22 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     const pieces = street.kind === 'main' && surface !== 'earth'
       ? splitAtRadius(street.points, radius * 1.06)
       : [street.points, null];
-    pieces.forEach((points, piece) => {
-      if (!points || points.length < 2) return;
+    for (const [piece, points] of pieces.entries()) {
+      if (!points || points.length < 2) continue;
       const kind = piece === 0 ? surface : 'earth';
-      addRibbon(buffers.get(kind), smoothPath(points, closed), street.width, {
+      yield* addRibbon(buffers.get(kind), smoothPath(points, closed), street.width, {
         closed,
         // A street that springs from another one starts under it; only its free end frays.
         fadeStart: piece === 1 ? false : street.kind === 'walk',
         fadeEnd: !(piece === 0 && pieces[1]),
         tone: street.kind === 'walk' ? 0.94 : 1,
       }, heightAt);
-    });
+    }
     yield;
   }
   if (plan.squareRadius > 0) {
     // Out to the house fronts that wall the square (see `squareFrontage`).
-    addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), plan.squareRadius + 2.2, heightAt, 1.03);
+    yield* addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), plan.squareRadius + 2.2, heightAt, 1.03);
     yield;
   }
   const shade = new SurfaceBuffer(SHADE_LAYER, 1);
@@ -306,5 +306,7 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     addShade(shade, building, heightAt);
     if (index % 12 === 11) yield;
   }
-  return [...buffers.values()].filter((buffer) => buffer.indices.length > 0).map((buffer) => buffer.arrays());
+  const arrays = [];
+  for (const buffer of buffers.values()) if (buffer.indices.length > 0) arrays.push(yield* buffer.arraysJob());
+  return arrays;
 }

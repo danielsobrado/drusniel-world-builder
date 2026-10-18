@@ -30,6 +30,7 @@ export class MeadowBandBatch {
     this.slotCapacity = meadowPageTileCapacity(this.stride);
     this.slots = new Map();
     this.present = new Set();
+    this.order = [];
     this.geometry = new THREE.InstancedBufferGeometry();
     for (const name of ['position', 'uv', 'bladeSide']) {
       this.geometry.setAttribute(name, template.getAttribute(name));
@@ -93,11 +94,25 @@ export class MeadowBandBatch {
   update(tiles) {
     this.present.clear();
     for (const tile of tiles) this.present.add(tile);
+    // Fill an equal-sized retirement hole from the page tail. Every tile still
+    // occupies one contiguous run, so churn cannot accumulate fragmentation.
+    for (let i = this.order.length - 1; i >= 0; i--) {
+      if (this.present.has(this.order[i])) continue;
+      const last = this.order.length - 1;
+      const removed = this.slots.get(this.order[i]);
+      const tail = this.order[last];
+      if (i !== last && removed?.count === Math.min(tail.output.count, this.stride)) {
+        this.order[i] = tail; this.order.pop();
+      } else this.order.splice(i, 1);
+    }
+    const ordered = new Set(this.order);
+    for (const tile of tiles) if (!ordered.has(tile)) this.order.push(tile);
     for (const tile of this.slots.keys()) {
       if (!this.present.has(tile)) this.slots.delete(tile);
     }
     let start = 0;
-    for (const tile of tiles) {
+    let changed = false;
+    for (const tile of this.order) {
       const count = Math.min(tile.output.count, this.stride);
       let slot = this.slots.get(tile);
       // Detail-only LOD publications have a new build ID but reuse the same
@@ -110,6 +125,7 @@ export class MeadowBandBatch {
       }
       if (writeSource || slot.renderX !== tile.renderX || slot.renderZ !== tile.renderZ) {
         this.writeTile(start, tile, count, writeSource);
+        changed = true;
       }
       if (!slot) {
         slot = {};
@@ -122,9 +138,10 @@ export class MeadowBandBatch {
       slot.renderZ = tile.renderZ;
       start += count;
     }
+    changed ||= this.geometry.instanceCount !== start;
     this.geometry.instanceCount = start;
     this.mesh.visible = start > 0;
-    this.bounds?.update(tiles);
+    if (changed) this.bounds?.update(this.order);
     this.mesh.frustumCulled = this.bounds !== null && !this.bounds.ground.isEmpty();
     return start;
   }

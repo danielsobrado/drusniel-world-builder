@@ -2,6 +2,7 @@ import { buildingEntry } from '../SettlementBuildingCatalog.js';
 import { InteriorBuilder } from './interior/InteriorBuilder.js';
 import { drawPiece } from './interior/RoomFurnitureMesh.js';
 import { planRoom } from './interior/RoomPlan.js';
+import { drainJob } from '../SettlementArrayJobs.js';
 
 /**
  * What is behind every open door of a settlement: a timber-framed room over a
@@ -197,14 +198,14 @@ export function roomSolids(building, shell) {
  * @returns {?Record<string, Record<string, Float32Array>>} the rooms as one set of arrays
  *   per material (InteriorBuilder), or null when no house can be entered
  */
-export function settlementInteriorArrays(plan) {
+export function* settlementInteriorJob(plan) {
   const builder = new InteriorBuilder();
   let rooms = 0;
   for (const building of plan.buildings) {
     const shell = houseShell(building);
-    if (!shell) continue;
-    addHouse(builder, building, shell);
-    rooms += 1;
+    if (shell) { addHouse(builder, building, shell); rooms += 1; }
+    yield;
   }
-  return rooms > 0 ? builder.arrays() : null;
+  return rooms > 0 ? yield* builder.arraysJob() : null;
 }
+export function settlementInteriorArrays(plan) { return drainJob(settlementInteriorJob(plan)); }

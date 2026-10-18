@@ -156,6 +156,17 @@ export class MeadowGrassBatches {
     return stems;
   }
 
+  publicationBytes(tile, band, output) {
+    const batch = this.batches.get(band);
+    const page = batch?.slots.get(tile);
+    const slot = page?.slots.get(tile);
+    let count = output.count;
+    if (slot && slot.count !== count) {
+      for (const other of page.slots.values()) if (other.start > slot.start) count += other.count;
+    }
+    return count * 14 * 4;
+  }
+
   get meshes() {
     return [...this.batches.values()].flatMap((batch) => batch.meshes);
   }

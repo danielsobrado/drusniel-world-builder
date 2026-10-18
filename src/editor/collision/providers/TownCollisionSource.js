@@ -1,5 +1,6 @@
 import { collisionChunkKey } from '../CollisionIds.js';
 import { collisionChunkForCanonical } from '../colliders/ColliderBounds.js';
+import { drainJob } from '../../world/settlements/SettlementArrayJobs.js';
 
 /**
  * Collision boxes for streamed towns (src/editor/towns), keyed by owner chunk.
@@ -44,15 +45,46 @@ export class TownCollisionSource {
 
   /** Replace every box an owner (one town) contributes. */
   setOwner(ownerId, boxes) {
-    this.removeOwner(ownerId);
+    drainJob(this.setOwnerJob(ownerId, boxes));
+  }
+
+  *setOwnerJob(ownerId, boxes) {
     const list = [...boxes];
-    this.owners.set(ownerId, list);
-    if (!this.chunkWorldSize) return;
-    for (const box of list) {
-      const key = this.keyFor(box);
-      if (!this.chunks.has(key)) this.chunks.set(key, new Map());
-      this.chunks.get(key).set(box.id, box);
-      this.touch(key);
+    if (!this.chunkWorldSize) { this.owners.set(ownerId, list); return; }
+    retry: for (;;) {
+      const revision = this.revision;
+      const size = this.chunkWorldSize;
+      const staged = new Map();
+      let steps = 0;
+      const affected = new Set();
+      for (const box of [...(this.owners.get(ownerId) ?? []), ...list]) {
+        affected.add(this.keyFor(box));
+        if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
+      }
+      for (const key of affected) {
+        const chunk = new Map(); staged.set(key, chunk);
+        for (const [id, box] of this.chunks.get(key) ?? []) {
+          chunk.set(id, box);
+          if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
+        }
+      }
+      for (const box of this.owners.get(ownerId) ?? []) {
+        staged.get(this.keyFor(box))?.delete(box.id);
+        if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
+      }
+      for (const box of list) {
+        staged.get(this.keyFor(box)).set(box.id, box);
+        if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
+      }
+      // Doors or another town may have changed a shared chunk while we yielded.
+      if (revision !== this.revision || size !== this.chunkWorldSize) continue;
+      this.owners.set(ownerId, list);
+      for (const [key, chunk] of staged) {
+        if (chunk.size) this.chunks.set(key, chunk);
+        else this.chunks.delete(key);
+        this.touch(key);
+      }
+      return;
     }
   }
 

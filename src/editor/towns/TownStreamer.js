@@ -1,4 +1,4 @@
-import { layoutTown } from './TownLayout.js';
+import { TownLayoutBuilder } from './TownLayout.js';
 import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance } from './TownLod.js';
 import { TownMesh } from './TownMesh.js';
 
@@ -46,10 +46,13 @@ export class TownStreamer {
     this.pending = new Map();
     this.generator = null;
     this.nextQueryAt = 0;
+    this.buildJob = null;
+    this.buildErrors = new Map();
     this.stats = { resident: 0, instances: 0, colliders: 0, buildMs: 0 };
   }
 
-  update(nowMs, focus) {
+  update(nowMs, focus, budget = null) {
+    this.focus = focus;
     const generator = this.getGenerator();
     if (generator !== this.generator) {
       this.clear();
@@ -61,20 +64,24 @@ export class TownStreamer {
       this.refresh(generator, focus);
     }
     this.updateLods(focus);
-    if (this.pending.size === 0) return;
+    if (this.pending.size === 0 && !this.buildJob) return;
     if (!this.assets.ready) {
       this.assets.ensure();
       return;
     }
-    this.buildNearest(generator, focus);
+    const work = () => this.buildNearest(generator, focus, budget?.shouldYield);
+    if (!budget || !budget.shouldYield()) (budget?.runner ?? (run => run()))(work);
   }
 
   refresh(generator, focus) {
+    if (this.buildJob && this.distanceTo(this.buildJob.entry.settlement, focus)
+        > this.unloadRadius + (this.buildJob.entry.plan.profile?.reach ?? 0)) this.cancelBuild();
     const cellX = focus.x / this.tileSize;
     const cellZ = -focus.z / this.tileSize;
     const near = generator.settlementsNear(cellX, cellZ, this.loadRadius / this.tileSize);
     for (const { settlement, plan } of near) {
-      if (!plan || this.towns.has(settlement.id)) continue;
+      if (!plan || this.towns.has(settlement.id) || this.buildJob?.entry.settlement.id === settlement.id
+          || this.buildErrors.has(settlement.id)) continue;
       this.pending.set(settlement.id, { settlement, plan });
     }
     for (const [id, town] of this.towns) {
@@ -115,25 +122,51 @@ export class TownStreamer {
     return Math.hypot(settlement.cellX * this.tileSize - focus.x, -settlement.cellZ * this.tileSize - focus.z);
   }
 
-  buildNearest(generator, focus) {
-    let best = null;
-    for (const entry of this.pending.values()) {
-      const distance = this.distanceTo(entry.settlement, focus);
-      if (!best || distance < best.distance) best = { ...entry, distance };
+  buildNearest(generator = this.generator, focus = this.focus, shouldYield = () => false) {
+    if (!focus || !this.assets.ready || (!this.buildJob && this.pending.size === 0)) return;
+    if (!this.buildJob) {
+      let best = null;
+      for (const entry of this.pending.values()) {
+        const distance = this.distanceTo(entry.settlement, focus);
+        if (!best || distance < best.distance) best = { ...entry, distance };
+      }
+      this.pending.delete(best.settlement.id);
+      this.buildJob = { entry: best, iterator: this.prepareTown(best, generator), mesh: null };
     }
-    this.pending.delete(best.settlement.id);
+    try {
+      for (;;) {
+        const step = this.buildJob.iterator.next();
+        if (step.done) { this.buildJob = null; return; }
+        if (shouldYield()) return;
+      }
+    } catch (error) {
+      this.buildErrors.set(this.buildJob.entry.settlement.id, error);
+      this.cancelBuild();
+      console.warn('Town preparation failed.', error);
+    }
+  }
+
+  cancelBuild() {
+    this.buildJob?.iterator.return();
+    this.buildJob?.mesh?.dispose();
+    this.buildJob = null;
+  }
+
+  *prepareTown(best, generator) {
     const startedAt = performance.now();
-    const layout = layoutTown({
+    const layout = yield* new TownLayoutBuilder({
       settlement: best.settlement,
       plan: best.plan,
       tileSize: this.tileSize,
       kit: this.assets.kit,
       sampleHeight: (x, z) => generator.sampleHeight(x / this.tileSize, -z / this.tileSize),
-    });
+    }).buildJob();
     const climate = this.climateAt(generator, best.settlement);
-    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate });
+    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate, deferred: true });
+    this.buildJob.mesh = mesh;
+    yield* mesh.preparation;
+    mesh.preparation = null;
     mesh.setOrigin(this.floatingOrigin.getState());
-    this.scene.add(mesh.group);
     const town = {
       id: best.settlement.id,
       layout,
@@ -143,8 +176,11 @@ export class TownStreamer {
       doorAngles: new Float32Array(layout.doors.length),
       doorTargets: new Float32Array(layout.doors.length),
     };
+    const boxes = [...layout.boxes, ...layout.doors.map((door) => door.box)];
+    if (this.collisionSource?.setOwnerJob) yield* this.collisionSource.setOwnerJob(this.ownerId(town.id), boxes);
+    else this.collisionSource?.setOwner(this.ownerId(town.id), boxes);
+    this.scene.add(mesh.group);
     this.towns.set(town.id, town);
-    this.collisionSource?.setOwner(this.ownerId(town.id), [...layout.boxes, ...layout.doors.map((door) => door.box)]);
     this.stats.buildMs = performance.now() - startedAt;
     this.updateStats();
   }
@@ -193,6 +229,8 @@ export class TownStreamer {
   }
 
   clear() {
+    this.cancelBuild();
+    this.buildErrors.clear();
     for (const id of [...this.towns.keys()]) this.unload(id);
     this.pending.clear();
   }

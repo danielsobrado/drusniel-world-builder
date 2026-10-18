@@ -1,5 +1,6 @@
 import { poolKey } from '../SettlementBuildingCatalog.js';
 import { isCraftedKind } from '../SettlementCraftedKinds.js';
+import { drainJob } from '../SettlementArrayJobs.js';
 
 /**
  * A settlement plan as things to draw: every building and prop with its pooled
@@ -30,7 +31,7 @@ export function planToWorld(settlement, tileSize, x, z) {
  * @returns {Array<{ key: string, kind: string, variant: number, small: boolean,
  *   x: number, y: number, z: number, rotationY: number, scale: number, seed: number }>}
  */
-export function settlementPlacements(settlement, plan, tileSize, heightAt) {
+export function* settlementPlacementsJob(settlement, plan, tileSize, heightAt) {
   const styleKey = plan.profile.style.key;
   const place = (item, index, y, small) => {
     const world = planToWorld(settlement, tileSize, item.x, item.z);
@@ -49,9 +50,15 @@ export function settlementPlacements(settlement, plan, tileSize, heightAt) {
       seed: ((Math.imul(settlement.id | 0, 9973) ^ Math.imul(index + 1, 0x9e3779b1)) >>> 8) / 16777216,
     };
   };
-  return [
-    // A building stands on the pad the terrain was graded to.
-    ...plan.buildings.map((building, index) => place(building, index, building.pad, false)),
-    ...plan.props.map((prop, index) => place(prop, plan.buildings.length + index, heightAt(prop.x, prop.z), isSmallKind(prop.kind))),
-  ];
+  const result = [];
+  for (const [index, building] of plan.buildings.entries()) {
+    result.push(place(building, index, building.pad, false));
+    if (index % 16 === 15) yield;
+  }
+  for (const [index, prop] of plan.props.entries()) {
+    result.push(place(prop, plan.buildings.length + index, heightAt(prop.x, prop.z), isSmallKind(prop.kind)));
+    if (index % 16 === 15) yield;
+  }
+  return result;
 }
+export function settlementPlacements(...args) { return drainJob(settlementPlacementsJob(...args)); }

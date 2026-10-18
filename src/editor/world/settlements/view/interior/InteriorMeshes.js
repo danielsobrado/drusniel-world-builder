@@ -68,7 +68,8 @@ export function createInteriorMeshes(arrays, surfaces) {
     geometry.setAttribute('uv', new THREE.BufferAttribute(group.uvs, 2));
     geometry.setAttribute('fire', new THREE.BufferAttribute(group.fire, 3));
     geometry.setAttribute('sky', new THREE.BufferAttribute(group.sky, 1));
-    geometry.computeBoundingSphere();
+    if (group.boundingSphere) geometry.boundingSphere = group.boundingSphere;
+    else geometry.computeBoundingSphere();
     const material = materialFor(key, surfaces);
     material.name = `settlement-interior-${key}`;
     const mesh = new THREE.Mesh(geometry, material);

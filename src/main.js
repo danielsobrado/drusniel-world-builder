@@ -1489,6 +1489,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   if (restoreState) await startup.wait(restoreEditorRecoveryState(restoreState, { controller, editorCamera, playerController, viewModeController, proceduralWorkshop }));
   boot.finish();
 
+  if (perfQaConfig?.scenarioId === 'settlement-approach') {
+    const { prepareSettlementApproach } = await import('./editor/performance/qa/SettlementApproachFixture.js');
+    terrainView.settlementQaRoute = await prepareSettlementApproach({ controller, terrainView, config });
+  }
   const perfQa = PerfQaHarness.fromLocation({
     viewModeController,
     playerController,
@@ -1621,7 +1625,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       viewModeController.readFocusWorld(renderFocus);
     }
     if (profiling) perfQa.mark('floatingOrigin');
-    townRuntime?.update(frameTimestamp);
+    townRuntime?.update(frameTimestamp, deferredWork);
     if (profiling) perfQa.mark('towns');
 
     if (characterView) {
@@ -1728,7 +1732,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     spellRuntime?.update(frameTimestamp);
     if (profiling) perfQa.mark('weatherSpells');
 
-    objectView.update(frameTimestamp, viewModeController.camera);
+    objectView.update(frameTimestamp, viewModeController.camera, deferredWork);
     if (profiling) perfQa.mark('objects');
 
     voxelPrototype.update(canonicalFocus);

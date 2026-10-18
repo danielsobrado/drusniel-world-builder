@@ -18,6 +18,6 @@ export class WorkshopDependencyGraph {
   affected(ids) { return Object.freeze(this.topology.ordered(this.affectedIds(ids))); }
   topologicalOrder(ids = null) {
     if (ids === null) return this.topology.order();
-    return Object.freeze(this.topology.ordered(new Set(ids.filter(id => this.document.hasEntity(id)))));
+    return Object.freeze(this.topology.ordered(new Set([...ids].filter(id => this.document.hasEntity(id)))));
   }
 }

@@ -1,3 +1,4 @@
+import { drainJob, typedArrayJob } from '../../SettlementArrayJobs.js';
 /**
  * Gathers a town's rooms into a handful of meshes, one per material, with
  * their light baked in.
@@ -178,12 +179,14 @@ export class InteriorBuilder {
   }
 
   /** The gathered meshes, by material, as typed arrays; materials with nothing in them are left out. */
-  arrays() {
+  *arraysJob() {
     const result = {};
     for (const [key, group] of this.groups) {
       if (group.positions.length === 0) continue;
-      result[key] = Object.fromEntries(Object.entries(group).map(([name, values]) => [name, new Float32Array(values)]));
+      result[key] = {};
+      for (const [name, values] of Object.entries(group)) result[key][name] = yield* typedArrayJob(values);
     }
     return result;
   }
+  arrays() { return drainJob(this.arraysJob()); }
 }

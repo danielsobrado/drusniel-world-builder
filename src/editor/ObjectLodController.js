@@ -110,6 +110,7 @@ export class ObjectLodController {
   seed(placements, band = 'near', timestamp = 0) {
     const sourceBand = OBJECT_TO_SOURCE_BAND[band] ?? 'near';
     for (const placement of placements) {
+      if (this.states.has(placement.object.id)) continue;
       this.states.set(placement.object.id, {
         from: sourceBand,
         target: sourceBand,
@@ -122,6 +123,11 @@ export class ObjectLodController {
         })]),
       });
     }
+  }
+
+  invalidate() {
+    this.hasLastCameraState = false;
+    this.nextEvaluationAt = 0;
   }
 
   plan({

@@ -61,6 +61,11 @@ const SCENARIOS = Object.freeze({
     keys: ({ running }) => (running ? ['KeyW', 'ShiftLeft'] : ['KeyW']),
     defaults: { duration: 14, speed: 'run', warmup: 8 },
   },
+  'settlement-approach': {
+    id: 'settlement-approach', label: 'Frozen Azgaar burg approach',
+    keys: ({ running }) => running ? ['KeyW', 'ShiftLeft'] : ['KeyW'],
+    defaults: { warmup: 8, duration: 12, speed: 'run' },
+  },
   'construction-ring': {
     id: 'construction-ring',
     label: 'Dense construction wall corridor',

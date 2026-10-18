@@ -1,3 +1,4 @@
+import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
 import { rect, rectHitsPolyline, rectsOverlap } from '../world/settlements/SettlementGeometry.js';
 import { townHash as hash } from './townHash.js';
 
@@ -74,7 +75,8 @@ function yardFence(occupancy, out, building, size) {
  * @param {number} options.seed per-town seed
  * @param {Array<{building:object, size:number[]}>} options.placed buildings with their prefab footprint
  */
-export function planDressing({ plan, seed, placed, family = null }) {
+export function planDressing(options) { return drainJob(planDressingJob(options)); }
+export function* planDressingJob({ plan, seed, placed, family = null }) {
   const isGoblin = family === 'Goblin' || ['timber-thatch', 'swamp-thatch', 'goblin'].includes(plan.profile?.style?.key);
   const occupancy = new Occupancy(plan.streets ?? []);
   for (const { building, size } of placed) {
@@ -82,10 +84,10 @@ export function planDressing({ plan, seed, placed, family = null }) {
   }
   for (const prop of plan.props ?? []) occupancy.claim(rect(prop.x, prop.z, 1.6, 1.6, prop.yaw ?? 0));
   const out = [];
-  placed.forEach(({ building, size }, index) => {
+  for (const [index, { building, size }] of placed.entries()) {
     if (!['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'apothecary', 'farmhouse', 'warehouse',
       'chapel', 'keep', 'hall', 'guildhall', 'guardhouse', 'library']
-      .includes(building.kind)) return;
+      .includes(building.kind)) continue;
     const [w, d] = size;
     const roll = (salt) => hash(seed, index, salt);
     // Offsets clear the house's own 0.3 m claim plus the 0.15 m fit clearance.
@@ -133,12 +135,14 @@ export function planDressing({ plan, seed, placed, family = null }) {
     if (!isGoblin && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
       yardFence(occupancy, out, building, size);
     }
-  });
+    yield;
+  }
   return out;
 }
 
 /** Paving tiles (2 m) along a town's streets and over its square, as plan-space placements. */
-export function planPaving(plan) {
+export function planPaving(plan) { return drainJob(planPavingJob(plan)); }
+export function* planPavingJob(plan) {
   const tiles = [];
   const rank = plan.profile?.rank ?? 0;
   if (rank < 1) return tiles;
@@ -158,6 +162,7 @@ export function planPaving(plan) {
         for (let k = 0; k < across; k += 1) {
           const offset = (k - (across - 1) / 2) * 2;
           tiles.push({ x: ax + (bx - ax) * t + nx * offset, z: az + (bz - az) * t + nz * offset, yaw });
+          if (tiles.length % 32 === 0) yield;
         }
       }
     }
@@ -166,6 +171,7 @@ export function planPaving(plan) {
   for (let x = -radius; x <= radius; x += 2) {
     for (let z = -radius; z <= radius; z += 2) {
       if (Math.hypot(x, z) <= radius - 0.5) tiles.push({ x, z, yaw: 0 });
+      if (tiles.length % 32 === 0) yield;
     }
   }
   return tiles;

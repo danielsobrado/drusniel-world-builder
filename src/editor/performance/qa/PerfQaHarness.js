@@ -80,9 +80,13 @@ export class PerfQaHarness {
   }
 
   static fromLocation(deps, search = window.location.search) {
-    const config = parseQaParams(search);
+    let config = parseQaParams(search);
     if (!config) {
       return null;
+    }
+    if (config.scenarioId === 'settlement-approach') {
+      if (!deps.terrainView.settlementQaRoute) throw new Error('Settlement QA route was not prepared.');
+      config = Object.freeze({ ...config, ...deps.terrainView.settlementQaRoute });
     }
     return new PerfQaHarness({ ...deps, config });
   }

@@ -6,6 +6,8 @@ import * as THREE from 'three/webgpu';
 import { WorkshopDocument } from '../src/editor/workshop/kernel/WorkshopDocument.js';
 import { WorkshopCommandBus } from '../src/editor/workshop/kernel/WorkshopCommandBus.js';
 import { ObjectView } from '../src/editor/ObjectView.js';
+import { objectResidencyState } from '../src/editor/placement/ObjectResidencyState.js';
+import { sceneryPreparationStatus } from '../src/editor/stylized/SceneryPreparationStatus.js';
 import { StreamedDrawPreparation } from '../src/render/preparation/StreamedDrawPreparation.js';
 import { MeadowBandBatch } from '../src/editor/stylized/meadow/MeadowBandBatch.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
@@ -51,10 +53,13 @@ function workshop() {
 }
 
 function objectResidency() {
-  const view = { terrainView: { slots: [] }, objectMap: { revision: 1 },
+  const view = { terrainView: { slots: [] }, objectMap: { revision: 1, signatureForBounds: () => 0 },
     selectedObjectId: null, lastResidencyFocusKey: '', lastResidencyObjectRevision: 1,
-    lastResidencySelection: null, collectResidentObjects: () => [], refreshAll: () => { refreshes++; } };
+    lastResidencySelection: null, dirtyPlacements: new Set(), allPlacementsDirty: false,
+    collectResidentObjects: () => [], refreshAll: () => { refreshes++; } };
   let refreshes = 0;
+  const initial = objectResidencyState(view);
+  view.lastResidencyObjectRevision = initial.objects;
   const unchanged = ObjectView.prototype.syncResidency.call(view);
   view.objectMap.revision++;
   const unrelatedRevision = ObjectView.prototype.syncResidency.call(view);
@@ -72,7 +77,12 @@ function discovery() {
   const traverse = scene.traverse.bind(scene);
   let visits = 0;
   scene.traverse = visitor => traverse(object => { visits++; visitor(object); });
-  for (let i = 0; i < 100; i++) { add(); prep.discover(); }
+  for (let i = 0; i < 100; i++) {
+    const mesh = new THREE.Mesh(geometry, material);
+    const visit = mesh.traverse.bind(mesh);
+    mesh.traverse = visitor => visit(object => { visits++; visitor(object); });
+    scene.add(mesh); prep.register(mesh);
+  }
   const result = { initialMeshes: 1000, addedMeshes: 100, visits, pending: prep.pending.size };
   prep.dispose(); geometry.dispose(); material.dispose();
   return result;
@@ -120,15 +130,17 @@ function settlementSlice() {
     } };
   site.job = SettlementSite.prototype.prepare.call(site, { sampleHeight: () => { heightSamples++; return 0; } }, 2);
   SettlementSite.prototype.advance.call(site, () => { checks++; samplesAtFirstCheck = heightSamples; return true; });
-  return { placementsBeforeFirstYield: site.placements.length, heightSamples, checks, samplesAtFirstCheck };
+  return { placementsBeforeFirstYield: site.placements?.length ?? 0, heightSamples, checks, samplesAtFirstCheck };
 }
 
 function settle() {
   PerfCounters.reset();
+  const terrainView = { getStreamingStatus: () => ({ loading: 0 }),
+    settlementView: { getPreparationStatus: () => ({ ready: false, pending: 100 }) } };
+  const surface = { terrainView };
+  terrainView.stylizedSurface = { getPreparationStatus: () => sceneryPreparationStatus(surface) };
   const readiness = PerfQaHarness.prototype.settleReadiness.call({ playerController: {},
-    terrainView: { getStreamingStatus: () => ({ loading: 0 }),
-      stylizedSurface: { getPreparationStatus: () => ({ ready: true }) } },
-    settlementView: { pool: { pending: 100, uncompiled: [1], compiling: 1 } },
+    terrainView,
   });
   const gate = new PerfQaSettleGate();
   let verdict;

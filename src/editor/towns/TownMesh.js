@@ -1,3 +1,5 @@
+import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
+import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
@@ -30,7 +32,7 @@ function simplerFar(near, far) {
  * else.
  */
 export class TownMesh {
-  constructor({ assets, palette, layout, climate = {} }) {
+  constructor({ assets, palette, layout, climate = {}, deferred = false }) {
     this.layout = layout;
     this.group = new THREE.Group();
     this.group.name = `Town ${layout.name || layout.settlementId}`;
@@ -40,6 +42,11 @@ export class TownMesh {
     this.lod = TOWN_LOD_NEAR;
     this.interiorCentre = null;
     this.modules = [];
+    this.preparation = this.prepare(assets, palette, layout);
+    if (!deferred) { drainJob(this.preparation); this.preparation = null; }
+  }
+
+  *prepare(assets, palette, layout) {
     const kit = palette.kitMaterial(this.look);
     const glass = palette.glassMaterial();
     const createMesh = (geometry, kind, count) => this.instanced(geometry, kind === 'glass' ? glass : kit,
@@ -54,13 +61,17 @@ export class TownMesh {
         near,
         far: simplerFar(near, assets.farModules.get(module)),
         interior: assets.isInterior(module),
-        createMesh,
+        createMesh, deferred: true,
       });
+      this.pendingModule = instances;
+      yield* instances.preparation;
+      this.pendingModule = null;
+      instances.preparation = null;
       for (const mesh of instances.meshes) this.group.add(mesh);
       this.instanceCount += instances.count;
       this.modules.push(instances);
     }
-    this.buildDoors(assets, kit);
+    yield* this.buildDoorsJob(assets, kit);
   }
 
   setLod(lod) {
@@ -86,7 +97,7 @@ export class TownMesh {
     return mesh;
   }
 
-  buildDoors(assets, kit) {
+  *buildDoorsJob(assets, kit) {
     const doors = this.layout.doors;
     const geometry = assets.modules.get(DOOR_MODULE)?.opaque;
     if (!doors.length || !geometry) return;
@@ -97,9 +108,19 @@ export class TownMesh {
     for (let i = 0; i < doors.length; i += 1) colours.set(seedColour(0.5, rgb), i * 3);
     mesh.instanceColor = new THREE.InstancedBufferAttribute(colours, 3);
     this.doorMeshes.push(mesh);
-    doors.forEach((_, index) => this.writeDoor(index, 0));
+    for (let index = 0; index < doors.length; index++) {
+      this.writeDoor(index, 0);
+      if (index % 64 === 63) yield;
+    }
     mesh.name = DOOR_MODULE;
-    mesh.computeBoundingSphere();
+    yield* townBoundsJob(mesh);
+    const swingRadius = geometry.boundingSphere.radius + geometry.boundingSphere.center.length();
+    const swing = new THREE.Sphere();
+    for (let index = 0; index < doors.length; index++) {
+      swing.center.fromArray(doors[index].hinge); swing.radius = swingRadius;
+      mesh.boundingSphere.union(swing);
+      if (index % 64 === 63) yield;
+    }
     this.group.add(mesh);
     this.instanceCount += doors.length;
   }
@@ -124,6 +145,8 @@ export class TownMesh {
   }
 
   dispose() {
+    for (const mesh of this.pendingModule?.meshes ?? []) mesh.dispose?.();
+    this.pendingModule = null;
     this.group.removeFromParent();
     for (const child of this.group.children) child.dispose?.();
     this.group.clear();

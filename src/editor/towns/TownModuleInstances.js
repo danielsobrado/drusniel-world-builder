@@ -1,3 +1,5 @@
+import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
+import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
@@ -50,17 +52,25 @@ export class TownModuleInstances {
    * @param {boolean} options.interior draw only near the viewer
    * @param {(geometry, kind, count) => THREE.InstancedMesh} options.createMesh kind: 'kit' | 'glass'
    */
-  constructor({ module, values, seeds, near, far, interior = false, createMesh }) {
+  constructor({ module, values, seeds, near, far, interior = false, createMesh, deferred = false }) {
     this.values = values;
     this.count = values.length / 4;
     this.interior = interior;
     this.matrices = new Float32Array(this.count * 16);
     this.colours = new Float32Array(this.count * 3);
+    this.nearMeshes = []; this.farMeshes = [];
+    this.preparation = this.prepare({ module, seeds, near, far, interior, createMesh });
+    if (!deferred) { drainJob(this.preparation); this.preparation = null; }
+  }
+
+  *prepare({ module, seeds, near, far, interior, createMesh }) {
+    const values = this.values;
     const rgb = [0, 0, 0];
     for (let i = 0; i < this.count; i += 1) {
       composePlacement(values[i * 4], values[i * 4 + 1], values[i * 4 + 2], values[i * 4 + 3])
         .toArray(this.matrices, i * 16);
       this.colours.set(seedColour(seeds ? seeds[i] : 0.5, rgb), i * 3);
+      if (i % 64 === 63) yield;
     }
     const build = (geometry, level) => {
       const list = [];
@@ -74,6 +84,7 @@ export class TownModuleInstances {
     this.previousIndices = interior ? new Uint32Array(this.count).fill(0xffffffff) : null;
     this.visibleCount = -1;
     this.lod = TOWN_LOD_NEAR;
+    for (const mesh of this.meshes) yield* townBoundsJob(mesh);
     this.setLod(TOWN_LOD_NEAR);
   }
 
@@ -84,7 +95,6 @@ export class TownModuleInstances {
     if (coloured) {
       mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(this.colours), 3);
     }
-    mesh.computeBoundingSphere();
     return mesh;
   }
 

@@ -72,15 +72,16 @@ export function createTownRuntime({
     shading: townKitShared,
     getPreparationStatus() {
       const pending = streamer.pending.size + Number(Boolean(streamer.buildJob));
-      const errors = assets.failed ? [String(assets.failed.message ?? assets.failed)] : [];
+      const errors = [...streamer.buildErrors.values()].map(error => String(error.message ?? error));
+      if (assets.failed) errors.push(String(assets.failed.message ?? assets.failed));
       return { ready: pending === 0 && errors.length === 0, pending,
         resident: streamer.towns.size, instances: streamer.stats.instances, errors };
     },
-    update(timestamp) {
+    update(timestamp, budget = null) {
       const delta = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
       lastTimestamp = timestamp;
       townKitShared.sunElevation.value = isNight() ? NIGHT_ELEVATION : sun();
-      streamer.update(timestamp, getFocusCanonical());
+      streamer.update(timestamp, getFocusCanonical(), budget);
       walker = getWalkerCanonical();
       const focused = doors.focus(walker);
       prompt.show(focused ? (doors.isOpen(focused) ? 'Close door' : 'Open door') : '');

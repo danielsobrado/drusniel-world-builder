@@ -1,4 +1,4 @@
-export const SCENERY_WORK_ORDER = Object.freeze(['fields', 'meadow', 'rockManifest', 'treeManifest', 'rock', 'tree', 'bush', 'detail', 'flower']);
+export const SCENERY_WORK_ORDER = Object.freeze(['fields', 'meadow', 'rockManifest', 'treeManifest', 'rock', 'tree', 'bush', 'detail', 'flower', 'settlement', 'town', 'objects']);
 /** Rotate the first preparation turn without granting another frame allowance. */
 export class SceneryWorkScheduler {
   constructor() { this.cursor = 0; this.first = 0; }
@@ -34,6 +34,21 @@ export function createSceneryConsumers(surface) {
     run: () => surface[`${layer}View`].manifestStore.flush({ consumeCompleted: false }),
   });
   return {
+    objects: {
+      pending: () => (surface.terrainView?.objectView?.pendingObjectUpdates?.size ?? 0) > 0,
+      run: () => surface.terrainView.objectView.advancePreparation(surface.shouldYieldWork),
+    },
+    settlement: {
+      pending: () => Boolean(surface.terrainView?.settlementView?.hasPendingWork?.()),
+      run: () => surface.terrainView.settlementView.advanceWork(surface.shouldYieldWork),
+    },
+    town: {
+      pending: () => {
+        const streamer = surface.terrainView?.townRuntime?.streamer;
+        return Boolean(streamer?.assets.ready && (streamer.pending.size || streamer.buildJob));
+      },
+      run: () => surface.terrainView.townRuntime.streamer.buildNearest(undefined, undefined, surface.shouldYieldWork),
+    },
     fields: {
       pending: () => (surface.preparedPlacement?.completed?.length ?? 0) > (surface.preparedPlacement?.completedHead ?? 0),
       run: () => surface.preparedPlacement.flush(surface.shouldYieldWork),

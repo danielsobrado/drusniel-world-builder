@@ -3,7 +3,9 @@ import { disposeModelParts } from './assets/modelParts.js';
 import { createObjectModelParts } from './ObjectModelLibrary.js';
 import { ObjectLodController } from './ObjectLodController.js';
 import { PerfCounters } from './performance/qa/PerfCounters.js';
-import { collectResidentObjects, residentDescriptorSignature } from './world/residentObjectQueries.js';
+import { collectResidentObjects } from './world/residentObjectQueries.js';
+import { updateObjectInstances, prepareObjectInstances, publishObjectInstances } from './placement/ObjectInstanceUpdates.js';
+import { objectResidencyState, invalidateObjectPlacements } from './placement/ObjectResidencyState.js';
 import { ObjectPlacementResolver } from './placement/ObjectPlacementResolver.js';
 import {
   createInstancedRenderers,
@@ -132,6 +134,11 @@ export class ObjectView {
       this.renderers.set(definition.key, this.createRendererRecord(definition, parts));
     }
 
+    this.dirtyPlacements = new Set();
+    this.allPlacementsDirty = true;
+    this.pendingObjectUpdates = new Map();
+    terrainView.objectView = this;
+    this.unsubscribePlacements = terrainView.worldStore?.subscribe?.(change => invalidateObjectPlacements(this, change));
     this.refreshAll();
   }
 
@@ -228,109 +235,78 @@ export class ObjectView {
   }
 
   syncResidency(force = false) {
-    const focusKey = residentDescriptorSignature(this.terrainView.slots);
-    const objectRevision = this.objectMap.revision;
-    if (!force
-        && focusKey === this.lastResidencyFocusKey
-        && objectRevision === this.lastResidencyObjectRevision
-        && this.selectedObjectId === this.lastResidencySelection) {
-      return false;
-    }
+    const state = objectResidencyState(this);
+    if (!force && state.key === this.lastResidencyFocusKey && state.objects === this.lastResidencyObjectRevision
+        && this.selectedObjectId === this.lastResidencySelection && !this.allPlacementsDirty && this.dirtyPlacements.size === 0) return false;
     this.refreshAll(this.collectResidentObjects());
     return true;
   }
 
   refreshAll(objects = null) {
     const startedAt = performance.now();
-    const grouped = new Map(Array.from(this.renderers.keys(), (definitionKey) => [definitionKey, []]));
-    for (const object of objects ?? this.collectResidentObjects()) grouped.get(object.definitionKey)?.push(object);
-
-    this.pickMeshes = [];
-    for (const [definitionKey, renderer] of this.renderers.entries()) {
-      const objects = grouped.get(definitionKey) ?? [];
-      const placements = objects.map((object) => ({ object, placement: this.resolvePlacement(object) }));
-      this.ensureCapacity(renderer, objects.length);
-      const objectIds = objects.map((object) => object.id);
-
-      if (renderer.lodSources) {
-        renderer.lodController.clear();
-        renderer.lodPlacements = placements.map(({ object, placement }) => {
-          const matrix = this.createObjectMatrix(object, placement.surface);
-          return {
-            object,
-            matrix,
-            worldPosition: new THREE.Vector3(
-              matrix.elements[12],
-              matrix.elements[13] + renderer.worldHeight / 2,
-              matrix.elements[14],
-            ),
-            worldHeight: renderer.worldHeight,
-          };
-        });
-        renderer.lodController.seed(renderer.lodPlacements);
-        const nearInstances = renderer.lodPlacements.map(({ object, matrix }) => ({
-          matrix,
-          fade: 1,
-          seed: object.id / 0xffffffff,
-          objectId: object.id,
-        }));
-        writeInstances([renderer.lodMeshes.near], [nearInstances]);
-        writeInstances([renderer.lodMeshes.coarse], [[]]);
-        writeInstances([renderer.lodMeshes.shell], [[]]);
-        renderer.lodSignatures = {
-          near: objectIds.map((id) => `${id}:16`).join('|'),
-          coarse: '',
-          shell: '',
-        };
-        for (const meshes of Object.values(renderer.lodMeshes)) {
-          for (const mesh of meshes) {
-            mesh.userData.objectIds = meshes === renderer.lodMeshes.near ? objectIds : [];
-            this.pickMeshes.push(mesh);
-          }
-        }
-      } else {
-        for (const mesh of renderer.meshes) {
-          mesh.count = objects.length;
-          mesh.userData.objectIds = objectIds;
-          this.pickMeshes.push(mesh);
-        }
-
-        for (let index = 0; index < placements.length; index += 1) {
-          const { object, placement } = placements[index];
-          const rootMatrix = this.createObjectMatrix(object, placement.surface);
-          for (let partIndex = 0; partIndex < renderer.parts.length; partIndex += 1) {
-            const matrix = new THREE.Matrix4().multiplyMatrices(
-              rootMatrix,
-              renderer.parts[partIndex].matrix,
-            );
-            renderer.meshes[partIndex].setMatrixAt(index, matrix);
-          }
-        }
-
-        for (const mesh of renderer.meshes) {
-          mesh.instanceMatrix.needsUpdate = true;
-          mesh.computeBoundingSphere();
-        }
-      }
-
-      const foundationPlacements = placements.filter(
-        ({ placement }) => placement.surface.foundationDepth > FOUNDATION_EPSILON,
-      );
-      this.refreshFoundations(renderer, foundationPlacements);
+    const grouped = new Map();
+    for (const object of objects ?? this.collectResidentObjects()) {
+      if (!grouped.has(object.definitionKey)) grouped.set(object.definitionKey, []);
+      grouped.get(object.definitionKey).push(object);
     }
-
-    this.lastResidencyFocusKey = residentDescriptorSignature(this.terrainView.slots);
-    this.lastResidencyObjectRevision = this.objectMap.revision;
+    this.dirtyPlacements ??= new Set();
+    if (!this.unsubscribePlacements && this.heightField?.heights) this.allPlacementsDirty = true;
+    let updated = false;
+    for (const [key, renderer] of this.renderers) {
+      if (!grouped.has(key) && !renderer.placementRecords?.size) continue;
+      const members = grouped.get(key) ?? [];
+      if (members.length > 32) {
+        const invalidation = { all: this.allPlacementsDirty, dirty: new Set(this.dirtyPlacements),
+          origin: this.terrainView.floatingOrigin.getState() };
+        this.pendingObjectUpdates.set(key, { renderer, job: prepareObjectInstances(this, renderer, members, invalidation) });
+      } else {
+        this.pendingObjectUpdates.delete(key);
+        updated = updateObjectInstances(this, renderer, members) || updated;
+      }
+    }
+    this.pickMeshes = [...this.renderers.values()].flatMap(renderer => [
+      ...(renderer.lodMeshes ? Object.values(renderer.lodMeshes).flat() : renderer.meshes),
+      ...(renderer.foundationMesh?.count ? [renderer.foundationMesh] : []),
+    ]);
+    const state = objectResidencyState(this);
+    this.lastResidencyFocusKey = state.key;
+    this.lastResidencyObjectRevision = state.objects;
     this.lastResidencySelection = this.selectedObjectId;
-    this.updatePerformanceCounters(grouped);
-    PerfCounters.inc('objectRefreshes');
-    PerfCounters.inc('objectRefreshMs', performance.now() - startedAt);
+    this.allPlacementsDirty = false;
+    this.dirtyPlacements.clear();
+    if (updated) {
+      this.updatePerformanceCounters(grouped);
+      PerfCounters.inc('objectRefreshes');
+      PerfCounters.inc('objectRefreshMs', performance.now() - startedAt);
+    }
+  }
+
+  advancePreparation(shouldYield = () => false) {
+    for (const [key, entry] of this.pendingObjectUpdates) {
+      if (shouldYield()) return;
+      for (;;) {
+        const step = entry.job.next();
+        if (step.done) {
+          if (step.value && this.renderers.get(key) === entry.renderer) {
+            publishObjectInstances(this, entry.renderer, step.value);
+            this.pickMeshes = [...this.renderers.values()].flatMap(renderer => [
+              ...(renderer.lodMeshes ? Object.values(renderer.lodMeshes).flat() : renderer.meshes),
+              ...(renderer.foundationMesh?.count ? [renderer.foundationMesh] : []),
+            ]);
+            this.updatePerformanceCounters();
+          }
+          this.pendingObjectUpdates.delete(key);
+          break;
+        }
+        if (shouldYield()) return;
+      }
+    }
   }
 
   updatePerformanceCounters(grouped = null) {
     const countsByDefinition = grouped ?? (() => {
       const counts = new Map(Array.from(this.renderers.keys(), (definitionKey) => [definitionKey, []]));
-      for (const object of this.objectMap.list()) counts.get(object.definitionKey)?.push(object);
+      for (const [key, renderer] of this.renderers) counts.set(key, [...(renderer.placementRecords?.values() ?? [])]);
       return counts;
     })();
     let instances = 0;
@@ -417,8 +393,11 @@ export class ObjectView {
     renderer.capacity = capacity;
   }
 
-  update(timestamp, camera) {
+  update(timestamp, camera, budget = null) {
     this.syncResidency();
+    if (!budget || !budget.shouldYield()) {
+      (budget?.runner ?? (work => work()))(() => this.advancePreparation(budget?.shouldYield));
+    }
     const startedAt = performance.now();
     const viewportHeight = this.terrainView.viewportHeight
       || this.terrainView.renderer.domElement.height
@@ -627,6 +606,8 @@ export class ObjectView {
     if (this.disposed) return;
     this.disposed = true;
     this.placementResolver.dispose();
+    this.unsubscribePlacements?.();
+    this.pendingObjectUpdates.clear();
     for (const renderer of this.renderers.values()) this.disposeRendererRecord(renderer);
     for (const child of this.previewGroup.children) child.material.dispose();
     this.previewGroup.clear();

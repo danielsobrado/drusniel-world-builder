@@ -96,6 +96,10 @@ export class SettlementView {
   }
 
   getPreparationStatus() { return settlementPreparationStatus(this); }
+  hasPendingWork() {
+    return this.enabled && !this.disposed && (this.pool.pending > 0 || [...this.sites.values()]
+      .some(site => site.job || (site.surfaces && !site.pavingReady)));
+  }
 
   /** Adopt the settlements round `focus` (canonical metres) and drop the ones left behind. */
   refreshSites(focus) {
@@ -134,17 +138,21 @@ export class SettlementView {
   /** One slice of deferred work: site preparation first, then a mesh variant. */
   advanceWork(shouldYield) {
     if (shouldYield()) {
-      this.starved += 1;
-      if (this.starved < SETTLEMENT_VIEW.starvationFrames) return;
+      return;
     }
     this.starved = 0;
     // A starved slice still does one unit, then stops.
     let units = 0;
     const gate = () => units++ > 0 && shouldYield();
     for (const site of this.sites.values()) {
-      if (!site.job) continue;
-      if (site.advance(gate)) this.dirty = true;
-      return;
+      if (site.job) {
+        if (site.advance(gate)) this.dirty = true;
+        return;
+      }
+      if (!site.pavingReady && site.surfaces) {
+        if (site.installPaving(gate)) this.dirty = true;
+        return;
+      }
     }
     if (this.pool.advance()) this.dirty = true;
   }
@@ -296,7 +304,6 @@ export class SettlementView {
         site.dressed = true;
         this.dirty = true;
       }
-      site.installPaving();
       site.paving.position.set(site.centre.x - origin.x, 0, site.centre.z - origin.z);
     }
     const moved = Math.hypot(focus.x - this.selected.x, focus.z - this.selected.z) > SETTLEMENT_VIEW.reselectMetres;
