@@ -2,6 +2,8 @@
 
 Implementation and acceptance record for the [18-view visual audit and plan](../../plans/aaa-look-and-feel-plan-2026-10-16.md). The visual fixes and release checks are complete. Runtime `cdbf0c15` passes all four vegetation profiles, the construction corridor and the full water route on hardware WebGPU, with native Windows foreground monitoring. Full scenery recovery is below two seconds in every movement case. The original audit and failed intermediate captures remain available for review.
 
+The subsequent [split-waterline colour fix](../../waterline-color-fix-2026-10-18.md) covers submerged pixels before head immersion. Its captures and validation are separate from the October 17 record.
+
 ## Changes
 
 | Package | Delivered behavior |
@@ -98,7 +100,7 @@ The final [matrix](performance/final/matrix.json) uses frozen runtime `cdbf0c15`
 | Dense mixed | 12.00 ms | 78.1 ms | 0.26% | 1.371 s | 0.10 ms | pass |
 | Construction corridor | 20.97 ms | 220.9 ms | 0.96% | 0.110 s | 0.10 ms | pass |
 
-The first dense-forest launch timed out in the DOM focus preflight before measurement, although native window focus passed. The [rejected launch](performance/final-preflight-interrupted/status.json) remains retained. A [fresh retry](performance/final/setup-retry.json.gz) passed with the same frozen runtime and unchanged harness. The final matrix combines that capture with the other successful cases and applies the unchanged matrix gate evaluator. The [assembly script](performance/final/suite-assembly.mjs) retains the exact retry and gate calculation.
+The first dense-forest launch timed out in the DOM focus preflight before measurement, although native window focus passed. The [rejected launch](performance/final-preflight-interrupted/status.json) remains retained. A [fresh retry](performance/final/setup-retry.json.gz) passed with the same frozen runtime and unchanged harness. The final matrix combines that capture with the other successful cases and applies the unchanged matrix gate evaluator. The [assembly script](performance/final/suite-assembly.mjs.txt) retains the exact retry and gate calculation.
 
 The 12 authored wall constructions retain **96 wall modules** and non-zero masonry. The water route passes entry, swimming, dive, surface, dry exit, stable water identity, origin and caustic checks: **9.00 ms p95**, **0.06% hitches**, and **0.20 ms maximum caustic post-effect CPU** against its unchanged 4 ms limit. The final fresh-browser water route records an **8.90 ms maximum complete underwater pipeline**, including its scene pass; the worst water-route frame is 51.5 ms. The [additional pipeline gate](performance/final/water-pipeline-gate.json) requires a complete-pipeline peak of at most 33.3 ms. All final cases have zero browser errors and passing native foreground records.
 
