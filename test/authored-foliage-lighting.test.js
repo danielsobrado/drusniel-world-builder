@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
-import { cloneAuthoredNodeMaterial } from '../src/editor/stylized/AuthoredFoliageMaterial.js';
+import { cloneAuthoredNodeMaterial, applyUnderstoryPalette } from '../src/editor/stylized/AuthoredFoliageMaterial.js';
 import { cloneBushMaterial, createBushProxyMaterial } from '../src/editor/stylized/BushRenderAssets.js';
 
 test('unlit outdoor plants acquire lighting without losing their authored paint or cutout', () => {
@@ -36,4 +36,17 @@ test('authored bush and proxy representations both use scene lighting', () => {
   const source = new THREE.MeshBasicMaterial({ color: '#448822' });
   assert.ok(cloneBushMaterial(source).isMeshLambertNodeMaterial);
   assert.ok(createBushProxyMaterial(source).isMeshLambertNodeMaterial);
+});
+
+test('authored plants and both bush representations share the optional cloud shadow contract', () => {
+  const source = new THREE.MeshBasicMaterial({ color: '#448822' });
+  for (const enabled of [false, true]) {
+    const config = { sky: { cloudShadows: { enabled }, cloudScale: 1, cloudSpeed: .1, cloudWorldScale: 1 } };
+    const authored = applyUnderstoryPalette(cloneAuthoredNodeMaterial(source, { lit: true }), config);
+    const near = cloneBushMaterial(source, { config }), proxy = createBushProxyMaterial(source, { config });
+    for (const material of [authored, near, proxy]) {
+      assert.equal(!!material.userData.cloudShadow, enabled);
+      assert.equal(typeof material.receivedShadowNode === 'function', enabled);
+    }
+  }
 });

@@ -12,6 +12,7 @@ import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostP
 import { applyUnderstoryPalette, authoredFoliageColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
+import { applyCloudShadow } from './CloudShadow.js';
 
 export const BUSH_CAST_SHADOW = false;
 export const BUSH_PROXY_TRIANGLES = 60;
@@ -140,6 +141,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   material.transparent = false;
   material.depthWrite = true;
   applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
+  applyCloudShadow(material, config?.sky);
   applyJungleMist(material, config?.ambientEffects);
   return assignBushFoliageMaterialData(material);
 }

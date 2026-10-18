@@ -3,6 +3,7 @@ import { vec3 } from 'three/tsl';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
 import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
+import { applyCloudShadow } from './CloudShadow.js';
 
 /** Clone authored channels into a node material before assigning foliage nodes. */
 export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
@@ -41,5 +42,5 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     .add(foliageBacklight(color, blossom ? .18 : .25));
   // Retain any authored emission (e.g. flower centres).
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(fill) : fill;
-  return material;
+  return applyCloudShadow(material, config.sky);
 }
