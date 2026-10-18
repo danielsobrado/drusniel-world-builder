@@ -27,10 +27,30 @@ try {
   report.emulatedDomFocus = await pages[0].evaluate(() => document.hasFocus());
   report.background = await negative();
   report.otherOwnedWindow = await other();
+  await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: false });
   await cdp.detach();
+  // Reproduce a cold renderer blocking after the first real focus read. Native
+  // ownership and document.hasFocus remain real; no focus value is emulated.
+  await pages[0].evaluate(() => {
+    const original = document.hasFocus.bind(document);
+    let first = true;
+    document.hasFocus = () => {
+      const focused = original();
+      if (first) {
+        first = false;
+        setTimeout(() => {
+          const until = performance.now() + 6500;
+          while (performance.now() < until) { /* cold shader/pipeline stall */ }
+        }, 0);
+      }
+      return focused;
+    };
+  });
+  const busy = await focusPerfBrowser(browsers[0], pages[0], { headed: true });
+  report.busyForeground = await busy();
   report.passed = report.foreground.passed && report.foreground.native.samples >= 5
     && report.emulatedDomFocus && !report.background.passed
-    && report.background.native.lostFocus && report.otherOwnedWindow.passed;
+    && report.background.native.lostFocus && report.otherOwnedWindow.passed && report.busyForeground.passed;
 } catch (error) { report.error = error.stack; }
 finally {
   await Promise.all(browsers.map(browser => browser.close()));

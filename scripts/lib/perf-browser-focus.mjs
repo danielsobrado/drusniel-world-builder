@@ -54,7 +54,12 @@ export async function focusPerfBrowser(browser, page, { headed }) {
     catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }
     finally { await page.evaluate(() => document.querySelector('[data-perf-focus-target]')?.remove()); }
   }
-  try { await page.waitForFunction(() => document.hasFocus(), null, { timeout: 5000 }); }
+  // A cold renderer may block requestAnimationFrame longer than a polling
+  // timeout even while its real window and document retain focus. Read focus
+  // after pending renderer work completes; the native monitor remains active.
+  try {
+    if (!await page.evaluate(() => document.hasFocus())) throw new Error('The benchmark document does not have focus.');
+  }
   catch (error) { error.nativeFocus = await nativeMonitor?.(); throw error; }
   await page.evaluate(() => {
     const state = window.__perfBrowserFocus = { events: [], lostFocus: false };
