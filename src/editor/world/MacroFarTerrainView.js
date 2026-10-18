@@ -20,6 +20,7 @@ const DEFAULT_ANGULAR_RESOLUTION = 256;
 const DEFAULT_RADIAL_FALLOFF = 2.2;
 const DEFAULT_HEIGHT_BIAS = 3;
 const DEFAULT_ROWS_PER_FRAME = 24;
+const VERTICES_PER_STEP = 16;
 const FALLBACK_COLOR = '#3b4a57';
 
 const DEFAULT_ROCK_COLOR = '#8d9195';
@@ -264,6 +265,8 @@ export class MacroFarTerrainView {
       originZ,
       sampleRing: 0,
       shadeRing: 0,
+      sampleSpoke: 0,
+      shadeSpoke: 0,
       field,
       forestSignature: field?.signature ?? null,
       heights: this.pendingHeights,
@@ -273,10 +276,10 @@ export class MacroFarTerrainView {
   }
 
   /** Fills one ring of height and raw samples used by the shading pass. */
-  sampleRing(job, ring) {
+  sampleRing(job, ring, start = 0, end = this.angularResolution) {
     const spokes = this.angularResolution;
     const tileSize = this.worldStore.tileSize;
-    for (let spoke = 0; spoke < spokes; spoke += 1) {
+    for (let spoke = start; spoke < end; spoke += 1) {
       const index = ring * spokes + spoke;
       const offset = index * 3;
       const cellX = Math.floor((this.pendingPositions[offset] + job.originX) / tileSize);
@@ -313,9 +316,9 @@ export class MacroFarTerrainView {
     return Math.hypot(radialDelta / radialSpan, angularDelta / angularSpan);
   }
 
-  shadeRing(job, ring) {
+  shadeRing(job, ring, start = 0, end = this.angularResolution) {
     const spokes = this.angularResolution;
-    for (let spoke = 0; spoke < spokes; spoke += 1) {
+    for (let spoke = start; spoke < end; spoke += 1) {
       const index = ring * spokes + spoke;
       const height = job.heights[index];
       const slope = this.slopeAt(job, ring, spoke);
@@ -365,29 +368,30 @@ export class MacroFarTerrainView {
     }
   }
 
-  /** Advances one bounded phase of a sliced rebuild. */
+  advanceRings(job, phase, shouldYield) {
+    const ringKey = `${phase}Ring`, spokeKey = `${phase}Spoke`;
+    const limit = Math.min(this.radialResolution, job[ringKey] + this.rowsPerFrame);
+    while (job[ringKey] < limit) {
+      const start = job[spokeKey] ?? 0;
+      const end = Math.min(this.angularResolution, start + VERTICES_PER_STEP);
+      this[ringKey](job, job[ringKey], start, end);
+      job[spokeKey] = end === this.angularResolution ? 0 : end;
+      if (end === this.angularResolution) job[ringKey]++;
+      if (shouldYield?.()) break;
+    }
+  }
+
+  /** Advances a phase with deadline checks every sixteen vertices. */
   advanceJob(shouldYield = null) {
     const job = this.job;
     const rings = this.radialResolution;
     if (job.sampleRing < rings) {
-      const limit = Math.min(rings, job.sampleRing + this.rowsPerFrame);
-      let ring = job.sampleRing;
-      for (; ring < limit; ring += 1) {
-        if (ring > job.sampleRing && shouldYield?.()) break;
-        this.sampleRing(job, ring);
-      }
-      job.sampleRing = ring;
+      this.advanceRings(job, 'sample', shouldYield);
       return false;
     }
 
     if (job.shadeRing < rings) {
-      const limit = Math.min(rings, job.shadeRing + this.rowsPerFrame);
-      let ring = job.shadeRing;
-      for (; ring < limit; ring += 1) {
-        if (ring > job.shadeRing && shouldYield?.()) break;
-        this.shadeRing(job, ring);
-      }
-      job.shadeRing = ring;
+      this.advanceRings(job, 'shade', shouldYield);
       if (job.shadeRing < rings) return false;
     }
 
@@ -423,6 +427,15 @@ export class MacroFarTerrainView {
 
   isActive() {
     return this.enabled && !!this.generator;
+  }
+
+  getPreparationStatus() {
+    if (!this.enabled || !isAzgaarMacroWorldSource(this.worldStore?.baseTerrain)) return { ready: true };
+    const origin = this.floatingOrigin.getState();
+    const signature = this.forestFieldProvider?.()?.signature ?? null;
+    return { ready: !this.job && this.builtOriginX === origin.x && this.builtOriginZ === origin.z
+        && this.builtForestSignature === signature,
+      samplingRing: this.job?.sampleRing ?? null, shadingRing: this.job?.shadeRing ?? null };
   }
 
   update(shouldYield = null) {

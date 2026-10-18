@@ -13,6 +13,7 @@ import { buildSettlementMeshData } from './SettlementMeshData.js';
 import { SettlementMeshWorkerClient } from './SettlementMeshWorkerClient.js';
 import { createSettlementStoneParts } from './SettlementStoneMesh.js';
 import { createSettlementTrimParts } from './SettlementTrimMesh.js';
+import { SettlementTierPublication } from './SettlementTierPublication.js';
 
 /** Material families that still read as a house from across the town. */
 const HOUSE_FAR_SLOTS = Object.freeze(['mortar', 'roof', 'recess']);
@@ -46,9 +47,11 @@ function geometryFrom(packed) {
  * it takes the workshop's own shell tier, which the mesh data carries.
  */
 export class SettlementPrototypePool {
-  constructor({ root, renderer, worker = new SettlementMeshWorkerClient() }) {
+  constructor({ root, renderer, worker = new SettlementMeshWorkerClient(), getDrawPreparation = () => null }) {
     this.root = root;
     this.renderer = renderer;
+    this.publications = new SettlementTierPublication(root, getDrawPreparation,
+      meshes => disposeInstancedRenderers(root, [meshes]));
     /** New meshes, hidden: first waiting for their shaders, then for `reveal` to show them a few at a time. */
     this.uncompiled = [];
     this.compiling = 0;
@@ -207,8 +210,9 @@ export class SettlementPrototypePool {
       name,
       castShadow,
     });
-    this.stage(meshes);
-    return { meshes, capacity: MIN_CAPACITY, castShadow, name, materials: parts.map(({ material }) => material) };
+    const result = { meshes, capacity: MIN_CAPACITY, castShadow, name, materials: parts.map(({ material }) => material) };
+    if (!this.publications.stage(result)) this.stage(meshes);
+    return result;
   }
 
   /**
@@ -230,11 +234,13 @@ export class SettlementPrototypePool {
       name: tier.name,
       castShadow: tier.castShadow,
     });
-    disposeInstancedRenderers(this.root, [tier.meshes]);
-    this.stage(meshes);
-    tier.meshes = meshes;
-    tier.capacity = capacity;
-    return tier;
+    const result = { ...tier, meshes, capacity, publication: null };
+    if (!this.publications.stage(result, tier)) {
+      this.publications.release(tier);
+      this.stage(meshes);
+    }
+    entry[name] = result;
+    return result;
   }
 
   /**
@@ -283,6 +289,7 @@ export class SettlementPrototypePool {
    * few. Call once a frame.
    */
   reveal(count, camera = null, scene = null) {
+    this.publications.advance(count);
     while (this.uncompiled.length > 0 && this.compiling < PRECOMPILE_AT_ONCE) {
       const mesh = this.uncompiled.shift();
       if (!mesh.parent) continue;
@@ -299,7 +306,7 @@ export class SettlementPrototypePool {
   }
 
   release(entry) {
-    for (const tier of [entry.near, entry.far]) if (tier) disposeInstancedRenderers(this.root, [tier.meshes]);
+    for (const tier of [entry.near, entry.far]) if (tier) this.publications.release(tier);
     entry.near = null;
     entry.far = null;
     // Whoever still holds the entry must see it is gone, not a ready one with no meshes.

@@ -14,7 +14,7 @@ export function settlementPreparationStatus(view) {
   }
   for (const entry of pool.entries.values()) if (entry.failed) errors.push(String(entry.failed.message ?? entry.failed));
   const variants = pool.pending;
-  const compilation = pool.uncompiled.length + pool.compiling;
+  const compilation = pool.uncompiled.length + pool.compiling + (pool.publications?.pending.size ?? 0);
   const reveal = pool.unrevealed.length;
   return { ready: sites + surfaces + installation + variants + compilation + reveal === 0
     && errors.length === 0 && (view.sites.size === 0 || (!view.dirty && !view.fading)),

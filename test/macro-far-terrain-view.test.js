@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { MacroFarTerrainView } from '../src/editor/world/MacroFarTerrainView.js';
+import { Scene } from 'three/webgpu';
 
 function createHarness(originRef, fieldRef) {
   const view = Object.create(MacroFarTerrainView.prototype);
@@ -134,6 +135,7 @@ test('MacroFarTerrainView yields between rings while guaranteeing progress', () 
   const view = Object.create(MacroFarTerrainView.prototype);
   Object.assign(view, {
     radialResolution: 4,
+    angularResolution: 8,
     rowsPerFrame: 4,
     job: { sampleRing: 0, shadeRing: 0 },
     sampleRing: (_job, ring) => { view.lastSampled = ring; },
@@ -146,4 +148,36 @@ test('MacroFarTerrainView yields between rings while guaranteeing progress', () 
   assert.equal(done, false);
   assert.equal(view.job.sampleRing, 1);
   assert.equal(view.lastSampled, 0);
+});
+
+test('large far-terrain rings yield every sixteen samples and preserve exact complete buffers', () => {
+  let samples = 0, shades = 0;
+  const create = () => {
+    const view = new MacroFarTerrainView({ scene: new Scene(), worldStore: { tileSize: 2 },
+      floatingOrigin: { getState: () => ({ x: 0, z: 0 }) }, config: {
+        world: { farTerrain: { radialResolution: 4, angularResolution: 64, rebuildRowsPerFrame: 4 } },
+      } });
+    view.generator = { sampleMacroColumn: (x, z) => { samples++; return { height: Math.sin(x) * 30 + z % 3, tileId: 4 }; },
+      getTileDefinition: () => ({ color: '#558844' }) };
+    view.startJob(1024, 2048, { signature: 'exact', sampleCoarse: () => { shades++; return { patchCoverage: 0.7, suitability: 0.6 }; } });
+    return view;
+  };
+  const reference = create(), sliced = create();
+  try {
+    for (let ring = 0; ring < 4; ring++) reference.sampleRing(reference.job, ring);
+    for (let ring = 0; ring < 4; ring++) reference.shadeRing(reference.job, ring);
+    let turns = 0;
+    while (sliced.job.sampleRing < 4 || sliced.job.shadeRing < 4) {
+      const beforeSamples = samples, beforeShades = shades;
+      sliced.advanceJob(() => true);
+      assert.ok(samples - beforeSamples <= 16);
+      assert.ok(shades - beforeShades <= 16);
+      assert.equal(sliced.mesh.visible, false);
+      assert.ok(++turns < 1000);
+    }
+    assert.equal(sliced.advanceJob(() => false), true);
+    assert.deepEqual(sliced.positions, reference.pendingPositions);
+    assert.deepEqual(sliced.colors, reference.pendingColors);
+    assert.equal(sliced.mesh.visible, true);
+  } finally { reference.dispose(); sliced.dispose(); }
 });

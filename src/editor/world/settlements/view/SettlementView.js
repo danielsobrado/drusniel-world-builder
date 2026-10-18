@@ -65,7 +65,8 @@ export class SettlementView {
     this.pavingRoot.name = 'settlement-paving';
     terrainView.scene.add(this.root, this.pavingRoot);
     this.anchor = new InstanceAnchor();
-    this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer });
+    this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer,
+      getDrawPreparation: () => terrainView.drawPreparation });
     this.skyline = new SettlementSkyline({ scene: terrainView.scene });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();

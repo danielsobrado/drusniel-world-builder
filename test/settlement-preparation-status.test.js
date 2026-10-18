@@ -27,3 +27,11 @@ test('all settlement preparation and publication stages block full scenery readi
   view.enabled = false; view.pool.pending = 100;
   assert.equal(settlementPreparationStatus(view).ready, true);
 });
+
+test('far-terrain publication and settlement tier replacement prevent false scenery readiness', () => {
+  const view = fixture();
+  view.pool.publications = { pending: new Set([{}]) };
+  assert.equal(settlementPreparationStatus(view).ready, false);
+  const terrainView = { macroFarTerrain: { getPreparationStatus: () => ({ ready: false }) } };
+  assert.equal(sceneryPreparationStatus({ terrainView }).ready, false);
+});

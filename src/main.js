@@ -509,6 +509,7 @@ async function initializeEditor(restoreState, resources, startup) {
     forestFieldProvider: () => stylizedSurface.treeView?.manifestStore?.forestField ?? null,
   });
   resources.own(macroFarTerrain);
+  terrainView.macroFarTerrain = macroFarTerrain;
 
   const editorCamera = new EditorCamera({
     canvas: terrainView.renderer.domElement,
@@ -1669,6 +1670,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       deferredWork.run(() => macroFarTerrain.update(deferredWork.shouldYield));
     }
     const backdropActive = macroFarTerrain.isActive();
+    if (profiling) perfQa.mark('farTerrain');
     if (backdropActive !== farViewActive) {
       farViewActive = backdropActive;
       applyViewDistance(backdropActive);
