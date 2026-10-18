@@ -5,6 +5,7 @@ import sharp from 'sharp';
 // Browsing derivatives only; the capture PNGs and their hashes stay untouched.
 const out = path.resolve(process.argv[2] ?? 'docs/qa/visual-audit-2026-10-18');
 const report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
+const planLink = path.relative(out, path.resolve('docs/plans/aaa-look-and-feel-plan-2026-10-18.md')).replaceAll('\\', '/');
 if (!report.poses?.length) throw new Error('The report contains no captured poses.');
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;');
@@ -26,7 +27,7 @@ h2{font-size:18px}article h2,article p{margin:12px 18px}
 </style><header><h1>World visual audit · October 18, 2026</h1>
 <p>${report.poses.length} views · source ${escape(report.sourceSha?.slice(0, 8))} · seeded selection ${report.seed} · ${report.viewport.width} × ${report.viewport.height}</p>
 <p>Unedited renderer captures. Clean and HUD images are successive frames. Capture validity: ${report.captureValid === true ? 'passed' : 'incomplete or failed'}; this is not a performance verdict.</p>
-<p><a href="../../plans/aaa-look-and-feel-plan-2026-10-18.md">Detailed improvement plan</a> · <a href="contact-sheet.jpg">Contact sheet</a> · <a href="report.json">Capture metadata</a></p></header>
+<p><a href="${escape(planLink)}">Detailed improvement plan</a> · <a href="contact-sheet.jpg">Contact sheet</a> · <a href="report.json">Capture metadata</a></p></header>
 <main>${cards}</main></html>\n`);
 
 const tileWidth = 480, imageHeight = 270, labelHeight = 48, tileHeight = imageHeight + labelHeight;
