@@ -14,6 +14,10 @@ export function hasPreparationBacklog(surface) {
   if (surface.treeView?.manifestStore?.queue?.size > 0 || surface.rockView?.manifestStore?.queue?.size > 0) return true;
   if (surface.preparedPlacement?.pending?.size > 0 || surface.terrainView?.commitQueue?.size > 0) return true;
   if (surface.terrainView?.drawPreparation?.pending?.size > 0) return true;
+  if (surface.terrainView?.objectView?.pendingObjectUpdates?.size > 0) return true;
+  if (surface.terrainView?.settlementView?.hasPendingWork?.()) return true;
+  const towns = surface.terrainView?.townRuntime?.streamer;
+  if (towns?.assets.ready && (towns.pending.size > 0 || towns.buildJob)) return true;
   return (surface.meadowGrass?.blades?.staleTiles?.length ?? 0)
     + (surface.meadowGrass?.cards?.staleTiles?.length ?? 0) > 0;
 }

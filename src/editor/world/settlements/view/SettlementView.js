@@ -166,11 +166,14 @@ export class SettlementView {
     }
     let fading = false;
     let shown = 0;
+    let visibleBuildings = 0, visibleProps = 0;
     for (const site of this.sites.values()) {
       // Houses are generated in the town's own timber and plaster: wait for them.
       if (!site.surfaces) continue;
       const source = { style: site.plan.profile.style, kind: '', variant: 0, surfaces: site.surfaces };
+      let placementIndex = 0;
       for (const placement of site.placements ?? []) {
+        const building = placementIndex++ < site.plan.buildings.length;
         const distance = Math.hypot(placement.x - focus.x, placement.z - focus.z);
         const range = placement.small ? SETTLEMENT_VIEW.smallRange : SETTLEMENT_VIEW.farRange;
         if (distance > range + 20 && placement.shown === 0) continue;
@@ -199,6 +202,7 @@ export class SettlementView {
         if (placement.near.fade > 0) rows.near.push(placement.near);
         if (placement.far.fade > 0 && entry.far) rows.far.push(placement.far);
         shown += 1;
+        if (building) visibleBuildings++; else visibleProps++;
       }
     }
     this.anchor.follow(this.origin);
@@ -212,6 +216,7 @@ export class SettlementView {
       if (entry.far) writeInstances([this.pool.tier(entry, 'far', rows.far.length).meshes], [rows.far], this.anchor);
     }
     PerfCounters.set('settlementInstances', shown);
+    this.visibleBuildings = visibleBuildings; this.visibleProps = visibleProps;
     return fading;
   }
 

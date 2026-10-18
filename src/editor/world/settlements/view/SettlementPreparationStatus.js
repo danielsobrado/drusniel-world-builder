@@ -19,5 +19,6 @@ export function settlementPreparationStatus(view) {
   return { ready: sites + surfaces + installation + variants + compilation + reveal === 0
     && errors.length === 0 && (view.sites.size === 0 || (!view.dirty && !view.fading)),
   enabled: true, sites, surfaces, installation, variants, compilation, reveal,
-  requestedBuildings, requestedProps, residentSites: view.sites.size, errors: errors.slice(0, 16) };
+  requestedBuildings, requestedProps, visibleBuildings: view.visibleBuildings ?? 0,
+  visibleProps: view.visibleProps ?? 0, residentSites: view.sites.size, errors: errors.slice(0, 16) };
 }
