@@ -23,7 +23,7 @@ attempt in its report. Capture validity is separate from visual acceptance.
 | R6 habitat composition | World-stable flower colonies, biome petal palettes; meadow bouquets excluded from taiga/rainforest | Worker/main tests and 18-view rollout pass; expanded positions and true marine check pending |
 | R7 atmosphere/composition | Restrained daytime dust glints/pollen; neighborhood/ID survey and persistent layer controls | Eight diagnostic views pass, including a true marine cell; source geography retained |
 | R8 motion/interaction/HUD/sound | Pending | Pending |
-| R9 release/performance | Frozen hardware baseline; strict native focus control | Previous verify passes, 6,857 tests; verification after lit conversion and final matrix running/pending |
+| R9 release/performance | Frozen hardware baseline; strict native focus control | Final verify passes, 6,861 tests; hardware movement matrix pending |
 
 ## Diagnosed causes
 
@@ -119,3 +119,7 @@ their existing systems are not silently replaced on the strength of stills.
   and matrix are separate from that intermediate evidence.
 - Remaining GPU lighting/movement/performance results are pending. Pending rows
   above are not release claims. Failed attempts remain labeled and retained.
+- Final `npm run verify` after the authored lit conversion passes all 6,861
+  tests, lint, generated UI, production assets and build. The added tests cover
+  paint/cutout preservation, Basic-node promotion, intentional unlit callers and
+  agreement between authored bush and proxy lighting.
