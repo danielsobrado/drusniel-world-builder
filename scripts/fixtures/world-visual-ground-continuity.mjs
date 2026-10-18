@@ -5,6 +5,7 @@ import { createTerrainTransitionPatterns } from '/src/editor/materials/TerrainTr
 import { createMeadowGroundShading } from '/src/editor/stylized/meadow/MeadowGroundShading.js';
 import { applyMeadowGroundDetail } from '/src/editor/stylized/meadow/meadowGroundDetail.js';
 import { createAridSubstrateNodes } from '/src/editor/materials/AridSubstrateNodes.js';
+import { PATTERN_PERIOD } from '/src/editor/stylized/PatternOrigins.js';
 
 const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
 const state = window.__worldGrassFixture = { report: { backend, checks: [], cases: [], done: false }, pendingCapture: null };
@@ -76,6 +77,22 @@ try {
         normalMode.value = 0;
       }
     }
+  }
+  // Adjacent chunks can express one canonical point a whole wrapped lattice
+  // apart. Coarse ripple districts must close over the same physical period.
+  for (const id of [1, 2]) {
+    biome.value = id; normalMode.value = 0; distance.value = 4;
+    patterns.update(0, 0); const origin = patterns.uniforms.fine.value.clone();
+    const reference = await draw();
+    for (const [x, z] of [[PATTERN_PERIOD, 0], [0, -PATTERN_PERIOD], [PATTERN_PERIOD, PATTERN_PERIOD]]) {
+      patterns.uniforms.fine.value.copy(origin).add(new THREE.Vector2(x, z));
+      const shifted = await draw(); let error = 0;
+      for (let i = 0; i < reference.length; i += 4) for (let c = 0; c < 3; c++) error += Math.abs(reference[i + c] - shifted[i + c]);
+      const meanError = error / (reference.length / 4 * 3);
+      state.report.checks.push({ id: `arid-wrap-${id}-${x}-${z}`, meanError,
+        passed: Number.isFinite(meanError) && meanError < .0005 });
+    }
+    patterns.uniforms.fine.value.copy(origin);
   }
   state.report.passed = state.report.checks.every(check => check.passed);
 } catch (error) { state.report.failure = error.stack; state.report.passed = false; }

@@ -86,8 +86,11 @@ function periodicFbmOctaves(position, count) {
 }
 
 /** One octave of value noise in [0, 1], periodic over PATTERN_PERIOD: four hashes. */
-export function periodicNoise(position) {
-  return periodicValueNoise(position, PATTERN_PERIOD);
+export function periodicNoise(position, period = PATTERN_PERIOD) {
+  if (!Number.isSafeInteger(period) || period < 2 || (period & (period - 1)) !== 0) {
+    throw new Error('Periodic noise period must be a power of two of at least 2');
+  }
+  return periodicValueNoise(position, period);
 }
 
 /** Two-octave FBM in [0, 1], periodic over PATTERN_PERIOD. */

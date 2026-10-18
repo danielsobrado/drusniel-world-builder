@@ -1,6 +1,7 @@
 import { Color } from 'three/webgpu';
 import { Fn, If, float, mix, oneMinus, positionView, sin, smoothstep, vec3, vec4 } from 'three/tsl';
 import { periodicFbm2, periodicNoise } from '../stylized/PeriodicNoiseNodes.js';
+import { PATTERN_PERIOD } from '../stylized/PatternOrigins.js';
 
 const pigment = hex => { const color = new Color(hex); return vec3(color.r, color.g, color.b); };
 
@@ -16,7 +17,7 @@ export function createAridSubstrateNodes({ tileId, bare, patterns, localXZ, came
       const macro = periodicFbm2(patterns.latticePoint('broad', localXZ));
       const grain = periodicNoise(p.mul(8).add(31.7));
       const warp = periodicNoise(p.add(17.3));
-      const drift = periodicNoise(p.div(8).add(7.3));
+      const drift = periodicNoise(p.div(8).add(7.3), PATTERN_PERIOD / 8);
       // Integer lattice frequencies close over PatternOrigins' 512-cell wrap.
       const phase = p.x.mul(4).add(p.y).mul(Math.PI * 2).add(warp.mul(2));
       const filtered = oneMinus(smoothstep(.6, 2.4, phase.fwidth())).mul(reach);
