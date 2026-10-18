@@ -14,16 +14,16 @@ attempt in its report. Capture validity is separate from visual acceptance.
 
 | Item | Implementation | Acceptance |
 | --- | --- | --- |
-| R0 evidence | Eighteen baseline world poses; source/config/map hashes; targeted tree surveys | Baseline and final stills pass, 18/18 each; baseline and initial candidate motion pass |
+| R0 evidence | Eighteen baseline world poses; source/config/map hashes; targeted tree surveys | Baseline and intermediate stills pass, 18/18 each; final replay follows the authored-lighting fix |
 | R1 plant motion | Explicit asset motion profiles; rooted rigid fallback for leaves/shrubs; matching normals and conservative bounds | CPU tests and 48 GPU comparisons pass; final movement review pending |
-| R2 plant appearance | Explicit material roles for authored flowers; restrained understory grading; procedural flowers use terrain stem pigments and world-space bent normals, cloud shadow and mist | Mixed-light GPU review pending |
+| R2 plant appearance | Lit conversion for unlit natural plant GLBs; explicit flower roles; restrained grading; procedural flowers use terrain stem pigments and correct normals, cloud shadow and mist | Final authored/procedural four-light review passes 44 checks across both backends, including blackout controls |
 | R3 grass/ground | Persistent stand-weighted substrate occlusion; lighter sparse roots | Unit tests and 284 ground continuity checks pass; combined controls and LOD review pending |
-| R4 tree shapes | Leafless dead state; living crown height retained; authored species no longer receive a second narrow/wide squeeze | Morphology/LOD tests and same-instance world replay pass; representation/light review pending |
-| R5 surfaces/contact | Coherent sand ripple districts with quiet gaps; stronger cool mineral substrate in near/far recipes | Backend surface review pending |
+| R4 tree shapes | Leafless dead state; living crown height retained; authored species no longer receive a second narrow/wide squeeze | CPU tests and 1,112 representation/alpha/lighting GPU checks pass; same-instance world replay passes |
+| R5 surfaces/contact | Coherent sand ripple districts with quiet gaps; stronger cool mineral substrate in near/far recipes | 456 GPU surface checks pass across four lights and both backends |
 | R6 habitat composition | World-stable flower colonies, biome petal palettes; meadow bouquets excluded from taiga/rainforest | Worker/main tests and 18-view rollout pass; expanded positions and true marine check pending |
-| R7 atmosphere/composition | Restrained daytime dust glints/pollen; neighborhood/ID survey and persistent layer controls | Air/landscape diagnosis pending; source geography retained |
+| R7 atmosphere/composition | Restrained daytime dust glints/pollen; neighborhood/ID survey and persistent layer controls | Eight diagnostic views pass, including a true marine cell; source geography retained |
 | R8 motion/interaction/HUD/sound | Pending | Pending |
-| R9 release/performance | Frozen hardware baseline; strict native focus control | Release verify passes, 6,857 tests; final matrix pending |
+| R9 release/performance | Frozen hardware baseline; strict native focus control | Previous verify passes, 6,857 tests; verification after lit conversion and final matrix running/pending |
 
 ## Diagnosed causes
 
@@ -35,6 +35,13 @@ attempt in its report. Capture validity is separate from visual acceptance.
   and regional mist wrappers. Their roots also used a global color independent
   of the meadow's biome palette. Authored blossoms now explicitly distinguish
   stems, petals and centers, protecting yellow petals from the green mask.
+- Both authored flower GLBs explicitly declare `KHR_materials_unlit` on stems,
+  petals and centers. Preserving their Basic material type kept them bright
+  independently of the scene lights. Natural foliage now promotes Basic
+  materials to Lambert nodes while retaining color, maps, UV transforms,
+  cutout and sidedness. Generic cloning still preserves intentional unlit
+  materials for other callers. Actual asset blackout tests now read zero
+  luminance for both flowers and the leafy ground plant on both backends.
 - Sparse grass roots were much darker than their floor. Root shading is lifted
   while a bounded habitat-density contribution darkens the substrate of dense
   stands in both near shading and the CPU distant palette.
@@ -58,7 +65,7 @@ Dead trees retain their existing identity and trunk/collision geometry. Species
 selection and Azgaar IDs are preserved. Tree atlas source geometry/materials
 remain unchanged; per-instance appearance is applied at runtime.
 
-The final rainforest pose records 449,230,428 tracked bytes versus 446,659,674
+The intermediate rainforest pose records 449,230,428 tracked bytes versus 446,659,674
 in the baseline (about +2.45 MiB, +0.58%). These are bounded resource-accounting
 snapshots, not driver VRAM measurements or proof of a leak. Flower resource
 accounting now includes its previously uncounted node-only textures. Both
@@ -67,7 +74,7 @@ Streaming and recovery acceptance remains a separate movement gate.
 
 ## World review and scope
 
-The final [18-view gallery](qa/world-look-implementation-2026-10-18/worlds/index.html)
+The [18-view gallery](qa/world-look-implementation-2026-10-18/worlds/index.html)
 uses the original poses and shows the dead snag without a green puff, fuller
 living crowns, deeper leafy understory, coherent mineral/sand colors and quieter
 flower distribution. The [baseline gallery](qa/visual-audit-2026-10-18/index.html)
@@ -106,8 +113,9 @@ their existing systems are not silently replaced on the strength of stills.
 - Ground continuity passes 142 checks per backend, including six new hot/cold
   substrate wrap controls. Maximum wrap mean error is 0.00001154 on WebGPU and
   0.00000956 on WebGL, below the 0.0005 limit.
-- Final world capture at production revision `b32eab78` passes all 18 views,
+- Intermediate world capture at production revision `b32eab78` passes all 18 views,
   fixed source, matching IDs, complete assets/readiness and zero browser errors.
-  Later harness-only commits do not alter the frozen production imports.
+  A later authored-lighting correction is frozen at `75fbb126`; its final replay
+  and matrix are separate from that intermediate evidence.
 - Remaining GPU lighting/movement/performance results are pending. Pending rows
   above are not release claims. Failed attempts remain labeled and retained.
