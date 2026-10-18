@@ -23,7 +23,7 @@ if (poses.some(p => !p)) throw new Error('Required diagnostic poses are missing.
 if (!qualityReview) poses.push({ id: 'marine-cell', name: 'True marine cell', world: 'procedural', expectedBiomeId: 0,
   x: -2045, z: 1731, yaw: -Math.PI / 2, pitch: -.45, mode: 'fly', heightAboveGround: 30, fov: 60 });
 await mkdir(out, { recursive: true });
-const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
+const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`), { timeoutMs: 900000 });
 const report = { startedAt: new Date().toISOString(), viewport: { width: 1600, height: 900 },
   interpretation: 'Live animation; distance fog control does not disable regional mist, sky haze, cloud shadows or finishing.',
   poses: [], artifacts: [] };
