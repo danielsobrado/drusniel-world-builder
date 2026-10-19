@@ -9,6 +9,7 @@ import { authoredTexture } from '../AuthoredTextureNode.js';
 import { orientedScreenDitherThreshold } from './screenDither.js';
 import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';
+import { applyCanopySnow, canopySnowCap, crownUpNode } from '../forest/canopySnow.js';
 
 export function createSourceOpacityNode(material) {
   if (material.opacityNode) return material.opacityNode;
@@ -57,7 +58,9 @@ function applyMorphology(material, kind, pivot) {
 }
 
 /**
- * `tinted` adds a per-instance vec3 on top of the scalar brightness variation.
+ * `tinted` adds a per-instance vec3 on top of the scalar brightness variation,
+ * and the canopy snow cap from its w; `crownBounds` (the leaf part's bounds)
+ * gathers that cap onto the crown's top.
  * `kind` selects the per-instance tree morphology transform. Other scatter layers
  * keep the identity morphology written by the shared instance runtime.
  */
@@ -66,6 +69,7 @@ export function createDitheredMaterial(sourceMaterial, {
   kind = null,
   morphologyPivot = null,
   morphologyPivotY = 0,
+  crownBounds = null,
 } = {}) {
   const material = sourceMaterial.clone();
   // A classic material's clone() drops node properties; keep a position node the
@@ -90,11 +94,20 @@ export function createDitheredMaterial(sourceMaterial, {
   // moved. At full coverage this now resolves to the original stable cutout.
   material.opacityNode = sourceOpacity ? sourceOpacity.mul(fadeMask) : fadeMask;
   if (material.colorNode) {
-    const variation = tinted
-      ? attribute('instanceLeafTint', 'vec3').mul(colorVariation)
-      : colorVariation;
+    const leafTint = tinted ? attribute('instanceLeafTint', 'vec4') : null;
+    const variation = leafTint ? leafTint.xyz.mul(colorVariation) : colorVariation;
     material.colorNode = material.colorNode.mul(variation);
     if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(variation);
+    if (leafTint) {
+      // Snow on the crown's upward faces; w is the tree's canopy snow.
+      const snowed = applyCanopySnow({
+        color: material.colorNode,
+        emissive: material.emissiveNode,
+        cap: canopySnowCap(leafTint.w, crownUpNode(crownBounds)),
+      });
+      material.colorNode = snowed.color;
+      material.emissiveNode = snowed.emissive;
+    }
   }
   applyMorphology(
     material,

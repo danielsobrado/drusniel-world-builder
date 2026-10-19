@@ -25,6 +25,7 @@ import {
   uncoveredGeneratedSpecies,
 } from './forest/ForestSpeciesGeometry.js';
 import { createForestLeafTintTable } from './forest/forestLeafTint.js';
+import { createCanopySnowResolver, setCanopySnowColor } from './forest/canopySnow.js';
 import { createProceduralBarkTextures } from './forest/ProceduralBarkTextures.js';
 import { instanceCapacity } from './scatterMath.js';
 import { TreeManifestStore } from './TreeManifestStore.js';
@@ -190,6 +191,14 @@ export class StylizedTreeView {
     this.preservePrototypeLeafColor = [];
     this.gradedPrototypeLeaf = [];
     this.leafTints = createForestLeafTintTable({ config });
+    // Snow caps per tree: its biome's canopy snow, or the bark's (and ground's)
+    // snow band at its height.
+    if (config.biomeLooks) setCanopySnowColor(config.biomeLooks.snowColor);
+    this.canopySnow = createCanopySnowResolver({
+      byTile: config.biomeLooks?.snow?.canopy ?? null,
+      snowLine: this.barkWeatheringSettings?.snowBand?.line ?? snowBand?.snowLine,
+      snowFade: this.barkWeatheringSettings?.snowBand?.fade ?? snowBand?.snowFade,
+    });
     this.proxyPrototypes = [];
     this.renderers = [];
     this.proxyRenderers = [];
@@ -844,6 +853,11 @@ export class StylizedTreeView {
       clusterRenderers: this.clusterRenderers,
       understoryRenderers: this.understoryRenderers,
       resolveLeafTint: (record) => this.resolveLeafTint(record),
+      resolveLeafSnow: (record) => this.canopySnow(
+        this.tileIdAt(record.x, record.z),
+        record.height,
+        record.groveSeed ?? record.priority,
+      ),
       resolvePrototypeIndex: (placement) => this.resolvePalettePrototypeIndex(placement),
     }), 'pendingLodRebuild');
     if (completed) this.lastLodRebuildAt = performance.now();

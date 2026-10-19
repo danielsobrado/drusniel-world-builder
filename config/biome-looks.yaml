@@ -1,0 +1,55 @@
+# Each biome's look, one row per terrain tile id: Azgaar's standard biomes are
+# 0–12, and custom biomes take ids 32–254 (CLAUDE.md). Every layer that dresses
+# a biome reads its column here, so a biome's palette and weather are tuned in
+# one place (src/editor/biomes/BiomeLooks.js):
+#
+#   canopy        crown hue the trees wear (stylized/forest/forestLeafTint.js),
+#                 a ratio against the species' own lit crown so its gradient
+#                 survives. Unlisted biomes keep the species palette.
+#   snow.ground   snow lying at any height: the terrain bake, the far terrain
+#                 and the grass gate (materials/SnowAccumulation.js).
+#   snow.canopy   snow caps on the upward-facing foliage of trees and their
+#                 impostors (stylized/forest/canopySnow.js).
+#   snow.grass    frost on the meadow's blade tips, folded into the biome's
+#                 grass palette (grass.meadow.palette in editor.config.yaml).
+#   snow.air      snow-country air: a cooler, paler sky and haze, stopped-down
+#                 exposure, diamond dust, spindrift, frost and breath, and the
+#                 soundscape (stylized/sky/SnowCountryWeight.js).
+#   snow.fall     regional snowfall (weather-effects.yaml `snowfall`), which
+#                 starts at its `regionalMinCoverage`.
+#
+# Above the terrain's snow line (terrain-material-bake.yaml) every snow column
+# reaches 1 whatever the biome. Values are 0..1; unlisted columns are 0.
+biomeLooks:
+  snow:
+    # Snow on foliage, lit; its shade takes the sky's cool fill.
+    color: '#eef3f8'
+    # The frost the meadow's tips lean toward, a little warmer than snow so a
+    # frosted stand still reads as grass.
+    frost: '#d9e0e2'
+  byTileId:
+    # Cold steppe: bare ground with snow lying in the hollows.
+    2: { name: cold desert, snow: { ground: 0.2, air: 0.3, fall: 0.3 } }
+    3: { name: savanna, canopy: '#aeae5a' }
+    4: { name: grassland, canopy: '#86b04a' }
+    5: { name: tropical seasonal forest, canopy: '#6fae3e' }
+    6: { name: temperate deciduous forest, canopy: '#6da03c' }
+    7: { name: tropical rainforest, canopy: '#3f8f34' }
+    8: { name: temperate rainforest, canopy: '#4c9142' }
+    # Boreal forest in its winter: drifts between the trunks, snow along the
+    # tops of the crowns, frosted grass and light flurries.
+    9:
+      name: taiga
+      canopy: '#4a7a55'
+      snow: { ground: 0.3, canopy: 0.7, grass: 0.6, air: 0.4, fall: 0.45 }
+    # A snow carpet broken by tussocks; trees wear full caps.
+    10:
+      name: tundra
+      canopy: '#8a9a62'
+      snow: { ground: 0.8, canopy: 0.95, grass: 0.8, air: 0.7, fall: 0.75 }
+    11:
+      name: glacier
+      # No grass grows on the ice (grass.meadow.growth), so it takes no frost:
+      # a frosted palette would spend one of the meadow's eight for nothing.
+      snow: { ground: 1, canopy: 1, air: 1, fall: 1 }
+    12: { name: wetland, canopy: '#6f8f43' }

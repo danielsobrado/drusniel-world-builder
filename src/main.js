@@ -1032,6 +1032,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     getGroundHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
     snowLine: config.stylizedSurface.materialBake.classification.snowLine,
     snowFade: config.stylizedSurface.materialBake.classification.snowFade,
+    looks: config.stylizedSurface.biomeLooks,
   });
   // Each part of the map gets its own air: biomes kilometres out set the region's
   // sky, the ground close by only nudges it (stylized/sky/skyRegionClimate.js).
@@ -1780,7 +1781,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const snowCountryWeight = snowCountry.update(frameDelta, viewModeController.camera);
     skyLooks?.setSnowCountry(snowCountryWeight);
     skyLooks?.setRegion(skyRegion.update(frameDelta, viewModeController.camera));
-    weatherController?.setRegionalSnow(snowCountryWeight);
+    weatherController?.setRegionalSnow(snowCountry.snowfall);
     terrainView.godRays.setShaftAtmosphere(snowCountryWeight);
     if (dayNightCycle) {
       // The clock blends the two presets the hour lies between, so the sun moves

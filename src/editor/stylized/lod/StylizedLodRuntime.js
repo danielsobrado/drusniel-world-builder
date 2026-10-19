@@ -12,6 +12,7 @@ import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
 const WAITING_FADE = Number.EPSILON;
 const UNTINTED = Object.freeze([1, 1, 1]);
+const LEAF_TINT = [1, 1, 1, 0];
 const IDENTITY_MORPHOLOGY = Object.freeze([1, 1, 1]);
 const LOD_WORLD_POSITION = { x: 0, y: 0, z: 0 };
 
@@ -41,10 +42,11 @@ function createGeometry(source, capacity, tinted, morphed, surface, plantMotion)
     );
   }
   if (tinted) {
-    geometry.setAttribute(
-      'instanceLeafTint',
-      new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3).fill(1), 3),
-    );
+    // rgb = leaf tint (a multiplier, so it defaults to 1), w = canopy snow
+    // (forest/canopySnow.js), which shares the buffer rather than taking one.
+    const tint = new Float32Array(capacity * 4).fill(1);
+    for (let index = 0; index < capacity; index += 1) tint[index * 4 + 3] = 0;
+    geometry.setAttribute('instanceLeafTint', new THREE.InstancedBufferAttribute(tint, 4));
   }
   return geometry;
 }
@@ -57,6 +59,12 @@ export function treeMorphologyPivotY(geometry, kind) {
   return Number.isFinite(geometry.boundingBox?.min.y)
     ? geometry.boundingBox.min.y
     : 0;
+}
+
+function crownBounds(geometry) {
+  geometry.computeBoundingBox();
+  const box = geometry.boundingBox;
+  return box && !box.isEmpty() ? { min: box.min.toArray(), max: box.max.toArray() } : null;
 }
 
 export function treeMorphologyPivot(parts, part) {
@@ -95,6 +103,7 @@ export function createInstancedRenderers({
       tinted,
       kind: morphed ? part.kind : null,
       morphologyPivot: treeMorphologyPivot(parts, part),
+      crownBounds: tinted ? crownBounds(part.geometry) : null,
     });
     const mesh = new THREE.InstancedMesh(geometry, material, capacity);
     // The matrices as a storage buffer, not an instanced vertex attribute. Past the
@@ -150,6 +159,20 @@ function writeDitherInstance(attribute, index, fade, seed, colorVariation, range
   array[offset + 1] = seed;
   array[offset + 2] = colorVariation;
   widenDirtyRange(range, index);
+}
+
+function writeVector4Instance(attribute, index, value, range) {
+  const array = attribute.array;
+  const offset = index * 4;
+  let changed = false;
+  for (let channel = 0; channel < 4; channel += 1) {
+    const component = Math.fround(value[channel]);
+    if (array[offset + channel] !== component) {
+      array[offset + channel] = component;
+      changed = true;
+    }
+  }
+  if (changed) widenDirtyRange(range, index);
 }
 
 function writeVector3Instance(attribute, index, value, range) {
@@ -269,7 +292,12 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
           ditherRange,
         );
         if (tints) {
-          writeVector3Instance(tints, index, instance.leafTint ?? UNTINTED, tintRange);
+          const tint = instance.leafTint ?? UNTINTED;
+          LEAF_TINT[0] = tint[0];
+          LEAF_TINT[1] = tint[1];
+          LEAF_TINT[2] = tint[2];
+          LEAF_TINT[3] = instance.leafSnow ?? 0;
+          writeVector4Instance(tints, index, LEAF_TINT, tintRange);
         }
         if (morphologies) {
           writeVector3Instance(

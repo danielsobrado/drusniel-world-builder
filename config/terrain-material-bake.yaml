@@ -45,10 +45,8 @@ classification:
   snowLine: 700
   snowFade: 250
   snowSlopeMax: 0.55
-  # Snow at any height by terrain tile (Azgaar biome id): tundra, glacier.
-  snowBiomeCover:
-    10: 0.35
-    11: 1
+  # Snow at any height by terrain tile comes from config/biome-looks.yaml
+  # (snow.ground), which the far terrain reads as well.
   # Drifts break the snow edge; windward faces lose snow, hollows gain it.
   snowPatchScale: 60
   snowPatchStrength: 0.45

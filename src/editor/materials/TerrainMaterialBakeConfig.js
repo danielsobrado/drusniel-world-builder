@@ -156,7 +156,9 @@ function normalizeClassification(source) {
       throw new Error(`Invalid terrain material bake configuration: classification.${field} must be non-negative.`);
     }
   }
-  const cover = source.snowBiomeCover;
+  // Filled from config/biome-looks.yaml (snow.ground) by applyBiomeLooks; a
+  // source read on its own carries no biome snow.
+  const cover = source.snowBiomeCover ?? {};
   if (!cover || typeof cover !== 'object' || Array.isArray(cover)) {
     throw new Error('Invalid terrain material bake configuration: classification.snowBiomeCover must map tile ids to cover.');
   }
@@ -170,7 +172,7 @@ function normalizeClassification(source) {
   if (source.wetnessRadiusCells > source.shorelineRadiusCells) {
     fail('classification.wetnessRadiusCells', 'must not exceed shorelineRadiusCells');
   }
-  return Object.freeze({ ...source });
+  return Object.freeze({ ...source, snowBiomeCover: cover });
 }
 
 function normalizeMacro(source) {

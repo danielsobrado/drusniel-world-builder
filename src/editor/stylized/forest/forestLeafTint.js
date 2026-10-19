@@ -43,27 +43,17 @@ const AUTUMN_TARGETS = Object.freeze({
   conifer_wide: Object.freeze([]),
 });
 
-/**
- * Canopy colour per biome, keyed on canonical Azgaar tile IDs.
+/*
+ * Canopy colour per biome is the biome look table's `canopy` column
+ * (config/biome-looks.yaml), keyed on terrain tile ids.
  *
  * We have three authored broadleaf silhouettes, not one per biome, so hue is
  * what has to carry the difference between a savanna, a rainforest and a taiga.
  * These reuse the autumn machinery exactly — a ratio against the species' own
  * lit crown colour — so the crown's height gradient and fbm variation survive
- * and only its hue moves. Biomes absent from this table keep their species
+ * and only its hue moves. Biomes absent from the column keep their species
  * palette untouched, which is what deserts, glacier, road and farm want.
  */
-const BIOME_TARGETS = Object.freeze({
-  3: '#aeae5a', // savanna: dry olive-gold
-  4: '#86b04a', // grassland: fresh green
-  5: '#6fae3e', // tropical seasonal forest
-  6: '#6da03c', // temperate deciduous forest — the established reference look
-  7: '#3f8f34', // tropical rainforest: deep and saturated
-  8: '#4c9142', // temperate rainforest: deep and cool
-  9: '#4a7a55', // taiga: blue-green
-  10: '#8a9a62', // tundra: grey-green
-  12: '#6f8f43', // wetland: olive
-});
 
 const UNTINTED = Object.freeze([1, 1, 1]);
 // Headroom for turning a saturated green into a warm hue. Anchoring on `leafTop`
@@ -99,7 +89,7 @@ export function createForestLeafTintTable({
   config,
   palettes = FOREST_SPECIES_PALETTES,
   autumnTargets = AUTUMN_TARGETS,
-  biomeTargets = BIOME_TARGETS,
+  biomeTargets = config?.biomeLooks?.canopy ?? {},
 } = {}) {
   const autumnShare = Math.min(1, Math.max(0, Number(config?.trees?.autumnGroves) || 0));
   const grade = resolveCanopyGrade(config?.trees?.canopyGrade);
@@ -166,5 +156,4 @@ export function createForestLeafTintTable({
 }
 
 export const FOREST_AUTUMN_TARGETS = AUTUMN_TARGETS;
-export const FOREST_BIOME_TARGETS = BIOME_TARGETS;
 export const FOREST_LEAF_TINT_UNTINTED = UNTINTED;

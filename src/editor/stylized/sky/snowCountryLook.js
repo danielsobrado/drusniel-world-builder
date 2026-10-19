@@ -7,7 +7,12 @@ import * as THREE from 'three/webgpu';
  * moonlit summit stays moonlit and a golden-hour one stays golden.
  */
 const COOL_SKY = [0.92, 0.99, 1.08];
-const COOL_ZENITH = [0.9, 0.98, 1.06];
+/**
+ * The zenith pales and lifts too: a winter sky is light, not the deep summer
+ * blue (Tiny Glade's snow scenes). Multiplicative, so a night sky stays dark.
+ */
+const COOL_ZENITH = [1.1, 1.14, 1.08];
+const ZENITH_PALING = 0.3;
 const COOL_FOG = [0.95, 1.0, 1.06];
 const WARM_SUN = [1.04, 1.0, 0.94];
 /** How far the horizon and fog pale toward their own luminance. */
@@ -38,7 +43,7 @@ export function snowCountryLook(look, weight) {
   return {
     ...look,
     lowColor: tinted(look.lowColor, COOL_SKY, w, PALING),
-    highColor: tinted(look.highColor, COOL_ZENITH, w),
+    highColor: tinted(look.highColor, COOL_ZENITH, w, ZENITH_PALING),
     fogColor: tinted(look.fogColor, COOL_FOG, w, PALING),
     directionalColor: tinted(look.directionalColor, WARM_SUN, w),
     ambientIntensity: look.ambientIntensity * (1 + 0.15 * w),

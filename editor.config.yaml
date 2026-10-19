@@ -80,8 +80,9 @@ world:
     # Origin-snap rebuilds are sliced this many rings per frame into a back
     # buffer, then swapped, so a snap cannot spike a frame or tear the mesh.
     rebuildRowsPerFrame: 24
-    # Slope reveals rock then bare stone; snow settles above the line, and on
-    # tundra and glacier at any height, but not on faces too steep to hold it.
+    # Slope reveals rock then bare stone; snow settles above the line, and in
+    # the snowy biomes at any height (config/biome-looks.yaml snow.ground), but
+    # not on faces too steep to hold it.
     # Keep in step with config/terrain-material-bake.yaml classification.
     rockColor: '#8d9195'
     screeColor: '#6d7175'
@@ -89,9 +90,6 @@ world:
     snowLine: 700
     snowFade: 250
     snowSlopeMax: 0.55
-    snowBiomeCover:
-      10: 0.35
-      11: 1
     rockSlopeStart: 0.18
     rockSlopeFull: 0.62
 camera:
