@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { float, mix, normalize, normalWorld, positionGeometry, smoothstep, uniform, vec3 } from 'three/tsl';
 import { foliageLight } from './foliageLight.js';
+import { blurTileValueAt } from '../../world/BiomeFieldBlur.js';
 
 /**
  * Snow caps on tree crowns, in the Tiny Glade winter style: white along the
@@ -28,24 +29,36 @@ export function setCanopySnowColor(hex) {
 }
 
 /**
+ * A biome's canopy snow at a cell, blurred over the same ±BIOME_BLUR_CELLS
+ * kernel the ground snow uses, so a tree on a biome border carries as much
+ * snow as the ground it stands on instead of stepping at the border line.
+ *
+ * @param {Float32Array|null} byTile `biomeLooks.snow.canopy`
+ * @param {(cellX: number, cellZ: number) => number} tileAt
+ */
+export function biomeCanopySnowAt(byTile, tileAt, cellX, cellZ) {
+  if (!byTile) return 0;
+  return blurTileValueAt(tileAt, cellX, cellZ, (tileId) => byTile[tileId] ?? 0);
+}
+
+/**
  * Per-instance snow for a tree, 0..1: the larger of its biome's canopy snow and
  * the terrain's snow band at its height, drifting a little per tree so a stand
  * is not uniformly white.
  *
  * @param {object} options
- * @param {Float32Array|null} options.byTile `biomeLooks.snow.canopy`
  * @param {number} [options.snowLine] metres
  * @param {number} [options.snowFade] metres
- * @returns {(tileId: number|null, height: number, seed: number) => number}
+ * @returns {(biome: number, height: number, seed: number) => number} `biome`
+ *   is biomeCanopySnowAt's value
  */
-export function createCanopySnowResolver({ byTile = null, snowLine = Infinity, snowFade = 1 }) {
+export function createCanopySnowResolver({ snowLine = Infinity, snowFade = 1 } = {}) {
   const fade = Math.max(1e-3, snowFade);
-  return (tileId, height, seed = 0.5) => {
-    const biome = byTile && Number.isInteger(tileId) ? byTile[tileId] ?? 0 : 0;
+  return (biome, height, seed = 0.5) => {
     const altitude = Number.isFinite(height)
       ? THREE.MathUtils.smoothstep(height, snowLine, snowLine + fade)
       : 0;
-    const snow = Math.max(biome, altitude);
+    const snow = Math.max(Number.isFinite(biome) ? biome : 0, altitude);
     if (snow <= 0) return 0;
     return Math.min(1, snow * (0.8 + 0.4 * (Number.isFinite(seed) ? seed : 0.5)));
   };
@@ -97,4 +110,18 @@ export function applyCanopySnow({ color, emissive = null, cap }) {
   const fill = snow.mul(vec3(...SNOW_SHADE)).mul(foliageLight.fill).mul(0.22).mul(cap);
   const lit = emissive ? emissive.mul(cap.oneMinus()).add(fill) : fill;
   return { color: capped, emissive: lit };
+}
+
+/** Share of a fully snowed tree's upward bark faces that whiten. */
+const TRUNK_SNOW = 0.85;
+
+/**
+ * Snow along the tops of a trunk's limbs and root flares: the same tree's
+ * canopy snow on its upward bark faces, broken by the bark's own geometry.
+ */
+export function trunkSnow(color, snow) {
+  const local = positionGeometry;
+  const broken = local.y.mul(2.3).add(local.x.mul(4.1)).sin().mul(0.12);
+  const faces = smoothstep(0.35, 0.75, normalWorld.y.add(broken));
+  return mix(color, canopySnowColor, faces.mul(snow).mul(TRUNK_SNOW));
 }

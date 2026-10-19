@@ -13,6 +13,7 @@ import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 const WAITING_FADE = Number.EPSILON;
 const UNTINTED = Object.freeze([1, 1, 1]);
 const LEAF_TINT = [1, 1, 1, 0];
+const TRUNK_MORPHOLOGY = [0, 1, 1];
 const IDENTITY_MORPHOLOGY = Object.freeze([1, 1, 1]);
 const LOD_WORLD_POSITION = { x: 0, y: 0, z: 0 };
 
@@ -300,12 +301,16 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
           writeVector4Instance(tints, index, LEAF_TINT, tintRange);
         }
         if (morphologies) {
-          writeVector3Instance(
-            morphologies,
-            index,
-            instance.morphology ?? IDENTITY_MORPHOLOGY,
-            morphologyRange,
-          );
+          let morphology = instance.morphology ?? IDENTITY_MORPHOLOGY;
+          // A trunk reads only z (its scale); its x carries the tree's canopy snow
+          // to the bark (StylizedDitheredMaterial), sparing a vertex buffer.
+          if (roots) {
+            TRUNK_MORPHOLOGY[0] = instance.leafSnow ?? 0;
+            TRUNK_MORPHOLOGY[1] = morphology[1];
+            TRUNK_MORPHOLOGY[2] = morphology[2];
+            morphology = TRUNK_MORPHOLOGY;
+          }
+          writeVector3Instance(morphologies, index, morphology, morphologyRange);
         }
       }
       markAttributeSubrangeUpdated(mesh.instanceMatrix, matrixRange.min, matrixRange.max);

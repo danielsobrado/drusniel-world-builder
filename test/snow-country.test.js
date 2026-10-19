@@ -78,3 +78,28 @@ test('tiles are sampled on rings, canonical z running opposite to cell z', () =>
   assert.equal(tiles[0], 11);
   assert.equal(tileShare(tiles, [11]), 0.2);
 });
+
+test('snow country listens to the ground underfoot and ignores open water', () => {
+  const band = { groundHeight: 100, snowLine: 700, snowFade: 250 };
+  const byTile = { 9: 0.4, 6: 0 };
+  // Centre taiga, near ring half lake, far ring deciduous wood.
+  const tiles = [9, 9, 9, 9, 9, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6];
+  const weights = [4, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
+  const equal = snowCountryWeight({ tiles, ...band, byTile });
+  const weighted = snowCountryWeight({ tiles, weights, ...band, byTile });
+  assert.ok(weighted > 0.25 && weighted > equal * 1.5, `${weighted} vs ${equal}`);
+  assert.equal(snowCountryWeight({ tiles: [0, 0], ...band, byTile }), 0, 'open water alone is not snow country');
+  assert.equal(snowCountryWeight({ tiles: [10, 0], ...BAND, groundHeight: 100 }), 0.6, 'a tundra lake shore is tundra');
+});
+
+test('a daylit snow-country sky turns pale, not merely tinted', () => {
+  const day = resolveSkyLook(SKY, 'configured');
+  const alpine = snowCountryLook(day, 1);
+  const zenith = new THREE.Color(alpine.highColor);
+  const summer = new THREE.Color(day.highColor);
+  const saturation = (color) => (Math.max(color.r, color.g, color.b) - Math.min(color.r, color.g, color.b))
+    / Math.max(color.r, color.g, color.b);
+  assert.ok(luminance(alpine.highColor) > luminance(day.highColor) * 1.6, 'the zenith lifts');
+  assert.ok(saturation(zenith) < saturation(summer), 'and loses its summer saturation');
+  assert.ok(zenith.b > zenith.r, 'while staying blue');
+});

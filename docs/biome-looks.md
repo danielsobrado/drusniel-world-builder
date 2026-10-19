@@ -20,7 +20,10 @@ Above the terrain's snow line every snow column reaches 1 whatever the biome.
 ## Canopy snow
 
 Snow per tree is the larger of its biome's `snow.canopy` and the snow band at
-its height, drifted ±20 % per grove. It costs no vertex buffer: a tree leaf part
+its height, drifted ±20 % per grove. The biome term is blurred over the same
+±`BIOME_BLUR_CELLS` kernel as the ground snow (`biomeCanopySnowAt`), so a tree
+on a biome border carries as much snow as the ground under it; it is cached per
+placement record, so the 121-cell kernel runs once per tree, not per rebuild. It costs no vertex buffer: a tree leaf part
 is near WebGPU's eight, so it rides `instanceLeafTint.w` (now a vec4) on meshes,
 and the integer part of the crown-width channel on impostors
 (`TreeAppearance.packImpostorWidth`), whose appearance vec4 was full. The cap
@@ -31,6 +34,24 @@ leaf's transmission.
 
 Crowns painted with snow (the alpine conifers' COLOR_0) keep their paint and
 take the cap on top.
+
+Trunks carry the same tree's snow on their upward bark faces
+(`canopySnow.trunkSnow`). A trunk reads only z of `instanceMorphology`, so its
+x carries the snow. Bark weathering's own snow band now reads the world height:
+it compared the trunk-local height with the 700 m line, so trunks never
+whitened.
+
+## Snow-country air
+
+`SnowCountryWeight` samples rings at 0, 60 and 180 m, weighted 4 : 1 : 0.5 per
+sample, and leaves open water (tile 0) out. With equal votes the far ring
+decided: a taiga pose beside a deciduous wood and a lake read 0.09, a tundra
+shore 0.29. Weighted, they read 0.20 and 0.56.
+
+`snowCountryLook` leans a daylit sky toward pale winter blues (`WINTER_ZENITH`,
+`WINTER_HORIZON`), each scaled to the colour's own lifted luminance so night
+and dusk skies keep their darkness. Sky colour follows an ease-out of the
+weight (`1 − (1 − w)²`); exposure and haze density keep the plain weight.
 
 ## A/B
 

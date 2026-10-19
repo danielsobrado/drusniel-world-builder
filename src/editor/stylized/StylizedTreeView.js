@@ -25,7 +25,7 @@ import {
   uncoveredGeneratedSpecies,
 } from './forest/ForestSpeciesGeometry.js';
 import { createForestLeafTintTable } from './forest/forestLeafTint.js';
-import { createCanopySnowResolver, setCanopySnowColor } from './forest/canopySnow.js';
+import { biomeCanopySnowAt, createCanopySnowResolver, setCanopySnowColor } from './forest/canopySnow.js';
 import { createProceduralBarkTextures } from './forest/ProceduralBarkTextures.js';
 import { instanceCapacity } from './scatterMath.js';
 import { TreeManifestStore } from './TreeManifestStore.js';
@@ -194,8 +194,11 @@ export class StylizedTreeView {
     // Snow caps per tree: its biome's canopy snow, or the bark's (and ground's)
     // snow band at its height.
     if (config.biomeLooks) setCanopySnowColor(config.biomeLooks.snowColor);
+    this.canopySnowByTile = config.biomeLooks?.snow?.canopy ?? null;
+    // Placements are stable manifest records, so a tree's blurred biome snow
+    // (121 tile reads) is resolved once rather than on every LOD rebuild.
+    this.canopySnowCache = new WeakMap();
     this.canopySnow = createCanopySnowResolver({
-      byTile: config.biomeLooks?.snow?.canopy ?? null,
       snowLine: this.barkWeatheringSettings?.snowBand?.line ?? snowBand?.snowLine,
       snowFade: this.barkWeatheringSettings?.snowBand?.fade ?? snowBand?.snowFade,
     });
@@ -853,11 +856,7 @@ export class StylizedTreeView {
       clusterRenderers: this.clusterRenderers,
       understoryRenderers: this.understoryRenderers,
       resolveLeafTint: (record) => this.resolveLeafTint(record),
-      resolveLeafSnow: (record) => this.canopySnow(
-        this.tileIdAt(record.x, record.z),
-        record.height,
-        record.groveSeed ?? record.priority,
-      ),
+      resolveLeafSnow: (record) => this.resolveLeafSnow(record),
       resolvePrototypeIndex: (placement) => this.resolvePalettePrototypeIndex(placement),
     }), 'pendingLodRebuild');
     if (completed) this.lastLodRebuildAt = performance.now();
@@ -887,6 +886,22 @@ export class StylizedTreeView {
       this.preservePrototypeLeafColor[prototypeIndex] ?? false,
       this.gradedPrototypeLeaf?.[prototypeIndex] ?? false,
     );
+  }
+
+  /** Per-instance canopy snow (forest/canopySnow.js), cached per record. */
+  resolveLeafSnow(record) {
+    let snow = this.canopySnowCache.get(record);
+    if (snow !== undefined) return snow;
+    const tileSize = this.terrainView.worldStore.tileSize;
+    const biome = biomeCanopySnowAt(
+      this.canopySnowByTile,
+      (cellX, cellZ) => this.terrainView.tileMap.get(cellX, cellZ),
+      Math.floor(record.x / tileSize),
+      Math.floor(-record.z / tileSize),
+    );
+    snow = this.canopySnow(biome, record.height, record.groveSeed ?? record.priority);
+    this.canopySnowCache.set(record, snow);
+    return snow;
   }
 
   resolvePalettePrototypeIndex(placement) {

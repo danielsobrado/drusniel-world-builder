@@ -9,7 +9,7 @@ import { authoredTexture } from '../AuthoredTextureNode.js';
 import { orientedScreenDitherThreshold } from './screenDither.js';
 import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';
-import { applyCanopySnow, canopySnowCap, crownUpNode } from '../forest/canopySnow.js';
+import { applyCanopySnow, canopySnowCap, crownUpNode, trunkSnow } from '../forest/canopySnow.js';
 
 export function createSourceOpacityNode(material) {
   if (material.opacityNode) return material.opacityNode;
@@ -107,6 +107,9 @@ export function createDitheredMaterial(sourceMaterial, {
       });
       material.colorNode = snowed.color;
       material.emissiveNode = snowed.emissive;
+    } else if (kind === 'trunk') {
+      // The tree's canopy snow, carried in the trunk's morphology x.
+      material.colorNode = trunkSnow(material.colorNode, attribute('instanceMorphology', 'vec3').x);
     }
   }
   applyMorphology(

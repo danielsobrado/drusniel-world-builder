@@ -7,7 +7,7 @@ import { resolveBiomeLooks, biomeSnowCover } from '../src/editor/biomes/BiomeLoo
 import { applyBiomeLooks, frostMeadowPalette, settleMeadowGrowth } from '../src/editor/biomes/applyBiomeLooks.js';
 import { createTerrainMaterialBakeConfig } from '../src/editor/materials/TerrainMaterialBakeConfig.js';
 import { resolveMeadowPalettes } from '../src/editor/stylized/meadow/meadowPalettes.js';
-import { createCanopySnowResolver } from '../src/editor/stylized/forest/canopySnow.js';
+import { biomeCanopySnowAt, createCanopySnowResolver } from '../src/editor/stylized/forest/canopySnow.js';
 import { packImpostorWidth, unpackImpostorWidth } from '../src/editor/stylized/forest/TreeAppearance.js';
 import { snowCountryWeight } from '../src/editor/stylized/sky/SnowCountryWeight.js';
 import { loadBiomeLooks } from '../tests/helpers/biomeLooks.js';
@@ -87,13 +87,24 @@ test('snow settles a frosted stand and leaves warm biomes standing', () => {
 });
 
 test('a tree carries its biome canopy snow, or the snow band at its height', () => {
-  const resolve = createCanopySnowResolver({ byTile: LOOKS.snow.canopy, snowLine: 700, snowFade: 250 });
-  assert.equal(resolve(6, 100, 0.5), 0, 'a lowland deciduous tree is bare');
-  assert.ok(resolve(TUNDRA, 100, 0.5) > 0.8, 'tundra crowns are capped');
-  assert.ok(resolve(TAIGA, 100, 0.5) > 0.5);
-  assert.equal(resolve(6, 1000, 0.5), 1, 'above the snow band every crown is white');
-  assert.ok(resolve(TAIGA, 100, 0) < resolve(TAIGA, 100, 1), 'trees in a stand differ');
-  assert.equal(resolve(null, Number.NaN, Number.NaN), 0);
+  const resolve = createCanopySnowResolver({ snowLine: 700, snowFade: 250 });
+  const biome = (tile) => LOOKS.snow.canopy[tile];
+  assert.equal(resolve(biome(6), 100, 0.5), 0, 'a lowland deciduous tree is bare');
+  assert.ok(resolve(biome(TUNDRA), 100, 0.5) > 0.8, 'tundra crowns are capped');
+  assert.ok(resolve(biome(TAIGA), 100, 0.5) > 0.5);
+  assert.equal(resolve(biome(6), 1000, 0.5), 1, 'above the snow band every crown is white');
+  assert.ok(resolve(biome(TAIGA), 100, 0) < resolve(biome(TAIGA), 100, 1), 'trees in a stand differ');
+  assert.equal(resolve(Number.NaN, Number.NaN, Number.NaN), 0);
+});
+
+test('canopy snow ramps across a biome border like the ground snow', () => {
+  // Taiga west of cell 0, deciduous forest east of it.
+  const tileAt = (cellX) => (cellX < 0 ? TAIGA : 6);
+  const at = (cellX) => biomeCanopySnowAt(LOOKS.snow.canopy, tileAt, cellX, 0);
+  assert.equal(at(-20), LOOKS.snow.canopy[TAIGA]);
+  assert.equal(at(20), 0);
+  assert.ok(at(-1) > at(0) && at(0) > at(2) && at(2) > 0, 'a ramp, not a step');
+  assert.equal(biomeCanopySnowAt(null, tileAt, 0, 0), 0);
 });
 
 test('impostor width and canopy snow share one channel', () => {
@@ -121,4 +132,27 @@ test('the biomeSnow A/B control draws the biomes without biome snow', () => {
   const bare = resolveBiomeLooks(source, { snow: false });
   for (const column of Object.values(bare.snow)) assert.ok(column.every((value) => value === 0));
   assert.deepEqual(bare.canopy, LOOKS.canopy, 'canopy hue is not snow');
+});
+
+test('a tree hands its canopy snow to both its crown and its trunk', async () => {
+  const WebGpu = await import('three/webgpu');
+  const { createInstancedRenderers, writeInstances } = await import('../src/editor/stylized/lod/StylizedLodRuntime.js');
+  const part = (kind) => {
+    const geometry = new WebGpu.BufferGeometry();
+    geometry.setAttribute('position', new WebGpu.BufferAttribute(new Float32Array([0, 0, 0, 1, 2, 0, 0, 3, 1]), 3));
+    geometry.setAttribute('normal', new WebGpu.BufferAttribute(new Float32Array(9), 3));
+    return { kind, geometry, material: new WebGpu.MeshLambertNodeMaterial() };
+  };
+  const [[leaf, trunk]] = createInstancedRenderers({
+    root: new WebGpu.Group(), partsByPrototype: [[part('leaf'), part('trunk')]],
+    capacity: 2, name: 'snow', castShadow: false, tintLeaves: true,
+  });
+  writeInstances([[leaf, trunk]], [[{
+    matrix: new WebGpu.Matrix4(), fade: 1, seed: 0.3, leafTint: [0.9, 1, 1.1], leafSnow: 0.75, morphology: [1.2, 1.1, 0.9],
+  }]]);
+  assert.deepEqual([...leaf.geometry.getAttribute('instanceLeafTint').array.slice(0, 4)].map((v) => +v.toFixed(3)), [0.9, 1, 1.1, 0.75]);
+  assert.deepEqual([...leaf.geometry.getAttribute('instanceMorphology').array.slice(0, 3)].map((v) => +v.toFixed(3)), [1.2, 1.1, 0.9],
+    'the crown keeps its scale');
+  assert.deepEqual([...trunk.geometry.getAttribute('instanceMorphology').array.slice(0, 3)].map((v) => +v.toFixed(3)), [0.75, 1.1, 0.9],
+    'the trunk reads only z, so x carries the snow');
 });

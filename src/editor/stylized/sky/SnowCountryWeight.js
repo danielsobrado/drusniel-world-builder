@@ -1,4 +1,4 @@
-import { sampleTilesAround } from '../../world/sampleTilesAround.js';
+import { ringPoints } from '../../world/sampleTilesAround.js';
 
 /**
  * Tundra reads as partly snow country, glacier as wholly, when no biome look
@@ -6,6 +6,15 @@ import { sampleTilesAround } from '../../world/sampleTilesAround.js';
  */
 const SNOW_TILE_WEIGHT = Object.freeze({ 10: 0.6, 11: 1 });
 const SAMPLE_RINGS = [0, 60, 180];
+/**
+ * Each sample's say, by ring: the ground underfoot counts as much as half a
+ * ring, the far ring half as much as the near one. With equal votes the 180 m
+ * ring outvoted the rest, so a snowy taiga beside a deciduous wood read as
+ * barely snow country (0.09) and its sky stayed summer blue.
+ */
+const RING_WEIGHTS = [4, 1, 0.5];
+/** Marine and lakes (Azgaar 0) have no say: open water is neither snowy nor not. */
+const WATER_TILE = 0;
 const SAMPLE_DIRECTIONS = 8;
 const RESAMPLE_SECONDS = 1;
 
@@ -20,10 +29,18 @@ function smoothstep(edge0, edge1, value) {
  * terrain draws. Measured from the ground below the camera, so an orbit
  * camera high over a meadow is still over a meadow.
  */
-export function snowCountryWeight({ tiles, groundHeight, snowLine, snowFade, byTile = SNOW_TILE_WEIGHT }) {
+export function snowCountryWeight({
+  tiles, weights = null, groundHeight, snowLine, snowFade, byTile = SNOW_TILE_WEIGHT,
+}) {
   let biome = 0;
-  for (const tile of tiles) biome += byTile[tile] ?? 0;
-  biome = tiles.length ? biome / tiles.length : 0;
+  let total = 0;
+  tiles.forEach((tile, index) => {
+    if (tile === WATER_TILE) return;
+    const weight = weights?.[index] ?? 1;
+    biome += (byTile[tile] ?? 0) * weight;
+    total += weight;
+  });
+  biome = total > 0 ? biome / total : 0;
   const altitude = Number.isFinite(groundHeight)
     ? smoothstep(snowLine - snowFade, snowLine + snowFade, groundHeight)
     : 0;
@@ -60,15 +77,20 @@ export class SnowCountryWeight {
     const origin = this.getOrigin();
     const x = camera.position.x + origin.x;
     const z = camera.position.z + origin.z;
+    const tileSize = this.getTileSize();
+    const tiles = [];
+    const weights = [];
+    SAMPLE_RINGS.forEach((radius, ring) => {
+      for (const sample of ringPoints({ x, z, rings: [radius], directions: SAMPLE_DIRECTIONS })) {
+        const tile = this.getTile(Math.floor(sample.x / tileSize), Math.floor(-sample.z / tileSize));
+        if (!Number.isInteger(tile)) continue;
+        tiles.push(tile);
+        weights.push(RING_WEIGHTS[ring]);
+      }
+    });
     const sample = {
-      tiles: sampleTilesAround({
-        getTile: this.getTile,
-        tileSize: this.getTileSize(),
-        x,
-        z,
-        rings: SAMPLE_RINGS,
-        directions: SAMPLE_DIRECTIONS,
-      }),
+      tiles,
+      weights,
       groundHeight: this.getGroundHeight(x, z),
       snowLine: this.snowLine,
       snowFade: this.snowFade,

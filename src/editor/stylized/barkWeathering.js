@@ -8,6 +8,7 @@ import {
   mix,
   normalWorld,
   positionGeometry,
+  positionWorld,
   smoothstep,
   vec2,
   vec3,
@@ -125,8 +126,12 @@ export function applyBarkWeathering(material, { settings }) {
     .max(0).mul(0.7)
     .add(normalWorld.y.max(0).mul(0.8));
   const low = smoothstep(0, MOSS_REACH, local.y).oneMinus().mul(0.6).add(0.4);
+  // The snow band is an altitude, so it reads the world height — the instance
+  // anchor shifts only x and z, so y is canonical metres. Against `local.y`,
+  // the height up the trunk, the 700 m line was never reached and trunks
+  // stayed bare under snowy crowns.
   const snowLine = settings.snowBand
-    ? smoothstep(settings.snowBand.line, settings.snowBand.line + settings.snowBand.fade, local.y)
+    ? smoothstep(settings.snowBand.line, settings.snowBand.line + settings.snowBand.fade, positionWorld.y)
     : float(0);
   // Nothing mossy survives above the snow line, which is the same line the ground
   // whitens at.
