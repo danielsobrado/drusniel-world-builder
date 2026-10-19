@@ -4,7 +4,6 @@ import { terrainMaterialAnalysisChannels } from './TerrainMaterialAnalysisTextur
 import {
   Fn,
   clamp,
-  dot,
   faceDirection,
   float,
   max,
@@ -247,8 +246,11 @@ export function createTerrainMaterialBakedSurface({
   const familyMultiplier = vec3(1).add(
     sampledFamilyMultiplier.sub(1).mul(genome.detailScale),
   );
-  const detailHeight = dot(familyMultiplier.sub(1), vec3(1 / 3))
-    .add(featureState.heightOffset);
+  // The family atlas is reflectance, not a height map. Differentiating it
+  // turns pigment/variant boundaries (and quantized canonical coordinates on
+  // imported maps) into little raised plates. Only physical feature relief
+  // contributes to the normal; its slot-local pattern remains precise there.
+  const detailHeight = featureState.heightOffset;
   const normalVisibility = oneMinus(smoothstep(
     families.normalFadeStartDistance,
     families.normalFadeEndDistance,
