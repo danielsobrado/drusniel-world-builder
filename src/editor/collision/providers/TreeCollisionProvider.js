@@ -48,13 +48,17 @@ function colliderForPlacement({ placement, profile, minimumTrunkRadius }) {
     layers: COLLISION_LAYERS.blocking,
     ownerChunkX: placement.ownerChunkX,
     ownerChunkZ: placement.ownerChunkZ,
+    // Authored trunks can sit off the prototype origin. The manifest owns the
+    // placement anchor even when the rotated trunk is wholly across a boundary.
+    // Keep that anchor in the conservative broad-phase bounds; narrow-phase
+    // collision still uses the unchanged capsule position and dimensions.
     aabb: createCanonicalAabb({
-      minX: x - radius,
-      maxX: x + radius,
+      minX: Math.min(placement.x, x - radius),
+      maxX: Math.max(placement.x, x + radius),
       minY: baseY,
       maxY: baseY + height,
-      minZ: z - radius,
-      maxZ: z + radius,
+      minZ: Math.min(placement.z, z - radius),
+      maxZ: Math.max(placement.z, z + radius),
     }),
     position: [x, baseY, z],
     rotationY,

@@ -3,6 +3,8 @@ import test from 'node:test';
 import { COLLISION_LAYERS } from '../src/editor/collision/CollisionLayers.js';
 import { CollisionWorld } from '../src/editor/collision/CollisionWorld.js';
 import { CharacterMotor } from '../src/editor/collision/character/CharacterMotor.js';
+import { createCharacterCapsule } from '../src/editor/collision/character/CharacterCapsule.js';
+import { capsuleOverlapsPrimitive } from '../src/editor/collision/character/CharacterContacts.js';
 import { COLLIDER_TYPE_CAPSULE } from '../src/editor/collision/colliders/ColliderRecords.js';
 import { TerrainCollisionProvider } from '../src/editor/collision/providers/TerrainCollisionProvider.js';
 import { TreeCollisionProvider } from '../src/editor/collision/providers/TreeCollisionProvider.js';
@@ -25,7 +27,7 @@ function placement(overrides = {}) {
   });
 }
 
-function createHarness(initialPlacements = [placement()]) {
+function createHarness(initialPlacements = [placement()], profileOverrides = {}) {
   let epoch = 'epoch:1';
   let signature = 'manifest:1';
   let placements = initialPlacements;
@@ -37,6 +39,7 @@ function createHarness(initialPlacements = [placement()]) {
     centerX: 0.25,
     centerZ: 0,
     baseY: 0.1,
+    ...profileOverrides,
   });
   const source = Object.freeze({
     descriptor: Object.freeze({ id: 'production-tree-trunks', profileCount: 1 }),
@@ -94,6 +97,37 @@ test('planted tree IDs remain deterministic and encoded safely', () => {
   const harness = createHarness([planted]);
   const collider = harness.provider.buildOwnerChunk(0, 0).colliders[0];
   assert.equal(collider.sourceId, 'tree:planted%3Aoak%3A42:trunk');
+});
+
+test('offset trunks retain canonical ownership across every chunk edge and rotation', () => {
+  for (const rotationY of [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2]) {
+    const planted = placement({ x: 0.02, z: -0.02, rotationY, scale: 1,
+      heightScale: 1, height: 0 });
+    const { provider, world } = createHarness([planted], { centerX: 2, centerZ: 2, radius: 0.1 });
+    const built = provider.buildOwnerChunk(0, 0);
+    const collider = built.colliders[0];
+    assert.doesNotThrow(() => world.replaceOwnerChunk({ chunkX: 0, chunkZ: 0, ...built }));
+    assert.equal(world.isOwnerChunkReady(0, 0), true);
+    assert.equal(collider.ownerChunkX, 0);
+    assert.equal(collider.ownerChunkZ, 0);
+    assert.equal(collider.dimensions[0], 0.16);
+    assert.ok(Math.abs(collider.position[0] - planted.x) > 1.9);
+    assert.ok(Math.abs(collider.position[2] - planted.z) > 1.9);
+    const candidates = world.collectCandidates({
+      minX: collider.position[0] - 0.2, maxX: collider.position[0] + 0.2,
+      minY: 0, maxY: 6,
+      minZ: collider.position[2] - 0.2, maxZ: collider.position[2] + 0.2,
+    }, COLLISION_LAYERS.blocking, []);
+    assert.equal(candidates.length, 1);
+    assert.equal(candidates[0].sourceId, collider.sourceId);
+    const capsuleAt = (x, z) => createCharacterCapsule({ x, y: 0.2, z, radius: 0.35, bodyHeight: 1.8 });
+    assert.equal(capsuleOverlapsPrimitive(capsuleAt(planted.x, planted.z), collider), false,
+      'conservative anchor bounds must not create a phantom trunk');
+    assert.equal(capsuleOverlapsPrimitive(capsuleAt(collider.position[0], collider.position[2]), collider), true);
+    const rebuilt = provider.buildOwnerChunk(0, 0).colliders[0];
+    assert.deepEqual(rebuilt.aabb, collider.aabb);
+    assert.deepEqual(rebuilt.position, collider.position);
+  }
 });
 
 test('cut-tree refresh removes the collider atomically', () => {
