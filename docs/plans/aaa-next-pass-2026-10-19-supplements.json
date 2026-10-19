@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "seed": 2026101802,
+  "selection": "Retained original river plus explicit marine ID 0 coverage",
+  "sampledCandidates": 2076,
+  "generator": {
+    "seed": 918273,
+    "version": 1,
+    "heightScale": 24,
+    "seaLevel": -1.5,
+    "waterDomainVersion": 3,
+    "waterDomain": {
+      "version": 3,
+      "cellSizeMeters": 1,
+      "shoreDistanceMeters": 48,
+      "ocean": {
+        "coastalShelfMeters": 20,
+        "shelfDepth": 4,
+        "maximumDepth": 24,
+        "maximumBedSlope": 0.75,
+        "beachHeight": 1.8,
+        "beachWidthMeters": 30
+      },
+      "river": {
+        "minimumDepth": 0.8,
+        "maximumDepth": 8,
+        "widthDepthRatio": 0.18,
+        "bankExponent": 1.8,
+        "minimumGradient": 0.0002,
+        "profileStepMeters": 100,
+        "valleySlope": 0.7,
+        "valleyReachMeters": 1500,
+        "leveeHeight": 1,
+        "leveeWidthMeters": 12
+      },
+      "lake": {
+        "minimumDepth": 1.5,
+        "maximumDepth": 18,
+        "shoreDepthMeters": 300,
+        "bankHeight": 1.5,
+        "bankWidthMeters": 60,
+        "shoreSlope": 0.3,
+        "shoreReachMeters": 3000,
+        "shorelineNoiseMeters": 400,
+        "shorelineNoiseScaleMeters": 2500
+      },
+      "falls": {
+        "enabled": true,
+        "minimumHeight": 4,
+        "maximumHeight": 30,
+        "faceSlope": 1.2,
+        "plungeDecayMeters": 40
+      }
+    }
+  },
+  "lighting": {
+    "preset": "highfield",
+    "hour": 12,
+    "weather": "off"
+  },
+  "requestedPoses": [
+    {
+      "id": "marine-open-00",
+      "name": "Open marine water",
+      "world": "procedural",
+      "expectedBiomeId": 0,
+      "x": -2045,
+      "z": 1763,
+      "yaw": 1.5707963267948966,
+      "pitch": -0.3,
+      "mode": "fly",
+      "heightAboveGround": 17.156273857317494,
+      "fov": 68,
+      "selection": "First ID 0 cell deeper than 4 m in an expanding eight-metre search around retained coast",
+      "water": {
+        "kind": 1,
+        "bodyId": 1,
+        "coverage": 1,
+        "surfaceHeight": -1.5,
+        "bedHeight": -6.768660784384219,
+        "depth": 5.268660784384219,
+        "shoreDistance": 22.213199615478516,
+        "flowX": 0,
+        "flowZ": 0,
+        "fall": 0,
+        "plunge": 0,
+        "flags": 0
+      }
+    },
+    {
+      "id": "river-08",
+      "name": "Temperate rainforest river",
+      "world": "eldara",
+      "x": -4269925.294875607,
+      "z": 2359551.9412070587,
+      "yaw": 1.9498808872537716,
+      "pitch": -0.39313070685593626,
+      "mode": "fly",
+      "heightAboveGround": 7,
+      "fov": 68,
+      "expectedBiomeId": 8,
+      "expectedWaterKind": 3,
+      "target": {
+        "x": -4269945.007565132,
+        "z": 2359559.793789044,
+        "water": {
+          "kind": 3,
+          "bodyId": 1469,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -7.402283795004533,
+          "depth": 5.902283795004533,
+          "shoreDistance": 16.219169921875,
+          "flowX": -0.3700701777775926,
+          "flowZ": 0.9290038016712638,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "segmentIndex": 549,
+      "radiusMeters": 16.219169921875,
+      "selection": "Seeded random segment and longitudinal position, first qualifying bank for each distinct biome; nominal channel radius 4–150 m."
+    }
+  ],
+  "sourceSha": "000c8126b199a1eadfe79000543d6e6e9b8df0b9",
+  "map": "maps/Eldara Full 2026-07-23-20-37.json"
+}

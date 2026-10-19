@@ -12,7 +12,6 @@ import {
   max,
   mix,
   oneMinus,
-  output,
   positionLocal,
   positionWorld,
   sin,
@@ -20,7 +19,6 @@ import {
   uv,
   vec2,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
@@ -49,6 +47,7 @@ import { createTerrainDriftNodes } from './materials/TerrainDriftNodes.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
 import { applyJungleMist } from './stylized/ambient/jungleMistOutput.js';
 import { createValleyFogNodes } from './stylized/mist/ValleyFogShading.js';
+import { applyValleyFogOutput } from './stylized/mist/ValleyFogOutput.js';
 import { createFootprintShading } from './stylized/deformation/FootprintShading.js';
 import { acquirePathTextures, createTerrainPathPaint, resolvePathPaint } from './stylized/path/terrainPathPaint.js';
 import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js';
@@ -487,12 +486,7 @@ export function createTerrainMaterial({
         fogColor: surfaceEffects.valleyFog.uniforms.fogColor,
       })
       : null;
-    if (fog) {
-      // In-scattered light is radiance, not terrain reflectance. Blending it
-      // into albedo let sun/fill light the mist again, painting pale ground bands.
-      const lit = material.outputNode ?? output;
-      material.outputNode = vec4(mix(lit.rgb, fog.color, fog.amount), lit.a);
-    }
+    applyValleyFogOutput(material, fog);
     // Jungle ground mist, blended over the lit output like the grass and trees
     // that stand in it; a zero region weight skips it with one compare.
     applyJungleMist(material, surfaceEffects?.ambientEffects);
