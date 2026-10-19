@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "seed": 2026101802,
+  "selection": "Retained diagnostic supplements: three scene-integration targets and the previously reviewed imported river.",
+  "sampledCandidates": 2076,
+  "generator": {
+    "seed": 918273,
+    "version": 1,
+    "heightScale": 24,
+    "seaLevel": -1.5,
+    "waterDomainVersion": 3,
+    "waterDomain": {
+      "version": 3,
+      "cellSizeMeters": 1,
+      "shoreDistanceMeters": 48,
+      "ocean": {
+        "coastalShelfMeters": 20,
+        "shelfDepth": 4,
+        "maximumDepth": 24,
+        "maximumBedSlope": 0.75,
+        "beachHeight": 1.8,
+        "beachWidthMeters": 30
+      },
+      "river": {
+        "minimumDepth": 0.8,
+        "maximumDepth": 8,
+        "widthDepthRatio": 0.18,
+        "bankExponent": 1.8,
+        "minimumGradient": 0.0002,
+        "profileStepMeters": 100,
+        "valleySlope": 0.7,
+        "valleyReachMeters": 1500,
+        "leveeHeight": 1,
+        "leveeWidthMeters": 12
+      },
+      "lake": {
+        "minimumDepth": 1.5,
+        "maximumDepth": 18,
+        "shoreDepthMeters": 300,
+        "bankHeight": 1.5,
+        "bankWidthMeters": 60,
+        "shoreSlope": 0.3,
+        "shoreReachMeters": 3000,
+        "shorelineNoiseMeters": 400,
+        "shorelineNoiseScaleMeters": 2500
+      },
+      "falls": {
+        "enabled": true,
+        "minimumHeight": 4,
+        "maximumHeight": 30,
+        "faceSlope": 1.2,
+        "plungeDecayMeters": 40
+      }
+    }
+  },
+  "lighting": {
+    "preset": "highfield",
+    "hour": 12,
+    "weather": "off"
+  },
+  "requestedPoses": [
+    {
+      "id": "random-05",
+      "name": "Tropical seasonal forest",
+      "world": "procedural",
+      "expectedBiomeId": 5,
+      "x": -15339,
+      "z": -2063,
+      "yaw": 2.148885930112986,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "random-06",
+      "name": "Temperate deciduous forest",
+      "world": "procedural",
+      "expectedBiomeId": 6,
+      "x": 13103,
+      "z": -9155,
+      "yaw": 1.8447918597629227,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68
+    },
+    {
+      "id": "eldara-wetland-reverse",
+      "expectedBiomeId": 12,
+      "x": 993673,
+      "z": 1701497,
+      "yaw": 3.141592653589793,
+      "pitch": -0.08,
+      "mode": "player",
+      "heightAboveGround": 1.7,
+      "fov": 68,
+      "world": "eldara",
+      "name": "Eldara Wetland",
+      "selection": "seeded choice of existing imported biome views"
+    },
+    {
+      "id": "river-08",
+      "name": "Temperate rainforest river",
+      "world": "eldara",
+      "x": -4269925.294875607,
+      "z": 2359551.9412070587,
+      "yaw": 1.9498808872537716,
+      "pitch": -0.39313070685593626,
+      "mode": "fly",
+      "heightAboveGround": 7,
+      "fov": 68,
+      "expectedBiomeId": 8,
+      "expectedWaterKind": 3,
+      "target": {
+        "x": -4269945.007565132,
+        "z": 2359559.793789044,
+        "water": {
+          "kind": 3,
+          "bodyId": 1469,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -7.402283795004533,
+          "depth": 5.902283795004533,
+          "shoreDistance": 16.219169921875,
+          "flowX": -0.3700701777775926,
+          "flowZ": 0.9290038016712638,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        }
+      },
+      "segmentIndex": 549,
+      "radiusMeters": 16.219169921875,
+      "selection": "Seeded random segment and longitudinal position, first qualifying bank for each distinct biome; nominal channel radius 4\u2013150 m."
+    }
+  ],
+  "sourceSha": "000c8126b199a1eadfe79000543d6e6e9b8df0b9",
+  "map": "maps/Eldara Full 2026-07-23-20-37.json"
+}

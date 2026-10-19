@@ -28,7 +28,12 @@ export async function setVisualMaterialControl(page, control = 'restore') {
       }
       return { control, count: state.meshes.length };
     }
-    const { float, faceDirection, normalViewGeometry, uv, vec2, vec3, vec4 } = await import('three/tsl');
+    // Evaluation runs outside Vite's module transform. Reuse the exact TSL
+    // dependency URL of the frozen production shader rather than a bare import.
+    const noiseSource = await (await fetch('/src/editor/stylized/StylizedNoiseNodes.js')).text();
+    const tslUrl = noiseSource.match(/from\s*['"]([^'"]*three_tsl[^'"]*)['"]/)?.[1];
+    if (!tslUrl) throw new Error('Cannot resolve the frozen shader TSL dependency.');
+    const { float, faceDirection, normalViewGeometry, uv, vec2, vec3, vec4 } = await import(tslUrl);
     const { slotTexture, slotVector2 } = await import('/src/editor/materials/TerrainSlotBindings.js');
     const { stylizedNaturalTrailMask } = await import('/src/editor/stylized/StylizedNoiseNodes.js');
     const slots = editor.terrainView.slots, template = slots.find(slot => slot.descriptor);
