@@ -47,6 +47,7 @@ import { createTerrainDriftNodes } from './materials/TerrainDriftNodes.js';
 import { createFrostShading } from './stylized/ambient/FrostShading.js';
 import { applyJungleMist } from './stylized/ambient/jungleMistOutput.js';
 import { createValleyFogNodes } from './stylized/mist/ValleyFogShading.js';
+import { applyValleyFogOutput } from './stylized/mist/ValleyFogOutput.js';
 import { createFootprintShading } from './stylized/deformation/FootprintShading.js';
 import { acquirePathTextures, createTerrainPathPaint, resolvePathPaint } from './stylized/path/terrainPathPaint.js';
 import { createSnowWakeShading } from './stylized/deformation/SnowWakeShading.js';
@@ -485,9 +486,7 @@ export function createTerrainMaterial({
         fogColor: surfaceEffects.valleyFog.uniforms.fogColor,
       })
       : null;
-    if (fog) {
-      material.colorNode = mix(material.colorNode, fog.color, fog.amount);
-    }
+    applyValleyFogOutput(material, fog);
     // Jungle ground mist, blended over the lit output like the grass and trees
     // that stand in it; a zero region weight skips it with one compare.
     applyJungleMist(material, surfaceEffects?.ambientEffects);

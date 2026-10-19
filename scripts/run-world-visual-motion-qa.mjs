@@ -16,8 +16,10 @@ const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),clips:[],checks:[],artifacts:[],errors:{count:0,errors:[]},videoOverheadExcludedFromPerformance:true};let browser,page,errors;
 try {
- const manifest=JSON.parse(await readFile(path.join(repo,'docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json'),'utf8'));
- const poses=[...[3,5,4,9].map(i=>manifest.original[i]),{id:'synthetic-open-ground',synthetic:true}];
+ const manifestPath=option('--manifest',null);
+ const manifest=JSON.parse(await readFile(path.join(repo,manifestPath??'docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json'),'utf8'));
+ if(manifestPath)report.poseManifest={path:manifestPath,sha256:await fileHash(path.join(repo,manifestPath))};
+ const poses=[...(manifestPath?manifest.requestedPoses.filter(p=>p.world==='procedural'&&p.mode==='player'):[3,5,4,9].map(i=>manifest.original[i])),{id:'synthetic-open-ground',synthetic:true}];
  const cases=poses.flatMap(startPose=>['first-person','third-person'].map(cameraMode=>({id:`${startPose.id}-${cameraMode}`,startPose,cameraMode,sequenceId:'walk-sprint-turn-v1'})));
  if(only?.some(id=>!cases.some(c=>c.id===id)))throw new Error(`Unknown motion case ${only}`);
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
@@ -104,7 +106,7 @@ try {
   report.artifacts.push({path:file,sha256:await fileHash(path.join(out,file))});
  }
  report.sourceStable=visualSourceStayedFixed(report,await captureVisualSource(url,repo));
- report.passed=report.sourceStable&&!report.dirtyFiles.length&&report.errors.count===0&&report.clips.length===(only?.length??10)&&report.checks.every(c=>c.passed);
+ report.passed=report.sourceStable&&!report.dirtyFiles.length&&report.errors.count===0&&report.clips.length===(only?.length??cases.length)&&report.checks.every(c=>c.passed);
  if(!report.passed)process.exitCode=1;
 }catch(error){report.failure=error.stack;report.passed=false;process.exitCode=1;}
 finally{await browser?.close();release();report.finishedAt=new Date().toISOString();await writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));}

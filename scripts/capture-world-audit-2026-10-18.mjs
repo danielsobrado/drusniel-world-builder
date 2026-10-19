@@ -19,6 +19,14 @@ const out = path.resolve(root, process.env.AAA_AUDIT_OUT ?? 'docs/qa/visual-audi
 const url = process.env.AAA_AUDIT_URL ?? 'http://localhost:5267';
 const settleTimeoutMs = Number(process.env.AAA_AUDIT_SETTLE_MS ?? 120000);
 if (!Number.isFinite(settleTimeoutMs) || settleTimeoutMs < 16000) throw new Error('Invalid visual settle timeout.');
+async function withDeadline(promise, timeoutMs, phase) {
+  let timer;
+  try {
+    return await Promise.race([promise, new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Capture phase timed out: ${phase}`)), timeoutMs);
+    })]);
+  } finally { clearTimeout(timer); }
+}
 await mkdir(out, { recursive: true });
 if ((await readdir(out)).length) throw new Error(`Refusing to overwrite an existing audit: ${out}. Set AAA_AUDIT_OUT to an empty directory.`);
 const config = yaml.load(await readFile(path.join(root, 'editor.config.yaml'), 'utf8'));
@@ -113,9 +121,11 @@ try {
       world = 'procedural';
     }
     if (pose.world !== world) {
-      await page.evaluate(name => window.__worldVisualQa.loadWorld(name), pose.world);
+      console.log(`Loading ${pose.world} for ${pose.id}.`);
+      await withDeadline(page.evaluate(name => window.__worldVisualQa.loadWorld(name), pose.world), 240000, `load ${pose.world}`);
       await page.evaluate(() => window.__worldVisualQa.setLighting());
       world = pose.world;
+      console.log(`Loaded ${world}.`);
     }
     try {
       const preparation = await prepareVisualPose(page, pose, { timeoutMs: settleTimeoutMs });
