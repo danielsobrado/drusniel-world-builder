@@ -4,6 +4,8 @@ import {
   selectProjectedLod,
   updateLodTransition,
 } from './stylized/lod/projectedLod.js';
+import { InstanceLodRows } from './stylized/lod/InstanceLodRows.js';
+import { PerfCounters } from './performance/qa/PerfCounters.js';
 
 const SOURCE_TO_OBJECT_BAND = Object.freeze({
   near: 'near',
@@ -19,7 +21,6 @@ const OBJECT_TO_SOURCE_BAND = Object.freeze({
   shell: 'impostor',
 });
 
-const OBJECT_BANDS = Object.freeze(['near', 'coarse', 'shell']);
 const CAMERA_STATE_SIZE = 10;
 
 function writeCameraState(camera, viewportHeight, target) {
@@ -40,19 +41,6 @@ function writeCameraState(camera, viewportHeight, target) {
 function cameraStatesEqual(left, right) {
   for (let index = 0; index < CAMERA_STATE_SIZE; index += 1) {
     if (left[index] !== right[index]) return false;
-  }
-  return true;
-}
-
-function bucketEqual(left, right) {
-  if (left === right) return true;
-  if (!left || !right || left.length !== right.length) return false;
-  for (let index = 0; index < left.length; index += 1) {
-    const a = left[index];
-    const b = right[index];
-    if (a.objectId !== b.objectId
-      || a.quantizedFade !== b.quantizedFade
-      || a.ditherDirection !== b.ditherDirection) return false;
   }
   return true;
 }
@@ -85,26 +73,30 @@ export class ObjectLodController {
     this.nextEvaluationAt = 0;
     this.states = new Map();
     this.seeds = new Map();
-    this.activeIds = new Set();
     this.cameraState = new Float64Array(CAMERA_STATE_SIZE);
     this.lastCameraState = new Float64Array(CAMERA_STATE_SIZE);
     this.hasLastCameraState = false;
     this.lastSelectedObjectId = null;
     this.lastPlan = null;
-    this.bandVersions = { near: 0, coarse: 0, shell: 0 };
     this.transitioning = false;
+    this.rows = new InstanceLodRows();
+    this.placements = new Map();
+    this.dirtyIds = new Set();
+    this.transitionIds = new Set();
   }
 
   clear() {
     this.states.clear();
     this.seeds.clear();
-    this.activeIds.clear();
     this.nextEvaluationAt = 0;
     this.hasLastCameraState = false;
     this.lastSelectedObjectId = null;
     this.lastPlan = null;
-    this.bandVersions = { near: 0, coarse: 0, shell: 0 };
     this.transitioning = false;
+    this.rows = new InstanceLodRows();
+    this.placements = new Map();
+    this.dirtyIds = new Set();
+    this.transitionIds = new Set();
   }
 
   seed(placements, band = 'near', timestamp = 0) {
@@ -130,96 +122,74 @@ export class ObjectLodController {
     this.nextEvaluationAt = 0;
   }
 
-  plan({
-    placements,
-    camera,
-    viewportHeight,
-    timestamp,
-    selectedObjectId = null,
-    force = false,
-  }) {
+  /** Retain camera/LOD history; changed placement products invalidate only their IDs. */
+  updatePlacements(next) {
+    for (const [id, record] of next) if (this.placements.get(id) !== record) this.dirtyIds.add(id);
+    for (const id of this.placements.keys()) if (!next.has(id)) this.dirtyIds.add(id);
+    this.placements = next;
+    this.seed([...this.dirtyIds].flatMap(id => next.has(id) ? [next.get(id)] : []));
+  }
+
+  classify(placement, camera, viewportHeight, timestamp, selectedObjectId) {
+    PerfCounters.inc('objectLodPlacementsEvaluated');
+    const objectId = placement.object.id;
+    const previousState = this.states.get(objectId) ?? null;
+    const previousObjectBand = SOURCE_TO_OBJECT_BAND[previousState?.target] ?? null;
+    const pixels = projectedPixelHeight({ camera, worldPosition: placement.worldPosition,
+      worldHeight: placement.worldHeight, viewportHeight });
+    const band = objectId === selectedObjectId ? 'near' : SOURCE_TO_OBJECT_BAND[selectProjectedLod({
+      pixels, previous: previousObjectBand ? OBJECT_TO_SOURCE_BAND[previousObjectBand] : null, ...this.thresholds,
+    })];
+    const state = updateLodTransition({ state: previousState,
+      target: OBJECT_TO_SOURCE_BAND[band] ?? 'impostor', timestamp, durationMs: this.transitionMs });
+    this.states.set(objectId, state);
+    if (state.complete) this.transitionIds.delete(objectId); else this.transitionIds.add(objectId);
+    let seed = this.seeds.get(objectId);
+    if (seed === undefined) { seed = stableSeed(objectId); this.seeds.set(objectId, seed); }
+    return state.representations.map(representation => ({
+      band: SOURCE_TO_OBJECT_BAND[representation.band], matrix: placement.matrix,
+      fade: representation.fade, ditherDirection: representation.ditherDirection ?? 1,
+      quantizedFade: quantizeFade(representation.fade, this.fadeSteps), seed, objectId,
+    }));
+  }
+
+  plan({ placements, camera, viewportHeight, timestamp, selectedObjectId = null, force = false }) {
     writeCameraState(camera, viewportHeight, this.cameraState);
-    const cameraUnchanged = this.hasLastCameraState
-      && cameraStatesEqual(this.cameraState, this.lastCameraState);
+    const cameraUnchanged = this.hasLastCameraState && cameraStatesEqual(this.cameraState, this.lastCameraState);
     const selectionUnchanged = selectedObjectId === this.lastSelectedObjectId;
-    if (!force && selectionUnchanged && this.lastPlan) {
+    if (!force && selectionUnchanged && !this.dirtyIds.size && this.lastPlan) {
       if (!this.transitioning && cameraUnchanged) return this.lastPlan;
       if (Number.isFinite(timestamp) && timestamp < this.nextEvaluationAt) return this.lastPlan;
     }
-
-    const buckets = { near: [], coarse: [], shell: [] };
-    const activeIds = this.activeIds;
-    activeIds.clear();
-    let transitions = 0;
-    for (const placement of placements) {
-      const objectId = placement.object.id;
-      activeIds.add(objectId);
-      const previousState = this.states.get(objectId) ?? null;
-      const previousObjectBand = SOURCE_TO_OBJECT_BAND[previousState?.target] ?? null;
-      const pixels = projectedPixelHeight({
-        camera,
-        worldPosition: placement.worldPosition,
-        worldHeight: placement.worldHeight,
-        viewportHeight,
-      });
-      const targetObjectBand = objectId === selectedObjectId
-        ? 'near'
-        : SOURCE_TO_OBJECT_BAND[selectProjectedLod({
-          pixels,
-          previous: previousObjectBand ? OBJECT_TO_SOURCE_BAND[previousObjectBand] : null,
-          ...this.thresholds,
-        })];
-      const target = OBJECT_TO_SOURCE_BAND[targetObjectBand] ?? 'impostor';
-      const state = updateLodTransition({
-        state: previousState,
-        target,
-        timestamp,
-        durationMs: this.transitionMs,
-      });
-      this.states.set(objectId, state);
-      if (!state.complete) transitions += 1;
-
-      let seed = this.seeds.get(objectId);
-      if (seed === undefined) {
-        seed = stableSeed(objectId);
-        this.seeds.set(objectId, seed);
+    if (!force && cameraUnchanged && this.lastPlan) {
+      const ids = new Set([...this.dirtyIds, ...this.transitionIds]);
+      if (!selectionUnchanged) {
+        if (selectedObjectId !== null) ids.add(selectedObjectId);
+        if (this.lastSelectedObjectId !== null) ids.add(this.lastSelectedObjectId);
       }
-      for (const representation of state.representations) {
-        const band = SOURCE_TO_OBJECT_BAND[representation.band];
-        if (!buckets[band]) continue;
-        buckets[band].push({
-          matrix: placement.matrix,
-          fade: representation.fade,
-          ditherDirection: representation.ditherDirection ?? 1,
-          quantizedFade: quantizeFade(representation.fade, this.fadeSteps),
-          seed,
-          objectId,
-        });
+      const changes = new Map();
+      for (const id of ids) {
+        const placement = this.placements.get(id);
+        changes.set(id, placement ? this.classify(placement, camera, viewportHeight, timestamp, selectedObjectId) : []);
+        if (!placement) { this.states.delete(id); this.seeds.delete(id); this.transitionIds.delete(id); }
       }
+      this.lastPlan = this.rows.patch(changes, this.transitionIds.size);
+    } else {
+      this.placements = new Map(placements.map(p => [p.object.id, p]));
+      const buckets = { near: [], coarse: [], shell: [] };
+      for (const placement of placements) for (const row of this.classify(placement, camera, viewportHeight, timestamp, selectedObjectId)) {
+        if (buckets[row.band]) buckets[row.band].push(row);
+      }
+      for (const id of this.states.keys()) if (!this.placements.has(id)) {
+        this.states.delete(id); this.seeds.delete(id); this.transitionIds.delete(id);
+      }
+      this.lastPlan = this.rows.replace(buckets, this.transitionIds.size);
     }
-    for (const id of this.states.keys()) {
-      if (activeIds.has(id)) continue;
-      this.states.delete(id);
-      this.seeds.delete(id);
-    }
-
-    const signatures = {};
-    for (const band of OBJECT_BANDS) {
-      if (!bucketEqual(this.lastPlan?.buckets?.[band], buckets[band])) this.bandVersions[band] += 1;
-      signatures[band] = this.bandVersions[band];
-    }
-    this.transitioning = transitions > 0;
-    this.nextEvaluationAt = Number.isFinite(timestamp)
-      ? timestamp + this.evaluationIntervalMs
-      : 0;
-    this.lastCameraState.set(this.cameraState);
-    this.hasLastCameraState = true;
+    this.dirtyIds.clear();
+    this.transitioning = this.transitionIds.size > 0;
+    this.nextEvaluationAt = Number.isFinite(timestamp) ? timestamp + this.evaluationIntervalMs : 0;
+    this.lastCameraState.set(this.cameraState); this.hasLastCameraState = true;
     this.lastSelectedObjectId = selectedObjectId;
-    this.lastPlan = Object.freeze({
-      buckets,
-      signatures: Object.freeze(signatures),
-      transitions,
-    });
     return this.lastPlan;
   }
 }

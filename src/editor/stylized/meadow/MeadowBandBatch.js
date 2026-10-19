@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { MeadowPageBounds } from './MeadowPageBounds.js';
+import { meadowPageUpdatePlan } from './MeadowPageUpdatePlan.js';
 
 // Sparse bands can share more tiles without enlarging a dense page. This keeps
 // CPU draw submission bounded while the stem ceiling still bounds allocation.
@@ -91,59 +92,44 @@ export class MeadowBandBatch {
     this.markRange('instanceTile', start, count);
   }
 
-  update(tiles) {
-    this.present.clear();
-    for (const tile of tiles) this.present.add(tile);
-    // Fill an equal-sized retirement hole from the page tail. Every tile still
-    // occupies one contiguous run, so churn cannot accumulate fragmentation.
-    for (let i = this.order.length - 1; i >= 0; i--) {
-      if (this.present.has(this.order[i])) continue;
-      const last = this.order.length - 1;
-      const removed = this.slots.get(this.order[i]);
-      const tail = this.order[last];
-      if (i !== last && removed?.count === Math.min(tail.output.count, this.stride)) {
-        this.order[i] = tail; this.order.pop();
-      } else this.order.splice(i, 1);
+  rebase(dx, dz, budget) {
+    if ((!dx && !dz) || !this.geometry.instanceCount) return;
+    const origins = this.geometry.getAttribute('instanceTile').array;
+    for (const slot of this.slots.values()) { slot.renderX += dx; slot.renderZ += dz; }
+    for (let i = 0; i < this.geometry.instanceCount; i++) {
+      origins[i * 4] += dx; origins[i * 4 + 1] += dz;
     }
-    const ordered = new Set(this.order);
-    for (const tile of tiles) if (!ordered.has(tile)) this.order.push(tile);
-    for (const tile of this.slots.keys()) {
-      if (!this.present.has(tile)) this.slots.delete(tile);
+    this.markRange('instanceTile', 0, this.geometry.instanceCount);
+    budget?.rebase(this.geometry.instanceCount * 16);
+    // Bounds follow the same translated rows, even if optional repacking waits.
+    this.bounds?.translate(dx, dz);
+  }
+
+  update(tiles, budget = null) {
+    const plan = meadowPageUpdatePlan(this, tiles);
+    if (budget && !budget.take(plan.bytes)) {
+      this.pending = true;
+      PerfCounters.inc('meadowPageCommitsDeferred');
+      return this.geometry.instanceCount;
     }
-    let start = 0;
-    let changed = false;
-    for (const tile of this.order) {
-      const count = Math.min(tile.output.count, this.stride);
-      let slot = this.slots.get(tile);
-      // Detail-only LOD publications have a new build ID but reuse the same
-      // prepared generation. A new generation still invalidates pooled arrays.
-      const source = tile.prepared ?? tile.buildId;
-      const writeSource = !slot || slot.start !== start || slot.count !== count
-        || slot.source !== source;
-      if (slot && slot.start !== start && slot.count === count && slot.source === source) {
-        PerfCounters.inc('meadowRepackBytes', count * 14 * 4);
-      }
-      if (writeSource || slot.renderX !== tile.renderX || slot.renderZ !== tile.renderZ) {
-        this.writeTile(start, tile, count, writeSource);
-        changed = true;
-      }
-      if (!slot) {
-        slot = {};
-        this.slots.set(tile, slot);
-      }
-      slot.start = start;
-      slot.count = count;
-      slot.source = source;
-      slot.renderX = tile.renderX;
-      slot.renderZ = tile.renderZ;
-      start += count;
+    this.pending = false;
+    this.present = plan.present;
+    this.order = plan.order;
+    for (const tile of this.slots.keys()) if (!plan.present.has(tile)) this.slots.delete(tile);
+    let changed = this.geometry.instanceCount !== plan.count;
+    for (const { tile, start, count, source, writeSource, metadata } of plan.writes) {
+      if (metadata) { this.writeTile(start, tile, count, writeSource); changed = true; }
+      const slot = this.slots.get(tile) ?? {};
+      Object.assign(slot, { start, count, source, renderX: tile.renderX, renderZ: tile.renderZ,
+        revealTime: tile.revealTime, revealRank: tile.revealRank });
+      this.slots.set(tile, slot);
     }
-    changed ||= this.geometry.instanceCount !== start;
-    this.geometry.instanceCount = start;
-    this.mesh.visible = start > 0;
+    PerfCounters.inc('meadowRepackBytes', plan.repackBytes);
+    this.geometry.instanceCount = plan.count;
+    this.mesh.visible = plan.count > 0;
     if (changed) this.bounds?.update(this.order);
     this.mesh.frustumCulled = this.bounds !== null && !this.bounds.ground.isEmpty();
-    return start;
+    return plan.count;
   }
 
   dispose() {

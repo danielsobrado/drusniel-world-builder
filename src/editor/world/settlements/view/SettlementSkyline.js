@@ -44,9 +44,9 @@ export class SettlementSkyline {
 
   /**
    * Adopt the towns round `focus` and drop the ones left behind. Builds at most
-   * one new skyline a call: planning a city takes a few milliseconds of its own.
+   * one ready skyline a call; unavailable plans are requested ahead in a worker.
    */
-  refresh(field, focus, tileSize) {
+  refresh(field, focus, tileSize, getPlan = entry => entry.plan) {
     const near = field
       ? field.entriesNear(focus.x / tileSize, -focus.z / tileSize, SETTLEMENT_SKYLINE.radius / tileSize).slice(0, SETTLEMENT_SKYLINE.maxTowns)
       : [];
@@ -57,10 +57,14 @@ export class SettlementSkyline {
       town.mesh.removeFromParent();
       this.towns.delete(id);
     }
-    const next = near.find(({ entry }) => !this.towns.has(entry.settlement.id));
+    let next = null, plan = null;
+    for (const candidate of near) {
+      if (this.towns.has(candidate.entry.settlement.id)) continue;
+      const ready = getPlan(candidate.entry);
+      if (!next && ready) { next = candidate; plan = ready; }
+    }
     if (!next) return;
     const { settlement } = next.entry;
-    const { plan } = field.ensurePlan(next.entry);
     const arrays = settlementSkylineArrays(plan, skylineColors(plan.profile.style));
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(arrays.positions, 3));

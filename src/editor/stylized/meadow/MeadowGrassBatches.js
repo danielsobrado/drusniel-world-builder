@@ -57,9 +57,12 @@ class MeadowBandPages {
       page.memberCount -= 1;
       this.slots.delete(tile);
     }
+    // A wholly retired page costs no upload: hide it before another band can
+    // reuse it, even when its future source publication must wait.
+    for (const page of this.pages) if (page.memberCount === 0) page.update([]);
   }
 
-  update(tiles) {
+  update(tiles, budget) {
     for (const page of this.pages) page.members.length = 0;
     for (const tile of tiles) {
       let page = this.slots.get(tile);
@@ -71,7 +74,7 @@ class MeadowBandPages {
       page.members.push(tile);
     }
     let stems = 0;
-    for (const page of this.pages) stems += page.update(page.members);
+    for (const page of this.pages) stems += page.update(page.members, budget);
     return stems;
   }
 
@@ -131,7 +134,7 @@ export class MeadowGrassBatches {
   }
 
   /** @returns {Record<string, number>} stems drawn per band */
-  commit() {
+  commit(budget = null) {
     // High/medium dense bands have equal populations and one tile per page.
     // Move ownership before either band retires its old members, retaining the
     // populated GPU attributes when only the blade template changes.
@@ -152,8 +155,24 @@ export class MeadowGrassBatches {
     // compatible page even when its previous band is later in the update order.
     for (const [band, batch] of this.batches) batch.retireTiles?.(this.members.get(band));
     const stems = {};
-    for (const [band, batch] of this.batches) stems[band] = batch.update(this.members.get(band));
+    for (const [band, batch] of this.batches) stems[band] = batch.update(this.members.get(band), budget);
     return stems;
+  }
+
+  rebase(x, z, budget) {
+    for (const batch of this.batches.values()) for (const page of batch.pages) page.rebase(x, z, budget);
+  }
+
+  get pending() {
+    let pending = 0;
+    for (const batch of this.batches.values()) for (const page of batch.pages) pending += Number(Boolean(page.pending));
+    return pending;
+  }
+
+  isPublished(tile) {
+    const batch = this.batches.get(tile.builtBand), slot = batch?.slots.get(tile)?.slots.get(tile);
+    return Boolean(slot && slot.source === (tile.prepared ?? tile.buildId)
+      && slot.count === Math.min(tile.output.count, batch.stride));
   }
 
   publicationBytes(tile, band, output) {

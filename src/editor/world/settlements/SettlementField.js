@@ -1,4 +1,5 @@
-import { PlanGrid, rect, rectContains } from './SettlementGeometry.js';
+import { rectContains } from './SettlementGeometry.js';
+import { indexPlan } from './SettlementPlanIndex.js';
 import { planSettlement } from './SettlementPlanner.js';
 import { settlementProfile } from './SettlementProfile.js';
 
@@ -226,34 +227,4 @@ export class SettlementField {
     }
     return result;
   }
-}
-
-function indexPlan(plan) {
-  const grid = new PlanGrid(12);
-  for (const building of plan.buildings) {
-    const box = rect(building.x, building.z, building.width, building.depth, building.yaw);
-    grid.insert({ box, pad: building.pad }, box.x, box.z, box.radius + PAD_BLEND);
-  }
-  for (const street of plan.streets) {
-    for (let index = 1; index < street.points.length; index += 1) {
-      const [ax, az] = street.points[index - 1];
-      const [bx, bz] = street.points[index];
-      const halfWidth = street.width / 2;
-      const item = {
-        street: true,
-        halfWidth,
-        distance(x, z) {
-          const dx = bx - ax;
-          const dz = bz - az;
-          const lengthSquared = dx * dx + dz * dz || 1;
-          const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / lengthSquared));
-          return Math.hypot(x - (ax + dx * t), z - (az + dz * t));
-        },
-      };
-      const cx = (ax + bx) / 2;
-      const cz = (az + bz) / 2;
-      grid.insert(item, cx, cz, Math.hypot(bx - ax, bz - az) / 2 + halfWidth);
-    }
-  }
-  return { grid, squareRadius: plan.squareRadius };
 }

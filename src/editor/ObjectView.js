@@ -428,8 +428,12 @@ export class ObjectView {
           triangles += renderer.lodTriangles[band] * instances.length;
         }
         if (renderer.lodSignatures[band] === plan.signatures[band]) continue;
-        writeInstances([renderer.lodMeshes[band]], [instances]);
-        const objectIds = instances.map(({ objectId }) => objectId);
+        const rows = renderer.lodSignatures[band] === plan.baseVersions?.[band] ? plan.changedRows[band] : null;
+        writeInstances([renderer.lodMeshes[band]], [instances], null, rows ? [rows] : null);
+        const objectIds = rows ? renderer.lodMeshes[band][0]?.userData.objectIds ?? [] : [];
+        if (rows) for (const index of rows) objectIds[index] = instances[index].objectId;
+        else for (const instance of instances) objectIds.push(instance.objectId);
+        objectIds.length = instances.length;
         for (const mesh of renderer.lodMeshes[band]) mesh.userData.objectIds = objectIds;
         renderer.lodSignatures[band] = plan.signatures[band];
         PerfCounters.inc('objectLodBucketRewrites');

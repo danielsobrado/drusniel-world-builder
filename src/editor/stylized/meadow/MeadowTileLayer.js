@@ -4,6 +4,7 @@ import { MeadowGrassBatches } from './MeadowGrassBatches.js';
 import { tileDistanceSquared } from './meadowGrassLayout.js';
 import { compactionPrefix } from './MeadowCompactionPrefix.js';
 import { meadowTileInView } from './meadowTileVisibility.js';
+import { MeadowPublicationBudget } from './MeadowPublicationBudget.js';
 
 /**
  * A camera-centred grid of chunk-aligned tiles, each drawing one band's template
@@ -53,6 +54,8 @@ export class MeadowTileLayer {
     this.maxPublicationsPerFrame = maxPublicationsPerFrame;
     this.publicationBytes = 0;
     this.publications = 0;
+    this.batchBudget = new MeadowPublicationBudget(maxPublicationBytes);
+    this.origin = null;
     const definitions = Object.values(templates).map(template => template.userData?.meadow);
     this.stablePrefixes = definitions.every(definition => definition?.tileSize === tileSize
       && definition.cards === definitions[0].cards);
@@ -95,12 +98,19 @@ export class MeadowTileLayer {
     this.publicationFrameId = frameId;
     this.publicationBytes = 0;
     this.publications = 0;
+    this.batchBudget.reset(this.maxPublicationBytes);
   }
 
   update(camera, origin, deadline, time = performance.now() / 1000, viewCone = null, buildEnabled = true, frameId = null) {
     this.time = time;
-    if (frameId === null) { this.publicationBytes = 0; this.publications = 0; }
+    if (frameId === null) {
+      this.publicationBytes = 0; this.publications = 0; this.batchBudget.reset(this.maxPublicationBytes);
+    }
     else this.beginFrame(frameId);
+    if (this.origin && (this.origin.x !== origin.x || this.origin.z !== origin.z)) {
+      this.batches.rebase(this.origin.x - origin.x, this.origin.z - origin.z, this.batchBudget);
+    }
+    this.origin = { x: origin.x, z: origin.z };
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
       ? this.ground.revision
@@ -403,9 +413,10 @@ export class MeadowTileLayer {
   }
 
   canPublish(output, tile = null) {
-    // One unusually large tile must still make progress. The bound covers new
-    // source publications; page compaction and retired ranges may also upload.
+    // Source admission and actual page writes are separate: all uploads,
+    // including retirement and origin maintenance, spend the batch allowance.
     if (!output.count && !tile?.output?.count) return true;
+    if (this.batchBudget.used >= this.maxPublicationBytes) return false;
     return this.publications < this.maxPublicationsPerFrame && (this.publicationBytes === 0
       || this.publicationBytes + this.batches.publicationBytes(tile, tile?.band, output) <= this.maxPublicationBytes);
   }
@@ -425,8 +436,16 @@ export class MeadowTileLayer {
     let visibleMissing = 0, visibleCapacityLag = 0;
     let inViewMissing = 0, inViewCapacityLag = 0;
     for (const tile of this.tiles.values()) {
+      if (tile.band === null || !tile.output || tile.output.count === 0) continue;
+      this.batches.add(tile.builtBand, tile);
+      tiles += 1;
+    }
+    const uploadStartedAt = performance.now();
+    this.stats.bands = this.batches.commit(this.batchBudget);
+    PerfCounters.inc('meadowBatchCommitMs', performance.now() - uploadStartedAt);
+    for (const tile of this.tiles.values()) {
       if (tile.band !== null && tile.revision !== null) {
-        if (!tile.output) {
+        if (!tile.output || tile.output.count > 0 && !this.batches.isPublished(tile)) {
           visibleMissing++;
           if (tile.inView) inViewMissing++;
         } else if (this.templates[tile.builtBand].instanceCount < this.templates[tile.band].instanceCount) {
@@ -434,26 +453,21 @@ export class MeadowTileLayer {
           if (tile.inView) inViewCapacityLag++;
         }
       }
-      if (tile.band === null || !tile.output || tile.output.count === 0) continue;
-      this.batches.add(tile.builtBand, tile);
-      tiles += 1;
     }
-    const uploadStartedAt = performance.now();
-    this.stats.bands = this.batches.commit();
-    PerfCounters.inc('meadowBatchCommitMs', performance.now() - uploadStartedAt);
     this.stats.tiles = tiles;
     this.stats.visibleMissing = visibleMissing;
     this.stats.visibleCapacityLag = visibleCapacityLag;
     this.stats.inViewMissing = inViewMissing;
     this.stats.inViewCapacityLag = inViewCapacityLag;
     this.stats.stems = Object.values(this.stats.bands).reduce((sum, value) => sum + value, 0);
-    this.batchDirty = false;
+    this.batchDirty = this.batches.pending > 0;
   }
 
   getState() {
     return {
       ...this.stats,
-      building: this.staleTiles.length,
+      building: this.staleTiles.length + this.batches.pending,
+      pendingPages: this.batches.pending,
       bands: { ...this.stats.bands },
       resident: this.tiles.size,
     };

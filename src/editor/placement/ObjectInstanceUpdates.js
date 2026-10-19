@@ -56,11 +56,10 @@ export function publishObjectInstances(view, renderer, next) {
   view.ensureCapacity(renderer, next.size);
   if (renderer.lodSources) {
     renderer.lodPlacements = records;
-    renderer.lodController.seed(records);
-    renderer.lodController.invalidate();
-    renderer.lodSignatures = { near: '', coarse: '', shell: '' };
+    renderer.lodController.updatePlacements(next);
     if (records.length === 0) {
       renderer.lodController.clear();
+      renderer.lodSignatures = { near: '', coarse: '', shell: '' };
       for (const meshes of Object.values(renderer.lodMeshes)) for (const mesh of meshes) {
         mesh.count = 0; mesh.visible = false; mesh.userData.objectIds = [];
       }

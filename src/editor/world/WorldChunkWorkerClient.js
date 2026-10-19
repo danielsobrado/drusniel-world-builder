@@ -5,6 +5,7 @@ import { createTerrainWorkerBaseTerrain } from './TerrainWorkerBaseTerrain.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { WorkerPriorityQueue } from './WorkerPriorityQueue.js';
 import { chunkKey } from './WorldCoordinates.js';
+import { generateSettlementPlan } from './settlements/SettlementPlanRequest.js';
 
 const DEFAULT_MAX_IN_FLIGHT_PER_WORKER = 1;
 const MAX_WORKER_COUNT = 8;
@@ -144,6 +145,9 @@ export class WorldChunkWorkerClient {
       .then(() => {
         if (this.disposed) throw disposedError();
         if (request.materialBakeRequest) return bakeTerrainMaterialPage(request.materialBakeRequest);
+        if (request.settlementPlanId !== null && request.settlementPlanId !== undefined) {
+          return generateSettlementPlan(this.ensureWorldGenerator(), request.settlementPlanId);
+        }
         return request.placementSamplingConfig
           ? generatePreparedPlacementChunk(request, this.ensureWorldGenerator())
           : generateBaseWorldChunk({ ...request, worldGenerator: this.ensureWorldGenerator() });
@@ -173,7 +177,7 @@ export class WorldChunkWorkerClient {
     }
   }
 
-  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null } = {}) {
+  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null, settlementPlanId = null } = {}) {
     if (this.disposed) {
       return Promise.reject(disposedError());
     }
@@ -187,6 +191,7 @@ export class WorldChunkWorkerClient {
       placementSamplingConfig,
       materialBakeRequest,
       terrainOverrides,
+      settlementPlanId,
     };
     // CPU generation is an explicit non-browser backend; browser failure pauses streaming.
     if (this.workers.length === 0) {
@@ -195,7 +200,8 @@ export class WorldChunkWorkerClient {
 
     const id = this.nextId;
     this.nextId += 1;
-    const key = materialBakeRequest ? `material:${materialBakeRequest.descriptor.key}`
+    const key = settlementPlanId !== null ? `settlement:${settlementPlanId}`
+      : materialBakeRequest ? `material:${materialBakeRequest.descriptor.key}`
       : `${placementSamplingConfig ? 'placement:' : ''}${chunkKey(chunkX, chunkZ)}`;
     return new Promise((resolve, reject) => {
       const job = {
@@ -224,7 +230,12 @@ export class WorldChunkWorkerClient {
 
   /** Drop a request that has not started generating yet. */
   cancel(chunkX, chunkZ, namespace = '') {
-    const key = `${namespace}${chunkKey(chunkX, chunkZ)}`;
+    return this.cancelQueued(`${namespace}${chunkKey(chunkX, chunkZ)}`);
+  }
+
+  cancelSettlementPlan(id) { return this.cancelQueued(`settlement:${id}`); }
+
+  cancelQueued(key) {
     const job = this.queuedByKey.get(key);
     if (!job) {
       return false;

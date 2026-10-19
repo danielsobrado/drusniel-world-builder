@@ -3,6 +3,7 @@ import { sampleTableBuffers } from './PreparedSampleTable.js';
 import { generatePreparedPlacementChunk } from './PreparedPlacementChunk.js';
 import { generateBaseWorldChunk } from './generateWorldChunk.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
+import { generateSettlementPlan } from './settlements/SettlementPlanRequest.js';
 
 let baseTerrain = null;
 let worldGenerator = null;
@@ -28,6 +29,10 @@ self.addEventListener('message', async (event) => {
     if (!worldGenerator || metadataChanged) {
       generatorMetadata = request.generator;
       worldGenerator = createWorldGenerator(generatorMetadata, baseTerrain);
+    }
+    if (request.settlementPlanId !== null && request.settlementPlanId !== undefined) {
+      self.postMessage({ id, page: generateSettlementPlan(worldGenerator, request.settlementPlanId) });
+      return;
     }
     const page = request.placementSamplingConfig
       ? generatePreparedPlacementChunk(request, worldGenerator)

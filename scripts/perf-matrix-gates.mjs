@@ -9,6 +9,7 @@ const REQUIRED_CASES = Object.freeze([
   'high-grass',
   'dense-mixed',
   'construction-ring',
+  'settlement-approach',
 ]);
 
 function finite(value) {
@@ -92,7 +93,7 @@ export function evaluatePerfMatrix(
       if (entry.report?.density?.grassSystem === 'meadow') {
         for (const failure of evaluateGrassCoverage(entry.report).failures) failures.push(`${id}: ${failure}`);
       }
-      const expectedProfile = id === 'construction-ring' ? 'standard' : id;
+      const expectedProfile = ['construction-ring', 'settlement-approach'].includes(id) ? 'standard' : id;
       if (entry.report?.scenario?.densityProfile !== expectedProfile) {
         failures.push(
           `${id}: reported density ${entry.report?.scenario?.densityProfile ?? 'missing'} `
@@ -126,6 +127,18 @@ export function evaluatePerfMatrix(
     if (!finite(construction?.constructionStones) || construction.constructionStones <= 0) {
       failures.push('construction-ring: no masonry stones were resident');
     }
+    const settlement = caseMap.get('settlement-approach');
+    if (settlement?.report?.scenario?.settlementFixture?.requestedBuildings > 0
+      && settlement.report.scenario.id === 'settlement-approach') {
+      addCaseFailures({ ...settlement, id: 'settlement-revisit', report: settlement.report.revisit }, failures);
+      if (settlement.report.revisit?.conditions?.sameBrowser !== true
+        || settlement.report.revisit?.conditions?.midpointCameraTurnDegrees !== 180) {
+        failures.push('settlement-revisit: same-browser return and camera turn were not captured');
+      }
+      if (settlement.report.revisit?.density?.grassSystem === 'meadow') {
+        for (const failure of evaluateGrassCoverage(settlement.report.revisit).failures) failures.push(`settlement-revisit: ${failure}`);
+      }
+    } else failures.push('settlement-approach: imported settlement workload was not active');
   }
 
   if (requireWater) {

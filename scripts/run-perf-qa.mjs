@@ -424,6 +424,11 @@ const fs = require('fs');
     report.capture.browserErrors = browserErrors.snapshot();
     report.capture.focus = await captureFocus();
     fs.writeFileSync(${JSON.stringify(outPath.replace(/\\/g, '/'))}, JSON.stringify(report, null, 2) + '\\n');
+    const { perfPreparationFailures } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-preparation-gates.mjs')).href)});
+    for (const failure of perfPreparationFailures(report, ${hasFlag('settle')})) {
+      console.error('Perf QA invalid: ' + failure + '; inspect the saved report.');
+      process.exitCode = 1;
+    }
     if (report.capture.browserErrors.count > 0) {
       console.error('Perf QA invalid: browser errors occurred; inspect capture.browserErrors in the saved report.');
       process.exitCode = 1;

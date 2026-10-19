@@ -9,6 +9,7 @@ import {
 import { createDitheredMaterial } from './StylizedDitheredMaterial.js';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { extendInstanceBounds } from './InstanceBoundsUpdate.js';
 
 const WAITING_FADE = Number.EPSILON;
 const UNTINTED = Object.freeze([1, 1, 1]);
@@ -231,8 +232,10 @@ const DRY_SURFACE = Object.freeze([0, 0, 0]);
  * @param {Array<Array<object>>} instancesByPrototype
  * @param {?{ x: number, z: number }} [anchor] canonical point the matrices are
  *   written relative to (InstanceAnchor); the root must sit at anchor − origin
+ * @param {?(number[] | null)[]} [rowsByPrototype] complete dirty row indices per
+ *   prototype; null entries compare the full publication, empty entries only set counts
  */
-export function writeInstances(renderers, instancesByPrototype, anchor = null) {
+export function writeInstances(renderers, instancesByPrototype, anchor = null, rowsByPrototype = null) {
   const offsetX = anchor?.x ?? 0;
   const offsetZ = anchor?.z ?? 0;
   let total = 0;
@@ -261,7 +264,12 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
       const surfaceRange = resetDirtyRange(SURFACE_RANGE);
       const plantRange = resetDirtyRange(PLANT_ROOT_RANGE);
       let plantScaleSquared = 1;
-      for (let index = 0; index < writableCount; index += 1) {
+      const selectedRows = rowsByPrototype?.[prototypeIndex];
+      const visits = selectedRows?.length ?? writableCount;
+      PerfCounters.inc('stylizedInstanceRowsCompared', visits);
+      for (let visit = 0; visit < visits; visit += 1) {
+        const index = selectedRows ? selectedRows[visit] : visit;
+        if (index >= writableCount) continue;
         const instance = instances[index];
         if (plantRoots) {
           const e = instance.matrix.elements;
@@ -327,7 +335,8 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null) {
         );
       }
       if (matrixRange.max >= 0 || writableCount !== previousCount) {
-        mesh.computeBoundingSphere();
+        if (selectedRows && !plantRoots) extendInstanceBounds(mesh, selectedRows);
+        else mesh.computeBoundingSphere();
         if (plantRoots) mesh.boundingSphere.radius += (mesh.material.userData.plantMotionReach ?? 0)
           * Math.sqrt(plantScaleSquared);
       }

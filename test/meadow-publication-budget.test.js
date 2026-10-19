@@ -36,7 +36,9 @@ test('prepared LOD changes spread source uploads across frames and retain the pr
     scheduledUpdate(true);
     const changed = [...layer.tiles.values()].filter(tile => tile.output && before.get(tile)?.buildId !== tile.buildId);
     const bytes = changed.reduce((sum, tile) => sum + tile.output.count * 14 * 4, 0);
-    assert.ok(bytes > 0 && bytes <= maxPublicationBytes, `one frame published ${bytes} source bytes`);
+    assert.ok(bytes <= maxPublicationBytes, `one frame published ${bytes} source bytes`);
+    assert.ok(bytes > 0 || layer.batchBudget.used > 0,
+      'retirement work may consume this frame, but the shared publication allowance must progress');
     const waiting = [...layer.tiles.values()].filter(tile => tile.band !== null && tile.builtBand !== tile.band);
     assert.ok(waiting.length > 0, 'ready transitions wait their turn');
     for (const tile of waiting) {

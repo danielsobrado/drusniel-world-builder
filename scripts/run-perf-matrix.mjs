@@ -42,6 +42,9 @@ function reportSummary(report) {
     sceneryUpdateCpu: report.sceneryUpdateCpu,
     adapter: report.adapter,
     capture: report.capture,
+    measuredCounters: report.measuredCounters,
+    conditions: report.conditions,
+    revisit: report.revisit ? reportSummary(report.revisit) : null,
     density: {
       treesPerChunk: stylized?.trees?.perChunk ?? null,
       candidateBudgetPerChunk:
@@ -89,6 +92,7 @@ const cases = [
   { id: 'high-grass', qa: 'diagonal', density: 'high-grass' },
   { id: 'dense-mixed', qa: 'diagonal', density: 'dense-mixed' },
   { id: 'construction-ring', qa: 'construction-ring', density: 'standard' },
+  { id: 'settlement-approach', qa: 'settlement-approach', density: 'standard' },
 ];
 
 fs.mkdirSync(outDir, { recursive: true });
@@ -116,6 +120,7 @@ for (const entry of waterOnly ? [] : cases) {
     '--out', outPath,
   ];
   if (entry.id === 'construction-ring') args.push('--x', '0', '--z', '-100', '--yaw', '180');
+  if (entry.id === 'settlement-approach') args.push('--revisit', '--turn-on-revisit');
   if (hasFlag('resources')) args.push('--resources');
   if (headed) args.unshift('--headed');
   const execution = await runScript('scripts/run-perf-qa.mjs', args);

@@ -15,7 +15,7 @@ function report(id, densityProfile, {
   webgl = 0,
 } = {}) {
   return {
-    scenario: { id: id === 'construction-ring' ? id : 'diagonal', densityProfile,
+    scenario: { id: ['construction-ring', 'settlement-approach'].includes(id) ? id : 'diagonal', densityProfile,
       settle: { settled: true } },
     summary: { frameCount: 100, hitchRate, dt: { p95Ms } },
     collision: { gate: { passed: true } },
@@ -69,6 +69,14 @@ function passingMatrix() {
           constructionModulesResident: 96,
           constructionStones: 551,
         }),
+      },
+      {
+        id: 'settlement-approach', execution: { code: 0 },
+        report: { ...report('settlement-approach', 'standard'),
+          scenario: { ...report('settlement-approach', 'standard').scenario,
+            settlementFixture: { requestedBuildings: 1000 } },
+          revisit: { ...report('settlement-approach', 'standard'),
+            conditions: { sameBrowser: true, midpointCameraTurnDegrees: 180 } } },
       },
     ],
     water: {
@@ -142,4 +150,16 @@ test('meadow matrix cases require coverage recovery even when frame gates pass',
   const gate = evaluatePerfMatrix(matrix);
   assert.equal(gate.passed, false);
   assert.ok(gate.failures.some(f => f.includes('recover within 2000 ms')));
+});
+
+test('matrix requires an active imported town and a settled same-browser revisit', () => {
+  const matrix = passingMatrix();
+  const town = matrix.cases.find(entry => entry.id === 'settlement-approach').report;
+  town.revisit.scenario.settle.settled = false;
+  assert.ok(evaluatePerfMatrix(matrix).failures.some(f => /settlement-revisit: preparation did not settle/.test(f)));
+  town.revisit.scenario.settle.settled = true;
+  delete town.revisit;
+  assert.equal(evaluatePerfMatrix(matrix).passed, false);
+  town.scenario.settlementFixture.requestedBuildings = 0;
+  assert.ok(evaluatePerfMatrix(matrix).failures.some(f => /workload was not active/.test(f)));
 });

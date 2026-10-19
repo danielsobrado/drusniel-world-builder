@@ -66,6 +66,12 @@ export class MeadowPageBounds {
     this.refresh();
   }
 
+  translate(x, z) {
+    this.ground.min.x += x; this.ground.max.x += x;
+    this.ground.min.z += z; this.ground.max.z += z;
+    this.refresh();
+  }
+
   refresh() {
     const box = this.geometry.boundingBox.copy(this.ground);
     if (box.isEmpty()) {

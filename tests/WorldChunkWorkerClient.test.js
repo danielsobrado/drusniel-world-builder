@@ -155,3 +155,23 @@ test('dispose rejects pending and queued work', async () => {
     assert.ok(FakeWorker.instances.every((w) => w.terminated));
   });
 });
+
+test('settlement plans have independent queue identities and cancellation from terrain', async () => {
+  await withFakeWorkers(async () => {
+    const client = makeClient({ workerCount: 1 }), worker = FakeWorker.instances[0];
+    const active = client.request(1, 1);
+    const terrain = client.request(0, 0);
+    const plan = client.request(0, 0, { settlementPlanId: 18, priority: 10 });
+    const cancelled = plan.catch(error => error);
+    assert.equal(client.cancelSettlementPlan(18), true);
+    assert.equal((await cancelled).cancelled, true);
+    worker.resolve(1); await active;
+    assert.equal(worker.posted.at(-1).request.settlementPlanId, null);
+    worker.resolve(2); await terrain;
+    const retry = client.request(0, 0, { settlementPlanId: 18 });
+    assert.equal(worker.posted.at(-1).request.settlementPlanId, 18);
+    worker.resolve(4, { settlementId: 18, plan: { id: 18 } });
+    assert.equal((await retry).settlementId, 18);
+    client.dispose();
+  });
+});

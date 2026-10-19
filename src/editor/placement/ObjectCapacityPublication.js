@@ -43,6 +43,7 @@ export function prepareObjectCapacity(view, renderer, count, foundationCount, ne
     const old = renderer.lodMeshes ? Object.values(renderer.lodMeshes).flat() : renderer.meshes;
     removeMeshes(view, old, Boolean(renderer.lodSources));
     renderer.meshes = stage.meshes; renderer.lodMeshes = stage.lodMeshes; renderer.capacity = stage.capacity;
+    if (renderer.lodSources) renderer.lodSignatures = { near: '', coarse: '', shell: '' };
   }
   if (stage.newFoundation) {
     if (renderer.foundationMesh) { view.root.remove(renderer.foundationMesh); renderer.foundationMesh.dispose?.(); }

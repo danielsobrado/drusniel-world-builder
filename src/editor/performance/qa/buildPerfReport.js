@@ -268,7 +268,11 @@ export function buildPerfReport({
       'meadowWorkerIdleGapMs', 'meadowWorkerRanksPrepared', 'meadowWorkerResultsPublished',
       'meadowResultPublishWaitMs', 'meadowStemsCompacted', 'meadowRanksDiscarded', 'meadowBatchCommitMs', 'meadowBuildTurns',
       'meadowDeadlineDeferredResults', 'meadowPublicationDeferredResults', 'meadowAttributeBytesUploaded',
-      'meadowCompactionReuses', 'meadowRepackBytes', 'meadowPublications', 'meadowPublicationBytes']
+      'meadowCompactionReuses', 'meadowRepackBytes', 'meadowPublications', 'meadowPublicationBytes',
+      'meadowBatchPublicationBytes', 'meadowOriginMaintenanceBytes', 'meadowOversizedPageBytes',
+      'meadowPageCommitsDeferred', 'settlementPlansRequested', 'settlementPlanInstallationCpuMs',
+      'settlementPlacementsEvaluated', 'settlementRetirementRowsChecked',
+      'objectLodPlacementsEvaluated', 'stylizedInstanceRowsCompared']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
