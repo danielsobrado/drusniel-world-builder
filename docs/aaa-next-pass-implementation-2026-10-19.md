@@ -12,7 +12,7 @@ the recorded collider ownership failure. Runtime work starts from `3575b90e`
 | --- | --- | --- |
 | Q0 collision | Conservative trunk bounds retain the canonical placement anchor while the capsule remains at its actual transformed trunk; failing glacier pose now captures without errors | Movement/collision QA |
 | N0 evidence | Eighteen baseline views, original failures, replay metadata and image-specific observations retained | Material/fog controls and current-runtime A/B evidence |
-| N1 distance | Overlapping regional extinction is bounded while climate identity, local mist and weather remain owned by their existing systems | Four-light and ordinary-view review; timing |
+| N1 distance | Regional extinction is bounded; valley mist now composes radiance after lighting with lower, thinner noon pockets | Final four-light mist contract, ordinary-view review and timing |
 | N2 paths | Analytic contour-gradient normalization keeps path width spatially consistent; terrain, grass, flowers and clearance share it | GPU parity/path fixture, world replay and residency/timing |
 | N3 trees/floor | Authored bark reflectance grade, deeper root seating, restrained weathering, litter/understory rebalance; all 29 tree atlases rebuilt | Four-light tree fixtures and world comparison; pale floor investigation |
 | N4 habitats | Separate woodland pigments, species eligibility, reed/broadleaf motion response, embedded rocks; existing population budgets retained | Full biome gallery, LOD/motion and residency checks |
@@ -105,8 +105,16 @@ The initial material diagnostic batch failed on an unresolved bare TSL import;
 the helper now resolves the frozen Vite dependency URL. A fresh forest control
 batch passes. Grass eligibility is full in the pale area and the narrow path
 occupies only part of it. Matte terrain retains the pale floor, so this is not
-the same specular-only failure as the river bank. Local mist and material weights
-are the next controls; a cause is not assumed from the screenshot.
+the same specular-only failure as the river bank. The candidate controls then
+confirm the baked ground is grass and disabling local mist removes the broad
+pale areas. Valley weight is 0.3168 and jungle-mist weight is zero at that pose.
+The responsible valley blend was applied to albedo before lighting, so surface
+sun/fill illuminated its radiance a second time. It now composes the lit output
+and preserves alpha, before the existing jungle-mist output composition. The
+production valley settings use density 0.018, height 2.5 m, ceiling 9 m and a
+restrained forward lobe, with the first 8–24 m clearing gradually. Local volumes
+remain enabled. A GPU contract verifies the same mist radiance over surfaces
+under zero, ordinary and strong lighting; final world replay is separate.
 
 Imported camera-cut readiness includes the far terrain added by intervening
 performance work. A river attempt timed out there and a fresh retry was terminated
