@@ -1,0 +1,145 @@
+# Schema proposal ONLY: the current simulator does not consume this file.
+schemaVersion: 1
+catalogId: drusniel-visual-identity-proposal-v1
+status: proposal-not-runtime-consumed
+authority:
+  publishedLore: https://www.drusniel.com/the-regions-of-astalor/
+  map: maps/Eldara Full 2026-07-23-20-37.json
+  cultures: config/cultures.yaml
+independentDimensions:
+- narrativeRealm
+- azgaarStateId
+- azgaarProvinceId
+- canonicalCulture
+- culturalBranch
+- ancestry
+- faith
+- biome
+- terrainFeature
+- economicRole
+- settlementScale
+- district
+- historicalOverlay
+selectionOrder:
+- resolve immutable Azgaar map identifiers
+- map source culture IDs via config/cultures.yaml
+- resolve local cultural branch from province and place context
+- filter architecture by culture, terrain and economy
+- apply polity civic buildings, institutions and district needs
+- compose street grammar and infrastructure constraints
+- apply season and historical state
+- choose seeded deterministic asset variants
+regionProfiles:
+- id: lumeshire
+  loreRealm: Lumeshire
+  azgaarStateName: Lumeshire
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - lumish
+  loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+  promptBrief: regions/lumeshire.md
+  status: visual-design-proposal
+- id: zuraldi
+  loreRealm: Zuraldi
+  azgaarStateName: Lumeshire
+  mappingConfidence: direct-subregion
+  canonicalCultureOrSeedKeys:
+  - zuraldarr
+  loreSource: https://www.drusniel.com/the-zuraldarr/
+  promptBrief: regions/zuraldi.md
+  status: visual-design-proposal
+- id: contian
+  loreRealm: Contian Theocracy
+  azgaarStateName: Contia
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - contian
+  loreSource: https://www.drusniel.com/the-contian-theocracys-quest-for-magical-supremacy/
+  promptBrief: regions/contian.md
+  status: visual-design-proposal
+- id: frostgard
+  loreRealm: Frostgard
+  azgaarStateName: Frostgard
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - norths
+  loreSource: https://www.drusniel.com/ice-and-iron-the-warriors-of-the-empire-of-frostgard/
+  promptBrief: regions/frostgard.md
+  status: visual-design-proposal
+- id: stonehold
+  loreRealm: Stonehold
+  azgaarStateName: Ironpeak
+  mappingConfidence: requires-confirmation
+  canonicalCultureOrSeedKeys:
+  - vondari
+  loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+  promptBrief: regions/stonehold.md
+  status: visual-design-proposal
+- id: elenoria
+  loreRealm: Elenoria
+  azgaarStateName: Elenoria
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - elenori
+  loreSource: https://www.drusniel.com/eternal-woods-the-kingdom-of-elenorias-dance-with-nature/
+  promptBrief: regions/elenoria.md
+  status: visual-design-proposal
+- id: grukmar
+  loreRealm: Grukmar
+  azgaarStateName: Grukmar
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - orc-peoples
+  - goblin-peoples
+  - rakhnid-broods
+  loreSource: https://www.drusniel.com/the-unruly-might-of-the-grukmar-tribes/
+  promptBrief: regions/grukmar.md
+  status: visual-design-proposal
+- id: umbrakor
+  loreRealm: Umbra'kor
+  azgaarStateName: Umbra'kor
+  mappingConfidence: direct
+  canonicalCultureOrSeedKeys:
+  - umbra-kori
+  loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+  promptBrief: regions/umbrakor.md
+  status: visual-design-proposal
+- id: wyrmreach
+  loreRealm: Wyrmreach
+  azgaarStateName: Wyrmreach
+  mappingConfidence: direct-name-architecture-uncertain
+  canonicalCultureOrSeedKeys:
+  - orc-peoples
+  - goblin-peoples
+  - jotunn
+  - serpent-peoples
+  - rakhnid-broods
+  - draconic-remnant
+  loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+  promptBrief: regions/wyrmreach.md
+  status: visual-design-proposal
+areaOverlays:
+- id: coast-harbor
+  promptBrief: areas/coast-harbor.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
+- id: mountain-pass
+  promptBrief: areas/mountain-pass.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
+- id: forest-canopy
+  promptBrief: areas/forest-canopy.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
+- id: swamp-bog
+  promptBrief: areas/swamp-bog.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
+- id: underground-cavern
+  promptBrief: areas/underground-cavern.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
+- id: ruins-rift
+  promptBrief: areas/ruins-rift.md
+  applyWhen: Azgaar terrain/biome allows; does not override culture
+  status: visual-design-proposal
