@@ -23,7 +23,8 @@ async function withDeadline(promise, timeoutMs, phase) {
   let timer;
   try {
     return await Promise.race([promise, new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`Capture phase timed out: ${phase}`)), timeoutMs);
+      timer = setTimeout(() => reject(Object.assign(new Error(`Capture phase timed out: ${phase}`),
+        { captureDeadline: true })), timeoutMs);
     })]);
   } finally { clearTimeout(timer); }
 }
@@ -128,7 +129,9 @@ try {
       console.log(`Loaded ${world}.`);
     }
     try {
-      const preparation = await prepareVisualPose(page, pose, { timeoutMs: settleTimeoutMs });
+      const preparation = await withDeadline(prepareVisualPose(page, pose, {
+        timeoutMs: settleTimeoutMs, onPhase: phase => console.log(`${pose.id}: ${phase}`),
+      }), settleTimeoutMs + 60000, `prepare ${pose.id}`);
       const lighting = await page.evaluate(() => window.__worldVisualQa.settleLighting());
       const state = await page.evaluate(() => {
         const d = window.__worldVisualQa.diagnostics();
@@ -163,8 +166,12 @@ try {
       }
       console.log(`Captured ${pose.id}; ready in ${Math.round(preparation.readiness.waitedMs)} ms.`);
     } catch (error) {
-      report.failures.push({ pose, error: error.stack, readiness: await page.evaluate(() => window.__worldVisualQa.readiness()) });
+      const readiness = await withDeadline(page.evaluate(() => window.__worldVisualQa.readiness()),
+        5000, `failure diagnostics ${pose.id}`).catch(diagnostic => ({ unavailable: diagnostic.message }));
+      report.failures.push({ pose, error: error.stack, readiness });
       console.log(`FAILED ${pose.id}: ${error.message}`);
+      // A blocked renderer cannot safely prepare the next pose in this browser.
+      if (error.captureDeadline) throw error;
     }
     await writeFile(path.join(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   }
