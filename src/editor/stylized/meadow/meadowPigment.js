@@ -1,6 +1,7 @@
-import { color, dot, float, fract, mix, pow, smoothstep, uv, vec3, vec4 } from 'three/tsl';
+import { cameraPosition, color, dot, float, fract, mix, pow, smoothstep, uv, vec3, vec4 } from 'three/tsl';
 
 import { stylizedPathWearMask } from '../StylizedNoiseNodes.js';
+import { meadowCanopyColor, meadowCanopyView } from './meadowCanopy.js';
 import { meadowPatchColors } from './meadowColorNodes.js';
 import { applyGrassMarks } from './meadowGrassMarks.js';
 import { MEADOW_GRASS_DEFAULTS } from './meadowGrassConfig.js';
@@ -21,8 +22,13 @@ const DEFAULT_PATH_FRINGE_STRENGTH = 0.55;
  * separates overlapping blades into layers instead of one flat sheet; straw tips
  * along a path's verge; and, with `marks`, the scorch, frost or blight a spell
  * left on the blades.
+ *
+ * Past `meltStart` the per-stem detail (tuft and blade value, contact shade,
+ * soil foot) melts away and the gradient flattens toward the canopy colour, so
+ * a distant stand reads as one lit surface with the ground's own value instead
+ * of a speckle of separate spikes. `melted` forces it fully on (far cards).
  */
-export function meadowPigment({ uniforms, tuning, config, blade, marks = false }) {
+export function meadowPigment({ uniforms, tuning, config, blade, marks = false, melted = false }) {
   const appearance = uniforms.appearance;
   const height = uv().y.clamp(0, 1);
   const patchSettings = { ...MEADOW_GRASS_DEFAULTS.appearance, ...config.grass?.meadow?.appearance };
@@ -52,23 +58,30 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false }
   }
   const tufts = uniforms.tufts;
   const occupancy = meadowTuftNodes(blade.canonical).occupancy;
-  const tuftValue = occupancy.sub(0.5).mul(tufts.valueSpread.mul(2)).add(1);
+  const melt = melted ? float(1) : smoothstep(appearance.meltStart, appearance.meltEnd, cameraPosition.distance(blade.base));
+  const tuftValue = mix(occupancy.sub(0.5).mul(tufts.valueSpread.mul(2)).add(1), float(1), melt);
   root = root.mul(tuftValue);
   tip = tip.mul(tuftValue);
   if (marks && uniforms.spellGround) ({ root, tip } = applyGrassMarks(uniforms.spellGround, blade.base, root, tip));
   // Occupancy rides in the root varying's fourth lane: no extra vertex output.
   const rootData = vec4(root, occupancy).toVarying('meadowRootPigment');
   root = rootData.xyz;
-  tip = tip.toVarying('meadowTipPigment');
-  const pigment = mix(root, tip, pow(height, appearance.gradientPower));
+  // Melt rides in the tip varying's fourth lane.
+  const tipData = vec4(tip, melt).toVarying('meadowTipPigment');
+  tip = tipData.xyz;
+  const melting = tipData.w;
+  const canopy = meadowCanopyColor(root, tip, appearance.canopyTipMix);
+  const pigment = mix(mix(root, tip, pow(height, appearance.gradientPower)), canopy, melting.mul(appearance.meltFlatten));
   // Contact darkening belongs to dense interiors; an isolated stem's foot stays
   // near the ground's own value instead of punching a dark dot into it.
   const rootFloor = mix(appearance.rootBrightness, float(1), float(1).sub(rootData.w).mul(tufts.rootLift));
-  const rootShade = mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height));
-  const soil = root.mul(SOIL_SHARE);
-  const based = mix(soil, pigment, smoothstep(0, 0.18, height));
-  const variation = mix(vec3(0.93, 1, 0.9), vec3(1.07, 1, 0.86), blade.variation);
-  const bladeValue = fract(blade.rank.mul(0.618034)).sub(0.5).mul(appearance.valueJitter).add(1);
+  const rootShade = mix(mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height)), float(1), melting);
+  // The foot meets the ground as the terrain shows it from this view
+  // (MeadowGroundShading's root): soil-side from above, canopy when grazing.
+  const soil = mix(root.mul(SOIL_SHARE), canopy, meadowCanopyView(appearance.canopyStrength));
+  const based = mix(soil, pigment, smoothstep(0, 0.18, height).max(melting));
+  const variation = mix(mix(vec3(0.93, 1, 0.9), vec3(1.07, 1, 0.86), blade.variation), vec3(1), melting);
+  const bladeValue = mix(fract(blade.rank.mul(0.618034)).sub(0.5).mul(appearance.valueJitter).add(1), float(1), melting);
   return {
     pigment,
     bladeValue,

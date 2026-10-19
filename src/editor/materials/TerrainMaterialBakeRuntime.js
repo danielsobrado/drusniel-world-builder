@@ -97,7 +97,7 @@ export class TerrainMaterialBakeRuntime {
     return {
       grassBottomColor: style?.color?.bottom ?? '#ffffff',
       grassBrightness: Number(style?.color?.brightness) || 1,
-      ...(this.meadowGroundPalette ? { meadowGroundColors: this.meadowGroundPalette.roots } : {}),
+      ...(this.meadowGroundPalette ? { meadowGroundColors: this.meadowGroundPalette.far } : {}),
       dirtColor: style?.dirt?.color ?? '#808080',
       forestColor: style?.trees?.forestFloor?.groundCoreColor ?? '#3b5233',
     };

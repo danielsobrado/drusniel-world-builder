@@ -56,6 +56,15 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
     dryEnd: 0.84,
     dryStrength: 0,
     dryColor: '#777455',
+    /** Canopy colour: share of the way from root to tip (meadowCanopy.js). */
+    canopyTipMix: 0.4,
+    /** How far the ground under a full stand leans to the canopy at a grazing view. */
+    canopyStrength: 0.8,
+    /** Metres over which per-stem detail melts into the field's shared shading. */
+    meltStart: 12,
+    meltEnd: 35,
+    /** Share of a melted stem's root-to-tip gradient replaced by the canopy colour. */
+    meltFlatten: 0.5,
   }),
   /**
    * The far meadow: billboard cards past the blades, each a clump of stems
@@ -152,8 +161,13 @@ export function resolveMeadowGrassConfig(source) {
   for (const key of ['rootBrightness', 'gradientPower', 'groundTipMix', 'canopyDepth', 'valueJitter', 'backlight', 'fill', 'patchScale', 'lodThinning', 'lodCompensation', 'lodWidenMax', 'dryPatchScale']) {
     finite(appearance[key], d.appearance[key], `${path}.appearance.${key}`, { min: 0 });
   }
-  for (const key of ['dryStart', 'dryEnd', 'dryStrength']) {
+  for (const key of ['canopyTipMix', 'canopyStrength', 'meltFlatten', 'dryStart', 'dryEnd', 'dryStrength']) {
     finite(appearance[key], d.appearance[key], `${path}.appearance.${key}`, { min: 0, max: 1 });
+  }
+  finite(appearance.meltStart, d.appearance.meltStart, `${path}.appearance.meltStart`, { min: 0 });
+  finite(appearance.meltEnd, d.appearance.meltEnd, `${path}.appearance.meltEnd`, { min: 0 });
+  if (appearance.meltEnd <= appearance.meltStart) {
+    throw new Error(`Invalid editor configuration: ${path}.appearance.meltEnd must exceed meltStart.`);
   }
   if (appearance.dryEnd <= appearance.dryStart) {
     throw new Error(`Invalid editor configuration: ${path}.appearance.dryEnd must exceed dryStart.`);

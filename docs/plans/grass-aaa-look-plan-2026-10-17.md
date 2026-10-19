@@ -125,6 +125,29 @@ Each finding names the frames that show it. Paths are under
   (`b03-low`), and grass seems to sit on a carpet rather than grow out of soil.
 - This is the single largest cause of the "stylised lawn" look.
 
+**Update, October 19, 2026: canopy integration** (`docs/qa/canopy-integration-2026-10-19/`).
+Compared with Tiny Glade, our stems read as dark spikes stuck into a lighter
+floor, worst in taiga. The fix looks at how the stand reads from a grazing
+view, not top-down. That leaves this finding's top-down concern intact.
+
+- **Canopy colour.** `meadow/meadowCanopy.js` defines one canopy colour per
+  biome: root to tip at `canopyTipMix`. It is stored as row 4 of the ground
+  palette map.
+- **Ground under the stand.** It leans to the canopy colour by
+  `canopyStrength × density × grazing`. From above it keeps the root, litter
+  and occlusion value. The far bake uses the grazing value (`palette.far`).
+- **Stem feet.** They fade to that same view-dependent value.
+- **Melt.** From `meltStart` to `meltEnd` (12–35 m), tuft value, blade value,
+  variation and contact shade melt to 1. The gradient flattens toward the
+  canopy colour by `meltFlatten` (0.25; 0.5 lost the grassland's swept
+  depth). Far cards are fully melted, so the handoff matches.
+- **Coverage.** `lodWidenMax` goes from 1.35 to 2. Taiga, savanna and wetland
+  widths go to 0.05, and taiga density to 0.8.
+- **Not done.** Blade normals stay world-up, because stems carry no terrain
+  normal and there is no vertex-buffer slot left to add one.
+- **Performance.** Neutral on high-grass chunk-cross: 38.7 → 38.8 FPS, 78 → 74
+  hitches, one run each.
+
 ### F3 — From 15 to 60 m the field breaks into stepped, combed rows (high)
 **Evidence:** `b08-eye` (crop `zoom-temperate-rainforest-mid.jpg`), `b03-eye` (crop `zoom-savanna-far.jpg`), `b04-eye-rev`.
 

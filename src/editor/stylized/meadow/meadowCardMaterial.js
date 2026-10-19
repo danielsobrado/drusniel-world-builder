@@ -100,7 +100,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   material.alphaTest = ALPHA_TEST;
   material.transparent = false;
 
-  const { pigment, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade: card });
+  const { pigment, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade: card, melted: true });
   material.colorNode = albedo;
   material.normalNode = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
   const view = normalize(cameraPosition.sub(positionWorld));
