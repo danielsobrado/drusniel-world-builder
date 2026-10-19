@@ -1773,8 +1773,6 @@ stylizedSurface:
     # Lift painted black crevices as reflectance, preserving actual shadows and
     # authored bark structure. Baked impostors use the identical material grade.
     barkGrade: { enabled: true, contrast: 0.65, pivot: 0.18, saturation: 0.88, strength: 0.55 }
-    rootFit:
-      bury: 0.12
     # grass-test's canopy grade (stylized/forest/canopyGrade.js): textured authored
     # crowns are re-coloured by their luminance onto one shade->light green ramp,
     # the donor's `canopyShadow`/`canopyLight`/`canopyTint`. It is what makes its
