@@ -1,0 +1,70 @@
+{
+  "source": "452b8701",
+  "method": "Runtime extraction, disconnected-part grouping, configured scale and trunk pivot applied to decoded source positions; prototypeRootSeat measured before placement.",
+  "results": [
+    {
+      "asset": "/assets/trees/meadow/tree7.glb",
+      "scale": 0.357,
+      "seat": 0.2599022686481476,
+      "reach": 2.2969513696173727,
+      "sourceSha256": "0452fd18faa4653668e147eef479c6f7c2ed237113ae9f68519a0edfbb2c1251"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree8.glb",
+      "scale": 0.357,
+      "seat": 0.2873570919036865,
+      "reach": 2.4068909417961155,
+      "sourceSha256": "20be03d4b17f58277e9381b404cf404eeef590499b988947b0820714781a3999"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree9.glb",
+      "scale": 0.357,
+      "seat": 0.35050585865974426,
+      "reach": 3.4799222236528515,
+      "sourceSha256": "dbcccae8b47ded89ac8de5b0ac126edf3f43c0c4bd344137036855bffdd1c25a"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree1.glb",
+      "scale": 0.357,
+      "seat": 0.13686570525169373,
+      "reach": 1.3578215960110356,
+      "sourceSha256": "3e1abb13c296f6219943371d29f4ea9dc9023e45d7a899546970e192e901045d"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree2.glb",
+      "scale": 0.357,
+      "seat": 0.03414788469672203,
+      "reach": 0.3105306878936226,
+      "sourceSha256": "e162bd07f55f793cdfc929093c13e6d6f366e15878267c0c0c7d04071cf712c5"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree3.glb",
+      "scale": 0.357,
+      "seat": 0.11131276935338974,
+      "reach": 1.0911640723074596,
+      "sourceSha256": "0b5390d764664df34e28b0209dd36bc69ffdd2856b0b0f8d223b66611e543bdc"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree4.glb",
+      "scale": 0.357,
+      "seat": 0.18801233172416687,
+      "reach": 1.8702078742568542,
+      "sourceSha256": "2ee38be0bf4590386e2ede52ecb4252793595cb5ed08d42d484258609a4a607b"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree5.glb",
+      "scale": 0.357,
+      "seat": 0.2342994660139084,
+      "reach": 2.3148878221051583,
+      "sourceSha256": "cdf4a029db339d75fcb0f16d4dd566bd06aee9e8788b47ac020a60aff92915dd"
+    },
+    {
+      "asset": "/assets/trees/meadow/tree6.glb",
+      "scale": 0.357,
+      "seat": 0.244940847158432,
+      "reach": 2.157259810519345,
+      "sourceSha256": "64fc0f80e9cf818227f321510505a6a9a64fe8c62a4f434a0a1dfb3ab2842518"
+    }
+  ],
+  "algorithmSha256": "9b3877d39ccbfdda8f6cfe1f74c9b90bd5cab0f1235cb67b2f6f4de7943457ec"
+}
