@@ -9,6 +9,8 @@ const [before, after] = await Promise.all([beforeDir, afterDir].map(async dir =>
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const relative = file => path.relative(afterDir, file).replaceAll('\\', '/');
 const baseline = new Map(before.poses.map(pose => [pose.id, pose]));
+const foreground = report => report.focus?.passed ?? (report.batches?.some(b => b.focus?.passed === false)
+  ? false : report.batches?.every(b => b.focus?.passed === true) ? true : null);
 const shots = after.poses.map(pose => {
   const old = baseline.get(pose.id), current = `${pose.id}.png`;
   const oldImage = old ? relative(path.join(beforeDir, current)) : null;
@@ -31,6 +33,7 @@ body{margin:0;background:#141c1b;color:#e8ede6;font:16px/1.5 system-ui,sans-seri
 <p>Original source ${escape(before.sourceSha)}. Implemented source ${escape(after.sourceSha)}.</p>
 <p>These are unretouched engine captures. The slider reveals the original on the left and implementation on the right. Live plant/particle phases and placement clearance may differ; this is a scene comparison, not a pixel-difference metric.</p>
 <p>Candidate capture valid: <strong>${after.captureValid === true}</strong>. Original aggregate capture valid: <strong>${before.captureValid === true}</strong>. Consult each report for failures. Visual validity does not establish performance or artistic approval.</p>
+<p>Native foreground monitor: candidate ${escape(foreground(after) ?? 'not established')}; original ${escape(foreground(before) ?? 'not established')}. A failed monitor makes the affected images diagnostic even when an older report's capture flag says true.</p>
 <p><a href="report.json">Candidate evidence</a> · <a href="${escape(relative(path.join(beforeDir, 'report.json')))}">Original evidence</a></p>
 <nav>${after.poses.map(p => `<a href="#${escape(p.id)}">${escape(p.id)}</a>`).join('')}</nav>${shots}
 </main><script>document.querySelectorAll('article input').forEach(input=>input.addEventListener('input',()=>{input.closest('article').querySelector('.candidate').style.clipPath='inset(0 0 0 '+input.value+'%)'}));</script></html>`;

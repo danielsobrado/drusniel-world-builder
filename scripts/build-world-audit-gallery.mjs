@@ -5,6 +5,8 @@ import sharp from 'sharp';
 // Browsing derivatives only; the capture PNGs and their hashes stay untouched.
 const out = path.resolve(process.argv[2] ?? 'docs/qa/visual-audit-2026-10-18');
 const report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
+const nativeFocus = report.focus?.passed ?? (report.batches?.some(b => b.focus?.passed === false)
+  ? false : report.batches?.every(b => b.focus?.passed === true) ? true : null);
 const captureDate = new Date(report.startedAt ?? '2026-10-18').toLocaleDateString('en-US', {
   year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
 });
@@ -48,7 +50,7 @@ article{background:#1b292f;border-radius:8px;overflow:hidden}img{display:block;w
 h2{font-size:18px}article h2,article p{margin:12px 18px}
 </style><header><h1>World visual audit · ${escape(captureDate)}</h1>
 <p>${report.poses.length} captured / ${report.requestedPoses?.length ?? report.poses.length} requested views · source ${escape(report.sourceSha?.slice(0, 8))} · seeded selection ${report.seed} · ${report.viewport.width} × ${report.viewport.height}</p>
-<p>Unedited renderer captures. Clean and HUD images are successive frames. Capture validity: ${report.captureValid === true ? 'passed' : 'incomplete or failed'}; this is not a performance verdict.</p>
+<p>Unedited renderer captures. Clean and HUD images are successive frames. Recorded capture flag: ${report.captureValid === true ? 'passed' : 'incomplete or failed'}. Native foreground: ${nativeFocus === null ? 'not established' : nativeFocus ? 'passed' : 'lost in one or more batches; diagnostic images only'}. A legacy capture flag does not override a failed foreground monitor. This is not a performance verdict.</p>
 <p><a href="${escape(planLink)}">Detailed improvement plan</a> · <a href="contact-sheet.jpg">Contact sheet</a> · <a href="report.json">Capture metadata</a></p></header>
 <main>${cards}</main></html>\n`);
 
