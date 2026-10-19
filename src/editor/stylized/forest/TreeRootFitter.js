@@ -1,5 +1,6 @@
 import { fitRootGround, resolveRootSettings } from './treeRootFit.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { prototypeRootSeat } from './treeRootSeat.js';
 
 export function prototypeRootReach(parts, rootHeight) {
   let reach = 0;
@@ -19,7 +20,10 @@ export class TreeRootFitter {
     this.settings = resolveRootSettings(settings);
     this.sampleHeight = sampleHeight;
     this.resolvePrototypeIndex = resolvePrototypeIndex;
-    this.reach = parts.map(prototype => prototypeRootReach(prototype, this.settings.rootHeight));
+    const feet = parts.map(prototype => prototypeRootSeat(prototype));
+    this.seat = feet.map(foot => foot.seat);
+    this.reach = parts.map((prototype, i) => Math.max(
+      prototypeRootReach(prototype, this.settings.rootHeight), feet[i].reach));
   }
   fit(placement) {
     if (!this.settings.enabled) return placement;
@@ -27,7 +31,8 @@ export class TreeRootFitter {
     const scale = placement.heightScale ?? placement.scale;
     const reach = (this.reach[index] ?? 0) * scale * (placement.trunkScale ?? 1);
     if (!(reach > 0)) return placement;
-    const rootFit = fitRootGround(this.sampleHeight, placement.x, placement.z, reach, this.settings);
+    const rootFit = fitRootGround(this.sampleHeight, placement.x, placement.z, reach, this.settings,
+      (this.seat[index] ?? 0) * scale);
     if (!Object.values(rootFit).every(Number.isFinite)) return placement;
     if (!placement.planted && rootFit.overhang > this.settings.maxOverhang) {
       PerfCounters.inc('treeRootPlacementsRejected');

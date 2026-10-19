@@ -61,7 +61,7 @@ export function measureRootReach(root, { rootHeight, excludeName = null }) {
 // (≤ 0, capped by maxSink) drops it below every sample, including a ridge crest
 // falling away on both sides. `overhang` is how far the sunk plane still stands
 // above the lowest sample once the sink is capped: roots in the air.
-export function fitRootGround(sampleHeight, x, z, radius, settings) {
+export function fitRootGround(sampleHeight, x, z, radius, settings, rootSeat = 0) {
   const center = sampleHeight(x, z);
   if (!(radius > 0)) return { center, slopeX: 0, slopeZ: 0, sink: 0, overhang: 0 };
   const samples = [[0, 0, center]];
@@ -86,8 +86,8 @@ export function fitRootGround(sampleHeight, x, z, radius, settings) {
   }
   let lowest = 0;
   for (const [dx, dz, h] of samples) lowest = Math.min(lowest, h - (center + slopeX * dx + slopeZ * dz));
-  const sink = Math.max(-settings.maxSink, lowest - settings.bury);
-  return { center, slopeX, slopeZ, sink, overhang: Math.max(0, sink - lowest) };
+  const sink = Math.max(-settings.maxSink, lowest - settings.bury - rootSeat);
+  return { center, slopeX, slopeZ, sink, overhang: Math.max(0, sink + rootSeat - lowest) };
 }
 
 // Converts a world ground slope into the local-space shear the bark shader
