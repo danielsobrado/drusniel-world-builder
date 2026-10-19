@@ -10,13 +10,24 @@ export async function setVisualMaterialControl(page, control = 'restore') {
       }
       for (const material of previous.materials) material.dispose();
       if (previous.fog) Object.defineProperty(scene.fog, 'density', previous.fog);
+      for (const [target, key, descriptor] of previous.properties ?? []) Object.defineProperty(target, key, descriptor);
       window.__visualMaterialControl = null;
     }
     if (control === 'restore') return { restored: true };
     const allowed = ['albedo', 'terrain-normals', 'terrain-flat-normals', 'terrain-matte',
-      'grass-mask', 'forest-mask', 'path-mask', 'distance-fog-off', 'water-hidden'];
+      'grass-mask', 'forest-mask', 'path-mask', 'distance-fog-off', 'local-mist-off', 'water-hidden', 'material-weights'];
     if (!allowed.includes(control)) throw new Error(`Unknown material control: ${control}`);
-    const state = window.__visualMaterialControl = { meshes: [], materials: new Set(), fog: null };
+    const state = window.__visualMaterialControl = { meshes: [], materials: new Set(), fog: null, properties: [] };
+    if (control === 'local-mist-off') {
+      const { jungleMistUniforms } = await import('/src/editor/stylized/ambient/JungleMist.js');
+      const weights = [editor.terrainView.valleyFog?.uniforms?.weight, jungleMistUniforms.weight].filter(Boolean);
+      const values = weights.map(weight => weight.value);
+      for (const weight of weights) {
+        state.properties.push([weight, 'value', Object.getOwnPropertyDescriptor(weight, 'value')]);
+        Object.defineProperty(weight, 'value', { configurable: true, get: () => 0, set: () => {} });
+      }
+      return { control, weights: values, interpretation: 'Local valley and jungle mist disabled; distance fog and finishing retained.' };
+    }
     if (control === 'distance-fog-off') {
       state.fog = Object.getOwnPropertyDescriptor(scene.fog, 'density');
       Object.defineProperty(scene.fog, 'density', { configurable: true, get: () => 0, set: () => {} });
@@ -34,7 +45,8 @@ export async function setVisualMaterialControl(page, control = 'restore') {
     const tslUrl = noiseSource.match(/from\s*['"]([^'"]*three_tsl[^'"]*)['"]/)?.[1];
     if (!tslUrl) throw new Error('Cannot resolve the frozen shader TSL dependency.');
     const { float, faceDirection, normalViewGeometry, uv, vec2, vec3, vec4 } = await import(tslUrl);
-    const { slotTexture, slotVector2 } = await import('/src/editor/materials/TerrainSlotBindings.js');
+    const { slotTexture, slotVector2, createSlotBakeGpuState } = await import('/src/editor/materials/TerrainSlotBindings.js');
+    const { getTerrainMaterialBakeGpuState } = await import('/src/editor/materials/TerrainMaterialBakeGpu.js');
     const { stylizedNaturalTrailMask } = await import('/src/editor/stylized/StylizedNoiseNodes.js');
     const slots = editor.terrainView.slots, template = slots.find(slot => slot.descriptor);
     const terrain = new Set(slots.map(slot => slot.mesh));
@@ -55,6 +67,11 @@ export async function setVisualMaterialControl(page, control = 'restore') {
         else {
           let value = original.colorNode ?? vec3(...original.color.toArray());
           if (control === 'terrain-normals') value = (original.normalNode ?? normalViewGeometry).mul(.5).add(.5);
+          if (control === 'material-weights') {
+            const bake = createSlotBakeGpuState(getTerrainMaterialBakeGpuState(template.mesh));
+            const weights = bake.sampleTexture('materialWeights', uv());
+            value = vec3(weights.r, weights.g, weights.b.max(weights.a));
+          }
           if (control === 'grass-mask' || control === 'forest-mask' || control === 'path-mask') {
             const surface = slotTexture('surfaceMaskTexture', template.surfaceMaskTexture, uv());
             if (control === 'grass-mask') value = vec3(surface.g);

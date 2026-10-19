@@ -1,5 +1,6 @@
 import { createMeadowWindVariationWriter } from './meadowWindVariation.js';
 import { compactionPrefix } from './MeadowCompactionPrefix.js';
+import { createMeadowTileDistribution } from './meadowTileDistribution.js';
 
 /**
  * One tile's stems, filtered to where grass grows, ported from grass-test's
@@ -49,6 +50,7 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
   output.maxHeight = previous?.output.maxHeight ?? -Infinity;
   const ground = { height: 0, strength: 1, shape: 0, path: 0 };
   const cards = Boolean(template.userData.meadow?.cards);
+  const distribution = createMeadowTileDistribution(centerX, centerZ, template.userData.meadow.tileSize);
   const writeWind = createMeadowWindVariationWriter(centerX, centerZ, template.userData.meadow.tileSize);
   let total = template.instanceCount;
   let cursor = previous ? Math.min(previous.capacity, total) : 0;
@@ -95,8 +97,8 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
       const end = Math.min(total, cursor + Math.max(1, Math.floor(limit)));
       for (; cursor < end; cursor += 1) {
         const p = cursor * 4;
-        const localX = source.position[p];
-        const localZ = source.position[p + 2];
+        const localX = distribution.x(source.position[p]);
+        const localZ = distribution.z(source.position[p + 2]);
         const rank = source.data[p + 1];
         const worldX = centerX + localX;
         const worldZ = centerZ + localZ;

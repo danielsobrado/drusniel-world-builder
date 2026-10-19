@@ -22,6 +22,7 @@ import {
 } from 'three/tsl';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
+import { terrainGrassCover } from './materials/TerrainGrassCoverNodes.js';
 import { createAridSubstrateNodes } from './materials/AridSubstrateNodes.js';
 import {
   attachTerrainMaterialBakeGpuState,
@@ -272,27 +273,7 @@ export function createTerrainMaterial({
       .mul(grassCoverage)
       .mul(oneMinus(forestFloor.mul(oneMinus(retention))))
       .mul(oneMinus(dirt));
-    const direction = vec2(farCover.direction[0], farCover.direction[1]);
-    const strandA = smoothstep(
-      farCover.strandThreshold,
-      1,
-      abs(sin(dot(worldXZ, direction).mul(farCover.frequency)
-        .add(stylizedFbm(worldXZ.mul(farCover.noiseScale)).mul(farCover.noiseWarp)))),
-    );
-    const crossDirection = vec2(direction.y.negate(), direction.x);
-    const strandB = smoothstep(
-      Math.min(0.98, farCover.strandThreshold + 0.08),
-      1,
-      abs(sin(dot(worldXZ, crossDirection).mul(farCover.frequency * 1.37)
-        .add(stylizedFbm(worldXZ.mul(farCover.noiseScale * 1.7).add(vec2(4.7, 9.2)))
-          .mul(farCover.noiseWarp)))),
-    );
-    const strand = max(strandA, strandB.mul(0.7));
-    const coverVariation = smoothstep(
-      0.2,
-      0.82,
-      stylizedFbm(worldXZ.mul(farCover.noiseScale * 0.55).add(vec2(13.1, 5.3))),
-    );
+    const { strand, variation: coverVariation } = terrainGrassCover({ transitionPatterns, localXZ });
     const farGrass = mix(
       grassTint,
       meadowGround?.tip ?? colorNode(farCover.tipColor),
@@ -395,7 +376,12 @@ export function createTerrainMaterial({
     if (waterContext) {
       const wet = waterContext.wet.mul(oneMinus(grassCoverage).max(.15));
       beachSurface.color = beachSurface.color.mul(float(1).sub(wet.mul(.22)));
-      beachSurface.roughness = mix(beachSurface.roughness, float(.38), wet);
+      // Damp sediment retains a broad, quiet highlight. The former universal
+      // 0.38 override erased substrate roughness and amplified bank-normal bands.
+      // Liquid films/swash and rain retain their separate surface responses.
+      const bankRoughness = mix(float(.64), float(.74), waterContext.organic)
+        .max(waterContext.cold.mul(.68));
+      beachSurface.roughness = mix(beachSurface.roughness, bankRoughness, wet);
     }
     // Swash, foam and wet sand where the ground meets the sea.
     const swash = coastPatternsTemplate && createCoastSwashNodes({

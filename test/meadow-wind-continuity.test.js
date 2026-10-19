@@ -3,12 +3,14 @@ import test from 'node:test';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { gradientNoise2dCpu } from '../src/editor/weather/wind/windNoise.js';
+import { createMeadowTileDistribution, wrapMeadowTileCoordinate } from '../src/editor/stylized/meadow/meadowTileDistribution.js';
 
 function compactPoint({ centerX, centerZ, x, z, tileSize = 8, cards = false }) {
   const template = createMeadowTemplate({ detail: 2, count: 1, tileSize, cards });
   const position = template.getAttribute('instancePosition').array;
-  position[0] = x - centerX;
-  position[2] = z - centerZ;
+  const distribution = createMeadowTileDistribution(centerX, centerZ, tileSize);
+  position[0] = wrapMeadowTileCoordinate(x - centerX - distribution.offsetX, tileSize);
+  position[2] = wrapMeadowTileCoordinate(z - centerZ - distribution.offsetZ, tileSize);
   const compaction = createCompaction({
     template, centerX, centerZ,
     sample: (_x, _z, _rank, out) => {

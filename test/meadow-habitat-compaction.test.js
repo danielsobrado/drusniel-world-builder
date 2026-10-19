@@ -3,6 +3,7 @@ import test from 'node:test';
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
+import { createMeadowTileDistribution } from '../src/editor/stylized/meadow/meadowTileDistribution.js';
 import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
 
 function fixture(coverage,density=1,forest=false) {
@@ -19,9 +20,10 @@ function fixture(coverage,density=1,forest=false) {
 }
 function accepted(sampler,source,reverse=false) {
   const sample=sampler.forTile(-32,32,32).sample,ids=[],out={};
+  const distribution=createMeadowTileDistribution(-32,32,source.userData.meadow.tileSize);
   for(let j=0;j<source.instanceCount;j++) {
     const i=reverse?source.instanceCount-1-j:j,p=source.getAttribute('instancePosition').array;
-    if(sample(-32+p[i*4],32+p[i*4+2],i,out))ids.push(i);
+    if(sample(-32+distribution.x(p[i*4]),32+distribution.z(p[i*4+2]),i,out))ids.push(i);
   }
   return ids.sort((a,b)=>a-b);
 }
@@ -30,9 +32,10 @@ function accepted(sampler,source,reverse=false) {
 // so a stem's acceptance is coverage times the island and stand density there.
 function meanStandDensity(template,density,seed=918273) {
   const p=template.getAttribute('instancePosition').array;
+  const distribution=createMeadowTileDistribution(-32,32,template.userData.meadow.tileSize);
   let total=0;
   for(let i=0;i<template.instanceCount;i++) {
-    const x=-32+p[i*4],z=32+p[i*4+2];
+    const x=-32+distribution.x(p[i*4]),z=32+distribution.z(p[i*4+2]);
     total+=grassPatchCover(x/2,-z/2,density,seed)*grassStandDensity(x,z,density,seed);
   }
   return total/template.instanceCount;

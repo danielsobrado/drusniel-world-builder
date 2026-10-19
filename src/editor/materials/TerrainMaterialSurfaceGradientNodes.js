@@ -21,7 +21,7 @@ export function createTerrainSurfaceNormal({ encodedNormal, detailHeight, detail
   const surfaceNormal = transformDirection(worldNormal, cameraViewMatrix);
   // Height and position derivatives must retain the same pixel footprint.
   // Normalizing only position made relief depend on distance/resolution and
-  // produced broad, camera-dependent highlights on shallow banks.
+  // can produce camera-dependent highlights on shallow banks.
   const sigmaX = positionView.dFdx();
   const sigmaY = positionView.dFdy();
   const r1 = sigmaY.cross(surfaceNormal);

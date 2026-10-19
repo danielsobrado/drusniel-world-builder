@@ -66,13 +66,16 @@ test('dry-patch settings reject invalid colors, reversed thresholds and unbounde
   assert.equal(resolveMeadowGrassConfig({ appearance: { dryStrength: 0 } }).appearance.dryStrength, 0);
 });
 
-test('shipped tundra adds one muted palette while forests retain the base pair',async()=>{
+test('shipped woodland and tundra pigments remain distinct within the eight-palette limit',async()=>{
  const {readFileSync}=await import('node:fs');const {load}=await import('js-yaml');
  const surface=load(readFileSync(new URL('../editor.config.yaml',import.meta.url),'utf8')).stylizedSurface;
  const settings=resolveMeadowGrassConfig(surface.grass.meadow),colors=createMeadowGroundPalette(surface);
  const index=id=>Math.floor(settings.shapeTable[id]/3)%8;
- assert.equal(index(5),0);assert.equal(index(6),0);
+ assert.equal(index(5),index(6));
+ assert.notEqual(index(5),index(4));
+ assert.notEqual(index(7),index(5));
+ assert.notEqual(index(8),index(7));
  assert.deepEqual(settings.palette.palettes[index(10)],{base:'#666746',tip:'#a3a07a'});
- assert.equal(settings.palette.palettes.length,7);
+ assert.equal(settings.palette.palettes.length,8);
  assert.notDeepEqual(colors.roots.subarray(10*3,11*3),colors.roots.subarray(9*3,10*3));
 });
