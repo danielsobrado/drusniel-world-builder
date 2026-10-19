@@ -61,7 +61,7 @@ export async function setVisualMaterialControl(page, control = 'restore') {
       const replacements = originals.map(original => {
         if (clones.has(original)) return clones.get(original);
         const material = original.clone();
-        material.fog = false;
+        if (!['terrain-matte', 'terrain-flat-normals'].includes(control)) material.fog = false;
         if (control === 'terrain-matte') material.roughnessNode = float(1);
         else if (control === 'terrain-flat-normals') material.normalNode = normalViewGeometry.mul(faceDirection);
         else {
@@ -95,6 +95,8 @@ export async function setVisualMaterialControl(page, control = 'restore') {
     await editor.terrainView.renderer.compileAsync(scene, editor.viewModeController.camera);
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return { control, objects: state.meshes.length, materials: state.materials.size,
+      interpretation: control === 'albedo' ? 'Unlit material color graph; output atmosphere and display finishing retained.' :
+        'Only the named terrain input changes; other scene layers and display finishing retained.',
       camera: editor.viewModeController.camera.position.toArray() };
   }, control);
 }
