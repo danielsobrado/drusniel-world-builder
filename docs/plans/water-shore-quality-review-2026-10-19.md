@@ -31,6 +31,13 @@ Later streaming/performance work is present on current main. The completed
 addresses plant lighting, wind structure, dead crowns, ground pigmentation and
 flower habitats. Those items must not be restarted based on older evidence.
 
+The final sync also brought in the [next world visual pass](aaa-next-pass-plan-2026-10-18.md),
+tree broad-phase correction `61a5b892` and natural-trail width correction
+`84ed5bf6`. The controls here remain evidence for frozen `8b178832`; they were
+not rerun after that trail change. Replay grass coverage on the new head before
+implementing placement changes. This focused review supplies the bank/card
+diagnosis for that broader plan, rather than a competing habitat system.
+
 Original images are retained without retouching. Annotation and zoom in the
 review page are presentation aids, not simulated improvements. No proposed
 look is presented as an engine screenshot.
