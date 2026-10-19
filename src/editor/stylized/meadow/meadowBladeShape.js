@@ -233,7 +233,7 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
         .mul(lod.width);
       local.x.assign(positionLocal.x.mul(width));
       local.y.assign(r.mul(height));
-      local.z.assign(r.mul(r).mul(height).mul(uniforms.curve).mul(mix(0.7, 1.3, blade.variation)));
+      local.z.assign(r.mul(r).mul(height).mul(uniforms.curve).mul(profile.curve).mul(mix(0.7, 1.3, blade.variation)));
       // Face the blade. Snapshot both components: `local.x` is a live reference,
       // and reading it after the first assignment would rotate the rotated value.
       const x = local.x.toVar();
@@ -250,7 +250,7 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, tufts.lean).toVar();
       const restDirection = restMix.div(restMix.length().max(1e-3));
       const restAngle = uniforms.baseBend.mul(blade.strength).mul(HALF_PI).mul(bendPower)
-        .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy));
+        .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest);
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));
@@ -273,7 +273,7 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
         .mul(tuning.windTurbulence);
       // Short stems ride the gust with less swing than the tall stand round them.
       const compliance = oneMinus(blade.variation.mul(tuning.windStiffnessRange))
-        .mul(mix(tufts.windShort, float(1), stature));
+        .mul(mix(tufts.windShort, float(1), stature)).mul(profile.wind);
       const windAngle = tuning.windLean.add(primary.add(secondary).add(turbulence).mul(tuning.windStrength))
         .mul(compliance).mul(gust).mul(blade.strength).mul(2).clamp(-1.3, 1.3)
         .mul(bendPower);

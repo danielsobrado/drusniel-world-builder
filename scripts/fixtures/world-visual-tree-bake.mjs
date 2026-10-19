@@ -1,6 +1,27 @@
 import * as THREE from 'three/webgpu';
 import { texture,vec3 } from 'three/tsl';
 import { TreeImpostorBaker } from '/src/editor/stylized/impostor/TreeImpostorBaker.js';
+import { gradeBark, gradeBarkRgb, resolveBarkGrade } from '/src/editor/stylized/forest/barkGrade.js';
+
+/** Float-target checks exercise the production shader against a linear-light
+ * reference, including black crevices and pale birch under the same grade. */
+export async function runBarkGradeSwatches({ scene, camera, draw, state }) {
+ const geometry=new THREE.PlaneGeometry(3,3),settings=resolveBarkGrade({enabled:true});
+ camera.position.set(0,0,10);camera.lookAt(0,0,0);camera.updateMatrixWorld();
+ for(const sample of [[0,0,0],[.02,.01,.005],[.18,.09,.035],[.85,.88,.8]]) {
+  const material=new THREE.MeshBasicNodeMaterial({side:THREE.DoubleSide});
+  material.colorNode=gradeBark(vec3(...sample),settings);
+  const mesh=new THREE.Mesh(geometry,material);scene.add(mesh);
+  try {
+   const expected=gradeBarkRgb(sample,settings),id=`bark-grade-${sample.join('-')}`;
+   const pixels=await draw(id,{sample,expected},true),center=(300*800+400)*4;
+   const actual=Array.from(pixels.subarray(center,center+3));
+   const error=Math.max(...actual.map((value,index)=>Math.abs(value-expected[index])));
+   state.report.checks.push({id,sample,expected,actual,error,passed:error<.0001});
+  }finally{scene.remove(mesh);material.dispose();}
+ }
+ geometry.dispose();
+}
 
 /** Round-trip an actual production bake through its tagged PNG/canvas texture. */
 export async function runBakerSwatch({renderer,scene,camera,draw,state}) {

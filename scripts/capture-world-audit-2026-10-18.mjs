@@ -18,16 +18,18 @@ const url = process.env.AAA_AUDIT_URL ?? 'http://localhost:5267';
 await mkdir(out, { recursive: true });
 if ((await readdir(out)).length) throw new Error(`Refusing to overwrite an existing audit: ${out}. Set AAA_AUDIT_OUT to an empty directory.`);
 const config = yaml.load(await readFile(path.join(root, 'editor.config.yaml'), 'utf8'));
+const replayPath = process.env.AAA_AUDIT_MANIFEST;
+const replay = replayPath ? JSON.parse(await readFile(path.resolve(root, replayPath), 'utf8')) : null;
 const generator = new ProceduralWorldGenerator({ seed: config.world.seed, version: config.world.generatorVersion,
   heightScale: config.world.heightScale, seaLevel: config.world.seaLevel });
 const names = ['Marine', 'Hot desert', 'Cold desert', 'Savanna', 'Grassland', 'Tropical seasonal forest',
   'Temperate deciduous forest', 'Tropical rainforest', 'Temperate rainforest', 'Taiga', 'Tundra', 'Glacier', 'Wetland'];
-const seed = Number(process.env.AAA_AUDIT_SEED ?? 20261018);
+const seed = Number(process.env.AAA_AUDIT_SEED ?? replay?.seed ?? 20261018);
 if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) throw new Error('AAA_AUDIT_SEED must be an unsigned 32-bit integer.');
 let randomState = seed, sampled = 0;
 const next = () => ((randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0) / 4294967296);
 const found = new Map();
-while (found.size < 12 && sampled < 1000000) {
+while (!replay && found.size < 12 && sampled < 1000000) {
   sampled++;
   const cellX = Math.floor(next() * 16000) - 8000, cellZ = Math.floor(next() * 16000) - 8000;
   const id = generator.sampleTile(cellX, cellZ);
@@ -36,15 +38,19 @@ while (found.size < 12 && sampled < 1000000) {
     expectedBiomeId: id, x: (cellX + .5) * 2, z: -(cellZ + .5) * 2,
     yaw: next() * Math.PI * 2, pitch: -.08, mode: 'player', heightAboveGround: 1.7, fov: 68 });
 }
-if (found.size !== 12) throw new Error(`Only found ${found.size} land biomes after ${sampled} candidates.`);
-const shore = JSON.parse(await readFile(path.join(root, 'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'), 'utf8'));
-let poses = [...found.values()].sort((a, b) => a.expectedBiomeId - b.expectedBiomeId);
+if (!replay && found.size !== 12) throw new Error(`Only found ${found.size} land biomes after ${sampled} candidates.`);
+const shore = replay ? { map: replay.map ?? 'maps/Eldara Full 2026-07-23-20-37.json' }
+  : JSON.parse(await readFile(path.join(root, 'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'), 'utf8'));
+let poses = replay ? replay.requestedPoses.map(pose => ({ ...pose }))
+  : [...found.values()].sort((a, b) => a.expectedBiomeId - b.expectedBiomeId);
+if (!replay) {
 poses.push(...shore.marine.map(p => ({ ...p, world: 'procedural', name: 'Marine coast (targeted supplement)', selection: 'existing coast fixture' })));
 for (const biome of [6, 9, 11, 12]) {
   const choices = shore.imported.filter(p => p.expectedBiomeId === biome);
   const pose = choices[Math.floor(next() * choices.length)];
   poses.push({ ...pose, fov: pose.fov ?? 68, world: 'eldara', name: `Eldara ${names[biome]}`,
     selection: 'seeded choice of existing imported biome views' });
+}
 }
 const only = process.env.AAA_AUDIT_ONLY?.split(',');
 if (only) {
@@ -54,7 +60,8 @@ if (only) {
 const report = { schemaVersion: 1, kind: 'visual-audit', startedAt: new Date().toISOString(),
   viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, seed,
   selection: 'First encountered point for each land biome in seeded random cell samples, then two fixed coast supplements and four seeded imported-view choices.',
-  sampledCandidates: sampled, generator: generator.toMetadata(), lighting: { preset: 'highfield', hour: 12, weather: 'off' },
+  sampledCandidates: replay?.sampledCandidates ?? sampled, generator: replay?.generator ?? generator.toMetadata(), lighting: { preset: 'highfield', hour: 12, weather: 'off' },
+  replayManifest: replayPath ?? null, only: only ?? null,
   requestedPoses: poses, poses: [], failures: [], artifacts: [] };
 await writeFile(path.join(out, 'manifest.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ sampled, poses: poses.map(p => ({ id: p.id, x: p.x, z: p.z, biome: p.expectedBiomeId })) }));
@@ -65,11 +72,12 @@ try {
   await writeFile(path.join(out, 'source-snapshot.json'), JSON.stringify(source, null, 2) + '\n');
   report.sourceSha = source.sourceSha;
   report.sourceSnapshotSha256 = source.sourceSnapshot?.sha256;
-  if (source.sourceSnapshot?.files['editor.config.yaml'] !== await fileHash(path.join(root, 'editor.config.yaml'))) throw new Error('Selection config differs from frozen runtime.');
-  for (const file of ['src/editor/world/ProceduralWorldGenerator.js', 'src/editor/world/ProceduralBiomeClassifier.js']) {
+  if (!replay && source.sourceSnapshot?.files['editor.config.yaml'] !== await fileHash(path.join(root, 'editor.config.yaml'))) throw new Error('Selection config differs from frozen runtime.');
+  for (const file of replay ? [] : ['src/editor/world/ProceduralWorldGenerator.js', 'src/editor/world/proceduralBiomeClassification.js']) {
     if (source.sourceSnapshot?.files[file] && source.sourceSnapshot.files[file] !== await fileHash(path.join(root, file))) throw new Error(`Selection source changed: ${file}`);
   }
-  report.configSha256 = await fileHash(path.join(root, 'editor.config.yaml'));
+  report.configSha256 = source.sourceSnapshot?.files['editor.config.yaml'] ?? await fileHash(path.join(root, 'editor.config.yaml'));
+  if (replayPath) report.poseManifestSha256 = await fileHash(path.resolve(root, replayPath));
   report.mapSha256 = await fileHash(path.join(root, shore.map));
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   browser = await chromium.launch({ headless: false,

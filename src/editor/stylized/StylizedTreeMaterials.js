@@ -27,6 +27,7 @@ import { foliageWindPosition } from './forest/foliageWind.js';
 import { treeBendPosition } from './forest/treeSway.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyBarkWeathering } from './barkWeathering.js';
+import { gradeBark, resolveBarkGrade } from './forest/barkGrade.js';
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -167,6 +168,7 @@ export function createAuthoredTrunkMaterial({
   barkTextures = null,
   barkScale = 0.8,
   barkWeathering = null,
+  barkGrade = null,
   sway = null,
 }) {
   if (!barkTextures) {
@@ -174,9 +176,10 @@ export function createAuthoredTrunkMaterial({
       side: source?.side ?? THREE.FrontSide,
     });
     const baseColor = colorNode(source?.color ?? '#ffffff');
-    material.colorNode = sourceMap
+    const albedo = sourceMap
       ? authoredTexture(sourceMap).rgb.mul(baseColor)
       : baseColor;
+    material.colorNode = gradeBark(albedo, resolveBarkGrade(barkGrade));
     return withTrunkSway(applyBarkWeathering(material, { settings: barkWeathering }), sway);
   }
 
@@ -200,7 +203,7 @@ export function createAuthoredTrunkMaterial({
   const material = new THREE.MeshStandardNodeMaterial({
     side: source?.side ?? THREE.FrontSide,
   });
-  material.colorNode = barkColor;
+  material.colorNode = gradeBark(barkColor, resolveBarkGrade(barkGrade));
   material.normalNode = bumpNormal(albedoHeight.a.mul(0.045));
   material.roughnessNode = normalRoughness.b;
   material.metalness = 0;

@@ -11,6 +11,7 @@ const SOURCES = [
   'src/editor/stylized/StylizedPrototypeBake.js',
   'src/editor/stylized/AuthoredTextureNode.js',
   'src/editor/stylized/forest/canopyGrade.js',
+  'src/editor/stylized/forest/barkGrade.js',
   'src/editor/stylized/forest/ForestSpeciesGeometry.js',
   'src/editor/stylized/forest/ProceduralBarkTextures.js',
   'src/editor/stylized/barkWeathering.js',

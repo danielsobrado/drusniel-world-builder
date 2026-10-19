@@ -464,6 +464,7 @@ export class StylizedTreeView {
                 barkTextures: authoredBarkTextures,
                 barkScale: authoredBarkScale,
                 barkWeathering: this.barkWeatheringSettings,
+                barkGrade: this.config.trees.barkGrade,
                 sway,
               })
               : createStylizedTrunkMaterial({ textures: barkTextures, config: this.config, sway }));

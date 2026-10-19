@@ -13,10 +13,17 @@
  * every shape within ~1.35× of slender's 0.5; these are its values.
  */
 export const MEADOW_GRASS_SHAPES = Object.freeze({
-  slender: Object.freeze({ id: 0, label: 'Slender', widthScale: 1, width: (r) => 1 - r }),
-  reed: Object.freeze({ id: 1, label: 'Reed', widthScale: 0.55, width: (r) => 1 - r ** 5 }),
-  broadleaf: Object.freeze({ id: 2, label: 'Broadleaf', widthScale: 0.85, width: (r) => Math.sqrt(Math.max(0, 1 - r * r)) }),
+  slender: Object.freeze({ id: 0, label: 'Slender', wind: 1, rest: 1, curve: 1, widthScale: 1, width: (r) => 1 - r }),
+  reed: Object.freeze({ id: 1, label: 'Reed', wind: .45, rest: .28, curve: .35, widthScale: 0.55, width: (r) => 1 - r ** 5 }),
+  broadleaf: Object.freeze({ id: 2, label: 'Broadleaf', wind: .7, rest: .7, curve: .75, widthScale: 0.85, width: (r) => Math.sqrt(Math.max(0, 1 - r * r)) }),
 });
+
+/** Reuse the density uniform's spare channels for structure, shared by blades,
+ * cards and live profile updates. No extra instance data or shader branch. */
+export function meadowGrowthResponse(profile) {
+  const shape = MEADOW_GRASS_SHAPES[profile.shape] ?? MEADOW_GRASS_SHAPES.slender;
+  return [profile.density, shape.wind, shape.rest, shape.curve];
+}
 
 export const DEFAULT_MEADOW_SHAPE = 'slender';
 /** Shapes a look code spans before its palette index: code = shape + count × palette. */

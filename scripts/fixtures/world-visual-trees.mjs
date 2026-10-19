@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { runMistCards,runNormalRotation,runOpticalDepth } from './world-visual-tree-mist.mjs';
 import { runTreeRepresentations } from './world-visual-tree-representations.mjs';
-import { runBakerSwatch } from './world-visual-tree-bake.mjs';
+import { runBakerSwatch, runBarkGradeSwatches } from './world-visual-tree-bake.mjs';
 import { loadEditorConfig } from '/src/config/loadEditorConfig.js';
 import { applyFixtureLighting } from './world-visual-fixture-lighting.mjs';
 const params=new URLSearchParams(location.search),backend=params.get('backend')??'webgpu',phase=params.get('phase')??'after';
@@ -30,7 +30,7 @@ try {
  const context={renderer,scene,camera,draw,state,sun,fill,ambient:raw.ambientEffects,fixtureLight:params.get('light')??'neutral',treeDiagnostic};
  state.report.lighting=applyFixtureLighting(raw,sun,fill,context.fixtureLight);
  if(!treeDiagnostic){await runOpticalDepth(context);await runNormalRotation(context);
-  if(phase!=='before')await runBakerSwatch(context);if(phase==='after')await runMistCards(context);}
+  if(phase!=='before'){await runBakerSwatch(context);await runBarkGradeSwatches(context);}if(phase==='after')await runMistCards(context);}
  if(phase==='after')await runTreeRepresentations(context);
  state.report.passed=state.report.checks.length>0&&state.report.checks.every(c=>c.passed);
 }catch(error){state.report.failure=error.stack;state.report.passed=false;}

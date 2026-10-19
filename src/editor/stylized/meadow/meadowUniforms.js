@@ -22,7 +22,7 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
         const p=growth.profiles[i] ?? growth.profiles[0];
         return new THREE.Vector4(p.shortHeight,p.tallHeight,p.width,p.patchMeters);
       }),'vec4'),
-      density: uniformArray(Array.from({length:16},(_,i)=>new THREE.Vector4((growth.profiles[i] ?? growth.profiles[0]).density,0,0,0)),'vec4'),
+      density: uniformArray(Array.from({length:16},(_,i)=>new THREE.Vector4(...meadowGrowthResponse(growth.profiles[i] ?? growth.profiles[0]))),'vec4'),
       maxHeight: growth.maxHeight, maxWidth: growth.maxWidth,
     },
     // The player's body stamp and its render-space window. The centre is the
@@ -103,3 +103,4 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
     patchWarm: vec3(...appearance.patchWarm),
   };
 }
+import { meadowGrowthResponse } from './meadowGrassShapes.js';

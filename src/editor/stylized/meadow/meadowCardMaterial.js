@@ -65,7 +65,8 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
     If(card.strength.greaterThan(0), () => {
       const toward = cameraPosition.xz.sub(card.base.xz).normalize();
       // Clumps stand patchier than single blades (the donor's 0.5..1.25).
-      const height = meadowGrowthNodes(uniforms,card,true).height.mul(card.strength);
+      const profile = meadowGrowthNodes(uniforms,card,true);
+      const height = profile.height.mul(card.strength);
       const width = uniforms.cardWidth.mul(sqrt(card.strength));
       local.x.assign(positionLocal.x.mul(toward.y).mul(width));
       local.z.assign(positionLocal.x.mul(toward.x.negate()).mul(width));
@@ -75,7 +76,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
       const along = windWaveCoordinates(card.canonical).along;
       const sway = sin(along.mul(tuning.windFrequency).add(uniforms.time.mul(tuning.windSpeed)).add(card.phase));
       const angle = tuning.windLean.add(sway.mul(tuning.windStrength))
-        .mul(wind.envelope.clamp(0.35, 3.5)).mul(2).clamp(-1.2, 1.2).mul(pow(r, 3));
+        .mul(wind.envelope.clamp(0.35, 3.5)).mul(profile.wind).mul(2).clamp(-1.2, 1.2).mul(pow(r, 3));
       const reach = height.mul(sin(angle));
       local.x.addAssign(wind.direction.x.mul(reach));
       local.z.addAssign(wind.direction.y.mul(reach));

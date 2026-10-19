@@ -31,6 +31,7 @@ const cards = report.poses.map(p => `<article>
   <a href="${escape(p.id)}.png"><img src="${escape(p.id)}.png" loading="lazy" alt="${escape(p.name)}"></a>
   <h2>${escape(p.id)} · ${escape(p.name)}</h2>
   <p>${escape(p.world)} · camera biome ${p.actualBiomeId} · X ${p.x}, Z ${p.z} · ${escape(p.mode)}</p>
+  ${p.captureStatus ? `<p>Evidence: <strong>${escape(p.captureStatus)}</strong>${p.batchReport ? ` · <a href="${escape(p.batchReport)}">Original batch report</a>` : ''}</p>` : ''}
   <p><a href="${escape(p.id)}.png">Original clean PNG</a> · <a href="${escape(p.id)}-hud.png">Original HUD PNG</a>${annotated.has(p.id) ? ` · <a href="${escape(p.id)}-identities.png">Tree identities (QA overlay)</a>` : ''}</p>
 </article>`).join('\n');
 await writeFile(path.join(out, 'index.html'), `<!doctype html>

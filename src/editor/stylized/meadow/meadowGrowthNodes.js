@@ -10,7 +10,8 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const ramp=smoothstep(MEADOW_TALL_RAMP[0],MEADOW_TALL_RAMP[1],noise).toVar();
   const weight=uniforms.tufts.height.mul(ramp.mul(-MEADOW_TALL_TUFT_RELIEF).add(1));
   const share=mix(ramp,tuft.occupancy,weight).clamp(0,1);
+  const response=uniforms.growth.density.element(instance.growth.toInt());
   return {height:mix(dimensions.x.mul(MEADOW_SHORT_FLOOR),dimensions.y,share).mul(cards?1.125:1),
     tallHeight:dimensions.y,tuft,
-    width:dimensions.z,density:uniforms.growth.density.element(instance.growth.toInt()).x};
+    width:dimensions.z,density:response.x,wind:response.y,rest:response.z,curve:response.w};
 }
