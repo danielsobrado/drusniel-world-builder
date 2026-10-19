@@ -1,5 +1,12 @@
 # Water visual follow-up — October 18, 2026
 
+October 19 follow-up: the [expanded quality review](plans/water-shore-quality-review-2026-10-19.md)
+adds successful terrain and grass controls on frozen `8b178832`. Fully matte
+terrain removes the bright bank teeth; constant grey albedo preserves them;
+geometric normals expose faceted bands. The prominent grass rows disappear
+with cards hidden, while a finer terrain pattern remains with all grass hidden.
+The original observations and their limits below remain the historical record.
+
 Reviewed the updated `main` after pulling to
 `3e20d11595ee7a89d2c2fd785855afb3c4e716a5`. The earlier short inland-detail
 repeat and repeated white crest stamps have already been addressed by the
