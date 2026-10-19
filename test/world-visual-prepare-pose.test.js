@@ -7,8 +7,8 @@ test('fresh aerial capture prepares actual destination collision before applying
   const previous=global.window;
   global.window={__worldVisualQa:{cut:async p=>{calls.push(['cut',p]);},settle:async p=>{calls.push(['settle',p]);return {ready:true};}}};
   try {
-    const page={evaluate:(fn,arg)=>fn(arg)},result=await prepareVisualPose(page,pose);
-    assert.deepEqual(calls,[['cut',{...pose,mode:'player',heightAboveGround:1.7}],['settle',{minimumMs:0}],['cut',pose],['settle',{minimumMs:16000}]]);
+    const page={evaluate:(fn,arg)=>fn(arg)},result=await prepareVisualPose(page,pose,{timeoutMs:300000});
+    assert.deepEqual(calls,[['cut',{...pose,mode:'player',heightAboveGround:1.7}],['settle',{minimumMs:0,timeoutMs:300000}],['cut',pose],['settle',{minimumMs:16000,timeoutMs:300000}]]);
     assert.equal(result.groundPreparation.ready,true);assert.equal(result.readiness.ready,true);
     assert.equal(pose.mode,'fly');assert.equal(pose.heightAboveGround,30);
   }finally{global.window=previous;}
