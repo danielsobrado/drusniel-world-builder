@@ -185,7 +185,8 @@ finally {
   }
   report.finishedAt = new Date().toISOString();
   await browser?.close(); release();
-  report.captureValid = !report.failure && !report.failures.length && report.sourceStayedFixed && report.errors.count === 0 && report.poses.length === poses.length;
+  report.captureValid = !report.failure && !report.failures.length && report.sourceStayedFixed
+    && report.focus?.passed === true && report.errors.count === 0 && report.poses.length === poses.length;
   if (!report.captureValid) process.exitCode = 1;
   await writeFile(path.join(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify({ captureValid: report.captureValid, count: report.poses.length, failures: report.failures.length, errorCount: report.errors.count, failure: report.failure }));
