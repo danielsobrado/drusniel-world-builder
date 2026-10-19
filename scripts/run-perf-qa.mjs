@@ -415,6 +415,11 @@ const fs = require('fs');
       screenshot: ${JSON.stringify(screenshotReportPath)},
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
     };
+    // On-demand accounting after movement AND recovery; never in frame timing.
+    if (${hasFlag('resources')}) report.capture.resourcesAfterRecovery = await page.evaluate(async () => {
+      const { trackedWorldResources } = await import('/src/editor/performance/qa/WorldVisualResources.js');
+      return trackedWorldResources(window.__editor);
+    });
     ${screenshotPath === null ? '' : `await page.screenshot({ path: ${JSON.stringify(screenshotPath.replace(/\\/g, '/'))} });`}
     report.capture.browserErrors = browserErrors.snapshot();
     report.capture.focus = await captureFocus();

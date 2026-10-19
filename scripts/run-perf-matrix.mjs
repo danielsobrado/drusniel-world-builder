@@ -116,6 +116,7 @@ for (const entry of waterOnly ? [] : cases) {
     '--out', outPath,
   ];
   if (entry.id === 'construction-ring') args.push('--x', '0', '--z', '-100', '--yaw', '180');
+  if (hasFlag('resources')) args.push('--resources');
   if (headed) args.unshift('--headed');
   const execution = await runScript('scripts/run-perf-qa.mjs', args);
   const report = fs.existsSync(outPath)
