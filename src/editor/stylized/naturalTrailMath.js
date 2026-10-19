@@ -48,15 +48,44 @@ function fieldAt(worldX,worldZ,settings) {
     + Math.sin((warpedX + warpedZ) * 0.47 - 0.6) * 0.15;
 }
 
+/** Analytic gradient in field coordinates; divide by it to obtain path width
+ * in space rather than letting low-gradient areas become broad bare plazas. */
+function gradientAt(worldX, worldZ, settings) {
+  const x = worldX * settings.scale, z = worldZ * settings.scale;
+  const u = x + Math.sin(z * 0.73 + 1.7) * settings.warp;
+  const v = z + Math.sin(x * 0.61 - 2.3) * settings.warp;
+  const shared = Math.cos((u + v) * 0.47 - 0.6) * 0.0705;
+  const du = Math.cos(u) * 0.52 + shared;
+  const dv = Math.cos(v * 0.83 + 1.1) * 0.2739 + shared;
+  return { x: du + dv * Math.cos(x * 0.61 - 2.3) * settings.warp * 0.61,
+    z: dv + du * Math.cos(z * 0.73 + 1.7) * settings.warp * 0.73 };
+}
+
+export function naturalTrailGradientAt(x, z, config = {}) {
+  const settings = normalizeNaturalTrailConfig(config);
+  const gradient = gradientAt(x, z, settings);
+  return { x: gradient.x * settings.scale, z: gradient.z * settings.scale };
+}
+
+export function naturalTrailGradientBound(settings) {
+  const warp = Math.abs(settings.warp);
+  return .52 * (1 + .73 * warp) + .2739 * (1 + .61 * warp) + .0705 * (2 + 1.34 * warp);
+}
+
+function contourDistanceAt(x, z, settings) {
+  const gradient = gradientAt(x, z, settings);
+  // Bounded at critical points, where the first-order distance approximation
+  // ceases to be reliable. The identical guard lives in the TSL path mask.
+  return Math.abs(fieldAt(x, z, settings) - settings.level) / Math.max(.08, Math.hypot(gradient.x, gradient.z));
+}
+
 export function naturalTrailMaskAt(worldX, worldZ, config = {}) {
   return maskAt(worldX,worldZ,normalizeNaturalTrailConfig(config));
 }
 
 function maskAt(worldX,worldZ,settings) {
   if (!settings.enabled) return 0;
-  const distance = Math.abs(
-    fieldAt(worldX, worldZ, settings) - settings.level,
-  );
+  const distance = contourDistanceAt(worldX, worldZ, settings);
   const transition = Math.min(1, Math.max(
     0,
     (distance - settings.width) / settings.softness,
