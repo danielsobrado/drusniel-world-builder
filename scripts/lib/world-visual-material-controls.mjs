@@ -95,8 +95,9 @@ export async function setVisualMaterialControl(page, control = 'restore') {
     await editor.terrainView.renderer.compileAsync(scene, editor.viewModeController.camera);
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return { control, objects: state.meshes.length, materials: state.materials.size,
-      interpretation: control === 'albedo' ? 'Unlit material color graph; output atmosphere and display finishing retained.' :
-        'Only the named terrain input changes; other scene layers and display finishing retained.',
+      interpretation: ['terrain-matte', 'terrain-flat-normals'].includes(control)
+        ? 'Only terrain roughness/normal changes; fog, other scene layers and finishing retained.'
+        : 'Diagnostic unlit color graph without material distance fog; output atmosphere, other layers and finishing retained.',
       camera: editor.viewModeController.camera.position.toArray() };
   }, control);
 }

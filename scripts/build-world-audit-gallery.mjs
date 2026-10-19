@@ -5,6 +5,9 @@ import sharp from 'sharp';
 // Browsing derivatives only; the capture PNGs and their hashes stay untouched.
 const out = path.resolve(process.argv[2] ?? 'docs/qa/visual-audit-2026-10-18');
 const report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
+const captureDate = new Date(report.startedAt ?? '2026-10-18').toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+});
 const planLink = path.relative(out, path.resolve(process.argv[3] ?? 'docs/plans/aaa-look-and-feel-plan-2026-10-18.md')).replaceAll('\\', '/');
 if (!report.poses?.length) throw new Error('The report contains no captured poses.');
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
@@ -36,15 +39,15 @@ const cards = report.poses.map(p => `<article>
 </article>`).join('\n');
 await writeFile(path.join(out, 'index.html'), `<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>World visual audit · October 18, 2026</title>
+<title>World visual audit · ${escape(captureDate)}</title>
 <style>
 body{margin:0;background:#101a20;color:#e7eded;font:16px/1.5 system-ui,sans-serif}
 header{max-width:1200px;margin:auto;padding:32px 24px}h1{margin:0}a{color:#b7dcde}
 main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px;padding:24px}
 article{background:#1b292f;border-radius:8px;overflow:hidden}img{display:block;width:100%;height:auto}
 h2{font-size:18px}article h2,article p{margin:12px 18px}
-</style><header><h1>World visual audit · October 18, 2026</h1>
-<p>${report.poses.length} views · source ${escape(report.sourceSha?.slice(0, 8))} · seeded selection ${report.seed} · ${report.viewport.width} × ${report.viewport.height}</p>
+</style><header><h1>World visual audit · ${escape(captureDate)}</h1>
+<p>${report.poses.length} captured / ${report.requestedPoses?.length ?? report.poses.length} requested views · source ${escape(report.sourceSha?.slice(0, 8))} · seeded selection ${report.seed} · ${report.viewport.width} × ${report.viewport.height}</p>
 <p>Unedited renderer captures. Clean and HUD images are successive frames. Capture validity: ${report.captureValid === true ? 'passed' : 'incomplete or failed'}; this is not a performance verdict.</p>
 <p><a href="${escape(planLink)}">Detailed improvement plan</a> · <a href="contact-sheet.jpg">Contact sheet</a> · <a href="report.json">Capture metadata</a></p></header>
 <main>${cards}</main></html>\n`);
