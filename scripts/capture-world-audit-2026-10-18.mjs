@@ -61,9 +61,9 @@ if (only) {
 }
 const report = { schemaVersion: 1, kind: 'visual-audit', startedAt: new Date().toISOString(),
   viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, seed,
-  selection: 'First encountered point for each land biome in seeded random cell samples, then two fixed coast supplements and four seeded imported-view choices.',
+  selection: replay?.selection ?? 'First encountered point for each land biome in seeded random cell samples, then two fixed coast supplements and four seeded imported-view choices.',
   sampledCandidates: replay?.sampledCandidates ?? sampled, generator: replay?.generator ?? generator.toMetadata(), lighting: { preset: 'highfield', hour: 12, weather: 'off' },
-  replayManifest: replayPath ?? null, only: only ?? null,
+  replayManifest: replayPath ?? null, only: only ?? null, reloadPerPose: process.env.AAA_AUDIT_RELOAD === '1',
   requestedPoses: poses, poses: [], failures: [], artifacts: [] };
 await writeFile(path.join(out, 'manifest.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ sampled, poses: poses.map(p => ({ id: p.id, x: p.x, z: p.z, biome: p.expectedBiomeId })) }));
@@ -104,6 +104,12 @@ try {
   let world = 'procedural';
   for (const pose of poses) {
     console.log(`Capturing ${pose.id}: ${pose.name}`);
+    if (report.reloadPerPose && pose !== poses[0]) {
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
+      await page.evaluate(() => window.__worldVisualQa.setLighting());
+      world = 'procedural';
+    }
     if (pose.world !== world) {
       await page.evaluate(name => window.__worldVisualQa.loadWorld(name), pose.world);
       await page.evaluate(() => window.__worldVisualQa.setLighting());
