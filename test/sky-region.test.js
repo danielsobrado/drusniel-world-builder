@@ -8,7 +8,7 @@ import {
   skyPersonality,
   skyRegionAt,
 } from '../src/editor/stylized/sky/skyRegionClimate.js';
-import { regionalSkyLook } from '../src/editor/stylized/sky/regionalSkyLook.js';
+import { regionalSkyLook, boundRegionalFogScale } from '../src/editor/stylized/sky/regionalSkyLook.js';
 
 const LOOK = Object.freeze({
   lowColor: '#c5e7df', highColor: '#438ec5', sunColor: '#fff0c9', sunGlowColor: '#ffe8ad',
@@ -84,6 +84,23 @@ test('regional air is relative: a night sky stays dark', () => {
   });
   assert.ok(luminance(desert.highColor) < 40);
   assert.ok(luminance(desert.lowColor) < 70);
+});
+
+test('overlapping regional extinction preserves middle-distance contrast and weather scale', () => {
+  assert.equal(boundRegionalFogScale(1, 1), 1);
+  assert.equal(boundRegionalFogScale(.55, 1), .55);
+  assert.equal(boundRegionalFogScale(0, 0), 0);
+  let previous = 1;
+  for (const combined of [1.1, 1.7, 2.6, 4.61, 12]) {
+    const actual = boundRegionalFogScale(combined, 1);
+    assert.ok(actual > previous && actual < 2.4);
+    assert.ok(actual < combined);
+    assert.equal(boundRegionalFogScale(combined * 2, 2), actual * 2);
+    previous = actual;
+  }
+  const density = .0015 * boundRegionalFogScale(4.61, 1);
+  const transmissionAt300m = Math.exp(-(density * 300) ** 2);
+  assert.ok(transmissionAt300m > .4, 'wetland air must retain visible middle-distance contrast');
 });
 
 test('the controller eases toward a travelled region and snaps on a jump', async () => {

@@ -125,7 +125,20 @@ export function regionalSkyLook(look, region) {
   result.fogDensityScale *= 1 + 0.5 * (personality.haze ?? 0);
   result.cloudDensity -= 0.2 * (personality.cloudiness ?? 0);
   result.cloudOpacity = Math.max(0, Math.min(1, result.cloudOpacity + 0.12 * (personality.cloudiness ?? 0)));
-  return applyRegionalCharacter(result, airCharacter(region));
+  const resolved = applyRegionalCharacter(result, airCharacter(region));
+  resolved.fogDensityScale = boundRegionalFogScale(resolved.fogDensityScale, look.fogDensityScale);
+  return resolved;
+}
+
+/** Climate, personality and humid-air extinction describe overlapping air.
+ * Compress their combined excess instead of letting three multipliers erase
+ * the same middle distance. Local valley mist retains its separate structure;
+ * weather and the time-of-day base still own their full density response. */
+export function boundRegionalFogScale(combined, base) {
+  if (!(base > 0) || combined <= base) return combined;
+  const excess = combined / base - 1;
+  const headroom = 1.4;
+  return base * (1 + headroom * excess / (headroom + excess));
 }
 
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
