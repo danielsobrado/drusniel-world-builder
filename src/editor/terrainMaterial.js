@@ -12,6 +12,7 @@ import {
   max,
   mix,
   oneMinus,
+  output,
   positionLocal,
   positionWorld,
   sin,
@@ -19,6 +20,7 @@ import {
   uv,
   vec2,
   vec3,
+  vec4,
 } from 'three/tsl';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
@@ -486,7 +488,10 @@ export function createTerrainMaterial({
       })
       : null;
     if (fog) {
-      material.colorNode = mix(material.colorNode, fog.color, fog.amount);
+      // In-scattered light is radiance, not terrain reflectance. Blending it
+      // into albedo let sun/fill light the mist again, painting pale ground bands.
+      const lit = material.outputNode ?? output;
+      material.outputNode = vec4(mix(lit.rgb, fog.color, fog.amount), lit.a);
     }
     // Jungle ground mist, blended over the lit output like the grass and trees
     // that stand in it; a zero region weight skips it with one compare.

@@ -2102,7 +2102,14 @@ stylizedSurface:
       quality: 1
       steps: 6
       maxDistance: 56
-      nearClear: [3, 10]
+      nearClear: [8, 24]
+      # Low pockets retain the ground's value hierarchy at ordinary noon exposure.
+      # Mist is composed as radiance after surface lighting, never as pale albedo.
+      density: 0.018
+      height: 2.5
+      ceiling: 9
+      scatter: 0.35
+      sunScatter: 0.18
     groundLightColor: '#6f784d'
     ambientIntensity: 2.0
     # Share of highColor's saturation the sky light keeps, at the same
