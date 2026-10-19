@@ -1,6 +1,6 @@
 # Next visual pass implementation — October 19, 2026
 
-Status: **implementation delivered; merged visual/performance acceptance in progress**.
+Status: **implementation delivered; performance unverified by user choice**.
 Implements the [random-biome review plan](plans/aaa-next-pass-plan-2026-10-18.md).
 The [baseline gallery](qa/random-world-review-2026-10-18/index.html) contains eighteen
 views; fourteen are error-free and four cold-biome images are diagnostic due to
@@ -9,19 +9,19 @@ the recorded collider ownership failure. Runtime work starts from `3575b90e`
 
 ## Delivery status
 
-| Package | Current result | Remaining acceptance |
+| Package | Implementation | Validation and limits |
 | --- | --- | --- |
-| Q0 collision | Conservative trunk bounds retain the canonical placement anchor; glacier and movement replays have no collision errors | Merged movement replay |
-| N0 evidence | Eighteen-view implementation replay passes; fog/material controls and comparison sliders retained | Merged gallery |
-| N1 distance | Regional extinction bounded; valley mist composes radiance after lighting; four-light mist contracts pass on both backends | Merged world review and timing |
-| N2 paths | Contour-gradient normalization; shared terrain/grass/flower/clearance width; GPU path, LOD and continuity fixtures pass | Merged motion and timing |
-| N3 trees/floor | Bark grade, measured root-plate seating, active burial configuration, litter/understory rebalance; all 29 atlases rebuilt after merge | Merged tree fixture and contact review |
-| N4 habitats | Separate woodland pigments, species eligibility, reed/broadleaf motion response, embedded rocks; deterministic distribution and residency checks pass | Merged cold-biome looks and timing |
-| N5 shores | Body-aware damp-bank roughness; original river and true marine ID 0 replay pass before merge; explicit relief separated from reflectance | Merged river controls and water route |
-| N6 surfaces | Metric relief derivatives; substrate separation; filtered interrupted cover marks; four-light material and temporal fixtures pass | Merged relief review and timing |
+| Q0 collision | Conservative trunk bounds retain the placement anchor without changing the actual capsule | Twenty focused checks; glacier replay and five movement clips have no collision errors |
+| N0 evidence | Eighteen ready/error-free implementation images, controls, original failures and comparison sliders retained | Four of nine implementation batches lost native foreground; their images are diagnostic despite the legacy capture flag |
+| N1 distance | Bounded regional extinction; valley mist composes radiance after lighting | Merged four-light surface/mist fixtures pass on both backends; no timing claim |
+| N2 paths | Contour-gradient normalization shared by terrain, grass, flowers and clearance | CPU/TSL parity, path GPU fixture, deterministic placement, LOD and continuity checks pass |
+| N3 trees/floor | Bark grade, measured root-plate seating, active burial, litter/understory rebalance; 29 atlases rebuilt after merge | Three root-contact views retain native focus; merged four-light tree fixtures pass on both backends |
+| N4 habitats | Separate pigments, species eligibility, reed/broadleaf motion response, embedded rocks | Distribution/residency tests and pre-merge movement pass; incoming biome snow validated by full tests and merged tree fixtures |
+| N5 shores | Body-aware damp-bank roughness; explicit relief separated from reflectance | Pre-merge river and submerged marine replay pass with native focus; merged river images are diagnostic, including an invalid reflection probe |
+| N6 surfaces | Metric derivatives; substrate separation; filtered interrupted cover marks; pigment excluded from physical bump height | Merged surface fixtures pass 504 checks; submerged diagnostic replay visibly removes rectangular bump marks |
 | N7 geography | Conditional package not activated: no existing/imported geography regenerated | Future landmarks require separately versioned geography and route evidence |
-| N8 feel | Five motion clips pass 85 checks; HUD passes 29 checks at four sizes; motion contact sheets reviewed | Merged motion; human sound-mix judgment remains ungraded |
-| N9 release | Merged full verification passes: 6,909 tests, lint, UI generation, required assets and production build | Clean matched hardware matrices and resource comparison |
+| N8 feel | Five motion clips pass 85 checks; HUD passes 29 checks at four sizes; contact sheets reviewed | Motion is at `dbfbf83e`; no human sound-mix or all-quality-tier art approval is claimed |
+| N9 release | Full verification, required assets and targeted shader checks; strict capture/focus gates and post-recovery resource accounting | Matched timing/resource comparison cancelled before start at the user's request; performance remains unverified |
 
 ## Changes and evidence
 
@@ -41,7 +41,8 @@ bound. Its preparation signature changes to `paths2`. Seventeen focused tests
 pass, including numerical gradient checks at imported-world coordinates, physical
 shoulder width and stable worker/main grass exclusion. The first combined world
 batch (`first-slice/`, source `5d6f6420`) captures 03, 05, 06 and the previously
-failing 11 with full readiness and zero errors. GPU path checks remain required.
+failing 11 with full readiness and zero errors. The later GPU path fixture passes
+on WebGPU and WebGL.
 
 N1 compresses the excess contribution of climate, regional personality and humid
 air to a bounded regional multiplier. Neutral and clear air are unchanged;
@@ -52,8 +53,8 @@ regional contribution retains over 40% transmission there. That is an analytic
 control, not a screenshot or performance result. Sky/region tests pass.
 
 Original screenshots are unretouched. Visual capture, movement recording and
-hardware timing are separate workloads. Unfinished packages above are not
-claimed as delivered.
+hardware timing are separate workloads. Implementation does not establish
+artistic approval or measured performance acceptance.
 
 ## Material and habitat implementation
 
@@ -113,7 +114,9 @@ boundaries, including canonical-coordinate quantization on imported maps,
 became rectangular bump highlights. The physical normal now receives the
 explicit feature height only; family pigment remains in the surface colour.
 This adds no texture, sampler, pass or geometry. Sixty focused terrain
-material checks pass. The merged river controls determine its visual result.
+material checks pass. The submerged replay removes the conspicuous rectangular
+bump highlights. The merged river's foreground/reflection failures mean its
+material appearance is not accepted as a final production look.
 
 ## Review artifacts and merged scope
 
@@ -125,7 +128,15 @@ use the original unretouched PNGs. Later
 and [marine/river supplements](qa/aaa-next-pass-implementation-2026-10-19/supplements/index.html)
 use `dbfbf83e`. These stages are retained independently, not relabelled as the
 latest source. The real marine supplement is ID 0; the original coast cameras
-sit in ID 4.
+sit in ID 4. Its actual camera Y is -6.579 m: this is a submerged marine view,
+not an above-water panorama. The coast views provide the surface-water review.
+
+The eighteen-view report predates the strict focus verdict: batches 02, 03,
+05 and 06 lost native foreground (nine images total), although DOM focus
+remained true. Its historical `captureValid: true` is retained, with the
+foreground failure displayed in the gallery and durable summary. Those images
+are diagnostic. The separate root-contact and pre-merge supplement reports
+retain native focus. No screenshot is a frame-timing measurement.
 
 The pre-merge motion report covers seasonal forest, deciduous first/third
 person, wetland and a synthetic route with actual eviction/return and origin
@@ -139,8 +150,47 @@ no new sound mix or camera controller was introduced.
 
 The requested pull/merge/push brought in per-biome snow/canopy looks and grass
 ground integration (`62ddd418`). The root configuration correction and relief
-separation produce frozen runtime `f7dc2b53` for final replay and timings.
+separation produce frozen runtime `f7dc2b53` for final shader fixtures and replay.
 Canonical terrain identities and custom-biome persistence are unchanged.
+
+## Final validation and handoff
+
+The merged runtime passes 504 surface/mist checks and 1,144 tree checks across
+daylight, low sun, overcast and night, on hardware WebGPU and WebGL, with zero
+browser errors. The required atlas validator passes after rebuilding all 29
+prototypes. Full verification includes lint, generated UI, production assets,
+unit tests and the production build. The final `npm run verify` passes all
+6,909 tests. The final rerun also fixes a pre-existing
+parallel-test race: the relief generator's determinism test now writes to a
+temporary output instead of briefly truncating the shared generated module.
+The original failure and focused retry logs are retained.
+
+The [evidence index](qa/aaa-next-pass-implementation-2026-10-19/index.html) links
+the galleries, controls, videos and reports. The
+[tracked validation summary](plans/aaa-next-pass-2026-10-19-validation.json)
+records source/report hashes and separates verified results from diagnostics.
+Original media stays in the intentionally ignored `docs/qa/` directory.
+
+The merged marine/river batch produced two ready, error-free images but lost
+native foreground. Its river reflection probe was invalid and still located at
+the preceding marine pose. Those images are diagnostic; they do not approve the
+river's colour or reflections. The additional merged gallery stopped after
+three ready/error-free diagnostic images; the remaining optional replay and
+movement reruns were cancelled during finalization. Earlier complete-stage
+evidence remains separately labelled. No failed attempt is promoted to a pass.
+
+The user selected **“Finish and mark timing unverified.”** The queued matched
+baseline/candidate matrices were cancelled before starting. The earlier
+exploratory matrix is excluded from acceptance. There is no new FPS, frame
+ceiling, memory-equivalence or three-round regression claim. Future timing can
+use `--resources` to sample tracked arrays/textures after movement and recovery;
+it adds no accounting work to measured frames. Driver allocations and shader
+caches are outside that accounting.
+
+Remaining review is explicit: uninterrupted hardware timing, a fresh river
+capture with a valid destination reflection probe, low/balanced/high artistic
+review, and human listening for the sound mix. N7's optional geography/content
+expansion was not activated; existing and imported worlds retain their shapes.
 
 ## Capture and timing caveats
 

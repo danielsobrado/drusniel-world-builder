@@ -10,7 +10,7 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&a
 const relative = file => path.relative(afterDir, file).replaceAll('\\', '/');
 const baseline = new Map(before.poses.map(pose => [pose.id, pose]));
 const foreground = report => report.focus?.passed ?? (report.batches?.some(b => b.focus?.passed === false)
-  ? false : report.batches?.every(b => b.focus?.passed === true) ? true : null);
+  ? false : report.batches?.length && report.batches.every(b => b.focus?.passed === true) ? true : null);
 const shots = after.poses.map(pose => {
   const old = baseline.get(pose.id), current = `${pose.id}.png`;
   const oldImage = old ? relative(path.join(beforeDir, current)) : null;

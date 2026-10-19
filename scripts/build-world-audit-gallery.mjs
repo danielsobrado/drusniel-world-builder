@@ -6,7 +6,7 @@ import sharp from 'sharp';
 const out = path.resolve(process.argv[2] ?? 'docs/qa/visual-audit-2026-10-18');
 const report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
 const nativeFocus = report.focus?.passed ?? (report.batches?.some(b => b.focus?.passed === false)
-  ? false : report.batches?.every(b => b.focus?.passed === true) ? true : null);
+  ? false : report.batches?.length && report.batches.every(b => b.focus?.passed === true) ? true : null);
 const captureDate = new Date(report.startedAt ?? '2026-10-18').toLocaleDateString('en-US', {
   year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
 });

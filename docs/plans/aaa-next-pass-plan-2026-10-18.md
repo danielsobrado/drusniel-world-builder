@@ -2,6 +2,11 @@
 
 Date: **October 18, 2026**. Status: **implementation authorized October 19; baseline review retained below**.
 
+Implementation results: [delivery and limits](../aaa-next-pass-implementation-2026-10-19.md)
+and [validation summary](aaa-next-pass-2026-10-19-validation.json).
+The visual implementation is delivered; matched timing was cancelled at the
+user's request and remains unverified. Conditional geography was not activated.
+
 The next visual pass should make the world feel like a connected landscape:
 readable middle distances, materials that belong together, convincing contact
 between trees and soil, and habitats that remain recognizable while walking.
