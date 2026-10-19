@@ -1,0 +1,76 @@
+{
+  "kind": "partial-instance-webgpu-correctness",
+  "sourceSha": "7d8aa03f",
+  "timingAcceptance": "unverified",
+  "headless": false,
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace"
+  },
+  "stages": [
+    {
+      "count": 3,
+      "webgpu": true
+    },
+    {
+      "count": 3,
+      "webgpu": true
+    },
+    {
+      "count": 2,
+      "webgpu": true
+    }
+  ],
+  "errors": [],
+  "pixelChecks": [
+    {
+      "stage": 0,
+      "actual": [
+        255,
+        255,
+        255,
+        0
+      ],
+      "expected": [
+        255,
+        255,
+        255,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "stage": 1,
+      "actual": [
+        0,
+        255,
+        255,
+        255
+      ],
+      "expected": [
+        0,
+        255,
+        255,
+        255
+      ],
+      "passed": true
+    },
+    {
+      "stage": 2,
+      "actual": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "expected": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

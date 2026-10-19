@@ -121,6 +121,7 @@ When a run finishes, the report is available as:
 | `chunk-cross` | Long forward run intended to cross chunk boundaries |
 | `edited-world` | Authored biome/height patches, a distant override, and paint/sculpt every three seconds during diagonal movement |
 | `object-town` | Deterministic 64/256-building masonry town; set `buildings=64` or `256` |
+| `settlement-approach` | Frozen Eldara map, imported burg 18; approach its main street. `--revisit --turn-on-revisit` repeats in the same browser and turns the camera 180 degrees halfway through the return run. |
 | `construction-ring` | Twelve deterministic 96 m wall constructions around a clear movement corridor (see the note below before using it to measure walls) |
 | `water-acceptance` | External phase driver: dry → swim → dive → surface → dry |
 
@@ -181,7 +182,7 @@ Report kind: `simcity-dnd-perf-qa` (version `2`).
 | Script | Role |
 |--------|------|
 | `npm run qa:perf` | `scripts/run-perf-qa.mjs` — Playwright Chromium, waits for `window.__perfQa.status === 'done'`, writes `tmp/perf-qa-latest.json` |
-| `npm run qa:perf:matrix` | Runs standard/dense-forest/high-grass/dense-mixed plus the construction corridor, then the deterministic water acceptance route; writes `tmp/perf-matrix-latest.json` |
+| `npm run qa:perf:matrix` | Runs standard/dense-forest/high-grass/dense-mixed, the construction corridor, imported settlement approach and camera-turn revisit, then the deterministic water acceptance route; writes `tmp/perf-matrix-latest.json` |
 | `npm run qa:perf:parse` | `scripts/parse-perf-qa.mjs` — prints a short summary from a report or CDP extract JSON |
 
 `--resources` on the movement runner or matrix records
@@ -200,7 +201,19 @@ The matrix is a gate, not only a batch runner. It exits non-zero unless:
   two seconds after stopping, and finish recovery with no missing or
   below-density in-view grass tiles;
 - the construction corridor had at least 12 resident wall modules and non-zero masonry;
+- the imported settlement workload was active and its same-browser camera-turn revisit passed the frame, collision, settling and meadow recovery gates;
 - the water route passed entry, swim, dive, surface, dry-exit, caustic, origin, and frame gates.
+
+The direct movement runner also exits non-zero on initial or revisit settling
+timeout, after saving the diagnostic report. A timed-out capture is not acceptance
+evidence. Matrix summaries retain `measuredCounters` for actual meadow page
+publication, repacking, mandatory origin maintenance, deferred pages, settlement
+plan/index work, placement evaluations and instance-row comparisons. Source
+admission bytes and actual page-write bytes are separate measurements.
+
+Deterministic CPU work-count comparisons for these paths are recorded in
+[critical-path-review-fixes-2026-10-19.md](critical-path-review-fixes-2026-10-19.md).
+They do not replace hardware frame pacing or scenery-recovery acceptance.
 
 The verdict and any failure messages are stored in `gate` inside
 `tmp/perf-matrix-latest.json`. The runner also owns

@@ -1,0 +1,52 @@
+{
+  "kind": "critical-path-work-counts",
+  "timingAcceptance": "unverified",
+  "baseline": {
+    "objectEdit": {
+      "objects": 256,
+      "classified": 256,
+      "matricesRead": 256,
+      "rewrittenBands": 3
+    },
+    "settlement": {
+      "placements": 1000,
+      "largestClassificationUnit": 1000,
+      "settledCycleClassified": 1000,
+      "settledCycleMatricesRead": 1000
+    },
+    "grass": {
+      "sourceTiles": 48,
+      "survivingTiles": 45,
+      "stems": 57216,
+      "repackBytesPerFrame": [
+        3010560
+      ]
+    }
+  },
+  "candidate": {
+    "objectEdit": {
+      "objects": 256,
+      "classified": 1,
+      "matricesRead": 1,
+      "rewrittenBands": 1
+    },
+    "settlement": {
+      "placements": 1000,
+      "largestClassificationUnit": 32,
+      "settledCycleClassified": 1000,
+      "settledCycleMatricesRead": 0
+    },
+    "grass": {
+      "sourceTiles": 48,
+      "survivingTiles": 45,
+      "stems": 57216,
+      "repackBytesPerFrame": [
+        1010688,
+        1003520,
+        996352
+      ]
+    }
+  },
+  "baselineSourceSha": "b2a23b9f9c743a8c49442f3b860271883921c402",
+  "candidateSourceSha": "7d8aa03fedb7c279460c496302bd27e7b28ed29e"
+}
