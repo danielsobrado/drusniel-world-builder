@@ -86,6 +86,11 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       lodThinning: uniform(appearance.lodThinning),
       lodCompensation: uniform(appearance.lodCompensation),
       lodWidenMax: uniform(appearance.lodWidenMax),
+      canopyTipMix: uniform(appearance.canopyTipMix),
+      canopyStrength: uniform(appearance.canopyStrength),
+      meltStart: uniform(appearance.meltStart),
+      meltEnd: uniform(appearance.meltEnd),
+      meltFlatten: uniform(appearance.meltFlatten),
     },
     // The tuft field's shaping (meadowTuftField.js), live.
     tufts: Object.fromEntries(Object.entries(settings.tufts ?? MEADOW_TUFT_DEFAULTS)

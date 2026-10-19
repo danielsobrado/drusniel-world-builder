@@ -2,6 +2,7 @@ import enhancementsSource from '../../config/render-enhancements.yaml?compiled';
 import { resolveRenderEnhancements } from './RenderEnhancements.js';
 import ambientEffectsConfigSource from '../../config/ambient-effects.yaml?compiled';
 import azgaarGuidanceConfigSource from '../../config/azgaar-guidance.yaml?compiled';
+import biomeLooksConfigSource from '../../config/biome-looks.yaml?compiled';
 import collisionConfigSource from '../../config/collision.yaml?compiled';
 import culturesConfigSource from '../../config/cultures.yaml?compiled';
 import configSource from '../../editor.config.yaml?compiled';
@@ -16,6 +17,8 @@ import { resolveWeatherEffects } from '../editor/weather/WeatherEffectsConfig.js
 import { createCollisionConfig } from '../editor/collision/CollisionConfig.js';
 import { registerCollisionConfig } from '../editor/collision/CollisionPlayerBridge.js';
 import { createTerrainMaterialBakeConfig } from '../editor/materials/TerrainMaterialBakeConfig.js';
+import { resolveBiomeLooks } from '../editor/biomes/BiomeLooks.js';
+import { applyBiomeLooks } from '../editor/biomes/applyBiomeLooks.js';
 import { resolveSurfaceWetnessConfig } from '../editor/weather/surfaceWetnessConfig.js';
 import { resolveAmbientEffectsConfig } from '../editor/stylized/ambient/ambientEffectsConfig.js';
 import {
@@ -55,9 +58,13 @@ export function loadEditorConfig() {
   config.weatherEffects = resolveWeatherEffects(structuredClone(weatherEffectsConfigSource));
   config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;
   config.import.azgaarGuidance = structuredClone(azgaarGuidanceConfigSource);
-  config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(
-    structuredClone(terrainMaterialBakeConfigSource),
-  );
+  // Each biome's look (config/biome-looks.yaml) hands the terrain, grass, trees
+  // and air their columns before any of them is resolved.
+  const terrainMaterialBakeSource = structuredClone(terrainMaterialBakeConfigSource);
+  const biomeSnow = new URLSearchParams(runtimeSearch()).get('biomeSnow') !== '0';
+  applyBiomeLooks(config, terrainMaterialBakeSource,
+    resolveBiomeLooks(structuredClone(biomeLooksConfigSource)?.biomeLooks, { snow: biomeSnow }));
+  config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(terrainMaterialBakeSource);
   config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness);
   config.stylizedSurface.ambientEffects = resolveAmbientEffectsConfig(
     structuredClone(ambientEffectsConfigSource)?.ambientEffects,

@@ -3,11 +3,14 @@ import test from 'node:test';
 import * as THREE from 'three';
 import {
   FOREST_AUTUMN_TARGETS,
-  FOREST_BIOME_TARGETS,
   FOREST_LEAF_TINT_UNTINTED,
   createForestLeafTintTable,
 } from '../src/editor/stylized/forest/forestLeafTint.js';
 import { FOREST_SPECIES_PALETTES } from '../src/editor/stylized/forest/ForestSpeciesGeometry.js';
+import { loadBiomeLooks } from './helpers/biomeLooks.js';
+
+const LOOKS = loadBiomeLooks();
+const FOREST_BIOME_TARGETS = LOOKS.canopy;
 
 function config(autumnGroves) {
   return {
@@ -15,6 +18,7 @@ function config(autumnGroves) {
       autumnGroves,
       leafTop: '#5c8338',
     },
+    biomeLooks: LOOKS,
   };
 }
 

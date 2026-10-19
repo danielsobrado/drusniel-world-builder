@@ -29,7 +29,9 @@ import {
 import {
   TREE_COLOR_VARIATION_MIN,
   TREE_COLOR_VARIATION_RANGE,
+  unpackImpostorWidthNode,
 } from '../forest/TreeAppearance.js';
+import { applyCanopySnow, canopySnowCap } from '../forest/canopySnow.js';
 import { orientedScreenDitherThreshold } from '../lod/screenDither.js';
 import { assignTreeFoliageMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
@@ -46,7 +48,8 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const parameters = readParameters();
   const appearance = readAppearance();
   const scale = transform.w;
-  const widthScale = appearance.x;
+  // Crown width and canopy snow share x (TreeAppearance.packImpostorWidth).
+  const { width: widthScale, snow: canopySnow } = unpackImpostorWidthNode(appearance.x);
   const right = normalize(cameraRight);
   const up = normalize(mix(vec3(0, 1, 0), cameraUp, sphericalBlend));
   const normalUp = normalize(cameraUp);
@@ -126,10 +129,15 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
 
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.positionNode = worldPosition;
-  material.colorNode = albedo.rgb.mul(colorMultiplier);
-  if (atlas.foliageLighting) {
-    material.emissiveNode = treeFoliageEmission(material.colorNode).mul(foliageMask);
-  }
+  const crown = albedo.rgb.mul(colorMultiplier);
+  // The crown's snow cap, on the atlas's own normals and only on foliage texels.
+  const snowed = applyCanopySnow({
+    color: crown,
+    emissive: atlas.foliageLighting ? treeFoliageEmission(crown).mul(foliageMask) : null,
+    cap: canopySnowCap(canopySnow.mul(foliageMask), worldNormal.y),
+  });
+  material.colorNode = snowed.color;
+  material.emissiveNode = snowed.emissive;
   material.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   // Keep atlas alpha stable at full coverage. Feeding it into the stochastic
   // fade threshold re-dithered every soft foliage edge in screen space and made

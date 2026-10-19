@@ -79,3 +79,33 @@ test('shipped woodland and tundra pigments remain distinct within the eight-pale
  assert.equal(settings.palette.palettes.length,8);
  assert.notDeepEqual(colors.roots.subarray(10*3,11*3),colors.roots.subarray(9*3,10*3));
 });
+
+test('canopy colour sits between blade root and tip, and its strength follows stand density', () => {
+  const plain = structuredClone(config);
+  plain.grass.meadow.groundDetail = { enabled: false };
+  plain.grass.meadow.appearance = { groundTipMix: 0.08, canopyTipMix: 0.4, canopyStrength: 0.8 };
+  const palette = createMeadowGroundPalette(plain);
+  const growth = resolveMeadowGrassConfig(plain.grass.meadow).growth;
+  for (const id of [3, 4, 9, 254]) {
+    const colors = config.grass.meadow.palette.byTileId[id] ?? config.grass.meadow.palette;
+    const root = new Color(colors.base).lerp(new Color(colors.tip), 0.08).multiplyScalar(1.2);
+    const tip = new Color(colors.tip).multiplyScalar(1.2);
+    const expected = root.clone().lerp(tip, 0.4).toArray();
+    const canopy = palette.canopies.subarray(id * 4, id * 4 + 4);
+    expected.forEach((channel, index) => assert.ok(Math.abs(channel - canopy[index]) < 1e-6));
+    const density = growth.profiles[growth.table[id]].density;
+    assert.ok(Math.abs(canopy[3] - 0.8 * density) < 1e-6);
+    // The far bake is the ground at a grazing view: root leaning to canopy by that strength.
+    for (let channel = 0; channel < 3; channel++) {
+      const root = palette.roots[id * 3 + channel];
+      assert.ok(Math.abs(palette.far[id * 3 + channel] - (root + (canopy[channel] - root) * canopy[3])) < 1e-6);
+    }
+  }
+});
+
+test('zero canopy strength keeps the far bake on the substrate root', () => {
+  const off = structuredClone(config);
+  off.grass.meadow.appearance = { groundTipMix: 0.08, canopyStrength: 0 };
+  const palette = createMeadowGroundPalette(off);
+  assert.deepEqual([...palette.far], [...palette.roots]);
+});

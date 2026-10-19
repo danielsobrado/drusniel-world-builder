@@ -1,6 +1,9 @@
 import { sampleTilesAround } from '../../world/sampleTilesAround.js';
 
-/** Tundra reads as partly snow country, glacier as wholly. */
+/**
+ * Tundra reads as partly snow country, glacier as wholly, when no biome look
+ * table (config/biome-looks.yaml `snow.air` / `snow.fall`) is given.
+ */
 const SNOW_TILE_WEIGHT = Object.freeze({ 10: 0.6, 11: 1 });
 const SAMPLE_RINGS = [0, 60, 180];
 const SAMPLE_DIRECTIONS = 8;
@@ -17,9 +20,9 @@ function smoothstep(edge0, edge1, value) {
  * terrain draws. Measured from the ground below the camera, so an orbit
  * camera high over a meadow is still over a meadow.
  */
-export function snowCountryWeight({ tiles, groundHeight, snowLine, snowFade }) {
+export function snowCountryWeight({ tiles, groundHeight, snowLine, snowFade, byTile = SNOW_TILE_WEIGHT }) {
   let biome = 0;
-  for (const tile of tiles) biome += SNOW_TILE_WEIGHT[tile] ?? 0;
+  for (const tile of tiles) biome += byTile[tile] ?? 0;
   biome = tiles.length ? biome / tiles.length : 0;
   const altitude = Number.isFinite(groundHeight)
     ? smoothstep(snowLine - snowFade, snowLine + snowFade, groundHeight)
@@ -36,14 +39,20 @@ export class SnowCountryWeight {
    * @param {(x: number, z: number) => number} options.getGroundHeight canonical metres
    * @param {number} options.snowLine
    * @param {number} options.snowFade
+   * @param {object} [options.looks] resolveBiomeLooks: its `snow.air` column
+   *   weighs the air, its `snow.fall` the snowfall
    */
-  constructor({ getTile, getTileSize, getOrigin, getGroundHeight, snowLine, snowFade }) {
+  constructor({ getTile, getTileSize, getOrigin, getGroundHeight, snowLine, snowFade, looks = null }) {
     Object.assign(this, { getTile, getTileSize, getOrigin, getGroundHeight, snowLine, snowFade });
+    this.airByTile = looks?.snow?.air ?? SNOW_TILE_WEIGHT;
+    this.fallByTile = looks?.snow?.fall ?? SNOW_TILE_WEIGHT;
     this.value = 0;
+    /** 0..1 regional snowfall coverage, sampled with `value`. */
+    this.snowfall = 0;
     this.sinceSample = Infinity;
   }
 
-  /** @returns {number} the current weight, resampled about once a second */
+  /** @returns {number} the current air weight, resampled about once a second */
   update(dt, camera) {
     this.sinceSample += dt;
     if (this.sinceSample < RESAMPLE_SECONDS) return this.value;
@@ -51,7 +60,7 @@ export class SnowCountryWeight {
     const origin = this.getOrigin();
     const x = camera.position.x + origin.x;
     const z = camera.position.z + origin.z;
-    this.value = snowCountryWeight({
+    const sample = {
       tiles: sampleTilesAround({
         getTile: this.getTile,
         tileSize: this.getTileSize(),
@@ -63,7 +72,9 @@ export class SnowCountryWeight {
       groundHeight: this.getGroundHeight(x, z),
       snowLine: this.snowLine,
       snowFade: this.snowFade,
-    });
+    };
+    this.value = snowCountryWeight({ ...sample, byTile: this.airByTile });
+    this.snowfall = snowCountryWeight({ ...sample, byTile: this.fallByTile });
     return this.value;
   }
 }

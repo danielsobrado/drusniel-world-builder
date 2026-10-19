@@ -71,3 +71,29 @@ export function treeLeanAngles(placement) {
     rotationZ: -Math.atan(leanX),
   };
 }
+
+/**
+ * An impostor's appearance vec4 is full (crown width, leaf tint rgb), so its
+ * canopy snow rides in the width's integer part: `width + SPAN × round(snow ×
+ * 255)`. Widths stay below SPAN, and at the largest code float32 still keeps
+ * the width to ~2e-4.
+ */
+export const IMPOSTOR_WIDTH_SPAN = 8;
+const SNOW_STEPS = 255;
+
+export function packImpostorWidth(width, snow = 0) {
+  const clampedWidth = Math.min(IMPOSTOR_WIDTH_SPAN - 1e-3, Math.max(0, finite(width, 1)));
+  const code = Math.round(Math.min(1, Math.max(0, finite(snow, 0))) * SNOW_STEPS);
+  return clampedWidth + IMPOSTOR_WIDTH_SPAN * code;
+}
+
+export function unpackImpostorWidth(packed) {
+  const code = Math.floor(packed / IMPOSTOR_WIDTH_SPAN);
+  return { width: packed - code * IMPOSTOR_WIDTH_SPAN, snow: code / SNOW_STEPS };
+}
+
+/** The same decode in TSL, for the impostor material. */
+export function unpackImpostorWidthNode(packed) {
+  const code = packed.div(IMPOSTOR_WIDTH_SPAN).floor();
+  return { width: packed.sub(code.mul(IMPOSTOR_WIDTH_SPAN)), snow: code.div(SNOW_STEPS) };
+}

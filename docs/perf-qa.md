@@ -102,6 +102,7 @@ When a run finishes, the report is available as:
 | `speed` | `run` | `walk` or `run` |
 | `explorationBoost` | off | `1` enables the configured fast-travel multiplier; recorded with effective player settings |
 | `spellWorld` | on | `0` compiles the terrain and meadow without the spell world light, the spell press-and-mark map and grass marks — the A/B control for spell work that touches world shaders (see [spell VFX](spell-vfx.md)) |
+| `biomeSnow` | on | `0` zeroes every snow column of the biome look table (`config/biome-looks.yaml`): no biome ground snow, canopy caps, grass frost, snow-country air or regional snowfall — the A/B control for biome snow work (see [biome looks](biome-looks.md)). Snow above the terrain's snow line stays |
 | `seaPolish` | on | `0` disables the new surf and crossing ripple layers for A/B controls; resolved settings remain in the report |
 | `hitchMs` | `~33.3` | Frame-dt threshold that counts as a hitch |
 | `autostart` | `1` | Start as soon as stylized assets are ready |

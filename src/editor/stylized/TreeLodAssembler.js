@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { completeIterator } from './ResumableIterator.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import {
+  packImpostorWidth,
   treeColorVariation,
   treeLeanAngles,
   treeMorphology,
@@ -100,8 +101,10 @@ function recordBatchStats(statsByMode, stats) {
   target.dropped += stats.dropped;
 }
 
-function leafAppearance(placement, resolveLeafTint, proxyReadable = false) {
-  const tint = resolveLeafTint?.(placement) ?? UNTINTED;
+/** `leaf` = { tint, snow }: the per-instance canopy hue and snow resolvers. */
+function leafAppearance(placement, leaf, proxyReadable = false) {
+  const tint = leaf?.tint?.(placement) ?? UNTINTED;
+  const snow = leaf?.snow?.(placement) ?? 0;
   const morphology = proxyReadable
     ? treeProxyMorphology(placement)
     : treeMorphology(placement);
@@ -109,8 +112,9 @@ function leafAppearance(placement, resolveLeafTint, proxyReadable = false) {
     morphology,
     colorVariation: treeColorVariation(placement),
     leafTint: tint,
+    leafSnow: snow,
     impostorAppearance: [
-      morphology[0],
+      packImpostorWidth(morphology[0], snow),
       tint[0],
       tint[1],
       tint[2],
@@ -122,10 +126,10 @@ function geometryInstance(
   placement,
   fade,
   ditherDirection,
-  resolveLeafTint,
+  leaf,
   proxyReadable = false,
 ) {
-  const appearance = leafAppearance(placement, resolveLeafTint, proxyReadable);
+  const appearance = leafAppearance(placement, leaf, proxyReadable);
   return {
     matrix: treeMatrix(placement),
     rootFit: placement.rootFit,
@@ -134,20 +138,21 @@ function geometryInstance(
     seed: treeRenderSeed(placement),
     colorVariation: appearance.colorVariation,
     leafTint: appearance.leafTint,
+    leafSnow: appearance.leafSnow,
     morphology: appearance.morphology,
   };
 }
 
-function impostorRecord(placement, atlas, fade, ditherDirection, resolveLeafTint) {
+function impostorRecord(placement, atlas, fade, ditherDirection, leaf) {
   const heightScale = placement.heightScale ?? placement.scale;
-  const appearance = leafAppearance(placement, resolveLeafTint);
+  const appearance = leafAppearance(placement, leaf);
   const seed = treeRenderSeed(placement);
   return {
     x: placement.x,
     y: placement.height + (placement.rootFit?.sink ?? 0) + (atlas.centerY ?? atlas.height * 0.5) * heightScale,
     z: placement.z,
     scale: heightScale,
-    radius: atlas.radius * heightScale * Math.max(1, appearance.impostorAppearance[0]),
+    radius: atlas.radius * heightScale * Math.max(1, appearance.morphology[0]),
     yaw: placement.rotationY,
     fade: fade * ditherDirection,
     seed,
@@ -202,12 +207,14 @@ export function* iterateTreeLod({
   clusterRenderers,
   understoryRenderers = [],
   resolveLeafTint = null,
+  resolveLeafSnow = null,
   resolvePrototypeIndex = null,
   // Canonical point the instance matrices are written relative to (InstanceAnchor).
   anchor = null,
   beforePublish = null,
 }) {
   PerfCounters.inc('treeRebuilds');
+  const leaf = { tint: resolveLeafTint, snow: resolveLeafSnow };
   const near = createInstances(prototypeCount);
   const proxy = createInstances(prototypeCount);
   const fallback = createInstances(prototypeCount);
@@ -260,6 +267,7 @@ export function* iterateTreeLod({
             seed: cluster.seed,
             colorVariation: 0.9 + cluster.seed * 0.2,
             leafTint: resolveLeafTint?.(cluster),
+            leafSnow: resolveLeafSnow?.(cluster) ?? 0,
           });
         }
         const emergent = aggregate?.emergent ?? (() => {
@@ -283,14 +291,14 @@ export function* iterateTreeLod({
               atlas,
               representation.fade,
               ditherDirection,
-              resolveLeafTint,
+              leaf,
             ));
           } else {
             fallback[prototypeIndex].push(geometryInstance(
               placement,
               representation.fade,
               ditherDirection,
-              resolveLeafTint,
+              leaf,
               true,
             ));
           }
@@ -327,14 +335,14 @@ export function* iterateTreeLod({
               atlas,
               representation.fade,
               ditherDirection,
-              resolveLeafTint,
+              leaf,
             ));
           } else {
             fallback[prototypeIndex].push(geometryInstance(
               placement,
               representation.fade,
               ditherDirection,
-              resolveLeafTint,
+              leaf,
               true,
             ));
           }
@@ -345,7 +353,7 @@ export function* iterateTreeLod({
           placement,
           representation.fade,
           ditherDirection,
-          resolveLeafTint,
+          leaf,
           representation.band !== 'near',
         );
         const target = representation.band === 'near' ? near : proxy;

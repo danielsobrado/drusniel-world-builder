@@ -6,9 +6,11 @@ import { withDrawPreparation } from '../src/render/preparation/DrawPreparation.j
 
 function createMesh() {
   const geometry = new THREE.BufferGeometry();
-  for (const name of ['instanceDither', 'instanceLeafTint', 'instanceMorphology']) {
+  for (const name of ['instanceDither', 'instanceMorphology']) {
     geometry.setAttribute(name, new THREE.InstancedBufferAttribute(new Float32Array(6), 3));
   }
+  // Leaf tint rgb plus canopy snow in w.
+  geometry.setAttribute('instanceLeafTint', new THREE.InstancedBufferAttribute(new Float32Array(8), 4));
   return {
     geometry,
     instanceMatrix: new THREE.InstancedBufferAttribute(new Float32Array(32), 16),
@@ -25,6 +27,7 @@ function instance() {
     seed: 0.17,
     colorVariation: 0.83,
     leafTint: [0.1, 0.7, 0.9],
+    leafSnow: 0.6,
     morphology: [0.7, 1.1, 0.9],
   };
 }
