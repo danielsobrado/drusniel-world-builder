@@ -1,4 +1,5 @@
 import { Vector3 } from 'three/webgpu';
+import { prototypeRootSeat } from '../../stylized/forest/treeRootSeat.js';
 
 const LAYERS = Object.freeze({ grass: 'meadowGrass', trees: 'treeView', rocks: 'rockView',
   bushes: 'bushView', flowers: 'flowerView', details: 'groundDetailView', tropical: 'tropicalKitView' });
@@ -54,6 +55,7 @@ export function worldVisualVegetation(editor, { radius = 160, limit = 96 } = {})
       project.set(render.x, p.height + 3 * (p.heightScale ?? p.scale), render.z).project(camera);
       return { stableId: p.stableId, x: p.x, z: p.z, distance, prototype,
         asset: inverse.get(prototype) ?? 'primary-scene', tileId: tree.tileIdAt(p.x, p.z),
+        height: p.height, heightScale: p.heightScale ?? p.scale, rootFit: p.rootFit ?? null,
         speciesId: p.speciesId, ageClass: p.ageClass, crownScale: p.crownScale,
         crownAspect: p.crownAspect, crownAspectScale: p.crownAspectScale, foliageDensity: p.foliageDensity,
         screen: { x: project.x * .5 + .5, y: .5 - project.y * .5,
@@ -72,5 +74,6 @@ export function worldVisualVegetation(editor, { radius = 160, limit = 96 } = {})
       }
     });
   }
-  return { center, trees, materials };
+  const rootFeet = tree?.prototypes?.map((parts, prototype) => ({ prototype, ...prototypeRootSeat(parts) })) ?? [];
+  return { center, trees, materials, rootFeet };
 }
