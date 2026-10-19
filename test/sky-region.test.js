@@ -99,7 +99,7 @@ test('overlapping regional extinction preserves middle-distance contrast and wea
     previous = actual;
   }
   const density = .0015 * boundRegionalFogScale(4.61, 1);
-  const transmissionAt300m = Math.exp(-(density * 300) ** 2);
+  const transmissionAt300m = Math.exp(-((density * 300) ** 2));
   assert.ok(transmissionAt300m > .4, 'wetland air must retain visible middle-distance contrast');
 });
 
