@@ -17,6 +17,8 @@ import { captureVisualHarness } from './lib/world-visual-harness.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const out = path.resolve(root, process.env.AAA_AUDIT_OUT ?? 'docs/qa/visual-audit-2026-10-18');
 const url = process.env.AAA_AUDIT_URL ?? 'http://localhost:5267';
+const settleTimeoutMs = Number(process.env.AAA_AUDIT_SETTLE_MS ?? 120000);
+if (!Number.isFinite(settleTimeoutMs) || settleTimeoutMs < 16000) throw new Error('Invalid visual settle timeout.');
 await mkdir(out, { recursive: true });
 if ((await readdir(out)).length) throw new Error(`Refusing to overwrite an existing audit: ${out}. Set AAA_AUDIT_OUT to an empty directory.`);
 const config = yaml.load(await readFile(path.join(root, 'editor.config.yaml'), 'utf8'));
@@ -63,7 +65,7 @@ const report = { schemaVersion: 1, kind: 'visual-audit', startedAt: new Date().t
   viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, seed,
   selection: replay?.selection ?? 'First encountered point for each land biome in seeded random cell samples, then two fixed coast supplements and four seeded imported-view choices.',
   sampledCandidates: replay?.sampledCandidates ?? sampled, generator: replay?.generator ?? generator.toMetadata(), lighting: { preset: 'highfield', hour: 12, weather: 'off' },
-  replayManifest: replayPath ?? null, only: only ?? null, reloadPerPose: process.env.AAA_AUDIT_RELOAD === '1',
+  replayManifest: replayPath ?? null, only: only ?? null, reloadPerPose: process.env.AAA_AUDIT_RELOAD === '1', settleTimeoutMs,
   requestedPoses: poses, poses: [], failures: [], artifacts: [] };
 await writeFile(path.join(out, 'manifest.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ sampled, poses: poses.map(p => ({ id: p.id, x: p.x, z: p.z, biome: p.expectedBiomeId })) }));
@@ -116,7 +118,7 @@ try {
       world = pose.world;
     }
     try {
-      const preparation = await prepareVisualPose(page, pose);
+      const preparation = await prepareVisualPose(page, pose, { timeoutMs: settleTimeoutMs });
       const lighting = await page.evaluate(() => window.__worldVisualQa.settleLighting());
       const state = await page.evaluate(() => {
         const d = window.__worldVisualQa.diagnostics();
