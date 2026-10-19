@@ -11,6 +11,8 @@ import { fileHash } from '../scripts/lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from '../scripts/perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from '../scripts/lib/perf-browser-errors.mjs';
 import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
+import { setVisualMaterialControl } from './lib/world-visual-material-controls.mjs';
+import { captureVisualHarness } from './lib/world-visual-harness.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const out = path.resolve(root, process.env.AAA_AUDIT_OUT ?? 'docs/qa/visual-audit-2026-10-18');
@@ -80,6 +82,7 @@ try {
   if (replayPath) report.poseManifestSha256 = await fileHash(path.resolve(root, replayPath));
   report.mapSha256 = await fileHash(path.join(root, shore.map));
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
+  report.harness = await captureVisualHarness(import.meta.url, root);
   browser = await chromium.launch({ headless: false,
     args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default',
       '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'] });
@@ -123,6 +126,16 @@ try {
       await page.screenshot({ path: path.join(out, `${pose.id}-hud.png`) });
       if (!await page.evaluate(() => window.__worldVisualQa.setCaptureUi(true))) throw new Error('Capture UI was blocked.');
       await captureWorldCanvas(page, path.join(out, `${pose.id}.png`));
+      state.controls = [];
+      for (const control of (process.env.AAA_AUDIT_CONTROLS ?? '').split(',').filter(Boolean)) {
+        try {
+          const diagnostic = await setVisualMaterialControl(page, control);
+          const file = `${pose.id}-${control}.png`;
+          await captureWorldCanvas(page, path.join(out, file));
+          report.artifacts.push({ path: file, sha256: await fileHash(path.join(out, file)) });
+          state.controls.push(diagnostic);
+        } finally { await setVisualMaterialControl(page); }
+      }
       await page.evaluate(() => window.__worldVisualQa.setCaptureUi(false));
       report.poses.push({ ...pose, ...state, preparation, lighting });
       report.errors = monitor.snapshot();

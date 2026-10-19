@@ -19,8 +19,11 @@ function decodeUpperHemisphereOctNormal(encoded) {
 export function createTerrainSurfaceNormal({ encodedNormal, detailHeight, detailStrength }) {
   const worldNormal = decodeUpperHemisphereOctNormal(encodedNormal);
   const surfaceNormal = transformDirection(worldNormal, cameraViewMatrix);
-  const sigmaX = positionView.dFdx().normalize();
-  const sigmaY = positionView.dFdy().normalize();
+  // Height and position derivatives must retain the same pixel footprint.
+  // Normalizing only position made relief depend on distance/resolution and
+  // produced broad, camera-dependent highlights on shallow banks.
+  const sigmaX = positionView.dFdx();
+  const sigmaY = positionView.dFdy();
   const r1 = sigmaY.cross(surfaceNormal);
   const r2 = surfaceNormal.cross(sigmaX);
   const determinant = sigmaX.dot(r1).mul(faceDirection);

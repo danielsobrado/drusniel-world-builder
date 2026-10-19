@@ -10,6 +10,7 @@ import {raiseDeviceLimits} from '/src/render/deviceLimits.js';
 import {runTerrainSubstrateSwatches} from './world-visual-substrates.mjs';
 import {runRockSwatches} from './world-visual-rocks.mjs';
 import {applyFixtureLighting} from './world-visual-fixture-lighting.mjs';
+import {runTerrainNormalMetric} from './world-visual-normal-metric.mjs';
 const backend=new URLSearchParams(location.search).get('backend')??'webgpu';
 const requiredLimits=backend==='webgpu'?await raiseDeviceLimits({}, {powerPreference:'high-performance'}):{};
 const renderer=new THREE.WebGPURenderer({antialias:false,forceWebGL:backend==='webgl',requiredLimits,powerPreference:'high-performance'});
@@ -66,6 +67,7 @@ try {
  worldWindUniforms.windowCenterCanonical.value.set(0,0);
  renderer.setClearColor(0,1);
  const raw=loadEditorConfig().stylizedSurface,settings=resolveBlownStreaks(raw.ambientEffects);
+ await runTerrainNormalMetric({scene,camera,draw,state});
  const fixtureLight=new URLSearchParams(location.search).get('light')??'neutral';
  state.report.lighting=applyFixtureLighting(raw,sun,fill,fixtureLight);
  blownStreakUniforms.sand.value=settings.sand.strength;blownStreakUniforms.snow.value=settings.snow.strength;
