@@ -1,6 +1,7 @@
 # Next visual pass implementation — October 19, 2026
 
-Status: **in progress**. Implements the [random-biome review plan](plans/aaa-next-pass-plan-2026-10-18.md).
+Status: **implementation delivered; merged visual/performance acceptance in progress**.
+Implements the [random-biome review plan](plans/aaa-next-pass-plan-2026-10-18.md).
 The [baseline gallery](qa/random-world-review-2026-10-18/index.html) contains eighteen
 views; fourteen are error-free and four cold-biome images are diagnostic due to
 the recorded collider ownership failure. Runtime work starts from `3575b90e`
@@ -10,17 +11,17 @@ the recorded collider ownership failure. Runtime work starts from `3575b90e`
 
 | Package | Current result | Remaining acceptance |
 | --- | --- | --- |
-| Q0 collision | Conservative trunk bounds retain the canonical placement anchor while the capsule remains at its actual transformed trunk; failing glacier pose now captures without errors | Movement/collision QA |
-| N0 evidence | Eighteen baseline views, original failures, replay metadata and image-specific observations retained | Material/fog controls and current-runtime A/B evidence |
-| N1 distance | Regional extinction is bounded; valley mist now composes radiance after lighting with lower, thinner noon pockets | Final four-light mist contract, ordinary-view review and timing |
-| N2 paths | Analytic contour-gradient normalization keeps path width spatially consistent; terrain, grass, flowers and clearance share it | GPU parity/path fixture, world replay and residency/timing |
-| N3 trees/floor | Authored bark reflectance grade, deeper root seating, restrained weathering, litter/understory rebalance; all 29 tree atlases rebuilt | Four-light tree fixtures and world comparison; pale floor investigation |
-| N4 habitats | Separate woodland pigments, species eligibility, reed/broadleaf motion response, embedded rocks; existing population budgets retained | Full biome gallery, LOD/motion and residency checks |
-| N5 shores | Body-aware damp-bank roughness replaces universal 0.38 gloss; diagnostic controls retained | Original river replay and water route |
-| N6 surfaces | Relief derivatives retain physical scale; mineral/litter/mud separation strengthened; interrupted filtered ground-cover marks replace continuous stripes | World controls, four lights, temporal and timing checks |
-| N7 geography | Conditional, separate new-world version; existing/imported geography preserved | Demonstrate need after composition changes |
-| N8 feel | Pending | Movement, contact, HUD and listening review |
-| N9 release | Full verification passes: 6,895 tests, lint, UI generation check, required assets and production build | Candidate matrix, resources, persistence and final evidence |
+| Q0 collision | Conservative trunk bounds retain the canonical placement anchor; glacier and movement replays have no collision errors | Merged movement replay |
+| N0 evidence | Eighteen-view implementation replay passes; fog/material controls and comparison sliders retained | Merged gallery |
+| N1 distance | Regional extinction bounded; valley mist composes radiance after lighting; four-light mist contracts pass on both backends | Merged world review and timing |
+| N2 paths | Contour-gradient normalization; shared terrain/grass/flower/clearance width; GPU path, LOD and continuity fixtures pass | Merged motion and timing |
+| N3 trees/floor | Bark grade, measured root-plate seating, active burial configuration, litter/understory rebalance; all 29 atlases rebuilt after merge | Merged tree fixture and contact review |
+| N4 habitats | Separate woodland pigments, species eligibility, reed/broadleaf motion response, embedded rocks; deterministic distribution and residency checks pass | Merged cold-biome looks and timing |
+| N5 shores | Body-aware damp-bank roughness; original river and true marine ID 0 replay pass before merge; explicit relief separated from reflectance | Merged river controls and water route |
+| N6 surfaces | Metric relief derivatives; substrate separation; filtered interrupted cover marks; four-light material and temporal fixtures pass | Merged relief review and timing |
+| N7 geography | Conditional package not activated: no existing/imported geography regenerated | Future landmarks require separately versioned geography and route evidence |
+| N8 feel | Five motion clips pass 85 checks; HUD passes 29 checks at four sizes; motion contact sheets reviewed | Merged motion; human sound-mix judgment remains ungraded |
+| N9 release | Merged full verification passes: 6,909 tests, lint, UI generation, required assets and production build | Clean matched hardware matrices and resource comparison |
 
 ## Changes and evidence
 
@@ -58,8 +59,9 @@ claimed as delivered.
 
 The optional bark grade operates on linear reflectance. It reduces the painted
 black/gold contrast while preserving ordered values and warm hue; it adds no
-emission. Root seating changes from 0.05 to 0.12 m using the existing slope-aware
-fit. The forest floor uses cooler humus and stronger brown litter. Leafy floor
+emission. Root burial changes from 0.05 to 0.12 m through the active
+`config/exploration.yaml` owner, using the existing slope-aware fit.
+The forest floor uses cooler humus and stronger brown litter. Leafy floor
 assets gain selection weight within the same placement budget. Birch-profile
 `tree-03` is restricted to compatible damp temperate/wetland roots; the existing
 large broadleaf models supply tropical broadleaf eligibility. There are no new
@@ -74,13 +76,25 @@ Rocks use 0.14 m burial, shared with their collision source.
 
 All 29 tree impostors were rebuilt with hardware WebGPU and KTX2 encoding.
 Required validation passes with signature `tree-impostor-v8-25a57e2c`.
+The incoming biome-snow merge changed tree source inputs and required another
+complete bake; its updated manifest and changed atlas bytes are committed.
+
+Burial alone did not address the authored roots. Decoded meadow source meshes
+have a surrounding root plate 0.034–0.350 m above an isolated downward tip;
+the exact `tree8` plate is 0.287357 m above that tip. The fitter now measures
+that visible low plate once per prototype, requires a radial flare across
+multiple quadrants, scales its seat with the tree, and retains maximum sink,
+slope and overhang rejection. Thin trunks and low branches are not
+reclassified as root plates. Near, proxy and impostor placements share the
+fit. Source hashes and measurements are in
+[root-source evidence](plans/aaa-next-pass-2026-10-19-root-source.json).
+Thirty-three focused root/exploration checks passed before integration.
 
 Terrain relief previously normalized position derivatives while retaining height
 derivatives in pixel units. The corrected surface gradient uses matching units.
 The analytic ramp fixture agrees with its expected normal at three zoom levels
 on WebGPU and WebGL (maximum error below 0.000001). This establishes the metric
-correction; attribution of the historic river scallops still needs its world
-control. Damp banks now target roughness 0.64–0.74 according to organic/cold
+correction. Damp banks now target roughness 0.64–0.74 according to organic/cold
 context; rain and moving liquid swash keep their existing responses.
 
 The incoming [shore review](plans/water-shore-quality-review-2026-10-19.md)
@@ -92,6 +106,41 @@ sampling, on both main and worker compaction paths. Rank prefixes, instance
 budgets and wind anchoring remain intact. Fifty-five meadow tests pass, including
 spatial uniformity, prefixes, large coordinates, eviction replay, habitat density,
 path exclusion and continuous wind.
+
+The river replay exposed another distinct issue: the shader differentiated
+family-atlas reflectance as though it were a height map. Pigment and variant
+boundaries, including canonical-coordinate quantization on imported maps,
+became rectangular bump highlights. The physical normal now receives the
+explicit feature height only; family pigment remains in the surface colour.
+This adds no texture, sampler, pass or geometry. Sixty focused terrain
+material checks pass. The merged river controls determine its visual result.
+
+## Review artifacts and merged scope
+
+The [implementation gallery](qa/aaa-next-pass-implementation-2026-10-19/candidate/index.html)
+contains 18/18 fully ready, error-free views at `970783f1`; its
+[comparison sliders](qa/aaa-next-pass-implementation-2026-10-19/candidate/comparison.html)
+use the original unretouched PNGs. Later
+[root-contact views](qa/aaa-next-pass-implementation-2026-10-19/root-contact/index.html)
+and [marine/river supplements](qa/aaa-next-pass-implementation-2026-10-19/supplements/index.html)
+use `dbfbf83e`. These stages are retained independently, not relabelled as the
+latest source. The real marine supplement is ID 0; the original coast cameras
+sit in ID 4.
+
+The pre-merge motion report covers seasonal forest, deciduous first/third
+person, wetland and a synthetic route with actual eviction/return and origin
+rebasing. All 85 checks pass, including feet/collision, field of view, input
+release, two-second recovery, stable source IDs and growth assignments, one
+audio owner and retained mute state. Videos are 1600 × 900 at verified 25 fps;
+recording overhead is excluded from performance evidence. HUD contrast,
+overlap and capture/input checks pass at 760 × 600, 1280 × 720, 1600 × 900 and
+1920 × 1080. Automated audio lifecycle results do not grade the audible mix;
+no new sound mix or camera controller was introduced.
+
+The requested pull/merge/push brought in per-biome snow/canopy looks and grass
+ground integration (`62ddd418`). The root configuration correction and relief
+separation produce frozen runtime `f7dc2b53` for final replay and timings.
+Canonical terrain identities and custom-biome persistence are unchanged.
 
 ## Capture and timing caveats
 
