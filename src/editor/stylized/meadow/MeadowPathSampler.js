@@ -1,4 +1,4 @@
-import { createNaturalTrailSampler } from '../naturalTrailMath.js';
+import { createNaturalTrailSampler, naturalTrailGradientBound } from '../naturalTrailMath.js';
 
 // Gods' End's vegetation policy clears half a metre beyond the path mask.
 export const MEADOW_PATH_CLEARANCE_METERS = .5;
@@ -9,11 +9,12 @@ function answer(out,path,blocked) {out.path=path;out.blocked=blocked;return out;
 export function createMeadowPathSampler(pathConfig=null) {
   const trail=createNaturalTrailSampler(pathConfig?.naturalTrail??{});
   const threshold=trail.settings.clearThreshold;
-  const {scale,warp,width,softness}=trail.settings;
+  const {scale,width,softness}=trail.settings;
   // Upper bound on |gradient(field)|, used only to skip distant clearance probes.
-  const bound=scale*(.52*(1+.73*Math.abs(warp))+.33*.83*(1+.61*Math.abs(warp))+.15*.47*(2+1.34*Math.abs(warp)));
-  const probeThresholdDistance=width+softness+bound*MEADOW_PATH_CLEARANCE_METERS;
-  const signature=pathConfig?`paths1:${JSON.stringify({trail:trail.settings,clearance:MEADOW_PATH_CLEARANCE_METERS})}`:'';
+  const gradientBound=naturalTrailGradientBound(trail.settings);
+  const bound=scale*gradientBound;
+  const probeThresholdDistance=(width+softness)*gradientBound+bound*MEADOW_PATH_CLEARANCE_METERS;
+  const signature=pathConfig?`paths2:${JSON.stringify({trail:trail.settings,clearance:MEADOW_PATH_CLEARANCE_METERS})}`:'';
   return {
     signature,
     sample(x,z,coverage,paintedMask=0,out={}) {

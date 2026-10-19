@@ -5,7 +5,7 @@ import sharp from 'sharp';
 // Browsing derivatives only; the capture PNGs and their hashes stay untouched.
 const out = path.resolve(process.argv[2] ?? 'docs/qa/visual-audit-2026-10-18');
 const report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
-const planLink = path.relative(out, path.resolve('docs/plans/aaa-look-and-feel-plan-2026-10-18.md')).replaceAll('\\', '/');
+const planLink = path.relative(out, path.resolve(process.argv[3] ?? 'docs/plans/aaa-look-and-feel-plan-2026-10-18.md')).replaceAll('\\', '/');
 if (!report.poses?.length) throw new Error('The report contains no captured poses.');
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;');

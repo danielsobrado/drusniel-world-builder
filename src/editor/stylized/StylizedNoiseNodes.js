@@ -1,6 +1,7 @@
 import {
   abs,
   clamp,
+  cos,
   dot,
   floor,
   fract,
@@ -90,7 +91,14 @@ export function stylizedNaturalTrailMask(worldXZ, settings) {
   const field = sin(warpedX).mul(0.52)
     .add(sin(warpedY.mul(0.83).add(1.1)).mul(0.33))
     .add(sin(warpedX.add(warpedY).mul(0.47).sub(0.6)).mul(0.15));
-  const contourDistance = abs(field.sub(settings.level));
+  const shared = cos(warpedX.add(warpedY).mul(.47).sub(.6)).mul(.0705);
+  const du = cos(warpedX).mul(.52).add(shared);
+  const dv = cos(warpedY.mul(.83).add(1.1)).mul(.2739).add(shared);
+  const gradient = vec2(
+    du.add(dv.mul(cos(position.x.mul(.61).sub(2.3))).mul(settings.warp).mul(.61)),
+    dv.add(du.mul(cos(position.y.mul(.73).add(1.7))).mul(settings.warp).mul(.73)),
+  );
+  const contourDistance = abs(field.sub(settings.level)).div(gradient.length().max(.08));
   return smoothstep(
     settings.width,
     settings.width.add(settings.softness),

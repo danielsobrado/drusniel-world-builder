@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
@@ -10,17 +10,21 @@ import { captureVisualSource, visualSourceStayedFixed } from '../scripts/lib/wor
 import { fileHash } from '../scripts/lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from '../scripts/perf-run-lock.mjs';
 import { createBrowserErrorMonitor } from '../scripts/lib/perf-browser-errors.mjs';
+import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const out = path.resolve(root, process.env.AAA_AUDIT_OUT ?? 'docs/qa/visual-audit-2026-10-18');
 const url = process.env.AAA_AUDIT_URL ?? 'http://localhost:5267';
 await mkdir(out, { recursive: true });
+if ((await readdir(out)).length) throw new Error(`Refusing to overwrite an existing audit: ${out}. Set AAA_AUDIT_OUT to an empty directory.`);
 const config = yaml.load(await readFile(path.join(root, 'editor.config.yaml'), 'utf8'));
 const generator = new ProceduralWorldGenerator({ seed: config.world.seed, version: config.world.generatorVersion,
   heightScale: config.world.heightScale, seaLevel: config.world.seaLevel });
 const names = ['Marine', 'Hot desert', 'Cold desert', 'Savanna', 'Grassland', 'Tropical seasonal forest',
   'Temperate deciduous forest', 'Tropical rainforest', 'Temperate rainforest', 'Taiga', 'Tundra', 'Glacier', 'Wetland'];
-let randomState = 20261018, sampled = 0;
+const seed = Number(process.env.AAA_AUDIT_SEED ?? 20261018);
+if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) throw new Error('AAA_AUDIT_SEED must be an unsigned 32-bit integer.');
+let randomState = seed, sampled = 0;
 const next = () => ((randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0) / 4294967296);
 const found = new Map();
 while (found.size < 12 && sampled < 1000000) {
@@ -34,7 +38,7 @@ while (found.size < 12 && sampled < 1000000) {
 }
 if (found.size !== 12) throw new Error(`Only found ${found.size} land biomes after ${sampled} candidates.`);
 const shore = JSON.parse(await readFile(path.join(root, 'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'), 'utf8'));
-const poses = [...found.values()].sort((a, b) => a.expectedBiomeId - b.expectedBiomeId);
+let poses = [...found.values()].sort((a, b) => a.expectedBiomeId - b.expectedBiomeId);
 poses.push(...shore.marine.map(p => ({ ...p, world: 'procedural', name: 'Marine coast (targeted supplement)', selection: 'existing coast fixture' })));
 for (const biome of [6, 9, 11, 12]) {
   const choices = shore.imported.filter(p => p.expectedBiomeId === biome);
@@ -42,15 +46,20 @@ for (const biome of [6, 9, 11, 12]) {
   poses.push({ ...pose, fov: pose.fov ?? 68, world: 'eldara', name: `Eldara ${names[biome]}`,
     selection: 'seeded choice of existing imported biome views' });
 }
+const only = process.env.AAA_AUDIT_ONLY?.split(',');
+if (only) {
+  if (only.some(id => !poses.some(pose => pose.id === id))) throw new Error('AAA_AUDIT_ONLY contains an unknown pose.');
+  poses = poses.filter(pose => only.includes(pose.id));
+}
 const report = { schemaVersion: 1, kind: 'visual-audit', startedAt: new Date().toISOString(),
-  viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, seed: 20261018,
+  viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, seed,
   selection: 'First encountered point for each land biome in seeded random cell samples, then two fixed coast supplements and four seeded imported-view choices.',
   sampledCandidates: sampled, generator: generator.toMetadata(), lighting: { preset: 'highfield', hour: 12, weather: 'off' },
   requestedPoses: poses, poses: [], failures: [], artifacts: [] };
 await writeFile(path.join(out, 'manifest.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ sampled, poses: poses.map(p => ({ id: p.id, x: p.x, z: p.z, biome: p.expectedBiomeId })) }));
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
-let browser, page, monitor;
+let browser, page, monitor, finishFocus;
 try {
   const source = await captureVisualSource(url, root);
   await writeFile(path.join(out, 'source-snapshot.json'), JSON.stringify(source, null, 2) + '\n');
@@ -64,11 +73,13 @@ try {
   report.mapSha256 = await fileHash(path.join(root, shore.map));
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default',
+      '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'] });
   page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 });
   monitor = createBrowserErrorMonitor(page);
   await page.goto(`${url}/?qaVisual=1`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
+  finishFocus = await focusPerfBrowser(browser, page, { headed: true });
   report.adapter = await page.evaluate(async () => {
     const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance', featureLevel: 'compatibility' });
     return { vendor: a?.info.vendor, architecture: a?.info.architecture, description: a?.info.description,
@@ -106,6 +117,7 @@ try {
       await captureWorldCanvas(page, path.join(out, `${pose.id}.png`));
       await page.evaluate(() => window.__worldVisualQa.setCaptureUi(false));
       report.poses.push({ ...pose, ...state, preparation, lighting });
+      report.errors = monitor.snapshot();
       for (const suffix of ['.png', '-hud.png']) {
         const file = `${pose.id}${suffix}`;
         report.artifacts.push({ path: file, sha256: await fileHash(path.join(out, file)) });
@@ -121,6 +133,10 @@ try {
 } catch (error) { report.failure = error.stack; process.exitCode = 1; }
 finally {
   report.errors = monitor?.snapshot() ?? { count: 0, errors: [] };
+  if (finishFocus) {
+    try { report.focus = await finishFocus(); }
+    catch (error) { report.focus = { passed: false, failure: error.message }; }
+  }
   report.finishedAt = new Date().toISOString();
   await browser?.close(); release();
   report.captureValid = !report.failure && !report.failures.length && report.sourceStayedFixed && report.errors.count === 0 && report.poses.length === poses.length;
