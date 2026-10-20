@@ -1,0 +1,91 @@
+{
+  "assetId": "lumeshire/imperial-registry-hall",
+  "title": "",
+  "priority": "P0",
+  "assetClass": "civic",
+  "loreStatus": "design-proposal",
+  "modelStatus": "planned",
+  "scopeType": "region",
+  "scopeKey": "lumeshire",
+  "displayName": "Lumeshirean Divine Empire",
+  "footprintMeters": [
+    15,
+    10,
+    8.5
+  ],
+  "fallback": {
+    "kind": "building",
+    "settlementKind": "hall",
+    "settlementVariant": 0,
+    "kitPrefab": "Tudor_Guildhall",
+    "kitProp": null,
+    "footprint": [
+      15,
+      10,
+      8.5
+    ]
+  },
+  "views": {
+    "hero": {
+      "view": "hero",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/hero.png",
+      "prompt": "Isolated 3/4 isometric architectural concept sheet of a  (civic) for Lumeshirean Divine Empire in the world of Drusniel. Footprint 15m width × 10m depth × 8.5m height. Built with dressed cream limestone and oak frame, blue gray slate (steep axial gable with clerestory), resting on a ashlar plinth foundation. Grounded, physically believable load-bearing construction, clear human door scale (2.1m doorway), neutral studio gray background (#808080), soft even overcast key light, crisp material separation for 3D modeling reference.",
+      "negativePrompt": "busy background, environment clutter, dramatic fog, lens flare, cropped edges, floating geometry, watermark, text"
+    },
+    "front": {
+      "view": "front",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/front.png",
+      "prompt": "True orthographic front elevation (+Z facade) of a  (Lumeshirean Divine Empire), footprint 15m wide by 8.5m tall. Primary entrance clearly visible, dressed cream limestone and oak frame, blue gray slate, ashlar plinth base resting on a flat ground line. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "left": {
+      "view": "left",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/left.png",
+      "prompt": "True orthographic left side elevation (-X profile) of a  (Lumeshirean Divine Empire), 10m deep by 8.5m tall. Consistent roof ridge height, eave overhang, wall courses, and ashlar plinth plinth matching the front elevation. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "rear": {
+      "view": "rear",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/rear.png",
+      "prompt": "True orthographic rear elevation (-Z back wall) of a  (Lumeshirean Divine Empire), 15m wide by 8.5m tall. Service doors, chimney flue or structural buttresses, dressed cream limestone and oak frame and blue gray slate matching the front elevation. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "top": {
+      "view": "top",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/top.png",
+      "prompt": "True orthographic top-down roof plan (+Y nadir view) of a  (Lumeshirean Divine Empire), 15m by 10m footprint. Shows blue gray slate ridge lines, valleys, flue caps, and foundation perimeter. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "detail": {
+      "view": "detail",
+      "targetPath": "docs/asset-bible/references/lumeshire/imperial-registry-hall/detail.png",
+      "prompt": "Architectural callout sheet for  (Lumeshirean Divine Empire): close-up orthographic details of doorway lintel, window frame, wall-to-foundation joint (ashlar plinth), and roof eave joinery (blue gray slate). Neutral #808080 background, even studio lighting, clear construction joints.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    }
+  },
+  "materials": [
+    {
+      "slot": "wall_primary",
+      "materialDescription": "dressed cream limestone and oak frame",
+      "prompt": "Seamless tileable 2m×2m orthographic texture reference of dressed cream limestone and oak frame for Lumeshirean Divine Empire. Even diffuse albedo lighting, no directional cast shadows, crisp mortar and timber grain detail suitable for 2K PBR basecolor/normal/roughness extraction.",
+      "negativePrompt": "directional sunlight, hard cast shadows, specular highlights, perspective tilt, seams, borders, frames, watermark, text"
+    },
+    {
+      "slot": "roof_primary",
+      "materialDescription": "blue gray slate",
+      "prompt": "Seamless tileable 2m×2m orthographic texture reference of blue gray slate for Lumeshirean Divine Empire. Even diffuse albedo lighting, no directional cast shadows, clear overlapping course geometry suitable for 2K PBR extraction.",
+      "negativePrompt": "directional sunlight, hard cast shadows, specular highlights, perspective tilt, seams, borders, frames, watermark, text"
+    }
+  ],
+  "blenderSpec": {
+    "units": "meters",
+    "forwardAxis": "+Z front, +Y up (glTF 2.0 standard)",
+    "origin": "bottom-center of foundation at ground plane (y=0)",
+    "lods": [
+      "LOD0 (full detail)",
+      "LOD1 (45% triangles)",
+      "LOD2 (20% skyline proxy)"
+    ],
+    "collider": "oriented box or convex hull in moduleColliders/prefabs"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "assetId": "grukmar/bog-stilt-dwelling",
+  "title": "",
+  "priority": "P0",
+  "assetClass": "residence",
+  "loreStatus": "design-proposal",
+  "modelStatus": "planned",
+  "scopeType": "region",
+  "scopeKey": "grukmar",
+  "displayName": "Grukmar Confederacy & Bog Marches",
+  "footprintMeters": [
+    8,
+    7,
+    6
+  ],
+  "fallback": {
+    "kind": "building",
+    "settlementKind": "house",
+    "settlementVariant": 2,
+    "kitPrefab": "Goblin_House_Small",
+    "kitProp": null,
+    "footprint": [
+      8,
+      7,
+      6
+    ]
+  },
+  "views": {
+    "hero": {
+      "view": "hero",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/hero.png",
+      "prompt": "Isolated 3/4 isometric architectural concept sheet of a  (residence) for Grukmar Confederacy & Bog Marches in the world of Drusniel. Footprint 8m width × 7m depth × 6m height. Built with charred bog cypress lashings and upland rubble, layered marsh reed thatch and tarred plank (steep shed and pitched stilt canopy), resting on a bog stilt or earthfast foundation. Grounded, physically believable load-bearing construction, clear human door scale (2.1m doorway), neutral studio gray background (#808080), soft even overcast key light, crisp material separation for 3D modeling reference.",
+      "negativePrompt": "busy background, environment clutter, dramatic fog, lens flare, cropped edges, floating geometry, watermark, text"
+    },
+    "front": {
+      "view": "front",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/front.png",
+      "prompt": "True orthographic front elevation (+Z facade) of a  (Grukmar Confederacy & Bog Marches), footprint 8m wide by 6m tall. Primary entrance clearly visible, charred bog cypress lashings and upland rubble, layered marsh reed thatch and tarred plank, bog stilt or earthfast base resting on a flat ground line. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "left": {
+      "view": "left",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/left.png",
+      "prompt": "True orthographic left side elevation (-X profile) of a  (Grukmar Confederacy & Bog Marches), 7m deep by 6m tall. Consistent roof ridge height, eave overhang, wall courses, and bog stilt or earthfast plinth matching the front elevation. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "rear": {
+      "view": "rear",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/rear.png",
+      "prompt": "True orthographic rear elevation (-Z back wall) of a  (Grukmar Confederacy & Bog Marches), 8m wide by 6m tall. Service doors, chimney flue or structural buttresses, charred bog cypress lashings and upland rubble and layered marsh reed thatch and tarred plank matching the front elevation. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "top": {
+      "view": "top",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/top.png",
+      "prompt": "True orthographic top-down roof plan (+Y nadir view) of a  (Grukmar Confederacy & Bog Marches), 8m by 7m footprint. Shows layered marsh reed thatch and tarred plank ridge lines, valleys, flue caps, and foundation perimeter. Flat diffuse studio lighting, neutral #808080 background, zero perspective convergence.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    },
+    "detail": {
+      "view": "detail",
+      "targetPath": "docs/asset-bible/references/grukmar/bog-stilt-dwelling/detail.png",
+      "prompt": "Architectural callout sheet for  (Grukmar Confederacy & Bog Marches): close-up orthographic details of doorway lintel, window frame, wall-to-foundation joint (bog stilt or earthfast), and roof eave joinery (layered marsh reed thatch and tarred plank). Neutral #808080 background, even studio lighting, clear construction joints.",
+      "negativePrompt": "perspective distortion, vanishing point, fisheye, wide angle lens, dramatic cast shadows, fog, vignette, cut-off roof, cropped foundation, floating elements, text watermark, characters, modern steel, neon glow"
+    }
+  },
+  "materials": [
+    {
+      "slot": "wall_primary",
+      "materialDescription": "charred bog cypress lashings and upland rubble",
+      "prompt": "Seamless tileable 2m×2m orthographic texture reference of charred bog cypress lashings and upland rubble for Grukmar Confederacy & Bog Marches. Even diffuse albedo lighting, no directional cast shadows, crisp mortar and timber grain detail suitable for 2K PBR basecolor/normal/roughness extraction.",
+      "negativePrompt": "directional sunlight, hard cast shadows, specular highlights, perspective tilt, seams, borders, frames, watermark, text"
+    },
+    {
+      "slot": "roof_primary",
+      "materialDescription": "layered marsh reed thatch and tarred plank",
+      "prompt": "Seamless tileable 2m×2m orthographic texture reference of layered marsh reed thatch and tarred plank for Grukmar Confederacy & Bog Marches. Even diffuse albedo lighting, no directional cast shadows, clear overlapping course geometry suitable for 2K PBR extraction.",
+      "negativePrompt": "directional sunlight, hard cast shadows, specular highlights, perspective tilt, seams, borders, frames, watermark, text"
+    }
+  ],
+  "blenderSpec": {
+    "units": "meters",
+    "forwardAxis": "+Z front, +Y up (glTF 2.0 standard)",
+    "origin": "bottom-center of foundation at ground plane (y=0)",
+    "lods": [
+      "LOD0 (full detail)",
+      "LOD1 (45% triangles)",
+      "LOD2 (20% skyline proxy)"
+    ],
+    "collider": "oriented box or convex hull in moduleColliders/prefabs"
+  }
+}
