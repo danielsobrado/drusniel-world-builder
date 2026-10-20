@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "generatedAt": "2026-10-19T13:18:37.521Z",
+  "generatedAt": "2026-10-20T00:45:20.474Z",
   "sourceSignature": "tree-impostor-v8-25a57e2c",
   "sourceInputs": {
     "version": 1,
@@ -33,8 +33,8 @@
       "src/editor/stylized/StylizedPrototypeBake.js": "84d37363ad05197ea3f184d19d0b7ec2179ddcb95a7adf0370f841ef15df93fc",
       "src/editor/stylized/StylizedTreeMaterials.js": "e4e5e7caba210ad842f4f6a405840cfe48b496b434a5baa412baa3dc94566be0",
       "src/editor/stylized/StylizedTreePrototypes.js": "1888efeacf914aff540f23b1166ca08fdbf9731080cfc7364bf07a38c700bf71",
-      "src/editor/stylized/StylizedTreeView.js": "a301d5401de76a645bafea3ee3a5755c201db2945b54cf6a23fd7cd71dcfb327",
-      "src/editor/stylized/barkWeathering.js": "774d1a19138dd094f1d23ef862b566bf26fd7a3f4cf5810ea08d57c6325e4116",
+      "src/editor/stylized/StylizedTreeView.js": "fa04080a5269da3494b20bea5307eeefc411cc293aa3d8a250245b262f232922",
+      "src/editor/stylized/barkWeathering.js": "4c06c1939a23c430f7df5cb522b6ca8bb36f18bb591e6bc2c53a6de1bc580a1a",
       "src/editor/stylized/forest/ForestSpeciesGeometry.js": "84e6943c0988ab1b929bc282c93e6e5fed9db185c368a3621c30dc632f33f852",
       "src/editor/stylized/forest/ProceduralBarkTextures.js": "cb07f1b23961721c26dfcc7d4f3ba8d8834540d22955b113a554d51987ec5b4c",
       "src/editor/stylized/forest/barkGrade.js": "1d2f97203e2c7541cadc8d686500a0deb755fa70dc142ebf01da4bcddea35e12",
@@ -447,8 +447,8 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-13-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "a260b8c0c9437e4ad2d00b0e5922a66ef38508dacfb792ab0ccd20cb4faf47ce",
-        "sha256": "0d6792c369dabf5de31c088bed822450319aaff3e3af3e732e977f2b524e5e22",
+        "sourceSha256": "2a35735fc40a2619314cefe0d0b2152dbcc4e3aae902dc29c7c859179ef819a5",
+        "sha256": "2fb71d88b928cb3c1fa5610f0101f8364d90439f5f5dc90e5efa412bdc1ca9eb",
         "width": 1024,
         "height": 256,
         "levels": 6,
@@ -476,7 +476,7 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-14-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "cd80483049c9e3a802d173876b32e9cc539841aaa7b8fb5fb60665ddb7b9cb81",
+        "sourceSha256": "e48d36c9e08217ef874b81b4be48df4f290051107c10530aab4e80b121077963",
         "sha256": "d18a844d3f16bf38f54fb269858ca941e825680d124847a16ae47920c7601008",
         "width": 1024,
         "height": 256,
@@ -505,8 +505,8 @@
       "albedoKtx2": "/assets/impostors/trees/prototype-15-albedo.ktx2",
       "albedoKtx2Metadata": {
         "encoder": "toktx v4.4.2",
-        "sourceSha256": "9d9f9441d6fafc15e5cabbeff9c95d1dbeec73655a90985865a1d90fdfb70cbf",
-        "sha256": "99a9102dea8cb68c1127a36325bfbb00677cfc150eb1c5e2bb9b1b805baf476e",
+        "sourceSha256": "59eaf9c52acf92a5b9cc38dd7aae1d8ff3cb5d25c6394e0600cce4ece819d584",
+        "sha256": "ea0593922dbb9983b0516cbc983220ea6dd0d63f953a1a2968d748944e21d4ca",
         "width": 1024,
         "height": 256,
         "levels": 6,
