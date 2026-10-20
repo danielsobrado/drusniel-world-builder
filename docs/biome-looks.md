@@ -59,3 +59,9 @@ weight (`1 − (1 − w)²`); exposure and haze density keep the plain weight.
 2026-10-19 at the taiga pose (`chunk-cross`, warmup 25, two pairs, order
 swapped): on 106.5 / 114.0 fps, p50 7.9 / 7.5 ms; off 92.7 / 80.7 fps, p50
 7.7 / 8.0 ms. The 0.5–2 s stall at the start of motion appears in both.
+
+2026-10-20, after the ring weighting (Snow-country air, above) lifted taiga's snowfall weight past
+the field's `regionalMinCoverage`: on 54.3 / 49.0 fps (p50 11.7 / 12.9 ms),
+off 68.7 fps (p50 9.3 ms); the extra time was per-frame submission work, not
+draws (187 vs 192). Taiga's `fall` dropped to 0.15 so it no longer snows on
+its own; that change is not yet re-measured.

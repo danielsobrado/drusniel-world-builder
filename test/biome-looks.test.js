@@ -156,3 +156,12 @@ test('a tree hands its canopy snow to both its crown and its trunk', async () =>
   assert.deepEqual([...trunk.geometry.getAttribute('instanceMorphology').array.slice(0, 3)].map((v) => +v.toFixed(3)), [0.75, 1.1, 0.9],
     'the trunk reads only z, so x carries the snow');
 });
+
+test('taiga stays below the regional snowfall threshold', () => {
+  // Snowfall over taiga cost ~20 % of the frame (docs/biome-looks.md); it snows
+  // only where tundra or glacier, or the snow line, lift the weight.
+  const { snowfall } = loadYaml('../config/weather-effects.yaml');
+  assert.ok(LOOKS.snow.fall[TAIGA] < snowfall.regionalMinCoverage,
+    `taiga fall ${LOOKS.snow.fall[TAIGA]} must stay below ${snowfall.regionalMinCoverage}`);
+  assert.ok(LOOKS.snow.fall[TUNDRA] > snowfall.regionalMinCoverage, 'tundra still snows');
+});

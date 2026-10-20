@@ -37,11 +37,15 @@ biomeLooks:
     7: { name: tropical rainforest, canopy: '#3f8f34' }
     8: { name: temperate rainforest, canopy: '#4c9142' }
     # Boreal forest in its winter: drifts between the trunks, snow along the
-    # tops of the crowns, frosted grass and light flurries.
+    # tops of the crowns and frosted grass. `fall` stays below the snowfall's
+    # regionalMinCoverage (weather-effects.yaml), so taiga alone never snows:
+    # at 0.45 the field switched on there and the taiga chunk-cross ran at
+    # 54 / 49 fps against 69 with biome snow off (2026-10-20). Tundra and
+    # glacier next door still snow over it.
     9:
       name: taiga
       canopy: '#4a7a55'
-      snow: { ground: 0.3, canopy: 0.7, grass: 0.6, air: 0.4, fall: 0.45 }
+      snow: { ground: 0.3, canopy: 0.7, grass: 0.6, air: 0.4, fall: 0.15 }
     # A snow carpet broken by tussocks; trees wear full caps.
     10:
       name: tundra
