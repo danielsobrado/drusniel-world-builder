@@ -485,7 +485,7 @@ export function createSimulationWorld({
   });
 
   function stepSimulationTicks(ticks) {
-    if (Number.isSafeInteger(ticks) && ticks > 0) {
+    if (!clock.isPaused() && Number.isSafeInteger(ticks) && ticks > 0) {
       const start = clock.getTick(), end = start + ticks, day = ticksPerDay(clock.getConfig());
       const month = day * clock.getConfig().daysPerMonth;
       const commands = Math.floor(end / day) - Math.floor(start / day) + Math.floor(end / month) - Math.floor(start / month);
@@ -615,6 +615,7 @@ export function createSimulationWorld({
 
     async stepDaysAsync(days = 1) {
       if (!Number.isSafeInteger(days) || days < 0) throw new Error('invalid_days');
+      if (clock.isPaused()) return;
       for (let day = 0; day < days; day++) { await history.flush(); this.stepDays(1); }
     },
 
@@ -851,7 +852,7 @@ export function createSimulationWorld({
       await history.flush();
       const pendingSave = await saveStore.beginSave(slot, payload);
       if (!pendingSave.ok) return pendingSave;
-      if (typeof pendingSave.transactionId !== 'string') throw new Error('invalid_save_transaction');
+      if (pendingSave.transactionId == null) throw new Error('invalid_save_transaction');
       return saveStore.commitSave(slot, pendingSave.transactionId);
     },
 

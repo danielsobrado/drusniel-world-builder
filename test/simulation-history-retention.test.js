@@ -47,6 +47,7 @@ test('archive failure retains history, rejects excess work before mutation, and 
   const before = world.checksum(), tick = world.clock.getTick();
   assert.equal(patch(4).code, 'history_archive_backpressure');
   assert.throws(() => world.stepDays(1), /history_archive_backpressure/);
+  world.pause(); assert.equal(world.stepDays(1).advanced, 0); await world.stepDaysAsync(1); world.resume();
   assert.equal(world.checksum(), before); assert.equal(world.clock.getTick(), tick);
   await assert.rejects(world.save('previous'), /disk unavailable/);
   assert.equal((await store.load('previous')).payload.snapshot.commandRange.count, 0);
@@ -76,7 +77,14 @@ test('invalid history metadata cannot partially replace the live world', async (
 
 test('existing injected save-store interfaces can archive through reserved transactional slots', async () => {
   const memory = createInMemorySaveStore();
-  const store = Object.fromEntries(['beginSave', 'commitSave', 'load'].map(key => [key, memory[key].bind(memory)]));
+  const store = {
+    async beginSave(slot, payload) {
+      const result = await memory.beginSave(slot, payload);
+      return { ...result, transactionId: Number(result.transactionId.slice(5)) };
+    },
+    commitSave: (slot, id) => memory.commitSave(slot, `save:${id}`),
+    load: memory.load.bind(memory),
+  };
   const { world, patch } = boot(store, { journalSegmentCommands: 2 });
   for (let i = 0; i < 10; i++) { await world.flushHistory(); assert.equal(patch(i).ok, true); }
   await world.save('compatible');
