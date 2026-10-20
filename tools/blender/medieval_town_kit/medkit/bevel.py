@@ -76,12 +76,44 @@ def vertex_shade(p, n, mat):
     if n.z < -0.5:
         shade *= 0.70
     elif abs(n.z) < 0.5 and mat in GRIMED:
-        shade *= 0.80 + 0.20 * _smooth(0.0, 0.95, p.z)
+        # Damp, splash and occlusion at the foot of every face, strongest in the first 30 cm.
+        shade *= 0.66 + 0.18 * _smooth(0.0, 0.3, p.z) + 0.16 * _smooth(0.3, 0.6, p.z)
         if mat in WALL_SOFFIT_AO and 2.5 < p.z <= 3.05:
-            shade *= 0.88 + 0.12 * _smooth(3.0, 2.5, p.z)
+            shade *= 0.80 + 0.20 * _smooth(3.0, 2.55, p.z)
     elif n.z > 0.45 and mat in ('stone_dressed', 'roof', 'roof_terracotta'):
         shade *= 1.03
     return shade
+
+
+# Heights (module space) where tall grimed faces are cut so the shading can form a
+# damp band at the foot and occlusion under the eaves instead of one linear ramp.
+GRIME_CUTS = (0.12, 0.3, 0.6, 2.55, 2.85)
+
+
+def grime_strips(pts, n, mat):
+    """Split a vertical axis-aligned quad into horizontal strips at GRIME_CUTS, or None."""
+    if mat not in GRIMED or len(pts) != 4 or abs(n.normalized().z) > 0.05:
+        return None
+    zs = sorted({round(p.z, 5) for p in pts})
+    if len(zs) != 2:
+        return None
+    z0, z1 = zs
+    cuts = [z for z in GRIME_CUTS if z0 + 0.05 < z < z1 - 0.05]
+    if not cuts:
+        return None
+    bottom = [p for p in pts if abs(p.z - z0) < 1e-4]
+    top = [p for p in pts if abs(p.z - z1) < 1e-4]
+    if len(bottom) != 2 or len(top) != 2:
+        return None
+    # Pair each bottom corner with the top corner above it.
+    pairs = [(b, min(top, key=lambda t: (t.x - b.x) ** 2 + (t.y - b.y) ** 2)) for b in bottom]
+    levels = [z0, *cuts, z1]
+    out = []
+    for za, zb in zip(levels, levels[1:]):
+        ta, tb = (za - z0) / (z1 - z0), (zb - z0) / (z1 - z0)
+        (b0, t0), (b1, t1) = pairs
+        out.append([b0.lerp(t0, ta), b1.lerp(t1, ta), b1.lerp(t1, tb), b0.lerp(t0, tb)])
+    return out
 
 
 def unit(v):

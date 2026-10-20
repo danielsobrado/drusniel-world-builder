@@ -185,7 +185,7 @@ def _bake_scan_relief(name, albedo, normal, seed):
         plaster_col = tint(
             plaster_col,
             (0.92 + 0.14 * trowel)
-            * (1.0 - 0.15 * smooth(0.45, 0.92, big))
+            * (1.0 - 0.06 * smooth(0.45, 0.92, big))
             * (1.0 - 0.24 * crazing)
             + 0.08 * plaster_rim,
         )

@@ -59,8 +59,12 @@ SPEC = {
     'foliage': Spec('foliage', 1.5, 0.9),
     'bark': Spec('bark', 1.0, 0.9, tint=(0.78, 0.74, 0.70)),
     'flowers': Spec('flowers', 1.0, 0.9),
-    'glow': Spec(color=(1.0, 0.48, 0.16), emission=4.0),
+    'glow': Spec(color=(1.0, 0.42, 0.12), emission=2.4),
     'water': Spec(color=(0.07, 0.14, 0.18), rough=0.08),
+    # Lashing cord and rigging: tan bast fibre, never white.
+    'rope': Spec('cloth', 0.5, 0.95, tint=(0.44, 0.36, 0.25), normal=1.2),
+    # A fire-lit room seen through a small opening: warm but far dimmer than a flame.
+    'firelight': Spec(color=(0.30, 0.16, 0.07), emission=0.7, rough=1.0),
     # The dark of an unlit opening (arrow loops, a door rebate) seen from outside.
     'shadow': Spec(color=(0.025, 0.022, 0.02), rough=1.0),
     'gold': Spec(color=(0.85, 0.65, 0.22), rough=0.35, metal=1.0),

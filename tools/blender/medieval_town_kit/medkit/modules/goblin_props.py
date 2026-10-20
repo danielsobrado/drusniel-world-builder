@@ -21,7 +21,7 @@ def cauldron_fire():
         c, s = math.cos(a) * 0.48, math.sin(a) * 0.48
         b.beam((-c, -s, 0.08), (c, s, 0.14), (0, 0, 1), (-0.06, 0.06), 0.11, 'bark')
     # Glowing fire & ember bed
-    b.lathe([(0.0, 0.04), (0.48, 0.04), (0.38, 0.18), (0.0, 0.24)], 8, 'glow')
+    b.blob((0, 0, 0.08), 0.46, 'iron', subdiv=2, squash=(1.0, 1.0, 0.22), jitter=0.3, seed=9)
     if detailed():
         for fx, fy, fh in ((0.0, 0.0, 0.36), (-0.16, 0.12, 0.30), (0.18, -0.1, 0.32)):
             b.lathe([(0.0, 0.12), (0.14, 0.16), (0.06, fh), (0.0, fh + 0.06)], 6, 'glow', m=_at(fx, fy))
@@ -34,8 +34,8 @@ def cauldron_fire():
         (0.50, 0.78), (0.57, 0.86), (0.52, 0.90), (0.46, 0.82), (0.0, 0.80),
     ]
     b.lathe(prof, 12 if detailed() else 8, 'iron')
-    # Glowing bubbling stew surface
-    b.lathe([(0.0, 0.81), (0.47, 0.81), (0.44, 0.84), (0.0, 0.85)], 10 if detailed() else 6, 'glow')
+    # Stew surface: dark broth, lit from below by the fire, not glowing itself
+    b.lathe([(0.0, 0.81), (0.47, 0.81), (0.44, 0.84), (0.0, 0.85)], 10 if detailed() else 6, 'hide')
     # Wooden stirring paddle resting across the cauldron lip
     b.beam((-0.62, -0.18, 1.16), (0.22, 0.14, 0.62), (0, 0, 1), (-0.03, 0.03), 0.06, 'planks')
     if detailed():
@@ -63,21 +63,21 @@ def drying_rack():
     b.beam((-1.05, -0.22, 1.12), (1.05, -0.18, 1.15), (0, 0, 1), (-0.038, 0.038), 0.075, 'bark')
     for sx in (-1.02, 1.00):
         b.beam((sx, -0.44, 2.22), (sx, 0.46, 1.80), (1, 0, 0), (-0.04, 0.04), 0.08, 'bark')
-        b.box((sx - 0.07, -0.44, 1.54), (sx + 0.07, -0.30, 1.68), 'cloth_cream')
+        b.box((sx - 0.07, -0.44, 1.54), (sx + 0.07, -0.30, 1.68), 'rope')
     # Slanted tattered hide/thatch rooflet overhead
     b.extrude([(-1.22, -0.56, 2.30), (1.22, -0.56, 2.26), (1.22, 0.56, 1.82), (-1.22, 0.56, 1.86)],
               (0, 0, 0.09), 'thatch')
     b.extrude([(-0.85, -0.52, 2.38), (0.75, -0.52, 2.35), (0.68, 0.44, 1.94), (-0.78, 0.44, 1.96)],
-              (0, 0, 0.04), 'cloth_cream')
+              (0, 0, 0.04), 'rope')
     # Hanging smoked fish & cured meat haunches on upper & lower bars
     for fx in (-0.72, -0.36, 0.0, 0.38, 0.74):
-        b.box((fx - 0.015, -0.02, 1.46), (fx + 0.015, 0.02, 1.62), 'cloth_cream')
+        b.box((fx - 0.015, -0.02, 1.46), (fx + 0.015, 0.02, 1.62), 'rope')
         b.lathe([(0.0, 1.08), (0.04, 1.14), (0.09, 1.28), (0.07, 1.42), (0.0, 1.48)],
                 6, 'cloth_red', m=_at(fx, 0.0))
         b.box((fx - 0.06, -0.015, 1.00), (fx + 0.06, 0.015, 1.10), 'plaster')
     if detailed():
         for mx in (-0.58, -0.12, 0.42):
-            b.box((mx - 0.015, -0.22, 0.96), (mx + 0.015, -0.18, 1.14), 'cloth_cream')
+            b.box((mx - 0.015, -0.22, 0.96), (mx + 0.015, -0.18, 1.14), 'rope')
             b.lathe([(0.0, 0.56), (0.11, 0.64), (0.13, 0.82), (0.06, 0.96), (0.0, 0.98)],
                     7, 'cloth_red', m=_at(mx, -0.20))
             b.box((mx - 0.025, -0.225, 0.44), (mx + 0.025, -0.175, 0.58), 'plaster')
@@ -91,7 +91,7 @@ def basket_cluster():
     b.lathe([(0.0, 0.0), (0.24, 0.0), (0.32, 0.26), (0.28, 0.54), (0.22, 0.68),
              (0.25, 0.74), (0.19, 0.74), (0.0, 0.66)], 10 if detailed() else 7, 'thatch',
             m=_at(-0.28, 0.08))
-    b.lathe([(0.29, 0.32), (0.33, 0.32), (0.33, 0.38), (0.29, 0.38)], 8, 'cloth_cream',
+    b.lathe([(0.29, 0.32), (0.33, 0.32), (0.33, 0.38), (0.29, 0.38)], 8, 'rope',
             m=_at(-0.28, 0.08))
     # Wide shallow catch basket filled with fish
     b.lathe([(0.0, 0.0), (0.30, 0.0), (0.36, 0.18), (0.34, 0.34), (0.28, 0.34), (0.0, 0.24)],
@@ -104,7 +104,7 @@ def basket_cluster():
             8, 'iron', m=_at(-0.04, -0.34))
     if detailed():
         b.lathe([(0.10, 0.0), (0.24, 0.0), (0.22, 0.12), (0.10, 0.12)],
-                8, 'cloth_cream', m=_at(0.32, 0.34))
+                8, 'rope', m=_at(0.32, 0.34))
     return b
 
 
@@ -113,10 +113,9 @@ def torch_pole():
     b = MeshBuilder()
     b.beam((0, 0, 0.0), (0.03, -0.02, 2.35), (0, 1, 0), (-0.065, 0.065), 0.13, 'bark')
     for z in (0.35, 1.35, 2.15):
-        b.box((-0.08, -0.08, z), (0.08, 0.08, z + 0.10), 'cloth_cream')
-    # Angled strut & skull charm
+        b.box((-0.08, -0.08, z), (0.08, 0.08, z + 0.10), 'rope')
+    # Angled strut
     b.beam((0.0, 0.0, 1.85), (0.22, 0.0, 2.12), (0, 1, 0), (-0.035, 0.035), 0.07, 'bark')
-    b.blob((0.22, 0.0, 1.76), 0.10, 'plaster', subdiv=1, squash=(0.85, 0.95, 1.1), jitter=0.06, seed=31)
     # Iron pitch basket & bright flame
     b.lathe([(0.0, 2.28), (0.08, 2.30), (0.19, 2.56), (0.15, 2.58), (0.0, 2.42)],
             8, 'iron')
@@ -125,22 +124,22 @@ def torch_pole():
 
 
 def goblin_totem():
-    """Spiked goblin clan totem pole with horned skull, red cloth streamers, and lantern."""
+    """Goblin clan totem pole with a carved mark block, red cloth streamers, and lantern."""
     b = MeshBuilder()
     b.beam((0, 0, 0.0), (-0.03, 0.02, 2.95), (0, 1, 0), (-0.09, 0.09), 0.18, 'bark')
     for z in (0.65, 1.65, 2.45):
-        b.box((-0.11, -0.11, z), (0.11, 0.11, z + 0.12), 'cloth_cream')
+        b.box((-0.11, -0.11, z), (0.11, 0.11, z + 0.12), 'rope')
     # Cross-beams & sharpened horn/tusk spikes
     b.beam((-0.58, 0.0, 2.15), (0.58, 0.0, 2.22), (0, 0, 1), (-0.05, 0.05), 0.10, 'bark')
     for sx in (-1, 1):
-        b.beam((sx * 0.42, 0.0, 2.18), (sx * 0.72, -0.06, 2.54), (0, 1, 0), (-0.035, 0.035), 0.07, 'plaster')
+        b.beam((sx * 0.42, 0.0, 2.18), (sx * 0.62, -0.06, 2.40), (0, 1, 0), (-0.035, 0.035), 0.07, 'bark')
         # Hanging red war-cloth strips
         b.extrude([(sx * 0.48, -0.04, 2.16), (sx * 0.30, -0.04, 2.16),
                    (sx * 0.34, -0.06, 1.38), (sx * 0.44, -0.06, 1.48)], (0, 0.03, 0), 'cloth_red')
-    # Horned beast skull at crest
-    b.blob((0.0, -0.12, 2.68), 0.18, 'plaster', subdiv=1, squash=(0.9, 1.1, 1.15), jitter=0.08, seed=41)
-    for sx in (-1, 1):
-        b.beam((sx * 0.10, -0.12, 2.74), (sx * 0.44, -0.18, 3.06), (0, 1, 0), (-0.03, 0.03), 0.06, 'plaster')
+    # Carved clan-mark block at the crest: notched bands cut into a squared head
+    b.box((-0.16, -0.16, 2.62), (0.16, 0.16, 3.02), 'planks')
+    for z in (2.70, 2.84):
+        b.box((-0.17, -0.17, z), (0.17, 0.17, z + 0.035), 'shadow', bevel=0)
     # Hanging lantern on side arm
     b.beam((0.0, 0.0, 1.72), (0.48, 0.0, 1.82), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
     b.box((0.40, -0.08, 1.42), (0.54, 0.08, 1.66), 'iron')
@@ -149,7 +148,7 @@ def goblin_totem():
 
 
 def spike_barricade():
-    """Lashed palisade barrier of angled sharpened stakes and a skull pike."""
+    """Lashed palisade barrier of angled sharpened stakes and a marker post."""
     b = MeshBuilder()
     # Heavy horizontal base & cross logs
     b.beam((-0.95, 0.12, 0.10), (0.95, 0.12, 0.10), (0, 0, 1), (-0.08, 0.08), 0.16, 'bark')
@@ -160,10 +159,9 @@ def spike_barricade():
         top_z = 1.28 + (i % 2) * 0.14
         b.beam((x, 0.28, 0.02), (x + (i % 2 - 0.5) * 0.06, -0.38, top_z),
                (1, 0, 0), (-0.055, 0.055), 0.11, 'bark')
-        b.box((x - 0.07, -0.12, 0.56), (x + 0.07, 0.04, 0.72), 'cloth_cream')
-    # Tall central warning pike with skull
+        b.box((x - 0.07, -0.12, 0.56), (x + 0.07, 0.04, 0.72), 'rope')
+    # Tall central marker post
     b.beam((0.02, 0.10, 0.0), (-0.02, 0.04, 1.82), (0, 1, 0), (-0.045, 0.045), 0.09, 'bark')
-    b.blob((-0.02, 0.02, 1.88), 0.12, 'plaster', subdiv=1, squash=(0.85, 0.95, 1.1), jitter=0.06, seed=53)
     return b
 
 
@@ -246,16 +244,20 @@ def goblin_firepit():
         a = 2 * math.pi * i / 8
         sx, sy = math.cos(a) * 0.44, math.sin(a) * 0.44
         b.box((sx - 0.11, sy - 0.10, 0.0), (sx + 0.11, sy + 0.10, 0.14), 'stone')
-    b.lathe([(0.0, 0.02), (0.36, 0.02), (0.26, 0.16), (0.0, 0.22)], 7, 'glow')
+    # Ash and charred wood with a few live coals; the flame itself is the lit part.
+    b.blob((0, 0, 0.06), 0.36, 'iron', subdiv=2, squash=(1.0, 1.0, 0.22), jitter=0.3, seed=7)
+    for k, (dx, dy) in enumerate(((-0.1, 0.05), (0.08, -0.06), (0.02, 0.12), (-0.04, -0.1))):
+        b.blob((dx, dy, 0.12), 0.06, 'glow', subdiv=1, jitter=0.35, seed=60 + k)
+    b.lathe([(0.0, 0.10), (0.10, 0.14), (0.05, 0.30), (0.0, 0.36)], 6, 'glow')
     # Three-pole tripod lashed at apex
     for a in (0.3, 2.4, 4.5):
         b.beam((math.cos(a) * 0.48, math.sin(a) * 0.48, 0.0),
                (math.cos(a) * 0.05, math.sin(a) * 0.05, 1.38),
                (0, 0, 1), (-0.035, 0.035), 0.07, 'bark')
-    b.box((-0.07, -0.07, 1.18), (0.07, 0.07, 1.30), 'cloth_cream')
+    b.box((-0.07, -0.07, 1.18), (0.07, 0.07, 1.30), 'rope')
     b.box((-0.015, -0.015, 0.68), (0.015, 0.015, 1.20), 'iron')
     b.lathe([(0.0, 0.34), (0.18, 0.36), (0.24, 0.52), (0.20, 0.66), (0.0, 0.64)], 8, 'iron')
-    b.lathe([(0.0, 0.63), (0.18, 0.63), (0.0, 0.66)], 6, 'glow')
+    b.lathe([(0.0, 0.63), (0.18, 0.63), (0.0, 0.66)], 6, 'water')
     return b
 
 
@@ -264,15 +266,15 @@ def goblin_nest():
     b = MeshBuilder()
     b.blob((0.0, 0.0, 0.10), 0.62, 'thatch', subdiv=1, squash=(0.78, 1.18, 0.22), jitter=0.10, seed=61)
     b.extrude([(-0.38, -0.56, 0.12), (0.38, -0.52, 0.12),
-               (0.42, 0.36, 0.16), (-0.36, 0.40, 0.16)], (0, 0, 0.06), 'cloth_cream')
+               (0.42, 0.36, 0.16), (-0.36, 0.40, 0.16)], (0, 0, 0.06), 'hide')
     b.extrude([(-0.30, -0.44, 0.17), (0.26, -0.38, 0.17),
                (0.22, 0.12, 0.19), (-0.32, 0.16, 0.19)], (0, 0, 0.04), 'cloth_red')
-    b.beam((-0.34, 0.44, 0.18), (0.34, 0.42, 0.18), (0, 0, 1), (-0.09, 0.09), 0.16, 'cloth_cream')
+    b.beam((-0.34, 0.44, 0.18), (0.34, 0.42, 0.18), (0, 0, 1), (-0.09, 0.09), 0.16, 'hide')
     return b
 
 
 def bone_throne():
-    """Chieftain's lashed log-and-skull throne with tattered red hide cushion and horn spikes."""
+    """Chieftain's lashed log seat of office with a hide cushion and carved crest rail."""
     b = MeshBuilder()
     # Heavy bark legs & armrests
     for sx in (-0.42, 0.42):
@@ -285,14 +287,14 @@ def bone_throne():
     b.extrude([(-0.36, -0.38, 0.52), (0.36, -0.38, 0.52),
                (0.32, -0.40, 1.48), (-0.32, -0.40, 1.48)], (0, 0.05, 0), 'cloth_red',
               m=_at(0, 0.72, 0))
-    # Crossbars, skull trophies & horn spikes on high backrest
+    # Crossbars on the high backrest
     for z in (0.85, 1.25, 1.58):
         b.beam((-0.48, 0.34, z), (0.48, 0.34, z), (0, 0, 1), (-0.045, 0.045), 0.09, 'bark')
-    for sx in (-0.45, 0.0, 0.45):
-        b.blob((sx, 0.34, 1.78 if sx != 0 else 1.88), 0.11, 'plaster', subdiv=1,
-               squash=(0.85, 0.95, 1.1), jitter=0.05, seed=71 + int(sx * 10))
-    for sx in (-1, 1):
-        b.beam((sx * 0.44, 0.36, 1.62), (sx * 0.72, 0.28, 1.96), (0, 1, 0), (-0.03, 0.03), 0.06, 'plaster')
+    # Turned post caps and a carved crest rail instead of skull trophies
+    for sx in (-0.45, 0.45):
+        b.lathe([(0.0, 1.70), (0.08, 1.72), (0.09, 1.80), (0.05, 1.86), (0.0, 1.88)], 8, 'bark',
+                m=_at(sx, 0.34), smooth=False)
+    b.box((-0.30, 0.30, 1.66), (0.30, 0.40, 1.86), 'planks')
     return b
 
 
@@ -329,7 +331,7 @@ def loot_pile():
     # Upright stolen barrel + grain sack + round goblin shield
     b.lathe([(0.0, 0.0), (0.20, 0.0), (0.24, 0.28), (0.20, 0.56), (0.0, 0.56)],
             8, 'planks', m=_at(0.34, 0.12))
-    b.blob((-0.38, 0.28, 0.22), 0.22, 'cloth_cream', subdiv=1, squash=(0.95, 0.85, 1.15), jitter=0.08, seed=92)
+    b.blob((-0.38, 0.28, 0.22), 0.22, 'rope', subdiv=1, squash=(0.95, 0.85, 1.15), jitter=0.08, seed=92)
     if detailed():
         sh_m = _at(0.28, -0.20, 0.32) @ Matrix.Rotation(math.radians(68), 4, 'X')
         b.lathe([(0.0, 0.0), (0.28, 0.0), (0.28, 0.04), (0.0, 0.06)], 10, 'cloth_red', m=sh_m)
@@ -368,8 +370,8 @@ def mud_bank(seed=43):
     # Crooked wooden mooring stakes with rope coil
     b.beam((-0.48, -0.22, -0.05), (-0.54, -0.28, 0.92), (0, 1, 0), (-0.055, 0.055), 0.11, 'bark')
     b.beam((0.42, -0.18, -0.05), (0.48, -0.12, 0.76), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
-    b.box((-0.60, -0.34, 0.56), (-0.44, -0.18, 0.70), 'cloth_cream')
-    b.beam((-0.52, -0.25, 0.62), (0.45, -0.15, 0.52), (0, 0, 1), (-0.025, 0.025), 0.05, 'cloth_cream')
+    b.box((-0.60, -0.34, 0.56), (-0.44, -0.18, 0.70), 'rope')
+    b.beam((-0.52, -0.25, 0.62), (0.45, -0.15, 0.52), (0, 0, 1), (-0.025, 0.025), 0.05, 'rope')
     # Tall marsh reed & cattail clusters
     reed_clusters = [(-0.62, 0.24), (-0.18, 0.36), (0.52, 0.22), (0.78, -0.05)]
     for cx, cy in reed_clusters:
@@ -386,16 +388,16 @@ def fishing_net_rack():
     for sx in (-0.92, 0.92):
         b.beam((sx, -0.36, 0.0), (sx * 0.95, -0.04, 1.72), (1, 0, 0), (-0.045, 0.045), 0.09, 'bark')
         b.beam((sx, 0.36, 0.0), (sx * 0.95, 0.04, 1.72), (1, 0, 0), (-0.045, 0.045), 0.09, 'bark')
-        b.box((sx * 0.95 - 0.07, -0.09, 1.48), (sx * 0.95 + 0.07, 0.09, 1.62), 'cloth_cream')
+        b.box((sx * 0.95 - 0.07, -0.09, 1.48), (sx * 0.95 + 0.07, 0.09, 1.62), 'rope')
     b.beam((-1.08, 0.0, 1.64), (1.08, 0.0, 1.60), (0, 0, 1), (-0.045, 0.045), 0.09, 'bark')
     # Draped fishing net sheets & criss-cross cord ribs
     b.extrude([(-0.82, -0.03, 1.60), (0.82, -0.03, 1.56),
                (0.74, -0.22, 0.34), (-0.76, -0.18, 0.38)], (0, 0.03, 0), 'thatch')
     for x in (-0.64, -0.32, 0.0, 0.32, 0.64):
-        b.beam((x, -0.04, 1.58), (x * 0.92, -0.22, 0.36), (1, 0, 0), (-0.015, 0.015), 0.03, 'cloth_cream')
+        b.beam((x, -0.04, 1.58), (x * 0.92, -0.22, 0.36), (1, 0, 0), (-0.015, 0.015), 0.03, 'rope')
         b.box((x - 0.04, -0.07, 1.52), (x + 0.04, 0.05, 1.64), 'planks')
     for z in (0.58, 0.92, 1.26):
-        b.beam((-0.78, -0.14, z), (0.78, -0.14, z - 0.03), (0, 0, 1), (-0.015, 0.015), 0.03, 'cloth_cream')
+        b.beam((-0.78, -0.14, z), (0.78, -0.14, z - 0.03), (0, 0, 1), (-0.015, 0.015), 0.03, 'rope')
     # Conical woven reed fish-trap basket at the foot of the rack
     trap_m = _at(0.45, 0.32, 0.22) @ Matrix.Rotation(math.radians(78), 4, 'Y')
     b.lathe([(0.0, 0.0), (0.24, 0.0), (0.18, 0.42), (0.08, 0.78), (0.0, 0.84)],

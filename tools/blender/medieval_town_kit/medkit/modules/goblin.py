@@ -34,7 +34,7 @@ def _at(x, y, z=0.0):
 def _lash(b, x, y, z, r=0.11, h=0.14):
     """Coiled rope lashing around a timber joint."""
     seg = 8 if detailed() else 5
-    b.lathe([(r, z - h / 2), (r + 0.015, z), (r, z + h / 2)], seg, 'cloth_cream',
+    b.lathe([(r, z - h / 2), (r + 0.015, z), (r, z + h / 2)], seg, 'rope',
             m=_at(x, y), smooth=False)
 
 
@@ -59,7 +59,7 @@ def wall_goblin(window=False, door=False, arcade=False):
         if detailed():
             for hx in (0.65, 1.35):
                 b.box((hx - 0.015, -T - 0.02, STORY - 0.56), (hx + 0.015, -T + 0.02, STORY - 0.22),
-                      'cloth_cream')
+                      'rope')
                 b.blob((hx, -T - 0.02, STORY - 0.62), 0.07, 'plaster', subdiv=1,
                        squash=(0.8, 0.8, 1.2), jitter=0.04, seed=int(hx * 10))
         return b
@@ -76,7 +76,7 @@ def wall_goblin(window=False, door=False, arcade=False):
         b.box((0.58, -T, 1.95), (1.42, T, STORY), 'planks', skip=('+z',))
         # Warm fire-lit interior backing + crooked iron/bark bars (no white Tudor glass)
         b.box((0.60, -0.03, 0.97), (1.40, 0.03, 1.93), 'iron')
-        b.box((0.64, -0.04, 1.02), (1.36, 0.02, 1.88), 'glow')
+        b.box((0.64, -0.04, 1.02), (1.36, 0.02, 1.88), 'firelight')
         for bx in (0.82, 1.02, 1.20):
             b.beam((bx, -T - 0.01, 0.95), (bx + 0.02, -T - 0.01, 1.95),
                    (0, 1, 0), (-0.025, 0.025), 0.04, 'bark')
@@ -116,13 +116,12 @@ def wall_goblin(window=False, door=False, arcade=False):
         _lash(b, 0.52, out, 2.16, r=0.10, h=0.14)
         _lash(b, 1.48, out, 2.16, r=0.10, h=0.14)
         if detailed():
-            # Horned skull trophy mounted above the door lintel
-            b.blob((1.0, out - 0.08, 2.48), 0.12, 'plaster', subdiv=1,
-                   squash=(0.85, 0.9, 1.1), jitter=0.05, seed=11)
-            for sx in (-1, 1):
-                b.beam((1.0 + sx * 0.06, out - 0.08, 2.52),
-                       (1.0 + sx * 0.24, out - 0.14, 2.74),
-                       (0, 1, 0), (-0.02, 0.02), 0.04, 'plaster')
+            # Clan-mark board over the lintel: a trader's sign, not a trophy
+            b.box((0.72, out - 0.06, 2.30), (1.28, out - 0.01, 2.62), 'planks')
+            for mx in (0.86, 1.0, 1.14):
+                b.box((mx - 0.018, out - 0.075, 2.36), (mx + 0.018, out - 0.055, 2.56), 'shadow', bevel=0)
+            _lash(b, 0.78, out - 0.03, 2.62, r=0.035, h=0.06)
+            _lash(b, 1.22, out - 0.03, 2.62, r=0.035, h=0.06)
     return b
 
 
@@ -278,9 +277,6 @@ def roof_goblin_end(span):
         b.beam((-0.18, span / 2 - sy * 0.45, apex - 0.25),
                (-0.18, span / 2 + sy * 0.38, apex + THICK * 1.35 + 0.52),
                (1, 0, 0), (-0.04, 0.04), 0.08, 'bark')
-    if detailed():
-        b.blob((-0.48, span / 2, apex + THICK * 1.12), 0.11, 'plaster', subdiv=1,
-               squash=(0.8, 0.9, 1.15), jitter=0.05, seed=int(span) + 3)
     return b
 
 
@@ -317,7 +313,7 @@ def roof_goblin_hut(size):
         b.beam((px, py, 0.0), (px, py, 1.15), (0, 1, 0), (-0.06, 0.06), 0.12, 'bark')
         nx, ny = corners[(i + 1) % 4]
         b.beam((px, py, 0.88), (nx, ny, 0.88), (0, 0, 1), (-0.04, 0.04), 0.08, 'bark')
-        b.beam((px, py, 0.44), (nx, ny, 0.44), (0, 0, 1), (-0.03, 0.03), 0.06, 'cloth_cream')
+        b.beam((px, py, 0.44), (nx, ny, 0.44), (0, 0, 1), (-0.03, 0.03), 0.06, 'rope')
         # Tall corner torch pole with blazing fire basket
         if i < 2:
             tx = px + (-0.15 if px < cx else 0.15)
@@ -412,14 +408,15 @@ def goblin_tarp_canopy():
     b.extrude([(-1.98, 1.15, 2.74), (1.98, 1.15, 2.72),
                (1.98, -0.05, 2.32), (-1.98, -0.05, 2.34)], (0, 0, 0.08), 'thatch')
     b.extrude([(-1.92, 0.05, 2.36), (1.92, 0.05, 2.34),
-               (1.92, -1.22, 2.08), (-1.92, -1.22, 2.10)], (0, 0, 0.06), 'cloth_cream')
+               (1.92, -1.22, 2.08), (-1.92, -1.22, 2.10)], (0, 0, 0.06), 'hide')
     b.box((-0.08, -0.95, 1.68), (0.08, -0.79, 1.94), 'iron')
     b.box((-0.06, -0.93, 1.71), (0.06, -0.81, 1.90), 'glow')
     return b
 
 
 def banner_goblin_skull():
-    """Ragged red war-banner on a lashed crossbar bearing a white goblin skull & crossbones."""
+    """Clan trade cloth on a lashed crossbar: an earth-dyed hanging with a woven lozenge
+    mark (Grukmar brief: clan marks, never skull-and-bones everywhere)."""
     b = MeshBuilder()
     b.beam((-0.52, -0.06, 0.0), (0.52, -0.06, 0.0), (0, 1, 0), (-0.04, 0.04), 0.08, 'bark')
     _lash(b, -0.38, -0.06, 0.0, r=0.055, h=0.09)
@@ -431,13 +428,11 @@ def banner_goblin_skull():
         (-0.40, -0.09, -1.18),
     ]
     b.extrude(pts, (0, -0.03, 0), 'cloth_red')
-    # Skull & crossbones emblem on the front face
-    b.box((-0.13, -0.115, -0.52), (0.13, -0.095, -0.26), 'plaster')
-    b.box((-0.08, -0.115, -0.62), (0.08, -0.095, -0.50), 'plaster')
-    for eye_x in (-0.055, 0.055):
-        b.box((eye_x - 0.025, -0.12, -0.44), (eye_x + 0.025, -0.09, -0.36), 'iron')
-    b.beam((-0.24, -0.11, -0.86), (0.24, -0.11, -0.58), (0, 1, 0), (-0.015, 0.015), 0.04, 'plaster')
-    b.beam((-0.24, -0.11, -0.58), (0.24, -0.11, -0.86), (0, 1, 0), (-0.015, 0.015), 0.04, 'plaster')
+    # Woven lozenge between two bars
+    b.extrude([(0.0, -0.105, -0.30), (0.16, -0.105, -0.52), (0.0, -0.105, -0.74), (-0.16, -0.105, -0.52)],
+              (0, -0.012, 0), 'rope')
+    for bz in (-0.18, -0.86):
+        b.box((-0.30, -0.115, bz - 0.03), (0.30, -0.103, bz + 0.03), 'rope', bevel=0)
     return b
 
 
@@ -515,9 +510,9 @@ def railing_goblin():
     for x, tilt in ((0.12, 0.04), (1.05, -0.05), (GRID - 0.12, 0.03)):
         b.beam((x, 0.16, -0.08), (x + tilt, 0.14, 0.96), (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
         _lash(b, x + tilt * 0.8, 0.15, 0.80, r=0.065, h=0.10)
-    b.beam((0.0, 0.15, 0.80), (1.05, 0.14, 0.72), (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
-    b.beam((1.05, 0.14, 0.72), (GRID, 0.15, 0.80), (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
-    b.beam((0.0, 0.15, 0.42), (GRID, 0.15, 0.38), (0, 1, 0), (-0.02, 0.02), 0.04, 'cloth_cream')
+    b.beam((0.0, 0.15, 0.80), (1.05, 0.14, 0.72), (0, 1, 0), (-0.025, 0.025), 0.05, 'rope')
+    b.beam((1.05, 0.14, 0.72), (GRID, 0.15, 0.80), (0, 1, 0), (-0.025, 0.025), 0.05, 'rope')
+    b.beam((0.0, 0.15, 0.42), (GRID, 0.15, 0.38), (0, 1, 0), (-0.02, 0.02), 0.04, 'rope')
     return b
 
 
@@ -535,7 +530,7 @@ def stairs_boardwalk(units):
         b.beam((sx, run - 0.08, rise), (sx, run - 0.08, rise + 0.92),
                (0, 1, 0), (-0.05, 0.05), 0.10, 'bark')
         b.beam((sx, 0.08, 0.78), (sx, run - 0.08, rise + 0.78),
-               (1, 0, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
+               (1, 0, 0), (-0.025, 0.025), 0.05, 'rope')
     for i in range(steps):
         t0 = i / steps
         t1 = (i + 0.82) / steps
@@ -588,12 +583,12 @@ def rope_bridge(span=4.0, depth=2.0, height=3.0):
         z0, z1 = sag_z(x0), sag_z(x1)
         for py in (0.14, depth - 0.14):
             b.beam((x0, py, z0 - 0.04), (x1, py, z1 - 0.04),
-                   (0, 1, 0), (-0.03, 0.03), 0.06, 'cloth_cream')
+                   (0, 1, 0), (-0.03, 0.03), 0.06, 'rope')
             b.beam((x0, py, z0 + 0.92), (x1, py, z1 + 0.92),
-                   (0, 1, 0), (-0.025, 0.025), 0.05, 'cloth_cream')
+                   (0, 1, 0), (-0.025, 0.025), 0.05, 'rope')
             if k > 0:
                 b.beam((x0, py, z0 - 0.02), (x0, py, z0 + 0.92),
-                       (0, 1, 0), (-0.015, 0.015), 0.03, 'cloth_cream')
+                       (0, 1, 0), (-0.015, 0.015), 0.03, 'rope')
     return b
 
 

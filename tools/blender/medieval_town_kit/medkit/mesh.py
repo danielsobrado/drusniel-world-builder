@@ -13,7 +13,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 from . import materials
-from .bevel import DEFAULT_BEVEL, chamfer_faces, piece_tone, vertex_shade
+from .bevel import DEFAULT_BEVEL, chamfer_faces, grime_strips, piece_tone, vertex_shade
 from .config import detailed
 
 _BOX_FACES = {
@@ -73,6 +73,12 @@ class MeshBuilder:
         n = newell(pts)
         if n.length < 1e-9:
             return
+        if uvs is None and detailed():
+            strips = grime_strips(pts, n, mat)
+            if strips:
+                for strip in strips:
+                    self.poly(strip, mat, outward=outward, smooth=smooth, grain_dir=grain_dir, tone=tone)
+                return
         if outward is not None and n.dot(Vector(outward)) < 0:
             pts.reverse()
             n = -n

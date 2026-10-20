@@ -3,6 +3,8 @@
     blender -b --factory-startup --python tools/blender/medieval_town_kit/review_shots.py -- OUT_DIR [shot,shot,...] [--res 960x720]
 
 With no shot list every shot in SHOTS is rendered. `--list` prints the kit's module names.
+`--cinematic` renders with haze, sun through the glass, shadowed fire light and a dimmer
+sky fill indoors: the target the game's renderer should grow toward, not what it shows today.
 Modules are shown alone on a plain earth ground from a front three-quarter view.
 """
 import os
@@ -35,6 +37,8 @@ SHOTS = {
     'med_villa': ('prefab', 'Med_Villa'),
     'round_tower': ('prefab', 'RoundTower'),
     'street': ('town', 'street'),
+    'plaza': ('town', 'plaza'),
+    'lane': ('town', 'lane'),
     'interior': ('town', 'interior'),
     'overview': ('town', 'overview'),
 }
@@ -48,10 +52,11 @@ def _args():
         argv.remove('--res')
         res = (int(w), int(h))
     listing = '--list' in argv
-    argv = [a for a in argv if a != '--list']
+    cinematic = '--cinematic' in argv
+    argv = [a for a in argv if a not in ('--list', '--cinematic')]
     out = argv[0] if argv else os.path.join(config.PREVIEW_DIR, 'review_live')
     names = argv[1].split(',') if len(argv) > 1 else list(SHOTS)
-    return out, names, res, listing
+    return out, names, res, listing, cinematic
 
 
 def _bounds(objs):
@@ -84,6 +89,68 @@ def _frame(objs, out, res, view=(-0.55, -1.0, 0.32)):
     game_look.render(bpy.context.scene, cam, out, res)
 
 
+FIRES = {'Hearth': (0, -0.15, 0.4), 'Forge_Hood': (-0.25, -0.2, 1.0), 'Bake_Oven': (0, -0.3, 0.9),
+         'Goblin_Firepit': (0, 0, 0.4), 'Cauldron_Fire': (0, 0, 0.6), 'Brazier': (0, 0, 1.1)}
+
+
+def _set(obj, attr, value):
+    if hasattr(obj, attr):
+        try:
+            setattr(obj, attr, value)
+        except (TypeError, ValueError):
+            pass
+
+
+def _cinematic():
+    """Haze, transmissive glass, shadowed fire and candle light."""
+    scene = bpy.context.scene
+    eevee = scene.eevee
+    for attr, value in (('use_volumetric_shadows', True), ('volumetric_tile_size', '4'),
+                        ('volumetric_samples', 64), ('volumetric_end', 90.0), ('use_shadows', True),
+                        ('shadow_ray_count', 3), ('shadow_step_count', 12), ('use_fast_gi', True),
+                        ('fast_gi_distance', 4.0), ('ray_tracing_method', 'SCREEN'), ('shadow_pool_size', '1024')):
+        _set(eevee, attr, value)
+    nt = scene.world.node_tree
+    vol = nt.nodes.new('ShaderNodeVolumePrincipled')
+    vol.inputs['Density'].default_value = 0.012
+    vol.inputs['Anisotropy'].default_value = 0.65
+    vol.inputs['Color'].default_value = (1.0, 0.92, 0.82, 1)
+    out = next(n for n in nt.nodes if n.type == 'OUTPUT_WORLD')
+    nt.links.new(vol.outputs['Volume'], out.inputs['Volume'])
+    sun = bpy.data.objects['Sun']
+    sun.data.energy *= 1.5
+    sun.data.angle = 0.03
+    glass = bpy.data.materials.get('M_glass')
+    if glass:
+        bsdf = next(n for n in glass.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+        bsdf.inputs['Alpha'].default_value = 0.35
+        _set(glass, 'surface_render_method', 'DITHERED')
+        _set(glass, 'use_transparent_shadow', True)
+    for light in bpy.data.lights:
+        if light.type == 'POINT':
+            light.energy *= 0.7
+    for obj in list(bpy.data.objects):
+        offset = FIRES.get(obj.get('kit_module'))
+        if offset is None:
+            continue
+        data = bpy.data.lights.new('Fire', 'POINT')
+        data.energy, data.color, data.shadow_soft_size = 160.0, (1.0, 0.55, 0.24), 0.25
+        fire = bpy.data.objects.new('Fire', data)
+        bpy.context.scene.collection.objects.link(fire)
+        fire.location = obj.matrix_world @ Vector(offset)
+
+
+def _sky(scale, haze=0.0015):
+    nodes = bpy.context.scene.world.node_tree.nodes
+    vol = next((n for n in nodes if n.type == 'PRINCIPLED_VOLUME'), None)
+    if vol is not None:
+        vol.inputs['Density'].default_value = haze
+    bg = next(n for n in nodes if n.type == 'BACKGROUND')
+    if '_base' not in bg:
+        bg['_base'] = bg.inputs['Strength'].default_value
+    bg.inputs['Strength'].default_value = bg['_base'] * scale
+
+
 def _hide_all():
     for o in bpy.data.objects:
         if o.type == 'MESH' and o.name != 'QA_Ground':
@@ -91,7 +158,7 @@ def _hide_all():
 
 
 def main():
-    out_dir, names, res, listing = _args()
+    out_dir, names, res, listing, cinematic = _args()
     t0 = time.time()
     config.LOD = 0
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -106,6 +173,8 @@ def main():
         village.build(kit, village_plan)
     prefabs = PrefabBuilder(kit).build_all() if need_prefabs else None
     render.setup_scene()
+    if cinematic:
+        _cinematic()
     ground = _ground()
     os.makedirs(out_dir, exist_ok=True)
     print(f'[review] built in {time.time() - t0:.1f}s')
@@ -123,6 +192,8 @@ def main():
             render._set_visible('Kit', False)
             render._set_visible('Prefabs', False)
             render._set_visible('Town', True)
+            if cinematic:
+                _sky(*((0.3, 0.008) if shot[1].startswith('interior') else (0.8, 0.0)))
             render.previews(out_dir, {shot[1]})
             os.replace(os.path.join(out_dir, f'{shot[1]}.png'), path)
             ground.hide_render = False
@@ -153,6 +224,8 @@ def main():
                 objs.append(obj)
         if not objs:
             continue
+        if cinematic:
+            _sky(0.8)
         for o in objs:
             o.hide_render = False
         bpy.context.view_layer.update()

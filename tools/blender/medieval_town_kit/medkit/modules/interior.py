@@ -102,8 +102,7 @@ def pew(length=1.7):
     if detailed():
         b.box((-h + 0.08, -0.18, 0.08), (h - 0.08, -0.06, 0.14), 'wood_trim')
         for px0, px1 in ((-h + 0.12, -0.04), (0.04, h - 0.12)):
-            recessed_panel_front(b, px0, px1, 0.53, 0.92, 0.115, depth=0.018, border=0.024,
-                                 carved=True, style='knotwork')
+            recessed_panel_front(b, px0, px1, 0.53, 0.92, 0.115, depth=0.018, border=0.024, carved=False)
     return b
 
 
