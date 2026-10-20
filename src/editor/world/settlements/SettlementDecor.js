@@ -173,6 +173,68 @@ function fieldFences({ fields, props }) {
   }
 }
 
+function regionalOverlayProps({ profile, occupancy, streets, squareRadius, props, random }) {
+  if (!profile.hasRegionalIdentity || !profile.recipe) return;
+  const candidates = [
+    ...(profile.recipe.regionalProps ?? []),
+    ...(profile.recipe.overlayModules ?? []),
+  ];
+  if (!candidates.length) return;
+  const mains = streets.filter(({ kind }) => kind === 'main');
+  let placedCount = 0;
+  const maxRegionalProps = Math.min(candidates.length * 2, 6 + profile.rank * 3);
+
+  for (let index = 0; index < candidates.length && placedCount < maxRegionalProps; index += 1) {
+    const item = candidates[index];
+    const fb = item.runtime?.fallback;
+    if (!fb) continue;
+    const kind = fb.settlementKind;
+    const variant = fb.settlementVariant ?? 0;
+    let placed = false;
+
+    if (squareRadius > 0 && index < 3) {
+      const angle = (Math.PI * 2 * index) / Math.max(3, candidates.length) + 0.25;
+      const radius = squareRadius * 0.78;
+      const x = Math.sin(angle) * radius;
+      const z = Math.cos(angle) * radius;
+      if (occupancy.isBuildable(x, z)) {
+        props.push({
+          kind,
+          variant,
+          x,
+          z,
+          yaw: angle + Math.PI,
+          assetId: item.assetId,
+          kitProp: fb.kitProp,
+          ...(item.areaOverlay ? { areaOverlay: item.areaOverlay } : {}),
+        });
+        placed = true;
+      }
+    }
+
+    if (!placed && mains.length > 0) {
+      const street = mains[index % mains.length];
+      const length = polylineLength(street.points);
+      const distance = Math.min(length * 0.65, Math.max(squareRadius + 8, profile.radius * (0.35 + (index % 4) * 0.14)));
+      const at = pointAlong(street.points, distance);
+      if (at) {
+        const side = index % 2 === 0 ? 1 : -1;
+        const offset = street.width / 2 + 1.6;
+        const x = at.x + Math.cos(at.along) * side * offset;
+        const z = at.z - Math.sin(at.along) * side * offset;
+        if (placeProp(occupancy, props, kind, variant, x, z, at.along - (Math.PI / 2) * side, { ignoreStreets: true })) {
+          const last = props.at(-1);
+          last.assetId = item.assetId;
+          last.kitProp = fb.kitProp;
+          if (item.areaOverlay) last.areaOverlay = item.areaOverlay;
+          placed = true;
+        }
+      }
+    }
+    if (placed) placedCount += 1;
+  }
+}
+
 export function planDecor({ profile, occupancy, streets, squareRadius, buildings, fields, random }) {
   const props = [];
   const walks = [];
@@ -182,5 +244,6 @@ export function planDecor({ profile, occupancy, streets, squareRadius, buildings
   tradeGoods({ buildings, occupancy, props, random });
   roadMarkers({ profile, occupancy, streets, props, random });
   fieldFences({ fields, props });
+  regionalOverlayProps({ profile, occupancy, streets, squareRadius, props, random });
   return { props, walks };
 }

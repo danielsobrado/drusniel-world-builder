@@ -1,13 +1,24 @@
 import { hash32 } from '../stylized/scatterMath.js';
+import { resolvePlaceIdentity } from '../../worldIdentity/PlaceIdentityResolver.js';
+import { resolveSceneRecipe } from '../../worldIdentity/SceneRecipeResolver.js';
 
 /**
  * Stable cosmetic representatives; never increments the authoritative population.
  * `spots` are the places a planned settlement gathers at (SettlementGathering),
  * best first; without them residents stand on a ring round the centre.
+ *
+ * Each resident receives a deterministic regional `profession`, `professionTitle`,
+ * `role`, `district`, `loreRealm`, `cultureKey`, and `localBranch` from the
+ * settlement's `PlaceIdentity` and `SceneRecipe`.
  */
 export function residentManifest(settlement, { tileSize, worldSeed, settings, population = settlement.population, spots = null }) {
   if (!(population > 0)) return [];
   const count = Math.min(settings.maxPerSettlement, Math.max(1, Math.ceil(Math.log2(1 + population)) * 4 + 2));
+  const identity = resolvePlaceIdentity(settlement);
+  const recipe = resolveSceneRecipe(identity);
+  const professions = recipe.residentProfessions ?? [];
+  const wards = recipe.multiPeopleDistricts ?? [];
+
   return Array.from({ length: count }, (_, index) => {
     const seed = hash32(worldSeed ^ Math.imul(Number(settlement.id) || 1, 977) ^ index);
     const angle = seed / 0xffffffff * Math.PI * 2;
@@ -15,10 +26,24 @@ export function residentManifest(settlement, { tileSize, worldSeed, settings, po
     // A step off the spot, so two residents sharing one do not stand in each other.
     const spot = spots?.length > 0 ? spots[index % spots.length] : null;
     const lap = spots?.length > 0 ? Math.floor(index / spots.length) : 0;
+    const profession = professions.length > 0
+      ? ((settlement.capital && index === 0)
+        ? (professions.find((entry) => entry.visualKind === 'paladin') ?? professions[0])
+        : professions[(seed + index) % professions.length])
+      : null;
+    const ward = wards.length > 1 ? wards[index % wards.length] : null;
+
     return {
       id: `settlement:${settlement.id}:resident:${index}`,
       settlementId: settlement.id,
       kind: settlement.capital && index === 0 ? 'paladin' : 'villager',
+      profession: profession?.id ?? 'burgher',
+      professionTitle: profession?.title ?? 'Town Resident',
+      role: profession?.role ?? 'civic',
+      district: ward?.id ?? profession?.district ?? 'residential',
+      loreRealm: identity.loreRealm,
+      cultureKey: ward?.cultureKey ?? identity.cultureKey,
+      localBranch: ward?.localBranch ?? identity.localBranch,
       x: spot ? spot.x + Math.cos(angle) * lap * 1.4 : (settlement.cellX + 0.5) * tileSize + Math.cos(angle) * radius,
       z: spot ? spot.z + Math.sin(angle) * lap * 1.4 : -(settlement.cellZ + 0.5) * tileSize + Math.sin(angle) * radius,
       wander: settings.wanderRadius,

@@ -1,4 +1,5 @@
 import { drainJob, typedArrayJob } from '../world/settlements/SettlementArrayJobs.js';
+import { resolveRuntimeAsset } from '../../worldIdentity/AssetRegistry.js';
 import { planDressingJob, planPavingJob } from './TownDressing.js';
 import { familyForStyle, prefabNameFor, propClusterFor } from './TownPrefabCatalog.js';
 import { townHash as placementSeed } from './townHash.js';
@@ -67,7 +68,8 @@ export class TownLayoutBuilder {
     this.kit = kit;
     this.sampleHeight = sampleHeight;
     this.anchor = Object.freeze({ x: settlement.cellX * tileSize, z: -settlement.cellZ * tileSize });
-    this.family = familyForStyle(plan.profile?.style?.key);
+    this.styleKey = plan.profile?.kitStyleKey ?? plan.profile?.style?.key ?? null;
+    this.family = familyForStyle(this.styleKey);
     this.parts = new Map();
     this.seeds = new Map();
     this.boxes = [];
@@ -116,14 +118,21 @@ export class TownLayoutBuilder {
   }
 
   addBuilding(building, index) {
-    const name = prefabNameFor(building.kind, building.variant, this.family, this.kit.prefabs,
-      placementSeed(this.settlement.id, index, 37));
+    const resolvedAsset = building.assetId
+      ? resolveRuntimeAsset(building.assetId)
+      : null;
+    const requestedPrefab = building.kitPrefab ?? resolvedAsset?.fallback?.kitPrefab ?? null;
+    const buildingFamily = building.kitFamily || this.family;
+    const name = (requestedPrefab && this.kit.prefabs?.[requestedPrefab])
+      ? requestedPrefab
+      : prefabNameFor(building.kind, building.variant, buildingFamily, this.kit.prefabs,
+        placementSeed(this.settlement.id, index, 37));
     const prefab = name ? this.kit.prefabs[name] : null;
     if (!prefab) return;
     const pad = Number.isFinite(building.pad) ? building.pad : this.groundAt(building.x, -building.z);
     const frame = planFrame(building, pad);
     const key = `town:${this.settlement.id}:b${index}`;
-    this.placed.push({ building, size: prefab.size });
+    this.placed.push({ building, size: prefab.size, family: buildingFamily });
     const seed = placementSeed(this.settlement.id, index, 11);
     for (const part of prefab.parts) this.addPart(part.m, frame.point(part.p), frame.yaw + part.yaw, seed);
     prefab.colliders.forEach((box, boxIndex) => {
@@ -170,8 +179,16 @@ export class TownLayoutBuilder {
   }
 
   addProp(prop, index) {
-    const cluster = propClusterFor(prop.kind, prop.variant, this.settlement.id + index,
+    const resolvedAsset = prop.assetId
+      ? resolveRuntimeAsset(prop.assetId)
+      : null;
+    const requestedKind = prop.kitProp ?? resolvedAsset?.fallback?.kitProp ?? prop.kind;
+    let cluster = propClusterFor(requestedKind, prop.variant, this.settlement.id + index,
       this.plan.profile?.rank ?? 0);
+    if (!cluster.length && requestedKind !== prop.kind) {
+      cluster = propClusterFor(prop.kind, prop.variant, this.settlement.id + index,
+        this.plan.profile?.rank ?? 0);
+    }
     if (!cluster.length) return;
     const frame = new Frame(prop.x, 0, -prop.z, Math.PI - prop.yaw);
     cluster.forEach(([module, dx, dz, yaw, dy], partIndex) => {
@@ -234,8 +251,10 @@ export class TownLayoutBuilder {
       capital: Boolean(this.settlement.capital),
       citadel: Boolean(this.settlement.citadel),
       culture: Number.isFinite(this.settlement.culture) ? this.settlement.culture : null,
-      styleKey: this.plan.profile?.style?.key ?? null,
+      styleKey: this.styleKey,
       finishes: this.plan.profile?.style?.finishes ?? [],
+      identity: this.plan.profile?.identity ?? null,
+      recipeId: this.plan.profile?.recipe?.id ?? null,
       anchor: this.anchor,
       parts,
       partSeeds,

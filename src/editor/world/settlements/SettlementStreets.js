@@ -177,24 +177,46 @@ function spokeLanes({ bearings, inner, outer, mains, random, isBuildable }) {
 export function planStreets({ profile, routeBearings, random, isBuildable }) {
   const squareRadius = marketSquareRadius(profile);
   const streets = [];
+  const regional = Boolean(profile.hasRegionalIdentity && profile.recipe?.streetConfig);
+  const streetConfig = regional ? profile.recipe.streetConfig : null;
+  const mainDrift = streetConfig ? streetConfig.drift : 0.22;
+  const surfaceRole = streetConfig?.hasBoardwalkNetwork
+    ? 'boardwalk'
+    : (streetConfig?.grammar === 'contour-switchback-terrace'
+      ? 'switchback'
+      : (streetConfig?.grammar === 'fortified-forge-axis' ? 'forge-track' : 'street'));
+
   // A port is planned from its water: the quay road is the first street it has.
   const quayBearing = profile.port ? waterBearing(profile, isBuildable) : null;
   const bearings = mainBearings(profile, routeBearings, random, quayBearing);
   const reach = profile.radius * FARM_BELT.outer;
   for (const bearing of bearings) {
     const start = [Math.sin(bearing) * squareRadius, Math.cos(bearing) * squareRadius];
-    const points = walkStreet({ start, bearing, length: reach, step: 12, drift: 0.22, random, isBuildable });
-    if (points.length > 1) streets.push({ kind: 'main', width: STREET_WIDTH.main, points, bearing });
+    const points = walkStreet({ start, bearing, length: reach, step: 12, drift: mainDrift, random, isBuildable });
+    if (points.length > 1) {
+      streets.push({
+        kind: 'main',
+        width: STREET_WIDTH.main,
+        points,
+        bearing,
+        ...(regional ? { surfaceRole } : {}),
+      });
+    }
   }
   const mains = streets.filter(({ kind }) => kind === 'main');
 
-  if (profile.rank >= 2) {
+  const allowRings = !streetConfig || streetConfig.ringCount > 0;
+  if (profile.rank >= 2 && allowRings) {
     const inner = profile.radius * (0.44 + random() * 0.08);
-    streets.push(...ringStreets({ ringRadius: inner, random, isBuildable }));
+    streets.push(...ringStreets({ ringRadius: inner, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
     const outer = profile.rank >= 3 ? profile.radius * (0.8 + random() * 0.06) : profile.radius * 0.92;
-    if (profile.rank >= 3) streets.push(...ringStreets({ ringRadius: outer, random, isBuildable }));
-    streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable }));
+    if (profile.rank >= 3 && (!streetConfig || streetConfig.ringCount >= 2)) {
+      streets.push(...ringStreets({ ringRadius: outer, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
+    }
+    streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
   }
-  if (profile.rank >= 1) streets.push(...sideLanes({ profile, mains, random, isBuildable }));
+  if (profile.rank >= 1) {
+    streets.push(...sideLanes({ profile, mains, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
+  }
   return { streets, squareRadius, bearings, quayBearing };
 }

@@ -10,11 +10,12 @@ const MAX_PAD_FALL = 3.2;
  * street, and nothing is put in water or on a cliff.
  */
 export class SettlementOccupancy {
-  constructor({ streets, squareRadius, isBuildable, sampleHeight }) {
+  constructor({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall = MAX_PAD_FALL }) {
     this.streets = streets;
     this.squareRadius = squareRadius;
     this.isBuildable = isBuildable;
     this.sampleHeight = sampleHeight;
+    this.maxPadFall = maxPadFall;
     this.grid = new PlanGrid(16);
     this.claimed = [];
   }
@@ -37,7 +38,7 @@ export class SettlementOccupancy {
     const samples = [...rectCorners(box), [box.x, box.z]];
     if (!samples.every(([x, z]) => this.isBuildable(x, z))) return 'water';
     const heights = samples.map(([x, z]) => this.sampleHeight(x, z));
-    if (Math.max(...heights) - Math.min(...heights) > MAX_PAD_FALL) return 'slope';
+    if (Math.max(...heights) - Math.min(...heights) > this.maxPadFall) return 'slope';
     return null;
   }
 

@@ -18,16 +18,40 @@ function burgCell(burg, { sourceWidth, sourceHeight, bounds }) {
 
 export function settlementsFromBurgs(burgs, frame) {
   if (!Array.isArray(burgs) || !(frame?.sourceWidth > 0) || !(frame?.sourceHeight > 0) || !frame.bounds) return [];
+  const stateNames = new Map(
+    (Array.isArray(frame.states) ? frame.states : [])
+      .filter((s) => s && Number.isSafeInteger(Number(s.i)))
+      .map((s) => [Number(s.i), String(s.name ?? s.fullName ?? '')]),
+  );
+  const provinceNames = new Map(
+    (Array.isArray(frame.provinces) ? frame.provinces : [])
+      .filter((p) => p && Number.isSafeInteger(Number(p.i)))
+      .map((p) => [Number(p.i), String(p.name ?? p.fullName ?? '')]),
+  );
   return burgs.flatMap((burg) => {
     if (!burg || burg.removed || !Number.isSafeInteger(Number(burg.i)) || Number(burg.i) <= 0) return [];
     if (!Number.isFinite(Number(burg.x)) || !Number.isFinite(Number(burg.y))) return [];
     const flags = Object.fromEntries(FLAGS.map((flag) => [flag, Boolean(Number(burg[flag]) || burg[flag] === true)]));
+    const state = Number.isSafeInteger(Number(burg.state)) ? Number(burg.state) : null;
+    const province = Number.isSafeInteger(Number(burg.province)) ? Number(burg.province) : null;
+    const stateName = typeof burg.stateName === 'string'
+      ? burg.stateName
+      : (state !== null && stateNames.get(state) ? stateNames.get(state) : null);
+    const provinceName = typeof burg.provinceName === 'string'
+      ? burg.provinceName
+      : (province !== null && provinceNames.get(province) ? provinceNames.get(province) : null);
+    const type = typeof burg.type === 'string' && burg.type.trim() ? burg.type.trim() : null;
     return [{
       id: Number(burg.i),
       name: String(burg.name ?? ''),
       ...burgCell(burg, frame),
       population: Number.isFinite(Number(burg.population)) ? Number(burg.population) : 0,
       culture: Number.isFinite(Number(burg.culture)) ? Number(burg.culture) : null,
+      ...(state !== null ? { state } : {}),
+      ...(stateName ? { stateName } : {}),
+      ...(province !== null ? { province } : {}),
+      ...(provinceName ? { provinceName } : {}),
+      ...(type ? { type } : {}),
       ...flags,
     }];
   });
@@ -39,6 +63,8 @@ export function createSettlementData(document, bounds) {
     sourceWidth: Number(document.info?.width),
     sourceHeight: Number(document.info?.height),
     bounds,
+    states: document.pack?.states,
+    provinces: document.pack?.provinces,
   });
 }
 
@@ -59,6 +85,8 @@ export function withSettlementData(baseTerrain, campaign, { enabled = true } = {
     sourceWidth: Number(campaign?.source?.sourceWidth),
     sourceHeight: Number(campaign?.source?.sourceHeight),
     bounds: baseTerrain.bounds,
+    states: campaign?.states,
+    provinces: campaign?.provinces,
   });
   return settlements.length > 0 ? { ...baseTerrain, settlements } : baseTerrain;
 }

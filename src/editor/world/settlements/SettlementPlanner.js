@@ -24,11 +24,19 @@ export const SETTLEMENT_PLAN_VERSION = 7;
  * ground at its centre. The terrain grades to it and the renderer stands the
  * building on it, so the two cannot disagree.
  */
-export function planSettlement({ settlement, worldSeed, routeBearings = [], sampleHeight, isBuildable }) {
-  const profile = settlementProfile(settlement);
+export function planSettlement({
+  settlement,
+  worldSeed,
+  routeBearings = [],
+  sampleHeight = () => 12,
+  isBuildable = () => true,
+  geography = undefined,
+}) {
+  const profile = settlementProfile(settlement, geography ? { geography } : {});
   const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_PLAN_VERSION));
   const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, routeBearings, random, isBuildable });
-  const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight });
+  const maxPadFall = profile.hasRegionalIdentity && profile.identity?.activeOverlays?.includes('mountain-pass') ? 5.2 : undefined;
+  const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall });
   const buildings = planBuildings({ profile, occupancy, streets, bearings, quayBearing, random });
   const defences = planDefences({ profile, occupancy, streets, random });
   const { farms, fields } = planFarms({ profile, occupancy, streets, random });
@@ -58,6 +66,8 @@ export function planSettlement({ settlement, worldSeed, routeBearings = [], samp
     id: settlement.id,
     name: settlement.name ?? '',
     profile,
+    identity: profile.identity,
+    recipe: profile.recipe,
     squareRadius,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),

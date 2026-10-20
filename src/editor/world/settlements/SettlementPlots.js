@@ -31,17 +31,41 @@ function bearingGap(a, b) {
   return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
 }
 
-/** The districts of one town, as `{ kind, bearing }`; towns and larger only. */
+/** The districts of one town, as `{ kind, bearing, wardId?, kitFamily?, foundationType? }`; towns and larger only. */
 export function planDistricts({ profile, bearings, quayBearing, keep, random }) {
-  if (profile.rank < 2) return [];
+  if (profile.rank < 2 && !(profile.hasRegionalIdentity && profile.recipe?.multiPeopleDistricts?.length > 0)) return [];
   const districts = [];
   if (quayBearing !== null && quayBearing !== undefined) districts.push({ kind: 'quay', bearing: quayBearing });
   if (keep) districts.push({ kind: 'wealthy', bearing: Math.atan2(keep.x, keep.z) });
+
+  if (profile.hasRegionalIdentity && profile.recipe?.multiPeopleDistricts?.length > 0) {
+    const wards = profile.recipe.multiPeopleDistricts;
+    wards.forEach((ward, index) => {
+      const baseBearing = bearings[index % Math.max(1, bearings.length)] ?? (index * Math.PI * 2 / wards.length);
+      const kind = ward.id === 'goblin-wetland-ward'
+        ? 'goblinWetland'
+        : (ward.id === 'orc-upland-ward' ? 'orcUpland' : 'salvageTrade');
+      districts.push({
+        kind,
+        bearing: baseBearing,
+        wardId: ward.id,
+        cultureKey: ward.cultureKey,
+        localBranch: ward.localBranch,
+        kitFamily: ward.kitFamily,
+        foundationType: ward.foundationType,
+      });
+    });
+    return districts;
+  }
+
   // Craftsmen take the road that is furthest from everything already spoken for.
   const free = bearings
     .map((bearing) => ({ bearing, room: Math.min(Math.PI, ...districts.map((district) => bearingGap(district.bearing, bearing))) }))
     .sort((left, right) => right.room - left.room)[0];
-  districts.push({ kind: 'craft', bearing: free && free.room > DISTRICT_SPREAD * 1.5 ? free.bearing : random() * Math.PI * 2 });
+  const craftKind = profile.hasRegionalIdentity && profile.identity?.loreRealm === 'stonehold'
+    ? 'forgeheart'
+    : (profile.hasRegionalIdentity && profile.identity?.loreRealm === 'zuraldi' ? 'passTrade' : 'craft');
+  districts.push({ kind: craftKind, bearing: free && free.room > DISTRICT_SPREAD * 1.5 ? free.bearing : random() * Math.PI * 2 });
   return districts;
 }
 
@@ -69,7 +93,33 @@ function weighted(random, table) {
 }
 
 /** Landmarks this class of settlement must have, with the zone each prefers. */
-function landmarkQueue(profile, random) {
+function landmarkQueue(profile, random, skipFirstLandmark = false) {
+  if (profile.hasRegionalIdentity && profile.recipe?.mandatoryLandmarks?.length) {
+    const queue = [];
+    const landmarks = skipFirstLandmark
+      ? profile.recipe.mandatoryLandmarks.slice(1)
+      : profile.recipe.mandatoryLandmarks;
+    for (const landmark of landmarks) {
+      const fb = landmark.runtime.fallback;
+      if (!SETTLEMENT_BUILDINGS[fb.settlementKind]) continue;
+      queue.push({
+        kind: fb.settlementKind,
+        variant: fb.settlementVariant ?? 0,
+        zone: landmark.zone ?? 'core',
+        assetId: landmark.assetId,
+        assetClass: landmark.assetClass,
+        kitPrefab: fb.kitPrefab,
+      });
+    }
+    if (profile.rank >= 1) queue.push({ kind: 'tavern', zone: 'core' }, { kind: 'smithy', zone: 'mid' });
+    if (profile.rank >= 2) queue.push({ kind: 'bakery', zone: 'mid' });
+    const shops = profile.rank >= 2 ? profile.rank : 0;
+    for (let index = 0; index < shops; index += 1) queue.push({ kind: 'shop', zone: 'core' });
+    const warehouses = profile.trade ? Math.max(1, profile.rank - 1) + (profile.port ? 1 : 0) : 0;
+    for (let index = 0; index < warehouses; index += 1) queue.push({ kind: 'warehouse', zone: random() < 0.5 ? 'core' : 'mid' });
+    return queue;
+  }
+
   const queue = [];
   if (profile.chapel) queue.push({ kind: 'chapel', zone: 'core' });
   if (profile.rank >= 1) queue.push({ kind: 'tavern', zone: 'core' }, { kind: 'smithy', zone: 'mid' });
@@ -133,8 +183,18 @@ function tryPlace(occupancy, anchor, kind, variant, setback, clearance) {
   return occupancy.fits(box, clearance === undefined ? undefined : { clearance }) ? box : null;
 }
 
-function building(box, kind, variant, anchor) {
-  return { kind, variant, x: box.x, z: box.z, yaw: box.yaw, width: box.halfWidth * 2, depth: box.halfDepth * 2, front: anchor ? [anchor.x, anchor.z] : null };
+function building(box, kind, variant, anchor, meta = null) {
+  return {
+    kind,
+    variant,
+    x: box.x,
+    z: box.z,
+    yaw: box.yaw,
+    width: box.halfWidth * 2,
+    depth: box.halfDepth * 2,
+    front: anchor ? [anchor.x, anchor.z] : null,
+    ...(meta ?? {}),
+  };
 }
 
 /** Keep or lord's hall, set back from the square on a quarter no main street takes. */
@@ -176,34 +236,69 @@ function squareFrontage(squareRadius) {
 /** Town plots: landmarks first, then a zone-weighted fill up to the class's target. */
 export function planBuildings({ profile, occupancy, streets, bearings, quayBearing = null, random }) {
   const buildings = [];
+  const regional = Boolean(profile.hasRegionalIdentity && profile.recipe);
+  const baseFoundation = regional ? profile.recipe.architecture.foundationType : null;
   let keep = null;
   if (profile.keep) {
     keep = placeKeep(occupancy, profile, bearings, random);
     if (keep) {
+      if (regional) {
+        const primaryLandmark = profile.recipe.mandatoryLandmarks[0];
+        if (primaryLandmark) {
+          keep.assetId = primaryLandmark.assetId;
+          keep.assetClass = primaryLandmark.assetClass;
+          keep.kitPrefab = primaryLandmark.runtime.fallback.kitPrefab;
+        }
+        keep.foundationType = baseFoundation;
+      }
       buildings.push(keep);
       occupancy.claim(rect(keep.x, keep.z, keep.width, keep.depth, keep.yaw));
     }
   }
   const districts = planDistricts({ profile, bearings, quayBearing, keep, random });
-  const queue = landmarkQueue(profile, random);
+  const queue = landmarkQueue(profile, random, Boolean(keep && regional));
   const anchors = frontageAnchors([...squareFrontage(occupancy.squareRadius), ...streets], random, { maxDistance: profile.radius });
+  const regionalZoneMix = regional ? profile.recipe.zoneMix : ZONE_MIX;
+  const regionalDistrictMix = regional ? { ...DISTRICT_MIX, ...profile.recipe.districtMix } : DISTRICT_MIX;
+
   for (const anchor of anchors) {
     if (buildings.length >= profile.buildings) break;
     const zone = zoneOf(anchor.distance, profile.radius);
-    const landmarkIndex = queue.findIndex((entry) => entry.zone === zone || (zone === 'edge' && entry.zone === 'mid'));
-    // Villages and hamlets have no town core: their houses are all dwellings.
+    const landmarkIndex = queue.findIndex(
+      (entry) => entry.zone === zone || (zone === 'edge' && entry.zone === 'mid') || (regional && entry.assetId),
+    );
+    // Villages and hamlets have no town core unless regional recipe specifies core landmarks.
     const district = districtAt(districts, anchor, profile.radius);
-    const mix = district ? DISTRICT_MIX[district.kind] : profile.rank >= 2 ? ZONE_MIX[zone] : ZONE_MIX.edge;
-    const kind = landmarkIndex >= 0 ? queue[landmarkIndex].kind : weighted(random, mix);
-    const variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
+    const mixTable = district
+      ? (regionalDistrictMix[district.kind] ?? DISTRICT_MIX.craft)
+      : (profile.rank >= 2 || regional ? regionalZoneMix[zone] : ZONE_MIX.edge);
+    let chosenLandmark = landmarkIndex >= 0 ? queue[landmarkIndex] : null;
+    let kind = chosenLandmark ? chosenLandmark.kind : weighted(random, mixTable);
+    let variant = chosenLandmark?.variant !== undefined
+      ? chosenLandmark.variant % SETTLEMENT_BUILDINGS[kind].length
+      : Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
     // Hamlets and villages have no terraces: every house keeps a yard.
     const density = ZONE_DENSITY[profile.rank >= 2 ? zone : 'edge'];
     const setback = density.setback[0] + random() * density.setback[1];
-    const box = tryPlace(occupancy, anchor, kind, variant, setback, density.clearance);
+    let box = tryPlace(occupancy, anchor, kind, variant, setback, density.clearance);
+    if (!box && chosenLandmark) {
+      chosenLandmark = null;
+      kind = weighted(random, mixTable);
+      variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
+      box = tryPlace(occupancy, anchor, kind, variant, setback, density.clearance);
+    }
     if (!box) continue;
-    if (landmarkIndex >= 0) queue.splice(landmarkIndex, 1);
+    if (chosenLandmark && landmarkIndex >= 0) queue.splice(landmarkIndex, 1);
     occupancy.claim(box);
-    buildings.push(building(box, kind, variant, anchor));
+    const meta = regional
+      ? {
+        ...(chosenLandmark?.assetId ? { assetId: chosenLandmark.assetId, assetClass: chosenLandmark.assetClass } : {}),
+        ...(chosenLandmark?.kitPrefab ? { kitPrefab: chosenLandmark.kitPrefab } : {}),
+        ...(district?.wardId ? { wardId: district.wardId, localBranch: district.localBranch, kitFamily: district.kitFamily } : {}),
+        foundationType: district?.foundationType ?? baseFoundation,
+      }
+      : null;
+    buildings.push(building(box, kind, variant, anchor, meta));
   }
   return buildings;
 }

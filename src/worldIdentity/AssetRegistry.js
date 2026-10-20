@@ -38,10 +38,21 @@ export const ASSET_REGISTRY = Object.freeze(
 );
 
 const warnedFallbackAssetIds = new Set();
+const recordedFallbackAssetIds = new Set();
 
 export function resetAssetFallbackWarnings() {
   warnedFallbackAssetIds.clear();
+  recordedFallbackAssetIds.clear();
 }
+
+export function getAssetFallbackWarnings() {
+  return Object.freeze([...recordedFallbackAssetIds]);
+}
+
+export {
+  getAssetFallbackWarnings as getFallbackWarnings,
+  resetAssetFallbackWarnings as resetFallbackWarnings,
+};
 
 export function getAssetCandidate(assetId) {
   return ASSET_REGISTRY[assetId] ?? null;
@@ -85,6 +96,7 @@ export function isAssetPhysicallyEligible(assetOrId, siteContext = {}) {
 export function resolveRuntimeAsset(assetId, { warnOnFallback = false, logger = console } = {}) {
   const asset = getAssetCandidate(assetId);
   if (!asset) {
+    recordedFallbackAssetIds.add(assetId);
     if (warnOnFallback && !warnedFallbackAssetIds.has(assetId)) {
       warnedFallbackAssetIds.add(assetId);
       logger?.warn?.(`[AssetRegistry] Unknown asset ID "${assetId}"; using generic house fallback.`);
@@ -108,11 +120,14 @@ export function resolveRuntimeAsset(assetId, { warnOnFallback = false, logger = 
   }
 
   const isReady = asset.modelStatus === 'ready' && typeof asset.runtimeGlb === 'string' && asset.runtimeGlb.length > 0;
-  if (!isReady && warnOnFallback && !warnedFallbackAssetIds.has(asset.id)) {
-    warnedFallbackAssetIds.add(asset.id);
-    logger?.warn?.(
-      `[AssetRegistry] Asset "${asset.id}" has modelStatus="${asset.modelStatus}"; using procedural/kit fallback (${asset.fallback.settlementKind}).`,
-    );
+  if (!isReady) {
+    recordedFallbackAssetIds.add(asset.id);
+    if (warnOnFallback && !warnedFallbackAssetIds.has(asset.id)) {
+      warnedFallbackAssetIds.add(asset.id);
+      logger?.warn?.(
+        `[AssetRegistry] Asset "${asset.id}" has modelStatus="${asset.modelStatus}"; using procedural/kit fallback (${asset.fallback.settlementKind}).`,
+      );
+    }
   }
 
   return Object.freeze({

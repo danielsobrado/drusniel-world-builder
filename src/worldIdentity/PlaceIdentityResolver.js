@@ -137,8 +137,9 @@ export function resolveLocalCultureBranch({ loreRealm, cultureKey, settlement = 
  * Evaluate physical geography & site context to determine active environmental overlays.
  */
 export function resolveSiteGeography(settlement = {}, geography = {}) {
-  const biome = Number.isFinite(Number(geography.biome ?? settlement.biome))
-    ? Number(geography.biome ?? settlement.biome)
+  const rawBiome = geography.biome ?? geography.biomeId ?? settlement.biome ?? settlement.biomeId;
+  const biome = Number.isFinite(Number(rawBiome))
+    ? Number(rawBiome)
     : null;
   const elevation = Number.isFinite(Number(geography.elevation ?? settlement.elevation))
     ? Number(geography.elevation ?? settlement.elevation)

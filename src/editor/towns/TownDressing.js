@@ -73,21 +73,25 @@ function yardFence(occupancy, out, building, size) {
  * @param {object} options
  * @param {object} options.plan settlement plan
  * @param {number} options.seed per-town seed
- * @param {Array<{building:object, size:number[]}>} options.placed buildings with their prefab footprint
+ * @param {Array<{building:object, size:number[], family?:string}>} options.placed buildings with their prefab footprint
  */
 export function planDressing(options) { return drainJob(planDressingJob(options)); }
 export function* planDressingJob({ plan, seed, placed, family = null }) {
-  const isGoblin = family === 'Goblin' || ['timber-thatch', 'swamp-thatch', 'goblin'].includes(plan.profile?.style?.key);
+  const townStyleKey = plan.profile?.kitStyleKey ?? plan.profile?.style?.key;
+  const isTownGoblin = family === 'Goblin' || ['timber-thatch', 'swamp-thatch', 'goblin'].includes(townStyleKey);
   const occupancy = new Occupancy(plan.streets ?? []);
   for (const { building, size } of placed) {
     occupancy.claim(rect(building.x, building.z, size[0] + 0.6, size[1] + 0.6, building.yaw));
   }
   for (const prop of plan.props ?? []) occupancy.claim(rect(prop.x, prop.z, 1.6, 1.6, prop.yaw ?? 0));
   const out = [];
-  for (const [index, { building, size }] of placed.entries()) {
+  for (const [index, { building, size, family: buildingFamily }] of placed.entries()) {
     if (!['house', 'townhouse', 'shop', 'tavern', 'smithy', 'bakery', 'apothecary', 'farmhouse', 'warehouse',
       'chapel', 'keep', 'hall', 'guildhall', 'guardhouse', 'library']
       .includes(building.kind)) continue;
+    const isGoblin = (buildingFamily || building.kitFamily) === 'Goblin'
+      || (!buildingFamily && !building.kitFamily && isTownGoblin);
+    const loreRealm = building.loreRealm ?? plan.profile?.identity?.loreRealm ?? null;
     const [w, d] = size;
     const roll = (salt) => hash(seed, index, salt);
     // Offsets clear the house's own 0.3 m claim plus the 0.15 m fit clearance.
@@ -101,10 +105,10 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       { kind: 'barricade', lx: beside(-1, 2.0), lz: -d / 2 + 0.8, w: 2.0, d: 0.9, turn: 0.2 },
     ] : [
       { kind: 'barrels', variant: roll(1) < 0.5 ? 0 : 1, lx: beside(-1, 1.4), lz: d / 2 - 0.9, w: 1.4, d: 1.4, turn: 0 },
-      { kind: 'planter', lx: beside(1, 1.0), lz: d / 2 - 0.4, w: 1.0, d: 0.4, turn: 0 },
-      { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
+      { kind: loreRealm === 'umbrakor' ? 'brazier' : 'planter', lx: beside(1, 1.0), lz: d / 2 - 0.4, w: 1.0, d: 0.6, turn: 0 },
+      { kind: loreRealm === 'stonehold' ? 'cargo' : 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
       { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
-      { kind: 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
+      { kind: loreRealm === 'umbrakor' ? 'shrine' : 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
     ];
     if (building.kind === 'smithy') {
       candidates.push({ kind: 'grindstone', lx: beside(1, 1.0), lz: d / 2 - 0.8, w: 1.0, d: 0.8, turn: 0 });
@@ -132,7 +136,7 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
     for (const [salt, candidate] of candidates.entries()) {
       if (roll(10 + salt) < 0.62) tryProp(occupancy, out, building, candidate);
     }
-    if (!isGoblin && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
+    if (!isGoblin && loreRealm !== 'umbrakor' && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
       yardFence(occupancy, out, building, size);
     }
     yield;

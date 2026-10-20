@@ -186,7 +186,7 @@ export const ASSET_CANDIDATE_LIST = Object.freeze([
   regionalAsset('stonehold', 'sealed-shaft-barricade', 'defense', 'P1', prop('bollards', 0, 'barricade', [4.2, 1.5, 2.2])),
   regionalAsset('stonehold', 'mine-ventilation-stack', 'industry', 'P1', prop('well', 0, 'brazier', [2.8, 2.8, 4])),
   regionalAsset('stonehold', 'ore-assay-bench', 'prop', 'P1', prop('stall', 1, 'grindstone', [2.8, 1.8, 1.6])),
-  regionalAsset('stonehold', 'stonehold-ward-block', 'prop', 'P1', prop('quarryBlock', 0, 'bollards', [1.4, 1.4, 1.6])),
+  regionalAsset('stonehold', 'stonehold-ward-block', 'prop', 'P1', prop('bollards', 0, 'bollards', [1.4, 1.4, 1.6])),
 
   // --- UMBRA'KOR (12: 6 P0, 6 P1) ---
   regionalAsset('umbrakor', 'cliff-house-compound', 'residence', 'P0', bldg('keep', 0, 'Med_Villa', [14, 12, 11])),
@@ -208,12 +208,12 @@ export const ASSET_CANDIDATE_LIST = Object.freeze([
   regionalAsset('wyrmreach', 'coastal-warning-lookout', 'defense', 'P0', bldg('tower', 0, 'Nordic_Guardhouse', [7, 7, 9])),
   regionalAsset('wyrmreach', 'mixed-community-market-shed', 'trade', 'P0', bldg('shop', 1, 'Nordic_Shop_Small', [8, 6, 5])),
   regionalAsset('wyrmreach', 'rock-windbreak-hut', 'residence', 'P0', bldg('house', 2, 'Nordic_House_Cottage', [8, 6, 4.2])),
-  regionalAsset('wyrmreach', 'ancient-smooth-stair', 'ruin', 'P0', prop('quarryBlock', 0, 'shrine', [3.5, 4.5, 2.4]), { requiresRuinContext: true }),
+  regionalAsset('wyrmreach', 'ancient-smooth-stair', 'ruin', 'P0', prop('bollards', 0, 'shrine', [3.5, 4.5, 2.4]), { requiresRuinContext: true }),
   regionalAsset('wyrmreach', 'relic-survey-camp', 'prop', 'P1', prop('stall', 1, 'cargo', [3.2, 2.8, 2.2])),
   regionalAsset('wyrmreach', 'impossible-measuring-plinth', 'ruin', 'P1', prop('shrine', 1, 'shrine', [2, 2, 2.8]), { requiresRuinContext: true }),
   regionalAsset('wyrmreach', 'gray-crust-descent-cover', 'ruin', 'P1', prop('well', 0, 'well', [3.4, 3.4, 1.5]), { requiresRuinContext: true }),
   regionalAsset('wyrmreach', 'storm-shielded-water-cache', 'infrastructure', 'P1', prop('barrels', 0, 'barrels', [2.4, 2.4, 1.8])),
-  regionalAsset('wyrmreach', 'old-rift-boundary-cairn', 'prop', 'P1', prop('boulder', 0, 'bollards', [1.8, 1.8, 2.2])),
+  regionalAsset('wyrmreach', 'old-rift-boundary-cairn', 'prop', 'P1', prop('bollards', 0, 'bollards', [1.8, 1.8, 2.2])),
   regionalAsset('wyrmreach', 'pre-kingdom-black-wall', 'ruin', 'P1', bldg('wall', 1, 'CityWall', [12, 2.2, 5.5]), { requiresRuinContext: true }),
 
   // --- ZURALDI (12: 6 P0, 6 P1) ---
@@ -243,17 +243,17 @@ export const ASSET_CANDIDATE_LIST = Object.freeze([
   overlayAsset('forest-canopy', 'elevated-ranger-platform', bldg('tower', 0, 'Med_Guardhouse', [6, 6, 8]), { requiresForest: true }),
   overlayAsset('forest-canopy', 'living-arch-gateway', bldg('gatehouse', 0, 'Gatehouse', [8, 4, 5]), { requiresForest: true }),
 
-  overlayAsset('mountain-pass', 'pass-retaining-wall', prop('quarryBlock', 0, 'bollards', [4, 1.2, 2]), { requiresSlope: true }),
+  overlayAsset('mountain-pass', 'pass-retaining-wall', prop('bollards', 0, 'bollards', [4, 1.2, 2]), { requiresSlope: true }),
   overlayAsset('mountain-pass', 'switchback-parapet', prop('bollards', 0, 'bollards', [4.5, 1, 1.2]), { requiresSlope: true }),
   overlayAsset('mountain-pass', 'upland-drainage-culvert', prop('well', 0, 'trough', [2.8, 2, 1.4]), { requiresSlope: true }),
   overlayAsset('mountain-pass', 'caravan-pack-rack', prop('cart', 0, 'cargo', [2.6, 2, 1.8]), { requiresSlope: true }),
   overlayAsset('mountain-pass', 'avalanche-refuge', bldg('house', 2, 'Nordic_House_Cottage', [7, 5.5, 4]), { requiresSlope: true }),
 
-  overlayAsset('ruins-rift', 'buried-threshold', prop('quarryBlock', 0, 'shrine', [3, 3, 1.5]), { requiresRuinContext: true }),
-  overlayAsset('ruins-rift', 'broken-arch-section', prop('boulder', 0, 'bollards', [3.5, 1.8, 3.2]), { requiresRuinContext: true }),
+  overlayAsset('ruins-rift', 'buried-threshold', prop('bollards', 0, 'shrine', [3, 3, 1.5]), { requiresRuinContext: true }),
+  overlayAsset('ruins-rift', 'broken-arch-section', prop('bollards', 0, 'bollards', [3.5, 1.8, 3.2]), { requiresRuinContext: true }),
   overlayAsset('ruins-rift', 'sealed-ward-plaque', prop('shrine', 1, 'notice_board', [1.8, 1, 2.2]), { requiresRuinContext: true }),
   overlayAsset('ruins-rift', 'archaeologist-tool-roll', prop('barrels', 1, 'cargo', [1.8, 1.8, 1.2]), { requiresRuinContext: true }),
-  overlayAsset('ruins-rift', 'anomaly-scar-stone', prop('boulder', 0, 'totem', [2, 2, 2.4]), { requiresRuinContext: true }),
+  overlayAsset('ruins-rift', 'anomaly-scar-stone', prop('bollards', 0, 'totem', [2, 2, 2.4]), { requiresRuinContext: true }),
 
   overlayAsset('swamp-bog', 'raised-boardwalk', prop('fence', 0, 'fence', [4, 1.8, 1]), { requiresWetland: true }),
   overlayAsset('swamp-bog', 'reed-cutting-shed', bldg('barn', 0, 'Goblin_House_Small', [7, 6, 4.5]), { requiresWetland: true }),
