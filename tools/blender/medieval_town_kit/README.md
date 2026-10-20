@@ -50,7 +50,29 @@ colours are tints (`baseColorFactor`) over one cloth texture.
   - Tudor: half-timber with slate gables.
   - Nordic: clapboard, 60° gables, crossed finials and pent roofs.
   - Med: render over stone, terracotta hip roofs, loggias and a courtyard villa.
-- **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 106 buildings sized to
+  - Goblin (Grukmar marsh): stilts, shanty walls, shaggy reed roofs.
+  - Orc (Grukmar uplands): low, broad, one-story halls with a dark fieldstone
+    socle, heavy split-log boarding, low 35° reed thatch and a deep front
+    porch. Big halls and the `_Tall` siblings get a boarded loft. Also
+    `Orc_CityWall` (palisade) and `Orc_Gatehouse` (gate tower on a stone pad).
+  - Frostgard: horizontal hewn logs with crossed corner ends on rugged granite
+    plinths. Homes take sod roofs held by eave logs; halls take steep, plain
+    slate. Louvred smoke vents ride the ridge instead of chimneys, and there are
+    no roof horns.
+  - Stonehold: granite with basalt bands and pilasters, shouldered squared
+    openings, few grilled windows, flat parapeted roofs with three-flue stacks,
+    and vaulted portals on shopfronts. `Stonehold_Gatehouse` is two towers
+    around a vaulted gate with a portcullis.
+
+  The regional modules are in `modules/walls_frontier.py`,
+  `roofs_regional.py`, `palisade.py` and `walls_stonehold.py`. The new textures
+  (`granite`, `sod`) are in `texture_patterns_regional.py`. Other regional
+  materials are tints of the shared textures (`materials.py`). The briefs they
+  follow are `docs/asset-bible/regions/<realm>.md` and
+  `05-differentiation-matrix.md`. `review_shots.py` has a shot per family plus
+  `families_tavern` and `families_house`, which put one base across families
+  side by side.
+- **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 245 buildings sized to
   the game planner's plots (including `Apothecary`, `Guildhall`, `Guardhouse`, and `Library`). They are exported as `medieval_kit_prefabs.json`,
   which holds parts, collision boxes, doors and lights. The game instances them
   per Azgaar burg (see `docs/towns.md`).

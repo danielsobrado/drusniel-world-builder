@@ -1,4 +1,4 @@
-"""Building prefabs for the game's settlement planner, in three regional families.
+"""Building prefabs for the game's settlement planner, in the regional families.
 
 The game plans towns per Azgaar burg (src/editor/world/settlements) and asks
 for buildings by kind and variant; the burg's culture picks the family. Each
@@ -13,6 +13,8 @@ import bpy
 
 from .buildings import BuildingAssembler, BuildingSpec
 from .config import GRID
+from .modules.palisade import TOWER
+from .modules.walls_stonehold import GATE_D, GATE_W
 from .prefab_families import BASE_BY_NAME, BASES, FAMILIES, TALLER, taller
 
 
@@ -87,6 +89,38 @@ class PrefabBuilder:
             self.kit.place('Bush', self.coll, root, (x, y, 0))
         self._add('Med_Villa', root, (6 * GRID, 5 * GRID), (3 * GRID, 2.5 * GRID), stories=2)
 
+    def orc_palisade(self, segments=6):
+        """Grukmar ridge palisade run, named so the planner's CityWall resolves to it."""
+        root = self.kit.group('BLD_Orc_CityWall', self.coll, None, self._slot())
+        for i in range(segments):
+            self.kit.place('Palisade_Orc', self.coll, root, (i * GRID, 0, 0))
+        length = segments * GRID
+        self._add('Orc_CityWall', root, (length, 1.0), (length / 2, 0.0), kind='defence')
+
+    def orc_gatehouse(self, wings=2):
+        """The single gate tower on its stone footing with palisade running off both sides."""
+        root = self.kit.group('BLD_Orc_Gatehouse', self.coll, None, self._slot())
+        x = wings * GRID
+        self.kit.place('Gate_Tower_Orc', self.coll, root, (x, -TOWER / 2, 0))
+        for i in range(wings):
+            self.kit.place('Palisade_Orc', self.coll, root, (i * GRID, 0, 0))
+            self.kit.place('Palisade_Orc', self.coll, root, (x + TOWER + i * GRID, 0, 0))
+        length = 2 * x + TOWER
+        self._add('Orc_Gatehouse', root, (length, TOWER), (length / 2, 0.0), kind='defence', stories=2)
+
+    def stonehold_gatehouse(self):
+        """Two granite towers flanking the vaulted gate block."""
+        root = self.kit.group('BLD_Stonehold_Gatehouse', self.coll, None, self._slot())
+        tower = BuildingSpec('Stonehold_Gatetower', 2, 2, ('granite',) * 3, roof='flat', plinth='Basalt',
+                             chimney=False, furnish='none', seed=185)
+        self.assembler.build(tower, (0, 0, 0), 0, parent=root)
+        self.kit.place('Gate_Stonehold', self.coll, root, (2 * GRID, 0, 0))
+        self.assembler.build(replace(tower, name='Stonehold_Gatetower_R', seed=186),
+                             (2 * GRID + GATE_W, 0, 0), 0, parent=root)
+        length = 4 * GRID + GATE_W
+        self._add('Stonehold_Gatehouse', root, (length, GATE_D), (length / 2, GATE_D / 2), kind='defence',
+                  stories=3)
+
     def build_all(self):
         for family in FAMILIES:
             for base in BASES:
@@ -97,5 +131,8 @@ class PrefabBuilder:
         self.round_tower()
         self.gatehouse()
         self.villa()
+        self.orc_palisade()
+        self.orc_gatehouse()
+        self.stonehold_gatehouse()
         print(f'[kit] {len(self.prefabs)} prefabs assembled')
         return self.prefabs

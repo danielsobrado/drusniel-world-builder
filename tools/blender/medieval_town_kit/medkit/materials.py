@@ -68,6 +68,19 @@ SPEC = {
     # The dark of an unlit opening (arrow loops, a door rebate) seen from outside.
     'shadow': Spec(color=(0.025, 0.022, 0.02), rough=1.0),
     'gold': Spec(color=(0.85, 0.65, 0.22), rough=0.35, metal=1.0),
+    # Regional families (docs/asset-bible/regions): reuse the shared textures with a
+    # tint where the bible's material is a darker or weathered variant of one we have.
+    # Grukmar upland orcs: dark ridge fieldstone, bog-aged hardwood, reed thatch.
+    'stone_dark': Spec('stone', 2.0, 0.88, normal=2.6, tint=(0.52, 0.52, 0.54)),
+    'timber_dark': Spec('timber', 1.5, 0.74, grain=True, normal=2.2, tint=(0.62, 0.56, 0.50)),
+    'thatch_reed': Spec('thatch', 2.0, 0.94, normal=2.2, tint=(0.80, 0.76, 0.66)),
+    # Frostgard: weather-silvered hewn pine logs and rooted sod roofs.
+    'log': Spec('timber', 1.8, 0.78, grain=True, normal=2.4, tint=(1.22, 1.20, 1.24)),
+    'sod': Spec('sod', 2.0, 0.96, normal=1.8),
+    # Stonehold: mined granite courses, charcoal basalt dressings, dulled bronze.
+    'stone_granite': Spec('granite', 3.0, 0.84, normal=2.2, tint=(0.80, 0.85, 0.92)),
+    'stone_basalt': Spec('granite', 1.6, 0.78, normal=1.6, tint=(0.46, 0.46, 0.50)),
+    'bronze': Spec(color=(0.26, 0.22, 0.14), rough=0.55, metal=0.85),
 }
 
 # A scanned texture covers its photograph's real width (scans.py).

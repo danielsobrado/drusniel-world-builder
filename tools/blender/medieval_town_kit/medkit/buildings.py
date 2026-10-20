@@ -10,22 +10,18 @@ import random
 
 from . import furnish, lights
 from .building_accents import AccentPlacer
-from .building_spec import CORNER, WALL_PREFIX, BuildingSpec, jetty_level  # noqa: F401  (re-export)
+from .building_spec import CORNER, GROUND_PENT, WALL_PREFIX, BuildingSpec, jetty_level  # noqa: F401  (re-export)
+from .building_spec import segments as _segments
 from .config import GRID, JETTY, STORY
 from .mesh import wall_point as _wall_point
 from .modules.foundations import PLINTHS
 from .roof_assembly import RoofAssembler
 
 
-def _segments(w, d):
-    for i in range(w):
-        yield 'front', i, (i * GRID, 0), 0
-    for j in range(d):
-        yield 'right', j, (w * GRID, j * GRID), 1
-    for i in range(w):
-        yield 'back', i, ((w - i) * GRID, d * GRID), 2
-    for j in range(d):
-        yield 'left', j, (0, (d - j) * GRID), 3
+
+
+# Window boxes belong to the lowland families; frontier and mountain walls stay bare.
+FLOWER_BOX_KINDS = {'stone', 'timber', 'plank', 'plaster'}
 
 
 def stair_side(k):
@@ -110,7 +106,7 @@ class BuildingAssembler:
                 lights.point(self.lights_coll, story,
                              _wall_point(loc, rotq, (0.2, -0.6, 2.0)), energy=45.0)
             elif spec.arcade and k == 0 and side == 'front':
-                arc = 'Wall_Goblin_Arcade' if kind == 'goblin' else 'Wall_Arcade'
+                arc = f'{plain}_Arcade' if kind in ('goblin', 'granite') else 'Wall_Arcade'
                 self.kit.place_q(arc, self.coll, story, (*loc, 0), rotq)
             elif (not self.accents.keeps_plain(self.plan, side, k, i)
                   and not (side == 'back' and spec.furnish != 'none'
@@ -118,7 +114,7 @@ class BuildingAssembler:
                   and rng.random() < odds):
                 self.kit.place_q(f'{prefix}_Window', self.coll, story, (*loc, 0), rotq)
                 accent = side == 'front' and self.accents.front_window(spec, k, story, loc, rotq, out)
-                if kind != 'goblin' and side == 'front' and rng.random() < 0.25 and not accent:
+                if kind in FLOWER_BOX_KINDS and side == 'front' and rng.random() < 0.25 and not accent:
                     self.kit.place_q('Flower_Box', self.coll, story,
                                      _wall_point(loc, rotq, (1.0, -0.36 - out, 1.02)), rotq)
             else:
@@ -129,11 +125,13 @@ class BuildingAssembler:
             if side == 'front' and out:
                 self.accents.under_jetty(spec, k, story, loc, rotq, level)
             if spec.pent and side == 'front' and (
-                (k == 0 and not spec.gable_front) if kind == 'goblin' else upper
+                (k == 0 and not spec.gable_front) if kind in GROUND_PENT else upper
             ):
-                pent_mod = 'Goblin_Awning' if kind == 'goblin' else 'Pent_Roof'
+                pent_mod, (px, py, pz) = GROUND_PENT.get(kind, ('Pent_Roof', (0, -0.15, STORY - 0.12)))
+                if k == 0 and i == spec.door and f'{pent_mod}_Door' in self.kit.modules:
+                    pent_mod = f'{pent_mod}_Door'   # keeps the way to the door clear of posts
                 self.kit.place_q(pent_mod, self.coll, story,
-                                 _wall_point(loc, rotq, (0, -0.15 - out, STORY - 0.12)), rotq)
+                                 _wall_point(loc, rotq, (px, py - out, pz)), rotq)
         if spec.pent and kind == 'goblin' and spec.gable_front and k == 0:
             self.kit.place('Goblin_Tarp_Canopy', self.coll, story, (mid, -1.25, 0))
             lights.point(self.lights_coll, story, (mid, -1.5, 2.0), energy=65.0)

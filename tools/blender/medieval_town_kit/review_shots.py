@@ -19,7 +19,8 @@ from mathutils import Vector  # noqa: E402
 from medkit import catalog, config, game_look, materials, render, textures, village, village_plan  # noqa: E402
 from medkit.prefabs import PrefabBuilder  # noqa: E402
 
-# name -> modules laid side by side, or ('prefab', name), or ('town', render.SHOTS key)
+# name -> modules laid side by side, or ('prefab', name), or ('row', [prefab, ...]) lined up
+# left to right, or ('town', render.SHOTS key)
 SHOTS = {
     'wall_timber': ['Wall_Timber_Window', 'Wall_Timber_Door'],
     'wall_stone': ['Wall_Stone_Window', 'Wall_Stone_Door'],
@@ -36,6 +37,27 @@ SHOTS = {
     'med_tavern': ('prefab', 'Med_Tavern'),
     'med_villa': ('prefab', 'Med_Villa'),
     'round_tower': ('prefab', 'RoundTower'),
+    'wall_orc': ['Wall_Orc_Window', 'Wall_Orc_Door', 'Corner_Orc', 'Orc_Porch'],
+    'wall_log': ['Wall_Log_Window', 'Wall_Log_Door', 'Corner_Log'],
+    'wall_granite': ['Wall_Granite_Window', 'Wall_Granite_Door', 'Wall_Granite_Arcade', 'Corner_Granite'],
+    'roof_thatch': ['Roof_Thatch_End_S6', 'Roof_Thatch_S6', 'Gable_Wall_Orc_S6'],
+    'roof_sod': ['Roof_Sod_End_S6', 'Roof_Sod_S6', 'Gable_Wall_Log_S6', 'Smoke_Vent'],
+    'orc_palisade': ['Palisade_Orc', 'Gate_Tower_Orc'],
+    'stonehold_gate': ['Gate_Stonehold', 'Chimney_Granite'],
+    'orc_hall': ('prefab', 'Orc_Tavern_Large'),
+    'orc_house': ('prefab', 'Orc_House_Large'),
+    'orc_keep': ('prefab', 'Orc_Keep'),
+    'orc_gatehouse': ('prefab', 'Orc_Gatehouse'),
+    'frostgard_hall': ('prefab', 'Frostgard_Tavern_Large'),
+    'frostgard_house': ('prefab', 'Frostgard_House_Long'),
+    'frostgard_cottage': ('prefab', 'Frostgard_House_Square'),
+    'frostgard_keep': ('prefab', 'Frostgard_Keep'),
+    'stonehold_guildhall': ('prefab', 'Stonehold_Guildhall'),
+    'stonehold_house': ('prefab', 'Stonehold_Townhouse_Tall'),
+    'stonehold_keep': ('prefab', 'Stonehold_Keep'),
+    'stonehold_gatehouse': ('prefab', 'Stonehold_Gatehouse'),
+    'families_tavern': ('row', [f'{f}_Tavern' for f in ('Tudor', 'Nordic', 'Orc', 'Frostgard', 'Stonehold')]),
+    'families_house': ('row', [f'{f}_House_Large' for f in ('Tudor', 'Nordic', 'Orc', 'Frostgard', 'Stonehold')]),
     'street': ('town', 'street'),
     'plaza': ('town', 'plaza'),
     'lane': ('town', 'lane'),
@@ -151,6 +173,24 @@ def _sky(scale, haze=0.0015):
     bg.inputs['Strength'].default_value = bg['_base'] * scale
 
 
+def _row(names, gap=4.0, y=-2000.0):
+    """Line prefabs up left to right on one baseline (moves their roots) and return their meshes."""
+    objs, x = [], 0.0
+    for name in names:
+        root = bpy.data.objects.get(f'BLD_{name}')
+        if root is None:
+            print(f'[review] no prefab {name}')
+            continue
+        meshes = [o for o in root.children_recursive if o.type == 'MESH']
+        lo, _ = _bounds(meshes)
+        root.location = (root.location.x + x - lo.x, y, 0)
+        bpy.context.view_layer.update()
+        _, hi = _bounds(meshes)
+        x = hi.x + gap
+        objs.extend(meshes)
+    return objs
+
+
 def _hide_all():
     for o in bpy.data.objects:
         if o.type == 'MESH' and o.name != 'QA_Ground':
@@ -168,7 +208,7 @@ def main():
         print('MODULES', ' '.join(sorted(kit.modules)))
         return
     need_town = any(isinstance(SHOTS[n], tuple) and SHOTS[n][0] == 'town' for n in names)
-    need_prefabs = any(isinstance(SHOTS[n], tuple) and SHOTS[n][0] == 'prefab' for n in names)
+    need_prefabs = any(isinstance(SHOTS[n], tuple) and SHOTS[n][0] in ('prefab', 'row') for n in names)
     if need_town:
         village.build(kit, village_plan)
     prefabs = PrefabBuilder(kit).build_all() if need_prefabs else None
@@ -202,7 +242,9 @@ def main():
         render._set_visible('Prefabs', True)
         render._set_visible('Town', False)
         _hide_all()
-        if isinstance(shot, tuple):
+        if isinstance(shot, tuple) and shot[0] == 'row':
+            objs = _row(shot[1])
+        elif isinstance(shot, tuple):
             root = bpy.data.objects.get(f'BLD_{shot[1]}')
             if root is None:
                 print(f'[review] no prefab {shot[1]}')

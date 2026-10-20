@@ -2,7 +2,8 @@
 
 Styles: gable (Tudor 50 deg), steep (Nordic 60 deg, optional crossed finials),
 hip (Mediterranean terracotta, needs length >= span), pyramid / spire / battlements
-(square towers).
+(square towers), the regional gables of roofs_regional.py (thatch_low, sod, steep_log),
+thatch_pyramid (orc towers) and flat (Stonehold: flagged deck, parapets, chimney stacks).
 
 A gable-fronted house turns its roof a quarter turn so the ridge runs from front
 to back and a full gable faces the street (BuildingAssembler places the roof
@@ -11,22 +12,27 @@ top story's jetty, which a short fill section closes.
 """
 import math
 
+from .building_spec import segments
 from .config import GRID, HIP_LENGTHS, JETTY, ROOF_PITCH, jetty_key
 from .modules.goblin import GOBLIN_PITCH
 from .modules.roof_shapes import HIP_PITCH
 from .modules.roofs import END_LEN, PYRAMID_PITCH, STEEP_PITCH, ridge_height
+from .modules.roofs_regional import REGIONAL_GABLES
 
 GABLE_SETS = {
     'gable': ('Roof_Gable', 'Roof_Gable_End', 'Gable_Wall', ROOF_PITCH),
     'steep': ('Roof_Steep', 'Roof_Steep_End', 'Gable_Wall_Steep', STEEP_PITCH),
     'goblin': ('Roof_Goblin', 'Roof_Goblin_End', 'Gable_Wall_Goblin', GOBLIN_PITCH),
+    **REGIONAL_GABLES,
 }
 TOWER_TOPS = {
     'pyramid': 'Roof_Pyramid',
     'spire': 'Roof_Spire',
     'battlements': 'Roof_Battlements',
     'goblin_hut': 'Roof_Goblin_Hut',
+    'thatch_pyramid': 'Roof_Pyramid_Thatch',
 }
+CORNERS = ((0, 0), (1, 0), (1, 1), (0, 1))
 
 
 class RoofAssembler:
@@ -35,6 +41,9 @@ class RoofAssembler:
 
     def place(self, spec, roof, level=0, rng=None, chimney=True):
         self.chimney = chimney and spec.chimney
+        if spec.roof == 'flat':
+            self._flat(spec, roof)
+            return
         if spec.roof in TOWER_TOPS:
             self._tower_top(spec, roof)
             return
@@ -72,6 +81,28 @@ class RoofAssembler:
             self.kit.place('Cross_Gable_3', self.coll, roof, (i * GRID + GRID / 2, 0, 0))
             self.cross_cells = {i}
 
+    def _flat(self, spec, roof):
+        """Flagged deck per cell, a parapet over every wall cell, piers at the corners and
+        a broad chimney stack near the back (two on long buildings)."""
+        for i in range(spec.w):
+            for j in range(spec.d):
+                self.kit.place('Roof_Flat_Granite', self.coll, roof, (i * GRID, j * GRID, 0))
+        for _side, _i, loc, rotq in segments(spec.w, spec.d):
+            self.kit.place_q('Parapet_Granite', self.coll, roof, (*loc, 0), rotq)
+        for rotq, (cx, cy) in enumerate(CORNERS):
+            self.kit.place_q('Parapet_Granite_Corner', self.coll, roof,
+                             (cx * spec.w * GRID, cy * spec.d * GRID, 0), rotq)
+        if self.chimney:
+            xs = (GRID,) if spec.w < 4 else (GRID, (spec.w - 1) * GRID)
+            for x in xs:
+                self.kit.place('Chimney_Granite', self.coll, roof, (x, spec.d * GRID - 1.0, 0.14))
+
+    def _vents(self, roof, length, span, apex):
+        """Louvred smoke vents on the ridge: one per two to three cells of hall."""
+        count = max(1, round(length / (2.5 * GRID)))
+        for k in range(count):
+            self.kit.place('Smoke_Vent', self.coll, roof, ((k + 0.5) * length / count, span / 2, apex))
+
     def _tower_top(self, spec, roof):
         size = int(spec.w * GRID)
         self.kit.place(f'{TOWER_TOPS[spec.roof]}_{size}', self.coll, roof, (0, 0, 0))
@@ -99,6 +130,8 @@ class RoofAssembler:
             self.kit.place('Gable_Spike', self.coll, roof, (length + 0.12, span / 2, apex + 0.25))
         if spec.furnish == 'church':
             self.kit.place('Weathervane', self.coll, roof, (length / 2, span / 2, apex + 0.3))
+        if spec.vent:
+            self._vents(roof, length, span, apex)
         self._chimney(spec, roof, span, pitch)
         if spec.dormers and not spec.cross_gable:
             tan = math.tan(pitch)

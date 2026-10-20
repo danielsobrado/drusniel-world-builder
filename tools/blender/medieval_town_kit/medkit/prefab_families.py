@@ -5,6 +5,14 @@ Pure data (no bpy), shared by the game prefabs (prefabs.py) and the town generat
 Families:  Tudor  (stone + half-timber, 50 deg slate gables, dormers)
            Nordic (stone + clapboard, 60 deg gables, crossed finials, pent roofs)
            Med    (stone + ochre render, terracotta hip roofs, loggias, villa)
+           Goblin (Grukmar marsh: stilts, shanty walls, shaggy reed roofs)
+           Orc       (Grukmar uplands: low broad halls, dark stone socle, heavy timber,
+                      low reed thatch, deep porches)
+           Frostgard (horizontal hewn logs, sod roofs on homes, steep plain slate on
+                      halls, ridge smoke vents, rugged granite plinths; no roof horns)
+           Stonehold (granite with basalt dressings, squared shouldered openings,
+                      flat parapeted roofs, chimney stacks, vaulted portals)
+Regional briefs: docs/asset-bible/regions/<realm>.md and 05-differentiation-matrix.md.
 """
 from dataclasses import dataclass, field, replace
 
@@ -148,6 +156,61 @@ def goblin(base):
 
 
 
-FAMILIES = (tudor, nordic, mediterranean, goblin)
-FAMILY_BY_NAME = {'Tudor': tudor, 'Nordic': nordic, 'Med': mediterranean, 'Goblin': goblin}
+def _without(extra, *keys):
+    return {k: v for k, v in extra.items() if k not in keys}
+
+
+# Bases that keep their timber and earth roofs rather than a porch: stores and the forge.
+ORC_NO_PORCH = {'Barn', 'Warehouse', 'Smithy'}
+ORC_LOFT = {'Manor', 'Tavern_Large'}
+# Frostgard longhall governance and big stores take the steep slate roof; homes take sod.
+FROST_HALLS = {'Tavern', 'Tavern_Large', 'Guildhall', 'Manor', 'Chapel', 'Library',
+               'Warehouse', 'Barn', 'Guardhouse'}
+
+
+def _lift(base):
+    """1 for the one-story-taller sibling (taller()), else 0."""
+    return base.stories - BASE_BY_NAME[base.name].stories
+
+
+def orc(base):
+    """Grukmar upland orc ridge-hold: one broad story; only big halls and the taller
+    siblings get a boarded loft over the stone-socled ground floor. No banners: the
+    kit's only banner is the Lumish fleur-de-lis."""
+    extra = _without(base.extra, 'dormers', 'chimney', 'banner')
+    if base.tower:
+        stories = ('orc',) + ('orc_loft',) * (min(base.stories, 3) - 1)
+        return BuildingSpec(f'Orc_{base.name}', base.w, base.d, stories,
+                            roof='thatch_pyramid', plinth='Dark', chimney=False, **extra)
+    lofts = min(1, _lift(base) + (base.name in ORC_LOFT))
+    return BuildingSpec(f'Orc_{base.name}', base.w, base.d, ('orc',) + ('orc_loft',) * lofts,
+                        roof='thatch_low', plinth='Dark', pent=base.name not in ORC_NO_PORCH,
+                        chimney=False, shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
+
+
+def frostgard(base):
+    extra = _without(base.extra, 'dormers', 'chimney')
+    if base.tower:
+        return BuildingSpec(f'Frostgard_{base.name}', base.w, base.d, ('log',) * base.stories,
+                            roof='pyramid', plinth='Rugged', chimney=False, **extra)
+    roof = 'steep_log' if base.name in FROST_HALLS else 'sod'
+    stories = min(BASE_BY_NAME[base.name].stories, 2) + _lift(base)
+    return BuildingSpec(f'Frostgard_{base.name}', base.w, base.d, ('log',) * stories,
+                        roof=roof, plinth='Rugged', vent=True, chimney=False,
+                        gable_front=base.name in GABLE_FRONTED,
+                        shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
+
+
+def stonehold(base):
+    # No banners: the walls carry no cloth; the hold's mark is the gate (prefabs.py).
+    extra = _without(base.extra, 'dormers', 'banner', 'window_odds')
+    return BuildingSpec(f'Stonehold_{base.name}', base.w, base.d, ('granite',) * base.stories,
+                        roof='flat', plinth='Basalt', arcade=base.shopfront and not base.tower,
+                        window_odds=min(base.extra.get('window_odds', 0.6), 0.35),
+                        shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
+
+
+FAMILIES = (tudor, nordic, mediterranean, goblin, orc, frostgard, stonehold)
+FAMILY_BY_NAME = {'Tudor': tudor, 'Nordic': nordic, 'Med': mediterranean, 'Goblin': goblin,
+                  'Orc': orc, 'Frostgard': frostgard, 'Stonehold': stonehold}
 BASE_BY_NAME = {base.name: base for base in BASES}

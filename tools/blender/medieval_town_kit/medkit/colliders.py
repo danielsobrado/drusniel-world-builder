@@ -10,6 +10,9 @@ from .modules.floors import LANDING_Y, RAIL_X, STAIR_X, STAIR_Y0, STAIR_Y1, WELL
 from .modules.walls import DOOR, TIMBER_WINDOW, WINDOW
 from .modules.walls_regional import ARCADE
 from .modules import foundations as F
+from .modules.palisade import CHAMBER, PAD_H, TOWER
+from .modules.walls_stonehold import FACE, GATE_D, GATE_H, GATE_W, GRANITE_WINDOW, PASSAGE
+from .modules.walls_frontier import PORCH_DEPTH, PORCH_POSTS
 
 
 def _panel(hole):
@@ -84,6 +87,24 @@ COLLIDERS = {
     'Goblin_Ladder': [((-0.30, -0.26, 0), (0.30, -0.06, STORY + 0.35))],
     'Goblin_Tarp_Canopy': [((-2.02, -1.42, 0), (-1.78, -1.18, 2.02)),
                            ((1.78, -1.42, 0), (2.02, -1.18, 2.02))],
+    **{f'Wall_{family}{suffix}': _panel(hole) for family in ('Orc', 'Orc_Loft', 'Log')
+       for suffix, hole in (('', None), ('_Window', TIMBER_WINDOW), ('_Door', DOOR))},
+    **{f'Wall_Granite{suffix}': [((lo[0], FACE, lo[2]), hi) for lo, hi in _panel(hole)]
+       for suffix, hole in (('', None), ('_Window', GRANITE_WINDOW), ('_Door', DOOR), ('_Arcade', ARCADE))},
+    'Corner_Orc': [((-T - 0.13, -T - 0.13, 0), (T + 0.02, T + 0.02, STORY))],
+    'Corner_Orc_Loft': [((-0.28, -0.28, 0), (0.18, 0.18, STORY))],
+    'Corner_Log': [((-T - 0.05, -T - 0.05, 0), (T + 0.05, T + 0.05, STORY))],
+    'Corner_Granite': [((FACE - 0.16, FACE - 0.16, 0), (T + 0.02, T + 0.02, STORY))],
+    **{name: [((x - 0.17, -PORCH_DEPTH + 0.08, 0), (x + 0.17, -PORCH_DEPTH + 0.42, 2.3)) for x in PORCH_POSTS[door]]
+       for name, door in (('Orc_Porch', False), ('Orc_Porch_Door', True))},
+    'Palisade_Orc': [((0, -0.3, 0), (GRID, 0.3, 3.5))],
+    'Gate_Tower_Orc': [((0, 0, 0), (0.85, TOWER, PAD_H)), ((TOWER - 0.85, 0, 0), (TOWER, TOWER, PAD_H)),
+                       ((0, 0, CHAMBER[0] - 0.5), (TOWER, TOWER, CHAMBER[1] + 0.16))]
+                      + [((x - 0.24, y - 0.24, PAD_H), (x + 0.24, y + 0.24, CHAMBER[0]))
+                         for x in (0.42, TOWER - 0.42) for y in (0.42, TOWER - 0.42)],
+    'Gate_Stonehold': [((0, 0, 0), (PASSAGE[0], GATE_D, GATE_H + 1.14)),
+                       ((PASSAGE[1], 0, 0), (GATE_W, GATE_D, GATE_H + 1.14)),
+                       ((PASSAGE[0], 0, PASSAGE[2]), (PASSAGE[1], GATE_D, GATE_H + 1.14))],
     'Wall_Curtain': [((0, -0.6, 0), (GRID, 0.6, 6.2))],
     'Tower_Round': [((-2.2, -2.2, 0), (2.2, 2.2, 9.7))],
     'Corner_Stone': [((-0.21, -0.21, 0), (0.21, 0.21, STORY))],
@@ -191,6 +212,16 @@ def _foundations():
 
 
 COLLIDERS.update(_foundations())
+COLLIDERS.update({
+    'Stonehold_Ledge_Small': _centred(2.4, 2.2, 1.0),
+    'Stonehold_Ledge_Large': _centred(3.3, 2.8, 1.2),
+    'Stonehold_Twin_Outcrop': _centred(4.4, 2.4, 1.25),
+    'Stonehold_Vent_Crater': _centred(2.5, 2.4, 0.72),
+    'Stonehold_Caldera_Basin': _centred(3.5, 3.1, 1.45),
+    'Stonehold_Fang_Shrine': _centred(2.8, 2.6, 0.85) + [((-0.95, 0.0, 0), (0.35, 1.0, 2.95))],
+    'Stonehold_Cavern_Maw': _centred(3.7, 3.0, 0.45, y0=-2.0) + [((-1.55, -0.1, 0), (1.55, 1.85, 4.4))],
+    'Stonehold_Horned_Sanctum': _centred(4.6, 4.0, 2.1) + _centred(2.2, 2.0, 4.1),
+})
 
 
 def for_module(name):

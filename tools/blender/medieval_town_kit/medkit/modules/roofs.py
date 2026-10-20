@@ -5,6 +5,7 @@ Gable roofs ride on the wall tops (local z=0) of a building `span` metres
 deep; the ridge runs along X. A section covers one 2 m cell of length.
 """
 import math
+from dataclasses import dataclass
 
 from mathutils import Matrix, Vector
 
@@ -23,14 +24,14 @@ def ridge_height(span, pitch=ROOF_PITCH):
     return span / 2 * math.tan(pitch)
 
 
-def _ridge_saddle(b, x0, x1, span, pitch, mat='roof'):
+def _ridge_saddle(b, x0, x1, span, pitch, mat='roof', lift=ROOF_THICK):
     """Pitched V-saddle ridge cap with individual overlapping crested ridge tiles."""
     h = ridge_height(span, pitch)
     tan = math.tan(pitch)
     mid = span * 0.5
     hw = 0.17
     drop = hw * tan
-    z_base = h + ROOF_THICK - 0.02
+    z_base = h + lift - 0.02
     profile = [
         (x0, mid - hw, z_base - drop),
         (x0, mid - hw, z_base - drop + 0.07),
@@ -51,26 +52,51 @@ def _ridge_saddle(b, x0, x1, span, pitch, mat='roof'):
                 b.box((tx0, mid - 0.11, z_base + 0.02), (tx1, mid + 0.11, z_base + 0.135), mat)
 
 
-def _slopes(b, x0, x1, span, pitch, barge=False):
+@dataclass(frozen=True)
+class Covering:
+    """What a gable roof is clad in: the slab's top material, its thickness, the eave
+    overhang, and whether the barge ends carry the carved Tudor/Nordic ornament."""
+    mat: str = 'roof'
+    thick: float = ROOF_THICK
+    overhang: float = OV
+    ornate: bool = True
+    eave_log: bool = False   # a turf-retaining log along the eave (sod roofs)
+    edge: str = 'timber'     # the slab's cut edges: boards under slate, the covering itself if thick
+
+
+SLATE = Covering()
+
+
+def _slopes(b, x0, x1, span, pitch, barge=False, cover=SLATE):
     tan, cos = math.tan(pitch), math.cos(pitch)
-    front = Matrix.Translation((0, -OV, -OV * tan)) @ Matrix.Rotation(pitch, 4, 'X')
+    ov, thick = cover.overhang, cover.thick
+    front = Matrix.Translation((0, -ov, -ov * tan)) @ Matrix.Rotation(pitch, 4, 'X')
     back = Matrix.Translation((x0 + x1, span, 0)) @ Matrix.Rotation(math.pi, 4, 'Z') @ front
-    length = (span / 2 + OV) / cos + 0.05
+    length = (span / 2 + ov) / cos + 0.05
     seam_skip = () if barge else ('-x', '+x')
     for m in (front, back):
         # One tone and square ends: neighbouring sections must read as one roof, not
         # 2 m tiles with a chamfer groove and a shade step at every joint.
-        b.box((x0, 0, 0), (x1, length, ROOF_THICK), 'timber', m=m, mats=SLAB_MATS, tone=1.0,
-              bevel=0, skip=seam_skip)
-        if detailed():
-            # Dimensional starter eave slate course & molded double-stepped eave fascia board
-            b.box((x0, -0.02, ROOF_THICK - 0.005), (x1, 0.18, ROOF_THICK + 0.018), 'roof', m=m,
-                  tone=1.0, bevel=0, skip=seam_skip)
-            b.box((x0, -0.07, -0.14), (x1, 0.03, ROOF_THICK + 0.03), 'timber', m=m, tone=1.0,
+        b.box((x0, 0, 0), (x1, length, thick), cover.edge, m=m, mats={'+z': cover.mat, '-z': 'planks'},
+              tone=1.0, bevel=0, skip=seam_skip)
+        if cover.eave_log:
+            b.box((x0, 0.02, thick - 0.02), (x1, 0.22, thick + 0.16), 'log', m=m, tone=1.0,
                   skip=seam_skip)
-            b.box((x0, -0.085, -0.04), (x1, -0.055, ROOF_THICK + 0.045), 'wood_trim', m=m,
-                  tone=1.0, bevel=0, skip=seam_skip)
-    if barge:
+        if detailed():
+            # Dimensional starter eave course & molded double-stepped eave fascia board
+            if not cover.eave_log:
+                b.box((x0, -0.02, thick - 0.005), (x1, 0.18, thick + 0.018), cover.mat, m=m,
+                      tone=1.0, bevel=0, skip=seam_skip)
+            b.box((x0, -0.07, -0.14), (x1, 0.03, thick + 0.03), 'timber', m=m, tone=1.0,
+                  skip=seam_skip)
+            if cover.ornate:
+                b.box((x0, -0.085, -0.04), (x1, -0.055, thick + 0.045), 'wood_trim', m=m,
+                      tone=1.0, bevel=0, skip=seam_skip)
+    if barge and not cover.ornate:
+        # Plain heavy barge boards, no carving: frontier roofs are built, not decorated.
+        b.box((x0, -0.08, -0.18), (x0 + 0.09, length, thick + 0.05), 'timber', m=front)
+        b.box((x1 - 0.09, -0.08, -0.18), (x1, length, thick + 0.05), 'timber', m=back)
+    elif barge:
         # Ornate double-stepped gable bargeboards (vergeboards) with eave corbel knees
         b.box((x0, -0.06, -0.15), (x0 + 0.065, length, ROOF_THICK + 0.06), 'timber', m=front)
         b.box((x1 - 0.065, -0.06, -0.15), (x1, length, ROOF_THICK + 0.06), 'timber', m=back)
@@ -92,8 +118,8 @@ def _slopes(b, x0, x1, span, pitch, barge=False):
         for m in (front, back):
             for i in range(int((x1 - x0) / 0.5)):
                 x = x0 + 0.25 + i * 0.5
-                b.box((x - 0.05, -0.12, -0.13), (x + 0.05, OV / cos + 0.35, 0.0), 'timber', m=m)
-                if detailed():
+                b.box((x - 0.05, -0.12, -0.13), (x + 0.05, ov / cos + 0.35, 0.0), 'timber', m=m)
+                if detailed() and cover.ornate:
                     # Chamfered rafter-tail corbel nose & oak peg
                     b.box((x - 0.042, -0.155, -0.105), (x + 0.042, -0.09, -0.015), 'wood_trim', m=m)
     h = ridge_height(span, pitch)
@@ -111,12 +137,13 @@ def _slopes(b, x0, x1, span, pitch, barge=False):
                 b.box((ix - 0.025, span / 2 - 0.185, h + 0.06),
                       (ix + 0.025, span / 2 + 0.185, h + 0.38), 'iron', bevel=0)
     else:
-        _ridge_saddle(b, x0, x1, span, pitch, 'roof')
+        # A thicker covering lifts its ridge by the extra thickness measured vertically.
+        _ridge_saddle(b, x0, x1, span, pitch, cover.mat, ROOF_THICK + (thick - ROOF_THICK) / cos)
 
 
-def gable_section(span, pitch=ROOF_PITCH):
+def gable_section(span, pitch=ROOF_PITCH, cover=SLATE):
     b = MeshBuilder()
-    _slopes(b, 0, GRID, span, pitch)
+    _slopes(b, 0, GRID, span, pitch, cover=cover)
     return b
 
 
@@ -128,9 +155,9 @@ def gable_fill(span, length, pitch=ROOF_PITCH):
     return b
 
 
-def gable_eave_end(span, pitch=ROOF_PITCH):
+def gable_eave_end(span, pitch=ROOF_PITCH, cover=SLATE):
     b = MeshBuilder()
-    _slopes(b, 0, END_LEN, span, pitch, barge=True)
+    _slopes(b, 0, END_LEN, span, pitch, barge=True, cover=cover)
     return b
 
 
@@ -191,7 +218,7 @@ def gable_wall(span, pitch=ROOF_PITCH, infill='plaster'):
     return b
 
 
-def pyramid(size, pitch_deg, spire=False):
+def pyramid(size, pitch_deg, spire=False, mat='roof', finial=True):
     b = MeshBuilder()
     tan = math.tan(math.radians(pitch_deg))
     z_lift = 0.12
@@ -202,10 +229,10 @@ def pyramid(size, pitch_deg, spire=False):
     for i in range(4):
         a, d = c[i], c[(i + 1) % 4]
         mid = ((a[0] + d[0]) / 2 - centre[0], (a[1] + d[1]) / 2 - centre[1], 1.0)
-        b.poly([a, d, apex], 'roof', outward=mid)
+        b.poly([a, d, apex], mat, outward=mid)
         if detailed():
             # Hip ridge cresting spine along each corner hip
-            b.beam(a, apex, mid, (-0.05, 0.05), 0.11, 'roof')
+            b.beam(a, apex, mid, (-0.05, 0.05), 0.11, mat)
     b.poly(c, 'planks', outward=(0, 0, -1))
     # Molded eave fascia & corbel frieze around the 4 sides
     e0, e1 = -OV, size + OV
@@ -215,6 +242,8 @@ def pyramid(size, pitch_deg, spire=False):
                    ((e1 - 0.08, e0 + 0.08, ze - 0.14), (e1, e1 - 0.08, ze + 0.04))):
         b.box(lo, hi, 'timber')
     top = apex[2]
+    if not finial:
+        return b
     b.lathe([(0.09, top - 0.12), (0.11, top + 0.04), (0.055, top + 0.72)], 6, 'iron',
             m=Matrix.Translation((apex[0], apex[1], 0)))
     if spire:

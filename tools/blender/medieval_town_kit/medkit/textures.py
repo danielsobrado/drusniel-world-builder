@@ -7,6 +7,7 @@ import numpy as np
 from . import scans
 from .texture_patterns import PATTERNS, _uv, courses, fbm, lerp, normal_from_height, rounded_edge, smooth, tint
 from .texture_patterns_extra import EXTRA_PATTERNS
+from .texture_patterns_regional import REGIONAL_PATTERNS
 from .texture_patterns_weathered import WEATHERED_PATTERNS
 
 
@@ -259,6 +260,8 @@ def generate(out_dir, seed=7):
     os.makedirs(out_dir, exist_ok=True)
     patterns = {**PATTERNS, **EXTRA_PATTERNS, **WEATHERED_PATTERNS}
     patterns.setdefault('clapboard', patterns['planks'])
+    # Appended last so the earlier patterns keep their seeds.
+    patterns.update(REGIONAL_PATTERNS)
     images = {}
     for i, (name, (fn, size)) in enumerate(patterns.items()):
         p_seed = seed + i * 101
