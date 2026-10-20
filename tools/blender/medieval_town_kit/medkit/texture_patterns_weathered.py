@@ -73,16 +73,35 @@ def ashlar(n, seed):
 
 def dressed(n, seed):
     """Tooled limestone for quoins, copings, sills and voussoirs: one stone per face, so no
-    joints. Pale against the rubble it frames, with fine pitting, faint claw-tool
-    striations and rain staining; the piece chamfer and per-piece tone draw each block."""
-    fine, mid, big = fbm(n, seed, 1.0), fbm(n, seed + 1, 1.9), fbm(n, seed + 2, 2.7)
-    tool = fbm(n, seed + 3, 1.2, sx=1, sy=22)
-    pits = smooth(0.8, 0.9, fbm(n, seed + 4, 0.6))
-    shade = (0.9 + 0.12 * fine) * (0.94 + 0.08 * tool) * (1 - 0.18 * smooth(0.5, 0.95, big)) * (1 - 0.3 * pits)
-    albedo = tint((0.55, 0.53, 0.49), shade)
-    moss = smooth(0.66, 0.86, big) * 0.45
-    height = 0.35 * mid + 0.25 * tool + 0.15 * fine - 0.5 * pits
-    return _weather(albedo, n, seed, 0.3, moss), height, 1.6
+    joints. Warm honey-cream limestone with diagonal claw-chisel striations, fossil flecks,
+    weathered pits with baked cavity AO, and rain staining."""
+    u, v = np.mgrid[0:n, 0:n].astype(np.float32) / n
+    fine, mid, big = fbm(n, seed, 1.05), fbm(n, seed + 1, 1.85), fbm(n, seed + 2, 2.6)
+    # Diagonal mason's claw-chisel / drove tooling marks
+    chisel_diag = 0.5 + 0.5 * np.sin((u * 38.0 + v * 38.0 + 0.35 * fine) * np.pi * 2.0)
+    tool = fbm(n, seed + 3, 1.25, sx=2.0, sy=26.0)
+    pits = smooth(0.76, 0.89, fbm(n, seed + 4, 0.65))
+    veins = smooth(0.78, 0.86, fbm(n, seed + 5, 1.6, sx=8.0, sy=2.0))
+    # Edge margin draft & center pecked boss feel
+    shade = (
+        (0.86 + 0.16 * fine)
+        * (0.91 + 0.10 * tool + 0.06 * chisel_diag)
+        * (1.0 - 0.20 * smooth(0.48, 0.94, big))
+        * (1.0 - 0.42 * pits)
+    )
+    base_stone = lerp((0.54, 0.49, 0.41), (0.66, 0.60, 0.51), 0.55 * mid + 0.45 * fine)
+    albedo = tint(base_stone, shade)
+    albedo = lerp(albedo, (0.72, 0.67, 0.58), veins * 0.28)
+    moss = smooth(0.66, 0.86, big) * 0.42
+    height = (
+        0.38 * mid
+        + 0.24 * tool
+        + 0.14 * chisel_diag
+        + 0.14 * fine
+        + 0.10 * veins
+        - 0.65 * pits
+    ).astype(np.float32)
+    return _weather(albedo, n, seed, 0.26, moss), height, 2.3
 
 
 def planks(n, seed):
@@ -100,12 +119,25 @@ def planks(n, seed):
 
 
 def timber(n, seed):
-    grain = fbm(n, seed, 1.4, sx=16)
-    cracks = smooth(0.8, 0.9, fbm(n, seed + 1, 1.2, sx=24))
-    silver = fbm(n, seed + 2, 2.4)
-    wood = tint((0.25, 0.2, 0.16), (0.6 + 0.6 * grain) * (1 - 0.55 * cracks))
-    albedo = lerp(wood, (0.37, 0.35, 0.32), smooth(0.5, 0.85, silver) * 0.3)
-    return albedo, 0.6 * grain - 0.5 * cracks, 1.8
+    """Adze-hewn seasoned oak structural timber with warm heartwood figure,
+    medullary rays, tool facets, and deep seasoning checks."""
+    v, u = (np.mgrid[0:n, 0:n].astype(np.float32) + 0.5) / n
+    grain = fbm(n, seed, 1.45, sx=18.0, sy=1.5)
+    fine = fbm(n, seed + 1, 1.2, sx=28.0, sy=2.0)
+    figure = 0.5 + 0.5 * np.sin((u * 3.0 + fbm(n, seed + 2, 2.1, sx=4.0, sy=1.4) * 1.8) * np.pi * 2.0)
+    # Subtle hand-hewn adze facets along the beam length
+    adze = 0.5 + 0.5 * np.sin((u * 9.0 + 0.4 * fbm(n, seed + 3, 2.0)) * np.pi * 2.0)
+    cracks = smooth(0.79, 0.90, fbm(n, seed + 4, 1.25, sx=24.0, sy=1.2))
+    knots = smooth(0.85, 0.93, fbm(n, seed + 5, 1.1, sx=3.5, sy=1.8))
+    silver = fbm(n, seed + 6, 2.3)
+
+    mix = 0.48 * grain + 0.26 * figure + 0.14 * adze + 0.12 * fine
+    wood = lerp((0.20, 0.125, 0.075), (0.40, 0.265, 0.16), mix)
+    wood = tint(wood, (0.82 + 0.28 * fine) * (1.0 - 0.62 * cracks) * (1.0 - 0.38 * knots))
+    # Subtle sun-silvered highlight on raised grain ridges
+    albedo = lerp(wood, (0.42, 0.36, 0.29), smooth(0.58, 0.88, silver) * grain * 0.22)
+    height = (0.52 * grain + 0.22 * figure + 0.16 * adze + 0.10 * fine - 0.65 * cracks - 0.25 * knots).astype(np.float32)
+    return albedo.astype(np.float32), height, 2.4
 
 
 def shingles(n, seed):
@@ -135,6 +167,6 @@ def render(n, seed):
 
 WEATHERED_PATTERNS = {
     'stone': (rubble, 1024), 'ashlar': (ashlar, 1024), 'planks': (planks, 1024),
-    'timber': (timber, 512), 'roof': (shingles, 1024), 'plaster': (render, 512),
-    'dressed': (dressed, 512),
+    'timber': (timber, 1024), 'roof': (shingles, 1024), 'plaster': (render, 1024),
+    'dressed': (dressed, 1024),
 }

@@ -173,12 +173,13 @@ def recessed_panel_front(b, x0, x1, z0, z1, y_face, depth=0.022, border=0.026,
 
 
 def recessed_panel_side(b, y0, y1, z0, z1, x_face, sign_x, depth=0.02, border=0.03,
-                        frame_mat='wood_trim'):
+                        frame_mat='wood_trim', carved=True):
     """Stepped recessed panel on a -X (sign_x=-1) or +X (sign_x=1) cabinet side wall."""
     x_in = x_face - sign_x * depth
     x_lo, x_hi = (x_face, x_in) if sign_x < 0 else (x_in, x_face)
+    field_mat = 'carved_wood' if carved else frame_mat
     b.box((x_lo, y0 + border, z0 + border), (x_hi, y1 - border, z1 - border),
-          frame_mat, tone=0.88, bevel=0)
+          field_mat, tone=0.88, bevel=0)
     if not detailed():
         return
     f_lo, f_hi = (x_face, x_face - sign_x * depth * 0.55) if sign_x < 0 else (x_face - sign_x * depth * 0.55, x_face)

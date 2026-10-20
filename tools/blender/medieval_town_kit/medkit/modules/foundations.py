@@ -6,7 +6,7 @@ and is placed at ground level under its wall; the building's stories stand on
 top. Corner pieces take a quarter turn per corner so their arms run along the
 two walls they join.
 """
-from ..config import GRID, HALF_T as T, STORY
+from ..config import GRID, HALF_T as T, STORY, detailed
 from ..mesh import MeshBuilder
 
 PLINTHS = {'Low': 0.3, 'High': 0.6, 'Stilts': 0.6}
@@ -18,19 +18,29 @@ BURY = 0.4
 def plinth(height):
     b = MeshBuilder()
     b.box((0, -T - 0.18, -BURY), (GRID, T, height - 0.08), 'stone', skip=('-x', '+x', '-z'))
+    # Stepped water-table coping at top + battered footing course at ground level
     b.box((0, -T - 0.24, height - 0.08), (GRID, -T + 0.05, height), 'stone_dressed', skip=('-x', '+x'))
+    if detailed():
+        b.box((0, -T - 0.21, height - 0.13), (GRID, -T - 0.15, height - 0.08), 'stone_dressed',
+              skip=('-x', '+x'))
+        b.box((0, -T - 0.22, -BURY), (GRID, -T - 0.16, 0.08), 'stone_dressed',
+              skip=('-x', '+x', '-z'))
     return b
 
 
 def plinth_corner(height):
     b = MeshBuilder()
     b.box((-T - 0.18, -T - 0.18, -BURY), (T, T, height - 0.08), 'stone', skip=('-z',))
-    b.box((-T - 0.24, -T - 0.24, height - 0.08), (T, T, height), 'stone_dressed', bevel=0)
+    b.box((-T - 0.24, -T - 0.24, height - 0.08), (T, T, height), 'stone_dressed')
+    if detailed():
+        b.box((-T - 0.21, -T - 0.21, height - 0.13), (T, T, height - 0.08), 'stone_dressed')
+        b.box((-T - 0.22, -T - 0.22, -BURY), (T, T, 0.08), 'stone_dressed', skip=('-z',))
     return b
 
 
 def entry_steps(height, width=1.5):
-    """Steps descending outward (-Y) from a door centred at x = 1 on its wall."""
+    """Steps descending outward (-Y) from a door centred at x = 1 on its wall,
+    with overhanging bullnose treads and stepped cheek parapets with pier caps."""
     b = MeshBuilder()
     count = max(1, round(height / STEP_RISE))
     rise = height / count
@@ -38,11 +48,21 @@ def entry_steps(height, width=1.5):
     face = -T - 0.18
     for i in range(count):
         top = height - i * rise
-        b.box((x0, face - (i + 1) * STEP_RUN, -BURY), (x1, face, top), 'stone_dressed',
+        y_front = face - (i + 1) * STEP_RUN
+        # Riser body + overhanging dressed-stone bullnose tread slab
+        b.box((x0, y_front + 0.03, -BURY), (x1, face, top - 0.045), 'stone',
               skip=('-z',) if i else ())
-    for x in (x0 - 0.22, x1):
-        b.box((x, face - count * STEP_RUN, -BURY), (x + 0.22, face, height + 0.1), 'stone_dressed',
-              skip=('-z',))
+        b.box((x0 - 0.02, y_front, top - 0.045), (x1 + 0.02, face, top), 'stone_dressed')
+    # Stepped cheek walls with dressed-stone coping and terminal newel piers
+    total_run = count * STEP_RUN
+    for cx0, cx1 in ((x0 - 0.22, x0), (x1, x1 + 0.22)):
+        b.box((cx0, face - total_run, -BURY), (cx1, face, height + 0.06), 'stone', skip=('-z',))
+        b.box((cx0 - 0.025, face - total_run - 0.02, height + 0.05),
+              (cx1 + 0.025, face + 0.02, height + 0.13), 'stone_dressed')
+        if detailed():
+            # Terminal newel pier block at the foot of the stair cheek
+            b.box((cx0 - 0.035, face - total_run - 0.04, 0.0),
+                  (cx1 + 0.035, face - total_run + 0.24, height + 0.20), 'stone_dressed')
     return b
 
 

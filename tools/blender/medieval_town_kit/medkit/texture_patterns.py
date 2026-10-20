@@ -190,10 +190,15 @@ def bark(n, seed):
 
 
 def iron(n, seed):
-    fine, mid = fbm(n, seed, 1.2), fbm(n, seed + 1, 2.0)
-    albedo = lerp(tint((0.13, 0.13, 0.14), 0.7 + 0.5 * fine), (0.36, 0.19, 0.09),
-                  smooth(0.72, 0.88, mid) * 0.6)
-    return albedo, fine, 0.6
+    """Hand-forged hammered wrought iron with peened facets, blackened forge scale,
+    polished steel edge sheen, and warm oil-quenched patina in hollows."""
+    fine, mid, big = fbm(n, seed, 1.15), fbm(n, seed + 1, 1.85), fbm(n, seed + 2, 2.5)
+    peen = 0.5 + 0.5 * np.sin((fine * 4.5 + mid * 2.5) * np.pi * 2.0)
+    height = (0.45 * mid + 0.35 * peen + 0.20 * fine).astype(np.float32)
+    base = lerp((0.10, 0.105, 0.115), (0.26, 0.27, 0.29), 0.55 * peen + 0.45 * fine)
+    patina = smooth(0.68, 0.88, big) * (1.0 - 0.6 * peen)
+    albedo = lerp(base, (0.32, 0.18, 0.09), patina * 0.48)
+    return albedo.astype(np.float32), height, 1.6
 
 
 def cloth(n, seed):
@@ -205,22 +210,35 @@ def cloth(n, seed):
 
 
 def window(n, seed):
-    """Leaded diamond panes; mapped 0..1 across each pane (material uses fit UVs)."""
+    """Leaded diamond crown-glass panes with raised lead cames, soldered joint bosses,
+    and subtle hand-spun crown glass ripples (mapped 0..1 across each pane via fit=True)."""
     u, v = _uv(n)
     fine = fbm(n, seed, 1.5)
+    wobble = (fbm(n, seed + 1, 2.1) - 0.5) * 0.03
 
     def line(x):
         return np.abs(x - np.round(x))
 
-    lead = np.minimum(line((u + v * 1.4) * 3.5), line((u - v * 1.4) * 3.5))
+    d1 = line((u + v * 1.4 + wobble) * 3.5)
+    d2 = line((u - v * 1.4 - wobble) * 3.5)
+    lead = np.minimum(d1, d2)
+    joint_boss = smooth(0.06, 0.015, np.hypot(d1, d2))
     border = np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v))
     bar = np.minimum(lead, border * 2.5)
-    # Crown glass, pale and faintly green-cream: by day a window is lit by the sky, not a
-    # fire. The game's glass material adds the warm glow as the sun goes down.
-    glass = tint(lerp((0.86, 0.85, 0.74), (0.72, 0.72, 0.6), v), 0.8 + 0.25 * fine)
-    glass = lerp(glass, (0.95, 0.93, 0.82), smooth(0.6, 0.0, np.hypot(u - 0.5, v - 0.35)) * 0.35)
-    albedo = lerp((0.08, 0.06, 0.05), glass, smooth(0.02, 0.04, bar))
-    return albedo, smooth(0.02, 0.04, bar), 1.0
+    pane_mask = smooth(0.022, 0.046, bar)
+    lead_ao = smooth(0.022, 0.085, bar)
+
+    # Subtle hand-spun crown-glass ripples inside each diamond quarry
+    q_center = np.hypot(d1 - 0.5, d2 - 0.5)
+    ripple = 0.5 + 0.5 * np.sin(q_center * np.pi * 6.0 + fine * 2.0)
+
+    glass = tint(lerp((0.88, 0.86, 0.75), (0.70, 0.71, 0.58), v),
+                 (0.78 + 0.22 * fine) * (0.92 + 0.10 * ripple) * (0.72 + 0.28 * lead_ao))
+    glass = lerp(glass, (0.97, 0.94, 0.83), smooth(0.62, 0.0, np.hypot(u - 0.5, v - 0.36)) * 0.38)
+    lead_col = lerp((0.07, 0.06, 0.055), (0.18, 0.17, 0.16), joint_boss * 0.65)
+    albedo = lerp(lead_col, glass, pane_mask)
+    height = (1.0 - pane_mask) * (0.75 + 0.25 * joint_boss) + pane_mask * (0.15 * ripple + 0.10 * fine)
+    return albedo.astype(np.float32), height.astype(np.float32), 1.6
 
 
 def flowers(n, seed):
@@ -236,9 +254,9 @@ def flowers(n, seed):
 
 PATTERNS = {
     'stone': (stone, 1024), 'cobble': (cobble, 1024), 'roof': (roof, 1024),
-    'plaster': (plaster, 512), 'planks': (planks, 1024), 'timber': (timber, 512),
+    'plaster': (plaster, 1024), 'planks': (planks, 1024), 'timber': (timber, 1024),
     'grass': (grass, 512), 'foliage': (foliage, 512), 'bark': (bark, 512),
-    'iron': (iron, 256), 'cloth': (cloth, 256), 'window': (window, 256),
+    'iron': (iron, 512), 'cloth': (cloth, 512), 'window': (window, 512),
     'flowers': (flowers, 512),
 }
 

@@ -13,12 +13,13 @@ from mathutils import Vector
 AXES = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
 # Default chamfer per material; boxes with skipped faces stay square.
 DEFAULT_BEVEL = {'timber': 0.022, 'wood_trim': 0.014, 'stone': 0.03, 'stone_dressed': 0.035}
-TONED = {'timber': (0.8, 1.08), 'wood_trim': (0.88, 1.06), 'carved_wood': (0.9, 1.06),
+TONED = {'timber': (0.82, 1.08), 'wood_trim': (0.88, 1.06), 'carved_wood': (0.9, 1.06),
          'stone': (0.84, 1.08), 'stone_dressed': (0.84, 1.06),
-         'planks': (0.86, 1.06),
+         'planks': (0.86, 1.06), 'roof': (0.92, 1.05), 'roof_terracotta': (0.90, 1.06),
          'clapboard': (0.86, 1.05), 'bark': (0.85, 1.05),
          'thatch': (0.8, 1.08), 'hide': (0.82, 1.1), 'bone': (0.88, 1.04)}
 GRIMED = {'stone', 'stone_dressed', 'plaster', 'clapboard', 'timber', 'wood_trim', 'carved_wood', 'planks'}
+WALL_SOFFIT_AO = {'stone', 'plaster', 'clapboard'}
 
 
 def chamfer_faces(lo, hi, b):
@@ -73,9 +74,13 @@ def vertex_shade(p, n, mat):
     """Ambient occlusion and grime for one vertex of a face with normal n (module space)."""
     shade = 1.0
     if n.z < -0.5:
-        shade *= 0.72
+        shade *= 0.70
     elif abs(n.z) < 0.5 and mat in GRIMED:
-        shade *= 0.84 + 0.16 * _smooth(0.0, 0.9, p.z)
+        shade *= 0.80 + 0.20 * _smooth(0.0, 0.95, p.z)
+        if mat in WALL_SOFFIT_AO and 2.5 < p.z <= 3.05:
+            shade *= 0.88 + 0.12 * _smooth(3.0, 2.5, p.z)
+    elif n.z > 0.45 and mat in ('stone_dressed', 'roof', 'roof_terracotta'):
+        shade *= 1.03
     return shade
 
 

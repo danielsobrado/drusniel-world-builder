@@ -26,23 +26,23 @@ class Spec:
 
 
 SPEC = {
-    'stone': Spec('stone', 2.0, 0.9, normal=2.2),
-    'stone_ashlar': Spec('ashlar', 2.0, 0.85, normal=1.8),
+    'stone': Spec('stone', 2.0, 0.86, normal=2.4),
+    'stone_ashlar': Spec('ashlar', 2.0, 0.82, normal=2.0),
     # Dressed stone (quoins, copings, sills, voussoirs): one tooled block per piece.
-    'stone_dressed': Spec('dressed', 1.2, 0.88, normal=1.3),
-    'cobble': Spec('cobble', 2.0, 0.85, normal=2.0),
-    'plaster': Spec('plaster', 2.0, 0.95, normal=1.4, tint=(1.0, 0.93, 0.8)),
-    'timber': Spec('timber', 1.5, 0.76, grain=True, normal=1.6),
+    'stone_dressed': Spec('dressed', 1.2, 0.80, normal=1.8),
+    'cobble': Spec('cobble', 2.0, 0.82, normal=2.2),
+    'plaster': Spec('plaster', 2.0, 0.90, normal=1.6, tint=(1.0, 0.94, 0.82)),
+    'timber': Spec('timber', 1.5, 0.70, grain=True, normal=2.0),
     'wood_trim': Spec('fine_wood', 1.1, 0.62, grain=True, normal=0.95, tint=(1.04, 0.98, 0.92)),
     'carved_wood': Spec('carved_wood', 0.6, 0.64, fit=True, normal=1.8),
-    'planks': Spec('planks', 2.0, 0.78, grain=True, normal=1.8),
-    # Near-neutral weathered slate; the game's workshop houses tint the same scan alike.
-    'roof': Spec('roof', 2.0, 0.85, tint=(0.6, 0.6, 0.62), normal=2.0),
-    'roof_terracotta': Spec('terracotta', 2.0, 0.8, normal=1.6),
-    'thatch': Spec('thatch', 2.0, 0.95, normal=1.6),
-    'clapboard': Spec('clapboard', 2.0, 0.85, normal=1.6),
+    'planks': Spec('planks', 2.0, 0.75, grain=True, normal=2.0),
+    # Weathered split slate with mineral sheen and deep baked course lap shadows.
+    'roof': Spec('roof', 2.0, 0.74, tint=(0.72, 0.73, 0.76), normal=2.3),
+    'roof_terracotta': Spec('terracotta', 2.0, 0.72, normal=2.0),
+    'thatch': Spec('thatch', 2.0, 0.92, normal=2.0),
+    'clapboard': Spec('clapboard', 2.0, 0.76, normal=2.0, tint=(1.08, 0.96, 0.86)),
     'grass': Spec('grass', 2.0, 0.95),
-    'iron': Spec('iron', 1.0, 0.45, metal=0.85),
+    'iron': Spec('iron', 1.0, 0.42, metal=0.88, normal=1.4),
     # Old crown glass: dark and reflective by day with a low warm glow from the
     # room behind, so panes read as glass instead of lit white panels.
     'glass': Spec('window', fit=True, rough=0.12, emission=0.45, tint=(0.42, 0.44, 0.46),
