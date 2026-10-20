@@ -12,13 +12,13 @@ from mathutils import Vector
 
 AXES = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
 # Default chamfer per material; boxes with skipped faces stay square.
-DEFAULT_BEVEL = {'timber': 0.022, 'wood_trim': 0.014, 'stone': 0.03, 'stone_dressed': 0.035}
+DEFAULT_BEVEL = {'timber': 0.022, 'wood_trim': 0.014, 'stone': 0.03, 'stone_dressed': 0.035, 'brick': 0.012}
 TONED = {'timber': (0.82, 1.08), 'wood_trim': (0.88, 1.06), 'carved_wood': (0.9, 1.06),
-         'stone': (0.84, 1.08), 'stone_dressed': (0.84, 1.06),
+         'stone': (0.84, 1.08), 'stone_dressed': (0.84, 1.06), 'brick': (0.86, 1.08),
          'planks': (0.86, 1.06), 'roof': (0.92, 1.05), 'roof_terracotta': (0.90, 1.06),
          'clapboard': (0.86, 1.05), 'bark': (0.85, 1.05),
          'thatch': (0.8, 1.08), 'hide': (0.82, 1.1), 'bone': (0.88, 1.04)}
-GRIMED = {'stone', 'stone_dressed', 'plaster', 'clapboard', 'timber', 'wood_trim', 'carved_wood', 'planks'}
+GRIMED = {'stone', 'stone_dressed', 'brick', 'plaster', 'clapboard', 'timber', 'wood_trim', 'carved_wood', 'planks'}
 WALL_SOFFIT_AO = {'stone', 'plaster', 'clapboard'}
 
 

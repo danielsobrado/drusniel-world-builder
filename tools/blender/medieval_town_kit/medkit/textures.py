@@ -5,7 +5,7 @@ import bpy
 import numpy as np
 
 from . import scans
-from .texture_patterns import PATTERNS, fbm, lerp, normal_from_height, smooth, tint
+from .texture_patterns import PATTERNS, _uv, courses, fbm, lerp, normal_from_height, rounded_edge, smooth, tint
 from .texture_patterns_extra import EXTRA_PATTERNS
 from .texture_patterns_weathered import WEATHERED_PATTERNS
 
@@ -23,11 +23,41 @@ def _blur_periodic(field, radius):
     return out
 
 
+def _brick_underlayer(n, seed):
+    """Running-bond medieval kilned clay bricks with pale sandy lime-mortar joints."""
+    rng = np.random.default_rng(seed)
+    block, dx, dy, t_row, count = courses(n, rng, 14, 0.16 * n, 0.26 * n, row_jitter=0.05)
+    fine = fbm(n, seed + 1, 1.35)
+    wobble = fbm(n, seed + 2, 2.0)
+    edge = rounded_edge(dx, dy, n * 0.008) + (wobble - 0.5) * n * 0.005
+    mortar = n * 0.0042
+    face = smooth(mortar, mortar + n * 0.006, edge)
+
+    BRICK_PALETTE = np.array([
+        [0.64, 0.29, 0.18],  # terracotta red
+        [0.54, 0.25, 0.16],  # burnt russet
+        [0.69, 0.38, 0.23],  # warm salmon-ochre clay
+        [0.44, 0.22, 0.15],  # kiln-flashed dark clinker
+        [0.60, 0.33, 0.21],  # weathered red-brown brick
+    ], np.float32)
+    pick = rng.integers(0, len(BRICK_PALETTE), count)
+    tones = rng.uniform(0.86, 1.12, count)
+    brick_col = (BRICK_PALETTE[pick] * tones[:, None])[block]
+    top_hi = smooth(0.80, 0.98, t_row) * face
+    bot_ao = smooth(0.20, 0.02, t_row) * face
+    brick_col = tint(brick_col, (0.86 + 0.24 * fine) * (0.92 + 0.12 * top_hi - 0.12 * bot_ao))
+    mortar_col = tint((0.74, 0.69, 0.59), 0.88 + 0.20 * fine)
+    albedo = lerp(mortar_col, brick_col, face)
+    height = (face * (0.72 + 0.12 * top_hi + 0.16 * fine) + (1.0 - face) * 0.12 * fine).astype(np.float32)
+    return albedo, height, face
+
+
 def _bake_scan_relief(name, albedo, normal, seed):
     """Bake normal-derived cavity AO, overlap shadows, chiselled edge highlights,
-    and multi-scale weathering/patina into scanned PBR textures so roofs and
-    exteriors have deep, crisp relief in both Blender renders and the runtime."""
+    and rich material-specific albedo & normal details (exposed brick/mortar courses,
+    multi-hued stonework, wood cathedral grain) into scanned PBR textures."""
     n = albedo.shape[0]
+    u, v = _uv(n)
     nx = normal[..., 0] * 2.0 - 1.0
     ny = normal[..., 1] * 2.0 - 1.0
     nz = np.clip(normal[..., 2] * 2.0 - 1.0, 0.05, 1.0)
@@ -44,21 +74,22 @@ def _bake_scan_relief(name, albedo, normal, seed):
     cavity = 0.55 * raw_cavity + 0.30 * _blur_periodic(raw_cavity, 2) + 0.15 * _blur_periodic(raw_cavity, 5)
     edge_hi = smooth(0.015, 0.18, curv) * smooth(-0.08, 0.24, ny)
 
-    fine = fbm(n, seed + 11, 1.25)
+    fine = fbm(n, seed + 11, 1.35)
+    mid = fbm(n, seed + 17, 1.95)
     big = fbm(n, seed + 23, 2.5)
-    streak = fbm(n, seed + 37, 1.8, sy=9.0)
+    streak = fbm(n, seed + 37, 1.85, sy=9.0)
 
     # Config per scan type: (ao_strength, hi_strength, normal_boost)
     cfg = {
         'roof': (0.58, 0.20, 1.65),
         'terracotta': (0.54, 0.18, 1.50),
         'thatch': (0.50, 0.15, 1.45),
-        'stone': (0.54, 0.18, 1.45),
-        'ashlar': (0.50, 0.16, 1.40),
-        'clapboard': (0.58, 0.18, 1.55),
-        'planks': (0.50, 0.15, 1.40),
-        'plaster': (0.35, 0.10, 1.35),
-        'cobble': (0.52, 0.16, 1.40),
+        'stone': (0.52, 0.22, 1.60),
+        'ashlar': (0.48, 0.20, 1.55),
+        'clapboard': (0.56, 0.22, 1.60),
+        'planks': (0.52, 0.20, 1.50),
+        'plaster': (0.38, 0.14, 1.45),
+        'cobble': (0.52, 0.18, 1.45),
     }
     ao_str, hi_str, n_boost = cfg.get(name, (0.45, 0.14, 1.35))
 
@@ -77,24 +108,103 @@ def _bake_scan_relief(name, albedo, normal, seed):
         lichen = smooth(0.60, 0.84, big) * smooth(0.22, 0.60, cavity) * 0.42
         col = lerp(col, (0.30, 0.29, 0.18), lichen)
     elif name in ('stone', 'ashlar'):
-        # Warm Cotswold/hold limestone grade & mortar moss
-        warm = lerp((1.04, 0.99, 0.91), (0.95, 0.98, 1.02), big)
-        col = col * warm * (0.92 + 0.16 * fine)[..., None]
-        moss = smooth(0.60, 0.82, big) * smooth(0.25, 0.65, cavity) * 0.45
+        # Extract stone/brick faces vs recessed mortar joints from luminance + normal cavity
+        lum = 0.299 * col[..., 0] + 0.587 * col[..., 1] + 0.114 * col[..., 2]
+        lum_local = lum - _blur_periodic(lum, 10)
+        mortar_mask = np.clip(smooth(0.18, 0.48, cavity) * smooth(0.015, -0.045, lum_local), 0.0, 1.0)
+        stone_face = 1.0 - mortar_mask
+
+        # Multi-hued geological block tinting (warm terracotta sandstone, golden honey limestone, cool buff)
+        patch_a = fbm(n, seed + 41, 2.2)
+        patch_b = fbm(n, seed + 43, 2.0)
+        warm_sandstone = lerp((1.12, 0.96, 0.82), (0.94, 0.98, 1.04), patch_a)
+        terracotta_fleck = smooth(0.62, 0.84, patch_b) * stone_face
+        col = col * warm_sandstone * (0.88 + 0.22 * fine)[..., None]
+        col = lerp(col, col * np.array([1.22, 0.88, 0.72], np.float32), terracotta_fleck * 0.45)
+
+        # Crisp chiselled stone micro-grain and sunlit top-edge arris polish
+        chisel = 0.5 + 0.5 * np.sin((u * 42.0 + v * 42.0 + 0.35 * mid) * np.pi * 2.0)
+        top_arris = smooth(0.05, 0.35, ny) * stone_face
+        col = lerp(col, (0.76, 0.70, 0.60), top_arris * 0.24)
+        col = tint(col, 0.95 + 0.10 * chisel * stone_face)
+
+        # Distinct pale sandy-lime mortar in recessed joints with deep inner crevice AO
+        inner_crevice = smooth(0.45, 0.82, cavity)
+        mortar_col = tint((0.68, 0.63, 0.54), (0.90 + 0.16 * fine) * (1.0 - 0.38 * inner_crevice))
+        col = lerp(col, mortar_col, mortar_mask * 0.72)
+
+        moss = smooth(0.60, 0.82, big) * smooth(0.28, 0.68, cavity) * 0.45
         col = lerp(col, (0.24, 0.30, 0.13), moss)
     elif name in ('clapboard', 'planks'):
-        # Warm seasoned oak/pine amber heartwood richness & deep lap-board shadow
-        grain = fbm(n, seed + 51, 1.5, sx=16.0, sy=1.6)
-        warm_wood = lerp((1.08, 0.88, 0.70), (1.18, 0.98, 0.80), grain)
-        col = col * warm_wood * (0.88 + 0.22 * fine)[..., None]
+        # Rich wood cathedral figure, longitudinal fibers, and per-plank tone diversity
+        fibers = fbm(n, seed + 51, 1.45, sx=20.0, sy=1.1)
+        warp = fbm(n, seed + 53, 2.2, sx=6.0, sy=1.4)
+        board_rows = 8.0 if name == 'clapboard' else 7.0
+        v_board = (v * board_rows) % 1.0
+        board_id = np.floor(v * board_rows).astype(np.int32)
+        rng_b = np.random.default_rng(seed + 55)
+        board_tones = rng_b.uniform(0.86, 1.16, 16)[board_id % 16]
+        board_warmth = rng_b.uniform(-0.06, 0.08, 16)[board_id % 16]
+
+        # Cathedral grain arches within each horizontal plank
+        r_pith = np.hypot((v_board - 0.48 + 0.18 * (warp - 0.5)) * 3.6, 0.32 * np.sin(u * np.pi * 2.0 + warp * 2.5))
+        rings = 0.5 + 0.5 * np.sin((r_pith * 3.2 + fibers * 1.1) * np.pi * 2.0)
+        latewood = smooth(0.55, 0.92, rings)
+        pores = smooth(0.74, 0.88, fbm(n, seed + 57, 1.2, sx=18.0, sy=0.8)) * (1.0 - 0.6 * latewood)
+
+        warm_wood = lerp((1.02, 0.80, 0.60), (1.28, 1.04, 0.80), 0.55 * fibers + 0.45 * (1.0 - latewood))
+        warm_wood = warm_wood * board_tones[..., None] + np.stack(
+            [board_warmth, board_warmth * 0.4, -board_warmth * 0.3], axis=-1
+        )
+        col = col * warm_wood * (0.86 + 0.24 * fine)[..., None] * (1.0 - 0.25 * pores)[..., None]
+
+        # Add wood grain normal detail
+        grain_n = normal_from_height((0.55 * fibers + 0.30 * (1.0 - latewood) - 0.25 * pores).astype(np.float32), 0.85)
+        nx = nx + (grain_n[..., 0] * 2.0 - 1.0) * 0.45
+        ny = ny + (grain_n[..., 1] * 2.0 - 1.0) * 0.45
     elif name == 'plaster':
-        # Hand-troweled limewash plaster waves, hairline crazing, and warm cream patina
-        trowel = 0.5 * fbm(n, seed + 61, 1.9, sx=2.5, sy=2.5) + 0.5 * fine
-        crazing = smooth(0.88, 0.95, fbm(n, seed + 71, 1.05))
-        trowel_n = normal_from_height((0.65 * trowel - 0.35 * crazing).astype(np.float32), 0.95)
-        nx = nx + (trowel_n[..., 0] * 2.0 - 1.0) * 0.55
-        ny = ny + (trowel_n[..., 1] * 2.0 - 1.0) * 0.55
-        col = tint(col, (0.94 + 0.10 * trowel) * (1.0 - 0.14 * smooth(0.45, 0.92, big)) * (1.0 - 0.20 * crazing))
+        # Hand-troweled limewash plaster with sweeping trowel arcs, warm ochre/cream mottling,
+        # sub-surface brick/mortar ghosting, and weathered exposed medieval brick patches!
+        brick_col, brick_h, brick_face = _brick_underlayer(n, seed + 60)
+
+        trowel_sweep = 0.5 + 0.5 * np.sin(
+            (np.hypot((u - 0.5) * 3.0, (v - 0.5) * 3.0) + 0.45 * mid) * np.pi * 3.0
+        )
+        trowel = 0.45 * fbm(n, seed + 63, 1.85, sx=2.2, sy=2.2) + 0.30 * trowel_sweep + 0.25 * fine
+        crazing = smooth(0.84, 0.93, fbm(n, seed + 71, 1.35))
+
+        # Wear field: faint brick ghosting where limewash is thin, plus flaked-off exposed brick patches
+        wear_field = 0.55 * fbm(n, seed + 75, 2.3) + 0.30 * mid + 0.15 * (1.0 - v)
+        ghost_mask = smooth(0.46, 0.68, wear_field)
+        exposed_mask = smooth(0.71, 0.77, wear_field)
+        plaster_rim = smooth(0.67, 0.71, wear_field) * (1.0 - exposed_mask)
+
+        # Enrich base limewash plaster with warm cream & ochre lime pigment variation
+        lime_warm = lerp((1.02, 0.99, 0.93), (0.95, 0.89, 0.79), big)
+        plaster_col = col * lime_warm
+        plaster_col = tint(
+            plaster_col,
+            (0.92 + 0.14 * trowel)
+            * (1.0 - 0.15 * smooth(0.45, 0.92, big))
+            * (1.0 - 0.24 * crazing)
+            + 0.08 * plaster_rim,
+        )
+        # Blend sub-surface brick ghosting through thin limewash
+        ghost_tint = lerp(plaster_col, brick_col * 0.92 + 0.08, 0.26 * (1.0 - 0.35 * brick_face))
+        plaster_col = lerp(plaster_col, ghost_tint, ghost_mask * (1.0 - exposed_mask))
+        # Exposed brick patch with dark plaster-edge drop shadow
+        rim_shadow = smooth(0.70, 0.74, wear_field) * exposed_mask
+        exposed_brick_shaded = tint(brick_col, 1.0 - 0.28 * rim_shadow)
+        col = lerp(plaster_col, exposed_brick_shaded, exposed_mask)
+
+        # Combined height relief for plaster trowel waves, cracks, plaster lip, and exposed bricks
+        comp_h = (
+            (1.0 - exposed_mask) * (0.58 + 0.24 * trowel + 0.08 * plaster_rim - 0.28 * crazing + 0.08 * ghost_mask * brick_h)
+            + exposed_mask * (0.35 * brick_h)
+        ).astype(np.float32)
+        plaster_n = normal_from_height(comp_h, 1.45)
+        nx = nx + (plaster_n[..., 0] * 2.0 - 1.0) * 0.75
+        ny = ny + (plaster_n[..., 1] * 2.0 - 1.0) * 0.75
 
     # Apply baked cavity AO, vertical rain streaks, and convex arris highlights
     shade = (1.0 - ao_str * cavity) * (1.0 - 0.10 * smooth(0.55, 0.90, streak)) + hi_str * edge_hi

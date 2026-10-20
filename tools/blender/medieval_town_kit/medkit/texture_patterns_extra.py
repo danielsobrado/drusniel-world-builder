@@ -1,7 +1,7 @@
 """Roofing and relief-carved woodwork textures for the regional styles."""
 import numpy as np
 
-from .texture_patterns import _uv, fbm, lerp, smooth, tint
+from .texture_patterns import _uv, courses, fbm, lerp, rounded_edge, smooth, tint
 
 
 def terracotta(n, seed):
@@ -43,18 +43,29 @@ def thatch(n, seed):
 
 
 def fine_wood(n, seed):
-    """Smooth, hand-planed and oiled walnut/oak cabinetmaker's wood with subtle
-    cathedral figure and directional wood grain (no rough bark cracks)."""
+    """Smooth, hand-planed and oiled walnut/oak cabinetmaker's wood with parabolic
+    cathedral growth-ring figure, dark earlywood vessel pores, and golden medullary rays."""
     u, v = _uv(n)
-    del v
-    streak = fbm(n, seed, 1.55, sx=18.0, sy=1.6)
-    cathedral = 0.5 + 0.5 * np.sin((u * 3.5 + fbm(n, seed + 1, 2.1, sx=3.5, sy=1.4) * 1.6) * np.pi * 2.0)
-    fine = fbm(n, seed + 2, 1.25, sx=28.0, sy=2.2)
-    mix = 0.52 * streak + 0.30 * cathedral + 0.18 * fine
-    albedo = lerp((0.25, 0.16, 0.095), (0.45, 0.30, 0.18), mix)
-    albedo = tint(albedo, 0.92 + 0.16 * fine)
-    height = 0.55 * streak + 0.25 * cathedral + 0.20 * fine
-    return albedo.astype(np.float32), height.astype(np.float32), 0.75
+    fibers = fbm(n, seed, 1.5, sx=22.0, sy=1.1)
+    warp = fbm(n, seed + 1, 2.2, sx=6.5, sy=1.4)
+    v_warped = v + 0.11 * (warp - 0.5)
+    u_arch = 0.28 * np.sin(u * np.pi * 2.0 + fbm(n, seed + 2, 2.4) * 2.4)
+    r_pith = np.hypot((v_warped - 0.50) * 4.4, u_arch)
+    ring_phase = r_pith * 3.2 + fbm(n, seed + 3, 1.9, sx=10.0, sy=1.4) * 1.25
+    ring_wave = 0.5 + 0.5 * np.sin(ring_phase * np.pi * 2.0)
+    latewood = smooth(0.54, 0.92, ring_wave)
+
+    pores = smooth(0.74, 0.88, fbm(n, seed + 4, 1.2, sx=18.0, sy=0.8)) * (1.0 - 0.65 * latewood)
+    rays = smooth(0.75, 0.89, fbm(n, seed + 5, 1.65, sx=7.0, sy=2.4))
+    fine = fbm(n, seed + 6, 1.35, sx=26.0, sy=1.6)
+
+    earlywood_col = np.array((0.48, 0.32, 0.19), np.float32)
+    latewood_col = np.array((0.23, 0.145, 0.082), np.float32)
+    albedo = lerp(earlywood_col, latewood_col, 0.60 * latewood + 0.28 * (1.0 - fibers) + 0.12 * (1.0 - fine))
+    albedo = lerp(albedo, (0.58, 0.41, 0.25), rays * 0.30)
+    albedo = tint(albedo, (0.90 + 0.16 * fibers) * (1.0 - 0.26 * pores))
+    height = (0.45 * fibers + 0.30 * (1.0 - latewood) + 0.15 * fine + 0.10 * rays - 0.25 * pores).astype(np.float32)
+    return albedo.astype(np.float32), height, 1.15
 
 
 def carved_wood(n, seed):
@@ -123,9 +134,68 @@ def carved_wood(n, seed):
     return albedo, height, 2.8
 
 
+def brick(n, seed):
+    """Hand-molded medieval kilned clay brickwork in running bond (~12 courses per tile)
+    with warm terracotta/russet/ochre clay variation, kiln-flashed clinker headers,
+    firing creases, and recessed sandy lime-mortar joints."""
+    rng = np.random.default_rng(seed)
+    block, dx, dy, t_row, count = courses(n, rng, 12, 0.16 * n, 0.25 * n, row_jitter=0.06)
+    fine = fbm(n, seed + 1, 1.30)
+    mid = fbm(n, seed + 2, 1.95)
+    big = fbm(n, seed + 3, 2.55)
+    crease = fbm(n, seed + 4, 1.55, sx=14.0, sy=1.6)
+    wobble = fbm(n, seed + 5, 2.0)
+    pits = smooth(0.76, 0.89, fbm(n, seed + 6, 1.25))
+
+    edge = rounded_edge(dx, dy, n * 0.009) + (wobble - 0.5) * n * 0.006
+    mortar = n * 0.0045
+    face = smooth(mortar, mortar + n * 0.007, edge)
+    chamfer = smooth(mortar, mortar + n * 0.018, edge)
+
+    BRICK_PALETTE = np.array([
+        [0.64, 0.28, 0.18],  # classic terracotta red
+        [0.53, 0.23, 0.15],  # deep russet clay
+        [0.69, 0.37, 0.23],  # warm salmon-ochre brick
+        [0.39, 0.20, 0.14],  # kiln-flashed dark clinker
+        [0.58, 0.31, 0.20],  # weathered red-brown clay
+    ], np.float32)
+    pick = rng.integers(0, len(BRICK_PALETTE), count)
+    tones = rng.uniform(0.86, 1.12, count)
+    bulge = rng.uniform(0.80, 1.05, count)[block]
+    brick_col = (BRICK_PALETTE[pick] * tones[:, None])[block]
+
+    # Hand-struck clay fold creases & kiln soot flashing
+    brick_col = lerp(brick_col, brick_col * np.array([1.10, 1.04, 0.96], np.float32), crease * 0.32)
+    soot_flash = smooth(0.68, 0.88, mid) * face
+    brick_col = lerp(brick_col, (0.28, 0.17, 0.12), soot_flash * 0.28)
+
+    top_hi = smooth(0.78, 0.96, t_row) * face
+    bot_ao = smooth(0.22, 0.04, t_row) * face
+    shade = (
+        (0.85 + 0.22 * fine + 0.08 * crease)
+        * (0.78 + 0.22 * chamfer + 0.10 * top_hi - 0.10 * bot_ao)
+        * (1.0 - 0.16 * smooth(0.50, 0.92, big))
+        * (1.0 - 0.30 * pits)
+    )
+    brick_col = tint(brick_col, shade)
+
+    # Sandy lime mortar with recessed joint AO
+    mortar_ao = smooth(0.0, mortar, edge)
+    mortar_col = tint((0.72, 0.67, 0.57), (0.86 + 0.22 * fine) * (0.76 + 0.24 * mortar_ao))
+    albedo = lerp(mortar_col, brick_col, face)
+
+    height = (
+        face * (0.64 + 0.22 * chamfer * bulge + 0.08 * top_hi + 0.10 * crease)
+        + 0.08 * fine
+        - 0.28 * pits * face
+    ).astype(np.float32)
+    return albedo.astype(np.float32), height, 2.5
+
+
 EXTRA_PATTERNS = {
     'terracotta': (terracotta, 1024),
     'thatch': (thatch, 512),
     'fine_wood': (fine_wood, 1024),
     'carved_wood': (carved_wood, 1024),
+    'brick': (brick, 1024),
 }

@@ -57,6 +57,13 @@ def window_dressing(b, hole, stone):
 
     if stone and detailed():
         arched_head(b, (x0 + x1) / 2, z1, (x1 - x0) / 2)
+        # Alternating long-and-short dressed-stone window jamb quoins
+        for k in range(4):
+            jz0 = z0 + k * 0.30 + 0.008
+            jz1 = z0 + (k + 1) * 0.30 - 0.008
+            wj = 0.11 if k % 2 == 0 else 0.07
+            b.box((x0 - wj, -T - 0.048, jz0), (x0, -T + 0.02, jz1), 'stone_dressed')
+            b.box((x1, -T - 0.048, jz0), (x1 + wj, -T + 0.02, jz1), 'stone_dressed')
     elif stone:
         b.box((x0 - 0.14, -T - 0.05, z1), (x1 + 0.14, -T + 0.04, z1 + 0.24), 'stone_dressed')
     elif detailed():
@@ -161,13 +168,85 @@ def door_frame(b, stone):
             b.box((jx - 0.04, -T - 0.095, z1 - 0.16), (jx + 0.04, -T - 0.01, z1), 'wood_trim')
 
 
+def _stone_masonry_relief(b, hole=None, door=False):
+    """High-detail 3D coursed ashlar/rubble relief blocks, header bricks, base plinth,
+    mid-story belt course, and corbelled cornice on stone_wall."""
+    # Keep-out zone around window/shutters or door/voussoirs
+    keepout = None
+    if door:
+        keepout = (0.20, 1.80, 0.0, 2.74)
+    elif hole is not None:
+        keepout = (0.22, 1.78, 0.68, 2.74)
+
+    # 1. Coursed 3D ashlar base plinth (z = 0..0.28) with sloped water-table drip cap
+    base_blocks = (
+        (0.01, 0.48, 'stone_dressed', 0.96),
+        (0.50, 0.98, 'stone', 0.88),
+        (1.00, 1.52, 'stone_dressed', 1.03),
+        (1.54, 1.99, 'stone', 0.92),
+    )
+    for bx0, bx1, bmat, btone in base_blocks:
+        if door and bx1 > 0.36 and bx0 < 1.64:
+            continue
+        b.box((bx0, -T - 0.038, 0.0), (bx1, -T + 0.01, 0.24), bmat, skip=('-z',), tone=btone)
+    if not door:
+        b.box((0.0, -T - 0.048, 0.24), (GRID, -T + 0.01, 0.29), 'stone_dressed', skip=('-x', '+x'))
+    else:
+        b.box((0.0, -T - 0.048, 0.24), (0.36, -T + 0.01, 0.29), 'stone_dressed', skip=('-x',))
+        b.box((1.64, -T - 0.048, 0.24), (GRID, -T + 0.01, 0.29), 'stone_dressed', skip=('+x',))
+
+    # 2. Mid-wall dressed-stone string/belt course at z = 0.92..0.99
+    belt_spans = ((0.0, GRID),) if keepout is None else ((0.0, keepout[0]), (keepout[1], GRID))
+    for sx0, sx1 in belt_spans:
+        if sx1 - sx0 > 0.08:
+            b.box((sx0, -T - 0.032, 0.92), (sx1, -T + 0.01, 0.99), 'stone_dressed')
+
+    # 3. Staggered 3D proud relief stones & ashlar header bricks across the masonry courses
+    courses_spec = (
+        (0.32, 0.56, 0.0, ((0.04, 0.44, 'stone', 0.90), (0.48, 0.76, 'stone_dressed', 1.04),
+                           (0.80, 1.24, 'stone', 0.85), (1.28, 1.58, 'stone_dressed', 0.98),
+                           (1.62, 1.96, 'stone', 0.93))),
+        (0.60, 0.88, 0.0, ((0.02, 0.32, 'stone_dressed', 1.02), (0.36, 0.82, 'stone', 0.88),
+                           (0.86, 1.16, 'stone_dressed', 0.95), (1.20, 1.66, 'stone', 0.84),
+                           (1.70, 1.98, 'stone_dressed', 1.05))),
+        (1.03, 1.31, 0.0, ((0.03, 0.42, 'stone', 0.92), (0.46, 0.88, 'stone_dressed', 1.01),
+                           (0.92, 1.18, 'stone', 0.86), (1.22, 1.62, 'stone_dressed', 0.96),
+                           (1.66, 1.97, 'stone', 0.89))),
+        (1.35, 1.64, 0.0, ((0.02, 0.28, 'stone_dressed', 1.04), (0.32, 0.74, 'stone', 0.85),
+                           (0.78, 1.22, 'stone_dressed', 0.98), (1.26, 1.68, 'stone', 0.91),
+                           (1.72, 1.98, 'stone_dressed', 1.02))),
+        (1.68, 1.97, 0.0, ((0.04, 0.46, 'stone', 0.87), (0.50, 0.80, 'stone_dressed', 1.05),
+                           (0.84, 1.28, 'stone', 0.93), (1.32, 1.60, 'stone_dressed', 0.97),
+                           (1.64, 1.96, 'stone', 0.86))),
+        (2.01, 2.30, 0.0, ((0.02, 0.34, 'stone_dressed', 0.99), (0.38, 0.82, 'stone', 0.88),
+                           (0.86, 1.16, 'stone_dressed', 1.04), (1.20, 1.64, 'stone', 0.85),
+                           (1.68, 1.98, 'stone_dressed', 0.96))),
+        (2.34, 2.66, 0.0, ((0.03, 0.45, 'stone', 0.91), (0.49, 0.92, 'stone_dressed', 1.02),
+                           (0.96, 1.38, 'stone', 0.86), (1.42, 1.70, 'stone_dressed', 1.05),
+                           (1.74, 1.97, 'stone', 0.90))),
+    )
+    for cz0, cz1, _, row_blocks in courses_spec:
+        for bx0, bx1, bmat, btone in row_blocks:
+            if keepout is not None:
+                kx0, kx1, kz0, kz1 = keepout
+                if bx1 > kx0 and bx0 < kx1 and cz1 > kz0 and cz0 < kz1:
+                    continue
+            proud = 0.026 if bmat == 'stone_dressed' else 0.019
+            b.box((bx0, -T - proud, cz0), (bx1, -T + 0.005, cz1), bmat, tone=btone)
+
+    # 4. Top corbelled dressed-stone cornice & dentil blocks (z = STORY - 0.22..STORY)
+    b.box((0, -T - 0.042, STORY - 0.14), (GRID, -T + 0.02, STORY), 'stone_dressed', skip=('-x', '+x'))
+    b.box((0, -T - 0.062, STORY - 0.06), (GRID, -T - 0.02, STORY), 'stone_dressed', skip=('-x', '+x'))
+    for i in range(8):
+        dx = 0.05 + i * 0.25
+        b.box((dx, -T - 0.052, STORY - 0.21), (dx + 0.11, -T - 0.01, STORY - 0.14), 'stone_dressed')
+
+
 def stone_wall(hole=None, door=False):
     b = MeshBuilder()
     panel(b, 'stone', -T, T, hole, INTERIOR)
     if detailed():
-        # Dressed-stone string course / cornice belt at the top of the masonry story
-        b.box((0, -T - 0.035, STORY - 0.14), (GRID, -T + 0.02, STORY), 'stone_dressed',
-              skip=('-x', '+x'))
+        _stone_masonry_relief(b, hole=hole, door=door)
     if door:
         door_frame(b, stone=True)
     elif hole:
@@ -178,6 +257,24 @@ def stone_wall(hole=None, door=False):
 def _timber_beams(b, rails, posts, braces):
     for x0, x1, z0, z1 in rails + posts:
         b.box((x0, -T - 0.05, z0), (x1, 0.0, z1), 'timber')
+        if detailed():
+            # Molded chamfered edge fillets & mortise oak treenail pegs along framing members
+            is_rail = (x1 - x0) > (z1 - z0)
+            if is_rail and (x1 - x0) >= 0.35:
+                b.box((x0 + 0.01, -T - 0.058, z0 + 0.012),
+                      (x1 - 0.01, -T - 0.042, z0 + 0.032), 'wood_trim', bevel=0)
+                b.box((x0 + 0.01, -T - 0.058, z1 - 0.032),
+                      (x1 - 0.01, -T - 0.042, z1 - 0.012), 'wood_trim', bevel=0)
+            elif not is_rail and (z1 - z0) >= 0.8:
+                zm = (z0 + z1) * 0.5
+                xm = (x0 + x1) * 0.5
+                for pz in (z0 + 0.08, zm, z1 - 0.08):
+                    b.box((xm - 0.016, -T - 0.066, pz - 0.016),
+                          (xm + 0.016, -T - 0.045, pz + 0.016), 'wood_trim', bevel=0)
+                # Carved capital necking under the top wall-plate
+                if z1 >= STORY - 0.25:
+                    b.box((x0 - 0.012, -T - 0.068, z1 - 0.10),
+                          (x1 + 0.012, -T - 0.035, z1 - 0.02), 'wood_trim')
     for (ax, az), (bx, bz) in braces:
         b.beam((ax, 0, az), (bx, 0, bz), (0, 1, 0), (-T - 0.035, -0.01), 0.13, 'timber')
         if detailed():
@@ -190,6 +287,39 @@ def _timber_beams(b, rails, posts, braces):
         # Molded drip lip under the top wall-plate & over the bottom sill plate
         b.box((0, -T - 0.068, STORY - 0.24), (GRID, -T - 0.04, STORY - 0.19), 'wood_trim',
               skip=('-x', '+x'))
+        b.box((0, -T - 0.064, 0.20), (GRID, -T - 0.04, 0.24), 'wood_trim',
+              skip=('-x', '+x'))
+
+
+def _brick_nogging_bay(b, x0, x1, z0, z1):
+    """3D coursed medieval clay-brick nogging & recessed wood_trim bay molding inside a half-timber bay."""
+    # Inner molded bay frame lining the plaster/brick panel
+    bw = 0.018
+    b.box((x0, -T - 0.022, z0), (x0 + bw, -T + 0.002, z1), 'wood_trim', bevel=0)
+    b.box((x1 - bw, -T - 0.022, z0), (x1, -T + 0.002, z1), 'wood_trim', bevel=0)
+    b.box((x0 + bw, -T - 0.022, z1 - bw), (x1 - bw, -T + 0.002, z1), 'wood_trim', bevel=0)
+
+    # Lower dado rail at z0 + 0.34 with 3D coursed red-ochre brick nogging below it
+    dado_z = min(z1 - 0.12, z0 + 0.34)
+    if dado_z > z0 + 0.14 and (x1 - x0) >= 0.28:
+        b.box((x0, -T - 0.036, dado_z), (x1, -T - 0.002, dado_z + 0.055), 'timber')
+        # Coursed brick nogging backing panel + 3D proud relief bricks
+        b.box((x0 + bw, -T - 0.009, z0), (x1 - bw, -T + 0.002, dado_z), 'brick', bevel=0)
+        rows = 3
+        rh = (dado_z - z0) / rows
+        cols = max(2, int(round((x1 - x0) / 0.18)))
+        for r in range(rows):
+            rz0 = z0 + r * rh + 0.008
+            rz1 = z0 + (r + 1) * rh - 0.008
+            stagger = 0.5 if (r % 2 == 1) else 0.0
+            cw = (x1 - x0) / cols
+            for c in range(cols):
+                bx0 = max(x0 + 0.012, x0 + (c + stagger * 0.4) * cw + 0.008)
+                bx1 = min(x1 - 0.012, bx0 + cw - 0.016)
+                if bx1 - bx0 > 0.045:
+                    mat = 'brick' if (r + c) % 4 != 0 else 'stone_dressed'
+                    tone = 0.88 + 0.08 * ((r * 3 + c) % 3)
+                    b.box((bx0, -T - 0.018, rz0), (bx1, -T - 0.004, rz1), mat, tone=tone)
 
 
 def timber_wall(kind, level=0):
@@ -209,6 +339,11 @@ def timber_wall(kind, level=0):
         _timber_beams(b, rails, posts, braces)
         if detailed():
             carved_relief_motif(b, 0.16, 1.84, 1.44, 1.56, -T - 0.05, style='frieze')
+            _brick_nogging_bay(b, 0.10, 0.94, 0.22, 1.42)
+            _brick_nogging_bay(b, 1.06, 1.90, 0.22, 1.42)
+            # Intermediate vertical Queen-studs in upper bays
+            for sx in (0.50, 1.50):
+                b.box((sx - 0.04, -T - 0.038, 1.58), (sx + 0.04, -0.01, STORY - 0.22), 'timber')
     elif kind == 'window':
         x0, x1, z0, z1 = TIMBER_WINDOW
         panel(b, 'plaster', -0.1 - out, T, TIMBER_WINDOW, INTERIOR)
@@ -219,6 +354,13 @@ def timber_wall(kind, level=0):
         braces = [((0.12, 0.22), (x0 - 0.1, 1.42)), ((1.88, 0.22), (x1 + 0.1, 1.42)),
                   ((0.12, 2.78), (x0 - 0.1, 1.58)), ((1.88, 2.78), (x1 + 0.1, 1.58))]
         _timber_beams(b, rails, posts, braces)
+        if detailed():
+            _brick_nogging_bay(b, 0.10, x0 - 0.10, 0.22, 1.42)
+            _brick_nogging_bay(b, x1 + 0.10, 1.90, 0.22, 1.42)
+            # Mullioned apron & brick-nogging infill under the window sill
+            _brick_nogging_bay(b, x0, x1, 0.22, z0 - 0.12)
+            for mx in (0.82, 1.00, 1.18):
+                b.box((mx - 0.03, -T - 0.042, 0.22), (mx + 0.03, -0.01, z0 - 0.12), 'timber')
         window_dressing(b, TIMBER_WINDOW, stone=False)
     else:
         x0, x1, _, z1 = DOOR
@@ -230,7 +372,16 @@ def timber_wall(kind, level=0):
         braces = [((0.1, 0.22), (x0 - 0.1, 1.3)), ((1.9, 0.22), (x1 + 0.1, 1.3)),
                   ((0.1, 2.78), (x0 - 0.1, 2.36)), ((1.9, 2.78), (x1 + 0.1, 2.36))]
         _timber_beams(b, rails, posts, braces)
+        if detailed():
+            _brick_nogging_bay(b, 0.10, x0 - 0.10, 0.22, 1.30)
+            _brick_nogging_bay(b, x1 + 0.10, 1.90, 0.22, 1.30)
         door_frame(b, stone=False)
+    if detailed() and level == 0:
+        # Coursed dressed-stone sill blocks under ground-floor timber sill beam
+        for bx0, bx1 in ((0.02, 0.46), (0.50, 0.96), (1.04, 1.50), (1.54, 1.98)):
+            if kind == 'door' and bx1 > 0.42 and bx0 < 1.58:
+                continue
+            b.box((bx0, -T - 0.062, 0.0), (bx1, -T + 0.01, 0.075), 'stone_dressed', skip=('-z',))
     if out:
         b.shift_from(start, (0, -out, 0))
         jetty_underside(b, level)

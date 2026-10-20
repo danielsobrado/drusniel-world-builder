@@ -12,13 +12,18 @@ def _norm(a):
 
 
 def fbm(n, seed, beta=2.0, sx=1.0, sy=1.0):
-    """Periodic 1/f^beta noise; sx/sy > 1 stretch features along u/v."""
+    """Periodic 1/f^beta noise; sx/sy > 1 stretch features along u/v.
+    Uses a true 2D fractal spectral exponent and sub-Nyquist roll-off so 1024px
+    maps never degenerate into 1-pixel Nyquist static."""
     rng = np.random.default_rng(seed)
     f = np.fft.fftfreq(n)
     fy, fx = np.meshgrid(f, f, indexing='ij')
     r = np.sqrt((fx * sx) ** 2 + (fy * sy) ** 2)
     r[0, 0] = 1.0
-    spec = np.fft.fft2(rng.standard_normal((n, n))) * r ** (-beta / 2)
+    r_iso = np.hypot(fx, fy)
+    exp = -(0.74 + 0.52 * beta)
+    lowpass = np.exp(-(r_iso / 0.24) ** 4)
+    spec = np.fft.fft2(rng.standard_normal((n, n))) * (r ** exp) * lowpass
     spec[0, 0] = 0
     return _norm(np.real(np.fft.ifft2(spec))).astype(np.float32)
 

@@ -30,6 +30,7 @@ SPEC = {
     'stone_ashlar': Spec('ashlar', 2.0, 0.82, normal=2.0),
     # Dressed stone (quoins, copings, sills, voussoirs): one tooled block per piece.
     'stone_dressed': Spec('dressed', 1.2, 0.80, normal=1.8),
+    'brick': Spec('brick', 1.2, 0.84, normal=2.2),
     'cobble': Spec('cobble', 2.0, 0.82, normal=2.2),
     'plaster': Spec('plaster', 2.0, 0.90, normal=1.6, tint=(1.0, 0.94, 0.82)),
     'timber': Spec('timber', 1.5, 0.70, grain=True, normal=2.0),

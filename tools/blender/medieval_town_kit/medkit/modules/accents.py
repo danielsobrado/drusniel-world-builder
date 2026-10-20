@@ -72,7 +72,7 @@ def chimney_breast(height=STORY, width=1.3, depth=0.6, bottom=0.0):
     x0, x1 = -T - depth, -T + 0.02
     b.box((x0, -width / 2, bottom), (x1, width / 2, height), 'stone', skip=('-z', '+z'))
     if detailed() and height >= 1.5:
-        # Dressed stone corner quoins on the outer corners of the chimney breast
+        # Dressed stone corner quoins & 3D proud relief masonry courses on the chimney breast
         course = 0.42
         steps = int((height - bottom) / course)
         for k in range(steps):
@@ -84,6 +84,11 @@ def chimney_breast(height=STORY, width=1.3, depth=0.6, bottom=0.0):
                 cy = sy * (width / 2 + 0.015)
                 b.box((x0 - 0.015, min(cy, cy - sy * dy), z0),
                       (x0 + dx, max(cy, cy - sy * dy), z1), 'stone_dressed')
+            # Central proud stone/brick relief block on the outer -X face between quoins
+            y_mid0 = -0.32 if k % 2 == 0 else -0.24
+            y_mid1 = 0.24 if k % 2 == 0 else 0.32
+            c_mat = 'stone' if k % 3 != 1 else 'brick'
+            b.box((x0 - 0.020, y_mid0, z0 + 0.02), (x0 + 0.01, y_mid1, z1 - 0.02), c_mat)
     return b
 
 
@@ -97,11 +102,24 @@ def chimney_stack(top):
            'stone_dressed', outward=(0, -1, 1))
     b.poly([(x0, 0.65, 0.5), (x0, 0.4, 0.85), (x1, 0.4, 0.85), (x1, 0.65, 0.5)],
            'stone_dressed', outward=(0, 1, 1))
-    b.box((x0, -0.4, 0.5), (x1, 0.4, top - 0.22), 'stone', skip=('-z',))
+    b.box((x0, -0.4, 0.5), (x1, 0.4, 0.86), 'stone', skip=('-z',))
+    b.box((x0, -0.4, 0.86), (x1, 0.4, top - 0.22), 'brick', skip=('-z',))
     # Stepped corbelled oversailing crown in dressed stone
     b.box((x0 - 0.05, -0.45, top - 0.26), (x1 + 0.05, 0.45, top - 0.16), 'stone_dressed')
     b.box((x0 - 0.10, -0.50, top - 0.16), (x1 + 0.10, 0.50, top), 'stone_dressed')
     if detailed():
+        # Dressed corner quoins along the brick flue shaft
+        course = 0.36
+        k0 = int(0.88 / course) + 1
+        k1 = int((top - 0.28) / course)
+        for k in range(k0, k1):
+            z0, z1 = k * course + 0.01, (k + 1) * course - 0.01
+            dy = 0.16 if k % 2 == 0 else 0.24
+            dx = 0.22 if k % 2 == 0 else 0.15
+            for sy in (-1, 1):
+                cy = sy * 0.415
+                b.box((x0 - 0.015, min(cy, cy - sy * dy), z0),
+                      (x0 + dx, max(cy, cy - sy * dy), z1), 'stone_dressed')
         for y in (-0.19, 0.19):
             cx = (x0 + x1) / 2
             b.box((cx - 0.14, y - 0.14, top), (cx + 0.14, y + 0.14, top + 0.05), 'stone_dressed')

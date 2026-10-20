@@ -308,10 +308,10 @@ def chimney(height=6.2):
                 cx, cy = sx * 0.435, sy * 0.435
                 b.box((min(cx, cx - sx * long_arm), min(cy, cy - sy * short_arm), z0),
                       (max(cx, cx - sx * long_arm), max(cy, cy - sy * short_arm), z1), 'stone_dressed')
-    # Stepped dressed-stone necking band & corbelled oversailing cap
+    # Stepped dressed-stone necking band & corbelled oversailing cap with brick flue shaft
     b.box((-0.48, -0.48, band - 0.08), (0.48, 0.48, band + 0.04), 'stone_dressed')
     b.box((-0.52, -0.52, band + 0.04), (0.52, 0.52, band + 0.16), 'stone_dressed')
-    b.box((-0.44, -0.44, band + 0.16), (0.44, 0.44, height - 0.22), 'stone')
+    b.box((-0.44, -0.44, band + 0.16), (0.44, 0.44, height - 0.22), 'brick')
     b.box((-0.50, -0.50, height - 0.22), (0.50, 0.50, height - 0.12), 'stone_dressed')
     b.box((-0.56, -0.56, height - 0.12), (0.56, 0.56, height), 'stone_dressed')
     for x in (-0.21, 0.21):
