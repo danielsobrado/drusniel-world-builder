@@ -26,7 +26,8 @@ export class SettlementRegistryPreparation {
     }
     if (!generator?.installSettlementRegistry) return generator?.ensureSettlementField?.() ?? null;
     const cached = generator.source.settlementRegistry;
-    if (!generator.source.settlements?.length || validSettlementRegistry(cached, generator.settlementRegistryKey)) {
+    if (!generator.source.settlements?.length || (!generator.adoptPreparedSettlementRegistry
+      && validSettlementRegistry(cached, generator.settlementRegistryKey))) {
       return generator.ensureSettlementField();
     }
     if (!this.request) this.request = { attempts: 0 };
@@ -42,7 +43,8 @@ export class SettlementRegistryPreparation {
     PerfCounters.inc('settlementRegistryRequests');
     this.store.chunkWorker.request(0, 0, { settlementRegistry: true, priority: -1e9 }).then(result => {
       if (epoch !== this.epoch || this.request !== request) return;
-      this.generator.installSettlementRegistry(result.registry);
+      if (this.generator.adoptPreparedSettlementRegistry) this.generator.adoptPreparedSettlementRegistry(result.registry);
+      else this.generator.installSettlementRegistry(result.registry);
       this.request = null;
       this.onReady();
     }).catch(error => {

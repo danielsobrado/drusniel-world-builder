@@ -6,6 +6,8 @@ import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { WorkerPriorityQueue } from './WorkerPriorityQueue.js';
 import { chunkKey } from './WorldCoordinates.js';
 import { generateSettlementPlan, generateSettlementRegistry } from './settlements/SettlementPlanRequest.js';
+import { SettlementWorkerConnections } from './SettlementWorkerConnections.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const DEFAULT_MAX_IN_FLIGHT_PER_WORKER = 1;
 const MAX_WORKER_COUNT = 8;
@@ -84,6 +86,8 @@ export class WorldChunkWorkerClient {
     this.workers = [];
     this.inFlight = [];
     this.workerRestartCounts = [];
+    this.configurationRevision = 0;
+    this.settlementConnections = settlementLane ? null : new SettlementWorkerConnections(this);
 
     if (typeof Worker === 'function') {
       const count = resolveWorkerCount(workerCount);
@@ -166,12 +170,13 @@ export class WorldChunkWorkerClient {
     const nextWorkerBaseTerrain = createTerrainWorkerBaseTerrain(baseTerrain);
     this.baseTerrain = nextWorkerBaseTerrain;
     this.worldGenerator = null;
+    this.configurationRevision++;
     this.settlementWorker?.setBaseTerrain(baseTerrain);
     for (let index = 0; index < this.workers.length; index += 1) {
       const worker = this.workers[index];
       if (!worker) continue;
       try {
-        worker.postMessage({ type: 'configure', baseTerrain: this.baseTerrain });
+        worker.postMessage({ type: 'configure', baseTerrain: this.baseTerrain, revision: this.configurationRevision });
       } catch (error) {
         this.handleWorkerFailure(
           index,
@@ -180,6 +185,7 @@ export class WorldChunkWorkerClient {
         );
       }
     }
+    this.settlementConnections?.configure();
   }
 
   settlementPool() {
@@ -211,6 +217,7 @@ export class WorldChunkWorkerClient {
       terrainOverrides,
       settlementPlanId,
       settlementRegistry,
+      sharedSettlementPlans: !this.settlementLane && Boolean(this.baseTerrain?.settlements?.length),
     };
     // CPU generation is an explicit non-browser backend; browser failure pauses streaming.
     if (this.workers.length === 0) {
@@ -320,6 +327,9 @@ export class WorldChunkWorkerClient {
   }
 
   onMessage(event) {
+    if (event.data?.type === 'settlement-plan-generated') {
+      PerfCounters.inc('settlementWorkerPlansGenerated'); return;
+    }
     const { id, page, error } = event.data ?? {};
     const pending = this.pending.get(id);
     if (!pending) {
@@ -386,7 +396,7 @@ export class WorldChunkWorkerClient {
       let replacement = null;
       try {
         replacement = this.createWorker(workerIndex);
-        replacement.postMessage({ type: 'configure', baseTerrain: this.baseTerrain });
+        replacement.postMessage({ type: 'configure', baseTerrain: this.baseTerrain, revision: this.configurationRevision });
         this.workers[workerIndex] = replacement;
       } catch (replacementError) {
         replacement?.terminate();
@@ -397,6 +407,9 @@ export class WorldChunkWorkerClient {
     } else {
       console.error(`World chunk worker ${workerIndex} disabled after repeated failures.`, error);
     }
+
+    this.onWorkersChanged?.();
+    this.settlementConnections?.connect(workerIndex);
 
     if (this.workerCount === 0) {
       const queued = [...this.queue];

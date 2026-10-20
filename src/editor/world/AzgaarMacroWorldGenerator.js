@@ -243,7 +243,6 @@ export class AzgaarMacroWorldGenerator {
     this.source = source;
     this.trailGrading = undefined;
     this.settlementField = undefined;
-    this.settlementRegistryKey = source.settlements?.length ? settlementRegistryKey(source, proceduralMetadata.seed) : null;
     this.heights = decodeGuidanceField(source, 'elevation');
     this.biomeAtlas = decodeGuidanceField(source, 'biomeId');
     this.features = hasGuidanceField(source, 'featureId')
@@ -459,6 +458,21 @@ export class AzgaarMacroWorldGenerator {
       landSearchStepCells: bounds.widthCells / atlas.width,
     });
     return this.settlementField;
+  }
+
+  // Large source fingerprints belong to import/settlement workers. Direct
+  // synchronous callers retain validation, but construction no longer pays it.
+  get settlementRegistryKey() {
+    return this._settlementRegistryKey ??= this.source.settlements?.length
+      ? settlementRegistryKey(this.source, this.seed) : null;
+  }
+
+  adoptPreparedSettlementRegistry(registry) {
+    // Called only with the response to this world's worker request. Epoch and
+    // generator ownership are checked by SettlementRegistryPreparation.
+    if (!validSettlementRegistry(registry, registry?.key)) throw new Error('Invalid prepared settlement registry.');
+    this._settlementRegistryKey = registry.key;
+    return this.installSettlementRegistry(registry);
   }
 
   installSettlementRegistry(registry) {

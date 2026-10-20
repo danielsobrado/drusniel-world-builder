@@ -47,6 +47,7 @@ export function createTownRuntime({
   const streamer = new TownStreamer({
     scene: terrainView.scene,
     getGenerator,
+    getWorldStore: () => terrainView.worldStore,
     tileSize,
     floatingOrigin: terrainView.floatingOrigin,
     assets,
@@ -72,8 +73,7 @@ export function createTownRuntime({
     /** Live town shading knobs (albedo lift, saturation, crevice depth, relief) for tuning. */
     shading: townKitShared,
     getPreparationStatus() {
-      const pending = streamer.pending.size + Number(Boolean(streamer.buildJob));
-      const errors = [...streamer.buildErrors.values()].map(error => String(error.message ?? error));
+      const { pending, errors } = streamer.getPreparationStatus();
       if (assets.failed) errors.push(String(assets.failed.message ?? assets.failed));
       return { ready: pending === 0 && errors.length === 0, pending,
         resident: streamer.towns.size, instances: streamer.stats.instances, errors };

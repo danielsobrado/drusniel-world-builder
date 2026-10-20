@@ -7,8 +7,7 @@ import { updateSettlementSunlight } from './SettlementWindowLight.js';
 import { SettlementSite } from './SettlementSite.js';
 import { SettlementSkyline } from './SettlementSkyline.js';
 import { settlementPreparationStatus } from './SettlementPreparationStatus.js';
-import { SettlementPlanPreparation } from './SettlementPlanPreparation.js';
-import { SettlementRegistryPreparation } from './SettlementRegistryPreparation.js';
+import { settlementPreparationFor } from '../SettlementPreparation.js';
 import { settlementSelectionJob, placeSettlementRows } from './SettlementSelection.js';
 
 export const SETTLEMENT_VIEW = Object.freeze({
@@ -71,8 +70,10 @@ export class SettlementView {
       getDrawPreparation: () => terrainView.drawPreparation });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
-    this.plans = new SettlementPlanPreparation(() => { this.nextRefresh = 0; this.dirty = true; });
-    this.registry = new SettlementRegistryPreparation(() => { this.nextRefresh = 0; this.dirty = true; });
+    this.preparation = settlementPreparationFor(terrainView.worldStore);
+    this.plans = this.preparation.plans;
+    this.registry = this.preparation.registry;
+    this.unsubscribePreparation = this.preparation.subscribe(() => { this.nextRefresh = 0; this.dirty = true; });
     this.generator = null;
     this.origin = { x: 0, z: 0 };
     this.nextRefresh = 0;
@@ -90,8 +91,7 @@ export class SettlementView {
   }
 
   reset() {
-    this.registry.reset();
-    this.plans.reset();
+    this.plans.release(this);
     for (const site of this.sites.values()) site.dispose();
     this.sites.clear();
     this.skyline.clear();
@@ -122,7 +122,7 @@ export class SettlementView {
       if (!this.sites.has(id) && edge > SETTLEMENT_VIEW.siteRadius) continue;
       keep.add(id);
       if (this.sites.has(id)) continue;
-      const plan = this.plans.get(entry, edge);
+      const plan = this.plans.get(entry, edge, this);
       if (!plan) continue;
       const site = new SettlementSite({ entry, plan, generator: this.generator, tileSize,
         library: this.library, getDrawPreparation: () => this.terrainView.drawPreparation });
@@ -248,13 +248,12 @@ export class SettlementView {
 
     if (timestamp >= this.nextRefresh) {
       this.nextRefresh = timestamp + SETTLEMENT_VIEW.refreshMs;
-      const field = this.registry.get(generator, view.worldStore);
-      this.plans.configure(field, view.worldStore);
-      this.plans.begin();
+      const field = this.preparation.field(generator);
+      this.plans.begin(this);
       this.refreshSites(focus, field);
       this.skyline.refresh(field, focus, view.worldStore.tileSize, entry => this.plans.get(entry,
         Math.hypot(entry.settlement.cellX * view.worldStore.tileSize - focus.x,
-          -entry.settlement.cellZ * view.worldStore.tileSize - focus.z)));
+          -entry.settlement.cellZ * view.worldStore.tileSize - focus.z), this));
       this.plans.end();
     }
     this.skyline.update(focus, origin);
@@ -288,6 +287,7 @@ export class SettlementView {
 
   dispose() {
     this.disposed = true;
+    this.unsubscribePreparation();
     this.reset();
     this.pool.dispose();
     this.skyline.dispose();

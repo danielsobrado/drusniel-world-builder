@@ -5,6 +5,8 @@ import { TownStreamer } from '../../src/editor/towns/TownStreamer.js';
 import { TownCollisionSource } from '../../src/editor/collision/providers/TownCollisionSource.js';
 import { layoutTown } from '../../src/editor/towns/TownLayout.js';
 import { StreamedDrawPreparation } from '../../src/render/preparation/StreamedDrawPreparation.js';
+import { SettlementField } from '../../src/editor/world/settlements/SettlementField.js';
+import { generateSettlementPlan } from '../../src/editor/world/settlements/SettlementPlanRequest.js';
 
 function fixture() {
   const geometry = new BoxGeometry(), material = new MeshBasicMaterial();
@@ -17,9 +19,12 @@ function fixture() {
   const plan = { profile: { rank: 1, radius: 100, reach: 150, style: { key: 'limestone-slate' } },
     buildings: Array.from({ length: 100 }, (_, i) => ({ kind: 'house', variant: 0, x: i * 10, z: 0, yaw: 0, pad: 0 })),
     props: [], fields: [], streets: [] };
-  const generator = { settlementsNear: () => [{ settlement, plan }], sampleHeight: () => 0 };
+  const entry = { settlement, plan, index: {}, skyline: {}, reachCells: 75 };
+  const generator = { ensureSettlementField: () => ({ entriesNear: (x, z, radius) =>
+    Math.hypot(x, z) < radius + 75 ? [{ entry, distance: Math.hypot(x, z) }] : [] }), sampleHeight: () => 0 };
+  const store = { generator };
   const source = new TownCollisionSource().configure(128), scene = new Scene();
-  const streamer = new TownStreamer({ scene, getGenerator: () => generator, tileSize: 2,
+  const streamer = new TownStreamer({ scene, getGenerator: () => generator, getWorldStore: () => store, tileSize: 2,
     floatingOrigin: { getState: () => ({ x: 0, z: 0 }) }, collisionSource: source,
     assets: { ready: true, kit, modules: new Map([['Wall', { opaque: geometry, glass: [] }]]),
       farModules: new Map(), isInterior: () => false },
@@ -96,4 +101,31 @@ test('a door update while a town owner stages cannot be lost at publication', ()
   while (!job.next().done) { /* drain after the concurrent door edit */ }
   assert.equal(source.list(0, 0).some(box => box.id === 'door'), false);
   assert.equal(source.list(0, 0).length, 100);
+});
+
+test('playable town approach, arrival and revisit never synchronously plan a settlement', async () => {
+  const f = fixture();
+  const createField = sampleGround => new SettlementField({ settlements: [{ ...f.settlement, population: 1 }],
+    tileSize: 2, worldSeed: 7, sampleGround, isBuildable: () => true });
+  const field = createField(() => assert.fail('main-thread planSettlement sampled ground'));
+  f.generator.ensureSettlementField = () => field;
+  f.generator.settlementsNear = () => assert.fail('TownStreamer used the synchronous planning query');
+  let requests = 0;
+  const store = { generator: f.generator, chunkWorker: { request: async () => {
+    requests++;
+    return structuredClone(generateSettlementPlan({ ensureSettlementField: () => createField(() => 0) }, 1));
+  } } };
+  f.streamer.getWorldStore = () => store;
+  try {
+    let now = 0;
+    for (const x of [400, 0, 10000, 0]) {
+      for (let frame = 0; frame < 4; frame++) {
+        f.streamer.update(now += 1000, { x, z: 0 });
+        await new Promise(resolve => setImmediate(resolve));
+      }
+    }
+    assert.equal(requests, 1, 'revisit reuses the canonical installed plan');
+    assert.equal(f.streamer.towns.size, 1);
+    assert.ok(field.findById(1).index);
+  } finally { f.streamer.dispose(); f.geometry.dispose(); f.material.dispose(); }
 });

@@ -718,7 +718,7 @@ export class InfiniteTerrainView {
     return velocity;
   }
 
-  async assignSlot(slot, descriptor, { immediate = false, retainVisible = false } = {}) {
+  async assignSlot(slot, descriptor, { retainVisible = false } = {}) {
     if (this.disposed) return;
     PerfCounters.inc('terrainAssignSlots');
     slot.token += 1;
@@ -751,10 +751,6 @@ export class InfiniteTerrainView {
           if (slot.token === token) {
             slot.loading = false;
           }
-          return;
-        }
-        if (immediate) {
-          this.commitPage(slot, page);
           return;
         }
         this.commitQueue.enqueue(createTerrainCommitJob({
@@ -973,9 +969,10 @@ export class InfiniteTerrainView {
 
   onWorldChange(change) {
     if (change.kind === 'reset') {
+      this.commitQueue.clear();
       for (const slot of this.slots) {
         if (slot.descriptor) {
-          void this.assignSlot(slot, slot.descriptor, { immediate: true });
+          void this.assignSlot(slot, slot.descriptor);
         }
       }
       return;

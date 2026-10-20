@@ -6,6 +6,7 @@ import {
   registerCommandHandler,
 } from '../src/sim/commands/dispatcher.js';
 import { createEmptyWorldState } from '../src/sim/model/worldState.js';
+import { createSimulationWorld, createMiniCampaignFixture } from '../src/sim/index.js';
 
 const COMMAND_TYPE = 'test.runtimeSideEffectsRollback';
 
@@ -120,4 +121,18 @@ test('scoped mutable handlers isolate their declared collections on rejection', 
 
   assert.equal(result.ok, false);
   assert.equal(state.settlements.get('settlement:test').data.value, 1);
+});
+
+test('economic and core commands do not checkpoint the unrelated LOD runtime', () => {
+  const world = createSimulationWorld({ campaign: createMiniCampaignFixture() });
+  const original = world.lod.serialize.bind(world.lod);
+  let lodSnapshots = 0;
+  world.lod.serialize = () => { lodSnapshots++; return original(); };
+  assert.equal(world.initializeSystems().ok, true);
+  world.stepDays(2);
+  const town = world.queries().list('settlement')[0];
+  assert.equal(world.dispatch('sim.patchEntity', { kind: 'settlement', id: town.id, dataPatch: { name: 'Renamed' } }).ok, true);
+  assert.equal(lodSnapshots, 0);
+  assert.equal(world.promoteSettlement(town.id, 'C').ok, true);
+  assert.equal(lodSnapshots, 1, 'LOD commands retain transactional rollback');
 });

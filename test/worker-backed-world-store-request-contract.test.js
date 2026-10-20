@@ -208,3 +208,31 @@ test('chunk requests after disposal are rejected without touching the worker', a
   assert.equal(calls, 0);
   assert.equal(store.cache.size, 0);
 });
+
+test('continuous edits coalesce into one quiet-period regeneration and preserve the last cached page', async () => {
+  const requests = [];
+  const store = createStore({ chunkWorker: { request(x, z, options) {
+    return new Promise(resolve => requests.push({ options, resolve: () => resolve(createPage(x, z)) }));
+  } } });
+  const turn = () => new Promise(resolve => setImmediate(resolve));
+  try {
+    const first = store.requestChunk(0, 0); await turn(); requests[0].resolve();
+    const visible = await first;
+    store.tileOverrides.set('0:0', 1);
+    const pending = store.requestChunk(0, 0); await turn();
+    for (let i = 2; i <= 10; i++) {
+      store.tileOverrides.set('0:0', i);
+      assert.equal(store.requestChunk(0, 0), pending);
+    }
+    requests[1].resolve(); await turn();
+    assert.equal(requests.length, 2, 'stale completions do not immediately start another worker');
+    assert.equal(store.cache.get('0:0'), visible);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    assert.equal(requests.length, 3);
+    assert.deepEqual(requests[2].options.terrainOverrides.tiles, [[0, 0, 10]]);
+    requests[2].resolve();
+    const latest = await pending;
+    assert.equal(latest.editState.tileVersion, store.pageEditState(0, 0).tileVersion);
+    assert.equal(requests.length, 3);
+  } finally { store.dispose(); }
+});

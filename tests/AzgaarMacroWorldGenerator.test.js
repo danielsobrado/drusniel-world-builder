@@ -6,6 +6,8 @@ import {
 import { createAzgaarBiomeDefinitions } from '../src/editor/AzgaarBiomeCatalog.js';
 import { AzgaarMacroWorldGenerator } from '../src/editor/world/AzgaarMacroWorldGenerator.js';
 import { generateBaseWorldChunk } from '../src/editor/world/generateWorldChunk.js';
+import { settlementRegistryKey, serializeSettlementRegistry } from '../src/editor/world/settlements/SettlementRegistry.js';
+import { SettlementRegistryPreparation } from '../src/editor/world/settlements/view/SettlementRegistryPreparation.js';
 
 function createSource() {
   const width = 4;
@@ -71,6 +73,40 @@ test('macro generation is deterministic and respects ocean bounds', () => {
   assert.equal(generator.sampleTile(20, 0), 0);
   assert.ok(generator.sampleHeight(20, 0) <= generator.sampleHeight(8, 0));
   assert.equal(generator.sampleHeight(0, 0), generator.sampleHeight(0, 0));
+});
+
+test('generator construction and worker registry adoption never stringify source payloads on the main thread', async t => {
+  const source = createSource();
+  source.settlements = [{ id: 1, cellX: 0, cellZ: 0, population: .3 }];
+  const workerGenerator = new AzgaarMacroWorldGenerator(source, metadata);
+  source.settlementRegistry = serializeSettlementRegistry(workerGenerator.ensureSettlementField(), workerGenerator.settlementRegistryKey);
+  const stringify = JSON.stringify;
+  t.mock.method(JSON, 'stringify', value => {
+    if (Array.isArray(value) && value.includes(source.settlements)) assert.fail('synchronous source fingerprint');
+    return stringify(value);
+  });
+  const generator = new AzgaarMacroWorldGenerator(source, metadata);
+  const preparation = new SettlementRegistryPreparation();
+  const store = { chunkWorker: { request: async () => ({ registry: source.settlementRegistry }) } };
+  assert.equal(preparation.get(generator, store), null, 'worker validation gates cached registries too');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(preparation.pending, 0);
+  assert.equal(generator.settlementRegistryKey, source.settlementRegistry.key);
+});
+
+test('worker registry validation invalidates persisted keys when relevant source data changes', () => {
+  const source = createSource();
+  source.settlements = [{ id: 1, cellX: 0, cellZ: 0, population: .3 }];
+  const original = new AzgaarMacroWorldGenerator(source, metadata);
+  source.settlementRegistry = serializeSettlementRegistry(original.ensureSettlementField(), original.settlementRegistryKey);
+  const key = source.settlementRegistry.key;
+  for (const mutate of [s => s.settlements[0].population++, s => s.bounds.widthCells++,
+    s => s.physical.widthMeters++, s => { s.routes = [{ points: [[0, 0], [1, 1]] }]; },
+    s => { s.atlas.heightData.data += 'A'; }]) {
+    const changed = structuredClone(source); mutate(changed);
+    assert.notEqual(settlementRegistryKey(changed, metadata.seed), key);
+  }
+  assert.notEqual(settlementRegistryKey(source, metadata.seed + 1), key);
 });
 
 test('neighboring macro chunks share bit-identical edge heights', () => {

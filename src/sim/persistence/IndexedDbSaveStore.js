@@ -111,5 +111,30 @@ export function createIndexedDbSaveStore({ indexedDB = globalThis.indexedDB,
         read(tx.objectStore('archives').get([namespace, id]), record => done(verified(record)));
       });
     },
+    async getArchives(ids) {
+      if (ids.length === 0) return [];
+      return transaction(['archives'], 'readonly', (tx, read, done) => {
+        const records = new Array(ids.length);
+        let remaining = ids.length;
+        ids.forEach((id, index) => read(tx.objectStore('archives').get([namespace, id]), record => {
+          records[index] = verified(record);
+          if (--remaining === 0) done(records);
+        }));
+      });
+    },
+    async getArchiveChain(head, limit) {
+      if (!Number.isSafeInteger(limit) || limit < 1) throw new Error('invalid_archive_batch_size');
+      return transaction(['archives'], 'readonly', (tx, read, done) => {
+        const records = [];
+        const next = id => read(tx.objectStore('archives').get([namespace, id]), record => {
+          const result = verified(record);
+          records.push({ id, ...result });
+          const previous = result.payload?.previous;
+          if (!result.ok || previous === null || typeof previous !== 'string' || records.length >= limit) done(records);
+          else next(previous);
+        });
+        next(head);
+      });
+    },
   };
 }

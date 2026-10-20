@@ -3,11 +3,12 @@ import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdge
 import { TownMesh } from './TownMesh.js';
 import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../render/preparation/StagedDrawPublication.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
+import { settlementPreparationFor } from '../world/settlements/SettlementPreparation.js';
 
 /**
  * Streams the Azgaar burgs around the viewer into the scene.
  *
- * Plans come from the world generator (`settlementsNear`, the same plans the
+ * Plans come from the shared asynchronous preparation service (the same plans the
  * terrain grades its pads and paints its streets from), so a town stands exactly
  * where its burg is on the map and on the ground the terrain flattened for it.
  * Towns load inside `loadRadius`, at most one per frame, and unload past
@@ -21,6 +22,7 @@ export class TownStreamer {
   constructor({
     scene,
     getGenerator,
+    getWorldStore,
     tileSize,
     floatingOrigin,
     assets,
@@ -35,6 +37,7 @@ export class TownStreamer {
   }) {
     this.scene = scene;
     this.getGenerator = getGenerator;
+    this.getWorldStore = getWorldStore;
     this.tileSize = tileSize;
     this.floatingOrigin = floatingOrigin;
     this.assets = assets;
@@ -62,7 +65,10 @@ export class TownStreamer {
       this.clear();
       this.generator = generator;
     }
-    if (!generator?.settlementsNear || !focus) return;
+    if (!generator?.ensureSettlementField || !focus) return;
+    this.prepareField(generator);
+    const advancePlans = () => this.preparation.plans.advance(budget?.shouldYield ?? (() => false));
+    if (!budget || !budget.shouldYield()) (budget?.runner ?? (run => run()))(advancePlans);
     if (nowMs >= this.nextQueryAt) {
       this.nextQueryAt = nowMs + this.queryIntervalMs;
       this.refresh(generator, focus);
@@ -82,12 +88,18 @@ export class TownStreamer {
         > this.unloadRadius + (this.buildJob.entry.plan.profile?.reach ?? 0)) this.cancelBuild();
     const cellX = focus.x / this.tileSize;
     const cellZ = -focus.z / this.tileSize;
-    const near = generator.settlementsNear(cellX, cellZ, this.loadRadius / this.tileSize);
-    for (const { settlement, plan } of near) {
+    const field = this.prepareField(generator);
+    const plans = this.preparation.plans;
+    plans.begin(this);
+    const near = field?.entriesNear(cellX, cellZ, this.loadRadius / this.tileSize) ?? [];
+    for (const { entry, distance } of near) {
+      const { settlement } = entry;
+      const plan = plans.get(entry, distance * this.tileSize, this);
       if (!plan || this.towns.has(settlement.id) || this.buildJob?.entry.settlement.id === settlement.id
           || this.buildErrors.has(settlement.id)) continue;
       this.pending.set(settlement.id, { settlement, plan });
     }
+    plans.end();
     for (const [id, town] of this.towns) {
       const distance = Math.hypot(town.layout.anchor.x - focus.x, town.layout.anchor.z - focus.z);
       if (distance > this.unloadRadius + town.reach) this.unload(id);
@@ -96,6 +108,26 @@ export class TownStreamer {
       const distance = this.distanceTo(entry.settlement, focus);
       if (distance > this.unloadRadius + (entry.plan.profile?.reach ?? 0)) this.pending.delete(id);
     }
+  }
+
+  prepareField(generator) {
+    const preparation = settlementPreparationFor(this.getWorldStore());
+    if (preparation !== this.preparation) {
+      this.preparation?.plans.release(this);
+      this.unsubscribePreparation?.();
+      this.preparation = preparation;
+      this.unsubscribePreparation = preparation.subscribe(() => { this.nextQueryAt = 0; });
+    }
+    return preparation.field(generator);
+  }
+
+  getPreparationStatus() {
+    const preparation = this.preparation;
+    const pending = this.pending.size + Number(Boolean(this.buildJob))
+      + (preparation?.registry.pending ?? 0) + (preparation?.plans.pending ?? 0);
+    const errors = [...this.buildErrors.values()].map(error => String(error.message ?? error));
+    errors.push(...(preparation?.registry.errors ?? []), ...(preparation?.plans.errors ?? []));
+    return { pending, errors, ready: pending === 0 && errors.length === 0 };
   }
 
   updateLods(focus) {
@@ -242,6 +274,7 @@ export class TownStreamer {
   }
 
   clear() {
+    this.preparation?.plans.release(this);
     this.cancelBuild();
     this.buildErrors.clear();
     for (const id of [...this.towns.keys()]) this.unload(id);
@@ -250,5 +283,6 @@ export class TownStreamer {
 
   dispose() {
     this.clear();
+    this.unsubscribePreparation?.();
   }
 }

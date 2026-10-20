@@ -1,4 +1,5 @@
 import { checksumCanonical } from './canonicalSerialize.js';
+import { readReplayArchives } from './ReplayArchiveReader.js';
 
 const positive = (value, name) => {
   if (!Number.isSafeInteger(value) || value < 1) throw new Error(`invalid_history_limit:${name}`);
@@ -99,24 +100,7 @@ export class SimulationHistory {
   async *readCommands() {
     const header = structuredClone(this.header), tail = this.journal.list();
     await this.flush();
-    const stack = [], seen = new Set();
-    let id = header.head, end = header.commands;
-    while (id !== null) {
-      if (seen.has(id)) throw new Error('history_archive_cycle'); seen.add(id);
-      const record = await this.store.getArchive(id), segment = record.payload;
-      if (!record.ok || segment?.kind !== 'command-segment' || !Array.isArray(segment.commands)
-        || checksumCanonical(segment.commands) !== segment.checksum || segment.start + segment.commands.length !== end) {
-        throw new Error('invalid_history_archive');
-      }
-      stack.push(id); end = segment.start; id = segment.previous;
-    }
-    if (end !== 0 || stack.length !== header.segments) throw new Error('incomplete_history_archive');
-    // Only IDs accumulate during explicit history reads; old payloads stream one segment at a time.
-    for (const key of stack.reverse()) {
-      const record = await this.store.getArchive(key);
-      if (!record.ok || checksumCanonical(record.payload.commands) !== record.payload.checksum) throw new Error('invalid_history_archive');
-      for (const command of record.payload.commands) yield structuredClone(command);
-    }
+    yield* readReplayArchives(this.store, header);
     for (const command of tail) yield command;
   }
   getStatus() {

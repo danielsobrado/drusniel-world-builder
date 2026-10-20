@@ -9,7 +9,7 @@ export class SettlementPlanPreparation {
     this.onReady = onReady;
     this.requests = new Map();
     this.epoch = 0;
-    this.wanted = new Set();
+    this.consumers = new Map();
     this.retry = new SettlementRequestRetry(retryOptions);
   }
 
@@ -17,6 +17,7 @@ export class SettlementPlanPreparation {
     this.epoch++;
     for (const id of this.requests.keys()) this.store?.chunkWorker?.cancelSettlementPlan?.(id);
     this.requests.clear();
+    this.consumers.clear();
   }
 
   configure(field, store) {
@@ -27,8 +28,9 @@ export class SettlementPlanPreparation {
     this.revision = store.baseTerrainRevision;
   }
 
-  get(entry, priority = 0) {
-    this.wanted.add(entry.settlement.id);
+  get(entry, priority = 0, consumer = this) {
+    if (!this.consumers.has(consumer)) this.begin(consumer);
+    this.consumers.get(consumer).add(entry.settlement.id);
     if (entry.plan !== undefined && entry.skyline !== undefined) return entry.plan;
     const id = entry.settlement.id;
     const existing = this.requests.get(id);
@@ -67,9 +69,11 @@ export class SettlementPlanPreparation {
     });
   }
 
-  begin() { this.wanted.clear(); }
+  begin(consumer = this) { this.consumers.set(consumer, new Set()); }
+  release(consumer) { this.consumers.delete(consumer); this.end(); }
   end() {
-    for (const id of this.requests.keys()) if (!this.wanted.has(id)) {
+    const wanted = new Set([...this.consumers.values()].flatMap(ids => [...ids]));
+    for (const id of this.requests.keys()) if (!wanted.has(id)) {
       this.store?.chunkWorker?.cancelSettlementPlan?.(id);
       this.requests.delete(id);
     }

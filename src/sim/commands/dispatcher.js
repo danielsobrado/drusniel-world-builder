@@ -6,9 +6,9 @@ import { calendarFromTick } from '../time/worldClock.js';
 
 const handlers = new Map();
 
-function snapshotRuntimeState(runtimeCtx) {
-  const ledger = runtimeCtx?.ledger;
-  const lod = runtimeCtx?.lod;
+function snapshotRuntimeState(runtimeCtx, resources) {
+  const ledger = resources.includes('ledger') ? runtimeCtx?.ledger : null;
+  const lod = resources.includes('lod') ? runtimeCtx?.lod : null;
   const ledgerCheckpoint = ledger?.checkpoint && ledger?.rollback
     ? ledger.checkpoint()
     : null;
@@ -54,13 +54,17 @@ function rejectCommand(state, error, runtimeCtx, runtimeSnapshot, fallbackCode) 
   };
 }
 
-export function registerCommandHandler(type, handler, { mutableKinds = null } = {}) {
+export function registerCommandHandler(type, handler, {
+  mutableKinds = null, runtimeResources = ['ledger', 'lod'],
+} = {}) {
   if (handlers.has(type)) {
     throw new Error(`duplicate_handler:${type}`);
   }
   handlers.set(type, {
     handler,
     mutableKinds: mutableKinds == null ? null : Object.freeze([...mutableKinds]),
+    // Undeclared external handlers retain conservative rollback protection.
+    runtimeResources: Object.freeze([...runtimeResources]),
   });
 }
 
@@ -97,7 +101,7 @@ export function createCommandDispatcher({ onAccepted = null } = {}) {
       const commandWithCtx = runtimeCtx
         ? { ...command, payload: { ...command.payload, __ctx: runtimeCtx, __result: null } }
         : { ...command, payload: { ...command.payload, __result: null } };
-      const runtimeSnapshot = snapshotRuntimeState(runtimeCtx);
+      const runtimeSnapshot = snapshotRuntimeState(runtimeCtx, registration.runtimeResources);
 
       let emitted;
       try {
@@ -150,22 +154,22 @@ registerCommandHandler('sim.upsertEntity', (_state, command) => [{
   type: 'entity.upserted',
   entityIds: [command.payload.id],
   payload: command.payload,
-}], { mutableKinds: [] });
+}], { mutableKinds: [], runtimeResources: [] });
 
 registerCommandHandler('sim.destroyEntity', (_state, command) => [{
   type: 'entity.destroyed',
   entityIds: [command.payload.id],
   payload: command.payload,
-}], { mutableKinds: [] });
+}], { mutableKinds: [], runtimeResources: [] });
 
 registerCommandHandler('sim.patchEntity', (_state, command) => [{
   type: 'entity.patched',
   entityIds: [command.payload.id],
   payload: command.payload,
-}], { mutableKinds: [] });
+}], { mutableKinds: [], runtimeResources: [] });
 
 registerCommandHandler('sim.setCalendar', (_state, command) => [{
   type: 'calendar.set',
   entityIds: [],
   payload: command.payload,
-}], { mutableKinds: [] });
+}], { mutableKinds: [], runtimeResources: [] });

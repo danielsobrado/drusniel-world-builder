@@ -17,6 +17,7 @@ import { chunkKey } from './WorldCoordinates.js';
 import { INFINITE_WORLD_FORMAT_VERSION } from './worldConstants.js';
 
 const MAX_TILE_ID = 255;
+const EDIT_QUIET_PERIOD_MS = 50;
 
 function recordWaterGeneration(page, durationMs) {
   page.timings = {
@@ -183,36 +184,43 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
       && state.tileVersion === current.tileVersion && state.heightVersion === current.heightVersion;
   }
 
-  requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining = 1) {
+  async requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining = 1) {
     const epoch = this.worldStateEpoch;
     const baseRevision = this.baseTerrainRevision;
-    return Promise.resolve()
-      .then(() => {
-        if (this.disposed) {
-          throw createCancelledRequestError('World chunk request cancelled by store disposal.');
-        }
+    const assertCurrent = () => {
+      if (this.disposed || epoch !== this.worldStateEpoch || baseRevision !== this.baseTerrainRevision) {
+        throw createCancelledRequestError('World chunk request superseded by a world change or store disposal.');
+      }
+    };
+    let coalesce = false;
+    for (;;) {
+      assertCurrent();
+      // One pending promise owns this chunk. Wait for a quiet local revision
+      // before replacing an obsolete result; unrelated edits do not delay it.
+      if (coalesce) {
+        let state;
+        do {
+          state = this.pageEditState(chunkX, chunkZ);
+          await new Promise(resolve => setTimeout(resolve, EDIT_QUIET_PERIOD_MS));
+          assertCurrent();
+        } while (!this.pageEditsMatch(state, chunkX, chunkZ));
+      }
+      try {
         const editState = this.pageEditState(chunkX, chunkZ);
         const terrainOverrides = {
           tiles: editState.tiles.entriesInRect(...editState.bounds),
           heights: editState.heights.entriesInRect(...editState.bounds),
         };
-        return Promise.resolve(this.chunkWorker.request(chunkX, chunkZ, { priority, terrainOverrides })).then(page => {
-          if (this.disposed || epoch !== this.worldStateEpoch || baseRevision !== this.baseTerrainRevision) {
-            throw createCancelledRequestError('World chunk request superseded by a world change.');
-          }
-          if (!this.pageEditsMatch(editState, chunkX, chunkZ)) {
-            return this.requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining);
-          }
-          return { ...page, editState };
-        });
-      })
-      .catch((error) => {
-        if (this.disposed) {
-          throw createCancelledRequestError('World chunk request cancelled by store disposal.');
-        }
+        const page = await this.chunkWorker.request(chunkX, chunkZ, { priority, terrainOverrides });
+        assertCurrent();
+        if (this.pageEditsMatch(editState, chunkX, chunkZ)) return { ...page, editState };
+        coalesce = true;
+      } catch (error) {
+        assertCurrent();
         if (!error?.retryable || retriesRemaining <= 0) throw error;
-        return this.requestWorkerPage(chunkX, chunkZ, priority, retriesRemaining - 1);
-      });
+        retriesRemaining--;
+      }
+    }
   }
 
   requestChunk(chunkX, chunkZ, { priority = 0 } = {}) {

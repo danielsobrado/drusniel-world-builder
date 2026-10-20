@@ -130,7 +130,7 @@ function ensureHandlersRegistered() {
     });
     events.push(...factions.events);
     return events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.dailyTick', (state, command) => {
     const { definition, config, ledger } = command.payload.__ctx;
@@ -140,7 +140,7 @@ function ensureHandlersRegistered() {
       reasonCodes: [...economy.reasonCodes, ...shipments.reasonCodes],
     };
     return [...economy.events, ...shipments.events];
-  }, { mutableKinds: ['facility', 'inventoryAccount', 'market', 'shipment'] });
+  }, { mutableKinds: ['facility', 'inventoryAccount', 'market', 'shipment'], runtimeResources: ['ledger'] });
 
   registerCommandHandler('sim.monthlyTick', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -151,7 +151,7 @@ function ensureHandlersRegistered() {
       reasonCodes: [...pop.reasonCodes, ...factions.reasonCodes, ...expired.reasonCodes],
     };
     return [...pop.events, ...factions.events, ...expired.events];
-  }, { mutableKinds: ['populationCohort', 'settlement'] });
+  }, { mutableKinds: ['populationCohort', 'settlement'], runtimeResources: [] });
 
   registerCommandHandler('sim.planShipment', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -168,7 +168,7 @@ function ensureHandlersRegistered() {
       reasonCodes: result.reasonCodes,
     };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.matchTrades', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -181,20 +181,20 @@ function ensureHandlersRegistered() {
       reasonCodes: result.reasonCodes,
     };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.setRouteDanger', (state, command) => {
     const result = setRouteDanger(state, command.payload.routeId, command.payload.danger);
     command.payload.__result = { reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.detectOpportunities', (state, command) => {
     const { definition } = command.payload.__ctx;
     const result = detectOpportunities(state, definition, { commandId: command.id });
     command.payload.__result = { reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.acceptContract', (state, command) => {
     const { definition } = command.payload.__ctx;
@@ -208,7 +208,7 @@ function ensureHandlersRegistered() {
       reasonCodes: result.reasonCodes,
     };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.resolveContract', (state, command) => {
     const result = applyContractOutcome(state, {
@@ -218,7 +218,7 @@ function ensureHandlersRegistered() {
     });
     command.payload.__result = { reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.runEncounterCombat', (state, command) => {
     const { definition, config } = command.payload.__ctx;
@@ -283,21 +283,21 @@ function ensureHandlersRegistered() {
       log: combat.log,
     };
     return events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.promoteSettlement', (state, command) => {
     const lod = command.payload.__ctx.lod;
     const result = lod.promote(state, command.payload.settlementId, command.payload.tier);
     command.payload.__result = { reasonCodes: result.reasonCodes, manifest: result.manifest };
     return result.events;
-  });
+  }, { runtimeResources: ['lod'] });
 
   registerCommandHandler('sim.demoteSettlement', (state, command) => {
     const lod = command.payload.__ctx.lod;
     const result = lod.demote(state, command.payload.settlementId, command.payload.tier);
     command.payload.__result = { reasonCodes: result.reasonCodes, conserved: result.conserved };
     return result.events;
-  });
+  }, { runtimeResources: ['lod'] });
 
   registerCommandHandler('sim.declareConflict', (state, command) => {
     const { definition } = command.payload.__ctx;
@@ -309,7 +309,7 @@ function ensureHandlersRegistered() {
     });
     command.payload.__result = { conflictId: result.conflictId, reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.promotePerson', (state, command) => {
     const { definition } = command.payload.__ctx;
@@ -322,7 +322,7 @@ function ensureHandlersRegistered() {
     });
     command.payload.__result = { characterId: result.characterId, reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.createEncounterSite', (state, command) => {
     const { definition } = command.payload.__ctx;
@@ -333,7 +333,7 @@ function ensureHandlersRegistered() {
     });
     command.payload.__result = { encounterSiteId: result.encounterSiteId };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 
   registerCommandHandler('sim.patchFactionRelationship', (state, command) => {
     const result = setFactionRelationship(
@@ -344,7 +344,7 @@ function ensureHandlersRegistered() {
     );
     command.payload.__result = { reasonCodes: result.reasonCodes };
     return result.events;
-  });
+  }, { runtimeResources: [] });
 }
 
 export function createSimulationWorld({

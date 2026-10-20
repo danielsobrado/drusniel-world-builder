@@ -100,3 +100,25 @@ test('disposed views do not restart failed terrain requests', async (t) => {
   await view.updateStreaming({ x: 0, z: 0 }, slot.retryAt + 1);
   assert.equal(requests, 1);
 });
+
+test('reset completions publish through the frame budget, nearest first, and discard superseded pages', async t => {
+  let revision = 0;
+  const { view, slot, descriptor } = createView(t, (x, z) => Promise.resolve({ key: `${x}:${z}`, revision }));
+  slot.descriptor = descriptor;
+  view.slots = [3, 0, 1].map((chunkX, slotIndex) => ({ ...slot, slotIndex,
+    descriptor: createTerrainChunkDescriptor({ chunkX, chunkZ: 0, chunkSize: 8, tileSize: 2 }) }));
+  const published = [];
+  view.commitPage = (target, page) => { published.push([target.descriptor.chunkX, page.revision]); };
+  view.onWorldChange({ kind: 'reset' });
+  await Promise.all(view.pendingFetches);
+  assert.deepEqual(published, [], 'worker completions never perform publication');
+  revision++;
+  view.onWorldChange({ kind: 'reset' });
+  await Promise.all(view.pendingFetches);
+  assert.equal(view.commitQueue.size, 3);
+  for (let frame = 0; frame < 3; frame++) {
+    view.flushUploadQueue({ maxCommits: 1, budgetMs: Infinity });
+    assert.equal(published.length, frame + 1);
+  }
+  assert.deepEqual(published, [[0, 1], [1, 1], [3, 1]]);
+});

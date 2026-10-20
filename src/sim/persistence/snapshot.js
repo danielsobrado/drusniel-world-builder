@@ -210,6 +210,19 @@ export function createInMemorySaveStore() {
       archives.set(id, structuredClone(payload)); return { ok: true, id };
     },
     async getArchive(id) { return archives.has(id) ? { ok: true, payload: structuredClone(archives.get(id)) } : { ok: false, code: 'missing_archive' }; },
+    async getArchives(ids) { return Promise.all(ids.map(id => this.getArchive(id))); },
+    async getArchiveChain(head, limit) {
+      if (!Number.isSafeInteger(limit) || limit < 1) throw new Error('invalid_archive_batch_size');
+      const records = [];
+      let id = head;
+      while (id !== null && records.length < limit) {
+        const record = await this.getArchive(id);
+        records.push({ id, ...record });
+        if (!record.ok) break;
+        id = record.payload.previous;
+      }
+      return records;
+    },
     async beginSave(slot, payload) {
       transactionSeq += 1;
       const transactionId = `save:${transactionSeq}`;

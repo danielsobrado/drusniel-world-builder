@@ -2,6 +2,7 @@ import { rectContains } from './SettlementGeometry.js';
 import { indexPlan } from './SettlementPlanIndex.js';
 import { planSettlement } from './SettlementPlanner.js';
 import { settlementProfile } from './SettlementProfile.js';
+import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
 /** Metres over which a flattened pad blends back into the natural ground. */
 const PAD_BLEND = 3;
@@ -194,6 +195,10 @@ export class SettlementField {
 
   ensurePlan(entry) {
     if (entry.plan !== undefined) return entry;
+    if (this.requirePreparedPlans) throw Object.assign(new Error('Settlement plan preparation required.'), {
+      code: 'settlement_plan_required', settlementId: entry.settlement.id,
+    });
+    if (typeof window !== 'undefined') PerfCounters.inc('settlementMainThreadPlansGenerated');
     const { settlement } = entry;
     const toCell = (x, z) => [settlement.cellX + x / this.tileSize, settlement.cellZ + z / this.tileSize];
     entry.plan = planSettlement({
