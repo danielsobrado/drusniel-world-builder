@@ -34,6 +34,9 @@ export const DEFAULT_SIMULATION_CONFIG = Object.freeze({
     maximumCommandsBetweenSnapshots: 100000,
     importantEventRetentionYears: 20,
     recentReducerEventDays: 30,
+    journalSegmentCommands: 256,
+    maxPendingJournalSegments: 4,
+    maximumReasonLogEntries: 2048,
   }),
   lod: Object.freeze({
     tierBRadiusSettlements: 3,

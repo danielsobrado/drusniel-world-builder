@@ -1,6 +1,9 @@
 import { createCommandEnvelope } from './commands/commandEnvelope.js';
 import { createCommandDispatcher, registerCommandHandler } from './commands/dispatcher.js';
 import { mergeSimulationConfig } from './config/defaultSimulationConfig.js';
+import { createIndexedDbSaveStore } from './persistence/IndexedDbSaveStore.js';
+import { SimulationHistory, boundedReasonLog } from './persistence/SimulationHistory.js';
+import { createSimulationReplay } from './persistence/SimulationReplay.js';
 import { projectAzgaarWorld } from './import/projectAzgaarWorld.js';
 import { createWorldQueries, checksumWorldState } from './queries/worldQueries.js';
 import { validateWorldState } from './model/validation/validateWorldState.js';
@@ -348,6 +351,7 @@ export function createSimulationWorld({
   campaign,
   config: partialConfig = {},
   worldId = null,
+  saveStore: providedSaveStore = null,
 } = {}) {
   ensureHandlersRegistered();
 
@@ -361,23 +365,30 @@ export function createSimulationWorld({
   let definition = projected.definition;
   let state = projected.state;
   const ledger = createLedger();
-  const journal = createCommandJournal();
+  let journal = createCommandJournal();
   const eventHistory = createEventHistory();
   const pathCache = new PathCache(config.geography.pathCacheEntries);
   const lod = createLodController(config);
-  const saveStore = createInMemorySaveStore();
+  const saveStore = providedSaveStore ?? (globalThis.indexedDB
+    ? createIndexedDbSaveStore({ namespace: definition.worldId }) : createInMemorySaveStore());
   const migrations = createMigrationRegistry();
-  const reasonLog = [];
+  const reasonLog = boundedReasonLog(config.persistence.maximumReasonLogEntries);
+  let history = new SimulationHistory({ journal, store: saveStore, config: config.persistence });
   let commandSeq = 0;
 
   const clock = createWorldClock(config.time, state.calendar.tick);
   const scheduler = createScheduler(clock);
 
   function recordAccepted(command, events) {
-    journal.append(command);
+    history.append(command);
     for (const event of events) {
       eventHistory.append(event, { important: true });
     }
+  }
+
+  function checkpointHistory() {
+    history.maybeCheckpoint(() => serializeWorldSnapshot({ definition, state,
+      commandRange: { count: history.count, sequence: commandSeq } }));
   }
 
   const dispatcher = createCommandDispatcher({ onAccepted: recordAccepted });
@@ -404,6 +415,7 @@ export function createSimulationWorld({
   }
 
   function dispatch(type, payload = {}) {
+    if (!history.canAccept()) return { ok: false, code: 'history_archive_backpressure', events: [], state };
     const envelope = createCommandEnvelope({
       id: nextCommandId(type),
       type,
@@ -423,6 +435,7 @@ export function createSimulationWorld({
       if (result.result?.reasonCodes) {
         reasonLog.push(...result.result.reasonCodes);
       }
+      checkpointHistory();
     }
     return {
       ...result,
@@ -431,6 +444,7 @@ export function createSimulationWorld({
   }
 
   function dispatchBatch(envelopes) {
+    if (!history.canAccept(envelopes.length)) return { ok: false, code: 'history_archive_backpressure', events: [], state };
     let current = state;
     const accepted = [];
     const events = [];
@@ -448,6 +462,7 @@ export function createSimulationWorld({
     for (const entry of accepted) {
       recordAccepted(entry.command, entry.events);
     }
+    checkpointHistory();
     if (eventsAffectPathfinding(events)) {
       pathCache.clear();
     }
@@ -470,11 +485,30 @@ export function createSimulationWorld({
   });
 
   function stepSimulationTicks(ticks) {
+    if (Number.isSafeInteger(ticks) && ticks > 0) {
+      const start = clock.getTick(), end = start + ticks, day = ticksPerDay(clock.getConfig());
+      const month = day * clock.getConfig().daysPerMonth;
+      const commands = Math.floor(end / day) - Math.floor(start / day) + Math.floor(end / month) - Math.floor(start / month);
+      if (!history.canAccept(commands)) throw Object.assign(new Error('history_archive_backpressure'), { code: 'history_archive_backpressure' });
+    }
     try {
       return runner.stepTicks(ticks, {});
     } finally {
       state.calendar = calendarFromTick(clock.getTick(), clock.getConfig());
     }
+  }
+
+  function adoptReplay(staged) {
+    definition = staged.definition; state = staged.state; commandSeq = staged.sequence;
+    clock.setTick(state.calendar.tick);
+    state.calendar = calendarFromTick(clock.getTick(), clock.getConfig());
+    lod.restore(staged.lod.serialize()); scheduler.restore({ jobSeq: 0, jobs: [] });
+    ledger.clear(); for (const entry of staged.ledger.list()) ledger.record(entry);
+    journal = staged.journal; history = staged.history;
+    eventHistory.clear(); for (const event of staged.events.list()) {
+      const { important, ...saved } = event; eventHistory.append(saved, { important });
+    }
+    reasonLog.length = 0; reasonLog.push(...staged.reasons); pathCache.clear();
   }
 
   function requireSavedArray(value, field) {
@@ -577,6 +611,11 @@ export function createSimulationWorld({
     stepDays(days = 1) {
       const dayTicks = ticksPerDay(clock.getConfig());
       return stepSimulationTicks(dayTicks * days);
+    },
+
+    async stepDaysAsync(days = 1) {
+      if (!Number.isSafeInteger(days) || days < 0) throw new Error('invalid_days');
+      for (let day = 0; day < days; day++) { await history.flush(); this.stepDays(1); }
     },
 
     stepMonths(months = 1) {
@@ -791,7 +830,7 @@ export function createSimulationWorld({
       return serializeWorldSnapshot({
         definition,
         state,
-        commandRange: { count: journal.list().length, sequence: commandSeq },
+        commandRange: { count: history.count, sequence: commandSeq },
       });
     },
 
@@ -800,6 +839,7 @@ export function createSimulationWorld({
       const payload = {
         snapshot: snap,
         journal: journal.list(),
+        history: structuredClone(history.header),
         eventHistory: eventHistory.list(),
         ledger: ledger.list(),
         lod: lod.serialize(),
@@ -808,6 +848,7 @@ export function createSimulationWorld({
         clockTick: clock.getTick(),
         scheduler: scheduler.serialize(),
       };
+      await history.flush();
       const pendingSave = await saveStore.beginSave(slot, payload);
       return saveStore.commitSave(slot, pendingSave.transactionId);
     },
@@ -819,6 +860,16 @@ export function createSimulationWorld({
       if (!corruption.ok) return corruption;
       const restored = restoreWorldSnapshot(loaded.payload.snapshot);
       const staged = stageLoadedPayload(loaded.payload, restored);
+      const nextJournal = createCommandJournal();
+      for (const command of staged.journal) nextJournal.append(command);
+      const nextHistory = new SimulationHistory({ journal: nextJournal, store: saveStore, config: config.persistence });
+      nextHistory.restore(loaded.payload.history);
+      if (loaded.payload.history && loaded.payload.snapshot.commandRange?.count !== nextHistory.count) {
+        throw new Error('invalid_save_payload:history_command_count');
+      }
+      while (nextJournal.count >= nextHistory.segmentSize && saveStore.putArchive) {
+        nextHistory.seal(); await nextHistory.flush();
+      }
 
       definition = restored.definition;
       state = restored.state;
@@ -826,8 +877,7 @@ export function createSimulationWorld({
       state.calendar = calendarFromTick(clock.getTick(), clock.getConfig());
       lod.restore(staged.lod);
       scheduler.restore(staged.scheduler);
-      journal.clear();
-      for (const command of staged.journal) journal.append(command);
+      journal = nextJournal; history = nextHistory;
       eventHistory.clear();
       for (const savedEvent of staged.eventHistory) {
         const { important = false, ...event } = savedEvent;
@@ -843,71 +893,37 @@ export function createSimulationWorld({
     },
 
     replayFromSnapshot(snapshot, commands) {
-      if (!Array.isArray(commands)) {
-        throw new Error('invalid_replay_commands');
-      }
-      const restored = restoreWorldSnapshot(snapshot);
-      const replayLedger = createLedger();
-      const replayLod = createLodController(config);
-      for (const settlement of listEntities(restored.state, 'settlement', { includeDestroyed: true })) {
-        replayLod.setTier(settlement.id, settlement.data.simTier ?? 'A');
-      }
-      let current = restored.state;
+      if (!Array.isArray(commands)) throw new Error('invalid_replay_commands');
+      const staged = createSimulationReplay({ snapshot, sequence: commandSeq, dispatcher: isolatedDispatcher, config, store: saveStore });
       const applied = [];
-      const accepted = [];
-      const replayReasonLog = [];
-      const snapshotSequence = snapshot.commandRange?.sequence ?? snapshot.commandRange?.count ?? 0;
-      if (!Number.isSafeInteger(snapshotSequence) || snapshotSequence < 0) {
-        throw new Error('invalid_snapshot:command_sequence');
-      }
-      let replayCommandSeq = Math.max(commandSeq, snapshotSequence);
       for (const command of commands) {
-        const result = isolatedDispatcher.dispatch(current, command, {
-          definition: restored.definition,
-          config,
-          ledger: replayLedger,
-          lod: replayLod,
-        });
-        if (!result.ok) {
-          return { ok: false, code: result.code, applied, state: current };
-        }
-        current = result.state;
+        const result = staged.apply(command);
+        if (!result.ok) return { ok: false, code: result.code, applied, state: staged.state };
         applied.push(command.id);
-        accepted.push({ command, events: result.events });
-        // Generated entity IDs depend on command IDs. Reserve sequence numbers
-        // from this world's replay journal before accepting new live commands.
-        const worldSuffix = `:${restored.definition.worldId}:`;
-        const suffixIndex = command.id.lastIndexOf(worldSuffix);
-        if (suffixIndex >= 0) {
-          const sequence = Number(command.id.slice(suffixIndex + worldSuffix.length));
-          if (Number.isSafeInteger(sequence) && sequence >= 0) {
-            replayCommandSeq = Math.max(replayCommandSeq, sequence);
-          }
-        }
-        if (result.result?.reasonCodes) replayReasonLog.push(...result.result.reasonCodes);
       }
+      adoptReplay(staged);
+      return { ok: true, applied, state };
+    },
 
-      definition = restored.definition;
-      state = current;
-      commandSeq = replayCommandSeq;
-      clock.setTick(state.calendar.tick);
-      state.calendar = calendarFromTick(clock.getTick(), clock.getConfig());
-      lod.restore(replayLod.serialize());
-      scheduler.restore({ jobSeq: 0, jobs: [] });
-      ledger.clear();
-      for (const entry of replayLedger.list()) ledger.record(entry);
-      journal.clear();
-      eventHistory.clear();
-      for (const entry of accepted) recordAccepted(entry.command, entry.events);
-      reasonLog.length = 0;
-      reasonLog.push(...replayReasonLog);
-      pathCache.clear();
-      return { ok: true, code: 'ok', applied, state, definition };
+    async replayJournalFromSnapshot(snapshot, commands) {
+      const staged = createSimulationReplay({ snapshot, sequence: commandSeq, dispatcher: isolatedDispatcher, config, store: saveStore });
+      for await (const command of commands) {
+        if (!staged.history.canAccept()) await staged.history.flush();
+        const result = staged.apply(command);
+        if (!result.ok) return { ok: false, code: result.code, appliedCount: staged.count };
+      }
+      await staged.history.flush();
+      adoptReplay(staged);
+      return { ok: true, appliedCount: staged.count, state };
     },
 
     getJournal() {
       return journal.list();
     },
+
+    readJournal() { return history.readCommands(); },
+    flushHistory() { return history.flush(); },
+    getHistoryStatus() { return history.getStatus(); },
 
     diagnosticReport() {
       return buildDiagnosticReport({

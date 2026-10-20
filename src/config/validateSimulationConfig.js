@@ -106,5 +106,11 @@ export function validateSimulationConfig(simulation) {
     }
   }
 
+  const persistence = simulation.persistence ?? {};
+  assertObject(persistence, 'simulation.persistence');
+  for (const key of ['maximumCommandsBetweenSnapshots', 'journalSegmentCommands', 'maxPendingJournalSegments', 'maximumReasonLogEntries']) {
+    assertPositiveSafeInt(persistence[key] ?? DEFAULT_SIMULATION_CONFIG.persistence[key], `simulation.persistence.${key}`);
+  }
+
   return simulation;
 }

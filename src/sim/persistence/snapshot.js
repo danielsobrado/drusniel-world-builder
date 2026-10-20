@@ -138,6 +138,8 @@ export function restoreWorldSnapshot(snapshot) {
 export function createCommandJournal() {
   const commands = [];
   return {
+    get count() { return commands.length; },
+    take(count) { return commands.splice(0, count); },
     append(command) {
       commands.push(structuredClone(command));
     },
@@ -179,6 +181,7 @@ export function createEventHistory({ maxImportant = 10000 } = {}) {
 
 export function createInMemorySaveStore() {
   const saves = new Map();
+  const archives = new Map();
   const pending = new Map();
   let transactionSeq = 0;
 
@@ -201,6 +204,12 @@ export function createInMemorySaveStore() {
   }
 
   return {
+    kind: 'memory',
+    async putArchive(id, payload) {
+      if (archives.has(id) && checksumCanonical(archives.get(id)) !== checksumCanonical(payload)) throw new Error('archive_conflict');
+      archives.set(id, structuredClone(payload)); return { ok: true, id };
+    },
+    async getArchive(id) { return archives.has(id) ? { ok: true, payload: structuredClone(archives.get(id)) } : { ok: false, code: 'missing_archive' }; },
     async beginSave(slot, payload) {
       transactionSeq += 1;
       const transactionId = `save:${transactionSeq}`;
