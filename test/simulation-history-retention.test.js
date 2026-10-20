@@ -93,3 +93,14 @@ test('a rejected save begin never commits an older pending transaction', async (
   assert.deepEqual(await world.save('slot'), { ok: false, code: 'quota_exceeded' });
   assert.equal((await store.load('slot')).ok, false);
 });
+
+test('a browser without IndexedDB cannot silently create volatile saves', () => {
+  const previous = globalThis.window;
+  globalThis.window = {};
+  try {
+    assert.throws(() => createSimulationWorld({ campaign: createMiniCampaignFixture() }), /indexeddb_unavailable/);
+    assert.equal(boot(createInMemorySaveStore()).world.saveStore.kind, 'memory', 'an explicit transient backend remains available');
+  } finally {
+    if (previous === undefined) delete globalThis.window; else globalThis.window = previous;
+  }
+});

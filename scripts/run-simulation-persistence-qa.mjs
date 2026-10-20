@@ -67,6 +67,13 @@ try {
     check(world.reasonLog.length === 3, 'diagnostic window grew');
     const defaults = createSimulationWorld({ campaign: createMiniCampaignFixture() });
     check((await defaults.load('default-adapter')).ok, 'default browser adapter was not durable');
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'indexedDB'); let unavailable = false;
+    try {
+      Object.defineProperty(window, 'indexedDB', { value: undefined, configurable: true });
+      createSimulationWorld({ campaign: createMiniCampaignFixture() });
+    } catch (error) { unavailable = error.message === 'indexeddb_unavailable'; }
+    finally { if (descriptor) Object.defineProperty(window, 'indexedDB', descriptor); else delete window.indexedDB; }
+    check(unavailable, 'missing IndexedDB silently selected volatile storage');
     const other = createIndexedDbSaveStore({ databaseName: 'simulation-storage-qa', namespace: 'other-campaign' });
     check(!(await other.load('resume')).ok, 'campaign namespace leaked');
     const a = await store.beginSave('overlap', { revision: 1 }), b = await store.beginSave('overlap', { revision: 2 });
@@ -97,7 +104,8 @@ try {
       archivedCommands: ids.length, history: world.getHistoryStatus(),
       checks: ['browser-restart', 'default-persistent-adapter', 'exact-state-and-snapshot-checksum',
         'interrupted-save-preserves-manifest', 'namespace-isolation', 'overlapping-transactions',
-        'aborted-commit-and-retry', 'archive-order', 'bounded-reason-log', 'corrupt-load-isolation'] };
+        'aborted-commit-and-retry', 'archive-order', 'bounded-reason-log', 'corrupt-load-isolation',
+        'unavailable-indexeddb-is-explicit'] };
   }, saved);
   assert.deepEqual(errors, []);
   const report = { kind: 'simulation-indexeddb-qa', sourceSha, passed: true, browserRestarted: true,

@@ -369,7 +369,7 @@ export function createSimulationWorld({
   const eventHistory = createEventHistory();
   const pathCache = new PathCache(config.geography.pathCacheEntries);
   const lod = createLodController(config);
-  const saveStore = providedSaveStore ?? (globalThis.indexedDB
+  const saveStore = providedSaveStore ?? (globalThis.indexedDB || typeof window !== 'undefined'
     ? createIndexedDbSaveStore({ namespace: definition.worldId }) : createInMemorySaveStore());
   const migrations = createMigrationRegistry();
   const reasonLog = boundedReasonLog(config.persistence.maximumReasonLogEntries);
