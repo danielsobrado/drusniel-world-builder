@@ -55,6 +55,38 @@ export function routeBearings(routes, center, radiusCells) {
  * and `grade` (footprints flattened to their pad, blended at the edges).
  */
 export class SettlementField {
+  /** Immutable registry data stays shared; only nearby entries get mutable plan state. */
+  static fromRegistry(registry, { sampleGround, isBuildable }) {
+    const field = Object.create(SettlementField.prototype);
+    Object.assign(field, { tileSize: registry.tileSize, worldSeed: registry.worldSeed,
+      routes: registry.routes, landSearchStepCells: registry.landSearchStepCells,
+      bucketCells: registry.bucketCells, registry, resolvedEntries: new Map(), sampleGround, isBuildable });
+    const buckets = new Map();
+    field.buckets = { get: key => {
+      if (!buckets.has(key) && registry.buckets[key]) buckets.set(key, registry.buckets[key].map(index => field.entryAt(index)));
+      return buckets.get(key);
+    } };
+    return field;
+  }
+
+  get entries() {
+    return this._entries ??= this.registry.entries.map((_, i) => this.entryAt(i));
+  }
+  set entries(entries) { this._entries = entries; }
+
+  entryAt(index) {
+    if (!this.resolvedEntries.has(index)) {
+      this.resolvedEntries.set(index, { ...this.registry.entries[index], plan: undefined, index: null });
+    }
+    return this.resolvedEntries.get(index);
+  }
+
+  findById(id) {
+    if (!this.registry) return this.entries.find(entry => entry.settlement.id === id);
+    const index = this.registry.ids[id];
+    return index === undefined ? null : this.entryAt(index);
+  }
+
   constructor({ settlements, tileSize, worldSeed, routes = [], sampleGround, isBuildable, landSearchStepCells = 0 }) {
     this.tileSize = tileSize;
     this.worldSeed = worldSeed;

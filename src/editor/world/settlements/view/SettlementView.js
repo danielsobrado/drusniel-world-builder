@@ -8,6 +8,7 @@ import { SettlementSite } from './SettlementSite.js';
 import { SettlementSkyline } from './SettlementSkyline.js';
 import { settlementPreparationStatus } from './SettlementPreparationStatus.js';
 import { SettlementPlanPreparation } from './SettlementPlanPreparation.js';
+import { SettlementRegistryPreparation } from './SettlementRegistryPreparation.js';
 import { settlementSelectionJob, placeSettlementRows } from './SettlementSelection.js';
 
 export const SETTLEMENT_VIEW = Object.freeze({
@@ -66,10 +67,12 @@ export class SettlementView {
     terrainView.scene.add(this.root, this.pavingRoot);
     this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer,
       getDrawPreparation: () => terrainView.drawPreparation });
-    this.skyline = new SettlementSkyline({ scene: terrainView.scene });
+    this.skyline = new SettlementSkyline({ scene: terrainView.scene,
+      getDrawPreparation: () => terrainView.drawPreparation });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
     this.plans = new SettlementPlanPreparation(() => { this.nextRefresh = 0; this.dirty = true; });
+    this.registry = new SettlementRegistryPreparation(() => { this.nextRefresh = 0; this.dirty = true; });
     this.generator = null;
     this.origin = { x: 0, z: 0 };
     this.nextRefresh = 0;
@@ -87,6 +90,7 @@ export class SettlementView {
   }
 
   reset() {
+    this.registry.reset();
     this.plans.reset();
     for (const site of this.sites.values()) site.dispose();
     this.sites.clear();
@@ -100,7 +104,7 @@ export class SettlementView {
 
   getPreparationStatus() { return settlementPreparationStatus(this); }
   hasPendingWork() {
-    return this.enabled && !this.disposed && (Boolean(this.selectionJob) || this.plans.pending > 0 || this.pool.pending > 0 || [...this.sites.values()]
+    return this.enabled && !this.disposed && (Boolean(this.selectionJob) || this.skyline.pending > 0 || this.registry.pending > 0 || this.plans.pending > 0 || this.pool.pending > 0 || [...this.sites.values()]
       .some(site => site.job || (site.surfaces && !site.pavingReady)));
   }
 
@@ -149,6 +153,8 @@ export class SettlementView {
     }
     this.starved = 0;
     this.plans.advance(shouldYield);
+    if (shouldYield()) return;
+    this.skyline.advance(shouldYield);
     if (shouldYield()) return;
     // A starved slice still does one unit, then stops.
     let units = 0;
@@ -242,7 +248,7 @@ export class SettlementView {
 
     if (timestamp >= this.nextRefresh) {
       this.nextRefresh = timestamp + SETTLEMENT_VIEW.refreshMs;
-      const field = generator?.ensureSettlementField?.() ?? null;
+      const field = this.registry.get(generator, view.worldStore);
       this.plans.configure(field, view.worldStore);
       this.plans.begin();
       this.refreshSites(focus, field);
@@ -252,7 +258,7 @@ export class SettlementView {
       this.plans.end();
     }
     this.skyline.update(focus, origin);
-    if (this.sites.size === 0 && this.rows.size === 0 && this.plans.pending === 0) return;
+    if (this.sites.size === 0 && this.rows.size === 0 && this.plans.pending === 0 && this.registry.pending === 0 && this.skyline.pending === 0) return;
 
     const started = performance.now();
     this.pool.reveal(SETTLEMENT_VIEW.revealsPerFrame, camera, view.scene);

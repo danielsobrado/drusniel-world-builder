@@ -156,22 +156,35 @@ test('dispose rejects pending and queued work', async () => {
   });
 });
 
-test('settlement plans have independent queue identities and cancellation from terrain', async () => {
+test('settlement plans use one separate worker and queued cancellation cannot remove terrain', async () => {
   await withFakeWorkers(async () => {
     const client = makeClient({ workerCount: 1 }), worker = FakeWorker.instances[0];
-    const active = client.request(1, 1);
-    const terrain = client.request(0, 0);
-    const plan = client.request(0, 0, { settlementPlanId: 18, priority: 10 });
-    const cancelled = plan.catch(error => error);
+    const active = client.request(1, 1), terrain = client.request(0, 0);
+    const runningPlan = client.request(0, 0, { settlementPlanId: 17 });
+    const settlement = FakeWorker.instances[1];
+    const cancelled = client.request(0, 0, { settlementPlanId: 18 }).catch(error => error);
     assert.equal(client.cancelSettlementPlan(18), true);
     assert.equal((await cancelled).cancelled, true);
     worker.resolve(1); await active;
     assert.equal(worker.posted.at(-1).request.settlementPlanId, null);
     worker.resolve(2); await terrain;
-    const retry = client.request(0, 0, { settlementPlanId: 18 });
-    assert.equal(worker.posted.at(-1).request.settlementPlanId, 18);
-    worker.resolve(4, { settlementId: 18, plan: { id: 18 } });
-    assert.equal((await retry).settlementId, 18);
+    settlement.resolve(1, { settlementId: 17 }); await runningPlan;
     client.dispose();
+    assert.ok(settlement.terminated);
+  });
+});
+
+test('eight city requests cannot occupy any terrain worker, including a one-worker terrain pool', async () => {
+  await withFakeWorkers(async () => {
+    const client = makeClient({ workerCount: 1 });
+    const plans = Array.from({ length: 8 }, (_, settlementPlanId) => client.request(0, 0, { settlementPlanId }));
+    const terrain = client.request(42, 7, { priority: -100 });
+    assert.equal(FakeWorker.instances.length, 2);
+    assert.equal(FakeWorker.instances[0].posted[0].request.chunkX, 42);
+    const planner = FakeWorker.instances[1];
+    assert.equal(planner.posted.filter(message => message.request).length, 1);
+    FakeWorker.instances[0].resolve(1); await terrain;
+    for (let i = 0; i < 8; i++) planner.resolve(i + 1, { settlementId: i });
+    await Promise.all(plans); client.dispose();
   });
 });

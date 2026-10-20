@@ -3,7 +3,6 @@ import { sampleTableBuffers } from './PreparedSampleTable.js';
 import { generatePreparedPlacementChunk } from './PreparedPlacementChunk.js';
 import { generateBaseWorldChunk } from './generateWorldChunk.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
-import { generateSettlementPlan } from './settlements/SettlementPlanRequest.js';
 
 let baseTerrain = null;
 let worldGenerator = null;
@@ -31,7 +30,17 @@ self.addEventListener('message', async (event) => {
       worldGenerator = createWorldGenerator(generatorMetadata, baseTerrain);
     }
     if (request.settlementPlanId !== null && request.settlementPlanId !== undefined) {
-      self.postMessage({ id, page: generateSettlementPlan(worldGenerator, request.settlementPlanId) });
+      const generator = worldGenerator;
+      const { generateSettlementPlan } = await import('./settlements/SettlementPlanRequest.js');
+      const page = generateSettlementPlan(generator, request.settlementPlanId);
+      self.postMessage({ id, page }, [page.skyline.positions.buffer, page.skyline.colors.buffer,
+        page.skyline.normals.buffer, page.skyline.indices.buffer]);
+      return;
+    }
+    if (request.settlementRegistry) {
+      const generator = worldGenerator;
+      const { generateSettlementRegistry } = await import('./settlements/SettlementPlanRequest.js');
+      self.postMessage({ id, page: generateSettlementRegistry(generator) });
       return;
     }
     const page = request.placementSamplingConfig
@@ -69,7 +78,8 @@ self.addEventListener('message', async (event) => {
   } catch (error) {
     self.postMessage({
       id,
-      error: error instanceof Error ? error.message : String(error),
+      error: { message: error instanceof Error ? error.message : String(error),
+        code: error?.code, retryable: error?.retryable === true },
     });
   }
 });

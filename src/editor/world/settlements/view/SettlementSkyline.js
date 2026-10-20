@@ -1,105 +1,95 @@
 import * as THREE from 'three/webgpu';
-import { PLASTER_PALETTES, ROOF_PALETTES, STONE_PALETTES } from '../../../workshop/ProceduralWorkshopMaterials.js';
-import { finishIndexFor } from '../SettlementBuildingCatalog.js';
-import { settlementSkylineArrays } from './SettlementSkylineGeometry.js';
+import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../../../render/preparation/StagedDrawPublication.js';
+import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 
-export const SETTLEMENT_SKYLINE = Object.freeze({
-  /** Towns whose edge is within this many metres are given a skyline. */
-  radius: 3200,
-  /** The skyline takes over from the instanced meshes at this distance from the town's centre... */
-  near: 560,
-  /** ...and never while the camera is inside the town's own reach. */
-  maxTowns: 8,
-});
+export const SETTLEMENT_SKYLINE = Object.freeze({ radius: 3200, near: 560, maxTowns: 8 });
 
-const linear = ([red, green, blue]) => [red / 255, green / 255, blue / 255];
-
-function skylineColors(style) {
-  const stone = linear((STONE_PALETTES[style.style] ?? STONE_PALETTES.granite).base);
-  const roof = linear((ROOF_PALETTES[style.topStyle] ?? ROOF_PALETTES.slate).ramp[0]).map((channel) => channel * 0.55);
-  return {
-    stone,
-    roof,
-    walls: (building) => {
-      const finish = style.finishes[finishIndexFor(building.kind, building.variant) % style.finishes.length];
-      return finish === 'masonry' ? stone : linear(PLASTER_PALETTES[finish].base).map((channel) => channel * 0.82);
-    },
-  };
-}
-
-/**
- * Settlements as distant massing (SettlementSkylineGeometry): one small mesh a
- * town, shown from where its instanced buildings stop being drawn out to a few
- * kilometres, so a city is on the horizon before it is underfoot.
- */
+/** Worker-prepared massing; installation and shader preparation are deferred. */
 export class SettlementSkyline {
-  constructor({ scene }) {
-    this.root = new THREE.Group();
-    this.root.name = 'settlement-skylines';
-    scene.add(this.root);
-    this.material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 1, metalness: 0, side: THREE.DoubleSide, flatShading: true });
+  constructor({ scene, getDrawPreparation = () => null }) {
+    this.root = new THREE.Group(); this.root.name = 'settlement-skylines'; scene.add(this.root);
+    this.getDrawPreparation = getDrawPreparation;
+    this.material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 1, metalness: 0,
+      side: THREE.DoubleSide, flatShading: true });
     this.material.name = 'settlement-skyline';
-    this.towns = new Map();
+    this.towns = new Map(); this.expected = new Map(); this.jobs = new Map(); this.failed = new Map();
+    this.staged = new Map();
+    this.origin = { x: 0, z: 0 }; this.focus = { x: 0, z: 0 };
   }
 
-  /**
-   * Adopt the towns round `focus` and drop the ones left behind. Builds at most
-   * one ready skyline a call; unavailable plans are requested ahead in a worker.
-   */
   refresh(field, focus, tileSize, getPlan = entry => entry.plan) {
-    const near = field
-      ? field.entriesNear(focus.x / tileSize, -focus.z / tileSize, SETTLEMENT_SKYLINE.radius / tileSize).slice(0, SETTLEMENT_SKYLINE.maxTowns)
-      : [];
-    const keep = new Set(near.map(({ entry }) => entry.settlement.id));
-    for (const [id, town] of this.towns) {
-      if (keep.has(id)) continue;
-      town.mesh.geometry.dispose();
-      town.mesh.removeFromParent();
-      this.towns.delete(id);
+    const near = field ? field.entriesNear(focus.x / tileSize, -focus.z / tileSize,
+      SETTLEMENT_SKYLINE.radius / tileSize).slice(0, SETTLEMENT_SKYLINE.maxTowns) : [];
+    this.expected = new Map(near.map(({ entry }) => [entry.settlement.id, entry]));
+    for (const [id, town] of this.towns) if (!this.expected.has(id)) {
+      town.mesh.geometry.dispose(); town.mesh.removeFromParent(); this.towns.delete(id);
     }
-    let next = null, plan = null;
-    for (const candidate of near) {
-      if (this.towns.has(candidate.entry.settlement.id)) continue;
-      const ready = getPlan(candidate.entry);
-      if (!next && ready) { next = candidate; plan = ready; }
+    for (const [id, job] of this.jobs) if (!this.expected.has(id)) {
+      job.return(); this.jobs.delete(id);
     }
-    if (!next) return;
-    const { settlement } = next.entry;
-    const arrays = settlementSkylineArrays(plan, skylineColors(plan.profile.style));
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(arrays.positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(arrays.colors, 3));
-    geometry.setIndex(new THREE.BufferAttribute(arrays.indices, 1));
-    geometry.computeVertexNormals();
-    geometry.computeBoundingSphere();
-    const mesh = new THREE.Mesh(geometry, this.material);
-    mesh.name = `settlement-skyline-${settlement.id}`;
-    mesh.castShadow = false;
-    mesh.receiveShadow = false;
-    mesh.userData.skipWarmup = true;
-    this.root.add(mesh);
-    this.towns.set(settlement.id, { mesh, centre: { x: settlement.cellX * tileSize, z: -settlement.cellZ * tileSize } });
+    for (const id of this.failed.keys()) if (!this.expected.has(id)) this.failed.delete(id);
+    for (const { entry } of near) {
+      const id = entry.settlement.id;
+      if (this.towns.has(id) || this.jobs.has(id) || this.failed.has(id)) continue;
+      getPlan(entry);
+      if (!entry.skyline) continue;
+      const centre = { x: entry.settlement.cellX * tileSize, z: -entry.settlement.cellZ * tileSize };
+      this.jobs.set(id, this.install(id, entry.skyline, centre));
+    }
   }
 
-  /** Place every skyline for this floating origin and show the ones far enough to need it. */
+  *install(id, arrays, centre) {
+    const geometry = new THREE.BufferGeometry(); let mesh = null, published = false;
+    try {
+      for (const [name, array] of [['position', arrays.positions], ['color', arrays.colors], ['normal', arrays.normals]]) {
+        yield; geometry.setAttribute(name, new THREE.BufferAttribute(array, 3));
+      }
+      yield; geometry.setIndex(new THREE.BufferAttribute(arrays.indices, 1));
+      geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3().fromArray(arrays.sphere.center), arrays.sphere.radius);
+      yield;
+      mesh = new THREE.Mesh(geometry, this.material); mesh.name = `settlement-skyline-${id}`;
+      mesh.castShadow = false; mesh.receiveShadow = false; mesh.userData.skipWarmup = true;
+      this.staged.set(id, { mesh, centre });
+      this.place({ mesh, centre });
+      yield* stagedDrawPublication(this.root, [mesh], this.getDrawPreparation());
+      this.place({ mesh, centre }); this.root.add(mesh); this.towns.set(id, { mesh, centre }); published = true;
+      PerfCounters.inc('settlementSkylinesInstalled');
+    } finally { this.staged.delete(id); if (!published) { mesh?.removeFromParent(); geometry.dispose(); } }
+  }
+
+  advance(shouldYield) {
+    for (const [id, job] of this.jobs) {
+      while (!shouldYield()) {
+        try {
+          const step = job.next();
+          if (step.done) { this.jobs.delete(id); break; }
+          if (step.value === WAIT_FOR_DRAW_PREPARATION) return;
+        } catch (error) { this.failed.set(id, error); this.jobs.delete(id); break; }
+        // Shader readiness changes between frames, not by spinning this job.
+      }
+      if (shouldYield()) return;
+    }
+  }
+
+  place({ mesh, centre }) {
+    mesh.position.set(centre.x - this.origin.x, 0, centre.z - this.origin.z);
+    mesh.visible = Math.hypot(centre.x - this.focus.x, centre.z - this.focus.z) > SETTLEMENT_SKYLINE.near;
+  }
   update(focus, origin) {
-    for (const { mesh, centre } of this.towns.values()) {
-      mesh.position.set(centre.x - origin.x, 0, centre.z - origin.z);
-      mesh.visible = Math.hypot(centre.x - focus.x, centre.z - focus.z) > SETTLEMENT_SKYLINE.near;
-    }
+    Object.assign(this.origin, origin); Object.assign(this.focus, focus);
+    for (const town of this.towns.values()) this.place(town);
+    for (const town of this.staged.values()) this.place(town);
   }
-
+  get pending() { return this.expected.size - this.towns.size; }
+  getPreparationStatus() {
+    return { ready: this.pending === 0 && this.failed.size === 0, expected: this.expected.size,
+      installed: this.towns.size, pending: this.pending, failed: this.failed.size,
+      errors: [...this.failed.values()].map(error => error.message) };
+  }
   clear() {
-    for (const { mesh } of this.towns.values()) {
-      mesh.geometry.dispose();
-      mesh.removeFromParent();
-    }
-    this.towns.clear();
+    for (const job of this.jobs.values()) job.return(); this.jobs.clear();
+    for (const { mesh } of this.towns.values()) { mesh.geometry.dispose(); mesh.removeFromParent(); }
+    this.towns.clear(); this.expected.clear(); this.failed.clear();
   }
-
-  dispose() {
-    this.clear();
-    this.material.dispose();
-    this.root.removeFromParent();
-  }
+  dispose() { this.clear(); this.material.dispose(); this.root.removeFromParent(); }
 }

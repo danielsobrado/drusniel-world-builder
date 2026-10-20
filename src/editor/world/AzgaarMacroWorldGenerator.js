@@ -9,6 +9,7 @@ import { createBiomeBoundaryWarp } from './BiomeBoundaryWarp.js';
 import { TrailGrading, validateTrailGrading } from './TrailGrading.js';
 import { validateRouteMetadata } from '../import/AzgaarRoutes.js';
 import { SettlementField } from './settlements/SettlementField.js';
+import { settlementRegistryKey, validSettlementRegistry } from './settlements/SettlementRegistry.js';
 import { validateSettlementMetadata } from './settlements/SettlementData.js';
 import { TILE_BY_KEY } from '../tileCatalog.js';
 import { WORLD_MAX_SAFE_CELL_COORDINATE } from './worldConstants.js';
@@ -242,6 +243,7 @@ export class AzgaarMacroWorldGenerator {
     this.source = source;
     this.trailGrading = undefined;
     this.settlementField = undefined;
+    this.settlementRegistryKey = source.settlements?.length ? settlementRegistryKey(source, proceduralMetadata.seed) : null;
     this.heights = decodeGuidanceField(source, 'elevation');
     this.biomeAtlas = decodeGuidanceField(source, 'biomeId');
     this.features = hasGuidanceField(source, 'featureId')
@@ -439,6 +441,9 @@ export class AzgaarMacroWorldGenerator {
       this.settlementField = null;
       return null;
     }
+    if (validSettlementRegistry(this.source.settlementRegistry, this.settlementRegistryKey)) {
+      return this.installSettlementRegistry(this.source.settlementRegistry);
+    }
     const { bounds, atlas, physical } = this.source;
     const toCell = ([x, y]) => [
       bounds.minCellX + x / atlas.width * bounds.widthCells,
@@ -452,6 +457,15 @@ export class AzgaarMacroWorldGenerator {
       sampleGround: (cellX, cellZ) => this.sampleGroundHeight(cellX, cellZ),
       isBuildable: (cellX, cellZ) => this.isDryLand(cellX, cellZ),
       landSearchStepCells: bounds.widthCells / atlas.width,
+    });
+    return this.settlementField;
+  }
+
+  installSettlementRegistry(registry) {
+    if (!validSettlementRegistry(registry, this.settlementRegistryKey)) throw new Error('Mismatched settlement registry.');
+    this.settlementField = SettlementField.fromRegistry(registry, {
+      sampleGround: (x, z) => this.sampleGroundHeight(x, z),
+      isBuildable: (x, z) => this.isDryLand(x, z),
     });
     return this.settlementField;
   }

@@ -4,6 +4,8 @@ import {
 } from '../world/worldConstants.js';
 import { createAzgaarCartographySource } from './AzgaarCartographySource.js';
 import { serializeWaterDomainConfig } from '../water/WaterConfig.js';
+import { AzgaarMacroWorldGenerator } from '../world/AzgaarMacroWorldGenerator.js';
+import { serializeSettlementRegistry } from '../world/settlements/SettlementRegistry.js';
 import {
   buildAzgaarImportSummary,
   createAzgaarMacroWorldSource,
@@ -233,6 +235,13 @@ export function importAzgaarFullJson(document, config, options = {}) {
   const summary = buildAzgaarImportSummary(sourceDocument, config, options);
   assertSafeWorldBounds(summary, config);
   const baseTerrain = createAzgaarMacroWorldSource(sourceDocument, config, options);
+  // The browser import runs in its import worker. Persist the cheap immutable
+  // registry, not plans, so first terrain/view use never repeats coastline search.
+  if (baseTerrain.settlements?.length) {
+    const generator = new AzgaarMacroWorldGenerator(baseTerrain, { seed: config.world.seed,
+      version: config.world.generatorVersion, heightScale: config.world.heightScale, seaLevel: config.world.seaLevel });
+    baseTerrain.settlementRegistry = serializeSettlementRegistry(generator.ensureSettlementField(), generator.settlementRegistryKey);
+  }
   const cartography = Array.isArray(document.pack?.vertices)
     ? createAzgaarCartographySource(document)
     : null;

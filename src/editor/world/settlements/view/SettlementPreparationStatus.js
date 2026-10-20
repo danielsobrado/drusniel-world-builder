@@ -3,7 +3,9 @@ export function settlementPreparationStatus(view) {
   if (!view.enabled || view.disposed) return { ready: true, enabled: false };
   const pool = view.pool;
   let sites = 0, surfaces = 0, installation = 0, requestedBuildings = 0, requestedProps = 0;
-  const errors = [...(view.plans?.errors ?? [])];
+  const skyline = view.skyline?.getPreparationStatus() ?? { ready: true, pending: 0 };
+  const registry = view.registry?.pending ?? 0;
+  const errors = [...(view.plans?.errors ?? []), ...(view.registry?.errors ?? []), ...(skyline.errors ?? [])];
   const plans = view.plans?.pending ?? 0;
   const selection = Number(Boolean(view.selectionJob));
   for (const site of view.sites.values()) {
@@ -18,9 +20,9 @@ export function settlementPreparationStatus(view) {
   const variants = pool.pending;
   const compilation = pool.uncompiled.length + pool.compiling + (pool.publications?.pending.size ?? 0);
   const reveal = pool.unrevealed.length;
-  return { ready: plans + selection + sites + surfaces + installation + variants + compilation + reveal === 0
+  return { ready: registry + plans + selection + sites + surfaces + installation + variants + compilation + reveal === 0 && skyline.ready
     && errors.length === 0 && (view.sites.size === 0 || (!view.dirty && !view.fading)),
-  enabled: true, plans, selection, sites, surfaces, installation, variants, compilation, reveal,
+  enabled: true, registry, skyline, plans, selection, sites, surfaces, installation, variants, compilation, reveal,
   requestedBuildings, requestedProps, visibleBuildings: view.visibleBuildings ?? 0,
   visibleProps: view.visibleProps ?? 0, residentSites: view.sites.size, errors: errors.slice(0, 16) };
 }

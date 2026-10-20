@@ -1,14 +1,16 @@
 import { settlementPlanIndexJob } from '../SettlementPlanIndex.js';
 import { SETTLEMENT_PLAN_VERSION } from '../SettlementPlanner.js';
 import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
+import { SettlementRequestRetry } from './SettlementRequestRetry.js';
 
 /** Worker planning, then bounded index installation. Never plans a city in a view update. */
 export class SettlementPlanPreparation {
-  constructor(onReady = () => {}) {
+  constructor(onReady = () => {}, retryOptions = {}) {
     this.onReady = onReady;
     this.requests = new Map();
     this.epoch = 0;
     this.wanted = new Set();
+    this.retry = new SettlementRequestRetry(retryOptions);
   }
 
   reset() {
@@ -27,28 +29,42 @@ export class SettlementPlanPreparation {
 
   get(entry, priority = 0) {
     this.wanted.add(entry.settlement.id);
-    if (entry.plan !== undefined) return entry.plan;
+    if (entry.plan !== undefined && entry.skyline !== undefined) return entry.plan;
     const id = entry.settlement.id;
-    if (this.requests.has(id)) return null;
-    const request = { entry, epoch: this.epoch, job: null, error: null };
+    const existing = this.requests.get(id);
+    if (existing) {
+      if (this.retry.due(existing)) this.start(id, existing);
+      return entry.plan ?? null;
+    }
+    const request = { entry, priority, epoch: this.epoch, job: null, error: null, attempts: 0 };
     this.requests.set(id, request);
+    this.start(id, request);
+    return entry.plan ?? null;
+  }
+
+  start(id, request) {
+    request.attempts++;
+    request.error = null;
     const worker = this.store?.chunkWorker;
     if (!worker) {
-      request.error = new Error('Settlement planning requires the terrain worker.');
-      return null;
+      this.retry.fail(request, new Error('Settlement planning requires the terrain worker.'));
+      return;
     }
     PerfCounters.inc('settlementPlansRequested');
-    worker.request(0, 0, { settlementPlanId: id, priority }).then(result => {
+    worker.request(0, 0, { settlementPlanId: id, priority: request.priority }).then(result => {
       if (request.epoch !== this.epoch || this.requests.get(id) !== request) return;
       if (result.settlementId !== id || result.plan?.id !== id || result.plan.version !== SETTLEMENT_PLAN_VERSION) {
         throw new Error(`Settlement ${id} returned a mismatched plan.`);
       }
+      if (!(result.skyline?.positions instanceof Float32Array) || !(result.skyline.normals instanceof Float32Array)
+        || !(result.skyline.colors instanceof Float32Array) || !(result.skyline.indices instanceof Uint32Array)
+        || !Number.isFinite(result.skyline.sphere?.radius)) throw new Error(`Settlement ${id} returned invalid skyline data.`);
       request.plan = result.plan;
+      request.skyline = result.skyline;
       request.job = settlementPlanIndexJob(result.plan);
     }).catch(error => {
-      if (request.epoch === this.epoch && this.requests.get(id) === request) request.error = error;
+      if (request.epoch === this.epoch && this.requests.get(id) === request) this.retry.fail(request, error);
     });
-    return null;
   }
 
   begin() { this.wanted.clear(); }
@@ -63,15 +79,20 @@ export class SettlementPlanPreparation {
     const started = performance.now();
     try {
       for (const [id, request] of this.requests) {
-        if (request.entry.plan !== undefined) { this.requests.delete(id); continue; }
+        if (request.entry.plan !== undefined && request.entry.skyline !== undefined) { this.requests.delete(id); continue; }
+        if (this.retry.due(request) && !shouldYield()) this.start(id, request);
         if (!request.job) continue;
+        if (request.entry.plan !== undefined) {
+          request.entry.skyline = request.skyline; this.requests.delete(id); this.onReady(); continue;
+        }
         while (!shouldYield()) {
           let step;
           try { step = request.job.next(); }
-          catch (error) { request.error = error; request.job = null; break; }
+          catch (error) { this.retry.fail(request, error); break; }
           if (!step.done) continue;
           request.entry.plan = request.plan;
           request.entry.index = step.value;
+          request.entry.skyline = request.skyline;
           this.requests.delete(id);
           this.onReady();
           break;

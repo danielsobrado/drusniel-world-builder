@@ -5,7 +5,7 @@ import { createTerrainWorkerBaseTerrain } from './TerrainWorkerBaseTerrain.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { WorkerPriorityQueue } from './WorkerPriorityQueue.js';
 import { chunkKey } from './WorldCoordinates.js';
-import { generateSettlementPlan } from './settlements/SettlementPlanRequest.js';
+import { generateSettlementPlan, generateSettlementRegistry } from './settlements/SettlementPlanRequest.js';
 
 const DEFAULT_MAX_IN_FLIGHT_PER_WORKER = 1;
 const MAX_WORKER_COUNT = 8;
@@ -63,6 +63,7 @@ export class WorldChunkWorkerClient {
     workerCount = null,
     maxInFlightPerWorker = DEFAULT_MAX_IN_FLIGHT_PER_WORKER,
     allowMainThreadFallback = typeof window === 'undefined' && typeof Worker !== 'function',
+    settlementLane = false,
   }) {
     this.chunkSize = chunkSize;
     this.generator = generator.toMetadata();
@@ -77,6 +78,8 @@ export class WorldChunkWorkerClient {
     this.queuedByKey = new Map();  // chunk key -> queued job (for cancel/reprioritize)
     this.disposed = false;
     this.allowMainThreadFallback = allowMainThreadFallback;
+    this.settlementLane = settlementLane;
+    this.settlementWorker = null;
     this.unavailableReason = null;
     this.workers = [];
     this.inFlight = [];
@@ -145,6 +148,7 @@ export class WorldChunkWorkerClient {
       .then(() => {
         if (this.disposed) throw disposedError();
         if (request.materialBakeRequest) return bakeTerrainMaterialPage(request.materialBakeRequest);
+        if (request.settlementRegistry) return generateSettlementRegistry(this.ensureWorldGenerator());
         if (request.settlementPlanId !== null && request.settlementPlanId !== undefined) {
           return generateSettlementPlan(this.ensureWorldGenerator(), request.settlementPlanId);
         }
@@ -162,6 +166,7 @@ export class WorldChunkWorkerClient {
     const nextWorkerBaseTerrain = createTerrainWorkerBaseTerrain(baseTerrain);
     this.baseTerrain = nextWorkerBaseTerrain;
     this.worldGenerator = null;
+    this.settlementWorker?.setBaseTerrain(baseTerrain);
     for (let index = 0; index < this.workers.length; index += 1) {
       const worker = this.workers[index];
       if (!worker) continue;
@@ -177,9 +182,22 @@ export class WorldChunkWorkerClient {
     }
   }
 
-  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null, settlementPlanId = null } = {}) {
+  settlementPool() {
+    if (!this.settlementWorker) {
+      this.settlementWorker = new WorldChunkWorkerClient({ chunkSize: this.chunkSize,
+        generator: { toMetadata: () => this.generator }, workerCount: 1,
+        settlementLane: true, allowMainThreadFallback: this.allowMainThreadFallback });
+      this.settlementWorker.setBaseTerrain(this.baseTerrain);
+    }
+    return this.settlementWorker;
+  }
+
+  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null, settlementPlanId = null, settlementRegistry = false } = {}) {
     if (this.disposed) {
       return Promise.reject(disposedError());
+    }
+    if (!this.settlementLane && (settlementPlanId !== null || settlementRegistry)) {
+      return this.settlementPool().request(chunkX, chunkZ, { priority, settlementPlanId, settlementRegistry });
     }
     const request = {
       chunkX,
@@ -192,6 +210,7 @@ export class WorldChunkWorkerClient {
       materialBakeRequest,
       terrainOverrides,
       settlementPlanId,
+      settlementRegistry,
     };
     // CPU generation is an explicit non-browser backend; browser failure pauses streaming.
     if (this.workers.length === 0) {
@@ -200,7 +219,7 @@ export class WorldChunkWorkerClient {
 
     const id = this.nextId;
     this.nextId += 1;
-    const key = settlementPlanId !== null ? `settlement:${settlementPlanId}`
+    const key = settlementRegistry ? 'settlement-registry' : settlementPlanId !== null ? `settlement:${settlementPlanId}`
       : materialBakeRequest ? `material:${materialBakeRequest.descriptor.key}`
       : `${placementSamplingConfig ? 'placement:' : ''}${chunkKey(chunkX, chunkZ)}`;
     return new Promise((resolve, reject) => {
@@ -233,7 +252,13 @@ export class WorldChunkWorkerClient {
     return this.cancelQueued(`${namespace}${chunkKey(chunkX, chunkZ)}`);
   }
 
-  cancelSettlementPlan(id) { return this.cancelQueued(`settlement:${id}`); }
+  cancelSettlementPlan(id) {
+    return this.settlementLane ? this.cancelQueued(`settlement:${id}`) : this.settlementWorker?.cancelSettlementPlan(id) ?? false;
+  }
+
+  cancelSettlementRegistry() {
+    return this.settlementLane ? this.cancelQueued('settlement-registry') : this.settlementWorker?.cancelSettlementRegistry() ?? false;
+  }
 
   cancelQueued(key) {
     const job = this.queuedByKey.get(key);
@@ -304,7 +329,8 @@ export class WorldChunkWorkerClient {
     this.inFlight[pending.workerIndex] = Math.max(0, this.inFlight[pending.workerIndex] - 1);
     this.workerRestartCounts[pending.workerIndex] = 0;
     if (error) {
-      pending.reject(new Error(error));
+      pending.reject(Object.assign(new Error(typeof error === 'string' ? error : error.message),
+        typeof error === 'object' ? { code: error.code, retryable: error.retryable === true } : {}));
     } else if (!page || typeof page !== 'object') {
       pending.reject(new Error('World chunk worker returned an invalid page.'));
     } else {
@@ -392,6 +418,7 @@ export class WorldChunkWorkerClient {
       return;
     }
     this.disposed = true;
+    this.settlementWorker?.dispose();
     for (const worker of this.workers) {
       worker?.terminate();
     }
