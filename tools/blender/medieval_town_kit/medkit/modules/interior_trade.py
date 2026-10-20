@@ -11,19 +11,26 @@ from mathutils import Matrix
 
 from ..config import detailed
 from ..mesh import MeshBuilder
+from .carpentry import molded_cornice, recessed_panel_front, shaped_bracket_base
 from .interior import _at, _candle
 
 
 def counter(length=2.0):
-    """Panelled timber shop and tavern bar counter; customer side is -Y."""
+    """Carved & panelled shop/tavern bar counter with bracket base, recessed knotwork
+    front bays, and overhanging molded walnut bar top; customer side is -Y."""
     b = MeshBuilder()
     h = length / 2
-    b.box((-h + 0.04, -0.26, 0), (h - 0.04, 0.24, 0.96), 'planks')
-    b.box((-h, -0.32, 0.96), (h, 0.3, 1.04), 'timber')
+    shaped_bracket_base(b, -h + 0.02, h - 0.02, -0.28, 0.24, h=0.10, foot_w=0.14)
+    b.box((-h + 0.04, -0.26, 0.10), (h - 0.04, 0.24, 0.95), 'wood_trim')
+    molded_cornice(b, -h, h, -0.32, 0.30, 0.95, h=0.09, overhang=0.04)
     for x in (-h + 0.02, -0.04, h - 0.1):
-        b.box((x, -0.29, 0), (x + 0.08, -0.24, 0.96), 'timber')
-    b.box((-h + 0.02, -0.29, 0.06), (h - 0.02, -0.24, 0.14), 'timber')
+        b.box((x, -0.29, 0.10), (x + 0.08, -0.24, 0.95), 'wood_trim', tone=0.98)
     if detailed():
+        for px0, px1 in ((-h + 0.11, -0.05), (0.05, h - 0.11)):
+            recessed_panel_front(b, px0, px1, 0.16, 0.72, -0.265, depth=0.022, border=0.026,
+                                 carved=True, style='knotwork')
+            recessed_panel_front(b, px0, px1, 0.76, 0.91, -0.265, depth=0.018, border=0.02,
+                                 carved=True, style='frieze')
         b.box((-h + 0.08, -0.18, 0.46), (h - 0.08, 0.22, 0.51), 'planks')
         for x in (-0.55, -0.25):
             b.lathe([(0.0, 1.04), (0.05, 1.04), (0.045, 1.17), (0.0, 1.17)], 8, 'iron',

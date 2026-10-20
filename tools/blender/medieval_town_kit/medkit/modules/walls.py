@@ -7,6 +7,7 @@ import math
 
 from ..config import GRID, HALF_T as T, JETTY, JETTY_LEVELS, STORY, detailed
 from ..mesh import MeshBuilder
+from .carpentry import carved_relief_motif, iron_latch_and_ring, ornate_strap_hinge, recessed_panel_front
 
 INTERIOR = {'+y': 'plaster'}
 WINDOW = (0.65, 1.35, 1.0, 2.2)
@@ -33,16 +34,36 @@ def window_dressing(b, hole, stone):
     for lo, hi in (((x0, -0.06, z0), (x0 + f, 0.06, z1)), ((x1 - f, -0.06, z0), (x1, 0.06, z1)),
                    ((x0 + f, -0.06, z0), (x1 - f, 0.06, z0 + f)),
                    ((x0 + f, -0.06, z1 - f), (x1 - f, 0.06, z1))):
-        b.box(lo, hi, 'timber')
+        b.box(lo, hi, 'wood_trim')
     b.box((x0 + f, -0.02, z0 + f), (x1 - f, 0.02, z1 - f), 'glass', skip=('-x', '+x', '-z', '+z'))
-    sill_mat = 'stone_dressed' if stone else 'timber'
-    b.box((x0 - 0.1, -T - 0.12, z0 - 0.1), (x1 + 0.1, 0.0, z0 + 0.02), sill_mat)
+    if detailed():
+        xm = (x0 + x1) * 0.5
+        zm = (z0 + z1) * 0.5
+        # Central wooden mullion and transom bars + diamond leaded cames
+        b.box((xm - 0.02, -0.038, z0 + f), (xm + 0.02, 0.038, z1 - f), 'wood_trim', bevel=0)
+        b.box((x0 + f, -0.035, zm - 0.018), (x1 - f, 0.035, zm + 0.018), 'wood_trim', bevel=0)
+    sill_mat = 'stone_dressed' if stone else 'wood_trim'
+    b.box((x0 - 0.1, -T - 0.13, z0 - 0.1), (x1 + 0.1, 0.0, z0 + 0.02), sill_mat)
+    if detailed() and not stone:
+        # Carved corbel brackets under wooden window sill
+        for cx in (x0 - 0.03, x1 + 0.03):
+            b.box((cx - 0.035, -T - 0.11, z0 - 0.2), (cx + 0.035, -T, z0 - 0.1), 'timber', bevel=0)
     if stone and detailed():
         arched_head(b, (x0 + x1) / 2, z1, (x1 - x0) / 2)
     elif stone:
         b.box((x0 - 0.14, -T - 0.05, z1), (x1 + 0.14, -T + 0.04, z1 + 0.24), 'stone_dressed')
-    for sx0, sx1 in ((x0 - 0.36, x0 - 0.04), (x1 + 0.04, x1 + 0.36)):
-        b.box((sx0, -T - 0.07, z0 + 0.03), (sx1, -T - 0.03, z1 - 0.03), 'planks')
+    for sx0, sx1, sdir in ((x0 - 0.36, x0 - 0.04, -1), (x1 + 0.04, x1 + 0.36, 1)):
+        b.box((sx0, -T - 0.07, z0 + 0.03), (sx1, -T - 0.03, z1 - 0.03), 'wood_trim')
+        if detailed():
+            zm = (z0 + z1) * 0.5
+            recessed_panel_front(b, sx0 + 0.03, sx1 - 0.03, zm + 0.02, z1 - 0.06, -T - 0.072,
+                                 depth=0.014, border=0.018, carved=True, style='knotwork')
+            recessed_panel_front(b, sx0 + 0.03, sx1 - 0.03, z0 + 0.06, zm - 0.02, -T - 0.072,
+                                 depth=0.014, border=0.018, carved=True, style='knotwork')
+            hx = sx1 if sdir < 0 else sx0
+            for hz in (z0 + 0.18, z1 - 0.18):
+                b.box((min(hx, hx - sdir * 0.18), -T - 0.078, hz - 0.012),
+                      (max(hx, hx - sdir * 0.18), -T - 0.068, hz + 0.012), 'iron', bevel=0)
 
 
 def arched_head(b, cx, z, r):
@@ -76,12 +97,16 @@ def voussoir_arch(b, cx, base_z, r0, r1, y0, y1, count=7):
 
 def door_frame(b, stone):
     x0, x1, _, z1 = DOOR
-    b.box((x0, -0.1, 0), (x0 + 0.08, 0.1, z1), 'timber')
-    b.box((x1 - 0.08, -0.1, 0), (x1, 0.1, z1), 'timber')
-    b.box((x0 + 0.08, -0.1, z1 - 0.08), (x1 - 0.08, 0.1, z1), 'timber')
+    b.box((x0, -0.11, 0), (x0 + 0.085, 0.1, z1), 'wood_trim')
+    b.box((x1 - 0.085, -0.11, 0), (x1, 0.1, z1), 'wood_trim')
+    b.box((x0 + 0.085, -0.11, z1 - 0.09), (x1 - 0.085, 0.1, z1), 'wood_trim')
     b.box((x0 - 0.1, -T - 0.3, 0), (x1 + 0.1, -T + 0.02, 0.12), 'stone_dressed', skip=('-z',))
     if stone:
         voussoir_arch(b, (x0 + x1) / 2, z1 - 0.12, 0.52, 0.8, -T - 0.07, -T + 0.04)
+    elif detailed():
+        # Carved lintel frieze beam over timber doors
+        b.box((x0 - 0.04, -T - 0.07, z1), (x1 + 0.04, -T - 0.01, z1 + 0.14), 'wood_trim')
+        carved_relief_motif(b, x0 + 0.04, x1 - 0.04, z1 + 0.02, z1 + 0.12, -T - 0.07, style='frieze')
 
 
 def stone_wall(hole=None, door=False):
@@ -205,12 +230,32 @@ def _merge(b, other):
 
 
 def door_leaf():
-    """Hinged at local x=0; rotate around Z to open."""
+    """Hinged at local x=0; rotate around Z to open.
+    AAA carved oak door with vertical stiles, horizontal rails, recessed Nordic/Celtic
+    knotwork panels, wrought-iron fleur-de-lis strap hinges with rivets, and ring latch."""
     b = MeshBuilder()
-    b.box((0, -0.04, 0), (0.84, 0.04, 2.08), 'planks')
-    for z in (0.3, 1.0, 1.72):
-        b.box((0.03, -0.06, z), (0.8, -0.04, z + 0.07), 'iron')
-    b.box((0.66, -0.1, 0.98), (0.72, -0.04, 1.1), 'iron')
+    w, h = 0.84, 2.08
+    # Core door slab and molded outer stiles/rails
+    b.box((0.0, -0.036, 0.0), (w, 0.036, h), 'wood_trim', tone=0.90)
+    stile = 0.085
+    for sx0, sx1 in ((0.0, stile), (w - stile, w)):
+        b.box((sx0, -0.044, 0.0), (sx1, 0.044, h), 'wood_trim', tone=0.96)
+    for rz0, rz1 in ((0.0, 0.12), (0.88, 1.00), (1.72, 1.80), (h - 0.10, h)):
+        b.box((stile, -0.042, rz0), (w - stile, 0.042, rz1), 'wood_trim', tone=0.94)
+
+    # Top frieze panel + upper & lower carved knotwork square panels on exterior (-Y)
+    px0, px1 = stile + 0.008, w - stile - 0.008
+    recessed_panel_front(b, px0, px1, 1.80, h - 0.10, -0.044,
+                         depth=0.018, border=0.018, carved=True, style='frieze')
+    recessed_panel_front(b, px0, px1, 1.00, 1.72, -0.044,
+                         depth=0.022, border=0.024, carved=True, style='knotwork')
+    recessed_panel_front(b, px0, px1, 0.12, 0.88, -0.044,
+                         depth=0.022, border=0.024, carved=True, style='knotwork')
+
+    # Three ornate forged wrought-iron fleur-de-lis strap hinges and ring pull latch
+    for hz in (0.34, 1.04, 1.74):
+        ornate_strap_hinge(b, 0.025, hz, 0.56, -0.044, dir_x=1)
+    iron_latch_and_ring(b, w - 0.11, 1.04, -0.044)
     return b
 
 

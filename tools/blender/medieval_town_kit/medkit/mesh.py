@@ -116,27 +116,27 @@ class MeshBuilder:
             self.poly(pts, (mats or {}).get(key, mat), outward=m3 @ Vector(_AXIS[key]),
                       grain_dir=grain, tone=tone)
 
-    def beam(self, p0, p1, side_axis, side_range, width, mat, mats=None, bevel=None):
+    def beam(self, p0, p1, side_axis, side_range, width, mat, mats=None, bevel=None, tone=1.0):
         """Box from p0 to p1; side_range spans along side_axis, width along the third axis."""
         d = Vector(p1) - Vector(p0)
         m = frame(p0, d, side_axis)
         self.box((0, side_range[0], -width / 2), (d.length, side_range[1], width / 2),
-                 mat, m=m, mats=mats, bevel=bevel)
+                 mat, m=m, mats=mats, bevel=bevel, tone=tone)
 
-    def extrude(self, pts, offset, mat, m=IDENTITY, side_mat=None):
+    def extrude(self, pts, offset, mat, m=IDENTITY, side_mat=None, tone=1.0):
         """Prism from a convex planar polygon swept along offset."""
         m3 = m.to_3x3()
         base = [m @ Vector(p) for p in pts]
         off = m3 @ Vector(offset)
         top = [p + off for p in base]
         centre = sum(base, Vector()) / len(base)
-        self.poly(base, mat, outward=-off)
-        self.poly(top, mat, outward=off)
+        self.poly(base, mat, outward=-off, tone=tone)
+        self.poly(top, mat, outward=off, tone=tone)
         for i, a in enumerate(base):
             b = base[(i + 1) % len(base)]
             out = (a + b) / 2 - centre
             out -= off.normalized() * out.dot(off.normalized())
-            self.poly([a, b, b + off, a + off], side_mat or mat, outward=out)
+            self.poly([a, b, b + off, a + off], side_mat or mat, outward=out, tone=tone)
 
     def lathe(self, profile, seg, mat, m=IDENTITY, smooth=True, phase=0.0):
         """Surface of revolution of [(r, z), ...] around local Z.

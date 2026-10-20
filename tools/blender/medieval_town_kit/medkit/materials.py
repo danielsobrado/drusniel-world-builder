@@ -22,6 +22,7 @@ class Spec:
     emission: float = 0.0
     normal: float = 1.0
     color: tuple = (0.8, 0.8, 0.8)
+    glow_tint: tuple = None  # emission colour multiplier; None emits the albedo itself
 
 
 SPEC = {
@@ -31,8 +32,10 @@ SPEC = {
     'stone_dressed': Spec('dressed', 1.2, 0.88, normal=1.3),
     'cobble': Spec('cobble', 2.0, 0.85, normal=2.0),
     'plaster': Spec('plaster', 2.0, 0.95, normal=1.4, tint=(1.0, 0.93, 0.8)),
-    'timber': Spec('timber', 1.5, 0.8, grain=True, normal=1.6),
-    'planks': Spec('planks', 2.0, 0.8, grain=True, normal=1.6),
+    'timber': Spec('timber', 1.5, 0.76, grain=True, normal=1.6),
+    'wood_trim': Spec('fine_wood', 1.1, 0.62, grain=True, normal=0.95, tint=(1.04, 0.98, 0.92)),
+    'carved_wood': Spec('carved_wood', 0.6, 0.64, fit=True, normal=1.8),
+    'planks': Spec('planks', 2.0, 0.78, grain=True, normal=1.8),
     # Near-neutral weathered slate; the game's workshop houses tint the same scan alike.
     'roof': Spec('roof', 2.0, 0.85, tint=(0.6, 0.6, 0.62), normal=2.0),
     'roof_terracotta': Spec('terracotta', 2.0, 0.8, normal=1.6),
@@ -40,7 +43,13 @@ SPEC = {
     'clapboard': Spec('clapboard', 2.0, 0.85, normal=1.6),
     'grass': Spec('grass', 2.0, 0.95),
     'iron': Spec('iron', 1.0, 0.45, metal=0.85),
-    'glass': Spec('window', fit=True, rough=0.3, emission=1.6),
+    # Old crown glass: dark and reflective by day with a low warm glow from the
+    # room behind, so panes read as glass instead of lit white panels.
+    'glass': Spec('window', fit=True, rough=0.12, emission=0.45, tint=(0.42, 0.44, 0.46),
+                  glow_tint=(1.0, 0.66, 0.36)),
+    # Cured hides stretched over goblin walls, and bleached trophy bone.
+    'hide': Spec('cloth', 0.8, 0.92, tint=(0.56, 0.41, 0.28), normal=1.4),
+    'bone': Spec(color=(0.8, 0.74, 0.6), rough=0.55),
     # Weathered dyes: earth pigments gone chalky in the sun, never primaries
     # (the game's SettlementView trim uses the same aged palette).
     'cloth_cream': Spec('cloth', 1.0, 0.95, tint=(0.86, 0.8, 0.68)),
@@ -91,11 +100,21 @@ def _build(name, spec, images):
     bsdf.inputs['Roughness'].default_value = spec.rough
     bsdf.inputs['Metallic'].default_value = spec.metal
     color_out = None
+    emit_out = None
     if spec.tex:
         albedo, normal = images[spec.tex]
         tex = nodes.new('ShaderNodeTexImage')
         tex.image = albedo
         color_out = tex.outputs['Color']
+        emit_out = color_out
+        if spec.glow_tint:
+            glow = nodes.new('ShaderNodeMix')
+            glow.data_type = 'RGBA'
+            glow.blend_type = 'MULTIPLY'
+            glow.inputs[0].default_value = 1.0
+            links.new(color_out, glow.inputs[6])
+            glow.inputs[7].default_value = _linear(spec.glow_tint)
+            emit_out = glow.outputs[2]
         if spec.tint != (1.0, 1.0, 1.0):
             mix = nodes.new('ShaderNodeMix')
             mix.data_type = 'RGBA'
@@ -116,8 +135,8 @@ def _build(name, spec, images):
         solid.outputs[0].default_value = _linear(spec.color)
         links.new(_with_shading(nodes, links, solid.outputs[0]), bsdf.inputs['Base Color'])
     if spec.emission:
-        if color_out is not None:
-            links.new(color_out, bsdf.inputs['Emission Color'])
+        if emit_out is not None:
+            links.new(emit_out, bsdf.inputs['Emission Color'])
         else:
             bsdf.inputs['Emission Color'].default_value = _linear(spec.color)
         bsdf.inputs['Emission Strength'].default_value = spec.emission
