@@ -1,0 +1,60 @@
+{
+  "kind": "settlement-preparation-work-counts",
+  "timingAcceptance": "unverified",
+  "baseline": {
+    "registry": {
+      "entries": 926,
+      "coastlineProbesOnFirstUse": 32675,
+      "coastlineProbesInWorkerPreparation": 0,
+      "resolvedEntriesAfterLocalQuery": 926
+    },
+    "capacity": {
+      "cityBurst": 8,
+      "terrainWorkers": 8,
+      "terrainWorkersOccupiedByPlans": 8,
+      "terrainRequestDispatchedImmediately": false,
+      "dedicatedSettlementWorkers": 0
+    },
+    "skyline": {
+      "buildings": 268,
+      "mainThreadBuildingsMassed": 268,
+      "workerBuildingsMassed": 0,
+      "installationTurns": 1,
+      "vertices": 7100
+    },
+    "retry": {
+      "injectedTransientFailures": 1,
+      "requests": 1,
+      "recoveredInPlace": false
+    }
+  },
+  "candidate": {
+    "registry": {
+      "entries": 926,
+      "coastlineProbesOnFirstUse": 0,
+      "coastlineProbesInWorkerPreparation": 32675,
+      "resolvedEntriesAfterLocalQuery": 21
+    },
+    "capacity": {
+      "cityBurst": 8,
+      "terrainWorkers": 8,
+      "terrainWorkersOccupiedByPlans": 0,
+      "terrainRequestDispatchedImmediately": true,
+      "dedicatedSettlementWorkers": 1
+    },
+    "skyline": {
+      "buildings": 268,
+      "mainThreadBuildingsMassed": 0,
+      "workerBuildingsMassed": 268,
+      "installationTurns": 4,
+      "vertices": 7100
+    },
+    "retry": {
+      "injectedTransientFailures": 1,
+      "requests": 2,
+      "recoveredInPlace": true
+    }
+  },
+  "baselineSourceSha": "d7dd7e02d0696050eeee99e22f4e8510c95ecb16",
+  "candidateSourceSha": "f5033e7379c6a37e98f86b6d43dd1e47f8f9baa1"
+}

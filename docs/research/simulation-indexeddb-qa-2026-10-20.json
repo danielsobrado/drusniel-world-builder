@@ -1,0 +1,34 @@
+{
+  "kind": "simulation-indexeddb-qa",
+  "sourceSha": "f5033e7379c6a37e98f86b6d43dd1e47f8f9baa1",
+  "passed": true,
+  "browserRestarted": true,
+  "gpuUsed": false,
+  "errors": [],
+  "stateChecksum": "db24bd8c",
+  "snapshotChecksum": "379d277a",
+  "archivedCommands": 32,
+  "history": {
+    "residentCommands": 0,
+    "archivedCommands": 32,
+    "checkpoint": "1d5e35e7-48de-4001-8fff-8b81dc329875:checkpoint:12",
+    "checkpointCommands": 32,
+    "pendingCommands": 0,
+    "segments": 8,
+    "pending": 0,
+    "errors": []
+  },
+  "checks": [
+    "browser-restart",
+    "default-persistent-adapter",
+    "exact-state-and-snapshot-checksum",
+    "interrupted-save-preserves-manifest",
+    "namespace-isolation",
+    "overlapping-transactions",
+    "aborted-commit-and-retry",
+    "archive-order",
+    "bounded-reason-log",
+    "corrupt-load-isolation",
+    "unavailable-indexeddb-is-explicit"
+  ]
+}

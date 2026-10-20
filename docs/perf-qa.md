@@ -215,6 +215,13 @@ Deterministic CPU work-count comparisons for these paths are recorded in
 [critical-path-review-fixes-2026-10-19.md](critical-path-review-fixes-2026-10-19.md).
 They do not replace hardware frame pacing or scenery-recovery acceptance.
 
+The next review's registry cache, isolated settlement worker, retries, skyline
+publication/readiness and durable simulation history are recorded in
+[critical-path-second-review-fixes-2026-10-20.md](critical-path-second-review-fixes-2026-10-20.md).
+That report includes deterministic work-count comparisons, real Chromium worker
+and IndexedDB checks, and passing production verification after rebaking the
+stale tree atlas. Hardware frame pacing remains unverified.
+
 The verdict and any failure messages are stored in `gate` inside
 `tmp/perf-matrix-latest.json`. The runner also owns
 `tmp/perf-matrix.lock`; a concurrent matrix exits immediately instead of

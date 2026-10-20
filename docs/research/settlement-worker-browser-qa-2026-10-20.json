@@ -1,0 +1,25 @@
+{
+  "kind": "settlement-worker-browser-qa",
+  "sourceSha": "6424cdc2e2faf3c47d991471b168d9ad4f08f2c0",
+  "gpuUsed": false,
+  "errors": [],
+  "passed": true,
+  "terrainWorkers": 2,
+  "settlementWorkers": 1,
+  "simultaneousPlanRequests": 8,
+  "queuedPlanRequests": 7,
+  "criticalTerrainDispatchedImmediately": true,
+  "canonicalPlansMatched": 8,
+  "skylineArraysTransferred": 8,
+  "registryEntries": 8,
+  "workerSourceUnchangedAt": "f5033e7379c6a37e98f86b6d43dd1e47f8f9baa1",
+  "workerSourceSha256": {
+    "src/editor/world/WorldChunkWorkerClient.js": "e57730ddcca1662b95764f82060c64e7a515bc4063fa68b98d88aa646b100e91",
+    "src/editor/world/worldChunk.worker.js": "c0277c5ed351dccb4b3691181d1f51c7abc8a827e0e17414c17820431b5ab200",
+    "src/editor/world/settlements/SettlementField.js": "84521748643d9fc41af4f4d2d1cdd4575c53e62113d4fe1dc16df42f6bbd1391",
+    "src/editor/world/settlements/SettlementRegistry.js": "f97e9eba2623497abb3513b68a90daa01f304472acc7687f98f342c76015b185",
+    "src/editor/world/settlements/SettlementPlanRequest.js": "ac7f2841ac6a2e8e1000f7cbcd87f1e3031e73544c66596abe92191c3293cfa0",
+    "src/editor/world/settlements/view/SettlementSkylineData.js": "05036371ba5fbbb1f437bdf7d3b56e36771c16f43995133e3046f336bf8eada5",
+    "src/editor/workshop/WorkshopPalettes.js": "00a0e0466e9a73a3fca6c20a54862f8f6fad454980c9c6fe3be984651313bc05"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "critical-path-production-verification",
+  "sourceSha": "f5033e7379c6a37e98f86b6d43dd1e47f8f9baa1",
+  "command": "npm run verify",
+  "exitCode": 0,
+  "counts": {
+    "tests": 6941,
+    "pass": 6941,
+    "fail": 0,
+    "skipped": 0
+  },
+  "treeAtlas": {
+    "prototypes": 29,
+    "sourceSignature": "tree-impostor-v8-25a57e2c",
+    "sourceProvenanceValidated": true,
+    "encoder": "toktx v4.4.2"
+  },
+  "hardwareTimingAcceptance": "unverified"
+}

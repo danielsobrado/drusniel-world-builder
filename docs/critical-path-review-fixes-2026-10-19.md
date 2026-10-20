@@ -105,6 +105,11 @@ node scripts/measure-critical-path-work.mjs tmp/critical-path-baseline tmp/criti
 
 ## Validation and remaining acceptance
 
+Follow-up, 2026-10-20: the atlas was rebaked and full production verification now
+passes, including 6,941 tests. See the
+[second review report](critical-path-second-review-fixes-2026-10-20.md).
+The results below remain the historical record of this October 19 pass.
+
 - Full `npm test`: **6,926 passed**, zero failures, skips or cancellations.
 - `npm run lint`, `npm run build`, `npm run check:natural-ui` and diff checks
   passed. Build retains the existing large-chunk advisory.
