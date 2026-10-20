@@ -162,7 +162,8 @@ def log_wall(kind):
                        ((x0 - 0.06, -T - 0.12, z0 - 0.08), (x1 + 0.06, T, z0 + 0.04)),
                        ((x0 - 0.1, -T - 0.12, z1 - 0.04), (x1 + 0.1, T, z1 + 0.14))):
             b.box(lo, hi, 'timber')
-        b.box((x0 + f, -0.02, z0 + 0.04), (x1 - f, 0.02, z1 - 0.04), 'glass', skip=('-x', '+x', '-z', '+z'))
+        b.box((x0 + f, -0.02, z0 + 0.04), (x1 - f, 0.02, z1 - 0.04), 'glass_clear',
+              skip=('-x', '+x', '-z', '+z'))
         b.box(((x0 + x1) / 2 - 0.025, -0.05, z0), ((x0 + x1) / 2 + 0.025, 0.0, z1), 'timber', bevel=0)
         # Plain board shutters folded back against the logs.
         w = (x1 - x0) / 2

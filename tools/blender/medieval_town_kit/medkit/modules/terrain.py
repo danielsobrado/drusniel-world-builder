@@ -33,17 +33,17 @@ def paving():
     return b
 
 
-def terrace_wall(pillar=False):
+def terrace_wall(pillar=False, mat='stone', pier=None):
     b = MeshBuilder()
-    b.box((0, 0, 0), (GRID, 0.5, TERRACE), 'stone', skip=('+y', '-z', '+z', '-x', '+x'))
+    b.box((0, 0, 0), (GRID, 0.5, TERRACE), mat, skip=('+y', '-z', '+z', '-x', '+x'))
     if pillar:
-        b.box((0.72, -0.16, 0), (1.28, 0.0, TERRACE), 'stone', skip=('-z', '+y'))
+        b.box((0.72, -0.16, 0), (1.28, 0.0, TERRACE), pier or mat, skip=('-z', '+y'))
     return b
 
 
-def coping():
+def coping(mat='stone'):
     b = MeshBuilder()
-    b.box((0, -0.08, 0), (GRID, 0.45, COPING_H), 'stone', skip=('-z',))
+    b.box((0, -0.08, 0), (GRID, 0.45, COPING_H), mat, skip=('-z',))
     return b
 
 
@@ -68,7 +68,7 @@ def fence():
     return b
 
 
-def stone_stairs(units):
+def stone_stairs(units, mat='stone'):
     """Climbs +Y; units terrace levels over (units + 1) cells."""
     b = MeshBuilder()
     rise = units * TERRACE
@@ -76,11 +76,11 @@ def stone_stairs(units):
     steps = units * 10
     tread, step_h = run / steps, rise / steps
     for i in range(steps):
-        b.box((0, i * tread, 0), (GRID, run, (i + 1) * step_h), 'stone',
+        b.box((0, i * tread, 0), (GRID, run, (i + 1) * step_h), mat,
               skip=('-z', '+y', '-x', '+x'))
     for x in (-0.25, GRID):
         b.extrude([(x, 0, 0), (x, run, 0), (x, run, rise + 0.3), (x, 0, 0.35)], (0.25, 0, 0),
-                  'stone')
+                  mat)
     return b
 
 

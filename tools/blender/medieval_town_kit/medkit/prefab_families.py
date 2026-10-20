@@ -143,7 +143,7 @@ def goblin(base):
             stories = ('goblin',) + ('goblin_frame',) * max(1, base.stories - 2)
         return BuildingSpec(f'Goblin_{base.name}', base.w, base.d, stories,
                             roof='goblin_hut', plinth='Stilts', chimney=False, **extra)
-    n_stories = 1 if base.stories <= 2 else 2
+    n_stories = (1 if BASE_BY_NAME[base.name].stories <= 2 else 2) + _lift(base)
     stories = ('goblin',) * n_stories
     gable_front = base.w in (2, 3) and (base.name in GABLE_FRONTED or base.name == 'House_Small')
     has_awning = (base.shopfront or gable_front
@@ -163,6 +163,8 @@ def _without(extra, *keys):
 # Bases that keep their timber and earth roofs rather than a porch: stores and the forge.
 ORC_NO_PORCH = {'Barn', 'Warehouse', 'Smithy'}
 ORC_LOFT = {'Manor', 'Tavern_Large'}
+# Clan halls roof with red-stained hides: the one warm accent of an orc skyline.
+ORC_HIDE = {'Manor', 'Tavern_Large', 'Tavern', 'Smithy', 'Guildhall'}
 # Frostgard longhall governance and big stores take the steep slate roof; homes take sod.
 FROST_HALLS = {'Tavern', 'Tavern_Large', 'Guildhall', 'Manor', 'Chapel', 'Library',
                'Warehouse', 'Barn', 'Guardhouse'}
@@ -184,7 +186,8 @@ def orc(base):
                             roof='thatch_pyramid', plinth='Dark', chimney=False, **extra)
     lofts = min(1, _lift(base) + (base.name in ORC_LOFT))
     return BuildingSpec(f'Orc_{base.name}', base.w, base.d, ('orc',) + ('orc_loft',) * lofts,
-                        roof='thatch_low', plinth='Dark', pent=base.name not in ORC_NO_PORCH,
+                        roof='hide' if base.name in ORC_HIDE else 'thatch_low', plinth='Dark',
+                        pent=base.name not in ORC_NO_PORCH,
                         chimney=False, shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
 
 
@@ -201,11 +204,18 @@ def frostgard(base):
                         shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
 
 
+# Stonehold's civic and defensive buildings keep the flat parapeted roof; homes, shops and
+# workshops take the low stone-slab gable, so a hold's skyline steps instead of reading as blocks.
+STONEHOLD_FLAT = {'Keep', 'Tower', 'Guildhall', 'Manor', 'Guardhouse', 'Library', 'Chapel', 'Townhouse_Wide'}
+
+
 def stonehold(base):
     # No banners: the walls carry no cloth; the hold's mark is the gate (prefabs.py).
     extra = _without(base.extra, 'dormers', 'banner', 'window_odds')
+    roof = 'flat' if base.tower or base.name in STONEHOLD_FLAT else 'slab'
     return BuildingSpec(f'Stonehold_{base.name}', base.w, base.d, ('granite',) * base.stories,
-                        roof='flat', plinth='Basalt', arcade=base.shopfront and not base.tower,
+                        roof=roof, plinth='Basalt', arcade=base.shopfront and not base.tower,
+                        gable_front=roof == 'slab' and base.name in GABLE_FRONTED,
                         window_odds=min(base.extra.get('window_odds', 0.6), 0.35),
                         shop_sign=TRADE_SIGNS.get(base.name, ''), **extra)
 

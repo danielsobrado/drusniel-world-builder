@@ -4,6 +4,9 @@
   is vertical dark boarding with a smoke outlet under the apex (the shared hearth).
 - Sod (Frostgard homes): 40 deg, a turf mat held by a log along each eave.
 - Slate (Frostgard halls): the 60 deg pitch of the Nordic roof, without its carving.
+- Hide (Grukmar clan halls): the thatch pitch clad in red-stained stretched hides.
+- Slab (Stonehold houses): a low 28 deg roof of thick dark stone slabs on a granite gable
+  with a basalt raking coping; the flat parapeted roof is kept for halls, keeps and towers.
 Frostgard gables are horizontal logs like the walls under them.
 """
 import math
@@ -18,11 +21,16 @@ SOD_PITCH = math.radians(40)
 THATCH = Covering('thatch_reed', thick=0.34, overhang=0.95, ornate=False, edge='thatch_reed')
 SOD = Covering('sod', thick=0.22, overhang=0.5, ornate=False, eave_log=True, edge='sod')
 SLATE_PLAIN = Covering(ornate=False)
+HIDE = Covering('hide_red', thick=0.14, overhang=0.85, ornate=False, edge='timber_dark')
+SLAB_PITCH = math.radians(28)
+SLAB = Covering('roof', thick=0.32, overhang=0.45, ornate=False, edge='stone_basalt')
 # style -> (section, end, gable wall, pitch); RoofAssembler places them like the core sets.
 REGIONAL_GABLES = {
     'thatch_low': ('Roof_Thatch', 'Roof_Thatch_End', 'Gable_Wall_Orc', THATCH_PITCH),
     'sod': ('Roof_Sod', 'Roof_Sod_End', 'Gable_Wall_Log', SOD_PITCH),
     'steep_log': ('Roof_Slate', 'Roof_Slate_End', 'Gable_Wall_Log_Steep', STEEP_PITCH),
+    'hide': ('Roof_Hide', 'Roof_Hide_End', 'Gable_Wall_Orc', THATCH_PITCH),
+    'slab': ('Roof_Slab', 'Roof_Slab_End', 'Gable_Wall_Granite', SLAB_PITCH),
 }
 PYRAMID_THATCH_PITCH = 40
 
@@ -73,6 +81,17 @@ def log_gable(span, pitch):
     return b
 
 
+def granite_gable(span, pitch=SLAB_PITCH):
+    """Solid granite gable with a basalt coping along both rakes (exterior -X at x=0)."""
+    b = MeshBuilder()
+    h = ridge_height(span, pitch) - 0.02
+    _triangle(b, span, h, 'stone_granite', x0=-0.18)
+    b.box((-0.26, -0.1, 0), (-0.1, span + 0.1, 0.24), 'stone_basalt')
+    for y0, y1 in ((0.0, span / 2), (span, span / 2)):
+        b.beam((0, y0, 0.1), (0, y1, h + 0.1), (1, 0, 0), (-0.28, -0.08), 0.22, 'stone_basalt')
+    return b
+
+
 def define(kit):
     for span in ROOF_SPANS:
         kit.define(f'Roof_Thatch_S{span}', 'roofs', gable_section(span, THATCH_PITCH, THATCH))
@@ -84,6 +103,11 @@ def define(kit):
         kit.define(f'Roof_Slate_S{span}', 'roofs', gable_section(span, STEEP_PITCH, SLATE_PLAIN))
         kit.define(f'Roof_Slate_End_S{span}', 'roofs', gable_eave_end(span, STEEP_PITCH, SLATE_PLAIN))
         kit.define(f'Gable_Wall_Log_Steep_S{span}', 'roofs', log_gable(span, STEEP_PITCH))
+        kit.define(f'Roof_Hide_S{span}', 'roofs', gable_section(span, THATCH_PITCH, HIDE))
+        kit.define(f'Roof_Hide_End_S{span}', 'roofs', gable_eave_end(span, THATCH_PITCH, HIDE))
+        kit.define(f'Roof_Slab_S{span}', 'roofs', gable_section(span, SLAB_PITCH, SLAB))
+        kit.define(f'Roof_Slab_End_S{span}', 'roofs', gable_eave_end(span, SLAB_PITCH, SLAB))
+        kit.define(f'Gable_Wall_Granite_S{span}', 'roofs', granite_gable(span))
     for size in (4, 6):
         kit.define(f'Roof_Pyramid_Thatch_{size}', 'roofs',
                    pyramid(float(size), PYRAMID_THATCH_PITCH, mat='thatch_reed', finial=False))

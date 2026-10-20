@@ -99,7 +99,7 @@ class RoofAssembler:
 
     def _vents(self, roof, length, span, apex):
         """Louvred smoke vents on the ridge: one per two to three cells of hall."""
-        count = max(1, round(length / (2.5 * GRID)))
+        count = 2 if length >= 5 * GRID else 1
         for k in range(count):
             self.kit.place('Smoke_Vent', self.coll, roof, ((k + 0.5) * length / count, span / 2, apex))
 
@@ -140,6 +140,9 @@ class RoofAssembler:
                 self.kit.place('Dormer', self.coll, roof, (i * GRID + 1.0, 0.55, 0.55 * tan + 0.12))
 
     def _chimney(self, spec, roof, span, pitch):
-        if self.chimney and spec.roof != 'goblin':
+        if self.chimney and spec.roof == 'slab':
+            # A broad granite stack astride the ridge, one cell in from the gable.
+            self.kit.place('Chimney_Granite', self.coll, roof, (GRID, span / 2, ridge_height(span, pitch) - 0.7))
+        elif self.chimney and spec.roof != 'goblin':
             self.kit.place('Chimney', self.coll, roof,
                            (0.75, span / 2 + 0.75, ridge_height(span, pitch) - 3.6))

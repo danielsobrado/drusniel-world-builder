@@ -72,6 +72,23 @@ colours are tints (`baseColorFactor`) over one cloth texture.
   `05-differentiation-matrix.md`. `review_shots.py` has a shot per family plus
   `families_tavern` and `families_house`, which put one base across families
   side by side.
+- **Whole regional towns** (`regional_towns.py`): run
+  `-- OUT_DIR Orc|Frostgard|Stonehold [SEED]` to generate a town and render an
+  isometric overview, an elevated hero view and an eye-level view through the
+  main entrance. The renders include a ground and a light aerial haze.
+  `medkit/town_styles.py` sets each family's town grammar:
+  - Ground: earth or flagged lanes, upland or frost grass.
+  - Regional terrace walls, railings and stairs (`modules/terrain_regional.py`).
+  - Street fire posts and braziers.
+  - Pines, boulders and crags.
+  - The square: a clan hearth with war banners, an oath-stone circle, or an
+    ore crane.
+  - The crown building.
+  - The town rim (palisade or windbreak), the orc gate tower, and the
+    Stonehold rock backdrop.
+
+  Dressing modules are in `modules/props_regional.py`. Run the families one
+  after another, because each run rewrites the shared textures.
 - **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 245 buildings sized to
   the game planner's plots (including `Apothecary`, `Guildhall`, `Guardhouse`, and `Library`). They are exported as `medieval_kit_prefabs.json`,
   which holds parts, collision boxes, doors and lights. The game instances them

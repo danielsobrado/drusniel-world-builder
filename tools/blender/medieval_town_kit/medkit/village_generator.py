@@ -9,17 +9,18 @@ unchanged. Pure Python (no bpy), deterministic in (seed, family).
   stairs     two flights over every band edge, one onto the crown, two from outside
   buildings  greedy plots, each with a reserved street strip in front of its door
   plaza      the most open plaza-level spot gets the well and market stalls
+  style      town_styles.py dresses each family: ground, edges, stairs, street fire,
+             greenery, the square, the crown building, and the town rim / gate / backdrop
 """
 import random
 from dataclasses import replace
 
 from .prefab_families import BASE_BY_NAME, FAMILY_BY_NAME
+from .town_styles import style_for
 
-STAIR_CELLS = {'Stairs_Stone_1': 2, 'Stairs_Stone_2': 3, 'Stairs_Boardwalk_1': 2, 'Stairs_Boardwalk_2': 3}
-TOWN_POOL = ('House_Small', 'House_Small', 'House_Large', 'House_Cottage', 'House_Square',
-             'House_Long', 'Townhouse_Narrow', 'Townhouse_Tall', 'Shop_Small', 'Shop_Large',
-             'Bakery', 'Smithy', 'Apothecary', 'Guardhouse', 'Library', 'Warehouse')
-LANDMARKS = ('Tavern', 'Manor', 'Guildhall', 'Townhouse_Wide')
+# Every stair set climbs one terrace over two cells or two over three.
+STAIR_CELLS = {f'{kind}_{units}': units + 1 for units in (1, 2)
+               for kind in ('Stairs_Stone', 'Stairs_Boardwalk', 'Stairs_Dark', 'Stairs_Frost', 'Stairs_Granite')}
 FACINGS = (0, 0, 0, 1, 3)        # mostly facing down the slope, some across it
 
 
@@ -32,6 +33,9 @@ class GeneratedVillage:
             raise ValueError(f'Unknown family {family}; use one of {sorted(FAMILY_BY_NAME)}.')
         self.seed, self.family = seed, family
         self.STYLE = 'goblin' if family == 'Goblin' else 'medieval'
+        self.TOWN_STYLE = style_for(family)
+        self.stair_mod = 'Stairs_Boardwalk_1' if family == 'Goblin' else f'{self.TOWN_STYLE.stairs}_1'
+        self.entrances = []
         self.rng = random.Random(seed)
         self.dress = FAMILY_BY_NAME[family]
         self._terraces()
@@ -89,7 +93,6 @@ class GeneratedVillage:
         options = self._stair_columns(level)
         self.rng.shuffle(options)
         placed = []
-        stair_mod = 'Stairs_Boardwalk_1' if self.family == 'Goblin' else 'Stairs_Stone_1'
         for x, y in options:
             if len(placed) >= count or any(abs(x - px) < 4 for px, _ in placed):
                 continue
@@ -97,16 +100,16 @@ class GeneratedVillage:
             if level and any(c in self.occupied for c in run | {(x, y + 2)}):
                 continue
             placed.append((x, y))
-            self.STAIRS.append((stair_mod, x, y))
+            self.STAIRS.append((self.stair_mod, x, y))
             self.occupied |= run
             self.streets |= {(x, y - 1), (x, y + 2), (x, y + 3)}
         return placed
 
     def _stairs(self):
-        stair_mod = 'Stairs_Boardwalk_1' if self.family == 'Goblin' else 'Stairs_Stone_1'
         for x in self.rng.sample(range(2, self.W - 2), 2):
-            self.STAIRS.append((stair_mod, x, -2))
+            self.STAIRS.append((self.stair_mod, x, -2))
             self.streets |= {(x, 0), (x, 1)}
+            self.entrances.append(x)
         for level in (1, 2):
             self._place_stairs(level, 2)
         self._place_stairs(3, 1)
@@ -155,21 +158,21 @@ class GeneratedVillage:
     def _chapel(self):
         """The chapel crowns the top terrace, set back one row for its forecourt."""
         x0, x1, y0, _ = self.crown
-        chapel = self._spec('Chapel')
+        chapel = self._spec(self.TOWN_STYLE.crown)
         spots = [(cx, y0 + 1) for cx in range(x0, x1 + 1)]
         self.rng.shuffle(spots)
         next((spot for spot in spots if self._try_place(chapel, *spot, 0)), None)
 
     def _landmarks(self):
-        self._scatter(self._spec('Tower'), {1, 3}, facings=(0,))
-        for name in LANDMARKS:
+        self._scatter(self._spec(self.TOWN_STYLE.tower), {1, 3}, facings=(0,))
+        for name in self.TOWN_STYLE.landmarks:
             self._scatter(self._spec(name), {2, 3})
 
     def _houses(self):
-        target = self.W * self.H // 14
+        target = self.W * self.H // self.TOWN_STYLE.density
         misses = 0
         while len(self.BUILDINGS) < target and misses < 12:
-            name = self.rng.choice(TOWN_POOL)
+            name = self.rng.choice(self.TOWN_STYLE.pool)
             if not self._scatter(self._spec(name), {1, 2, 3}, attempts=120):
                 misses += 1
 
@@ -187,10 +190,10 @@ class GeneratedVillage:
         if not cells:
             return
         wx, wy = max(cells, key=lambda c: (openness(c), -abs(c[0] - self.W / 2)))
-        centerpiece = self.rng.choice(('Well', 'Fountain', 'Town_Cross'))
+        centerpiece = self.rng.choice(self.TOWN_STYLE.centerpieces)
         self.PROPS.append((centerpiece, wx + 0.5, wy + 0.5, 0))
         self.occupied.add((wx, wy))
-        stalls = ('Market_Stall_Cream', 'Market_Stall_Blue', 'Market_Stall_Red', 'Notice_Board')
+        stalls = self.TOWN_STYLE.stalls
         for i, (dx, dy) in enumerate(((-2, 0), (2, 0), (0, -2), (0, 2))):
             cell = (wx + dx, wy + dy)
             if i < len(stalls) and self._free({cell}) and self.height(*cell) == 2:
@@ -201,15 +204,15 @@ class GeneratedVillage:
             self.PROPS.append(('Bench', bench[0] + 0.5, bench[1] + 0.2, 0))
 
     def _dressing(self):
-        rng = self.rng
+        rng, style = self.rng, self.TOWN_STYLE
         free = [c for c in self._open_cells() if c not in self.streets]
         rng.shuffle(free)
         self.GRASS = set()
-        for x, y in free[: len(free) // 3]:
+        for x, y in free[: int(len(free) * style.grass_share)]:
             self.GRASS.add((x, y))
-        greenery = free[: len(free) // 6]
+        greenery = free[: int(len(free) * style.tree_share)]
         for x, y in greenery:
-            kind = rng.choice(('Tree_Oak', 'Tree_Cypress', 'Tree_Cypress', 'Bush', 'Bush'))
+            kind = rng.choice(style.trees)
             self.PROPS.append((kind, x + rng.uniform(0.3, 0.7), y + rng.uniform(0.3, 0.7),
                                rng.uniform(0, 360)))
             self.occupied.add((x, y))
@@ -219,6 +222,28 @@ class GeneratedVillage:
         for x, y in streets[: max(4, len(streets) // 6)]:
             self.LAMPS.append((x + 0.15, y + 0.15))
         for x, y in streets[len(streets) // 6: len(streets) // 6 + 10]:
-            kind = rng.choice(('Barrel', 'Crate', 'Cart', 'Woodpile', 'Horse_Trough',
-                               'Brazier', 'Cargo_Pile', 'Signpost', 'Wayside_Shrine'))
+            kind = rng.choice(style.yard)
             self.PROPS.append((kind, x + 0.8, y + 0.5, rng.uniform(0, 360)))
+        yards = [c for c in self._open_cells() if c not in self.streets]
+        rng.shuffle(yards)
+        for module, count in style.extras:
+            for _ in range(count):
+                if not yards:
+                    break
+                x, y = yards.pop()
+                self.PROPS.append((module, x + 0.5, y + 0.5, rng.choice((0, 90, 180, 270))))
+                self.occupied.add((x, y))
+        self._surroundings()
+
+    def _surroundings(self):
+        """Outside the map: a gate tower before the first entrance stair, a rock backdrop."""
+        style = self.TOWN_STYLE
+        if style.gate and self.entrances:
+            # Gate_Tower_Orc is 2 x 2 cells with its passage centred on its width.
+            self.PROPS.append((style.gate, self.entrances[0] - 0.5, -4.0, 0))
+        if style.backdrop:
+            for x in range(-2, self.W + 2, 2):
+                self.PROPS.append((style.backdrop, x, self.H + 0.1, 0))
+            for y in range(self.H // 2, self.H, 2):
+                self.PROPS.append((style.backdrop, -0.1, y, 90))
+                self.PROPS.append((style.backdrop, self.W + 0.1, y + 2, 270))

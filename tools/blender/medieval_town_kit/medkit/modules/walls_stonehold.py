@@ -61,7 +61,7 @@ def granite_wall(kind):
             b.box((jx0, FACE - 0.08, z0), (jx1, FACE + 0.1, z1), 'stone_basalt')
         _squared_head(b, x0, x1, z1, 0.3, 0.14, 0.1)
         b.box((x0 - 0.22, FACE - 0.18, z0 - 0.14), (x1 + 0.22, FACE + 0.1, z0), 'stone_basalt')
-        b.box((x0, 0.02, z0), (x1, 0.05, z1), 'glass', skip=('-x', '+x', '-z', '+z'))
+        b.box((x0, 0.02, z0), (x1, 0.05, z1), 'glass_clear', skip=('-x', '+x', '-z', '+z'))
         # Forged grille set in the reveal.
         for bx in (x0 + 0.18, x1 - 0.18):
             b.box((bx - 0.018, FACE + 0.02, z0), (bx + 0.018, FACE + 0.06, z1), 'iron', bevel=0)

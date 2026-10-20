@@ -1,6 +1,7 @@
 """Turns a terrace height map into ground tiles, retaining walls, coping and railings."""
 from .config import GRID, TERRACE
 from .modules.terrain import COPING_H
+from .town_styles import DEFAULT
 
 # side -> (neighbour offset, quarter turns that point a wall module's -Y outward)
 SIDES = {'S': ((0, -1), 0), 'E': ((1, 0), 1), 'N': ((0, 1), 2), 'W': ((-1, 0), 3)}
@@ -21,6 +22,7 @@ class TerrainBuilder:
         root = self.kit.group('Terrain', self.coll)
         p = self.plan
         goblin = getattr(p, 'STYLE', '') == 'goblin'
+        self.style = getattr(p, 'TOWN_STYLE', DEFAULT)
         for cx in range(p.W):
             for cy in range(p.H):
                 h = p.height(cx, cy)
@@ -34,7 +36,7 @@ class TerrainBuilder:
                             'Tile_Grass' if (cx, cy) in p.GRASS else 'Tile_Boardwalk'
                         )
                     else:
-                        tile = 'Tile_Grass' if (cx, cy) in p.GRASS else 'Tile_Cobble'
+                        tile = self.style.grass if (cx, cy) in p.GRASS else self.style.street
                     self.kit.place(tile, self.coll, root, (cx * GRID, cy * GRID, z))
                 for side, ((dx, dy), rotq) in SIDES.items():
                     nh = p.height(cx + dx, cy + dy)
@@ -53,7 +55,7 @@ class TerrainBuilder:
             if goblin:
                 name = 'Stilt_Wall_Pillar' if pillar else 'Stilt_Wall'
             else:
-                name = 'Terrace_Wall_Pillar' if pillar else 'Terrace_Wall'
+                name = self.style.pillar if pillar else self.style.wall
             self.kit.place_q(name, self.coll, root, (x, y, level * TERRACE), rotq)
         if bare:
             return
@@ -62,5 +64,13 @@ class TerrainBuilder:
             self.kit.place_q('Boardwalk_Edge', self.coll, root, (x, y, top), rotq)
             self.kit.place_q('Railing_Goblin', self.coll, root, (x, y, top + 0.08), rotq)
         else:
-            self.kit.place_q('Terrace_Coping', self.coll, root, (x, y, top), rotq)
-            self.kit.place_q('Railing_Wood', self.coll, root, (x, y, top + COPING_H), rotq)
+            self.kit.place_q(self.style.coping, self.coll, root, (x, y, top), rotq)
+            if low == 0 and self.style.rim and side in self.style.rim_sides and self._on_rim(cx, cy, side):
+                self.kit.place_q(self.style.rim, self.coll, root, (x, y, top), rotq)
+            else:
+                self.kit.place_q(self.style.railing, self.coll, root, (x, y, top + COPING_H), rotq)
+
+    def _on_rim(self, cx, cy, side):
+        (dx, dy), _ = SIDES[side]
+        nx, ny = cx + dx, cy + dy
+        return not (0 <= nx < self.plan.W and 0 <= ny < self.plan.H)

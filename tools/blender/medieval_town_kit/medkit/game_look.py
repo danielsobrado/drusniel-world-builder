@@ -118,5 +118,9 @@ def render(scene, camera, path, res=(1600, 1200)):
     out.save()
     for image in (img, out):
         bpy.data.images.remove(image)
-    os.remove(exr)
+    try:
+        os.remove(exr)
+    except PermissionError:
+        # Windows can hold the file briefly (indexer, a preview pane); the next render overwrites it.
+        print(f'[kit] could not remove {exr} yet')
     print(f'[kit] rendered {path}')

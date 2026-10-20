@@ -6,6 +6,13 @@ from .buildings import BuildingAssembler
 from .config import GRID, TERRACE
 from .kit import footprint_cells, footprint_origin
 from .terrain_builder import TerrainBuilder
+from .town_styles import DEFAULT
+
+# Preview-only fire light per prop: (height above its foot, energy). The game lights
+# these virtually; scene lights here only make previews read like dusk in town.
+FIRE_LIGHTS = {'Brazier': (1.15, 65.0), 'Lamp_Post_Banner': (2.8, 80.0), 'Cauldron_Fire': (1.1, 110.0),
+               'Torch_Pole': (2.65, 90.0), 'Goblin_Totem': (1.65, 60.0), 'Goblin_Skiff': (1.05, 50.0),
+               'Fire_Post': (2.55, 70.0), 'Brazier_Pillar': (1.5, 70.0), 'Clan_Hearth': (0.8, 140.0)}
 
 
 def _z(plan, x, y):
@@ -57,23 +64,15 @@ def _props(kit, plan, coll, lights_coll):
     for name, x, y, rot in plan.PROPS:
         z = _z(plan, x, y)
         kit.place(name, coll, root, (x * GRID, y * GRID, z), math.radians(rot))
-        if name == 'Brazier':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.15), energy=65.0)
-        elif name == 'Lamp_Post_Banner':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.8), energy=80.0)
-        elif name == 'Cauldron_Fire':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.1), energy=110.0)
-        elif name == 'Torch_Pole':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.65), energy=90.0)
-        elif name == 'Goblin_Totem':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.65), energy=60.0)
-        elif name == 'Goblin_Skiff':
-            lights.point(lights_coll, root, (x * GRID, y * GRID, z + 1.05), energy=50.0)
-    lamp_mod = 'Torch_Pole' if goblin else 'Lamp_Post'
+        if name in FIRE_LIGHTS:
+            height, energy = FIRE_LIGHTS[name]
+            lights.point(lights_coll, root, (x * GRID, y * GRID, z + height), energy=energy)
+    style = getattr(plan, 'TOWN_STYLE', DEFAULT)
+    lamp_mod = 'Torch_Pole' if goblin else style.lamp
     for x, y in plan.LAMPS:
         z = _z(plan, x, y)
         kit.place(lamp_mod, coll, root, (x * GRID, y * GRID, z))
-        lights.point(lights_coll, root, (x * GRID, y * GRID, z + 2.7), energy=85.0)
+        lights.point(lights_coll, root, (x * GRID, y * GRID, z + style.lamp_light), energy=85.0)
 
 
 def build(kit, plan=village_plan):

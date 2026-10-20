@@ -75,12 +75,25 @@ SPEC = {
     'timber_dark': Spec('timber', 1.5, 0.74, grain=True, normal=2.2, tint=(0.62, 0.56, 0.50)),
     'thatch_reed': Spec('thatch', 2.0, 0.94, normal=2.2, tint=(0.80, 0.76, 0.66)),
     # Frostgard: weather-silvered hewn pine logs and rooted sod roofs.
-    'log': Spec('timber', 1.8, 0.78, grain=True, normal=2.4, tint=(1.22, 1.20, 1.24)),
+    'log': Spec('timber', 1.8, 0.78, grain=True, normal=2.4, tint=(1.10, 1.16, 1.30)),
     'sod': Spec('sod', 2.0, 0.96, normal=1.8),
     # Stonehold: mined granite courses, charcoal basalt dressings, dulled bronze.
-    'stone_granite': Spec('granite', 3.0, 0.84, normal=2.2, tint=(0.80, 0.85, 0.92)),
-    'stone_basalt': Spec('granite', 1.6, 0.78, normal=1.6, tint=(0.46, 0.46, 0.50)),
+    'stone_granite': Spec('granite', 3.0, 0.84, normal=2.2),
+    'stone_basalt': Spec('granite', 1.6, 0.78, normal=1.6, tint=(0.64, 0.64, 0.68)),
     'bronze': Spec(color=(0.26, 0.22, 0.14), rough=0.55, metal=0.85),
+    # Regional ground and greenery: packed earth lanes, frost-bitten grass, dark conifers.
+    'earth': Spec('earth', 2.0, 0.95, normal=1.8),
+    'grass_frost': Spec('grass', 2.0, 0.95, tint=(0.86, 0.90, 0.84)),
+    # Grukmar clan halls roof with stretched hides stained a weathered ochre red.
+    'hide_red': Spec('cloth', 3.0, 0.94, tint=(0.44, 0.29, 0.23), normal=1.2),
+    'grass_upland': Spec('grass', 2.0, 0.95, tint=(0.92, 0.86, 0.70)),
+    # Open land round a town in previews: the same grass at field scale, so it never checkers.
+    'meadow': Spec('grass', 23.0, 0.95, tint=(0.90, 0.86, 0.72)),
+    'meadow_frost': Spec('grass', 23.0, 0.97, tint=(0.80, 0.84, 0.80)),
+    'meadow_earth': Spec('earth', 31.0, 0.95),
+    'foliage_pine': Spec('foliage', 1.5, 0.9, tint=(0.52, 0.66, 0.60)),
+    # Plain blown glass for frontier and hold windows (the lattice pane is a lowland look).
+    'glass_clear': Spec(color=(0.11, 0.12, 0.12), rough=0.1, emission=0.35, glow_tint=(1.0, 0.62, 0.30)),
 }
 
 # A scanned texture covers its photograph's real width (scans.py).
