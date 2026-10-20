@@ -73,3 +73,23 @@ test('invalid history metadata cannot partially replace the live world', async (
   const before = world.checksum();
   await assert.rejects(world.load('invalid'), /invalid_save_payload/); assert.equal(world.checksum(), before);
 });
+
+test('existing injected save-store interfaces can archive through reserved transactional slots', async () => {
+  const memory = createInMemorySaveStore();
+  const store = Object.fromEntries(['beginSave', 'commitSave', 'load'].map(key => [key, memory[key].bind(memory)]));
+  const { world, patch } = boot(store, { journalSegmentCommands: 2 });
+  for (let i = 0; i < 10; i++) { await world.flushHistory(); assert.equal(patch(i).ok, true); }
+  await world.save('compatible');
+  const resumed = boot(store, { journalSegmentCommands: 2 }).world;
+  await resumed.load('compatible');
+  const commands = []; for await (const command of resumed.readJournal()) commands.push(command);
+  assert.equal(commands.length, 10); assert.equal(resumed.checksum(), world.checksum());
+});
+
+test('a rejected save begin never commits an older pending transaction', async () => {
+  const store = createInMemorySaveStore(), { world } = boot(store);
+  await store.beginSave('slot', { marker: 'unrelated' });
+  store.beginSave = async () => ({ ok: false, code: 'quota_exceeded' });
+  assert.deepEqual(await world.save('slot'), { ok: false, code: 'quota_exceeded' });
+  assert.equal((await store.load('slot')).ok, false);
+});

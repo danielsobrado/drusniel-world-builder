@@ -850,6 +850,8 @@ export function createSimulationWorld({
       };
       await history.flush();
       const pendingSave = await saveStore.beginSave(slot, payload);
+      if (!pendingSave.ok) return pendingSave;
+      if (typeof pendingSave.transactionId !== 'string') throw new Error('invalid_save_transaction');
       return saveStore.commitSave(slot, pendingSave.transactionId);
     },
 
@@ -867,7 +869,7 @@ export function createSimulationWorld({
       if (loaded.payload.history && loaded.payload.snapshot.commandRange?.count !== nextHistory.count) {
         throw new Error('invalid_save_payload:history_command_count');
       }
-      while (nextJournal.count >= nextHistory.segmentSize && saveStore.putArchive) {
+      while (nextJournal.count >= nextHistory.segmentSize) {
         nextHistory.seal(); await nextHistory.flush();
       }
 

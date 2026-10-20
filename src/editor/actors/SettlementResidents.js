@@ -32,7 +32,7 @@ export class SettlementResidents {
       const population = this.populationProvider?.(settlement.id) ?? settlement.population;
       const key = `${settlement.id}:${population}`;
       if (!this.manifests.has(key)) {
-        const entry = field.entries.find(candidate => candidate.settlement === settlement);
+        const entry = field.findById?.(settlement.id) ?? field.entries.find(candidate => candidate.settlement === settlement);
         const spots = entry ? gatheringSpots(settlement, field.ensurePlan(entry).plan, field.tileSize) : null;
         const manifest = residentManifest(settlement, { tileSize: this.terrainView.worldStore.tileSize,
           worldSeed: this.generator.worldSeed ?? this.generator.seed ?? 1, settings: this.settings, population, spots });

@@ -20,7 +20,15 @@ export function boundedReasonLog(limit) {
 /** Bounded resident tail and pending writes. Archives keep every accepted command. */
 export class SimulationHistory {
   constructor({ journal, store, config }) {
-    this.journal = journal; this.store = store;
+    this.journal = journal;
+    if (!store?.beginSave || !store.commitSave || !store.load) throw new Error('invalid_simulation_save_store');
+    this.store = store.putArchive && store.getArchive ? store : {
+      async putArchive(id, payload) {
+        const slot = `__replay_archive__:${id}`, pending = await store.beginSave(slot, payload);
+        return pending.ok ? store.commitSave(slot, pending.transactionId) : pending;
+      },
+      getArchive: id => store.load(`__replay_archive__:${id}`),
+    };
     this.segmentSize = positive(config.journalSegmentCommands, 'journalSegmentCommands');
     this.maxPending = positive(config.maxPendingJournalSegments, 'maxPendingJournalSegments');
     this.checkpointInterval = positive(config.maximumCommandsBetweenSnapshots, 'maximumCommandsBetweenSnapshots');
@@ -113,6 +121,7 @@ export class SimulationHistory {
   }
   getStatus() {
     return { residentCommands: this.journal.count, archivedCommands: this.header.commands,
+      checkpoint: this.header.checkpoint, checkpointCommands: this.header.checkpointCommands,
       pendingCommands: [...this.pending.values()].reduce((sum, job) => sum + (job.payload.commands?.length ?? 0), 0),
       segments: this.header.segments, pending: this.pending.size,
       errors: [...this.pending.values()].flatMap(job => job.error ? [job.error.message] : []) };
