@@ -199,7 +199,7 @@ function resolveMultiPeopleDistricts(identity) {
         cultureKey: 'orc-peoples',
         localBranch: 'grukmar-orcs',
         terrainPreference: 'dry-upland-ridge',
-        kitFamily: 'Nordic',
+        kitFamily: 'Orc',
         foundationType: 'earthfast-stone-and-timber',
         signatureAssets: Object.freeze([
           'grukmar/clan-assembly-hall',
@@ -230,7 +230,7 @@ function resolveMultiPeopleDistricts(identity) {
         cultureKey: 'norths',
         localBranch: 'frostgard-norths',
         terrainPreference: 'sheltered-hollow',
-        kitFamily: 'Nordic',
+        kitFamily: 'Frostgard',
         foundationType: 'earth-bermed-sill',
         signatureAssets: Object.freeze(['frostgard/hearth-longhall', 'frostgard/turf-roofed-smithy']),
       }),
@@ -239,7 +239,7 @@ function resolveMultiPeopleDistricts(identity) {
         cultureKey: 'jotunn',
         localBranch: 'frostgard-jotunn',
         terrainPreference: 'glacial-ridge',
-        kitFamily: 'Nordic',
+        kitFamily: 'Frostgard',
         foundationType: 'megalithic-boulder-ring',
         signatureAssets: Object.freeze(['frostgard/jotunn-stone-moot-ring', 'frostgard/windbreak-beacon-tower']),
       }),
@@ -268,7 +268,7 @@ export function resolveSceneRecipe(settlementOrIdentity, options = {}) {
     kitFamily = 'Goblin';
     settlementStyleKey = identity.geography.isWetland ? 'swamp-thatch' : 'timber-thatch';
   } else if (identity.cultureKey === 'orc-peoples' && identity.loreRealm === 'grukmar' && !identity.geography.isWetland) {
-    kitFamily = 'Nordic';
+    kitFamily = 'Orc';
     settlementStyleKey = 'granite-slate';
     foundationType = 'earthfast-stone-and-timber';
   }

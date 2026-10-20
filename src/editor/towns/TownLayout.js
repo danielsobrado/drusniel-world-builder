@@ -1,7 +1,7 @@
 import { drainJob, typedArrayJob } from '../world/settlements/SettlementArrayJobs.js';
 import { resolveRuntimeAsset } from '../../worldIdentity/AssetRegistry.js';
 import { planDressingJob, planPavingJob } from './TownDressing.js';
-import { familyForStyle, prefabNameFor, propClusterFor } from './TownPrefabCatalog.js';
+import { familyForProfile, prefabNameFor, propClusterFor } from './TownPrefabCatalog.js';
 import { townHash as placementSeed } from './townHash.js';
 
 /**
@@ -69,7 +69,7 @@ export class TownLayoutBuilder {
     this.sampleHeight = sampleHeight;
     this.anchor = Object.freeze({ x: settlement.cellX * tileSize, z: -settlement.cellZ * tileSize });
     this.styleKey = plan.profile?.kitStyleKey ?? plan.profile?.style?.key ?? null;
-    this.family = familyForStyle(this.styleKey);
+    this.family = familyForProfile(plan.profile, this.styleKey);
     this.parts = new Map();
     this.seeds = new Map();
     this.boxes = [];

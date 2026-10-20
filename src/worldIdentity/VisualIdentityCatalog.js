@@ -91,7 +91,7 @@ export const AZGAAR_CULTURE_SOURCE_MAP = Object.freeze({
     defaultRealm: 'frostgard',
     regionalSphere: 'northern-frost-sphere',
     settlementStyleKey: 'granite-slate',
-    kitFamily: 'Nordic',
+    kitFamily: 'Frostgard',
   }),
   5: Object.freeze({
     sourceId: 5,
@@ -126,7 +126,7 @@ export const AZGAAR_CULTURE_SOURCE_MAP = Object.freeze({
     defaultRealm: 'frostgard',
     regionalSphere: 'northern-frost-sphere',
     settlementStyleKey: 'granite-slate',
-    kitFamily: 'Nordic',
+    kitFamily: 'Frostgard',
   }),
   8: Object.freeze({
     sourceId: 8,
@@ -148,7 +148,7 @@ export const AZGAAR_CULTURE_SOURCE_MAP = Object.freeze({
     primaryAncestry: 'orc',
     defaultRealm: 'grukmar',
     settlementStyleKey: 'granite-slate',
-    kitFamily: 'Nordic',
+    kitFamily: 'Orc',
   }),
   10: Object.freeze({
     sourceId: 10,
@@ -160,7 +160,7 @@ export const AZGAAR_CULTURE_SOURCE_MAP = Object.freeze({
     defaultRealm: 'stonehold',
     regionalSphere: 'eastern-dwarven-sphere',
     settlementStyleKey: 'granite-slate',
-    kitFamily: 'Nordic',
+    kitFamily: 'Stonehold',
   }),
   11: Object.freeze({
     sourceId: 11,
@@ -335,7 +335,7 @@ export const LORE_REALM_CATALOG = Object.freeze({
     polityForm: 'fortified-mountain-hold-monarchy',
     architectureGrammar: Object.freeze({
       settlementStyleKey: 'granite-slate',
-      kitFamily: 'Nordic',
+      kitFamily: 'Stonehold',
       kitSkin: 'frost',
       wallMaterial: 'interlocking-ashlar-basalt-and-iron-bands',
       roofMaterial: 'stepped-stone-corbel-and-slate',
@@ -496,7 +496,7 @@ export const LORE_REALM_CATALOG = Object.freeze({
     polityForm: 'jarldom-and-jotunn-moot',
     architectureGrammar: Object.freeze({
       settlementStyleKey: 'granite-slate',
-      kitFamily: 'Nordic',
+      kitFamily: 'Frostgard',
       kitSkin: 'frost',
       wallMaterial: 'heavy-pine-stave-timber-over-drift-boulder-sills',
       roofMaterial: 'steep-shed-snow-board-and-turf',

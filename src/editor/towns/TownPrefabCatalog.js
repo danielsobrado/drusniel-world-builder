@@ -2,13 +2,19 @@
  * Which kit prefab or prop modules stand in for each thing a settlement plan asks for.
  *
  * Prefabs come from the Blender kit (tools/blender/medieval_town_kit, exported to
- * medieval_kit_prefabs.json) in three regional families. A burg's family follows
+ * medieval_kit_prefabs.json) in regional families. A burg's family follows
  * its settlement style, which the planner derives from the burg's culture — so
  * one people's towns share a look and neighbouring cultures differ:
  *
  *   granite-slate         → Nordic  (clapboard, steep gables, finials, pent roofs)
  *   limestone-slate       → Tudor   (half-timber, slate gables, dormers)
  *   *-terracotta          → Med     (render, terracotta hip roofs, loggias, villas)
+ *   *-thatch, goblin      → Goblin  (stilts, shanty walls, reed roofs)
+ *
+ * Realms whose people have a family of their own (Grukmar upland orcs, Frostgard,
+ * Stonehold) name it in their scene recipe's `kitFamily`; it wins over the style,
+ * which those realms share with Nordic towns. A family's own defences
+ * (`<Family>_CityWall`, `<Family>_Gatehouse`) win over the shared ones.
  *
  * Pure data, no three.js.
  */
@@ -24,6 +30,9 @@ const FAMILY_BY_STYLE = Object.freeze({
 });
 
 export const DEFAULT_FAMILY = 'Tudor';
+
+/** Families only a recipe's kitFamily selects: no settlement style maps to them. */
+const RECIPE_FAMILIES = new Set(['Orc', 'Frostgard', 'Stonehold']);
 
 /** Prefab base names per planner building kind, indexed by the plan's variant. */
 const BUILDING_BASES = Object.freeze({
@@ -103,6 +112,12 @@ export function familyForStyle(styleKey) {
   return FAMILY_BY_STYLE[styleKey] ?? DEFAULT_FAMILY;
 }
 
+/** A town's family: its recipe's own family when it has one, else its style's. */
+export function familyForProfile(profile, styleKey) {
+  const kitFamily = profile?.hasRegionalIdentity ? profile.recipe?.architecture?.kitFamily : null;
+  return RECIPE_FAMILIES.has(kitFamily) ? kitFamily : familyForStyle(styleKey);
+}
+
 /** Share of buildings that use a base's one-story-taller sibling when the kit has one. */
 export const TALL_SHARE = 0.4;
 const TALL_SUFFIX = '_Tall';
@@ -119,7 +134,10 @@ export function prefabNameFor(kind, variant, family, prefabs, heightRoll = 1) {
 }
 
 function basePrefabFor(kind, variant, family, prefabs) {
-  if (DEFENCE_PREFABS[kind]) return DEFENCE_PREFABS[kind];
+  if (DEFENCE_PREFABS[kind]) {
+    const own = `${family}_${DEFENCE_PREFABS[kind]}`;
+    return prefabs?.[own] ? own : DEFENCE_PREFABS[kind];
+  }
   const bases = BUILDING_BASES[kind];
   if (!bases) return null;
   const base = bases[Math.abs(variant | 0) % bases.length];

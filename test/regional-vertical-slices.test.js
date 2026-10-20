@@ -173,7 +173,7 @@ test('Vertical Slice 3: Stonehold Vondari mining settlement includes forge landm
   assert.ok(residents.some((r) => ['deep-warden', 'forgeheart-master', 'ore-assayer', 'vault-councillor'].includes(r.profession)));
 });
 
-test('Vertical Slice 4: Grukmar multi-people wetland trading settlement combines Goblin wetland stilt wards with Nordic upland orc wards', () => {
+test('Vertical Slice 4: Grukmar multi-people wetland trading settlement combines Goblin wetland stilt wards with Orc upland wards', () => {
   const settlement = {
     id: 504,
     name: 'Mirefang Crossing',
@@ -207,10 +207,10 @@ test('Vertical Slice 4: Grukmar multi-people wetland trading settlement combines
   // Verify boardwalk streets
   assert.ok(plan.streets.some((s) => s.surfaceRole === 'boardwalk'));
 
-  // Verify multi-people district wards in buildings (both Goblin wetland ward and Nordic upland orc ward)
+  // Verify multi-people district wards in buildings (both Goblin wetland ward and Orc upland ward)
   const kitFamilies = new Set(plan.buildings.map((b) => b.kitFamily).filter(Boolean));
   assert.ok(kitFamilies.has('Goblin'), 'Grukmar town must contain Goblin wetland buildings');
-  assert.ok(kitFamilies.has('Nordic'), 'Grukmar multi-people town must contain upland Nordic/Orc camp buildings');
+  assert.ok(kitFamilies.has('Orc'), 'Grukmar multi-people town must contain upland Orc ward buildings');
 
   // Verify kit layout places both Goblin and Nordic modules + swamp props
   const town = layoutTown({
@@ -224,8 +224,8 @@ test('Vertical Slice 4: Grukmar multi-people wetland trading settlement combines
   assert.equal(town.styleKey, 'swamp-thatch');
   assert.ok(town.parts.has('Wall_Goblin') || town.parts.has('Plinth_Stilts'), 'Kit town must use Goblin stilt/wall modules');
   assert.ok(
-    town.parts.has('Wall_Log') || town.parts.has('Wall_Timber') || town.parts.has('Wall_Stone'),
-    'Kit town must also include upland orc/troll camp modules',
+    town.parts.has('Wall_Orc') || town.parts.has('Corner_Orc'),
+    'Kit town must also include the upland Orc ward modules',
   );
 
   const residents = residentManifest(settlement, {

@@ -56,6 +56,7 @@ test('building kinds resolve to family prefabs with a Tudor fallback', () => {
     Tudor_Guildhall: {},
     Med_Villa: {},
     CityWall: {},
+    Orc_CityWall: {},
   };
   assert.equal(prefabNameFor('house', 0, 'Nordic', prefabs), 'Nordic_House_Small');
   assert.equal(prefabNameFor('house', 0, 'Goblin', prefabs), 'Goblin_House_Small');
@@ -64,6 +65,7 @@ test('building kinds resolve to family prefabs with a Tudor fallback', () => {
   assert.equal(prefabNameFor('guildhall', 0, 'Tudor', prefabs), 'Tudor_Guildhall');
   assert.equal(prefabNameFor('hall', 0, 'Med', prefabs), 'Med_Villa');
   assert.equal(prefabNameFor('wall', 0, 'Med', prefabs), 'CityWall');
+  assert.equal(prefabNameFor('wall', 0, 'Orc', prefabs), 'Orc_CityWall');
   assert.equal(prefabNameFor('bollards', 0, 'Med', prefabs), null);
   assert.deepEqual(propClusterFor('signpost', 0), [['Signpost', 0, 0, 0, 0]]);
   assert.deepEqual(propClusterFor('shrine', 0), [['Wayside_Shrine', 0, 0, 0, 0]]);
