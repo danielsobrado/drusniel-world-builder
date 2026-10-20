@@ -144,32 +144,35 @@ def battlements(size):
         b.box((x0, y0, 0.2), (x1, y1, 0.75), 'stone')
         b.box((x0 - 0.02, y0 - 0.02, 0.70), (x1 + 0.02, y1 + 0.02, 0.77), 'stone_dressed')
     full = size + 0.4
+    # Odd segment count so each side starts and ends on a merlon; the corner merlons
+    # belong to the X sides, so the Y sides skip their end segments.
+    count = max(5, int(round(full / 0.75)) | 1)
+    step = full / count
     for x0, y0, along_x in ((-0.2, -0.2, True), (-0.2, size + 0.2 - t, True),
                             (-0.2, -0.2, False), (size + 0.2 - t, -0.2, False)):
-        count = max(2, int(full))
-        step = full / count
-        for i in range(count):
-            a = i * step + step * 0.25
+        for i in range(0, count, 2):
+            if not along_x and i in (0, count - 1):
+                continue
+            a0, a1 = i * step, (i + 1) * step
             if along_x:
-                b.box((x0 + a, y0, 0.75), (x0 + a + step * 0.5, y0 + t, 1.26), 'stone')
-                b.box((x0 + a - 0.03, y0 - 0.03, 1.24),
-                      (x0 + a + step * 0.5 + 0.03, y0 + t + 0.03, 1.34), 'stone_dressed')
+                lo, hi = (x0 + a0, y0, 0.75), (x0 + a1, y0 + t, 1.30)
             else:
-                b.box((x0, y0 + a, 0.75), (x0 + t, y0 + a + step * 0.5, 1.26), 'stone')
-                b.box((x0 - 0.03, y0 + a - 0.03, 1.24),
-                      (x0 + t + 0.03, y0 + a + step * 0.5 + 0.03, 1.34), 'stone_dressed')
+                lo, hi = (x0, y0 + a0, 0.75), (x0 + t, y0 + a1, 1.30)
+            b.box(lo, hi, 'stone', skip=('-z',))
+            b.box((lo[0] - 0.02, lo[1] - 0.02, 1.30), (hi[0] + 0.02, hi[1] + 0.02, 1.36), 'stone_dressed')
         if detailed():
-            # Machicolation corbel brackets beneath the overhanging parapet
+            # Stepped machicolation corbels carrying the overhanging parapet
             corbels = max(4, int(full * 1.5))
             c_step = full / corbels
             for c_idx in range(corbels):
                 ca = (c_idx + 0.5) * c_step
-                if along_x:
-                    cy = y0 if y0 < 0 else y0 + t - 0.18
-                    b.box((x0 + ca - 0.06, cy, -0.24), (x0 + ca + 0.06, cy + 0.18, 0.0), 'stone_dressed')
-                else:
-                    cx = x0 if x0 < 0 else x0 + t - 0.18
-                    b.box((cx, y0 + ca - 0.06, -0.24), (cx + 0.18, y0 + ca + 0.06, 0.0), 'stone_dressed')
+                for k, (z0, z1, reach) in enumerate(((-0.62, -0.42, 0.08), (-0.42, -0.21, 0.14), (-0.21, 0.0, 0.2))):
+                    if along_x:
+                        cy0, cy1 = (-reach, 0.0) if y0 < 0 else (size, size + reach)
+                        b.box((x0 + ca - 0.07, cy0, z0), (x0 + ca + 0.07, cy1, z1), 'stone_dressed')
+                    else:
+                        cx0, cx1 = (-reach, 0.0) if x0 < 0 else (size, size + reach)
+                        b.box((cx0, y0 + ca - 0.07, z0), (cx1, y0 + ca + 0.07, z1), 'stone_dressed')
     return b
 
 

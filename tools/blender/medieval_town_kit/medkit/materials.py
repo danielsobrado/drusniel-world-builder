@@ -34,7 +34,7 @@ SPEC = {
     'cobble': Spec('cobble', 2.0, 0.82, normal=2.2),
     'plaster': Spec('plaster', 2.0, 0.90, normal=1.6, tint=(1.0, 0.94, 0.82)),
     'timber': Spec('timber', 1.5, 0.70, grain=True, normal=2.0),
-    'wood_trim': Spec('fine_wood', 1.1, 0.62, grain=True, normal=0.95, tint=(1.04, 0.98, 0.92)),
+    'wood_trim': Spec('fine_wood', 1.1, 0.62, grain=True, normal=0.95, tint=(0.94, 0.92, 0.90)),
     'carved_wood': Spec('carved_wood', 0.6, 0.64, fit=True, normal=1.8),
     'planks': Spec('planks', 2.0, 0.75, grain=True, normal=2.0),
     # Weathered split slate with mineral sheen and deep baked course lap shadows.
@@ -43,11 +43,11 @@ SPEC = {
     'thatch': Spec('thatch', 2.0, 0.92, normal=2.0),
     'clapboard': Spec('clapboard', 2.0, 0.76, normal=2.0, tint=(1.08, 0.96, 0.86)),
     'grass': Spec('grass', 2.0, 0.95),
-    'iron': Spec('iron', 1.0, 0.42, metal=0.88, normal=1.4),
+    'iron': Spec('iron', 1.0, 0.5, metal=0.85, normal=0.6),
     # Old crown glass: dark and reflective by day with a low warm glow from the
     # room behind, so panes read as glass instead of lit white panels.
-    'glass': Spec('window', fit=True, rough=0.12, emission=0.45, tint=(0.42, 0.44, 0.46),
-                  glow_tint=(1.0, 0.66, 0.36)),
+    'glass': Spec('window', fit=True, rough=0.08, emission=0.12, tint=(0.9, 0.95, 0.95),
+                  glow_tint=(1.0, 0.62, 0.30), normal=0.5),
     # Cured hides stretched over goblin walls, and bleached trophy bone.
     'hide': Spec('cloth', 0.8, 0.92, tint=(0.56, 0.41, 0.28), normal=1.4),
     'bone': Spec(color=(0.8, 0.74, 0.6), rough=0.55),
@@ -57,10 +57,12 @@ SPEC = {
     'cloth_blue': Spec('cloth', 1.0, 0.95, tint=(0.16, 0.22, 0.4)),
     'cloth_red': Spec('cloth', 1.0, 0.95, tint=(0.46, 0.15, 0.11)),
     'foliage': Spec('foliage', 1.5, 0.9),
-    'bark': Spec('bark', 1.0, 0.9),
+    'bark': Spec('bark', 1.0, 0.9, tint=(0.78, 0.74, 0.70)),
     'flowers': Spec('flowers', 1.0, 0.9),
     'glow': Spec(color=(1.0, 0.48, 0.16), emission=4.0),
     'water': Spec(color=(0.07, 0.14, 0.18), rough=0.08),
+    # The dark of an unlit opening (arrow loops, a door rebate) seen from outside.
+    'shadow': Spec(color=(0.025, 0.022, 0.02), rough=1.0),
     'gold': Spec(color=(0.85, 0.65, 0.22), rough=0.35, metal=1.0),
 }
 

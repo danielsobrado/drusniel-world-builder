@@ -1,6 +1,7 @@
 """Roofing and relief-carved woodwork textures for the regional styles."""
 import numpy as np
 
+from .texture_patterns_weathered import oak
 from .texture_patterns import _uv, courses, fbm, lerp, rounded_edge, smooth, tint
 
 
@@ -43,29 +44,9 @@ def thatch(n, seed):
 
 
 def fine_wood(n, seed):
-    """Smooth, hand-planed and oiled walnut/oak cabinetmaker's wood with parabolic
-    cathedral growth-ring figure, dark earlywood vessel pores, and golden medullary rays."""
-    u, v = _uv(n)
-    fibers = fbm(n, seed, 1.5, sx=22.0, sy=1.1)
-    warp = fbm(n, seed + 1, 2.2, sx=6.5, sy=1.4)
-    v_warped = v + 0.11 * (warp - 0.5)
-    u_arch = 0.28 * np.sin(u * np.pi * 2.0 + fbm(n, seed + 2, 2.4) * 2.4)
-    r_pith = np.hypot((v_warped - 0.50) * 4.4, u_arch)
-    ring_phase = r_pith * 3.2 + fbm(n, seed + 3, 1.9, sx=10.0, sy=1.4) * 1.25
-    ring_wave = 0.5 + 0.5 * np.sin(ring_phase * np.pi * 2.0)
-    latewood = smooth(0.54, 0.92, ring_wave)
-
-    pores = smooth(0.74, 0.88, fbm(n, seed + 4, 1.2, sx=18.0, sy=0.8)) * (1.0 - 0.65 * latewood)
-    rays = smooth(0.75, 0.89, fbm(n, seed + 5, 1.65, sx=7.0, sy=2.4))
-    fine = fbm(n, seed + 6, 1.35, sx=26.0, sy=1.6)
-
-    earlywood_col = np.array((0.48, 0.32, 0.19), np.float32)
-    latewood_col = np.array((0.23, 0.145, 0.082), np.float32)
-    albedo = lerp(earlywood_col, latewood_col, 0.60 * latewood + 0.28 * (1.0 - fibers) + 0.12 * (1.0 - fine))
-    albedo = lerp(albedo, (0.58, 0.41, 0.25), rays * 0.30)
-    albedo = tint(albedo, (0.90 + 0.16 * fibers) * (1.0 - 0.26 * pores))
-    height = (0.45 * fibers + 0.30 * (1.0 - latewood) + 0.15 * fine + 0.10 * rays - 0.25 * pores).astype(np.float32)
-    return albedo.astype(np.float32), height, 1.15
+    """Planed and oiled cabinetmaker's oak: the structural oak's grain, darker, no checks."""
+    albedo, height = oak(n, seed, (0.38, 0.27, 0.17), (0.25, 0.17, 0.105), checks=0.15)
+    return albedo, height, 1.0
 
 
 def carved_wood(n, seed):
@@ -123,7 +104,7 @@ def carved_wood(n, seed):
     ).astype(np.float32)
 
     # Cohesive oiled walnut/oak heartwood palette matching `fine_wood`
-    base_wood = lerp((0.25, 0.16, 0.095), (0.45, 0.30, 0.18), 0.55 * grain_mix + 0.45 * figure)
+    base_wood = lerp((0.24, 0.165, 0.11), (0.38, 0.27, 0.18), 0.55 * grain_mix + 0.45 * figure)
     relief_shade = (
         outer_frame * 0.98
         + molding_ridge * 0.92

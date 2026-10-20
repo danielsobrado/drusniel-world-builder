@@ -118,7 +118,7 @@ class BuildingAssembler:
                   and rng.random() < odds):
                 self.kit.place_q(f'{prefix}_Window', self.coll, story, (*loc, 0), rotq)
                 accent = side == 'front' and self.accents.front_window(spec, k, story, loc, rotq, out)
-                if kind != 'goblin' and side == 'front' and rng.random() < 0.45 and not accent:
+                if kind != 'goblin' and side == 'front' and rng.random() < 0.25 and not accent:
                     self.kit.place_q('Flower_Box', self.coll, story,
                                      _wall_point(loc, rotq, (1.0, -0.36 - out, 1.02)), rotq)
             else:

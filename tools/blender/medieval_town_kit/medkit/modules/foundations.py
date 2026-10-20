@@ -23,18 +23,19 @@ def plinth(height):
     if detailed():
         b.box((0, -T - 0.21, height - 0.13), (GRID, -T - 0.15, height - 0.08), 'stone_dressed',
               skip=('-x', '+x'))
-        b.box((0, -T - 0.22, -BURY), (GRID, -T - 0.16, 0.08), 'stone_dressed',
+        b.box((0, -T - 0.22, -BURY), (GRID, -T - 0.16, 0.08), 'stone',
               skip=('-x', '+x', '-z'))
-        # 3D coursed ashlar/rubble foundation stones along the exterior plinth face
+        # Coursed dressed blocks along the exterior face, one tone each, with sunk joints
         z_top = height - 0.13
-        if z_top > 0.10:
-            for bx0, bx1, bmat, btone in ((0.02, 0.48, 'stone_dressed', 0.96), (0.51, 0.98, 'stone', 0.88),
-                                          (1.01, 1.50, 'stone_dressed', 1.03), (1.53, 1.98, 'stone', 0.91)):
-                b.box((bx0, -T - 0.205, 0.08), (bx1, -T - 0.17, min(z_top, 0.28)), bmat, tone=btone)
-        if z_top > 0.30:
-            for bx0, bx1, bmat, btone in ((0.02, 0.34, 'stone', 0.90), (0.37, 0.86, 'stone_dressed', 1.02),
-                                          (0.89, 1.38, 'stone', 0.86), (1.41, 1.98, 'stone_dressed', 0.98)):
-                b.box((bx0, -T - 0.205, 0.29), (bx1, -T - 0.17, z_top), bmat, tone=btone)
+        rows = [(0.08, z_top)] if z_top <= 0.36 else [(0.08, (0.08 + z_top) / 2), ((0.08 + z_top) / 2, z_top)]
+        for r, (rz0, rz1) in enumerate(rows):
+            if rz1 - rz0 < 0.06:
+                continue
+            cuts = (0.0, 0.58, 1.22, GRID) if r % 2 == 0 else (0.0, 0.34, 0.96, 1.58, GRID)
+            for bx0, bx1 in zip(cuts, cuts[1:]):
+                proud = 0.012 * ((int(bx0 * 10) + r) % 3)
+                b.box((bx0 + 0.008, -T - 0.205 - proud, rz0 + 0.006), (bx1 - 0.008, -T - 0.17, rz1 - 0.006),
+                      'stone_dressed')
     return b
 
 
@@ -91,11 +92,6 @@ def quoins(story=STORY, course=0.5):
         ly = 0.28 if k % 2 == 0 else 0.50
         b.box((out, out, z0), (lx, -T + 0.02, z1), 'stone_dressed')
         b.box((out, out, z0), (-T + 0.02, ly, z1), 'stone_dressed')
-        if detailed():
-            # Raised chisel-drafted inner boss faces on the -Y and -X quoin arms
-            m = 0.035
-            b.box((out + m, out - 0.018, z0 + m), (lx - m, out + 0.01, z1 - m), 'stone_dressed')
-            b.box((out - 0.018, out + m, z0 + m), (out + 0.01, ly - m, z1 - m), 'stone_dressed')
     return b
 
 

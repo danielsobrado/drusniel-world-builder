@@ -35,11 +35,18 @@ def round_tower(seg=16):
         for a in (0.3, 2.4, 4.4):
             m = Matrix.Translation((math.cos(a) * RADIUS, math.sin(a) * RADIUS, 0)) \
                 @ Matrix.Rotation(a, 4, 'Z')
-            b.box((-0.04, -0.18, z - 0.08), (0.09, 0.18, z + 0.78), 'stone_dressed', m=m)
-            b.box((-0.02, -0.12, z), (0.11, 0.12, z + 0.7), 'glass', m=m)
+            # Arrow loop: dressed jambs, lintel and sill round a narrow dark slit
+            for y0, y1 in ((-0.20, -0.04), (0.04, 0.20)):
+                b.box((-0.03, y0, z - 0.06), (0.07, y1, z + 0.76), 'stone_dressed', m=m)
+            b.box((-0.03, -0.20, z + 0.76), (0.08, 0.20, z + 0.92), 'stone_dressed', m=m)
+            b.box((-0.03, -0.22, z - 0.16), (0.10, 0.22, z - 0.06), 'stone_dressed', m=m)
+            b.box((-0.05, -0.04, z - 0.06), (0.0, 0.04, z + 0.76), 'shadow', m=m)
     # Dressed-stone postern portal surround & iron-bound oak door
     b.box((-0.62, -RADIUS - 0.10, 0), (0.62, -RADIUS + 0.3, 2.34), 'stone_dressed')
-    b.box((-0.44, -RADIUS - 0.12, 0.05), (0.44, -RADIUS - 0.04, 2.15), 'wood_trim')
+    b.box((-0.46, -RADIUS - 0.02, 0.05), (0.46, -RADIUS + 0.02, 2.15), 'shadow')
+    for i in range(5):
+        x0 = -0.44 + i * 0.176
+        b.box((x0 + 0.004, -RADIUS - 0.10, 0.05), (x0 + 0.172, -RADIUS - 0.03, 2.15), 'planks', bevel=0.008)
     if detailed():
         for hz in (0.45, 1.10, 1.75):
             ornate_strap_hinge(b, -0.40, hz, 0.58, -RADIUS - 0.12, dir_x=1)

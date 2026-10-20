@@ -102,9 +102,8 @@ def _med_cornice(b):
     if detailed():
         b.box((0, -T - 0.08, STORY - 0.16), (GRID, -T - 0.03, STORY - 0.10), 'stone_dressed',
               skip=('-x', '+x'))
-        for i in range(8):
-            dx = 0.06 + i * 0.25
-            b.box((dx, -T - 0.07, STORY - 0.34), (dx + 0.12, -T - 0.02, STORY - 0.28), 'stone_dressed')
+        b.box((0, -T - 0.035, STORY - 0.33), (GRID, -T + 0.02, STORY - 0.28), 'stone_dressed',
+              skip=('-x', '+x'))
 
 
 def _plaster_brick_patch(b, cx, cz):
@@ -115,7 +114,7 @@ def _plaster_brick_patch(b, cx, cz):
         (-0.18, -0.01, -0.07, -0.01, 'brick', 0.94),
         (0.01, 0.18, -0.07, -0.01, 'brick', 0.86),
         (-0.23, -0.06, 0.01, 0.07, 'brick', 1.02),
-        (-0.04, 0.14, 0.01, 0.07, 'stone_dressed', 0.92),
+        (-0.04, 0.14, 0.01, 0.07, 'brick', 0.92),
         (-0.14, 0.06, 0.09, 0.15, 'brick', 0.90),
     )
     for dx0, dx1, dz0, dz1, mat, tone in bricks:
@@ -132,13 +131,10 @@ def plaster_wall(kind):
         b.box((0, -T - 0.06, 0.32), (GRID, -T + 0.02, 0.39), 'stone_dressed', skip=('-x', '+x'))
         if detailed():
             # Individual 3D chamfered rusticated ashlar base blocks
-            for bx0, bx1, bmat in ((0.02, 0.48, 'stone_dressed'), (0.51, 0.98, 'stone'),
-                                   (1.01, 1.49, 'stone_dressed'), (1.52, 1.98, 'stone')):
-                b.box((bx0, -T - 0.052, 0.0), (bx1, -T + 0.01, 0.16), bmat, skip=('-z',))
-            for bx0, bx1, bmat in ((0.02, 0.32, 'stone'), (0.35, 0.82, 'stone_dressed'),
-                                   (0.85, 1.32, 'stone'), (1.35, 1.78, 'stone_dressed'),
-                                   (1.81, 1.98, 'stone')):
-                b.box((bx0, -T - 0.052, 0.17), (bx1, -T + 0.01, 0.32), bmat)
+            for bx0, bx1 in ((0.0, 0.62), (0.62, 1.30), (1.30, GRID)):
+                b.box((bx0 + 0.006, -T - 0.052, 0.0), (bx1 - 0.006, -T + 0.01, 0.16), 'stone_dressed', skip=('-z',))
+            for bx0, bx1 in ((0.0, 0.34), (0.34, 0.96), (0.96, 1.58), (1.58, GRID)):
+                b.box((bx0 + 0.006, -T - 0.052, 0.17), (bx1 - 0.006, -T + 0.01, 0.32), 'stone_dressed')
     else:
         x0, x1, _, _ = DOOR
         for sx0, sx1 in ((0.0, x0), (x1, GRID)):
@@ -146,17 +142,12 @@ def plaster_wall(kind):
             b.box((sx0, -T - 0.06, 0.32), (sx1, -T + 0.02, 0.39), 'stone_dressed')
             if detailed():
                 b.box((sx0 + 0.02, -T - 0.052, 0.0), (sx1 - 0.02, -T + 0.01, 0.16), 'stone_dressed', skip=('-z',))
-                b.box((sx0 + 0.02, -T - 0.052, 0.17), (sx1 - 0.02, -T + 0.01, 0.32), 'stone')
+                b.box((sx0 + 0.02, -T - 0.052, 0.17), (sx1 - 0.02, -T + 0.01, 0.32), 'stone_dressed')
     if detailed():
+        # One flaked patch low on the blank wall only, where damp rises; patches on every
+        # module repeat along a facade and read as stickers.
         if kind == 'plain':
-            _plaster_brick_patch(b, 0.52, 1.15)
-            _plaster_brick_patch(b, 1.48, 1.92)
-        elif kind == 'window':
-            _plaster_brick_patch(b, 0.56, 0.62)
-            _plaster_brick_patch(b, 1.46, 0.62)
-        elif kind == 'door':
-            _plaster_brick_patch(b, 0.22, 1.18)
-            _plaster_brick_patch(b, 1.78, 1.82)
+            _plaster_brick_patch(b, 1.55, 0.62)
     if kind == 'window':
         window_dressing(b, WINDOW, stone=True)
     elif kind == 'door':
@@ -181,9 +172,6 @@ def arcade_wall():
                 b.box((px0 + 0.01, -T - 0.028, qz0), (px1 - 0.01, T + 0.028, qz1), 'stone_dressed')
     if detailed():
         voussoir_arch(b, 1.0, 1.6, 0.60, 0.84, -T - 0.06, -T + 0.04, count=9)
-        # Carved stone spandrel medallions flanking the arcade arch
-        for sx in (0.20, 1.80):
-            b.box((sx - 0.09, -T - 0.035, 2.08), (sx + 0.09, -T + 0.01, 2.26), 'stone_dressed')
     return b
 
 

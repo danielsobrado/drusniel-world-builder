@@ -84,11 +84,6 @@ def chimney_breast(height=STORY, width=1.3, depth=0.6, bottom=0.0):
                 cy = sy * (width / 2 + 0.015)
                 b.box((x0 - 0.015, min(cy, cy - sy * dy), z0),
                       (x0 + dx, max(cy, cy - sy * dy), z1), 'stone_dressed')
-            # Central proud stone/brick relief block on the outer -X face between quoins
-            y_mid0 = -0.32 if k % 2 == 0 else -0.24
-            y_mid1 = 0.24 if k % 2 == 0 else 0.32
-            c_mat = 'stone' if k % 3 != 1 else 'brick'
-            b.box((x0 - 0.020, y_mid0, z0 + 0.02), (x0 + 0.01, y_mid1, z1 - 0.02), c_mat)
     return b
 
 
@@ -198,8 +193,12 @@ def balcony(width=1.8, depth=0.75):
             b.box((x - 0.022, -depth + 0.01, 0.0), (x + 0.022, -depth + 0.06, rail - 0.06), 'timber', bevel=0)
         x += step
     b.box((-half + 0.15, -depth - 0.14, rail - 0.3), (half - 0.15, -depth + 0.0, rail - 0.12), 'wood_trim')
-    b.blob((0, -depth - 0.07, rail - 0.1), 0.6, 'flowers', subdiv=2 if detailed() else 1,
-           squash=(1.2, 0.25, 0.25), jitter=0.25, seed=17)
+    b.blob((0, -depth - 0.07, rail - 0.1), 0.6, 'foliage', subdiv=2 if detailed() else 1,
+           squash=(1.2, 0.25, 0.22), jitter=0.35, seed=17)
+    if detailed():
+        for k, x in enumerate((-0.5, -0.15, 0.2, 0.52)):
+            b.blob((x, -depth - 0.08, rail + 0.02), 0.11, 'flowers', subdiv=1, squash=(1.0, 0.8, 0.7),
+                   jitter=0.4, seed=31 + k)
     return b
 
 

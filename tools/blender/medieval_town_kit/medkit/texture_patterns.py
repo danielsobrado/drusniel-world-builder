@@ -183,10 +183,12 @@ def grass(n, seed):
 
 
 def foliage(n, seed):
-    blobs, fine = fbm(n, seed, 1.3), fbm(n, seed + 1, 1.0)
-    leaf = smooth(0.35, 0.7, blobs)
-    albedo = lerp((0.05, 0.10, 0.03), lerp((0.20, 0.36, 0.10), (0.44, 0.57, 0.18), fine), leaf)
-    return albedo, leaf, 2.0
+    # Individual leaves: fine cells with dark gaps between, lit tops a little yellower.
+    leaves, mass, fine = fbm(n, seed, 0.45), fbm(n, seed + 2, 2.2), fbm(n, seed + 1, 1.0)
+    leaf = smooth(0.42, 0.56, leaves)
+    lit = lerp((0.16, 0.27, 0.08), (0.36, 0.46, 0.14), 0.6 * fine + 0.4 * mass)
+    albedo = lerp((0.07, 0.11, 0.04), lit, 0.35 + 0.65 * leaf)
+    return albedo, 0.7 * leaf + 0.3 * mass, 2.4
 
 
 def bark(n, seed):
@@ -198,11 +200,12 @@ def iron(n, seed):
     """Hand-forged hammered wrought iron with peened facets, blackened forge scale,
     polished steel edge sheen, and warm oil-quenched patina in hollows."""
     fine, mid, big = fbm(n, seed, 1.15), fbm(n, seed + 1, 1.85), fbm(n, seed + 2, 2.5)
-    peen = 0.5 + 0.5 * np.sin((fine * 4.5 + mid * 2.5) * np.pi * 2.0)
-    height = (0.45 * mid + 0.35 * peen + 0.20 * fine).astype(np.float32)
-    base = lerp((0.10, 0.105, 0.115), (0.26, 0.27, 0.29), 0.55 * peen + 0.45 * fine)
-    patina = smooth(0.68, 0.88, big) * (1.0 - 0.6 * peen)
-    albedo = lerp(base, (0.32, 0.18, 0.09), patina * 0.48)
+    # Soft hammer dents rather than contour bands; rust only in patches.
+    dents = smooth(0.35, 0.75, fbm(n, seed + 3, 1.6))
+    height = (0.55 * mid + 0.25 * dents + 0.20 * fine).astype(np.float32)
+    base = lerp((0.13, 0.13, 0.14), (0.21, 0.21, 0.22), 0.6 * fine + 0.4 * dents)
+    patina = smooth(0.62, 0.86, big)
+    albedo = lerp(base, (0.29, 0.17, 0.10), patina * 0.40)
     return albedo.astype(np.float32), height, 1.6
 
 
@@ -234,27 +237,29 @@ def window(n, seed):
     lead_ao = smooth(0.022, 0.085, bar)
 
     # Subtle hand-spun crown-glass ripples inside each diamond quarry
-    q_center = np.hypot(d1 - 0.5, d2 - 0.5)
-    ripple = 0.5 + 0.5 * np.sin(q_center * np.pi * 6.0 + fine * 2.0)
-
-    glass = tint(lerp((0.88, 0.86, 0.75), (0.70, 0.71, 0.58), v),
-                 (0.78 + 0.22 * fine) * (0.92 + 0.10 * ripple) * (0.72 + 0.28 * lead_ao))
-    glass = lerp(glass, (0.97, 0.94, 0.83), smooth(0.62, 0.0, np.hypot(u - 0.5, v - 0.36)) * 0.38)
+    ripple = fbm(n, seed + 2, 1.3)
+    quarry = fbm(n, seed + 3, 0.9)
+    glass = tint(lerp((0.36, 0.40, 0.37), (0.48, 0.50, 0.44), quarry),
+                 (0.82 + 0.18 * fine) * (0.90 + 0.14 * ripple) * (0.80 + 0.20 * lead_ao))
     lead_col = lerp((0.07, 0.06, 0.055), (0.18, 0.17, 0.16), joint_boss * 0.65)
     albedo = lerp(lead_col, glass, pane_mask)
-    height = (1.0 - pane_mask) * (0.75 + 0.25 * joint_boss) + pane_mask * (0.15 * ripple + 0.10 * fine)
+    height = (1.0 - pane_mask) * (0.75 + 0.25 * joint_boss) + pane_mask * (0.35 * ripple + 0.15 * fine)
     return albedo.astype(np.float32), height.astype(np.float32), 1.6
 
 
 def flowers(n, seed):
     base, _, _ = foliage(n, seed)
-    spots = fbm(n, seed + 7, 0.7)
+    # Small separate blooms over leaves: high-frequency spots, cottage-garden colours
+    # a little sun-faded, never a solid sheet of pink.
+    spots = fbm(n, seed + 7, 0.25)
     hue = fbm(n, seed + 8, 2.4)
-    mask = smooth(0.5, 0.56, spots)
-    palette = np.array([[0.88, 0.20, 0.18], [0.92, 0.55, 0.62], [0.96, 0.93, 0.86],
-                        [0.96, 0.80, 0.25]], np.float32)
-    petal = palette[np.minimum((hue * 4).astype(int), 3)]
-    return lerp(base, petal, mask), mask, 2.0
+    mask = smooth(0.66, 0.72, spots)
+    centre = smooth(0.76, 0.80, spots)
+    palette = np.array([[0.72, 0.20, 0.17], [0.80, 0.52, 0.58], [0.88, 0.86, 0.78],
+                        [0.86, 0.70, 0.26], [0.46, 0.36, 0.62]], np.float32)
+    petal = palette[np.minimum((hue * 5).astype(int), 4)]
+    petal = lerp(petal, (0.78, 0.62, 0.20), centre * 0.7)
+    return lerp(base, petal, mask), 0.4 * smooth(0.3, 0.7, spots) + 0.6 * mask, 2.0
 
 
 PATTERNS = {

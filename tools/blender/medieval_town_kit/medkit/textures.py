@@ -117,10 +117,10 @@ def _bake_scan_relief(name, albedo, normal, seed):
         # Multi-hued geological block tinting (warm terracotta sandstone, golden honey limestone, cool buff)
         patch_a = fbm(n, seed + 41, 2.2)
         patch_b = fbm(n, seed + 43, 2.0)
-        warm_sandstone = lerp((1.12, 0.96, 0.82), (0.94, 0.98, 1.04), patch_a)
+        warm_sandstone = lerp((1.02, 0.97, 0.90), (0.92, 0.95, 0.98), patch_a)
         terracotta_fleck = smooth(0.62, 0.84, patch_b) * stone_face
         col = col * warm_sandstone * (0.88 + 0.22 * fine)[..., None]
-        col = lerp(col, col * np.array([1.22, 0.88, 0.72], np.float32), terracotta_fleck * 0.45)
+        col = lerp(col, col * np.array([1.08, 0.97, 0.88], np.float32), terracotta_fleck * 0.35)
 
         # Crisp chiselled stone micro-grain and sunlit top-edge arris polish
         chisel = 0.5 + 0.5 * np.sin((u * 42.0 + v * 42.0 + 0.35 * mid) * np.pi * 2.0)
@@ -148,11 +148,11 @@ def _bake_scan_relief(name, albedo, normal, seed):
 
         # Cathedral grain arches within each horizontal plank
         r_pith = np.hypot((v_board - 0.48 + 0.18 * (warp - 0.5)) * 3.6, 0.32 * np.sin(u * np.pi * 2.0 + warp * 2.5))
-        rings = 0.5 + 0.5 * np.sin((r_pith * 3.2 + fibers * 1.1) * np.pi * 2.0)
+        rings = 0.5 + 0.5 * np.sin((r_pith * 10.0 + fibers * 1.8) * np.pi * 2.0)
         latewood = smooth(0.55, 0.92, rings)
         pores = smooth(0.74, 0.88, fbm(n, seed + 57, 1.2, sx=18.0, sy=0.8)) * (1.0 - 0.6 * latewood)
 
-        warm_wood = lerp((1.02, 0.80, 0.60), (1.28, 1.04, 0.80), 0.55 * fibers + 0.45 * (1.0 - latewood))
+        warm_wood = lerp((0.90, 0.84, 0.78), (1.04, 0.98, 0.90), 0.60 * fibers + 0.40 * (1.0 - latewood))
         warm_wood = warm_wood * board_tones[..., None] + np.stack(
             [board_warmth, board_warmth * 0.4, -board_warmth * 0.3], axis=-1
         )
@@ -176,7 +176,7 @@ def _bake_scan_relief(name, albedo, normal, seed):
         # Wear field: faint brick ghosting where limewash is thin, plus flaked-off exposed brick patches
         wear_field = 0.55 * fbm(n, seed + 75, 2.3) + 0.30 * mid + 0.15 * (1.0 - v)
         ghost_mask = smooth(0.46, 0.68, wear_field)
-        exposed_mask = smooth(0.71, 0.77, wear_field)
+        exposed_mask = 0.0 * wear_field
         plaster_rim = smooth(0.67, 0.71, wear_field) * (1.0 - exposed_mask)
 
         # Enrich base limewash plaster with warm cream & ochre lime pigment variation
@@ -190,7 +190,7 @@ def _bake_scan_relief(name, albedo, normal, seed):
             + 0.08 * plaster_rim,
         )
         # Blend sub-surface brick ghosting through thin limewash
-        ghost_tint = lerp(plaster_col, brick_col * 0.92 + 0.08, 0.26 * (1.0 - 0.35 * brick_face))
+        ghost_tint = lerp(plaster_col, brick_col * 0.92 + 0.08, 0.08 * (1.0 - 0.35 * brick_face))
         plaster_col = lerp(plaster_col, ghost_tint, ghost_mask * (1.0 - exposed_mask))
         # Exposed brick patch with dark plaster-edge drop shadow
         rim_shadow = smooth(0.70, 0.74, wear_field) * exposed_mask
@@ -205,6 +205,13 @@ def _bake_scan_relief(name, albedo, normal, seed):
         plaster_n = normal_from_height(comp_h, 1.45)
         nx = nx + (plaster_n[..., 0] * 2.0 - 1.0) * 0.75
         ny = ny + (plaster_n[..., 1] * 2.0 - 1.0) * 0.75
+
+    # Scans photographed in warm light read orange under the game's low sun: pull
+    # clay and field stone back toward their own luminance.
+    saturation = {'terracotta': 0.72, 'stone': 0.78, 'ashlar': 0.85}.get(name)
+    if saturation is not None:
+        lum = (0.299 * col[..., 0] + 0.587 * col[..., 1] + 0.114 * col[..., 2])[..., None]
+        col = lum + (col - lum) * saturation
 
     # Apply baked cavity AO, vertical rain streaks, and convex arris highlights
     shade = (1.0 - ao_str * cavity) * (1.0 - 0.10 * smooth(0.55, 0.90, streak)) + hi_str * edge_hi

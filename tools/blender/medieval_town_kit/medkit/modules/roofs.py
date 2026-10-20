@@ -49,9 +49,6 @@ def _ridge_saddle(b, x0, x1, span, pitch, mat='roof'):
             if tx1 > tx0:
                 # Overlapping crested ridge tile collar & finial nib
                 b.box((tx0, mid - 0.11, z_base + 0.02), (tx1, mid + 0.11, z_base + 0.135), mat)
-                cx = 0.5 * (tx0 + tx1)
-                b.box((cx - 0.035, mid - 0.045, z_base + 0.13),
-                      (cx + 0.035, mid + 0.045, z_base + 0.18), 'stone_dressed', bevel=0)
 
 
 def _slopes(b, x0, x1, span, pitch, barge=False):

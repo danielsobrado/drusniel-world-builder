@@ -48,7 +48,8 @@ class TerrainBuilder:
     def _edge(self, root, cx, cy, side, rotq, low, high, bare, goblin=False):
         x, y = edge_origin(cx, cy, side)
         for level in range(low, high):
-            pillar = (cx + cy + level) % 3 == 0
+            # A pillar's cap rises above the terrace, so under a building it shows through the floor.
+            pillar = (cx + cy + level) % 3 == 0 and not bare
             if goblin:
                 name = 'Stilt_Wall_Pillar' if pillar else 'Stilt_Wall'
             else:

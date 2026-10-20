@@ -72,68 +72,33 @@ def ashlar(n, seed):
 
 
 def dressed(n, seed):
-    """Finely tooled ashlar limestone with subtle chisel-drafted margins, warm
-    sedimentary travertine bedding veins, fossil mineral flecks, and crisp arrises."""
-    rng = np.random.default_rng(seed)
+    """Tooled limestone with no joints: every dressed piece is its own block, so the
+    texture is only the stone's face. Fine diagonal drove tooling, scattered small
+    pores, soft bedding and lichen dots; contrast is kept low so neighbouring pieces
+    differ by their per-piece tone, not by a pattern repeating inside them."""
     v, u = (np.mgrid[0:n, 0:n].astype(np.float32) + 0.5) / n
-    block, dx, dy, t_row, count = courses(n, rng, 4, 0.36 * n, 0.62 * n, row_jitter=0.08)
-    block, dx, dy = _warp(n, seed + 9, 0.008, block, dx, dy)
     fine = fbm(n, seed + 1, 1.35)
     mid = fbm(n, seed + 2, 1.95)
     big = fbm(n, seed + 3, 2.55)
-    bedding = fbm(n, seed + 4, 1.70, sx=12.0, sy=1.5)
-
-    edge = rounded_edge(dx, dy, n * 0.010) + (fine - 0.5) * n * 0.004
-    mortar = n * 0.0025
-    face = smooth(mortar, mortar + n * 0.008, edge)
-    margin_w = n * 0.018
-    boss_face = smooth(mortar + margin_w, mortar + margin_w + n * 0.014, edge)
-    margin_band = face * (1.0 - boss_face)
-
-    # Subtle mason's chisel striations & sedimentary limestone bedding
-    drove_diag = 0.5 + 0.5 * np.sin((u * 52.0 + v * 52.0 + 0.8 * fine) * np.pi * 2.0)
-    tooling = 0.65 * bedding + 0.20 * fine + 0.15 * drove_diag
-
-    pits = smooth(0.78, 0.89, fbm(n, seed + 5, 1.30)) * boss_face
-    veins = smooth(0.76, 0.86, fbm(n, seed + 6, 1.65, sx=8.0, sy=1.8)) * face
-
-    # Per-block warm Cotswold/Mediterranean honey-limestone color variation
-    ASHLAR_PALETTE = np.array([
-        [0.65, 0.59, 0.49],
-        [0.69, 0.63, 0.53],
-        [0.61, 0.56, 0.47],
-        [0.72, 0.65, 0.54],
-        [0.63, 0.55, 0.44],
-    ], np.float32)
-    pick = rng.integers(0, len(ASHLAR_PALETTE), count)
-    tones = rng.uniform(0.90, 1.08, count)
-    stone_col = (ASHLAR_PALETTE[pick] * tones[:, None])[block]
-
-    # Sedimentary bedding & subtle drafted margin lightening
-    stone_col = lerp(stone_col, stone_col * np.array([1.08, 1.05, 1.01], np.float32), bedding * 0.36)
-    stone_col = lerp(stone_col, (0.74, 0.68, 0.58), margin_band * 0.16 + veins * 0.32)
-
-    # Top-arris sunlight catch and bottom-edge shadow within each course
-    top_hi = smooth(0.84, 0.98, t_row) * face
-    bot_ao = smooth(0.16, 0.02, t_row) * face
-    shade = (
-        (0.86 + 0.16 * fine + 0.08 * mid + 0.05 * tooling)
-        * (0.95 + 0.05 * boss_face + 0.07 * top_hi - 0.09 * bot_ao)
-        * (1.0 - 0.18 * smooth(0.48, 0.92, big))
-        * (1.0 - 0.32 * pits)
-    )
-    stone_col = tint(stone_col, shade)
-    mortar_col = tint((0.46, 0.43, 0.37), 0.86 + 0.24 * fine)
-    albedo = lerp(mortar_col, stone_col, face)
-    moss = smooth(0.66, 0.86, big) * (1.0 - 0.85 * boss_face) * 0.35
-    height = (
-        face * (0.66 + 0.18 * boss_face + 0.06 * top_hi)
-        + 0.12 * mid * face
-        + 0.08 * tooling * face
-        + 0.06 * veins
-        - 0.32 * pits
-    ).astype(np.float32)
-    return _weather(albedo, n, seed, 0.20, moss), height, 2.2
+    bedding = fbm(n, seed + 4, 1.7, sx=10.0, sy=1.2)
+    # Drove tooling: parallel chisel strokes in patches that change angle and fade.
+    patch = fbm(n, seed + 5, 2.2)
+    angle = (patch - 0.5) * 0.9
+    drove = 0.5 + 0.5 * np.sin((u * np.cos(angle) + v * np.sin(angle)) * 64.0 * np.pi * 2.0 + 0.6 * fine)
+    drove *= smooth(0.25, 0.65, fbm(n, seed + 6, 2.0))
+    # Small pores and chips: high-frequency noise thresholded so each spot stays tiny.
+    pores = smooth(0.80, 0.90, fbm(n, seed + 7, 0.35))
+    chips = smooth(0.86, 0.94, fbm(n, seed + 8, 0.9)) * smooth(0.5, 0.7, mid)
+    lichen = smooth(0.87, 0.93, fbm(n, seed + 9, 0.6)) * smooth(0.55, 0.8, big)
+    base = lerp((0.70, 0.65, 0.56), (0.64, 0.60, 0.53), big)
+    base = lerp(base, (0.74, 0.69, 0.60), bedding * 0.35)
+    shade = (0.92 + 0.08 * fine) * (0.96 + 0.04 * mid) * (1.0 - 0.025 * drove) * (1.0 - 0.30 * pores)         * (1.0 - 0.18 * chips)
+    albedo = tint(base, shade)
+    albedo = lerp(albedo, (0.78, 0.74, 0.62), lichen * 0.45)
+    albedo = lerp(albedo, (0.40, 0.42, 0.30), smooth(0.70, 0.88, big) * smooth(0.45, 0.7, fine) * 0.12)
+    height = (0.55 + 0.20 * mid + 0.10 * fine + 0.015 * drove + 0.05 * bedding
+              - 0.35 * pores - 0.25 * chips).astype(np.float32)
+    return albedo.astype(np.float32), height, 1.6
 
 
 def planks(n, seed):
@@ -150,71 +115,39 @@ def planks(n, seed):
     return _weather(albedo, n, seed, 0.15), seam * (0.75 + 0.25 * grain) - 0.2 * knots, 2.2
 
 
-def timber(n, seed):
-    """Adze-hewn seasoned oak structural timber with catheter growth-ring arches,
-    knot grain deflection, dark earlywood vessel pores, golden medullary rays,
-    chamfered beam edges, and deep seasoning checks."""
+def oak(n, seed, early, late, grey=0.0, checks=1.0):
+    """Quarter-sawn oak seen along the grain (u): long fibrous streaks and soft flame
+    figure, a few small knots, thin seasoning checks. Rings are never drawn as bands:
+    they only modulate tone, which is what keeps beams from reading as zebra stripes."""
     v, u = (np.mgrid[0:n, 0:n].astype(np.float32) + 0.5) / n
-    fibers = fbm(n, seed, 1.45, sx=22.0, sy=1.0)
-    fine = fbm(n, seed + 1, 1.25, sx=28.0, sy=1.4)
-    warp = fbm(n, seed + 2, 2.1, sx=7.0, sy=1.5)
-
-    # Knots that radially deflect surrounding wood fibers and growth rings
-    v_deflect = np.zeros((n, n), np.float32)
-    knot_mask = np.zeros((n, n), np.float32)
-    knot_rings = np.zeros((n, n), np.float32)
-    for uk, vk, rx, ry in ((0.23, 0.30, 1.7, 3.2), (0.67, 0.68, 1.5, 2.9), (0.86, 0.24, 1.9, 3.5)):
+    warp = fbm(n, seed + 2, 2.1, sx=6.0, sy=1.5)
+    fibers = fbm(n, seed, 1.3, sx=26.0, sy=1.0)
+    streak = fbm(n, seed + 1, 1.1, sx=44.0, sy=1.3)
+    flame = 0.5 + 0.5 * np.sin((v + 0.10 * (warp - 0.5)) * 38.0 * np.pi + 3.0 * fbm(n, seed + 3, 2.2, sx=4.0))
+    patches = fbm(n, seed + 4, 2.4)
+    knot = np.zeros((n, n), np.float32)
+    rng = np.random.default_rng(seed)
+    for _ in range(2):
+        uk, vk = rng.uniform(0, 1, 2)
         du = ((u - uk + 0.5) % 1.0) - 0.5
         dv = ((v - vk + 0.5) % 1.0) - 0.5
-        dk = np.hypot(du * rx, dv * ry)
-        v_deflect += (dv / (dk + 0.045)) * 0.075 * np.exp(-dk * 8.5)
-        knot_mask = np.maximum(knot_mask, smooth(0.11, 0.025, dk))
-        knot_rings = np.maximum(
-            knot_rings,
-            smooth(0.19, 0.05, dk) * (0.5 + 0.5 * np.sin(dk * 85.0)),
-        )
+        knot = np.maximum(knot, smooth(0.022, 0.006, np.hypot(du * 0.6, dv * 1.6)))
+    check = smooth(0.955, 0.985, fbm(n, seed + 7, 1.1, sx=34.0, sy=0.7)) * smooth(0.45, 0.7, patches) * checks
+    t = 0.45 * fibers + 0.30 * streak + 0.25 * flame
+    wood = lerp(np.array(late, np.float32), np.array(early, np.float32), smooth(0.15, 0.85, t))
+    wood = tint(wood, (0.90 + 0.14 * patches) * (1.0 - 0.35 * knot) * (1.0 - 0.45 * check))
+    if grey:
+        wood = lerp(wood, (0.40, 0.39, 0.36), smooth(0.4, 0.85, fbm(n, seed + 9, 2.4)) * grey)
+    height = (0.45 * fibers + 0.35 * streak + 0.10 * flame - 0.6 * check - 0.3 * knot).astype(np.float32)
+    return wood.astype(np.float32), height
 
-    # Parabolic cathedral growth-ring arches opening along u (beam length)
-    v_warped = v + v_deflect + 0.13 * (warp - 0.5)
-    u_arch = 0.30 * np.sin(u * np.pi * 2.0 + fbm(n, seed + 3, 2.4) * 2.6)
-    r_pith = np.hypot((v_warped - 0.50) * 4.6, u_arch)
-    ring_phase = r_pith * 3.4 + fbm(n, seed + 4, 1.85, sx=11.0, sy=1.4) * 1.35
-    ring_wave = 0.5 + 0.5 * np.sin(ring_phase * np.pi * 2.0)
-    latewood = smooth(0.56, 0.93, ring_wave)
 
-    # Open-grain oak vessel pores in earlywood + golden quarter-sawn medullary rays
-    pores = smooth(0.73, 0.87, fbm(n, seed + 5, 1.15, sx=18.0, sy=0.75)) * (1.0 - 0.65 * latewood)
-    rays = smooth(0.75, 0.89, fbm(n, seed + 6, 1.65, sx=7.5, sy=2.4))
-    cracks = smooth(0.82, 0.91, fbm(n, seed + 7, 1.5, sx=26.0, sy=1.1)) * smooth(0.38, 0.68, fbm(n, seed + 8, 2.3))
-    adze = 0.5 + 0.5 * np.sin((u * 8.0 + 0.35 * warp) * np.pi * 2.0)
-
-    # Planed edge bevel highlight along top/bottom beam arrises
-    edge_dist = np.minimum(v, 1.0 - v)
-    edge_chamfer = smooth(0.055, 0.012, edge_dist) * smooth(0.0, 0.008, edge_dist)
-
-    # Rich seasoned oak heartwood albedo
-    earlywood_col = np.array((0.46, 0.31, 0.18), np.float32)
-    latewood_col = np.array((0.20, 0.125, 0.07), np.float32)
-    wood = lerp(earlywood_col, latewood_col, 0.58 * latewood + 0.28 * (1.0 - fibers) + 0.14 * knot_rings)
-    wood = lerp(wood, (0.56, 0.40, 0.24), rays * 0.32 + edge_chamfer * 0.26)
-    wood = tint(
-        wood,
-        (0.84 + 0.22 * fibers + 0.08 * adze)
-        * (1.0 - 0.32 * pores)
-        * (1.0 - 0.65 * cracks)
-        * (1.0 - 0.55 * knot_mask),
-    )
-    height = (
-        0.38 * fibers
-        + 0.28 * (1.0 - latewood)
-        + 0.14 * adze
-        + 0.10 * fine
-        + 0.10 * edge_chamfer
-        - 0.28 * pores
-        - 0.70 * cracks
-        - 0.35 * knot_mask
-    ).astype(np.float32)
-    return wood.astype(np.float32), height, 2.4
+def timber(n, seed):
+    """Adze-dressed, weathered structural oak."""
+    wood, height = oak(n, seed, (0.37, 0.29, 0.21), (0.24, 0.18, 0.13), grey=0.28)
+    u = (np.mgrid[0:n, 0:n][1].astype(np.float32) + 0.5) / n
+    adze = 0.5 + 0.5 * np.sin((u * 8.0 + 0.3 * fbm(n, seed + 11, 2.0)) * np.pi * 2.0)
+    return tint(wood, 0.96 + 0.06 * adze), height + 0.12 * adze, 2.0
 
 
 def shingles(n, seed):

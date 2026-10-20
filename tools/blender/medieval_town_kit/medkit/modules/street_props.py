@@ -38,16 +38,20 @@ def lamp_post(arm=False):
     b = MeshBuilder()
     b.box((-0.26, -0.26, 0), (0.26, 0.26, 0.18), 'stone', skip=('-z',))
     b.box((-0.2, -0.2, 0.18), (0.2, 0.2, 0.36), 'stone')
-    b.lathe([(0.13, 0.36), (0.1, 0.48), (0.07, 0.62), (0.055, 0.7), (0.05, 2.42), (0.08, 2.48),
-             (0.08, 2.54), (0.13, 2.6), (0.13, 2.66), (0.0, 2.66)], 8, 'iron')
+    # A squared oak post with iron bands, not a cast-iron column: the town is medieval.
+    b.box((-0.085, -0.085, 0.36), (0.085, 0.085, 2.56), 'timber')
+    if detailed():
+        for z in (0.5, 2.38):
+            b.box((-0.095, -0.095, z), (0.095, 0.095, z + 0.05), 'iron', bevel=0)
+    b.box((-0.14, -0.14, 2.56), (0.14, 0.14, 2.66), 'iron', bevel=0)
     if detailed():
         for a in range(4):
             c, s = math.cos(a * math.pi / 2), math.sin(a * math.pi / 2)
-            b.beam((c * 0.05, s * 0.05, 2.3), (c * 0.17, s * 0.17, 2.6), (-s, c, 0), (-0.012, 0.012),
+            b.beam((c * 0.085, s * 0.085, 2.3), (c * 0.17, s * 0.17, 2.6), (-s, c, 0), (-0.012, 0.012),
                    0.03, 'iron', bevel=0)
     lantern(b, 0, 0, 2.66)
     if arm:
-        b.beam((0, 0, 2.25), (0, -0.85, 2.25), (1, 0, 0), (-0.025, 0.025), 0.05, 'iron', bevel=0)
+        b.beam((0, 0, 2.25), (0, -0.85, 2.25), (1, 0, 0), (-0.035, 0.035), 0.07, 'timber', bevel=0)
         _banner_cloth(b, 0.0, -0.5, 2.22, width=0.5, drop=1.15, plane='yz')
     return b
 
@@ -134,13 +138,17 @@ def flower_box():
     """Planter on a sill, flowers mounded over the rim and trailing down the front."""
     b = MeshBuilder()
     b.box((-0.45, -0.12, 0), (0.45, 0.12, 0.2), 'planks')
-    b.blob((0, 0, 0.22), 0.5, 'flowers', subdiv=2 if detailed() else 1,
-           squash=(1.0, 0.34, 0.4), jitter=0.25, seed=5)
+    # A leafy mound with separate clumps of bloom on it and a few trailing sprigs.
+    b.blob((0, 0, 0.2), 0.46, 'foliage', subdiv=2 if detailed() else 1,
+           squash=(1.0, 0.3, 0.28), jitter=0.35, seed=5)
     if detailed():
-        for k, x in enumerate((-0.3, 0.02, 0.32)):
-            b.blob((x, -0.16, 0.06 - 0.05 * (k % 2)), 0.17, 'foliage', subdiv=1,
-                   squash=(0.9, 0.45, 1.0), jitter=0.3, seed=11 + k)
-            b.blob((x + 0.06, -0.2, 0.12), 0.1, 'flowers', subdiv=1, seed=21 + k)
+        for k, (x, z, r) in enumerate(((-0.33, 0.27, 0.11), (-0.14, 0.33, 0.13), (0.06, 0.29, 0.10),
+                                       (0.24, 0.34, 0.12), (0.37, 0.25, 0.09))):
+            b.blob((x, -0.02 * (k % 2), z), r, 'flowers', subdiv=1, squash=(1.0, 0.8, 0.7),
+                   jitter=0.4, seed=21 + k)
+        for k, x in enumerate((-0.28, 0.1, 0.3)):
+            b.blob((x, -0.15, 0.05 - 0.05 * (k % 2)), 0.13, 'foliage', subdiv=1,
+                   squash=(0.7, 0.45, 1.2), jitter=0.4, seed=11 + k)
     return b
 
 

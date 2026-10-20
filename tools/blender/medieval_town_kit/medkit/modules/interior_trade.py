@@ -27,8 +27,8 @@ def counter(length=2.0):
         b.box((x, -0.29, 0.10), (x + 0.08, -0.24, 0.95), 'wood_trim', tone=0.98)
     if detailed():
         for px0, px1 in ((-h + 0.11, -0.05), (0.05, h - 0.11)):
-            recessed_panel_front(b, px0, px1, 0.16, 0.72, -0.265, depth=0.022, border=0.026,
-                                 carved=True, style='knotwork')
+            # Wide bays take plain fielded panels: knotwork stretched this wide reads as sticks.
+            recessed_panel_front(b, px0, px1, 0.16, 0.72, -0.265, depth=0.022, border=0.026, carved=False)
             recessed_panel_front(b, px0, px1, 0.76, 0.91, -0.265, depth=0.018, border=0.02,
                                  carved=True, style='frieze')
         b.box((-h + 0.08, -0.18, 0.46), (h - 0.08, 0.22, 0.51), 'planks')
