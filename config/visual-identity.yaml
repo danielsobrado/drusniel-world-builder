@@ -1,0 +1,1290 @@
+schemaVersion: 1
+catalogId: drusniel-visual-identity-v1
+authority:
+  loreSite: https://www.drusniel.com/
+  culturesCatalog: config/cultures.yaml
+  localPopulationsRef: docs/reference/eldara-local-cultures-populations.md
+  assetBible: docs/asset-bible/README.md
+azgaarCultureSourceMap:
+  "0":
+    sourceId: 0
+    sourceName: Wildlands
+    targetType: none
+    key: none
+    displayName: Uninhabited / Wildlands
+    primaryAncestry: none
+    defaultRealm: wyrmreach
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "1":
+    sourceId: 1
+    sourceName: Eldoria
+    targetType: culture
+    key: elenori
+    displayName: Elenori High Elven
+    primaryAncestry: elven
+    defaultRealm: elenoria
+    regionalSphere: western-elven-sphere
+    settlementStyleKey: limestone-slate
+    kitFamily: Med
+  "2":
+    sourceId: 2
+    sourceName: Mercian
+    targetType: seed
+    key: serpent-peoples
+    displayName: Serpent Peoples
+    primaryAncestry: serpentfolk
+    defaultRealm: contia
+    regionalSphere: serpentine-basin-sphere
+    settlementStyleKey: sandstone-terracotta
+    kitFamily: Med
+  "3":
+    sourceId: 3
+    sourceName: Kentland
+    targetType: culture
+    key: lumish
+    displayName: Lumish Imperial
+    primaryAncestry: human
+    defaultRealm: lumeshire
+    settlementStyleKey: limestone-slate
+    kitFamily: Tudor
+  "4":
+    sourceId: 4
+    sourceName: Yotunn
+    targetType: seed
+    key: jotunn
+    displayName: Jotunn Frost-Giant Kin
+    primaryAncestry: giantkin
+    defaultRealm: frostgard
+    regionalSphere: northern-frost-sphere
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "5":
+    sourceId: 5
+    sourceName: Enlandic
+    targetType: seed
+    key: draconic-remnant
+    displayName: Draconic Remnant
+    primaryAncestry: draconic
+    defaultRealm: wyrmreach
+    regionalSphere: draconic-highland-sphere
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "6":
+    sourceId: 6
+    sourceName: Valarans
+    targetType: culture
+    key: zuraldarr
+    displayName: Zuraldarr Highlanders
+    primaryAncestry: human
+    defaultRealm: zuraldi
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "7":
+    sourceId: 7
+    sourceName: Norheim
+    targetType: culture
+    key: norths
+    displayName: Norths of Frostgard
+    primaryAncestry: human
+    defaultRealm: frostgard
+    regionalSphere: northern-frost-sphere
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "8":
+    sourceId: 8
+    sourceName: Darkhold
+    targetType: culture
+    key: umbra-kori
+    displayName: Umbra'kori Dominion
+    primaryAncestry: dark-elven
+    defaultRealm: umbrakor
+    settlementStyleKey: granite-slate
+    kitFamily: Med
+  "9":
+    sourceId: 9
+    sourceName: Uruk
+    targetType: seed
+    key: orc-peoples
+    displayName: Orcish Clans
+    primaryAncestry: orc
+    defaultRealm: grukmar
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "10":
+    sourceId: 10
+    sourceName: Durinheim
+    targetType: culture
+    key: vondari
+    displayName: Vondari Mountain-Folk
+    primaryAncestry: dwarven
+    defaultRealm: stonehold
+    regionalSphere: eastern-dwarven-sphere
+    settlementStyleKey: granite-slate
+    kitFamily: Nordic
+  "11":
+    sourceId: 11
+    sourceName: Schwarzlicht
+    targetType: culture
+    key: contian
+    displayName: Contian League
+    primaryAncestry: human
+    defaultRealm: contia
+    settlementStyleKey: limestone-terracotta
+    kitFamily: Med
+  "12":
+    sourceId: 12
+    sourceName: Rakhnid
+    targetType: seed
+    key: rakhnid-broods
+    displayName: Rakhnid Broods
+    primaryAncestry: arachnid
+    defaultRealm: grukmar
+    settlementStyleKey: timber-thatch
+    kitFamily: Goblin
+  "13":
+    sourceId: 13
+    sourceName: Darkspire
+    targetType: seed
+    key: goblin-peoples
+    displayName: Goblin Peoples
+    primaryAncestry: goblin
+    defaultRealm: grukmar
+    regionalSphere: goblin-march-sphere
+    settlementStyleKey: swamp-thatch
+    kitFamily: Goblin
+loreRealms:
+  lumeshire:
+    id: lumeshire
+    displayName: Lumeshirean Divine Empire
+    azgaarStateNames:
+      - Lumeshire
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    primaryCultures:
+      - lumish
+    secondaryCultures:
+      - zuraldarr
+      - orc-peoples
+      - goblin-peoples
+    defaultLocalBranch: lumeshire-imperial
+    faith: Church of Lumina
+    polityForm: divine-empire
+    architectureGrammar:
+      settlementStyleKey: limestone-slate
+      kitFamily: Tudor
+      kitSkin: imperial
+      wallMaterial: dressed-cream-limestone-and-oak-frame
+      roofMaterial: blue-gray-slate
+      roofForm: steep-axial-gable-with-clerestory
+      roofPitch: 42
+      roofOverhang: 0.35
+      irregularity: 0.1
+      weathering: 0.22
+      foundationType: ashlar-plinth
+      streetGrammar: axial-imperial-grid
+      dressingPreference: old-market
+      silhouetteSummary: Orderly axial market square, arcaded registry hall,
+        twin-lancet parish church, buttressed granary, and disciplined
+        timber-framed rowhouses.
+    mandatoryLandmarks:
+      - lumeshire/imperial-registry-hall
+      - lumeshire/parish-church
+      - lumeshire/granary
+      - lumeshire/fortified-market-hall
+      - lumeshire/border-watchtower
+      - lumeshire/toll-bridge-gate
+    propPool:
+      - lumeshire/wagon-grain-stall
+      - lumeshire/road-mile-marker
+      - lumeshire/communal-bake-oven
+      - lumeshire/barracks-supply-shed
+    residentProfessions:
+      - id: imperial-magistrate
+        title: Imperial Registry Magistrate
+        visualKind: paladin
+        district: civic
+        role: administration
+      - id: lumina-cleric
+        title: Parish Cleric of Lumina
+        visualKind: paladin
+        district: sacred
+        role: sacred
+      - id: grain-reeve
+        title: Imperial Tithe & Grain Reeve
+        visualKind: villager
+        district: market
+        role: agriculture
+      - id: chartered-burgher
+        title: Chartered Guild Merchant
+        visualKind: villager
+        district: market
+        role: trade
+      - id: border-pikeman
+        title: Imperial Border Warden
+        visualKind: paladin
+        district: garrison
+        role: military
+      - id: guild-baker
+        title: Communal Oven Baker
+        visualKind: villager
+        district: craft
+        role: craft
+  zuraldi:
+    id: zuraldi
+    displayName: Zuraldi Highland Autonomy
+    azgaarStateNames:
+      - Lumeshire
+    mappingConfidence: culture-and-geography
+    loreStatus: published
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    primaryCultures:
+      - zuraldarr
+    secondaryCultures:
+      - lumish
+      - orc-peoples
+    defaultLocalBranch: lumeshire-zuraldarr
+    faith: Six Ancestor-Gods & Druidic Groves
+    polityForm: autonomous-highland-six-offices
+    architectureGrammar:
+      settlementStyleKey: granite-slate
+      kitFamily: Nordic
+      kitSkin: plains
+      wallMaterial: dry-laid-mountain-granite-and-larch-beams
+      roofMaterial: heavy-split-shale-slabs
+      roofForm: low-wind-resistant-hipped-gable
+      roofPitch: 32
+      roofOverhang: 0.48
+      irregularity: 0.22
+      weathering: 0.42
+      foundationType: stepped-dry-stone-terrace
+      streetGrammar: contour-switchback-terrace
+      dressingPreference: river-stone
+      silhouetteSummary: Slope-following gray-stone terraces, six-pillar council hall,
+        carved ancestor monolith, caravan unloading shelves, and cattle
+        enclosures without Imperial cathedral grids.
+    mandatoryLandmarks:
+      - zuraldi/six-offices-council-hall
+      - zuraldi/ancestor-monolith
+      - zuraldi/terraced-stone-farmstead
+      - zuraldi/ridge-watchhouse
+      - zuraldi/caravan-unloading-shelf
+      - zuraldi/switchback-bridge
+    propPool:
+      - zuraldi/cattle-yard
+      - zuraldi/highland-cheese-smokehouse
+      - zuraldi/druid-grove-altar
+      - zuraldi/matriarch-table
+      - zuraldi/stone-pass-cairn
+      - zuraldi/mountain-pony-pack-cart
+    residentProfessions:
+      - id: six-offices-speaker
+        title: Speaker of the Six Offices
+        visualKind: paladin
+        district: civic
+        role: administration
+      - id: grove-druid
+        title: Highland Grove Keeper
+        visualKind: villager
+        district: sacred
+        role: sacred
+      - id: pass-warden
+        title: Mountain Pass Warden
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: caravan-drover
+        title: Highland Pony Caravan Drover
+        visualKind: villager
+        district: market
+        role: trade
+      - id: cattle-matriarch
+        title: Terrace Herd Matriarch
+        visualKind: villager
+        district: agricultural
+        role: pastoral
+      - id: smokehouse-curer
+        title: Upland Cheese & Meat Curer
+        visualKind: villager
+        district: craft
+        role: craft
+  stonehold:
+    id: stonehold
+    displayName: Mountain Kingdom of Stonehold
+    azgaarStateNames:
+      - Ironpeak
+      - Stonehold
+      - Glimmerhold
+    mappingConfidence: requires-confirmation
+    mappingNote: Working crosswalk maps Stonehold lore to Azgaar state Ironpeak
+      (Durinheim/vondari majority); preserve both loreRealm=stonehold and
+      azgaarStateName=Ironpeak.
+    loreStatus: published
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    primaryCultures:
+      - vondari
+    secondaryCultures:
+      - orc-peoples
+      - umbra-kori
+    defaultLocalBranch: ironpeak-vondari
+    faith: Forgeheart & Ancestral Craft Reverence
+    polityForm: fortified-mountain-hold-monarchy
+    architectureGrammar:
+      settlementStyleKey: granite-slate
+      kitFamily: Nordic
+      kitSkin: frost
+      wallMaterial: interlocking-ashlar-basalt-and-iron-bands
+      roofMaterial: stepped-stone-corbel-and-slate
+      roofForm: buttressed-gabled-vault-with-flues
+      roofPitch: 36
+      roofOverhang: 0.25
+      irregularity: 0.08
+      weathering: 0.35
+      foundationType: heavy-cyclopean-plinth
+      streetGrammar: fortified-forge-axis
+      dressingPreference: dark-quarter
+      silhouetteSummary: Heavy trapezoidal mountain gate, twin-chimney forgeheart
+        workshops, vertical smelter towers, ore-lift headframes, ore-cart rail
+        tracks, and terraced stone worker rows.
+    mandatoryLandmarks:
+      - stonehold/fortress-mountain-gate
+      - stonehold/forgeheart-workshop
+      - stonehold/smelter-tower
+      - stonehold/ore-lift-headframe
+      - stonehold/ore-cart-track
+      - stonehold/vault-council-hall
+    propPool:
+      - stonehold/terraced-stone-worker-home
+      - stonehold/basalt-viaduct
+      - stonehold/sealed-shaft-barricade
+      - stonehold/mine-ventilation-stack
+      - stonehold/ore-assay-bench
+      - stonehold/stonehold-ward-block
+    residentProfessions:
+      - id: deep-warden
+        title: Sealed-Shaft Gate Warden
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: forgeheart-master
+        title: Forgeheart Master Smith
+        visualKind: villager
+        district: industrial
+        role: industry
+      - id: ore-assayer
+        title: Guild Ore Assayer & Hoist Engineer
+        visualKind: villager
+        district: industrial
+        role: mining
+      - id: vault-councillor
+        title: Vault Council Elder
+        visualKind: paladin
+        district: civic
+        role: administration
+      - id: contract-hauler
+        title: Ironpeak Contract Ore Hauler
+        visualKind: villager
+        district: market
+        role: logistics
+      - id: tunnel-mason
+        title: Basalt Viaduct Mason
+        visualKind: villager
+        district: craft
+        role: craft
+  grukmar:
+    id: grukmar
+    displayName: Grukmar Confederacy & Bog Marches
+    azgaarStateNames:
+      - Grukmar
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    primaryCultures:
+      - goblin-peoples
+      - orc-peoples
+      - rakhnid-broods
+    secondaryCultures:
+      - umbra-kori
+      - jotunn
+    defaultLocalBranch: grukmar-goblins
+    faith: Bog Spirit Pacts, Clan Totems & Brood Webs
+    polityForm: multi-people-martial-trade-confederacy
+    architectureGrammar:
+      settlementStyleKey: swamp-thatch
+      kitFamily: Goblin
+      kitSkin: marsh
+      wallMaterial: charred-bog-cypress-lashings-and-upland-rubble
+      roofMaterial: layered-marsh-reed-thatch-and-tarred-plank
+      roofForm: steep-shed-and-pitched-stilt-canopy
+      roofPitch: 46
+      roofOverhang: 0.55
+      irregularity: 0.34
+      weathering: 0.55
+      foundationType: bog-stilt-or-earthfast
+      streetGrammar: wetland-boardwalk-and-upland-ring
+      dressingPreference: mossy-lanes
+      silhouetteSummary: "Dual ecological grammar: goblin stilt dwellings, raised
+        boardwalks, and skiff barter markets over wetlands paired with orc
+        upland timber-and-stone clan assembly halls and salvage trade yards."
+    mandatoryLandmarks:
+      - grukmar/bog-stilt-dwelling
+      - grukmar/clan-assembly-hall
+      - grukmar/raised-marsh-boardwalk
+      - grukmar/wetland-barter-market
+      - grukmar/salvage-smithy
+      - grukmar/ridge-palisade-gate
+    propPool:
+      - grukmar/marsh-watch-tower
+      - grukmar/peat-kiln-shed
+      - grukmar/goblin-boat-landing
+      - grukmar/orc-haul-wagon
+      - grukmar/reed-drying-frame
+      - grukmar/treaty-totem-post
+    residentProfessions:
+      - id: clan-warchief
+        title: Confederacy Clan Envoy
+        visualKind: paladin
+        district: civic
+        role: administration
+      - id: bog-skiff-factor
+        title: Goblin Marsh Barter Factor
+        visualKind: villager
+        district: market
+        role: trade
+      - id: salvage-ironsmith
+        title: Salvage & Bog-Iron Smith
+        visualKind: villager
+        district: industrial
+        role: craft
+      - id: ridge-outpost-guard
+        title: Palisade Ridge Guard
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: peat-cutter
+        title: Wetland Reed & Peat Cutter
+        visualKind: villager
+        district: agricultural
+        role: gathering
+      - id: totem-mediator
+        title: Treaty-Post Shaman
+        visualKind: villager
+        district: sacred
+        role: sacred
+  contia:
+    id: contia
+    displayName: Contian League & Academy Cities
+    azgaarStateNames:
+      - Contia
+      - Sunspire
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    primaryCultures:
+      - contian
+    secondaryCultures:
+      - vondari
+      - serpent-peoples
+      - goblin-peoples
+      - rakhnid-broods
+    defaultLocalBranch: contian-core
+    faith: Secular Civic Philosophy & Collegial Patronage
+    polityForm: mercantile-scholarly-league
+    architectureGrammar:
+      settlementStyleKey: limestone-terracotta
+      kitFamily: Med
+      kitSkin: sun
+      wallMaterial: warm-ochre-limestone-stucco-and-carved-pilasters
+      roofMaterial: barrel-terracotta-tile-and-copper-lanterns
+      roofForm: low-hipped-courtyard-and-clerestory-pavilion
+      roofPitch: 28
+      roofOverhang: 0.42
+      irregularity: 0.09
+      weathering: 0.2
+      foundationType: courtyard-colonnade
+      streetGrammar: scholarly-terraced-avenue
+      dressingPreference: grey-setts
+      silhouetteSummary: Colonnaded lecture halls, stepped library archives, hydraulic
+        aqueduct cisterns, observatory towers, and arcaded merchant guild
+        houses.
+    mandatoryLandmarks:
+      - contian/collegium-lecture-hall
+      - contian/archive-rotunda
+      - contian/guild-exchange-loggia
+      - contian/aqueduct-cistern-house
+      - contian/observatory-instrument-tower
+      - contian/customs-canal-gate
+    propPool:
+      - contian/scholar-courtyard-townhouse
+      - contian/printing-bindery-workshop
+      - contian/botanical-specimen-court
+      - contian/water-clock-kiosk
+      - contian/surveyor-obelisk
+      - contian/book-peddler-stall
+    residentProfessions:
+      - id: collegium-fellow
+        title: Collegium Natural Philosopher
+        visualKind: villager
+        district: civic
+        role: scholarship
+      - id: syndic-guard
+        title: League Customs Provost
+        visualKind: paladin
+        district: garrison
+        role: administration
+      - id: archive-scrivener
+        title: Rotunda Archive Scrivener
+        visualKind: villager
+        district: civic
+        role: scholarship
+      - id: exchange-broker
+        title: Loggia Factor & Assayer
+        visualKind: villager
+        district: market
+        role: trade
+      - id: hydraulic-warden
+        title: Cistern & Aqueduct Engineer
+        visualKind: villager
+        district: craft
+        role: infrastructure
+  frostgard:
+    id: frostgard
+    displayName: Frostgard Holds & Jotunn Reaches
+    azgaarStateNames:
+      - Frostgard
+      - Stormgarde
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    primaryCultures:
+      - norths
+      - jotunn
+    secondaryCultures:
+      - orc-peoples
+      - rakhnid-broods
+      - goblin-peoples
+    defaultLocalBranch: frostgard-norths
+    faith: Hearth-Oath Sagas & Ancient Glacier Reverence
+    polityForm: jarldom-and-jotunn-moot
+    architectureGrammar:
+      settlementStyleKey: granite-slate
+      kitFamily: Nordic
+      kitSkin: frost
+      wallMaterial: heavy-pine-stave-timber-over-drift-boulder-sills
+      roofMaterial: steep-shed-snow-board-and-turf
+      roofForm: deep-A-frame-wind-deflecting-longhouse
+      roofPitch: 52
+      roofOverhang: 0.45
+      irregularity: 0.18
+      weathering: 0.48
+      foundationType: earthfast-snow-sill
+      streetGrammar: windbreak-hearth-cluster
+      dressingPreference: black-setts
+      silhouetteSummary: Earth-bermed longhalls, megalithic Jotunn moot rings,
+        seal-oil smokehouses, sea-ice slipways, and snow-trench windbreaks.
+    mandatoryLandmarks:
+      - frostgard/hearth-longhall
+      - frostgard/jotunn-stone-moot-ring
+      - frostgard/ice-harbor-boathouse
+      - frostgard/windbreak-beacon-tower
+      - frostgard/winter-store-pit-house
+      - frostgard/turf-roofed-smithy
+    propPool:
+      - frostgard/earth-bermed-homestead
+      - frostgard/whale-rib-drying-stage
+      - frostgard/snow-trench-palisade
+      - frostgard/sled-dog-yard
+      - frostgard/carved-saga-runestone
+      - frostgard/blubber-try-pot-hearth
+    residentProfessions:
+      - id: jarl-huscarl
+        title: Longhall Huscarl
+        visualKind: paladin
+        district: civic
+        role: defense
+      - id: ice-pilot
+        title: Sea-Ice Whaler & Pilot
+        visualKind: villager
+        district: harbor
+        role: maritime
+      - id: saga-skald
+        title: Moot-Ring Skald
+        visualKind: villager
+        district: sacred
+        role: sacred
+      - id: winter-provender
+        title: Smokehouse & Store-Pit Keeper
+        visualKind: villager
+        district: market
+        role: agriculture
+      - id: sled-wright
+        title: Runner & Bog-Iron Wright
+        visualKind: villager
+        district: craft
+        role: craft
+  elenoria:
+    id: elenoria
+    displayName: Elenoria Canopy & Grove Realm
+    azgaarStateNames:
+      - Elenoria
+      - Alveria
+      - Vaeloria
+      - Thornvale
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    primaryCultures:
+      - elenori
+    secondaryCultures:
+      - serpent-peoples
+      - goblin-peoples
+      - zuraldarr
+    defaultLocalBranch: elenoria-elenori
+    faith: Sacred Duty of Living Harmony
+    polityForm: grove-stewardship-council
+    architectureGrammar:
+      settlementStyleKey: limestone-slate
+      kitFamily: Med
+      kitSkin: heartland
+      wallMaterial: pale-river-ashlar-and-pleached-heartwood-ribs
+      roofMaterial: curved-shingle-and-living-moss-leaf-slate
+      roofForm: swept-organic-pavilion-and-bough-gallery
+      roofPitch: 38
+      roofOverhang: 0.5
+      irregularity: 0.16
+      weathering: 0.28
+      foundationType: root-bridged-canopy
+      streetGrammar: organic-canopy-ring
+      dressingPreference: mossy-lanes
+      silhouetteSummary: Root-spanning stone bridges, living-bough council pavilions,
+        botanical ward sanctuaries, terraced stream mills, and ranger canopy
+        watch-platforms.
+    mandatoryLandmarks:
+      - elenoria/bough-council-pavilion
+      - elenoria/root-span-arch-bridge
+      - elenoria/grove-harmony-sanctuary
+      - elenoria/canopy-warden-outpost
+      - elenoria/terraced-herb-distillery
+      - elenoria/living-wood-craft-hall
+    propPool:
+      - elenoria/understory-cottage
+      - elenoria/stream-weir-basin
+      - elenoria/suspended-walkway-span
+      - elenoria/seed-vault-shrine
+      - elenoria/wayfinder-lantern-bough
+      - elenoria/silviculture-tending-bench
+    residentProfessions:
+      - id: grove-warden
+        title: Canopy Ward Sentinel
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: harmony-arbiter
+        title: Bough Council Arbiter
+        visualKind: villager
+        district: civic
+        role: administration
+      - id: wood-shaper
+        title: Living-Wood Shaper
+        visualKind: villager
+        district: craft
+        role: craft
+      - id: botanical-alchemist
+        title: Understory Herb Distiller
+        visualKind: villager
+        district: market
+        role: agriculture
+      - id: seed-keeper
+        title: Sanctuary Seed Keeper
+        visualKind: villager
+        district: sacred
+        role: sacred
+  umbrakor:
+    id: umbrakor
+    displayName: Umbra'kor Dominion
+    azgaarStateNames:
+      - Umbra'kor
+      - Umbrakor
+      - Duskwatch
+      - Nightsong
+      - Netheris
+      - Ravenshadow
+    mappingConfidence: direct-name
+    loreStatus: published
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    primaryCultures:
+      - umbra-kori
+    secondaryCultures:
+      - vondari
+      - goblin-peoples
+      - rakhnid-broods
+    defaultLocalBranch: umbrakor-core
+    faith: Venemora & Pact with the Deep Shadow
+    polityForm: noble-house-dominion
+    architectureGrammar:
+      settlementStyleKey: granite-slate
+      kitFamily: Med
+      kitSkin: frost
+      wallMaterial: chiseled-columnar-basalt-and-obsidian-courses
+      roofMaterial: stepped-slate-terrace-and-cavern-drip-sheds
+      roofForm: vertical-buttressed-terrace-compound
+      roofPitch: 34
+      roofOverhang: 0.22
+      irregularity: 0.11
+      weathering: 0.36
+      foundationType: carved-basalt-ledge
+      streetGrammar: vertical-cavern-tier
+      dressingPreference: black-setts
+      silhouetteSummary: Cliff-hugging noble house compounds, void-spanning basalt
+        arch bridges, spore/fungus cultivation halls, rift-seal checkpoints, and
+        pale mineral wayfinders.
+    mandatoryLandmarks:
+      - umbrakor/cliff-house-compound
+      - umbrakor/void-arch-bridge
+      - umbrakor/vertical-terrace-block
+      - umbrakor/fungus-cultivation-hall
+      - umbrakor/house-market-balcony
+      - umbrakor/depth-warden-gate
+    propPool:
+      - umbrakor/venemora-temple-hall
+      - umbrakor/rift-seal-checkpoint
+      - umbrakor/cavern-air-shaft
+      - umbrakor/pale-wayfinder
+      - umbrakor/underground-river-dock
+      - umbrakor/house-archive-vault
+    residentProfessions:
+      - id: depth-warden
+        title: Rift-Seal & Depth Warden
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: house-archon
+        title: Noble House Archon
+        visualKind: paladin
+        district: civic
+        role: administration
+      - id: venemora-acolyte
+        title: Vigil Acolyte of Venemora
+        visualKind: villager
+        district: sacred
+        role: sacred
+      - id: myciculturist
+        title: Cavern Fungus Steward
+        visualKind: villager
+        district: agricultural
+        role: agriculture
+      - id: shadow-factor
+        title: Balcony Exchange Factor
+        visualKind: villager
+        district: market
+        role: trade
+  wyrmreach:
+    id: wyrmreach
+    displayName: Wyrmreach Dominion & Uncharted Interior
+    azgaarStateNames:
+      - Wyrmreach
+    mappingConfidence: direct-name-architecture-uncertain
+    mappingNote: Published lore intentionally leaves inland Wyrmreach mysterious;
+      coastal burgs use pragmatic local-peoples frontier architecture while
+      inland sites use sparse windbreak refuges and rare smooth black
+      pre-kingdom ruins.
+    loreStatus: published
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    primaryCultures:
+      - orc-peoples
+      - goblin-peoples
+      - jotunn
+      - serpent-peoples
+      - rakhnid-broods
+      - draconic-remnant
+    secondaryCultures: []
+    defaultLocalBranch: wyrmreach-orcs
+    faith: Frontier Ward-Keeping & Ancient Threshold Caution
+    polityForm: frontier-waystations-and-sealed-interior
+    architectureGrammar:
+      settlementStyleKey: granite-slate
+      kitFamily: Nordic
+      kitSkin: plains
+      wallMaterial: storm-pinned-drift-stone-and-salvaged-timber-bracing
+      roofMaterial: weighted-slab-roof-with-stone-wind-ties
+      roofForm: low-crouched-windbreak-shelter
+      roofPitch: 26
+      roofOverhang: 0.3
+      irregularity: 0.28
+      weathering: 0.62
+      foundationType: windbreak-rubble-shelter
+      streetGrammar: sparse-waystation-trail
+      dressingPreference: river-stone
+      silhouetteSummary: Storm-lashed coastal breakwaters and multi-people frontier
+        waystations on the rim; sparse windbreak huts and rare, uncannily smooth
+        black pre-kingdom thresholds inland.
+    mandatoryLandmarks:
+      - wyrmreach/storm-coast-waystation
+      - wyrmreach/frontier-cargo-breakwater
+      - wyrmreach/coastal-warning-lookout
+      - wyrmreach/mixed-community-market-shed
+      - wyrmreach/rock-windbreak-hut
+      - wyrmreach/ancient-smooth-stair
+    propPool:
+      - wyrmreach/relic-survey-camp
+      - wyrmreach/impossible-measuring-plinth
+      - wyrmreach/gray-crust-descent-cover
+      - wyrmreach/storm-shielded-water-cache
+      - wyrmreach/old-rift-boundary-cairn
+      - wyrmreach/pre-kingdom-black-wall
+    residentProfessions:
+      - id: lookout-warden
+        title: Coastal Warning Lookout
+        visualKind: paladin
+        district: garrison
+        role: defense
+      - id: waystation-quartermaster
+        title: Storm-Coast Quartermaster
+        visualKind: villager
+        district: market
+        role: trade
+      - id: threshold-surveyor
+        title: Pre-Kingdom Ruin Surveyor
+        visualKind: villager
+        district: ruin
+        role: scholarship
+      - id: breakwater-rigger
+        title: Breakwater Cargo Rigger
+        visualKind: villager
+        district: harbor
+        role: maritime
+localCultureBranches:
+  lumeshire-imperial:
+    id: lumeshire-imperial
+    cultureKey: lumish
+    loreRealm: lumeshire
+    azgaarStateName: Lumeshire
+    provinceContext: strong-majority
+    loreStatus: repo-authored
+    summary: Core Lumish Imperial administrative, agrarian, and cathedral-parish
+      heartland.
+  lumeshire-zuraldarr:
+    id: lumeshire-zuraldarr
+    cultureKey: zuraldarr
+    loreRealm: zuraldi
+    azgaarStateName: Lumeshire
+    provinceContext: enclave
+    loreStatus: published
+    summary: Autonomous Zuraldarr mountain-pass and highland communities within
+      Lumeshire (Persbury, Westclesia, Pyreaz, Hatbury, Lexabusur).
+  lumeshire-border-orcs:
+    id: lumeshire-border-orcs
+    cultureKey: orc-peoples
+    loreRealm: lumeshire
+    azgaarStateName: Lumeshire
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Borderland orcish settlements along the Pyreaz / Grukmar march.
+  lumeshire-border-goblins:
+    id: lumeshire-border-goblins
+    cultureKey: goblin-peoples
+    loreRealm: lumeshire
+    azgaarStateName: Lumeshire
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Borderland goblin wetland/march trade settlements inside outer Lumeshire.
+  ironpeak-vondari:
+    id: ironpeak-vondari
+    cultureKey: vondari
+    loreRealm: stonehold
+    azgaarStateName: Ironpeak
+    provinceContext: strong-majority
+    loreStatus: repo-authored
+    summary: Vondari mountain-hold mining, smelting, and fortress communities of
+      Stonehold / Ironpeak.
+  ironpeak-contract-orcs:
+    id: ironpeak-contract-orcs
+    cultureKey: orc-peoples
+    loreRealm: stonehold
+    azgaarStateName: Ironpeak
+    provinceContext: mixed-majority
+    loreStatus: repo-authored
+    summary: Contract-bound and frontier orcish heavy-haul and quarry settlements in
+      Ironpeak.
+  ironpeak-deep-umbrakori:
+    id: ironpeak-deep-umbrakori
+    cultureKey: umbra-kori
+    loreRealm: stonehold
+    azgaarStateName: Ironpeak
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Deep-seam Umbra'kori enclaves near Stonehold's subterranean approaches.
+  grukmar-goblins:
+    id: grukmar-goblins
+    cultureKey: goblin-peoples
+    loreRealm: grukmar
+    azgaarStateName: Grukmar
+    provinceContext: mixed-majority
+    loreStatus: published
+    summary: Wetland, delta, and boardwalk-building goblin merchant-artisan
+      communities of Grukmar.
+  grukmar-orcs:
+    id: grukmar-orcs
+    cultureKey: orc-peoples
+    loreRealm: grukmar
+    azgaarStateName: Grukmar
+    provinceContext: mixed-majority
+    loreStatus: published
+    summary: Upland ridge-fortified orcish clan assembly and heavy-haul settlements
+      of Grukmar.
+  grukmar-rakhnid:
+    id: grukmar-rakhnid
+    cultureKey: rakhnid-broods
+    loreRealm: grukmar
+    azgaarStateName: Grukmar
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Rakhnid silk-weaving and marsh-canopy brood enclaves allied with Grukmar.
+  grukmar-umbrakori:
+    id: grukmar-umbrakori
+    cultureKey: umbra-kori
+    loreRealm: grukmar
+    azgaarStateName: Grukmar
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Umbra'kori trade and intelligence enclaves within Grukmar.
+  grukmar-jotunn:
+    id: grukmar-jotunn
+    cultureKey: jotunn
+    loreRealm: grukmar
+    azgaarStateName: Grukmar
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Highland Jotunn border steadings on Grukmar’s northern ridges.
+  contian-core:
+    id: contian-core
+    cultureKey: contian
+    loreRealm: contia
+    azgaarStateName: Contia
+    provinceContext: strong-majority
+    loreStatus: published
+    summary: Scholarly and mercantile Contian League academy towns and river ports.
+  contia-vondari:
+    id: contia-vondari
+    cultureKey: vondari
+    loreRealm: contia
+    azgaarStateName: Contia
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Vondari artificer, foundry, and hydraulic engineering wards within Contia.
+  contia-serpent-enclaves:
+    id: contia-serpent-enclaves
+    cultureKey: serpent-peoples
+    loreRealm: contia
+    azgaarStateName: Contia
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Warm-basin Serpent Peoples river-trade and botanical enclaves in Contia.
+  contia-goblin-quarters:
+    id: contia-goblin-quarters
+    cultureKey: goblin-peoples
+    loreRealm: contia
+    azgaarStateName: Contia
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Canal-side goblin dockworker and tinker quarters in Contian ports.
+  contia-rakhnid:
+    id: contia-rakhnid
+    cultureKey: rakhnid-broods
+    loreRealm: contia
+    azgaarStateName: Contia
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Rakhnid silk-merchant enclaves in Contian trade cities.
+  frostgard-norths:
+    id: frostgard-norths
+    cultureKey: norths
+    loreRealm: frostgard
+    azgaarStateName: Frostgard
+    provinceContext: mixed-majority
+    loreStatus: published
+    summary: Human Norths fjord, tundra, and hearth-longhall holds of Frostgard.
+  frostgard-jotunn:
+    id: frostgard-jotunn
+    cultureKey: jotunn
+    loreRealm: frostgard
+    azgaarStateName: Frostgard
+    provinceContext: mixed-majority
+    loreStatus: published
+    summary: Jotunn megalithic stone-and-timber glacial steadings of Frostgard.
+  frostgard-orcs:
+    id: frostgard-orcs
+    cultureKey: orc-peoples
+    loreRealm: frostgard
+    azgaarStateName: Frostgard
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Cold-adapted orcish hunting and ice-pass clans in Frostgard.
+  frostgard-rakhnid:
+    id: frostgard-rakhnid
+    cultureKey: rakhnid-broods
+    loreRealm: frostgard
+    azgaarStateName: Frostgard
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Sub-glacial Rakhnid thermal-vent hollows in Frostgard.
+  frostgard-goblins:
+    id: frostgard-goblins
+    cultureKey: goblin-peoples
+    loreRealm: frostgard
+    azgaarStateName: Frostgard
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Hot-spring and whaling-station goblin trapper camps in Frostgard.
+  elenoria-elenori:
+    id: elenoria-elenori
+    cultureKey: elenori
+    loreRealm: elenoria
+    azgaarStateName: Elenoria
+    provinceContext: strong-majority
+    loreStatus: published
+    summary: Core Elenori canopy, root-bridge, and sacred grove stewardship settlements.
+  elenoria-serpent-groves:
+    id: elenoria-serpent-groves
+    cultureKey: serpent-peoples
+    loreRealm: elenoria
+    azgaarStateName: Elenoria
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: River-glade Serpent Peoples herbalist sanctuaries in Elenoria.
+  elenoria-goblin-tracks:
+    id: elenoria-goblin-tracks
+    cultureKey: goblin-peoples
+    loreRealm: elenoria
+    azgaarStateName: Elenoria
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Outer-margin goblin resin-tapping and trail-barter camps in Elenoria.
+  elenoria-zuraldarr-wardens:
+    id: elenoria-zuraldarr-wardens
+    cultureKey: zuraldarr
+    loreRealm: elenoria
+    azgaarStateName: Elenoria
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Zuraldarr highland-edge grove wardens sharing druidic kinship with
+      Elenoria.
+  umbrakor-core:
+    id: umbrakor-core
+    cultureKey: umbra-kori
+    loreRealm: umbrakor
+    azgaarStateName: Umbra'kor
+    provinceContext: strong-majority
+    loreStatus: published
+    summary: Core Umbra'kori basalt cliff-compounds, cavern tiers, and Rift-warded
+      cities.
+  umbrakor-vondari-holdouts:
+    id: umbrakor-vondari-holdouts
+    cultureKey: vondari
+    loreRealm: umbrakor
+    azgaarStateName: Umbra'kor
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Fortified Vondari deep-mining holdouts and treaty wards within Umbra'kor.
+  umbrakor-goblin-warrens:
+    id: umbrakor-goblin-warrens
+    cultureKey: goblin-peoples
+    loreRealm: umbrakor
+    azgaarStateName: Umbra'kor
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Lower-tier cavern goblin porter and fungus-tending warrens in Umbra'kor.
+  umbrakor-rakhnid-deep:
+    id: umbrakor-rakhnid-deep
+    cultureKey: rakhnid-broods
+    loreRealm: umbrakor
+    azgaarStateName: Umbra'kor
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Chasm-spanning Rakhnid silk-bridge and Venemora-aligned broods in
+      Umbra'kor.
+  wyrmreach-orcs:
+    id: wyrmreach-orcs
+    cultureKey: orc-peoples
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Storm-hardened orcish coastal waystations and windbreak camps on the
+      Wyrmreach rim.
+  wyrmreach-goblins:
+    id: wyrmreach-goblins
+    cultureKey: goblin-peoples
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Wreck-salvage and cove-harbor goblin landings along the Wyrmreach coast.
+  wyrmreach-jotunn:
+    id: wyrmreach-jotunn
+    cultureKey: jotunn
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: plural-frontier
+    loreStatus: repo-authored
+    summary: Cyclopean windbreak steadings of Jotunn watch-clans in northern Wyrmreach.
+  wyrmreach-serpent-enclaves:
+    id: wyrmreach-serpent-enclaves
+    cultureKey: serpent-peoples
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Estuary and thermal-cove Serpent Peoples waystations on the Wyrmreach
+      coast.
+  wyrmreach-rakhnid:
+    id: wyrmreach-rakhnid
+    cultureKey: rakhnid-broods
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: enclave
+    loreStatus: repo-authored
+    summary: Fissure-dwelling Rakhnid outposts along Wyrmreach escarpments.
+  wyrmreach-draconic-remnant:
+    id: wyrmreach-draconic-remnant
+    cultureKey: draconic-remnant
+    loreRealm: wyrmreach
+    azgaarStateName: Wyrmreach
+    provinceContext: enclave
+    loreStatus: design-proposal
+    ruralOnly: true
+    summary: Uninhabited or trace-presence inland anomaly zones with smooth black
+      pre-kingdom thresholds (0 burgs).
+environmentalOverlays:
+  coast-harbor:
+    id: coast-harbor
+    displayName: Coast, Fishing Harbor & River-Port
+    promptFile: areas/coast-harbor.md
+    loreStatus: design-proposal
+    preconditions:
+      requiresWaterAccess: true
+      allowedWaterTypes:
+        - coast
+        - estuary
+        - navigable-river
+        - lake-port
+        - underground-river
+    foundationAdaptation: pile-jetty-and-tide-quay
+    sharedAssets:
+      - coast-harbor/pile-jetty
+      - coast-harbor/fish-smoking-shed
+      - coast-harbor/tide-stair-quay
+      - coast-harbor/net-mending-bench
+      - coast-harbor/cargo-capstan
+    forbiddenWhenAbsent:
+      - coast-harbor/pile-jetty
+      - coast-harbor/tide-stair-quay
+      - coast-harbor/cargo-capstan
+      - frostgard/ice-harbor-boathouse
+      - grukmar/goblin-boat-landing
+      - umbrakor/underground-river-dock
+      - wyrmreach/frontier-cargo-breakwater
+  mountain-pass:
+    id: mountain-pass
+    displayName: Mountain Pass, Terraced Settlement & Highland Commerce
+    promptFile: areas/mountain-pass.md
+    loreStatus: design-proposal
+    preconditions:
+      minSlope: 0.14
+      minElevation: 18
+      allowedBiomes:
+        - 9
+        - 10
+        - 11
+    foundationAdaptation: stepped-retaining-terrace
+    sharedAssets:
+      - mountain-pass/pass-retaining-wall
+      - mountain-pass/switchback-parapet
+      - mountain-pass/upland-drainage-culvert
+      - mountain-pass/caravan-pack-rack
+      - mountain-pass/avalanche-refuge
+    forbiddenWhenAbsent:
+      - mountain-pass/avalanche-refuge
+      - zuraldi/switchback-bridge
+  forest-canopy:
+    id: forest-canopy
+    displayName: Forest Floor, Canopy Town & Protected Grove
+    promptFile: areas/forest-canopy.md
+    loreStatus: design-proposal
+    preconditions:
+      requiresForest: true
+      allowedBiomes:
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+    foundationAdaptation: root-safe-stepped-plinth
+    sharedAssets:
+      - forest-canopy/root-step-path
+      - forest-canopy/canopy-support-joint
+      - forest-canopy/forest-herb-garden
+      - forest-canopy/elevated-ranger-platform
+      - forest-canopy/living-arch-gateway
+    forbiddenWhenAbsent:
+      - forest-canopy/canopy-support-joint
+      - forest-canopy/elevated-ranger-platform
+  swamp-bog:
+    id: swamp-bog
+    displayName: Bog, Swamp Boardwalk & Raised Market
+    promptFile: areas/swamp-bog.md
+    loreStatus: design-proposal
+    preconditions:
+      requiresWetland: true
+      allowedBiomes:
+        - 12
+    foundationAdaptation: braced-timber-stilts-and-corduroy-causeway
+    sharedAssets:
+      - swamp-bog/raised-boardwalk
+      - swamp-bog/reed-cutting-shed
+      - swamp-bog/flatwater-skiff
+      - swamp-bog/bog-pole-marker
+      - swamp-bog/mud-island-causeway
+    forbiddenWhenAbsent:
+      - swamp-bog/flatwater-skiff
+      - swamp-bog/mud-island-causeway
+      - grukmar/bog-stilt-dwelling
+      - grukmar/raised-marsh-boardwalk
+  underground-cavern:
+    id: underground-cavern
+    displayName: Inhabited Cavern & Deep Infrastructure
+    promptFile: areas/underground-cavern.md
+    loreStatus: design-proposal
+    preconditions:
+      requiresUnderground: true
+      forbidsSky: true
+    foundationAdaptation: rock-cut-shelf-and-arch-bracket
+    sharedAssets:
+      - underground-cavern/deep-walkway-arch
+      - underground-cavern/cavern-drain-channel
+      - underground-cavern/shaft-air-damper
+      - underground-cavern/cavern-lift-platform
+      - underground-cavern/dim-wayfinding-crystal
+    forbiddenWhenAbsent:
+      - underground-cavern/shaft-air-damper
+      - underground-cavern/dim-wayfinding-crystal
+  ruins-rift:
+    id: ruins-rift
+    displayName: Ancient Ruins, Abandoned Sites & Anomaly Threshold
+    promptFile: areas/ruins-rift.md
+    loreStatus: design-proposal
+    preconditions:
+      requiresRuinOrAnomalyContext: true
+    foundationAdaptation: fractured-ashlar-and-smooth-monolith-seam
+    sharedAssets:
+      - ruins-rift/buried-threshold
+      - ruins-rift/broken-arch-section
+      - ruins-rift/sealed-ward-plaque
+      - ruins-rift/archaeologist-tool-roll
+      - ruins-rift/anomaly-scar-stone
+    forbiddenWhenAbsent:
+      - ruins-rift/buried-threshold
+      - ruins-rift/anomaly-scar-stone
+      - wyrmreach/ancient-smooth-stair
+      - wyrmreach/impossible-measuring-plinth

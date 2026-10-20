@@ -1,0 +1,4681 @@
+schemaVersion: 1
+catalogId: drusniel-asset-registry-v1
+summary:
+  totalAssets: 138
+  byStatus:
+    planned: 138
+    reference-approved: 0
+    modeling: 0
+    review: 0
+    ready: 0
+    fallback: 0
+  byPriority:
+    P0: 54
+    P1: 84
+  byRegion:
+    contian: 12
+    elenoria: 12
+    frostgard: 12
+    grukmar: 12
+    lumeshire: 12
+    stonehold: 12
+    umbrakor: 12
+    wyrmreach: 12
+    zuraldi: 12
+  byOverlay:
+    coast-harbor: 5
+    forest-canopy: 5
+    mountain-pass: 5
+    ruins-rift: 5
+    swamp-bog: 5
+    underground-cavern: 5
+assets:
+  - id: contian/collegium-lecture-hall
+    assetClass: civic
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: &a1
+      - contian
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/collegium-lecture-hall/hero.png
+      - references/contian/collegium-lecture-hall/front.png
+      - references/contian/collegium-lecture-hall/left.png
+      - references/contian/collegium-lecture-hall/rear.png
+      - references/contian/collegium-lecture-hall/top.png
+      - references/contian/collegium-lecture-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Med_Guildhall
+      kitProp: null
+      footprint:
+        - 14
+        - 10
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/archive-rotunda
+    assetClass: civic
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/archive-rotunda/hero.png
+      - references/contian/archive-rotunda/front.png
+      - references/contian/archive-rotunda/left.png
+      - references/contian/archive-rotunda/rear.png
+      - references/contian/archive-rotunda/top.png
+      - references/contian/archive-rotunda/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: chapel
+      settlementVariant: 0
+      kitPrefab: Med_Library
+      kitProp: null
+      footprint:
+        - 10
+        - 10
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/guild-exchange-loggia
+    assetClass: trade
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/guild-exchange-loggia/hero.png
+      - references/contian/guild-exchange-loggia/front.png
+      - references/contian/guild-exchange-loggia/left.png
+      - references/contian/guild-exchange-loggia/rear.png
+      - references/contian/guild-exchange-loggia/top.png
+      - references/contian/guild-exchange-loggia/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 0
+      kitPrefab: Med_Shop_Large
+      kitProp: null
+      footprint:
+        - 12
+        - 8
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/aqueduct-cistern-house
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/aqueduct-cistern-house/hero.png
+      - references/contian/aqueduct-cistern-house/front.png
+      - references/contian/aqueduct-cistern-house/left.png
+      - references/contian/aqueduct-cistern-house/rear.png
+      - references/contian/aqueduct-cistern-house/top.png
+      - references/contian/aqueduct-cistern-house/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Med_Warehouse
+      kitProp: null
+      footprint:
+        - 10
+        - 10
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/observatory-instrument-tower
+    assetClass: civic
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/observatory-instrument-tower/hero.png
+      - references/contian/observatory-instrument-tower/front.png
+      - references/contian/observatory-instrument-tower/left.png
+      - references/contian/observatory-instrument-tower/rear.png
+      - references/contian/observatory-instrument-tower/top.png
+      - references/contian/observatory-instrument-tower/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: RoundTower
+      kitProp: null
+      footprint:
+        - 8
+        - 8
+        - 12
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/customs-canal-gate
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/customs-canal-gate/hero.png
+      - references/contian/customs-canal-gate/front.png
+      - references/contian/customs-canal-gate/left.png
+      - references/contian/customs-canal-gate/rear.png
+      - references/contian/customs-canal-gate/top.png
+      - references/contian/customs-canal-gate/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 14
+        - 8
+        - 7
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/scholar-courtyard-townhouse
+    assetClass: residence
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/scholar-courtyard-townhouse/hero.png
+      - references/contian/scholar-courtyard-townhouse/front.png
+      - references/contian/scholar-courtyard-townhouse/left.png
+      - references/contian/scholar-courtyard-townhouse/rear.png
+      - references/contian/scholar-courtyard-townhouse/top.png
+      - references/contian/scholar-courtyard-townhouse/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: townhouse
+      settlementVariant: 1
+      kitPrefab: Med_Villa
+      kitProp: null
+      footprint:
+        - 12
+        - 9
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/printing-bindery-workshop
+    assetClass: industry
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/printing-bindery-workshop/hero.png
+      - references/contian/printing-bindery-workshop/front.png
+      - references/contian/printing-bindery-workshop/left.png
+      - references/contian/printing-bindery-workshop/rear.png
+      - references/contian/printing-bindery-workshop/top.png
+      - references/contian/printing-bindery-workshop/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 1
+      kitPrefab: Med_Apothecary
+      kitProp: null
+      footprint:
+        - 9
+        - 7
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/botanical-specimen-court
+    assetClass: agriculture
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/botanical-specimen-court/hero.png
+      - references/contian/botanical-specimen-court/front.png
+      - references/contian/botanical-specimen-court/left.png
+      - references/contian/botanical-specimen-court/rear.png
+      - references/contian/botanical-specimen-court/top.png
+      - references/contian/botanical-specimen-court/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: planter
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: planter
+      footprint:
+        - 4
+        - 4
+        - 2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/water-clock-kiosk
+    assetClass: prop
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/water-clock-kiosk/hero.png
+      - references/contian/water-clock-kiosk/front.png
+      - references/contian/water-clock-kiosk/left.png
+      - references/contian/water-clock-kiosk/rear.png
+      - references/contian/water-clock-kiosk/top.png
+      - references/contian/water-clock-kiosk/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fountain
+      footprint:
+        - 3
+        - 3
+        - 3.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/surveyor-obelisk
+    assetClass: prop
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/surveyor-obelisk/hero.png
+      - references/contian/surveyor-obelisk/front.png
+      - references/contian/surveyor-obelisk/left.png
+      - references/contian/surveyor-obelisk/rear.png
+      - references/contian/surveyor-obelisk/top.png
+      - references/contian/surveyor-obelisk/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 2
+        - 2
+        - 3.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: contian/book-peddler-stall
+    assetClass: prop
+    priority: P1
+    regionDossier: contian
+    eligibleCultureSeeds: *a1
+    loreSource: https://www.drusniel.com/knowledge-and-power-the-rise-of-the-contian-league/
+    promptFile: regions/contian.md
+    referenceImages:
+      - references/contian/book-peddler-stall/hero.png
+      - references/contian/book-peddler-stall/front.png
+      - references/contian/book-peddler-stall/left.png
+      - references/contian/book-peddler-stall/rear.png
+      - references/contian/book-peddler-stall/top.png
+      - references/contian/book-peddler-stall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: stall
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: stall
+      footprint:
+        - 3.5
+        - 2.5
+        - 2.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/bough-council-pavilion
+    assetClass: civic
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: &a2
+      - elenori
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/bough-council-pavilion/hero.png
+      - references/elenoria/bough-council-pavilion/front.png
+      - references/elenoria/bough-council-pavilion/left.png
+      - references/elenoria/bough-council-pavilion/rear.png
+      - references/elenoria/bough-council-pavilion/top.png
+      - references/elenoria/bough-council-pavilion/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Med_Guildhall
+      kitProp: null
+      footprint:
+        - 14
+        - 10
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/root-span-arch-bridge
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/root-span-arch-bridge/hero.png
+      - references/elenoria/root-span-arch-bridge/front.png
+      - references/elenoria/root-span-arch-bridge/left.png
+      - references/elenoria/root-span-arch-bridge/rear.png
+      - references/elenoria/root-span-arch-bridge/top.png
+      - references/elenoria/root-span-arch-bridge/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 12
+        - 5
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/grove-harmony-sanctuary
+    assetClass: sacred
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/grove-harmony-sanctuary/hero.png
+      - references/elenoria/grove-harmony-sanctuary/front.png
+      - references/elenoria/grove-harmony-sanctuary/left.png
+      - references/elenoria/grove-harmony-sanctuary/rear.png
+      - references/elenoria/grove-harmony-sanctuary/top.png
+      - references/elenoria/grove-harmony-sanctuary/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: chapel
+      settlementVariant: 0
+      kitPrefab: Med_Chapel
+      kitProp: null
+      footprint:
+        - 9
+        - 12
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/canopy-warden-outpost
+    assetClass: defense
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/canopy-warden-outpost/hero.png
+      - references/elenoria/canopy-warden-outpost/front.png
+      - references/elenoria/canopy-warden-outpost/left.png
+      - references/elenoria/canopy-warden-outpost/rear.png
+      - references/elenoria/canopy-warden-outpost/top.png
+      - references/elenoria/canopy-warden-outpost/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Med_Guardhouse
+      kitProp: null
+      footprint:
+        - 8
+        - 8
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/terraced-herb-distillery
+    assetClass: industry
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/terraced-herb-distillery/hero.png
+      - references/elenoria/terraced-herb-distillery/front.png
+      - references/elenoria/terraced-herb-distillery/left.png
+      - references/elenoria/terraced-herb-distillery/rear.png
+      - references/elenoria/terraced-herb-distillery/top.png
+      - references/elenoria/terraced-herb-distillery/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: bakery
+      settlementVariant: 0
+      kitPrefab: Med_Apothecary
+      kitProp: null
+      footprint:
+        - 8
+        - 6
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/living-wood-craft-hall
+    assetClass: industry
+    priority: P0
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/living-wood-craft-hall/hero.png
+      - references/elenoria/living-wood-craft-hall/front.png
+      - references/elenoria/living-wood-craft-hall/left.png
+      - references/elenoria/living-wood-craft-hall/rear.png
+      - references/elenoria/living-wood-craft-hall/top.png
+      - references/elenoria/living-wood-craft-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 0
+      kitPrefab: Med_Shop_Large
+      kitProp: null
+      footprint:
+        - 10
+        - 7
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/understory-cottage
+    assetClass: residence
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/understory-cottage/hero.png
+      - references/elenoria/understory-cottage/front.png
+      - references/elenoria/understory-cottage/left.png
+      - references/elenoria/understory-cottage/rear.png
+      - references/elenoria/understory-cottage/top.png
+      - references/elenoria/understory-cottage/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: house
+      settlementVariant: 4
+      kitPrefab: Med_House_Cottage
+      kitProp: null
+      footprint:
+        - 9
+        - 6
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/stream-weir-basin
+    assetClass: infrastructure
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/stream-weir-basin/hero.png
+      - references/elenoria/stream-weir-basin/front.png
+      - references/elenoria/stream-weir-basin/left.png
+      - references/elenoria/stream-weir-basin/rear.png
+      - references/elenoria/stream-weir-basin/top.png
+      - references/elenoria/stream-weir-basin/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fountain
+      footprint:
+        - 3.4
+        - 3.4
+        - 2
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/suspended-walkway-span
+    assetClass: infrastructure
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/suspended-walkway-span/hero.png
+      - references/elenoria/suspended-walkway-span/front.png
+      - references/elenoria/suspended-walkway-span/left.png
+      - references/elenoria/suspended-walkway-span/rear.png
+      - references/elenoria/suspended-walkway-span/top.png
+      - references/elenoria/suspended-walkway-span/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fence
+      footprint:
+        - 4
+        - 1.6
+        - 2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/seed-vault-shrine
+    assetClass: sacred
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/seed-vault-shrine/hero.png
+      - references/elenoria/seed-vault-shrine/front.png
+      - references/elenoria/seed-vault-shrine/left.png
+      - references/elenoria/seed-vault-shrine/rear.png
+      - references/elenoria/seed-vault-shrine/top.png
+      - references/elenoria/seed-vault-shrine/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 2.2
+        - 2.2
+        - 2.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/wayfinder-lantern-bough
+    assetClass: prop
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/wayfinder-lantern-bough/hero.png
+      - references/elenoria/wayfinder-lantern-bough/front.png
+      - references/elenoria/wayfinder-lantern-bough/left.png
+      - references/elenoria/wayfinder-lantern-bough/rear.png
+      - references/elenoria/wayfinder-lantern-bough/top.png
+      - references/elenoria/wayfinder-lantern-bough/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: lantern
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: lantern
+      footprint:
+        - 1.5
+        - 1.5
+        - 3
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: elenoria/silviculture-tending-bench
+    assetClass: prop
+    priority: P1
+    regionDossier: elenoria
+    eligibleCultureSeeds: *a2
+    loreSource: https://www.drusniel.com/guardians-of-harmony-elenorias-sacred-duty/
+    promptFile: regions/elenoria.md
+    referenceImages:
+      - references/elenoria/silviculture-tending-bench/hero.png
+      - references/elenoria/silviculture-tending-bench/front.png
+      - references/elenoria/silviculture-tending-bench/left.png
+      - references/elenoria/silviculture-tending-bench/rear.png
+      - references/elenoria/silviculture-tending-bench/top.png
+      - references/elenoria/silviculture-tending-bench/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bench
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bench
+      footprint:
+        - 2.4
+        - 1.2
+        - 1.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/hearth-longhall
+    assetClass: civic
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: &a3
+      - norths
+      - jotunn
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/hearth-longhall/hero.png
+      - references/frostgard/hearth-longhall/front.png
+      - references/frostgard/hearth-longhall/left.png
+      - references/frostgard/hearth-longhall/rear.png
+      - references/frostgard/hearth-longhall/top.png
+      - references/frostgard/hearth-longhall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Nordic_Manor
+      kitProp: null
+      footprint:
+        - 16
+        - 9
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/jotunn-stone-moot-ring
+    assetClass: sacred
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/jotunn-stone-moot-ring/hero.png
+      - references/frostgard/jotunn-stone-moot-ring/front.png
+      - references/frostgard/jotunn-stone-moot-ring/left.png
+      - references/frostgard/jotunn-stone-moot-ring/rear.png
+      - references/frostgard/jotunn-stone-moot-ring/top.png
+      - references/frostgard/jotunn-stone-moot-ring/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: chapel
+      settlementVariant: 0
+      kitPrefab: Nordic_Chapel
+      kitProp: null
+      footprint:
+        - 12
+        - 12
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/ice-harbor-boathouse
+    assetClass: coastal
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/ice-harbor-boathouse/hero.png
+      - references/frostgard/ice-harbor-boathouse/front.png
+      - references/frostgard/ice-harbor-boathouse/left.png
+      - references/frostgard/ice-harbor-boathouse/rear.png
+      - references/frostgard/ice-harbor-boathouse/top.png
+      - references/frostgard/ice-harbor-boathouse/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 12
+        - 6
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/windbreak-beacon-tower
+    assetClass: defense
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/windbreak-beacon-tower/hero.png
+      - references/frostgard/windbreak-beacon-tower/front.png
+      - references/frostgard/windbreak-beacon-tower/left.png
+      - references/frostgard/windbreak-beacon-tower/rear.png
+      - references/frostgard/windbreak-beacon-tower/top.png
+      - references/frostgard/windbreak-beacon-tower/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Nordic_Guardhouse
+      kitProp: null
+      footprint:
+        - 8
+        - 8
+        - 10
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/winter-store-pit-house
+    assetClass: agriculture
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/winter-store-pit-house/hero.png
+      - references/frostgard/winter-store-pit-house/front.png
+      - references/frostgard/winter-store-pit-house/left.png
+      - references/frostgard/winter-store-pit-house/rear.png
+      - references/frostgard/winter-store-pit-house/top.png
+      - references/frostgard/winter-store-pit-house/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: barn
+      settlementVariant: 0
+      kitPrefab: Nordic_Barn
+      kitProp: null
+      footprint:
+        - 8
+        - 10
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/turf-roofed-smithy
+    assetClass: industry
+    priority: P0
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/turf-roofed-smithy/hero.png
+      - references/frostgard/turf-roofed-smithy/front.png
+      - references/frostgard/turf-roofed-smithy/left.png
+      - references/frostgard/turf-roofed-smithy/rear.png
+      - references/frostgard/turf-roofed-smithy/top.png
+      - references/frostgard/turf-roofed-smithy/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: smithy
+      settlementVariant: 0
+      kitPrefab: Nordic_Smithy
+      kitProp: null
+      footprint:
+        - 9
+        - 7
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/earth-bermed-homestead
+    assetClass: residence
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/earth-bermed-homestead/hero.png
+      - references/frostgard/earth-bermed-homestead/front.png
+      - references/frostgard/earth-bermed-homestead/left.png
+      - references/frostgard/earth-bermed-homestead/rear.png
+      - references/frostgard/earth-bermed-homestead/top.png
+      - references/frostgard/earth-bermed-homestead/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: farmhouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Farmhouse
+      kitProp: null
+      footprint:
+        - 12
+        - 7
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/whale-rib-drying-stage
+    assetClass: industry
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/whale-rib-drying-stage/hero.png
+      - references/frostgard/whale-rib-drying-stage/front.png
+      - references/frostgard/whale-rib-drying-stage/left.png
+      - references/frostgard/whale-rib-drying-stage/rear.png
+      - references/frostgard/whale-rib-drying-stage/top.png
+      - references/frostgard/whale-rib-drying-stage/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: barrels
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: drying_rack
+      footprint:
+        - 2.6
+        - 1.4
+        - 2.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/snow-trench-palisade
+    assetClass: defense
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/snow-trench-palisade/hero.png
+      - references/frostgard/snow-trench-palisade/front.png
+      - references/frostgard/snow-trench-palisade/left.png
+      - references/frostgard/snow-trench-palisade/rear.png
+      - references/frostgard/snow-trench-palisade/top.png
+      - references/frostgard/snow-trench-palisade/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: barricade
+      footprint:
+        - 4
+        - 1.2
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/sled-dog-yard
+    assetClass: agriculture
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/sled-dog-yard/hero.png
+      - references/frostgard/sled-dog-yard/front.png
+      - references/frostgard/sled-dog-yard/left.png
+      - references/frostgard/sled-dog-yard/rear.png
+      - references/frostgard/sled-dog-yard/top.png
+      - references/frostgard/sled-dog-yard/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: trough
+      footprint:
+        - 3
+        - 2
+        - 1.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/carved-saga-runestone
+    assetClass: prop
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/carved-saga-runestone/hero.png
+      - references/frostgard/carved-saga-runestone/front.png
+      - references/frostgard/carved-saga-runestone/left.png
+      - references/frostgard/carved-saga-runestone/rear.png
+      - references/frostgard/carved-saga-runestone/top.png
+      - references/frostgard/carved-saga-runestone/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 1.8
+        - 1.8
+        - 3
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: frostgard/blubber-try-pot-hearth
+    assetClass: prop
+    priority: P1
+    regionDossier: frostgard
+    eligibleCultureSeeds: *a3
+    loreSource: https://www.drusniel.com/unyielding-spirit-of-frostgards-frozen-heart/
+    promptFile: regions/frostgard.md
+    referenceImages:
+      - references/frostgard/blubber-try-pot-hearth/hero.png
+      - references/frostgard/blubber-try-pot-hearth/front.png
+      - references/frostgard/blubber-try-pot-hearth/left.png
+      - references/frostgard/blubber-try-pot-hearth/rear.png
+      - references/frostgard/blubber-try-pot-hearth/top.png
+      - references/frostgard/blubber-try-pot-hearth/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: cauldron
+      footprint:
+        - 2
+        - 2
+        - 1.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/bog-stilt-dwelling
+    assetClass: residence
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: &a4
+      - goblin-peoples
+      - orc-peoples
+      - rakhnid-broods
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/bog-stilt-dwelling/hero.png
+      - references/grukmar/bog-stilt-dwelling/front.png
+      - references/grukmar/bog-stilt-dwelling/left.png
+      - references/grukmar/bog-stilt-dwelling/rear.png
+      - references/grukmar/bog-stilt-dwelling/top.png
+      - references/grukmar/bog-stilt-dwelling/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: house
+      settlementVariant: 2
+      kitPrefab: Goblin_House_Small
+      kitProp: null
+      footprint:
+        - 8
+        - 7
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/clan-assembly-hall
+    assetClass: civic
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/clan-assembly-hall/hero.png
+      - references/grukmar/clan-assembly-hall/front.png
+      - references/grukmar/clan-assembly-hall/left.png
+      - references/grukmar/clan-assembly-hall/rear.png
+      - references/grukmar/clan-assembly-hall/top.png
+      - references/grukmar/clan-assembly-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Goblin_Manor
+      kitProp: null
+      footprint:
+        - 14
+        - 10
+        - 7.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/raised-marsh-boardwalk
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/raised-marsh-boardwalk/hero.png
+      - references/grukmar/raised-marsh-boardwalk/front.png
+      - references/grukmar/raised-marsh-boardwalk/left.png
+      - references/grukmar/raised-marsh-boardwalk/rear.png
+      - references/grukmar/raised-marsh-boardwalk/top.png
+      - references/grukmar/raised-marsh-boardwalk/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fence
+      footprint:
+        - 4
+        - 2
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/wetland-barter-market
+    assetClass: trade
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/wetland-barter-market/hero.png
+      - references/grukmar/wetland-barter-market/front.png
+      - references/grukmar/wetland-barter-market/left.png
+      - references/grukmar/wetland-barter-market/rear.png
+      - references/grukmar/wetland-barter-market/top.png
+      - references/grukmar/wetland-barter-market/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 0
+      kitPrefab: Goblin_Shop_Large
+      kitProp: null
+      footprint:
+        - 10
+        - 8
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/salvage-smithy
+    assetClass: industry
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/salvage-smithy/hero.png
+      - references/grukmar/salvage-smithy/front.png
+      - references/grukmar/salvage-smithy/left.png
+      - references/grukmar/salvage-smithy/rear.png
+      - references/grukmar/salvage-smithy/top.png
+      - references/grukmar/salvage-smithy/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: smithy
+      settlementVariant: 0
+      kitPrefab: Goblin_Smithy
+      kitProp: null
+      footprint:
+        - 9
+        - 7
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/ridge-palisade-gate
+    assetClass: defense
+    priority: P0
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/ridge-palisade-gate/hero.png
+      - references/grukmar/ridge-palisade-gate/front.png
+      - references/grukmar/ridge-palisade-gate/left.png
+      - references/grukmar/ridge-palisade-gate/rear.png
+      - references/grukmar/ridge-palisade-gate/top.png
+      - references/grukmar/ridge-palisade-gate/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Goblin_Guardhouse
+      kitProp: null
+      footprint:
+        - 10
+        - 6
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/marsh-watch-tower
+    assetClass: defense
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/marsh-watch-tower/hero.png
+      - references/grukmar/marsh-watch-tower/front.png
+      - references/grukmar/marsh-watch-tower/left.png
+      - references/grukmar/marsh-watch-tower/rear.png
+      - references/grukmar/marsh-watch-tower/top.png
+      - references/grukmar/marsh-watch-tower/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Goblin_Tower
+      kitProp: null
+      footprint:
+        - 6
+        - 6
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/peat-kiln-shed
+    assetClass: industry
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/peat-kiln-shed/hero.png
+      - references/grukmar/peat-kiln-shed/front.png
+      - references/grukmar/peat-kiln-shed/left.png
+      - references/grukmar/peat-kiln-shed/rear.png
+      - references/grukmar/peat-kiln-shed/top.png
+      - references/grukmar/peat-kiln-shed/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: bakery
+      settlementVariant: 0
+      kitPrefab: Goblin_Bakery
+      kitProp: null
+      footprint:
+        - 7
+        - 6
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/goblin-boat-landing
+    assetClass: coastal
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/goblin-boat-landing/hero.png
+      - references/grukmar/goblin-boat-landing/front.png
+      - references/grukmar/goblin-boat-landing/left.png
+      - references/grukmar/goblin-boat-landing/rear.png
+      - references/grukmar/goblin-boat-landing/top.png
+      - references/grukmar/goblin-boat-landing/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: skiff
+      footprint:
+        - 3.2
+        - 2
+        - 1.2
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/orc-haul-wagon
+    assetClass: prop
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/orc-haul-wagon/hero.png
+      - references/grukmar/orc-haul-wagon/front.png
+      - references/grukmar/orc-haul-wagon/left.png
+      - references/grukmar/orc-haul-wagon/rear.png
+      - references/grukmar/orc-haul-wagon/top.png
+      - references/grukmar/orc-haul-wagon/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: cart
+      footprint:
+        - 2.4
+        - 4.2
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/reed-drying-frame
+    assetClass: prop
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/reed-drying-frame/hero.png
+      - references/grukmar/reed-drying-frame/front.png
+      - references/grukmar/reed-drying-frame/left.png
+      - references/grukmar/reed-drying-frame/rear.png
+      - references/grukmar/reed-drying-frame/top.png
+      - references/grukmar/reed-drying-frame/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: barrels
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: drying_rack
+      footprint:
+        - 2.4
+        - 1.2
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: grukmar/treaty-totem-post
+    assetClass: prop
+    priority: P1
+    regionDossier: grukmar
+    eligibleCultureSeeds: *a4
+    loreSource: https://www.drusniel.com/from-ashes-to-empire-the-rise-of-grukmar/
+    promptFile: regions/grukmar.md
+    referenceImages:
+      - references/grukmar/treaty-totem-post/hero.png
+      - references/grukmar/treaty-totem-post/front.png
+      - references/grukmar/treaty-totem-post/left.png
+      - references/grukmar/treaty-totem-post/rear.png
+      - references/grukmar/treaty-totem-post/top.png
+      - references/grukmar/treaty-totem-post/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: totem
+      footprint:
+        - 1.4
+        - 1.4
+        - 3.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/imperial-registry-hall
+    assetClass: civic
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: &a5
+      - lumish
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/imperial-registry-hall/hero.png
+      - references/lumeshire/imperial-registry-hall/front.png
+      - references/lumeshire/imperial-registry-hall/left.png
+      - references/lumeshire/imperial-registry-hall/rear.png
+      - references/lumeshire/imperial-registry-hall/top.png
+      - references/lumeshire/imperial-registry-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Tudor_Guildhall
+      kitProp: null
+      footprint:
+        - 15
+        - 10
+        - 8.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/parish-church
+    assetClass: sacred
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/parish-church/hero.png
+      - references/lumeshire/parish-church/front.png
+      - references/lumeshire/parish-church/left.png
+      - references/lumeshire/parish-church/rear.png
+      - references/lumeshire/parish-church/top.png
+      - references/lumeshire/parish-church/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: chapel
+      settlementVariant: 0
+      kitPrefab: Tudor_Chapel
+      kitProp: null
+      footprint:
+        - 8
+        - 12
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/granary
+    assetClass: agriculture
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/granary/hero.png
+      - references/lumeshire/granary/front.png
+      - references/lumeshire/granary/left.png
+      - references/lumeshire/granary/rear.png
+      - references/lumeshire/granary/top.png
+      - references/lumeshire/granary/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Tudor_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 11
+        - 8.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/fortified-market-hall
+    assetClass: trade
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/fortified-market-hall/hero.png
+      - references/lumeshire/fortified-market-hall/front.png
+      - references/lumeshire/fortified-market-hall/left.png
+      - references/lumeshire/fortified-market-hall/rear.png
+      - references/lumeshire/fortified-market-hall/top.png
+      - references/lumeshire/fortified-market-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 0
+      kitPrefab: Tudor_Shop_Large
+      kitProp: null
+      footprint:
+        - 11
+        - 8
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/border-watchtower
+    assetClass: defense
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/border-watchtower/hero.png
+      - references/lumeshire/border-watchtower/front.png
+      - references/lumeshire/border-watchtower/left.png
+      - references/lumeshire/border-watchtower/rear.png
+      - references/lumeshire/border-watchtower/top.png
+      - references/lumeshire/border-watchtower/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: RoundTower
+      kitProp: null
+      footprint:
+        - 7
+        - 7
+        - 10
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/toll-bridge-gate
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/toll-bridge-gate/hero.png
+      - references/lumeshire/toll-bridge-gate/front.png
+      - references/lumeshire/toll-bridge-gate/left.png
+      - references/lumeshire/toll-bridge-gate/rear.png
+      - references/lumeshire/toll-bridge-gate/top.png
+      - references/lumeshire/toll-bridge-gate/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 12
+        - 6
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/clerks-rowhouse
+    assetClass: residence
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/clerks-rowhouse/hero.png
+      - references/lumeshire/clerks-rowhouse/front.png
+      - references/lumeshire/clerks-rowhouse/left.png
+      - references/lumeshire/clerks-rowhouse/rear.png
+      - references/lumeshire/clerks-rowhouse/top.png
+      - references/lumeshire/clerks-rowhouse/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: townhouse
+      settlementVariant: 0
+      kitPrefab: Tudor_Townhouse_Narrow
+      kitProp: null
+      footprint:
+        - 6
+        - 10
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/courtyard-tenement
+    assetClass: residence
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/courtyard-tenement/hero.png
+      - references/lumeshire/courtyard-tenement/front.png
+      - references/lumeshire/courtyard-tenement/left.png
+      - references/lumeshire/courtyard-tenement/rear.png
+      - references/lumeshire/courtyard-tenement/top.png
+      - references/lumeshire/courtyard-tenement/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: townhouse
+      settlementVariant: 1
+      kitPrefab: Tudor_Townhouse_Wide
+      kitProp: null
+      footprint:
+        - 11
+        - 8
+        - 9.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/wagon-grain-stall
+    assetClass: prop
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/wagon-grain-stall/hero.png
+      - references/lumeshire/wagon-grain-stall/front.png
+      - references/lumeshire/wagon-grain-stall/left.png
+      - references/lumeshire/wagon-grain-stall/rear.png
+      - references/lumeshire/wagon-grain-stall/top.png
+      - references/lumeshire/wagon-grain-stall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: stall
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: stall
+      footprint:
+        - 3.8
+        - 2.8
+        - 2.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/road-mile-marker
+    assetClass: prop
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/road-mile-marker/hero.png
+      - references/lumeshire/road-mile-marker/front.png
+      - references/lumeshire/road-mile-marker/left.png
+      - references/lumeshire/road-mile-marker/rear.png
+      - references/lumeshire/road-mile-marker/top.png
+      - references/lumeshire/road-mile-marker/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: signpost
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: signpost
+      footprint:
+        - 1.4
+        - 1.4
+        - 2.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/barracks-supply-shed
+    assetClass: military
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/barracks-supply-shed/hero.png
+      - references/lumeshire/barracks-supply-shed/front.png
+      - references/lumeshire/barracks-supply-shed/left.png
+      - references/lumeshire/barracks-supply-shed/rear.png
+      - references/lumeshire/barracks-supply-shed/top.png
+      - references/lumeshire/barracks-supply-shed/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: barn
+      settlementVariant: 0
+      kitPrefab: Tudor_Guardhouse
+      kitProp: null
+      footprint:
+        - 8
+        - 9
+        - 5.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: lumeshire/communal-bake-oven
+    assetClass: industry
+    priority: P1
+    regionDossier: lumeshire
+    eligibleCultureSeeds: *a5
+    loreSource: https://www.drusniel.com/the-resilient-defense-of-the-lumeshirean-divine-empire/
+    promptFile: regions/lumeshire.md
+    referenceImages:
+      - references/lumeshire/communal-bake-oven/hero.png
+      - references/lumeshire/communal-bake-oven/front.png
+      - references/lumeshire/communal-bake-oven/left.png
+      - references/lumeshire/communal-bake-oven/rear.png
+      - references/lumeshire/communal-bake-oven/top.png
+      - references/lumeshire/communal-bake-oven/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: bakery
+      settlementVariant: 0
+      kitPrefab: Tudor_Bakery
+      kitProp: null
+      footprint:
+        - 8
+        - 6
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/fortress-mountain-gate
+    assetClass: defense
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: &a6
+      - vondari
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/fortress-mountain-gate/hero.png
+      - references/stonehold/fortress-mountain-gate/front.png
+      - references/stonehold/fortress-mountain-gate/left.png
+      - references/stonehold/fortress-mountain-gate/rear.png
+      - references/stonehold/fortress-mountain-gate/top.png
+      - references/stonehold/fortress-mountain-gate/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 14
+        - 8
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/forgeheart-workshop
+    assetClass: industry
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/forgeheart-workshop/hero.png
+      - references/stonehold/forgeheart-workshop/front.png
+      - references/stonehold/forgeheart-workshop/left.png
+      - references/stonehold/forgeheart-workshop/rear.png
+      - references/stonehold/forgeheart-workshop/top.png
+      - references/stonehold/forgeheart-workshop/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: smithy
+      settlementVariant: 0
+      kitPrefab: Nordic_Smithy
+      kitProp: null
+      footprint:
+        - 10
+        - 8
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/smelter-tower
+    assetClass: industry
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/smelter-tower/hero.png
+      - references/stonehold/smelter-tower/front.png
+      - references/stonehold/smelter-tower/left.png
+      - references/stonehold/smelter-tower/rear.png
+      - references/stonehold/smelter-tower/top.png
+      - references/stonehold/smelter-tower/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: RoundTower
+      kitProp: null
+      footprint:
+        - 7
+        - 7
+        - 11
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/ore-lift-headframe
+    assetClass: industry
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/ore-lift-headframe/hero.png
+      - references/stonehold/ore-lift-headframe/front.png
+      - references/stonehold/ore-lift-headframe/left.png
+      - references/stonehold/ore-lift-headframe/rear.png
+      - references/stonehold/ore-lift-headframe/top.png
+      - references/stonehold/ore-lift-headframe/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 10
+        - 10
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/ore-cart-track
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/ore-cart-track/hero.png
+      - references/stonehold/ore-cart-track/front.png
+      - references/stonehold/ore-cart-track/left.png
+      - references/stonehold/ore-cart-track/rear.png
+      - references/stonehold/ore-cart-track/top.png
+      - references/stonehold/ore-cart-track/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bollards
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: cargo
+      footprint:
+        - 4.5
+        - 1.6
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/vault-council-hall
+    assetClass: civic
+    priority: P0
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/vault-council-hall/hero.png
+      - references/stonehold/vault-council-hall/front.png
+      - references/stonehold/vault-council-hall/left.png
+      - references/stonehold/vault-council-hall/rear.png
+      - references/stonehold/vault-council-hall/top.png
+      - references/stonehold/vault-council-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: keep
+      settlementVariant: 0
+      kitPrefab: Nordic_Guildhall
+      kitProp: null
+      footprint:
+        - 14
+        - 12
+        - 10
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/terraced-stone-worker-home
+    assetClass: residence
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/terraced-stone-worker-home/hero.png
+      - references/stonehold/terraced-stone-worker-home/front.png
+      - references/stonehold/terraced-stone-worker-home/left.png
+      - references/stonehold/terraced-stone-worker-home/rear.png
+      - references/stonehold/terraced-stone-worker-home/top.png
+      - references/stonehold/terraced-stone-worker-home/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: townhouse
+      settlementVariant: 2
+      kitPrefab: Nordic_Townhouse_Narrow
+      kitProp: null
+      footprint:
+        - 7
+        - 8
+        - 7.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/basalt-viaduct
+    assetClass: infrastructure
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/basalt-viaduct/hero.png
+      - references/stonehold/basalt-viaduct/front.png
+      - references/stonehold/basalt-viaduct/left.png
+      - references/stonehold/basalt-viaduct/rear.png
+      - references/stonehold/basalt-viaduct/top.png
+      - references/stonehold/basalt-viaduct/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: wall
+      settlementVariant: 0
+      kitPrefab: CityWall
+      kitProp: null
+      footprint:
+        - 12
+        - 3
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/sealed-shaft-barricade
+    assetClass: defense
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/sealed-shaft-barricade/hero.png
+      - references/stonehold/sealed-shaft-barricade/front.png
+      - references/stonehold/sealed-shaft-barricade/left.png
+      - references/stonehold/sealed-shaft-barricade/rear.png
+      - references/stonehold/sealed-shaft-barricade/top.png
+      - references/stonehold/sealed-shaft-barricade/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bollards
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: barricade
+      footprint:
+        - 4.2
+        - 1.5
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/mine-ventilation-stack
+    assetClass: industry
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/mine-ventilation-stack/hero.png
+      - references/stonehold/mine-ventilation-stack/front.png
+      - references/stonehold/mine-ventilation-stack/left.png
+      - references/stonehold/mine-ventilation-stack/rear.png
+      - references/stonehold/mine-ventilation-stack/top.png
+      - references/stonehold/mine-ventilation-stack/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: brazier
+      footprint:
+        - 2.8
+        - 2.8
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/ore-assay-bench
+    assetClass: prop
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/ore-assay-bench/hero.png
+      - references/stonehold/ore-assay-bench/front.png
+      - references/stonehold/ore-assay-bench/left.png
+      - references/stonehold/ore-assay-bench/rear.png
+      - references/stonehold/ore-assay-bench/top.png
+      - references/stonehold/ore-assay-bench/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: stall
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: grindstone
+      footprint:
+        - 2.8
+        - 1.8
+        - 1.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: stonehold/stonehold-ward-block
+    assetClass: prop
+    priority: P1
+    regionDossier: stonehold
+    eligibleCultureSeeds: *a6
+    loreSource: https://www.drusniel.com/forge-and-fire-the-mountain-kingdom-of-stoneholds-stand-against-chaos/
+    promptFile: regions/stonehold.md
+    referenceImages:
+      - references/stonehold/stonehold-ward-block/hero.png
+      - references/stonehold/stonehold-ward-block/front.png
+      - references/stonehold/stonehold-ward-block/left.png
+      - references/stonehold/stonehold-ward-block/rear.png
+      - references/stonehold/stonehold-ward-block/top.png
+      - references/stonehold/stonehold-ward-block/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: quarryBlock
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 1.4
+        - 1.4
+        - 1.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/cliff-house-compound
+    assetClass: residence
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: &a7
+      - umbra-kori
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/cliff-house-compound/hero.png
+      - references/umbrakor/cliff-house-compound/front.png
+      - references/umbrakor/cliff-house-compound/left.png
+      - references/umbrakor/cliff-house-compound/rear.png
+      - references/umbrakor/cliff-house-compound/top.png
+      - references/umbrakor/cliff-house-compound/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: keep
+      settlementVariant: 0
+      kitPrefab: Med_Villa
+      kitProp: null
+      footprint:
+        - 14
+        - 12
+        - 11
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/void-arch-bridge
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/void-arch-bridge/hero.png
+      - references/umbrakor/void-arch-bridge/front.png
+      - references/umbrakor/void-arch-bridge/left.png
+      - references/umbrakor/void-arch-bridge/rear.png
+      - references/umbrakor/void-arch-bridge/top.png
+      - references/umbrakor/void-arch-bridge/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: wall
+      settlementVariant: 0
+      kitPrefab: CityWall
+      kitProp: null
+      footprint:
+        - 12
+        - 3
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/vertical-terrace-block
+    assetClass: residence
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/vertical-terrace-block/hero.png
+      - references/umbrakor/vertical-terrace-block/front.png
+      - references/umbrakor/vertical-terrace-block/left.png
+      - references/umbrakor/vertical-terrace-block/rear.png
+      - references/umbrakor/vertical-terrace-block/top.png
+      - references/umbrakor/vertical-terrace-block/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: townhouse
+      settlementVariant: 0
+      kitPrefab: Med_Townhouse_Tall
+      kitProp: null
+      footprint:
+        - 7
+        - 9
+        - 10
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/fungus-cultivation-hall
+    assetClass: agriculture
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/fungus-cultivation-hall/hero.png
+      - references/umbrakor/fungus-cultivation-hall/front.png
+      - references/umbrakor/fungus-cultivation-hall/left.png
+      - references/umbrakor/fungus-cultivation-hall/rear.png
+      - references/umbrakor/fungus-cultivation-hall/top.png
+      - references/umbrakor/fungus-cultivation-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: barn
+      settlementVariant: 0
+      kitPrefab: Med_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 11
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/house-market-balcony
+    assetClass: trade
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/house-market-balcony/hero.png
+      - references/umbrakor/house-market-balcony/front.png
+      - references/umbrakor/house-market-balcony/left.png
+      - references/umbrakor/house-market-balcony/rear.png
+      - references/umbrakor/house-market-balcony/top.png
+      - references/umbrakor/house-market-balcony/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 0
+      kitPrefab: Med_Shop_Large
+      kitProp: null
+      footprint:
+        - 10
+        - 7
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/depth-warden-gate
+    assetClass: defense
+    priority: P0
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/depth-warden-gate/hero.png
+      - references/umbrakor/depth-warden-gate/front.png
+      - references/umbrakor/depth-warden-gate/left.png
+      - references/umbrakor/depth-warden-gate/rear.png
+      - references/umbrakor/depth-warden-gate/top.png
+      - references/umbrakor/depth-warden-gate/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 12
+        - 7
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/venemora-temple-hall
+    assetClass: sacred
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/venemora-temple-hall/hero.png
+      - references/umbrakor/venemora-temple-hall/front.png
+      - references/umbrakor/venemora-temple-hall/left.png
+      - references/umbrakor/venemora-temple-hall/rear.png
+      - references/umbrakor/venemora-temple-hall/top.png
+      - references/umbrakor/venemora-temple-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: chapel
+      settlementVariant: 0
+      kitPrefab: Med_Chapel
+      kitProp: null
+      footprint:
+        - 9
+        - 12
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/rift-seal-checkpoint
+    assetClass: defense
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/rift-seal-checkpoint/hero.png
+      - references/umbrakor/rift-seal-checkpoint/front.png
+      - references/umbrakor/rift-seal-checkpoint/left.png
+      - references/umbrakor/rift-seal-checkpoint/rear.png
+      - references/umbrakor/rift-seal-checkpoint/top.png
+      - references/umbrakor/rift-seal-checkpoint/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Med_Guardhouse
+      kitProp: null
+      footprint:
+        - 7
+        - 7
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/cavern-air-shaft
+    assetClass: infrastructure
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/cavern-air-shaft/hero.png
+      - references/umbrakor/cavern-air-shaft/front.png
+      - references/umbrakor/cavern-air-shaft/left.png
+      - references/umbrakor/cavern-air-shaft/rear.png
+      - references/umbrakor/cavern-air-shaft/top.png
+      - references/umbrakor/cavern-air-shaft/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: brazier
+      footprint:
+        - 3
+        - 3
+        - 3.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/pale-wayfinder
+    assetClass: prop
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/pale-wayfinder/hero.png
+      - references/umbrakor/pale-wayfinder/front.png
+      - references/umbrakor/pale-wayfinder/left.png
+      - references/umbrakor/pale-wayfinder/rear.png
+      - references/umbrakor/pale-wayfinder/top.png
+      - references/umbrakor/pale-wayfinder/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: lantern
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: lantern
+      footprint:
+        - 1.4
+        - 1.4
+        - 2.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/underground-river-dock
+    assetClass: coastal
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/underground-river-dock/hero.png
+      - references/umbrakor/underground-river-dock/front.png
+      - references/umbrakor/underground-river-dock/left.png
+      - references/umbrakor/underground-river-dock/rear.png
+      - references/umbrakor/underground-river-dock/top.png
+      - references/umbrakor/underground-river-dock/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Med_Warehouse
+      kitProp: null
+      footprint:
+        - 8
+        - 10
+        - 6
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: umbrakor/house-archive-vault
+    assetClass: civic
+    priority: P1
+    regionDossier: umbrakor
+    eligibleCultureSeeds: *a7
+    loreSource: https://www.drusniel.com/the-umbrakor-dominions-pact-with-darkness/
+    promptFile: regions/umbrakor.md
+    referenceImages:
+      - references/umbrakor/house-archive-vault/hero.png
+      - references/umbrakor/house-archive-vault/front.png
+      - references/umbrakor/house-archive-vault/left.png
+      - references/umbrakor/house-archive-vault/rear.png
+      - references/umbrakor/house-archive-vault/top.png
+      - references/umbrakor/house-archive-vault/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Med_Library
+      kitProp: null
+      footprint:
+        - 11
+        - 9
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/storm-coast-waystation
+    assetClass: residence
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: &a8
+      - orc-peoples
+      - goblin-peoples
+      - jotunn
+      - serpent-peoples
+      - rakhnid-broods
+      - draconic-remnant
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/storm-coast-waystation/hero.png
+      - references/wyrmreach/storm-coast-waystation/front.png
+      - references/wyrmreach/storm-coast-waystation/left.png
+      - references/wyrmreach/storm-coast-waystation/rear.png
+      - references/wyrmreach/storm-coast-waystation/top.png
+      - references/wyrmreach/storm-coast-waystation/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tavern
+      settlementVariant: 0
+      kitPrefab: Nordic_Tavern
+      kitProp: null
+      footprint:
+        - 9
+        - 7
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/frontier-cargo-breakwater
+    assetClass: coastal
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/frontier-cargo-breakwater/hero.png
+      - references/wyrmreach/frontier-cargo-breakwater/front.png
+      - references/wyrmreach/frontier-cargo-breakwater/left.png
+      - references/wyrmreach/frontier-cargo-breakwater/rear.png
+      - references/wyrmreach/frontier-cargo-breakwater/top.png
+      - references/wyrmreach/frontier-cargo-breakwater/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 11
+        - 6
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/coastal-warning-lookout
+    assetClass: defense
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/coastal-warning-lookout/hero.png
+      - references/wyrmreach/coastal-warning-lookout/front.png
+      - references/wyrmreach/coastal-warning-lookout/left.png
+      - references/wyrmreach/coastal-warning-lookout/rear.png
+      - references/wyrmreach/coastal-warning-lookout/top.png
+      - references/wyrmreach/coastal-warning-lookout/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Nordic_Guardhouse
+      kitProp: null
+      footprint:
+        - 7
+        - 7
+        - 9
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/mixed-community-market-shed
+    assetClass: trade
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/mixed-community-market-shed/hero.png
+      - references/wyrmreach/mixed-community-market-shed/front.png
+      - references/wyrmreach/mixed-community-market-shed/left.png
+      - references/wyrmreach/mixed-community-market-shed/rear.png
+      - references/wyrmreach/mixed-community-market-shed/top.png
+      - references/wyrmreach/mixed-community-market-shed/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: shop
+      settlementVariant: 1
+      kitPrefab: Nordic_Shop_Small
+      kitProp: null
+      footprint:
+        - 8
+        - 6
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/rock-windbreak-hut
+    assetClass: residence
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/rock-windbreak-hut/hero.png
+      - references/wyrmreach/rock-windbreak-hut/front.png
+      - references/wyrmreach/rock-windbreak-hut/left.png
+      - references/wyrmreach/rock-windbreak-hut/rear.png
+      - references/wyrmreach/rock-windbreak-hut/top.png
+      - references/wyrmreach/rock-windbreak-hut/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: house
+      settlementVariant: 2
+      kitPrefab: Nordic_House_Cottage
+      kitProp: null
+      footprint:
+        - 8
+        - 6
+        - 4.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/ancient-smooth-stair
+    assetClass: ruin
+    priority: P0
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/ancient-smooth-stair/hero.png
+      - references/wyrmreach/ancient-smooth-stair/front.png
+      - references/wyrmreach/ancient-smooth-stair/left.png
+      - references/wyrmreach/ancient-smooth-stair/rear.png
+      - references/wyrmreach/ancient-smooth-stair/top.png
+      - references/wyrmreach/ancient-smooth-stair/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: quarryBlock
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 3.5
+        - 4.5
+        - 2.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: wyrmreach/relic-survey-camp
+    assetClass: prop
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/relic-survey-camp/hero.png
+      - references/wyrmreach/relic-survey-camp/front.png
+      - references/wyrmreach/relic-survey-camp/left.png
+      - references/wyrmreach/relic-survey-camp/rear.png
+      - references/wyrmreach/relic-survey-camp/top.png
+      - references/wyrmreach/relic-survey-camp/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: stall
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: cargo
+      footprint:
+        - 3.2
+        - 2.8
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/impossible-measuring-plinth
+    assetClass: ruin
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/impossible-measuring-plinth/hero.png
+      - references/wyrmreach/impossible-measuring-plinth/front.png
+      - references/wyrmreach/impossible-measuring-plinth/left.png
+      - references/wyrmreach/impossible-measuring-plinth/rear.png
+      - references/wyrmreach/impossible-measuring-plinth/top.png
+      - references/wyrmreach/impossible-measuring-plinth/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 2
+        - 2
+        - 2.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: wyrmreach/gray-crust-descent-cover
+    assetClass: ruin
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/gray-crust-descent-cover/hero.png
+      - references/wyrmreach/gray-crust-descent-cover/front.png
+      - references/wyrmreach/gray-crust-descent-cover/left.png
+      - references/wyrmreach/gray-crust-descent-cover/rear.png
+      - references/wyrmreach/gray-crust-descent-cover/top.png
+      - references/wyrmreach/gray-crust-descent-cover/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: well
+      footprint:
+        - 3.4
+        - 3.4
+        - 1.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: wyrmreach/storm-shielded-water-cache
+    assetClass: infrastructure
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/storm-shielded-water-cache/hero.png
+      - references/wyrmreach/storm-shielded-water-cache/front.png
+      - references/wyrmreach/storm-shielded-water-cache/left.png
+      - references/wyrmreach/storm-shielded-water-cache/rear.png
+      - references/wyrmreach/storm-shielded-water-cache/top.png
+      - references/wyrmreach/storm-shielded-water-cache/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: barrels
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: barrels
+      footprint:
+        - 2.4
+        - 2.4
+        - 1.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/old-rift-boundary-cairn
+    assetClass: prop
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/old-rift-boundary-cairn/hero.png
+      - references/wyrmreach/old-rift-boundary-cairn/front.png
+      - references/wyrmreach/old-rift-boundary-cairn/left.png
+      - references/wyrmreach/old-rift-boundary-cairn/rear.png
+      - references/wyrmreach/old-rift-boundary-cairn/top.png
+      - references/wyrmreach/old-rift-boundary-cairn/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: boulder
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 1.8
+        - 1.8
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: wyrmreach/pre-kingdom-black-wall
+    assetClass: ruin
+    priority: P1
+    regionDossier: wyrmreach
+    eligibleCultureSeeds: *a8
+    loreSource: https://www.drusniel.com/the-mysteries-of-the-wyrmreach-dominion/
+    promptFile: regions/wyrmreach.md
+    referenceImages:
+      - references/wyrmreach/pre-kingdom-black-wall/hero.png
+      - references/wyrmreach/pre-kingdom-black-wall/front.png
+      - references/wyrmreach/pre-kingdom-black-wall/left.png
+      - references/wyrmreach/pre-kingdom-black-wall/rear.png
+      - references/wyrmreach/pre-kingdom-black-wall/top.png
+      - references/wyrmreach/pre-kingdom-black-wall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: wall
+      settlementVariant: 1
+      kitPrefab: CityWall
+      kitProp: null
+      footprint:
+        - 12
+        - 2.2
+        - 5.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: zuraldi/six-offices-council-hall
+    assetClass: civic
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: &a9
+      - zuraldarr
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/six-offices-council-hall/hero.png
+      - references/zuraldi/six-offices-council-hall/front.png
+      - references/zuraldi/six-offices-council-hall/left.png
+      - references/zuraldi/six-offices-council-hall/rear.png
+      - references/zuraldi/six-offices-council-hall/top.png
+      - references/zuraldi/six-offices-council-hall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: hall
+      settlementVariant: 0
+      kitPrefab: Nordic_Guildhall
+      kitProp: null
+      footprint:
+        - 14
+        - 10
+        - 6.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/ancestor-monolith
+    assetClass: sacred
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/ancestor-monolith/hero.png
+      - references/zuraldi/ancestor-monolith/front.png
+      - references/zuraldi/ancestor-monolith/left.png
+      - references/zuraldi/ancestor-monolith/rear.png
+      - references/zuraldi/ancestor-monolith/top.png
+      - references/zuraldi/ancestor-monolith/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 2.4
+        - 2.4
+        - 4.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/terraced-stone-farmstead
+    assetClass: residence
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/terraced-stone-farmstead/hero.png
+      - references/zuraldi/terraced-stone-farmstead/front.png
+      - references/zuraldi/terraced-stone-farmstead/left.png
+      - references/zuraldi/terraced-stone-farmstead/rear.png
+      - references/zuraldi/terraced-stone-farmstead/top.png
+      - references/zuraldi/terraced-stone-farmstead/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: farmhouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Farmhouse
+      kitProp: null
+      footprint:
+        - 13
+        - 7
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/ridge-watchhouse
+    assetClass: defense
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/ridge-watchhouse/hero.png
+      - references/zuraldi/ridge-watchhouse/front.png
+      - references/zuraldi/ridge-watchhouse/left.png
+      - references/zuraldi/ridge-watchhouse/rear.png
+      - references/zuraldi/ridge-watchhouse/top.png
+      - references/zuraldi/ridge-watchhouse/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Nordic_Guardhouse
+      kitProp: null
+      footprint:
+        - 7
+        - 7
+        - 8.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/caravan-unloading-shelf
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/caravan-unloading-shelf/hero.png
+      - references/zuraldi/caravan-unloading-shelf/front.png
+      - references/zuraldi/caravan-unloading-shelf/left.png
+      - references/zuraldi/caravan-unloading-shelf/rear.png
+      - references/zuraldi/caravan-unloading-shelf/top.png
+      - references/zuraldi/caravan-unloading-shelf/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Warehouse
+      kitProp: null
+      footprint:
+        - 9
+        - 10
+        - 6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/switchback-bridge
+    assetClass: infrastructure
+    priority: P0
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/switchback-bridge/hero.png
+      - references/zuraldi/switchback-bridge/front.png
+      - references/zuraldi/switchback-bridge/left.png
+      - references/zuraldi/switchback-bridge/rear.png
+      - references/zuraldi/switchback-bridge/top.png
+      - references/zuraldi/switchback-bridge/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: wall
+      settlementVariant: 0
+      kitPrefab: CityWall
+      kitProp: null
+      footprint:
+        - 12
+        - 3
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/cattle-yard
+    assetClass: agriculture
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/cattle-yard/hero.png
+      - references/zuraldi/cattle-yard/front.png
+      - references/zuraldi/cattle-yard/left.png
+      - references/zuraldi/cattle-yard/rear.png
+      - references/zuraldi/cattle-yard/top.png
+      - references/zuraldi/cattle-yard/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: barn
+      settlementVariant: 0
+      kitPrefab: Nordic_Barn
+      kitProp: null
+      footprint:
+        - 9
+        - 11
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/highland-cheese-smokehouse
+    assetClass: industry
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/highland-cheese-smokehouse/hero.png
+      - references/zuraldi/highland-cheese-smokehouse/front.png
+      - references/zuraldi/highland-cheese-smokehouse/left.png
+      - references/zuraldi/highland-cheese-smokehouse/rear.png
+      - references/zuraldi/highland-cheese-smokehouse/top.png
+      - references/zuraldi/highland-cheese-smokehouse/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: bakery
+      settlementVariant: 0
+      kitPrefab: Nordic_Bakery
+      kitProp: null
+      footprint:
+        - 7
+        - 6
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/druid-grove-altar
+    assetClass: sacred
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/druid-grove-altar/hero.png
+      - references/zuraldi/druid-grove-altar/front.png
+      - references/zuraldi/druid-grove-altar/left.png
+      - references/zuraldi/druid-grove-altar/rear.png
+      - references/zuraldi/druid-grove-altar/top.png
+      - references/zuraldi/druid-grove-altar/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 2.6
+        - 2.6
+        - 2.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/matriarch-table
+    assetClass: prop
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/matriarch-table/hero.png
+      - references/zuraldi/matriarch-table/front.png
+      - references/zuraldi/matriarch-table/left.png
+      - references/zuraldi/matriarch-table/rear.png
+      - references/zuraldi/matriarch-table/top.png
+      - references/zuraldi/matriarch-table/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bench
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bench
+      footprint:
+        - 2.6
+        - 1.4
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/stone-pass-cairn
+    assetClass: prop
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/stone-pass-cairn/hero.png
+      - references/zuraldi/stone-pass-cairn/front.png
+      - references/zuraldi/stone-pass-cairn/left.png
+      - references/zuraldi/stone-pass-cairn/rear.png
+      - references/zuraldi/stone-pass-cairn/top.png
+      - references/zuraldi/stone-pass-cairn/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: signpost
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: signpost
+      footprint:
+        - 1.8
+        - 1.8
+        - 2.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: zuraldi/mountain-pony-pack-cart
+    assetClass: prop
+    priority: P1
+    regionDossier: zuraldi
+    eligibleCultureSeeds: *a9
+    loreSource: https://www.drusniel.com/the-zuraldarr/
+    promptFile: regions/zuraldi.md
+    referenceImages:
+      - references/zuraldi/mountain-pony-pack-cart/hero.png
+      - references/zuraldi/mountain-pony-pack-cart/front.png
+      - references/zuraldi/mountain-pony-pack-cart/left.png
+      - references/zuraldi/mountain-pony-pack-cart/rear.png
+      - references/zuraldi/mountain-pony-pack-cart/top.png
+      - references/zuraldi/mountain-pony-pack-cart/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: cart
+      footprint:
+        - 2.2
+        - 3.8
+        - 2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: coast-harbor/pile-jetty
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: coast-harbor
+    promptFile: areas/coast-harbor.md
+    referenceImages:
+      - references/coast-harbor/pile-jetty/hero.png
+      - references/coast-harbor/pile-jetty/front.png
+      - references/coast-harbor/pile-jetty/left.png
+      - references/coast-harbor/pile-jetty/rear.png
+      - references/coast-harbor/pile-jetty/top.png
+      - references/coast-harbor/pile-jetty/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 4.5
+        - 2.2
+        - 1.5
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: coast-harbor/fish-smoking-shed
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: coast-harbor
+    promptFile: areas/coast-harbor.md
+    referenceImages:
+      - references/coast-harbor/fish-smoking-shed/hero.png
+      - references/coast-harbor/fish-smoking-shed/front.png
+      - references/coast-harbor/fish-smoking-shed/left.png
+      - references/coast-harbor/fish-smoking-shed/rear.png
+      - references/coast-harbor/fish-smoking-shed/top.png
+      - references/coast-harbor/fish-smoking-shed/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: bakery
+      settlementVariant: 0
+      kitPrefab: Nordic_Bakery
+      kitProp: null
+      footprint:
+        - 7
+        - 5.5
+        - 4
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: coast-harbor/tide-stair-quay
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: coast-harbor
+    promptFile: areas/coast-harbor.md
+    referenceImages:
+      - references/coast-harbor/tide-stair-quay/hero.png
+      - references/coast-harbor/tide-stair-quay/front.png
+      - references/coast-harbor/tide-stair-quay/left.png
+      - references/coast-harbor/tide-stair-quay/rear.png
+      - references/coast-harbor/tide-stair-quay/top.png
+      - references/coast-harbor/tide-stair-quay/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bollards
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 4.5
+        - 2
+        - 1.5
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: coast-harbor/net-mending-bench
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: coast-harbor
+    promptFile: areas/coast-harbor.md
+    referenceImages:
+      - references/coast-harbor/net-mending-bench/hero.png
+      - references/coast-harbor/net-mending-bench/front.png
+      - references/coast-harbor/net-mending-bench/left.png
+      - references/coast-harbor/net-mending-bench/rear.png
+      - references/coast-harbor/net-mending-bench/top.png
+      - references/coast-harbor/net-mending-bench/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bench
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: drying_rack
+      footprint:
+        - 2.6
+        - 1.4
+        - 1.8
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: coast-harbor/cargo-capstan
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: coast-harbor
+    promptFile: areas/coast-harbor.md
+    referenceImages:
+      - references/coast-harbor/cargo-capstan/hero.png
+      - references/coast-harbor/cargo-capstan/front.png
+      - references/coast-harbor/cargo-capstan/left.png
+      - references/coast-harbor/cargo-capstan/rear.png
+      - references/coast-harbor/cargo-capstan/top.png
+      - references/coast-harbor/cargo-capstan/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: barrels
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: cargo
+      footprint:
+        - 2.2
+        - 2.2
+        - 1.8
+    constraints:
+      requiresWaterAccess: true
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: forest-canopy/root-step-path
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: forest-canopy
+    promptFile: areas/forest-canopy.md
+    referenceImages:
+      - references/forest-canopy/root-step-path/hero.png
+      - references/forest-canopy/root-step-path/front.png
+      - references/forest-canopy/root-step-path/left.png
+      - references/forest-canopy/root-step-path/rear.png
+      - references/forest-canopy/root-step-path/top.png
+      - references/forest-canopy/root-step-path/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fence
+      footprint:
+        - 4
+        - 1.5
+        - 0.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: forest-canopy/canopy-support-joint
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: forest-canopy
+    promptFile: areas/forest-canopy.md
+    referenceImages:
+      - references/forest-canopy/canopy-support-joint/hero.png
+      - references/forest-canopy/canopy-support-joint/front.png
+      - references/forest-canopy/canopy-support-joint/left.png
+      - references/forest-canopy/canopy-support-joint/rear.png
+      - references/forest-canopy/canopy-support-joint/top.png
+      - references/forest-canopy/canopy-support-joint/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: swamp_tree
+      footprint:
+        - 3
+        - 3
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: forest-canopy/forest-herb-garden
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: forest-canopy
+    promptFile: areas/forest-canopy.md
+    referenceImages:
+      - references/forest-canopy/forest-herb-garden/hero.png
+      - references/forest-canopy/forest-herb-garden/front.png
+      - references/forest-canopy/forest-herb-garden/left.png
+      - references/forest-canopy/forest-herb-garden/rear.png
+      - references/forest-canopy/forest-herb-garden/top.png
+      - references/forest-canopy/forest-herb-garden/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: planter
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: planter
+      footprint:
+        - 2.8
+        - 1.6
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: forest-canopy/elevated-ranger-platform
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: forest-canopy
+    promptFile: areas/forest-canopy.md
+    referenceImages:
+      - references/forest-canopy/elevated-ranger-platform/hero.png
+      - references/forest-canopy/elevated-ranger-platform/front.png
+      - references/forest-canopy/elevated-ranger-platform/left.png
+      - references/forest-canopy/elevated-ranger-platform/rear.png
+      - references/forest-canopy/elevated-ranger-platform/top.png
+      - references/forest-canopy/elevated-ranger-platform/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: tower
+      settlementVariant: 0
+      kitPrefab: Med_Guardhouse
+      kitProp: null
+      footprint:
+        - 6
+        - 6
+        - 8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: forest-canopy/living-arch-gateway
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: forest-canopy
+    promptFile: areas/forest-canopy.md
+    referenceImages:
+      - references/forest-canopy/living-arch-gateway/hero.png
+      - references/forest-canopy/living-arch-gateway/front.png
+      - references/forest-canopy/living-arch-gateway/left.png
+      - references/forest-canopy/living-arch-gateway/rear.png
+      - references/forest-canopy/living-arch-gateway/top.png
+      - references/forest-canopy/living-arch-gateway/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: gatehouse
+      settlementVariant: 0
+      kitPrefab: Gatehouse
+      kitProp: null
+      footprint:
+        - 8
+        - 4
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: true
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: mountain-pass/pass-retaining-wall
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: mountain-pass
+    promptFile: areas/mountain-pass.md
+    referenceImages:
+      - references/mountain-pass/pass-retaining-wall/hero.png
+      - references/mountain-pass/pass-retaining-wall/front.png
+      - references/mountain-pass/pass-retaining-wall/left.png
+      - references/mountain-pass/pass-retaining-wall/rear.png
+      - references/mountain-pass/pass-retaining-wall/top.png
+      - references/mountain-pass/pass-retaining-wall/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: quarryBlock
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 4
+        - 1.2
+        - 2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: mountain-pass/switchback-parapet
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: mountain-pass
+    promptFile: areas/mountain-pass.md
+    referenceImages:
+      - references/mountain-pass/switchback-parapet/hero.png
+      - references/mountain-pass/switchback-parapet/front.png
+      - references/mountain-pass/switchback-parapet/left.png
+      - references/mountain-pass/switchback-parapet/rear.png
+      - references/mountain-pass/switchback-parapet/top.png
+      - references/mountain-pass/switchback-parapet/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bollards
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 4.5
+        - 1
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: mountain-pass/upland-drainage-culvert
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: mountain-pass
+    promptFile: areas/mountain-pass.md
+    referenceImages:
+      - references/mountain-pass/upland-drainage-culvert/hero.png
+      - references/mountain-pass/upland-drainage-culvert/front.png
+      - references/mountain-pass/upland-drainage-culvert/left.png
+      - references/mountain-pass/upland-drainage-culvert/rear.png
+      - references/mountain-pass/upland-drainage-culvert/top.png
+      - references/mountain-pass/upland-drainage-culvert/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: trough
+      footprint:
+        - 2.8
+        - 2
+        - 1.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: mountain-pass/caravan-pack-rack
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: mountain-pass
+    promptFile: areas/mountain-pass.md
+    referenceImages:
+      - references/mountain-pass/caravan-pack-rack/hero.png
+      - references/mountain-pass/caravan-pack-rack/front.png
+      - references/mountain-pass/caravan-pack-rack/left.png
+      - references/mountain-pass/caravan-pack-rack/rear.png
+      - references/mountain-pass/caravan-pack-rack/top.png
+      - references/mountain-pass/caravan-pack-rack/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: cargo
+      footprint:
+        - 2.6
+        - 2
+        - 1.8
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: mountain-pass/avalanche-refuge
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: mountain-pass
+    promptFile: areas/mountain-pass.md
+    referenceImages:
+      - references/mountain-pass/avalanche-refuge/hero.png
+      - references/mountain-pass/avalanche-refuge/front.png
+      - references/mountain-pass/avalanche-refuge/left.png
+      - references/mountain-pass/avalanche-refuge/rear.png
+      - references/mountain-pass/avalanche-refuge/top.png
+      - references/mountain-pass/avalanche-refuge/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: house
+      settlementVariant: 2
+      kitPrefab: Nordic_House_Cottage
+      kitProp: null
+      footprint:
+        - 7
+        - 5.5
+        - 4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: true
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: ruins-rift/buried-threshold
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: ruins-rift
+    promptFile: areas/ruins-rift.md
+    referenceImages:
+      - references/ruins-rift/buried-threshold/hero.png
+      - references/ruins-rift/buried-threshold/front.png
+      - references/ruins-rift/buried-threshold/left.png
+      - references/ruins-rift/buried-threshold/rear.png
+      - references/ruins-rift/buried-threshold/top.png
+      - references/ruins-rift/buried-threshold/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: quarryBlock
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: shrine
+      footprint:
+        - 3
+        - 3
+        - 1.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: ruins-rift/broken-arch-section
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: ruins-rift
+    promptFile: areas/ruins-rift.md
+    referenceImages:
+      - references/ruins-rift/broken-arch-section/hero.png
+      - references/ruins-rift/broken-arch-section/front.png
+      - references/ruins-rift/broken-arch-section/left.png
+      - references/ruins-rift/broken-arch-section/rear.png
+      - references/ruins-rift/broken-arch-section/top.png
+      - references/ruins-rift/broken-arch-section/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: boulder
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: bollards
+      footprint:
+        - 3.5
+        - 1.8
+        - 3.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: ruins-rift/sealed-ward-plaque
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: ruins-rift
+    promptFile: areas/ruins-rift.md
+    referenceImages:
+      - references/ruins-rift/sealed-ward-plaque/hero.png
+      - references/ruins-rift/sealed-ward-plaque/front.png
+      - references/ruins-rift/sealed-ward-plaque/left.png
+      - references/ruins-rift/sealed-ward-plaque/rear.png
+      - references/ruins-rift/sealed-ward-plaque/top.png
+      - references/ruins-rift/sealed-ward-plaque/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: shrine
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: notice_board
+      footprint:
+        - 1.8
+        - 1
+        - 2.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: ruins-rift/archaeologist-tool-roll
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: ruins-rift
+    promptFile: areas/ruins-rift.md
+    referenceImages:
+      - references/ruins-rift/archaeologist-tool-roll/hero.png
+      - references/ruins-rift/archaeologist-tool-roll/front.png
+      - references/ruins-rift/archaeologist-tool-roll/left.png
+      - references/ruins-rift/archaeologist-tool-roll/rear.png
+      - references/ruins-rift/archaeologist-tool-roll/top.png
+      - references/ruins-rift/archaeologist-tool-roll/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: barrels
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: cargo
+      footprint:
+        - 1.8
+        - 1.8
+        - 1.2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: ruins-rift/anomaly-scar-stone
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: ruins-rift
+    promptFile: areas/ruins-rift.md
+    referenceImages:
+      - references/ruins-rift/anomaly-scar-stone/hero.png
+      - references/ruins-rift/anomaly-scar-stone/front.png
+      - references/ruins-rift/anomaly-scar-stone/left.png
+      - references/ruins-rift/anomaly-scar-stone/rear.png
+      - references/ruins-rift/anomaly-scar-stone/top.png
+      - references/ruins-rift/anomaly-scar-stone/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: boulder
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: totem
+      footprint:
+        - 2
+        - 2
+        - 2.4
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: true
+  - id: swamp-bog/raised-boardwalk
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: swamp-bog
+    promptFile: areas/swamp-bog.md
+    referenceImages:
+      - references/swamp-bog/raised-boardwalk/hero.png
+      - references/swamp-bog/raised-boardwalk/front.png
+      - references/swamp-bog/raised-boardwalk/left.png
+      - references/swamp-bog/raised-boardwalk/rear.png
+      - references/swamp-bog/raised-boardwalk/top.png
+      - references/swamp-bog/raised-boardwalk/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fence
+      footprint:
+        - 4
+        - 1.8
+        - 1
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: swamp-bog/reed-cutting-shed
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: swamp-bog
+    promptFile: areas/swamp-bog.md
+    referenceImages:
+      - references/swamp-bog/reed-cutting-shed/hero.png
+      - references/swamp-bog/reed-cutting-shed/front.png
+      - references/swamp-bog/reed-cutting-shed/left.png
+      - references/swamp-bog/reed-cutting-shed/rear.png
+      - references/swamp-bog/reed-cutting-shed/top.png
+      - references/swamp-bog/reed-cutting-shed/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: barn
+      settlementVariant: 0
+      kitPrefab: Goblin_House_Small
+      kitProp: null
+      footprint:
+        - 7
+        - 6
+        - 4.5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: swamp-bog/flatwater-skiff
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: swamp-bog
+    promptFile: areas/swamp-bog.md
+    referenceImages:
+      - references/swamp-bog/flatwater-skiff/hero.png
+      - references/swamp-bog/flatwater-skiff/front.png
+      - references/swamp-bog/flatwater-skiff/left.png
+      - references/swamp-bog/flatwater-skiff/rear.png
+      - references/swamp-bog/flatwater-skiff/top.png
+      - references/swamp-bog/flatwater-skiff/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: cart
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: skiff
+      footprint:
+        - 3.2
+        - 1.6
+        - 1
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: swamp-bog/bog-pole-marker
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: swamp-bog
+    promptFile: areas/swamp-bog.md
+    referenceImages:
+      - references/swamp-bog/bog-pole-marker/hero.png
+      - references/swamp-bog/bog-pole-marker/front.png
+      - references/swamp-bog/bog-pole-marker/left.png
+      - references/swamp-bog/bog-pole-marker/rear.png
+      - references/swamp-bog/bog-pole-marker/top.png
+      - references/swamp-bog/bog-pole-marker/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: signpost
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: torch_pole
+      footprint:
+        - 1.2
+        - 1.2
+        - 3
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: swamp-bog/mud-island-causeway
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: swamp-bog
+    promptFile: areas/swamp-bog.md
+    referenceImages:
+      - references/swamp-bog/mud-island-causeway/hero.png
+      - references/swamp-bog/mud-island-causeway/front.png
+      - references/swamp-bog/mud-island-causeway/left.png
+      - references/swamp-bog/mud-island-causeway/rear.png
+      - references/swamp-bog/mud-island-causeway/top.png
+      - references/swamp-bog/mud-island-causeway/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: fence
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: fence
+      footprint:
+        - 4
+        - 2.2
+        - 0.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: true
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: false
+      forbidsSky: false
+      requiresRuinContext: false
+  - id: underground-cavern/deep-walkway-arch
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: underground-cavern
+    promptFile: areas/underground-cavern.md
+    referenceImages:
+      - references/underground-cavern/deep-walkway-arch/hero.png
+      - references/underground-cavern/deep-walkway-arch/front.png
+      - references/underground-cavern/deep-walkway-arch/left.png
+      - references/underground-cavern/deep-walkway-arch/rear.png
+      - references/underground-cavern/deep-walkway-arch/top.png
+      - references/underground-cavern/deep-walkway-arch/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: wall
+      settlementVariant: 0
+      kitPrefab: CityWall
+      kitProp: null
+      footprint:
+        - 10
+        - 2.5
+        - 5
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: true
+      forbidsSky: true
+      requiresRuinContext: false
+  - id: underground-cavern/cavern-drain-channel
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: underground-cavern
+    promptFile: areas/underground-cavern.md
+    referenceImages:
+      - references/underground-cavern/cavern-drain-channel/hero.png
+      - references/underground-cavern/cavern-drain-channel/front.png
+      - references/underground-cavern/cavern-drain-channel/left.png
+      - references/underground-cavern/cavern-drain-channel/rear.png
+      - references/underground-cavern/cavern-drain-channel/top.png
+      - references/underground-cavern/cavern-drain-channel/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: bollards
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: trough
+      footprint:
+        - 3.5
+        - 1.4
+        - 1
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: true
+      forbidsSky: true
+      requiresRuinContext: false
+  - id: underground-cavern/shaft-air-damper
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: underground-cavern
+    promptFile: areas/underground-cavern.md
+    referenceImages:
+      - references/underground-cavern/shaft-air-damper/hero.png
+      - references/underground-cavern/shaft-air-damper/front.png
+      - references/underground-cavern/shaft-air-damper/left.png
+      - references/underground-cavern/shaft-air-damper/rear.png
+      - references/underground-cavern/shaft-air-damper/top.png
+      - references/underground-cavern/shaft-air-damper/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: well
+      settlementVariant: 0
+      kitPrefab: null
+      kitProp: brazier
+      footprint:
+        - 2.4
+        - 2.4
+        - 2.6
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: true
+      forbidsSky: true
+      requiresRuinContext: false
+  - id: underground-cavern/cavern-lift-platform
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: underground-cavern
+    promptFile: areas/underground-cavern.md
+    referenceImages:
+      - references/underground-cavern/cavern-lift-platform/hero.png
+      - references/underground-cavern/cavern-lift-platform/front.png
+      - references/underground-cavern/cavern-lift-platform/left.png
+      - references/underground-cavern/cavern-lift-platform/rear.png
+      - references/underground-cavern/cavern-lift-platform/top.png
+      - references/underground-cavern/cavern-lift-platform/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: building
+      settlementKind: warehouse
+      settlementVariant: 0
+      kitPrefab: Nordic_Warehouse
+      kitProp: null
+      footprint:
+        - 8
+        - 8
+        - 7
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: true
+      forbidsSky: true
+      requiresRuinContext: false
+  - id: underground-cavern/dim-wayfinding-crystal
+    assetClass: shared-environment
+    priority: P1
+    areaOverlay: underground-cavern
+    promptFile: areas/underground-cavern.md
+    referenceImages:
+      - references/underground-cavern/dim-wayfinding-crystal/hero.png
+      - references/underground-cavern/dim-wayfinding-crystal/front.png
+      - references/underground-cavern/dim-wayfinding-crystal/left.png
+      - references/underground-cavern/dim-wayfinding-crystal/rear.png
+      - references/underground-cavern/dim-wayfinding-crystal/top.png
+      - references/underground-cavern/dim-wayfinding-crystal/detail.png
+    loreStatus: design-proposal
+    modelStatus: planned
+    fallback:
+      kind: prop
+      settlementKind: lantern
+      settlementVariant: 1
+      kitPrefab: null
+      kitProp: brazier
+      footprint:
+        - 1.4
+        - 1.4
+        - 2
+    constraints:
+      requiresWaterAccess: false
+      requiresWetland: false
+      requiresSlope: false
+      requiresForest: false
+      requiresUnderground: true
+      forbidsSky: true
+      requiresRuinContext: false
