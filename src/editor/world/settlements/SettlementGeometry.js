@@ -92,6 +92,8 @@ export function rectHitsPolyline(box, points, halfWidth, clearance = 0) {
   return false;
 }
 
+const EMPTY = Object.freeze([]);
+
 /** Uniform bucket grid for items with a centre and a radius. */
 export class PlanGrid {
   constructor(cell = 16) {
@@ -120,8 +122,11 @@ export class PlanGrid {
   }
 
   near(x, z, radius) {
+    const keys = this.keys(x, z, radius);
+    // One cell (every terrain vertex query): its bucket holds each item once already.
+    if (keys.length === 1) return this.buckets.get(keys[0]) ?? EMPTY;
     const found = new Set();
-    for (const key of this.keys(x, z, radius)) {
+    for (const key of keys) {
       for (const item of this.buckets.get(key) ?? []) found.add(item);
     }
     return found;
