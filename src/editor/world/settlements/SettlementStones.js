@@ -16,7 +16,14 @@ export const SETTLEMENT_STONES = Object.freeze({
   // Field clearance: what the plough turned up, heaped at the corner of the field.
   boulder: Object.freeze({ archetype: 'boulder', variants: 4, size: 1.35 }),
   fieldstone: Object.freeze({ archetype: 'pebble', variants: 3, size: 0.6 }),
+  // Bare rock breaking the slopes round a hill town of the frontier and mountain peoples.
+  outcrop: Object.freeze({ archetype: 'boulder', variants: 4, size: 3.4 }),
 });
+
+/** Peoples who build on rocky ground (the recipe's own kit family, TownPrefabCatalog). */
+const OUTCROP_FAMILIES = new Set(['Orc', 'Frostgard', 'Stonehold']);
+// Height difference across 4 m above which a spot counts as a slope worth an outcrop.
+const STEEP_RISE = 0.7;
 
 export function isStoneKind(kind) {
   return Object.hasOwn(SETTLEMENT_STONES, kind);
@@ -95,11 +102,44 @@ function fieldClearance({ fields, random }, props) {
   }
 }
 
+/**
+ * Rock outcrops with a scatter of boulders on the slopes inside a frontier or mountain town,
+ * favouring steep ground. Drawn from their own random stream (`outcropRandom`), so the other
+ * stone and trim never move.
+ */
+function outcrops({ profile, occupancy, outcropRandom: random }, props) {
+  const family = profile.hasRegionalIdentity ? profile.recipe?.architecture?.kitFamily : null;
+  if (!random || !OUTCROP_FAMILIES.has(family)) return;
+  const wanted = 5 + profile.rank * 3;
+  let placed = 0;
+  for (let attempt = 0; attempt < wanted * 8 && placed < wanted; attempt += 1) {
+    const angle = random() * Math.PI * 2;
+    const distance = profile.radius * (0.45 + random() * 0.6);
+    const x = Math.sin(angle) * distance;
+    const z = Math.cos(angle) * distance;
+    const h = (dx, dz) => occupancy.sampleHeight(x + dx, z + dz);
+    const rise = Math.abs(h(2, 0) - h(-2, 0)) + Math.abs(h(0, 2) - h(0, -2));
+    if (rise < STEEP_RISE && random() > 0.25) continue;
+    const spot = rect(x, z, 3.6, 3.6, 0);
+    if (!occupancy.fits(spot, { clearance: 0.6, streetClearance: 1.5 })) continue;
+    occupancy.claim(spot, { soft: true });
+    props.push(stone('outcrop', x, z, random, 0.35));
+    const scatter = 1 + Math.floor(random() * 3);
+    for (let index = 0; index < scatter; index += 1) {
+      const around = random() * Math.PI * 2;
+      const reach = 2.2 + random() * 1.4;
+      props.push(stone('boulder', x + Math.sin(around) * reach, z + Math.cos(around) * reach, random));
+    }
+    placed += 1;
+  }
+}
+
 /** Every loose stone of one settlement, as props. */
 export function planStones(context) {
   const props = [];
   guardStones(context, props);
   yardBlocks(context, props);
   fieldClearance(context, props);
+  outcrops(context, props);
   return props;
 }

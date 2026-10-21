@@ -70,6 +70,38 @@ function yardFence(occupancy, out, building, size) {
 }
 
 /**
+ * What the frontier and mountain families keep round a house, in the house's frame (front +z):
+ * winter wood, curing racks, clan banners, street fire and a tree or rock behind, so a town reads
+ * as lived in and set in its land (the hill-fort reference) instead of a lowland street.
+ */
+const REGIONAL_DRESSING = Object.freeze({
+  Orc: (beside, w, d, roll) => [
+    { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'drying_rack', lx: beside(-1, 2.4), lz: -0.6, w: 2.4, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'war_banner', lx: w / 2 - 0.3, lz: d / 2 + 1.0, w: 0.6, d: 0.6, turn: 0 },
+    { kind: 'barrels', variant: roll(1) < 0.5 ? 0 : 1, lx: beside(-1, 1.4), lz: d / 2 - 0.9, w: 1.4, d: 1.4, turn: 0 },
+    { kind: 'fire_post', lx: -w / 2 + 0.3, lz: d / 2 + 0.7, w: 0.5, d: 0.5, turn: 0 },
+    { kind: 'tree', variant: roll(2) < 0.7 ? 0 : 1, lx: beside(1, 2.0), lz: -d / 2 - 1.6, w: 2.0, d: 2.0, turn: 0 },
+  ],
+  Frostgard: (beside, w, d, roll) => [
+    { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'woodpile', lx: beside(1, 1.2), lz: d / 2 - 0.7, w: 1.3, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'drying_rack', lx: beside(-1, 2.4), lz: -0.6, w: 2.4, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'boulders', lx: beside(-1, 2.0), lz: d / 2 - 0.4, w: 2.0, d: 1.6, turn: roll(3) * Math.PI },
+    { kind: 'pine', variant: roll(2) < 0.6 ? 0 : 1, lx: beside(-1, 2.0), lz: -d / 2 - 1.6, w: 2.0, d: 2.0, turn: 0 },
+    { kind: 'pine', variant: 0, lx: beside(1, 2.0), lz: -d / 2 - 2.2, w: 2.0, d: 2.0, turn: 0 },
+  ],
+  Stonehold: (beside, w, d, roll) => [
+    { kind: 'cargo', lx: beside(1, 1.7), lz: -0.2, w: 1.7, d: 1.4, turn: 0.2 },
+    { kind: 'brazier_pillar', lx: -w / 2 + 0.4, lz: d / 2 + 1.0, w: 0.8, d: 0.8, turn: 0 },
+    { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
+    { kind: 'boulders', lx: beside(-1, 2.0), lz: -d / 2 - 1.4, w: 2.0, d: 1.6, turn: roll(3) * Math.PI },
+  ],
+});
+/** Workshops of these families get an ore crane or a curing rack in the yard. */
+const YARD_WORK = Object.freeze({ Stonehold: 'ore_crane', Orc: 'drying_rack', Frostgard: 'drying_rack' });
+
+/**
  * @param {object} options
  * @param {object} options.plan settlement plan
  * @param {number} options.seed per-town seed
@@ -96,7 +128,8 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
     const roll = (salt) => hash(seed, index, salt);
     // Offsets clear the house's own 0.3 m claim plus the 0.15 m fit clearance.
     const beside = (side, width) => side * (w / 2 + 0.5 + width / 2);
-    const candidates = isGoblin ? [
+    const regional = REGIONAL_DRESSING[buildingFamily || building.kitFamily];
+    const candidates = regional && !isGoblin ? regional(beside, w, d, roll) : isGoblin ? [
       { kind: 'baskets', lx: beside(-1, 1.3), lz: d / 2 - 0.8, w: 1.3, d: 1.0, turn: 0 },
       { kind: 'cauldron', lx: beside(1, 1.5), lz: d / 2 - 0.5, w: 1.5, d: 1.5, turn: 0 },
       { kind: 'drying_rack', lx: beside(1, 2.4), lz: -0.4, w: 2.4, d: 1.2, turn: Math.PI / 2 },
@@ -110,6 +143,10 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
       { kind: loreRealm === 'umbrakor' ? 'shrine' : 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
     ];
+    const yardWork = YARD_WORK[buildingFamily || building.kitFamily];
+    if (yardWork && ['smithy', 'warehouse'].includes(building.kind)) {
+      candidates.push({ kind: yardWork, lx: beside(-1, 2.4), lz: -d / 2 - 1.6, w: 2.4, d: 2.4, turn: 0 });
+    }
     if (building.kind === 'smithy') {
       candidates.push({ kind: 'grindstone', lx: beside(1, 1.0), lz: d / 2 - 0.8, w: 1.0, d: 0.8, turn: 0 });
     } else if (building.kind === 'tavern') {
@@ -136,7 +173,8 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
     for (const [salt, candidate] of candidates.entries()) {
       if (roll(10 + salt) < 0.62) tryProp(occupancy, out, building, candidate);
     }
-    if (!isGoblin && loreRealm !== 'umbrakor' && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
+    if (!isGoblin && loreRealm !== 'umbrakor' && (buildingFamily || building.kitFamily) !== 'Stonehold'
+      && !['chapel', 'keep', 'guardhouse'].includes(building.kind) && roll(20) < 0.55) {
       yardFence(occupancy, out, building, size);
     }
     yield;

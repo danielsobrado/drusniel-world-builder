@@ -72,6 +72,7 @@ const SOLID_PROPS = Object.freeze({
   barrels: [1.3, 1.7, 1],
   quarryBlock: [1, 1, 0.7],
   boulder: [1, 1, 0.55],
+  outcrop: [1, 1, 0.6],
 });
 
 function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, walkable, chunkWorldSize }) {

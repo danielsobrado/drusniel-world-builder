@@ -100,6 +100,14 @@ const PROP_CLUSTERS = Object.freeze({
   barricade: [[['Spike_Barricade', 0, 0, 0, 0]]],
   skiff: [[['Goblin_Skiff', 0, 0, 0, 0]]],
   swamp_tree: [[['Swamp_Tree', 0, 0, 0, 0]]],
+  // Frontier and mountain dressing (TownDressing REGIONAL_DRESSING).
+  war_banner: [[['War_Banner', 0, 0, 0, 0]]],
+  fire_post: [[['Fire_Post', 0, 0, 0, 0]]],
+  brazier_pillar: [[['Brazier_Pillar', 0, 0, 0, 0]]],
+  ore_crane: [[['Ore_Crane', 0, 0, 0, 0]]],
+  boulders: [[['Boulder_Cluster', 0, 0, 0, 0]]],
+  pine: [[['Tree_Pine', 0, 0, 0, 0]], [['Tree_Pine_Tall', 0, 0, 0, 0]]],
+  tree: [[['Tree_Oak', 0, 0, 0, 0]], [['Tree_Pine', 0, 0, 0, 0]]],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */

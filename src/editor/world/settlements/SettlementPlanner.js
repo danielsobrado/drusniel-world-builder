@@ -50,7 +50,8 @@ export function planSettlement({
     random,
   });
   // Last, so adding or retuning loose stone never reshuffles the town itself.
-  const stones = planStones({ profile, occupancy, buildings: [...buildings, ...farms], fields, random });
+  const outcropRandom = planRandom(hashInts(worldSeed, settlement.id, 0x0c7));
+  const stones = planStones({ profile, occupancy, buildings: [...buildings, ...farms], fields, random, outcropRandom });
   const trim = planTrim({ profile, occupancy, buildings: [...buildings, ...farms, ...defences], fields, random });
   const styleKey = profile.style.key;
   // A building the plan fronts on a street gets the door its pooled mesh has (SettlementDoors.generated).
