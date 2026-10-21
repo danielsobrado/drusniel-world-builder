@@ -141,8 +141,14 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       { kind: loreRealm === 'umbrakor' ? 'brazier' : 'planter', lx: beside(1, 1.0), lz: d / 2 - 0.4, w: 1.0, d: 0.6, turn: 0 },
       { kind: loreRealm === 'stonehold' ? 'cargo' : 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
       { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
-      { kind: loreRealm === 'umbrakor' ? 'shrine' : 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
+      { kind: loreRealm === 'umbrakor' ? 'shrine' : loreRealm === 'stonehold' ? 'stonehold_ledge' : 'bush', lx: beside(-1, 1.2), lz: 0.3, w: 1.2, d: 1.2, turn: 0 },
     ];
+    if (loreRealm === 'stonehold') {
+      candidates.push(
+        { kind: 'stonehold_crater', variant: roll(5) < 0.5 ? 0 : 1, lx: beside(1, 2.5), lz: -d / 2 - 0.8, w: 2.5, d: 2.4, turn: 0 },
+        { kind: 'stonehold_shrine', variant: Math.floor(roll(6) * 3) % 3, lx: beside(-1, 2.8), lz: -d / 2 - 1.2, w: 2.8, d: 2.6, turn: 0 },
+      );
+    }
     const yardWork = YARD_WORK[buildingFamily || building.kitFamily];
     if (yardWork && ['smithy', 'warehouse'].includes(building.kind)) {
       candidates.push({ kind: yardWork, lx: beside(-1, 2.4), lz: -d / 2 - 1.6, w: 2.4, d: 2.4, turn: 0 });

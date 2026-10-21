@@ -65,3 +65,5 @@ def define(kit):
     kit.define('Tree_Cypress', 'nature', cypress())
     kit.define('Bush', 'nature', bush())
     kit.define('Ivy_Patch', 'nature', ivy())
+    from . import stonehold_formations
+    stonehold_formations.define(kit)

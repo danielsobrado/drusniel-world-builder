@@ -108,6 +108,20 @@ const PROP_CLUSTERS = Object.freeze({
   boulders: [[['Boulder_Cluster', 0, 0, 0, 0]]],
   pine: [[['Tree_Pine', 0, 0, 0, 0]], [['Tree_Pine_Tall', 0, 0, 0, 0]]],
   tree: [[['Tree_Oak', 0, 0, 0, 0]], [['Tree_Pine', 0, 0, 0, 0]]],
+  stonehold_ledge: [
+    [['Stonehold_Ledge_Small', 0, 0, 0, 0]],
+    [['Stonehold_Ledge_Large', 0, 0, 0, 0]],
+    [['Stonehold_Twin_Outcrop', 0, 0, 0, 0]],
+  ],
+  stonehold_crater: [
+    [['Stonehold_Vent_Crater', 0, 0, 0, 0]],
+    [['Stonehold_Caldera_Basin', 0, 0, 0, 0]],
+  ],
+  stonehold_shrine: [
+    [['Stonehold_Fang_Shrine', 0, 0, 0, 0]],
+    [['Stonehold_Cavern_Maw', 0, 0, 0, 0]],
+    [['Stonehold_Horned_Sanctum', 0, 0, 0, 0]],
+  ],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */
