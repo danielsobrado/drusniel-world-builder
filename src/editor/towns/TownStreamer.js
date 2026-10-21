@@ -100,6 +100,11 @@ export class TownStreamer {
       const plan = plans.get(entry, distance * this.tileSize, this);
       if (!plan || this.towns.has(settlement.id) || this.buildJob?.entry.settlement.id === settlement.id
           || this.buildErrors.has(settlement.id)) continue;
+      let ready = true;
+      for (const { entry: neighbor } of field.entriesNear(settlement.cellX, settlement.cellZ, entry.reachCells)) {
+        if (!plans.get(neighbor, distance * this.tileSize, this) || !neighbor.index) ready = false;
+      }
+      if (!ready) continue;
       this.pending.set(settlement.id, { settlement, plan });
     }
     for (const [id, town] of this.towns) {
@@ -114,7 +119,9 @@ export class TownStreamer {
     if (this.buildJob) retained.add(this.buildJob.entry.settlement.id);
     for (const id of retained) {
       const entry = field?.findById(id);
-      if (entry) plans.get(entry, this.distanceTo(entry.settlement, focus), this);
+      if (entry) for (const { entry: neighbor } of field.entriesNear(entry.settlement.cellX, entry.settlement.cellZ, entry.reachCells)) {
+        plans.get(neighbor, this.distanceTo(neighbor.settlement, focus), this);
+      }
     }
     plans.end();
   }

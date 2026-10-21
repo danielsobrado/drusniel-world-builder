@@ -129,8 +129,13 @@ export class SettlementView {
       if (!this.sites.has(id) && edge > SETTLEMENT_VIEW.siteRadius) continue;
       keep.add(id);
       const plan = this.plans.get(entry, edge, this);
-      if (this.sites.has(id)) continue;
       if (!plan) continue;
+      let ready = true;
+      for (const { entry: neighbor } of field.entriesNear(entry.settlement.cellX, entry.settlement.cellZ, entry.reachCells)) {
+        if (!this.plans.get(neighbor, edge, this) || !neighbor.index) ready = false;
+      }
+      if (!ready) continue;
+      if (this.sites.has(id)) continue;
       const site = new SettlementSite({ entry, plan, generator: this.generator, tileSize,
         library: this.library, getDrawPreparation: () => this.terrainView.drawPreparation });
       this.pavingRoot.add(site.paving);

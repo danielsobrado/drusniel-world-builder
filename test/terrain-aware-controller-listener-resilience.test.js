@@ -56,3 +56,26 @@ test('controller notifications continue after individual listener failures', asy
     assert.equal(errors.length, 4);
   });
 });
+
+test('cold hover defers numeric sampling, coalesces the latest cell and stops retries on disposal', () => {
+  const original = globalThis.requestAnimationFrame, frames = [];
+  globalThis.requestAnimationFrame = callback => frames.push(callback);
+  try {
+    const controller = Object.create(TerrainAwareEditorController.prototype);
+    let ready = false, reads = 0, releases = 0, payload;
+    Object.assign(controller, { worldStore: { chunkWorker: {}, chunkSize: 32 }, terrainView: {},
+      hoverSampling: { prepare: () => ready, dispose: () => releases++ },
+      tileMap: { get: () => { reads++; return 4; }, getTileDefinition: () => ({ id: 4 }) },
+      objectMap: { findAt: () => null }, heightField: { getCellHeight: () => 20 },
+      hoverListeners: new Set([value => { payload = value; }]) });
+    controller.emitHover({ x: 1, z: 2 }); controller.emitHover({ x: 3, z: 4 });
+    assert.equal(reads, 0); assert.equal(frames.length, 1);
+    ready = true; frames.shift()();
+    assert.deepEqual(payload, { x: 3, z: 4, tile: { id: 4 }, object: null, objectDefinition: null, height: 20 });
+    assert.equal(reads, 1);
+    ready = false; controller.emitHover({ x: 5, z: 6 });
+    controller.emitHover(null); assert.equal(releases, 1);
+    controller.hoverSamplingDisposed = true; frames.shift()();
+    assert.equal(reads, 1); assert.equal(frames.length, 0);
+  } finally { globalThis.requestAnimationFrame = original; }
+});

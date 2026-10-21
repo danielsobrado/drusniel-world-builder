@@ -3,6 +3,8 @@ import { NpcSystem } from './NpcSystem.js';
 import { residentManifest, nearbySettlements } from './ResidentManifest.js';
 import { rectContains } from '../world/settlements/SettlementGeometry.js';
 import { gatheringSpots } from '../world/settlements/SettlementGathering.js';
+import { settlementPreparationFor } from '../world/settlements/SettlementPreparation.js';
+import { SettlementSamplingPreparation } from '../world/settlements/SettlementSamplingPreparation.js';
 
 /** Cosmetic residents project existing burg populations, without authoring entities. */
 export class SettlementResidents {
@@ -12,6 +14,7 @@ export class SettlementResidents {
     this.npcs = new NpcSystem({ scene, terrainView, assets, onInstalled,
       canStand: (x, z) => this.canStand(x, z) });
     this.manifests = new Map(); this.generator = null; this.nextRefresh = 0;
+    this.sampling = new SettlementSamplingPreparation(terrainView.worldStore);
   }
   canStand(x, z) {
     const field = this.generator?.ensureSettlementField?.();
@@ -51,13 +54,44 @@ export class SettlementResidents {
     for (const key of this.manifests.keys()) if (!currentKeys.has(key)) this.manifests.delete(key);
     this.npcs.setManifest(records.slice(0, this.settings.maxResidents));
   }
-  update(dt, camera, focus, timestamp) {
+  prepareSampling(focus, shouldYield) {
+    const generator = this.terrainView.worldStore.generator;
+    if (!this.settings.enabled) return;
+    if (this.terrainView.worldStore.chunkWorker) {
+      const field = settlementPreparationFor(this.terrainView.worldStore).field(generator);
+      if (!field) return;
+      const tileSize = field.tileSize, radius = this.settings.radiusMeters / tileSize;
+      const x = focus.x / tileSize, z = -focus.z / tileSize, wander = this.settings.wanderRadius / tileSize;
+      const bounds = { minX: x - radius, maxX: x + radius, minZ: z - radius, maxZ: z + radius };
+      for (const { entry } of field.entriesNear(x, z, radius)) {
+        const reach = entry.reachCells + wander;
+        bounds.minX = Math.min(bounds.minX, entry.settlement.cellX - reach);
+        bounds.maxX = Math.max(bounds.maxX, entry.settlement.cellX + reach);
+        bounds.minZ = Math.min(bounds.minZ, entry.settlement.cellZ - reach);
+        bounds.maxZ = Math.max(bounds.maxZ, entry.settlement.cellZ + reach);
+      }
+      // Pending model loads and rebases may still place the previous manifest.
+      for (const record of this.npcs.desired.values()) {
+        const cellX = record.x / tileSize, cellZ = -record.z / tileSize, reach = record.wander / tileSize;
+        bounds.minX = Math.min(bounds.minX, cellX - reach); bounds.maxX = Math.max(bounds.maxX, cellX + reach);
+        bounds.minZ = Math.min(bounds.minZ, cellZ - reach); bounds.maxZ = Math.max(bounds.maxZ, cellZ + reach);
+      }
+      const size = this.terrainView.worldStore.chunkSize;
+      bounds.minX = Math.floor(bounds.minX / size) * size; bounds.maxX = Math.ceil(bounds.maxX / size) * size;
+      bounds.minZ = Math.floor(bounds.minZ / size) * size; bounds.maxZ = Math.ceil(bounds.maxZ / size) * size;
+      if (!this.sampling.prepare(bounds, shouldYield)) return false;
+    }
+    return true;
+  }
+  update(dt, camera, focus, timestamp, budget = null) {
     if (!this.settings.enabled) return;
     const generator = this.terrainView.worldStore.generator;
     if (this.generator !== generator) { this.generator = generator; this.npcs.clear(); this.manifests.clear(); this.nextRefresh = 0; }
+    const prepare = () => this.prepareSampling(focus, budget?.shouldYield);
+    if (!(budget?.runner ?? (run => run()))(prepare)) return;
     if (timestamp >= this.nextRefresh) { this.nextRefresh = timestamp + this.settings.refreshSeconds * 1000; this.refresh(focus); }
     this.npcs.update(dt, camera);
   }
   shiftWorld() { this.npcs.shiftWorld(); }
-  dispose() { this.manifests.clear(); this.npcs.dispose(); }
+  dispose() { this.sampling.dispose(); this.manifests.clear(); this.npcs.dispose(); }
 }

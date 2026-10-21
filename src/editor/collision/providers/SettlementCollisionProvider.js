@@ -9,6 +9,8 @@ import { createCollisionSourceId } from '../CollisionIds.js';
 import { collisionChunkCanonicalBounds, collisionChunkForCanonical } from '../colliders/ColliderBounds.js';
 import { COLLISION_LAYERS } from '../CollisionLayers.js';
 import { COLLIDER_TYPE_BOX, createPrimitiveCollider } from '../colliders/ColliderRecords.js';
+import { COLLISION_BUILD_DEFERRED } from '../CollisionBuildResult.js';
+import { SettlementSamplingPreparation } from '../../world/settlements/SettlementSamplingPreparation.js';
 
 const SETTLEMENT_COLLISION_SCHEMA = `settlements:v1:plan${SETTLEMENT_PLAN_VERSION}`;
 const PLOT_MARGIN = HOUSE_SHELL.plotMargin;
@@ -121,6 +123,7 @@ export class SettlementCollisionProvider {
     this.generatorCount = 0;
     /** Solids per planned settlement: a town spans many chunks, and each asks. */
     this.solids = new WeakMap();
+    this.preparation = new Map();
   }
 
   /** Changes with the world: another generator plans other towns. */
@@ -194,6 +197,27 @@ export class SettlementCollisionProvider {
   }
 
   buildChunkData(chunkX, chunkZ) {
+    const store = this.terrainView.worldStore, key = `${chunkX}:${chunkZ}`;
+    if (store.chunkWorker) {
+      let sampling = this.preparation.get(key);
+      if (!sampling) {
+        sampling = new SettlementSamplingPreparation(store); this.preparation.set(key, sampling);
+        // Unfinished requests left behind by a cut must not pin a travel history.
+        while (this.preparation.size > 64) {
+          const oldest = this.preparation.keys().next().value;
+          this.preparation.get(oldest).dispose(); this.preparation.delete(oldest);
+        }
+      }
+      const bounds = collisionChunkCanonicalBounds(chunkX, chunkZ, this.chunkWorldSize);
+      let units = 0;
+      if (!sampling.prepare({ minX: bounds.minX / store.tileSize, maxX: bounds.maxX / store.tileSize,
+        minZ: -bounds.maxZ / store.tileSize, maxZ: -bounds.minZ / store.tileSize }, () => ++units > 16)) return COLLISION_BUILD_DEFERRED;
+    }
+    try { return this.preparedChunkData(chunkX, chunkZ); }
+    finally { this.preparation.get(key)?.dispose(); this.preparation.delete(key); }
+  }
+
+  preparedChunkData(chunkX, chunkZ) {
     const field = this.terrainView.worldStore.generator?.ensureSettlementField?.() ?? null;
     const colliders = [];
     if (field) {
@@ -227,6 +251,8 @@ export class SettlementCollisionProvider {
   }
 
   dispose() {
+    for (const sampling of this.preparation.values()) sampling.dispose();
+    this.preparation.clear();
     this.generators = new WeakMap();
     this.solids = new WeakMap();
   }

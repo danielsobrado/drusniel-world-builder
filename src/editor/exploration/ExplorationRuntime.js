@@ -40,9 +40,9 @@ export class ExplorationRuntime {
     this.deltaSeconds = this.lastTimestamp === null ? 0 : Math.min(0.1, Math.max(0, (timestamp - this.lastTimestamp) / 1000));
     this.lastTimestamp = timestamp; this.tour.update(this.deltaSeconds); this.syncMobileVisibility();
   }
-  update(timestamp, focus, playerBody) {
+  update(timestamp, focus, playerBody, budget = null) {
     const camera = this.viewModeController.camera;
-    this.residents.update(this.deltaSeconds, camera, focus, timestamp);
+    this.residents.update(this.deltaSeconds, camera, focus, timestamp, budget);
     this.serpents.update(this.deltaSeconds, camera, focus, playerBody, timestamp);
   }
   shiftWorld(x, z) { this.residents.shiftWorld(); this.serpents.shiftWorld(); this.tour.shiftWorld(x, z); }

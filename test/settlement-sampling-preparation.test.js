@@ -3,6 +3,9 @@ import test from 'node:test';
 import { SettlementField } from '../src/editor/world/settlements/SettlementField.js';
 import { SettlementSamplingPreparation } from '../src/editor/world/settlements/SettlementSamplingPreparation.js';
 import { generateSettlementPlan } from '../src/editor/world/settlements/SettlementPlanRequest.js';
+import { SettlementCollisionProvider } from '../src/editor/collision/providers/SettlementCollisionProvider.js';
+import { COLLISION_BUILD_DEFERRED } from '../src/editor/collision/CollisionBuildResult.js';
+import { SettlementResidents } from '../src/editor/actors/SettlementResidents.js';
 
 const settlements = [{ id: 18, cellX: 0, cellZ: 0, population: 5 }];
 const createField = sampleGround => new SettlementField({ settlements, tileSize: 2, worldSeed: 19,
@@ -40,4 +43,64 @@ test('sampling source replacement cancels obsolete leases before adopting anothe
   await Promise.resolve();
   assert.equal(old.entries[0].plan, undefined); assert.equal(next.entries[0].plan, undefined);
   sampler.dispose();
+});
+
+test('cold collision defers rather than planning on the main thread, then publishes identical colliders', async () => {
+  const main = createField(() => 20), canonical = createField(() => 20);
+  const ensure = main.ensurePlan.bind(main);
+  main.ensurePlan = entry => { assert.ok(entry.plan, 'collision never plans synchronously'); return ensure(entry); };
+  let deliver;
+  const provider = new SettlementCollisionProvider({ chunkWorldSize: 128, terrainView: { worldStore: {
+    tileSize: 2, generator: { settlementField: main, ensureSettlementField: () => main },
+    chunkWorker: { request: () => new Promise(resolve => { deliver = resolve; }), cancelSettlementPlan() {} },
+  } } });
+  assert.equal(provider.buildChunkData(0, 0), COLLISION_BUILD_DEFERRED);
+  deliver(generateSettlementPlan({ ensureSettlementField: () => canonical }, 18)); await Promise.resolve();
+  let result = COLLISION_BUILD_DEFERRED;
+  for (let turn = 0; turn < 1000 && result === COLLISION_BUILD_DEFERRED; turn++) result = provider.buildChunkData(0, 0);
+  assert.notEqual(result, COLLISION_BUILD_DEFERRED);
+  const expected = new SettlementCollisionProvider({ chunkWorldSize: 128,
+    terrainView: { worldStore: { generator: { ensureSettlementField: () => canonical } } } });
+  assert.deepEqual(result.colliders, expected.buildChunkData(0, 0).colliders);
+  assert.equal(provider.preparation.size, 0); assert.equal(main.planCache.getStatus().pinned, 0);
+  provider.dispose(); expected.dispose();
+});
+
+test('resident refresh and wander wait for canonical plans without changing the manifest', async () => {
+  const main = createField(() => 20), canonical = createField(() => 20);
+  const ensure = main.ensurePlan.bind(main);
+  main.ensurePlan = entry => { assert.ok(entry.plan, 'residents never plan synchronously'); return ensure(entry); };
+  let deliver;
+  const store = { chunkSize: 32, tileSize: 2, generator: { worldSeed: 19,
+    settlementField: main, ensureSettlementField: () => main },
+    chunkWorker: { request: () => new Promise(resolve => { deliver = resolve; }) } };
+  const residents = Object.create(SettlementResidents.prototype);
+  Object.assign(residents, { terrainView: { worldStore: store }, manifests: new Map(), nextRefresh: 0,
+    settings: { enabled: true, radiusMeters: 300, wanderRadius: 12, maxResidents: 10, maxPerSettlement: 10, refreshSeconds: 5 },
+    sampling: new SettlementSamplingPreparation(store),
+    npcs: { desired: new Map(), clear() {}, updates: 0, update() { this.updates++; },
+      setManifest(records) { this.records = records; this.desired = new Map(records.map(record => [record.id, record])); } } });
+  const focus = { x: 0, z: 0 };
+  residents.update(0.016, null, focus, 1);
+  assert.equal(residents.npcs.updates, 0); assert.equal(residents.npcs.records, undefined);
+  deliver(generateSettlementPlan({ ensureSettlementField: () => canonical }, 18)); await Promise.resolve();
+  for (let turn = 0; turn < 1000 && !residents.npcs.updates; turn++) {
+    let units = 0;
+    residents.update(0.016, null, focus, 1, { runner: run => run(), shouldYield: () => ++units > 5 });
+  }
+  assert.equal(residents.npcs.updates, 1);
+  const expected = Object.create(SettlementResidents.prototype);
+  Object.assign(expected, { terrainView: { worldStore: { tileSize: 2 } }, manifests: new Map(),
+    generator: { worldSeed: 19, ensureSettlementField: () => canonical }, settings: residents.settings,
+    npcs: { setManifest(records) { this.records = records; } } });
+  expected.refresh(focus);
+  assert.deepEqual(residents.npcs.records, expected.npcs.records);
+  assert.ok(residents.npcs.records.length);
+  // A pending model from the old publication stays protected during travel.
+  const old = residents.npcs.records[0];
+  let captured;
+  residents.sampling.prepare = bounds => { captured = bounds; return false; };
+  residents.prepareSampling({ x: 4000, z: 4000 });
+  assert.ok(captured.minX <= (old.x - old.wander) / 2 && captured.maxZ >= (-old.z + old.wander) / 2);
+  residents.sampling.dispose();
 });

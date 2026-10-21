@@ -1562,6 +1562,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const playerBodyScratch = { x: 0, y: 0, z: 0 };
   ui.minimapBudget = deferredWork;
   terrainView.minimapPreparation = ui;
+  terrainView.queryWorkBudget = deferredWork;
   terrainView.setAnimationLoop((timestamp) => {
     if (!active) return;
 
@@ -1724,7 +1725,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     }
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
-    exploration.update(frameTimestamp, canonicalFocus, playerBody);
+    exploration.update(frameTimestamp, canonicalFocus, playerBody, deferredWork);
     deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera));
     const nearestTown = settlementView.enabled ? settlementView.nearestTown(canonicalFocus) : null;
     settlementAmbience.update(frameTimestamp / 1000, nearestTown, Boolean(skyLooks?.night));

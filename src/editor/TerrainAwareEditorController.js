@@ -4,6 +4,7 @@ import { evaluateObjectSurface } from './TerrainPlacement.js';
 import { createWorldDocument, loadWorldDocument } from './WorldDocument.js';
 import { worldToCell } from './world/WorldCoordinates.js';
 import { hasForestEdits } from './forest/ForestEditDocument.js';
+import { SettlementSamplingPreparation } from './world/settlements/SettlementSamplingPreparation.js';
 
 function cloneCampaign(campaign) {
   return campaign ? structuredClone(campaign) : null;
@@ -105,6 +106,22 @@ export class TerrainAwareEditorController extends EditorController {
   }
 
   emitHover(cell) {
+    if (this.hoverSamplingDisposed) return;
+    this.pendingHoverCell = cell;
+    if (cell && this.worldStore?.chunkWorker && typeof requestAnimationFrame === 'function') {
+      this.hoverSampling ??= new SettlementSamplingPreparation(this.worldStore);
+      const size = this.worldStore.chunkSize, x = Math.floor(cell.x / size), z = Math.floor(cell.z / size);
+      const budget = this.terrainView.queryWorkBudget;
+      const prepare = () => this.hoverSampling.prepare({ minX: (x - 1) * size, maxX: (x + 2) * size,
+        minZ: (z - 1) * size, maxZ: (z + 2) * size }, budget?.shouldYield);
+      if (!(budget?.runner ?? (run => run()))(prepare)) {
+        if (!this.hoverSamplingQueued) {
+          this.hoverSamplingQueued = true;
+          requestAnimationFrame(() => { this.hoverSamplingQueued = false; this.emitHover(this.pendingHoverCell); });
+        }
+        return;
+      }
+    } else if (!cell) this.hoverSampling?.dispose();
     const tileId = cell ? this.tileMap.get(cell.x, cell.z) : null;
     const tile = tileId === null ? null : this.tileMap.getTileDefinition?.(tileId);
     const object = cell ? this.objectMap.findAt(cell.x, cell.z) : null;
@@ -459,6 +476,8 @@ export class TerrainAwareEditorController extends EditorController {
   }
 
   dispose() {
+    this.hoverSamplingDisposed = true;
+    this.hoverSampling?.dispose(); this.pendingHoverCell = null;
     const attachedControllers = [
       ['construction gizmo', this.constructionGizmo],
       ['construction palette', this.constructionPalette],
