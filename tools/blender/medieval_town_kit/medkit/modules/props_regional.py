@@ -22,8 +22,9 @@ def _at(x, y, z=0.0):
     return Matrix.Translation((x, y, z))
 
 
-def pine(height=6.0, seed=5):
-    """Bark trunk under five drooping cone tiers that narrow toward a spire tip."""
+def pine(height=6.0, seed=5, snow=False):
+    """Bark trunk under five drooping cone tiers that narrow toward a spire tip; with snow,
+    each tier carries a white cap on its upper slope."""
     b = MeshBuilder()
     rng = random.Random(seed)
     b.lathe([(0.2, 0.0), (0.14, height * 0.4), (0.05, height * 0.85)], 7, 'bark')
@@ -33,9 +34,13 @@ def pine(height=6.0, seed=5):
         base = height * (0.2 + 0.6 * t)
         r = 1.55 * (1 - 0.72 * t) * rng.uniform(0.92, 1.06)
         tall = height * 0.3 * (1 - 0.35 * t)
+        phase = rng.uniform(0, 1)
         b.lathe([(0.0, base + 0.25), (r * 0.82, base + 0.02), (r, base - 0.18), (r * 0.9, base - 0.26),
                  (0.0, base + tall)][::-1], 9 if detailed() else 6, 'foliage_pine',
-                phase=rng.uniform(0, 1), smooth=False)
+                phase=phase, smooth=False)
+        if snow:
+            b.lathe([(0.0, base + tall + 0.04), (r * 0.62, base + tall * 0.42), (r * 0.7, base + tall * 0.3),
+                     (0.0, base + tall * 0.4)], 9 if detailed() else 6, 'snow', phase=phase, smooth=False)
     return b
 
 
@@ -43,24 +48,34 @@ def boulders(seed=7):
     b = MeshBuilder()
     rng = random.Random(seed)
     for i, (x, y, r) in enumerate(((0, 0, 0.75), (0.85, 0.35, 0.48), (-0.7, 0.45, 0.4), (0.3, -0.7, 0.32))):
-        b.blob((x, y, r * 0.45), r, 'stone_granite', subdiv=2, squash=(1.1, 0.95, 0.7),
+        b.blob((x, y, r * 0.45), r, 'rock', subdiv=2, squash=(1.1, 0.95, 0.7),
                jitter=0.22, seed=seed * 7 + i + rng.randint(0, 9))
     return b
 
 
+def _strata(b, cx, cy, z, radius, height, rng, sides=7):
+    """One faceted rock stratum: an irregular convex outline extruded straight up."""
+    pts = []
+    for i in range(sides):
+        a = 2 * math.pi * (i + rng.uniform(-0.25, 0.25)) / sides
+        r = radius * rng.uniform(0.78, 1.0)
+        pts.append((cx + r * math.cos(a), cy + r * 0.75 * math.sin(a), z))
+    b.extrude(pts, (rng.uniform(-0.12, 0.12), rng.uniform(0.0, 0.18), height), 'rock')
+
+
 def cliff(width=4.0, height=9.0, seed=11):
-    """Weathered granite crag: big rounded masses stacked and stepping back as they rise.
-    Spans X 0..width, face toward -Y, footprint about 3 m deep."""
+    """Stratified granite crag: faceted beds stacked and stepping back as they rise, like the
+    bare rock a hill fort is built on. Spans X 0..width, face toward -Y, about 3 m deep."""
     b = MeshBuilder()
     rng = random.Random(seed)
-    z, k = 0.0, 0
+    z, k = -0.3, 0
     while z < height:
-        r = rng.uniform(1.7, 2.3) * max(0.5, 1 - 0.1 * k)
-        for i in range(3):
-            x = width * (0.1 + 0.4 * i) + rng.uniform(-0.3, 0.3)
-            b.blob((x, 1.2 + 0.3 * k, z + r * 0.5), r, 'stone_granite', subdiv=2,
-                   squash=(1.6, 1.1, 0.75), jitter=0.22, seed=seed * 31 + k * 7 + i)
-        z += r * 1.05
+        bed = rng.uniform(0.9, 1.7)
+        shrink = max(0.55, 1 - 0.07 * k)
+        for i in range(2):
+            x = width * (0.28 + 0.44 * i) + rng.uniform(-0.25, 0.25)
+            _strata(b, x, 1.3 + 0.22 * k, z, 1.65 * shrink * rng.uniform(0.9, 1.1), bed, rng)
+        z += bed * 0.96
         k += 1
     return b
 
@@ -158,6 +173,8 @@ def rune_stone(seed=9):
 def define(kit):
     kit.define('Tree_Pine', 'nature', pine())
     kit.define('Tree_Pine_Tall', 'nature', pine(8.5, seed=8))
+    kit.define('Tree_Pine_Snow', 'nature', pine(seed=6, snow=True))
+    kit.define('Tree_Pine_Snow_Tall', 'nature', pine(8.5, seed=9, snow=True))
     kit.define('Boulder_Cluster', 'nature', boulders())
     kit.define('Cliff_Granite', 'nature', cliff())
     kit.define('Ore_Crane', 'props', ore_crane())

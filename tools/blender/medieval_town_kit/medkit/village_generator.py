@@ -43,6 +43,7 @@ class GeneratedVillage:
         self.STAIRS, self.BUILDINGS, self.PROPS, self.LAMPS = [], [], [], []
         self._chapel()
         self._stairs()
+        self._towers()      # before the houses, which would otherwise take every corner
         self._landmarks()
         self._houses()
         self._plaza()
@@ -54,23 +55,48 @@ class GeneratedVillage:
         self.W, self.H = rng.randint(18, 26), rng.randint(16, 21)
         self.b1 = rng.randint(3, 5)
         self.b2 = min(self.b1 + rng.randint(5, 7), self.H - 7)
-        blocks = range(0, self.W, 4)
-        self.step1 = {b: rng.choice((-1, 0, 0, 1)) for b in blocks}
-        self.step2 = {b: rng.choice((-1, 0, 0, 1)) for b in blocks}
+        self.hill = self.TOWN_STYLE.terrain == 'hill'
+        if self.hill:
+            # Terrace edges wander smoothly across the town like contour lines on a hillside.
+            self.edge1, self.edge2 = self._meander(rng, 1.6), self._meander(rng, 2.0)
+        else:
+            blocks = range(0, self.W, 4)
+            self.step1 = {b: rng.choice((-1, 0, 0, 1)) for b in blocks}
+            self.step2 = {b: rng.choice((-1, 0, 0, 1)) for b in blocks}
         tw = rng.randint(6, 9)
         tx = rng.randint(2, self.W - tw - 2)
         ty = self.b2 + 3
         self.crown = (tx, tx + tw - 1, ty, self.H - 1)
 
+    def _meander(self, rng, amp, period=5):
+        """Per-column offset (cells) that wanders smoothly within +-amp."""
+        knots = [rng.uniform(-amp, amp) for _ in range(self.W // period + 3)]
+        out = {}
+        for x in range(self.W):
+            t = x / period
+            i, f = int(t), t - int(t)
+            f = f * f * (3 - 2 * f)
+            out[x] = round(knots[i] * (1 - f) + knots[i + 1] * f)
+        return out
+
     def height(self, x, y):
         if not (0 <= x < self.W and 0 <= y < self.H):
             return 0
+        x0, x1, y0, y1 = self.crown
+        if self.hill:
+            if y < self.b1 + self.edge1[x]:
+                return 1
+            if y < self.b2 + self.edge2[x]:
+                return 2
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                return 4
+            # The upper terrace falls away at the hill's shoulders.
+            return 2 if x < 2 or x >= self.W - 2 else 3
         block = x - x % 4
         if y < self.b1 + self.step1[block]:
             return 1
         if y < self.b2 + self.step2[block]:
             return 2
-        x0, x1, y0, y1 = self.crown
         return 4 if x0 <= x <= x1 and y0 <= y <= y1 else 3
 
     def _free(self, cells):
@@ -234,6 +260,26 @@ class GeneratedVillage:
                 self.PROPS.append((module, x + 0.5, y + 0.5, rng.choice((0, 90, 180, 270))))
                 self.occupied.add((x, y))
         self._surroundings()
+
+    def _towers(self):
+        """Watchtowers on the town's corners first, then along its rim: each stands on a grid
+        point with the four cells round it free."""
+        modules = [m for m, count in self.TOWN_STYLE.towers for _ in range(count)]
+        if not modules:
+            return
+        corners = [(1, 1), (self.W - 1, 1), (1, self.H - 1), (self.W - 1, self.H - 1)]
+        rim = [(x, 1) for x in range(3, self.W - 2, 3)] + [(x, self.H - 1) for x in range(3, self.W - 2, 3)]
+        rim += [(1, y) for y in range(3, self.H - 2, 3)] + [(self.W - 1, y) for y in range(3, self.H - 2, 3)]
+        self.rng.shuffle(rim)
+        for gx, gy in corners + rim:
+            if not modules:
+                return
+            cells = {(gx - 1, gy - 1), (gx, gy - 1), (gx - 1, gy), (gx, gy)}
+            levels = {self.height(*c) for c in cells}
+            if len(levels) != 1 or not self._free(cells):
+                continue
+            self.PROPS.append((modules.pop(0), gx, gy, self.rng.choice((0, 90, 180, 270))))
+            self.occupied |= cells
 
     def _surroundings(self):
         """Outside the map: a gate tower before the first entrance stair, a rock backdrop."""

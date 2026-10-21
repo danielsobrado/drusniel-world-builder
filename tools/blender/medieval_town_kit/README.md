@@ -89,6 +89,19 @@ colours are tints (`baseColorFactor`) over one cloth texture.
 
   Dressing modules are in `modules/props_regional.py`. Run the families one
   after another, because each run rewrites the shared textures.
+- **Land and towers:** frontier towns get meandering hill terraces
+  (`TownStyle.terrain = 'hill'`). The town renders stand them on rolling land
+  that climbs into a ridge, with faceted crags and trees; Stonehold sits under a
+  rock mountain and Frostgard above a frozen lake. Stilted watchtowers
+  (`modules/towers_regional.py`) stand on the town corners. They are also
+  exported as `Orc_RoundTower` and `Frostgard_RoundTower`, so the game's
+  defence towers turn regional.
+- **Frostgard winter:** snow on roofs, pyramids, pines and ground, trodden snow
+  lanes, a low pink winter sun with warm windows. These follow the Frostgard
+  winter references.
+- **Reference check:** `compare_refs.py -- SHEET REF IMG...` prints value,
+  saturation, hue and contrast statistics against a reference and writes a
+  contact sheet. The references are in `assets-src/medieval-town-kit/references`.
 - **Prefabs** (`medkit/prefabs.py`, `prefab_export.py`): 245 buildings sized to
   the game planner's plots (including `Apothecary`, `Guildhall`, `Guardhouse`, and `Library`). They are exported as `medieval_kit_prefabs.json`,
   which holds parts, collision boxes, doors and lights. The game instances them

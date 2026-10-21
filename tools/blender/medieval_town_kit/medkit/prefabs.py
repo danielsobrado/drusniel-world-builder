@@ -121,6 +121,18 @@ class PrefabBuilder:
         self._add('Stonehold_Gatehouse', root, (length, GATE_D), (length / 2, GATE_D / 2), kind='defence',
                   stories=3)
 
+    def regional_towers(self):
+        """Each frontier family's RoundTower: the game's SettlementDefences towers resolve to
+        <Family>_RoundTower (TownPrefabCatalog), so their walls get regional towers."""
+        for name, module in (('Orc_RoundTower', 'Watchtower_Orc'), ('Frostgard_RoundTower', 'Watchtower_Frost')):
+            root = self.kit.group(f'BLD_{name}', self.coll, None, self._slot())
+            self.kit.place(module, self.coll, root, (0, 0, 0))
+            self._add(name, root, (3.8, 3.8), (0.0, 0.0), kind='defence', stories=3)
+        tower = BuildingSpec('Stonehold_RoundTower', 2, 2, ('granite',) * 4, roof='flat', plinth='Basalt',
+                             chimney=False, furnish='none', seed=187)
+        root = self.assembler.build(tower, self._slot(), 0)
+        self._add('Stonehold_RoundTower', root, (2 * GRID, 2 * GRID), (GRID, GRID), kind='defence', stories=4)
+
     def build_all(self):
         for family in FAMILIES:
             for base in BASES:
@@ -134,5 +146,6 @@ class PrefabBuilder:
         self.orc_palisade()
         self.orc_gatehouse()
         self.stonehold_gatehouse()
+        self.regional_towers()
         print(f'[kit] {len(self.prefabs)} prefabs assembled')
         return self.prefabs

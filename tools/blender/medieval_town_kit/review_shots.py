@@ -43,6 +43,7 @@ SHOTS = {
     'roof_thatch': ['Roof_Thatch_End_S6', 'Roof_Thatch_S6', 'Gable_Wall_Orc_S6'],
     'roof_sod': ['Roof_Sod_End_S6', 'Roof_Sod_S6', 'Gable_Wall_Log_S6', 'Smoke_Vent'],
     'orc_palisade': ['Palisade_Orc', 'Gate_Tower_Orc'],
+    'watchtowers': ['Watchtower_Orc', 'Watchtower_Frost', 'Cliff_Granite', 'Boulder_Cluster'],
     'stonehold_gate': ['Gate_Stonehold', 'Chimney_Granite'],
     'orc_hall': ('prefab', 'Orc_Tavern_Large'),
     'orc_house': ('prefab', 'Orc_House_Large'),

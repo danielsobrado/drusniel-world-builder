@@ -75,7 +75,7 @@ SPEC = {
     'timber_dark': Spec('timber', 1.5, 0.74, grain=True, normal=2.2, tint=(0.62, 0.56, 0.50)),
     'thatch_reed': Spec('thatch', 2.0, 0.94, normal=2.2, tint=(0.80, 0.76, 0.66)),
     # Frostgard: weather-silvered hewn pine logs and rooted sod roofs.
-    'log': Spec('timber', 1.8, 0.78, grain=True, normal=2.4, tint=(1.10, 1.16, 1.30)),
+    'log': Spec('timber', 1.8, 0.8, grain=True, normal=2.4, tint=(0.86, 0.90, 1.02)),
     'sod': Spec('sod', 2.0, 0.96, normal=1.8),
     # Stonehold: mined granite courses, charcoal basalt dressings, dulled bronze.
     'stone_granite': Spec('granite', 3.0, 0.84, normal=2.2),
@@ -85,12 +85,21 @@ SPEC = {
     'earth': Spec('earth', 2.0, 0.95, normal=1.8),
     'grass_frost': Spec('grass', 2.0, 0.95, tint=(0.86, 0.90, 0.84)),
     # Grukmar clan halls roof with stretched hides stained a weathered ochre red.
-    'hide_red': Spec('cloth', 3.0, 0.94, tint=(0.44, 0.29, 0.23), normal=1.2),
+    'hide_red': Spec('plaster', 2.5, 0.94, tint=(0.60, 0.37, 0.29), normal=1.4),
     'grass_upland': Spec('grass', 2.0, 0.95, tint=(0.92, 0.86, 0.70)),
     # Open land round a town in previews: the same grass at field scale, so it never checkers.
     'meadow': Spec('grass', 23.0, 0.95, tint=(0.90, 0.86, 0.72)),
     'meadow_frost': Spec('grass', 23.0, 0.97, tint=(0.80, 0.84, 0.80)),
     'meadow_earth': Spec('earth', 31.0, 0.95),
+    # Frostgard winter: drifted snow on roofs and ground, trodden lanes, frosted slate, lake ice.
+    'snow': Spec('snow', 7.0, 0.72, normal=0.8),
+    'snow_land': Spec('snow', 19.0, 0.75, normal=0.8),
+    'snow_path': Spec('snow_path', 2.0, 0.8, normal=1.4),
+    'roof_frost': Spec('roof', 2.0, 0.7, tint=(1.45, 1.52, 1.66), normal=2.0),
+    'ice': Spec('snow', 7.0, 0.12, tint=(0.55, 0.68, 0.82), normal=0.4),
+    # Natural crag and boulder rock (bedding and cracks, no joints).
+    'rock': Spec('rock', 4.0, 0.9, normal=2.2),
+    'rock_land': Spec('rock', 17.0, 0.92, normal=1.6),
     'foliage_pine': Spec('foliage', 1.5, 0.9, tint=(0.52, 0.66, 0.60)),
     # Plain blown glass for frontier and hold windows (the lattice pane is a lowland look).
     'glass_clear': Spec(color=(0.11, 0.12, 0.12), rough=0.1, emission=0.35, glow_tint=(1.0, 0.62, 0.30)),

@@ -59,8 +59,10 @@ def define(kit):
     kit.define('Tile_Earth', 'terrain', tile('earth'))
     kit.define('Tile_Grass_Frost', 'terrain', tile('grass_frost'))
     kit.define('Tile_Grass_Upland', 'terrain', tile('grass_upland'))
+    kit.define('Tile_Snow', 'terrain', tile('snow'))
+    kit.define('Tile_Snow_Path', 'terrain', tile('snow_path'))
     kit.define('Tile_Flagstone', 'terrain', flagstone_tile())
-    for name, wall, pier in (('Dark', 'stone_dark', 'stone_dark'), ('Frost', 'stone_granite', 'stone_dark'),
+    for name, wall, pier in (('Dark', 'stone_dark', 'stone_dark'), ('Frost', 'stone_dark', 'rock'),
                              ('Granite', 'stone_granite', 'stone_basalt')):
         kit.define(f'Terrace_Wall_{name}', 'terrain', terrace_wall(mat=wall))
         kit.define(f'Terrace_Wall_{name}_Pillar', 'terrain', terrace_wall(True, wall, pier))

@@ -2,8 +2,9 @@
 
 - Thatch (Grukmar orc halls): low 35 deg pitch, thick reed thatch, deep eaves; the gable
   is vertical dark boarding with a smoke outlet under the apex (the shared hearth).
-- Sod (Frostgard homes): 40 deg, a turf mat held by a log along each eave.
-- Slate (Frostgard halls): the 60 deg pitch of the Nordic roof, without its carving.
+- Sod (Frostgard homes): 40 deg, a turf mat held by a log along each eave, under a thick
+  winter blanket of snow (Frostgard is a winter frontier).
+- Slate (Frostgard halls): the 60 deg pitch of the Nordic roof, without its carving, frosted.
 - Hide (Grukmar clan halls): the thatch pitch clad in red-stained stretched hides.
 - Slab (Stonehold houses): a low 28 deg roof of thick dark stone slabs on a granite gable
   with a basalt raking coping; the flat parapeted roof is kept for halls, keeps and towers.
@@ -19,8 +20,8 @@ from .walls_frontier import LOG_H
 THATCH_PITCH = math.radians(35)
 SOD_PITCH = math.radians(40)
 THATCH = Covering('thatch_reed', thick=0.34, overhang=0.95, ornate=False, edge='thatch_reed')
-SOD = Covering('sod', thick=0.22, overhang=0.5, ornate=False, eave_log=True, edge='sod')
-SLATE_PLAIN = Covering(ornate=False)
+SOD = Covering('snow', thick=0.34, overhang=0.55, ornate=False, eave_log=True, edge='snow')
+SLATE_PLAIN = Covering('snow', thick=0.24, ornate=False, edge='roof_frost')
 HIDE = Covering('hide_red', thick=0.14, overhang=0.85, ornate=False, edge='timber_dark')
 SLAB_PITCH = math.radians(28)
 SLAB = Covering('roof', thick=0.32, overhang=0.45, ornate=False, edge='stone_basalt')
@@ -109,5 +110,6 @@ def define(kit):
         kit.define(f'Roof_Slab_End_S{span}', 'roofs', gable_eave_end(span, SLAB_PITCH, SLAB))
         kit.define(f'Gable_Wall_Granite_S{span}', 'roofs', granite_gable(span))
     for size in (4, 6):
+        kit.define(f'Roof_Pyramid_Snow_{size}', 'roofs', pyramid(float(size), 50, mat='snow', finial=False))
         kit.define(f'Roof_Pyramid_Thatch_{size}', 'roofs',
                    pyramid(float(size), PYRAMID_THATCH_PITCH, mat='thatch_reed', finial=False))

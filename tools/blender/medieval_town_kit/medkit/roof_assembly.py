@@ -31,6 +31,7 @@ TOWER_TOPS = {
     'battlements': 'Roof_Battlements',
     'goblin_hut': 'Roof_Goblin_Hut',
     'thatch_pyramid': 'Roof_Pyramid_Thatch',
+    'snow_pyramid': 'Roof_Pyramid_Snow',
 }
 CORNERS = ((0, 0), (1, 0), (1, 1), (0, 1))
 

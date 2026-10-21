@@ -105,8 +105,13 @@ COLLIDERS = {
     'Gate_Stonehold': [((0, 0, 0), (PASSAGE[0], GATE_D, GATE_H + 1.14)),
                        ((PASSAGE[1], 0, 0), (GATE_W, GATE_D, GATE_H + 1.14)),
                        ((PASSAGE[0], 0, PASSAGE[2]), (PASSAGE[1], GATE_D, GATE_H + 1.14))],
+    'Watchtower_Orc': [((-1.9, -1.9, 0), (1.9, 1.9, 0.75))] + [
+        ((sx * 1.55 - 0.15, sy * 1.55 - 0.15, 0.75), (sx * 1.55 + 0.15, sy * 1.55 + 0.15, 6.2))
+        for sx in (-1, 1) for sy in (-1, 1)],
     'Tree_Pine': _centred(0.4, 0.4, 3.0),
     'Tree_Pine_Tall': _centred(0.4, 0.4, 3.0),
+    'Tree_Pine_Snow': _centred(0.4, 0.4, 3.0),
+    'Tree_Pine_Snow_Tall': _centred(0.4, 0.4, 3.0),
     'Boulder_Cluster': _centred(2.0, 1.6, 0.9),
     'Ore_Crane': _centred(1.9, 1.9, 6.6),
     'Windbreak_Wall': [((0, -0.36, 0), (GRID, 0.36, 2.05))],
@@ -222,6 +227,7 @@ def _foundations():
 
 
 COLLIDERS.update(_foundations())
+COLLIDERS['Watchtower_Frost'] = COLLIDERS['Watchtower_Orc']
 COLLIDERS.update({
     'Stonehold_Ledge_Small': _centred(2.4, 2.2, 1.0),
     'Stonehold_Ledge_Large': _centred(3.3, 2.8, 1.2),

@@ -192,10 +192,11 @@ def orc(base):
 
 
 def frostgard(base):
-    extra = _without(base.extra, 'dormers', 'chimney')
+    # No banners: the kit's only banner is the Lumish fleur-de-lis.
+    extra = _without(base.extra, 'dormers', 'chimney', 'banner')
     if base.tower:
         return BuildingSpec(f'Frostgard_{base.name}', base.w, base.d, ('log',) * base.stories,
-                            roof='pyramid', plinth='Rugged', chimney=False, **extra)
+                            roof='snow_pyramid', plinth='Rugged', chimney=False, **extra)
     roof = 'steep_log' if base.name in FROST_HALLS else 'sod'
     stories = min(BASE_BY_NAME[base.name].stories, 2) + _lift(base)
     return BuildingSpec(f'Frostgard_{base.name}', base.w, base.d, ('log',) * stories,

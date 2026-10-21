@@ -22,7 +22,7 @@ TONED = {'timber': (0.82, 1.08), 'wood_trim': (0.88, 1.06), 'carved_wood': (0.9,
          'thatch': (0.8, 1.08), 'hide': (0.82, 1.1), 'bone': (0.88, 1.04),
          'timber_dark': (0.82, 1.1), 'log': (0.84, 1.08), 'stone_dark': (0.82, 1.1),
          'thatch_reed': (0.84, 1.06), 'sod': (0.86, 1.08), 'stone_granite': (0.88, 1.06),
-         'stone_basalt': (0.86, 1.08)}
+         'stone_basalt': (0.86, 1.08), 'rock': (0.85, 1.08)}
 GRIMED = {'stone', 'stone_dressed', 'brick', 'plaster', 'clapboard', 'timber', 'timber_dark', 'log',
           'stone_dark', 'stone_granite', 'stone_basalt', 'wood_trim', 'carved_wood', 'planks'}
 WALL_SOFFIT_AO = {'stone', 'plaster', 'clapboard', 'stone_granite'}
