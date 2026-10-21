@@ -572,6 +572,15 @@ Both matter:
 The adapter is recorded as `adapter` in the report. Treat any run without it, or
 with `fallback: true`, as void.
 
+The editor's JS heap sits at 2.3–3.3 GB at ordinary poses, against a hard 4 GB
+ceiling. Near towns and dense biomes a tab can exceed it, die and reload. A
+harness then reports this as a navigation ("Execution context was destroyed",
+or `__worldVisualQa` undefined), not as a crash. The ceiling cannot be raised:
+Chromium builds V8 with pointer compression, which caps each renderer's heap at
+4 GB. `--js-flags=--max-old-space-size=8192` is accepted and ignored, and
+`performance.memory.jsHeapSizeLimit` stays at 4192 MB. The only fix is a
+smaller heap.
+
 ### Fix landed: canonical distance fields were regenerating terrain per lookup
 
 **Symptom:** player-mode movement fell to ~13 FPS (`diagonal`, p50 dt 83 ms) while

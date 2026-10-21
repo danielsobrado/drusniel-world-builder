@@ -46,7 +46,9 @@ Also done (2026-10-21, later the same day):
     level and from above.
   - `npm run qa:perf -- --headed --qa bog-cross --warmup 8 --settle` runs
     through the swamp forest (`BogCrossFixture`).
-- **Heap:** every QA browser runs with an 8 GB JS heap (`docs/perf-qa.md`).
+- **Heap:** an 8 GB JS heap for QA browsers was tried and reverted. Chromium's
+  pointer-compressed V8 caps a renderer at 4 GB whatever the flag says
+  (`docs/perf-qa.md`).
 
 The "rounded lumps on the horizon" were never the far terrain. They were the
 tree fallback proxy, drawn for every distant tree whenever the impostor atlas
