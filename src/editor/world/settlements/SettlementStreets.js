@@ -17,6 +17,12 @@ export const STREET_WIDTH = Object.freeze({ main: 5.5, ring: 4.5, lane: 3.2, wal
 const MIN_ROAD_SEPARATION = 0.55;
 /** Least angle, in radians, between two radial streets of one quarter. */
 const SPOKE_SEPARATION = 0.5;
+/** Ring streets every this many metres out from the square, so blocks stay one lot-row deep at any size. */
+const RING_SPACING = 80;
+/** Spoke lanes between two rings stand about this far apart along the inner ring (m). */
+const SPOKE_ARC = 70;
+/** Towns of rank 1 grow rings once they are this wide (m): a big market town is not a village. */
+const RING_TOWN_RADIUS = 200;
 
 function angleGap(a, b) {
   return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
@@ -110,6 +116,24 @@ function ringStreets({ ringRadius, random, isBuildable }) {
   return streets;
 }
 
+/**
+ * Radii of the ring streets: the first a ring-spacing out from the square, then every
+ * RING_SPACING (jittered) while it stays inside 0.95 of the radius. A regional recipe's
+ * ringCount caps how many rings each 160 m of radius may have.
+ */
+function ringRadii(profile, squareRadius, random, streetConfig) {
+  const radii = [];
+  const cap = streetConfig ? streetConfig.ringCount * Math.max(1, Math.round(profile.radius / 160)) : Infinity;
+  let ring = Math.max(squareRadius + RING_SPACING * 0.75, profile.radius * 0.44);
+  if (profile.radius < 2.2 * RING_SPACING) ring = profile.radius * (0.44 + random() * 0.08);
+  while (ring <= profile.radius * 0.95 && radii.length < cap) {
+    radii.push(ring);
+    ring += RING_SPACING * (0.9 + random() * 0.2);
+  }
+  if (radii.length === 0) radii.push(profile.radius * (0.44 + random() * 0.08));
+  return radii;
+}
+
 /** Side lanes off every main street, alternating sides, clipped at the next main. */
 function sideLanes({ profile, mains, random, isBuildable }) {
   const lanes = [];
@@ -143,14 +167,14 @@ function sideLanes({ profile, mains, random, isBuildable }) {
  * Radial lanes through the quarters no main street serves, from `inner` out to
  * `outer`, so the blocks between two rings are closed rather than open fields.
  */
-function spokeLanes({ bearings, inner, outer, mains, random, isBuildable }) {
+function spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separation = SPOKE_SEPARATION }) {
   const lanes = [];
   const sorted = [...bearings].sort((left, right) => left - right);
   for (let index = 0; index < sorted.length; index += 1) {
     const from = sorted[index];
     const to = index + 1 < sorted.length ? sorted[index + 1] : sorted[0] + Math.PI * 2;
     const gap = to - from;
-    const count = Math.floor(gap / SPOKE_SEPARATION) - 1;
+    const count = Math.floor(gap / separation) - 1;
     for (let spoke = 1; spoke <= count; spoke += 1) {
       const bearing = from + gap * spoke / (count + 1) + (random() - 0.5) * 0.12;
       const start = [Math.sin(bearing) * inner, Math.cos(bearing) * inner];
@@ -171,8 +195,9 @@ function spokeLanes({ bearings, inner, outer, mains, random, isBuildable }) {
  * The street network of one settlement, in plan space. Returns streets
  * ({ kind, width, points }) and the market square, if the class has one.
  *
- * Towns grow one ring street; cities and above a second near the wall, with
- * spoke lanes between them, so the plan is a web of closed blocks.
+ * Towns of rank 2 and up (and wide rank-1 towns) grow ring streets every RING_SPACING
+ * metres out to the wall, with spoke lanes SPOKE_ARC apart between each pair of rings,
+ * so the plan stays a web of closed blocks however large the town grows.
  */
 export function planStreets({ profile, routeBearings, random, isBuildable }) {
   const squareRadius = marketSquareRadius(profile);
@@ -206,14 +231,21 @@ export function planStreets({ profile, routeBearings, random, isBuildable }) {
   const mains = streets.filter(({ kind }) => kind === 'main');
 
   const allowRings = !streetConfig || streetConfig.ringCount > 0;
-  if (profile.rank >= 2 && allowRings) {
-    const inner = profile.radius * (0.44 + random() * 0.08);
-    streets.push(...ringStreets({ ringRadius: inner, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
-    const outer = profile.rank >= 3 ? profile.radius * (0.8 + random() * 0.06) : profile.radius * 0.92;
-    if (profile.rank >= 3 && (!streetConfig || streetConfig.ringCount >= 2)) {
-      streets.push(...ringStreets({ ringRadius: outer, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
+  if ((profile.rank >= 2 || profile.radius >= RING_TOWN_RADIUS) && allowRings) {
+    const radii = ringRadii(profile, squareRadius, random, streetConfig);
+    for (const ringRadius of radii) {
+      streets.push(...ringStreets({ ringRadius, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
     }
-    streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
+    // Spoke lanes between the square and the first ring and between every pair of rings.
+    const bounds = [Math.max(squareRadius + 8, radii[0] - RING_SPACING), ...radii, profile.radius * 0.97];
+    for (let index = 1; index < bounds.length; index += 1) {
+      const inner = bounds[index - 1];
+      const outer = bounds[index];
+      if (outer - inner < 30) continue;
+      const separation = Math.min(SPOKE_SEPARATION, SPOKE_ARC / Math.max(inner, 1));
+      streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separation })
+        .map((s) => (regional ? { ...s, surfaceRole } : s)));
+    }
   }
   if (profile.rank >= 1) {
     streets.push(...sideLanes({ profile, mains, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));

@@ -99,6 +99,7 @@ export class PlanGrid {
     this.buckets = new Map();
   }
 
+  /** Bucket keys covering a disc. Numeric (no string per query); plans span far less than 32 km. */
   keys(x, z, radius) {
     const keys = [];
     const x0 = Math.floor((x - radius) / this.cell);
@@ -106,7 +107,7 @@ export class PlanGrid {
     const z0 = Math.floor((z - radius) / this.cell);
     const z1 = Math.floor((z + radius) / this.cell);
     for (let bx = x0; bx <= x1; bx += 1) {
-      for (let bz = z0; bz <= z1; bz += 1) keys.push(`${bx}:${bz}`);
+      for (let bz = z0; bz <= z1; bz += 1) keys.push((bx + 32768) * 65536 + (bz + 32768));
     }
     return keys;
   }

@@ -1,9 +1,11 @@
 /**
  * What kind of place an Azgaar burg is, and what it looks like.
  *
- * Azgaar reports population in thousands. Classes set the town's radius (kept
- * tight, so a walled town is built up to its wall rather than camped in a field), how
- * many buildings its plots may hold and which landmarks it earns; the style is
+ * Azgaar reports population in thousands. A town's size follows its population:
+ * about one building per PEOPLE_PER_BUILDING people, capped at MAX_BUILDINGS, in a
+ * radius that holds that many lots (kept tight, so a walled town is built up to its
+ * wall rather than camped in a field). Classes rank the place (which landmarks,
+ * walls and markets it earns) and set a hamlet's floor; the style is
  * chosen from the burg's culture so neighbouring towns of one people share
  * stone, roof and render. Pure data, safe in terrain workers.
  */
@@ -20,6 +22,23 @@ export const SETTLEMENT_CLASSES = Object.freeze([
 ]);
 
 const CLASS_RANK = Object.freeze(Object.fromEntries(SETTLEMENT_CLASSES.map(({ id }, index) => [id, index])));
+
+/** Medieval occupancy: people per building, counting houses, shops and workshops. */
+export const PEOPLE_PER_BUILDING = 7;
+/** The most buildings one burg plans, so the largest cities stay affordable to plan and draw. */
+export const MAX_BUILDINGS = 1500;
+/** Plan area per building (m²): its lot plus its share of street and yard. */
+export const LOT_AREA = 320;
+const MAX_FARMS = 32;
+
+/** Buildings and radius for a population (thousands), never below the class's own floor. */
+export function townSize(population, size = classFor(population)) {
+  const people = Math.max(0, Number.isFinite(population) ? population : 0) * 1000;
+  const buildings = Math.min(MAX_BUILDINGS, Math.max(size.buildings, Math.round(people / PEOPLE_PER_BUILDING)));
+  const radius = Math.max(size.radius, Math.sqrt(buildings * LOT_AREA / Math.PI));
+  const farms = Math.min(MAX_FARMS, Math.max(size.farms, Math.round(buildings / 45)));
+  return { buildings, radius, farms };
+}
 
 /** Farm belt, as a multiple of the town radius. */
 export const FARM_BELT = Object.freeze({ inner: 1.12, outer: 1.75 });
@@ -88,15 +107,17 @@ export function styleFor(settlement, recipe = null) {
 export function settlementProfile(settlement, options = {}) {
   const size = classFor(settlement.population);
   const rank = classRank(size.id);
-  const radius = size.radius * (0.9 + (hashInts(settlement.id, 0x7ad1) % 1000) / 1000 * 0.2);
+  const scaled = townSize(settlement.population, size);
+  const radius = scaled.radius * (0.9 + (hashInts(settlement.id, 0x7ad1) % 1000) / 1000 * 0.2);
   const walled = Boolean(settlement.walls) && rank >= 2;
   const hasRegionalIdentity = hasExplicitRegionalContext(settlement);
   const identity = resolvePlaceIdentity(settlement, options);
   const recipe = resolveSceneRecipe(identity, options);
   const style = hasRegionalIdentity ? styleFor(settlement, recipe) : styleFor(settlement);
-  const farms = hasRegionalIdentity && recipe.streetConfig.suppressSurfaceFarms ? 0 : size.farms;
+  const farms = hasRegionalIdentity && recipe.streetConfig.suppressSurfaceFarms ? 0 : scaled.farms;
   return Object.freeze({
     ...size,
+    buildings: scaled.buildings,
     farms,
     rank,
     radius,
