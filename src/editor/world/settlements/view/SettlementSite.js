@@ -77,7 +77,8 @@ export class SettlementSite {
     this.id = entry.settlement.id;
     this.settlement = entry.settlement;
     this.plan = plan;
-    this.dressing = dressingFor(entry.settlement, plan.profile.style);
+    const preference = plan.profile.hasRegionalIdentity ? plan.profile.recipe?.architecture?.dressingPreference : null;
+    this.dressing = dressingFor(entry.settlement, plan.profile.style, preference);
     /** Tells this town's pooled meshes from another's: only the timber tone and the style differ. */
     this.poolPrefix = `${this.dressing.timberTone}|${plan.profile.style.key}|`;
     this.surfaces = null;

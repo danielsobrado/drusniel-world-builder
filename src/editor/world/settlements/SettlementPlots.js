@@ -2,6 +2,7 @@ import { buildingEntry, SETTLEMENT_BUILDINGS } from './SettlementBuildingCatalog
 import { FARM_BELT } from './SettlementProfile.js';
 import { rect } from './SettlementGeometry.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
+import { pickVariant } from './SettlementSignature.js';
 
 /** Generic fill by zone: core (around the square), mid town, and outskirts. */
 const ZONE_MIX = Object.freeze({
@@ -234,7 +235,7 @@ function squareFrontage(squareRadius) {
 }
 
 /** Town plots: landmarks first, then a zone-weighted fill up to the class's target. */
-export function planBuildings({ profile, occupancy, streets, bearings, quayBearing = null, random }) {
+export function planBuildings({ profile, signature = null, occupancy, streets, bearings, quayBearing = null, random }) {
   const buildings = [];
   const regional = Boolean(profile.hasRegionalIdentity && profile.recipe);
   const baseFoundation = regional ? profile.recipe.architecture.foundationType : null;
@@ -276,7 +277,7 @@ export function planBuildings({ profile, occupancy, streets, bearings, quayBeari
     let kind = chosenLandmark ? chosenLandmark.kind : weighted(random, mixTable);
     let variant = chosenLandmark?.variant !== undefined
       ? chosenLandmark.variant % SETTLEMENT_BUILDINGS[kind].length
-      : Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
+      : pickVariant(signature, kind, random);
     // Hamlets and villages have no terraces: every house keeps a yard.
     const density = ZONE_DENSITY[profile.rank >= 2 ? zone : 'edge'];
     const setback = density.setback[0] + random() * density.setback[1];
@@ -284,7 +285,7 @@ export function planBuildings({ profile, occupancy, streets, bearings, quayBeari
     if (!box && chosenLandmark) {
       chosenLandmark = null;
       kind = weighted(random, mixTable);
-      variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
+      variant = pickVariant(signature, kind, random);
       box = tryPlace(occupancy, anchor, kind, variant, setback, density.clearance);
     }
     if (!box) continue;
@@ -307,7 +308,7 @@ export function planBuildings({ profile, occupancy, streets, bearings, quayBeari
  * The farm belt: farmsteads along the main roads beyond the town, each with a
  * fenced field behind it running away from the road.
  */
-export function planFarms({ profile, occupancy, streets, random }) {
+export function planFarms({ profile, signature = null, occupancy, streets, random }) {
   const farms = [];
   const fields = [];
   const mains = streets.filter(({ kind }) => kind === 'main');
@@ -316,7 +317,7 @@ export function planFarms({ profile, occupancy, streets, random }) {
   for (const anchor of anchors) {
     if (farms.length >= profile.farms * 2) break;
     const kind = farms.length % 2 === 0 ? 'farmhouse' : (random() < 0.6 ? 'barn' : 'house');
-    const variant = Math.floor(random() * SETTLEMENT_BUILDINGS[kind].length);
+    const variant = pickVariant(signature, kind, random);
     const box = tryPlace(occupancy, anchor, kind, variant, 3 + random() * 4);
     if (!box) continue;
     occupancy.claim(box);

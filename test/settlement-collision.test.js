@@ -27,8 +27,9 @@ function fixture() {
 function chunksOf(provider, around) {
   const centre = collisionChunkForCanonical(around.x, around.z, CHUNK);
   const colliders = [];
-  for (let dx = -8; dx <= 8; dx += 1) {
-    for (let dz = -8; dz <= 8; dz += 1) {
+  // Out past the farm belt of a population-sized city (profile.reach is ~690 m here).
+  for (let dx = -11; dx <= 11; dx += 1) {
+    for (let dz = -11; dz <= 11; dz += 1) {
       const data = provider.buildChunkData(centre.chunkX + dx, centre.chunkZ + dz);
       for (const collider of data.colliders) {
         assert.equal(collider.ownerChunkX, centre.chunkX + dx);

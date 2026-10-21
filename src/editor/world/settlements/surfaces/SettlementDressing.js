@@ -115,13 +115,19 @@ export const SETTLEMENT_DRESSING_KEYS = Object.freeze(DRESSINGS.map(({ key }) =>
 /**
  * The dressing of one settlement: a set name per role, and its timber tone.
  *
+ * A realm that prefers a dressing (its architecture's `dressingPreference`)
+ * gets it in two towns of three, so its towns read as one people's without
+ * all being paved alike.
+ *
  * @param {{ id: number }} settlement
  * @param {{ topStyle: string }} style the settlement's style (SettlementProfile)
+ * @param {string | null} preference the realm's preferred dressing key, if any
  */
-export function dressingFor(settlement, style) {
+export function dressingFor(settlement, style, preference = null) {
   let hash = Math.imul((settlement.id | 0) ^ 0x51ed27, 0x9e3779b1);
   hash ^= hash >>> 15;
-  const base = DRESSINGS[(hash >>> 0) % DRESSINGS.length];
+  const preferred = DRESSINGS.find(({ key }) => key === preference);
+  const base = preferred && (hash >>> 0) % 3 !== 0 ? preferred : DRESSINGS[(hash >>> 0) % DRESSINGS.length];
   return Object.freeze({
     ...base,
     timber: 'timber-beam',

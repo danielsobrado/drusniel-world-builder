@@ -4,11 +4,12 @@ import { planDefences } from './SettlementDefences.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
 import { planBuildings, planFarms } from './SettlementPlots.js';
 import { hashInts, settlementProfile } from './SettlementProfile.js';
+import { settlementSignature } from './SettlementSignature.js';
 import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 8;
+export const SETTLEMENT_PLAN_VERSION = 9;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -34,14 +35,16 @@ export function planSettlement({
 }) {
   const profile = settlementProfile(settlement, geography ? { geography } : {});
   const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_PLAN_VERSION));
+  const signature = settlementSignature(settlement, profile, worldSeed);
   const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, routeBearings, random, isBuildable });
   const maxPadFall = profile.hasRegionalIdentity && profile.identity?.activeOverlays?.includes('mountain-pass') ? 5.2 : undefined;
   const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall });
-  const buildings = planBuildings({ profile, occupancy, streets, bearings, quayBearing, random });
+  const buildings = planBuildings({ profile, signature, occupancy, streets, bearings, quayBearing, random });
   const defences = planDefences({ profile, occupancy, streets, random });
-  const { farms, fields } = planFarms({ profile, occupancy, streets, random });
+  const { farms, fields } = planFarms({ profile, signature, occupancy, streets, random });
   const { props, walks } = planDecor({
     profile,
+    signature,
     occupancy,
     streets,
     squareRadius,
@@ -69,6 +72,7 @@ export function planSettlement({
     profile,
     identity: profile.identity,
     recipe: profile.recipe,
+    signature,
     squareRadius,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),

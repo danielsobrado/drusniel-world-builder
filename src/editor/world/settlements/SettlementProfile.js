@@ -48,7 +48,14 @@ export const SETTLEMENT_STYLES = Object.freeze([
   Object.freeze({ key: 'limestone-terracotta', style: 'limestone', topStyle: 'terracotta', finishes: ['limewash', 'ochre', 'rose'] }),
   Object.freeze({ key: 'sandstone-terracotta', style: 'sandstone', topStyle: 'terracotta', finishes: ['ochre', 'rose', 'limewash'] }),
   Object.freeze({ key: 'limestone-slate', style: 'limestone', topStyle: 'slate', finishes: ['limewash', 'masonry', 'ochre'] }),
+  // Realm roof lines (VisualIdentityCatalog roofPitch): a culture style with a steep or low roof.
+  Object.freeze({ key: 'granite-slate-steep', style: 'granite', topStyle: 'slate', finishes: ['limewash', 'masonry', 'ochre'], roofPitch: 50, roofOverhang: 0.5 }),
+  Object.freeze({ key: 'granite-slate-low', style: 'granite', topStyle: 'slate', finishes: ['masonry', 'ochre', 'limewash'], roofPitch: 30, roofOverhang: 0.55 }),
+  Object.freeze({ key: 'limestone-terracotta-low', style: 'limestone', topStyle: 'terracotta', finishes: ['limewash', 'rose', 'ochre'], roofPitch: 28, roofOverhang: 0.6 }),
 ]);
+
+/** The styles a culture without a realm is hashed into; the rest are realm roof lines. */
+const CULTURE_STYLES = SETTLEMENT_STYLES.slice(0, 4);
 
 export function hashInts(...values) {
   let hash = 2166136261;
@@ -87,16 +94,25 @@ export function hasExplicitRegionalContext(settlement = {}) {
   );
 }
 
+/** A realm's roof line: its style's steep or low sibling when its roofPitch is far from the pooled 40°. */
+function withRoofLine(style, roofPitch) {
+  if (!Number.isFinite(roofPitch)) return style;
+  const line = roofPitch >= 46 ? 'steep' : (roofPitch <= 34 ? 'low' : null);
+  return (line && STYLE_BY_KEY[`${style.key}-${line}`]) ?? style;
+}
+
 export function styleFor(settlement, recipe = null) {
   if (recipe?.architecture?.settlementStyleKey) {
     const styleKey = recipe.architecture.settlementStyleKey;
-    if (STYLE_BY_KEY[styleKey]) return STYLE_BY_KEY[styleKey];
+    const roofPitch = recipe.architecture.roofPitch;
+    if (STYLE_BY_KEY[styleKey]) return withRoofLine(STYLE_BY_KEY[styleKey], roofPitch);
     if (styleKey === 'swamp-thatch' || styleKey === 'timber-thatch' || styleKey === 'goblin') {
-      return STYLE_BY_KEY['granite-slate'];
+      // Reed and stilt peoples: no thatch in the pool, so the steep slate roof stands in.
+      return STYLE_BY_KEY['granite-slate-steep'];
     }
   }
   const culture = Number.isFinite(settlement.culture) ? settlement.culture : settlement.id;
-  return SETTLEMENT_STYLES[hashInts(culture, 0x5717e) % SETTLEMENT_STYLES.length];
+  return CULTURE_STYLES[hashInts(culture, 0x5717e) % CULTURE_STYLES.length];
 }
 
 /**

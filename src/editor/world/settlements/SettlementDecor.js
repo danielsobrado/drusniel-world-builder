@@ -1,5 +1,6 @@
 import { buildingEntry } from './SettlementBuildingCatalog.js';
 import { rect } from './SettlementGeometry.js';
+import { hasTrait } from './SettlementSignature.js';
 import { STREET_WIDTH } from './SettlementStreets.js';
 
 function placeProp(occupancy, props, kind, variant, x, z, yaw, { ignoreStreets = false } = {}) {
@@ -35,9 +36,9 @@ function polylineLength(points) {
 }
 
 /** Street lanterns at the kerb, alternating sides, inside the town. */
-function streetLanterns({ profile, occupancy, streets, props, random }) {
+function streetLanterns({ profile, signature, occupancy, streets, props, random }) {
   const variant = profile.rank >= 2 ? 0 : 1;
-  const spacing = 20 - profile.rank * 1.5;
+  const spacing = (20 - profile.rank * 1.5) * (hasTrait(signature, 'lantern-lit') ? 0.7 : 1);
   for (const street of streets) {
     if (street.kind === 'walk') continue;
     const length = polylineLength(street.points);
@@ -55,7 +56,8 @@ function streetLanterns({ profile, occupancy, streets, props, random }) {
 }
 
 /** A short paved walk from each house door to its street, and a planter by some doors. */
-function doorWalks({ buildings, occupancy, props, walks, random }) {
+function doorWalks({ signature, buildings, occupancy, props, walks, random }) {
+  const planters = hasTrait(signature, 'flower-town') ? 0.75 : 0.4;
   for (const building of buildings) {
     if (!building.front) continue;
     const front = [Math.sin(building.yaw), Math.cos(building.yaw)];
@@ -64,7 +66,7 @@ function doorWalks({ buildings, occupancy, props, walks, random }) {
     if (Math.hypot(sx - door[0], sz - door[1]) > 0.8) {
       walks.push({ kind: 'walk', width: STREET_WIDTH.walk, points: [door, [sx, sz]] });
     }
-    if (random() < 0.4) {
+    if (random() < planters) {
       const across = [front[1], -front[0]];
       const side = random() < 0.5 ? -1 : 1;
       // Clear of the wall and of the walk: out past the eaves drip, beside the door.
@@ -235,12 +237,12 @@ function regionalOverlayProps({ profile, occupancy, streets, squareRadius, props
   }
 }
 
-export function planDecor({ profile, occupancy, streets, squareRadius, buildings, fields, random }) {
+export function planDecor({ profile, signature = null, occupancy, streets, squareRadius, buildings, fields, random }) {
   const props = [];
   const walks = [];
   squareFurniture({ profile, occupancy, squareRadius, props, random });
-  streetLanterns({ profile, occupancy, streets, props, random });
-  doorWalks({ buildings, occupancy, props, walks, random });
+  streetLanterns({ profile, signature, occupancy, streets, props, random });
+  doorWalks({ signature, buildings, occupancy, props, walks, random });
   tradeGoods({ buildings, occupancy, props, random });
   roadMarkers({ profile, occupancy, streets, props, random });
   fieldFences({ fields, props });
