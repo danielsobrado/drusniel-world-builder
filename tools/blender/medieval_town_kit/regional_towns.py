@@ -37,17 +37,11 @@ LAND_REACH = 220.0       # how far the land runs past the town (m)
 LAND_LOOK = {'Stonehold': dict(rock=0.97, crags=170, ridge=0.75, lake=False),
              'Frostgard': dict(rock=0.6, crags=60, ridge=0.85, lake=True)}
 LAND_DEFAULT = dict(rock=0.78, crags=70, ridge=0.42, lake=False)
-# Frostgard's preview look: a cold winter afternoon with the sun low and pink, a blue sky fill
-# and a snow-bright ground bounce; windows glow warm against it (the Frostgard references).
-WINTER = dict(elevation=11, azimuth=250, sun='#ffc6a2', sun_intensity=1.7, sky='#8fa9d6', ground='#d3dbe8',
-              ambient=2.8)
-LOOKS = {'Frostgard': dict(look='winter', haze=0.0042, haze_colour=(0.74, 0.83, 1.0), glow=6.0)}
-LOOK_DEFAULT = dict(look='town_review', haze=0.0022, haze_colour=(0.86, 0.9, 1.0), glow=1.0)
-game_look.LOOKS['winter'] = WINTER
-# Review sky: between the game's 'configured' noon and 'storybook' dusk; a warm sun at 32 deg
-# with a strong sky fill, so values stay soft like a painted town view.
-game_look.LOOKS['town_review'] = dict(elevation=32, azimuth=240, sun='#ffe2bd', sun_intensity=2.7,
-                                      sky='#c4d4e8', ground='#7d7458', ambient=2.3)
+# Lit with game sky presets (game_look.LOOKS mirrors SkyPresets.js), so a preview predicts the
+# game: Frostgard's winter afternoon ('winterlight', windows glowing warm against the blue)
+# and the warm building light of 'glade' for the others.
+LOOKS = {'Frostgard': dict(look='winterlight', haze=0.0042, haze_colour=(0.74, 0.83, 1.0), glow=6.0)}
+LOOK_DEFAULT = dict(look='glade', haze=0.0022, haze_colour=(0.86, 0.9, 1.0), glow=1.0)
 HAZE = 0.0022      # aerial perspective: soft distance like a painted town view
 
 
@@ -96,7 +90,9 @@ def _landscape(kit, land, family, mat, seed):
             dzy = (q[3][2] + q[2][2] - q[0][2] - q[1][2]) / (2 * LAND_STEP)
             nz = 1 / math.sqrt(1 + dzx * dzx + dzy * dzy)
             rock = nz < look['rock']
-            b.poly(q, 'rock_land' if rock else mat, outward=(0, 0, 1), smooth=True)
+            face = 'rock_land' if rock else mat
+            scale = materials.SPEC[face].scale
+            b.poly(q, face, outward=(0, 0, 1), smooth=True, uvs=[(p[0] / scale, p[1] / scale) for p in q])
             if rock or (nz < 0.93 and land.outside(xs[i], ys[j]) > 8):
                 steep.append((xs[i] + LAND_STEP / 2, ys[j] + LAND_STEP / 2))
     if look['lake']:

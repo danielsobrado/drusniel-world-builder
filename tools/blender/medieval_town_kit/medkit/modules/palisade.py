@@ -1,5 +1,5 @@
 """Grukmar orc ridge palisade (regions/grukmar.md, 04 `orc-ridge-palisade`): upright log wall
-segments on a dark stone pad, braced from inside against wind and earth, and a single gate
+segments on a dark stone pad with a wall-walk inside, and a single gate
 tower on a stone footing. Sharpened log tops only; no skulls or trophies.
 
 Palisade_Orc follows the wall contract: spans X 0..GRID, exterior -Y.
@@ -17,6 +17,7 @@ from .walls import _merge
 LOGS = 7
 LOG_R = 0.145
 PALISADE_H = 3.7
+WALK_Z, WALK_Y = 2.4, 1.05   # wall-walk deck height and its inner edge
 TOWER = 4.0
 PAD_H = 1.2
 CHAMBER = (4.0, 6.4)     # floor and wall top of the tower's fighting chamber
@@ -41,9 +42,16 @@ def palisade():
         _log(b, (i + 0.5) * step, 0.0, 0.3, _height(i))
     for z in (1.25, 2.85):
         b.box((0, LOG_R, z), (GRID, LOG_R + 0.13, z + 0.17), 'timber_dark', skip=('-x', '+x'))
-    # Raking shore on the inside, footed on its own stone.
-    b.beam((1.0, LOG_R + 0.13, 2.6), (1.0, 1.75, 0.0), (1, 0, 0), (-0.08, 0.08), 0.16, 'timber_dark')
-    b.box((0.78, 1.55, -0.3), (1.22, 1.98, 0.14), 'stone_dark')
+    # Wall-walk on the inside: a plank deck on joists into the wall and a post row,
+    # low enough below the log tops to leave a breast-high parapet (the hill-fort reference).
+    y0, y1 = LOG_R + 0.13, WALK_Y
+    b.box((0, y0, WALK_Z - 0.1), (GRID, y1 + 0.1, WALK_Z), 'planks', skip=('-x', '+x'))
+    b.box((0, y1 - 0.06, WALK_Z - 0.32), (GRID, y1 + 0.1, WALK_Z - 0.1), 'timber_dark', skip=('-x', '+x'))
+    b.box((0.92, y1 - 0.08, -0.3), (1.08, y1 + 0.08, WALK_Z - 0.32), 'timber_dark', skip=('-z',))
+    b.box((0.8, y1 - 0.2, -0.3), (1.2, y1 + 0.2, 0.12), 'stone_dark')
+    for s in (-1, 1):
+        b.beam((1.0, y1, WALK_Z - 1.0), (1.0 + s * 0.6, y1, WALK_Z - 0.33), (0, 1, 0), (-0.05, 0.05), 0.1,
+               'timber_dark')
     if detailed():
         for x in (0.3, 1.7):
             b.box((x - 0.08, -LOG_R - 0.02, 2.2), (x + 0.08, LOG_R + 0.14, 2.3), 'iron', bevel=0)

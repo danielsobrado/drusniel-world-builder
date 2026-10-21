@@ -70,6 +70,27 @@ export const SKY_PRESETS = Object.freeze({
     groundLightColor: '#8a6f4e',
     fogColor: '#e3bf95',
   }),
+  // A Frostgard winter afternoon: a low pink sun, a cold blue sky and a snow-bright
+  // ground bounce, so lit windows read warm against the blue. The town kit's Frostgard
+  // previews render with the same values (game_look.py, look 'winterlight').
+  winterlight: Object.freeze({
+    label: 'Winterlight (snowy afternoon)',
+    sunElevation: 11,
+    sunAzimuth: 250,
+    lowColor: '#d9c4cf',
+    highColor: '#5f7fb8',
+    sunGlowColor: '#ffc6a2',
+    sunColor: '#fff2e6',
+    sunGlowIntensity: 0.45,
+    cloudEdge: '#f2dde0',
+    cloudRim: '#ffc6a2',
+    directionalColor: '#ffc6a2',
+    directionalIntensity: 1.7,
+    ambientIntensity: 2.8,
+    groundLightColor: '#d3dbe8',
+    fogColor: '#b9c7dd',
+    fogDensityScale: 1.6,
+  }),
   highfield: Object.freeze({
     label: 'Highfield (day)',
     sunElevation: 42,

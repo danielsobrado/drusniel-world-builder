@@ -26,6 +26,11 @@ LOOKS = {
                       sky='#b9c9e6', ground='#8a6f4e', ambient=1.6),
     'swamp': dict(elevation=18, azimuth=235, sun='#ffd29d', sun_intensity=2.4,
                   sky='#9fb6c6', ground='#495748', ambient=1.85),
+    # SkyPresets 'glade' (warm building light) and 'winterlight' (Frostgard winter afternoon).
+    'glade': dict(elevation=38, azimuth=135, sun='#ffe0b1', sun_intensity=3.1,
+                  sky='#b8c9df', ground='#a8936a', ambient=1.9),
+    'winterlight': dict(elevation=11, azimuth=250, sun='#ffc6a2', sun_intensity=1.7,
+                        sky='#8fa9d6', ground='#d3dbe8', ambient=2.8),
 }
 
 # three's ACESFilmicToneMapping (nodes/display/ToneMappingFunctions.js), rows.

@@ -97,7 +97,7 @@ COLLIDERS = {
     'Corner_Granite': [((FACE - 0.16, FACE - 0.16, 0), (T + 0.02, T + 0.02, STORY))],
     **{name: [((x - 0.17, -PORCH_DEPTH + 0.08, 0), (x + 0.17, -PORCH_DEPTH + 0.42, 2.3)) for x in PORCH_POSTS[door]]
        for name, door in (('Orc_Porch', False), ('Orc_Porch_Door', True))},
-    'Palisade_Orc': [((0, -0.3, 0), (GRID, 0.3, 3.5))],
+    'Palisade_Orc': [((0, -0.3, 0), (GRID, 0.3, 3.5)), ((0, 0.3, 2.3), (GRID, 1.15, 2.4))],
     'Gate_Tower_Orc': [((0, 0, 0), (0.85, TOWER, PAD_H)), ((TOWER - 0.85, 0, 0), (TOWER, TOWER, PAD_H)),
                        ((0, 0, CHAMBER[0] - 0.5), (TOWER, TOWER, CHAMBER[1] + 0.16))]
                       + [((x - 0.24, y - 0.24, PAD_H), (x + 0.24, y + 0.24, CHAMBER[0]))

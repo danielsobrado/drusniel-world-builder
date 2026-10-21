@@ -92,6 +92,8 @@ setOptionalQuery(query, 'density', density);
 setOptionalQuery(query, 'gpuTimings', readArg('gpuTimings'));
 setOptionalQuery(query, 'collisionDebug', collisionDebug);
 setOptionalQuery(query, 'constructionStyle', constructionStyle);
+// settlement-approach only: visit another Eldara burg (looking at a realm's town, not the perf gate).
+setOptionalQuery(query, 'burg', readArg('burg'));
 if (hasFlag('settle')) query.set('settle', '1');
 setOptionalQuery(query, 'settleTimeout', readArg('settleTimeout'));
 setOptionalQuery(query, 'x', spawnX);

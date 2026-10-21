@@ -1493,7 +1493,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
 
   if (perfQaConfig?.scenarioId === 'settlement-approach') {
     const { prepareSettlementApproach } = await import('./editor/performance/qa/SettlementApproachFixture.js');
-    terrainView.settlementQaRoute = await prepareSettlementApproach({ controller, terrainView, config });
+    const burgId = Number(new URLSearchParams(window.location.search).get('burg')) || 18;
+    terrainView.settlementQaRoute = await prepareSettlementApproach({ controller, terrainView, config, burgId });
   }
   const perfQa = PerfQaHarness.fromLocation({
     viewModeController,
