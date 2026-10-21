@@ -87,6 +87,7 @@ export class WorldChunkWorkerClient {
     this.inFlight = [];
     this.workerRestartCounts = [];
     this.configurationRevision = 0;
+    this.settlementCacheStatuses = new Map();
     this.settlementConnections = settlementLane ? null : new SettlementWorkerConnections(this);
 
     if (typeof Worker === 'function') {
@@ -120,7 +121,9 @@ export class WorldChunkWorkerClient {
       new URL('./worldChunk.worker.js', import.meta.url),
       { type: 'module' },
     );
-    worker.addEventListener('message', (event) => this.onMessage(event));
+    worker.addEventListener('message', (event) => {
+      if (this.workers[workerIndex] === worker) this.onMessage(event, workerIndex);
+    });
     worker.addEventListener('messageerror', (event) => this.onMessageError(event, workerIndex, worker));
     worker.addEventListener('error', (event) => this.onError(event, workerIndex, worker));
     return worker;
@@ -167,6 +170,7 @@ export class WorldChunkWorkerClient {
   }
 
   setBaseTerrain(baseTerrain) {
+    this.settlementCacheStatuses.clear();
     const nextWorkerBaseTerrain = createTerrainWorkerBaseTerrain(baseTerrain);
     this.baseTerrain = nextWorkerBaseTerrain;
     this.worldGenerator = null;
@@ -326,7 +330,10 @@ export class WorldChunkWorkerClient {
     }
   }
 
-  onMessage(event) {
+  onMessage(event, workerIndex = 0) {
+    if (event.data?.type === 'settlement-plan-cache') {
+      this.settlementCacheStatuses.set(workerIndex, event.data.status); return;
+    }
     if (event.data?.type === 'settlement-plan-generated') {
       PerfCounters.inc('settlementWorkerPlansGenerated'); return;
     }
@@ -381,6 +388,7 @@ export class WorldChunkWorkerClient {
     if (this.disposed || this.workers[workerIndex] !== sourceWorker) return;
 
     sourceWorker?.terminate();
+    this.settlementCacheStatuses.delete(workerIndex);
     this.workers[workerIndex] = null;
 
     for (const [id, pending] of this.pending.entries()) {

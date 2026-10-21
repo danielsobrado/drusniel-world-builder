@@ -4,6 +4,7 @@ import { BoxGeometry, InstancedMesh, MeshBasicMaterial } from 'three/webgpu';
 
 import { TOWN_LOD_DEFAULTS, townSplits } from '../../src/editor/towns/TownLod.js';
 import { TownModuleInstances } from '../../src/editor/towns/TownModuleInstances.js';
+import { PerfCounters } from '../../src/editor/performance/qa/PerfCounters.js';
 
 const material = new MeshBasicMaterial();
 const geometry = { opaque: new BoxGeometry(), glass: [] };
@@ -56,4 +57,20 @@ test('a module the far kit does not lighten stays whole and near', () => {
   module.split(0, 0, 95);
   assert.equal(module.nearMeshes[0].count, 50);
   assert.equal(module.farMeshes.length, 0);
+});
+
+test('large-town preparation yields and later small steps classify only local placements', () => {
+  const packed = new Float32Array(10000 * 4);
+  for (let i = 0; i < 10000; i++) packed[i * 4] = i * 10;
+  const module = new TownModuleInstances({ module: 'Wall', values: packed, seeds: null, near: geometry, far: geometry,
+    createMesh: (g, kind, count) => new InstancedMesh(g, material, count) });
+  const job = module.splitJob(0, 0, 130);
+  let turns = 0;
+  while (!job.next().done) { turns++; assert.equal(module.nearMeshes[0].count + module.farMeshes[0].count, 20000); }
+  assert.ok(turns > 100);
+  assert.equal(module.nearMeshes[0].count + module.farMeshes[0].count, 10000);
+  PerfCounters.reset(); module.split(8, 0, 130);
+  assert.ok(PerfCounters.get('townLodPlacementsEvaluated') < 30);
+  assert.equal(module.nearMeshes[0].count + module.farMeshes[0].count, 10000);
+  for (const mesh of module.meshes) mesh.dispose();
 });

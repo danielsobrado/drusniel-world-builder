@@ -3,7 +3,9 @@ import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
-import { TOWN_LOD_FAR, TOWN_LOD_NEAR, TOWN_LOD_SPLIT, placementsWithin } from './TownLod.js';
+import { TOWN_LOD_FAR, TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
+import { PlanGrid } from '../world/settlements/SettlementGeometry.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const ONE = new THREE.Vector3(1, 1, 1);
@@ -44,12 +46,9 @@ class SlotSet {
     this.count = 0;
   }
 
-  /** Make the set hold exactly the placements with `want[i]`; returns the slots that changed. */
-  update(want) {
-    const dirty = [];
+  set(i, wanted, dirty) {
     const { slotOf, placementAt } = this;
-    for (let i = 0; i < slotOf.length; i += 1) {
-      if (want[i] || slotOf[i] < 0) continue;
+    if (!wanted && slotOf[i] >= 0) {
       const slot = slotOf[i];
       const last = --this.count;
       const moved = placementAt[last];
@@ -57,15 +56,12 @@ class SlotSet {
       slotOf[moved] = slot;
       slotOf[i] = -1;
       if (slot !== last) dirty.push(slot);
-    }
-    for (let i = 0; i < slotOf.length; i += 1) {
-      if (!want[i] || slotOf[i] >= 0) continue;
+    } else if (wanted && slotOf[i] < 0) {
       const slot = this.count++;
       placementAt[slot] = i;
       slotOf[i] = slot;
       dirty.push(slot);
     }
-    return dirty;
   }
 }
 
@@ -98,6 +94,7 @@ export class TownModuleInstances {
     this.interior = interior;
     this.matrices = new Float32Array(this.count * 16);
     this.colours = new Float32Array(this.count * 3);
+    this.spatial = new PlanGrid(32);
     this.nearMeshes = []; this.farMeshes = [];
     this.preparation = this.prepare({ module, seeds, near, far, interior, createMesh });
     if (!deferred) { drainJob(this.preparation); this.preparation = null; }
@@ -107,6 +104,7 @@ export class TownModuleInstances {
     const values = this.values;
     const rgb = [0, 0, 0];
     for (let i = 0; i < this.count; i += 1) {
+      this.spatial.insert(i, values[i * 4], values[i * 4 + 2], 0);
       composePlacement(values[i * 4], values[i * 4 + 1], values[i * 4 + 2], values[i * 4 + 3])
         .toArray(this.matrices, i * 16);
       this.colours.set(seedColour(seeds ? seeds[i] : 0.5, rgb), i * 3);
@@ -123,7 +121,7 @@ export class TownModuleInstances {
     this.visibleIndices = interior ? new Uint32Array(this.count) : null;
     // Interior culling: what the near meshes last held. Split drawing: stable slots.
     this.shown = new Map();
-    this.nearSlots = null; this.farSlots = null; this.wantNear = null;
+    this.nearSlots = null; this.farSlots = null;
     this.lod = TOWN_LOD_NEAR;
     for (const mesh of this.meshes) yield* townBoundsJob(mesh);
     this.setLod(TOWN_LOD_NEAR);
@@ -188,20 +186,46 @@ export class TownModuleInstances {
    * own behaviour (all near; interiors use `cull`).
    */
   split(x, z, radius) {
+    drainJob(this.splitJob(x, z, radius));
+  }
+
+  *splitJob(x, z, radius) {
     if (this.interior || this.farMeshes.length === 0) return;
+    const initial = !this.nearSlots;
     this.nearSlots ??= new SlotSet(this.count);
     this.farSlots ??= new SlotSet(this.count);
-    this.wantNear ??= new Uint8Array(this.count);
     const radiusSq = radius * radius;
     const values = this.values;
-    for (let i = 0; i < this.count; i += 1) {
+    const next = new Set();
+    let units = 0;
+    for (const i of this.spatial.near(x, z, radius)) {
       const dx = values[i * 4] - x;
       const dz = values[i * 4 + 2] - z;
-      this.wantNear[i] = dx * dx + dz * dz <= radiusSq ? 1 : 0;
+      if (dx * dx + dz * dz <= radiusSq) next.add(i);
+      PerfCounters.inc('townLodPlacementsEvaluated');
+      if (++units % 64 === 0) yield;
     }
-    this.writeSlots(this.nearMeshes, this.nearSlots, this.nearSlots.update(this.wantNear));
-    for (let i = 0; i < this.count; i += 1) this.wantNear[i] ^= 1;
-    this.writeSlots(this.farMeshes, this.farSlots, this.farSlots.update(this.wantNear));
+    const nearDirty = [], farDirty = [];
+    if (initial) {
+      for (let i = 0; i < this.count; i++) {
+        this.nearSlots.set(i, next.has(i), nearDirty);
+        this.farSlots.set(i, !next.has(i), farDirty);
+        if (++units % 64 === 0) yield;
+      }
+    } else {
+      const toFar = [...this.nearSlots.placementAt.subarray(0, this.nearSlots.count)]
+        .filter(i => !next.has(i)).sort((a, b) => a - b);
+      const toNear = [...next].filter(i => this.nearSlots.slotOf[i] < 0).sort((a, b) => a - b);
+      for (const [slots, dirty, remove, add] of [[this.nearSlots, nearDirty, toFar, toNear], [this.farSlots, farDirty, toNear, toFar]]) {
+        for (const i of remove) { slots.set(i, false, dirty); if (++units % 64 === 0) yield; }
+        for (const i of add) { slots.set(i, true, dirty); if (++units % 64 === 0) yield; }
+      }
+    }
+    // The initial split is prepared before the town enters the scene. Later
+    // commits copy only changed local slots, keeping both tiers coherent.
+    yield;
+    this.writeSlots(this.nearMeshes, this.nearSlots, nearDirty);
+    this.writeSlots(this.farMeshes, this.farSlots, farDirty);
     this.setLod(TOWN_LOD_SPLIT);
   }
 
@@ -229,8 +253,20 @@ export class TownModuleInstances {
 
   /** Interior modules: draw only placements within `radius` of town-local (x, z). */
   cull(x, z, radius) {
+    drainJob(this.cullJob(x, z, radius));
+  }
+
+  *cullJob(x, z, radius) {
     if (!this.interior) return;
-    const count = placementsWithin(this.values, x, z, radius, this.visibleIndices);
+    let count = 0, units = 0;
+    for (const i of this.spatial.near(x, z, radius)) {
+      const dx = this.values[i * 4] - x, dz = this.values[i * 4 + 2] - z;
+      if (dx * dx + dz * dz <= radius * radius) this.visibleIndices[count++] = i;
+      PerfCounters.inc('townLodPlacementsEvaluated');
+      if (++units % 64 === 0) yield;
+    }
+    this.visibleIndices.subarray(0, count).sort();
+    yield;
     this.writeSubset(this.nearMeshes, this.visibleIndices, count);
     this.setLod(this.lod);
   }

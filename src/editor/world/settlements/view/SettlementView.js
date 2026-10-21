@@ -8,7 +8,7 @@ import { SettlementSite } from './SettlementSite.js';
 import { SettlementSkyline } from './SettlementSkyline.js';
 import { settlementPreparationStatus } from './SettlementPreparationStatus.js';
 import { settlementPreparationFor } from '../SettlementPreparation.js';
-import { settlementSelectionJob, placeSettlementRows } from './SettlementSelection.js';
+import { settlementSelectionJob, placeSettlementRows, settlementSiteDrawn } from './SettlementSelection.js';
 
 export const SETTLEMENT_VIEW = Object.freeze({
   /** Settlements whose edge is within this many metres of the camera are drawn. */
@@ -73,11 +73,7 @@ export class SettlementView {
       getDrawPreparation: () => terrainView.drawPreparation });
     this.skyline = new SettlementSkyline({ scene: terrainView.scene,
       getDrawPreparation: () => terrainView.drawPreparation,
-      // A town's own buildings replace its massing once its site is prepared and paved.
-      isDrawn: (id) => {
-        const site = this.sites.get(id);
-        return Boolean(site?.surfaces && !site.job && site.pavingReady);
-      } });
+      isDrawn: id => settlementSiteDrawn(this, this.sites.get(id)) });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
     this.preparation = settlementPreparationFor(terrainView.worldStore);
@@ -98,6 +94,7 @@ export class SettlementView {
     this.culledWith = new Matrix4().makeScale(0, 0, 0);
     this.sphere = new Sphere();
     this.disposed = false;
+    this.coverageEpoch = 0;
   }
 
   reset() {
@@ -266,6 +263,9 @@ export class SettlementView {
           -entry.settlement.cellZ * view.worldStore.tileSize - focus.z), this));
       this.plans.end();
     }
+    const moved = Math.hypot(focus.x - this.selected.x, focus.z - this.selected.z) > SETTLEMENT_VIEW.reselectMetres;
+    const turned = this.aim(camera);
+    if (moved || turned) { this.coverageEpoch++; this.dirty = true; }
     this.skyline.update(focus, origin);
     if (this.sites.size === 0 && this.rows.size === 0 && this.plans.pending === 0 && this.registry.pending === 0 && this.skyline.pending === 0) return;
 
@@ -280,8 +280,6 @@ export class SettlementView {
       }
       site.paving.position.set(site.centre.x - origin.x, 0, site.centre.z - origin.z);
     }
-    const moved = Math.hypot(focus.x - this.selected.x, focus.z - this.selected.z) > SETTLEMENT_VIEW.reselectMetres;
-    const turned = this.aim(camera);
     if (!this.selectionJob && (this.dirty || this.fading || moved || turned)) {
       this.selectionJob = settlementSelectionJob(this, { ...focus }, timestamp, SETTLEMENT_VIEW);
       this.selected.x = focus.x; this.selected.z = focus.z;

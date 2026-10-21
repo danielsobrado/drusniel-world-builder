@@ -82,15 +82,23 @@ export class TownMesh {
 
   /** A big town: near kit within `radius` of the town-local point (x, z), far kit beyond. */
   split(x, z, radius) {
+    drainJob(this.splitJob(x, z, radius));
+  }
+
+  *splitJob(x, z, radius) {
     this.lod = TOWN_LOD_SPLIT;
+    for (const instances of this.modules) { yield* instances.splitJob(x, z, radius); yield; }
     this.splitCentre = { x, z };
-    for (const instances of this.modules) instances.split(x, z, radius);
   }
 
   /** Draw interior modules only within `radius` of the town-local point (x, z). */
   cullInteriors(x, z, radius) {
+    drainJob(this.cullInteriorsJob(x, z, radius));
+  }
+
+  *cullInteriorsJob(x, z, radius) {
+    for (const instances of this.modules) { yield* instances.cullJob(x, z, radius); yield; }
     this.interiorCentre = { x, z };
-    for (const instances of this.modules) instances.cull(x, z, radius);
   }
 
   instanced(geometry, material, count, glass) {

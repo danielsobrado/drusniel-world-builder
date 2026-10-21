@@ -5,6 +5,22 @@ import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 
 const SLICE = 32;
 
+/** A paved site is not a replacement for its still-loading building silhouettes. */
+export function settlementSiteDrawn(view, site) {
+  const coverage = site?.buildingCoverage;
+  if (!site?.surfaces || site.job || !site.pavingReady || !coverage?.complete
+      || coverage.epoch !== (view.coverageEpoch ?? 0)) return false;
+  for (const [key, bands] of coverage.required) {
+    const entry = view.pool.get(key);
+    if (!entry) return false;
+    for (const band of bands) {
+      const tier = entry[band];
+      if (!tier || tier.publication || !tier.meshes.every(mesh => mesh.parent === view.root && mesh.visible && mesh.count > 0)) return false;
+    }
+  }
+  return true;
+}
+
 function publish(view, key, changes) {
   const rows = view.rows.get(key);
   if (!rows || rows.entry.state !== 'ready') { view.rows.delete(key); return; }
@@ -32,6 +48,7 @@ function publish(view, key, changes) {
  * last complete instance; no whole-town buffer comparison on every fade frame. */
 export function* settlementSelectionJob(view, focus, timestamp, settings) {
   const seen = new Map(), pending = new Map();
+  const epoch = view.coverageEpoch ?? 0;
   let fading = false, shown = 0, buildings = 0, props = 0, units = 0;
   const flush = function* () {
     for (const [key, changes] of pending) { publish(view, key, changes); yield; }
@@ -39,10 +56,13 @@ export function* settlementSelectionJob(view, focus, timestamp, settings) {
   };
   for (const site of view.sites.values()) {
     if (!site.surfaces) continue;
+    const coverage = { epoch, complete: Boolean(site.placements) && !site.job, required: new Map() };
     const source = { style: site.plan.profile.style, kind: '', variant: 0, surfaces: site.surfaces };
     for (const [index, placement] of (site.placements ?? []).entries()) {
       const id = `${site.id}:${index}`, distance = Math.hypot(placement.x - focus.x, placement.z - focus.z);
       const range = placement.small ? settings.smallRange : settings.farRange;
+      const inView = !view.culls || view.inView(placement);
+      const needsCoverage = index < site.plan.buildings.length && distance < range && inView;
       // Elapsed wall time per placement keeps fade speed independent of how
       // many frames the town's classification needs.
       const fadeStep = placement.selectedAt === undefined ? 0
@@ -70,20 +90,27 @@ export function* settlementSelectionJob(view, focus, timestamp, settings) {
         if (!seen.has(placement.key)) seen.set(placement.key, new Set());
         seen.get(placement.key).add(id);
         const representations = [];
-        if (visible > 0 && (!view.culls || view.inView(placement))) {
+        if (visible > 0 && inView) {
           for (const [band, fade, direction] of [['near', visible * blend, 1], ['far', visible * (1 - blend), -1]]) {
             if (fade <= 0 || band === 'far' && !entry.far) continue;
             representations.push({ ...placement[band], band, fade, objectId: id,
               quantizedFade: Math.fround(fade), ditherDirection: direction });
+            if (needsCoverage) {
+              if (!coverage.required.has(placement.key)) coverage.required.set(placement.key, new Set());
+              coverage.required.get(placement.key).add(band);
+            }
           }
           shown++; if (index < site.plan.buildings.length) buildings++; else props++;
         }
         if (!pending.has(placement.key)) pending.set(placement.key, new Map());
         pending.get(placement.key).set(id, representations);
       }
+      if (needsCoverage && (entry?.state !== 'ready' || placement.shown < 1)) coverage.complete = false;
       PerfCounters.inc('settlementPlacementsEvaluated');
       if (++units % SLICE === 0) { yield* flush(); yield; }
     }
+    yield* flush();
+    site.buildingCoverage = coverage;
   }
   yield* flush();
   // Eviction and culled/unready placements retire locally, under the same slices.

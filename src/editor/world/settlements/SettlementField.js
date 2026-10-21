@@ -3,6 +3,7 @@ import { indexPlan } from './SettlementPlanIndex.js';
 import { planSettlement } from './SettlementPlanner.js';
 import { settlementProfile } from './SettlementProfile.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { SettlementPlanCache } from './SettlementPlanCache.js';
 
 /** Metres over which a flattened pad blends back into the natural ground. */
 const PAD_BLEND = 3;
@@ -61,7 +62,8 @@ export class SettlementField {
     const field = Object.create(SettlementField.prototype);
     Object.assign(field, { tileSize: registry.tileSize, worldSeed: registry.worldSeed,
       routes: registry.routes, landSearchStepCells: registry.landSearchStepCells,
-      bucketCells: registry.bucketCells, registry, resolvedEntries: new Map(), sampleGround, isBuildable });
+      bucketCells: registry.bucketCells, registry, resolvedEntries: new Map(), sampleGround, isBuildable,
+      planCache: new SettlementPlanCache() });
     const buckets = new Map();
     field.buckets = { get: key => {
       if (!buckets.has(key) && registry.buckets[key]) buckets.set(key, registry.buckets[key].map(index => field.entryAt(index)));
@@ -95,6 +97,7 @@ export class SettlementField {
     this.sampleGround = sampleGround;
     this.isBuildable = isBuildable;
     this.landSearchStepCells = landSearchStepCells;
+    this.planCache = new SettlementPlanCache();
     this.entries = settlements.flatMap((source) => {
       const settlement = this.onLand(source);
       if (!settlement) return [];
@@ -194,7 +197,7 @@ export class SettlementField {
   }
 
   ensurePlan(entry) {
-    if (entry.plan !== undefined) return entry;
+    if (entry.plan !== undefined) { this.planCache.retain(entry); return entry; }
     if (this.requirePreparedPlans) throw Object.assign(new Error('Settlement plan preparation required.'), {
       code: 'settlement_plan_required', settlementId: entry.settlement.id,
     });
@@ -209,6 +212,7 @@ export class SettlementField {
       isBuildable: (x, z) => this.isBuildable(...toCell(x, z)),
     });
     entry.index = indexPlan(entry.plan);
+    this.planCache.retain(entry);
     return entry;
   }
 

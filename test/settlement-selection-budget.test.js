@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { BoxGeometry, Group, Matrix4, MeshBasicNodeMaterial } from 'three/webgpu';
-import { settlementSelectionJob, placeSettlementRows } from '../src/editor/world/settlements/view/SettlementSelection.js';
+import { settlementSelectionJob, placeSettlementRows, settlementSiteDrawn } from '../src/editor/world/settlements/view/SettlementSelection.js';
 import { SETTLEMENT_VIEW } from '../src/editor/world/settlements/view/SettlementView.js';
 import { createInstancedRenderers, disposeInstancedRenderers } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
@@ -19,7 +19,7 @@ function fixture(t) {
     far: { matrix: new Matrix4().makeTranslation(i / 100, 0, 0), seed: i / 1000 } }));
   const view = { root, origin: { x: 0, z: 0 }, rows: new Map(), culls: false,
     sites: new Map([[1, { id: 1, surfaces: {}, plan: { profile: { style: {} }, buildings: placements }, placements }]]),
-    pool: { request: key => entries.get(key), tier: (entry, band) => entry[band] } };
+    pool: { request: key => entries.get(key), get: key => entries.get(key), tier: (entry, band) => entry[band] } };
   t.after(() => { for (const entry of entries.values()) for (const band of ['near', 'far']) disposeInstancedRenderers(root, [entry[band].meshes]); geometry.dispose(); material.dispose(); });
   return { view, entries, placements };
 }
@@ -64,4 +64,29 @@ test('origin movement preserves complete old tiers until their own rows are rewr
   assert.equal(mesh.instanceMatrix.array[12] + mesh.position.x + 4096, x);
   run(f.view, 800);
   assert.equal(mesh.instanceMatrix.array[12] + mesh.position.x + 4096, x);
+});
+
+test('skyline handover waits for this site buildings, fades and published tiers', t => {
+  const f = fixture(t), site = f.view.sites.get(1);
+  site.pavingReady = true;
+  assert.equal(settlementSiteDrawn(f.view, site), false);
+  run(f.view, 0);
+  assert.equal(settlementSiteDrawn(f.view, site), false, 'zero-opacity buildings do not replace massing');
+  run(f.view, 400);
+  for (const entry of f.entries.values()) for (const band of ['near', 'far']) {
+    for (const mesh of entry[band].meshes) mesh.visible = mesh.count > 0;
+  }
+  assert.equal(settlementSiteDrawn(f.view, site), true);
+  const tier = f.entries.get('house-0').near;
+  tier.publication = {};
+  assert.equal(settlementSiteDrawn(f.view, site), false, 'a replacement tier is still staged');
+  delete tier.publication;
+  f.entries.set('unrelated-town', { state: 'queued' });
+  assert.equal(settlementSiteDrawn(f.view, site), true, 'unrelated content does not hold the skyline');
+  f.view.coverageEpoch = 1;
+  assert.equal(settlementSiteDrawn(f.view, site), false, 'a camera turn invalidates old coverage');
+  f.entries.get('house-0').state = 'failed';
+  run(f.view, 800);
+  assert.equal(settlementSiteDrawn(f.view, site), false, 'failed required buildings retain massing');
+  f.entries.delete('unrelated-town');
 });

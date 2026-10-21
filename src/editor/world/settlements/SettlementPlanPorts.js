@@ -44,6 +44,7 @@ export class SettlementPlanPortClient {
     if (entry.plan === undefined) {
       const index = indexPlan(result.plan);
       entry.plan = result.plan; entry.index = index;
+      field.planCache.retain(entry);
     }
   }
 }

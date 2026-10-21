@@ -31,23 +31,31 @@ async function preparePlans(generator, request) {
     ...(request.placementSamplingConfig?.targets ?? []).map(target => Math.ceil(target.maxCells) + 1));
   const centerX = (request.chunkX + .5) * request.chunkSize, centerZ = (request.chunkZ + .5) * request.chunkSize;
   const radius = (request.chunkSize / 2 + margin) * Math.SQRT2;
-  for (const { entry } of field.entriesNear(centerX, centerZ, radius)) {
+  const entries = field.entriesNear(centerX, centerZ, radius);
+  request.settlementPins = new Set(entries.map(({ entry }) => entry.settlement.id));
+  field.planCache.pin(request, request.settlementPins);
+  for (const { entry } of entries) {
     if (entry.plan === undefined) await planClient.prepare(generator, request.generator, entry.settlement.id);
   }
 }
 
 async function generatePage(generator, request) {
-  await preparePlans(generator, request);
-  for (;;) {
-    try {
-      return request.placementSamplingConfig ? generatePreparedPlacementChunk(request, generator)
-        : generateBaseWorldChunk({ ...request, worldGenerator: generator });
-    } catch (error) {
-      // Ecology can sample beyond the mask halo. Resolve that exact missing
-      // plan through the authority rather than silently planning it again.
-      if (!request.sharedSettlementPlans || error.code !== 'settlement_plan_required') throw error;
-      await planClient.prepare(generator, request.generator, error.settlementId);
+  try {
+    await preparePlans(generator, request);
+    for (;;) {
+      try {
+        return request.placementSamplingConfig ? generatePreparedPlacementChunk(request, generator)
+          : generateBaseWorldChunk({ ...request, worldGenerator: generator });
+      } catch (error) {
+        // Ecology can sample beyond the mask halo. Resolve that exact missing
+        // plan through the authority rather than silently planning it again.
+        if (!request.sharedSettlementPlans || error.code !== 'settlement_plan_required') throw error;
+        request.settlementPins.add(error.settlementId);
+        await planClient.prepare(generator, request.generator, error.settlementId);
+      }
     }
+  } finally {
+    generator.settlementField?.planCache.release(request);
   }
 }
 
@@ -126,5 +134,8 @@ self.addEventListener('message', async (event) => {
       error: { message: error instanceof Error ? error.message : String(error),
         code: error?.code, retryable: error?.retryable === true },
     });
+  } finally {
+    if (worldGenerator?.settlementField?.planCache) self.postMessage({ type: 'settlement-plan-cache',
+      status: worldGenerator.settlementField.planCache.getStatus() });
   }
 });

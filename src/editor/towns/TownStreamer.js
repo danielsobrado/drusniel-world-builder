@@ -75,7 +75,8 @@ export class TownStreamer {
       this.nextQueryAt = nowMs + this.queryIntervalMs;
       this.refresh(generator, focus);
     }
-    this.updateLods(focus);
+    const select = () => this.updateLods(focus, budget?.shouldYield);
+    (budget?.runner ?? (run => run()))(select);
     if (this.pending.size === 0 && !this.buildJob) return;
     if (!this.assets.ready) {
       this.assets.ensure();
@@ -126,39 +127,48 @@ export class TownStreamer {
   getPreparationStatus() {
     const preparation = this.preparation;
     const pending = this.pending.size + Number(Boolean(this.buildJob))
+      + [...this.towns.values()].filter(town => town.selectionJob).length
       + (preparation?.registry.pending ?? 0) + (preparation?.plans.pending ?? 0);
     const errors = [...this.buildErrors.values()].map(error => String(error.message ?? error));
     errors.push(...(preparation?.registry.errors ?? []), ...(preparation?.plans.errors ?? []));
     return { pending, errors, ready: pending === 0 && errors.length === 0 };
   }
 
-  updateLods(focus) {
+  updateLods(focus, shouldYield = () => false) {
     for (const town of this.towns.values()) {
-      if (town.split) {
-        this.updateSplit(town, focus);
-        continue;
+      town.selectionJob ??= this.selection(town, { ...focus });
+      while (!shouldYield()) {
+        if (town.selectionJob.next().done) { town.selectionJob = null; break; }
       }
-      const distance = townEdgeDistance(town.layout.anchor, town.reach, focus.x, focus.z);
-      const lod = selectTownLod(town.mesh.lod, distance, this.lod);
-      if (lod !== town.mesh.lod) town.mesh.setLod(lod);
-      if (lod !== TOWN_LOD_NEAR) continue;
-      const x = focus.x - town.layout.anchor.x;
-      const z = focus.z - town.layout.anchor.z;
-      if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
-        town.mesh.cullInteriors(x, z, this.lod.interiorRadius);
-      }
+      if (shouldYield()) return;
+    }
+  }
+
+  *selection(town, focus) {
+    if (town.split) {
+      yield* this.updateSplit(town, focus);
+      return;
+    }
+    const distance = townEdgeDistance(town.layout.anchor, town.reach, focus.x, focus.z);
+    const lod = selectTownLod(town.mesh.lod, distance, this.lod);
+    if (lod !== town.mesh.lod) town.mesh.setLod(lod);
+    if (lod !== TOWN_LOD_NEAR) return;
+    const x = focus.x - town.layout.anchor.x;
+    const z = focus.z - town.layout.anchor.z;
+    if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
+      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius);
     }
   }
 
   /** A split town: re-pick the near placements (and the interiors) as the viewer moves. */
-  updateSplit(town, focus) {
+  *updateSplit(town, focus) {
     const x = focus.x - town.layout.anchor.x;
     const z = focus.z - town.layout.anchor.z;
     if (needsRefresh(town.mesh.splitCentre, x, z, this.lod.splitRefresh)) {
-      town.mesh.split(x, z, this.lod.splitRadius);
+      yield* town.mesh.splitJob(x, z, this.lod.splitRadius);
     }
     if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
-      town.mesh.cullInteriors(x, z, this.lod.interiorRadius);
+      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius);
     }
   }
 
@@ -229,7 +239,7 @@ export class TownStreamer {
     mesh.preparation = null;
     // A city publishes already split, never whole with the near kit for a frame.
     if (townSplits(best.plan.profile?.radius ?? 0, this.lod) && this.focus) {
-      mesh.split(this.focus.x - layout.anchor.x, this.focus.z - layout.anchor.z, this.lod.splitRadius);
+      yield* mesh.splitJob(this.focus.x - layout.anchor.x, this.focus.z - layout.anchor.z, this.lod.splitRadius);
     }
     mesh.setOrigin(this.floatingOrigin.getState());
     yield* stagedDrawPublication(this.scene, [mesh.group], this.getDrawPreparation());
@@ -275,6 +285,7 @@ export class TownStreamer {
   unload(id) {
     const town = this.towns.get(id);
     if (!town) return;
+    town.selectionJob?.return();
     town.mesh.dispose();
     this.collisionSource?.removeOwner(this.ownerId(id));
     this.towns.delete(id);

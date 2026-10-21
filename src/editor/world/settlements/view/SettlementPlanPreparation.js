@@ -14,6 +14,7 @@ export class SettlementPlanPreparation {
   }
 
   reset() {
+    this.field?.planCache?.release(this);
     this.epoch++;
     for (const id of this.requests.keys()) this.store?.chunkWorker?.cancelSettlementPlan?.(id);
     this.requests.clear();
@@ -31,7 +32,11 @@ export class SettlementPlanPreparation {
   get(entry, priority = 0, consumer = this) {
     if (!this.consumers.has(consumer)) this.begin(consumer);
     this.consumers.get(consumer).add(entry.settlement.id);
-    if (entry.plan !== undefined && entry.skyline !== undefined) return entry.plan;
+    this.field?.planCache?.pin(this, new Set([...this.consumers.values()].flatMap(ids => [...ids])));
+    if (entry.plan !== undefined && entry.skyline !== undefined) {
+      this.field?.planCache?.retain(entry);
+      return entry.plan;
+    }
     const id = entry.settlement.id;
     const existing = this.requests.get(id);
     if (existing) {
@@ -73,6 +78,7 @@ export class SettlementPlanPreparation {
   release(consumer) { this.consumers.delete(consumer); this.end(); }
   end() {
     const wanted = new Set([...this.consumers.values()].flatMap(ids => [...ids]));
+    this.field?.planCache?.pin(this, wanted);
     for (const id of this.requests.keys()) if (!wanted.has(id)) {
       this.store?.chunkWorker?.cancelSettlementPlan?.(id);
       this.requests.delete(id);
@@ -87,7 +93,9 @@ export class SettlementPlanPreparation {
         if (this.retry.due(request) && !shouldYield()) this.start(id, request);
         if (!request.job) continue;
         if (request.entry.plan !== undefined) {
-          request.entry.skyline = request.skyline; this.requests.delete(id); this.onReady(); continue;
+          request.entry.skyline = request.skyline;
+          this.field?.planCache?.retain(request.entry);
+          this.requests.delete(id); this.onReady(); continue;
         }
         while (!shouldYield()) {
           let step;
@@ -97,6 +105,7 @@ export class SettlementPlanPreparation {
           request.entry.plan = request.plan;
           request.entry.index = step.value;
           request.entry.skyline = request.skyline;
+          this.field?.planCache?.retain(request.entry);
           this.requests.delete(id);
           this.onReady();
           break;
