@@ -231,6 +231,7 @@ export class SettlementPrototypePool {
       renderer: this.renderer,
       partsByPrototype: [sources],
       capacity,
+      reuseVertexArrays: true,
       name: tier.name,
       castShadow: tier.castShadow,
     });

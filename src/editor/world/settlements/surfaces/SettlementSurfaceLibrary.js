@@ -39,13 +39,19 @@ export class SettlementSurfaceLibrary {
     this.loader = loader;
     this.sets = new Map();
     this.baker = null;
+    this.disposed = false;
   }
 
   async loadPhotographed(name, config) {
     const maps = {};
-    await Promise.all(Object.entries(surfaceSetFiles(name)).map(async ([map, file]) => {
+    const loaded = await Promise.allSettled(Object.entries(surfaceSetFiles(name)).map(async ([map, file]) => {
       maps[map] = configure(await this.loader.loadAsync(this.root + file), MAP_COLOR_SPACE[map], config.repeat);
     }));
+    const failed = loaded.find(result => result.status === 'rejected');
+    if (failed) {
+      Object.values(maps).forEach(map => map.dispose());
+      throw failed.reason;
+    }
     return Object.freeze({
       name,
       tileMetres: config.tileMetres,
@@ -60,11 +66,14 @@ export class SettlementSurfaceLibrary {
       import('./SettlementProceduralBaker.js'),
     ]);
     if (!response.ok) throw new Error(`Settlement surface recipe ${name} answered ${response.status}.`);
+    const recipe = await response.json();
+    if (this.disposed) throw new Error('Settlement surface library was disposed.');
     this.baker ??= new SettlementProceduralBaker(this.renderer);
-    return this.baker.bake(await response.json(), { name, ...config });
+    return this.baker.bake(recipe, { name, ...config });
   }
 
   acquireSet(name) {
+    if (this.disposed) throw new Error('Settlement surface library was disposed.');
     let entry = this.sets.get(name);
     if (!entry) {
       const config = SETTLEMENT_SURFACE_SETS[name];
@@ -85,15 +94,15 @@ export class SettlementSurfaceLibrary {
   }
 
   /** One role's set, or the role's photographed fallback if its own cannot be made. */
-  async acquireRole(role, name, held) {
-    held.push(name);
+  async acquireRole(role, name, lease) {
+    lease.names.push(name);
     try {
       return await this.acquireSet(name);
     } catch (error) {
       const fallback = SETTLEMENT_ROLE_FALLBACK[role];
-      if (name === fallback) throw error;
+      if (name === fallback || lease.released || this.disposed) throw error;
       console.warn(`Settlement surface ${name} could not be made; using ${fallback}.`, error);
-      held.push(fallback);
+      lease.names.push(fallback);
       return this.acquireSet(fallback);
     }
   }
@@ -103,13 +112,20 @@ export class SettlementSurfaceLibrary {
    * the `release` that gives exactly those back.
    */
   acquire(dressing) {
-    const held = [];
-    const surfaces = Promise.all(SETTLEMENT_SURFACE_ROLES.map((role) => this.acquireRole(role, dressing[role], held)))
-      .then((sets) => Object.freeze(Object.fromEntries(SETTLEMENT_SURFACE_ROLES.map((role, index) => [role, sets[index]]))));
-    return { surfaces, release: () => held.splice(0).forEach((name) => this.releaseSet(name)) };
+    const lease = { names: [], released: false };
+    const release = () => {
+      if (lease.released) return;
+      lease.released = true;
+      lease.names.splice(0).forEach(name => this.releaseSet(name));
+    };
+    const surfaces = Promise.all(SETTLEMENT_SURFACE_ROLES.map((role) => this.acquireRole(role, dressing[role], lease)))
+      .then((sets) => Object.freeze(Object.fromEntries(SETTLEMENT_SURFACE_ROLES.map((role, index) => [role, sets[index]]))))
+      .catch(error => { release(); throw error; });
+    return { surfaces, release };
   }
 
   dispose() {
+    this.disposed = true;
     for (const name of [...this.sets.keys()]) {
       this.sets.get(name).uses = 1;
       this.releaseSet(name);

@@ -10,6 +10,7 @@ import { createDitheredMaterial } from './StylizedDitheredMaterial.js';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { extendInstanceBounds } from './InstanceBoundsUpdate.js';
+import { instanceGeometryArrays } from './instanceGeometryArrays.js';
 
 const WAITING_FADE = Number.EPSILON;
 const UNTINTED = Object.freeze([1, 1, 1]);
@@ -27,8 +28,8 @@ const LOD_WORLD_POSITION = { x: 0, y: 0, z: 0 };
  *
  * x = signed LOD fade, y = stable dither seed, z = colour variation.
  */
-function createGeometry(source, capacity, tinted, morphed, surface, plantMotion) {
-  const geometry = source.clone();
+function createGeometry(source, capacity, tinted, morphed, surface, plantMotion, reuseVertexArrays) {
+  const geometry = reuseVertexArrays ? instanceGeometryArrays(source) : source.clone();
   const dither = new Float32Array(capacity * 3);
   // Colour variation is a multiplier, so it must default to 1 rather than 0.
   for (let index = 0; index < capacity; index += 1) dither[index * 3 + 2] = 1;
@@ -92,12 +93,13 @@ export function createInstancedRenderers({
   castShadow,
   tintLeaves = false,
   renderer = null,
+  reuseVertexArrays = false,
 }) {
   return partsByPrototype.map((parts, prototypeIndex) => parts.map((part, partIndex) => {
     const tinted = tintLeaves && part.kind === 'leaf';
     const morphed = tintLeaves;
     const geometry = createGeometry(part.geometry, capacity, tinted, morphed, part.instanceSurface,
-      part.material.userData.plantMotionAnchor);
+      part.material.userData.plantMotionAnchor, reuseVertexArrays);
     if (morphed && part.kind === 'trunk') {
       geometry.setAttribute('instanceRootPlane', new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
     }
