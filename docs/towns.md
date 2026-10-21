@@ -70,6 +70,16 @@ because both draw houses on the same plots.
      get no far level. The switch is per town on purpose: a near ring plus far
      remainder drew both kits at once (+230 draws in Wyle) and lost ~15 fps,
      while all-near versus all-far differed by only ~4%.
+     A population-sized city (radius over 160 m, `townSplits`) is too large for
+     that switch, because drawing it whole with the near kit would be about
+     100k near-kit placements. So it draws **split**:
+     - Each module's near meshes hold the placements within 130 m of the viewer,
+       and its far meshes hold the rest.
+     - It re-picks every 8 m.
+     - Instances keep stable slots, so a re-pick uploads only what changed.
+
+     That costs both kits' draws for that town (about 164 for a capped city),
+     but only for cities.
    - `TownMaterialPalette`: regional looks from shared textures. Stone is tinted
      per style, plaster per finish, Nordic roofs get wood shingles, and hamlets
      get thatch.

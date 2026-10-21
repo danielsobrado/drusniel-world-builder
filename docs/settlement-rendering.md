@@ -153,7 +153,24 @@ town. The dependency is pinned to a pushed commit on GitHub.
 - **Culling**: placements outside the camera frustum (plus a shadow margin) are
   not drawn; the visible set is re-chosen when the camera turns.
 - **Skyline** (`SettlementSkyline`): a box and a gable per building, one mesh a
-  town, shown beyond 560 m out to 3.2 km.
+  town, out to 3.2 km. A town's skyline hides once its own site is prepared and
+  paved, rather than at a set distance. Towns are sized by population and a city
+  is up to about 820 m across, so a fixed distance would leave a gap or an
+  overlap. An adopted site draws its buildings out to 1500 m (`farRange`).
+
+## Town size
+
+A burg's size follows its Azgaar population (`SettlementProfile.townSize`):
+- About one building per 7 people, capped at 1,500.
+- The radius is the area those lots need (`LOT_AREA` 320 m² each).
+- Farms scale with the building count.
+- Ring streets run every 80 m and spoke lanes stand about 70 m apart in each
+  ring, so blocks stay one lot-row deep at any size.
+
+A 5k town plans about 780 buildings in about 280 m, and a 38k city about 1,450
+in about 410 m. The classes (hamlet → metropolis) now only rank a place:
+landmarks, walls and market. `scripts/measure-settlement-plan-scale.mjs` prints
+size and plan time per population; a capped city plans in about 40 ms.
 - **Residents** stand at `SettlementGathering` spots — stalls, well, benches,
   trade doors, main streets — up to 14 a town.
 - **Dusk** (`SettlementDusk`): one uniform from the sky's sun height and key
