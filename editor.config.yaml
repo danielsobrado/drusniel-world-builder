@@ -999,8 +999,8 @@ stylizedSurface:
       # bottom/top pair suits the painted terrain and the clump system; the
       # meadow's lit blades need the paler, yellower field grass.
       palette:
-        base: '#50852b'
-        tip: '#a6bf65'
+        base: '#5f8f34'
+        tip: '#c4d27a'
         brightness: 1
         # Biomes the donor's single meadow never had: its lime field is the base,
         # and these lean it drier, lusher or colder in the same dark-root/pale-tip
