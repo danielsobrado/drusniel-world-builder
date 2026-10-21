@@ -16,7 +16,7 @@ await mkdir(output, { recursive: true });
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 const report = { url: url.href, checks: {} }; let browser, errors;
 try {
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   errors = createBrowserErrorMonitor(page);
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });

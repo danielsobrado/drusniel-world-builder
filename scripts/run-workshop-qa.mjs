@@ -1197,7 +1197,7 @@ async function runBrowserQa(run) {
     headless: !hasFlag('headed'),
     args: performanceMode
       ? [
-        '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
+        '--enable-unsafe-webgpu',
         '--ignore-gpu-blocklist',
         '--use-angle=default',
         '--enable-gpu-rasterization',
@@ -1205,7 +1205,7 @@ async function runBrowserQa(run) {
         '--disable-frame-rate-limit',
       ]
       : [
-        '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
+        '--enable-unsafe-webgpu',
         '--enable-features=Vulkan',
         '--use-angle=swiftshader',
       ],

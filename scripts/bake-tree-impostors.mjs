@@ -387,7 +387,7 @@ async function bakeWithPlaywright(url, downloadDirectory, diagnostics) {
   const headed = process.argv.includes('--headed');
   const browser = await chromium.launch({
     headless: !headed,
-    args: headed ? ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] : [
+    args: headed ? ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] : [
       '--disable-gpu-sandbox',
       '--enable-webgl',
       '--ignore-gpu-blocklist',

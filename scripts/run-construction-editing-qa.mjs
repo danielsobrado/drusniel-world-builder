@@ -11,7 +11,7 @@ const base = arg('url', 'http://127.0.0.1:5183');
 const out = path.resolve(arg('out', 'tmp/construction-editing'));
 fs.mkdirSync(out, { recursive: true });
 const browser = await chromium.launch({ headless: !process.argv.includes('--headed'),
-  args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = [];

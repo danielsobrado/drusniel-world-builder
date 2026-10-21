@@ -665,7 +665,7 @@ async function main() {
     browser = await chromium.launch({
       headless: !headed,
       args: [
-        '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
+        '--enable-unsafe-webgpu',
         '--ignore-gpu-blocklist',
         '--use-angle=default',
         '--enable-gpu-rasterization',

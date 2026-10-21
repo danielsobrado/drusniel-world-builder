@@ -31,7 +31,7 @@ try {
     }
     report.harnessImportMap = importMap;
   }
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
   for (const backend of ['webgpu', 'webgl']) {
     const page = await browser.newPage({ viewport: { width: 384, height: 384 }, deviceScaleFactor: 1 });
     const monitor = createBrowserErrorMonitor(page);

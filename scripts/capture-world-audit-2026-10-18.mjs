@@ -95,7 +95,7 @@ try {
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   report.harness = await captureVisualHarness(import.meta.url, root);
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default',
+    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default',
       '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'] });
   page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 });
   monitor = createBrowserErrorMonitor(page);

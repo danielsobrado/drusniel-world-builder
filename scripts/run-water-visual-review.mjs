@@ -28,7 +28,7 @@ try {
   report.selectorSha256 = await fileHash(fileURLToPath(new URL('../docs/qa/water-aaa-audit-2026-10-16/select-poses.mjs', import.meta.url)));
   report.mapSha256 = await fileHash(path.join(root, 'maps/Eldara Full 2026-07-23-20-37.json'));
   report.browserPolicy = 'Headed hardware capture; background/occlusion throttling disabled; reload between poses.';
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default',
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default',
     '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'] });
   page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 });
   monitor = createBrowserErrorMonitor(page);

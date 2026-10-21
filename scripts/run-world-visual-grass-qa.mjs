@@ -17,7 +17,7 @@ const url=option('--url','http://localhost:5173');await mkdir(out,{recursive:tru
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
 try {
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const backend of ['webgpu','webgl']) {
   const viewport=['lod','temporal','water-foam','water-spray','water-appearance','ground-continuity'].includes(fixture)?{width:800,height:600}:{width:1600,height:900};
   const page=await browser.newPage({viewport,deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);

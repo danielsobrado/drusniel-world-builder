@@ -67,7 +67,7 @@ try {
     if (attempt > 300) throw new Error('Review server did not start.');
     await delay(100);
   }
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
   page.setDefaultTimeout(60_000);
   page.on('pageerror', (error) => report.pageErrors.push(error.message));

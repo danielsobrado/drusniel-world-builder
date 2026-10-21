@@ -19,7 +19,7 @@ if(lights.some(l=>!['neutral','day','low-sun','overcast','night'].includes(l)))t
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),backends:{},artifacts:[]};let browser;
 try {
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const light of lights)for(const backend of ['webgpu','webgl']) {
   const key=light==='neutral'?backend:`${light}-${backend}`;console.log(`Tree fixture QA: ${key}`);
   const page=await browser.newPage({viewport:{width:800,height:600},deviceScaleFactor:1}),errors=createBrowserErrorMonitor(page);

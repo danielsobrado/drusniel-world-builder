@@ -16,7 +16,7 @@ if(!sizes.length||sizes.some(size=>size.length!==2||size.some(n=>!Number.isSafeI
 await mkdir(out,{recursive:true});const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),checks:[],artifacts:[],poses:[]};let browser,errors;
 try {
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  const page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});errors=createBrowserErrorMonitor(page);
  await page.goto(new URL('/?qaVisual=1',url).href,{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>!!window.__worldVisualQa,null,{timeout:180000});await page.evaluate(()=>window.__worldVisualQa.setLighting());

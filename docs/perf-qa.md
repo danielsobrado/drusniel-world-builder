@@ -572,13 +572,6 @@ Both matter:
 The adapter is recorded as `adapter` in the report. Treat any run without it, or
 with `fallback: true`, as void.
 
-Every browser the scripts launch also passes `--js-flags=--max-old-space-size=8192`.
-The editor's JS heap already sits at 2.3–3.3 GB at ordinary poses. Against
-V8's default 4 GB ceiling, a tab would die mid-run near towns and dense biomes
-and reload, which a harness reads as a navigation, not a crash. Use the same flag
-when launching Chrome by hand to look at those places. The heap itself still
-needs to come down.
-
 ### Fix landed: canonical distance fields were regenerating terrain per lookup
 
 **Symptom:** player-mode movement fell to ~13 FPS (`diagonal`, p50 dt 83 ms) while

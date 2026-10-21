@@ -22,7 +22,7 @@ try {
  const poses=[...(manifestPath?manifest.requestedPoses.filter(p=>p.world==='procedural'&&p.mode==='player'):[3,5,4,9].map(i=>manifest.original[i])),{id:'synthetic-open-ground',synthetic:true}];
  const cases=poses.flatMap(startPose=>['first-person','third-person'].map(cameraMode=>({id:`${startPose.id}-${cameraMode}`,startPose,cameraMode,sequenceId:'walk-sprint-turn-v1'})));
  if(only?.some(id=>!cases.some(c=>c.id===id)))throw new Error(`Unknown motion case ${only}`);
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const c of cases.filter(c=>!only||only.includes(c.id))) {
   console.log(`Motion QA: ${c.id}`);
   const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});await observeVisualAudio(context);page=await context.newPage();errors=createBrowserErrorMonitor(page);

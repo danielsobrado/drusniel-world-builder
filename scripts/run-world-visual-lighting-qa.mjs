@@ -22,7 +22,7 @@ try {
   {id:'night',preset:'moonrise',hour:0,weather:'off'}];
  const cases=poses.flatMap(p=>lights.map(light=>({id:`${p.id}-${light.id}`,pose:p,light})));
  if(only?.some(id=>!cases.some(c=>c.id===id)))throw new Error(`Unknown lighting case ${only}`);
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
  for(const c of cases.filter(c=>!only||only.includes(c.id))) {
   console.log(`Lighting QA: ${c.id}`);
   // A new context gives each pose/light pair fresh weather, wetness and temporal history.

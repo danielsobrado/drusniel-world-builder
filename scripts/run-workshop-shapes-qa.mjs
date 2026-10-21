@@ -113,7 +113,7 @@ try {
   browser = await chromium.launch({
     headless: process.argv.includes('--headless'),
     args: [
-      '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
+      '--enable-unsafe-webgpu',
       '--ignore-gpu-blocklist',
       '--use-angle=default',
       '--enable-gpu-rasterization',

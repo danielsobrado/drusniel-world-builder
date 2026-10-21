@@ -5,7 +5,7 @@ const value = (flag, fallback) => { const index = process.argv.indexOf(flag); re
 const url = value('--url', 'http://127.0.0.1:5180/?profile=1');
 const out = value('--out', 'tmp/grass-test-remaining/render-enhancements.json');
 const timeout = Number(value('--timeout', '120000'));
-const browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192'] });
+const browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 if (process.argv.includes('--stacks')) await page.addInitScript(() => {
   const original = console.error;
