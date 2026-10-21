@@ -52,7 +52,6 @@ export class TownCollisionSource {
     const list = [...boxes];
     if (!this.chunkWorldSize) { this.owners.set(ownerId, list); return; }
     retry: for (;;) {
-      const revision = this.revision;
       const size = this.chunkWorldSize;
       const staged = new Map();
       let steps = 0;
@@ -61,6 +60,10 @@ export class TownCollisionSource {
         affected.add(this.keyFor(box));
         if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
       }
+      // Only a change to a chunk this owner touches (a door, another town) can stale the
+      // staged copy; a city-sized owner yields thousands of times, so any change anywhere
+      // in the world must not restart it.
+      const seen = new Map([...affected].map((key) => [key, this.revisions.get(key) ?? 0]));
       for (const key of affected) {
         const chunk = new Map(); staged.set(key, chunk);
         for (const [id, box] of this.chunks.get(key) ?? []) {
@@ -77,7 +80,8 @@ export class TownCollisionSource {
         if (++steps % 64 === 0) { yield; if (size !== this.chunkWorldSize) continue retry; }
       }
       // Doors or another town may have changed a shared chunk while we yielded.
-      if (revision !== this.revision || size !== this.chunkWorldSize) continue;
+      if (size !== this.chunkWorldSize) continue;
+      for (const [key, revision] of seen) if ((this.revisions.get(key) ?? 0) !== revision) continue retry;
       this.owners.set(ownerId, list);
       for (const [key, chunk] of staged) {
         if (chunk.size) this.chunks.set(key, chunk);

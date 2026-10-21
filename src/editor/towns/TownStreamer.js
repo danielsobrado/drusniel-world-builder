@@ -1,5 +1,5 @@
 import { TownLayoutBuilder } from './TownLayout.js';
-import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance } from './TownLod.js';
+import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance, townSplits } from './TownLod.js';
 import { TownMesh } from './TownMesh.js';
 import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../render/preparation/StagedDrawPublication.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -16,7 +16,9 @@ import { settlementPreparationFor } from '../world/settlements/SettlementPrepara
  * the town collision source while resident. Each frame every resident town
  * picks its kit level of detail from the viewer's distance to its edge, and a
  * near town keeps its interiors (floors, stairs, furniture) to the viewer's
- * surroundings, re-picked every few metres of movement.
+ * surroundings, re-picked every few metres of movement. A population-sized city
+ * (TownLod.townSplits) instead draws the near kit round the viewer and the far kit
+ * beyond, re-picked the same way.
  */
 export class TownStreamer {
   constructor({
@@ -132,6 +134,10 @@ export class TownStreamer {
 
   updateLods(focus) {
     for (const town of this.towns.values()) {
+      if (town.split) {
+        this.updateSplit(town, focus);
+        continue;
+      }
       const distance = townEdgeDistance(town.layout.anchor, town.reach, focus.x, focus.z);
       const lod = selectTownLod(town.mesh.lod, distance, this.lod);
       if (lod !== town.mesh.lod) town.mesh.setLod(lod);
@@ -141,6 +147,18 @@ export class TownStreamer {
       if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
         town.mesh.cullInteriors(x, z, this.lod.interiorRadius);
       }
+    }
+  }
+
+  /** A split town: re-pick the near placements (and the interiors) as the viewer moves. */
+  updateSplit(town, focus) {
+    const x = focus.x - town.layout.anchor.x;
+    const z = focus.z - town.layout.anchor.z;
+    if (needsRefresh(town.mesh.splitCentre, x, z, this.lod.splitRefresh)) {
+      town.mesh.split(x, z, this.lod.splitRadius);
+    }
+    if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
+      town.mesh.cullInteriors(x, z, this.lod.interiorRadius);
     }
   }
 
@@ -209,6 +227,10 @@ export class TownStreamer {
     this.buildJob.mesh = mesh;
     yield* mesh.preparation;
     mesh.preparation = null;
+    // A city publishes already split, never whole with the near kit for a frame.
+    if (townSplits(best.plan.profile?.radius ?? 0, this.lod) && this.focus) {
+      mesh.split(this.focus.x - layout.anchor.x, this.focus.z - layout.anchor.z, this.lod.splitRadius);
+    }
     mesh.setOrigin(this.floatingOrigin.getState());
     yield* stagedDrawPublication(this.scene, [mesh.group], this.getDrawPreparation());
     const town = {
@@ -217,6 +239,7 @@ export class TownStreamer {
       mesh,
       reach: best.plan.profile?.reach ?? 0,
       radius: best.plan.profile?.radius ?? 0,
+      split: townSplits(best.plan.profile?.radius ?? 0, this.lod),
       doorAngles: new Float32Array(layout.doors.length),
       doorTargets: new Float32Array(layout.doors.length),
     };

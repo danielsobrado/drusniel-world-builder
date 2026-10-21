@@ -14,6 +14,8 @@
  */
 export const TOWN_LOD_NEAR = 0;
 export const TOWN_LOD_FAR = 1;
+/** A big town: near kit round the viewer, far kit beyond (TownModuleInstances.split). */
+export const TOWN_LOD_SPLIT = 2;
 
 export const TOWN_LOD_DEFAULTS = Object.freeze({
   farDistance: 100,
@@ -22,7 +24,22 @@ export const TOWN_LOD_DEFAULTS = Object.freeze({
   interiorRadius: 36,
   /** Metres the viewer moves before a town re-picks its nearby interiors. */
   interiorRefresh: 6,
+  /**
+   * Towns wider than this (radius, m) split instead of switching whole: near-kit meshes
+   * hold the placements within `splitRadius` of the viewer and far-kit meshes the rest.
+   * A population-sized city is too big to draw whole with the near kit, while for a
+   * small town the whole-town switch stays cheaper (fewer draws, see above).
+   */
+  splitTownRadius: 160,
+  splitRadius: 130,
+  /** Metres the viewer moves before a split town re-picks its near placements. */
+  splitRefresh: 8,
 });
+
+/** Whether a town of this radius draws split (near round the viewer, far beyond) rather than whole. */
+export function townSplits(radius, options = TOWN_LOD_DEFAULTS) {
+  return radius > options.splitTownRadius;
+}
 
 /**
  * @param {number} current TOWN_LOD_NEAR or TOWN_LOD_FAR

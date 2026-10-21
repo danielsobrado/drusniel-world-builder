@@ -3,7 +3,7 @@ import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
-import { TOWN_LOD_NEAR } from './TownLod.js';
+import { TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
 import { townLook } from './TownMaterialPalette.js';
 import { TownModuleInstances, composePlacement, seedColour } from './TownModuleInstances.js';
 
@@ -26,7 +26,8 @@ function simplerFar(near, far) {
  * One town's draw objects, positioned relative to the burg anchor: per kit
  * module, InstancedMeshes of its merged geometry with the town's shared
  * material, at two levels of detail (TownModuleInstances). `setLod` draws the
- * whole town with the full kit (0) or the light far kit (1); `cullInteriors`
+ * whole town with the full kit (0) or the light far kit (1); `split` draws a big
+ * town near round the viewer and far beyond; `cullInteriors`
  * keeps floors, stairs and furniture to the viewer's surroundings. Door leaves
  * are their own instanced mesh so a door can swing without touching anything
  * else.
@@ -77,6 +78,13 @@ export class TownMesh {
   setLod(lod) {
     this.lod = lod;
     for (const instances of this.modules) instances.setLod(lod);
+  }
+
+  /** A big town: near kit within `radius` of the town-local point (x, z), far kit beyond. */
+  split(x, z, radius) {
+    this.lod = TOWN_LOD_SPLIT;
+    this.splitCentre = { x, z };
+    for (const instances of this.modules) instances.split(x, z, radius);
   }
 
   /** Draw interior modules only within `radius` of the town-local point (x, z). */
