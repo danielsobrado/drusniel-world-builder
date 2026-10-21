@@ -1501,6 +1501,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const burgId = Number(new URLSearchParams(window.location.search).get('burg')) || 18;
     terrainView.settlementQaRoute = await prepareSettlementApproach({ controller, terrainView, config, burgId });
   }
+  if (perfQaConfig?.scenarioId === 'bog-cross') {
+    const { prepareBogCross } = await import('./editor/performance/qa/BogCrossFixture.js');
+    terrainView.settlementQaRoute = await prepareBogCross({ controller, terrainView, config });
+  }
   const perfQa = PerfQaHarness.fromLocation({
     viewModeController,
     playerController,

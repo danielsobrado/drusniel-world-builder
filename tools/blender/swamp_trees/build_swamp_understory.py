@@ -262,6 +262,68 @@ def build_fern(fern):
     return finish('swamp-fern-01', bm, fern)
 
 
+def glow_materials():
+    """Dark rotten stems, and caps that glow a cold green: the bog's bioluminescent
+    fungi. The emission rides glTF (KHR_materials_emissive_strength), which the
+    ground-detail layer keeps when it clones the material."""
+    stem = bpy.data.materials.new('Swamp fungus stem')
+    stem.use_nodes = True
+    bsdf = next(n for n in stem.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    bsdf.inputs['Base Color'].default_value = (0.11, 0.1, 0.075, 1)
+    bsdf.inputs['Roughness'].default_value = 0.8
+    cap = bpy.data.materials.new('Swamp fungus glow')
+    cap.use_nodes = True
+    bsdf = next(n for n in cap.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    bsdf.inputs['Base Color'].default_value = (0.25, 0.55, 0.45, 1)
+    bsdf.inputs['Roughness'].default_value = 0.5
+    bsdf.inputs['Emission Color'].default_value = (0.25, 1.0, 0.65, 1)
+    bsdf.inputs['Emission Strength'].default_value = 2.5
+    return stem, cap
+
+
+def build_fungi(materials):
+    """A cluster of glowing toadstools on a rotten stub, with bracket shelves."""
+    stem_mat, cap_mat = materials
+    rng = random.Random(21)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+    caps = []
+
+    def cap(centre, radius, height):
+        # A flattened dome: one ring of six around a crown point, and an underside fan.
+        ring = [bm.verts.new(centre + Vector((math.cos(a) * radius, math.sin(a) * radius, 0)))
+                for a in (k * math.pi / 3 for k in range(6))]
+        top = bm.verts.new(centre + Vector((0, 0, height)))
+        under = bm.verts.new(centre - Vector((0, 0, height * 0.25)))
+        for k in range(6):
+            caps.append(bm.faces.new((ring[k], ring[(k + 1) % 6], top)))
+            caps.append(bm.faces.new((ring[(k + 1) % 6], ring[k], under)))
+
+    stub = [Vector((0, 0, -0.1)), Vector((0.02, 0, 0.25)), Vector((0.03, 0.01, 0.45))]
+    tube(bm, uv, stub, [0.2, 0.17, 0.15], 6, rough=0.1, rng=rng)
+    for k in range(9):
+        a = rng.uniform(0, 6.28)
+        r = rng.uniform(0.18, 0.55)
+        h = rng.uniform(0.06, 0.2)
+        base = Vector((math.cos(a) * r, math.sin(a) * r, -0.02))
+        tube(bm, uv, [base, base + Vector((0, 0, h))], [0.012, 0.01], 3, cap_end=False)
+        cap(base + Vector((0, 0, h)), rng.uniform(0.04, 0.08), rng.uniform(0.025, 0.045))
+    for k in range(3):
+        a = rng.uniform(0, 6.28)
+        cap(Vector((math.cos(a) * 0.17, math.sin(a) * 0.17, 0.15 + k * 0.1)), 0.09, 0.02)
+    mesh = bpy.data.meshes.new('swamp-fungi-01')
+    cap_faces = set(caps)
+    for face in bm.faces:
+        face.material_index = 1 if face in cap_faces else 0
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.materials.append(stem_mat)
+    mesh.materials.append(cap_mat)
+    for poly in mesh.polygons:
+        poly.use_smooth = True
+    return mesh, sum(len(poly.vertices) - 2 for poly in mesh.polygons)
+
+
 def place(name, mesh):
     root = bpy.data.objects.new(name, None)
     bpy.context.scene.collection.objects.link(root)
@@ -328,7 +390,9 @@ def main():
     setup_scene()
     wood = material('Swamp wood', wood_texture())
     fern = material('Swamp fern', fern_texture(), alpha=True)
-    for build, mat, distance in ((build_log, wood, 5), (build_stump, wood, 3.5), (build_knees, wood, 3.5), (build_fern, fern, 2.2)):
+    glow = glow_materials()
+    for build, mat, distance in ((build_log, wood, 5), (build_stump, wood, 3.5), (build_knees, wood, 3.5), (build_fern, fern, 2.2),
+                                 (build_fungi, glow, 1.6)):
         mesh, tris = build(mat)
         name = mesh.name
         assert tris <= MAX_TRIANGLES, f'{name} has {tris} triangles, over {MAX_TRIANGLES}'

@@ -87,8 +87,9 @@ export class PerfQaHarness {
     if (!config) {
       return null;
     }
-    if (config.scenarioId === 'settlement-approach') {
-      if (!deps.terrainView.settlementQaRoute) throw new Error('Settlement QA route was not prepared.');
+    // Routes on the frozen Azgaar import: their spawn is only known once it is loaded.
+    if (config.scenarioId === 'settlement-approach' || config.scenarioId === 'bog-cross') {
+      if (!deps.terrainView.settlementQaRoute) throw new Error(`${config.scenarioId} QA route was not prepared.`);
       config = Object.freeze({ ...config, ...deps.terrainView.settlementQaRoute });
     }
     return new PerfQaHarness({ ...deps, config });

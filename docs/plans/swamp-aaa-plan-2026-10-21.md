@@ -29,20 +29,42 @@ it lives.
 | Air | Bog overcast (`SkyLookController`), `bogMurkLook` (teal murk over sky, fog and cloud, plus `skyFog` fading the dome), and fog beyond the regional bound. The jungle ground mist, spores, midges and fireflies now also run in the `wetland` ambient region. |
 | Light | `bogWisps`: slow emissive will-o'-wisps over the pools. `stylized/bog/BogVents.js` with the `bogGasFlame` recipe: swamp-gas flames that catch on dry bog islands in turns, at most three at once. Each has a flickering virtual light and ground pool. No scene lights. |
 
-Still open:
+Also done (2026-10-21, later the same day):
 
-- Glowing fungi (§6).
-- A wading footstep below the water table (§7).
-- QA pose in `WorldVisualQa` and a `qa:perf` A/B (§8). The capture used during
-  development is a scratch script around `__worldVisualQa` with
-  `--js-flags=--max-old-space-size=8192`, because the app's JS heap already sits
-  at 2.3–3.3 GB of the default 4 GB limit and the tab intermittently dies near
-  towns.
-- The far terrain's canopy lift still draws rounded lumps on the bog horizon.
+- **Glowing fungi:** `swamp-fungi-01`, toadstools on a rotten stub with an
+  emissive cap material (glTF emissive strength 2.5) as a tile-12 ground
+  detail, under canopy.
+- **Wading sound:** a footfall with at least 4 cm of water over the foot
+  splashes (`GlbCharacterView`, `SPLASH_DEPTH`), so ankle-deep bog pools
+  sound wet below wading depth.
+- **Hanging moss:** swamp crowns opt out of the canopy grade
+  (`canopyGrade: false` on the tree variant). The moss keeps its painted
+  grey and the leaves their olive.
+- **QA:**
+  - `npm run qa:world:visual -- --suite bog --out …` captures four frozen
+    poses (`BOG_VISUAL_POSES`): `bog-pools` and `bog-forest`, each at ground
+    level and from above.
+  - `npm run qa:perf -- --headed --qa bog-cross --warmup 8 --settle` runs
+    through the swamp forest (`BogCrossFixture`).
+- **Heap:** every QA browser runs with an 8 GB JS heap (`docs/perf-qa.md`).
 
-Review spots used while tuning (canonical metres, Eldara, player height 1.7 m,
-yaw 0.6): a pool-and-island bog at (-2255555, -1564130), and a closed swamp
-forest at (-3534792, -1471060).
+The "rounded lumps on the horizon" were never the far terrain. They were the
+tree fallback proxy, drawn for every distant tree whenever the impostor atlas
+no longer matches the tree sources. **Any change to a tree GLB, leaf colour or
+tree-material option needs `npm run bake:impostors`.** Check
+`__worldVisualQa.diagnostics().assetIntegrity.ready` after such a change.
+
+`bog-cross` baseline on this machine (RTX 4080, headed, warmup 8, settled; two
+runs). It was recorded with the swamp in place, as there is no pre-swamp build
+of this route to A/B against:
+
+| Run | avg FPS | hitches | p50 ms | p95 ms | p99 ms | max ms |
+|---|---|---|---|---|---|---|
+| 1 | 96.4 | 7 | 9.3 | 14.4 | 29.5 | 120.1 |
+| 2 | 98.2 | 7 | 9.0 | 13.8 | 31.2 | 173.7 |
+
+Still open: the app's JS heap itself (2.3–3.3 GB at ordinary poses) and the
+tab crash near Grukmar towns. Both are outside the swamp work.
 
 ## Today vs target (as planned)
 

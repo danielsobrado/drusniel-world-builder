@@ -22,12 +22,19 @@ export function selectAdditionalPoses({sampleTile,original=[],seed=20261014,maxC
   if([...required.values()].some(n=>n>0))throw new Error(`Insufficient biome coverage after ${sampled} candidates: ${JSON.stringify([...required])}`);
   return {seed,sampled,poses};
 }
+/** Grukmar's bog (docs/plans/swamp-aaa-plan-2026-10-21.md): pools and islands, then closed swamp forest. */
+export const BOG_VISUAL_POSES=Object.freeze([
+  ['bog-pools',-2255555,-1564130],['bog-forest',-3534792,-1471060],
+].flatMap(([id,x,z])=>[
+  {id,world:'eldara',expectedBiomeId:12,x,z,yaw:.6,pitch:-.05,mode:'player',heightAboveGround:1.7},
+  {id:`${id}-overview`,world:'eldara',expectedBiomeId:12,x,z,yaw:.6,pitch:-.35,mode:'fly',heightAboveGround:25,fov:60},
+]));
 export function parseVisualArguments(args) {
   const result={suite:'all',url:'http://localhost:5173'};
   for(let i=0;i<args.length;i++) {
     const key=args[i];if(!['--out','--suite','--baseline','--url','--only'].includes(key)||!args[i+1]||args[i+1].startsWith('--'))throw new Error(`Invalid visual QA argument: ${key}`);
     result[key.slice(2)]=args[++i];
   }
-  if(!result.out||!['original','atmosphere','biome-classification','extended','composition','shore','imported','lighting','motion','all'].includes(result.suite))throw new Error('Visual QA requires --out PATH and a valid suite.');
+  if(!result.out||!['original','atmosphere','biome-classification','extended','composition','shore','imported','bog','lighting','motion','all'].includes(result.suite))throw new Error('Visual QA requires --out PATH and a valid suite.');
   return result;
 }

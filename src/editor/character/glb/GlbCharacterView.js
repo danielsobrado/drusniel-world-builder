@@ -30,6 +30,9 @@ import { ContactShadow } from './ContactShadow.js';
 import { createContactBlob } from './contactShadowBlob.js';
 import { collectHumanoidBones } from './humanoidRig.js';
 
+/** Water over the foot (metres) from which a footfall splashes rather than lands. */
+const SPLASH_DEPTH = 0.04;
+
 /**
  * Height of the swim pivot (the chest) as a share of the body. Swimming lifts
  * the body until that pivot rides just under the surface, whatever the
@@ -304,7 +307,8 @@ export class GlbCharacterView {
       z: this._footPosition.z,
       facing: this.motion.facing,
       speed: this.motion.speed,
-      surface: status.waterState === PLAYER_WATER_WADING ? 'water' : 'ground',
+      // Ankle-deep bog and shallows splash too, not only water past wading depth.
+      surface: status.waterState === PLAYER_WATER_WADING || (status.waterDepth ?? 0) >= SPLASH_DEPTH ? 'water' : 'ground',
     });
     for (const listener of this._footstepListeners) listener(event);
   }

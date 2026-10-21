@@ -553,9 +553,12 @@ stylizedSurface:
       # fluted, buttressed giants forking into a bare twig lattice, sparse dark
       # leaves and hanging moss, plus a broken dead snag. The bog wears nothing
       # else, so its silhouette is its own (docs/plans/swamp-aaa-plan-2026-10-21.md).
+      # `canopyGrade: false`: their grey moss and olive leaves keep the painted
+      # colour rather than the shared green canopy ramp.
       - scene: /assets/trees/swamp/swamp-giant-01.glb
         trunkMaterial: Swamp bark
         leafMaterial: Swamp leaves
+        canopyGrade: false
         species: wetland_sparse
         barkProfile: swamp
         barkScale: 0.7
@@ -566,6 +569,7 @@ stylizedSurface:
       - scene: /assets/trees/swamp/swamp-giant-02.glb
         trunkMaterial: Swamp bark
         leafMaterial: Swamp leaves
+        canopyGrade: false
         species: wetland_sparse
         barkProfile: swamp
         barkScale: 0.7
@@ -576,6 +580,7 @@ stylizedSurface:
       - scene: /assets/trees/swamp/swamp-giant-03.glb
         trunkMaterial: Swamp bark
         leafMaterial: Swamp leaves
+        canopyGrade: false
         species: wetland_sparse
         barkProfile: swamp
         barkScale: 0.7
@@ -586,6 +591,7 @@ stylizedSurface:
       - scene: /assets/trees/swamp/swamp-snag-01.glb
         trunkMaterial: Swamp bark
         leafMaterial: Swamp leaves
+        canopyGrade: false
         species: wetland_sparse
         barkProfile: swamp
         barkScale: 0.7
@@ -670,8 +676,8 @@ stylizedSurface:
       # which is what lets a wetland be lush and a savanna dry without new
       # geometry. Green stays full height as reeds; dry is scaled to tuft height.
       # --- Bog floor (tools/blender/swamp_trees/build_swamp_understory.py):
-      # ferns under the swamp giants, fallen mossy logs, broken stumps and
-      # cypress knees standing out of the mud. Grukmar's bogs only.
+      # ferns under the swamp giants, fallen mossy logs, broken stumps, cypress
+      # knees standing out of the mud and glowing fungi. Grukmar's bogs only.
       - scene: /assets/ground/swamp/swamp-fern-01.glb
         motion: grass-tuft
         scale: 1
@@ -704,6 +710,17 @@ stylizedSurface:
         sway: false
         prototypeGroups:
           - [swamp-knees-01]
+      # Bioluminescent toadstools on rotten stubs: an emissive cap material that
+      # blooms after dark. Light comes from the glow itself, never a scene light.
+      - scene: /assets/ground/swamp/swamp-fungi-01.glb
+        motion: rigid
+        scale: 1
+        weight: 0.45
+        tileIds: [12]
+        canopy: core
+        sway: false
+        prototypeGroups:
+          - [swamp-fungi-01]
       - scene: /assets/ground/weeds/grass-blade-01.glb
         motion: grass-tuft
         scale: 1

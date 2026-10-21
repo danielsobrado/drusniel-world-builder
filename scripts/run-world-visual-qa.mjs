@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath,pathToFileURL } from 'node:url';
-import { originalVisualPoses,parseVisualArguments } from './lib/world-visual-poses.mjs';
+import { BOG_VISUAL_POSES,originalVisualPoses,parseVisualArguments } from './lib/world-visual-poses.mjs';
 import { captureVisualSource,visualSourceStayedFixed } from './lib/world-visual-source.mjs';
 import { fileHash,validateVisualReport } from './lib/world-visual-report.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
@@ -49,6 +49,7 @@ try {
     if(report.mapHash!==manifest.mapSha256)throw new Error('Frozen imported map hash changed.');
     poses=args.suite==='imported'?manifest.imported.map(p=>({...p,world:'eldara'})):[...manifest.shore.filter(p=>p.world==='procedural'),...manifest.marine,...manifest.shore.filter(p=>p.world==='eldara')];
   }
+  if(args.suite==='bog')poses=[...BOG_VISUAL_POSES];
   if(args.suite==='composition') {
     const biomes=JSON.parse(await readFile(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json',root),'utf8'));
     const shores=JSON.parse(await readFile(new URL('docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json',root),'utf8'));
@@ -57,7 +58,7 @@ try {
       ...shores.shore.filter(p=>p.world==='procedural'),...shores.marine,
       ...shores.imported.map(p=>({...p,world:'eldara'})),...shores.shore.filter(p=>p.world==='eldara')];
   }
-  if(!['original','atmosphere','biome-classification','extended','composition','shore','imported'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
+  if(!['original','atmosphere','biome-classification','extended','composition','shore','imported','bog'].includes(args.suite))throw new Error(`Suite ${args.suite} requires later implementation fixtures; no fixtures were skipped.`);
   if(args.only) {
     const ids=args.only.split(',');
     if(ids.some(id=>!poses.some(p=>p.id===id)))throw new Error(`Unknown requested pose: ${args.only}`);

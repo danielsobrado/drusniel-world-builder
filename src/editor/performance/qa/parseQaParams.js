@@ -66,6 +66,11 @@ const SCENARIOS = Object.freeze({
     keys: ({ running }) => running ? ['KeyW', 'ShiftLeft'] : ['KeyW'],
     defaults: { warmup: 8, duration: 12, speed: 'run' },
   },
+  'bog-cross': {
+    id: 'bog-cross', label: 'Grukmar swamp forest crossing',
+    keys: ({ running }) => running ? ['KeyW', 'ShiftLeft'] : ['KeyW'],
+    defaults: { warmup: 8, duration: 12, speed: 'run' },
+  },
   'construction-ring': {
     id: 'construction-ring',
     label: 'Dense construction wall corridor',

@@ -169,7 +169,7 @@ def leaf_atlas():
         length = rng.uniform(0.3, 0.95) * h
         phase, freq, amp = rng.uniform(0, 6.28), rng.uniform(0.01, 0.03), rng.uniform(2, 7)
         width = rng.uniform(1.2, 2.4)
-        tone = np.array([0.47, 0.51, 0.37]) * rng.uniform(0.7, 1.1)
+        tone = np.array([0.42, 0.43, 0.33]) * rng.uniform(0.7, 1.1)
         for y in range(int(length)):
             t = y / length
             x = xs0 + amp * math.sin(phase + y * freq)

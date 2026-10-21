@@ -4806,13 +4806,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "8e4a4226249f6f72145e39c4c0483b8953b6a2cd213eefad3faaa23772029547",
-      "sourceSha256": "64d920c5398594d3ebf7b03b646f8b794a8230b87dbb622d674e249245f8a2a9",
-      "outputSha256": "9a20ae8adbf29385882084d92851f4ec1025a7bb2305ea2bc71bd1f92faab6c7",
-      "sourceBytes": 605892,
-      "outputBytes": 227296,
-      "gzipBytes": 201596,
-      "brotliBytes": 200544,
+      "cacheKey": "e067b3e4f5ab4b84ed10ec7a870681d6cec20072b9a885f8c4a577a79997df3d",
+      "sourceSha256": "04363ad23fa282f4aa3dadb21136730aa9b999ed952fab36ce22e7e13ae2f3f4",
+      "outputSha256": "74cd8adf24f71f40da5e1b7223d526f25d18cb289d9f6fe5a36fd8853cfb533a",
+      "sourceBytes": 605052,
+      "outputBytes": 225840,
+      "gzipBytes": 200219,
+      "brotliBytes": 199112,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -4841,12 +4841,12 @@
             9.758790969848633
           ]
         },
-        "bufferBytes": 603208,
+        "bufferBytes": 602368,
         "logicalAccessorBytes": 457564,
         "logicalVertexBytes": 376384,
         "logicalIndexBytes": 81180,
         "geometryBufferBytes": 457564,
-        "imageBufferBytes": 145643,
+        "imageBufferBytes": 144803,
         "nodeNames": [
           "swamp-giant-01",
           "swamp-giant-01-Bark",
@@ -4888,12 +4888,12 @@
             9.75878906
           ]
         },
-        "bufferBytes": 490384,
+        "bufferBytes": 488928,
         "logicalAccessorBytes": 256169,
         "logicalVertexBytes": 174989,
         "logicalIndexBytes": 81180,
         "geometryBufferBytes": 266636,
-        "imageBufferBytes": 133092,
+        "imageBufferBytes": 131633,
         "nodeNames": [
           "swamp-giant-01",
           "swamp-giant-01-Bark",
@@ -4945,13 +4945,13 @@
         },
         "data": {
           "json": 3404,
-          "binary": 223748,
+          "binary": 222292,
           "buffers": {
             "vertex": 76349,
             "index": 14304,
             "animation": 0,
             "transform": 0,
-            "image": 133092
+            "image": 131633
           }
         }
       }
@@ -4982,13 +4982,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "e4f0b585227da213600a8892df4bb82e3304d65994a13a755e1497cd65febce0",
-      "sourceSha256": "d32bd869dafe4b02b5fc27d9ed2d4eb5d64270b1a2977294140850a5c078d7c5",
-      "outputSha256": "44cb2c8ccd06cc24b666bef3870f5b1571c664b5ae7932bc25513ed281121cba",
-      "sourceBytes": 503964,
-      "outputBytes": 205180,
-      "gzipBytes": 185140,
-      "brotliBytes": 184271,
+      "cacheKey": "dd86e730b08f6c20d89272c67ea36937e2303b82dd0659641ba656e5ee1a5dbd",
+      "sourceSha256": "b0feb00cbd9e34c48ee45eb7a37e840b18e9725ea987d2b17f3bad4a86cc3f5b",
+      "outputSha256": "2b350cf6ac301dea2cbaf299443e258e778dd34881caf2190d3c1b333aa53736",
+      "sourceBytes": 503124,
+      "outputBytes": 203724,
+      "gzipBytes": 183747,
+      "brotliBytes": 182769,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5017,12 +5017,12 @@
             10.770421028137207
           ]
         },
-        "bufferBytes": 501280,
+        "bufferBytes": 500440,
         "logicalAccessorBytes": 355634,
         "logicalVertexBytes": 291008,
         "logicalIndexBytes": 64626,
         "geometryBufferBytes": 355634,
-        "imageBufferBytes": 145643,
+        "imageBufferBytes": 144803,
         "nodeNames": [
           "swamp-giant-02",
           "swamp-giant-02-Bark",
@@ -5064,12 +5064,12 @@
             10.7705078
           ]
         },
-        "bufferBytes": 409092,
+        "bufferBytes": 407636,
         "logicalAccessorBytes": 199353,
         "logicalVertexBytes": 134727,
         "logicalIndexBytes": 64626,
         "geometryBufferBytes": 207458,
-        "imageBufferBytes": 133092,
+        "imageBufferBytes": 131633,
         "nodeNames": [
           "swamp-giant-02",
           "swamp-giant-02-Bark",
@@ -5121,13 +5121,13 @@
         },
         "data": {
           "json": 3401,
-          "binary": 201632,
+          "binary": 200176,
           "buffers": {
             "vertex": 57110,
             "index": 11423,
             "animation": 0,
             "transform": 0,
-            "image": 133092
+            "image": 131633
           }
         }
       }
@@ -5158,13 +5158,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "5b9a534051a2c7c16d1d4ec778ea576bad47d9e76fe328f63f970a73b1bb73e0",
-      "sourceSha256": "bb576d99ed6326ffd3ac61f9cc595546bc6fce55b8a1229412cc040688717eba",
-      "outputSha256": "a74b8a1e5d831296ef84add1788d6a15804520e07856be3941aa37c54d187f6e",
-      "sourceBytes": 570152,
-      "outputBytes": 218928,
-      "gzipBytes": 194894,
-      "brotliBytes": 193704,
+      "cacheKey": "d1fc7a25e4b0f8b8c0c3e1d8f905c8c458ff34e52320096dd96b80d1a412cdc9",
+      "sourceSha256": "23d41abf0e2de88f5afda12855ec38662bb9471df7ff296950cdedc98e7ac873",
+      "outputSha256": "d10b1b045ec7964157f20cc20fdab7fa3df9bae0e9f4afa295fe5c57c7479d63",
+      "sourceBytes": 569312,
+      "outputBytes": 217472,
+      "gzipBytes": 193384,
+      "brotliBytes": 192177,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5193,12 +5193,12 @@
             11.257506370544434
           ]
         },
-        "bufferBytes": 567464,
+        "bufferBytes": 566624,
         "logicalAccessorBytes": 421820,
         "logicalVertexBytes": 350048,
         "logicalIndexBytes": 71772,
         "geometryBufferBytes": 421820,
-        "imageBufferBytes": 145643,
+        "imageBufferBytes": 144803,
         "nodeNames": [
           "swamp-giant-03",
           "swamp-giant-03-Bark",
@@ -5240,12 +5240,12 @@
             11.2573242
           ]
         },
-        "bufferBytes": 460832,
+        "bufferBytes": 459376,
         "logicalAccessorBytes": 235787,
         "logicalVertexBytes": 164015,
         "logicalIndexBytes": 71772,
         "geometryBufferBytes": 245452,
-        "imageBufferBytes": 133092,
+        "imageBufferBytes": 131633,
         "nodeNames": [
           "swamp-giant-03",
           "swamp-giant-03-Bark",
@@ -5297,13 +5297,13 @@
         },
         "data": {
           "json": 3401,
-          "binary": 215380,
+          "binary": 213924,
           "buffers": {
             "vertex": 69673,
             "index": 12611,
             "animation": 0,
             "transform": 0,
-            "image": 133092
+            "image": 131633
           }
         }
       }
@@ -5334,13 +5334,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "6f0bc0508ff526cf1e8b80972bc74082dea005ea9f8fe5adbeb62297dd68792c",
-      "sourceSha256": "ce3af0e7e850f9aad888313b10f6dd074871064feeef0ca196eeabb12992a94e",
-      "outputSha256": "e2f0787a20535f510f88102fec10c16bc71af3ada604b678a094ea2bec9f8255",
-      "sourceBytes": 212980,
-      "outputBytes": 149668,
-      "gzipBytes": 144639,
-      "brotliBytes": 143997,
+      "cacheKey": "229c16afce98b1e3c66ef5384c5e471e95a379155d270e2e571fa6870b0b6c71",
+      "sourceSha256": "ee5cb47185b11dc55a13708060b79a95992a77c726a335614f97c0e1f855c75c",
+      "outputSha256": "f88b2d8634f53bb16b17b0c49545d4276db2b35caed01b62951ec2308e89eb6d",
+      "sourceBytes": 212140,
+      "outputBytes": 148212,
+      "gzipBytes": 143169,
+      "brotliBytes": 142524,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5369,12 +5369,12 @@
             5.012197494506836
           ]
         },
-        "bufferBytes": 210316,
+        "bufferBytes": 209476,
         "logicalAccessorBytes": 64672,
         "logicalVertexBytes": 52096,
         "logicalIndexBytes": 12576,
         "geometryBufferBytes": 64672,
-        "imageBufferBytes": 145643,
+        "imageBufferBytes": 144803,
         "nodeNames": [
           "swamp-snag-01",
           "swamp-snag-01-Bark",
@@ -5416,12 +5416,12 @@
             5.01220703
           ]
         },
-        "bufferBytes": 184024,
+        "bufferBytes": 182568,
         "logicalAccessorBytes": 36418,
         "logicalVertexBytes": 23842,
         "logicalIndexBytes": 12576,
         "geometryBufferBytes": 37888,
-        "imageBufferBytes": 133092,
+        "imageBufferBytes": 131633,
         "nodeNames": [
           "swamp-snag-01",
           "swamp-snag-01-Bark",
@@ -5473,13 +5473,13 @@
         },
         "data": {
           "json": 3386,
-          "binary": 146136,
+          "binary": 144680,
           "buffers": {
             "vertex": 10763,
             "index": 2276,
             "animation": 0,
             "transform": 0,
-            "image": 133092
+            "image": 131633
           }
         }
       }
@@ -7518,6 +7518,180 @@
             "animation": 0,
             "transform": 0,
             "image": 10172
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/ground/swamp/swamp-fungi-01.glb",
+      "source": "assets/runtime-sources/ground/swamp/swamp-fungi-01.glb",
+      "output": "public/assets/ground/swamp/swamp-fungi-01.glb",
+      "profile": "standardScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "color,attrib",
+        "-tu",
+        "normal"
+      ],
+      "cacheKey": "d000c1de6b09629f7f513d69d18ec6cb08263cacbfaee13c9f9aa650619de4e9",
+      "sourceSha256": "1b4241ca2a0813221d3510abe0555d4baa3a60441a2d573211e696da7b544a79",
+      "outputSha256": "16c5ea196857b66932c28d3b0788854ccaaab8c33e583054b47d128ff3b05a39",
+      "sourceBytes": 10216,
+      "outputBytes": 4276,
+      "gzipBytes": 2289,
+      "brotliBytes": 2109,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 2,
+        "textures": 0,
+        "images": 0,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 228,
+        "renderedTriangles": 228,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp fungus glow": 144,
+          "Swamp fungus stem": 84
+        },
+        "sceneBounds": {
+          "min": [
+            -0.3382937014102936,
+            -0.11166365444660187,
+            -0.4653816819190979
+          ],
+          "max": [
+            0.5178724527359009,
+            0.46001359820365906,
+            0.3396301865577698
+          ]
+        },
+        "bufferBytes": 7832,
+        "logicalAccessorBytes": 7832,
+        "logicalVertexBytes": 6464,
+        "logicalIndexBytes": 1368,
+        "geometryBufferBytes": 7832,
+        "imageBufferBytes": 0,
+        "nodeNames": [
+          "swamp-fungi-01",
+          "swamp-fungi-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp fungus glow",
+          "Swamp fungus stem"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "KHR_materials_emissive_strength"
+        ],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 2,
+        "textures": 0,
+        "images": 0,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 228,
+        "renderedTriangles": 228,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp fungus glow": 144,
+          "Swamp fungus stem": 84
+        },
+        "sceneBounds": {
+          "min": [
+            -0.338287354,
+            -0.111663818,
+            -0.465377808
+          ],
+          "max": [
+            0.517883301,
+            0.460006714,
+            0.339630127
+          ]
+        },
+        "bufferBytes": 6096,
+        "logicalAccessorBytes": 4173,
+        "logicalVertexBytes": 2805,
+        "logicalIndexBytes": 1368,
+        "geometryBufferBytes": 4360,
+        "imageBufferBytes": 0,
+        "nodeNames": [
+          "swamp-fungi-01",
+          "swamp-fungi-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp fungus glow",
+          "Swamp fungus stem"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_materials_emissive_strength",
+          "KHR_mesh_quantization"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 0,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 2,
+        "hints": 0,
+        "drawCalls": 2,
+        "vertices": 187,
+        "triangles": 228
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 2,
+          "textureCount": 0,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 2,
+          "instanceCount": 2,
+          "triangleCount": 228
+        },
+        "data": {
+          "json": 2399,
+          "binary": 1736,
+          "buffers": {
+            "vertex": 1485,
+            "index": 246,
+            "animation": 0,
+            "transform": 0,
+            "image": 0
           }
         }
       }
@@ -14002,15 +14176,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 72635332,
-    "outputBytes": 39720184,
-    "gzipBytes": 37750213,
-    "brotliBytes": 37706703,
-    "logicalSourceVertexBytes": 37261744,
-    "logicalOutputVertexBytes": 17837340,
-    "logicalSourceIndexBytes": 4738308,
-    "logicalOutputIndexBytes": 4461036,
-    "savedBytes": 32915148,
-    "reductionRatio": 0.453156
+    "sourceBytes": 72642188,
+    "outputBytes": 39718636,
+    "gzipBytes": 37746752,
+    "brotliBytes": 37702878,
+    "logicalSourceVertexBytes": 37268208,
+    "logicalOutputVertexBytes": 17840145,
+    "logicalSourceIndexBytes": 4739676,
+    "logicalOutputIndexBytes": 4462404,
+    "savedBytes": 32923552,
+    "reductionRatio": 0.453229
   }
 }

@@ -66,6 +66,10 @@ export function createStylizedLeafMaterial({
   // forest-pack narrow conifer's brown leaf cards stayed brown and, under
   // foliage lighting and haze, read as pale cream columns in the taiga.
   leafGain = 1,
+  // False keeps a painted crown's own texture colour (times COLOR_0 when the
+  // geometry carries it) instead of re-grading it onto the shared green ramp:
+  // the swamp giants' grey moss and olive leaves are not canopy greens.
+  canopyGrade = true,
 }) {
   registerTreeWindTime(config, time);
   // Height within the crown from the prototype's own geometry: `positionLocal`
@@ -93,10 +97,10 @@ export function createStylizedLeafMaterial({
   // carries the attribute may ask for it.
   let authoredColor = null;
   if (preserveSourceColor && map) {
-    authoredColor = gradeCanopy(
-      authoredTexture(map).rgb.mul(colorNode(source?.color ?? '#ffffff')).mul(leafGain),
-      resolveCanopyGrade(config.trees?.canopyGrade),
-    );
+    const painted = authoredTexture(map).rgb.mul(colorNode(source?.color ?? '#ffffff')).mul(leafGain);
+    authoredColor = canopyGrade
+      ? gradeCanopy(painted, resolveCanopyGrade(config.trees?.canopyGrade))
+      : (vertexColor ? painted.mul(attribute('color', 'vec3')) : painted);
   } else if (preserveSourceColor && vertexColor) {
     authoredColor = attribute('color', 'vec3');
   }
@@ -125,7 +129,7 @@ export function createStylizedLeafMaterial({
     material.colorNode = crown;
     material.emissiveNode = treeFoliageEmission(crown);
     // Its biome and autumn tints are ratios against the grade, not the palette.
-    material.userData.gradedCanopy = true;
+    material.userData.gradedCanopy = canopyGrade;
   } else {
     material.colorNode = applyCanopyRim(leafColor, config, palette);
   }
