@@ -4,10 +4,17 @@ import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 
 export const SETTLEMENT_SKYLINE = Object.freeze({ radius: 3200, near: 560, maxTowns: 8 });
 
+/**
+ * A town's massing stands in for it until the town itself is drawn: hidden once its
+ * site is ready (`isDrawn`), or, without one, inside SETTLEMENT_SKYLINE.near. A
+ * population-sized city is wider than `near`, so the site, not the distance, decides.
+ */
+
 /** Worker-prepared massing; installation and shader preparation are deferred. */
 export class SettlementSkyline {
-  constructor({ scene, getDrawPreparation = () => null }) {
+  constructor({ scene, getDrawPreparation = () => null, isDrawn = null }) {
     this.root = new THREE.Group(); this.root.name = 'settlement-skylines'; scene.add(this.root);
+    this.isDrawn = isDrawn;
     this.getDrawPreparation = getDrawPreparation;
     this.material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 1, metalness: 0,
       side: THREE.DoubleSide, flatShading: true });
@@ -49,10 +56,10 @@ export class SettlementSkyline {
       yield;
       mesh = new THREE.Mesh(geometry, this.material); mesh.name = `settlement-skyline-${id}`;
       mesh.castShadow = false; mesh.receiveShadow = false; mesh.userData.skipWarmup = true;
-      this.staged.set(id, { mesh, centre });
-      this.place({ mesh, centre });
+      this.staged.set(id, { id, mesh, centre });
+      this.place({ id, mesh, centre });
       yield* stagedDrawPublication(this.root, [mesh], this.getDrawPreparation());
-      this.place({ mesh, centre }); this.root.add(mesh); this.towns.set(id, { mesh, centre }); published = true;
+      this.place({ id, mesh, centre }); this.root.add(mesh); this.towns.set(id, { id, mesh, centre }); published = true;
       PerfCounters.inc('settlementSkylinesInstalled');
     } finally { this.staged.delete(id); if (!published) { mesh?.removeFromParent(); geometry.dispose(); } }
   }
@@ -71,9 +78,10 @@ export class SettlementSkyline {
     }
   }
 
-  place({ mesh, centre }) {
+  place({ id, mesh, centre }) {
     mesh.position.set(centre.x - this.origin.x, 0, centre.z - this.origin.z);
-    mesh.visible = Math.hypot(centre.x - this.focus.x, centre.z - this.focus.z) > SETTLEMENT_SKYLINE.near;
+    mesh.visible = this.isDrawn ? !this.isDrawn(id)
+      : Math.hypot(centre.x - this.focus.x, centre.z - this.focus.z) > SETTLEMENT_SKYLINE.near;
   }
   update(focus, origin) {
     Object.assign(this.origin, origin); Object.assign(this.focus, focus);

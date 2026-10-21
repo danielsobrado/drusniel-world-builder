@@ -65,3 +65,17 @@ test('eviction cancels staged skyline geometry before exposing it', t => {
   skyline.refresh(null, { x: 0, z: 0 }, 2);
   assert.equal(skyline.pending, 0); assert.equal(skyline.root.children.length, 0); assert.ok(disposals > 0);
 });
+
+test('a town massing hides exactly while its own site draws it, however wide the town is', () => {
+  const drawn = new Set();
+  const skyline = new SettlementSkyline({ scene: new Scene(), isDrawn: (id) => drawn.has(id) });
+  const mesh = { position: { set() {} }, visible: true };
+  skyline.focus = { x: 0, z: 0 };
+  // The camera stands at the town centre: well inside SETTLEMENT_SKYLINE.near.
+  skyline.place({ id: 7, mesh, centre: { x: 0, z: 0 } });
+  assert.equal(mesh.visible, true, 'a site still loading leaves the massing up, so there is no hole');
+  drawn.add(7);
+  skyline.place({ id: 7, mesh, centre: { x: 0, z: 0 } });
+  assert.equal(mesh.visible, false, 'a drawn town replaces its massing');
+  skyline.dispose();
+});

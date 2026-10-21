@@ -23,7 +23,12 @@ export const SETTLEMENT_VIEW = Object.freeze({
   nearOut: 84,
   /** Street furniture is drawn only this close. */
   smallRange: 95,
-  farRange: 620,
+  /**
+   * Buildings of an adopted site draw out to here (props stop at `smallRange`). Wide
+   * enough for a whole population-sized city seen from `siteRadius`, so a site draws
+   * all of its town and the skyline can step aside for it (SettlementSkyline isDrawn).
+   */
+  farRange: 1500,
   fadeSeconds: 0.35,
   /** Metres the camera may move before levels of detail are re-chosen. */
   reselectMetres: 2,
@@ -67,7 +72,12 @@ export class SettlementView {
     this.pool = new SettlementPrototypePool({ root: this.root, renderer: terrainView.renderer,
       getDrawPreparation: () => terrainView.drawPreparation });
     this.skyline = new SettlementSkyline({ scene: terrainView.scene,
-      getDrawPreparation: () => terrainView.drawPreparation });
+      getDrawPreparation: () => terrainView.drawPreparation,
+      // A town's own buildings replace its massing once its site is prepared and paved.
+      isDrawn: (id) => {
+        const site = this.sites.get(id);
+        return Boolean(site?.surfaces && !site.job && site.pavingReady);
+      } });
     this.library = new SettlementSurfaceLibrary({ renderer: terrainView.renderer, baseUrl });
     this.sites = new Map();
     this.preparation = settlementPreparationFor(terrainView.worldStore);
