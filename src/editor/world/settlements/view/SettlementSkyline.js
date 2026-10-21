@@ -37,8 +37,8 @@ export class SettlementSkyline {
     for (const id of this.failed.keys()) if (!this.expected.has(id)) this.failed.delete(id);
     for (const { entry } of near) {
       const id = entry.settlement.id;
-      if (this.towns.has(id) || this.jobs.has(id) || this.failed.has(id)) continue;
       getPlan(entry);
+      if (this.towns.has(id) || this.jobs.has(id) || this.failed.has(id)) continue;
       if (!entry.skyline) continue;
       const centre = { x: entry.settlement.cellX * tileSize, z: -entry.settlement.cellZ * tileSize };
       this.jobs.set(id, this.install(id, entry.skyline, centre));

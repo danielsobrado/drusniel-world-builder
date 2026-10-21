@@ -2,6 +2,7 @@ import { AmbientEffectsSystem } from './AmbientEffectsSystem.js';
 import { BreathPuffs } from './BreathPuffs.js';
 import { RidgePlumes } from './RidgePlumes.js';
 import { ambientPresetName } from './ambientPresets.js';
+import { SettlementSamplingPreparation } from '../../world/settlements/SettlementSamplingPreparation.js';
 
 /** Height above the orbit target that stands in for a walker's eyes. */
 const ORBIT_EYE_HEIGHT = 1.7;
@@ -31,6 +32,9 @@ export class WorldAmbience {
     this.skyView = skyView;
     this.defaultWind = { x: defaultWindDirection[0], z: defaultWindDirection[1] };
     this.focus = { x: 0, y: 0, z: 0 };
+    this.sampling = new SettlementSamplingPreparation(terrainView.worldStore);
+    terrainView.worldAmbience = this;
+    this.queryRadius = settings.plumes?.enabled ? 1200 : 160;
     this.system = new AmbientEffectsSystem({
       scene: terrainView.scene,
       settings,
@@ -38,6 +42,7 @@ export class WorldAmbience {
       getTileSize: () => tileSize,
       getWater: (x, z) => getGenerator()?.sampleWater?.(x / tileSize, -z / tileSize) ?? null,
       getGroundHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
+      getGroundRevision: () => `${terrainView.worldStore.baseTerrainRevision}:${terrainView.worldStore.revision}`,
       sunDirection: skyView?.sunDirection ?? null,
     });
     this.addExtras(settings, snowLine);
@@ -71,9 +76,19 @@ export class WorldAmbience {
    * @param {number} state.snowCountry 0..1
    * @param {object | null} [state.player] the walker, for breath
    */
-  update(delta, { camera, walking, orbitFocus, weather, skyPreset, night, snowCountry, player = null }) {
+  update(delta, { camera, walking, orbitFocus, weather, skyPreset, night, snowCountry, player = null, budget = null }) {
     if (!this.system.enabled) return;
     const origin = this.terrainView.floatingOrigin.getState();
+    const point = walking || !orbitFocus ? camera.position : orbitFocus;
+    const tileSize = this.terrainView.worldStore.tileSize;
+    const snap = this.terrainView.worldStore.chunkSize * tileSize;
+    const x = Math.round((point.x + origin.x) / snap) * snap;
+    const z = Math.round((point.z + origin.z) / snap) * snap;
+    const radius = this.queryRadius + snap;
+    const prepare = () => this.sampling.prepare({ minX: (x - radius) / tileSize, maxX: (x + radius) / tileSize,
+      minZ: -(z + radius) / tileSize, maxZ: -(z - radius) / tileSize }, budget?.shouldYield);
+    this.preparing = !(budget?.runner ?? (run => run()))(prepare);
+    if (this.preparing) return;
     if (walking || !orbitFocus) {
       this.focus.x = camera.position.x;
       this.focus.y = camera.position.y;
@@ -101,6 +116,7 @@ export class WorldAmbience {
       snowCountry,
       seaLevel: this.getGenerator()?.seaLevel ?? 0,
       player,
+      budget,
     });
   }
 
@@ -123,6 +139,8 @@ export class WorldAmbience {
   }
 
   dispose() {
+    if (this.terrainView.worldAmbience === this) this.terrainView.worldAmbience = null;
+    this.sampling.dispose();
     this.system.dispose();
   }
 }

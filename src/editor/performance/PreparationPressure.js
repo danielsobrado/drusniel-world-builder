@@ -17,8 +17,11 @@ export function hasPreparationBacklog(surface) {
   if (surface.terrainView?.objectView?.pendingObjectUpdates?.size > 0) return true;
   if (surface.terrainView?.settlementView?.hasPendingWork?.()) return true;
   if (surface.terrainView?.macroFarTerrain?.getPreparationStatus?.().ready === false) return true;
+  if (surface.terrainView?.worldAmbience?.preparing || surface.terrainView?.worldAmbience?.system.ground?.job
+      || surface.terrainView?.minimapPreparation?.minimapRequest) return true;
   const towns = surface.terrainView?.townRuntime?.streamer;
-  if (towns?.assets.ready && (towns.pending.size > 0 || towns.buildJob)) return true;
+  if (towns?.assets.ready && (towns.pending.size > 0 || towns.buildJob
+      || [...(towns.towns?.values() ?? [])].some(town => town.selectionJob))) return true;
   return (surface.meadowGrass?.blades?.staleTiles?.length ?? 0)
     + (surface.meadowGrass?.cards?.staleTiles?.length ?? 0) > 0;
 }

@@ -19,9 +19,8 @@ import { HudRegionMap } from './HudRegionMap.js';
 export function createHudMinimapSource({ ui, controller, tileMap, getBaseTerrain = () => null }) {
   const editorMap = Object.freeze({
     frame: ui.minimapFrame ?? null,
-    getWindow: () => ({ center: ui.minimapCenter, cells: ui.minimapCells }),
-    // Drawn at once rather than queued, so the new bitmap and the offset the
-    // HUD derives from its centre land in the same frame.
+    getWindow: () => ui.minimapPublishedWindow ?? ({ center: ui.minimapCenter, cells: ui.minimapCells }),
+    // Offset follows the published bitmap until the replacement is complete.
     recenter: (cell) => {
       ui.minimapCenter = cell;
       ui.updateMinimap();

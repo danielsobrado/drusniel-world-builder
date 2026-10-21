@@ -1560,6 +1560,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const canonicalFocusScratch = { x: 0, z: 0 };
   const frameOriginScratch = { x: 0, z: 0 };
   const playerBodyScratch = { x: 0, y: 0, z: 0 };
+  ui.minimapBudget = deferredWork;
+  terrainView.minimapPreparation = ui;
   terrainView.setAnimationLoop((timestamp) => {
     if (!active) return;
 
@@ -1579,6 +1581,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       }
     }
     if (profiling) perfQa.mark('terrainCommit');
+    ui.advanceMinimap(deferredWork);
     exploration.beforeMovement(frameTimestamp);
     // Optional roadside dressing gets one budget-gated turn near the start of the frame.
     // Its own revision gate makes unchanged frames effectively free.
@@ -1820,6 +1823,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     });
     snowPowder.update(frameSeconds);
     worldAmbience.update(frameDelta, {
+      budget: deferredWork,
       camera: viewModeController.camera,
       walking: viewModeController.mode === PLAYER_MODE_WALK,
       orbitFocus: renderFocus,

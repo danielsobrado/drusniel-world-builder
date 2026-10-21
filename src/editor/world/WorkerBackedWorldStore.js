@@ -244,7 +244,7 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
 
     const sourceRevision = this.baseTerrainRevision;
     const sourceEpoch = this.worldStateEpoch;
-    const workerRequest = this.requestWorkerPage(chunkX, chunkZ, priority);
+    const workerRequest = Promise.resolve().then(() => this.requestWorkerPage(chunkX, chunkZ, priority));
     const contentRequest = Promise.resolve().then(() => {
       if (this.disposed) {
         throw createCancelledRequestError('World chunk request cancelled by store disposal.');

@@ -128,8 +128,8 @@ export class SettlementView {
       const edge = (distance - entry.reachCells) * tileSize;
       if (!this.sites.has(id) && edge > SETTLEMENT_VIEW.siteRadius) continue;
       keep.add(id);
-      if (this.sites.has(id)) continue;
       const plan = this.plans.get(entry, edge, this);
+      if (this.sites.has(id)) continue;
       if (!plan) continue;
       const site = new SettlementSite({ entry, plan, generator: this.generator, tileSize,
         library: this.library, getDrawPreparation: () => this.terrainView.drawPreparation });

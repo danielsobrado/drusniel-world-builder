@@ -20,7 +20,7 @@ function fixture() {
     buildings: Array.from({ length: 100 }, (_, i) => ({ kind: 'house', variant: 0, x: i * 10, z: 0, yaw: 0, pad: 0 })),
     props: [], fields: [], streets: [] };
   const entry = { settlement, plan, index: {}, skyline: {}, reachCells: 75 };
-  const generator = { ensureSettlementField: () => ({ entriesNear: (x, z, radius) =>
+  const generator = { ensureSettlementField: () => ({ findById: id => id === settlement.id ? entry : null, entriesNear: (x, z, radius) =>
     Math.hypot(x, z) < radius + 75 ? [{ entry, distance: Math.hypot(x, z) }] : [] }), sampleHeight: () => 0 };
   const store = { generator };
   const source = new TownCollisionSource().configure(128), scene = new Scene();

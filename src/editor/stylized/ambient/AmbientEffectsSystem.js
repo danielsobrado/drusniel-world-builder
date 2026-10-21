@@ -48,7 +48,7 @@ export class AmbientEffectsSystem {
    * @param {object | null} [options.sunDirection] live sun direction node
    * @param {string} [options.quality]
    */
-  constructor({ scene, settings, getTile, getTileSize, getWater, getGroundHeight, sunDirection = null, quality = 'high' }) {
+  constructor({ scene, settings, getTile, getTileSize, getWater, getGroundHeight, prepareGround, getGroundRevision, sunDirection = null, quality = 'high' }) {
     this.settings = settings;
     this.enabled = settings.enabled;
     this.fields = [];
@@ -60,7 +60,7 @@ export class AmbientEffectsSystem {
     this.getTileSize = getTileSize;
     this.getWater = getWater;
     this.getGroundHeight = getGroundHeight;
-    this.ground = new LocalGroundHeight({ getHeight: getGroundHeight });
+    this.ground = new LocalGroundHeight({ getHeight: getGroundHeight, prepareBounds: prepareGround, getRevision: getGroundRevision });
     this.levels = { sea: uniform(0), lake: uniform(-1e5), desert: uniform(0) };
     this.light = { sun: uniform(new THREE.Color(1, 1, 1)), sky: uniform(new THREE.Color(0.5, 0.6, 0.7)) };
     this.sun = sunDirection ?? vec3(0.35, 0.85, 0.25).normalize();
@@ -168,7 +168,9 @@ export class AmbientEffectsSystem {
     const delta = Math.min(Math.max(Number(deltaSeconds) || 0, 0), MAX_STEP_SECONDS);
     this.elapsed += delta;
     this.levels.sea.value = seaLevel;
-    this.ground.update(focus, origin);
+    const prepare = () => this.ground.update(focus, origin, state.budget?.shouldYield);
+    (state.budget?.runner ?? (run => run()))(prepare);
+    if (!this.ground.ready) return;
 
     const jumped = !this.lastFocus
       || Math.hypot(focus.x + origin.x - this.lastFocus.x, focus.z + origin.z - this.lastFocus.z) > SNAP_DISTANCE;

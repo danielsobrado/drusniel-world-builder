@@ -102,7 +102,6 @@ export class TownStreamer {
           || this.buildErrors.has(settlement.id)) continue;
       this.pending.set(settlement.id, { settlement, plan });
     }
-    plans.end();
     for (const [id, town] of this.towns) {
       const distance = Math.hypot(town.layout.anchor.x - focus.x, town.layout.anchor.z - focus.z);
       if (distance > this.unloadRadius + town.reach) this.unload(id);
@@ -111,6 +110,13 @@ export class TownStreamer {
       const distance = this.distanceTo(entry.settlement, focus);
       if (distance > this.unloadRadius + (entry.plan.profile?.reach ?? 0)) this.pending.delete(id);
     }
+    const retained = new Set([...this.towns.keys(), ...this.pending.keys()]);
+    if (this.buildJob) retained.add(this.buildJob.entry.settlement.id);
+    for (const id of retained) {
+      const entry = field?.findById(id);
+      if (entry) plans.get(entry, this.distanceTo(entry.settlement, focus), this);
+    }
+    plans.end();
   }
 
   prepareField(generator) {

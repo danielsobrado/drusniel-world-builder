@@ -14,8 +14,7 @@ import { createMinimapBurgElements } from './map/minimapBurgMarkers.js';
 import { normalizeSceneSettings } from './settings/SceneSettings.js';
 import { createPostProcessingSettingsPanel } from './settings/PostProcessingSettingsPanel.js';
 import { assetFileName, formatBytes, trackStreamingSettle } from './ui/loadingSources.js';
-import { hexToRgbBytes } from './tileCatalog.js';
-import { shadeMinimapPixel } from './map/minimapRelief.js';
+import { MinimapRaster, WAIT_FOR_MINIMAP } from './map/MinimapRaster.js';
 
 const TERRAIN_MODE_LABELS = Object.freeze({
   paint: 'Paint',
@@ -1306,9 +1305,10 @@ export class EditorUi {
       const bounds = this.minimap.getBoundingClientRect();
       const normalizedX = (event.clientX - bounds.left) / bounds.width - 0.5;
       const normalizedZ = (event.clientY - bounds.top) / bounds.height - 0.5;
+      const mapWindow = this.minimapPublishedWindow ?? { center: this.minimapCenter, cells: this.minimapCells };
       controller.focusCell(
-        Math.floor(this.minimapCenter.x + normalizedX * this.minimapCells),
-        Math.floor(this.minimapCenter.z + normalizedZ * this.minimapCells),
+        Math.floor(mapWindow.center.x + normalizedX * mapWindow.cells),
+        Math.floor(mapWindow.center.z + normalizedZ * mapWindow.cells),
       );
       this.minimapCenter = controller.getFocusCell?.() ?? this.minimapCenter;
       this.queueMinimapUpdate();
@@ -1830,76 +1830,57 @@ export class EditorUi {
   }
 
   queueMinimapUpdate() {
-    if (this.minimapQueued) return;
-    this.minimapQueued = true;
-    requestAnimationFrame(() => {
-      this.minimapQueued = false;
-      this.updateMinimap();
-    });
+    this.minimapRequestKey = null;
+    this.updateMinimap();
   }
 
   updateMinimap() {
+    if (this.minimapDisposed) return;
+    this.minimapRaster ??= new MinimapRaster(this);
+    const request = { center: { ...this.minimapCenter }, cells: this.minimapCells, revision: this.minimapRaster.revision() };
+    const key = `${request.center.x}:${request.center.z}:${request.cells}:${request.revision}`;
+    if (key === this.minimapRequestKey) return;
+    this.minimapRequestKey = key; this.minimapRequest = request;
+    this.scheduleMinimap();
+  }
+
+  scheduleMinimap() {
+    if (this.minimapBudget || this.minimapQueued || this.minimapDisposed) return;
+    this.minimapQueued = true;
+    requestAnimationFrame(() => {
+      this.minimapQueued = false;
+      if (!this.minimapBudget) this.advanceMinimap();
+    });
+  }
+
+  advanceMinimap(budget = null) {
+    if (this.minimapDisposed || !this.minimapRequest) return;
+    const raster = this.minimapRaster, request = this.minimapRequest;
+    const revision = raster.revision();
+    if (this.minimapJob && this.minimapActive.revision !== revision) {
+      this.minimapJob.return(); this.minimapJob = null;
+    }
     const context = this.minimap.getContext('2d', { alpha: false });
-    const image = context.createImageData(MINIMAP_SIZE, MINIMAP_SIZE);
-    const minimumX = this.minimapCenter.x - Math.floor(this.minimapCells / 2);
-    const minimumZ = this.minimapCenter.z - Math.floor(this.minimapCells / 2);
-    const cellAt = (pixel, minimum) => minimum + Math.floor(pixel * this.minimapCells / MINIMAP_SIZE);
-
-    // One height per pixel plus a one-pixel ring, so every pixel has four
-    // neighbours for its relief without sampling any column twice.
-    const span = MINIMAP_SIZE + 2;
-    const heights = new Float32Array(span * span);
-    for (let row = 0; row < span; row += 1) {
-      const z = cellAt(row - 1, minimumZ);
-      for (let column = 0; column < span; column += 1) {
-        heights[row * span + column] = this.heightField.getCellHeight(cellAt(column - 1, minimumX), z) ?? 0;
-      }
+    if (!this.minimapJob) {
+      this.minimapActive = { ...request, revision };
+      this.minimapActiveRequest = request;
+      this.minimapJob = raster.build(request.center, request.cells, context, budget?.shouldYield);
     }
-    const spacing = (this.minimapCells / MINIMAP_SIZE) * (this.tileMap?.tileSize ?? 1);
-    const neighbours = { left: 0, right: 0, up: 0, down: 0 };
-
-    for (let pixelZ = 0; pixelZ < MINIMAP_SIZE; pixelZ += 1) {
-      for (let pixelX = 0; pixelX < MINIMAP_SIZE; pixelX += 1) {
-        const tile = this.tileMap.getTileDefinition(this.tileMap.get(cellAt(pixelX, minimumX), cellAt(pixelZ, minimumZ)));
-        const at = (pixelZ + 1) * span + pixelX + 1;
-        neighbours.left = heights[at - 1];
-        neighbours.right = heights[at + 1];
-        neighbours.up = heights[at - span];
-        neighbours.down = heights[at + span];
-        const [red, green, blue] = shadeMinimapPixel(hexToRgbBytes(tile.color), {
-          water: tile.terrainClass === 'water',
-          height: heights[at],
-          neighbours,
-          spacing,
-        });
-        const offset = (pixelZ * MINIMAP_SIZE + pixelX) * 4;
-        image.data[offset] = red;
-        image.data[offset + 1] = green;
-        image.data[offset + 2] = blue;
-        image.data[offset + 3] = 255;
+    const advance = () => {
+      while (!budget?.shouldYield()) {
+        const step = this.minimapJob.next();
+        if (step.done) {
+          raster.publish(step.value, context);
+          this.minimapPublishedWindow = { center: step.value.center, cells: step.value.cells };
+          this.renderMinimapBurgs(); this.minimapJob = null;
+          if (this.minimapRequest === this.minimapActiveRequest) this.minimapRequest = null;
+          break;
+        }
+        if (!budget || step.value === WAIT_FOR_MINIMAP) break;
       }
-    }
-
-    context.putImageData(image, 0, 0);
-    const scale = MINIMAP_SIZE / this.minimapCells;
-    for (const object of this.objectMap.list()) {
-      if (object.x < minimumX || object.z < minimumZ
-          || object.x >= minimumX + this.minimapCells
-          || object.z >= minimumZ + this.minimapCells) {
-        continue;
-      }
-      const definition = this.objectByKey.get(object.definitionKey);
-      context.fillStyle = definition.color;
-      context.fillRect(
-        Math.floor((object.x - minimumX) * scale) - 1,
-        Math.floor((object.z - minimumZ) * scale) - 1,
-        Math.max(2, Math.ceil(definition.footprint.width * scale)),
-        Math.max(2, Math.ceil(definition.footprint.depth * scale)),
-      );
-    }
-    // No centre marker in the bitmap: the walking HUD keeps the player centred
-    // between redraws, so a mark at the bitmap's centre would drift off them.
-    this.renderMinimapBurgs();
+    };
+    (budget?.runner ?? (run => run()))(advance);
+    if (this.minimapRequest) this.scheduleMinimap();
   }
 
   /**
@@ -1911,8 +1892,8 @@ export class EditorUi {
     if (!this.minimapBurgs) return;
     const markers = selectMinimapBurgs({
       campaign: this.controller?.campaign ?? null,
-      center: this.minimapCenter,
-      cells: this.minimapCells,
+      center: this.minimapPublishedWindow?.center ?? this.minimapCenter,
+      cells: this.minimapPublishedWindow?.cells ?? this.minimapCells,
     });
     this.minimapBurgs.replaceChildren(...createMinimapBurgElements(markers, this.tileMap?.tileSize ?? 1));
   }
@@ -1927,6 +1908,8 @@ export class EditorUi {
     }, 2600);
   }
   dispose() {
+    this.minimapDisposed = true;
+    this.minimapJob?.return(); this.minimapRaster?.dispose();
     this.postProcessingPanel?.dispose(); this.unsubscribeGodRaysPostProcessing?.();
     this.constructionDrawingControls?.dispose();
   }

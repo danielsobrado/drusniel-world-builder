@@ -21,7 +21,21 @@ export class CameraCutCoordinator {
     this.active = true;
     player.cutBlocked = true;
     player.resetInput?.();
+    const store = this.terrainView.worldStore, source = store?.generator;
+    const sampling = store?.chunkWorker ? new SettlementSamplingPreparation(store) : null;
     try {
+      if (sampling) {
+        const cellX = x / store.tileSize, cellZ = -z / store.tileSize;
+        const bounds = { minX: cellX - 2, maxX: cellX + 2, minZ: cellZ - 2, maxZ: cellZ + 2 };
+        for (;;) {
+          let units = 0;
+          if (sampling.prepare(bounds, () => ++units > 16)) break;
+          if (generation !== this.generation || this.disposed || store.generator !== source) return { cancelled: true };
+          if (this.now() - startedAt >= this.timeoutMs) throw new Error('Camera cut terrain preparation timed out.');
+          await this.nextFrame();
+        }
+        if (generation !== this.generation || this.disposed || store.generator !== source) return { cancelled: true };
+      }
       // No await until the new resident descriptors, origin and camera agree.
       this.terrainView.cutToCanonical({ x, z }, startedAt);
       const origin = this.terrainView.floatingOrigin;
@@ -52,6 +66,7 @@ export class CameraCutCoordinator {
       }
       return generation === this.generation ? { cancelled: false, generation } : { cancelled: true };
     } finally {
+      sampling?.dispose();
       if (generation === this.generation) {
         this.active = false;
         player.cutBlocked = false;
@@ -66,3 +81,5 @@ export class CameraCutCoordinator {
     this.playerController.cutBlocked = false;
   }
 }
+import { SettlementSamplingPreparation } from './settlements/SettlementSamplingPreparation.js';
+

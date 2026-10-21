@@ -93,6 +93,8 @@ test('an edit during generation supersedes the stale worker result before cachin
   const { store, jobs } = fixture({ hold: true });
   const pending = store.requestChunk(0, 0); await tick();
   store.setTile(1, 1, 9); jobs[0].release(); await tick();
+  // The worker waits for the configured edit-quiet period before replacing it.
+  for (let turn = 0; jobs.length < 2 && turn < 400; turn++) await new Promise(resolve => setTimeout(resolve, 5));
   assert.equal(jobs.length, 2); assert.equal(store.cache.size, 0);
   jobs[1].release(); const page = await pending;
   assert.equal(page.tiles[5], 9); assert.equal(store.cache.get('0:0'), page);
