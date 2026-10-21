@@ -90,6 +90,9 @@ export function createSurfaceMaskConfig(stylizedConfig, { tileSize = null } = {}
   const bake = stylizedConfig?.materialBake;
   return {
     grassDensityByTile: grassDensityByTile(stylizedConfig),
+    // Bare-ground colour per biome where it differs from the map colour
+    // (config/biome-looks.yaml `soil`); a plain object for the chunk workers.
+    soilColorByTile: { ...(stylizedConfig?.biomeLooks?.soil ?? {}) },
     tileSize: tileSize ?? 2,
     snow: bake?.classification && Number.isFinite(tileSize)
       ? { classification: bake.classification, seedOffset: bake.macro.seedOffset, tileSize }
@@ -115,14 +118,14 @@ function resolveTile(tileId, tileDefinitions) {
   return tileDefinitions?.get?.(tileId) ?? TILE_BY_ID.get(tileId);
 }
 
-export function buildTilePixels(tiles, tileDefinitions = null) {
+export function buildTilePixels(tiles, tileDefinitions = null, soilColorByTile = null) {
   const pixels = new Uint8Array(tiles.length * 4);
   for (let index = 0; index < tiles.length; index += 1) {
     const tile = resolveTile(tiles[index], tileDefinitions);
     if (!tile) {
       throw new Error(`Unknown tile id: ${tiles[index]}.`);
     }
-    const [red, green, blue] = hexToRgbBytes(tile.color);
+    const [red, green, blue] = hexToRgbBytes(soilColorByTile?.[tile.id] ?? tile.color);
     const offset = index * 4;
     pixels[offset] = red;
     pixels[offset + 1] = green;
@@ -321,7 +324,7 @@ export function buildSurfaceMaskPixels({
  */
 export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinitions = null, sampling = {}) {
   const chunkSize = Math.sqrt(page.tiles.length) | 0;
-  page.tilePixels = buildTilePixels(page.tiles, tileDefinitions);
+  page.tilePixels = buildTilePixels(page.tiles, tileDefinitions, maskConfig?.soilColorByTile);
   // Biome snow blurred across borders, for the material bake's snow.
   page.snowBiomeCover = new Uint8Array(chunkSize * chunkSize);
   const colors = new Map();
@@ -329,7 +332,7 @@ export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinit
     let color = colors.get(tileId);
     if (!color) {
       const tile = resolveTile(tileId, tileDefinitions);
-      color = tile ? hexToRgbBytes(tile.color) : [0, 0, 0];
+      color = tile ? hexToRgbBytes(maskConfig?.soilColorByTile?.[tile.id] ?? tile.color) : [0, 0, 0];
       colors.set(tileId, color);
     }
     return color;

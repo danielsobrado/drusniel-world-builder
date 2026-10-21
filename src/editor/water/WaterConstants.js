@@ -2,7 +2,8 @@ export const WATER_DOMAIN_LEGACY_VERSION = 0;
 // 3: lakes carry their own level from Azgaar lake features, and river levels are
 // traced along the terrain with falls where it drops. Both change deterministic
 // geography, so worlds re-import.
-export const WATER_DOMAIN_VERSION = 3;
+// 4: bogs lay their ground around a water table, with pools of standing water.
+export const WATER_DOMAIN_VERSION = 4;
 
 export const WATER_KIND_NONE = 0;
 export const WATER_KIND_OCEAN = 1;
@@ -11,6 +12,8 @@ export const WATER_KIND_RIVER = 3;
 
 export const WATER_BODY_ID_NONE = 0;
 export const WATER_BODY_ID_PROCEDURAL_OCEAN = 1;
+/** Every bog pool: still water at the local water table (BogPools). */
+export const WATER_BODY_ID_BOG = 2;
 /** Lake bodies are this plus the Azgaar feature id (feature ids stay below 512). */
 export const WATER_BODY_ID_LAKE_BASE = 512;
 export const WATER_BODY_ID_RIVER_BASE = 1024;

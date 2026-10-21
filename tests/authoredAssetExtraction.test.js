@@ -70,10 +70,16 @@ test('every published ambient ground detail stays cheap enough to stream', async
       `/${output.published.replace(/^public\//, '')}`,
       output.triangles,
     ]));
+  // Assets authored for the runtime directly (the Blender swamp understory) are
+  // measured by the optimizer's own source stats instead.
+  const runtime = JSON.parse(await readFile(path.join(ROOT, 'assets/runtime-asset-manifest.json'), 'utf8'));
+  for (const asset of runtime.assets) {
+    if (!trianglesByScene.has(asset.scene)) trianglesByScene.set(asset.scene, asset.sourceStats?.triangles);
+  }
 
   for (const variant of config.stylizedSurface.assets.groundDetailVariants) {
     const triangles = trianglesByScene.get(variant.scene);
-    assert.ok(triangles !== undefined, `${variant.scene} is not a published extraction`);
+    assert.ok(triangles !== undefined, `${variant.scene} is neither a published extraction nor a runtime asset`);
     assert.ok(
       triangles <= 350,
       `${variant.scene} streams ${triangles} triangles as ambient ground cover`,

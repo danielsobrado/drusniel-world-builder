@@ -333,7 +333,7 @@ stylizedSurface:
         motion: woody-shrub
         scale: 1
         weight: 1.2
-        tileIds: [6, 3, 4, 5, 8, 12, 14]
+        tileIds: [6, 3, 4, 5, 8, 14]
         canopy: edge
       - scene: /assets/bushes/small_bush.glb
         motion: woody-shrub
@@ -351,7 +351,7 @@ stylizedSurface:
         motion: woody-shrub
         scale: 1
         weight: 1
-        tileIds: [4, 3, 6, 9, 12, 14]
+        tileIds: [4, 3, 6, 9, 14]
         character: scrub
         canopy: open
       - scene: /assets/bushes/bamboo_bush.glb
@@ -441,12 +441,12 @@ stylizedSurface:
       - scene: /assets/trees/tree-scene/tree-03.glb
         trunkMaterial: Bark
         leafMaterial: Leaves
-        species: [broadleaf_tall, wetland_sparse]
+        species: broadleaf_tall
         barkProfile: birch
         barkScale: 0.72
         barkSeed: 127
         scale: 1
-        tileIds: [8, 12]
+        tileIds: [8]
       # grass-test's meadow trees (tree1-tree9), prepared by
       # scripts/prepare-meadow-tree-assets.mjs: billboards stripped, bark UV
       # transforms baked, branches and roots decimated to ~3 500 triangles, leaf
@@ -503,23 +503,23 @@ stylizedSurface:
       - scene: /assets/trees/meadow/tree4.glb
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
-        species: [broadleaf_tall, wetland_sparse]
+        species: broadleaf_tall
         scale: 0.357
-        tileIds: [4, 8, 12]
+        tileIds: [4, 8]
         pivot: trunk
       - scene: /assets/trees/meadow/tree5.glb
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
-        species: [broadleaf_tall, wetland_sparse]
+        species: broadleaf_tall
         scale: 0.357
-        tileIds: [4, 8, 12]
+        tileIds: [4, 8]
         pivot: trunk
       - scene: /assets/trees/meadow/tree6.glb
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
-        species: [broadleaf_tall, wetland_sparse]
+        species: broadleaf_tall
         scale: 0.357
-        tileIds: [4, 8, 12]
+        tileIds: [4, 8]
         pivot: trunk
       # grass-test's alpine conifers (§11 item 6), prepared by
       # scripts/prepare-alpine-tree-assets.mjs: billboards stripped, needles and
@@ -545,6 +545,50 @@ stylizedSurface:
         preferredTileIds: [10]
         # Windswept: the crown streams ~3 m downwind of the stem, so a bounds pivot
         # would stand the trunk (and its collider) that far off the placement.
+        pivot: trunk
+      # Grukmar's swamp trees (tools/blender/swamp_trees/build_swamp_trees.py):
+      # fluted, buttressed giants forking into a bare twig lattice, sparse dark
+      # leaves and hanging moss, plus a broken dead snag. The bog wears nothing
+      # else, so its silhouette is its own (docs/plans/swamp-aaa-plan-2026-10-21.md).
+      - scene: /assets/trees/swamp/swamp-giant-01.glb
+        trunkMaterial: Swamp bark
+        leafMaterial: Swamp leaves
+        species: wetland_sparse
+        barkProfile: swamp
+        barkScale: 0.7
+        barkSeed: 211
+        scale: 1
+        tileIds: [12]
+        pivot: trunk
+      - scene: /assets/trees/swamp/swamp-giant-02.glb
+        trunkMaterial: Swamp bark
+        leafMaterial: Swamp leaves
+        species: wetland_sparse
+        barkProfile: swamp
+        barkScale: 0.7
+        barkSeed: 223
+        scale: 1
+        tileIds: [12]
+        pivot: trunk
+      - scene: /assets/trees/swamp/swamp-giant-03.glb
+        trunkMaterial: Swamp bark
+        leafMaterial: Swamp leaves
+        species: wetland_sparse
+        barkProfile: swamp
+        barkScale: 0.7
+        barkSeed: 227
+        scale: 1
+        tileIds: [12]
+        pivot: trunk
+      - scene: /assets/trees/swamp/swamp-snag-01.glb
+        trunkMaterial: Swamp bark
+        leafMaterial: Swamp leaves
+        species: wetland_sparse
+        barkProfile: swamp
+        barkScale: 0.7
+        barkSeed: 229
+        scale: 1
+        tileIds: [12]
         pivot: trunk
     # Sparse recognisable plants layered over the shared procedural blade carpet.
     # Each prototype group becomes one instanced object with all of its authored
@@ -622,6 +666,41 @@ stylizedSurface:
       # --- Tall blades. The same two shapes come in Green_Grass and Brown_Grass,
       # which is what lets a wetland be lush and a savanna dry without new
       # geometry. Green stays full height as reeds; dry is scaled to tuft height.
+      # --- Bog floor (tools/blender/swamp_trees/build_swamp_understory.py):
+      # ferns under the swamp giants, fallen mossy logs, broken stumps and
+      # cypress knees standing out of the mud. Grukmar's bogs only.
+      - scene: /assets/ground/swamp/swamp-fern-01.glb
+        motion: grass-tuft
+        scale: 1
+        weight: 2.2
+        tileIds: [12]
+        canopy: core
+        prototypeGroups:
+          - [swamp-fern-01]
+      - scene: /assets/ground/swamp/swamp-log-01.glb
+        motion: rigid
+        scale: 1
+        weight: 0.35
+        tileIds: [12]
+        sway: false
+        prototypeGroups:
+          - [swamp-log-01]
+      - scene: /assets/ground/swamp/swamp-stump-01.glb
+        motion: rigid
+        scale: 1
+        weight: 0.3
+        tileIds: [12]
+        sway: false
+        prototypeGroups:
+          - [swamp-stump-01]
+      - scene: /assets/ground/swamp/swamp-knees-01.glb
+        motion: rigid
+        scale: 1
+        weight: 0.6
+        tileIds: [12]
+        sway: false
+        prototypeGroups:
+          - [swamp-knees-01]
       - scene: /assets/ground/weeds/grass-blade-01.glb
         motion: grass-tuft
         scale: 1
@@ -906,7 +985,8 @@ stylizedSurface:
           9: {shortHeight: 0.1, tallHeight: 0.28, width: 0.05, density: 0.8, patchMeters: 12, shape: slender}
           10: {shortHeight: 0.06, tallHeight: 0.16, width: 0.028, density: 0.28, patchMeters: 7, shape: slender}
           11: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
-          12: {shortHeight: 0.28, tallHeight: 0.95, width: 0.05, density: 0.82, patchMeters: 13, shape: reed}
+          # Bog: sedge tussocks on the islands, patchy over moss rather than a field.
+          12: {shortHeight: 0.14, tallHeight: 0.6, width: 0.045, density: 0.5, patchMeters: 5, shape: reed}
       bladeHeight: 0.64
       bladeWidth: 0.071
       heightScale: [0.72, 1.3]
@@ -931,7 +1011,7 @@ stylizedSurface:
           8: { base: '#3d5f3c', tip: '#829b68' }   # cool mossy floor
           10: { base: '#666746', tip: '#a3a07a' }  # sparse tundra
           9: { base: '#34563a', tip: '#8fa77a' }   # taiga: cool sage
-          12: { base: '#3a6a2e', tip: '#9ab85e' }  # wetland: lush, reedy
+          12: { base: '#22351c', tip: '#6b7a3c' }  # wetland: dark sedge, olive tips
       # grass-test's final visual-refinement layer, converted at 2.8 units/m.
       # Keep stand density and streaming distances: depth comes from pigment.
       appearance:
@@ -997,7 +1077,7 @@ stylizedSurface:
           8: { litter: '#5a4a30', litterAmount: 0.5, moss: 0.5, soil: 0.2, streaks: 0.3 }    # temperate rainforest
           9: { litter: '#6b543a', litterAmount: 0.6, moss: 0.55, soil: 0.35, streaks: 0.5 }  # taiga: needle duff, moss
           10: { litter: '#8f8d72', litterAmount: 0.45, moss: 0.3, soil: 0.5, streaks: 0.25 } # tundra: lichen, mineral soil
-          12: { litter: '#6f7a48', litterAmount: 0.35, moss: 0.5, soil: 0.15, streaks: 0.4 } # wetland: damp sedge
+          12: { litter: '#3f4429', litterAmount: 0.45, moss: 0.85, soil: 0.45, streaks: 0.3 } # wetland: moss, peat, dead sedge
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
       shapes:
         default: slender
@@ -1515,7 +1595,9 @@ stylizedSurface:
       3: 0.45
       4: 0.6
       9: 0.6
-      12: 0.7
+      # The bog floor is fern, sedge and fallen wood (groundDetails), with only
+      # the odd shade shrub.
+      12: 0.2
       14: 0.35
   groundDetails:
     enabled: true
@@ -1584,8 +1666,9 @@ stylizedSurface:
     residentRadius: 1
     # This candidate pool gives selected lotus colonies several leaves;
     # the colony rule rejects lotus everywhere else, while rooted plants remain
-    # sparse enough for the eight shared instanced renderers.
-    perChunk: 24
+    # sparse enough for the eight shared instanced renderers. Bog pools take
+    # the most: their margins carry cattails, and their water lily pads.
+    perChunk: 40
     # Water is a field laid over the terrain, not a biome, so a lake or river
     # covering grassland leaves those cells classified as their dry biome. A
     # marine/wetland-only gate therefore rejects every candidate in inland
@@ -1625,6 +1708,11 @@ stylizedSurface:
       floweringLilyPad:
         kind: floweringLilyPad
         weight: 0.35
+      # Bog-pool margins (water/BogPools.js): stands of cattails in the shallows.
+      cattail:
+        kind: cattail
+        weight: 2.5
+        tileIds: [12]
   # Shore life: starfish, shells, driftwood and creeping leaves, after grass-test's
   # beach scatter, starfish and coastal groundcover.
   #
@@ -1832,6 +1920,10 @@ stylizedSurface:
       profiles:
         9: { elevationMax: 550, elevationFade: 100 }
         10: { elevationMax: 620, elevationFade: 80 }
+        # Grukmar's bogs are closed swamp forest standing in their own water, not
+        # stands hugging a distant shore; imported lowland bogs sit 10-60 m up.
+        12: { density: 0.9, elevationMax: 300, elevationFade: 60, waterMaximum: 100000, maximumSlope: 0.9,
+          patchRadiusMin: 0.62, patchRadiusMax: 0.96, patchEdgeWidth: 0.2 }
     forestFloor:
       # Sparse forest-floor plants and shaded margins use the same canopy field
       # as litter. Open meadows retain the default population.

@@ -721,6 +721,7 @@ function validateStylizedSurface(config) {
         'birch',
         'karst_gnarl',
         'snag',
+        'swamp',
       ]);
       if (!barkProfiles.has(variant.barkProfile)) {
         throw new Error(`Invalid editor configuration: ${path}.barkProfile is unsupported.`);

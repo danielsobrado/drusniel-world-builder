@@ -37,7 +37,8 @@ const AUTUMN_TARGETS = Object.freeze({
   // Birch: the reference image's golds through to burnt orange.
   broadleaf_tall: Object.freeze(['#e8bc44', '#dd8f2f', '#c8592c']),
   broadleaf_round: Object.freeze(['#d9a336', '#c87a2c', '#b84b28']),
-  wetland_sparse: Object.freeze(['#c9a441', '#ab8437']),
+  // Swamp giants keep their dark leaves through the year.
+  wetland_sparse: Object.freeze([]),
   tropical_tall: Object.freeze([]),
   conifer_narrow: Object.freeze([]),
   conifer_wide: Object.freeze([]),

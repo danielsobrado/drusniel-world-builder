@@ -12,13 +12,16 @@ export function createWaterAppearanceNodes(nearest, filtered) {
     ocean: float(kind.equal(1)), lake: float(kind.equal(2)), river: float(kind.equal(3)),
     exposure: filtered.a.clamp(.3, 1),
     color(base, depth) {
-      const organicColor = mix(color('#45594b'), color('#172f29'), smoothstep(.3, 5, depth));
+      // Tannin water: tea-brown in a few centimetres, black-green beyond. A bog
+      // (organic 1) owns its colour outright; forest streams only lean to it.
+      const organicColor = mix(color('#2c3324'), color('#0b120d'), smoothstep(.08, 1.2, depth));
       const coldColor = mix(color('#638687'), color('#193f4c'), smoothstep(.3, 8, depth));
-      return mix(mix(base, organicColor, organic.mul(.72)), coldColor, cold.mul(.24));
+      return mix(mix(base, organicColor, organic.mul(.92)), coldColor, cold.mul(.24));
     },
-    density(base) { return base.mul(organic.mul(.7).add(1)); },
-    absorption(base) { return base.mul(mix(vec3(1), vec3(1.1, 1.5, 2.3), organic)); },
-    roughness: clamp(float(.12).add(organic.mul(.12)).add(cold.mul(.025)), 0, 1),
-    clarity: oneMinus(organic.mul(.5)),
+    density(base) { return base.mul(organic.mul(2.5).add(1)); },
+    absorption(base) { return base.mul(mix(vec3(1), vec3(1.6, 2.2, 3.4), organic)); },
+    // Still bog water is a dark mirror; streams through woods stay a little rougher.
+    roughness: clamp(float(.12).add(organic.mul(.12)).sub(smoothstep(.6, 1, organic).mul(.18)).add(cold.mul(.025)), 0, 1),
+    clarity: oneMinus(organic.mul(.8)),
   };
 }

@@ -1,4 +1,5 @@
 import {
+  WATER_BODY_ID_BOG,
   WATER_BODY_ID_NONE,
   WATER_BODY_ID_PROCEDURAL_OCEAN,
   WATER_KIND_LAKE,
@@ -13,6 +14,7 @@ import { LakeBodies } from './LakeBodies.js';
 import { RiverValley } from './RiverValley.js';
 import { WaterDistanceField } from './WaterDistanceField.js';
 import { WaterCellCache } from './WaterCellCache.js';
+import { BogPools } from './BogPools.js';
 
 const WATER_TILE_ID = 0;
 /** How far a river must stand above a lake to count as still falling into it. */
@@ -42,6 +44,9 @@ export class WaterTerrainModel {
       ? new LakeBodies({ source, resolveLevel: resolveLakeLevel, config })
       : null;
     this.lakes = lakes?.size ? lakes : null;
+    this.bog = config.bog?.enabled
+      ? new BogPools({ seed, config: config.bog, cellSizeMeters: config.cellSizeMeters, sampleBaseHeight, sampleBaseTile })
+      : null;
     this.riverChannel = source?.rivers?.length
       ? new RiverChannel({
         source,
@@ -145,8 +150,9 @@ export class WaterTerrainModel {
     return this.vertexHeightCache.get(cellX, cellZ, (x, z) => {
       const baseHeight = this.sampleBaseHeight(x, z);
       const oceanBed = this.beachHeight(x, z, this.oceanBedHeight(x, z, baseHeight));
+      const bog = this.bog ? this.bog.shapeHeight(x, z, oceanBed) : oceanBed;
       // Valley walls first, so a lake basin can still cut below a river's levee.
-      const valley = this.riverValley ? this.riverValley.shapeHeight(x, z, oceanBed) : oceanBed;
+      const valley = this.riverValley ? this.riverValley.shapeHeight(x, z, bog) : bog;
       const shaped = this.lakes ? this.lakes.shapeHeight(x, z, valley) : valley;
       const river = this.riverChannel?.sample(x, z) ?? null;
       if (!river) return shaped;
@@ -220,7 +226,10 @@ export class WaterTerrainModel {
     }
 
     if (!this.isOceanCell(Math.floor(cellX), Math.floor(cellZ))) {
-      return null;
+      // Only a bog interpolates the bed; a dry probe elsewhere stays a tile lookup.
+      if (!(this.bog?.weight(cellX, cellZ) > 0)) return null;
+      const pool = this.bog.sample(cellX, cellZ, knownBedHeight ?? this.interpolatedHeight(cellX, cellZ));
+      return pool ? { kind: WATER_KIND_LAKE, bodyId: WATER_BODY_ID_BOG, coverage: 1, ...pool } : null;
     }
     return {
       kind: WATER_KIND_OCEAN,

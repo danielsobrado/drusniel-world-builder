@@ -1,5 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { eelgrass, flower, lilyPad, pondweed, waterweed } from './lakeGeometry.js';
+import { cattail, eelgrass, flower, lilyPad, pondweed, waterweed } from './lakeGeometry.js';
 import { kelp, seagrass, tuft } from './seaGeometry.js';
 
 export function aquaticRandom(seed) {
@@ -24,6 +24,7 @@ export function createGodsEndAquaticGeometry(kind, { lod = 'near', seed = 77103 
     case 'waterweed': return waterweed(near ? 9 : 5, near ? 8 : 5);
     case 'pondweed': return pondweed(near ? 5 : 3, near ? 8 : 5, random);
     case 'lilyPad': return lilyPad(near ? 18 : 7);
+    case 'cattail': return cattail(near ? 14 : 7, near ? 5 : 3, near ? 5 : 2, random);
     case 'floweringLilyPad': {
       const pad = lilyPad(near ? 18 : 7);
       const bloom = flower(near ? 8 : 4);

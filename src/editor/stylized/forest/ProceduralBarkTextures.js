@@ -99,6 +99,23 @@ export const BARK_PROFILES = Object.freeze({
     roughnessVariation: 0.06,
     normalStrength: 2.2,
   }),
+  // Swamp giants: long stringy ridges, wet and dark, the plates furred green-grey.
+  swamp: Object.freeze({
+    plates: [13, 2],
+    warp: 0.9,
+    fissureWidth: 0.38,
+    fissureDepth: 0.95,
+    plateRoundness: 0.35,
+    micro: 0.3,
+    verticalCracks: 0.7,
+    lenticels: 0,
+    deep: [0.02, 0.021, 0.016],
+    high: [0.1, 0.098, 0.074],
+    mottle: 0.4,
+    roughness: 0.7,
+    roughnessVariation: 0.15,
+    normalStrength: 3,
+  }),
 });
 
 function clamp01(value) {

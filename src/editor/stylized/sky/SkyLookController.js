@@ -1,6 +1,6 @@
 import { CONFIGURED_SKY_PRESET, DEFAULT_SKY_PRESET, SKY_PRESETS } from './SkyPresets.js';
 import { mixSkyLooks, overcastSkyLook, resolveSkyLook } from './SkyLook.js';
-import { regionalSkyLook } from './regionalSkyLook.js';
+import { bogMurkLook, regionalSkyLook } from './regionalSkyLook.js';
 import { NEUTRAL_AIR, NEUTRAL_SKY_REGION, SKY_CLIMATES } from './skyRegionClimate.js';
 import { snowCountryLook } from './snowCountryLook.js';
 
@@ -40,6 +40,9 @@ function easeTransition(progress) {
  * sky is written only while something is changing, so capture tools that set
  * the lights directly keep their settings.
  */
+/** How overcast a bog's own sky is (0..1), squared on its wetland weight. */
+const BOG_OVERCAST = 0.8;
+
 export class SkyLookController {
   /**
    * @param {object} options
@@ -182,10 +185,12 @@ export class SkyLookController {
     if (this.stepRegion(step)) changed = true;
     if (!changed) return false;
     const timeOfDay = mixSkyLooks(this.from, this.to, easeTransition(this.progress));
-    this.current = snowCountryLook(
-      overcastSkyLook(regionalSkyLook(timeOfDay, this.region), this.overcast),
+    // A bog wears its own low lid whatever the weather does; rain only adds to it.
+    const bogOvercast = BOG_OVERCAST * (this.region.weights.wetland ?? 0) ** 2;
+    this.current = bogMurkLook(snowCountryLook(
+      overcastSkyLook(regionalSkyLook(timeOfDay, this.region), Math.max(this.overcast, bogOvercast)),
       this.snowCountry,
-    );
+    ), this.region.weights.wetland ?? 0);
     this.skyView.applyLook(this.current);
     this.onLook?.(this.current);
     return true;

@@ -141,7 +141,7 @@ export class AmbientEffectsSystem {
    */
   surfaceEffectWeight(effect, region, presetName) {
     if (!this.enabled || !effect || effect.enabled === false) return 0;
-    const value = regionWeight(this.weights, [region])
+    const value = regionWeight(this.weights, Array.isArray(region) ? region : [region])
       * presetWeight(effect, presetName)
       * windFactor(this.windiness, effect.windResponse);
     return Math.max(0, Math.min(1, value));
@@ -233,7 +233,8 @@ export class AmbientEffectsSystem {
     );
     jungleMistUniforms.weight.value = this.step(
       jungleMistUniforms.weight.value,
-      this.strengthWeight(this.settings.jungleMist, 'jungle', presetName),
+      // The same humid ground mist hangs between the trunks of a bog.
+      this.strengthWeight(this.settings.jungleMist, ['jungle', 'wetland'], presetName),
     );
     if (Number.isFinite(this.focusGround)) {
       jungleMistUniforms.ground.value = jumped

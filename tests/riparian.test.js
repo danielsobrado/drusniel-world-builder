@@ -153,7 +153,7 @@ test('water-loving species gain share on wet ground and lose it on dry', () => {
     return counts;
   };
 
-  // wetland palette is [wetland_sparse (affinity 0.8), broadleaf_tall (0.15)].
+  // wetland palette is swamp giants (wetland_sparse, affinity 0.8) and conifer_narrow (-0.1).
   const dry = countSpecies(0);
   const wet = countSpecies(1);
   assert.ok(

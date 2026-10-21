@@ -6,6 +6,9 @@
 #   canopy        crown hue the trees wear (stylized/forest/forestLeafTint.js),
 #                 a ratio against the species' own lit crown so its gradient
 #                 survives. Unlisted biomes keep the species palette.
+#   soil          the terrain's bare ground between the grass, in place of the
+#                 Azgaar map colour (world/ChunkRenderPixels.js). Unlisted
+#                 biomes keep the map colour.
 #   snow.ground   snow lying at any height: the terrain bake, the far terrain
 #                 and the grass gate (materials/SnowAccumulation.js).
 #   snow.canopy   snow caps on the upward-facing foliage of trees and their
@@ -56,4 +59,6 @@ biomeLooks:
       # No grass grows on the ice (grass.meadow.growth), so it takes no frost:
       # a frosted palette would spend one of the meadow's eight for nothing.
       snow: { ground: 1, canopy: 1, air: 1, fall: 1 }
-    12: { name: wetland, canopy: '#6f8f43' }
+    # Swamp giants: dark, olive-black leaves under the bog overcast.
+    # Peat and moss between the sedge, not the map's bright marsh green.
+    12: { name: wetland, canopy: '#3f5434', soil: '#2c3120' }

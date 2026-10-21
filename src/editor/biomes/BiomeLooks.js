@@ -49,6 +49,7 @@ function tileId(key, path) {
  *   snowColor: string, frostColor: string,
  *   names: Readonly<Record<number, string>>,
  *   canopy: Readonly<Record<number, string>>,
+ *   soil: Readonly<Record<number, string>>,
  *   snow: Readonly<Record<string, Float32Array>>,
  * }>}
  */
@@ -58,6 +59,7 @@ export function resolveBiomeLooks(source, { snow: withSnow = true } = {}) {
   const frostColor = hex(source.snow?.frost, `${PATH}.snow.frost`);
   const names = {};
   const canopy = {};
+  const soil = {};
   const snow = Object.fromEntries(BIOME_SNOW_COLUMNS.map((column) => [column, new Float32Array(256)]));
   for (const [key, row] of Object.entries(source.byTileId ?? {})) {
     const path = `${PATH}.byTileId.${key}`;
@@ -65,6 +67,7 @@ export function resolveBiomeLooks(source, { snow: withSnow = true } = {}) {
     if (!isRecord(row)) fail(path, 'must be an object');
     if (row.name !== undefined) names[id] = String(row.name);
     if (row.canopy !== undefined) canopy[id] = hex(row.canopy, `${path}.canopy`);
+    if (row.soil !== undefined) soil[id] = hex(row.soil, `${path}.soil`);
     if (row.snow !== undefined && !isRecord(row.snow)) fail(`${path}.snow`, 'must be an object');
     for (const column of Object.keys(row.snow ?? {})) {
       if (!BIOME_SNOW_COLUMNS.includes(column)) fail(`${path}.snow.${column}`, `is not one of ${BIOME_SNOW_COLUMNS.join(', ')}`);
@@ -77,6 +80,7 @@ export function resolveBiomeLooks(source, { snow: withSnow = true } = {}) {
     frostColor,
     names: Object.freeze(names),
     canopy: Object.freeze(canopy),
+    soil: Object.freeze(soil),
     snow: Object.freeze(snow),
   });
 }

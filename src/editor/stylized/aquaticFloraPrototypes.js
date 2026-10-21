@@ -83,7 +83,9 @@ export function createAquaticFloraPrototypes(layer = {}, water = {}, { clock = w
       // which bodies it lives in, and rooted or floating.
       water: {
         placement: kind.placement ?? 'rooted',
-        minimumDepth: entry.minimumDepth ?? (kind.placement === AQUATIC_PLACEMENT_SURFACE
+        // Submerged plants need water over their tips; emergent ones (cattails)
+        // stand out of it, so their own depth band is the whole rule.
+        minimumDepth: entry.minimumDepth ?? (kind.placement === AQUATIC_PLACEMENT_SURFACE || kind.emergent
           ? minimumDepth : Math.max(minimumDepth, height * (layer.maxScale ?? 1.3) + 0.12)),
         maximumDepth: entry.maximumDepth ?? maximumDepth,
         minimumCoverage: entry.minimumCoverage ?? 0.5,

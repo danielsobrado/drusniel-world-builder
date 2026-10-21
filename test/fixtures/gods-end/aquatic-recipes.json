@@ -62,5 +62,13 @@
   "floweringLilyPad:far": {
     "vertices": 75,
     "sha256": "fb4a9113544542d5aafbc04f92eee1e8a1fabf891af2627c41d1d71c224fc458"
+  },
+  "cattail:near": {
+    "vertices": 810,
+    "sha256": "5d8522bba8a0abfb480474696e120bbe824d965df087f0c6cd197d25c9e0ace2"
+  },
+  "cattail:far": {
+    "vertices": 318,
+    "sha256": "3b4983a3a9626ddefef1a4215c2bfe9566b6946b84decc73999cd6a32b0a1df1"
   }
 }

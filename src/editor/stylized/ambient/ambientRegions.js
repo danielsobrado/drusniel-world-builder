@@ -2,9 +2,9 @@ import { ringPoints } from '../../world/sampleTilesAround.js';
 
 /**
  * Where the focus is, as the ambient layer's regions (after grass-test's
- * ambientRegions): 0..1 weights for snow, sand, surf, jungle, water (lake or
- * river nearby), lake (on a lake) and meadow (open ground, none of the
- * others), plus the water levels fields can float on.
+ * ambientRegions): 0..1 weights for snow, sand, surf, jungle, wetland (bog
+ * country), water (lake or river nearby), lake (on a lake) and meadow (open
+ * ground, none of the others), plus the water levels fields can float on.
  *
  * Tiles are the Azgaar biome ids; water kinds as WaterConstants numbers them.
  */
@@ -12,6 +12,7 @@ import { ringPoints } from '../../world/sampleTilesAround.js';
 // tropical seasonal forest (5) is open, dry woodland over grass, so it reads as
 // meadow — the soundscape keeps its jungle calls (soundscape_weights.js).
 const JUNGLE = new Set([7]);
+const WETLAND = new Set([12]);
 const MEADOW = new Set([3, 4, 5, 6, 8, 14]);
 const HOT_DESERT = 1;
 const WATER_OCEAN = 1;
@@ -54,6 +55,7 @@ export function ambientRegionWeights({ tiles, water, heightAboveSea, snow }) {
     sand,
     surf,
     jungle: clamp01(jungle * 1.4) * (1 - snowWeight),
+    wetland: clamp01(shareOf(tiles, (tile) => WETLAND.has(tile)) * 1.3) * (1 - snowWeight),
     water: clamp01(Math.sqrt(fresh) * 1.2),
     lake: clamp01(onLake * 1.5),
     meadow: clamp01(shareOf(tiles, (tile) => MEADOW.has(tile)) * 1.3) * lowland,

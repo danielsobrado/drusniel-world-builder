@@ -26,7 +26,7 @@ const DEFAULT_SPECIES = Object.freeze({
     spacing: 4.1, crownAspect: 0.72, color: '#2f8240', waterAffinity: 0.25,
   }),
   wetland_sparse: Object.freeze({
-    spacing: 4.4, crownAspect: 0.82, color: '#547943', waterAffinity: 0.8,
+    spacing: 5.2, crownAspect: 0.82, color: '#3f5a33', waterAffinity: 0.8,
   }),
 });
 
@@ -39,7 +39,8 @@ const DEFAULT_PALETTES = Object.freeze({
   temperate_rainforest: Object.freeze(['conifer_wide', 'broadleaf_tall']),
   taiga: Object.freeze(['conifer_narrow', 'conifer_wide']),
   tundra: Object.freeze(['conifer_narrow']),
-  wetland: Object.freeze(['wetland_sparse', 'broadleaf_tall']),
+  // Swamp giants, with the odd stand of dark narrow spruce on the drier islands.
+  wetland: Object.freeze(['wetland_sparse', 'wetland_sparse', 'wetland_sparse', 'conifer_narrow']),
 });
 
 /**

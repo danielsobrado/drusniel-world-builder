@@ -248,6 +248,7 @@ ambientEffects:
       - meadow
       - water
       - jungle
+      - wetland
       presetDefault: 0
       presets:
         moonlight: 1
@@ -273,7 +274,9 @@ ambientEffects:
         sharpness: 5
       nearFade: 0.2857
     spores:
-      region: jungle
+      region:
+      - jungle
+      - wetland
       presets:
         rainy: 0.4
         moonlight: 0.5
@@ -321,7 +324,9 @@ ambientEffects:
       blending: additive
       nearFade: 1.0714
     midges:
-      region: water
+      region:
+      - water
+      - wetland
       presets:
         goldenHour: 1
         calm: 1
@@ -350,6 +355,37 @@ ambientEffects:
       scatter: 2.5
       backlit: 0.5
       nearFade: 0.2857
+    # Will-o'-wisps: a few slow, pale-green lights drifting low over the bog
+    # pools by day and night. Emissive particles only — no scene light
+    # (CLAUDE.md, spell VFX).
+    bogWisps:
+      region: wetland
+      presetDefault: 0.6
+      presets:
+        moonlight: 1
+        rainy: 0.5
+        goldenHour: 0.9
+      count: 36
+      area: 60
+      floor: lake
+      height:
+      - 0.35
+      - 2.2
+      wander:
+        radius: 2.4
+        frequency: 0.04
+      size:
+      - 0.16
+      - 0.3
+      shape: firefly
+      color: '#a8f0c4'
+      lighting: emissive
+      emissive: 5
+      blending: additive
+      blink:
+        rate: 0.18
+        sharpness: 2
+      nearFade: 0.6
     lakeMist:
       region: lake
       presetDefault: 0.25

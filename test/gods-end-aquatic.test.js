@@ -32,7 +32,7 @@ test('three seabed boulder recipes retain source vertices, normals and topology 
   }
 });
 
-test('eight aquatic species retain the donor vertices, normals and colours at both LODs', () => {
+test('every aquatic species retains its recorded vertices, normals and colours at both LODs', () => {
   for (const kind of AQUATIC_FLORA_KINDS) for (const lod of ['near', 'far']) {
     const geometry = createGodsEndAquaticGeometry(kind, { lod });
     const hash = createHash('sha256');
@@ -46,12 +46,15 @@ test('eight aquatic species retain the donor vertices, normals and colours at bo
 
 test('rooted aquatic species stay beneath water and pads sit above its surface', () => {
   const definitions = createAquaticFloraPrototypes({ maxScale: 1.3, proceduralVariants: Object.fromEntries(AQUATIC_FLORA_KINDS.map(kind => [kind, { kind }])) });
-  assert.equal(definitions.length, 8);
+  assert.equal(definitions.length, AQUATIC_FLORA_KINDS.length);
   for (const definition of definitions) {
     const { geometry, material } = definition.parts[0];
     geometry.computeBoundingBox();
     assert.equal(material.vertexColors, true);
-    if (definition.water.placement === 'rooted') {
+    if (definition.id === 'cattail') {
+      // Emergent: rooted in the shallows, standing clear of the water.
+      assert.ok(geometry.boundingBox.max.y > definition.water.maximumDepth, definition.id);
+    } else if (definition.water.placement === 'rooted') {
       assert.ok(geometry.boundingBox.max.y * 1.3 < definition.water.minimumDepth, definition.id);
     } else {
       assert.ok(definition.heightOffset > 0);

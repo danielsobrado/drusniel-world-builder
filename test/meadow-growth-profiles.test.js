@@ -17,7 +17,7 @@ const rows=[
  [0,0,0,0,12,'slender'],[0,0,0,0,12,'slender'],[0,0,0,0,12,'slender'],
  [.25,.85,.050,.72,14,'slender'],[.18,.55,.045,.92,9,'slender'],[.16,.50,.060,.85,11,'broadleaf'],
  [.12,.38,.042,.85,10,'slender'],[.14,.48,.065,.82,12,'broadleaf'],[.12,.36,.046,.78,10,'broadleaf'],
- [.10,.28,.050,.80,12,'slender'],[.06,.16,.028,.28,7,'slender'],[0,0,0,0,12,'slender'],[.28,.95,.050,.82,13,'reed'],
+ [.10,.28,.050,.80,12,'slender'],[.06,.16,.028,.28,7,'slender'],[0,0,0,0,12,'slender'],[.14,.60,.045,.50,5,'reed'],
 ];
 const record=values=>Object.fromEntries(['shortHeight','tallHeight','width','density','patchMeters','shape'].map((k,i)=>[k,values[i]]));
 test('all thirteen shipped growth rows match their exact specification and custom IDs use grassland',()=>{

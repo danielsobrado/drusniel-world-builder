@@ -55,6 +55,34 @@ export function pondweed(leafCount, leafSegments, random) {
   return mergeGeometries(parts);
 }
 
+/**
+ * A bog-edge stand of cattails: long arching blades with a few stiff stalks
+ * standing through them, each carrying a brown seed head. One metre tall here;
+ * the species scales it.
+ */
+export function cattail(blades, stalks, segments, random) {
+  const parts = [];
+  for (let i = 0; i < blades; i += 1) {
+    const blade = ribbon(0.028, segments, (random() - 0.5) * 0.6, (random() - 0.5) * 0.8);
+    blade.scale(1, 0.7 + random() * 0.3, 1);
+    blade.rotateY((i / blades) * Math.PI * 2 + random() * 0.7);
+    blade.translate((random() - 0.5) * 0.22, 0, (random() - 0.5) * 0.22);
+    parts.push(colored(blade, { base: '#25331a', top: '#7d7b40' }));
+  }
+  for (let i = 0; i < stalks; i += 1) {
+    const height = 0.85 + random() * 0.2;
+    const x = (random() - 0.5) * 0.2;
+    const z = (random() - 0.5) * 0.2;
+    const stalk = new THREE.CylinderGeometry(0.006, 0.009, height, 3, 1, true);
+    stalk.translate(x, height / 2, z);
+    parts.push(colored(stalk, { base: '#2f3d1d', top: '#5c6230' }));
+    const head = new THREE.CylinderGeometry(0.022, 0.022, 0.13, 5, 1);
+    head.translate(x, height - 0.1, z);
+    parts.push(colored(head, '#3f2a19'));
+  }
+  return mergeGeometries(parts);
+}
+
 export function lilyPad(segments) {
   const shape = new THREE.Shape();
   const notch = 0.35;

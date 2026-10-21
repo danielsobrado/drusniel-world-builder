@@ -1,7 +1,7 @@
 waterDomain:
   # 3 added lakes at their own level, terrain-traced river levels and falls.
-  # All change geography, so a version-2 world must be re-imported.
-  version: 3
+  # 4 added bog pools. Both change geography, so older worlds must be re-imported.
+  version: 4
   shoreDistanceMeters: 48
   ocean:
     coastalShelfMeters: 20
@@ -57,6 +57,22 @@ waterDomain:
     faceSlope: 1.2
     # Distance over which the plunge churn below a fall dies away.
     plungeDecayMeters: 40
+  # Bogs (water/BogPools.js): the ground is re-laid around a local water table,
+  # the base terrain sampled every latticeMeters, less tableDrop. A noise field
+  # of poolScaleMeters decides islands (islandHeight above the table, with
+  # hummocks) and pools (down to maximumDepth); threshold and shoreWidth set how
+  # much is water and how gently the shore shelves.
+  bog:
+    enabled: true
+    tileIds: [12]
+    latticeMeters: 32
+    tableDrop: 0.1
+    poolScaleMeters: 38
+    threshold: 0.14
+    shoreWidth: 0.16
+    islandHeight: 0.35
+    maximumDepth: 0.9
+    hummockHeight: 0.12
 player:
   water:
     wadeDepth: 0.7

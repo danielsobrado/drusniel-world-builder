@@ -44,6 +44,17 @@ export const GODS_END_AQUATIC_SPECIES = Object.freeze({
     depth: Object.freeze([1, 8]),
     kinds: Object.freeze([WATER_KIND_LAKE]),
   }),
+  // Emergent: rooted in the shallows at a bog pool's edge and standing well clear
+  // of the water, so its depth band is the water it stands in, not its height.
+  cattail: Object.freeze({
+    height: 2.1,
+    sway: 0.12,
+    color: '#ffffff',
+    depth: Object.freeze([0.02, 0.45]),
+    kinds: Object.freeze([WATER_KIND_LAKE]),
+    shoreDistance: Object.freeze([0, 6]),
+    emergent: true,
+  }),
   lilyPad: Object.freeze({
     height: 0.26,
     // A pad is not rooted, so it rides the surface and only breathes with the swell.

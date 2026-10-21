@@ -58,6 +58,7 @@ import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
+import { applyBogGround } from './stylized/bog/BogGroundShading.js';
 import { resolveSurfaceWetnessConfig } from './weather/surfaceWetnessConfig.js';
 import {
   createSlotBakeGpuState,
@@ -393,9 +394,15 @@ export function createTerrainMaterial({
       shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
       oceanMask,
     });
-    const shoreSurface = swash
+    const coastSurface = swash
       ? swash.apply(beachSurface.color, beachSurface.roughness)
       : beachSurface;
+    const shoreSurface = applyBogGround({
+      color: coastSurface.color,
+      roughness: coastSurface.roughness ?? float(stylizedConfig.materialBake.render.fallbackRoughness),
+      tileId: tileSample.a.mul(255).round(),
+      wet: waterContext?.wet,
+    });
     // Rain darkens and slicks exposed ground; snow and canopy shelter it.
     const surface = createRainWetnessShading({
       snow: bakedSurface.snow ?? float(0),

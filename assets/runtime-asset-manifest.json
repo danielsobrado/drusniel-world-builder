@@ -4781,6 +4781,710 @@
       }
     },
     {
+      "scene": "/assets/trees/swamp/swamp-giant-01.glb",
+      "source": "assets/runtime-sources/trees/swamp/swamp-giant-01.glb",
+      "output": "public/assets/trees/swamp/swamp-giant-01.glb",
+      "profile": "alphaCritical",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "1024",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "79cae23bd2297df3fa44ba0e63eda8ff45f924eb44a0c74365670212dd57e3e9",
+      "sourceSha256": "0f7d38301eabe2fac58f49909658f88dbb7731cdc65ec54d8d0dee275c83bddc",
+      "outputSha256": "6e014ee970e24a443021c885cf5ce3f166487ce16b0454046f5e4e50d46853f8",
+      "sourceBytes": 587744,
+      "outputBytes": 223616,
+      "gzipBytes": 199545,
+      "brotliBytes": 198652,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 13530,
+        "renderedTriangles": 13530,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 12406,
+          "Swamp leaves": 1124
+        },
+        "sceneBounds": {
+          "min": [
+            -8.899030685424805,
+            -0.4970768988132477,
+            -8.470735549926758
+          ],
+          "max": [
+            8.16440486907959,
+            21.979333877563477,
+            9.758790969848633
+          ]
+        },
+        "bufferBytes": 585224,
+        "logicalAccessorBytes": 439580,
+        "logicalVertexBytes": 358400,
+        "logicalIndexBytes": 81180,
+        "geometryBufferBytes": 439580,
+        "imageBufferBytes": 145643,
+        "nodeNames": [
+          "swamp-giant-01",
+          "swamp-giant-01-Bark",
+          "swamp-giant-01-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 13530,
+        "renderedTriangles": 13530,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 12406,
+          "Swamp leaves": 1124
+        },
+        "sceneBounds": {
+          "min": [
+            -8.89892578,
+            -0.497070312,
+            -8.47070312
+          ],
+          "max": [
+            8.16455078,
+            21.9794922,
+            9.75878906
+          ]
+        },
+        "bufferBytes": 478040,
+        "logicalAccessorBytes": 247177,
+        "logicalVertexBytes": 165997,
+        "logicalIndexBytes": 81180,
+        "geometryBufferBytes": 257644,
+        "imageBufferBytes": 133092,
+        "nodeNames": [
+          "swamp-giant-01",
+          "swamp-giant-01-Bark",
+          "swamp-giant-01-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 2,
+        "vertices": 10467,
+        "triangles": 13530
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 3,
+          "meshCount": 2,
+          "materialCount": 2,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 2,
+          "instanceCount": 2,
+          "triangleCount": 13530
+        },
+        "data": {
+          "json": 3073,
+          "binary": 220396,
+          "buffers": {
+            "vertex": 72997,
+            "index": 14304,
+            "animation": 0,
+            "transform": 0,
+            "image": 133092
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/trees/swamp/swamp-giant-02.glb",
+      "source": "assets/runtime-sources/trees/swamp/swamp-giant-02.glb",
+      "output": "public/assets/trees/swamp/swamp-giant-02.glb",
+      "profile": "alphaCritical",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "1024",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "8cd2967da56934697f58d4ac2aaa8a3e0f0845eaaab1bf8f27a7261000743818",
+      "sourceSha256": "d6d8fd41ee142271f54ddaaf681e86c810d9d4fac4f267d7bf9a2fa504fa5edb",
+      "outputSha256": "53dfb58f8cb9a996665dfda5160c00aa95a90dcf70bd1f87a2d165f305720ef4",
+      "sourceBytes": 490652,
+      "outputBytes": 202408,
+      "gzipBytes": 183593,
+      "brotliBytes": 182791,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 10771,
+        "renderedTriangles": 10771,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 9949,
+          "Swamp leaves": 822
+        },
+        "sceneBounds": {
+          "min": [
+            -7.345320224761963,
+            -0.5751738548278809,
+            -6.426247596740723
+          ],
+          "max": [
+            11.954069137573242,
+            24.445220947265625,
+            10.770421028137207
+          ]
+        },
+        "bufferBytes": 488128,
+        "logicalAccessorBytes": 342482,
+        "logicalVertexBytes": 277856,
+        "logicalIndexBytes": 64626,
+        "geometryBufferBytes": 342482,
+        "imageBufferBytes": 145643,
+        "nodeNames": [
+          "swamp-giant-02",
+          "swamp-giant-02-Bark",
+          "swamp-giant-02-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 10771,
+        "renderedTriangles": 10771,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 9949,
+          "Swamp leaves": 822
+        },
+        "sceneBounds": {
+          "min": [
+            -7.34521484,
+            -0.575164795,
+            -6.42626953
+          ],
+          "max": [
+            11.9541016,
+            24.4453125,
+            10.7705078
+          ]
+        },
+        "bufferBytes": 400076,
+        "logicalAccessorBytes": 192777,
+        "logicalVertexBytes": 128151,
+        "logicalIndexBytes": 64626,
+        "geometryBufferBytes": 200882,
+        "imageBufferBytes": 133092,
+        "nodeNames": [
+          "swamp-giant-02",
+          "swamp-giant-02-Bark",
+          "swamp-giant-02-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 2,
+        "vertices": 8105,
+        "triangles": 10771
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 3,
+          "meshCount": 2,
+          "materialCount": 2,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 2,
+          "instanceCount": 2,
+          "triangleCount": 10771
+        },
+        "data": {
+          "json": 3070,
+          "binary": 199192,
+          "buffers": {
+            "vertex": 54673,
+            "index": 11423,
+            "animation": 0,
+            "transform": 0,
+            "image": 133092
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/trees/swamp/swamp-giant-03.glb",
+      "source": "assets/runtime-sources/trees/swamp/swamp-giant-03.glb",
+      "output": "public/assets/trees/swamp/swamp-giant-03.glb",
+      "profile": "alphaCritical",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "1024",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "04399ad4b089553193b0de58f80659ea02838ee4ef6cf1b52c2d920821c27378",
+      "sourceSha256": "8d1bb5e4271493d271e3e41398d446927271154608f706ee967a5aa0c4dbe7c3",
+      "outputSha256": "330425b7b7667c6d9df80ff7dcbf9bc3c0d6cafb6b5ccf59fe0d1225253119fc",
+      "sourceBytes": 550948,
+      "outputBytes": 215052,
+      "gzipBytes": 192695,
+      "brotliBytes": 191662,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 11962,
+        "renderedTriangles": 11962,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 10772,
+          "Swamp leaves": 1190
+        },
+        "sceneBounds": {
+          "min": [
+            -11.70189094543457,
+            -2.3650081157684326,
+            -6.712161540985107
+          ],
+          "max": [
+            5.258835792541504,
+            20.049821853637695,
+            11.257506370544434
+          ]
+        },
+        "bufferBytes": 548424,
+        "logicalAccessorBytes": 402780,
+        "logicalVertexBytes": 331008,
+        "logicalIndexBytes": 71772,
+        "geometryBufferBytes": 402780,
+        "imageBufferBytes": 145643,
+        "nodeNames": [
+          "swamp-giant-03",
+          "swamp-giant-03-Bark",
+          "swamp-giant-03-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 11962,
+        "renderedTriangles": 11962,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 10772,
+          "Swamp leaves": 1190
+        },
+        "sceneBounds": {
+          "min": [
+            -11.7016602,
+            -2.36499023,
+            -6.7121582
+          ],
+          "max": [
+            5.25878906,
+            20.0498047,
+            11.2573242
+          ]
+        },
+        "bufferBytes": 447768,
+        "logicalAccessorBytes": 226267,
+        "logicalVertexBytes": 154495,
+        "logicalIndexBytes": 71772,
+        "geometryBufferBytes": 235932,
+        "imageBufferBytes": 133092,
+        "nodeNames": [
+          "swamp-giant-03",
+          "swamp-giant-03-Bark",
+          "swamp-giant-03-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 2,
+        "vertices": 9665,
+        "triangles": 11962
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 3,
+          "meshCount": 2,
+          "materialCount": 2,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 2,
+          "instanceCount": 2,
+          "triangleCount": 11962
+        },
+        "data": {
+          "json": 3070,
+          "binary": 211836,
+          "buffers": {
+            "vertex": 66130,
+            "index": 12611,
+            "animation": 0,
+            "transform": 0,
+            "image": 133092
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/trees/swamp/swamp-snag-01.glb",
+      "source": "assets/runtime-sources/trees/swamp/swamp-snag-01.glb",
+      "output": "public/assets/trees/swamp/swamp-snag-01.glb",
+      "profile": "alphaCritical",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "1024",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "b2ac754972d5738e2ca5907e80aca40ba22b0290c6249933871139a94e4015ef",
+      "sourceSha256": "cace6cde51f3b80848e3a781fbaa9b71b5216d0f127d90ed1e5406c033fb47e2",
+      "outputSha256": "67a400e56dda00591658bccfb53df6ef655de455c984cde41f404be76a92c484",
+      "sourceBytes": 211028,
+      "outputBytes": 148968,
+      "gzipBytes": 144352,
+      "brotliBytes": 143746,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 2096,
+        "renderedTriangles": 2096,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 1984,
+          "Swamp leaves": 112
+        },
+        "sceneBounds": {
+          "min": [
+            -5.783590793609619,
+            -0.44910746812820435,
+            -3.8387551307678223
+          ],
+          "max": [
+            2.759042739868164,
+            11.082575798034668,
+            5.012197494506836
+          ]
+        },
+        "bufferBytes": 208524,
+        "logicalAccessorBytes": 62880,
+        "logicalVertexBytes": 50304,
+        "logicalIndexBytes": 12576,
+        "geometryBufferBytes": 62880,
+        "imageBufferBytes": 145643,
+        "nodeNames": [
+          "swamp-snag-01",
+          "swamp-snag-01-Bark",
+          "swamp-snag-01-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 3,
+        "meshes": 2,
+        "materials": 2,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 2096,
+        "renderedTriangles": 2096,
+        "drawParts": 2,
+        "materialTriangleCounts": {
+          "Swamp bark": 1984,
+          "Swamp leaves": 112
+        },
+        "sceneBounds": {
+          "min": [
+            -5.78369141,
+            -0.449111938,
+            -3.83874512
+          ],
+          "max": [
+            2.7590332,
+            11.0825195,
+            5.01220703
+          ]
+        },
+        "bufferBytes": 182756,
+        "logicalAccessorBytes": 35522,
+        "logicalVertexBytes": 22946,
+        "logicalIndexBytes": 12576,
+        "geometryBufferBytes": 36992,
+        "imageBufferBytes": 133092,
+        "nodeNames": [
+          "swamp-snag-01",
+          "swamp-snag-01-Bark",
+          "swamp-snag-01-Leaves"
+        ],
+        "materialNames": [
+          "Swamp bark",
+          "Swamp leaves"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 2,
+        "vertices": 1470,
+        "triangles": 2096
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 3,
+          "meshCount": 2,
+          "materialCount": 2,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 2,
+          "instanceCount": 2,
+          "triangleCount": 2096
+        },
+        "data": {
+          "json": 3060,
+          "binary": 145764,
+          "buffers": {
+            "vertex": 10392,
+            "index": 2276,
+            "animation": 0,
+            "transform": 0,
+            "image": 133092
+          }
+        }
+      }
+    },
+    {
       "scene": "/assets/ground/stylized-grass/clump-01.glb",
       "source": "assets/extracted/ground/stylized-grass/clump-01.glb",
       "output": "public/assets/ground/stylized-grass/clump-01.glb",
@@ -6134,6 +6838,686 @@
             "animation": 0,
             "transform": 0,
             "image": 97407
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/ground/swamp/swamp-fern-01.glb",
+      "source": "assets/runtime-sources/ground/swamp/swamp-fern-01.glb",
+      "output": "public/assets/ground/swamp/swamp-fern-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "3fdf0d3652b99cf75481f083a951f0785c0103ed1587003c8094a4693fd572a4",
+      "sourceSha256": "4c8d7c92b06f2997118f40f9ec1ab92998fed5393a4101c56b5292c2ece8ff33",
+      "outputSha256": "50f626bccba89fc58511201ce9a7ec346c4fdadff86e7c9976cef865c0cbae92",
+      "sourceBytes": 17856,
+      "outputBytes": 22208,
+      "gzipBytes": 20399,
+      "brotliBytes": 20038,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 36,
+        "renderedTriangles": 36,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp fern": 36
+        },
+        "sceneBounds": {
+          "min": [
+            -0.7336495518684387,
+            0.019999999552965164,
+            -0.9484833478927612
+          ],
+          "max": [
+            0.9813916087150574,
+            0.604701042175293,
+            0.9889038801193237
+          ]
+        },
+        "bufferBytes": 16356,
+        "logicalAccessorBytes": 1944,
+        "logicalVertexBytes": 1728,
+        "logicalIndexBytes": 216,
+        "geometryBufferBytes": 1944,
+        "imageBufferBytes": 14409,
+        "nodeNames": [
+          "swamp-fern-01",
+          "swamp-fern-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp fern"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 36,
+        "renderedTriangles": 36,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp fern": 36
+        },
+        "sceneBounds": {
+          "min": [
+            -0.733642578,
+            0.0200004578,
+            -0.948486328
+          ],
+          "max": [
+            0.981384277,
+            0.604705811,
+            0.988891602
+          ]
+        },
+        "bufferBytes": 20964,
+        "logicalAccessorBytes": 1242,
+        "logicalVertexBytes": 1026,
+        "logicalIndexBytes": 216,
+        "geometryBufferBytes": 1296,
+        "imageBufferBytes": 18912,
+        "nodeNames": [
+          "swamp-fern-01",
+          "swamp-fern-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp fern"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 54,
+        "triangles": 36
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 36
+        },
+        "data": {
+          "json": 2398,
+          "binary": 19668,
+          "buffers": {
+            "vertex": 694,
+            "index": 53,
+            "animation": 0,
+            "transform": 0,
+            "image": 18912
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/ground/swamp/swamp-log-01.glb",
+      "source": "assets/runtime-sources/ground/swamp/swamp-log-01.glb",
+      "output": "public/assets/ground/swamp/swamp-log-01.glb",
+      "profile": "standardScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "color,attrib",
+        "-tu",
+        "normal"
+      ],
+      "cacheKey": "23e6e14ffd24f25b793d86f1546ec02b12e2725699d3e1d4ca5b19a466851d5c",
+      "sourceSha256": "47d9881b297dff3a4cd9ffcd359a5d5538a9e5376762b7bd8d055bf6b833fc67",
+      "outputSha256": "d896d7f30b0391127b21bf16704c2a1f05f9ef8ba2c1e4ef57afdda16bc28cce",
+      "sourceBytes": 58304,
+      "outputBytes": 14632,
+      "gzipBytes": 12561,
+      "brotliBytes": 12223,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 167,
+        "renderedTriangles": 167,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 167
+        },
+        "sceneBounds": {
+          "min": [
+            -2.6283085346221924,
+            -0.08886884152889252,
+            -0.6649772524833679
+          ],
+          "max": [
+            2.6079795360565186,
+            1.258114218711853,
+            0.39207923412323
+          ]
+        },
+        "bufferBytes": 56852,
+        "logicalAccessorBytes": 5706,
+        "logicalVertexBytes": 4704,
+        "logicalIndexBytes": 1002,
+        "geometryBufferBytes": 5706,
+        "imageBufferBytes": 51142,
+        "nodeNames": [
+          "swamp-log-01",
+          "swamp-log-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 167,
+        "renderedTriangles": 167,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 167
+        },
+        "sceneBounds": {
+          "min": [
+            -2.6282959,
+            -0.0888671875,
+            -0.664978027
+          ],
+          "max": [
+            2.60803223,
+            1.25811768,
+            0.392074585
+          ]
+        },
+        "bufferBytes": 16064,
+        "logicalAccessorBytes": 3795,
+        "logicalVertexBytes": 2793,
+        "logicalIndexBytes": 1002,
+        "geometryBufferBytes": 3942,
+        "imageBufferBytes": 10172,
+        "nodeNames": [
+          "swamp-log-01",
+          "swamp-log-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 147,
+        "triangles": 167
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 167
+        },
+        "data": {
+          "json": 2371,
+          "binary": 12120,
+          "buffers": {
+            "vertex": 1728,
+            "index": 210,
+            "animation": 0,
+            "transform": 0,
+            "image": 10172
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/ground/swamp/swamp-stump-01.glb",
+      "source": "assets/runtime-sources/ground/swamp/swamp-stump-01.glb",
+      "output": "public/assets/ground/swamp/swamp-stump-01.glb",
+      "profile": "standardScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "color,attrib",
+        "-tu",
+        "normal"
+      ],
+      "cacheKey": "8d214aa4036b8bf43e2f2a6bc68f2eb2ff62085dd447746edff623177f64678d",
+      "sourceSha256": "09fe0bee659c3554afd780c0292aa9a5a6b12fb0506324fd9e20462d203d9202",
+      "outputSha256": "7b251d005afcd6adcdb8aeeebf3d3f22fa0172751f7d864f92da13aef5328c00",
+      "sourceBytes": 59652,
+      "outputBytes": 15104,
+      "gzipBytes": 12926,
+      "brotliBytes": 12601,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 177,
+        "renderedTriangles": 177,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 177
+        },
+        "sceneBounds": {
+          "min": [
+            -1.1457841396331787,
+            -0.18951359391212463,
+            -1.1652331352233887
+          ],
+          "max": [
+            1.1582201719284058,
+            1.7367602586746216,
+            1.1936438083648682
+          ]
+        },
+        "bufferBytes": 58192,
+        "logicalAccessorBytes": 7046,
+        "logicalVertexBytes": 5984,
+        "logicalIndexBytes": 1062,
+        "geometryBufferBytes": 7046,
+        "imageBufferBytes": 51142,
+        "nodeNames": [
+          "swamp-stump-01",
+          "swamp-stump-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 177,
+        "renderedTriangles": 177,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 177
+        },
+        "sceneBounds": {
+          "min": [
+            -1.14581299,
+            -0.18951416,
+            -1.16522217
+          ],
+          "max": [
+            1.15820312,
+            1.73675537,
+            1.19366455
+          ]
+        },
+        "bufferBytes": 17392,
+        "logicalAccessorBytes": 4615,
+        "logicalVertexBytes": 3553,
+        "logicalIndexBytes": 1062,
+        "geometryBufferBytes": 4802,
+        "imageBufferBytes": 10172,
+        "nodeNames": [
+          "swamp-stump-01",
+          "swamp-stump-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 187,
+        "triangles": 177
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 177
+        },
+        "data": {
+          "json": 2373,
+          "binary": 12588,
+          "buffers": {
+            "vertex": 2190,
+            "index": 223,
+            "animation": 0,
+            "transform": 0,
+            "image": 10172
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/ground/swamp/swamp-knees-01.glb",
+      "source": "assets/runtime-sources/ground/swamp/swamp-knees-01.glb",
+      "output": "public/assets/ground/swamp/swamp-knees-01.glb",
+      "profile": "standardScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "color,attrib",
+        "-tu",
+        "normal"
+      ],
+      "cacheKey": "fd4f42b97c748549692fb06e6756126568648f87fbeb3987b85000940193effd",
+      "sourceSha256": "c669c65f7aaa91d6a5512a1a4868197904d46f974060d9bb0051e9e73da9f262",
+      "outputSha256": "d66c9423460e262d98cbbc717b7156ae9b90d8d21b12d7c45a1bfecf635db455",
+      "sourceBytes": 60212,
+      "outputBytes": 15168,
+      "gzipBytes": 12788,
+      "brotliBytes": 12482,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 180,
+        "renderedTriangles": 180,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 180
+        },
+        "sceneBounds": {
+          "min": [
+            -1.0275930166244507,
+            -0.11478093266487122,
+            -1.2964227199554443
+          ],
+          "max": [
+            1.4231176376342773,
+            0.7982714176177979,
+            1.050368070602417
+          ]
+        },
+        "bufferBytes": 58752,
+        "logicalAccessorBytes": 7608,
+        "logicalVertexBytes": 6528,
+        "logicalIndexBytes": 1080,
+        "geometryBufferBytes": 7608,
+        "imageBufferBytes": 51142,
+        "nodeNames": [
+          "swamp-knees-01",
+          "swamp-knees-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 1,
+        "images": 1,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 180,
+        "renderedTriangles": 180,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Swamp wood": 180
+        },
+        "sceneBounds": {
+          "min": [
+            -1.02758789,
+            -0.114780426,
+            -1.29644775
+          ],
+          "max": [
+            1.4230957,
+            0.798278809,
+            1.050354
+          ]
+        },
+        "bufferBytes": 17812,
+        "logicalAccessorBytes": 4956,
+        "logicalVertexBytes": 3876,
+        "logicalIndexBytes": 1080,
+        "geometryBufferBytes": 5160,
+        "imageBufferBytes": 10172,
+        "nodeNames": [
+          "swamp-knees-01",
+          "swamp-knees-01-mesh"
+        ],
+        "materialNames": [
+          "Swamp wood"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 2,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 3,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 204,
+        "triangles": 180
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 1,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 180
+        },
+        "data": {
+          "json": 2372,
+          "binary": 12652,
+          "buffers": {
+            "vertex": 2247,
+            "index": 227,
+            "animation": 0,
+            "transform": 0,
+            "image": 10172
           }
         }
       }
@@ -12618,15 +14002,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 70546320,
-    "outputBytes": 38852000,
-    "gzipBytes": 36965270,
-    "brotliBytes": 36926843,
-    "logicalSourceVertexBytes": 36173264,
-    "logicalOutputVertexBytes": 17328519,
-    "logicalSourceIndexBytes": 4504794,
-    "logicalOutputIndexBytes": 4227522,
-    "savedBytes": 31694320,
-    "reductionRatio": 0.44927
+    "sourceBytes": 72582716,
+    "outputBytes": 39709156,
+    "gzipBytes": 37744129,
+    "brotliBytes": 37701038,
+    "logicalSourceVertexBytes": 37209776,
+    "logicalOutputVertexBytes": 17811356,
+    "logicalSourceIndexBytes": 4738308,
+    "logicalOutputIndexBytes": 4461036,
+    "savedBytes": 32873560,
+    "reductionRatio": 0.452912
   }
 }

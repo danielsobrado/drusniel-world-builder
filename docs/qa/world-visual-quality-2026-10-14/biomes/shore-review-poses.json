@@ -3,7 +3,7 @@
   "selectionSourceSha": "3df8032175cf14fa27bc493283b61ca242ea4c26",
   "configSha256": "61668d09ae1317662e9b9cc1c9e57392b18e865fa8db4a7d3bd73469d5b3e341",
   "map": "maps/Eldara Full 2026-07-23-20-37.json",
-  "mapSha256": "dcd1ae3575ccf5cdde064580d0f033755d575e6054d7a9d1d5e64403570bd388",
+  "mapSha256": "128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
   "gridMeters": 8,
   "tieBreak": [
     "distanceSquared",

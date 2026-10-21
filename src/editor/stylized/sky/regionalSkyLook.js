@@ -37,13 +37,16 @@ const CLIMATE_AIR = Object.freeze({
     scale: { fogDensityScale: 1.8, ambientSaturation: 1.2, directionalIntensity: 0.85 },
     add: { cloudDensity: -0.22, cloudOpacity: 0.18 },
   },
+  // Bog air: a low teal-grey overcast that swallows the sky, the sun only a
+  // pale disc, and the light flat and cool under it.
   wetland: {
-    tint: { lowColor: [0.84, 0.96, 0.9], highColor: [0.72, 0.84, 0.84], fogColor: [0.8, 0.94, 0.86],
-      cloudCore: [0.8, 0.84, 0.84], cloudEdge: [0.88, 0.9, 0.9], groundLightColor: [0.72, 0.92, 0.74],
-      directionalColor: [0.94, 0.98, 0.94] },
-    pale: { lowColor: 0.5, highColor: 0.45, fogColor: 0.55, directionalColor: 0.2 },
-    scale: { fogDensityScale: 2.6, directionalIntensity: 0.72, sunGlowIntensity: 0.5, ambientSaturation: 0.7 },
-    add: { cloudDensity: -0.28, cloudOpacity: 0.22 },
+    tint: { lowColor: [0.62, 0.8, 0.78], highColor: [0.52, 0.68, 0.7], fogColor: [0.6, 0.8, 0.78],
+      cloudCore: [0.62, 0.7, 0.7], cloudEdge: [0.7, 0.78, 0.78], groundLightColor: [0.5, 0.72, 0.6],
+      sunGlowColor: [0.8, 0.9, 0.86], directionalColor: [0.82, 0.94, 0.9] },
+    pale: { lowColor: 0.7, highColor: 0.75, fogColor: 0.65, directionalColor: 0.35, cloudCore: 0.6, cloudEdge: 0.6 },
+    scale: { fogDensityScale: 2.6, directionalIntensity: 0.5, sunGlowIntensity: 0.35, ambientSaturation: 0.6,
+      ambientIntensity: 0.82 },
+    add: { cloudDensity: -0.45, cloudOpacity: 0.4 },
   },
   coastal: {
     tint: { lowColor: [0.9, 1.06, 1.12], highColor: [0.92, 1.02, 1.08], fogColor: [0.9, 1.05, 1.12] },
@@ -126,9 +129,44 @@ export function regionalSkyLook(look, region) {
   result.cloudDensity -= 0.2 * (personality.cloudiness ?? 0);
   result.cloudOpacity = Math.max(0, Math.min(1, result.cloudOpacity + 0.12 * (personality.cloudiness ?? 0)));
   const resolved = applyRegionalCharacter(result, airCharacter(region));
-  resolved.fogDensityScale = boundRegionalFogScale(resolved.fogDensityScale, look.fogDensityScale);
+  resolved.fogDensityScale = boundRegionalFogScale(resolved.fogDensityScale, look.fogDensityScale)
+    * (1 + BOG_FOG * (weights.wetland ?? 0) ** 2);
   return resolved;
 }
+
+/** Bog murk per colour: the grey lid the overcast leaves, darkened to teal. */
+const BOG_MURK = Object.freeze({
+  fogColor: [0.5, 0.62, 0.6],
+  lowColor: [0.5, 0.62, 0.6],
+  highColor: [0.48, 0.56, 0.58],
+  cloudCore: [0.5, 0.58, 0.58],
+  cloudEdge: [0.5, 0.58, 0.58],
+  groundLightColor: [0.55, 0.66, 0.58],
+});
+
+/**
+ * Laid over the finished look (after weather and overcast): inside a bog the
+ * sky, haze and cloud lid sink to a dark teal murk, as in a swamp the light
+ * comes from nowhere in particular and the far trees vanish into it.
+ *
+ * @param {object} look
+ * @param {number} wetland 0..1 the region's wetland weight
+ */
+export function bogMurkLook(look, wetland) {
+  const amount = Math.max(0, Math.min(1, wetland)) ** 2;
+  if (amount === 0) return look;
+  const result = { ...look };
+  for (const [key, factor] of Object.entries(BOG_MURK)) {
+    result[key] = recolour(look[key], factor.map((f) => 1 + (f - 1) * amount), 0);
+  }
+  result.ambientIntensity = look.ambientIntensity * (1 - 0.22 * amount);
+  return result;
+}
+
+/** Bog fog beyond the regional bound: in a swamp the murk closes in to tens of
+ * metres, which is its identity rather than overlapping haze. Squared, so a
+ * half-wet rainforest only takes a quarter of it. */
+const BOG_FOG = 3.2;
 
 /** Climate, personality and humid-air extinction describe overlapping air.
  * Compress their combined excess instead of letting three multipliers erase

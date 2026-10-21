@@ -8,7 +8,7 @@ import {resolveParticleWaterDepth} from './ParticleWaterDepth.js';
 import { resolveParticleBurst } from './ParticleBurst.js';
 const PREFIX = 'ambientEffects';
 const SHAPES = new Set(['soft', 'glint', 'streak', 'firefly', 'fluff', 'shaft', 'puff']);
-const REGIONS = new Set(['any', 'snow', 'sand', 'surf', 'jungle', 'water', 'lake', 'meadow']);
+const REGIONS = new Set(['any', 'snow', 'sand', 'surf', 'jungle', 'wetland', 'water', 'lake', 'meadow']);
 const NAMED_LEVELS = new Set(['sea', 'lake']);
 const QUALITY_NAMES = ['performance', 'balanced', 'high', 'ultra'];
 const DEFAULT_QUALITY = Object.freeze({ performance: 0.35, balanced: 0.6, high: 1, ultra: 1 });

@@ -47,6 +47,18 @@ export const DEFAULT_WATER_DOMAIN_CONFIG = Object.freeze({
     faceSlope: 1.2,
     plungeDecayMeters: 40,
   }),
+  bog: Object.freeze({
+    enabled: true,
+    tileIds: Object.freeze([12]),
+    latticeMeters: 32,
+    tableDrop: 0.1,
+    poolScaleMeters: 38,
+    threshold: 0.14,
+    shoreWidth: 0.16,
+    islandHeight: 0.35,
+    maximumDepth: 0.9,
+    hummockHeight: 0.12,
+  }),
 });
 
 let runtimeWaterDomainConfig = DEFAULT_WATER_DOMAIN_CONFIG;
@@ -78,6 +90,7 @@ function cloneDomain(domain) {
     river: { ...domain.river },
     lake: { ...domain.lake },
     falls: { ...domain.falls },
+    bog: { ...domain.bog, tileIds: [...domain.bog.tileIds] },
   };
 }
 
@@ -86,6 +99,8 @@ function freezeDomain(domain) {
   Object.freeze(domain.river);
   Object.freeze(domain.lake);
   Object.freeze(domain.falls);
+  Object.freeze(domain.bog.tileIds);
+  Object.freeze(domain.bog);
   return Object.freeze(domain);
 }
 
@@ -171,7 +186,27 @@ export function validateWaterDomainDefinition(domain) {
   }
   validateLakeDefinition(domain.lake);
   validateFallsDefinition(domain.falls);
+  validateBogDefinition(domain.bog);
   return domain;
+}
+
+function validateBogDefinition(bog) {
+  assertObject(bog, 'waterDomain.bog');
+  if (typeof bog.enabled !== 'boolean') {
+    throw new Error('Invalid water configuration: waterDomain.bog.enabled must be boolean.');
+  }
+  if (!Array.isArray(bog.tileIds) || bog.tileIds.some((id) => !Number.isInteger(id) || id < 0)) {
+    throw new Error('Invalid water configuration: waterDomain.bog.tileIds must list tile ids.');
+  }
+  for (const field of ['latticeMeters', 'poolScaleMeters', 'shoreWidth', 'maximumDepth']) {
+    assertPositive(bog[field], `waterDomain.bog.${field}`);
+  }
+  for (const field of ['tableDrop', 'islandHeight', 'hummockHeight']) {
+    assertNonNegative(bog[field], `waterDomain.bog.${field}`);
+  }
+  if (!Number.isFinite(bog.threshold) || Math.abs(bog.threshold) >= 1) {
+    throw new Error('Invalid water configuration: waterDomain.bog.threshold must be within (-1, 1).');
+  }
 }
 
 function validateLakeDefinition(lake) {
@@ -225,6 +260,7 @@ export function resolveWaterDomainConfig(value = runtimeWaterDomainConfig) {
     river: { ...DEFAULT_WATER_DOMAIN_CONFIG.river, ...source.river },
     lake: { ...DEFAULT_WATER_DOMAIN_CONFIG.lake, ...source.lake },
     falls: { ...DEFAULT_WATER_DOMAIN_CONFIG.falls, ...source.falls },
+    bog: { ...DEFAULT_WATER_DOMAIN_CONFIG.bog, ...source.bog },
   });
   validateWaterDomainDefinition(resolved);
   return freezeDomain(resolved);
