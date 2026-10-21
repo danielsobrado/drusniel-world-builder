@@ -65,8 +65,10 @@ of this route to A/B against:
 | 1 | 96.4 | 7 | 9.3 | 14.4 | 29.5 | 120.1 |
 | 2 | 98.2 | 7 | 9.0 | 13.8 | 31.2 | 173.7 |
 
-Still open: the app's JS heap itself (2.3–3.3 GB at ordinary poses) and the
-tab crash near Grukmar towns. Both are outside the swamp work.
+The JS heap, which crashed tabs near towns, came down from 3.26 GB to 1.1 GB at
+the Eldara forest pose once the river indexes stopped bucketing every fine block
+eagerly (`water/SegmentBlockIndex.js`). `bog-cross` afterwards: 94.2 and 93.7 FPS,
+4 and 6 hitches, p95 14.4 and 14.1 ms. That is level with the baseline above.
 
 ## Today vs target (as planned)
 

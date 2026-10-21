@@ -572,8 +572,12 @@ Both matter:
 The adapter is recorded as `adapter` in the report. Treat any run without it, or
 with `fallback: true`, as void.
 
-The editor's JS heap sits at 2.3–3.3 GB at ordinary poses, against a hard 4 GB
-ceiling. Near towns and dense biomes a tab can exceed it, die and reload. A
+Until 2026-10-21 the editor's JS heap sat at 2.3–3.3 GB at ordinary poses, against
+a hard 4 GB ceiling. The largest single cost was the river channel and valley
+indexes: millions of string-keyed buckets along every Azgaar river, about 450 MB.
+They now bucket coarsely and derive fine blocks on demand
+(`water/SegmentBlockIndex.js`). The heap at the Eldara forest pose fell from
+3.26 GB to 1.1 GB, with `bog-cross` frame times unchanged. Near towns and dense biomes a tab can exceed it, die and reload. A
 harness then reports this as a navigation ("Execution context was destroyed",
 or `__worldVisualQa` undefined), not as a crash. The ceiling cannot be raised:
 Chromium builds V8 with pointer compression, which caps each renderer's heap at

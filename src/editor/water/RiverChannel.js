@@ -1,5 +1,6 @@
 import { createRiverSurfaceSegments } from './RiverSurfaceProfile.js';
 import { reachFallAt, reachPlungeAt, reachSurfaceAt } from './RiverReachProfile.js';
+import { SegmentBlockIndex } from './SegmentBlockIndex.js';
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
@@ -25,10 +26,6 @@ function pointSegmentSample(cellX, cellZ, segment) {
   };
 }
 
-function blockCoordinate(value, blockSize) {
-  return Math.floor(value / blockSize);
-}
-
 export class RiverChannel {
   constructor({
     source,
@@ -50,49 +47,14 @@ export class RiverChannel {
       config,
       lakeLevelAt,
     });
-    this.index = new Map();
-    this.buildIndex();
-  }
-
-  /**
-   * Bucket each segment into the blocks its buffered centre line crosses.
-   *
-   * Not its bounding box: an imported river reach runs for a hundred kilometres,
-   * often diagonally, and its box holds hundreds of thousands of blocks — enough
-   * across a whole Azgaar map to overflow a Map. Walking the line in half-block
-   * steps touches only the blocks the channel can actually reach.
-   */
-  buildIndex() {
-    const blockSize = this.blockSize;
-    const step = blockSize * 0.5;
-    for (const segment of this.segments) {
-      const margin = segment.radiusCells + 1;
-      // The channel's own margin plus the half step a sample can sit between walked points.
-      const reach = Math.ceil((margin + step * 0.5) / blockSize);
-      const keys = new Set();
-      const steps = Math.max(1, Math.ceil(segment.length / step));
-      for (let index = 0; index <= steps; index += 1) {
-        const t = index / steps;
-        const blockX = blockCoordinate(segment.ax + segment.dx * t, blockSize);
-        const blockZ = blockCoordinate(segment.az + segment.dz * t, blockSize);
-        for (let offsetZ = -reach; offsetZ <= reach; offsetZ += 1) {
-          for (let offsetX = -reach; offsetX <= reach; offsetX += 1) {
-            keys.add(`${blockX + offsetX}:${blockZ + offsetZ}`);
-          }
-        }
-      }
-      for (const key of keys) {
-        const bucket = this.index.get(key);
-        if (bucket) bucket.push(segment);
-        else this.index.set(key, [segment]);
-      }
-    }
+    // A reach runs for up to a hundred kilometres; see SegmentBlockIndex for why
+    // the fine buckets are derived on demand.
+    this.index = new SegmentBlockIndex({ blockSize });
+    for (const segment of this.segments) this.index.add(segment, segment.radiusCells + 1);
   }
 
   candidates(cellX, cellZ) {
-    return this.index.get(
-      `${blockCoordinate(cellX, this.blockSize)}:${blockCoordinate(cellZ, this.blockSize)}`,
-    ) ?? [];
+    return this.index.at(cellX, cellZ);
   }
 
   sample(cellX, cellZ) {

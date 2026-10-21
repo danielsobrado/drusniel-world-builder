@@ -1,4 +1,5 @@
 import { BANK_HANDOVER, bankCeiling, bankFloor, bankReach } from './BankProfile.js';
+import { SegmentBlockIndex } from './SegmentBlockIndex.js';
 import { reachSurfaceAt } from './RiverReachProfile.js';
 
 /**
@@ -61,7 +62,9 @@ export class RiverValley {
     });
     this.leveeReachMeters = bankReach(this.bank);
     this.maximumReachMeters = Math.max(this.leveeReachMeters, config.river.valleyReachMeters);
-    this.index = new Map();
+    // Coarse eager, fine on demand (SegmentBlockIndex): the valleys of a whole
+    // Azgaar map's rivers otherwise cost tens of megabytes of string keys.
+    this.index = new SegmentBlockIndex({ blockSize: blockCells, coarseBlocks: 8 });
     this.reaches = new Map();
     for (const segment of segments) this.add(segment);
   }
@@ -107,43 +110,19 @@ export class RiverValley {
     return reaches[step] + (reaches[step + 1] - reaches[step]) * (position - step);
   }
 
-  key(blockX, blockZ) {
-    return `${blockX}:${blockZ}`;
-  }
-
   add(segment) {
-    const block = this.blockCells;
-    const step = block * 0.5;
-    const steps = Math.max(1, Math.ceil(segment.length / step));
+    const steps = Math.max(1, Math.ceil(segment.length / (this.blockCells * 0.5)));
     const reaches = this.measureReaches(segment, steps);
     this.reaches.set(segment, reaches);
-    const keys = new Set();
-    for (let index = 0; index <= steps; index += 1) {
-      const t = index / steps;
-      const reachCells = reaches[index] / this.cellSizeMeters;
-      const reach = Math.ceil((segment.radiusCells + reachCells + step * 0.5) / block);
-      const blockX = Math.floor((segment.ax + segment.dx * t) / block);
-      const blockZ = Math.floor((segment.az + segment.dz * t) / block);
-      for (let offsetZ = -reach; offsetZ <= reach; offsetZ += 1) {
-        for (let offsetX = -reach; offsetX <= reach; offsetX += 1) {
-          keys.add(this.key(blockX + offsetX, blockZ + offsetZ));
-        }
-      }
-    }
-    for (const key of keys) {
-      const bucket = this.index.get(key);
-      if (bucket) bucket.push(segment);
-      else this.index.set(key, [segment]);
-    }
+    let reachMeters = 0;
+    for (const reach of reaches) reachMeters = Math.max(reachMeters, reach);
+    this.index.add(segment, segment.radiusCells + reachMeters / this.cellSizeMeters);
   }
 
   /** The channel whose edge is nearest, within reach, or null. */
   nearest(cellX, cellZ) {
-    const candidates = this.index.get(this.key(
-      Math.floor(cellX / this.blockCells),
-      Math.floor(cellZ / this.blockCells),
-    ));
-    if (!candidates) return null;
+    const candidates = this.index.at(cellX, cellZ);
+    if (candidates.length === 0) return null;
     let selected = null;
     for (const segment of candidates) {
       const sample = nearestOnSegment(cellX, cellZ, segment);
