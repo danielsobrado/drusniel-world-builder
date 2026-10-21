@@ -191,29 +191,113 @@ function spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separa
   return lanes;
 }
 
+/** Grid towns lay their block streets this far apart (m). */
+const GRID_SPACING = 70;
+
+/** Every street of a radial town after its main streets: rings, spokes and side lanes. */
+function radialStreets({ profile, mains, bearings, squareRadius, streetConfig, tag, random, isBuildable }) {
+  const streets = [];
+  const allowRings = !streetConfig || streetConfig.ringCount > 0;
+  if ((profile.rank >= 2 || profile.radius >= RING_TOWN_RADIUS) && allowRings) {
+    const radii = ringRadii(profile, squareRadius, random, streetConfig);
+    for (const ringRadius of radii) {
+      streets.push(...ringStreets({ ringRadius, random, isBuildable }).map(tag));
+    }
+    // Spoke lanes between the square and the first ring and between every pair of rings.
+    const bounds = [Math.max(squareRadius + 8, radii[0] - RING_SPACING), ...radii, profile.radius * 0.97];
+    for (let index = 1; index < bounds.length; index += 1) {
+      const inner = bounds[index - 1];
+      const outer = bounds[index];
+      if (outer - inner < 30) continue;
+      const separation = Math.min(SPOKE_SEPARATION, SPOKE_ARC / Math.max(inner, 1));
+      streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separation }).map(tag));
+    }
+  }
+  if (profile.rank >= 1) streets.push(...sideLanes({ profile, mains, random, isBuildable }).map(tag));
+  return streets;
+}
+
+/**
+ * The block streets of a planned grid: straight lines GRID_SPACING apart both
+ * ways across the town, broken at the square and on unbuildable ground. They are
+ * planned as kind 'ring' — the through streets of the block web, paved and lit
+ * like a radial town's rings.
+ */
+function gridStreets({ profile, axis, squareRadius, random, isBuildable }) {
+  const streets = [];
+  const limit = profile.radius * 0.97;
+  for (const along of [axis, axis + Math.PI / 2]) {
+    const [ux, uz] = [Math.sin(along), Math.cos(along)];
+    const [vx, vz] = [uz, -ux];
+    for (let line = 1; line * GRID_SPACING < limit; line += 1) {
+      for (const side of [-1, 1]) {
+        const offset = side * line * GRID_SPACING * (0.95 + random() * 0.1);
+        const half = Math.sqrt(Math.max(0, limit * limit - offset * offset));
+        if (half < 20) continue;
+        let current = [];
+        for (let t = -half; t <= half; t += 10) {
+          const x = ux * t + vx * offset;
+          const z = uz * t + vz * offset;
+          if (isBuildable(x, z) && Math.hypot(x, z) > squareRadius + 4) {
+            current.push([x, z]);
+          } else {
+            if (current.length > 2) streets.push({ kind: 'ring', width: STREET_WIDTH.ring, points: current });
+            current = [];
+          }
+        }
+        if (current.length > 2) streets.push({ kind: 'ring', width: STREET_WIDTH.ring, points: current });
+      }
+    }
+  }
+  return streets;
+}
+
+/**
+ * Main-street bearings by layout: a radial town's from its roads and quay; a grid
+ * town's four half-axes, turned to its strongest road; a street village's one
+ * road through, both ways — along the shore for a port.
+ */
+function layoutBearings(grammar, profile, routeBearings, random, quayBearing) {
+  if (grammar === 'grid') {
+    const axis = routeBearings[0] ?? quayBearing ?? random() * Math.PI * 2;
+    return [0, 1, 2, 3].map((quarter) => axis + quarter * Math.PI / 2);
+  }
+  if (grammar === 'linear') {
+    const axis = quayBearing !== null ? quayBearing + Math.PI / 2 : (routeBearings[0] ?? random() * Math.PI * 2);
+    return [axis, axis + Math.PI];
+  }
+  return mainBearings(profile, routeBearings, random, quayBearing);
+}
+
 /**
  * The street network of one settlement, in plan space. Returns streets
  * ({ kind, width, points }) and the market square, if the class has one.
  *
- * Towns of rank 2 and up (and wide rank-1 towns) grow ring streets every RING_SPACING
- * metres out to the wall, with spoke lanes SPOKE_ARC apart between each pair of rings,
- * so the plan stays a web of closed blocks however large the town grows.
+ * The town's layout grammar (SettlementSignature) shapes it:
+ * - radial: towns of rank 2 and up (and wide rank-1 towns) grow ring streets every
+ *   RING_SPACING metres out to the wall, with spoke lanes SPOKE_ARC apart between
+ *   each pair of rings, so the plan stays a web of closed blocks however large it grows;
+ * - grid: two straight axes through the square and block streets GRID_SPACING apart;
+ * - linear: one street through the square, both ways, with side lanes off it.
  */
-export function planStreets({ profile, routeBearings, random, isBuildable }) {
+export function planStreets({ profile, signature = null, routeBearings, random, isBuildable }) {
+  const grammar = signature?.grammar ?? 'radial';
   const squareRadius = marketSquareRadius(profile);
   const streets = [];
   const regional = Boolean(profile.hasRegionalIdentity && profile.recipe?.streetConfig);
   const streetConfig = regional ? profile.recipe.streetConfig : null;
-  const mainDrift = streetConfig ? streetConfig.drift : 0.22;
+  // A planned grid is laid out with a line: its axes do not meander.
+  const mainDrift = grammar === 'grid' ? 0.02 : (streetConfig ? streetConfig.drift : 0.22);
   const surfaceRole = streetConfig?.hasBoardwalkNetwork
     ? 'boardwalk'
     : (streetConfig?.grammar === 'contour-switchback-terrace'
       ? 'switchback'
       : (streetConfig?.grammar === 'fortified-forge-axis' ? 'forge-track' : 'street'));
+  const tag = (street) => (regional ? { ...street, surfaceRole } : street);
 
   // A port is planned from its water: the quay road is the first street it has.
   const quayBearing = profile.port ? waterBearing(profile, isBuildable) : null;
-  const bearings = mainBearings(profile, routeBearings, random, quayBearing);
+  const bearings = layoutBearings(grammar, profile, routeBearings, random, quayBearing);
   const reach = profile.radius * FARM_BELT.outer;
   for (const bearing of bearings) {
     const start = [Math.sin(bearing) * squareRadius, Math.cos(bearing) * squareRadius];
@@ -230,25 +314,12 @@ export function planStreets({ profile, routeBearings, random, isBuildable }) {
   }
   const mains = streets.filter(({ kind }) => kind === 'main');
 
-  const allowRings = !streetConfig || streetConfig.ringCount > 0;
-  if ((profile.rank >= 2 || profile.radius >= RING_TOWN_RADIUS) && allowRings) {
-    const radii = ringRadii(profile, squareRadius, random, streetConfig);
-    for (const ringRadius of radii) {
-      streets.push(...ringStreets({ ringRadius, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
-    }
-    // Spoke lanes between the square and the first ring and between every pair of rings.
-    const bounds = [Math.max(squareRadius + 8, radii[0] - RING_SPACING), ...radii, profile.radius * 0.97];
-    for (let index = 1; index < bounds.length; index += 1) {
-      const inner = bounds[index - 1];
-      const outer = bounds[index];
-      if (outer - inner < 30) continue;
-      const separation = Math.min(SPOKE_SEPARATION, SPOKE_ARC / Math.max(inner, 1));
-      streets.push(...spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separation })
-        .map((s) => (regional ? { ...s, surfaceRole } : s)));
-    }
-  }
-  if (profile.rank >= 1) {
-    streets.push(...sideLanes({ profile, mains, random, isBuildable }).map((s) => (regional ? { ...s, surfaceRole } : s)));
+  if (grammar === 'grid') {
+    streets.push(...gridStreets({ profile, axis: bearings[0], squareRadius, random, isBuildable }).map(tag));
+  } else if (grammar === 'linear') {
+    streets.push(...sideLanes({ profile, mains, random, isBuildable }).map(tag));
+  } else {
+    streets.push(...radialStreets({ profile, mains, bearings, squareRadius, streetConfig, tag, random, isBuildable }));
   }
   return { streets, squareRadius, bearings, quayBearing };
 }

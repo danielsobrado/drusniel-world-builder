@@ -3,8 +3,8 @@
  *
  * A town's signature is a handful of discrete choices drawn from the burg it
  * already is — world seed, id, rank, walls, port, routes, realm — never a
- * per-town asset: which variants of the pooled buildings it favours, and a few
- * local traits from a fixed table (place-identity plan §27). Every choice is a
+ * per-town asset: its layout grammar, which variants of the pooled buildings it
+ * favours, and a few local traits from a fixed table (place-identity plan §27). Every choice is a
  * plan-time knob, so a town's identity costs no meshes and no draw calls; the
  * world's mesh pool stays styles × kinds × variants.
  *
@@ -58,6 +58,45 @@ function houseWeights(random) {
   return Object.freeze(weights);
 }
 
+/** Street villages stay small: past this many buildings one road cannot front them all. */
+const LINEAR_MAX_BUILDINGS = 150;
+
+/** Realm street grammars (VisualIdentityCatalog) that lean a town toward a layout. */
+const REALM_LAYOUT = Object.freeze({
+  'axial-imperial-grid': Object.freeze({ grid: 2 }),
+  'scholarly-terraced-avenue': Object.freeze({ grid: 0.8 }),
+  'sparse-waystation-trail': Object.freeze({ linear: 1.5 }),
+  'windbreak-hearth-cluster': Object.freeze({ radial: 0.8 }),
+  'organic-canopy-ring': Object.freeze({ radial: 0.8 }),
+});
+
+/**
+ * Layout grammar (place-identity plan §10–11), scored from what the burg is and
+ * drawn by those scores: a walled town keeps its radial plan, so gates still
+ * meet its main streets; capitals and imperial realms lean to a planned grid;
+ * small towns on one or two roads string out along them.
+ */
+function pickGrammar(settlement, profile, routeCount, random) {
+  if (profile.walled) return 'radial';
+  const lean = (profile.hasRegionalIdentity && REALM_LAYOUT[profile.recipe?.streetConfig?.grammar]) || {};
+  const scores = [
+    ['radial', 1 + (lean.radial ?? 0)],
+    ['grid', profile.rank >= 1
+      ? (profile.rank >= 2 ? 0.5 : 0.15) + (settlement.capital ? 1.5 : 0) + (lean.grid ?? 0)
+      : 0],
+    ['linear', profile.rank <= 1 && profile.buildings <= LINEAR_MAX_BUILDINGS
+      ? (routeCount <= 2 ? 1.4 : 0.4) + (lean.linear ?? 0)
+      : 0],
+  ];
+  const total = scores.reduce((sum, [, score]) => sum + score, 0);
+  let roll = random() * total;
+  for (const [grammar, score] of scores) {
+    roll -= score;
+    if (roll < 0) return grammar;
+  }
+  return 'radial';
+}
+
 function pickTraits(profile, random) {
   const [fewest, most] = TRAIT_COUNT[profile.rank] ?? TRAIT_COUNT.at(-1);
   const count = fewest + Math.floor(random() * (most - fewest + 1));
@@ -71,11 +110,14 @@ function pickTraits(profile, random) {
  * @param {object} settlement the burg (SettlementData)
  * @param {object} profile its settlementProfile
  * @param {number} worldSeed
+ * @param {number} routeCount how many Azgaar roads leave the burg
  */
-export function settlementSignature(settlement, profile, worldSeed) {
+export function settlementSignature(settlement, profile, worldSeed, routeCount = 0) {
   const random = planRandom(hashInts(worldSeed, settlement.id, 0x5167));
+  const grammar = pickGrammar(settlement, profile, routeCount, random);
   const traits = pickTraits(profile, random);
   return Object.freeze({
+    grammar,
     traits,
     houseWeights: houseWeights(random),
   });

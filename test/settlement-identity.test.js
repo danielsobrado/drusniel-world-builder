@@ -67,3 +67,51 @@ test('the plan carries its signature', () => {
   const plan = planSettlement({ settlement: town(11), worldSeed: 3 });
   assert.ok(plan.signature.traits.length >= 1);
 });
+
+function townWithGrammar(grammar, extra) {
+  for (let id = 1; id < 400; id += 1) {
+    const burg = town(id, extra);
+    if (settlementSignature(burg, settlementProfile(burg), 3, 2).grammar === grammar) return burg;
+  }
+  throw new Error(`no ${grammar} town found`);
+}
+
+const angleBetween = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+
+test('towns are laid out radial, grid or along one road, and walled towns stay radial', () => {
+  const seen = new Set();
+  for (let id = 1; id < 200; id += 1) {
+    const open = town(id, { population: id % 2 ? 1 : 12, capital: id % 7 === 0 });
+    seen.add(settlementSignature(open, settlementProfile(open), 3, 2).grammar);
+    const walled = town(id, { population: 12, walls: true });
+    assert.equal(settlementSignature(walled, settlementProfile(walled), 3, 2).grammar, 'radial');
+  }
+  assert.deepEqual([...seen].sort(), ['grid', 'linear', 'radial']);
+});
+
+test('a grid town has straight block streets square to its axes, and still houses its people', () => {
+  const burg = townWithGrammar('grid', { population: 12, capital: true });
+  const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [0.4, 2.1] });
+  const mains = plan.streets.filter(({ kind }) => kind === 'main');
+  assert.equal(mains.length, 4);
+  const axis = mains[0].bearing;
+  const blocks = plan.streets.filter(({ kind }) => kind === 'ring');
+  assert.ok(blocks.length >= 8);
+  for (const { points } of blocks) {
+    const heading = Math.atan2(points.at(-1)[0] - points[0][0], points.at(-1)[1] - points[0][1]);
+    const offAxis = Math.min(...[0, 1, 2, 3].map((quarter) => angleBetween(heading, axis + quarter * Math.PI / 2)));
+    assert.ok(offAxis < 0.01, `block street ${offAxis} rad off its grid`);
+  }
+  const houses = plan.buildings.filter(({ kind }) => !['farmhouse', 'barn', 'wall', 'gatehouse', 'tower'].includes(kind));
+  // Radial towns on open ground fill 65–90% of their target too; a grid must do no worse.
+  assert.ok(houses.length >= plan.profile.buildings * 0.8, `${houses.length} of ${plan.profile.buildings}`);
+});
+
+test('a street village is one road through the square, with no rings', () => {
+  const burg = townWithGrammar('linear', { population: 0.9 });
+  const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [1.2] });
+  const mains = plan.streets.filter(({ kind }) => kind === 'main');
+  assert.equal(mains.length, 2);
+  assert.ok(angleBetween(mains[0].bearing, mains[1].bearing + Math.PI) < 1e-9);
+  assert.equal(plan.streets.filter(({ kind }) => kind === 'ring').length, 0);
+});

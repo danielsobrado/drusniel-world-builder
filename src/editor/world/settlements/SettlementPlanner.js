@@ -9,7 +9,7 @@ import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 9;
+export const SETTLEMENT_PLAN_VERSION = 10;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -35,8 +35,8 @@ export function planSettlement({
 }) {
   const profile = settlementProfile(settlement, geography ? { geography } : {});
   const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_PLAN_VERSION));
-  const signature = settlementSignature(settlement, profile, worldSeed);
-  const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, routeBearings, random, isBuildable });
+  const signature = settlementSignature(settlement, profile, worldSeed, routeBearings.length);
+  const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, signature, routeBearings, random, isBuildable });
   const maxPadFall = profile.hasRegionalIdentity && profile.identity?.activeOverlays?.includes('mountain-pass') ? 5.2 : undefined;
   const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall });
   const buildings = planBuildings({ profile, signature, occupancy, streets, bearings, quayBearing, random });
