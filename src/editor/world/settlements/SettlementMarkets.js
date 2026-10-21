@@ -31,14 +31,19 @@ const ROLE_GOODS = Object.freeze({
   'winter-provisioning': 'Fur',
 });
 
-function marketName(town, kind, goods) {
+/** Catches sold off the boats: a hall is not named for them, the harbour market is. */
+const QUAYSIDE_GOODS = new Set(['Fish', 'Whale']);
+
+function marketName(town, kind, goods, primary) {
   switch (kind) {
     case 'grand-square': return `${town} Grand Square`;
-    case 'market-hall': return `${town} ${goods ?? 'Cloth'} Hall`;
+    case 'market-hall': return `${town} ${goods && !QUAYSIDE_GOODS.has(goods) ? goods : 'Cloth'} Hall`;
     case 'harbour': return `${town} Fish Market`;
     case 'street-market': return `${town} Market Street`;
     case 'gate-market': return `${town} Gate Market`;
-    default: return goods ? `${town} ${goods} Market` : `${town} Market Square`;
+    default:
+      if (!primary) return `${town} New Market`;
+      return goods && !QUAYSIDE_GOODS.has(goods) ? `${town} ${goods} Market` : `${town} Market Square`;
   }
 }
 
@@ -67,7 +72,7 @@ export function marketKinds({ settlement, profile, grammar, traits, avenues }) {
   return Object.freeze(kinds.map((kind, index) => Object.freeze({
     kind,
     // The goods name the town's main market, not every one of its squares.
-    name: marketName(town, kind, index === 0 || kind === 'market-hall' ? goods : null),
+    name: marketName(town, kind, index === 0 || kind === 'market-hall' ? goods : null, index === 0),
   })));
 }
 

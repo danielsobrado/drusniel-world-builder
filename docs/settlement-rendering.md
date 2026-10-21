@@ -171,6 +171,47 @@ A 5k town plans about 780 buildings in about 280 m, and a 38k city about 1,450
 in about 410 m. The classes (hamlet → metropolis) now only rank a place:
 landmarks, walls and market. `scripts/measure-settlement-plan-scale.mjs` prints
 size and plan time per population; a capped city plans in about 40 ms.
+
+## Town identity
+
+Every town is itself through a *signature* (`SettlementSignature`): a few
+discrete choices drawn from the burg it already is — world seed, id, rank,
+walls, port, roads, realm — on a random stream of its own. Nothing in it is a
+per-town asset, so identity costs no meshes and no draw calls: the world's mesh
+pool stays styles × kinds × variants, and the variety is in how a town combines
+them. The signature travels with the plan as `plan.signature`.
+
+- **Layout grammar** (`grammar`), scored and drawn: **radial** (rings and
+  spokes; every walled town, so gates still meet its mains), **grid** (two
+  straight axes turned to the strongest road, block streets every 70 m;
+  capitals and the imperial and scholarly realms lean to it) and **linear**
+  (one road through the square; small towns on one or two roads, at most 150
+  buildings). Grid block streets are planned as kind `'ring'`.
+- **Street hierarchy.** Towns of rank 2 and up widen mains into **avenues**
+  inside the town — the quay or busiest road, or every main in a capital or a
+  grid: 9 m, 11 m when grand. An avenue stops at 0.92 R and the same street
+  goes on as a 5.5 m road, which is the one a gatehouse stands on. Avenues are
+  paved in flags and lit down both kerbs. Where every main is an avenue the
+  square is 1.5× wider.
+- **Markets** (`SettlementMarkets`), named from the town and its first
+  economic role: grand square (fountain, two stall rings), market hall
+  (arcaded `market-hall` house standing in its square), market street (a
+  street village's first 0.45 R at 12 m with a row of stalls), plain square.
+  Cities, double-market towns, ports and gate-market towns open secondary
+  squares beside a main street, clear of every street: a fish market where
+  the quay road meets the water, a gate market inside the wall. `plan.squares`
+  holds them all, primary at the origin first; `squareRadius` stays the
+  primary's.
+- **Look.** Each town favours two or three variants of each house kind (4× as
+  often). A realm whose `roofPitch` is far from 40° gets a steep or low sibling
+  of its culture style, and its `dressingPreference` dresses two towns in three.
+- **Traits** from a fixed table, 1 for a hamlet up to 4–6 for a metropolis
+  (place-identity plan §27): grand-avenue, planted-avenue, fountain-square,
+  market-hall, double-market, harbour-market, gate-market, flower-town,
+  lantern-lit. Each acts in the stage it belongs to.
+
+Adding a style or a pooled house regenerates the doors
+(`npm run generate:settlement-doors`).
 - **Residents** stand at `SettlementGathering` spots — stalls, well, benches,
   trade doors, main streets — up to 14 a town.
 - **Dusk** (`SettlementDusk`): one uniform from the sky's sun height and key

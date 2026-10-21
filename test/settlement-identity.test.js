@@ -221,3 +221,11 @@ test('a street village holds its market in its street', () => {
   const stalls = plan.props.filter(({ kind, x, z }) => kind === 'stall' && Math.hypot(x, z) > plan.squareRadius + 2);
   assert.ok(stalls.length >= 3);
 });
+
+test('no two markets of a town share a name', () => {
+  for (let id = 1; id < 120; id += 1) {
+    const burg = town(id, { population: 20, walls: true, port: true });
+    const names = settlementSignature(burg, settlementProfile(burg), 3, 3).markets.map(({ name }) => name);
+    assert.equal(new Set(names).size, names.length, names.join(', '));
+  }
+});
