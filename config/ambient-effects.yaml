@@ -365,7 +365,7 @@ ambientEffects:
         moonlight: 1
         rainy: 0.5
         goldenHour: 0.9
-      count: 36
+      count: 48
       area: 60
       floor: lake
       height:
@@ -375,12 +375,12 @@ ambientEffects:
         radius: 2.4
         frequency: 0.04
       size:
-      - 0.16
-      - 0.3
+      - 0.35
+      - 0.7
       shape: firefly
       color: '#a8f0c4'
       lighting: emissive
-      emissive: 5
+      emissive: 9
       blending: additive
       blink:
         rate: 0.18

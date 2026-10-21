@@ -19,22 +19,25 @@ export const SKY_LOOK_NUMBERS = Object.freeze([
   'ambientIntensity', 'ambientSaturation', 'directionalIntensity', 'fogDensityScale',
   'cloudShadowStrength', 'shadowRadius',
   'cloudSharpness', 'cloudDetail', 'mist', 'snowBrightness', 'snowShade', 'snowBlue', 'nightness',
-  'exposure',
+  'exposure', 'skyFog',
 ]);
 /**
  * Look values with a fixed neutral default when neither the preset nor the
  * config names them: the cloud form (detail 1 is the plain fbm), how misty the
  * air is (valley fog), and how snow takes the light — `snowBrightness` scales its
  * albedo, `snowShade` how far faces turned from the sun fall into shade, and
- * `snowBlue` how blue that shade is (0 grey, 1 cold blue).
+ * `snowBlue` how blue that shade is (0 grey, 1 cold blue). `skyFog` is how far
+ * the dome itself sinks into the fog colour (a bog's murk swallows its sky).
  */
 const LOOK_NUMBER_DEFAULTS = Object.freeze({
   cloudSharpness: 0.24, cloudDetail: 1, mist: 0, exposure: 1, snowBrightness: 0.82, snowShade: 0.35, snowBlue: 0.6,
+  skyFog: 0,
 });
 /** The look values the sky material reads, which become its uniforms. */
-const MATERIAL_COLORS = Object.freeze(['lowColor', 'highColor', 'sunColor', 'sunGlowColor', 'cloudCore', 'cloudEdge', 'cloudRim']);
+const MATERIAL_COLORS = Object.freeze(['lowColor', 'highColor', 'sunColor', 'sunGlowColor', 'cloudCore', 'cloudEdge', 'cloudRim',
+  'fogColor']);
 const MATERIAL_NUMBERS = Object.freeze(['sunEmission', 'sunGlowIntensity', 'cloudOpacity', 'cloudDensity',
-  'cloudSharpness', 'cloudDetail']);
+  'cloudSharpness', 'cloudDetail', 'skyFog']);
 
 export function skyPresetNames() {
   return Object.keys(SKY_PRESETS);

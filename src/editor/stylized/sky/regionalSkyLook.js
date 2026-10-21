@@ -160,6 +160,7 @@ export function bogMurkLook(look, wetland) {
     result[key] = recolour(look[key], factor.map((f) => 1 + (f - 1) * amount), 0);
   }
   result.ambientIntensity = look.ambientIntensity * (1 - 0.22 * amount);
+  result.skyFog = Math.max(look.skyFog ?? 0, 0.85 * amount);
   return result;
 }
 
