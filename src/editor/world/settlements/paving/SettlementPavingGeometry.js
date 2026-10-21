@@ -28,8 +28,10 @@ export const PAVING_LAYERS = Object.freeze(['earth', 'cobble', 'flagstone']);
 export const SHADE_LAYER = 'shade';
 
 /** Which surface each street kind is laid in, by settlement rank. */
-function surfaceFor(streetKind, rank) {
+function surfaceFor(streetKind, rank, avenue = false) {
   if (rank === 0) return 'earth';
+  // An avenue is laid in flags, so the town's spine reads from its setts.
+  if (avenue) return 'flagstone';
   if (streetKind === 'walk') return rank >= 2 ? 'flagstone' : 'earth';
   if (streetKind === 'lane') return rank >= 2 ? 'cobble' : 'earth';
   return 'cobble';
@@ -277,7 +279,7 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
   for (const street of plan.streets) {
     const closed = street.points.length > 3
       && street.points[0][0] === street.points.at(-1)[0] && street.points[0][1] === street.points.at(-1)[1];
-    const surface = surfaceFor(street.kind, rank);
+    const surface = surfaceFor(street.kind, rank, street.avenue);
     const pieces = street.kind === 'main' && surface !== 'earth'
       ? splitAtRadius(street.points, radius * 1.06)
       : [street.points, null];

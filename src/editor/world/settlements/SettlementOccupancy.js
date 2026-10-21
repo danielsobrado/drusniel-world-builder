@@ -4,8 +4,6 @@ import { PlanGrid, rect, rectContains, rectCorners, rectsOverlap, segmentDistanc
 const MAX_PAD_FALL = 3.2;
 /** Bucket size of the street index (m); street points are indexed at least this densely. */
 const STREET_CELL = 16;
-/** Widest street's half-width (main street, SettlementStreets.STREET_WIDTH). */
-const MAX_HALF_STREET = 2.75;
 
 /**
  * Every street segment, bucketed by the cells it passes through (grown by its
@@ -81,6 +79,8 @@ export class SettlementOccupancy {
     this.maxPadFall = maxPadFall;
     this.grid = new PlanGrid(16);
     this.streetGrid = indexStreets(streets);
+    /** Widest street's half-width: how far past a box a street centreline may still reach into it. */
+    this.maxHalfStreet = streets.reduce((widest, street) => Math.max(widest, street.width / 2), 0);
     this.claimed = [];
   }
 
@@ -99,7 +99,7 @@ export class SettlementOccupancy {
       if (rectsOverlap(box, other.box, other.soft ? 0.2 : clearance)) return 'occupied';
     }
     if (!ignoreStreets) {
-      const near = this.segmentsNear(box.x, box.z, box.radius + (streetClearance + MAX_HALF_STREET) * Math.SQRT2);
+      const near = this.segmentsNear(box.x, box.z, box.radius + (streetClearance + this.maxHalfStreet) * Math.SQRT2);
       if (rectHitsStreets(box, near, streetClearance)) return 'street';
     }
     if (!ground) return null;

@@ -22,7 +22,7 @@ import { planRandom } from './SettlementStreets.js';
  */
 const TRAITS = Object.freeze([
   Object.freeze({ id: 'grand-avenue', when: (profile) => profile.rank >= 2 }),
-  Object.freeze({ id: 'tree-lined-avenue', when: (profile) => profile.rank >= 2 }),
+  Object.freeze({ id: 'planted-avenue', when: (profile) => profile.rank >= 2 }),
   Object.freeze({ id: 'fountain-square', when: (profile) => profile.square }),
   Object.freeze({ id: 'market-hall', when: (profile) => profile.market }),
   Object.freeze({ id: 'double-market', when: (profile) => profile.rank >= 2 }),
@@ -116,9 +116,13 @@ export function settlementSignature(settlement, profile, worldSeed, routeCount =
   const random = planRandom(hashInts(worldSeed, settlement.id, 0x5167));
   const grammar = pickGrammar(settlement, profile, routeCount, random);
   const traits = pickTraits(profile, random);
+  const capital = Boolean(settlement.capital);
   return Object.freeze({
     grammar,
     traits,
+    // Which main streets are avenues inside the town (SettlementStreets), and whether they are grand.
+    avenues: profile.rank < 2 ? 'none' : (grammar === 'grid' || capital ? 'all' : 'first'),
+    grandAvenue: profile.rank >= 2 && (capital || traits.includes('grand-avenue')),
     houseWeights: houseWeights(random),
   });
 }

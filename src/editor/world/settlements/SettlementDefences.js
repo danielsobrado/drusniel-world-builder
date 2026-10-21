@@ -58,7 +58,8 @@ export function planDefences({ profile, occupancy, streets, random }) {
   // The last length closes the ring; a short one would overlap the first.
   if (travelled < segment * 0.6) joints.pop();
   const gates = streets
-    .filter(({ kind }) => kind === 'main')
+    // An avenue stops short of the wall: the road beyond it carries the gate.
+    .filter(({ kind, avenue }) => kind === 'main' && !avenue)
     .map((street) => {
       const crossing = street.points.find(([x, z]) => Math.hypot(x, z) >= radiusAt(Math.atan2(x, z))) ?? street.points.at(-1);
       return point(Math.atan2(crossing[0], crossing[1]));

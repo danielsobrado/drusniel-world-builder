@@ -13,7 +13,10 @@ export function planRandom(seed) {
   };
 }
 
-export const STREET_WIDTH = Object.freeze({ main: 5.5, ring: 4.5, lane: 3.2, walk: 1.6 });
+/** Street widths by rank in the hierarchy: a town's grand avenues, its avenues, then main road to footpath. */
+export const STREET_WIDTH = Object.freeze({ grand: 11, avenue: 9, main: 5.5, ring: 4.5, lane: 3.2, walk: 1.6 });
+/** An avenue runs out to this share of the town's radius; beyond, it is a road again, through the gate. */
+const AVENUE_REACH = 0.92;
 const MIN_ROAD_SEPARATION = 0.55;
 /** Least angle, in radians, between two radial streets of one quarter. */
 const SPOKE_SEPARATION = 0.5;
@@ -85,9 +88,13 @@ function walkStreet({ start, bearing, length, step, drift, random, isBuildable }
   return points;
 }
 
-/** Radius of the market square, by settlement rank. */
-export function marketSquareRadius(profile) {
-  return profile.square ? 11 + profile.rank * 3.5 : 0;
+/** Squares where every main street arrives as an avenue are this much wider, or the avenues eat their frontage. */
+const GRAND_SQUARE = 1.5;
+
+/** Radius of the market square, by settlement rank: a grand square where all its streets are avenues. */
+export function marketSquareRadius(profile, signature = null) {
+  if (!profile.square) return 0;
+  return (11 + profile.rank * 3.5) * (signature?.avenues === 'all' ? GRAND_SQUARE : 1);
 }
 
 /** A ring street at roughly `ringRadius`, broken wherever the ground is unbuildable. */
@@ -253,6 +260,18 @@ function gridStreets({ profile, axis, squareRadius, random, isBuildable }) {
 }
 
 /**
+ * A main street as its avenue — the stretch inside the town, at avenue width —
+ * and the road on beyond it at main width, which is the one a gatehouse is
+ * planned on. The two share the vertex where they meet.
+ */
+function asAvenue(main, limit, width) {
+  const cut = main.points.findIndex(([x, z]) => Math.hypot(x, z) > limit);
+  if (cut === 0 || cut === 1) return [main];
+  const avenue = { ...main, width, avenue: true, points: cut < 0 ? main.points : main.points.slice(0, cut) };
+  return cut < 0 ? [avenue] : [avenue, { ...main, points: main.points.slice(cut - 1) }];
+}
+
+/**
  * Main-street bearings by layout: a radial town's from its roads and quay; a grid
  * town's four half-axes, turned to its strongest road; a street village's one
  * road through, both ways — along the shore for a port.
@@ -279,10 +298,14 @@ function layoutBearings(grammar, profile, routeBearings, random, quayBearing) {
  *   each pair of rings, so the plan stays a web of closed blocks however large it grows;
  * - grid: two straight axes through the square and block streets GRID_SPACING apart;
  * - linear: one street through the square, both ways, with side lanes off it.
+ *
+ * Towns of rank 2 and up widen some main streets into avenues inside the town
+ * (signature.avenues): the first — the quay or busiest road — or, in a capital or
+ * a grid, every one.
  */
 export function planStreets({ profile, signature = null, routeBearings, random, isBuildable }) {
   const grammar = signature?.grammar ?? 'radial';
-  const squareRadius = marketSquareRadius(profile);
+  const squareRadius = marketSquareRadius(profile, signature);
   const streets = [];
   const regional = Boolean(profile.hasRegionalIdentity && profile.recipe?.streetConfig);
   const streetConfig = regional ? profile.recipe.streetConfig : null;
@@ -321,5 +344,11 @@ export function planStreets({ profile, signature = null, routeBearings, random, 
   } else {
     streets.push(...radialStreets({ profile, mains, bearings, squareRadius, streetConfig, tag, random, isBuildable }));
   }
-  return { streets, squareRadius, bearings, quayBearing };
+  // Last, so lanes are planned off whole mains: which of them are avenues inside the town.
+  const avenues = new Set(signature?.avenues === 'all' ? mains : (signature?.avenues === 'first' ? mains.slice(0, 1) : []));
+  const avenueWidth = signature?.grandAvenue ? STREET_WIDTH.grand : STREET_WIDTH.avenue;
+  const planned = streets.flatMap((street) => (avenues.has(street)
+    ? asAvenue(street, profile.radius * AVENUE_REACH, avenueWidth)
+    : [street]));
+  return { streets: planned, squareRadius, bearings, quayBearing };
 }

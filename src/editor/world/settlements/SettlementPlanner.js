@@ -9,7 +9,7 @@ import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 10;
+export const SETTLEMENT_PLAN_VERSION = 11;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,

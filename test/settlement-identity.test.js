@@ -92,7 +92,8 @@ test('towns are laid out radial, grid or along one road, and walled towns stay r
 test('a grid town has straight block streets square to its axes, and still houses its people', () => {
   const burg = townWithGrammar('grid', { population: 12, capital: true });
   const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [0.4, 2.1] });
-  const mains = plan.streets.filter(({ kind }) => kind === 'main');
+  // Each half-axis is an avenue inside the town and a road beyond it.
+  const mains = plan.streets.filter(({ kind, avenue }) => kind === 'main' && !avenue);
   assert.equal(mains.length, 4);
   const axis = mains[0].bearing;
   const blocks = plan.streets.filter(({ kind }) => kind === 'ring');
@@ -114,4 +115,41 @@ test('a street village is one road through the square, with no rings', () => {
   assert.equal(mains.length, 2);
   assert.ok(angleBetween(mains[0].bearing, mains[1].bearing + Math.PI) < 1e-9);
   assert.equal(plan.streets.filter(({ kind }) => kind === 'ring').length, 0);
+});
+
+test('a capital widens every main street into an avenue inside its wall; the gate road stays narrow', () => {
+  const burg = town(18, { population: 28, capital: true, walls: true, citadel: true });
+  const plan = planSettlement({ settlement: burg, worldSeed: 1234, routeBearings: [0.3, 1.9, 4] });
+  const avenues = plan.streets.filter(({ avenue }) => avenue);
+  const roads = plan.streets.filter(({ kind, avenue }) => kind === 'main' && !avenue);
+  assert.ok(avenues.length >= 3);
+  for (const avenue of avenues) {
+    assert.equal(avenue.width, 11);
+    assert.ok(avenue.points.every(([x, z]) => Math.hypot(x, z) <= plan.profile.radius * 0.93));
+  }
+  assert.ok(roads.every(({ width }) => width === 5.5));
+  // Every gate sits on a road, none on an avenue.
+  assert.equal(plan.buildings.filter(({ kind }) => kind === 'gatehouse').length, roads.length);
+});
+
+test('a town of rank 2 has one avenue, wider than its other streets, and nothing is built on it', () => {
+  const burg = town(9, { population: 12 });
+  const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [0.3, 1.9, 4] });
+  const avenues = plan.streets.filter(({ avenue }) => avenue);
+  assert.ok(avenues.length >= 1);
+  const widest = Math.max(...plan.streets.filter(({ avenue }) => !avenue).map(({ width }) => width));
+  assert.ok(avenues.every(({ width }) => width > widest));
+  for (const building of plan.buildings) {
+    for (const { points, width } of avenues) {
+      for (const [x, z] of points) {
+        const dx = x - building.x;
+        const dz = z - building.z;
+        const along = dx * Math.cos(building.yaw) - dz * Math.sin(building.yaw);
+        const across = dx * Math.sin(building.yaw) + dz * Math.cos(building.yaw);
+        // Distance from the avenue's centreline point to the footprint rectangle.
+        const gap = Math.hypot(Math.max(0, Math.abs(along) - building.width / 2), Math.max(0, Math.abs(across) - building.depth / 2));
+        assert.ok(gap >= width / 2 - 0.05, `a ${building.kind} stands on the avenue (${gap.toFixed(2)} m from its centre)`);
+      }
+    }
+  }
 });

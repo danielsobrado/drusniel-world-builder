@@ -27,6 +27,16 @@ function pointAlong(points, distance) {
   return null;
 }
 
+/**
+ * The point `distance` metres from the town's centre along a street that runs
+ * out from it — a road beyond an avenue starts out at the avenue's end, not at
+ * the square. Null when the street does not reach that far or starts beyond it.
+ */
+function pointFromCentre(points, distance) {
+  const start = Math.hypot(points[0][0], points[0][1]);
+  return distance < start ? null : pointAlong(points, distance - start);
+}
+
 function polylineLength(points) {
   let total = 0;
   for (let index = 1; index < points.length; index += 1) {
@@ -47,10 +57,32 @@ function streetLanterns({ profile, signature, occupancy, streets, props, random 
       const at = pointAlong(street.points, s);
       if (!at || Math.hypot(at.x, at.z) > profile.radius * 1.02) continue;
       const offset = street.width / 2 + 0.7;
-      const x = at.x + Math.cos(at.along) * side * offset;
-      const z = at.z - Math.sin(at.along) * side * offset;
-      placeProp(occupancy, props, 'lantern', variant, x, z, at.along + Math.PI / 2 * side, { ignoreStreets: true });
+      // An avenue is lit down both kerbs; any other street alternates.
+      for (const kerb of street.avenue ? [1, -1] : [side]) {
+        const x = at.x + Math.cos(at.along) * kerb * offset;
+        const z = at.z - Math.sin(at.along) * kerb * offset;
+        placeProp(occupancy, props, 'lantern', variant, x, z, at.along + Math.PI / 2 * kerb, { ignoreStreets: true });
+      }
       side = -side;
+    }
+  }
+}
+
+/** Planters down both kerbs of a planted avenue, between its lanterns. */
+function avenuePlanters({ signature, occupancy, streets, props }) {
+  if (!hasTrait(signature, 'planted-avenue')) return;
+  for (const street of streets) {
+    if (!street.avenue) continue;
+    const length = polylineLength(street.points);
+    for (let s = 6; s < length; s += 9) {
+      const at = pointAlong(street.points, s);
+      if (!at) continue;
+      const offset = street.width / 2 + 0.9;
+      for (const kerb of [1, -1]) {
+        const x = at.x + Math.cos(at.along) * kerb * offset;
+        const z = at.z - Math.sin(at.along) * kerb * offset;
+        placeProp(occupancy, props, 'planter', 0, x, z, at.along, { ignoreStreets: true });
+      }
     }
   }
 }
@@ -127,11 +159,9 @@ function squareFurniture({ profile, occupancy, squareRadius, props, random }) {
 
 /** A signpost where each main road enters the town, and a wayside shrine or cross further out. */
 function roadMarkers({ profile, occupancy, streets, props, random }) {
-  for (const street of streets.filter(({ kind }) => kind === 'main')) {
-    const length = polylineLength(street.points);
+  for (const street of streets.filter(({ kind, avenue }) => kind === 'main' && !avenue)) {
     for (const [kind, distance] of [['signpost', profile.radius * 1.04], ['shrine', profile.radius * (1.3 + random() * 0.3)]]) {
-      if (distance > length) continue;
-      const at = pointAlong(street.points, distance);
+      const at = pointFromCentre(street.points, distance);
       if (!at) continue;
       const side = random() < 0.5 ? -1 : 1;
       const offset = street.width / 2 + 1.4;
@@ -216,9 +246,9 @@ function regionalOverlayProps({ profile, occupancy, streets, squareRadius, props
 
     if (!placed && mains.length > 0) {
       const street = mains[index % mains.length];
-      const length = polylineLength(street.points);
-      const distance = Math.min(length * 0.65, Math.max(squareRadius + 8, profile.radius * (0.35 + (index % 4) * 0.14)));
-      const at = pointAlong(street.points, distance);
+      const reach = Math.hypot(...street.points[0]) + polylineLength(street.points);
+      const distance = Math.min(reach * 0.65, Math.max(squareRadius + 8, profile.radius * (0.35 + (index % 4) * 0.14)));
+      const at = pointFromCentre(street.points, distance);
       if (at) {
         const side = index % 2 === 0 ? 1 : -1;
         const offset = street.width / 2 + 1.6;
@@ -242,6 +272,7 @@ export function planDecor({ profile, signature = null, occupancy, streets, squar
   const walks = [];
   squareFurniture({ profile, occupancy, squareRadius, props, random });
   streetLanterns({ profile, signature, occupancy, streets, props, random });
+  avenuePlanters({ signature, occupancy, streets, props });
   doorWalks({ signature, buildings, occupancy, props, walks, random });
   tradeGoods({ buildings, occupancy, props, random });
   roadMarkers({ profile, occupancy, streets, props, random });

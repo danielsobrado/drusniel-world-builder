@@ -14,7 +14,7 @@ export async function prepareSettlementApproach({ controller, terrainView, confi
   const entry = field.entries.find(item => Number(item.settlement.id) === burgId);
   if (!entry) throw new Error(`Settlement QA burg ${burgId} is absent from the frozen map.`);
   const { plan } = field.ensurePlan(entry);
-  const street = plan.streets.find(item => item.kind === 'main');
+  const street = plan.streets.find(item => item.kind === 'main' && !item.avenue);
   if (!street?.points.length) throw new Error('Settlement QA burg has no approach street.');
   const endpoint = [...street.points].sort((a, b) => Math.hypot(...b) - Math.hypot(...a))[0];
   const length = Math.hypot(...endpoint) || 1;
