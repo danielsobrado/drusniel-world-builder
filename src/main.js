@@ -68,6 +68,7 @@ import {
   raycastTerrainHeightfield,
 } from './editor/weather/weather_terrain_adapters.js';
 import { attachSpellHotkeys, createSpellRuntime } from './editor/spells/spell_runtime.js';
+import { createBogVents } from './editor/stylized/bog/BogVents.js';
 import { GRASS_MARK } from './editor/stylized/meadow/MeadowInteractionMap.js';
 import { attachCaptureHotkey } from './editor/input/attachCaptureHotkey.js';
 import { ThirdPersonCamera } from './editor/player/ThirdPersonCamera.js';
@@ -1316,6 +1317,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     })
     : null;
   resources.own(spellRuntime);
+  // Swamp gas catching on bog islands, through the grimoire's VFX (stylized/bog/BogVents.js).
+  const bogVents = spellRuntime?.effects
+    ? createBogVents({ vfx: spellRuntime.effects, terrainView, tileIds: config.waterDomain.bog?.tileIds ?? [] })
+    : null;
   spellKeyHandler = spellRuntime
     ? (event) => spellRuntime.handleKeyDown(event)
     : null;
@@ -1734,6 +1739,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       );
     }
     spellRuntime?.update(frameTimestamp);
+    bogVents?.tick(frameTimestamp, canonicalFocus);
     if (profiling) perfQa.mark('weatherSpells');
 
     objectView.update(frameTimestamp, viewModeController.camera, deferredWork);

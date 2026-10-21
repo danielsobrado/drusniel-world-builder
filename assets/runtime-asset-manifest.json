@@ -4806,13 +4806,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "79cae23bd2297df3fa44ba0e63eda8ff45f924eb44a0c74365670212dd57e3e9",
-      "sourceSha256": "0f7d38301eabe2fac58f49909658f88dbb7731cdc65ec54d8d0dee275c83bddc",
-      "outputSha256": "6e014ee970e24a443021c885cf5ce3f166487ce16b0454046f5e4e50d46853f8",
-      "sourceBytes": 587744,
-      "outputBytes": 223616,
-      "gzipBytes": 199545,
-      "brotliBytes": 198652,
+      "cacheKey": "8e4a4226249f6f72145e39c4c0483b8953b6a2cd213eefad3faaa23772029547",
+      "sourceSha256": "64d920c5398594d3ebf7b03b646f8b794a8230b87dbb622d674e249245f8a2a9",
+      "outputSha256": "9a20ae8adbf29385882084d92851f4ec1025a7bb2305ea2bc71bd1f92faab6c7",
+      "sourceBytes": 605892,
+      "outputBytes": 227296,
+      "gzipBytes": 201596,
+      "brotliBytes": 200544,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -4841,11 +4841,11 @@
             9.758790969848633
           ]
         },
-        "bufferBytes": 585224,
-        "logicalAccessorBytes": 439580,
-        "logicalVertexBytes": 358400,
+        "bufferBytes": 603208,
+        "logicalAccessorBytes": 457564,
+        "logicalVertexBytes": 376384,
         "logicalIndexBytes": 81180,
-        "geometryBufferBytes": 439580,
+        "geometryBufferBytes": 457564,
         "imageBufferBytes": 145643,
         "nodeNames": [
           "swamp-giant-01",
@@ -4888,11 +4888,11 @@
             9.75878906
           ]
         },
-        "bufferBytes": 478040,
-        "logicalAccessorBytes": 247177,
-        "logicalVertexBytes": 165997,
+        "bufferBytes": 490384,
+        "logicalAccessorBytes": 256169,
+        "logicalVertexBytes": 174989,
         "logicalIndexBytes": 81180,
-        "geometryBufferBytes": 257644,
+        "geometryBufferBytes": 266636,
         "imageBufferBytes": 133092,
         "nodeNames": [
           "swamp-giant-01",
@@ -4944,10 +4944,10 @@
           "triangleCount": 13530
         },
         "data": {
-          "json": 3073,
-          "binary": 220396,
+          "json": 3404,
+          "binary": 223748,
           "buffers": {
-            "vertex": 72997,
+            "vertex": 76349,
             "index": 14304,
             "animation": 0,
             "transform": 0,
@@ -4982,13 +4982,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "8cd2967da56934697f58d4ac2aaa8a3e0f0845eaaab1bf8f27a7261000743818",
-      "sourceSha256": "d6d8fd41ee142271f54ddaaf681e86c810d9d4fac4f267d7bf9a2fa504fa5edb",
-      "outputSha256": "53dfb58f8cb9a996665dfda5160c00aa95a90dcf70bd1f87a2d165f305720ef4",
-      "sourceBytes": 490652,
-      "outputBytes": 202408,
-      "gzipBytes": 183593,
-      "brotliBytes": 182791,
+      "cacheKey": "e4f0b585227da213600a8892df4bb82e3304d65994a13a755e1497cd65febce0",
+      "sourceSha256": "d32bd869dafe4b02b5fc27d9ed2d4eb5d64270b1a2977294140850a5c078d7c5",
+      "outputSha256": "44cb2c8ccd06cc24b666bef3870f5b1571c664b5ae7932bc25513ed281121cba",
+      "sourceBytes": 503964,
+      "outputBytes": 205180,
+      "gzipBytes": 185140,
+      "brotliBytes": 184271,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5017,11 +5017,11 @@
             10.770421028137207
           ]
         },
-        "bufferBytes": 488128,
-        "logicalAccessorBytes": 342482,
-        "logicalVertexBytes": 277856,
+        "bufferBytes": 501280,
+        "logicalAccessorBytes": 355634,
+        "logicalVertexBytes": 291008,
         "logicalIndexBytes": 64626,
-        "geometryBufferBytes": 342482,
+        "geometryBufferBytes": 355634,
         "imageBufferBytes": 145643,
         "nodeNames": [
           "swamp-giant-02",
@@ -5064,11 +5064,11 @@
             10.7705078
           ]
         },
-        "bufferBytes": 400076,
-        "logicalAccessorBytes": 192777,
-        "logicalVertexBytes": 128151,
+        "bufferBytes": 409092,
+        "logicalAccessorBytes": 199353,
+        "logicalVertexBytes": 134727,
         "logicalIndexBytes": 64626,
-        "geometryBufferBytes": 200882,
+        "geometryBufferBytes": 207458,
         "imageBufferBytes": 133092,
         "nodeNames": [
           "swamp-giant-02",
@@ -5120,10 +5120,10 @@
           "triangleCount": 10771
         },
         "data": {
-          "json": 3070,
-          "binary": 199192,
+          "json": 3401,
+          "binary": 201632,
           "buffers": {
-            "vertex": 54673,
+            "vertex": 57110,
             "index": 11423,
             "animation": 0,
             "transform": 0,
@@ -5158,13 +5158,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "04399ad4b089553193b0de58f80659ea02838ee4ef6cf1b52c2d920821c27378",
-      "sourceSha256": "8d1bb5e4271493d271e3e41398d446927271154608f706ee967a5aa0c4dbe7c3",
-      "outputSha256": "330425b7b7667c6d9df80ff7dcbf9bc3c0d6cafb6b5ccf59fe0d1225253119fc",
-      "sourceBytes": 550948,
-      "outputBytes": 215052,
-      "gzipBytes": 192695,
-      "brotliBytes": 191662,
+      "cacheKey": "5b9a534051a2c7c16d1d4ec778ea576bad47d9e76fe328f63f970a73b1bb73e0",
+      "sourceSha256": "bb576d99ed6326ffd3ac61f9cc595546bc6fce55b8a1229412cc040688717eba",
+      "outputSha256": "a74b8a1e5d831296ef84add1788d6a15804520e07856be3941aa37c54d187f6e",
+      "sourceBytes": 570152,
+      "outputBytes": 218928,
+      "gzipBytes": 194894,
+      "brotliBytes": 193704,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5193,11 +5193,11 @@
             11.257506370544434
           ]
         },
-        "bufferBytes": 548424,
-        "logicalAccessorBytes": 402780,
-        "logicalVertexBytes": 331008,
+        "bufferBytes": 567464,
+        "logicalAccessorBytes": 421820,
+        "logicalVertexBytes": 350048,
         "logicalIndexBytes": 71772,
-        "geometryBufferBytes": 402780,
+        "geometryBufferBytes": 421820,
         "imageBufferBytes": 145643,
         "nodeNames": [
           "swamp-giant-03",
@@ -5240,11 +5240,11 @@
             11.2573242
           ]
         },
-        "bufferBytes": 447768,
-        "logicalAccessorBytes": 226267,
-        "logicalVertexBytes": 154495,
+        "bufferBytes": 460832,
+        "logicalAccessorBytes": 235787,
+        "logicalVertexBytes": 164015,
         "logicalIndexBytes": 71772,
-        "geometryBufferBytes": 235932,
+        "geometryBufferBytes": 245452,
         "imageBufferBytes": 133092,
         "nodeNames": [
           "swamp-giant-03",
@@ -5296,10 +5296,10 @@
           "triangleCount": 11962
         },
         "data": {
-          "json": 3070,
-          "binary": 211836,
+          "json": 3401,
+          "binary": 215380,
           "buffers": {
-            "vertex": 66130,
+            "vertex": 69673,
             "index": 12611,
             "animation": 0,
             "transform": 0,
@@ -5334,13 +5334,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "b2ac754972d5738e2ca5907e80aca40ba22b0290c6249933871139a94e4015ef",
-      "sourceSha256": "cace6cde51f3b80848e3a781fbaa9b71b5216d0f127d90ed1e5406c033fb47e2",
-      "outputSha256": "67a400e56dda00591658bccfb53df6ef655de455c984cde41f404be76a92c484",
-      "sourceBytes": 211028,
-      "outputBytes": 148968,
-      "gzipBytes": 144352,
-      "brotliBytes": 143746,
+      "cacheKey": "6f0bc0508ff526cf1e8b80972bc74082dea005ea9f8fe5adbeb62297dd68792c",
+      "sourceSha256": "ce3af0e7e850f9aad888313b10f6dd074871064feeef0ca196eeabb12992a94e",
+      "outputSha256": "e2f0787a20535f510f88102fec10c16bc71af3ada604b678a094ea2bec9f8255",
+      "sourceBytes": 212980,
+      "outputBytes": 149668,
+      "gzipBytes": 144639,
+      "brotliBytes": 143997,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -5369,11 +5369,11 @@
             5.012197494506836
           ]
         },
-        "bufferBytes": 208524,
-        "logicalAccessorBytes": 62880,
-        "logicalVertexBytes": 50304,
+        "bufferBytes": 210316,
+        "logicalAccessorBytes": 64672,
+        "logicalVertexBytes": 52096,
         "logicalIndexBytes": 12576,
-        "geometryBufferBytes": 62880,
+        "geometryBufferBytes": 64672,
         "imageBufferBytes": 145643,
         "nodeNames": [
           "swamp-snag-01",
@@ -5416,11 +5416,11 @@
             5.01220703
           ]
         },
-        "bufferBytes": 182756,
-        "logicalAccessorBytes": 35522,
-        "logicalVertexBytes": 22946,
+        "bufferBytes": 184024,
+        "logicalAccessorBytes": 36418,
+        "logicalVertexBytes": 23842,
         "logicalIndexBytes": 12576,
-        "geometryBufferBytes": 36992,
+        "geometryBufferBytes": 37888,
         "imageBufferBytes": 133092,
         "nodeNames": [
           "swamp-snag-01",
@@ -5472,10 +5472,10 @@
           "triangleCount": 2096
         },
         "data": {
-          "json": 3060,
-          "binary": 145764,
+          "json": 3386,
+          "binary": 146136,
           "buffers": {
-            "vertex": 10392,
+            "vertex": 10763,
             "index": 2276,
             "animation": 0,
             "transform": 0,
@@ -14002,15 +14002,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 72582716,
-    "outputBytes": 39709156,
-    "gzipBytes": 37744129,
-    "brotliBytes": 37701038,
-    "logicalSourceVertexBytes": 37209776,
-    "logicalOutputVertexBytes": 17811356,
+    "sourceBytes": 72635332,
+    "outputBytes": 39720184,
+    "gzipBytes": 37750213,
+    "brotliBytes": 37706703,
+    "logicalSourceVertexBytes": 37261744,
+    "logicalOutputVertexBytes": 17837340,
     "logicalSourceIndexBytes": 4738308,
     "logicalOutputIndexBytes": 4461036,
-    "savedBytes": 32873560,
-    "reductionRatio": 0.452912
+    "savedBytes": 32915148,
+    "reductionRatio": 0.453156
   }
 }

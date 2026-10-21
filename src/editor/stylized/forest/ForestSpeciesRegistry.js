@@ -40,7 +40,7 @@ const DEFAULT_PALETTES = Object.freeze({
   taiga: Object.freeze(['conifer_narrow', 'conifer_wide']),
   tundra: Object.freeze(['conifer_narrow']),
   // Swamp giants, with the odd stand of dark narrow spruce on the drier islands.
-  wetland: Object.freeze(['wetland_sparse', 'wetland_sparse', 'wetland_sparse', 'conifer_narrow']),
+  wetland: Object.freeze([...Array(11).fill('wetland_sparse'), 'conifer_narrow']),
 });
 
 /**

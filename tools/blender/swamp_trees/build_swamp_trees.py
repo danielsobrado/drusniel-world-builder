@@ -405,6 +405,20 @@ def foliage(bm, uv_layer, branches, seed, kind):
                                         top - side - Vector((0, 0, length))], uvs)
 
 
+def paint_cards(mesh, seed):
+    """A per-card tint around white. The runtime keeps a vertex-coloured crown's
+    own colours instead of re-grading it onto the shared green canopy ramp, so
+    the moss stays grey-green and the leaves olive."""
+    rng = random.Random(seed * 11 + 3)
+    attribute = mesh.color_attributes.new('Col', 'FLOAT_COLOR', 'CORNER')
+    for poly in mesh.polygons:
+        shade = rng.uniform(0.82, 1.08)
+        tint = (shade, shade * rng.uniform(0.97, 1.03), shade * rng.uniform(0.94, 1.0), 1.0)
+        for loop in poly.loop_indices:
+            attribute.data[loop].color = tint
+    mesh.color_attributes.active_color = attribute
+
+
 def material(name, image, alpha, color=None):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -450,6 +464,7 @@ def build_tree(name, seed, kind, height, base_radius, forks, lean, bark_mat, lea
     bm.to_mesh(leaf_mesh)
     bm.free()
     leaf_mesh.materials.append(leaf_mat)
+    paint_cards(leaf_mesh, seed)
     root = bpy.data.objects.new(name, None)
     bpy.context.scene.collection.objects.link(root)
     for mesh, label in ((trunk_mesh, 'Bark'), (leaf_mesh, 'Leaves')):
@@ -469,7 +484,8 @@ def export(root, path):
     for child in root.children:
         child.select_set(True)
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True,
-                              export_apply=True, export_yup=True, export_image_format='AUTO')
+                              export_apply=True, export_yup=True, export_image_format='AUTO',
+                              export_vertex_color='ACTIVE')
 
 
 def render_preview(root, path):

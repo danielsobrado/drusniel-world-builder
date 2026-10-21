@@ -306,7 +306,13 @@ export class TreeManifestStore {
     if (!entry) return null;
     const shapeKey = `${minimumWidth}:${minimumHeight}`;
     if (entry.canopyShapeKey === shapeKey) return entry.canopy;
-    const placements = entry.placements;
+    // Lattice crowns (trees.unclusteredSpecies) read as nothing like a merged
+    // canopy blob, so they skip the clusters and stand as their own impostors.
+    const unclustered = new Set(this.config.trees.unclusteredSpecies ?? []);
+    const standalone = entry.placements.filter((placement) => unclustered.has(placement.speciesId));
+    const placements = standalone.length
+      ? entry.placements.filter((placement) => !unclustered.has(placement.speciesId))
+      : entry.placements;
     const emergentCount = Math.max(0, Math.round(placements.length * 0.04));
     const emergent = placements.length === 0 || emergentCount === 0
       ? []
@@ -316,6 +322,7 @@ export class TreeManifestStore {
           || (left.stableId < right.stableId ? -1 : (left.stableId > right.stableId ? 1 : 0))
         ))
         .slice(0, emergentCount);
+    emergent.push(...standalone);
     entry.canopy = Object.freeze({
       clusters: aggregateCanopyClusters({
         chunkX,

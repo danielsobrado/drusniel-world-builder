@@ -14,7 +14,37 @@ Grukmar taiga to Wetland (biome 12) in both `maps/Eldara …map` and `…Full…
 Grukmar goes from 80 to 267 wetland cells out of 633 land cells, the most of
 any realm. Burg cells keep their biome.
 
-## Today vs target
+## Status (2026-10-21)
+
+Built and committed on `main` (`e758ae27` and later). Each item names where
+it lives.
+
+| Area | What exists now |
+|---|---|
+| Trees | `tools/blender/swamp_trees/build_swamp_trees.py` builds three buttressed, fluted swamp giants and a broken snag. Each is one bark mesh on the procedural `swamp` bark profile plus one vertex-coloured leaf mesh carrying twig sprays, sparse leaves and hanging moss. They are the only crowns of `wetland_sparse`, mixed about 11:1 with the scene's dark spruces. The wetland habitat reaches 300 m and keeps at least 0.75 of the regional woodland channel (`regionalForestFloor`). They never merge into far-band canopy blobs (`trees.unclusteredSpecies`). |
+| Water | `water/BogPools.js` lays bog ground around a 32 m-lattice water table, with noise islands and pools down to 0.9 m (water domain v4). Bog water is tannin-black, mirror-smooth and foamless (`WaterAppearanceNodes`). |
+| Margins | Procedural cattail stands in the aquatic layer (emergent, 0.02–0.45 m water). The existing lily pads and pondweed now find bog pools too. |
+| Ground | `soil` column in `config/biome-looks.yaml` (peat for tile 12). `stylized/bog/BogGroundShading.js` pulls the ground toward peat and wet mud at the waterline. The sedge is short, dark and patchy. |
+| Understory | `build_swamp_understory.py`: fern, mossy log, stump and cypress knees as tile-12 ground details. Shrubs leave the bog. |
+| Air | Bog overcast (`SkyLookController`), `bogMurkLook` (teal murk over sky, fog and cloud, plus `skyFog` fading the dome), and fog beyond the regional bound. The jungle ground mist, spores, midges and fireflies now also run in the `wetland` ambient region. |
+| Light | `bogWisps`: slow emissive will-o'-wisps over the pools. `stylized/bog/BogVents.js` with the `bogGasFlame` recipe: swamp-gas flames that catch on dry bog islands in turns, at most three at once. Each has a flickering virtual light and ground pool. No scene lights. |
+
+Still open:
+
+- Glowing fungi (§6).
+- A wading footstep below the water table (§7).
+- QA pose in `WorldVisualQa` and a `qa:perf` A/B (§8). The capture used during
+  development is a scratch script around `__worldVisualQa` with
+  `--js-flags=--max-old-space-size=8192`, because the app's JS heap already sits
+  at 2.3–3.3 GB of the default 4 GB limit and the tab intermittently dies near
+  towns.
+- The far terrain's canopy lift still draws rounded lumps on the bog horizon.
+
+Review spots used while tuning (canonical metres, Eldara, player height 1.7 m,
+yaw 0.6): a pool-and-island bog at (-2255555, -1564130), and a closed swamp
+forest at (-3534792, -1471060).
+
+## Today vs target (as planned)
 
 | Layer | Today | Target (reference) |
 |---|---|---|

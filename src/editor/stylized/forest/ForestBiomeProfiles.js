@@ -216,6 +216,10 @@ function normalizeProfile(tileId, value) {
     // Zero by default, so profiles that do not opt in are unchanged.
     riparianCoverage: clamp(finite(profile.riparianCoverage, 0), 0, 1),
     riparianRange: Math.max(0.001, finite(profile.riparianRange, 40)),
+    // The least of the regional woodland channel this biome keeps: a closed
+    // swamp forest is wooded wherever it is, not only in the field's woodland
+    // districts. Zero leaves the channel as it is.
+    regionalForestFloor: clamp(finite(profile.regionalForestFloor, 0), 0, 1),
   });
 }
 
@@ -256,6 +260,7 @@ export function forestProfileSignature(profiles) {
       profile.waterFade,
       profile.riparianCoverage,
       profile.riparianRange,
+      profile.regionalForestFloor,
     ]);
   return JSON.stringify(values);
 }

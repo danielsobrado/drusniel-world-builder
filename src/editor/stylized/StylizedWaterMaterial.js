@@ -385,6 +385,7 @@ export function createStylizedWaterMaterial({
     // Sea foam comes from breaking crests and the shared swash front.
     if (sea) foamAmount = foamAmount.mul(oneMinus(sea.mask));
     foamAmount = foamAmount.mul(waterCoverage);
+    if (appearance) foamAmount = foamAmount.mul(appearance.foamScale);
   }
 
   // Foam is composited after refraction, which resets alpha to coverage.

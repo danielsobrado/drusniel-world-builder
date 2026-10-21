@@ -292,7 +292,10 @@ export class ForestHabitatField {
     // A gallery wood along a river is not an upland patch that happens to touch
     // water — it is its own corridor, so it competes with the patch field for
     // coverage instead of scaling it.
-    const regionalForest = this.regionalCharacterField?.sampleChannel(x, z, 'forest') ?? 1;
+    const regionalForest = Math.max(
+      profile.regionalForestFloor,
+      this.regionalCharacterField?.sampleChannel(x, z, 'forest') ?? 1,
+    );
     const rawCoverage = Math.max(patch.patchCoverage, riparian) * regionalForest;
     const coverage = clamp01(rawCoverage ** this.coverageContrast);
     const suitability = clamp01(

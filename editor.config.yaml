@@ -339,7 +339,7 @@ stylizedSurface:
         motion: woody-shrub
         scale: 2
         weight: 1.3
-        tileIds: [6, 3, 4, 5, 7, 8, 9, 12, 14]
+        tileIds: [6, 3, 4, 5, 7, 8, 9, 14]
         canopy: core
       - scene: /assets/bushes/bush2.glb
         motion: woody-shrub
@@ -411,6 +411,9 @@ stylizedSurface:
         species: conifer_narrow
         scale: 1
         preferredTileIds: [9]
+        # A narrow green crown that reads as broadleaf: kept to the boreal biomes,
+        # so the bog's conifer stands are the scene's dark spruces.
+        tileIds: [9, 10]
         # The forest-pack crowns tile a small leaf texture ~16x per card, so
         # they read as the texture's average: grey sage (wide) and brown
         # (narrow), ~0.05 linear luminance, under the canopy grade's dark-texel
@@ -1569,7 +1572,8 @@ stylizedSurface:
     enabled: true
     residentRadius: 2
     perChunk: 96
-    tileIds: [3, 4, 5, 6, 7, 8, 9, 12, 14]
+    # The bog (12) grows ferns and deadwood (groundDetails), not shrubs.
+    tileIds: [3, 4, 5, 6, 7, 8, 9, 14]
     minScale: 0.7
     maxScale: 1.65
     radius: 0.55
@@ -1595,9 +1599,6 @@ stylizedSurface:
       3: 0.45
       4: 0.6
       9: 0.6
-      # The bog floor is fern, sedge and fallen wood (groundDetails), with only
-      # the odd shade shrub.
-      12: 0.2
       14: 0.35
   groundDetails:
     enabled: true
@@ -1895,6 +1896,9 @@ stylizedSurface:
       tint: 0.12
       base: 0.25
       baseHeight: 1.2
+    # Species whose bare, lattice crowns must never merge into the far band's
+    # rounded canopy clusters; they stand as their own impostors instead.
+    unclusteredSpecies: [wetland_sparse]
     habitat:
       enabled: true
       # Closed forest needs real density; the patch field keeps glades open, so
@@ -1923,7 +1927,7 @@ stylizedSurface:
         # Grukmar's bogs are closed swamp forest standing in their own water, not
         # stands hugging a distant shore; imported lowland bogs sit 10-60 m up.
         12: { density: 0.9, elevationMax: 300, elevationFade: 60, waterMaximum: 100000, maximumSlope: 0.9,
-          patchRadiusMin: 0.62, patchRadiusMax: 0.96, patchEdgeWidth: 0.2 }
+          patchRadiusMin: 0.62, patchRadiusMax: 0.96, patchEdgeWidth: 0.2, regionalForestFloor: 0.75 }
     forestFloor:
       # Sparse forest-floor plants and shaded margins use the same canopy field
       # as litter. Open meadows retain the default population.

@@ -23,5 +23,7 @@ export function createWaterAppearanceNodes(nearest, filtered) {
     // Still bog water is a dark mirror; streams through woods stay a little rougher.
     roughness: clamp(float(.12).add(organic.mul(.12)).sub(smoothstep(.6, 1, organic).mul(.18)).add(cold.mul(.025)), 0, 1),
     clarity: oneMinus(organic.mul(.8)),
+    // Still bog water carries scum, not surf: its shore foam fades out.
+    foamScale: oneMinus(smoothstep(.6, 1, organic).mul(.9)),
   };
 }
