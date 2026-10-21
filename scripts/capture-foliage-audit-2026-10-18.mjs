@@ -22,7 +22,7 @@ try {
   report.sourceSha = source.sourceSha;
   report.sourceSnapshotSha256 = source.sourceSnapshot.sha256;
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+    args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   context = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1,
     recordVideo: { dir: path.join(root, 'tmp/foliage-audit-2026-10-18-video'), size: { width: 1600, height: 900 } } });
   const page = await context.newPage();

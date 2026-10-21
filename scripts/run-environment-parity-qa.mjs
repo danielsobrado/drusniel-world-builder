@@ -22,7 +22,7 @@ const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${
 const report = { url: baseUrl, checks: [], backends: {} };
 let browser;
 try {
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   const images = new Map();
   for (const backend of ['webgpu', 'webgl']) {
     const page = await browser.newPage({ viewport: { width: 640, height: 480 }, deviceScaleFactor: 1 });

@@ -19,7 +19,7 @@ const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${
 const report = { passed: false, checks: [] };
 let browser;
 try {
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
   const errors = createBrowserErrorMonitor(page);
   await page.goto(new URL('/scripts/fixtures/snow-surface.html', option('--url', 'http://localhost:5173')).href);

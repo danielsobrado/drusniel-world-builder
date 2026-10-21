@@ -20,7 +20,7 @@ const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${
 const report = { url: url.href, scenarios: [] }; let browser;
 try {
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+    args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   for (const scenario of scenarios) {
     const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
     const errors = createBrowserErrorMonitor(page);

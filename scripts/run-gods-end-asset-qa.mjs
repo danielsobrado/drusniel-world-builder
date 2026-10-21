@@ -21,7 +21,7 @@ const failures = [];
 const loaded = [];
 try {
   browser = await chromium.launch({ headless: !process.argv.includes('--headed'), args: [
-    '--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-gpu-rasterization',
+    '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--enable-gpu-rasterization',
   ] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (error) => errors.push(error.message));

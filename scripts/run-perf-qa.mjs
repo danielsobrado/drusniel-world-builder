@@ -129,7 +129,7 @@ const fs = require('fs');
       // vsync is also disabled: a 60 Hz cap hides all headroom above the refresh
       // rate, so a regression is invisible until it drops under the cap.
       args: [
-        '--enable-unsafe-webgpu',
+        '--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
         '--ignore-gpu-blocklist',
         '--use-angle=default',
         '--enable-gpu-rasterization',

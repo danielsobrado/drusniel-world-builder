@@ -13,7 +13,7 @@ const release = await waitForPerfRunLock(path.resolve('tmp', `perf-browser-${pro
 const report = { backends: {}, checks: [] };
 let browser;
 try {
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   for (const backend of ['webgpu', 'webgl']) {
     const page = await browser.newPage({ viewport: { width: 640, height: 480 }, deviceScaleFactor: 1 });
     const errors = createBrowserErrorMonitor(page);

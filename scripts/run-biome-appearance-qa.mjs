@@ -17,7 +17,7 @@ const report = { url, mode: captureOnly ? 'capture' : 'acceptance', checks: [], 
 let browser;
 try {
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+    args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   for (const backend of ['webgpu', 'webgl']) {
     const page = await browser.newPage({ viewport: { width: 720, height: 480 }, deviceScaleFactor: 1 });
     const errors = createBrowserErrorMonitor(page);

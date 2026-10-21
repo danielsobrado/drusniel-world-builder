@@ -7,7 +7,7 @@ const baseUrl = urlIndex < 0 ? 'http://localhost:5173' : process.argv[urlIndex +
 const recoveryUrl = new URL(baseUrl); recoveryUrl.searchParams.set('qaRecovery', '1');
 
 // Run with native Windows Node from WSL for the host's hardware WebGPU adapter.
-const browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu',
+const browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192',
   '--ignore-gpu-blocklist', '--use-angle=default', '--disable-gpu-vsync', '--disable-frame-rate-limit'] });
 const errors = [], warnings = [], checks = {};
 let page;

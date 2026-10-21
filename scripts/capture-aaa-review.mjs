@@ -39,7 +39,7 @@ try {
   report.mapSha256 = await fileHash(path.join(root, 'maps/Eldara Full 2026-07-23-20-37.json'));
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   browser = await chromium.launch({ headless: false,
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+    args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 });
   monitor = createBrowserErrorMonitor(page);
   await page.goto(`${url}/?qaVisual=1`, { waitUntil: 'domcontentloaded' });

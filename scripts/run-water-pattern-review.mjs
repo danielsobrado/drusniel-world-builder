@@ -14,7 +14,7 @@ const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','htt
 await mkdir(out,{recursive:true});const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={schemaVersion:1,...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),cases:[],artifacts:[]};let browser,errors;
 try {
- browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
+ browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192','--ignore-gpu-blocklist','--use-angle=default']});
  const page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});errors=createBrowserErrorMonitor(page);
  await page.goto(new URL('/?qaVisual=1',url).href,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>!!window.__worldVisualQa,null,{timeout:180000});
  report.adapter=await page.evaluate(async()=>{const a=await navigator.gpu.requestAdapter({powerPreference:'high-performance',featureLevel:'compatibility'});

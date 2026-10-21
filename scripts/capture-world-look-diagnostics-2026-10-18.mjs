@@ -32,7 +32,7 @@ try {
   source = await captureVisualSource(url, root);
   Object.assign(report, source);
   report.harnessSha256 = await fileHash(fileURLToPath(import.meta.url));
-  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
+  browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--js-flags=--max-old-space-size=8192', '--ignore-gpu-blocklist', '--use-angle=default'] });
   const page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 });
   monitor = createBrowserErrorMonitor(page);
   await page.goto(`${url}/?qaVisual=1`, { waitUntil: 'domcontentloaded' });
