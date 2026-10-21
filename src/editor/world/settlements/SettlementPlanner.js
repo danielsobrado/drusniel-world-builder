@@ -1,6 +1,8 @@
 import { buildingDoor, buildingWindows } from './SettlementBuildingCatalog.js';
 import { planDecor } from './SettlementDecor.js';
 import { planDefences } from './SettlementDefences.js';
+import { rect } from './SettlementGeometry.js';
+import { marketHalls, placeSquares } from './SettlementMarkets.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
 import { planBuildings, planFarms } from './SettlementPlots.js';
 import { hashInts, settlementProfile } from './SettlementProfile.js';
@@ -9,7 +11,7 @@ import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 11;
+export const SETTLEMENT_PLAN_VERSION = 12;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -38,8 +40,12 @@ export function planSettlement({
   const signature = settlementSignature(settlement, profile, worldSeed, routeBearings.length);
   const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, signature, routeBearings, random, isBuildable });
   const maxPadFall = profile.hasRegionalIdentity && profile.identity?.activeOverlays?.includes('mountain-pass') ? 5.2 : undefined;
-  const occupancy = new SettlementOccupancy({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall });
-  const buildings = planBuildings({ profile, signature, occupancy, streets, bearings, quayBearing, random });
+  const squares = placeSquares({ profile, signature, streets, squareRadius, quayBearing, isBuildable });
+  const occupancy = new SettlementOccupancy({ streets, squares, isBuildable, sampleHeight, maxPadFall });
+  // A market hall stands in its square, where nothing else may: claimed before any plot is.
+  const halls = marketHalls(squares);
+  for (const hall of halls) occupancy.claim(rect(hall.x, hall.z, hall.width, hall.depth, hall.yaw));
+  const buildings = [...halls, ...planBuildings({ profile, signature, occupancy, streets, bearings, quayBearing, random })];
   const defences = planDefences({ profile, occupancy, streets, random });
   const { farms, fields } = planFarms({ profile, signature, occupancy, streets, random });
   const { props, walks } = planDecor({
@@ -48,6 +54,7 @@ export function planSettlement({
     occupancy,
     streets,
     squareRadius,
+    squares,
     buildings: [...buildings, ...farms],
     fields,
     random,
@@ -74,6 +81,8 @@ export function planSettlement({
     recipe: profile.recipe,
     signature,
     squareRadius,
+    // Every square, primary (at the origin, squareRadius) first: { x, z, radius, kind, name }.
+    squares,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),
     props: [...props, ...stones, ...trim],

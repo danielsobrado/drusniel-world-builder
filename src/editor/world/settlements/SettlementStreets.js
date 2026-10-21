@@ -14,9 +14,11 @@ export function planRandom(seed) {
 }
 
 /** Street widths by rank in the hierarchy: a town's grand avenues, its avenues, then main road to footpath. */
-export const STREET_WIDTH = Object.freeze({ grand: 11, avenue: 9, main: 5.5, ring: 4.5, lane: 3.2, walk: 1.6 });
+export const STREET_WIDTH = Object.freeze({ market: 12, grand: 11, avenue: 9, main: 5.5, ring: 4.5, lane: 3.2, walk: 1.6 });
 /** An avenue runs out to this share of the town's radius; beyond, it is a road again, through the gate. */
 const AVENUE_REACH = 0.92;
+/** A market street's wide stretch runs out to this share of the radius. */
+const MARKET_STREET_REACH = 0.45;
 const MIN_ROAD_SEPARATION = 0.55;
 /** Least angle, in radians, between two radial streets of one quarter. */
 const SPOKE_SEPARATION = 0.5;
@@ -347,8 +349,13 @@ export function planStreets({ profile, signature = null, routeBearings, random, 
   // Last, so lanes are planned off whole mains: which of them are avenues inside the town.
   const avenues = new Set(signature?.avenues === 'all' ? mains : (signature?.avenues === 'first' ? mains.slice(0, 1) : []));
   const avenueWidth = signature?.grandAvenue ? STREET_WIDTH.grand : STREET_WIDTH.avenue;
-  const planned = streets.flatMap((street) => (avenues.has(street)
-    ? asAvenue(street, profile.radius * AVENUE_REACH, avenueWidth)
-    : [street]));
+  // A street village's market is its street: the first stretch out of the square, wide enough for a row of stalls.
+  const marketStreet = signature?.markets?.[0]?.kind === 'street-market' ? mains[0] : null;
+  const planned = streets.flatMap((street) => {
+    if (avenues.has(street)) return asAvenue(street, profile.radius * AVENUE_REACH, avenueWidth);
+    if (street !== marketStreet) return [street];
+    return asAvenue(street, profile.radius * MARKET_STREET_REACH, STREET_WIDTH.market)
+      .map((piece) => (piece.avenue ? { ...piece, market: true } : piece));
+  });
   return { streets: planned, squareRadius, bearings, quayBearing };
 }

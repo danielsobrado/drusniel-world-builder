@@ -215,11 +215,13 @@ export function* planPavingJob(plan) {
       }
     }
   }
-  const radius = plan.squareRadius ?? 0;
-  for (let x = -radius; x <= radius; x += 2) {
-    for (let z = -radius; z <= radius; z += 2) {
-      if (Math.hypot(x, z) <= radius - 0.5) tiles.push({ x, z, yaw: 0 });
-      if (tiles.length % 32 === 0) yield;
+  for (const square of plan.squares ?? []) {
+    const { radius } = square;
+    for (let x = -radius; x <= radius; x += 2) {
+      for (let z = -radius; z <= radius; z += 2) {
+        if (Math.hypot(x, z) <= radius - 0.5) tiles.push({ x: square.x + x, z: square.z + z, yaw: 0 });
+        if (tiles.length % 32 === 0) yield;
+      }
     }
   }
   return tiles;

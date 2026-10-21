@@ -220,18 +220,19 @@ function placeKeep(occupancy, profile, bearings, random) {
 }
 
 /**
- * The rim of the market square as a street nothing is paved for: plots are
- * anchored on it like on any other, so the square is walled by house fronts
- * instead of ringed by a meadow.
+ * The rim of each square as a street nothing is paved for: plots are anchored
+ * on it like on any other, so a square is walled by house fronts instead of
+ * ringed by a meadow.
  */
-function squareFrontage(squareRadius) {
-  if (!(squareRadius > 0)) return [];
-  const steps = Math.max(12, Math.round(Math.PI * 2 * squareRadius / 4));
-  const points = Array.from({ length: steps + 1 }, (_, index) => {
-    const angle = Math.PI * 2 * (index % steps) / steps;
-    return [Math.sin(angle) * squareRadius, Math.cos(angle) * squareRadius];
+function squareFrontage(squares) {
+  return squares.map(({ x, z, radius }) => {
+    const steps = Math.max(12, Math.round(Math.PI * 2 * radius / 4));
+    const points = Array.from({ length: steps + 1 }, (_, index) => {
+      const angle = Math.PI * 2 * (index % steps) / steps;
+      return [x + Math.sin(angle) * radius, z + Math.cos(angle) * radius];
+    });
+    return { kind: 'frontage', width: SQUARE_APRON * 2, points };
   });
-  return [{ kind: 'frontage', width: SQUARE_APRON * 2, points }];
 }
 
 /** Town plots: landmarks first, then a zone-weighted fill up to the class's target. */
@@ -258,7 +259,7 @@ export function planBuildings({ profile, signature = null, occupancy, streets, b
   }
   const districts = planDistricts({ profile, bearings, quayBearing, keep, random });
   const queue = landmarkQueue(profile, random, Boolean(keep && regional));
-  const anchors = frontageAnchors([...squareFrontage(occupancy.squareRadius), ...streets], random, { maxDistance: profile.radius });
+  const anchors = frontageAnchors([...squareFrontage(occupancy.squares), ...streets], random, { maxDistance: profile.radius });
   const regionalZoneMix = regional ? profile.recipe.zoneMix : ZONE_MIX;
   const regionalDistrictMix = regional ? { ...DISTRICT_MIX, ...profile.recipe.districtMix } : DISTRICT_MIX;
 

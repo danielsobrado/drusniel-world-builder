@@ -1,5 +1,6 @@
 import { buildingEntry } from './SettlementBuildingCatalog.js';
 import { rect } from './SettlementGeometry.js';
+import { marketHallReach } from './SettlementMarkets.js';
 import { hasTrait } from './SettlementSignature.js';
 import { STREET_WIDTH } from './SettlementStreets.js';
 
@@ -129,32 +130,66 @@ function tradeGoods({ buildings, occupancy, props, random }) {
   }
 }
 
-/** The market square: a well at its heart, stalls round it facing in, benches and lanterns at the rim. */
-function squareFurniture({ profile, occupancy, squareRadius, props, random }) {
-  if (squareRadius <= 0) return;
-  props.push({ kind: 'well', variant: 0, x: 0, z: 0, yaw: random() * Math.PI * 2 });
-  const stalls = profile.market ? 2 + profile.rank * 2 : 0;
+/**
+ * The furniture of one square, by its market kind: a well, or a fountain in a
+ * grand square or a fountain town, at its heart — a market hall instead where it
+ * has one — stalls ringed round it facing in, benches and lanterns at the rim.
+ * A grand square rings its stalls twice; a harbour market heaps goods off the
+ * boats; a gate market keeps carts for the road.
+ */
+function squareFurniture({ profile, signature, occupancy, square, props, random }) {
+  const { x: cx, z: cz, radius: squareRadius, kind } = square;
+  const put = (propKind, variant, angle, distance, yaw) => props.push({
+    kind: propKind, variant, x: cx + Math.sin(angle) * distance, z: cz + Math.cos(angle) * distance, yaw,
+  });
+  const fountain = kind === 'grand-square' || (kind === 'square' && cx === 0 && cz === 0 && hasTrait(signature, 'fountain-square'));
+  if (kind !== 'market-hall') props.push({ kind: fountain ? 'fountain' : 'well', variant: 0, x: cx, z: cz, yaw: random() * Math.PI * 2 });
+  const stalls = profile.market || kind !== 'square' ? 2 + profile.rank * 2 : 0;
+  // Stall rings as [share of the radius, count]; round a hall, midway from its corners to the rim.
+  const rings = {
+    'grand-square': [[0.45, stalls], [0.74, stalls + 2]],
+    'market-hall': [[(marketHallReach() + 2.5 + squareRadius * 0.9) / 2 / squareRadius, stalls]],
+  }[kind] ?? [[0.62, stalls]];
   const phase = random() * Math.PI * 2;
-  for (let index = 0; index < stalls; index += 1) {
-    const angle = phase + Math.PI * 2 * index / stalls;
-    const radius = squareRadius * 0.62;
-    props.push({ kind: 'stall', variant: index % 2, x: Math.sin(angle) * radius, z: Math.cos(angle) * radius, yaw: angle + Math.PI });
-    if (random() < 0.5) {
-      const extra = angle + 0.35;
-      props.push({ kind: 'barrels', variant: index % 2, x: Math.sin(extra) * radius * 1.05, z: Math.cos(extra) * radius * 1.05, yaw: angle });
+  for (const [share, count] of rings) {
+    for (let index = 0; index < count; index += 1) {
+      // Each ring turned by its own share, so a grand square's two rings do not line up.
+      const angle = phase + Math.PI * 2 * index / count + share;
+      const radius = squareRadius * share;
+      put('stall', index % 2, angle, radius, angle + Math.PI);
+      if (random() < 0.5) put('barrels', index % 2, angle + 0.35, radius * 1.05, angle);
     }
+  }
+  if (kind === 'harbour') {
+    // The day's catch and cargo, stacked between the stalls and the quay side.
+    for (let index = 0; index < 4; index += 1) put('barrels', index % 2, random() * Math.PI * 2, squareRadius * 0.3, random() * Math.PI);
   }
   const rim = Math.max(4, profile.rank * 2 + 2);
   for (let index = 0; index < rim; index += 1) {
     const angle = phase + Math.PI * (2 * index + 1) / rim;
-    const radius = squareRadius * 0.92;
-    const kind = index % 2 === 0 ? 'lantern' : 'bench';
-    props.push({ kind, variant: 0, x: Math.sin(angle) * radius, z: Math.cos(angle) * radius, yaw: angle + Math.PI });
+    put(index % 2 === 0 ? 'lantern' : 'bench', 0, angle, squareRadius * 0.92, angle + Math.PI);
   }
-  if (profile.rank >= 2) {
-    props.push({ kind: 'cart', variant: 0, x: Math.sin(phase) * squareRadius * 0.3, z: Math.cos(phase) * squareRadius * 0.3, yaw: phase });
+  const carts = kind === 'gate-market' ? 2 : (profile.rank >= 2 || kind === 'harbour' ? 1 : 0);
+  for (let index = 0; index < carts; index += 1) {
+    const angle = phase + index * Math.PI;
+    put('cart', 0, angle, squareRadius * (kind === 'market-hall' ? 0.88 : 0.3), angle);
   }
-  occupancy.claim(rect(0, 0, squareRadius * 2, squareRadius * 2, 0), { soft: true });
+  occupancy.claim(rect(cx, cz, squareRadius * 2, squareRadius * 2, 0), { soft: true });
+}
+
+/** A market street's stalls, in a row down its middle, each facing a kerb in turn. */
+function marketStreetStalls({ occupancy, streets, props }) {
+  for (const street of streets) {
+    if (!street.market) continue;
+    const length = polylineLength(street.points);
+    let side = 1;
+    for (let s = 5; s < length - 4; s += 8) {
+      const at = pointAlong(street.points, s);
+      if (!at) continue;
+      placeProp(occupancy, props, 'stall', s % 16 < 8 ? 0 : 1, at.x, at.z, at.along + Math.PI / 2 * side, { ignoreStreets: true });
+      side = -side;
+    }
+  }
 }
 
 /** A signpost where each main road enters the town, and a wayside shrine or cross further out. */
@@ -267,10 +302,11 @@ function regionalOverlayProps({ profile, occupancy, streets, squareRadius, props
   }
 }
 
-export function planDecor({ profile, signature = null, occupancy, streets, squareRadius, buildings, fields, random }) {
+export function planDecor({ profile, signature = null, occupancy, streets, squareRadius, squares = [], buildings, fields, random }) {
   const props = [];
   const walks = [];
-  squareFurniture({ profile, occupancy, squareRadius, props, random });
+  for (const square of squares) squareFurniture({ profile, signature, occupancy, square, props, random });
+  marketStreetStalls({ occupancy, streets, props });
   streetLanterns({ profile, signature, occupancy, streets, props, random });
   avenuePlanters({ signature, occupancy, streets, props });
   doorWalks({ signature, buildings, occupancy, props, walks, random });

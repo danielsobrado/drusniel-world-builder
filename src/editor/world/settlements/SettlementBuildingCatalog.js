@@ -38,6 +38,8 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
   bakery: Object.freeze([house('bakery', 7, 5.5, 3.2, [9.4, 6.8])]),
   warehouse: Object.freeze([house('warehouse', 8, 10, 9, [9.2, 12.2])]),
   chapel: Object.freeze([house('chapel', 6.5, 11, 6, [8.2, 12.2])]),
+  // Stands free in its square (SettlementMarkets), so its footprint is its own extent and eaves.
+  markethall: Object.freeze([house('market-hall', 14, 8, 8, [15.6, 9.8])]),
   farmhouse: Object.freeze([house('farmhouse', 13, 6.5, 3.4, [14.4, 8]), house('farmhouse', 11, 6, 3, [12.4, 7.6])]),
   barn: Object.freeze([house('barn', 8, 11, 4.8, [9.2, 12.2])]),
   keep: Object.freeze([castle('square-tower', 9, 3, 12, [16, 16], { style: null, topStyle: 'battlements', ivy: true })]),
@@ -50,6 +52,7 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
   gatehouse: Object.freeze([castle('gatehouse', 10, 3, 7, [16, 10], { topStyle: 'battlements' })]),
   tower: Object.freeze([castle('tower', 6, 2, 9, [8, 8], { topStyle: 'battlements' })]),
   well: Object.freeze([prop('well', 2, 3, [3.4, 3.4])]),
+  fountain: Object.freeze([prop('fountain', 4.4, 3, [5, 5])]),
   stall: Object.freeze([prop('market-stall', 3, 2.6, [4.4, 3]), prop('market-stall', 2.5, 2.4, [3.9, 3])]),
   lantern: Object.freeze([prop('lantern-post', 2, 2.8), prop('walk-lantern', 2, 2)]),
   planter: Object.freeze([prop('planter', 2, 2, [2.4, 1])]),

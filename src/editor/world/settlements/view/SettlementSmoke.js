@@ -75,7 +75,7 @@ const HAZE = Object.freeze({ spacing: 14, height: 2.2, size: 13 });
  */
 export function createSettlementHaze(plan, heightAt) {
   const banks = [];
-  if (plan.squareRadius > 0) banks.push([0, 0]);
+  for (const square of plan.squares ?? []) banks.push([square.x, square.z]);
   for (const street of plan.streets) {
     if (street.kind !== 'main' && street.kind !== 'ring') continue;
     let travelled = HAZE.spacing / 2;

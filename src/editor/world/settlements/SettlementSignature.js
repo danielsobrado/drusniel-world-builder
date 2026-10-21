@@ -13,6 +13,7 @@
  */
 
 import { SETTLEMENT_BUILDINGS } from './SettlementBuildingCatalog.js';
+import { marketKinds } from './SettlementMarkets.js';
 import { hashInts } from './SettlementProfile.js';
 import { planRandom } from './SettlementStreets.js';
 
@@ -117,13 +118,16 @@ export function settlementSignature(settlement, profile, worldSeed, routeCount =
   const grammar = pickGrammar(settlement, profile, routeCount, random);
   const traits = pickTraits(profile, random);
   const capital = Boolean(settlement.capital);
+  const avenues = profile.rank < 2 ? 'none' : (grammar === 'grid' || capital ? 'all' : 'first');
   return Object.freeze({
     grammar,
     traits,
     // Which main streets are avenues inside the town (SettlementStreets), and whether they are grand.
-    avenues: profile.rank < 2 ? 'none' : (grammar === 'grid' || capital ? 'all' : 'first'),
+    avenues,
     grandAvenue: profile.rank >= 2 && (capital || traits.includes('grand-avenue')),
     houseWeights: houseWeights(random),
+    // Its markets' kinds and names, primary first; SettlementMarkets places their squares.
+    markets: marketKinds({ settlement, profile, grammar, traits, avenues }),
   });
 }
 

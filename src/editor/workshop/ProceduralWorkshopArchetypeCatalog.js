@@ -106,6 +106,13 @@ const HOUSE_VARIANTS = Object.freeze([
     icon: '⛪',
     defaults: Object.freeze({ label: 'Chapel', width: 6.5, depth: 11, height: 6, topStyle: 'slate', finish: 'masonry', style: 'limestone' }),
   }),
+  Object.freeze({
+    id: 'market-hall',
+    group: 'Civic',
+    label: 'Arcaded market hall',
+    icon: '🏛️',
+    defaults: Object.freeze({ label: 'Market Hall', width: 14, depth: 8, height: 8, topStyle: 'slate', finish: 'limewash', style: 'limestone' }),
+  }),
 ]);
 
 const PROP_VARIANTS = Object.freeze([
@@ -212,6 +219,14 @@ const PROP_VARIANTS = Object.freeze([
     icon: '🪣',
     uses: Object.freeze(['width', 'topStyle']),
     defaults: Object.freeze({ label: 'Village Well', width: 2, depth: 1, height: 3, topStyle: 'terracotta' }),
+  }),
+  Object.freeze({
+    id: 'fountain',
+    group: 'Market & yard',
+    label: 'Tiered fountain',
+    icon: '⛲',
+    uses: Object.freeze(['width']),
+    defaults: Object.freeze({ label: 'Market Fountain', width: 4.4, depth: 1, height: 3 }),
   }),
   Object.freeze({
     id: 'market-stall',

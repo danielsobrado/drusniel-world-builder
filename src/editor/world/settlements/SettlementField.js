@@ -232,7 +232,9 @@ export class SettlementField {
     for (const entry of this.candidates(cellX, cellZ)) {
       const { index } = this.ensurePlan(entry);
       const [x, z] = this.local(entry, cellX, cellZ);
-      if (index.squareRadius > 0 && Math.hypot(x, z) <= index.squareRadius + SQUARE_PAVED_MARGIN) return 1;
+      for (const square of index.squares) {
+        if (Math.hypot(x - square.x, z - square.z) <= square.radius + SQUARE_PAVED_MARGIN) return 1;
+      }
       for (const item of index.grid.near(x, z, 0)) {
         if (item.street) {
           if (item.distance(x, z) <= item.halfWidth) return 1;

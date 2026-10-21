@@ -9,6 +9,7 @@ import { cottageDesign } from './variants/Cottage.js';
 import { deckTavernDesign } from './variants/DeckTavern.js';
 import { farmhouseDesign } from './variants/Farmhouse.js';
 import { generatedHouseDesign } from './variants/GeneratedHouse.js';
+import { marketHallDesign } from './variants/MarketHall.js';
 import { rowhouseDesign } from './variants/RowHouse.js';
 import { shopDesign } from './variants/Shop.js';
 import { smithyDesign } from './variants/Smithy.js';
@@ -30,6 +31,7 @@ const DESIGNS = Object.freeze({
   barn: barnDesign,
   bakery: bakeryDesign,
   chapel: chapelDesign,
+  'market-hall': marketHallDesign,
 });
 
 function designFor(recipe) {

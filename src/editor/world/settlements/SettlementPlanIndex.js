@@ -31,7 +31,7 @@ export function* settlementPlanIndexJob(plan) {
       grid.insert(item, cx, cz, Math.hypot(bx - ax, bz - az) / 2 + halfWidth);
     }
   }
-  return { grid, squareRadius: plan.squareRadius };
+  return { grid, squares: plan.squares ?? [] };
 }
 
 export function indexPlan(plan) {

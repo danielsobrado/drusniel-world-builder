@@ -147,10 +147,10 @@ function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, h
   }
 }
 
-function* addDisc(buffer, radius, heightAt, tone) {
+function* addDisc(buffer, radius, heightAt, tone, cx = 0, cz = 0) {
   const outer = radius + BORDER * 1.6;
   const rings = Math.max(2, Math.ceil(outer / STEP));
-  const centre = buffer.vertex(0, 0, 0, heightAt, tone);
+  const centre = buffer.vertex(cx, cz, 0, heightAt, tone);
   let previous = null;
   for (let ring = 1; ring <= rings; ring += 1) {
     const r = outer * ring / rings;
@@ -158,7 +158,7 @@ function* addDisc(buffer, radius, heightAt, tone) {
     const edge = Math.max(0, Math.min(1, (r - (radius - 0.4)) / (outer - radius + 0.4)));
     const row = Array.from({ length: segments }, (_, index) => {
       const angle = Math.PI * 2 * index / segments;
-      return buffer.vertex(Math.sin(angle) * r, Math.cos(angle) * r, edge, heightAt, tone);
+      return buffer.vertex(cx + Math.sin(angle) * r, cz + Math.cos(angle) * r, edge, heightAt, tone);
     });
     if (!previous) {
       for (let index = 0; index < segments; index += 1) buffer.indices.push(centre, row[(index + 1) % segments], row[index]);
@@ -296,9 +296,9 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     }
     yield;
   }
-  if (plan.squareRadius > 0) {
+  for (const square of plan.squares ?? []) {
     // Out to the house fronts that wall the square (see `squareFrontage`).
-    yield* addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), plan.squareRadius + 2.2, heightAt, 1.03);
+    yield* addDisc(buffers.get(rank >= 1 ? 'flagstone' : 'earth'), square.radius + 2.2, heightAt, 1.03, square.x, square.z);
     yield;
   }
   const shade = new SurfaceBuffer(SHADE_LAYER, 1);

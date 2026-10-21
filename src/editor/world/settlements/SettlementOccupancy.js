@@ -71,9 +71,10 @@ function rectHitsStreets(box, segments, clearance) {
  * street, and nothing is put in water or on a cliff.
  */
 export class SettlementOccupancy {
-  constructor({ streets, squareRadius, isBuildable, sampleHeight, maxPadFall = MAX_PAD_FALL }) {
+  constructor({ streets, squares = [], isBuildable, sampleHeight, maxPadFall = MAX_PAD_FALL }) {
     this.streets = streets;
-    this.squareRadius = squareRadius;
+    /** The town's squares ({ x, z, radius }), the market square at the origin first. */
+    this.squares = squares;
     this.isBuildable = isBuildable;
     this.sampleHeight = sampleHeight;
     this.maxPadFall = maxPadFall;
@@ -91,10 +92,9 @@ export class SettlementOccupancy {
 
   /** Why `box` cannot be placed, or null when it can. */
   conflict(box, { clearance = 1.2, streetClearance = 0.8, ignoreStreets = false, ground = true } = {}) {
-    // Nothing may reach into the square: its nearest edge must clear the rim.
-    if (this.squareRadius > 0 && Math.hypot(box.x, box.z) < this.squareRadius + Math.min(box.halfWidth, box.halfDepth)) {
-      return 'square';
-    }
+    // Nothing may reach into a square: its nearest edge must clear the rim.
+    const reach = Math.min(box.halfWidth, box.halfDepth);
+    if (this.squares.some(({ x, z, radius }) => Math.hypot(box.x - x, box.z - z) < radius + reach)) return 'square';
     for (const other of this.grid.near(box.x, box.z, box.radius + clearance + 4)) {
       if (rectsOverlap(box, other.box, other.soft ? 0.2 : clearance)) return 'occupied';
     }

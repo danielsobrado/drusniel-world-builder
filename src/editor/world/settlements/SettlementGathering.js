@@ -18,7 +18,7 @@ export function gatheringSpots(settlement, plan, tileSize) {
     // A stall faces the middle of the square: its customers stand on that side.
     if (prop.kind === 'stall') add(prop.x + Math.sin(prop.yaw) * 1.9, prop.z + Math.cos(prop.yaw) * 1.9);
   }
-  if (plan.squareRadius > 0) add(2.6, 1.2);
+  for (const square of plan.squares ?? []) add(square.x + 2.6, square.z + 1.2);
   for (const prop of plan.props) {
     if (prop.kind === 'bench') add(prop.x + Math.sin(prop.yaw) * 0.9, prop.z + Math.cos(prop.yaw) * 0.9);
   }

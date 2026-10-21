@@ -49,6 +49,8 @@ const BUILDING_BASES = Object.freeze({
   barn: ['Barn'],
   keep: ['Keep', 'Guardhouse'],
   hall: ['Manor', 'Guildhall'],
+  // The kit has no arcaded hall; its guildhall stands in for the market hall.
+  markethall: ['Guildhall'],
   guildhall: ['Guildhall'],
   guardhouse: ['Guardhouse'],
   library: ['Library'],

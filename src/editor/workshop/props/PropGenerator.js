@@ -2,6 +2,7 @@ import { getWorkshopVariant } from '../ProceduralWorkshopArchetypeCatalog.js';
 import { centreOnFootprint, HouseKit } from '../village/HouseKit.js';
 import { buildCart } from './CartProp.js';
 import { buildChest } from './ChestProp.js';
+import { buildFountain } from './FountainProp.js';
 import { buildLanternPost, buildWallLantern } from './LanternProps.js';
 import { buildBarrels, buildCrates, buildMarketStall } from './MarketProps.js';
 import { buildBench, buildFence, buildSignpost } from './StreetProps.js';
@@ -20,6 +21,7 @@ const BUILDERS = Object.freeze({
   'lantern-post': buildLanternPost,
   'wall-lantern': buildWallLantern,
   well: buildWell,
+  fountain: buildFountain,
   'market-stall': buildMarketStall,
   cart: buildCart,
   barrels: buildBarrels,

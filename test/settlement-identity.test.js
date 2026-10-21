@@ -111,7 +111,8 @@ test('a grid town has straight block streets square to its axes, and still house
 test('a street village is one road through the square, with no rings', () => {
   const burg = townWithGrammar('linear', { population: 0.9 });
   const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [1.2] });
-  const mains = plan.streets.filter(({ kind }) => kind === 'main');
+  // Its market street is the first stretch of one of them: count the roads.
+  const mains = plan.streets.filter(({ kind, avenue }) => kind === 'main' && !avenue);
   assert.equal(mains.length, 2);
   assert.ok(angleBetween(mains[0].bearing, mains[1].bearing + Math.PI) < 1e-9);
   assert.equal(plan.streets.filter(({ kind }) => kind === 'ring').length, 0);
@@ -152,4 +153,71 @@ test('a town of rank 2 has one avenue, wider than its other streets, and nothing
       }
     }
   }
+});
+
+function townWithMarket(kind, extra, options = {}) {
+  for (let id = 1; id < 400; id += 1) {
+    const burg = town(id, extra);
+    const plan = planSettlement({ settlement: burg, worldSeed: 3, routeBearings: [0.3, 1.9, 4], ...options });
+    if (plan.squares.some((square) => square.kind === kind)) return plan;
+  }
+  throw new Error(`no town with a ${kind} market`);
+}
+
+function assertSquaresClear(plan) {
+  for (const square of plan.squares) {
+    for (const building of plan.buildings) {
+      if (building.kind === 'markethall') continue;
+      const reach = Math.min(building.width, building.depth) / 2;
+      assert.ok(Math.hypot(building.x - square.x, building.z - square.z) >= square.radius + reach - 1e-6, `a ${building.kind} stands in the ${square.kind}`);
+    }
+  }
+}
+
+test('every town with a square names its markets, the primary first and at its heart', () => {
+  const plan = planSettlement({ settlement: town(5, { name: 'Velmora', population: 6 }), worldSeed: 3, routeBearings: [0.3, 1.9] });
+  assert.ok(plan.squares.length >= 1);
+  assert.deepEqual([plan.squares[0].x, plan.squares[0].z], [0, 0]);
+  assert.equal(plan.squares[0].radius, plan.squareRadius);
+  assert.ok(plan.squares.every(({ name }) => name.startsWith('Velmora ')));
+  assert.deepEqual(plan.signature.markets.map(({ kind }) => kind).slice(0, plan.squares.length), plan.squares.map(({ kind }) => kind));
+});
+
+test('a port opens a fish market beside the quay road, clear of streets and houses', () => {
+  // Water lies north of the town: the quay road runs that way.
+  const isBuildable = (x, z) => z < 180;
+  const plan = townWithMarket('harbour', { population: 6, port: true }, { isBuildable });
+  const harbour = plan.squares.find(({ kind }) => kind === 'harbour');
+  assert.ok(harbour.z > plan.profile.radius * 0.4, `the fish market is not on the quay side (z ${harbour.z.toFixed(0)})`);
+  assert.match(harbour.name, /Fish Market$/);
+  assertSquaresClear(plan);
+  assert.ok(plan.props.some(({ kind, x, z }) => kind === 'stall' && Math.hypot(x - harbour.x, z - harbour.z) < harbour.radius));
+});
+
+test('a market hall stands alone in its square, with its door and stalls round it', () => {
+  const plan = townWithMarket('market-hall', { population: 3 });
+  const square = plan.squares.find(({ kind }) => kind === 'market-hall');
+  const hall = plan.buildings.find(({ kind }) => kind === 'markethall');
+  assert.ok(Math.hypot(hall.x - square.x, hall.z - square.z) < 1e-6);
+  assert.ok(hall.door, 'the hall has no door');
+  assert.match(square.name, /Hall$/);
+  assertSquaresClear(plan);
+  const stalls = plan.props.filter(({ kind, x, z }) => kind === 'stall' && Math.hypot(x - square.x, z - square.z) < square.radius);
+  assert.ok(stalls.length >= 4);
+  assert.ok(!plan.props.some(({ kind, x, z }) => kind === 'well' && Math.hypot(x - square.x, z - square.z) < 1));
+});
+
+test('a capital has a grand square with a fountain and two rings of stalls', () => {
+  const plan = planSettlement({ settlement: town(18, { population: 28, capital: true, walls: true }), worldSeed: 3, routeBearings: [0.3, 1.9, 4] });
+  assert.equal(plan.squares[0].kind, 'grand-square');
+  assert.ok(plan.props.some(({ kind, x, z }) => kind === 'fountain' && x === 0 && z === 0));
+  assertSquaresClear(plan);
+});
+
+test('a street village holds its market in its street', () => {
+  const plan = townWithMarket('street-market', { population: 0.9 }, { routeBearings: [1.2] });
+  const market = plan.streets.find(({ market }) => market);
+  assert.equal(market.width, 12);
+  const stalls = plan.props.filter(({ kind, x, z }) => kind === 'stall' && Math.hypot(x, z) > plan.squareRadius + 2);
+  assert.ok(stalls.length >= 3);
 });
