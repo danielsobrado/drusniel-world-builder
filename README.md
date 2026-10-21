@@ -286,3 +286,7 @@ See `docs/object-pipeline.md` for the authoring contract and
 - Full visual runtime verification still requires a physical WebGPU browser.
 
 These are explicit later phases, not hidden fallbacks or readback paths.
+
+## License 
+
+CC BY-NC-ND 
