@@ -48,9 +48,13 @@ try {
   });
   const busy = await focusPerfBrowser(browsers[0], pages[0], { headed: true });
   report.busyForeground = await busy();
+  await pages[0].goto('data:text/html,<title>Perf QA cold navigation</title><script>const end=performance.now()+6500;while(performance.now()<end){}</script>', { waitUntil: 'commit' });
+  const coldNavigation = await focusPerfBrowser(browsers[0], pages[0], { headed: true });
+  report.coldNavigationForeground = await coldNavigation();
   report.passed = report.foreground.passed && report.foreground.native.samples >= 5
     && report.emulatedDomFocus && !report.background.passed
-    && report.background.native.lostFocus && report.otherOwnedWindow.passed && report.busyForeground.passed;
+    && report.background.native.lostFocus && report.otherOwnedWindow.passed && report.busyForeground.passed
+    && report.coldNavigationForeground.passed;
 } catch (error) { report.error = error.stack; }
 finally {
   await Promise.all(browsers.map(browser => browser.close()));

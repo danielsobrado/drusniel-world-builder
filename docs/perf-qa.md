@@ -299,6 +299,11 @@ windows. Keep that test window foreground during movement and recovery; a failed
 focus record is not an engine timing result. Older DOM-only focus records cannot
 establish native foreground ownership.
 
+The movement and water runners activate their owned blank window before loading
+the app, then start a fresh document/native focus observation as soon as navigation
+commits. This lets Windows activate the window before cold shader compilation can
+block it; it does not bypass foreground checks during the workload.
+
 Run `node scripts/check-perf-browser-focus.mjs` with Windows Node to verify the
 monitor. Its two owned test windows check both successful activation and rejection
 of a background browser whose emulated DOM focus still reports true. The control

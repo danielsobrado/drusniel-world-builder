@@ -324,8 +324,10 @@ async function main() {
 
     const discoveryUrl = new URL(baseUrl);
     for (const [key, value] of new URLSearchParams({ qa: 'water-acceptance', autostart: '0', download: '0' })) discoveryUrl.searchParams.set(key, value);
+    const startupFocus = await focusPerfBrowser(browser, page, { headed });
+    if (!(await startupFocus()).passed) throw new Error('Water benchmark startup did not retain foreground focus.');
     await page.goto(discoveryUrl.href, {
-      waitUntil: 'domcontentloaded',
+      waitUntil: 'commit',
     });
     const captureDiscoveryFocus = await focusPerfBrowser(browser, page, { headed });
     const adapter = await inspectAdapter(page);
@@ -374,7 +376,7 @@ async function main() {
     });
     const measuredUrl = new URL(baseUrl);
     for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
-    await page.goto(measuredUrl.href, { waitUntil: 'domcontentloaded' });
+    await page.goto(measuredUrl.href, { waitUntil: 'commit' });
     const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(({ x, z }) => {
       const focus = window.__editor?.controller?.focusProvider?.();

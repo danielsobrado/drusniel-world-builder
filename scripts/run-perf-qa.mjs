@@ -145,8 +145,11 @@ const fs = require('fs');
     const { createBrowserErrorMonitor } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-errors.mjs')).href)});
     const browserErrors = createBrowserErrorMonitor(page);
     page.on('pageerror', error => console.error('Perf QA browser error:', error.stack ?? error.message));
-    await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'domcontentloaded' });
     const { focusPerfBrowser } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
+    // Activate the owned blank window before cold renderer work can block it.
+    const startupFocus = await focusPerfBrowser(browser, page, { headed: ${hasFlag('headed')} });
+    if (!(await startupFocus()).passed) throw new Error('Benchmark startup did not retain foreground focus.');
+    await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'commit' });
     const captureFocus = await focusPerfBrowser(browser, page, { headed: ${hasFlag('headed')} });
     await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
 
