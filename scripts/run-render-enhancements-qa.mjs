@@ -48,7 +48,7 @@ try {
       const { PLAYER_MODE_WALK } = await import('/src/editor/player/playerConstants.js');
       const manifest = await (await fetch('/maps/manifest.json')).json();
       const source = await (await fetch('/maps/' + manifest.maps[0].url)).json();
-      e.controller.loadDocument(importAzgaarFullJson(source, e.config, { physicalWidthMeters }));
+      await e.controller.loadDocument(importAzgaarFullJson(source, e.config, { physicalWidthMeters }));
       const generator = e.terrainView.worldStore.generator;
       const field = generator.ensureSettlementField(), lanterns = new RoadsideLanternGenerator(generator);
       const tileSize = e.terrainView.worldStore.tileSize, reach = e.terrainView.chunkWorldSize * 2;
@@ -78,7 +78,7 @@ try {
       const object = changeRoadsideDetail(e.controller, detail, { promote: true });
       e.controller.undo(); const undone = !e.controller.roadsideDetails.has(detail.key) && !e.objectMap.getById(object.id);
       e.controller.redo(); const redone = e.controller.roadsideDetails.has(detail.key) && Boolean(e.objectMap.getById(object.id));
-      const saved = e.controller.toDocument(); e.controller.loadDocument(saved);
+      const saved = e.controller.toDocument(); await e.controller.loadDocument(saved);
       const restored = e.objectMap.getById(object.id);
       const preserved = restored?.roadsidePlacement.sourceKey === detail.key && e.controller.roadsideDetails.has(detail.key);
       if (!undone || !redone || !preserved) throw new Error('Roadside semantic history/save contract failed.');

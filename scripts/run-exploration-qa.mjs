@@ -45,7 +45,7 @@ try {
     const manifest = await (await fetch('/maps/manifest.json')).json();
     const source = await (await fetch('/maps/' + manifest.maps[0].url)).json();
     const document = importAzgaarFullJson(source, e.config);
-    e.controller.loadDocument(document);
+    await e.controller.loadDocument(document);
     const field = e.terrainView.worldStore.generator.ensureSettlementField();
     const burg = field.entries.find(entry => entry.settlement.population > 0).settlement;
     const home = { x: (burg.cellX + 0.5) * field.tileSize, z: -(burg.cellZ + 0.5) * field.tileSize };
