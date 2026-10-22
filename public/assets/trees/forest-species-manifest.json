@@ -1588,7 +1588,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": false,
       "outputs": {
         "lod0": "wetland_sparse/sapling-0-lod0.glb",
@@ -1596,7 +1596,7 @@
         "impostor": "wetland_sparse/sapling-0-impostor",
         "metadata": "wetland_sparse/sapling-0.json"
       },
-      "signature": "a435d41d"
+      "signature": "72d2649d"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1609,7 +1609,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/young-0-lod0.glb",
@@ -1617,7 +1617,7 @@
         "impostor": "wetland_sparse/young-0-impostor",
         "metadata": "wetland_sparse/young-0.json"
       },
-      "signature": "75fdbee9"
+      "signature": "eae21b2b"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1630,7 +1630,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/mature-0-lod0.glb",
@@ -1638,7 +1638,7 @@
         "impostor": "wetland_sparse/mature-0-impostor",
         "metadata": "wetland_sparse/mature-0.json"
       },
-      "signature": "84729edf"
+      "signature": "3763cae6"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1651,7 +1651,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/ancient-0-lod0.glb",
@@ -1659,7 +1659,7 @@
         "impostor": "wetland_sparse/ancient-0-impostor",
         "metadata": "wetland_sparse/ancient-0.json"
       },
-      "signature": "d4dc6b68"
+      "signature": "bdbf7d63"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1672,7 +1672,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/dead-0-lod0.glb",
@@ -1680,7 +1680,7 @@
         "impostor": "wetland_sparse/dead-0-impostor",
         "metadata": "wetland_sparse/dead-0.json"
       },
-      "signature": "ce4842a3"
+      "signature": "340bfb6a"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1693,7 +1693,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": false,
       "outputs": {
         "lod0": "wetland_sparse/sapling-1-lod0.glb",
@@ -1701,7 +1701,7 @@
         "impostor": "wetland_sparse/sapling-1-impostor",
         "metadata": "wetland_sparse/sapling-1.json"
       },
-      "signature": "869a675f"
+      "signature": "c0c44bae"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1714,7 +1714,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/young-1-lod0.glb",
@@ -1722,7 +1722,7 @@
         "impostor": "wetland_sparse/young-1-impostor",
         "metadata": "wetland_sparse/young-1.json"
       },
-      "signature": "dc1f0429"
+      "signature": "b1b89b96"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1735,7 +1735,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/mature-1-lod0.glb",
@@ -1743,7 +1743,7 @@
         "impostor": "wetland_sparse/mature-1-impostor",
         "metadata": "wetland_sparse/mature-1.json"
       },
-      "signature": "c2d95bc7"
+      "signature": "54aadf35"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1756,7 +1756,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/ancient-1-lod0.glb",
@@ -1764,7 +1764,7 @@
         "impostor": "wetland_sparse/ancient-1-impostor",
         "metadata": "wetland_sparse/ancient-1.json"
       },
-      "signature": "9d8f135e"
+      "signature": "3648214e"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1777,7 +1777,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/dead-1-lod0.glb",
@@ -1785,7 +1785,7 @@
         "impostor": "wetland_sparse/dead-1-impostor",
         "metadata": "wetland_sparse/dead-1.json"
       },
-      "signature": "57a2c0fd"
+      "signature": "d8e44e12"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1798,7 +1798,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": false,
       "outputs": {
         "lod0": "wetland_sparse/sapling-2-lod0.glb",
@@ -1806,7 +1806,7 @@
         "impostor": "wetland_sparse/sapling-2-impostor",
         "metadata": "wetland_sparse/sapling-2.json"
       },
-      "signature": "73a55e73"
+      "signature": "a7425c53"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1819,7 +1819,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/young-2-lod0.glb",
@@ -1827,7 +1827,7 @@
         "impostor": "wetland_sparse/young-2-impostor",
         "metadata": "wetland_sparse/young-2.json"
       },
-      "signature": "49bd0e57"
+      "signature": "1dec913d"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1840,7 +1840,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/mature-2-lod0.glb",
@@ -1848,7 +1848,7 @@
         "impostor": "wetland_sparse/mature-2-impostor",
         "metadata": "wetland_sparse/mature-2.json"
       },
-      "signature": "a1b8264a"
+      "signature": "f885f1ab"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1861,7 +1861,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/ancient-2-lod0.glb",
@@ -1869,7 +1869,7 @@
         "impostor": "wetland_sparse/ancient-2-impostor",
         "metadata": "wetland_sparse/ancient-2.json"
       },
-      "signature": "12fe2e88"
+      "signature": "9878b4fc"
     },
     {
       "speciesId": "wetland_sparse",
@@ -1882,7 +1882,7 @@
         "branchAngle": 0.66
       },
       "crownAspect": 0.82,
-      "spacing": 4.4,
+      "spacing": 5.2,
       "rootCollar": true,
       "outputs": {
         "lod0": "wetland_sparse/dead-2-lod0.glb",
@@ -1890,8 +1890,8 @@
         "impostor": "wetland_sparse/dead-2-impostor",
         "metadata": "wetland_sparse/dead-2.json"
       },
-      "signature": "8c429dd8"
+      "signature": "29d6ec9c"
     }
   ],
-  "signature": "ee9f560b"
+  "signature": "afa9f14a"
 }
