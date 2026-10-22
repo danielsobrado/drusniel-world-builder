@@ -55,6 +55,7 @@ test('a river world is prepared before publication and a superseded or failed lo
   const payload = { key: waterPreparationKey(metadata), canonical: [], macro: [], canonicalReaches: [], macroReaches: [] };
   replies[0].resolve(payload); await first;
   assert.equal(controller.published.world.baseTerrain, doc.world.baseTerrain);
+  assert.equal(preparedWaterTerrain(doc.world.baseTerrain, metadata), null, 'mutable input documents do not keep a stale preparation cache');
   const pending = controller.loadDocument({ world: { generator: metadata, baseTerrain: source() } });
   controller.loadDocument({ world: {} }); const current = controller.published;
   replies[1].resolve(payload);

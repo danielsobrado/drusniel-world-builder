@@ -40,3 +40,5 @@ export function clonePreparedWaterSource(source) {
   if (result) prepared.set(clone, result);
   return clone;
 }
+
+export function releasePreparedWaterTerrain(source) { prepared.delete(source); }

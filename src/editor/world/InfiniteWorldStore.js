@@ -679,7 +679,7 @@ export class InfiniteWorldStore {
         chunkSize: this.chunkSize,
         tileSize: this.tileSize,
         generator: this.generator.toMetadata(),
-        ...(this.baseTerrain ? { baseTerrain: clonePreparedWaterSource(this.baseTerrain) } : {}),
+        ...(this.baseTerrain ? { baseTerrain: structuredClone(this.baseTerrain) } : {}),
       },
       chunks,
       forestEdits: structuredClone(this.forestEdits),

@@ -6,7 +6,7 @@ import { worldToCell } from './world/WorldCoordinates.js';
 import { hasForestEdits } from './forest/ForestEditDocument.js';
 import { SettlementSamplingPreparation } from './world/settlements/SettlementSamplingPreparation.js';
 import { withSettlementData } from './world/settlements/SettlementData.js';
-import { preparedWaterTerrain, installPreparedWaterTerrain } from './water/PreparedWaterTerrain.js';
+import { preparedWaterTerrain, installPreparedWaterTerrain, releasePreparedWaterTerrain } from './water/PreparedWaterTerrain.js';
 
 function cloneCampaign(campaign) {
   return campaign ? structuredClone(campaign) : null;
@@ -391,7 +391,8 @@ export class TerrainAwareEditorController extends EditorController {
         sourcePreparation: { source, metadata } }).then(result => {
         if (generation !== this.loadGeneration || this.hoverSamplingDisposed || this.worldStore.disposed) throw new Error('World load was superseded.');
         installPreparedWaterTerrain(source, metadata, result);
-        return this.loadPreparedDocument({ ...document, world: { ...document.world, baseTerrain: source } }, options);
+        try { return this.loadPreparedDocument({ ...document, world: { ...document.world, baseTerrain: source } }, options); }
+        finally { releasePreparedWaterTerrain(source); }
       });
     }
     return this.loadPreparedDocument(document, options);
