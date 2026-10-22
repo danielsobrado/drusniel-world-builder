@@ -274,7 +274,7 @@ export class MeadowTileLayer {
   /** A tile needs a build when its ground is resident and its band or page moved on. */
   static isStale(tile) {
     return tile.revision !== null && ((tile.band !== null
-      && (tile.builtBand !== tile.band || tile.builtRevision !== tile.revision))
+      && (!tile.output || tile.builtBand !== tile.band || tile.builtRevision !== tile.revision))
       || (tile.preparationBand !== tile.band
         && (tile.prepared?.revision !== tile.revision || tile.prepared.capacity < tile.preparationCapacity)));
   }

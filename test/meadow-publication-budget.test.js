@@ -111,6 +111,40 @@ test('empty ground does not consume a GPU publication turn', () => {
   } finally { layer.dispose(); material.dispose(); template.dispose(); }
 });
 
+test('a prepared tile republishes after leaving and reentering its drawable band', () => {
+  const template = createMeadowTemplate({ detail: 2, count: 16, tileSize: 8 });
+  const material = new MeshBasicNodeMaterial();
+  const samples = new Map();
+  const layer = new MeadowTileLayer({ scene: new Scene(), name: 'reactivation', tileSize: 8,
+    templates: { cards: template }, material, reach: 24, maxPublicationsPerFrame: 1,
+    selectBand: nearest => nearest > 10 ** 2 && nearest < 24 ** 2 ? 'cards' : null,
+    selectPreparationBand: () => 'cards',
+    ground: { revision: 1, revisionAt: () => 1, forTile: (x, z) => ({ revision: 1,
+      sample: (_x, _z, _rank, out) => {
+        const key = `${x}:${z}`; samples.set(key, (samples.get(key) ?? 0) + 1);
+        Object.assign(out, { height: 2, strength: 1, shape: 0, path: 0 }); return true;
+      } }) } });
+  const update = (x, build = true) => layer.update({ x, z: 0 }, { x: 0, z: 0 }, Infinity, 1, null, build);
+  try {
+    for (let frame = 0; frame < 100; frame++) update(20);
+    const tile = layer.tiles.get('0:0'), prepared = tile.prepared;
+    assert.equal(tile.output.count, 16);
+    const sampled = samples.get('4:4');
+    for (let frame = 0; frame < 100; frame++) update(0);
+    assert.equal(tile.band, null);
+    assert.equal(tile.output, null);
+    assert.equal(tile.prepared, prepared, 'the nondrawable band retains its prepared ranks');
+    update(20, false);
+    assert.equal(MeadowTileLayer.isStale(tile), true, 'matching band/revision cannot stand in for an absent output');
+    for (let frame = 0; frame < 100; frame++) update(20);
+    assert.equal(tile.output.count, 16);
+    assert.equal(layer.batches.isPublished(tile), true);
+    assert.equal(layer.getState().visibleMissing, 0);
+    assert.equal(layer.getState().building, 0);
+    assert.equal(samples.get('4:4'), sampled, 'reactivation reuses the exact prepared ranks');
+  } finally { layer.dispose(); material.dispose(); template.dispose(); }
+});
+
 test('several small ready tiles share a frame within the byte allowance; a dense tile publishes alone', () => {
   const template = createMeadowTemplate({ detail: 2, count: 64, tileSize: 8 });
   const material = new MeshBasicNodeMaterial();
