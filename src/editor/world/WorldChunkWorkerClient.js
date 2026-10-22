@@ -8,6 +8,7 @@ import { chunkKey } from './WorldCoordinates.js';
 import { generateSettlementPlan, generateSettlementRegistry } from './settlements/SettlementPlanRequest.js';
 import { SettlementWorkerConnections } from './SettlementWorkerConnections.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
+import { preparedWaterTerrain } from '../water/PreparedWaterTerrain.js';
 
 const DEFAULT_MAX_IN_FLIGHT_PER_WORKER = 1;
 const MAX_WORKER_COUNT = 8;
@@ -155,6 +156,8 @@ export class WorldChunkWorkerClient {
       .then(() => {
         if (this.disposed) throw disposedError();
         if (request.materialBakeRequest) return bakeTerrainMaterialPage(request.materialBakeRequest);
+        if (request.sourcePreparation) return createWorldGenerator(request.sourcePreparation.metadata,
+          request.sourcePreparation.source).prepareWaterTerrain();
         if (request.settlementRegistry) return generateSettlementRegistry(this.ensureWorldGenerator());
         if (request.settlementPlanId !== null && request.settlementPlanId !== undefined) {
           return generateSettlementPlan(this.ensureWorldGenerator(), request.settlementPlanId);
@@ -173,6 +176,7 @@ export class WorldChunkWorkerClient {
     this.settlementCacheStatuses.clear();
     const nextWorkerBaseTerrain = createTerrainWorkerBaseTerrain(baseTerrain);
     this.baseTerrain = nextWorkerBaseTerrain;
+    this.waterPreparation = preparedWaterTerrain(baseTerrain, this.generator);
     this.worldGenerator = null;
     this.configurationRevision++;
     this.settlementWorker?.setBaseTerrain(baseTerrain);
@@ -180,7 +184,8 @@ export class WorldChunkWorkerClient {
       const worker = this.workers[index];
       if (!worker) continue;
       try {
-        worker.postMessage({ type: 'configure', baseTerrain: this.baseTerrain, revision: this.configurationRevision });
+        worker.postMessage({ type: 'configure', baseTerrain: this.baseTerrain,
+          waterPreparation: this.waterPreparation, revision: this.configurationRevision });
       } catch (error) {
         this.handleWorkerFailure(
           index,
@@ -202,12 +207,12 @@ export class WorldChunkWorkerClient {
     return this.settlementWorker;
   }
 
-  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null, settlementPlanId = null, settlementRegistry = false } = {}) {
+  request(chunkX, chunkZ, { priority = 0, placementSamplingConfig = null, materialBakeRequest = null, terrainOverrides = null, settlementPlanId = null, settlementRegistry = false, sourcePreparation = null } = {}) {
     if (this.disposed) {
       return Promise.reject(disposedError());
     }
-    if (!this.settlementLane && (settlementPlanId !== null || settlementRegistry)) {
-      return this.settlementPool().request(chunkX, chunkZ, { priority, settlementPlanId, settlementRegistry });
+    if (!this.settlementLane && (settlementPlanId !== null || settlementRegistry || sourcePreparation)) {
+      return this.settlementPool().request(chunkX, chunkZ, { priority, settlementPlanId, settlementRegistry, sourcePreparation });
     }
     const request = {
       chunkX,
@@ -221,6 +226,7 @@ export class WorldChunkWorkerClient {
       terrainOverrides,
       settlementPlanId,
       settlementRegistry,
+      sourcePreparation,
       sharedSettlementPlans: !this.settlementLane && Boolean(this.baseTerrain?.settlements?.length),
     };
     // CPU generation is an explicit non-browser backend; browser failure pauses streaming.
@@ -230,7 +236,7 @@ export class WorldChunkWorkerClient {
 
     const id = this.nextId;
     this.nextId += 1;
-    const key = settlementRegistry ? 'settlement-registry' : settlementPlanId !== null ? `settlement:${settlementPlanId}`
+    const key = sourcePreparation ? `source-preparation:${id}` : settlementRegistry ? 'settlement-registry' : settlementPlanId !== null ? `settlement:${settlementPlanId}`
       : materialBakeRequest ? `material:${materialBakeRequest.descriptor.key}`
       : `${placementSamplingConfig ? 'placement:' : ''}${chunkKey(chunkX, chunkZ)}`;
     return new Promise((resolve, reject) => {
@@ -404,7 +410,8 @@ export class WorldChunkWorkerClient {
       let replacement = null;
       try {
         replacement = this.createWorker(workerIndex);
-        replacement.postMessage({ type: 'configure', baseTerrain: this.baseTerrain, revision: this.configurationRevision });
+        replacement.postMessage({ type: 'configure', baseTerrain: this.baseTerrain,
+          waterPreparation: this.waterPreparation, revision: this.configurationRevision });
         this.workers[workerIndex] = replacement;
       } catch (replacementError) {
         replacement?.terminate();

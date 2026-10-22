@@ -260,7 +260,7 @@ export class SceneSettingsRuntime {
       if (!worldDocument) {
         throw new Error('The pending world reload document has expired.');
       }
-      this.controller.loadDocument(worldDocument, { loadReason: 'SAVE_RESTORED' });
+      await this.controller.loadDocument(worldDocument, { loadReason: 'SAVE_RESTORED' });
       this.mapSource = this.document.map;
       await invokeRuntimeCallback(this.afterMapLoad, 'after-map-load', worldDocument);
       await cleanupStagedWorld(this.deleteBrowserDocument, pendingWorldKey);
@@ -321,7 +321,7 @@ export class SceneSettingsRuntime {
       });
       return worldDocument;
     }
-    this.controller.loadDocument(worldDocument, {
+    await this.controller.loadDocument(worldDocument, {
       preserveInventory: true,
       loadReason: 'WORLD_IMPORTED',
     });

@@ -7,6 +7,7 @@ function createHarness(originRef, fieldRef) {
   const view = Object.create(MacroFarTerrainView.prototype);
   view.enabled = true;
   view.generator = {};
+  view.preparation = { plans: { release() {} } };
   view.ensureGenerator = () => view.generator;
   view.mesh = { visible: false };
   view.floatingOrigin = { getState: () => originRef.current };
@@ -91,6 +92,7 @@ test('the far ring reads the forest from its own tile, height and slope', () => 
     radialResolution: 2,
     radii: new Float32Array([100, 200]),
     worldStore: { tileSize: 2 },
+    preparation: { plans: { release() {} } },
     heightBias: 0,
     pendingPositions: new Float32Array(2 * 8 * 3),
     pendingColors: new Float32Array(2 * 8 * 3),
@@ -137,6 +139,7 @@ test('MacroFarTerrainView yields between rings while guaranteeing progress', () 
     radialResolution: 4,
     angularResolution: 8,
     rowsPerFrame: 4,
+    worldStore: {},
     job: { sampleRing: 0, shadeRing: 0 },
     sampleRing: (_job, ring) => { view.lastSampled = ring; },
     shadeRing: () => {},

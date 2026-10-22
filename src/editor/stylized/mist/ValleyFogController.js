@@ -28,7 +28,7 @@ export class ValleyFogController {
    * @param {number} [options.resolution] patch texels per side
    * @param {number} [options.extent] patch metres per side
    */
-  constructor({ getHeight, config, quality = 1, resolution = 64, extent = 128 } = {}) {
+  constructor({ getHeight, config, quality = 1, resolution = 64, extent = 128, prepareBounds, getRevision } = {}) {
     // The project's rule is stricter than the module's: a material built with no
     // valleyFog block at all keeps its plain shading, rather than compiling the
     // default mist in. A world that wants it says so in `sky.valleyFog`.
@@ -38,7 +38,7 @@ export class ValleyFogController {
     // The patch's extent bounds the march; the config validator keeps maxDistance
     // inside half of it, so the README contract (the march never reads terrain the
     // patch does not hold) is a config error rather than a visual one.
-    this.patch = new LocalGroundHeight({ getHeight, resolution, extent });
+    this.patch = new LocalGroundHeight({ getHeight, resolution, extent, prepareBounds, getRevision });
     this.quality = quality;
     this.uniforms = {
       /** Seconds, for the drifting pockets. */
@@ -63,7 +63,9 @@ export class ValleyFogController {
    */
   update(focus, origin, state = {}) {
     if (!this.enabled) return;
-    this.patch.update(focus, origin);
+    const prepare = () => this.patch.update(focus, origin, state.budget?.shouldYield);
+    (state.budget?.runner ?? (run => run()))(prepare);
+    if (!this.patch.ready) return;
     this.uniforms.time.value = Number(state.timeSeconds) || 0;
     this.uniforms.weight.value = Math.max(0, Math.min(1, Number(state.weight) || 0));
     if (state.sunDirection) this.uniforms.sunDirection.value.copy(state.sunDirection);

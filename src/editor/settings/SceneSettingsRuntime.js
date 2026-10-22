@@ -44,7 +44,7 @@ export class SceneSettingsRuntime extends SceneSettingsRuntimeBase {
       if (!worldDocument) {
         throw new Error('The pending world reload document has expired.');
       }
-      this.controller.loadDocument(worldDocument, { loadReason: 'SAVE_RESTORED' });
+      await this.controller.loadDocument(worldDocument, { loadReason: 'SAVE_RESTORED' });
       this.mapSource = this.document.map;
       await invokeAfterMapLoad(this.afterMapLoad, worldDocument);
     } finally {

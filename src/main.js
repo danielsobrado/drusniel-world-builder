@@ -1814,6 +1814,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     // country anywhere fills its valleys.
     const valleyMist = skyLooks?.current?.mist ?? 0;
     terrainView.updateValleyFog({
+      budget: deferredWork,
       focus: viewModeController.camera.position,
       origin: frameOrigin,
       timeSeconds: frameSeconds,

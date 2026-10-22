@@ -17,6 +17,7 @@ import { createTerrainTransitionPatterns } from './materials/TerrainTransitionNo
 import { resolveBlownStreaks } from './stylized/ambient/BlownStreaks.js';
 import { resolveFrost } from './stylized/ambient/FrostShading.js';
 import { ValleyFogController } from './stylized/mist/ValleyFogController.js';
+import { SettlementSamplingPreparation } from './world/settlements/SettlementSamplingPreparation.js';
 import {
   attachTerrainMaterialBakeGpuState,
   createTerrainMaterialBakeGpuState,
@@ -379,8 +380,14 @@ export class InfiniteTerrainView {
     // The valley mist's height patch and uniforms, built here because one terrain
     // material is shared by every slot and has to hold them from construction. The
     // surface view (or main) drives it once a frame — see updateValleyFog.
+    this.valleyFogSampling = new SettlementSamplingPreparation(worldStore);
     this.valleyFog = new ValleyFogController({
       getHeight: (x, z) => this.getCanonicalHeight(x, z),
+      prepareBounds: (bounds, shouldYield) => this.valleyFogSampling.prepare({
+        minX: bounds.minX / worldStore.tileSize, maxX: bounds.maxX / worldStore.tileSize,
+        minZ: -bounds.maxZ / worldStore.tileSize, maxZ: -bounds.minZ / worldStore.tileSize,
+      }, shouldYield),
+      getRevision: () => `${worldStore.baseTerrainRevision}:${worldStore.revision}`,
       config: skyConfig?.valleyFog,
       quality: skyConfig?.valleyFog?.quality,
     });
@@ -494,9 +501,9 @@ export class InfiniteTerrainView {
    * colours and the region weight that fades the mist out where there are no
    * gorges. A no-op without the config, so worlds that do not want it pay nothing.
    */
-  updateValleyFog({ focus, origin, timeSeconds, weight, sunDirection, sunColor, fogColor } = {}) {
+  updateValleyFog({ focus, origin, timeSeconds, weight, sunDirection, sunColor, fogColor, budget } = {}) {
     if (!focus || !origin) return;
-    this.valleyFog?.update(focus, origin, { timeSeconds, weight, sunDirection, sunColor, fogColor });
+    this.valleyFog?.update(focus, origin, { timeSeconds, weight, sunDirection, sunColor, fogColor, budget });
   }
 
   /**
@@ -1159,6 +1166,7 @@ export class InfiniteTerrainView {
     // Slots share one material; each mesh carries its own bake state.
     new Set(this.slots.map((slot) => slot.material)).forEach((material) => material.dispose());
     this.valleyFog?.dispose();
+    this.valleyFogSampling?.dispose();
     this.valleyFog = null;
     for (const slot of this.slots) {
       this.scene.remove(slot.mesh);

@@ -19,10 +19,11 @@ export function sceneryPreparationStatus(surface) {
   const farTerrain = surface.terrainView.macroFarTerrain?.getPreparationStatus?.() ?? { ready: true };
   const ambience = surface.terrainView.worldAmbience;
   const ambientGround = Boolean(ambience?.system.ground?.job || ambience?.preparing);
+  const valleyGround = Boolean(surface.terrainView.valleyFog?.patch?.job);
   const minimap = Boolean(surface.terrainView.minimapPreparation?.minimapRequest);
   return { ready: queueDepth+fields+meadow+draws+variants+staged.length+waterObstacles === 0 && errors.length === 0
-      && settlements.ready && towns.ready && objects === 0 && farTerrain.ready && !ambientGround && !minimap,
-    settlements, towns, objects, farTerrain, ambientGround, minimap,
+      && settlements.ready && towns.ready && objects === 0 && farTerrain.ready && !ambientGround && !valleyGround && !minimap,
+    settlements, towns, objects, farTerrain, ambientGround, valleyGround, minimap,
     queueDepth, fields, meadow, draws, variants, waterObstacles, staged: staged.length, queues, errors,
     blockedJobs: staged.filter(view => view.blockedDependency).map(view => ({
       key: (view.pendingRebuild ?? view.pendingLodRebuild ?? view.stagedRebuild?.job)?.key,

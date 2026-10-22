@@ -4,6 +4,7 @@ import { hasForestEdits, normalizeForestEditDocument } from '../forest/ForestEdi
 import { ProceduralWorldGenerator } from './ProceduralWorldGenerator.js';
 import { SpatialOverrideMap } from './SpatialOverrideMap.js';
 import { createWorldGenerator } from './WorldGeneratorFactory.js';
+import { clonePreparedWaterSource } from '../water/PreparedWaterTerrain.js';
 import {
   cellKey,
   cellToChunk,
@@ -232,7 +233,7 @@ export class InfiniteWorldStore {
   }
 
   setBaseTerrain(baseTerrain) {
-    const cloned = baseTerrain ? structuredClone(baseTerrain) : null;
+    const cloned = clonePreparedWaterSource(baseTerrain);
     this.generator = createWorldGenerator(this.generator.toMetadata(), cloned);
     this.baseTerrain = cloned;
     this.cache.clear();
@@ -642,7 +643,7 @@ export class InfiniteWorldStore {
       tileOverrides: Object.freeze([...this.tileOverrides.entries()]),
       heightOverrides: Object.freeze([...this.heightOverrides.entries()]),
       baseTerrain: this.baseTerrain
-        ? (cloneBaseTerrain ? structuredClone(this.baseTerrain) : this.baseTerrain)
+        ? (cloneBaseTerrain ? clonePreparedWaterSource(this.baseTerrain) : this.baseTerrain)
         : null,
       forestEdits: structuredClone(this.forestEdits),
     });
@@ -678,7 +679,7 @@ export class InfiniteWorldStore {
         chunkSize: this.chunkSize,
         tileSize: this.tileSize,
         generator: this.generator.toMetadata(),
-        ...(this.baseTerrain ? { baseTerrain: structuredClone(this.baseTerrain) } : {}),
+        ...(this.baseTerrain ? { baseTerrain: clonePreparedWaterSource(this.baseTerrain) } : {}),
       },
       chunks,
       forestEdits: structuredClone(this.forestEdits),

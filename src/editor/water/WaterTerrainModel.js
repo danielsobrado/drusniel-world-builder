@@ -30,6 +30,8 @@ export class WaterTerrainModel {
     sampleBaseTile,
     isBaseRiverCell = null,
     resolveLakeLevel = null,
+    riverSegments = null,
+    riverReaches = null,
   }) {
     this.source = source;
     this.seed = seed;
@@ -49,6 +51,7 @@ export class WaterTerrainModel {
       : null;
     this.riverChannel = source?.rivers?.length
       ? new RiverChannel({
+        segments: riverSegments,
         source,
         sampleBaseHeight,
         seaLevel,
@@ -57,7 +60,7 @@ export class WaterTerrainModel {
       })
       : null;
     this.riverValley = this.riverChannel?.segments.length
-      ? new RiverValley({ segments: this.riverChannel.segments, config, seaLevel, sampleBaseHeight })
+      ? new RiverValley({ segments: this.riverChannel.segments, config, seaLevel, sampleBaseHeight, reaches: riverReaches })
       : null;
     this.oceanConfig = Object.freeze({
       ...config.ocean,

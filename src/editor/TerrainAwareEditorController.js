@@ -5,6 +5,8 @@ import { createWorldDocument, loadWorldDocument } from './WorldDocument.js';
 import { worldToCell } from './world/WorldCoordinates.js';
 import { hasForestEdits } from './forest/ForestEditDocument.js';
 import { SettlementSamplingPreparation } from './world/settlements/SettlementSamplingPreparation.js';
+import { withSettlementData } from './world/settlements/SettlementData.js';
+import { preparedWaterTerrain, installPreparedWaterTerrain } from './water/PreparedWaterTerrain.js';
 
 function cloneCampaign(campaign) {
   return campaign ? structuredClone(campaign) : null;
@@ -379,7 +381,23 @@ export class TerrainAwareEditorController extends EditorController {
     };
   }
 
-  loadDocument(document, {
+  loadDocument(document, options = {}) {
+    const generation = this.loadGeneration = (this.loadGeneration ?? 0) + 1;
+    const source = withSettlementData(document.world?.baseTerrain, document.campaign,
+      { enabled: this.worldStore?.settlementsEnabled !== false });
+    const metadata = document.world?.generator;
+    if (this.worldStore?.chunkWorker && source?.rivers?.length && !preparedWaterTerrain(source, metadata)) {
+      return this.worldStore.chunkWorker.request(0, 0, { priority: -1e9,
+        sourcePreparation: { source, metadata } }).then(result => {
+        if (generation !== this.loadGeneration || this.hoverSamplingDisposed || this.worldStore.disposed) throw new Error('World load was superseded.');
+        installPreparedWaterTerrain(source, metadata, result);
+        return this.loadPreparedDocument({ ...document, world: { ...document.world, baseTerrain: source } }, options);
+      });
+    }
+    return this.loadPreparedDocument(document, options);
+  }
+
+  loadPreparedDocument(document, {
     preserveInventory = false,
     loadReason = 'WORLD_LOADED',
   } = {}) {
@@ -476,6 +494,7 @@ export class TerrainAwareEditorController extends EditorController {
   }
 
   dispose() {
+    this.loadGeneration = (this.loadGeneration ?? 0) + 1;
     this.hoverSamplingDisposed = true;
     this.hoverSampling?.dispose(); this.pendingHoverCell = null;
     const attachedControllers = [

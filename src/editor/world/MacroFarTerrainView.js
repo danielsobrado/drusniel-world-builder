@@ -10,8 +10,8 @@ import {
   smoothstep,
   uniform,
 } from 'three/tsl';
-import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { isAzgaarMacroWorldSource } from '../import/AzgaarMacroWorldSource.js';
+import { settlementPreparationFor } from './settlements/SettlementPreparation.js';
 
 const DEFAULT_RADIUS_METERS = 10000;
 const DEFAULT_INNER_RADIUS_METERS = 256;
@@ -56,6 +56,7 @@ export class MacroFarTerrainView {
     this.worldStore = worldStore;
     this.floatingOrigin = floatingOrigin;
     this.forestFieldProvider = forestFieldProvider;
+    this.preparation = settlementPreparationFor(worldStore);
 
     const farConfig = config.world?.farTerrain ?? {};
     this.enabled = farConfig.enabled !== false;
@@ -220,20 +221,14 @@ export class MacroFarTerrainView {
       return this.generator;
     }
     this.baseTerrainRef = baseTerrain;
+    this.preparation.plans.release(this);
     this.generator = null;
     this.colorCache.clear();
     this.builtOriginX = null;
     this.builtOriginZ = null;
     this.job = null;
     if (isAzgaarMacroWorldSource(baseTerrain)) {
-      try {
-        this.generator = createWorldGenerator(
-          this.worldStore.generator.toMetadata(),
-          baseTerrain,
-        );
-      } catch (error) {
-        console.error('Far-terrain backdrop could not build a macro generator.', error);
-      }
+      this.generator = this.worldStore.generator;
     }
     return this.generator;
   }
@@ -260,6 +255,7 @@ export class MacroFarTerrainView {
   }
 
   startJob(originX, originZ, field = this.forestFieldProvider?.() ?? null) {
+    this.preparation.plans.release(this); this.sampleStepKey = null;
     this.job = {
       originX,
       originZ,
@@ -290,6 +286,27 @@ export class MacroFarTerrainView {
       // The canopy lifts it in the shading pass, once the ring slopes are known.
       this.pendingPositions[offset + 1] = height - this.heightBias;
     }
+  }
+
+  samplePreparedRing(job, ring, start, end, shouldYield) {
+    if (!this.worldStore.chunkWorker) { this.sampleRing(job, ring, start, end); return true; }
+    const { plans, registry } = this.preparation, field = this.preparation.field(this.generator);
+    if (!field && (registry.pending || registry.errors.length)) return false;
+    const key = `${ring}:${start}`;
+    if (key !== this.sampleStepKey) { plans.begin(this); this.sampleStepKey = key; }
+    let units = 0;
+    plans.advance(shouldYield ?? (() => ++units > 2));
+    const previous = field?.requirePreparedPlans;
+    if (field) field.requirePreparedPlans = true;
+    try {
+      this.sampleRing(job, ring, start, end);
+      plans.release(this); this.sampleStepKey = null;
+      return true;
+    } catch (error) {
+      if (error.code !== 'settlement_plan_required') throw error;
+      plans.get(field.findById(error.settlementId), 0, this); plans.end();
+      return false;
+    } finally { if (field) field.requirePreparedPlans = previous; }
   }
 
   /**
@@ -374,7 +391,9 @@ export class MacroFarTerrainView {
     while (job[ringKey] < limit) {
       const start = job[spokeKey] ?? 0;
       const end = Math.min(this.angularResolution, start + VERTICES_PER_STEP);
-      this[ringKey](job, job[ringKey], start, end);
+      if (phase === 'sample') {
+        if (!this.samplePreparedRing(job, job[ringKey], start, end, shouldYield)) return;
+      } else this[ringKey](job, job[ringKey], start, end);
       job[spokeKey] = end === this.angularResolution ? 0 : end;
       if (end === this.angularResolution) job[ringKey]++;
       if (shouldYield?.()) break;
@@ -469,6 +488,7 @@ export class MacroFarTerrainView {
   }
 
   dispose() {
+    this.preparation.plans.release(this);
     this.scene.remove(this.mesh);
     this.geometry.dispose();
     this.material.dispose();

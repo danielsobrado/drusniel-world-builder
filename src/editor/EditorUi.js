@@ -1227,7 +1227,7 @@ export class EditorUi {
               });
             session?.start('apply');
             if (!this.sceneSettingsRuntime) {
-              controller.loadDocument(document, {
+              await controller.loadDocument(document, {
                 preserveInventory: true,
                 loadReason: 'WORLD_IMPORTED',
               });
@@ -1631,7 +1631,7 @@ export class EditorUi {
               const saved = await loadFromBrowser(this.config.storage.key);
               if (!saved) return null;
               session?.start('apply');
-              this.controller.loadDocument(saved, { loadReason: 'SAVE_RESTORED' });
+              await this.controller.loadDocument(saved, { loadReason: 'SAVE_RESTORED' });
               this.syncImportedBiomeTiles(saved);
               return saved;
             },

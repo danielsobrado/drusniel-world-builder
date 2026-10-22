@@ -49,7 +49,7 @@ function nearestOnSegment(cellX, cellZ, segment) {
 }
 
 export class RiverValley {
-  constructor({ segments, config, seaLevel, sampleBaseHeight, blockCells = DEFAULT_BLOCK_CELLS }) {
+  constructor({ segments, config, seaLevel, sampleBaseHeight, blockCells = DEFAULT_BLOCK_CELLS, reaches = null }) {
     this.seaLevel = seaLevel;
     this.cellSizeMeters = config.cellSizeMeters;
     this.blockCells = blockCells;
@@ -66,7 +66,7 @@ export class RiverValley {
     // Azgaar map's rivers otherwise cost tens of megabytes of string keys.
     this.index = new SegmentBlockIndex({ blockSize: blockCells, coarseBlocks: 8 });
     this.reaches = new Map();
-    for (const segment of segments) this.add(segment);
+    segments.forEach((segment, index) => this.add(segment, reaches?.[index]));
   }
 
   /** Valley reach in metres for ground `cut` metres above the water. */
@@ -110,9 +110,9 @@ export class RiverValley {
     return reaches[step] + (reaches[step + 1] - reaches[step]) * (position - step);
   }
 
-  add(segment) {
+  add(segment, preparedReaches = null) {
     const steps = Math.max(1, Math.ceil(segment.length / (this.blockCells * 0.5)));
-    const reaches = this.measureReaches(segment, steps);
+    const reaches = preparedReaches ?? this.measureReaches(segment, steps);
     this.reaches.set(segment, reaches);
     let reachMeters = 0;
     for (const reach of reaches) reachMeters = Math.max(reachMeters, reach);

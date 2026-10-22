@@ -34,13 +34,14 @@ export class RiverChannel {
     config,
     lakeLevelAt = null,
     blockSize = 64,
+    segments = null,
   }) {
     if (!Number.isInteger(blockSize) || blockSize < 1) {
       throw new Error('River channel blockSize must be a positive integer.');
     }
     this.config = config;
     this.blockSize = blockSize;
-    this.segments = createRiverSurfaceSegments({
+    this.segments = segments ?? createRiverSurfaceSegments({
       source,
       sampleBaseHeight,
       seaLevel,

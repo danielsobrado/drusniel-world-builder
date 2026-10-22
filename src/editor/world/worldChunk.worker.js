@@ -6,10 +6,12 @@ import { createWorldGenerator } from './WorldGeneratorFactory.js';
 import { generateSettlementPlan, generateSettlementRegistry } from './settlements/SettlementPlanRequest.js';
 import { SettlementPlanPortAuthority, SettlementPlanPortClient } from './settlements/SettlementPlanPorts.js';
 import { getSurfaceMaskSearchRadius } from './ChunkRenderPixels.js';
+import { installPreparedWaterTerrain } from '../water/PreparedWaterTerrain.js';
 
 let baseTerrain = null;
 let worldGenerator = null;
 let generatorMetadata = null;
+let waterPreparation = null;
 const planClient = new SettlementPlanPortClient();
 const planAuthority = new SettlementPlanPortAuthority(ensureGenerator,
   () => self.postMessage({ type: 'settlement-plan-generated' }));
@@ -17,6 +19,7 @@ const planAuthority = new SettlementPlanPortAuthority(ensureGenerator,
 function ensureGenerator(metadata) {
   if (!worldGenerator || JSON.stringify(generatorMetadata) !== JSON.stringify(metadata)) {
     generatorMetadata = metadata;
+    if (waterPreparation && baseTerrain) installPreparedWaterTerrain(baseTerrain, metadata, waterPreparation);
     worldGenerator = createWorldGenerator(metadata, baseTerrain);
   }
   return worldGenerator;
@@ -64,6 +67,8 @@ self.addEventListener('message', async (event) => {
     planClient.disconnect();
     planAuthority.reset(event.data.revision);
     baseTerrain = event.data.baseTerrain ?? null;
+    waterPreparation = event.data.waterPreparation ?? null;
+    if (waterPreparation && generatorMetadata && baseTerrain) installPreparedWaterTerrain(baseTerrain, generatorMetadata, waterPreparation);
     worldGenerator = generatorMetadata
       ? createWorldGenerator(generatorMetadata, baseTerrain)
       : null;
@@ -83,6 +88,11 @@ self.addEventListener('message', async (event) => {
     if (request.materialBakeRequest) {
       const page = await bakeTerrainMaterialPage(request.materialBakeRequest);
       self.postMessage({ id, page }, Object.values(page.value.channels).map(channel => channel.buffer));
+      return;
+    }
+    if (request.sourcePreparation) {
+      const { metadata, source } = request.sourcePreparation;
+      self.postMessage({ id, page: createWorldGenerator(metadata, source).prepareWaterTerrain() });
       return;
     }
     const generator = ensureGenerator(request.generator);
