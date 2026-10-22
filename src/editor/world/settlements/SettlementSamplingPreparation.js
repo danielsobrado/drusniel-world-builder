@@ -23,7 +23,8 @@ export class SettlementSamplingPreparation {
       if (!preparation.plans.get(entry, 0, this) || !entry.index) ready = false;
     }
     preparation.plans.end();
-    preparation.plans.advance(shouldYield);
+    let units = 0;
+    preparation.plans.advance(() => ++units > 2 || shouldYield());
     return ready;
   }
 

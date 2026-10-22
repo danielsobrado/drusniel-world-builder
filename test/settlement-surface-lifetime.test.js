@@ -53,3 +53,42 @@ test('partially loaded photographed sets release every successful texture on fai
   assert.equal(disposed, 2);
   library.dispose();
 });
+
+test('successful completion after release disposes its set without reviving the lease', async () => {
+  const library = new SettlementSurfaceLibrary();
+  let finish, disposed = 0;
+  library.generateProcedural = () => new Promise(resolve => { finish = resolve; });
+  library.loadPhotographed = async name => ({ name, dispose() { disposed++; } });
+  const lease = library.acquire(dressing);
+  lease.release();
+  finish({ name: 'cobble-cut', dispose() { disposed++; } });
+  await lease.surfaces; await Promise.resolve();
+  assert.equal(library.sets.size, 0); assert.equal(disposed, 8);
+  library.dispose();
+});
+
+test('a failed fallback releases the other roles and both failed references', async t => {
+  const f = fixture(), load = f.library.loadPhotographed;
+  f.library.loadPhotographed = name => name === 'cobble-grey' ? Promise.reject(new Error('fallback failed')) : load(name);
+  const warn = console.warn; console.warn = () => {};
+  t.after(() => { console.warn = warn; f.library.dispose(); });
+  const lease = f.library.acquire(dressing);
+  const rejected = assert.rejects(lease.surfaces, /fallback failed/);
+  f.fail(); await rejected; await Promise.resolve();
+  lease.release(); assert.equal(f.library.sets.size, 0);
+  assert.deepEqual(f.counts(), { disposed: 7, photographed: 7 });
+});
+
+test('disposal during a recipe fetch cannot start another bake', async t => {
+  const originalFetch = globalThis.fetch;
+  let deliver, bakes = 0, disposed = 0;
+  globalThis.fetch = () => new Promise(resolve => { deliver = resolve; });
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const library = new SettlementSurfaceLibrary();
+  library.baker = { bake() { bakes++; assert.fail('bake after disposal'); }, dispose() { disposed++; } };
+  const loading = library.generateProcedural('cobble-cut', {});
+  library.dispose(); deliver({ ok: true, json: async () => ({}) });
+  await assert.rejects(loading, /disposed/);
+  assert.equal(bakes, 0); assert.equal(disposed, 1);
+  assert.equal(library.baker, null); assert.equal(library.sets.size, 0);
+});

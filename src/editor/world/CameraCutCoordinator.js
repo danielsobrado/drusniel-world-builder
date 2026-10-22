@@ -1,3 +1,5 @@
+import { SettlementSamplingPreparation } from './settlements/SettlementSamplingPreparation.js';
+
 /** Atomically replace residency, rebase and pose; collision preparation resumes input. */
 export class CameraCutCoordinator {
   constructor({ terrainView, playerController, viewModeController, shiftWorld = () => {},
@@ -81,5 +83,3 @@ export class CameraCutCoordinator {
     this.playerController.cutBlocked = false;
   }
 }
-import { SettlementSamplingPreparation } from './settlements/SettlementSamplingPreparation.js';
-

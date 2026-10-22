@@ -146,9 +146,9 @@ const fs = require('fs');
     const browserErrors = createBrowserErrorMonitor(page);
     page.on('pageerror', error => console.error('Perf QA browser error:', error.stack ?? error.message));
     await page.goto(${JSON.stringify(targetUrl)}, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
     const { focusPerfBrowser } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
     const captureFocus = await focusPerfBrowser(browser, page, { headed: ${hasFlag('headed')} });
+    await page.waitForFunction(() => window.__perfQa != null, null, { timeout: ${timeoutMs} });
 
     const rendererBackend = await page.evaluate(() => {
       const canvas = document.querySelector(

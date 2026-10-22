@@ -21,6 +21,8 @@ test('cold interactive sampling waits for a worker plan and retains exact gradin
   assert.equal(sampler.prepare(bounds), false); assert.equal(requests, 1);
   deliver(generateSettlementPlan({ ensureSettlementField: () => canonical }, 18));
   await Promise.resolve();
+  sampler.prepare(bounds);
+  assert.equal(main.entries[0].index, null, 'bootstrap without a frame budget still installs only a bounded slice');
   let ready = false;
   for (let turn = 0; turn < 1000 && !ready; turn++) {
     let checks = 0; ready = sampler.prepare(bounds, () => ++checks > 5);

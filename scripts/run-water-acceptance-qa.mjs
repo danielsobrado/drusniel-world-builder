@@ -327,6 +327,7 @@ async function main() {
     await page.goto(discoveryUrl.href, {
       waitUntil: 'domcontentloaded',
     });
+    const captureDiscoveryFocus = await focusPerfBrowser(browser, page, { headed });
     const adapter = await inspectAdapter(page);
     const softwareAdapter = isSoftwareAdapter(adapter);
     if (softwareAdapter && !allowSoftware) {
@@ -334,6 +335,8 @@ async function main() {
     }
 
     const discovery = await discoverRoute(page);
+    const discoveryFocus = await captureDiscoveryFocus();
+    if (!discoveryFocus.passed) throw new Error('Water route discovery lost browser foreground focus.');
     if (!discovery.route) {
       throw new Error(
         `No deterministic dry-to-deep shoreline route was found: ${
@@ -372,11 +375,11 @@ async function main() {
     const measuredUrl = new URL(baseUrl);
     for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
     await page.goto(measuredUrl.href, { waitUntil: 'domcontentloaded' });
+    const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(({ x, z }) => {
       const focus = window.__editor?.controller?.focusProvider?.();
       return focus && Math.hypot(focus.x - x, focus.z - z) < 2;
     }, discovery.route.start);
-    const captureFocus = await focusPerfBrowser(browser, page, { headed });
     await page.waitForFunction(() => window.__perfQa?.recording, null, { timeout: 180_000 });
 
     const tracker = new WaterAcceptanceTracker({

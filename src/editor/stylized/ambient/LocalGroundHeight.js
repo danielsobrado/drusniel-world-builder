@@ -8,8 +8,8 @@ import { texture, uniform, vec2 } from 'three/tsl';
  *
  * Heights are stored in half floats relative to the patch centre's height,
  * which a uniform adds back, so they stay precise at any altitude. The patch
- * is rebuilt only when the camera leaves its middle, or the floating origin
- * moves under it.
+ * is rebuilt when the camera leaves its middle or the terrain changes.
+ * A floating-origin shift only moves the published patch's corner uniform.
  */
 export class LocalGroundHeight {
   /**
