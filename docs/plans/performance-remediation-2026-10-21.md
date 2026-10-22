@@ -9,8 +9,11 @@ imported Azgaar world, population-sized towns, and the shipped visual settings.
 Protect skyline coverage before accepting faster settlement frames. Eight
 confirmed findings follow, with a complete implementation and validation checklist.
 
-**Status: review and plan only. Runtime fixes are not implemented by this change.**
-No visual settings were changed. No current hardware FPS result or speedup is claimed.
+**Implementation update — 2026-10-22:** All eight findings now have runtime fixes
+and regression coverage. See [implementation results and remaining acceptance
+checks](../performance-remediation-results-2026-10-22.md). No visual settings
+were reduced and no FPS speedup is claimed. The baseline findings and original
+acceptance checklists below are retained as the review record.
 
 ## Review boundary and evidence
 

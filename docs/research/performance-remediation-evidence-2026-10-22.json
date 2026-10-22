@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "runtimeSource": "a61809aec3122f736b1f111cef58a8234e833a41",
+  "runtimeArchiveSha256": "04ece78e13e396ea252d0e7ff8e1e5f404d5da49d4e6e08cee1f3474d0d200f9",
+  "configSha256": {
+    "editor.config.yaml": "04c6557fb2e3fdeb92faeba50d4acc7029b0425a68d1b07e95c42452b29ef028",
+    "config/ambient-effects.yaml": "4a2ef220da74c1cee7f4113202392a46ab673f59af8687eb127cd111ceb77a60",
+    "config/exploration.yaml": "e6398bc07158ae7be4f8da63dce0a95d93d2cd935f1e6b9776f94c9f5986a539",
+    "config/water-domain.yaml": "24d151ad26dffae2c5f9255d8e06da0bcd5e7a5d36afa262431f9edb37eeedf2",
+    "config/water-visual.yaml": "cacf6da21771578845eb91731059b0dc1aa0fc9deab745c8dd5a25dddd43f2c6",
+    "config/terrain-material-bake.yaml": "6201f522a87a55c917af3d47b2e4c8f21af7e0688cfad563c29ec45f2072b05b"
+  },
+  "correctnessOnly": {
+    "purpose": "Functional correctness only; foreground is not controlled and timings are not acceptance evidence.",
+    "passed": true,
+    "adapter": {
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "fallback": false,
+      "backend": "webgpu"
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1
+    },
+    "target": {
+      "id": 18,
+      "name": "Cyvazin",
+      "cold": true,
+      "x": 2366074.6308430247,
+      "z": 2374571.0822547586
+    },
+    "mainThreadPlansGenerated": 0,
+    "skyline": {
+      "frames": 2861,
+      "retainedFrames": 2391,
+      "hiddenBeforeReady": []
+    },
+    "settlement": {
+      "ready": true,
+      "enabled": true,
+      "registry": 0,
+      "skyline": {
+        "ready": true,
+        "expected": 1,
+        "installed": 1,
+        "pending": 0,
+        "failed": 0,
+        "errors": []
+      },
+      "plans": 0,
+      "selection": 0,
+      "sites": 0,
+      "surfaces": 0,
+      "installation": 0,
+      "variants": 0,
+      "compilation": 0,
+      "reveal": 0,
+      "requestedBuildings": 1130,
+      "requestedProps": 2488,
+      "visibleBuildings": 363,
+      "visibleProps": 38,
+      "residentSites": 1,
+      "errors": []
+    },
+    "ambient": {
+      "ready": true,
+      "resolution": 64
+    },
+    "residents": 16,
+    "tour": {
+      "stopped": true,
+      "plansGenerated": 0
+    },
+    "errors": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    },
+    "resourceLabel": "tracked resource bytes",
+    "trackedResourceBytes": 916463786,
+    "settlementCaches": {
+      "main": {
+        "plans": 1,
+        "pinned": 1,
+        "skylineBytes": 1311912,
+        "estimatedBytes": 3451048,
+        "maxEntries": 32,
+        "maxBytes": 33554432,
+        "evictions": 0,
+        "overBudget": false
+      },
+      "terrainWorkers": [
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        },
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        }
+      ],
+      "authority": [
+        {
+          "plans": 1,
+          "pinned": 0,
+          "skylineBytes": 0,
+          "estimatedBytes": 2139136,
+          "maxEntries": 32,
+          "maxBytes": 33554432,
+          "evictions": 0,
+          "overBudget": false
+        }
+      ]
+    }
+  },
+  "cpuChecks": {
+    "tests": 3947,
+    "passed": 3947,
+    "failed": 0,
+    "skipped": 0,
+    "lintPassed": true,
+    "testLog": "final3-tests.log",
+    "lintLog": "final3-lint.log"
+  },
+  "fullVerify": {
+    "passed": false,
+    "blocker": "Pre-existing forest-recipe manifest mismatch",
+    "expectedSignature": "afa9f14a",
+    "actualSignature": "ee9f560b",
+    "reproducesOnBaseline": true
+  },
+  "performanceAcceptance": {
+    "passed": false,
+    "source": "484bad2af94ddc35db83031c2f3efa10b115ce62",
+    "reason": "Native foreground loss/activation rejection; remaining cases have no accepted report.",
+    "limits": {
+      "p95Ms": 33.3,
+      "hitchRate": 0.02,
+      "sceneryRecoveryMs": 2000
+    },
+    "invalidStandardCapture": {
+      "foregroundPassed": false,
+      "browserErrors": 0,
+      "firstSceneryReadyMs": 2119.599999964237
+    },
+    "failedGateCount": 28
+  }
+}
