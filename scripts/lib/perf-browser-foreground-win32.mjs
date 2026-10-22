@@ -15,6 +15,19 @@ using System.Threading;
 public static class QaBrowserForeground {
   [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window, out uint processId);
+  [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
+  [DllImport("user32.dll")] static extern bool AttachThreadInput(uint first, uint second, bool attach);
+  [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr window);
+  public static void Activate(int browserPid) {
+    var window = System.Diagnostics.Process.GetProcessById(browserPid).MainWindowHandle;
+    if (window == IntPtr.Zero) return;
+    uint ignored;
+    var current = GetCurrentThreadId();
+    var foreground = GetWindowThreadProcessId(GetForegroundWindow(), out ignored);
+    var joined = foreground != 0 && foreground != current && AttachThreadInput(current, foreground, true);
+    try { SetForegroundWindow(window); }
+    finally { if (joined) AttachThreadInput(current, foreground, false); }
+  }
   public static uint ProcessId() {
     uint processId;
     GetWindowThreadProcessId(GetForegroundWindow(), out processId);
@@ -32,6 +45,7 @@ $qaBrowserPid = ${browserPid}
 $qaShell = New-Object -ComObject WScript.Shell
 for ($attempt = 0; $attempt -lt 10; $attempt++) {
   $qaShell.AppActivate($qaBrowserPid) | Out-Null
+  if ([QaBrowserForeground]::ProcessId() -ne $qaBrowserPid) { [QaBrowserForeground]::Activate($qaBrowserPid) }
   Start-Sleep -Milliseconds 100
   if ([QaBrowserForeground]::ProcessId() -eq $qaBrowserPid) { break }
 }

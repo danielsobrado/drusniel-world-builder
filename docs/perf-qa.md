@@ -303,6 +303,10 @@ The movement and water runners activate their owned blank window before loading
 the app, then start a fresh document/native focus observation as soon as navigation
 commits. This lets Windows activate the window before cold shader compilation can
 block it; it does not bypass foreground checks during the workload.
+If `AppActivate` is refused, startup temporarily joins the helper's input queue
+to the foreground queue and calls `SetForegroundWindow` on the CDP-owned browser's
+main window. The queues are detached immediately. Activation ends before monitoring;
+the monitor never reacquires focus to conceal a foreground loss.
 
 Run `node scripts/check-perf-browser-focus.mjs` with Windows Node to verify the
 monitor. Its two owned test windows check both successful activation and rejection

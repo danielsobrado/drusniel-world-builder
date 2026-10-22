@@ -29,6 +29,11 @@ try {
   report.otherOwnedWindow = await other();
   await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: false });
   await cdp.detach();
+  // Focus emulation can leave its renderer unfocused after it is disabled.
+  // The cold-start control needs a fresh renderer with no emulated state.
+  const previousPage = pages[0];
+  pages[0] = await browsers[0].newPage();
+  await previousPage.close();
   // Reproduce a cold renderer blocking after the first real focus read. Native
   // ownership and document.hasFocus remain real; no focus value is emulated.
   await pages[0].evaluate(() => {
