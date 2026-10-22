@@ -1,5 +1,6 @@
 import { FARM_BELT } from './SettlementProfile.js';
-import { polylineDistance } from './SettlementGeometry.js';
+import { polylineDistance, walkStreet } from './SettlementGeometry.js';
+import { growLanes } from './SettlementLaneFill.js';
 
 /** A small deterministic generator; plans must not depend on Math.random. */
 export function planRandom(seed) {
@@ -71,23 +72,6 @@ export function mainBearings(profile, routeBearings, random, quayBearing = null)
     if (bearings.every((existing) => angleGap(existing, candidate) > Math.PI / (minimum + 0.5))) bearings.push(candidate);
   }
   return bearings;
-}
-
-/** A gently meandering street out along a bearing, stopping at unbuildable ground. */
-function walkStreet({ start, bearing, length, step, drift, random, isBuildable }) {
-  const points = [start];
-  let [x, z] = start;
-  let heading = bearing;
-  for (let travelled = 0; travelled < length; travelled += step) {
-    heading += (random() - 0.5) * drift;
-    // Pull back toward the bearing so the street keeps its general direction.
-    heading += Math.atan2(Math.sin(bearing - heading), Math.cos(bearing - heading)) * 0.25;
-    x += Math.sin(heading) * step;
-    z += Math.cos(heading) * step;
-    if (!isBuildable(x, z)) break;
-    points.push([x, z]);
-  }
-  return points;
 }
 
 /** Squares where every main street arrives as an avenue are this much wider, or the avenues eat their frontage. */
@@ -203,11 +187,16 @@ function spokeLanes({ bearings, inner, outer, mains, random, isBuildable, separa
 /** Grid towns lay their block streets this far apart (m). */
 const GRID_SPACING = 70;
 
-/** Every street of a radial town after its main streets: rings, spokes and side lanes. */
+/**
+ * Every street of a radial town after its main streets: rings, spokes and side
+ * lanes — and, in a town too small for rings, lanes grown until it has frontage
+ * for its population (SettlementLaneFill).
+ */
 function radialStreets({ profile, mains, bearings, squareRadius, streetConfig, tag, random, isBuildable }) {
   const streets = [];
   const allowRings = !streetConfig || streetConfig.ringCount > 0;
-  if ((profile.rank >= 2 || profile.radius >= RING_TOWN_RADIUS) && allowRings) {
+  const ringed = (profile.rank >= 2 || profile.radius >= RING_TOWN_RADIUS) && allowRings;
+  if (ringed) {
     const radii = ringRadii(profile, squareRadius, random, streetConfig);
     for (const ringRadius of radii) {
       streets.push(...ringStreets({ ringRadius, random, isBuildable }).map(tag));
@@ -223,6 +212,9 @@ function radialStreets({ profile, mains, bearings, squareRadius, streetConfig, t
     }
   }
   if (profile.rank >= 1) streets.push(...sideLanes({ profile, mains, random, isBuildable }).map(tag));
+  if (!ringed) {
+    streets.push(...growLanes({ profile, streets: [...mains, ...streets], squareRadius, width: STREET_WIDTH.lane, random, isBuildable }).map(tag));
+  }
   return streets;
 }
 
@@ -343,6 +335,7 @@ export function planStreets({ profile, signature = null, routeBearings, random, 
     streets.push(...gridStreets({ profile, axis: bearings[0], squareRadius, random, isBuildable }).map(tag));
   } else if (grammar === 'linear') {
     streets.push(...sideLanes({ profile, mains, random, isBuildable }).map(tag));
+    streets.push(...growLanes({ profile, streets, squareRadius, width: STREET_WIDTH.lane, random, isBuildable }).map(tag));
   } else {
     streets.push(...radialStreets({ profile, mains, bearings, squareRadius, streetConfig, tag, random, isBuildable }));
   }

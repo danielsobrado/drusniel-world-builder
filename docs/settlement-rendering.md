@@ -166,6 +166,13 @@ A burg's size follows its Azgaar population (`SettlementProfile.townSize`):
 - Farms scale with the building count.
 - Ring streets run every 80 m and spoke lanes stand about 70 m apart in each
   ring, so blocks stay one lot-row deep at any size.
+- A town too small for rings — and every street village — grows lanes
+  (`SettlementLaneFill`) until it has about 9.5 m of street per building. Every
+  plot fronts a street, so fill follows frontage: with a road or two and no
+  rings a village housed a quarter to a half of its people. Lanes branch
+  roughly square off existing streets, held 20 m from any other. Small radial
+  towns now fill 74–90% of their lots and street villages 64–75%, like the ring
+  cities' ~80%. A 1.8k village plans in about 13 ms, three times its houses.
 
 A 5k town plans about 780 buildings in about 280 m, and a 38k city about 1,450
 in about 410 m. The classes (hamlet → metropolis) now only rank a place:

@@ -74,6 +74,23 @@ export function polylineDistance(points, x, z) {
   return best;
 }
 
+/** A gently meandering street out along a bearing, stopping at unbuildable ground. */
+export function walkStreet({ start, bearing, length, step, drift, random, isBuildable }) {
+  const points = [start];
+  let [x, z] = start;
+  let heading = bearing;
+  for (let travelled = 0; travelled < length; travelled += step) {
+    heading += (random() - 0.5) * drift;
+    // Pull back toward the bearing so the street keeps its general direction.
+    heading += Math.atan2(Math.sin(bearing - heading), Math.cos(bearing - heading)) * 0.25;
+    x += Math.sin(heading) * step;
+    z += Math.cos(heading) * step;
+    if (!isBuildable(x, z)) break;
+    points.push([x, z]);
+  }
+  return points;
+}
+
 /** Does a rectangle come within `clearance` of a polyline of half-width `halfWidth`? */
 export function rectHitsPolyline(box, points, halfWidth, clearance = 0) {
   const reach = halfWidth + clearance;

@@ -40,3 +40,20 @@ test('every planned building stands within the town and plans are deterministic'
   const limit = city.profile.reach + 20;
   for (const building of city.buildings) assert.ok(Math.hypot(building.x, building.z) <= limit);
 });
+
+test('hamlets and villages without rings still house their people', () => {
+  const homes = (p) => p.buildings.filter(({ kind }) => !['farmhouse', 'barn', 'wall', 'gatehouse', 'tower'].includes(kind)).length;
+  for (const population of [0.3, 0.9, 2.2]) {
+    const fills = [];
+    for (let id = 1; fills.length < 12; id += 1) {
+      const village = planSettlement({ settlement: { id, cellX: 0, cellZ: 0, population }, worldSeed: 9, routeBearings: [1.2], sampleHeight: ground });
+      // A grid village has block streets of its own; this is about the radial and street villages.
+      if (village.signature.grammar === 'grid') continue;
+      assert.equal(village.streets.filter(({ kind }) => kind === 'ring').length, 0);
+      fills.push(homes(village) / village.profile.buildings);
+    }
+    const fill = fills.reduce((sum, share) => sum + share, 0) / fills.length;
+    // One road and no rings once housed a quarter to a third; lanes grown to the population house most.
+    assert.ok(fill >= 0.65, `${population}k villages housed ${(fill * 100).toFixed(0)}% of their buildings`);
+  }
+});
