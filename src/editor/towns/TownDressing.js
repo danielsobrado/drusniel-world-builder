@@ -85,7 +85,7 @@ const REGIONAL_DRESSING = Object.freeze({
   ],
   Frostgard: (beside, w, d, roll) => [
     { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
-    { kind: 'woodpile', lx: beside(1, 1.2), lz: d / 2 - 0.7, w: 1.3, d: 1.2, turn: Math.PI / 2 },
+    { kind: 'supply_sled', lx: beside(1, 1.4), lz: d / 2 - 0.7, w: 1.4, d: 2.0, turn: 0 },
     { kind: 'drying_rack', lx: beside(-1, 2.4), lz: -0.6, w: 2.4, d: 1.2, turn: Math.PI / 2 },
     { kind: 'boulders', lx: beside(-1, 2.0), lz: d / 2 - 0.4, w: 2.0, d: 1.6, turn: roll(3) * Math.PI },
     { kind: 'pine', variant: roll(2) < 0.6 ? 0 : 1, lx: beside(-1, 2.0), lz: -d / 2 - 1.6, w: 2.0, d: 2.0, turn: 0 },
@@ -94,8 +94,7 @@ const REGIONAL_DRESSING = Object.freeze({
   Stonehold: (beside, w, d, roll) => [
     { kind: 'cargo', lx: beside(1, 1.7), lz: -0.2, w: 1.7, d: 1.4, turn: 0.2 },
     { kind: 'brazier_pillar', lx: -w / 2 + 0.4, lz: d / 2 + 1.0, w: 0.8, d: 0.8, turn: 0 },
-    { kind: 'barrels', variant: 1, lx: beside(-1, 1.0), lz: -d / 2 + 0.8, w: 1.0, d: 1.0, turn: 0.3 },
-    { kind: 'boulders', lx: beside(-1, 2.0), lz: -d / 2 - 1.4, w: 2.0, d: 1.6, turn: roll(3) * Math.PI },
+    { kind: 'boulders', lx: beside(1, 2.0), lz: -d / 2 - 1.4, w: 2.0, d: 1.6, turn: roll(3) * Math.PI },
   ],
 });
 /** Workshops of these families get an ore crane or a curing rack in the yard. */
@@ -153,22 +152,39 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
     if (yardWork && ['smithy', 'warehouse'].includes(building.kind)) {
       candidates.push({ kind: yardWork, lx: beside(-1, 2.4), lz: -d / 2 - 1.6, w: 2.4, d: 2.4, turn: 0 });
     }
+    if ((buildingFamily || building.kitFamily) === 'Stonehold') {
+      candidates.push(
+        { kind: 'ward_pillar', lx: w / 2 - 0.4, lz: d / 2 + 1.1, w: 1.4, d: 1.4, turn: 0 },
+        { kind: 'mine_cart', lx: beside(-1, 1.4), lz: 0.2, w: 1.4, d: 2.2, turn: 0 },
+      );
+    }
     if (building.kind === 'smithy') {
-      candidates.push({ kind: 'grindstone', lx: beside(1, 1.0), lz: d / 2 - 0.8, w: 1.0, d: 0.8, turn: 0 });
+      const isStonehold = (buildingFamily || building.kitFamily) === 'Stonehold' || loreRealm === 'stonehold';
+      candidates.push(
+        { kind: 'grindstone', lx: beside(1, 1.0), lz: d / 2 - 0.8, w: 1.0, d: 0.8, turn: 0 },
+        { kind: isStonehold ? 'smelter_stack' : 'armorer_stand', lx: beside(-1, 2.0), lz: d / 2 - 0.4, w: 2.0, d: 1.4, turn: 0 },
+      );
+    } else if (building.kind === 'bakery') {
+      candidates.push({ kind: 'bake_oven', lx: beside(1, 1.9), lz: d / 2 - 0.4, w: 1.9, d: 1.6, turn: 0 });
+    } else if (building.kind === 'apothecary') {
+      candidates.push({ kind: 'alchemist_stall', lx: beside(1, 2.2), lz: d / 2 - 0.3, w: 2.2, d: 1.5, turn: 0 });
     } else if (building.kind === 'tavern') {
       candidates.push(
+        { kind: 'tavern_tables', lx: beside(1, 1.8), lz: d / 2 + 0.4, w: 1.8, d: 1.6, turn: 0 },
         { kind: 'trough', lx: beside(1, 1.8), lz: d / 2 - 0.6, w: 1.8, d: 0.8, turn: 0 },
         { kind: 'notice_board', lx: beside(-1, 1.7), lz: d / 2 - 0.4, w: 1.7, d: 0.6, turn: 0 },
         { kind: 'brazier', lx: w / 2 - 0.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
       );
     } else if (building.kind === 'chapel') {
       candidates.push(
+        { kind: 'statue', lx: beside(1, 2.1), lz: d / 2 + 0.4, w: 2.1, d: 2.1, turn: 0 },
         { kind: 'shrine', lx: beside(-1, 1.3), lz: d / 2 - 0.6, w: 1.3, d: 1.2, turn: 0 },
         { kind: 'brazier', lx: -1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
         { kind: 'brazier', lx: 1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
       );
     } else if (['keep', 'hall', 'guildhall', 'guardhouse'].includes(building.kind)) {
       candidates.push(
+        { kind: 'guard_post', lx: beside(-1, 2.0), lz: d / 2 - 0.3, w: 2.0, d: 1.3, turn: 0 },
         { kind: 'brazier', lx: -1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
         { kind: 'brazier', lx: 1.4, lz: d / 2 + 0.9, w: 0.8, d: 0.8, turn: 0 },
         { kind: 'notice_board', lx: beside(1, 1.7), lz: d / 2 - 0.5, w: 1.7, d: 0.6, turn: 0 },

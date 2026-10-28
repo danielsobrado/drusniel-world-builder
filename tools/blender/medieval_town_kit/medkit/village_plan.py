@@ -85,9 +85,14 @@ BUILDINGS = [
 
 # (module, x, y, rotation in degrees) in cell units; z follows the terrace.
 PROPS = [
-    ('Well', 6.5, 6.0, 0), ('Fountain', 12.2, 5.2, 0),
+    ('Well', 6.5, 6.0, 0), ('Fountain', 12.2, 5.2, 0), ('Statue_Plinth', 9.5, 10.6, 0),
+    ('Street_Arch_Stone', 10.0, 2.5, 0), ('Street_Arch_Timber', 10.0, 7.5, 0),
+    ('Street_Bunting', 10.0, 4.5, 0),
     ('Market_Stall_Cream', 4.0, 5.0, 0), ('Market_Stall_Blue', 7.6, 4.6, 0),
-    ('Market_Stall_Red', 14.8, 4.8, 0), ('Market_Stall_Cream', 17.5, 4.8, 0),
+    ('Market_Stall_Red', 14.8, 4.8, 0), ('Alchemist_Stall', 17.5, 4.8, 0),
+    ('Tavern_Table_Set', 12.6, 6.3, 0), ('Tavern_Table_Set', 14.2, 6.3, 15),
+    ('Bake_Oven_Outdoor', 6.2, 0.8, 0), ('Armorer_Stand', 16.2, 0.75, 0),
+    ('Guard_Post', 18.4, 2.2, 0), ('Pillory_Stocks', 4.2, 6.8, 0),
     ('Notice_Board', 9.5, 6.7, 0), ('Town_Cross', 5.2, 6.8, 0),
     ('Signpost', 10.8, 4.2, -25), ('Signpost', 5.8, 1.8, 15),
     ('Horse_Trough', 14.8, 6.7, 0), ('Grindstone', 14.3, 0.75, 25),

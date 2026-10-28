@@ -68,11 +68,12 @@ const FAMILY_OVERRIDES = Object.freeze({ Med: Object.freeze({ Manor: 'Med_Villa'
  */
 const PROP_CLUSTERS = Object.freeze({
   well: [[['Well', 0, 0, 0, 0]]],
-  fountain: [[['Fountain', 0, 0, 0, 0]], [['Town_Cross', 0, 0, 0, 0]]],
+  fountain: [[['Fountain', 0, 0, 0, 0]], [['Town_Cross', 0, 0, 0, 0]], [['Statue_Plinth', 0, 0, 0, 0]]],
   stall: [
     [['Market_Stall_Cream', 0, 0, 0, 0], ['Barrel', 1.5, 0.5, 0, 0]],
     [['Market_Stall_Blue', 0, 0, 0, 0], ['Crate', -1.5, 0.3, 0.3, 0]],
     [['Market_Stall_Red', 0, 0, 0, 0]],
+    [['Alchemist_Stall', 0, 0, 0, 0]],
   ],
   lantern: [[['Lamp_Post', 0, 0, 0, 0]], [['Lamp_Post_Banner', 0, 0, 0, 0]]],
   planter: [[['Flower_Box', 0, 0, 0, 0]]],
@@ -124,6 +125,23 @@ const PROP_CLUSTERS = Object.freeze({
     [['Stonehold_Cavern_Maw', 0, 0, 0, 0]],
     [['Stonehold_Horned_Sanctum', 0, 0, 0, 0]],
   ],
+  street_arch: [
+    [['Street_Arch_Stone', 0, 0, 0, 0]],
+    [['Street_Arch_Timber', 0, 0, 0, 0]],
+    [['Street_Arch_Granite', 0, 0, 0, 0]],
+    [['Street_Bunting', 0, 0, 0, 0]],
+  ],
+  tavern_tables: [[['Tavern_Table_Set', 0, 0, 0, 0]]],
+  alchemist_stall: [[['Alchemist_Stall', 0, 0, 0, 0]]],
+  armorer_stand: [[['Armorer_Stand', 0, 0, 0, 0]]],
+  bake_oven: [[['Bake_Oven_Outdoor', 0, 0, 0, 0]]],
+  guard_post: [[['Guard_Post', 0, 0, 0, 0]]],
+  stocks: [[['Pillory_Stocks', 0, 0, 0, 0]]],
+  statue: [[['Statue_Plinth', 0, 0, 0, 0]]],
+  mine_cart: [[['Mine_Cart_Track', 0, 0, 0, 0]]],
+  smelter_stack: [[['Smelter_Stack', 0, 0, 0, 0]]],
+  ward_pillar: [[['Stonehold_Ward_Pillar', 0, 0, 0, 0]]],
+  supply_sled: [[['Winter_Supply_Sled', 0, 0, 0, 0]]],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */

@@ -237,6 +237,23 @@ COLLIDERS.update({
     'Stonehold_Fang_Shrine': _centred(2.8, 2.6, 0.85) + [((-0.95, 0.0, 0), (0.35, 1.0, 2.95))],
     'Stonehold_Cavern_Maw': _centred(3.7, 3.0, 0.45, y0=-2.0) + [((-1.55, -0.1, 0), (1.55, 1.85, 4.4))],
     'Stonehold_Horned_Sanctum': _centred(4.6, 4.0, 2.1) + _centred(2.2, 2.0, 4.1),
+    'Street_Arch_Stone': [((-2.0, -0.58, 0), (-1.30, 0.58, 3.85)), ((1.30, -0.58, 0), (2.0, 0.58, 3.85)),
+                          ((-2.0, -0.58, 2.85), (2.0, 0.58, 3.85))],
+    'Street_Arch_Timber': [((-1.96, -0.68, 0), (-1.44, 0.68, 2.85)), ((1.44, -0.68, 0), (1.96, 0.68, 2.85)),
+                           ((-2.0, -0.78, 2.82), (2.0, 0.78, 5.20))],
+    'Street_Arch_Granite': [((-2.0, -0.72, 0), (-1.32, 0.72, 4.45)), ((1.32, -0.72, 0), (2.0, 0.72, 4.45)),
+                            ((-2.0, -0.72, 2.92), (2.0, 0.72, 4.45))],
+    'Tavern_Table_Set': _centred(1.75, 1.55, 0.85),
+    'Alchemist_Stall': [((-1.16, -0.78, 0), (1.16, 0.62, 2.55))],
+    'Armorer_Stand': _centred(2.05, 1.05, 1.85),
+    'Bake_Oven_Outdoor': _centred(1.88, 1.52, 2.45),
+    'Guard_Post': _centred(1.96, 1.16, 2.45),
+    'Pillory_Stocks': _centred(1.56, 1.16, 1.65),
+    'Statue_Plinth': _centred(2.16, 2.16, 3.90),
+    'Mine_Cart_Track': _centred(1.10, 1.60, 1.15),
+    'Smelter_Stack': _centred(1.88, 1.75, 3.85),
+    'Stonehold_Ward_Pillar': _centred(1.36, 1.36, 2.95),
+    'Winter_Supply_Sled': _centred(1.18, 2.00, 0.98),
 })
 
 

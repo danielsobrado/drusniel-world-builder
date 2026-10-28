@@ -39,7 +39,7 @@ def _loft_rings(b, bot_pts, top_pts, mat, cap_bot=False, cap_top=True, cap_mat=N
         b.poly(top_pts, cap_mat or mat, outward=(0, 0, 1), tone=tone * 1.03)
 
 
-def _crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='stone_granite',
+def _crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='rock',
                 cap_mat='stone_dressed', batter=0.88, chamfer=0.045,
                 tilt_x=0.0, tilt_y=0.0, rot=0.0, tone=None):
     """Faceted polygonal rock slab with battered cliff sides and a crisp chamfered upper table."""
@@ -49,7 +49,7 @@ def _crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='stone_granite',
     angles = [2 * math.pi * i / sides + rng.uniform(-0.18, 0.18) / sides for i in range(sides)]
     rm_bot = [rng.uniform(0.84, 1.14) for _ in range(sides)]
     rm_mid = [r * batter * rng.uniform(0.95, 1.04) for r in rm_bot]
-    tone_val = rng.uniform(0.88, 1.06) if tone is None else tone
+    tone_val = rng.uniform(0.84, 1.04) if tone is None else tone
 
     bot = _ring_pts(cx, cy, z0, rx, ry, angles, rm_bot, rot=rot)
     if detailed() and (z1 - z0) > chamfer * 2.2:
@@ -60,13 +60,13 @@ def _crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='stone_granite',
         top = _ring_pts(cx, cy, z1, rx, ry, angles, rm_top, tilt_x=tilt_x, tilt_y=tilt_y, rot=rot)
         _loft_rings(b, bot, mid, mat, cap_bot=False, cap_top=False, tone=tone_val)
         _loft_rings(b, mid, top, cap_mat or mat, cap_bot=False, cap_top=True,
-                    cap_mat=cap_mat or mat, tone=tone_val * 1.02)
+                    cap_mat=cap_mat or mat, tone=tone_val * 1.03)
     else:
         top = _ring_pts(cx, cy, z1, rx, ry, angles, rm_mid, tilt_x=tilt_x, tilt_y=tilt_y, rot=rot)
         _loft_rings(b, bot, top, mat, cap_bot=False, cap_top=True, cap_mat=cap_mat or mat, tone=tone_val)
 
 
-def _wedge_block(b, pts_bot, pts_top, z0, z1, mat='stone_granite', cap_mat='stone_dressed',
+def _wedge_block(b, pts_bot, pts_top, z0, z1, mat='rock', cap_mat='stone_dressed',
                  chamfer=0.04, tone=1.0):
     """Polygonal rock plate from explicit 2D [(x, y), ...] bottom and top outlines."""
     n = len(pts_bot)
@@ -79,20 +79,20 @@ def _wedge_block(b, pts_bot, pts_top, z0, z1, mat='stone_granite', cap_mat='ston
         top = [Vector((cx + (x - cx) * 0.88, cy + (y - cy) * 0.88, z1)) for x, y in pts_top]
         _loft_rings(b, bot, mid, mat, cap_bot=False, cap_top=False, tone=tone)
         _loft_rings(b, mid, top, cap_mat or mat, cap_bot=False, cap_top=True,
-                    cap_mat=cap_mat or mat, tone=tone * 1.02)
+                    cap_mat=cap_mat or mat, tone=tone * 1.03)
     else:
         top = [Vector((x, y, z1)) for x, y in pts_top]
         _loft_rings(b, bot, top, mat, cap_bot=False, cap_top=True, cap_mat=cap_mat or mat, tone=tone)
 
 
 def _fractured_terrace(b, cx, cy, z0, z1, rx, ry, seed=1, sectors=8,
-                       mat='stone_granite', cap_mat='stone_dressed', gap=0.045):
+                       mat='rock', cap_mat='stone_dressed', gap=0.045):
     """A flat-topped rock stratum split by deep radial and ring fissures into fitted polygonal slabs."""
     rng = random.Random(seed)
     # Dark basalt inner core so deep fissure cracks show dark stone rather than void
     _crag_block(b, cx, cy, z0, max(z0 + 0.05, z1 - 0.09), rx * 0.84, ry * 0.84,
                 seed=seed + 99, sides=sectors, mat='stone_basalt', cap_mat='stone_basalt',
-                batter=0.92, chamfer=0.0, tone=0.72)
+                batter=0.92, chamfer=0.0, tone=0.68)
 
     if not detailed():
         _crag_block(b, cx, cy, z0, z1, rx, ry, seed=seed, sides=max(6, sectors - 2),
@@ -108,7 +108,7 @@ def _fractured_terrace(b, cx, cy, z0, z1, rx, ry, seed=1, sectors=8,
         _crag_block(b, ox, oy, z0 + 0.02, z1 + rng.uniform(-0.02, 0.04),
                     inner_rx * 0.72, inner_ry * 0.54, seed=seed + 10 + k, sides=6,
                     mat=mat, cap_mat=cap_mat, batter=0.94, chamfer=0.035,
-                    rot=ang0, tone=rng.uniform(0.92, 1.06))
+                    rot=ang0, tone=rng.uniform(0.90, 1.05))
 
     # Perimeter ring of wedge-shaped fractured blocks separated by radial crevices
     angles = [2 * math.pi * i / sectors + rng.uniform(-0.09, 0.09) for i in range(sectors)]
@@ -147,10 +147,10 @@ def _fractured_terrace(b, cx, cy, z0, z1, rx, ry, seed=1, sectors=8,
         ]
         dz = rng.uniform(-0.045, 0.055)
         _wedge_block(b, pts_bot, pts_top, z0, z1 + dz, mat=mat, cap_mat=cap_mat,
-                     chamfer=0.038, tone=rng.uniform(0.88, 1.06))
+                     chamfer=0.038, tone=rng.uniform(0.86, 1.05))
 
 
-def _rock_spire(b, base_pt, tip_pt, rx, ry, seed=1, mat='stone_granite',
+def _rock_spire(b, base_pt, tip_pt, rx, ry, seed=1, mat='rock',
                 cap_mat='stone_dressed', curve=(0.0, 0.0, 0.0), sides=6, segs=5):
     """Curved, multi-segment faceted rock horn / monolith spire tapering to a sharp point."""
     rng = random.Random(seed)
@@ -183,16 +183,16 @@ def _rock_spire(b, base_pt, tip_pt, rx, ry, seed=1, mat='stone_granite',
             ring.append(pos + u_vec * lx + v_vec * ly)
         rings.append(ring)
 
-    tone_val = rng.uniform(0.90, 1.05)
+    tone_val = rng.uniform(0.88, 1.04)
     for k in range(segs):
-        use_mat = cap_mat if k >= segs - 2 else mat
+        use_mat = cap_mat if k >= segs - 1 else mat
         _loft_rings(b, rings[k], rings[k + 1], use_mat,
                     cap_bot=(k == 0), cap_top=(k == segs - 1),
-                    cap_mat=cap_mat, tone=tone_val * (0.94 + 0.03 * k))
+                    cap_mat=cap_mat, tone=tone_val * (0.92 + 0.03 * k))
 
 
 def _talus_skirt(b, cx, cy, z0, rx, ry, count, size_lo, size_hi, seed=1,
-                 mat='stone_granite', cap_mat='stone_dressed', arc=(0.0, 2 * math.pi)):
+                 mat='rock', cap_mat='stone_dressed', arc=(0.0, 2 * math.pi)):
     """Scatter angular fractured talus boulders around a perimeter arc."""
     rng = random.Random(seed)
     if not detailed():
@@ -305,7 +305,7 @@ def stonehold_vent_crater():
         h_top = rng.uniform(0.48, 0.78)
         w_b = rng.uniform(0.24, 0.38)
         _crag_block(b, rx_c, ry_c, 0.18, h_top, w_b, w_b * 0.85,
-                    seed=410 + i, sides=6, mat='stone_granite', cap_mat='stone_dressed',
+                    seed=410 + i, sides=6, mat='rock', cap_mat='stone_dressed',
                     batter=0.80, chamfer=0.03,
                     tilt_x=-0.16 * math.cos(a), tilt_y=-0.16 * math.sin(a), rot=a)
     _talus_skirt(b, 0.0, 0.0, 0.0, 1.28, 1.20, 14, 0.14, 0.26, seed=430)
@@ -325,7 +325,7 @@ def stonehold_caldera_basin():
 
     _fractured_terrace(b, -0.58, 0.78, 0.64, 1.16, 0.76, 0.58, seed=504, sectors=6)
     _crag_block(b, -0.56, 0.80, 1.12, 1.52, 0.52, 0.42, seed=505, sides=6,
-                mat='stone_dressed', cap_mat='stone_dressed', chamfer=0.04)
+                mat='rock', cap_mat='stone_dressed', chamfer=0.04)
 
     rng = random.Random(506)
     for i in range(12 if detailed() else 6):
@@ -335,7 +335,7 @@ def stonehold_caldera_basin():
         bh = rng.uniform(0.88, 1.28)
         bw = rng.uniform(0.28, 0.44)
         _crag_block(b, bx, by, 0.32, bh, bw, bw * 0.84, seed=520 + i, sides=6,
-                    mat='stone_granite', cap_mat='stone_dressed', batter=0.82, chamfer=0.035,
+                    mat='rock', cap_mat='stone_dressed', batter=0.82, chamfer=0.035,
                     rot=a)
 
     _crag_block(b, -0.35, -1.32, 0.0, 0.24, 0.58, 0.38, seed=540, sides=6)
@@ -349,13 +349,15 @@ def stonehold_fang_shrine():
     _fractured_terrace(b, 0.0, 0.0, 0.0, 0.28, 1.48, 1.38, seed=601, sectors=8)
     _fractured_terrace(b, 0.12, -0.10, 0.24, 0.46, 1.06, 0.98, seed=602, sectors=7)
 
+    # Vondari Dwarven carved octagonal ward dais with basalt & bronze trim
     for k, (r_step, z_lo, z_hi) in enumerate(((0.58, 0.42, 0.58),
                                               (0.44, 0.56, 0.72),
                                               (0.32, 0.70, 0.86))):
         _crag_block(b, 0.18, -0.18, z_lo, z_hi, r_step, r_step, seed=610 + k, sides=8,
-                    mat='stone_dressed', cap_mat='stone_dressed', batter=0.94, chamfer=0.025)
-
+                    mat='stone_basalt' if k == 1 else 'stone_granite',
+                    cap_mat='stone_dressed', batter=0.96, chamfer=0.025)
     if detailed():
+        b.box((0.02, -0.34, 0.85), (0.34, -0.02, 0.88), 'bronze')
         rng = random.Random(620)
         for i in range(9):
             a = 2 * math.pi * i / 9.0 + rng.uniform(-0.15, 0.15)
@@ -366,13 +368,13 @@ def stonehold_fang_shrine():
                    subdiv=1, squash=(0.88, 1.08, 0.95), jitter=0.14, seed=630 + i)
 
     _rock_spire(b, (-0.38, 0.42, 0.20), (-0.12, 0.62, 3.05), 0.56, 0.42,
-                seed=640, mat='stone_granite', cap_mat='stone_dressed',
+                seed=640, mat='rock', cap_mat='stone_dressed',
                 curve=(-0.18, 0.08, 0.20), sides=6, segs=6)
     _rock_spire(b, (-0.82, 0.28, 0.20), (-0.96, 0.40, 1.72), 0.30, 0.24,
-                seed=641, mat='stone_granite', cap_mat='stone_dressed',
+                seed=641, mat='rock', cap_mat='stone_dressed',
                 curve=(-0.08, 0.04, 0.10), sides=5, segs=4)
     _rock_spire(b, (0.08, 0.66, 0.20), (0.24, 0.78, 1.55), 0.28, 0.22,
-                seed=642, mat='stone_granite', cap_mat='stone_dressed',
+                seed=642, mat='rock', cap_mat='stone_dressed',
                 curve=(0.06, 0.05, 0.08), sides=5, segs=4)
 
     _talus_skirt(b, 0.0, 0.0, 0.0, 1.42, 1.32, 10, 0.15, 0.28, seed=650)
@@ -380,50 +382,74 @@ def stonehold_fang_shrine():
 
 
 def stonehold_cavern_maw():
+    """Twin-horned crag massif with an unobstructed glowing triangular cavern cleft & Dwarven basalt portal."""
     b = MeshBuilder()
-    _fractured_terrace(b, 0.0, -0.55, 0.0, 0.24, 1.95, 1.65, seed=701, sectors=10)
-    _fractured_terrace(b, 0.0, -0.35, 0.20, 0.42, 1.45, 1.18, seed=702, sectors=8)
-    _crag_block(b, -0.32, -0.68, 0.38, 0.54, 0.46, 0.36, seed=703, sides=6,
-                mat='stone_dressed', cap_mat='stone_dressed')
-    _crag_block(b, 0.36, -0.58, 0.38, 0.52, 0.42, 0.34, seed=704, sides=6,
-                mat='stone_dressed', cap_mat='stone_dressed')
+    # Stepped flagstone forecourt approach
+    _fractured_terrace(b, 0.0, -0.58, 0.0, 0.24, 1.95, 1.65, seed=701, sectors=10)
+    _fractured_terrace(b, 0.0, -0.38, 0.20, 0.42, 1.48, 1.18, seed=702, sectors=8)
+    _crag_block(b, -0.34, -0.78, 0.38, 0.54, 0.46, 0.34, seed=703, sides=6,
+                mat='stone_granite', cap_mat='stone_dressed')
+    _crag_block(b, 0.36, -0.68, 0.38, 0.52, 0.42, 0.32, seed=704, sides=6,
+                mat='stone_granite', cap_mat='stone_dressed')
 
-    _crag_block(b, 0.0, 0.85, 0.0, 3.65, 1.55, 1.05, seed=710, sides=8,
-                mat='stone_granite', cap_mat='stone_dressed', batter=0.76, chamfer=0.06)
-    b.box((-0.52, -0.02, 0.38), (0.52, 0.75, 2.05), 'stone_basalt', skip=('-y', '-z'))
-    b.extrude([(-0.42, 0.22, 0.38), (0.42, 0.22, 0.38), (0.0, 0.22, 1.88)],
-              (0, 0.18, 0), 'glow')
-    b.extrude([(-0.56, 0.06, 0.38), (-0.36, 0.06, 0.38), (-0.06, 0.06, 1.96), (-0.22, 0.06, 2.08)],
-              (0, 0.16, 0), 'firelight')
-    b.extrude([(0.36, 0.06, 0.38), (0.56, 0.06, 0.38), (0.22, 0.06, 2.08), (0.06, 0.06, 1.96)],
-              (0, 0.16, 0), 'firelight')
-    b.box((-0.44, -0.18, 0.36), (0.44, 0.35, 0.45), 'firelight')
+    # Flanking left & right cliff cheeks leaving the central portal cleft (x = -0.52..0.52) wide open!
+    for side, s_idx in ((-1, 710), (1, 711)):
+        _crag_block(b, side * 0.96, 0.62, 0.32, 1.45, 0.66, 0.78, seed=s_idx, sides=7,
+                    mat='rock', cap_mat='stone_dressed', batter=0.88, chamfer=0.04)
+        _crag_block(b, side * 0.88, 0.68, 1.38, 2.55, 0.58, 0.68, seed=s_idx + 2, sides=7,
+                    mat='rock', cap_mat='stone_dressed', batter=0.84, chamfer=0.04)
 
-    _rock_spire(b, (-0.75, 0.72, 2.10), (-0.95, 0.55, 4.55), 0.62, 0.52,
-                seed=720, mat='stone_granite', cap_mat='stone_dressed',
+    # Rear cliff massif behind the cavern throat (y >= 0.62) and upper bridge crown above z = 2.15
+    _crag_block(b, 0.0, 1.18, 0.32, 3.65, 1.48, 0.68, seed=714, sides=8,
+                mat='rock', cap_mat='stone_dressed', batter=0.78, chamfer=0.05)
+    _crag_block(b, 0.0, 0.72, 2.12, 3.35, 1.18, 0.66, seed=715, sides=7,
+                mat='rock', cap_mat='stone_dressed', batter=0.82, chamfer=0.05)
+    _crag_block(b, 0.0, 0.78, 3.25, 4.02, 0.78, 0.58, seed=722, sides=7,
+                mat='rock', cap_mat='stone_dressed', batter=0.78, chamfer=0.05)
+
+    # Vondari Dwarven basalt jambs, threshold & corbelled lintel framing the triangular cavern maw
+    for side in (-1, 1):
+        b.box((side * 0.50 - 0.10, -0.02, 0.40), (side * 0.50 + 0.10, 0.42, 1.65), 'stone_basalt')
+    b.box((-0.66, -0.06, 1.98), (0.66, 0.44, 2.20), 'stone_basalt')
+    b.box((-0.52, -0.22, 0.38), (0.52, 0.48, 0.45), 'stone_basalt')
+    if detailed():
+        b.box((-0.44, -0.08, 2.04), (0.44, -0.04, 2.14), 'bronze')
+
+    # Glowing triangular cavern portal & warm forge/magma throat inside the cleft (unobstructed!)
+    b.box((-0.54, 0.32, 0.42), (0.54, 0.62, 2.12), 'stone_basalt', skip=('-y', '-z'))
+    b.extrude([(-0.44, 0.24, 0.44), (0.44, 0.24, 0.44), (0.0, 0.24, 1.96)],
+              (0, 0.10, 0), 'glow')
+    b.extrude([(-0.56, 0.12, 0.44), (-0.38, 0.12, 0.44), (-0.04, 0.12, 2.02), (-0.22, 0.12, 2.10)],
+              (0, 0.14, 0), 'firelight')
+    b.extrude([(0.38, 0.12, 0.44), (0.56, 0.12, 0.44), (0.22, 0.12, 2.10), (0.04, 0.12, 2.02)],
+              (0, 0.14, 0), 'firelight')
+    b.box((-0.40, -0.14, 0.43), (0.40, 0.26, 0.48), 'glow')
+
+    # Twin sweeping summit horns
+    _rock_spire(b, (-0.75, 0.72, 2.25), (-0.95, 0.55, 4.48), 0.58, 0.48,
+                seed=720, mat='rock', cap_mat='stone_dressed',
                 curve=(-0.18, -0.10, 0.25), sides=6, segs=5)
-    _rock_spire(b, (0.75, 0.72, 2.10), (0.95, 0.55, 4.40), 0.62, 0.52,
-                seed=721, mat='stone_granite', cap_mat='stone_dressed',
+    _rock_spire(b, (0.75, 0.72, 2.25), (0.95, 0.55, 4.36), 0.58, 0.48,
+                seed=721, mat='rock', cap_mat='stone_dressed',
                 curve=(0.18, -0.10, 0.25), sides=6, segs=5)
-    _crag_block(b, 0.0, 0.78, 2.40, 4.05, 0.78, 0.62, seed=722, sides=7,
-                mat='stone_dressed', cap_mat='stone_dressed', batter=0.72, chamfer=0.05)
 
+    # Framing fang ribs along both sides of the portal cleft (outside x = +-0.56 so they frame the glow)
     for side in (-1, 1):
         for k, (x_bot, y_bot, x_top, z_top, r_w) in enumerate((
-            (0.58, -0.12, 0.14, 2.35, 0.22),
-            (0.82, -0.04, 0.38, 2.85, 0.25),
-            (1.08, 0.12, 0.68, 3.35, 0.28),
-            (1.30, 0.32, 0.96, 3.60, 0.26),
+            (0.64, -0.10, 0.34, 2.30, 0.20),
+            (0.88, -0.02, 0.54, 2.82, 0.23),
+            (1.12, 0.14, 0.78, 3.30, 0.26),
+            (1.34, 0.32, 1.02, 3.58, 0.24),
         )):
             _rock_spire(
                 b,
-                (side * x_bot, y_bot, 0.32),
-                (side * x_top, 0.28 + 0.08 * k, z_top),
+                (side * x_bot, y_bot, 0.36),
+                (side * x_top, 0.26 + 0.08 * k, z_top),
                 r_w, r_w * 0.82,
                 seed=730 + (0 if side < 0 else 10) + k,
-                mat='stone_dressed' if k % 2 == 0 else 'stone_granite',
+                mat='stone_dressed' if k % 2 == 0 else 'rock',
                 cap_mat='stone_dressed',
-                curve=(side * 0.12, -0.16, 0.15),
+                curve=(side * 0.10, -0.14, 0.15),
                 sides=5, segs=4,
             )
 
@@ -440,7 +466,7 @@ def stonehold_horned_sanctum():
     _fractured_terrace(b, -1.65, 0.35, 1.05, 1.62, 1.15, 1.02, seed=804, sectors=7)
     _fractured_terrace(b, -1.72, 0.40, 1.58, 2.02, 0.88, 0.78, seed=805, sectors=6)
     _crag_block(b, -1.45, 0.32, 0.0, 1.12, 0.78, 0.72, seed=806, sides=6,
-                mat='stone_granite', cap_mat='stone_dressed', batter=0.92)
+                mat='rock', cap_mat='stone_dressed', batter=0.92)
 
     for bx, by, z0, z1, rx, ry, s in (
         (-1.18, -1.05, 0.35, 2.15, 0.48, 0.44, 810),
@@ -450,8 +476,9 @@ def stonehold_horned_sanctum():
         (-0.88, 1.08, 0.50, 2.75, 0.62, 0.54, 814),
     ):
         _crag_block(b, bx, by, z0, z1, rx, ry, seed=s, sides=6,
-                    mat='stone_granite', cap_mat='stone_dressed', batter=0.86, chamfer=0.045)
+                    mat='rock', cap_mat='stone_dressed', batter=0.86, chamfer=0.045)
 
+    # Winding Vondari Dwarven rock-cut granite & basalt staircase
     stair_path = [
         (0.28, -1.85, 0.18),
         (0.12, -1.62, 0.36),
@@ -472,23 +499,23 @@ def stonehold_horned_sanctum():
             stair_path[min(idx + 1, len(stair_path) - 1)][0] - stair_path[max(0, idx - 1)][0],
         )
         _crag_block(b, sx, sy, max(0.0, sz - 0.24), sz, 0.42, 0.24,
-                    seed=820 + idx, sides=6, mat='stone_dressed', cap_mat='stone_dressed',
+                    seed=820 + idx, sides=6, mat='stone_basalt', cap_mat='stone_dressed',
                     batter=0.95, chamfer=0.02, rot=yaw)
 
     _fractured_terrace(b, 0.12, 0.22, 1.82, 2.28, 1.18, 1.02, seed=840, sectors=7)
     _crag_block(b, 0.08, 0.12, 2.22, 3.28, 0.68, 0.54, seed=841, sides=7,
                 mat='stone_dressed', cap_mat='stone_dressed', batter=0.88, chamfer=0.05)
     _rock_spire(b, (-0.48, 0.06, 2.25), (-0.82, -0.18, 3.92), 0.34, 0.28,
-                seed=842, mat='stone_dressed', cap_mat='stone_dressed',
+                seed=842, mat='rock', cap_mat='stone_dressed',
                 curve=(-0.18, -0.08, 0.15), sides=5, segs=5)
     _rock_spire(b, (0.64, 0.06, 2.25), (0.98, -0.18, 3.92), 0.34, 0.28,
-                seed=843, mat='stone_dressed', cap_mat='stone_dressed',
+                seed=843, mat='rock', cap_mat='stone_dressed',
                 curve=(0.18, -0.08, 0.15), sides=5, segs=5)
 
     _crag_block(b, 0.24, 0.92, 2.18, 3.75, 0.82, 0.64, seed=845, sides=6,
-                mat='stone_granite', cap_mat='stone_dressed', batter=0.90, chamfer=0.05)
+                mat='rock', cap_mat='stone_dressed', batter=0.90, chamfer=0.05)
     _crag_block(b, 0.22, 0.94, 3.70, 4.25, 0.56, 0.44, seed=846, sides=6,
-                mat='stone_dressed', cap_mat='stone_dressed', batter=0.92, chamfer=0.04)
+                mat='stone_basalt', cap_mat='stone_dressed', batter=0.92, chamfer=0.04)
 
     _talus_skirt(b, 0.0, 0.0, 0.0, 2.38, 2.08, 18, 0.20, 0.42, seed=860)
     _talus_skirt(b, 0.1, 0.1, 0.48, 1.92, 1.65, 12, 0.18, 0.34, seed=861)

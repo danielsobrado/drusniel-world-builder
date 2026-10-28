@@ -12,7 +12,13 @@ from .town_styles import DEFAULT
 # these virtually; scene lights here only make previews read like dusk in town.
 FIRE_LIGHTS = {'Brazier': (1.15, 65.0), 'Lamp_Post_Banner': (2.8, 80.0), 'Cauldron_Fire': (1.1, 110.0),
                'Torch_Pole': (2.65, 90.0), 'Goblin_Totem': (1.65, 60.0), 'Goblin_Skiff': (1.05, 50.0),
-               'Fire_Post': (2.55, 70.0), 'Brazier_Pillar': (1.5, 70.0), 'Clan_Hearth': (0.8, 140.0)}
+               'Fire_Post': (2.55, 70.0), 'Brazier_Pillar': (1.5, 70.0), 'Clan_Hearth': (0.8, 140.0),
+               'Street_Arch_Stone': (2.1, 75.0), 'Street_Arch_Timber': (2.0, 75.0),
+               'Street_Arch_Granite': (2.0, 85.0), 'Bake_Oven_Outdoor': (1.0, 60.0),
+               'Guard_Post': (0.95, 65.0), 'Smelter_Stack': (1.1, 110.0),
+               'Stonehold_Ward_Pillar': (2.8, 80.0), 'Stonehold_Vent_Crater': (0.65, 55.0),
+               'Stonehold_Caldera_Basin': (1.05, 75.0), 'Stonehold_Fang_Shrine': (0.95, 65.0),
+               'Stonehold_Cavern_Maw': (1.15, 140.0), 'Stonehold_Horned_Sanctum': (1.35, 95.0)}
 
 
 def _z(plan, x, y):
