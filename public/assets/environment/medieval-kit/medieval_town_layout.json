@@ -129,6 +129,10 @@
   "Material_Swatch",
   "Meat_Rack",
   "Mine_Cart_Track",
+  "Mine_Vent_Stack",
+  "Mountain_Cavern_Vault",
+  "Mountain_Cliff_Wall",
+  "Mountain_Gate_Massif",
   "Mud_Bank",
   "Notice_Board",
   "Orc_Porch",
@@ -7530,7 +7534,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3012",
+       "name": "Floor_Ground.2153",
        "position": [
         0.0,
         0.0,
@@ -7540,7 +7544,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3013",
+       "name": "Floor_Ground.2154",
        "position": [
         0.0,
         2.0,
@@ -7550,7 +7554,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3014",
+       "name": "Floor_Ground.2155",
        "position": [
         2.0,
         0.0,
@@ -7560,7 +7564,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3015",
+       "name": "Floor_Ground.2156",
        "position": [
         2.0,
         2.0,
@@ -7570,7 +7574,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3016",
+       "name": "Floor_Ground.2157",
        "position": [
         4.0,
         0.0,
@@ -7580,7 +7584,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3017",
+       "name": "Floor_Ground.2158",
        "position": [
         4.0,
         2.0,
@@ -7627,7 +7631,7 @@
        }
       },
       {
-       "name": "Rug.395",
+       "name": "Rug.393",
        "position": [
         4.9,
         2.3,
@@ -7637,7 +7641,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.195",
+       "name": "Stairs_Interior_L.192",
        "position": [
         0.0,
         0.0,
@@ -7647,7 +7651,7 @@
        "module": "Stairs_Interior_L"
       },
       {
-       "name": "Stool.152",
+       "name": "Stool.151",
        "position": [
         4.0,
         2.8,
@@ -7677,7 +7681,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.731",
+       "name": "Wall_Sconce.729",
        "position": [
         2.75,
         3.83,
@@ -7687,7 +7691,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.732",
+       "name": "Wall_Sconce.730",
        "position": [
         5.25,
         3.83,
@@ -7808,7 +7812,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.243",
+       "name": "Bed.241",
        "position": [
         4.0,
         2.8,
@@ -7818,7 +7822,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.235",
+       "name": "Chest.233",
        "position": [
         2.75,
         3.43,
@@ -7868,7 +7872,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.195",
+       "name": "Floor_Landing_L.192",
        "position": [
         0.0,
         2.0,
@@ -7878,7 +7882,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3561",
+       "name": "Floor_Planks.2491",
        "position": [
         2.0,
         0.0,
@@ -7888,7 +7892,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3562",
+       "name": "Floor_Planks.2492",
        "position": [
         2.0,
         2.0,
@@ -7898,7 +7902,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3563",
+       "name": "Floor_Planks.2493",
        "position": [
         4.0,
         0.0,
@@ -7908,7 +7912,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3564",
+       "name": "Floor_Planks.2494",
        "position": [
         4.0,
         2.0,
@@ -7918,7 +7922,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.195",
+       "name": "Floor_Stairwell_L.192",
        "position": [
         0.0,
         0.0,
@@ -7948,7 +7952,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.396",
+       "name": "Rug.394",
        "position": [
         4.0,
         2.0,
@@ -7958,7 +7962,7 @@
        "module": "Rug"
       },
       {
-       "name": "Wall_Sconce.733",
+       "name": "Wall_Sconce.731",
        "position": [
         2.75,
         3.83,
@@ -7968,7 +7972,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.734",
+       "name": "Wall_Sconce.732",
        "position": [
         5.25,
         3.83,
@@ -7978,7 +7982,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Tapestry.127",
+       "name": "Wall_Tapestry.126",
        "position": [
         4.0,
         3.83,
@@ -8088,7 +8092,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.131",
+       "name": "Wardrobe.130",
        "position": [
         5.25,
         3.57,
@@ -8110,7 +8114,7 @@
      "module": "Entry_Steps_Low"
     },
     {
-     "name": "Light_Interior.526",
+     "name": "Light_Interior.523",
      "position": [
       3.0,
       2.0,
@@ -8127,7 +8131,7 @@
      }
     },
     {
-     "name": "Light_Interior.527",
+     "name": "Light_Interior.524",
      "position": [
       3.0,
       2.0,
@@ -8487,7 +8491,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3018",
+       "name": "Floor_Ground.2159",
        "position": [
         0.0,
         0.0,
@@ -8497,7 +8501,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3019",
+       "name": "Floor_Ground.2160",
        "position": [
         0.0,
         2.0,
@@ -8507,7 +8511,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3020",
+       "name": "Floor_Ground.2161",
        "position": [
         2.0,
         0.0,
@@ -8517,7 +8521,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3021",
+       "name": "Floor_Ground.2162",
        "position": [
         2.0,
         2.0,
@@ -8564,7 +8568,7 @@
        "module": "Sign_Loaf"
       },
       {
-       "name": "Stairs_Interior_L.196",
+       "name": "Stairs_Interior_L.193",
        "position": [
         0.0,
         0.0,
@@ -8675,7 +8679,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.244",
+       "name": "Bed.242",
        "position": [
         3.0,
         2.8,
@@ -8725,7 +8729,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.196",
+       "name": "Floor_Landing_L.193",
        "position": [
         0.0,
         2.0,
@@ -8735,7 +8739,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3565",
+       "name": "Floor_Planks.2495",
        "position": [
         2.0,
         0.0,
@@ -8745,7 +8749,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3566",
+       "name": "Floor_Planks.2496",
        "position": [
         2.0,
         2.0,
@@ -8755,7 +8759,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.196",
+       "name": "Floor_Stairwell_L.193",
        "position": [
         0.0,
         0.0,
@@ -8775,7 +8779,7 @@
        "module": "Flower_Box"
       },
       {
-       "name": "Rug.397",
+       "name": "Rug.395",
        "position": [
         3.0,
         2.0,
@@ -8867,7 +8871,7 @@
      ]
     },
     {
-     "name": "Light_Interior.528",
+     "name": "Light_Interior.525",
      "position": [
       2.0,
       2.0,
@@ -8884,7 +8888,7 @@
      }
     },
     {
-     "name": "Light_Interior.529",
+     "name": "Light_Interior.526",
      "position": [
       2.0,
       2.0,
@@ -8923,7 +8927,7 @@
      "module": "Entry_Steps_Low"
     },
     {
-     "name": "Light_Interior.530",
+     "name": "Light_Interior.527",
      "position": [
       3.0,
       2.0,
@@ -8940,7 +8944,7 @@
      }
     },
     {
-     "name": "Light_Interior.531",
+     "name": "Light_Interior.528",
      "position": [
       3.0,
       2.0,
@@ -9288,7 +9292,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3022",
+       "name": "Floor_Ground.2163",
        "position": [
         0.0,
         0.0,
@@ -9298,7 +9302,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3023",
+       "name": "Floor_Ground.2164",
        "position": [
         0.0,
         2.0,
@@ -9308,7 +9312,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3024",
+       "name": "Floor_Ground.2165",
        "position": [
         2.0,
         0.0,
@@ -9318,7 +9322,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3025",
+       "name": "Floor_Ground.2166",
        "position": [
         2.0,
         2.0,
@@ -9328,7 +9332,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3026",
+       "name": "Floor_Ground.2167",
        "position": [
         4.0,
         0.0,
@@ -9338,7 +9342,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3027",
+       "name": "Floor_Ground.2168",
        "position": [
         4.0,
         2.0,
@@ -9425,7 +9429,7 @@
        "module": "Sign_Anvil"
       },
       {
-       "name": "Stairs_Interior_L.197",
+       "name": "Stairs_Interior_L.194",
        "position": [
         0.0,
         0.0,
@@ -9445,7 +9449,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.735",
+       "name": "Wall_Sconce.733",
        "position": [
         2.75,
         3.83,
@@ -9455,7 +9459,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.736",
+       "name": "Wall_Sconce.734",
        "position": [
         5.25,
         3.83,
@@ -9586,7 +9590,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.245",
+       "name": "Bed.243",
        "position": [
         4.0,
         2.8,
@@ -9596,7 +9600,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.236",
+       "name": "Chest.234",
        "position": [
         2.75,
         3.43,
@@ -9646,7 +9650,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.197",
+       "name": "Floor_Landing_L.194",
        "position": [
         0.0,
         2.0,
@@ -9656,7 +9660,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3567",
+       "name": "Floor_Planks.2497",
        "position": [
         2.0,
         0.0,
@@ -9666,7 +9670,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3568",
+       "name": "Floor_Planks.2498",
        "position": [
         2.0,
         2.0,
@@ -9676,7 +9680,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3569",
+       "name": "Floor_Planks.2499",
        "position": [
         4.0,
         0.0,
@@ -9686,7 +9690,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3570",
+       "name": "Floor_Planks.2500",
        "position": [
         4.0,
         2.0,
@@ -9696,7 +9700,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.197",
+       "name": "Floor_Stairwell_L.194",
        "position": [
         0.0,
         0.0,
@@ -9716,7 +9720,7 @@
        "module": "Flower_Box"
       },
       {
-       "name": "Rug.398",
+       "name": "Rug.396",
        "position": [
         4.0,
         2.0,
@@ -9726,7 +9730,7 @@
        "module": "Rug"
       },
       {
-       "name": "Wall_Sconce.737",
+       "name": "Wall_Sconce.735",
        "position": [
         2.75,
         3.83,
@@ -9736,7 +9740,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.738",
+       "name": "Wall_Sconce.736",
        "position": [
         5.25,
         3.83,
@@ -9846,7 +9850,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.132",
+       "name": "Wardrobe.131",
        "position": [
         5.25,
         3.57,
@@ -9981,7 +9985,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3028",
+       "name": "Floor_Ground.2169",
        "position": [
         0.0,
         0.0,
@@ -9991,7 +9995,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3029",
+       "name": "Floor_Ground.2170",
        "position": [
         0.0,
         2.0,
@@ -10001,7 +10005,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3030",
+       "name": "Floor_Ground.2171",
        "position": [
         2.0,
         0.0,
@@ -10011,7 +10015,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3031",
+       "name": "Floor_Ground.2172",
        "position": [
         2.0,
         2.0,
@@ -10078,7 +10082,7 @@
        }
       },
       {
-       "name": "Rug.399",
+       "name": "Rug.397",
        "position": [
         3.0,
         2.0,
@@ -10088,7 +10092,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.198",
+       "name": "Stairs_Interior_L.195",
        "position": [
         0.0,
         0.0,
@@ -10259,7 +10263,7 @@
        "module": "Corner_Quoins"
       },
       {
-       "name": "Floor_Landing_L.198",
+       "name": "Floor_Landing_L.195",
        "position": [
         0.0,
         2.0,
@@ -10269,7 +10273,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3571",
+       "name": "Floor_Planks.2501",
        "position": [
         2.0,
         0.0,
@@ -10279,7 +10283,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3572",
+       "name": "Floor_Planks.2502",
        "position": [
         2.0,
         2.0,
@@ -10289,7 +10293,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.198",
+       "name": "Floor_Stairwell_L.195",
        "position": [
         0.0,
         0.0,
@@ -10420,7 +10424,7 @@
        "module": "Banner_Blue"
       },
       {
-       "name": "Bed.246",
+       "name": "Bed.244",
        "position": [
         1.25,
         2.8,
@@ -10430,7 +10434,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.159",
+       "name": "Bookcase.158",
        "position": [
         0.85,
         3.65,
@@ -10440,7 +10444,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.237",
+       "name": "Chest.235",
        "position": [
         0.75,
         1.2,
@@ -10500,7 +10504,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3573",
+       "name": "Floor_Planks.2503",
        "position": [
         0.0,
         0.0,
@@ -10510,7 +10514,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3574",
+       "name": "Floor_Planks.2504",
        "position": [
         0.0,
         2.0,
@@ -10530,7 +10534,7 @@
        "module": "Floor_Stairwell_R"
       },
       {
-       "name": "Rug.400",
+       "name": "Rug.398",
        "position": [
         1.0,
         2.0,
@@ -10540,7 +10544,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stool.153",
+       "name": "Stool.152",
        "position": [
         1.0,
         2.85,
@@ -10630,7 +10634,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.113",
+       "name": "Writing_Desk.112",
        "position": [
         1.0,
         3.4,
@@ -10642,7 +10646,7 @@
      ]
     },
     {
-     "name": "Light_Interior.532",
+     "name": "Light_Interior.529",
      "position": [
       2.0,
       2.0,
@@ -10659,7 +10663,7 @@
      }
     },
     {
-     "name": "Light_Interior.533",
+     "name": "Light_Interior.530",
      "position": [
       2.0,
       2.0,
@@ -10676,7 +10680,7 @@
      }
     },
     {
-     "name": "Light_Interior.534",
+     "name": "Light_Interior.531",
      "position": [
       2.0,
       2.0,
@@ -10966,7 +10970,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3032",
+       "name": "Floor_Ground.2173",
        "position": [
         0.0,
         0.0,
@@ -10976,7 +10980,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3033",
+       "name": "Floor_Ground.2174",
        "position": [
         0.0,
         2.0,
@@ -10986,7 +10990,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3034",
+       "name": "Floor_Ground.2175",
        "position": [
         0.0,
         4.0,
@@ -10996,7 +11000,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3035",
+       "name": "Floor_Ground.2176",
        "position": [
         2.0,
         0.0,
@@ -11006,7 +11010,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3036",
+       "name": "Floor_Ground.2177",
        "position": [
         2.0,
         2.0,
@@ -11016,7 +11020,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3037",
+       "name": "Floor_Ground.2178",
        "position": [
         2.0,
         4.0,
@@ -11026,7 +11030,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3038",
+       "name": "Floor_Ground.2179",
        "position": [
         4.0,
         0.0,
@@ -11036,7 +11040,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3039",
+       "name": "Floor_Ground.2180",
        "position": [
         4.0,
         2.0,
@@ -11046,7 +11050,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3040",
+       "name": "Floor_Ground.2181",
        "position": [
         4.0,
         4.0,
@@ -11056,7 +11060,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3041",
+       "name": "Floor_Ground.2182",
        "position": [
         6.0,
         0.0,
@@ -11066,7 +11070,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3042",
+       "name": "Floor_Ground.2183",
        "position": [
         6.0,
         2.0,
@@ -11076,7 +11080,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3043",
+       "name": "Floor_Ground.2184",
        "position": [
         6.0,
         4.0,
@@ -11133,7 +11137,7 @@
        }
       },
       {
-       "name": "Rug.401",
+       "name": "Rug.399",
        "position": [
         6.9,
         4.3,
@@ -11163,7 +11167,7 @@
        "module": "Sign_Mug"
       },
       {
-       "name": "Stairs_Interior_L.199",
+       "name": "Stairs_Interior_L.196",
        "position": [
         0.0,
         0.0,
@@ -11173,7 +11177,7 @@
        "module": "Stairs_Interior_L"
       },
       {
-       "name": "Stool.154",
+       "name": "Stool.153",
        "position": [
         6.0,
         4.8,
@@ -11203,7 +11207,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.739",
+       "name": "Wall_Sconce.737",
        "position": [
         2.75,
         5.83,
@@ -11213,7 +11217,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.740",
+       "name": "Wall_Sconce.738",
        "position": [
         7.25,
         5.83,
@@ -11394,7 +11398,7 @@
        "module": "Balcony"
       },
       {
-       "name": "Bed.247",
+       "name": "Bed.245",
        "position": [
         2.75,
         4.8,
@@ -11404,7 +11408,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bed.248",
+       "name": "Bed.246",
        "position": [
         4.2,
         4.8,
@@ -11414,7 +11418,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.238",
+       "name": "Chest.236",
        "position": [
         2.75,
         1.25,
@@ -11474,7 +11478,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.199",
+       "name": "Floor_Landing_L.196",
        "position": [
         0.0,
         2.0,
@@ -11484,7 +11488,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3575",
+       "name": "Floor_Planks.2505",
        "position": [
         0.0,
         4.0,
@@ -11494,7 +11498,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3576",
+       "name": "Floor_Planks.2506",
        "position": [
         2.0,
         0.0,
@@ -11504,7 +11508,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3577",
+       "name": "Floor_Planks.2507",
        "position": [
         2.0,
         2.0,
@@ -11514,7 +11518,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3578",
+       "name": "Floor_Planks.2508",
        "position": [
         2.0,
         4.0,
@@ -11524,7 +11528,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3579",
+       "name": "Floor_Planks.2509",
        "position": [
         4.0,
         0.0,
@@ -11534,7 +11538,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3580",
+       "name": "Floor_Planks.2510",
        "position": [
         4.0,
         2.0,
@@ -11544,7 +11548,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3581",
+       "name": "Floor_Planks.2511",
        "position": [
         4.0,
         4.0,
@@ -11554,7 +11558,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3582",
+       "name": "Floor_Planks.2512",
        "position": [
         6.0,
         0.0,
@@ -11564,7 +11568,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3583",
+       "name": "Floor_Planks.2513",
        "position": [
         6.0,
         2.0,
@@ -11574,7 +11578,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3584",
+       "name": "Floor_Planks.2514",
        "position": [
         6.0,
         4.0,
@@ -11584,7 +11588,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.199",
+       "name": "Floor_Stairwell_L.196",
        "position": [
         0.0,
         0.0,
@@ -11614,7 +11618,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.402",
+       "name": "Rug.400",
        "position": [
         4.0,
         3.0,
@@ -11634,7 +11638,7 @@
        "module": "Stairs_Interior_R"
       },
       {
-       "name": "Wall_Sconce.741",
+       "name": "Wall_Sconce.739",
        "position": [
         2.75,
         5.83,
@@ -11644,7 +11648,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.742",
+       "name": "Wall_Sconce.740",
        "position": [
         5.25,
         5.83,
@@ -11804,7 +11808,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.133",
+       "name": "Wardrobe.132",
        "position": [
         5.25,
         5.57,
@@ -11845,7 +11849,7 @@
        "module": "Balcony"
       },
       {
-       "name": "Bed.249",
+       "name": "Bed.247",
        "position": [
         0.75,
         4.8,
@@ -11855,7 +11859,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bed.250",
+       "name": "Bed.248",
        "position": [
         3.2,
         4.8,
@@ -11865,7 +11869,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.239",
+       "name": "Chest.237",
        "position": [
         0.75,
         1.25,
@@ -11935,7 +11939,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3585",
+       "name": "Floor_Planks.2515",
        "position": [
         0.0,
         0.0,
@@ -11945,7 +11949,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3586",
+       "name": "Floor_Planks.2516",
        "position": [
         0.0,
         2.0,
@@ -11955,7 +11959,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3587",
+       "name": "Floor_Planks.2517",
        "position": [
         0.0,
         4.0,
@@ -11965,7 +11969,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3588",
+       "name": "Floor_Planks.2518",
        "position": [
         2.0,
         0.0,
@@ -11975,7 +11979,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3589",
+       "name": "Floor_Planks.2519",
        "position": [
         2.0,
         2.0,
@@ -11985,7 +11989,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3590",
+       "name": "Floor_Planks.2520",
        "position": [
         2.0,
         4.0,
@@ -11995,7 +11999,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3591",
+       "name": "Floor_Planks.2521",
        "position": [
         4.0,
         0.0,
@@ -12005,7 +12009,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3592",
+       "name": "Floor_Planks.2522",
        "position": [
         4.0,
         2.0,
@@ -12015,7 +12019,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3593",
+       "name": "Floor_Planks.2523",
        "position": [
         4.0,
         4.0,
@@ -12025,7 +12029,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3594",
+       "name": "Floor_Planks.2524",
        "position": [
         6.0,
         4.0,
@@ -12045,7 +12049,7 @@
        "module": "Floor_Stairwell_R"
       },
       {
-       "name": "Rug.403",
+       "name": "Rug.401",
        "position": [
         3.0,
         3.0,
@@ -12065,7 +12069,7 @@
        "module": "Turret_Corner"
       },
       {
-       "name": "Wall_Sconce.743",
+       "name": "Wall_Sconce.741",
        "position": [
         0.75,
         5.83,
@@ -12075,7 +12079,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.744",
+       "name": "Wall_Sconce.742",
        "position": [
         5.25,
         5.83,
@@ -12235,7 +12239,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.134",
+       "name": "Wardrobe.133",
        "position": [
         5.25,
         5.57,
@@ -12245,7 +12249,7 @@
        "module": "Wardrobe"
       },
       {
-       "name": "Writing_Desk.114",
+       "name": "Writing_Desk.113",
        "position": [
         4.9,
         1.55,
@@ -12257,7 +12261,7 @@
      ]
     },
     {
-     "name": "Light_Interior.535",
+     "name": "Light_Interior.532",
      "position": [
       4.0,
       3.0,
@@ -12274,7 +12278,7 @@
      }
     },
     {
-     "name": "Light_Interior.536",
+     "name": "Light_Interior.533",
      "position": [
       4.0,
       3.0,
@@ -12291,7 +12295,7 @@
      }
     },
     {
-     "name": "Light_Interior.537",
+     "name": "Light_Interior.534",
      "position": [
       4.0,
       3.0,
@@ -12330,7 +12334,7 @@
      "module": "Entry_Steps_Low"
     },
     {
-     "name": "Light_Interior.538",
+     "name": "Light_Interior.535",
      "position": [
       3.0,
       3.0,
@@ -12347,7 +12351,7 @@
      }
     },
     {
-     "name": "Light_Interior.539",
+     "name": "Light_Interior.536",
      "position": [
       3.0,
       3.0,
@@ -12654,7 +12658,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bookcase.160",
+       "name": "Bookcase.159",
        "position": [
         5.15,
         5.65,
@@ -12674,7 +12678,7 @@
        "module": "Chandelier"
       },
       {
-       "name": "Chest.240",
+       "name": "Chest.238",
        "position": [
         5.35,
         1.25,
@@ -12745,7 +12749,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3044",
+       "name": "Floor_Ground.2185",
        "position": [
         0.0,
         0.0,
@@ -12755,7 +12759,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3045",
+       "name": "Floor_Ground.2186",
        "position": [
         0.0,
         2.0,
@@ -12765,7 +12769,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3046",
+       "name": "Floor_Ground.2187",
        "position": [
         0.0,
         4.0,
@@ -12775,7 +12779,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3047",
+       "name": "Floor_Ground.2188",
        "position": [
         2.0,
         0.0,
@@ -12785,7 +12789,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3048",
+       "name": "Floor_Ground.2189",
        "position": [
         2.0,
         2.0,
@@ -12795,7 +12799,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3049",
+       "name": "Floor_Ground.2190",
        "position": [
         2.0,
         4.0,
@@ -12805,7 +12809,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3050",
+       "name": "Floor_Ground.2191",
        "position": [
         4.0,
         0.0,
@@ -12815,7 +12819,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3051",
+       "name": "Floor_Ground.2192",
        "position": [
         4.0,
         2.0,
@@ -12825,7 +12829,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3052",
+       "name": "Floor_Ground.2193",
        "position": [
         4.0,
         4.0,
@@ -12872,7 +12876,7 @@
        }
       },
       {
-       "name": "Rug.404",
+       "name": "Rug.402",
        "position": [
         4.0,
         4.25,
@@ -12902,7 +12906,7 @@
        "module": "Sign_Boot"
       },
       {
-       "name": "Stairs_Interior_L.200",
+       "name": "Stairs_Interior_L.197",
        "position": [
         0.0,
         0.0,
@@ -12922,7 +12926,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.745",
+       "name": "Wall_Sconce.743",
        "position": [
         2.75,
         5.83,
@@ -12932,7 +12936,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.746",
+       "name": "Wall_Sconce.744",
        "position": [
         5.25,
         5.83,
@@ -13073,7 +13077,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.251",
+       "name": "Bed.249",
        "position": [
         4.0,
         4.8,
@@ -13083,7 +13087,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.241",
+       "name": "Chest.239",
        "position": [
         2.75,
         5.43,
@@ -13133,7 +13137,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.200",
+       "name": "Floor_Landing_L.197",
        "position": [
         0.0,
         2.0,
@@ -13143,7 +13147,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3595",
+       "name": "Floor_Planks.2525",
        "position": [
         0.0,
         4.0,
@@ -13153,7 +13157,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3596",
+       "name": "Floor_Planks.2526",
        "position": [
         2.0,
         0.0,
@@ -13163,7 +13167,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3597",
+       "name": "Floor_Planks.2527",
        "position": [
         2.0,
         2.0,
@@ -13173,7 +13177,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3598",
+       "name": "Floor_Planks.2528",
        "position": [
         2.0,
         4.0,
@@ -13183,7 +13187,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3599",
+       "name": "Floor_Planks.2529",
        "position": [
         4.0,
         0.0,
@@ -13193,7 +13197,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3600",
+       "name": "Floor_Planks.2530",
        "position": [
         4.0,
         2.0,
@@ -13203,7 +13207,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3601",
+       "name": "Floor_Planks.2531",
        "position": [
         4.0,
         4.0,
@@ -13213,7 +13217,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.200",
+       "name": "Floor_Stairwell_L.197",
        "position": [
         0.0,
         0.0,
@@ -13233,7 +13237,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.405",
+       "name": "Rug.403",
        "position": [
         4.0,
         3.0,
@@ -13243,7 +13247,7 @@
        "module": "Rug"
       },
       {
-       "name": "Wall_Sconce.747",
+       "name": "Wall_Sconce.745",
        "position": [
         2.75,
         5.83,
@@ -13253,7 +13257,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.748",
+       "name": "Wall_Sconce.746",
        "position": [
         5.25,
         5.83,
@@ -13263,7 +13267,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Tapestry.128",
+       "name": "Wall_Tapestry.127",
        "position": [
         4.0,
         5.83,
@@ -13393,7 +13397,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.135",
+       "name": "Wardrobe.134",
        "position": [
         5.25,
         5.57,
@@ -13417,7 +13421,7 @@
    "building": "Merchant",
    "children": [
     {
-     "name": "Light_Interior.540",
+     "name": "Light_Interior.537",
      "position": [
       4.0,
       3.0,
@@ -13434,7 +13438,7 @@
      }
     },
     {
-     "name": "Light_Interior.541",
+     "name": "Light_Interior.538",
      "position": [
       4.0,
       3.0,
@@ -13451,7 +13455,7 @@
      }
     },
     {
-     "name": "Light_Interior.542",
+     "name": "Light_Interior.539",
      "position": [
       4.0,
       3.0,
@@ -13618,7 +13622,7 @@
        "module": "Alchemist_Table"
       },
       {
-       "name": "Bookcase.161",
+       "name": "Bookcase.160",
        "position": [
         2.85,
         5.65,
@@ -13699,7 +13703,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3053",
+       "name": "Floor_Ground.2194",
        "position": [
         0.0,
         0.0,
@@ -13709,7 +13713,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3054",
+       "name": "Floor_Ground.2195",
        "position": [
         0.0,
         2.0,
@@ -13719,7 +13723,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3055",
+       "name": "Floor_Ground.2196",
        "position": [
         0.0,
         4.0,
@@ -13729,7 +13733,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3056",
+       "name": "Floor_Ground.2197",
        "position": [
         2.0,
         0.0,
@@ -13739,7 +13743,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3057",
+       "name": "Floor_Ground.2198",
        "position": [
         2.0,
         2.0,
@@ -13749,7 +13753,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3058",
+       "name": "Floor_Ground.2199",
        "position": [
         2.0,
         4.0,
@@ -13759,7 +13763,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3059",
+       "name": "Floor_Ground.2200",
        "position": [
         4.0,
         0.0,
@@ -13769,7 +13773,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3060",
+       "name": "Floor_Ground.2201",
        "position": [
         4.0,
         2.0,
@@ -13779,7 +13783,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3061",
+       "name": "Floor_Ground.2202",
        "position": [
         4.0,
         4.0,
@@ -13789,7 +13793,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3062",
+       "name": "Floor_Ground.2203",
        "position": [
         6.0,
         0.0,
@@ -13799,7 +13803,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3063",
+       "name": "Floor_Ground.2204",
        "position": [
         6.0,
         2.0,
@@ -13809,7 +13813,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3064",
+       "name": "Floor_Ground.2205",
        "position": [
         6.0,
         4.0,
@@ -13886,7 +13890,7 @@
        }
       },
       {
-       "name": "Rug.406",
+       "name": "Rug.404",
        "position": [
         5.0,
         4.4,
@@ -13916,7 +13920,7 @@
        "module": "Sign_Potion"
       },
       {
-       "name": "Stairs_Interior_L.201",
+       "name": "Stairs_Interior_L.198",
        "position": [
         0.0,
         0.0,
@@ -13936,7 +13940,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.749",
+       "name": "Wall_Sconce.747",
        "position": [
         2.75,
         5.83,
@@ -13946,7 +13950,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.750",
+       "name": "Wall_Sconce.748",
        "position": [
         7.25,
         5.83,
@@ -14107,7 +14111,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.252",
+       "name": "Bed.250",
        "position": [
         5.25,
         4.8,
@@ -14117,7 +14121,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.162",
+       "name": "Bookcase.161",
        "position": [
         2.85,
         5.65,
@@ -14127,7 +14131,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.242",
+       "name": "Chest.240",
        "position": [
         2.75,
         1.2,
@@ -14177,7 +14181,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.201",
+       "name": "Floor_Landing_L.198",
        "position": [
         0.0,
         2.0,
@@ -14187,7 +14191,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3602",
+       "name": "Floor_Planks.2532",
        "position": [
         0.0,
         4.0,
@@ -14197,7 +14201,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3603",
+       "name": "Floor_Planks.2533",
        "position": [
         2.0,
         0.0,
@@ -14207,7 +14211,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3604",
+       "name": "Floor_Planks.2534",
        "position": [
         2.0,
         2.0,
@@ -14217,7 +14221,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3605",
+       "name": "Floor_Planks.2535",
        "position": [
         2.0,
         4.0,
@@ -14227,7 +14231,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3606",
+       "name": "Floor_Planks.2536",
        "position": [
         4.0,
         0.0,
@@ -14237,7 +14241,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3607",
+       "name": "Floor_Planks.2537",
        "position": [
         4.0,
         2.0,
@@ -14247,7 +14251,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3608",
+       "name": "Floor_Planks.2538",
        "position": [
         4.0,
         4.0,
@@ -14257,7 +14261,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3609",
+       "name": "Floor_Planks.2539",
        "position": [
         6.0,
         0.0,
@@ -14267,7 +14271,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3610",
+       "name": "Floor_Planks.2540",
        "position": [
         6.0,
         2.0,
@@ -14277,7 +14281,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3611",
+       "name": "Floor_Planks.2541",
        "position": [
         6.0,
         4.0,
@@ -14287,7 +14291,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.201",
+       "name": "Floor_Stairwell_L.198",
        "position": [
         0.0,
         0.0,
@@ -14317,7 +14321,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.407",
+       "name": "Rug.405",
        "position": [
         4.0,
         3.0,
@@ -14337,7 +14341,7 @@
        "module": "Stairs_Interior_R"
       },
       {
-       "name": "Stool.155",
+       "name": "Stool.154",
        "position": [
         4.0,
         4.85,
@@ -14357,7 +14361,7 @@
        "module": "Vine_Hanging"
       },
       {
-       "name": "Wall_Sconce.751",
+       "name": "Wall_Sconce.749",
        "position": [
         2.75,
         5.83,
@@ -14367,7 +14371,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.752",
+       "name": "Wall_Sconce.750",
        "position": [
         5.25,
         5.83,
@@ -14517,7 +14521,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.115",
+       "name": "Writing_Desk.114",
        "position": [
         4.0,
         5.4,
@@ -14538,7 +14542,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.253",
+       "name": "Bed.251",
        "position": [
         5.25,
         4.8,
@@ -14548,7 +14552,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.163",
+       "name": "Bookcase.162",
        "position": [
         0.85,
         5.65,
@@ -14558,7 +14562,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.243",
+       "name": "Chest.241",
        "position": [
         0.75,
         1.2,
@@ -14618,7 +14622,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3612",
+       "name": "Floor_Planks.2542",
        "position": [
         0.0,
         0.0,
@@ -14628,7 +14632,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3613",
+       "name": "Floor_Planks.2543",
        "position": [
         0.0,
         2.0,
@@ -14638,7 +14642,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3614",
+       "name": "Floor_Planks.2544",
        "position": [
         0.0,
         4.0,
@@ -14648,7 +14652,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3615",
+       "name": "Floor_Planks.2545",
        "position": [
         2.0,
         0.0,
@@ -14658,7 +14662,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3616",
+       "name": "Floor_Planks.2546",
        "position": [
         2.0,
         2.0,
@@ -14668,7 +14672,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3617",
+       "name": "Floor_Planks.2547",
        "position": [
         2.0,
         4.0,
@@ -14678,7 +14682,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3618",
+       "name": "Floor_Planks.2548",
        "position": [
         4.0,
         0.0,
@@ -14688,7 +14692,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3619",
+       "name": "Floor_Planks.2549",
        "position": [
         4.0,
         2.0,
@@ -14698,7 +14702,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3620",
+       "name": "Floor_Planks.2550",
        "position": [
         4.0,
         4.0,
@@ -14708,7 +14712,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3621",
+       "name": "Floor_Planks.2551",
        "position": [
         6.0,
         4.0,
@@ -14758,7 +14762,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.408",
+       "name": "Rug.406",
        "position": [
         3.0,
         3.0,
@@ -14768,7 +14772,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stool.156",
+       "name": "Stool.155",
        "position": [
         3.0,
         4.85,
@@ -14778,7 +14782,7 @@
        "module": "Stool"
       },
       {
-       "name": "Wall_Sconce.753",
+       "name": "Wall_Sconce.751",
        "position": [
         0.75,
         5.83,
@@ -14788,7 +14792,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.754",
+       "name": "Wall_Sconce.752",
        "position": [
         5.25,
         5.83,
@@ -14938,7 +14942,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.116",
+       "name": "Writing_Desk.115",
        "position": [
         3.0,
         5.4,
@@ -15173,7 +15177,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3065",
+       "name": "Floor_Ground.2206",
        "position": [
         0.0,
         0.0,
@@ -15183,7 +15187,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3066",
+       "name": "Floor_Ground.2207",
        "position": [
         0.0,
         2.0,
@@ -15193,7 +15197,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3067",
+       "name": "Floor_Ground.2208",
        "position": [
         2.0,
         0.0,
@@ -15203,7 +15207,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3068",
+       "name": "Floor_Ground.2209",
        "position": [
         2.0,
         2.0,
@@ -15213,7 +15217,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3069",
+       "name": "Floor_Ground.2210",
        "position": [
         4.0,
         0.0,
@@ -15223,7 +15227,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3070",
+       "name": "Floor_Ground.2211",
        "position": [
         4.0,
         2.0,
@@ -15270,7 +15274,7 @@
        }
       },
       {
-       "name": "Rug.409",
+       "name": "Rug.407",
        "position": [
         4.9,
         2.3,
@@ -15280,7 +15284,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.202",
+       "name": "Stairs_Interior_L.199",
        "position": [
         0.0,
         0.0,
@@ -15290,7 +15294,7 @@
        "module": "Stairs_Interior_L"
       },
       {
-       "name": "Stool.157",
+       "name": "Stool.156",
        "position": [
         4.0,
         2.8,
@@ -15320,7 +15324,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.755",
+       "name": "Wall_Sconce.753",
        "position": [
         2.75,
         3.83,
@@ -15330,7 +15334,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.756",
+       "name": "Wall_Sconce.754",
        "position": [
         5.25,
         3.83,
@@ -15451,7 +15455,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.254",
+       "name": "Bed.252",
        "position": [
         4.0,
         2.8,
@@ -15461,7 +15465,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.244",
+       "name": "Chest.242",
        "position": [
         2.75,
         3.43,
@@ -15511,7 +15515,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.202",
+       "name": "Floor_Landing_L.199",
        "position": [
         0.0,
         2.0,
@@ -15521,7 +15525,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3622",
+       "name": "Floor_Planks.2552",
        "position": [
         2.0,
         0.0,
@@ -15531,7 +15535,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3623",
+       "name": "Floor_Planks.2553",
        "position": [
         2.0,
         2.0,
@@ -15541,7 +15545,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3624",
+       "name": "Floor_Planks.2554",
        "position": [
         4.0,
         0.0,
@@ -15551,7 +15555,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3625",
+       "name": "Floor_Planks.2555",
        "position": [
         4.0,
         2.0,
@@ -15561,7 +15565,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.202",
+       "name": "Floor_Stairwell_L.199",
        "position": [
         0.0,
         0.0,
@@ -15591,7 +15595,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.410",
+       "name": "Rug.408",
        "position": [
         4.0,
         2.0,
@@ -15631,7 +15635,7 @@
        "module": "Vine_Hanging"
       },
       {
-       "name": "Wall_Sconce.757",
+       "name": "Wall_Sconce.755",
        "position": [
         2.75,
         3.83,
@@ -15641,7 +15645,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.758",
+       "name": "Wall_Sconce.756",
        "position": [
         5.25,
         3.83,
@@ -15651,7 +15655,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Tapestry.129",
+       "name": "Wall_Tapestry.128",
        "position": [
         4.0,
         3.83,
@@ -15761,7 +15765,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.136",
+       "name": "Wardrobe.135",
        "position": [
         5.25,
         3.57,
@@ -15773,7 +15777,7 @@
      ]
     },
     {
-     "name": "Light_Interior.543",
+     "name": "Light_Interior.540",
      "position": [
       3.0,
       2.0,
@@ -15790,7 +15794,7 @@
      }
     },
     {
-     "name": "Light_Interior.544",
+     "name": "Light_Interior.541",
      "position": [
       3.0,
       2.0,
@@ -15989,7 +15993,7 @@
      "module": "Entry_Steps_Low"
     },
     {
-     "name": "Light_Interior.545",
+     "name": "Light_Interior.542",
      "position": [
       4.0,
       3.0,
@@ -16006,7 +16010,7 @@
      }
     },
     {
-     "name": "Light_Interior.546",
+     "name": "Light_Interior.543",
      "position": [
       4.0,
       3.0,
@@ -16023,7 +16027,7 @@
      }
     },
     {
-     "name": "Light_Interior.547",
+     "name": "Light_Interior.544",
      "position": [
       4.0,
       3.0,
@@ -16200,7 +16204,7 @@
        "module": "Chandelier"
       },
       {
-       "name": "Chest.245",
+       "name": "Chest.243",
        "position": [
         7.35,
         1.25,
@@ -16271,7 +16275,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3071",
+       "name": "Floor_Ground.2212",
        "position": [
         0.0,
         0.0,
@@ -16281,7 +16285,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3072",
+       "name": "Floor_Ground.2213",
        "position": [
         0.0,
         2.0,
@@ -16291,7 +16295,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3073",
+       "name": "Floor_Ground.2214",
        "position": [
         0.0,
         4.0,
@@ -16301,7 +16305,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3074",
+       "name": "Floor_Ground.2215",
        "position": [
         2.0,
         0.0,
@@ -16311,7 +16315,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3075",
+       "name": "Floor_Ground.2216",
        "position": [
         2.0,
         2.0,
@@ -16321,7 +16325,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3076",
+       "name": "Floor_Ground.2217",
        "position": [
         2.0,
         4.0,
@@ -16331,7 +16335,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3077",
+       "name": "Floor_Ground.2218",
        "position": [
         4.0,
         0.0,
@@ -16341,7 +16345,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3078",
+       "name": "Floor_Ground.2219",
        "position": [
         4.0,
         2.0,
@@ -16351,7 +16355,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3079",
+       "name": "Floor_Ground.2220",
        "position": [
         4.0,
         4.0,
@@ -16361,7 +16365,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3080",
+       "name": "Floor_Ground.2221",
        "position": [
         6.0,
         0.0,
@@ -16371,7 +16375,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3081",
+       "name": "Floor_Ground.2222",
        "position": [
         6.0,
         2.0,
@@ -16381,7 +16385,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3082",
+       "name": "Floor_Ground.2223",
        "position": [
         6.0,
         4.0,
@@ -16448,7 +16452,7 @@
        }
       },
       {
-       "name": "Rug.411",
+       "name": "Rug.409",
        "position": [
         5.0,
         3.0,
@@ -16458,7 +16462,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.203",
+       "name": "Stairs_Interior_L.200",
        "position": [
         0.0,
         0.0,
@@ -16488,7 +16492,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.759",
+       "name": "Wall_Sconce.757",
        "position": [
         2.75,
         5.83,
@@ -16498,7 +16502,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.760",
+       "name": "Wall_Sconce.758",
        "position": [
         7.25,
         5.83,
@@ -16699,7 +16703,7 @@
        "module": "Balcony"
       },
       {
-       "name": "Bed.255",
+       "name": "Bed.253",
        "position": [
         5.25,
         4.8,
@@ -16709,7 +16713,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.246",
+       "name": "Chest.244",
        "position": [
         4.0,
         5.43,
@@ -16769,7 +16773,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.203",
+       "name": "Floor_Landing_L.200",
        "position": [
         0.0,
         2.0,
@@ -16779,7 +16783,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3626",
+       "name": "Floor_Planks.2556",
        "position": [
         0.0,
         4.0,
@@ -16789,7 +16793,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3627",
+       "name": "Floor_Planks.2557",
        "position": [
         2.0,
         0.0,
@@ -16799,7 +16803,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3628",
+       "name": "Floor_Planks.2558",
        "position": [
         2.0,
         2.0,
@@ -16809,7 +16813,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3629",
+       "name": "Floor_Planks.2559",
        "position": [
         2.0,
         4.0,
@@ -16819,7 +16823,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3630",
+       "name": "Floor_Planks.2560",
        "position": [
         4.0,
         0.0,
@@ -16829,7 +16833,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3631",
+       "name": "Floor_Planks.2561",
        "position": [
         4.0,
         2.0,
@@ -16839,7 +16843,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3632",
+       "name": "Floor_Planks.2562",
        "position": [
         4.0,
         4.0,
@@ -16849,7 +16853,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3633",
+       "name": "Floor_Planks.2563",
        "position": [
         6.0,
         0.0,
@@ -16859,7 +16863,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3634",
+       "name": "Floor_Planks.2564",
        "position": [
         6.0,
         2.0,
@@ -16869,7 +16873,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3635",
+       "name": "Floor_Planks.2565",
        "position": [
         6.0,
         4.0,
@@ -16879,7 +16883,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.203",
+       "name": "Floor_Stairwell_L.200",
        "position": [
         0.0,
         0.0,
@@ -16909,7 +16913,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.412",
+       "name": "Rug.410",
        "position": [
         4.0,
         3.0,
@@ -16929,7 +16933,7 @@
        "module": "Stairs_Interior_R"
       },
       {
-       "name": "Wall_Sconce.761",
+       "name": "Wall_Sconce.759",
        "position": [
         2.75,
         5.83,
@@ -16939,7 +16943,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.762",
+       "name": "Wall_Sconce.760",
        "position": [
         5.25,
         5.83,
@@ -17130,7 +17134,7 @@
        "module": "Banner_Blue"
       },
       {
-       "name": "Bed.256",
+       "name": "Bed.254",
        "position": [
         5.25,
         4.8,
@@ -17140,7 +17144,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.164",
+       "name": "Bookcase.163",
        "position": [
         0.85,
         5.65,
@@ -17150,7 +17154,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.247",
+       "name": "Chest.245",
        "position": [
         0.75,
         1.2,
@@ -17220,7 +17224,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3636",
+       "name": "Floor_Planks.2566",
        "position": [
         0.0,
         0.0,
@@ -17230,7 +17234,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3637",
+       "name": "Floor_Planks.2567",
        "position": [
         0.0,
         2.0,
@@ -17240,7 +17244,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3638",
+       "name": "Floor_Planks.2568",
        "position": [
         0.0,
         4.0,
@@ -17250,7 +17254,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3639",
+       "name": "Floor_Planks.2569",
        "position": [
         2.0,
         0.0,
@@ -17260,7 +17264,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3640",
+       "name": "Floor_Planks.2570",
        "position": [
         2.0,
         2.0,
@@ -17270,7 +17274,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3641",
+       "name": "Floor_Planks.2571",
        "position": [
         2.0,
         4.0,
@@ -17280,7 +17284,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3642",
+       "name": "Floor_Planks.2572",
        "position": [
         4.0,
         0.0,
@@ -17290,7 +17294,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3643",
+       "name": "Floor_Planks.2573",
        "position": [
         4.0,
         2.0,
@@ -17300,7 +17304,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3644",
+       "name": "Floor_Planks.2574",
        "position": [
         4.0,
         4.0,
@@ -17310,7 +17314,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3645",
+       "name": "Floor_Planks.2575",
        "position": [
         6.0,
         4.0,
@@ -17350,7 +17354,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.413",
+       "name": "Rug.411",
        "position": [
         3.0,
         3.0,
@@ -17360,7 +17364,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stool.158",
+       "name": "Stool.157",
        "position": [
         3.0,
         4.85,
@@ -17400,7 +17404,7 @@
        "module": "Vine_Hanging"
       },
       {
-       "name": "Wall_Sconce.763",
+       "name": "Wall_Sconce.761",
        "position": [
         0.75,
         5.83,
@@ -17410,7 +17414,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.764",
+       "name": "Wall_Sconce.762",
        "position": [
         5.25,
         5.83,
@@ -17570,7 +17574,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.117",
+       "name": "Writing_Desk.116",
        "position": [
         3.0,
         5.4,
@@ -17894,7 +17898,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bookcase.165",
+       "name": "Bookcase.164",
        "position": [
         2.85,
         3.65,
@@ -17904,7 +17908,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Bookcase.166",
+       "name": "Bookcase.165",
        "position": [
         5.15,
         3.65,
@@ -17985,7 +17989,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3083",
+       "name": "Floor_Ground.2224",
        "position": [
         0.0,
         0.0,
@@ -17995,7 +17999,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3084",
+       "name": "Floor_Ground.2225",
        "position": [
         0.0,
         2.0,
@@ -18005,7 +18009,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3085",
+       "name": "Floor_Ground.2226",
        "position": [
         2.0,
         0.0,
@@ -18015,7 +18019,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3086",
+       "name": "Floor_Ground.2227",
        "position": [
         2.0,
         2.0,
@@ -18025,7 +18029,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3087",
+       "name": "Floor_Ground.2228",
        "position": [
         4.0,
         0.0,
@@ -18035,7 +18039,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3088",
+       "name": "Floor_Ground.2229",
        "position": [
         4.0,
         2.0,
@@ -18102,7 +18106,7 @@
        }
       },
       {
-       "name": "Rug.414",
+       "name": "Rug.412",
        "position": [
         4.0,
         2.0,
@@ -18122,7 +18126,7 @@
        "module": "Sign_Book"
       },
       {
-       "name": "Stairs_Interior_L.204",
+       "name": "Stairs_Interior_L.201",
        "position": [
         0.0,
         0.0,
@@ -18132,7 +18136,7 @@
        "module": "Stairs_Interior_L"
       },
       {
-       "name": "Stool.159",
+       "name": "Stool.158",
        "position": [
         3.15,
         1.75,
@@ -18152,7 +18156,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.765",
+       "name": "Wall_Sconce.763",
        "position": [
         2.75,
         3.83,
@@ -18162,7 +18166,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.766",
+       "name": "Wall_Sconce.764",
        "position": [
         5.25,
         3.83,
@@ -18272,7 +18276,7 @@
        "module": "Wall_Stone_Window"
       },
       {
-       "name": "Writing_Desk.118",
+       "name": "Writing_Desk.117",
        "position": [
         3.15,
         2.3,
@@ -18293,7 +18297,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.257",
+       "name": "Bed.255",
        "position": [
         3.25,
         2.8,
@@ -18303,7 +18307,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.167",
+       "name": "Bookcase.166",
        "position": [
         2.85,
         3.65,
@@ -18313,7 +18317,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.248",
+       "name": "Chest.246",
        "position": [
         2.75,
         1.2,
@@ -18363,7 +18367,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.204",
+       "name": "Floor_Landing_L.201",
        "position": [
         0.0,
         2.0,
@@ -18373,7 +18377,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3646",
+       "name": "Floor_Planks.2576",
        "position": [
         2.0,
         0.0,
@@ -18383,7 +18387,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3647",
+       "name": "Floor_Planks.2577",
        "position": [
         2.0,
         2.0,
@@ -18393,7 +18397,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3648",
+       "name": "Floor_Planks.2578",
        "position": [
         4.0,
         0.0,
@@ -18403,7 +18407,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3649",
+       "name": "Floor_Planks.2579",
        "position": [
         4.0,
         2.0,
@@ -18413,7 +18417,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.204",
+       "name": "Floor_Stairwell_L.201",
        "position": [
         0.0,
         0.0,
@@ -18433,7 +18437,7 @@
        "module": "Oriel_Window"
       },
       {
-       "name": "Rug.415",
+       "name": "Rug.413",
        "position": [
         3.0,
         2.0,
@@ -18453,7 +18457,7 @@
        "module": "Stairs_Interior_R"
       },
       {
-       "name": "Stool.160",
+       "name": "Stool.159",
        "position": [
         3.0,
         2.85,
@@ -18563,7 +18567,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.119",
+       "name": "Writing_Desk.118",
        "position": [
         3.0,
         3.4,
@@ -18584,7 +18588,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.258",
+       "name": "Bed.256",
        "position": [
         3.25,
         2.8,
@@ -18594,7 +18598,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.168",
+       "name": "Bookcase.167",
        "position": [
         0.85,
         3.65,
@@ -18604,7 +18608,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.249",
+       "name": "Chest.247",
        "position": [
         0.75,
         1.2,
@@ -18664,7 +18668,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3650",
+       "name": "Floor_Planks.2580",
        "position": [
         0.0,
         0.0,
@@ -18674,7 +18678,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3651",
+       "name": "Floor_Planks.2581",
        "position": [
         0.0,
         2.0,
@@ -18684,7 +18688,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3652",
+       "name": "Floor_Planks.2582",
        "position": [
         2.0,
         0.0,
@@ -18694,7 +18698,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3653",
+       "name": "Floor_Planks.2583",
        "position": [
         2.0,
         2.0,
@@ -18724,7 +18728,7 @@
        "module": "Flower_Box"
       },
       {
-       "name": "Rug.416",
+       "name": "Rug.414",
        "position": [
         2.0,
         2.0,
@@ -18734,7 +18738,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stool.161",
+       "name": "Stool.160",
        "position": [
         2.0,
         2.85,
@@ -18754,7 +18758,7 @@
        "module": "Vine_Hanging"
       },
       {
-       "name": "Wall_Sconce.767",
+       "name": "Wall_Sconce.765",
        "position": [
         0.75,
         3.83,
@@ -18764,7 +18768,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.768",
+       "name": "Wall_Sconce.766",
        "position": [
         3.25,
         3.83,
@@ -18774,7 +18778,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Tapestry.130",
+       "name": "Wall_Tapestry.129",
        "position": [
         2.0,
         3.83,
@@ -18884,7 +18888,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.120",
+       "name": "Writing_Desk.119",
        "position": [
         2.0,
         3.4,
@@ -18896,7 +18900,7 @@
      ]
     },
     {
-     "name": "Light_Interior.548",
+     "name": "Light_Interior.545",
      "position": [
       3.0,
       2.0,
@@ -18913,7 +18917,7 @@
      }
     },
     {
-     "name": "Light_Interior.549",
+     "name": "Light_Interior.546",
      "position": [
       3.0,
       2.0,
@@ -18930,7 +18934,7 @@
      }
     },
     {
-     "name": "Light_Interior.550",
+     "name": "Light_Interior.547",
      "position": [
       3.0,
       2.0,
@@ -19150,7 +19154,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3089",
+       "name": "Floor_Ground.2230",
        "position": [
         0.0,
         0.0,
@@ -19160,7 +19164,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3090",
+       "name": "Floor_Ground.2231",
        "position": [
         0.0,
         2.0,
@@ -19170,7 +19174,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3091",
+       "name": "Floor_Ground.2232",
        "position": [
         2.0,
         0.0,
@@ -19180,7 +19184,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3092",
+       "name": "Floor_Ground.2233",
        "position": [
         2.0,
         2.0,
@@ -19190,7 +19194,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3093",
+       "name": "Floor_Ground.2234",
        "position": [
         4.0,
         0.0,
@@ -19200,7 +19204,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3094",
+       "name": "Floor_Ground.2235",
        "position": [
         4.0,
         2.0,
@@ -19257,7 +19261,7 @@
        }
       },
       {
-       "name": "Rug.417",
+       "name": "Rug.415",
        "position": [
         4.9,
         2.3,
@@ -19267,7 +19271,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.205",
+       "name": "Stairs_Interior_L.202",
        "position": [
         0.0,
         0.0,
@@ -19277,7 +19281,7 @@
        "module": "Stairs_Interior_L"
       },
       {
-       "name": "Stool.162",
+       "name": "Stool.161",
        "position": [
         4.0,
         2.8,
@@ -19307,7 +19311,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.769",
+       "name": "Wall_Sconce.767",
        "position": [
         2.75,
         3.83,
@@ -19317,7 +19321,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.770",
+       "name": "Wall_Sconce.768",
        "position": [
         5.25,
         3.83,
@@ -19438,7 +19442,7 @@
      "rotationZDeg": 0.0,
      "children": [
       {
-       "name": "Bed.259",
+       "name": "Bed.257",
        "position": [
         4.0,
         2.8,
@@ -19448,7 +19452,7 @@
        "module": "Bed"
       },
       {
-       "name": "Chest.250",
+       "name": "Chest.248",
        "position": [
         2.75,
         3.43,
@@ -19498,7 +19502,7 @@
        "module": "Corner_Timber_J1_R"
       },
       {
-       "name": "Floor_Landing_L.205",
+       "name": "Floor_Landing_L.202",
        "position": [
         0.0,
         2.0,
@@ -19508,7 +19512,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3654",
+       "name": "Floor_Planks.2584",
        "position": [
         2.0,
         0.0,
@@ -19518,7 +19522,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3655",
+       "name": "Floor_Planks.2585",
        "position": [
         2.0,
         2.0,
@@ -19528,7 +19532,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3656",
+       "name": "Floor_Planks.2586",
        "position": [
         4.0,
         0.0,
@@ -19538,7 +19542,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3657",
+       "name": "Floor_Planks.2587",
        "position": [
         4.0,
         2.0,
@@ -19548,7 +19552,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.205",
+       "name": "Floor_Stairwell_L.202",
        "position": [
         0.0,
         0.0,
@@ -19568,7 +19572,7 @@
        "module": "Flower_Box"
       },
       {
-       "name": "Rug.418",
+       "name": "Rug.416",
        "position": [
         4.0,
         2.0,
@@ -19578,7 +19582,7 @@
        "module": "Rug"
       },
       {
-       "name": "Wall_Sconce.771",
+       "name": "Wall_Sconce.769",
        "position": [
         2.75,
         3.83,
@@ -19588,7 +19592,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.772",
+       "name": "Wall_Sconce.770",
        "position": [
         5.25,
         3.83,
@@ -19598,7 +19602,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Tapestry.131",
+       "name": "Wall_Tapestry.130",
        "position": [
         4.0,
         3.83,
@@ -19708,7 +19712,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Wardrobe.137",
+       "name": "Wardrobe.136",
        "position": [
         5.25,
         3.57,
@@ -19730,7 +19734,7 @@
      "module": "Entry_Steps_Low"
     },
     {
-     "name": "Light_Interior.551",
+     "name": "Light_Interior.548",
      "position": [
       3.0,
       2.0,
@@ -19747,7 +19751,7 @@
      }
     },
     {
-     "name": "Light_Interior.552",
+     "name": "Light_Interior.549",
      "position": [
       3.0,
       2.0,
@@ -20157,7 +20161,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3095",
+       "name": "Floor_Ground.2236",
        "position": [
         0.0,
         0.0,
@@ -20167,7 +20171,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3096",
+       "name": "Floor_Ground.2237",
        "position": [
         0.0,
         2.0,
@@ -20177,7 +20181,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3097",
+       "name": "Floor_Ground.2238",
        "position": [
         2.0,
         0.0,
@@ -20187,7 +20191,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3098",
+       "name": "Floor_Ground.2239",
        "position": [
         2.0,
         2.0,
@@ -20197,7 +20201,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3099",
+       "name": "Floor_Ground.2240",
        "position": [
         4.0,
         0.0,
@@ -20207,7 +20211,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3100",
+       "name": "Floor_Ground.2241",
        "position": [
         4.0,
         2.0,
@@ -20274,7 +20278,7 @@
        }
       },
       {
-       "name": "Stairs_Interior_L.206",
+       "name": "Stairs_Interior_L.203",
        "position": [
         0.0,
         0.0,
@@ -20294,7 +20298,7 @@
        "module": "Wall_Lantern"
       },
       {
-       "name": "Wall_Sconce.773",
+       "name": "Wall_Sconce.771",
        "position": [
         2.75,
         3.83,
@@ -20304,7 +20308,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.774",
+       "name": "Wall_Sconce.772",
        "position": [
         5.25,
         3.83,
@@ -20485,7 +20489,7 @@
        "module": "Crate"
       },
       {
-       "name": "Floor_Landing_L.206",
+       "name": "Floor_Landing_L.203",
        "position": [
         0.0,
         2.0,
@@ -20495,7 +20499,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3658",
+       "name": "Floor_Planks.2588",
        "position": [
         2.0,
         0.0,
@@ -20505,7 +20509,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3659",
+       "name": "Floor_Planks.2589",
        "position": [
         2.0,
         2.0,
@@ -20515,7 +20519,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3660",
+       "name": "Floor_Planks.2590",
        "position": [
         4.0,
         0.0,
@@ -20525,7 +20529,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3661",
+       "name": "Floor_Planks.2591",
        "position": [
         4.0,
         2.0,
@@ -20535,7 +20539,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.206",
+       "name": "Floor_Stairwell_L.203",
        "position": [
         0.0,
         0.0,
@@ -20565,7 +20569,7 @@
        "module": "Flower_Box"
       },
       {
-       "name": "Wall_Sconce.775",
+       "name": "Wall_Sconce.773",
        "position": [
         2.75,
         3.83,
@@ -20575,7 +20579,7 @@
        "module": "Wall_Sconce"
       },
       {
-       "name": "Wall_Sconce.776",
+       "name": "Wall_Sconce.774",
        "position": [
         5.25,
         3.83,
@@ -20687,7 +20691,7 @@
      ]
     },
     {
-     "name": "Light_Interior.553",
+     "name": "Light_Interior.550",
      "position": [
       3.0,
       2.0,
@@ -20704,7 +20708,7 @@
      }
     },
     {
-     "name": "Light_Interior.554",
+     "name": "Light_Interior.551",
      "position": [
       3.0,
       2.0,
@@ -20873,7 +20877,7 @@
    "building": "Watchtower",
    "children": [
     {
-     "name": "Light_Interior.555",
+     "name": "Light_Interior.552",
      "position": [
       2.0,
       2.0,
@@ -20890,7 +20894,7 @@
      }
     },
     {
-     "name": "Light_Interior.556",
+     "name": "Light_Interior.553",
      "position": [
       2.0,
       2.0,
@@ -20907,7 +20911,7 @@
      }
     },
     {
-     "name": "Light_Interior.557",
+     "name": "Light_Interior.554",
      "position": [
       2.0,
       2.0,
@@ -20924,7 +20928,7 @@
      }
     },
     {
-     "name": "Light_Interior.558",
+     "name": "Light_Interior.555",
      "position": [
       2.0,
       2.0,
@@ -21052,7 +21056,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3101",
+       "name": "Floor_Ground.2242",
        "position": [
         0.0,
         0.0,
@@ -21062,7 +21066,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3102",
+       "name": "Floor_Ground.2243",
        "position": [
         0.0,
         2.0,
@@ -21072,7 +21076,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3103",
+       "name": "Floor_Ground.2244",
        "position": [
         2.0,
         0.0,
@@ -21082,7 +21086,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3104",
+       "name": "Floor_Ground.2245",
        "position": [
         2.0,
         2.0,
@@ -21149,7 +21153,7 @@
        }
       },
       {
-       "name": "Rug.419",
+       "name": "Rug.417",
        "position": [
         3.0,
         2.0,
@@ -21159,7 +21163,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stairs_Interior_L.207",
+       "name": "Stairs_Interior_L.204",
        "position": [
         0.0,
         0.0,
@@ -21330,7 +21334,7 @@
        "module": "Corner_Quoins"
       },
       {
-       "name": "Floor_Landing_L.207",
+       "name": "Floor_Landing_L.204",
        "position": [
         0.0,
         2.0,
@@ -21340,7 +21344,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3662",
+       "name": "Floor_Planks.2592",
        "position": [
         2.0,
         0.0,
@@ -21350,7 +21354,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3663",
+       "name": "Floor_Planks.2593",
        "position": [
         2.0,
         2.0,
@@ -21360,7 +21364,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.207",
+       "name": "Floor_Stairwell_L.204",
        "position": [
         0.0,
         0.0,
@@ -21531,7 +21535,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3664",
+       "name": "Floor_Planks.2594",
        "position": [
         0.0,
         0.0,
@@ -21541,7 +21545,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3665",
+       "name": "Floor_Planks.2595",
        "position": [
         0.0,
         2.0,
@@ -21561,7 +21565,7 @@
        "module": "Floor_Stairwell_R"
       },
       {
-       "name": "Stairs_Interior_L.208",
+       "name": "Stairs_Interior_L.205",
        "position": [
         0.0,
         0.0,
@@ -21672,7 +21676,7 @@
        "module": "Banner_Blue"
       },
       {
-       "name": "Bed.260",
+       "name": "Bed.258",
        "position": [
         3.25,
         2.8,
@@ -21682,7 +21686,7 @@
        "module": "Bed"
       },
       {
-       "name": "Bookcase.169",
+       "name": "Bookcase.168",
        "position": [
         2.85,
         3.65,
@@ -21692,7 +21696,7 @@
        "module": "Bookcase"
       },
       {
-       "name": "Chest.251",
+       "name": "Chest.249",
        "position": [
         2.75,
         1.2,
@@ -21742,7 +21746,7 @@
        "module": "Corner_Timber"
       },
       {
-       "name": "Floor_Landing_L.208",
+       "name": "Floor_Landing_L.205",
        "position": [
         0.0,
         2.0,
@@ -21752,7 +21756,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3666",
+       "name": "Floor_Planks.2596",
        "position": [
         2.0,
         0.0,
@@ -21762,7 +21766,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3667",
+       "name": "Floor_Planks.2597",
        "position": [
         2.0,
         2.0,
@@ -21772,7 +21776,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.208",
+       "name": "Floor_Stairwell_L.205",
        "position": [
         0.0,
         0.0,
@@ -21782,7 +21786,7 @@
        "module": "Floor_Stairwell_L"
       },
       {
-       "name": "Rug.420",
+       "name": "Rug.418",
        "position": [
         3.0,
         2.0,
@@ -21792,7 +21796,7 @@
        "module": "Rug"
       },
       {
-       "name": "Stool.163",
+       "name": "Stool.162",
        "position": [
         3.0,
         2.85,
@@ -21882,7 +21886,7 @@
        "module": "Wall_Timber_Window"
       },
       {
-       "name": "Writing_Desk.121",
+       "name": "Writing_Desk.120",
        "position": [
         3.0,
         3.4,
@@ -22137,7 +22141,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3105",
+       "name": "Floor_Ground.2246",
        "position": [
         0.0,
         0.0,
@@ -22147,7 +22151,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3106",
+       "name": "Floor_Ground.2247",
        "position": [
         0.0,
         2.0,
@@ -22157,7 +22161,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3107",
+       "name": "Floor_Ground.2248",
        "position": [
         0.0,
         4.0,
@@ -22167,7 +22171,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3108",
+       "name": "Floor_Ground.2249",
        "position": [
         2.0,
         0.0,
@@ -22177,7 +22181,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3109",
+       "name": "Floor_Ground.2250",
        "position": [
         2.0,
         2.0,
@@ -22187,7 +22191,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3110",
+       "name": "Floor_Ground.2251",
        "position": [
         2.0,
         4.0,
@@ -22197,7 +22201,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3111",
+       "name": "Floor_Ground.2252",
        "position": [
         4.0,
         0.0,
@@ -22207,7 +22211,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3112",
+       "name": "Floor_Ground.2253",
        "position": [
         4.0,
         2.0,
@@ -22217,7 +22221,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3113",
+       "name": "Floor_Ground.2254",
        "position": [
         4.0,
         4.0,
@@ -22227,7 +22231,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3114",
+       "name": "Floor_Ground.2255",
        "position": [
         6.0,
         0.0,
@@ -22237,7 +22241,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3115",
+       "name": "Floor_Ground.2256",
        "position": [
         6.0,
         2.0,
@@ -22247,7 +22251,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3116",
+       "name": "Floor_Ground.2257",
        "position": [
         6.0,
         4.0,
@@ -22257,7 +22261,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3117",
+       "name": "Floor_Ground.2258",
        "position": [
         8.0,
         0.0,
@@ -22267,7 +22271,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3118",
+       "name": "Floor_Ground.2259",
        "position": [
         8.0,
         2.0,
@@ -22277,7 +22281,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3119",
+       "name": "Floor_Ground.2260",
        "position": [
         8.0,
         4.0,
@@ -22374,7 +22378,7 @@
        "module": "Pew"
       },
       {
-       "name": "Rug.421",
+       "name": "Rug.419",
        "position": [
         5.0,
         3.75,
@@ -22564,7 +22568,7 @@
        "module": "Wall_Stone_Window"
       },
       {
-       "name": "Wall_Tapestry.132",
+       "name": "Wall_Tapestry.131",
        "position": [
         3.4,
         5.83,
@@ -22574,7 +22578,7 @@
        "module": "Wall_Tapestry"
       },
       {
-       "name": "Wall_Tapestry.133",
+       "name": "Wall_Tapestry.132",
        "position": [
         6.6,
         5.83,
@@ -22827,7 +22831,7 @@
      ]
     },
     {
-     "name": "Light_Interior.559",
+     "name": "Light_Interior.556",
      "position": [
       5.0,
       3.0,
@@ -22937,7 +22941,7 @@
        "interactable": "door"
       },
       {
-       "name": "Floor_Ground.3120",
+       "name": "Floor_Ground.2261",
        "position": [
         0.0,
         0.0,
@@ -22947,7 +22951,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3121",
+       "name": "Floor_Ground.2262",
        "position": [
         0.0,
         2.0,
@@ -22957,7 +22961,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3122",
+       "name": "Floor_Ground.2263",
        "position": [
         2.0,
         0.0,
@@ -22967,7 +22971,7 @@
        "module": "Floor_Ground"
       },
       {
-       "name": "Floor_Ground.3123",
+       "name": "Floor_Ground.2264",
        "position": [
         2.0,
         2.0,
@@ -23024,7 +23028,7 @@
        }
       },
       {
-       "name": "Stairs_Interior_L.209",
+       "name": "Stairs_Interior_L.206",
        "position": [
         0.0,
         0.0,
@@ -23175,7 +23179,7 @@
        "module": "Corner_Quoins"
       },
       {
-       "name": "Floor_Landing_L.209",
+       "name": "Floor_Landing_L.206",
        "position": [
         0.0,
         2.0,
@@ -23185,7 +23189,7 @@
        "module": "Floor_Landing_L"
       },
       {
-       "name": "Floor_Planks.3668",
+       "name": "Floor_Planks.2598",
        "position": [
         2.0,
         0.0,
@@ -23195,7 +23199,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3669",
+       "name": "Floor_Planks.2599",
        "position": [
         2.0,
         2.0,
@@ -23205,7 +23209,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Stairwell_L.209",
+       "name": "Floor_Stairwell_L.206",
        "position": [
         0.0,
         0.0,
@@ -23376,7 +23380,7 @@
        "module": "Floor_Landing_R"
       },
       {
-       "name": "Floor_Planks.3670",
+       "name": "Floor_Planks.2600",
        "position": [
         0.0,
         0.0,
@@ -23386,7 +23390,7 @@
        "module": "Floor_Planks"
       },
       {
-       "name": "Floor_Planks.3671",
+       "name": "Floor_Planks.2601",
        "position": [
         0.0,
         2.0,
@@ -23498,7 +23502,7 @@
      ]
     },
     {
-     "name": "Light_Interior.560",
+     "name": "Light_Interior.557",
      "position": [
       2.0,
       2.0,
@@ -23515,7 +23519,7 @@
      }
     },
     {
-     "name": "Light_Interior.561",
+     "name": "Light_Interior.558",
      "position": [
       2.0,
       2.0,
@@ -23532,7 +23536,7 @@
      }
     },
     {
-     "name": "Light_Interior.562",
+     "name": "Light_Interior.559",
      "position": [
       2.0,
       2.0,

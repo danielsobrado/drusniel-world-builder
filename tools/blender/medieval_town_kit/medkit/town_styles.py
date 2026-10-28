@@ -51,6 +51,8 @@ class TownStyle:
     extras: tuple = field(default_factory=tuple)   # (module, count) set in open yards
     towers: tuple = ()                      # (module, count) watchtowers on the corners and rim
     formations: tuple = ()                  # regional rock/crag formations around perimeter/terraces
+    under_mountain: bool = False            # true for Dwarven holds built mostly inside a mountain
+    outer_pool: tuple = ()                  # small outpost/worker buildings allowed outside the mountain
 
 
 DEFAULT = TownStyle(
@@ -216,11 +218,15 @@ STYLES = {
             'Shop_Small', 'Shop_Large', 'Smithy', 'Smithy', 'Warehouse', 'Guardhouse', 'Library', 'Tavern',
         ),
         density=11, grass_share=0.08, tree_share=0.06,
-        backdrop='Cliff_Granite', gate='Gate_Stonehold',
+        backdrop='', gate='',
+        under_mountain=True,
+        outer_pool=(
+            'House_Cottage', 'House_Small', 'Smithy', 'Shop_Small', 'Guardhouse',
+        ),
         extras=(
             ('Mine_Cart_Track', 3), ('Smelter_Stack', 2), ('Stonehold_Ward_Pillar', 3),
-            ('Ore_Crane', 2), ('Armorer_Stand', 2), ('Stonehold_Fang_Shrine', 1),
-            ('Stonehold_Twin_Outcrop', 1), ('Stonehold_Ledge_Large', 2),
+            ('Ore_Crane', 2), ('Armorer_Stand', 2), ('Mine_Vent_Stack', 2),
+            ('Stonehold_Fang_Shrine', 1), ('Stonehold_Twin_Outcrop', 1), ('Stonehold_Ledge_Large', 2),
         ),
         formations=(
             'Stonehold_Horned_Sanctum', 'Stonehold_Cavern_Maw', 'Stonehold_Fang_Shrine',

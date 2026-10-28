@@ -253,6 +253,16 @@ COLLIDERS.update({
     'Mine_Cart_Track': _centred(1.10, 1.60, 1.15),
     'Smelter_Stack': _centred(1.88, 1.75, 3.85),
     'Stonehold_Ward_Pillar': _centred(1.36, 1.36, 2.95),
+    'Mine_Vent_Stack': _centred(2.40, 2.30, 3.70),
+    'Mountain_Cliff_Wall': [((-4.1, -1.5, 0), (4.1, 1.5, 17.5))],
+    'Mountain_Gate_Massif': [
+        ((-6.8, -1.6, 0), (-2.3, 2.4, 19.5)),
+        ((2.3, -1.6, 0), (6.8, 2.4, 19.5)),
+        ((-2.3, -1.6, 6.2), (2.3, 2.4, 19.5)),
+    ],
+    'Mountain_Cavern_Vault': [
+        ((-6.3, -5.3, 9.6), (6.3, 5.3, 21.5)),
+    ],
     'Winter_Supply_Sled': _centred(1.18, 2.00, 0.98),
 })
 

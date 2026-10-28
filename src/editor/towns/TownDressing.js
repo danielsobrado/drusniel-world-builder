@@ -156,6 +156,7 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       candidates.push(
         { kind: 'ward_pillar', lx: w / 2 - 0.4, lz: d / 2 + 1.1, w: 1.4, d: 1.4, turn: 0 },
         { kind: 'mine_cart', lx: beside(-1, 1.4), lz: 0.2, w: 1.4, d: 2.2, turn: 0 },
+        { kind: 'mine_vent_stack', lx: beside(1, 2.4), lz: -d / 2 - 1.6, w: 2.4, d: 2.3, turn: 0 },
       );
     }
     if (building.kind === 'smithy') {
@@ -200,6 +201,33 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       yardFence(occupancy, out, building, size);
     }
     yield;
+  }
+  // For Stonehold / Dwarven settlements, roof the inner city (core + mid zones) inside a
+  // hollow mountain cavern massif, leaving only the small outer edge buildings outside.
+  const isStoneholdTown = family === 'Stonehold' || plan.profile?.identity?.loreRealm === 'stonehold';
+  if (isStoneholdTown && (plan.profile?.rank ?? 0) >= 1) {
+    const mountainRadius = (plan.profile?.radius ?? 48) * 0.68;
+    for (let x = -mountainRadius * 0.75; x <= mountainRadius * 0.75; x += 11.2) {
+      for (let z = -mountainRadius * 0.75; z <= mountainRadius * 0.75; z += 9.4) {
+        if (Math.hypot(x, z) <= mountainRadius * 0.85) {
+          out.push({ kind: 'mountain_vault', variant: 0, x, z, yaw: 0 });
+        }
+      }
+    }
+    const ringSteps = Math.max(12, Math.round((2 * Math.PI * mountainRadius) / 7.8));
+    for (let i = 0; i < ringSteps; i += 1) {
+      const angle = (2 * Math.PI * i) / ringSteps;
+      const rx = Math.sin(angle) * mountainRadius;
+      const rz = Math.cos(angle) * mountainRadius;
+      const isGateSlot = i === 0;
+      out.push({
+        kind: isGateSlot ? 'mountain_gate' : 'mountain_cliff',
+        variant: 0,
+        x: rx,
+        z: rz,
+        yaw: angle,
+      });
+    }
   }
   return out;
 }

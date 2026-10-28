@@ -253,11 +253,15 @@ def main():
                     if d < min_clear_dist:
                         blocked_near = True
 
-            # Also check that the camera isn't inside a building/roof by casting upward and backward
+            # Also check that the camera isn't inside a building/roof or right against a wall
             up_hit, up_loc, _, _, up_ob, _ = sc.ray_cast(depsgraph, loc, Vector((0, 0, 1)), distance=3.5)
             inside_penalty = 0.0
             if up_hit and up_ob != stage_floor and (up_loc - loc).length < 1.5:
-                inside_penalty = 50.0
+                inside_penalty += 50.0
+            for side_dir in (Vector((1, 0, 0)), Vector((-1, 0, 0)), Vector((0, 1, 0)), Vector((0, -1, 0))):
+                sh, sl, _, _, sob, _ = sc.ray_cast(depsgraph, loc, side_dir, distance=1.4)
+                if sh and sob != stage_floor and (sl - loc).length < 1.0:
+                    inside_penalty += 25.0
 
             score = min(min_hit, 18.0) * 4.0 - (40.0 if blocked_near else 0.0) - inside_penalty
             if score > best_score:
@@ -391,6 +395,25 @@ def main():
         shutil.copy2(dio_path, os.path.join(DIR_SCENES, "16_scene_Stonehold_Citadel_and_Formations_Diorama.png"))
         clear_stage(diorama_objs + dio_lights)
 
+        # Render the new Dwarven Mountain Gate, Cliff Wall, Cavern Vault & Mine Vent Stack lineup
+        mtn_objs = [
+            place_kit_clone("Mountain_Cliff_Wall", (-11.5, 1.5, 0.0), 0.15),
+            place_kit_clone("Mountain_Gate_Massif", (0.0, 0.0, 0.0), 0.0),
+            place_kit_clone("Mountain_Cavern_Vault", (13.0, 1.5, 0.0), -0.15),
+            place_kit_clone("Mine_Vent_Stack", (-5.5, -4.5, 0.0), 0.2),
+        ]
+        mtn_lights = [
+            add_point_light("L_Mtn_Gate", (0.0, -1.5, 5.2), 260.0),
+            add_point_light("L_Mtn_Cliff", (-11.5, -0.5, 4.5), 140.0),
+            add_point_light("L_Mtn_Vault", (13.0, 1.5, 8.8), 380.0),
+            add_point_light("L_Mtn_Vent", (-5.5, -5.2, 2.6), 110.0),
+        ]
+        mtn_path = os.path.join(DIR_STONEHOLD, "11_Stonehold_Mountain_Gate_Cliff_and_Cavern_Vault.png")
+        frame_and_render(mtn_objs, mtn_path, view_dir=(-0.14, -1.0, 0.32),
+                         lens=34, dist_mult=0.96, res=(1920, 1080), z_bias=-0.04)
+        shutil.copy2(mtn_path, os.path.join(DIR_MODULES, "21_Stonehold_Mountain_Gate_Cliff_and_Cavern_Vault.png"))
+        clear_stage(mtn_objs + mtn_lights)
+
     # ==========================================================================
     # PART 2: NEW D&D / BALDUR'S GATE & DWARVEN STREET MODULES
     # ==========================================================================
@@ -478,59 +501,90 @@ def main():
                 crown_cx = ccx + cspec.w * 0.5
                 cy0 = ccy
 
-            # Shot 1: High Street Canyon & Market Plaza (looking along the Terrace 2 High Street toward the Plaza)
-            tgt1 = ((px + 0.5) * GRID, (py + 0.5) * GRID, 2 * TERRACE + 1.8)
+            # Shot 1: High Street Canyon & Market Plaza (for Stonehold: Inside the Mountain Cavern under the Vault Ceiling!)
+            under_mtn = getattr(plan.TOWN_STYLE, 'under_mountain', False)
+            tgt1 = (
+                (px + 0.5) * GRID,
+                (py + 0.5) * GRID,
+                2 * TERRACE + (4.2 if under_mtn else 1.8),
+            )
             cands1 = []
             # Search open street cells on terrace 2 west and east of the plaza
-            for cx in range(2, plan.W - 2):
+            for cx in range(3, plan.W - 3):
                 if abs(cx - px) < 4 or abs(cx - px) > 9:
                     continue
-                for cy in (spine2, spine2 + 1, py, py - 1, py + 1):
+                for cy in ((spine2, spine2 + 1) if under_mtn else (spine2, spine2 + 1, py, py - 1, py + 1)):
                     if 1 <= cy < plan.H - 1 and (cx, cy) in plan.streets and (cx, cy) not in plan.occupied:
                         if plan.height(cx, cy) == 2:
-                            for z_off in (2.3, 3.0, 3.8):
+                            for z_off in ((2.1, 2.6) if under_mtn else (2.3, 3.0, 3.8)):
                                 cands1.append(((cx + 0.5) * GRID, (cy + 0.5) * GRID, 2 * TERRACE + z_off))
-            # Also add elevated terrace-edge balcony viewpoints looking into the plaza
-            for dx in (-6.5, -5.0, 5.0, 6.5):
-                for dy in (-3.5, -2.5, -1.5, 0.5):
-                    cands1.append(((px + dx) * GRID, (py + dy) * GRID, 2 * TERRACE + 3.6))
-            cam1 = pick_clear_camera(cands1, tgt1, min_clear_dist=5.5)
+            if not under_mtn:
+                # Also add elevated terrace-edge balcony viewpoints looking into the plaza
+                for dx in (-6.5, -5.0, 5.0, 6.5):
+                    for dy in (-3.5, -2.5, -1.5, 0.5):
+                        cands1.append(((px + dx) * GRID, (py + dy) * GRID, 2 * TERRACE + 3.6))
+            cam1 = pick_clear_camera(cands1, tgt1, min_clear_dist=5.0)
             p1 = os.path.join(DIR_STREETS, f"{idx:02d}_{fam}_01_high_street_canyon.png")
-            render_camera_shot(cam1, tgt1, p1, lens=30, res=(1600, 1000))
+            render_camera_shot(cam1, tgt1, p1, lens=24 if under_mtn else 30, res=(1600, 1000))
 
-            # Shot 2: Gate & Lower Street Approach Vista (looking from entrance avenue up to Plaza & Crown)
-            tgt2 = ((px + 0.5) * GRID, (py + 1.5) * GRID, 2 * TERRACE + 2.8)
-            cands2 = [
-                ((ent_x + dx) * GRID, y_grid * GRID, 1 * TERRACE + z_off)
-                for y_grid in (-5.5, -6.8, -4.5, -8.0)
-                for dx in (-3.2, -2.0, -0.8, 0.5, 1.8, 3.2, 4.5)
-                for z_off in (3.0, 4.0, 5.2, 6.2)
-            ]
-            cam2 = pick_clear_camera(cands2, tgt2, min_clear_dist=9.5)
+            # Shot 2: Gate & Lower Street Approach Vista
+            if under_mtn:
+                # For Dwarven holds: Outside on Terrace 1 looking past the small outer stone cottages/smithies
+                # straight at the monumental Mountain_Gate_Massif carved into the towering cliff face!
+                tgt2 = ((ent_x + 0.5) * GRID, (plan.b1 - 0.5) * GRID, 1 * TERRACE + 5.4)
+                cands2 = [
+                    ((ent_x + dx) * GRID, y_grid * GRID, 1 * TERRACE + z_off)
+                    for y_grid in (-3.8, -5.0, -2.6, -6.2)
+                    for dx in (-4.2, -2.8, -1.5, 1.5, 2.8, 4.2)
+                    for z_off in (2.8, 3.6, 4.5)
+                ]
+                cam2 = pick_clear_camera(cands2, tgt2, min_clear_dist=8.0)
+            else:
+                tgt2 = ((px + 0.5) * GRID, (py + 1.5) * GRID, 2 * TERRACE + 2.8)
+                cands2 = [
+                    ((ent_x + dx) * GRID, y_grid * GRID, 1 * TERRACE + z_off)
+                    for y_grid in (-5.5, -6.8, -4.5, -8.0)
+                    for dx in (-3.2, -2.0, -0.8, 0.5, 1.8, 3.2, 4.5)
+                    for z_off in (3.0, 4.0, 5.2, 6.2)
+                ]
+                cam2 = pick_clear_camera(cands2, tgt2, min_clear_dist=9.5)
             p2 = os.path.join(DIR_STREETS, f"{idx:02d}_{fam}_02_gate_and_avenue_vista.png")
-            render_camera_shot(cam2, tgt2, p2, lens=32, res=(1600, 1000))
+            render_camera_shot(cam2, tgt2, p2, lens=30 if under_mtn else 32, res=(1600, 1000))
 
-            # Shot 3: Upper Ward & Crown Street View (looking across Terrace 2/3 toward the Crown Hall/Keep)
-            tgt3 = (crown_cx * GRID, (cy0 + 1.5) * GRID, 4 * TERRACE + 2.6)
-            cands3 = [
-                ((crown_cx + dx) * GRID, (cy0 + dy) * GRID, 3 * TERRACE + z_off)
-                for dy in (-4.8, -5.8, -3.8, -6.8)
-                for dx in (-4.5, -3.0, -1.5, 1.5, 3.0, 4.5)
-                for z_off in (2.6, 3.6, 4.6)
-            ]
-            cam3 = pick_clear_camera(cands3, tgt3, min_clear_dist=6.0)
+            # Shot 3: Upper Ward & Crown Street View (for Stonehold: Deep Inside the Mountain Cavern!)
+            if under_mtn:
+                tgt3 = (crown_cx * GRID, (cy0 + 1.2) * GRID, 4 * TERRACE + 3.6)
+                cands3 = []
+                for cy in range(plan.b2 - 3, cy0):
+                    for cx in range(max(3, int(crown_cx) - 5), min(plan.W - 3, int(crown_cx) + 6)):
+                        if (cx, cy) in plan.streets and (cx, cy) not in plan.occupied:
+                            lvl_z = plan.height(cx, cy) * TERRACE
+                            for z_off in (2.0, 2.6):
+                                cands3.append(((cx + 0.5) * GRID, (cy + 0.5) * GRID, lvl_z + z_off))
+                if not cands3:
+                    cands3 = [((crown_cx - 2.0) * GRID, (cy0 - 3.5) * GRID, 3 * TERRACE + 2.4)]
+                cam3 = pick_clear_camera(cands3, tgt3, min_clear_dist=5.5)
+            else:
+                tgt3 = (crown_cx * GRID, (cy0 + 1.5) * GRID, 4 * TERRACE + 2.6)
+                cands3 = [
+                    ((crown_cx + dx) * GRID, (cy0 + dy) * GRID, 3 * TERRACE + z_off)
+                    for dy in (-4.8, -5.8, -3.8, -6.8)
+                    for dx in (-4.2, -2.8, -1.4, 1.4, 2.8, 4.2)
+                    for z_off in (2.6, 3.6, 4.6)
+                ]
+                cam3 = pick_clear_camera(cands3, tgt3, min_clear_dist=5.5)
             p3 = os.path.join(DIR_STREETS, f"{idx:02d}_{fam}_03_upper_ward_and_crown.png")
-            render_camera_shot(cam3, tgt3, p3, lens=32, res=(1600, 1000))
+            render_camera_shot(cam3, tgt3, p3, lens=25 if under_mtn else 32, res=(1600, 1000))
 
             # Shot 4: Full City Architectural Overview
-            cam4_x = (plan.W * 0.5 - 12.0) * GRID
-            cam4_y = -11.5 * GRID
-            cam4_z = 24.0
+            cam4_x = (plan.W * 0.5 - (10.5 if under_mtn else 12.0)) * GRID
+            cam4_y = (-13.0 if under_mtn else -11.5) * GRID
+            cam4_z = 23.5 if under_mtn else 24.0
             tgt4_x = (plan.W * 0.5) * GRID
-            tgt4_y = (plan.H * 0.48) * GRID
-            tgt4_z = 2.2 * TERRACE
+            tgt4_y = (plan.H * (0.42 if under_mtn else 0.48)) * GRID
+            tgt4_z = (2.8 if under_mtn else 2.2) * TERRACE
             p4 = os.path.join(DIR_STREETS, f"{idx:02d}_{fam}_04_city_overview.png")
-            render_camera_shot((cam4_x, cam4_y, cam4_z), (tgt4_x, tgt4_y, tgt4_z), p4, lens=34, res=(1600, 1000))
+            render_camera_shot((cam4_x, cam4_y, cam4_z), (tgt4_x, tgt4_y, tgt4_z), p4, lens=32 if under_mtn else 34, res=(1600, 1000))
 
         clear_town_collections()
 

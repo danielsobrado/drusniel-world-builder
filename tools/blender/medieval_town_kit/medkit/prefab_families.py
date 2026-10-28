@@ -214,7 +214,8 @@ def stonehold(base):
     # No banners: the walls carry no cloth; the hold's mark is the gate (prefabs.py).
     extra = _without(base.extra, 'dormers', 'banner', 'window_odds')
     roof = 'flat' if base.tower or base.name in STONEHOLD_FLAT else 'slab'
-    return BuildingSpec(f'Stonehold_{base.name}', base.w, base.d, ('granite',) * base.stories,
+    stories = min(base.stories, 3)
+    return BuildingSpec(f'Stonehold_{base.name}', base.w, base.d, ('granite',) * stories,
                         roof=roof, plinth='Basalt', arcade=base.shopfront and not base.tower,
                         gable_front=roof == 'slab' and base.name in GABLE_FRONTED,
                         window_odds=min(base.extra.get('window_odds', 0.6), 0.35),

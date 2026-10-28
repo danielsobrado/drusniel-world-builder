@@ -65,6 +65,15 @@ class GeneratedVillage:
     def _terraces(self):
         rng = self.rng
         self.W, self.H = rng.randint(22, 26), rng.randint(18, 22)
+        if self.TOWN_STYLE.under_mountain:
+            self.W, self.H = 24, 22
+            self.b1 = 6
+            self.b2 = 13
+            self.hill = True
+            self.edge1 = {x: 0 for x in range(self.W)}
+            self.edge2 = {x: 0 for x in range(self.W)}
+            self.crown = (8, 15, 17, self.H - 1)
+            return
         self.b1 = rng.randint(4, 5)
         self.b2 = min(self.b1 + rng.randint(6, 7), self.H - 7)
         self.hill = self.TOWN_STYLE.terrain == 'hill'
@@ -155,6 +164,41 @@ class GeneratedVillage:
         return placed
 
     def _stairs(self):
+        if self.TOWN_STYLE.under_mountain:
+            c1 = self.W // 2
+            self.STAIRS.append((self.stair_mod, c1, -2))
+            self.entrances.append(c1)
+            # Single monumental mountain-gate stair from Terrace 1 (outside) into Terrace 2 (inside the mountain)
+            gy = self.b1 - 2
+            self.STAIRS.append((self.stair_mod, c1, gy))
+            self.occupied |= {(c1, gy), (c1, gy + 1)}
+            # Central subterranean stair from Terrace 2 to Terrace 3 and from Terrace 3 to Crown (Terrace 4)
+            s2_y = self.b2 - 2
+            self.STAIRS.append((self.stair_mod, c1, s2_y))
+            self.occupied |= {(c1, s2_y), (c1, s2_y + 1)}
+            _, _, cy0, _ = self.crown
+            s3_y = cy0 - 2
+            self.STAIRS.append((self.stair_mod, c1, s3_y))
+            self.occupied |= {(c1, s3_y), (c1, s3_y + 1)}
+            self.stairs_by_level = {
+                1: [(c1, gy)],
+                2: [(c1, s2_y)] + self._place_stairs(2, 2),
+                3: [(c1, s3_y)],
+            }
+            # Reserve the central subterranean avenue & Upper Vault Courtyard in front of the Crown
+            for y in range(0, cy0 + 1):
+                for dx in (-1, 0, 1):
+                    cell = (c1 + dx, y)
+                    if cell not in self.occupied:
+                        self.streets.add(cell)
+                        self.main_streets.add(cell)
+            for y in range(self.b2 + 1, cy0):
+                for x in range(c1 - 3, c1 + 4):
+                    if (x, y) not in self.occupied:
+                        self.streets.add((x, y))
+                        self.main_streets.add((x, y))
+            return
+
         # Place main gate entrance near town centre-left and secondary entrance on the right
         c1 = self.rng.randint(max(4, self.W // 3 - 2), self.W // 2)
         c2 = self.rng.randint(self.W // 2 + 3, self.W - 5)
@@ -172,16 +216,20 @@ class GeneratedVillage:
     def _carve_streets(self):
         """Carve continuous E-W High Streets on each terrace band, N-S connecting avenues
         between stair landings, and a central Market Plaza on terrace 2."""
+        preferred_spines = {1: 1, 2: 9, 3: 15} if self.TOWN_STYLE.under_mountain else {}
         for level in (1, 2, 3):
-            # Find the row y with the widest flat span at `level`
-            best_y, best_score = None, -1
-            for y in range(1, self.H - 2):
-                span = sum(
-                    1 for x in range(2, self.W - 2)
-                    if self.height(x, y) == level and (x, y) not in self.occupied
-                )
-                if span > best_score:
-                    best_score, best_y = span, y
+            if level in preferred_spines:
+                best_y, best_score = preferred_spines[level], 20
+            else:
+                # Find the row y with the widest flat span at `level`
+                best_y, best_score = None, -1
+                for y in range(1, self.H - 2):
+                    span = sum(
+                        1 for x in range(2, self.W - 2)
+                        if self.height(x, y) == level and (x, y) not in self.occupied
+                    )
+                    if span > best_score:
+                        best_score, best_y = span, y
             if best_y is not None and best_score >= 6:
                 self.spine_y[level] = best_y
                 for x in range(2, self.W - 2):
@@ -352,12 +400,36 @@ class GeneratedVillage:
                 break
 
     def _landmarks(self):
+        if self.TOWN_STYLE.under_mountain:
+            # In a Dwarven hold, major civic/guild/keep landmarks stand inside the mountain (levels 2 & 3)
+            self._scatter(self._spec(self.TOWN_STYLE.tower), {3}, facings=(0,))
+            for name in self.TOWN_STYLE.landmarks:
+                self._scatter(self._spec(name), {2, 3})
+            return
         self._scatter(self._spec(self.TOWN_STYLE.tower), {1, 3}, facings=(0,))
         for name in self.TOWN_STYLE.landmarks:
             self._scatter(self._spec(name), {1, 2, 3})
 
     def _houses(self):
         target = max(18, self.W * self.H // self.TOWN_STYLE.density)
+        if self.TOWN_STYLE.under_mountain:
+            # First place 4 small stone outpost/worker buildings outside the mountain on Terrace 1
+            # flanking both sides of the Mountain Gate approach road (y = 1)
+            outer_spots = [
+                ('House_Small', 7, 2),
+                ('House_Cottage', 4, 2),
+                ('Shop_Small', 14, 2),
+                ('Smithy', 17, 2),
+            ]
+            for name, ox, oy in outer_spots:
+                self._try_place(self._spec(name), ox, oy, 0)
+            # Place the entire rest of the city inside the mountain on Terraces 2 & 3
+            misses = 0
+            while len(self.BUILDINGS) < target and misses < 22:
+                name = self.rng.choice(self.TOWN_STYLE.pool)
+                if not self._scatter(self._spec(name), {2, 3}, attempts=180):
+                    misses += 1
+            return
         misses = 0
         while len(self.BUILDINGS) < target and misses < 18:
             name = self.rng.choice(self.TOWN_STYLE.pool)
@@ -573,6 +645,42 @@ class GeneratedVillage:
         """Outside the map: a gate tower before the first entrance stair, a rock backdrop,
         and sculpted regional stone formations (such as Stonehold's Vondari crags & shrines)."""
         style = self.TOWN_STYLE
+        if style.under_mountain:
+            gate_x = self.entrances[0] if self.entrances else self.W // 2
+            # 1. Monumental Fortress Mountain Gate carved into the cliff line at y = b1 - 0.65
+            self.PROPS.append(('Mountain_Gate_Massif', gate_x + 0.5, self.b1 - 0.65, 0))
+            # 2. Seamless Mountain Cliff Wall across the front (y = b1 - 0.65) flanking the Mountain Gate
+            for cx in (0.8, 3.6, 7.2, 17.8, 21.4, 23.2):
+                self.PROPS.append(('Mountain_Cliff_Wall', cx, self.b1 - 0.65, 0))
+            # 3. West, East, and North Mountain Cliff Walls enclosing Terraces 2, 3, and 4
+            for cy in range(self.b1 + 2, self.H - 1, 4):
+                self.PROPS.append(('Mountain_Cliff_Wall', 0.05, cy + 0.5, 90))
+                self.PROPS.append(('Mountain_Cliff_Wall', self.W - 0.05, cy + 0.5, 270))
+            for cx in range(2, self.W - 1, 4):
+                self.PROPS.append(('Mountain_Cliff_Wall', cx + 1.5, self.H - 0.05, 180))
+            # 4. Hollow Mountain Peak & Subterranean Cavern Vault Ceiling covering the indoor city (Terraces 2-4)
+            for vy in (self.b1 + 2.8, self.b1 + 7.6, self.b1 + 12.4):
+                if vy >= self.H - 0.5:
+                    continue
+                for vx in (3.6, 9.2, 14.8, 20.4):
+                    if vx < self.W - 1.5:
+                        self.PROPS.append(('Mountain_Cavern_Vault', vx, vy, 0))
+            # 5. Outer mountainside formations & mine ventilation stacks on Terrace 1 and perimeter
+            outer_formations = [
+                ('Stonehold_Fang_Shrine', gate_x - 3.6, 0.8, 25),
+                ('Stonehold_Ward_Pillar', gate_x - 1.8, self.b1 - 1.5, 0),
+                ('Stonehold_Ward_Pillar', gate_x + 2.8, self.b1 - 1.5, 0),
+                ('Mine_Vent_Stack', 2.2, 1.2, 15),
+                ('Stonehold_Twin_Outcrop', self.W - 2.6, 1.4, -20),
+                ('Stonehold_Ledge_Large', -1.6, 2.5, 65),
+                ('Stonehold_Ledge_Large', self.W + 1.6, 2.8, -65),
+                ('Stonehold_Horned_Sanctum', 1.8, self.b1 - 0.2, 15),
+                ('Stonehold_Cavern_Maw', self.W - 2.2, self.b1 - 0.2, -15),
+            ]
+            for fmod, fx, fy, frot in outer_formations:
+                self.PROPS.append((fmod, fx, fy, frot))
+            return
+
         if style.gate and self.entrances:
             # Gate_Stonehold is 6 m (3 cells) wide; Gate_Tower_Orc is 4 m (2 cells) wide.
             dx = -1.0 if style.gate == 'Gate_Stonehold' else -0.5

@@ -18,7 +18,9 @@ FIRE_LIGHTS = {'Brazier': (1.15, 65.0), 'Lamp_Post_Banner': (2.8, 80.0), 'Cauldr
                'Guard_Post': (0.95, 65.0), 'Smelter_Stack': (1.1, 110.0),
                'Stonehold_Ward_Pillar': (2.8, 80.0), 'Stonehold_Vent_Crater': (0.65, 55.0),
                'Stonehold_Caldera_Basin': (1.05, 75.0), 'Stonehold_Fang_Shrine': (0.95, 65.0),
-               'Stonehold_Cavern_Maw': (1.15, 140.0), 'Stonehold_Horned_Sanctum': (1.35, 95.0)}
+               'Stonehold_Cavern_Maw': (1.15, 140.0), 'Stonehold_Horned_Sanctum': (1.35, 95.0),
+               'Mine_Vent_Stack': (2.6, 110.0), 'Mountain_Cliff_Wall': (3.5, 160.0),
+               'Mountain_Gate_Massif': (4.8, 360.0), 'Mountain_Cavern_Vault': (6.8, 560.0)}
 
 
 def _z(plan, x, y):

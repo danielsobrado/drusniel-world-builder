@@ -263,9 +263,25 @@ export function planBuildings({ profile, signature = null, occupancy, streets, b
   const regionalZoneMix = regional ? profile.recipe.zoneMix : ZONE_MIX;
   const regionalDistrictMix = regional ? { ...DISTRICT_MIX, ...profile.recipe.districtMix } : DISTRICT_MIX;
 
+  const isStonehold = profile.identity?.loreRealm === 'stonehold'
+    || profile.recipe?.architecture?.kitFamily === 'Stonehold';
+  let outerStoneholdCount = 0;
+
   for (const anchor of anchors) {
     if (buildings.length >= profile.buildings) break;
     const zone = zoneOf(anchor.distance, profile.radius);
+    if (isStonehold && zone === 'edge') {
+      // Dwarven holds keep most of the city inside the mountain (core + mid) and only a few small buildings outside
+      if (outerStoneholdCount >= 4) continue;
+      const smallKind = outerStoneholdCount === 1 ? 'smithy' : 'house';
+      const smallVariant = smallKind === 'house' ? (outerStoneholdCount % 2 === 0 ? 2 : 0) : 0;
+      const smallBox = tryPlace(occupancy, anchor, smallKind, smallVariant, 2.2, 5.5);
+      if (!smallBox) continue;
+      occupancy.claim(smallBox);
+      outerStoneholdCount += 1;
+      buildings.push(building(smallBox, smallKind, smallVariant, anchor, regional ? { foundationType: baseFoundation } : null));
+      continue;
+    }
     const landmarkIndex = queue.findIndex(
       (entry) => entry.zone === zone || (zone === 'edge' && entry.zone === 'mid') || (regional && entry.assetId),
     );
@@ -312,6 +328,9 @@ export function planBuildings({ profile, signature = null, occupancy, streets, b
 export function planFarms({ profile, signature = null, occupancy, streets, random }) {
   const farms = [];
   const fields = [];
+  if (profile.recipe?.streetConfig?.suppressSurfaceFarms || profile.identity?.loreRealm === 'stonehold') {
+    return { farms, fields };
+  }
   const mains = streets.filter(({ kind }) => kind === 'main');
   const anchors = frontageAnchors(mains, random, { spacing: 7, maxDistance: profile.radius * FARM_BELT.outer })
     .filter(({ distance }) => distance > profile.radius * FARM_BELT.inner);

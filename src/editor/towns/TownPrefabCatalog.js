@@ -142,6 +142,10 @@ const PROP_CLUSTERS = Object.freeze({
   smelter_stack: [[['Smelter_Stack', 0, 0, 0, 0]]],
   ward_pillar: [[['Stonehold_Ward_Pillar', 0, 0, 0, 0]]],
   supply_sled: [[['Winter_Supply_Sled', 0, 0, 0, 0]]],
+  mine_vent_stack: [[['Mine_Vent_Stack', 0, 0, 0, 0]]],
+  mountain_cliff: [[['Mountain_Cliff_Wall', 0, 0, 0, 0]]],
+  mountain_gate: [[['Mountain_Gate_Massif', 0, 0, 0, 0]]],
+  mountain_vault: [[['Mountain_Cavern_Vault', 0, 0, 0, 0]]],
 });
 
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */
