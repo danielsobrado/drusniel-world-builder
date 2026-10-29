@@ -301,27 +301,58 @@ def main():
     # ==========================================================================
     if "stonehold" in modes:
         stage_floor.hide_render = False
-        stage_floor_mesh.materials[0] = ped_mat
+        stage_floor_mesh.materials[0] = materials.get('rock_land')
+        # Set warm golden-hour mountain sun from front-left (35 deg elevation, 218 deg azimuth)
+        # and cool alpine skylight so horizontal flagstone terraces and dark cliffs read clearly
+        sun_ob = bpy.data.objects.get('Sun')
+        if sun_ob:
+            sun_ob.rotation_euler = (math.radians(90 - 35), 0, math.radians(180 - 218))
+            sun_ob.data.energy = 3.1
+        world = bpy.data.worlds.get('GameSky')
+        if world and world.use_nodes:
+            bg = next((n for n in world.node_tree.nodes if n.type == 'BACKGROUND'), None)
+            if bg:
+                bg.inputs['Strength'].default_value = 2.15 / math.pi
+
         sh_shots = [
-            ("01_Stonehold_Ledge_Small", "Stonehold_Ledge_Small", (-0.34, -1.0, 0.52), 46, 1.06, []),
-            ("02_Stonehold_Ledge_Large", "Stonehold_Ledge_Large", (-0.30, -1.0, 0.52), 45, 1.06, []),
-            ("03_Stonehold_Twin_Outcrop", "Stonehold_Twin_Outcrop", (-0.28, -1.0, 0.48), 44, 1.04, []),
-            ("04_Stonehold_Vent_Crater", "Stonehold_Vent_Crater", (-0.26, -1.0, 0.62), 46, 1.06, [
-                ((0.0, 0.0, 0.65), 35.0),
+            ("01_Stonehold_Ledge_Small", "Stonehold_Ledge_Small", (-0.24, -1.0, 0.58), 46, 1.05, [
+                ((0.04, 0.14, 1.48), 32.0),
+                ((0.32, -0.78, 0.72), 26.0),
             ]),
-            ("05_Stonehold_Caldera_Basin", "Stonehold_Caldera_Basin", (-0.28, -1.0, 0.54), 44, 1.05, [
-                ((0.0, -0.2, 1.05), 55.0),
+            ("02_Stonehold_Ledge_Large", "Stonehold_Ledge_Large", (-0.20, -1.0, 0.56), 44, 1.04, [
+                ((-0.36, -0.15, 1.75), 36.0),
+                ((0.98, -0.10, 1.48), 34.0),
+                ((0.32, -1.25, 0.45), 26.0),
             ]),
-            ("06_Stonehold_Fang_Shrine", "Stonehold_Fang_Shrine", (-0.36, -1.0, 0.36), 44, 1.06, [
-                ((0.25, -0.35, 0.95), 45.0),
+            ("03_Stonehold_Twin_Outcrop", "Stonehold_Twin_Outcrop", (-0.10, -1.0, 0.58), 44, 1.00, [
+                ((-1.14, 0.14, 1.95), 42.0),
+                ((1.10, -0.15, 1.75), 42.0),
+                ((1.06, -0.58, 1.25), 35.0),
+                ((-0.35, -0.25, 0.95), 32.0),
+                ((0.78, -0.68, 0.48), 35.0),
+                ((-1.15, -0.75, 0.85), 28.0),
             ]),
-            ("07_Stonehold_Cavern_Maw", "Stonehold_Cavern_Maw", (-0.24, -1.0, 0.34), 42, 1.08, [
-                ((0.0, 0.05, 1.05), 140.0),
-                ((0.0, -0.45, 0.75), 65.0),
+            ("04_Stonehold_Vent_Crater", "Stonehold_Vent_Crater", (-0.22, -1.0, 0.60), 46, 1.06, [
+                ((0.0, 0.0, 0.72), 45.0),
+                ((0.0, -1.15, 0.65), 28.0),
             ]),
-            ("08_Stonehold_Horned_Sanctum", "Stonehold_Horned_Sanctum", (-0.28, -1.0, 0.38), 42, 1.12, [
-                ((-0.2, -0.9, 1.25), 85.0),
-                ((0.1, 0.1, 2.75), 65.0),
+            ("05_Stonehold_Caldera_Basin", "Stonehold_Caldera_Basin", (-0.22, -1.0, 0.58), 44, 1.05, [
+                ((0.0, -0.1, 1.05), 55.0),
+                ((-0.48, 0.55, 1.55), 38.0),
+            ]),
+            ("06_Stonehold_Fang_Shrine", "Stonehold_Fang_Shrine", (-0.26, -1.0, 0.46), 44, 1.06, [
+                ((0.06, -0.12, 1.15), 45.0),
+                ((0.04, 0.12, 1.05), 38.0),
+            ]),
+            ("07_Stonehold_Cavern_Maw", "Stonehold_Cavern_Maw", (-0.20, -1.0, 0.40), 42, 1.08, [
+                ((0.0, 0.05, 1.15), 95.0),
+                ((0.0, -0.65, 0.72), 48.0),
+                ((0.0, 0.78, 3.80), 42.0),
+            ]),
+            ("08_Stonehold_Horned_Sanctum", "Stonehold_Horned_Sanctum", (-0.22, -1.0, 0.48), 42, 1.08, [
+                ((-0.2, -0.8, 1.45), 55.0),
+                ((0.1, -0.1, 2.75), 52.0),
+                ((0.24, 0.90, 4.18), 42.0),
             ]),
         ]
         for file_stem, mod_name, vdir, lens, dmult, light_specs in sh_shots:

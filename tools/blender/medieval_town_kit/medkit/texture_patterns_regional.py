@@ -103,5 +103,26 @@ def snow_path(n, seed):
     return albedo.astype(np.float32), (height - 0.4 * ruts - 0.3 * bare).astype(np.float32), 1.4
 
 
+def basalt(n, seed):
+    """Stonehold cliff basalt: charcoal columns split by deep vertical joints (sy = along v,
+    which runs up a cliff face), a few horizontal shears and pale weathered column faces."""
+    big, fine = fbm(n, seed, 2.4), fbm(n, seed + 1, 0.8)
+    # Axis 1 is u (across the face): 12 columns, edges wobbled by tall low-frequency noise.
+    u = np.tile(np.arange(n, dtype=np.float32) / n, (n, 1))
+    cell = (u + (fbm(n, seed + 2, 2.6, sy=6.0) - 0.5) * 0.05) * 12.0
+    frac = cell - np.floor(cell)
+    edge = np.minimum(frac, 1.0 - frac)
+    joints = smooth(0.07, 0.0, edge)
+    col_tone = np.asarray(np.random.default_rng(seed).uniform(0.78, 1.18, 12), np.float32)[
+        np.floor(cell).astype(int) % 12]
+    shear = smooth(0.025, 0.0, np.abs(fbm(n, seed + 4, 1.6, sx=7.0, sy=1.0) - 0.5)) * smooth(0.55, 0.75, big)
+    face = smooth(0.0, 0.3, edge)
+    albedo = lerp((0.12, 0.13, 0.16), (0.27, 0.28, 0.31), smooth(0.2, 0.9, 0.4 * face + 0.6 * big))
+    albedo = tint(albedo, col_tone * (0.88 + 0.22 * fine) * (1 - 0.75 * joints) * (1 - 0.5 * shear))
+    height = 0.6 * face + 0.15 * big + 0.12 * fine - 0.8 * joints - 0.35 * shear
+    return _weather(albedo, n, seed, 0.16), height.astype(np.float32), 3.0
+
+
 REGIONAL_PATTERNS = {'granite': (granite, 1024), 'sod': (sod, 512), 'earth': (earth, 1024),
-                     'rock': (rock, 1024), 'snow': (snow, 512), 'snow_path': (snow_path, 1024)}
+                     'rock': (rock, 1024), 'snow': (snow, 512), 'snow_path': (snow_path, 1024),
+                     'basalt': (basalt, 1024)}
