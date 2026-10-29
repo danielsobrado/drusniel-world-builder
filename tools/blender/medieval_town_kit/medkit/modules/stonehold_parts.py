@@ -18,6 +18,7 @@ import random
 
 from mathutils import Matrix, Vector
 
+from .. import materials
 from ..config import detailed
 from ..mesh import MeshBuilder
 
@@ -35,19 +36,63 @@ def ring_pts(cx, cy, z, rx, ry, angles, radii_mult, tilt_x=0.0, tilt_y=0.0, rot=
     return pts
 
 
-def loft_rings(b, bot_pts, top_pts, mat, cap_bot=False, cap_top=True, cap_mat=None, tone=1.0):
+def _ring_u(pts, scale, u0):
+    """Arc length round a ring in texture units, so a wrapped texture flows across edges."""
+    us = [u0]
+    for i in range(len(pts)):
+        us.append(us[-1] + (pts[(i + 1) % len(pts)] - pts[i]).length / scale)
+    return us
+
+
+def loft_rings(b, bot_pts, top_pts, mat, cap_bot=False, cap_top=True, cap_mat=None, tone=1.0, us=None):
     n = len(bot_pts)
     centre = sum(bot_pts, Vector()) / n
+    # Rock wraps its texture round the block (u = arc length, v = height); per-face planar UVs
+    # restart at every edge and make the texture jump between facets. u is measured once (on the
+    # block's foot ring) and shared by every ring, or a battered top shears the columns diagonal.
+    wrap = mat == 'rock_cliff'
+    if wrap:
+        scale = materials.SPEC[mat].scale
+        ub = ut = us or _ring_u(bot_pts, scale, 0.0)
     for i in range(n):
         p0, p1 = bot_pts[i], bot_pts[(i + 1) % n]
         q1, q0 = top_pts[(i + 1) % n], top_pts[i]
         mid = (p0 + p1 + q0 + q1) * 0.25
         out = Vector((mid.x - centre.x, mid.y - centre.y, 0.15))
-        b.poly([p0, p1, q1, q0], mat, outward=out, tone=tone)
+        uvs = None
+        if wrap:
+            uvs = [(ub[i], p0.z / scale), (ub[i + 1], p1.z / scale),
+                   (ut[i + 1], q1.z / scale), (ut[i], q0.z / scale)]
+        b.poly([p0, p1, q1, q0], mat, outward=out, tone=tone, uvs=uvs)
     if cap_bot:
         b.poly(list(reversed(bot_pts)), mat, outward=(0, 0, -1), tone=tone * 0.75)
     if cap_top:
         b.poly(top_pts, cap_mat or mat, outward=(0, 0, 1), tone=tone * 0.98)
+
+
+def _kinked_loft(b, bot, end, mat, rng, rx, tone, us, cap_top, cap_mat):
+    """Loft bot -> end through jittered intermediate rings, so a rock face's long edges kink
+    and bulge like fractured stone instead of running ruler-straight."""
+    h = end[0].z - bot[0].z
+    n_mid = 0 if not detailed() else min(2, int(h / 0.18))
+    bulge = min(rx, 0.18)  # big massifs get the same few-cm kinks as ribs, not terraces
+    centre = sum(bot, Vector()) / len(bot)
+    rings = [bot]
+    for k in range(1, n_mid + 1):
+        t = k / (n_mid + 1) + rng.uniform(-0.08, 0.08) / (n_mid + 1)
+        ring = []
+        for p, q in zip(bot, end):
+            v = p.lerp(q, t)
+            radial = Vector((v.x - centre.x, v.y - centre.y, 0.0))
+            if radial.length > 1e-6:
+                v = v + radial.normalized() * bulge * rng.uniform(-0.05, 0.07)
+            ring.append(v + Vector((0, 0, rng.uniform(-0.12, 0.12) * h / (n_mid + 1))))
+        rings.append(ring)
+    rings.append(end)
+    for k in range(len(rings) - 1):
+        last = k == len(rings) - 2
+        loft_rings(b, rings[k], rings[k + 1], mat, cap_bot=False, cap_top=cap_top and last,
+                   cap_mat=cap_mat, tone=tone, us=us)
 
 
 def crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='rock_cliff',
@@ -63,18 +108,20 @@ def crag_block(b, cx, cy, z0, z1, rx, ry, seed=1, sides=7, mat='rock_cliff',
     tone_val = rng.uniform(0.70, 0.96) if tone is None else tone
 
     bot = ring_pts(cx, cy, z0, rx, ry, angles, rm_bot, rot=rot)
+    us = _ring_u(bot, materials.SPEC[mat].scale, rng.uniform(0.0, 1.0)) if mat == 'rock_cliff' else None
     if detailed() and chamfer > 0.005 and (z1 - z0) > chamfer * 2.5 and min(rx, ry) > chamfer * 3.0:
         z_ch = z1 - chamfer
         mid = ring_pts(cx, cy, z_ch, rx, ry, angles, rm_mid, tilt_x=tilt_x, tilt_y=tilt_y, rot=rot)
         ch_scale = max(0.65, 1.0 - chamfer / max(0.20, min(rx, ry)))
         rm_top = [r * ch_scale for r in rm_mid]
         top = ring_pts(cx, cy, z1, rx, ry, angles, rm_top, tilt_x=tilt_x, tilt_y=tilt_y, rot=rot)
-        loft_rings(b, bot, mid, mat, cap_bot=False, cap_top=False, tone=tone_val)
+        _kinked_loft(b, bot, mid, mat, rng, min(rx, ry), tone_val, us, False, None)
         loft_rings(b, mid, top, cap_mat or mat, cap_bot=False, cap_top=True,
-                   cap_mat=cap_mat or mat, tone=tone_val * 0.96)
+                   cap_mat=cap_mat or mat, tone=tone_val * 0.96,
+                   us=us if (cap_mat or mat) == mat else None)
     else:
         top = ring_pts(cx, cy, z1, rx, ry, angles, rm_mid, tilt_x=tilt_x, tilt_y=tilt_y, rot=rot)
-        loft_rings(b, bot, top, mat, cap_bot=False, cap_top=True, cap_mat=cap_mat or mat, tone=tone_val)
+        _kinked_loft(b, bot, top, mat, rng, min(rx, ry), tone_val, us, True, cap_mat or mat)
 
 
 def rock_spire(b, base_pt, tip_pt, rx, ry, seed=1, mat='rock_cliff',
@@ -149,7 +196,7 @@ def jagged_cliff_tier(b, cx, cy, z0, z1, rx, ry, seed=1, ribs=20,
             rib_z1 = z1 - rng.uniform(0.060, 0.100)
         else:
             rib_z1 = z1 - rng.uniform(0.01, 0.14 * (z1 - z0))
-        tone_choice = rng.uniform(0.68, 0.98)
+        tone_choice = rng.uniform(0.80, 0.94)
         # Break each column into 1-3 stacked blocks, wider and further out toward the foot,
         # so the face reads as fractured crag with ledges rather than a palisade of posts.
         n_seg = 1 if in_open or not detailed() or (rib_z1 - z0) < 0.26 else rng.choice((2, 2, 3))
@@ -167,7 +214,7 @@ def jagged_cliff_tier(b, cx, cy, z0, z1, rx, ry, seed=1, ribs=20,
                        mat='rock_cliff', cap_mat='rock_cliff',
                        batter=rng.uniform(0.82, 0.93), chamfer=0.0 if top_seg else 0.014,
                        tilt_x=tilt * math.cos(a), tilt_y=tilt * math.sin(a),
-                       rot=a + rng.uniform(-0.3, 0.3), tone=tone_choice * rng.uniform(0.9, 1.06))
+                       rot=a + rng.uniform(-0.3, 0.3), tone=tone_choice * rng.uniform(0.96, 1.03))
             if not top_seg and rng.random() < 0.22:
                 moss_tuft(b, cx + rx * (seg_dist + 0.02) * math.cos(a),
                           cy + ry * (seg_dist + 0.02) * math.sin(a), bounds[k + 1],
@@ -814,10 +861,12 @@ def waterfall_cascade(b, p_top, p_bot, width=0.26, seed=1):
     p1 = Vector(p_bot)
 
     segs = 5 if detailed() else 3
+    # Interior points wander sideways so the fall follows the crag instead of a ruler line.
+    wrng = random.Random(seed + 7)
+    pts = [p0.lerp(p1, k / segs) + (Vector((wrng.uniform(-1, 1), wrng.uniform(-1, 1), 0.0)) * width * 0.08
+                                    if 0 < k < segs else Vector()) for k in range(segs + 1)]
     for k in range(segs):
-        t0, t1 = k / segs, (k + 1) / segs
-        c0 = p0.lerp(p1, t0)
-        c1 = p0.lerp(p1, t1)
+        c0, c1 = pts[k], pts[k + 1]
         # Note: in b.beam(..., (0,0,1), side_range, width, mat),
         # `side_range` is vertical thickness and `width` is horizontal chute width!
         b.beam((c0.x, c0.y, c0.z), (c1.x, c1.y, c1.z),
