@@ -13,6 +13,7 @@ from .modules import foundations as F
 from .modules.palisade import CHAMBER, PAD_H, TOWER
 from .modules.walls_stonehold import FACE, GATE_D, GATE_H, GATE_W, GRANITE_WINDOW, PASSAGE
 from .modules.walls_frontier import PORCH_DEPTH, PORCH_POSTS
+from .modules.stonehold_formations import BLUFFS
 
 
 def _panel(hole):
@@ -228,10 +229,20 @@ def _foundations():
 
 COLLIDERS.update(_foundations())
 COLLIDERS['Watchtower_Frost'] = COLLIDERS['Watchtower_Orc']
+
+
+def _on_bluff(name, boxes):
+    """A Stonehold formation lifted onto its bluff: one solid box per cliff ellipse (inset to
+    the faces between its ribs), plus the formation's own boxes raised by the bluff height."""
+    h, ellipses, _ = BLUFFS[name]
+    cliff = [((cx - rx * 0.8, cy - ry * 0.8, 0), (cx + rx * 0.8, cy + ry * 0.8, h))
+             for cx, cy, rx, ry, _ in ellipses]
+    return cliff + [((x0, y0, z0 + h), (x1, y1, z1 + h)) for (x0, y0, z0), (x1, y1, z1) in boxes]
+
 COLLIDERS.update({
     'Stonehold_Ledge_Small': _centred(2.4, 2.2, 1.0),
     'Stonehold_Ledge_Large': _centred(3.3, 2.8, 1.2),
-    'Stonehold_Twin_Outcrop': _centred(4.4, 2.4, 1.25 + 0.85),  # + TWIN_BLUFF_H
+    'Stonehold_Twin_Outcrop': _centred(4.4, 2.4, 1.25),
     'Stonehold_Vent_Crater': _centred(2.5, 2.4, 0.72),
     'Stonehold_Caldera_Basin': _centred(3.5, 3.1, 1.45),
     'Stonehold_Fang_Shrine': _centred(2.8, 2.6, 0.85) + [((-0.95, 0.0, 0), (0.35, 1.0, 2.95))],
@@ -265,6 +276,7 @@ COLLIDERS.update({
     ],
     'Winter_Supply_Sled': _centred(1.18, 2.00, 0.98),
 })
+COLLIDERS.update({name: _on_bluff(name, COLLIDERS[name]) for name in BLUFFS})
 
 
 def for_module(name):

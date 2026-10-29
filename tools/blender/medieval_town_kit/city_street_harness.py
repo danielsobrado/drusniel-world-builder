@@ -367,7 +367,8 @@ def main():
             lights_created = [add_point_light(f"L_{file_stem}_{idx}", l_loc, l_en)
                               for idx, (l_loc, l_en) in enumerate(light_specs)]
             out_p = os.path.join(DIR_STONEHOLD, f"{file_stem}.png")
-            frame_and_render([ob], out_p, view_dir=vdir, lens=lens, dist_mult=dmult, res=(1440, 1080))
+            # Formations stand on bluffs (stonehold_formations.BLUFFS); pull back to keep their feet in frame.
+            frame_and_render([ob], out_p, view_dir=vdir, lens=lens, dist_mult=dmult * 1.25, res=(1440, 1080))
             shutil.copy2(out_p, os.path.join(DIR_MODULES, f"16_{file_stem}.png"))
             clear_stage([ob] + lights_created)
 

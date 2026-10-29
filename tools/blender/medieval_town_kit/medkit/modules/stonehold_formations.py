@@ -359,14 +359,28 @@ def stonehold_twin_outcrop():
 
     _talus_skirt(b, -1.26, 0.02, 0.0, 1.28, 1.14, 10, 0.14, 0.26, seed=370)
     _talus_skirt(b, 1.26, 0.06, 0.0, 1.32, 1.18, 10, 0.14, 0.26, seed=371)
-    _raise_on_bluff(b, TWIN_BLUFF_H, ((-1.30, 0.02, 1.55, 1.36, 380), (1.30, 0.06, 1.60, 1.40, 381),
-                                      (-0.02, -0.34, 0.95, 0.92, 382)),
-                    falls=((-0.68, -1.18, -1.50, 0.22), (0.24, -0.98, -1.42, 0.28)))
     return b
 
 
-# Height of the basalt bluff the twin citadels stand on (colliders.py adds it to the deck block).
-TWIN_BLUFF_H = 0.85
+# Each formation stands on a basalt bluff so its citadel tiers crown a mountain, as in the
+# concept art: module -> (height, ellipses (cx, cy, rx, ry, seed), falls (x, y_top, y_foot,
+# width)). Ellipses cover the stair feet; falls continue an existing waterfall from its old pool
+# down the new cliff. colliders.py builds each formation's collision from the same table.
+BLUFFS = {
+    'Stonehold_Ledge_Small': (0.70, ((0.0, -0.12, 1.45, 1.50, 180),),
+                              ((0.88, -1.20, -1.55, 0.22),)),
+    'Stonehold_Ledge_Large': (0.80, ((0.0, -0.12, 1.95, 1.72, 280),),
+                              ((-1.20, -1.50, -1.78, 0.24),)),
+    'Stonehold_Twin_Outcrop': (0.85, ((-1.30, 0.02, 1.55, 1.36, 380), (1.30, 0.06, 1.60, 1.40, 381),
+                                      (-0.02, -0.34, 0.95, 0.92, 382)),
+                               ((-0.68, -1.18, -1.50, 0.22), (0.24, -0.98, -1.42, 0.28))),
+    'Stonehold_Vent_Crater': (0.60, ((0.0, -0.06, 1.55, 1.62, 480),), ()),
+    'Stonehold_Caldera_Basin': (0.70, ((0.0, -0.08, 2.00, 1.86, 580),), ()),
+    'Stonehold_Fang_Shrine': (0.60, ((0.0, -0.08, 1.62, 1.62, 680),), ()),
+    'Stonehold_Cavern_Maw': (0.50, ((0.0, -0.20, 2.05, 2.12, 780),), ()),
+    'Stonehold_Horned_Sanctum': (0.70, ((0.10, -0.05, 2.55, 2.32, 880), (-1.70, 0.35, 1.15, 1.05, 881)),
+                                 ((1.42, -1.78, -2.30, 0.28),)),
+}
 
 
 def _raise_on_bluff(b, h, bluffs, falls=()):
@@ -925,4 +939,7 @@ STONEHOLD_MODULES = (
 
 def define(kit):
     for name, fn in STONEHOLD_MODULES:
-        kit.define(name, 'nature', fn())
+        b = fn()
+        if name in BLUFFS:
+            _raise_on_bluff(b, *BLUFFS[name])
+        kit.define(name, 'nature', b)
