@@ -301,7 +301,14 @@ def main():
     # ==========================================================================
     if "stonehold" in modes:
         stage_floor.hide_render = False
-        stage_floor_mesh.materials[0] = materials.get('rock_land')
+        # Pale valley haze under the cliffs, as in the Stonehold concept art (a textured
+        # floor moirés at this distance and warms the cliffs with bounce light).
+        haze_mat = bpy.data.materials.new('HarnessHazeMat')
+        haze_mat.use_nodes = True
+        hbsdf = next(n for n in haze_mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+        hbsdf.inputs['Base Color'].default_value = (0.50, 0.53, 0.58, 1.0)
+        hbsdf.inputs['Roughness'].default_value = 1.0
+        stage_floor_mesh.materials[0] = haze_mat
         # Set warm golden-hour mountain sun from front-left (35 deg elevation, 218 deg azimuth)
         # and cool alpine skylight so horizontal flagstone terraces and dark cliffs read clearly
         sun_ob = bpy.data.objects.get('Sun')

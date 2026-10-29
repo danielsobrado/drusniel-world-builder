@@ -143,35 +143,35 @@ def jagged_cliff_tier(b, cx, cy, z0, z1, rx, ry, seed=1, ribs=20,
             dist = rng.uniform(0.80, 0.98)
         bx = cx + rx * dist * math.cos(a)
         by = cy + ry * dist * math.sin(a)
-        rib_w = (2 * math.pi * max(rx, ry) / n_ribs) * rng.uniform(0.54, 0.78)
+        rib_w = (2 * math.pi * max(rx, ry) / n_ribs) * rng.uniform(0.48, 0.92)
         rib_d = rib_w * rng.uniform(0.72, 1.08)
         if under_terrace:
             rib_z1 = z1 - rng.uniform(0.060, 0.100)
-            tx, ty = 0.0, 0.0
         else:
             rib_z1 = z1 - rng.uniform(0.01, 0.14 * (z1 - z0))
-            tx = -0.12 * math.cos(a)
-            ty = -0.12 * math.sin(a)
         tone_choice = rng.uniform(0.68, 0.98)
-        crag_block(b, bx, by, z0, rib_z1, rib_w, rib_d,
-                   seed=seed * 17 + i, sides=5 if i % 2 == 0 else 6,
-                   mat='rock_cliff', cap_mat='rock_cliff',
-                   batter=rng.uniform(0.84, 0.93), chamfer=0.0,
-                   tilt_x=tx, tilt_y=ty,
-                   rot=a + rng.uniform(-0.22, 0.22), tone=tone_choice)
-        # Secondary stepped crag shoulder halfway up the cliff (skip in stair openings)
-        if detailed() and not in_open and i % 2 == 0 and (z1 - z0) > 0.32:
-            s_dist = dist + (0.05 if under_terrace else 0.09)
-            lx = cx + rx * s_dist * math.cos(a)
-            ly = cy + ry * s_dist * math.sin(a)
-            lz1 = z0 + (z1 - z0) * rng.uniform(0.38, 0.64)
-            crag_block(b, lx, ly, z0, lz1, rib_w * 0.80, rib_d * 0.78,
-                       seed=seed * 31 + i, sides=5,
+        # Break each column into 1-3 stacked blocks, wider and further out toward the foot,
+        # so the face reads as fractured crag with ledges rather than a palisade of posts.
+        n_seg = 1 if in_open or not detailed() or (rib_z1 - z0) < 0.26 else rng.choice((2, 2, 3))
+        cuts = sorted(rng.uniform(0.25, 0.8) for _ in range(n_seg - 1))
+        bounds = [z0] + [z0 + (rib_z1 - z0) * c for c in cuts] + [rib_z1]
+        for k in range(n_seg):
+            below = n_seg - 1 - k
+            seg_dist = dist + below * rng.uniform(0.02, 0.05)
+            grow = 1.0 + below * rng.uniform(0.10, 0.28)
+            top_seg = k == n_seg - 1
+            tilt = 0.0 if (under_terrace and top_seg) else rng.uniform(-0.07, 0.07)
+            crag_block(b, cx + rx * seg_dist * math.cos(a), cy + ry * seg_dist * math.sin(a),
+                       bounds[k], bounds[k + 1], rib_w * grow, rib_d * grow,
+                       seed=seed * 17 + i * 5 + k, sides=5 if (i + k) % 2 == 0 else 6,
                        mat='rock_cliff', cap_mat='rock_cliff',
-                       batter=0.84, chamfer=0.0,
-                       tilt_x=0.0 if under_terrace else -0.10 * math.cos(a),
-                       tilt_y=0.0 if under_terrace else -0.10 * math.sin(a),
-                       rot=a, tone=tone_choice * 0.88)
+                       batter=rng.uniform(0.82, 0.93), chamfer=0.0 if top_seg else 0.014,
+                       tilt_x=tilt * math.cos(a), tilt_y=tilt * math.sin(a),
+                       rot=a + rng.uniform(-0.3, 0.3), tone=tone_choice * rng.uniform(0.9, 1.06))
+            if not top_seg and rng.random() < 0.22:
+                moss_tuft(b, cx + rx * (seg_dist + 0.02) * math.cos(a),
+                          cy + ry * (seg_dist + 0.02) * math.sin(a), bounds[k + 1],
+                          radius=rib_w * 0.55, seed=seed * 7 + i)
 
 
 def _angle_in_ranges(ang, open_angles):
@@ -217,33 +217,11 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
         g_top = ring_pts(cx, cy, z_deck - 0.018, rx * 1.025, ry * 1.025, angles, radii)
         loft_rings(b, g_bot, g_top, 'gold', cap_bot=False, cap_top=False, tone=0.88)
 
-    # 2. Sunlit paved flagstone slab courses across the terrace deck
-    if detailed():
-        inner_r = [r * 0.50 for r in radii]
-        center_pts = ring_pts(cx, cy, z_deck + 0.016, rx * 0.46, ry * 0.46, angles, radii)
-        center_bot = ring_pts(cx, cy, z_deck - 0.005, rx * 0.46, ry * 0.46, angles, radii)
-        loft_rings(b, center_bot, center_pts, 'stone_dressed',
-                   cap_bot=False, cap_top=True, cap_mat='stone_dressed', tone=0.96)
-        for i in range(sides):
-            j = (i + 1) % sides
-            a0, a1 = angles[i] + 0.025, angles[j] - 0.025
-            r_mid0, r_mid1 = radii[i] * 0.72, radii[j] * 0.72
-            r_out0, r_out1 = radii[i] * 0.94, radii[j] * 0.94
-            ri0, ri1 = inner_r[i], inner_r[j]
-            for ra0, rb0, ra1, rb1, t_off in (
-                (ri0, r_mid0 - 0.02, ri1, r_mid1 - 0.02, 0.0),
-                (r_mid0 + 0.01, r_out0, r_mid1 + 0.01, r_out1, 0.04),
-            ):
-                slab_bot = [
-                    Vector((cx + rx * ra0 * math.cos(a0), cy + ry * ra0 * math.sin(a0), z_deck - 0.005)),
-                    Vector((cx + rx * rb0 * math.cos(a0), cy + ry * rb0 * math.sin(a0), z_deck - 0.005)),
-                    Vector((cx + rx * rb1 * math.cos(a1), cy + ry * rb1 * math.sin(a1), z_deck - 0.005)),
-                    Vector((cx + rx * ra1 * math.cos(a1), cy + ry * ra1 * math.sin(a1), z_deck - 0.005)),
-                ]
-                slab_top = [Vector((p.x, p.y, z_deck + 0.015)) for p in slab_bot]
-                loft_rings(b, slab_bot, slab_top, 'stone_dressed',
-                           cap_bot=False, cap_top=True, cap_mat='stone_dressed',
-                           tone=0.90 + 0.05 * ((i + (1 if t_off else 0)) % 3))
+    # 2. One flagstone paving course over the whole deck (the texture draws the slabs)
+    pave_bot = ring_pts(cx, cy, z_deck - 0.005, rx * 0.96, ry * 0.96, angles, radii)
+    pave_top = ring_pts(cx, cy, z_deck + 0.012, rx * 0.96, ry * 0.96, angles, radii)
+    loft_rings(b, pave_bot, pave_top, 'stone_flag', cap_bot=False, cap_top=True,
+               cap_mat='stone_flag', tone=0.96)
 
     # 3. Sleek perimeter crenellated parapet curbs & slender vertical cliff pilaster buttresses
     rim_pts = ring_pts(cx, cy, z_deck, rx * 0.97, ry * 0.97, angles, radii)
@@ -253,14 +231,14 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
         p1 = rim_pts[j]
         c0 = cornice_top[i]
         # Slender vertical corner pilaster buttress descending down the cliff face
-        if buttresses and (detailed() or i % 2 == 0):
+        if buttresses and i % 2 == 0:
             ang_v = angles[i]
             vx, vy = c0.x, c0.y
             bw = 0.042
             z_butt_bot = max(0.0, z0)
             b.box((vx - bw, vy - bw, z_butt_bot), (vx + bw, vy + bw, z_deck + 0.085), 'stone_basalt', bevel=0)
             b.box((vx - bw * 1.15, vy - bw * 1.15, z_deck + 0.075),
-                  (vx + bw * 1.15, vy + bw * 1.15, z_deck + 0.095), 'gold', bevel=0)
+                  (vx + bw * 1.15, vy + bw * 1.15, z_deck + 0.095), 'stone_basalt', bevel=0)
             if detailed() and gold_trim and (z_deck - z_butt_bot) > 0.22:
                 gx = vx + math.cos(ang_v) * (bw * 0.55)
                 gy = vy + math.sin(ang_v) * (bw * 0.55)
@@ -396,7 +374,7 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
     b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
            (0, 0, 1), (-0.09, 0.0), width, 'stone_basalt', bevel=0)
     b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-           (0, 0, 1), (-0.002, 0.018), width * 0.88, 'stone_dressed', bevel=0)
+           (0, 0, 1), (-0.002, 0.018), width * 0.88, 'stone_flag', bevel=0)
     if detailed():
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
                (0, 0, 1), (-0.052, -0.026), width * 1.04, 'gold', bevel=0)
@@ -856,11 +834,8 @@ def waterfall_cascade(b, p_top, p_bot, width=0.26, seed=1):
 
     # Splash pool & wet boulders at base
     crag_block(b, p1.x, p1.y, 0.0, 0.038, width * 1.45, width * 1.25,
-               seed=seed + 80, sides=8, mat='rock_cliff', cap_mat='ice',
+               seed=seed + 80, sides=8, mat='rock_cliff', cap_mat='water',
                batter=0.95, chamfer=0.0, tone=0.72)
-    crag_block(b, p1.x, p1.y, 0.005, 0.048, width * 0.82, width * 0.72,
-               seed=seed + 84, sides=7, mat='ice', cap_mat='snow',
-               batter=0.90, chamfer=0.0, tone=0.95)
     if detailed():
         b.blob((p1.x, p1.y, 0.040), width * 0.50, 'snow',
                subdiv=1, squash=(1.4, 1.4, 0.18), jitter=0.25, seed=seed + 88)

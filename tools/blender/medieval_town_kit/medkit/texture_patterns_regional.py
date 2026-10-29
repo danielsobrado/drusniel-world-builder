@@ -107,22 +107,52 @@ def basalt(n, seed):
     """Stonehold cliff basalt: charcoal columns split by deep vertical joints (sy = along v,
     which runs up a cliff face), a few horizontal shears and pale weathered column faces."""
     big, fine = fbm(n, seed, 2.4), fbm(n, seed + 1, 0.8)
-    # Axis 1 is u (across the face): 12 columns, edges wobbled by tall low-frequency noise.
+    # Axis 1 is u (across the face): 7 columns, edges wobbled by tall low-frequency noise.
     u = np.tile(np.arange(n, dtype=np.float32) / n, (n, 1))
-    cell = (u + (fbm(n, seed + 2, 2.6, sy=6.0) - 0.5) * 0.05) * 12.0
+    cell = (u + (fbm(n, seed + 2, 2.6, sy=6.0) - 0.5) * 0.09) * 7.0
     frac = cell - np.floor(cell)
     edge = np.minimum(frac, 1.0 - frac)
-    joints = smooth(0.07, 0.0, edge)
-    col_tone = np.asarray(np.random.default_rng(seed).uniform(0.78, 1.18, 12), np.float32)[
-        np.floor(cell).astype(int) % 12]
+    joints = smooth(0.045, 0.0, edge) * (0.55 + 0.45 * smooth(0.3, 0.7, fbm(n, seed + 5, 2.0, sy=4.0)))
+    col_tone = np.asarray(np.random.default_rng(seed).uniform(0.82, 1.14, 7), np.float32)[
+        np.floor(cell).astype(int) % 7]
     shear = smooth(0.025, 0.0, np.abs(fbm(n, seed + 4, 1.6, sx=7.0, sy=1.0) - 0.5)) * smooth(0.55, 0.75, big)
     face = smooth(0.0, 0.3, edge)
-    albedo = lerp((0.12, 0.13, 0.16), (0.27, 0.28, 0.31), smooth(0.2, 0.9, 0.4 * face + 0.6 * big))
-    albedo = tint(albedo, col_tone * (0.88 + 0.22 * fine) * (1 - 0.75 * joints) * (1 - 0.5 * shear))
+    albedo = lerp((0.15, 0.16, 0.20), (0.33, 0.34, 0.39), smooth(0.2, 0.9, 0.4 * face + 0.6 * big))
+    albedo = tint(albedo, col_tone * (0.88 + 0.22 * fine) * (1 - 0.55 * joints) * (1 - 0.5 * shear))
     height = 0.6 * face + 0.15 * big + 0.12 * fine - 0.8 * joints - 0.35 * shear
     return _weather(albedo, n, seed, 0.16), height.astype(np.float32), 3.0
 
 
+def flagstone(n, seed):
+    """Stonehold terrace paving: big flat irregular slabs (Voronoi, no dome) with thin dark
+    joints, pale warm-grey tones and worn edges."""
+    rng = np.random.default_rng(seed)
+    k = 7
+    gy, gx = np.mgrid[0:k, 0:k]
+    px = ((gx + 0.5 + rng.uniform(-0.4, 0.4, (k, k))) / k).ravel()
+    py = ((gy + 0.5 + rng.uniform(-0.4, 0.4, (k, k))) / k).ravel()
+    v, u = (np.mgrid[0:n, 0:n].astype(np.float32) + 0.5) / n
+    f1 = np.full((n, n), 9.0, np.float32)
+    f2 = np.full((n, n), 9.0, np.float32)
+    idx = np.zeros((n, n), np.int32)
+    for i in range(k * k):
+        ddx, ddy = np.abs(u - px[i]), np.abs(v - py[i])
+        d = np.sqrt(np.minimum(ddx, 1 - ddx) ** 2 + np.minimum(ddy, 1 - ddy) ** 2)
+        closer = d < f1
+        f2 = np.where(closer, f1, np.minimum(f2, d))
+        idx = np.where(closer, i, idx)
+        f1 = np.where(closer, d, f1)
+    fine, mid = fbm(n, seed + 1, 1.0), fbm(n, seed + 2, 2.0)
+    gap = (f2 - f1) * k
+    face = smooth(0.012, 0.05, gap)
+    tones = rng.uniform(0.82, 1.12, k * k)[idx]
+    col = lerp((0.50, 0.49, 0.47), (0.62, 0.58, 0.52), rng.uniform(0, 1, k * k)[idx])
+    col = tint(col, tones * (0.82 + 0.28 * fine) * (0.9 + 0.1 * mid) * (0.86 + 0.14 * smooth(0.05, 0.3, gap)))
+    albedo = lerp(tint((0.30, 0.29, 0.27), 0.8 + 0.4 * fine), col, face)
+    height = face * (0.85 + 0.15 * smooth(0.05, 0.3, gap)) + 0.08 * fine
+    return albedo.astype(np.float32), height.astype(np.float32), 2.0
+
+
 REGIONAL_PATTERNS = {'granite': (granite, 1024), 'sod': (sod, 512), 'earth': (earth, 1024),
                      'rock': (rock, 1024), 'snow': (snow, 512), 'snow_path': (snow_path, 1024),
-                     'basalt': (basalt, 1024)}
+                     'basalt': (basalt, 1024), 'flagstone': (flagstone, 1024)}

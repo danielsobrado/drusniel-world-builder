@@ -102,6 +102,7 @@ SPEC = {
     'rock_land': Spec('rock', 17.0, 0.92, normal=1.6),
     # Stonehold columnar cliff basalt, dark so the pale terrace decks read above it.
     'rock_cliff': Spec('basalt', 1.6, 0.86, normal=2.6),
+    'stone_flag': Spec('flagstone', 1.1, 0.82, normal=1.4),
     'foliage_pine': Spec('foliage', 1.5, 0.9, tint=(0.52, 0.66, 0.60)),
     # Plain blown glass for frontier and hold windows (the lattice pane is a lowland look).
     'glass_clear': Spec(color=(0.11, 0.12, 0.12), rough=0.1, emission=0.35, glow_tint=(1.0, 0.62, 0.30)),
