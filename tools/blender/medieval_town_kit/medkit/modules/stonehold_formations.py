@@ -15,6 +15,7 @@ from mathutils import Matrix
 
 from ..config import detailed
 from ..mesh import MeshBuilder
+from ..sculpt import sculpt_rock
 from .stonehold_parts import (
     cargo_cluster,
     cliff_portal_alcove,
@@ -942,4 +943,8 @@ def define(kit):
         b = fn()
         if name in BLUFFS:
             _raise_on_bluff(b, *BLUFFS[name])
-        kit.define(name, 'nature', b)
+        obj = kit.define(name, 'nature', b)
+        if name in BLUFFS:
+            centres = [(cx, cy) for cx, cy, _, _, _ in BLUFFS[name][1]]
+            blockout, sculpted = sculpt_rock(obj, seed=len(name) * 131 + sum(map(ord, name)), centres=centres)
+            print(f'[kit] sculpted {name}: rock {blockout} -> {sculpted} tris')

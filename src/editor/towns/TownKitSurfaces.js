@@ -27,6 +27,9 @@ export const SURFACES = Object.freeze({
   M_stone_basalt: { role: ROLE.stone, normal: 1.8, cavity: 0.68, parallax: 0.018 },
   M_brick: { role: ROLE.stone, normal: 2.2, cavity: 0.72, parallax: 0.024 },
   M_cobble: { role: ROLE.paving, normal: 2.15, cavity: 0.72, parallax: 0.032 },
+  // Stonehold: columnar cliff basalt (moss and rain streaks as stone) and terrace flagstones.
+  M_rock_cliff: { role: ROLE.stone, normal: 2.4, cavity: 0.75, parallax: 0.03 },
+  M_stone_flag: { role: ROLE.paving, normal: 1.6, cavity: 0.6, parallax: 0.016 },
   M_roof: { role: ROLE.roof, normal: 2.3, cavity: 0.78, parallax: 0.028, gain: 1.05 },
   M_roof_terracotta: { role: ROLE.roof, normal: 2.0, cavity: 0.68, parallax: 0.024 },
   M_thatch: { role: ROLE.roof, normal: 1.9, cavity: 0.6, parallax: 0.022 },
