@@ -100,7 +100,7 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   border-radius: 6px;
   background: transparent;
   color: #b8b9ac;
-  font: 500 11px/1.2 var(--hud-font, system-ui, sans-serif);
+  font: 500 11px/14px var(--hud-font, system-ui, sans-serif);
   letter-spacing: 0.02em;
   text-align: center;
   cursor: pointer;
