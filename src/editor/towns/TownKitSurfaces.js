@@ -23,8 +23,10 @@ export const SURFACES = Object.freeze({
   M_stone_ashlar: { role: ROLE.stone, normal: 2.0, cavity: 0.65, parallax: 0.024 },
   // One tooled block per piece: its chamfer, chisel striations, and pits draw it.
   M_stone_dressed: { role: ROLE.stone, normal: 1.85, cavity: 0.45, parallax: 0.008 },
-  M_stone_granite: { role: ROLE.stone, normal: 2.2, cavity: 0.72, parallax: 0.028 },
-  M_stone_basalt: { role: ROLE.stone, normal: 1.8, cavity: 0.68, parallax: 0.018 },
+  // Stonehold granite and basalt read near-black on shaded faces at their authored
+  // albedo; lifted so dark stone still shows its courses out of the sun.
+  M_stone_granite: { role: ROLE.stone, normal: 2.2, cavity: 0.62, parallax: 0.028, gain: 1.35 },
+  M_stone_basalt: { role: ROLE.stone, normal: 1.8, cavity: 0.6, parallax: 0.018, gain: 1.3 },
   M_brick: { role: ROLE.stone, normal: 2.2, cavity: 0.72, parallax: 0.024 },
   M_cobble: { role: ROLE.paving, normal: 2.15, cavity: 0.72, parallax: 0.032 },
   // Stonehold: columnar cliff basalt (moss and rain streaks as stone) and terrace flagstones.
