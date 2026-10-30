@@ -8,7 +8,7 @@ import { SETTLEMENT_TRIM, trimPiece } from './SettlementTrim.js';
 const APPROACH_LENGTH = 54;
 const APPROACH_STEP = 9;
 /** Half-width of the trodden ground at the gate and where it has narrowed to the road's shoulders. */
-const APPROACH_HALF_WIDTH = Object.freeze([9, 4.5]);
+const APPROACH_HALF_WIDTH = Object.freeze([7.5, 4]);
 /** Metres the outer face of a gatehouse stands from its centre (the piers' collider depth). */
 const GATE_FACE = 3.4;
 /** Metres either side of the passage centre that a gate's banners hang. */
@@ -79,23 +79,23 @@ function checkpoint({ gate, approach, side, bannerVariant, occupancy, random }, 
       z: gate.z + front[1] * GATE_FACE + across[1] * hand * BANNER_OFFSET,
       yaw: gate.yaw,
     });
-    const light = beside(approach, 7.5, hand, approach.roadHalf + 1.5);
+    const light = beside(approach, 7.5, hand, approach.roadHalf + 2.2);
     catalogProp(occupancy, props, 'lantern', 0, light, light.along);
   }
-  const rack = beside(approach, 8, side, approach.roadHalf + 3.2);
+  const rack = beside(approach, 8.5, side, approach.roadHalf + 3.6);
   // Its long side to the road, spears within reach of whoever stands the gate.
   place(occupancy, props, { ...trimPiece('spearRack', rack.x, rack.z, rack.along + Math.PI / 2 * side, random) }, 2.2, 0.8);
-  const stores = beside(approach, 5.5, side, approach.roadHalf + 3.4);
+  const stores = beside(approach, 12, side, approach.roadHalf + 3.2);
   catalogProp(occupancy, props, 'barrels', 1, stores, stores.along + (random() - 0.5) * 0.3);
 }
 
 /** `merchant_stop`: a cart drawn off the road to wait its turn, its load and a rail for the team. */
 function merchantStop({ approach, side, occupancy, random }, props) {
-  const cartAt = beside(approach, 17, -side, approach.roadHalf + 2);
+  const cartAt = beside(approach, 18, -side, approach.roadHalf + 2.2);
   if (!catalogProp(occupancy, props, 'cart', 0, cartAt, cartAt.along + (random() - 0.5) * 0.12)) return;
-  const load = beside(approach, 13, -side, approach.roadHalf + 2.4);
+  const load = beside(approach, 13.5, -side, approach.roadHalf + 2.6);
   catalogProp(occupancy, props, 'barrels', 0, load, load.along + (random() - 0.5) * 0.4);
-  const rail = beside(approach, 23, -side, approach.roadHalf + 1.8);
+  const rail = beside(approach, 24, -side, approach.roadHalf + 2);
   place(occupancy, props, { ...trimPiece('hitchPost', rail.x, rail.z, rail.along + Math.PI / 2, random) }, 2.2, 0.5);
 }
 

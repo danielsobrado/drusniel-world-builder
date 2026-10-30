@@ -224,8 +224,8 @@ function spearRack(builder, variant) {
   for (let index = 0; index < spears; index += 1) {
     const x = -0.7 + 1.4 * index / (spears - 1);
     // Bottom of the shaft out on the ground, the blade over the rail.
-    builder.quad([x - 0.02, 0, 0.38], [x + 0.02, 0, 0.38], [x + 0.02, 2.2, -0.2], [x - 0.02, 2.2, -0.2], WOOD);
-    builder.quad([x - 0.05, 2.2, -0.2], [x + 0.05, 2.2, -0.2], [x, 2.55, -0.3], [x, 2.55, -0.3], IRON.map((channel) => channel * 3));
+    builder.quad([x - 0.035, 0, 0.38], [x + 0.035, 0, 0.38], [x + 0.035, 2.2, -0.2], [x - 0.035, 2.2, -0.2], WOOD);
+    builder.quad([x - 0.07, 2.2, -0.2], [x + 0.07, 2.2, -0.2], [x, 2.62, -0.3], [x, 2.62, -0.3], IRON.map((channel) => channel * 3));
   }
 }
 

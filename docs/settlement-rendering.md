@@ -229,6 +229,45 @@ Adding a style or a pooled house regenerates the doors
   saturation at fetch time, so paving sits with the painted vegetation.
 - **Wall tops** are walkable colliders at the wall-walk's own height.
 
+## Gate approaches
+
+`SettlementGateApproach` plans the ground in front of each wall gate, from the
+finished town and on a random stream of its own, so nothing in it can move a
+house. It is the first slice of the environment-art plan: every walled town gets
+it, and Cyvazin (burg 18, whose region the HUD calls Highfield) is the town to
+look at.
+
+- **Sightline.** `plan.approaches` are 54 m of road out from each gate, tapering
+  from 7.5 m to 4 m half-width. `SettlementPlanIndex` inserts them as street
+  segments, so the field paints them as road tile; that, plus the path clearance
+  round road tiles, is what keeps trees and grass off the view of the gate. There
+  is no separate tree rule.
+- **Grounding.** The paving lays an earth ribbon along each approach, flared at
+  the gate and no wider than the road at its far end. A wider ribbon turns the
+  whole approach into a bare yard and the road stops leading the eye. Fieldstone
+  and the odd boulder lie along the wall foot either side of the gate.
+- **Props come in scenes, not scatter.** `gate_checkpoint` at every gate: a
+  banner either side of the passage (one banner per town), two lanterns, a spear
+  rack and stores on one side. `merchant_stop` at alternate gates: a cart drawn
+  off the road, its load, and a hitching rail. Each goes through
+  `occupancy.fits` and is left out where the ground or a neighbour refuses it.
+- **New trim.** `gateBanner`, `spearRack` and `hitchPost` are crafted kinds, so
+  they cost no workshop generation. Like all crafted kinds they stop at
+  `smallRange`, so a town's banners appear at 95 m.
+
+A town's seed takes `SETTLEMENT_LAYOUT_EPOCH`, not `SETTLEMENT_PLAN_VERSION`:
+the version only invalidates caches. Hashing it redrew every town on each bump,
+which also makes a perf A/B compare two different towns. Measured on
+`settlement-approach` (burg 18, `--warmup 20 --duration 12 --settle`, frozen
+copies, alternating runs): 77.4 and 69.9 FPS before, 74.7 and 73.6 after, p95
+24.5 and 29.6 ms before, 26.5 and 28.2 ms after, hitches 13 and 17 before, 17 and
+18 after. The FPS and p95 differences are inside run-to-run spread; two runs a
+side cannot rule out a small hitch increase.
+
+A regional asset may also be a building of kind `gatehouse`, stood on a street
+inside the town. Only the gatehouses from `planDefences` are wall gates (their
+`front` is null), so filter on that when reading a plan.
+
 ## Trim, shade, sound and ways in
 
 - **Trim** (`SettlementTrim`, `view/SettlementTrimMesh`): hanging signs and

@@ -13,6 +13,8 @@ import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
 export const SETTLEMENT_PLAN_VERSION = 15;
+/** Part of every town's seed. Raising it redraws every town; the version above only invalidates caches. */
+const SETTLEMENT_LAYOUT_EPOCH = 14;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -37,7 +39,7 @@ export function planSettlement({
   geography = undefined,
 }) {
   const profile = settlementProfile(settlement, geography ? { geography } : {});
-  const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_PLAN_VERSION));
+  const random = planRandom(hashInts(worldSeed, settlement.id, SETTLEMENT_LAYOUT_EPOCH));
   const signature = settlementSignature(settlement, profile, worldSeed, routeBearings.length);
   const { streets, squareRadius, bearings, quayBearing } = planStreets({ profile, signature, routeBearings, random, isBuildable });
   const maxPadFall = profile.hasRegionalIdentity && profile.identity?.activeOverlays?.includes('mountain-pass') ? 5.2 : undefined;

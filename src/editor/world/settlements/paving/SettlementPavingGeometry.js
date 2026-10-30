@@ -297,11 +297,11 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     yield;
   }
   for (const { points, halfWidths } of plan.approaches ?? []) {
-    // Narrower than the road tile under it, so its frayed edge dies out on bare ground, not grass.
+    // Flares at the gate and is the road again by the far end, so the road stays what leads the eye.
     const widthAt = (t) => {
       const at = t * (halfWidths.length - 1);
       const index = Math.min(halfWidths.length - 2, Math.floor(at));
-      return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * 1.5;
+      return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * 1.15;
     };
     yield* addRibbon(buffers.get('earth'), smoothPath(points), widthAt, { closed: false, fadeStart: false, fadeEnd: true, tone: 0.97 }, heightAt);
     yield;
