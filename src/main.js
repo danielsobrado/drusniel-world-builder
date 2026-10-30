@@ -1505,6 +1505,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const { prepareBogCross } = await import('./editor/performance/qa/BogCrossFixture.js');
     terrainView.settlementQaRoute = await prepareBogCross({ controller, terrainView, config });
   }
+  // An explicit `?yaw=` frames a fixture route from another angle (visual captures).
+  if (terrainView.settlementQaRoute && new URLSearchParams(window.location.search).has('yaw')) {
+    delete terrainView.settlementQaRoute.yawDegrees;
+  }
   const perfQa = PerfQaHarness.fromLocation({
     viewModeController,
     playerController,

@@ -38,9 +38,14 @@ export function naturalTrailFieldAt(worldX, worldZ, config = {}) {
   return fieldAt(worldX,worldZ,normalizeNaturalTrailConfig(config));
 }
 
+// The materials wrap chunk centres to this period (StylizedNoiseNodes); the
+// whole coordinate is wrapped here so CPU placement sees the same contour.
+const NOISE_WRAP_METRES = 65536;
+const wrap = (value) => value - Math.floor(value / NOISE_WRAP_METRES + 0.5) * NOISE_WRAP_METRES;
+
 function fieldAt(worldX,worldZ,settings) {
-  const x = worldX * settings.scale;
-  const z = worldZ * settings.scale;
+  const x = wrap(worldX) * settings.scale;
+  const z = wrap(worldZ) * settings.scale;
   const warpedX = x + Math.sin(z * 0.73 + 1.7) * settings.warp;
   const warpedZ = z + Math.sin(x * 0.61 - 2.3) * settings.warp;
   return Math.sin(warpedX) * 0.52
@@ -51,7 +56,7 @@ function fieldAt(worldX,worldZ,settings) {
 /** Analytic gradient in field coordinates; divide by it to obtain path width
  * in space rather than letting low-gradient areas become broad bare plazas. */
 function gradientAt(worldX, worldZ, settings) {
-  const x = worldX * settings.scale, z = worldZ * settings.scale;
+  const x = wrap(worldX) * settings.scale, z = wrap(worldZ) * settings.scale;
   const u = x + Math.sin(z * 0.73 + 1.7) * settings.warp;
   const v = z + Math.sin(x * 0.61 - 2.3) * settings.warp;
   const shared = Math.cos((u + v) * 0.47 - 0.6) * 0.0705;

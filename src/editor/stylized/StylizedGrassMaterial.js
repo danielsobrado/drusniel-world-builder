@@ -30,6 +30,7 @@ import {
   stylizedNaturalTrailMask,
   stylizedPatchMask,
   stylizedPathWearMask,
+  wrapNoiseOrigin,
 } from './StylizedNoiseNodes.js';
 import { createSurfaceClassNodes } from './SurfaceMaskNodes.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../weather/wind/worldWindState.js';
@@ -119,7 +120,7 @@ export function createStylizedGrassMaterial({
   // sampled once per blade. The streamed renderer batches blades into clumps;
   // `bladeCenter` restores that per-blade sample instead of making a whole clump
   // disappear, recolour or sway as one visible unit.
-  const worldXZ = base.xz.add(sampleOffset).add(chunkCenter);
+  const worldXZ = base.xz.add(sampleOffset).add(wrapNoiseOrigin(chunkCenter));
   const surface = texture(surfaceMaskTexture, localUv);
   const surfaceClass = createSurfaceClassNodes(surface);
   const trampleSample = texture(trampleTexture, localUv);

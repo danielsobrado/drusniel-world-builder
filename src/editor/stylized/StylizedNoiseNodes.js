@@ -13,6 +13,21 @@ import {
   vec2,
 } from 'three/tsl';
 
+/**
+ * Period (metres) to which chunk centres are wrapped before world-space noise.
+ * Imported Azgaar worlds put towns millions of metres out, where a float32
+ * resolves only ~0.25 m, so trail contours and patch noise came out as squares.
+ * Centred on zero, so coordinates within ±32 km are untouched; seams fall on odd
+ * multiples of 32 768 m, which chunk edges (128 m) never straddle. The CPU mirror
+ * (naturalTrailMath) wraps whole coordinates the same way.
+ */
+export const NOISE_WRAP_METRES = 65536;
+
+/** Chunk centre wrapped to NOISE_WRAP_METRES, for building noise coordinates. */
+export function wrapNoiseOrigin(center) {
+  return center.sub(floor(center.div(NOISE_WRAP_METRES).add(0.5)).mul(NOISE_WRAP_METRES));
+}
+
 function hash2(position) {
   const value = fract(position.mul(vec2(127.1, 311.7)));
   const mixed = value.add(dot(value, value.add(19.19)));

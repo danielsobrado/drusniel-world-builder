@@ -23,6 +23,7 @@ import {
   stylizedDirtMask,
   stylizedNaturalTrailMask,
   stylizedPathWearMask,
+  wrapNoiseOrigin,
 } from './StylizedNoiseNodes.js';
 import { createSurfaceClassNodes } from './SurfaceMaskNodes.js';
 import { sampleWorldWindCanonical, windWaveCoordinates } from '../weather/wind/worldWindState.js';
@@ -56,7 +57,7 @@ export function createStylizedFlowerMaterial({
     base.x.div(chunkWorldSize).add(0.5),
     float(0.5).sub(base.z.div(chunkWorldSize)),
   );
-  const worldXZ = base.xz.add(chunkCenter);
+  const worldXZ = base.xz.add(wrapNoiseOrigin(chunkCenter));
   const surface = texture(surfaceMaskTexture, localUv);
   const tile = tileTexture ? texture(tileTexture, localUv) : null;
   const ground = tile ? createMeadowGroundShading(config, tile, worldXZ) : null;

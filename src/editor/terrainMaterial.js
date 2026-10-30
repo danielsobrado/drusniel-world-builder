@@ -38,6 +38,7 @@ import {
   stylizedNaturalTrailMask,
   stylizedPatchMask,
   stylizedPathWearMask,
+  wrapNoiseOrigin,
 } from './stylized/StylizedNoiseNodes.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './stylized/CoastSwashShading.js';
 import { createCoastSandNodes } from './stylized/CoastSandShading.js';
@@ -156,7 +157,7 @@ export function createTerrainMaterial({
     terrainUv.x.sub(0.5).mul(chunkWorldSize),
     float(0.5).sub(terrainUv.y).mul(chunkWorldSize),
   );
-  const worldXZ = chunkCenter.add(localXZ);
+  const worldXZ = wrapNoiseOrigin(chunkCenter).add(localXZ);
   const cameraDistance = distance(cameraPosition, positionWorld);
   const dirtSettings = {
     scale: float(stylizedConfig.dirt.scale),
