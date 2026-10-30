@@ -74,3 +74,16 @@ test('large-town preparation yields and later small steps classify only local pl
   assert.equal(module.nearMeshes[0].count + module.farMeshes[0].count, 10000);
   for (const mesh of module.meshes) mesh.dispose();
 });
+
+test('a building on the ring keeps its kit while the viewer moves back and forth', () => {
+  const module = instances();
+  module.split(0, 0, 95);
+  const nearCount = () => module.nearMeshes[0].count;
+  assert.equal(nearCount(), 10);
+  module.split(-8, 0, 95);      // placement at x=90 is now 98 m away: inside the band, stays near
+  assert.equal(nearCount(), 10);
+  module.split(0, 0, 95);
+  assert.equal(nearCount(), 10);
+  module.split(-40, 0, 95);     // well past the band it does swap
+  assert.ok(nearCount() < 10);
+});

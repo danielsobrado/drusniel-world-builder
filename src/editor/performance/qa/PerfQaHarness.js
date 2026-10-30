@@ -2,6 +2,7 @@ import { FrameProfiler } from './FrameProfiler.js';
 import { PerfCounters } from './PerfCounters.js';
 import { GpuPassProfiler } from './GpuPassProfiler.js';
 import { PerfQaSettleGate } from './PerfQaSettleGate.js';
+import { QaRouteWalker } from './QaRouteWalker.js';
 import { buildPerfReport, downloadPerfReport } from './buildPerfReport.js';
 import { createMovementPlan, parseQaParams } from './parseQaParams.js';
 
@@ -175,6 +176,8 @@ export class PerfQaHarness {
       yaw: degreesToRadians(this.config.yawDegrees),
       pitch: degreesToRadians(this.config.pitchDegrees),
     });
+    this.routeFrozen = false;
+    this.routeWalker = this.config.route ? new QaRouteWalker(this.config.route) : null;
     this.enterPhase(this.plan.phases[0]);
     this.nextTerrainEditAt = 0;
     if (this.config.scenarioId === 'edited-world') {
@@ -280,6 +283,20 @@ export class PerfQaHarness {
     return frame;
   }
 
+  steerRoute(timestamp) {
+    const player = this.playerController;
+    const { position, yaw } = player.getStatus();
+    const origin = this.terrainView.floatingOrigin.getState();
+    const step = this.routeWalker.update(position.x + origin.x, position.z + origin.z, yaw, timestamp / 1000);
+    if (step.hop) {
+      player.setPose({ x: step.hop.x - origin.x, z: step.hop.z - origin.z, yaw: step.yaw, pitch: player.getStatus().pitch });
+      this.log(`Route: hopped past an obstacle (${this.routeWalker.hops})`);
+      return;
+    }
+    player.yaw = step.yaw;
+    player.applyCameraState();
+  }
+
   advancePhases(timestamp) {
     if (this.status !== 'running' || this.phaseIndex < 0) {
       return;
@@ -300,6 +317,8 @@ export class PerfQaHarness {
         pitch: status.pitch,
       });
     }
+
+    if (phase.record && this.routeWalker && !this.routeFrozen) this.steerRoute(timestamp);
 
     const useFrames = Number.isFinite(phase.durationFrames);
     if (useFrames) {
@@ -532,6 +551,7 @@ export class PerfQaHarness {
       status: this.status,
       get recording() { return harness.recording; },
       setKeys: (codes) => this.setKeys(codes),
+      freezeRoute: () => { this.routeFrozen = true; },
       config: this.config,
       live: this.live,
       getReport: () => this.report,

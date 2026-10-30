@@ -394,6 +394,7 @@ const fs = require('fs');
         await page.waitForFunction(() => window.__perfQa?.recording === true);
         await page.waitForTimeout(${Number(duration) * 500});
         await page.evaluate(() => {
+          window.__perfQa.freezeRoute();
           const player = window.__editor.playerController;
           const state = player.getStatus();
           player.setPose({ ...state.position, yaw: state.yaw + Math.PI, pitch: state.pitch });

@@ -1508,6 +1508,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   // An explicit `?yaw=` frames a fixture route from another angle (visual captures).
   if (terrainView.settlementQaRoute && new URLSearchParams(window.location.search).has('yaw')) {
     delete terrainView.settlementQaRoute.yawDegrees;
+    delete terrainView.settlementQaRoute.route;
   }
   const perfQa = PerfQaHarness.fromLocation({
     viewModeController,

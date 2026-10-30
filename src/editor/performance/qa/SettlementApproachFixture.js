@@ -1,4 +1,5 @@
 import { importAzgaarFullJson } from '../../import/AzgaarJsonImporter.js';
+import { streetRoute } from './QaRouteWalker.js';
 
 /**
  * A real frozen Azgaar burg; object-town remains a separate placed-object test.
@@ -22,7 +23,10 @@ export async function prepareSettlementApproach({ controller, terrainView, confi
   const canonicalX = entry.settlement.cellX * tileSize + endpoint[0] * (1 + 90 / length);
   const canonicalZ = -entry.settlement.cellZ * tileSize - endpoint[1] * (1 + 90 / length);
   const origin = terrainView.floatingOrigin.getState();
-  return { spawn: { x: canonicalX - origin.x, z: canonicalZ - origin.z },
+  const toCanonical = ([x, z]) => ({ x: entry.settlement.cellX * tileSize + x, z: -entry.settlement.cellZ * tileSize - z });
+  const route = streetRoute(plan.streets.filter(item => item.kind === 'main' && !item.avenue),
+    { x: canonicalX, z: canonicalZ }, toCanonical);
+  return { route, spawn: { x: canonicalX - origin.x, z: canonicalZ - origin.z },
     yawDegrees: Math.atan2(endpoint[0], -endpoint[1]) * 180 / Math.PI,
     settlementFixture: { map: 'Eldara Full 2026-07-23-20-37', burgId,
       name: entry.settlement.name, requestedBuildings: plan.buildings.length, requestedProps: plan.props.length,

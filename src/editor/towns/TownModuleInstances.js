@@ -3,7 +3,7 @@ import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
-import { TOWN_LOD_FAR, TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
+import { TOWN_LOD_DEFAULTS, TOWN_LOD_FAR, TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
 import { PlanGrid } from '../world/settlements/SettlementGeometry.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
@@ -195,13 +195,17 @@ export class TownModuleInstances {
     this.nearSlots ??= new SlotSet(this.count);
     this.farSlots ??= new SlotSet(this.count);
     const radiusSq = radius * radius;
+    // A building already drawn near keeps the near kit a band further out, or one on
+    // the ring swaps kits (detail to blocks and back) every time the viewer re-picks.
+    const keep = radius + TOWN_LOD_DEFAULTS.hysteresis;
+    const keepSq = keep * keep;
     const values = this.values;
     const next = new Set();
     let units = 0;
-    for (const i of this.spatial.near(x, z, radius)) {
+    for (const i of this.spatial.near(x, z, keep)) {
       const dx = values[i * 4] - x;
       const dz = values[i * 4 + 2] - z;
-      if (dx * dx + dz * dz <= radiusSq) next.add(i);
+      if (dx * dx + dz * dz <= (this.nearSlots.slotOf[i] >= 0 ? keepSq : radiusSq)) next.add(i);
       PerfCounters.inc('townLodPlacementsEvaluated');
       if (++units % 64 === 0) yield;
     }
