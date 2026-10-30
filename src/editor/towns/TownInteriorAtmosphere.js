@@ -77,8 +77,9 @@ export class TownInteriorAtmosphere {
     const origin = this.floatingOrigin.getState();
     this.lights.forEach((light, index) => {
       const candidate = candidates[index];
-      light.visible = Boolean(candidate);
-      if (!candidate) return;
+      // Never toggle `visible`: a change in light count recompiles every lit material,
+      // which froze the walk up to a town gate for seconds per lantern.
+      if (!candidate) { light.intensity = 0; return; }
       light.position.set(candidate.x - origin.x, candidate.y, candidate.z - origin.z);
       light.intensity = candidate.light.energy >= 80 ? 6 : 3;
       light.distance = candidate.light.energy >= 80 ? 10 : 7;
