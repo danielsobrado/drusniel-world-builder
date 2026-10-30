@@ -4,7 +4,7 @@ import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundS
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
 import { createMeadowTileDistribution } from '../src/editor/stylized/meadow/meadowTileDistribution.js';
-import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
+import { CANOPY_FLOOR_PATCH_SALT, canopyFloorCover, grassPatchCover, grassStandDensity } from '../src/editor/world/GrassPatchiness.js';
 
 function fixture(coverage,density=1,forest=false) {
   const size=32,mask=new Uint8Array(size*size*4);
@@ -30,13 +30,13 @@ function accepted(sampler,source,reverse=false) {
 
 // Thin biomes pack their stems into islands and tussocks (GrassPatchiness.js),
 // so a stem's acceptance is coverage times the island and stand density there.
-function meanStandDensity(template,density,seed=918273) {
+function meanStandDensity(template,density,seed=918273,cover=grassPatchCover) {
   const p=template.getAttribute('instancePosition').array;
   const distribution=createMeadowTileDistribution(-32,32,template.userData.meadow.tileSize);
   let total=0;
   for(let i=0;i<template.instanceCount;i++) {
     const x=-32+distribution.x(p[i*4]),z=32+distribution.z(p[i*4+2]);
-    total+=grassPatchCover(x/2,-z/2,density,seed)*grassStandDensity(x,z,density,seed);
+    total+=cover(x/2,-z/2,density,seed)*grassStandDensity(x,z,density,seed);
   }
   return total/template.instanceCount;
 }
@@ -79,8 +79,29 @@ test('reverse order, origin rebasing, and near/card queries preserve accepted ca
 test('forest and edge probabilities use independent channels: half coverage keeps half the canopy floor', () => {
   const template=createMeadowTemplate({detail:2,count:100000,tileSize:64});
   try {
-    const floor=meanStandDensity(template,.5,918273^CANOPY_FLOOR_PATCH_SALT);
+    const floor=meanStandDensity(template,.5,918273^CANOPY_FLOOR_PATCH_SALT,canopyFloorCover);
     const {sampler}=fixture(.5,1,true),count=accepted(sampler,template).length;
     assert.ok(Math.abs(count/100000-.5*floor)<.01,`${count} survivors, expected ${Math.round(.5*floor*100000)}`);
   }finally{template.dispose();}
+});
+
+test('the canopy floor thins across a wide band, and more canopy grass means more cover', () => {
+  // Share of the ground in the thinning band rather than fully on or off.
+  const inBetween=(cover)=>{
+    let count=0;
+    for(let i=0;i<20000;i++) {
+      const value=cover(i*.37,(i*i%977)*.61,.4,7);
+      if(value>.25&&value<.75)count++;
+    }
+    return count/20000;
+  };
+  assert.ok(inBetween(canopyFloorCover)>inBetween(grassPatchCover)*2);
+  const mean=(density)=>{
+    let total=0;
+    for(let i=0;i<20000;i++)total+=canopyFloorCover(i*.37,(i*i%977)*.61,density,7);
+    return total/20000;
+  };
+  assert.ok(mean(.3)<mean(.5)&&mean(.5)<mean(.8));
+  assert.equal(canopyFloorCover(3,4,1,7),1);
+  assert.equal(canopyFloorCover(3,4,.4,7),canopyFloorCover(3,4,.4,7));
 });

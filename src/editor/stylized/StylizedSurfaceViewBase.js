@@ -35,7 +35,7 @@ import {
 } from './forestFloorTexture.js';
 import { forestFloorDensity } from './forest/ForestFloor.js';
 import { bilinearSample } from './forest/bilinearGrid.js';
-import { CANOPY_FLOOR_PATCH_SALT, grassPatchCover } from '../world/GrassPatchiness.js';
+import { CANOPY_FLOOR_PATCH_SALT, canopyFloorCover } from '../world/GrassPatchiness.js';
 import { isLandStreamingSuspended } from '../water/underwaterState.js';
 import {
   GRASS_BLADE_SEGMENTS,
@@ -932,7 +932,7 @@ export class StylizedSurfaceView {
         const sz = at((z + 0.5) * ratio - 0.5);
         const floor = bilinearSample(grassFloor, samples, sx, sz);
         if (floor >= 1) return 0;
-        return 1 - grassPatchCover(
+        return 1 - canopyFloorCover(
           (descriptor.centerWorldX - half + (x + 0.5) * texel) / tileSize,
           -(descriptor.centerWorldZ + half - (z + 0.5) * texel) / tileSize,
           floor,

@@ -33,6 +33,10 @@ const ISLAND_CELLS = 5.5;
 const SUB_ISLAND_CELLS = 2;
 /** Tussocks, in metres. */
 const TUFT_METERS = 1.15;
+/** Canopy floor: the warp's wavelength and reach in cells, and its thinning band. */
+const CANOPY_WARP_CELLS = 9;
+const CANOPY_WARP_REACH_CELLS = 4;
+const CANOPY_EDGE_BAND = 0.24;
 
 function smoothstep(edge0, edge1, value) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -62,6 +66,29 @@ export function grassPatchCover(cellX, cellZ, density, seed = 0) {
   const threshold = 0.5 + 0.34 * (0.5 - density);
   const island = smoothstep(threshold - 0.09, threshold + 0.09, noise);
   return 1 - sparsity * (1 - island);
+}
+
+/**
+ * The woodland floor's reading of the same idea, shared by the stems and the
+ * litter they stand in. Unlike a biome's near-binary islands it is a slow
+ * gradient: at the islands' narrow band, bare value noise draws long straight
+ * contours that read as hard-edged lawns on soil, so the lattice is warped and
+ * the stand thins across a wide band instead of stopping at a line.
+ * @param {number} cellX canonical cell (fractional allowed)
+ * @param {number} cellZ canonical cell
+ * @param {number} density the canopy's grass density here
+ * @param {number} seed world seed, salted with CANOPY_FLOOR_PATCH_SALT
+ */
+export function canopyFloorCover(cellX, cellZ, density, seed = 0) {
+  const sparsity = grassSparsity(density);
+  if (sparsity <= 0) return 1;
+  const warpX = valueNoise(cellX / CANOPY_WARP_CELLS, cellZ / CANOPY_WARP_CELLS, seed ^ 0x4a7) * CANOPY_WARP_REACH_CELLS;
+  const warpZ = valueNoise(cellX / CANOPY_WARP_CELLS, cellZ / CANOPY_WARP_CELLS, seed ^ 0x2c9) * CANOPY_WARP_REACH_CELLS;
+  const noise = 0.5
+    + valueNoise((cellX + warpX) / ISLAND_CELLS, (cellZ + warpZ) / ISLAND_CELLS, seed ^ PATCH_SEED) * 0.33
+    + valueNoise((cellX + warpX) / SUB_ISLAND_CELLS, (cellZ + warpZ) / SUB_ISLAND_CELLS, (seed ^ PATCH_SEED) + 977) * 0.17;
+  const threshold = 0.5 + 0.34 * (0.5 - density);
+  return 1 - sparsity * (1 - smoothstep(threshold - CANOPY_EDGE_BAND, threshold + CANOPY_EDGE_BAND, noise));
 }
 
 /**

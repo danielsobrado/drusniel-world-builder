@@ -7,6 +7,7 @@ import { forestDensitySamplerFromGrid } from '../forest/ForestFloor.js';
 import { BIOME_BLUR_CELLS } from '../../world/BiomeFieldBlur.js';
 import {
   CANOPY_FLOOR_PATCH_SALT,
+  canopyFloorCover,
   ecotoneJitter,
   grassPatchCover,
   grassStandDensity,
@@ -78,7 +79,7 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
     if (forest) {
       const floor = forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ);
       if (floor < 1) {
-        const keep = grassPatchCover(x / tileSize, -z / tileSize, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT)
+        const keep = canopyFloorCover(x / tileSize, -z / tileSize, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT)
           * grassStandDensity(x, z, floor, worldSeed ^ CANOPY_FLOOR_PATCH_SALT);
         if (hash2d(rank, 91) >= keep) return false;
       }
