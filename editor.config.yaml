@@ -285,6 +285,10 @@ stylizedSurface:
     scene: /assets/grass-scene.glb
     trunkMaterial: Material.011
     leafMaterial: 2237f4d60830642a24d65276e7abe1e6
+    # Primary-scene pines kept out of the conifer pools: 3 is a bare, broken
+    # stem and 4 a crooked trunk with two tufts; both read as wrong, dead-looking
+    # trees among full crowns. Indices follow the scene's extraction order.
+    excludePrimaryTreePrototypes: [3, 4]
     # Authored scatter prototypes retain their embedded diffuse/normal textures.
     # Per-file scales normalize the source packages into metre-sized scenery.
     # grass-test's stones (scripts/prepare-donor-rock-assets.mjs): the eleven

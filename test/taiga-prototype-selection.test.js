@@ -20,3 +20,11 @@ test('10000 stable candidates per cold biome choose green forest-pack taiga and 
   assert.ok(!allowed.has(a.prototypeIndex)||allowed.get(a.prototypeIndex).has(tileId));
  }
 });
+
+test('excluded primary tree prototypes never enter a species pool', () => {
+  const { map, fallback } = createSpeciesPrototypeIndex({ glbPrototypeCount: 5, generatedSpeciesIds: [],
+    excludedPrimaryIndices: [3, 4] });
+  for (const indices of [...map.values(), fallback]) assert.ok(!indices.includes(3) && !indices.includes(4));
+  assert.throws(() => createSpeciesPrototypeIndex({ glbPrototypeCount: 2, generatedSpeciesIds: [],
+    excludedPrimaryIndices: [5] }));
+});

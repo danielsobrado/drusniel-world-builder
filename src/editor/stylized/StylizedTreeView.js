@@ -390,6 +390,7 @@ export class StylizedTreeView {
     );
     this.speciesPrototypeIndex = createSpeciesPrototypeIndex({
       glbPrototypeCount,
+      excludedPrimaryIndices: this.config.assets.excludePrimaryTreePrototypes ?? [],
       generatedSpeciesIds,
       generatedFirstIndex,
       additionalPrototypeIndicesBySpecies,

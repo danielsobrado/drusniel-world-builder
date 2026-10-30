@@ -441,8 +441,18 @@ export function createSpeciesPrototypeIndex({
   generatedSpeciesIds,
   generatedFirstIndex = glbPrototypeCount,
   additionalPrototypeIndicesBySpecies = null,
+  // Primary-scene prototypes kept out of every species pool (a misshapen source tree).
+  excludedPrimaryIndices = [],
 }) {
-  const glbRange = Array.from({ length: glbPrototypeCount }, (_, index) => index);
+  const excluded = new Set(excludedPrimaryIndices);
+  for (const index of excluded) {
+    if (!Number.isInteger(index) || index < 0 || index >= glbPrototypeCount) {
+      throw new Error(`Excluded primary tree prototype ${index} is outside 0..${glbPrototypeCount - 1}.`);
+    }
+  }
+  const glbRange = Array.from({ length: glbPrototypeCount }, (_, index) => index)
+    .filter((index) => !excluded.has(index));
+  if (glbRange.length === 0) throw new Error('Every primary tree prototype is excluded.');
   const map = new Map();
   for (const speciesId of FOREST_GLB_CONIFER_SPECIES) {
     map.set(speciesId, glbRange);
