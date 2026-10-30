@@ -69,6 +69,11 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
     const pathSample=paths.sample(x,z,coverage,path,pathResult);
     if(pathSample.blocked)return false;
     path=pathSample.path;
+    // Path shoulder: the stand thins and shortens toward the edge, never a hard grass line.
+    if (pathSample.shoulder > 0) {
+      if (hash2d(rank, 97) < pathSample.shoulder * 0.8) return false;
+      strength *= 1 - 0.45 * pathSample.shoulder;
+    }
     // Canopy grass gathers into its own islands instead of an even speckle.
     if (forest) {
       const floor = forest(x - descriptor.centerWorldX, z - descriptor.centerWorldZ);
