@@ -14,7 +14,7 @@
  * Pure data.
  */
 
-export const ROLE = Object.freeze({ other: 0, stone: 1, timber: 2, roof: 3, plaster: 4, banner: 5, paving: 6 });
+export const ROLE = Object.freeze({ other: 0, stone: 1, timber: 2, roof: 3, plaster: 4, banner: 5, paving: 6, cobble: 7 });
 
 const DEFAULT = Object.freeze({ role: ROLE.other, normal: 1, cavity: 0.2, parallax: 0, gain: 1 });
 
@@ -28,7 +28,8 @@ export const SURFACES = Object.freeze({
   M_stone_granite: { role: ROLE.stone, normal: 2.2, cavity: 0.62, parallax: 0.028, gain: 1.35 },
   M_stone_basalt: { role: ROLE.stone, normal: 1.8, cavity: 0.6, parallax: 0.018, gain: 1.3 },
   M_brick: { role: ROLE.stone, normal: 2.2, cavity: 0.72, parallax: 0.024 },
-  M_cobble: { role: ROLE.paving, normal: 2.15, cavity: 0.72, parallax: 0.032 },
+  // Own role: a small repeating scan, so the material lays it in ground space (TownKitMaterial).
+  M_cobble: { role: ROLE.cobble, normal: 2.15, cavity: 0.72, parallax: 0.032 },
   // Stonehold: columnar cliff basalt (moss and rain streaks as stone) and terrace flagstones.
   M_rock_cliff: { role: ROLE.stone, normal: 2.4, cavity: 0.75, parallax: 0.03 },
   // Natural crags and boulders (sculpted, scanned rock_face_03).
