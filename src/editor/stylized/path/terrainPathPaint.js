@@ -2,14 +2,18 @@ import * as THREE from 'three/webgpu';
 import {
   Fn,
   If,
+  cameraPosition,
   color as colorNode,
   dFdx,
   dFdy,
+  distance,
   dot,
+  float,
   floor,
   fract,
   fwidth,
   mix,
+  positionWorld,
   sin,
   smoothstep,
   texture,
@@ -173,13 +177,26 @@ export function createTerrainPathPaint({
     apply(baseColor, baseRoughness) {
       const paint = Fn(() => {
         const world = local.mul(DONOR_UNITS_PER_METRE).toVar();
-        const uvA = terrainUv.mul(repeats).toVar();
-        const uvB = terrainUv.mul(secondaryRepeats).add(vec2(...ANTI_TILING.offset)).toVar();
+        // Smooth world-space warp, a tile or so over ~15 m: the 4.9 m repeat never lines
+        // up into rows along a trail. World-based, so it stays continuous across chunks.
+        const warp = vec2(
+          sin(world.y.mul(0.041).add(sin(world.x.mul(0.023)).mul(2.1))),
+          sin(world.x.mul(0.037).add(sin(world.y.mul(0.029)).mul(1.7))),
+        ).mul(0.42).toVar();
+        const uvA = terrainUv.mul(repeats).add(warp).toVar();
+        const uvB = terrainUv.mul(secondaryRepeats).add(vec2(...ANTI_TILING.offset)).sub(warp.mul(0.7)).toVar();
         // Everything that needs screen derivatives, before the branch.
         const gradA = [dFdx(uvA).toVar(), dFdy(uvA).toVar()];
         const gradB = [dFdx(uvB).toVar(), dFdy(uvB).toVar()];
         const turfLayer = turfLayers(world);
         const result = vec4(baseColor, baseRoughness).toVar();
+        // Bare ground has no texture of its own: lend it the dirt's light and dark near the
+        // viewer, as grit and litter. Past 45 m the branch skips the tap.
+        const floorFade = smoothstep(14, 45, distance(cameraPosition, positionWorld)).oneMinus().toVar();
+        If(floorFade.greaterThan(0), () => {
+          const grit = dot(texture(textures.colorRoughness, uvA.mul(0.61)).grad(gradA[0].mul(0.61), gradA[1].mul(0.61)).rgb, vec3(0.3, 0.55, 0.15));
+          result.assign(vec4(result.xyz.mul(mix(float(1), grit.div(0.3).clamp(0.6, 1.6), floorFade.mul(0.85))), result.w));
+        });
         const mask = pathMask.toVar();
         const vergeBand = verge.toVar();
         // Only a path and its verge are painted: elsewhere (nearly all the
@@ -200,8 +217,12 @@ export function createTerrainPathPaint({
             texture(textures.colorRoughness, uvB).grad(...gradB),
             tileBlend,
           ).toVar();
+          // Broad damp hollows and sun-bleached runs, so no stretch of trail is one tone.
+          const damp = sin(world.x.mul(0.083).add(sin(world.y.mul(0.11)).mul(1.9)))
+            .mul(sin(world.y.mul(0.067).add(sin(world.x.mul(0.13)).mul(1.4)))).mul(0.5).add(0.5).smoothstep(0.35, 0.8);
           const ground = dirt.rgb
-            .mul(mix(1 - ANTI_TILING.colorVariation, 1 + ANTI_TILING.colorVariation, macroTile)).toVar();
+            .mul(mix(1 - ANTI_TILING.colorVariation, 1 + ANTI_TILING.colorVariation, macroTile))
+            .mul(mix(vec3(1.08, 1.05, 1.0), vec3(0.72, 0.7, 0.68), damp)).toVar();
           const soilRoughness = dirt.a
             .add(macroTile.sub(0.5).mul(ANTI_TILING.roughnessVariation * 2)).clamp(0, 1);
           const pathPaint = mix(ground, colorNode(settings.color).mul(ground.r.mul(0.65).add(0.65)), settings.tint)
