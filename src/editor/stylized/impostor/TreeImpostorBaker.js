@@ -322,7 +322,7 @@ export class TreeImpostorBaker {
       depth: Math.max(0.1, size.z),
       centerY: center.y,
       radius,
-      foliageLighting: parts.some(part => part.kind === 'leaf' && part.material.userData?.gradedCanopy === true),
+      foliageLighting: parts.some(part => part.kind === 'leaf' && Boolean(part.material.emissiveNode)),
       normalEncoding: TREE_IMPOSTOR_NORMAL_ENCODING,
       albedoCanvas,
       normalCanvas,

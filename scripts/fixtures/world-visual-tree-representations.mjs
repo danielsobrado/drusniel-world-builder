@@ -55,7 +55,7 @@ export async function runTreeRepresentations({renderer,scene,camera,draw,state,s
    const index=view.prototypeIndicesByAsset.get(asset)?.[0];
    if(!Number.isInteger(index))throw new Error(`No production prototype for ${asset}.`);
    const parts=view.prototypes[index],atlas=atlases.find(a=>a.prototypeIndex===index),bounds=new THREE.Box3();
-   const foliageLighting=parts.some(part=>part.kind==='leaf'&&part.material.userData?.gradedCanopy===true);
+   const foliageLighting=parts.some(part=>part.kind==='leaf'&&Boolean(part.material.emissiveNode));
    state.report.checks.push({id:`tree-foliage-lighting-metadata-${index}`,expected:foliageLighting,actual:atlas.foliageLighting,
     passed:foliageLighting===atlas.foliageLighting});
    bounds.makeEmpty();for(const part of parts){part.geometry.computeBoundingBox();bounds.union(part.geometry.boundingBox);}

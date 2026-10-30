@@ -132,6 +132,9 @@ export function createStylizedLeafMaterial({
     material.userData.gradedCanopy = canopyGrade;
   } else {
     material.colorNode = applyCanopyRim(leafColor, config, palette);
+    // A vertex-painted crown has no leaf map but the same dark interior: without
+    // sky fill the alpine conifers render near black beside every other tree.
+    if (authoredColor) material.emissiveNode = treeFoliageEmission(leafColor);
   }
   if (map) {
     material.opacityNode = authoredTexture(map).a;

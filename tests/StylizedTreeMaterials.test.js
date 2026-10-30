@@ -38,6 +38,31 @@ function leafMaterial(source) {
   });
 }
 
+test('vertex-painted crowns take the same foliage fill as textured crowns', () => {
+  const painted = createStylizedLeafMaterial({
+    source: {},
+    bounds: { minY: 0, maxY: 2 },
+    time: uniform(0),
+    config: CONFIG,
+    preserveSourceColor: true,
+    vertexColor: true,
+  });
+  const palette = createStylizedLeafMaterial({
+    source: {},
+    bounds: { minY: 0, maxY: 2 },
+    time: uniform(0),
+    config: CONFIG,
+  });
+
+  try {
+    assert.ok(painted.emissiveNode);
+    assert.ok(!palette.emissiveNode);
+  } finally {
+    painted.dispose();
+    palette.dispose();
+  }
+});
+
 test('authored leaf cutouts retain their intended alpha threshold', () => {
   const map = new THREE.Texture();
   const masked = leafMaterial({ map, alphaTest: 0.5, color: new THREE.Color('#ffffff') });
