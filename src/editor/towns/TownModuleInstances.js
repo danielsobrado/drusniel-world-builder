@@ -21,13 +21,18 @@ export function composePlacement(x, y, z, yaw) {
 }
 
 /**
- * A building seed in [0, 1) spread to three channels in [0.9, 1] for
+ * A building seed in [0, 1) (plus 1 on a piece whose foot stands on the ground)
+ * spread to three channels in [0.9, 1] for
  * instanceColor: TownKitMaterial reads them as render, timber and roof choices,
  * and three multiplies them in as a gentle per-building tone.
  */
 export function seedColour(seed, out = [0, 0, 0]) {
-  const channel = (k, o) => 0.9 + 0.1 * ((seed * k + o) % 1);
-  out[0] = channel(1, 0);
+  const grounded = seed >= 1;
+  const roll = grounded ? seed - 1 : seed;
+  const channel = (k, o) => 0.9 + 0.1 * ((roll * k + o) % 1);
+  // Eight render tones (TownKitMaterial wants four), and half a step records a
+  // ground-floor piece: a 0.6% tint nobody sees, and no eighth vertex buffer.
+  out[0] = 0.9 + Math.floor(roll * 8) / 80 + (grounded ? 1 / 160 : 0);
   out[1] = channel(7.137, 0.31);
   out[2] = channel(13.71, 0.77);
   return out;
@@ -86,10 +91,12 @@ export class TownModuleInstances {
    * @param {{opaque, glass}} options.near near-kit geometry
    * @param {{opaque, glass}|null} options.far far-kit geometry, or null
    * @param {boolean} options.interior draw only near the viewer
+   * @param {number} [options.farReach] a split town's far meshes stop this far from the viewer
    * @param {(geometry, kind, count) => THREE.InstancedMesh} options.createMesh kind: 'kit' | 'glass'
    */
-  constructor({ module, values, seeds, near, far, interior = false, createMesh, deferred = false }) {
+  constructor({ module, values, seeds, near, far, interior = false, farReach = Infinity, createMesh, deferred = false }) {
     this.values = values;
+    this.farReach = farReach;
     this.count = values.length / 4;
     this.interior = interior;
     this.matrices = new Float32Array(this.count * 16);
@@ -114,6 +121,9 @@ export class TownModuleInstances {
       const list = [];
       if (geometry.opaque) list.push(this.mesh(createMesh(geometry.opaque, 'kit', this.count), module, level, true));
       for (const glass of geometry.glass) list.push(this.mesh(createMesh(glass, 'glass', this.count), module, level, false));
+      // The far kit starts past the sun's shadow range (TownLod.splitRadius), so
+      // casting only drew the whole city again into every cascade.
+      if (level === 'far') for (const mesh of list) mesh.castShadow = false;
       return list;
     };
     this.nearMeshes = build(near, 'near');
@@ -209,18 +219,34 @@ export class TownModuleInstances {
       PerfCounters.inc('townLodPlacementsEvaluated');
       if (++units % 64 === 0) yield;
     }
+    // Past farReach a prop is a few pixels: it leaves the far meshes as well.
+    let reached = null;
+    if (Number.isFinite(this.farReach)) {
+      reached = new Set();
+      const stay = this.farReach + TOWN_LOD_DEFAULTS.hysteresis;
+      for (const i of this.spatial.near(x, z, stay)) {
+        const dx = values[i * 4] - x;
+        const dz = values[i * 4 + 2] - z;
+        const limit = this.farSlots.slotOf[i] >= 0 ? stay : this.farReach;
+        if (dx * dx + dz * dz <= limit * limit) reached.add(i);
+        if (++units % 64 === 0) yield;
+      }
+    }
+    const wantsFar = (i) => !next.has(i) && (!reached || reached.has(i));
     const nearDirty = [], farDirty = [];
     if (initial) {
       for (let i = 0; i < this.count; i++) {
         this.nearSlots.set(i, next.has(i), nearDirty);
-        this.farSlots.set(i, !next.has(i), farDirty);
+        this.farSlots.set(i, wantsFar(i), farDirty);
         if (++units % 64 === 0) yield;
       }
     } else {
-      const toFar = [...this.nearSlots.placementAt.subarray(0, this.nearSlots.count)]
-        .filter(i => !next.has(i)).sort((a, b) => a - b);
+      const drawn = (slots) => [...slots.placementAt.subarray(0, slots.count)];
       const toNear = [...next].filter(i => this.nearSlots.slotOf[i] < 0).sort((a, b) => a - b);
-      for (const [slots, dirty, remove, add] of [[this.nearSlots, nearDirty, toFar, toNear], [this.farSlots, farDirty, toNear, toFar]]) {
+      const leftNear = drawn(this.nearSlots).filter(i => !next.has(i)).sort((a, b) => a - b);
+      const leftFar = reached ? drawn(this.farSlots).filter(i => !wantsFar(i)).sort((a, b) => a - b) : toNear;
+      const toFar = reached ? [...reached].filter(i => wantsFar(i) && this.farSlots.slotOf[i] < 0).sort((a, b) => a - b) : leftNear;
+      for (const [slots, dirty, remove, add] of [[this.nearSlots, nearDirty, leftNear, toNear], [this.farSlots, farDirty, leftFar, toFar]]) {
         for (const i of remove) { slots.set(i, false, dirty); if (++units % 64 === 0) yield; }
         for (const i of add) { slots.set(i, true, dirty); if (++units % 64 === 0) yield; }
       }
@@ -231,6 +257,20 @@ export class TownModuleInstances {
     this.writeSlots(this.nearMeshes, this.nearSlots, nearDirty);
     this.writeSlots(this.farMeshes, this.farSlots, farDirty);
     this.setLod(TOWN_LOD_SPLIT);
+  }
+
+  /** Turn one placement in place (a swinging door), in whichever meshes draw it. */
+  setYaw(i, yaw) {
+    const v = this.values;
+    composePlacement(v[i * 4], v[i * 4 + 1], v[i * 4 + 2], yaw).toArray(this.matrices, i * 16);
+    for (const [meshes, slots] of [[this.nearMeshes, this.nearSlots], [this.farMeshes, this.farSlots]]) {
+      const slot = slots ? slots.slotOf[i] : i;
+      if (slot < 0) continue;
+      for (const mesh of meshes) {
+        mesh.instanceMatrix.array.set(this.matrices.subarray(i * 16, i * 16 + 16), slot * 16);
+        markAttributeSubrangeUpdated(mesh.instanceMatrix, slot, slot);
+      }
+    }
   }
 
   /** Write the changed slots of a slot set into its meshes, uploading each run of them. */

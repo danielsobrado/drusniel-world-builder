@@ -55,8 +55,8 @@ function createSpellButton({ id, key, label, glyph, onClick }) {
   button.setAttribute('aria-pressed', 'false');
   button.innerHTML = `
     <span class="spell-slot__glyph">${glyph}</span>
-    <svg class="spell-slot__channel" viewBox="0 0 48 48" aria-hidden="true">
-      <rect x="2" y="2" width="44" height="44" rx="13" pathLength="100"/>
+    <svg class="spell-slot__channel" viewBox="0 0 44 54" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="1" y="1" width="42" height="52" rx="9" pathLength="100"/>
     </svg>
     <kbd class="spell-slot__key">${key}</kbd>
     <span class="spell-slot__label"></span>
@@ -123,7 +123,7 @@ function elementsPage(config, controller) {
 }
 
 /**
- * The spell dock: compact tiles on a light tray, dragged by its grip, paged
+ * The spell dock: school tabs above a quiet spell row, dragged by its grip, paged
  * by tabs (or `[` and `]`). Casting from a slot and casting from the number
  * keys (`castSlot`) share one path, so both get the same ring, miss flash and
  * cast sound.

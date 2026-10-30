@@ -34,6 +34,8 @@ export const TOWN_LOD_DEFAULTS = Object.freeze({
   splitRadius: 130,
   /** Metres the viewer moves before a split town re-picks its near placements. */
   splitRefresh: 8,
+  /** A split town's props and doors draw only this close: past it they are a few pixels. */
+  propReach: 320,
 });
 
 /** Whether a town of this radius draws split (near round the viewer, far beyond) rather than whole. */

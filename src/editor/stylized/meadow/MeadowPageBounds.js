@@ -1,10 +1,11 @@
 import { Box3, Sphere } from 'three/webgpu';
+import { MEADOW_STAND_MAX_HEIGHT } from './meadowStandNodes.js';
 
 /** Shader displacement envelopes, including live tuning and body interaction. */
 export function meadowBladeBoundsPadding(uniforms, tuning, dirtCut = 0) {
   const height = (uniforms.growth?.maxHeight ?? (Math.abs(uniforms.bladeHeight.value)
     * Math.max(Math.abs(uniforms.heightScale.value.x), Math.abs(uniforms.heightScale.value.y))))
-    * Math.max(1, Math.abs(1 - dirtCut));
+    * Math.max(1, Math.abs(1 - dirtCut)) * MEADOW_STAND_MAX_HEIGHT;
   const restAngle = Math.abs(uniforms.baseBend.value) * Math.PI / 2;
   const windAngle = 1.3; // The blade shader clamps wind before applying bend power.
   const vertical = height * (1

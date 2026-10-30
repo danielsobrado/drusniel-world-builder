@@ -289,6 +289,11 @@ stylizedSurface:
     # stem and 4 a crooked trunk with two tufts; both read as wrong, dead-looking
     # trees among full crowns. Indices follow the scene's extraction order.
     excludePrimaryTreePrototypes: [3, 4]
+    # The primary pines' crown on the shared canopy grade and foliage lighting,
+    # as every authored crown: on the palette they stood near black beside lit
+    # broadleaves. Its authored alpha cutoff (0.61) ate the needles; part of the
+    # impostor signature, so changing this needs a rebake.
+    primaryLeaf: { gain: 2, alphaTest: 0.35 }
     # Authored scatter prototypes retain their embedded diffuse/normal textures.
     # Per-file scales normalize the source packages into metre-sized scenery.
     # grass-test's stones (scripts/prepare-donor-rock-assets.mjs): the eleven

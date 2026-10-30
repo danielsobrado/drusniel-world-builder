@@ -18,6 +18,7 @@ import {
   positionLocal,
   sin,
   smoothstep,
+  step,
   texture,
   time,
   uniform,
@@ -72,8 +73,16 @@ export const townKitShared = Object.freeze({
   reliefScale: uniform(1.25),
 });
 
+/** Decodes TownModuleInstances.seedColour; `grounded` is 1 on a ground-floor piece. */
 function seedChannels() {
-  return clamp(instanceColor.sub(0.9).mul(10), 0, 1);
+  const channels = clamp(instanceColor.sub(0.9).mul(10), 0, 1);
+  const steps = instanceColor.x.sub(0.9).mul(80).add(0.1);
+  return {
+    x: steps.floor().div(7).clamp(0, 1),
+    y: channels.y,
+    z: channels.z,
+    grounded: step(0.3, steps.fract()),
+  };
 }
 
 /**
@@ -147,8 +156,12 @@ export function createTownKitMaterial(atlas, look) {
   // A second tap of the same stones, turned and rescaled, blended by noise (as
   // SettlementPavingMaterial): no two stretches of a street are alike.
   const turned = vec2(st.x.mul(0.8).sub(st.y.mul(0.6)), st.x.mul(0.6).add(st.y.mul(0.8))).mul(0.73).add(vec2(0.37, 0.71));
-  const stoneMix = smoothstep(-0.28, 0.28, mx_noise_float(place.mul(0.31))).mul(isCobble);
-  const sample = mix(laid, texture(atlas.albedo, turned).depth(row.x).rgb, stoneMix);
+  // A wall takes the same stones shifted along their course, so the joints still
+  // line up but the same block never comes round again every tile.
+  const isStone = isRole(ROLE.stone);
+  const secondTap = mix(turned, st.add(vec2(0.37, 0)), isStone);
+  const stoneMix = smoothstep(-0.28, 0.28, mx_noise_float(place.mul(0.31))).mul(isCobble.add(isStone));
+  const sample = mix(laid, texture(atlas.albedo, secondTap).depth(row.x).rgb, stoneMix);
   const normalSample = texture(atlas.normal, st).depth(row.y).rgb;
   // Crevices from the normal map: the further a texel tilts, the deeper the joint.
   const crevice = smoothstep(0.97, 0.72, normalSample.z).mul(surface.y);
@@ -174,7 +187,9 @@ export function createTownKitMaterial(atlas, look) {
   }
   const houseTint = mix(vec3(1), renderTint, isRole(ROLE.plaster))
     .mul(mix(float(1), mix(float(0.82), float(1.1), seed.y), isRole(ROLE.timber)))
-    .mul(mix(float(1), mix(float(0.9), float(1.1), seed.z), isRole(ROLE.roof)));
+    .mul(mix(float(1), mix(float(0.9), float(1.1), seed.z), isRole(ROLE.roof)))
+    // Masons' stone came from more than one bed: each building its own tone.
+    .mul(mix(vec3(1), mix(vec3(0.84, 0.83, 0.81), vec3(1.1, 1.07, 1.02), seed.y), isStone));
   // Broad drift so long walls and roofs are never one flat tone.
   const drift = mx_noise_float(place.mul(0.09)).mul(0.08).add(1);
   colour = colour.mul(houseTint).mul(drift).mul(data.x);
@@ -183,7 +198,11 @@ export function createTownKitMaterial(atlas, look) {
   // The same weather as SettlementView's houses: moss on ledges and slates, rain runs down faces.
   const amount = (key) => [[ROLE.stone, 'stone'], [ROLE.plaster, 'plaster'], [ROLE.timber, 'timber'], [ROLE.roof, 'roof']]
     .reduce((sum, [value, family]) => sum.add(isRole(value).mul(WEATHER_FAMILIES[family][key])), float(0));
-  colour = weatherTownSurface(colour, { place, up, family: { moss: amount('moss'), streaks: amount('streaks') } });
+  // A ground-floor piece's own origin is its foot, so its height is the wall's;
+  // the band is for walls, not the floors and steps at the same height.
+  const wall = smoothstep(0.7, 0.3, up.abs());
+  const height = mix(float(99), positionGeometry.y, seed.grounded.mul(wall));
+  colour = weatherTownSurface(colour, { place, up, height, family: { moss: amount('moss'), streaks: amount('streaks'), damp: amount('damp') } });
   // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
   colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving).add(isCobble));
   const snowCover = smoothstep(0.38, 0.72, up).mul(snow).mul(kind.y);

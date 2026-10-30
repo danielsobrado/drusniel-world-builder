@@ -148,6 +148,16 @@ const PROP_CLUSTERS = Object.freeze({
   mountain_vault: [[['Mountain_Cavern_Vault', 0, 0, 0, 0]]],
 });
 
+/** Kit modules that only ever stand as props, not the massifs a town is seen by. */
+const PROP_MODULES = new Set(Object.entries(PROP_CLUSTERS)
+  .filter(([kind]) => !kind.startsWith('mountain_'))
+  .flatMap(([, variants]) => variants.flat().map(([module]) => module)));
+PROP_MODULES.add('Wall_Lantern');
+
+export function isTownProp(module) {
+  return PROP_MODULES.has(module);
+}
+
 /** Kinds whose variant is only a look choice, so the town spreads them by salt. */
 const SALTED_PROPS = new Set(['stall', 'lantern', 'shrine', 'signpost']);
 

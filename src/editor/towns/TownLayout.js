@@ -134,7 +134,8 @@ export class TownLayoutBuilder {
     const key = `town:${this.settlement.id}:b${index}`;
     this.placed.push({ building, size: prefab.size, family: buildingFamily });
     const seed = placementSeed(this.settlement.id, index, 11);
-    for (const part of prefab.parts) this.addPart(part.m, frame.point(part.p), frame.yaw + part.yaw, seed);
+    // Seed + 1 marks a piece standing on the ground (TownModuleInstances.seedColour).
+    for (const part of prefab.parts) this.addPart(part.m, frame.point(part.p), frame.yaw + part.yaw, part.p[1] < 1 ? seed + 1 : seed);
     prefab.colliders.forEach((box, boxIndex) => {
       this.addBox(`${key}:c${boxIndex}`, frame.point(box.c), box.s, frame.yaw + box.yaw);
     });

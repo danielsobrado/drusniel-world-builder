@@ -1,11 +1,10 @@
 import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
-import { townBoundsJob } from './TownBoundsJob.js';
 import * as THREE from 'three/webgpu';
-import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
-import { TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
+import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
 import { townLook } from './TownMaterialPalette.js';
-import { TownModuleInstances, composePlacement, seedColour } from './TownModuleInstances.js';
+import { isTownProp } from './TownPrefabCatalog.js';
+import { TownModuleInstances } from './TownModuleInstances.js';
 
 const DOOR_MODULE = 'Door_Leaf';
 // A far level costs a second set of draws, so only modules the far kit makes
@@ -29,15 +28,14 @@ function simplerFar(near, far) {
  * whole town with the full kit (0) or the light far kit (1); `split` draws a big
  * town near round the viewer and far beyond; `cullInteriors`
  * keeps floors, stairs and furniture to the viewer's surroundings. Door leaves
- * are their own instanced mesh so a door can swing without touching anything
- * else.
+ * are their own instances so a door can swing without touching anything else.
  */
 export class TownMesh {
   constructor({ assets, palette, layout, climate = {}, deferred = false }) {
     this.layout = layout;
     this.group = new THREE.Group();
     this.group.name = `Town ${layout.name || layout.settlementId}`;
-    this.doorMeshes = [];
+    this.doors = null;
     this.instanceCount = 0;
     this.look = townLook(layout, climate);
     this.lod = TOWN_LOD_NEAR;
@@ -62,17 +60,22 @@ export class TownMesh {
         near,
         far: simplerFar(near, assets.farModules.get(module)),
         interior: assets.isInterior(module),
+        farReach: isTownProp(module) ? TOWN_LOD_DEFAULTS.propReach : Infinity,
         createMesh, deferred: true,
       });
-      this.pendingModule = instances;
-      yield* instances.preparation;
-      this.pendingModule = null;
-      instances.preparation = null;
-      for (const mesh of instances.meshes) this.group.add(mesh);
-      this.instanceCount += instances.count;
-      this.modules.push(instances);
+      yield* this.adopt(instances);
     }
-    yield* this.buildDoorsJob(assets, kit);
+    yield* this.buildDoorsJob(assets, createMesh);
+  }
+
+  *adopt(instances) {
+    this.pendingModule = instances;
+    yield* instances.preparation;
+    this.pendingModule = null;
+    instances.preparation = null;
+    for (const mesh of instances.meshes) this.group.add(mesh);
+    this.instanceCount += instances.count;
+    this.modules.push(instances);
   }
 
   setLod(lod) {
@@ -113,46 +116,27 @@ export class TownMesh {
     return mesh;
   }
 
-  *buildDoorsJob(assets, kit) {
-    const doors = this.layout.doors;
-    const geometry = assets.modules.get(DOOR_MODULE)?.opaque;
-    if (!doors.length || !geometry) return;
-    const mesh = this.instanced(geometry, kit, doors.length, false);
-    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    const colours = new Float32Array(doors.length * 3);
-    const rgb = [0, 0, 0];
-    for (let i = 0; i < doors.length; i += 1) colours.set(seedColour(0.5, rgb), i * 3);
-    mesh.instanceColor = new THREE.InstancedBufferAttribute(colours, 3);
-    this.doorMeshes.push(mesh);
-    for (let index = 0; index < doors.length; index++) {
-      this.writeDoor(index, 0);
-      if (index % 64 === 63) yield;
-    }
-    mesh.name = DOOR_MODULE;
-    yield* townBoundsJob(mesh);
-    const swingRadius = geometry.boundingSphere.radius + geometry.boundingSphere.center.length();
-    const swing = new THREE.Sphere();
-    for (let index = 0; index < doors.length; index++) {
-      swing.center.fromArray(doors[index].hinge); swing.radius = swingRadius;
-      mesh.boundingSphere.union(swing);
-      if (index % 64 === 63) yield;
-    }
-    this.group.add(mesh);
-    this.instanceCount += doors.length;
-  }
-
-  writeDoor(index, angle) {
-    const door = this.layout.doors[index];
-    const matrix = composePlacement(door.hinge[0], door.hinge[1], door.hinge[2], door.yaw + angle);
-    for (const mesh of this.doorMeshes) {
-      mesh.setMatrixAt(index, matrix);
-      markAttributeSubrangeUpdated(mesh.instanceMatrix, index, index);
-    }
+  *buildDoorsJob(assets, createMesh) {
+    const { doors } = this.layout;
+    const near = assets.modules.get(DOOR_MODULE);
+    if (!doors.length || !near?.opaque) return;
+    const values = new Float32Array(doors.length * 4);
+    doors.forEach((door, i) => values.set([...door.hinge, door.yaw], i * 4));
+    this.doors = new TownModuleInstances({
+      module: DOOR_MODULE,
+      values,
+      seeds: null,
+      near,
+      far: simplerFar(near, assets.farModules.get(DOOR_MODULE)),
+      farReach: TOWN_LOD_DEFAULTS.propReach,
+      createMesh, deferred: true,
+    });
+    yield* this.adopt(this.doors);
   }
 
   /** Swing door `index` to `angle` radians (0 = shut, positive opens inward). */
   setDoorAngle(index, angle) {
-    this.writeDoor(index, angle);
+    this.doors.setYaw(index, this.layout.doors[index].yaw + angle);
   }
 
   setOrigin(origin) {

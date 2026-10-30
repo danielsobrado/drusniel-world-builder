@@ -1,28 +1,30 @@
 /*
- * Spell dock: pages of compact tiles on a dark, gold-edged tray, so it sits in the
- * world as a game HUD rather than an editor palette. It springs up from the bottom
- * edge when casting becomes possible and slides away when it stops. A tile
- * inverts while its spell runs and an accent border drains over the cast;
- * names are tooltips.
+ * Spell dock: a quiet glass tray with school tabs above the spell row.
+ * Gold marks the current school and active casts; names appear on demand.
  */
 .spell-dock {
   position: fixed;
   left: 50%;
   bottom: 16px;
   z-index: 13;
-  display: flex;
-  gap: 4px;
+  display: grid;
+  grid-template-areas: "tabs grip" "slots slots";
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 10px;
   align-items: center;
-  padding: 4px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 8px 10px 10px;
   transform: translateX(-50%);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgb(34 29 22 / 86%), rgb(18 15 11 / 90%));
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgb(29 32 25 / 92%), rgb(17 21 17 / 94%));
   box-shadow:
-    inset 0 0 0 1px rgb(214 176 104 / 30%),
-    0 8px 24px rgb(0 0 0 / 45%);
+    inset 0 0 0 1px rgb(234 210 156 / 16%),
+    0 6px 20px rgb(0 0 0 / 28%);
   backdrop-filter: var(--glade-blur, blur(14px));
   color: #f1e6cf;
-  font-family: var(--glade-font, system-ui, sans-serif);
+  font-family: var(--hud-font, system-ui, sans-serif);
   user-select: none;
   touch-action: none;
   transition:
@@ -51,19 +53,20 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 }
 
 .spell-menu-grip {
+  grid-area: grip;
   display: grid;
-  grid-template-columns: repeat(2, 3px);
+  grid-template-columns: repeat(2, 2px);
   gap: 3px;
-  padding: 10px 5px;
-  border-radius: 10px;
+  padding: 6px;
+  border-radius: 6px;
   cursor: grab;
 }
 
 .spell-menu-grip i {
-  width: 3px;
-  height: 3px;
+  width: 2px;
+  height: 2px;
   border-radius: 50%;
-  background: rgb(214 176 104 / 45%);
+  background: rgb(241 230 207 / 35%);
 }
 
 .spell-menu-grip:hover {
@@ -75,46 +78,66 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 }
 
 .spell-menu-slots {
+  grid-area: slots;
   display: flex;
-  gap: 4px;
+  min-width: 0;
 }
 
 /* Spell pages: Elements, then the grimoire's schools. One page shows at a time. */
 .spell-menu-tabs {
+  grid-area: tabs;
   display: flex;
-  flex-direction: column;
   gap: 2px;
-  margin-right: 2px;
+  min-width: 0;
 }
 
 .spell-menu-tab {
-  padding: 3px 7px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 7px 8px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
-  color: rgb(241 230 207 / 78%);
-  font: 800 10.5px/1.1 var(--glade-font, system-ui, sans-serif);
+  color: #b8b9ac;
+  font: 500 11px/1.2 var(--hud-font, system-ui, sans-serif);
   letter-spacing: 0.02em;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
 }
 
 .spell-menu-tab:hover,
 .spell-menu-tab:focus-visible {
-  outline: none;
-  background: rgb(214 176 104 / 14%);
+  background: rgb(241 230 207 / 6%);
   color: #f1e6cf;
 }
 
+.spell-menu-tab:focus-visible {
+  outline: 2px solid #ead29c;
+  outline-offset: 1px;
+}
+
 .spell-menu-tab[aria-selected='true'] {
-  background: #d6b068;
-  color: #1c1812;
+  color: #ead29c;
+}
+
+.spell-menu-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  bottom: 0;
+  left: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
 }
 
 .spell-menu-page {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
 }
 
 .spell-menu-page[hidden] {
@@ -122,39 +145,39 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 }
 
 .spell-slot {
-
   position: relative;
   display: grid;
+  flex: 1 1 44px;
+  grid-template-rows: 24px 12px;
+  gap: 4px;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
+  min-width: 0;
+  width: 44px;
+  height: 54px;
+  padding: 7px 0;
+  box-sizing: border-box;
   border: 0;
   border-radius: 10px;
-  background: linear-gradient(180deg, #3b3327, #241e16);
-  box-shadow:
-    inset 0 1px 0 rgb(255 240 210 / 10%),
-    inset 0 -2px 0 rgb(0 0 0 / 30%),
-    0 0 0 1px rgb(214 176 104 / 26%);
+  background: rgb(241 230 207 / 4%);
   color: #f1e6cf;
   cursor: pointer;
   transition:
     translate var(--glade-spring-ms, 690ms) var(--glade-spring, ease),
     scale var(--glade-spring-ms, 690ms) var(--glade-spring, ease),
     box-shadow 180ms ease,
-    filter 180ms ease;
+    background 180ms ease;
 }
 
 .spell-slot:hover,
 .spell-slot:focus-visible {
   outline: none;
   translate: 0 -2px;
+  background: rgb(241 230 207 / 10%);
 }
 
 .spell-slot:focus-visible {
-  box-shadow:
-    inset 0 -2px 0 rgb(0 0 0 / 30%),
-    0 0 0 2px var(--glade-accent, #e59b52);
+  outline: 2px solid #ead29c;
+  outline-offset: 2px;
 }
 
 .spell-slot:active {
@@ -169,13 +192,13 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot__glyph svg {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   overflow: visible;
 }
 
 .spell-slot .glyph-fill { fill: currentColor; }
-.spell-slot .glyph-light { fill: #241e16; }
+.spell-slot .glyph-light { fill: #20261e; }
 
 .spell-slot .glyph-line {
   fill: none;
@@ -189,24 +212,21 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot .glyph-shine {
   fill: none;
-  stroke: #241e16;
+  stroke: #20261e;
   stroke-width: 1.8;
   stroke-linecap: round;
 }
 
 .spell-slot__key {
-  position: absolute;
-  right: 3px;
-  bottom: 2px;
-  color: rgb(241 230 207 / 62%);
-  font: 800 9px/1 var(--glade-font, system-ui, sans-serif);
+  color: #b8b9ac;
+  font: 500 10px/1 var(--hud-font, system-ui, sans-serif);
 }
 
 .spell-slot__channel {
   position: absolute;
-  inset: -5px;
-  width: calc(100% + 10px);
-  height: calc(100% + 10px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
   opacity: 0;
   pointer-events: none;
@@ -214,26 +234,23 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot__channel rect {
   fill: none;
-  stroke: var(--glade-accent, #e59b52);
-  stroke-width: 3;
+  stroke: #ead29c;
+  stroke-width: 1.5;
   stroke-linecap: round;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
 }
 
 .spell-slot[aria-pressed='true'] {
-  background: linear-gradient(180deg, #6a5228, #3e2f15);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 226 160 / 55%),
-    0 0 14px rgb(229 170 82 / 50%);
+  background: rgb(234 210 156 / 14%);
   color: #fff3d8;
-  translate: 0 -3px;
+  translate: 0 -2px;
 }
 
-.spell-slot[aria-pressed='true'] .glyph-light { fill: var(--glade-accent, #e59b52); }
+.spell-slot[aria-pressed='true'] .glyph-light { fill: #3e4231; }
 
 .spell-slot[aria-pressed='true'] .spell-slot__glyph {
-  scale: 1.16;
+  scale: 1.08;
 }
 
 .spell-slot[aria-pressed='true'] .spell-slot__channel {
@@ -242,14 +259,14 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot__label {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 48px);
   left: 50%;
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: var(--glade-ink, #4a4036);
-  box-shadow: var(--glade-shadow-soft, 0 3px 10px rgb(62 44 24 / 14%));
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: #1d2019;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 24%);
   color: var(--glade-cream, #fff9ee);
-  font: 800 11px/1 var(--glade-font, system-ui, sans-serif);
+  font: 500 11px/1.2 var(--hud-font, system-ui, sans-serif);
   white-space: nowrap;
   opacity: 0;
   translate: -50% 4px;
@@ -265,10 +282,19 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   translate: -50% 0;
 }
 
+.spell-slot:first-child .spell-slot__label {
+  left: 0;
+  translate: 0 0;
+}
+
+.spell-slot:last-child .spell-slot__label {
+  right: 0;
+  left: auto;
+  translate: 0 0;
+}
+
 .spell-slot.spell-miss {
-  box-shadow:
-    inset 0 -2px 0 rgb(0 0 0 / 30%),
-    0 0 0 2px var(--glade-danger, #d8645a);
+  box-shadow: inset 0 0 0 2px var(--glade-danger, #d8645a);
   animation: spell-miss-shake 0.28s ease-out;
 }
 
@@ -280,20 +306,21 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 @media (max-width: 760px) {
   .spell-dock {
-    bottom: 10px;
-    max-width: calc(100vw - 16px);
+    bottom: max(10px, env(safe-area-inset-bottom));
+    grid-template-areas: "tabs" "slots";
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .spell-menu-grip {
     display: none;
   }
 
-  .spell-menu-slots {
-    gap: 5px;
+  .spell-menu-page {
+    gap: 4px;
   }
 
   .spell-slot {
-    width: 36px;
-    height: 36px;
+    flex-basis: 40px;
+    width: 40px;
   }
 }

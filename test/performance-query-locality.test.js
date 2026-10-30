@@ -4,7 +4,7 @@ import { createEmptyWorldState, upsertEntity } from '../src/sim/model/worldState
 import { shortestPath } from '../src/sim/geography/geographicGraph.js';
 import { matchTradeOffers } from '../src/sim/logistics/shipments.js';
 import { TownDoorController } from '../src/editor/towns/TownDoors.js';
-import { TownMesh } from '../src/editor/towns/TownMesh.js';
+import { TownModuleInstances } from '../src/editor/towns/TownModuleInstances.js';
 import { BoxGeometry, InstancedMesh, MeshBasicMaterial } from 'three/webgpu';
 
 test('path adjacency retains unrelated rows and updates moved, disabled and removed edges', () => {
@@ -67,9 +67,17 @@ test('door focus preserves reach and tie order while only moving doors animate',
 test('door subranges survive culled frames and isolate changed matrices', () => {
   const geometry = new BoxGeometry(), material = new MeshBasicMaterial();
   const mesh = new InstancedMesh(geometry, material, 1024);
-  const fake = { layout: { doors: [{ hinge: [0, 0, 0], yaw: 0 }, { hinge: [4, 0, 0], yaw: 0 }] }, doorMeshes: [mesh] };
-  TownMesh.prototype.writeDoor.call(fake, 0, 1);
-  TownMesh.prototype.writeDoor.call(fake, 1, 1);
+  const doors = new TownModuleInstances({
+    module: 'Door_Leaf',
+    values: new Float32Array([0, 0, 0, 0, 4, 0, 0, 0]),
+    seeds: null,
+    near: { opaque: geometry, glass: [] },
+    far: null,
+    createMesh: () => mesh,
+  });
+  mesh.instanceMatrix.clearUpdateRanges();
+  doors.setYaw(0, 1);
+  doors.setYaw(1, 1);
   assert.deepEqual(mesh.instanceMatrix.updateRanges, [{ start: 0, count: 32 }]);
   mesh.dispose(); geometry.dispose(); material.dispose();
 });

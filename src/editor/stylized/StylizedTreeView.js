@@ -297,7 +297,12 @@ export class StylizedTreeView {
     const barkTextures = barkResult.value;
     const foliageCard = foliageResult.value;
     if (this.disposed || !barkTextures) return;
-    const primaryCount = this.appendScenePrototypes(scene, this.config, barkTextures);
+    const primaryLeaf = this.config.assets.primaryLeaf;
+    const primaryCount = this.appendScenePrototypes(scene, this.config, barkTextures, {
+      gradeLeaf: Boolean(primaryLeaf),
+      leafGain: primaryLeaf?.gain,
+      leafAlphaTest: primaryLeaf?.alphaTest,
+    });
     if (primaryCount === 0) {
       throw new Error('No pine prototype contains both configured trunk and leaf materials.');
     }
@@ -411,6 +416,9 @@ export class StylizedTreeView {
     barkTextures,
     {
       preserveSourceAppearance = false,
+      // The crown joins the shared canopy grade while its bark stays stylized.
+      gradeLeaf = preserveSourceAppearance,
+      leafAlphaTest = 0,
       scale = 1,
       authoredBarkTextures = null,
       authoredBarkScale = 0.8,
@@ -468,7 +476,8 @@ export class StylizedTreeView {
               treeTopY: sway.topY,
               time: this.time,
               config: this.config,
-              preserveSourceColor: preserveSourceAppearance,
+              preserveSourceColor: gradeLeaf,
+              alphaTest: leafAlphaTest,
               vertexColor: Boolean(part.geometry.getAttribute('color')),
               leafGain,
               canopyGrade,
