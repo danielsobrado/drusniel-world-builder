@@ -150,8 +150,8 @@ export function createTownKitMaterial(atlas, look) {
   // scan in its own space repeated it as a visible grid.
   const isCobble = isRole(ROLE.cobble);
   const base = mix(uv(), place.xz, isCobble);
-  const height = dot(texture(atlas.albedo, base).depth(row.x).rgb, vec3(0.3, 0.55, 0.15));
-  const st = base.sub(parallaxDirection.xy.mul(height.sub(0.45).mul(surface.z).mul(townKitShared.reliefScale)));
+  const reliefHeight = dot(texture(atlas.albedo, base).depth(row.x).rgb, vec3(0.3, 0.55, 0.15));
+  const st = base.sub(parallaxDirection.xy.mul(reliefHeight.sub(0.45).mul(surface.z).mul(townKitShared.reliefScale)));
   const laid = texture(atlas.albedo, st).depth(row.x).rgb;
   // A second tap of the same stones, turned and rescaled, blended by noise (as
   // SettlementPavingMaterial): no two stretches of a street are alike.
