@@ -41,7 +41,7 @@ export function stoneSeed(kind, variant) {
 
 const YARD_KINDS = new Set(['smithy', 'warehouse']);
 
-function stone(kind, x, z, random, sizeJitter = 0.25) {
+export function looseStone(kind, x, z, random, sizeJitter = 0.25) {
   return {
     kind,
     variant: Math.floor(random() * SETTLEMENT_STONES[kind].variants),
@@ -60,7 +60,7 @@ function guardStones({ profile, buildings, random }, props) {
     const box = rect(building.x, building.z, building.width, building.depth, building.yaw);
     // Corners 2 and 3 are the front pair (local +z); the stone sits just proud of one.
     const [cx, cz] = rectCorners(box)[random() < 0.5 ? 2 : 3];
-    props.push(stone('guardStone', cx + box.az[0] * 0.15, cz + box.az[1] * 0.15, random, 0.15));
+    props.push(looseStone('guardStone', cx + box.az[0] * 0.15, cz + box.az[1] * 0.15, random, 0.15));
   }
 }
 
@@ -79,7 +79,7 @@ function yardBlocks({ buildings, occupancy, random }, props) {
       const spot = rect(x, z, 1, 1, building.yaw);
       if (!occupancy.fits(spot, { clearance: 0.1, streetClearance: 0.2 })) continue;
       occupancy.claim(spot, { soft: true });
-      props.push(stone('quarryBlock', x, z, random, 0.12));
+      props.push(looseStone('quarryBlock', x, z, random, 0.12));
     }
   }
 }
@@ -91,12 +91,12 @@ function fieldClearance({ fields, random }, props) {
     const first = Math.floor(random() * 4);
     for (const index of random() < 0.4 ? [first, (first + 2) % 4] : [first]) {
       const [cx, cz] = corners[index];
-      props.push(stone('boulder', cx, cz, random));
+      props.push(looseStone('boulder', cx, cz, random));
       const scatter = 2 + Math.floor(random() * 3);
       for (let pebble = 0; pebble < scatter; pebble += 1) {
         const angle = random() * Math.PI * 2;
         const distance = 0.9 + random() * 1.3;
-        props.push(stone('fieldstone', cx + Math.sin(angle) * distance, cz + Math.cos(angle) * distance, random, 0.35));
+        props.push(looseStone('fieldstone', cx + Math.sin(angle) * distance, cz + Math.cos(angle) * distance, random, 0.35));
       }
     }
   }
@@ -123,12 +123,12 @@ function outcrops({ profile, occupancy, outcropRandom: random }, props) {
     const spot = rect(x, z, 3.6, 3.6, 0);
     if (!occupancy.fits(spot, { clearance: 0.6, streetClearance: 1.5 })) continue;
     occupancy.claim(spot, { soft: true });
-    props.push(stone('outcrop', x, z, random, 0.35));
+    props.push(looseStone('outcrop', x, z, random, 0.35));
     const scatter = 1 + Math.floor(random() * 3);
     for (let index = 0; index < scatter; index += 1) {
       const around = random() * Math.PI * 2;
       const reach = 2.2 + random() * 1.4;
-      props.push(stone('boulder', x + Math.sin(around) * reach, z + Math.cos(around) * reach, random));
+      props.push(looseStone('boulder', x + Math.sin(around) * reach, z + Math.cos(around) * reach, random));
     }
     placed += 1;
   }

@@ -1,6 +1,7 @@
 import { buildingDoor, buildingWindows } from './SettlementBuildingCatalog.js';
 import { planDecor } from './SettlementDecor.js';
 import { planDefences } from './SettlementDefences.js';
+import { planGateApproaches } from './SettlementGateApproach.js';
 import { rect } from './SettlementGeometry.js';
 import { marketHalls, placeSquares } from './SettlementMarkets.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
@@ -11,7 +12,7 @@ import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 14;
+export const SETTLEMENT_PLAN_VERSION = 15;
 
 /**
  * Plan one settlement: streets, market square, landmark and house plots,
@@ -63,6 +64,9 @@ export function planSettlement({
   const outcropRandom = planRandom(hashInts(worldSeed, settlement.id, 0x0c7));
   const stones = planStones({ profile, occupancy, buildings: [...buildings, ...farms], fields, random, outcropRandom });
   const trim = planTrim({ profile, occupancy, buildings: [...buildings, ...farms, ...defences], fields, random });
+  // After everything else and on its own stream, for the same reason.
+  const gateSeed = planRandom(hashInts(worldSeed, settlement.id, 0x6a7e));
+  const gateways = planGateApproaches({ streets, defences, occupancy, random: gateSeed });
   const styleKey = profile.style.key;
   // A building the plan fronts on a street gets the door its pooled mesh has (SettlementDoors.generated).
   const withPad = (item) => ({
@@ -85,7 +89,9 @@ export function planSettlement({
     squares,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),
-    props: [...props, ...stones, ...trim],
+    props: [...props, ...stones, ...trim, ...gateways.props],
+    // Worn ground in front of each gate: { points, halfWidths }, gate first.
+    approaches: gateways.approaches,
     fields,
   });
 }

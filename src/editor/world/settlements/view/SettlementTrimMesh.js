@@ -14,10 +14,11 @@ const IRON = [0.07, 0.07, 0.08];
 const SIGN_BOARDS = [[0.36, 0.11, 0.07], [0.1, 0.13, 0.17], [0.36, 0.28, 0.11], [0.12, 0.18, 0.1]];
 const AWNING_CLOTH = [[0.36, 0.12, 0.09], [0.12, 0.15, 0.2], [0.4, 0.33, 0.17]];
 const CLOTH_STRIPE = [0.62, 0.58, 0.48];
+const BANNER_CLOTH = [[0.3, 0.06, 0.05], [0.06, 0.09, 0.2], [0.07, 0.14, 0.08], [0.32, 0.22, 0.05]];
 /** Trim built of wood, which wears the town's timber set. */
 const WOODEN = new Set(['shopSign']);
 /** Trim of canvas, which is woven and weathered in the shader. */
-const CLOTH = new Set(['awning']);
+const CLOTH = new Set(['awning', 'gateBanner']);
 /**
  * Canvas over the dye in its vertex colour: darker where rain runs off and dirt
  * gathers, bleached in broad patches where the sun has had it. No weave: at
@@ -202,7 +203,42 @@ function hen(builder, variant) {
   for (const x of [-0.04, 0.04]) builder.box(x, 0.07, 0, 0.02, 0.14, 0.02, [0.6, 0.45, 0.1]);
 }
 
-const BUILDERS = Object.freeze({ shopSign, awning, ivyPatch, sheep, hen });
+/** A long pointed banner down a gatehouse face at z = 0, on an iron bar over the passage's flank. */
+function gateBanner(builder, variant) {
+  const cloth = BANNER_CLOTH[variant % BANNER_CLOTH.length];
+  const [half, top, hem, tip] = [0.68, 6.2, 3, 2.4];
+  builder.box(0, top + 0.04, 0.18, half * 2 + 0.3, 0.07, 0.07, IRON);
+  for (const x of [-half, half]) builder.box(x, top + 0.04, 0.09, 0.07, 0.07, 0.18, IRON);
+  builder.quad([-half, hem, 0.18], [half, hem, 0.18], [half, top, 0.18], [-half, top, 0.18], cloth);
+  builder.quad([-half, hem, 0.18], [0, tip, 0.18], [half, hem, 0.18], [0, hem, 0.18], cloth);
+  // A pale band down the middle: the one mark that reads from down the road.
+  builder.quad([-0.17, hem - 0.3, 0.19], [0.17, hem - 0.3, 0.19], [0.17, top, 0.19], [-0.17, top, 0.19], CLOTH_STRIPE);
+}
+
+/** A rail on two posts with spears stood against it, leaning back from the road side (+z). */
+function spearRack(builder, variant) {
+  for (const x of [-0.95, 0.95]) builder.box(x, 0.65, 0, 0.1, 1.3, 0.1, WOOD);
+  builder.box(0, 1.2, 0, 2, 0.08, 0.08, WOOD);
+  builder.box(0, 0.35, 0, 2, 0.08, 0.08, WOOD);
+  const spears = 4 + variant;
+  for (let index = 0; index < spears; index += 1) {
+    const x = -0.7 + 1.4 * index / (spears - 1);
+    // Bottom of the shaft out on the ground, the blade over the rail.
+    builder.quad([x - 0.02, 0, 0.38], [x + 0.02, 0, 0.38], [x + 0.02, 2.2, -0.2], [x - 0.02, 2.2, -0.2], WOOD);
+    builder.quad([x - 0.05, 2.2, -0.2], [x + 0.05, 2.2, -0.2], [x, 2.55, -0.3], [x, 2.55, -0.3], IRON.map((channel) => channel * 3));
+  }
+}
+
+/** A hitching rail, worn pale along the top, with a trough under some. */
+function hitchPost(builder, variant) {
+  for (const x of [-0.95, 0.95]) builder.box(x, 0.6, 0, 0.14, 1.2, 0.14, WOOD);
+  builder.box(0, 1.08, 0, 2.1, 0.09, 0.09, WOOD.map((channel) => channel * 1.5));
+  if (variant === 0) return;
+  builder.box(0, 0.24, 0.42, 1.5, 0.48, 0.5, WOOD);
+  builder.box(0, 0.46, 0.42, 1.36, 0.05, 0.36, [0.04, 0.07, 0.08]);
+}
+
+const BUILDERS = Object.freeze({ shopSign, awning, ivyPatch, sheep, hen, gateBanner, spearRack, hitchPost });
 
 /** How far an animal ambles from where it was put, how fast, and how high its step lifts it. */
 const GAIT = Object.freeze({ sheep: [1.6, 0.11, 0.03], hen: [0.9, 0.5, 0.05] });
@@ -245,7 +281,7 @@ export function createSettlementTrimParts(entry) {
     roughness: set ? 1 : 0.9,
     metalness: 0,
     // Cloth and leaves are single sheets, seen from both sides.
-    side: entry.kind === 'awning' || entry.kind === 'ivyPatch' ? THREE.DoubleSide : THREE.FrontSide,
+    side: ['awning', 'ivyPatch', 'gateBanner', 'spearRack'].includes(entry.kind) ? THREE.DoubleSide : THREE.FrontSide,
   });
   if (GAIT[entry.kind]) material.positionNode = amble(GAIT[entry.kind]);
   material.userData.workshopSlot = stair ? 'stone' : 'wood';

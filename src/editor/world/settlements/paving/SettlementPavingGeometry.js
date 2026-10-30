@@ -123,10 +123,10 @@ class SurfaceBuffer {
 }
 
 function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, heightAt) {
-  const half = width / 2 + BORDER;
   let previous = null;
   const last = path.length - 1;
   for (let index = 0; index <= last; index += 1) {
+    const half = (typeof width === 'function' ? width(index / last) : width) / 2 + BORDER;
     const [x, z] = path[index];
     const [bx, bz] = path[Math.max(0, index - 1)];
     const [ax, az] = path[Math.min(last, index + 1)];
@@ -294,6 +294,16 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
         tone: street.kind === 'walk' ? 0.94 : 1,
       }, heightAt);
     }
+    yield;
+  }
+  for (const { points, halfWidths } of plan.approaches ?? []) {
+    // Narrower than the road tile under it, so its frayed edge dies out on bare ground, not grass.
+    const widthAt = (t) => {
+      const at = t * (halfWidths.length - 1);
+      const index = Math.min(halfWidths.length - 2, Math.floor(at));
+      return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * 1.5;
+    };
+    yield* addRibbon(buffers.get('earth'), smoothPath(points), widthAt, { closed: false, fadeStart: false, fadeEnd: true, tone: 0.97 }, heightAt);
     yield;
   }
   for (const square of plan.squares ?? []) {

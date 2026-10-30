@@ -13,7 +13,7 @@ function placeProp(occupancy, props, kind, variant, x, z, yaw, { ignoreStreets =
   return true;
 }
 
-function pointAlong(points, distance) {
+export function pointAlong(points, distance) {
   let remaining = distance;
   for (let index = 1; index < points.length; index += 1) {
     const [ax, az] = points[index - 1];
