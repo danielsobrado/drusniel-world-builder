@@ -16,6 +16,7 @@ from mathutils import Matrix
 
 from ..config import GRID, detailed
 from ..mesh import MeshBuilder
+from ..sculpt import sculpt_rock
 
 
 def _at(x, y, z=0.0):
@@ -75,6 +76,8 @@ def cliff(width=4.0, height=9.0, seed=11):
         for i in range(2):
             x = width * (0.28 + 0.44 * i) + rng.uniform(-0.25, 0.25)
             _strata(b, x, 1.3 + 0.22 * k, z, 1.65 * shrink * rng.uniform(0.9, 1.1), bed, rng)
+        # A core stratum between the two keeps the sculpted cliff solid (a gap remeshes into a tunnel).
+        _strata(b, width * 0.5, 1.5 + 0.22 * k, z, 1.2 * shrink, bed, rng)
         z += bed * 0.96
         k += 1
     return b
@@ -175,8 +178,10 @@ def define(kit):
     kit.define('Tree_Pine_Tall', 'nature', pine(8.5, seed=8))
     kit.define('Tree_Pine_Snow', 'nature', pine(seed=6, snow=True))
     kit.define('Tree_Pine_Snow_Tall', 'nature', pine(8.5, seed=9, snow=True))
-    kit.define('Boulder_Cluster', 'nature', boulders())
-    kit.define('Cliff_Granite', 'nature', cliff())
+    # Sculpted like the Stonehold crags (sculpt.py), on the shared crag rock.
+    sculpt_rock(kit.define('Boulder_Cluster', 'nature', boulders()), seed=7, floor=2500, mat='rock')
+    sculpt_rock(kit.define('Cliff_Granite', 'nature', cliff()), seed=11, centres=((2.0, 1.4),),
+                floor=8000, mat='rock')
     kit.define('Ore_Crane', 'props', ore_crane())
     kit.define('Windbreak_Wall', 'props', windbreak())
     kit.define('Fire_Post', 'props', fire_post())

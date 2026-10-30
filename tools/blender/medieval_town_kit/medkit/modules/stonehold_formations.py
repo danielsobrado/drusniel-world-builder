@@ -17,6 +17,7 @@ from ..config import detailed
 from ..mesh import MeshBuilder
 from ..sculpt import sculpt_rock
 from .stonehold_parts import (
+    STONE_BEVEL,
     cargo_cluster,
     cliff_portal_alcove,
     cliff_scaffolding_crane,
@@ -384,6 +385,15 @@ BLUFFS = {
 }
 
 
+# Mountain pieces sculpted the same way: (wrap-UV centres, rock triangle floor); no bluff.
+MOUNTAIN_SCULPT = {
+    'Mountain_Cliff_Wall': (((0.0, 0.0),), 12000),
+    'Mountain_Gate_Massif': (((-4.5, 0.4), (4.5, 0.4)), 12000),
+    'Mountain_Cavern_Vault': (((0.0, 0.0),), 8000),
+    'Mine_Vent_Stack': (((0.0, 0.0),), 1500),
+}
+
+
 def _raise_on_bluff(b, h, bluffs, falls=()):
     """Lift everything built so far by `h` onto tall columnar cliffs, so the citadel tiers read
     as crowning a mountain rather than stacked on the ground; `falls` (x, y_top, y_foot, width)
@@ -595,11 +605,11 @@ def stonehold_cavern_maw():
 
     # Vondari Dwarven basalt jambs, threshold & gold-inlaid corbelled lintel framing the cavern maw
     for side in (-1, 1):
-        b.box((side * 0.50 - 0.10, -0.04, 0.42), (side * 0.50 + 0.10, 0.42, 1.85), 'stone_basalt', bevel=0)
+        b.box((side * 0.50 - 0.10, -0.04, 0.42), (side * 0.50 + 0.10, 0.42, 1.85), 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             b.box((side * 0.50 - 0.035, -0.06, 0.52), (side * 0.50 + 0.035, -0.02, 1.78), 'gold', bevel=0)
-    b.box((-0.72, -0.08, 1.98), (0.72, 0.46, 2.24), 'stone_basalt', bevel=0)
-    b.box((-0.54, -0.24, 0.40), (0.54, 0.48, 0.48), 'stone_basalt', bevel=0)
+    b.box((-0.72, -0.08, 1.98), (0.72, 0.46, 2.24), 'stone_basalt', bevel=STONE_BEVEL)
+    b.box((-0.54, -0.24, 0.40), (0.54, 0.48, 0.48), 'stone_basalt', bevel=STONE_BEVEL)
     if detailed():
         b.box((-0.58, -0.10, 2.04), (0.58, -0.05, 2.16), 'gold', bevel=0)
         for rx in (-0.38, -0.19, 0.0, 0.19, 0.38):
@@ -731,7 +741,7 @@ def _build_vent_stack_at(b, cx, cy, z0, scale=1.0, seed=900):
           (cx + 0.64 * s, cy + 0.64 * s, z0 + 2.85 * s), 'stone_granite', skip=('-z',), bevel=0)
     for bz in (1.35 * s, 2.05 * s, 2.82 * s):
         b.box((cx - 0.72 * s, cy - 0.72 * s, z0 + bz),
-              (cx + 0.72 * s, cy + 0.72 * s, z0 + bz + 0.16 * s), 'stone_basalt', bevel=0)
+              (cx + 0.72 * s, cy + 0.72 * s, z0 + bz + 0.16 * s), 'stone_basalt', bevel=STONE_BEVEL)
     # Glowing forge-draft louver vents on all 4 sides
     b.box((cx - 0.48 * s, cy - 0.66 * s, z0 + 2.22 * s),
           (cx + 0.48 * s, cy + 0.66 * s, z0 + 2.76 * s), 'firelight', bevel=0)
@@ -756,7 +766,7 @@ def _build_vent_stack_at(b, cx, cy, z0, scale=1.0, seed=900):
     # Twin basalt exhaust flues at top
     for fx in (-0.28 * s, 0.28 * s):
         b.box((cx + fx - 0.20 * s, cy - 0.22 * s, z0 + 2.98 * s),
-              (cx + fx + 0.20 * s, cy + 0.22 * s, z0 + 3.48 * s), 'stone_basalt', bevel=0)
+              (cx + fx + 0.20 * s, cy + 0.22 * s, z0 + 3.48 * s), 'stone_basalt', bevel=STONE_BEVEL)
         b.box((cx + fx - 0.13 * s, cy - 0.15 * s, z0 + 3.42 * s),
               (cx + fx + 0.13 * s, cy + 0.15 * s, z0 + 3.52 * s), 'glow', bevel=0)
 
@@ -793,15 +803,15 @@ def mountain_cliff_wall():
         if detailed():
             b.box((px - 0.10, -1.46, 1.6), (px + 0.10, 1.46, 8.8), 'gold', bevel=0)
     for cz in (4.6, 9.0):
-        b.box((-4.15, -1.48, cz), (4.15, 1.48, cz + 0.40), 'stone_basalt', bevel=0)
+        b.box((-4.15, -1.48, cz), (4.15, 1.48, cz + 0.40), 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             b.box((-4.15, -1.52, cz + 0.12), (4.15, 1.52, cz + 0.24), 'gold', bevel=0)
 
     # Rock-cut subterranean hall embrasures with shouldered lintels & glowing forge light
     for wx in (-2.4, 0.0, 2.4):
         for wz in (1.8, 5.8):
-            b.box((wx - 0.48, -1.40, wz), (wx + 0.48, 1.40, wz + 1.85), 'stone_granite', bevel=0)
-            b.box((wx - 0.58, -1.50, wz + 1.75), (wx + 0.58, 1.50, wz + 2.12), 'stone_basalt', bevel=0)
+            b.box((wx - 0.48, -1.40, wz), (wx + 0.48, 1.40, wz + 1.85), 'stone_granite', bevel=STONE_BEVEL)
+            b.box((wx - 0.58, -1.50, wz + 1.75), (wx + 0.58, 1.50, wz + 2.12), 'stone_basalt', bevel=STONE_BEVEL)
             for side in (-1, 1):
                 y0, y1 = (side * 1.44, side * 1.30) if side < 0 else (side * 1.30, side * 1.44)
                 b.box((wx - 0.32, y0, wz + 0.18), (wx + 0.32, y1, wz + 1.68), 'firelight', bevel=0)
@@ -840,12 +850,12 @@ def mountain_gate_massif():
         b.box((side * 4.55 - 0.35, -1.45, -0.2), (side * 4.55 + 0.35, 2.25, 7.0),
               'stone_basalt', skip=('-z',), bevel=0)
         for bz in (0.9, 3.4, 6.4):
-            b.box((side * 3.55 - 1.35, -1.50, bz), (side * 3.55 + 1.35, 2.30, bz + 0.34), 'stone_basalt', bevel=0)
+            b.box((side * 3.55 - 1.35, -1.50, bz), (side * 3.55 + 1.35, 2.30, bz + 0.34), 'stone_basalt', bevel=STONE_BEVEL)
             if detailed():
                 b.box((side * 3.55 - 1.38, -1.54, bz + 0.10), (side * 3.55 + 1.38, 2.34, bz + 0.22), 'gold', bevel=0)
         # Glowing bastion guard embrasure & Vondari banner
         b.box((side * 3.55 - 0.36, -1.42, 3.95), (side * 3.55 + 0.36, 2.22, 5.65), 'firelight', bevel=0)
-        b.box((side * 3.55 - 0.48, -1.52, 5.60), (side * 3.55 + 0.48, 2.32, 5.92), 'stone_basalt', bevel=0)
+        b.box((side * 3.55 - 0.48, -1.52, 5.60), (side * 3.55 + 0.48, 2.32, 5.92), 'stone_basalt', bevel=STONE_BEVEL)
         vondari_cliff_banner(b, side * 3.55, -1.48, 3.30, yaw=0.0, height=2.20, width=0.68)
         if detailed():
             for y_bronze, y_glow in ((-1.58, -1.60), (2.36, 2.38)):
@@ -853,10 +863,10 @@ def mountain_gate_massif():
                 b.box((side * 2.55 - 0.07, y_glow - 0.04, 1.8), (side * 2.55 + 0.07, y_glow + 0.04, 5.0), 'glow', bevel=0)
 
     # Monumental squared & corbelled basalt lintel spanning over the central tunnel (Z = 6.2..7.9)
-    b.box((-3.2, -1.62, 6.2), (3.2, 2.42, 7.6), 'stone_basalt', bevel=0)
-    b.box((-3.5, -1.72, 7.4), (3.5, 2.52, 7.95), 'stone_granite', bevel=0)
+    b.box((-3.2, -1.62, 6.2), (3.2, 2.42, 7.6), 'stone_basalt', bevel=STONE_BEVEL)
+    b.box((-3.5, -1.72, 7.4), (3.5, 2.52, 7.95), 'stone_granite', bevel=STONE_BEVEL)
     for side in (-1, 1):
-        b.box((side * 2.05 - 0.32, -1.50, 5.35), (side * 2.05 + 0.32, 2.30, 6.22), 'stone_basalt', bevel=0)
+        b.box((side * 2.05 - 0.32, -1.50, 5.35), (side * 2.05 + 0.32, 2.30, 6.22), 'stone_basalt', bevel=STONE_BEVEL)
     if detailed():
         for y_frz, y_glw in ((-1.66, -1.70), (2.44, 2.48)):
             b.box((-2.2, y_frz - 0.06, 6.55), (2.2, y_frz + 0.06, 7.25), 'gold', bevel=0)
@@ -887,21 +897,21 @@ def mountain_cavern_vault():
     b = MeshBuilder()
     for sx in (-5.5, 5.5):
         for sy in (-4.5, 4.5):
-            b.box((sx - 0.42, sy - 0.42, 7.2), (sx + 0.42, sy + 0.42, 8.2), 'stone_basalt', bevel=0)
-            b.box((sx - 0.58, sy - 0.58, 8.1), (sx + 0.58, sy + 0.58, 9.4), 'stone_granite', bevel=0)
-            b.box((sx - 0.78, sy - 0.78, 9.3), (sx + 0.78, sy + 0.78, 11.0), 'stone_basalt', bevel=0)
+            b.box((sx - 0.42, sy - 0.42, 7.2), (sx + 0.42, sy + 0.42, 8.2), 'stone_basalt', bevel=STONE_BEVEL)
+            b.box((sx - 0.58, sy - 0.58, 8.1), (sx + 0.58, sy + 0.58, 9.4), 'stone_granite', bevel=STONE_BEVEL)
+            b.box((sx - 0.78, sy - 0.78, 9.3), (sx + 0.78, sy + 0.78, 11.0), 'stone_basalt', bevel=STONE_BEVEL)
 
     b.box((-6.35, -5.35, 11.0), (6.35, 5.35, 12.8), 'rock_cliff', bevel=0)
-    b.box((-6.35, -5.35, 9.6), (-4.2, 5.35, 11.1), 'stone_granite', bevel=0)
-    b.box((4.2, -5.35, 9.6), (6.35, 5.35, 11.1), 'stone_granite', bevel=0)
-    b.box((-4.2, -5.35, 9.8), (4.2, -3.6, 11.1), 'stone_granite', bevel=0)
-    b.box((-4.2, 3.6, 9.8), (4.2, 5.35, 11.1), 'stone_granite', bevel=0)
+    b.box((-6.35, -5.35, 9.6), (-4.2, 5.35, 11.1), 'stone_granite', bevel=STONE_BEVEL)
+    b.box((4.2, -5.35, 9.6), (6.35, 5.35, 11.1), 'stone_granite', bevel=STONE_BEVEL)
+    b.box((-4.2, -5.35, 9.8), (4.2, -3.6, 11.1), 'stone_granite', bevel=STONE_BEVEL)
+    b.box((-4.2, 3.6, 9.8), (4.2, 5.35, 11.1), 'stone_granite', bevel=STONE_BEVEL)
 
     for ry in (-4.4, 0.0, 4.4):
-        b.box((-5.9, ry - 0.38, 9.9), (5.9, ry + 0.38, 11.15), 'stone_basalt', bevel=0)
-        b.box((-3.8, ry - 0.42, 10.3), (3.8, ry + 0.42, 11.25), 'stone_basalt', bevel=0)
+        b.box((-5.9, ry - 0.38, 9.9), (5.9, ry + 0.38, 11.15), 'stone_basalt', bevel=STONE_BEVEL)
+        b.box((-3.8, ry - 0.42, 10.3), (3.8, ry + 0.42, 11.25), 'stone_basalt', bevel=STONE_BEVEL)
     for rx in (-5.4, 0.0, 5.4):
-        b.box((rx - 0.38, -4.9, 9.9), (rx + 0.38, 4.9, 11.15), 'stone_basalt', bevel=0)
+        b.box((rx - 0.38, -4.9, 9.9), (rx + 0.38, 4.9, 11.15), 'stone_basalt', bevel=STONE_BEVEL)
 
     for cx, cz_base, sc in ((0.0, 6.9, 1.0), (-3.2, 7.6, 0.72), (3.2, 7.6, 0.72)):
         b.box((cx - 0.55 * sc, -0.55 * sc, 9.85), (cx + 0.55 * sc, 0.55 * sc, 10.65), 'gold', bevel=0)
@@ -947,4 +957,8 @@ def define(kit):
         if name in BLUFFS:
             centres = [(cx, cy) for cx, cy, _, _, _ in BLUFFS[name][1]]
             blockout, sculpted = sculpt_rock(obj, seed=len(name) * 131 + sum(map(ord, name)), centres=centres)
+            print(f'[kit] sculpted {name}: rock {blockout} -> {sculpted} tris')
+        elif name in MOUNTAIN_SCULPT:
+            centres, floor = MOUNTAIN_SCULPT[name]
+            blockout, sculpted = sculpt_rock(obj, seed=sum(map(ord, name)), centres=centres, floor=floor)
             print(f'[kit] sculpted {name}: rock {blockout} -> {sculpted} tris')

@@ -37,6 +37,11 @@ SCANS = {
     'planks': Scan('old_planks_02', 2.0, turn=True),
     'clapboard': Scan('dark_planks', 2.0),
     'cobble': Scan('cobblestone_floor_01', 1.0),
+    # Stonehold (AAA pass): dark fractured cliff rock and irregular terrace flags.
+    'basalt': Scan('dark_rock_02', 2.0),
+    'flagstone': Scan('stone_tiles_02', 2.0),
+    # Natural crags and boulders of every family (Orc uplands, Frostgard yards).
+    'crag': Scan('rock_face_03', 2.7),
 }
 
 

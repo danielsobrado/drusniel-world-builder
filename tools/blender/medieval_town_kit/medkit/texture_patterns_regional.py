@@ -155,4 +155,6 @@ def flagstone(n, seed):
 
 REGIONAL_PATTERNS = {'granite': (granite, 1024), 'sod': (sod, 512), 'earth': (earth, 1024),
                      'rock': (rock, 1024), 'snow': (snow, 512), 'snow_path': (snow_path, 1024),
-                     'basalt': (basalt, 1024), 'flagstone': (flagstone, 1024)}
+                     'basalt': (basalt, 1024), 'flagstone': (flagstone, 1024),
+                     # Crag rock's own key so its scan (scans.py) never retiles the field-scale rock_land.
+                     'crag': (rock, 1024)}

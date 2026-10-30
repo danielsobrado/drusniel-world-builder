@@ -22,6 +22,10 @@ from .. import materials
 from ..config import detailed
 from ..mesh import MeshBuilder
 
+# Fine chamfer on the tabletop-scale stone pieces: their edges catch the light like
+# dressed masonry (the kit default, 3 cm, is sized for full-scale buildings).
+STONE_BEVEL = 0.008
+
 
 def ring_pts(cx, cy, z, rx, ry, angles, radii_mult, tilt_x=0.0, tilt_y=0.0, rot=0.0):
     c_rot, s_rot = math.cos(rot), math.sin(rot)
@@ -283,9 +287,9 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
             vx, vy = c0.x, c0.y
             bw = 0.042
             z_butt_bot = max(0.0, z0)
-            b.box((vx - bw, vy - bw, z_butt_bot), (vx + bw, vy + bw, z_deck + 0.085), 'stone_basalt', bevel=0)
+            b.box((vx - bw, vy - bw, z_butt_bot), (vx + bw, vy + bw, z_deck + 0.085), 'stone_basalt', bevel=STONE_BEVEL)
             b.box((vx - bw * 1.15, vy - bw * 1.15, z_deck + 0.075),
-                  (vx + bw * 1.15, vy + bw * 1.15, z_deck + 0.095), 'stone_basalt', bevel=0)
+                  (vx + bw * 1.15, vy + bw * 1.15, z_deck + 0.095), 'stone_basalt', bevel=STONE_BEVEL)
             if detailed() and gold_trim and (z_deck - z_butt_bot) > 0.22:
                 gx = vx + math.cos(ang_v) * (bw * 0.55)
                 gy = vy + math.sin(ang_v) * (bw * 0.55)
@@ -306,15 +310,26 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
         # `side_range` is vertical height along Z and `width` is horizontal thickness!
         # Low dark balustrade (curb, slim posts, handrail) so the paving stays the bright read.
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-               (0, 0, 1), (0.0, 0.022), 0.040, 'stone_basalt', bevel=0)
+               (0, 0, 1), (0.0, 0.022), 0.040, 'stone_basalt', bevel=STONE_BEVEL)
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-               (0, 0, 1), (0.056, 0.066), 0.020, 'stone_basalt', bevel=0)
+               (0, 0, 1), (0.056, 0.066), 0.020, 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             n_posts = max(2, int(seg_len / 0.16))
             for m_idx in range(1, n_posts):
                 mp = p0.lerp(p1, m_idx / n_posts)
                 b.box((mp.x - 0.009, mp.y - 0.009, z_deck + 0.02),
                       (mp.x + 0.009, mp.y + 0.009, z_deck + 0.058), 'iron', bevel=0)
+            if seg_len > 0.40 and i % 2 == 0:
+                # Lantern post mid-span: the warm points of light along every terrace edge.
+                lp = p0.lerp(p1, 0.5)
+                b.box((lp.x - 0.013, lp.y - 0.013, z_deck), (lp.x + 0.013, lp.y + 0.013, z_deck + 0.12),
+                      'stone_basalt', bevel=0)
+                b.box((lp.x - 0.018, lp.y - 0.018, z_deck + 0.12), (lp.x + 0.018, lp.y + 0.018, z_deck + 0.128),
+                      'gold', bevel=0)
+                b.box((lp.x - 0.012, lp.y - 0.012, z_deck + 0.128), (lp.x + 0.012, lp.y + 0.012, z_deck + 0.158),
+                      'glow', bevel=0)
+                b.box((lp.x - 0.017, lp.y - 0.017, z_deck + 0.158), (lp.x + 0.017, lp.y + 0.017, z_deck + 0.166),
+                      'iron', bevel=0)
 
 
 def dwarven_brazier(b, cx, cy, z0, scale=1.0, tall=False):
@@ -324,7 +339,7 @@ def dwarven_brazier(b, cx, cy, z0, scale=1.0, tall=False):
     z_base = max(0.0, z0 - 0.02 * s)
     r_ped = 0.048 * s
     b.box((cx - r_ped, cy - r_ped, z_base),
-          (cx + r_ped, cy + r_ped, z0 + h_ped), 'stone_basalt', bevel=0)
+          (cx + r_ped, cy + r_ped, z0 + h_ped), 'stone_basalt', bevel=STONE_BEVEL)
     if detailed():
         b.box((cx - r_ped * 1.12, cy - r_ped * 1.12, z0 + h_ped - 0.024 * s),
               (cx + r_ped * 1.12, cy + r_ped * 1.12, z0 + h_ped + 0.005 * s), 'gold', bevel=0)
@@ -389,14 +404,14 @@ def dwarven_stair_flight(b, p_start, p_end, width=0.38, steps=8, cheek_walls=Tru
                 zb_blk = max(0.0, p0.z + (p1.z - p0.z) * t_a - 0.08)
                 zt_blk = p0.z + (p1.z - p0.z) * ((k + 1) / n_ch) + 0.055
                 b.beam((wa.x, wa.y, zb_blk), (wb.x, wb.y, zb_blk),
-                       (0, 0, 1), (0.0, zt_blk - zb_blk), cw * 1.85, 'stone_basalt', bevel=0)
+                       (0, 0, 1), (0.0, zt_blk - zb_blk), cw * 1.85, 'stone_basalt', bevel=STONE_BEVEL)
                 b.beam((wa.x, wa.y, zt_blk), (wb.x, wb.y, zt_blk),
-                       (0, 0, 1), (0.0, 0.018), cw * 2.05, 'stone_dressed', bevel=0)
+                       (0, 0, 1), (0.0, 0.018), cw * 2.05, 'stone_dressed', bevel=STONE_BEVEL)
             # Terminal newel piers at bottom and top
             b.box((w0.x - cw * 1.25, w0.y - cw * 1.25, max(0.0, p0.z - 0.05)),
-                  (w0.x + cw * 1.25, w0.y + cw * 1.25, p0.z + 0.11), 'stone_basalt', bevel=0)
+                  (w0.x + cw * 1.25, w0.y + cw * 1.25, p0.z + 0.11), 'stone_basalt', bevel=STONE_BEVEL)
             b.box((w1.x - cw * 1.25, w1.y - cw * 1.25, max(0.0, p1.z - 0.05)),
-                  (w1.x + cw * 1.25, w1.y + cw * 1.25, p1.z + 0.11), 'stone_basalt', bevel=0)
+                  (w1.x + cw * 1.25, w1.y + cw * 1.25, p1.z + 0.11), 'stone_basalt', bevel=STONE_BEVEL)
             if braziers_bottom:
                 dwarven_brazier(b, w0.x, w0.y, p0.z + 0.11, scale=0.68)
             if braziers_top:
@@ -419,9 +434,9 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
 
     # Roadway deck slab, sunlit dressed-stone flagstone paving & gold cornice frieze
     b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-           (0, 0, 1), (-0.09, 0.0), width, 'stone_basalt', bevel=0)
+           (0, 0, 1), (-0.09, 0.0), width, 'stone_basalt', bevel=STONE_BEVEL)
     b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-           (0, 0, 1), (-0.002, 0.018), width * 0.88, 'stone_flag', bevel=0)
+           (0, 0, 1), (-0.002, 0.018), width * 0.88, 'stone_flag', bevel=STONE_BEVEL)
     if detailed():
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
                (0, 0, 1), (-0.052, -0.026), width * 1.04, 'gold', bevel=0)
@@ -432,9 +447,9 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
         off = right * (side * (hw - pw * 0.45))
         s0, s1 = p0 + off, p1 + off
         b.beam((s0.x, s0.y, z_deck), (s1.x, s1.y, z_deck),
-               (0, 0, 1), (0.0, 0.050), pw, 'stone_granite', bevel=0)
+               (0, 0, 1), (0.0, 0.050), pw, 'stone_granite', bevel=STONE_BEVEL)
         b.beam((s0.x, s0.y, z_deck), (s1.x, s1.y, z_deck),
-               (0, 0, 1), (0.048, 0.064), pw * 1.15, 'stone_dressed', bevel=0)
+               (0, 0, 1), (0.048, 0.064), pw * 1.15, 'stone_dressed', bevel=STONE_BEVEL)
         if detailed():
             n_m = max(2, int(length / 0.26))
             for m_i in range(n_m):
@@ -443,7 +458,7 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
                 mp0 = s0.lerp(s1, mt0)
                 mp1 = s0.lerp(s1, mt1)
                 b.beam((mp0.x, mp0.y, z_deck), (mp1.x, mp1.y, z_deck),
-                       (0, 0, 1), (0.062, 0.088), pw, 'stone_dressed', bevel=0)
+                       (0, 0, 1), (0.062, 0.088), pw, 'stone_dressed', bevel=STONE_BEVEL)
 
     # Supporting piers & arch spandrels underneath
     n_arches = max(1, arches)
@@ -454,7 +469,7 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
         pw_x = 0.075
         b.beam((pier_c.x - fwd.x * pw_x, pier_c.y - fwd.y * pw_x, z_ground),
                (pier_c.x + fwd.x * pw_x, pier_c.y + fwd.y * pw_x, z_ground),
-               (0, 0, 1), (0.0, pier_h), width * 0.94, 'stone_basalt', bevel=0)
+               (0, 0, 1), (0.0, pier_h), width * 0.94, 'stone_basalt', bevel=STONE_BEVEL)
         if detailed() and pier_h > 0.25:
             b.beam((pier_c.x - fwd.x * (pw_x * 0.42), pier_c.y - fwd.y * (pw_x * 0.42), z_ground),
                    (pier_c.x + fwd.x * (pw_x * 0.42), pier_c.y + fwd.y * (pw_x * 0.42), z_ground),
@@ -473,10 +488,10 @@ def viaduct_bridge(b, p0_xy, p1_xy, z_deck, z_ground=0.0, width=0.52,
             a_mid2 = a_start.lerp(a_end, 0.70)
             b.beam((a_start.x, a_start.y, z_deck - 0.24),
                    (a_mid1.x, a_mid1.y, z_deck - 0.10),
-                   (0, 0, 1), (-0.045, 0.045), width * 0.86, 'stone_granite', bevel=0)
+                   (0, 0, 1), (-0.045, 0.045), width * 0.86, 'stone_granite', bevel=STONE_BEVEL)
             b.beam((a_mid2.x, a_mid2.y, z_deck - 0.10),
                    (a_end.x, a_end.y, z_deck - 0.24),
-                   (0, 0, 1), (-0.045, 0.045), width * 0.86, 'stone_granite', bevel=0)
+                   (0, 0, 1), (-0.045, 0.045), width * 0.86, 'stone_granite', bevel=STONE_BEVEL)
 
 
 def cliff_portal_alcove(b, cx, cy, z0, yaw=0.0, width=0.38, height=0.48):
@@ -492,7 +507,7 @@ def cliff_portal_alcove(b, cx, cy, z0, yaw=0.0, width=0.38, height=0.48):
     p_L = origin - right * hw
     p_R = origin + right * hw
     b.beam((p_L.x, p_L.y, max(0.0, z0 - 0.03)), (p_R.x, p_R.y, max(0.0, z0 - 0.03)),
-           (0, 0, 1), (0.0, height + 0.06), 0.18, 'stone_basalt', bevel=0)
+           (0, 0, 1), (0.0, height + 0.06), 0.18, 'stone_basalt', bevel=STONE_BEVEL)
     # Glowing interior firelight & core glow
     g_L = origin - right * (hw * 0.66) + fwd * 0.06
     g_R = origin + right * (hw * 0.66) + fwd * 0.06
@@ -507,7 +522,7 @@ def cliff_portal_alcove(b, cx, cy, z0, yaw=0.0, width=0.38, height=0.48):
     for side in (-1, 1):
         jp = origin + right * (side * (hw * 0.84)) + fwd * 0.06
         b.box((jp.x - 0.042, jp.y - 0.042, max(0.0, z0 - 0.02)),
-              (jp.x + 0.042, jp.y + 0.042, z0 + height), 'stone_basalt', bevel=0)
+              (jp.x + 0.042, jp.y + 0.042, z0 + height), 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             gp = jp + fwd * 0.022
             b.box((gp.x - 0.018, gp.y - 0.018, z0 + 0.04),
@@ -516,7 +531,7 @@ def cliff_portal_alcove(b, cx, cy, z0, yaw=0.0, width=0.38, height=0.48):
     l_L = origin - right * (hw * 1.10) + fwd * 0.06
     l_R = origin + right * (hw * 1.10) + fwd * 0.06
     b.beam((l_L.x, l_L.y, z0 + height - 0.045), (l_R.x, l_R.y, z0 + height - 0.045),
-           (0, 0, 1), (0.0, 0.078), 0.124, 'stone_basalt', bevel=0)
+           (0, 0, 1), (0.0, 0.078), 0.124, 'stone_basalt', bevel=STONE_BEVEL)
     if detailed():
         b.beam((l_L.x, l_L.y, z0 + height - 0.015), (l_R.x, l_R.y, z0 + height - 0.015),
                (0, 0, 1), (0.0, 0.022), 0.136, 'gold', bevel=0)
@@ -560,7 +575,7 @@ def summit_citadel_hall(b, cx, cy, z0, height=0.62, rx=0.60, ry=0.54, seed=1,
         ang = angles[i]
         bw = 0.046
         b.box((v0.x - bw, v0.y - bw, z0),
-              (v0.x + bw, v0.y + bw, z0 + height * 0.92), 'stone_basalt', bevel=0)
+              (v0.x + bw, v0.y + bw, z0 + height * 0.92), 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             gx = v0.x + math.cos(ang) * (bw * 0.52)
             gy = v0.y + math.sin(ang) * (bw * 0.52)
@@ -569,7 +584,7 @@ def summit_citadel_hall(b, cx, cy, z0, height=0.62, rx=0.60, ry=0.54, seed=1,
         # Roof parapet wall between corner buttresses
         rt0, rt1 = c_top[i], c_top[j]
         b.beam((rt0.x, rt0.y, z0 + height * 0.82), (rt1.x, rt1.y, z0 + height * 0.82),
-               (0, 0, 1), (0.0, height * 0.09), 0.058, 'stone_granite', bevel=0)
+               (0, 0, 1), (0.0, height * 0.09), 0.058, 'stone_granite', bevel=STONE_BEVEL)
 
     # 4. Stepped inner octagonal roof crown with radial stone ribs
     r2_bot = ring_pts(cx, cy, z0 + height * 0.82, rx * 0.72, ry * 0.72, angles, radii)
@@ -580,7 +595,7 @@ def summit_citadel_hall(b, cx, cy, z0, height=0.62, rx=0.60, ry=0.54, seed=1,
             p_in = Vector((cx + rx * 0.28 * math.cos(angles[i]), cy + ry * 0.28 * math.sin(angles[i]), z0 + height * 0.94))
             p_out = r2_top[i]
             b.beam((p_in.x, p_in.y, z0 + height * 0.93), (p_out.x, p_out.y, z0 + height * 0.93),
-                   (0, 0, 1), (0.0, 0.032), 0.044, 'stone_basalt', bevel=0)
+                   (0, 0, 1), (0.0, 0.032), 0.044, 'stone_basalt', bevel=STONE_BEVEL)
     r3_bot = ring_pts(cx, cy, z0 + height * 0.93, rx * 0.32, ry * 0.32, angles, radii)
     r3_top = ring_pts(cx, cy, z0 + height * 1.06, rx * 0.26, ry * 0.26, angles, radii)
     loft_rings(b, r3_bot, r3_top, 'stone_basalt', cap_bot=False, cap_top=True, cap_mat='stone_dressed', tone=0.88)
@@ -617,7 +632,7 @@ def summit_beacon_fort(b, cx, cy, z0, height=0.34, radius=0.50, seed=1):
         ang = angles[i]
         bw = 0.042
         b.box((p0.x - bw, p0.y - bw, z0),
-              (p0.x + bw, p0.y + bw, z0 + height + 0.085), 'stone_basalt', bevel=0)
+              (p0.x + bw, p0.y + bw, z0 + height + 0.085), 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
             gx = p0.x + math.cos(ang) * (bw * 0.52)
             gy = p0.y + math.sin(ang) * (bw * 0.52)
@@ -627,7 +642,7 @@ def summit_beacon_fort(b, cx, cy, z0, height=0.34, radius=0.50, seed=1):
         mid_a = math.atan2(0.5 * (p0.y + p1.y) - cy, 0.5 * (p0.x + p1.x) - cx)
         if abs(mid_a + math.pi * 0.5) > 0.42:
             b.beam((p0.x, p0.y, z0 + height), (p1.x, p1.y, z0 + height),
-                   (0, 0, 1), (0.0, 0.050), 0.054, 'stone_granite', bevel=0)
+                   (0, 0, 1), (0.0, 0.050), 0.054, 'stone_granite', bevel=STONE_BEVEL)
 
     # Central circular stepped fire-ring & roaring signal fire
     z_deck = z0 + height
@@ -641,7 +656,7 @@ def summit_beacon_fort(b, cx, cy, z0, height=0.34, radius=0.50, seed=1):
             mx = cx + r_pit * 0.96 * math.cos(a)
             my = cy + r_pit * 0.96 * math.sin(a)
             b.box((mx - 0.032, my - 0.032, z_deck + 0.07),
-                  (mx + 0.032, my + 0.032, z_deck + 0.13), 'stone_dressed', bevel=0)
+                  (mx + 0.032, my + 0.032, z_deck + 0.13), 'stone_dressed', bevel=STONE_BEVEL)
         # Crossed timber fire logs
         for k in range(3):
             a = math.pi * k / 3 + 0.2
@@ -854,32 +869,39 @@ def cargo_cluster(b, cx, cy, z0, yaw=0.0, seed=1, scale=1.0):
               (bp.x + 0.043 * s, bp.y + 0.043 * s, z0 + 0.078 * s), 'iron', bevel=0)
 
 
+def _ribbon(b, pts, side, half_w, mat, lift, out=None):
+    """Double-sided strip through pts, half_w either side; `lift` floats it off a sheet."""
+    up = (out or Vector((0, 0, 0))) * lift
+    for p, q in zip(pts, pts[1:]):
+        quad = [p - side * half_w + up, p + side * half_w + up, q + side * half_w + up, q - side * half_w + up]
+        n = (quad[1] - quad[0]).cross(quad[3] - quad[0])
+        b.poly(quad, mat, outward=n)
+        b.poly(quad, mat, outward=-n)
+
+
 def waterfall_cascade(b, p_top, p_bot, width=0.26, seed=1):
     """Cascading mountain waterfall with stepped wet rock chute, continuous whitewater
     (`ice` & `snow`) foam ribbons, and a rocky splash pool at the base."""
     p0 = Vector(p_top)
     p1 = Vector(p_bot)
 
-    segs = 5 if detailed() else 3
-    # Interior points wander sideways so the fall follows the crag instead of a ruler line.
+    # One continuous sheet: it arcs out over the lip, then drops along a smooth curve with a
+    # slight sideways wander (separate straight beams read as stacked planks).
+    segs = 12 if detailed() else 4
+    run = Vector((p1.x - p0.x, p1.y - p0.y, 0.0))
+    out = run.normalized() if run.length > 1e-6 else Vector((0.0, -1.0, 0.0))
+    side = Vector((-out.y, out.x, 0.0))
     wrng = random.Random(seed + 7)
-    pts = [p0.lerp(p1, k / segs) + (Vector((wrng.uniform(-1, 1), wrng.uniform(-1, 1), 0.0)) * width * 0.08
-                                    if 0 < k < segs else Vector()) for k in range(segs + 1)]
-    for k in range(segs):
-        c0, c1 = pts[k], pts[k + 1]
-        # Note: in b.beam(..., (0,0,1), side_range, width, mat),
-        # `side_range` is vertical thickness and `width` is horizontal chute width!
-        b.beam((c0.x, c0.y, c0.z), (c1.x, c1.y, c1.z),
-               (0, 0, 1), (-0.035, 0.0), width * 1.15, 'rock_cliff', bevel=0)
-        b.beam((c0.x, c0.y, c0.z), (c1.x, c1.y, c1.z),
-               (0, 0, 1), (0.0, 0.024), width * 0.88, 'ice', bevel=0)
-        # Thin foam streaks over the sheet; stacked blobs read as snowmen, not water.
-        for off in ((-0.24, 0.20) if detailed() else (0.0,)):
-            sx, sy = c1.y - c0.y, c0.x - c1.x
-            ln = math.hypot(sx, sy) or 1.0
-            ox, oy = sx / ln * width * off, sy / ln * width * off
-            b.beam((c0.x + ox, c0.y + oy, c0.z), (c1.x + ox, c1.y + oy, c1.z),
-                   (0, 0, 1), (0.024, 0.030), width * 0.16, 'snow', bevel=0)
+    sway = [wrng.uniform(-1, 1) for _ in range(3)]
+    pts = []
+    for k in range(segs + 1):
+        t = k / segs
+        bow = math.sin(math.pi * min(1.0, t * 1.6)) * width * 0.30 * (1.0 - t)
+        drift = sum(a * math.sin(math.pi * (i + 1) * t) for i, a in enumerate(sway)) * width * 0.06
+        pts.append(p0.lerp(p1, t) + out * bow + side * drift)
+    _ribbon(b, pts, side, width * 0.44, 'ice', 0.0)
+    for off in ((-0.22, 0.18) if detailed() else ()):
+        _ribbon(b, [p + side * width * off for p in pts], side, width * 0.07, 'snow', 0.006, out)
 
     # Splash pool & wet boulders at base
     crag_block(b, p1.x, p1.y, 0.0, 0.038, width * 1.45, width * 1.25,

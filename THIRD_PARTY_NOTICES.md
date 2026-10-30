@@ -405,6 +405,7 @@ Apache License 2.0. Its runtime regenerates the material recipes under
 
 The medieval town kit's surfaces are built from these Poly Haven textures:
 rustic_stone_wall, medieval_blocks_03, grey_roof_tiles_02, clay_roof_tiles_02,
-reed_roof_04, painted_plaster_wall, old_planks_02, dark_planks and
-cobblestone_floor_01 (https://polyhaven.com). They are released under CC0 1.0,
+reed_roof_04, painted_plaster_wall, old_planks_02, dark_planks,
+cobblestone_floor_01, rock_face_03 (crags), and for Stonehold dark_rock_02 and
+stone_tiles_02 (https://polyhaven.com). They are released under CC0 1.0,
 so no attribution is required.

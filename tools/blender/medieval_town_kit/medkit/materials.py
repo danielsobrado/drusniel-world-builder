@@ -98,10 +98,10 @@ SPEC = {
     'roof_frost': Spec('roof', 2.0, 0.7, tint=(1.45, 1.52, 1.66), normal=2.0),
     'ice': Spec('snow', 7.0, 0.12, tint=(0.55, 0.68, 0.82), normal=0.4),
     # Natural crag and boulder rock (bedding and cracks, no joints).
-    'rock': Spec('rock', 4.0, 0.9, normal=2.2),
+    'rock': Spec('crag', 4.0, 0.9, normal=2.2, tint=(0.70, 0.74, 0.86)),
     'rock_land': Spec('rock', 17.0, 0.92, normal=1.6),
     # Stonehold columnar cliff basalt, dark so the pale terrace decks read above it.
-    'rock_cliff': Spec('basalt', 1.6, 0.86, normal=2.6),
+    'rock_cliff': Spec('basalt', 1.6, 0.86, normal=2.6, tint=(0.78, 0.84, 0.98)),
     'stone_flag': Spec('flagstone', 1.1, 0.82, normal=1.4),
     'foliage_pine': Spec('foliage', 1.5, 0.9, tint=(0.52, 0.66, 0.60)),
     # Plain blown glass for frontier and hold windows (the lattice pane is a lowland look).

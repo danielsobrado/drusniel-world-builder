@@ -17,17 +17,16 @@ from mathutils import Vector
 from . import materials
 from .config import detailed
 
-ROCK = 'M_rock_cliff'
 # Triangle budgets: sculpted rock gets at least ROCK_FLOOR at LOD0 (never fewer than the
 # blockout had); a whole formation stays under MODULE_TRIS (LOD0) / MODULE_TRIS_LOD1.
 ROCK_FLOOR = 12000
-MODULE_TRIS = 36000
+MODULE_TRIS = 48000  # LOD0 only: bevels, lanterns and ribbons are not built at LOD1
 MODULE_TRIS_LOD1 = 12000
 
 
-def _split_rock(obj):
+def _split_rock(obj, mat):
     """Move obj's rock faces into a new object; None if it has none."""
-    slot = next((i for i, m in enumerate(obj.data.materials) if m and m.name == ROCK), None)
+    slot = next((i for i, m in enumerate(obj.data.materials) if m and m.name == f'M_{mat}'), None)
     if slot is None:
         return None
     rock_me = obj.data.copy()
@@ -62,13 +61,14 @@ def _shape(rock, seed, voxel):
     rem.voxel_size = voxel
     _apply(rock, rem)
     # Texture space squashed in z (via a scaled empty) stretches cells into vertical columns.
+    k = max(1.0, voxel / 0.045)  # big pieces (mountains) get proportionally bigger fractures
     space = bpy.data.objects.new(f'{rock.name}_space', None)
     bpy.context.scene.collection.objects.link(space)
     space.scale = (1.0, 1.0, 3.2)
     space.location = (random.Random(seed).uniform(-9, 9), 0.0, 0.0)
     for tex_type, size, strength in (('VORONOI', 0.22, 0.075), ('STUCCI', 0.06, 0.018)):
         tex = bpy.data.textures.new(f'{rock.name}_{tex_type}', tex_type)
-        tex.noise_scale = size
+        tex.noise_scale = size * k
         if tex_type == 'VORONOI':
             tex.distance_metric = 'DISTANCE'
             tex.weight_1, tex.weight_2 = -1.0, 1.0  # F2 - F1: crisp ridges between cells
@@ -76,7 +76,7 @@ def _shape(rock, seed, voxel):
         disp.texture = tex
         disp.texture_coords = 'OBJECT'
         disp.texture_coords_object = space
-        disp.strength = strength
+        disp.strength = strength * k
         disp.mid_level = 0.5
         _apply(rock, disp)
         bpy.data.textures.remove(tex)
@@ -124,20 +124,26 @@ def _decimate(rock, budget):
         dec = rock.modifiers.new('decimate', 'DECIMATE')
         dec.ratio = budget / tris
         _apply(rock, dec)
+    # Collapse can flip faces in tight folds; the kit's backface-culled materials drop them.
+    bm = bmesh.new()
+    bm.from_mesh(rock.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(rock.data)
+    bm.free()
     rock.data.shade_smooth()
     rock.data.set_sharp_from_angle(angle=math.radians(38))
 
 
-def _wrap_uvs(rock, centres):
+def _wrap_uvs(rock, centres, mat, k=1.0):
     """Side faces wrap round the nearest bluff centre (u = arc length, v = height); ledges
     and tops take a plan projection. Matches the blockout's wrapped rock UVs."""
-    scale = materials.SPEC['rock_cliff'].scale
+    scale = materials.SPEC[mat].scale * k  # big rocks: big texture, like their fractures
     me = rock.data
     uv = me.uv_layers.get('UVMap') or me.uv_layers.new(name='UVMap')
     for poly in me.polygons:
         loops = list(poly.loop_indices)
         pts = [me.vertices[me.loops[li].vertex_index].co for li in loops]
-        if abs(poly.normal.z) > 0.72:
+        if abs(poly.normal.z) > 0.55:  # slopes too: a wrap stretches v on them
             for li, p in zip(loops, pts):
                 uv.data[li].uv = (p.x / scale, p.y / scale)
             continue
@@ -183,21 +189,25 @@ def _join(obj, rock):
         bpy.ops.object.join()
 
 
-def sculpt_rock(obj, seed, centres=((0.0, 0.0),)):
+def sculpt_rock(obj, seed, centres=((0.0, 0.0),), floor=ROCK_FLOOR, mat='rock_cliff'):
     """Replace obj's blockout rock with sculpted rock within the budgets above; returns
     (blockout_tris, sculpted_tris) for the build's budget report."""
     mats = obj.data.materials
     blockout = sum(len(p.vertices) - 2 for p in obj.data.polygons
-                   if mats[p.material_index] and mats[p.material_index].name == ROCK)
-    rock = _split_rock(obj)
+                   if mats[p.material_index] and mats[p.material_index].name == f'M_{mat}')
+    rock = _split_rock(obj, mat)
     if rock is None:
         return 0, 0
-    budget = max(blockout, ROCK_FLOOR if detailed() else blockout)
-    _shape(rock, seed, 0.045 if detailed() else 0.08)
+    budget = max(blockout, floor if detailed() else blockout)
+    # Voxel scales with the rock (a 20 m mountain wall would otherwise remesh into millions).
+    size = Vector(rock.dimensions).length
+    voxel = max(0.045 if detailed() else 0.08, size / (110 if detailed() else 45))
+    k = max(1.0, voxel / 0.045)
+    _shape(rock, seed, voxel)
     _drop_islands(rock, 400 if detailed() else 60)
     _drop_underside(rock)
     _decimate(rock, budget)
-    _wrap_uvs(rock, centres)
+    _wrap_uvs(rock, centres, mat, k)
     _bake_occlusion(rock, 16 if detailed() else 4)
     sculpted = sum(len(p.vertices) - 2 for p in rock.data.polygons)
     assert sculpted <= budget * 1.02, f'{obj.name}: sculpted rock {sculpted} > budget {budget}'
