@@ -1956,7 +1956,7 @@ stylizedSurface:
         5: { grassCoreDensity: 0.24, flowerCoreDensity: 0.06 }
         6: { grassCoreDensity: 0.25, flowerCoreDensity: 0.08 }
         7: { grassCoreDensity: 0.18, flowerCoreDensity: 0.04 }
-        8: { grassCoreDensity: 0.2, flowerCoreDensity: 0.04 }
+        8: { grassCoreDensity: 0.32, flowerCoreDensity: 0.06 }   # rainforest floor: moss and grass islands
         9: { grassCoreDensity: 0.24, flowerCoreDensity: 0.04 }
         12: { grassCoreDensity: 0.22, flowerCoreDensity: 0.04 }
       # Core densities are how much ground cover survives under closed canopy.
@@ -1973,11 +1973,13 @@ stylizedSurface:
       # Tint the ground takes under canopy. The old '#273c25' at 0.68 landed the
       # wood interior near black once Lambert shading and canopy shadow stacked on
       # top of it — this keeps the floor shaded but still readable.
-      groundCoreColor: '#4c5141'
+      # Kept mid-value (never the old near-black), but green and warm rather than
+      # grey: '#4c5141' read as mud across a closed forest's floor.
+      groundCoreColor: '#4b5a3a'
       groundStrength: 0.38
       # Under canopy the meadow grows in islands (world/GrassPatchiness.js); the
       # ground between them takes this leaf-litter tone instead of meadow green.
-      litterColor: '#645843'
+      litterColor: '#6e5435'
       litterStrength: 0.78
     minScale: 0.85
     maxScale: 1.15
