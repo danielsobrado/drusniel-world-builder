@@ -8998,12 +8998,12 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "693d85f3ec5c73b103bc75346be1ebc89f398e7fdec0841241f1edbc007f3276",
-      "sourceSha256": "fa808d2f59cf81ef887d715d1f211d28efa3a20eb9acef71dd48ff9185a39fdb",
-      "outputSha256": "edf751d4f0b3c1b5a6d1d5cc85433c77d2afc5fdc2f94b4ab5f43b228fbf2891",
-      "sourceBytes": 60384,
-      "outputBytes": 121104,
-      "gzipBytes": 117692,
+      "cacheKey": "15406b601435af4f932734f0994ab7c75014b67420d54a9d20a96a320bc8a6db",
+      "sourceSha256": "89a7972d0a104acbeed860fa713448821578e8a13a4910d49255d6ef59827cee",
+      "outputSha256": "f9ef274468b4df7e3cd2712b54904d058467c0f9111eb5efffb3a344659ffd55",
+      "sourceBytes": 60372,
+      "outputBytes": 121152,
+      "gzipBytes": 117700,
       "brotliBytes": 116960,
       "sourceStats": {
         "scenes": 1,
@@ -9049,11 +9049,11 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "KHR_materials_ior",
+          "KHR_materials_specular"
         ],
         "extensionsRequired": [
-          "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "EXT_texture_webp"
         ]
       },
       "outputStats": {
@@ -9100,7 +9100,8 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_meshopt_compression",
-          "KHR_materials_pbrSpecularGlossiness",
+          "KHR_materials_ior",
+          "KHR_materials_specular",
           "KHR_mesh_quantization",
           "KHR_texture_basisu",
           "KHR_texture_transform"
@@ -9139,7 +9140,7 @@
           "triangleCount": 37
         },
         "data": {
-          "json": 4088,
+          "json": 4138,
           "binary": 116872,
           "buffers": {
             "vertex": 824,
@@ -9177,13 +9178,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "b0b0bd5200e3ffa14e1f2ba8560c34910de4a68b8b90bbf0589ee562f1723c83",
-      "sourceSha256": "d980f429ff2de2ff5dc23dd3093c23cfb7122170a63ab77f9af611b9b77c254e",
-      "outputSha256": "c48394875117f509616f416eafbd2fbe139547c855d8b4c032c35cd7bb9be2d6",
-      "sourceBytes": 38420,
-      "outputBytes": 94384,
-      "gzipBytes": 91685,
-      "brotliBytes": 91036,
+      "cacheKey": "2340d489c71dde50268ab92c12e6ee9626514b54c302c32bbdbeaa5b18fa0204",
+      "sourceSha256": "e1d7746be05edbe9e6c53b88d4c4dacfdcde3b4335be169a008b5823014ec435",
+      "outputSha256": "97a26b6724322d046ba04dd3f9722b94497e626040fb6e2de45d46778419237e",
+      "sourceBytes": 38412,
+      "outputBytes": 94436,
+      "gzipBytes": 91697,
+      "brotliBytes": 91047,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -9228,11 +9229,11 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "KHR_materials_ior",
+          "KHR_materials_specular"
         ],
         "extensionsRequired": [
-          "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "EXT_texture_webp"
         ]
       },
       "outputStats": {
@@ -9279,7 +9280,8 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_meshopt_compression",
-          "KHR_materials_pbrSpecularGlossiness",
+          "KHR_materials_ior",
+          "KHR_materials_specular",
           "KHR_mesh_quantization",
           "KHR_texture_basisu",
           "KHR_texture_transform"
@@ -9318,7 +9320,7 @@
           "triangleCount": 12
         },
         "data": {
-          "json": 3744,
+          "json": 3795,
           "binary": 90500,
           "buffers": {
             "vertex": 547,
@@ -9356,13 +9358,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "bbff06b41178d7e25464b23edc931b42a803da8b756d1e2029bb5609754c924b",
-      "sourceSha256": "67aa1ee84d66463f65575dca805e67ad37ba3e0ca0b7d038451b1ad7f4591942",
-      "outputSha256": "e433646b3e3f348e064fbd4f1f9ac087577675f022dd4723e43069475fe35b94",
-      "sourceBytes": 38424,
-      "outputBytes": 94388,
-      "gzipBytes": 91687,
-      "brotliBytes": 91039,
+      "cacheKey": "4e369a8b337c61813d6513711d677c73c4fa1a844550ccaf90523e24b6b2a97f",
+      "sourceSha256": "79c68eb63633b1d35d4cd63b1e64b1d7d9c295dc765f9cc20feeaa250ebf89dd",
+      "outputSha256": "b5f417c182df9c274168ca16fbb21c6292ec842dfb9b09cca52e1d43d08ebec9",
+      "sourceBytes": 38420,
+      "outputBytes": 94440,
+      "gzipBytes": 91698,
+      "brotliBytes": 91051,
       "sourceStats": {
         "scenes": 1,
         "nodes": 3,
@@ -9407,11 +9409,11 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "KHR_materials_ior",
+          "KHR_materials_specular"
         ],
         "extensionsRequired": [
-          "EXT_texture_webp",
-          "KHR_materials_pbrSpecularGlossiness"
+          "EXT_texture_webp"
         ]
       },
       "outputStats": {
@@ -9458,7 +9460,8 @@
         "animationNames": [],
         "extensionsUsed": [
           "EXT_meshopt_compression",
-          "KHR_materials_pbrSpecularGlossiness",
+          "KHR_materials_ior",
+          "KHR_materials_specular",
           "KHR_mesh_quantization",
           "KHR_texture_basisu",
           "KHR_texture_transform"
@@ -9497,7 +9500,7 @@
           "triangleCount": 12
         },
         "data": {
-          "json": 3743,
+          "json": 3794,
           "binary": 90504,
           "buffers": {
             "vertex": 551,
@@ -14176,15 +14179,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 72642188,
-    "outputBytes": 39718636,
-    "gzipBytes": 37746752,
-    "brotliBytes": 37702878,
+    "sourceBytes": 72642164,
+    "outputBytes": 39718788,
+    "gzipBytes": 37746783,
+    "brotliBytes": 37702901,
     "logicalSourceVertexBytes": 37268208,
     "logicalOutputVertexBytes": 17840145,
     "logicalSourceIndexBytes": 4739676,
     "logicalOutputIndexBytes": 4462404,
-    "savedBytes": 32923552,
-    "reductionRatio": 0.453229
+    "savedBytes": 32923376,
+    "reductionRatio": 0.453227
   }
 }

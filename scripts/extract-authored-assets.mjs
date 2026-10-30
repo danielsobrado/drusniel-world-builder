@@ -7,6 +7,7 @@ import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import {
   copyToDocument,
   getBounds,
+  metalRough,
   simplify,
   textureCompress,
 } from '@gltf-transform/functions';
@@ -232,6 +233,11 @@ async function extractOne(sourceDocument, definition, entry, sourceMetadata) {
   // than a fraction of that on screen, and the KTX2 encoding the runtime
   // optimizer applies has a per-texture floor cost, so an oversized map turns a
   // 37-triangle weed into a megabyte of download.
+  // three.js no longer reads KHR_materials_pbrSpecularGlossiness: a spec/gloss
+  // material loads with no colour map and draws pure white (the grass chunks did).
+  // Convert to metallic-roughness here; assets already in metal/rough are untouched.
+  await target.transform(metalRough());
+
   const textureSize = Number(entry.textureSize ?? 1024);
   if (!Number.isInteger(textureSize) || textureSize < 16 || textureSize > 4096) {
     throw new Error(`${definition.input}: ${entry.name} textureSize must be 16-4096.`);
