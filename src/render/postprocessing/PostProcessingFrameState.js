@@ -108,9 +108,17 @@ export class PostProcessingFrameState {
     );
     if (history) history.jitterIndex = (sampleIndex + 1) % sampleCount;
 
+    // Either form moves every point by -jitterNdc, which TaaResolveNode undoes.
+    // An orthographic w is 1, so the perspective terms would scale with depth.
     camera.projectionMatrix.copy(this.unjitteredProjection);
-    camera.projectionMatrix.elements[8] += this.jitterNdc.x;
-    camera.projectionMatrix.elements[9] += this.jitterNdc.y;
+    const { elements } = camera.projectionMatrix;
+    if (camera.isOrthographicCamera) {
+      elements[12] -= this.jitterNdc.x;
+      elements[13] -= this.jitterNdc.y;
+    } else {
+      elements[8] += this.jitterNdc.x;
+      elements[9] += this.jitterNdc.y;
+    }
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     this.projectionJittered = true;
   }
