@@ -10,8 +10,8 @@ import {
   createInstancedRenderers,
   disposeInstancedRenderers,
   pruneStateMap,
-  writeInstances,
 } from './lod/StylizedLodRuntime.js';
+import { drawnRepresentations, ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
 import { InstanceAnchor } from './lod/InstanceAnchor.js';
 import { ScatterClusterField } from './forest/ScatterClusterField.js';
 import { forestFloorDensity } from './forest/ForestFloor.js';
@@ -56,6 +56,18 @@ function lodSettings(config) {
       hysteresisRatio: bush.hysteresisRatio ?? 0.15,
     },
   });
+}
+
+function bushMatrix(placement) {
+  return new THREE.Matrix4().compose(
+    BUSH_SCRATCH.position.set(placement.x, placement.height, placement.z),
+    BUSH_SCRATCH.quaternion.setFromAxisAngle(BUSH_UP, placement.rotationY),
+    BUSH_SCRATCH.scale.setScalar(placement.scale),
+  );
+}
+
+function bushAppearance(placement) {
+  return { seed: placement.priority, colorVariation: 0.84 + placement.priority * 0.32 };
 }
 
 function disposePrototypes(prototypes) {
@@ -117,6 +129,7 @@ export class StylizedBushView {
     this.root = new THREE.Group();
     // Instances are written relative to this, not in canonical metres (InstanceAnchor).
     this.instanceAnchor = new InstanceAnchor();
+    this.instanceRows = new ScatterInstanceRows('bush', bushMatrix, bushAppearance);
     this.root.name = 'stylized-bushes';
     terrainView.scene.add(this.root);
   }
@@ -433,9 +446,7 @@ export class StylizedBushView {
 
   *iterateRebuild(focus, placementRadius, plan, rockSource) {
     PerfCounters.inc('bushRebuilds');
-    const near = this.prototypes.map(() => []);
-    const proxy = this.proxyPrototypes.map(() => []);
-    const placements = [];
+    const job = this.instanceRows.begin();
     const activeChunks = new Set();
     const planByChunk = new Map(
       plan.entries.map((entry) => [`${entry.chunkX}:${entry.chunkZ}`, entry]),
@@ -449,12 +460,8 @@ export class StylizedBushView {
         chunkX += 1) {
         const key = `${chunkX}:${chunkZ}`;
         activeChunks.add(key);
-        const entry = planByChunk.get(key);
-        if (!entry) continue;
-        const visible = entry.representations.some((representation) => (
-          representation.band !== 'culled' && representation.fade > 0
-        ));
-        if (!visible) continue;
+        const representations = drawnRepresentations(planByChunk.get(key));
+        if (representations.length === 0) continue;
         let manifest = null;
         while (manifest === null) {
           const blockers = this.blockersFor(chunkX, chunkZ, rockSource);
@@ -466,37 +473,19 @@ export class StylizedBushView {
             yield ITERATOR_PENDING;
           }
         }
-        placements.push(...manifest);
-        for (const representation of entry.representations) {
-          if (representation.band === 'culled' || representation.fade <= 0) continue;
-          const target = representation.band === 'near' ? near : proxy;
-          for (const placement of manifest) {
-            yield;
-            target[placement.prototypeIndex].push({
-              matrix: new THREE.Matrix4().compose(
-                BUSH_SCRATCH.position.set(placement.x, placement.height, placement.z),
-                BUSH_SCRATCH.quaternion.setFromAxisAngle(BUSH_UP, placement.rotationY),
-                BUSH_SCRATCH.scale.setScalar(placement.scale),
-              ),
-              fade: representation.fade,
-              ditherDirection: representation.ditherDirection ?? 1,
-              seed: placement.priority,
-              colorVariation: 0.84 + placement.priority * 0.32,
-            });
-          }
-        }
+        yield* this.instanceRows.stageChunk(job, key, manifest, representations);
       }
     }
+    yield* this.instanceRows.stageRetired(job);
 
     const anchorOrigin = this.terrainView.floatingOrigin.getState();
     this.instanceAnchor.follow(anchorOrigin);
-    const nearCount = writeInstances(this.meshes, near, this.instanceAnchor);
-    const proxyCount = writeInstances(this.proxyMeshes, proxy, this.instanceAnchor);
+    const counts = this.instanceRows.commit(job, this.meshes, this.proxyMeshes, this.instanceAnchor);
     this.instanceAnchor.place(this.root, anchorOrigin);
-    this.placements = placements;
-    PerfCounters.set('bushNearInstances', nearCount);
-    PerfCounters.set('bushProxyInstances', proxyCount);
-    PerfCounters.set('bushPlacementInstances', placements.length);
+    if (counts.manifestsChanged) this.placements = this.instanceRows.placements();
+    PerfCounters.set('bushNearInstances', counts.near);
+    PerfCounters.set('bushProxyInstances', counts.proxy);
+    PerfCounters.set('bushPlacementInstances', this.placements.length);
     PerfCounters.set('bushClusterFieldBuilds', this.clusterField.stats.builds);
     PerfCounters.set('bushClusterFieldCacheHits', this.clusterField.stats.cacheHits);
 

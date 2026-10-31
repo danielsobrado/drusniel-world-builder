@@ -17,8 +17,8 @@ import {
   createInstancedRenderers,
   disposeInstancedRenderers,
   pruneStateMap,
-  writeInstances,
 } from './lod/StylizedLodRuntime.js';
+import { drawnRepresentations, ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
 import { InstanceAnchor } from './lod/InstanceAnchor.js';
 import { ScatterClusterField } from './forest/ScatterClusterField.js';
 import { resolveForestSeed } from './forest/ForestRuntimeConfig.js';
@@ -71,10 +71,6 @@ export function createStylizedRockMaterial(mesh, config, weathering) {
   applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
   return material;
-}
-
-function createInstances(prototypeCount) {
-  return Array.from({ length: prototypeCount }, () => []);
 }
 
 function lodSettings(config) {
@@ -157,8 +153,30 @@ export class StylizedRockView {
     this.root = new THREE.Group();
     // Instances are written relative to this, not in canonical metres (InstanceAnchor).
     this.instanceAnchor = new InstanceAnchor();
+    this.instanceRows = new ScatterInstanceRows('rock', placement => this.placementMatrix(placement),
+      placement => this.placementAppearance(placement));
     this.root.name = 'stylized-rocks';
     terrainView.scene.add(this.root);
+  }
+
+  /** Sink each boulder by a fraction of its height so it reads as embedded in the ground. */
+  placementMatrix(placement) {
+    const burial = Math.max(0, Number(this.config.rocks.burial) || 0)
+      * (this.prototypeHeights[placement.prototypeIndex] ?? this.prototypeHeight) * placement.scale;
+    return new THREE.Matrix4().compose(
+      ROCK_SCRATCH.position.set(placement.x, placement.height - burial, placement.z),
+      ROCK_SCRATCH.quaternion.setFromAxisAngle(ROCK_UP, placement.rotationY),
+      ROCK_SCRATCH.scale.setScalar(placement.scale),
+    );
+  }
+
+  placementAppearance(placement) {
+    const colorRange = Math.max(0, Number(this.config.rocks.colorVariation) || 0);
+    return {
+      seed: placement.priority,
+      colorVariation: 1 - colorRange * 0.5 + placement.priority * colorRange,
+      surfaceData: placement.surfaceData,
+    };
   }
 
   /**
@@ -548,19 +566,7 @@ export class StylizedRockView {
 
   *iterateRebuild(focus, placementRadius, plan) {
     PerfCounters.inc('rockRebuilds');
-    // Sink each boulder by a fraction of its height so it reads as embedded in
-    // the ground rather than resting on it.
-    const burial = Math.max(0, Number(this.config.rocks.burial) || 0);
-    const colorRange = Math.max(0, Number(this.config.rocks.colorVariation) || 0);
-    const burialFor = (placement) => (
-      (this.prototypeHeights[placement.prototypeIndex] ?? this.prototypeHeight)
-      * placement.scale
-      * burial
-    );
-    const near = createInstances(this.prototypes.length);
-    const proxy = createInstances(this.prototypes.length);
-    const placements = [];
-    const activeChunks = new Set();
+    const job = this.instanceRows.begin();
     const planByChunk = new Map(plan.entries.map((entry) => [`${entry.chunkX}:${entry.chunkZ}`, entry]));
 
     for (let chunkZ = focus.chunkZ - placementRadius;
@@ -570,51 +576,26 @@ export class StylizedRockView {
         chunkX <= focus.chunkX + placementRadius;
         chunkX += 1) {
         const key = `${chunkX}:${chunkZ}`;
-        activeChunks.add(key);
         let manifest;
         while ((manifest = this.manifestForChunk(chunkX, chunkZ)) === null) yield ITERATOR_PENDING;
         yield;
-        placements.push(...manifest);
-        const entry = planByChunk.get(key);
-        if (!entry) continue;
-        for (const representation of entry.representations) {
-          if (representation.band === 'culled' || representation.fade <= 0) continue;
-          for (const placement of manifest) {
-            yield;
-            const instance = {
-              matrix: new THREE.Matrix4().compose(
-                ROCK_SCRATCH.position.set(
-                  placement.x,
-                  placement.height - burialFor(placement),
-                  placement.z,
-                ),
-                ROCK_SCRATCH.quaternion.setFromAxisAngle(ROCK_UP, placement.rotationY),
-                ROCK_SCRATCH.scale.setScalar(placement.scale),
-              ),
-              fade: representation.fade,
-              ditherDirection: representation.ditherDirection ?? 1,
-              seed: placement.priority,
-              colorVariation: 1 - colorRange * 0.5 + placement.priority * colorRange,
-              surfaceData: placement.surfaceData,
-            };
-            const target = representation.band === 'near' ? near : proxy;
-            target[placement.prototypeIndex].push(instance);
-          }
-        }
+        yield* this.instanceRows.stageChunk(job, key, manifest, drawnRepresentations(planByChunk.get(key)));
       }
     }
+    yield* this.instanceRows.stageRetired(job);
 
     yield;
     const anchorOrigin = this.terrainView.floatingOrigin.getState();
     this.instanceAnchor.follow(anchorOrigin);
-    const nearCount = writeInstances(this.meshes, near, this.instanceAnchor);
-    const proxyCount = writeInstances(this.proxyMeshes, proxy, this.instanceAnchor);
+    const counts = this.instanceRows.commit(job, this.meshes, this.proxyMeshes, this.instanceAnchor);
     this.instanceAnchor.place(this.root, anchorOrigin);
-    this.placements = placements;
-    this.signature = placementSignature(placements);
-    PerfCounters.set('rockNearInstances', nearCount);
-    PerfCounters.set('rockProxyInstances', proxyCount);
-    PerfCounters.set('rockPlacementInstances', placements.length);
+    if (counts.manifestsChanged) {
+      this.placements = this.instanceRows.placements();
+      this.signature = placementSignature(this.placements);
+    }
+    PerfCounters.set('rockNearInstances', counts.near);
+    PerfCounters.set('rockProxyInstances', counts.proxy);
+    PerfCounters.set('rockPlacementInstances', this.placements.length);
     return true;
   }
 

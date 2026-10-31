@@ -28,6 +28,9 @@ const SLICE_STEMS = 256;
 const POOL_LIMIT = 24;
 const CAMERA_POSITION_QUANTIZATION = 4;
 const VIEW_DIRECTION_QUANTIZATION = 512;
+/** Metres the camera may travel between full window walks. No wider than a tile:
+ * the walk reaches one tile past `reach`, so an arriving tile is always found. */
+const LAYOUT_SLACK = 1;
 
 export class MeadowTileLayer {
   /**
@@ -69,6 +72,10 @@ export class MeadowTileLayer {
     this.staleTiles = [];
     this.layoutState = new Float64Array(5);
     this.layoutState.fill(Number.NaN);
+    this.layoutCamera = { x: Number.NaN, z: Number.NaN };
+    this.layoutSlack = Math.min(LAYOUT_SLACK, tileSize);
+    // Flat tx, tz pairs whose band or membership could change within the slack.
+    this.boundaryCells = [];
     this.viewState = new Float64Array(3);
     this.viewState.fill(Number.NaN);
     this.batchDirty = true;
@@ -115,8 +122,11 @@ export class MeadowTileLayer {
     const groundRevision = Number.isFinite(this.ground.revision)
       ? this.ground.revision
       : this.updateSerial;
+    const windowRefresh = this.windowInputsChanged(origin, groundRevision);
     const layoutChanged = this.updateLayoutState(camera, origin, groundRevision);
-    if (layoutChanged) this.refreshLayout(camera, origin, viewCone);
+    if (windowRefresh || (layoutChanged && Math.hypot(camera.x - this.layoutCamera.x,
+      camera.z - this.layoutCamera.z) >= this.layoutSlack)) this.refreshLayout(camera, origin, viewCone);
+    else if (layoutChanged) this.refreshBoundary(camera, origin, viewCone);
     else if (this.staleTiles.length > 1 && this.updateViewState(viewCone)) {
       for (const tile of this.staleTiles) {
         tile.inView = meadowTileInView(
@@ -140,6 +150,11 @@ export class MeadowTileLayer {
     }
     if (this.batchDirty && this.workRunner) this.workRunner(() => this.commit());
     else this.commit();
+  }
+
+  windowInputsChanged(origin, groundRevision) {
+    const state = this.layoutState;
+    return state[2] !== origin.x || state[3] !== origin.z || state[4] !== groundRevision;
   }
 
   updateLayoutState(camera, origin, groundRevision) {
@@ -177,54 +192,122 @@ export class MeadowTileLayer {
     const size = this.tileSize;
     const reach = this.reach + size;
     const frameSerial = ++this.frameSerial;
+    this.layoutCamera.x = camera.x;
+    this.layoutCamera.z = camera.z;
+    this.boundaryCells.length = 0;
     for (let tz = Math.floor((camera.z - reach) / size); tz <= Math.floor((camera.z + reach) / size); tz += 1) {
       for (let tx = Math.floor((camera.x - reach) / size); tx <= Math.floor((camera.x + reach) / size); tx += 1) {
-        const centerX = (tx + 0.5) * size;
-        const centerZ = (tz + 0.5) * size;
-        const nearest = tileDistanceSquared(camera.x, camera.z, centerX, centerZ, size);
-        const farthest = (Math.abs(camera.x - centerX) + size / 2) ** 2
-          + (Math.abs(camera.z - centerZ) + size / 2) ** 2;
-        const band = this.selectBand(nearest, farthest);
-        const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
-        if (!preparationBand) continue;
-        const key = `${tx}:${tz}`;
-        let tile = this.tiles.get(key);
-        if (!tile) {
-          tile = { key, centerX, centerZ, output: null, buildId: 0, job: null };
-          this.tiles.set(key, tile);
-          this.batchDirty = true;
-        }
-        const previousBand = tile.band;
-        const previousRenderX = tile.renderX;
-        const previousRenderZ = tile.renderZ;
-        tile.seenFrame = frameSerial;
-        tile.band = band;
-        if (band === null && tile.output) {
-          tile.output = null;
-          this.batchDirty = true;
-        }
-        tile.preparationBand = preparationBand;
-        tile.preparationCapacity = this.templates[preparationBand].instanceCount;
-        tile.distanceSquared = nearest;
-        tile.inView = meadowTileInView(centerX, centerZ, camera, size, viewCone);
-        tile.renderX = centerX - origin.x;
-        tile.renderZ = centerZ - origin.z;
-        if (previousBand !== tile.band
-            || previousRenderX !== tile.renderX
-            || previousRenderZ !== tile.renderZ) {
-          this.batchDirty = true;
-        }
-        tile.revision = this.ground.revisionAt(centerX, centerZ);
+        const { nearest, farthest } = this.measureCell(tx, tz, camera);
+        if (this.bandCanChange(nearest, farthest)) this.boundaryCells.push(tx, tz);
+        const tile = this.refreshCell(tx, tz, nearest, farthest, camera, origin, viewCone);
+        if (tile) tile.seenFrame = frameSerial;
       }
     }
     for (const [key, tile] of this.tiles) {
-      if (tile.seenFrame === frameSerial) continue;
-      if (tile.output) this.batchDirty = true;
-      this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
-      this.releaseJob(tile);
-      this.tiles.delete(key);
+      if (tile.seenFrame !== frameSerial) this.retire(key, tile);
     }
     this.rebuildStaleTiles();
+  }
+
+  /**
+   * The camera moved inside the slack: only cells that could change band were
+   * listed, and only tiles waiting to build care about their exact distance.
+   */
+  refreshBoundary(camera, origin, viewCone) {
+    this.updateViewState(viewCone);
+    let changed = false;
+    const cells = this.boundaryCells;
+    for (let index = 0; index < cells.length; index += 2) {
+      const tx = cells[index], tz = cells[index + 1];
+      const key = `${tx}:${tz}`;
+      const before = this.tiles.get(key);
+      const previousBand = before?.band, previousPreparationBand = before?.preparationBand;
+      const { nearest, farthest } = this.measureCell(tx, tz, camera);
+      const tile = this.refreshCell(tx, tz, nearest, farthest, camera, origin, viewCone);
+      if (!tile && before) this.retire(key, before);
+      changed ||= tile !== (before ?? null) || tile?.band !== previousBand
+        || tile?.preparationBand !== previousPreparationBand;
+    }
+    if (changed) { this.rebuildStaleTiles(); return; }
+    for (const tile of this.staleTiles) {
+      const { nearest } = this.measureTile(tile.centerX, tile.centerZ, camera);
+      tile.distanceSquared = nearest;
+      tile.inView = meadowTileInView(tile.centerX, tile.centerZ, camera, this.tileSize, viewCone);
+    }
+    this.sortStaleTiles();
+  }
+
+  measureCell(tx, tz, camera) {
+    return this.measureTile((tx + 0.5) * this.tileSize, (tz + 0.5) * this.tileSize, camera);
+  }
+
+  measureTile(centerX, centerZ, camera) {
+    const size = this.tileSize;
+    const measure = this.measure ??= { nearest: 0, farthest: 0 };
+    measure.nearest = tileDistanceSquared(camera.x, camera.z, centerX, centerZ, size);
+    measure.farthest = (Math.abs(camera.x - centerX) + size / 2) ** 2
+      + (Math.abs(camera.z - centerZ) + size / 2) ** 2;
+    return measure;
+  }
+
+  /**
+   * Both distances move at most as far as the camera, and the bands widen with
+   * distance, so the extremes reachable within the slack bound any change.
+   */
+  bandCanChange(nearest, farthest) {
+    const nearRoot = Math.sqrt(nearest), farRoot = Math.sqrt(farthest), slack = this.layoutSlack;
+    const closeNearest = Math.max(0, nearRoot - slack) ** 2, wideNearest = (nearRoot + slack) ** 2;
+    const closeFarthest = Math.max(0, farRoot - slack) ** 2, wideFarthest = (farRoot + slack) ** 2;
+    const select = this.selectBand, prepare = this.selectPreparationBand;
+    const band = select(nearest, farthest);
+    return select(closeNearest, wideFarthest) !== band || select(wideNearest, closeFarthest) !== band
+      || (prepare !== null && (prepare(closeNearest, wideFarthest) !== prepare(nearest, farthest)
+        || prepare(wideNearest, closeFarthest) !== prepare(nearest, farthest)));
+  }
+
+  /** Brings one cell's tile up to date. Returns it, or null when the cell is outside the window. */
+  refreshCell(tx, tz, nearest, farthest, camera, origin, viewCone) {
+    const size = this.tileSize;
+    const centerX = (tx + 0.5) * size;
+    const centerZ = (tz + 0.5) * size;
+    const band = this.selectBand(nearest, farthest);
+    const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
+    if (!preparationBand) return null;
+    const key = `${tx}:${tz}`;
+    let tile = this.tiles.get(key);
+    if (!tile) {
+      tile = { key, centerX, centerZ, output: null, buildId: 0, job: null };
+      this.tiles.set(key, tile);
+      this.batchDirty = true;
+    }
+    const previousBand = tile.band;
+    const previousRenderX = tile.renderX;
+    const previousRenderZ = tile.renderZ;
+    tile.band = band;
+    if (band === null && tile.output) {
+      tile.output = null;
+      this.batchDirty = true;
+    }
+    tile.preparationBand = preparationBand;
+    tile.preparationCapacity = this.templates[preparationBand].instanceCount;
+    tile.distanceSquared = nearest;
+    tile.inView = meadowTileInView(centerX, centerZ, camera, size, viewCone);
+    tile.renderX = centerX - origin.x;
+    tile.renderZ = centerZ - origin.z;
+    if (previousBand !== tile.band
+        || previousRenderX !== tile.renderX
+        || previousRenderZ !== tile.renderZ) {
+      this.batchDirty = true;
+    }
+    tile.revision = this.ground.revisionAt(centerX, centerZ);
+    return tile;
+  }
+
+  retire(key, tile) {
+    if (tile.output) this.batchDirty = true;
+    this.release(tile.prepared?.band ?? tile.builtBand, tile.prepared?.output ?? tile.output);
+    this.releaseJob(tile);
+    this.tiles.delete(key);
   }
 
   rebuildStaleTiles() {

@@ -201,9 +201,7 @@ export class SettlementView {
     if (!nearest) return null;
     const { site, distance } = nearest;
     let smithy = Infinity;
-    for (const placement of site.placements ?? []) {
-      if (placement.kind === 'smithy') smithy = Math.min(smithy, Math.hypot(placement.x - focus.x, placement.z - focus.z));
-    }
+    for (const { x, z } of site.smithies) smithy = Math.min(smithy, Math.hypot(x - focus.x, z - focus.z));
     return { distance, radius: site.plan.profile.radius, rank: site.plan.profile.rank, smithy };
   }
 

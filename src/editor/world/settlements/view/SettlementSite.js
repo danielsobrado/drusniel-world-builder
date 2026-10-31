@@ -94,6 +94,7 @@ export class SettlementSite {
     });
     this.centre = { x: entry.settlement.cellX * tileSize, z: -entry.settlement.cellZ * tileSize };
     this.placements = null;
+    this.smithies = [];
     this.paving = new THREE.Group();
     this.paving.name = `settlement-paving-${this.id}`;
     this.pavingReady = false;
@@ -121,6 +122,7 @@ export class SettlementSite {
       if (index % 16 === 15) yield;
     }
     this.placements = placements;
+    this.smithies = placements.filter(placement => placement.kind === 'smithy');
     // Smoke needs only the plan; it rides with the paving, which shares its frame.
     const smoke = createSettlementSmoke(this.plan);
     if (smoke) this.paving.add(smoke);

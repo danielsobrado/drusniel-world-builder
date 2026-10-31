@@ -265,8 +265,9 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
       const morphologyRange = resetDirtyRange(MORPHOLOGY_RANGE);
       const surfaceRange = resetDirtyRange(SURFACE_RANGE);
       const plantRange = resetDirtyRange(PLANT_ROOT_RANGE);
-      let plantScaleSquared = 1;
       const selectedRows = rowsByPrototype?.[prototypeIndex];
+      // A partial write never reads the unselected rows, so keep the largest scale seen.
+      let plantScaleSquared = selectedRows && plantRoots ? mesh.userData.plantScaleSquared ?? 1 : 1;
       const visits = selectedRows?.length ?? writableCount;
       PerfCounters.inc('stylizedInstanceRowsCompared', visits);
       for (let visit = 0; visit < visits; visit += 1) {
@@ -336,6 +337,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
           morphologyRange.max,
         );
       }
+      if (plantRoots) mesh.userData.plantScaleSquared = plantScaleSquared;
       if (matrixRange.max >= 0 || writableCount !== previousCount) {
         if (selectedRows && !plantRoots) extendInstanceBounds(mesh, selectedRows);
         else mesh.computeBoundingSphere();
