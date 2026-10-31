@@ -10,7 +10,6 @@
   background: rgba(12, 16, 22, 0.78);
   color: #e8eef2;
   font: 12px/1.35 "Segoe UI", system-ui, sans-serif;
-  backdrop-filter: blur(8px);
   pointer-events: auto;
 }
 

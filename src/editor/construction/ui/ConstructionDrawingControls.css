@@ -28,7 +28,7 @@
   font-size: 12px;
   cursor: pointer;
 }
-.construction-drawing-controls button:hover { background: rgb(96 76 52 / 9%); }
+.construction-drawing-controls button:hover { background: rgb(233 224 203 / 9%); }
 .construction-drawing-controls button[aria-pressed="true"] { background: #d8c88e; color: #282d20; }
 .construction-drawing-controls button:focus-visible { outline: 2px solid #897945; outline-offset: 1px; }
 .construction-drawing-controls p { margin: 6px 4px 2px; font-size: 11px; line-height: 1.4; }

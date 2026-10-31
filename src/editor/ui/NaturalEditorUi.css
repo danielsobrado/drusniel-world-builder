@@ -23,7 +23,6 @@
   border-radius: 16px;
   background: rgb(20 28 23 / 86%);
   box-shadow: 0 18px 55px rgb(0 0 0 / 30%);
-  backdrop-filter: blur(18px) saturate(1.1);
   overflow-y: auto;
   transition:
     opacity 160ms ease,
@@ -146,7 +145,6 @@
   border-radius: 999px;
   background: rgb(12 18 14 / 62%);
   box-shadow: 0 8px 30px rgb(0 0 0 / 20%);
-  backdrop-filter: blur(12px);
   color: #bdc7bf;
   font-size: 10px;
   pointer-events: none;
@@ -182,7 +180,6 @@
   border-radius: 14px;
   background: rgb(16 23 19 / 70%);
   box-shadow: 0 8px 28px rgb(0 0 0 / 22%);
-  backdrop-filter: blur(14px) saturate(1.05);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .natural-brand__text {
@@ -208,7 +205,6 @@
   border-radius: 14px;
   background: rgb(16 23 19 / 70%);
   box-shadow: 0 8px 28px rgb(0 0 0 / 22%);
-  backdrop-filter: blur(14px) saturate(1.05);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .natural-icon-button,
@@ -289,7 +285,6 @@
   border-radius: 14px;
   background: rgb(18 26 21 / 94%);
   box-shadow: 0 18px 55px rgb(0 0 0 / 34%);
-  backdrop-filter: blur(18px);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .natural-world-menu__head {
@@ -341,7 +336,6 @@
   border-radius: 17px;
   background: rgb(16 23 19 / 78%);
   box-shadow: 0 14px 45px rgb(0 0 0 / 28%);
-  backdrop-filter: blur(18px) saturate(1.08);
   transform: translateX(-50%);
 }
 
@@ -383,7 +377,6 @@
   border-radius: 14px;
   background: rgb(17 24 20 / 76%);
   box-shadow: 0 10px 32px rgb(0 0 0 / 24%);
-  backdrop-filter: blur(16px);
   transform: translateX(-50%);
 }
 
@@ -418,7 +411,6 @@
   border-radius: 14px;
   background: rgb(17 24 20 / 86%);
   box-shadow: 0 12px 38px rgb(0 0 0 / 26%);
-  backdrop-filter: blur(16px);
   transform: translateX(-50%);
 }
 
@@ -614,7 +606,6 @@
   border-radius: 999px;
   background: rgb(24 31 26 / 88%);
   box-shadow: 0 12px 36px rgb(0 0 0 / 25%);
-  backdrop-filter: blur(14px);
   color: #e9dfbd;
   cursor: pointer;
   font-size: 10px;

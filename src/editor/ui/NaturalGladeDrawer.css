@@ -1,34 +1,34 @@
 /*
  * Tiny Glade skin for the editor drawer. The drawer's panels are styled with
  * the dark palette tokens from styles.css, so the drawer re-points those
- * tokens at paper and ink; the rules after that re-ink the few colours that
+ * tokens at dark glass and light ink; the rules after that re-ink the few colours that
  * were written in directly.
  */
 .editor-shell[data-natural-ui-installed="true"] .sidebar {
-  --surface-0: #f3ebdc;
+  --surface-0: rgb(14 26 20 / 60%);
   --surface-1: transparent;
-  --surface-2: #fcf8f0;
-  --surface-3: #f4ead8;
-  --border: rgb(96 76 52 / 13%);
-  --border-strong: rgb(96 76 52 / 28%);
+  --surface-2: rgb(255 255 255 / 7%);
+  --surface-3: rgb(255 255 255 / 12%);
+  --border: rgb(233 224 203 / 13%);
+  --border-strong: rgb(233 224 203 / 28%);
   --text: var(--glade-ink);
   --text-dim: var(--glade-ink-soft);
-  --accent: #d98a3f;
-  --accent-soft: rgb(229 155 82 / 16%);
-  --danger: #c0564c;
+  --accent: #ead29c;
+  --accent-soft: rgb(234 210 156 / 16%);
+  --danger: #ff9a8a;
 
   top: var(--glade-under-top);
   bottom: var(--glade-gutter);
   left: var(--glade-gutter);
   width: min(304px, calc(100vw - 32px));
   border: 0;
-  border-radius: 20px;
+  border-radius: 10px;
   background: var(--glade-paper-strong);
   box-shadow: var(--glade-shadow);
   color: var(--glade-ink);
-  color-scheme: light;
+  color-scheme: dark;
   font-family: var(--glade-font);
-  scrollbar-color: rgb(96 76 52 / 22%) transparent;
+  scrollbar-color: rgb(233 224 203 / 22%) transparent;
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar.is-settings-drawer {
@@ -37,7 +37,7 @@
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar::-webkit-scrollbar-thumb {
-  background: rgb(96 76 52 / 22%);
+  background: rgb(233 224 203 / 22%);
   background-clip: content-box;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .editor-shell[data-natural-ui-installed="true"] .natural-drawer-close:hover {
-  background: rgb(96 76 52 / 12%);
+  background: rgb(233 224 203 / 12%);
   color: var(--glade-ink);
 }
 
@@ -95,7 +95,7 @@
 .editor-shell[data-natural-ui-installed="true"] .sidebar :is(.tile-button, .object-button, .tool-button, .brush-button, .action-button) {
   border-color: transparent;
   border-radius: 12px;
-  box-shadow: 0 1px 0 rgb(96 76 52 / 10%), 0 0 0 1px var(--border);
+  box-shadow: 0 1px 0 rgb(233 224 203 / 10%), 0 0 0 1px var(--border);
   font-weight: 700;
   transition:
     background-color 140ms ease,
@@ -218,7 +218,7 @@
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar .natural-advanced-settings > summary span {
-  background: rgb(96 76 52 / 8%);
+  background: rgb(233 224 203 / 8%);
   color: var(--glade-ink-soft);
 }
 
@@ -229,7 +229,7 @@
 .editor-shell[data-natural-ui-installed="true"] .sidebar :is(.natural-controls-hint kbd, .help-list kbd, .action-button kbd) {
   border: 0;
   background: var(--glade-cream);
-  box-shadow: inset 0 -2px 0 rgb(96 76 52 / 14%), 0 0 0 1px var(--border);
+  box-shadow: inset 0 -2px 0 rgb(233 224 203 / 14%), 0 0 0 1px var(--border);
   color: var(--glade-ink);
 }
 
@@ -250,7 +250,7 @@
 #app .weather-panel input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background: rgb(96 76 52 / 16%);
+  background: rgb(233 224 203 / 16%);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar input[type="range"]::-webkit-slider-thumb,
@@ -262,14 +262,14 @@
   border-radius: 50%;
   appearance: none;
   background: var(--glade-accent);
-  box-shadow: 0 1px 3px rgb(62 44 24 / 30%);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar input[type="range"]::-moz-range-track,
 #app .weather-panel input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 999px;
-  background: rgb(96 76 52 / 16%);
+  background: rgb(233 224 203 / 16%);
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar input[type="range"]::-moz-range-thumb,

@@ -104,14 +104,14 @@
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar [data-terrain-mode]:hover {
-  background: rgb(255 255 255 / 60%);
+  background: rgb(255 255 255 / 12%);
   color: var(--glade-ink);
   translate: none;
 }
 
 .editor-shell[data-natural-ui-installed="true"] .sidebar [data-terrain-mode].is-active {
   background: var(--glade-ink);
-  box-shadow: 0 2px 5px rgb(62 44 24 / 25%);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 25%);
   color: var(--glade-cream);
 }
 

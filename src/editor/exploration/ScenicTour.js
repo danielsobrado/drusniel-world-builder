@@ -14,7 +14,6 @@ export class ScenicTour {
     this.button.dataset.captureUi = '';
     this.button.className = 'scenic-tour-button'; this.button.textContent = 'Scenic tour';
     this.button.title = 'Fly around nearby terrain; Escape returns to your view';
-    this.button.style.cssText = 'position:absolute;top:12px;right:12px;z-index:104;padding:8px 12px;border-radius:8px;background:#243027;color:#f0eedf;border:1px solid #81937a;';
     this.onClick = () => {
       if (this.active || this.preparing) this.stop();
       else void this.start().catch(error => console.error('Scenic tour preparation failed.', error));

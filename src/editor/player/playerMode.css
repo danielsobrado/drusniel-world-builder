@@ -17,7 +17,6 @@
   border-radius: 999px;
   background: var(--glade-paper);
   box-shadow: var(--glade-shadow);
-  backdrop-filter: var(--glade-blur);
   font-family: var(--glade-font);
   pointer-events: auto;
   user-select: none;
@@ -82,7 +81,7 @@
 }
 
 .view-mode-switcher button:hover {
-  background: rgb(96 76 52 / 8%);
+  background: rgb(233 224 203 / 8%);
   color: var(--glade-ink);
 }
 
@@ -97,7 +96,7 @@
 
 .view-mode-switcher button.is-active {
   background: var(--glade-ink);
-  box-shadow: 0 2px 6px rgb(62 44 24 / 26%);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 26%);
   color: var(--glade-cream);
 }
 
