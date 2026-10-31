@@ -28,6 +28,18 @@ test('cold interactive sampling waits for a worker plan and retains exact gradin
     let checks = 0; ready = sampler.prepare(bounds, () => ++checks > 5);
   }
   assert.equal(ready, true);
+  const plans = sampler.preparation.plans;
+  let lookups = 0;
+  const originalGet = plans.get;
+  plans.get = function (...args) { lookups++; return originalGet.apply(this, args); };
+  try {
+    assert.equal(sampler.prepare(bounds), true);
+    assert.equal(lookups, 0, 'ready sampling does not recheck pinned plans every frame');
+    assert.equal(sampler.prepare({ ...bounds, maxX: 48 }), true);
+    assert.ok(lookups > 0, 'changing sampling bounds requires new plan verification');
+  } finally {
+    plans.get = originalGet;
+  }
   for (let x = -32; x <= 32; x += 8) assert.equal(main.grade(x, 0, 20), canonical.grade(x, 0, 20));
   assert.equal(main.planCache.getStatus().pinned, 1);
   sampler.dispose(); assert.equal(main.planCache.getStatus().pinned, 0);
