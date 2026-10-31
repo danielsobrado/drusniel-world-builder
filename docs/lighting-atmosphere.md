@@ -59,13 +59,24 @@ the look lowered cloud density by a fixed offset, and a clear-skied region raise
 it back, so density now eases to an absolute lid. Regional personality cannot
 reopen it.
 
-`chunk-cross`, one focused run each side, 0e359b28 before and this pass after:
+`chunk-cross`, every run focused. d4d5c706 against the same tree with only this
+pass's shader files rolled back, so assets and the spell dock match:
 
-| | FPS | p50 | p95 | p99 | Hitches |
-| --- | --- | --- | --- | --- | --- |
-| Before | 130.0 | 7.2 ms | 10.8 ms | 17.4 ms | 3 (0.19%) |
-| After | 109.9 | 7.9 ms | 15.9 ms | 32.4 ms | 9 (0.68%) |
+| | FPS by run | p95 | p99 | Hitches |
+| --- | --- | --- | --- | --- |
+| Shaders rolled back | 120.1, 125.1, 121.3 | 10.9–11.6 ms | 16.9–22.2 ms | 5, 0, 3 |
+| This pass | 125.1, 125.4, 123.9, 124.1, 120.8 | 10.9–11.7 ms | 15.5–19.4 ms | 1, 0, 1, 1, 3 |
+| This pass, `contactOcclusion=0` | 127.4, 124.5 | 11.0–11.1 ms | 14.7–16.4 ms | 3, 3 |
 
-That is inside the p95 and hitch-rate budgets, but it is a visible cost, not
-noise-level, and one run a side cannot apportion it. The p99 sits just under the
-33.3 ms hitch line, so bisect the shader changes before spending more there.
+The pass has no measurable cost on this route, and contact occlusion is within
+run-to-run spread. `chunk-cross` meets no town, so the town material changes are
+not exercised here.
+
+An earlier single pair showed 130.0 against 109.9 FPS; disregard it. Its baseline
+paired old code with live assets, which can fail the impostor signature check and
+draw low-poly proxies, so an old-commit copy is not a clean baseline after the
+trees change. The slow side matched a separate mode, about 108 FPS with p95 16 ms,
+p99 32 ms and runs of 34 ms frames. It hit all three `contactOcclusion=0` runs that
+came last in a base, head, no-occlusion cycle, and neither of the two in the
+reversed series, so it follows something other than the shaders. Its cause is
+unknown; if it appears, compare `renderSubmissionCpu` p95 (9 ms against 6 ms).
