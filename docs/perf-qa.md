@@ -645,6 +645,48 @@ Slicing that rebuild per chunk is the next win. There is also one reproducible
 ~676 ms hitch whose `stylized` phase is only ~3.6 ms, i.e. async GPU/pipeline work
 outside the marked loop.
 
+### Scatter rows, smithy index and meadow boundary cells (2026-10-31)
+
+Source review of `8d9ba29`, verified against and A/B-tested on `cb19788c`. Same
+machine and session, alternating arms, `--gpuTimings 1 --drain-seconds 8
+--grass-diagnostics`. `settlement-approach` needs `--warmup 8 --settle`: without
+them the runner rejects both arms for incomplete scenery at measurement start.
+
+Focus-valid runs, baseline → change:
+
+| Metric | `chunk-cross` (2 → 1) | `settlement-approach` (2 → 2) | Its revisit (2 → 2) |
+|--------|-----------------------|-------------------------------|---------------------|
+| Avg FPS | 135.4, 133.6 → 134.8 | 84.4, 84.8 → 86.3, 87.0 | 113.5, 111.4 → 113.6, 113.2 |
+| dt p95 ms | 10.3, 10.3 → 10.5 | 15.9, 15.6 → 15.2, 14.9 | 12.2, 12.2 → 11.9, 12.1 |
+| dt p99 ms | 15.8, 14.2 → 15.6 | 31.2, 28.9 → 29.9, 29.1 | 13.5, 13.6 → 13.8, 13.7 |
+| CPU p95 ms | 9.3, 9.2 → 9.4 | 15.0, 14.6 → 14.2, 13.9 | 11.5, 11.4 → 11.2, 11.2 |
+| Hitches | 1, 2 → 1 | 7, 5 → 7, 7 | 0, 0 → 0, 0 |
+| GPU avg ms | 1.97, 1.98 → 1.97 | 3.28, 3.31 → 3.24, 3.26 | 2.53, 2.56 → 2.55, 2.58 |
+| Rows compared | 9708, 7804 → 5464 | 31455, 34167 → 33329, 27075 | 39613, 41318 → 29858, 30241 |
+
+Rock, bush, tree and settlement instance counts match, GPU pass counts match,
+meadow stems stay within a tile of each other, and recovery stays ready. Frame
+pacing did not move outside run-to-run spread, except a small settlement approach
+gain that needs more runs. CPU profiles (inclusive, one run per arm, whole capture):
+
+| Function | Baseline | Change |
+|----------|----------|--------|
+| `nearestTown`, settlement approach | 196 ms | 25 ms |
+| meadow `refreshLayout` (+ `refreshBoundary`), chunk-cross | 214 ms | 138 ms |
+| meadow `refreshLayout` (+ `refreshBoundary`), settlement approach | 251 ms | 169 ms |
+| Rock `iterateRebuild`, chunk-cross | 4.5 ms | 14.7 ms |
+| `writeInstances`, chunk-cross | 12.6 ms | 18.7 ms |
+
+The review's P1 was an overestimate for these routes: about 800 rocks and 500
+bushes are too few for publication to spike a frame. The row reuse lowers
+comparisons, not frame time, and its value is in heavier scenes, which were not
+measured. `MeadowBandBatch.rebase` is not worth changing yet: both routes recorded
+0 origin snaps and 0 `meadowOriginMaintenanceBytes`. Neither is
+`WorldAmbience` sampling preparation: 7–45 ms inclusive across 27–64 s captures.
+The cost left on these routes is `SettlementSite.prepare` (about 3.8 s on the
+approach, in resumable slices) and `buildChunkLodPlan`, which bushes rebuild
+every frame while rocks cache it.
+
 ### Renderer GPU preference
 
 `InfiniteTerrainView` requests `powerPreference: 'high-performance'`
