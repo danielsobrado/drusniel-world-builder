@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three/webgpu';
-import { mixSkyLooks, resolveSkyLook } from '../src/editor/stylized/sky/SkyLook.js';
+import { mixSkyLooks, overcastSkyLook, resolveSkyLook } from '../src/editor/stylized/sky/SkyLook.js';
 import { skyAmbientColor } from '../src/editor/stylized/sky/skyAmbient.js';
 
 const luminance = (color) => color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
@@ -22,6 +22,23 @@ test('full ambient saturation is the zenith colour itself', () => {
   const light = skyAmbientColor({ highColor: '#3f83c2', ambientSaturation: 1 });
   assert.ok(light.equals(zenith));
   assert.ok(skyAmbientColor({ highColor: '#3f83c2' }).equals(zenith), 'missing means 1');
+});
+
+test('diffuse sky sees a low sun and a cloud lid in daylight, while night retains its dark fill', () => {
+  const look = { ...resolveSkyLook({}, 'highfield'), lowColor: '#d1b094', highColor: '#5c7293',
+    sunElevation: 7, cloudCore: '#a9aeb6', ambientSaturation: 1 };
+  const horizon = luminance(skyAmbientColor(look));
+  const zenith = luminance(new THREE.Color(look.highColor));
+  assert.ok(horizon > zenith && horizon < luminance(new THREE.Color(look.lowColor)));
+  assert.ok(skyAmbientColor({ ...look, sunElevation: 42 }).equals(new THREE.Color(look.highColor)));
+  const covered = overcastSkyLook(look, 1);
+  const onlySky = skyAmbientColor({ ...covered, overcastAmount: 0 });
+  const underCloud = skyAmbientColor(covered);
+  assert.ok(luminance(underCloud) > luminance(onlySky));
+  assert.ok(luminance(underCloud) < luminance(new THREE.Color(covered.cloudCore)));
+  const half = skyAmbientColor({ ...covered, overcastAmount: 0.5 });
+  assert.ok(Math.abs(luminance(half) - (luminance(onlySky) + luminance(underCloud)) / 2) < 1e-6);
+  assert.ok(skyAmbientColor({ ...covered, nightness: 1 }).equals(new THREE.Color(covered.highColor)));
 });
 
 test('a paler sky light keeps the zenith luminance and only loses saturation', () => {

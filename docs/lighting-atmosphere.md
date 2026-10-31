@@ -80,3 +80,17 @@ p99 32 ms and runs of 34 ms frames. It hit all three `contactOcclusion=0` runs t
 came last in a base, head, no-occlusion cycle, and neither of the two in the
 reversed series, so it follows something other than the shaders. Its cause is
 unknown; if it appears, compare `renderSubmissionCpu` p95 (9 ms against 6 ms).
+
+## Highfield foreground review
+
+In the accepted `original-04` captures at `0b7ede54`, the road and distant trees
+remained legible under cloud, but the foreground grass lost detail. The sky dome
+showed a bright cloud base while the hemisphere still sampled the darker zenith
+behind it. The hemisphere now includes the cloud base in daylight and a smaller
+contribution from the horizon when the sun is low. Terrain, grass, foliage and
+the HDR environment use the same resolved light. The blend runs when the sky
+look changes and adds no render pass.
+
+Workshop and settlement buildings now use the same normal-map sample for
+surface lighting and specular filtering. The shader build test checks the
+generated WGSL for a single normal texture read on a representative wall.

@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { dot, float, materialColor, materialRoughness, mix, normalWorld, positionGeometry, texture, vec3, vertexColor } from 'three/tsl';
+import { dot, float, materialColor, materialNormal, materialRoughness, mix, normalWorld, positionGeometry, vec3, vertexColor } from 'three/tsl';
 
 import { WEATHER_FAMILIES, weatherTownSurface } from './townWeathering.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from './townWetness.js';
@@ -126,7 +126,12 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   const wet = wetTownSurface(material.colorNode, material.roughnessNode ?? materialRoughness,
     normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
   material.colorNode = wet.color;
-  material.roughnessNode = material.normalMap
-    ? filterSpecularRoughness(wet.roughness, texture(material.normalMap).xyz.mul(2).sub(1).mul(vec3(material.normalScale.x, material.normalScale.y, 1)))
-    : wet.roughness;
+  material.roughnessNode = wet.roughness;
+  if (material.normalMap && !material.normalNode) {
+    // Share the lit normal's sample and UV transform. A separate texture() here
+    // made the shader fetch the same normal map twice for every visible wall.
+    const normal = materialNormal.getTexture('normal').xyz.mul(2).sub(1);
+    const scale = materialNormal.getCache('normalScale', 'vec2');
+    material.roughnessNode = filterSpecularRoughness(wet.roughness, normal.mul(vec3(scale, 1)));
+  }
 }

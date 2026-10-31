@@ -54,7 +54,11 @@ test('wet workshop and instanced town materials generate with filtered normal de
   const normalMap = new THREE.DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1);
   const workshop = new THREE.MeshStandardNodeMaterial({ normalMap });
   gradeTownMaterial(workshop, 'stone');
-  assert.match(build(new THREE.Mesh(new THREE.PlaneGeometry(), workshop)).fragmentShader, /dpdx/);
+  const workshopShader = build(new THREE.Mesh(new THREE.PlaneGeometry(), workshop)).fragmentShader;
+  assert.match(workshopShader, /dpdx/);
+  // This nearest-filtered fixture has one sampled data texture (the normal).
+  // The BRDF lookup uses a sampler. Physical shading and AA share one textureLoad.
+  assert.equal(workshopShader.match(/\btextureLoad\(/g)?.length, 1);
 
   const array = () => new THREE.DataArrayTexture(new Uint8Array([128, 128, 255, 255]), 1, 1, 1);
   const atlas = { albedo: array(), normal: array(), albedoLayer: () => 0,
