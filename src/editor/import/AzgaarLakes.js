@@ -1,3 +1,4 @@
+import { azgaarYToAtlas } from './azgaarAtlasY.js';
 /**
  * Azgaar lake features.
  *
@@ -71,7 +72,7 @@ export function createLakeData(document, atlasWidth, atlasHeight) {
     const outline = feature.vertices.flatMap((index) => {
       const point = vertices[index]?.p;
       return Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])
-        ? [[point[0] / sourceWidth * atlasWidth, point[1] / sourceHeight * atlasHeight]]
+        ? [[point[0] / sourceWidth * atlasWidth, azgaarYToAtlas(point[1], sourceHeight, atlasHeight)]]
         : [];
     });
     if (outline.length < 3) return [];

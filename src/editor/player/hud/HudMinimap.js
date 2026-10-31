@@ -34,10 +34,8 @@ const MARKUP = `
  * keeps the player at the centre between redraws, and hands the frame back
  * when walking stops.
  *
- * The bitmap is drawn with cell z growing downwards, which is the world's
- * top-down view flipped (cell z runs towards -Z). The dial therefore mirrors
- * it back and turns it by the camera yaw, so what is on the player's left in
- * the world is on the left of the dial.
+ * The bitmap is drawn north-up, the world's own top-down view, so the dial only
+ * turns it by the camera yaw for the player's left to be the dial's left.
  */
 export class HudMinimap {
   /**
@@ -139,7 +137,8 @@ export class HudMinimap {
     if (!window?.center || !(window.cells > 0)) return null;
     return {
       x: (point.x - window.center.x) / window.cells,
-      z: (point.z - window.center.z) / window.cells,
+      // Bitmap rows run south, against cell z.
+      z: (window.center.z - point.z) / window.cells,
     };
   }
 

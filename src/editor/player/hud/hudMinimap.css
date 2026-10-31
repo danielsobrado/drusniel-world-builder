@@ -76,7 +76,7 @@
 /*
  * Both layers are the bitmap's size times the zoom, pinned by their top-left
  * corner to the dial centre. Read right to left: slide the player's point onto
- * that corner, mirror the rows back into a top-down view, turn by the yaw.
+ * that corner, turn by the yaw.
  */
 .hud-minimap .minimap-frame canvas,
 .hud-minimap .minimap-burgs {
@@ -90,7 +90,6 @@
   transform-origin: 0 0;
   transform:
     rotate(var(--hud-heading, 0rad))
-    scaleY(-1)
     translate(
       calc((-0.5 - var(--hud-map-x, 0)) * 100%),
       calc((-0.5 - var(--hud-map-z, 0)) * 100%)
@@ -104,11 +103,10 @@
   filter: saturate(0.78) brightness(0.92) contrast(1.04);
 }
 
-/* Settlement names undo the mirror and the turn so they read level. */
+/* Settlement names undo the turn so they read level. */
 .hud-minimap .minimap-burg {
   transform:
     translate(-50%, -50%)
-    scaleY(-1)
     rotate(calc(-1 * var(--hud-heading, 0rad)));
 }
 
@@ -159,15 +157,12 @@
   filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 55%));
 }
 
-/*
- * North is world +Z, which the mirrored dial puts at the bottom before it
- * turns; the badge rides the ring there and stays upright.
- */
+/* North is the bitmap's top; the badge rides the ring there and stays upright. */
 .hud-minimap__compass {
   position: absolute;
   inset: 0;
   z-index: 4;
-  transform: rotate(calc(var(--hud-heading, 0rad) + 180deg));
+  transform: rotate(var(--hud-heading, 0rad));
   pointer-events: none;
 }
 
@@ -184,7 +179,7 @@
   background: #13211de0;
   color: #ead29c;
   font: 700 8px/1 var(--hud-font);
-  transform: rotate(calc(-1 * (var(--hud-heading, 0rad) + 180deg)));
+  transform: rotate(calc(-1 * var(--hud-heading, 0rad)));
 }
 
 /* The biome rides the dial's lower rim instead of taking a row of its own. */

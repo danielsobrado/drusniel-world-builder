@@ -1,3 +1,4 @@
+import { azgaarYToAtlas } from './azgaarAtlasY.js';
 /**
  * Azgaar land routes (roads and trails; sea routes are left out) as polylines
  * in atlas coordinates, the same space rivers use. The terrain grades them
@@ -13,7 +14,7 @@ export function createRouteData(document, atlasWidth, atlasHeight) {
     if (!LAND_ROUTE_GROUPS.includes(route?.group) || !Array.isArray(route.points)) return [];
     const points = route.points
       .filter((point) => Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1]))
-      .map(([x, y]) => [x / sourceWidth * atlasWidth, y / sourceHeight * atlasHeight]);
+      .map(([x, y]) => [x / sourceWidth * atlasWidth, azgaarYToAtlas(y, sourceHeight, atlasHeight)]);
     if (points.length < 2) return [];
     return [{ id: Number.isSafeInteger(route.i) ? route.i : 0, group: route.group, points }];
   });

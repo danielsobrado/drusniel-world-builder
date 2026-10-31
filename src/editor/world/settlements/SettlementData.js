@@ -12,7 +12,8 @@ const FLAGS = Object.freeze(['capital', 'walls', 'citadel', 'plaza', 'temple', '
 function burgCell(burg, { sourceWidth, sourceHeight, bounds }) {
   return {
     cellX: bounds.minCellX + Number(burg.x) / sourceWidth * bounds.widthCells,
-    cellZ: bounds.minCellZ + Number(burg.y) / sourceHeight * bounds.heightCells,
+    // Azgaar's y runs south, cell z north (see `azgaarYToAtlas`).
+    cellZ: bounds.minCellZ + (1 - Number(burg.y) / sourceHeight) * bounds.heightCells,
   };
 }
 

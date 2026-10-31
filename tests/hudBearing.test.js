@@ -17,12 +17,12 @@ test('turning left by a quarter puts what was on the left dead ahead', () => {
   near(relativeBearing(0, -1, Math.PI / 2), 90);
 });
 
-test('compass points follow the Azgaar axes: north +Z, east +X', () => {
+test('compass points follow the Azgaar axes: north -Z, east +X', () => {
   assert.equal(COMPASS_POINTS.length, 16);
   const point = (label) => COMPASS_POINTS.find((entry) => entry.label === label);
-  near(point('N').worldDz, 1);
+  near(point('N').worldDz, -1);
   near(point('E').worldDx, 1);
-  near(point('S').worldDz, -1);
+  near(point('S').worldDz, 1);
   near(point('W').worldDx, -1);
   assert.equal(COMPASS_POINTS.filter(({ label }) => label).length, 8);
 });

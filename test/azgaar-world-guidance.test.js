@@ -150,17 +150,17 @@ test('Azgaar macro v2 persists raw and derived world guidance fields', () => {
 
   const decoded = decodeMacroAtlas(source, { includeGuidance: true });
   assert.deepEqual(decoded.fields.temperature, Int8Array.from([
-    -10, -10, 5, 5,
-    -10, -10, 5, 5,
     8, 8, -5, -5,
     8, 8, -5, -5,
+    -10, -10, 5, 5,
+    -10, -10, 5, 5,
   ]));
-  assert.equal(decoded.fields.riverFlux[8], 120);
-  assert.equal(decoded.fields.population[8], 325);
-  assert.ok(decoded.fields.coastDistance[0] < 0);
-  assert.ok(decoded.fields.coastDistance[12] >= 0);
-  assert.ok(decoded.fields.moisture[8] > decoded.fields.moisture[10]);
-  assert.ok(decoded.fields.mountainness[10] > decoded.fields.mountainness[8]);
+  assert.equal(decoded.fields.riverFlux[4], 120);
+  assert.equal(decoded.fields.population[4], 325);
+  assert.ok(decoded.fields.coastDistance[12] < 0);
+  assert.ok(decoded.fields.coastDistance[0] >= 0);
+  assert.ok(decoded.fields.moisture[4] > decoded.fields.moisture[6]);
+  assert.ok(decoded.fields.mountainness[6] > decoded.fields.mountainness[4]);
 });
 
 test('macro sampling preserves multiple packed cells inside one Azgaar grid cell', () => {
@@ -309,7 +309,7 @@ test('world guidance decodes individual fields only when requested', () => {
   const guidance = new WorldGuidanceField(source);
   assert.deepEqual(guidance.decodedFieldNames(), []);
 
-  const boundary = cellAtAtlas(source, 1.5, 2);
+  const boundary = cellAtAtlas(source, 1.5, 1);
   guidance.sampleBiomeBlend(boundary.x, boundary.z);
   assert.deepEqual(guidance.decodedFieldNames(), ['biomeId']);
 
@@ -320,7 +320,7 @@ test('world guidance decodes individual fields only when requested', () => {
 test('world guidance exposes scaled samples and continuous biome weights', () => {
   const source = createAzgaarMacroWorldSource(createDocument(), config);
   const guidance = new WorldGuidanceField(source);
-  const wetLand = cellAtAtlas(source, 0, 2);
+  const wetLand = cellAtAtlas(source, 0, 1);
   const sample = guidance.sample(wetLand.x, wetLand.z);
 
   assert.equal(sample.inside, true);
@@ -331,7 +331,7 @@ test('world guidance exposes scaled samples and continuous biome weights', () =>
   assert.ok(Number.isFinite(sample.coastDistanceMeters));
   assert.ok(Number.isFinite(sample.riverDistanceMeters));
 
-  const boundary = cellAtAtlas(source, 1.5, 2);
+  const boundary = cellAtAtlas(source, 1.5, 1);
   const blend = guidance.sampleBiomeBlend(boundary.x, boundary.z);
   assert.deepEqual(blend.weights.map(({ sourceId }) => sourceId), [4, 6]);
   assert.ok(Math.abs(blend.weights.reduce((sum, entry) => sum + entry.weight, 0) - 1) < 1e-12);
@@ -400,7 +400,7 @@ test('macro generation decodes optional guidance only when queried', () => {
   });
   assert.equal(generator.guidance, null);
 
-  const position = cellAtAtlas(source, 0, 2);
+  const position = cellAtAtlas(source, 0, 1);
   assert.equal(generator.sampleGuidance(position.x, position.z).riverId, 7);
   assert.ok(generator.guidance instanceof WorldGuidanceField);
 });

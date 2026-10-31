@@ -14,8 +14,8 @@
  * touched.
  *
  * The dome's own convention is `directionFromAngles(elevation, azimuth)`
- * (StylizedGodRaysPostProcess): x = cos(elevation) cos(azimuth),
- * y = sin(elevation), z = cos(elevation) sin(azimuth). The presets read it the
+ * (StylizedGodRaysPostProcess): x = cos(elevation) sin(azimuth),
+ * y = sin(elevation), z = -cos(elevation) cos(azimuth). The presets read it the
  * same way, so morning sits near azimuth 110 and golden hour near 262 and
  * azimuth rises through the day. This module keeps that: east is azimuth 90
  * (sunrise), south is 180 (noon), west is 270 (sunset).

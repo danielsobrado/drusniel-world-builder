@@ -127,7 +127,7 @@ test('a burg teleport target lands inside the imported world bounds and matches 
     seaLevel: config.world.seaLevel,
   });
   const atlasFromGenerator = generator.toAtlasPosition(cell.x, cell.z);
-  const atlasFromBurg = { x: nx * baseTerrain.atlas.width, y: nz * baseTerrain.atlas.height };
+  const atlasFromBurg = { x: nx * baseTerrain.atlas.width, y: (1 - nz) * baseTerrain.atlas.height };
   assert.ok(Math.abs(atlasFromGenerator.x - atlasFromBurg.x) <= 1);
   assert.ok(Math.abs(atlasFromGenerator.y - atlasFromBurg.y) <= 1);
 });

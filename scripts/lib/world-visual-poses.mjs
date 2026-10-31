@@ -24,10 +24,10 @@ export function selectAdditionalPoses({sampleTile,original=[],seed=20261014,maxC
 }
 /** Grukmar's bog (docs/plans/swamp-aaa-plan-2026-10-21.md): pools and islands, then closed swamp forest. */
 export const BOG_VISUAL_POSES=Object.freeze([
-  ['bog-pools',-2255555,-1564130],['bog-forest',-3534792,-1471060],
+  ['bog-pools',-2255555,1564130],['bog-forest',-3534792,1471060],
 ].flatMap(([id,x,z])=>[
-  {id,world:'eldara',expectedBiomeId:12,x,z,yaw:.6,pitch:-.05,mode:'player',heightAboveGround:1.7},
-  {id:`${id}-overview`,world:'eldara',expectedBiomeId:12,x,z,yaw:.6,pitch:-.35,mode:'fly',heightAboveGround:25,fov:60},
+  {id,world:'eldara',expectedBiomeId:12,x,z,yaw:2.54,pitch:-.05,mode:'player',heightAboveGround:1.7},
+  {id:`${id}-overview`,world:'eldara',expectedBiomeId:12,x,z,yaw:2.54,pitch:-.35,mode:'fly',heightAboveGround:25,fov:60},
 ]));
 export function parseVisualArguments(args) {
   const result={suite:'all',url:'http://localhost:5173'};

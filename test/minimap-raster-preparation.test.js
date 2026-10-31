@@ -30,10 +30,11 @@ test('sliced minimap matches exact raster, reuses samples and queries only local
   };
   const result = build({ x: 0, z: 0 });
   const cell = p => -20 + Math.floor(p * 41 / 32), f = (x, z) => Math.fround(height(x, z));
+  const z = r => cell(31 - r); // north-up: the top row is the highest cell z
   for (let row = 0; row < 32; row++) for (let column = 0; column < 32; column++) {
-    const rgb = shadeMinimapPixel(hexToRgbBytes(tile.color), { water: false, height: f(cell(column), cell(row)),
-      neighbours: { left: f(cell(column - 1), cell(row)), right: f(cell(column + 1), cell(row)),
-        up: f(cell(column), cell(row - 1)), down: f(cell(column), cell(row + 1)) }, spacing: 41 / 32 * 2 });
+    const rgb = shadeMinimapPixel(hexToRgbBytes(tile.color), { water: false, height: f(cell(column), z(row)),
+      neighbours: { left: f(cell(column - 1), z(row)), right: f(cell(column + 1), z(row)),
+        up: f(cell(column), z(row - 1)), down: f(cell(column), z(row + 1)) }, spacing: 41 / 32 * 2 });
     assert.deepEqual([...result.image.data.subarray((row * 32 + column) * 4, (row * 32 + column) * 4 + 4)], [...rgb, 255]);
   }
   const before = heightCalls + tileCalls;

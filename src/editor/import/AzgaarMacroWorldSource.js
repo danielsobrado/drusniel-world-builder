@@ -1,3 +1,4 @@
+import { azgaarYToAtlas } from './azgaarAtlasY.js';
 import { createAzgaarBiomeDefinitions } from '../AzgaarBiomeCatalog.js';
 import { deriveAzgaarWorldGuidance } from './AzgaarWorldGuidance.js';
 import { decodeMacroField, encodeMacroField } from './MacroAtlasCodec.js';
@@ -227,7 +228,7 @@ function createRiverData(document, atlasWidth, atlasHeight, physicalWidthMeters)
       ),
       points: points.map(([x, y]) => [
         x / sourceWidth * atlasWidth,
-        y / sourceHeight * atlasHeight,
+        azgaarYToAtlas(y, sourceHeight, atlasHeight),
       ]),
     }];
   });
@@ -453,7 +454,8 @@ export function createAzgaarMacroWorldSource(document, config, options = {}) {
   const lakeCells = createLakeCellOverrides(document);
 
   for (let y = 0; y < summary.atlasHeight; y += 1) {
-    const normalizedY = (y + 0.5) / summary.atlasHeight;
+    // The mapping is its own inverse, so this also reads a row's source y.
+    const normalizedY = azgaarYToAtlas(y + 0.5, summary.atlasHeight, 1);
     for (let x = 0; x < summary.atlasWidth; x += 1) {
       const normalizedX = (x + 0.5) / summary.atlasWidth;
       const gridCell = sourceGridCellAt(document, lookup, normalizedX, normalizedY);

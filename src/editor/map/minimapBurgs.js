@@ -1,4 +1,4 @@
-import { burgToNormalized } from './worldMapCoordinates.js';
+import { burgToNormalized, normalizedToCellZ } from './worldMapCoordinates.js';
 
 const DEFAULT_BURG_COLOR = '#f0cf68';
 // How far past the visible window an off-map burg still earns a rim marker,
@@ -57,7 +57,7 @@ export function selectMinimapBurgs({
 
     const { nx, nz } = burgToNormalized({ x: sourceX, y: sourceY }, source);
     const cellX = Math.floor(bounds.minCellX + nx * bounds.widthCells);
-    const cellZ = Math.floor(bounds.minCellZ + nz * bounds.heightCells);
+    const cellZ = Math.floor(normalizedToCellZ(nz, bounds));
     const offsetX = cellX - center.x;
     const offsetZ = cellZ - center.z;
     const distanceCells = Math.hypot(offsetX, offsetZ);
@@ -67,13 +67,13 @@ export function selectMinimapBurgs({
       ? distanceCells > rimCells
       : Math.abs(offsetX) > halfCells || Math.abs(offsetZ) > halfCells;
     let u = 0.5 + offsetX / cells;
-    let v = 0.5 + offsetZ / cells;
+    let v = 0.5 - offsetZ / cells;
     if (offscreen) {
       // distanceCells is non-zero here: an offset inside half a cell of the
       // centre cannot leave the window.
       const scale = rimCells / distanceCells;
       u = 0.5 + (offsetX / cells) * scale;
-      v = 0.5 + (offsetZ / cells) * scale;
+      v = 0.5 - (offsetZ / cells) * scale;
     }
 
     markers.push(Object.freeze({

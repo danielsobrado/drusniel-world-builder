@@ -1,5 +1,13 @@
 import { cellCenterToWorld } from '../world/WorldCoordinates.js';
 
+/**
+ * The fractional cell z of a normalised map row. `nz` runs south like the map,
+ * cell z runs north (see `azgaarYToAtlas`).
+ */
+export function normalizedToCellZ(nz, bounds) {
+  return bounds.minCellZ + (1 - nz) * bounds.heightCells;
+}
+
 export function burgToNormalized(burg, source) {
   return Object.freeze({
     nx: burg.x / source.sourceWidth,
@@ -9,7 +17,11 @@ export function burgToNormalized(burg, source) {
 
 export function normalizedToCanonicalWorld(nx, nz, bounds, tileSize) {
   const cellX = Math.floor(bounds.minCellX + nx * bounds.widthCells);
-  const cellZ = Math.floor(bounds.minCellZ + nz * bounds.heightCells);
+  // nz = 0 is the map's north edge, the first row past the last cell.
+  const cellZ = Math.min(
+    Math.floor(normalizedToCellZ(nz, bounds)),
+    bounds.minCellZ + bounds.heightCells - 1,
+  );
   return cellCenterToWorld(cellX, cellZ, tileSize);
 }
 
@@ -18,7 +30,7 @@ export function canonicalWorldToNormalized(worldX, worldZ, bounds, tileSize) {
   const cellZ = -worldZ / tileSize;
   return Object.freeze({
     nx: (cellX - bounds.minCellX) / bounds.widthCells,
-    nz: (cellZ - bounds.minCellZ) / bounds.heightCells,
+    nz: 1 - (cellZ - bounds.minCellZ) / bounds.heightCells,
   });
 }
 

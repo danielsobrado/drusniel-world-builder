@@ -35,8 +35,7 @@ function pathsFor(model) {
 
 /**
  * Paints the Azgaar biome map inside a source-pixel rectangle onto a square
- * canvas: biome fills, coastline, rivers and roads, in the Azgaar source's own
- * orientation (y down), which is the same as the cell bitmap's z down.
+ * canvas: biome fills, coastline, rivers and roads, north-up like the cell bitmap.
  *
  * @param {CanvasRenderingContext2D} context
  * @param {object} model from `createVectorMapModel`

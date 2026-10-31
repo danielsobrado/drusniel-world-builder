@@ -1,7 +1,7 @@
 import { importAzgaarFullJson } from '../../import/AzgaarJsonImporter.js';
 
 /** Grukmar's closed swamp forest (the world-visual `bog-forest` pose), canonical metres. */
-export const BOG_CROSS_START = Object.freeze({ x: -3534792, z: -1471060, yawDegrees: 34 });
+export const BOG_CROSS_START = Object.freeze({ x: -3534792, z: 1471060, yawDegrees: 146 });
 
 /**
  * The bog-cross perf route: the frozen Eldara import, spawned in Grukmar's

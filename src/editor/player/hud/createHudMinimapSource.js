@@ -67,7 +67,7 @@ export function createHudMinimapSource({ ui, controller, tileMap, getBaseTerrain
       color,
       // Rim clamping keeps a marker's direction, which is all the compass reads.
       worldDx: u - 0.5,
-      worldDz: 0.5 - v,
+      worldDz: v - 0.5,
       metres: distanceCells * tileMap.tileSize,
     })),
     describeCell: (cellX, cellZ) => {

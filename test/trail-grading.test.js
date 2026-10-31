@@ -49,7 +49,7 @@ test('only land routes are imported, in atlas coordinates', () => {
     },
   }, 100, 50);
   assert.equal(routes.length, 1);
-  assert.deepEqual(routes[0].points, [[5, 5], [15, 10]]);
+  assert.deepEqual(routes[0].points, [[5, 45], [15, 40]]);
 });
 
 test('a smoothed route still passes through its points', () => {

@@ -6,7 +6,8 @@ import { SettlementSamplingPreparation } from '../world/settlements/SettlementSa
 export const WAIT_FOR_MINIMAP = 'wait-for-minimap';
 
 /** Builds a complete bitmap off the published canvas, retaining only one window
- * of exact terrain samples between redraws. The caller atomically adopts it. */
+ * of exact terrain samples between redraws. The caller atomically adopts it.
+ * North-up: rows run from the highest cell z down, x grows to the right. */
 export class MinimapRaster {
   constructor({ tileMap, heightField, objectMap, objectByKey, size = MINIMAP_SIZE }) {
     Object.assign(this, { tileMap, heightField, objectMap, objectByKey, size });
@@ -24,6 +25,7 @@ export class MinimapRaster {
     const { size, tileMap, heightField } = this;
     const minimumX = center.x - Math.floor(cells / 2), minimumZ = center.z - Math.floor(cells / 2);
     const cellAt = (pixel, minimum) => minimum + Math.floor(pixel * cells / size);
+    const zOfRow = (row) => cellAt(size - 1 - row, minimumZ);
     const bounds = { minX: cellAt(-1, minimumX), maxX: cellAt(size, minimumX) + 1,
       minZ: cellAt(-1, minimumZ), maxZ: cellAt(size, minimumZ) + 1 };
     while (this.sampling && !this.sampling.prepare(bounds, shouldYield)) yield WAIT_FOR_MINIMAP;
@@ -37,7 +39,7 @@ export class MinimapRaster {
     const heights = new Float32Array(span * span);
     let units = 0;
     for (let row = 0; row < span; row++) for (let column = 0; column < span; column++) {
-      const x = cellAt(column - 1, minimumX), z = cellAt(row - 1, minimumZ), key = `${x}:${z}`;
+      const x = cellAt(column - 1, minimumX), z = zOfRow(row - 1), key = `${x}:${z}`;
       let height = nextHeights.get(key) ?? this.heights.get(key);
       if (height === undefined) height = heightField.getCellHeight(x, z) ?? 0;
       nextHeights.set(key, height); heights[row * span + column] = height;
@@ -46,7 +48,7 @@ export class MinimapRaster {
     const spacing = cells / size * (tileMap.tileSize ?? 1);
     const neighbours = { left: 0, right: 0, up: 0, down: 0 };
     for (let row = 0; row < size; row++) for (let column = 0; column < size; column++) {
-      const x = cellAt(column, minimumX), z = cellAt(row, minimumZ), key = `${x}:${z}`;
+      const x = cellAt(column, minimumX), z = zOfRow(row), key = `${x}:${z}`;
       let id = nextTiles.get(key) ?? this.tiles.get(key);
       if (id === undefined) id = tileMap.get(x, z);
       nextTiles.set(key, id);
@@ -73,7 +75,8 @@ export class MinimapRaster {
       if (object.x < minimumX || object.z < minimumZ || object.x >= minimumX + cells || object.z >= minimumZ + cells) continue;
       const definition = this.objectByKey.get(object.definitionKey);
       context.fillStyle = definition.color;
-      context.fillRect(Math.floor((object.x - minimumX) * scale) - 1, Math.floor((object.z - minimumZ) * scale) - 1,
+      const top = minimumZ + cells - object.z - definition.footprint.depth;
+      context.fillRect(Math.floor((object.x - minimumX) * scale) - 1, Math.floor(top * scale) - 1,
         Math.max(2, Math.ceil(definition.footprint.width * scale)), Math.max(2, Math.ceil(definition.footprint.depth * scale)));
     }
   }

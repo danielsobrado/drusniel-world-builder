@@ -90,7 +90,7 @@ export class HudRegionMap {
     const half = this.cells / 2;
     paintRegionMap(this.canvas.getContext('2d'), model, {
       minX: (cell.x - half - bounds.minCellX) * toSourceX,
-      minY: (cell.z - half - bounds.minCellZ) * toSourceY,
+      minY: sourceHeight - (cell.z + half - bounds.minCellZ) * toSourceY,
       width: this.cells * toSourceX,
       height: this.cells * toSourceY,
     });

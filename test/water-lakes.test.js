@@ -140,7 +140,7 @@ test('import rasterizes lake cells as land at the lake level in the surrounding 
     id: 2,
     name: 'Neury',
     height: 27.3,
-    outline: [[5, 10], [25, 10], [15, 30]],
+    outline: [[5, 40], [25, 40], [15, 20]],
   }]);
 });
 

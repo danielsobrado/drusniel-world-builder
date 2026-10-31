@@ -1308,7 +1308,7 @@ export class EditorUi {
       const mapWindow = this.minimapPublishedWindow ?? { center: this.minimapCenter, cells: this.minimapCells };
       controller.focusCell(
         Math.floor(mapWindow.center.x + normalizedX * mapWindow.cells),
-        Math.floor(mapWindow.center.z + normalizedZ * mapWindow.cells),
+        Math.floor(mapWindow.center.z - normalizedZ * mapWindow.cells),
       );
       this.minimapCenter = controller.getFocusCell?.() ?? this.minimapCenter;
       this.queueMinimapUpdate();

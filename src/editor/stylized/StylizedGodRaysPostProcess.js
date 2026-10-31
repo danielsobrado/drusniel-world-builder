@@ -35,13 +35,14 @@ const SUN_FADE_UV_MARGIN = 0.35;
 const SUN_FADE_FORWARD_END = 0.12;
 const GOD_RAY_TECHNIQUES = Object.freeze(['cinematic', 'screen-space', 'volumetric']);
 
+/** Compass azimuth: 0 is north (-Z), 90 east (+X), 180 south, 270 west. */
 export function directionFromAngles(elevationDegrees, azimuthDegrees) {
   const elevation = THREE.MathUtils.degToRad(elevationDegrees);
   const azimuth = THREE.MathUtils.degToRad(azimuthDegrees);
   return new THREE.Vector3(
-    Math.cos(elevation) * Math.cos(azimuth),
-    Math.sin(elevation),
     Math.cos(elevation) * Math.sin(azimuth),
+    Math.sin(elevation),
+    -Math.cos(elevation) * Math.cos(azimuth),
   ).normalize();
 }
 
