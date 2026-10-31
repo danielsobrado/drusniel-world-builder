@@ -20,6 +20,7 @@ import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { applyUnderstoryPalette, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
+import { applySkywardNormal } from './forest/foliageLight.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
@@ -37,6 +38,7 @@ function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
   applyPlantMotion(material, { wind, height, profile: motion });
+  if (foliageConfig) applySkywardNormal(material);
   if ('roughness' in material) material.roughness = Math.max(0.72, material.roughness ?? 1);
   if ('metalness' in material) material.metalness = 0;
   if (material.map?.colorSpace !== undefined) {

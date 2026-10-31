@@ -1,6 +1,9 @@
 import * as THREE from 'three';
-import { dot, max, mix, smoothstep, vec3 } from 'three/tsl';
+import { dot, float, max, mix, smoothstep, vec3 } from 'three/tsl';
 import { resolveCanopyGrade } from './canopyGrade.js';
+
+/** Brightest channel a petal keeps: hue survives, only its value is lifted. */
+const PETAL_MIN_PEAK = .62;
 
 /** Understory bridges the meadow and canopy, using their configured pigments. */
 export function resolveFoliagePalette(config = {}, tileId = null) {
@@ -35,7 +38,9 @@ export function gradePlantPart(sample, palette, role = 'auto') {
   if (role === 'stem') return mix(sample, vec3(...palette.base.toArray()), .65);
   if (role === 'petal' || role === 'center') {
     const luminance = dot(sample, vec3(.2126, .7152, .0722));
-    return mix(vec3(luminance), sample, .82).mul(.94);
+    // Petals were painted for unlit rendering; lit, a deep violet reads as black.
+    const peak = max(max(sample.r, sample.g), max(sample.b, .001));
+    return mix(vec3(luminance), sample, .82).mul(max(float(PETAL_MIN_PEAK).div(peak), 1)).mul(.94);
   }
   throw new Error(`Unknown plant material role: ${role}`);
 }

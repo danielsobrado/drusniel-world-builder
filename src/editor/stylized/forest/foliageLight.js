@@ -1,5 +1,12 @@
 import * as THREE from 'three/webgpu';
-import { uniform } from 'three/tsl';
+import { cameraViewMatrix, faceDirection, mix, normalViewGeometry, positionView, smoothstep, uniform, vec4 } from 'three/tsl';
+
+/** Share of a plant's normal bent to the sky, leaving a little authored form. */
+const SKYWARD_NORMAL = 0.72;
+/** Crown in-scatter: metres over which it ramps, and its share of the sky fill. */
+const CROWN_AIR_START = 25;
+const CROWN_AIR_END = 240;
+const CROWN_AIR = 0.32;
 
 /**
  * A restrained sky fill shared by crowns and understory, updated once a frame.
@@ -31,7 +38,24 @@ export function foliageSkyFill(color, amount) {
   return color.mul(foliageLight.skyColor).mul(foliageLight.fill).mul(amount);
 }
 
-/** Only sky fill is emissive; sunlight must pass through the shadow system. */
+/**
+ * Lights a ground plant as the meadow around it, whose normals face the sky.
+ * Upright leaf normals catch almost no high sun, so tufts read near black against
+ * the grass. Call after applyPlantMotion, which may replace `normalNode`.
+ */
+export function applySkywardNormal(material) {
+  const authored = material.normalNode ?? normalViewGeometry.mul(faceDirection);
+  const up = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz;
+  material.normalNode = mix(authored, up, SKYWARD_NORMAL).normalize();
+  return material;
+}
+
+/**
+ * Only sky fill is emissive; sunlight must pass through the shadow system.
+ * The added air lifts shaded leaves toward the sky behind them: exp² fog is still
+ * near zero at the treeline, where crowns otherwise cut out of the sky.
+ */
 export function treeFoliageEmission(crown) {
-  return foliageSkyFill(crown, 0.28);
+  const air = smoothstep(CROWN_AIR_START, CROWN_AIR_END, positionView.length()).mul(CROWN_AIR);
+  return foliageSkyFill(crown, 0.4).add(foliageLight.skyColor.mul(foliageLight.fill).mul(air));
 }

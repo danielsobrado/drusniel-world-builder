@@ -81,6 +81,20 @@ came last in a base, head, no-occlusion cycle, and neither of the two in the
 reversed series, so it follows something other than the shaders. Its cause is
 unknown; if it appears, compare `renderSubmissionCpu` p95 (9 ms against 6 ms).
 
+## Meadow blending pass
+
+Ground plants, bushes and flower cards bend their normals to the sky
+(`applySkywardNormal`), as the meadow's blades do; upright normals caught almost no
+high sun and read near black against the grass. Cloud-shadow edges are 2.5× wider
+than the dome's cloud edges. Crowns add distance in-scatter in `foliageLight.js`,
+which the live trees and impostors share, so no impostor rebake is needed: exp² fog
+is still near zero at the treeline. All of it is ALU; no pass or light is added.
+
+`chunk-cross`, same session, focused, 12 s: 110.1, 107.1, 115.9 FPS before and
+102.0, 115.5, 106.2, 103.7 after, with p95 12–13 ms against 11.7–14.4 ms. A fifth
+after-run hit 70.9 FPS with 31 hitches and did not recur in the next two; its cause
+is unknown. If it reappears, A/B this pass before blaming streaming.
+
 ## Highfield foreground review
 
 In the accepted `original-04` captures at `0b7ede54`, the road and distant trees

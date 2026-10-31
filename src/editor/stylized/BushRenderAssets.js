@@ -12,6 +12,7 @@ import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostP
 import { applyUnderstoryPalette, authoredFoliageColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
+import { applySkywardNormal } from './forest/foliageLight.js';
 import { applyCloudShadow } from './CloudShadow.js';
 
 export const BUSH_CAST_SHADOW = false;
@@ -46,6 +47,7 @@ export function cloneBushMaterial(source, { config = null, height = 0, tileId = 
   material.colorNode = authoredFoliageColor(material);
   if (config) applyUnderstoryPalette(material, config, tileId);
   applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
+  if (config) applySkywardNormal(material);
   material.side = THREE.DoubleSide;
   if (usesCutout(material)) {
     material.alphaTest = Math.max(0.35, material.alphaTest ?? 0);
@@ -141,6 +143,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   material.transparent = false;
   material.depthWrite = true;
   applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
+  if (config) applySkywardNormal(material);
   applyCloudShadow(material, config?.sky);
   applyJungleMist(material, config?.ambientEffects);
   return assignBushFoliageMaterialData(material);

@@ -30,7 +30,7 @@ import { sampleWorldWindCanonical, windWaveCoordinates } from '../weather/wind/w
 import { createMeadowGroundShading } from './meadow/MeadowGroundShading.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
-import { foliageSkyFill } from './forest/foliageLight.js';
+import { applySkywardNormal, foliageSkyFill } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { createFlowerPalette } from './FlowerPalette.js';
 
@@ -161,6 +161,7 @@ export function createStylizedFlowerMaterial({
   const slope = wind.add(vec2(bend, 0)).mul(2).div(localHeight.max(.05));
   const normal = vec3(nx, nx.mul(slope.x).add(nz.mul(slope.y)).negate(), nz).normalize();
   material.normalNode = cameraViewMatrix.mul(vec4(normal, 0)).xyz.toVarying('flowerBentNormal').normalize();
+  applySkywardNormal(material);
   material.colorNode = flowerColor;
   material.emissiveNode = foliageSkyFill(flowerColor, .1);
   material.foliageTransmissionNode = float(.18);

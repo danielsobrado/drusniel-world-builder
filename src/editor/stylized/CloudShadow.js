@@ -14,6 +14,9 @@ import { cloudFbm2 } from './sky/cloudNoise.js';
  */
 export const CLOUD_WRAP_UNITS = 512;
 
+/** Sharpness widths added to each side of a shadow's edge, around its midpoint. */
+const CLOUD_SHADOW_PENUMBRA = 1.5;
+
 /** A canonical metre coordinate wrapped for cloud sampling, in metres. */
 export function wrapCloudCoordinate(canonicalMeters, worldScale) {
   const period = CLOUD_WRAP_UNITS * worldScale;
@@ -99,7 +102,13 @@ function cloudSunlightNode(sky) {
     speed: sky.cloudSpeed,
     worldScale: sky.cloudWorldScale,
   });
-  const cover = smoothstep(u.cloudDensity, u.cloudDensity.add(u.cloudSharpness), cloudFbm2(uv));
+  // A cloud's edge is crisp in the sky, but its shadow is a wide penumbra on the
+  // ground: at the dome's width it drew hard lobes across the meadow.
+  const cover = smoothstep(
+    u.cloudDensity.sub(u.cloudSharpness.mul(CLOUD_SHADOW_PENUMBRA)),
+    u.cloudDensity.add(u.cloudSharpness.mul(1 + CLOUD_SHADOW_PENUMBRA)),
+    cloudFbm2(uv),
+  );
   return float(1).sub(cover.mul(u.sunBand).mul(u.strength));
 }
 
