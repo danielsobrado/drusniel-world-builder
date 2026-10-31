@@ -20,6 +20,8 @@
     "prepare:construction-textures": "node scripts/prepare-construction-textures.mjs",
     "fetch:settlement-textures": "node scripts/fetch-settlement-textures.mjs",
     "generate:settlement-doors": "node scripts/generate-settlement-doors.mjs",
+    "generate:settlement-gates": "node scripts/generate-settlement-gates.mjs",
+    "check:settlement-gates": "node scripts/generate-settlement-gates.mjs --check",
     "check:settlement-doors": "node scripts/generate-settlement-doors.mjs --check",
     "export:ptl-settlement-recipes": "node scripts/export-ptl-settlement-recipes.mjs",
     "validate:extracted-assets": "node scripts/validate-extracted-assets.mjs",

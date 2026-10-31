@@ -103,12 +103,14 @@ export function overcastSkyLook(look, amount) {
   if (t === 0) return look;
   const result = { ...look };
   for (const key of SKY_LOOK_COLORS) result[key] = greyed(look[key], t * 0.75, OVERCAST_DIMMING[key] ?? 0.15);
-  result.directionalIntensity = look.directionalIntensity * (1 - 0.65 * t);
+  result.directionalIntensity = look.directionalIntensity * (1 - 0.85 * t);
+  result.ambientIntensity = look.ambientIntensity * (1 - 0.15 * t);
+  result.shadowRadius = look.shadowRadius * (1 + 1.5 * t);
   result.sunEmission = look.sunEmission * (1 - 0.8 * t);
   result.sunGlowIntensity = look.sunGlowIntensity * (1 - 0.8 * t);
   result.cloudDensity = look.cloudDensity - 0.3 * t;
   result.cloudOpacity = Math.min(1, look.cloudOpacity + 0.3 * t);
-  result.cloudShadowStrength = look.cloudShadowStrength * (1 - 0.7 * t);
+  result.cloudShadowStrength = look.cloudShadowStrength * (1 - t);
   result.fogDensityScale = look.fogDensityScale * (1 + 0.6 * t);
   // A grey lid: soft-edged, smooth stratus rather than broken cumulus, and the
   // flat light takes the modelling out of the snow.

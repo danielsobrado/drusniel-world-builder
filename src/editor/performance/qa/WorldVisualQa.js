@@ -76,6 +76,9 @@ export class WorldVisualQa {
         time:e.worldWind.time,directionDegrees:e.worldWind.directionDegrees,intensity:e.worldWind.intensity,
         centerCanonical:{...e.worldWind.centerCanonical},params:{...e.worldWind.params}}:null),weather:{...e.weatherSettings},
       renderPath:e.terrainView.activeRenderPath??'unknown',finishApplications:e.terrainView.finishApplications??0,
+      contactOcclusion:e.terrainView.godRays?.getSettings?.().contactOcclusionEnabled??false,
+      buildingWetness:e.surfaceWetness?.buildingValues.toArray()??null,
+      environment:{loaded:!!e.terrainView.scene.environment,intensity:e.terrainView.scene.environmentIntensity},
       waterReflections:e.stylizedSurface.reflections?.getDiagnostics?.()??null,
       backend:e.terrainView.rendererBackendStatus?.mode,clock:{hour:e.dayNightCycle?.hour,paused:e.dayNightCycle?.paused}};
   }
@@ -93,6 +96,7 @@ export class WorldVisualQa {
     e.dayNightCycle?.setPaused(true);e.dayNightCycle?.setHour(hour);e.skyLooks?.setPreset(preset);
     e.weatherSettings.weatherMode=weather;e.weatherSettings.weatherIntensity=weather==='off'?0:1;
     e.weatherController?.applySettings();
+    await e.stylizedSurface.skyView.environment.ready;
   }
   setWaterTime(seconds = null) { setWaterTimeOverride(seconds); }
   neighborhood() { return worldVisualNeighborhood(this.editor); }

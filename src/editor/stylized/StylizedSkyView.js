@@ -22,7 +22,7 @@ import { createHeatShimmerNodes, resolveHeatShimmerConfig } from './ambient/Heat
 import { createMoonDiscNode, createStarFieldNode, STAR_FIELD_DEFAULTS } from './sky/starField.js';
 import { skyAmbientColor } from './sky/skyAmbient.js';
 import { updateSkyLight, updateSnowLight } from './sky/skyLight.js';
-import { applySceneEnvironment } from './sky/sceneEnvironment.js';
+import { applySceneEnvironment, environmentLightScale } from './sky/sceneEnvironment.js';
 import { sceneExposure } from '../../render/sceneExposure.js';
 import { resolveSunHazeConfig, sunHazeColor, SunHazeFog } from './sky/sunHaze.js';
 import { litCloudColorNode, resolveCloudLightingConfig } from './sky/cloudLighting.js';
@@ -265,7 +265,7 @@ export class StylizedSkyView {
     // material holding the uniform follows.
     this.sunDirection = uniform(this.sunDirectionValue);
     this.look = resolveSkyLook(config.sky);
-    this.configuredLook = this.look;
+    this.configuredLook = resolveSkyLook(config.sky, 'configured');
     this.lookUniforms = createSkyLookUniforms(this.look);
     // Night bodies. `night` follows the active look, so choosing a moonlit preset
     // (or the cycle reaching one) is what lights the stars; the moon's direction
@@ -427,6 +427,7 @@ export class StylizedSkyView {
     this.setFogDensity();
     this.setCloudShadowStrength(look.cloudShadowStrength);
     updateSkyLight(look, this.configuredLook);
+    this.environment.setLightScale(environmentLightScale(look, this.configuredLook));
     updateSnowLight(look);
     // Snow country stops the exposure down (sceneExposure). While the post
     // graph owns the output it reads the scale itself and the renderer stays

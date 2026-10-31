@@ -84,12 +84,41 @@ function buildArchTrim(recipe, opening, {
   return stones;
 }
 
+/** An open gate has no leaf: only the portcullis's teeth, drawn up under the arch. */
+function addRaisedPortcullis(sets, opening, frontZ, height) {
+  const teeth = Math.max(4, Math.round(opening.width / 0.3));
+  const span = opening.width * 0.84;
+  for (let index = 0; index < teeth; index += 1) {
+    const x = opening.centerX - span / 2 + span * (index + 0.5) / teeth;
+    sets.metal.push(tagOpeningGeometry(beveledBox({
+      width: 0.07,
+      height: 0.62,
+      depth: 0.07,
+      position: [x, opening.bottom + height - 0.28, frontZ - 0.2],
+      detail: 1,
+      bevelRatio: 0.08,
+    }), opening, true));
+  }
+  sets.metal.push(tagOpeningGeometry(beveledBox({
+    width: span,
+    height: 0.09,
+    depth: 0.09,
+    position: [opening.centerX, opening.bottom + height - 0.14, frontZ - 0.2],
+    detail: 1,
+    bevelRatio: 0.08,
+  }), opening, true));
+}
+
 function addOpeningInsert(sets, recipe, opening, {
   frontZ,
   door = false,
   rectangular = false,
 }) {
   const height = opening.springHeight + opening.radius;
+  if (door && opening.componentId && opening.componentId === recipe.openDoorId) {
+    addRaisedPortcullis(sets, opening, frontZ, height);
+    return;
+  }
   const panel = tagOpeningGeometry(rectangular
     ? beveledBox({
       width: opening.width * 0.9,
@@ -1049,14 +1078,26 @@ function buildGatehouse(recipe) {
     openings: mainOpenings,
     seedOffset: 200,
   }));
-  sets.mortar.push(tagStructureGeometry(beveledBox({
-    width: recipe.width * 0.995,
-    height: recipe.height * 0.995,
+  // The core stands either side of and over an open gate, or it would plug the passage.
+  const passage = recipe.openDoorId ? mainOpenings.find(({ door }) => door) : null;
+  const core = (x, y, width, height) => sets.mortar.push(tagStructureGeometry(beveledBox({
+    width,
+    height,
     depth: recipe.depth * 0.86,
-    position: [0, recipe.height / 2, 0],
+    position: [x, y, 0],
     detail: 1,
     bevelRatio: 0.012,
   }), hosts[0]));
+  if (passage) {
+    const fullWidth = recipe.width * 0.995;
+    const fullHeight = recipe.height * 0.995;
+    const pier = (fullWidth - passage.width) / 2;
+    const arch = passage.bottom + passage.springHeight + passage.radius;
+    for (const side of [-1, 1]) core(passage.centerX + side * (passage.width + pier) / 2, fullHeight / 2, pier, fullHeight);
+    core(passage.centerX, (arch + fullHeight) / 2, passage.width, fullHeight - arch);
+  } else {
+    core(0, recipe.height / 2, recipe.width * 0.995, recipe.height * 0.995);
+  }
   mainOpenings.forEach((opening, index) => {
     addOpeningDetails(sets, recipe, opening, {
       frontZ: recipe.depth / 2 + 0.08,

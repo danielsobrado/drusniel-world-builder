@@ -100,11 +100,15 @@ export function createDitheredMaterial(sourceMaterial, {
     if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(variation);
     if (leafTint) {
       // Snow on the crown's upward faces; w is the tree's canopy snow.
+      const cap = canopySnowCap(leafTint.w, crownUpNode(crownBounds));
       const snowed = applyCanopySnow({
         color: material.colorNode,
         emissive: material.emissiveNode,
-        cap: canopySnowCap(leafTint.w, crownUpNode(crownBounds)),
+        cap,
       });
+      if (material.foliageTransmissionNode) {
+        material.foliageTransmissionNode = material.foliageTransmissionNode.mul(cap.oneMinus());
+      }
       material.colorNode = snowed.color;
       material.emissiveNode = snowed.emissive;
     } else if (kind === 'trunk') {

@@ -1,0 +1,87 @@
+# What stands at a town's gates and along its walls, per building people.
+#
+# Compiled to src/editor/world/settlements/SettlementGateProfiles.generated.js by
+# `npm run generate:settlement-gates`, because the planner runs in terrain workers
+# and plain Node as well as the app. Placement rules stay in code
+# (SettlementGateApproach, SettlementWallDressing); this file only says what.
+#
+# scene items:
+#   kind      a settlement building kind, or a trim kind (which needs `size`)
+#   at        metres out from the gate along the road
+#   off       metres from the road's edge
+#   side      watch (the gate's working side), trade (the other), both
+#   facing    along the road, or across it toward the road
+#   turn      most radians of random turn, either way
+# A scene with `needsFirst` is dropped when its first item will not fit.
+# banners index BANNER_CLOTH in view/SettlementTrimMesh.js; 4 and up are ragged.
+
+scenes:
+  watch: &watch
+    - { kind: lantern, variant: 0, at: 7.5, off: 2.2, side: both, facing: along }
+    - { kind: spearRack, size: [2.2, 0.8], at: 8.5, off: 3.6, side: watch, facing: across }
+    - { kind: barrels, variant: 1, at: 12, off: 3.2, side: watch, facing: along, turn: 0.15 }
+  sparseWatch: &sparseWatch
+    - { kind: spearRack, size: [2.2, 0.8], at: 8.5, off: 3.6, side: watch, facing: across }
+    - { kind: barrels, variant: 0, at: 11, off: 3.2, side: watch, facing: along, turn: 0.4 }
+    - { kind: quarryBlock, at: 13.5, off: 2.6, side: trade }
+  merchant: &merchant
+    - { kind: cart, variant: 0, at: 18, off: 2.2, side: trade, facing: along, turn: 0.06 }
+    - { kind: barrels, variant: 0, at: 13.5, off: 2.6, side: trade, facing: along, turn: 0.2 }
+    - { kind: hitchPost, size: [2.2, 0.5], at: 24, off: 2, side: trade, facing: across }
+
+default: &default
+  banners: [0, 1, 2, 3]
+  checkpoint: *watch
+  merchantStop: *merchant
+  merchantEvery: 2
+  rubblePerSide: 6
+  wall:
+    buttressKind: wallButtress
+    buttressEvery: 5
+    repairEvery: 6
+    spoutEvery: 7
+
+families:
+  # Functional masonry and organised trade: every gate a trader's.
+  Med:
+    <<: *default
+    banners: [0, 1, 3]
+    merchantEvery: 1
+  Tudor:
+    <<: *default
+    banners: [0, 3]
+    merchantEvery: 1
+    wall: { buttressKind: wallButtress, buttressEvery: 6, repairEvery: 4, spoutEvery: 8 }
+  Nordic:
+    <<: *default
+    banners: [1, 2]
+    merchantEvery: 3
+    wall: { buttressKind: wallButtress, buttressEvery: 4, repairEvery: 8, spoutEvery: 10 }
+  # Dwarven weight: close-set heavy buttresses, nothing left to fall.
+  Stonehold:
+    <<: *default
+    banners: [5]
+    merchantEvery: 3
+    rubblePerSide: 2
+    wall: { buttressKind: wallButtress, buttressEvery: 2, repairEvery: 12, spoutEvery: 5 }
+  Frostgard:
+    <<: *default
+    banners: [1, 5]
+    merchantEvery: 4
+    rubblePerSide: 3
+    wall: { buttressKind: wallButtress, buttressEvery: 3, repairEvery: 9, spoutEvery: 12 }
+  # Scavenged and propped up: no lamps, ragged colours, timber holding it all.
+  Goblin:
+    <<: *default
+    banners: [4]
+    checkpoint: *sparseWatch
+    merchantEvery: 4
+    rubblePerSide: 12
+    wall: { buttressKind: wallShoring, buttressEvery: 3, repairEvery: 3, spoutEvery: 14 }
+  Orc:
+    <<: *default
+    banners: [4, 5]
+    checkpoint: *sparseWatch
+    merchantEvery: 4
+    rubblePerSide: 10
+    wall: { buttressKind: wallShoring, buttressEvery: 4, repairEvery: 4, spoutEvery: 14 }

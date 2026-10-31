@@ -1,7 +1,7 @@
 import { buildingDoor, buildingWindows } from './SettlementBuildingCatalog.js';
 import { planDecor } from './SettlementDecor.js';
 import { planDefences } from './SettlementDefences.js';
-import { planGateApproaches } from './SettlementGateApproach.js';
+import { gateProfileFor, planGateApproaches } from './SettlementGateApproach.js';
 import { rect } from './SettlementGeometry.js';
 import { marketHalls, placeSquares } from './SettlementMarkets.js';
 import { SettlementOccupancy } from './SettlementOccupancy.js';
@@ -10,9 +10,10 @@ import { hashInts, settlementProfile } from './SettlementProfile.js';
 import { settlementSignature } from './SettlementSignature.js';
 import { planStones } from './SettlementStones.js';
 import { planTrim } from './SettlementTrim.js';
+import { planWallDressing } from './SettlementWallDressing.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 15;
+export const SETTLEMENT_PLAN_VERSION = 16;
 /** Part of every town's seed. Raising it redraws every town; the version above only invalidates caches. */
 const SETTLEMENT_LAYOUT_EPOCH = 14;
 
@@ -68,7 +69,9 @@ export function planSettlement({
   const trim = planTrim({ profile, occupancy, buildings: [...buildings, ...farms, ...defences], fields, random });
   // After everything else and on its own stream, for the same reason.
   const gateSeed = planRandom(hashInts(worldSeed, settlement.id, 0x6a7e));
-  const gateways = planGateApproaches({ streets, defences, occupancy, random: gateSeed });
+  const gateProfile = gateProfileFor(profile);
+  const gateways = planGateApproaches({ streets, defences, occupancy, gateProfile, random: gateSeed });
+  const wallDressing = planWallDressing({ defences, wall: gateProfile.wall, random: gateSeed });
   const styleKey = profile.style.key;
   // A building the plan fronts on a street gets the door its pooled mesh has (SettlementDoors.generated).
   const withPad = (item) => ({
@@ -91,7 +94,7 @@ export function planSettlement({
     squares,
     streets: [...streets, ...walks],
     buildings: [...buildings, ...farms, ...defences].map(withPad),
-    props: [...props, ...stones, ...trim, ...gateways.props],
+    props: [...props, ...stones, ...trim, ...gateways.props, ...wallDressing],
     // Worn ground in front of each gate: { points, halfWidths }, gate first.
     approaches: gateways.approaches,
     fields,

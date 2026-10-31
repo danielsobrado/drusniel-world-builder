@@ -359,7 +359,9 @@ test('god rays route only perspective cameras and reuse their pipeline', () => {
   effect.ensurePipeline(perspective);
   const pipeline = effect.pipeline;
   assert.ok(effect.cloudPass);
-  effect.ensurePipeline(frontCamera());
+  perspective.position.x = 10;
+  perspective.updateMatrixWorld(true);
+  effect.ensurePipeline(perspective);
   assert.equal(effect.pipeline, pipeline);
 
   let renders = 0;
@@ -374,6 +376,42 @@ test('god rays route only perspective cameras and reuse their pipeline', () => {
   assert.equal(effect.cloudPass, null);
   assert.equal(effect.raysTexture, null);
   assert.equal(effect.shouldRender(perspective), false);
+});
+
+test('cinematic contact occlusion rebuilds for a new camera and can remove its GPU pass', () => {
+  const effect = new StylizedGodRaysPostProcess({
+    renderer: { samples: 4, toneMapping: THREE.NoToneMapping, outputColorSpace: THREE.SRGBColorSpace },
+    scene: new THREE.Scene(), config: enabledConfig(), sunDirection: new THREE.Vector3(0, 0, -1),
+  });
+  const camera = frontCamera();
+  effect.ensurePipeline(camera);
+  assert.ok(effect.cinematicOcclusion);
+  const first = effect.cinematicPipeline;
+  const occlusion = effect.cinematicOcclusion;
+  let releases = 0;
+  const dispose = occlusion.dispose;
+  occlusion.dispose = () => { releases++; dispose(); };
+  effect.setSettings({ contactOcclusionIntensity: 0.3 });
+  assert.equal(effect.cinematicPipeline, first, 'intensity edits only change a uniform');
+  assert.equal(occlusion.intensity.value, 0.3);
+  const replacement = frontCamera();
+  effect.ensurePipeline(replacement);
+  assert.notEqual(effect.cinematicPipeline, first);
+  assert.equal(effect.cinematicCamera, replacement);
+  assert.equal(releases, 1);
+  assert.equal(effect.cinematicOcclusion.intensity.value, 0.3);
+  const scenePass = effect.scenePass;
+  effect.setSettings({ contactOcclusionEnabled: false });
+  assert.equal(effect.pipeline, null, 'does not retain a disposed active pipeline');
+  effect.ensurePipeline(replacement);
+  assert.equal(effect.cinematicOcclusion, null, 'disabled means no AO trace');
+  assert.equal(effect.scenePass, scenePass, 'reuse scene depth instead of another geometry pass');
+  effect.setSettings({ contactOcclusionEnabled: true, contactOcclusionIntensity: 2 });
+  effect.ensurePipeline(replacement);
+  assert.equal(effect.cinematicOcclusion.intensity.value, 1);
+  effect.dispose(); effect.dispose();
+  assert.equal(effect.cinematicOcclusion, null);
+  assert.equal(effect.cinematicCamera, null);
 });
 
 test('god ray settings switch techniques and update live uniforms safely', () => {

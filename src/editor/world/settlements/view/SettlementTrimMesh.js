@@ -14,9 +14,13 @@ const IRON = [0.07, 0.07, 0.08];
 const SIGN_BOARDS = [[0.36, 0.11, 0.07], [0.1, 0.13, 0.17], [0.36, 0.28, 0.11], [0.12, 0.18, 0.1]];
 const AWNING_CLOTH = [[0.36, 0.12, 0.09], [0.12, 0.15, 0.2], [0.4, 0.33, 0.17]];
 const CLOTH_STRIPE = [0.62, 0.58, 0.48];
-const BANNER_CLOTH = [[0.3, 0.06, 0.05], [0.06, 0.09, 0.2], [0.07, 0.14, 0.08], [0.32, 0.22, 0.05]];
+/** Indexed by config/settlement-gates.yaml; from RAGGED_BANNER on the cloth is torn. */
+const BANNER_CLOTH = [[0.3, 0.06, 0.05], [0.06, 0.09, 0.2], [0.07, 0.14, 0.08], [0.32, 0.22, 0.05], [0.16, 0.13, 0.05], [0.12, 0.12, 0.13]];
+const RAGGED_BANNER = 4;
 /** Trim built of wood, which wears the town's timber set. */
-const WOODEN = new Set(['shopSign']);
+const WOODEN = new Set(['shopSign', 'wallShoring']);
+/** Trim of the wall's own stone, which wears the town's stone set. */
+const MASONRY = new Set(['wallStair', 'wallButtress', 'wallRepair', 'wallSpout']);
 /** Trim of canvas, which is woven and weathered in the shader. */
 const CLOTH = new Set(['awning', 'gateBanner']);
 /**
@@ -210,7 +214,15 @@ function gateBanner(builder, variant) {
   builder.box(0, top + 0.04, 0.18, half * 2 + 0.3, 0.07, 0.07, IRON);
   for (const x of [-half, half]) builder.box(x, top + 0.04, 0.09, 0.07, 0.07, 0.18, IRON);
   builder.quad([-half, hem, 0.18], [half, hem, 0.18], [half, top, 0.18], [-half, top, 0.18], cloth);
-  builder.quad([-half, hem, 0.18], [0, tip, 0.18], [half, hem, 0.18], [0, hem, 0.18], cloth);
+  if (variant < RAGGED_BANNER) builder.quad([-half, hem, 0.18], [0, tip, 0.18], [half, hem, 0.18], [0, hem, 0.18], cloth);
+  else {
+    const random = seeded(variant + 31);
+    for (let tear = 0; tear < 5; tear += 1) {
+      const x0 = -half + tear * half * 0.4;
+      const drop = 0.2 + random() * 0.8;
+      builder.quad([x0, hem - drop, 0.18], [x0 + half * 0.32, hem - drop * 0.6, 0.18], [x0 + half * 0.4, hem, 0.18], [x0, hem, 0.18], cloth);
+    }
+  }
   // A pale band down the middle: the one mark that reads from down the road.
   builder.quad([-0.17, hem - 0.3, 0.19], [0.17, hem - 0.3, 0.19], [0.17, top, 0.19], [-0.17, top, 0.19], CLOTH_STRIPE);
 }
@@ -238,7 +250,51 @@ function hitchPost(builder, variant) {
   builder.box(0, 0.46, 0.42, 1.36, 0.05, 0.36, [0.04, 0.07, 0.08]);
 }
 
-const BUILDERS = Object.freeze({ shopSign, awning, ivyPatch, sheep, hen, gateBanner, spearRack, hitchPost });
+const shade = (colour, factor) => colour.map((channel) => channel * factor);
+
+/** Stepped masonry against a wall at z = 0: a plinth, a body and a set-back top. */
+function wallButtress(builder, variant, stone) {
+  const width = variant === 0 ? 1.5 : 1.9;
+  builder.box(0, 0.3, 0.6, width + 0.3, 0.6, 1.2, shade(stone, 0.86));
+  builder.box(0, 1.9, 0.45, width, 2.6, 0.9, shade(stone, 0.96));
+  builder.box(0, 3.75, 0.28, width - 0.2, 1.1, 0.56, shade(stone, 1.02));
+  builder.quad([-width / 2 + 0.1, 4.3, 0.56], [width / 2 - 0.1, 4.3, 0.56], [width / 2 - 0.1, 4.75, 0.02], [-width / 2 + 0.1, 4.75, 0.02], shade(stone, 1.1));
+}
+
+/** Timber raked against a wall at z = 0, footed in the ground: what holds a scavenged wall up. */
+function wallShoring(builder, variant) {
+  const reach = 1.6 + variant * 0.5;
+  for (const x of [-0.45, 0.45]) {
+    const top = 3.6 + x * variant;
+    builder.quad([x - 0.11, 0, reach], [x + 0.11, 0, reach], [x + 0.11, top, 0.02], [x - 0.11, top, 0.02], WOOD);
+    builder.quad([x - 0.11, top, 0.02], [x - 0.11, 0, reach - 0.2], [x - 0.11, 0, reach], [x - 0.11, top, 0.1], shade(WOOD, 0.7));
+  }
+  builder.box(0, 1.5, 1.05, 1.3, 0.14, 0.12, WOOD);
+  builder.box(0, 0.12, reach, 1.4, 0.24, 0.3, shade(WOOD, 0.8));
+}
+
+/** Newer coursed stone let into a wall at z = 0: paler, cleaner and a finger proud of the old. */
+function wallRepair(builder, variant, stone) {
+  const random = seeded(variant + 53);
+  const [courses, width] = [5 + variant, 2.6 + variant * 0.5];
+  for (let course = 0; course < courses; course += 1) {
+    const y = 1.1 + course * 0.36;
+    let x = -width / 2 + (course % 2) * 0.35 + (random() - 0.5) * 0.2;
+    while (x < width / 2) {
+      const length = 0.6 + random() * 0.4;
+      builder.box(x + length / 2, y, 0.03, length - 0.03, 0.33, 0.07, shade(stone, 1.12 + random() * 0.2));
+      x += length;
+    }
+  }
+}
+
+/** A stone drain at the wall-walk and the stain it has run down a wall at z = 0. */
+function wallSpout(builder, variant, stone) {
+  builder.box(0, 4.7, 0.3, 0.32, 0.22, 0.6, shade(stone, 0.9));
+  builder.quad([-0.1, 0.8, 0.015], [0.1, 0.8, 0.015], [0.3, 4.6, 0.015], [-0.3, 4.6, 0.015], [0.03, 0.04, 0.03]);
+}
+
+const BUILDERS = Object.freeze({ shopSign, awning, ivyPatch, sheep, hen, gateBanner, spearRack, hitchPost, wallButtress, wallShoring, wallRepair, wallSpout });
 
 /** How far an animal ambles from where it was put, how fast, and how high its step lifts it. */
 const GAIT = Object.freeze({ sheep: [1.6, 0.11, 0.03], hen: [0.9, 0.5, 0.05] });
@@ -267,11 +323,12 @@ function amble([range, pace, lift]) {
  */
 export function createSettlementTrimParts(entry) {
   const builder = new TrimBuilder();
-  const stair = entry.kind === 'wallStair';
-  if (stair) wallStair(builder, (STONE_PALETTES[entry.style.style] ?? STONE_PALETTES.granite).base.map((channel) => channel / 255));
-  else BUILDERS[entry.kind](builder, entry.variant);
+  const masonry = MASONRY.has(entry.kind);
+  const stone = (STONE_PALETTES[entry.style.style] ?? STONE_PALETTES.granite).base.map((channel) => channel / 255);
+  if (entry.kind === 'wallStair') wallStair(builder, stone);
+  else BUILDERS[entry.kind](builder, entry.variant, stone);
   const wooden = WOODEN.has(entry.kind);
-  const set = stair ? entry.surfaces?.stone ?? null : wooden ? entry.surfaces?.timber ?? null : null;
+  const set = masonry ? entry.surfaces?.stone ?? null : wooden ? entry.surfaces?.timber ?? null : null;
   const material = new THREE.MeshStandardNodeMaterial({
     color: '#ffffff',
     map: set?.color ?? null,
@@ -281,15 +338,15 @@ export function createSettlementTrimParts(entry) {
     roughness: set ? 1 : 0.9,
     metalness: 0,
     // Cloth and leaves are single sheets, seen from both sides.
-    side: ['awning', 'ivyPatch', 'gateBanner', 'spearRack'].includes(entry.kind) ? THREE.DoubleSide : THREE.FrontSide,
+    side: ['awning', 'ivyPatch', 'gateBanner', 'spearRack', 'wallShoring'].includes(entry.kind) ? THREE.DoubleSide : THREE.FrontSide,
   });
   if (GAIT[entry.kind]) material.positionNode = amble(GAIT[entry.kind]);
-  material.userData.workshopSlot = stair ? 'stone' : 'wood';
+  material.userData.workshopSlot = masonry ? 'stone' : 'wood';
   const cloth = CLOTH.has(entry.kind);
   if (cloth) {
     material.colorNode = canvasColour();
     material.vertexColors = false;
   }
-  const uvDensity = stair ? 0.58 : set ? 1.1 : cloth ? 1 : 0;
+  const uvDensity = masonry ? 0.58 : set ? 1.1 : cloth ? 1 : 0;
   return [{ geometry: builder.geometry({ uvDensity }), material, matrix: new THREE.Matrix4() }];
 }

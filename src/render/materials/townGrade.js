@@ -1,7 +1,9 @@
 import * as THREE from 'three/webgpu';
-import { dot, float, materialColor, mix, normalWorld, positionGeometry, vec3, vertexColor } from 'three/tsl';
+import { dot, float, materialColor, materialRoughness, mix, normalWorld, positionGeometry, texture, vec3, vertexColor } from 'three/tsl';
 
 import { WEATHER_FAMILIES, weatherTownSurface } from './townWeathering.js';
+import { TOWN_WET_FAMILIES, wetTownSurface } from './townWetness.js';
+import { filterSpecularRoughness } from './specularAntialiasing.js';
 
 /**
  * One palette for a whole town — and for every workshop building, so a house
@@ -104,7 +106,8 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   const role = rubble ? 'stone' : slot;
   if (material.normalMap && RELIEF[role]) material.normalScale.multiplyScalar(RELIEF[role]);
   const joints = slot === 'mortar' && !plastered && !rubble;
-  const family = WEATHER_FAMILIES[slot === 'mortar' && !rubble ? (plastered ? 'plaster' : 'mortar') : WEATHER_OF_SLOT[role]];
+  const familyKey = slot === 'mortar' && !rubble ? (plastered ? 'plaster' : 'mortar') : WEATHER_OF_SLOT[role];
+  const family = WEATHER_FAMILIES[familyKey];
   const tone = joints ? grade.map((channel) => channel * JOINT_DARKENING) : grade;
   const spread = seed.mul(SEED_SPREAD);
   // Three multiplies vertex colours in after the colour node, which would put the
@@ -120,4 +123,10 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
     height: positionGeometry.y,
     family,
   });
+  const wet = wetTownSurface(material.colorNode, material.roughnessNode ?? materialRoughness,
+    normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
+  material.colorNode = wet.color;
+  material.roughnessNode = material.normalMap
+    ? filterSpecularRoughness(wet.roughness, texture(material.normalMap).xyz.mul(2).sub(1).mul(vec3(material.normalScale.x, material.normalScale.y, 1)))
+    : wet.roughness;
 }

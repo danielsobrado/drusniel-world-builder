@@ -275,6 +275,7 @@ export function parseQaParams(search = '') {
     running,
     explorationBoost: readBoolean(params, 'explorationBoost', false),
     seaPolish: readBoolean(params, 'seaPolish', true),
+    contactOcclusion: params.has('contactOcclusion') ? readBoolean(params, 'contactOcclusion', true) : null,
     gpuTimings: readBoolean(params, 'gpuTimings', false),
     hitchMs: Math.max(1, readNumber(params, 'hitchMs', 1000 / 30)),
     autostart: readBoolean(params, 'autostart', true),

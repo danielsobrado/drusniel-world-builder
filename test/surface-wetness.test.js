@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { Vector3 } from 'three/webgpu';
 
 import { SurfaceWetness } from '../src/editor/weather/surfaceWetness.js';
 import {
@@ -32,4 +33,26 @@ test('wetness settings default and reject nonsense', () => {
   assert.throws(() => resolveSurfaceWetnessConfig({ wetSeconds: 0 }), /wetSeconds/);
   assert.throws(() => resolveSurfaceWetnessConfig({ darkening: 1.5 }), /darkening/);
   assert.throws(() => resolveSurfaceWetnessConfig({ canopyShelter: -1 }), /canopyShelter/);
+});
+
+test('roof runoff, stone and timber have distinct uptake and drying without frame-rate dependence', () => {
+  const simulate = (step) => {
+    const buildingTarget = { value: new Vector3() };
+    const state = new SurfaceWetness(DEFAULT_SURFACE_WETNESS, { value: 0 }, buildingTarget);
+    for (let t = 0; t < 16; t += step) state.update(step, 1);
+    const partial = buildingTarget.value.clone();
+    assert.ok(partial.z > partial.x && partial.x > partial.y, 'roofs wet fastest; timber absorbs slowly');
+    state.update(80, 1);
+    assert.deepEqual(buildingTarget.value.toArray(), [1, 1, 1]);
+    for (let t = 0; t < 60; t += step) state.update(step, 0);
+    const drying = buildingTarget.value.clone();
+    assert.ok(drying.z < drying.x && drying.x < drying.y, 'timber holds water; roofs drain sooner');
+    state.update(0, 1); state.update(1, NaN); state.update(Infinity, 1);
+    assert.deepEqual(buildingTarget.value, drying, 'invalid updates cannot poison shared uniforms');
+    state.update(1000, 0);
+    assert.deepEqual(buildingTarget.value.toArray(), [0, 0, 0]);
+    return [...partial.toArray(), ...drying.toArray()];
+  };
+  const coarse = simulate(1), fine = simulate(0.25);
+  coarse.forEach((value, i) => assert.ok(Math.abs(value - fine[i]) < 1e-10));
 });

@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = Object.freeze({
 
 const VALID_WEATHER_MODES = new Set([
   'off',
+  'overcast',
   'meadow',
   'rain',
   'snow',
@@ -38,6 +39,14 @@ const VALID_WEATHER_MODES = new Set([
 function finiteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+/** Dry cloud cover uses the same eased sky response as precipitation. */
+export function weatherOvercastAmount(settings, enabled = true) {
+  if (!enabled) return 0;
+  const intensity = THREE.MathUtils.clamp(finiteNumber(settings.weatherIntensity, 0), 0, 1);
+  const share = { overcast: 1, rain: 0.8, storm: 1, snow: 0.6, sandstorm: 0.4 }[settings.weatherMode] ?? 0;
+  return share * intensity;
 }
 
 function sanitizeWeatherSettings(value = {}) {

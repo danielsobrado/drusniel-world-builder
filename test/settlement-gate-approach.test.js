@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
 import { segmentDistance } from '../src/editor/world/settlements/SettlementGeometry.js';
@@ -58,4 +59,37 @@ test('gate dressing is deterministic, and an open village has none', () => {
   const village = planSettlement({ settlement: { id: 931, name: 'Open', cellX: 80, cellZ: 80, population: 1 }, worldSeed: 4242 });
   assert.equal(village.approaches.length, 0);
   assert.equal(pick(village).length, 0);
+});
+
+const wall = (plan, kind) => plan.props.filter((prop) => prop.kind === kind);
+const regional = (cfg) => planSettlement({
+  settlement: { id: 932, name: 'Regional', cellX: 80, cellZ: 80, population: 28, plaza: true, walls: true, group: 'town', ...cfg },
+  worldSeed: 4242,
+  routeBearings: [0.4, 2.6, 4.4],
+});
+
+test('long walls are broken up on their outer face', () => {
+  const plan = walled();
+  const buttresses = wall(plan, 'wallButtress');
+  assert.ok(buttresses.length > 2);
+  assert.ok(wall(plan, 'wallRepair').length > 2);
+  for (const piece of [...buttresses, ...wall(plan, 'wallRepair'), ...wall(plan, 'wallSpout')]) {
+    const front = [Math.sin(piece.yaw), Math.cos(piece.yaw)];
+    assert.ok(front[0] * piece.x + front[1] * piece.z > 0, `${piece.kind} must face away from the town`);
+  }
+});
+
+test('peoples build their gates and walls differently', () => {
+  const med = regional({ culture: 3, stateName: 'Lumeshire', biomeId: 6, elevation: 12 });
+  const goblin = regional({ culture: 9, stateName: 'Grukmar', biomeId: 12, elevation: 8 });
+  assert.equal(goblin.profile.recipe.architecture.kitFamily, 'Goblin');
+  assert.equal(wall(goblin, 'wallButtress').length, 0, 'goblins shore their walls with timber');
+  assert.ok(wall(goblin, 'wallShoring').length > 0);
+  assert.equal(wall(goblin, 'gateBanner')[0].variant, 4, 'goblin colours are ragged');
+  assert.notEqual(wall(med, 'gateBanner')[0].variant, 4);
+});
+
+test('the generated profiles match config/settlement-gates.yaml', () => {
+  const run = spawnSync(process.execPath, ['scripts/generate-settlement-gates.mjs', '--check']);
+  assert.equal(run.status, 0, String(run.stderr));
 });

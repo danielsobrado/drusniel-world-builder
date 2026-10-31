@@ -107,7 +107,7 @@ export function applyCanopySnow({ color, emissive = null, cap }) {
   const capped = mix(color, snow, cap);
   // The leaf's own sky fill and transmission give way to snow's cool fill, so a
   // cap in the crown's shade reads blue-grey instead of green-lit.
-  const fill = snow.mul(vec3(...SNOW_SHADE)).mul(foliageLight.fill).mul(0.22).mul(cap);
+  const fill = snow.mul(vec3(...SNOW_SHADE)).mul(foliageLight.skyColor).mul(foliageLight.fill).mul(0.22).mul(cap);
   const lit = emissive ? emissive.mul(cap.oneMinus()).add(fill) : fill;
   return { color: capped, emissive: lit };
 }

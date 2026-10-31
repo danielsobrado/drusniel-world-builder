@@ -1,5 +1,6 @@
 const WEATHER_MODES = Object.freeze([
   'off',
+  'overcast',
   'meadow',
   'rain',
   'snow',

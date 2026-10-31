@@ -18,6 +18,8 @@ const STEP = 1.6;
 const BORDER = 0.55;
 /** Cross-section stations, as a fraction of the half-width, and their `edge`. */
 const STATIONS = Object.freeze([[-1, 1], [-0.62, 0.18], [0, 0], [0.62, 0.18], [1, 1]]);
+/** Wheel tracks on a country road: metres from the crown, half a track's width, and how deep and dark. */
+const RUT = Object.freeze({ gauge: 0.8, half: 0.28, depth: 0.012, shade: 0.72 });
 /**
  * Height above the ground, per surface. Surfaces overlap at every junction, so
  * each rides its own level: the higher one wins cleanly instead of z-fighting.
@@ -122,7 +124,7 @@ class SurfaceBuffer {
   }
 }
 
-function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, heightAt) {
+function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone, rutted = false }, heightAt) {
   let previous = null;
   const last = path.length - 1;
   for (let index = 0; index <= last; index += 1) {
@@ -136,7 +138,18 @@ function* addRibbon(buffer, path, width, { closed, fadeStart, fadeEnd, tone }, h
     const nz = (ax - bx) / length;
     const swell = half * (1 + (drift(x, z, 14) - 0.5) * 0.16);
     const cap = !closed && ((index === 0 && fadeStart) || (index === last && fadeEnd));
-    const row = STATIONS.map(([offset, edge]) => buffer.vertex(x + nx * offset * swell, z + nz * offset * swell, cap ? 1 : edge, heightAt, tone));
+    const station = ([offset, edge]) => buffer.vertex(x + nx * offset * swell, z + nz * offset * swell, cap ? 1 : edge, heightAt, tone);
+    const flank = (at) => buffer.vertex(x + nx * at, z + nz * at, 0, heightAt, tone);
+    // Tracks come and go along the road, and run out where it ends.
+    const worn = rutted && !cap ? Math.max(0, Math.min(1, (drift(x, z, 17) - 0.25) * 3)) * Math.min(1, 2 - 2 * index / last) : 0;
+    const rut = (at) => buffer.vertex(x + nx * at, z + nz * at, 0, (px, pz) => heightAt(px, pz) - RUT.depth * worn, tone * (1 - (1 - RUT.shade) * worn));
+    const row = rutted
+      ? [station(STATIONS[0]), station(STATIONS[1]),
+        flank(-RUT.gauge - RUT.half), rut(-RUT.gauge), flank(-RUT.gauge + RUT.half),
+        station(STATIONS[2]),
+        flank(RUT.gauge - RUT.half), rut(RUT.gauge), flank(RUT.gauge + RUT.half),
+        station(STATIONS[3]), station(STATIONS[4])]
+      : STATIONS.map(station);
     if (previous) {
       for (let station = 0; station < row.length - 1; station += 1) {
         buffer.quad(previous[station], row[station], row[station + 1], previous[station + 1]);
@@ -292,6 +305,7 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
         fadeStart: piece === 1 ? false : street.kind === 'walk',
         fadeEnd: !(piece === 0 && pieces[1]),
         tone: street.kind === 'walk' ? 0.94 : 1,
+        rutted: street.kind === 'main' && kind === 'earth' && rank > 0,
       }, heightAt);
     }
     yield;
@@ -303,7 +317,7 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
       const index = Math.min(halfWidths.length - 2, Math.floor(at));
       return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * 1.15;
     };
-    yield* addRibbon(buffers.get('earth'), smoothPath(points), widthAt, { closed: false, fadeStart: false, fadeEnd: true, tone: 0.97 }, heightAt);
+    yield* addRibbon(buffers.get('earth'), smoothPath(points), widthAt, { closed: false, fadeStart: false, fadeEnd: true, tone: 0.97, rutted: true }, heightAt);
     yield;
   }
   for (const square of plan.squares ?? []) {

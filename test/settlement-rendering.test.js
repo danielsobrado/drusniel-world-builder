@@ -262,7 +262,8 @@ test('dusk follows a low sun or a dimmed key light', () => {
 test('a city is trimmed: signs, awnings, ivy, wall stairs and livestock', () => {
   const cityPlan = plan(CITY);
   const trim = cityPlan.props.filter(({ kind }) => isTrimKind(kind));
-  for (const kind of Object.keys(SETTLEMENT_TRIM)) assert.ok(trim.some((prop) => prop.kind === kind), `no ${kind} planned`);
+  // Shoring is a goblin and orc wall's, and this city is neither.
+  for (const kind of Object.keys(SETTLEMENT_TRIM).filter((name) => name !== 'wallShoring')) assert.ok(trim.some((prop) => prop.kind === kind), `no ${kind} planned`);
   assert.ok(trim.every(({ kind, variant }) => variant < SETTLEMENT_TRIM[kind].variants));
   // A stair stands just inside the wall it climbs, and its flight reaches the wall-walk.
   const walls = cityPlan.buildings.filter(({ kind }) => kind === 'wall');

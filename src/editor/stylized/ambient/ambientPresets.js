@@ -16,6 +16,7 @@ const BY_SKY_PRESET = Object.freeze({
 });
 
 const BY_WEATHER = Object.freeze({
+  overcast: 'calm',
   rain: 'rainy',
   storm: 'rainy',
   wind: 'windy',

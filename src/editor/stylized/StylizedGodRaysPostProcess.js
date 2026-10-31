@@ -200,6 +200,8 @@ export class StylizedGodRaysPostProcess {
     this.camera = null;
     this.cinematicPipeline = null;
     this.cinematicShafts = null;
+    this.cinematicOcclusion = null;
+    this.cinematicCamera = null;
     this.cinematicIntensity = uniform(0);
     this.shaftAtmosphere = 0;
   }
@@ -294,16 +296,23 @@ export class StylizedGodRaysPostProcess {
 
   ensureCinematicPipeline(camera) {
     this.ensureScenePass(camera);
+    if (this.cinematicPipeline && this.cinematicCamera !== camera) this.disposeCinematicPipeline();
     if (this.cinematicPipeline) return this.cinematicPipeline;
     const beauty = this.scenePass.getTextureNode('output');
+    this.cinematicOcclusion = createContactOcclusion({
+      depth: this.scenePass.getTextureNode('depth'), camera,
+      settings: this.config.volumetric.contactOcclusion,
+    });
+    const lit = this.cinematicOcclusion ? beauty.rgb.mul(this.cinematicOcclusion.factor) : beauty.rgb;
     this.cinematicShafts = new GodsEndLightShafts({
       depth: this.scenePass.getTextureNode('depth'),
       sunUv: this.sunUv, intensity: this.cinematicIntensity,
     });
     this.cinematicPipeline = setPipelineOutput(new THREE.RenderPipeline(this.renderer), vec4(
-      beauty.rgb.add(this.cinematicShafts.outputNode.mul(this.tint).mul(this.lightScale)),
+      lit.add(this.cinematicShafts.outputNode.mul(this.tint).mul(this.lightScale)),
       beauty.a,
     ), { fxaa: this.config.fxaa !== false, finish: this.finishFor(beauty) }).pipeline;
+    this.cinematicCamera = camera;
     return this.cinematicPipeline;
   }
 
@@ -447,6 +456,8 @@ export class StylizedGodRaysPostProcess {
       volumetricDistanceAttenuation: volumetric.distanceAttenuation,
       volumetricBlurSoftness: volumetric.blurSoftness,
       volumetricCloudInfluence: volumetric.cloudInfluence,
+      contactOcclusionEnabled: Boolean(volumetric.contactOcclusion?.enabled),
+      contactOcclusionIntensity: volumetric.contactOcclusion?.intensity ?? 0.6,
       heightFogDensity: volumetric.fogDensity,
       heightFogBaseHeight: volumetric.fogBaseHeight,
       heightFogFalloff: volumetric.fogHeightFalloff,
@@ -483,6 +494,16 @@ export class StylizedGodRaysPostProcess {
     this.config.cloudOcclusion = number('cloudOcclusion', this.config.cloudOcclusion, 0, 1);
 
     const volumetric = this.config.volumetric;
+    const contact = volumetric.contactOcclusion ??= {};
+    if ('contactOcclusionEnabled' in patch && Boolean(patch.contactOcclusionEnabled) !== Boolean(contact.enabled)) {
+      contact.enabled = Boolean(patch.contactOcclusionEnabled);
+      // Disabling removes the trace entirely, useful for honest GPU A/B captures.
+      this.disposeCinematicPipeline();
+      this.disposeVolumetricPipeline();
+    }
+    contact.intensity = number('contactOcclusionIntensity', contact.intensity ?? 0.6, 0, 1);
+    if (this.cinematicOcclusion) this.cinematicOcclusion.intensity.value = contact.intensity;
+    if (this.volumetricOcclusion) this.volumetricOcclusion.intensity.value = contact.intensity;
     volumetric.intensity = number('volumetricIntensity', volumetric.intensity, 0, 5);
     volumetric.resolutionScale = number(
       'volumetricResolutionScale',
@@ -565,7 +586,19 @@ export class StylizedGodRaysPostProcess {
     return this.getSettings();
   }
 
+  disposeCinematicPipeline() {
+    if (this.pipeline === this.cinematicPipeline) this.pipeline = null;
+    this.cinematicPipeline?.dispose();
+    this.cinematicShafts?.dispose();
+    this.cinematicOcclusion?.dispose();
+    this.cinematicPipeline = null;
+    this.cinematicShafts = null;
+    this.cinematicOcclusion = null;
+    this.cinematicCamera = null;
+  }
+
   disposeVolumetricPipeline() {
+    if (this.pipeline === this.volumetricPipeline) this.pipeline = null;
     this.volumetricPipeline?.dispose();
     this.volumetricRays?.dispose();
     this.volumetricBlur?.dispose();
@@ -581,8 +614,7 @@ export class StylizedGodRaysPostProcess {
     if (this.disposed) return;
     this.disposed = true;
     this.screenPipeline?.dispose();
-    this.cinematicPipeline?.dispose();
-    this.cinematicShafts?.dispose();
+    this.disposeCinematicPipeline();
     this.disposeVolumetricPipeline();
     this.scenePass?.dispose();
     this.cloudPass?.dispose();

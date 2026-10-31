@@ -31,7 +31,8 @@ const SOLID_SHAPES = Object.freeze({
   keep: [[0, 0, 10.3, 8.2]],
   // Offsets are in the footprint's frame, whose +x is the mesh's −x once placed.
   hall: [[0.6, 0.45, 14, 8.4]],
-  gatehouse: [[-4.7, 0, 5, 6.8], [4.7, 0, 5, 6.8]],
+  // Inner faces at the arch, which is 2.8 m wide.
+  gatehouse: [[-4.3, 0, 5.8, 6.8], [4.3, 0, 5.8, 6.8]],
 });
 
 const STAIR_STEPS_PER_TREAD = 2;
@@ -75,6 +76,7 @@ const SOLID_PROPS = Object.freeze({
   quarryBlock: [1, 1, 0.7],
   boulder: [1, 1, 0.55],
   outcrop: [1, 1, 0.6],
+  wallButtress: [1.8, 2, 3.6],
 });
 
 function boxRecord({ sourceId, x, y, z, yaw, width, depth, height, walkable, chunkWorldSize }) {

@@ -61,7 +61,7 @@ import { PLAYER_MODE_EDIT, PLAYER_MODE_WALK, PLAYER_MODE_FLY } from './editor/pl
 import { isTreeImpostorBakeMode } from './editor/stylized/impostorBakeMode.js';
 import { StylizedSurfaceView } from './editor/stylized/StylizedSurfaceView.js';
 import { BiomeAssetPalette } from './editor/stylized/BiomeAssetPalette.js';
-import { createWeatherController } from './editor/weather/weather_controller.js';
+import { createWeatherController, weatherOvercastAmount } from './editor/weather/weather_controller.js';
 import { createWeatherUi } from './editor/weather/weather_ui.js';
 import {
   createWeatherTerrainSamplers,
@@ -213,6 +213,9 @@ async function initializeEditor(restoreState, resources, startup) {
   const perfQaConfig = parseQaParams(window.location.search);
   if (perfQaConfig) {
     applyPerfQaDensityProfile(config, perfQaConfig.densityProfile);
+    if (perfQaConfig.contactOcclusion !== null) {
+      config.stylizedSurface.sky.godRays.volumetric.contactOcclusion.enabled = perfQaConfig.contactOcclusion;
+    }
     if (!perfQaConfig.seaPolish) {
       config.stylizedSurface.water.sea.surf.enabled = false;
       config.stylizedSurface.water.sea.detail.enabled = false;
@@ -1065,12 +1068,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     sunDirection: terrainView.godRays.sunDirection,
   });
   resources.own(snowPowder);
-  const weatherOvercast = () => {
-    if (!weatherEnabled) return 0;
-    const intensity = Math.max(0, Math.min(1, weatherSettings.weatherIntensity ?? 0));
-    const share = { rain: 0.8, storm: 1, snow: 0.6, sandstorm: 0.4 }[weatherSettings.weatherMode] ?? 0;
-    return share * intensity;
-  };
+  const weatherOvercast = () => weatherOvercastAmount(weatherSettings, weatherEnabled);
   const worldSoundscape = new WorldSoundscape({
     audioBus,
     getTile: (cellX, cellZ) => worldStore.getTile(cellX, cellZ),

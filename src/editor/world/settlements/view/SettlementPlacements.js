@@ -15,8 +15,11 @@ import { drainJob } from '../SettlementArrayJobs.js';
 /** Kinds drawn only from close by: street furniture a far tier would never show. */
 const SMALL_KINDS = new Set(['lantern', 'planter', 'shrine', 'signpost', 'bench', 'cart', 'barrels', 'fence', 'bollards', 'stall', 'well']);
 
+/** Crafted, but seen as part of the wall they hang on: they draw as far as it does. */
+const WALL_KINDS = new Set(['gateBanner', 'wallButtress', 'wallShoring', 'wallRepair', 'wallSpout']);
+
 export function isSmallKind(kind) {
-  return SMALL_KINDS.has(kind) || isCraftedKind(kind);
+  return SMALL_KINDS.has(kind) || (isCraftedKind(kind) && !WALL_KINDS.has(kind));
 }
 
 export function planToWorld(settlement, tileSize, x, z) {

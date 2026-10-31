@@ -30,7 +30,8 @@ import { sampleWorldWindCanonical, windWaveCoordinates } from '../weather/wind/w
 import { createMeadowGroundShading } from './meadow/MeadowGroundShading.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
-import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
+import { foliageSkyFill } from './forest/foliageLight.js';
+import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { createFlowerPalette } from './FlowerPalette.js';
 
 function colorNode(value) {
@@ -153,7 +154,7 @@ export function createStylizedFlowerMaterial({
     gradient,
   ).mul(config.flowers.brightness);
 
-  const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
+  const material = new (foliageMaterialClass(THREE.MeshLambertNodeMaterial))({ side: THREE.DoubleSide });
   material.positionNode = finalPosition;
   const nx = cos(angle).mul(normalGeometry.x).sub(sin(angle).mul(normalGeometry.z));
   const nz = sin(angle).mul(normalGeometry.x).add(cos(angle).mul(normalGeometry.z));
@@ -161,7 +162,8 @@ export function createStylizedFlowerMaterial({
   const normal = vec3(nx, nx.mul(slope.x).add(nz.mul(slope.y)).negate(), nz).normalize();
   material.normalNode = cameraViewMatrix.mul(vec4(normal, 0)).xyz.toVarying('flowerBentNormal').normalize();
   material.colorNode = flowerColor;
-  material.emissiveNode = flowerColor.mul(foliageLight.fill).mul(.1).add(foliageBacklight(flowerColor, .18));
+  material.emissiveNode = foliageSkyFill(flowerColor, .1);
+  material.foliageTransmissionNode = float(.18);
   material.opacityNode = mask.mul(alive);
   material.alphaTest = 0.5;
   material.transparent = false;

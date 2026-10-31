@@ -27,11 +27,24 @@ import { finishFrame } from './cinematicFinish.js';
  */
 export function setPipelineOutput(pipeline, composite, { fxaa: antialias = true, finish = null } = {}) {
   const finished = finish ? finishFrame(composite, finish) : { node: composite, bloom: null };
+  let filter = null;
+  // Pipelines are rebuilt when the camera or AO topology changes. RenderPipeline
+  // frees only its quad material, so explicitly release this finish's targets.
+  const dispose = pipeline.dispose.bind(pipeline);
+  let disposed = false;
+  pipeline.dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    finished.bloom?.dispose();
+    filter?.textureNode.dispose();
+    dispose();
+  };
   if (!antialias) {
     pipeline.outputNode = finished.node;
     return { pipeline, bloom: finished.bloom };
   }
   pipeline.outputColorTransform = false;
-  pipeline.outputNode = fxaa(renderOutput(finished.node));
+  filter = fxaa(renderOutput(finished.node));
+  pipeline.outputNode = filter;
   return { pipeline, bloom: finished.bloom };
 }

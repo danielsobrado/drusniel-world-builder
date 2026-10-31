@@ -3,6 +3,7 @@ import {
   attribute,
   clamp,
   dot,
+  float,
   max,
   mix,
   normalView,
@@ -23,6 +24,7 @@ import { stylizedFbm } from './StylizedNoiseNodes.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
 import { treeFoliageEmission } from './forest/foliageLight.js';
+import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
 import { treeBendPosition } from './forest/treeSway.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
@@ -118,7 +120,8 @@ export function createStylizedLeafMaterial({
     vec3(0),
   ).mul(paletteValue(palette, config, 'brightness'));
 
-  const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
+  const material = new (foliageMaterialClass(THREE.MeshLambertNodeMaterial))({ side: THREE.DoubleSide });
+  if (authoredColor) material.foliageTransmissionNode = float(0.8);
   material.positionNode = finalPosition;
   if (authoredColor && map) {
     // A textured crown is lit the way its donor lit it: the graded leaf colour,

@@ -14,9 +14,14 @@ export const SETTLEMENT_TRIM = Object.freeze({
   sheep: Object.freeze({ variants: 2 }),
   hen: Object.freeze({ variants: 2 }),
   // At the gates (SettlementGateApproach), which picks one banner per town.
-  gateBanner: Object.freeze({ variants: 4 }),
+  gateBanner: Object.freeze({ variants: 6 }),
   spearRack: Object.freeze({ variants: 2 }),
   hitchPost: Object.freeze({ variants: 2 }),
+  // On the outer face of a wall (SettlementWallDressing).
+  wallButtress: Object.freeze({ variants: 2 }),
+  wallShoring: Object.freeze({ variants: 2 }),
+  wallRepair: Object.freeze({ variants: 3 }),
+  wallSpout: Object.freeze({ variants: 1 }),
 });
 
 /** The wall-walk stair: a straight flight inside the wall, as the mesh and the collider both build it. */

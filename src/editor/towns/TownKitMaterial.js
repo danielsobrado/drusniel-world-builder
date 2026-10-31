@@ -30,6 +30,8 @@ import {
 } from 'three/tsl';
 
 import { WEATHER_FAMILIES, treadPaving, weatherTownSurface } from '../../render/materials/townWeathering.js';
+import { TOWN_WET_FAMILIES, wetTownSurface } from '../../render/materials/townWetness.js';
+import { filterSpecularRoughness } from '../../render/materials/specularAntialiasing.js';
 import { sampleWorldWind } from '../weather/wind/worldWindState.js';
 import { KIT_DATA_ATTRIBUTE } from './TownKitGeometry.js';
 import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
@@ -205,13 +207,21 @@ export function createTownKitMaterial(atlas, look) {
   colour = weatherTownSurface(colour, { place, up, height, family: { moss: amount('moss'), streaks: amount('streaks'), damp: amount('damp') } });
   // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
   colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving).add(isCobble));
+  const wetAmount = (key) => [[ROLE.stone, 'stone'], [ROLE.plaster, 'plaster'], [ROLE.timber, 'timber'],
+    [ROLE.roof, 'roof'], [ROLE.paving, 'stone'], [ROLE.cobble, 'stone']]
+    .reduce((sum, [value, family]) => sum.add(isRole(value).mul(TOWN_WET_FAMILIES[family][key])), float(0));
+  const wet = wetTownSurface(colour, row.z, up, {
+    wetness: wetAmount('wetness'), darkening: wetAmount('darkening'), roughness: wetAmount('roughness'),
+  });
+  colour = wet.color;
   const snowCover = smoothstep(0.38, 0.72, up).mul(snow).mul(kind.y);
   colour = mix(colour, SNOW.mul(data.x.mul(0.3).add(0.7)), snowCover);
 
   material.colorNode = vec4(colour, 1);
   const strength = surface.x.mul(townKitShared.reliefScale).mul(float(1).sub(snowCover.mul(0.7)));
   material.normalNode = normalMap(normalSample, vec2(strength));
-  material.roughnessNode = mix(row.z, float(0.62), snowCover).add(wear.mul(0.05)).add(crevice.mul(0.08));
+  const roughness = mix(wet.roughness, float(0.62), snowCover).add(wear.mul(0.05)).add(crevice.mul(0.08));
+  material.roughnessNode = filterSpecularRoughness(roughness, normalSample.mul(2).sub(1).mul(vec3(strength, strength, 1)));
   material.metalnessNode = mix(row.w, float(0), snowCover);
   material.emissiveNode = sample.mul(tint.rgb).mul(tint.w);
   return material;

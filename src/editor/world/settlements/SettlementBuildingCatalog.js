@@ -49,7 +49,8 @@ export const SETTLEMENT_BUILDINGS = Object.freeze({
     // The same length, overgrown: the workshop grows ivy on castle archetypes.
     castle('wall', 12, 1.8, 6, [12, 5], { shape: 'classic', topStyle: 'battlements', windows: false, ivy: true }),
   ]),
-  gatehouse: Object.freeze([castle('gatehouse', 10, 3, 7, [16, 10], { topStyle: 'battlements' })]),
+  // The gate stands open: the road goes through it.
+  gatehouse: Object.freeze([castle('gatehouse', 10, 3, 7, [16, 10], { topStyle: 'battlements', openDoorId: 'door-1' })]),
   tower: Object.freeze([castle('tower', 6, 2, 9, [8, 8], { topStyle: 'battlements' })]),
   well: Object.freeze([prop('well', 2, 3, [3.4, 3.4])]),
   fountain: Object.freeze([prop('fountain', 4.4, 3, [5, 5])]),

@@ -1,8 +1,9 @@
 import * as THREE from 'three/webgpu';
-import { vec3 } from 'three/tsl';
+import { float, vec3 } from 'three/tsl';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
-import { foliageBacklight, foliageLight } from './forest/foliageLight.js';
+import { foliageSkyFill } from './forest/foliageLight.js';
+import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { applyCloudShadow } from './CloudShadow.js';
 
 /** Clone authored channels into a node material before assigning foliage nodes. */
@@ -18,6 +19,7 @@ export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
   else if (source.isMeshBasicMaterial) material = new THREE.MeshBasicNodeMaterial();
   else material = new THREE.MeshStandardNodeMaterial();
   if (promote || !source.isNodeMaterial) material.copy(source);
+  if (lit) material = new (foliageMaterialClass(material.constructor))().copy(material);
   // Several authored plant GLBs declare KHR_materials_unlit. Their albedo and
   // cutouts belong to the asset; their lighting belongs to the outdoor scene.
   if (promote) material.lights = true;
@@ -38,8 +40,8 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const color = gradePlantPart(authoredFoliageColor(material), resolveFoliagePalette(config, tileId), role);
   material.colorNode = color;
   const blossom = role === 'petal' || role === 'center';
-  const fill = color.mul(foliageLight.fill).mul(blossom ? .1 : .14)
-    .add(foliageBacklight(color, blossom ? .18 : .25));
+  const fill = foliageSkyFill(color, blossom ? .1 : .14);
+  material.foliageTransmissionNode = float(blossom ? .18 : .25);
   // Retain any authored emission (e.g. flower centres).
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(fill) : fill;
   return applyCloudShadow(material, config.sky);

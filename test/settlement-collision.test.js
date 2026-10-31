@@ -64,7 +64,7 @@ test('a gatehouse is two piers with the road open between them', () => {
   const gateZ = -(CITY.cellZ * TILE + gate.z);
   for (const pier of piers) {
     const distance = Math.hypot(pier.position[0] - gateX, pier.position[2] - gateZ);
-    assert.ok(distance - pier.dimensions[0] / 2 > 1.5, 'a pier closes the gate passage');
+    assert.ok(distance - pier.dimensions[0] / 2 > 1.3, 'a pier closes the gate passage');
     assert.ok(pier.aabb.minY <= gate.pad && pier.aabb.maxY > gate.pad + 6);
     assert.equal(pier.layers, COLLISION_LAYERS.solid);
   }

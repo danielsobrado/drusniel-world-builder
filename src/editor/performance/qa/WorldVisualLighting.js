@@ -6,7 +6,9 @@ export function staticLightingComponents(editor) {
  const values=SKY_LOOK_NUMBERS.map(key=>look[key]);
  for(const key of SKY_LOOK_COLORS)new Color(look[key]).toArray(values,values.length);
  const sky=editor.stylizedSurface.skyView;
- for(const light of [sky?.directional,sky?.hemisphere])if(light){values.push(light.intensity);light.color.toArray(values,values.length);}
+ for(const light of [sky?.directional,sky?.hemisphere])if(light){values.push(light.intensity);light.color.toArray(values,values.length);
+  light.groundColor?.toArray(values,values.length);}
+ values.push(editor.terrainView.scene.environmentIntensity);
  const fog=editor.terrainView.scene.fog;
  if(fog){values.push(fog.density??fog.near,fog.far??0);fog.color.toArray(values,values.length);}
  if(values.some(v=>!Number.isFinite(v)))throw new Error('Nonfinite static lighting component.');

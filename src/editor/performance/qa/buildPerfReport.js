@@ -237,6 +237,7 @@ export function buildPerfReport({
       measureFrames: config.measureFrames ?? null,
       speed: config.speed,
       explorationBoost: Boolean(config.explorationBoost),
+      contactOcclusion: config.contactOcclusion ?? null,
       keys: config.keys,
       hitchMs: config.hitchMs,
       buildingCount: config.buildingCount ?? null,

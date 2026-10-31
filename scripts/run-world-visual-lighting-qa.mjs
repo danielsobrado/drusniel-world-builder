@@ -11,15 +11,17 @@ import {captureWorldCanvas} from './lib/world-visual-canvas.mjs';
 const option=(key,fallback)=>process.argv.includes(key)?process.argv[process.argv.indexOf(key)+1]:fallback;
 const repo=fileURLToPath(new URL('../',import.meta.url)),url=option('--url','http://localhost:5173'),out=path.resolve(option('--out','tmp/world-visual-quality/after/lighting'));
 const only=option('--only',null)?.split(',');await mkdir(out,{recursive:true});
+const highfield=process.argv.includes('--highfield');
 const release=await waitForPerfRunLock(path.join(repo,'tmp',`perf-browser-${process.platform}.lock`));
 const report={...await captureVisualSource(url,repo),harness:await captureVisualHarness(import.meta.url,repo),startedAt:new Date().toISOString(),poses:[],checks:[],artifacts:[],errors:{count:0,errors:[]}};let browser,page,errors;
 try {
  const manifest=JSON.parse(await readFile(path.join(repo,'docs/qa/world-visual-quality-2026-10-14/biomes/procedural-review-poses.json'),'utf8'));
- const poses=[...manifest.original.filter((_,i)=>[0,1,3,5,6,9,10,11].includes(i)),manifest.additional.find(p=>p.expectedBiomeId===11)];
+ const poses=highfield?[manifest.original.find(p=>p.id==='original-04')]
+  :[...manifest.original.filter((_,i)=>[0,1,3,5,6,9,10,11].includes(i)),manifest.additional.find(p=>p.expectedBiomeId===11)];
  const lights=[{id:'day',preset:'highfield',hour:12,weather:'off'},
   {id:'low-sun',preset:'emberfall',hour:18,weather:'off'},
-  {id:'overcast',preset:'highfield',hour:12,weather:'rain'},
-  {id:'night',preset:'moonrise',hour:0,weather:'off'}];
+  {id:'overcast',preset:'highfield',hour:12,weather:highfield?'overcast':'rain'},
+  {id:'night',preset:'moonrise',hour:0,weather:'off'}].filter(light=>!highfield||light.id!=='night');
  const cases=poses.flatMap(p=>lights.map(light=>({id:`${p.id}-${light.id}`,pose:p,light})));
  if(only?.some(id=>!cases.some(c=>c.id===id)))throw new Error(`Unknown lighting case ${only}`);
  browser=await chromium.launch({headless:false,args:['--enable-unsafe-webgpu','--ignore-gpu-blocklist','--use-angle=default']});
@@ -47,6 +49,7 @@ try {
     overcast:window.__editor.skyLooks.overcast,overcastTarget:window.__editor.skyLooks.overcastTarget,
     regional:window.__editor.skyLooks.region,stats:window.__editor.weatherController?.getStats?.()}));
    report.checks.push({id:c.id,passed:readiness.ready&&warmup.simulationSeconds>=20&&convergence.stableFrames>=60&&convergence.maximumChange<.001
+    &&(!highfield||(resolvedWeather.wetness===0&&diagnostics.environment.loaded))
     &&(!diagnostics.renderPath.includes('cinematic')||diagnostics.finishApplications===1)});
    report.poses.push({...c,freshWetness,warmup,convergence,readiness,resolvedWeather,diagnostics,adapter});
    if(!await page.evaluate(()=>window.__worldVisualQa.setCaptureUi(true)))throw new Error('Lighting capture UI refused entry.');
@@ -59,7 +62,7 @@ try {
   }finally{await context.close();page=null;}
  }
  report.sourceStable=visualSourceStayedFixed(report,await captureVisualSource(url,repo));
- report.passed=report.sourceStable&&report.dirtyFiles.length===0&&report.errors.count===0&&report.checks.length===(only?.length??36)&&report.checks.every(c=>c.passed);
+ report.passed=report.sourceStable&&report.dirtyFiles.length===0&&report.errors.count===0&&report.checks.length===(only?.length??cases.length)&&report.checks.every(c=>c.passed);
  if(!report.passed)process.exitCode=1;
 }catch(error){report.failure=error.stack;report.passed=false;process.exitCode=1;}
 finally{await browser?.close();release();report.finishedAt=new Date().toISOString();await writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));}
