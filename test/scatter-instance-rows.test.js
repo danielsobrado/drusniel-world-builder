@@ -113,3 +113,15 @@ test('drawn representations drop culled and faded bands and fold the rest onto p
   ] }), [{ band: 'proxy', fade: 0.5, ditherDirection: 1 }]);
   assert.deepEqual(drawnRepresentations(undefined), []);
 });
+
+test('forced publication restores full rows after a visibility selection changed the main buffer', () => {
+  const { rows, near, anchor, publish } = fixture();
+  const chunk = manifest(1, 2);
+  publish([['0:0', chunk, NEAR]]);
+  near.instanceMatrix.array[12] = 999;
+  const job = rows.begin();
+  drain(rows.stageChunk(job, '0:0', chunk, NEAR));
+  drain(rows.stageRetired(job));
+  rows.commit(job, [[near]], [], anchor, true);
+  assert.deepEqual(drawnX(near), [1, 2]);
+});

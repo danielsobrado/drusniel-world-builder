@@ -11,9 +11,9 @@ import { createStableChunkManifestBuilder } from './StableScatterManifest.js';
 import {
   createInstancedRenderers,
   disposeInstancedRenderers,
-  writeInstances,
 } from './lod/StylizedLodRuntime.js';
 import { InstanceAnchor } from './lod/InstanceAnchor.js';
+import { ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
 import { extractAuthoredGroupedPrototypes } from './StylizedPrototypeBake.js';
 import { acceptsStrategicDetailPlacement } from './StrategicDetailPlacement.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
@@ -24,6 +24,7 @@ import { applySkywardNormal } from './forest/foliageLight.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
+const DETAIL_REPRESENTATIONS = Object.freeze([{ band: 'near', fade: 1, ditherDirection: 1 }]);
 const DETAIL_SCRATCH = {
   position: new THREE.Vector3(),
   quaternion: new THREE.Quaternion(),
@@ -108,10 +109,36 @@ export class StylizedGroundDetailView {
     this.root = new THREE.Group();
     // Instances are written relative to this, not in canonical metres (InstanceAnchor).
     this.instanceAnchor = new InstanceAnchor();
+    this.instanceRows = new ScatterInstanceRows(layerName,
+      placement => this.placementMatrix(placement), placement => this.placementAppearance(placement));
     this.root.name = `stylized-${layerName}`;
     this.visibility = config.enhancements?.detailVisibility && layerConfig.castShadow !== true
       && ['groundDetail', 'tropicalPlant'].includes(layerName) ? new BudgetedDetailVisibility(this) : null;
     terrainView.scene.add(this.root);
+  }
+
+  placementMatrix(placement) {
+    const index = placement.prototypeIndex;
+    const height = Number.isFinite(placement.waterPlacementHeight)
+      ? placement.waterPlacementHeight : placement.height;
+    return new THREE.Matrix4().compose(
+      DETAIL_SCRATCH.position.set(placement.x, height + (this.prototypeHeightOffsets[index] ?? 0), placement.z),
+      placement.groundNormal
+        ? DETAIL_SCRATCH.quaternion.setFromUnitVectors(DETAIL_UP,
+          DETAIL_SCRATCH.normal.fromArray(placement.groundNormal)).multiply(
+          DETAIL_SCRATCH.yaw.setFromAxisAngle(DETAIL_UP, placement.rotationY))
+        : DETAIL_SCRATCH.quaternion.setFromAxisAngle(DETAIL_UP, placement.rotationY),
+      DETAIL_SCRATCH.scale.setScalar(placement.scale),
+    );
+  }
+
+  placementAppearance(placement) {
+    const range = Math.max(0, Number(this.layerConfig.colorVariation) || 0);
+    return {
+      seed: placement.priority,
+      colorVariation: 1 - range * 0.5 + placement.priority * range,
+      surfaceData: placement.surfaceData,
+    };
   }
 
   appendVariants(authoredVariants = []) {
@@ -398,10 +425,9 @@ export class StylizedGroundDetailView {
 
   *iterateRebuild(focus) {
     PerfCounters.inc(`${this.layerName}Rebuilds`);
-    const instances = this.prototypes.map(() => []);
+    const job = this.instanceRows.begin();
     const activeChunks = new Set();
     const radius = this.layerConfig.residentRadius;
-    const colorVariation = Math.max(0, Number(this.layerConfig.colorVariation) || 0);
     for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
       for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
         const key = `${chunkX}:${chunkZ}`;
@@ -411,39 +437,27 @@ export class StylizedGroundDetailView {
           manifest = this.manifestForChunk(chunkX, chunkZ, this.currentShouldYield);
           if (manifest === null) yield ITERATOR_PENDING;
         }
-        for (const placement of manifest) {
-          yield;
-          const placementHeight = Number.isFinite(placement.waterPlacementHeight)
-            ? placement.waterPlacementHeight
-            : placement.height;
-          instances[placement.prototypeIndex].push({
-            matrix: new THREE.Matrix4().compose(
-              DETAIL_SCRATCH.position.set(
-                placement.x,
-                placementHeight + (this.prototypeHeightOffsets[placement.prototypeIndex] ?? 0),
-                placement.z,
-              ),
-              placement.groundNormal
-                ? DETAIL_SCRATCH.quaternion.setFromUnitVectors(DETAIL_UP,
-                  DETAIL_SCRATCH.normal.fromArray(placement.groundNormal)).multiply(
-                  DETAIL_SCRATCH.yaw.setFromAxisAngle(DETAIL_UP, placement.rotationY))
-                : DETAIL_SCRATCH.quaternion.setFromAxisAngle(DETAIL_UP, placement.rotationY),
-              DETAIL_SCRATCH.scale.setScalar(placement.scale),
-            ),
-            fade: 1,
-            seed: placement.priority,
-            colorVariation: 1 - colorVariation * 0.5 + placement.priority * colorVariation,
-            surfaceData: placement.surfaceData,
-          });
-        }
+        yield* this.instanceRows.stageChunk(job, key, manifest, DETAIL_REPRESENTATIONS);
       }
     }
-    const anchorOrigin = this.terrainView.floatingOrigin.getState();
-    this.instanceAnchor.follow(anchorOrigin);
-    const count = writeInstances(this.meshes, instances, this.instanceAnchor);
-    this.visibility?.reset(instances);
-    this.instanceAnchor.place(this.root, anchorOrigin);
-    PerfCounters.set(`${this.layerName}Instances`, count);
+    yield* this.instanceRows.stageRetired(job);
+    yield;
+    const origin = this.terrainView.floatingOrigin.getState();
+    this.instanceAnchor.follow(origin);
+    const rebased = this.instanceAnchor.x !== this.instanceRows.anchorX
+      || this.instanceAnchor.z !== this.instanceRows.anchorZ;
+    const changed = job.changes.some(changes => changes?.size > 0);
+    if (!this.visibility || changed || rebased || job.manifestsChanged) {
+      const { near: count } = this.instanceRows.commit(job, this.meshes, [], this.instanceAnchor,
+        Boolean(this.visibility));
+      if (this.visibility) {
+        this.visibility.reset(this.instanceRows.storage.map(storage => storage.buckets.near));
+      }
+      PerfCounters.set(`${this.layerName}Instances`, count);
+    } else {
+      this.instanceRows.chunks = job.chunks;
+    }
+    this.instanceAnchor.place(this.root, origin);
     for (const key of this.manifestCache.keys()) {
       if (!activeChunks.has(key)) this.manifestCache.delete(key);
     }

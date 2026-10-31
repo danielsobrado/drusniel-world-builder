@@ -1,4 +1,5 @@
 import { ITERATOR_PENDING } from './ResumableIterator.js';
+import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -363,7 +364,8 @@ export class StylizedBushView {
       : this.config.bushes.residentRadius;
     const viewportHeight = this.terrainView.viewportHeight
       ?? this.terrainView.renderer.domElement.height ?? 1;
-    const plan = settings.enabled
+    const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${viewportHeight}:${camera.fov}:${camera.zoom}:${this.prototypeRevision}`;
+    const plan = cachedLodPlan(this, planKey, timestamp, settings.transitionMs / 8, () => settings.enabled
       ? buildChunkLodPlan({
         focus,
         radius: renderRadius + 1,
@@ -393,8 +395,11 @@ export class StylizedBushView {
       : {
         entries: this.createNearOnlyPlan(focus, renderRadius),
         signature: `near:${focus.chunkX}:${focus.chunkZ}:${renderRadius}`,
-      };
-    pruneStateMap(this.chunkLodStates, plan.entries);
+      });
+    if (this.previousPlan !== plan) {
+      pruneStateMap(this.chunkLodStates, plan.entries);
+      this.previousPlan = plan;
+    }
     const revisionSignature = this.revisionTracker.windowSignature(focus, renderRadius + 1, 1);
     const updateKey = `${focus.chunkX}:${focus.chunkZ}:${revisionSignature}:${
       plan.signature

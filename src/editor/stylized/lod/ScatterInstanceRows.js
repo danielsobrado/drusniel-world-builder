@@ -115,7 +115,7 @@ export class ScatterInstanceRows {
    *
    * @returns {{ near: number, proxy: number, manifestsChanged: boolean }}
    */
-  commit(job, nearRenderers, proxyRenderers, anchor) {
+  commit(job, nearRenderers, proxyRenderers, anchor, forceFull = false) {
     const rebased = anchor.x !== this.anchorX || anchor.z !== this.anchorZ;
     this.anchorX = anchor.x;
     this.anchorZ = anchor.z;
@@ -131,8 +131,8 @@ export class ScatterInstanceRows {
       changedRows += plan.changedRows.near.length + plan.changedRows.proxy.length;
     }
     PerfCounters.inc(`${this.name}RowsChanged`, changedRows);
-    const nearCount = writeInstances(nearRenderers, near, anchor, rebased ? null : nearRows);
-    const proxyCount = writeInstances(proxyRenderers, proxy, anchor, rebased ? null : proxyRows);
+    const nearCount = writeInstances(nearRenderers, near, anchor, rebased || forceFull ? null : nearRows);
+    const proxyCount = writeInstances(proxyRenderers, proxy, anchor, rebased || forceFull ? null : proxyRows);
     this.chunks = job.chunks;
     return { near: nearCount, proxy: proxyCount, manifestsChanged: job.manifestsChanged };
   }
