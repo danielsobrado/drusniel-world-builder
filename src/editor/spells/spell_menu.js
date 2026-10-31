@@ -55,8 +55,8 @@ function createSpellButton({ id, key, label, glyph, onClick }) {
   button.setAttribute('aria-pressed', 'false');
   button.innerHTML = `
     <span class="spell-slot__glyph">${glyph}</span>
-    <svg class="spell-slot__channel" viewBox="0 0 44 54" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="42" height="52" rx="9" pathLength="100"/>
+    <svg class="spell-slot__channel" viewBox="0 0 48 48" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="1" y="1" width="46" height="46" rx="2" pathLength="100"/>
     </svg>
     <kbd class="spell-slot__key">${key}</kbd>
     <span class="spell-slot__label"></span>
