@@ -27,7 +27,8 @@ test('terrain keeps the procedural material as fallback while delegating baked L
   assert.match(terrainSource, /gpuState: materialBakeGpu/);
   // The material consumes every output of the baked surface: colour, roughness
   // and the computed lighting normal.
-  assert.match(terrainSource, /material\.roughnessNode = surface\.roughness;/);
+  assert.match(terrainSource, /antialiasSpecularRoughness\(surface\.roughness, bakedSurface\.normal\)/);
+  assert.match(terrainSource, /material\.roughnessNode = filteredRoughness;/);
   assert.match(terrainSource, /material\.normalNode = bakedSurface\.normal;/);
   assert.doesNotMatch(terrainSource, /material\.normalNode = vec3\(/);
 });

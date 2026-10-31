@@ -9,11 +9,25 @@ import {
   vec3,
 } from 'three/tsl';
 
+const SPECULAR_AA_VARIANCE = 0.5;
+const SPECULAR_AA_MAX_KERNEL = 0.36;
+
 function decodeUpperHemisphereOctNormal(encoded) {
   const x = encoded.r;
   const z = encoded.g;
   const y = max(0, oneMinus(abs(x).add(abs(z))));
   return vec3(x, y, z).normalize();
+}
+
+/**
+ * Geometric specular antialiasing (Kaplanyan/Tokuyoshi): roughness widens where
+ * the normal changes faster than a pixel resolves. Wet sand's tight lobe otherwise
+ * lands on alternate pixels at grazing angles and draws a dotted moiré.
+ */
+export function antialiasSpecularRoughness(roughness, normal) {
+  const dx = normal.dFdx(), dy = normal.dFdy();
+  const variance = dx.dot(dx).add(dy.dot(dy)).mul(SPECULAR_AA_VARIANCE);
+  return roughness.mul(roughness).add(variance.min(SPECULAR_AA_MAX_KERNEL)).sqrt();
 }
 
 export function createTerrainSurfaceNormal({ encodedNormal, detailHeight, detailStrength }) {

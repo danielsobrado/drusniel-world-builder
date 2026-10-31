@@ -22,6 +22,7 @@ import {
 } from 'three/tsl';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
+import { antialiasSpecularRoughness } from './materials/TerrainMaterialSurfaceGradientNodes.js';
 import { terrainGrassCover } from './materials/TerrainGrassCoverNodes.js';
 import { createAridSubstrateNodes } from './materials/AridSubstrateNodes.js';
 import {
@@ -450,11 +451,14 @@ export function createTerrainMaterial({
     const detailedSnowColor = snowDetail ? snowDetail.color(driftColor) : driftColor;
     const printed = footprints.apply(snowSurface ? snowSurface.apply(detailedSnowColor) : detailedSnowColor);
     material.colorNode = wake ? wake.apply(printed) : printed;
-    material.roughnessNode = surface.roughness;
+    const filteredRoughness = bakedSurface.normal
+      ? antialiasSpecularRoughness(surface.roughness, bakedSurface.normal)
+      : surface.roughness;
+    material.roughnessNode = filteredRoughness;
     if (snowSurface) material.emissiveNode = snowSurface.emissive;
     if (bakedSurface.normal) material.normalNode = bakedSurface.normal;
     if (snowDetail) {
-      material.roughnessNode = snowDetail.roughness(surface.roughness);
+      material.roughnessNode = snowDetail.roughness(filteredRoughness);
       if (snowNormal) material.normalNode = snowNormal;
     }
     // Rime on the up-facing faces, keyed on the same baked snow: the deposition the

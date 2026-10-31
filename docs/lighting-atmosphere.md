@@ -95,6 +95,14 @@ is still near zero at the treeline. All of it is ALU; no pass or light is added.
 after-run hit 70.9 FPS with 31 hitches and did not recur in the next two; its cause
 is unknown. If it reappears, A/B this pass before blaming streaming.
 
+## Terrain specular antialiasing
+
+Wet sand drew a dotted moiré under the moon at grazing angles: its tight lobe met
+per-pixel derivative normals. `antialiasSpecularRoughness` widens roughness by the
+normal's screen-space variance, and wet sand and swash film roughness rose to 0.42
+and 0.3 (`config/water-visual.yaml`). Hardware frame cost is not yet measured: the
+A/B was abandoned because another session was using the GPU.
+
 ## Highfield foreground review
 
 In the accepted `original-04` captures at `0b7ede54`, the road and distant trees

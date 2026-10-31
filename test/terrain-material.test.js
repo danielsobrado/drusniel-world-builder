@@ -22,7 +22,7 @@ test('terrain uses PBR response and baked slope-aware surface normals', () => {
   assert.match(source, /new THREE\.MeshStandardNodeMaterial/);
   // Roughness comes from the baked surface; the coast swash only wets it at the sea's edge.
   assert.match(source, /bakedSurface\.roughness/);
-  assert.match(source, /material\.roughnessNode\s*=\s*surface\.roughness/);
+  assert.match(source, /material\.roughnessNode\s*=\s*filteredRoughness/);
   assert.match(source, /snowDetail\.normal\(bakedSurface\.normal\)/);
   assert.match(source, /material\.normalNode\s*=\s*snowNormal/);
 });
