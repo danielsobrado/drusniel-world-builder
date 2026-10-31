@@ -53,7 +53,19 @@ WebGPU. Investigate streaming counters and CPU phases before adding lighting
 passes. The earlier scenic-tour hitch counts are not a measured baseline for
 this change.
 
-Visual tuning and hardware performance acceptance are pending: this session's
-headed Chromium launch was refused by the execution environment (exit
-3221225506). No before/after frame-time or visual-quality claim is established
-by the CPU tests.
+Accepted on hardware on 2026-10-31 (NVIDIA WebGPU, frozen copies of the code).
+The three-view capture passes. It first showed blue holes under full overcast:
+the look lowered cloud density by a fixed offset, and a clear-skied region raised
+it back, so density now eases to an absolute lid. Regional personality cannot
+reopen it.
+
+`chunk-cross`, one focused run each side, 0e359b28 before and this pass after:
+
+| | FPS | p50 | p95 | p99 | Hitches |
+| --- | --- | --- | --- | --- | --- |
+| Before | 130.0 | 7.2 ms | 10.8 ms | 17.4 ms | 3 (0.19%) |
+| After | 109.9 | 7.9 ms | 15.9 ms | 32.4 ms | 9 (0.68%) |
+
+That is inside the p95 and hitch-rate budgets, but it is a visible cost, not
+noise-level, and one run a side cannot apportion it. The p99 sits just under the
+33.3 ms hitch line, so bisect the shader changes before spending more there.

@@ -393,6 +393,14 @@ frozen copy, alternating runs, all settled): 35.7 and 33.2 FPS before, 35.4 and
 before, 107 and 111 after. Frame rate and p95 are inside run-to-run spread; two
 runs a side cannot rule out a small hitch increase.
 
+Treat those figures with care: frames near 30 ms and FPS in the mid-30s are what
+this route shows when `capture.focus` fails, so check it before comparing. One
+pair with focus held on 2026-10-31, against the same code with the settlements
+rolled back to before any gate work: 83.8 FPS, p95 15.5 ms, 5 hitches before;
+77.9 FPS, p95 17.1 ms, 15 hitches (1.6%) after. That is inside the budgets, and
+the whole of the gate, wall and approach dressing together, but one pair is not
+enough to size the cost precisely.
+
 ## Doors and rooms
 
 `scripts/generate-settlement-doors.mjs` measures where the workshop puts each
