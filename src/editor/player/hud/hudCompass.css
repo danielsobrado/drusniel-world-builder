@@ -1,0 +1,113 @@
+/*
+ * Compass ribbon under the mode switch. `HudCompass` publishes --mark-at on each
+ * mark, -1 (left edge of the field) to 1 (right edge), and the width lives here.
+ */
+.hud-compass {
+  --compass-half: min(320px, 50vw - 24px);
+
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  width: calc(var(--compass-half) * 2);
+  height: 30px;
+  transform: translateX(-50%);
+  animation: glade-rise-in 320ms ease both;
+}
+
+.hud-compass[hidden] {
+  display: none;
+}
+
+.hud-compass__track {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-block: 1px solid #ead29c80;
+  background: linear-gradient(90deg, transparent, #132119e0 18% 82%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
+}
+
+.hud-compass__point,
+.hud-compass__place {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(var(--mark-at, 0) * var(--compass-half) - 50%), -50%);
+}
+
+.hud-compass__point {
+  color: var(--hud-ink-soft);
+  font: 600 11px/1 var(--hud-font);
+  letter-spacing: 0.04em;
+}
+
+.hud-compass__point.is-cardinal {
+  color: var(--hud-gold);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* The diamonds turn on a pseudo-element: `rotate` would also turn the mark's slide. */
+.hud-compass__point.is-tick,
+.hud-compass__place {
+  width: 5px;
+  height: 5px;
+}
+
+.hud-compass__point.is-tick::before,
+.hud-compass__place::before {
+  position: absolute;
+  inset: 0;
+  background: #ead29c99;
+  content: '';
+  rotate: 45deg;
+}
+
+.hud-compass__place {
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+}
+
+.hud-compass__place::before {
+  background: var(--place-color);
+  box-shadow: 0 0 0 1.5px #ead29c, 0 0 0 3px #132119e0;
+}
+
+.hud-compass__place.is-capital {
+  width: 14px;
+  height: 14px;
+}
+
+.hud-compass__pointer {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 14px;
+  height: 7px;
+  transform: translateX(-50%);
+  background: var(--hud-gold);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.hud-compass__focus {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  max-width: 100%;
+  overflow: hidden;
+  transform: translateX(-50%);
+  color: var(--hud-ink-strong);
+  font: 600 12px/1.2 var(--hud-font);
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  text-shadow: var(--hud-text-shadow);
+  white-space: nowrap;
+}
+
+/* The status line sits below the ribbon and its place name while walking. */
+.player-hud[data-hud-phase='walking'] .hud-status {
+  top: 116px;
+}

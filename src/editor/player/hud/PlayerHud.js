@@ -1,7 +1,9 @@
+import { HudCompass } from './HudCompass.js';
 import { HudKeyHints } from './HudKeyHints.js';
 import { HudMetrics } from './HudMetrics.js';
 import { HudMinimap } from './HudMinimap.js';
 import { HudStatus } from './HudStatus.js';
+import { HudVitals } from './HudVitals.js';
 import { HUD_PHASE, isPlayerEngaged, resolveHudPhase } from './hudState.js';
 
 function createReticle() {
@@ -12,12 +14,13 @@ function createReticle() {
 }
 
 /**
- * The walking HUD: a status line, the reticle, the heading-up minimap with the
- * frame-rate readout beside it, and the scene legend with the controls — laid out
- * as grass-test's cinematic HUD. Spells keep their own dock (`spell_menu.js`).
+ * The walking HUD: a status line, the compass ribbon, the reticle, the vitals, the
+ * heading-up minimap with the frame-rate readout beside it, and the scene legend
+ * with the controls — laid out as grass-test's cinematic HUD. Spells keep their
+ * own dock (`spell_menu.js`).
  *
  * `render` follows view-mode state changes; `update` runs every frame and only
- * moves the minimap, so it stays cheap while walking and free otherwise.
+ * moves the compass and minimap, so it stays cheap while walking and free otherwise.
  */
 export class PlayerHud {
   /**
@@ -38,12 +41,16 @@ export class PlayerHud {
 
     this.status = new HudStatus();
     this.reticle = createReticle();
+    this.compass = new HudCompass(minimap ?? {});
+    this.vitals = new HudVitals();
     this.minimap = minimap ? new HudMinimap(minimap) : null;
     this.hints = new HudKeyHints({ canToggleCamera, canBoost, getSceneLabel });
     this.metrics = new HudMetrics({ getRenderer });
     this.element.append(
+      this.compass.element,
       this.status.element,
       this.reticle,
+      this.vitals.element,
       ...(this.minimap ? [this.minimap.element] : []),
       this.metrics.element,
       this.hints.element,
@@ -58,6 +65,8 @@ export class PlayerHud {
     this.element.dataset.hudPhase = phase;
     this.reticle.hidden = phase !== HUD_PHASE.walking;
     this.status.render(state);
+    this.compass.render(phase);
+    this.vitals.render(phase);
     this.minimap?.render(phase);
     this.hints.render(phase, { engaged: isPlayerEngaged(state) });
     this.metrics.setVisible(phase === HUD_PHASE.walking);
@@ -65,12 +74,15 @@ export class PlayerHud {
 
   update(heading, nowMs = performance.now()) {
     if (this.phase !== HUD_PHASE.walking) return;
+    this.compass.update(heading, nowMs);
     this.minimap?.update(heading, nowMs);
     this.metrics.update(nowMs);
     this.hints.refreshScene();
   }
 
   dispose() {
+    this.compass.dispose();
+    this.vitals.dispose();
     this.minimap?.dispose();
     this.hints.dispose();
     this.metrics.dispose();

@@ -1,4 +1,4 @@
-function formatDistance(meters) {
+export function formatDistance(meters) {
   return meters >= 1000
     ? `${(meters / 1000).toFixed(meters >= 10000 ? 0 : 1)} km`
     : `${Math.round(meters)} m`;

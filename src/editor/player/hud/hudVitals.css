@@ -1,0 +1,123 @@
+/*
+ * Vitals on the left, above the legend: mana's tall bar rising out of a diamond of
+ * gems. `HudVitals` publishes --level on the bar and on each gem. The diamonds
+ * are clip-paths rather than rotated squares so a gem fills straight upwards.
+ */
+.hud-vitals {
+  position: absolute;
+  bottom: calc(var(--hud-inset-y) + 136px);
+  left: var(--hud-inset-x);
+  width: 150px;
+  height: 258px;
+  animation: glade-rise-in 320ms ease both;
+}
+
+.hud-vitals[hidden] {
+  display: none;
+}
+
+.hud-vitals__bar {
+  position: absolute;
+  top: 0;
+  bottom: 34px;
+  left: 21px;
+  width: 26px;
+  background: #ead29c;
+  clip-path: polygon(0 16px, 100% 0, 100% 100%, 0 100%);
+}
+
+.hud-vitals__bar::before {
+  position: absolute;
+  inset: 1.5px;
+  background: #0b1014;
+  clip-path: polygon(0 16px, 100% 0, 100% 100%, 0 100%);
+  content: '';
+}
+
+.hud-vitals__bar i {
+  position: absolute;
+  inset: auto 1.5px 1.5px;
+  height: calc(var(--level, 100%) - 3px);
+  background: linear-gradient(180deg, #dcecff, #6f9fe0 55%, #3f6fb8);
+  clip-path: polygon(0 16px, 100% 0, 100% 100%, 0 100%);
+}
+
+.hud-vital {
+  --gem-size: 54px;
+  --gem-empty: #1b1a16;
+
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--gem-size);
+  height: var(--gem-size);
+  background: #ead29c;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  color: #f5ecd8;
+}
+
+.hud-vital::before {
+  position: absolute;
+  inset: 1.5px;
+  background: var(--gem-empty);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  content: '';
+}
+
+.hud-vital i {
+  position: absolute;
+  inset: auto 1.5px 1.5px;
+  height: calc(var(--level, 100%) - 3px);
+  background: var(--gem-color);
+}
+
+.hud-vital svg {
+  position: relative;
+  width: 42%;
+  height: 42%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 1px #0009);
+}
+
+.hud-vital--mana {
+  --gem-size: 68px;
+  --gem-color: #5a0d12;
+
+  bottom: 0;
+  left: 0;
+}
+
+.hud-vital--stamina {
+  --gem-color: #5f8a6a;
+
+  bottom: 39px;
+  left: 39px;
+}
+
+.hud-vital--life {
+  --gem-color: #b0434c;
+
+  bottom: 7px;
+  left: 70px;
+}
+
+.hud-vital--energy {
+  --gem-color: #a9874a;
+
+  bottom: -25px;
+  left: 39px;
+}
+
+@media (max-width: 760px) {
+  .hud-vitals {
+    top: 124px;
+    bottom: auto;
+    height: 200px;
+    scale: 0.7;
+    transform-origin: top left;
+  }
+}

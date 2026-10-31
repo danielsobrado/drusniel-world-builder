@@ -2,6 +2,8 @@
 @import './hud/hudTheme.css';
 @import './hud/playerHud.css';
 @import './hud/hudMinimap.css';
+@import './hud/hudCompass.css';
+@import './hud/hudVitals.css';
 
 /* The Edit / Play switch floats over the viewport in every mode. */
 .view-mode-switcher {

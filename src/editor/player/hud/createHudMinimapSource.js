@@ -1,5 +1,10 @@
+import { selectMinimapBurgs } from '../../map/minimapBurgs.js';
 import { worldToCellPoint } from '../../world/WorldCoordinates.js';
 import { HudRegionMap } from './HudRegionMap.js';
+
+/** Settlements on the compass: the nearest few, out to this many minimap windows. */
+const COMPASS_MAX_PLACES = 5;
+const COMPASS_RANGE_FACTOR = 12;
 
 /**
  * Adapts the editor's minimap and tile lookups to what `HudMinimap` needs, so
@@ -49,6 +54,22 @@ export function createHudMinimapSource({ ui, controller, tileMap, getBaseTerrain
       const canonical = controller.focusProvider?.();
       return canonical ? worldToCellPoint(canonical.x, canonical.z, tileMap.tileSize) : null;
     },
+    getPlaces: (point) => selectMinimapBurgs({
+      campaign: controller.campaign ?? null,
+      center: { x: Math.floor(point.x), z: Math.floor(point.z) },
+      cells: active.getWindow().cells,
+      maxMarkers: COMPASS_MAX_PLACES,
+      edgeFactor: COMPASS_RANGE_FACTOR,
+    }).map(({ id, name, capital, color, u, v, distanceCells }) => ({
+      id,
+      name,
+      capital,
+      color,
+      // Rim clamping keeps a marker's direction, which is all the compass reads.
+      worldDx: u - 0.5,
+      worldDz: 0.5 - v,
+      metres: distanceCells * tileMap.tileSize,
+    })),
     describeCell: (cellX, cellZ) => {
       const definition = tileMap.getTileDefinition(tileMap.get(cellX, cellZ));
       return definition ? { label: definition.label, color: definition.color } : null;
