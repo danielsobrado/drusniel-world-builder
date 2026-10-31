@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
+import { settlementPavingJob } from '../src/editor/world/settlements/paving/SettlementPavingGeometry.js';
 import { segmentDistance } from '../src/editor/world/settlements/SettlementGeometry.js';
 import { indexPlan } from '../src/editor/world/settlements/SettlementPlanIndex.js';
 import { planSettlement } from '../src/editor/world/settlements/SettlementPlanner.js';
@@ -36,6 +37,26 @@ test('the approach is clear ground the field treats as road', () => {
     const hit = index.grid.near(x, z, 0).some((item) => item.street && item.distance(x, z) <= item.halfWidth);
     assert.ok(hit, 'a station of the approach must be covered');
   }
+});
+
+test('an approach stops at the first ground that cannot carry it, and still paves', () => {
+  const reach = Math.max(...gatehouses(walled()).map(({ x, z }) => Math.hypot(x, z))) + 20;
+  const isBuildable = (x, z) => Math.hypot(x, z) <= reach;
+  const plan = planSettlement({
+    settlement: { id: 930, name: 'Gate Test', cellX: 80, cellZ: 80, population: 28, plaza: true, walls: true, group: 'town' },
+    worldSeed: 4242,
+    routeBearings: [0.4, 2.6, 4.4],
+    isBuildable,
+  });
+  assert.ok(plan.approaches.length > 0);
+  assert.ok(plan.approaches.some(({ points }) => points.length < 7), 'the shore should cut an approach short');
+  for (const { points, halfWidths } of plan.approaches) {
+    assert.ok(points.length > 1);
+    assert.equal(halfWidths.length, points.length);
+    assert.ok(points.every(([x, z]) => isBuildable(x, z)));
+  }
+  const job = settlementPavingJob(plan, () => 0, new Proxy({}, { get: () => 4 }));
+  while (!job.next().done);
 });
 
 test('nothing at a gate stands in the road', () => {

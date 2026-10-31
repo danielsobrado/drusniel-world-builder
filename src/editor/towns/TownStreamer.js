@@ -102,7 +102,7 @@ export class TownStreamer {
           || this.buildErrors.has(settlement.id)) continue;
       let ready = true;
       for (const { entry: neighbor } of field.entriesNear(settlement.cellX, settlement.cellZ, entry.reachCells)) {
-        if (!plans.get(neighbor, distance * this.tileSize, this) || !neighbor.index) ready = false;
+        if (!plans.get(neighbor, this.distanceTo(neighbor.settlement, focus), this) || !neighbor.index) ready = false;
       }
       if (!ready) continue;
       this.pending.set(settlement.id, { settlement, plan });

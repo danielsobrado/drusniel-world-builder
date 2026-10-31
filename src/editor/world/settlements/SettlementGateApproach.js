@@ -46,6 +46,13 @@ function gateApproach(gate, streets) {
   return { points, halfWidths, roadHalf: (street?.width ?? 5.5) / 2 };
 }
 
+/** The approach up to its first station the ground refuses; the gate itself stands on built ground. */
+function buildableStretch({ points, halfWidths }, isBuildable) {
+  const refused = points.findIndex(([x, z], index) => index > 0 && !isBuildable(x, z));
+  const end = refused < 0 ? points.length : refused;
+  return { points: points.slice(0, end), halfWidths: halfWidths.slice(0, end) };
+}
+
 /** A point `offset` metres to `side` of the road, `distance` metres out from the gate. */
 function beside(approach, distance, side, offset) {
   const at = pointAlong(approach.points, distance);
@@ -136,7 +143,8 @@ export function planGateApproaches({ streets, defences, occupancy, gateProfile, 
   const bannerVariant = gateProfile.banners[Math.floor(random() * gateProfile.banners.length)];
   for (const [index, gate] of gates.entries()) {
     const approach = gateApproach(gate, streets);
-    approaches.push({ points: approach.points, halfWidths: approach.halfWidths });
+    const worn = buildableStretch(approach, occupancy.isBuildable);
+    if (worn.points.length > 1) approaches.push(worn);
     const scene = { gate, approach, side: random() < 0.5 ? -1 : 1, bannerVariant, gateProfile, occupancy, random };
     gateBanners(scene, props);
     placeScene(scene, props, gateProfile.checkpoint);

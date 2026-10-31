@@ -2,6 +2,7 @@ import { selectMinimapBurgs } from '../../map/minimapBurgs.js';
 import { createMinimapBurgElements } from '../../map/minimapBurgMarkers.js';
 import { paintRegionMap } from '../../map/regionMapPainter.js';
 import { getWorldVectorModel } from '../../map/worldMapModelCache.js';
+import { MAP_ZOOM } from './HudMinimap.js';
 
 /** Canvas resolution; the dial shows it at up to ~310 CSS px after the zoom. */
 const CANVAS_SIZE = 384;
@@ -94,7 +95,7 @@ export class HudRegionMap {
       height: this.cells * toSourceY,
     });
     const markers = selectMinimapBurgs({
-      campaign, center: this.center, cells: this.cells, maxMarkers: MAX_BURGS,
+      campaign, center: this.center, cells: this.cells, maxMarkers: MAX_BURGS, dialZoom: MAP_ZOOM,
     });
     this.burgs.replaceChildren(...createMinimapBurgElements(markers, this.tileSize));
   }

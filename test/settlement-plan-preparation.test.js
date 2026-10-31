@@ -63,6 +63,19 @@ test('late plans cannot cross world revisions or repopulate cancelled residency'
   assert.deepEqual(cancelled, [city.id, city.id]);
 });
 
+test('repeated lookups pin once and a pass releases what it stopped asking for', () => {
+  const main = field(), preparation = new SettlementPlanPreparation();
+  preparation.configure(main, { chunkWorker: { request: () => new Promise(() => {}) } });
+  const pin = main.planCache.pin.bind(main.planCache);
+  let pins = 0;
+  main.planCache.pin = (...args) => { pins++; pin(...args); };
+  for (let lookup = 0; lookup < 100; lookup++) preparation.get(main.entries[0]);
+  assert.equal(pins, 1);
+  assert.ok(main.planCache.isPinned(main.entries[0]));
+  preparation.begin(); preparation.end();
+  assert.equal(main.planCache.isPinned(main.entries[0]), false);
+});
+
 test('mismatched or unavailable worker plans remain explicit readiness failures', async () => {
   const main = field(), preparation = new SettlementPlanPreparation();
   preparation.configure(main, { chunkWorker: { request: async () => ({ settlementId: -1 }) } });

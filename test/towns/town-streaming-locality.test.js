@@ -91,6 +91,28 @@ test('kit town waits for draw preparation before publishing collision and follow
   } finally { f.streamer.dispose(); preparation.dispose(); f.geometry.dispose(); f.material.dispose(); }
 });
 
+test('a neighbouring plan is prioritised by its own distance, not its parent town\'s', () => {
+  const f = fixture();
+  const parent = { settlement: f.settlement, plan: f.plan, index: {}, skyline: {}, reachCells: 400 };
+  const neighbor = { settlement: { id: 2, cellX: 300, cellZ: 0 }, reachCells: 75 };
+  const field = { findById: id => (id === 1 ? parent : null),
+    entriesNear: (x, z, radius) => [parent, neighbor].map(entry => ({ entry,
+      distance: Math.hypot(entry.settlement.cellX - x, entry.settlement.cellZ - z) }))
+      .filter(({ distance }) => distance <= radius) };
+  f.generator.ensureSettlementField = () => field;
+  const priorities = [];
+  const store = { generator: f.generator, chunkWorker: { request: (x, z, { priority }) => {
+    priorities.push(priority);
+    return new Promise(() => {});
+  } } };
+  f.streamer.getWorldStore = () => store;
+  try {
+    f.streamer.generator = f.generator;
+    f.streamer.refresh(f.generator, { x: 0, z: 0 });
+    assert.deepEqual(priorities, [600]);
+  } finally { f.streamer.dispose(); f.geometry.dispose(); f.material.dispose(); }
+});
+
 test('a door update while a town owner stages cannot be lost at publication', () => {
   const source = new TownCollisionSource().configure(128);
   const door = { id: 'door', x: 0, y: 1, z: 0, sx: 1, sy: 2, sz: 1, yaw: 0 };

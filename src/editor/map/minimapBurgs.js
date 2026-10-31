@@ -4,7 +4,7 @@ const DEFAULT_BURG_COLOR = '#f0cf68';
 // How far past the visible window an off-map burg still earns a rim marker,
 // as a multiple of the window's half-width.
 export const MINIMAP_BURG_EDGE_FACTOR = 2.5;
-// Rim markers sit just inside the round player-mode frame.
+// Rim markers sit just inside the frame, as a share of what it shows.
 const MINIMAP_BURG_EDGE_RADIUS = 0.44;
 // Closest two names may sit, as a share of the window: the map turns under them,
 // so this is a radius rather than a row height.
@@ -19,6 +19,12 @@ const MINIMAP_LABEL_SPACING = 0.2;
  * still nearby are clamped to the rim and flagged `offscreen`, which is how a
  * settlement announces itself before it drifts into view.
  *
+ * `dialZoom` is set by a round dial that draws the window that much larger, so
+ * only a circle of the window shows and the rim has to fall inside that circle.
+ * shortcut: the rim is placed around the window centre and refreshed on recentre,
+ * so a marker can leave the dial while the player drifts; move it to a per-frame
+ * overlay if that shows.
+ *
  * Returns an empty list for worlds without an Azgaar campaign.
  */
 export function selectMinimapBurgs({
@@ -27,6 +33,7 @@ export function selectMinimapBurgs({
   cells,
   maxMarkers = 6,
   edgeFactor = MINIMAP_BURG_EDGE_FACTOR,
+  dialZoom = null,
 }) {
   const source = campaign?.source;
   const bounds = source?.target;
@@ -39,6 +46,7 @@ export function selectMinimapBurgs({
   );
   const halfCells = cells / 2;
   const rangeCells = halfCells * edgeFactor;
+  const rimCells = (MINIMAP_BURG_EDGE_RADIUS * cells) / (dialZoom ?? 1);
   const markers = [];
 
   for (const burg of campaign.burgs) {
@@ -55,13 +63,15 @@ export function selectMinimapBurgs({
     const distanceCells = Math.hypot(offsetX, offsetZ);
     if (distanceCells > rangeCells) continue;
 
-    const offscreen = Math.abs(offsetX) > halfCells || Math.abs(offsetZ) > halfCells;
+    const offscreen = dialZoom
+      ? distanceCells > rimCells
+      : Math.abs(offsetX) > halfCells || Math.abs(offsetZ) > halfCells;
     let u = 0.5 + offsetX / cells;
     let v = 0.5 + offsetZ / cells;
     if (offscreen) {
       // distanceCells is non-zero here: an offset inside half a cell of the
       // centre cannot leave the window.
-      const scale = (MINIMAP_BURG_EDGE_RADIUS * cells) / distanceCells;
+      const scale = rimCells / distanceCells;
       u = 0.5 + (offsetX / cells) * scale;
       v = 0.5 + (offsetZ / cells) * scale;
     }

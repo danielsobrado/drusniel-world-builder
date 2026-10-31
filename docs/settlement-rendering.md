@@ -241,9 +241,11 @@ look at.
   from 7.5 m to 4 m half-width. `SettlementPlanIndex` inserts them as street
   segments, so the field paints them as road tile; that, plus the path clearance
   round road tiles, is what keeps trees and grass off the view of the gate. There
-  is no separate tree rule.
+  is no separate tree rule. An approach stops short of its first unbuildable
+  station, and a gate facing that ground straight away has none.
 - **Grounding.** The paving lays an earth ribbon along each approach, flared at
-  the gate and no wider than the road at its far end. A wider ribbon turns the
+  the gate and no wider than the road at its far end, so it is deliberately
+  narrower than the cleared sightline. A wider ribbon turns the
   whole approach into a bare yard and the road stops leading the eye. Fieldstone
   and the odd boulder lie along the wall foot either side of the gate.
 - **Props come in scenes, not scatter.** `gate_checkpoint` at every gate: a

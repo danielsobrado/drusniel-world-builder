@@ -16,6 +16,8 @@ import { typedArrayJob } from '../SettlementArrayJobs.js';
 const STEP = 1.6;
 /** Extra half-width, in metres, that the ragged border is allowed to occupy. */
 const BORDER = 0.55;
+/** Metres of earth ribbon, edge to edge, per metre of a gate approach's cleared half-width: the sightline stays far wider than the worn ground. */
+const APPROACH_RIBBON_WIDTH = 1.15;
 /** Cross-section stations, as a fraction of the half-width, and their `edge`. */
 const STATIONS = Object.freeze([[-1, 1], [-0.62, 0.18], [0, 0], [0.62, 0.18], [1, 1]]);
 /** Wheel tracks on a country road: metres from the crown, half a track's width, and how deep and dark. */
@@ -320,7 +322,7 @@ export function* settlementPavingJob(plan, heightAt, tileMetres) {
     const widthAt = (t) => {
       const at = t * (halfWidths.length - 1);
       const index = Math.min(halfWidths.length - 2, Math.floor(at));
-      return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * 1.15;
+      return (halfWidths[index] + (halfWidths[index + 1] - halfWidths[index]) * (at - index)) * APPROACH_RIBBON_WIDTH;
     };
     yield* addRibbon(buffers.get('earth'), smoothPath(points), widthAt, { closed: false, fadeStart: false, fadeEnd: true, tone: 0.97, rutted: true }, heightAt);
     yield;

@@ -10,6 +10,7 @@ export class SettlementPlanPreparation {
     this.requests = new Map();
     this.epoch = 0;
     this.consumers = new Map();
+    this.pinned = new Set();
     this.retry = new SettlementRequestRetry(retryOptions);
   }
 
@@ -19,6 +20,7 @@ export class SettlementPlanPreparation {
     for (const id of this.requests.keys()) this.store?.chunkWorker?.cancelSettlementPlan?.(id);
     this.requests.clear();
     this.consumers.clear();
+    this.pinned = new Set();
   }
 
   configure(field, store) {
@@ -32,7 +34,11 @@ export class SettlementPlanPreparation {
   get(entry, priority = 0, consumer = this) {
     if (!this.consumers.has(consumer)) this.begin(consumer);
     this.consumers.get(consumer).add(entry.settlement.id);
-    this.field?.planCache?.pin(this, new Set([...this.consumers.values()].flatMap(ids => [...ids])));
+    // Only growth reaches the cache here; end() settles the set, and a pass may repeat an id many times.
+    if (!this.pinned.has(entry.settlement.id)) {
+      this.pinned.add(entry.settlement.id);
+      this.field?.planCache?.pin(this, this.pinned);
+    }
     if (entry.plan !== undefined && entry.skyline !== undefined) {
       this.field?.planCache?.retain(entry);
       return entry.plan;
@@ -77,9 +83,9 @@ export class SettlementPlanPreparation {
   begin(consumer = this) { this.consumers.set(consumer, new Set()); }
   release(consumer) { this.consumers.delete(consumer); this.end(); }
   end() {
-    const wanted = new Set([...this.consumers.values()].flatMap(ids => [...ids]));
-    this.field?.planCache?.pin(this, wanted);
-    for (const id of this.requests.keys()) if (!wanted.has(id)) {
+    this.pinned = new Set([...this.consumers.values()].flatMap(ids => [...ids]));
+    this.field?.planCache?.pin(this, this.pinned);
+    for (const id of this.requests.keys()) if (!this.pinned.has(id)) {
       this.store?.chunkWorker?.cancelSettlementPlan?.(id);
       this.requests.delete(id);
     }

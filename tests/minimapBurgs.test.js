@@ -46,6 +46,25 @@ test('a nearby burg outside the window is clamped to the rim and flagged offscre
   assert.ok(Math.abs(marker.v - 0.5) < 1e-9);
 });
 
+test('a zoomed round dial keeps rim markers inside the circle it shows', () => {
+  const dialZoom = 1.7;
+  const dialRadius = ({ u, v }) => Math.hypot(u - 0.5, v - 0.5) * dialZoom;
+  // In the window, but beyond what the dial shows: the far corner and due east.
+  const campaign = createCampaign([
+    { i: 1, name: 'Corner', x: 570, y: 470 },
+    { i: 2, name: 'Farhold', x: 650, y: 400 },
+    { i: 3, name: 'Near', x: 510, y: 400 },
+  ]);
+  const markers = selectMinimapBurgs({ campaign, center: { x: 0, z: 0 }, cells: 192, dialZoom });
+  const named = Object.fromEntries(markers.map((marker) => [marker.name, marker]));
+  assert.equal(named.Near.offscreen, false);
+  assert.ok(Math.abs(named.Near.u - (0.5 + 10 / 192)) < 1e-9);
+  for (const name of ['Corner', 'Farhold']) {
+    assert.equal(named[name].offscreen, true);
+    assert.ok(Math.abs(dialRadius(named[name]) - 0.44) < 1e-9);
+  }
+});
+
 test('burgs beyond the edge range are dropped', () => {
   const campaign = createCampaign([{ i: 1, name: 'Distant', x: 900, y: 400 }]);
   assert.deepEqual(

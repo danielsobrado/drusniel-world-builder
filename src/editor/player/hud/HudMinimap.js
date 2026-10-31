@@ -1,7 +1,7 @@
 import { HUD_PHASE } from './hudState.js';
 
 /** The borrowed bitmap is drawn this much larger than the dial it shows through. */
-const MAP_ZOOM = 1.7;
+export const MAP_ZOOM = 1.7;
 /**
  * How far the player may drift from the bitmap's centre, as a fraction of its
  * window, before it is redrawn around them. The dial stays covered at any
