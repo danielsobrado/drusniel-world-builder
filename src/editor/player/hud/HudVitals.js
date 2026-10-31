@@ -1,17 +1,18 @@
 import { hudIcon } from './hudIcons.js';
 import { HUD_PHASE } from './hudState.js';
 
-/** Mana is the primary resource: it owns the large diamond and the tall bar. */
 const VITALS = Object.freeze([
-  { id: 'mana', label: 'Mana' },
   { id: 'stamina', label: 'Stamina' },
   { id: 'life', label: 'Life' },
+  { id: 'mana', label: 'Mana' },
   { id: 'energy', label: 'Energy' },
 ]);
+/** The two main resources also get a tall phial, one on each side of the gems. */
+const PHIALS = Object.freeze(['life', 'mana']);
 
 /**
- * The vitals cluster on the left of the walking HUD: mana as a tall bar over a
- * diamond of four resource gems, each filling from the bottom.
+ * The vitals cluster on the left of the walking HUD: four equal gems in a diamond,
+ * flanked by the life and mana phials, each filling from the bottom.
  *
  * shortcut: nothing in the game tracks these yet, so they sit full; call `set`
  * from the system that introduces them.
@@ -21,11 +22,14 @@ export class HudVitals {
     this.element = document.createElement('div');
     this.element.className = 'hud-vitals';
     this.element.hidden = true;
-    this.bar = document.createElement('div');
-    this.bar.className = 'hud-vitals__bar';
-    this.bar.append(document.createElement('i'));
-    this.element.append(this.bar);
 
+    this.phials = new Map(PHIALS.map((id) => {
+      const phial = document.createElement('div');
+      phial.className = `hud-vitals__phial hud-vitals__phial--${id}`;
+      phial.append(document.createElement('i'));
+      this.element.append(phial);
+      return [id, phial];
+    }));
     this.gems = new Map(VITALS.map(({ id, label }) => {
       const gem = document.createElement('div');
       gem.className = `hud-vital hud-vital--${id}`;
@@ -50,7 +54,7 @@ export class HudVitals {
     const gem = this.gems.get(id);
     gem.style.setProperty('--level', `${percent}%`);
     gem.setAttribute('aria-valuenow', String(percent));
-    if (id === 'mana') this.bar.style.setProperty('--level', `${percent}%`);
+    this.phials.get(id)?.style.setProperty('--level', `${percent}%`);
   }
 
   dispose() {
