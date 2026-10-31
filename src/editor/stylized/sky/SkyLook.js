@@ -91,6 +91,9 @@ function greyed(hex, amount, dim) {
 /** How much each colour darkens under full cover: rain clouds read grey, not white. */
 const OVERCAST_DIMMING = Object.freeze({ highColor: 0.35, cloudCore: 0.5, cloudEdge: 0.4, cloudRim: 0.5 });
 
+/** Far enough under the cloud noise's whole range, with the stratus sharpness, that nothing shows through. */
+const OVERCAST_CLOUD_DENSITY = -0.25;
+
 /**
  * The look under cloud cover: colours drain toward a cool grey, the sun
  * weakens, clouds close up and stop casting distinct shadows, fog thickens.
@@ -108,7 +111,8 @@ export function overcastSkyLook(look, amount) {
   result.shadowRadius = look.shadowRadius * (1 + 1.5 * t);
   result.sunEmission = look.sunEmission * (1 - 0.8 * t);
   result.sunGlowIntensity = look.sunGlowIntensity * (1 - 0.8 * t);
-  result.cloudDensity = look.cloudDensity - 0.3 * t;
+  // Toward an absolute lid, not by an offset: a clear-skied region would otherwise keep blue holes at full cover.
+  result.cloudDensity = look.cloudDensity + (OVERCAST_CLOUD_DENSITY - look.cloudDensity) * t * t;
   result.cloudOpacity = Math.min(1, look.cloudOpacity + 0.3 * t);
   result.cloudShadowStrength = look.cloudShadowStrength * (1 - t);
   result.fogDensityScale = look.fogDensityScale * (1 + 0.6 * t);

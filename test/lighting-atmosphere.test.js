@@ -148,3 +148,10 @@ test('dry overcast is selectable and activates no precipitation or storm systems
     }
   } finally { controller.dispose(); }
 });
+
+test('full overcast closes the cloud deck under any regional sky', () => {
+  const clear = { ...resolveSkyLook({ preset: 'highfield' }), cloudDensity: 0.7 };
+  const covered = overcastSkyLook(clear, 1);
+  assert.ok(covered.cloudDensity + covered.cloudSharpness < 0.25, 'cloud noise must clear the threshold everywhere');
+  assert.ok(overcastSkyLook(clear, 0.4).cloudDensity > 0.3, 'light cover stays broken');
+});
