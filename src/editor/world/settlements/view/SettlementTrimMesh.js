@@ -3,6 +3,7 @@ import { attribute, mx_noise_float, positionLocal, sin, smoothstep, time, uv, ve
 import { STONE_PALETTES } from '../../../workshop/ProceduralWorkshopMaterials.js';
 import { projectedUvAt } from '../../../workshop/WorkshopProjectedUv.js';
 import { WALL_STAIR } from '../SettlementTrim.js';
+import { gradeSettlementMaterial } from './SettlementGrade.js';
 
 const WOOD = [0.2, 0.12, 0.07];
 const IRON = [0.07, 0.07, 0.08];
@@ -282,7 +283,7 @@ function wallRepair(builder, variant, stone) {
     let x = -width / 2 + (course % 2) * 0.35 + (random() - 0.5) * 0.2;
     while (x < width / 2) {
       const length = 0.6 + random() * 0.4;
-      builder.box(x + length / 2, y, 0.03, length - 0.03, 0.33, 0.07, shade(stone, 1.12 + random() * 0.2));
+      builder.box(x + length / 2, y, 0.03, length - 0.03, 0.33, 0.07, shade(stone, 0.92 + random() * 0.16));
       x += length;
     }
   }
@@ -342,6 +343,8 @@ export function createSettlementTrimParts(entry) {
   });
   if (GAIT[entry.kind]) material.positionNode = amble(GAIT[entry.kind]);
   material.userData.workshopSlot = masonry ? 'stone' : 'wood';
+  // The wall's own stone must take the wall's own grade, or it reads as a patch of another colour.
+  if (masonry) gradeSettlementMaterial(material, 'stone', { plastered: false });
   const cloth = CLOTH.has(entry.kind);
   if (cloth) {
     material.colorNode = canvasColour();
