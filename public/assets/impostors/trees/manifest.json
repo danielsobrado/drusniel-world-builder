@@ -1,10 +1,10 @@
 {
   "version": 4,
-  "generatedAt": "2026-10-30T17:12:53.355Z",
-  "sourceSignature": "tree-impostor-v8-e9125626",
+  "generatedAt": "2026-10-31T03:33:05.765Z",
+  "sourceSignature": "tree-impostor-v8-77ef1b6a",
   "sourceInputs": {
     "version": 1,
-    "configuration": "67b8a6506f07312a0d7ebf7bd94db57842101557966b4045154f3c14604f1b76",
+    "configuration": "487b3a9a63ba32607ed9a2eeb47f671645edea057a8535ad2d2ce54f1d57e07c",
     "files": {
       "public/assets/grass-scene.glb": "7b0c6932643aca545bb04584c242c932bd48bc127d1a54266817e60662b572b4",
       "public/assets/textures/bark/bark_AO.png": "d71fd24119c330e8e54ca7138e86e80779c7b72a7ba27de74c2a4e1ec8b71524",
@@ -35,7 +35,7 @@
       "public/assets/trees/tree-scene/tree-03.glb": "502d37a67cec0d956bdfc7585e0375c20c06a3ab768ee145d7d3cb01f93d3fb9",
       "src/editor/stylized/AuthoredTextureNode.js": "6235f2a2b4b745a0dcc3330777e23922e68ab22799d467c163e2e8b42a8c44e7",
       "src/editor/stylized/StylizedPrototypeBake.js": "84d37363ad05197ea3f184d19d0b7ec2179ddcb95a7adf0370f841ef15df93fc",
-      "src/editor/stylized/StylizedTreeMaterials.js": "fe155d6c1de7d4aa998cd92a680f2f6642253a2b30c24a33688cc65da99d7396",
+      "src/editor/stylized/StylizedTreeMaterials.js": "c202adf4084b35f64adc268e257eb2722a2da98fcc3f3a5705c9c52473d43124",
       "src/editor/stylized/StylizedTreePrototypes.js": "1888efeacf914aff540f23b1166ca08fdbf9731080cfc7364bf07a38c700bf71",
       "src/editor/stylized/StylizedTreeView.js": "dd4af8bf2bb6ebf7a6d9c9812b1848f7b354745e12091b9ec2a3d90faae7f5e4",
       "src/editor/stylized/barkWeathering.js": "4c06c1939a23c430f7df5cb522b6ca8bb36f18bb591e6bc2c53a6de1bc580a1a",

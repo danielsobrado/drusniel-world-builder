@@ -13,7 +13,7 @@ import { planTrim } from './SettlementTrim.js';
 import { planWallDressing } from './SettlementWallDressing.js';
 import { planRandom, planStreets } from './SettlementStreets.js';
 
-export const SETTLEMENT_PLAN_VERSION = 16;
+export const SETTLEMENT_PLAN_VERSION = 17;
 /** Part of every town's seed. Raising it redraws every town; the version above only invalidates caches. */
 const SETTLEMENT_LAYOUT_EPOCH = 14;
 
@@ -71,7 +71,7 @@ export function planSettlement({
   const gateSeed = planRandom(hashInts(worldSeed, settlement.id, 0x6a7e));
   const gateProfile = gateProfileFor(profile);
   const gateways = planGateApproaches({ streets, defences, occupancy, gateProfile, random: gateSeed });
-  const wallDressing = planWallDressing({ defences, wall: gateProfile.wall, random: gateSeed });
+  const wallDressing = planWallDressing({ defences, wall: gateProfile.wall, occupancy, random: gateSeed });
   const styleKey = profile.style.key;
   // A building the plan fronts on a street gets the door its pooled mesh has (SettlementDoors.generated).
   const withPad = (item) => ({

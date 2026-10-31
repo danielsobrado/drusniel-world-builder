@@ -26,6 +26,8 @@ import {
   isInsideOpening,
 } from './ProceduralWorkshopMasonry.js';
 import { createRandom, mixSeed } from './ProceduralRandom.js';
+import { stackCourses } from './ProceduralWorkshopCoursePacker.js';
+import { wornMerlon } from './ProceduralWorkshopMerlonWear.js';
 import { tagOpeningGeometry, tagStructureGeometry } from './ProceduralWorkshopSemantics.js';
 import { buildArchetypeSets, hasArchetypeGenerator } from './ProceduralWorkshopArchetypes.js';
 import { gatehouseTowerDimensions, roundTowerDimensions } from './ProceduralWorkshopTowerDimensions.js';
@@ -290,19 +292,21 @@ function buildBattlementLine(sets, recipe, {
 }) {
   const merlons = Math.max(3, Math.ceil(width / 1.25));
   const spacing = width / merlons;
+  const random = createRandom(mixSeed(recipe.seed, seedOffset + 930));
   let stableIndex = seedOffset * 10000;
   for (let index = 0; index < merlons; index += 1) {
     const localX = -width / 2 + spacing * (index + 0.5);
+    const { height, lean } = wornMerlon(random, 0.62);
     addStone(sets.stone, recipe, {
       width: Math.min(0.62, spacing * 0.58),
-      height: 0.62,
+      height,
       depth: depth + 0.2,
       position: [
         centerX + Math.cos(yaw) * localX,
-        y + 0.31,
+        y + height / 2,
         centerZ - Math.sin(yaw) * localX,
       ],
-      rotation: [0, yaw, 0],
+      rotation: [0, yaw, lean],
     }, stableIndex + index, 1);
   }
   const coping = Math.max(2, Math.ceil(width / 0.7));
@@ -348,19 +352,19 @@ function buildTowerBody(recipe, {
 }) {
   const random = createRandom(mixSeed(recipe.seed, seedOffset));
   const stones = [];
-  const courseHeight = 0.5 - recipe.detail * 0.04;
-  const courses = Math.max(3, Math.ceil(height / courseHeight));
-  const actualHeight = height / courses;
+  const courses = stackCourses(height, 0.42 - recipe.detail * 0.034, random);
   const circumference = TAU * radius;
-  const blocks = Math.max(12, Math.ceil(circumference / (0.82 - recipe.detail * 0.06)));
+  const blocks = Math.max(12, Math.ceil(circumference / (0.68 - recipe.detail * 0.05)));
+  // Flat stones are spaced on the centre line, but it is their outer faces that
+  // show: sized for the centre, every vertical joint opens into a dark slot.
+  const outerFace = 1 + depth / 2 / radius;
   let stableIndex = seedOffset * 10000;
 
-  for (let course = 0; course < courses; course += 1) {
+  for (const [course, { y, height: actualHeight }] of courses.entries()) {
     const phase = (course % 2) * Math.PI / blocks;
-    const y = (course + 0.5) * actualHeight;
     for (let block = 0; block < blocks; block += 1) {
       const angle = phase + block / blocks * TAU;
-      const blockWidth = circumference / blocks * 0.94;
+      const blockWidth = circumference / blocks * outerFace * 0.96;
       if (!openings.some((opening) => (
         towerOpeningAt(opening, angle, radius, y, blockWidth / 2)
       ))) {
@@ -394,19 +398,21 @@ function buildRoundBattlements(sets, recipe, {
   seedOffset,
 }) {
   const count = Math.max(10, Math.ceil(TAU * radius / 1.05));
+  const random = createRandom(mixSeed(recipe.seed, seedOffset + 930));
   let stableIndex = seedOffset * 10000;
   for (let index = 0; index < count; index += 1) {
     const angle = index / count * TAU;
+    const { height: merlonHeight, lean } = wornMerlon(random, 0.66);
     addStone(sets.stone, recipe, {
       width: TAU * radius / count * 0.58,
-      height: 0.66,
+      height: merlonHeight,
       depth: depth * 1.12,
       position: [
         centerX + Math.sin(angle) * (radius + depth * 0.08),
-        height + 0.33,
+        height + merlonHeight / 2,
         centerZ + Math.cos(angle) * (radius + depth * 0.08),
       ],
-      rotation: [0, angle, 0],
+      rotation: [0, angle, lean],
     }, stableIndex + index, 1);
   }
   for (let index = 0; index < count * 2; index += 1) {

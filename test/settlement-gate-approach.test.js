@@ -79,6 +79,14 @@ test('long walls are broken up on their outer face', () => {
   }
 });
 
+test('a wall foot carries fallen stone and stores outside the wall', () => {
+  const plan = walled();
+  const lengths = plan.buildings.filter(({ kind }) => kind === 'wall');
+  const near = (piece) => lengths.some(({ x, z }) => Math.hypot(piece.x - x, piece.z - z) < 8);
+  assert.ok(plan.props.filter((prop) => prop.kind === 'fieldstone' && near(prop)).length >= lengths.length);
+  assert.ok(plan.props.some((prop) => prop.kind === 'barrels' && near(prop)));
+});
+
 test('peoples build their gates and walls differently', () => {
   const med = regional({ culture: 3, stateName: 'Lumeshire', biomeId: 6, elevation: 12 });
   const goblin = regional({ culture: 9, stateName: 'Grukmar', biomeId: 12, elevation: 8 });

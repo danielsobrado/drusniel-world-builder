@@ -396,30 +396,31 @@ stylizedSurface:
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
-        preferredTileIds: [9]
         leafGain: 2
       # Two more distinct conifer crowns from the same pack, 630 and 624
       # triangles. Verified distinct rather than transforms of tree-wide-01.
+      # Both are broad, broadleaf-shaped crowns on a 1.8 m low-poly stem, so they
+      # stay in temperate rainforest. Preferring the pack in taiga also shut out
+      # the primary spruces there, and a boreal wood grew oak silhouettes.
       - scene: /assets/trees/forest-pack/tree-wide-02.glb
         trunkMaterial: Tree_Trunk_01
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
-        preferredTileIds: [9]
+        tileIds: [8]
         leafGain: 2
       - scene: /assets/trees/forest-pack/tree-wide-03.glb
         trunkMaterial: Tree_Trunk_01
         leafMaterial: Tree_Branches_01
         species: conifer_wide
         scale: 1
-        preferredTileIds: [9]
+        tileIds: [8]
         leafGain: 2
       - scene: /assets/trees/forest-pack/tree-narrow-01.glb
         trunkMaterial: Tree_Trunk_02
         leafMaterial: Tree_Branches_02
         species: conifer_narrow
         scale: 1
-        preferredTileIds: [9]
         # A narrow green crown that reads as broadleaf: kept to the boreal biomes,
         # so the bog's conifer stands are the scene's dark spruces.
         tileIds: [9, 10]
@@ -537,7 +538,7 @@ stylizedSurface:
       # scripts/prepare-alpine-tree-assets.mjs: billboards stripped, needles and
       # settled snow merged into one vertex-coloured leaf part, leaves decimated to
       # 2 000 triangles (5 666 and 3 596 in all). The crown keeps its painted snow
-      # (COLOR_0), so they stay in tundra; green forest-pack crowns serve taiga.
+      # (COLOR_0), so they stay in tundra; spruces and forest-pack crowns serve taiga.
       - scene: /assets/trees/alpine/tree10.glb
         trunkMaterial: Alpine bark
         leafMaterial: Evergreen needles

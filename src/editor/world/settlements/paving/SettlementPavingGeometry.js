@@ -202,6 +202,10 @@ const APRON = Object.freeze({ reach: 1.9, tuck: 0.35 });
 // Fraying from the wall outward, with no darkening of its own: the shade layer does that.
 const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 1], [0.2, 0.15, 1], [APRON.reach * 0.45, 0.55, 1], [APRON.reach, 1, 1]]);
 
+/** Walls and towers wear a wider strip: patrols, carts and rain-off keep their foot bare. */
+const DEFENCE_KINDS = new Set(['wall', 'tower']);
+const DEFENCE_APRON_SPREAD = 1.7;
+
 /** The perimeter of a footprint grown by `offset`, `perSide` points to a side. */
 function footprintRing(building, offset, perSide) {
   const sin = Math.sin(building.yaw);
@@ -231,9 +235,10 @@ function footprintRing(building, offset, perSide) {
  */
 function addApron(buffer, building, heightAt) {
   const perSide = Math.max(2, Math.ceil(Math.max(building.width, building.depth) / STEP));
+  const spread = DEFENCE_KINDS.has(building.kind) ? DEFENCE_APRON_SPREAD : 1;
   let previous = null;
   for (const [offset, edge, tone] of APRON_RINGS) {
-    const row = footprintRing(building, offset, perSide).map(([x, z]) => buffer.vertex(x, z, edge, heightAt, tone));
+    const row = footprintRing(building, offset > 0 ? offset * spread : offset, perSide).map(([x, z]) => buffer.vertex(x, z, edge, heightAt, tone));
     if (previous) {
       for (let index = 0; index < row.length; index += 1) {
         const next = (index + 1) % row.length;

@@ -6,6 +6,9 @@ const DEFAULT_BURG_COLOR = '#f0cf68';
 export const MINIMAP_BURG_EDGE_FACTOR = 2.5;
 // Rim markers sit just inside the round player-mode frame.
 const MINIMAP_BURG_EDGE_RADIUS = 0.44;
+// Closest two names may sit, as a share of the window: the map turns under them,
+// so this is a radius rather than a row height.
+const MINIMAP_LABEL_SPACING = 0.2;
 
 /**
  * Picks the Azgaar burgs worth drawing on the local minimap.
@@ -78,5 +81,15 @@ export function selectMinimapBurgs({
   // Nearest first, so the marker cap drops the far ones rather than whichever
   // the export happened to list last.
   markers.sort((left, right) => left.distanceCells - right.distanceCells);
-  return markers.slice(0, maxMarkers);
+  return labelNearestFirst(markers.slice(0, maxMarkers));
+}
+
+/** A burg keeps its dot, but its name only when no nearer burg's name is in the way. */
+function labelNearestFirst(markers) {
+  const named = [];
+  return markers.map((marker) => {
+    const labelled = named.every(({ u, v }) => Math.hypot(u - marker.u, v - marker.v) >= MINIMAP_LABEL_SPACING);
+    if (labelled) named.push(marker);
+    return Object.freeze({ ...marker, labelled });
+  });
 }

@@ -32,11 +32,11 @@ const FAMILY_GRADE = Object.freeze({
   roof: [0.96, 0.95, 0.94],
 });
 /**
- * Joint mortar of bare masonry, as a share of the stone it binds. The
- * workshop's is two-thirds of the stone, which reads as a pale grid between
- * blocks; recessed, weathered joints are darker than the faces they part.
+ * Joint mortar of bare masonry, as a share of the stone it binds. Recessed joints
+ * read darker than the faces they part already, from baked crevice occlusion:
+ * much below this and the joints outdraw the stone, near black from any distance.
  */
-const JOINT_DARKENING = 0.62;
+const JOINT_DARKENING = 0.92;
 const WEATHER_OF_SLOT = Object.freeze({ stone: 'stone', wood: 'timber', roof: 'roof' });
 /**
  * One palette with the medieval kit's towns: each family keeps only part of its

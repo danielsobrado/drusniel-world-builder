@@ -86,6 +86,34 @@ function nudgeOutOfBands(joint, bands, band, low, high) {
   return best;
 }
 
+/** Course heights are drawn within this fraction of the target height. */
+const COURSE_SPREAD_LOW = 0.76;
+const COURSE_SPREAD_HIGH = 1.24;
+
+/**
+ * Stack courses of uneven height that fill `height` exactly, so a wall reads as
+ * laid stone rather than ruled lines.
+ *
+ * @param {number} height total height to fill
+ * @param {number} targetHeight mean course height
+ * @param {() => number} random seeded PRNG in [0, 1)
+ * @returns {{ y: number, height: number }[]} course centres and heights, bottom up
+ */
+export function stackCourses(height, targetHeight, random) {
+  const count = Math.max(3, Math.ceil(height / targetHeight));
+  const weights = Array.from({ length: count }, () => (
+    COURSE_SPREAD_LOW + random() * (COURSE_SPREAD_HIGH - COURSE_SPREAD_LOW)
+  ));
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  let bottom = 0;
+  return weights.map((weight) => {
+    const courseHeight = weight / total * height;
+    const course = { y: bottom + courseHeight / 2, height: courseHeight };
+    bottom += courseHeight;
+    return course;
+  });
+}
+
 /**
  * Pack one course into `[-span / 2, +span / 2]`.
  *

@@ -56,11 +56,10 @@ test('authored snowfall matches reference coverage tuning and rejects inverted c
 });
 
 
-test('forest-pack crowns prefer taiga while alpine assets are limited to tundra',()=>{
- for(const name of ['tree-wide-01','tree-wide-02','tree-wide-03','tree-narrow-01']) {
-  const variant=surface.assets.treeVariants.find(v=>v.scene===`/assets/trees/forest-pack/${name}.glb`);
-  assert.deepEqual(variant.preferredTileIds,[9]);
- }
+test('broadleaf-shaped forest-pack crowns stay out of taiga while alpine assets are limited to tundra',()=>{
+ const pack=name=>surface.assets.treeVariants.find(v=>v.scene===`/assets/trees/forest-pack/${name}.glb`);
+ for(const name of ['tree-wide-01','tree-wide-02','tree-wide-03','tree-narrow-01'])assert.equal(pack(name).preferredTileIds,undefined);
+ for(const name of ['tree-wide-02','tree-wide-03'])assert.deepEqual(pack(name).tileIds,[8]);
  for(const variant of surface.assets.treeVariants.filter(v=>v.scene.includes('/alpine/'))) {
   assert.deepEqual(variant.tileIds,[10]);assert.deepEqual(variant.preferredTileIds,[10]);
  }

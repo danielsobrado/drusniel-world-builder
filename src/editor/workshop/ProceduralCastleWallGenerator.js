@@ -6,7 +6,8 @@ import {
   harmonizeVertexColors,
 } from './ProceduralWorkshopGeometry.js';
 import { buildProceduralFacadeIvy } from './ProceduralWorkshopIvy.js';
-import { packCourse } from './ProceduralWorkshopCoursePacker.js';
+import { packCourse, stackCourses } from './ProceduralWorkshopCoursePacker.js';
+import { wornMerlon } from './ProceduralWorkshopMerlonWear.js';
 import { createSurfaceRelief } from './ProceduralWorkshopSurfaceRelief.js';
 import { stoneJitter } from './ProceduralWorkshopIrregularity.js';
 import { applyUnitShading } from './ProceduralWorkshopMaterials.js';
@@ -82,10 +83,8 @@ function shouldDropRuinStone(recipe, random, x, y, localTop) {
 
 function buildWallBody(sets, recipe, openings, relief = null) {
   const random = createRandom(mixSeed(recipe.seed, 910));
-  const courseHeight = 0.5 - recipe.detail * 0.045;
-  const courseCount = Math.max(3, Math.ceil(recipe.height / courseHeight));
-  const actualCourseHeight = recipe.height / courseCount;
-  const targetStoneWidth = 0.92 - recipe.detail * 0.07;
+  const courses = stackCourses(recipe.height, 0.42 - recipe.detail * 0.038, random);
+  const targetStoneWidth = 0.76 - recipe.detail * 0.058;
   let stableIndex = 9_100_000;
 
   // Joints of the course below, so this course breaks bond against them
@@ -93,8 +92,7 @@ function buildWallBody(sets, recipe, openings, relief = null) {
   // outside the wall span and produced clipped part-stones at both ends.
   let previousJoints = [];
 
-  for (let course = 0; course < courseCount; course += 1) {
-    const y = (course + 0.5) * actualCourseHeight;
+  for (const { y, height: actualCourseHeight } of courses) {
     const { stones, joints } = packCourse({
       span: recipe.width,
       targetWidth: targetStoneWidth,
@@ -273,15 +271,18 @@ function buildBattlements(sets, recipe) {
   if (recipe.topStyle !== 'battlements') return;
   const count = Math.max(3, Math.ceil(recipe.width / 1.18));
   const spacing = recipe.width / count;
+  const random = createRandom(mixSeed(recipe.seed, 930));
 
   for (let index = 0; index < count; index += 1) {
     const x = -recipe.width / 2 + spacing * (index + 0.5);
     const top = getCastleWallTopHeight(recipe, x);
+    const { height, lean } = wornMerlon(random, 0.62);
     addStone(sets.stone, recipe, {
       width: Math.min(0.62, spacing * 0.58),
-      height: 0.62,
+      height,
       depth: recipe.depth + 0.16,
-      position: [x, top + 0.39, 0],
+      position: [x, top + 0.08 + height / 2, 0],
+      rotation: [0, 0, lean],
     }, 9_900_000 + index, 1);
   }
 }

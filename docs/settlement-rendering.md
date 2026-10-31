@@ -368,6 +368,31 @@ joint shadow do the drawing.
   surface's joints, so layers thin out into grass and into each other over a
   metre. Aprons carry no darkening of their own; the shade layer does that.
 
+## Walls up close
+
+- **Courses.** Walls and round towers lay courses of uneven height
+  (`stackCourses`), about 0.34 m tall and 0.64 m long at settlement detail.
+  Equal courses of the old 0.41 × 0.78 m read as a tiled texture. A wall length
+  costs roughly 1.5× the stones in its near tier.
+- **Round towers.** Flat stones are spaced on the centre line but seen on the
+  outer face, so they are widened by `1 + depth / 2 / radius`. Sized for the
+  centre line, every vertical joint opened into a dark slot.
+- **Mortar.** `JOINT_DARKENING` is 0.92: baked crevice occlusion already darkens
+  a recessed joint, and at 0.62 joints went near black on any face out of the
+  sun, which turned a shaded wall charcoal.
+- **Merlons** wear through `wornMerlon`: most a little short, one in seven broken
+  down, each slightly out of true.
+- **Repairs** feather course by course (`wallRepair`) and keep to the wall's own
+  tone, so they read as newer stone rather than a rectangle.
+- **The foot of a wall** carries three loose stones a length, stores every fifth
+  length, and an apron 1.7× a house's (`planWallDressing`, `addApron`).
+
+Measured on `settlement-approach` (burg 18, `--warmup 20 --duration 12 --settle`,
+frozen copy, alternating runs, all settled): 35.7 and 33.2 FPS before, 35.4 and
+36.1 after; p95 47.2 and 47.3 ms before, 46.8 and 47.2 after; hitches 100 and 108
+before, 107 and 111 after. Frame rate and p95 are inside run-to-run spread; two
+runs a side cannot rule out a small hitch increase.
+
 ## Doors and rooms
 
 `scripts/generate-settlement-doors.mjs` measures where the workshop puts each

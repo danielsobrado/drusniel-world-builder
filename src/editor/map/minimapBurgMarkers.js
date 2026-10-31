@@ -32,7 +32,8 @@ export function createMinimapBurgElements(markers, tileSize) {
       ? `${marker.name} · ${formatDistance(marker.distanceCells * tileSize)}`
       : marker.name;
 
-    element.append(dot, name);
+    element.append(dot);
+    if (marker.labelled) element.append(name);
     return element;
   });
 }

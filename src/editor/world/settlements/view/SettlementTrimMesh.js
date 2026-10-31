@@ -274,16 +274,21 @@ function wallShoring(builder, variant) {
   builder.box(0, 0.12, reach, 1.4, 0.24, 0.3, shade(WOOD, 0.8));
 }
 
-/** Newer coursed stone let into a wall at z = 0: paler, cleaner and a finger proud of the old. */
+/**
+ * Newer coursed stone let into a wall at z = 0, barely proud of the old. Each
+ * course stops at its own length, so the patch feathers out instead of showing
+ * a rectangle, and its tone stays within the wall's own stone-to-stone spread.
+ */
 function wallRepair(builder, variant, stone) {
   const random = seeded(variant + 53);
   const [courses, width] = [5 + variant, 2.6 + variant * 0.5];
   for (let course = 0; course < courses; course += 1) {
     const y = 1.1 + course * 0.36;
-    let x = -width / 2 + (course % 2) * 0.35 + (random() - 0.5) * 0.2;
-    while (x < width / 2) {
+    const half = width / 2 * (0.45 + 0.55 * Math.sin((course + 0.5) / courses * Math.PI)) + random() * 0.3;
+    let x = -half + (random() - 0.5) * 0.3;
+    while (x < half) {
       const length = 0.6 + random() * 0.4;
-      builder.box(x + length / 2, y, 0.03, length - 0.03, 0.33, 0.07, shade(stone, 0.92 + random() * 0.16));
+      builder.box(x + length / 2, y, 0.02, length - 0.03, 0.33, 0.05, shade(stone, 0.92 + random() * 0.16));
       x += length;
     }
   }
