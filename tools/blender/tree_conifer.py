@@ -10,8 +10,6 @@ from mathutils import Vector
 
 from tree_kit import Branch
 
-GOLDEN = 2.39996
-
 
 def trunk_sampler(points, radii, height):
     def at(z):
@@ -34,6 +32,8 @@ def whorled_conifer(rng, spec):
     bole = spec['clear_bole'] * height
     heading, phase = rng.uniform(0, 6.28), rng.uniform(0, 6.28)
     lean_dir = Vector((math.cos(heading), math.sin(heading), 0))
+    ortho_dir = Vector((-lean_dir.y, lean_dir.x, 0))
+    sweep_amp = height * rng.uniform(0.012, 0.026)
     points, radii = [], []
     # Cluster lower trunk stations near z=0 (and slightly below grade) for a smooth root flare
     ts = [-0.14 / max(height, 1.0), 0.0, 0.025, 0.06, 0.11] + [0.11 + 0.89 * i / 12 for i in range(1, 13)]
@@ -41,10 +41,19 @@ def whorled_conifer(rng, spec):
         tc = max(0.0, t)
         z = t * height
         zc = tc * height
-        wobble = Vector((math.sin(phase + tc * 5.1), math.cos(phase * 1.7 + tc * 4.3), 0)) * 0.15 * math.sin(math.pi * tc)
-        points.append(lean_dir * spec['lean'] * zc + wobble + Vector((0, 0, z)))
-        radii.append(base_radius * (1 - 0.2 * zc / bole) if zc < bole
-                     else base_radius * 0.8 + (tip_radius - base_radius * 0.8) * (zc - bole) / (height - bole))
+        curve = (
+            lean_dir * math.sin(tc * math.pi * 0.9) * sweep_amp
+            + ortho_dir * math.sin(phase + tc * math.pi * 1.6) * sweep_amp * 0.55
+            + Vector((math.sin(phase + tc * 4.3), math.cos(phase * 1.4 + tc * 3.7), 0)) * 0.08 * math.sin(math.pi * tc)
+        )
+        points.append(lean_dir * spec['lean'] * zc + curve + Vector((0, 0, z)))
+        if zc < bole:
+            u_b = zc / max(bole, 1e-4)
+            radii.append(base_radius * (1.0 - 0.18 * (u_b ** 0.85)))
+        else:
+            u_c = (zc - bole) / max(height - bole, 1e-4)
+            bole_top_r = base_radius * 0.82
+            radii.append(bole_top_r + (tip_radius - bole_top_r) * (u_c ** 0.88))
     trunk = Branch(points, radii, 0, kind='trunk')
     branches, cards = [trunk], []
     trunk_at = trunk_sampler(points, radii, height)
@@ -60,22 +69,29 @@ def whorled_conifer(rng, spec):
     while z < top:
         t = (z - bole) / (height - bole)
         reach = crown * (1 - t) ** spec['profile_power']
-        start, trunk_radius = trunk_at(z)
+        gaps = [rng.uniform(0.65, 1.35) for _ in range(spec['per_whorl'])]
+        gap_sum = sum(gaps) or 1.0
+        angle_cursor = turn
         for k in range(spec['per_whorl']):
-            angle = turn + k * 6.28318 / spec['per_whorl'] + rng.uniform(-0.2, 0.2)
-            length = rng.uniform(*spec['length_range']) if 'length_range' in spec else reach * 0.85 * rng.uniform(0.88, 1.12)
+            angle = angle_cursor
+            angle_cursor += (gaps[k] / gap_sum) * math.tau
+            branch_z = max(bole * 0.85, min(top, z + rng.uniform(-0.18, 0.18) * spec['whorl_spacing']))
+            start, trunk_radius = trunk_at(branch_z)
+            length = rng.uniform(*spec['length_range']) if 'length_range' in spec else reach * 0.85 * rng.uniform(0.84, 1.16)
             if length < 0.25:
                 continue
             pts, dirs, pos = [start.copy()], [], start.copy()
+            yaw_bend = rng.uniform(-0.18, 0.18)
             for j in range(segments):
                 f = (j + 0.5) / segments
-                elevation = 0.15 * (1 - f) - spec['droop'] * f
-                d = Vector((math.cos(angle) * math.cos(elevation), math.sin(angle) * math.cos(elevation), math.sin(elevation)))
+                seg_angle = angle + yaw_bend * (f - 0.25)
+                elevation = 0.15 * (1 - f) - spec['droop'] * f + rng.uniform(-0.04, 0.04)
+                d = Vector((math.cos(seg_angle) * math.cos(elevation), math.sin(seg_angle) * math.cos(elevation), math.sin(elevation)))
                 pos = pos + d * length / segments
                 pts.append(pos.copy())
                 dirs.append(d)
-            r0 = max(0.024, min(0.08, trunk_radius * 0.38))
-            branches.append(Branch(pts, [r0 + (0.012 - r0) * j / segments for j in range(segments + 1)], 1, parent=trunk))
+            r0 = max(0.024, min(0.08, trunk_radius * 0.42 * rng.uniform(0.85, 1.15)))
+            branches.append(Branch(pts, [r0 * ((0.012 / max(r0, 1e-4)) ** ((j / segments) ** 0.85)) for j in range(segments + 1)], 1, parent=trunk))
             for s in range(stations):
                 f = near if stations == 1 else near + (far - near) * s / (stations - 1)
                 at = min(int(f * segments), segments - 1)
@@ -89,7 +105,7 @@ def whorled_conifer(rng, spec):
                     cards.append({'base': base, 'dir': d, 'width': width, 'key': key,
                                   'roll': roll + c * math.pi / count, 'whorl': whorl, 'branch': k})
         whorl += 1
-        turn += GOLDEN
+        turn += rng.uniform(1.65, 2.85)
         z += spec['whorl_spacing']
     if stations:
         # The top of the crown is one upright leader pair.

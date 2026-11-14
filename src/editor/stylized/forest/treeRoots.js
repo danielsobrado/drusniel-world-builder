@@ -151,12 +151,25 @@ function uvRange(geometry) {
   return { minU, spanU: maxU - minU, minV, spanV: maxV - minV };
 }
 
-/** Compass headings of a tree's roots, stable for its seed. */
+/** Compass headings of a tree's roots, stable for its seed, with irregular angular spacing. */
 export function rootHeadings(seed, profile = ROOT_PROFILES.broadleaf) {
   const count = Math.round(lerp(profile.count, unitRandom(seed, 290)));
-  return Array.from({ length: count }, (_, root) => (
-    ((root + (unitRandom(seed, 300 + root * 7) - 0.5) * 0.6) / count) * Math.PI * 2
+  const gaps = Array.from({ length: count }, (_, root) => (
+    0.58 + unitRandom(seed, 300 + root * 7) * 0.84
   ));
+  const totalGap = gaps.reduce((sum, gap) => sum + gap, 0);
+  const startAngle = (unitRandom(seed, 291) - 0.5) * 0.5;
+  let angle = startAngle;
+  return gaps.map((gap) => {
+    const heading = angle;
+    angle += (gap / totalGap) * Math.PI * 2;
+    return heading;
+  });
+}
+
+function rootDominance(seed, root) {
+  const raw = unitRandom(seed, 300 + root * 7 + 5);
+  return 0.74 + raw * 0.44;
 }
 
 /**
@@ -184,28 +197,30 @@ export function createTreeRootGeometry(trunk, seed, {
   const footZ = stem.footZ ?? stem.z;
   rootHeadings(seed, profile).forEach((angle, root) => {
     const channel = 300 + root * 7;
-    const reach = Math.min(stem.radius * lerp(profile.reach, unitRandom(seed, channel + 1)), maxReach);
-    const rise = stem.radius * lerp(profile.rise, unitRandom(seed, channel + 2));
-    const thickness = stem.radius * lerp(profile.thickness, unitRandom(seed, channel + 3));
-    const wander = (unitRandom(seed, channel + 4) - 0.5) * 0.8;
+    const dominance = rootDominance(seed, root);
+    const reach = Math.min(stem.radius * lerp(profile.reach, unitRandom(seed, channel + 1)) * dominance, maxReach);
+    const rise = stem.radius * lerp(profile.rise, unitRandom(seed, channel + 2)) * (0.82 + dominance * 0.24);
+    const thickness = stem.radius * lerp(profile.thickness, unitRandom(seed, channel + 3)) * (0.8 + dominance * 0.22);
+    const wander = (unitRandom(seed, channel + 4) - 0.5) * 0.72;
+    const bend = (unitRandom(seed, channel + 6) - 0.5) * 0.28;
     const sink = thickness * 0.35;
     const first = positions.length / 3;
     let travelled = 0;
     let previous = null;
     for (let ring = 0; ring < ROOT_RINGS; ring += 1) {
       const t = ring / (ROOT_RINGS - 1);
-      const heading = angle + wander * t * t;
-      const out = stem.radius * 0.42 + reach * (t ** 1.12);
+      const heading = angle + wander * t * (1 - 0.25 * t) + bend * Math.sin(t * Math.PI);
+      const out = stem.radius * 0.38 + reach * (t ** 1.08);
       const originX = footX + (stem.x - footX) * ((1 - t) ** 1.6);
       const originZ = footZ + (stem.z - footZ) * ((1 - t) ** 1.6);
       const cx = originX + Math.cos(heading) * out;
       const cz = originZ + Math.sin(heading) * out;
-      // A fin from below the soil up to a crest that falls fast off the bole and
-      // then creeps along the ground, so the root reads as rising out of the earth.
-      const halfWidth = thickness * (1 - t * 0.72);
+      // A fin from below the soil up to a smooth concave collar that settles into
+      // the earth, so the root reads as continuous buttress wood rather than a wedge.
+      const halfWidth = thickness * (1 - t * 0.74);
       // The tip dives into the soil, so a dip under it never shows it hanging.
       const dive = stem.radius * 0.6 * t * t;
-      const crest = stem.minY + rise * ((1 - t) ** 1.75) + halfWidth * (1 - 0.5 * t) - dive;
+      const crest = stem.minY + rise * ((1 - t) ** 1.85) + halfWidth * (1 - 0.52 * t) - dive;
       const floor = stem.minY - sink - dive;
       const cy = (crest + floor) / 2;
       const halfHeight = Math.max(0.005, (crest - floor) / 2);
@@ -264,7 +279,7 @@ export function createTreeRootGeometry(trunk, seed, {
 export function swellTrunkBase(trunk, stem, headings, profile = ROOT_PROFILES.broadleaf) {
   const position = trunk.getAttribute('position');
   if (!position || headings.length === 0) return;
-  const reachHeight = stem.radius * lerp(profile.rise, 0.5) * 1.2;
+  const reachHeight = stem.radius * lerp(profile.rise, 0.5) * 1.25;
   const footX = stem.footX ?? stem.x;
   const footZ = stem.footZ ?? stem.z;
   for (let index = 0; index < position.count; index += 1) {
@@ -280,8 +295,11 @@ export function swellTrunkBase(trunk, stem, headings, profile = ROOT_PROFILES.br
     if (distance < 1e-5 || distance > stem.radius * 2.5) continue;
     const theta = Math.atan2(dz, dx);
     let lobe = 0;
-    for (const heading of headings) lobe = Math.max(lobe, Math.max(0, Math.cos(theta - heading)) ** 4);
-    const scale = 1 + profile.swell * ((1 - hClamped) ** 2.6) * (0.45 + 0.55 * lobe);
+    for (let r = 0; r < headings.length; r += 1) {
+      const weight = 0.75 + 0.35 * ((r % 3) / 2);
+      lobe = Math.max(lobe, weight * (Math.max(0, Math.cos(theta - headings[r])) ** 3));
+    }
+    const scale = 1 + profile.swell * ((1 - hClamped) ** 2.3) * (0.36 + 0.64 * Math.min(1.15, lobe));
     position.setX(index, axisX + dx * scale);
     position.setZ(index, axisZ + dz * scale);
   }

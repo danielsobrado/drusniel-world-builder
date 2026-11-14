@@ -70,6 +70,22 @@ def perpendicular(direction):
     return direction.cross(other).normalized()
 
 
+def _irregular_azimuths(rng, count, start=None):
+    """Choose `count` uneven azimuths without golden-angle spiral regularity."""
+    if count <= 0:
+        return []
+    azimuth = start if start is not None else rng.uniform(0.0, math.tau)
+    if count == 1:
+        return [azimuth]
+    gaps = [rng.uniform(0.55, 1.45) for _ in range(count)]
+    total = sum(gaps) or 1.0
+    angles = []
+    for gap in gaps:
+        angles.append(azimuth % math.tau)
+        azimuth += (gap / total) * math.tau
+    return angles
+
+
 def grow(rng, start, direction, length, radius, depth, spec, out, tip_radius=None, parent=None):
     """A branch from `start`, recursing into children per `spec` (taper,
     phototropism, gnarl, droop, children, child_start, angle, ratio, max_depth,
@@ -78,37 +94,65 @@ def grow(rng, start, direction, length, radius, depth, spec, out, tip_radius=Non
     steps = max(3, int(length / seg))
     points, radii = [start.copy()], [radius]
     pos, d = start.copy(), direction.normalized()
-    end_radius = tip_radius if tip_radius is not None else radius * spec['taper']
+    end_radius = max(1e-4, tip_radius if tip_radius is not None else radius * spec['taper'])
+    rad_ratio = end_radius / max(radius, 1e-4)
+    # Use a deterministic sub-RNG for organic bend/azimuth variation without perturbing caller's rng stream.
+    sub_seed = int(abs(start.x * 1009 + start.y * 9176 + start.z * 31337 + radius * 10000 + depth * 97))
+    sub_rng = random.Random(sub_seed)
+    bend_axis = perpendicular(d)
+    bend_phase = sub_rng.uniform(0.0, math.tau)
+    twist_sign = sub_rng.choice((-1.0, 1.0))
+    twist_amp = spec['gnarl'][min(depth, 4)] * (0.45 if depth >= 1 else 0.28)
     for i in range(1, steps + 1):
         t = i / steps
         up = Vector((0, 0, 1)) * spec['phototropism'][min(depth, 4)]
         droop = Vector((0, 0, -1)) * spec['droop'] * t * (depth >= 2)
-        d = (d + jitter(rng, spec['gnarl'][min(depth, 4)]) + up * seg * 0.1 + droop * 0.1).normalized()
+        wave = (Matrix.Rotation(twist_sign * t * 1.4, 3, d) @ bend_axis) * math.sin(bend_phase + t * 2.8) * twist_amp
+        d = (d + jitter(rng, spec['gnarl'][min(depth, 4)] * 0.72) + wave * 0.35 + up * seg * 0.1 + droop * 0.1).normalized()
         pos = pos + d * seg
         points.append(pos.copy())
-        radii.append(radius + (end_radius - radius) * t ** 0.8)
+        radii.append(max(1e-4, radius * (rad_ratio ** (t ** 0.88))))
     branch = Branch(points, radii, depth, parent=parent)
     out.append(branch)
     if depth >= spec['max_depth'] or radius < spec['min_radius']:
         return branch
     count = spec['children'][min(depth, 4)]
     golden = rng.uniform(0, 6.28)
+    azimuths = _irregular_azimuths(sub_rng, count, start=golden)
+    dominant_k = count - 1 if count >= 2 else 0
     for k in range(count):
-        # Anchor the final child at the parent tip (1.0) so limbs divide into terminal
-        # shoots instead of ending as thick amputated logs past their last side branch.
+        # Anchor the final child near the parent tip (1.0) so limbs divide into organic
+        # unequal terminal forks rather than terminating as blunt stumps.
         t = 1.0 if (k == count - 1 and count >= 2) else rng.uniform(spec['child_start'][min(depth, 4)], 0.92)
         index = min(len(points) - 1, max(1, round(t * (len(points) - 1))))
         parent_dir = (points[index] - points[index - 1]).normalized()
         side = perpendicular(parent_dir)
-        golden += 2.39996
-        side.rotate(Matrix.Rotation(golden, 3, parent_dir))
+        side.rotate(Matrix.Rotation(azimuths[k], 3, parent_dir))
         angle_range = spec['angle'][min(depth, 4)]
-        angle = math.radians(rng.uniform(*angle_range) * (0.55 if index == len(points) - 1 else 1.0))
+        is_apical = index == len(points) - 1
+        if is_apical and depth <= 1 and k == dominant_k:
+            split_scale = sub_rng.uniform(0.42, 0.58)
+        elif is_apical:
+            split_scale = sub_rng.uniform(0.72, 1.04)
+        else:
+            split_scale = 1.0
+        angle = math.radians(rng.uniform(*angle_range) * split_scale)
         child_dir = (parent_dir * math.cos(angle) + side * math.sin(angle)).normalized()
         child_len = length * rng.uniform(*spec['ratio']) * (1.15 - 0.35 * (index / (len(points) - 1)))
-        child_radius = radii[index] * (rng.uniform(0.62, 0.78) if index == len(points) - 1 else rng.uniform(0.45, 0.68))
+        raw_share = rng.uniform(0.62, 0.78) if is_apical else rng.uniform(0.45, 0.68)
+        if is_apical:
+            # Asymmetric apical fork: dominant leader retains most radius while lateral fork steps down.
+            share = min(0.84, raw_share * (1.05 if k == dominant_k else 0.78))
+        else:
+            share = min(0.68, raw_share * 0.96)
+        child_radius = min(radii[index] * 0.84, radii[index] * share)
         if child_radius < spec['min_radius'] * 0.6:
             continue
+        if depth <= 1 and not is_apical and share >= 0.48 and index < len(points) - 1:
+            deflect = -side * (0.045 * share)
+            for p_idx in range(index + 1, len(points)):
+                frac = (p_idx - index) / max(1, len(points) - 1 - index)
+                points[p_idx] += deflect * frac * (points[-1] - points[index]).length
         grow(rng, points[index], child_dir, child_len, child_radius, depth + 1, spec, out, parent=branch)
     return branch
 
@@ -204,20 +248,22 @@ def weld_skeleton_junctions(branches, add_collars=True, snag=False):
         if not apical_kids and not snag and parent.depth >= 1 and len(parent.points) >= 4:
             parent.radii[-1] = min(parent.radii[-1], max(0.016, parent.radii[0] * 0.25))
 
-        # Handle apical fork: flare the fork limbs from the parent's exact ring at p_base
+        # Handle apical fork: seat dominant leader closer to trunk axis and offset subordinate forks asymmetrically
         if apical_kids:
             parent.uncapped_tip = True
             p_base = p_tip - t_tip * (r_tip * 0.90)
             r_base = r_tip * 0.98
             parent_sides = _tube_sides_for(parent)
-            for c in apical_kids:
+            apical_kids.sort(key=lambda kid: kid.radii[0] if kid.radii else 0.0, reverse=True)
+            for k_idx, c in enumerate(apical_kids):
                 if len(c.points) < 2:
                     continue
                 if (c.points[0] - p_tip).length > 1e-4:
                     _translate_subtree(c, p_tip - c.points[0], children_map)
                 d_c = (c.points[1] - c.points[0]).normalized()
                 seg1_len = (c.points[1] - p_tip).length
-                r_c = c.radii[0]
+                r_c = min(c.radii[0], r_tip * (0.86 if k_idx == 0 else 0.70))
+                c.radii[0] = r_c
                 u_c = d_c - t_tip * d_c.dot(t_tip)
                 u_c = u_c.normalized() if u_c.length > 1e-4 else perpendicular(t_tip)
 
@@ -227,12 +273,13 @@ def weld_skeleton_junctions(branches, add_collars=True, snag=False):
                     c.forced_sides = min(8, parent_sides)
 
                 if (add_collars or parent.depth == 0) and len(c.points) >= 3:
-                    r_crotch = max(r_c * 1.12, r_tip * 0.74)
-                    p_crotch = p_tip + u_c * max(0.0, (r_tip * 0.94 - r_crotch)) + d_c * (r_tip * 0.12)
-                    neck_dist = min(seg1_len * 0.55, r_tip * 0.95)
+                    lat_shift = max(0.0, (r_tip * 0.88 - r_c)) * (0.35 if k_idx == 0 else 0.95)
+                    r_crotch = max(r_c * 1.16, min(r_tip * 0.82, r_c * 1.32))
+                    p_crotch = p_tip + u_c * lat_shift + d_c * (r_tip * 0.14)
+                    neck_dist = min(seg1_len * 0.58, r_tip * 1.05)
                     if add_collars and seg1_len > r_tip * 1.35:
                         p_neck = p_tip.lerp(c.points[1], neck_dist / max(seg1_len, 1e-4))
-                        r_neck = r_c + (c.radii[1] - r_c) * (neck_dist / max(seg1_len, 1e-4))
+                        r_neck = r_c * 1.06 + (c.radii[1] - r_c) * (neck_dist / max(seg1_len, 1e-4))
                         c.points = [p_base.copy(), p_crotch, p_neck] + c.points[1:]
                         c.radii = [r_base, r_crotch, r_neck] + c.radii[1:]
                     else:
@@ -240,7 +287,6 @@ def weld_skeleton_junctions(branches, add_collars=True, snag=False):
                         c.radii = [r_base, r_crotch] + c.radii[1:]
                     c.base_tangent = t_tip
                 else:
-                    r_crotch = max(r_c * 1.14, r_tip * 0.76)
                     c.points[0] = p_base.copy()
                     c.radii[0] = r_base
                     c.base_tangent = t_tip
@@ -254,25 +300,31 @@ def weld_skeleton_junctions(branches, add_collars=True, snag=False):
             else:
                 parent.radii[-1] = r_tip * 0.58
 
-        # Handle lateral branch collars
+        # Handle lateral branch collars with smoother two-stage flare
         for c, q, r_p, tang_p, _ in lateral_kids:
             if len(c.points) < 2:
                 continue
             d_c = (c.points[1] - c.points[0]).normalized()
             seg1_len = (c.points[1] - q).length
-            r_c = min(c.radii[0], r_p * 0.78)
+            r_c = min(c.radii[0], r_p * 0.70)
             c.radii[0] = r_c
             sin_a = max(0.38, math.sqrt(max(0.0, 1.0 - min(1.0, abs(d_c.dot(tang_p))) ** 2)))
             s_surf = min(r_p * 1.10, max(r_p * 0.42, r_p / sin_a))
-            p_anchor = q + d_c * (s_surf * 0.40)
-            r_anchor = min(r_p * 0.86, max(r_c * 1.36, r_c + r_p * 0.14))
-            collar_dist = s_surf + r_c * 0.55
+            p_anchor = q + d_c * (s_surf * 0.38)
+            r_anchor = min(r_p * 0.86, max(r_c * 1.38, r_c + r_p * 0.16))
+            shoulder_dist = s_surf + r_c * 0.25
+            p_shoulder = q + d_c * shoulder_dist
+            r_shoulder = min(r_anchor * 0.92, r_c * 1.16)
+            collar_dist = s_surf + r_c * 0.72
             p_collar = q + d_c * collar_dist
             r_collar = r_c
 
-            if add_collars and len(c.points) >= 3 and seg1_len > collar_dist + r_c * 0.35:
-                c.points = [p_anchor, p_collar] + c.points[1:]
-                c.radii = [r_anchor, r_collar] + c.radii[1:]
+            if add_collars and len(c.points) >= 3 and seg1_len > collar_dist + r_c * 0.45:
+                c.points = [p_anchor, p_shoulder, p_collar] + c.points[1:]
+                c.radii = [r_anchor, r_shoulder, r_collar] + c.radii[1:]
+            elif add_collars and len(c.points) >= 3 and seg1_len > s_surf + r_c * 0.45:
+                c.points = [p_anchor, q + d_c * (s_surf + r_c * 0.45)] + c.points[1:]
+                c.radii = [r_anchor, r_c] + c.radii[1:]
             else:
                 c.points[0] = p_anchor
                 c.radii[0] = r_anchor
@@ -295,6 +347,9 @@ def tube_mesh(bm, uv_layer, branch, radius_scale=None):
     normal = perpendicular(init_d)
     length_acc = 0.0
     circumference = 2 * math.pi * max(r0, 0.05)
+    asym_seed = sum((s + 1) * (ord(c) if isinstance(c, str) else 1) for s, c in enumerate(str(len(pts))))
+    asym_phase = (abs(init_d.x * 13.7 + init_d.y * 7.3 + pts[0].z) + asym_seed) % math.tau
+    ring_count = max(1, len(pts) - 1)
     for i, p in enumerate(pts):
         if i == 0 and getattr(branch, 'base_tangent', None) is not None:
             d = branch.base_tangent
@@ -305,12 +360,19 @@ def tube_mesh(bm, uv_layer, branch, radius_scale=None):
         if i > 0:
             length_acc += (pts[i] - pts[i - 1]).length
         v_coord = length_acc / circumference
+        t_height = i / ring_count
         ring_verts = []
         for s in range(sides):
             theta = s / sides * 2 * math.pi
             r = radii[i]
             if radius_scale:
                 r *= radius_scale(p.z, theta)
+            if branch.depth == 0:
+                asym = 1.0 + (1.0 - 0.55 * t_height) * (
+                    0.055 * math.cos(2.0 * theta + asym_phase + 0.55 * v_coord)
+                    + 0.035 * math.cos(3.0 * theta - asym_phase * 0.7)
+                )
+                r *= asym
             offset = normal * math.cos(theta) * r + binormal * math.sin(theta) * r
             ring_verts.append(bm.verts.new(p + offset))
         rings.append((ring_verts, v_coord))
@@ -422,9 +484,9 @@ def add_root_spurs(bm, uv_layer, trunk, spurs, trunk_scale=None, steps=5):
         h_global = min(1.0, max(0.0, z_st) / z_join)
         # Smooth blend to exact trunk_scale at h_global == 1.0
         flare_env = (1.0 - h_global)
-        # Gentle valley/collar swell right at the base so sinuses between roots curve into the ground
+        # Gentle valley/collar swell right at the base so sinuses remain subtly concave
         h_collar = min(1.0, max(0.0, z_st) / max(0.25, z_join * 0.45))
-        valley_swell = 1.0 + 0.18 * ((1.0 - h_collar) ** 2.4)
+        valley_swell = 1.0 + 0.09 * ((1.0 - h_collar) ** 2.6)
 
         v_coord = v_join - (z_join - z_st) / circumference
         ring_verts = []

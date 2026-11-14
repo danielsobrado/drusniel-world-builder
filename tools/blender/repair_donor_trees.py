@@ -48,6 +48,91 @@ def _trunk_slice_center_radius(
     return cx, cy, max(r, 1e-4)
 
 
+def _trunk_bend_offset(z_norm: float, t_height: float, seed: int) -> Vector:
+    """Seed-deterministic, grounded natural trunk sweep (zero at z_norm == 0)."""
+    t = max(0.0, min(1.0, z_norm))
+    p1 = seed * 1.73 + 0.4
+    p2 = seed * 2.91 + 1.6
+    dir1 = Vector((math.cos(p1), math.sin(p1), 0.0))
+    dir2 = Vector((-dir1.y, dir1.x, 0.0))
+    sweep1 = 0.036 * t_height * (0.72 * math.sin(t * math.pi * 1.15) + 0.28 * math.sin(t * math.pi * 2.1))
+    sweep2 = 0.018 * t_height * math.sin(max(0.0, t - 0.14) * math.pi * 1.7 + p2 * 0.15)
+    # Ease back slightly near crown top so upper canopy stays centered over base
+    crown_ease = 1.0 - 0.35 * (t ** 2.2)
+    return (dir1 * sweep1 + dir2 * sweep2) * crown_ease
+
+
+def _trunk_spine_samples(
+    trunk_verts: list[bmesh.types.BMVert], t_min_z: float, t_height: float, n_slices: int = 14
+) -> list[tuple[float, float, float, float]]:
+    """Return sorted (z, cx, cy, median_r) slices along the trunk."""
+    samples = []
+    half_win = max(0.035 * t_height, 0.5 * (t_height / n_slices))
+    for i in range(n_slices + 1):
+        z = t_min_z + (i / n_slices) * t_height
+        cx, cy, r = _trunk_slice_center_radius(trunk_verts, z, window=half_win)
+        samples.append((z, cx, cy, r))
+    return samples
+
+
+def _interp_trunk_spine(
+    samples: list[tuple[float, float, float, float]], z: float
+) -> tuple[float, float, float]:
+    if z <= samples[0][0]:
+        return samples[0][1], samples[0][2], samples[0][3]
+    if z >= samples[-1][0]:
+        return samples[-1][1], samples[-1][2], samples[-1][3]
+    for (z0, x0, y0, r0), (z1, x1, y1, r1) in zip(samples, samples[1:]):
+        if z0 <= z <= z1:
+            span = max(1e-5, z1 - z0)
+            f = (z - z0) / span
+            return x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, r0 + (r1 - r0) * f
+    return samples[-1][1], samples[-1][2], samples[-1][3]
+
+
+def _reshape_donor_trunk(
+    trunk_verts: list[bmesh.types.BMVert],
+    t_min_z: float,
+    t_height: float,
+    seed: int,
+) -> list[tuple[float, float, float, float]]:
+    """Apply subtle natural bend, gradual taper above the flare, and vertical asymmetry."""
+    samples = _trunk_spine_samples(trunk_verts, t_min_z, t_height)
+    # Build monotonic gradual bole taper reference above the root collar (z_norm >= 0.14)
+    bole_base_idx = min(len(samples) - 1, max(1, int(round(0.16 * (len(samples) - 1)))))
+    r_bole = samples[bole_base_idx][3]
+    phase2 = seed * 1.91 + 0.5
+    phase3 = seed * 2.63 + 1.2
+
+    for v in trunk_verts:
+        z_norm = max(0.0, min(1.0, (v.co.z - t_min_z) / t_height))
+        cx, cy, r_med = _interp_trunk_spine(samples, v.co.z)
+        dx = v.co.x - cx
+        dy = v.co.y - cy
+        r_v = math.hypot(dx, dy)
+        if r_v > 1e-5:
+            theta = math.atan2(dy, dx)
+            # Cure stagnant upper-trunk cylinder sections by blending toward a gradual power taper
+            taper_env = max(0.0, (z_norm - 0.12) / 0.88)
+            r_expected = r_bole * (1.0 - 0.52 * (taper_env ** 0.86))
+            r_capped = min(r_v, r_expected * 1.18) if z_norm > 0.25 and r_v > r_expected else r_v
+            if z_norm > 0.35 and r_med > r_expected:
+                r_capped = r_v * (r_expected / max(r_med, 1e-4))
+            asym = 1.0 + (1.0 - 0.45 * z_norm) * (
+                0.070 * math.cos(2.0 * theta + phase2 + 0.8 * z_norm)
+                + 0.042 * math.cos(3.0 * theta + phase3 - 0.6 * z_norm)
+            )
+            scale = (r_capped / r_v) * asym
+            v.co.x = cx + dx * scale
+            v.co.y = cy + dy * scale
+
+        bend = _trunk_bend_offset(z_norm, t_height, seed)
+        v.co.x += bend.x
+        v.co.y += bend.y
+
+    return _trunk_spine_samples(trunk_verts, t_min_z, t_height)
+
+
 def _add_donor_root_spurs(
     bm: bmesh.types.BMesh,
     uv_layer: bmesh.types.BMLayerItem,
@@ -55,13 +140,13 @@ def _add_donor_root_spurs(
     t_min_z: float,
     t_height: float,
     seed: int,
-    n_spurs: int = 5,
+    n_spurs: int = 4,
     steps: int = 3,
 ) -> None:
-    """Subdivide the lower donor trunk and sculpt its own vertices into a single-surface,
-    concave J-curved root flare with narrow, rounded root ridges and zero intersecting tent meshes."""
+    """Subdivide the lower donor trunk and sculpt its own vertices into an asymmetric,
+    concave root flare without creating a regular bell skirt."""
     trunk_set = set(trunk_verts)
-    subdiv_top_z = t_min_z + 0.14 * t_height
+    subdiv_top_z = t_min_z + 0.15 * t_height
     low_edges = [
         e
         for e in bm.edges
@@ -86,17 +171,32 @@ def _add_donor_root_spurs(
     mid_cx, mid_cy, mid_r = _trunk_slice_center_radius(
         sculpt_verts, t_min_z + 0.16 * t_height, window=0.035 * t_height
     )
-    ref_r = max(mid_r, foot_r * 0.75, 0.02 * t_height)
+    ref_r = max(mid_r, foot_r * 0.72, 0.02 * t_height)
     flare_top_z = t_min_z + 0.19 * t_height
-    base_ang_w = min(0.36, math.pi / (n_spurs * 1.45))
 
+    # Build irregular root headings with paired buttresses and open concave sinuses
+    actual_spurs = 4 if (seed % 2 == 0) else max(4, n_spurs)
+    base_ang_w = min(0.32, math.pi / (actual_spurs * 1.55))
+    gaps = [
+        0.58 + 0.84 * (0.5 + 0.5 * math.sin(seed * 1.9 + i * 2.37))
+        for i in range(actual_spurs)
+    ]
+    gap_sum = sum(gaps) or 1.0
+    ang_cursor = (seed * 1.13) % (2.0 * math.pi)
     spurs = []
-    for s_idx in range(n_spurs):
-        angle = (2.0 * math.pi * s_idx) / n_spurs + ((seed * 0.618 + s_idx * 0.29) % 0.36 - 0.18)
-        up_h = t_height * (0.16 + 0.025 * math.cos(seed * 1.3 + s_idx * 1.9))
-        out_r = ref_r * (0.92 + 0.18 * math.sin(seed * 1.7 + s_idx * 2.1))
-        curv = 0.14 * math.sin(seed * 2.1 + s_idx * 1.5)
-        spurs.append((angle, up_h, out_r, curv))
+    for s_idx, gap in enumerate(gaps):
+        angle = ang_cursor % (2.0 * math.pi)
+        ang_cursor += (gap / gap_sum) * (2.0 * math.pi)
+        # 2 dominant structural spurs and 2-3 subordinate spurs for natural asymmetry
+        is_dominant = (s_idx % 2 == 0)
+        if is_dominant:
+            up_h = t_height * (0.13 + 0.035 * abs(math.cos(seed * 1.3 + s_idx * 1.9)))
+            out_r = ref_r * (0.68 + 0.24 * abs(math.sin(seed * 1.7 + s_idx * 2.1)))
+        else:
+            up_h = t_height * (0.075 + 0.028 * abs(math.sin(seed * 2.3 + s_idx * 1.7)))
+            out_r = ref_r * (0.34 + 0.22 * abs(math.cos(seed * 2.1 + s_idx * 1.4)))
+        curv = 0.20 * math.sin(seed * 2.4 + s_idx * 1.8)
+        spurs.append((angle, up_h, out_r, curv, 1.0 if is_dominant else 0.78))
 
     for v in sculpt_verts:
         z_rel = v.co.z - t_min_z
@@ -110,34 +210,35 @@ def _add_donor_root_spurs(
             if r_orig > 1e-5:
                 theta_0 = math.atan2(dy, dx)
                 theta_shift = 0.0
-                for angle, up_h, _, curv in spurs:
+                for angle, up_h, _, curv, _ in spurs:
                     h_k = max(0.0, min(1.0, z_rel / max(1e-4, up_h)))
                     if h_k >= 1.0:
                         continue
                     az_k = angle + curv * ((1.0 - h_k) ** 1.45)
                     dth = math.atan2(math.sin(theta_0 - az_k), math.cos(theta_0 - az_k))
-                    pinch_env = ((1.0 - h_k) ** 1.35) * math.exp(-((dth / (base_ang_w * 1.55)) ** 2))
-                    theta_shift -= 0.44 * dth * pinch_env
+                    pinch_env = ((1.0 - h_k) ** 1.35) * math.exp(-((dth / (base_ang_w * 1.5)) ** 2))
+                    theta_shift -= 0.42 * dth * pinch_env
                 theta = theta_0 + theta_shift
 
-                h_collar = max(0.0, min(1.0, z_rel / max(1e-4, 0.09 * t_height)))
-                valley_swell = 1.0 + 0.22 * ((1.0 - h_collar) ** 2.4)
+                h_collar = max(0.0, min(1.0, z_rel / max(1e-4, 0.07 * t_height)))
+                # Minimal sinus swell so concave hollows stay crisp between buttresses
+                valley_swell = 1.0 + 0.05 * ((1.0 - h_collar) ** 2.6)
 
                 ext_total = 0.0
-                for angle, up_h, out_r, curv in spurs:
+                for angle, up_h, out_r, curv, width_mul in spurs:
                     h_k = max(0.0, min(1.0, z_rel / max(1e-4, up_h)))
                     if h_k >= 1.0:
                         continue
                     az_k = angle + curv * ((1.0 - h_k) ** 1.45)
                     dth = math.atan2(math.sin(theta - az_k), math.cos(theta - az_k))
-                    ang_w = base_ang_w * (0.72 + 0.28 * h_k)
+                    ang_w = base_ang_w * width_mul * (0.72 + 0.28 * h_k)
                     if abs(dth) >= ang_w * 1.75:
                         continue
                     lobe = math.exp(-((dth / ang_w) ** 2)) * (
                         math.cos(min(math.pi * 0.5, abs(dth) / (ang_w * 1.75))) ** 2
                     )
-                    h_low = max(0.0, min(1.0, z_rel / max(1e-4, up_h * 0.42)))
-                    j_curve = 0.26 * ((1.0 - h_k) ** 2.5) + 0.74 * ((1.0 - h_low) ** 2.35)
+                    h_low = max(0.0, min(1.0, z_rel / max(1e-4, up_h * 0.44)))
+                    j_curve = 0.24 * ((1.0 - h_k) ** 2.4) + 0.76 * ((1.0 - h_low) ** 2.25)
                     ext_k = out_r * j_curve * lobe
                     if ext_k > ext_total:
                         ext_total = ext_k
@@ -149,14 +250,12 @@ def _add_donor_root_spurs(
             v.co.z = t_min_z - 0.010 * t_height
 
 
-
-def _collar_branch_by_boundary_rings(
+def _collect_branch_rings(
     comp: list[bmesh.types.BMVert],
     parent_verts: list[bmesh.types.BMVert],
     tree_height: float,
-    collar_scales: tuple[float, float, float] = (0.78, 1.28, 1.10),
-) -> None:
-    """Seat and flare a tubular branch component using its exact base boundary ring."""
+) -> tuple[list[list[bmesh.types.BMVert]], Vector, Vector, float]:
+    """Trace longitudinal vertex rings along a tubular branch from its parent-facing base."""
     kd = KDTree(len(parent_verts))
     for i, pv in enumerate(parent_verts):
         kd.insert(pv.co, i)
@@ -177,10 +276,9 @@ def _collar_branch_by_boundary_rings(
             best_parent_co = co.copy()
 
     if best_v is None or best_parent_co is None:
-        return
+        return [], Vector((0.0, 0.0, 0.0)), Vector((0.0, 0.0, 0.0)), 0.0
 
-    # 1. Walk boundary edges from best_v within base radius to collect the exact base ring (ring 0)
-    max_ring0_span = 0.05 * tree_height
+    max_ring0_span = 0.055 * tree_height
     ring0: list[bmesh.types.BMVert] = []
     visited: set[bmesh.types.BMVert] = {best_v}
     stack = [best_v]
@@ -198,68 +296,142 @@ def _collar_branch_by_boundary_rings(
                     visited.add(other)
                     stack.append(other)
 
-    # Fallback if the base wasn't an open boundary loop
     if len(ring0) < 3:
-        ring0 = [v for v in comp if (v.co - best_v.co).length <= 0.025 * tree_height]
+        ring0 = [v for v in comp if (v.co - best_v.co).length <= 0.028 * tree_height]
         visited = set(ring0)
 
-    # 2. Step 1 edge-hop from ring0 to get ring1, and 1 edge-hop from ring1 to get ring2
-    ring1: list[bmesh.types.BMVert] = []
-    for v in ring0:
-        for e in v.link_edges:
-            other = e.other_vert(v)
-            if (
-                other in comp_set
-                and other not in visited
-                and (other.co - best_v.co).length <= 0.11 * tree_height
-            ):
-                visited.add(other)
-                ring1.append(other)
-
-    ring2: list[bmesh.types.BMVert] = []
-    for v in ring1:
-        for e in v.link_edges:
-            other = e.other_vert(v)
-            if (
-                other in comp_set
-                and other not in visited
-                and (other.co - best_v.co).length <= 0.17 * tree_height
-            ):
-                visited.add(other)
-                ring2.append(other)
+    rings: list[list[bmesh.types.BMVert]] = [ring0]
+    frontier = ring0
+    while frontier:
+        next_ring: list[bmesh.types.BMVert] = []
+        for v in frontier:
+            for e in v.link_edges:
+                other = e.other_vert(v)
+                if other in comp_set and other not in visited:
+                    visited.add(other)
+                    next_ring.append(other)
+        if not next_ring:
+            break
+        rings.append(next_ring)
+        frontier = next_ring
 
     ring0_center = sum((v.co for v in ring0), Vector((0.0, 0.0, 0.0))) / len(ring0)
     ring0_radius = sum((v.co - ring0_center).length for v in ring0) / len(ring0)
+    return rings, best_parent_co, ring0_center, ring0_radius
 
-    # Estimate parent center at attachment height
-    p_window = max(0.025 * tree_height, ring0_radius * 2.5)
-    p_neighbors = [pv.co for pv in parent_verts if abs(pv.co.z - ring0_center.z) <= p_window]
-    if not p_neighbors:
-        p_neighbors = [pv.co for pv in parent_verts if (pv.co - best_parent_co).length <= p_window * 2.0]
+
+def _reshape_branch_component(
+    comp: list[bmesh.types.BMVert],
+    parent_verts: list[bmesh.types.BMVert],
+    tree_height: float,
+    t_min_z: float,
+    seed: int,
+    branch_idx: int,
+    trunk_samples: list[tuple[float, float, float, float]] | None = None,
+    is_secondary: bool = False,
+) -> float:
+    """Seat branch collar smoothly inside parent, enforce proportional taper, and add organic bend/twist."""
+    rings, best_parent_co, ring0_center, ring0_radius = _collect_branch_rings(
+        comp, parent_verts, tree_height
+    )
+    if len(rings) < 2:
+        return 999.0
+
+    # Estimate parent center and radius near attachment height
+    p_window = max(0.025 * tree_height, ring0_radius * 2.6)
+    p_neighbors = [pv.co for pv in parent_verts if (pv.co - best_parent_co).length <= p_window * 2.2]
     parent_center = (
         sum(p_neighbors, Vector((0.0, 0.0, 0.0))) / len(p_neighbors)
         if p_neighbors
         else best_parent_co
     )
+    parent_r = (
+        sum((p - parent_center).length for p in p_neighbors) / max(1, len(p_neighbors))
+        if p_neighbors
+        else max(ring0_radius * 1.8, 0.02 * tree_height)
+    )
+    if trunk_samples is not None and not is_secondary:
+        cx_t, cy_t, tr_t = _interp_trunk_spine(trunk_samples, ring0_center.z)
+        parent_center = Vector((cx_t, cy_t, ring0_center.z))
+        parent_r = tr_t
 
-    # Seat target pulls ring0 inside the parent axis so open ring0 never pokes out
-    seat_target = best_parent_co.lerp(parent_center, 0.82)
-    seat_delta = seat_target - ring0_center
-    max_pull = max(ring0_radius * 2.6, 0.032 * tree_height)
-    if seat_delta.length > max_pull:
-        seat_delta = seat_delta.normalized() * max_pull
+    seat_target = best_parent_co.lerp(parent_center, 0.78 if not is_secondary else 0.68)
+    base_delta = seat_target - ring0_center
+    max_pull = max(ring0_radius * 4.0, (0.065 if not is_secondary else 0.060) * tree_height)
+    if base_delta.length > max_pull:
+        base_delta = base_delta.normalized() * max_pull
 
-    rings = (ring0, ring1, ring2)
-    pull_weights = (1.0, 0.42, 0.12)
-    for h in (0, 1, 2):
-        r_verts = rings[h]
-        if len(r_verts) < 3:
-            continue
-        rc = sum((v.co for v in r_verts), Vector((0.0, 0.0, 0.0))) / len(r_verts)
-        scale = collar_scales[h]
-        pull = seat_delta * pull_weights[h]
+    ring_centers = [sum((v.co for v in r), Vector((0.0, 0.0, 0.0))) / len(r) for r in rings]
+    tip_center = ring_centers[-1]
+    branch_axis = tip_center - ring0_center
+    branch_len = max(1e-4, branch_axis.length)
+    branch_dir = branch_axis / branch_len
+
+    # Orthogonal axes for subtle natural arch and directional twist
+    side_axis = Vector((-branch_dir.y, branch_dir.x, 0.0))
+    if side_axis.length < 1e-4:
+        side_axis = Vector((1.0, 0.0, 0.0))
+    side_axis.normalize()
+    arch_axis = branch_dir.cross(side_axis).normalized()
+    if arch_axis.z < 0:
+        arch_axis = -arch_axis
+
+    phase = seed * 2.17 + branch_idx * 1.43
+    arch_amp = branch_len * (0.065 + 0.045 * math.sin(phase)) * (1.0 if not is_secondary else 0.75)
+    crook_amp = branch_len * 0.048 * math.cos(phase * 1.3)
+
+    # Proportional base radius relative to supporting parent & smooth power taper toward tip
+    max_ratio = 0.58 if not is_secondary else 0.66
+    min_ratio = 0.28 if not is_secondary else 0.25
+    target_base_r = min(max(ring0_radius, parent_r * min_ratio), parent_r * max_ratio)
+    tip_ratio = 0.26 if not is_secondary else 0.22
+
+    n_rings = len(rings)
+    for k, r_verts in enumerate(rings):
+        u = k / max(1, n_rings - 1)
+        rc = ring_centers[k]
+        raw_r = sum((v.co - rc).length for v in r_verts) / max(1, len(r_verts))
+
+        # Smooth collar swell over basal 18%, blending into gradual power taper
+        collar = 1.0 + 0.16 * ((1.0 - min(1.0, u / 0.22)) ** 2)
+        desired_r = target_base_r * (1.0 - (1.0 - tip_ratio) * (u ** 0.85)) * collar
+        rad_scale = desired_r / max(raw_r, 1e-5)
+
+        # Follow trunk base movement decaying to 0 at tip so distal tips stay inside foliage
+        seat_w = (1.0 - u) ** 1.35
+        bend_w = math.sin(u * math.pi)
+        twist_w = math.sin(u * math.pi * 1.75) * (1.0 - 0.3 * u)
+        curve_offset = arch_axis * (arch_amp * bend_w) + side_axis * (crook_amp * twist_w)
+
         for v in r_verts:
-            v.co = rc + (v.co - rc) * scale + pull
+            offset = v.co - rc
+            # Slightly deepen vertical axis at base collar for oval trunk-branch blending
+            if k <= 1:
+                offset.z *= 1.12
+            v.co = rc + offset * rad_scale + base_delta * seat_w + curve_offset
+            if is_secondary and v.co.z < t_min_z + 0.15 * tree_height:
+                v.co.z = max(t_min_z + 0.15 * tree_height, v.co.z)
+
+    return (best_parent_co - ring0_center).length
+
+
+def _collar_branch_by_boundary_rings(
+    comp: list[bmesh.types.BMVert],
+    parent_verts: list[bmesh.types.BMVert],
+    tree_height: float,
+    collar_scales: tuple[float, float, float] = (0.78, 1.28, 1.10),
+) -> None:
+    """Backward-compatible wrapper around `_reshape_branch_component` for external callers."""
+    _reshape_branch_component(
+        comp,
+        parent_verts,
+        tree_height,
+        min(v.co.z for v in parent_verts),
+        seed=1,
+        branch_idx=0,
+        trunk_samples=None,
+        is_secondary=False,
+    )
 
 
 def repair_meadow_tree(idx: int, donor_dir: Path, existing_dir: Path, out_dir: Path) -> None:
@@ -392,16 +564,46 @@ def repair_meadow_tree(idx: int, donor_dir: Path, existing_dir: Path, out_dir: P
     t_height = max(1.0, t_max_z - t_min_z)
 
     # Filter non-trunk components:
-    # - Drop the 7 separate spider-leg root pipes (max_z < 0.08 * t_height)
-    # - Drop tiny canopy micro-twigs (len < 115 after remove_doubles)
-    # - Keep all primary branches (len >= 115 after remove_doubles)
+    # - Drop detached spider-leg root pipes (max_z < 0.08 * t_height)
+    # - Keep all primary branches (len >= 108)
+    # - Keep up to 10 structural secondary fork branches attached to primary limbs
+    #   to provide organic fork connections into the crown while staying inside the tri budget
+    sec_candidates: list[tuple[float, int, list[bmesh.types.BMVert]]] = []
     drop_verts: set[bmesh.types.BMVert] = set()
+    prim_only_verts: list[bmesh.types.BMVert] = []
+    raw_sec: list[list[bmesh.types.BMVert]] = []
     for comp in comps:
         if comp is lower_trunk or comp is upper_trunk:
             continue
         zs = [v.co.z for v in comp]
-        if max(zs) < t_min_z + 0.08 * t_height or len(comp) < 115:
+        if max(zs) < t_min_z + 0.08 * t_height or len(comp) < 32:
             drop_verts.update(comp)
+        elif len(comp) >= 108:
+            prim_only_verts.extend(comp)
+        elif min(zs) >= t_min_z + 0.18 * t_height:
+            raw_sec.append(comp)
+        else:
+            drop_verts.update(comp)
+
+    if raw_sec and prim_only_verts:
+        prim_kd = KDTree(len(prim_only_verts))
+        for i, pv in enumerate(prim_only_verts):
+            prim_kd.insert(pv.co, i)
+        prim_kd.balance()
+        for comp in raw_sec:
+            min_d = min(prim_kd.find(v.co)[2] for v in comp)
+            if min_d <= 0.14 * t_height:
+                span = max((v.co - comp[0].co).length for v in comp)
+                sec_candidates.append((span, len(comp), comp))
+            else:
+                drop_verts.update(comp)
+    else:
+        for comp in raw_sec:
+            drop_verts.update(comp)
+
+    sec_candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    for _, _, comp in sec_candidates[7:]:
+        drop_verts.update(comp)
 
     if drop_verts:
         drop_faces = [f for f in bm.faces if any(v in drop_verts for v in f.verts)]
@@ -410,23 +612,48 @@ def repair_meadow_tree(idx: int, donor_dir: Path, existing_dir: Path, out_dir: P
         if orphan_verts:
             bmesh.ops.delete(bm, geom=orphan_verts, context="VERTS")
 
-    # Recompute components: separate trunk components from primary branch components
+    # Recompute components: separate trunk, primary branches, and secondary forks
     comps = _connected_components(bm)
     surviving_trunk: list[bmesh.types.BMVert] = []
-    branch_comps: list[list[bmesh.types.BMVert]] = []
+    primary_comps: list[list[bmesh.types.BMVert]] = []
+    secondary_comps: list[list[bmesh.types.BMVert]] = []
     for comp in comps:
         zs = [v.co.z for v in comp]
         if min(zs) < t_min_z + 0.02 * t_height or max(zs) >= global_max_z - 0.01 * t_height:
             surviving_trunk.extend(comp)
+        elif len(comp) >= 108:
+            primary_comps.append(comp)
         else:
-            branch_comps.append(comp)
+            secondary_comps.append(comp)
 
-    branch_comps.sort(key=lambda c: min(v.co.z for v in c))
+    trunk_samples = _reshape_donor_trunk(surviving_trunk, t_min_z, t_height, seed=idx)
 
-    parent_verts: list[bmesh.types.BMVert] = list(surviving_trunk)
-    for comp in branch_comps:
-        _collar_branch_by_boundary_rings(comp, parent_verts, t_height)
-        parent_verts.extend(comp)
+    primary_comps.sort(key=lambda c: min(v.co.z for v in c))
+    for b_idx, comp in enumerate(primary_comps):
+        _reshape_branch_component(
+            comp,
+            surviving_trunk,
+            t_height,
+            t_min_z,
+            seed=idx,
+            branch_idx=b_idx,
+            trunk_samples=trunk_samples,
+            is_secondary=False,
+        )
+
+    fork_parents = [v for comp in primary_comps for v in comp] or list(surviving_trunk)
+    secondary_comps.sort(key=lambda c: min(v.co.z for v in c))
+    for s_idx, comp in enumerate(secondary_comps):
+        _reshape_branch_component(
+            comp,
+            fork_parents,
+            t_height,
+            t_min_z,
+            seed=idx,
+            branch_idx=100 + s_idx,
+            trunk_samples=None,
+            is_secondary=True,
+        )
 
     bmesh.ops.dissolve_degenerate(bm, dist=1e-5, edges=bm.edges)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -434,9 +661,9 @@ def repair_meadow_tree(idx: int, donor_dir: Path, existing_dir: Path, out_dir: P
     bm.free()
     mesh.update()
 
-    # Lightly decimate ONLY non-trunk branch vertices so total with 5 root spurs (205 tris) <= 1,980
+    # Lightly decimate ONLY non-trunk branch vertices so total with 4-5 root spurs (<= 220 tris) <= 1,980
     total_tris = sum(len(p.vertices) - 2 for p in mesh.polygons)
-    if total_tris > 1760:
+    if total_tris > 1740:
         bm2 = bmesh.new()
         bm2.from_mesh(mesh)
         comps2 = _connected_components(bm2)
@@ -455,8 +682,8 @@ def repair_meadow_tree(idx: int, donor_dir: Path, existing_dir: Path, out_dir: P
         vg.add(non_trunk_indices, 1.0, "REPLACE")
 
         branch_tris = max(1, total_tris - trunk_tris)
-        target_branch_tris = max(400, 1750 - trunk_tris)
-        ratio = max(0.45, min(0.95, target_branch_tris / branch_tris))
+        target_branch_tris = max(400, 1730 - trunk_tris)
+        ratio = max(0.36, min(0.95, target_branch_tris / branch_tris))
 
         bpy.context.view_layer.objects.active = existing_bark
         mod = existing_bark.modifiers.new(name="BranchDecimate", type="DECIMATE")
@@ -576,9 +803,10 @@ def repair_alpine_tree(idx: int, donor_dir: Path, alpine_dir: Path) -> None:
 
     comps = _connected_components(bm)
     trunk_comp = comps[0]
+    trunk_samples = _reshape_donor_trunk(trunk_comp, t_min_z, t_height, seed=idx)
 
-    # Repair branch components: lift sub-ground drooping tips on tree10, collar base, taper tip
-    for comp in comps[1:]:
+    # Repair branch components: lift sub-ground drooping tips on tree10, organic collar & taper
+    for b_idx, comp in enumerate(comps[1:]):
         zs = [v.co.z for v in comp]
         c_min_z = min(zs)
         if c_min_z < t_min_z + 0.20:
@@ -586,32 +814,16 @@ def repair_alpine_tree(idx: int, donor_dir: Path, alpine_dir: Path) -> None:
                 if v.co.z < t_min_z + 0.25:
                     v.co.z = max(t_min_z + 0.25, v.co.z + 0.78)
 
-        _collar_branch_by_boundary_rings(
-            comp, trunk_comp, t_height, collar_scales=(0.78, 1.32, 1.08)
+        _reshape_branch_component(
+            comp,
+            trunk_comp,
+            t_height,
+            t_min_z,
+            seed=idx,
+            branch_idx=b_idx,
+            trunk_samples=trunk_samples,
+            is_secondary=False,
         )
-
-        # Taper outer pipe end to a closed point instead of an open cylinder
-        comp_d = []
-        for v in comp:
-            cx, cy, _ = _trunk_slice_center_radius(trunk_comp, v.co.z, window=0.25)
-            d = math.hypot(v.co.x - cx, v.co.y - cy)
-            comp_d.append((d, v))
-        comp_d.sort(key=lambda item: item[0])
-        min_d = comp_d[0][0]
-        max_d = comp_d[-1][0]
-        span_d = max(1e-4, max_d - min_d)
-        if span_d > 0.30:
-            outer_verts = [v.co.copy() for d, v in comp_d if (d - min_d) / span_d >= 0.80]
-            tip_co = (
-                sum(outer_verts, Vector((0.0, 0.0, 0.0))) / len(outer_verts)
-                if outer_verts
-                else comp_d[-1][1].co.copy()
-            )
-            for d, v in comp_d:
-                t = (d - min_d) / span_d
-                if t > 0.82:
-                    u = min(1.0, (t - 0.82) / 0.18)
-                    v.co = v.co.lerp(tip_co, 0.88 * (u * u))
 
     uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.verify()
     _add_donor_root_spurs(bm, uv_layer, trunk_comp, t_min_z, t_height, seed=idx, n_spurs=5, steps=3)
