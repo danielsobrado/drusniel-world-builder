@@ -21,8 +21,10 @@ to three things.
    layers apart; hue does not.
 2. **Three plant layers.** A floor that closes over the ground (the meadow), an
    accent layer standing out of it (ground details, 0.2–1 m), and a shrub layer
-   (bushes, 1–3 m). A wood adds trees and debris on top. A biome missing a
-   layer reads as empty at eye level, however good the others are.
+   (bushes: low shrubs, tall edge shrubs and saplings, 0.3–5 m). A wood adds
+   trees and debris on top. A biome missing a layer reads as empty at eye
+   level, however good the others are. The five heights are in
+   [Objects a biome needs](#objects-a-biome-needs).
 3. **One row per table.** Tune the biome in its rows, then look at its
    neighbours in the same capture run. Do not special-case a tile id in a
    shader or a view.
@@ -46,17 +48,37 @@ Then run `node --test tests/biomeContract.test.js` and `npm test`.
 
 ### Objects a biome needs
 
+Between the grass and the crowns stand five layers, each a community of the
+biome's own species, not the same plants recoloured. A layer left empty is a
+height at which the biome reads as bare.
+
+| Layer | Height | Where | `canopy` |
+| --- | --- | --- | --- |
+| Ground cover | 2–15 cm | ground-detail row (litter, moss, floor scans), `forestDebris`, small `groundDetailVariants` | `core` for woodland floor plants, `open` for meadow rosettes |
+| Herbaceous | 15–60 cm | `groundDetailVariants`, `tropicalKitVariants`: ferns, broadleaf herbs, flowers | ferns and moss `core`, meadow flowers `open`, tall herbs and brambles `edge` |
+| Low shrubs | 0.3–1 m | `bushVariants` | `core` for shade shrubs, `open` for scrub |
+| Tall shrubs | 1–2.5 m | `bushVariants`; a shrub at a larger `scale` is a second entry with its own `id` | `edge` |
+| Saplings | 1.5–5 m | `bushVariants` (a single-mesh young-tree GLB), and the tree layer's young trees in the edge ring | `edge` |
+
+Height is the GLB's height times the variant's `scale`. The layer then scales
+each instance by its `minScale`–`maxScale`, and the edge belt by up to
+`1 + edgeScale` more. A bush variant is one mesh with one material: a tree GLB
+(trunk plus crown) cannot be listed as a sapling, because the bush layer would
+place each mesh on its own.
+
 | Kind of biome | Floor accents | Shrubs | Trees | Rocks |
 | --- | --- | --- | --- | --- |
 | Bare (desert, badlands, ice) | 2 or more | 1, sparse | none | look row `rock`, `formations` |
-| Open (grassland, savanna, tundra) | 6 or more, with 2 tall silhouettes | 2 or more | 2 or more, sparse | look row `rock` |
-| Wood (forest, rainforest, taiga, wetland) | 8 or more across two heights | 3 or more | 3 or more, plus a dead or young one | look row `rock`, moss raised in wet woods |
+| Open (grassland, savanna, tundra) | 6 or more, with 2 tall silhouettes | 2 low, 2 tall on the edge | 2 or more, sparse | look row `rock` |
+| Wood (forest, rainforest, taiga, wetland) | 8 or more, ground cover and herbaceous | 2 low, 2 tall on the edge, a `core` and an `open` species, a sapling | 3 or more, plus a dead or young one | look row `rock`, moss raised in wet woods |
 
 The test enforces the floor of this table: a name, a rock look, a floor
 accent, a shrub, a ground-detail row, and for a grass biome a soil, a canopy
-and a palette, and two tree variants where trees grow. The counts above are
-the art target, not a gate. A piece that truly does not apply goes in the
-test's `WAIVED` table with its reason.
+and a palette. Where trees grow it wants two tree variants and two shrub
+variants, one of them `canopy: edge`. Every shrub, floor and tropical-kit
+variant must name `tileIds` and `canopy`, and two entries for one GLB need
+distinct `id`s. The rest of the table is the art target, not a gate. A piece
+that truly does not apply goes in the test's `WAIVED` table with its reason.
 
 Asset rules are in [authored-natural-assets.md](authored-natural-assets.md):
 painted props under 350 triangles, scans up to their configured target, a
@@ -117,7 +139,7 @@ gets all of this from its forest profile and its variants' `canopy` tags.
 | Succession | A thin scatter of trees crosses the edge ring; those outside the closed stand are only saplings and young trees. | `ForestHabitatField.evaluate`, `weightedAge` |
 | Glades | Clearings 30-60 m across inside closed and fragmented woods, cut from the field itself: trees, shrubs, grass thinning, litter and the far canopy all open. Their rims grow the edge community. Grove biomes (savanna, grassland) get none. | `forestGlade` |
 | Communities | Each shrub and floor-plant species has its own slow field (16 m), so a stretch of ground favours two or three species, not all of them evenly. | `BiomePrototypeSelector` (`communities`) |
-| Variant `canopy` | `core`, `edge`, `open` weight which species grows where along the gradient. Tag every shrub and floor variant. | `assets.*Variants` |
+| Variant `canopy` | `core`, `edge`, `open` weight which species grows where along the gradient. Every shrub and floor variant is tagged (`any` where none fits); the contract test checks it. | `assets.*Variants` |
 
 Open meadow -> shrub belt -> saplings -> closed wood is therefore the default
 shape of any wood. What is not modelled: moisture (only distance to water),
@@ -134,7 +156,9 @@ until the player is near it.
   layer's residency, fetches at most two GLBs at once, and installs one per
   frame ([asset-startup-and-variant-residency.md](asset-startup-and-variant-residency.md)).
   A variant with no `tileIds` loads in every world: the contract test rejects
-  that for shrubs, floor accents and the tropical kit.
+  that for shrubs, floor accents and the tropical kit. Residency keys a variant
+  by `id ?? scene`, so a second entry for one GLB (the same shrub at another
+  scale) needs its own `id`, or only the first entry ever installs.
 - **Never at startup.** Only the trees and the shared scene may block the first
   frame (`CLAUDE.md`). Do not add a GLB to a `Promise.all` in `bootstrapLayers`.
 - **Textures.** A biome's own textures ride in its GLBs, KTX2-compressed, and

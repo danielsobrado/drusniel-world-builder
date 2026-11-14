@@ -21,6 +21,7 @@ const WAIVED = {
 };
 
 const variantsOn = (list, id) => (list ?? []).filter((variant) => variant.tileIds?.includes(id)).length;
+const edgeBushes = surface.assets.bushVariants.filter((variant) => variant.canopy === 'edge');
 const grows = (id) => (meadow.growth.byTileId?.[id]?.density ?? 0) > 0;
 
 for (const [key, look] of Object.entries(looks)) {
@@ -47,14 +48,24 @@ for (const [key, look] of Object.entries(looks)) {
     }
     if (surface.trees.tileIds.includes(id)) {
       need('trees', variantsOn(surface.assets.treeVariants, id) >= 2, 'two or more assets.treeVariants entries, so a wood is not one tree repeated');
+      need('shrubBelt', variantsOn(surface.assets.bushVariants, id) >= 2 && variantsOn(edgeBushes, id) >= 1,
+        'two or more assets.bushVariants entries, one with `canopy: edge`, so the meadow steps up to the crowns');
     }
   });
 }
 
-test('every streamed variant names its biomes, so it is withheld from worlds without them', () => {
+test('every streamed variant names its biomes, its place on the wood gradient and a key of its own', () => {
   for (const list of ['bushVariants', 'groundDetailVariants', 'tropicalKitVariants']) {
+    const keys = new Set();
     surface.assets[list].forEach((variant, index) => {
-      assert.ok(variant.tileIds?.length > 0, `assets.${list}[${index}] (${variant.scene ?? variant.id}) has no tileIds`);
+      const name = `assets.${list}[${index}] (${variant.id ?? variant.scene})`;
+      assert.ok(variant.tileIds?.length > 0, `${name} has no tileIds, so it loads in every world`);
+      assert.ok(variant.canopy, `${name} has no canopy (core, edge, open or any)`);
+      // Residency and the asset palette key a variant by `id ?? scene`: a second
+      // entry for one GLB without an id of its own never installs.
+      const key = variant.id ?? variant.scene;
+      assert.ok(!keys.has(key), `${name} repeats the key ${key}; give it an id`);
+      keys.add(key);
     });
   }
 });
