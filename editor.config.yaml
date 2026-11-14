@@ -2192,13 +2192,14 @@ stylizedSurface:
   bushes:
     enabled: true
     residentRadius: 2
-    # 216 since 2026-11-12 (was 180): woods were empty between trunks at eye level.
-    perChunk: 216
+    # 440 since 2026-11-14 (was 216): at one shrub per 9 m the woodland-edge belt
+    # was a few dots; a belt needs shrubs close enough to touch.
+    perChunk: 440
     # Biomes 1, 2, 10, 12, 32 now carry dedicated sparse desert ocotillo, boreal
     # juniper, and wetland buttonbush shrubs controlled by densityByTile below.
     tileIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 32]
-    minScale: 0.7
-    maxScale: 1.65
+    minScale: 0.85
+    maxScale: 1.9
     radius: 0.55
     colorLarge: '#6d9a5d'
     colorSmall: '#79a765'
@@ -2208,7 +2209,7 @@ stylizedSurface:
     # A shrub belt along every woodland edge, out past the last trunks, at this
     # share of a thicket's density; and how much taller its shrubs stand.
     edgeBelt: 0.85
-    edgeScale: 0.35
+    edgeScale: 0.6
     # Cluster density a wood's interior keeps at full canopy, wherever the cluster
     # field has no thicket: a closed forest has a shrub layer throughout.
     understoryDensity: 1.0
@@ -2614,8 +2615,10 @@ stylizedSurface:
       # Closed forest needs real density; the patch field keeps glades open, so
       # raising these thickens cores rather than filling the world evenly.
       # Spacing uses a bucket index, so cost is linear in candidates, not squared.
-      candidateBudgetPerChunk: 220
-      maxAcceptedPerChunk: 110
+      # 320 / 170 since 2026-11-14 (was 220 / 110): from the air a wood's crowns
+      # stood 12 m apart and read as scattered trees, not a canopy.
+      candidateBudgetPerChunk: 320
+      maxAcceptedPerChunk: 170
       patchSupercellSize: 384
       patchSampleSpacing: 12
       # Convert broad low-probability habitat into compact stands: coverage
