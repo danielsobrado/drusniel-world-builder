@@ -127,6 +127,7 @@ export class StylizedSurfaceView {
         cragsByTile: config.biomeLooks?.crags ?? [],
         snowBand: config.materialBake?.classification,
         seaLevel: terrainView.worldStore.generator?.seaLevel ?? 0,
+        config,
       })
       : null;
     this.rockView = this.enabled && !this.impostorBakeMode

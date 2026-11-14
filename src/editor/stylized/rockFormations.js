@@ -68,13 +68,13 @@ export function formationStones(gx, gz, config, shareAt) {
  * @param {object} options sink options (see createStonePlacementSink), plus:
  * @param {(x: number, z: number) => number} options.shareAt formation chance at a point, 0..1
  * @param {number} options.seaLevel
- * @param {(x: number, z: number) => boolean} [options.blocked] e.g. path clearance
+ * @param {(x: number, z: number, radius?: number) => boolean} [options.blocked] e.g. path clearance
  * @param {object} [options.config] `rocks.formations`
  */
 export function* iterateRockFormations({ shareAt, seaLevel, blocked = null, config = DEFAULT_ROCK_FORMATIONS, ...sinkOptions }) {
   if (!config.enabled) return [];
   const sink = createStonePlacementSink({ prefix: 'formation-rock', ...sinkOptions });
-  const { tileSize, heightAt } = sinkOptions;
+  const { tileSize, heightAt, radiusForScale } = sinkOptions;
   const { minX, minZ, maxX, maxZ } = sink.cells;
   const reach = config.maxRadius + config.cellMeters;
   const x0 = minX * tileSize - reach;
@@ -87,7 +87,8 @@ export function* iterateRockFormations({ shareAt, seaLevel, blocked = null, conf
       const formation = formationStones(gx, gz, config, shareAt);
       if (!formation) continue;
       for (const stone of formation.stones) {
-        if (!sink.owns(stone.x, stone.z) || blocked?.(stone.x, stone.z)) continue;
+        const radius = radiusForScale ? radiusForScale(stone.scale) : stone.scale;
+        if (!sink.owns(stone.x, stone.z) || blocked?.(stone.x, stone.z, radius)) continue;
         const height = heightAt(stone.x, stone.z);
         if (!Number.isFinite(seaLevel) || height < seaLevel + config.minimumAboveSea) continue;
         sink.place(stone.identity, stone.x, stone.z, stone.scale, stone.roll, stone.rotation, stone.priority, height);

@@ -84,19 +84,48 @@ function yardBlocks({ buildings, occupancy, random }, props) {
   }
 }
 
+function pushStoneIfClear(
+  kind,
+  x,
+  z,
+  span,
+  streetClearance,
+  occupancy,
+  random,
+  props,
+  { yaw = 0, sizeJitter, claim = false } = {},
+) {
+  const stone = looseStone(kind, x, z, random, sizeJitter);
+  const spot = rect(x, z, span, span, yaw);
+  if (occupancy && !occupancy.fits(spot, { clearance: 0.2, streetClearance })) return false;
+  if (claim && occupancy) occupancy.claim(spot, { soft: true });
+  props.push(stone);
+  return true;
+}
+
 /** A boulder and its scatter at one or two corners of every farm field. */
-function fieldClearance({ fields, random }, props) {
+function fieldClearance({ fields, occupancy, random }, props) {
   for (const field of fields) {
     const corners = rectCorners(rect(field.x, field.z, field.width + 2.4, field.depth + 2.4, field.yaw));
     const first = Math.floor(random() * 4);
     for (const index of random() < 0.4 ? [first, (first + 2) % 4] : [first]) {
       const [cx, cz] = corners[index];
-      props.push(looseStone('boulder', cx, cz, random));
+      pushStoneIfClear('boulder', cx, cz, 1.8, 1.2, occupancy, random, props, { yaw: field.yaw });
       const scatter = 2 + Math.floor(random() * 3);
       for (let pebble = 0; pebble < scatter; pebble += 1) {
         const angle = random() * Math.PI * 2;
         const distance = 0.9 + random() * 1.3;
-        props.push(looseStone('fieldstone', cx + Math.sin(angle) * distance, cz + Math.cos(angle) * distance, random, 0.35));
+        pushStoneIfClear(
+          'fieldstone',
+          cx + Math.sin(angle) * distance,
+          cz + Math.cos(angle) * distance,
+          1.0,
+          0.6,
+          occupancy,
+          random,
+          props,
+          { sizeJitter: 0.35 },
+        );
       }
     }
   }
@@ -128,7 +157,17 @@ function outcrops({ profile, occupancy, outcropRandom: random }, props) {
     for (let index = 0; index < scatter; index += 1) {
       const around = random() * Math.PI * 2;
       const reach = 2.2 + random() * 1.4;
-      props.push(looseStone('boulder', x + Math.sin(around) * reach, z + Math.cos(around) * reach, random));
+      pushStoneIfClear(
+        'boulder',
+        x + Math.sin(around) * reach,
+        z + Math.cos(around) * reach,
+        1.8,
+        1.2,
+        occupancy,
+        random,
+        props,
+        { claim: true },
+      );
     }
     placed += 1;
   }

@@ -34,3 +34,19 @@ test('formations stay out of the sea and off cleared paths', () => {
   assert.equal(chunkPlacements(0, 0, { seaLevel: 10, height: 5 }).length, 0, 'under the sea');
   assert.equal(chunkPlacements(0, 0, { blocked: () => true }).length, 0, 'on a path');
 });
+
+test('formation clearance forwards each stone radius so large boulders do not overhang paths', () => {
+  const all = chunkPlacements(0, 0);
+  assert.ok(all.length > 0);
+  const largest = all.reduce((best, stone) => (stone.radius > best.radius ? stone : best), all[0]);
+  const pathX = largest.x + largest.radius * 0.5;
+  const seenRadii = [];
+  const kept = chunkPlacements(0, 0, {
+    blocked: (x, z, radius) => {
+      seenRadii.push(radius);
+      return Math.abs(x - pathX) < radius;
+    },
+  });
+  assert.ok(seenRadii.some((radius) => radius === largest.radius), 'expected stone radius passed to blocked');
+  assert.equal(kept.some((stone) => stone.stableId === largest.stableId), false, 'overhanging stone excluded');
+});

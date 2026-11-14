@@ -127,3 +127,41 @@ test('natural trail clearance is stable across world chunk boundaries', () => {
   const disagreements = first.filter((value, index) => value !== second[index]).length;
   assert.ok(disagreements <= 1, `unexpected seam produced ${disagreements} disagreements`);
 });
+
+test('large boulders near a road are excluded when their radius reaches into clearance', () => {
+  const field = createField(3);
+  const worldZ = -50;
+  // Road is at cell 40 (x in [80, 82)); cell 45 (x = 91) is outside point clearance (3 cells = 6m).
+  assert.equal(field.blocks(91, worldZ), false);
+  // A boulder with 6m radius overlaps cell 42 (x in [84, 86)), which is inside road clearance.
+  assert.equal(field.blocks(91, worldZ, 6), true);
+  assert.equal(field.exclusion()({ x: 91, z: worldZ, radius: 6 }), true);
+  // Further away at x = 96, a 6m boulder stays clear.
+  assert.equal(field.blocks(96, worldZ, 6), false);
+  assert.equal(field.exclusion()({ x: 96, z: worldZ, radius: 6 }), false);
+});
+
+test('large boulders whose perimeter overlaps a natural trail are blocked', () => {
+  const field = createNaturalTrailField();
+  let trailX = null;
+  let trailZ = null;
+  for (let z = -320; z <= 320 && trailX === null; z += 4) {
+    for (let x = -320; x <= 320 && trailX === null; x += 4) {
+      if (field.blocks(x, z)) {
+        trailX = x;
+        trailZ = z;
+      }
+    }
+  }
+  assert.notEqual(trailX, null);
+  let shoulderX = null;
+  for (let dx = 0.5; dx <= 24; dx += 0.5) {
+    if (!field.blocks(trailX + dx, trailZ)) {
+      shoulderX = trailX + dx;
+      break;
+    }
+  }
+  assert.notEqual(shoulderX, null, 'expected an unblocked point just outside the natural trail');
+  assert.equal(field.blocks(shoulderX, trailZ, 0), false);
+  assert.equal(field.blocks(shoulderX, trailZ, 5), true);
+});

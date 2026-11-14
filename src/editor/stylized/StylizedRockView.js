@@ -597,6 +597,7 @@ export class StylizedRockView {
         z,
       ),
       radiusForScale: options.radiusForScale,
+      blocked: this.pathClearance?.enabled ? (x, z, r = 0) => this.pathClearance.blocks(x, z, r) : null,
       config: this.riverbankConfig,
     });
   }
@@ -616,7 +617,7 @@ export class StylizedRockView {
       heightAt: options.heightAt,
       seaLevel: this.terrainView.worldStore?.generator?.seaLevel,
       shareAt: (x, z) => share[tileAt(x, z)] ?? 0,
-      blocked: this.pathClearance?.enabled ? (x, z) => this.pathClearance.blocks(x, z) : null,
+      blocked: this.pathClearance?.enabled ? (x, z, r = 0) => this.pathClearance.blocks(x, z, r) : null,
       prototypeIndexForRoll: (roll, x, z) => options.prototypeIndexForRoll(roll, tileAt(x, z), x, z),
       radiusForScale: options.radiusForScale,
       config: this.formationConfig,

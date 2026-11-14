@@ -80,6 +80,7 @@ function clipToBox(segment, minX, minZ, maxX, maxZ) {
  * @param {(x: number, z: number) => number} options.heightAt canonical ground height
  * @param {(roll: number, x: number, z: number) => number} options.prototypeIndexForRoll
  * @param {(scale: number) => number} options.radiusForScale
+ * @param {(x: number, z: number, radius?: number) => boolean} [options.blocked] e.g. path clearance
  * @param {object} [options.config] `rocks.riverbank`
  */
 export function* iterateRiverbankRocks({
@@ -92,6 +93,7 @@ export function* iterateRiverbankRocks({
   heightAt,
   prototypeIndexForRoll,
   radiusForScale,
+  blocked = null,
   config = DEFAULT_RIVERBANK_ROCKS,
 }) {
   if (!config.enabled) return [];
@@ -106,7 +108,10 @@ export function* iterateRiverbankRocks({
     radiusForScale,
   });
   const { minX, minZ, maxX, maxZ } = sink.cells;
-  const place = (...args) => sink.place(...args);
+  const place = (identity, x, z, scale, roll, rotation, priority) => {
+    if (!sink.owns(x, z) || blocked?.(x, z, radiusForScale(scale))) return;
+    sink.place(identity, x, z, scale, roll, rotation, priority);
+  };
   const scaleFor = (roll, factor = 1) => (
     (config.minScale + roll * (config.maxScale - config.minScale)) * factor
   );

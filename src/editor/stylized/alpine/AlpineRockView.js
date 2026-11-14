@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { CELL_PENDING, CellResidency } from '../lod/CellResidency.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
+import { createPathClearanceField } from '../TreeManifestStore.js';
 import { ALPINE_CELL_METERS, ALPINE_ROCK_KINDS, alpineRocksInCell } from './alpineRockField.js';
 import { createAlpineRockGeometry } from './alpineRockGeometry.js';
 import { createAlpineRockMaterial } from './AlpineRockMaterial.js';
@@ -24,13 +25,24 @@ const spin = new THREE.Quaternion();
 
 /** Crags and boulder clusters round the player: one instanced draw per shape, nothing until one is near. */
 export class AlpineRockView {
-  constructor({ scene, terrainView, snowGroundByTile, cragsByTile = [], seaLevel, snowBand = NO_SNOW_BAND }) {
+  constructor({
+    scene,
+    terrainView,
+    snowGroundByTile,
+    cragsByTile = [],
+    seaLevel,
+    snowBand = NO_SNOW_BAND,
+    config = null,
+    pathClearance = null,
+  }) {
     this.terrainView = terrainView;
     this.floatingOrigin = terrainView.floatingOrigin;
     this.snowGroundByTile = snowGroundByTile;
     this.cragsByTile = cragsByTile;
     this.seaLevel = seaLevel;
     this.snowBand = snowBand;
+    this.pathClearance = pathClearance
+      ?? (config && terrainView?.tileMap ? createPathClearanceField(terrainView, config) : null);
     this.root = new THREE.Group();
     this.root.name = 'alpine-rocks';
     scene.add(this.root);
@@ -46,9 +58,11 @@ export class AlpineRockView {
     const height = view.getCanonicalHeight(x, z);
     const size = view.worldStore.tileSize;
     const tile = view.worldStore.getTile(Math.floor(x / size), Math.floor(-z / size));
+    const roadTileId = view.roadTileId ?? this.pathClearance?.roadTileId;
+    const isRoad = roadTileId !== undefined && tile === roadTileId;
     const biomeSnow = this.snowGroundByTile[tile] ?? 0;
     const rocky = biomeSnow >= COLD_GROUND_SNOW || this.cragsByTile[tile] === 1;
-    const allowed = height > this.seaLevel + 1 && (height >= ALPINE_HEIGHT || rocky);
+    const allowed = !isRoad && height > this.seaLevel + 1 && (height >= ALPINE_HEIGHT || rocky);
     if (!allowed) return { allowed, slope: 0, height };
     // The terrain's own two sources (SnowAccumulation): the biome's ground snow and the altitude band.
     const { snowLine, snowFade } = this.snowBand;
@@ -69,14 +83,18 @@ export class AlpineRockView {
     )) return CELL_PENDING;
     const rocks = alpineRocksInCell(cellX, cellZ, this.ground);
     if (!rocks) return null;
+    const kept = [];
     for (const rock of rocks) {
+      if (this.pathClearance?.blocks(rock.x, rock.z, rock.scale * 0.85)) continue;
       const ground = this.groundAt(rock.x, rock.z);
+      if (!ground.allowed) continue;
       rock.y = ground.height;
       rock.dx = ground.dx ?? 0;
       rock.dz = ground.dz ?? 0;
       rock.snow = ground.snow ?? 0;
+      kept.push(rock);
     }
-    return rocks;
+    return kept.length ? kept : null;
   }
 
   ensureMeshes() {
