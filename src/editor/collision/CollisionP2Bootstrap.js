@@ -196,7 +196,11 @@ function attach({
   }
 
   const terrainProvider = new TerrainCollisionProvider({
-    getHeight: (x, z) => player.terrainView.getCanonicalHeight(x, z),
+    getHeight: (x, z) => {
+      const terrain = player.terrainView.getCanonicalHeight(x, z);
+      const bridge = player.terrainView.getBridgeDeckHeight?.(x, z) ?? null;
+      return bridge === null ? terrain : Math.max(terrain, bridge);
+    },
     sampleDistance: collisionConfig.player.radius,
   });
   motor = new CharacterMotor({

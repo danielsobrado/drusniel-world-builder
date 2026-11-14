@@ -506,10 +506,16 @@ export class PlayerController {
     // Inside an instanced location the ground is the location's, at the level the feet are on.
     if (this.groundOverride) return this.groundOverride.heightAt(x, z, this.state.footY ?? this.state.y - this.config.eyeHeight);
     const terrain = this.terrainView.getWorldHeight(x, z);
-    if (!this.constructionGround) return terrain;
-    const canonical = this.terrainView.floatingOrigin.toCanonical(x, z);
+    const canonical = this.terrainView.getBridgeDeckHeight || this.constructionGround
+      ? this.terrainView.floatingOrigin.toCanonical(x, z)
+      : null;
+    const bridge = canonical && this.terrainView.getBridgeDeckHeight
+      ? this.terrainView.getBridgeDeckHeight(canonical.x, canonical.z)
+      : null;
+    const ground = bridge === null ? terrain : Math.max(terrain, bridge);
+    if (!this.constructionGround) return ground;
     const wall = this.constructionGround.heightAt(canonical.x, canonical.z);
-    return wall === null ? terrain : Math.max(terrain, wall);
+    return wall === null ? ground : Math.max(ground, wall);
   }
 
   readFocusWorld(out) {

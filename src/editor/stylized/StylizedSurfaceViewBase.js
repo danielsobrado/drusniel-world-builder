@@ -1,4 +1,5 @@
 import { AlpineRockView } from './alpine/AlpineRockView.js';
+import { PathBridgeView } from './path/PathBridgeView.js';
 import { IcebergView } from './ice/IcebergView.js';
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
 import { WaterObstacleUpdates } from './WaterObstacleUpdates.js';
@@ -129,6 +130,16 @@ export class StylizedSurfaceView {
         seaLevel: terrainView.worldStore.generator?.seaLevel ?? 0,
         config,
       })
+      : null;
+    this.pathBridgeView = this.enabled && !this.impostorBakeMode
+      ? new PathBridgeView({
+        scene: terrainView.scene,
+        terrainView,
+        naturalTrail: config.path?.naturalTrail ?? null,
+      })
+      : null;
+    terrainView.getBridgeDeckHeight = this.pathBridgeView
+      ? (x, z) => this.pathBridgeView.deckHeightAt(x, z)
       : null;
     this.rockView = this.enabled && !this.impostorBakeMode
       ? new StylizedRockView({
@@ -792,6 +803,7 @@ export class StylizedSurfaceView {
       const updateGeology = () => {
         this.icebergView?.update(cameraWorld, this.shouldYieldWork);
         this.alpineRockView?.update(cameraWorld, this.shouldYieldWork);
+        this.pathBridgeView?.update(cameraWorld, this.shouldYieldWork);
       };
       if (this.runDeferredWork) this.runDeferredWork(updateGeology);
       else updateGeology();
@@ -1071,8 +1083,10 @@ export class StylizedSurfaceView {
     this.bushView?.dispose();
     this.treeView?.dispose();
     this.rockView?.dispose();
+    this.terrainView.getBridgeDeckHeight = null;
     this.icebergView?.dispose();
     this.alpineRockView?.dispose();
+    this.pathBridgeView?.dispose();
     if (this.sharedScenePath) {
       this.sceneAssets?.release(this.sharedScenePath);
       this.sharedScenePath = null;
