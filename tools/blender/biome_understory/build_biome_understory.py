@@ -29,6 +29,7 @@ from understory_common import (
     MAX_TRIANGLES,
     arched_card,
     finish_mesh,
+    leaf_spray_fan,
     mushroom_dome,
     place_and_export,
     render_preview,
@@ -147,39 +148,32 @@ def build_desert_agave(mat):
 
 
 def build_desert_sagebrush(mat):
-    """Grounded desert sagebrush & creosote hummock with 3D faceted cushion core and wide-skirted dome cards."""
+    """Sprawling gnarled desert sagebrush with twisted forked woody branches and irregular silvery-olive sprig tufts."""
     rng = random.Random(203)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Grounded 3D faceted woody/stone root hummock + central dense foliage dome cushion (matches SM_Rocks facets)
-    rock_chunk(bm, uv, Vector((-0.14, 0.08, 0.10)), (0.34, 0.28, 0.16), u_range=(0.04, 0.30), v_range=(0.15, 0.85), subdivisions=1, rng=rng, dome=True)
-    rock_chunk(bm, uv, Vector((0.04, -0.02, 0.18)), (0.48, 0.44, 0.26), u_range=(0.54, 0.80), v_range=(0.25, 0.72), subdivisions=1, rng=rng, dome=True)
+    # 5 irregular twisted woody branches spreading unevenly from a low root crown
+    stems = (
+        (0.20, 0.44, 0.14, 0.34),
+        (1.45, 0.36, 0.20, 0.46),
+        (2.65, 0.48, 0.12, 0.28),
+        (3.85, 0.38, 0.18, 0.42),
+        (5.10, 0.46, 0.15, 0.36),
+    )
+    for idx, (yaw, r_xy, z_mid, z_top) in enumerate(stems):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.05 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.50) + side * rng.uniform(-0.07, 0.07) + Vector((0.0, 0.0, z_mid))
+        p2 = out * r_xy + Vector((0.0, 0.0, z_top))
+        tube(bm, uv, [p0, p1, p2], [0.044, 0.028, 0.013], sides=4, u_range=(0.02, 0.32), v_range=(0.05, 0.90), rough=0.06, rng=rng, cap_end=False)
 
-    # 3 low spreading gnarled woody branches hugging the sand
-    for k in range(3):
-        yaw = k * 2 * math.pi / 3 + rng.uniform(-0.25, 0.25)
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        pts = [
-            out * 0.08 + Vector((0, 0, -0.03)),
-            out * 0.32 + Vector((0, 0, 0.14)),
-            out * 0.52 + Vector((rng.uniform(-0.06, 0.06), rng.uniform(-0.06, 0.06), 0.28)),
-        ]
-        tube(bm, uv, pts, [0.055, 0.038, 0.018], sides=4, u_range=(0.02, 0.32), v_range=(0.05, 0.90), rough=0.06, rng=rng)
+        twig = p1 + out * 0.18 + side * (0.20 if idx % 2 == 0 else -0.20) + Vector((0.0, 0.0, 0.10))
+        tube(bm, uv, [p1, twig], [0.020, 0.010], sides=3, u_range=(0.02, 0.32), v_range=(0.12, 0.88), cap_end=False)
 
-    # 10 wide-skirted inward-arching dome cards (grounded `/\` mound silhouette, never V-shaped `\/`)
-    for k in range(10):
-        yaw = k / 10 * 2 * math.pi + rng.uniform(-0.18, 0.18)
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        r0 = rng.uniform(0.42, 0.56)
-        r1 = rng.uniform(0.52, 0.66)
-        r2 = rng.uniform(0.16, 0.30)
-        p0 = out * r0 + Vector((0, 0, -0.02))
-        p1 = out * r1 + Vector((0, 0, rng.uniform(0.20, 0.30)))
-        p2 = out * r2 + Vector((0, 0, rng.uniform(0.38, 0.50)))
-        w = rng.uniform(0.46, 0.60)
-        arched_card(bm, uv, p0, p1, p2, w * 0.85, w, w * 0.68, side, u_range=(0.35, 1.0), v_range=(0.02, 0.98))
+        leaf_spray_fan(bm, uv, p2 - Vector((0, 0, 0.04)), (p2 - p1 + Vector((0, 0, 0.10))).normalized(), 0.38, 0.40, u_range=(0.35, 1.0), v_range=(0.02, 0.98), roll=0.25 if idx % 2 else -0.25, arch=0.10)
+        leaf_spray_fan(bm, uv, twig - Vector((0, 0, 0.03)), (twig - p1).normalized(), 0.34, 0.36, u_range=(0.35, 1.0), v_range=(0.02, 0.98), roll=-0.6 if idx % 2 else 0.6, arch=0.06)
     return finish_mesh('desert-sagebrush-01', bm, mat)
 
 
@@ -213,100 +207,97 @@ def build_badlands_deadwood(mat):
 # ---------------------------------------------------------------------------
 
 def build_savanna_aloe(mat):
-    """Savanna succulent aloe rosette nestled against a weathered stone mound with low warm torch-lily spikes."""
+    """Savanna succulent aloe rosette emerging directly from root crown with warm torch-lily flower spikes."""
     rng = random.Random(205)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Grounded 3D faceted succulent/stone core cushion
-    rock_chunk(bm, uv, Vector((0.0, 0.0, 0.11)), (0.36, 0.34, 0.18), u_range=(0.14, 0.40), v_range=(0.15, 0.72), subdivisions=1, rng=rng, dome=True)
-
-    # 10 arching toothed aloe leaves hugging the ground
-    for k in range(10):
-        yaw = k / 10 * 2 * math.pi + rng.uniform(-0.18, 0.18)
-        length = rng.uniform(0.56, 0.78)
+    # 11 arching toothed aloe blades extending cleanly from central basal rosette (outer flat, inner angled)
+    for k in range(11):
+        tier = 0 if k < 7 else 1
+        yaw = (k + 0.35 * tier) / (7 if tier == 0 else 4) * 2 * math.pi + rng.uniform(-0.16, 0.16)
+        length = rng.uniform(0.58, 0.80) if tier == 0 else rng.uniform(0.40, 0.54)
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        p0 = out * 0.08 + Vector((0, 0, 0.02))
-        p1 = out * (length * 0.54) + Vector((0, 0, length * 0.34))
-        p2 = out * (length * 0.96) + Vector((0, 0, length * 0.12))
-        arched_card(bm, uv, p0, p1, p2, 0.16, 0.24, 0.05, side, u_range=(0.0, 0.54), v_range=(0.02, 0.98))
+        p0 = out * (0.04 + 0.02 * tier) + Vector((0, 0, 0.01 + tier * 0.03))
+        p1 = out * (length * (0.56 if tier == 0 else 0.44)) + Vector((0, 0, length * (0.34 if tier == 0 else 0.52)))
+        p2 = out * (length * (0.96 if tier == 0 else 0.78)) + Vector((0, 0, length * (0.14 if tier == 0 else 0.44)))
+        arched_card(bm, uv, p0, p1, p2, 0.14, 0.24, 0.04, side, u_range=(0.0, 0.54), v_range=(0.02, 0.98))
 
-    # 4 compact crossed-card torch-lily flower spikes (8 cards, low 0.58..0.76m profile)
+    # 4 compact crossed-card torch-lily flower spikes
     spikes = [
-        (Vector((0.0, 0.0, 0.04)), Vector((0.02, 0.01, 0.76)), 0.20),
-        (Vector((0.12, 0.08, 0.04)), Vector((0.20, 0.14, 0.68)), 0.18),
-        (Vector((-0.12, 0.07, 0.04)), Vector((-0.20, 0.12, 0.64)), 0.18),
-        (Vector((0.05, -0.13, 0.04)), Vector((0.10, -0.22, 0.58)), 0.17),
+        (Vector((0.0, 0.0, 0.02)), Vector((0.03, 0.02, 0.76)), 0.20),
+        (Vector((0.12, 0.08, 0.02)), Vector((0.20, 0.14, 0.68)), 0.18),
+        (Vector((-0.12, 0.07, 0.02)), Vector((-0.20, 0.12, 0.62)), 0.18),
+        (Vector((0.05, -0.13, 0.02)), Vector((0.10, -0.22, 0.56)), 0.17),
     ]
     for b0, b2, w in spikes:
         b1 = b0.lerp(b2, 0.48)
         for cross in (0.0, 0.5 * math.pi):
             yaw = math.atan2(b2.y - b0.y, b2.x - b0.x) + cross
             side = Vector((math.cos(yaw), math.sin(yaw), 0))
-            arched_card(bm, uv, b0, b1, b2, w * 0.48, w, w * 0.72, side, u_range=(0.56, 1.0), v_range=(0.02, 0.98), v_mid=0.42)
+            arched_card(bm, uv, b0, b1, b2, w * 0.46, w, w * 0.70, side, u_range=(0.56, 1.0), v_range=(0.02, 0.98), v_mid=0.42)
     return finish_mesh('savanna-aloe-01', bm, mat)
 
 
 def build_meadow_lupine(mat):
-    """Compact wild lupine & foxglove cluster with grounded 3D basal foliage cushion."""
+    """Wild lupine cluster with palmate basal foliage leaves radiating from stems and dusty lavender flower spikes."""
     rng = random.Random(206)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Grounded 3D faceted foliage cushion core
-    rock_chunk(bm, uv, Vector((0.0, 0.0, 0.12)), (0.38, 0.36, 0.18), u_range=(0.12, 0.36), v_range=(0.24, 0.68), subdivisions=1, rng=rng, dome=True)
-
-    # 8 wide basal palmate leaf cards
-    for k in range(8):
-        yaw = k / 8 * 2 * math.pi + rng.uniform(-0.2, 0.2)
+    # 10 basal palmate leaf fans curving outward directly from the central crown
+    for k in range(10):
+        yaw = k / 10 * 2 * math.pi + rng.uniform(-0.2, 0.2)
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        p0 = out * 0.08 + Vector((0, 0, 0.02))
-        p1 = out * 0.36 + Vector((0, 0, 0.24))
-        p2 = out * 0.64 + Vector((0, 0, 0.16))
-        arched_card(bm, uv, p0, p1, p2, 0.20, 0.38, 0.28, side, u_range=(0.0, 0.48), v_range=(0.04, 0.96))
+        reach = rng.uniform(0.46, 0.66)
+        p0 = out * 0.04 + Vector((0, 0, 0.02))
+        p1 = out * (reach * 0.52) + Vector((0, 0, rng.uniform(0.20, 0.30)))
+        p2 = out * reach + Vector((0, 0, rng.uniform(0.12, 0.22)))
+        arched_card(bm, uv, p0, p1, p2, 0.16, 0.36, 0.26, side, u_range=(0.0, 0.48), v_range=(0.04, 0.96))
 
-    # 5 compact crossed-plane lupine floral spikes (10 cards, 0.56..0.76m profile)
+    # 5 uneven crossed-plane lupine floral spikes
     for k in range(5):
-        yaw = k / 5 * 2 * math.pi + rng.uniform(-0.18, 0.18)
-        rad = 0.04 if k == 0 else rng.uniform(0.12, 0.24)
-        height = 0.76 if k == 0 else rng.uniform(0.56, 0.70)
+        yaw = k / 5 * 2 * math.pi + rng.uniform(-0.22, 0.22)
+        rad = 0.06 if k == 0 else rng.uniform(0.14, 0.28)
+        height = 0.78 if k == 0 else rng.uniform(0.54, 0.72)
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        b0 = out * (rad * 0.5) + Vector((0, 0, 0.04))
-        b1 = out * (rad * 0.85) + Vector((0, 0, height * 0.46))
+        b0 = out * (rad * 0.4) + Vector((0, 0, 0.02))
+        b1 = out * (rad * 0.8) + Vector((0, 0, height * 0.46))
         b2 = out * rad + Vector((0, 0, height))
         for cross in (0.0, 0.5 * math.pi):
             side = Vector((math.cos(yaw + cross), math.sin(yaw + cross), 0))
-            arched_card(bm, uv, b0, b1, b2, 0.14, 0.24, 0.15, side, u_range=(0.50, 1.0), v_range=(0.02, 0.98), v_mid=0.38)
+            arched_card(bm, uv, b0, b1, b2, 0.13, 0.24, 0.14, side, u_range=(0.50, 1.0), v_range=(0.02, 0.98), v_mid=0.38)
     return finish_mesh('meadow-lupine-01', bm, mat)
 
 
 def build_meadow_heather(mat):
-    """Dense sunlit hummock of moorland heather and goldenrod with a 3D faceted cushion core."""
+    """Irregular woody-stemmed moorland heather & goldenrod clump with uneven multi-height bloom sprays."""
     rng = random.Random(207)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Two grounded 3D faceted hummock cushions at the core
-    rock_chunk(bm, uv, Vector((-0.08, 0.04, 0.14)), (0.44, 0.38, 0.22), u_range=(0.14, 0.36), v_range=(0.24, 0.72), subdivisions=1, rng=rng, dome=True)
-    rock_chunk(bm, uv, Vector((0.18, -0.10, 0.10)), (0.32, 0.28, 0.16), u_range=(0.64, 0.86), v_range=(0.24, 0.72), subdivisions=1, rng=rng, dome=True)
+    # 5 irregular creeping woody heather stems
+    stems = (
+        (0.15, 0.48, 0.16, 0.36),
+        (1.38, 0.38, 0.22, 0.48),
+        (2.58, 0.50, 0.14, 0.30),
+        (3.82, 0.40, 0.20, 0.42),
+        (5.04, 0.44, 0.15, 0.34),
+    )
+    for idx, (yaw, r_xy, z_mid, z_top) in enumerate(stems):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.05 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.50) + side * rng.uniform(-0.06, 0.06) + Vector((0.0, 0.0, z_mid))
+        p2 = out * r_xy + Vector((0.0, 0.0, z_top))
+        tube(bm, uv, [p0, p1, p2], [0.036, 0.022, 0.011], sides=3, u_range=(0.20, 0.30), v_range=(0.10, 0.80), cap_end=False)
 
-    # 12 wide-skirted inward-arching sprig cards hugging the hummock
-    for k in range(12):
-        yaw = k / 12 * 2 * math.pi + rng.uniform(-0.20, 0.20)
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        r0 = rng.uniform(0.38, 0.52)
-        r1 = rng.uniform(0.46, 0.62)
-        r2 = rng.uniform(0.16, 0.30)
-        h_top = rng.uniform(0.34, 0.48)
-        p0 = out * r0 + Vector((0, 0, -0.02))
-        p1 = out * r1 + Vector((0, 0, h_top * 0.58))
-        p2 = out * r2 + Vector((0, 0, h_top))
-        u_rng = (0.0, 0.5) if (k % 3 != 0) else (0.5, 1.0)
-        w = rng.uniform(0.36, 0.48)
-        arched_card(bm, uv, p0, p1, p2, w * 0.82, w, w * 0.68, side, u_range=u_rng, v_range=(0.02, 0.98))
+        u_rng = (0.0, 0.48) if (idx % 3 != 0) else (0.52, 1.0)
+        leaf_spray_fan(bm, uv, p2 - Vector((0, 0, 0.04)), (p2 - p1 + Vector((0, 0, 0.12))).normalized(), 0.38, 0.40, u_range=u_rng, v_range=(0.02, 0.98), roll=0.25 if idx % 2 else -0.25, arch=0.14)
+        twig_dir = (out * 0.7 + side * (0.6 if idx % 2 else -0.6) + Vector((0, 0, 0.35))).normalized()
+        leaf_spray_fan(bm, uv, p1, twig_dir, 0.36, 0.38, u_range=u_rng, v_range=(0.02, 0.98), roll=-0.45 if idx % 2 else 0.45, arch=0.10)
     return finish_mesh('meadow-heather-01', bm, mat)
 
 
@@ -341,22 +332,55 @@ def build_meadow_thistle_stone(mat):
 # ---------------------------------------------------------------------------
 
 def build_forest_bracken(mat):
-    """Multi-tiered woodland lady-fern / autumn-edged bracken crown."""
+    """Multi-tiered woodland lady-fern / bracken crown with 3D basal rachises, graceful arch, and progressively tapered tips."""
     rng = random.Random(209)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    for tier, count, pitch_boost, len_scale in ((0, 9, 0.0, 1.0), (1, 6, 0.24, 0.74)):
+    # Three irregular tiers: outer sprawling fronds, mid arching fronds, steep inner croziers
+    tiers = (
+        (0, 5, 0.22, 0.98, 1.08),
+        (1, 5, 0.46, 0.88, 0.96),
+        (2, 3, 0.72, 0.66, 0.82),
+    )
+    for tier, count, up_bias, len_scale, w_scale in tiers:
         for k in range(count):
-            yaw = (k + 0.4 * tier) / count * 2 * math.pi + rng.uniform(-0.2, 0.2)
-            length = rng.uniform(0.78, 1.12) * len_scale
-            width = length * 0.34
-            out = Vector((math.cos(yaw), math.sin(yaw), 0))
-            side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-            p0 = out * 0.04 + Vector((0, 0, 0.03 + tier * 0.04))
-            p1 = out * (length * 0.46) + Vector((0, 0, length * (0.54 + pitch_boost)))
-            p2 = out * (length * 0.96) + Vector((0, 0, length * (0.22 + pitch_boost * 0.8)))
-            arched_card(bm, uv, p0, p1, p2, width * 0.32, width, width * 0.42, side, u_range=(0.0, 1.0), v_range=(0.0, 1.0))
+            yaw = (k + 0.38 * tier) / count * 2 * math.pi + rng.uniform(-0.22, 0.22)
+            length = rng.uniform(0.86, 1.18) * len_scale
+            width = length * 0.34 * w_scale
+            out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+            side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+
+            # 4-point naturally arching frond spine (steep basal rise -> graceful arch -> nodding fine tip)
+            pts = (
+                out * 0.04 + Vector((0.0, 0.0, 0.02)),
+                out * (length * 0.28) + Vector((0.0, 0.0, length * (0.34 + up_bias * 0.28))),
+                out * (length * 0.66) + Vector((0.0, 0.0, length * (0.44 + up_bias * 0.36))),
+                out * (length * 0.98) + Vector((0.0, 0.0, length * (0.18 + up_bias * 0.30))),
+            )
+            # Slim 3D basal rachis stem into lower frond
+            tube(bm, uv, [pts[0], pts[1], pts[2]], [0.014, 0.010, 0.005], sides=3, u_range=(0.48, 0.52), v_range=(0.02, 0.65), cap_end=False)
+
+            # V-cupped tapered 3-segment blade progressively narrowing toward the tip
+            rings = []
+            profiles = (
+                (0.14 * width, 0.00, 0.02),
+                (0.50 * width, 0.028 * width, 0.34),
+                (0.32 * width, 0.022 * width, 0.70),
+                (0.06 * width, 0.006 * width, 0.99),
+            )
+            for p, (hw, cup, vc) in zip(pts, profiles):
+                rings.append((
+                    bm.verts.new(p - side * hw + Vector((0.0, 0.0, cup))),
+                    bm.verts.new(p),
+                    bm.verts.new(p + side * hw + Vector((0.0, 0.0, cup))),
+                    vc,
+                ))
+            for a, b in zip(rings[:-1], rings[1:]):
+                for u0, u1, i0, i1 in ((0.0, 0.5, 0, 1), (0.5, 1.0, 1, 2)):
+                    face = bm.faces.new((a[i0], a[i1], b[i1], b[i0]))
+                    for loop, coord in zip(face.loops, ((u0, a[3]), (u1, a[3]), (u1, b[3]), (u0, b[3]))):
+                        loop[uv].uv = coord
     return finish_mesh('forest-bracken-01', bm, mat)
 
 
@@ -631,37 +655,33 @@ def build_tundra_cushion(mat):
 
 
 def build_tundra_dwarf_willow(mat):
-    """Windswept prostrate arctic dwarf willow & crimson alpine bearberry mat with 3D cushion core."""
+    """Windswept prostrate arctic dwarf willow & crimson bearberry creeping boughs with open sprig clusters."""
     rng = random.Random(219)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Grounded 3D faceted cushion core
-    rock_chunk(bm, uv, Vector((0.06, 0.0, 0.10)), (0.46, 0.40, 0.16), u_range=(0.24, 0.76), v_range=(0.24, 0.76), subdivisions=1, rng=rng, dome=True)
+    # 5 creeping woody krummholz stems biased downwind (+X) hugging close to the frost soil
+    boughs = (
+        (0.18, 0.84, 0.09, 0.22),
+        (1.02, 0.72, 0.12, 0.26),
+        (2.25, 0.62, 0.08, 0.18),
+        (3.60, 0.66, 0.07, 0.16),
+        (5.05, 0.78, 0.11, 0.24),
+    )
+    root = Vector((-0.14, 0.02, 0.01))
+    for idx, (yaw, r_xy, z_elbow, z_tip) in enumerate(boughs):
+        out = Vector((math.cos(yaw) + 0.28, math.sin(yaw), 0.0)).normalized()
+        side = Vector((-out.y, out.x, 0.0))
+        p0 = root + out * 0.04
+        p1 = root + out * (r_xy * 0.50) + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, z_elbow))
+        p2 = root + out * r_xy + Vector((0.0, 0.0, z_tip))
+        tube(bm, uv, [p0, p1, p2], [0.036, 0.022, 0.011], sides=3, u_range=(0.47, 0.53), v_range=(0.05, 0.80), cap_end=False)
 
-    # 3 creeping woody krummholz stems hugging the ground
-    for k in range(3):
-        yaw = k * 2 * math.pi / 3 + 0.3
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        pts = [
-            Vector((0, 0, 0.02)),
-            out * 0.35 + Vector((0, 0, 0.10)),
-            out * 0.72 + Vector((0, 0, 0.06)),
-        ]
-        tube(bm, uv, pts, [0.045, 0.032, 0.018], sides=4, u_range=(0.46, 0.54), v_range=(0.05, 0.85))
+        twig = p1 + out * 0.22 + side * (0.20 if idx % 2 == 0 else -0.20) + Vector((0.0, 0.0, 0.06))
+        tube(bm, uv, [p1, twig], [0.018, 0.009], sides=3, u_range=(0.47, 0.53), v_range=(0.10, 0.75), cap_end=False)
 
-    # 11 low windswept foliage cards (biased slightly along +X wind direction)
-    for k in range(11):
-        yaw = k / 11 * 2 * math.pi + rng.uniform(-0.2, 0.2)
-        out = Vector((math.cos(yaw) + 0.25, math.sin(yaw), 0)).normalized()
-        side = Vector((-out.y, out.x, 0))
-        reach = rng.uniform(0.55, 0.85)
-        h = rng.uniform(0.16, 0.30)
-        p0 = out * 0.18 + Vector((0, 0, 0.01))
-        p1 = out * (reach * 0.58) + Vector((0, 0, h))
-        p2 = out * reach + Vector((0, 0, h * 0.45))
-        w = rng.uniform(0.36, 0.48)
-        arched_card(bm, uv, p0, p1, p2, w * 0.75, w, w * 0.68, side, u_range=(0.0, 1.0), v_range=(0.0, 1.0))
+        leaf_spray_fan(bm, uv, p2 - out * 0.06, Vector((out.x, out.y, 0.28)).normalized(), 0.42, 0.44, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=0.2 if idx % 2 else -0.2, arch=0.06)
+        leaf_spray_fan(bm, uv, twig - out * 0.04, Vector((twig.x - p1.x, twig.y - p1.y, 0.18)).normalized(), 0.36, 0.38, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=-0.4 if idx % 2 else 0.4, arch=0.04)
     return finish_mesh('tundra-dwarf-willow-01', bm, mat)
 
 
@@ -817,7 +837,8 @@ def main():
     for out_root, subdir, build_fn, mat_key, dist, look_z in specs:
         mesh, tris = build_fn(mats[mat_key])
         name = mesh.name
-        assert tris <= MAX_TRIANGLES, f'{name} has {tris} triangles > {MAX_TRIANGLES}'
+        budget = 520 if out_root == OUT_BUSHES else MAX_TRIANGLES
+        assert tris <= budget, f'{name} has {tris} triangles > {budget}'
         glb_path = os.path.join(out_root, subdir, f'{name}.glb') if subdir else os.path.join(out_root, f'{name}.glb')
         root = place_and_export(name, mesh, glb_path)
         tag = subdir if subdir else 'bushes'

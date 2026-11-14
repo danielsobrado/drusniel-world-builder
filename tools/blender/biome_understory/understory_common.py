@@ -170,6 +170,70 @@ def arched_card(bm, uv, p0, p1, p2, w0, w1, w2, side_dir, u_range=(0.0, 1.0), v_
     return faces
 
 
+def leaf_spray_fan(
+    bm,
+    uv,
+    attach_pt,
+    forward_dir,
+    length,
+    width,
+    u_range=(0.30, 1.0),
+    v_range=(0.02, 0.98),
+    roll=0.0,
+    arch=0.14,
+    cup=0.16,
+    tip_scale=0.38,
+):
+    """3D V-cupped tapered leaf spray anchored directly to a branch node at `attach_pt`."""
+    f = forward_dir.normalized()
+    world_up = Vector((0.0, 0.0, 1.0)) if abs(f.z) < 0.92 else Vector((1.0, 0.0, 0.0))
+    right = f.cross(world_up).normalized()
+    up_perp = right.cross(f).normalized()
+    side = (right * math.cos(roll) + up_perp * math.sin(roll)).normalized()
+    cup_dir = (up_perp * math.cos(roll) - right * math.sin(roll)).normalized()
+
+    p0 = attach_pt
+    p1 = attach_pt + f * (length * 0.48) + cup_dir * (length * arch * 0.55)
+    p2 = attach_pt + f * length + cup_dir * (length * arch)
+
+    hw0 = width * 0.16
+    hw1 = width * 0.50
+    hw2 = width * (0.50 * tip_scale)
+    cup1 = cup_dir * (width * cup)
+    cup2 = cup_dir * (width * cup * 0.55)
+
+    u0, u1 = u_range
+    uc = 0.5 * (u0 + u1)
+    v0, v1 = v_range
+    vm = v0 + (v1 - v0) * 0.54
+    du_tip = (u1 - u0) * 0.22
+
+    v_bL = bm.verts.new(p0 - side * hw0)
+    v_bC = bm.verts.new(p0)
+    v_bR = bm.verts.new(p0 + side * hw0)
+    v_mL = bm.verts.new(p1 - side * hw1 + cup1)
+    v_mC = bm.verts.new(p1)
+    v_mR = bm.verts.new(p1 + side * hw1 + cup1)
+    v_tL = bm.verts.new(p2 - side * hw2 + cup2)
+    v_tC = bm.verts.new(p2)
+    v_tR = bm.verts.new(p2 + side * hw2 + cup2)
+
+    quads = (
+        (((u0, v0), (uc, v0), (uc, vm), (u0, vm)), (v_bL, v_bC, v_mC, v_mL)),
+        (((uc, v0), (u1, v0), (u1, vm), (uc, vm)), (v_bC, v_bR, v_mR, v_mC)),
+        (((u0, vm), (uc, vm), (uc, v1), (u0 + du_tip, v1)), (v_mL, v_mC, v_tC, v_tL)),
+        (((uc, vm), (u1, vm), (u1 - du_tip, v1), (uc, v1)), (v_mC, v_mR, v_tR, v_tC)),
+    )
+    faces = []
+    for uvs, vs in quads:
+        if len(set(vs)) == 4:
+            face = bm.faces.new(vs)
+            for loop, coord in zip(face.loops, uvs):
+                loop[uv].uv = coord
+            faces.append(face)
+    return faces
+
+
 def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), subdivisions=2, rng=None, dome=False):
     """Sculpted organic boulder or moss/cushion hummock with seam-free UV projection."""
     existing_verts = set(bm.verts)
@@ -245,7 +309,7 @@ def mushroom_dome(bm, uv, center, radius, height, sides=6, u_range=(0.52, 0.98),
     return faces
 
 
-def finish_mesh(name, bm, materials):
+def finish_mesh(name, bm, materials, max_triangles=MAX_TRIANGLES):
     """Weld close vertices, triangulate, purge tiny/degenerate triangles, and convert to Mesh."""
     if not isinstance(materials, (list, tuple)):
         materials = [materials]
@@ -279,15 +343,15 @@ def finish_mesh(name, bm, materials):
     up = Vector((0.0, 0.0, 1.0))
     custom_normals = []
     for v in mesh.vertices:
-        radial = Vector((v.co.x, v.co.y, max(0.40, v.co.z + 0.45)))
+        radial = Vector((v.co.x, v.co.y, max(0.25, v.co.z + 0.25)))
         radial = radial.normalized() if radial.length > 1e-4 else up
-        n = v.normal * 0.30 + radial * 0.40 + up * 0.30
-        if n.z < 0.30:
-            n.z = 0.30
+        n = v.normal * 0.68 + radial * 0.18 + up * 0.14
+        if n.z < 0.05:
+            n.z = 0.05
         custom_normals.append(n.normalized())
     mesh.normals_split_custom_set_from_vertices(custom_normals)
     tris = sum(len(p.vertices) - 2 for p in mesh.polygons)
-    assert tris <= MAX_TRIANGLES, f'{name} has {tris} triangles (budget {MAX_TRIANGLES})'
+    assert tris <= max_triangles, f'{name} has {tris} triangles (budget {max_triangles})'
     return mesh, tris
 
 

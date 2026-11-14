@@ -16,17 +16,20 @@ import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLig
 import { applyCloudShadow } from './CloudShadow.js';
 
 export const BUSH_CAST_SHADOW = false;
-export const BUSH_PROXY_TRIANGLES = 60;
+export const BUSH_PROXY_TRIANGLES = 100;
 
 const DEFAULT_PROXY_COLOR = '#6d8a58';
 const MIN_PROXY_EXTENT = 0.05;
 const PROXY_FIT_MARGIN = 2e-7;
 const WHITE_THRESHOLD = 0.92;
 const WHITE_SPREAD = 0.05;
+// Irregular asymmetrical multi-cluster arrangement: [x, y, z, scaleX, scaleY, scaleZ, rotX, rotY, rotZ]
 const PROXY_LOBES = Object.freeze([
-  Object.freeze([-0.26, -0.14, 0.04, 0.68, 0.64, 0.76]),
-  Object.freeze([0.26, -0.12, -0.05, 0.68, 0.68, 0.76]),
-  Object.freeze([0, 0.08, 0.04, 0.74, 0.66, 0.68]),
+  Object.freeze([-0.34, -0.18, 0.12, 0.56, 0.42, 0.52, 0.15, 0.4, -0.2]),
+  Object.freeze([0.32, -0.10, -0.14, 0.50, 0.52, 0.48, -0.18, 1.1, 0.14]),
+  Object.freeze([0.10, 0.22, 0.06, 0.48, 0.56, 0.44, 0.12, 2.0, 0.10]),
+  Object.freeze([-0.14, 0.06, -0.26, 0.42, 0.44, 0.46, -0.22, -0.8, 0.16]),
+  Object.freeze([0.04, -0.24, 0.30, 0.44, 0.34, 0.40, 0.08, 0.9, -0.12]),
 ]);
 
 function usesCutout(material) {
@@ -105,9 +108,12 @@ export function createBushProxyGeometry(sourceGeometry) {
     throw new Error('Bush proxy generation requires buffer geometry.');
   }
   const proxyBounds = expandedProxyBounds(sourceGeometry);
-  const lobes = PROXY_LOBES.map(([x, y, z, width, height, depth]) => {
+  const lobes = PROXY_LOBES.map(([x, y, z, width, height, depth, rx, ry, rz]) => {
     const geometry = new THREE.IcosahedronGeometry(1, 0);
     geometry.scale(width, height, depth);
+    geometry.rotateX(rx);
+    geometry.rotateY(ry);
+    geometry.rotateZ(rz);
     geometry.translate(x, y, z);
     return geometry;
   });

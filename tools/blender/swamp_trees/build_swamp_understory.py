@@ -80,31 +80,31 @@ def wood_texture():
 
 
 def fern_texture():
-    """A single fern frond, base at the bottom edge: a midrib with paired,
-    tapering pinnae. Alpha-cut."""
+    """A single fern frond, base at the bottom edge: slender midrib with paired
+    pinnae growing progressively smaller toward a tapered pointed apex. Alpha-cut."""
     w, h = 128, 512
     rgba = np.zeros((h, w, 4))
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
     t = 1 - ys / h  # 0 base .. 1 tip
-    cx = w / 2 + 6 * np.sin(t * 2.4)
-    rib = np.abs(xs - cx) < 1.6 + (1 - t) * 1.5
+    cx = w / 2 + 5 * np.sin(t * 2.3)
+    rib = np.abs(xs - cx) < 1.2 + (1 - t) * 1.8
     rgba[rib] = (0.12, 0.17, 0.06, 1)
-    pinnae = 34
+    pinnae = 26
     for k in range(pinnae):
-        tk = 0.08 + k / pinnae * 0.9
+        tk = 0.08 + k / pinnae * 0.89
         y0 = h * (1 - tk)
-        length = (w / 2 - 6) * math.sin(math.pi * min(1, tk * 1.15)) * (1 - tk * 0.35)
+        length = (w / 2 - 5) * math.sin(math.pi * min(1, tk * 1.38)) * ((1.0 - 0.88 * tk) ** 0.72)
         for side in (-1, 1):
-            # each pinna: a slim leaf angled up toward the tip
             for s in np.linspace(0, 1, 40):
-                px = w / 2 + 6 * math.sin(tk * 2.4) + side * s * length
-                py = y0 - s * length * 0.35
-                half = 4.5 * (1 - s) ** 0.6 + 0.6
+                px = w / 2 + 5 * math.sin(tk * 2.3) + side * s * length
+                py = y0 - s * length * 0.38
+                pinna_base_w = 4.6 * (1.0 - 0.55 * tk)
+                half = pinna_base_w * (1 - s) ** 0.65 + 0.5
                 yy0, yy1 = int(max(0, py - half)), int(min(h - 1, py + half))
                 x = int(px)
                 if 0 <= x < w:
-                    shade = 0.75 + 0.35 * s
-                    rgba[yy0:yy1 + 1, x] = (0.15 * shade, 0.24 * shade, 0.08 * shade, 1)
+                    shade = 0.74 + 0.36 * s
+                    rgba[yy0:yy1 + 1, x] = (0.15 * shade, 0.25 * shade, 0.08 * shade, 1)
     return save_image('swamp_fern', rgba, os.path.join(TEX, 'swamp-fern.png'))
 
 
@@ -238,27 +238,43 @@ def build_knees(wood):
 
 
 def build_fern(fern):
-    """Arching fronds as bent two-segment cards around a crown."""
+    """Multi-tiered naturally arching swamp fern fronds with V-cupped blades and progressively tapered tips."""
     rng = random.Random(17)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
-    fronds = 9
-    for k in range(fronds):
-        yaw = k / fronds * 2 * math.pi + rng.uniform(-0.25, 0.25)
-        length = rng.uniform(0.75, 1.1)
-        width = length * 0.32
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0)) * width / 2
-        # rise, then arch over: three spine points
-        p0 = Vector((0, 0, 0.02))
-        p1 = out * length * 0.45 + Vector((0, 0, length * 0.55))
-        p2 = out * length * 0.95 + Vector((0, 0, length * 0.25))
-        verts = [bm.verts.new(c) for c in (p0 - side * 0.3, p0 + side * 0.3, p1 + side, p1 - side, p2 + side * 0.4, p2 - side * 0.4)]
-        for quad, vs in (((0.0, 0.0), (1.0, 0.0), (1.0, 0.55), (0.0, 0.55)), (verts[0], verts[1], verts[2], verts[3])), \
-                         (((0.0, 0.55), (1.0, 0.55), (1.0, 1.0), (0.0, 1.0)), (verts[3], verts[2], verts[4], verts[5])):
-            f = bm.faces.new(vs)
-            for loop, coord in zip(f.loops, quad):
-                loop[uv].uv = coord
+    tiers = ((0, 6, 0.18, 1.0), (1, 4, 0.45, 0.78))
+    for tier, count, up_bias, scale in tiers:
+        for k in range(count):
+            yaw = (k + 0.4 * tier) / count * 2 * math.pi + rng.uniform(-0.22, 0.22)
+            length = rng.uniform(0.82, 1.15) * scale
+            width = length * 0.34
+            out = Vector((math.cos(yaw), math.sin(yaw), 0))
+            side = Vector((-math.sin(yaw), math.cos(yaw), 0))
+            pts = (
+                out * 0.04 + Vector((0, 0, 0.02)),
+                out * (length * 0.28) + Vector((0, 0, length * (0.34 + up_bias * 0.28))),
+                out * (length * 0.66) + Vector((0, 0, length * (0.44 + up_bias * 0.36))),
+                out * (length * 0.98) + Vector((0, 0, length * (0.18 + up_bias * 0.30))),
+            )
+            rings = []
+            profiles = (
+                (0.12 * width, 0.00, 0.02),
+                (0.50 * width, 0.028 * width, 0.34),
+                (0.30 * width, 0.022 * width, 0.70),
+                (0.05 * width, 0.006 * width, 0.99),
+            )
+            for p, (hw, cup, vc) in zip(pts, profiles):
+                rings.append((
+                    bm.verts.new(p - side * hw + Vector((0, 0, cup))),
+                    bm.verts.new(p),
+                    bm.verts.new(p + side * hw + Vector((0, 0, cup))),
+                    vc,
+                ))
+            for a, b in zip(rings[:-1], rings[1:]):
+                for u0, u1, i0, i1 in ((0.0, 0.5, 0, 1), (0.5, 1.0, 1, 2)):
+                    f = bm.faces.new((a[i0], a[i1], b[i1], b[i0]))
+                    for loop, coord in zip(f.loops, ((u0, a[3]), (u1, a[3]), (u1, b[3]), (u0, b[3]))):
+                        loop[uv].uv = coord
     return finish('swamp-fern-01', bm, fern)
 
 

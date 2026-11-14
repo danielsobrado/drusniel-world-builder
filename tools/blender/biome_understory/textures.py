@@ -207,25 +207,27 @@ def _tex_sagebrush(tex_dir):
     rgba[bark_mask, :3] = np.clip(np.array([0.34, 0.28, 0.21]) * (0.7 + 0.6 * noise[bark_mask, None]), 0, 1)
     rgba[bark_mask, 3] = 1.0
 
-    # Foliage card u in [0.35, 1.0] with solid central cushion core + feathered sprigs
+    # Foliage spray card u in [0.35, 1.0]: open branched twig with separate feathery olive-sage tufts
     fu = (u - 0.35) / 0.65
-    cx = 0.5 + 0.06 * np.sin(v * 8.0)
-    dist = np.abs(fu - cx)
-    max_reach = 0.45 * np.sin(np.clip(v * 1.08, 0, 1) * math.pi) + 0.06
-    r_core = np.sqrt(((fu - 0.5) / 0.34) ** 2 + ((v - 0.48) / 0.36) ** 2)
-    clump = fbm(w, h, (14, 14), rng, 3)
-    in_branch = (u >= 0.35) & (dist < 0.045 * (1 - 0.6 * v))
-    in_leaves = (u >= 0.35) & (dist < max_reach) & (
-        (r_core <= 0.85) | (clump > 0.34 + 0.28 * (dist / np.maximum(max_reach, 0.05)))
+    clump = fbm(w, h, (16, 16), rng, 3)
+    in_branch = (u >= 0.35) & (v <= 0.74) & (
+        (np.abs(fu - 0.5 - 0.05 * np.sin(v * 7.0)) < 0.042 * (1 - 0.55 * v))
+        | ((v > 0.24) & (v < 0.62) & (np.abs(fu - (0.5 - (v - 0.24) * 0.75)) < 0.025))
+        | ((v > 0.36) & (v < 0.72) & (np.abs(fu - (0.5 + (v - 0.36) * 0.72)) < 0.024))
     )
+    # Discrete separated sprig puffs rather than one circular center blob
+    dist_leaves = np.full_like(u, 9.0)
+    for lx, ly, lr in ((0.26, 0.52, 0.18), (0.74, 0.62, 0.18), (0.50, 0.76, 0.19), (0.36, 0.74, 0.16), (0.62, 0.46, 0.15)):
+        dist_leaves = np.minimum(dist_leaves, np.hypot(fu - lx, v - ly) / lr)
+    in_leaves = (u >= 0.35) & (fu > 0.04) & (fu < 0.96) & (v < 0.96) & (dist_leaves < 1.05) & (clump > 0.32 + 0.32 * dist_leaves)
     rgba[in_branch, :3] = np.array([0.46, 0.40, 0.31])
     rgba[in_branch, 3] = 1.0
     # Warm dusty olive-sage green (g > r, b so biome grading works smoothly) with muted ochre desert blooms
-    is_bloom = in_leaves & (v > 0.64) & (clump > 0.68)
-    leaf_col = np.array([0.36, 0.42, 0.28]) * (0.82 + 0.34 * clump[..., None])
+    is_bloom = in_leaves & (v > 0.62) & (clump > 0.64)
+    leaf_col = np.array([0.34, 0.42, 0.27]) * (0.78 + 0.38 * clump[..., None])
     rgba[in_leaves, :3] = np.clip(leaf_col[in_leaves], 0, 1)
     rgba[in_leaves, 3] = 1.0
-    rgba[is_bloom, :3] = np.array([0.78, 0.68, 0.36])
+    rgba[is_bloom, :3] = np.array([0.80, 0.70, 0.34])
     return save_image('arid_sagebrush_alb', rgba, os.path.join(tex_dir, 'arid-sagebrush-alb.png'))
 
 
@@ -355,16 +357,21 @@ def _tex_meadow_heather(tex_dir):
         mask_half = (u >= u0) & (u < u0 + 0.5)
         cx = 0.5 + 0.06 * np.sin(v * 9.0 + side * 2.0)
         dist = np.abs(su - cx)
-        env = 0.42 * np.sin(np.clip(v * 1.08, 0, 1) * math.pi) + 0.05
-        r_core = np.sqrt(((su - 0.5) / 0.34) ** 2 + ((v - 0.48) / 0.36) ** 2)
-        in_stem = mask_half & (dist < 0.045 * (1 - 0.5 * v))
-        in_sprig = mask_half & (dist < env) & (
-            (r_core <= 0.85) | (clump > 0.34 + 0.26 * (dist / np.maximum(env, 0.05)))
+        fork_l = np.abs(su - (0.5 - np.maximum(0, v - 0.28) * 0.65)) < 0.032
+        fork_r = np.abs(su - (0.5 + np.maximum(0, v - 0.36) * 0.62)) < 0.030
+        in_stem = mask_half & (v < 0.78) & ((dist < 0.042 * (1 - 0.5 * v)) | (fork_l & (v > 0.28)) | (fork_r & (v > 0.36)))
+        sprig_r = np.minimum(
+            np.hypot((su - 0.28) / 0.18, (v - 0.58) / 0.22),
+            np.minimum(
+                np.hypot((su - 0.72) / 0.18, (v - 0.64) / 0.22),
+                np.hypot((su - 0.50) / 0.20, (v - 0.76) / 0.20),
+            ),
         )
+        in_sprig = mask_half & (su > 0.04) & (su < 0.96) & (v < 0.96) & (sprig_r < 1.1) & (clump > 0.34 + 0.32 * sprig_r)
         rgba[in_stem, :3] = np.array([0.36, 0.30, 0.22])
         rgba[in_stem, 3] = 1.0
-        is_flower = in_sprig & (v > 0.42) & (clump > 0.56)
-        fol_col = np.array([0.26, 0.36, 0.18]) * (0.80 + 0.34 * clump[..., None])
+        is_flower = in_sprig & (v > 0.48) & (clump > 0.55)
+        fol_col = np.array([0.24, 0.36, 0.16]) * (0.80 + 0.34 * clump[..., None])
         rgba[in_sprig, :3] = np.clip(fol_col[in_sprig], 0, 1)
         rgba[in_sprig, 3] = 1.0
         rgba[is_flower, :3] = np.clip(bloom_rgb * (0.82 + 0.28 * clump[is_flower, None]), 0, 1)
@@ -412,34 +419,35 @@ def _tex_thistle_stone(tex_dir):
 
 
 def _tex_forest_bracken(tex_dir):
-    """Lush woodland lady-fern / bracken frond with serrated pinnae and warm russet spore margins."""
+    """Lush woodland lady-fern / bracken frond with progressively smaller tapered pinnae and crisp serrated margins."""
     w, h = 256, 512
     rgba = np.zeros((h, w, 4), dtype=np.float32)
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
     t = 1.0 - ys / h
-    cx = w * 0.5 + 8.0 * np.sin(t * 2.6)
-    rib = np.abs(xs - cx) < 1.8 + (1.0 - t) * 1.8
-    rgba[rib] = (0.18, 0.26, 0.10, 1.0)
-    pinnae = 38
+    cx = w * 0.5 + 7.0 * np.sin(t * 2.4)
+    rib = np.abs(xs - cx) < 1.5 + (1.0 - t) * 2.2
+    rgba[rib] = (0.18, 0.24, 0.09, 1.0)
+    pinnae = 28
     for k in range(pinnae):
-        tk = 0.06 + (k / pinnae) * 0.91
+        tk = 0.08 + (k / pinnae) * 0.89
         y0 = h * (1.0 - tk)
-        length = (w * 0.46) * math.sin(math.pi * min(1.0, tk * 1.12)) * (1.0 - tk * 0.32)
+        # Widest near lower-mid frond (~0.24..0.34), tapering progressively toward a pointed apex
+        length = (w * 0.45) * math.sin(math.pi * min(1.0, tk * 1.38)) * ((1.0 - 0.88 * tk) ** 0.72)
         for side in (-1, 1):
-            for s in np.linspace(0, 1, 48):
-                px = w * 0.5 + 8.0 * math.sin(tk * 2.6) + side * s * length
-                py = y0 - s * length * 0.32
-                lobe = 1.0 + 0.32 * math.sin(s * 9 * math.pi)
-                half = (4.8 * ((1.0 - s) ** 0.55) + 0.7) * lobe
+            for s in np.linspace(0, 1, 128):
+                px = w * 0.5 + 7.0 * math.sin(tk * 2.4) + side * s * length
+                py = y0 - s * length * 0.36
+                lobe = 0.94 + 0.24 * math.sin(s * 8 * math.pi)
+                pinna_base_w = 6.2 * (1.0 - 0.50 * tk)
+                half = (pinna_base_w * ((1.0 - s) ** 0.62) + 0.6) * lobe
                 yy0, yy1 = int(max(0, py - half)), int(min(h - 1, py + half))
                 x = int(px)
                 if 0 <= x < w:
-                    shade = 0.72 + 0.38 * s
-                    # Warm copper-russet tip accent on outermost pinnae (r > g on very tips)
-                    if s > 0.84 and tk > 0.65:
+                    shade = 0.70 + 0.38 * s
+                    if s > 0.84 and tk > 0.62:
                         rgba[yy0:yy1 + 1, x] = (0.48 * shade, 0.28 * shade, 0.12 * shade, 1.0)
                     else:
-                        rgba[yy0:yy1 + 1, x] = (0.16 * shade, 0.29 * shade, 0.09 * shade, 1.0)
+                        rgba[yy0:yy1 + 1, x] = (0.15 * shade, 0.29 * shade, 0.09 * shade, 1.0)
     return save_image('forest_bracken_alb', rgba, os.path.join(tex_dir, 'forest-bracken-alb.png'))
 
 
@@ -769,24 +777,31 @@ def _tex_tundra_cushion(tex_dir):
 
 
 def _tex_tundra_willow(tex_dir):
-    """Windswept prostrate arctic willow & autumn-crimson bearberry mat with silvery catkins."""
+    """Windswept prostrate arctic willow & autumn-crimson bearberry twigs with separated leaf sprays & silvery catkins."""
     rng = np.random.default_rng(119)
     w = h = 256
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
     u, v = xs / w, 1.0 - ys / h
     rgba = np.zeros((h, w, 4), dtype=np.float32)
-    clump = fbm(w, h, (14, 14), rng, 3)
+    clump = fbm(w, h, (16, 16), rng, 3)
 
-    cx = 0.5 + 0.09 * np.sin(v * 6.0)
+    cx = 0.5 + 0.08 * np.sin(v * 6.0)
     dist = np.abs(u - cx)
-    env = 0.44 * np.sin(np.clip(v * 1.06, 0, 1) * math.pi) + 0.06
-    in_branch = dist < 0.048 * (1 - 0.4 * v)
-    in_mat = (dist < env) & (clump > 0.33 + 0.26 * (dist / np.maximum(env, 0.05)))
+    fork_l = np.abs(u - (0.5 - np.maximum(0, v - 0.25) * 0.65)) < 0.026
+    fork_r = np.abs(u - (0.5 + np.maximum(0, v - 0.35) * 0.60)) < 0.024
+    in_branch = (v < 0.78) & ((dist < 0.044 * (1 - 0.45 * v)) | (fork_l & (v > 0.25)) | (fork_r & (v > 0.35)))
+    sprig_r = np.minimum(
+        np.hypot((u - 0.26) / 0.18, (v - 0.56) / 0.20),
+        np.minimum(
+            np.hypot((u - 0.74) / 0.18, (v - 0.62) / 0.20),
+            np.hypot((u - 0.50) / 0.20, (v - 0.76) / 0.20),
+        ),
+    )
+    in_mat = (u > 0.04) & (u < 0.96) & (v < 0.96) & (sprig_r < 1.08) & (clump > 0.32 + 0.30 * sprig_r)
     rgba[in_branch] = (0.30, 0.20, 0.15, 1.0)
-    # Mix of boreal willow green and russet-crimson alpine bearberry leaves + pale catkins
-    crimson = in_mat & (clump > 0.58) & (u > 0.48)
-    catkin = in_mat & (v > 0.68) & (clump > 0.68) & (u <= 0.48)
-    rgba[in_mat, :3] = np.clip(np.array([0.20, 0.30, 0.14]) * (0.78 + 0.35 * clump[in_mat, None]), 0, 1)
+    crimson = in_mat & (clump > 0.57) & (u > 0.46)
+    catkin = in_mat & (v > 0.68) & (clump > 0.67) & (u <= 0.46)
+    rgba[in_mat, :3] = np.clip(np.array([0.20, 0.31, 0.14]) * (0.78 + 0.35 * clump[in_mat, None]), 0, 1)
     rgba[in_mat, 3] = 1.0
     rgba[crimson, :3] = np.clip(np.array([0.68, 0.18, 0.14]) * (0.8 + 0.3 * clump[crimson, None]), 0, 1)
     rgba[catkin, :3] = np.array([0.86, 0.84, 0.76])

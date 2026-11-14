@@ -1,10 +1,27 @@
 import * as THREE from 'three/webgpu';
-import { cameraViewMatrix, faceDirection, float, mix, normalMap, normalView, normalViewGeometry, normalWorld, positionGeometry, positionView, smoothstep, vec2, vec4 } from 'three/tsl';
+import {
+  cameraViewMatrix,
+  clamp,
+  faceDirection,
+  float,
+  max,
+  mix,
+  normalMap,
+  normalView,
+  normalViewGeometry,
+  normalWorld,
+  positionGeometry,
+  positionView,
+  smoothstep,
+  vec2,
+  vec4,
+} from 'three/tsl';
 import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 import { authoredTexture } from '../AuthoredTextureNode.js';
 
-/** Share of a plant's normal bent to the sky, leaving a little authored form. */
-const SKYWARD_NORMAL = 0.72;
+/** Share of foliage vs woody-stem normals bent to the sky, preserving branch contrast. */
+const SKYWARD_FOLIAGE_NORMAL = 0.48;
+const SKYWARD_WOODY_NORMAL = 0.12;
 /** Strength of a plant's own normal map over the bent normal. */
 const UNDERSTORY_NORMAL_STRENGTH = 0.8;
 /** Crown in-scatter: metres over which it ramps, and its share of the sky fill. */
@@ -84,14 +101,24 @@ export function foliageSkyFill(color, amount) {
 }
 
 /**
- * Lights a ground plant as the meadow around it, whose normals face the sky.
- * Upright leaf normals catch almost no high sun, so tufts read near black against
- * the grass. Call after applyPlantMotion, which may replace `normalNode`.
+ * Lights green leaf groups smoothly like the meadow while keeping lower skyward
+ * blend on woody stems and bark so internal shrub branches hold 3D shading contrast.
+ * Call after applyPlantMotion, which may replace `normalNode`.
  */
 export function applySkywardNormal(material) {
   const authored = material.normalNode ?? normalViewGeometry.mul(faceDirection);
   const up = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz;
-  material.normalNode = withAuthoredNormalMap(material, mix(authored, up, SKYWARD_NORMAL).normalize());
+  const sample = material.map
+    ? authoredTexture(material.map).rgb
+    : material.colorNode ?? null;
+  const skywardBlend = sample
+    ? mix(
+      float(SKYWARD_WOODY_NORMAL),
+      float(SKYWARD_FOLIAGE_NORMAL),
+      clamp(sample.g.sub(max(sample.r, sample.b)).mul(8.0), 0.0, 1.0),
+    )
+    : float(SKYWARD_FOLIAGE_NORMAL);
+  material.normalNode = withAuthoredNormalMap(material, mix(authored, up, skywardBlend).normalize());
   return material;
 }
 

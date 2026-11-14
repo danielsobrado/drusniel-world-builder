@@ -5,7 +5,7 @@ import math
 import random
 import bmesh
 from mathutils import Vector
-from understory_common import arched_card, finish_mesh, mushroom_dome, rock_chunk, tube
+from understory_common import arched_card, finish_mesh, leaf_spray_fan, mushroom_dome, rock_chunk, tube
 
 
 # ---------------------------------------------------------------------------
@@ -458,87 +458,221 @@ def build_structure_rainforest_idol(mat):
 
 
 # ---------------------------------------------------------------------------
-# 5. AUTHORED BIOME SHRUBS (`bushVariants`, height 1.15 - 1.65 m)
+# 5. AUTHORED BIOME SHRUBS (`bushVariants`, distinct multi-stem woody forms)
 # ---------------------------------------------------------------------------
 
-def _build_shrub_archetype(name, mat, seed, height=1.10, spread=1.24, n_branches=3, n_cards=12, flat_top=False):
-    """Grounded multi-tiered shrub mound with 3D faceted foliage cushion core (matching SM_Rocks facets) + wide-skirted dome cards."""
-    rng = random.Random(seed)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
+SHRUB_MAX_TRIANGLES = 520
 
-    # 1. Two grounded 3D faceted low-poly foliage dome cushions at the core (mapped to opaque center of leaf atlas)
-    rock_chunk(
-        bm, uv,
-        Vector((-spread * 0.08, spread * 0.04, height * 0.34)),
-        (spread * 0.44, spread * 0.40, height * 0.38),
-        u_range=(0.48, 0.82), v_range=(0.24, 0.68),
-        subdivisions=1, rng=rng, dome=True,
+
+def _add_branch_spray_pair(bm, uv, attach_pt, branch_dir, length, width, arch=0.14, roll_bias=0.0):
+    """Attach two complementary 3D V-cupped twig sprays directly onto a branch node."""
+    fwd = branch_dir.normalized()
+    leaf_spray_fan(
+        bm, uv, attach_pt, fwd, length, width,
+        u_range=(0.30, 1.0), v_range=(0.02, 0.98),
+        roll=roll_bias + 0.18, arch=arch, cup=0.18, tip_scale=0.38,
     )
-    rock_chunk(
-        bm, uv,
-        Vector((spread * 0.16, -spread * 0.10, height * 0.24)),
-        (spread * 0.34, spread * 0.30, height * 0.28),
-        u_range=(0.48, 0.82), v_range=(0.24, 0.68),
-        subdivisions=1, rng=rng, dome=True,
+    # Crossed/splayed secondary leaf fan at a distinct pitch/roll angle so silhouette reads from every view
+    up = Vector((0.0, 0.0, 1.0)) if abs(fwd.z) < 0.90 else Vector((1.0, 0.0, 0.0))
+    side = fwd.cross(up).normalized()
+    fwd2 = (fwd * 0.86 + up * 0.32 + side * 0.24).normalized()
+    leaf_spray_fan(
+        bm, uv, attach_pt, fwd2, length * 0.88, width * 0.92,
+        u_range=(0.30, 1.0), v_range=(0.02, 0.98),
+        roll=roll_bias - 0.85, arch=arch * 0.7, cup=0.15, tip_scale=0.36,
     )
-
-    # 2. Subtle woody basal stems tucked inside the lower skirt
-    for k in range(n_branches):
-        yaw = k / n_branches * 2 * math.pi + rng.uniform(-0.22, 0.22)
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        p0 = out * (spread * 0.10) + Vector((0, 0, -0.03))
-        p1 = out * (spread * 0.24) + Vector((0, 0, height * 0.20))
-        p2 = out * (spread * 0.34) + Vector((0, 0, height * 0.40))
-        tube(bm, uv, [p0, p1, p2], [0.058, 0.038, 0.020], sides=4, u_range=(0.02, 0.28), v_range=(0.05, 0.92), rough=0.04, rng=rng)
-
-    # 3. Grounded outer skirt + inward-arching dome cards (wide at base -> full belly -> rounded top)
-    n_skirt = (n_cards * 2) // 3
-    for k in range(n_cards):
-        yaw = (k * 2.39996) + rng.uniform(-0.16, 0.16)
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        if k < n_skirt:
-            r0 = spread * rng.uniform(0.46, 0.58)
-            r1 = spread * rng.uniform(0.58, 0.70)
-            r2 = spread * rng.uniform(0.24, 0.36)
-            z0 = -0.03
-            z1 = height * rng.uniform(0.30, 0.42)
-            z2 = height * rng.uniform(0.60, 0.72)
-        else:
-            r0 = spread * rng.uniform(0.32, 0.44)
-            r1 = spread * rng.uniform(0.42, 0.52)
-            r2 = spread * (rng.uniform(0.18, 0.28) if flat_top else rng.uniform(0.08, 0.18))
-            z0 = height * rng.uniform(0.10, 0.18)
-            z1 = height * rng.uniform(0.48, 0.60)
-            z2 = height * (rng.uniform(0.76, 0.84) if flat_top else rng.uniform(0.82, 0.92))
-        p0 = out * r0 + Vector((0, 0, z0))
-        p1 = out * r1 + Vector((0, 0, z1))
-        p2 = out * r2 + Vector((0, 0, z2))
-        w = spread * rng.uniform(0.56, 0.68)
-        arched_card(bm, uv, p0, p1, p2, w * 0.86, w, w * 0.68, side, u_range=(0.30, 1.0), v_range=(0.02, 0.98))
-    return finish_mesh(name, bm, mat)
 
 
 def build_bush_arid_ocotillo(mat):
-    return _build_shrub_archetype('bush-arid-ocotillo-01', mat, 321, height=1.02, spread=1.18, n_branches=3, n_cards=12)
+    """Sprawling multi-cane desert Ocotillo (Fouquieria splendens) whip fountain with stem leaves and scarlet tip spikes."""
+    rng = random.Random(321)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    cane_specs = (
+        (0.18, 0.56, 1.48), (0.94, 0.42, 1.66), (1.72, 0.72, 1.24), (2.48, 0.48, 1.56),
+        (3.26, 0.68, 1.18), (4.05, 0.38, 1.72), (4.88, 0.60, 1.36), (5.58, 0.76, 1.06),
+    )
+    for idx, (yaw, splay, h) in enumerate(cane_specs):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        bend = rng.uniform(-0.14, 0.14)
+        p0 = out * 0.07 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (splay * 0.46) + side * (bend * 0.5) + Vector((0.0, 0.0, h * 0.50))
+        p2 = out * (splay * 0.92) + side * bend + Vector((0.0, 0.0, h))
+        tube(bm, uv, [p0, p1, p2], [0.042, 0.028, 0.012], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
+
+        # Stem-hugging leaflet cuffs along mid cane + flowering crimson spike at tip
+        mid_pt = p0.lerp(p1, 0.75)
+        cane_dir = (p1 - p0).normalized()
+        leaf_spray_fan(bm, uv, mid_pt, (cane_dir + side * 0.35).normalized(), 0.44, 0.38, u_range=(0.30, 1.0), v_range=(0.02, 0.74), roll=0.4 if idx % 2 else -0.4, arch=0.10)
+        tip_dir = (p2 - p1 + Vector((0.0, 0.0, 0.18))).normalized()
+        _add_branch_spray_pair(bm, uv, p1.lerp(p2, 0.65), tip_dir, 0.52, 0.40, arch=0.14, roll_bias=idx * 0.7)
+    return finish_mesh('bush-arid-ocotillo-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
 
 
 def build_bush_savanna_thorn(mat):
-    return _build_shrub_archetype('bush-savanna-thorn-01', mat, 322, height=1.00, spread=1.32, n_branches=3, n_cards=12, flat_top=True)
+    """Crooked multi-stemmed flat-topped Savanna thorn scrub (Vachellia/Acacia shrub) with open basal branches."""
+    rng = random.Random(322)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    stems = (
+        # (yaw, len_xy, z_fork, z_top, fork_spread)
+        (0.15, 0.84, 0.44, 0.96, 0.38),
+        (1.42, 0.92, 0.54, 1.12, 0.42),
+        (2.70, 0.76, 0.38, 0.82, 0.35),
+        (3.92, 0.88, 0.48, 1.02, 0.40),
+        (5.15, 0.70, 0.34, 0.74, 0.32),
+    )
+    for idx, (yaw, r_xy, z_f, z_t, f_sp) in enumerate(stems):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.08 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.42) + side * rng.uniform(-0.10, 0.10) + Vector((0.0, 0.0, z_f))
+        p2 = out * r_xy + side * rng.uniform(-0.12, 0.12) + Vector((0.0, 0.0, z_t))
+        tube(bm, uv, [p0, p1, p2], [0.052, 0.032, 0.015], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+
+        # Horizontal flat-topped lateral branch forks creating tiered table acacia canopy
+        s_sign = 1.0 if idx % 2 == 0 else -1.0
+        fork_end = p1 + out * (f_sp * 0.80) + side * (s_sign * f_sp) + Vector((0.0, 0.0, z_t * 0.38))
+        tube(bm, uv, [p1, fork_end], [0.025, 0.012], sides=3, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
+        fork2 = p1.lerp(p2, 0.45) + side * (-s_sign * f_sp * 0.72) + out * 0.14 + Vector((0.0, 0.0, 0.16))
+        tube(bm, uv, [p1.lerp(p2, 0.45), fork2], [0.020, 0.010], sides=3, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
+
+        # Flat horizontal table-like acacia foliage pads perched at branch ends
+        flat_dir = Vector((p2.x - p1.x, p2.y - p1.y, 0.14)).normalized()
+        _add_branch_spray_pair(bm, uv, p2 - flat_dir * 0.14, flat_dir, 0.86, 0.92, arch=0.04, roll_bias=0.14)
+        f_dir = Vector((fork_end.x - p1.x, fork_end.y - p1.y, 0.12)).normalized()
+        _add_branch_spray_pair(bm, uv, fork_end - f_dir * 0.10, f_dir, 0.76, 0.82, arch=0.04, roll_bias=-0.18)
+        f2_dir = Vector((fork2.x - p1.x, fork2.y - p1.y, 0.10)).normalized()
+        _add_branch_spray_pair(bm, uv, fork2 - f2_dir * 0.08, f2_dir, 0.68, 0.74, arch=0.03, roll_bias=0.22)
+    return finish_mesh('bush-savanna-thorn-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
 
 
 def build_bush_meadow_gorse(mat):
-    return _build_shrub_archetype('bush-meadow-gorse-01', mat, 323, height=1.04, spread=1.22, n_branches=3, n_cards=12)
+    """Irregular, billowy Meadow Gorse thicket with asymmetrical dark multi-stem canes and sunlit flower clusters."""
+    rng = random.Random(323)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    canes = (
+        (0.10, 0.68, 0.36, 0.74),
+        (1.25, 0.56, 0.48, 1.06),
+        (2.38, 0.74, 0.30, 0.62),
+        (3.52, 0.60, 0.44, 0.96),
+        (4.65, 0.72, 0.34, 0.68),
+        (5.48, 0.48, 0.50, 1.12),
+    )
+    for idx, (yaw, r_xy, z_mid, z_top) in enumerate(canes):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.07 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.48) + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, z_mid))
+        p2 = out * r_xy + Vector((0.0, 0.0, z_top))
+        tube(bm, uv, [p0, p1, p2], [0.050, 0.032, 0.015], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
+
+        fork_side = 1.0 if idx % 2 == 0 else -1.0
+        twig_end = p1 + out * 0.26 + side * (fork_side * 0.30) + Vector((0.0, 0.0, 0.16 if idx % 3 else -0.04))
+        tube(bm, uv, [p1, twig_end], [0.024, 0.012], sides=3, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
+
+        _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.06)), (p2 - p1 + Vector((0, 0, 0.22))).normalized(), 0.58, 0.60, arch=0.14, roll_bias=idx * 0.4)
+        _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - p1).normalized(), 0.52, 0.54, arch=0.08, roll_bias=-0.5)
+    return finish_mesh('bush-meadow-gorse-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
 
 
 def build_bush_boreal_juniper(mat):
-    return _build_shrub_archetype('bush-boreal-juniper-01', mat, 324, height=0.92, spread=1.26, n_branches=3, n_cards=12)
+    """Low wind-swept prostrate Boreal Krummholz Juniper with creeping twisted boughs and upturned conifer plumes."""
+    rng = random.Random(324)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    # Offset multi-bough rootstock sprawling wider (+X/+Y windward/leeward asymmetry) than tall
+    root_origin = Vector((-0.18, 0.06, -0.02))
+    boughs = (
+        (0.12, 0.96, 0.20, 0.58),
+        (0.95, 0.84, 0.24, 0.68),
+        (2.10, 0.72, 0.16, 0.42),
+        (3.45, 0.78, 0.14, 0.36),
+        (4.85, 0.88, 0.22, 0.54),
+        (5.68, 0.68, 0.15, 0.40),
+    )
+    for idx, (yaw, r_xy, z_elbow, z_tip) in enumerate(boughs):
+        out = Vector((math.cos(yaw) + 0.22, math.sin(yaw), 0.0)).normalized()
+        side = Vector((-out.y, out.x, 0.0))
+        p0 = root_origin + out * 0.06
+        p1 = root_origin + out * (r_xy * 0.52) + side * rng.uniform(-0.12, 0.12) + Vector((0.0, 0.0, z_elbow))
+        p2 = root_origin + out * r_xy + Vector((0.0, 0.0, z_tip))
+        tube(bm, uv, [p0, p1, p2], [0.056, 0.036, 0.016], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+
+        fork = p1 + out * 0.28 + side * (0.32 if idx % 2 == 0 else -0.32) + Vector((0.0, 0.0, 0.18))
+        tube(bm, uv, [p1, fork], [0.026, 0.013], sides=3, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
+
+        # Mid-bough and terminal conifer needle plumes sweeping outward and upward
+        mid_dir = Vector((out.x * 0.92 + side.x * (-0.28 if idx % 2 == 0 else 0.28), out.y * 0.92 + side.y * (-0.28 if idx % 2 == 0 else 0.28), 0.34)).normalized()
+        _add_branch_spray_pair(bm, uv, p1.lerp(p2, 0.28), mid_dir, 0.56, 0.60, arch=0.14, roll_bias=-0.22)
+        tip_dir = Vector((out.x * 0.85, out.y * 0.85, 0.48)).normalized()
+        _add_branch_spray_pair(bm, uv, p2 - out * 0.12, tip_dir, 0.64, 0.68, arch=0.18, roll_bias=0.25)
+        f_dir = Vector((fork.x - p1.x, fork.y - p1.y, 0.36)).normalized()
+        _add_branch_spray_pair(bm, uv, fork - f_dir * 0.10, f_dir, 0.56, 0.60, arch=0.15, roll_bias=-0.35)
+    return finish_mesh('bush-boreal-juniper-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
 
 
 def build_bush_tropical_hibiscus(mat):
-    return _build_shrub_archetype('bush-tropical-hibiscus-01', mat, 325, height=1.14, spread=1.26, n_branches=3, n_cards=12)
+    """Graceful arching Tropical Hibiscus multi-stem shrub with forked nodes and broad-leaved flower sprays."""
+    rng = random.Random(325)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    stems = (
+        (0.25, 0.64, 0.52, 1.18),
+        (1.50, 0.72, 0.46, 0.98),
+        (2.78, 0.58, 0.58, 1.28),
+        (4.02, 0.76, 0.40, 0.84),
+        (5.22, 0.62, 0.50, 1.10),
+    )
+    for idx, (yaw, r_xy, z_f, z_t) in enumerate(stems):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.07 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.42) + Vector((0.0, 0.0, z_f))
+        p2 = out * r_xy + Vector((0.0, 0.0, z_t))
+        tube(bm, uv, [p0, p1, p2], [0.048, 0.030, 0.014], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.04, rng=rng, cap_end=False)
+
+        fork_pt = p1.lerp(p2, 0.25)
+        twig_end = fork_pt + out * 0.30 + side * (0.34 if idx % 2 == 0 else -0.34) + Vector((0.0, 0.0, 0.14))
+        tube(bm, uv, [fork_pt, twig_end], [0.024, 0.012], sides=3, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
+
+        _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.06)), (p2 - p1 + Vector((0, 0, 0.15))).normalized(), 0.62, 0.64, arch=-0.06, roll_bias=idx * 0.5)
+        _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - fork_pt).normalized(), 0.54, 0.56, arch=-0.08, roll_bias=-0.4)
+    return finish_mesh('bush-tropical-hibiscus-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
 
 
 def build_bush_swamp_buttonbush(mat):
-    return _build_shrub_archetype('bush-swamp-buttonbush-01', mat, 326, height=1.04, spread=1.22, n_branches=3, n_cards=12)
+    """Sprawling crooked wetland Buttonbush with leaning forked bog canes and distinct airy leaf groupings."""
+    rng = random.Random(326)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    canes = (
+        (0.08, 0.82, 0.38, 0.82),
+        (1.12, 0.68, 0.48, 1.08),
+        (2.18, 0.86, 0.32, 0.68),
+        (3.36, 0.64, 0.44, 0.96),
+        (4.42, 0.78, 0.34, 0.74),
+        (5.50, 0.58, 0.52, 1.12),
+    )
+    for idx, (yaw, r_xy, z_f, z_t) in enumerate(canes):
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        p0 = out * 0.08 + Vector((0.0, 0.0, -0.02))
+        p1 = out * (r_xy * 0.46) + side * rng.uniform(-0.14, 0.14) + Vector((0.0, 0.0, z_f))
+        p2 = out * r_xy + side * rng.uniform(-0.10, 0.10) + Vector((0.0, 0.0, z_t))
+        tube(bm, uv, [p0, p1, p2], [0.050, 0.032, 0.015], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+
+        twig_end = p1 + out * 0.28 + side * (-0.34 if idx % 2 else 0.34) + Vector((0.0, 0.0, 0.12))
+        tube(bm, uv, [p1, twig_end], [0.024, 0.012], sides=3, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
+
+        _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.05)), (p2 - p1 + Vector((0, 0, 0.18))).normalized(), 0.58, 0.58, arch=0.10, roll_bias=idx * 0.45)
+        _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - p1).normalized(), 0.50, 0.52, arch=0.08, roll_bias=-0.4)
+    return finish_mesh('bush-swamp-buttonbush-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
