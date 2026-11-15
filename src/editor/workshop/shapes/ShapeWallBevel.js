@@ -26,9 +26,10 @@ export function addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, th
     if (outward) mesh.quad(...vertices, tint, uv);
     else mesh.quad(...vertices.toReversed(), tint, uv.toReversed());
   };
-  if (caps.relief) {
-    // Four facets meeting at the stone's crown (clamped into this piece of a curved stone).
-    const cu = Math.max(inner[0][0], Math.min(inner[1][0], caps.crown[0]));
+  // Only the piece holding the stone's crown is faceted around it; every other piece of a curved
+  // stone lies on the same relief surface, so neighbouring pieces meet without creases.
+  if (caps.relief && caps.crown[0] >= inner[0][0] && caps.crown[0] <= inner[1][0]) {
+    const cu = caps.crown[0];
     // Between the bed and cap edges at the crown's own position, so a raking gable cap still bounds it.
     const t = (cu - inner[0][0]) / Math.max(1e-6, inner[1][0] - inner[0][0]);
     const bed = inner[0][1] + (inner[1][1] - inner[0][1]) * t, cap = inner[3][1] + (inner[2][1] - inner[3][1]) * t;

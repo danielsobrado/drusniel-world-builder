@@ -79,6 +79,17 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
   // Stone (not boards, not regular cells) is laid as a rule-based bond rather than a grid.
   const bonded = detail && stagger && domain !== 'planks';
 
+  // How far the wall (or a raking roof line above it) departs from a straight chord over [a, b].
+  const bend = (a, b) => {
+    const pa = surface.point(a, 0, 0), pb = surface.point(b, 0, 0), pm = surface.point((a + b) / 2, 0, 0);
+    const chord = Math.hypot(pm[0] - (pa[0] + pb[0]) / 2, pm[2] - (pa[2] + pb[2]) / 2);
+    return ceiling ? Math.max(chord, Math.abs(ceiling((a + b) / 2) - (ceiling(a) + ceiling(b)) / 2) / 3) : chord;
+  };
+  // A stone is only cut at a mark where an opening actually crosses its own course; curvature is
+  // followed by subdivision below. Cutting every course at every opening edge and curve sample
+  // scored false joints and sliver bevels through whole stones.
+  const needsCut = (d, y0, y1) => [-0.004, 0.004].some((s) => surface.gaps(wrap(d + s)).some((g) => g.bottom < y1 && g.top > y0));
+
   const layStone = (left, right, y0, y1, cellKey, sunk) => {
     const color = shapeStoneTone(recipe, plan, domain, cellKey);
     // Hand-cut stones: uneven joints, own protrusion, faceted crowned face.
@@ -91,9 +102,13 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
       const u0 = Math.max(closed ? left : Math.max(0, left), from),
         u1 = Math.min(closed ? right : Math.min(length, right), to);
       if (u1 - u0 < 0.08) continue;
-      const pieces = Math.max(1, Math.ceil((u1 - u0) / 0.18));
-      const cuts = [u0, ...marks.filter((d) => d > u0 && d < u1), u1];
-      for (let k = 1; k < pieces; k++) cuts.push(u0 + ((u1 - u0) * k) / pieces);
+      const marked = [u0, ...marks.filter((d) => d > u0 && d < u1 && needsCut(d, y0, y1)), u1];
+      const cuts = [...marked];
+      // Follow a curved wall or raking roof line with short pieces; a flat run stays one stone.
+      for (let k = 0; k < marked.length - 1; k++) {
+        const a = marked[k], b = marked[k + 1], pieces = bend(a, b) > 0.003 ? Math.ceil((b - a) / 0.18) : 1;
+        for (let n = 1; n < pieces; n++) cuts.push(a + ((b - a) * n) / pieces);
+      }
       cuts.sort((a, b) => a - b);
       const wear = shapeCellWear(plan, recipe.seed, cellKey);
       for (let k = 0; k < cuts.length - 1; k++) {
