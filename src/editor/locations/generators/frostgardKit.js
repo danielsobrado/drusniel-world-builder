@@ -13,6 +13,39 @@ const P = (x, y, z) => ({ x, y, z });
 export const LOG = 0x7f6243, DARK = 0x4d3a29, PALE = 0x9c8a6a, STONE = 0xa8a39b;
 export const HEARTH = '#ffac62';
 const LOG_RADIUS = 0.19, LOG_COURSE = 0.36;
+const LOG_TONES = [0x6b5036, 0x7f6243, 0x8a6d4e, 0x614831, 0x74583c];
+const STONE_TONES = [STONE, 0x97938b, 0x86837d, 0x9f998f];
+const hash01 = (seed) => {
+  const v = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return v - Math.floor(v);
+};
+
+/**
+ * A single hand-felled log from `a` to `c` with subtle taper, bow and timber tone.
+ * Long spans break into 2–3 slightly cambered sections so walls never look extruded.
+ */
+function logCourse(b, a, c, { material = 'timber', tint = LOG, radius = LOG_RADIUS, seed = 0 } = {}) {
+  const dx = c.x - a.x, dy = c.y - a.y, dz = c.z - a.z;
+  const span = Math.hypot(dx, dy, dz);
+  if (span < 0.08) return;
+  const color = tint === LOG ? LOG_TONES[Math.floor(hash01(seed + 3.1) * LOG_TONES.length)] : tint;
+  const segs = span > 2.6 ? 3 : span > 1.4 ? 2 : 1;
+  const nx = -dz / span, nz = dx / span;
+  const r0 = radius * (0.91 + hash01(seed + 1.3) * 0.18);
+  const r1 = radius * (0.91 + hash01(seed + 2.7) * 0.18);
+  let prev = a, prevR = r0;
+  for (let s = 1; s <= segs; s += 1) {
+    const t = s / segs;
+    const mid = s < segs ? Math.sin(Math.PI * t) : 0;
+    const bowY = mid * (hash01(seed + s * 5.7) - 0.5) * 0.045;
+    const bowN = mid * (hash01(seed + s * 9.3) - 0.5) * 0.04;
+    const next = P(a.x + dx * t + nx * bowN, a.y + dy * t + bowY, a.z + dz * t + nz * bowN);
+    const nextR = s === segs ? r1 : radius * (0.92 + hash01(seed + s * 4.1) * 0.16);
+    b.prop(material, rod(prev, next, prevR, nextR, 7), color);
+    prev = next;
+    prevR = nextR;
+  }
+}
 
 /**
  * A wall of stacked logs from floor point `a` to `c`. Alternate courses run
@@ -24,20 +57,87 @@ export function logWall(b, a, c, height, { material = 'timber', tint = LOG, gap 
   const ux = (c.x - a.x) / length, uz = (c.z - a.z) / length;
   const at = (along, y) => P(a.x + ux * along, a.y + y, a.z + uz * along);
   for (let row = 0; row < Math.round(height / LOG_COURSE); row += 1) {
-    const y = LOG_RADIUS + row * LOG_COURSE, over = row % 2 ? overrun : 0;
-    const spans = gap && y < gap.height ? [[-over, gap.from], [gap.to, length + over]] : [[-over, length + over]];
-    for (const [from, to] of spans) b.prop(material, rod(at(from, y), at(to, y), LOG_RADIUS, LOG_RADIUS, 7), tint);
+    const seed = a.x * 1.7 + a.z * 2.3 + row * 13.7;
+    const y = LOG_RADIUS + row * LOG_COURSE + (hash01(seed + 0.5) - 0.5) * 0.022;
+    const overA = row % 2 ? overrun * (0.65 + hash01(seed + 4.3) * 0.65) : overrun * (0.12 + hash01(seed + 4.9) * 0.25);
+    const overB = row % 2 ? overrun * (0.65 + hash01(seed + 6.1) * 0.65) : overrun * (0.12 + hash01(seed + 6.7) * 0.25);
+    const spans = gap && y < gap.height ? [[-overA, gap.from], [gap.to, length + overB]] : [[-overA, length + overB]];
+    for (let i = 0; i < spans.length; i += 1) {
+      const [from, to] = spans[i];
+      logCourse(b, at(from, y), at(to, y), { material, tint, seed: seed + i * 19.3 });
+    }
   }
 }
 
-/** Icicles along an eave or lintel from `a` to `c`, longest where meltwater gathers mid-span. */
-export function eaveIcicles(b, a, c, { spacing = 0.32, length = 0.9 } = {}) {
-  const span = Math.hypot(c.x - a.x, c.y - a.y, c.z - a.z);
-  for (let along = b.range(0, spacing); along < span; along += spacing * b.range(0.6, 1.6)) {
+/**
+ * Icicles along an eave or lintel from `a` to `c`, fused to the wood via an
+ * irregular frozen meltwater cornice and snow lip so ice never floats off timber.
+ */
+export function eaveIcicles(b, a, c, { spacing = 0.3, length = 0.95, cornice = true } = {}) {
+  const dx = c.x - a.x, dy = c.y - a.y, dz = c.z - a.z;
+  const span = Math.hypot(dx, dy, dz);
+  if (cornice && span > 0.4) {
+    const segs = Math.max(3, Math.round(span / 1.1));
+    for (let s = 0; s < segs; s += 1) {
+      const t0 = s / segs, t1 = (s + 1) / segs, tm = (t0 + t1) * 0.5;
+      const seed = a.x * 3.1 + a.z * 4.7 + s * 7.3;
+      const p0 = P(a.x + dx * t0, a.y + dy * t0 + 0.05, a.z + dz * t0);
+      const p1 = P(a.x + dx * t1, a.y + dy * t1 + 0.05, a.z + dz * t1);
+      // Frozen meltwater bead bridging roof snow to timber fascia.
+      b.prop('clearIce', rod(p0, p1, 0.06 + hash01(seed) * 0.04, 0.06 + hash01(seed + 1.1) * 0.04, 6), 0xe6f4ff);
+      if (hash01(seed + 2.3) > 0.28) {
+        b.prop('roof', stoneBlock(span / segs * 0.72, 0.14 + hash01(seed + 3.1) * 0.08, 0.24,
+          P(a.x + dx * tm, a.y + dy * tm + 0.08, a.z + dz * tm),
+          { irregular: 0.65, bevel: 0.06 }), 0xffffff);
+      }
+    }
+  }
+  for (let along = b.range(0, spacing); along < span; along += spacing * b.range(0.55, 1.45)) {
     const t = along / span;
-    const reach = length * b.range(0.25, 1) * (0.5 + Math.sin(Math.PI * t) * 0.5);
-    b.prop('clearIce', icicle(P(a.x + (c.x - a.x) * t, a.y + (c.y - a.y) * t, a.z + (c.z - a.z) * t),
-      reach, 0.03 + reach * 0.05, { phase: along * 7 }), 0xffffff);
+    const reach = length * b.range(0.28, 1.05) * (0.52 + Math.sin(Math.PI * t) * 0.48);
+    const root = P(a.x + dx * t, a.y + dy * t + 0.06, a.z + dz * t);
+    b.prop('clearIce', icicle(root, reach, 0.034 + reach * 0.052, { phase: along * 7 }), 0xffffff);
+    if (reach > 0.55) {
+      b.prop('clearIce', icicle(P(root.x + b.range(-0.08, 0.08), root.y + 0.02, root.z + b.range(-0.08, 0.08)),
+        reach * b.range(0.45, 0.72), 0.028 + reach * 0.032, { phase: along * 11 + 2 }), 0xeef8ff);
+    }
+  }
+}
+
+/**
+ * Irregular split-stone steps with weathered timber tread nosing and snow-packed
+ * side pockets. Steps descend along `+Z` (`dirZ = 1`) or `-Z` (`dirZ = -1`).
+ */
+export function irregularSteps(b, at, { width = 2.6, height = 1.0, depth = 1.5, count = 2, dirZ = 1 } = {}) {
+  const stepDepth = depth / count;
+  for (let i = 0; i < count; i += 1) {
+    const frac = (count - i) / (count + 1);
+    const stepH = height * frac;
+    const zCenter = at.z + dirZ * (stepDepth * (i + 0.5));
+    const slabs = Math.max(3, Math.round(width / 0.8));
+    const slabW = width / slabs;
+    for (let s = 0; s < slabs; s += 1) {
+      const seed = at.x * 2.1 + zCenter * 3.7 + s * 11.3 + i * 29.1;
+      const x = at.x - width / 2 + slabW * (s + 0.5) + (hash01(seed + 1.1) - 0.5) * 0.06;
+      const w = slabW * (0.88 + hash01(seed + 2.2) * 0.22);
+      const h = stepH + (hash01(seed + 3.3) - 0.5) * 0.05;
+      const d = stepDepth * (0.9 + hash01(seed + 4.4) * 0.16);
+      const yaw = (hash01(seed + 5.5) - 0.5) * 0.07;
+      const tone = STONE_TONES[Math.floor(hash01(seed + 6.6) * STONE_TONES.length)];
+      b.prop('masonry', stoneBlock(w, h + 0.25, d, P(x, at.y - 0.25, zCenter + (hash01(seed + 7.7) - 0.5) * 0.04),
+        { irregular: 0.52, bevel: 0.07, yaw }), tone);
+    }
+    // Hand-hewn timber nosing along the step lip + snow pillows tucked at the flanks.
+    const lipZ = zCenter + dirZ * (stepDepth * 0.44);
+    b.prop('timber', hewnBeam(
+      P(at.x - width * 0.48, at.y + stepH - 0.03, lipZ),
+      P(at.x + width * 0.48, at.y + stepH - 0.02, lipZ + dirZ * 0.02),
+      0.13, 0.11, { irregular: 0.4, taper: 0.02 }), DARK);
+    for (const sx of [-1, 1]) {
+      b.prop('roof', stoneBlock(0.55, 0.16, stepDepth * 0.78,
+        P(at.x + sx * (width * 0.43), at.y + stepH - 0.02, zCenter),
+        { irregular: 0.72, bevel: 0.08, yaw: sx * 0.2 }), 0xffffff);
+    }
   }
 }
 
@@ -64,8 +164,17 @@ export function pitchedRoof(b, at, {
     for (const end of [-1, 1]) {
       const u = end * (length / 2 + 0.75);
       b.prop(timber, beam(W(u, eave - 0.2, sign * half), W(u, ridge + 0.25, 0), 0.12, 0.3), DARK);
+      if (icicles) {
+        // Frozen meltwater glaze bridging roof snow over the timber bargeboard.
+        b.prop('clearIce', rod(W(u, eave - 0.22, sign * (half - 0.05)), W(u, ridge + 0.05, sign * 0.25), 0.05, 0.04, 6), 0xe6f4ff);
+      }
     }
-    if (icicles) eaveIcicles(b, W(-length / 2 - 0.7, eave - 0.42, sign * half), W(length / 2 + 0.7, eave - 0.42, sign * half));
+    if (icicles) {
+      // Fascia/eave timber collar so the frozen cornice and icicles visibly bridge snow to wood.
+      b.prop(timber, hewnBeam(W(-length / 2 - 0.72, eave - 0.26, sign * (half - 0.08)),
+        W(length / 2 + 0.72, eave - 0.26, sign * (half - 0.08)), 0.14, 0.18, { irregular: 0.3 }), DARK);
+      eaveIcicles(b, W(-length / 2 - 0.7, eave - 0.34, sign * half), W(length / 2 + 0.7, eave - 0.34, sign * half));
+    }
   }
   b.prop(timber, beam(W(-length / 2 - 0.9, ridge + 0.1, 0), W(length / 2 + 0.9, ridge + 0.1, 0), 0.3), DARK);
 }
@@ -94,7 +203,7 @@ export function longhall(b, at, { length, width, wallHeight, roofRise }, { icicl
     const endRows = Math.round((wallHeight - 0.18) / LOG_COURSE);
     for (let y = plinth + 0.18 + LOG_RADIUS + endRows * LOG_COURSE; y < ridge - 0.3; y += LOG_COURSE) {
       const half = front * (1 - (y - eave) / roofRise);
-      b.prop('timber', rod(L(end * length / 2, y, -half), L(end * length / 2, y, half), LOG_RADIUS, LOG_RADIUS, 7), LOG);
+      logCourse(b, L(end * length / 2, y, -half), L(end * length / 2, y, half), { seed: end * 31 + y * 9.7 });
     }
   }
   pitchedRoof(b, at, { length, width, eave, ridge, icicles });
@@ -114,9 +223,11 @@ export function longhall(b, at, { length, width, wallHeight, roofRise }, { icicl
   b.light(L(length * 0.15, ridge + 1.5, 0), HEARTH, 1.2, 9);
   b.emit('smoke', L(length * 0.15, ridge + 0.9, 0));
 
-  // Steps down from the plinth.
-  b.prop('masonry', block(2.4, plinth * 0.66, 0.8, L(0, 0, front + 0.8)), STONE);
-  b.prop('masonry', block(2.4, plinth * 0.33, 0.8, L(0, 0, front + 1.6)), STONE);
+  // Irregular stone-and-timber steps down from the plinth, plus snow pillows along the flanks.
+  irregularSteps(b, L(0, 0, front + 0.4), { width: 2.5, height: plinth, depth: 1.6, count: 2, dirZ: 1 });
+  for (const sx of [-1, 1]) {
+    b.prop('roof', stoneBlock(1.4, 0.48, 1.8, L(sx * (length * 0.34), 0, front + 0.45), { irregular: 0.75, bevel: 0.16 }), 0xffffff);
+  }
   b.nav.addRect(L(0, plinth * 0.33, front + 1.6), 1.2, 0.4);
   b.nav.addRect(L(0, plinth * 0.66, front + 0.8), 1.2, 0.4);
   for (const dx of [-length * 0.27, 0, length * 0.27]) b.nav.block(L(dx, 0, dx === 0 ? -0.6 : 0), width * 0.62, 6);
@@ -185,8 +296,9 @@ export function watchGate(b, at, { width = 4.2, deck = 3.6 } = {}) {
 /**
  * A border beacon: a timber frame on a boulder footing carrying an iron fire
  * basket high enough to be seen down the valley, with the alarm bell under it.
+ * `unlit` leaves the basket cold, as a beacon stands by day.
  */
-export function beacon(b, at, { height = 8 } = {}) {
+export function beacon(b, at, { height = 8, unlit = false } = {}) {
   const L = (dx, dy, dz) => P(at.x + dx, at.y + dy, at.z + dz);
   b.prop('masonry', stoneBlock(3.4, 1.1, 3.4, at, { batter: 0.2, irregular: 0.6, bevel: 0.12 }), STONE);
   b.prop('masonry', stoneBlock(2.5, 0.7, 2.5, L(0, 1.1, 0), { batter: 0.16, irregular: 0.6, bevel: 0.1, yaw: 0.5 }), STONE);
@@ -201,10 +313,12 @@ export function beacon(b, at, { height = 8 } = {}) {
   }
   b.prop('timber', block(1.5, 0.16, 1.5, L(0, height, 0)), DARK);
   b.prop('iron', rod(L(0, height + 0.16, 0), L(0, height + 0.7, 0), 0.34, 0.62, 8), 0x5c6068);
-  b.prop('glow', rod(L(0, height + 0.5, 0), L(0, height + 0.72, 0), 0.5, 0.42, 8), '#d2460f', 1.8);
-  b.flame(L(0, height + 0.7, 0), { width: 1.2, height: 1.9, core: '#fff2bc', outer: '#ff520e' });
-  b.light(L(0, height + 1.4, 0), '#ffb066', 12, 38, { radius: 2.4, halo: 4.5 });
-  b.emit('ember', L(0, height + 0.9, 0));
+  if (!unlit) {
+    b.prop('glow', rod(L(0, height + 0.5, 0), L(0, height + 0.72, 0), 0.5, 0.42, 8), '#d2460f', 1.8);
+    b.flame(L(0, height + 0.7, 0), { width: 1.2, height: 1.9, core: '#fff2bc', outer: '#ff520e' });
+    b.light(L(0, height + 1.4, 0), '#ffb066', 12, 38, { radius: 2.4, halo: 4.5 });
+    b.emit('ember', L(0, height + 0.9, 0));
+  }
   b.prop('iron', rod(L(0, height - 0.95, 0), L(0, height - 0.35, 0), 0.3, 0.08, 8), 0x7d7362);
   b.nav.block(at, 2.4, 4);
 }
@@ -227,24 +341,30 @@ export function gableFront(b, at, { width, wallHeight, roofRise, porch = 2.8, do
   const wallRows = Math.round((wallHeight - sill) / LOG_COURSE);
   for (let y = sill + LOG_RADIUS + wallRows * LOG_COURSE; y < ridge - 0.4; y += LOG_COURSE) {
     const reach = half * (1 - (y - wallHeight) / roofRise);
-    b.prop('timber', rod(L(-reach, y, 0), L(reach, y, 0), LOG_RADIUS, LOG_RADIUS, 7), LOG);
+    logCourse(b, L(-reach, y, 0), L(reach, y, 0), { seed: y * 11.3 + reach * 3.1 });
   }
   pitchedRoof(b, L(0, 0, porch / 2 - 1), { length: porch + 2, width, eave: wallHeight, ridge, alongZ: true, icicles: true });
   for (const sx of [-1, 1]) {
     b.prop('timber', hewnBeam(L(sx * (half - 0.3), -footing, porch), L(sx * (half - 0.3), wallHeight - 0.1, porch), 0.34, 0.34, { taper: 0.05 }), LOG);
+    // Stone & frost collar at the porch post base so timber meets snow smoothly.
+    b.prop('masonry', stoneBlock(0.62, 0.36, 0.62, L(sx * (half - 0.3), -0.1, porch), { irregular: 0.65, bevel: 0.09, yaw: sx * 0.3 }), STONE);
+    b.prop('timber', hewnBeam(L(sx * (half - 0.3), wallHeight - 0.22, porch - 0.28), L(sx * (half - 0.3), wallHeight - 0.22, porch + 0.28), 0.42, 0.2, { irregular: 0.3 }), DARK);
     b.prop('timber', hewnBeam(L(sx * (half - 0.3), wallHeight - 1.3, porch), L(sx * (half - 1.6), wallHeight - 0.15, porch), 0.18, 0.2), DARK);
     b.prop('timber', hewnBeam(L(sx * (door / 2 + 0.12), 0, 0.1), L(sx * (door / 2 + 0.12), 2.7, 0.1), 0.26, 0.3), DARK);
     b.nav.block(L(sx * (half - 0.3), 0, porch), 0.5, 3);
     // A shuttered window: the fire behind it, the shutters folded back against the logs.
     const x = sx * half * 0.58;
     b.prop('glow', box(0.8, 0.62, 0.1, L(x, 2.25, 0.16)), HEARTH, 2.2);
-    b.prop('timber', box(1.04, 0.1, 0.2, L(x, 1.88, 0.2)), DARK);
-    b.prop('timber', box(1.04, 0.1, 0.2, L(x, 2.62, 0.2)), DARK);
+    b.prop('timber', hewnBeam(L(x - 0.54, 1.88, 0.2), L(x + 0.54, 1.88, 0.2), 0.2, 0.11, { irregular: 0.35 }), DARK);
+    b.prop('timber', hewnBeam(L(x - 0.54, 2.62, 0.2), L(x + 0.54, 2.62, 0.2), 0.22, 0.12, { irregular: 0.35 }), DARK);
+    b.prop('roof', stoneBlock(1.06, 0.09, 0.2, L(x, 2.67, 0.21), { irregular: 0.6, bevel: 0.03 }), 0xffffff);
     b.prop('timber', box(0.06, 0.64, 0.14, L(x, 2.25, 0.22)), DARK);
     for (const side of [-1, 1]) b.prop('timber', box(0.42, 0.7, 0.05, L(x + side * 0.66, 2.25, 0.24)), 0x5d4631);
     b.light(L(x, 2.25, 1), HEARTH, 2.6, 10, { halo: 1.3 });
   }
   b.prop('timber', hewnBeam(L(-half + 0.2, wallHeight, porch), L(half - 0.2, wallHeight, porch), 0.3, 0.32), DARK);
+  eaveIcicles(b, L(-half + 0.4, wallHeight - 0.16, porch + 0.16), L(-half + 1.5, wallHeight - 0.16, porch + 0.16), { spacing: 0.26, length: 0.48, cornice: false });
+  eaveIcicles(b, L(half - 1.5, wallHeight - 0.16, porch + 0.16), L(half - 0.4, wallHeight - 0.16, porch + 0.16), { spacing: 0.26, length: 0.48, cornice: false });
   b.prop('timber', hewnBeam(L(-door / 2 - 0.4, 2.75, 0.1), L(door / 2 + 0.4, 2.75, 0.1), 0.3, 0.3), DARK);
   b.prop('timber', panel(L(door / 2 + 0.1, 1.3, 0.25), L(door / 2 + 0.55, 1.3, 1.35), P(0, 1, 0), 2.5, 0.1), 0x5d4631);
   lantern(b, L(-door / 2 - 0.9, 2.5, porch - 0.3), { intensity: 3.2, range: 11, halo: 1.2, hung: 0.6 });

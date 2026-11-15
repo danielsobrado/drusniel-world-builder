@@ -1,5 +1,5 @@
 import { beam, block, box, hewnBeam, panel, rod, stoneBlock } from '../gen/propKit.js';
-import { DARK, HEARTH, PALE, STONE, logWall } from './frostgardKit.js';
+import { DARK, HEARTH, LOG, PALE, STONE, logWall } from './frostgardKit.js';
 import { barrel, crate, lantern } from './kits.js';
 
 /** What a Norths household leaves about a yard, and what stands inside its hall. */
@@ -11,14 +11,26 @@ const HALL_LOG = 0xa3947e, HALL_BEAM = 0x65574a;
 /** Metres between the frames that carry a hall's roof. */
 const BAY = 4;
 
-/** A stacked woodpile along X, `rows` high. */
+const WOOD_TONES = [0x765c41, 0x8d7150, 0x674f38, 0x977a58];
+
+/** A stacked woodpile along X, `rows` high, with weathered varied logs and a light snow cap. */
 export function woodpile(b, at, { length = 1.2, rows = 3, count = 5 } = {}) {
   for (let row = 0; row < rows; row += 1) {
     for (let index = 0; index < count - row; index += 1) {
-      const y = at.y + 0.17 + row * 0.31, z = at.z + index * 0.36 + row * 0.18;
-      b.prop('timber', rod(P(at.x - length / 2, y, z), P(at.x + length / 2, y, z), 0.17, 0.17, 7), 0x8d7150);
+      const r0 = b.range(0.14, 0.19), r1 = b.range(0.13, 0.19);
+      const y = at.y + 0.16 + row * 0.3 + b.range(-0.02, 0.02);
+      const z = at.z + index * 0.36 + row * 0.18 + b.range(-0.025, 0.025);
+      const half = length * b.range(0.42, 0.56);
+      const shift = b.range(-0.08, 0.08);
+      const tone = WOOD_TONES[Math.floor(b.range(0, WOOD_TONES.length))];
+      b.prop('timber', rod(P(at.x - half + shift, y, z), P(at.x + half + shift, y + b.range(-0.02, 0.02), z + b.range(-0.03, 0.03)), r0, r1, 7), tone);
     }
   }
+  // Light drifted snow on the top ridge and tucked along the base so the stack sits in the snowpack.
+  b.prop('roof', stoneBlock(length * 0.88, 0.16, 0.55, P(at.x, at.y + 0.12 + rows * 0.28, at.z + (count - 1) * 0.18),
+    { irregular: 0.72, bevel: 0.07 }), 0xffffff);
+  b.prop('roof', stoneBlock(length * 1.12, 0.18, count * 0.42, P(at.x, at.y - 0.06, at.z + (count - 1) * 0.18),
+    { irregular: 0.75, bevel: 0.09 }), 0xffffff);
   b.nav.block(P(at.x, at.y, at.z + count * 0.18), Math.max(length, count * 0.36) * 0.6, 2);
 }
 
@@ -157,9 +169,32 @@ export function hallInterior(b, at, { halfWidth, halfLength, wallHeight, ridge }
   b.nav.addRect(L(0, 0, 0), aisle + 0.35, halfLength - 0.6);
 }
 
-/** A door hide: a heavy curtain pegged to a lintel, drawn half aside, across a passage running along Z at `at`. */
-export function doorHide(b, at, { width = 2.2, height = 2.4 } = {}) {
-  b.prop('timber', hewnBeam(P(at.x - width / 2 - 0.2, at.y + height, at.z), P(at.x + width / 2 + 0.2, at.y + height, at.z), 0.2, 0.22), DARK);
-  b.prop('timber', box(width * 0.5, height - 0.1, 0.07, P(at.x - width * 0.26, at.y + height / 2, at.z)), FUR[1]);
-  b.prop('timber', beam(P(at.x + width * 0.5, at.y + height, at.z), P(at.x + width * 0.34, at.y + 0.3, at.z + 0.1), 0.3, 0.08), FUR[0]);
+/**
+ * A door hide: a heavy curtain pegged to a lintel, drawn half aside, across a
+ * passage running along Z at `at` — or along whatever `yaw` turns Z to.
+ */
+export function doorHide(b, at, { width = 2.2, height = 2.4, yaw = 0 } = {}) {
+  const c = Math.cos(yaw), s = Math.sin(yaw);
+  const L = (dx, dy, dz) => P(at.x + c * dx + s * dz, at.y + dy, at.z - s * dx + c * dz);
+  b.prop('timber', hewnBeam(L(-width / 2 - 0.2, height, 0), L(width / 2 + 0.2, height, 0), 0.2, 0.22), DARK);
+  b.prop('timber', box(width * 0.5, height - 0.1, 0.07, L(-width * 0.26, height / 2, 0), yaw), FUR[1]);
+  b.prop('timber', beam(L(width * 0.5, height, 0), L(width * 0.34, 0.3, 0.1), 0.3, 0.08), FUR[0]);
+}
+
+/**
+ * A woodshed: a lean-to roof on four posts over the stacked wood, high side
+ * toward the building it serves (-Z). `at` is the middle of its floor.
+ */
+export function woodShed(b, at, { width = 3.6, depth = 3, height = 2.4, fall = 0.5 } = {}) {
+  const L = (dx, dy, dz) => P(at.x + dx, at.y + dy, at.z + dz);
+  const eave = (dz) => height - fall * (dz + depth / 2) / depth;
+  for (const dx of [-width / 2, width / 2]) {
+    for (const dz of [-depth / 2, depth / 2]) {
+      b.prop('timber', hewnBeam(L(dx, -0.3, dz), L(dx, eave(dz), dz), 0.18, 0.18), LOG);
+      b.nav.block(L(dx, 0, dz), 0.3, 3);
+    }
+    b.prop('timber', hewnBeam(L(dx, eave(-depth / 2 - 0.3), -depth / 2 - 0.3), L(dx, eave(depth / 2 + 0.3), depth / 2 + 0.3), 0.14, 0.18), DARK);
+  }
+  const over = depth / 2 + 0.4;
+  b.prop('roof', panel(L(0, eave(-over) + 0.19, -over), L(0, eave(over) + 0.19, over), P(1, 0, 0), width + 0.8, 0.2), 0xffffff);
 }

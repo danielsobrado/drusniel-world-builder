@@ -1,11 +1,12 @@
 import { boulder } from '../gen/iceKit.js';
 import { fbm3 } from '../gen/noise.js';
 import { onTrail } from '../gen/plan.js';
-import { block, box, hewnBeam, rod, stoneBlock } from '../gen/propKit.js';
+import { block, hewnBeam, stoneBlock } from '../gen/propKit.js';
 import { crevasse, hall as hallShape, mound, shaft, tunnel } from '../gen/shapes.js';
-import { DARK, LOG, STONE, beacon, gableFront, longhall, palisade, storehouse, torch, watchGate } from './frostgardKit.js';
-import { doorHide, dryingRack, hallInterior, sled, woodpile } from './frostgardDressing.js';
-import { icicleCluster } from './glacierKit.js';
+import { DARK, STONE, beacon, gableFront, irregularSteps, longhall, palisade, storehouse, torch, watchGate } from './frostgardKit.js';
+import { doorHide, dryingRack, hallInterior, sled, woodShed, woodpile } from './frostgardDressing.js';
+import { airlock, cutIceStore, fitIceStore, storeFrame } from './frostgardIceStore.js';
+import { COLD_POST } from './frostgardStoreKit.js';
 import { barrel, crate, lantern, timberSet } from './kits.js';
 
 /**
@@ -16,8 +17,9 @@ import { barrel, crate, lantern, timberSet } from './kits.js';
  * let the snow bury its roof: rock holds a fire's heat, and ice would melt
  * round it. A palisade and watch gate keep the wind off the yard; the beacon
  * answers the border. Only the store is in the glacier — a passage from the
- * back of the hall leaves the rock, enters the ice, and ends in a chamber that
- * has never been above freezing.
+ * back of the hall leaves the rock through an airlock of hides, enters the ice,
+ * and ends in a cut chamber that has never been above freezing
+ * (`frostgardIceStore.js`).
  */
 
 export const open = true;
@@ -26,10 +28,29 @@ export const bounds = { min: { x: -56, y: -8, z: -84 }, max: { x: 56, y: 52, z: 
 const P = (x, y, z) => ({ x, y, z });
 const clamp01 = (value) => Math.min(1, Math.max(0, value));
 const smooth01 = (value) => { const t = clamp01(value); return t * t * (3 - 2 * t); };
+const mix = (a, c, t) => a + (c - a) * t;
 const HEADROOM = 2.2;
-const MEAT = [0x7a4a3e, 0x8d6654, 0x9c9082];
 /** Half the width of the sled road and the yard's paths, metres. */
 const TRAIL_HALF_WIDTH = 1.6;
+/** Metres past the bend where the passage leaves the rock (the threshold), and the vestibule behind it. */
+const THRESHOLD = 1.4, VESTIBULE = 1.8;
+/** Within this many metres of the passage's middle the medium is what its cutters met: rock to the threshold, ice beyond. */
+const PASSAGE_REACH = 3, PASSAGE_MID = 1.35;
+/** How rough tool-cut faces stay, as a share of a natural face's roughness. */
+const CUT_ROUGHNESS = 0.3;
+
+/** Distance from a point to the passage's line from floor point `a` to `c`, taken at mid height. */
+function fromPassage(x, y, z, a, c) {
+  const dx = c.x - a.x, dz = c.z - a.z;
+  const t = clamp01(((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz));
+  return Math.hypot(x - a.x - dx * t, y - a.y - (c.y - a.y) * t - PASSAGE_MID, z - a.z - dz * t);
+}
+
+/** The floor point `metres` from `a` toward `c`. */
+function toward(a, c, metres) {
+  const k = metres / Math.hypot(c.x - a.x, c.z - a.z);
+  return P(a.x + (c.x - a.x) * k, a.y + (c.y - a.y) * k, a.z + (c.z - a.z) * k);
+}
 
 export function generate(b, params) {
   const seed = b.seed;
@@ -67,22 +88,35 @@ export function generate(b, params) {
   b.grid.carve(tunnel(P(0, floor, knoll.front + 2.5), P(0, floor, south - 0.5), { halfWidth: 1.15, height: 2.55, arch: 0.1 }));
   b.grid.carve(tunnel(P(0, floor, north + 0.5), P(0, floor, north - 4), { halfWidth: 1.1, height: 2.5, arch: 0.1 }));
   b.grid.carve(shaft(P(0, 0, hallAt.z + 1), { radius: 0.75, bottomY: floor + hall.wallHeight + hall.vaultRise - 0.5, topY: knoll.height + 5 }));
-  // Behind the hall the passage leaves the rock for the ice, and ends in the store.
-  const passage = [P(0, floor, north - 3.5), P(-8, floor - 0.4, north - 8.5), P(store.x + 5, store.floor, store.z + 5)];
+  // Behind the hall the passage leaves the rock for the ice, and runs straight down the store's aisle.
+  const bend = P(-8, floor - 0.4, north - 8.5);
+  const storeRoom = storeFrame(P(store.x, store.floor, store.z), bend, store);
+  const passage = [P(0, floor, north - 3.5), bend, storeRoom.at(-store.halfLength, 0, 0)];
   for (let index = 0; index < passage.length - 1; index += 1) {
     b.passage(passage[index], passage[index + 1], { width: 2.5, height: 2.7, arch: 0.3, smooth: 0.5 });
   }
-  b.room(P(store.x, store.floor + 3.3, store.z), { rx: store.radius, ry: 5, rz: store.radius - 0.5, floorY: store.floor, smooth: 0.8, walkRadius: store.radius - 1.6 });
+  cutIceStore(b, storeRoom);
+  const threshold = toward(bend, passage[2], THRESHOLD);
+  const iceward = toward(P(0, 0, 0), P(passage[2].x - bend.x, 0, passage[2].z - bend.z), 1);
+  const pastThreshold = (p) => (p.x - threshold.x) * iceward.x + (p.z - threshold.z) * iceward.z;
+  const nearPassage = (x, y, z) => clamp01(PASSAGE_REACH + 1
+    - Math.min(fromPassage(x, y, z, passage[0], bend), fromPassage(x, y, z, bend, passage[2])));
 
   // Drifts where the wind drops its load: against the palisade, the bluff and the buildings.
   const gateZ = params.yard.gateZ;
   for (const [x, z, rx, rz] of [[-9, gateZ + 1.6, 6, 2.2], [12, gateZ + 1.4, 7, 2], [-25, gateZ + 1.2, 6, 2.4], [26, gateZ + 1.5, 6, 2],
-    [-9, knoll.front + 1.5, 5, 2.4], [10, knoll.front + 1.2, 6, 2.2], [-20, 4, 3, 5]]) {
+    [-9, knoll.front + 1.5, 5, 2.4], [10, knoll.front + 1.2, 6, 2.2], [-20, 4, 3, 5],
+    [-2.5, knoll.front + 3.0, 1.5, 1.8], [2.5, knoll.front + 3.0, 1.5, 1.8],
+    [-hall.halfWidth - 0.85, knoll.front + 3.1, 1.3, 1.2], [hall.halfWidth + 0.85, knoll.front + 3.1, 1.3, 1.2],
+    [-3.9, knoll.front + 0.8, 2.4, 1.3], [3.9, knoll.front + 0.8, 2.4, 1.3]]) {
     b.grid.fill(mound(P(x, ground(x, z) + 0.1, z), rx, 1, rz), 1);
   }
 
-  // Cut rock and laid timber stay true; only the natural faces are broken up.
-  const built = (x, y, z) => (Math.abs(x) < hall.halfWidth + 2.5 && z < knoll.front + 3 && z > north - 5 && y < knoll.height - 1 ? 0 : 1);
+  // The hall's rock and timber stay true; the passage and the store keep a little of a tool-cut face; the rest is broken up.
+  const built = (x, y, z) => {
+    if (Math.abs(x) < hall.halfWidth + 2.5 && z < knoll.front + 3 && z > north - 5 && y < knoll.height - 1) return 0;
+    return 1 - Math.max(nearPassage(x, y, z), storeRoom.inside(x, y, z)) * (1 - CUT_ROUGHNESS);
+  };
   b.grid.roughen({ amp: 0.7, scale: 0.1, seed, octaves: 3, floorAmp: 0.08, ampAt: built });
   b.grid.striate({ ...params.strata, seed: seed + 9, ampAt: (x, y, z) => (z < faceZ(x, y) + 5 ? built(x, y, z) : 0) });
   b.grid.roughen({ amp: 0.2, scale: 0.5, seed: seed + 5, octaves: 2, floorAmp: 0.12, ampAt: built });
@@ -107,20 +141,24 @@ export function generate(b, params) {
 
   // --- What the surface is made of ---------------------------------------------
   const near = (p, q, radius) => Math.max(0, 1 - Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) / radius);
-  const storeAt = P(store.x, store.floor + 2, store.z);
+  const storeAt = P(store.x, store.floor + 2, store.z), storeDoor = P(passage[2].x, store.floor + 1.5, passage[2].z);
   b.classify = (p, n, mask, mask2) => {
     const grain = fbm3(p.x * 0.09, p.y * 0.09, p.z * 0.09, seed + 11, 3);
     const up = clamp01((n.y - 0.25) / 0.45);
     const into = faceZ(p.x, p.y) - p.z;
-    // Ice is whatever lies behind the glacier's face; the contact with the rock is ragged, not a line.
-    const rock = clamp01(0.5 - (into + (grain - 0.5) * 5) / 2.5);
-    const cold = near(p, storeAt, store.radius + 6);
+    // Ice is whatever lies behind the glacier's face; the contact with the rock is ragged, not a line —
+    // except along the passage, which was cut through rock as far as the threshold and through ice beyond it.
+    const contact = clamp01(0.5 - (into + (grain - 0.5) * 5) / 2.5);
+    const rock = mix(contact, clamp01(0.5 - pastThreshold(p) / 0.6), nearPassage(p.x, p.y, p.z));
+    const cold = near(p, storeAt, store.halfLength + 6);
+    // The store's walls are tool-cut: clear and unfractured, rimed only where breath and lamps reach by the door.
+    const cut = storeRoom.inside(p.x, p.y, p.z);
     mask[0] = rock;
     mask[1] = 0;
-    mask[2] = clamp01(cold * 0.3 + clamp01((p.y - glacier.height + 8) / 10) * 0.4);
-    mask[3] = clamp01(cold * 0.5 + Math.max(0, grain - 0.5) * 2.2);
+    mask[2] = mix(clamp01(cold * 0.3 + clamp01((p.y - glacier.height + 8) / 10) * 0.4), 0.1 + near(p, storeDoor, 4) * 0.7, cut);
+    mask[3] = mix(clamp01(cold * 0.5 + Math.max(0, grain - 0.5) * 2.2), 0.08, cut);
     // The glacier's sole is dirty with what it rode over: it shows wherever the passage cuts it.
-    mask2[0] = clamp01(Math.max(0, 1 - (p.y - ground(p.x, p.z)) / 6) * (0.5 + grain));
+    mask2[0] = clamp01(Math.max(0, 1 - (p.y - ground(p.x, p.z)) / 6) * (0.5 + grain)) * (1 - cut * 0.6);
     mask2[1] = clamp01((p.y - 22) / 14);
     mask2[2] = clamp01(cold * up * 0.9);
     mask2[3] = onTrail(p, trails, TRAIL_HALF_WIDTH) * up;
@@ -131,11 +169,18 @@ export function generate(b, params) {
   const ridge = hall.wallHeight + hall.vaultRise - 0.35;
   hallInterior(b, hallAt, { halfWidth: hall.halfWidth, halfLength: hall.halfLength, wallHeight: hall.wallHeight, ridge });
   gableFront(b, P(0, floor, knoll.front + 0.35), { width: hall.halfWidth * 2 + 2.4, wallHeight: 4.2, roofRise: 4, footing: floor + 1 });
-  // The stoop and its steps, and the door passages dressed in stone under timber lintels.
-  b.prop('masonry', stoneBlock(3.8, floor + 1, 4.9, P(0, -1, knoll.front + 2.2), { irregular: 0.2 }), STONE);
-  for (const [step, z] of [[0.66, stoopZ + 0.4], [0.33, stoopZ + 1.1]]) {
-    b.prop('masonry', stoneBlock(3, floor * step + 0.5, 0.75, P(0, -0.5, z), { irregular: 0.25 }), STONE);
+  // The stoop and its irregular stone-and-timber steps, and the door passages dressed in stone under timber lintels.
+  b.prop('masonry', stoneBlock(3.4, floor + 0.96, 4.6, P(0, -1, knoll.front + 2.1), { irregular: 0.28, bevel: 0.08 }), STONE);
+  for (const sx of [-1, 1]) {
+    for (let k = 0; k < 4; k += 1) {
+      const z = knoll.front + 0.4 + k * 1.15;
+      b.prop('masonry', stoneBlock(0.55, floor + 0.98 + (k % 2 ? 0.03 : -0.02), 1.08, P(sx * 1.68, -1, z),
+        { irregular: 0.55, bevel: 0.08, yaw: sx * ((k % 2 ? 1 : -1) * 0.04) }), k % 2 ? 0x97938b : STONE);
+    }
+    b.prop('roof', stoneBlock(0.75, 0.28, 3.6, P(sx * 1.82, -0.08, knoll.front + 2.2), { irregular: 0.72, bevel: 0.1 }), 0xffffff);
   }
+  b.prop('timber', hewnBeam(P(-1.75, floor - 0.03, stoopZ - 0.05), P(1.75, floor - 0.02, stoopZ - 0.04), 0.16, 0.12, { irregular: 0.35 }), DARK);
+  irregularSteps(b, P(0, 0, stoopZ + 0.04), { width: 3.1, height: floor, depth: 1.48, count: 2, dirZ: 1 });
   for (const [from, to] of [[knoll.front + 0.2, south], [north, north - 4]]) {
     for (const sx of [-1, 1]) {
       b.prop('masonry', stoneBlock(0.3, 2.5, Math.abs(to - from), P(sx * 1.25, floor, (from + to) / 2), { irregular: 0.2 }), STONE);
@@ -155,50 +200,17 @@ export function generate(b, params) {
   b.emit('smoke', P(vent.x, vent.y + 1.7, vent.z));
 
   // --- The passage and the store ---------------------------------------------------
-  timberSet(b, passage[1], Math.atan2(passage[2].x - passage[0].x, passage[2].z - passage[0].z), 2.3, 2.45);
-  const mid = P((passage[1].x + passage[2].x) / 2, (passage[1].y + passage[2].y) / 2, (passage[1].z + passage[2].z) / 2);
-  timberSet(b, mid, Math.atan2(passage[2].x - passage[1].x, passage[2].z - passage[1].z), 2.3, 2.45);
-  lantern(b, P(passage[1].x, passage[1].y + 2.05, passage[1].z), { intensity: 2.4, range: 9, halo: 1 });
-  // The stretch still in rock, between the two door hides.
+  // A lamp at each turn: between the hall's door hides, at the bend, and (in the store's fittings) at the store door.
   lantern(b, P(0.7, floor + 2.1, north - 2.4), { intensity: 2.2, range: 8, halo: 0.8, hung: 0.3 });
-  // Lamps set in niches behind the ice: a wall a metre thick glows, and lights the store without warming it.
-  for (const [dx, dz] of [[-store.radius - 1.2, 1], [1.5, -store.radius - 0.7], [store.radius + 1, -2.5]]) {
-    b.light(P(store.x + dx, store.floor + 2, store.z + dz), '#fff0d0', 6, 10, { radius: 1.4 });
-  }
-  const S = (dx, dy, dz) => P(store.x + dx, store.floor + dy, store.z + dz);
-  // Carcasses and split fish hung on a rail, clear of the floor.
-  for (const dx of [-3.2, 3.2]) {
-    b.prop('timber', hewnBeam(S(dx, 0, -2), S(dx, 2.9, -2), 0.2, 0.2), LOG);
-    b.nav.block(S(dx, 0, -2), 0.4, 3);
-    // A working lamp on each post: the one warm thing in the room.
-    lantern(b, S(dx * 0.86, 2.2, -1.75), { intensity: 2.6, range: 10, halo: 0.9, hung: 0.45 });
-  }
-  b.prop('timber', hewnBeam(S(-3.6, 2.8, -2), S(3.6, 2.8, -2), 0.18, 0.2), DARK);
-  for (let dx = -2.2; dx <= 2.2; dx += 0.88) {
-    const long = b.range(0.8, 1.4);
-    b.prop('timber', rod(S(dx, 2.72, -2), S(dx, 2.5, -2), 0.02, 0.02, 4), 0x9c8a6a);
-    b.prop('timber', boulder(S(dx, 2.5 - long, -2), b.range(0.17, 0.24), long * 0.72, b.range(0.13, 0.18),
-      { seed: Math.round(dx * 31 + 77), blocky: 0.15 }), MEAT[Math.floor(b.range(0, 3))]);
-  }
-  // Cut ice stacked for the summer, stores on sleepers, the sled they came on.
-  for (let row = 0; row < 3; row += 1) {
-    for (let index = 0; index < 4 - row; index += 1) {
-      b.prop('clearIce', box(0.9, 0.5, 0.6, S(4.2 - row * 0.1, 0.25 + row * 0.5, 0.8 + index * 0.95 + row * 0.45), 0.05 * index), 0xffffff);
-    }
-  }
-  b.nav.block(S(4.2, 0, 2.2), 1.9, 2);
-  for (const [dx, dz] of [[-4.2, 1.2], [-4.6, 2.2], [-3.6, 2.6]]) {
-    barrel(b, S(dx, 0, dz));
-    b.nav.block(S(dx, 0, dz), 0.5, 2);
-  }
-  crate(b, S(-4.4, 0, 0), 0.9, 0.2);
-  crate(b, S(-4.3, 0.74, 0.1), 0.7, 0.5);
-  b.nav.block(S(-4.4, 0, 0), 0.8, 2);
-  sled(b, S(0.6, 0, 3), 2.4);
-  for (let index = 0; index < params.icicles; index += 1) {
-    const dx = b.range(-store.radius, store.radius), dz = b.range(-store.radius, store.radius);
-    icicleCluster(b, S(dx, 2, dz), { length: [0.4, 1.6], reach: 8 });
-  }
+  lantern(b, P(bend.x, bend.y + 2.05, bend.z), { intensity: 2.8, range: 9, halo: 1, hung: 0.45 });
+  airlock(b, threshold, toward(bend, passage[2], THRESHOLD + VESTIBULE), passage[2]);
+  // Ice creeps: a set holds the roof of the stretch cut through it.
+  const set = toward(bend, passage[2], (THRESHOLD + VESTIBULE + Math.hypot(passage[2].x - bend.x, passage[2].z - bend.z)) / 2);
+  timberSet(b, set, Math.atan2(iceward.x, iceward.z), 2.3, 2.45, COLD_POST);
+  // A lamp behind the ice wall: past the threshold the walls glow cold, and the set stands dark against them.
+  const { glow } = params.storeLight;
+  b.light(P(set.x + iceward.z * 2.5, set.y + 1.6, set.z - iceward.x * 2.5), '#fff0d0', glow.intensity, glow.range, { radius: 1.4 });
+  fitIceStore(b, storeRoom, { light: params.storeLight, icicles: params.icicles });
 
   // --- The yard --------------------------------------------------------------------
   palisade(b, P(-wall.x + 2, 0, gateZ), P(wall.x - 2, 0, gateZ), ground, { skip: [wall.x - 2 - 2.9, wall.x - 2 + 2.9] });
@@ -212,6 +224,7 @@ export function generate(b, params) {
   storehouse(b, stand(15, -2), { icicles: true });
   woodpile(b, stand(-8, knoll.front + 4.6), { length: 1.3, rows: 4, count: 7 });
   woodpile(b, stand(-6.4, knoll.front + 4.6), { length: 1.3, rows: 3, count: 6 });
+  woodShed(b, stand(-7.2, knoll.front + 5.9));
   sled(b, stand(5.5, 6), 0.5);
   dryingRack(b, stand(17, 6.5));
   dryingRack(b, stand(-27, 8), { hides: true });
