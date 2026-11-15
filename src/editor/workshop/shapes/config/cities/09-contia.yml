@@ -4,7 +4,7 @@
 # observatories over sober institutional massing. Tall storeys, almost no weathering.
 group: Contia · mage theocracy
 palette:
-  recipe: { style: limestone, finish: masonry, topStyle: slate, weathering: 0.15 }
+  recipe: { style: limestone, finish: masonry, topStyle: slate, weathering: 0.15, irregularity: 0.15 }
   masonry: { color: "#ddd6c6", roughness: 0.8, label: Precision limestone }
   plaster: { color: "#e9e4d8", label: Academy render }
   planks: { color: "#6b5a48", label: Archive oak }
@@ -14,6 +14,9 @@ palette:
   metal: { color: "#9c7a3c", metalness: 0.85, roughness: 0.35, label: Aged bronze }
   glass: { color: "#6f9cc4", roughness: 0.2, label: Arcane blue glass }
 style:
+  details: [windows, buttresses, hood, dormers, turret]
+  surroundings: [path, yard, well]
+  yard: { surface: masonry, height: 1, depth: 4.8 }
   surface: masonry
   stonework: ashlar
   facade: plain
@@ -59,6 +62,9 @@ kit:
   - { id: contia-stair-grand, label: "Stairs · Academy stair", blueprint: stair-grand }
   - { id: contia-stair-switchback, label: "Stairs · Observatory switchback", blueprint: stair-switchback }
   - { id: contia-stair-bridge, label: "Stairs · Measured bridge", blueprint: stair-bridge }
+  - { id: contia-house-row, label: "House · Scribes' row", blueprint: house-row }
+  - { id: contia-plaza-fountain, label: "Plaza · Geometric fountain court", blueprint: plaza-fountain }
+  - { id: contia-plaza-market, label: "Plaza · Survey-plinth market", blueprint: plaza-market }
 styles:
   cut: &cut { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.45, shutters: false, windowBoxes: false, chimney: false, ivyDensity: 0.05, age: 0.12, base: { style: plinth, height: 0.68, out: 0.12 } }
 presets:

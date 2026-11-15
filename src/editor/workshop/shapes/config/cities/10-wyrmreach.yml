@@ -4,7 +4,7 @@
 # stone. Here and there, impossibly smooth black precursor stone that nobody built.
 group: Wyrmreach · storm frontier
 palette:
-  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.85 }
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.85, irregularity: 0.8 }
   planks: { color: "#8d867c", roughness: 0.97, label: Storm-bleached boards }
   masonry: { color: "#7a7b7e", roughness: 0.95, normal: 1.4, label: Storm granite }
   plaster: { color: "#99958c", label: Salt-crusted render }
@@ -18,6 +18,9 @@ precursor: &precursor
   trim: { color: "#18181c", roughness: 0.15, normal: 0.2, label: Precursor black stone }
   roof: { color: "#121215", roughness: 0.2, label: Precursor black stone }
 style:
+  details: [windows, hood, bay]
+  surroundings: [path, yard, woodshed]
+  yard: { surface: masonry, height: 1.35, depth: 4 }
   surface: planks
   facade: plain
   shed: planks
@@ -64,6 +67,9 @@ kit:
   - { id: wyrmreach-stair-switchback, label: "Stairs · Cliff path", blueprint: stair-switchback }
   - { id: wyrmreach-stair-bridge, label: "Stairs · Gully footbridge", blueprint: stair-bridge }
   - { id: wyrmreach-stair-grand, label: "Stairs · Ancient smooth stair", blueprint: stair-grand, palette: *precursor, style: { wall: { stonework: ashlar } } }
+  - { id: wyrmreach-house-row, label: "House · Patched harbour row", blueprint: house-row }
+  - { id: wyrmreach-plaza-fountain, label: "Plaza · Cistern square", blueprint: plaza-fountain }
+  - { id: wyrmreach-plaza-market, label: "Plaza · Mixed-community market", blueprint: plaza-market }
 presets:
   - id: wyrmreach-black-wall
     label: "Landmark · Pre-kingdom black wall"

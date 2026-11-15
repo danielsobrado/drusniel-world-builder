@@ -4,7 +4,7 @@
 # footprints under tall cones. Squat proportions (scale/storey) read as dwarven at a glance.
 group: Stonehold · dwarf and gnome holds
 palette:
-  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.45 }
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.45, irregularity: 0.5 }
   masonry: { color: "#8e8c88", roughness: 0.93, normal: 1.3, label: Mined granite }
   plaster: { color: "#d8b886", label: Gnome ochre wash }
   planks: { color: "#6e5038", label: Mine timber }
@@ -15,6 +15,9 @@ palette:
   glass: { color: "#6b4a2b", label: Forge-lit glass }
 gnomePalette: &gnomePalette { recipe: { topStyle: terracotta, finish: ochre }, roof: { color: "#a4503a", label: Gnome red tiles }, plaster: { color: "#e6cc9e", label: Gnome ochre wash } }
 style:
+  details: [windows, buttresses, hood]
+  surroundings: [path, yard, woodshed]
+  yard: { surface: masonry, height: 1.3, depth: 4.2 }
   surface: masonry
   stonework: ashlar
   facade: plain
@@ -61,6 +64,9 @@ kit:
   - { id: stonehold-stair-switchback, label: "Stairs · Cliff switchback", blueprint: stair-switchback }
   - { id: stonehold-stair-grand, label: "Stairs · Hall stair", blueprint: stair-grand }
   - { id: stonehold-stair-bridge, label: "Stairs · Basalt viaduct", blueprint: stair-bridge }
+  - { id: stonehold-house-row, label: "House · Hall-street row", blueprint: house-row }
+  - { id: stonehold-plaza-fountain, label: "Plaza · Forge-water fountain court", blueprint: plaza-fountain }
+  - { id: stonehold-plaza-market, label: "Plaza · Ore-market cross", blueprint: plaza-market }
 styles:
   stone: &stone { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.6, shutters: false, windowBoxes: false, ivyDensity: 0.05, age: 0.4, base: { style: batter, height: 1.2, out: 0.3 } }
   timber: &timber { kind: curved-volume, surface: planks, thickness: 0.18, chimney: false, windowBoxes: false, shutters: false, age: 0.55 }

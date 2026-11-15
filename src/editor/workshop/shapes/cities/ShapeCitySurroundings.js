@@ -56,7 +56,7 @@ export function addSurroundings(st, kind, primitives) {
   }
   if (wanted.includes('well')) {
     const side = along > 0 ? -1 : 1;
-    add(volume(st, 'well', 'Well', { at: beside(main, [side * (w / 2 - 1), d / 2 + depth * 0.55]), w: 1.6, d: 1.6, h: 1, footprint: 'oval',
+    add(volume({ ...st, scale: 1 }, 'well', 'Well', { at: beside(main, [side * (w / 2 - 1), d / 2 + depth * 0.55]), w: 2.1, d: 2.1, h: 1, footprint: 'oval',
       surface: 'masonry', roof: { family: 'flat' }, crown: null, base: null, chimney: false, windowBoxes: false, shutters: false,
       interior: 'none', decorate: false, thickness: 0.25 }));
   }

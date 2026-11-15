@@ -4,7 +4,7 @@
 # fences, root-stone footings. Light, airy proportions.
 group: Elenoria · living-wood elves
 palette:
-  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.15 }
+  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.15, irregularity: 0.6 }
   planks: { color: "#93907a", roughness: 0.85, label: Silver bark }
   plaster: { color: "#d4d8bf", label: Sap-wash }
   masonry: { color: "#8d9483", roughness: 0.92, label: Mossy root-stone }
@@ -15,6 +15,9 @@ palette:
   glass: { color: "#7fae8c", label: Leaf-light glass }
 autumn: &autumn { roof: { color: "#b8763a", roughness: 0.9, label: Autumn canopy } }
 style:
+  details: [windows, balcony, oriel]
+  surroundings: [path, yard]
+  yard: { surface: planks, height: 0.9, depth: 4.4 }
   surface: planks
   facade: plain
   footprint: oval
@@ -62,6 +65,9 @@ kit:
   - { id: elenoria-stair-bridge, label: "Stairs · Branch footbridge", blueprint: stair-bridge }
   - { id: elenoria-stair-switchback, label: "Stairs · Root stair", blueprint: stair-switchback }
   - { id: elenoria-stair-grand, label: "Stairs · Council stair", blueprint: stair-grand }
+  - { id: elenoria-house-row, label: "House · Bough-street row", blueprint: house-row }
+  - { id: elenoria-plaza-fountain, label: "Plaza · Moonwell glade", blueprint: plaza-fountain }
+  - { id: elenoria-plaza-market, label: "Plaza · Leaf-market ring", blueprint: plaza-market }
 styles:
   grown: &grown { kind: curved-volume, surface: planks, thickness: 0.28, taper: 0.9, shutters: false, windowBoxes: true, chimney: false, ivyDensity: 0.9, age: 0.18, base: { style: batter, height: 0.7, out: 0.25 } }
 presets:

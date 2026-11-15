@@ -3,7 +3,7 @@
 # weathered boards, boardwalks between everything. Small proportions (scale 0.82).
 group: Grukmar · goblin bog towns
 palette:
-  recipe: { style: sandstone, finish: ochre, topStyle: terracotta, weathering: 0.8 }
+  recipe: { style: sandstone, finish: ochre, topStyle: terracotta, weathering: 0.8, irregularity: 0.8 }
   planks: { color: "#7e7558", roughness: 0.96, label: Bog-grey boards }
   plaster: { color: "#7b6a4e", label: Mud daub }
   masonry: { color: "#7f8270", label: Mossy cobbles }
@@ -13,6 +13,9 @@ palette:
   metal: { color: "#56705a", metalness: 0.5, roughness: 0.6, label: Verdigris scrap }
   glass: { color: "#3c5a3a", label: Swamp-lantern glass }
 style:
+  details: [windows, hood, balcony]
+  surroundings: []
+  yard: { surface: planks, height: 1, depth: 3.6 }
   surface: planks
   facade: plain
   shed: planks
@@ -61,6 +64,9 @@ kit:
   - { id: grukmar-goblin-wall-retaining, label: "Wall · Dyke bank", blueprint: wall-retaining, style: { wall: { surface: masonry } } }
   - { id: grukmar-goblin-stair-bridge, label: "Stairs · Bog footbridge", blueprint: stair-bridge }
   - { id: grukmar-goblin-stair-switchback, label: "Stairs · Ladder climb", blueprint: stair-switchback }
+  - { id: grukmar-goblin-house-row, label: "House · Stilt row", blueprint: house-row }
+  - { id: grukmar-goblin-plaza-fountain, label: "Plaza · Rain-barrel square", blueprint: plaza-fountain }
+  - { id: grukmar-goblin-plaza-market, label: "Plaza · Barter cross", blueprint: plaza-market }
 styles:
   hut: &hut { kind: curved-volume, surface: planks, thickness: 0.16, shutters: true, windowBoxes: false, chimney: false, ivyDensity: 0.3, age: 0.75, taper: 1.04 }
   deck: &deck { kind: traversal, mode: walkway, support: piers, railing: true, style: { floor: timber, supports: timber, railing: timber } }

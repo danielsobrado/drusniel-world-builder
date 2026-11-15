@@ -65,6 +65,23 @@ export const HOUSE_BLUEPRINTS = {
     return [under, house, frontStair(st, house, 'steps', lift, { along: r2(-1.4 * st.scale) })];
   },
 
+  'house-row': (st) => {
+    // A street frontage: three party-walled townhouses of differing width, height and roof line.
+    const specs = [{ w: 5, levels: 2, rise: 1 }, { w: 5.8, levels: 3, rise: 1.15 }, { w: 4.6, levels: 2, rise: 0.9 }];
+    const total = specs.reduce((sum, s) => sum + s.w * st.scale, 0);
+    let x = -total / 2;
+    return specs.map((spec, i) => {
+      const w = spec.w * st.scale, h = r2(S(st) * spec.levels);
+      const house = volume(st, `row-${i + 1}`, 'Row house', { at: [r2(x + w / 2), r2((i % 2) * 0.35)], w: spec.w, d: 6.4, levels: spec.levels,
+        axis: 'depth', corner: 0.12, roof: { pitch: st.roof.pitch * spec.rise }, openings: [
+          door('door', 'front', i === 1 ? 0 : (i ? 0.55 : -0.55)), win('shop', 'front', i === 1 ? 0.7 : (i ? -0.5 : 0.5), 0.8, { width: 1.3 }),
+          win('upper', 'front', [-0.55, 0.55], sill(h, spec.levels, 1)), win('rear', 'back', 0, 1)],
+        features: [i === 1 ? feature('upper-floor', 'jetty', undefined, undefined, { depth: 0.4 }) : null] });
+      x += w - 0.05;
+      return house;
+    });
+  },
+
   'house-round': (st) => {
     const hut = volume(st, 'roundhouse', 'Round house', { w: 6.2, d: 6.2, footprint: 'oval', storey: S(st) * 0.95, stilts: true,
       roof: { family: st.roof.family === 'gable' || st.roof.family === 'hip' ? 'cone' : st.roof.family, pitch: 0.55 },

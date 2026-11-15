@@ -4,7 +4,7 @@
 # with pale violet phosphor. No window boxes, no ivy: nothing grows here but fungus.
 group: Umbra'kor · dark-elf caverns
 palette:
-  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.4 }
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.4, irregularity: 0.3 }
   masonry: { color: "#4a4852", roughness: 0.82, normal: 1.2, label: Cavern basalt }
   plaster: { color: "#56545c", label: Ash render }
   planks: { color: "#3a3036", label: Blackwood }
@@ -14,6 +14,9 @@ palette:
   metal: { color: "#4b4f5c", metalness: 0.85, roughness: 0.4, label: Iron linkwork }
   glass: { color: "#8762c4", roughness: 0.25, label: Violet phosphor glass }
 style:
+  details: [windows, buttresses, balcony, turret]
+  surroundings: [path, yard]
+  yard: { surface: masonry, height: 1.5, depth: 4.2 }
   surface: masonry
   stonework: ashlar
   facade: plain
@@ -61,6 +64,9 @@ kit:
   - { id: umbrakor-stair-switchback, label: "Stairs · Cliff switchback", blueprint: stair-switchback }
   - { id: umbrakor-stair-bridge, label: "Stairs · Void arch bridge", blueprint: stair-bridge }
   - { id: umbrakor-stair-grand, label: "Stairs · Temple stair", blueprint: stair-grand }
+  - { id: umbrakor-house-row, label: "House · Terrace-street row", blueprint: house-row }
+  - { id: umbrakor-plaza-fountain, label: "Plaza · Black-water basin court", blueprint: plaza-fountain }
+  - { id: umbrakor-plaza-market, label: "Plaza · House market cross", blueprint: plaza-market }
 styles:
   basalt: &basalt { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.5, shutters: false, windowBoxes: false, chimney: false, ivyDensity: 0, age: 0.35, base: { style: plinth, height: 0.68, out: 0.12 } }
 presets:

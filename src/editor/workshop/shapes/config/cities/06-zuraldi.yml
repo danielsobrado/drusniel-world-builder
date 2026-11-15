@@ -5,7 +5,7 @@
 # boxes. Civic life gathers at the pelota frontón, the arcaded council hall and the hill ermita.
 group: Zuraldi · Basque mountain valleys
 palette:
-  recipe: { style: sandstone, finish: limewash, topStyle: terracotta, weathering: 0.25 }
+  recipe: { style: sandstone, finish: limewash, topStyle: terracotta, weathering: 0.25, irregularity: 0.55 }
   plaster: { color: "#f5f2eb", roughness: 0.96, label: Whitewash }
   masonry: { color: "#bcad92", roughness: 0.9, label: Valley sandstone }
   planks: { color: "#7a2c24", roughness: 0.8, label: Oxblood boards }
@@ -16,6 +16,9 @@ palette:
   glass: { color: "#3b5660", label: Clear glass }
 green: &green { timber: { color: "#2d5a3a", roughness: 0.75, label: Green painted timber }, planks: { color: "#2f5b3b", roughness: 0.8, label: Green boards } }
 style:
+  details: [windows, balcony, hood]
+  surroundings: [path, yard, well]
+  yard: { surface: masonry, height: 1.15, depth: 5 }
   surface: plaster
   facade: plain
   stonework: ashlar
@@ -63,6 +66,9 @@ kit:
   - { id: zuraldi-stair-switchback, label: "Stairs · Terrace switchback", blueprint: stair-switchback }
   - { id: zuraldi-stair-bridge, label: "Stairs · Switchback stone bridge", blueprint: stair-bridge }
   - { id: zuraldi-stair-grand, label: "Stairs · Church-hill steps", blueprint: stair-grand }
+  - { id: zuraldi-house-row, label: "House · Kale street row", blueprint: house-row }
+  - { id: zuraldi-plaza-fountain, label: "Plaza · Village fountain plaza", blueprint: plaza-fountain }
+  - { id: zuraldi-plaza-market, label: "Plaza · Market-day plaza", blueprint: plaza-market }
 styles:
   baserri: &baserri { kind: curved-volume, surface: plaster, facade: plain, stonework: ashlar, thickness: 0.45, shutters: true, windowBoxes: true, chimney: true, ivyDensity: 0.12, age: 0.25, base: { style: plinth, height: 0.9, out: 0.08 } }
   stone: &stone { kind: curved-volume, surface: masonry, stonework: fieldstone, thickness: 0.5, shutters: true, windowBoxes: false, chimney: false, ivyDensity: 0.2, age: 0.35 }

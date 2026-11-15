@@ -10,7 +10,7 @@ const SLOTS = Object.freeze({
   roof: 'roof', trim: 'stone', timber: 'wood', metal: 'metal', glass: 'recess',
 });
 /** The recipe-wide bases a realm sets: stone palette, plaster finish, roof character, weathering. */
-export const CITY_RECIPE_FIELDS = Object.freeze(['style', 'finish', 'topStyle', 'weathering']);
+export const CITY_RECIPE_FIELDS = Object.freeze(['style', 'finish', 'topStyle', 'weathering', 'irregularity']);
 const shade = (hex, k) => `#${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('')}`;
 
 /**

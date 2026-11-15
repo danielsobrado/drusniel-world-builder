@@ -4,7 +4,7 @@
 # towers. No ivy, cold blue-grey stone, warm firelit glass against the cold.
 group: Frostgard · cold mountain Norths
 palette:
-  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.5 }
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.5, irregularity: 0.65 }
   planks: { color: "#56443a", roughness: 0.92, label: Tarred pine logs }
   masonry: { color: "#8c939b", roughness: 0.9, normal: 1.2, label: Frost granite }
   plaster: { color: "#c3beb4", label: Lime render }
@@ -15,6 +15,9 @@ palette:
   glass: { color: "#6e5a36", label: Firelit horn panes }
 snow: &snow { roof: { color: "#e2e9f0", roughness: 0.7, label: Snow-laden roof } }
 style:
+  details: [windows, porch, dormers]
+  surroundings: [path, yard, woodshed]
+  yard: { surface: masonry, height: 1, depth: 4.8 }
   surface: planks
   facade: plain
   shed: planks
@@ -61,6 +64,9 @@ kit:
   - { id: frostgard-stair-switchback, label: "Stairs · Mountain switchback", blueprint: stair-switchback }
   - { id: frostgard-stair-bridge, label: "Stairs · Gorge footbridge", blueprint: stair-bridge }
   - { id: frostgard-stair-grand, label: "Stairs · Jarl's hall stair", blueprint: stair-grand }
+  - { id: frostgard-house-row, label: "House · Fjord street row", blueprint: house-row }
+  - { id: frostgard-plaza-fountain, label: "Plaza · Hot-spring basin square", blueprint: plaza-fountain }
+  - { id: frostgard-plaza-market, label: "Plaza · Thing-stone market", blueprint: plaza-market }
 styles:
   logs: &logs { kind: curved-volume, surface: planks, thickness: 0.34, shutters: true, windowBoxes: false, chimney: true, ivyDensity: 0, age: 0.5, base: { style: plinth, height: 1.1, out: 0.16 } }
 presets:

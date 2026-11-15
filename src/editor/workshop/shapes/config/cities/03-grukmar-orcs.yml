@@ -3,7 +3,7 @@
 # rounded corners; log palisades and drum towers. Big proportions (scale 1.12) read as orcish.
 group: Grukmar · orc holds
 palette:
-  recipe: { style: granite, finish: ochre, topStyle: terracotta, weathering: 0.7 }
+  recipe: { style: granite, finish: ochre, topStyle: terracotta, weathering: 0.7, irregularity: 0.9 }
   masonry: { color: "#6f655b", roughness: 0.97, normal: 1.6, label: Ridge fieldstone }
   planks: { color: "#6b4e36", roughness: 0.95, label: Rough logs }
   plaster: { color: "#8e7458", label: Clay daub }
@@ -13,6 +13,9 @@ palette:
   metal: { color: "#6e4630", metalness: 0.45, roughness: 0.75, label: Salvage iron }
   glass: { color: "#5a3a22", label: Hearth glow }
 style:
+  details: [windows, porch, buttresses]
+  surroundings: [path, yard, woodshed]
+  yard: { surface: planks, height: 1.9, depth: 5 }
   surface: masonry
   stonework: fieldstone
   facade: plain
@@ -58,6 +61,9 @@ kit:
   - { id: grukmar-orc-stair-switchback, label: "Stairs · Ridge climb", blueprint: stair-switchback }
   - { id: grukmar-orc-stair-bridge, label: "Stairs · Log bridge", blueprint: stair-bridge }
   - { id: grukmar-orc-stair-grand, label: "Stairs · Chieftain's mound stair", blueprint: stair-grand }
+  - { id: grukmar-orc-house-row, label: "House · Clan row-houses", blueprint: house-row }
+  - { id: grukmar-orc-plaza-fountain, label: "Plaza · Totem water pit", blueprint: plaza-fountain }
+  - { id: grukmar-orc-plaza-market, label: "Plaza · Raid-spoils market", blueprint: plaza-market }
 styles:
   hall: &hall { kind: curved-volume, surface: masonry, stonework: fieldstone, thickness: 0.6, taper: 0.93, shutters: false, windowBoxes: false, chimney: true, ivyDensity: 0.05, age: 0.7, base: { style: batter, height: 1, out: 0.35 } }
   logs: &logs { kind: curved-volume, surface: planks, thickness: 0.22, chimney: false, windowBoxes: false, shutters: false, age: 0.7 }

@@ -36,7 +36,7 @@ for (const footprint of [
 }
 
 // Every realm city must be buildable on its own: the minimum building mix per catalog.
-const CITY_MINIMUMS = { house: 5, farm: 3, inn: 3, shop: 5, tower: 3, wall: 2, stair: 2 };
+const CITY_MINIMUMS = { house: 5, farm: 3, inn: 3, shop: 5, tower: 3, wall: 2, stair: 2, plaza: 2 };
 
 for (const catalog of SHAPE_CITY_CATALOGS) {
   test(`${catalog.group} has a full city's building mix and grouped picker entries`, () => {

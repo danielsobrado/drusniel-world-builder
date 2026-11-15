@@ -14,7 +14,7 @@ styles:
 # Materials: recipe bases (stone palette, plaster finish, roof character) plus per-surface
 # tints and surface response, see cities/ShapeCityPalette.js. Tints multiply, so keep them light.
 palette:
-  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.3 }
+  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.3, irregularity: 0.4 }
   plaster: { color: "#ede4cf", roughness: 0.96, label: Limewash }
   masonry: { color: "#cdbf9e", roughness: 0.88, label: Pale limestone }
   planks: { color: "#8c6648", label: Oak boards }
@@ -24,6 +24,9 @@ palette:
   metal: { color: "#2e3033", label: Forged iron }
   glass: { color: "#3d5866", label: Leaded glass }
 style:
+  details: [windows, hood, dormers, oriel]
+  surroundings: [path, yard, well, woodshed]
+  yard: { surface: masonry, height: 1.1, depth: 4.6 }
   surface: plaster
   facade: timber
   roof: { family: gable, pitch: 0.62, overhang: 0.5, sweep: 0.45, sag: 0.1 }
@@ -57,6 +60,9 @@ kit:
   - { id: lumeshire-stair-switchback, label: "Stairs · Switchback steps", blueprint: stair-switchback }
   - { id: lumeshire-stair-bridge, label: "Stairs · Arched footbridge", blueprint: stair-bridge }
   - { id: lumeshire-stair-grand, label: "Stairs · Processional stair", blueprint: stair-grand }
+  - { id: lumeshire-house-row, label: "House · Burghers' row", blueprint: house-row }
+  - { id: lumeshire-plaza-fountain, label: "Plaza · Fountain square of the Divine Light", blueprint: plaza-fountain }
+  - { id: lumeshire-plaza-market, label: "Plaza · Market cross square", blueprint: plaza-market }
 presets:
   - id: lumeshire-paladin-chapterhouse
     label: "Landmark · Paladin chapterhouse with oath tower and drill yard"

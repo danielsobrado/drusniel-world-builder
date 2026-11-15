@@ -1,6 +1,6 @@
 /** A shallow dressed edge follows the host surface and the opening's clipped bands. */
 export function addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, thickness, color, caps }) {
-  const size = Math.min(0.018, (u1 - u0) * 0.18, (high[0] - low[0]) * 0.15, (high[1] - low[1]) * 0.15);
+  const size = Math.min(caps.bevelSize ?? 0.018, (u1 - u0) * 0.18, (high[0] - low[0]) * 0.15, (high[1] - low[1]) * 0.15);
   if (size <= 0) return;
   const start = caps.start !== false, end = caps.end !== false;
   const inset = [u0 + (start ? size : 0), u1 - (end ? size : 0)];
@@ -16,13 +16,30 @@ export function addShapeWallBevel(mesh, surface, { u0, u1, low, high, offset, th
     inner[i][1] += (i < 2 ? 1 : -1) * wear;
   }
   const points = (coordinates, lift) => coordinates.map(([u, y]) => surface.point(u, y, lift));
-  const a = points(outer, offset), b = points(inner, offset + Math.sign(thickness) * size);
+  // A hand-cut stone's face is raised and faceted by its relief; a plain dressed face is flat.
+  const lift = (u, y) => offset + Math.sign(thickness) * (size + (caps.relief ? caps.relief(u, y) : 0));
+  const a = points(outer, offset), b = inner.map(([u, y]) => surface.point(u, y, lift(u, y)));
+  const outward = surface.clockwise !== thickness < 0;
+  const grain = (uv) => (caps.grainAlong === 'u' ? uv.map(([u, v]) => [v, u]) : uv);
   const face = (vertices, uv, tint) => {
-    if (caps.grainAlong === 'u') uv = uv.map(([u, v]) => [v, u]);
-    if (surface.clockwise !== thickness < 0) mesh.quad(...vertices, tint, uv);
+    uv = grain(uv);
+    if (outward) mesh.quad(...vertices, tint, uv);
     else mesh.quad(...vertices.toReversed(), tint, uv.toReversed());
   };
-  face(b, inner, color);
+  if (caps.relief) {
+    // Four facets meeting at the stone's crown (clamped into this piece of a curved stone).
+    const cu = Math.max(inner[0][0], Math.min(inner[1][0], caps.crown[0]));
+    // Between the bed and cap edges at the crown's own position, so a raking gable cap still bounds it.
+    const t = (cu - inner[0][0]) / Math.max(1e-6, inner[1][0] - inner[0][0]);
+    const bed = inner[0][1] + (inner[1][1] - inner[0][1]) * t, cap = inner[3][1] + (inner[2][1] - inner[3][1]) * t;
+    const cy = Math.max(bed, Math.min(cap, caps.crown[1]));
+    const c = surface.point(cu, cy, lift(cu, cy));
+    for (let i = 0; i < 4; i++) {
+      const next = (i + 1) % 4, uv = grain([inner[i], inner[next], [cu, cy]]);
+      if (outward) mesh.triangle(b[i], b[next], c, color, uv);
+      else mesh.triangle(c, b[next], b[i], color, uv.toReversed());
+    }
+  } else face(b, inner, color);
   for (let i = 0; i < 4; i++) {
     if ((i === 1 && !end) || (i === 3 && !start)) continue;
     const next = (i + 1) % 4, shade = i === 0 ? 0.72 : i === 2 ? 1.05 : 0.9;
