@@ -7,6 +7,7 @@ import { LOCATION_GENERATORS } from '../src/editor/locations/generators/index.js
 import { generateLocation } from '../src/editor/locations/LocationBuilder.js';
 import { resolveLocationCatalog } from '../src/editor/locations/LocationCatalog.js';
 import { extrudedProfile } from '../src/editor/locations/gen/propKit.js';
+import { clipFieldToDressings } from '../src/editor/locations/gen/masonryDressingClip.js';
 
 const source = yaml.load(fs.readFileSync(new URL('../config/instanced-locations.yaml', import.meta.url), 'utf8'));
 const catalog = resolveLocationCatalog(source, { generatorKeys: Object.keys(LOCATION_GENERATORS), quality: 'low' });
@@ -16,6 +17,17 @@ test('a bevelled profile stays inside its outline, so abutting stones do not sha
   geometry.computeBoundingBox();
   const { min, max } = geometry.boundingBox;
   for (const [value, expected] of [[min.x, 0], [max.x, 1], [min.y, 0], [max.y, 0.5]]) assert.ok(Math.abs(value - expected) < 1e-6, `${value} ≈ ${expected}`);
+});
+
+test('field stones stop where an arch dressing begins', () => {
+  const square = (half) => [[-half, -half], [half, -half], [half, half], [-half, half]];
+  const field = { category: 'field', s: 0, y: 0, corners: square(0.5) };
+  const clear = { category: 'field', s: 5, y: 0, corners: square(0.5) };
+  const voussoir = { category: 'voussoir', s: 0.5, y: 0, contourPolygons: [[square(0.25)]] };
+  const cut = clipFieldToDressings([field, clear, voussoir]);
+  assert.ok(!cut.has(clear), 'a stone no dressing reaches is left alone');
+  const [[ring]] = cut.get(field);
+  assert.ok(ring.every(([x, y]) => !(x > 0.25 + 1e-9 && Math.abs(y) < 0.25 - 1e-9)), 'nothing remains inside the voussoir');
 });
 
 test('the catalog rejects a reference to something that does not exist', () => {

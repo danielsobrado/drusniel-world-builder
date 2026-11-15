@@ -7,9 +7,12 @@ import { openingHalfWidthAt, openingVerticalSpan } from '../../construction/maso
 import { mortarCoreDepth } from '../../construction/compile/ConstructionMortarCoreBuilder.js';
 import { mixSeed } from '../../workshop/ProceduralRandom.js';
 import { extrudedProfile, stoneBox } from './propKit.js';
+import { clipFieldToDressings } from './masonryDressingClip.js';
 
 /** Metres the mortar backing stops short of a wall's ends and top. */
 const MORTAR_RECESS = 0.03;
+/** Total spread of the per-stone depth jitter, metres. */
+const DEPTH_NOISE = 0.035;
 
 function hashFloat(seed, index, salt = 0) {
   return (mixSeed(seed ^ salt, index) & 0xffff) / 0xffff;
@@ -129,7 +132,11 @@ export function coursedMasonryWall(b, a, c, height, thickness, {
 
   // Recessed dark mortar backing split around openings so arches stay cleanly open.
   if (mortarBacking) {
-    const coreD = mortarCoreDepth(thickness, { minimumDepth: thickness * 0.55, faceRecess: 0.035 });
+    // Also kept behind the shallowest stone (depth noise included): on a thick wall the
+    // fixed face recess alone left some stone faces level with the core's.
+    const shallowest = Math.min(...stones.map((stone) => stone.depth)) - DEPTH_NOISE;
+    const coreD = Math.min(mortarCoreDepth(thickness, { minimumDepth: thickness * 0.55, faceRecess: 0.035 }),
+      shallowest - 2 * MORTAR_RECESS);
     const bands = openings.length
       ? Array.from(new Set([
         0, height,
@@ -186,7 +193,10 @@ export function coursedMasonryWall(b, a, c, height, thickness, {
     }
   }
 
+  const cutByDressings = clipFieldToDressings(stones);
   for (const stone of stones) {
+    const cut = cutByDressings.get(stone);
+    if (cut?.length === 0) continue;
     const f = arcTable.frameAt(stone.s);
     const px = f.x + f.normalX * stone.offsetNormal;
     const pz = f.z + f.normalZ * stone.offsetNormal;
@@ -194,12 +204,13 @@ export function coursedMasonryWall(b, a, c, height, thickness, {
     const isDressing = stone.category === 'voussoir' || stone.category === 'ashlar' || stone.category === 'coping';
     const targetMat = isDressing ? trimMaterial : material;
     const bevelBase = isDressing ? 0.032 : 0.026;
-    const depthNoise = (hashFloat(seed, stone.stableIndex, 0x7a12) - 0.5) * 0.035;
+    const depthNoise = (hashFloat(seed, stone.stableIndex, 0x7a12) - 0.5) * DEPTH_NOISE;
     const stoneDepth = Math.max(0.08, stone.depth + depthNoise);
     const tint = stoneTintColor(isDressing ? trimTint : baseTint, seed, stone.stableIndex, stone.category);
 
-    if (stone.contourPolygons) {
-      const geoms = extrudePolygons(stone.contourPolygons, stoneDepth, {
+    const contour = cut ?? stone.contourPolygons;
+    if (contour) {
+      const geoms = extrudePolygons(contour, stoneDepth, {
         bevel: bevelBase,
         at: { x: px, y: py, z: pz },
         yaw: f.yaw,
