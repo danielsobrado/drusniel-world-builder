@@ -98,50 +98,50 @@ instancedLocations:
       surface: cave-rock
       altSurface: basalt
       altScale: 0.24
-      altTint: '#e4d4c2'
+      altTint: '#cfd8e4'
       floorSurface: earth-dry
       floorScale: 0.85
       scale: 0.26
-      tint: '#f5efe6'
-      normalStrength: 1.16
-      roughness: 0.94
-      cavityShade: 0.70
-      strata: { frequency: 1.28, warp: 2.3, dip: 0.18, dark: '#9a9288', light: '#e6dfd5', relief: 1.15 }
+      tint: '#e6dcd0'
+      normalStrength: 0.98
+      roughness: 0.95
+      cavityShade: 0.56
+      strata: { frequency: 0.95, warp: 2.1, dip: 0.16, dark: '#aaa195', light: '#e4dcd0', relief: 0.62 }
       # Restrained mineral seams anchored to crevices and geological bedding.
       vein: { color: '#8c6943', scale: 3.6, sharpness: 16.0, roughness: 0.48, f0: 0.12, glow: 0, gain: 1.22, strength: 0.34 }
       geology:
-        baseGain: 6.0
-        chromaNeutralize: 0.68
-        highlightKnee: 9.5
+        baseGain: 2.95
         macroScale: 0.046
-        macroContrast: 0.22
-        warmTint: '#ede0cf'
-        coolTint: '#dfdcd6'
-        darkTint: '#aaa49a'
-        lightTint: '#f0ebe2'
-        altRockBlend: 0.38
-        altLuminanceScale: 0.68
-        fractureStain: 0.30
-        fractureColor: '#6b645b'
+        macroContrast: 0.30
+        warmTint: '#e4d6c2'
+        coolTint: '#c2cddb'
+        darkTint: '#9f998e'
+        lightTint: '#e6dfd4'
+        altRockBlend: 0.54
+        altLuminanceScale: 0.80
+        microCavityStrength: 1.50
+        microShelfStrength: 0.48
+        fractureStain: 0.34
+        fractureColor: '#696259'
         mineralTint: '#8a6d4e'
         paleMineralTint: '#c7c3b8'
-        verticalSeep: 0.24
-        strataVariation: 0.52
+        verticalSeep: 0.26
+        strataVariation: 0.56
       ground:
-        compactedTint: '#b89f86'
-        compactedValue: 1.08
+        compactedTint: '#c2a68c'
+        compactedValue: 0.98
         compactedRoughness: 0.94
-        wearTint: '#cdbda9'
-        wearRoughness: 0.80
-        gravelTint: '#b2b4b8'
-        gravelValue: 1.12
-        gravelRoughness: 0.94
+        wearTint: '#cfc0af'
+        wearRoughness: 0.82
+        gravelTint: '#b8bdc4'
+        gravelValue: 1.14
+        gravelRoughness: 0.92
         gravelScale: 6.4
-        gravelRelief: 1.32
-        trackWeatherTint: '#625851'
-        bedrockRoughness: 0.94
-        dampTint: '#59514a'
-        dampRoughness: 0.56
+        gravelRelief: 1.28
+        trackWeatherTint: '#6a5f58'
+        bedrockRoughness: 0.92
+        dampTint: '#686056'
+        dampRoughness: 0.54
         dampF0: 0.036
       wetness:
         darken: 0.72
@@ -157,17 +157,17 @@ instancedLocations:
     mine_debris:
       surface: cave-rock
       scale: 0.52
-      tint: '#b8b0a5'
+      tint: '#c9c1b6'
       normalStrength: 1.0
-      roughness: 0.95
+      roughness: 0.94
       cavityShade: 0.56
     ore_rubble:
       surface: rubble
       scale: 0.72
-      tint: '#b59978'
-      roughness: 0.68
-      f0: 0.22
-      vein: { color: '#a8783a', scale: 5.2, sharpness: 10.5, roughness: 0.36, f0: 0.32, glow: 0 }
+      tint: '#cfb28e'
+      roughness: 0.62
+      f0: 0.24
+      vein: { color: '#c48d44', scale: 5.2, sharpness: 10.5, roughness: 0.34, f0: 0.34, glow: 0 }
     still_water:
       surface: iron
       scale: 0.42
@@ -179,9 +179,9 @@ instancedLocations:
     timber:
       surface: timber
       scale: 0.55
-      tint: '#dfd4c6'
-      normalStrength: 0.92
-      roughness: 0.94
+      tint: '#ebe0d2'
+      normalStrength: 0.95
+      roughness: 0.92
       woodGrain: true
     sod_roof:
       surface: timber
@@ -191,11 +191,11 @@ instancedLocations:
     iron:
       surface: iron
       scale: 0.9
-      tint: '#9aa0ab'
+      tint: '#b2b8c4'
       normalStrength: 1.05
-      roughness: 0.52
-      metalness: 0.7
-      f0: 0.44
+      roughness: 0.48
+      metalness: 0.72
+      f0: 0.46
     rubble_masonry:
       surface: rubble
       scale: 0.42
@@ -256,6 +256,13 @@ instancedLocations:
       roughness: 0.9
       strata: { frequency: 0.55, warp: 5, dip: 0.05, dark: '#77777f', light: '#c5c7d2', relief: 0.8 }
       vein: { color: '#9fe6ff', scale: 0.9, sharpness: 14, roughness: 0.2, f0: 0.3, glow: 0.07 }
+    # Umbra'kor fungus-bed compost; the props' vertex tint carries the loam and its mycelium.
+    fungus_loam:
+      surface: earth-dry
+      scale: 1.1
+      tint: '#ffffff'
+      normalStrength: 0.8
+      roughness: 0.97
     umbra_ashlar:
       surface: basalt
       scale: 0.3
@@ -330,40 +337,60 @@ instancedLocations:
       tint: '#30303a'
       roughness: 0.35
       f0: 0.08
+    # Dyed wool for trail flags. Cloth flaps the frost off, so it keeps its colour where timber greys; the
+    # prop's tint is the dye, over a fine coarse-weave grain.
+    trail_cloth:
+      surface: earth-dry
+      scale: 1.6
+      tint: '#ffffff'
+      normalStrength: 0.35
+      roughness: 0.96
 
   # Ice families: one shader (materials/GlacierIceMaterial.js), a preset each. A vertex mask
   # can push part of a wall toward another family, so one cave shows several.
+  #   thinColor   aerated or thin ice, seen over a short path: pale grey-white-aqua
+  #   deepColor   thick clear ice, looked into: dark slate
+  #   saturation  how much colour the body keeps (1 as computed, 0 grey)
   #   absorption  per-metre rgb extinction of light inside the ice
-  #   depthRate   metres of light path per metre of ice behind the surface: how fast it goes blue
+  #   depthRate   metres of light path per metre of ice behind the surface: how fast clear ice goes dark
+  #   cloud       base scatter, 0 clear .. 1 white; the layering, bubbles and crust add to it
+  #   lightThrough how far a face lit through the ice (the bake's light arrives short of red) glows with that light
   #   gloss       strength of the broad wet highlight
+  #   reflection  gain: the ambients scaled up to the radiance the ice mirrors; horizon: how much brighter the
+  #               horizon is than the dome under an open sky
   #   crust       white weathering on faces open to the sky; snowfall: snow lying where the sky can see
   #   snowSlope   how upright a face must be (its normal's Y, from..to) before snow lies on it
+  #   snowEdge    gather: how much snow prefers scallop hollows and cracks; breakup: how ragged its edge is;
+  #               lip: metres of snow depth stepped up at its edge; shadow: how much the lip darkens the ice beside it
   #   wind        plan direction the snow ridges run along; drift: loose snow snaking down it under open sky
   #   translucency how strongly thin ice (icicles, fins) glows with the light around it
   #   trailColor  what trodden snow is multiplied by
   #   detailRange metres over which cracks, bubbles and sparkle fade out with distance
-  #   banding     layers per metre, tilt, fold amplitude (metres of layer offset), strength
+  #   banding     layers per metre, tilt, fold amplitude (metres of layer offset), band contrast;
+  #               zones: contrast of clear and aerated lenses, zoneSize metres they run along the layers
   # Amounts are 0..1 and add to the vertex masks.
   iceProfiles:
     deep_blue_glacier: &ice
       textures: { ice: ice, cracks: ice-cracks, snow: snow }
-      thinColor: '#dff3f8'
-      deepColor: '#0b3f7a'
-      milkColor: '#c4e2ee'
-      scatterColor: '#cfefff'
+      thinColor: '#d3e2e6'
+      deepColor: '#1e3850'
+      saturation: 0.75
+      scatterColor: '#b9d9e6'
       sedimentColor: '#3d3a33'
-      frostColor: '#e9f4fa'
+      frostColor: '#e9f1f5'
       snowColor: '#f4f8fb'
       snowShade: '#b9cfe8'
-      absorption: [0.5, 0.12, 0.035]
-      depthRate: 1.1
+      absorption: [0.42, 0.085, 0.05]
+      depthRate: 1
+      lightThrough: 0.5
       roughness: 0.14
       gloss: 0.3
+      reflection: { gain: 3, horizon: 2 }
       microNormal: 0.16
-      crackGain: 0.5
+      crackGain: 0.6
       fracture: 0.1
       bubbles: 0.08
-      cloud: 0.4
+      cloud: 0.3
       sediment: 0
       frost: 0
       snow: 0
@@ -371,48 +398,64 @@ instancedLocations:
       crust: 0
       snowfall: 0
       snowSlope: [0.25, 0.65]
+      snowEdge: { gather: 0.35, breakup: 0.35, lip: 0.07, shadow: 0.3 }
       wind: [0.6, 0.8]
       drift: 0
       driftSpeed: 3
       translucency: 1.2
       trailColor: '#a9bcd6'
       detailRange: [16, 48]
-      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.6 }
+      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.3, zones: 0.6, zoneSize: 24 }
       scallop: { scale: 0.6, depth: 0.26 }
+    # Firn ice: so full of air it is pale through and through, matte, layered only faintly.
     white_bubbly:
       <<: *ice
-      deepColor: '#5f9fc4'
+      thinColor: '#e2ebee'
+      deepColor: '#5d84a0'
+      saturation: 0.6
       roughness: 0.3
       gloss: 0.12
+      reflection: { gain: 2, horizon: 2 }
       bubbles: 0.9
-      cloud: 0.95
+      cloud: 0.8
       crackGain: 0.3
       depthRate: 0.35
+      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.3, zones: 0.3, zoneSize: 24 }
+    # Meltwater ice: no air to scatter, so the eye goes straight in and every fracture shows.
     clear_polished:
       <<: *ice
+      deepColor: '#16304a'
+      saturation: 0.8
       roughness: 0.06
       gloss: 0.45
+      reflection: { gain: 4, horizon: 2.5 }
       microNormal: 0.1
       bubbles: 0.03
-      cloud: 0.05
+      cloud: 0
       polish: 0.6
-      crackGain: 0.35
-      depthRate: 1.6
+      crackGain: 0.45
+      depthRate: 1.4
       translucency: 1.9
-      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.12 }
+      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.12, zones: 0.2, zoneSize: 24 }
       scallop: { scale: 0.75, depth: 0.03 }
+    # Loose pieces carry little baked depth, so depthRate is high to keep them from going pale.
     fractured:
       <<: *ice
       fracture: 0.9
       crackGain: 1.1
       roughness: 0.22
+      cloud: 0.2
+      depthRate: 2.5
     dirty_sediment:
       <<: *ice
-      deepColor: '#16405f'
+      thinColor: '#cfd8d6'
+      deepColor: '#2a3a44'
+      saturation: 0.55
       sediment: 0.8
-      cloud: 0.5
+      cloud: 0.45
       roughness: 0.34
       gloss: 0.15
+      reflection: { gain: 2, horizon: 2 }
     frost_covered:
       <<: *ice
       frost: 0.75
@@ -421,25 +464,33 @@ instancedLocations:
       <<: *ice
       snow: 0.9
       frost: 0.3
-    # A glacier under the sky: sun-cupped, crusted white where exposed, blue in its breaks, snow on what faces up.
+    # A glacier under the sky: sun-cupped, crusted pale on what faces up, blue in its breaks, snow on the level.
     weathered_glacier:
       <<: *ice
-      crust: 0.85
+      thinColor: '#dbe6ea'
+      deepColor: '#284a64'
+      saturation: 0.7
+      absorption: [0.4, 0.08, 0.05]
+      lightThrough: 0.3
+      reflection: { gain: 4, horizon: 2.5 }
+      crust: 0.6
       snowfall: 1
       # Ledges on a cliff hold little: snow wants a nearly level place to lie.
       snowSlope: [0.5, 0.85]
       drift: 0.7
-      depthRate: 1.25
-      cloud: 0.5
+      depthRate: 1.1
+      cloud: 0.4
       roughness: 0.2
       detailRange: [22, 70]
-      banding: { frequency: 0.9, dip: 0.22, fold: 7, strength: 0.45 }
+      banding: { frequency: 0.9, dip: 0.22, fold: 7, strength: 0.28, zones: 0.7, zoneSize: 30 }
       scallop: { scale: 0.35, depth: 0.2 }
-    # Fresh-fallen blocks: broken faces, a cap of new snow.
+    # Fresh-fallen blocks: clear broken faces, a cap of new snow.
     calved_block:
       <<: *ice
       fracture: 0.8
       crackGain: 1
+      cloud: 0.15
+      depthRate: 3
       crust: 0.4
       snowfall: 0.8
 
@@ -449,14 +500,14 @@ instancedLocations:
   lightingProfiles:
     mine_lanterns:
       background: '#040507'
-      fog: { color: '#080a0d', density: 0.0155 }
-      ambientUp: '#2d333f'
-      ambientDown: '#1b1f27'
-      carried: { color: '#ecd9c3', intensity: 0.44, range: 10.0 }
-      exposure: 1.28
-      bakeGain: 2.70
-      dynamicGain: 0.28
-      indirectBounce: { strength: 0.86, cellSize: 1.25, radius: 14.0, wrap: 0.64, maxEnergy: 2.6 }
+      fog: { color: '#07090c', density: 0.018 }
+      ambientUp: '#1c212b'
+      ambientDown: '#101319'
+      carried: { color: '#ecd9c3', intensity: 0.42, range: 9.5 }
+      exposure: 1.18
+      bakeGain: 2.15
+      dynamicGain: 0.26
+      indirectBounce: { strength: 0.66, cellSize: 1.25, radius: 13.0, wrap: 0.54, maxEnergy: 2.2 }
       propShadows: { resolution: 0.16, minTransmit: 0.12, contactStrength: 0.76 }
       absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
     umbra_pale:
@@ -676,12 +727,12 @@ instancedLocations:
           beddingDipZ: 0.09
         # Section lighting mood, deterministic lantern rhythm, and portal/cavern transitions (see generators/mineLightingLayout.js).
         lightingSections:
-          adit: { daylightTint: '#b8d4f4', daylightIntensity: 5.8, daylightRange: 21.0, thresholdTint: '#8faed4', thresholdIntensity: 2.45, thresholdRange: 19.5 }
-          haulage: { tint: '#ffbe7a', warmAltTint: '#ffc88a', intensity: 4.9, range: 15.0, spacingFrames: 3, unlitRate: 0.14, flickerAmount: 0.085 }
-          hub: { tint: '#ffc07c', shaftAbyssTint: '#6c859c', shaftAbyssIntensity: 2.1, hoistIntensity: 6.4, hoistRange: 19.5 }
-          stope: { tint: '#ffc482', workTint: '#ffb870', primaryIntensity: 6.2, primaryRange: 17.5, flickerAmount: 0.105 }
-          abandoned: { tint: '#eb9e56', dimTint: '#df8d46', intensity: 3.4, range: 13.5, flickerAmount: 0.21 }
-          flooded: { tint: '#ffba72', pierIntensity: 4.8, pierRange: 16.0, farIntensity: 4.2, farRange: 16.5 }
+          adit: { daylightTint: '#b8d4f4', daylightIntensity: 3.8, daylightRange: 17.5, thresholdTint: '#8faed4', thresholdIntensity: 1.75, thresholdRange: 16.5 }
+          haulage: { tint: '#ffbe7a', warmAltTint: '#ffc88a', intensity: 4.4, range: 15.0, spacingFrames: 3, unlitRate: 0.14, flickerAmount: 0.085 }
+          hub: { tint: '#ffc07c', shaftAbyssTint: '#6c859c', shaftAbyssIntensity: 2.1, hoistIntensity: 5.6, hoistRange: 19.5 }
+          stope: { tint: '#ffc482', workTint: '#ffb870', primaryIntensity: 5.2, primaryRange: 17.5, flickerAmount: 0.105 }
+          abandoned: { tint: '#eb9e56', dimTint: '#df8d46', intensity: 2.6, range: 11.5, flickerAmount: 0.24 }
+          flooded: { tint: '#ffba72', pierIntensity: 4.0, pierRange: 16.0, farIntensity: 4.0, farRange: 17.5 }
     drow_cavern_city:
       generatorKey: vertical-cavern-city
       lightingProfile: umbra_pale
@@ -695,6 +746,7 @@ instancedLocations:
         timber: { kind: stone, profile: timber, masked: false }
         iron: { kind: stone, profile: iron, masked: false }
         water: { kind: stone, profile: still_water, masked: false }
+        loam: { kind: stone, profile: fungus_loam, masked: false }
         glow: { kind: glow }
       params:
         stalactites: 70
@@ -741,10 +793,31 @@ instancedLocations:
         # Attempts; a cluster hangs wherever one finds a roof low enough.
         icicles: 420
         longhall: { length: 13, width: 6, wallHeight: 2.6, roofRise: 3.4 }
-        # Ledges melted along the layers: metres of relief, layers per metre, tilt, waviness.
-        strata: { amp: 0.24, frequency: 0.45, dip: 0.12, warp: 4 }
-        # The sun above the glacier, reaching the cave only through the ice: [x, z, strength].
-        surfaceLight: [[-22, -52, 1.1], [14, -38, 1.1], [-4, -62, 1.1], [-16, -40, 1.5], [12, -56, 1.4], [-2, -22, 1.1], [3, -8, 1], [10, -86, 1.3], [-18, -62, 1], [-40, -74, 1.3], [-30, -90, 1]]
+        # Ledges melted along the layers of the hall's walls (not the tube or pillars): metres of relief,
+        # layers per metre, tilt, waviness.
+        strata: { amp: 0.3, frequency: 0.22, dip: 0.12, warp: 4 }
+        # The meltwater tube, keyed by metres in from the mouth: [metres, half-width of the slot the stream
+        # cut at its floor, how deep it cut, half-width and half-height of the older tube over it, that
+        # tube's offset to one side]. `trail` caps the walked half-width, `wobble` lets the bore drift from
+        # the keys over metres, `lean` tilts the slot (metres per metre); scallops are eddy dishes, metres.
+        tube:
+          keys: [[0, 3.4, 0.3, 6.2, 3.4, 0], [9, 2.6, 0.9, 4.4, 3, 0.7], [17, 2.4, 1.6, 3.6, 2.6, -0.8], [24, 3.4, 2, 5.6, 3.6, 1.4], [31, 2.2, 2.4, 3.4, 2.4, -0.5], [36, 1.4, 3.4, 2, 1.6, 0.5], [39, 1.15, 4.6, 1.3, 1.1, 0.4], [53, 1.15, 4.8, 1.4, 1.2, -0.4], [58, 1.9, 3.6, 2.6, 2, 0], [63, 3.2, 2, 4.5, 3, 0]]
+          trail: 1.5
+          wobble: 0.12
+          lean: 0.14
+          scallops: { size: 2.2, depth: 0.3 }
+        # Breaks, [metres of relief, metres per block, height over width]: sheer columns on the crevasse's
+        # walls and the pillars; layered steps on the hall's walls and the tube's spalled roof.
+        fracture: { columns: [0.5, 1.6, 2.6], layers: [0.45, 2.4, 0.45] }
+        # Snow lying, metres: drifted in at the mouth, fallen down the crevasse, down the moulin.
+        snow: { mouth: 1.3, crevasse: 0.8, moulin: 1.1 }
+        # Ice mounds left on the hall floor where nobody walks.
+        hummocks: 10
+        # Daylight, [strength, reach in metres]: in at the mouth, and down the crevasse into the hall.
+        daylight: { mouth: [1.8, 34], crevasse: [1, 36] }
+        # Daylight through thin ice: metres of ice left over each hollow it glows through, then
+        # [strength, reach] at the moulin, the fall's chimney, the squeeze's end and over the refuge.
+        glow: { ice: 2.4, moulin: [1.6, 16], fall: [1.5, 18], squeeze: [1.3, 12], refuge: [0.9, 22] }
     frostgard_glacier_front:
       generatorKey: glacier-front
       lightingProfile: frostgard_daylight
@@ -758,22 +831,57 @@ instancedLocations:
         iceBlock: { kind: ice, profile: calved_block, masked: false }
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
+        roof: { kind: stone, profile: snow_roof, masked: false }
         iron: { kind: stone, profile: iron, masked: false }
         glow: { kind: glow }
       params:
-        # The ice cliff: where it stands (z), how high, how far its middle bows forward, its backward lean
-        # per metre of height; crevasses cut back from the lip; spires and bergs by x ([x, metres out, size]).
-        front: { z: -34, height: 38, bow: 14, lean: 0.12, crevasses: 8, spires: [-38, -15, 6, 31, 48], caveX: 10, bergs: [[-18, 7, 2.6], [27, 6, 2.2], [-2, 9, 1.6]] }
-        # The rock walls: where they stand, how far they lean back per metre, how much craggier than ice.
-        wall: { x: 58, lean: 0.14, crag: 1.7 }
-        moraine: { z: 37, height: 9, width: 7 }
+        # The ice cliff: where it stands (z), how high, how far its middle bows forward, its backward lean per metre
+        # of height. The face stands in facets about `facet` metres wide, up to `setback` metres forward of or behind
+        # each other: buttresses and re-entrants. Over the undercut foot between `calving` x the face leans out by
+        # `overhang` per metre of height. Crevasses cut back from the lip; caveX is where meltwater bored the cave;
+        # bergs calved at the foot: [x, metres out from the face, size, tilt in radians (near 1.3 lies flat)].
+        front: { z: -34, height: 38, bow: 14, lean: 0.12, facet: 14, setback: 9, calving: [-48, -22], overhang: 0.26, crevasses: 8, caveX: 10, bergs: [[-18, 8, 3.2, 0.35], [27, 7, 2.8, 0.5], [-11, 16, 1.8, 0.2], [38, 9, 3.4, 1.3]] }
+        # Crevasses across the flow: [fromX, toX, metres back from the lip].
+        transverse: [[-48, -6, 9], [0, 46, 12], [-30, 30, 24]]
+        # Between `zone` x the lip has slumped toward the face in `steps` treads, `tread` metres deep and `rise` high.
+        # Towers along the lip: [x, metres back, width, thickness, height, lean toward the forefield in radians];
+        # a strong lean is a serac part-way through toppling.
+        seracs:
+          zone: [6, 46]
+          steps: 3
+          tread: 7
+          rise: 5
+          towers: [[-44, 4, 6, 5, 12, 0.05], [-36, 11, 5, 4, 8, -0.1], [-29, 2, 8, 2.6, 11, 0.32], [-14, 6, 6, 5, 13, 0.08], [-6, 12, 5, 4, 10, 0.12], [0, 3, 6, 4.5, 9, 0.2], [15, 3, 6, 5, 10, 0.3], [22, 16, 5, 4, 9, -0.15], [29, 9, 6, 4, 12, 0.55], [44, 4, 5, 4.5, 11, 0.15]]
+        # Breaking along planes: [cell metres, relief metres, stretchY]. blocks: serac blocks and rock joints;
+        # planes: the fractures across every face; soffit: the flat slabs the arch's underside fails in.
+        fracture: { blocks: [9, 2.2, 2.4], planes: [3.2, 0.7, 1.4], soffit: [2.4, 0.6, 0.3] }
+        # The rock walls: where they stand, lean back per metre, how much craggier than ice. Bedding planes every
+        # `ledge` metres up step back onto a `bench` where snow lies, dipping down-valley by `dip`, wandering by `warp`.
+        wall: { x: 58, lean: 0.05, ledge: 7, bench: 1.9, dip: 0.04, warp: 6, crag: 1 }
+        # The end moraine across the valley, and the lateral moraines along each wall foot (distance from the middle).
+        moraine: { z: 37, height: 9, width: 7, lateral: { x: 48, height: 3, width: 6 } }
         pool: { x: -8, z: -22, rx: 22, rz: 9, y: -0.3 }
-        arch: { x: 4, z: -6, width: 8.4, height: 9.5, wallHeight: 13 }
-        strata: { amp: 0.32, frequency: 0.3, dip: 0.08, warp: 6 }
+        # The frozen melt stream, a leading line: cave mouth → pool → under the arch → out across the forefield ([x, z]).
+        channel: { path: [[10, -36], [6, -30], [1, -25], [-4, -21], [0, -14], [1.5, -6], [0.5, 2], [-2.5, 10], [-6, 18]], halfWidth: 1.3, bank: 1.6, depth: 0.7 }
+        # The wall of old ice across the forefield: its ends (x), crest height, thickness, length of each crest step,
+        # the window through it [x, y], blocks fallen from its broken east end, the cornice's reach off its lee crest,
+        # and how much harder its flanks fracture than the cliff's.
+        ridge: { west: -29, east: 24, height: 13, thickness: 6, block: 6, window: [-12, 7.5], debris: 7, cornice: 1.4, fracture: 1.4 }
+        # The arch, through a thicker pier of ice: its half width (pier), depth through and crown height.
+        arch: { x: 4, z: -6, width: 8.4, height: 9.5, pier: 9, depth: 9, crown: 17 }
+        strata: { amp: 0.22, frequency: 0.3, dip: 0.08, warp: 6 }
+        # Snow: metres built up on tops and ledges, on the open forefield; the wind (plan, as the atmosphere's);
+        # drift tails in obstacle sizes and moat depth; the bank under the wall's lee, its reach and the gap at the arch.
+        snow: { depth: 1.2, field: 0.35, wind: [0.6, 0.8], tail: 5, scour: 0.5, bank: 2.4, bankReach: 9, bankGap: 8 }
+        # Boulders the ice carried down and set on the forefield: [x, z, size].
+        erratics: [[-7, 15, 2.2], [17, 9, 1.5], [-24, 3, 2.8], [-38, 22, 2]]
         # Strength of the sun shafts through the old wall's openings.
         shafts: 0.08
         icicles: 240
-        stakes: [[2.5, 14], [5.5, 4], [7, -14], [9.5, -24]]
+        stakes: [[0.6, 20], [2.5, 14], [5.5, 4], [7, -14], [9.5, -24]]
+        # A Norths waystation before the arch, and the torches at its mouth ([x, z]).
+        waystation: { x: 12, z: 4, torches: [[-2.6, 0], [7.4, 0]] }
     frostgard_hold:
       generatorKey: frostgard-hold
       lightingProfile: frostgard_dusk
@@ -800,11 +908,16 @@ instancedLocations:
         glacier: { z: -46, height: 40, lean: 0.1, swing: 34, crevasses: [[-40, -8, 7], [4, 40, 9]] }
         wall: { x: 44, lean: 0.3 }
         rise: { z: 42, height: 8, width: 5 }
-        store: { x: -18, z: -58, floor: 0.4, radius: 7.5 }
+        # The ice store, cut square into the glacier: its middle, floor height, half spans along and across
+        # it, wall height and the rise of its vault.
+        store: { x: -18, z: -58, floor: 0.4, halfLength: 7, halfWidth: 4.4, wallHeight: 2.9, vaultRise: 1.6 }
+        # The store's working lanterns, and the lamps set behind its walls that make the ice glow.
+        storeLight: { lamp: { intensity: 3.4, range: 9 }, glow: { intensity: 7, range: 10 } }
         yard: { gateZ: 15 }
         cottage: { length: 7, width: 4.4, wallHeight: 2.2, roofRise: 2.6 }
         strata: { amp: 0.3, frequency: 0.3, dip: 0.08, warp: 6 }
-        icicles: 60
+        # Icicle clusters at the store's door end, where warm air leaks in and refreezes.
+        icicles: 16
 
   # Showcase sites are development access only: they have no Azgaar source and are
   # not lore locations. World-anchored sites add `source` and `entrances` here.

@@ -72,18 +72,7 @@ export function applyGeologicalVariation({
   const lightMass = smoothstep(0.58, 0.94, macroZone);
   const warmCool = mx_noise_float(point.mul(0.075).add(vec3(2.9, 8.4, 1.3))).mul(0.5).add(0.5);
 
-  const baseGain = float(geo.baseGain ?? 1.35);
-  const rawLuma = max(albedo.r.mul(0.2126).add(albedo.g.mul(0.7152)).add(albedo.b.mul(0.0722)), 1e-4);
-  const rawChroma = albedo.div(rawLuma);
-  const rockChroma = mix(
-    rawChroma,
-    normalizeTint(color(profile.tint ?? '#ebe3d6')),
-    float(geo.chromaNeutralize ?? 0.68),
-  );
-  const scaledLuma = rawLuma.mul(baseGain);
-  const liftedLuma = scaledLuma.div(scaledLuma.mul(float(geo.highlightKnee ?? 9.5)).add(1.0));
-
-  let outAlbedo = rockChroma.mul(liftedLuma);
+  let outAlbedo = albedo.add(vec3(0.008, 0.008, 0.008)).mul(float(geo.baseGain ?? 1.35));
   let outNormal = normal;
   let outRoughness = roughness;
   let outF0 = f0;
@@ -108,8 +97,8 @@ export function applyGeologicalVariation({
   // 2. Natural rock-to-rock blending toward a compatible secondary rock texture (e.g. basalt).
   if (maps.alt) {
     const altScale = max(float(profile.altScale ?? 0.22), 1e-4);
-    const altTint = color(profile.altTint ?? '#d6d0c7');
-    const altLuminanceScale = float(geo.altLuminanceScale ?? 0.46);
+    const altTint = color(profile.altTint ?? '#d4dce6');
+    const altLuminanceScale = float(geo.altLuminanceScale ?? 0.92);
     const altAlbedo = triplanarSample(maps.alt.color, point, weights, altScale).rgb
       .mul(altTint)
       .mul(altLuminanceScale);
@@ -124,11 +113,28 @@ export function applyGeologicalVariation({
 
     // Driven by macro geological zone + meso rock-mass variation so borders are organic.
     const rockMask = smoothstep(0.24, 0.78, macroZone.mul(0.72).add(midPatch.mul(0.28)));
-    const altShare = clamp(rockMask.mul(float(geo.altRockBlend ?? 0.46)), 0, 1);
+    const altShare = clamp(rockMask.mul(float(geo.altRockBlend ?? 0.52)), 0, 1);
     outAlbedo = mix(outAlbedo, altAlbedo.mul(mix(float(0.88), float(1.12), macro)), altShare);
     outNormal = safeNormalize(mix(outNormal, altNormal, altShare.mul(0.55)));
     outRoughness = mix(outRoughness, altRough, altShare);
   }
+
+  // Normal-map micro-cavity and micro-shelf relief so upward-curving lower walls preserve rock fractures.
+  const normalDotGeom = outNormal.x.mul(geometryNormal.x)
+    .add(outNormal.y.mul(geometryNormal.y))
+    .add(outNormal.z.mul(geometryNormal.z));
+  const normalDeflection = clamp(
+    float(1).sub(normalDotGeom).mul(float(geo.microCavityStrength ?? 2.4)),
+    0,
+    0.42,
+  );
+  const microShelf = clamp(
+    outNormal.y.sub(geometryNormal.y).mul(float(geo.microShelfStrength ?? 0.45)),
+    -0.22,
+    0.22,
+  );
+  outAlbedo = outAlbedo.mul(float(1).sub(normalDeflection)).mul(float(1).add(microShelf));
+  outRoughness = mix(outRoughness, float(0.96), normalDeflection);
 
   // 3. Fracture-associated discoloration & restrained mineral staining.
   const wallMask = clamp(float(1).sub(abs(geometryNormal.y)), 0, 1);
@@ -198,6 +204,9 @@ export function applyGeologicalVariation({
     outRoughness = mix(outRoughness, float(0.96), dustMask.mul(0.55));
   }
 
+  // Soft-shoulder albedo compression prevents white crack spikes while preserving charcoal/granite relief.
+  outAlbedo = outAlbedo.div(outAlbedo.mul(0.75).add(1));
+
   return {
     albedo: outAlbedo,
     normal: safeNormalize(outNormal),
@@ -240,10 +249,10 @@ export function applyMineGround({
   );
   const domainGate = mask2 ? smoothstep(0.14, 0.48, max(mask2.y, max(mask2.z, mask2.w))) : float(1);
   const slopeBias = pocketField.sub(0.5).mul(0.14);
-  const floorMask = smoothstep(0.76, 0.93, geometryNormal.y.add(slopeBias)).mul(domainGate);
+  const floorMask = smoothstep(0.74, 0.92, geometryNormal.y.add(slopeBias)).mul(domainGate);
 
   // Wall-base skirt stays restricted to fractured base pockets; never smears earth up sloped chamber walls.
-  const skirtSlope = smoothstep(0.54, 0.84, geometryNormal.y);
+  const skirtSlope = smoothstep(0.52, 0.82, geometryNormal.y);
   const skirtBreakup = smoothstep(0.34, 0.82, pocketField.mul(0.65).add(midPatch.mul(0.35)));
   const rawSkirt = mask2 ? mask2.w.mul(skirtSlope) : float(0);
   const wallSkirt = clamp(rawSkirt.mul(skirtBreakup), 0, 1);
@@ -254,33 +263,39 @@ export function applyMineGround({
   const damp = mask ? clamp(mask.y, 0, 1) : float(0);
 
   // Anchor compacted earth luminance to cave-rock albedo so floors remain in the dark rock family.
-  const flScale = max(float(profile.floorScale ?? 0.82), 1e-4);
+  const flScale = max(float(profile.floorScale ?? 0.85), 1e-4);
   const albedoLuma = albedo.r.add(albedo.g).add(albedo.b).mul(0.333);
   const earthBase = mix(albedo, vec3(albedoLuma), float(0.45));
-  const compactedHue = normalizeTint(color(ground.compactedTint ?? '#cbb299'));
-  const compactedValue = float(ground.compactedValue ?? 1.14);
+  const compactedHue = normalizeTint(color(ground.compactedTint ?? '#baa38c'));
+  const compactedValue = float(ground.compactedValue ?? 0.92);
   let earthColor = earthBase
     .mul(compactedHue)
     .mul(compactedValue)
     .mul(mix(float(0.90), float(1.10), macro));
   let earthNormal = normal;
-  let earthRough = clamp(float(ground.compactedRoughness ?? 0.95), 0.25, 0.98);
+  let earthRough = clamp(float(ground.compactedRoughness ?? 0.94), 0.25, 0.98);
 
   if (maps.floor) {
     const flBase = triplanarSample(maps.floor.color, point, weights, flScale).rgb;
     const flFine = triplanarSample(maps.floor.color, point.add(vec3(0.41, 0.13, 0.67)), weights, flScale.mul(2.15)).rgb;
-    const flGrain = clamp(flBase.r.mul(0.5).add(flFine.g.mul(0.5)).sub(0.52).mul(2.2).add(1.0), 0.62, 1.38);
+    const flGrain = clamp(flBase.r.mul(0.55).add(flFine.g.mul(0.45)).sub(0.50).mul(2.4).add(1.0), 0.58, 1.38);
+    const flNormal = triplanarNormal(
+      maps.floor.normal, point, geometryNormal, weights, flScale, (profile.normalStrength ?? 1) * 1.15,
+    );
+    earthNormal = bumpNormal(safeNormalize(mix(normal, flNormal, float(0.52))), flFine.g.sub(0.5).mul(0.015), float(0.95));
+    const earthDotGeom = earthNormal.x.mul(geometryNormal.x)
+      .add(earthNormal.y.mul(geometryNormal.y))
+      .add(earthNormal.z.mul(geometryNormal.z));
+    const earthCavity = clamp(float(1).sub(earthDotGeom).mul(1.85), 0, 0.36);
     earthColor = earthBase
       .mul(compactedHue)
       .mul(compactedValue)
       .mul(flGrain)
-      .mul(mix(float(0.90), float(1.10), macro));
-    const flNormal = triplanarNormal(
-      maps.floor.normal, point, geometryNormal, weights, flScale, (profile.normalStrength ?? 1) * 1.15,
-    );
-    earthNormal = bumpNormal(safeNormalize(mix(normal, flNormal, float(0.46))), flFine.g.sub(0.5).mul(0.012), float(0.85));
+      .mul(float(1).sub(earthCavity))
+      .mul(mix(float(0.90), float(1.10), macro))
+      .mul(mix(float(0.92), float(1.08), grainMix));
     earthRough = clamp(
-      triplanarSample(maps.floor.rough, point, weights, flScale).g.mul(float(ground.compactedRoughness ?? 0.95)),
+      triplanarSample(maps.floor.rough, point, weights, flScale).g.mul(float(ground.compactedRoughness ?? 0.94)),
       0.25,
       0.98,
     );
@@ -294,14 +309,14 @@ export function applyMineGround({
   );
   earthColor = mix(
     earthColor,
-    earthColor.mul(normalizeTint(color(ground.wearTint ?? '#dcd0c2'))).mul(1.08),
-    wearField.mul(0.32),
+    earthColor.mul(normalizeTint(color(ground.wearTint ?? '#cfc1b0'))).mul(1.06),
+    wearField.mul(0.30),
   );
-  earthRough = mix(earthRough, float(ground.wearRoughness ?? 0.78), wearField.mul(0.36));
+  earthRough = mix(earthRough, float(ground.wearRoughness ?? 0.82), wearField.mul(0.36));
 
   // Exposed bedrock on floors: keeps wall rock's geological identity, flatter excavation roughness.
   const bedrockAlbedo = albedo.mul(mix(float(0.9), float(1.06), grainMix));
-  const bedrockRough = clamp(roughness.mul(float(ground.bedrockRoughness ?? 0.9)), 0.38, 0.96);
+  const bedrockRough = clamp(roughness.mul(float(ground.bedrockRoughness ?? 0.92)), 0.38, 0.96);
 
   // Blend exposed bedrock -> compacted earth strictly inside true flat floor pockets (never up walls).
   const filletSkirt = wallSkirt.mul(float(1).sub(floorMask));
@@ -314,18 +329,20 @@ export function applyMineGround({
   let groundNormal = safeNormalize(mix(normal, earthNormal, earthMix));
   let groundRough = mix(bedrockRough, earthRough, earthMix);
 
-  // Crushed stone, gravel & railway ballast: dual-scale angular Worley fragments + rock-anchored chip tone.
+  // Crushed stone, gravel & railway ballast: dual-scale angular Worley fragments + pebble-edge crevice darkening.
   const gScale = max(float(ground.gravelScale ?? 6.4), 1e-4);
   const wCoarse = mx_worley_noise_float(point.mul(gScale));
   const wFine = mx_worley_noise_float(point.mul(gScale.mul(2.35)).add(vec3(3.1, 1.7, 5.4)));
   const pebbleCrown = clamp(float(1).sub(wCoarse), 0, 1).mul(0.62)
     .add(clamp(float(1).sub(wFine), 0, 1).mul(0.38));
-  const chipTone = mix(float(0.48), float(1.42), clamp(wFine.mul(0.58).add(grainMix.mul(0.42)), 0, 1));
+  const chipTone = mix(float(0.72), float(1.18), clamp(wFine.mul(0.58).add(grainMix.mul(0.42)), 0, 1));
+  const pebbleShade = mix(float(0.58), float(1.24), pebbleCrown);
 
   let gravelColor = mix(earthColor, albedo, float(0.62))
-    .mul(normalizeTint(color(ground.gravelTint ?? '#b2b4b8')))
-    .mul(float(ground.gravelValue ?? 1.12))
-    .mul(chipTone);
+    .mul(normalizeTint(color(ground.gravelTint ?? '#b4b6ba')))
+    .mul(float(ground.gravelValue ?? 1.06))
+    .mul(chipTone)
+    .mul(pebbleShade);
   const trackWeather = smoothstep(0.45, 0.85, gravelWeight)
     .mul(smoothstep(0.28, 0.78, midPatch.mul(0.55).add(grainMix.mul(0.45))));
   gravelColor = mix(

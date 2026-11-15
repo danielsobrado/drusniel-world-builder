@@ -7,16 +7,16 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const DEFAULT_MINE_LIGHTING_SECTIONS = {
   adit: {
     daylightTint: '#b8d4f4',
-    daylightIntensity: 5.8,
-    daylightRange: 21.0,
+    daylightIntensity: 3.8,
+    daylightRange: 17.5,
     thresholdTint: '#8faed4',
-    thresholdIntensity: 2.45,
-    thresholdRange: 19.5,
+    thresholdIntensity: 1.75,
+    thresholdRange: 16.5,
   },
   haulage: {
     tint: '#ffbe7a',
     warmAltTint: '#ffc88a',
-    intensity: 4.9,
+    intensity: 4.4,
     range: 15.0,
     spacingFrames: 3,
     unlitRate: 0.14,
@@ -26,29 +26,29 @@ export const DEFAULT_MINE_LIGHTING_SECTIONS = {
     tint: '#ffc07c',
     shaftAbyssTint: '#6c859c',
     shaftAbyssIntensity: 2.1,
-    hoistIntensity: 6.4,
+    hoistIntensity: 5.6,
     hoistRange: 19.5,
   },
   stope: {
     tint: '#ffc482',
     workTint: '#ffb870',
-    primaryIntensity: 6.2,
+    primaryIntensity: 5.2,
     primaryRange: 17.5,
     flickerAmount: 0.105,
   },
   abandoned: {
     tint: '#eb9e56',
     dimTint: '#df8d46',
-    intensity: 3.4,
-    range: 13.5,
-    flickerAmount: 0.21,
+    intensity: 2.6,
+    range: 11.5,
+    flickerAmount: 0.24,
   },
   flooded: {
     tint: '#ffba72',
-    pierIntensity: 4.8,
+    pierIntensity: 4.0,
     pierRange: 16.0,
-    farIntensity: 4.2,
-    farRange: 16.5,
+    farIntensity: 4.0,
+    farRange: 17.5,
   },
 };
 
@@ -180,15 +180,15 @@ export function mountWallSconceLantern(b, origin, dirX, dirZ, {
 export function placeAditDaylightTransition(b, drift, sections) {
   const cfg = sections.adit;
   // Crisp cool overcast sky entering through the timbered portal doorway and frame cracks.
-  b.light(P(0, drift.height * 0.65, 5.8), cfg.daylightTint, cfg.daylightIntensity, cfg.daylightRange, {
-    radius: 2.2,
+  b.light(P(0, drift.height * 0.58, 5.2), cfg.daylightTint, cfg.daylightIntensity, cfg.daylightRange, {
+    radius: 2.0,
     flat: false,
     dynamic: false,
     section: 'adit',
   });
   // Soft cool twilight slate bounce decaying smoothly down the outer 15-20m of the adit.
-  b.light(P(0, drift.height * 0.48, 0.2), cfg.thresholdTint, cfg.thresholdIntensity, cfg.thresholdRange, {
-    radius: 2.8,
+  b.light(P(0, drift.height * 0.48, 0.8), cfg.thresholdTint, cfg.thresholdIntensity, cfg.thresholdRange, {
+    radius: 2.4,
     flat: false,
     dynamic: false,
     section: 'adit',
@@ -209,9 +209,9 @@ export function placeHaulageLanterns(b, frames, sections, { skipNearZ = [] } = {
     const frame = frames[i];
     const z = frame.plan.center.z;
 
-    // Keep the outer adit daylight-to-twilight transition free of warm lamps (leave one cold bracket).
-    if (z > -6.5) {
-      if (i === 2) placeUnlitFrameHook(b, frame);
+    // Keep the outer adit threshold (frames[0]) in cool twilight with an unlit hook; start warm lamps at frames[1] and keep the mine-6 close-up frame (~-8.7) lit.
+    if (z > -1.2) {
+      if (i === 0) placeUnlitFrameHook(b, frame);
       continue;
     }
 
@@ -222,16 +222,17 @@ export function placeHaulageLanterns(b, frames, sections, { skipNearZ = [] } = {
     const distSinceLast = lastLitZ - z;
     const h = detHash(b.seed + 19, i);
     const isFirstWarm = placed.length === 0;
+    const keepPortalCloseUp = i === 3 || Math.abs(z - (-8.69)) < 1.8;
     const isFinalApproach = i === frames.length - 1 || i === frames.length - 2;
     const desiredGap = 4.6 + detHash(b.seed + 41, i) * 3.6;
 
-    if (!isFirstWarm && distSinceLast < desiredGap && !(isFinalApproach && distSinceLast > 5.0)) {
+    if (!isFirstWarm && !keepPortalCloseUp && distSinceLast < desiredGap && !(isFinalApproach && distSinceLast > 5.0)) {
       if (h < cfg.unlitRate + 0.14) placeUnlitFrameHook(b, frame);
       continue;
     }
 
     // Occasional extra dark bay near mid-drift so shadow stretches breathe naturally.
-    if (!isFirstWarm && !isFinalApproach && h < cfg.unlitRate && distSinceLast < 8.0) {
+    if (!isFirstWarm && !keepPortalCloseUp && !isFinalApproach && h < cfg.unlitRate && distSinceLast < 8.0) {
       placeUnlitFrameHook(b, frame);
       continue;
     }

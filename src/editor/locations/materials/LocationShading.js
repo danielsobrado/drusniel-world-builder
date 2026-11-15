@@ -144,7 +144,9 @@ export function shadeSurface({
     const dynRange = max(slot.params.x, 1e-3);
     const dynRadius = max(slot.params.y, 0.75);
     const dynFade = clamp(float(1).sub(pow(dynDist.div(dynRange), 2)), 0, 1);
-    const dynAtten = dynFade.mul(dynFade).div(float(1).add(pow(dynDist.div(dynRadius), 2)));
+    const dynCore = float(1).div(float(1).add(pow(dynDist.div(dynRadius), 2)));
+    const dynScatter = float(1).div(float(1).add(pow(dynDist.div(dynRadius.mul(2.4)), 2)));
+    const dynAtten = dynFade.mul(dynFade).mul(dynCore.mul(0.60).add(dynScatter.mul(0.40)));
     const dynIrrad = slot.color.mul(dynAtten).mul(localAO);
     const dynSpecFace = clamp(dot(normal, dynDir).add(0.1), 0, 1);
     dynDiffuse = dynDiffuse.add(dynIrrad.mul(wrapped(normal, dynDir)));

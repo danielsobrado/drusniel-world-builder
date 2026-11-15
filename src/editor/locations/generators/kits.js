@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { arch, box, coursedWall, extrudedProfile, hewnBeam, rod, roughTimber, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { createTimberBeam, createTimberBoard } from '../gen/timberGeometry.js';
 import { buildStandaloneTimberSet } from '../gen/timberSupportBuilder.js';
 import { columnDrums } from '../gen/columnDrums.js';
 
@@ -29,15 +30,28 @@ const LANTERN_GLOBE_PROFILE = [
 
 function createLanternGlobeGeometry(at) {
   const pts = LANTERN_GLOBE_PROFILE.map(([r, y]) => new THREE.Vector2(r, y));
-  const geometry = new THREE.LatheGeometry(pts, 10);
+  const geometry = new THREE.LatheGeometry(pts, 14);
+  // Subtle vertical fluting on alternate ribs so the glass catches highlights like blown lantern glass.
+  const pos = geometry.attributes.position;
+  for (let i = 0; i < pos.count; i += 1) {
+    const px = pos.getX(i), pz = pos.getZ(i);
+    const r = Math.hypot(px, pz);
+    if (r > 0.01) {
+      const ang = Math.atan2(pz, px);
+      const flute = 1 + Math.cos(ang * 7) * 0.032;
+      pos.setX(i, px * flute);
+      pos.setZ(i, pz * flute);
+    }
+  }
+  geometry.computeVertexNormals();
   return geometry.translate(at.x, at.y, at.z);
 }
 
 /**
- * A caged oil lantern: tarnished-iron base pan and brass burner collar, corner guard
- * rods with horizontal retaining wires, stepped storm hood with flue cap and bail,
- * barrelled amber-lit glass globe, and baked + dynamic practical light.
- * Preserves `at.y - 0.22` base seating and `at.y + 0.26 + hung` hanging stem coordinates.
+ * A caged oil lantern: forged-iron base pan with filler cap, tarnished brass burner
+ * gallery, corner guard rods with triple retaining wires, louvered storm hood with
+ * bail ring, fluted amber-lit glass globe with inner flame core, and baked + dynamic
+ * practical light. Preserves `at.y - 0.22` base seating and `at.y + 0.26 + hung` stem.
  */
 export function lantern(b, at, {
   tint = '#ffb061',
@@ -51,42 +65,47 @@ export function lantern(b, at, {
   section = 'default',
   dynamic = true,
 } = {}) {
-  // Base oil fount pan + tarnished brass gallery collar + inner burner cup.
-  b.prop('iron', rod(up(at, -0.22), up(at, -0.16), 0.126, 0.14, 8), 0x32363e);
-  b.prop('iron', rod(up(at, -0.16), up(at, -0.125), 0.116, 0.104, 8), 0x7d5d38);
-  b.prop('iron', rod(up(at, -0.125), up(at, -0.09), 0.056, 0.036, 8), 0x8e6b40);
+  // Base oil fount pan + stepped filler cap + tarnished brass gallery collar & inner burner cup.
+  b.prop('iron', rod(up(at, -0.22), up(at, -0.16), 0.132, 0.145, 12), 0x4d535e);
+  b.prop('iron', rod(up(at, -0.16), up(at, -0.125), 0.118, 0.106, 12), 0xb58844);
+  b.prop('iron', rod(up(at, -0.125), up(at, -0.088), 0.058, 0.038, 10), 0xcfa056);
+  b.prop('iron', rod({ x: at.x + 0.088, y: at.y - 0.165, z: at.z + 0.045 }, { x: at.x + 0.088, y: at.y - 0.14, z: at.z + 0.045 }, 0.022, 0.018, 6), 0xa87c3c);
 
-  // Upper retaining collar, stepped storm hood, vented chimney flue, and top bail.
-  b.prop('iron', rod(up(at, 0.112), up(at, 0.14), 0.098, 0.118, 8), 0x5c4a35);
-  b.prop('iron', rod(up(at, 0.14), up(at, 0.198), 0.156, 0.082, 8), 0x343840);
-  b.prop('iron', rod(up(at, 0.198), up(at, 0.244), 0.068, 0.042, 8), 0x3c4048);
-  b.prop('iron', rod(up(at, 0.244), up(at, 0.27), 0.03, 0.022, 6), 0x464a52);
-  if (hung > 0) b.prop('iron', rod(up(at, 0.26), up(at, 0.26 + hung), 0.015, 0.015, 5), 0x42464e);
+  // Upper retaining collar, stepped storm hood, vented chimney flue with radial louvers, and top bail.
+  b.prop('iron', rod(up(at, 0.112), up(at, 0.14), 0.1, 0.122, 12), 0x9c753c);
+  b.prop('iron', rod(up(at, 0.14), up(at, 0.198), 0.16, 0.084, 12), 0x4c525d);
+  b.prop('iron', rod(up(at, 0.198), up(at, 0.244), 0.07, 0.044, 10), 0x585f6b);
+  b.prop('iron', rod(up(at, 0.244), up(at, 0.27), 0.032, 0.022, 8), 0x5e6572);
+  for (const [lx, lz] of [[-0.068, 0], [0.068, 0], [0, -0.068], [0, 0.068]]) {
+    b.prop('iron', stoneBox(0.018, 0.046, 0.018, { x: at.x + lx, y: at.y + 0.214, z: at.z + lz }, { bevel: 0.004 }), 0x676f7d);
+  }
+  if (hung > 0) b.prop('iron', rod(up(at, 0.26), up(at, 0.26 + hung), 0.016, 0.016, 6), 0x5a616e);
 
-  // Protective corner guard bars + upper/lower wire retaining cage.
-  const corners = [[-0.095, -0.095], [0.095, -0.095], [0.095, 0.095], [-0.095, 0.095]];
+  // Protective corner guard bars + triple wire retaining cage with corner lugs.
+  const corners = [[-0.098, -0.098], [0.098, -0.098], [0.098, 0.098], [-0.098, 0.098]];
   for (let i = 0; i < corners.length; i += 1) {
     const [dx, dz] = corners[i];
     const [nx, nz] = corners[(i + 1) % corners.length];
     b.prop('iron', rod(
-      { x: at.x + dx, y: at.y - 0.162, z: at.z + dz },
+      { x: at.x + dx, y: at.y - 0.165, z: at.z + dz },
       { x: at.x + dx, y: at.y + 0.145, z: at.z + dz },
-      0.012, 0.012, 5,
-    ), 0x2f333b);
-    for (const wireY of [-0.105, 0.095]) {
+      0.013, 0.013, 6,
+    ), 0x464c57);
+    for (const wireY of [-0.105, -0.005, 0.095]) {
       b.prop('iron', rod(
         { x: at.x + dx, y: at.y + wireY, z: at.z + dz },
         { x: at.x + nx, y: at.y + wireY, z: at.z + nz },
-        0.008, 0.008, 4,
-      ), 0x363a42);
+        0.0085, 0.0085, 4,
+      ), 0x555c68);
     }
   }
 
-  // Barrelled glass enclosure shaded in TSL from hot pale-gold core to rich amber/copper edges.
+  // Fluted amber glass enclosure + bright inner wick flame core.
   const globeTint = new THREE.Color(tint);
-  globeTint.setRGB(globeTint.r, globeTint.g * 0.88, globeTint.b * 0.65);
-  const globeGain = Math.max(0.58, Math.min(0.92, 0.7 + (intensity - 3) * 0.055));
+  globeTint.setRGB(globeTint.r * 0.94, globeTint.g * 0.78, globeTint.b * 0.52);
+  const globeGain = Math.max(0.48, Math.min(0.82, 0.58 + (intensity - 3) * 0.048));
   b.prop('glow', createLanternGlobeGeometry(at), globeTint, globeGain);
+  b.prop('glow', rod(up(at, -0.065), up(at, 0.025), 0.028, 0.008, 8), '#fff1cf', Math.min(1.25, globeGain * 1.48));
 
   const importanceScale = Math.max(0.7, Math.min(1.35, 0.78 + (importance - 1) * 0.38));
   const intensityScale = Math.max(0.45, Math.min(1.3, intensity / 4.2));
@@ -131,27 +150,114 @@ export function rails(b, a, c, gauge = 0.9) {
   }
 }
 
+/** Planked wooden supply crate with chamfered corner posts, diagonal braces, and iron straps. */
 export function crate(b, at, size = 0.8, yaw = 0) {
   const h = size * 0.82;
-  b.prop('timber', stoneBlock(size * 0.92, h * 0.92, size * 0.92, up(at, h * 0.04), { yaw, bevel: 0.02, irregular: 0.12 }), 0x7c6040);
-  // Corner framing battens and top/bottom rails.
   const c = Math.cos(yaw), s = Math.sin(yaw);
+  const local = (lx, ly, lz) => ({ x: at.x + c * lx + s * lz, y: at.y + ly, z: at.z - s * lx + c * lz });
+  const upDir = { x: 0, y: 1, z: 0 };
   const half = size * 0.46;
-  for (const [lx, lz] of [[-half, -half], [half, -half], [-half, half], [half, half]]) {
-    const px = at.x + c * lx + s * lz, pz = at.z - s * lx + c * lz;
-    b.prop('timber', stoneBlock(0.11, h, 0.11, { x: px, y: at.y, z: pz }, { yaw, bevel: 0.02, irregular: 0.15 }), 0x947551);
+  const slatThick = Math.max(0.032, size * 0.048);
+  const plankH = (h - 0.06) / 3;
+  const plankTones = [0x9e7c56, 0x8f6e49, 0xa8865e];
+
+  // Recessed dark inner backing so plank seams read with real depth.
+  b.prop('timber', stoneBlock(size * 0.86, h * 0.9, size * 0.86, up(at, h * 0.03), { yaw, bevel: 0.015, irregular: 0.06 }), 0x5c442d);
+
+  // Horizontal planked slats on all four sides (with directional wood grain).
+  for (let row = 0; row < 3; row += 1) {
+    const py = 0.03 + (row + 0.5) * plankH;
+    const tone = plankTones[row % plankTones.length];
+    for (const sideSign of [-1, 1]) {
+      b.prop('timber', createTimberBoard(
+        local(-half + 0.03, py, sideSign * (half - slatThick * 0.4)),
+        local(half - 0.03, py, sideSign * (half - slatThick * 0.4)),
+        upDir, plankH * 0.88, slatThick, { irregular: 0.16, damp: row === 0 ? 0.35 : 0.15, wear: 0.48, seed: 31 + row * 17 + sideSign },
+      ), tone);
+      b.prop('timber', createTimberBoard(
+        local(sideSign * (half - slatThick * 0.4), py, -half + 0.03),
+        local(sideSign * (half - slatThick * 0.4), py, half - 0.03),
+        upDir, plankH * 0.88, slatThick, { irregular: 0.16, damp: row === 0 ? 0.35 : 0.15, wear: 0.48, seed: 97 + row * 19 + sideSign },
+      ), plankTones[(row + 1) % plankTones.length]);
+    }
   }
-  b.prop('iron', stoneBlock(size + 0.03, 0.06, size + 0.03, up(at, h * 0.44), { yaw, bevel: 0.015, irregular: 0.05 }), 0x6a6e78);
-  b.prop('iron', stoneBlock(size + 0.03, 0.06, size + 0.03, up(at, h * 0.82), { yaw, bevel: 0.015, irregular: 0.05 }), 0x6a6e78);
+
+  // Planked top lid slats.
+  const lidPlanks = 3;
+  const lidW = (size * 0.92) / lidPlanks;
+  for (let i = 0; i < lidPlanks; i += 1) {
+    const lz = -size * 0.46 + (i + 0.5) * lidW;
+    b.prop('timber', createTimberBoard(
+      local(-half, h - 0.025, lz),
+      local(half, h - 0.025, lz),
+      { x: -s, y: 0, z: c }, lidW * 0.9, slatThick, { irregular: 0.14, damp: 0.12, wear: 0.52, seed: 211 + i * 13 },
+    ), plankTones[(i + 2) % plankTones.length]);
+  }
+
+  // Corner framing battens + diagonal cross-braces on front/back faces.
+  for (const [lx, lz] of [[-half, -half], [half, -half], [-half, half], [half, half]]) {
+    b.prop('timber', createTimberBeam(
+      local(lx, 0, lz), local(lx, h, lz), 0.095, 0.095,
+      { sideHint: { x: c, y: 0, z: -s }, bevelRatio: 0.15, irregular: 0.16, dampStart: 0.4, dampEnd: 0.15, wear: 0.55, seed: Math.round((lx + lz) * 100) + 401 },
+    ), 0xad8b63);
+  }
+  for (const sideSign of [-1, 1]) {
+    b.prop('timber', createTimberBoard(
+      local(-half + 0.06, 0.06, sideSign * (half + 0.008)),
+      local(half - 0.06, h - 0.06, sideSign * (half + 0.008)),
+      { x: -s, y: 0, z: c }, 0.075, 0.026, { irregular: 0.12, wear: 0.5, seed: 501 + sideSign },
+    ), 0xa28058);
+  }
+
+  // Iron corner strap bands & corner brackets.
+  for (const strapY of [h * 0.22, h * 0.82]) {
+    b.prop('iron', stoneBlock(size + 0.035, 0.048, size + 0.035, up(at, strapY), { yaw, bevel: 0.01, irregular: 0.03 }), 0x767d88);
+  }
 }
 
+/** Staved wooden mine barrel with recessed planked heads, bung plug, and riveted iron hoops. */
 export function barrel(b, at, radius = 0.36, height = 0.95) {
-  const mid = up(at, height / 2);
-  b.prop('timber', rod(at, mid, radius * 0.84, radius, 12), 0x86633f);
-  b.prop('timber', rod(mid, up(at, height), radius, radius * 0.84, 12), 0x86633f);
-  for (const frac of [0.16, 0.34, 0.66, 0.84]) {
-    const r = radius * (frac < 0.25 || frac > 0.75 ? 0.93 : 1.0);
-    b.prop('iron', rod(up(at, height * frac), up(at, height * (frac + 0.055)), r, r, 12), 0x686c74);
+  const staveCount = 14;
+  const waistR = radius;
+  const endR = radius * 0.84;
+  const staveThick = 0.038;
+  const staveWidth = (2 * Math.PI * waistR / staveCount) * 0.95;
+  const staveTones = [0x9c7850, 0x8d6b46, 0xa68158];
+
+  // Recessed dark core + top/bottom recessed heads.
+  const mid = up(at, height * 0.5);
+  b.prop('timber', rod(up(at, 0.03), mid, endR * 0.9, waistR * 0.93, staveCount), 0x5c432b);
+  b.prop('timber', rod(mid, up(at, height - 0.03), waistR * 0.93, endR * 0.9, staveCount), 0x5c432b);
+  b.prop('timber', rod(up(at, height - 0.075), up(at, height - 0.045), endR * 0.92, endR * 0.92, staveCount), 0x92704b);
+
+  // Individual beveled vertical staves in two bilged halves so the barrel silhouette bulges naturally.
+  for (let i = 0; i < staveCount; i += 1) {
+    const a = (i / staveCount) * Math.PI * 2;
+    const nx = Math.cos(a), nz = Math.sin(a);
+    const tangent = { x: -nz, y: 0, z: nx };
+    const tone = staveTones[i % staveTones.length];
+    b.prop('timber', createTimberBoard(
+      { x: at.x + nx * endR, y: at.y, z: at.z + nz * endR },
+      { x: at.x + nx * waistR, y: at.y + height * 0.5, z: at.z + nz * waistR },
+      tangent, staveWidth * 0.92, staveThick, { irregular: 0.14, damp: 0.35, wear: 0.45, seed: 601 + i * 11 },
+    ), tone);
+    b.prop('timber', createTimberBoard(
+      { x: at.x + nx * waistR, y: at.y + height * 0.5, z: at.z + nz * waistR },
+      { x: at.x + nx * endR, y: at.y + height, z: at.z + nz * endR },
+      tangent, staveWidth * 0.92, staveThick, { irregular: 0.14, damp: 0.15, wear: 0.48, seed: 701 + i * 11 },
+    ), tone);
+  }
+
+  // Side bung plug + 4 forged iron hoops with clasp overlap.
+  b.prop('timber', rod(
+    { x: at.x + waistR * 0.96, y: at.y + height * 0.5, z: at.z },
+    { x: at.x + waistR + 0.035, y: at.y + height * 0.5, z: at.z },
+    0.026, 0.022, 8,
+  ), 0xb08b60);
+  for (const frac of [0.12, 0.32, 0.68, 0.88]) {
+    const t = Math.abs(frac - 0.5) * 2;
+    const r = (waistR * (1 - t) + endR * t) + 0.022;
+    b.prop('iron', rod(up(at, height * frac), up(at, height * (frac + 0.048)), r, r, staveCount), 0x747b86);
   }
 }
 

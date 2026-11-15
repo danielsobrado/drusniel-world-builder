@@ -178,12 +178,14 @@ export function gatherBounceLight(field, {
 
             const fade = 1 - distSq / radiusSq;
             const form = (fade * fade * emitFace * recvFace) / (1 + distSq * 0.09);
+            const sLuma = s.r * 0.3 + s.g * 0.5 + s.b * 0.2;
+            const lumWeight = Math.min(1, sLuma / 0.32);
             br += s.r * form;
             bg += s.g * form;
             bb += s.b * form;
-            wSum += form;
+            wSum += form * Math.max(0.18, lumWeight);
 
-            const bounceLuma = (s.r * 0.3 + s.g * 0.5 + s.b * 0.2) * form;
+            const bounceLuma = sLuma * form;
             dx += ux * bounceLuma; dy += uy * bounceLuma; dz += uz * bounceLuma;
             dWeight += bounceLuma;
           }

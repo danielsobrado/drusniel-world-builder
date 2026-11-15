@@ -207,7 +207,7 @@ export function generate(b, params) {
       0.16,
       0.15,
       { bevelRatio: 0.15, irregular: 0.2, bow: 0.004, taper: 0.04, dampStart: 0.35, dampEnd: 0.35, seed: 801 + Math.round(dy * 100) },
-    ), 0x765a3e);
+    ), 0x96754f);
   }
   rails(b, P(-0.9, 0, 5), P(-0.9, -1, -40));
   rails(b, P(-0.9, -1, -40), P(-2.5, -1, -52));

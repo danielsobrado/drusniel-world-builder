@@ -110,7 +110,13 @@ export function bakeLighting({
         const fade = 1 - (distance / source.range) ** 2;
         const effDist = Math.max(distance, isProp ? 0.46 : 0.28);
         const effRadius = Math.max(source.radius ?? 1, isProp ? 0.85 : 0.4);
-        falloff = source.flat ? fade * fade : (fade * fade) / (1 + (effDist / effRadius) ** 2);
+        if (source.flat) {
+          falloff = fade * fade;
+        } else {
+          const core = 1 / (1 + (effDist / effRadius) ** 2);
+          const scatter = 1 / (1 + (effDist / (effRadius * 2.4)) ** 2);
+          falloff = (fade * fade) * (0.60 * core + 0.40 * scatter);
+        }
       }
       const nearWrap = isProp && !source.flat && !source.direction && distance < 0.75
         ? Math.min(0.65, wrap + (1 - distance / 0.75) * 0.32)

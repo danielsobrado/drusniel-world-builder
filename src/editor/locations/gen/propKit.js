@@ -457,3 +457,67 @@ export function extrudedProfile(points, depth, {
   if (yaw) geometry.rotateY(yaw);
   return geometry.translate(at.x, at.y, at.z);
 }
+
+/**
+ * A multi-faceted angular rock, slate slab, or mineral ore chunk centred at `at`.
+ * Uses deterministic cleavage planes and shared-vertex displacement so facets
+ * stay watertight with crisp geological normals.
+ */
+export function angularRock(rx, ry, rz, at, {
+  yaw = 0,
+  detail = 1,
+  irregular = 0.42,
+  flatBottom = 0.18,
+  seed = hashCoords(at.x, at.y, at.z, 97),
+} = {}) {
+  const rng = createRng(seed);
+  const base = new THREE.IcosahedronGeometry(1, detail);
+  const pos = base.attributes.position;
+
+  // Deterministic cleavage plane directions and cut depths.
+  const planes = Array.from({ length: 4 }, () => {
+    const theta = rng() * Math.PI * 2;
+    const phi = Math.acos(2 * rng() - 1);
+    return {
+      nx: Math.sin(phi) * Math.cos(theta),
+      ny: Math.cos(phi),
+      nz: Math.sin(phi) * Math.sin(theta),
+      limit: 0.68 + rng() * 0.24,
+    };
+  });
+
+  const displaced = new Map();
+  for (let i = 0; i < pos.count; i += 1) {
+    const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+    const key = `${Math.round(vx * 1000)},${Math.round(vy * 1000)},${Math.round(vz * 1000)}`;
+    let out = displaced.get(key);
+    if (!out) {
+      let sx = vx, sy = vy, sz = vz;
+      for (const p of planes) {
+        const d = sx * p.nx + sy * p.ny + sz * p.nz;
+        if (d > p.limit) {
+          const excess = (d - p.limit) * (0.45 + irregular * 0.45);
+          sx -= p.nx * excess;
+          sy -= p.ny * excess;
+          sz -= p.nz * excess;
+        }
+      }
+      const radial = 1 + (rng() - 0.5) * 2 * irregular * 0.38;
+      sx *= radial;
+      sy *= radial;
+      sz *= radial;
+      if (flatBottom > 0 && sy < -0.55) {
+        sy = -0.55 - (-0.55 - sy) * (1 - flatBottom);
+      }
+      out = [sx * rx, sy * ry, sz * rz];
+      displaced.set(key, out);
+    }
+    pos.setXYZ(i, out[0], out[1], out[2]);
+  }
+
+  const geo = base.index ? base.toNonIndexed() : base;
+  if (geo !== base) base.dispose();
+  if (yaw) geo.rotateY(yaw);
+  geo.computeVertexNormals();
+  return geo.translate(at.x, at.y, at.z);
+}
