@@ -332,9 +332,9 @@ instancedLocations:
       f0: 0.74
       patina: { color: '#4f8a72', amount: 0.5, spread: 0.3 }
     obsidian_seal:
-      surface: basalt
+      surface: frost-rock
       scale: 0.3
-      tint: '#a3a3b8'
+      tint: '#4b4b5c'
       roughness: 0.3
       f0: 0.1
     # Dyed wool for trail flags. Cloth flaps the frost off, so it keeps its colour where timber greys; the
@@ -485,6 +485,15 @@ instancedLocations:
       banding: { frequency: 0.9, dip: 0.22, fold: 7, strength: 0.28, zones: 0.7, zoneSize: 30 }
       scallop: { scale: 0.35, depth: 0.2 }
     # Fresh-fallen blocks: clear broken faces, a cap of new snow.
+    # Blocks sawn from the working face and stacked: clear, blue, and lit like any object in the room.
+    cut_block:
+      <<: *ice
+      cloud: 0.1
+      fracture: 0.5
+      crackGain: 0.9
+      depthRate: 3
+      lightThrough: 0
+      translucency: 0.3
     calved_block:
       <<: *ice
       fracture: 0.8
@@ -893,7 +902,7 @@ instancedLocations:
       materials:
         terrain: { kind: ice, profile: weathered_glacier, bedrock: valley_rock }
         clearIce: { kind: ice, profile: clear_polished, masked: false }
-        iceBlock: { kind: ice, profile: fractured, masked: false }
+        iceBlock: { kind: ice, profile: cut_block, masked: false }
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
         masonry: { kind: stone, profile: snowy_rubble, masked: false }
@@ -914,7 +923,7 @@ instancedLocations:
         # it, wall height and the rise of its vault.
         store: { x: -18, z: -58, floor: 0.4, halfLength: 7, halfWidth: 4.4, wallHeight: 2.9, vaultRise: 1.6 }
         # The store's working lanterns, and the lamps set behind its walls that make the ice glow.
-        storeLight: { lamp: { intensity: 3.4, range: 9 }, glow: { intensity: 7, range: 10 } }
+        storeLight: { lamp: { intensity: 3.4, range: 9 }, glow: { intensity: 5, range: 10 } }
         yard: { gateZ: 15 }
         cottage: { length: 7, width: 4.4, wallHeight: 2.2, roofRise: 2.6 }
         strata: { amp: 0.3, frequency: 0.3, dip: 0.08, warp: 6 }
