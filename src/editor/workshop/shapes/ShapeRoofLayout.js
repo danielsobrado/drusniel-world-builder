@@ -12,8 +12,12 @@ function slope(surface, u) {
   return points;
 }
 
-/** Courses are anchored in metres from the eave, with stable row/boundary keys. */
-export function planShapeRoofTiles(plan, surface, seed) {
+/**
+ * Courses are anchored in metres from the eave, with stable row/boundary keys. Within a course,
+ * tiles vary in width by `irregularity` (hand-made tiles are never uniform), within limits that
+ * keep every tile between 0.1 and 0.7 m, and the course still closes exactly on itself.
+ */
+export function planShapeRoofTiles(plan, surface, seed, irregularity = 0.45) {
   const length = plan.curve.length;
   const slopes = Array.from({ length: 8 }, (_, i) => slope(surface, length * (i + 0.5) / 8));
   const reference = slopes.sort((a, b) => b.at(-1).distance - a.at(-1).distance)[0];
@@ -41,7 +45,11 @@ export function planShapeRoofTiles(plan, surface, seed) {
       const i = Math.max(1, ring.findIndex(p => p.distance >= d)), a = ring[i - 1], b = ring[i];
       return a.u + (b.u - a.u) * (d - a.distance) / (b.distance - a.distance || 1);
     };
-    const boundary = cell => (cell + (row % 2) * 0.5) * width +
+    const spread = Math.max(0, Math.min(0.24 * irregularity / 0.45, 0.66 / width - 1.04));
+    const factors = Array.from({ length: cells }, (_, cell) => 1 + (shapeRandom(seed, plan.id, 'tile-width', `${row}:${cell}`) - 0.5) * 2 * spread);
+    const scale = cells / factors.reduce((sum, f) => sum + f, 0), edges = [0];
+    for (const f of factors) edges.push(edges.at(-1) + f * scale * width);
+    const boundary = cell => (row % 2) * 0.5 * width + edges[((cell % cells) + cells) % cells] + Math.floor(cell / cells) * perimeter +
       (shapeRandom(seed, plan.id, 'tile-joint', `${row}:${((cell % cells) + cells) % cells}`) - 0.5) * Math.min(0.045, width * 0.12);
     for (let cell = 0; cell < cells; cell++) {
       const left = boundary(cell), right = boundary(cell + 1);

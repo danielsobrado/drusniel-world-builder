@@ -67,3 +67,13 @@ merlons, rough field stone) govern it. Corners only move inwards (uneven joints,
 the course band), each stone stands slightly proud or sunk, and its face is four facets
 meeting at an off-centre crown. The course ceiling under a roof is measured at the furthest
 reach a stone can have (`CELL_RELIEF`), so crowned stones never pierce an eave.
+
+Courses are laid by `shapeCourseStones` (`ShapeCourseBond.js`) as a bond, not a grid. Stone
+lengths vary with irregularity (never fully uniform, even for ashlar), with short headers and
+longer footing stones. Every head joint laps the joints of the course below, and closed
+courses close on themselves. Some short stones split into two stacked blocks, and with age
+some sit sunk or, in field stone, have fallen out.
+
+Roof tiles (`ShapeRoofLayout.js`, `ShapeRoofTiles.js`) vary in width within a course, which
+still closes exactly. Each course's lower edge wavers, every tile has its own lift and twist,
+and with age a few slip, go missing over the deck, or gather moss and soot.

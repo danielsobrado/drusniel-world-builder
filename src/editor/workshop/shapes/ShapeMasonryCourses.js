@@ -6,6 +6,7 @@ import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTole
 import { SHAPE_COURSE_HEIGHT } from './ShapeProfile.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
 import { shapeStoneCut } from './ShapeStoneCut.js';
+import { shapeCourseStones } from './ShapeCourseBond.js';
 
 // Furthest a course stone reaches past the wall face (base relief, bevel, protrusion, crowned face).
 const CELL_RELIEF = 0.2;
@@ -58,8 +59,9 @@ export function shapeMasonryCeiling(plan, surface) {
 }
 
 /**
- * Lay staggered course cells over one band of a wall-like surface. Closed loops get a whole
- * number of stones per course, so the bond runs around a tower without a seam.
+ * Lay masonry courses over one band of a wall-like surface. Stone is laid as a rule-based bond
+ * (ShapeCourseBond); boards and coarse detail keep regular staggered cells. Closed loops close
+ * each course on itself, so the bond runs around a tower without a seam.
  */
 export function buildShapeCourseBand(plan, mesh, recipe, surface, {
   bottom = 0, top, faces, spans = null, ceiling = null, distances = [], openingEdges = new Set(),
@@ -74,56 +76,73 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
   const windows = !spans ? [[-Infinity, Infinity]]
     : closed ? spans.flatMap(([a, b]) => [[a - length, b - length], [a, b], [a + length, b + length]]) : spans;
   const count = Math.ceil((top - bottom) / course - tolerance.length);
-  for (let row = 0; row < count; row++) {
-    if (rows && !rows(row)) continue;
-    const y0 = bottom + row * course + 0.012,
-      y1 = Math.min(top - 0.012, bottom + (row + 1) * course - 0.012);
-    const shift = stagger ? ((row % 2) * width) / 2 : 0;
-    for (let cell = closed ? 0 : -1; cell < cells; cell++) {
-      const left = cell * width + shift + 0.012, right = (cell + 1) * width + shift - 0.012;
-      const color = shapeStoneTone(recipe, plan, domain, `${key}${row}:${cell}`);
-      // Hand-cut stones (not boards): uneven joints, own protrusion, faceted crowned face.
-      const stone = detail && domain !== 'planks' ? shapeStoneCut(recipe, plan, domain, `${key}${row}:${cell}`, left, right, y0, y1) : null;
-      const along = (u) => Math.max(0, Math.min(1, (u - left) / (right - left)));
-      const bedInset = (u) => (stone ? stone.inset[0][1] + (stone.inset[1][1] - stone.inset[0][1]) * along(u) : 0);
-      const capInset = (u) => (stone ? stone.inset[3][1] + (stone.inset[2][1] - stone.inset[3][1]) * along(u) : 0);
-      for (const [from, to] of windows) {
-        const u0 = Math.max(closed ? left : Math.max(0, left), from),
-          u1 = Math.min(closed ? right : Math.min(length, right), to);
-        if (u1 - u0 < 0.08) continue;
-        const pieces = Math.max(1, Math.ceil((u1 - u0) / 0.18));
-        const cuts = [u0, ...marks.filter((d) => d > u0 && d < u1), u1];
-        for (let k = 1; k < pieces; k++) cuts.push(u0 + ((u1 - u0) * k) / pieces);
-        cuts.sort((a, b) => a - b);
-        const wear = shapeCellWear(plan, recipe.seed, `${key}${row}:${cell}`);
-        for (let k = 0; k < cuts.length - 1; k++) {
-          // A stone is chipped at its own corners only, never along the cuts that bend it round a curve.
-          const first = k === 0, last = k === cuts.length - 2;
-          const chips = [first ? wear[0] : 0, last ? wear[1] : 0, last ? wear[2] : 0, first ? wear[3] : 0];
-          // Courses stop under the eave and climb a gable, following the roof underside.
-          // Head joints open by the stone's own corner insets; inner cuts that bend it round a curve stay put.
-          const c0 = cuts[k] + (stone && first ? (stone.inset[0][0] + stone.inset[3][0]) / 2 : 0);
-          const c1 = cuts[k + 1] - (stone && last ? (stone.inset[1][0] + stone.inset[2][0]) / 2 : 0);
-          if (c1 - c0 < 1e-3) continue;
-          const roofed = ceiling ? [ceiling(c0) - 0.012, ceiling(c1) - 0.012] : [y1, y1];
-          for (const band of wallSolidBands(surface, c0, c1, y0, y1, false)) {
-            const high = band.top.map((value, i) => Math.min(value, roofed[i]) - capInset(i ? c1 : c0));
-            const low = band.bottom.map((value, i) => Math.min(value + bedInset(i ? c1 : c0), high[i]));
-            if (Math.max(high[0] - low[0], high[1] - low[1]) < 0.04) continue;
-            for (const face of faces) {
-              addWallPatch(mesh, surface, c0, c1, low, high, face.offset + Math.sign(face.thickness) * (stone?.protrusion ?? 0), face.thickness, color, {
-                back: false,
-                bevel: detail,
-                ...(stone ? { bevelSize: stone.bevel, relief: stone.relief, crown: stone.crown } : {}),
-                wear: chips,
-                start: k === 0 || openingEdges.has(wrap(cuts[k])),
-                end: k === cuts.length - 2 || openingEdges.has(wrap(cuts[k + 1])),
-              });
-            }
+  // Stone (not boards, not regular cells) is laid as a rule-based bond rather than a grid.
+  const bonded = detail && stagger && domain !== 'planks';
+
+  const layStone = (left, right, y0, y1, cellKey, sunk) => {
+    const color = shapeStoneTone(recipe, plan, domain, cellKey);
+    // Hand-cut stones: uneven joints, own protrusion, faceted crowned face.
+    const stone = detail && domain !== 'planks' ? shapeStoneCut(recipe, plan, domain, cellKey, left, right, y0, y1) : null;
+    const protrusion = sunk ? -0.022 : stone?.protrusion ?? 0;
+    const along = (u) => Math.max(0, Math.min(1, (u - left) / (right - left)));
+    const bedInset = (u) => (stone ? stone.inset[0][1] + (stone.inset[1][1] - stone.inset[0][1]) * along(u) : 0);
+    const capInset = (u) => (stone ? stone.inset[3][1] + (stone.inset[2][1] - stone.inset[3][1]) * along(u) : 0);
+    for (const [from, to] of windows) {
+      const u0 = Math.max(closed ? left : Math.max(0, left), from),
+        u1 = Math.min(closed ? right : Math.min(length, right), to);
+      if (u1 - u0 < 0.08) continue;
+      const pieces = Math.max(1, Math.ceil((u1 - u0) / 0.18));
+      const cuts = [u0, ...marks.filter((d) => d > u0 && d < u1), u1];
+      for (let k = 1; k < pieces; k++) cuts.push(u0 + ((u1 - u0) * k) / pieces);
+      cuts.sort((a, b) => a - b);
+      const wear = shapeCellWear(plan, recipe.seed, cellKey);
+      for (let k = 0; k < cuts.length - 1; k++) {
+        // A stone is chipped at its own corners only, never along the cuts that bend it round a curve.
+        const first = k === 0, last = k === cuts.length - 2;
+        const chips = [first ? wear[0] : 0, last ? wear[1] : 0, last ? wear[2] : 0, first ? wear[3] : 0];
+        // Head joints open by the stone's own corner insets; inner cuts that bend it round a curve stay put.
+        const c0 = cuts[k] + (stone && first ? (stone.inset[0][0] + stone.inset[3][0]) / 2 : 0);
+        const c1 = cuts[k + 1] - (stone && last ? (stone.inset[1][0] + stone.inset[2][0]) / 2 : 0);
+        if (c1 - c0 < 1e-3) continue;
+        // Courses stop under the eave and climb a gable, following the roof underside.
+        const roofed = ceiling ? [ceiling(c0) - 0.012, ceiling(c1) - 0.012] : [y1, y1];
+        for (const band of wallSolidBands(surface, c0, c1, y0, y1, false)) {
+          const high = band.top.map((value, i) => Math.min(value, roofed[i]) - capInset(i ? c1 : c0));
+          const low = band.bottom.map((value, i) => Math.min(value + bedInset(i ? c1 : c0), high[i]));
+          if (Math.max(high[0] - low[0], high[1] - low[1]) < 0.04) continue;
+          for (const face of faces) {
+            addWallPatch(mesh, surface, c0, c1, low, high, face.offset + Math.sign(face.thickness) * protrusion, face.thickness, color, {
+              back: false,
+              bevel: detail,
+              ...(stone ? { bevelSize: stone.bevel, relief: stone.relief, crown: stone.crown } : {}),
+              wear: chips,
+              start: k === 0 || openingEdges.has(wrap(cuts[k])),
+              end: k === cuts.length - 2 || openingEdges.has(wrap(cuts[k + 1])),
+            });
           }
         }
       }
     }
+  };
+
+  let below = [];
+  for (let row = 0; row < count; row++) {
+    if (rows && !rows(row)) continue;
+    const y0 = bottom + row * course + 0.012,
+      y1 = Math.min(top - 0.012, bottom + (row + 1) * course - 0.012);
+    if (bonded) {
+      const laid = shapeCourseStones({ recipe, plan, domain, key, row, rows: count, length, closed, cellWidth, below, y0, y1 });
+      below = laid.joints;
+      for (const stone of laid.stones) {
+        if (stone.missing) continue;
+        for (const [ly0, ly1, suffix] of stone.layers)
+          layStone(stone.left + 0.012, stone.right - 0.012, ly0, ly1, `${key}${row}:${stone.index}${suffix}`, stone.sunk);
+      }
+      continue;
+    }
+    const shift = stagger ? ((row % 2) * width) / 2 : 0;
+    for (let cell = closed ? 0 : -1; cell < cells; cell++)
+      layStone(cell * width + shift + 0.012, (cell + 1) * width + shift - 0.012, y0, y1, `${key}${row}:${cell}`, false);
   }
 }
 
