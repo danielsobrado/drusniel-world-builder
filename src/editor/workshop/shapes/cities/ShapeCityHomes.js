@@ -57,7 +57,7 @@ export const HOUSE_BLUEPRINTS = {
 
   'house-hillside': (st) => {
     const lift = 1.4, under = volume(st, 'undercroft', 'Stone undercroft', { w: 7.6, d: 5.8, h: lift, surface: 'masonry', roof: { family: 'flat' },
-      base: { style: 'batter', height: 0.7, out: 0.2 }, crown: null, chimney: false, windowBoxes: false, shutters: false,
+      base: { style: 'batter', height: 0.7, out: 0.2 }, crown: null, chimney: false, windowBoxes: false, shutters: false, decorate: false,
       openings: [door('cellar', 'front', 0.55, { height: 1.3, width: 0.9, profile: 'square' })] });
     const house = volume(st, 'house', 'Terrace house', { elevation: lift, w: 7.2, d: 5.4, openings: [
       door('door', 'front', -0.45), win('window', 'front', [0.2, 0.8], 1), win('back', 'back', [-0.5, 0.5], 1), win('end', 'left', 0, 1)],

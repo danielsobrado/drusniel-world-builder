@@ -3,7 +3,7 @@ import { arch, door, feature, path, r2, sill, slit, volume, wall, win } from './
 const towerVolume = (st, id, label, o) => {
   const t = st.tower;
   return volume(st, id, label, { surface: t.surface, stonework: t.stonework, footprint: t.footprint, shutters: false, windowBoxes: false,
-    chimney: false, ivy: st.ivy * 0.6, thickness: 0.45, base: { style: 'batter', height: 1.4, out: 0.3 },
+    chimney: false, ivy: st.ivy * 0.6, thickness: 0.45, base: { style: 'batter', height: 1.4, out: 0.3 }, decorate: false,
     roof: t.roof === 'flat' ? { family: 'flat' } : { family: t.roof, pitch: t.roof === 'spire' ? 0.9 : 0.6 },
     crown: t.roof === 'flat' ? (t.crown ?? { style: 'parapet', height: 0.7 }) : t.crown, ...o });
 };
@@ -61,7 +61,7 @@ export const WALL_BLUEPRINTS = {
 
 /** A solid stone terrace for stairs to climb, so a flight always arrives somewhere. */
 const terrace = (st, id, label, o) => volume({ ...st, scale: 1 }, id, label, { surface: 'masonry', stonework: st.wall.stonework, roof: { family: 'flat' },
-  crown: null, interior: 'none', chimney: false, windowBoxes: false, shutters: false, ivy: Math.max(0.3, st.ivy), corner: 0.2,
+  crown: null, interior: 'none', decorate: false, chimney: false, windowBoxes: false, shutters: false, ivy: Math.max(0.3, st.ivy), corner: 0.2,
   base: { style: 'batter', height: 0.7, out: 0.2 }, ...o });
 
 export const STAIR_BLUEPRINTS = {

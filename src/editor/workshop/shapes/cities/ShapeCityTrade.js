@@ -60,7 +60,7 @@ export const SHOP_BLUEPRINTS = {
     features: [feature('dormer', 'dormer', 'front', 0, { width: 1.5, depth: 1.3 })] });
     return [bakery, volume(st, 'oven', 'Bread oven', { at: [r2(-bakery.footprint.width / 2 - 1.3 * st.scale), r2(-0.6 * st.scale)], w: 2.8, d: 2.6,
       footprint: 'oval', storey: 1.7, surface: 'masonry', taper: 0.85, thickness: 0.5, roof: { family: 'bell', rise: 1.3, sweep: 0.8, overhang: 0.1 },
-      base: null, chimney: true, windowBoxes: false, shutters: false, openings: [arch('mouth', 'left', 0, { width: 0.8, height: 0.8, bottom: 0.4 })] })];
+      base: null, chimney: true, windowBoxes: false, shutters: false, decorate: false, openings: [arch('mouth', 'left', 0, { width: 0.8, height: 0.8, bottom: 0.4 })] })];
   },
 
   'shop-corner': (st) => {

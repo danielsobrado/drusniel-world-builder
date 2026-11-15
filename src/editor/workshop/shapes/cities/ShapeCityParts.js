@@ -1,4 +1,5 @@
 import { footprintSideLength } from './ShapeSidePlacement.js';
+import { decorateFacade } from './ShapeCityDetails.js';
 
 /**
  * A realm's architectural grammar. Every kit blueprint reads these instead of hard-coding a
@@ -11,12 +12,13 @@ export const CITY_STYLE_DEFAULTS = Object.freeze({
   roof: { family: 'gable', pitch: 0.55, overhang: 0.5, sweep: 0.45, sag: 0.1 },
   door: 'arched', window: 'square', shutters: true, windowBoxes: true, chimney: true, ivy: 0.45, age: 0.3,
   base: { style: 'plinth', height: 0.68, out: 0.1 }, stilts: 0, flatCrown: null,
+  details: ['windows'], surroundings: [], yard: { surface: 'masonry', height: 1, depth: 4.6 },
   tower: { surface: 'masonry', stonework: 'fieldstone', footprint: 'oval', roof: 'cone', crown: null },
   wall: { surface: 'masonry', stonework: 'fieldstone', crown: { style: 'parapet', height: 0.7 } },
   path: { floor: 'stone', railing: 'stone' },
 });
 
-const NESTED = ['roof', 'base', 'tower', 'wall', 'path'];
+const NESTED = ['roof', 'base', 'tower', 'wall', 'path', 'yard'];
 
 /** Later layers win; nested groups merge one level deep (`base: null` removes the plinth). */
 export function cityStyle(...layers) {
@@ -57,6 +59,10 @@ function place(items, footprint, h, st) {
   });
 }
 
+/** Authored openings and features, then the realm's facade details unless the shape opts out. */
+const detailed = (st, o, host, openings, features) =>
+  (o.decorate === false ? { openings, features } : decorateFacade(st, host, openings, features));
+
 /** One building volume in the realm's grammar. Dimensions are before the realm's `scale`. */
 export function volume(st, id, label, o) {
   const w = r2(o.w * st.scale), d = r2(o.d * st.scale), levels = o.levels ?? 1;
@@ -87,14 +93,15 @@ export function volume(st, id, label, o) {
     ...(crown ? { crown } : {}), ...(o.stages ? { stages: o.stages } : {}),
     ...(o.interior ? { interior: o.interior } : {}),
     ...(o.stilts ? { stilts: true } : {}),
-    openings: place(o.openings ?? [], footprint, h, st),
-    features: place((o.features ?? []).filter((f) => f && (f.kind !== 'dormer' || pitched(st, roof.family))), footprint, h, st),
+    ...detailed(st, o, { footprint, h, levels, surface, roof: { family: roof.family, axis } },
+      place(o.openings ?? [], footprint, h, st),
+      place((o.features ?? []).filter((f) => f && (f.kind !== 'dormer' || pitched(st, roof.family))), footprint, h, st)),
   };
 }
 
 /** Outbuilding in the realm's shed material: no plinth, no window boxes, rougher. */
 export const shed = (st, id, label, o) => volume(st, id, label, {
-  surface: st.shed, base: null, windowBoxes: false, chimney: false, shutters: st.shutters,
+  surface: st.shed, base: null, windowBoxes: false, chimney: false, shutters: st.shutters, decorate: false,
   age: Math.min(1, st.age + 0.15), corner: Math.min(st.corner, 0.2), ...o,
   roof: { sweep: Math.min(st.roof.sweep, 0.35), sag: Math.min(0.3, st.roof.sag + 0.05), ...o.roof },
 });

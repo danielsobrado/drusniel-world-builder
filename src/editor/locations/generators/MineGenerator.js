@@ -2,12 +2,14 @@ import { createMineGeologyClassifier } from '../gen/mineGeology.js';
 import { mound, shaft } from '../gen/shapes.js';
 import { TimberGeometryCache, createTimberBeam } from '../gen/timberGeometry.js';
 import { buildMineTunnelSupports } from '../gen/timberSupportBuilder.js';
-import { rails } from './kits.js';
+import { barrel, crate, rails } from './kits.js';
 import {
   mountWallSconceLantern,
   placeHaulageLanterns,
   resolveMineLightingSections,
 } from './mineLightingLayout.js';
+import { buildOreSack, buildShovel } from './mineCampAndDressing.js';
+import { buildMiningTool } from './mineProps.js';
 import {
   buildAditPortal,
   buildCollapsedHeading,
@@ -209,6 +211,13 @@ export function generate(b, params) {
       { bevelRatio: 0.15, irregular: 0.2, bow: 0.004, taper: 0.04, dampStart: 0.35, dampEnd: 0.35, seed: 801 + Math.round(dy * 100) },
     ), 0x96754f);
   }
+  // Haulage drift wall-side supply alcoves (clear of rail & central walking lane).
+  buildShovel(b, P(1.22, -0.35, -16.1), P(1.36, 0.68, -15.95), { yaw: -0.3 });
+  buildMiningTool(b, P(1.25, -0.52, -21.2), P(1.38, 0.56, -21.05), { head: 'pick', yaw: 0.2 });
+  crate(b, P(1.16, -0.56, -22.4), 0.62, 0.18);
+  buildOreSack(b, P(1.18, -0.57, -23.15), { scale: 0.92, yaw: 0.6 });
+  barrel(b, P(1.18, -0.82, -33.2), 0.3, 0.78);
+  buildOreSack(b, P(1.14, -0.84, -34.0), { scale: 0.88, yaw: -0.4, tint: 0xa8926e });
   rails(b, P(-0.9, 0, 5), P(-0.9, -1, -40));
   rails(b, P(-0.9, -1, -40), P(-2.5, -1, -52));
 
