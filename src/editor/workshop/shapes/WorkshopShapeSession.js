@@ -133,13 +133,14 @@ export class WorkshopShapeSession {
   undo() {
     this.cancel();
     const entry = this.history.peek('undo'), result = this.history.undo();
-    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).before);
+    // The look to restore, and the look it replaces (so a later manual edit is never overwritten).
+    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).before, this.#looks.get(entry).after);
     return result;
   }
   redo() {
     this.cancel();
     const entry = this.history.peek('redo'), result = this.history.redo();
-    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).after);
+    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).after, this.#looks.get(entry).before);
     return result;
   }
   captureRuntimeState() {

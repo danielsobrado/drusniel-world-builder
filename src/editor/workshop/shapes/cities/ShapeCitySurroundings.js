@@ -1,4 +1,5 @@
 import { beside, path, r2, shed, volume, wall } from './ShapeCityParts.js';
+import { frontDoor } from './ShapeSidePlacement.js';
 
 /** Building kinds that sit in a lived-in plot; towers, walls and stairs stand alone. */
 const PLOT_KINDS = new Set(['house', 'farm', 'inn', 'shop']);
@@ -31,7 +32,7 @@ export function addSurroundings(st, kind, primitives) {
   if (!PLOT_KINDS.has(kind) || !wanted.length || main?.kind !== 'curved-volume' || main.elevation > 0) return primitives;
   const out = [...primitives], rotation = main.rotation ?? 0;
   const w = main.footprint.width, d = main.footprint.depth, depth = r2(st.yard.depth * st.scale);
-  const door = main.openings.find((o) => o.side === 'front' && o.bottom < 0.1 && ['door', 'arch'].includes(o.role) && !Array.isArray(o.along));
+  const door = frontDoor(main.openings);
   const along = door?.along ?? 0;
   const fits = (candidate, ignore = []) => {
     const box = bounds(candidate);

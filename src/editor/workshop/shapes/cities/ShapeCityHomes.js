@@ -1,4 +1,5 @@
 import { arch, door, feature, frontStair, r2, shed, sill, volume, wall, win } from './ShapeCityParts.js';
+import { frontDoor } from './ShapeSidePlacement.js';
 
 const S = (st) => st.storey;
 
@@ -62,7 +63,7 @@ export const HOUSE_BLUEPRINTS = {
     const house = volume(st, 'house', 'Terrace house', { elevation: lift, w: 7.2, d: 5.4, openings: [
       door('door', 'front', -0.45), win('window', 'front', [0.2, 0.8], 1), win('back', 'back', [-0.5, 0.5], 1), win('end', 'left', 0, 1)],
     features: [feature('balcony', 'balcony', 'right', 0, { width: 2.4, depth: 0.9, bottom: 1.2, height: 1 })] });
-    return [under, house, frontStair(st, house, 'steps', lift, { along: r2(-1.4 * st.scale) })];
+    return [under, house, frontStair(st, house, 'steps', lift, { along: frontDoor(house.openings)?.along ?? 0 })];
   },
 
   'house-row': (st) => {

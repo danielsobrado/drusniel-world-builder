@@ -26,7 +26,12 @@ export class WorkshopShapeUiBridge {
         return { before, after: this.captureLook(keys) };
       },
     });
-    this.editor.session.onLook = (look) => this.applyLook(look, 'Materials restored with the design.');
+    // Swap the look only if nobody changed materials or recipe bases since; otherwise keep the edits.
+    this.editor.session.onLook = (look, expected) => {
+      const now = this.captureLook(Object.keys(look.recipe));
+      if (JSON.stringify(now) === JSON.stringify(expected)) this.applyLook(look, 'Materials restored with the design.');
+      else this.editor.onStatus?.('Design restored; your material edits since were kept.', false);
+    };
     this.keyDown = (event) => {
       if (
         !this.active ||

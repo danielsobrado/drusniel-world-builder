@@ -1,4 +1,4 @@
-import { footprintSideLength } from './ShapeSidePlacement.js';
+import { footprintSideLength, frontDoor } from './ShapeSidePlacement.js';
 import { decorateFacade } from './ShapeCityDetails.js';
 
 /**
@@ -149,6 +149,7 @@ export function raiseOnStilts(st, primitives) {
     return [lifted,
       path(st, `${p.id}-deck`, 'Stilt deck', { at: p.position, rotation: p.rotation ?? 0, length: Math.min(32, r2(w + 1.2)),
         width: Math.min(8, r2(d + 1.2)), elevation: lifted.elevation, mode: 'walkway', support: 'piers', railing: false, style: timber }),
-      frontStair(st, p, `${p.id}-ladder`, lifted.elevation, { gap: 0.6, timber: true })];
+      // The ladder climbs to the front door, wherever along the front it is.
+      frontStair(st, p, `${p.id}-ladder`, lifted.elevation, { along: frontDoor(p.openings)?.along ?? 0, gap: 0.6, timber: true })];
   });
 }

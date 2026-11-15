@@ -2,6 +2,10 @@ const SIDES = ['back', 'right', 'front', 'left'];
 const OVAL_CENTRE = { right: 0, front: 0.25, left: 0.5, back: 0.75 };
 const wrap = (t) => Math.round((((t % 1) + 1) % 1) * 1e4) / 1e4;
 
+/** The ground-floor front door (or arch) of a side-placed opening list, or undefined. */
+export const frontDoor = (openings) => (openings ?? []).find((o) => o.side === 'front' && o.bottom < 0.1
+  && (o.role === 'door' || o.role === 'arch') && !Array.isArray(o.along));
+
 /** Straight run (rounded) or usable arc (oval) of one footprint side, in metres. */
 export function footprintSideLength(footprint, side) {
   const { family = 'rounded', width: w, depth: d } = footprint;

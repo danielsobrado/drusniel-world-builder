@@ -1,7 +1,9 @@
-import { footprintSideLength } from './ShapeSidePlacement.js';
+import { footprintSideLength, frontDoor } from './ShapeSidePlacement.js';
 
 const SIDES = ['front', 'back', 'left', 'right'];
 const MAX_FEATURES = 24;
+// Roofs a wall turret can take; a realm's hip or flat tower roof falls back to a cone.
+const TURRET_ROOFS = ['cone', 'spire', 'bell'];
 const r2 = (v) => Math.round(v * 100) / 100;
 const list = (v) => (Array.isArray(v) ? v : [v]);
 
@@ -59,9 +61,6 @@ function addWindows(st, host, openings, free) {
     }
   }
 }
-
-const frontDoor = (openings) => openings.find((o) => o.side === 'front' && o.bottom < 0.1 && (o.role === 'door' || o.role === 'arch')
-  && !Array.isArray(o.along));
 
 /** Realm detail recipes. Each adds only where its wall is free; none ever moves authored items. */
 const DETAILS = {
@@ -135,7 +134,7 @@ const DETAILS = {
     if (length < 4.5) return;
     const a = free('front', 1.6, bottom, host.h + 3, length / 2, 0.2);
     if (a !== null && a > length / 4) features.push({ id: 'd-turret', kind: 'turret', side: 'front', along: a, width: 1.6,
-      height: r2(Math.max(2.4, host.h - bottom + 1.2)), bottom, roof: st.tower.roof === 'flat' ? 'cone' : st.tower.roof });
+      height: r2(Math.max(2.4, host.h - bottom + 1.2)), bottom, roof: TURRET_ROOFS.includes(st.tower.roof) ? st.tower.roof : 'cone' });
   },
 };
 
