@@ -25,7 +25,12 @@ export function shapeCourseStones({ recipe, plan, domain, key, row, rows, length
   const footing = row < 2 ? 1.22 : 1;
   const min = cellWidth * (0.72 - 0.22 * amount) * footing, max = cellWidth * (1.28 + 0.5 * amount) * footing;
   const lap = Math.min(0.16, cellWidth * 0.24);
-  const near = (x) => below.find((j) => Math.abs(j - (closed ? ((x % length) + length) % length : x)) < lap);
+  // Signed offset from x to a joint below; on a closed course measured the short way round the seam.
+  const offset = (j, x) => {
+    const d = j - x;
+    return closed ? d - Math.round(d / length) * length : d;
+  };
+  const near = (x) => below.map((j) => offset(j, x)).find((d) => Math.abs(d) < lap);
   const start = closed ? random('start', 0) * cellWidth : -random('start', 0) * cellWidth * 0.9;
   const end = closed ? start + length : length + cellWidth;
   const stones = [];
@@ -36,8 +41,7 @@ export function shapeCourseStones({ recipe, plan, domain, key, row, rows, length
     // Lap rule: never stack a head joint on the one below; prefer stretching, else shortening.
     const clash = near(right);
     if (clash !== undefined) {
-      const base = closed ? right - (((right % length) + length) % length) : 0;
-      const longer = base + clash + lap, shorter = base + clash - lap;
+      const longer = right + clash + lap, shorter = right + clash - lap;
       right = longer - x <= max * 1.25 ? longer : shorter - x >= cellWidth * 0.38 ? shorter : right;
     }
     if (closed && end - right < min * 0.55) right = end;
@@ -54,7 +58,9 @@ export function shapeCourseStones({ recipe, plan, domain, key, row, rows, length
     const at = y0 + height * (0.38 + random('split-at', i) * 0.24);
     stone.layers = split ? [[y0, at - SPLIT_GAP / 2, ':a'], [at + SPLIT_GAP / 2, y1, ':b']] : [[y0, y1, '']];
     stone.sunk = random('sunk', i) < (0.03 + 0.09 * age) * (0.4 + amount);
-    stone.missing = field && row > 0 && row < rows - 1 && age >= 0.3 && random('missing', i) < age * 0.045 * amount;
+    // Only a masonry shell has a stone core to show; a plinth on plaster or boards never gapes.
+    stone.missing = field && plan.primitive.surface === 'masonry' && row > 0 && row < rows - 1 && age >= 0.3
+      && random('missing', i) < age * 0.045 * amount;
   }
   const joints = stones.map((s) => (closed ? ((s.left % length) + length) % length : s.left)).filter((j) => closed || j > 0);
   return { stones, joints };

@@ -12,14 +12,16 @@ export const CITY_BLUEPRINTS = Object.freeze({ ...HOUSE_BLUEPRINTS, ...FARM_BLUE
 
 /**
  * Shape primitives for one kit entry of a realm catalog: the blueprint drawn in the realm's
- * style (with the entry's own style tweaks), raised on stilts where the realm builds them,
- * then `with` merged into the main shape for one-off adjustments.
+ * style (with the entry's own style tweaks), `with` merged into the main shape for one-off
+ * adjustments, then raised on stilts and set in its plot where the realm builds them.
  */
 export function buildCityKitPreset(realmStyle, entry) {
   const make = CITY_BLUEPRINTS[entry.blueprint];
   if (!make) throw new Error(`Unknown city blueprint: ${entry.blueprint}.`);
   const st = cityStyle(CITY_STYLE_DEFAULTS, realmStyle, entry.style);
-  const primitives = addSurroundings(st, entry.blueprint.split('-')[0], raiseOnStilts(st, make(st)));
-  if (entry.with) primitives[0] = { ...primitives[0], ...entry.with };
+  const drawn = make(st);
+  // Patch the main shape first, so stilts and the plot are laid around the shape as patched.
+  if (entry.with) drawn[0] = { ...drawn[0], ...entry.with };
+  const primitives = addSurroundings(st, entry.blueprint.split('-')[0], raiseOnStilts(st, drawn));
   return primitives.map((p) => expandPlacedPrimitive(p, entry.id));
 }

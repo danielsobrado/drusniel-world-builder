@@ -31,11 +31,12 @@ export function shapeStoneCut(recipe, plan, domain, key, left, right, y0, y1) {
     clamp((i === 0 || i === 3 ? x + halfW : halfW - x) * 1.6, 0, maxU),
     clamp((i < 2 ? y + halfH : halfH - y) * 1.6, 0, maxY),
   ]);
-  const random = (lane) => shapeRandom(recipe.seed, plan.id, `${domain}-facet-${lane}`, key);
-  // Off-centre crown of the face, a leaning face plane and a bulge proportional to the stone.
-  const crownU = left + width * (0.32 + random('u') * 0.36), crownY = y0 + height * (0.3 + random('y') * 0.4);
-  const bulge = Math.min(width, height) * (0.05 + random('bulge') * 0.09) * (0.35 + amount) * rough;
-  const leanU = (random('lean-u') - 0.5) * 0.09 * amount, leanY = (random('lean-y') - 0.5) * 0.11 * amount;
+  // Crown position, bulge and lean all come from stoneJitter's own lanes (skew, depth, rotation),
+  // so the recipe irregularity and stone category govern the face exactly as they do the outline.
+  const crownU = clamp(left + width / 2 + shaped.skew[0] * 2, left + width * 0.32, right - width * 0.32);
+  const crownY = clamp(y0 + height / 2 + shaped.skew[1] * 2, y0 + height * 0.3, y1 - height * 0.3);
+  const bulge = Math.min(width, height) * clamp(0.09 + (shaped.depth / 0.22 - 1) * 0.5, 0.03, 0.16) * (0.35 + amount) * rough;
+  const leanU = Math.tan(shaped.rotation[1]) * 2.4, leanY = Math.tan(shaped.rotation[0]) * 3;
   const relief = (u, y) => {
     const tu = 1 - Math.abs(u - crownU) / Math.max(1e-3, u < crownU ? crownU - left : right - crownU);
     const ty = 1 - Math.abs(y - crownY) / Math.max(1e-3, y < crownY ? crownY - y0 : y1 - crownY);

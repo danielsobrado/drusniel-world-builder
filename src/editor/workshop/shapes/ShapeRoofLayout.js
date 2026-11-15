@@ -45,7 +45,8 @@ export function planShapeRoofTiles(plan, surface, seed, irregularity = 0.45) {
       const i = Math.max(1, ring.findIndex(p => p.distance >= d)), a = ring[i - 1], b = ring[i];
       return a.u + (b.u - a.u) * (d - a.distance) / (b.distance - a.distance || 1);
     };
-    const spread = Math.max(0, Math.min(0.24 * irregularity / 0.45, 0.66 / width - 1.04));
+    // Renormalising can grow one tile by up to (1+s)/(1-s); bound s so even that stays under 0.68 m.
+    const spread = Math.max(0, Math.min(0.24 * irregularity / 0.45, (0.68 - width) / (0.68 + width)));
     const factors = Array.from({ length: cells }, (_, cell) => 1 + (shapeRandom(seed, plan.id, 'tile-width', `${row}:${cell}`) - 0.5) * 2 * spread);
     const scale = cells / factors.reduce((sum, f) => sum + f, 0), edges = [0];
     for (const f of factors) edges.push(edges.at(-1) + f * scale * width);

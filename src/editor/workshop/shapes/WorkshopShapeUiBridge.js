@@ -19,7 +19,13 @@ export class WorkshopShapeUiBridge {
       // The realm's recipe bases go to the form; its palette is undoable through the material
       // history and keeps favourites while replacing the old design's area assignments.
       onMaterials: ({ recipe, document }, group) => {
-        for (const [key, value] of Object.entries(recipe)) if (ui.form.elements[key]) ui.form.elements[key].value = String(value);
+        for (const [key, value] of Object.entries(recipe)) {
+          const control = ui.form.elements[key];
+          if (!control) continue;
+          control.value = String(value);
+          // Let slider outputs and form listeners see the change, exactly as a user edit would.
+          for (const type of ['input', 'change']) control.dispatchEvent(new Event(type, { bubbles: true }));
+        }
         const current = ui.materialController?.toDocument();
         if (current) ui.materialController.commit({ ...current, ...document, materialLibrary: { sources: current.materialLibrary.sources,
           presets: { ...current.materialLibrary.presets, ...document.materialLibrary.presets } } }, `${group} materials applied.`);

@@ -45,8 +45,11 @@ export function cityMaterialDocument(realm, palette, primitives, mainSurface = '
     label: `${palette.masonry.label ?? realm} mortar`.slice(0, 64), baseColor: shade(palette.masonry.color ?? '#ffffff', 0.7) };
   const has = (slot) => Object.hasOwn(presets, `${realm}-${slot}`);
   const materialDefaults = {};
-  if (has(mainSurface)) materialDefaults.walls = `${realm}-${mainSurface}`;
   for (const slot of ['roof', 'trim', 'timber', 'metal', 'glass']) if (has(slot)) materialDefaults[SLOTS[slot]] = `${realm}-${slot}`;
+  // New shapes take the realm's main shell; a masonry-led realm colours them like its own walls
+  // (stones in the masonry colour, mortar between), not with dark trim stones and pale joints.
+  if (mainSurface === 'masonry' && has('masonry')) Object.assign(materialDefaults, { walls: `${realm}-mortar`, stone: `${realm}-masonry` });
+  else if (has(mainSurface)) materialDefaults.walls = `${realm}-${mainSurface}`;
   const materialAreaOverrides = {};
   for (const p of primitives) {
     if (p.kind === 'traversal') continue;

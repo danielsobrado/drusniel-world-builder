@@ -31,7 +31,6 @@ export function cityStyle(...layers) {
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const r2 = (v) => Math.round(v * 100) / 100;
-export const pitched = (st, family = st.roof.family) => family === 'gable' || family === 'hip';
 /** Dormers belong on eaves: any side of a hip, the long sides of a gable, never a gable end. */
 const eaveSide = (family, axis, side) => family === 'hip' || (family === 'gable' && (axis === 'depth') === (side === 'left' || side === 'right'));
 const list = (v) => (Array.isArray(v) ? v : [v]);
