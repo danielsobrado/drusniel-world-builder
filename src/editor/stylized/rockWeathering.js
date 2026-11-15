@@ -140,7 +140,6 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   const moss = look ? look.w.sub(snowSteps.mul(4)) : null;
   const snowGround = look ? snowSteps.div(LOOK_SNOW_STEPS) : null;
   const donor = pattern.mul(DONOR_UNITS_PER_METRE);
-  const donorXZ = donor.xz;
 
   // Broad tonal breakup from sine products over the stone, so stones sharing one
   // template stop reading as copies of each other.
@@ -154,29 +153,47 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     .mul(mix(0.74, 1.06, tone));
   const biomeAlbedo = look ? albedo.mul(look.rgb) : albedo;
 
-  // Moss in broken patches on whatever faces up.
-  const patches = sin(donorXZ.x.mul(0.9).add(sin(donorXZ.y.mul(0.7)).mul(1.8)))
-    .mul(sin(donorXZ.y.mul(1.1).add(sin(donorXZ.x.mul(0.5)).mul(1.4))))
-    .mul(0.5).add(0.5);
+  // Organic 3D FBM moss mats with fine bryophyte fringe breakup (replacing periodic sine stripes).
+  const macroPatch = stylizedFbm2(pattern.xz.mul(1.75).add(pattern.y.mul(0.65))).mul(0.5).add(0.5);
+  const edgeBreakup = mx_noise_float(pattern.mul(13.5)).mul(0.5).add(0.5);
+  const tuftGrain = mx_noise_float(pattern.mul(34.0)).mul(0.5).add(0.5);
+  const clumpTone = mx_noise_float(pattern.mul(8.5).add(3.7)).mul(0.5).add(0.5);
   const up = normalWorld.y;
-  const mossMask = up.smoothstep(0.35, 0.85)
-    .mul(patches.smoothstep(0.25, 0.7))
+  const rockLuma = dot(biomeAlbedo, vec3(0.3, 0.59, 0.11));
+  // Bias moss gently toward stone crevices/darker grain while keeping upward-facing growth.
+  const creviceBias = rockLuma.smoothstep(0.18, 0.65).oneMinus().mul(0.14);
+  const patchField = macroPatch.mul(0.72).add(edgeBreakup.mul(0.28)).add(creviceBias);
+  const mossCoverage = patchField.smoothstep(0.42, 0.56);
+  const mossMask = up.smoothstep(0.28, 0.80)
+    .mul(mossCoverage)
     .mul(settings.moss)
     .mul(look ? moss : float(1))
     .clamp(0, 1);
-  const shade = dot(biomeAlbedo, vec3(0.3, 0.59, 0.11)).mul(0.9).add(0.55);
-  const mossColor = mix(color(MOSS_DARK), color(MOSS_LIGHT), patches).mul(shade);
+
+  // Damp moisture rim around moss edges grounds the mat onto bare stone.
+  const dampBand = patchField.smoothstep(0.36, 0.45)
+    .mul(mossCoverage.oneMinus())
+    .mul(up.smoothstep(0.22, 0.72))
+    .mul(settings.moss)
+    .mul(look ? moss : float(1));
+  const dampStone = biomeAlbedo.mul(mix(float(1), float(0.72), dampBand));
+
+  const shade = rockLuma.mul(0.75).add(0.60);
+  const mossDeep = color('#3a4f1b');
+  const mossBase = mix(mossDeep, color(MOSS_DARK), clumpTone);
+  const mossVelvet = mix(mossBase, color(MOSS_LIGHT), tuftGrain.smoothstep(0.30, 0.85));
+  const mossColor = mossVelvet.mul(shade);
   // Keep a modest contact cue; Lambert lighting and scene AO supply the shade.
   const underside = mix(float(1 - settings.undersideShade), float(1), up.smoothstep(-0.7, 0.15));
-  let weathered = mix(biomeAlbedo, mossColor, mossMask).mul(underside);
+  let weathered = mix(dampStone, mossColor, mossMask).mul(underside);
   let roughness = material.roughnessMap
-    ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1).max(mossMask.mul(0.95))
-    : float(material.roughness ?? 0.85).max(mossMask.mul(0.95));
+    ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1).max(mossMask.mul(0.96))
+    : float(material.roughness ?? 0.85).max(mossMask.mul(0.96));
 
   // Dust settles on the bare tops the moss has not claimed.
   const dust = up.smoothstep(0.55, 0.95)
     .mul(mossMask.oneMinus())
-    .mul(patches.oneMinus())
+    .mul(macroPatch.oneMinus())
     .mul(settings.dust);
   weathered = mix(weathered, color(DUST).mul(shade), dust);
 
@@ -235,7 +252,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     weathered = mix(weathered, coldStone(pattern, normalLocal).mul(shading), frost);
     // The sine patches are too smooth to tear an edge: alone, whole facets went white
     // at once and the skirt ran in straight lines across a face.
-    const tear = mx_noise_float(pattern.mul(SNOW_TEAR_PER_METRE)).mul(0.6).add(patches.sub(0.5).mul(0.3));
+    const tear = mx_noise_float(pattern.mul(SNOW_TEAR_PER_METRE)).mul(0.6).add(macroPatch.sub(0.5).mul(0.3));
     const { cover, skirt } = snowDeposition({
       // A storm's snow settles on any stone; the cold stone stays the biome's.
       snow: snowGround.max(stormSnowCoverUniform), breakup: tear, ...(ground ?? {}),
