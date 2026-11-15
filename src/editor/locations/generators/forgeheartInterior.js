@@ -1,6 +1,7 @@
 import { coursedMasonryWall, emitRadialArch } from '../gen/dwarvenMasonry.js';
 import { box, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { barrel, crate, rails } from './kits.js';
+import { anvil, coursedStack, quenchTank } from './forgeProps.js';
 
 const P = (x, y, z) => ({ x, y, z });
 
@@ -59,7 +60,7 @@ export function buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmT
 
   // --- 1. Monumental Central Blast Crucible (the visual anchor beyond Hero Gateway) ---
   b.prop('carved', stoneBlock(7.2, 1.05, 4.4, P(0, 0, hearthZ), { bevel: 0.09, batter: 0.12, irregular: 0.06 }), 0xcbc7c0);
-  b.prop('masonry', stoneBlock(6.2, 4.4, 3.8, P(0, 1.05, hearthZ), { bevel: 0.08, batter: 0.05, irregular: 0.06 }), 0xd4d0c8);
+  coursedStack(b, 'masonry', P(0, 1.05, hearthZ), 6.2, 4.4, 3.8, { batter: 0.05, tint: 0xd4d0c8, cap: false });
   coursedMasonryWall(b, P(-3.0, 0.9, hearthZ + 1.92), P(3.0, 0.9, hearthZ + 1.92), 4.6, 0.42, {
     courseHeight: 0.68,
     openings: [{ s: 3.0, sill: 0, width: 2.8, height: 2.65, profile: 'round', dressed: true }],
@@ -68,7 +69,7 @@ export function buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmT
   });
   b.prop('carved', stoneBlock(5.0, 2.2, 3.2, P(0, 5.45, hearthZ), { bevel: 0.08, batter: 0.18, irregular: 0.05 }), 0xc6c3bd);
   b.prop('carved', stoneBox(6.6, 0.34, 4.1, P(0, 5.45, hearthZ), { bevel: 0.05, irregular: 0.04 }), 0xd6d3cd);
-  b.prop('masonry', stoneBlock(3.2, 6.8, 2.6, P(0, 7.65, hearthZ - 0.1), { bevel: 0.08, batter: 0.12, irregular: 0.05 }), 0xc4c0b9);
+  coursedStack(b, 'masonry', P(0, 7.65, hearthZ - 0.1), 3.2, 6.8, 2.6, { batter: 0.12, tint: 0xc4c0b9 });
   // Forged iron furnace braces, tension bands & bronze keystone crest on upper mantel.
   for (const sx of [-2.45, 2.45]) {
     b.prop('iron', stoneBlock(0.34, 5.6, 0.4, P(sx, 0.6, hearthZ + 1.98), { bevel: 0.025 }), 0x6c717a);
@@ -120,13 +121,11 @@ export function buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmT
   // Master Anvil on hooped dwarf-oak block + red-hot blank bar across the anvil table.
   b.prop('timber', rod(P(dais.x, 0.22, dais.z), P(dais.x, 0.98, dais.z), 0.66, 0.6, 10), 0x6a5038);
   b.prop('iron', rod(P(dais.x, 0.36, dais.z), P(dais.x, 0.44, dais.z), 0.66, 0.66, 10), 0x5c6068);
-  b.prop('iron', stoneBlock(1.45, 0.36, 0.62, P(dais.x, 0.98, dais.z), { bevel: 0.04, batter: 0.1 }), 0x686c74);
-  b.prop('iron', stoneBlock(1.95, 0.46, 0.68, P(dais.x, 1.34, dais.z), { bevel: 0.045, batter: -0.05 }), 0x767a84);
-  b.prop('iron', rod(P(dais.x + 0.95, 1.57, dais.z), P(dais.x + 1.75, 1.64, dais.z), 0.28, 0.04, 8), 0x767a84);
-  b.prop('glow', stoneBox(0.75, 0.08, 0.22, P(dais.x - 0.15, 1.83, dais.z), { yaw: 0.25, bevel: 0.015 }), '#ff701e', 2.4);
+  anvil(b, P(dais.x, 0.98, dais.z), { tint: 0x686c74, faceTint: 0x9ea4ae });
+  b.prop('glow', stoneBox(0.75, 0.05, 0.16, P(dais.x - 0.25, 1.855, dais.z), { yaw: 0.25, bevel: 0.012 }), '#ff701e', 2.4);
   b.light(P(dais.x, 2.65, dais.z + 1.0), '#ffb86e', 4.6, 16, { radius: 1.5, halo: 0 });
   // Companion quench tank & barrel flanking the master anvil.
-  b.prop('iron', stoneBox(1.25, 0.68, 0.85, P(dais.x - 1.75, 0.52, dais.z + 0.3), { yaw: 0.35, bevel: 0.03 }), 0x5e626a);
+  quenchTank(b, P(dais.x - 1.75, 0.18, dais.z + 0.3), { yaw: 0.35 });
   barrel(b, P(dais.x + 1.85, 0.18, dais.z + 0.55), 0.34, 0.9);
   b.nav.block(dais, 2.75, 2.5);
 
@@ -144,12 +143,12 @@ export function buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmT
 
   // --- 3. Secondary Flanking Bloomery Furnaces & Ingot Storage ---
   for (const at of [-14, 14].map((x) => P(x, 0, hearthZ))) {
-    b.prop('masonry', stoneBlock(5.5, 4.6, 3.6, at, { bevel: 0.08, batter: 0.06, irregular: 0.2 }));
+    coursedStack(b, 'masonry', at, 5.5, 4.6, 3.6, { batter: 0.06, cap: false });
     coursedMasonryWall(b, P(at.x - 2.6, 0, at.z + 1.82), P(at.x + 2.6, 0, at.z + 1.82), 4.5, 0.36, {
       courseHeight: 0.62, baseTint: 0xd0cec9, trimTint: 0xe6e3dc,
     });
-    b.prop('masonry', stoneBlock(4.1, 1.6, 2.9, P(at.x, 4.6, at.z), { bevel: 0.08, batter: 0.12, irregular: 0.18 }));
-    b.prop('masonry', stoneBlock(2.3, 9, 2.3, P(at.x, 6.2, at.z - 0.2), { bevel: 0.08, batter: 0.08, irregular: 0.18 }));
+    coursedStack(b, 'masonry', P(at.x, 4.6, at.z), 4.1, 1.6, 2.9, { batter: 0.3, course: 0.4, cap: false });
+    coursedStack(b, 'masonry', P(at.x, 6.2, at.z - 0.2), 2.3, 9, 2.3, { batter: 0.08 });
     emitRadialArch(b, 'masonry', P(at.x - 1.4, 0.4, at.z + 1.85), P(at.x + 1.4, 0.4, at.z + 1.85), 1.7, 0.52, 0.52, 9, {
       pointed: 0.15, irregular: 0.06,
     });

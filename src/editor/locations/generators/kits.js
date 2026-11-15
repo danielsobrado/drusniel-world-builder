@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { arch, box, coursedWall, extrudedProfile, hewnBeam, rod, roughTimber, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { buildStandaloneTimberSet } from '../gen/timberSupportBuilder.js';
+import { columnDrums } from '../gen/columnDrums.js';
 
 /**
  * Built assemblies shared by the generators. Each takes the builder first and
@@ -248,7 +249,7 @@ export function pillar(b, at, height, radius, {
   const shaftStart = ceremonial || reinforced ? 1.68 : 1.64;
   const shaftEnd = height - 1.95;
   const shaftH = Math.max(0.8, shaftEnd - shaftStart);
-  b.prop(material, rod(up(at, shaftStart), up(at, shaftEnd), radius * 0.96, radius * 0.9, sides), tint);
+  columnDrums(b, material, up(at, shaftStart), up(at, shaftEnd), radius * 0.96, radius * 0.9, sides, tint);
   const ribW = radius * (ceremonial ? 0.38 : 0.34);
   const ribDepth = radius * 0.14;
   const ribOverlap = 0.28;

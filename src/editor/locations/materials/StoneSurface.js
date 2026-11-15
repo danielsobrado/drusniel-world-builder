@@ -9,6 +9,7 @@ import {
   bakedShade, bumpNormal, createLocationMaterial, geometryNormal, shadeSurface, triplanarNormal, triplanarSample,
   triplanarWeights,
 } from './LocationShading.js';
+import { patinate, weatherDressedStone } from './StoneWeathering.js';
 
 /**
  * Rock, masonry, timber and metal: one triplanar PBR layer whose character
@@ -180,6 +181,12 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     roughness = roughness.mul(mix(float(1), float(0.85), ridgeWear.mul(profile.cavityShade)));
   }
 
+  if (profile.weathering) {
+    const aged = weatherDressedStone({ point, albedo, roughness }, profile.weathering);
+    albedo = aged.albedo;
+    roughness = aged.roughness;
+  }
+
   if (profile.water) {
     // Subterranean still pool: organic multi-scale surface ripples over dark mineral depths.
     const r1 = mx_noise_float(vec3(point.x.mul(1.8), point.z.mul(1.8), point.x.add(point.z).mul(0.35)));
@@ -269,6 +276,13 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     roughness = mix(roughness, woodRough, hasWoodUv);
   }
   if (profile.vertexTint) albedo = albedo.mul(attribute('tint', 'vec3'));
+  // After the tint, so a bronze tint does not turn its verdigris yellow.
+  if (profile.patina) {
+    const corroded = patinate({ point, albedo, roughness, metalness }, profile.patina);
+    albedo = corroded.albedo;
+    roughness = corroded.roughness;
+    metalness = corroded.metalness;
+  }
 
   if (profile.snow) {
     // Rime: whatever stands in the weather is greyed with frost before any snow settles on it.
