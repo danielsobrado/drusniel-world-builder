@@ -1,0 +1,248 @@
+# Zuraldi — autonomous mountain valleys with a Basque-like culture (docs/asset-bible/regions/zuraldi.md).
+# Big, nearly square limewashed baserri with sandstone quoins and plinths; low, wide terracotta
+# gables turned to the front (`gable: depth`) with very deep eaves; oxblood-red (or green)
+# painted timber and shutters; wooden gable balconies; broad arched stone portals; window
+# boxes. Civic life gathers at the pelota frontón, the arcaded council hall and the hill ermita.
+group: Zuraldi · Basque mountain valleys
+palette:
+  recipe: { style: sandstone, finish: limewash, topStyle: terracotta, weathering: 0.25 }
+  plaster: { color: "#f5f2eb", roughness: 0.96, label: Whitewash }
+  masonry: { color: "#bcad92", roughness: 0.9, label: Valley sandstone }
+  planks: { color: "#7a2c24", roughness: 0.8, label: Oxblood boards }
+  roof: { color: "#a9553b", roughness: 0.82, label: Terracotta tiles }
+  trim: { color: "#b8a888", label: Sandstone quoins }
+  timber: { color: "#7a271f", roughness: 0.75, label: Oxblood painted timber }
+  metal: { color: "#26282a", metalness: 0.7, roughness: 0.5, label: Black wrought iron }
+  glass: { color: "#3b5660", label: Clear glass }
+green: &green { timber: { color: "#2d5a3a", roughness: 0.75, label: Green painted timber }, planks: { color: "#2f5b3b", roughness: 0.8, label: Green boards } }
+style:
+  surface: plaster
+  facade: plain
+  stonework: ashlar
+  corner: 0.18
+  gable: depth
+  scale: 1.1
+  storey: 2.9
+  thickness: 0.4
+  roof: { family: gable, pitch: 0.3, overhang: 0.95, sweep: 0.12, sag: 0.04 }
+  door: arched
+  window: square
+  shutters: true
+  windowBoxes: true
+  chimney: true
+  ivy: 0.12
+  age: 0.25
+  base: { style: plinth, height: 0.9, out: 0.08 }
+  tower: { surface: masonry, stonework: fieldstone, footprint: rounded, roof: hip }
+  wall: { surface: masonry, stonework: fieldstone, crown: null }
+  path: { floor: stone, railing: stone }
+kit:
+  - { id: zuraldi-house-cottage, label: "House · Village house", blueprint: house-cottage }
+  - { id: zuraldi-house-townhouse, label: "House · Kale townhouse", blueprint: house-townhouse, palette: *green }
+  - { id: zuraldi-house-double, label: "House · Paired village houses", blueprint: house-double }
+  - { id: zuraldi-house-courtyard, label: "House · Farmhouse with walled yard", blueprint: house-courtyard, palette: *green }
+  - { id: zuraldi-house-tower, label: "House · Casa-torre tower house", blueprint: house-tower, style: { surface: masonry, stonework: fieldstone } }
+  - { id: zuraldi-house-hillside, label: "House · Terraced hillside house", blueprint: house-hillside }
+  - { id: zuraldi-farm-farmstead, label: "Farm · Baserri farmstead", blueprint: farm-farmstead }
+  - { id: zuraldi-farm-barnyard, label: "Farm · Hay barn and raised granary", blueprint: farm-barnyard, palette: *green }
+  - { id: zuraldi-farm-croft, label: "Farm · Shepherd's borda", blueprint: farm-croft, style: { surface: masonry, stonework: fieldstone } }
+  - { id: zuraldi-inn-roadside, label: "Inn · Venta roadside inn", blueprint: inn-roadside }
+  - { id: zuraldi-inn-tavern, label: "Inn · Cider house", blueprint: inn-tavern, palette: *green }
+  - { id: zuraldi-inn-lodge, label: "Inn · Muleteers' inn", blueprint: inn-lodge }
+  - { id: zuraldi-shop-general, label: "Shop · Valley store", blueprint: shop-general }
+  - { id: zuraldi-shop-baker, label: "Shop · Village bakery", blueprint: shop-baker, palette: *green }
+  - { id: zuraldi-shop-corner, label: "Shop · Corner ironmonger", blueprint: shop-corner }
+  - { id: zuraldi-shop-stalls, label: "Shop · Market-day stalls", blueprint: shop-stalls }
+  - { id: zuraldi-shop-warehouse, label: "Shop · Wool and cheese store", blueprint: shop-warehouse, palette: *green }
+  - { id: zuraldi-tower-watch, label: "Tower · Ridge watchhouse", blueprint: tower-watch }
+  - { id: zuraldi-tower-keep, label: "Tower · Casa-torre keep", blueprint: tower-keep }
+  - { id: zuraldi-tower-signal, label: "Tower · Fire-signal tower", blueprint: tower-signal }
+  - { id: zuraldi-wall-garden, label: "Wall · Dry-stone field walls", blueprint: wall-garden }
+  - { id: zuraldi-wall-retaining, label: "Wall · Terrace retaining wall", blueprint: wall-retaining }
+  - { id: zuraldi-wall-town, label: "Wall · Valley town wall", blueprint: wall-town }
+  - { id: zuraldi-stair-switchback, label: "Stairs · Terrace switchback", blueprint: stair-switchback }
+  - { id: zuraldi-stair-bridge, label: "Stairs · Switchback stone bridge", blueprint: stair-bridge }
+  - { id: zuraldi-stair-grand, label: "Stairs · Church-hill steps", blueprint: stair-grand }
+styles:
+  baserri: &baserri { kind: curved-volume, surface: plaster, facade: plain, stonework: ashlar, thickness: 0.45, shutters: true, windowBoxes: true, chimney: true, ivyDensity: 0.12, age: 0.25, base: { style: plinth, height: 0.9, out: 0.08 } }
+  stone: &stone { kind: curved-volume, surface: masonry, stonework: fieldstone, thickness: 0.5, shutters: true, windowBoxes: false, chimney: false, ivyDensity: 0.2, age: 0.35 }
+presets:
+  - id: zuraldi-baserri
+    label: "Landmark · Baserri with gable balcony and stone portal"
+    primitives:
+      - <<: *baserri
+        id: baserri
+        label: Baserri
+        footprint: { family: rounded, width: 12, depth: 13, cornerRadius: 0.2 }
+        height: 6.4
+        levels: 2
+        roof: { family: gable, axis: depth, rise: 2.1, overhang: 1.1, sweep: 0.12, sag: 0.04 }
+        openings:
+          - { id: portal, role: arch, profile: arched, side: front, along: 0, bottom: 0, width: 3, height: 3 }
+          - { id: low, role: window, profile: square, side: front, along: [-4, 4], bottom: 1.1, width: 0.9, height: 1.1 }
+          - { id: balcony-door, role: door, profile: square, side: front, along: [-1.4, 1.4], bottom: 3.4, width: 1, height: 2.1 }
+          - { id: upper, role: window, profile: square, side: front, along: [-4, 4], bottom: 4, width: 0.9, height: 1.1 }
+          - { id: side, role: window, profile: square, side: right, along: [-4, -1.4, 1.4, 4], bottom: 4, width: 0.8, height: 1, shutterPose: closed }
+          - { id: side-low, role: window, profile: square, side: left, along: [-3, 3], bottom: 1.2, width: 0.8, height: 1 }
+          - { id: byre, role: door, profile: arched, side: back, along: 0, bottom: 0, width: 2.4, height: 2.6 }
+        features:
+          - { id: gable-balcony, kind: balcony, side: front, along: 0, width: 7, depth: 1, bottom: 3.4, height: 1.05 }
+      - <<: *stone
+        id: bread-oven
+        label: Bread oven
+        position: [-7.6, 3.2]
+        footprint: { family: oval, width: 2.6, depth: 2.4 }
+        thickness: 0.4
+        height: 1.6
+        taper: 0.85
+        roof: { family: bell, rise: 1.2, overhang: 0.1, sweep: 0.8 }
+        chimney: true
+        shutters: false
+        openings:
+          - { id: mouth, role: arch, profile: arched, at: 0.25, bottom: 0.4, width: 0.7, height: 0.7 }
+
+  - id: zuraldi-council-hall
+    label: "Landmark · Six Offices council hall with arcade"
+    primitives:
+      - <<: *baserri
+        id: council
+        label: Council hall
+        surface: masonry
+        footprint: { family: rounded, width: 15, depth: 8, cornerRadius: 0.2 }
+        height: 7.2
+        levels: 2
+        roof: { family: hip, rise: 2.3, overhang: 1, sweep: 0.12, sag: 0.03 }
+        openings:
+          - { id: arcade, role: arch, profile: arched, side: front, along: [-5.6, -3.4, -1.1, 1.1, 3.4, 5.6], bottom: 0, width: 1.8, height: 3 }
+          - { id: office, role: door, profile: square, side: front, along: [-5.6, -3.4, -1.1, 1.1, 3.4, 5.6], bottom: 3.9, width: 0.9, height: 2 }
+          - { id: back, role: window, profile: square, side: back, along: [-4, 0, 4], bottom: 4.4, width: 0.9, height: 1.2 }
+        features:
+          - { id: long-balcony, kind: balcony, side: front, along: 0, width: 8, depth: 0.9, bottom: 3.9, height: 1.05 }
+      - id: plaza-steps
+        label: Plaza steps
+        kind: traversal
+        position: [0, 6.2]
+        rotation: -90
+        length: 2.4
+        width: 8
+        rise: 0.5
+        mode: stairs
+        railing: false
+
+  - id: zuraldi-fronton
+    label: "Landmark · Pelota frontón and plaza wall"
+    primitives:
+      - id: fronton
+        label: Frontón
+        kind: curved-wall
+        surface: plaster
+        position: [0, 0]
+        length: 12
+        bend: -0.6
+        height: 9
+        thickness: 1
+        base: { style: plinth, height: 0.9, out: 0.1 }
+        automaticGates: false
+      - id: side-wall
+        label: Side wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [-6.2, 8]
+        rotation: 90
+        length: 16
+        bend: 0
+        height: 3
+        thickness: 0.7
+        automaticGates: false
+      - id: spectator-steps
+        label: Spectator steps
+        kind: traversal
+        position: [7.4, 8]
+        rotation: 90
+        length: 14
+        width: 2.4
+        elevation: 0.6
+        mode: walkway
+        support: piers
+        railing: true
+
+  - id: zuraldi-ermita
+    label: "Landmark · Hilltop ermita with portico"
+    primitives:
+      - <<: *baserri
+        id: ermita
+        label: Ermita
+        footprint: { family: rounded, width: 6, depth: 9, cornerRadius: 0.2 }
+        height: 4
+        windowBoxes: false
+        chimney: false
+        roof: { family: gable, axis: depth, rise: 1.6, overhang: 0.7, sweep: 0.1, sag: 0.03 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.4, height: 2.6 }
+          - { id: oculus, role: window, profile: arched, side: front, along: 0, bottom: 3, width: 0.7, height: 0.7 }
+          - { id: side, role: window, profile: arched, side: right, along: [-2, 2], bottom: 2, width: 0.5, height: 1.1 }
+        features:
+          - { id: portico, kind: porch, side: front, along: 0, width: 5.4, depth: 2.2, height: 3 }
+      - <<: *stone
+        id: bell-gable
+        label: Bell gable
+        position: [0, -5.2]
+        footprint: { family: rounded, width: 2.4, depth: 2, cornerRadius: 0.1 }
+        thickness: 0.36
+        height: 6.4
+        roof: { family: gable, rise: 0.8, overhang: 0.2, sweep: 0.1, sag: 0 }
+        shutters: false
+        openings:
+          - { id: bell, role: arch, profile: arched, side: front, along: 0, bottom: 4.4, width: 0.9, height: 1.3 }
+      - id: hill-steps
+        label: Hill steps
+        kind: traversal
+        position: [0, 9.6]
+        rotation: -90
+        length: 6
+        width: 2
+        rise: 1.6
+        mode: stairs
+        railing: false
+
+  - id: zuraldi-horreo
+    label: "Landmark · Hórreo granary on stone pillars"
+    primitives:
+      - id: pillars
+        label: Pillar deck
+        kind: traversal
+        position: [0, 0]
+        length: 6.4
+        width: 4.6
+        elevation: 1.8
+        mode: walkway
+        support: piers
+        railing: false
+        style: { floor: stone, supports: stone }
+      - kind: curved-volume
+        id: horreo
+        label: Hórreo
+        surface: planks
+        position: [0, 0]
+        elevation: 1.8
+        footprint: { family: rounded, width: 5.6, depth: 3.8, cornerRadius: 0.1 }
+        height: 2.2
+        thickness: 0.16
+        chimney: false
+        windowBoxes: false
+        shutters: false
+        age: 0.4
+        roof: { family: hip, rise: 1.5, overhang: 0.6, sweep: 0.1, sag: 0.03 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 0.9, height: 1.7 }
+      - id: horreo-steps
+        label: Stone steps
+        kind: traversal
+        position: [-1.6, 4.4]
+        rotation: -90
+        length: 3.4
+        width: 1.1
+        rise: 1.8
+        mode: stairs
+        railing: false

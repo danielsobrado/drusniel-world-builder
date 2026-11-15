@@ -1,0 +1,192 @@
+# Umbra'kor Dominion — dark-elf cavern cities (docs/asset-bible/regions/umbrakor.md).
+# Violet-black basalt ashlar, flat parapeted terraces stacked like cliff tiers, tall narrow
+# pointed openings, needle spires and corbelled towers, iron linkwork, and glass that glows
+# with pale violet phosphor. No window boxes, no ivy: nothing grows here but fungus.
+group: Umbra'kor · dark-elf caverns
+palette:
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.4 }
+  masonry: { color: "#4a4852", roughness: 0.82, normal: 1.2, label: Cavern basalt }
+  plaster: { color: "#56545c", label: Ash render }
+  planks: { color: "#3a3036", label: Blackwood }
+  roof: { color: "#2d2c33", roughness: 0.7, label: Basalt shingle }
+  trim: { color: "#4d4b58", roughness: 0.7, label: Violet dressing }
+  timber: { color: "#2b2329", label: Blackwood beams }
+  metal: { color: "#4b4f5c", metalness: 0.85, roughness: 0.4, label: Iron linkwork }
+  glass: { color: "#8762c4", roughness: 0.25, label: Violet phosphor glass }
+style:
+  surface: masonry
+  stonework: ashlar
+  facade: plain
+  corner: 0.12
+  storey: 3.1
+  thickness: 0.45
+  roof: { family: flat, pitch: 0.9, overhang: 0.3, sweep: 0.2, sag: 0 }
+  flatCrown: { style: parapet, height: 0.6, merlons: none }
+  door: pointed
+  window: pointed
+  shutters: false
+  windowBoxes: false
+  chimney: false
+  ivy: 0
+  age: 0.35
+  base: { style: plinth, height: 0.68, out: 0.12 }
+  tower: { surface: masonry, stonework: ashlar, footprint: rounded, roof: spire, crown: { style: corbelled, projection: 0.3, height: 0.7, corbelSpacing: 0.55, arcade: pointed } }
+  wall: { surface: masonry, stonework: ashlar, crown: { style: parapet, height: 0.75, merlons: pierced, merlonWidth: 0.8, merlonGap: 0.45 } }
+  path: { floor: stone, railing: stone }
+spires: &spires { roof: { family: spire, pitch: 1.4, overhang: 0.3, sweep: 0.2, sag: 0 } }
+kit:
+  - { id: umbrakor-house-cottage, label: "House · Basalt cell house", blueprint: house-cottage }
+  - { id: umbrakor-house-townhouse, label: "House · Narrow spire house", blueprint: house-townhouse, style: *spires }
+  - { id: umbrakor-house-courtyard, label: "House · Cliff-house compound", blueprint: house-courtyard }
+  - { id: umbrakor-house-tower, label: "House · Noble house tower", blueprint: house-tower, style: *spires }
+  - { id: umbrakor-house-hillside, label: "House · Ledge house", blueprint: house-hillside }
+  - { id: umbrakor-house-double, label: "House · Paired gallery houses", blueprint: house-double }
+  - { id: umbrakor-farm-barnyard, label: "Farm · Fungus barn and spore granary", blueprint: farm-barnyard }
+  - { id: umbrakor-farm-farmstead, label: "Farm · Cavern farmstead", blueprint: farm-farmstead }
+  - { id: umbrakor-farm-croft, label: "Farm · Lichen croft", blueprint: farm-croft }
+  - { id: umbrakor-inn-tavern, label: "Inn · Shade tavern", blueprint: inn-tavern, style: *spires }
+  - { id: umbrakor-inn-roadside, label: "Inn · Deep-road inn", blueprint: inn-roadside }
+  - { id: umbrakor-inn-lodge, label: "Inn · Galleried guesthouse", blueprint: inn-lodge }
+  - { id: umbrakor-shop-corner, label: "Shop · Crystal cutter", blueprint: shop-corner }
+  - { id: umbrakor-shop-apothecary, label: "Shop · Apothecary spire", blueprint: shop-curio-tower, style: *spires }
+  - { id: umbrakor-shop-warehouse, label: "Shop · House market store", blueprint: shop-warehouse }
+  - { id: umbrakor-shop-stalls, label: "Shop · Market balcony booths", blueprint: shop-stalls }
+  - { id: umbrakor-shop-general, label: "Shop · Silk merchant", blueprint: shop-general }
+  - { id: umbrakor-tower-watch, label: "Tower · Depth warden tower", blueprint: tower-watch }
+  - { id: umbrakor-tower-keep, label: "Tower · House keep", blueprint: tower-keep }
+  - { id: umbrakor-tower-gate, label: "Tower · Depth warden gate", blueprint: tower-gate }
+  - { id: umbrakor-wall-town, label: "Wall · Basalt ward wall", blueprint: wall-town }
+  - { id: umbrakor-wall-retaining, label: "Wall · Cliff terrace", blueprint: wall-retaining }
+  - { id: umbrakor-wall-garden, label: "Wall · Shadow-garden walls", blueprint: wall-garden }
+  - { id: umbrakor-stair-switchback, label: "Stairs · Cliff switchback", blueprint: stair-switchback }
+  - { id: umbrakor-stair-bridge, label: "Stairs · Void arch bridge", blueprint: stair-bridge }
+  - { id: umbrakor-stair-grand, label: "Stairs · Temple stair", blueprint: stair-grand }
+styles:
+  basalt: &basalt { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.5, shutters: false, windowBoxes: false, chimney: false, ivyDensity: 0, age: 0.35, base: { style: plinth, height: 0.68, out: 0.12 } }
+presets:
+  - id: umbrakor-venemora-temple
+    label: "Landmark · Venemora temple hall with needle spires"
+    primitives:
+      - <<: *basalt
+        id: temple
+        label: Temple hall
+        footprint: { family: rounded, width: 9, depth: 15, cornerRadius: 0.2 }
+        height: 8
+        roof: { family: gable, axis: depth, rise: 6, overhang: 0.3, sweep: 0.15, sag: 0 }
+        openings:
+          - { id: portal, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 2, height: 4.4 }
+          - { id: lancet, role: window, profile: pointed, side: right, along: [-5, -2.5, 0, 2.5, 5], bottom: 2, width: 0.6, height: 4.6 }
+          - { id: lancet-left, role: window, profile: pointed, side: left, along: [-5, -2.5, 0, 2.5, 5], bottom: 2, width: 0.6, height: 4.6 }
+          - { id: rose, role: window, profile: pointed, side: front, along: 0, bottom: 5.2, width: 1.2, height: 2.2 }
+        features:
+          - { id: pier, kind: buttress, side: right, along: [-6.25, -3.75, -1.25, 1.25, 3.75, 6.25], width: 0.6, depth: 1.2, height: 7 }
+          - { id: pier-left, kind: buttress, side: left, along: [-6.25, -3.75, -1.25, 1.25, 3.75, 6.25], width: 0.6, depth: 1.2, height: 7 }
+      - <<: *basalt
+        id: spire-left
+        label: Needle spire
+        position: [-5.6, 7.6]
+        footprint: { family: rounded, width: 2.6, depth: 2.6, cornerRadius: 0.1 }
+        thickness: 0.45
+        height: 13
+        roof: { family: spire, rise: 9, overhang: 0.2, sweep: 0.2 }
+        openings:
+          - { id: slit, role: window, profile: pointed, side: front, along: 0, bottom: 9, width: 0.4, height: 2.2 }
+      - <<: *basalt
+        id: spire-right
+        label: Needle spire
+        position: [5.6, 7.6]
+        footprint: { family: rounded, width: 2.6, depth: 2.6, cornerRadius: 0.1 }
+        thickness: 0.45
+        height: 13
+        roof: { family: spire, rise: 9, overhang: 0.2, sweep: 0.2 }
+        openings:
+          - { id: slit, role: window, profile: pointed, side: front, along: 0, bottom: 9, width: 0.4, height: 2.2 }
+
+  - id: umbrakor-terrace-block
+    label: "Landmark · Vertical terrace block"
+    primitives:
+      - <<: *basalt
+        id: tier-1
+        label: Lower tier
+        footprint: { family: rounded, width: 14, depth: 9, cornerRadius: 0.15 }
+        height: 3.2
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.6, merlons: none }
+        openings:
+          - { id: door, role: door, profile: pointed, side: front, along: [-4.5, 0, 4.5], bottom: 0, width: 1.1, height: 2.4 }
+          - { id: window, role: window, profile: pointed, side: front, along: [-2.2, 2.2, -6, 6], bottom: 1.1, width: 0.6, height: 1.5 }
+      - <<: *basalt
+        id: tier-2
+        label: Middle tier
+        position: [0, -2]
+        elevation: 3.2
+        footprint: { family: rounded, width: 11, depth: 5, cornerRadius: 0.15 }
+        height: 3.1
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.6, merlons: none }
+        openings:
+          - { id: door, role: door, profile: pointed, side: front, along: [-3, 3], bottom: 0, width: 1, height: 2.3 }
+          - { id: window, role: window, profile: pointed, side: front, along: [-4.5, 0, 4.5], bottom: 1, width: 0.6, height: 1.5 }
+      - <<: *basalt
+        id: tier-3
+        label: Upper tier
+        position: [1.5, -3]
+        elevation: 6.3
+        footprint: { family: rounded, width: 6, depth: 3, cornerRadius: 0.15 }
+        height: 3
+        roof: { family: spire, rise: 3.6, overhang: 0.3, sweep: 0.2 }
+        openings:
+          - { id: door, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 1, height: 2.2 }
+      - id: stair-1
+        label: Terrace stair
+        kind: traversal
+        position: [-3.6, 2.4]
+        length: 5.6
+        width: 1.2
+        elevation: 0
+        rise: 3.2
+        mode: stairs
+      - id: stair-2
+        label: Upper stair
+        kind: traversal
+        position: [4.6, -0.2]
+        rotation: 180
+        length: 5.4
+        width: 1.1
+        elevation: 3.2
+        rise: 3.1
+        mode: stairs
+
+  - id: umbrakor-fungus-hall
+    label: "Landmark · Fungus cultivation hall with spore domes"
+    primitives:
+      - <<: *basalt
+        id: hall
+        label: Cultivation hall
+        footprint: { family: rounded, width: 16, depth: 7, cornerRadius: 0.3 }
+        height: 3.6
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.5, merlons: none }
+        openings:
+          - { id: door, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 1.6, height: 2.6 }
+          - { id: vent, role: slit, profile: square, side: front, along: [-6.5, -4.5, -2.5, 2.5, 4.5, 6.5], bottom: 2.2, width: 0.5, height: 0.6 }
+      - <<: *basalt
+        id: dome-a
+        label: Spore dome
+        position: [-4.4, -0.2]
+        elevation: 3.6
+        footprint: { family: oval, width: 4.4, depth: 4.4 }
+        height: 1.4
+        roof: { family: bell, rise: 2.4, overhang: 0.2, sweep: 0.9 }
+        openings:
+          - { id: port, role: window, profile: pointed, at: [0.25, 0.75], bottom: 0.3, width: 0.5, height: 0.8 }
+      - <<: *basalt
+        id: dome-b
+        label: Spore dome
+        position: [4.4, -0.2]
+        elevation: 3.6
+        footprint: { family: oval, width: 4.4, depth: 4.4 }
+        height: 1.4
+        roof: { family: bell, rise: 2.4, overhang: 0.2, sweep: 0.9 }
+        openings:
+          - { id: port, role: window, profile: pointed, at: [0.25, 0.75], bottom: 0.3, width: 0.5, height: 0.8 }

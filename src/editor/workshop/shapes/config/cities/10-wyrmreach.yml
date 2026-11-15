@@ -1,0 +1,179 @@
+# Wyrmreach Dominion — storm coasts and mystery frontier (docs/asset-bible/regions/wyrmreach.md).
+# Deliberately no unified civilisation: squat, patched, storm-bleached boards on heavy stone
+# footings, low sagging roofs lashed down against the wind, storm shutters kept closed, ash-grey
+# stone. Here and there, impossibly smooth black precursor stone that nobody built.
+group: Wyrmreach · storm frontier
+palette:
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.85 }
+  planks: { color: "#8d867c", roughness: 0.97, label: Storm-bleached boards }
+  masonry: { color: "#7a7b7e", roughness: 0.95, normal: 1.4, label: Storm granite }
+  plaster: { color: "#99958c", label: Salt-crusted render }
+  roof: { color: "#4e5156", roughness: 0.92, label: Tarred canvas and slate }
+  trim: { color: "#66676a", label: Ash-grey stone }
+  timber: { color: "#4a4540", label: Driftwood beams }
+  metal: { color: "#5e4a3a", metalness: 0.4, roughness: 0.8, label: Rusted iron }
+  glass: { color: "#4a5a5e", label: Salt-fogged glass }
+precursor: &precursor
+  masonry: { color: "#141417", roughness: 0.18, normal: 0.2, label: Precursor black stone }
+  trim: { color: "#18181c", roughness: 0.15, normal: 0.2, label: Precursor black stone }
+  roof: { color: "#121215", roughness: 0.2, label: Precursor black stone }
+style:
+  surface: planks
+  facade: plain
+  shed: planks
+  stonework: fieldstone
+  corner: 0.4
+  scale: 0.95
+  storey: 2.5
+  thickness: 0.3
+  roof: { family: hip, pitch: 0.34, overhang: 0.4, sweep: 0.15, sag: 0.22 }
+  door: square
+  window: square
+  shutters: true
+  windowBoxes: false
+  chimney: true
+  ivy: 0.08
+  age: 0.85
+  base: { style: plinth, height: 1.4, out: 0.2 }
+  tower: { surface: masonry, stonework: fieldstone, footprint: rounded, roof: hip }
+  wall: { surface: masonry, stonework: fieldstone, crown: null }
+  path: { floor: timber, railing: timber }
+kit:
+  - { id: wyrmreach-house-cottage, label: "House · Rock windbreak hut", blueprint: house-cottage, style: { surface: masonry } }
+  - { id: wyrmreach-house-longhouse, label: "House · Storm-coast waystation", blueprint: house-longhouse }
+  - { id: wyrmreach-house-round, label: "House · Shingle round-hut", blueprint: house-round, style: { surface: masonry, roof: { family: cone, pitch: 0.45 } } }
+  - { id: wyrmreach-house-double, label: "House · Patched twin houses", blueprint: house-double }
+  - { id: wyrmreach-house-hillside, label: "House · Cliff-step house", blueprint: house-hillside }
+  - { id: wyrmreach-farm-croft, label: "Farm · Ash-field croft", blueprint: farm-croft }
+  - { id: wyrmreach-farm-farmstead, label: "Farm · Salt-marsh steading", blueprint: farm-farmstead }
+  - { id: wyrmreach-farm-barnyard, label: "Farm · Storm barn and covered cache", blueprint: farm-barnyard }
+  - { id: wyrmreach-inn-roadside, label: "Inn · Waystation inn", blueprint: inn-roadside }
+  - { id: wyrmreach-inn-tavern, label: "Inn · Wreckers' tavern", blueprint: inn-tavern }
+  - { id: wyrmreach-inn-lodge, label: "Inn · Expedition lodge", blueprint: inn-lodge }
+  - { id: wyrmreach-shop-general, label: "Shop · Salvage trader", blueprint: shop-general }
+  - { id: wyrmreach-shop-stalls, label: "Shop · Mixed-community market shed", blueprint: shop-stalls }
+  - { id: wyrmreach-shop-warehouse, label: "Shop · Cargo shed", blueprint: shop-warehouse }
+  - { id: wyrmreach-shop-corner, label: "Shop · Chart maker", blueprint: shop-corner }
+  - { id: wyrmreach-shop-baker, label: "Shop · Fish smokehouse", blueprint: shop-baker }
+  - { id: wyrmreach-tower-watch, label: "Tower · Coastal warning lookout", blueprint: tower-watch }
+  - { id: wyrmreach-tower-signal, label: "Tower · Storm beacon", blueprint: tower-signal }
+  - { id: wyrmreach-tower-keep, label: "Tower · Refuge tower", blueprint: tower-keep }
+  - { id: wyrmreach-wall-garden, label: "Wall · Windbreak walls", blueprint: wall-garden }
+  - { id: wyrmreach-wall-retaining, label: "Wall · Breakwater bank", blueprint: wall-retaining }
+  - { id: wyrmreach-wall-palisade, label: "Wall · Driftwood stockade", blueprint: wall-palisade }
+  - { id: wyrmreach-stair-switchback, label: "Stairs · Cliff path", blueprint: stair-switchback }
+  - { id: wyrmreach-stair-bridge, label: "Stairs · Gully footbridge", blueprint: stair-bridge }
+  - { id: wyrmreach-stair-grand, label: "Stairs · Ancient smooth stair", blueprint: stair-grand, palette: *precursor, style: { wall: { stonework: ashlar } } }
+presets:
+  - id: wyrmreach-black-wall
+    label: "Landmark · Pre-kingdom black wall"
+    palette: *precursor
+    primitives:
+      - id: black-wall
+        label: Black wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        length: 20
+        bend: 1
+        height: 6
+        thickness: 1.4
+        age: 0.05
+        crown: { style: parapet, height: 0.6, merlons: none, ruin: 0.6 }
+        automaticGates: false
+      - id: black-plinth
+        label: Measuring plinth
+        kind: curved-volume
+        surface: masonry
+        stonework: ashlar
+        position: [5, 5]
+        footprint: { family: rounded, width: 2.4, depth: 2.4, cornerRadius: 0.02 }
+        height: 3.4
+        thickness: 0.4
+        age: 0.02
+        shutters: false
+        windowBoxes: false
+        chimney: false
+        interior: none
+        ivyDensity: 0
+        roof: { family: flat }
+
+  - id: wyrmreach-breakwater
+    label: "Landmark · Frontier cargo breakwater and mooring"
+    primitives:
+      - id: breakwater
+        label: Rock breakwater
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        length: 22
+        bend: 3
+        height: 2.2
+        thickness: 2
+        base: { style: batter, height: 1.2, out: 0.4 }
+        automaticGates: false
+      - id: mooring
+        label: Mooring platform
+        kind: traversal
+        position: [0, 5]
+        length: 14
+        width: 4
+        elevation: 1.2
+        mode: walkway
+        support: piers
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: landing
+        label: Landing steps
+        kind: traversal
+        position: [-9.4, 5]
+        length: 4.4
+        width: 2
+        rise: 1.2
+        mode: stairs
+        style: { floor: timber, supports: timber, railing: timber }
+      - kind: curved-volume
+        id: cargo-shed
+        label: Cargo shed
+        surface: planks
+        position: [4, -3.4]
+        footprint: { family: rounded, width: 6, depth: 4, cornerRadius: 0.3 }
+        height: 2.6
+        thickness: 0.2
+        age: 0.85
+        chimney: false
+        windowBoxes: false
+        roof: { family: hip, rise: 1.2, overhang: 0.4, sweep: 0.15, sag: 0.25 }
+        base: { style: plinth, height: 1, out: 0.2 }
+        openings:
+          - { id: doors, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 2.6, height: 2.2 }
+
+  - id: wyrmreach-water-cache
+    label: "Landmark · Storm-shielded water cache"
+    primitives:
+      - kind: curved-volume
+        id: cistern
+        label: Cistern
+        surface: masonry
+        stonework: fieldstone
+        footprint: { family: oval, width: 5, depth: 5 }
+        height: 1.8
+        thickness: 0.6
+        age: 0.85
+        chimney: false
+        windowBoxes: false
+        shutters: false
+        interior: none
+        roof: { family: cone, rise: 1.2, overhang: 0.5, sweep: 0.3 }
+        openings:
+          - { id: hatch, role: door, profile: square, at: 0.25, bottom: 0.4, width: 0.9, height: 1.2 }
+      - id: windbreak
+        label: Windbreak
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        position: [0, -4]
+        length: 9
+        bend: -2.6
+        height: 1.8
+        thickness: 0.6
+        automaticGates: false

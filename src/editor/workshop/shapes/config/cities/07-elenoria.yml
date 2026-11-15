@@ -1,0 +1,191 @@
+# Kingdom of Elenoria — elven cities grown from living wood (docs/asset-bible/regions/elenoria.md).
+# Oval, slightly tapering silver-bark forms under leaf-green bell canopies, homes lifted into
+# the canopy on stilt platforms, arched natural openings, heavy ivy and flowers, woven-branch
+# fences, root-stone footings. Light, airy proportions.
+group: Elenoria · living-wood elves
+palette:
+  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.15 }
+  planks: { color: "#93907a", roughness: 0.85, label: Silver bark }
+  plaster: { color: "#d4d8bf", label: Sap-wash }
+  masonry: { color: "#8d9483", roughness: 0.92, label: Mossy root-stone }
+  roof: { color: "#5f8a45", roughness: 0.9, label: Living leaf canopy }
+  trim: { color: "#7d8370", label: Root-stone }
+  timber: { color: "#5c5236", label: Living oak }
+  metal: { color: "#b8a66a", metalness: 0.8, roughness: 0.35, label: Pale gold }
+  glass: { color: "#7fae8c", label: Leaf-light glass }
+autumn: &autumn { roof: { color: "#b8763a", roughness: 0.9, label: Autumn canopy } }
+style:
+  surface: planks
+  facade: plain
+  footprint: oval
+  corner: 0.9
+  storey: 2.9
+  thickness: 0.28
+  taper: 0.92
+  stilts: 2.4
+  roof: { family: bell, pitch: 0.75, overhang: 0.85, sweep: 0.85, sag: 0 }
+  door: arched
+  window: arched
+  shutters: false
+  windowBoxes: true
+  chimney: false
+  ivy: 0.9
+  age: 0.18
+  base: { style: batter, height: 0.7, out: 0.25 }
+  tower: { surface: planks, stonework: fieldstone, footprint: oval, roof: bell }
+  wall: { surface: planks, stonework: fieldstone, crown: null }
+  path: { floor: timber, railing: timber }
+kit:
+  - { id: elenoria-house-round, label: "House · Canopy family home", blueprint: house-round }
+  - { id: elenoria-house-cottage, label: "House · Grove cottage on a platform", blueprint: house-cottage }
+  - { id: elenoria-house-townhouse, label: "House · Tree-tall home", blueprint: house-townhouse }
+  - { id: elenoria-house-double, label: "House · Twin-trunk homes", blueprint: house-double, palette: *autumn }
+  - { id: elenoria-house-hillside, label: "House · Root-terrace home", blueprint: house-hillside }
+  - { id: elenoria-house-tower, label: "House · Ranger's tower home", blueprint: house-tower, palette: *autumn }
+  - { id: elenoria-farm-croft, label: "Farm · Orchard croft", blueprint: farm-croft }
+  - { id: elenoria-farm-barnyard, label: "Farm · Root store and seed granary", blueprint: farm-barnyard, palette: *autumn }
+  - { id: elenoria-farm-farmstead, label: "Farm · Glade farmstead", blueprint: farm-farmstead }
+  - { id: elenoria-inn-roadside, label: "Inn · Moonleaf inn", blueprint: inn-roadside }
+  - { id: elenoria-inn-tavern, label: "Inn · Dewdrop tavern", blueprint: inn-tavern, palette: *autumn }
+  - { id: elenoria-inn-lodge, label: "Inn · Wayfarers' lodge", blueprint: inn-lodge }
+  - { id: elenoria-shop-stalls, label: "Shop · Living market kiosks", blueprint: shop-stalls }
+  - { id: elenoria-shop-general, label: "Shop · Bowyer and fletcher", blueprint: shop-general }
+  - { id: elenoria-shop-corner, label: "Shop · Herbalist", blueprint: shop-corner, palette: *autumn }
+  - { id: elenoria-shop-star, label: "Shop · Star-glass shop", blueprint: shop-curio-tower }
+  - { id: elenoria-shop-baker, label: "Shop · Honey-bread bakery", blueprint: shop-baker }
+  - { id: elenoria-tower-watch, label: "Tower · Ranger watch", blueprint: tower-watch }
+  - { id: elenoria-tower-signal, label: "Tower · Canopy lookout", blueprint: tower-signal }
+  - { id: elenoria-tower-keep, label: "Tower · Warden's spire", blueprint: tower-keep, style: { tower: { roof: spire } } }
+  - { id: elenoria-wall-garden, label: "Wall · Woven hedge walls", blueprint: wall-garden }
+  - { id: elenoria-wall-retaining, label: "Wall · Root terrace", blueprint: wall-retaining, style: { wall: { surface: masonry } } }
+  - { id: elenoria-wall-palisade, label: "Wall · Thorn palisade", blueprint: wall-palisade }
+  - { id: elenoria-stair-bridge, label: "Stairs · Branch footbridge", blueprint: stair-bridge }
+  - { id: elenoria-stair-switchback, label: "Stairs · Root stair", blueprint: stair-switchback }
+  - { id: elenoria-stair-grand, label: "Stairs · Council stair", blueprint: stair-grand }
+styles:
+  grown: &grown { kind: curved-volume, surface: planks, thickness: 0.28, taper: 0.9, shutters: false, windowBoxes: true, chimney: false, ivyDensity: 0.9, age: 0.18, base: { style: batter, height: 0.7, out: 0.25 } }
+presets:
+  - id: elenoria-grove-council
+    label: "Landmark · Grove council court"
+    primitives:
+      - <<: *grown
+        id: court
+        label: Council court
+        footprint: { family: oval, width: 13, depth: 13 }
+        height: 4.2
+        windowBoxes: false
+        roof: { family: bell, rise: 5, overhang: 1, sweep: 0.9 }
+        openings:
+          - { id: arch, role: arch, profile: arched, at: [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], bottom: 0, width: 2.8, height: 3.4 }
+      - id: ring-hedge
+        label: Ring hedge
+        kind: curved-wall
+        surface: planks
+        position: [0, 10]
+        length: 18
+        bend: 6
+        height: 1.1
+        thickness: 0.3
+        openings:
+          - { id: way, role: arch, profile: arched, at: 0.5, bottom: 0, width: 2.4, height: 1.1 }
+
+  - id: elenoria-grown-archive
+    label: "Landmark · Grown archive of joined trunks"
+    primitives:
+      - <<: *grown
+        id: hall
+        label: Archive hall
+        footprint: { family: oval, width: 10, depth: 8 }
+        height: 6
+        levels: 2
+        roof: { family: bell, rise: 4.4, overhang: 0.8, sweep: 0.85 }
+        openings:
+          - { id: portal, role: door, profile: arched, at: 0.25, bottom: 0, width: 1.8, height: 3 }
+          - { id: clerestory, role: window, profile: arched, at: [0.1, 0.18, 0.32, 0.4], bottom: 3.6, width: 0.8, height: 1.6 }
+      - <<: *grown
+        id: trunk-east
+        label: East trunk
+        position: [5.8, -1.6]
+        footprint: { family: oval, width: 4, depth: 4 }
+        height: 9
+        taper: 0.78
+        roof: { family: bell, rise: 3, overhang: 0.7, sweep: 0.9 }
+        openings:
+          - { id: window, role: window, profile: arched, at: 0.3, bottom: 6, width: 0.7, height: 1.2 }
+      - <<: *grown
+        id: trunk-west
+        label: West trunk
+        position: [-5.6, -1.2]
+        footprint: { family: oval, width: 3.6, depth: 3.6 }
+        height: 7.6
+        taper: 0.8
+        roof: { family: bell, rise: 2.8, overhang: 0.7, sweep: 0.9 }
+
+  - id: elenoria-canopy-walk
+    label: "Landmark · Canopy homes joined by a branch bridge"
+    primitives:
+      - <<: *grown
+        id: home-a
+        label: Canopy home
+        position: [-6, 0]
+        elevation: 3.6
+        footprint: { family: oval, width: 5, depth: 5 }
+        height: 2.8
+        roof: { family: bell, rise: 3.2, overhang: 0.8, sweep: 0.85 }
+        openings:
+          - { id: door, role: door, profile: arched, at: 0, bottom: 0, width: 1, height: 2 }
+          - { id: window, role: window, profile: arched, at: 0.25, bottom: 1, width: 0.8, height: 1 }
+      - <<: *grown
+        id: home-b
+        label: Canopy home
+        position: [6, 0.5]
+        elevation: 3.6
+        footprint: { family: oval, width: 4.4, depth: 4.4 }
+        height: 2.6
+        roof: { family: bell, rise: 3, overhang: 0.8, sweep: 0.85 }
+        openings:
+          - { id: door, role: door, profile: arched, at: 0.5, bottom: 0, width: 1, height: 2 }
+      - id: platform-a
+        label: Trunk platform
+        kind: traversal
+        position: [-6, 0]
+        length: 6.2
+        width: 6.2
+        elevation: 3.6
+        mode: walkway
+        support: piers
+        railing: false
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: platform-b
+        label: Trunk platform
+        kind: traversal
+        position: [6, 0.5]
+        length: 5.6
+        width: 5.6
+        elevation: 3.6
+        mode: walkway
+        support: piers
+        railing: false
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: branch-bridge
+        label: Branch bridge
+        kind: traversal
+        position: [0, 0.3]
+        length: 6.4
+        width: 1.4
+        elevation: 3.6
+        bend: 0.8
+        mode: bridge
+        support: none
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: spiral-stair
+        label: Climbing stair
+        kind: traversal
+        position: [-6, 5.8]
+        rotation: -90
+        length: 6.2
+        width: 1.2
+        rise: 3.6
+        bend: 1.6
+        mode: stairs
+        style: { floor: timber, supports: timber, railing: timber }

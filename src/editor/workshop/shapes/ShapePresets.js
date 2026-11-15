@@ -296,7 +296,7 @@ export const SHAPE_PRESETS = Object.freeze(
     return [
       ...c.kit.map((entry) => ({ id: entry.id, label: entry.label, group: c.group,
         create: () => buildCityKitPreset(c.style, entry), materials: materials(entry.style, entry.palette) })),
-      ...c.presets.map((preset) => ({ ...dataPreset(preset, c.group), materials: materials() })),
+      ...c.presets.map((preset) => ({ ...dataPreset(preset, c.group), materials: materials(undefined, preset.palette) })),
     ];
   }),
   ].map((preset) => Object.freeze(preset)),

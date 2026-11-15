@@ -31,7 +31,8 @@ export function loadCityCatalogs(directory) {
       claim(preset.id, name);
       if (typeof preset.label !== 'string' || !Array.isArray(preset.primitives) || !preset.primitives.length)
         throw new Error(`Invalid preset in ${name}: ${preset.id}`);
-      return { id: preset.id, label: preset.label, primitives: preset.primitives.map((p) => expandPlacedPrimitive(p, preset.id)) };
+      return { id: preset.id, label: preset.label, ...(preset.palette ? { palette: preset.palette } : {}),
+        primitives: preset.primitives.map((p) => expandPlacedPrimitive(p, preset.id)) };
     });
     const realm = name.replace(/^\d+-/, '').replace(/\.yml$/, '');
     if (!ID.test(realm)) throw new Error(`Realm file name must be NN-<id>.yml: ${name}`);

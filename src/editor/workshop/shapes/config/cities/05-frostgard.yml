@@ -1,0 +1,165 @@
+# Empire of Frostgard — Norths of the cold mountains (docs/asset-bible/regions/frostgard.md).
+# Heavy horizontal tarred-pine logs on tall granite plinths, very steep gables that shed snow,
+# sod roofs (and snow-laden ones), deep eaves, small shuttered windows, spire-roofed timber
+# towers. No ivy, cold blue-grey stone, warm firelit glass against the cold.
+group: Frostgard · cold mountain Norths
+palette:
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.5 }
+  planks: { color: "#56443a", roughness: 0.92, label: Tarred pine logs }
+  masonry: { color: "#8c939b", roughness: 0.9, normal: 1.2, label: Frost granite }
+  plaster: { color: "#c3beb4", label: Lime render }
+  roof: { color: "#55634a", roughness: 0.99, label: Sod roof }
+  trim: { color: "#7e858d", label: Granite plinth }
+  timber: { color: "#35281f", label: Tarred beams }
+  metal: { color: "#474c52", metalness: 0.7, roughness: 0.5, label: Cold iron }
+  glass: { color: "#6e5a36", label: Firelit horn panes }
+snow: &snow { roof: { color: "#e2e9f0", roughness: 0.7, label: Snow-laden roof } }
+style:
+  surface: planks
+  facade: plain
+  shed: planks
+  stonework: fieldstone
+  corner: 0.25
+  storey: 2.7
+  thickness: 0.34
+  roof: { family: gable, pitch: 1.05, overhang: 0.75, sweep: 0.25, sag: 0.06 }
+  door: square
+  window: square
+  shutters: true
+  windowBoxes: false
+  chimney: true
+  ivy: 0
+  age: 0.5
+  base: { style: plinth, height: 1.1, out: 0.16 }
+  tower: { surface: planks, stonework: fieldstone, footprint: rounded, roof: spire }
+  wall: { surface: masonry, stonework: fieldstone, crown: null }
+  path: { floor: timber, railing: timber }
+kit:
+  - { id: frostgard-house-longhouse, label: "House · Longhouse", blueprint: house-longhouse }
+  - { id: frostgard-house-cottage, label: "House · Sod-roof cottage", blueprint: house-cottage }
+  - { id: frostgard-house-double, label: "House · Snowbound twin houses", blueprint: house-double, palette: *snow }
+  - { id: frostgard-house-hillside, label: "House · Fjord-side house on a stone cellar", blueprint: house-hillside }
+  - { id: frostgard-house-tower, label: "House · Jarl's tower house", blueprint: house-tower, palette: *snow }
+  - { id: frostgard-house-courtyard, label: "House · Windbreak courtyard house", blueprint: house-courtyard }
+  - { id: frostgard-farm-farmstead, label: "Farm · Mountain steading", blueprint: farm-farmstead }
+  - { id: frostgard-farm-barnyard, label: "Farm · Heated storehouse and stabbur", blueprint: farm-barnyard, palette: *snow }
+  - { id: frostgard-farm-croft, label: "Farm · Reindeer herder's croft", blueprint: farm-croft }
+  - { id: frostgard-inn-roadside, label: "Inn · Mead hall inn", blueprint: inn-roadside }
+  - { id: frostgard-inn-tavern, label: "Inn · Skald's alehouse", blueprint: inn-tavern, palette: *snow }
+  - { id: frostgard-inn-lodge, label: "Inn · Mountain pass hostel", blueprint: inn-lodge }
+  - { id: frostgard-shop-general, label: "Shop · Fur trader", blueprint: shop-general }
+  - { id: frostgard-shop-baker, label: "Shop · Smoke-curing house", blueprint: shop-baker }
+  - { id: frostgard-shop-stalls, label: "Shop · Winter market booths", blueprint: shop-stalls, palette: *snow }
+  - { id: frostgard-shop-warehouse, label: "Shop · Whale-oil warehouse", blueprint: shop-warehouse }
+  - { id: frostgard-shop-corner, label: "Shop · Rune carver", blueprint: shop-corner }
+  - { id: frostgard-tower-watch, label: "Tower · Timber watch tower", blueprint: tower-watch }
+  - { id: frostgard-tower-signal, label: "Tower · Giant border beacon", blueprint: tower-signal, style: { tower: { surface: masonry } } }
+  - { id: frostgard-tower-gate, label: "Tower · Palisade gate tower", blueprint: tower-gate }
+  - { id: frostgard-wall-palisade, label: "Wall · Pine palisade", blueprint: wall-palisade }
+  - { id: frostgard-wall-town, label: "Wall · Dry-stone rampart", blueprint: wall-town }
+  - { id: frostgard-wall-retaining, label: "Wall · Snow terrace", blueprint: wall-retaining }
+  - { id: frostgard-stair-switchback, label: "Stairs · Mountain switchback", blueprint: stair-switchback }
+  - { id: frostgard-stair-bridge, label: "Stairs · Gorge footbridge", blueprint: stair-bridge }
+  - { id: frostgard-stair-grand, label: "Stairs · Jarl's hall stair", blueprint: stair-grand }
+styles:
+  logs: &logs { kind: curved-volume, surface: planks, thickness: 0.34, shutters: true, windowBoxes: false, chimney: true, ivyDensity: 0, age: 0.5, base: { style: plinth, height: 1.1, out: 0.16 } }
+presets:
+  - id: frostgard-great-longhall
+    label: "Landmark · Great winter longhall"
+    primitives:
+      - <<: *logs
+        id: longhall
+        label: Great longhall
+        footprint: { family: rounded, width: 22, depth: 8.4, cornerRadius: 0.5 }
+        height: 3.4
+        roof: { family: gable, rise: 7, overhang: 0.9, sweep: 0.3, sag: 0.1 }
+        openings:
+          - { id: great-door, role: door, profile: square, side: right, along: 0, bottom: 0, width: 2, height: 2.6 }
+          - { id: side-door, role: door, profile: square, side: front, along: [-6, 6], bottom: 0, width: 1.2, height: 2.2 }
+          - { id: slit, role: window, profile: square, side: front, along: [-8.5, -3, 0, 3, 8.5], bottom: 1.4, width: 0.6, height: 0.7, shutterPose: closed }
+        features:
+          - { id: door-porch, kind: porch, side: right, along: 0, width: 3.4, depth: 2.4, height: 3 }
+          - { id: smoke-vent, kind: dormer, side: front, along: [-4, 4], width: 1.4, depth: 1.2 }
+          - { id: side-porch, kind: porch, side: front, along: [-6, 6], width: 2, depth: 1.4, height: 2.6 }
+      - id: windbreak
+        label: Windbreak wall
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        position: [14, 2]
+        rotation: 90
+        length: 10
+        bend: 2.4
+        height: 1.8
+        thickness: 0.6
+
+  - id: frostgard-boathouse
+    label: "Landmark · Clinker boathouse with rope loft"
+    primitives:
+      - <<: *logs
+        id: boathouse
+        label: Boathouse
+        chimney: false
+        footprint: { family: rounded, width: 7, depth: 14, cornerRadius: 0.3 }
+        height: 3.2
+        roof: { family: gable, axis: depth, rise: 4.4, overhang: 0.7, sweep: 0.3, sag: 0.08 }
+        openings:
+          - { id: boat-doors, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 5, height: 3 }
+          - { id: loft-door, role: door, profile: square, side: back, along: 0, bottom: 1.4, width: 1.2, height: 1.6 }
+          - { id: side, role: window, profile: square, side: right, along: [-3, 3], bottom: 1.3, width: 0.6, height: 0.6 }
+      - id: shore-runners
+        label: Shore runners
+        kind: traversal
+        position: [0, 11]
+        rotation: 90
+        length: 8
+        width: 4.6
+        elevation: 0.2
+        mode: walkway
+        support: piers
+        railing: false
+        style: { floor: timber, supports: timber, railing: timber }
+
+  - id: frostgard-oath-circle
+    label: "Landmark · Runestone oath circle"
+    primitives:
+      - id: ring-a
+        label: Oath stones
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        position: [0, -3.4]
+        length: 11
+        bend: -4.4
+        height: 1.6
+        thickness: 0.7
+        openings:
+          - { id: gap-1, role: arch, profile: square, at: 0.22, bottom: 0, width: 1, height: 1.6 }
+          - { id: gap-2, role: arch, profile: square, at: 0.5, bottom: 0, width: 1, height: 1.6 }
+          - { id: gap-3, role: arch, profile: square, at: 0.78, bottom: 0, width: 1, height: 1.6 }
+      - id: ring-b
+        label: Oath stones
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        position: [0, 3.4]
+        length: 11
+        bend: 4.4
+        height: 1.6
+        thickness: 0.7
+        openings:
+          - { id: gap-1, role: arch, profile: square, at: 0.22, bottom: 0, width: 1, height: 1.6 }
+          - { id: gap-2, role: arch, profile: square, at: 0.5, bottom: 0, width: 1.6, height: 1.6 }
+          - { id: gap-3, role: arch, profile: square, at: 0.78, bottom: 0, width: 1, height: 1.6 }
+      - id: offering-block
+        label: Offering block
+        kind: curved-volume
+        surface: masonry
+        stonework: fieldstone
+        shutters: false
+        windowBoxes: false
+        chimney: false
+        interior: none
+        footprint: { family: rounded, width: 2.6, depth: 2, cornerRadius: 0.3 }
+        height: 1
+        roof: { family: flat }

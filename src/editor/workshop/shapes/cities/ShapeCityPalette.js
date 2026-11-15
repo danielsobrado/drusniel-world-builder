@@ -11,6 +11,7 @@ const SLOTS = Object.freeze({
 });
 /** The recipe-wide bases a realm sets: stone palette, plaster finish, roof character, weathering. */
 export const CITY_RECIPE_FIELDS = Object.freeze(['style', 'finish', 'topStyle', 'weathering']);
+const shade = (hex, k) => `#${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('')}`;
 
 /**
  * One realm material. `color` is the albedo itself (the shapes' vertex colours only add
@@ -38,6 +39,10 @@ export function cityMaterialDocument(realm, palette, primitives, mainSurface = '
   const recipe = Object.fromEntries(CITY_RECIPE_FIELDS.filter((key) => palette?.recipe?.[key] !== undefined).map((key) => [key, palette.recipe[key]]));
   const slots = Object.keys(palette ?? {}).filter((slot) => SLOTS[slot]);
   const presets = Object.fromEntries(slots.map((slot) => [`${realm}-${slot}`, preset(realm, slot, palette[slot])]));
+  // Masonry shells lay their stones in the stone (trim) area and only the joints in walls, so
+  // they get the masonry colour on the stones and a darker mortar derived from it between them.
+  if (palette?.masonry) presets[`${realm}-mortar`] = { ...preset(realm, 'masonry', palette.masonry), id: `${realm}-mortar`,
+    label: `${palette.masonry.label ?? realm} mortar`.slice(0, 64), baseColor: shade(palette.masonry.color ?? '#ffffff', 0.7) };
   const has = (slot) => Object.hasOwn(presets, `${realm}-${slot}`);
   const materialDefaults = {};
   if (has(mainSurface)) materialDefaults.walls = `${realm}-${mainSurface}`;
@@ -46,7 +51,10 @@ export function cityMaterialDocument(realm, palette, primitives, mainSurface = '
   for (const p of primitives) {
     if (p.kind === 'traversal') continue;
     const surface = p.surface ?? (p.kind === 'curved-wall' ? 'masonry' : 'plaster');
-    if (has(surface)) materialAreaOverrides[`${p.id}:walls`] = `${realm}-${surface}`;
+    if (surface === 'masonry' && has('masonry')) {
+      materialAreaOverrides[`${p.id}:walls`] = `${realm}-mortar`;
+      materialAreaOverrides[`${p.id}:trim`] = `${realm}-masonry`;
+    } else if (has(surface)) materialAreaOverrides[`${p.id}:walls`] = `${realm}-${surface}`;
     // A flat top is a walked stone deck (tower leads, terraces), not roofing.
     if (p.roof?.family === 'flat' && has('trim')) materialAreaOverrides[`${p.id}:roof`] = `${realm}-trim`;
   }

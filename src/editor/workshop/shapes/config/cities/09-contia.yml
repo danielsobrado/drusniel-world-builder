@@ -1,0 +1,204 @@
+# Contian Theocracy — academy and temple cities of the mage-priests (docs/asset-bible/regions/contian.md).
+# Precise pale cut-stone, crisp corners, dark basalt dressings, bronze hardware, verdigris
+# copper roofs, tall arched research windows glowing arcane blue, measured towers and
+# observatories over sober institutional massing. Tall storeys, almost no weathering.
+group: Contia · mage theocracy
+palette:
+  recipe: { style: limestone, finish: masonry, topStyle: slate, weathering: 0.15 }
+  masonry: { color: "#ddd6c6", roughness: 0.8, label: Precision limestone }
+  plaster: { color: "#e9e4d8", label: Academy render }
+  planks: { color: "#6b5a48", label: Archive oak }
+  roof: { color: "#5d8b81", roughness: 0.6, metalness: 0.2, label: Verdigris copper }
+  trim: { color: "#3b3c42", roughness: 0.6, label: Dark basalt dressing }
+  timber: { color: "#4a3a2c", label: Archive oak beams }
+  metal: { color: "#9c7a3c", metalness: 0.85, roughness: 0.35, label: Aged bronze }
+  glass: { color: "#6f9cc4", roughness: 0.2, label: Arcane blue glass }
+style:
+  surface: masonry
+  stonework: ashlar
+  facade: plain
+  corner: 0.08
+  storey: 3.2
+  thickness: 0.42
+  roof: { family: hip, pitch: 0.45, overhang: 0.3, sweep: 0.05, sag: 0 }
+  door: arched
+  window: arched
+  shutters: false
+  windowBoxes: false
+  chimney: true
+  ivy: 0.05
+  age: 0.12
+  base: { style: plinth, height: 0.68, out: 0.12 }
+  tower: { surface: masonry, stonework: ashlar, footprint: oval, roof: cone, crown: { style: corbelled, projection: 0.3, height: 0.7, corbelSpacing: 0.6, arcade: round } }
+  wall: { surface: masonry, stonework: ashlar, crown: { style: parapet, height: 0.7, merlons: square, merlonWidth: 0.9, merlonGap: 0.45 } }
+  path: { floor: stone, railing: stone }
+kit:
+  - { id: contia-house-townhouse, label: "House · Scribe rowhouse", blueprint: house-townhouse }
+  - { id: contia-house-cottage, label: "House · Acolyte cottage", blueprint: house-cottage }
+  - { id: contia-house-double, label: "House · Magisters' paired houses", blueprint: house-double }
+  - { id: contia-house-courtyard, label: "House · Scholar's court house", blueprint: house-courtyard }
+  - { id: contia-house-tower, label: "House · Mage's tower house", blueprint: house-tower, style: { roof: { family: spire, pitch: 1.1 } } }
+  - { id: contia-house-hillside, label: "House · Terrace residence", blueprint: house-hillside }
+  - { id: contia-farm-farmstead, label: "Farm · Temple farm", blueprint: farm-farmstead }
+  - { id: contia-farm-barnyard, label: "Farm · Tithe granary", blueprint: farm-barnyard }
+  - { id: contia-farm-croft, label: "Farm · Herb-grower's croft", blueprint: farm-croft }
+  - { id: contia-inn-roadside, label: "Inn · Pilgrim hostel", blueprint: inn-roadside }
+  - { id: contia-inn-tavern, label: "Inn · Inkwell tavern", blueprint: inn-tavern }
+  - { id: contia-inn-lodge, label: "Inn · Visiting scholars' lodge", blueprint: inn-lodge }
+  - { id: contia-shop-instruments, label: "Shop · Magical instrument shop", blueprint: shop-curio-tower }
+  - { id: contia-shop-corner, label: "Shop · Lens grinder", blueprint: shop-corner }
+  - { id: contia-shop-general, label: "Shop · Scriptorium supply", blueprint: shop-general }
+  - { id: contia-shop-warehouse, label: "Shop · Reagent store", blueprint: shop-warehouse }
+  - { id: contia-shop-baker, label: "Shop · Refectory bakery", blueprint: shop-baker }
+  - { id: contia-tower-watch, label: "Tower · Inquisitor watch", blueprint: tower-watch }
+  - { id: contia-tower-signal, label: "Tower · Measured sighting tower", blueprint: tower-signal }
+  - { id: contia-tower-keep, label: "Tower · Archive keep", blueprint: tower-keep }
+  - { id: contia-wall-town, label: "Wall · Theocratic ward wall", blueprint: wall-town }
+  - { id: contia-wall-garden, label: "Wall · Cloister walls", blueprint: wall-garden }
+  - { id: contia-wall-retaining, label: "Wall · Plaza terrace", blueprint: wall-retaining }
+  - { id: contia-stair-grand, label: "Stairs · Academy stair", blueprint: stair-grand }
+  - { id: contia-stair-switchback, label: "Stairs · Observatory switchback", blueprint: stair-switchback }
+  - { id: contia-stair-bridge, label: "Stairs · Measured bridge", blueprint: stair-bridge }
+styles:
+  cut: &cut { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.45, shutters: false, windowBoxes: false, chimney: false, ivyDensity: 0.05, age: 0.12, base: { style: plinth, height: 0.68, out: 0.12 } }
+presets:
+  - id: contia-academy-court
+    label: "Landmark · Academy court with matched arcades"
+    primitives:
+      - <<: *cut
+        id: north-wing
+        label: Lecture wing
+        position: [0, -6]
+        footprint: { family: rounded, width: 16, depth: 5, cornerRadius: 0.08 }
+        height: 7
+        levels: 2
+        roof: { family: hip, rise: 2.2, overhang: 0.3, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: arcade, role: arch, profile: arched, side: front, along: [-6, -3.6, -1.2, 1.2, 3.6, 6], bottom: 0, width: 1.6, height: 2.8 }
+          - { id: research, role: window, profile: arched, side: front, along: [-6, -3.6, -1.2, 1.2, 3.6, 6], bottom: 4.2, width: 0.7, height: 2.2 }
+      - <<: *cut
+        id: west-wing
+        label: Library wing
+        position: [-8.5, 1.5]
+        rotation: 90
+        footprint: { family: rounded, width: 10, depth: 5, cornerRadius: 0.08 }
+        height: 7
+        levels: 2
+        roof: { family: hip, rise: 2.2, overhang: 0.3, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: arcade, role: arch, profile: arched, side: back, along: [-3.6, -1.2, 1.2, 3.6], bottom: 0, width: 1.6, height: 2.8 }
+          - { id: research, role: window, profile: arched, side: back, along: [-3.6, -1.2, 1.2, 3.6], bottom: 4.2, width: 0.7, height: 2.2 }
+      - <<: *cut
+        id: east-wing
+        label: Laboratory wing
+        position: [8.5, 1.5]
+        rotation: 90
+        footprint: { family: rounded, width: 10, depth: 5, cornerRadius: 0.08 }
+        height: 7
+        levels: 2
+        chimney: true
+        roof: { family: hip, rise: 2.2, overhang: 0.3, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: arcade, role: arch, profile: arched, side: front, along: [-3.6, -1.2, 1.2, 3.6], bottom: 0, width: 1.6, height: 2.8 }
+          - { id: research, role: window, profile: arched, side: front, along: [-3.6, -1.2, 1.2, 3.6], bottom: 4.2, width: 0.7, height: 2.2 }
+      - id: court-gate
+        label: Inspection gate wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [0, 6.6]
+        length: 12
+        bend: 0
+        height: 2.6
+        thickness: 0.5
+        openings:
+          - { id: gate, role: arch, profile: arched, at: 0.5, bottom: 0, width: 2.6, height: 2.6 }
+
+  - id: contia-observatory
+    label: "Landmark · Measured observatory with instrument deck"
+    primitives:
+      - <<: *cut
+        id: base-block
+        label: Observatory base
+        footprint: { family: rounded, width: 7, depth: 7, cornerRadius: 0.08 }
+        height: 6
+        levels: 2
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.7, merlons: none }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.4, height: 2.6 }
+          - { id: window, role: window, profile: arched, side: front, along: [-2, 2], bottom: 3.4, width: 0.7, height: 2 }
+      - <<: *cut
+        id: drum
+        label: Instrument drum
+        position: [0, 0]
+        elevation: 6
+        footprint: { family: oval, width: 4.6, depth: 4.6 }
+        height: 7
+        levels: 2
+        roof: { family: bell, rise: 2.6, overhang: 0.3, sweep: 0.6 }
+        openings:
+          - { id: sight, role: window, profile: arched, at: [0.15, 0.4, 0.65, 0.9], bottom: 4.4, width: 0.6, height: 2 }
+        features:
+          - { id: instrument-deck, kind: balcony, at: 0.25, width: 3.6, depth: 1.1, bottom: 3.6, height: 1 }
+
+  - id: contia-archive-vault
+    label: "Landmark · Archive vault with scribe vestibule"
+    primitives:
+      - <<: *cut
+        id: vault
+        label: Archive vault
+        footprint: { family: rounded, width: 12, depth: 8, cornerRadius: 0.08 }
+        height: 6.4
+        roof: { family: hip, rise: 1.6, overhang: 0.25, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: vent, role: slit, profile: square, side: front, along: [-4.5, -2.5, 2.5, 4.5], bottom: 4.6, width: 0.3, height: 1 }
+          - { id: vent-side, role: slit, profile: square, side: right, along: [-2, 0, 2], bottom: 4.6, width: 0.3, height: 1 }
+        features:
+          - { id: pilaster, kind: buttress, side: front, along: [-5.4, -3.5, 3.5, 5.4], width: 0.6, depth: 0.4, height: 6 }
+      - <<: *cut
+        id: vestibule
+        label: Scribe vestibule
+        position: [0, 5.4]
+        footprint: { family: rounded, width: 5, depth: 3, cornerRadius: 0.08 }
+        height: 3.6
+        roof: { family: hip, rise: 1, overhang: 0.25, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: bronze-doors, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.6, height: 2.6 }
+          - { id: window, role: window, profile: arched, side: right, along: 0, bottom: 1.2, width: 0.6, height: 1.4 }
+
+  - id: contia-inquisitor-gate
+    label: "Landmark · Inquisitor check gate with guard booth"
+    primitives:
+      - <<: *cut
+        id: gate
+        label: Check gate
+        footprint: { family: rounded, width: 6, depth: 4, cornerRadius: 0.08 }
+        height: 6
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.7, merlons: square, merlonWidth: 0.8, merlonGap: 0.4 }
+        openings:
+          - { id: passage, role: arch, profile: arched, side: front, along: 0, bottom: 0, width: 2, height: 3.2 }
+          - { id: passage-in, role: arch, profile: arched, side: back, along: 0, bottom: 0, width: 2, height: 3.2 }
+          - { id: seal-window, role: window, profile: arched, side: front, along: 0, bottom: 4, width: 0.8, height: 1.2 }
+      - <<: *cut
+        id: booth
+        label: Guard booth
+        position: [4.4, 1.2]
+        footprint: { family: rounded, width: 2.8, depth: 2.8, cornerRadius: 0.08 }
+        height: 2.8
+        roof: { family: hip, rise: 1, overhang: 0.25, sweep: 0.05, sag: 0 }
+        openings:
+          - { id: door, role: door, profile: arched, side: right, along: 0, bottom: 0, width: 0.9, height: 2.1 }
+          - { id: hatch, role: window, profile: arched, side: front, along: 0, bottom: 1, width: 0.8, height: 1 }
+      - id: ward-left
+        label: Ward wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [-7.5, 0]
+        length: 9
+        height: 3.4
+        thickness: 0.6
+        crown: { style: parapet, height: 0.6, merlons: square }
+        automaticGates: false

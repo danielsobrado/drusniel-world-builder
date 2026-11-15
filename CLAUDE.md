@@ -92,6 +92,13 @@ exposure, or a baked asset will not look the way it did while authoring.
 
 Code Files are not too big unless really necessary and are always SOLID, refactor if needed
 
+## Workshop city kits
+
+Each Drusniel realm has a city catalog of starting designs: style grammar, material palette,
+blueprint kit and landmarks. See [workshop city kits](docs/workshop-city-kits.md). Add a building
+type as a blueprint every realm can use, and give a realm its look through its palette and
+style, never through realm branches in code.
+
 ## Settlements
 
 Towns are drawn by `SettlementView` from derived plans — see
