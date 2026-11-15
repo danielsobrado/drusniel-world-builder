@@ -74,8 +74,14 @@ class MeshBuilder {
     }
   }
 
-  /** A sawn or broken face: pale heartwood with a darker growth ring. */
+  /** A sawn or broken face: pale heartwood with a darker growth ring and crisp rim crease. */
   endGrain(ring, sides, centreAt, flip) {
+    const outer = this.positions.length / 3;
+    for (let side = 0; side < sides; side += 1) {
+      const offset = (ring + side) * 3;
+      const [x, y, z] = this.positions.slice(offset, offset + 3);
+      this.vertex(x, y, z, SCRATCH.copy(BARK_DARK).lerp(HEARTWOOD_RING, 0.55));
+    }
     const inner = this.positions.length / 3;
     for (let side = 0; side < sides; side += 1) {
       const offset = (ring + side) * 3;
@@ -84,15 +90,15 @@ class MeshBuilder {
         centreAt[0] + (x - centreAt[0]) * 0.62,
         centreAt[1] + (y - centreAt[1]) * 0.62,
         centreAt[2] + (z - centreAt[2]) * 0.62,
-        side % 2 ? HEARTWOOD_RING : SCRATCH.copy(HEARTWOOD_RING).lerp(HEARTWOOD, 0.35),
+        SCRATCH.copy(HEARTWOOD_RING).lerp(HEARTWOOD, 0.45),
       );
     }
     const centre = this.vertex(centreAt[0], centreAt[1], centreAt[2], HEARTWOOD);
     this.fan(centre, inner, sides, flip);
     for (let side = 0; side < sides; side += 1) {
       const next = (side + 1) % sides;
-      const a = ring + side;
-      const b = ring + next;
+      const a = outer + side;
+      const b = outer + next;
       const c = inner + side;
       const d = inner + next;
       if (flip) this.indices.push(a, c, b, b, c, d);
@@ -124,19 +130,20 @@ export function createStumpGeometry({ radius = 0.34, height = 0.62, roots = 5 } 
   const rings = 7;
   const cutTilt = 0.16;
   for (let ring = 0; ring < rings; ring += 1) {
-    const t = ring / (rings - 1);
-    for (let side = 0; side < sides; side += 1) {
-      const angle = (side / sides) * Math.PI * 2;
-      const lobe = Math.abs(Math.cos(angle * roots * 0.5 + 0.6)) ** 1.6;
-      const uneven = 0.86 + 0.14 * Math.sin(angle * 2 + 1);
-      const flare = (1 - t) ** 3;
-      const reach = radius * (0.96 + 0.05 * Math.sin(angle * 7)) * (1 + flare * (0.35 + 1.5 * lobe)) * uneven;
-      const x = Math.cos(angle) * reach;
-      const z = Math.sin(angle) * reach;
-      const moss = smoothstep(0.1, 0.8, Math.sin(angle) * 0.7 + 0.45 - t * 0.5 + (mottle(angle * 3, t * 6) - 0.5))
-        * (1 - t * 0.5);
-      builder.vertex(x, -0.12 + t * (height + 0.12) + (t === 1 ? x * cutTilt : 0), z, barkColor(angle * 4, t * 7, moss));
-    }
+      const t = ring / (rings - 1);
+      for (let side = 0; side < sides; side += 1) {
+        const angle = (side / sides) * Math.PI * 2;
+        const lobe = Math.abs(Math.cos(angle * roots * 0.5 + 0.6)) ** 1.6;
+        const uneven = 0.86 + 0.14 * Math.sin(angle * 2 + 1);
+        const flare = (1 - t) ** 3;
+        const sinkTuck = ring === 0 ? 0.90 : 1.0;
+        const reach = radius * (0.96 + 0.05 * Math.sin(angle * 7)) * (1 + flare * (0.35 + 1.5 * lobe)) * uneven * sinkTuck;
+        const x = Math.cos(angle) * reach;
+        const z = Math.sin(angle) * reach;
+        const moss = smoothstep(0.1, 0.8, Math.sin(angle) * 0.7 + 0.45 - t * 0.5 + (mottle(angle * 3, t * 6) - 0.5))
+          * (1 - t * 0.5);
+        builder.vertex(x, -0.28 + t * (height + 0.28) + (t === 1 ? x * cutTilt : 0), z, barkColor(angle * 4, t * 7, moss));
+      }
   }
   builder.grid(0, rings, sides);
   builder.endGrain((rings - 1) * sides, sides, [0, height, 0], true);
