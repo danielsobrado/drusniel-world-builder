@@ -52,6 +52,11 @@ export class WorkshopHistory {
     return this.#future.length;
   }
 
+  /** The entry the next undo (or redo) would apply, so callers can key their own state to it. */
+  peek(direction = 'undo') {
+    return (direction === 'redo' ? this.#future : this.#past).at(-1) ?? null;
+  }
+
   #recordEvent(event) {
     const before = this.#lastDocument;
     this.#lastDocument = event.document;

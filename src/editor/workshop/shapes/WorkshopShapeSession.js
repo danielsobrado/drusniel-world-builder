@@ -21,6 +21,9 @@ function validateComposition(composition) {
 }
 
 export class WorkshopShapeSession {
+  /** History entry -> { before, after } look (materials and recipe bases) that entry changed. */
+  #looks = new WeakMap();
+
   constructor(composition = createShapePreset('rounded-cottage')) {
     this.bus = new WorkshopCommandBus(createWorkshopDocumentFromRecipe({
       composition: validateComposition(composition),
@@ -118,13 +121,26 @@ export class WorkshopShapeSession {
     this.transaction = null;
     return result;
   }
+  /**
+   * Tie a look change (a realm design's palette and recipe bases) to the edit just made, so
+   * undoing that edit restores the previous look and redoing it re-applies the new one. `mark`
+   * is the undo entry from before the edit; nothing is tied when the edit changed nothing.
+   */
+  attachLook(look, mark) {
+    const entry = this.history.peek('undo');
+    if (entry && entry !== mark) this.#looks.set(entry, look);
+  }
   undo() {
     this.cancel();
-    return this.history.undo();
+    const entry = this.history.peek('undo'), result = this.history.undo();
+    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).before);
+    return result;
   }
   redo() {
     this.cancel();
-    return this.history.redo();
+    const entry = this.history.peek('redo'), result = this.history.redo();
+    if (result && this.#looks.has(entry)) this.onLook?.(this.#looks.get(entry).after);
+    return result;
   }
   captureRuntimeState() {
     return {

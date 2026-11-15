@@ -16,21 +16,17 @@ export class WorkshopShapeUiBridge {
         ui.status.textContent = message;
         ui.status.classList.toggle('is-error', error);
       },
-      // The realm's recipe bases go to the form; its palette is undoable through the material
-      // history and keeps favourites while replacing the old design's area assignments.
+      // A realm design's recipe bases and palette; returns the looks before and after, which the
+      // shape session ties to the design's history entry for undo and redo.
       onMaterials: ({ recipe, document }, group) => {
-        for (const [key, value] of Object.entries(recipe)) {
-          const control = ui.form.elements[key];
-          if (!control) continue;
-          control.value = String(value);
-          // Let slider outputs and form listeners see the change, exactly as a user edit would.
-          for (const type of ['input', 'change']) control.dispatchEvent(new Event(type, { bubbles: true }));
-        }
-        const current = ui.materialController?.toDocument();
-        if (current) ui.materialController.commit({ ...current, ...document, materialLibrary: { sources: current.materialLibrary.sources,
-          presets: { ...current.materialLibrary.presets, ...document.materialLibrary.presets } } }, `${group} materials applied.`);
+        const keys = Object.keys(recipe), before = this.captureLook(keys);
+        const current = before.document;
+        this.applyLook({ recipe, document: current && { ...current, ...document, materialLibrary: { sources: current.materialLibrary.sources,
+          presets: { ...current.materialLibrary.presets, ...document.materialLibrary.presets } } } }, `${group} materials applied.`);
+        return { before, after: this.captureLook(keys) };
       },
     });
+    this.editor.session.onLook = (look) => this.applyLook(look, 'Materials restored with the design.');
     this.keyDown = (event) => {
       if (
         !this.active ||
@@ -50,6 +46,25 @@ export class WorkshopShapeUiBridge {
       this.editor.changed();
     };
     window.addEventListener('keydown', this.keyDown, true);
+  }
+  /** The recipe bases named by `keys` as the form holds them, plus the material document. */
+  captureLook(keys) {
+    const { form, materialController } = this.ui;
+    return {
+      recipe: Object.fromEntries(keys.filter((key) => form.elements[key]).map((key) => [key, form.elements[key].value])),
+      document: materialController?.toDocument() ?? null,
+    };
+  }
+  applyLook({ recipe, document }, message) {
+    const { form, materialController } = this.ui;
+    for (const [key, value] of Object.entries(recipe)) {
+      const control = form.elements[key];
+      if (!control) continue;
+      control.value = String(value);
+      // Let slider outputs and form listeners see the change, exactly as a user edit would.
+      for (const type of ['input', 'change']) control.dispatchEvent(new Event(type, { bubbles: true }));
+    }
+    if (document && materialController) materialController.commit(document, message);
   }
   get active() {
     return this.ui.form.elements.archetype.value === 'composition';

@@ -66,3 +66,22 @@ test('preset ids are unique and side offsets stay on their wall', () => {
   assert.equal(new Set(SHAPE_PRESETS.map((p) => p.id)).size, SHAPE_PRESETS.length);
   assert.throws(() => placeOnSide({ family: 'rounded', width: 4, depth: 4, cornerRadius: 0.2 }, 'front', 3), /leaves the front side/);
 });
+
+test('undo and redo of a realm design restore and re-apply its look', async () => {
+  const { WorkshopShapeSession } = await import('../src/editor/workshop/shapes/WorkshopShapeSession.js');
+  const session = new WorkshopShapeSession(), seen = [];
+  session.onLook = (look) => seen.push(look);
+  const mark = session.history.peek('undo');
+  session.replace(createShapePreset('zuraldi-baserri'));
+  session.attachLook({ before: 'craft look', after: 'zuraldi look' }, mark);
+  session.undo();
+  session.redo();
+  assert.deepEqual(seen, ['craft look', 'zuraldi look']);
+  // Re-choosing the same design changes nothing, so no look is tied to an older entry.
+  const again = session.history.peek('undo');
+  session.replace(createShapePreset('zuraldi-baserri'));
+  session.attachLook({ before: 'stale', after: 'stale' }, again);
+  session.undo();
+  assert.deepEqual(seen, ['craft look', 'zuraldi look', 'craft look']);
+  session.dispose();
+});

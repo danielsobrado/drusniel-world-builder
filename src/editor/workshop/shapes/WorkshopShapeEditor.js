@@ -68,10 +68,13 @@ export class WorkshopShapeEditor {
       if (preview) return;
       if (action === 'preset') {
         this.inspector.show('building');
+        const mark = this.session.history.peek('undo');
         this.session.replace(createShapePreset(event.target.value));
-        // A realm design brings its palette; other designs keep the current materials.
+        // A realm design brings its palette; other designs keep the current materials. The look
+        // rides on the design's history entry, so undo and redo bring it back and forth too.
         const preset = SHAPE_PRESETS.find((p) => p.id === event.target.value);
-        if (preset.materials) this.onMaterials?.(preset.materials(this.session.primitives), preset.group);
+        const look = preset.materials && this.onMaterials?.(preset.materials(this.session.primitives), preset.group);
+        if (look) this.session.attachLook(look, mark);
         this.select(this.session.primitives[0].id);
         this.changed({ frame: true });
       }
