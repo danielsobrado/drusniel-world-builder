@@ -86,6 +86,7 @@ test('createForestDebrisPrototypes binds albedo-preserving colorNode and bark bu
   assert.equal(mat.vertexColors, true);
   assert.ok(mat.colorNode, 'expected colorNode on fallenLog material');
   assert.ok(mat.normalNode, 'expected bark bump normalNode on fallenLog material');
+  assert.ok(mat.roughnessNode, 'expected roughnessNode on fallenLog material');
   mat.dispose();
   defs[0].parts[0].geometry.dispose();
 });

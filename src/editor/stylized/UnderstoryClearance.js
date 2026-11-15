@@ -153,8 +153,8 @@ export function collectDebrisContactFootprints(placements = [], footprints = [],
       const yaw = p.rotationY ?? 0;
       const dirX = hx >= hz ? Math.cos(yaw) : Math.sin(yaw);
       const dirZ = hx >= hz ? -Math.sin(yaw) : Math.cos(yaw);
-      const radius = Math.max(0.45, Math.min(0.68, shortHalf * 0.95));
-      const reach = radius + 0.85 * scale;
+      const radius = Math.max(0.38, Math.min(0.58, shortHalf * 0.85));
+      const reach = radius + 1.15 * scale;
       const span = Math.max(0.4, longHalf - radius * 0.7);
       for (const s of [-1, 0, 1]) {
         out.push({

@@ -1056,13 +1056,16 @@ export class StylizedSurfaceView {
     const debrisPlacements = this.forestDebrisView?.manifestCache.get(
       `${descriptor.chunkX}:${descriptor.chunkZ}`,
     )?.placements ?? [];
+    const debrisSources = [];
     for (const circle of collectDebrisContactFootprints(debrisPlacements, this.forestDebrisView?.prototypeFootprints)) {
-      sources.push({
+      const entry = {
         x: circle.x,
         z: circle.z,
         radius: circle.reach,
         strength: this.contactShadeSettings.rockStrength * 0.9,
-      });
+      };
+      sources.push(entry);
+      debrisSources.push({ ...entry, radius: circle.reach * 1.15, strength: 0.78 });
     }
     if (sources.length === 0) return;
     paintContactShade({
@@ -1074,6 +1077,17 @@ export class StylizedSurfaceView {
       sources,
       channel: 1,
     });
+    if (debrisSources.length > 0) {
+      paintContactShade({
+        pixels: terrainSlot.forestFloorPixels,
+        size: terrainSlot.forestFloorSize,
+        centerWorldX: descriptor.centerWorldX,
+        centerWorldZ: descriptor.centerWorldZ,
+        chunkWorldSize: this.chunkWorldSize,
+        sources: debrisSources,
+        channel: 2,
+      });
+    }
     PerfCounters.inc('contactShadeSlotsPainted', sources.length);
   }
 
