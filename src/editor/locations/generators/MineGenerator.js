@@ -132,7 +132,8 @@ export function generate(b, params) {
   const railSegments = [
     [-0.9, 0, 5, -0.9, -1, -40],
     [-0.9, -1, -40, -2.5, -1, -52],
-    [inclineTop.x, inclineTop.y, inclineTop.z, 0, -9.2, -83],
+    [inclineTop.x, inclineTop.y, inclineTop.z, 0, -9, -80],
+    [0, -9, -80, 0, -9, -83],
   ];
   const rubblePoints = [
     { x: fall.x, y: fall.y, z: fall.z, radius: 7.5 },
@@ -252,6 +253,7 @@ export function generate(b, params) {
     { x: 32, y: 1.4, z: -31, dx: 0.7, dz: -0.7, count: 4 },
   ]);
 
-  b.spawn('entry', P(0, 0, 3.5), 0);
+  // Outside the adit exit's 2.5 m radius, so arriving never offers to leave at once.
+  b.spawn('entry', P(0, 0, 2.6), 0);
   b.exit('adit', P(0, 0, 5.6), { label: 'Leave the workings' });
 }

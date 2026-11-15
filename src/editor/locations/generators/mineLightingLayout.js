@@ -129,7 +129,8 @@ export function placeUnlitFrameHook(b, frame) {
 }
 
 /**
- * Mounts a lantern on an iron wall bracket driven flush into the probed rock wall.
+ * Mounts a lantern on an iron wall bracket driven flush into the probed rock wall. Returns the lantern
+ * position, or null when no wall lies within `maxProbe` (nothing is built then).
  */
 export function mountWallSconceLantern(b, origin, dirX, dirZ, {
   heightAboveFloor = 1.68,
@@ -147,7 +148,8 @@ export function mountWallSconceLantern(b, origin, dirX, dirZ, {
       break;
     }
   }
-  if (wallDist === null) wallDist = 1.65;
+  // No rock within reach: build nothing rather than a bracket and lantern hanging in mid-air.
+  if (wallDist === null) return null;
 
   const wallX = origin.x + dirX * wallDist;
   const wallZ = origin.z + dirZ * wallDist;
@@ -209,7 +211,7 @@ export function placeHaulageLanterns(b, frames, sections, { skipNearZ = [] } = {
     const frame = frames[i];
     const z = frame.plan.center.z;
 
-    // Keep the outer adit threshold (frames[0]) in cool twilight with an unlit hook; start warm lamps at frames[1] and keep the mine-6 close-up frame (~-8.7) lit.
+    // Keep the outer adit threshold (frames[0]) in cool twilight with an unlit hook; start warm lamps at frames[1].
     if (z > -1.2) {
       if (i === 0) placeUnlitFrameHook(b, frame);
       continue;
@@ -222,7 +224,9 @@ export function placeHaulageLanterns(b, frames, sections, { skipNearZ = [] } = {
     const distSinceLast = lastLitZ - z;
     const h = detHash(b.seed + 19, i);
     const isFirstWarm = placed.length === 0;
-    const keepPortalCloseUp = i === 3 || Math.abs(z - (-8.69)) < 1.8;
+    // In the portal approach (first 12 m) the first frame at least the shortest designed gap (4.6 m)
+    // past the last lamp is always lit, so the way in never waits on the random gap.
+    const keepPortalCloseUp = z > -12 && distSinceLast >= 4.6;
     const isFinalApproach = i === frames.length - 1 || i === frames.length - 2;
     const desiredGap = 4.6 + detHash(b.seed + 41, i) * 3.6;
 

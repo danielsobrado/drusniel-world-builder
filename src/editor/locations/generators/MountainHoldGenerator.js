@@ -1,5 +1,5 @@
 import { coursedMasonryWall, emitRadialArch } from '../gen/dwarvenMasonry.js';
-import { beam, block, box, coursedWall, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { box, coursedWall, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { hall, shaft } from '../gen/shapes.js';
 import { buildForgeheartInterior } from './forgeheartInterior.js';
 import { brazier, bridge, crate, pillar, stairs } from './kits.js';

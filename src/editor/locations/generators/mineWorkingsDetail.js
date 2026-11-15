@@ -305,12 +305,20 @@ export function buildSortingStation(b, shaftAt, hub, lightingSections = resolveM
     b.prop('timber', roughTimber(P(2.6, -1 + dy, -57.5 + dz), P(5.2, -1 + dy, -57.5 + dz), 0.12, 0.11, { bow: 0.015, irregular: 0.32 }), 0x9b7a54);
   }
   b.nav.block(P(3.9, -1, -57.4), 1.4, 2);
-  const stores = [[-9.5, -55.5], [-8.6, -56.6], [-9.9, -57.2], [5.5, -42], [6.6, -41.6]];
+  // The first store crate stands clear of the camp lean-to's back pole, and the small crate rests on its
+  // actual lid (its size is random) rather than at a fixed height that floated or sank into the barrel.
+  const stores = [[-9.6, -56.3], [-8.6, -56.6], [-9.9, -57.2], [5.5, -42], [6.6, -41.6]];
+  let stackBase = null;
   stores.forEach(([x, z], index) => {
-    if (index % 2) barrel(b, P(x, -1, z)); else crate(b, P(x, -1, z), b.range(0.7, 1), b.range(0, 1));
+    if (index % 2) barrel(b, P(x, -1, z));
+    else {
+      const size = b.range(0.7, 1);
+      crate(b, P(x, -1, z), size, b.range(0, 1));
+      stackBase ??= { x, z, top: -1 + size * 0.82 };
+    }
     b.nav.block(P(x, -1, z), 0.6, 2);
   });
-  crate(b, P(-8.9, -0.3, -56.2), 0.6, 0.5);
+  crate(b, P(stackBase.x + 0.04, stackBase.top, stackBase.z - 0.03), 0.6, 0.5);
 }
 
 /** Active West stope: wedged stulls, gallery supports, ore crib, mining tools, and seam lighting. */
@@ -541,7 +549,10 @@ export function buildFloodedLevel(b, inclineTop, flooded, waterY, inclineShape =
       tint: flCfg.tint, intensity: 3.8, range: 14.0, hung: 0.12, section: 'flooded',
     });
   }
-  rails(b, inclineTop, P(0, -9.2, -83), 0.9);
+  // Down the incline on its own floor to where it meets the drowned level (0,-9,-80), then a short run
+  // under the pier and the water. One straight run to (0,-9.2,-83) floated up to 0.8 m and broke the deck.
+  rails(b, inclineTop, P(0, -9, -80), 0.9);
+  rails(b, P(0, -9, -80), P(0, -9, -83), 0.9);
 
   // Walkable planked duckboard pier jutting cleanly to the edge of the flooded cavern lake.
   buildDuckboardPier(b, waterY);
