@@ -1,4 +1,4 @@
-import { angularRock, hewnBeam, rod, roughTimber, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { angularRock, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { createTimberBeam, createTimberBoard } from '../gen/timberGeometry.js';
 import { barrel, crate, lantern } from './kits.js';
 import { buildMiningTool } from './mineProps.js';
@@ -21,6 +21,8 @@ export function buildWheelbarrow(b, at, { yaw = 0, loaded = true } = {}) {
   const c = Math.cos(yaw), s = Math.sin(yaw);
   const local = (lx, ly, lz) => P(at.x + c * lx + s * lz, at.y + ly, at.z - s * lx + c * lz);
   const tones = [0x9c7a53, 0x8e6d48];
+  // Seeds include where the barrow stands, so two barrows never carry identical boards and ore.
+  const placed = Math.round(Math.abs(at.x) * 31 + Math.abs(at.z) * 17);
 
   // Two long handles extending from front wheel axle to rear grip.
   for (const lx of [-0.26, 0.26]) {
@@ -51,22 +53,22 @@ export function buildWheelbarrow(b, at, { yaw = 0, loaded = true } = {}) {
     for (const sideSign of [-1, 1]) {
       b.prop('timber', createTimberBoard(
         local(sideSign * fx, py, -0.32), local(sideSign * fx, py, 0.42),
-        UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1300 + row * 17 + sideSign },
+        UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1300 + placed + row * 17 + sideSign },
       ), tones[row]);
     }
     b.prop('timber', createTimberBoard(
       local(-fx, py, 0.42), local(fx, py, 0.42),
-      UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1350 + row * 17 },
+      UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1350 + placed + row * 17 },
     ), tones[1 - row]);
     b.prop('timber', createTimberBoard(
       local(-fx, py, -0.32), local(fx, py, -0.32),
-      UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1390 + row * 17 },
+      UP_DIR, 0.13, 0.036, { irregular: 0.14, wear: 0.5, seed: 1390 + placed + row * 17 },
     ), tones[row]);
   }
   if (loaded) {
     for (const [ox, oy, oz, sc] of [[0, 0.56, 0.06, 0.18], [-0.12, 0.52, -0.1, 0.14], [0.13, 0.53, 0.16, 0.15]]) {
       b.prop('ore', angularRock(sc, sc * 0.75, sc, local(ox, oy, oz), {
-        yaw: yaw + ox * 4, irregular: 0.48, seed: Math.round((ox + oz) * 100) + 1400,
+        yaw: yaw + ox * 4, irregular: 0.48, seed: Math.round((ox + oz) * 100) + 1400 + placed,
       }), 0xd4b68c);
     }
   }
@@ -169,7 +171,11 @@ export function buildMinerCamp(b, center, floorY, { lightSection = 'hub' } = {})
   // Rolled canvas bedroll + pack + ore/grain sacks near the west bench.
   const brY = (b.probe(cx - 1.55, floorY + 1.0, cz - 0.85, -1, 2.5) ?? floorY);
   b.prop('rock_debris', rod(P(cx - 1.85, brY + 0.14, cz - 0.95), P(cx - 1.25, brY + 0.14, cz - 0.75), 0.14, 0.14, 10), 0x7f684e);
-  b.prop('rock_debris', rod(P(cx - 1.85, brY + 0.14, cz - 0.95), P(cx - 1.25, brY + 0.14, cz - 0.75), 0.08, 0.08, 8), 0x9c5a3c);
+  // Two leather ties around the roll (a thinner rod along its whole length would sit hidden inside it).
+  for (const t of [0.22, 0.78]) {
+    const sx = cx - 1.85 + 0.6 * t, sz = cz - 0.95 + 0.2 * t;
+    b.prop('rock_debris', rod(P(sx - 0.02, brY + 0.14, sz - 0.007), P(sx + 0.02, brY + 0.14, sz + 0.007), 0.152, 0.152, 10), 0x9c5a3c);
+  }
   buildOreSack(b, P(cx - 1.85, brY, cz + 0.95), { scale: 1.05, yaw: 0.4 });
   buildOreSack(b, P(cx - 1.42, brY, cz + 1.18), { scale: 0.9, yaw: 1.1, tint: 0xa8926e });
 
