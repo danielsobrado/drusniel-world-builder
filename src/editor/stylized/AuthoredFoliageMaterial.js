@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { attribute, dot, float, materialRoughness, mix, mx_noise_float, normalWorld, positionWorld, smoothstep, vec3 } from 'three/tsl';
+import { attribute, dot, float, materialRoughness, mix, mx_noise_float, normalWorld, positionGeometry, positionWorld, sin, smoothstep, vec3 } from 'three/tsl';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
@@ -37,7 +37,13 @@ export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
 export function authoredFoliageColor(material) {
   const value = new THREE.Color(material.color ?? '#ffffff');
   const base = vec3(value.r, value.g, value.b);
-  return material.map ? authoredTexture(material.map).rgb.mul(base) : base;
+  if (material.map) return authoredTexture(material.map).rgb.mul(base);
+  const heightGrad = smoothstep(0.0, 0.72, positionGeometry.y);
+  const ribPhase = positionGeometry.x.mul(38).add(positionGeometry.z.mul(38)).add(positionGeometry.y.mul(14));
+  const ribs = sin(ribPhase).mul(0.5).add(0.5);
+  const mottle = mx_noise_float(positionGeometry.mul(9.5)).mul(0.5).add(0.5);
+  const shade = mix(float(0.42), float(1.48), heightGrad.mul(0.68).add(ribs.mul(0.18)).add(mottle.mul(0.14)));
+  return base.mul(shade);
 }
 
 /**

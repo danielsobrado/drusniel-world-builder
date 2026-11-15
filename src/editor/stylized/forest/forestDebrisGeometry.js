@@ -186,31 +186,58 @@ export function createFallenLogGeometry({ length = 3.6, radius = 0.24 } = {}) {
   return builder.build();
 }
 
-/** A forked dead branch resting on the ground. */
+/** A forked, curved dead branch resting on the ground with bark taper and end grain. */
 export function createFallenBranchGeometry({ length = 2.2, radius = 0.045 } = {}) {
   const builder = new MeshBuilder();
-  const limb = (from, to, startRadius) => {
+  const limb = (from, to, startRadius, { rows = 5, sides = 6, capEnds = true, arch = 0.03 } = {}) => {
     const first = builder.positions.length / 3;
-    const rows = 4;
+    const dx = to[0] - from[0];
+    const dy = to[1] - from[1];
+    const dz = to[2] - from[2];
+    const step = [dx, dy, dz];
+    const len = Math.max(1e-4, Math.hypot(dx, dy, dz));
     for (let ring = 0; ring < rows; ring += 1) {
       const t = ring / (rows - 1);
-      const reach = startRadius * (1 - t * 0.7);
-      const kink = Math.sin(t * 5 + from[0]) * 0.04;
-      for (let side = 0; side < 4; side += 1) {
-        const angle = (side / 4) * Math.PI * 2;
+      const reach = startRadius * (1 - t * 0.68);
+      const kinkZ = Math.sin(t * Math.PI * 1.4 + from[0] * 1.7) * 0.055;
+      const kinkY = Math.sin(t * Math.PI) * arch;
+      const cx = from[0] + dx * t;
+      const cy = from[1] + dy * t + kinkY;
+      const cz = from[2] + dz * t + kinkZ;
+      for (let side = 0; side < sides; side += 1) {
+        const angle = (side / sides) * Math.PI * 2;
+        const up = Math.sin(angle);
+        const ridge = 1 + 0.09 * Math.sin(angle * 3 + t * 5 + from[0]) + 0.05 * Math.sin(t * 9);
+        const r = reach * ridge;
+        const moss = smoothstep(0.15, 0.78, up + (mottle(t * 9 + from[0], angle * 2) - 0.5) * 0.8) * 0.76;
         builder.vertex(
-          from[0] + (to[0] - from[0]) * t,
-          from[1] + (to[1] - from[1]) * t + Math.sin(angle) * reach,
-          from[2] + (to[2] - from[2]) * t + kink + Math.cos(angle) * reach,
-          barkColor(t * 6, angle, 0),
+          cx,
+          cy + up * r,
+          cz + Math.cos(angle) * r,
+          barkColor(t * 7 + from[0], angle * 3, moss),
         );
       }
     }
-    builder.grid(first, rows, 4);
+    builder.grid(first, rows, sides);
+    if (capEnds) {
+      const invLen = 0.04 / len;
+      builder.endGrain(first, sides, [from[0] - step[0] * invLen, from[1], from[2] - step[2] * invLen], true);
+      builder.endGrain(
+        first + (rows - 1) * sides,
+        sides,
+        [to[0] + step[0] * invLen, to[1], to[2] + step[2] * invLen],
+        false,
+      );
+    } else {
+      const tipRing = first + (rows - 1) * sides;
+      const tipCentre = builder.vertex(to[0], to[1], to[2], barkColor(9, 1, 0.25));
+      builder.fan(tipCentre, tipRing, sides, false);
+    }
   };
   const half = length / 2;
-  limb([-half, 0.05, 0], [half, 0.03, 0.1], radius);
-  limb([-half * 0.1, 0.05, 0.03], [half * 0.5, 0.12, 0.5], radius * 0.6);
+  limb([-half, 0.05, -0.02], [half, 0.032, 0.12], radius, { rows: 5, sides: 6, capEnds: true, arch: 0.035 });
+  limb([-half * 0.12, 0.055, 0.03], [half * 0.52, 0.13, 0.48], radius * 0.62, { rows: 4, sides: 5, capEnds: false, arch: 0.02 });
+  limb([half * 0.22, 0.048, 0.07], [half * 0.74, 0.09, -0.26], radius * 0.46, { rows: 3, sides: 5, capEnds: false, arch: 0.015 });
   return builder.build();
 }
 

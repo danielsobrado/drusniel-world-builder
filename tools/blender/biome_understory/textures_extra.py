@@ -602,7 +602,22 @@ def _draw_segment(mask, fu, v, x0, y0, x1, y1, r0, r1):
     return dist <= rad
 
 
-def _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, angle, leaf_rgb, midrib_rgb, serration=0.0, notch=False):
+def _draw_leaf_cluster(
+    rgba,
+    fu,
+    v,
+    cx,
+    cy,
+    rx,
+    ry,
+    angle,
+    leaf_rgb,
+    midrib_rgb,
+    serration=0.0,
+    notch=False,
+    noise=None,
+    ao=1.0,
+):
     ca, sa = math.cos(angle), math.sin(angle)
     du = fu - cx
     dv = v - cy
@@ -616,11 +631,18 @@ def _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, angle, leaf_rgb, midrib_rgb,
     inside = (lv >= -1.0) & (lv <= 1.0) & (np.abs(lu) <= half_w)
     if notch:
         inside &= np.abs(lu) > 0.06 * (t_len > 0.25)
-    midrib = inside & (np.abs(lu) < 0.14 * (1.0 - 0.5 * t_len))
-    shade = 0.78 + 0.34 * t_len[..., None] + 0.12 * (1.0 - np.abs(lu) / np.maximum(half_w, 1e-4))[..., None]
-    rgba[inside, :3] = np.clip(np.array(leaf_rgb) * shade[inside], 0, 1)
+    norm_u = np.abs(lu) / np.maximum(half_w, 1e-4)
+    edge_rim = inside & (norm_u > 0.86)
+    midrib = inside & (np.abs(lu) < 0.11 * (1.0 - 0.45 * t_len))
+    lat_phase = (lv * 3.8 - norm_u * 1.6) * math.pi * 2.0
+    lat_vein = inside & (norm_u > 0.12) & (norm_u < 0.86) & (t_len > 0.12) & (t_len < 0.88) & (np.cos(lat_phase) > 0.82)
+    cell = (0.88 + 0.24 * noise) if noise is not None else 1.0
+    shade = ao * (0.62 + 0.54 * t_len + 0.14 * (1.0 - norm_u)) * cell
+    rgba[inside, :3] = np.clip(np.array(leaf_rgb) * shade[inside, None], 0, 1)
+    rgba[edge_rim, :3] *= 0.78
+    rgba[lat_vein, :3] = np.clip(np.array(midrib_rgb) * (ao * 0.92), 0, 1)
+    rgba[midrib, :3] = np.clip(np.array(midrib_rgb) * (ao * (1.04 - 0.12 * t_len[midrib, None])), 0, 1)
     rgba[inside, 3] = 1.0
-    rgba[midrib, :3] = np.clip(np.array(midrib_rgb), 0, 1)
 
 
 def _shrub_card_atlas(
@@ -633,7 +655,7 @@ def _shrub_card_atlas(
     accent_rgb,
     style='gorse',
 ):
-    """Species-distinct branched twig spray atlas: u < 0.28 is striped woody bark;
+    """Species-distinct branched twig spray atlas: u < 0.28 is furrowed woody bark;
     u >= 0.30 is an open twig skeleton carrying discrete leaflet groupings and accents."""
     rng = np.random.default_rng(seed)
     w = h = 256
@@ -641,105 +663,121 @@ def _shrub_card_atlas(
     u, v = xs / w, 1.0 - ys / h
     rgba = np.zeros((h, w, 4), dtype=np.float32)
     noise = fbm(w, h, (8, 12), rng, 4)
+    leaf_grain = fbm(w, h, (24, 24), rng, 3)
     grain = fbm(w, h, (20, 4), rng, 3)
 
-    # Bark strip u < 0.28 with lengthwise bark striations
+    # Furrowed bark strip u < 0.28 with high-contrast lengthwise striations
     in_wood = u < 0.28
-    bark_shade = 0.66 + 0.48 * grain[..., None] + 0.16 * (noise[..., None] - 0.5)
+    furrows = 0.5 + 0.5 * np.cos(u * 90.0 + grain * 4.5)
+    bark_shade = 0.44 + 0.52 * grain[..., None] + 0.24 * furrows[..., None] + 0.14 * (noise[..., None] - 0.5)
     rgba[in_wood, :3] = np.clip(np.array(wood_rgb) * bark_shade[in_wood], 0, 1)
     rgba[in_wood, 3] = 1.0
 
     fu = (u - 0.30) / 0.70
     in_spray = u >= 0.30
-    twig_dark = np.array(wood_rgb) * 0.88
-    midrib = np.clip(np.array(leaf_rgb) * 1.18, 0, 1)
+    twig_dark = np.array(wood_rgb) * 0.84
+    midrib = np.clip(np.array(leaf_rgb) * 1.24, 0, 1)
 
-    # Main forked twig skeleton (anchored at bottom petiole fu=0.50, v=0.0)
+    # Branched main + secondary forked twig skeleton (anchored at bottom petiole fu=0.50, v=0.0)
     twig_segs = (
-        (0.50, 0.00, 0.48, 0.34, 0.032, 0.022),
-        (0.48, 0.34, 0.54, 0.72, 0.022, 0.012),
-        (0.49, 0.26, 0.26, 0.54, 0.020, 0.010),
-        (0.50, 0.42, 0.78, 0.66, 0.018, 0.009),
-        (0.52, 0.58, 0.32, 0.82, 0.014, 0.008),
+        (0.50, 0.00, 0.48, 0.34, 0.030, 0.020),
+        (0.48, 0.34, 0.54, 0.78, 0.020, 0.010),
+        (0.49, 0.24, 0.24, 0.54, 0.019, 0.009),
+        (0.24, 0.54, 0.16, 0.70, 0.011, 0.006),
+        (0.50, 0.40, 0.78, 0.68, 0.018, 0.008),
+        (0.78, 0.68, 0.86, 0.80, 0.010, 0.005),
+        (0.52, 0.58, 0.32, 0.86, 0.014, 0.007),
+        (0.53, 0.64, 0.66, 0.88, 0.013, 0.006),
     )
     twig_mask = np.zeros_like(u, dtype=bool)
     for seg in twig_segs:
         twig_mask |= in_spray & _draw_segment(None, fu, v, *seg)
-    rgba[twig_mask, :3] = np.clip(twig_dark * (0.85 + 0.3 * grain[twig_mask, None]), 0, 1)
+    rgba[twig_mask, :3] = np.clip(twig_dark * (0.82 + 0.34 * grain[twig_mask, None]), 0, 1)
     rgba[twig_mask, 3] = 1.0
 
-    # Leaf clusters along twig nodes according to ecological species morphology
+    # Leaf clusters along twig nodes: back shaded leaflets (lower AO), then sunlit upper leaflets
     if style == 'juniper':
-        # Layered feathered cypress/juniper needle fans
         needles = (
-            (0.28, 0.52, 0.12, 0.17, 0.65), (0.20, 0.42, 0.10, 0.14, 0.95),
-            (0.75, 0.64, 0.13, 0.17, -0.60), (0.83, 0.54, 0.10, 0.13, -0.95),
-            (0.35, 0.80, 0.11, 0.15, 0.42), (0.62, 0.78, 0.11, 0.15, -0.35),
-            (0.51, 0.86, 0.11, 0.14, 0.05), (0.50, 0.60, 0.10, 0.14, 0.15),
+            (0.28, 0.44, 0.07, 0.12, 0.75, 0.80), (0.72, 0.48, 0.07, 0.12, -0.75, 0.80),
+            (0.22, 0.56, 0.07, 0.12, 0.90, 0.92), (0.34, 0.58, 0.06, 0.12, 0.45, 0.96),
+            (0.16, 0.68, 0.06, 0.11, 0.72, 1.04), (0.28, 0.68, 0.06, 0.11, 0.28, 1.06),
+            (0.76, 0.60, 0.07, 0.12, -0.82, 0.94), (0.64, 0.62, 0.06, 0.11, -0.45, 0.98),
+            (0.84, 0.74, 0.06, 0.11, -0.68, 1.06), (0.72, 0.76, 0.06, 0.11, -0.28, 1.08),
+            (0.36, 0.80, 0.07, 0.12, 0.48, 1.10), (0.60, 0.80, 0.07, 0.12, -0.42, 1.10),
+            (0.49, 0.86, 0.07, 0.12, 0.04, 1.16), (0.48, 0.68, 0.06, 0.11, 0.12, 0.95),
         )
-        for cx, cy, rx, ry, ang in needles:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.22)
+        for cx, cy, rx, ry, ang, ao in needles:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.20, noise=leaf_grain, ao=ao)
     elif style == 'gorse':
-        # Clustered spiky moorland furze sprays + terminal yellow blossom tufts
         sprigs = (
-            (0.27, 0.52, 0.07, 0.16, 0.75), (0.22, 0.44, 0.06, 0.14, 1.05), (0.34, 0.58, 0.06, 0.14, 0.35),
-            (0.76, 0.64, 0.07, 0.16, -0.65), (0.84, 0.55, 0.06, 0.13, -1.00), (0.68, 0.70, 0.06, 0.14, -0.35),
-            (0.34, 0.82, 0.07, 0.15, 0.45), (0.56, 0.78, 0.07, 0.16, -0.15), (0.48, 0.45, 0.06, 0.13, 0.12),
+            (0.28, 0.42, 0.055, 0.12, 0.85, 0.82), (0.72, 0.46, 0.055, 0.12, -0.82, 0.82),
+            (0.20, 0.54, 0.052, 0.12, 1.05, 0.94), (0.32, 0.56, 0.052, 0.12, 0.42, 0.98),
+            (0.16, 0.68, 0.048, 0.11, 0.72, 1.06), (0.28, 0.70, 0.048, 0.11, 0.25, 1.08),
+            (0.78, 0.58, 0.052, 0.12, -0.95, 0.94), (0.66, 0.62, 0.052, 0.12, -0.40, 0.98),
+            (0.86, 0.72, 0.048, 0.11, -0.68, 1.06), (0.72, 0.74, 0.048, 0.11, -0.25, 1.08),
+            (0.36, 0.82, 0.054, 0.12, 0.46, 1.12), (0.62, 0.82, 0.054, 0.12, -0.38, 1.12),
+            (0.50, 0.86, 0.054, 0.13, 0.04, 1.16), (0.48, 0.52, 0.050, 0.11, 0.14, 0.90),
         )
-        for cx, cy, rx, ry, ang in sprigs:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.14)
+        for cx, cy, rx, ry, ang, ao in sprigs:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.14, noise=leaf_grain, ao=ao)
     elif style == 'savanna':
-        # Airy horizontal acacia pinnae fans with crisp light gaps
         pads = (
-            (0.26, 0.52, 0.16, 0.08, 0.32), (0.20, 0.60, 0.14, 0.07, 0.52),
-            (0.76, 0.66, 0.16, 0.08, -0.28), (0.68, 0.56, 0.13, 0.07, -0.45),
-            (0.36, 0.82, 0.15, 0.08, 0.18), (0.60, 0.80, 0.15, 0.08, -0.18),
-            (0.50, 0.68, 0.13, 0.07, 0.0),
+            (0.28, 0.44, 0.11, 0.055, 0.36, 0.82), (0.72, 0.48, 0.11, 0.055, -0.34, 0.84),
+            (0.19, 0.56, 0.11, 0.052, 0.50, 0.96), (0.33, 0.60, 0.10, 0.050, 0.22, 1.00),
+            (0.80, 0.62, 0.11, 0.052, -0.46, 0.96), (0.65, 0.64, 0.10, 0.050, -0.22, 1.02),
+            (0.24, 0.74, 0.10, 0.048, 0.32, 1.06), (0.74, 0.76, 0.10, 0.048, -0.30, 1.08),
+            (0.38, 0.84, 0.11, 0.050, 0.16, 1.12), (0.60, 0.84, 0.11, 0.050, -0.16, 1.14),
+            (0.49, 0.72, 0.10, 0.048, 0.0, 1.02), (0.50, 0.90, 0.09, 0.044, 0.05, 1.18),
         )
-        for cx, cy, rx, ry, ang in pads:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.20)
+        for cx, cy, rx, ry, ang, ao in pads:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.20, noise=leaf_grain, ao=ao)
     elif style == 'ocotillo':
-        # Small spiral stem-hugging olive leaf rosettes leaving canes exposed
         rosettes = (
-            (0.48, 0.24, 0.09, 0.11, 0.65), (0.50, 0.42, 0.09, 0.11, -0.60),
-            (0.28, 0.52, 0.08, 0.10, 0.45), (0.74, 0.64, 0.08, 0.10, -0.45),
-            (0.35, 0.78, 0.08, 0.10, 0.30), (0.56, 0.68, 0.08, 0.10, -0.25),
+            (0.46, 0.22, 0.072, 0.090, 0.72, 0.82), (0.52, 0.32, 0.072, 0.090, -0.70, 0.86),
+            (0.32, 0.46, 0.068, 0.088, 0.56, 0.92), (0.20, 0.58, 0.062, 0.082, 0.82, 0.98),
+            (0.68, 0.52, 0.068, 0.088, -0.54, 0.94), (0.80, 0.64, 0.062, 0.082, -0.78, 1.00),
+            (0.36, 0.74, 0.066, 0.086, 0.40, 1.06), (0.64, 0.76, 0.066, 0.086, -0.38, 1.08),
+            (0.50, 0.64, 0.064, 0.084, 0.10, 1.00), (0.50, 0.86, 0.060, 0.080, -0.05, 1.14),
         )
-        for cx, cy, rx, ry, ang in rosettes:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.06)
+        for cx, cy, rx, ry, ang, ao in rosettes:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.06, noise=leaf_grain, ao=ao)
     elif style == 'hibiscus':
-        # Sculpted broad serrated tropical leaves on distinct petioles
         leaves = (
-            (0.26, 0.54, 0.14, 0.18, 0.68), (0.76, 0.62, 0.15, 0.19, -0.62),
-            (0.34, 0.82, 0.13, 0.17, 0.40), (0.62, 0.78, 0.14, 0.18, -0.32),
-            (0.50, 0.48, 0.12, 0.15, 0.15),
+            (0.28, 0.44, 0.095, 0.125, 0.76, 0.80), (0.72, 0.46, 0.095, 0.125, -0.74, 0.82),
+            (0.20, 0.58, 0.092, 0.122, 0.88, 0.94), (0.34, 0.62, 0.088, 0.118, 0.42, 0.98),
+            (0.80, 0.62, 0.092, 0.122, -0.82, 0.96), (0.64, 0.64, 0.088, 0.118, -0.40, 1.00),
+            (0.30, 0.78, 0.088, 0.118, 0.48, 1.08), (0.70, 0.80, 0.088, 0.118, -0.42, 1.10),
+            (0.46, 0.86, 0.085, 0.115, 0.18, 1.14), (0.58, 0.86, 0.085, 0.115, -0.18, 1.14),
+            (0.49, 0.52, 0.082, 0.110, 0.12, 0.92),
         )
-        for cx, cy, rx, ry, ang in leaves:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.14)
+        for cx, cy, rx, ry, ang, ao in leaves:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.14, noise=leaf_grain, ao=ao)
     else:
-        # 'buttonbush': Opposite glossy swamp-willow leaf pairs along red-brown stems
         pairs = (
-            (0.30, 0.46, 0.10, 0.18, 0.78), (0.68, 0.48, 0.10, 0.18, -0.78),
-            (0.24, 0.64, 0.09, 0.17, 0.62), (0.78, 0.68, 0.10, 0.18, -0.58),
-            (0.36, 0.84, 0.09, 0.16, 0.32), (0.60, 0.82, 0.09, 0.16, -0.28),
+            (0.32, 0.36, 0.072, 0.130, 0.86, 0.80), (0.66, 0.38, 0.072, 0.130, -0.84, 0.80),
+            (0.22, 0.52, 0.070, 0.128, 0.80, 0.92), (0.78, 0.54, 0.070, 0.128, -0.78, 0.92),
+            (0.28, 0.68, 0.068, 0.124, 0.58, 1.02), (0.72, 0.70, 0.068, 0.124, -0.56, 1.04),
+            (0.18, 0.74, 0.060, 0.112, 0.72, 1.06), (0.82, 0.76, 0.060, 0.112, -0.70, 1.06),
+            (0.38, 0.84, 0.068, 0.120, 0.34, 1.12), (0.60, 0.84, 0.068, 0.120, -0.32, 1.12),
+            (0.50, 0.88, 0.064, 0.115, 0.04, 1.16), (0.49, 0.58, 0.062, 0.112, 0.10, 0.96),
         )
-        for cx, cy, rx, ry, ang in pairs:
-            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.04)
+        for cx, cy, rx, ry, ang, ao in pairs:
+            _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=0.05, noise=leaf_grain, ao=ao)
 
     # Re-stamp crisp main woody petiole base over lowest leaf overlap
-    base_stem = in_spray & _draw_segment(None, fu, v, 0.50, 0.00, 0.48, 0.34, 0.030, 0.020)
+    base_stem = in_spray & _draw_segment(None, fu, v, 0.50, 0.00, 0.48, 0.34, 0.028, 0.018)
     rgba[base_stem, :3] = twig_dark
     rgba[base_stem, 3] = 1.0
 
     # Species blossoms / fruits anchored strictly at branch tips / upper axils
     if accent_rgb is not None:
         bloom_pts = {
-            'ocotillo': ((0.54, 0.84, 0.09, 0.11), (0.50, 0.92, 0.07, 0.08), (0.32, 0.86, 0.06, 0.07)),
-            'savanna': ((0.30, 0.64, 0.045, 0.045), (0.66, 0.84, 0.045, 0.045)),
-            'gorse': ((0.24, 0.58, 0.065, 0.065), (0.80, 0.70, 0.065, 0.065), (0.54, 0.82, 0.070, 0.070)),
-            'juniper': ((0.30, 0.56, 0.036, 0.036), (0.74, 0.66, 0.036, 0.036), (0.52, 0.76, 0.034, 0.034)),
-            'hibiscus': ((0.52, 0.74, 0.085, 0.085), (0.28, 0.64, 0.070, 0.070)),
-            'buttonbush': ((0.52, 0.76, 0.055, 0.055), (0.30, 0.72, 0.048, 0.048), (0.76, 0.74, 0.048, 0.048)),
+            'ocotillo': ((0.54, 0.84, 0.08, 0.10), (0.50, 0.92, 0.065, 0.075), (0.32, 0.86, 0.055, 0.065)),
+            'savanna': ((0.30, 0.64, 0.042, 0.042), (0.66, 0.84, 0.042, 0.042)),
+            'gorse': ((0.22, 0.58, 0.058, 0.058), (0.80, 0.70, 0.058, 0.058), (0.52, 0.84, 0.062, 0.062)),
+            'juniper': ((0.28, 0.56, 0.034, 0.034), (0.74, 0.66, 0.034, 0.034), (0.50, 0.78, 0.032, 0.032)),
+            'hibiscus': ((0.50, 0.76, 0.075, 0.075), (0.28, 0.66, 0.064, 0.064)),
+            'buttonbush': ((0.52, 0.78, 0.050, 0.050), (0.28, 0.72, 0.044, 0.044), (0.74, 0.74, 0.044, 0.044)),
         }.get(style, ())
         for bx, by, brx, bry in bloom_pts:
             r = np.hypot((fu - bx) / brx, (v - by) / bry)

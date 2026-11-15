@@ -20,6 +20,7 @@ import { iterateAuthoredGroupedPrototypes } from './StylizedPrototypeBake.js';
 import { acceptsStrategicDetailPlacement } from './StrategicDetailPlacement.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
+import { createPathClearanceField } from './TreeManifestStore.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { applyUnderstoryPalette, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { applySkywardNormal } from './forest/foliageLight.js';
@@ -347,6 +348,9 @@ export class StylizedGroundDetailView {
 
   manifestForChunk(chunkX, chunkZ, shouldYield = null) {
     const forestField = this.forestFieldProvider?.();
+    this.pathClearance ??= this.terrainView.tileMap
+      ? createPathClearanceField(this.terrainView, this.config)
+      : null;
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
       this.prototypes.length,
@@ -361,6 +365,7 @@ export class StylizedGroundDetailView {
       JSON.stringify(this.prototypeWaterRules),
       JSON.stringify(this.prototypeStrandRules),
       JSON.stringify(this.prototypeShoreRules),
+      this.pathClearance?.signature ?? 'nopath',
       this.regionalCharacterField?.signature ?? 'uniform-regions',
       forestField?.signature ?? 'uniform-forest',
       this.biomeAssetPalette?.revision ?? 0,
@@ -398,16 +403,24 @@ export class StylizedGroundDetailView {
       minScale: this.layerConfig.minScale,
       maxScale: this.layerConfig.maxScale,
       radiusForScale: (scale) => this.layerConfig.radius * scale,
+      randomChannelOffset: (this.priorityChannel ?? 41) * 16,
       priorityChannel: this.priorityChannel,
       candidateEvaluator: (candidate, shouldYield) => {
+        const placementRule = this.prototypePlacementRules[candidate.prototypeIndex];
         if (!acceptsStrategicDetailPlacement(
           candidate,
-          this.prototypePlacementRules[candidate.prototypeIndex],
+          placementRule,
           {
             tileSize: this.terrainView.worldStore.tileSize,
             tileAt: (cellX, cellZ) => this.terrainView.tileMap.get(cellX, cellZ),
           },
         )) return null;
+        if (this.layerName !== 'aquaticPlant'
+          && this.layerName !== 'shoreLife'
+          && placementRule?.strategy !== 'path-interior'
+          && this.pathClearance?.blocks(candidate.x, candidate.z, candidate.radius ?? 0)) {
+          return null;
+        }
 
         // A layer of woodland floor lives under canopy, thinning out with it.
         if (this.layerConfig.canopyGate

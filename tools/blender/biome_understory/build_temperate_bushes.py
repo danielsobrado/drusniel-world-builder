@@ -48,87 +48,124 @@ TEMPERATE_BUSH_BUDGET = 560
 
 
 def _temperate_shrub_texture(tex_dir, mat_name, filename, seed, wood_rgb, leaf_rgb, style='hazel'):
-    """High-contrast furrowed bark strip (u < 0.28) + open forked twig & discrete leaf clusters (u >= 0.30)."""
+    """High-contrast furrowed bark strip (u < 0.28) + open forked twig & discrete multi-leaflet clusters (u >= 0.30)."""
     rng = np.random.default_rng(seed)
     w = h = 256
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
     u, v = xs / w, 1.0 - ys / h
     rgba = np.zeros((h, w, 4), dtype=np.float32)
     noise = fbm(w, h, (8, 12), rng, 4)
+    leaf_grain = fbm(w, h, (24, 24), rng, 3)
     grain = fbm(w, h, (22, 4), rng, 3)
 
-    # Furrowed dark-warm woody bark on left u < 0.28
+    # Furrowed rich-warm woody bark on left u < 0.28
     in_wood = u < 0.28
-    bark_shade = 0.62 + 0.50 * grain[..., None] + 0.14 * (noise[..., None] - 0.5)
+    furrows = 0.5 + 0.5 * np.cos(u * 92.0 + grain * 4.5)
+    bark_shade = 0.42 + 0.54 * grain[..., None] + 0.24 * furrows[..., None] + 0.14 * (noise[..., None] - 0.5)
     rgba[in_wood, :3] = np.clip(np.array(wood_rgb) * bark_shade[in_wood], 0, 1)
     rgba[in_wood, 3] = 1.0
 
     fu = (u - 0.30) / 0.70
     in_spray = u >= 0.30
-    twig_col = np.array(wood_rgb) * 0.90
-    midrib = np.clip(np.array(leaf_rgb) * 1.24, 0, 1)
+    twig_col = np.array(wood_rgb) * 0.86
+    midrib = np.clip(np.array(leaf_rgb) * 1.26, 0, 1)
 
     twig_segs = (
-        (0.50, 0.00, 0.48, 0.36, 0.032, 0.020),
-        (0.48, 0.36, 0.54, 0.74, 0.020, 0.010),
-        (0.49, 0.24, 0.24, 0.54, 0.018, 0.009),
-        (0.50, 0.40, 0.78, 0.66, 0.017, 0.009),
-        (0.52, 0.58, 0.30, 0.84, 0.013, 0.007),
+        (0.50, 0.00, 0.48, 0.36, 0.030, 0.019),
+        (0.48, 0.36, 0.54, 0.78, 0.019, 0.009),
+        (0.49, 0.24, 0.24, 0.54, 0.018, 0.008),
+        (0.24, 0.54, 0.14, 0.70, 0.010, 0.005),
+        (0.50, 0.40, 0.78, 0.66, 0.017, 0.008),
+        (0.78, 0.66, 0.86, 0.80, 0.010, 0.005),
+        (0.52, 0.58, 0.30, 0.86, 0.013, 0.006),
+        (0.53, 0.64, 0.66, 0.88, 0.012, 0.006),
     )
     twig_mask = np.zeros_like(u, dtype=bool)
     for seg in twig_segs:
         twig_mask |= in_spray & _draw_segment(None, fu, v, *seg)
-    rgba[twig_mask, :3] = np.clip(twig_col * (0.85 + 0.3 * grain[twig_mask, None]), 0, 1)
+    rgba[twig_mask, :3] = np.clip(twig_col * (0.82 + 0.34 * grain[twig_mask, None]), 0, 1)
     rgba[twig_mask, 3] = 1.0
 
     if style == 'hazel':
-        # Distinct serrated ovate hazel/hawthorn leaves arranged on petiole forks
+        # Layered serrated hazel/hawthorn leaflet groupings along petiole forks
         leaves = (
-            (0.24, 0.54, 0.15, 0.19, 0.72),
-            (0.78, 0.64, 0.15, 0.19, -0.66),
-            (0.32, 0.84, 0.13, 0.17, 0.42),
-            (0.62, 0.80, 0.14, 0.17, -0.34),
-            (0.49, 0.48, 0.12, 0.15, 0.14),
-            (0.44, 0.68, 0.11, 0.14, 0.28),
+            (0.28, 0.42, 0.095, 0.125, 0.78, 0.78),
+            (0.72, 0.46, 0.095, 0.125, -0.74, 0.80),
+            (0.20, 0.56, 0.092, 0.122, 0.86, 0.92),
+            (0.34, 0.58, 0.088, 0.118, 0.42, 0.98),
+            (0.16, 0.70, 0.084, 0.112, 0.66, 1.06),
+            (0.28, 0.72, 0.082, 0.110, 0.28, 1.08),
+            (0.78, 0.60, 0.092, 0.122, -0.78, 0.94),
+            (0.64, 0.62, 0.088, 0.118, -0.38, 1.00),
+            (0.84, 0.74, 0.084, 0.112, -0.60, 1.06),
+            (0.70, 0.76, 0.082, 0.110, -0.26, 1.08),
+            (0.36, 0.84, 0.086, 0.116, 0.44, 1.12),
+            (0.62, 0.84, 0.086, 0.116, -0.36, 1.12),
+            (0.50, 0.90, 0.084, 0.112, 0.06, 1.16),
+            (0.48, 0.54, 0.082, 0.108, 0.14, 0.92),
         )
         serr = 0.18
     elif style == 'dogwood':
-        # Crisp pointed opposing dogwood/bramble leaflets leaving airy negative space
+        # Opposing pointed dogwood/bramble compound leaflets with crisp air gaps
         leaves = (
-            (0.22, 0.52, 0.12, 0.18, 0.82),
-            (0.76, 0.56, 0.12, 0.18, -0.78),
-            (0.28, 0.78, 0.11, 0.16, 0.48),
-            (0.72, 0.78, 0.11, 0.16, -0.46),
-            (0.51, 0.88, 0.10, 0.15, 0.04),
+            (0.30, 0.38, 0.074, 0.126, 0.86, 0.78),
+            (0.70, 0.40, 0.074, 0.126, -0.84, 0.78),
+            (0.20, 0.52, 0.072, 0.124, 0.82, 0.92),
+            (0.80, 0.54, 0.072, 0.124, -0.80, 0.92),
+            (0.32, 0.60, 0.070, 0.120, 0.44, 0.98),
+            (0.68, 0.62, 0.070, 0.120, -0.42, 0.98),
+            (0.18, 0.70, 0.064, 0.110, 0.68, 1.06),
+            (0.82, 0.72, 0.064, 0.110, -0.66, 1.06),
+            (0.30, 0.78, 0.068, 0.116, 0.46, 1.08),
+            (0.70, 0.80, 0.068, 0.116, -0.44, 1.08),
+            (0.42, 0.88, 0.064, 0.112, 0.24, 1.14),
+            (0.58, 0.88, 0.064, 0.112, -0.22, 1.14),
+            (0.50, 0.92, 0.060, 0.104, 0.02, 1.18),
+            (0.49, 0.54, 0.062, 0.108, 0.08, 0.94),
         )
         serr = 0.10
     elif style == 'elder':
-        # Feathery pinnate compound elder/alder sprays
+        # Fine pinnate compound elder/alder sprays (many narrow opposing leaflets)
         leaves = (
-            (0.20, 0.48, 0.09, 0.17, 0.90),
-            (0.80, 0.52, 0.09, 0.17, -0.88),
-            (0.24, 0.68, 0.09, 0.17, 0.62),
-            (0.76, 0.72, 0.09, 0.17, -0.60),
-            (0.38, 0.86, 0.09, 0.16, 0.30),
-            (0.60, 0.86, 0.09, 0.16, -0.26),
-            (0.50, 0.58, 0.08, 0.15, 0.06),
+            (0.28, 0.38, 0.056, 0.118, 0.92, 0.78),
+            (0.72, 0.40, 0.056, 0.118, -0.90, 0.78),
+            (0.20, 0.50, 0.058, 0.120, 0.88, 0.90),
+            (0.80, 0.52, 0.058, 0.120, -0.86, 0.90),
+            (0.34, 0.56, 0.056, 0.116, 0.52, 0.96),
+            (0.66, 0.58, 0.056, 0.116, -0.50, 0.96),
+            (0.16, 0.66, 0.054, 0.112, 0.74, 1.04),
+            (0.84, 0.68, 0.054, 0.112, -0.72, 1.04),
+            (0.26, 0.72, 0.056, 0.114, 0.56, 1.06),
+            (0.74, 0.74, 0.056, 0.114, -0.54, 1.06),
+            (0.38, 0.82, 0.056, 0.114, 0.34, 1.12),
+            (0.62, 0.82, 0.056, 0.114, -0.32, 1.12),
+            (0.46, 0.90, 0.054, 0.108, 0.16, 1.16),
+            (0.56, 0.90, 0.054, 0.108, -0.14, 1.16),
+            (0.50, 0.66, 0.052, 0.106, 0.04, 0.98),
         )
         serr = 0.12
     else:
-        # Broadleaf sapling spray: delicate alternate pointed oak/ash/birch leaves
+        # Broadleaf sapling spray: delicate alternate oak/ash/birch leaflet sprays
         leaves = (
-            (0.22, 0.54, 0.11, 0.18, 0.76),
-            (0.78, 0.62, 0.11, 0.18, -0.72),
-            (0.32, 0.82, 0.10, 0.16, 0.40),
-            (0.64, 0.84, 0.10, 0.16, -0.36),
-            (0.50, 0.92, 0.09, 0.14, 0.05),
+            (0.30, 0.40, 0.068, 0.120, 0.82, 0.80),
+            (0.70, 0.44, 0.068, 0.120, -0.78, 0.82),
+            (0.20, 0.54, 0.066, 0.118, 0.78, 0.94),
+            (0.80, 0.58, 0.066, 0.118, -0.74, 0.96),
+            (0.34, 0.62, 0.064, 0.114, 0.42, 1.00),
+            (0.66, 0.64, 0.064, 0.114, -0.40, 1.00),
+            (0.22, 0.74, 0.062, 0.110, 0.58, 1.06),
+            (0.78, 0.76, 0.062, 0.110, -0.54, 1.08),
+            (0.36, 0.84, 0.064, 0.112, 0.38, 1.12),
+            (0.64, 0.86, 0.064, 0.112, -0.34, 1.12),
+            (0.50, 0.92, 0.060, 0.106, 0.04, 1.18),
+            (0.49, 0.72, 0.058, 0.104, 0.10, 1.02),
         )
         serr = 0.14
 
-    for cx, cy, rx, ry, ang in leaves:
-        _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=serr)
+    for cx, cy, rx, ry, ang, ao in leaves:
+        _draw_leaf_cluster(rgba, fu, v, cx, cy, rx, ry, ang, leaf_rgb, midrib, serration=serr, noise=leaf_grain, ao=ao)
 
-    base_stem = in_spray & _draw_segment(None, fu, v, 0.50, 0.00, 0.48, 0.36, 0.032, 0.020)
+    base_stem = in_spray & _draw_segment(None, fu, v, 0.50, 0.00, 0.48, 0.36, 0.028, 0.018)
     rgba[base_stem, :3] = twig_col
     rgba[base_stem, 3] = 1.0
 
@@ -176,7 +213,7 @@ def build_stylized_bush(mat):
         p0 = out * 0.06 + Vector((0.0, 0.0, 0.0))
         p1 = out * (r_xy * 0.46) + side * rng.uniform(-0.10, 0.10) + Vector((0.0, 0.0, z_mid))
         p2 = out * r_xy + Vector((0.0, 0.0, z_top))
-        tube(bm, uv, [p0, p1, p2], [0.052, 0.032, 0.015], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
+        tube(bm, uv, [p0, p1, p2], [0.052, 0.032, 0.015], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig = p1 + out * 0.24 + side * (fork_side * 0.30) + Vector((0.0, 0.0, 0.16 if idx % 3 else -0.02))
@@ -211,7 +248,7 @@ def build_small_bush(mat):
         p0 = out * 0.04 + Vector((0.0, 0.0, 0.0))
         p1 = out * (r_xy * 0.50) + side * rng.uniform(-0.06, 0.06) + Vector((0.0, 0.0, z_mid))
         p2 = out * r_xy + Vector((0.0, 0.0, z_top))
-        tube(bm, uv, [p0, p1, p2], [0.032, 0.020, 0.010], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
+        tube(bm, uv, [p0, p1, p2], [0.032, 0.020, 0.010], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.05, rng=rng, cap_end=False)
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig = p1 + out * 0.16 + side * (fork_side * 0.18) + Vector((0.0, 0.0, 0.08))
@@ -246,7 +283,7 @@ def build_bush2(mat):
         p0 = out * 0.14 + Vector((0.0, 0.0, 0.0))
         p1 = out * (r_xy * 0.46) + side * rng.uniform(-0.22, 0.22) + Vector((0.0, 0.0, z_mid))
         p2 = out * r_xy + Vector((0.0, 0.0, z_top))
-        tube(bm, uv, [p0, p1, p2], [0.105, 0.065, 0.030], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+        tube(bm, uv, [p0, p1, p2], [0.105, 0.065, 0.030], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig1 = p1 + out * 0.48 + side * (fork_side * 0.62) + Vector((0.0, 0.0, 0.34 if idx % 3 else -0.05))
@@ -274,7 +311,7 @@ def build_sapling_bush(mat):
         (Vector((-0.03, 0.02, 0.0)), Vector((-0.12, 0.09, 0.48)), Vector((-0.24, 0.16, 0.98)), 0.026),
     )
     for l_idx, (p0, p1, p2, r0) in enumerate(leaders):
-        tube(bm, uv, [p0, p1, p2], [r0, r0 * 0.65, r0 * 0.32], sides=4, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.03, rng=rng, cap_end=False)
+        tube(bm, uv, [p0, p1, p2], [r0, r0 * 0.65, r0 * 0.32], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.03, rng=rng, cap_end=False)
         _add_spray_pair(bm, uv, p2 - Vector((0, 0, 0.06)), (p2 - p1 + Vector((0, 0, 0.25))).normalized(), 0.54, 0.52, arch=0.12, roll_bias=l_idx * 0.8)
 
     # 8 alternate tiered slim lateral sapling limbs rising asymmetrically
@@ -307,19 +344,19 @@ def main():
     mats = {
         'stylized_bush': _temperate_shrub_texture(
             TEX_DIR, 'stylized_bush', 'stylized-bush-alb.png', 401,
-            (0.36, 0.28, 0.20), (0.20, 0.38, 0.14), style='hazel',
+            (0.32, 0.21, 0.12), (0.20, 0.38, 0.14), style='hazel',
         ),
         'small_bush': _temperate_shrub_texture(
             TEX_DIR, 'bush_leaf', 'small-bush-alb.png', 402,
-            (0.34, 0.27, 0.19), (0.19, 0.36, 0.13), style='dogwood',
+            (0.31, 0.20, 0.12), (0.19, 0.36, 0.13), style='dogwood',
         ),
         'bush2': _temperate_shrub_texture(
             TEX_DIR, 'Leaves', 'bush2-alb.png', 403,
-            (0.35, 0.28, 0.21), (0.18, 0.35, 0.13), style='elder',
+            (0.32, 0.21, 0.13), (0.18, 0.35, 0.13), style='elder',
         ),
         'bush': _temperate_shrub_texture(
             TEX_DIR, 'vetka_kusta', 'sapling-bush-alb.png', 404,
-            (0.38, 0.30, 0.22), (0.22, 0.40, 0.15), style='sapling',
+            (0.34, 0.22, 0.13), (0.22, 0.40, 0.15), style='sapling',
         ),
     }
 
