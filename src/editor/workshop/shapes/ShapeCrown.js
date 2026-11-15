@@ -55,6 +55,31 @@ export function shapeRoofReach(p) {
   return p.crown.machicolation === 'open' ? frame.face : frame.outer;
 }
 
+/**
+ * The crown slab's voids, in the same opening form as shell gaps (`at` along the curve, `bottom`
+ * in primitive-local height): every embrasure or fallen merlon, the air above a ruined merlon,
+ * and the loop through a pierced one — the same intervals ShapeCrownBuilder lays stone around.
+ */
+function crownCollisionGaps(p, frame, merlons, length, closed, scale) {
+  if (!merlons.length) return [];
+  const c = p.crown, sill = frame.wallTop - frame.base, full = c.merlonHeight;
+  const gap = (key, u0, u1, bottom, height) => ({ id: `${p.id}:crown:${key}`, role: 'embrasure', profile: 'square',
+    at: ((((u0 + u1) / 2) % length) + length) % length / length, width: u1 - u0, bottom: frame.base + bottom, height });
+  const solid = merlons.map((m) => [m.u0, m.u1]);
+  const edges = closed ? [...solid, [solid[0][0] + length, solid[0][1] + length]] : [[0, 0], ...solid, [length, length]];
+  const gaps = [];
+  for (let i = 1; i < edges.length; i++)
+    if (edges[i][0] - edges[i - 1][1] > 1e-6) gaps.push(gap(`embrasure-${i}`, edges[i - 1][1], edges[i][0], sill, full));
+  for (const m of merlons) {
+    if (m.ruined) gaps.push(gap(`${m.key}:ruin`, m.u0, m.u1, sill + m.height, full - m.height));
+    else if (c.merlons === 'pierced') {
+      const slit = 0.06 / scale, mid = (m.u0 + m.u1) / 2;
+      gaps.push(gap(`${m.key}:loop`, mid - slit, mid + slit, sill + m.height * 0.18, m.height * 0.6));
+    }
+  }
+  return gaps;
+}
+
 function outline(surface, y, offset, count = 96) {
   return Array.from({ length: count + (surface.closed ? 0 : 1) }, (_, i) => {
     const point = surface.point((surface.length * i) / count, y, offset);
@@ -101,12 +126,13 @@ export function resolveShapeCrown(plan) {
     }
   }
   const elevation = p.elevation + frame.base;
+  const gaps = crownCollisionGaps(p, frame, merlons, length, closed, scale);
   const footprint = { kind: 'polygon', points: outline(surface, frame.base + 0.01, frame.outer - frame.thickness / 2, 48) };
   const rpg = {
     ...plan.rpg,
     collisionSlabs: [...plan.rpg.collisionSlabs, {
       id: `${p.id}:crown`, primitiveId: p.id, elevation, height: c.height + (merlons.length ? c.merlonHeight : 0),
-      thickness: frame.thickness, footprint, gaps: [], ...(closed ? {} : { open: true }),
+      thickness: frame.thickness, footprint, gaps, ...(closed ? {} : { open: true }),
     }],
     coverSurfaces: [...plan.rpg.coverSurfaces, { id: `${p.id}:crown:cover`, primitiveId: p.id,
       height: elevation + c.height, footprint }],

@@ -126,7 +126,8 @@ export function resolvePathGates(plans, index, byId) {
         ...plan.rpg,
         collisionSlabs: plan.rpg.collisionSlabs.map((s) => ({
           ...s,
-          gaps: openings,
+          // Keep each slab's own voids (crown embrasures) and add the path gates to them.
+          gaps: [...s.gaps, ...automaticOpenings],
         })),
         portals: openings
           .filter((o) => !['window', 'slit'].includes(o.role))

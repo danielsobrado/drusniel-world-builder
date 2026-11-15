@@ -7,6 +7,7 @@ import { buildRegisteredShape } from '../src/editor/workshop/shapes/ShapeGeometr
 import { SHAPE_PRESETS, createShapePreset } from '../src/editor/workshop/shapes/ShapePresets.js';
 import { SHAPE_CASTLE_PRESETS } from '../src/editor/workshop/shapes/config/ShapeCastleConfig.generated.js';
 import { shapeProfileOut, shapeProfileBreaks } from '../src/editor/workshop/shapes/ShapeProfile.js';
+import { offsetShapePolygon, polylineTouchesShape } from '../src/editor/workshop/shapes/ShapeEnvelope.js';
 import { shapeOpeningTop } from '../src/editor/workshop/shapes/ShapeOpenings.js';
 import { createShapeWallSurface } from '../src/editor/workshop/shapes/ShapeWallSurface.js';
 import { normalizeWorkshopComposition } from '../src/editor/workshop/ProceduralWorkshopComposition.js';
@@ -85,4 +86,49 @@ test('turrets, crowns and joined walls build finite geometry through the shared 
       part.geometry.dispose();
     }
   }
+});
+
+test('polygon offsets keep a true perpendicular distance at square corners', () => {
+  const square = [[0, 0], [2, 0], [2, 2], [0, 2]];
+  for (const points of [square, [...square].reverse()]) {
+    const out = offsetShapePolygon(points, 1);
+    for (const [x, z] of out) assert.ok(Math.abs(Math.abs(x - 1) - 2) < 1e-9 && Math.abs(Math.abs(z - 1) - 2) < 1e-9, `corner ${x},${z}`);
+    const inset = offsetShapePolygon(points, -0.5);
+    for (const [x, z] of inset) assert.ok(Math.abs(Math.abs(x - 1) - 0.5) < 1e-9 && Math.abs(Math.abs(z - 1) - 0.5) < 1e-9);
+  }
+  const spike = offsetShapePolygon([[0, 0], [10, 0.2], [0, 0.4]], 0.1);
+  assert.ok(Math.hypot(spike[1][0] - 10, spike[1][1] - 0.2) <= 0.4 + 1e-9, 'a needle tip is clamped at the miter limit');
+});
+
+test('a wall crossing a tower with no vertex inside it still joins', () => {
+  const square = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+  assert.ok(polylineTouchesShape([[-5, 0], [5, 0]], square), 'a segment straight through the footprint');
+  assert.ok(!polylineTouchesShape([[-5, 3], [5, 3]], square));
+  assert.ok(!polylineTouchesShape([[2, -1], [5, -1]], square), 'collinear with an edge but past its end');
+  const plans = [plan(tower()), plan({ id: 'wall', kind: 'curved-wall', path: { id: 'wall-path', closed: false,
+    points: [{ id: 'a', position: [-12, 0] }, { id: 'b', position: [12, 0] }],
+    segments: [{ id: 's0', kind: 'line', startId: 'a', endId: 'b' }] }, height: 5, thickness: 1 })];
+  const { contacts } = resolveShapeChemistry(plans);
+  assert.ok(contacts.some((c) => c.ruleId === 'wall-tower-join'), 'a straight wall through the tower joins it');
+});
+
+test('battlement collision carries the same voids the masonry leaves', () => {
+  const slab = (p) => p.rpg.collisionSlabs.find((s) => s.id === `${p.primitive.id}:crown`);
+  const solidAt = (crown, u) => crown.merlons.some((m) => u > m.u0 && u < m.u1);
+  const p = plan(tower({ crown: { style: 'parapet' } })), crown = p.crown, length = p.curve.length;
+  const gaps = slab(p).gaps;
+  assert.equal(gaps.length, crown.merlons.length, 'one embrasure between each pair of merlons around a closed ring');
+  for (const g of gaps) {
+    assert.ok(!solidAt(crown, g.at * length), 'an embrasure never sits on a merlon');
+    assert.ok(Math.abs(g.bottom - (crown.wallTop)) < 1e-9 && g.height > 0);
+  }
+  const pierced = plan(tower({ crown: { style: 'parapet', merlons: 'pierced' } }));
+  assert.equal(slab(pierced).gaps.filter((g) => g.id.endsWith(':loop')).length, pierced.crown.merlons.length);
+  const ruined = plan(tower({ crown: { style: 'parapet', ruin: 0.3 } }));
+  const broken = ruined.crown.merlons.filter((m) => m.ruined);
+  assert.ok(broken.length > 0);
+  assert.equal(slab(ruined).gaps.filter((g) => g.id.endsWith(':ruin')).length, broken.length, 'a broken merlon leaves air above it');
+  const walls = resolveShapeChemistry([plan({ id: 'wall', kind: 'curved-wall', length: 9, bend: 0, height: 5, thickness: 1,
+    crown: { style: 'parapet' } })]).plans;
+  assert.ok(slab(walls[0]).gaps.length > 0, 'path-gate resolution keeps the embrasures');
 });

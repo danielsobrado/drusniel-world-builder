@@ -1,7 +1,7 @@
 import { WorkshopSpatialIndex } from '../spatial/WorkshopSpatialIndex.js';
 import polygonClipping from 'polygon-clipping';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
-import { shapeEnvelopeAtHeight, pointInShape, offsetShapePolygon } from './ShapeEnvelope.js';
+import { shapeEnvelopeAtHeight, polylineTouchesShape, offsetShapePolygon } from './ShapeEnvelope.js';
 import { resolvePathGates } from './ShapePathGateReaction.js';
 import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
 import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
@@ -89,9 +89,12 @@ export function resolveShapeChemistry(plans) {
       for (const id of index.queryBounds(plan.bounds, { excludeIds: [plan.id] })) {
         const other = byId.get(id), a = plan.primitive, b = other.primitive;
         if (b.kind !== 'curved-volume' || a.elevation + a.height <= b.elevation || b.elevation + b.height <= a.elevation) continue;
-        const shell = shapeEnvelopeAtHeight(other, Math.max(a.elevation, b.elevation) + 0.5);
+        // A wall can pass clean through a tower with every sample outside it, so test edge crossings
+        // against the shell at the bottom, middle and top of the shared height band.
+        const bottom = Math.max(a.elevation, b.elevation), top = Math.min(a.elevation + a.height, b.elevation + b.height);
         const reach = a.thickness / 2 + b.thickness / 2;
-        if (!plan.boundary.some((point) => pointInShape(point, offsetShapePolygon(shell, reach)))) continue;
+        if (![bottom + 0.01, (bottom + top) / 2, top - 0.01].some((y) =>
+          polylineTouchesShape(plan.boundary, offsetShapePolygon(shapeEnvelopeAtHeight(other, y), reach), plan.curve.closed))) continue;
         plan.neighbors.push({ id: other.id, boundary: other.boundary, topBoundary: other.topBoundary, curve: other.curve, primitive: other.primitive });
         const key = `join:${plan.id}:${other.id}`;
         contacts.push({ id: key, source: 'auto', ruleId: 'wall-tower-join', generatorVersion: 1,

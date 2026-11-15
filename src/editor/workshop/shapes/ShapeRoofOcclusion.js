@@ -3,7 +3,9 @@ import { shapeBaseTop } from './ShapeProfile.js';
 import { clipShapePolygon, convexShapePlanes, convexShapeWallPlanes, interpolateShapeVertex, splitShapeFootprint } from './ShapePolygonClip.js';
 
 const triangles = (polygon) => Array.from({ length: Math.max(0, polygon.length - 2) }, (_, i) => [polygon[0], polygon[i + 1], polygon[i + 2]]);
-const positionKey = (p, roofs) => JSON.stringify([p.position, p.rotation, p.elevation, p.height, p.footprint, p.taper, p.thickness, roofs ? p.roof : null]);
+// Two shells own the same space only when their whole envelope matches, vertical profile and crown included.
+const positionKey = (p, roofs) => JSON.stringify([p.position, p.rotation, p.elevation, p.height, p.footprint, p.taper, p.thickness,
+  p.base, p.stages, p.crown, roofs ? p.roof : null]);
 
 function clipRoofHeight(triangle, signed, depth = 0) {
   const values = triangle.map((v) => signed(v.position));
