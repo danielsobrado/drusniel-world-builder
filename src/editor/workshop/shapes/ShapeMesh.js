@@ -8,6 +8,10 @@ export function shapeRandom(seed, entityId, domain, key) {
   let hash = (seed ^ 2166136261) >>> 0;
   for (const char of `${entityId}:${domain}:${key}`)
     hash = Math.imul(hash ^ char.charCodeAt(0), 16777619) >>> 0;
+  // FNV-1a alone leaves keys that differ in their last character within ~1/256 of each other.
+  hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b) >>> 0;
+  hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35) >>> 0;
+  hash = (hash ^ (hash >>> 16)) >>> 0;
   return hash / 4294967296;
 }
 

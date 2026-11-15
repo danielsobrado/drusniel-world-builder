@@ -8,6 +8,7 @@ import { SHAPE_PRESETS, createShapePreset } from '../src/editor/workshop/shapes/
 import { SHAPE_CASTLE_PRESETS } from '../src/editor/workshop/shapes/config/ShapeCastleConfig.generated.js';
 import { shapeProfileOut, shapeProfileBreaks } from '../src/editor/workshop/shapes/ShapeProfile.js';
 import { offsetShapePolygon, polylineTouchesShape } from '../src/editor/workshop/shapes/ShapeEnvelope.js';
+import { shapeRandom } from '../src/editor/workshop/shapes/ShapeMesh.js';
 import { shapeOpeningTop } from '../src/editor/workshop/shapes/ShapeOpenings.js';
 import { createShapeWallSurface } from '../src/editor/workshop/shapes/ShapeWallSurface.js';
 import { normalizeWorkshopComposition } from '../src/editor/workshop/ProceduralWorkshopComposition.js';
@@ -124,11 +125,17 @@ test('battlement collision carries the same voids the masonry leaves', () => {
   }
   const pierced = plan(tower({ crown: { style: 'parapet', merlons: 'pierced' } }));
   assert.equal(slab(pierced).gaps.filter((g) => g.id.endsWith(':loop')).length, pierced.crown.merlons.length);
-  const ruined = plan(tower({ crown: { style: 'parapet', ruin: 0.3 } }));
+  const ruined = plan(tower({ crown: { style: 'parapet', ruin: 0.9 } }));
   const broken = ruined.crown.merlons.filter((m) => m.ruined);
-  assert.ok(broken.length > 0);
+  assert.ok(broken.length > 0 && broken.length < ruined.crown.merlons.length, 'ruin varies merlon by merlon');
   assert.equal(slab(ruined).gaps.filter((g) => g.id.endsWith(':ruin')).length, broken.length, 'a broken merlon leaves air above it');
   const walls = resolveShapeChemistry([plan({ id: 'wall', kind: 'curved-wall', length: 9, bend: 0, height: 5, thickness: 1,
     crown: { style: 'parapet' } })]).plans;
   assert.ok(slab(walls[0]).gaps.length > 0, 'path-gate resolution keeps the embrasures');
+});
+
+test('shape randomness spreads keys that differ only in a trailing index', () => {
+  const values = Array.from({ length: 64 }, (_, i) => shapeRandom(0, 'tower', 'crown-ruin', i));
+  assert.ok(Math.max(...values) - Math.min(...values) > 0.8);
+  assert.ok(Math.abs(values.reduce((a, b) => a + b, 0) / values.length - 0.5) < 0.12);
 });
