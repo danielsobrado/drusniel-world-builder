@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createFallenLogGeometry } from '../src/editor/stylized/forest/forestDebrisGeometry.js';
+import {
+  createFallenLogGeometry,
+  createStumpGeometry,
+} from '../src/editor/stylized/forest/forestDebrisGeometry.js';
+import { createForestDebrisPrototypes } from '../src/editor/stylized/forest/forestDebrisPrototypes.js';
 import {
   collectChunkObstacleCircles,
+  collectDebrisContactFootprints,
   computePrototypeFootprint,
   footprintHitsObstacle,
   pathBlockedForFootprint,
@@ -48,4 +53,39 @@ test('pathBlockedForFootprint catches elongated log ends protruding into a walk 
   assert.equal(pathBlockedForFootprint(pathClearance, { x: 10, z: 5, scale: 1, rotationY: 0, radius: 0.3 }, footprint), true);
   // Parallel to path (rotationY = Math.PI / 2): X reach stays within 10 ± 0.25.
   assert.equal(pathBlockedForFootprint(pathClearance, { x: 10, z: 5, scale: 1, rotationY: Math.PI / 2, radius: 0.3 }, footprint), false);
+});
+
+test('collectDebrisContactFootprints emits oriented spine disks for fallen logs and skips tiny litter', () => {
+  const logGeo = createFallenLogGeometry();
+  const stumpGeo = createStumpGeometry();
+  const footprints = [
+    computePrototypeFootprint([{ geometry: logGeo }]),
+    computePrototypeFootprint([{ geometry: stumpGeo }]),
+    { halfX: 0.25, halfZ: 0.25 },
+  ];
+  const circles = collectDebrisContactFootprints([
+    { x: 10, z: 20, scale: 1, rotationY: 0, prototypeIndex: 0 },
+    { x: 30, z: 40, scale: 1, rotationY: 0, prototypeIndex: 1 },
+    { x: 50, z: 60, scale: 1, rotationY: 0, prototypeIndex: 2 },
+  ], footprints);
+  assert.equal(circles.length, 4);
+  assert.ok(circles[0].x < 10 && circles[1].x === 10 && circles[2].x > 10);
+  assert.equal(circles[3].x, 30);
+  logGeo.dispose();
+  stumpGeo.dispose();
+});
+
+test('createForestDebrisPrototypes binds albedo-preserving colorNode and bark bump normalNode', () => {
+  const defs = createForestDebrisPrototypes({
+    variants: {
+      fallenLog: { kind: 'fallenLog', enabled: true },
+    },
+  }, { soilColor: '#5c4a30', floorColor: '#3b5233' });
+  assert.equal(defs.length, 1);
+  const mat = defs[0].parts[0].material;
+  assert.equal(mat.vertexColors, true);
+  assert.ok(mat.colorNode, 'expected colorNode on fallenLog material');
+  assert.ok(mat.normalNode, 'expected bark bump normalNode on fallenLog material');
+  mat.dispose();
+  defs[0].parts[0].geometry.dispose();
 });

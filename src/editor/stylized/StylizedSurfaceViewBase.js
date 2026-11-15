@@ -28,6 +28,7 @@ import { StylizedChunkRevisionTracker } from './StylizedChunkRevisionTracker.js'
 import { StylizedFlowerView } from './StylizedFlowerView.js';
 import { StylizedGroundDetailView } from './StylizedGroundDetailView.js';
 import { createForestDebrisPrototypes } from './forest/forestDebrisPrototypes.js';
+import { collectDebrisContactFootprints } from './UnderstoryClearance.js';
 import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
 import { advancePlantSway } from './plantSway.js';
@@ -280,7 +281,10 @@ export class StylizedSurfaceView {
         ...detailObstacleProviders,
       })
       : null;
-    this.forestDebrisView?.appendProceduralPrototypes(createForestDebrisPrototypes(config.forestDebris));
+    this.forestDebrisView?.appendProceduralPrototypes(createForestDebrisPrototypes(config.forestDebris, {
+      soilColor: config.trees?.forestFloor?.litterColor,
+      floorColor: config.trees?.forestFloor?.groundCoreColor,
+    }));
     // Every per-chunk detail layer, authored or procedural, is rebuilt and disposed
     // the same way; the array is what keeps a new layer from having to be added to
     // three separate places.
@@ -338,6 +342,8 @@ export class StylizedSurfaceView {
         baseUrl,
         rockPlacementsProvider: () => this.rockView?.getPlacements() ?? [],
         treePlacementsProvider: (chunkX, chunkZ) => this.treeView?.manifestStore?.peek(chunkX, chunkZ) ?? null,
+        debrisPlacementsProvider: (chunkX, chunkZ) => this.forestDebrisView?.manifestCache.get(`${chunkX}:${chunkZ}`)?.placements ?? null,
+        debrisFootprintsProvider: () => this.forestDebrisView?.prototypeFootprints ?? null,
       })
       : null;
     this.slots = this.enabled && !this.impostorBakeMode && !this.meadowGrass
@@ -1047,6 +1053,17 @@ export class StylizedSurfaceView {
         strength: this.contactShadeSettings.rockStrength,
       });
     }
+    const debrisPlacements = this.forestDebrisView?.manifestCache.get(
+      `${descriptor.chunkX}:${descriptor.chunkZ}`,
+    )?.placements ?? [];
+    for (const circle of collectDebrisContactFootprints(debrisPlacements, this.forestDebrisView?.prototypeFootprints)) {
+      sources.push({
+        x: circle.x,
+        z: circle.z,
+        radius: circle.reach,
+        strength: this.contactShadeSettings.rockStrength * 0.9,
+      });
+    }
     if (sources.length === 0) return;
     paintContactShade({
       pixels: terrainSlot.forestFloorPixels,
@@ -1075,7 +1092,8 @@ export class StylizedSurfaceView {
       this.rockView,
     ) ?? [];
     const rocksHere = this.rockView?.placementsByChunk?.get(`${descriptor.chunkX}:${descriptor.chunkZ}`)?.length ?? 0;
-    return `${manifest.length}:${rocksHere}`;
+    const debrisHere = this.forestDebrisView?.manifestCache.get(`${descriptor.chunkX}:${descriptor.chunkZ}`)?.placements?.length ?? 0;
+    return `${manifest.length}:${rocksHere}:${debrisHere}`;
   }
 
   dispose() {

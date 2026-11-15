@@ -129,3 +129,46 @@ export function pathBlockedForFootprint(pathClearance, candidate, footprint) {
   return pathClearance.blocks(candidate.x + dirX * tipOffset, candidate.z + dirZ * tipOffset, shortHalf)
     || pathClearance.blocks(candidate.x - dirX * tipOffset, candidate.z - dirZ * tipOffset, shortHalf);
 }
+
+/**
+ * Decomposes larger deadwood placements (fallen logs, stumps) into overlapping
+ * ground-contact circles `{ x, z, radius, reach, phase }` used both to thin/suppress
+ * nearby grass and to paint soft ambient-occlusion contact shade on the floor.
+ */
+export function collectDebrisContactFootprints(placements = [], footprints = [], out = []) {
+  if (!Array.isArray(placements) || placements.length === 0) return out;
+  for (let i = 0; i < placements.length; i += 1) {
+    const p = placements[i];
+    const fp = footprints?.[p.prototypeIndex];
+    if (!fp) continue;
+    const maxH = Math.max(fp.halfX, fp.halfZ);
+    if (maxH < 0.45) continue;
+    const scale = p.scale ?? 1;
+    const hx = fp.halfX * scale;
+    const hz = fp.halfZ * scale;
+    const longHalf = Math.max(hx, hz);
+    const shortHalf = Math.min(hx, hz);
+    const phase = (Math.abs(Math.sin(p.x * 12.9898 + p.z * 78.233)) * 43758.5453 % 1) * Math.PI * 2;
+    if (longHalf >= shortHalf * 1.8 && longHalf >= 0.9) {
+      const yaw = p.rotationY ?? 0;
+      const dirX = hx >= hz ? Math.cos(yaw) : Math.sin(yaw);
+      const dirZ = hx >= hz ? -Math.sin(yaw) : Math.cos(yaw);
+      const radius = Math.max(0.45, Math.min(0.68, shortHalf * 0.95));
+      const reach = radius + 0.85 * scale;
+      const span = Math.max(0.4, longHalf - radius * 0.7);
+      for (const s of [-1, 0, 1]) {
+        out.push({
+          x: p.x + dirX * span * s,
+          z: p.z + dirZ * span * s,
+          radius,
+          reach,
+          phase: phase + s * 1.1,
+        });
+      }
+    } else {
+      const radius = Math.max(0.45, longHalf * 0.85);
+      out.push({ x: p.x, z: p.z, radius, reach: radius + 0.95 * scale, phase });
+    }
+  }
+  return out;
+}

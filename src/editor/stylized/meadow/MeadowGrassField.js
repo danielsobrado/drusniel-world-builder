@@ -59,6 +59,7 @@ export class MeadowGrassField {
   constructor({
     scene, terrainView, config, settings, tuning, sunDirection, forestFieldProvider, skyView = null, baseUrl = '/',
     rockPlacementsProvider = () => [], treePlacementsProvider = null,
+    debrisPlacementsProvider = null, debrisFootprintsProvider = null,
   }) {
     this.terrainView = terrainView;
     this.settings = settings;
@@ -110,6 +111,8 @@ export class MeadowGrassField {
       forestFloorConfig: config.trees?.forestFloor ?? null,
       rockPlacementsProvider,
       treePlacementsProvider,
+      debrisPlacementsProvider,
+      debrisFootprintsProvider,
       rocks: config.rocks ?? null,
     });
     const far = settings.far;

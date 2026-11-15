@@ -150,46 +150,56 @@ export function createStumpGeometry({ radius = 0.34, height = 0.62, roots = 5 } 
   return builder.build();
 }
 
-/** Tapered bent trunk lying half in the soil, moss on what faces the sky, snapped ends. */
+/** Tapered bent trunk lying half in the soil, fluted root buttresses, moss on what faces the sky, snapped ends. */
 export function createFallenLogGeometry({ length = 3.6, radius = 0.24 } = {}) {
   const builder = new MeshBuilder();
-  const sides = 9;
-  const rings = 8;
+  const sides = 10;
+  const rings = 9;
   const half = length / 2;
-  const ringCentre = (t) => [-half + t * length, radius * 0.55 + Math.sin(t * Math.PI) * 0.05, Math.sin(t * 2.6) * 0.22];
+  const ringCentre = (t) => [-half + t * length, radius * 0.48 + Math.sin(t * Math.PI) * 0.06, Math.sin(t * 2.6) * 0.22];
   for (let ring = 0; ring < rings; ring += 1) {
     const t = ring / (rings - 1);
     const [cx, cy, cz] = ringCentre(t);
-    const reach = radius * (1 - 0.42 * t) * (1 + 0.06 * Math.sin(t * 9));
+    const rootFlare = (1 - smoothstep(0, 0.28, t));
+    const baseReach = radius * (1 - 0.44 * t) * (1 + 0.06 * Math.sin(t * 9));
     for (let side = 0; side < sides; side += 1) {
       const angle = (side / sides) * Math.PI * 2;
       const up = Math.sin(angle);
-      const moss = smoothstep(0.1, 0.75, up + (mottle(t * 9, angle * 2) - 0.5) * 0.9) * 0.92;
-      builder.vertex(cx, cy + up * reach, cz + Math.cos(angle) * reach, barkColor(t * 10, angle * 3, moss));
+      const cosA = Math.cos(angle);
+      // Longitudinal bark ridges + fluted buttress lobes near the root end.
+      const furrow = 1 + 0.07 * Math.cos(angle * 7 + t * 3.5) + (mottle(t * 14, angle * 2.5) - 0.5) * 0.14;
+      const buttress = 1 + rootFlare * (0.16 + 0.26 * Math.max(0, Math.cos(angle * 4 + 0.5)));
+      const reach = baseReach * furrow * buttress;
+      const moss = smoothstep(0.05, 0.72, up + (mottle(t * 9, angle * 2) - 0.5) * 0.85) * 0.92;
+      builder.vertex(cx, cy + up * reach, cz + cosA * reach, barkColor(t * 10, angle * 3, moss));
     }
   }
   builder.grid(0, rings, sides);
   const foot = ringCentre(0);
-  builder.endGrain(0, sides, [foot[0] - 0.05, foot[1], foot[2]], true);
+  builder.endGrain(0, sides, [foot[0] - 0.07, foot[1], foot[2]], true);
   const tip = ringCentre(1);
-  builder.endGrain((rings - 1) * sides, sides, [tip[0] + 0.12, tip[1] + 0.02, tip[2]], false);
-  // A snapped limb, so the silhouette is a tree that fell and not a cylinder.
-  const stub = builder.positions.length / 3;
-  const base = ringCentre(0.62);
-  for (let ring = 0; ring < 3; ring += 1) {
-    const t = ring / 2;
-    for (let side = 0; side < 5; side += 1) {
-      const angle = (side / 5) * Math.PI * 2;
-      const reach = 0.07 * (1 - t * 0.6);
-      builder.vertex(
-        base[0] + t * 0.22 + Math.cos(angle) * reach,
-        base[1] + t * 0.42 + radius * 0.5,
-        base[2] + 0.08 + t * 0.2 + Math.sin(angle) * reach,
-        barkColor(t * 4, angle, 0),
-      );
+  builder.endGrain((rings - 1) * sides, sides, [tip[0] + 0.14, tip[1] + 0.03, tip[2]], false);
+  // Two snapped limb stubs at different angles so the silhouette reads as a fallen tree.
+  const addStub = (tPos, dx, dy, dz, baseR) => {
+    const stub = builder.positions.length / 3;
+    const base = ringCentre(tPos);
+    for (let ring = 0; ring < 3; ring += 1) {
+      const t = ring / 2;
+      for (let side = 0; side < 5; side += 1) {
+        const angle = (side / 5) * Math.PI * 2;
+        const reach = baseR * (1 - t * 0.58);
+        builder.vertex(
+          base[0] + t * dx + Math.cos(angle) * reach,
+          base[1] + radius * 0.45 + t * dy,
+          base[2] + (dz >= 0 ? 0.08 : -0.08) + t * dz + Math.sin(angle) * reach,
+          barkColor(t * 4, angle, t < 0.4 ? 0.2 : 0),
+        );
+      }
     }
-  }
-  builder.grid(stub, 3, 5);
+    builder.grid(stub, 3, 5);
+  };
+  addStub(0.62, 0.24, 0.42, 0.2, 0.075);
+  addStub(0.31, -0.14, 0.28, -0.18, 0.06);
   return builder.build();
 }
 

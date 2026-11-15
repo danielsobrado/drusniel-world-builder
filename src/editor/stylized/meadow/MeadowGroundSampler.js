@@ -2,6 +2,7 @@ import { meadowPageGrowthKey } from './MeadowGrowthUpdates.js';
 import { createMeadowPathSampler } from './MeadowPathSampler.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
+import { collectDebrisContactFootprints } from '../UnderstoryClearance.js';
 
 import { createMeadowGroundSample } from './MeadowGroundSample.js';
 import { identityOf } from './MeadowSharedGroundInputs.js';
@@ -35,9 +36,11 @@ export class MeadowGroundSampler {
   constructor({
     terrainView, tileIds, shapeTable, forestFieldProvider = () => null, forestFloorConfig = null,
     rockPlacementsProvider = () => [], rocks = null, growth = null, pathConfig = null,
-    treePlacementsProvider = null,
+    treePlacementsProvider = null, debrisPlacementsProvider = null, debrisFootprintsProvider = null,
   }) {
     this.treePlacementsProvider = treePlacementsProvider;
+    this.debrisPlacementsProvider = debrisPlacementsProvider;
+    this.debrisFootprintsProvider = debrisFootprintsProvider;
     const rootZone = forestFloorConfig?.rootZone;
     this.rootZone = treePlacementsProvider && rootZone?.enabled !== false && rootZone
       ? { radius: rootZone.radius, falloff: rootZone.falloff, maxReach: (rootZone.radius + rootZone.falloff) * ROOT_SCALE_MAX }
@@ -138,25 +141,53 @@ export class MeadowGroundSampler {
     return chunks;
   }
 
-  /** Keyed on placement-list identity, so a tile rebuilds once its trees arrive or change. */
-  rootSignature(centerX, centerZ, tileHalf) {
-    if (!this.rootZone) return '';
-    return `:r${this.rootChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`;
+  /** Debris placement lists (fallen trunks, stumps) within reach of a tile. */
+  debrisChunks(centerX, centerZ, tileHalf) {
+    if (!this.debrisPlacementsProvider) return [];
+    const reach = tileHalf + 3.5;
+    const [x0, z0] = this.chunkOf(centerX - reach, centerZ + reach);
+    const [x1, z1] = this.chunkOf(centerX + reach, centerZ - reach);
+    const chunks = [];
+    for (let chunkZ = z0; chunkZ <= z1; chunkZ += 1) {
+      for (let chunkX = x0; chunkX <= x1; chunkX += 1) chunks.push(this.debrisPlacementsProvider(chunkX, chunkZ));
+    }
+    return chunks;
   }
 
-  /** Trunks whose root zone touches a tile: grass thins to bare litter round their foot. */
+  /** Keyed on placement-list identity, so a tile rebuilds once its trees or deadwood arrive or change. */
+  rootSignature(centerX, centerZ, tileHalf) {
+    const treeSig = this.rootZone
+      ? `:r${this.rootChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`
+      : '';
+    const debrisSig = this.debrisPlacementsProvider
+      ? `:d${this.debrisChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`
+      : '';
+    return `${treeSig}${debrisSig}`;
+  }
+
+  /** Trunks and fallen logs whose zone touches a tile: grass thins to bare litter round their foot. */
   rootsNear(centerX, centerZ, tileHalf) {
-    if (!this.rootZone) return [];
-    const { radius, falloff } = this.rootZone;
     const near = [];
-    for (const list of this.rootChunks(centerX, centerZ, tileHalf)) {
-      for (const tree of list ?? []) {
-        const scale = Math.min(ROOT_SCALE_MAX, Math.max(ROOT_SCALE_MIN, tree.heightScale ?? tree.scale ?? 1));
-        const reach = (radius + falloff) * scale;
-        if (Math.abs(tree.x - centerX) > tileHalf + reach || Math.abs(tree.z - centerZ) > tileHalf + reach) continue;
-        // Deterministic per trunk, so the lobes do not turn with every rebuild.
-        const phase = (Math.abs(Math.sin(tree.x * 12.9898 + tree.z * 78.233)) * 43758.5453 % 1) * Math.PI * 2;
-        near.push({ x: tree.x, z: tree.z, radius: radius * scale, reach, phase });
+    if (this.rootZone) {
+      const { radius, falloff } = this.rootZone;
+      for (const list of this.rootChunks(centerX, centerZ, tileHalf)) {
+        for (const tree of list ?? []) {
+          const scale = Math.min(ROOT_SCALE_MAX, Math.max(ROOT_SCALE_MIN, tree.heightScale ?? tree.scale ?? 1));
+          const reach = (radius + falloff) * scale;
+          if (Math.abs(tree.x - centerX) > tileHalf + reach || Math.abs(tree.z - centerZ) > tileHalf + reach) continue;
+          // Deterministic per trunk, so the lobes do not turn with every rebuild.
+          const phase = (Math.abs(Math.sin(tree.x * 12.9898 + tree.z * 78.233)) * 43758.5453 % 1) * Math.PI * 2;
+          near.push({ x: tree.x, z: tree.z, radius: radius * scale, reach, phase });
+        }
+      }
+    }
+    if (this.debrisPlacementsProvider) {
+      const footprints = this.debrisFootprintsProvider?.() ?? [];
+      for (const list of this.debrisChunks(centerX, centerZ, tileHalf)) {
+        for (const circle of collectDebrisContactFootprints(list, footprints)) {
+          if (Math.abs(circle.x - centerX) > tileHalf + circle.reach || Math.abs(circle.z - centerZ) > tileHalf + circle.reach) continue;
+          near.push(circle);
+        }
       }
     }
     return near;
