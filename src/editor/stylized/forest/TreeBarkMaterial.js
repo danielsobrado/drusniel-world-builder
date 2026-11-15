@@ -108,7 +108,20 @@ export function createAuthoredTrunkMaterial({
     material = pbrBarkMaterial(source, surface);
     material.map = sourceMap ?? source?.map ?? null;
     const base = colorNode(source?.color ?? '#ffffff');
-    material.colorNode = material.map ? authoredTexture(material.map).rgb.mul(base) : base;
+    const triplanarColorOnly = Boolean(
+      material.map && !source?.bumpMap && !source?.normalMap && !source?.roughnessMap && !source?.aoMap,
+    );
+    if (triplanarColorOnly) {
+      // Color-only donor bark (e.g. meadow trees) compresses V on branches; triplanar object-space
+      // projection with Y-up on both X/Z walls keeps bark grain crisp and unstretched at any angle.
+      const weights = normalGeometry.abs().div(normalGeometry.abs().dot(vec3(1)).max(1e-5));
+      const sampled = texture(material.map, positionGeometry.zy.mul(barkScale)).mul(weights.x)
+        .add(texture(material.map, positionGeometry.zx.mul(barkScale)).mul(weights.y))
+        .add(texture(material.map, positionGeometry.xy.mul(barkScale)).mul(weights.z));
+      material.colorNode = sampled.rgb.mul(base);
+    } else {
+      material.colorNode = material.map ? authoredTexture(material.map).rgb.mul(base) : base;
+    }
     const heightMap = source?.bumpMap;
     // Keep the loader's independent map transforms. Displace the common base UV
     // before each texture applies its own KHR_texture_transform matrix.

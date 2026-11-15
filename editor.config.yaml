@@ -599,6 +599,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall, tropical_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [3, 4, 5, 6, 7]
         pivot: trunk
@@ -606,6 +607,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall, tropical_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [3, 4, 5, 6, 7]
         pivot: trunk
@@ -613,6 +615,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall, tropical_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [3, 4, 5, 6, 7]
         pivot: trunk
@@ -621,6 +624,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [6]
         pivot: trunk
@@ -628,6 +632,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [6]
         pivot: trunk
@@ -635,6 +640,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: [broadleaf_round, broadleaf_tall]
+        barkScale: 0.14
         scale: 0.357
         tileIds: [6]
         pivot: trunk
@@ -644,6 +650,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: broadleaf_tall
+        barkScale: 0.14
         scale: 0.357
         tileIds: [4, 8]
         pivot: trunk
@@ -651,6 +658,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: broadleaf_tall
+        barkScale: 0.14
         scale: 0.357
         tileIds: [4, 8]
         pivot: trunk
@@ -658,6 +666,7 @@ stylizedSurface:
         trunkMaterial: Meadow bark
         leafMaterial: Meadow leaves
         species: broadleaf_tall
+        barkScale: 0.14
         scale: 0.357
         tileIds: [4, 8]
         pivot: trunk
