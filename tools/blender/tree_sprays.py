@@ -158,16 +158,21 @@ def palm_frond(canvas, cell, rng, pairs):
     leaflet[:, 4, :3] = srgb([0.38, 0.46, 0.22])
     t = 1 - (np.arange(64)[:, None] + 0.5) / 64
     leaflet[..., 3] = across[None, :] <= np.clip((1 - t) / 0.3, 0, 1)  # pointed tip
-    rachis = polyline(((x0 + x1) / 2 - height * 0.03, y1), height * 0.96, 0.12, -0.24)
+    # Anchor the petiole all the way past the bottom cell margin so UV v=0 has zero gap
+    petiole_pad = height * 0.045
+    rachis = polyline(((x0 + x1) / 2 - height * 0.03, y1 + petiole_pad), height * 0.96 + petiole_pad, 0.12, -0.24)
     for i in range(pairs):
-        f = 0.1 + 0.88 * i / (pairs - 1)
+        f = 0.12 + 0.86 * i / (pairs - 1)
         length = height * (0.12 + 0.12 * f * 3 if f < 1 / 3 else 0.24 - 0.17 * (f - 1 / 3) / (2 / 3))
         point, direction = along(rachis, f)
         angle = math.radians(55 - 30 * f)
         for side in (-1, 1):
             d = rotated(direction, side * angle + rng.uniform(-0.05, 0.05))
             stamp(canvas, leaflet, point, (d[0] * length, d[1] * length), height * 0.018)
-    draw_stem(canvas, rachis, srgb([0.38, 0.46, 0.22]), height * 0.014, tip=0.25)
+    draw_stem(canvas, rachis, srgb([0.38, 0.46, 0.22]), height * 0.016, tip=0.25)
+    # Stout fibrous petiole base clasping into the palm crownshaft
+    petiole = polyline(((x0 + x1) / 2 - height * 0.03, y1 + petiole_pad), height * 0.14 + petiole_pad, 0.12, -0.04, segments=2)
+    draw_stem(canvas, petiole, srgb([0.34, 0.39, 0.19]), height * 0.032, tip=0.52)
 
 
 def bake_sprays(sprays, size, out_path):

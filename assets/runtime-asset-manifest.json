@@ -3285,13 +3285,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "0726cf207b3254fe9e84a86f613c7c8a4ce2592b23779bd681fcd0fbd77faeb8",
-      "sourceSha256": "bc6727336a6d6814e233ac8c3311f228df17da505ad15ed916c5dbb4b32d88e1",
-      "outputSha256": "b5a3a93b585fea3330339f9af584514ac162168113020d58b88d2c6a07b86fff",
-      "sourceBytes": 122988,
-      "outputBytes": 74776,
-      "gzipBytes": 67443,
-      "brotliBytes": 66404,
+      "cacheKey": "ad4882a736030d733598dfd77b5e4e156b81ccea156fefe38cf153e868f98203",
+      "sourceSha256": "d7fa9d51adef839a9e2b89981cb8d314a6dca7872b2385b93ab16fe0c141556b",
+      "outputSha256": "58caaaa79e383b588843f4d6301d02678696fcc664cac5120b8f1510ae769b8d",
+      "sourceBytes": 126352,
+      "outputBytes": 76016,
+      "gzipBytes": 68575,
+      "brotliBytes": 67549,
       "sourceStats": {
         "scenes": 1,
         "nodes": 6,
@@ -3301,31 +3301,31 @@
         "images": 1,
         "skins": 0,
         "animations": 0,
-        "triangles": 784,
-        "renderedTriangles": 784,
+        "triangles": 880,
+        "renderedTriangles": 880,
         "drawParts": 4,
         "materialTriangleCounts": {
-          "Palm bark": 352,
+          "Palm bark": 448,
           "Palm fronds": 432
         },
         "sceneBounds": {
           "min": [
-            -3.491424560546875,
+            -3.4202463626861572,
             -0.08640000224113464,
-            -2.2446186542510986
+            -1.7661820650100708
           ],
           "max": [
-            3.118605613708496,
-            12.159653663635254,
-            4.575648307800293
+            3.279127597808838,
+            12.483183860778809,
+            4.687948226928711
           ]
         },
-        "bufferBytes": 118556,
-        "logicalAccessorBytes": 46400,
-        "logicalVertexBytes": 41696,
-        "logicalIndexBytes": 4704,
-        "geometryBufferBytes": 46400,
-        "imageBufferBytes": 72156,
+        "bufferBytes": 121916,
+        "logicalAccessorBytes": 48704,
+        "logicalVertexBytes": 43424,
+        "logicalIndexBytes": 5280,
+        "geometryBufferBytes": 48704,
+        "imageBufferBytes": 73210,
         "nodeNames": [
           "palm-01",
           "palm-01-Bark",
@@ -3351,31 +3351,31 @@
         "images": 1,
         "skins": 0,
         "animations": 0,
-        "triangles": 784,
-        "renderedTriangles": 784,
+        "triangles": 880,
+        "renderedTriangles": 880,
         "drawParts": 4,
         "materialTriangleCounts": {
-          "Palm bark": 352,
+          "Palm bark": 448,
           "Palm fronds": 432
         },
         "sceneBounds": {
           "min": [
-            -3.49145508,
+            -3.42028809,
             -0.0863990784,
-            -2.24462891
+            -1.76617432
           ],
           "max": [
-            3.11865234,
-            12.159668,
-            4.57568359
+            3.2791748,
+            12.4833984,
+            4.68798828
           ]
         },
-        "bufferBytes": 98508,
-        "logicalAccessorBytes": 27366,
-        "logicalVertexBytes": 22662,
-        "logicalIndexBytes": 4704,
-        "geometryBufferBytes": 28416,
-        "imageBufferBytes": 59370,
+        "bufferBytes": 101084,
+        "logicalAccessorBytes": 28662,
+        "logicalVertexBytes": 23382,
+        "logicalIndexBytes": 5280,
+        "geometryBufferBytes": 29760,
+        "imageBufferBytes": 60308,
         "nodeNames": [
           "palm-01",
           "palm-01-Bark",
@@ -3411,8 +3411,8 @@
         "infos": 3,
         "hints": 0,
         "drawCalls": 4,
-        "vertices": 1050,
-        "triangles": 784
+        "vertices": 1098,
+        "triangles": 880
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -3426,17 +3426,17 @@
         "render": {
           "drawCount": 4,
           "instanceCount": 4,
-          "triangleCount": 784
+          "triangleCount": 880
         },
         "data": {
-          "json": 4540,
-          "binary": 70092,
+          "json": 4547,
+          "binary": 71324,
           "buffers": {
-            "vertex": 9894,
-            "index": 819,
+            "vertex": 10096,
+            "index": 915,
             "animation": 0,
             "transform": 0,
-            "image": 59370
+            "image": 60308
           }
         }
       }
@@ -21107,15 +21107,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 148929268,
-    "outputBytes": 38481952,
-    "gzipBytes": 36454887,
-    "brotliBytes": 36369836,
-    "logicalSourceVertexBytes": 35221688,
-    "logicalOutputVertexBytes": 17458307,
-    "logicalSourceIndexBytes": 4740834,
-    "logicalOutputIndexBytes": 4538928,
-    "savedBytes": 110447316,
-    "reductionRatio": 0.741609
+    "sourceBytes": 148932632,
+    "outputBytes": 38483192,
+    "gzipBytes": 36456019,
+    "brotliBytes": 36370981,
+    "logicalSourceVertexBytes": 35223416,
+    "logicalOutputVertexBytes": 17459027,
+    "logicalSourceIndexBytes": 4741410,
+    "logicalOutputIndexBytes": 4539504,
+    "savedBytes": 110449440,
+    "reductionRatio": 0.741607
   }
 }

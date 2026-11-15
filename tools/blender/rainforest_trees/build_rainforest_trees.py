@@ -321,12 +321,30 @@ def build_palm(rng, height, crown_radius, base_radius, trunk_limit, card_limit, 
     lean_dir = Vector((math.cos(heading), math.sin(heading), 0))
     bow_dir = Vector((math.cos(bow), math.sin(bow), 0))
     stem = height - 1.2  # the fronds arch above the top of the trunk
-    # Cluster stations near the base so the palm's bulbous fibrous root boss curves smoothly
+    # Cluster stations near the base so the palm's bulbous fibrous root boss curves smoothly,
+    # and taper the top into a domed crownheart / petiole collar so fronds seat cleanly.
     last = extra['rings'] - 1
-    ts = [-0.008, 0.0, 0.025, 0.06, 0.11] + [0.11 + 0.89 * i / (last - 2) for i in range(1, last - 1)]
-    points = [lean_dir * extra['lean'] * stem * (max(0.0, t) ** 1.6) + bow_dir * 0.25 * math.sin(math.pi * max(0.0, t))
-              + Vector((0, 0, stem * t)) for t in ts]
-    radii = [base_radius * (1 - 0.3 * max(0.0, t)) for t in ts]
+    ts = (
+        [-0.008, 0.0, 0.025, 0.06, 0.11]
+        + [0.11 + 0.89 * i / (last - 2) for i in range(1, last - 1)]
+        + [1.016, 1.032, 1.046]
+    )
+    def palm_point(t):
+        ct = min(max(0.0, t), 1.0)
+        return (lean_dir * extra['lean'] * stem * (ct ** 1.6)
+                + bow_dir * 0.25 * math.sin(math.pi * ct)
+                + Vector((0, 0, stem * t)))
+    def palm_radius(t):
+        base = base_radius * (1 - 0.3 * min(max(0.0, t), 1.0))
+        if t <= 1.0:
+            return base
+        # Slight fibrous petiole collar swell followed by smooth taper to a closed crown apex
+        u = (t - 1.0) / 0.046
+        if u < 0.38:
+            return base * (1.0 + 0.10 * math.sin(math.pi * (u / 0.38)))
+        return base * max(0.08, 1.06 * (1.0 - ((u - 0.38) / 0.62) ** 1.25))
+    points = [palm_point(t) for t in ts]
+    radii = [palm_radius(t) for t in ts]
     trunk = Branch(points, radii, 0, kind='trunk')
 
     def palm_bole(z, theta):
@@ -336,16 +354,25 @@ def build_palm(rng, height, crown_radius, base_radius, trunk_limit, card_limit, 
         return bulb * flute
 
     tube_mesh(bark_bm, uvs[0], trunk, palm_bole)
-    top = points[-1]
+    top = palm_point(1.0)
+    top_r = base_radius * 0.7
     for k in range(extra['fronds']):
         young = k < 5
-        frond(leaf_bm, uvs[1], regions[rng.choice(['PF1', 'PF2'])], top, k * 2.39996 + rng.uniform(-0.15, 0.15),
+        az = k * 2.39996 + rng.uniform(-0.15, 0.15)
+        out = Vector((math.cos(az), math.sin(az), 0))
+        seat_z = rng.uniform(0.18, 0.30) if young else rng.uniform(0.02, 0.16)
+        seat_r = top_r * (rng.uniform(0.05, 0.20) if young else rng.uniform(0.28, 0.45))
+        anchor = top + Vector((0, 0, seat_z)) + out * seat_r
+        frond(leaf_bm, uvs[1], regions[rng.choice(['PF1', 'PF2'])], anchor, az,
               math.radians(rng.uniform(50, 75) if young else rng.uniform(10, 40)),
               rng.uniform(0.3, 0.7) if young else rng.uniform(0.6, 1.2),
               extra['frond'] * rng.uniform(0.9, 1.05), FROND_STRIP)
     for k in range(3):
         # Dead fronds hang against the trunk; build_tree darkens these last faces.
-        frond(leaf_bm, uvs[1], regions['PF2'], top - Vector((0, 0, 0.3)), rng.uniform(0, 6.28),
+        az = rng.uniform(0, 6.28)
+        out = Vector((math.cos(az), math.sin(az), 0))
+        anchor = top - Vector((0, 0, 0.08)) + out * (top_r * 0.68)
+        frond(leaf_bm, uvs[1], regions['PF2'], anchor, az,
               math.radians(-35), 1.45, extra['frond'] * 0.75, FROND_STRIP * 0.8)
     return 3 * 6
 
