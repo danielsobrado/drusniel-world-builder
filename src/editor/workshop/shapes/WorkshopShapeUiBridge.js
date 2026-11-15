@@ -16,13 +16,14 @@ export class WorkshopShapeUiBridge {
         ui.status.textContent = message;
         ui.status.classList.toggle('is-error', error);
       },
-      // A realm design's recipe bases and palette; returns the looks before and after, which the
+      // A design's recipe bases and palette (a non-realm design brings only cleared area assignments);
+      // returns the looks before and after, which the
       // shape session ties to the design's history entry for undo and redo.
       onMaterials: ({ recipe, document }, group) => {
         const keys = Object.keys(recipe), before = this.captureLook(keys);
         const current = before.document;
         this.applyLook({ recipe, document: current && { ...current, ...document, materialLibrary: { sources: current.materialLibrary.sources,
-          presets: { ...current.materialLibrary.presets, ...document.materialLibrary.presets } } } }, `${group} materials applied.`);
+          presets: { ...current.materialLibrary.presets, ...document.materialLibrary?.presets } } } }, `${group} design chosen.`);
         return { before, after: this.captureLook(keys) };
       },
     });

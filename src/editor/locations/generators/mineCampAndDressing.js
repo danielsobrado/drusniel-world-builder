@@ -9,11 +9,11 @@ const UP_DIR = P(0, 1, 0);
 /** Burlap ore/grain sack with pinched neck and rope tie. */
 export function buildOreSack(b, at, { scale = 1, yaw = 0, tint = 0x9b8665 } = {}) {
   const s = scale;
-  b.prop('rock_debris', stoneBlock(0.38 * s, 0.42 * s, 0.34 * s, P(at.x, at.y, at.z), {
+  b.prop('cloth', stoneBlock(0.38 * s, 0.42 * s, 0.34 * s, P(at.x, at.y, at.z), {
     yaw, bevel: 0.08 * s, batter: 0.28, irregular: 0.26,
   }), tint);
   b.prop('timber', rod(P(at.x, at.y + 0.38 * s, at.z), P(at.x, at.y + 0.43 * s, at.z), 0.1 * s, 0.11 * s, 8), 0xb89f78);
-  b.prop('rock_debris', rod(P(at.x, at.y + 0.42 * s, at.z), P(at.x, at.y + 0.54 * s, at.z), 0.08 * s, 0.14 * s, 8), tint);
+  b.prop('cloth', rod(P(at.x, at.y + 0.42 * s, at.z), P(at.x, at.y + 0.54 * s, at.z), 0.08 * s, 0.14 * s, 8), tint);
 }
 
 /** Planked wooden mine wheelbarrow with iron wheel, handles, legs, and optional ore load. */
@@ -86,7 +86,10 @@ export function buildShovel(b, foot, tip, { yaw = 0 } = {}) {
     P(tip.x + c * 0.08, tip.y, tip.z - s * 0.08),
     0.04, 0.04, { sideHint: UP_DIR, bevelRatio: 0.15 },
   ), 0xa6845b);
-  b.prop('iron', stoneBox(0.24, 0.28, 0.028, P(foot.x, foot.y + 0.14, foot.z), { yaw, bevel: 0.008, batter: 0.18, irregular: 0.04 }), 0x828995);
+  // The blade runs up the shaft's own line, so it leans with the handle instead of standing upright.
+  const shaft = Math.hypot(tip.x - foot.x, tip.y - foot.y, tip.z - foot.z) || 1, k = 0.28 / shaft;
+  b.prop('iron', createTimberBeam(foot, P(foot.x + (tip.x - foot.x) * k, foot.y + (tip.y - foot.y) * k, foot.z + (tip.z - foot.z) * k),
+    0.24, 0.028, { sideHint: P(c, 0, -s), bevelRatio: 0.12, irregular: 0.02, wear: 0, chipChance: 0, splitChance: 0, taper: 0.18 }), 0x828995);
 }
 
 /** A-frame timber tool rack holding pickaxes and a shovel, plus spare rail & sleeper stack. */
@@ -170,11 +173,11 @@ export function buildMinerCamp(b, center, floorY, { lightSection = 'hub' } = {})
 
   // Rolled canvas bedroll + pack + ore/grain sacks near the west bench.
   const brY = (b.probe(cx - 1.55, floorY + 1.0, cz - 0.85, -1, 2.5) ?? floorY);
-  b.prop('rock_debris', rod(P(cx - 1.85, brY + 0.14, cz - 0.95), P(cx - 1.25, brY + 0.14, cz - 0.75), 0.14, 0.14, 10), 0x7f684e);
+  b.prop('cloth', rod(P(cx - 1.85, brY + 0.14, cz - 0.95), P(cx - 1.25, brY + 0.14, cz - 0.75), 0.14, 0.14, 10), 0x7f684e);
   // Two leather ties around the roll (a thinner rod along its whole length would sit hidden inside it).
   for (const t of [0.22, 0.78]) {
     const sx = cx - 1.85 + 0.6 * t, sz = cz - 0.95 + 0.2 * t;
-    b.prop('rock_debris', rod(P(sx - 0.02, brY + 0.14, sz - 0.007), P(sx + 0.02, brY + 0.14, sz + 0.007), 0.152, 0.152, 10), 0x9c5a3c);
+    b.prop('cloth', rod(P(sx - 0.02, brY + 0.14, sz - 0.007), P(sx + 0.02, brY + 0.14, sz + 0.007), 0.152, 0.152, 10), 0x9c5a3c);
   }
   buildOreSack(b, P(cx - 1.85, brY, cz + 0.95), { scale: 1.05, yaw: 0.4 });
   buildOreSack(b, P(cx - 1.42, brY, cz + 1.18), { scale: 0.9, yaw: 1.1, tint: 0xa8926e });

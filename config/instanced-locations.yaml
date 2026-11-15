@@ -688,6 +688,7 @@ instancedLocations:
         iron: { kind: stone, profile: iron, masked: false }
         ore: { kind: stone, profile: ore_rubble, masked: false }
         rock_debris: { kind: stone, profile: mine_debris, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
         water: { kind: stone, profile: still_water, masked: false }
         glow: { kind: glow }
       params:
