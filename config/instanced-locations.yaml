@@ -334,9 +334,9 @@ instancedLocations:
     obsidian_seal:
       surface: basalt
       scale: 0.3
-      tint: '#30303a'
-      roughness: 0.35
-      f0: 0.08
+      tint: '#a3a3b8'
+      roughness: 0.3
+      f0: 0.1
     # Dyed wool for trail flags. Cloth flaps the frost off, so it keeps its colour where timber greys; the
     # prop's tint is the dye, over a fine coarse-weave grain.
     trail_cloth:
@@ -893,6 +893,7 @@ instancedLocations:
       materials:
         terrain: { kind: ice, profile: weathered_glacier, bedrock: valley_rock }
         clearIce: { kind: ice, profile: clear_polished, masked: false }
+        iceBlock: { kind: ice, profile: fractured, masked: false }
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
         masonry: { kind: stone, profile: snowy_rubble, masked: false }

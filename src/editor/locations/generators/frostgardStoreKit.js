@@ -7,7 +7,7 @@ import { lantern } from './kits.js';
  * racks, the ice cutters' skids and tools, duckboards, lamps on posts — and the
  * stores themselves. A fitting is placed by a floor point and a `yaw`: its local
  * x runs along it and local z out from the wall it stands against, turned as
- * `box(…, yaw)` turns. Material keys: `timber`, `planks`, `iron`, `clearIce`.
+ * `box(…, yaw)` turns. Material keys: `timber`, `planks`, `iron`, `iceBlock`.
  */
 
 const P = (x, y, z) => ({ x, y, z });
@@ -71,7 +71,7 @@ export function storeCrate(b, at, size = 0.5, yaw = 0) {
 
 /** A block of cut ice resting on `at`. */
 export function iceBlock(b, at, yaw) {
-  b.prop('clearIce', box(ICE_BLOCK.length, ICE_BLOCK.height, ICE_BLOCK.width, P(at.x, at.y + ICE_BLOCK.height / 2, at.z),
+  b.prop('iceBlock', box(ICE_BLOCK.length, ICE_BLOCK.height, ICE_BLOCK.width, P(at.x, at.y + ICE_BLOCK.height / 2, at.z),
     yaw + b.range(-0.04, 0.04)), 0xffffff);
 }
 

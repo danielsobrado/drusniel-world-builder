@@ -7,7 +7,7 @@ import { DARK, torch } from './frostgardKit.js';
 import { dryingRack, sled, woodpile } from './frostgardDressing.js';
 import { hangCornice, openRidge, raiseRidge, ridgeLayout, splitLip } from './glacierFrontIce.js';
 import { driftAround, leeBank, scourAt } from './glacierFrontSnow.js';
-import { frozenFall, icicleCluster, icicleCurtain, scatter } from './glacierKit.js';
+import { fallFringe, frozenFall, icicleCluster, icicleCurtain, scatter } from './glacierKit.js';
 
 /**
  * The front of a Frostgard glacier, under the sky.
@@ -51,6 +51,9 @@ function cached(fn, [a0, a1], [c0, c1], step) {
     return near + (table[at + na] + (table[at + na + 1] - table[at + na]) * fa - near) * (gc - k);
   };
 }
+
+/** Metres from the arch within which the ground is the wall's own ice. */
+const ARCH_FLOOR_RADIUS = 14;
 
 export function generate(b, params) {
   const seed = b.seed, voxel = b.grid.voxel;
@@ -137,7 +140,7 @@ export function generate(b, params) {
   // A frozen fall down the east wall, draped over its ledges.
   const fallZ = -14;
   const fallFoot = P(wallX(1, fallZ) - 2.5, ground(wallX(1, fallZ) - 2.5, fallZ), fallZ);
-  frozenFall(b, P(wallX(34, fallZ) - 0.5, 34, fallZ), fallFoot, { x: 0, z: 1 }, { width: 8, columns: 11 });
+  const fall = frozenFall(b, P(wallX(34, fallZ) - 0.5, 34, fallZ), fallFoot, { x: 0, z: 1 }, { width: 8, columns: 11 });
 
   // Snow the wind has shaped: tails behind everything that stands in it, moats before it, a bank under the wall's lee.
   const wind = { x: snow.wind[0], z: snow.wind[1] };
@@ -147,6 +150,8 @@ export function generate(b, params) {
   leeBank(b, ground, ridge, params);
   hangCornice(b, ridge, params);
   b.grid.roughen({ amp: 0.22, scale: 0.5, seed: seed + 5, octaves: 2, floorAmp: 0.12 });
+  // After the last roughen, so the icicles hang from the ledges as they finally are.
+  fallFringe(b, fall);
 
   const scour = scourAt(obstacles, wind);
   const crestScour = (x, z) => Math.max(Math.exp(-(((z - moraine.z) / 3) ** 2)), Math.max(0, 1 - Math.abs(Math.abs(x) - lateral.x) / 2));
@@ -185,7 +190,9 @@ export function generate(b, params) {
     // Whatever stands clear of the valley floor short of the rock is ice: the old wall, seracs, calved blocks.
     const glacier = cliff || (height > 0.6 && margin < -3);
     // Rock is the valley walls and the till under the forefield; along the margin, ice and rock interleave.
-    const rock = glacier ? clamp01((margin + 4 + (grain - 0.5) * 9) / 3) : clamp01(1 - frozen * 2 - lake * 2);
+    // No snow falls under the arch, so its floor is the old ice the wall stands on, not bare till.
+    const underArch = clamp01(2 - Math.hypot(p.x - arch.x, p.z - arch.z) / ARCH_FLOOR_RADIUS * 2);
+    const rock = glacier ? clamp01((margin + 4 + (grain - 0.5) * 9) / 3) : clamp01(1 - frozen * 2 - lake * 2 - underArch * 2);
     mask[0] = rock;
     // Negative snow: the wind scours the pool, the frozen channel, the moats before obstacles and the moraine crests.
     mask[1] = -Math.max(lake * (1.25 - grain), scour(p.x, p.z) * low, crestScour(p.x, p.z) * 0.7 * low);
@@ -200,7 +207,7 @@ export function generate(b, params) {
     const band = cliff ? clamp01((Math.sin((p.y + p.x * 0.06 + grain * 5) * 1.3) - 0.85) * 6) * clamp01(1 - height / 18) : 0;
     mask2[0] = glacier ? clamp01(Math.max(0, 1 - height / 7) * (0.4 + grain) + clamp01((margin + 9) / 6) * 0.7 + band * 0.8) : 0;
     mask2[1] = clamp01(Math.max(0, (p.y - 24) / 14) + frozen + lake * 0.45);
-    mask2[2] = clamp01(lake + near(p, mouthAt, 9) * 0.6 + frozen * 0.5);
+    mask2[2] = clamp01(lake + near(p, mouthAt, 9) * 0.6 + frozen * 0.5 + underArch * up * 0.5);
     mask2[3] = onTrail(p, trails, TRAIL_HALF_WIDTH) * up;
     return 1 - rock;
   };

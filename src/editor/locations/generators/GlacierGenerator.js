@@ -4,7 +4,7 @@ import { beam, box, rod } from '../gen/propKit.js';
 import { chamber, column, crevasse, mound, slab } from '../gen/shapes.js';
 import { DARK, LOG, torch } from './frostgardKit.js';
 import { curtain, hollow, meltTube, pillar, plug, walkClearance } from './glacierCave.js';
-import { frozenFall, icicleCluster, scatter } from './glacierKit.js';
+import { fallFringe, frozenFall, icicleCluster, scatter } from './glacierKit.js';
 import { cairnLamp, plankBridge, refugeCamp, sealedVault } from './glacierWorks.js';
 
 /**
@@ -152,7 +152,7 @@ export function generate(b, params) {
   // Frozen fall: meltwater from a chimney in the east wall, frozen as it ran; its plunge pool froze clear.
   const chimneyTop = P(FALL.x + 2.4, 20, FALL.z - 0.6);
   b.grid.carve(hollow(column(P(FALL.x + 1.6, 8, FALL.z), chimneyTop, 1.8, 0.9)), 0.8);
-  frozenFall(b, P(FALL.x + 1.2, 13, FALL.z), P(FALL.x - 1.6, HALL.y, FALL.z), { x: 0, z: 1 });
+  const fall = frozenFall(b, P(FALL.x + 1.2, 13, FALL.z), P(FALL.x - 1.6, HALL.y, FALL.z), { x: 0, z: 1 });
   b.nav.block(FALL, 4.2, 6);
   const pool = across(POOL[0], POOL[1]);
   b.grid.carve(hollow(mound(pool, POOL[2], 0.5, POOL[2])), 0.3);
@@ -234,6 +234,8 @@ export function generate(b, params) {
   const snowLie = (x, y, z) => Math.max(clamp01(1 - Math.hypot(x - MOUTH.x, z - MOUTH.z) / MOUTH_DRIFT) * params.snow.mouth,
     slotNear(x, z) * params.snow.crevasse, near(P(x, y, z), moulinFoot, 4) * params.snow.moulin);
   b.grid.deposit({ depth: 1, seed: b.seed + 31, depthAt: (x, y, z) => snowLie(x, y, z) * free(x, y, z) });
+  // After the volume's last change, so the icicles hang from the ledges as they finally are.
+  fallFringe(b, fall);
 
   // --- Loose ice, where it fell and off the trail.
   const offTrail = (y) => (x, z) => (b.nav.surfaceAt(x, z, y + 0.6) === null ? b.terrainAt(x, y + 3, z) : null);
