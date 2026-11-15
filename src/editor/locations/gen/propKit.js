@@ -440,11 +440,14 @@ export function extrudedProfile(points, depth, {
 
   const bThick = Math.max(0, Math.min(bevel, depth * 0.42));
   const coreDepth = Math.max(0.01, depth - bThick * 2);
+  const size = Math.max(0.004, bevelSize);
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth: coreDepth,
     bevelEnabled: bThick > 0.004,
     bevelThickness: bThick,
-    bevelSize: Math.max(0.004, bevelSize),
+    bevelSize: size,
+    // Bevel inward from the outline, so abutting profiles (voussoirs) meet rather than overlap.
+    bevelOffset: -size,
     bevelSegments: 1,
     curveSegments: 1,
   });

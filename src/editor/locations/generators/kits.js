@@ -416,8 +416,9 @@ export function house(b, at, yaw, width, height, depth, {
       // Stone window sill, lintel, and cross mullion.
       b.prop(material, stoneBox(0.76, 0.14, 0.22, face(offset, y - 0.5, 0.07), { yaw, bevel: 0.025, irregular: 0.15 }), tint);
       b.prop(material, stoneBox(0.84, 0.18, 0.2, face(offset, y + 0.52, 0.06), { yaw, bevel: 0.025, irregular: 0.15 }), tint);
-      b.prop('iron', box(0.05, 0.9, 0.06, face(offset, y, 0.08), yaw), 0x2b2724);
-      b.prop('iron', box(0.52, 0.05, 0.06, face(offset, y + 0.08, 0.08), yaw), 0x2b2724);
+      // The transom sits a centimetre back from the upright, and the upright inside the glass, so no faces are shared.
+      b.prop('iron', box(0.05, 0.88, 0.06, face(offset, y, 0.08), yaw), 0x2b2724);
+      b.prop('iron', box(0.52, 0.05, 0.05, face(offset, y + 0.08, 0.08), yaw), 0x2b2724);
       b.light(face(offset, y, 0.7), windowTint, light, 7, { radius: 0.8, halo: 0.9 });
     }
   }

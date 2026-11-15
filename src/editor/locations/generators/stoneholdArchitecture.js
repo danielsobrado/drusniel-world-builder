@@ -429,13 +429,16 @@ export function buildFloorInlay(b, chasmZ, chasmHalf, farZ, medallions = []) {
     for (const [z0, z1] of [[-18.5, chasmZ + chasmHalf + 1.2], [chasmZ - chasmHalf - 1.2, farZ + 2.2]]) {
       const len = Math.abs(z0 - z1);
       const midZ = (z0 + z1) * 0.5;
-      b.prop('carved', stoneBox(0.68, 0.04, len, P(sign * 3.18, 0.015, midZ), { bevel: 0.015, irregular: 0.02 }));
-      b.prop('bronze', stoneBox(0.14, 0.046, len, P(sign * 2.8, 0.016, midZ), { bevel: 0.01, irregular: 0.02 }), 0xd4ae72);
+      // Tops at 0.04 (runner) and 0.046 (strip): clear of the floor, and below the sills crossing them.
+      b.prop('carved', stoneBox(0.68, 0.04, len, P(sign * 3.18, 0.02, midZ), { bevel: 0.015, irregular: 0.02 }));
+      b.prop('bronze', stoneBox(0.14, 0.046, len, P(sign * 2.8, 0.023, midZ), { bevel: 0.01, irregular: 0.02 }), 0xd4ae72);
     }
   }
   for (const z of [-19.5, chasmZ + chasmHalf + 2.4, chasmZ - chasmHalf - 2.4, farZ + 9.5]) {
-    b.prop('carved', stoneBox(6.8, 0.04, 0.9, P(0, 0.015, z), { bevel: 0.015, irregular: 0.02 }));
-    b.prop('bronze', stoneBox(5.6, 0.046, 0.16, P(0, 0.017, z), { bevel: 0.01, irregular: 0.02 }), 0xd4ae72);
+    // A sill crosses the runners, so it stands clearly prouder than their tops (which `irregular`
+    // jitters by millimetres) rather than sharing one.
+    b.prop('carved', stoneBox(6.8, 0.04, 0.9, P(0, 0.04, z), { bevel: 0.015, irregular: 0.02 }));
+    b.prop('bronze', stoneBox(5.6, 0.046, 0.16, P(0, 0.045, z), { bevel: 0.01, irregular: 0.02 }), 0xd4ae72);
   }
   for (const mz of medallions) {
     b.prop('carved', rod(P(0, -0.02, mz), P(0, 0.032, mz), 2.35, 2.35, 8));

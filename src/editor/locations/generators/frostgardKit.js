@@ -90,8 +90,9 @@ export function longhall(b, at, { length, width, wallHeight, roofRise }, { icicl
   logWall(b, L(-length / 2, plinth, -front), L(length / 2, plinth, -front), wallHeight);
   for (const end of [-1, 1]) {
     logWall(b, L(end * length / 2, plinth + 0.18, -front), L(end * length / 2, plinth + 0.18, front), wallHeight - 0.18);
-    // The gable closes with shortening logs up to the ridge.
-    for (let y = eave + 0.1; y < ridge - 0.3; y += LOG_COURSE) {
+    // The gable closes with shortening logs up to the ridge, on from the end wall's own courses.
+    const endRows = Math.round((wallHeight - 0.18) / LOG_COURSE);
+    for (let y = plinth + 0.18 + LOG_RADIUS + endRows * LOG_COURSE; y < ridge - 0.3; y += LOG_COURSE) {
       const half = front * (1 - (y - eave) / roofRise);
       b.prop('timber', rod(L(end * length / 2, y, -half), L(end * length / 2, y, half), LOG_RADIUS, LOG_RADIUS, 7), LOG);
     }
@@ -221,7 +222,10 @@ export function gableFront(b, at, { width, wallHeight, roofRise, porch = 2.8, do
     b.prop('masonry', coursedWall(L(from, -footing, 0.12), L(to, -footing, 0.12), footing + sill, 0.55, { quoins: true }), STONE);
   }
   logWall(b, L(-half, sill, 0), L(half, sill, 0), wallHeight - sill, { gap: { from: half - door / 2, to: half + door / 2, height: 2.6 - sill } });
-  for (let y = wallHeight + 0.1; y < ridge - 0.4; y += LOG_COURSE) {
+  // The gable carries on the wall's courses from the one above its last log; starting it at a
+  // fixed height could lay a second log exactly over that one.
+  const wallRows = Math.round((wallHeight - sill) / LOG_COURSE);
+  for (let y = sill + LOG_RADIUS + wallRows * LOG_COURSE; y < ridge - 0.4; y += LOG_COURSE) {
     const reach = half * (1 - (y - wallHeight) / roofRise);
     b.prop('timber', rod(L(-reach, y, 0), L(reach, y, 0), LOG_RADIUS, LOG_RADIUS, 7), LOG);
   }

@@ -8,6 +8,9 @@ import { mortarCoreDepth } from '../../construction/compile/ConstructionMortarCo
 import { mixSeed } from '../../workshop/ProceduralRandom.js';
 import { extrudedProfile, stoneBox } from './propKit.js';
 
+/** Metres the mortar backing stops short of a wall's ends and top. */
+const MORTAR_RECESS = 0.03;
+
 function hashFloat(seed, index, salt = 0) {
   return (mixSeed(seed ^ salt, index) & 0xffff) / 0xffff;
 }
@@ -56,6 +59,9 @@ function extrudePolygons(polygons, depth, { bevel = 0.025, at, yaw = 0, roll = 0
       bevelEnabled: bevel > 0.004,
       bevelThickness: bevel,
       bevelSize: bevel,
+      // The bevel grows outward from the shape by default; start it inside so the
+      // stone keeps the packed outline instead of overlapping its neighbours' faces.
+      bevelOffset: -bevel,
       bevelSegments: 1,
       curveSegments: 1,
     });
@@ -152,8 +158,9 @@ export function coursedMasonryWall(b, a, c, height, thickness, {
       for (const op of openings) {
         const hw = openingHalfWidthAt(op, ySample);
         if (hw <= 0) continue;
-        const cut0 = op.s - hw - 0.02;
-        const cut1 = op.s + hw + 0.02;
+        // Wider than the jamb stones reach, so the backing never shares their reveal face.
+        const cut0 = op.s - hw - 0.02 - MORTAR_RECESS;
+        const cut1 = op.s + hw + 0.02 + MORTAR_RECESS;
         intervals = intervals.flatMap(([a0, a1]) => {
           if (cut1 <= a0 || cut0 >= a1) return [[a0, a1]];
           const out = [];
@@ -163,13 +170,17 @@ export function coursedMasonryWall(b, a, c, height, thickness, {
         });
       }
       if (!intervals.length) continue;
-      for (const [sStart, sEnd] of intervals) {
+      // Held back from the wall's ends and top, where it would otherwise share a face with the stones.
+      const top = y1 >= height ? y1 - MORTAR_RECESS : y1;
+      for (const [rawStart, rawEnd] of intervals) {
+        const sStart = rawStart <= 0 ? MORTAR_RECESS : rawStart;
+        const sEnd = rawEnd >= arcTable.totalLength ? rawEnd - MORTAR_RECESS : rawEnd;
         const segW = sEnd - sStart;
-        if (segW < 0.08) continue;
+        if (segW < 0.08 || top - y0 < 0.05) continue;
         const sMid = (sStart + sEnd) * 0.5;
         const f = arcTable.frameAt(sMid);
-        b.prop(trimMaterial, stoneBox(segW, bh, coreD, {
-          x: f.x, y: baseY + (y0 + y1) * 0.5, z: f.z,
+        b.prop(trimMaterial, stoneBox(segW, top - y0, coreD, {
+          x: f.x, y: baseY + (y0 + top) * 0.5, z: f.z,
         }, { yaw: f.yaw, bevel: 0.015, irregular: 0 }), mortarTint);
       }
     }

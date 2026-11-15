@@ -6,9 +6,17 @@ import * as THREE from 'three/webgpu';
 import { LOCATION_GENERATORS } from '../src/editor/locations/generators/index.js';
 import { generateLocation } from '../src/editor/locations/LocationBuilder.js';
 import { resolveLocationCatalog } from '../src/editor/locations/LocationCatalog.js';
+import { extrudedProfile } from '../src/editor/locations/gen/propKit.js';
 
 const source = yaml.load(fs.readFileSync(new URL('../config/instanced-locations.yaml', import.meta.url), 'utf8'));
 const catalog = resolveLocationCatalog(source, { generatorKeys: Object.keys(LOCATION_GENERATORS), quality: 'low' });
+
+test('a bevelled profile stays inside its outline, so abutting stones do not share faces', () => {
+  const geometry = extrudedProfile([[0, 0], [1, 0], [1, 0.5], [0, 0.5]], 0.3, { bevel: 0.04 });
+  geometry.computeBoundingBox();
+  const { min, max } = geometry.boundingBox;
+  for (const [value, expected] of [[min.x, 0], [max.x, 1], [min.y, 0], [max.y, 0.5]]) assert.ok(Math.abs(value - expected) < 1e-6, `${value} ≈ ${expected}`);
+});
 
 test('the catalog rejects a reference to something that does not exist', () => {
   const broken = structuredClone(source);
