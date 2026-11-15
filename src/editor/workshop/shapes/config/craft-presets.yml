@@ -1,0 +1,735 @@
+# Craft workshop starting designs. Every preset is plain shape-primitive data over the same
+# curved-volume / curved-wall / traversal capabilities a user can author by hand.
+# Regenerate with `npm run generate:workshop-castle`.
+#
+# Rounded footprints run `at` back (-z) -> right (+x) -> front (+z) -> left (-x);
+# oval footprints run +x (0) -> +z (0.25) -> -x (0.5) -> -z (0.75).
+presets:
+  - id: craft-smithy
+    label: Smithy with forge canopy and coal shed
+    primitives:
+      - id: forge
+        label: Forge house
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 7.6, depth: 5.6, cornerRadius: 0.25 }
+        height: 3.6
+        thickness: 0.5
+        surface: masonry
+        stonework: fieldstone
+        age: 0.45
+        roof: { family: hip, rise: 2.3, overhang: 0.55, sweep: 0.3, sag: 0.06 }
+        base: { style: plinth, height: 0.68, out: 0.12 }
+        shutters: true
+        windowBoxes: false
+        chimney: true
+        openings:
+          - { id: forge-mouth, role: arch, profile: arched, bottom: 0, width: 2.5, height: 2.6, at: 0.687 }
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.544 }
+          - { id: right-window, role: window, profile: square, bottom: 1.1, width: 0.9, height: 1, at: 0.41 }
+          - { id: left-window, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.887, shutterPose: ajar }
+          - { id: vent-a, role: slit, profile: square, bottom: 2.1, width: 0.14, height: 0.8, at: 0.052 }
+          - { id: vent-b, role: slit, profile: square, bottom: 2.1, width: 0.14, height: 0.8, at: 0.221 }
+        features:
+          - { id: forge-canopy, kind: porch, at: 0.687, width: 3.4, depth: 1.9, height: 2.9 }
+          - { id: buttress-a, kind: buttress, at: 0.114, width: 0.6, depth: 0.7, height: 2.6 }
+          - { id: buttress-b, kind: buttress, at: 0.171, width: 0.6, depth: 0.7, height: 2.6 }
+      - id: coal-shed
+        label: Coal and charcoal shed
+        kind: curved-volume
+        position: [5.25, -0.4]
+        footprint: { family: rounded, width: 3, depth: 4.4, cornerRadius: 0.1 }
+        height: 2.4
+        thickness: 0.16
+        surface: planks
+        age: 0.55
+        roof: { family: gable, rise: 1.15, overhang: 0.35, sweep: 0.15, sag: 0.18, axis: depth }
+        chimney: false
+        windowBoxes: false
+        openings:
+          - { id: bay, role: arch, profile: square, bottom: 0, width: 2.1, height: 2, at: 0.596 }
+      - id: yard-wall
+        label: Forge yard wall
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        thickness: 0.45
+        position: [-3.6, 5.6]
+        length: 8.5
+        bend: 1.4
+        height: 1.25
+        openings:
+          - { id: yard-gate, role: arch, profile: square, at: 0.7, bottom: 0, width: 2.2, height: 1.25 }
+
+  - id: craft-carpenter
+    label: Carpenter's jettied workshop and timber store
+    primitives:
+      - id: joinery
+        label: Joinery
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 8.4, depth: 5.6, cornerRadius: 0.2 }
+        height: 5.6
+        levels: 2
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: gable, rise: 3, overhang: 0.55, sweep: 0.4, sag: 0.1 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: cart-doors, role: arch, profile: square, bottom: 0, width: 2.2, height: 2.4, at: 0.702 }
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.547 }
+          - { id: bench-window, role: window, profile: square, bottom: 1.1, width: 1.1, height: 1, at: 0.612 }
+          - { id: upper-a, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.739 }
+          - { id: upper-b, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.645 }
+          - { id: upper-c, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.551, shutterPose: closed }
+          - { id: hoist-door, role: door, profile: square, bottom: 3.1, width: 1.1, height: 1.7, at: 0.895 }
+          - { id: left-low, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.895 }
+          - { id: back-a, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.072 }
+          - { id: back-b, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1, at: 0.217 }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.5 }
+          - { id: hoist-landing, kind: balcony, at: 0.895, width: 1.8, depth: 0.7, bottom: 3.1, height: 1 }
+          - { id: loft-dormer, kind: dormer, at: 0.145, width: 1.8, depth: 1.5 }
+      - id: timber-store
+        label: Open timber store
+        kind: curved-volume
+        position: [5.6, 0.3]
+        footprint: { family: rounded, width: 3.2, depth: 5, cornerRadius: 0.1 }
+        height: 2.7
+        thickness: 0.16
+        surface: planks
+        age: 0.5
+        roof: { family: hip, rise: 1, overhang: 0.4, sweep: 0.1, sag: 0.15 }
+        chimney: false
+        windowBoxes: false
+        openings:
+          - { id: front-bay, role: arch, profile: square, bottom: 0, width: 2.5, height: 2.3, at: 0.592 }
+          - { id: side-bay, role: arch, profile: square, bottom: 0, width: 3.4, height: 2.3, at: 0.342 }
+
+  - id: craft-pottery
+    label: Potter's workshop with beehive kiln
+    primitives:
+      - id: pottery
+        label: Pottery
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 7, depth: 5, cornerRadius: 0.6 }
+        height: 3.2
+        thickness: 0.3
+        surface: plaster
+        roof: { family: gable, rise: 2.3, overhang: 0.5, sweep: 0.6, sag: 0.15 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: arched, bottom: 0, width: 1, height: 2.1, at: 0.557 }
+          - { id: wheel-window, role: window, profile: square, bottom: 1.1, width: 1.1, height: 1, at: 0.678 }
+          - { id: right-window, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.376 }
+          - { id: back-window, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.065 }
+          - { id: back-window-b, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.187, shutterPose: closed }
+      - id: kiln
+        label: Beehive kiln
+        kind: curved-volume
+        position: [-5.15, 0.6]
+        footprint: { family: oval, width: 3.6, depth: 3.6 }
+        height: 2.6
+        thickness: 0.6
+        taper: 0.78
+        surface: masonry
+        stonework: fieldstone
+        age: 0.65
+        chimney: false
+        windowBoxes: false
+        roof: { family: bell, rise: 1.6, overhang: 0.08, sweep: 0.9, sag: 0 }
+        base: { style: batter, height: 0.68, out: 0.25 }
+        openings:
+          - { id: stoke-hole, role: arch, profile: arched, at: 0.25, bottom: 0, width: 0.9, height: 1.05 }
+          - { id: flue-vent, role: slit, profile: square, at: 0.75, bottom: 1.4, width: 0.18, height: 0.5 }
+      - id: drying-shed
+        label: Drying shed
+        kind: curved-volume
+        position: [4.85, -0.4]
+        footprint: { family: rounded, width: 3, depth: 4, cornerRadius: 0.1 }
+        height: 2.3
+        thickness: 0.15
+        surface: planks
+        roof: { family: gable, rise: 1.2, overhang: 0.4, sweep: 0.2, sag: 0.2, axis: depth }
+        chimney: false
+        windowBoxes: false
+        age: 0.5
+        openings:
+          - { id: front-bay, role: arch, profile: square, bottom: 0, width: 2, height: 1.9, at: 0.601 }
+          - { id: side-bay, role: arch, profile: square, bottom: 0, width: 2.6, height: 1.9, at: 0.351 }
+      - id: clay-yard
+        label: Clay yard wall
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        thickness: 0.4
+        position: [0.5, 5.4]
+        length: 10
+        bend: 1.8
+        height: 1
+        openings:
+          - { id: gate, role: arch, profile: square, at: 0.36, bottom: 0, width: 1.6, height: 1 }
+
+  - id: craft-watermill
+    label: Stone watermill with sack hoist and race
+    primitives:
+      - id: mill
+        label: Mill
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 6.4, depth: 5.8, cornerRadius: 0.2 }
+        height: 8.4
+        levels: 3
+        thickness: 0.55
+        surface: masonry
+        stonework: fieldstone
+        roof: { family: gable, rise: 3.4, overhang: 0.45, sweep: 0.25, sag: 0.06, axis: depth }
+        base: { style: batter, height: 1.36, out: 0.3 }
+        shutters: true
+        chimney: false
+        windowBoxes: false
+        age: 0.4
+        openings:
+          - { id: door, role: door, profile: arched, bottom: 0, width: 1.3, height: 2.3, at: 0.683 }
+          - { id: ground-window, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.562 }
+          - { id: hoist-door, role: door, profile: square, bottom: 5.6, width: 1.1, height: 1.8, at: 0.625 }
+          - { id: first-a, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1, at: 0.691 }
+          - { id: first-b, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1, at: 0.558, shutterPose: ajar }
+          - { id: loop-a, role: slit, profile: square, bottom: 2.8, width: 0.14, height: 1, at: 0.925 }
+          - { id: loop-b, role: slit, profile: square, bottom: 6, width: 0.14, height: 1, at: 0.825 }
+          - { id: back-high, role: window, profile: arched, bottom: 6.2, width: 0.8, height: 1, at: 0.125 }
+          - { id: wheel-pit, role: arch, profile: arched, bottom: 0.3, width: 1.6, height: 1.6, at: 0.375 }
+        features:
+          - { id: hoist-platform, kind: balcony, at: 0.625, width: 2, depth: 0.8, bottom: 5.6, height: 1 }
+          - { id: race-buttress-a, kind: buttress, at: 0.296, width: 0.7, depth: 1, height: 4.2 }
+          - { id: race-buttress-b, kind: buttress, at: 0.454, width: 0.7, depth: 1, height: 4.2 }
+      - id: millers-house
+        label: Miller's house
+        kind: curved-volume
+        position: [-5.5, 0.6]
+        footprint: { family: rounded, width: 5, depth: 4.6, cornerRadius: 0.25 }
+        height: 5
+        levels: 2
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: hip, rise: 2.3, overhang: 0.45, sweep: 0.5, sag: 0.1 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.588 }
+          - { id: front, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.684 }
+          - { id: upper, role: window, profile: square, bottom: 3.1, width: 0.8, height: 1, at: 0.62 }
+          - { id: side, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.87 }
+          - { id: side-upper, role: window, profile: square, bottom: 3.1, width: 0.8, height: 1, at: 0.87, shutterPose: closed }
+      - id: race-wall
+        label: Mill race wall
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        thickness: 0.6
+        position: [5.3, 0]
+        rotation: 90
+        length: 11
+        bend: 0.6
+        height: 1.1
+      - id: race-bridge
+        label: Race footbridge
+        kind: traversal
+        position: [6.2, 5.2]
+        length: 4.2
+        width: 1.3
+        elevation: 0
+        rise: 0
+        mode: bridge
+        support: arch
+        railing: true
+
+  - id: craft-tannery
+    label: Tannery with drying loft and vat yard
+    primitives:
+      - id: tan-house
+        label: Tanning shed
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 10.5, depth: 4.6, cornerRadius: 0.12 }
+        height: 3.4
+        levels: 1
+        thickness: 0.18
+        surface: planks
+        age: 0.62
+        roof: { family: gable, rise: 2.1, overhang: 0.65, sweep: 0.2, sag: 0.22 }
+        chimney: false
+        windowBoxes: false
+        shutters: true
+        openings:
+          - { id: cart-door, role: arch, profile: square, bottom: 0, width: 2, height: 2.4, at: 0.798 }
+          - { id: vent-front-0, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.724 }
+          - { id: vent-front-1, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.664 }
+          - { id: vent-front-2, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.604 }
+          - { id: vent-front-3, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.544 }
+          - { id: vent-back-0, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.051 }
+          - { id: vent-back-1, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.131 }
+          - { id: vent-back-2, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.211 }
+          - { id: vent-back-3, role: slit, profile: square, bottom: 1.2, width: 0.5, height: 0.9, at: 0.291 }
+          - { id: loft-door, role: door, profile: square, bottom: 2.1, width: 1, height: 1.2, at: 0.421 }
+          - { id: loft-access, role: door, profile: square, bottom: 2, width: 0.9, height: 1.3, at: 0.634 }
+        features:
+          - { id: drying-gallery, kind: balcony, at: 0.634, width: 6.4, depth: 1.05, bottom: 2, height: 1 }
+      - id: tanners-house
+        label: Tanner's house
+        kind: curved-volume
+        position: [-7.35, 0.4]
+        footprint: { family: rounded, width: 4.6, depth: 4.6, cornerRadius: 0.3 }
+        height: 4.6
+        levels: 2
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: hip, rise: 2.4, overhang: 0.45, sweep: 0.55, sag: 0.1 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.567 }
+          - { id: front, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.668 }
+          - { id: upper, role: window, profile: square, bottom: 2.9, width: 0.8, height: 1, at: 0.612 }
+          - { id: side, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.862 }
+      - id: vat-yard
+        label: Vat yard fence
+        kind: curved-wall
+        surface: planks
+        stonework: fieldstone
+        thickness: 0.16
+        position: [1.2, 5.5]
+        length: 11
+        bend: -1.2
+        height: 1.2
+        openings:
+          - { id: gate, role: arch, profile: square, at: 0.18, bottom: 0, width: 2.2, height: 1.2 }
+
+  - id: craft-brewhouse
+    label: Brewhouse with malting kiln
+    primitives:
+      - id: brewhouse
+        label: Brewhouse
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 9, depth: 6, cornerRadius: 0.25 }
+        height: 5.4
+        levels: 2
+        thickness: 0.32
+        surface: plaster
+        facade: timber
+        roof: { family: hip, rise: 3.2, overhang: 0.5, sweep: 0.45, sag: 0.08 }
+        base: { style: plinth, height: 1.02, out: 0.14 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: cart-arch, role: arch, profile: arched, bottom: 0, width: 2.4, height: 2.6, at: 0.718 }
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.6 }
+          - { id: front-low, role: window, profile: square, bottom: 1.2, width: 0.8, height: 1, at: 0.542 }
+          - { id: upper-0, role: window, profile: square, bottom: 3.3, width: 0.8, height: 1.1, at: 0.745 }
+          - { id: upper-1, role: window, profile: square, bottom: 3.3, width: 0.8, height: 1.1, at: 0.678 }
+          - { id: upper-2, role: window, profile: square, bottom: 3.3, width: 0.8, height: 1.1, at: 0.61 }
+          - { id: upper-3, role: window, profile: square, bottom: 3.3, width: 0.8, height: 1.1, at: 0.542 }
+          - { id: loading-door, role: door, profile: square, bottom: 1.15, width: 1.3, height: 1.9, at: 0.894 }
+          - { id: back-a, role: window, profile: square, bottom: 3.3, width: 0.8, height: 1, at: 0.076 }
+          - { id: back-b, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.211 }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.4 }
+          - { id: dormer-a, kind: dormer, at: 0.698, width: 1.6, depth: 1.4 }
+          - { id: dormer-b, kind: dormer, at: 0.583, width: 1.6, depth: 1.4 }
+      - id: malt-kiln
+        label: Malting kiln
+        kind: curved-volume
+        position: [6.25, -0.6]
+        footprint: { family: oval, width: 3.9, depth: 3.9 }
+        height: 5.4
+        thickness: 0.45
+        taper: 0.9
+        surface: masonry
+        stonework: fieldstone
+        chimney: false
+        windowBoxes: false
+        age: 0.35
+        roof: { family: cone, rise: 3.8, overhang: 0.3, sweep: 0.55, sag: 0 }
+        openings:
+          - { id: kiln-door, role: door, profile: arched, at: 0.25, bottom: 0, width: 1, height: 2 }
+          - { id: kiln-vent, role: slit, profile: square, at: 0.12, bottom: 3.4, width: 0.16, height: 0.9 }
+          - { id: kiln-vent-b, role: slit, profile: square, at: 0.38, bottom: 3.4, width: 0.16, height: 0.9 }
+      - id: loading-steps
+        label: Loading steps
+        kind: traversal
+        mode: stairs
+        width: 1.2
+        position: [-6, 0]
+        length: 3
+        rise: 1.15
+        railing: true
+
+  - id: craft-weavers
+    label: Weavers' long workshop with loft stair
+    primitives:
+      - id: loom-house
+        label: Loom house
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 12.5, depth: 4.8, cornerRadius: 0.2 }
+        height: 5.4
+        levels: 2
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: gable, rise: 2.9, overhang: 0.5, sweep: 0.35, sag: 0.14 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.668 }
+          - { id: loom-light-0, role: window, profile: square, bottom: 1.1, width: 1.3, height: 1.1, at: 0.811 }
+          - { id: loom-light-1, role: window, profile: square, bottom: 1.1, width: 1.3, height: 1.1, at: 0.747 }
+          - { id: loom-light-2, role: window, profile: square, bottom: 1.1, width: 1.3, height: 1.1, at: 0.604 }
+          - { id: loom-light-3, role: window, profile: square, bottom: 1.1, width: 1.3, height: 1.1, at: 0.539 }
+          - { id: upper-0, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.817 }
+          - { id: upper-1, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.747 }
+          - { id: upper-2, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.677 }
+          - { id: upper-3, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.607, shutterPose: closed }
+          - { id: upper-4, role: window, profile: square, bottom: 3.4, width: 0.8, height: 1.1, at: 0.536 }
+          - { id: back-0, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.06 }
+          - { id: back-1, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.139 }
+          - { id: back-2, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.215 }
+          - { id: back-3, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.293 }
+          - { id: loft-door, role: door, profile: square, bottom: 2.75, width: 1, height: 1.9, at: 0.927 }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.4 }
+          - { id: loft-landing, kind: balcony, at: 0.927, width: 1.9, depth: 0.9, bottom: 2.75, height: 1 }
+          - { id: dormer-0, kind: dormer, at: 0.782, width: 1.5, depth: 1.3 }
+          - { id: dormer-1, kind: dormer, at: 0.677, width: 1.5, depth: 1.3 }
+          - { id: dormer-2, kind: dormer, at: 0.572, width: 1.5, depth: 1.3 }
+      - id: loft-stair
+        label: Outside loft stair
+        kind: traversal
+        mode: stairs
+        width: 1.1
+        position: [-9.15, 0]
+        length: 5.2
+        rise: 2.75
+        railing: true
+      - id: wash-shed
+        label: Wool wash shed
+        kind: curved-volume
+        position: [7.65, -0.4]
+        footprint: { family: rounded, width: 3, depth: 3.6, cornerRadius: 0.1 }
+        height: 2.4
+        thickness: 0.15
+        surface: planks
+        roof: { family: hip, rise: 1.2, overhang: 0.35, sweep: 0.2, sag: 0.12 }
+        chimney: false
+        windowBoxes: false
+        age: 0.5
+        openings:
+          - { id: bay, role: arch, profile: square, bottom: 0, width: 1.8, height: 2, at: 0.607 }
+
+  - id: craft-masons-lodge
+    label: Masons' lodge and arcaded work hall
+    primitives:
+      - id: lodge
+        label: Masons' lodge
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 9.2, depth: 5.4, cornerRadius: 0.15 }
+        height: 4.1
+        thickness: 0.5
+        surface: masonry
+        stonework: ashlar
+        roof: { family: gable, rise: 3.3, overhang: 0.35, sweep: 0.15, sag: 0.04 }
+        base: { style: plinth, height: 0.68, out: 0.12 }
+        shutters: false
+        chimney: true
+        windowBoxes: false
+        age: 0.25
+        openings:
+          - { id: door, role: door, profile: pointed, bottom: 0, width: 1.2, height: 2.5, at: 0.654 }
+          - { id: tracery-0, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.764 }
+          - { id: tracery-1, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.709 }
+          - { id: tracery-2, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.598 }
+          - { id: tracery-3, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.543 }
+          - { id: back-0, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.071 }
+          - { id: back-1, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.154 }
+          - { id: back-2, role: window, profile: pointed, bottom: 1.3, width: 0.7, height: 1.8, at: 0.237 }
+          - { id: gable-rose, role: window, profile: arched, bottom: 2.6, width: 1, height: 1, at: 0.904 }
+        features:
+          - { id: buttress-front-0, kind: buttress, at: 0.737, width: 0.62, depth: 0.85, height: 3.4 }
+          - { id: buttress-front-1, kind: buttress, at: 0.571, width: 0.62, depth: 0.85, height: 3.4 }
+          - { id: buttress-back-0, kind: buttress, at: 0.029, width: 0.62, depth: 0.85, height: 3.4 }
+          - { id: buttress-back-1, kind: buttress, at: 0.112, width: 0.62, depth: 0.85, height: 3.4 }
+          - { id: buttress-back-2, kind: buttress, at: 0.195, width: 0.62, depth: 0.85, height: 3.4 }
+          - { id: buttress-back-3, kind: buttress, at: 0.278, width: 0.62, depth: 0.85, height: 3.4 }
+      - id: work-hall
+        label: Arcaded work hall
+        kind: curved-volume
+        position: [7.05, 0.4]
+        footprint: { family: rounded, width: 5.2, depth: 4.6, cornerRadius: 0.12 }
+        height: 3.3
+        thickness: 0.45
+        surface: masonry
+        stonework: ashlar
+        roof: { family: hip, rise: 1.7, overhang: 0.4, sweep: 0.2, sag: 0.05 }
+        chimney: false
+        windowBoxes: false
+        openings:
+          - { id: arcade-a, role: arch, profile: pointed, bottom: 0, width: 1.7, height: 2.6, at: 0.69 }
+          - { id: arcade-b, role: arch, profile: pointed, bottom: 0, width: 1.7, height: 2.6, at: 0.566 }
+          - { id: arcade-c, role: arch, profile: pointed, bottom: 0, width: 1.9, height: 2.6, at: 0.378 }
+      - id: stone-yard
+        label: Stone yard wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        thickness: 0.5
+        position: [1.5, 6]
+        length: 15
+        bend: -2.2
+        height: 1.4
+        openings:
+          - { id: yard-gate, role: arch, profile: pointed, at: 0.42, bottom: 0, width: 2.4, height: 1.4 }
+
+  - id: craft-cooperage
+    label: Cooper's workshop with barrel store
+    primitives:
+      - id: cooperage
+        label: Cooperage
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 7.6, depth: 5.2, cornerRadius: 0.35 }
+        height: 3.4
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: hip, rise: 2.7, overhang: 0.55, sweep: 0.55, sag: 0.1 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1.6, height: 2.2, at: 0.638 }
+          - { id: front-a, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.734 }
+          - { id: front-b, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.542, shutterPose: ajar }
+          - { id: bay-window, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.888 }
+          - { id: back-a, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.074 }
+          - { id: back-b, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.202 }
+        features:
+          - { id: work-porch, kind: porch, at: 0.638, width: 3.4, depth: 1.8, height: 2.6 }
+          - { id: side-bay, kind: bay, at: 0.888, width: 2, depth: 0.8, bottom: 0, height: 2.4 }
+      - id: barrel-store
+        label: Barrel store
+        kind: curved-volume
+        position: [5.65, 0.6]
+        footprint: { family: rounded, width: 4.2, depth: 3.6, cornerRadius: 0.1 }
+        height: 2.6
+        thickness: 0.16
+        surface: planks
+        roof: { family: gable, rise: 1.5, overhang: 0.4, sweep: 0.2, sag: 0.18, axis: width }
+        chimney: false
+        windowBoxes: false
+        age: 0.5
+        openings:
+          - { id: barrel-doors, role: arch, profile: square, bottom: 0, width: 2.6, height: 2.2, at: 0.63 }
+      - id: cooper-yard
+        label: Stave yard fence
+        kind: curved-wall
+        surface: planks
+        stonework: fieldstone
+        thickness: 0.15
+        position: [-0.5, 5.2]
+        length: 10
+        bend: 1
+        height: 1.15
+        openings:
+          - { id: gate, role: arch, profile: square, at: 0.55, bottom: 0, width: 2, height: 1.15 }
+
+  - id: craft-glassworks
+    label: Glassworks with furnace cone
+    primitives:
+      - id: glass-hall
+        label: Glass hall
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 8.2, depth: 6, cornerRadius: 0.2 }
+        height: 4.3
+        thickness: 0.5
+        surface: masonry
+        stonework: fieldstone
+        roof: { family: gable, rise: 3, overhang: 0.4, sweep: 0.2, sag: 0.05, axis: depth }
+        shutters: true
+        chimney: false
+        windowBoxes: false
+        openings:
+          - { id: hall-arch, role: arch, profile: arched, bottom: 0, width: 2.6, height: 3, at: 0.639 }
+          - { id: front-a, role: window, profile: arched, bottom: 1.4, width: 0.8, height: 1.4, at: 0.732 }
+          - { id: front-b, role: window, profile: arched, bottom: 1.4, width: 0.8, height: 1.4, at: 0.546 }
+          - { id: gable-oculus, role: window, profile: arched, bottom: 3.45, width: 0.8, height: 0.8, at: 0.639 }
+          - { id: right-a, role: window, profile: arched, bottom: 1.4, width: 0.8, height: 1.4, at: 0.343 }
+          - { id: right-b, role: window, profile: arched, bottom: 1.4, width: 0.8, height: 1.4, at: 0.435 }
+        features:
+          - { id: buttress-a, kind: buttress, at: 0.389, width: 0.6, depth: 0.8, height: 3.4 }
+          - { id: buttress-b, kind: buttress, at: 0.942, width: 0.6, depth: 0.8, height: 3.4 }
+      - id: furnace-cone
+        label: Furnace cone
+        kind: curved-volume
+        position: [0, -4.4]
+        footprint: { family: oval, width: 4.4, depth: 4.4 }
+        height: 8.6
+        thickness: 0.6
+        taper: 0.66
+        surface: masonry
+        stonework: fieldstone
+        chimney: false
+        windowBoxes: false
+        age: 0.5
+        roof: { family: cone, rise: 1.4, overhang: 0.1, sweep: 0.2, sag: 0 }
+        base: { style: batter, height: 1.02, out: 0.3 }
+        openings:
+          - { id: glory-hole, role: slit, profile: arched, at: 0.5, bottom: 1.2, width: 0.4, height: 0.6 }
+          - { id: stoke-arch, role: arch, profile: arched, at: 0, bottom: 0, width: 1.1, height: 1.6 }
+      - id: annealing-house
+        label: Annealing house
+        kind: curved-volume
+        position: [-5.75, 0.6]
+        footprint: { family: rounded, width: 3.6, depth: 4.2, cornerRadius: 0.2 }
+        height: 2.9
+        thickness: 0.28
+        surface: plaster
+        roof: { family: hip, rise: 1.8, overhang: 0.45, sweep: 0.4, sag: 0.1 }
+        shutters: true
+        chimney: true
+        windowBoxes: false
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.605 }
+          - { id: side, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.855 }
+
+  - id: craft-bakehouse
+    label: Bakehouse with domed bread oven
+    primitives:
+      - id: bakehouse
+        label: Bakehouse
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: rounded, width: 7, depth: 5, cornerRadius: 0.5 }
+        height: 3.5
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: gable, rise: 2.6, overhang: 0.5, sweep: 0.6, sag: 0.12 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: arched, bottom: 0, width: 1, height: 2.1, at: 0.552 }
+          - { id: counter, role: window, profile: square, bottom: 0.9, width: 1.6, height: 1.2, at: 0.681 }
+          - { id: side, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.88 }
+          - { id: back, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.13, shutterPose: closed }
+        features:
+          - { id: counter-bay, kind: bay, at: 0.681, width: 2.3, depth: 0.8, bottom: 0.5, height: 1.8 }
+          - { id: roof-dormer, kind: dormer, at: 0.164, width: 1.5, depth: 1.3 }
+      - id: bread-oven
+        label: Bread oven
+        kind: curved-volume
+        position: [4.3, -0.5]
+        footprint: { family: oval, width: 3, depth: 3.4 }
+        height: 1.7
+        thickness: 0.5
+        taper: 0.86
+        surface: masonry
+        stonework: fieldstone
+        chimney: false
+        windowBoxes: false
+        age: 0.5
+        roof: { family: bell, rise: 1.15, overhang: 0.08, sweep: 0.95, sag: 0 }
+        openings:
+          - { id: oven-mouth, role: arch, profile: arched, at: 0.25, bottom: 0.45, width: 0.7, height: 0.6 }
+      - id: wood-store
+        label: Faggot store
+        kind: curved-volume
+        position: [4, -3.15]
+        footprint: { family: rounded, width: 2.6, depth: 3, cornerRadius: 0.1 }
+        height: 2
+        thickness: 0.14
+        surface: planks
+        roof: { family: gable, rise: 0.9, overhang: 0.3, sweep: 0.1, sag: 0.2, axis: depth }
+        chimney: false
+        windowBoxes: false
+        age: 0.6
+        openings:
+          - { id: bay, role: arch, profile: square, bottom: 0, width: 2.2, height: 1.7, at: 0.359 }
+
+  - id: craft-apothecary
+    label: Apothecary tower and herb workshop
+    primitives:
+      - id: still-tower
+        label: Still tower
+        kind: curved-volume
+        position: [0, 0]
+        footprint: { family: oval, width: 4.8, depth: 4.8 }
+        height: 8.8
+        levels: 3
+        thickness: 0.45
+        taper: 0.94
+        surface: masonry
+        stonework: fieldstone
+        chimney: false
+        windowBoxes: false
+        shutters: true
+        age: 0.35
+        roof: { family: spire, rise: 5, overhang: 0.4, sweep: 0.6, sag: 0 }
+        base: { style: batter, height: 1.02, out: 0.22 }
+        openings:
+          - { id: door, role: door, profile: arched, at: 0.25, bottom: 0, width: 1.05, height: 2.2 }
+          - { id: window-1, role: window, profile: arched, at: 0.4, bottom: 3.3, width: 0.6, height: 1.1 }
+          - { id: balcony-door, role: door, profile: arched, at: 0.25, bottom: 5.9, width: 0.95, height: 1.9 }
+          - { id: window-2, role: window, profile: arched, at: 0.62, bottom: 4.6, width: 0.6, height: 1.1 }
+          - { id: loop-1, role: slit, profile: square, at: 0.08, bottom: 2.4, width: 0.14, height: 0.9 }
+          - { id: loop-2, role: slit, profile: square, at: 0.85, bottom: 6.4, width: 0.14, height: 0.9 }
+        features:
+          - { id: herb-balcony, kind: balcony, at: 0.25, width: 3.2, depth: 0.9, bottom: 5.9, height: 1 }
+          - { id: stair-turret, kind: turret, roof: cone, at: 0.62, width: 1.8, height: 3.4, bottom: 6.2 }
+      - id: herb-shop
+        label: Herb workshop
+        kind: curved-volume
+        position: [4.7, 0.5]
+        footprint: { family: rounded, width: 5.8, depth: 4.4, cornerRadius: 0.35 }
+        height: 3.3
+        thickness: 0.3
+        surface: plaster
+        facade: timber
+        roof: { family: gable, rise: 2.4, overhang: 0.5, sweep: 0.55, sag: 0.12 }
+        shutters: true
+        chimney: true
+        windowBoxes: true
+        openings:
+          - { id: door, role: door, profile: square, bottom: 0, width: 1, height: 2.1, at: 0.563 }
+          - { id: shop-window, role: window, profile: square, bottom: 1.1, width: 1.2, height: 1, at: 0.674 }
+          - { id: side, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.379 }
+          - { id: back, role: window, profile: square, bottom: 1.1, width: 0.8, height: 1, at: 0.129 }
+        features:
+          - { id: shop-bay, kind: bay, at: 0.674, width: 1.9, depth: 0.7, bottom: 0.4, height: 1.8 }
+      - id: herb-garden
+        label: Herb garden wall
+        kind: curved-wall
+        surface: masonry
+        stonework: fieldstone
+        thickness: 0.4
+        position: [1.5, 5.6]
+        length: 9
+        bend: 2.2
+        height: 0.9
+        openings:
+          - { id: gate, role: arch, profile: square, at: 0.3, bottom: 0, width: 1.4, height: 0.9 }
