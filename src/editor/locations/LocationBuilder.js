@@ -273,6 +273,7 @@ export class LocationBuilder {
   /**
    * Adds built geometry (world space) under a material key from the generator's material set.
    * `tint` multiplies the material; for the `glow` material it is the emitted colour.
+   * A geometry that already carries a per-vertex `tint` keeps it, scaled by `tint`.
    */
   prop(material, geometry, tint = 0xffffff, gain = 1) {
     const parts = Array.isArray(geometry) ? geometry : [geometry];
@@ -280,8 +281,11 @@ export class LocationBuilder {
     for (const part of parts) {
       const flat = part.index ? part.toNonIndexed() : part;
       const count = flat.attributes.position.count;
+      const own = flat.attributes.tint;
       const colors = new Float32Array(count * 3);
-      for (let v = 0; v < count; v += 1) colors.set([linear.r, linear.g, linear.b], v * 3);
+      for (let v = 0; v < count; v += 1) {
+        colors.set(own ? [own.getX(v) * linear.r, own.getY(v) * linear.g, own.getZ(v) * linear.b] : [linear.r, linear.g, linear.b], v * 3);
+      }
       flat.setAttribute('tint', new THREE.BufferAttribute(colors, 3));
       if (!this.props.has(material)) this.props.set(material, []);
       this.props.get(material).push(flat);
@@ -483,7 +487,8 @@ export class LocationBuilder {
         propShadows: { ...(propShadows ?? {}), isProp: true },
         positions: at,
         normals: facing,
-        lights: this.lights,
+        // Glow is unlit (createGlowMaterial reads only `tint`): its bake just fills the shared attributes.
+        lights: key === 'glow' ? [] : this.lights,
         iceAt: () => entry.ice ?? 0,
         mediumAt,
         absorption,

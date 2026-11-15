@@ -8,6 +8,7 @@ import { generateLocation } from '../src/editor/locations/LocationBuilder.js';
 import { resolveLocationCatalog } from '../src/editor/locations/LocationCatalog.js';
 import { extrudedProfile } from '../src/editor/locations/gen/propKit.js';
 import { clipFieldToDressings } from '../src/editor/locations/gen/masonryDressingClip.js';
+import { bellCluster, lanternCap, loamMound, shelfBrackets } from '../src/editor/locations/generators/umbraFungus.js';
 
 const source = yaml.load(fs.readFileSync(new URL('../config/instanced-locations.yaml', import.meta.url), 'utf8'));
 const catalog = resolveLocationCatalog(source, { generatorKeys: Object.keys(LOCATION_GENERATORS), quality: 'low' });
@@ -28,6 +29,21 @@ test('field stones stop where an arch dressing begins', () => {
   assert.ok(!cut.has(clear), 'a stone no dressing reaches is left alone');
   const [[ring]] = cut.get(field);
   assert.ok(ring.every(([x, y]) => !(x > 0.25 + 1e-9 && Math.abs(y) < 0.25 - 1e-9)), 'nothing remains inside the voussoir');
+});
+
+test('every Umbra\'kor fungus body glows with a finite, positive per-vertex tint', () => {
+  let seed = 1;
+  const range = (lo, hi) => lo + ((seed = (seed * 16807) % 2147483647) / 2147483647) * (hi - lo);
+  const at = { x: 0, y: 0, z: 0 };
+  const bodies = [
+    ...lanternCap(at, 0.8, 0.25, range), ...bellCluster(at, 5, range), ...shelfBrackets(at, 0, 3, range),
+    loamMound(at, 2.4, 0.86, 0.17, 7).geometry,
+  ];
+  for (const body of bodies) {
+    const tint = body.attributes.tint.array;
+    assert.equal(tint.length, body.attributes.position.count * 3);
+    assert.ok(tint.every((value) => Number.isFinite(value) && value > 0), 'a tint is NaN or black');
+  }
 });
 
 test('the catalog rejects a reference to something that does not exist', () => {

@@ -2,6 +2,7 @@ import { beam, block, box, rod } from '../gen/propKit.js';
 import { fbm3 } from '../gen/noise.js';
 import { chamber, column, plateau, slab } from '../gen/shapes.js';
 import { bridge, crystal, house, lantern } from './kits.js';
+import { bellCluster, lanternCap, loamMound, shelfBrackets } from './umbraFungus.js';
 
 /**
  * An Umbra'kor cavern city. The cavern comes first — a void far larger than
@@ -169,16 +170,27 @@ export function generate(b, params) {
 
   // --- Fungus beds by the water -----------------------------------------------------
   const TEAL = '#79e3c4';
+  const range = (lo, hi) => b.range(lo, hi);
   for (let row = 0; row < 3; row += 1) {
     for (let x = -19; x <= 19; x += 7.6) {
       if (Math.abs(x - 19) < 4 && row === 0) continue;
       const at = P(beds.x + x, beds.y, beds.z - 5.4 + row * 4.6);
       b.prop('masonry', block(5.6, 0.5, 2.4, at));
       b.prop('timber', block(5.1, 0.62, 1.9, at), 0x2a211b);
-      for (let cap = 0; cap < 9; cap += 1) {
-        const cx = at.x + b.range(-2.3, 2.3), cz = at.z + b.range(-0.7, 0.7), tall = b.range(0.25, 0.9);
-        b.prop('timber', rod(P(cx, at.y + 0.6, cz), P(cx, at.y + 0.6 + tall, cz), 0.05, 0.04, 5), 0xb9b0a0);
-        b.prop('glow', rod(P(cx, at.y + 0.6 + tall, cz), P(cx, at.y + 0.72 + tall, cz), b.range(0.14, 0.3), 0.04, 7), TEAL, 0.9);
+      const loam = loamMound(P(at.x, at.y + 0.6, at.z), 2.42, 0.86, 0.17, Math.round(at.x * 13 + at.z * 7));
+      b.prop('loam', loam.geometry);
+      // The crop stands in a loose row down the bed; tufts and brackets take the gaps and the kerb.
+      for (let cap = 0; cap < 7; cap += 1) {
+        const cx = at.x - 2.05 + cap * 0.68 + b.range(-0.2, 0.2), cz = at.z + b.range(-0.45, 0.45), tall = b.range(0.3, 0.95);
+        b.prop('glow', lanternCap(P(cx, loam.groundAt(cx, cz) - 0.03, cz), tall, tall * b.range(0.24, 0.36), range), 0xffffff, 0.9);
+      }
+      for (let tuft = 0; tuft < 3; tuft += 1) {
+        const cx = at.x + b.range(-2.1, 2.1), cz = at.z + (tuft % 2 ? 1 : -1) * b.range(0.4, 0.7);
+        b.prop('glow', bellCluster(P(cx, loam.groundAt(cx, cz) - 0.02, cz), 3 + Math.floor(b.range(0, 4)), range), 0xffffff, 0.8);
+      }
+      for (const side of [1, -1]) {
+        const bx = at.x + b.range(-2.2, 2.2);
+        b.prop('glow', shelfBrackets(P(bx, at.y + b.range(0.12, 0.26), at.z + side * 1.205), side > 0 ? 0 : Math.PI, 2 + Math.floor(b.range(0, 2)), range), 0xffffff, 0.7);
       }
       b.light(P(at.x, at.y + 1.3, at.z), TEAL, 0.9, 7, { halo: 0 });
       b.nav.block(P(at.x - 1.6, at.y, at.z), 1.3, 2);
@@ -188,7 +200,14 @@ export function generate(b, params) {
   // Aqueduct along the back of the shelf, fed from the wall.
   b.prop('masonry', box(46, 0.9, 1.3, P(beds.x, beds.y + 1.6, beds.z - 8.6)));
   b.prop('water', box(45.6, 0.05, 0.7, P(beds.x, beds.y + 2.06, beds.z - 8.6)));
-  for (let x = -21; x <= 21; x += 6) b.prop('masonry', block(0.9, 1.2, 1.1, P(beds.x + x, beds.y, beds.z - 8.6)));
+  for (let x = -21; x <= 21; x += 6) {
+    b.prop('masonry', block(0.9, 1.2, 1.1, P(beds.x + x, beds.y, beds.z - 8.6)));
+    // Wild growth where the aqueduct seeps: brackets up the post, a tuft at its foot.
+    b.prop('glow', shelfBrackets(P(beds.x + x + b.range(-0.2, 0.2), beds.y + b.range(0.35, 0.7), beds.z - 8.04), 0, 2 + Math.floor(b.range(0, 3)), range), 0xffffff, 0.7);
+    const fx = beds.x + x + b.range(-0.6, 0.6), fz = beds.z - b.range(7.6, 7.85);
+    const ground = b.terrainAt(fx, beds.y + 1, fz) ?? beds.y;
+    b.prop('glow', bellCluster(P(fx, ground - 0.02, fz), 4 + Math.floor(b.range(0, 4)), range), 0xffffff, 0.8);
+  }
   lamp(P(beds.x - 21, beds.y, beds.z + 6.5), 0.8, 1.6);
   lamp(P(beds.x + 12, beds.y, beds.z + 6.8), 0.8, 1.6);
 
