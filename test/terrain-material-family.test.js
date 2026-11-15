@@ -143,7 +143,11 @@ test('terrain material family atlas is shared, mip-filtered and reference counte
   assert.equal(getTerrainMaterialFamilyAtlasEntryCount(), baseline + 1);
   assert.strictEqual(first.texture, second.texture);
   assert.equal(first.texture.isDataArrayTexture, true);
-  assert.equal(first.texture.image.depth, 16);
+  // Sixteen family layers, then the world-noise layers, neutral until loaded.
+  assert.equal(first.noiseLayer, 16);
+  assert.equal(first.texture.image.depth, 21);
+  const noise = first.texture.image.data.subarray(16 * 64 * 64 * 4);
+  assert.ok(noise.every((byte) => byte === 128), 'noise layers start at their neutral mean');
   assert.equal(first.texture.minFilter, THREE.LinearMipmapLinearFilter);
   assert.equal(first.texture.generateMipmaps, true);
 
