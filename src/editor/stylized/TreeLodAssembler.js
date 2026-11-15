@@ -165,20 +165,17 @@ function impostorRecord(placement, atlas, fade, ditherDirection, leaf) {
   };
 }
 
-const IMPOSTOR_VERTICAL_MORPH_MIN = 0.45;
 const IMPOSTOR_VERTICAL_MORPH_MAX = 1.45;
 
 export function isTreeImpostorMorphologyCompatible(placement) {
-  // Height age variation already lives in the billboard scale and horizontal
-  // crown variation lives in its appearance channel. Living age classes stay
-  // close enough to the canonical silhouette for the exact authored atlas to
-  // beat a generic geometry proxy at distance. Dead trees and truly extreme
-  // crown envelopes retain the connected fallback.
+  // Height lives in the billboard scale and crown width in its appearance
+  // channel, so a narrow crown is drawn exactly; only the crown's vertical
+  // stretch, which the atlas cannot carry, is bounded. (A width floor here sent
+  // every slender sapling to the proxy, which is clamped wider than its mesh.)
+  // Dead trees and thin crowns retain the connected fallback.
   if (placement.ageClass === 'dead') return false;
-  const verticalCrownScale = (placement.crownScale ?? 1) * (placement.foliageDensity ?? 1);
   if ((placement.foliageDensity ?? 1) < .35) return false;
-  return verticalCrownScale >= IMPOSTOR_VERTICAL_MORPH_MIN
-    && verticalCrownScale <= IMPOSTOR_VERTICAL_MORPH_MAX;
+  return treeMorphology(placement)[1] <= IMPOSTOR_VERTICAL_MORPH_MAX;
 }
 
 export function selectTreePhysicalRepresentation({

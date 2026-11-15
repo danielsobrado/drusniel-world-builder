@@ -161,7 +161,8 @@ export function deriveForestPlacementMorphology({
     },
     {
       crownPressure: clamp(coverage * 0.55, 0, 1),
-      directionalPressure: clamp(coverage * 0.4, 0, 1),
+      // Light is one-sided at a wood's edge, not in its closed core.
+      directionalPressure: edge,
       openLightDirectionXZ: edge > 0.01
         ? normalize2([Math.cos(edge * 6.2831853), Math.sin(edge * 6.2831853)])
         : [0, 0],

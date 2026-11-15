@@ -29,7 +29,8 @@ export class TreeRootFitter {
     if (!this.settings.enabled) return placement;
     const index = this.resolvePrototypeIndex?.(placement) ?? placement.prototypeIndex;
     const scale = placement.heightScale ?? placement.scale;
-    const reach = (this.reach[index] ?? 0) * scale * (placement.trunkScale ?? 1);
+    // The bark shader flares the root collar to trunkBaseScale (treeCrownShape.js).
+    const reach = (this.reach[index] ?? 0) * scale * (placement.trunkBaseScale ?? placement.trunkScale ?? 1);
     if (!(reach > 0)) return placement;
     const rootFit = fitRootGround(this.sampleHeight, placement.x, placement.z, reach, this.settings,
       (this.seat[index] ?? 0) * scale);

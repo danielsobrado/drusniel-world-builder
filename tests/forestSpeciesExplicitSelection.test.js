@@ -59,12 +59,15 @@ test('explicit planted age controls every derived age dimension', () => {
   const sapling = registry.select({ ...base, ageClass: 'sapling' }, HABITAT);
   const mature = registry.select({ ...base, ageClass: 'mature' }, HABITAT);
   const saplingAge = FOREST_AGE_CLASSES.sapling;
+  const matureAge = FOREST_AGE_CLASSES.mature;
+  const same = (a, b) => Math.abs(a - b) < 1e-12;
 
   assert.equal(sapling.ageClass, 'sapling');
   assert.equal(mature.ageClass, 'mature');
-  assert.ok(Math.abs(sapling.heightScale / saplingAge.height - mature.heightScale) < 1e-12);
-  assert.ok(Math.abs(sapling.trunkScale / saplingAge.trunk - mature.trunkScale) < 1e-12);
-  assert.ok(Math.abs(sapling.crownScale / saplingAge.crown - mature.crownScale) < 1e-12);
+  assert.ok(same(sapling.heightScale / saplingAge.height, mature.heightScale / matureAge.height));
+  assert.ok(same(sapling.trunkScale / saplingAge.trunk, mature.trunkScale / matureAge.trunk));
+  assert.ok(same(sapling.crownScale / saplingAge.crown, mature.crownScale / matureAge.crown));
+  assert.equal(sapling.crownHeightScale, saplingAge.crownHeight);
   assert.ok(Math.abs(
     sapling.spacingRadius / (saplingAge.spacing * sapling.crownScale)
       - FOREST_SPECIES_DEFAULTS.conifer_narrow.spacing,

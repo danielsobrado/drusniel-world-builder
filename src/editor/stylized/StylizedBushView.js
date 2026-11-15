@@ -3,6 +3,11 @@ import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
+import { valueNoise } from '../world/valueNoise2d.js';
+
+/** Metres across a thicket and the gap beside it. */
+const THICKET_METERS = 18;
+const THICKET_SEED = 0x74686963;
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
 import { instanceCapacity } from './scatterMath.js';
@@ -297,7 +302,9 @@ export class StylizedBushView {
         cluster.density * regionalScrub,
         habitat,
         bushes.understoryDensity,
-      ), (bushes.edgeBelt ?? 0) * edge);
+      // Squared: the ring is some 100 m wide, and a linear belt spread shrubs
+      // across the whole meadow beside a wood instead of banding its edge.
+      ), (bushes.edgeBelt ?? 0) * edge * edge);
       if (clusterDensity <= 0) return null;
       const canopy = habitat
         ? forestFloorDensity(habitat, 'bush', forestFloorConfig)
@@ -307,7 +314,10 @@ export class StylizedBushView {
       // How thick a biome's undergrowth runs: a rainforest floor is a thicket,
       // a taiga's is thin, a savanna's is scattered scrub.
       const biome = bushes.densityByTile?.[candidate.tileId] ?? 1;
-      const density = Math.min(1, clusterDensity * canopy * fringe * biome);
+      // Shrubs gather into thickets with open floor between: an even shrub
+      // layer read from the air as speckle (2026-11-15 capture).
+      const thicket = valueNoise(candidate.x / THICKET_METERS, candidate.z / THICKET_METERS, THICKET_SEED) * 0.5 + 0.5;
+      const density = Math.min(1, clusterDensity * canopy * fringe * biome * (0.12 + 2.4 * thicket * thicket));
       if (candidate.priority >= density) return null;
       return {
         // Edge shrubs stand taller: the step up from grass to crowns.

@@ -4,6 +4,7 @@ import {
 } from 'three/tsl';
 import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
 import { stormLevelUniform } from '../../weather/storm/stormGroundUniforms.js';
+import { treeTrunkScaleNode } from './treeCrownShape.js';
 
 const TWO_PI = Math.PI * 2;
 /** Share of a tree's height its bole sweeps off plumb at the top, and wanders. */
@@ -44,7 +45,7 @@ export function treeSwayField({ config, time, rootY = 0, topY = 1 }) {
   const speed = trees.swaySpeed ?? 0.85;
   // Gusts still reach trees, compressed: a 3x gust leans a crown ~1.7x, not 3x.
   const gust = field.envelope.clamp(0.35, 3).sqrt();
-  const compliance = float(1).div(attribute('instanceMorphology', 'vec3').z.clamp(0.65, 1.35));
+  const compliance = float(1).div(treeTrunkScaleNode(attribute('instanceMorphology', 'vec3').z).clamp(0.65, 1.35));
   // Two incommensurate periods keep the sway from reading as a metronome. The
   // wave term lets a gust roll across a forest slowly instead of per tree.
   const travelling = wave.along.mul(0.06);

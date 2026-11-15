@@ -55,4 +55,12 @@ test('authored impostors cover living age classes and reject dead or extreme cro
     crownAspect: 1,
     foliageDensity: 0.2,
   }), false);
+  // The atlas carries crown width, so a slender sapling stays an impostor; only
+  // a crown stretched past what the atlas shows falls back.
+  assert.equal(isTreeImpostorMorphologyCompatible({
+    ageClass: 'sapling', crownScale: 0.25, crownHeightScale: 1.3, foliageDensity: 0.9,
+  }), true);
+  assert.equal(isTreeImpostorMorphologyCompatible({
+    ageClass: 'sapling', crownScale: 0.25, crownHeightScale: 1.6, foliageDensity: 0.9,
+  }), false);
 });

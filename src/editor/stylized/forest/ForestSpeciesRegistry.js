@@ -1,5 +1,6 @@
 import { hash32 } from '../scatterMath.js';
-import { deriveForestPlacementMorphology } from './morphology/index.js';
+import { deriveForestPlacementMorphology, MORPHOLOGY_RANGES } from './morphology/index.js';
+import { decodeTreeShape, encodeTreeShape, TREE_ASYMMETRY_MAX } from './treeShapeCode.js';
 import { valueNoise } from '../../world/valueNoise2d.js';
 
 /** Metres across one grove or gap. */
@@ -17,12 +18,29 @@ export function groveSpacingFactor(x, z) {
   return 0.55 + grove * 0.75;
 }
 
+/**
+ * Age changes a tree's proportions, not only its size. A sapling is slender: a
+ * thin stem under a narrow crown drawn down toward the ground. An ancient tree is
+ * broad and flat-crowned on a stout, flared bole. `height` scales the whole tree
+ * (the instance matrix), so `crown` and `trunk` are widths per unit height:
+ * `crown` the crown's and `trunk` the stem-and-branch width, kept just inside
+ * the crown so branch tips stay in their foliage. `crownHeight` stretches the
+ * crown down from its fixed top (never below 1, which would bare the branches),
+ * `taper`, `bole`, `flare` and `asymmetry` feed the shape code (treeShapeCode.js).
+ * `spacing` holds each class's footprint where it was before crown widths
+ * changed, so stand density did not move with this.
+ */
 const AGE_CLASSES = Object.freeze({
-  sapling: Object.freeze({ height: 0.48, trunk: 0.58, crown: 0.55, spacing: 0.55 }),
-  young: Object.freeze({ height: 0.76, trunk: 0.78, crown: 0.8, spacing: 0.78 }),
-  mature: Object.freeze({ height: 1, trunk: 1, crown: 1, spacing: 1 }),
-  ancient: Object.freeze({ height: 1.2, trunk: 1.28, crown: 1.18, spacing: 1.22 }),
-  dead: Object.freeze({ height: 0.92, trunk: 0.94, crown: 0.42, spacing: 0.82 }),
+  sapling: Object.freeze({ height: 0.48, crown: 0.5, trunk: 0.42, crownHeight: 1.3,
+    taper: 0.1, bole: -0.15, flare: 0, asymmetry: 0.4, spacing: 0.6 }),
+  young: Object.freeze({ height: 0.76, crown: 0.72, trunk: 0.64, crownHeight: 1.15,
+    taper: 0, bole: 0, flare: 0.1, asymmetry: 0.7, spacing: 0.87 }),
+  mature: Object.freeze({ height: 1, crown: 1, trunk: 0.93, crownHeight: 1,
+    taper: 0, bole: 0.15, flare: 0.2, asymmetry: 1, spacing: 1 }),
+  ancient: Object.freeze({ height: 1.2, crown: 1.4, trunk: 1.3, crownHeight: 1,
+    taper: -0.1, bole: 0.4, flare: 0.35, asymmetry: 1.4, spacing: 1.03 }),
+  dead: Object.freeze({ height: 0.92, crown: 0.42, trunk: 0.9, crownHeight: 1,
+    taper: 0, bole: 0.15, flare: 0.25, asymmetry: 0, spacing: 0.82 }),
 });
 
 const DEFAULT_SPECIES = Object.freeze({
@@ -60,16 +78,29 @@ const DEFAULT_PALETTES = Object.freeze({
 });
 
 /**
- * Standing forms of a broadleaf: tall and narrow, broad and spreading, and two
- * nearer the mean. A multiplier on crown width and aspect, because the instance
- * morphology is what the far impostors carry too.
+ * Crown families, so one mesh stands as visibly different trees. `width` is the
+ * crown's world width and `height` the whole tree's, which the far impostor
+ * carries exactly (its scale and width channel); `taper` and `asymmetry` are
+ * near-mesh only. Conifers stay narrow and vary taper and height instead.
  */
+const crownForm = (name, width, height, taper, asymmetry) => Object.freeze({ name, width, height, taper, asymmetry });
 const BROADLEAF_FORMS = Object.freeze([
-  Object.freeze({ width: 0.74, aspect: 1.2 }),
-  Object.freeze({ width: 1.24, aspect: 0.82 }),
-  Object.freeze({ width: 1, aspect: 1 }),
-  Object.freeze({ width: 0.9, aspect: 1.08 }),
+  crownForm('spreading', 1.26, 0.96, -0.1, 1),
+  crownForm('upright', 0.72, 1.1, 0.2, 0.6),
+  crownForm('one-sided', 0.92, 1, 0, 2.5),
+  crownForm('flat-topped', 1.12, 0.94, -0.3, 0.8),
+  crownForm('irregular', 0.94, 1.04, 0.1, 1.6),
+  crownForm('rounded', 0.98, 1, 0, 1),
 ]);
+// No asymmetry: a conifer's leader grows plumb, and a crown that leans with
+// height drew every spire with a hooked tip (2026-11-15 taiga capture).
+const CONIFER_FORMS = Object.freeze([
+  crownForm('spire', 0.84, 1.12, 0.2, 0),
+  crownForm('standard', 1, 1, 0, 0),
+  crownForm('full', 1.12, 0.95, 0.1, 0),
+  crownForm('columnar', 0.94, 1.06, -0.1, 0),
+]);
+const CROWN_BIAS_MAX = MORPHOLOGY_RANGES.crownBiasX[1];
 
 /**
  * Fraction of trees that ignore their grove's dominant species. Real stands are
@@ -271,39 +302,54 @@ export class ForestSpeciesRegistry {
         this.prototypeCount - 1,
         Math.floor(prototypeRoll * this.prototypeCount),
       );
-    const heightScale = candidate.scale * age.height * individualVariation;
     const morphology = deriveForestPlacementMorphology({
       stableId: candidate.stableId,
       speciesId,
       habitat,
     });
-    const form = speciesId.startsWith('conifer')
-      ? BROADLEAF_FORMS[2]
-      : BROADLEAF_FORMS[Math.floor(stableUnit(candidate.stableId, 89) * BROADLEAF_FORMS.length)];
-    const crownScale = age.crown
-      * (0.92 + stableUnit(candidate.stableId, 59) * 0.16)
-      * morphology.crownWidth
-      * form.width;
-    const trunkScale = age.trunk
-      * (0.94 + stableUnit(candidate.stableId, 61) * 0.12)
-      * morphology.rootFlare;
-    const crownFlattening = morphology.crownFlattening * form.aspect;
+    const forms = speciesId.startsWith('conifer') ? CONIFER_FORMS : BROADLEAF_FORMS;
+    const form = forms[Math.floor(stableUnit(candidate.stableId, 89) * forms.length)];
+    const heightScale = candidate.scale * age.height * individualVariation * form.height;
+    // Crown width in world terms; the instance matrix already scales by height,
+    // so prototype-space widths divide a taller form's height back out.
+    const breadth = (0.92 + stableUnit(candidate.stableId, 59) * 0.16) * morphology.crownWidth * form.width;
+    const crownScale = age.crown * breadth;
+    const crownFlattening = morphology.crownFlattening;
     const crownAspect = species.crownAspect * crownFlattening;
+    // The stem and its branches spread with the crown, just inside it, so a broad
+    // crown sits on a stout trunk and no branch tip leaves its foliage.
+    const trunkScale = age.trunk * breadth * crownFlattening / form.height;
+    const living = ageClass !== 'dead';
+    // One-sided reach follows the light: crownBias is strongest at a wood's edge.
+    const lightBias = Math.hypot(morphology.crownBiasX, morphology.crownBiasZ) / CROWN_BIAS_MAX;
+    const shapeCode = encodeTreeShape({
+      asymmetry: TREE_ASYMMETRY_MAX * Math.min(1, lightBias * age.asymmetry * form.asymmetry),
+      taper: living ? age.taper + form.taper : 0,
+      // A broad crown takes a stouter bole than its width alone gives it.
+      bole: age.bole + 0.3 * (breadth - 1),
+      flare: age.flare * morphology.rootFlare,
+    });
+    const shape = decodeTreeShape(shapeCode);
     const spacingRadius = species.spacing * age.spacing * crownScale * groveSpacingFactor(candidate.x, candidate.z);
     return Object.freeze({
       speciesId,
       prototypeIndex,
       ageClass,
+      crownForm: form.name,
       scale: heightScale,
       heightScale,
       trunkScale,
+      // The stem's widest point, at the root collar, for root fitting.
+      trunkBaseScale: trunkScale * (1 + shape.bole + shape.flare),
       crownScale,
+      crownHeightScale: age.crownHeight,
+      shapeCode,
       spacingRadius,
       radius: spacingRadius,
       crownAspect,
       // Authored species meshes already contain their narrow/wide silhouette.
       // Apply ecological variation once instead of narrowing a narrow pine twice.
-      crownAspectScale: this.prototypeIndexBySpecies ? crownFlattening : crownAspect,
+      crownAspectScale: (this.prototypeIndexBySpecies ? crownFlattening : crownAspect) / form.height,
       leanX: morphology.leanX,
       leanZ: morphology.leanZ,
       branchDroop: morphology.branchDroop,

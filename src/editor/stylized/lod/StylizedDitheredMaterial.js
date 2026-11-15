@@ -17,6 +17,7 @@ import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';
 import { applyCanopySnow, canopySnowCap, canopySnowTransmission, crownUpNode, trunkSnow, trunkSnowCap, withStormSnow } from '../forest/canopySnow.js';
 import { applyTreeFoliageSnowSurface } from '../forest/TreeFoliageSurface.js';
+import { shapeTreePosition, treeTrunkScaleNode } from '../forest/treeCrownShape.js';
 
 /**
  * Share of a crown's 25 cm cells that cast a sun shadow. A crown is porous: with
@@ -48,7 +49,7 @@ export function createSourceOpacityNode(material) {
 }
 
 /**
- * Per-tree crown and trunk scale about the prototype's pivot. It must act in the
+ * Per-tree crown and trunk shape about the prototype's pivot. It must act in the
  * prototype's own space, so it runs before the instance matrix (see
  * preInstancePosition); applied after it, the scale pulled every crown toward the
  * mesh origin and parted it from its trunk by tens of metres. The source
@@ -57,16 +58,21 @@ export function createSourceOpacityNode(material) {
 function applyMorphology(material, kind, pivot) {
   if (kind !== 'leaf' && kind !== 'trunk') return;
   const morphology = attribute('instanceMorphology', 'vec3');
-  const horizontalScale = kind === 'leaf' ? morphology.x : morphology.z;
+  // A tagged prototype (StylizedTreeView) is shaped as one tree; anything else
+  // keeps the plain scale about its pivot.
+  const band = material.userData.treeCrownBand ?? null;
+  const horizontalScale = kind === 'leaf' ? morphology.x : treeTrunkScaleNode(morphology.z);
   const verticalScale = kind === 'leaf' ? morphology.y : float(1);
   const pivotX = float(pivot.x);
   const pivotY = float(pivot.y);
   const pivotZ = float(pivot.z);
   setPreInstancePosition(material, (position) => {
-    const shaped = vec3(
-    position.x.sub(pivotX).mul(horizontalScale).add(pivotX),
-    position.y.sub(pivotY).mul(verticalScale).add(pivotY),
-    position.z.sub(pivotZ).mul(horizontalScale).add(pivotZ),
+    const shaped = band ? shapeTreePosition(position, {
+      kind, center: pivot, band, morphology, seed: attribute('instanceDither', 'vec3').y,
+    }) : vec3(
+      position.x.sub(pivotX).mul(horizontalScale).add(pivotX),
+      position.y.sub(pivotY).mul(verticalScale).add(pivotY),
+      position.z.sub(pivotZ).mul(horizontalScale).add(pivotZ),
     );
     if (kind !== 'trunk') return shaped;
     const root = attribute('instanceRootPlane', 'vec3');

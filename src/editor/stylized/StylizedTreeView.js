@@ -59,6 +59,7 @@ import { applyCloudShadow } from './CloudShadow.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { TreeRootFitter } from './forest/TreeRootFitter.js';
 import { bakeCanopyVisibility } from './forest/CanopyVisibility.js';
+import { tagCrownBand } from './forest/treeCrownShape.js';
 
 function firstMaterial(mesh, name) {
   return materialList(mesh).find((material) => material?.name === name) ?? materialList(mesh)[0];
@@ -647,8 +648,10 @@ export class StylizedTreeView {
     const nearCapacity = capacityFor(settings.meshRadius);
     const proxyCapacity = capacityFor(settings.proxyRadius);
     const impostorCapacity = capacityFor(settings.impostorRadius);
+    // Before the LOD clones: each copies its material's crown band (treeCrownShape.js).
+    for (const parts of this.prototypes) tagCrownBand(parts);
     const proxies = this.prototypes.map((parts) => createTreeProxyPrototype(parts, this.config));
-    this.proxyPrototypes = proxies.map((prototype) => this.withCloudShadow(prototype.proxyParts));
+    this.proxyPrototypes = proxies.map((prototype) => this.withCloudShadow(tagCrownBand(prototype.proxyParts)));
     this.prototypeHeight = Math.max(...proxies.map((prototype) => prototype.height));
     this.prototypeWidth = Math.max(...proxies.map((prototype) => prototype.width));
     this.renderers = createInstancedRenderers({

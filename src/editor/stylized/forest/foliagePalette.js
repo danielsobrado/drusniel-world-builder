@@ -40,10 +40,10 @@ export function resolveFoliagePalette(config = {}, tileId = null) {
     base.lerp(shadowColor, 0.1);
     tip.lerp(lightColor, 0.2);
   } else {
-    base.lerp(shadowColor, 0.2);
-    tip.lerp(lightColor, 0.3);
+    base.lerp(shadowColor, 0.07);
+    tip.lerp(lightColor, 0.15);
   }
-  return { base, tip, exposure: config.understory?.paletteExposure ?? 1.15 };
+  return { base, tip, exposure: config.understory?.paletteExposure ?? 1.7 };
 }
 
 export function fallingLeafPalette(config = {}, tileId = null) {
@@ -66,18 +66,18 @@ function applyUnderstoryWeathering(color) {
   const skyFacing = smoothstep(0.15, 0.88, normalWorld.y);
   const foot = smoothstep(0, 0.32, positionGeometry.y);
   const grounded = color.mul(mix(float(0.84), float(1), foot));
-  return mix(grounded, bleached(color), skyFacing.mul(0.15));
+  return mix(grounded, bleached(color), skyFacing.mul(0.06));
 }
 
 /** Keep painted veins, stems and blossoms while harmonising them with the biome palette. */
 export function gradeUnderstory(sample, palette) {
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
   const green = smoothstep(0.005, 0.06, sample.g.sub(max(sample.r, sample.b)));
-  const earth = bleached(vec3(...palette.base.toArray()), 0.3, 0.6);
+  const earth = bleached(vec3(...palette.base.toArray()), 0.22, 0.75).mul(vec3(1.12, 0.96, 0.82));
   const mutedAccent = mix(
-    mix(vec3(luminance), sample, 0.62),
+    mix(vec3(luminance), sample, 0.82),
     earth.mul(luminance.mul(1.25).add(0.28)),
-    0.26,
+    0.18,
   );
   const graded = mix(mutedAccent, understoryRamp(sample, palette), green.mul(0.9));
   return applyUnderstoryWeathering(graded);

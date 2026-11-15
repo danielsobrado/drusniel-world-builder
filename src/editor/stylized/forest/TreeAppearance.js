@@ -1,4 +1,5 @@
 import { hash32 } from '../scatterMath.js';
+import { packTreeTrunk } from './treeShapeCode.js';
 
 export const TREE_COLOR_VARIATION_MIN = 0.9;
 export const TREE_COLOR_VARIATION_RANGE = 0.2;
@@ -33,13 +34,16 @@ export function treeMorphology(placement) {
   const crownScale = finite(placement.crownScale, 1);
   const crownAspect = finite(placement.crownAspectScale, finite(placement.crownAspect, 1));
   const foliageDensity = Math.max(0, finite(placement.foliageDensity, 1));
-  if (placement.ageClass === 'dead') return [1, 0, finite(placement.trunkScale, 1)];
+  // The crown and bole shape rides in the trunk channel's integer part.
+  const trunk = packTreeTrunk(finite(placement.trunkScale, 1), finite(placement.shapeCode, 0));
+  if (placement.ageClass === 'dead') return [1, 0, trunk];
   // Horizontal crown carries aspect and foliage density so sparse/wetland stands
-  // thin in silhouette without a second material path.
+  // thin in silhouette without a second material path. A crown only ever
+  // stretches vertically: shortening it would bare the branch tips above it.
   return [
     crownScale * crownAspect * Math.sqrt(foliageDensity),
-    Math.max(1, crownScale * foliageDensity),
-    finite(placement.trunkScale, 1),
+    Math.max(1, finite(placement.crownHeightScale, crownScale * foliageDensity)),
+    trunk,
   ];
 }
 

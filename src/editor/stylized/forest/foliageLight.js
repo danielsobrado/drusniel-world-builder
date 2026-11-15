@@ -40,7 +40,9 @@ const BARK_BOUNCE = 0.7;
  */
 const ROCK_FILL = 3.5;
 const ROCK_BOUNCE = 4;
-const UNDERSTORY_FILL = 1.65;
+// 1.0 since 2026-11-15 (was 1.65): the sky's blue lifted every shrub to a cool grey
+// beside saturated grass, so the understory read as a separate layer.
+const UNDERSTORY_FILL = 1.0;
 const UNDERSTORY_BOUNCE = 2.1;
 const BLOSSOM_FILL = 1.15;
 const BLOSSOM_BOUNCE = 1.4;
