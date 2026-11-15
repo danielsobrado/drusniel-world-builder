@@ -108,3 +108,12 @@ do not load them at startup, and keep tintable sets (plaster, stone, roof,
 timber) neutral, because the workshop's vertex colours already carry the hue.
 Procedural sets are generated in GPU memory from PTL recipes: keep that to one
 asynchronously compiled pass, and add only presets that generate in seconds.
+
+## Noise textures
+
+A CC0 library of tileable noise textures for shaders and VFX lives in
+`assets/source-library/noise/` (see its README: cracks, voronoi, streak, vein,
+perlin, turbulence and more, 512 px). Prefer sampling one of these over stacking
+procedural noise evaluations in a fragment shader. They are source material:
+convert the ones you use into `public/assets/textures/`, packing greyscale
+noises into RGB channels, and load them on demand, never at startup.

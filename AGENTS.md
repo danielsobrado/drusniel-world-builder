@@ -43,3 +43,12 @@ procedural detail sets, or new archetype-specific core branches when the
 semantic/registry framework can represent the feature.
 
 Code files are not too big unless really necessary and are always SOLID; refactor if needed.
+
+## Noise textures
+
+A CC0 library of tileable noise textures for shaders and VFX lives in
+`assets/source-library/noise/` (see its README: cracks, voronoi, streak, vein,
+perlin, turbulence and more, 512 px). Prefer sampling one of these over stacking
+procedural noise evaluations in a fragment shader. They are source material:
+convert the ones you use into `public/assets/textures/`, packing greyscale
+noises into RGB channels, and load them on demand, never at startup.
