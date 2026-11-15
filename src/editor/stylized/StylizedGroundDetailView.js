@@ -28,6 +28,12 @@ import { canopyShade } from './forest/ForestFloor.js';
 import { placementTileId } from '../biomes/BiomeLooks.js';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
+import {
+  collectChunkObstacleCircles,
+  computePrototypeFootprint,
+  footprintHitsObstacle,
+  pathBlockedForFootprint,
+} from './UnderstoryClearance.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
 const DETAIL_REPRESENTATIONS = Object.freeze([{ band: 'near', fade: 1, ditherDirection: 1 }]);
@@ -82,6 +88,9 @@ export class StylizedGroundDetailView {
     biomeAssetPalette = null,
     regionalCharacterField = null,
     forestFieldProvider = null,
+    treePlacementsProvider = null,
+    rockBlockersProvider = null,
+    obstacleVersionProvider = null,
     paletteLayerId = null,
   }) {
     this.terrainView = terrainView;
@@ -95,8 +104,12 @@ export class StylizedGroundDetailView {
     this.biomeAssetPalette = biomeAssetPalette;
     this.regionalCharacterField = regionalCharacterField;
     this.forestFieldProvider = forestFieldProvider;
+    this.treePlacementsProvider = treePlacementsProvider;
+    this.rockBlockersProvider = rockBlockersProvider;
+    this.obstacleVersionProvider = obstacleVersionProvider;
     this.prototypeIndicesByAsset = new Map();
     this.prototypes = [];
+    this.prototypeFootprints = [];
     this.prototypeHeightOffsets = [];
     // Lying deadwood (`conform: true`) tilts to the slope under it, or one end floats.
     this.prototypeConform = [];
@@ -241,6 +254,7 @@ export class StylizedGroundDetailView {
           yield part.material;
         }
         this.prototypes.push(prototype);
+        this.prototypeFootprints.push(computePrototypeFootprint(prototype));
       }
       if (extracted.length === 0) {
         throw new Error(`${this.layerName} variant ${definition.scene} produced no prototypes.`);
@@ -313,12 +327,14 @@ export class StylizedGroundDetailView {
         characterStrength: definition.characterStrength,
         canopy: definition.canopy,
       });
-      this.prototypes.push(definition.parts.map((part) => ({
+      const parts = definition.parts.map((part) => ({
         geometry: part.geometry,
         material: part.material,
         kind: part.kind ?? 'detail',
         instanceSurface: part.instanceSurface,
-      })));
+      }));
+      this.prototypes.push(parts);
+      this.prototypeFootprints.push(computePrototypeFootprint(parts));
       registerPrototypeIndices(
         this.prototypeIndicesByAsset,
         definition.id,
@@ -351,6 +367,10 @@ export class StylizedGroundDetailView {
     this.pathClearance ??= this.terrainView.tileMap
       ? createPathClearanceField(this.terrainView, this.config)
       : null;
+    const { obstacles, signature: obstacleSignature } = collectChunkObstacleCircles(chunkX, chunkZ, {
+      treePlacementsProvider: this.treePlacementsProvider,
+      rockBlockersProvider: this.rockBlockersProvider,
+    });
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
       this.prototypes.length,
@@ -368,6 +388,7 @@ export class StylizedGroundDetailView {
       this.pathClearance?.signature ?? 'nopath',
       this.regionalCharacterField?.signature ?? 'uniform-regions',
       forestField?.signature ?? 'uniform-forest',
+      obstacleSignature,
       this.biomeAssetPalette?.revision ?? 0,
     ].join('|');
     const cacheKey = `${chunkX}:${chunkZ}`;
@@ -415,10 +436,15 @@ export class StylizedGroundDetailView {
             tileAt: (cellX, cellZ) => this.terrainView.tileMap.get(cellX, cellZ),
           },
         )) return null;
+        const footprint = this.prototypeFootprints[candidate.prototypeIndex] ?? null;
         if (this.layerName !== 'aquaticPlant'
           && this.layerName !== 'shoreLife'
           && placementRule?.strategy !== 'path-interior'
-          && this.pathClearance?.blocks(candidate.x, candidate.z, candidate.radius ?? 0)) {
+          && pathBlockedForFootprint(this.pathClearance, candidate, footprint)) {
+          return null;
+        }
+        if (this.layerName !== 'aquaticPlant'
+          && footprintHitsObstacle(candidate, footprint, obstacles)) {
           return null;
         }
 
@@ -466,9 +492,10 @@ export class StylizedGroundDetailView {
     this.instanceAnchor.place(this.root, origin);
     const radius = this.layerConfig.residentRadius;
     const revisionSignature = this.revisionTracker.windowSignature(focus, radius + 1, 1);
+    const obstacleVersion = this.obstacleVersionProvider?.() ?? 0;
     const updateKey = `${focus.chunkX}:${focus.chunkZ}:${revisionSignature}:${
       this.biomeAssetPalette?.revision ?? 0
-    }:p${this.prototypeRevision}`;
+    }:o${obstacleVersion}:p${this.prototypeRevision}`;
     if (updateKey === this.lastUpdateKey && !this.pendingRebuild) return;
     if (this.pendingRebuild?.updateKey === updateKey) return;
     this.pendingRebuild = {

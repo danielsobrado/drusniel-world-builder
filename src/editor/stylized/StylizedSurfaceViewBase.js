@@ -183,6 +183,11 @@ export class StylizedSurfaceView {
         regionalCharacterField: this.regionalCharacterField,
       })
       : null;
+    const detailObstacleProviders = {
+      treePlacementsProvider: (chunkX, chunkZ) => this.treeView?.manifestStore?.peek(chunkX, chunkZ) ?? null,
+      rockBlockersProvider: (chunkX, chunkZ) => this.rockView?.manifestStore?.blockerSnapshotForChunk?.(chunkX, chunkZ, 1) ?? null,
+      obstacleVersionProvider: () => `${this.treeView?.manifestStore?.version ?? 0}:${this.rockView?.manifestStore?.version ?? 0}`,
+    };
     this.groundDetailView = this.enabled
       && !this.impostorBakeMode
       && config.groundDetails?.enabled
@@ -197,6 +202,7 @@ export class StylizedSurfaceView {
         regionalCharacterField: this.regionalCharacterField,
         // Lets a wood's shaded interior grow different cover from its fringe.
         forestFieldProvider: () => this.treeView?.manifestStore?.forestField ?? null,
+        ...detailObstacleProviders,
       })
       : null;
     this.aquaticPlantView = this.enabled
@@ -229,6 +235,7 @@ export class StylizedSurfaceView {
         biomeAssetPalette,
         regionalCharacterField: this.regionalCharacterField,
         forestFieldProvider: () => this.treeView?.manifestStore?.forestField ?? null,
+        ...detailObstacleProviders,
       })
       : null;
     // Water plants are procedural too: seagrass, kelp and the algae ride the same
@@ -251,6 +258,7 @@ export class StylizedSurfaceView {
         layerConfig: config.shoreLife,
         layerName: 'shoreLife',
         priorityChannel: 47,
+        ...detailObstacleProviders,
       })
       : null;
     if (this.shoreLifeView) {
@@ -269,6 +277,7 @@ export class StylizedSurfaceView {
         layerName: 'forestDebris',
         priorityChannel: 46,
         forestFieldProvider: () => this.treeView?.manifestStore?.forestField ?? null,
+        ...detailObstacleProviders,
       })
       : null;
     this.forestDebrisView?.appendProceduralPrototypes(createForestDebrisPrototypes(config.forestDebris));

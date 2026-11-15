@@ -1,0 +1,131 @@
+const DEFAULT_TRUNK_CLEARANCE = 0.58;
+const MIN_TRUNK_RADIUS = 0.45;
+const MIN_FOOTPRINT_EXTENT = 0.15;
+
+/**
+ * Measures the local XZ half-extents of a detail/understory prototype from its
+ * geometry parts at unit scale. Works for both compact plants and elongated
+ * fallen logs or branches without per-variant hardcoding.
+ */
+export function computePrototypeFootprint(parts = []) {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (const part of parts) {
+    const geometry = part?.geometry;
+    if (!geometry) continue;
+    if (!geometry.boundingBox && typeof geometry.computeBoundingBox === 'function') {
+      geometry.computeBoundingBox();
+    }
+    const box = geometry.boundingBox;
+    if (!box) continue;
+    if (box.min.x < minX) minX = box.min.x;
+    if (box.max.x > maxX) maxX = box.max.x;
+    if (box.min.z < minZ) minZ = box.min.z;
+    if (box.max.z > maxZ) maxZ = box.max.z;
+  }
+  if (!Number.isFinite(minX) || !Number.isFinite(minZ)) {
+    return Object.freeze({ halfX: MIN_FOOTPRINT_EXTENT, halfZ: MIN_FOOTPRINT_EXTENT });
+  }
+  return Object.freeze({
+    halfX: Math.max(MIN_FOOTPRINT_EXTENT, Math.abs(minX), Math.abs(maxX)),
+    halfZ: Math.max(MIN_FOOTPRINT_EXTENT, Math.abs(minZ), Math.abs(maxZ)),
+  });
+}
+
+/**
+ * Collects obstacle circles `{ x, z, radius }` around `chunkX, chunkZ` (including
+ * adjacent chunks so long props like fallen logs cannot clip across chunk borders
+ * into neighbouring tree trunks or rocks).
+ */
+export function collectChunkObstacleCircles(chunkX, chunkZ, {
+  treePlacementsProvider = null,
+  rockBlockersProvider = null,
+  trunkClearance = DEFAULT_TRUNK_CLEARANCE,
+} = {}) {
+  const obstacles = [];
+  let treeCount = 0;
+  if (typeof treePlacementsProvider === 'function') {
+    for (let dz = -1; dz <= 1; dz += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        const trees = treePlacementsProvider(chunkX + dx, chunkZ + dz);
+        if (!Array.isArray(trees) || trees.length === 0) continue;
+        treeCount += trees.length;
+        for (const tree of trees) {
+          const radius = Math.max(MIN_TRUNK_RADIUS, trunkClearance * (tree.scale ?? 1));
+          obstacles.push({ x: tree.x, z: tree.z, radius });
+        }
+      }
+    }
+  }
+  const rockSnapshot = typeof rockBlockersProvider === 'function'
+    ? rockBlockersProvider(chunkX, chunkZ)
+    : null;
+  const rockPlacements = Array.isArray(rockSnapshot)
+    ? rockSnapshot
+    : (rockSnapshot?.placements ?? []);
+  for (const rock of rockPlacements) {
+    if ((rock.radius ?? 0) > 0) obstacles.push(rock);
+  }
+  const rockSig = rockSnapshot?.signature ?? rockPlacements.length;
+  return {
+    obstacles,
+    signature: `t${treeCount}:r${rockSig}`,
+  };
+}
+
+/**
+ * Tests whether a candidate's oriented XZ footprint (scaled by `candidate.scale`
+ * and rotated by `candidate.rotationY`) intersects any obstacle circle.
+ */
+export function footprintHitsObstacle(candidate, footprint, obstacles = []) {
+  if (!obstacles || obstacles.length === 0) return false;
+  const scale = candidate.scale ?? 1;
+  const hx = (footprint?.halfX ?? candidate.radius ?? MIN_FOOTPRINT_EXTENT) * scale;
+  const hz = (footprint?.halfZ ?? candidate.radius ?? MIN_FOOTPRINT_EXTENT) * scale;
+  const yaw = candidate.rotationY ?? 0;
+  const cos = Math.cos(yaw);
+  const sin = Math.sin(yaw);
+  for (let i = 0; i < obstacles.length; i += 1) {
+    const obs = obstacles[i];
+    const dx = obs.x - candidate.x;
+    const dz = obs.z - candidate.z;
+    const r = obs.radius ?? 0;
+    const maxReach = Math.hypot(hx, hz) + r;
+    if (dx * dx + dz * dz >= maxReach * maxReach) continue;
+    // Inverse of Three.js Y-axis rotation: (x cos θ - z sin θ, x sin θ + z cos θ) -> inverse uses -θ.
+    const lx = dx * cos - dz * sin;
+    const lz = dx * sin + dz * cos;
+    const cx = Math.max(-hx, Math.min(hx, lx));
+    const cz = Math.max(-hz, Math.min(hz, lz));
+    const ox = lx - cx;
+    const oz = lz - cz;
+    if (ox * ox + oz * oz < r * r) return true;
+  }
+  return false;
+}
+
+/**
+ * Checks walk-path clearance across both the center and the two ends of an
+ * elongated footprint so fallen logs cannot protrude into trails.
+ */
+export function pathBlockedForFootprint(pathClearance, candidate, footprint) {
+  if (!pathClearance) return false;
+  const baseRadius = candidate.radius ?? 0;
+  if (pathClearance.blocks(candidate.x, candidate.z, baseRadius)) return true;
+  if (!footprint) return false;
+  const scale = candidate.scale ?? 1;
+  const hx = footprint.halfX * scale;
+  const hz = footprint.halfZ * scale;
+  const longHalf = Math.max(hx, hz);
+  const shortHalf = Math.min(hx, hz);
+  if (longHalf <= Math.max(baseRadius, shortHalf * 1.4)) return false;
+  const yaw = candidate.rotationY ?? 0;
+  // Three.js Y rotation maps local +X to (cos, -sin) and local +Z to (sin, cos).
+  const dirX = hx >= hz ? Math.cos(yaw) : Math.sin(yaw);
+  const dirZ = hx >= hz ? -Math.sin(yaw) : Math.cos(yaw);
+  const tipOffset = Math.max(0, longHalf - shortHalf);
+  return pathClearance.blocks(candidate.x + dirX * tipOffset, candidate.z + dirZ * tipOffset, shortHalf)
+    || pathClearance.blocks(candidate.x - dirX * tipOffset, candidate.z - dirZ * tipOffset, shortHalf);
+}
