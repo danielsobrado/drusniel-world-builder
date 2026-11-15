@@ -92,7 +92,8 @@ export function buildEntranceHall(b, { height = 8 } = {}) {
     lanternCage(b, P(wx + inDir * 0.42, 4.7, -10.5), '#ffd29e', 3.2, 14);
   }
 
-  emitRadialArch(b, 'carved', P(-6.8, height + 1.2, -20), P(6.8, height + 1.2, -20), 4.2, 1.32, 2.05, 15, {
+  // Springers seated into the impost caps (9.2–9.95 m), not flush with their undersides.
+  emitRadialArch(b, 'carved', P(-6.8, height + 1.5, -20), P(6.8, height + 1.5, -20), 4.2, 1.32, 2.05, 15, {
     pointed: 0.22, tint: 0xe8e5e0, keystoneTint: 0xf4f1eb, irregular: 0.04,
   });
 }
@@ -172,7 +173,8 @@ export function buildWallBay(b, sign, halfWidth, height, galleryY, z0, z1, varia
       });
     }
     // Upper arched spandrel course block cleanly bridging above the open chasm edge below the gallery sill.
-    coursedMasonryWall(b, P(xWall, 2.0, gapHigh + 0.1), P(xWall, 2.0, gapLow - 0.1), galleryY - 2.1, 0.68, {
+    // It spans the gap exactly: running on into the walls beside it laid its stones over theirs.
+    coursedMasonryWall(b, P(xWall, 2.0, gapHigh), P(xWall, 2.0, gapLow), galleryY - 2.1, 0.68, {
       courseHeight: WALL_COURSE_HEIGHT,
       baseTint: 0xe6e4e0,
       trimTint: 0xefede8,

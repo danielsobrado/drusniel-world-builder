@@ -109,7 +109,8 @@ export function buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmT
   b.prop('iron', stoneBox(0.24, 0.2, 2.2, P(1.58, 0.1, hearthZ + 3.1), { bevel: 0.02 }), 0x767b84);
   b.prop('iron', stoneBox(3.4, 0.2, 0.24, P(0, 0.1, hearthZ + 4.18), { bevel: 0.02 }), 0x767b84);
   b.prop('glow', box(0.38, 0.08, 1.9, P(0, 0.12, hearthZ + 3.0)), '#ff6014', 1.45);
-  b.prop('glow', box(1.95, 0.08, 0.52, P(0, 0.12, hearthZ + 3.8)), '#ff6c1a', 1.4);
+  // The cross pour stands a centimetre lower than the long one it meets.
+  b.prop('glow', box(1.95, 0.08, 0.52, P(0, 0.11, hearthZ + 3.8)), '#ff6c1a', 1.4);
   b.nav.block(P(0, 0, hearthZ + 3.1), 1.9, 1.5);
 
   // --- 2. Central Forging Dais & Master Anvil Station (silhouetted inside Hero Gateway vista) ---

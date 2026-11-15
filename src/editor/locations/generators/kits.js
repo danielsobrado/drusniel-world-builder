@@ -285,7 +285,7 @@ export function pillar(b, at, height, radius, {
     const a = (i / sides) * Math.PI * 2 + Math.PI / sides;
     const lugR = radius * 1.07;
     b.prop(trimMaterial, stoneBox(radius * 0.24, 0.2, radius * 0.24, {
-      x: at.x + Math.cos(a) * lugR, y: at.y + shaftEnd + 0.34, z: at.z + Math.sin(a) * lugR,
+      x: at.x + Math.cos(a) * lugR, y: at.y + shaftEnd + 0.35, z: at.z + Math.sin(a) * lugR,
     }, { yaw: -a, bevel: 0.03, irregular: 0.03 }), 0xedeae6);
   }
   b.prop(trimMaterial, rod(up(at, shaftEnd + 0.24), up(at, height - 0.92), radius * 1.08, radius * 1.44, sides), 0xebe9e6);
@@ -354,7 +354,8 @@ export function brazier(b, at, {
     b.prop('iron', rod({ x: bx, y: at.y + 1.3 * size, z: bz }, { x: bx, y: at.y + 1.58 * size, z: bz }, 0.032 * size, 0.028 * size, 5), 0x6c717a);
   }
   // Sculpted dark charcoal bed with glowing ember fissures underneath animated flame tongues.
-  b.prop('glow', rod(up(at, 1.22 * size), up(at, 1.36 * size), 0.58 * size, 0.42 * size, 8), '#c83e0e', 1.65);
+  // The ember bed's top sits under the rim's, not level with it.
+  b.prop('glow', rod(up(at, 1.22 * size), up(at, 1.335 * size), 0.58 * size, 0.42 * size, 8), '#c83e0e', 1.65);
   const clinkers = [
     [0.24, 0.14, 0.17, 0.35], [-0.22, 0.18, 0.15, 0.9], [0.16, -0.22, 0.16, 1.7],
     [-0.18, -0.18, 0.15, 2.2], [0.02, 0.04, 0.18, 0.6],

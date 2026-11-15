@@ -156,8 +156,9 @@ export function generate(b, params) {
         b.prop('glow', box(0.12, 1, 0.7, P(wall - sign * 0.08, galleryY + 1.8, z)), WARM, 2.4);
         b.prop('masonry', stoneBox(0.26, 0.14, 0.96, P(wall - sign * 0.12, galleryY + 1.24, z), { bevel: 0.02, irregular: 0.18 }));
         b.prop('masonry', stoneBox(0.24, 0.18, 1.04, P(wall - sign * 0.12, galleryY + 2.38, z), { bevel: 0.02, irregular: 0.18 }));
-        b.prop('iron', box(0.06, 1.0, 0.06, P(wall - sign * 0.14, galleryY + 1.8, z)), 0x2b2724);
-        b.prop('iron', box(0.06, 0.06, 0.72, P(wall - sign * 0.14, galleryY + 1.85, z)), 0x2b2724);
+        // The transom is a centimetre shallower than the upright, and the upright stops inside the glass.
+        b.prop('iron', box(0.06, 0.98, 0.06, P(wall - sign * 0.14, galleryY + 1.8, z)), 0x2b2724);
+        b.prop('iron', box(0.05, 0.06, 0.72, P(wall - sign * 0.14, galleryY + 1.85, z)), 0x2b2724);
         b.light(P(wall - sign * 0.9, galleryY + 1.9, z), WARM, 2.2, 10, { halo: 1.1 });
       }
       // Alternating gallery parapet lanterns so upper dwarf dwellings & walkways stay readable rather than black void.
