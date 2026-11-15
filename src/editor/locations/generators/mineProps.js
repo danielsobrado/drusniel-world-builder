@@ -1,4 +1,4 @@
-import { angularRock, hewnBeam, rod, roughTimber, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { angularRock, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { createTimberBeam, createTimberBoard } from '../gen/timberGeometry.js';
 import { lantern } from './kits.js';
 

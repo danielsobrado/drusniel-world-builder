@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { arch, box, coursedWall, extrudedProfile, hewnBeam, rod, roughTimber, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { arch, box, coursedWall, extrudedProfile, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { createTimberBeam, createTimberBoard } from '../gen/timberGeometry.js';
 import { buildStandaloneTimberSet } from '../gen/timberSupportBuilder.js';
 import { columnDrums } from '../gen/columnDrums.js';
@@ -66,20 +66,20 @@ export function lantern(b, at, {
   dynamic = true,
 } = {}) {
   // Base oil fount pan + stepped filler cap + tarnished brass gallery collar & inner burner cup.
-  b.prop('iron', rod(up(at, -0.22), up(at, -0.16), 0.132, 0.145, 12), 0x4d535e);
-  b.prop('iron', rod(up(at, -0.16), up(at, -0.125), 0.118, 0.106, 12), 0xb58844);
-  b.prop('iron', rod(up(at, -0.125), up(at, -0.088), 0.058, 0.038, 10), 0xcfa056);
-  b.prop('iron', rod({ x: at.x + 0.088, y: at.y - 0.165, z: at.z + 0.045 }, { x: at.x + 0.088, y: at.y - 0.14, z: at.z + 0.045 }, 0.022, 0.018, 6), 0xa87c3c);
+  b.prop('iron', rod(up(at, -0.22), up(at, -0.16), 0.132, 0.145, 12), 0x676f7d);
+  b.prop('iron', rod(up(at, -0.16), up(at, -0.125), 0.118, 0.106, 12), 0xd4a456);
+  b.prop('iron', rod(up(at, -0.125), up(at, -0.088), 0.058, 0.038, 10), 0xe0b566);
+  b.prop('iron', rod({ x: at.x + 0.088, y: at.y - 0.165, z: at.z + 0.045 }, { x: at.x + 0.088, y: at.y - 0.14, z: at.z + 0.045 }, 0.022, 0.018, 6), 0xc7984d);
 
   // Upper retaining collar, stepped storm hood, vented chimney flue with radial louvers, and top bail.
-  b.prop('iron', rod(up(at, 0.112), up(at, 0.14), 0.1, 0.122, 12), 0x9c753c);
-  b.prop('iron', rod(up(at, 0.14), up(at, 0.198), 0.16, 0.084, 12), 0x4c525d);
-  b.prop('iron', rod(up(at, 0.198), up(at, 0.244), 0.07, 0.044, 10), 0x585f6b);
-  b.prop('iron', rod(up(at, 0.244), up(at, 0.27), 0.032, 0.022, 8), 0x5e6572);
+  b.prop('iron', rod(up(at, 0.112), up(at, 0.14), 0.1, 0.122, 12), 0xc2934b);
+  b.prop('iron', rod(up(at, 0.14), up(at, 0.198), 0.16, 0.084, 12), 0x676f7d);
+  b.prop('iron', rod(up(at, 0.198), up(at, 0.244), 0.07, 0.044, 10), 0x747d8c);
+  b.prop('iron', rod(up(at, 0.244), up(at, 0.27), 0.032, 0.022, 8), 0x7d8696);
   for (const [lx, lz] of [[-0.068, 0], [0.068, 0], [0, -0.068], [0, 0.068]]) {
-    b.prop('iron', stoneBox(0.018, 0.046, 0.018, { x: at.x + lx, y: at.y + 0.214, z: at.z + lz }, { bevel: 0.004 }), 0x676f7d);
+    b.prop('iron', stoneBox(0.018, 0.046, 0.018, { x: at.x + lx, y: at.y + 0.214, z: at.z + lz }, { bevel: 0.004 }), 0x858e9e);
   }
-  if (hung > 0) b.prop('iron', rod(up(at, 0.26), up(at, 0.26 + hung), 0.016, 0.016, 6), 0x5a616e);
+  if (hung > 0) b.prop('iron', rod(up(at, 0.26), up(at, 0.26 + hung), 0.016, 0.016, 6), 0x767f8e);
 
   // Protective corner guard bars + triple wire retaining cage with corner lugs.
   const corners = [[-0.098, -0.098], [0.098, -0.098], [0.098, 0.098], [-0.098, 0.098]];
@@ -90,13 +90,13 @@ export function lantern(b, at, {
       { x: at.x + dx, y: at.y - 0.165, z: at.z + dz },
       { x: at.x + dx, y: at.y + 0.145, z: at.z + dz },
       0.013, 0.013, 6,
-    ), 0x464c57);
+    ), 0x6b7380);
     for (const wireY of [-0.105, -0.005, 0.095]) {
       b.prop('iron', rod(
         { x: at.x + dx, y: at.y + wireY, z: at.z + dz },
         { x: at.x + nx, y: at.y + wireY, z: at.z + nz },
         0.0085, 0.0085, 4,
-      ), 0x555c68);
+      ), 0x7a8392);
     }
   }
 
@@ -131,22 +131,30 @@ export function timberSet(b, at, yaw, width, height, tint = 0x7d6044, options = 
   return buildStandaloneTimberSet(b, at, yaw, width, height, { tint, ...options });
 }
 
-/** Cart rails with irregular hand-hewn sleepers from `a` to `c`. */
+/** Cart rails with flanged steel rails, iron tie-plates, and grain-aligned timber sleepers. */
 export function rails(b, a, c, gauge = 0.9) {
   const f = frame(a, c);
   for (const offset of [-gauge / 2, gauge / 2]) {
-    b.prop('iron', hewnBeam(up(side(a, f, offset), 0.13), up(side(c, f, offset), 0.13), 0.075, 0.1, { bevel: 0.018, irregular: 0.06 }), 0x747984);
+    b.prop('iron', hewnBeam(up(side(a, f, offset), 0.095), up(side(c, f, offset), 0.095), 0.105, 0.03, { bevel: 0.008, irregular: 0.03 }), 0x707783);
+    b.prop('iron', hewnBeam(up(side(a, f, offset), 0.145), up(side(c, f, offset), 0.145), 0.068, 0.075, { bevel: 0.016, irregular: 0.04 }), 0x8a919e);
   }
+  const sleeperTones = [0x7e6143, 0x73573b, 0x886a4b];
+  let idx = 0;
   for (let d = 0.4; d < f.length; d += 0.85) {
     const jitterD = d + b.range(-0.07, 0.07);
     const p = lerp(a, c, Math.max(0, Math.min(1, jitterD / f.length)));
     const halfSpan = gauge * b.range(0.74, 0.88);
     const skew = b.range(-0.05, 0.05);
-    b.prop('timber', roughTimber(
-      up(side(p, f, -halfSpan), 0.04),
-      { x: side(p, f, halfSpan).x + f.ux * skew, y: p.y + 0.04, z: side(p, f, halfSpan).z + f.uz * skew },
-      0.2, 0.1, { taper: 0.06, bow: 0.018, irregular: 0.42 },
-    ), 0x5d4733);
+    const sA = up(side(p, f, -halfSpan), 0.04);
+    const sB = { x: side(p, f, halfSpan).x + f.ux * skew, y: p.y + 0.04, z: side(p, f, halfSpan).z + f.uz * skew };
+    b.prop('timber', createTimberBeam(sA, sB, 0.18, 0.09, {
+      sideHint: { x: 0, y: 1, z: 0 }, bevelRatio: 0.16, irregular: 0.24, bow: 0.006, dampStart: 0.55, dampEnd: 0.55, wear: 0.55, seed: Math.round((sA.x * 37 + sA.z * 53 + idx * 17) * 100),
+    }), sleeperTones[idx % sleeperTones.length]);
+    for (const offset of [-gauge / 2, gauge / 2]) {
+      const rp = side(p, f, offset);
+      b.prop('iron', stoneBox(0.14, 0.024, 0.16, up(rp, 0.088), { yaw: f.yaw, bevel: 0.005, irregular: 0.02 }), 0x6b727e);
+    }
+    idx += 1;
   }
 }
 

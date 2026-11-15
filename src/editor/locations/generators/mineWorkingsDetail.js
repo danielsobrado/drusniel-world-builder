@@ -37,6 +37,16 @@ export { buildOreCart };
 const P = (x, y, z) => ({ x, y, z });
 const UP_DIR = P(0, 1, 0);
 
+/** Shared layout anchors so geology footings and built props stay in sync. */
+export const MINE_WORKINGS_SPOTS = {
+  headframeOffsets: [[-2.7, -2.7], [2.7, -2.7], [-2.7, 2.7], [2.7, 2.7]],
+  windlassOffset: [-3.6, 1.0],
+  sortingBench: P(-6, -0.1, -44.5),
+  minerCamp: P(-5.8, -1.0, -54.2),
+  toolStation: P(4.7, -1.0, -43.2),
+  stopeCribOffset: [-1.8, -2.6],
+};
+
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const lerpP = (a, c, t) => P(a.x + (c.x - a.x) * t, a.y + (c.y - a.y) * t, a.z + (c.z - a.z) * t);
 
@@ -288,14 +298,14 @@ export function buildSortingStation(b, shaftAt, hub, lightingSections = resolveM
   lantern(b, P(-1.32, switchArmY - 0.36, -45.5), { tint: hubCfg.tint, intensity: 4.2, range: 14.5, hung: 0.1, section: 'hub' });
 
   // Sorting bench with planked top, braced legs, ore specimens & assay pan.
-  buildSortingBench(b, P(-6, -0.1, -44.5), -1.0, 0.3);
+  buildSortingBench(b, MINE_WORKINGS_SPOTS.sortingBench, -1.0, 0.3);
   // Seated directly atop the plank tabletop (top y = -0.022; lantern base at at.y - 0.22).
   lantern(b, P(-5.14, 0.20, -44.77), { tint: '#ffc686', intensity: 4.6, range: 15.0, halo: 0.9, importance: 1.3, section: 'hub' });
   buildWheelbarrow(b, P(-3.6, -1.0, -43.1), { yaw: 0.55, loaded: true });
 
   // Miner's break camp (firepit, tripod kettle, log benches, bedroll, ration table) & track/tool station.
-  buildMinerCamp(b, P(-5.8, -1.0, -54.2), -1.0, { lightSection: 'hub' });
-  buildToolAndTrackStation(b, P(4.7, -1.0, -43.2), -0.45);
+  buildMinerCamp(b, MINE_WORKINGS_SPOTS.minerCamp, -1.0, { lightSection: 'hub' });
+  buildToolAndTrackStation(b, MINE_WORKINGS_SPOTS.toolStation, -0.45);
 
   // Stacked timber pit-props & stores with timber chocks and iron binding strap.
   for (const cz of [2.9, 4.9]) {
@@ -359,7 +369,8 @@ export function buildStopeWorkings(b, stope, westShape = null, timberConfig = {}
     b.nav.block(P(x, floorY, z), 0.32, 3);
   }
   // Interlocking timber ore crib, blasting crates, powder keg, ore sacks & wheelbarrow beside active pyrite seam face.
-  const crib = P(stope.x - 1.8, stope.y, stope.z - 2.6);
+  const [cribDx, cribDz] = MINE_WORKINGS_SPOTS.stopeCribOffset;
+  const crib = P(stope.x + cribDx, stope.y, stope.z + cribDz);
   buildOreCrib(b, crib, 0.25);
   buildMiningTool(b, P(crib.x + 1.15, stope.y, crib.z + 0.3), P(crib.x + 0.75, stope.y + 1.15, crib.z + 0.15), { head: 'pick', yaw: 0.3 });
   buildShovel(b, P(crib.x - 1.15, stope.y, crib.z + 0.2), P(crib.x - 0.85, stope.y + 1.12, crib.z - 0.05), { yaw: -0.25 });

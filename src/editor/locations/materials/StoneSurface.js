@@ -188,11 +188,15 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
   }
 
   if (profile.water) {
-    // Subterranean still pool: organic multi-scale surface ripples over dark mineral depths.
+    // Subterranean still pool: multi-scale mineral ripples, deep teal-slate body, and shoreline contact rim.
     const r1 = mx_noise_float(vec3(point.x.mul(1.8), point.z.mul(1.8), point.x.add(point.z).mul(0.35)));
-    const r2 = mx_noise_float(vec3(point.x.mul(4.6), point.z.mul(4.6), point.x.sub(point.z).mul(0.6)));
-    normal = bumpNormal(geometryNormal, r1.mul(0.016).add(r2.mul(0.008)), float(0.8));
-    albedo = color(profile.tint).mul(mix(float(0.6), float(1.1), r1.mul(0.5).add(0.5)));
+    const r2 = mx_noise_float(vec3(point.x.mul(4.8), point.z.mul(4.8), point.x.sub(point.z).mul(0.6)));
+    const r3 = mx_noise_float(vec3(point.x.mul(11.5), point.z.mul(11.5), 2.3));
+    const shore = smoothstep(0.75, 0.25, clamp(bakedShade.x, 0, 1));
+    normal = bumpNormal(geometryNormal, r1.mul(0.016).add(r2.mul(0.008)).add(r3.mul(0.003)), float(0.85));
+    albedo = color(profile.tint).mul(mix(float(0.75), float(1.35), r1.mul(0.5).add(0.5)));
+    albedo = mix(albedo, color('#42565a'), shore.mul(0.32));
+    roughness = mix(roughness, float(0.36), shore.mul(0.45));
   }
 
   if (profile.metalness > 0.2) {
@@ -202,6 +206,16 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     normal = bumpNormal(normal, hammer.mul(0.007).add(brush.mul(0.003)), float(0.55));
     albedo = albedo.mul(mix(float(0.86), float(1.12), hammer));
     roughness = clamp(roughness.mul(mix(float(0.78), float(1.22), brush.mul(0.55).add(hammer.mul(0.45)))), 0.16, 0.92);
+    if (profile.forgedPatina) {
+      const rustNoise = mx_noise_float(point.mul(2.8).add(vec3(3.1, 7.4, 1.9))).mul(0.5).add(0.5);
+      const contactCrevice = clamp(float(1).sub(bakedShade.x), 0, 1);
+      const rustMask = smoothstep(0.46, 0.84, rustNoise).mul(mix(float(0.28), float(0.95), contactCrevice));
+      const edgeWear = smoothstep(0.62, 0.92, hammer.mul(0.6).add(brush.mul(0.4)));
+      albedo = mix(albedo, color('#825436'), rustMask.mul(0.65));
+      albedo = mix(albedo, albedo.mul(1.22), edgeWear.mul(0.35));
+      metalness = metalness.mul(float(1).sub(rustMask.mul(0.68)));
+      roughness = mix(roughness, float(0.84), rustMask.mul(0.7));
+    }
   }
 
   if (mask) {
@@ -245,9 +259,10 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
 
     const sideAlbedo = texture(maps.color, woodUv).rgb.mul(color(profile.tint));
     const sideDetail = texture(maps.color, woodUv.mul(2.35).add(vec2(0.31, 0.73))).rgb;
-    const sideRough = clamp(texture(maps.rough, woodUv).g.mul(profile.roughness ?? 0.88), 0.76, 0.98);
+    const fiber = mx_noise_float(vec3(woodUv.x.mul(24.0), woodUv.y.mul(3.6), 2.1)).mul(0.5).add(0.5);
+    const sideRough = clamp(texture(maps.rough, woodUv).g.mul(profile.roughness ?? 0.88), 0.72, 0.98);
     const sideNorm = texture(maps.normal, woodUv).xy.mul(2).sub(1);
-    const sideHeight = sideAlbedo.g.mul(0.55).add(sideDetail.g.mul(0.25)).add(sideNorm.x.mul(0.22)).mul(0.024);
+    const sideHeight = sideAlbedo.g.mul(0.5).add(sideDetail.g.mul(0.24)).add(sideNorm.x.mul(0.22)).add(fiber.mul(0.14)).mul(0.026);
 
     // Saw-cut end-grain: concentric growth rings + radial checking from cross-section UV centered at (0.5, 0.5).
     const ringCoord = woodUv.sub(0.5);
@@ -276,6 +291,15 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     roughness = mix(roughness, woodRough, hasWoodUv);
   }
   if (profile.vertexTint) albedo = albedo.mul(attribute('tint', 'vec3'));
+
+  // Grounding & contact dust patina (opt-in per profile, e.g. mine props).
+  if (profile.contactDust) {
+    const contactAO = clamp(float(1).sub(bakedShade.x), 0, 1);
+    const dustPatch = mx_noise_float(point.mul(2.4).add(vec3(1.7, 5.3, 8.1))).mul(0.5).add(0.5);
+    const dustMask = pow(contactAO, 1.35).mul(mix(float(0.35), float(0.85), dustPatch));
+    albedo = mix(albedo, color('#6e6254'), dustMask.mul(0.48));
+    roughness = mix(roughness, float(0.95), dustMask.mul(0.65));
+  }
   // After the tint, so a bronze tint does not turn its verdigris yellow.
   if (profile.patina) {
     const corroded = patinate({ point, albedo, roughness, metalness }, profile.patina);

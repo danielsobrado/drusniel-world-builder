@@ -11,6 +11,7 @@ import {
 import { buildOreSack, buildShovel } from './mineCampAndDressing.js';
 import { buildMiningTool } from './mineProps.js';
 import {
+  MINE_WORKINGS_SPOTS,
   buildAditPortal,
   buildCollapsedHeading,
   buildFloodedLevel,
@@ -128,7 +129,14 @@ export function generate(b, params) {
   b.grid.roughen({ amp: 0.08, scale: 1.7, seed: b.seed + 9, octaves: 2, floorAmp: 0 });
 
   const waterY = flooded.y + 0.45;
-  const footings = [];
+  const footings = [
+    ...MINE_WORKINGS_SPOTS.headframeOffsets.map(([dx, dz]) => P(shaftAt.x + dx, hub.y, shaftAt.z + dz)),
+    P(shaftAt.x + MINE_WORKINGS_SPOTS.windlassOffset[0], hub.y, shaftAt.z + MINE_WORKINGS_SPOTS.windlassOffset[1]),
+    P(MINE_WORKINGS_SPOTS.sortingBench.x, hub.y, MINE_WORKINGS_SPOTS.sortingBench.z),
+    P(MINE_WORKINGS_SPOTS.minerCamp.x, hub.y, MINE_WORKINGS_SPOTS.minerCamp.z),
+    P(MINE_WORKINGS_SPOTS.toolStation.x, hub.y, MINE_WORKINGS_SPOTS.toolStation.z),
+    P(stope.x + MINE_WORKINGS_SPOTS.stopeCribOffset[0], stope.y, stope.z + MINE_WORKINGS_SPOTS.stopeCribOffset[1]),
+  ];
   const railSegments = [
     [-0.9, 0, 5, -0.9, -1, -40],
     [-0.9, -1, -40, -2.5, -1, -52],
@@ -216,8 +224,10 @@ export function generate(b, params) {
   buildShovel(b, P(1.22, -0.35, -16.1), P(1.36, 0.68, -15.95), { yaw: -0.3 });
   buildMiningTool(b, P(1.25, -0.52, -21.2), P(1.38, 0.56, -21.05), { head: 'pick', yaw: 0.2 });
   crate(b, P(1.16, -0.56, -22.4), 0.62, 0.18);
+  b.nav.block(P(1.16, -0.56, -22.4), 0.45, 1.0);
   buildOreSack(b, P(1.18, -0.57, -23.15), { scale: 0.92, yaw: 0.6 });
   barrel(b, P(1.18, -0.82, -33.2), 0.3, 0.78);
+  b.nav.block(P(1.18, -0.82, -33.2), 0.42, 1.0);
   buildOreSack(b, P(1.14, -0.84, -34.0), { scale: 0.88, yaw: -0.4, tint: 0xa8926e });
   rails(b, P(-0.9, 0, 5), P(-0.9, -1, -40));
   rails(b, P(-0.9, -1, -40), P(-2.5, -1, -52));

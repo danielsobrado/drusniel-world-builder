@@ -72,14 +72,7 @@ function buildChamferedPrism(width, height, depth, {
 
   // Build an 8-corner chamfered hexahedron by shrinking each face inward by `b`
   // into 3 vertices per corner (24 vertices total), then emitting 6 faces + 12 edge bevels + 8 corner bevels.
-  // For each corner c in 0..7, its 3 split vertices sit along its 3 incident axes.
-  const inset = (p, sx, sy, sz) => [
-    p[0] - sx * b, p[1], p[2], // X-inset
-    p[0], p[1] - sy * b, p[2], // Y-inset
-    p[0], p[1], p[2] - sz * b, // Z-inset
-  ];
-  // Actually simpler & cleaner: each corner has 3 vertices:
-  // vX (shifted toward center in Y & Z by b), vY (shifted in X & Z by b), vZ (shifted in X & Y by b)
+  // Each corner has 3 vertices: vX (shifted in Y & Z by b), vY (shifted in X & Z by b), vZ (shifted in X & Y by b).
   const signs = [
     [-1, -1, -1], [1, -1, -1], [1, -1, 1], [-1, -1, 1],
     [-1, 1, -1], [1, 1, -1], [1, 1, 1], [-1, 1, 1],

@@ -108,20 +108,20 @@ instancedLocations:
       cavityShade: 0.56
       strata: { frequency: 0.95, warp: 2.1, dip: 0.16, dark: '#aaa195', light: '#e4dcd0', relief: 0.62 }
       # Restrained mineral seams anchored to crevices and geological bedding.
-      vein: { color: '#8c6943', scale: 3.6, sharpness: 16.0, roughness: 0.48, f0: 0.12, glow: 0, gain: 1.22, strength: 0.34 }
+      vein: { color: '#9c7548', scale: 3.6, sharpness: 15.0, roughness: 0.44, f0: 0.16, glow: 0, gain: 1.48, strength: 0.48 }
       geology:
-        baseGain: 2.95
+        baseGain: 3.05
         macroScale: 0.046
-        macroContrast: 0.30
-        warmTint: '#e4d6c2'
-        coolTint: '#c2cddb'
-        darkTint: '#9f998e'
-        lightTint: '#e6dfd4'
-        altRockBlend: 0.54
+        macroContrast: 0.34
+        warmTint: '#e6d8c3'
+        coolTint: '#c0ccdb'
+        darkTint: '#9a9488'
+        lightTint: '#eae3d8'
+        altRockBlend: 0.58
         altLuminanceScale: 0.80
-        microCavityStrength: 1.50
-        microShelfStrength: 0.48
-        fractureStain: 0.34
+        microCavityStrength: 1.80
+        microShelfStrength: 0.56
+        fractureStain: 0.42
         fractureColor: '#696259'
         mineralTint: '#8a6d4e'
         paleMineralTint: '#c7c3b8'
@@ -161,12 +161,14 @@ instancedLocations:
       normalStrength: 1.0
       roughness: 0.94
       cavityShade: 0.56
+      contactDust: true
     ore_rubble:
       surface: rubble
       scale: 0.72
       tint: '#cfb28e'
       roughness: 0.62
       f0: 0.24
+      contactDust: true
       vein: { color: '#c48d44', scale: 5.2, sharpness: 10.5, roughness: 0.34, f0: 0.34, glow: 0 }
     still_water:
       surface: iron
@@ -176,13 +178,29 @@ instancedLocations:
       roughness: 0.24
       f0: 0.032
       water: true
+    mine_water:
+      surface: iron
+      scale: 0.42
+      tint: '#10262e'
+      normalStrength: 0.18
+      roughness: 0.16
+      f0: 0.048
+      water: true
     timber:
+      surface: timber
+      scale: 0.55
+      tint: '#dfd4c6'
+      normalStrength: 0.92
+      roughness: 0.94
+      woodGrain: true
+    mine_timber:
       surface: timber
       scale: 0.55
       tint: '#ebe0d2'
       normalStrength: 0.95
       roughness: 0.92
       woodGrain: true
+      contactDust: true
     sod_roof:
       surface: timber
       scale: 0.5
@@ -191,11 +209,21 @@ instancedLocations:
     iron:
       surface: iron
       scale: 0.9
-      tint: '#b2b8c4'
+      tint: '#9aa0ab'
       normalStrength: 1.05
-      roughness: 0.48
-      metalness: 0.72
-      f0: 0.46
+      roughness: 0.52
+      metalness: 0.7
+      f0: 0.44
+    mine_iron:
+      surface: iron
+      scale: 0.9
+      tint: '#c4cad6'
+      normalStrength: 1.05
+      roughness: 0.46
+      metalness: 0.42
+      f0: 0.52
+      forgedPatina: true
+      contactDust: true
     rubble_masonry:
       surface: rubble
       scale: 0.42
@@ -693,12 +721,12 @@ instancedLocations:
       voxel: 0.4
       materials:
         terrain: { kind: stone, profile: mine_rock }
-        timber: { kind: stone, profile: timber, masked: false }
-        iron: { kind: stone, profile: iron, masked: false }
+        timber: { kind: stone, profile: mine_timber, masked: false }
+        iron: { kind: stone, profile: mine_iron, masked: false }
         ore: { kind: stone, profile: ore_rubble, masked: false }
         rock_debris: { kind: stone, profile: mine_debris, masked: false }
         cloth: { kind: stone, profile: trail_cloth, masked: false }
-        water: { kind: stone, profile: still_water, masked: false }
+        water: { kind: stone, profile: mine_water, masked: false }
         glow: { kind: glow }
       params:
         drift: { width: 3.6, height: 3.2, setSpacing: 3.6 }

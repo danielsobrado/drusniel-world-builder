@@ -1,4 +1,4 @@
-import { angularRock, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
+import { angularRock, hewnBeam, panel, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { createTimberBeam, createTimberBoard } from '../gen/timberGeometry.js';
 import { barrel, crate, lantern } from './kits.js';
 import { buildMiningTool } from './mineProps.js';
@@ -14,6 +14,7 @@ export function buildOreSack(b, at, { scale = 1, yaw = 0, tint = 0x9b8665 } = {}
   }), tint);
   b.prop('timber', rod(P(at.x, at.y + 0.38 * s, at.z), P(at.x, at.y + 0.43 * s, at.z), 0.1 * s, 0.11 * s, 8), 0xb89f78);
   b.prop('cloth', rod(P(at.x, at.y + 0.42 * s, at.z), P(at.x, at.y + 0.54 * s, at.z), 0.08 * s, 0.14 * s, 8), tint);
+  b.nav.block(at, 0.28 * s, 0.7 * s);
 }
 
 /** Planked wooden mine wheelbarrow with iron wheel, handles, legs, and optional ore load. */
@@ -182,6 +183,34 @@ export function buildMinerCamp(b, center, floorY, { lightSection = 'hub' } = {})
   buildOreSack(b, P(cx - 1.85, brY, cz + 0.95), { scale: 1.05, yaw: 0.4 });
   buildOreSack(b, P(cx - 1.42, brY, cz + 1.18), { scale: 0.9, yaw: 1.1, tint: 0xa8926e });
 
+  // Timber-poled canvas lean-to tarp sheltering the west side of the camp.
+  const tFrontA = P(cx - 1.9, brY + 2.15, cz - 1.55);
+  const tFrontB = P(cx - 1.9, brY + 2.15, cz + 1.45);
+  const tBackA = P(cx - 3.25, brY + 1.25, cz - 1.55);
+  const tBackB = P(cx - 3.25, brY + 1.25, cz + 1.45);
+  for (const [topP, footZ] of [[tFrontA, cz - 1.55], [tFrontB, cz + 1.45]]) {
+    b.prop('timber', createTimberBeam(P(topP.x, brY, footZ), topP, 0.11, 0.11, {
+      sideHint: P(1, 0, 0), bevelRatio: 0.16, dampStart: 0.5, wear: 0.5,
+    }), 0x94734e);
+    b.nav.block(P(topP.x, brY, footZ), 0.25, 2.2);
+  }
+  for (const [topP, footZ] of [[tBackA, cz - 1.55], [tBackB, cz + 1.45]]) {
+    b.prop('timber', createTimberBeam(P(topP.x, brY, footZ), topP, 0.1, 0.1, {
+      sideHint: P(1, 0, 0), bevelRatio: 0.16, dampStart: 0.5, wear: 0.5,
+    }), 0x8c6b47);
+    b.nav.block(P(topP.x, brY, footZ), 0.25, 1.8);
+  }
+  for (const bz of [cz - 1.0, cz - 0.05, cz + 0.9]) {
+    b.nav.block(P(cx - 2.95, brY, bz), 0.65, 1.6);
+  }
+  b.prop('timber', createTimberBeam(tFrontA, tFrontB, 0.09, 0.09, { sideHint: UP_DIR, bevelRatio: 0.15 }), 0x9c7b55);
+  b.prop('timber', createTimberBeam(tBackA, tBackB, 0.09, 0.09, { sideHint: UP_DIR, bevelRatio: 0.15 }), 0x8e6e4a);
+  b.prop('cloth', panel(
+    P(cx - 1.85, brY + 2.2, cz - 0.05),
+    P(cx - 3.3, brY + 1.28, cz - 0.05),
+    P(0, 0, 1), 3.05, 0.045,
+  ), 0x9c8866);
+
   // Camp ration crate & plank table with tin mugs and a warm camp lantern.
   const tx = cx + 1.35, tz = cz - 0.55;
   const ty = b.probe(tx, floorY + 1.0, tz, -1, 2.5) ?? floorY;
@@ -217,6 +246,9 @@ export function buildFloodedPierDressing(b, waterY) {
     b.prop('timber', rod(P(0.92, pierY + 0.12 + i * 0.06, -82.85), P(0.92, pierY + 0.17 + i * 0.06, -82.85), 0.155, 0.155, 10), 0xb89f78);
   }
   crate(b, P(0.76, pierY + 0.04, -80.85), 0.56, 0.25);
+  b.nav.block(P(px, pierY, pz), 0.32, 1.4);
+  b.nav.block(P(0.92, pierY, -82.85), 0.26, 0.8);
+  b.nav.block(P(0.76, pierY, -80.85), 0.42, 0.9);
 
   // Rocky outcrops emerging from the flooded pool flanks so the water horizon feels natural.
   for (const [rx, ry, rz, sx, sy, sz, yaw] of [
