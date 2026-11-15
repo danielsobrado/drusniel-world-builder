@@ -10,9 +10,13 @@ const range = (field, label, min, max, step) =>
 const select = (field, label, values) =>
   `<label>${label}<select data-shape-field="${field}">${values.map(([value, text]) => `<option value="${value}">${text}</option>`).join('')}</select></label>`;
 
+// One optgroup per catalog (fortifications, crafts, each faction city), in catalog order.
+const presetOptions = () => Object.entries(Object.groupBy(SHAPE_PRESETS, (p) => p.group)).map(([group, presets]) =>
+  `<optgroup label="${group}">${presets.map((p) => `<option value="${p.id}">${p.label}</option>`).join('')}</optgroup>`).join('');
+
 export function workshopShapeMarkup() {
   return `<section class="workshop-shape-editor" data-role="shape-editor" hidden>
-    <label>Starting design<select data-shape-action="preset">${SHAPE_PRESETS.map((p) => `<option value="${p.id}">${p.label}</option>`).join('')}</select></label>
+    <label>Starting design<select data-shape-action="preset">${presetOptions()}</select></label>
     <label>Selected shape<select data-shape-action="select"></select></label>
     <div class="workshop-shape-actions">
       <button type="button" data-shape-action="add-volume">+ Building</button>

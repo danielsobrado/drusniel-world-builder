@@ -99,7 +99,8 @@ export function resolvePathGates(plans, index, byId) {
     const p = plan.primitive,
       automaticOpenings = [];
     if (p.automaticGates) {
-      const candidates = index.queryBounds(plan.bounds, { excludeIds: [plan.id] }).sort();
+      // The spatial index may return a frozen result; sort a copy.
+      const candidates = [...index.queryBounds(plan.bounds, { excludeIds: [plan.id] })].sort();
       for (const id of candidates) {
         const path = byId.get(id);
         if (path?.primitive.kind !== 'traversal') continue;

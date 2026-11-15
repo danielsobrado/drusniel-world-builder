@@ -1,0 +1,284 @@
+# Mountain Kingdom of Stonehold — dwarf and gnome fortress cities (docs/asset-bible/regions/stonehold.md).
+# Carved granite and basalt, stout squared heads, battered footings, low heavy hip roofs that
+# shed rockfall, flat crenellated towers, mine timber for sheds. Gnome quarters keep round
+# footprints under tall cones. Squat proportions (scale/storey) read as dwarven at a glance.
+group: Stonehold · dwarf and gnome holds
+palette:
+  recipe: { style: granite, finish: masonry, topStyle: slate, weathering: 0.45 }
+  masonry: { color: "#8e8c88", roughness: 0.93, normal: 1.3, label: Mined granite }
+  plaster: { color: "#d8b886", label: Gnome ochre wash }
+  planks: { color: "#6e5038", label: Mine timber }
+  roof: { color: "#4a4d56", roughness: 0.85, label: Basalt slab }
+  trim: { color: "#6b6a6d", roughness: 0.75, label: Basalt dressing }
+  timber: { color: "#4a3324", label: Smoked beam }
+  metal: { color: "#a8763c", metalness: 0.85, roughness: 0.38, label: Aged bronze }
+  glass: { color: "#6b4a2b", label: Forge-lit glass }
+gnomePalette: &gnomePalette { recipe: { topStyle: terracotta, finish: ochre }, roof: { color: "#a4503a", label: Gnome red tiles }, plaster: { color: "#e6cc9e", label: Gnome ochre wash } }
+style:
+  surface: masonry
+  stonework: ashlar
+  facade: plain
+  scale: 0.94
+  storey: 2.55
+  thickness: 0.5
+  taper: 0.97
+  corner: 0.2
+  roof: { family: hip, pitch: 0.36, overhang: 0.35, sweep: 0.18, sag: 0.03 }
+  door: square
+  window: square
+  shutters: false
+  windowBoxes: false
+  ivy: 0.08
+  age: 0.38
+  base: { style: batter, height: 0.9, out: 0.22 }
+  tower: { surface: masonry, stonework: ashlar, footprint: rounded, roof: flat, crown: { style: corbelled, projection: 0.4, height: 0.8, corbelSpacing: 0.65, arcade: none, merlons: stepped } }
+  wall: { surface: masonry, stonework: ashlar, crown: { style: parapet, height: 0.75, merlons: stepped, merlonWidth: 1, merlonGap: 0.5 } }
+gnome: &gnome { surface: plaster, facade: plain, footprint: oval, roof: { family: cone, pitch: 0.75, sweep: 0.6, sag: 0 }, door: arched, windowBoxes: true, shutters: true, ivy: 0.35, scale: 0.8 }
+kit:
+  - { id: stonehold-house-tower, label: "House · Clan tower-house", blueprint: house-tower }
+  - { id: stonehold-house-hillside, label: "House · Rock-terrace worker home", blueprint: house-hillside }
+  - { id: stonehold-house-double, label: "House · Paired miners' houses", blueprint: house-double }
+  - { id: stonehold-house-courtyard, label: "House · Hold-clan courtyard", blueprint: house-courtyard }
+  - { id: stonehold-house-longhouse, label: "House · Smoke-hood longhouse", blueprint: house-longhouse }
+  - { id: stonehold-house-gnome, label: "House · Gnome round-house", blueprint: house-round, style: *gnome, palette: *gnomePalette }
+  - { id: stonehold-farm-farmstead, label: "Farm · Highland steading", blueprint: farm-farmstead }
+  - { id: stonehold-farm-barnyard, label: "Farm · Cave-grain barn and granary", blueprint: farm-barnyard }
+  - { id: stonehold-farm-croft, label: "Farm · Goatherd's croft", blueprint: farm-croft }
+  - { id: stonehold-inn-roadside, label: "Inn · Hammer-and-tankard hall", blueprint: inn-roadside }
+  - { id: stonehold-inn-tavern, label: "Inn · Deep-ale tavern", blueprint: inn-tavern }
+  - { id: stonehold-inn-lodge, label: "Inn · Caravan lodge", blueprint: inn-lodge }
+  - { id: stonehold-shop-general, label: "Shop · Ironmonger", blueprint: shop-general }
+  - { id: stonehold-shop-baker, label: "Shop · Stone-oven bakery", blueprint: shop-baker }
+  - { id: stonehold-shop-corner, label: "Shop · Gem-cutter's corner", blueprint: shop-corner }
+  - { id: stonehold-shop-warehouse, label: "Shop · Ore exchange", blueprint: shop-warehouse }
+  - { id: stonehold-shop-tinker, label: "Shop · Gnome tinker tower", blueprint: shop-curio-tower, style: *gnome, palette: *gnomePalette }
+  - { id: stonehold-tower-watch, label: "Tower · Rune-ward watch tower", blueprint: tower-watch }
+  - { id: stonehold-tower-keep, label: "Tower · Thane's keep", blueprint: tower-keep }
+  - { id: stonehold-tower-gate, label: "Tower · Hold gate tower", blueprint: tower-gate }
+  - { id: stonehold-wall-town, label: "Wall · Granite rampart", blueprint: wall-town }
+  - { id: stonehold-wall-retaining, label: "Wall · Terrace bulwark", blueprint: wall-retaining }
+  - { id: stonehold-wall-garden, label: "Wall · Forge-yard walls", blueprint: wall-garden }
+  - { id: stonehold-stair-switchback, label: "Stairs · Cliff switchback", blueprint: stair-switchback }
+  - { id: stonehold-stair-grand, label: "Stairs · Hall stair", blueprint: stair-grand }
+  - { id: stonehold-stair-bridge, label: "Stairs · Basalt viaduct", blueprint: stair-bridge }
+styles:
+  stone: &stone { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.6, shutters: false, windowBoxes: false, ivyDensity: 0.05, age: 0.4, base: { style: batter, height: 1.2, out: 0.3 } }
+  timber: &timber { kind: curved-volume, surface: planks, thickness: 0.18, chimney: false, windowBoxes: false, shutters: false, age: 0.55 }
+presets:
+  - id: stonehold-mountain-gate
+    label: "Landmark · Fortress mountain gate"
+    primitives:
+      - <<: *stone
+        id: gate-block
+        label: Gate block
+        footprint: { family: rounded, width: 12, depth: 7, cornerRadius: 0.2 }
+        height: 9
+        levels: 2
+        chimney: false
+        roof: { family: flat }
+        crown: { style: corbelled, projection: 0.5, height: 0.9, corbelSpacing: 0.7, machicolation: open, merlons: stepped }
+        openings:
+          - { id: arch, role: arch, profile: square, side: front, along: [-2.1, 2.1], bottom: 0, width: 3, height: 4.6 }
+          - { id: arch-in, role: arch, profile: square, side: back, along: [-2.1, 2.1], bottom: 0, width: 3, height: 4.6 }
+          - { id: gallery, role: slit, profile: square, side: front, along: [-4.4, -1, 1, 4.4], bottom: 6, width: 0.16, height: 1.5 }
+        features:
+          - { id: pier, kind: buttress, side: front, along: [-5.4, 0, 5.4], width: 1.1, depth: 1.2, height: 7 }
+      - <<: *stone
+        id: flank-left
+        label: Left flank tower
+        position: [-7.6, -0.4]
+        footprint: { family: rounded, width: 4, depth: 6, cornerRadius: 0.2 }
+        height: 12
+        levels: 3
+        chimney: false
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.8, merlons: stepped, merlonWidth: 0.9, merlonGap: 0.5 }
+        openings:
+          - { id: loop, role: slit, profile: square, side: front, along: 0, bottom: 5, width: 0.16, height: 1.4 }
+      - <<: *stone
+        id: flank-right
+        label: Right flank tower
+        position: [7.6, -0.4]
+        footprint: { family: rounded, width: 4, depth: 6, cornerRadius: 0.2 }
+        height: 12
+        levels: 3
+        chimney: false
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.8, merlons: stepped, merlonWidth: 0.9, merlonGap: 0.5 }
+      - id: approach
+        label: Gate approach
+        kind: traversal
+        position: [0, 6.4]
+        rotation: -90
+        length: 5.6
+        width: 8
+        rise: 0.6
+        mode: stairs
+        railing: false
+
+  - id: stonehold-forgeheart
+    label: "Landmark · Forgeheart workshop with vent shafts"
+    primitives:
+      - <<: *stone
+        id: forge-hall
+        label: Forge hall
+        footprint: { family: rounded, width: 13, depth: 7.4, cornerRadius: 0.25 }
+        height: 5
+        chimney: true
+        roof: { family: hip, rise: 2.2, overhang: 0.35, sweep: 0.15, sag: 0.02 }
+        openings:
+          - { id: hearth-bay, role: arch, profile: square, side: front, along: [-4, 0, 4], bottom: 0, width: 2.6, height: 3.2 }
+          - { id: ore-door, role: door, profile: square, side: right, along: 0, bottom: 0, width: 1.6, height: 2.4 }
+          - { id: vent, role: slit, profile: square, side: back, along: [-4.5, -1.5, 1.5, 4.5], bottom: 3, width: 0.5, height: 1 }
+        features:
+          - { id: canopy, kind: porch, side: front, along: 0, width: 7.5, depth: 2, height: 3.6 }
+      - <<: *stone
+        id: shaft-west
+        label: West vent shaft
+        position: [-4.2, -2.6]
+        footprint: { family: rounded, width: 2.2, depth: 2.2, cornerRadius: 0.2 }
+        height: 11
+        thickness: 0.4
+        chimney: false
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.5, merlons: none }
+      - <<: *stone
+        id: shaft-east
+        label: East vent shaft
+        position: [4.2, -2.6]
+        footprint: { family: rounded, width: 2.2, depth: 2.2, cornerRadius: 0.2 }
+        height: 9.5
+        thickness: 0.4
+        chimney: false
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.5, merlons: none }
+
+  - id: stonehold-smelter
+    label: "Landmark · Tiered smelter tower and charging deck"
+    primitives:
+      - <<: *stone
+        id: smelter
+        label: Smelter stack
+        footprint: { family: oval, width: 6, depth: 6 }
+        height: 12
+        taper: 0.72
+        chimney: false
+        roof: { family: flat }
+        stages: [{ at: 4.2, out: -0.25 }, { at: 8.4, out: -0.2 }]
+        crown: { style: parapet, height: 0.6, merlons: none }
+        openings:
+          - { id: tap-arch, role: arch, profile: square, at: 0.25, bottom: 0, width: 1.6, height: 1.8 }
+          - { id: charge-door, role: door, profile: square, at: 0.5, bottom: 4.4, width: 1.2, height: 1.9 }
+      - id: charging-deck
+        label: Charging deck
+        kind: traversal
+        position: [-5.4, 0]
+        length: 4.6
+        width: 2.4
+        elevation: 4.4
+        mode: walkway
+        support: piers
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: ore-ramp
+        label: Ore ramp
+        kind: traversal
+        position: [-5.4, 5.4]
+        rotation: -90
+        length: 8.6
+        width: 2
+        rise: 4.4
+        mode: stairs
+        style: { floor: timber, supports: timber, railing: timber }
+
+  - id: stonehold-headframe
+    label: "Landmark · Ore lift headframe over a shaft house"
+    primitives:
+      - <<: *timber
+        id: headframe
+        label: Headframe
+        footprint: { family: rounded, width: 4, depth: 4, cornerRadius: 0.1 }
+        height: 13
+        taper: 0.75
+        roof: { family: gable, rise: 1.4, overhang: 0.4, sweep: 0.1, sag: 0.05 }
+        openings:
+          - { id: frame-front, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 2.6, height: 11 }
+          - { id: frame-back, role: arch, profile: square, side: back, along: 0, bottom: 0, width: 2.6, height: 11 }
+          - { id: frame-side, role: arch, profile: square, side: right, along: 0, bottom: 2, width: 2.6, height: 9 }
+          - { id: frame-left, role: arch, profile: square, side: left, along: 0, bottom: 2, width: 2.6, height: 9 }
+      - <<: *stone
+        id: winding-house
+        label: Winding house
+        position: [5.4, 0]
+        footprint: { family: rounded, width: 5.6, depth: 5, cornerRadius: 0.2 }
+        height: 3.6
+        chimney: true
+        roof: { family: hip, rise: 1.6, overhang: 0.35, sweep: 0.15, sag: 0.02 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1.2, height: 2.2 }
+          - { id: cable-port, role: window, profile: square, side: left, along: 0, bottom: 2, width: 0.9, height: 0.8 }
+      - id: loading-deck
+        label: Wagon loading deck
+        kind: traversal
+        position: [0, 4.4]
+        length: 7
+        width: 2.6
+        elevation: 1.2
+        mode: walkway
+        support: piers
+        style: { floor: timber, supports: timber, railing: timber }
+
+  - id: stonehold-council-vault
+    label: "Landmark · Vault council hall"
+    primitives:
+      - <<: *stone
+        id: council
+        label: Council vault
+        footprint: { family: rounded, width: 15, depth: 8, cornerRadius: 0.3 }
+        height: 6.6
+        chimney: false
+        roof: { family: hip, rise: 2.4, overhang: 0.3, sweep: 0.1, sag: 0 }
+        crown: { style: corbelled, projection: 0.35, height: 0.8, corbelSpacing: 0.6, arcade: none }
+        openings:
+          - { id: carved-doors, role: door, profile: square, side: front, along: 0, bottom: 0, width: 2.2, height: 4 }
+          - { id: clerestory, role: window, profile: square, side: front, along: [-5.4, -2.7, 2.7, 5.4], bottom: 3.4, width: 0.7, height: 1.6 }
+          - { id: back-clerestory, role: window, profile: square, side: back, along: [-4, 0, 4], bottom: 3.4, width: 0.7, height: 1.6 }
+        features:
+          - { id: pier, kind: buttress, side: front, along: [-6.6, -4, -1.6, 1.6, 4, 6.6], width: 0.9, depth: 1.1, height: 5.4 }
+          - { id: back-pier, kind: buttress, side: back, along: [-6.6, -2, 2, 6.6], width: 0.9, depth: 1.1, height: 5.4 }
+      - id: council-steps
+        label: Council steps
+        kind: traversal
+        position: [0, 6.2]
+        rotation: -90
+        length: 3.6
+        width: 5
+        rise: 0.9
+        mode: stairs
+        railing: false
+
+  - id: stonehold-vent-stack
+    label: "Landmark · Mine ventilation stack and sealed shaft"
+    primitives:
+      - <<: *stone
+        id: stack
+        label: Vent stack
+        footprint: { family: rounded, width: 3.4, depth: 3.4, cornerRadius: 0.3 }
+        height: 14
+        taper: 0.8
+        chimney: false
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.6, merlons: none }
+        openings:
+          - { id: shutter, role: window, profile: square, side: front, along: 0, bottom: 9, width: 0.8, height: 1 }
+      - <<: *stone
+        id: seal-house
+        label: Sealed shaft house
+        position: [0, 4.6]
+        footprint: { family: rounded, width: 6, depth: 3.6, cornerRadius: 0.15 }
+        height: 2.8
+        chimney: false
+        roof: { family: hip, rise: 1, overhang: 0.3, sweep: 0.1, sag: 0 }
+        openings:
+          - { id: inspection, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1.1, height: 2 }
+        features:
+          - { id: brace, kind: buttress, side: front, along: [-2.2, 2.2], width: 0.8, depth: 1, height: 2.4 }

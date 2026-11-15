@@ -17,7 +17,9 @@ export function buildShapePaving(paving, mesh, recipe, primitive) {
     const u0 = (col + shift) / across + 0.012 / width, u1 = (col + shift + 1) / across - 0.012 / width;
     const v0 = row / rows + 0.012 / depth, v1 = (row + 1) / rows - 0.012 / depth;
     const stone = [point(u0, v0), point(u1, v0), point(u1, v1), point(u0, v1)];
-    const clipped = polygonClipping.intersection([stone], polygons);
+    // polygon-clipping can fail to close a ring on near-degenerate overlaps; one cosmetic stone is skipped then.
+    let clipped;
+    try { clipped = polygonClipping.intersection([stone], polygons); } catch { continue; }
     const random = shapeRandom(recipe.seed, primitive.id, 'entrance-stone', key);
     const tone = 0.75 + random * 0.13, y = base + 0.035 + primitive.age * random * 0.007;
     for (const polygon of clipped) addShapePolygonSurface(mesh, polygon, y, [tone, tone, tone * 0.95], primitive);

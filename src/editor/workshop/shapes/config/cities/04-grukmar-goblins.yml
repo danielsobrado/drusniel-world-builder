@@ -1,0 +1,177 @@
+# Grukmar Tribes — marsh goblin bog towns (docs/asset-bible/regions/grukmar.md). Small plank
+# huts lifted on log piles (`stilts`) with decks and ladders, steep shaggy reed cones, mossy
+# weathered boards, boardwalks between everything. Small proportions (scale 0.82).
+group: Grukmar · goblin bog towns
+palette:
+  recipe: { style: sandstone, finish: ochre, topStyle: terracotta, weathering: 0.8 }
+  planks: { color: "#7e7558", roughness: 0.96, label: Bog-grey boards }
+  plaster: { color: "#7b6a4e", label: Mud daub }
+  masonry: { color: "#7f8270", label: Mossy cobbles }
+  roof: { color: "#b49a58", roughness: 0.99, label: Reed thatch }
+  trim: { color: "#8a7656", label: Pile timber }
+  timber: { color: "#5e5036", label: Driftwood }
+  metal: { color: "#56705a", metalness: 0.5, roughness: 0.6, label: Verdigris scrap }
+  glass: { color: "#3c5a3a", label: Swamp-lantern glass }
+style:
+  surface: planks
+  facade: plain
+  shed: planks
+  footprint: rounded
+  scale: 0.82
+  storey: 2.45
+  thickness: 0.18
+  taper: 1.04
+  corner: 0.7
+  stilts: 1.8
+  roof: { family: cone, pitch: 0.95, overhang: 0.7, sweep: 0.65, sag: 0.3 }
+  door: arched
+  window: square
+  shutters: true
+  windowBoxes: false
+  chimney: false
+  ivy: 0.3
+  age: 0.75
+  base: null
+  tower: { surface: planks, stonework: fieldstone, footprint: oval, roof: cone }
+  wall: { surface: planks, stonework: fieldstone, crown: null }
+  path: { floor: timber, railing: timber }
+kit:
+  - { id: grukmar-goblin-house-round, label: "House · Stilt hut", blueprint: house-round }
+  - { id: grukmar-goblin-house-cottage, label: "House · Stilt cottage", blueprint: house-cottage }
+  - { id: grukmar-goblin-house-townhouse, label: "House · Leaning stilt tower-hut", blueprint: house-townhouse }
+  - { id: grukmar-goblin-house-double, label: "House · Twin huts on one pile", blueprint: house-double }
+  - { id: grukmar-goblin-house-longhouse, label: "House · Merchant clan hut", blueprint: house-longhouse, style: { roof: { family: gable, pitch: 0.9 } } }
+  - { id: grukmar-goblin-house-tower, label: "House · Lookout home", blueprint: house-tower, style: { stilts: 0 } }
+  - { id: grukmar-goblin-farm-croft, label: "Farm · Frog-pond croft", blueprint: farm-croft }
+  - { id: grukmar-goblin-farm-barnyard, label: "Farm · Eel shed and stilt granary", blueprint: farm-barnyard }
+  - { id: grukmar-goblin-farm-farmstead, label: "Farm · Mushroom farmstead", blueprint: farm-farmstead }
+  - { id: grukmar-goblin-inn-roadside, label: "Inn · Bog-lantern inn", blueprint: inn-roadside }
+  - { id: grukmar-goblin-inn-tavern, label: "Inn · Leaky skiff tavern", blueprint: inn-tavern, style: { stilts: 1.4 } }
+  - { id: grukmar-goblin-inn-lodge, label: "Inn · Pier lodge", blueprint: inn-lodge }
+  - { id: grukmar-goblin-shop-stalls, label: "Shop · Barter booths", blueprint: shop-stalls }
+  - { id: grukmar-goblin-shop-general, label: "Shop · Junk emporium", blueprint: shop-general }
+  - { id: grukmar-goblin-shop-tinker, label: "Shop · Tinker tower", blueprint: shop-curio-tower }
+  - { id: grukmar-goblin-shop-warehouse, label: "Shop · Salvage store", blueprint: shop-warehouse }
+  - { id: grukmar-goblin-shop-corner, label: "Shop · Trinket shop", blueprint: shop-corner }
+  - { id: grukmar-goblin-tower-signal, label: "Tower · Signal drum platform", blueprint: tower-signal }
+  - { id: grukmar-goblin-tower-watch, label: "Tower · Reed watch tower", blueprint: tower-watch }
+  - { id: grukmar-goblin-tower-gate, label: "Tower · Stockade gate tower", blueprint: tower-gate }
+  - { id: grukmar-goblin-wall-palisade, label: "Wall · Stake stockade", blueprint: wall-palisade }
+  - { id: grukmar-goblin-wall-garden, label: "Wall · Reed fences", blueprint: wall-garden }
+  - { id: grukmar-goblin-wall-retaining, label: "Wall · Dyke bank", blueprint: wall-retaining, style: { wall: { surface: masonry } } }
+  - { id: grukmar-goblin-stair-bridge, label: "Stairs · Bog footbridge", blueprint: stair-bridge }
+  - { id: grukmar-goblin-stair-switchback, label: "Stairs · Ladder climb", blueprint: stair-switchback }
+styles:
+  hut: &hut { kind: curved-volume, surface: planks, thickness: 0.16, shutters: true, windowBoxes: false, chimney: false, ivyDensity: 0.3, age: 0.75, taper: 1.04 }
+  deck: &deck { kind: traversal, mode: walkway, support: piers, railing: true, style: { floor: timber, supports: timber, railing: timber } }
+presets:
+  - id: grukmar-goblin-barter-pier
+    label: "Landmark · Covered barter market on a pier"
+    primitives:
+      - <<: *deck
+        id: pier
+        label: Market pier
+        length: 16
+        width: 6.4
+        elevation: 1.4
+        railing: false
+      - <<: *hut
+        id: stall-a
+        label: Weigh-house
+        position: [-5, -1]
+        elevation: 1.4
+        footprint: { family: oval, width: 4, depth: 3.6 }
+        height: 2.3
+        roof: { family: cone, rise: 2.6, overhang: 0.6, sweep: 0.6 }
+        openings:
+          - { id: counter, role: arch, profile: square, at: 0.25, bottom: 0, width: 2.4, height: 2 }
+      - <<: *hut
+        id: stall-b
+        label: Barter stall
+        position: [0, -1.3]
+        elevation: 1.4
+        footprint: { family: rounded, width: 4.4, depth: 3, cornerRadius: 0.6 }
+        height: 2.2
+        roof: { family: hip, rise: 1.6, overhang: 0.6, sweep: 0.6, sag: 0.3 }
+        openings:
+          - { id: counter, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 3, height: 2 }
+      - <<: *hut
+        id: stall-c
+        label: Barter stall
+        position: [5, -1]
+        elevation: 1.4
+        footprint: { family: oval, width: 3.6, depth: 3.4 }
+        height: 2.2
+        roof: { family: cone, rise: 2.4, overhang: 0.6, sweep: 0.6 }
+        openings:
+          - { id: counter, role: arch, profile: square, at: 0.25, bottom: 0, width: 2.2, height: 2 }
+      - <<: *deck
+        id: skiff-landing
+        label: Skiff landing
+        position: [0, 6.4]
+        rotation: -90
+        length: 6.4
+        width: 2.2
+        elevation: 0
+        rise: 1.4
+        mode: ramp
+
+  - id: grukmar-goblin-boardwalk-spine
+    label: "Landmark · Boardwalk junction with stilt huts"
+    primitives:
+      - <<: *deck
+        id: walk-east
+        label: Boardwalk
+        position: [5, 0]
+        length: 12
+        width: 2
+        elevation: 1.2
+        bend: 1.5
+      - <<: *deck
+        id: walk-west
+        label: Boardwalk
+        position: [-6.5, 1.2]
+        rotation: 20
+        length: 10
+        width: 2
+        elevation: 1.2
+        bend: -1.2
+      - <<: *deck
+        id: walk-north
+        label: Boardwalk
+        position: [-0.4, -5.2]
+        rotation: -80
+        length: 9
+        width: 1.8
+        elevation: 1.2
+      - <<: *hut
+        id: hut-a
+        label: Stilt hut
+        position: [3.6, -3.6]
+        elevation: 1.2
+        footprint: { family: oval, width: 4.2, depth: 4 }
+        height: 2.4
+        roof: { family: cone, rise: 3.2, overhang: 0.7, sweep: 0.65 }
+        openings:
+          - { id: door, role: door, profile: arched, at: 0.25, bottom: 0, width: 0.9, height: 1.8 }
+          - { id: window, role: window, profile: square, at: 0.05, bottom: 0.9, width: 0.6, height: 0.6 }
+      - <<: *hut
+        id: hut-b
+        label: Stilt hut
+        position: [-4.6, -3.4]
+        elevation: 1.2
+        footprint: { family: oval, width: 3.6, depth: 3.6 }
+        height: 2.2
+        roof: { family: cone, rise: 2.8, overhang: 0.65, sweep: 0.65 }
+        openings:
+          - { id: door, role: door, profile: arched, at: 0.25, bottom: 0, width: 0.9, height: 1.8 }
+      - id: ladder
+        label: Ladder steps
+        kind: traversal
+        position: [10.6, 3.2]
+        rotation: -90
+        length: 2.6
+        width: 1.1
+        rise: 1.2
+        mode: stairs
+        style: { floor: timber, supports: timber, railing: timber }

@@ -1,5 +1,5 @@
 import { WorkshopShapeSession } from './WorkshopShapeSession.js';
-import { createShapePreset, createShapePrimitive } from './ShapePresets.js';
+import { SHAPE_PRESETS, createShapePreset, createShapePrimitive } from './ShapePresets.js';
 import { workshopShapeMarkup, shapeFieldValue, shapeFieldChanges } from './WorkshopShapeFields.js';
 import './workshopShapes.css';
 import { syncShapeGateControls, applyShapeGateAction } from './ShapeGateControls.js';
@@ -9,9 +9,10 @@ import { syncShapeDetailControls, applyShapeDetailAction, applyShapeDetailInput 
 import { WorkshopShapeInspector } from './WorkshopShapeInspector.js';
 
 export class WorkshopShapeEditor {
-  constructor({ form, onChange, onStatus }) {
+  constructor({ form, onChange, onStatus, onMaterials }) {
     this.form = form;
     this.onChange = onChange;
+    this.onMaterials = onMaterials;
     this.onStatus = onStatus;
     this.session = new WorkshopShapeSession();
     this.resolvedPlans = new Map();
@@ -68,6 +69,9 @@ export class WorkshopShapeEditor {
       if (action === 'preset') {
         this.inspector.show('building');
         this.session.replace(createShapePreset(event.target.value));
+        // A realm design brings its palette; other designs keep the current materials.
+        const preset = SHAPE_PRESETS.find((p) => p.id === event.target.value);
+        if (preset.materials) this.onMaterials?.(preset.materials(this.session.primitives), preset.group);
         this.select(this.session.primitives[0].id);
         this.changed({ frame: true });
       }

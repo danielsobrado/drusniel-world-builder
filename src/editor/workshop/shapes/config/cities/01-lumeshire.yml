@@ -1,0 +1,736 @@
+# Lumeshirean Divine Empire — the paladin heartland (docs/asset-bible/regions/lumeshire.md).
+# Pale dressed stone and lime plaster, dark oak frames, tight slate gables, institutional
+# monuments above the houses. Same soft diorama language as the craft workshops: rounded
+# corners, swept and slightly sagging roofs, stone plinths, shutters, window boxes and ivy.
+#
+# Openings and features may give `side` (front/back/left/right) and `along` (metres to the
+# viewer's right, or a list for a row) instead of `at`; the generator resolves them.
+# Regenerate with `npm run generate:workshop-castle`.
+group: Lumeshire · paladin empire
+styles:
+  house: &house { kind: curved-volume, surface: plaster, facade: timber, thickness: 0.3, shutters: true, windowBoxes: true, chimney: true, ivyDensity: 0.45, age: 0.28, base: { style: plinth, height: 0.68, out: 0.1 } }
+  hall: &hall { kind: curved-volume, surface: masonry, stonework: ashlar, thickness: 0.5, shutters: false, windowBoxes: false, chimney: false, ivyDensity: 0.35, age: 0.3, base: { style: plinth, height: 0.68, out: 0.14 } }
+  shed: &shed { kind: curved-volume, surface: planks, thickness: 0.16, chimney: false, windowBoxes: false, age: 0.45 }
+# Materials: recipe bases (stone palette, plaster finish, roof character) plus per-surface
+# tints and surface response, see cities/ShapeCityPalette.js. Tints multiply, so keep them light.
+palette:
+  recipe: { style: limestone, finish: limewash, topStyle: slate, weathering: 0.3 }
+  plaster: { color: "#ede4cf", roughness: 0.96, label: Limewash }
+  masonry: { color: "#cdbf9e", roughness: 0.88, label: Pale limestone }
+  planks: { color: "#8c6648", label: Oak boards }
+  roof: { color: "#3e5569", roughness: 0.78, label: Blue slate }
+  trim: { color: "#c6b796", label: Dressed limestone }
+  timber: { color: "#583a27", label: Dark oak }
+  metal: { color: "#2e3033", label: Forged iron }
+  glass: { color: "#3d5866", label: Leaded glass }
+style:
+  surface: plaster
+  facade: timber
+  roof: { family: gable, pitch: 0.62, overhang: 0.5, sweep: 0.45, sag: 0.1 }
+  door: arched
+  tower: { surface: masonry, stonework: ashlar, footprint: oval, roof: cone }
+  wall: { surface: masonry, stonework: ashlar, crown: { style: parapet, height: 0.7, merlonWidth: 0.85, merlonGap: 0.5, merlonHeight: 0.75 } }
+kit:
+  - { id: lumeshire-house-cottage, label: "House · Limewashed cottage", blueprint: house-cottage }
+  - { id: lumeshire-house-townhouse, label: "House · Jettied townhouse", blueprint: house-townhouse }
+  - { id: lumeshire-house-double, label: "House · Paired burgher houses", blueprint: house-double }
+  - { id: lumeshire-house-courtyard, label: "House · Courtyard house", blueprint: house-courtyard }
+  - { id: lumeshire-house-tower, label: "House · Knight's tower house", blueprint: house-tower, style: { surface: masonry, stonework: ashlar } }
+  - { id: lumeshire-house-hillside, label: "House · Terrace house over a cellar", blueprint: house-hillside }
+  - { id: lumeshire-farm-farmstead, label: "Farm · Imperial farmstead", blueprint: farm-farmstead }
+  - { id: lumeshire-farm-barnyard, label: "Farm · Tithe barn and granary", blueprint: farm-barnyard }
+  - { id: lumeshire-farm-croft, label: "Farm · Smallholder's croft", blueprint: farm-croft }
+  - { id: lumeshire-inn-roadside, label: "Inn · Pilgrims' roadside inn", blueprint: inn-roadside }
+  - { id: lumeshire-inn-tavern, label: "Inn · Corner tavern", blueprint: inn-tavern }
+  - { id: lumeshire-inn-lodge, label: "Inn · Galleried coaching lodge", blueprint: inn-lodge }
+  - { id: lumeshire-shop-general, label: "Shop · Chandler's store", blueprint: shop-general }
+  - { id: lumeshire-shop-baker, label: "Shop · Bakery with bread oven", blueprint: shop-baker }
+  - { id: lumeshire-shop-corner, label: "Shop · Draper's corner shop", blueprint: shop-corner }
+  - { id: lumeshire-shop-stalls, label: "Shop · Market stalls", blueprint: shop-stalls }
+  - { id: lumeshire-shop-warehouse, label: "Shop · Merchant warehouse", blueprint: shop-warehouse }
+  - { id: lumeshire-tower-watch, label: "Tower · Round watchtower", blueprint: tower-watch }
+  - { id: lumeshire-tower-keep, label: "Tower · Paladin keep", blueprint: tower-keep, style: { tower: { stonework: ashlar } } }
+  - { id: lumeshire-tower-signal, label: "Tower · Beacon tower", blueprint: tower-signal }
+  - { id: lumeshire-wall-town, label: "Wall · Crenellated town wall", blueprint: wall-town }
+  - { id: lumeshire-wall-garden, label: "Wall · Cloister garden walls", blueprint: wall-garden }
+  - { id: lumeshire-wall-retaining, label: "Wall · Terrace retaining wall", blueprint: wall-retaining }
+  - { id: lumeshire-stair-switchback, label: "Stairs · Switchback steps", blueprint: stair-switchback }
+  - { id: lumeshire-stair-bridge, label: "Stairs · Arched footbridge", blueprint: stair-bridge }
+  - { id: lumeshire-stair-grand, label: "Stairs · Processional stair", blueprint: stair-grand }
+presets:
+  - id: lumeshire-paladin-chapterhouse
+    label: "Landmark · Paladin chapterhouse with oath tower and drill yard"
+    primitives:
+      - <<: *hall
+        id: chapter-hall
+        label: Chapter hall
+        footprint: { family: rounded, width: 11, depth: 6.4, cornerRadius: 0.3 }
+        height: 5.4
+        roof: { family: gable, rise: 3.9, overhang: 0.4, sweep: 0.3, sag: 0.06 }
+        openings:
+          - { id: great-door, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 1.6, height: 3 }
+          - { id: nave-window, role: window, profile: pointed, side: front, along: [-3.6, -2, 2, 3.6], bottom: 1.6, width: 0.7, height: 2.4 }
+          - { id: back-window, role: window, profile: pointed, side: back, along: [-3, 0, 3], bottom: 1.6, width: 0.7, height: 2.4 }
+          - { id: gable-rose, role: window, profile: arched, side: right, along: 0, bottom: 3.4, width: 1.2, height: 1.4 }
+        features:
+          - { id: front-buttress, kind: buttress, side: front, along: [-4.6, -2.8, 2.8, 4.6], width: 0.6, depth: 0.85, height: 4.2 }
+          - { id: back-buttress, kind: buttress, side: back, along: [-4.6, -1.5, 1.5, 4.6], width: 0.6, depth: 0.85, height: 4.2 }
+          - { id: door-porch, kind: porch, side: front, along: 0, width: 2.8, depth: 1.6, height: 3.3 }
+      - <<: *hall
+        id: oath-tower
+        label: Oath tower
+        position: [-7.4, -0.6]
+        footprint: { family: rounded, width: 4.2, depth: 4.2, cornerRadius: 0.2 }
+        height: 11
+        levels: 3
+        roof: { family: spire, rise: 6.2, overhang: 0.35, sweep: 0.35 }
+        crown: { style: corbelled, projection: 0.35, height: 0.8, corbelSpacing: 0.7, arcade: pointed }
+        openings:
+          - { id: door, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 1.1, height: 2.3 }
+          - { id: bell-front, role: window, profile: pointed, side: front, along: 0, bottom: 7.4, width: 0.9, height: 1.8 }
+          - { id: bell-left, role: window, profile: pointed, side: left, along: 0, bottom: 7.4, width: 0.9, height: 1.8 }
+          - { id: slit, role: slit, profile: square, side: left, along: 0, bottom: 3.6, width: 0.14, height: 1.3 }
+      - id: drill-yard
+        label: Drill yard wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [1.2, 8.4]
+        length: 14
+        bend: -1.6
+        height: 1.4
+        thickness: 0.5
+        openings:
+          - { id: yard-gate, role: arch, profile: pointed, at: 0.5, bottom: 0, width: 2.4, height: 1.4 }
+      - id: hall-steps
+        label: Hall steps
+        kind: traversal
+        position: [0, 5.1]
+        rotation: -90
+        length: 2
+        width: 2.6
+        rise: 0.5
+        mode: stairs
+
+  - id: lumeshire-cathedral
+    label: "Landmark · Cathedral of the Divine Light with twin spires"
+    primitives:
+      - <<: *hall
+        id: nave
+        label: Nave
+        footprint: { family: rounded, width: 7, depth: 16, cornerRadius: 0.3 }
+        height: 8
+        roof: { family: gable, axis: depth, rise: 4.6, overhang: 0.35, sweep: 0.25, sag: 0.04 }
+        openings:
+          - { id: west-door, role: door, profile: pointed, side: front, along: 0, bottom: 0, width: 2, height: 3.8 }
+          - { id: rose, role: window, profile: arched, side: front, along: 0, bottom: 5, width: 1.8, height: 2 }
+          - { id: aisle-right, role: window, profile: pointed, side: right, along: [-5.4, -2.7, 0, 2.7, 5.4], bottom: 2.6, width: 0.9, height: 3.8 }
+          - { id: aisle-left, role: window, profile: pointed, side: left, along: [-5.4, -2.7, 0, 2.7, 5.4], bottom: 2.6, width: 0.9, height: 3.8 }
+        features:
+          - { id: right-buttress, kind: buttress, side: right, along: [-6.75, -4.05, -1.35, 1.35, 4.05], width: 0.7, depth: 1.4, height: 6.6 }
+          - { id: left-buttress, kind: buttress, side: left, along: [-6.75, -4.05, -1.35, 1.35, 4.05], width: 0.7, depth: 1.4, height: 6.6 }
+          - { id: west-porch, kind: porch, side: front, along: 0, width: 3.2, depth: 1.6, height: 4.2 }
+      - <<: *hall
+        id: spire-north
+        label: North spire tower
+        position: [-4.4, 8.6]
+        footprint: { family: rounded, width: 3.6, depth: 3.6, cornerRadius: 0.15 }
+        height: 14
+        levels: 4
+        roof: { family: spire, rise: 8, overhang: 0.3, sweep: 0.3 }
+        crown: { style: corbelled, projection: 0.3, height: 0.8, corbelSpacing: 0.6, arcade: pointed }
+        openings:
+          - { id: belfry, role: window, profile: pointed, side: front, along: 0, bottom: 9.6, width: 0.8, height: 2.4 }
+          - { id: belfry-side, role: window, profile: pointed, side: left, along: 0, bottom: 9.6, width: 0.8, height: 2.4 }
+          - { id: lancet, role: window, profile: pointed, side: front, along: 0, bottom: 4.4, width: 0.5, height: 2 }
+      - <<: *hall
+        id: spire-south
+        label: South spire tower
+        position: [4.4, 8.6]
+        footprint: { family: rounded, width: 3.6, depth: 3.6, cornerRadius: 0.15 }
+        height: 14
+        levels: 4
+        roof: { family: spire, rise: 8, overhang: 0.3, sweep: 0.3 }
+        crown: { style: corbelled, projection: 0.3, height: 0.8, corbelSpacing: 0.6, arcade: pointed }
+        openings:
+          - { id: belfry, role: window, profile: pointed, side: front, along: 0, bottom: 9.6, width: 0.8, height: 2.4 }
+          - { id: belfry-side, role: window, profile: pointed, side: right, along: 0, bottom: 9.6, width: 0.8, height: 2.4 }
+          - { id: lancet, role: window, profile: pointed, side: front, along: 0, bottom: 4.4, width: 0.5, height: 2 }
+      - <<: *hall
+        id: apse
+        label: Choir apse
+        position: [0, -9.4]
+        footprint: { family: oval, width: 6.4, depth: 5 }
+        height: 6.4
+        roof: { family: cone, rise: 3.4, overhang: 0.35, sweep: 0.3, sag: 0 }
+        openings:
+          - { id: apse-window, role: window, profile: pointed, at: [0.62, 0.75, 0.88], bottom: 2.2, width: 0.8, height: 3 }
+      - id: west-steps
+        label: West steps
+        kind: traversal
+        position: [0, 10.2]
+        rotation: -90
+        length: 2.4
+        width: 4.2
+        rise: 0.5
+        mode: stairs
+        railing: false
+
+  - id: lumeshire-parish-church
+    label: "Landmark · Parish church with square bell tower"
+    primitives:
+      - <<: *hall
+        id: nave
+        label: Nave
+        stonework: fieldstone
+        footprint: { family: rounded, width: 9.6, depth: 5.8, cornerRadius: 0.3 }
+        height: 4.6
+        roof: { family: gable, rise: 3.6, overhang: 0.4, sweep: 0.3, sag: 0.07 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: -2.6, bottom: 0, width: 1.2, height: 2.4 }
+          - { id: lancet, role: window, profile: pointed, side: front, along: [-0.4, 1.6, 3.4], bottom: 1.5, width: 0.5, height: 2 }
+          - { id: back-lancet, role: window, profile: pointed, side: back, along: [-2.6, 0, 2.6], bottom: 1.5, width: 0.5, height: 2 }
+          - { id: east-window, role: window, profile: pointed, side: right, along: 0, bottom: 1.6, width: 1, height: 2.2 }
+        features:
+          - { id: buttress, kind: buttress, side: front, along: [0.6, 2.5, 4.3], width: 0.6, depth: 0.75, height: 3.6 }
+          - { id: south-porch, kind: porch, side: front, along: -2.6, width: 2.4, depth: 1.8, height: 2.9 }
+      - <<: *hall
+        id: bell-tower
+        label: Bell tower
+        stonework: fieldstone
+        position: [-6.4, 0]
+        footprint: { family: rounded, width: 3.6, depth: 3.6, cornerRadius: 0.2 }
+        height: 9.2
+        levels: 3
+        roof: { family: spire, rise: 4.8, overhang: 0.4, sweep: 0.45 }
+        openings:
+          - { id: belfry, role: window, profile: arched, side: front, along: 0, bottom: 6.6, width: 0.8, height: 1.6, shutterPose: closed }
+          - { id: belfry-left, role: window, profile: arched, side: left, along: 0, bottom: 6.6, width: 0.8, height: 1.6 }
+          - { id: slit, role: slit, profile: square, side: front, along: 0, bottom: 3.4, width: 0.14, height: 1.1 }
+      - id: churchyard
+        label: Churchyard wall
+        kind: curved-wall
+        surface: masonry
+        position: [0.6, 6]
+        length: 13
+        bend: -1.8
+        height: 1.05
+        thickness: 0.45
+        openings:
+          - { id: lychgate, role: arch, profile: square, at: 0.32, bottom: 0, width: 1.8, height: 1.05 }
+
+  - id: lumeshire-town-registry
+    label: "Civic · Town registry with archive floor"
+    primitives:
+      - <<: *house
+        id: registry
+        label: Registry
+        surface: masonry
+        stonework: ashlar
+        facade: plain
+        windowBoxes: false
+        footprint: { family: rounded, width: 9, depth: 6, cornerRadius: 0.3 }
+        height: 6.4
+        levels: 2
+        roof: { family: gable, rise: 2.6, overhang: 0.45, sweep: 0.3, sag: 0.06 }
+        openings:
+          - { id: entrance, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.5, height: 2.7 }
+          - { id: notice-window, role: window, profile: square, side: front, along: [-2.6, 2.6], bottom: 1, width: 1.2, height: 1.3 }
+          - { id: archive, role: window, profile: square, side: front, along: [-2.6, 0, 2.6], bottom: 4.1, width: 0.8, height: 1.2, shutterPose: closed }
+          - { id: side, role: window, profile: square, side: right, along: [-1.2, 1.2], bottom: 4.1, width: 0.8, height: 1.2 }
+          - { id: back, role: window, profile: square, side: back, along: [-2, 2], bottom: 1.2, width: 0.9, height: 1.1 }
+        features:
+          - { id: steps-porch, kind: porch, side: front, along: 0, width: 3, depth: 1.5, height: 3.2 }
+          - { id: dormer, kind: dormer, side: back, along: 0, width: 1.6, depth: 1.4 }
+      - id: notice-court
+        label: Notice court wall
+        kind: curved-wall
+        surface: masonry
+        position: [0, 6.2]
+        length: 10
+        bend: -1.2
+        height: 0.95
+        thickness: 0.4
+        openings:
+          - { id: court-gap, role: arch, profile: square, at: 0.5, bottom: 0, width: 2.4, height: 0.95 }
+
+  - id: lumeshire-granary
+    label: "Farm · Raised granary on a stone undercroft"
+    primitives:
+      - <<: *hall
+        id: undercroft
+        label: Stone undercroft
+        stonework: fieldstone
+        footprint: { family: rounded, width: 8.4, depth: 5.2, cornerRadius: 0.35 }
+        height: 1.6
+        roof: { family: flat }
+        base: { style: batter, height: 0.68, out: 0.2 }
+        openings:
+          - { id: vent, role: slit, profile: square, side: front, along: [-2.6, 0, 2.6], bottom: 0.5, width: 0.5, height: 0.4 }
+      - <<: *shed
+        id: grain-loft
+        label: Grain loft
+        elevation: 1.6
+        footprint: { family: rounded, width: 8, depth: 4.8, cornerRadius: 0.25 }
+        height: 3.4
+        roof: { family: gable, rise: 2.7, overhang: 0.6, sweep: 0.5, sag: 0.14 }
+        openings:
+          - { id: delivery, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1.8, height: 2.2 }
+          - { id: louvre, role: slit, profile: square, side: front, along: [-2.6, 2.6], bottom: 1.2, width: 0.9, height: 0.5 }
+          - { id: hoist, role: door, profile: square, side: right, along: 0, bottom: 1.6, width: 1, height: 1.4 }
+        features:
+          - { id: delivery-hood, kind: porch, side: front, along: 0, width: 2.6, depth: 1.2, height: 2.6 }
+      - id: delivery-ramp
+        label: Delivery steps
+        kind: traversal
+        position: [0, 4.4]
+        rotation: -90
+        length: 3.2
+        width: 1.8
+        rise: 1.6
+        mode: stairs
+        style: { railing: timber }
+
+  - id: lumeshire-market-hall
+    label: "Shop · Fortified market hall over an open arcade"
+    primitives:
+      - <<: *house
+        id: market-hall
+        label: Market hall
+        footprint: { family: rounded, width: 13, depth: 6.4, cornerRadius: 0.3 }
+        height: 6.6
+        levels: 2
+        windowBoxes: false
+        roof: { family: hip, rise: 3, overhang: 0.6, sweep: 0.45, sag: 0.08 }
+        openings:
+          - { id: arcade-front, role: arch, profile: arched, side: front, along: [-4.8, -2.4, 0, 2.4, 4.8], bottom: 0, width: 1.9, height: 2.6 }
+          - { id: arcade-back, role: arch, profile: arched, side: back, along: [-4.8, -2.4, 0, 2.4, 4.8], bottom: 0, width: 1.9, height: 2.6 }
+          - { id: arcade-end, role: arch, profile: arched, side: right, along: [-1.4, 1.4], bottom: 0, width: 1.9, height: 2.6 }
+          - { id: cart-gate, role: arch, profile: square, side: left, along: 0, bottom: 0, width: 2.6, height: 2.8 }
+          - { id: guild-window, role: window, profile: square, side: front, along: [-4.8, -2.4, 0, 2.4, 4.8], bottom: 4.2, width: 0.9, height: 1.2 }
+          - { id: guild-back, role: window, profile: square, side: back, along: [-3.6, 0, 3.6], bottom: 4.2, width: 0.9, height: 1.2 }
+        features:
+          - { id: guild-floor, kind: jetty, depth: 0.45 }
+          - { id: clock-dormer, kind: dormer, side: front, along: 0, width: 2, depth: 1.6 }
+          - { id: stair-turret, kind: turret, roof: cone, side: left, along: 1.8, width: 1.8, height: 3.2, bottom: 3.3 }
+
+  - id: lumeshire-border-watchtower
+    label: "Tower · Border watchtower with beacon platform"
+    primitives:
+      - <<: *hall
+        id: watchtower
+        label: Watchtower
+        stonework: fieldstone
+        footprint: { family: rounded, width: 4.8, depth: 4.8, cornerRadius: 0.25 }
+        height: 10
+        levels: 3
+        roof: { family: flat }
+        base: { style: batter, height: 1.4, out: 0.3 }
+        crown: { style: parapet, height: 0.75, merlonWidth: 0.8, merlonGap: 0.5, merlonHeight: 0.7 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.1, height: 2.2 }
+          - { id: slit-low, role: slit, profile: square, side: right, along: 0, bottom: 3.6, width: 0.14, height: 1.3 }
+          - { id: slit-front, role: slit, profile: square, side: front, along: 0, bottom: 5, width: 0.14, height: 1.3 }
+          - { id: slit-left, role: slit, profile: square, side: left, along: 0, bottom: 6.6, width: 0.14, height: 1.3 }
+          - { id: watch, role: window, profile: arched, side: back, along: 0, bottom: 7.4, width: 0.7, height: 1.4, shutterPose: closed }
+        features:
+          - { id: beacon-turret, kind: turret, roof: cone, side: right, along: -1, width: 1.6, height: 2.4, bottom: 9.4 }
+      - <<: *shed
+        id: guard-lean-to
+        label: Guard lean-to
+        position: [3.9, 0.4]
+        footprint: { family: rounded, width: 2.8, depth: 3.6, cornerRadius: 0.12 }
+        height: 2.3
+        roof: { family: gable, axis: depth, rise: 1.1, overhang: 0.35, sweep: 0.2, sag: 0.14 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1, height: 1.9 }
+
+  - id: lumeshire-toll-bridge
+    label: "Stairs · Toll bridge with gate lodge and booth"
+    primitives:
+      - id: bridge
+        label: Toll bridge
+        kind: traversal
+        position: [0, 0]
+        length: 12
+        width: 3
+        elevation: 0.15
+        rise: 0
+        mode: bridge
+        support: arch
+      - <<: *hall
+        id: gate-lodge
+        label: Gate lodge
+        stonework: fieldstone
+        position: [-8.6, -0.2]
+        footprint: { family: rounded, width: 5.2, depth: 6.6, cornerRadius: 0.25 }
+        height: 5.2
+        levels: 2
+        roof: { family: hip, rise: 2.3, overhang: 0.45, sweep: 0.4, sag: 0.06 }
+        openings:
+          - { id: road-arch, role: arch, profile: arched, side: right, along: 0.2, bottom: 0, width: 2.8, height: 3.2 }
+          - { id: road-arch-out, role: arch, profile: arched, side: left, along: -0.2, bottom: 0, width: 2.8, height: 3.2 }
+          - { id: lodge-window, role: window, profile: square, side: front, along: [-1, 1], bottom: 3.3, width: 0.8, height: 1.1 }
+      - <<: *shed
+        id: booth
+        label: Receipt booth
+        position: [8.3, 2.6]
+        footprint: { family: rounded, width: 2.4, depth: 2.4, cornerRadius: 0.3 }
+        height: 2.5
+        roof: { family: hip, rise: 1.3, overhang: 0.4, sweep: 0.4, sag: 0.1 }
+        openings:
+          - { id: hatch, role: window, profile: square, side: back, along: 0, bottom: 0.9, width: 1, height: 0.8, shutterPose: open }
+          - { id: door, role: door, profile: square, side: right, along: 0, bottom: 0, width: 0.9, height: 1.9 }
+
+  - id: lumeshire-clerks-row
+    label: "House · Row of three clerks' townhouses"
+    primitives:
+      - <<: *house
+        id: row-a
+        label: Clerk's house
+        position: [-5.1, 0]
+        footprint: { family: rounded, width: 5, depth: 6, cornerRadius: 0.2 }
+        height: 5.6
+        levels: 2
+        roof: { family: gable, axis: depth, rise: 3, overhang: 0.45, sweep: 0.4, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: -1.2, bottom: 0, width: 1, height: 2.1 }
+          - { id: shop, role: window, profile: square, side: front, along: 0.9, bottom: 0.8, width: 1.5, height: 1.2, shutterPose: open }
+          - { id: upper, role: window, profile: square, side: front, along: [-1.1, 1.1], bottom: 3.6, width: 0.8, height: 1.1 }
+          - { id: rear, role: door, profile: square, side: back, along: 0, bottom: 0, width: 0.9, height: 2 }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.45 }
+      - <<: *house
+        id: row-b
+        label: Clerk's house
+        position: [0, 0.3]
+        footprint: { family: rounded, width: 5, depth: 6.6, cornerRadius: 0.2 }
+        height: 6.2
+        levels: 2
+        roof: { family: gable, axis: depth, rise: 3.3, overhang: 0.45, sweep: 0.45, sag: 0.12 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 1.2, bottom: 0, width: 1, height: 2.1 }
+          - { id: shop, role: window, profile: square, side: front, along: -0.9, bottom: 0.8, width: 1.5, height: 1.2 }
+          - { id: upper, role: window, profile: square, side: front, along: 0, bottom: 4, width: 1.2, height: 1.2, shutterPose: ajar }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.5 }
+          - { id: bay, kind: bay, side: front, along: 0, width: 1.9, depth: 0.7, bottom: 3.5, height: 1.8 }
+      - <<: *house
+        id: row-c
+        label: Clerk's house
+        position: [5, -0.2]
+        footprint: { family: rounded, width: 4.8, depth: 5.8, cornerRadius: 0.2 }
+        height: 5.4
+        levels: 2
+        facade: plain
+        roof: { family: gable, axis: depth, rise: 2.9, overhang: 0.45, sweep: 0.4, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1, height: 2.1 }
+          - { id: low, role: window, profile: square, side: front, along: 1.4, bottom: 1, width: 0.8, height: 1 }
+          - { id: upper, role: window, profile: square, side: front, along: [-1, 1], bottom: 3.5, width: 0.8, height: 1 }
+          - { id: side, role: window, profile: square, side: right, along: 0, bottom: 3.5, width: 0.8, height: 1 }
+        features:
+          - { id: door-hood, kind: porch, side: front, along: 0, width: 1.8, depth: 1, height: 2.5 }
+
+  - id: lumeshire-courtyard-tenement
+    label: "House · Courtyard tenement with timber gallery"
+    primitives:
+      - <<: *house
+        id: back-range
+        label: Back range
+        position: [0, -3.6]
+        footprint: { family: rounded, width: 11, depth: 4.4, cornerRadius: 0.25 }
+        height: 5.6
+        levels: 2
+        roof: { family: gable, rise: 2.5, overhang: 0.45, sweep: 0.4, sag: 0.12 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: [-3, 0, 3], bottom: 0, width: 0.9, height: 2 }
+          - { id: upper-door, role: door, profile: square, side: front, along: [-3, 0, 3], bottom: 2.9, width: 0.9, height: 1.9 }
+          - { id: low, role: window, profile: square, side: front, along: [-4.4, -1.5, 1.5, 4.4], bottom: 1, width: 0.7, height: 1 }
+      - <<: *house
+        id: left-wing
+        label: Left wing
+        position: [-4.1, 1.8]
+        footprint: { family: rounded, width: 2.8, depth: 6.4, cornerRadius: 0.2 }
+        height: 5.2
+        levels: 2
+        facade: plain
+        roof: { family: gable, axis: depth, rise: 1.8, overhang: 0.4, sweep: 0.3, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: square, side: right, along: 0, bottom: 0, width: 0.9, height: 2 }
+          - { id: window, role: window, profile: square, side: right, along: [-1.8, 1.8], bottom: 3.2, width: 0.7, height: 1 }
+      - <<: *house
+        id: right-wing
+        label: Right wing
+        position: [4.1, 1.8]
+        footprint: { family: rounded, width: 2.8, depth: 6.4, cornerRadius: 0.2 }
+        height: 5.2
+        levels: 2
+        facade: plain
+        roof: { family: gable, axis: depth, rise: 1.8, overhang: 0.4, sweep: 0.3, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: square, side: left, along: 0, bottom: 0, width: 0.9, height: 2 }
+          - { id: window, role: window, profile: square, side: left, along: [-1.8, 1.8], bottom: 3.2, width: 0.7, height: 1 }
+      - id: gallery
+        label: Timber gallery
+        kind: traversal
+        position: [0, -0.8]
+        length: 8.6
+        width: 1.2
+        elevation: 2.8
+        rise: 0
+        mode: walkway
+        support: piers
+        style: { supports: timber, railing: timber, floor: timber }
+      - id: gallery-stair
+        label: Gallery stair
+        kind: traversal
+        position: [0.8, 1.6]
+        rotation: -90
+        length: 3.8
+        width: 1
+        rise: 2.8
+        mode: stairs
+        style: { supports: timber, railing: timber, floor: timber }
+      - id: yard-wall
+        label: Street wall
+        kind: curved-wall
+        surface: plaster
+        position: [0, 5.2]
+        length: 10.8
+        bend: 0
+        height: 1.8
+        thickness: 0.35
+        openings:
+          - { id: yard-gate, role: arch, profile: arched, at: 0.5, bottom: 0, width: 1.8, height: 1.8 }
+
+  - id: lumeshire-garrison
+    label: "Landmark · Garrison barracks with supply lean-to"
+    primitives:
+      - <<: *house
+        id: barracks
+        label: Barracks
+        surface: masonry
+        stonework: fieldstone
+        facade: plain
+        windowBoxes: false
+        footprint: { family: rounded, width: 13, depth: 5.4, cornerRadius: 0.25 }
+        height: 3.6
+        roof: { family: gable, rise: 2.6, overhang: 0.45, sweep: 0.35, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: [-3.2, 3.2], bottom: 0, width: 1.1, height: 2.2 }
+          - { id: window, role: window, profile: square, side: front, along: [-5.2, -1.2, 1.2, 5.2], bottom: 1.2, width: 0.8, height: 1, shutterPose: closed }
+          - { id: back, role: window, profile: square, side: back, along: [-4, 0, 4], bottom: 1.2, width: 0.8, height: 1 }
+        features:
+          - { id: dormer, kind: dormer, side: front, along: [-4.2, 0, 4.2], width: 1.4, depth: 1.3 }
+      - <<: *shed
+        id: supply
+        label: Supply lean-to
+        position: [8.4, -0.4]
+        footprint: { family: rounded, width: 3.6, depth: 4.6, cornerRadius: 0.12 }
+        height: 2.6
+        roof: { family: hip, rise: 1, overhang: 0.45, sweep: 0.2, sag: 0.12 }
+        openings:
+          - { id: strap-doors, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 2.2, height: 2.2 }
+          - { id: unload, role: arch, profile: square, side: right, along: 0, bottom: 0, width: 2.8, height: 2.2 }
+      - id: drill-wall
+        label: Drill yard wall
+        kind: curved-wall
+        surface: masonry
+        position: [0, 6.2]
+        length: 15
+        bend: -1
+        height: 1.2
+        thickness: 0.45
+
+  - id: lumeshire-bake-oven
+    label: "Shop · Communal bake oven under a tiled shelter"
+    primitives:
+      - <<: *hall
+        id: oven
+        label: Domed oven
+        stonework: fieldstone
+        footprint: { family: oval, width: 3.8, depth: 3.4 }
+        height: 1.8
+        taper: 0.82
+        thickness: 0.6
+        roof: { family: bell, rise: 1.5, overhang: 0.1, sweep: 0.8 }
+        chimney: true
+        openings:
+          - { id: hearth, role: arch, profile: arched, at: 0.25, bottom: 0.3, width: 0.9, height: 0.8 }
+      - <<: *shed
+        id: shelter
+        label: Oven shelter
+        position: [0, 3.6]
+        footprint: { family: rounded, width: 5, depth: 3.4, cornerRadius: 0.2 }
+        height: 2.5
+        roof: { family: hip, rise: 1.4, overhang: 0.55, sweep: 0.5, sag: 0.12 }
+        openings:
+          - { id: open-front, role: arch, profile: square, side: front, along: 0, bottom: 0, width: 4, height: 2.2 }
+          - { id: open-side, role: arch, profile: square, side: right, along: 0, bottom: 0, width: 2.4, height: 2.2 }
+          - { id: open-left, role: arch, profile: square, side: left, along: 0, bottom: 0, width: 2.4, height: 2.2 }
+
+  - id: lumeshire-coaching-inn
+    label: "Inn · Coaching inn with stable range"
+    primitives:
+      - <<: *house
+        id: inn
+        label: Inn
+        footprint: { family: rounded, width: 10.4, depth: 6.4, cornerRadius: 0.35 }
+        height: 6
+        levels: 2
+        ivyDensity: 0.6
+        roof: { family: gable, rise: 3.6, overhang: 0.6, sweep: 0.55, sag: 0.13 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 0, bottom: 0, width: 1.3, height: 2.3 }
+          - { id: tap-window, role: window, profile: square, side: front, along: [-3.4, -1.8, 1.8, 3.4], bottom: 1, width: 1, height: 1.1 }
+          - { id: room, role: window, profile: square, side: front, along: [-3.6, -1.2, 1.2, 3.6], bottom: 3.9, width: 0.8, height: 1.1 }
+          - { id: back, role: window, profile: square, side: back, along: [-3, 0, 3], bottom: 3.9, width: 0.8, height: 1.1 }
+          - { id: gable, role: window, profile: square, side: right, along: 0, bottom: 3.9, width: 0.8, height: 1.1 }
+        features:
+          - { id: upper-floor, kind: jetty, depth: 0.45 }
+          - { id: dormer, kind: dormer, side: front, along: [-2.6, 2.6], width: 1.5, depth: 1.4 }
+          - { id: porch, kind: porch, side: front, along: 0, width: 2.4, depth: 1.6, height: 2.7 }
+      - <<: *shed
+        id: stable
+        label: Stable range
+        position: [-7.6, 2.4]
+        rotation: 90
+        footprint: { family: rounded, width: 7.6, depth: 4, cornerRadius: 0.15 }
+        height: 2.9
+        roof: { family: gable, rise: 1.9, overhang: 0.5, sweep: 0.4, sag: 0.16 }
+        openings:
+          - { id: stall, role: door, profile: square, side: back, along: [-2.4, 0, 2.4], bottom: 0, width: 1.4, height: 2.1, shutterPose: ajar }
+          - { id: hay, role: window, profile: square, side: left, along: 0, bottom: 1.6, width: 0.8, height: 0.7 }
+      - id: inn-yard
+        label: Inn yard wall
+        kind: curved-wall
+        surface: masonry
+        position: [-2.6, 7.4]
+        length: 10
+        bend: -1.4
+        height: 1.15
+        thickness: 0.45
+        openings:
+          - { id: coach-gate, role: arch, profile: arched, at: 0.25, bottom: 0, width: 2.8, height: 1.15 }
+
+  - id: lumeshire-city-gate
+    label: "Tower · City gatehouse with drum towers"
+    primitives:
+      - <<: *hall
+        id: gatehouse
+        label: Gatehouse
+        footprint: { family: rounded, width: 7, depth: 6.4, cornerRadius: 0.2 }
+        height: 8.4
+        levels: 2
+        roof: { family: hip, rise: 3, overhang: 0.4, sweep: 0.3, sag: 0.05 }
+        crown: { style: corbelled, projection: 0.4, height: 0.8, corbelSpacing: 0.7, arcade: round, machicolation: open }
+        openings:
+          - { id: gate, role: arch, profile: pointed, side: front, along: 0, bottom: 0, width: 3, height: 4.2 }
+          - { id: gate-in, role: arch, profile: pointed, side: back, along: 0, bottom: 0, width: 3, height: 4.2 }
+          - { id: guard, role: window, profile: arched, side: front, along: 0, bottom: 5.6, width: 0.8, height: 1.3 }
+      - <<: *hall
+        id: tower-left
+        label: Left drum tower
+        position: [-4.9, 1]
+        footprint: { family: oval, width: 4.6, depth: 4.6 }
+        height: 10
+        levels: 3
+        roof: { family: cone, rise: 4.4, overhang: 0.45, sweep: 0.55 }
+        base: { style: batter, height: 1.7, out: 0.35 }
+        openings:
+          - { id: loop, role: slit, profile: square, at: [0.2, 0.35, 0.5], bottom: 4, width: 0.14, height: 1.3 }
+          - { id: high, role: window, profile: arched, at: 0.3, bottom: 7, width: 0.6, height: 1.2 }
+      - <<: *hall
+        id: tower-right
+        label: Right drum tower
+        position: [4.9, 1]
+        footprint: { family: oval, width: 4.6, depth: 4.6 }
+        height: 10
+        levels: 3
+        roof: { family: cone, rise: 4.4, overhang: 0.45, sweep: 0.55 }
+        base: { style: batter, height: 1.7, out: 0.35 }
+        openings:
+          - { id: loop, role: slit, profile: square, at: [0, 0.15, 0.3], bottom: 4, width: 0.14, height: 1.3 }
+          - { id: high, role: window, profile: arched, at: 0.2, bottom: 7, width: 0.6, height: 1.2 }
+      - id: curtain-left
+        label: Curtain wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [-11.5, 0.6]
+        length: 9
+        bend: 0.4
+        height: 5.4
+        thickness: 1
+        crown: { style: parapet, height: 0.7, merlonWidth: 0.9, merlonGap: 0.55, merlonHeight: 0.75 }
+        automaticGates: false
+      - id: curtain-right
+        label: Curtain wall
+        kind: curved-wall
+        surface: masonry
+        stonework: ashlar
+        position: [11.5, 0.6]
+        length: 9
+        bend: 0.4
+        height: 5.4
+        thickness: 1
+        crown: { style: parapet, height: 0.7, merlonWidth: 0.9, merlonGap: 0.55, merlonHeight: 0.75 }
+        automaticGates: false
+
+  - id: lumeshire-merchant-manor
+    label: "House · Merchant manor with corner turret"
+    primitives:
+      - <<: *house
+        id: manor
+        label: Manor
+        footprint: { family: rounded, width: 9.4, depth: 6.2, cornerRadius: 0.5 }
+        height: 6.2
+        levels: 2
+        ivyDensity: 0.7
+        roof: { family: hip, rise: 3.4, overhang: 0.55, sweep: 0.55, sag: 0.1 }
+        openings:
+          - { id: door, role: door, profile: arched, side: front, along: 0.8, bottom: 0, width: 1.2, height: 2.3 }
+          - { id: low, role: window, profile: square, side: front, along: [-2.8, 3.2], bottom: 1, width: 1, height: 1.2 }
+          - { id: balcony-door, role: door, profile: square, side: front, along: 0.8, bottom: 3.3, width: 1.1, height: 2 }
+          - { id: upper, role: window, profile: square, side: front, along: [-2.8, 3.2], bottom: 3.9, width: 0.9, height: 1.1 }
+          - { id: side, role: window, profile: square, side: right, along: [-1.3, 1.3], bottom: 3.9, width: 0.8, height: 1.1 }
+        features:
+          - { id: balcony, kind: balcony, side: front, along: 0.8, width: 2.8, depth: 0.9, bottom: 3.3, height: 1 }
+          - { id: bay, kind: bay, side: front, along: -2.8, width: 2.2, depth: 0.9, bottom: 0, height: 2.6 }
+          - { id: corner-turret, kind: turret, roof: cone, side: left, along: 2.3, width: 2.1, height: 4, bottom: 3.2 }
+          - { id: dormer, kind: dormer, side: back, along: 0, width: 1.6, depth: 1.4 }
+      - id: garden-wall
+        label: Garden wall
+        kind: curved-wall
+        surface: masonry
+        position: [0, 6.8]
+        length: 12
+        bend: -2.4
+        height: 1.3
+        thickness: 0.4
+        openings:
+          - { id: garden-gate, role: arch, profile: arched, at: 0.55, bottom: 0, width: 1.6, height: 1.3 }
+
+  - id: lumeshire-wayside-shrine
+    label: "Landmark · Wayside shrine of the Divine Light"
+    primitives:
+      - <<: *hall
+        id: shrine
+        label: Shrine
+        footprint: { family: oval, width: 3.4, depth: 3.4 }
+        height: 3
+        roof: { family: bell, rise: 2.2, overhang: 0.4, sweep: 0.7 }
+        openings:
+          - { id: arch, role: arch, profile: pointed, at: 0.25, bottom: 0, width: 1.3, height: 2.3 }
+          - { id: arch-side, role: arch, profile: pointed, at: [0, 0.5], bottom: 0, width: 1, height: 2.1 }
+      - id: low-wall
+        label: Shrine wall
+        kind: curved-wall
+        surface: masonry
+        position: [0, 1.6]
+        length: 7
+        bend: -2.6
+        height: 0.8
+        thickness: 0.4
+        automaticGates: false

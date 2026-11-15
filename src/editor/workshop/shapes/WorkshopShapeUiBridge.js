@@ -16,6 +16,14 @@ export class WorkshopShapeUiBridge {
         ui.status.textContent = message;
         ui.status.classList.toggle('is-error', error);
       },
+      // The realm's recipe bases go to the form; its palette is undoable through the material
+      // history and keeps favourites while replacing the old design's area assignments.
+      onMaterials: ({ recipe, document }, group) => {
+        for (const [key, value] of Object.entries(recipe)) if (ui.form.elements[key]) ui.form.elements[key].value = String(value);
+        const current = ui.materialController?.toDocument();
+        if (current) ui.materialController.commit({ ...current, ...document, materialLibrary: { sources: current.materialLibrary.sources,
+          presets: { ...current.materialLibrary.presets, ...document.materialLibrary.presets } } }, `${group} materials applied.`);
+      },
     });
     this.keyDown = (event) => {
       if (

@@ -1,0 +1,172 @@
+# Grukmar Tribes — upland orc holds (docs/asset-bible/regions/grukmar.md). Low, broad, sturdy
+# halls of dark fieldstone and heavy logs; deep shaggy hip roofs that sag like hides; lumpy
+# rounded corners; log palisades and drum towers. Big proportions (scale 1.12) read as orcish.
+group: Grukmar · orc holds
+palette:
+  recipe: { style: granite, finish: ochre, topStyle: terracotta, weathering: 0.7 }
+  masonry: { color: "#6f655b", roughness: 0.97, normal: 1.6, label: Ridge fieldstone }
+  planks: { color: "#6b4e36", roughness: 0.95, label: Rough logs }
+  plaster: { color: "#8e7458", label: Clay daub }
+  roof: { color: "#5e4b37", roughness: 0.98, label: Hide and turf }
+  trim: { color: "#5a534c", label: Dark boulders }
+  timber: { color: "#3e2c20", label: Smoke-black beams }
+  metal: { color: "#6e4630", metalness: 0.45, roughness: 0.75, label: Salvage iron }
+  glass: { color: "#5a3a22", label: Hearth glow }
+style:
+  surface: masonry
+  stonework: fieldstone
+  facade: plain
+  scale: 1.12
+  storey: 3
+  thickness: 0.55
+  taper: 0.94
+  corner: 0.65
+  roof: { family: hip, pitch: 0.42, overhang: 0.8, sweep: 0.2, sag: 0.26 }
+  door: square
+  window: square
+  shutters: false
+  windowBoxes: false
+  ivy: 0.05
+  age: 0.65
+  base: { style: batter, height: 1, out: 0.3 }
+  tower: { surface: planks, stonework: fieldstone, footprint: rounded, roof: cone }
+  wall: { surface: planks, stonework: fieldstone, crown: { style: parapet, height: 0.6, merlonWidth: 0.45, merlonGap: 0.25, merlonHeight: 0.6 } }
+  path: { floor: timber, railing: timber }
+kit:
+  - { id: grukmar-orc-house-longhouse, label: "House · Clan longhouse", blueprint: house-longhouse }
+  - { id: grukmar-orc-house-round, label: "House · War-hut", blueprint: house-round }
+  - { id: grukmar-orc-house-double, label: "House · Brothers' houses", blueprint: house-double }
+  - { id: grukmar-orc-house-courtyard, label: "House · Chieftain's compound", blueprint: house-courtyard }
+  - { id: grukmar-orc-house-hillside, label: "House · Ridge house over a store pit", blueprint: house-hillside }
+  - { id: grukmar-orc-farm-farmstead, label: "Farm · Boar-pen steading", blueprint: farm-farmstead }
+  - { id: grukmar-orc-farm-barnyard, label: "Farm · Hide-roof barn and grain stilt", blueprint: farm-barnyard }
+  - { id: grukmar-orc-farm-croft, label: "Farm · Turnip croft", blueprint: farm-croft }
+  - { id: grukmar-orc-inn-roadside, label: "Inn · Grog hall", blueprint: inn-roadside }
+  - { id: grukmar-orc-inn-tavern, label: "Inn · Bone-and-ale tavern", blueprint: inn-tavern }
+  - { id: grukmar-orc-inn-lodge, label: "Inn · Warband lodge", blueprint: inn-lodge }
+  - { id: grukmar-orc-shop-general, label: "Shop · Raider trade-post", blueprint: shop-general }
+  - { id: grukmar-orc-shop-warehouse, label: "Shop · Tribute store", blueprint: shop-warehouse }
+  - { id: grukmar-orc-shop-stalls, label: "Shop · Barter stalls", blueprint: shop-stalls }
+  - { id: grukmar-orc-shop-baker, label: "Shop · Roast-pit cookhouse", blueprint: shop-baker }
+  - { id: grukmar-orc-shop-shaman, label: "Shop · Shaman's charm tower", blueprint: shop-curio-tower, style: { roof: { family: cone, pitch: 0.7 } } }
+  - { id: grukmar-orc-tower-watch, label: "Tower · Log watch tower", blueprint: tower-watch }
+  - { id: grukmar-orc-tower-signal, label: "Tower · Signal drum tower", blueprint: tower-signal }
+  - { id: grukmar-orc-tower-gate, label: "Tower · Ridge gate tower", blueprint: tower-gate, style: { tower: { surface: masonry } } }
+  - { id: grukmar-orc-wall-palisade, label: "Wall · Log palisade with fighting step", blueprint: wall-palisade }
+  - { id: grukmar-orc-wall-town, label: "Wall · Stone-footed log rampart", blueprint: wall-town }
+  - { id: grukmar-orc-wall-retaining, label: "Wall · Ridge earthwork", blueprint: wall-retaining, style: { wall: { surface: masonry } } }
+  - { id: grukmar-orc-stair-switchback, label: "Stairs · Ridge climb", blueprint: stair-switchback }
+  - { id: grukmar-orc-stair-bridge, label: "Stairs · Log bridge", blueprint: stair-bridge }
+  - { id: grukmar-orc-stair-grand, label: "Stairs · Chieftain's mound stair", blueprint: stair-grand }
+styles:
+  hall: &hall { kind: curved-volume, surface: masonry, stonework: fieldstone, thickness: 0.6, taper: 0.93, shutters: false, windowBoxes: false, chimney: true, ivyDensity: 0.05, age: 0.7, base: { style: batter, height: 1, out: 0.35 } }
+  logs: &logs { kind: curved-volume, surface: planks, thickness: 0.22, chimney: false, windowBoxes: false, shutters: false, age: 0.7 }
+presets:
+  - id: grukmar-orc-assembly-hall
+    label: "Landmark · Clan assembly hall with great porch"
+    primitives:
+      - <<: *hall
+        id: assembly
+        label: Assembly hall
+        footprint: { family: rounded, width: 18, depth: 9, cornerRadius: 1.2 }
+        height: 3.6
+        roof: { family: hip, rise: 4.2, overhang: 1, sweep: 0.2, sag: 0.3 }
+        openings:
+          - { id: great-door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 2.4, height: 2.8 }
+          - { id: smoke-window, role: window, profile: square, side: front, along: [-5.5, -3, 3, 5.5], bottom: 1.4, width: 0.9, height: 0.8 }
+          - { id: back-door, role: door, profile: square, side: back, along: 0, bottom: 0, width: 1.6, height: 2.4 }
+        features:
+          - { id: great-porch, kind: porch, side: front, along: 0, width: 8, depth: 3, height: 3.2 }
+          - { id: post, kind: buttress, side: front, along: [-7, 7], width: 1, depth: 1, height: 3 }
+      - <<: *logs
+        id: store
+        label: Storage annex
+        position: [11.6, -1]
+        footprint: { family: rounded, width: 5, depth: 6, cornerRadius: 0.4 }
+        height: 2.8
+        roof: { family: hip, rise: 1.6, overhang: 0.6, sweep: 0.2, sag: 0.3 }
+        openings:
+          - { id: door, role: door, profile: square, side: front, along: 0, bottom: 0, width: 1.6, height: 2.2 }
+
+  - id: grukmar-orc-war-ring
+    label: "Landmark · Fighting ring with drum stands"
+    primitives:
+      - id: ring-north
+        label: Ring wall
+        kind: curved-wall
+        surface: planks
+        position: [0, -4.5]
+        length: 16
+        bend: -6.5
+        height: 1.6
+        thickness: 0.3
+        openings:
+          - { id: champion-gate, role: arch, profile: square, at: 0.5, bottom: 0, width: 2, height: 1.6 }
+      - id: ring-south
+        label: Ring wall
+        kind: curved-wall
+        surface: planks
+        position: [0, 4.5]
+        length: 16
+        bend: 6.5
+        height: 1.6
+        thickness: 0.3
+        openings:
+          - { id: crowd-gate, role: arch, profile: square, at: 0.5, bottom: 0, width: 2.4, height: 1.6 }
+      - id: stand-west
+        label: Drum stand
+        kind: traversal
+        position: [-9.6, 0]
+        rotation: 90
+        length: 6
+        width: 2.4
+        elevation: 1.8
+        mode: walkway
+        support: piers
+        style: { floor: timber, supports: timber, railing: timber }
+      - id: stand-east
+        label: Drum stand
+        kind: traversal
+        position: [9.6, 0]
+        rotation: 90
+        length: 6
+        width: 2.4
+        elevation: 1.8
+        mode: walkway
+        support: piers
+        style: { floor: timber, supports: timber, railing: timber }
+
+  - id: grukmar-orc-salvage-forge
+    label: "Landmark · Salvage forge on a dry mound"
+    primitives:
+      - <<: *hall
+        id: mound
+        label: Dry mound
+        footprint: { family: oval, width: 12, depth: 9 }
+        height: 1.2
+        chimney: false
+        roof: { family: flat }
+        interior: none
+      - <<: *logs
+        id: forge
+        label: Salvage forge
+        elevation: 1.2
+        footprint: { family: rounded, width: 8, depth: 5.6, cornerRadius: 0.5 }
+        height: 3
+        chimney: true
+        roof: { family: hip, rise: 2, overhang: 0.7, sweep: 0.2, sag: 0.3 }
+        openings:
+          - { id: work-bay, role: arch, profile: square, side: front, along: -1.2, bottom: 0, width: 3.2, height: 2.4 }
+          - { id: door, role: door, profile: square, side: right, along: 0, bottom: 0, width: 1.1, height: 2.1 }
+        features:
+          - { id: scrap-canopy, kind: porch, side: front, along: -1.2, width: 4.4, depth: 1.8, height: 2.6 }
+      - id: mound-ramp
+        label: Mound ramp
+        kind: traversal
+        position: [-1.4, 6.6]
+        rotation: -90
+        length: 4.4
+        width: 2.4
+        rise: 1.2
+        mode: ramp
+        style: { floor: timber, supports: timber, railing: timber }

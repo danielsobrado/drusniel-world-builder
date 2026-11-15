@@ -1,4 +1,8 @@
 import { SHAPE_CASTLE_PRESETS, SHAPE_CRAFT_PRESETS } from './config/ShapeCastleConfig.generated.js';
+import { SHAPE_CITY_CATALOGS } from './config/ShapeCityPresets.generated.js';
+import { buildCityKitPreset } from './cities/ShapeCityKit.js';
+import { cityMaterialDocument } from './cities/ShapeCityPalette.js';
+import { CITY_STYLE_DEFAULTS, cityStyle } from './cities/ShapeCityParts.js';
 
 const opening = (id, at, role = 'window', bottom = 1) => ({
   id,
@@ -46,10 +50,14 @@ const traversal = (id, label, extra = {}) => ({
   ...extra,
 });
 
+const dataPreset = (preset, group) => ({ id: preset.id, label: preset.label, group, create: () => structuredClone(preset.primitives) });
+
 export const SHAPE_PRESETS = Object.freeze(
   [
-    // Fortification and craft-workshop designs are data (config/*-presets.yml) over the same shape capabilities.
-    ...[...SHAPE_CASTLE_PRESETS, ...SHAPE_CRAFT_PRESETS].map((preset) => ({ id: preset.id, label: preset.label, create: () => structuredClone(preset.primitives) })),
+  ...[
+    // Fortification, craft and faction-city designs are data (config/*-presets.yml, config/cities/) over the same shape capabilities.
+    ...SHAPE_CASTLE_PRESETS.map((preset) => dataPreset(preset, 'Fortifications')),
+    ...SHAPE_CRAFT_PRESETS.map((preset) => dataPreset(preset, 'Craft workshops')),
     {
       id: 'rounded-cottage',
       label: 'Rounded cottage',
@@ -280,6 +288,17 @@ export const SHAPE_PRESETS = Object.freeze(
         features: [{ id: 'curved-balcony', kind: 'balcony', at: 0.18, width: 4.2, depth: 1.05, bottom: 3.1, height: 1.1 }],
       })],
     },
+  ].map((preset) => ({ group: 'Cottages and gardens', ...preset })),
+  // Realm cities: blueprint kit entries drawn in the realm's style, then its landmarks.
+  ...SHAPE_CITY_CATALOGS.flatMap((c) => {
+    const materials = (style, palette) => (primitives) =>
+      cityMaterialDocument(c.realm, { ...c.palette, ...palette, recipe: { ...c.palette.recipe, ...palette?.recipe } }, primitives, cityStyle(CITY_STYLE_DEFAULTS, c.style, style).surface);
+    return [
+      ...c.kit.map((entry) => ({ id: entry.id, label: entry.label, group: c.group,
+        create: () => buildCityKitPreset(c.style, entry), materials: materials(entry.style, entry.palette) })),
+      ...c.presets.map((preset) => ({ ...dataPreset(preset, c.group), materials: materials() })),
+    ];
+  }),
   ].map((preset) => Object.freeze(preset)),
 );
 
