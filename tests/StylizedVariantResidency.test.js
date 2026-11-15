@@ -146,6 +146,22 @@ test('installs are capped per frame so an arriving batch cannot hitch', async ()
   assert.equal(applied.length, 2);
 });
 
+test('an install still advances a step each frame when the shared budget is spent', async () => {
+  const terrainView = createTerrainView({ tileForChunkX: () => 7 });
+  const { layer } = createLayer({ definitions: [{ scene: '/assets/rocks/generic.glb' }] });
+  let steps = 0;
+  layer.apply = function* () { for (let unit = 0; unit < 3; unit += 1) { steps += 1; yield; } return []; };
+  const residency = new StylizedVariantResidency({ terrainView, layers: [layer], rescanIntervalMs: 0 });
+  const exhausted = () => true;
+
+  residency.update(0, exhausted);
+  await Promise.resolve();
+  await Promise.resolve();
+  for (let frame = 1; frame <= 4; frame += 1) residency.update(frame, exhausted);
+  assert.equal(steps, 3);
+  assert.equal(residency.getPreparationStatus().pending, 0);
+});
+
 test('a variant is requested once, and a failed one is not retried', async () => {
   const terrainView = createTerrainView({ tileForChunkX: () => 7 });
   const { layer, acquired } = createLayer({ definitions: [DEFINITIONS[0]] });

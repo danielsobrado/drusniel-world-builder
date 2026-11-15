@@ -213,8 +213,14 @@ export class StylizedVariantResidency {
 
   pumpApplies(shouldYield = null) {
     let applied = 0;
+    // Every frame advances at least one install step (a few ms at most), whatever the
+    // shared budget says. The rebuilds that spend that budget first are the ones the
+    // next install restarts, so gating the first step too starved a cold load: 62
+    // variants took ~5 minutes and scenery never settled.
+    let advanced = false;
     while (applied < this.appliesPerFrame && (this.activeApply || this.pendingApplies.length > 0)) {
-      if (shouldYield?.()) break;
+      if (advanced && shouldYield?.()) break;
+      advanced = true;
       const job = this.activeApply ?? this.pendingApplies.shift();
       const startedAt = performance.now();
       try {
