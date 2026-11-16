@@ -10,25 +10,40 @@ import { acquireIceTextures } from './iceTextures.js';
 
 const DEEP = '#0b5aa8';
 const CLEAR = '#4cc4ee';
-const VEIN = '#c4ecfb';
-const FROST = '#e6f6fc';
-const SNOW = '#f2f7fa';
-/** Texture repeats per geometry unit: a berg is 26-110 m across, so a repeat is a few metres. */
-const DETAIL_PER_UNIT = 9;
-/** How far the view ray reaches into the body, in texture repeats: the veins slide behind the surface. */
-const INNER_REACH = 0.35;
+/** Weathered surface ice: an iceberg reads white from any distance, blue only where it is cut open. */
+const WEATHERED = '#d6e7ef';
+const FROST = '#eef7fb';
+const SNOW = '#f4f8fa';
+/**
+ * Texture repeats per geometry unit (a berg is one unit, scaled 26-110 m). The
+ * fine scale is surface relief a few metres across; the coarse one lays out the
+ * blue cracks and veins and breaks the fine one's repeat, which alone drew a grid.
+ */
+const FINE_PER_UNIT = 9;
+const COARSE_PER_UNIT = 2.2;
+/** How far the view ray reaches into the body, in coarse repeats: the veins slide behind the surface. */
+const INNER_REACH = 0.12;
 
 /** Three planar taps blended by the facet's facing: a berg has faces every way. */
 function triplanar(map, point, weights) {
-  const taps = [point.yz, point.zx, point.xy].map((uv) => texture(map, uv));
-  return { taps, value: taps[0].mul(weights.x).add(taps[1].mul(weights.y)).add(taps[2].mul(weights.z)) };
+  const planes = [point.yz, point.zx, point.xy];
+  const taps = planes.map((uv) => texture(map, uv));
+  return { planes, taps, value: taps[0].mul(weights.x).add(taps[1].mul(weights.y)).add(taps[2].mul(weights.z)) };
+}
+
+/** The packed normals, each decoded in its own plane's tangent frame (as the bark does), blended. */
+function blendedNormal(sampled, weights) {
+  const w = [weights.x, weights.y, weights.z];
+  return sampled.taps.map((tap, i) => barkPackedNormal(tap, sampled.planes[i]))
+    .reduce((sum, normal, i) => sum.add(normal.mul(w[i])), vec3(0));
 }
 
 /**
- * Glacial ice with a real PBR surface (the ice set, iceTextures.js): melt
- * ridges and cracks in the normal map, glazed where clear and rough where
- * frosted, a clear coat over all of it, veins and milky cloud read behind the
- * surface along the view ray, and frost crystals that sparkle toward the sun.
+ * Glacial ice with a real PBR surface (the ice set, iceTextures.js): weathered
+ * white ice cut open in blue along cracks, veins, steep walls and the wet
+ * waterline band; melt relief in the normal map at two scales; glazed where blue
+ * and rough where weathered, a clear coat over the blue, veins read behind the
+ * surface along the view ray, and frost crystals that catch the sun.
  * Opaque, because a viewport refraction would charge the whole frame
  * (CLAUDE.md); the light through the ice is emission around the sun.
  *
@@ -40,43 +55,41 @@ export function createIceMaterial({ sunDirection, seaLevel }) {
   const material = new THREE.MeshPhysicalNodeMaterial({ name: 'frosted-ice' });
   const view = normalize(cameraPosition.sub(positionWorld)).toVar();
   const sun = normalize(frameUniform(sunDirection));
-  const point = positionGeometry.mul(DETAIL_PER_UNIT).toVar();
   const facing = normalGeometry.abs().pow(4);
   const weights = facing.div(dot(facing, vec3(1)).max(1e-4)).toVar();
+  const fine = positionGeometry.mul(FINE_PER_UNIT).toVar();
+  const coarse = positionGeometry.mul(COARSE_PER_UNIT).toVar();
 
-  const inclusions = triplanar(detail, point, weights).value.toVar();
-  const packed = triplanar(surface, point, weights);
-  // The packed normals, each decoded in its own plane's tangent frame (as the bark does).
-  const planes = [point.yz, point.zx, point.xy];
-  material.normalNode = packed.taps.map((tap, i) => barkPackedNormal(tap, planes[i]))
-    .reduce((sum, normal, i) => sum.add(normal.mul([weights.x, weights.y, weights.z][i])), vec3(0)).normalize();
+  const masks = triplanar(detail, coarse, weights).value.toVar();
+  const fineSurface = triplanar(surface, fine, weights);
+  const coarseSurface = triplanar(surface, coarse, weights);
+  material.normalNode = blendedNormal(fineSurface, weights).mul(0.55)
+    .add(blendedNormal(coarseSurface, weights).mul(0.45)).normalize();
 
-  // Behind the surface: the veins again, a little way down the view ray.
-  const inner = texture(detail, point.xz.sub(view.xz.mul(INNER_REACH))).r;
-  const rim = float(1).sub(clamp(dot(normalWorld, view), 0, 1)).pow(2.5);
-  const veins = max(inclusions.r.mul(0.6), inner.mul(0.8)).toVar();
-  const cloud = inclusions.g;
-  const body = mix(color(DEEP), color(CLEAR), smoothstep(0.1, 0.7, cloud.mul(0.8).add(veins.mul(0.35)))).toVar();
-  const frost = smoothstep(0.35, 0.8, cloud.add(rim.mul(0.45))).toVar();
-  const cap = smoothstep(0.62, 0.86, normalWorld.y.add(cloud.sub(0.4).mul(0.5))).toVar();
-  const cracked = mix(mix(body, color(VEIN), veins.mul(0.4)), color(FROST), inclusions.b.mul(0.55));
-  const ice = mix(cracked, color(FROST), frost.mul(0.75));
-  const wet = smoothstep(seaLevel + 0.3, seaLevel + 1.6, positionWorld.y).oneMinus().mul(cap.oneMinus());
-  material.colorNode = mix(mix(ice, ice.mul(color(CLEAR)), wet), color(SNOW), cap);
+  // Where the berg is cut open: fracture lines and veins (coarse), steep walls, the wet band.
+  const wet = smoothstep(seaLevel + 0.3, seaLevel + 2.4, positionWorld.y).oneMinus();
+  const steep = smoothstep(0.55, 0.95, normalWorld.y.abs().oneMinus());
+  const blueShare = clamp(smoothstep(0.32, 0.75, masks.b.mul(0.9).add(masks.r.mul(0.45)))
+    .add(steep.mul(0.25)).add(wet.mul(0.7)), 0, 1).toVar();
+  const inner = texture(detail, coarse.xz.sub(view.xz.mul(INNER_REACH))).r;
+  const blue = mix(color(DEEP), color(CLEAR), smoothstep(0.15, 0.75, masks.g.mul(0.7).add(inner.mul(0.5)))).toVar();
+  const weathered = mix(color(WEATHERED), color(FROST), masks.g);
+  const cap = smoothstep(0.62, 0.86, normalWorld.y.add(masks.g.sub(0.4).mul(0.5))).toVar();
+  material.colorNode = mix(mix(weathered, blue, blueShare), color(SNOW), cap);
 
-  material.roughnessNode = mix(packed.value.b, float(0.82), cap);
+  material.roughnessNode = mix(mix(fineSurface.value.b.max(0.35), float(0.08), blueShare), float(0.82), cap);
   material.metalnessNode = float(0);
   material.iorNode = float(1.31);
-  // A glaze over the clear ice: the second, sharp highlight that makes ice read as ice.
-  material.clearcoatNode = cap.oneMinus().mul(frost.mul(0.6).oneMinus()).mul(0.8);
+  // A glaze over the blue, cut-open ice: the sharp second highlight that reads as ice.
+  material.clearcoatNode = blueShare.mul(cap.oneMinus()).mul(0.85);
   material.clearcoatRoughnessNode = float(0.05);
 
-  // Light through the ice, most of all toward a backlighting sun.
-  const through = max(dot(view, sun.negate()), 0).pow(3).mul(0.9).add(0.14);
-  const glow = body.mul(through).mul(cap.oneMinus()).mul(frost.mul(0.6).oneMinus());
-  // Frost crystals: rare texels of the packed roughness catch the sun as points.
-  const mirror = max(dot(reflect(view.negate(), normalWorld), sun), 0).pow(40);
-  const crystals = smoothstep(0.62, 0.7, packed.value.b).mul(mirror).mul(frost.add(cap)).mul(3);
+  // Light through the ice where it is thin and blue, most of all toward a backlighting sun.
+  const through = max(dot(view, sun.negate()), 0).pow(3).mul(0.9).add(0.12);
+  const glow = blue.mul(through).mul(blueShare).mul(cap.oneMinus());
+  // Frost crystals: the roughest texels of the weathered ice catch the sun as points.
+  const mirror = max(dot(reflect(view.negate(), normalWorld), sun), 0).pow(48);
+  const crystals = smoothstep(0.76, 0.82, fineSurface.value.b).mul(mirror).mul(blueShare.oneMinus()).mul(1.6);
   material.emissiveNode = glow.mul(skyLightUniforms.brightness).add(skyLightUniforms.sunColor.mul(crystals));
   return material;
 }
