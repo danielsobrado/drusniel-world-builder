@@ -26,11 +26,11 @@ const DUST_HUE_KEEP = 0.7;
 
 /** Per material family: how much of each the surface takes. */
 export const WEATHER_FAMILIES = Object.freeze({
-  stone: Object.freeze({ moss: 0.48, streaks: 0.65, damp: 0.75, dust: 0.34, cracks: 0.45 }),
-  plaster: Object.freeze({ moss: 0.14, streaks: 0.5, damp: 0.65, dust: 0.28, cracks: 0.7 }),
-  mortar: Object.freeze({ moss: 0.26, streaks: 0.45, damp: 0.75, dust: 0.32, cracks: 0.35 }),
-  timber: Object.freeze({ moss: 0.18, streaks: 0.35, damp: 0.55, dust: 0.24, cracks: 0 }),
-  roof: Object.freeze({ moss: 0.38, streaks: 0, damp: 0, dust: 0.32, cracks: 0 }),
+  stone: Object.freeze({ moss: 0.48, streaks: 0.65, damp: 0.75, dust: 0.34, cracks: 0.45, wash: 0.35 }),
+  plaster: Object.freeze({ moss: 0.14, streaks: 0.5, damp: 0.65, dust: 0.28, cracks: 0.7, wash: 1 }),
+  mortar: Object.freeze({ moss: 0.26, streaks: 0.45, damp: 0.75, dust: 0.32, cracks: 0.35, wash: 0.5 }),
+  timber: Object.freeze({ moss: 0.18, streaks: 0.35, damp: 0.55, dust: 0.24, cracks: 0, wash: 0.3 }),
+  roof: Object.freeze({ moss: 0.38, streaks: 0, damp: 0, dust: 0.32, cracks: 0, wash: 0.45 }),
 });
 
 /**
@@ -41,7 +41,7 @@ export const WEATHER_FAMILIES = Object.freeze({
  * @param {import('three/tsl').Node} options.up world normal's y
  * @param {?import('three/tsl').Node} [options.height] metres above the building's ground,
  *   or null where it is not known (no damp band then)
- * @param {{ moss: number|Node, streaks: number|Node, damp: number|Node, dust?: number|Node, cracks?: number|Node }} options.family amounts, 0..1
+ * @param {{ moss: number|Node, streaks: number|Node, damp: number|Node, dust?: number|Node, cracks?: number|Node, wash?: number|Node }} options.family amounts, 0..1
  * @returns {import('three/tsl').Node} weathered albedo (vec3)
  */
 export function weatherTownSurface(colour, { place, up, height = null, family }) {
@@ -64,7 +64,12 @@ export function weatherTownSurface(colour, { place, up, height = null, family })
   const crackLine = smoothstep(0.3, 0.1, triplanarNoise(NOISE.cracks, place.mul(0.42), blend));
   const cracks = crackLine.mul(smoothstep(-0.2, 0.25, patch)).mul(vertical.mul(0.6).add(0.4))
     .mul(family.cracks ?? 0).mul(0.5);
-  let weathered = colour.mul(float(1).sub(streak).sub(drips).sub(cracks).max(0.3));
+  // Uneven limewash and coat: blotches a metre across and a finer cloud within
+  // them, so a rendered panel reads as hand-laid rather than one flat paint.
+  const coat = triplanarNoise(NOISE.mottle, place.mul(0.9), blend).sub(0.5)
+    .add(triplanarNoise(NOISE.fbm, place.mul(3.1), blend).sub(0.5).mul(0.6));
+  const wash = coat.mul(family.wash ?? 0).mul(0.42).add(1);
+  let weathered = colour.mul(wash).mul(float(1).sub(streak).sub(drips).sub(cracks).max(0.3));
   if (height) {
     const foot = float(1).sub(smoothstep(0, 1.15, height)).pow(1.6);
     const damp = foot.mul(patch.mul(0.25).add(0.75)).mul(family.damp).mul(0.42);
