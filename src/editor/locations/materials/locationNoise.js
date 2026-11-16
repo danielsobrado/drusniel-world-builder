@@ -35,6 +35,8 @@ export const NOISE = Object.freeze({
   grit: field('micro', 'r', 62.8),
   /** Clods and pits: bubbles, corrosion pits. */
   pits: field('micro', 'g', 79.8),
+  /** Mud-plate cracks: dark branching lines on a light ground (not a Perlin; read it raw). */
+  cracks: field('micro', 'b', 62.8),
 });
 
 /** mx_noise_float's spread (std 0.267, measured) over a channel's (0.2). */
@@ -47,11 +49,19 @@ const signed = (value) => value.sub(0.5).mul(SIGNED_GAIN);
 
 /** Triplanar drop-in for `mx_noise_float(p)`, `p` in noise units along the world axes. */
 export function locationNoise(kind, p) {
+  return signed(triplanarNoise(kind, p, weights));
+}
+
+/**
+ * The raw channel (0..1) projected three ways, `p` in noise units along the axes
+ * `blend` weighs (triplanarWeights of the normal in `p`'s own frame).
+ */
+export function triplanarNoise(kind, p, blend) {
   const tap = worldNoiseField(kind.layer);
   const uv = p.div(kind.span);
-  return signed(tap(uv.zy)[kind.channel].mul(weights.x)
-    .add(tap(uv.xz)[kind.channel].mul(weights.y))
-    .add(tap(uv.xy)[kind.channel].mul(weights.z)));
+  return tap(uv.zy)[kind.channel].mul(blend.x)
+    .add(tap(uv.xz)[kind.channel].mul(blend.y))
+    .add(tap(uv.xy)[kind.channel].mul(blend.z));
 }
 
 /** Drop-in for `mx_noise_float` of a 2D coordinate: a horizontal plane or a surface's own UV. */

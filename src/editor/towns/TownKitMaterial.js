@@ -210,7 +210,7 @@ export function createTownKitMaterial(atlas, look) {
     place,
     up,
     height,
-    family: { moss: amount('moss'), streaks: amount('streaks'), damp: amount('damp'), dust: amount('dust') },
+    family: { moss: amount('moss'), streaks: amount('streaks'), damp: amount('damp'), dust: amount('dust'), cracks: amount('cracks') },
   });
   // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
   colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving).add(isCobble));

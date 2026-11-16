@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
-import { attribute, color, dot, float, fract, mix, mx_noise_float, positionWorld, sin, smoothstep, step, texture, uv, vec2, vec3 } from 'three/tsl';
+import { attribute, color, dot, float, fract, mix, positionWorld, sin, smoothstep, step, texture, uv, vec2 } from 'three/tsl';
+import { NOISE, planarNoise } from '../../../locations/materials/locationNoise.js';
 import { treadPaving } from '../../../../render/materials/townWeathering.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../../../render/materials/townWetness.js';
 import { buildingShadeEmission } from '../../../stylized/forest/foliageLight.js';
@@ -110,8 +111,8 @@ function untiledColour(map, arm, tint) {
   const laid = uv();
   const [cos, sin_] = [Math.cos(ALT_TURN), Math.sin(ALT_TURN)];
   const turned = vec2(laid.x.mul(cos).sub(laid.y.mul(sin_)), laid.x.mul(sin_).add(laid.y.mul(cos))).mul(ALT_SCALE).add(vec2(0.37, 0.71));
-  const blend = smoothstep(-0.28, 0.28, mx_noise_float(vec3(laid.mul(0.31), 0.5)));
-  const drift = mx_noise_float(vec3(laid.mul(0.11), 3.7)).mul(0.16).add(1);
+  const blend = smoothstep(-0.28, 0.28, planarNoise(NOISE.patch, laid.mul(0.31).add(0.5)));
+  const drift = planarNoise(NOISE.broad, laid.mul(0.11).add(3.7)).mul(0.16).add(1);
   const joints = mix(float(JOINT_SHADE), float(1), smoothstep(0.25, 0.85, texture(arm, laid).r));
   const surface = mix(texture(map, laid).rgb, texture(map, turned).rgb, blend).mul(color(tint)).mul(drift).mul(joints);
   return treadPaving(surface, laid);

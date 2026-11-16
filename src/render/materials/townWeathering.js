@@ -1,4 +1,6 @@
-import { float, mix, mx_noise_float, smoothstep, vec3 } from 'three/tsl';
+import { float, mix, normalGeometry, normalize, smoothstep, vec2, vec3 } from 'three/tsl';
+import { NOISE, SIGNED_GAIN, planarNoise, triplanarNoise } from '../../editor/locations/materials/locationNoise.js';
+import { triplanarWeights } from '../../editor/locations/materials/LocationShading.js';
 
 /**
  * The weather a town's buildings have stood in, shared by both town renderers
@@ -9,6 +11,11 @@ import { float, mix, mx_noise_float, smoothstep, vec3 } from 'three/tsl';
  * rain settles, dust on what faces the sky, a soft damp foot, faint runs. The
  * dust is each surface's own colour bleached by the sun, not one shared tint,
  * so a rose-rendered town and a slate-and-granite one stay themselves.
+ *
+ * Every field is read from the shared world-noise texture (locationNoise.js),
+ * projected in the building's own frame, in place of 3D Perlin per pixel. On
+ * top of the old look: rain drips, thin dark runs from each ledge, and hairline
+ * cracks in stone and render.
  */
 
 export const WEATHER_MOSS = Object.freeze([0.30, 0.39, 0.14]);
@@ -19,11 +26,11 @@ const DUST_HUE_KEEP = 0.7;
 
 /** Per material family: how much of each the surface takes. */
 export const WEATHER_FAMILIES = Object.freeze({
-  stone: Object.freeze({ moss: 0.48, streaks: 0.65, damp: 0.75, dust: 0.34 }),
-  plaster: Object.freeze({ moss: 0.14, streaks: 0.5, damp: 0.65, dust: 0.28 }),
-  mortar: Object.freeze({ moss: 0.26, streaks: 0.45, damp: 0.75, dust: 0.32 }),
-  timber: Object.freeze({ moss: 0.18, streaks: 0.35, damp: 0.55, dust: 0.24 }),
-  roof: Object.freeze({ moss: 0.38, streaks: 0, damp: 0, dust: 0.32 }),
+  stone: Object.freeze({ moss: 0.48, streaks: 0.65, damp: 0.75, dust: 0.34, cracks: 0.45 }),
+  plaster: Object.freeze({ moss: 0.14, streaks: 0.5, damp: 0.65, dust: 0.28, cracks: 0.7 }),
+  mortar: Object.freeze({ moss: 0.26, streaks: 0.45, damp: 0.75, dust: 0.32, cracks: 0.35 }),
+  timber: Object.freeze({ moss: 0.18, streaks: 0.35, damp: 0.55, dust: 0.24, cracks: 0 }),
+  roof: Object.freeze({ moss: 0.38, streaks: 0, damp: 0, dust: 0.32, cracks: 0 }),
 });
 
 /**
@@ -34,18 +41,30 @@ export const WEATHER_FAMILIES = Object.freeze({
  * @param {import('three/tsl').Node} options.up world normal's y
  * @param {?import('three/tsl').Node} [options.height] metres above the building's ground,
  *   or null where it is not known (no damp band then)
- * @param {{ moss: number|Node, streaks: number|Node, damp: number|Node, dust?: number|Node }} options.family amounts, 0..1
+ * @param {{ moss: number|Node, streaks: number|Node, damp: number|Node, dust?: number|Node, cracks?: number|Node }} options.family amounts, 0..1
  * @returns {import('three/tsl').Node} weathered albedo (vec3)
  */
 export function weatherTownSurface(colour, { place, up, height = null, family }) {
-  const patch = mx_noise_float(place.mul(0.6));
+  // `place` is in the building's own frame, so the projection follows its normal, not the world's.
+  const blend = triplanarWeights(normalize(normalGeometry));
+  const patch = triplanarNoise(NOISE.patch, place.mul(0.6), blend).sub(0.5).mul(SIGNED_GAIN);
   const facing = smoothstep(0.35, 0.85, up);
   const moss = facing.mul(smoothstep(-0.15, 0.35, patch)).mul(family.moss);
-  // Runs: noise stretched along the fall line, on faces that are near vertical.
-  const run = mx_noise_float(vec3(place.x.mul(2.4), place.y.mul(0.16), place.z.mul(2.4)));
+  // Runs: noise stretched along the fall line on the two wall planes, on faces near vertical.
+  const wall = (kind, across, down) => {
+    const tap = (u) => planarNoise(kind, vec2(u.mul(across), place.y.mul(down)));
+    return tap(place.z).mul(blend.x).add(tap(place.x).mul(blend.z)).div(blend.x.add(blend.z).max(1e-3));
+  };
   const vertical = float(1).sub(up.abs()).clamp(0, 1);
-  const streak = smoothstep(0.05, 0.55, run).mul(vertical).mul(family.streaks).mul(0.14);
-  let weathered = colour.mul(float(1).sub(streak));
+  const streak = smoothstep(0.05, 0.55, wall(NOISE.fbm, 2.4, 0.16)).mul(vertical).mul(family.streaks).mul(0.14);
+  // Drips: thin dark lines a hand apart, broken along their fall, where rain runs off a ledge.
+  const drips = smoothstep(0.32, 0.62, wall(NOISE.grit, 0.9, 0.035)).mul(smoothstep(-0.1, 0.3, patch))
+    .mul(vertical).mul(family.streaks).mul(0.22);
+  // Hairline cracks in stone and render, thinning out where the surface is sound.
+  const crackLine = smoothstep(0.3, 0.1, triplanarNoise(NOISE.cracks, place.mul(0.42), blend));
+  const cracks = crackLine.mul(smoothstep(-0.2, 0.25, patch)).mul(vertical.mul(0.6).add(0.4))
+    .mul(family.cracks ?? 0).mul(0.5);
+  let weathered = colour.mul(float(1).sub(streak).sub(drips).sub(cracks).max(0.3));
   if (height) {
     const foot = float(1).sub(smoothstep(0, 1.15, height)).pow(1.6);
     const damp = foot.mul(patch.mul(0.25).add(0.75)).mul(family.damp).mul(0.42);
@@ -69,7 +88,9 @@ export const TREAD_GRIME = Object.freeze({ depth: 0.34, earth: [0.66, 0.59, 0.49
  * stable on the ground.
  */
 export function treadPaving(colour, coords) {
-  const grime = smoothstep(0.05, 0.65, mx_noise_float(vec3(coords.mul(0.27), 9.2))).mul(TREAD_GRIME.depth);
-  const worn = colour.mul(TREAD_GRIME.tone);
+  const grime = smoothstep(0.05, 0.65, planarNoise(NOISE.mottle, coords.mul(0.27).add(9.2))).mul(TREAD_GRIME.depth);
+  // Stone by stone the setts are not one tone: some worn pale, some stained.
+  const tone = planarNoise(NOISE.grit, coords.mul(1.7)).mul(0.22).add(1);
+  const worn = colour.mul(TREAD_GRIME.tone).mul(tone);
   return mix(worn, worn.mul(vec3(...TREAD_GRIME.earth)), grime);
 }
