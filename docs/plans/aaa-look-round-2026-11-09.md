@@ -139,7 +139,7 @@ samplers, perf A/B for rendering changes.
 | B | Blizzard visibility and snowfall look | 2, 7 | phase 4 fog/whiteout, `snowfall/` | A visibility floor of about 50 m near-field at storm 1; wind-stretched flakes. Capture tundra and taiga snow at 0.5, 0.75 and 1. |
 | C | Snow cover outside snow country | 3 | `SnowCover`, `TerrainStormSnowNodes.js` | Ground accumulation follows `frame.snow`, not the tile share. Same files as B's terrain side: run after B, or merge B and C. |
 | D | Time-of-day capture | 4 | `WorldVisualQa.js`, `SkyLookController.js` | **Done.** `setLighting` paused the clock and then forced the `highfield` preset, so the hour moved only the sun and moon. Without a named preset it now applies the hour's time blend. A preset chosen after a blend is no longer skipped as a repeat. |
-| E | Storm sea and rain on water | 5, 6 | water and sea shaders | Swell and whitecaps from `seaStorm`; many small varied rain rings. |
+| E | Storm sea and rain on water | 5, 6, 15 | water and sea shaders | **Done** (`86e7e569`, `62b19c6f`); see "Workstream E outcome" below. |
 | F | Sky: lit cumulus and storm deck | 8, 10, 11, 17 | `overcastSkyLook`, cloud and sky nodes | Sun-lit cloud tops and shaded bases; storm scud layer; aerial horizon gradient. Phase 4 owns these files, so follow its structure. |
 | G | Ground variety and transitions | 12, 13 | terrain blend, grass and scatter | Noise-broken biome edges; grass hue and value variance; investigate the ghost bushes. |
 | H | Foliage lighting | 14, 16 | tree and leaf materials, dithered LOD | Inner-crown AO and translucency; storm crown bend; dither and fog speckle. |
@@ -246,3 +246,36 @@ Local artifacts (the capture directory is git-ignored):
 The contact sheet and corrected wetland eye-level view were inspected. A new
 accepted 38-shot baseline and phases 2–6 remain outstanding; this stop record
 does not mark any of those phases complete.
+
+## Workstream E outcome (2026-11-16): gaps 5, 6 and 15
+
+Commits `86e7e569` and `62b19c6f`. `9b607b4d` (another session) had narrowed the first shore line in between; `62b19c6f` replaces that shore line.
+
+- **Gap 5, rain rings: fixed.** The rings were one 1 m lattice with a fixed
+  0.45 m radius and period, added as brightness only. Two lattices (0.5 m and
+  0.33 m) now give each ring its own size, lifetime and phase. Each ring's crest
+  is also a slope on the sea and inland normals. Past a pixel the crest widens
+  and dims, and the rings fade where a pixel spans a fifth of a cell. Rain also
+  raises sea and river roughness.
+- **Gap 6, storm sea: fixed, without spray particles.** `seaStorm` now drives
+  swell ×2.6 (`stormScale`, CPU swimmer included), short-wave chop up to ×2.2,
+  wind-torn foam patches over open water past a gale, and swash foam up to ×2.
+- **Gap 15, clear coast: partly fixed.** A laced foam line now runs over the
+  first 1.4 m from shore (3.4 m in a storm), keyed on shore distance. A depth
+  band smeared metres wide on flat shelves. The open sea also darkens toward
+  the horizon (60–450 m). Still open: the underwater props still read as
+  floating sprites. They belong to shore life, not the water shader.
+- **Captures:** `coast-off-12`, `coast-storm-12` and `wetland-rain-12`, before
+  (`f0e62293`) and after (`62b19c6f`), are in `docs/qa/aaa-round-e/`, which is
+  local only, with a contact sheet. The wetland pond at that pose is a ground
+  puddle (workstream A), not water, so it shows no rings in either build.
+- **Perf:** a chunk-cross A/B (`--warmup 8 --duration 12 --settle
+  --gpuTimings 1`, frozen snapshots of `f0e62293` and `86e7e569`, two
+  interleaved rounds). Base `clear-1` ran cold (8 hitches) and is left out.
+  The result is level, within the spread between runs.
+
+| Case | Base GPU avg / p95 ms | Change GPU avg / p95 ms | Draws |
+| --- | --- | --- | --- |
+| clear (`storm=0`) | 2.13 / 2.39 | 2.09 / 2.32, 2.18 / 2.50 | 203 / 202–203 |
+| rain storm (`storm=1`) | 2.12 / 2.37, 2.13 / 2.37 | 2.10 / 2.29, 2.16 / 2.41 | 206 / 205–206 |
+
