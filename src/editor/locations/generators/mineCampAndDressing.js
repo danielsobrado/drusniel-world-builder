@@ -228,17 +228,20 @@ export function buildMinerCamp(b, center, floorY, { lightSection = 'hub' } = {})
 /** Hand-cranked wooden bilge pump & spout on the flooded pier edge, plus mooring bollard. */
 export function buildFloodedPierDressing(b, waterY) {
   const pierY = waterY + 0.18;
-  // Wooden bilge pump box column on left-front pier corner.
+  // Wooden bilge pump box column on left-front pier corner, with iron base collar, spout flange, and hand lever.
   const px = -0.92, pz = -83.15;
   b.prop('timber', createTimberBeam(P(px, pierY - 0.4, pz), P(px, pierY + 1.05, pz), 0.24, 0.24, {
     sideHint: P(1, 0, 0), bevelRatio: 0.15, dampStart: 0.7, dampEnd: 0.3, wear: 0.55,
   }), 0x866848);
-  b.prop('iron', stoneBox(0.28, 0.06, 0.28, P(px, pierY + 0.88, pz), { bevel: 0.01 }), 0x767d88);
-  b.prop('timber', createTimberBeam(P(px - 0.08, pierY + 0.68, pz), P(px - 0.58, pierY + 0.56, pz), 0.12, 0.09, {
-    sideHint: UP_DIR, bevelRatio: 0.14, dampStart: 0.5, dampEnd: 0.7,
-  }), 0x7e6143);
-  b.prop('iron', hewnBeam(P(px, pierY + 1.02, pz), P(px + 0.42, pierY + 1.32, pz), 0.04, 0.04, { bevel: 0.008 }), 0x848b97);
-  b.prop('iron', rod(P(px, pierY + 0.96, pz), P(px, pierY + 1.16, pz), 0.025, 0.025, 6), 0x7e8591);
+  b.prop('iron', stoneBox(0.28, 0.05, 0.28, P(px, pierY + 0.04, pz), { bevel: 0.01 }), 0x4c525b);
+  b.prop('iron', stoneBox(0.28, 0.06, 0.28, P(px, pierY + 0.88, pz), { bevel: 0.01 }), 0x4c525b);
+  b.prop('timber', createTimberBeam(P(px - 0.08, pierY + 0.68, pz), P(px - 0.44, pierY + 0.57, pz), 0.11, 0.08, {
+    sideHint: UP_DIR, bevelRatio: 0.14, dampStart: 0.55, dampEnd: 0.75,
+  }), 0x7a5e41);
+  b.prop('iron', stoneBox(0.06, 0.14, 0.14, P(px - 0.14, pierY + 0.66, pz), { bevel: 0.008 }), 0x4c525b);
+  b.prop('iron', hewnBeam(P(px, pierY + 1.02, pz), P(px + 0.40, pierY + 1.30, pz), 0.038, 0.036, { bevel: 0.008 }), 0x505660);
+  b.prop('iron', rod(P(px, pierY + 0.96, pz), P(px, pierY + 1.14, pz), 0.025, 0.025, 6), 0x4c525b);
+  b.prop('timber', rod(P(px + 0.40, pierY + 1.30, pz - 0.09), P(px + 0.40, pierY + 1.30, pz + 0.09), 0.024, 0.024, 8), 0x8b6c4a);
 
   // Mooring bollard + coiled rope + supply crate on right pier edge.
   b.prop('timber', rod(P(0.92, pierY, -82.85), P(0.92, pierY + 0.52, -82.85), 0.12, 0.11, 10), 0x846545);

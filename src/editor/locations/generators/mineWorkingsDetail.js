@@ -582,12 +582,12 @@ export function buildFloodedLevel(b, inclineTop, flooded, waterY, inclineShape =
     importance: 1.3,
     section: 'flooded',
   });
-  b.prop('timber', createTimberBeam(P(-3, waterY + 0.08, -84), P(-3.6, waterY + 0.35, -88), 0.26, 0.24, {
-    sideHint: UP_DIR, bevelRatio: 0.16, irregular: 0.28, bow: 0.02, taper: 0.1, dampStart: 0.8, dampEnd: 0.55, wear: 0.6,
+  b.prop('timber', createTimberBeam(P(-3, waterY + 0.04, -84), P(-3.6, waterY + 0.32, -88), 0.26, 0.24, {
+    sideHint: UP_DIR, bevelRatio: 0.16, irregular: 0.28, bow: 0.02, taper: 0.1, dampStart: 0.85, dampEnd: 0.55, wear: 0.6,
   }), 0x826546);
-  b.prop('timber', createTimberBeam(P(1.8, waterY + 0.04, -86.5), P(3.4, waterY + 0.06, -85.2), 0.22, 0.2, {
-    sideHint: UP_DIR, bevelRatio: 0.16, irregular: 0.25, bow: 0.015, dampStart: 0.8, dampEnd: 0.8, wear: 0.55,
-  }), 0x86694a);
+  b.prop('timber', createTimberBeam(P(2.4, waterY - 0.03, -87.4), P(4.1, waterY - 0.01, -86.0), 0.22, 0.2, {
+    sideHint: UP_DIR, bevelRatio: 0.16, irregular: 0.25, bow: 0.015, dampStart: 0.95, dampEnd: 0.95, wear: 0.55,
+  }), 0x765c40);
 
   // Far-side submerged piling post & rocky left-bank timber post lamps (no fake flat pool fill).
   buildGroundedLanternPost(b, 4.2, -89.2, {
