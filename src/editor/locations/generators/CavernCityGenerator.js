@@ -76,7 +76,7 @@ export function generate(b, params) {
   b.classify = (p, n, mask) => {
     const seam = fbm3(p.x * 0.05, p.y * 0.05, p.z * 0.05, b.seed + 41, 3);
     // Crystal seams run in the walls and roof, never across a floor.
-    mask[0] = Math.max(0, seam - 0.72) * 3 * (n.y > 0.4 ? 0 : 1);
+    mask[0] = Math.max(0, seam - 0.64) * 3 * (n.y > 0.4 ? 0 : 1);
     mask[1] = Math.min(1, Math.max(0, (LAKE + 7 - p.y) / 6));
     mask[2] = 0;
     // Where people walk, the floor is cut and flagged.
@@ -87,9 +87,26 @@ export function generate(b, params) {
 
   // --- Water and the light that shows the void ------------------------------
   b.prop('water', box(140, 0.05, 140, P(0, LAKE + 2.6, -72)));
-  for (const [x, y, z, power] of [[32, LAKE + 6, -40, 1.6], [-36, LAKE + 6, -102, 1.6], [0, 46, -40, 1.5], [-30, 40, -80, 1.3], [34, 40, -92, 1.3], [0, 30, -110, 1.2], [-44, 20, -40, 1], [44, 14, -100, 1]]) {
-    b.light(P(x, y, z), '#8496b8', power, 80, { flat: true });
+  // Doubled and leaning violet or teal by turns (was one #8496b8 at 1-1.6): at that
+  // level the void, its walls and the city's silhouette all read as black.
+  const VOID_TINTS = ['#7d8fd6', '#8a72cf', '#6fb0c8'];
+  for (const [index, [x, y, z, power]] of [[32, LAKE + 6, -40, 1.6], [-36, LAKE + 6, -102, 1.6], [0, 46, -40, 1.5], [-30, 40, -80, 1.3], [34, 40, -92, 1.3], [0, 30, -110, 1.2], [-44, 20, -40, 1], [44, 14, -100, 1]].entries()) {
+    b.light(P(x, y, z), VOID_TINTS[index % VOID_TINTS.length], power * 2.2, 80, { flat: true });
   }
+
+  // Glowing growth along the roads: the beds' own fungus, seeded wherever people
+  // walk, each patch with a small cold light, so streets, terraces and bridgeheads
+  // read as lit paths through the dark (`roads` in the loading tip).
+  const GROWTH_TINTS = ['#79e3c4', '#9b7ef0', '#6fd0ff'];
+  const growthRange = (lo, hi) => b.range(lo, hi);
+  const growth = (at, index) => {
+    const ground = b.terrainAt(at.x, at.y + 1.5, at.z) ?? at.y;
+    b.prop('glow', bellCluster(P(at.x, ground - 0.02, at.z), 4 + Math.floor(b.range(0, 4)), growthRange), 0xffffff, 0.85);
+    const tall = b.range(0.4, 1.1);
+    b.prop('glow', lanternCap(P(at.x + b.range(-0.6, 0.6), ground - 0.03, at.z + b.range(-0.6, 0.6)), tall, tall * b.range(0.24, 0.36), growthRange), 0xffffff, 0.9);
+    b.light(P(at.x, ground + 1.1, at.z), GROWTH_TINTS[index % GROWTH_TINTS.length], 1.5, 10, { halo: 0.6 });
+    b.nav.block(at, 0.8, 1.5);
+  };
 
   // --- Gate ledge -------------------------------------------------------------
   b.prop('masonry', block(1.6, 6.5, 1.6, P(-3.6, 16, -14.5)));
@@ -223,6 +240,19 @@ export function generate(b, params) {
   b.nav.block(wardenGate, 2.4, 5);
   lamp(P(-27.5, -6.4, -116), 0.9, 2);
   b.light(P(-45, -6, -128), '#6b4fb0', 1.3, 14, { halo: 2.2 });
+
+  // --- Lit roads -----------------------------------------------------------------------
+  let growthIndex = 0;
+  for (const side of [-1, 1]) growth(P(side * 6.4, ledge.y, ledge.z - 4), growthIndex++);
+  for (let index = 0; index < 10; index += 1) {
+    const angle = index / 10 * Math.PI * 2 + 0.2;
+    growth(P(market.x + Math.cos(angle) * 18.2, market.y, market.z + Math.sin(angle) * 18.2), growthIndex++);
+  }
+  for (let z = west.z - 20; z <= west.z + 20; z += 8) growth(P(west.x + 6.8, west.y, z), growthIndex++);
+  for (let z = east.z - 18; z <= east.z + 6; z += 8) growth(P(east.x - 6.6, east.y, z), growthIndex++);
+  for (const [x, y, z] of [[-17.5, 8, -72], [-35.4, 14, -70], [17.5, 8, -76], [35.4, 2, -80], [8, 8, -88], [20, -6, -103]]) {
+    growth(P(x, y, z), growthIndex++);
+  }
 
   b.spawn('entry', P(0, 16, 2), 0);
   b.exit('gate', P(gate.x, gate.y, gate.z - 0.5), { radius: 2.8, label: 'Take the tunnel back to the surface' });
