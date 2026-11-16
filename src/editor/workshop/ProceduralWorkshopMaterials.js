@@ -538,6 +538,8 @@ export function createWorkshopMaterials(recipe) {
       stoneConfig.workshopNormalScale,
     ),
     roughnessMap: stoneSet?.arm ?? stoneRoughness,
+    // The set's packed map carries occlusion in red: the pits and joints of the photograph.
+    aoMap: stoneSet?.arm ?? null,
     // Always on. Before 2026-07-25 an imported albedo disabled vertex colours
     // entirely, which contradicted 15-…md line 89 and threw away the baked
     // crevice occlusion. `applyUnitShading` switches to a neutral grey
@@ -566,8 +568,9 @@ export function createWorkshopMaterials(recipe) {
     bumpMap: roofBump,
     bumpScale: 0.095,
     normalMap: roofSet?.normal ?? roofNormal,
-    normalScale: new THREE.Vector2(0.68, 0.68),
+    normalScale: new THREE.Vector2(0.85, 0.85),
     roughnessMap: roofSet?.arm ?? roofRoughness,
+    aoMap: roofSet?.arm ?? null,
     vertexColors: true,
     roughness: 1,
     metalness: 0,
@@ -593,8 +596,10 @@ export function createWorkshopMaterials(recipe) {
       bumpMap: plasterBump,
       bumpScale: recipe.finish === 'masonry' ? 0.025 : 0.075,
       normalMap: plasterSet?.normal ?? plasterNormal,
-      normalScale: new THREE.Vector2(0.48, 0.48),
+      // Render read as flat paint at 0.48: trowel marks and patching need their relief.
+      normalScale: new THREE.Vector2(0.85, 0.85),
       roughnessMap: plasterSet?.arm ?? mortarRoughness,
+      aoMap: plasterSet?.arm ?? null,
       roughness: 1,
       metalness: 0,
       envMapIntensity: 0.66,
@@ -605,8 +610,9 @@ export function createWorkshopMaterials(recipe) {
       bumpMap: timberSet ? null : surfaceBumpTexture(recipe.seed + 317, 0.5),
       bumpScale: 0.035,
       normalMap: timberSet?.normal ?? woodNormal,
-      normalScale: new THREE.Vector2(0.6, 0.6),
+      normalScale: new THREE.Vector2(0.95, 0.95),
       roughnessMap: timberSet?.arm ?? woodRoughness,
+      aoMap: timberSet?.arm ?? null,
       roughness: 1,
       metalness: 0,
       envMapIntensity: 0.78,
