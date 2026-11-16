@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { createSurfaceTexturePixels } from '../assets/proceduralTexturePixels.js';
 import { mixSeed } from './ProceduralRandom.js';
+import { SETTLEMENT_SURFACE_SETS } from '../world/settlements/surfaces/SettlementDressing.js';
 import { getSurfaceTexture } from './ProceduralWorkshopTextureConfig.js';
 import { stoneSurfaceProfile } from './ProceduralWorkshopStoneSurfaceConfig.js';
 import { createStoneTexturePixels } from './ProceduralWorkshopStoneTexture.js';
@@ -583,8 +584,9 @@ export function createWorkshopMaterials(recipe) {
     stone,
     mortar: tagWorkshopMaterial(new THREE.MeshStandardNodeMaterial({
       color: wallAlbedo?.tint ?? (recipe.finish === 'masonry'
-        // Rubble is the stone itself, at the style's own tone; bare joint mortar is darker.
-        ? plasterSet ? new THREE.Color().setRGB(...STONE_PALETTES[recipe.style].base.map((channel) => channel / 255), THREE.SRGBColorSpace)
+        // Rubble is the stone itself, at the style's own tone; bare joint mortar is
+        // darker; brick keeps its own fired colour.
+        ? plasterSet ? SETTLEMENT_SURFACE_SETS[plasterSet.name]?.ownColour ? '#ffffff' : new THREE.Color().setRGB(...STONE_PALETTES[recipe.style].base.map((channel) => channel / 255), THREE.SRGBColorSpace)
           : (stoneConfig.mortarColor ?? new THREE.Color(
           STONE_PALETTES[recipe.style].base[0] / 255 * 0.66,
           STONE_PALETTES[recipe.style].base[1] / 255 * 0.66,

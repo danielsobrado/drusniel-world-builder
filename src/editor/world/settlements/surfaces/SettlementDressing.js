@@ -72,6 +72,15 @@ export const SETTLEMENT_SURFACE_SETS = Object.freeze({
   'stone-rock': Object.freeze({ source: 'rock_boulder_dry', neutralMean: 218, repeat: 0.8, contrast: 0.75, ...CLOSE_UP }),
   'roof-slate': Object.freeze({ source: 'grey_roof_tiles_02', neutralMean: 206, repeat: 0.62, ...CLOSE_UP }),
   'roof-clay': Object.freeze({ source: 'roof_09', neutralMean: 206, repeat: 0.62, ...CLOSE_UP }),
+  // Render with a hand: daub over wattle, and a lime coat that flakes. A light
+  // median only — the 7 px one flattened plaster to paint, and render has no
+  // camera grain to lose, only trowel relief to keep.
+  'plaster-daub': Object.freeze({ source: 'clay_plaster', neutralMean: 214, contrast: 1.15, size: 1024, median: 3 }),
+  'plaster-flaking': Object.freeze({ source: 'white_rough_plaster', neutralMean: 220, contrast: 1.1, size: 1024, median: 3 }),
+  // Brick walls in their own fired colour (`ownColour`: not tinted by the town's
+  // stone), for a masonry house walled in brick rather than rubble.
+  'brick-castle': Object.freeze({ source: 'castle_brick_02_red', ownColour: true, saturation: 0.85, ...CLOSE_UP, median: 5 }),
+  'brick-weathered': Object.freeze({ source: 'brick_wall_02', ownColour: true, saturation: 0.9, ...CLOSE_UP, median: 5 }),
   'plaster-aged': Object.freeze({ ptl: 'designer-aged-plaster', bakeMetres: 2.4, neutralGain: 1.3 }),
   'cobble-cut': Object.freeze({ ptl: 'cut-cobble-stone', bakeMetres: 2.4, tileMetres: 2.4 }),
   'earth-gravel': Object.freeze({ ptl: 'limestone-gravel', bakeMetres: 3, tileMetres: 3 }),
@@ -100,17 +109,17 @@ export const TIMBER_TONES = Object.freeze({ brown: '#c9925f', grey: '#b9ae9c', d
 
 const ROOF_SETS = Object.freeze({ slate: 'roof-slate', terracotta: 'roof-clay' });
 
-const dressing = (key, cobble, flagstone, timberTone, { plaster = 'plaster-lime', earth = 'earth-dry' } = {}) => (
-  Object.freeze({ key, cobble, flagstone, timberTone, stone: 'stone-rock', rubble: 'stone-rubble', plaster, earth })
+const dressing = (key, cobble, flagstone, timberTone, { plaster = 'plaster-lime', earth = 'earth-dry', rubble = 'stone-rubble' } = {}) => (
+  Object.freeze({ key, cobble, flagstone, timberTone, stone: 'stone-rock', rubble, plaster, earth })
 );
 
 const DRESSINGS = Object.freeze([
   dressing('grey-setts', 'cobble-grey', 'flag-monastery', 'brown', { plaster: 'plaster-painted' }),
-  dressing('mossy-lanes', 'cobble-mossy', 'flag-monastery', 'grey'),
-  dressing('dark-quarter', 'cobble-dark', 'flag-slate', 'dark'),
-  dressing('river-stone', 'cobble-old', 'flag-monastery', 'dark'),
+  dressing('mossy-lanes', 'cobble-mossy', 'flag-monastery', 'grey', { plaster: 'plaster-flaking' }),
+  dressing('dark-quarter', 'cobble-dark', 'flag-slate', 'dark', { plaster: 'plaster-daub', rubble: 'brick-castle' }),
+  dressing('river-stone', 'cobble-old', 'flag-monastery', 'dark', { plaster: 'plaster-daub' }),
   dressing('old-market', 'cobble-cut', 'flag-monastery', 'grey', { plaster: 'plaster-painted', earth: 'earth-gravel' }),
-  dressing('black-setts', 'cobble-dark', 'flag-monastery', 'brown', { plaster: 'plaster-painted' }),
+  dressing('black-setts', 'cobble-dark', 'flag-monastery', 'brown', { plaster: 'plaster-flaking', rubble: 'brick-weathered' }),
   dressing('kit-setts', 'cobble-kit', 'flag-slate', 'dark', { plaster: 'plaster-painted' }),
   dressing('old-town', 'cobble-old', 'flag-monastery', 'brown', { plaster: 'plaster-painted', earth: 'earth-gravel' }),
 ]);
