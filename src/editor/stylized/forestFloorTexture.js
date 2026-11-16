@@ -12,7 +12,7 @@
  * habitat evaluation, so it keeps its 16 × 16 samples and is upsampled
  * bilinearly into the texture: the same main-thread cost as before.
  */
-export const FOREST_FLOOR_SIZE = 64;
+export const FOREST_FLOOR_SIZE = 128;
 export const FOREST_FLOOR_CANOPY_SAMPLES = 16;
 
 /**

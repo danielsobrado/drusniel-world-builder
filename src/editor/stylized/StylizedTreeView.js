@@ -314,6 +314,7 @@ export class StylizedTreeView {
       }),
     ]);
     const barkScans = scanResult.status === 'fulfilled' ? scanResult.value : new Map();
+    this.barkScans = barkScans;
     // One pair per profile, shared by every variant that names it.
     for (const scan of barkScans.values()) this.textures.push(scan.albedoHeight, scan.normalRoughness);
     const failure = barkResult.status === 'rejected'

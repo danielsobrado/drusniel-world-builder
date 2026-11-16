@@ -94,13 +94,59 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
         strength *= 1 - flatten * (1 - smoothstep(rock.radius, rock.reach, distance));
       }
     }
-    // Root zone: bare roots and litter at a trunk's foot, the stand thinning in
-    // over the falloff. Lobed, not round: litter spills unevenly between roots.
+    // Root & deadwood zone: clears tightly under wood, parts collar tufts outward around logs and stumps.
+    out.rotSin = NaN;
+    out.rotCos = NaN;
     for (const root of roots) {
-      const dx = x - root.x, dz = z - root.z, distanceSquared = dx * dx + dz * dz;
+      if (root.kind === 'log') {
+        const vx = root.x1 - root.x0;
+        const vz = root.z1 - root.z0;
+        const segLenSq = vx * vx + vz * vz;
+        const t = segLenSq > 1e-6
+          ? Math.max(0, Math.min(1, ((x - root.x0) * vx + (z - root.z0) * vz) / segLenSq))
+          : 0.5;
+        const dx = x - (root.x0 + vx * t);
+        const dz = z - (root.z0 + vz * t);
+        const distSq = dx * dx + dz * dz;
+        if (distSq >= root.reach * root.reach) continue;
+        const dist = Math.sqrt(distSq);
+        const edgeJitter = 1 + 0.16 * Math.sin(t * 14 + root.phase);
+        const coreR = root.radius * (0.9 + 0.12 * Math.sin(t * 9 + root.phase));
+        if (dist < coreR) return false;
+        const collarEnd = root.collar * edgeJitter;
+        const keep = dist < collarEnd
+          ? 0.25 + 0.75 * smoothstep(coreR, collarEnd, dist)
+          : 1;
+        if (hash2d(rank, 93) >= keep) return false;
+        if (dist < collarEnd && dist > 1e-4) {
+          // Sheltered moisture beside the log produces slightly fuller collar tufts parted outward.
+          const collarBoost = 1 + 0.22 * (1 - smoothstep(coreR, collarEnd, dist));
+          strength = Math.min(1.25, strength * collarBoost);
+          out.rotSin = -dx / dist;
+          out.rotCos = dz / dist;
+        }
+        continue;
+      }
+      const dx = x - root.x;
+      const dz = z - root.z;
+      const distanceSquared = dx * dx + dz * dz;
       if (distanceSquared >= root.reach * root.reach) continue;
+      const dist = Math.sqrt(distanceSquared);
+      if (root.kind === 'stump') {
+        const lobe = 1 + ROOT_LOBE * Math.cos(5 * Math.atan2(dz, dx) + root.phase);
+        const coreR = root.radius * lobe * 0.9;
+        if (dist < coreR) return false;
+        const keep = smoothstep(coreR, root.reach * lobe, dist);
+        if (hash2d(rank, 93) >= keep) return false;
+        if (dist < root.collar * lobe && dist > 1e-4) {
+          strength *= 0.85 + 0.3 * keep;
+          out.rotSin = -dx / dist;
+          out.rotCos = dz / dist;
+        }
+        continue;
+      }
       const lobe = 1 + ROOT_LOBE * Math.cos(3 * Math.atan2(dz, dx) + root.phase);
-      const keep = smoothstep(root.radius, root.reach, Math.sqrt(distanceSquared) / lobe);
+      const keep = smoothstep(root.radius, root.reach, dist / lobe);
       if (hash2d(rank, 93) >= keep) return false;
       strength *= 0.55 + 0.45 * keep;
     }

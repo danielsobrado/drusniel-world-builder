@@ -43,6 +43,10 @@ const DETAIL_SCRATCH = {
   scale: new THREE.Vector3(),
   normal: new THREE.Vector3(),
   yaw: new THREE.Quaternion(),
+  axis: new THREE.Vector3(),
+  side: new THREE.Vector3(),
+  up: new THREE.Vector3(),
+  basis: new THREE.Matrix4(),
 };
 
 function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
@@ -90,6 +94,9 @@ export class StylizedGroundDetailView {
     forestFieldProvider = null,
     treePlacementsProvider = null,
     rockBlockersProvider = null,
+    bushPlacementsProvider = null,
+    debrisPlacementsProvider = null,
+    debrisFootprintsProvider = null,
     obstacleVersionProvider = null,
     paletteLayerId = null,
   }) {
@@ -106,6 +113,9 @@ export class StylizedGroundDetailView {
     this.forestFieldProvider = forestFieldProvider;
     this.treePlacementsProvider = treePlacementsProvider;
     this.rockBlockersProvider = rockBlockersProvider;
+    this.bushPlacementsProvider = bushPlacementsProvider;
+    this.debrisPlacementsProvider = debrisPlacementsProvider;
+    this.debrisFootprintsProvider = debrisFootprintsProvider;
     this.obstacleVersionProvider = obstacleVersionProvider;
     this.prototypeIndicesByAsset = new Map();
     this.prototypes = [];
@@ -117,6 +127,9 @@ export class StylizedGroundDetailView {
     this.prototypeWaterRules = [];
     this.prototypeStrandRules = [];
     this.prototypeShoreRules = [];
+    this.prototypeMinCanopy = [];
+    this.prototypeMinShoreClearance = [];
+    this.prototypeScanSyncHooks = [];
     this.oceanDistance = layerName === 'shoreLife'
       ? createOceanDistanceField(terrainView, layerConfig.coastalReachMeters ?? 48) : null;
     this.prototypeBiomeRules = [];
@@ -141,18 +154,56 @@ export class StylizedGroundDetailView {
 
   placementMatrix(placement) {
     const index = placement.prototypeIndex;
-    const height = Number.isFinite(placement.waterPlacementHeight)
+    const baseHeight = Number.isFinite(placement.waterPlacementHeight)
       ? placement.waterPlacementHeight : placement.height;
+    const heightOffset = this.prototypeHeightOffsets[index] ?? 0;
+    const scale = placement.scale ?? 1;
+    const footprint = this.prototypeFootprints?.[index];
+    const conform = this.prototypeConform?.[index] === true;
     const groundNormal = placement.groundNormal
-      ?? (this.prototypeConform[index] ? this.slopeNormal(placement.x, placement.z) : null);
+      ?? (conform ? this.slopeNormal(placement.x, placement.z) : null);
+
+    if (conform && !placement.groundNormal && footprint) {
+      const hx = footprint.halfX * scale;
+      const hz = footprint.halfZ * scale;
+      const longHalf = Math.max(hx, hz);
+      if (longHalf >= 0.75) {
+        const yaw = placement.rotationY ?? 0;
+        const alongX = hx >= hz;
+        const dirX = alongX ? Math.cos(yaw) : Math.sin(yaw);
+        const dirZ = alongX ? -Math.sin(yaw) : Math.cos(yaw);
+        const span = longHalf * 0.85;
+        const h0 = this.terrainView.getCanonicalHeight(placement.x - dirX * span, placement.z - dirZ * span);
+        const h1 = this.terrainView.getCanonicalHeight(placement.x + dirX * span, placement.z + dirZ * span);
+        const yMid = Math.min(baseHeight, 0.5 * (h0 + h1)) + heightOffset;
+        DETAIL_SCRATCH.axis.set(dirX * span * 2, h1 - h0, dirZ * span * 2).normalize();
+        DETAIL_SCRATCH.normal.fromArray(groundNormal);
+        if (alongX) {
+          DETAIL_SCRATCH.side.crossVectors(DETAIL_SCRATCH.axis, DETAIL_SCRATCH.normal).normalize();
+          DETAIL_SCRATCH.up.crossVectors(DETAIL_SCRATCH.side, DETAIL_SCRATCH.axis).normalize();
+          DETAIL_SCRATCH.basis.makeBasis(DETAIL_SCRATCH.axis, DETAIL_SCRATCH.up, DETAIL_SCRATCH.side);
+        } else {
+          DETAIL_SCRATCH.side.crossVectors(DETAIL_SCRATCH.normal, DETAIL_SCRATCH.axis).normalize();
+          DETAIL_SCRATCH.up.crossVectors(DETAIL_SCRATCH.side, DETAIL_SCRATCH.axis).normalize();
+          DETAIL_SCRATCH.basis.makeBasis(DETAIL_SCRATCH.side, DETAIL_SCRATCH.up, DETAIL_SCRATCH.axis);
+        }
+        DETAIL_SCRATCH.quaternion.setFromRotationMatrix(DETAIL_SCRATCH.basis);
+        return new THREE.Matrix4().compose(
+          DETAIL_SCRATCH.position.set(placement.x, yMid, placement.z),
+          DETAIL_SCRATCH.quaternion,
+          DETAIL_SCRATCH.scale.setScalar(scale),
+        );
+      }
+    }
+
     return new THREE.Matrix4().compose(
-      DETAIL_SCRATCH.position.set(placement.x, height + (this.prototypeHeightOffsets[index] ?? 0), placement.z),
+      DETAIL_SCRATCH.position.set(placement.x, baseHeight + heightOffset, placement.z),
       groundNormal
         ? DETAIL_SCRATCH.quaternion.setFromUnitVectors(DETAIL_UP,
           DETAIL_SCRATCH.normal.fromArray(groundNormal)).multiply(
           DETAIL_SCRATCH.yaw.setFromAxisAngle(DETAIL_UP, placement.rotationY))
         : DETAIL_SCRATCH.quaternion.setFromAxisAngle(DETAIL_UP, placement.rotationY),
-      DETAIL_SCRATCH.scale.setScalar(placement.scale),
+      DETAIL_SCRATCH.scale.setScalar(scale),
     );
   }
 
@@ -320,6 +371,13 @@ export class StylizedGroundDetailView {
         definition.strand ?? this.layerConfig.strand ?? null,
       );
       this.prototypeShoreRules.push(definition.shoreHabitat ?? null);
+      this.prototypeMinCanopy.push(Number.isFinite(definition.minCanopy) ? definition.minCanopy : 0);
+      this.prototypeMinShoreClearance.push(
+        Number.isFinite(definition.minShoreClearance) ? definition.minShoreClearance : 0,
+      );
+      if (typeof definition.syncScannedBark === 'function') {
+        this.prototypeScanSyncHooks.push(definition.syncScannedBark);
+      }
       this.prototypeBiomeRules.push({
         tileIds: definition.tileIds ?? null,
         weight: definition.weight ?? 1,
@@ -332,6 +390,7 @@ export class StylizedGroundDetailView {
         material: part.material,
         kind: part.kind ?? 'detail',
         instanceSurface: part.instanceSurface,
+        instanceBiomeLook: part.instanceBiomeLook,
       }));
       this.prototypes.push(parts);
       this.prototypeFootprints.push(computePrototypeFootprint(parts));
@@ -362,6 +421,37 @@ export class StylizedGroundDetailView {
     this.prototypeRevision += 1;
   }
 
+  /** Upgrades procedural bark textures on procedural deadwood materials once tree scans finish loading. */
+  syncScannedBark(barkScans) {
+    if (!barkScans || this.disposed) return false;
+    let upgraded = false;
+    for (const sync of this.prototypeScanSyncHooks) {
+      if (sync(barkScans)) upgraded = true;
+    }
+    if (upgraded && this.prototypes.length > 0 && this.terrainView?.renderer) {
+      disposeInstancedRenderers(this.root, this.meshes);
+      this.meshes = [];
+      const capacity = instanceCapacity({
+        residentRadius: this.layerConfig.residentRadius,
+        perChunk: this.layerConfig.perChunk,
+      });
+      this.meshes.push(...createInstancedRenderers({
+        root: this.root,
+        partsByPrototype: this.prototypes,
+        renderer: this.terrainView.renderer,
+        capacity,
+        name: `stylized-${this.layerName}-0`,
+        castShadow: this.layerConfig.castShadow === true,
+      }));
+      this.instanceRows = new ScatterInstanceRows(this.layerName,
+        placement => this.placementMatrix(placement), placement => this.placementAppearance(placement));
+      this.lastUpdateKey = null;
+      this.pendingRebuild = null;
+      this.prototypeRevision += 1;
+    }
+    return upgraded;
+  }
+
   manifestForChunk(chunkX, chunkZ, shouldYield = null) {
     const forestField = this.forestFieldProvider?.();
     this.pathClearance ??= this.terrainView.tileMap
@@ -370,6 +460,9 @@ export class StylizedGroundDetailView {
     const { obstacles, signature: obstacleSignature } = collectChunkObstacleCircles(chunkX, chunkZ, {
       treePlacementsProvider: this.treePlacementsProvider,
       rockBlockersProvider: this.rockBlockersProvider,
+      bushPlacementsProvider: this.bushPlacementsProvider,
+      debrisPlacementsProvider: this.debrisPlacementsProvider,
+      debrisFootprintsProvider: this.debrisFootprintsProvider,
     });
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
@@ -449,8 +542,35 @@ export class StylizedGroundDetailView {
         }
 
         // A layer of woodland floor lives under canopy, thinning out with it.
-        if (this.layerConfig.canopyGate
-          && candidate.priority >= (forestField?.sample(candidate.x, candidate.z).patchCoverage ?? 0)) return null;
+        const coverage = forestField?.sample(candidate.x, candidate.z).patchCoverage ?? 0;
+        const minCanopy = this.prototypeMinCanopy[candidate.prototypeIndex] ?? 0;
+        if (this.layerConfig.canopyGate && (candidate.priority >= coverage || coverage < minCanopy)) return null;
+
+        const minShore = this.prototypeMinShoreClearance[candidate.prototypeIndex] ?? 0;
+        if (minShore > 0) {
+          const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
+          if (Number.isFinite(seaLevel) && candidate.height <= seaLevel + 0.9) return null;
+          this.oceanDistance ??= createOceanDistanceField(this.terrainView, 24);
+          const dist = this.oceanDistance.sample(candidate.x, candidate.z);
+          if (Number.isFinite(dist) && dist < minShore) return null;
+        }
+
+        if (this.prototypeConform[candidate.prototypeIndex] && footprint) {
+          const scale = candidate.scale ?? 1;
+          const longHalf = Math.max(footprint.halfX, footprint.halfZ) * scale;
+          if (longHalf >= 0.75) {
+            const yaw = candidate.rotationY ?? 0;
+            const alongX = footprint.halfX >= footprint.halfZ;
+            const dirX = alongX ? Math.cos(yaw) : Math.sin(yaw);
+            const dirZ = alongX ? -Math.sin(yaw) : Math.cos(yaw);
+            const span = longHalf * 0.85;
+            const h0 = options.heightAt(candidate.x - dirX * span, candidate.z - dirZ * span);
+            const h1 = options.heightAt(candidate.x + dirX * span, candidate.z + dirZ * span);
+            if (Math.abs(h1 - h0) > span * 0.9) return null;
+            const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
+            if (Number.isFinite(seaLevel) && Math.min(h0, h1) <= seaLevel + 0.25) return null;
+          }
+        }
 
         const metadata = evaluateDetailSurfacePlacement(this, candidate, options.heightAt, shouldYield);
         if (!metadata) return null;
@@ -570,6 +690,9 @@ export class StylizedGroundDetailView {
     this.prototypeWaterRules.length = 0;
     this.prototypeStrandRules.length = 0;
     this.prototypeShoreRules.length = 0;
+    this.prototypeMinCanopy.length = 0;
+    this.prototypeMinShoreClearance.length = 0;
+    this.prototypeScanSyncHooks.length = 0;
     this.oceanDistance?.cache.clear();
     this.prototypeBiomeRules.length = 0;
     this.prototypeIndicesByAsset.clear();

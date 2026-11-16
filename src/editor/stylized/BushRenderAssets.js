@@ -1,3 +1,4 @@
+import { meadowPatchOnPlant } from './understoryPatch.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -148,7 +149,8 @@ export function createBushProxyMaterial(sourceMaterial, {
     vec3(top.r, top.g, top.b),
     heightMix,
   );
-  const shadedColor = biomeLook ? biomeUnderstoryColor(ramp) : ramp;
+  const local = config ? meadowPatchOnPlant(ramp, config) : ramp;
+  const shadedColor = biomeLook ? biomeUnderstoryColor(local) : local;
   material.colorNode = shadedColor;
   material.emissiveNode = understoryShadeEmission(shadedColor);
   material.transparent = false;

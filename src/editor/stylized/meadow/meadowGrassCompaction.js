@@ -48,7 +48,7 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
   output.count = 0;
   output.minHeight = previous?.output.minHeight ?? Infinity;
   output.maxHeight = previous?.output.maxHeight ?? -Infinity;
-  const ground = { height: 0, strength: 1, shape: 0, path: 0 };
+  const ground = { height: 0, strength: 1, shape: 0, path: 0, rotSin: NaN, rotCos: NaN };
   const cards = Boolean(template.userData.meadow?.cards);
   const distribution = createMeadowTileDistribution(centerX, centerZ, template.userData.meadow.tileSize);
   const writeWind = createMeadowWindVariationWriter(centerX, centerZ, template.userData.meadow.tileSize);
@@ -110,8 +110,13 @@ export function createCompaction({ template, centerX, centerZ, sample, output: r
         output.maxHeight = Math.max(output.maxHeight, output.position[o * 4 + 1]);
         output.position[o * 4 + 2] = localZ;
         output.position[o * 4 + 3] = ground.strength;
-        output.rotation[o * 2] = source.rotation[cursor * 2];
-        output.rotation[o * 2 + 1] = source.rotation[cursor * 2 + 1];
+        if (Number.isFinite(ground.rotSin) && Number.isFinite(ground.rotCos)) {
+          output.rotation[o * 2] = ground.rotSin;
+          output.rotation[o * 2 + 1] = ground.rotCos;
+        } else {
+          output.rotation[o * 2] = source.rotation[cursor * 2];
+          output.rotation[o * 2 + 1] = source.rotation[cursor * 2 + 1];
+        }
         // A card's atlas cell is its silhouette's block of four plus its variant.
         output.data[o * 4] = cards
           ? ground.shape * 4 + source.data[p]

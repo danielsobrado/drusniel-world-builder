@@ -92,28 +92,38 @@ export function paintContactShade({
   }
   const half = chunkWorldSize / 2;
   const metersPerTexel = chunkWorldSize / size;
+  const toTexelX = (worldX) => (worldX - (centerWorldX - half)) / metersPerTexel - 0.5;
+  const toTexelZ = (worldZ) => ((centerWorldZ + half) - worldZ) / metersPerTexel - 0.5;
   let painted = 0;
   for (const source of sources ?? []) {
     const radius = Number(source?.radius);
     if (!Number.isFinite(radius) || radius <= 0) continue;
-    if (!Number.isFinite(source.x) || !Number.isFinite(source.z)) continue;
+    const isCapsule = Number.isFinite(source.x0) && Number.isFinite(source.z0)
+      && Number.isFinite(source.x1) && Number.isFinite(source.z1);
+    if (!isCapsule && (!Number.isFinite(source.x) || !Number.isFinite(source.z))) continue;
     const strength = Number(source.strength ?? 1) * strengthScale;
     if (!(strength > 0)) continue;
-    // Canonical to texel, in the same orientation the texture is written in: x
-    // runs left to right, z runs *down* from the top edge.
-    const centerTexelX = (source.x - (centerWorldX - half)) / metersPerTexel - 0.5;
-    const centerTexelZ = ((centerWorldZ + half) - source.z) / metersPerTexel - 0.5;
+    const tx0 = toTexelX(isCapsule ? source.x0 : source.x);
+    const tz0 = toTexelZ(isCapsule ? source.z0 : source.z);
+    const tx1 = isCapsule ? toTexelX(source.x1) : tx0;
+    const tz1 = isCapsule ? toTexelZ(source.z1) : tz0;
     const texelRadius = radius / metersPerTexel;
-    const minimumZ = Math.max(0, Math.floor(centerTexelZ - texelRadius));
-    const maximumZ = Math.min(size - 1, Math.ceil(centerTexelZ + texelRadius));
-    const minimumX = Math.max(0, Math.floor(centerTexelX - texelRadius));
-    const maximumX = Math.min(size - 1, Math.ceil(centerTexelX + texelRadius));
+    const minimumZ = Math.max(0, Math.floor(Math.min(tz0, tz1) - texelRadius));
+    const maximumZ = Math.min(size - 1, Math.ceil(Math.max(tz0, tz1) + texelRadius));
+    const minimumX = Math.max(0, Math.floor(Math.min(tx0, tx1) - texelRadius));
+    const maximumX = Math.min(size - 1, Math.ceil(Math.max(tx0, tx1) + texelRadius));
     if (minimumX > maximumX || minimumZ > maximumZ) continue;
     painted += 1;
+    const vx = tx1 - tx0;
+    const vz = tz1 - tz0;
+    const segLenSq = vx * vx + vz * vz;
     for (let z = minimumZ; z <= maximumZ; z += 1) {
       for (let x = minimumX; x <= maximumX; x += 1) {
-        const dx = (x - centerTexelX) / texelRadius;
-        const dz = (z - centerTexelZ) / texelRadius;
+        const t = segLenSq > 1e-6
+          ? Math.max(0, Math.min(1, ((x - tx0) * vx + (z - tz0) * vz) / segLenSq))
+          : 0;
+        const dx = (x - (tx0 + vx * t)) / texelRadius;
+        const dz = (z - (tz0 + vz * t)) / texelRadius;
         const distance = Math.hypot(dx, dz);
         if (distance >= 1) continue;
         // Quadratic, as the donor has it: a soft patch rather than a disc, with no

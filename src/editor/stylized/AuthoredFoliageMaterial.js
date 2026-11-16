@@ -7,6 +7,9 @@ import { gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.j
 import { understoryShadeEmission } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { applyCloudShadow } from './CloudShadow.js';
+import { meadowPatchOnPlant } from './understoryPatch.js';
+import { worldNoiseField } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 
 /** Roughness of a fully rain-wet leaf. */
 const WET_LEAF_ROUGHNESS = 0.34;
@@ -60,7 +63,9 @@ export function biomeUnderstoryColor(color) {
   const snowSteps = look.w.div(4).floor();
   const saturation = look.w.sub(snowSteps.mul(4));
   const tinted = mix(vec3(dot(color, vec3(0.2126, 0.7152, 0.0722))), color, saturation).mul(look.xyz);
-  const clumps = mx_noise_float(positionWorld.mul(2.7)).mul(0.5).add(0.5);
+  // Snow clumps from the mottle of the world noise (one tap; it was a 3D Perlin
+  // on every understory pixel, snow or not).
+  const clumps = worldNoiseField(WORLD_NOISE_LAYERS.meso)(positionWorld.xz.add(positionWorld.y).div(2.6)).g;
   // A trace of snow switches it off, as on the rocks (snowDeposition): taiga's 0.1
   // mixed 13% white into dark leaves, which in linear light doubled their value
   // and drew every shrub, plant and log there pale blue (2026-11-12 captures).
@@ -77,7 +82,10 @@ export function biomeUnderstoryColor(color) {
  */
 export function applyUnderstoryPalette(material, config, tileId = null, role = 'auto', { biomeLook = false } = {}) {
   const graded = gradePlantPart(authoredFoliageColor(material), resolveFoliagePalette(config, tileId), role);
-  const color = biomeLook ? biomeUnderstoryColor(graded) : graded;
+  // Leaves follow the patches of the grass they stand in; petals, bark and stems keep their paint.
+  const leafy = role === 'auto' || role === 'leaf' || role === 'foliage';
+  const local = leafy ? meadowPatchOnPlant(graded, config) : graded;
+  const color = biomeLook ? biomeUnderstoryColor(local) : local;
   material.colorNode = color;
   const blossom = role === 'petal' || role === 'center';
   const fill = understoryShadeEmission(color, { blossom });

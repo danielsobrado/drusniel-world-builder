@@ -2377,20 +2377,24 @@ stylizedSurface:
     enabled: true
     residentRadius: 1
     perChunk: 256
-    tileIds: [5, 6, 7, 8, 9]
+    tileIds: [5, 6, 7, 8, 9, 12]
     canopyGate: true
     minScale: 0.8
     maxScale: 1.3
-    radius: 0.5
+    radius: 0.55
     heightOffset: 0
     colorVariation: 0.16
     castShadow: false
     variants:
-      leafLitter: { weight: 6, tileIds: [5, 6, 7, 8] }
-      mossMound: { weight: 1.5 }
-      fallenBranch: { weight: 1 }
-      fallenLog: { weight: 0.2 }
-      stump: { weight: 0.14 }
+      leafLitter: { weight: 5.5, tileIds: [5, 6, 7, 8] }
+      mossMound: { weight: 1.5, tileIds: [5, 6, 7, 8, 9, 12] }
+      fallenBranchBroadleaf: { kind: fallenBranch, barkProfile: pine, weight: 0.95, tileIds: [5, 6, 7], minCanopy: 0.14 }
+      fallenBranchConifer: { kind: fallenBranch, barkProfile: spruce, weight: 0.95, tileIds: [8, 9, 12], minCanopy: 0.14 }
+      fallenLogBroadleaf: { kind: fallenLog, barkProfile: pine, weight: 0.24, tileIds: [5, 6, 7], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogConifer: { kind: fallenLog, barkProfile: spruce, weight: 0.24, tileIds: [8, 9], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogSwamp: { kind: fallenLog, barkProfile: swamp, weight: 0.2, tileIds: [12], minCanopy: 0.16, minShoreClearance: 1.5 }
+      stumpBroadleaf: { kind: stump, barkProfile: pine, weight: 0.16, tileIds: [5, 6, 7], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpConifer: { kind: stump, barkProfile: spruce, weight: 0.16, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
   # The tropical kit's understory (assets.tropicalKitVariants): jungle grasses and
   # groundcover in tropical seasonal forest and rainforest. At 324-1 960 triangles
   # an instance it is a heavier job than the 350-triangle ground-detail accents, so

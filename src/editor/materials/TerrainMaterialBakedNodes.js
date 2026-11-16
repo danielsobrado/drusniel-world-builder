@@ -160,6 +160,8 @@ export function createTerrainMaterialBakedSurface({
     settings: families.transitions,
   });
   const weights = withStormSnow(transitions.weights, samples);
+  // The snow a storm laid beyond the bake's own (0 in clear weather, so nothing below changes then).
+  const stormSnow = weights.a.sub(transitions.weights.a).max(0);
   const genome = createTerrainMaterialGenome({
     worldXZ,
     biomeColor: tileColor,
@@ -301,7 +303,8 @@ export function createTerrainMaterialBakedSurface({
     .mul(float(1).sub(samples.wetnessShoreline.r.mul(render.wetDarkening)))
     .mul(heightShade);
   // Macro tint, family atlas and lichen are ground pigment: on snow they read as dirty concrete.
-  midColor = mix(midColor, snowColor.mul(heightShade), weights.a.mul(SNOW_ALBEDO_PURITY));
+  // Storm snow is fresh: it buries the forest floor's tint outright.
+  midColor = mix(midColor, snowColor.mul(heightShade), weights.a.mul(SNOW_ALBEDO_PURITY).add(stormSnow.mul(1 - SNOW_ALBEDO_PURITY)));
   // High rock is bare: lichen and the macro tint turned alpine faces mossy green.
   // Crag biomes (biome-looks `crags`) are bare at any height: lower down their
   // cliffs took the soil's tint and read as sand banks.
@@ -328,7 +331,9 @@ export function createTerrainMaterialBakedSurface({
   // Exposed rock and snow need their own colour at walking distance, rather
   // than being reduced to the turf's detail multiplier. Banks retain some turf.
   const nearMaterialBlend = families.transitions?.enabled
-    ? max(float(render.nearMaterialBlend), weights.b.add(weights.a).add(transitions.shoreline.mul(0.5)).clamp(0, 1))
+    // Storm snow counts twice: the mid colour already holds it at its weight, so a single
+    // count left near ground at weight² (a taiga floor at cover 1 kept ~20 % snow).
+    ? max(float(render.nearMaterialBlend), weights.b.add(weights.a).add(stormSnow).add(transitions.shoreline.mul(0.5)).clamp(0, 1))
     : float(render.nearMaterialBlend);
   const nearDetailed = mix(nearProcedural, midColor, nearMaterialBlend);
 
@@ -337,7 +342,8 @@ export function createTerrainMaterialBakedSurface({
   const nearBlend = smoothstep(render.nearDistance, nearBlendEnd, cameraDistance);
   const farBlend = smoothstep(render.farDistance, farBlendEnd, cameraDistance);
 
-  const farColor = samples.farColor.rgb.mul(genome.colorMultiplier);
+  // The far bake predates the storm: lay its snow there too, or the snow stops at the far band.
+  const farColor = mix(samples.farColor.rgb.mul(genome.colorMultiplier), snowColor.mul(heightShade), stormSnow);
   return {
     color: assembleBakedColor({
       nearDetailed,

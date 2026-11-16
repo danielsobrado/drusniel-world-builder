@@ -11,6 +11,7 @@ import {
   distance,
   dot,
   float,
+  int,
   max,
   mix,
   normalize,
@@ -20,11 +21,13 @@ import {
   select,
   sin,
   smoothstep,
+  texture,
   uv,
   vec2,
   vec3,
   uniformArray,
 } from 'three/tsl';
+import { WORLD_NOISE_LAYERS } from './stylized/worldNoiseLayout.js';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
 import { antialiasSpecularRoughness } from './materials/TerrainMaterialSurfaceGradientNodes.js';
@@ -205,7 +208,13 @@ export function createTerrainMaterial({
   });
   const dirt = max(pathWear.wear, proceduralDirt);
   const patch = stylizedPatchMask(worldXZ, patchSettings);
-  const meadowGround = createMeadowGroundShading(stylizedConfig, tileSample, worldXZ);
+  // Acquired ahead of the bake nodes: the meadow ground and the swash read its
+  // world-noise layers. The terrain has no sampler for the shared array.
+  const familyAtlas = acquireTerrainMaterialFamilyAtlas(stylizedConfig.materialBake);
+  const atlasNoise = (layer) => (familyAtlas
+    ? (uv) => texture(familyAtlas.texture, uv).depth(int(familyAtlas.noiseLayer + layer)).rgb
+    : null);
+  const meadowGround = createMeadowGroundShading(stylizedConfig, tileSample, worldXZ, atlasNoise(WORLD_NOISE_LAYERS.macro) ?? undefined);
   const grassTint = meadowGround?.root ?? mix(
     colorNode(stylizedConfig.color.bottom),
     mix(
@@ -332,7 +341,6 @@ export function createTerrainMaterial({
   const proceduralColor = groundColor.mul(heightShade);
   const ownBakeGpu = bakeGpuState ? null : createTerrainMaterialBakeGpuState(stylizedConfig.materialBake);
   const materialBakeGpu = bakeGpuState ? createSlotBakeGpuState(bakeGpuState) : ownBakeGpu;
-  const familyAtlas = acquireTerrainMaterialFamilyAtlas(stylizedConfig.materialBake);
   const material = new THREE.MeshStandardNodeMaterial({
     metalness: 0,
     roughness: stylizedConfig.materialBake.render.fallbackRoughness,
@@ -480,6 +488,8 @@ export function createTerrainMaterial({
       config: { ...DEFAULT_COAST_SWASH, ...(stylizedConfig.water?.coast ?? {}) },
       shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
       oceanMask,
+      // Through the family atlas's noise layers: the terrain has no sampler to spare.
+      laceField: familyAtlas ? (uv) => atlasNoise(WORLD_NOISE_LAYERS.water)(uv).r : null,
     });
     const swashed = swash ? swash.apply(beachSurface.color, beachSurface.roughness) : null;
     const coastSurface = swashed ? {

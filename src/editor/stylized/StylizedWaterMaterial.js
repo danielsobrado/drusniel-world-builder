@@ -10,6 +10,7 @@ import {
   exp,
   float,
   fwidth,
+  int,
   length,
   linearDepth,
   max,
@@ -49,6 +50,8 @@ import { createWaterfallFoamNode } from './WaterfallShading.js';
 import { createSeaSurfaceNodes, seaWaterMask } from './SeaSurfaceShading.js';
 import { createSeaOpticsNodes } from './SeaOpticsShading.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './CoastSwashShading.js';
+import { acquireWorldNoise } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { createRainRippleNode } from './RainRippleShading.js';
 import { createRiverSurfaceNodes } from './RiverSurfaceShading.js';
 import { compositeWaterFoam, waterRippleRefraction } from './WaterSurfaceResponse.js';
@@ -527,15 +530,15 @@ export function createStylizedWaterMaterial({
     // field draws a ring per cell, and neighbouring rings overlap into that web
     // — for one voronoi rather than the two a border metric would need. The
     // cell points drift on their own clock, so the web crawls.
-    const causticRing = abs(
-      periodicVoronoiF1(causticUv, time, caustics.speed).sub(CAUSTIC_RING_RADIUS),
-    );
-    const configuredWidth = float(1).div(max(float(caustics.contrast), 1e-4));
-    const causticWidth = max(
-      configuredWidth,
-      fwidth(causticRing).mul(CAUSTIC_AA_SCALE),
-    );
-    const causticNet = oneMinus(smoothstep(0, causticWidth, causticRing));
+    // The web is the world noise's caustic net (voronoi edges), twice: where two
+    // drifting nets cross is where a rippled surface focuses light. Two taps in
+    // place of a nine-cell animated voronoi a pixel.
+    const causticWeb = (uv) => texture(acquireWorldNoise().texture, uv).depth(int(WORLD_NOISE_LAYERS.water)).g;
+    const causticDrift = vec2(time.mul(caustics.speed * 0.11), time.mul(caustics.speed * -0.07));
+    const causticNet = smoothstep(0.5, 0.84, min(
+      causticWeb(causticUv.div(8).add(causticDrift)),
+      causticWeb(vec2(causticUv.y.negate(), causticUv.x).div(16).sub(causticDrift)).add(0.12),
+    ));
     const shallow = oneMinus(smoothstep(
       caustics.depthFadeStart,
       caustics.depthFadeEnd,
@@ -587,7 +590,8 @@ export function createStylizedWaterMaterial({
     const coast = createCoastSwashNodes({ localXZ, patternOrigins: surfacePatterns,
       groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterField.b),
       config: { ...DEFAULT_COAST_SWASH, ...water.coast }, clock: time,
-      shorelineFadeDepth: water.optics.shorelineFadeDepth });
+      shorelineFadeDepth: water.optics.shorelineFadeDepth,
+      laceField: (uv) => texture(acquireWorldNoise().texture, uv).depth(int(WORLD_NOISE_LAYERS.water)).r });
     const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask)
       .mul(seaStateUniforms.storm.add(1)) : float(0);
     const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine(shoreDistance))).mul(waterCoverage);

@@ -9,9 +9,16 @@ import {
   sin,
   step,
   smoothstep,
+  varying,
+  vec2,
   vec3,
 } from 'three/tsl';
 import { authoredTexture } from '../AuthoredTextureNode.js';
+import { worldNoiseField } from '../worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
+
+/** Value swing of the leaf masses inside one crown, lightest to darkest. */
+const CROWN_CLUMP_SWING = 0.55;
 import { orientedScreenDitherThreshold } from './screenDither.js';
 import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';
@@ -122,7 +129,14 @@ export function createDitheredMaterial(sourceMaterial, {
   if (material.colorNode) {
     const leafTint = tinted ? attribute('instanceLeafTint', 'vec4') : null;
     const variation = leafTint ? leafTint.xyz.mul(colorVariation) : colorVariation;
-    material.colorNode = material.colorNode.mul(variation);
+    // One mesh, many crowns: each tree reads its own patch of the world noise
+    // (by its seed) as light and dark leaf masses a couple of metres across.
+    // Per vertex and mild; per-pixel noise on textured crowns paints camouflage.
+    const clump = kind === 'leaf'
+      ? varying(worldNoiseField(WORLD_NOISE_LAYERS.macro)(positionGeometry.xz.mul(0.045).add(vec2(seed.mul(17.3), seed.mul(5.1)))).b, 'crownClump')
+        .sub(0.5).mul(CROWN_CLUMP_SWING).add(1)
+      : null;
+    material.colorNode = material.colorNode.mul(clump ? variation.mul(clump) : variation);
     if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(variation);
     if (leafTint) {
       // Snow on the crown's upward faces; w is the tree's canopy snow.

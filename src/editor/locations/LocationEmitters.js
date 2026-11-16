@@ -3,8 +3,16 @@ import {
   cameraPosition, clamp, color, float, fract, hash, instancedBufferAttribute, instanceIndex, length, mix, pow,
   smoothstep, time, uniform, vec2, vec3,
 } from 'three/tsl';
-import { softDisc } from './LocationEffects.js';
+import { softDisc, tornDisc } from './LocationEffects.js';
 import { locationLight } from './materials/LocationShading.js';
+
+/** How torn a puff is when shed, as a share of its `wisp`: fresh smoke is dense and tears as it thins. */
+const TEAR_AT_BIRTH = 0.35;
+
+/** A puff's shape: a plain soft disc, or with `wisp` one that tears more the older it gets. */
+const puffShape = (profile, falloff, seed, age) => (profile.wisp > 0
+  ? tornDisc(falloff, seed, mix(TEAR_AT_BIRTH, 1, age).mul(profile.wisp))
+  : softDisc(falloff));
 
 /**
  * Particles shed from fixed points: hearth smoke from a vent, drips off
@@ -14,7 +22,8 @@ import { locationLight } from './materials/LocationShading.js';
  * @param {object} profile an `atmosphereProfiles.*.emitters` entry:
  *   `perPoint` particles each, `life` seconds, `velocity` m/s, `gravity` m/s², `spread` metres of
  *   wander by the end of life, `size` metres [born, dying], `color`, `opacity`, `additive`,
- *   `ambientGain` (how much the place's ambient light shows on them) and `glow` (their own light)
+ *   `ambientGain` (how much the place's ambient light shows on them), `glow` (their own light)
+ *   and `wisp` (0..1, how far a puff tears into wisps by the end of its life; absent, a plain disc)
  * @param {Array<{ x: number, y: number, z: number }>} points
  * @param {number} scale quality multiplier on the particle count
  */
@@ -39,7 +48,8 @@ export function createEmitters(profile, points, scale = 1) {
     .add(vec3(...profile.velocity).mul(seconds)).sub(vec3(0, 0.5 * profile.gravity, 0).mul(seconds.mul(seconds)));
   material.scaleNode = vec2(mix(float(profile.size[0]), float(profile.size[1]), age));
   material.colorNode = color(profile.color).mul(locationLight.ambientUp.mul(profile.ambientGain).add(profile.glow));
-  material.opacityNode = softDisc(1.5).mul(smoothstep(0, 0.12, age)).mul(age.oneMinus()).mul(uniform(profile.opacity));
+  material.opacityNode = puffShape(profile, 1.5, seed.x, age).mul(smoothstep(0, 0.12, age)).mul(age.oneMinus())
+    .mul(uniform(profile.opacity));
   const sprite = new THREE.Sprite(material);
   sprite.count = count;
   sprite.frustumCulled = false;
@@ -55,6 +65,8 @@ const BREATH_GAP = 0.12;
 const BREATH_AHEAD = 0.75, BREATH_BELOW = 0.16;
 /** The fastest the walker is taken to be moving when a puff inherits their speed: a teleport is not a sprint. */
 const BREATH_MAX_SPEED = 8;
+/** Spreads birth times before hashing them, which truncates to whole numbers: puffs a breath apart wear different wisps. */
+const BREATH_SEED_SPREAD = 97;
 
 /**
  * The walker's breath in cold air. The view is first person, so it is the only
@@ -64,7 +76,7 @@ const BREATH_MAX_SPEED = 8;
  *
  * @param {object} profile an `atmosphereProfiles.*.breath` entry: `interval` seconds between breaths,
  *   `puffs` in each, `life`, `speed` and `rise` (m/s), `size` [born, dying], `color`, `opacity`,
- *   `ambientGain`, `glow`, and `outdoor` if it should stop under a roof
+ *   `ambientGain`, `glow`, `wisp` as for emitters, and `outdoor` if it should stop under a roof
  * @returns {{ sprite: THREE.Sprite, update(camera: THREE.Camera, seconds: number): void }}
  */
 export function createBreath(profile) {
@@ -84,7 +96,8 @@ export function createBreath(profile) {
   material.scaleNode = vec2(mix(float(profile.size[0]), float(profile.size[1]), age));
   material.colorNode = color(profile.color).mul(locationLight.ambientUp.mul(profile.ambientGain).add(profile.glow));
   // Faded out close to the eye: a puff walked into must not slam against the lens.
-  let opacity = softDisc(1.8).mul(smoothstep(0, 0.1, age)).mul(pow(age.oneMinus(), 1.5))
+  let opacity = puffShape(profile, 1.8, hash(born.w.mul(BREATH_SEED_SPREAD)), age).mul(smoothstep(0, 0.1, age))
+    .mul(pow(age.oneMinus(), 1.5))
     .mul(smoothstep(0.55, 1.2, length(at.sub(cameraPosition)))).mul(uniform(profile.opacity));
   if (profile.outdoor) opacity = opacity.mul(locationLight.outdoors);
   material.opacityNode = opacity;

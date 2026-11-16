@@ -1,3 +1,5 @@
+import { worldNoiseField } from '../worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 import * as THREE from 'three/webgpu';
 import { float, ivec2, mix, texture, vec3 } from 'three/tsl';
 import { createMeadowGroundPalette } from './meadowGroundPalette.js';
@@ -16,7 +18,7 @@ import { applyMeadowGroundStyle, meadowGroundStyle } from './meadowGroundStyle.j
  * `root` is the ground seen through the stand: the soil-side root from above,
  * leaning to the canopy's own colour as the view grazes.
  */
-export function createMeadowGroundShading(config, tileSample, worldXZ) {
+export function createMeadowGroundShading(config, tileSample, worldXZ, noiseField = worldNoiseField(WORLD_NOISE_LAYERS.macro)) {
   const palette = createMeadowGroundPalette(config);
   if (!palette) return null;
   const detail = resolveMeadowGroundDetail(config.grass.meadow.groundDetail);
@@ -41,7 +43,8 @@ export function createMeadowGroundShading(config, tileSample, worldXZ) {
   map.generateMipmaps = false;
   map.needsUpdate = true;
   const id = tileSample.a.mul(255).round().toInt();
-  const { tint, dry, dryColor } = meadowPatchColors(worldXZ, palette.appearance);
+  // The same field the blades read (meadowPigment), or ground and grass part ways.
+  const { tint, dry, dryColor } = meadowPatchColors(worldXZ, palette.appearance, { noiseField });
   const dryPigment = dryColor.mul(palette.brightness);
   const row = index => texture(map, ivec2(id, index)).setSampler(false);
   const lush = row(1).a;

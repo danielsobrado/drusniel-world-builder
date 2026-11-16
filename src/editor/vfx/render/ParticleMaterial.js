@@ -13,7 +13,7 @@ import {
   min,
   mix,
   mod,
-  mx_noise_float,
+  int,
   smoothstep,
   normalize,
   positionGeometry,
@@ -30,6 +30,8 @@ import {
   vec4,
 } from 'three/tsl';
 import { atlasTileUv, sampleRamp } from './atlasNodes.js';
+import { acquireWorldNoise } from '../../stylized/worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../../stylized/worldNoiseLayout.js';
 import { shadeVfx, shadeVolume } from './VfxLightingUniforms.js';
 
 /**
@@ -115,11 +117,15 @@ export function createParticleMaterial({ atlas, lighting }) {
   // Boiling: puffs warp their own texture with slowly evolving noise, more as
   // they age, so the silhouette curls and changes instead of only scaling.
   // The field also drifts down the sprite, so lobes appear to roll upward.
-  const flow = vec3(vLocalUv.mul(2.2).add(vec2(0, lighting.time.mul(-0.12))), lighting.time.mul(0.5).add(vSeed.mul(37)));
-  const warpX = mx_noise_float(flow);
-  const warpY = mx_noise_float(flow.add(vec3(19.7, 7.3, 3.1)));
+  // Two fields of the shared world noise panning apart (worldNoise.js), one
+  // fetch for both axes: three 3D Perlins a pixel was the costliest thing a
+  // puff did under its own overdraw. Each puff reads its own patch (vSeed).
+  const noise = acquireWorldNoise().texture;
+  const patch = vec2(vSeed.mul(7.3), vSeed.mul(3.1));
+  const warp = texture(noise, vLocalUv.mul(0.55).add(patch).add(vec2(lighting.time.mul(0.03), lighting.time.mul(-0.12))))
+    .depth(int(WORLD_NOISE_LAYERS.macro)).rg.sub(0.5).mul(2.4);
   const warpAmount = vBillow.mul(vLife.mul(0.12).add(0.05));
-  const boiled = vLocalUv.add(vec3(warpX, warpY, 0).xy.mul(warpAmount));
+  const boiled = vLocalUv.add(warp.mul(warpAmount));
   // Keep the warp inside the tile so it never samples a neighbour.
   const localUv = clamp(boiled, 0.02, 0.98);
   const texel = mix(
@@ -128,7 +134,8 @@ export function createParticleMaterial({ atlas, lighting }) {
     vFrac,
   );
   // Erosion: late in life a puff tears into wisps instead of fading evenly.
-  const tear = mx_noise_float(vec3(vLocalUv.mul(5.5), vSeed.mul(23).add(lighting.time.mul(0.2)))).mul(0.5).add(0.5);
+  const tear = texture(noise, vLocalUv.mul(0.9).sub(patch).add(vec2(lighting.time.mul(0.05), 0)))
+    .depth(int(WORLD_NOISE_LAYERS.sky)).b;
   const erode = vBillow.mul(smoothstep(0.35, 1, vLife)).mul(0.7);
   // Only ever removes coverage: boosting soft edges back up outlines every puff.
   const coverage = texel.a.mul(float(1).sub(erode.mul(smoothstep(0.25, 0.75, float(1).sub(tear)))));

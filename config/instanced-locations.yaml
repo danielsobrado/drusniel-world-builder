@@ -622,6 +622,7 @@ instancedLocations:
 
   # One instanced sprite field per entry, in a box that follows the camera.
   # velocity m/s; size metres [min, max]; anchor: a generator point the field gathers around.
+  # wisp 0..1 (particles, emitters, breath): how far the sky noise tears each sprite into wisps; absent, a plain soft disc.
   atmosphereProfiles:
     mine_dust:
       particles:
@@ -639,15 +640,15 @@ instancedLocations:
         - { count: 600, box: 18, velocity: [0.02, -0.03, 0.02], sway: 0.012, size: [0.012, 0.03], color: '#eaf6ff', opacity: 0.8, additive: true, ambientGain: 2.5, lampGain: 0.6, twinkle: 5 }
         - { count: 900, box: 26, velocity: [0.6, -0.5, -2.6], sway: 0.05, size: [0.03, 0.08], color: '#f2f8ff', opacity: 0.7, additive: false, ambientGain: 9, lampGain: 0.4, anchor: mouth, anchorRadius: 22 }
         # Cold haze: a few very large, very faint sprites, so depth reads in still air.
-        - { count: 70, box: 34, velocity: [0.05, 0, 0.04], sway: 0.4, size: [5, 9], color: '#bcd9ee', opacity: 0.03, additive: false, ambientGain: 1.6, lampGain: 0.15 }
+        - { count: 70, box: 34, velocity: [0.05, 0, 0.04], sway: 0.4, size: [5, 9], color: '#bcd9ee', opacity: 0.03, additive: false, ambientGain: 1.6, lampGain: 0.15, wisp: 0.8 }
       # Shed from points a generator marks with `emit(kind, at)`.
       emitters: &frostgard_emitters
         drip: { perPoint: 3, life: 1.6, velocity: [0, -0.2, 0], gravity: 5, spread: 0.04, size: [0.035, 0.03], color: '#dff2ff', opacity: 0.9, additive: true, ambientGain: 3, glow: 0.15 }
-        smoke: { perPoint: 26, life: 7, velocity: [0.12, 0.75, 0.05], gravity: -0.02, spread: 1.6, size: [0.5, 2.6], color: '#aab0ba', opacity: 0.13, additive: false, ambientGain: 4, glow: 0.04 }
+        smoke: { perPoint: 26, life: 7, velocity: [0.12, 0.75, 0.05], gravity: -0.02, spread: 1.6, size: [0.5, 2.6], color: '#aab0ba', opacity: 0.13, additive: false, ambientGain: 4, glow: 0.04, wisp: 0.9 }
         ember: { perPoint: 12, life: 2.6, velocity: [0.05, 1.1, 0.03], gravity: -0.15, spread: 0.9, size: [0.04, 0.012], color: '#ff9a3c', opacity: 0.95, additive: true, ambientGain: 0, glow: 2.2 }
-        sift: { perPoint: 60, life: 6, velocity: [1.2, -1.2, 2.2], gravity: 0.6, spread: 5, size: [0.25, 2.2], color: '#ffffff', opacity: 0.16, additive: false, ambientGain: 6, glow: 0 }
+        sift: { perPoint: 60, life: 6, velocity: [1.2, -1.2, 2.2], gravity: 0.6, spread: 5, size: [0.25, 2.2], color: '#ffffff', opacity: 0.16, additive: false, ambientGain: 6, glow: 0, wisp: 0.7 }
       # The walker's own breath: a few puffs every `interval` seconds.
-      breath: &frostgard_breath { interval: 3.4, puffs: 3, life: 2.4, speed: 0.55, rise: 0.12, size: [0.12, 0.7], color: '#dfeaf6', opacity: 0.2, ambientGain: 3, glow: 0.06 }
+      breath: &frostgard_breath { interval: 3.4, puffs: 3, life: 2.4, speed: 0.55, rise: 0.12, size: [0.12, 0.7], color: '#dfeaf6', opacity: 0.2, ambientGain: 3, glow: 0.06, wisp: 0.8 }
     # `outdoor` fields fade out while the walker stands under a roof.
     frostgard_glacier_wind:
       particles:
@@ -659,7 +660,7 @@ instancedLocations:
       particles:
         - { count: 1100, box: 26, velocity: [0.5, -1.1, 0.35], sway: 0.18, size: [0.02, 0.05], color: '#eaf2ff', opacity: 0.75, additive: false, ambientGain: 7, lampGain: 0.9, outdoor: true }
         - { count: 600, box: 26, velocity: [2.2, -0.2, 1.4], sway: 0.2, size: [0.03, 0.08], color: '#f2f8ff', opacity: 0.6, additive: false, ambientGain: 8, lampGain: 0.5, anchor: gate, anchorRadius: 26, outdoor: true }
-        - { count: 60, box: 34, velocity: [0.08, 0, 0.05], sway: 0.4, size: [5, 9], color: '#8fa9cc', opacity: 0.04, additive: false, ambientGain: 2, lampGain: 0.2 }
+        - { count: 60, box: 34, velocity: [0.08, 0, 0.05], sway: 0.4, size: [5, 9], color: '#8fa9cc', opacity: 0.04, additive: false, ambientGain: 2, lampGain: 0.2, wisp: 0.8 }
       emitters: *frostgard_emitters
       breath: { <<: *frostgard_breath, ambientGain: 5, outdoor: true }
 

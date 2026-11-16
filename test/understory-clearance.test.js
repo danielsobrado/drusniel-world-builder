@@ -8,10 +8,12 @@ import { createForestDebrisPrototypes } from '../src/editor/stylized/forest/fore
 import {
   collectChunkObstacleCircles,
   collectDebrisContactFootprints,
+  collectDebrisGrassZones,
   computePrototypeFootprint,
   footprintHitsObstacle,
   pathBlockedForFootprint,
 } from '../src/editor/stylized/UnderstoryClearance.js';
+import { paintContactShade } from '../src/editor/stylized/contactShade.js';
 
 test('computePrototypeFootprint measures elongated fallen log XZ extents', () => {
   const geometry = createFallenLogGeometry({ length: 3.6, radius: 0.24 });
@@ -83,10 +85,52 @@ test('createForestDebrisPrototypes binds albedo-preserving colorNode and bark bu
   }, { soilColor: '#5c4a30', floorColor: '#3b5233' });
   assert.equal(defs.length, 1);
   const mat = defs[0].parts[0].material;
-  assert.equal(mat.vertexColors, true);
+  assert.equal(mat.vertexColors, false);
   assert.ok(mat.colorNode, 'expected colorNode on fallenLog material');
   assert.ok(mat.normalNode, 'expected bark bump normalNode on fallenLog material');
   assert.ok(mat.roughnessNode, 'expected roughnessNode on fallenLog material');
   mat.dispose();
   defs[0].parts[0].geometry.dispose();
+});
+
+test('collectDebrisGrassZones emits capsule logs, tight stumps, and skips flat leaf litter', () => {
+  const logGeo = createFallenLogGeometry();
+  const stumpGeo = createStumpGeometry();
+  const footprints = [
+    computePrototypeFootprint([{ geometry: logGeo }]),
+    computePrototypeFootprint([{ geometry: stumpGeo }]),
+    { halfX: 1.7, halfZ: 1.7, height: 0.04 },
+  ];
+  const zones = collectDebrisGrassZones([
+    { x: 10, z: 20, scale: 1, rotationY: 0, prototypeIndex: 0 },
+    { x: 30, z: 40, scale: 1, rotationY: 0, prototypeIndex: 1 },
+    { x: 50, z: 60, scale: 1, rotationY: 0, prototypeIndex: 2 },
+  ], footprints);
+  assert.equal(zones.length, 2);
+  assert.equal(zones[0].kind, 'log');
+  assert.ok(zones[0].x0 < 10 && zones[0].x1 > 10);
+  assert.ok(zones[0].radius <= 0.35 && zones[0].collar > zones[0].radius);
+  assert.equal(zones[1].kind, 'stump');
+  logGeo.dispose();
+  stumpGeo.dispose();
+});
+
+test('paintContactShade paints elongated capsule contact shadow along fallen log axes', () => {
+  const pixels = new Uint8Array(64 * 64 * 4);
+  const painted = paintContactShade({
+    pixels,
+    size: 64,
+    centerWorldX: 0,
+    centerWorldZ: 0,
+    chunkWorldSize: 64,
+    sources: [{ x0: -5, z0: 0, x1: 5, z1: 0, radius: 1.5, strength: 1 }],
+    channel: 1,
+  });
+  assert.equal(painted, 1);
+  // Texels along z = 0 (-4, 0, +4) get capsule contact AO, while far corners remain 0.
+  const idx = (x, z) => ((31 - z) * 64 + (x + 31)) * 4 + 1;
+  assert.ok(pixels[idx(-4, 0)] > 100);
+  assert.ok(pixels[idx(0, 0)] > 100);
+  assert.ok(pixels[idx(4, 0)] > 100);
+  assert.equal(pixels[idx(0, 8)], 0);
 });

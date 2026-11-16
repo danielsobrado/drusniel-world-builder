@@ -17,6 +17,7 @@ import {
 import { cloudMotionCoordinatesNode } from './AtmosphereMotion.js';
 import { directionFromAngles } from './StylizedGodRaysPostProcess.js';
 import { cloudFbmBands } from './sky/cloudNoise.js';
+import { cloudEdgeDetail } from './sky/cloudEdgeDetail.js';
 import { updateCloudShadows, wrapCloudCoordinate } from './CloudShadow.js';
 import { createSkyLookUniforms, resolveSkyLook, writeSkyLookUniforms } from './sky/SkyLook.js';
 import { createHeatShimmerNodes, resolveHeatShimmerConfig } from './ambient/HeatShimmer.js';
@@ -56,7 +57,10 @@ function cloudCoverageNode({
   });
   // The look weights the ragged detail octaves: below 1 the field is rounded
   // masses (cumulus), above 1 broken wisps. At 1 it is the plain fbm.
-  const { low, detail } = cloudFbmBands(cloudUv);
+  // The masses stay procedural (the ground's cloud shadows share them); the
+  // edges are eaten by a billow or wisp texture, not two more octaves of blur.
+  const { low } = cloudFbmBands(cloudUv);
+  const detail = cloudEdgeDetail(cloudUv, look.cloudDetail);
   const cloudNoise = low.add(detail.mul(look.cloudDetail))
     .div(look.cloudDetail.mul(0.1875).add(0.75));
   const cloudShape = smoothstep(

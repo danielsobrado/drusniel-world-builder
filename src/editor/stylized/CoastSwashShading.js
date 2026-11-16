@@ -65,6 +65,8 @@ export const DEFAULT_COAST_SWASH = Object.freeze({
 });
 
 const TAU = Math.PI * 2;
+/** Lattice cells one repeat of the foam-lace texture spans; divides the 512-cell wrap. */
+const FOAM_LACE_CELLS = 8;
 const MEMORY_CYCLES = Object.freeze([0.15, 0.3, 0.45, 0.6]);
 const DRIFT_SCALE = 0.021;
 const FRONT_BREAKUP_WAVE = Object.freeze([0.13, 0.09]);
@@ -99,11 +101,16 @@ function colorNode(value) {
 
 /** Shared by the ground and water front. Real gaps replace the old sine's
  * positive opacity floor, which painted a continuous stripe on flat beaches. */
-export function createCoastFoamBreakup(patterns, localXZ, clock, strength) {
+export function createCoastFoamBreakup(patterns, localXZ, clock, strength, laceField = null) {
   if (!(strength > 0)) return float(1);
-  const point = patterns.latticePoint('foamLace', localXZ)
-    .add(vec2(clock.mul(.025).mod(512), clock.mul(-.017).mod(512)));
-  const lace = periodicFbm2(point);
+  const drift = vec2(clock.mul(.025).mod(512), clock.mul(-.017).mod(512));
+  const point = patterns.latticePoint('foamLace', localXZ).add(drift);
+  // `laceField` reads the world noise's foam lace (a vein net, not blurred fBm):
+  // two taps drifting apart, at scales that both divide the lattice's wrap.
+  const lace = laceField
+    ? laceField(point.div(FOAM_LACE_CELLS)).mul(0.6)
+      .add(laceField(vec2(point.y.negate(), point.x).sub(drift.mul(2)).div(FOAM_LACE_CELLS * 2)).mul(0.4))
+    : periodicFbm2(point);
   const threshold = strength * .625;
   const footprint = lace.fwidth();
   const filter = footprint.min(.15);
@@ -130,6 +137,7 @@ export function createCoastSwashNodes({
   clock = waterVisualClock,
   shorelineFadeDepth = 0.35,
   oceanMask = float(1),
+  laceField = null,
 }) {
   if (!config.enabled) return null;
   const height = groundHeight.sub(seaStateUniforms.seaLevel);
@@ -159,7 +167,7 @@ export function createCoastSwashNodes({
   };
   const front = frontAt(phase);
   const film = coverageAt(phase).mul(band);
-  const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength);
+  const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength, laceField);
   const contact = shoreContactDistance(height.sub(front), localXZ);
   const foam = oneMinus(smoothstep(config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
     max(float(config.foamWidthMeters ?? DEFAULT_COAST_SWASH.foamWidthMeters), contact.footprint), contact.distance))

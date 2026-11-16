@@ -4,6 +4,8 @@ import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.j
 import { canopySnowColor } from '../forest/canopySnow.js';
 import { stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { meadowCanopyColor, meadowCanopyView } from './meadowCanopy.js';
+import { worldNoiseField } from '../worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 import { meadowPatchColors } from './meadowColorNodes.js';
 import { applyGrassMarks } from './meadowGrassMarks.js';
 import { MEADOW_GRASS_DEFAULTS } from './meadowGrassConfig.js';
@@ -41,6 +43,7 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const patchSettings = { ...MEADOW_GRASS_DEFAULTS.appearance, ...config.grass?.meadow?.appearance };
   const { tint, dry, dryColor } = meadowPatchColors(blade.canonical, patchSettings, {
     patchScale: appearance.patchScale, patchCool: uniforms.patchCool, patchWarm: uniforms.patchWarm,
+    noiseField: worldNoiseField(WORLD_NOISE_LAYERS.macro),
   });
   const palette = uniforms.palette;
   const index = blade.palette.toInt();

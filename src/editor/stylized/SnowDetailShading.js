@@ -6,6 +6,10 @@ import { repeatMipTextureLoad } from './RepeatMipTextureLoad.js';
 import { createSnowReliefNodes } from './SnowReliefShading.js';
 import { resolveSnowSurfaceConfig } from './SnowSurfaceConfig.js';
 import { createSnowSurfaceState, snowSurfacePoint } from './SnowSurfaceState.js';
+import { stormSnowFallUniform } from '../weather/storm/stormGroundUniforms.js';
+
+/** Extra cavity depth at full snowfall, as a multiple of the configured strength. */
+const STORM_CAVITY_GAIN = 3;
 
 /** Snow007C's centered detail response, adapted to streamed terrain normals. */
 export function createSnowDetailNodes({ terrainUv, chunkWorldSize, chunkCenter, snow, material, groundHeight = float(0),
@@ -37,8 +41,10 @@ export function createSnowDetailNodes({ terrainUv, chunkWorldSize, chunkCenter, 
       const pigment = repeatMipTextureLoad(maps.color, point, dx, dy).rgb.div(vec3(0.629, 0.737, 0.849)).clamp(0.75, 1.25);
       const packed = repeatMipTextureLoad(maps.packed, point, dx, dy);
       const hollow = packed.b.sub(0.274).mul(2.5).add(1).clamp(0.25, 1.2);
+      // A storm's flat light leaves no shading relief: the hollows carry the footing instead.
+      const cavityStrength = stormSnowFallUniform.mul(settings.cavityStrength * STORM_CAVITY_GAIN).add(settings.cavityStrength);
       const cavity = mix(float(1), packed.r.div(0.944).mul(hollow),
-        state.detailScale.mul(settings.cavityStrength).mul(planar).mul(broadFade));
+        state.detailScale.mul(cavityStrength).mul(planar).mul(broadFade));
       const tint = mix(vec3(1), vec3(0.55, 0.72, 1), cavity.oneMinus().max(0).mul(0.7));
       result.assign(vec4(mix(vec3(1), pigment, state.detailScale.mul(settings.cavityStrength).mul(planar).mul(broadFade)).mul(cavity).mul(tint),
         packed.g.sub(0.714).mul(0.3).mul(state.detailScale).mul(broadFade)));

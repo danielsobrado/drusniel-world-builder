@@ -2,7 +2,7 @@ import { meadowPageGrowthKey } from './MeadowGrowthUpdates.js';
 import { createMeadowPathSampler } from './MeadowPathSampler.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
-import { collectDebrisContactFootprints } from '../UnderstoryClearance.js';
+import { collectDebrisGrassZones } from '../UnderstoryClearance.js';
 
 import { createMeadowGroundSample } from './MeadowGroundSample.js';
 import { identityOf } from './MeadowSharedGroundInputs.js';
@@ -184,9 +184,10 @@ export class MeadowGroundSampler {
     if (this.debrisPlacementsProvider) {
       const footprints = this.debrisFootprintsProvider?.() ?? [];
       for (const list of this.debrisChunks(centerX, centerZ, tileHalf)) {
-        for (const circle of collectDebrisContactFootprints(list, footprints)) {
-          if (Math.abs(circle.x - centerX) > tileHalf + circle.reach || Math.abs(circle.z - centerZ) > tileHalf + circle.reach) continue;
-          near.push(circle);
+        for (const zone of collectDebrisGrassZones(list, footprints)) {
+          const pad = zone.kind === 'log' ? (zone.span ?? 1.8) + zone.reach : zone.reach;
+          if (Math.abs(zone.x - centerX) > tileHalf + pad || Math.abs(zone.z - centerZ) > tileHalf + pad) continue;
+          near.push(zone);
         }
       }
     }

@@ -1,9 +1,11 @@
 import * as THREE from 'three/webgpu';
 import {
   abs, attribute, cameraPosition, clamp, color, densityFogFactor, dot, float, Fn, fract, hash, instancedBufferAttribute,
-  instanceIndex, length, max, mix, mx_noise_float, normalWorldGeometry, normalize, positionWorld, pow, reference,
-  renderGroup, sin, smoothstep, time, uniform, uv, vec2, vec3,
+  instanceIndex, int, length, max, min, mix, normalWorldGeometry, normalize, positionWorld, pow, reference,
+  renderGroup, sin, smoothstep, texture, time, uniform, uv, vec2, vec3,
 } from 'three/tsl';
+import { acquireWorldNoise } from '../stylized/worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../stylized/worldNoiseLayout.js';
 import { locationLight } from './materials/LocationShading.js';
 
 /**
@@ -11,8 +13,54 @@ import { locationLight } from './materials/LocationShading.js';
  * camera-facing sprites placed in the vertex stage; none is a scene light.
  */
 
+/** Texture tiles a torn puff spans: about six wisp lobes across it, fine enough that a rim frays rather than lumps. */
+const TEAR_SCALE = 0.55;
+/** Tiles a second the tear field slides down a puff, so its lobes change and seem to roll upward. */
+const TEAR_DRIFT = [0.006, -0.014];
+/** Gives the averaged wisp and erosion fields back the contrast of one. */
+const TEAR_CONTRAST = 1.4;
+/** Most of a puff's coverage a tear may take before the rest is rescaled; keeps the rescale off zero. */
+const TEAR_CEILING = 0.95;
+
+/** Flame turbulence in texture tiles across (u, -1..1) and up the sprite, tiles a second of scroll at speed 1. */
+const FLAME_SWAY = { across: 0.19, up: 0.25, scroll: 0.28 };
+const FLAME_TONGUES = { across: 0.345, up: 0.42, scroll: 0.41, warp: 0.06 };
+/** Tiles a second a flame's noise slides sideways, so the scroll never brings the same flame back round. */
+const FLAME_WANDER = 0.013;
+/** The texture's fields spread 0.2 about their mean, the Perlin they replace about 0.27: keeps the old sway. */
+const FLAME_GAIN = 1.35;
+
+/** The haze a shaft crosses: tiles across and along the beam (stretched along it, so it streaks), drift a second. */
+const SHAFT_HAZE = { across: 1.5, along: 0.35, drift: [0.012, -0.02], swing: 0.6 };
+
+/**
+ * One tap of the shared world-noise array (worldNoiseLayout.js): three tileable
+ * fields in r, g and b, each spread round a mean of 0.5 — and exactly 0.5 until
+ * the file arrives, so anything that reads it must still look whole on flat noise.
+ */
+export const noiseTap = (at, layer) => texture(acquireWorldNoise().texture, at).depth(int(WORLD_NOISE_LAYERS[layer]));
+
 /** A round sprite fading to nothing at its edge. */
 export const softDisc = (falloff) => pow(smoothstep(0, 0.5, length(uv().sub(0.5))).oneMinus(), falloff);
+
+/**
+ * A soft disc torn into drifting wisps by the sky layer's wisp (G) and turbulent
+ * erosion (B) fields. Eroded the way cloud density is: coverage below the field's
+ * local bar goes and the rest is rescaled, so a puff's heart holds while its fringe
+ * tears. It never exceeds `softDisc`, so the quad's edge cannot show; on flat noise
+ * it is a smaller soft disc.
+ *
+ * @param {number} falloff as `softDisc`
+ * @param {object} seed 0..1 node per sprite: which patch of the texture it wears
+ * @param {object|number} tear 0 a plain disc .. 1 the fringe gone wherever the wisps thin out
+ */
+export function tornDisc(falloff, seed, tear) {
+  const puff = softDisc(falloff);
+  const field = noiseTap(uv().mul(TEAR_SCALE).add(vec2(seed.mul(7.31), seed.mul(3.17))).add(vec2(...TEAR_DRIFT).mul(time)), 'sky');
+  const sparse = clamp(float(0.5).sub(mix(field.g, field.b, 0.45).sub(0.5).mul(TEAR_CONTRAST)), 0, 1);
+  const bar = min(sparse.mul(tear), TEAR_CEILING);
+  return clamp(puff.sub(bar).div(float(1).sub(bar)), 0, 1);
+}
 
 const flicker = (seed, amount) => {
   const draft = sin(time.mul(mix(float(2.1), float(3.4), hash(seed))).add(hash(seed.add(1.3)).mul(6.28))).mul(0.45)
@@ -101,8 +149,11 @@ export function createHalos(halos) {
 }
 
 /**
- * Animated procedural flame tongues rendered in one instanced draw call:
- * multi-octave upward turbulence, teardrop envelope, amber-gold core to orange tips.
+ * Animated flame tongues rendered in one instanced draw call: upward-scrolling
+ * turbulence, teardrop envelope, amber-gold core to orange tips. The turbulence
+ * is two taps of the sky layer at the scales of the two Perlin octaves it
+ * replaced (one Perlin cell is about a twelfth of a tile there): a broad sway
+ * from the wisp (G) and finer tongues from the erosion (B), warped by the sway.
  *
  * @param {Array<{ x: number, y: number, z: number, width: number, height: number, speed: number, core: number[], outer: number[] }>} flames
  */
@@ -136,8 +187,12 @@ export function createFlames(flames) {
   const v = uv().y;
   const scrollT = time.mul(sAttr.z);
 
-  const n1 = mx_noise_float(vec3(u.mul(2.1), v.mul(2.8).sub(scrollT.mul(3.1)), seed.mul(19.3)));
-  const n2 = mx_noise_float(vec3(u.mul(4.8).add(n1.mul(0.85)), v.mul(5.8).sub(scrollT.mul(5.7)), seed.mul(37.1)));
+  // Each flame burns in its own patch of the texture.
+  const patch = vec2(seed.mul(7.31).add(time.mul(FLAME_WANDER)), seed.mul(3.73));
+  const n1 = noiseTap(vec2(u.mul(FLAME_SWAY.across), v.mul(FLAME_SWAY.up).sub(scrollT.mul(FLAME_SWAY.scroll))).add(patch), 'sky')
+    .g.sub(0.5).mul(FLAME_GAIN);
+  const n2 = noiseTap(vec2(u.mul(FLAME_TONGUES.across).add(n1.mul(FLAME_TONGUES.warp)),
+    v.mul(FLAME_TONGUES.up).sub(scrollT.mul(FLAME_TONGUES.scroll))).sub(patch), 'sky').b.sub(0.5).mul(FLAME_GAIN);
   const turb = n1.mul(0.65).add(n2.mul(0.35));
 
   const envelope = pow(clamp(v.mul(3.6), 0, 1), 0.45).mul(pow(clamp(v.oneMinus(), 0, 1), 0.78));
@@ -166,7 +221,8 @@ export function createFlames(flames) {
  * what makes still air read as having volume.
  *
  * @param {object} profile a resolved `atmosphereProfiles.*.particles` entry; `outdoor` ones (snowfall,
- *   spindrift) fade out while the walker is under a roof
+ *   spindrift) fade out while the walker is under a roof, and `wisp` ones (the big haze sprites) are
+ *   torn by that much (`tornDisc`) instead of drawn as plain discs
  */
 export function createParticles(profile) {
   const size = profile.box;
@@ -206,7 +262,8 @@ export function createParticles(profile) {
     : rawAmbientGain;
   material.colorNode = color(profile.color).mul(locationLight.ambientUp.mul(effectiveAmbientGain)
     .add(lamp.mul(profile.lampGain ?? 1)).add(profile.glow ?? 0)).mul(twinkle);
-  let opacity = softDisc(1.8).mul(edge).mul(nearCamFade).mul(uniform(profile.opacity));
+  const disc = profile.wisp > 0 ? tornDisc(1.8, seed.x, profile.wisp) : softDisc(1.8);
+  let opacity = disc.mul(edge).mul(nearCamFade).mul(uniform(profile.opacity));
   if (profile.anchorPoint) {
     const { x, y, z } = profile.anchorPoint;
     opacity = opacity.mul(smoothstep(0, profile.anchorRadius, length(world.sub(vec3(x, y, z)))).oneMinus());
@@ -222,7 +279,9 @@ export function createParticles(profile) {
 
 /**
  * A shaft of light through hazy air: two crossed additive sheets from `from` to
- * `to`, widening to `width`. Stands in for volumetric light at a cave mouth.
+ * `to`, widening to `width`. Stands in for volumetric light at a cave mouth. Its
+ * streaks are the sky layer's wisp field (G) drifting through the beam, so it
+ * reads as light in moving haze rather than ruled lines.
  */
 export function createLightShaft({ from, to, width, tint, strength }) {
   const a = new THREE.Vector3(from.x, from.y, from.z), b = new THREE.Vector3(to.x, to.y, to.z);
@@ -236,7 +295,11 @@ export function createLightShaft({ from, to, width, tint, strength }) {
   });
   const across = smoothstep(0, 0.5, uv().x).mul(smoothstep(0.5, 1, uv().x).oneMinus());
   const along = smoothstep(0, 0.15, uv().y).mul(pow(uv().y.oneMinus(), 1.4).add(0.08));
-  const streaks = sin(uv().x.mul(37).add(time.mul(0.05))).mul(0.15).add(0.85);
+  // Each shaft crosses its own patch of haze, picked by where it starts.
+  const patch = vec2(from.x * 0.37, from.z * 0.37);
+  const haze = noiseTap(uv().mul(vec2(SHAFT_HAZE.across, SHAFT_HAZE.along)).add(patch)
+    .add(vec2(...SHAFT_HAZE.drift).mul(time)), 'sky').g;
+  const streaks = haze.sub(0.5).mul(SHAFT_HAZE.swing).add(0.85);
   material.colorNode = color(tint).mul(across).mul(along).mul(streaks).mul(strength);
   for (const roll of [0, Math.PI / 2]) {
     const sheet = new THREE.Mesh(geometry, material);

@@ -16,7 +16,9 @@ import { stormSnowCoverUniform } from '../weather/storm/stormGroundUniforms.js';
 export function withStormSnow(weights, samples) {
   // terrainShape.r is the gradient (tan): snow slides off past ~35°.
   const upFacing = oneMinus(smoothstep(0.55, 1, samples.terrainShape.r));
-  const open = oneMinus(samples.canopyWater.g).mul(oneMinus(samples.canopyWater.r.mul(0.6)));
+  // Open water takes none. A canopy is no shelter from a storm: it sheds what it
+  // catches, and a taiga floor held at 47 % read dark green under white crowns.
+  const open = oneMinus(samples.canopyWater.g);
   const ridge = clamp(samples.terrainShape.g.mul(-8).add(0.5), 0, 1);
   const lateness = clamp(ridge.mul(0.6).add(samples.macroTint.g.mul(0.8)).sub(0.2), 0, 1).mul(0.6);
   const cover = smoothstep(lateness, lateness.add(0.4), stormSnowCoverUniform).mul(upFacing).mul(open);

@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { int, texture } from 'three/tsl';
 import { WORLD_NOISE_LAYER_NAMES, WORLD_NOISE_SIZE } from './worldNoiseLayout.js';
 
 const URL_PATH = '/assets/textures/noise/world-noise.png';
@@ -87,4 +88,14 @@ export function downsampleWorldNoiseLayer(pixels, layer, resolution, target, off
       }
     }
   }
+}
+
+/**
+ * A layer of the shared array as `(uv) => vec3`, for any material with a texture
+ * slot free. The terrain has none: it reads the same layers through its family
+ * atlas (TerrainMaterialFamilyAtlas `noiseLayer`).
+ */
+export function worldNoiseField(layer) {
+  const noise = acquireWorldNoise().texture;
+  return (uv) => texture(noise, uv).depth(int(layer)).rgb;
 }
