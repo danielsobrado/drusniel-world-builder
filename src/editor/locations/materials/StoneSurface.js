@@ -228,7 +228,10 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
       const warp = locationNoise(NOISE.broad, point.mul(profile.vein.scale * 0.35)).mul(1.25);
       const line = safePow(abs(locationNoise(NOISE.fbm, point.mul(profile.vein.scale).add(warp))).oneMinus(), profile.vein.sharpness ?? 12);
       const pocket = smoothstep(0.38, 0.78, detailAlbedo.g.mul(0.6).add(grainMix.mul(0.4))).mul(smoothstep(0.28, 0.72, midPatch));
-      const vein = smoothstep(0.28, 0.75, line.mul(mask.x.mul(1.4)).mul(pocket));
+      // `vein.floor`: the share of vein a rock carries outside the generator's painted
+      // vein zones, for rock that is veined throughout (Umbra'kor's glowing basalt).
+      const zone = mask.x.mul(1.4).max(profile.vein.floor ?? 0);
+      const vein = smoothstep(0.28, 0.75, line.mul(zone).mul(pocket));
       const veinGain = float(profile.vein.gain ?? 1.85);
       const veinStrength = float(profile.vein.strength ?? 0.75);
       albedo = mix(albedo, albedo.mul(color(profile.vein.color)).mul(veinGain), vein.mul(veinStrength));

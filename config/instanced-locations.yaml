@@ -283,7 +283,9 @@ instancedLocations:
       normalStrength: 1.2
       roughness: 0.9
       strata: { frequency: 0.55, warp: 5, dip: 0.05, dark: '#77777f', light: '#c5c7d2', relief: 0.8 }
-      vein: { color: '#9fe6ff', scale: 0.9, sharpness: 14, roughness: 0.2, f0: 0.3, glow: 0.07 }
+      # Bioluminescent veins: in a cavern with no sky they are what shows the rock's
+      # shape. At glow 0.07 the city's walls read as black (2026-11-16 captures).
+      vein: { color: '#7fdcff', scale: 0.9, sharpness: 10, roughness: 0.2, f0: 0.3, glow: 0.85, floor: 0.75 }
     # Umbra'kor fungus-bed compost; the props' vertex tint carries the loam and its mycelium.
     fungus_loam:
       surface: earth-dry
@@ -549,12 +551,14 @@ instancedLocations:
       absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
     umbra_pale:
       background: '#020308'
-      fog: { color: '#0c0f18', density: 0.006 }
-      ambientUp: '#3a4258'
-      ambientDown: '#1c2030'
+      # A cool violet haze the veins and lamps light: lifted from #0c0f18 / #3a4258
+      # so the cavern's walls, bridges and towers keep a silhouette.
+      fog: { color: '#121a2c', density: 0.006 }
+      ambientUp: '#4a5674'
+      ambientDown: '#262a40'
       carried: { color: '#cfe4ff', intensity: 1.1, range: 10 }
-      exposure: 1.6
-      bakeGain: 2
+      exposure: 2.1
+      bakeGain: 2.6
       absorption: { rock: [5, 5, 5], ice: [0.55, 0.085, 0.03] }
     stonehold_forge:
       background: '#08090c'
@@ -631,6 +635,8 @@ instancedLocations:
     umbra_depth:
       particles:
         - { count: 500, box: 30, velocity: [0.03, 0.02, 0.01], sway: 0.02, size: [0.02, 0.06], color: '#a9dcff', opacity: 0.5, additive: true, ambientGain: 3, lampGain: 0.3, glow: 0.05, twinkle: 2 }
+        # Fungal spores rising slowly through the cavern, each glowing on its own.
+        - { count: 260, box: 40, velocity: [0.02, 0.09, 0.015], sway: 0.05, size: [0.04, 0.1], color: '#c78bff', opacity: 0.75, additive: true, ambientGain: 0.5, lampGain: 0.2, glow: 0.9, twinkle: 1.2 }
     stonehold_industry:
       particles:
         - { count: 450, box: 24, velocity: [0.05, 0.5, 0.03], sway: 0.03, size: [0.015, 0.045], color: '#ff9a4a', opacity: 0.7, additive: true, ambientGain: 0, lampGain: 0.1, glow: 0.8, twinkle: 3 }
