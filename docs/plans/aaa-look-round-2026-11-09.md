@@ -279,3 +279,99 @@ Commits `86e7e569` and `62b19c6f`. `9b607b4d` (another session) had narrowed the
 | clear (`storm=0`) | 2.13 / 2.39 | 2.09 / 2.32, 2.18 / 2.50 | 203 / 202–203 |
 | rain storm (`storm=1`) | 2.12 / 2.37, 2.13 / 2.37 | 2.10 / 2.29, 2.16 / 2.41 | 206 / 205–206 |
 
+
+## Workstreams B and C: blizzard visibility, snowfall, snow cover (2026-11-16)
+
+Fixes gaps 2, 3 and 7. The code landed on `main` inside two shared-checkout
+sweep commits by other sessions, `a2e7cce8` ("fixes") and `5b2339a9` ("new
+stylized areas"), so the root causes are recorded here rather than in those
+messages.
+
+### Root causes and fixes
+
+- **Gap 2, the blizzard card.** `stormAirLook` closed snow-storm fog to 50 m at
+  5 % contrast. With FogExp2 that is two-thirds fog at 30 m, so nothing past
+  ~25 m survived. Visibility is now 140 m: about 20 % fog at 40 m and 60 % at
+  80 m. Near footing reads and only the distance goes, and the flakes carry
+  the density. Live fog density at the tundra and taiga poses is exactly that
+  target (0.01236). A denser regional fog does not override it there.
+  Flat storm light also left the snow with no relief. The snow detail's
+  existing cavity term now deepens by up to 4× while snow falls, through the
+  new `stormSnowFallUniform` that main sets from `frame.snow`.
+- **Gap 3, dark ground under a snow storm.** `SnowCover` did follow
+  `frame.snow`, so the tile-share theory was wrong. Four other paths dropped
+  the snow:
+  1. QA captures snapped the storm but never `SnowCover`, so the cover was
+     0.02 after `warmWeather(8)`. `setLighting` now snaps it.
+  2. The near terrain band blended the mid colour by snow weight, and that
+     colour already held the snow at its weight, so near ground showed about
+     weight² (≈ 20 % at cover 1 under the taiga canopy). Storm snow now counts
+     again in the near blend and is laid at full purity.
+  3. The canopy shelter (×0.6, then ×0.3) is gone for storm snow.
+  4. The far bake and the far ring ignored storm snow. Both now lay it.
+  The meadow agrees: blades whiten with the cover (tips first) and settle by
+  up to 40 %, as biome frost already did. Clear weather is unchanged, because
+  the storm's extra snow is 0 there.
+- **Gap 7, sparse dots.** Each flake now streaks along its velocity, projected
+  on the view plane, over a 0.04 s shutter. The streak is capped at
+  0.055 rad, and its light is spread rather than brightened. A fourth
+  "curtain" population covers the middle distance: a 140 m box of large soft
+  flakes that start at about 25 m and gather into drifting gust sheets. The
+  sheets come from seed space, so they wrap seamlessly. Rebalanced, the storm
+  allocation is 31 500 flakes, under the 32 000 cap. Draws are unchanged.
+
+### Captures (local, git-ignored)
+
+`tmp/bc/before-after.jpg`: `taiga`, `tundra` and `snow-eye` at noon, clear
+and `?storm=0.5/0.75/1&stormSnap=1&stormKind=snow`. Base is HEAD with the
+B/C hunks reversed; change is HEAD. Frames are under `tmp/bc/cap/`.
+
+- At storm 1, base taiga is a white-out with ghost trees. The change keeps
+  the trees, the snowed ground, the pond and the stumps in the near field and
+  fades the distance.
+- Tundra and snow-eye now hold the boulder and crag silhouettes and the
+  ground's undulation.
+- Clear weather is unchanged by eye. Mean colour error base→change is 1.1
+  (tundra), 4.7 (snow-eye) and 11.8 (taiga). The taiga figure comes from wind
+  sway and the drifting regional flakes, whose curtain now also shows in snow
+  country's clear-weather snowfall.
+
+### `qa:look` snow gates (same harness and poses)
+
+| Shot / gate | Nov 11 | Now | Limit |
+| --- | ---: | ---: | ---: |
+| `core-taiga-snow-12` ground mean | 75.9 | 88.3 | ≥ 150 (fail) |
+| `core-taiga-air-snow-12` ground mean | 181.3 | 168.5 | ≥ 150 |
+| `tundra-snow-12` ground contrast | 22.4 | 28.3 / 31.1 (two runs) | ≥ 30 (marginal) |
+| `snow-eye-snow-12` ground contrast | 23.6 | 28.3 | ≥ 30 (fail) |
+
+The taiga eye-level gate stays open, and the cause is now isolated. The snow
+does reach the ground. The same pose in clear noon with the cover forced to 1
+reads **181**. All vegetation hidden reads 99, and valley mist off or flakes
+off change under 1. Under the storm the light look is the same as at tundra
+(directional 0.28, ambient about 1.3), yet open snow there reads 193. What
+stays dark is the taiga ground's response to ambient-only storm light, and
+the material layers above are cleared. That belongs to the storm light ladder
+and environment lighting (workstream F), not to the snow cover. The grass
+volume overlay past 55 m (`terrainMaterial.js`) also ignores snow. It could
+not be touched while that file held another session's uncommitted edits.
+
+### Perf A/B
+
+`chunk-cross --warmup 8 --duration 12 --settle --gpuTimings 1 --headed`,
+two interleaved rounds. Base is HEAD with B/C reversed; change is HEAD.
+
+| Case | Base GPU avg / p95 ms | Change GPU avg / p95 ms | Draws | Weather CPU ms |
+| --- | --- | --- | --- | --- |
+| clear (`storm=0`) | 2.49 / 3.16, 2.49 / 3.15 | 2.49 / 3.14, 2.48 / 3.06 | 238–240 / 237–240 | 0.027 / 0.028 |
+| snow storm (`storm=1`) | 2.79 / 3.34, 2.81 / 3.35 | 2.80 / 3.32, 2.80 / 3.34 | 241–242 / 239 | 0.032 / 0.033 |
+
+Snow costs +0.31 ms over clear in both arms, within the §7 budget of +0.8 ms.
+The change is level with base. The harness flagged every run in both arms as
+invalid for the same two reasons: HEAD's stale tree-impostor manifest, and one
+`ERR_NAME_NOT_RESOLVED` console error. No run lost focus.
+
+Tests: the full suite has 4 778 of 4 783 passing. The water anti-aliasing
+contract fails on HEAD without these changes. The four "biome N is fully
+dressed" failures come from another session's uncommitted `biome-looks.yaml`
+work and pass on clean HEAD.
