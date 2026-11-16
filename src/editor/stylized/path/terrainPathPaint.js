@@ -22,6 +22,7 @@ import {
   vec4,
 } from 'three/tsl';
 import { GROUND_LAYER_MEAN, GROUND_LAYERS } from './groundLayerIds.js';
+import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from '../worldNoiseLayout.js';
 
 /**
  * grass-test's path surface (`GroundMaterial`, cinematic style), on this
@@ -60,10 +61,6 @@ const NOISE_PERIOD_METRES = 1024;
 const ANTI_TILING = Object.freeze({
   secondaryScale: 0.618,
   offset: [0.37, 0.61],
-  macroFrequencyX: 0.012,
-  macroFrequencyZ: 0.016,
-  warpFrequency: 0.009,
-  warpStrength: 2.1,
   blendStart: 0.18,
   blendEnd: 0.82,
   colorVariation: 0.16,
@@ -87,46 +84,6 @@ export function resolvePathPaint(source) {
   return paint;
 }
 
-// The donor's GroundTurf noise: smooth random height with its analytic gradient.
-const turfNoise = Fn(([p]) => {
-  const cell = floor(p);
-  const local = fract(p);
-  const weight = local.mul(local).mul(local).mul(local.mul(local.mul(6).sub(15)).add(10));
-  const hash = (offset) => fract(sin(dot(cell.add(offset), vec2(127.1, 311.7))).mul(43758.5453));
-  const a = hash(vec2(0, 0));
-  const b = hash(vec2(1, 0));
-  const c = hash(vec2(0, 1));
-  const d = hash(vec2(1, 1));
-  return mix(mix(a, b, weight.x), mix(c, d, weight.x), weight.y).mul(2).sub(1);
-}, 'float');
-
-// The donor's `groundTurf` fibres and tufts: their coordinates, and how much of
-// each band survives before it goes sub-pixel. Derivatives, so built outside any
-// branch — WGSL allows `fwidth` only in uniform control flow.
-function turfLayers(world) {
-  const bend = vec2(sin(dot(world, vec2(0.73, 1.21))), sin(dot(world, vec2(-1.13, 0.67)))).mul(0.18);
-  const p = world.add(bend);
-  const layers = [
-    vec2(dot(p, vec2(18, 7)), dot(p, vec2(-1.5, 3.8))),
-    vec2(dot(p, vec2(-9, 16)), dot(p, vec2(-3.5, -2))).add(23.7),
-    vec2(dot(world, vec2(5.2, -3.9)), dot(world, vec2(3.9, 5.2))).add(41.3),
-  ];
-  return layers.map((coords) => {
-    const footprint = fwidth(coords);
-    return {
-      coords: coords.toVar(),
-      fade: smoothstep(0.25, 0.9, footprint.x.max(footprint.y)).oneMinus().toVar(),
-    };
-  });
-}
-
-// The donor's turf pigment from those layers.
-function turfPigment([a, b, c]) {
-  return turfNoise(a.coords).mul(a.fade).mul(0.45)
-    .add(turfNoise(b.coords).mul(b.fade).mul(0.35))
-    .add(turfNoise(c.coords).mul(c.fade).mul(0.2));
-}
-
 function floorMod(value, period) {
   return value.sub(floor(value.div(period)).mul(period));
 }
@@ -142,14 +99,18 @@ function floorMod(value, period) {
  * @param {{ colorRoughness: object } | null} options.textures acquireGroundLayers()
  * @param {{ layers: object, blend: object } | null} [options.floor] floor scans:
  *   layers.xy are array indices, blend moves from x to y, wet (optional) toward grit
+ * @param {((layer: number) => (uv: object) => object) | null} [options.noise] the
+ *   world-noise layers as the terrain reads them (its family atlas); neutral without
  * @returns {{ apply: (color: object, roughness: object) => { color: object, roughness: object } } | null}
  */
 export function createTerrainPathPaint({
   terrainUv, chunkWorldSize, chunkCenter, pathMask, verge, settings, textures, floor: floorScan = null,
+  noise = null,
 }) {
   if (!settings || !textures) return null;
   const repeats = Math.max(1, Math.round(chunkWorldSize / settings.repeatMeters));
   const secondaryRepeats = Math.max(1, Math.round(repeats * ANTI_TILING.secondaryScale));
+  const field = noise ?? (() => () => vec3(0.5));
   const local = vec2(
     floorMod(chunkCenter.x, NOISE_PERIOD_METRES).add(terrainUv.x.sub(0.5).mul(chunkWorldSize)),
     floorMod(chunkCenter.y, NOISE_PERIOD_METRES).add(terrainUv.y.oneMinus().sub(0.5).mul(chunkWorldSize)),
@@ -170,18 +131,39 @@ export function createTerrainPathPaint({
         // Everything that needs screen derivatives, before the branch.
         const gradA = [dFdx(uvA).toVar(), dFdy(uvA).toVar()];
         const gradB = [dFdx(uvB).toVar(), dFdy(uvB).toVar()];
-        const turfLayer = turfLayers(world);
+        // The world noise in the terrain's wrapped metres: the 1024 m wrap divides
+        // every layer's period, so neighbouring chunks read one field.
+        const macro = field(WORLD_NOISE_LAYERS.macro)(local.div(WORLD_NOISE_METERS.macro)).toVar();
+        const meso = field(WORLD_NOISE_LAYERS.meso)(local.div(WORLD_NOISE_METERS.meso)).toVar();
+        const micro = field(WORLD_NOISE_LAYERS.micro)(local.div(WORLD_NOISE_METERS.micro)).toVar();
+        // Texture repetition, Quilez's third variant: the meso field picks one of
+        // eight random offsets of a scan per region, and crosses to the next over
+        // its border, so the 4.9 m repeat never lines up into a grid.
+        const variant = meso.r.mul(8).toVar();
+        const offsetA = fract(sin(vec2(floor(variant).mul(3.17), floor(variant).mul(7.13))).mul(43.7)).toVar();
+        const offsetB = fract(sin(vec2(floor(variant).add(1).mul(3.17), floor(variant).add(1).mul(7.13))).mul(43.7)).toVar();
+        const variantBlend = fract(variant).toVar();
+        // The path edge eroded by clods and pits instead of a wide airbrushed ramp:
+        // its width is a pixel or two, taken here because fwidth needs uniform flow.
+        const mask = pathMask.toVar();
+        const edgeField = mask.add(micro.g.sub(0.5).mul(0.34)).add(meso.b.sub(0.5).mul(0.16))
+          .add(macro.b.sub(0.5).mul(0.1)).toVar();
+        const edgeWidth = fwidth(edgeField).mul(1.5).max(0.06).toVar();
         const result = vec4(baseColor, baseRoughness).toVar();
         // The ground has no texture of its own: lay a neutral scan over it near the
         // viewer, so the palette keeps the hue and the scan brings the structure, with
-        // no brightness ring where it fades. Past 45 m the branch skips both taps.
+        // no brightness ring where it fades. Past 45 m the branch skips its taps.
         const floorFade = smoothstep(14, 45, distance(cameraPosition, positionWorld)).oneMinus().toVar();
         If(floorFade.greaterThan(0), () => {
           // The cracked-mud scan's plates came out ~0.6 m across, triple real
           // dried mud: that layer alone is drawn at twice the frequency.
           const scan = (uv, grad, layer) => {
             const scale = layer.equal(int(GROUND_LAYERS.cracked)).select(float(2), float(1));
-            return texture(textures.colorRoughness, uv.mul(scale)).grad(grad[0].mul(scale), grad[1].mul(scale)).depth(layer).rgb;
+            const tap = (offset) => texture(textures.colorRoughness, uv.add(offset).mul(scale))
+              .grad(grad[0].mul(scale), grad[1].mul(scale)).depth(layer).rgb;
+            const a = tap(offsetA);
+            const b = tap(offsetB);
+            return mix(a, b, smoothstep(0.2, 0.8, variantBlend.sub(dot(a.sub(b), vec3(0.1)))));
           };
           const layerA = floorScan ? floorScan.layers.x.round().toInt() : int(GROUND_LAYERS.grit);
           const layerB = floorScan ? floorScan.layers.y.round().toInt() : layerA;
@@ -189,7 +171,6 @@ export function createTerrainPathPaint({
           const detail = floorScan?.wet ? mix(own, scan(uvA, gradA, int(GROUND_LAYERS.grit)), floorScan.wet) : own;
           result.assign(vec4(result.xyz.mul(mix(vec3(1), detail.div(GROUND_LAYER_MEAN).clamp(0.45, 1.8), floorFade.mul(0.85))), result.w));
         });
-        const mask = pathMask.toVar();
         const vergeBand = verge.toVar();
         // Only a path and its verge are painted: elsewhere (nearly all the
         // terrain) the whole paint is skipped. Unbranched it cost a third of the
@@ -197,21 +178,16 @@ export function createTerrainPathPaint({
         // Below 0.03 the dithered contour cannot reach the soil threshold; the
         // natural-trail mask's soft tail stays under it across open ground.
         If(mask.max(vergeBand).greaterThan(0.03), () => {
-          // Anti-tiling: a second, rescaled tap blended by a slow warped wave.
-          const macroTile = sin(world.x.mul(ANTI_TILING.macroFrequencyX)
-            .add(sin(world.y.mul(ANTI_TILING.warpFrequency)).mul(ANTI_TILING.warpStrength)))
-            .mul(sin(world.y.mul(ANTI_TILING.macroFrequencyZ)
-              .add(sin(world.x.mul(ANTI_TILING.warpFrequency * 1.37)).mul(ANTI_TILING.warpStrength * 0.63))))
-            .mul(0.5).add(0.5).toVar();
+          // Anti-tiling: a second, rescaled tap, blended by the meso mottle.
+          const macroTile = meso.g;
           const tileBlend = macroTile.smoothstep(ANTI_TILING.blendStart, ANTI_TILING.blendEnd);
           const dirt = mix(
-            texture(textures.colorRoughness, uvA).grad(...gradA).depth(int(0)),
+            texture(textures.colorRoughness, uvA.add(offsetA)).grad(...gradA).depth(int(0)),
             texture(textures.colorRoughness, uvB).grad(...gradB).depth(int(0)),
             tileBlend,
           ).toVar();
           // Broad damp hollows and sun-bleached runs, so no stretch of trail is one tone.
-          const damp = sin(world.x.mul(0.083).add(sin(world.y.mul(0.11)).mul(1.9)))
-            .mul(sin(world.y.mul(0.067).add(sin(world.x.mul(0.13)).mul(1.4)))).mul(0.5).add(0.5).smoothstep(0.35, 0.8);
+          const damp = macro.g.smoothstep(0.42, 0.72);
           const ground = dirt.rgb
             .mul(mix(1 - ANTI_TILING.colorVariation, 1 + ANTI_TILING.colorVariation, macroTile))
             .mul(mix(vec3(1.08, 1.05, 1.0), vec3(0.72, 0.7, 0.68), damp)).toVar();
@@ -219,24 +195,14 @@ export function createTerrainPathPaint({
             .add(macroTile.sub(0.5).mul(ANTI_TILING.roughnessVariation * 2)).clamp(0, 1);
           const pathPaint = mix(ground, colorNode(settings.color).mul(ground.r.mul(0.65).add(0.65)), settings.tint)
             .toVar();
-          // The contour, broken by turf fibre and the macro wave.
-          const macro = sin(world.x.mul(0.037).add(sin(world.y.mul(0.053)))).mul(sin(world.y.mul(0.071)))
-            .mul(0.5).add(0.5);
-          const turf = turfPigment(turfLayer);
-          // A metre-scale wander as well: with only fibre and the 10 m wave the
-          // edge followed the path mask's 2 m triangles as a straight line.
-          const wander = turfNoise(world.mul(0.26).add(vec2(13.1, 5.7)));
-          const soilEdge = smoothstep(0.12, 0.88, mask.add(turf.mul(0.09)).add(macro.sub(0.5).mul(0.06))
-            .add(wander.mul(0.2))).toVar();
+          const soilEdge = smoothstep(float(0.5).sub(edgeWidth), float(0.5).add(edgeWidth), edgeField).toVar();
           // The ground as the terrain painted it, read from the variable: naming
           // `baseColor` here would re-emit its whole graph inside the branch.
           const grass = result.xyz;
           let earth = mix(grass, pathPaint, soilEdge);
           if (settings.verge > 0) {
             // The verge as worn, trampled turf: duller and browner, broken by soil patches.
-            const patches = sin(world.x.mul(0.61).add(sin(world.y.mul(0.43)).mul(1.7)))
-              .mul(sin(world.y.mul(0.57).add(sin(world.x.mul(0.37)).mul(1.3)))).mul(0.5).add(0.5);
-            const soilPatch = patches.add(turf.mul(0.35)).smoothstep(0.45, 0.85);
+            const soilPatch = meso.r.add(micro.g.sub(0.5).mul(0.35)).smoothstep(0.5, 0.78);
             const dull = mix(vec3(dot(grass, vec3(0.3, 0.59, 0.11))), grass, 0.5).mul(vec3(1, 0.94, 0.76));
             const worn = mix(dull, pathPaint.mul(0.92), soilPatch.mul(0.55).add(0.18));
             earth = mix(earth, worn, vergeBand.mul(soilEdge.oneMinus()).mul(settings.verge));

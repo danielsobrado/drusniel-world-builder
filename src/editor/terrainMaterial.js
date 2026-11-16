@@ -27,7 +27,7 @@ import {
   vec3,
   uniformArray,
 } from 'three/tsl';
-import { WORLD_NOISE_LAYERS } from './stylized/worldNoiseLayout.js';
+import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from './stylized/worldNoiseLayout.js';
 import { assignTerrainMaterialData } from '../render/postprocessing/PostProcessingMaterialData.js';
 import { createTerrainMaterialBakedSurface } from './materials/TerrainMaterialBakedNodes.js';
 import { antialiasSpecularRoughness } from './materials/TerrainMaterialSurfaceGradientNodes.js';
@@ -112,6 +112,9 @@ function ecotoneTileUv({ terrainUv, transitionPatterns, chunkWorldSize, cellsPer
   // UV v runs against canonical z, as localXZ above.
   return terrainUv.add(vec2(offset.x, offset.y.negate()));
 }
+
+/** The packed noise swings wider than four-octave value noise (std 0.2 against ~0.12). */
+const NOISE_TO_FBM = 0.6;
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -215,6 +218,11 @@ export function createTerrainMaterial({
     ? (uv) => texture(familyAtlas.texture, uv).depth(int(familyAtlas.noiseLayer + layer)).rgb
     : null);
   const meadowGround = createMeadowGroundShading(stylizedConfig, tileSample, worldXZ, atlasNoise(WORLD_NOISE_LAYERS.macro) ?? undefined);
+  // The ground's fine fields from the world noise, one tap a layer, in place of
+  // four-octave value noise per pixel (kept for a material without the atlas).
+  // worldXZ wraps every 65 536 m, a whole number of every layer's period.
+  const meso = familyAtlas ? atlasNoise(WORLD_NOISE_LAYERS.meso)(worldXZ.div(WORLD_NOISE_METERS.meso)) : null;
+  const micro = familyAtlas ? atlasNoise(WORLD_NOISE_LAYERS.micro)(worldXZ.div(WORLD_NOISE_METERS.micro)) : null;
   const grassTint = meadowGround?.root ?? mix(
     colorNode(stylizedConfig.color.bottom),
     mix(
@@ -251,8 +259,11 @@ export function createTerrainMaterial({
   const rutStrength = pathConfig.rutStrength ?? 0;
   if (rutStrength > 0) {
     const rutScale = pathConfig.rutScale ?? 1.6;
-    const ruts = stylizedFbm(worldXZ.mul(rutScale)).sub(0.5)
-      .add(stylizedFbm(worldXZ.mul(rutScale * 4.1).add(vec2(7.1, 3.7))).sub(0.5).mul(0.35));
+    // Ruts run with the meso layer's oriented streak, pitted by the clods.
+    const ruts = meso
+      ? meso.b.sub(0.5).mul(NOISE_TO_FBM).add(micro.g.sub(0.5).mul(NOISE_TO_FBM * 0.35))
+      : stylizedFbm(worldXZ.mul(rutScale)).sub(0.5)
+        .add(stylizedFbm(worldXZ.mul(rutScale * 4.1).add(vec2(7.1, 3.7))).sub(0.5).mul(0.35));
     groundColor = groundColor.mul(
       float(1).add(ruts.mul(rutStrength).mul(pathWear.mask)),
     );
@@ -276,8 +287,12 @@ export function createTerrainMaterial({
     );
   }
 
-  const variation = stylizedFbm(worldXZ.mul(stylizedConfig.ground.variationScale)).sub(0.5);
-  const grain = stylizedFbm(worldXZ.mul(stylizedConfig.ground.grainScale)).sub(0.5);
+  const variation = meso
+    ? meso.r.sub(0.5).mul(NOISE_TO_FBM)
+    : stylizedFbm(worldXZ.mul(stylizedConfig.ground.variationScale)).sub(0.5);
+  const grain = micro
+    ? micro.r.sub(0.5).mul(NOISE_TO_FBM)
+    : stylizedFbm(worldXZ.mul(stylizedConfig.ground.grainScale)).sub(0.5);
   const variationColor = colorNode(stylizedConfig.ground.variationColor);
   groundColor = groundColor.add(
     variationColor.sub(groundColor)
@@ -437,6 +452,7 @@ export function createTerrainMaterial({
       verge: pathWear.verge.mul(oneMinus(bakedSurface.snow ?? float(0))),
       settings: pathPaintSettings,
       textures: pathPaintSettings ? acquireGroundLayers() : null,
+      noise: familyAtlas ? atlasNoise : null,
       // Wet ground and the bed under water wear grit whatever their tile: per-tile
       // scans switched along the cell grid at every waterline in straight steps.
       floor: meadowGround?.floor

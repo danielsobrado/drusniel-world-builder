@@ -12,9 +12,12 @@ import {
   positionWorld,
   sin,
   varying,
+  vec2,
   vec3,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
+import { worldNoiseField } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { coldStone, snowGrain } from './rockSnowSurface.js';
@@ -155,9 +158,20 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
 
   // Organic 3D FBM moss mats with fine bryophyte fringe breakup (replacing periodic sine stripes).
   const macroPatch = stylizedFbm2(pattern.xz.mul(1.75).add(pattern.y.mul(0.65))).mul(0.5).add(0.5);
-  const edgeBreakup = mx_noise_float(pattern.mul(13.5)).mul(0.5).add(0.5);
-  const tuftGrain = mx_noise_float(pattern.mul(34.0)).mul(0.5).add(0.5);
-  const clumpTone = mx_noise_float(pattern.mul(8.5).add(3.7)).mul(0.5).add(0.5);
+  // Fringe, tuft grain and clump tone from the world noise, mapped from above and
+  // from the side and blended by the facet's slope: four taps in place of three
+  // 3D Perlins a pixel. The micro layer's pits break the moss edge, its grit is
+  // the tufts; the meso mottle groups them into clumps.
+  const noiseAt = (layer, metres) => {
+    const field = worldNoiseField(layer);
+    const flat = field(pattern.xz.div(metres));
+    const side = field(vec2(pattern.x.add(pattern.z), pattern.y).div(metres).add(0.37));
+    return mix(side, flat, normalWorld.y.abs().smoothstep(0.35, 0.75));
+  };
+  const micro = noiseAt(WORLD_NOISE_LAYERS.micro, 2.5);
+  const edgeBreakup = micro.g;
+  const tuftGrain = micro.r;
+  const clumpTone = noiseAt(WORLD_NOISE_LAYERS.meso, 6).g;
   const up = normalWorld.y;
   const rockLuma = dot(biomeAlbedo, vec3(0.3, 0.59, 0.11));
   // Bias moss gently toward stone crevices/darker grain while keeping upward-facing growth.
