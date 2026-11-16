@@ -251,12 +251,17 @@ def _tex_alpine_edelweiss(tex_dir):
     u, v = xs / w, 1.0 - ys / h
     rgba = np.zeros((h, w, 4), dtype=np.float32)
     noise = fbm(w, h, (10, 10), rng, 4)
+    cracks = fbm(w, h, (18, 18), rng, 3)
 
-    # Limestone slab in u < 0.48
+    # Weathered alpine granite/slate stone in u < 0.48 with fracture veins, moss specks, and soil foot.
     in_stone = u < 0.48
-    stone = np.array([0.74, 0.72, 0.66]) * (0.80 + 0.32 * noise[..., None])
-    snow = (v > 0.56) & (noise > 0.48)
-    stone[snow] = np.array([0.92, 0.94, 0.97])
+    vein = np.abs(cracks - 0.5) < 0.06
+    stone = np.array([0.27, 0.26, 0.24]) * (0.68 + 0.54 * noise[..., None])
+    stone[vein] *= 0.55
+    lichen = (cracks > 0.62) & (noise > 0.52) & (v > 0.28)
+    stone[lichen] = np.array([0.24, 0.30, 0.17]) * (0.85 + 0.30 * noise[lichen, None])
+    earth_rim = v < 0.24
+    stone[earth_rim] = stone[earth_rim] * 0.45 + np.array([0.16, 0.13, 0.09]) * 0.55
     rgba[in_stone, :3] = np.clip(stone[in_stone], 0, 1)
     rgba[in_stone, 3] = 1.0
 

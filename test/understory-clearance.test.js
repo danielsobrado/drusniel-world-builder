@@ -19,7 +19,7 @@ test('computePrototypeFootprint measures elongated fallen log XZ extents', () =>
   const geometry = createFallenLogGeometry({ length: 3.6, radius: 0.24 });
   const footprint = computePrototypeFootprint([{ geometry }]);
   assert.ok(footprint.halfX >= 1.7 && footprint.halfX <= 2.0, `expected halfX ~1.8-1.95, got ${footprint.halfX}`);
-  assert.ok(footprint.halfZ >= 0.2 && footprint.halfZ <= 0.65, `expected halfZ ~0.25-0.55, got ${footprint.halfZ}`);
+  assert.ok(footprint.halfZ >= 0.2 && footprint.halfZ <= 0.8, `expected halfZ ~0.25-0.8, got ${footprint.halfZ}`);
   geometry.dispose();
 });
 

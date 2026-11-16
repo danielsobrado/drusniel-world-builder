@@ -108,15 +108,16 @@ export function collectChunkObstacleCircles(chunkX, chunkZ, {
         const zones = collectDebrisGrassZones(debris, footprints);
         for (const zone of zones) {
           if (zone.kind === 'log') {
+            const logBlockRadius = zone.radius * 0.65;
             for (const s of [0, 0.5, 1]) {
               obstacles.push({
                 x: zone.x0 + (zone.x1 - zone.x0) * s,
                 z: zone.z0 + (zone.z1 - zone.z0) * s,
-                radius: zone.radius,
+                radius: logBlockRadius,
               });
             }
           } else {
-            obstacles.push({ x: zone.x, z: zone.z, radius: zone.radius });
+            obstacles.push({ x: zone.x, z: zone.z, radius: zone.radius * 0.72 });
           }
         }
       }
@@ -253,11 +254,12 @@ export function collectDebrisGrassZones(placements = [], footprints = [], out = 
       const yaw = p.rotationY ?? 0;
       const dirX = hx >= hz ? Math.cos(yaw) : Math.sin(yaw);
       const dirZ = hx >= hz ? -Math.sin(yaw) : Math.cos(yaw);
-      // Actual wood core radius (~0.24 m log vs wider stub bounding box) so grass hugs close.
-      const radius = Math.max(0.14, Math.min(0.34, shortHalf * 0.52));
-      const collar = radius + 0.34 * scale;
-      const reach = radius + 0.82 * scale;
+      // Actual wood core radius (~0.20–0.24 m log vs wider stub/root bounding box) so grass & ferns hug close.
+      const radius = Math.max(0.13, Math.min(0.25, shortHalf * 0.44));
+      const collar = radius + 0.36 * scale;
+      const reach = radius + 0.84 * scale;
       const span = Math.max(0.3, longHalf - radius * 0.65);
+      const older = height <= 0.48 || ((Math.abs(Math.sin(p.x * 7.13 + p.z * 3.71)) * 43758.5) % 1) > 0.45;
       out.push({
         kind: 'log',
         x0: p.x - dirX * span,
@@ -270,6 +272,7 @@ export function collectDebrisGrassZones(placements = [], footprints = [], out = 
         collar,
         reach,
         phase,
+        older,
       });
     } else if (height >= 0.25) {
       const radius = Math.max(0.3, longHalf * 0.55);
@@ -279,4 +282,45 @@ export function collectDebrisGrassZones(placements = [], footprints = [], out = 
     }
   }
   return out;
+}
+
+/**
+ * Collects fallen log spine segments `{ x0, z0, x1, z1, radius, older }` across the
+ * 3x3 chunk neighborhood so middle-layer plants can hug flanks or perch on nurse logs.
+ */
+export function collectChunkDebrisLogs(chunkX, chunkZ, debrisPlacementsProvider = null, debrisFootprintsProvider = null) {
+  const logs = [];
+  if (typeof debrisPlacementsProvider !== 'function') return logs;
+  const footprints = typeof debrisFootprintsProvider === 'function' ? debrisFootprintsProvider() : null;
+  for (let dz = -1; dz <= 1; dz += 1) {
+    for (let dx = -1; dx <= 1; dx += 1) {
+      const debris = debrisPlacementsProvider(chunkX + dx, chunkZ + dz);
+      if (!Array.isArray(debris) || debris.length === 0) continue;
+      for (const zone of collectDebrisGrassZones(debris, footprints)) {
+        if (zone.kind === 'log') logs.push(zone);
+      }
+    }
+  }
+  return logs;
+}
+
+/** Distance from `(x, z)` to the nearest fallen log spine segment in `logs`. */
+export function nearestDebrisLog(x, z, logs = []) {
+  let best = null;
+  let bestDistSq = Infinity;
+  for (let i = 0; i < logs.length; i += 1) {
+    const log = logs[i];
+    const vx = log.x1 - log.x0;
+    const vz = log.z1 - log.z0;
+    const lenSq = vx * vx + vz * vz;
+    const t = lenSq > 1e-6 ? Math.max(0, Math.min(1, ((x - log.x0) * vx + (z - log.z0) * vz) / lenSq)) : 0.5;
+    const dx = x - (log.x0 + vx * t);
+    const dz = z - (log.z0 + vz * t);
+    const distSq = dx * dx + dz * dz;
+    if (distSq < bestDistSq) {
+      bestDistSq = distSq;
+      best = log;
+    }
+  }
+  return best ? { dist: Math.sqrt(bestDistSq), log: best } : null;
 }

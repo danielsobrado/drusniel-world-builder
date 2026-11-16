@@ -238,21 +238,24 @@ def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), su
     """Sculpted organic boulder or moss/cushion hummock with seam-free UV projection."""
     existing_verts = set(bm.verts)
     existing_faces = set(bm.faces)
-    bmesh.ops.create_icosphere(bm, subdivisions=subdivisions, radius=1.0)
+    bmesh.ops.create_icosphere(bm, subdivisions=max(2, subdivisions), radius=1.0)
     new_verts = [v for v in bm.verts if v not in existing_verts]
     new_faces = [f for f in bm.faces if f not in existing_faces]
+    for f in new_faces:
+        f.smooth = True
     rx, ry, rz = radii
     p1 = rng.uniform(0, 6.28) if rng else 0.7
     p2 = rng.uniform(0, 6.28) if rng else 1.9
     for v in new_verts:
         co = v.co.copy()
-        # Deterministic organic facets so neighboring vertices displace coherently
+        # Deterministic multi-frequency facets so boulders & moss cushions undulate organically.
         warp = (
             0.14 * math.sin(co.x * 3.2 + p1) * math.cos(co.y * 2.8 + p2)
             + 0.10 * math.cos(co.z * 3.7 - p1)
+            + 0.06 * math.sin(co.x * 6.4 - co.z * 5.2 + p2)
         )
         if rng is not None:
-            warp += rng.uniform(-0.05, 0.05)
+            warp += rng.uniform(-0.04, 0.04)
         scale = 1.0 + (warp * 0.55 if dome else warp)
         co.x *= scale
         co.y *= scale

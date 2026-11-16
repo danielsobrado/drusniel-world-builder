@@ -28,6 +28,7 @@ import { iterateAuthoredMeshPrototypes } from './StylizedPrototypeBake.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { placementTileId } from '../biomes/BiomeLooks.js';
+import { sampleMicrohabitat } from './MicrohabitatField.js';
 import {
   BUSH_CAST_SHADOW,
   cloneBushMaterial,
@@ -193,6 +194,7 @@ export class StylizedBushView {
           character: definition.character ?? null,
           characterStrength: definition.characterStrength,
           canopy: definition.canopy,
+          affinity: definition.affinity ?? null,
         });
       }
       registerPrototypeIndices(
@@ -298,26 +300,28 @@ export class StylizedBushView {
       // trunks: without it shrubs peaked in the core and the meadow met the
       // wood at a line of trees (`edgeBelt`, 0 disables).
       const edge = habitat?.patchEdge ?? 0;
+      const waterDist = habitat?.waterDistance ?? Infinity;
+      const bankBoost = Number.isFinite(waterDist) && waterDist < 14 ? 1 - waterDist / 14 : 0;
       const clusterDensity = Math.max(understoryClusterDensity(
         cluster.density * regionalScrub,
         habitat,
         bushes.understoryDensity,
       // Squared: the ring is some 100 m wide, and a linear belt spread shrubs
       // across the whole meadow beside a wood instead of banding its edge.
-      ), (bushes.edgeBelt ?? 0) * edge * edge);
+      ), (bushes.edgeBelt ?? 0) * edge * edge, bankBoost * 0.88);
       if (clusterDensity <= 0) return null;
       const canopy = habitat
         ? forestFloorDensity(habitat, 'bush', forestFloorConfig)
         : 1;
       // Fringes are the densest band: cluster edge and forest edge both add.
-      const fringe = 1 + edgeAffinity * Math.max(cluster.edge, habitat?.patchEdge ?? 0);
+      const fringe = 1 + edgeAffinity * Math.max(cluster.edge, habitat?.patchEdge ?? 0, bankBoost);
       // How thick a biome's undergrowth runs: a rainforest floor is a thicket,
       // a taiga's is thin, a savanna's is scattered scrub.
       const biome = bushes.densityByTile?.[candidate.tileId] ?? 1;
       // Shrubs gather into thickets with open floor between: an even shrub
       // layer read from the air as speckle (2026-11-15 capture).
       const thicket = valueNoise(candidate.x / THICKET_METERS, candidate.z / THICKET_METERS, THICKET_SEED) * 0.5 + 0.5;
-      const density = Math.min(1, clusterDensity * canopy * fringe * biome * (0.12 + 2.4 * thicket * thicket));
+      const density = Math.min(1, clusterDensity * canopy * fringe * biome * (0.12 + 2.4 * thicket * thicket) + bankBoost * 0.45);
       if (candidate.priority >= density) return null;
       return {
         // Edge shrubs stand taller: the step up from grass to crowns.
@@ -350,6 +354,7 @@ export class StylizedBushView {
     if (cached?.key === key) return cached.placements;
 
     const bushes = this.config.bushes;
+    const microScratch = { log: 0, treeBase: 0, water: 0, shade: 0, gap: 0 };
     const options = {
       kind: 'bush',
       chunkX,
@@ -362,14 +367,18 @@ export class StylizedBushView {
       heightAt: (x, z) => this.terrainView.getCanonicalHeight(x, z),
       prototypeCount: this.prototypes.length,
       prototypeIndexForRoll: (roll, tileId, x, z) => {
+        const needsHabitat = this.prototypeIndexForRoll.usesCanopy || this.prototypeIndexForRoll.usesMicrohabitat;
+        const habitat = needsHabitat ? (this.forestFieldProvider?.()?.sample(x, z) ?? null) : null;
+        const microhabitat = this.prototypeIndexForRoll.usesMicrohabitat
+          ? sampleMicrohabitat(x, z, { habitat, out: microScratch })
+          : null;
         const automaticIndex = this.prototypeIndexForRoll(
           roll,
           tileId,
           x,
           z,
-          this.prototypeIndexForRoll.usesCanopy
-            ? this.forestFieldProvider?.()?.sample(x, z) ?? null
-            : null,
+          habitat,
+          microhabitat,
         );
         return this.biomeAssetPalette?.resolvePrototypeIndex({
           tileId,

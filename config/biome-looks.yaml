@@ -130,16 +130,22 @@ biomeLooks:
       soil: '#6b5d3e'
       formations: 0.12
       rock: { tint: '#cfc6b4', tone: 0.9 }
-    5: { name: tropical seasonal forest, canopy: '#6fae3e', soil: '#5d4a30', rock: { tint: '#cdbfa6', tone: 0.9 } }
+    5: { name: tropical seasonal forest, canopy: '#6fae3e', soil: '#694e31', rock: { tint: '#cdbfa6', tone: 0.9 } }
     6:
       name: temperate deciduous forest
       canopy: '#6da03c'
-      soil: '#4f4230'
+      soil: '#5a3f26'
       formations: 0.08
-      rock: { tint: '#c4bfb2', tone: 0.86 }
+      rock: { tint: '#c4bfb2', tone: 0.86, moss: 0.8 }
     # Canopy drip keeps rainforest pools stippled with rings.
     7: { name: tropical rainforest, canopy: '#3f8f34', soil: '#3d2f20', rock: { moss: 1.4 }, ripples: { drops: 6, fade: 2.2 } }
-    8: { name: temperate rainforest, canopy: '#4c9142', soil: '#3a3324', rock: { moss: 1.4 }, ripples: { drops: 4, fade: 2.4 } }
+    8:
+      name: temperate rainforest
+      canopy: '#4c9142'
+      soil: '#2a3920'
+      understory: { tint: '#90c274', tone: 0.98, saturation: 1.05 }
+      rock: { moss: 1.85 }
+      ripples: { drops: 4, fade: 2.4 }
     # Boreal forest in its winter: peat and needle litter, snow only in the
     # hollows, along the tops of the crowns and as frost on the grass. Ground
     # snow at 0.3 lay as a thin grey film over the map colour, reading as bare
@@ -151,10 +157,11 @@ biomeLooks:
     9:
       name: taiga
       canopy: '#4a7a55'
-      soil: '#3d3a2b'
+      soil: '#403322'
       formations: 0.2
-      # Cold grey granite, between the wood's warm stone and the tundra's blue-grey.
-      rock: { tint: '#bcc0c2', tone: 0.9 }
+      # Cold grey granite with boreal moss & lichen; muted olive-moss understory removes warm turf wash.
+      rock: { tint: '#bdc2be', tone: 0.9, moss: 0.65 }
+      understory: { tint: '#9cb096', tone: 0.95, saturation: 0.78 }
       water: { tint: '#bccaca', desaturate: 0.35 }
       # Canopy 0.7 capped every crown white over green ground (2026-11-10 captures).
       snow: { ground: 0.1, canopy: 0.3, grass: 0.35, air: 0.4, fall: 0.15 }

@@ -1,4 +1,5 @@
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
+import { valueNoise } from '../world/valueNoise2d.js';
 import { completeIterator, ITERATOR_PENDING } from './ResumableIterator.js';
 import { BudgetedDetailVisibility } from './lod/BudgetedDetailVisibility.js';
 import { stepViewRebuild } from './StagedViewRebuild.js';
@@ -29,11 +30,14 @@ import { placementTileId } from '../biomes/BiomeLooks.js';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 import {
+  collectChunkDebrisLogs,
   collectChunkObstacleCircles,
   computePrototypeFootprint,
   footprintHitsObstacle,
+  nearestDebrisLog,
   pathBlockedForFootprint,
 } from './UnderstoryClearance.js';
+import { collectChunkTreeBases, sampleMicrohabitat } from './MicrohabitatField.js';
 
 const DETAIL_UP = new THREE.Vector3(0, 1, 0);
 const DETAIL_REPRESENTATIONS = Object.freeze([{ band: 'near', fade: 1, ditherDirection: 1 }]);
@@ -175,7 +179,7 @@ export class StylizedGroundDetailView {
         const span = longHalf * 0.85;
         const h0 = this.terrainView.getCanonicalHeight(placement.x - dirX * span, placement.z - dirZ * span);
         const h1 = this.terrainView.getCanonicalHeight(placement.x + dirX * span, placement.z + dirZ * span);
-        const yMid = Math.min(baseHeight, 0.5 * (h0 + h1)) + heightOffset;
+        const yMid = Math.min(baseHeight, 0.5 * (h0 + h1)) - 0.04 + heightOffset;
         DETAIL_SCRATCH.axis.set(dirX * span * 2, h1 - h0, dirZ * span * 2).normalize();
         DETAIL_SCRATCH.normal.fromArray(groundNormal);
         if (alongX) {
@@ -271,8 +275,14 @@ export class StylizedGroundDetailView {
           character: definition.character ?? null,
           characterStrength: definition.characterStrength,
           canopy: definition.canopy,
+          motion: definition.motion ?? null,
+          affinity: definition.affinity ?? null,
         });
-        const foliage = ['groundDetail', 'tropicalPlant'].includes(this.layerName);
+        // Only living foliage variants carry chlorophyll palette grading; rigid stones,
+        // scanned logs, exposed roots, deadfall, and structures keep their native textures.
+        const foliage = ['groundDetail', 'tropicalPlant'].includes(this.layerName)
+          && definition.motion !== 'rigid'
+          && definition.sway !== false;
         const prototype = [];
         for (const { geometry, source } of parts) {
           const sourceMaterial = materialList(source)[0];
@@ -384,6 +394,7 @@ export class StylizedGroundDetailView {
         character: definition.character ?? null,
         characterStrength: definition.characterStrength,
         canopy: definition.canopy,
+        affinity: definition.affinity ?? null,
       });
       const parts = definition.parts.map((part) => ({
         geometry: part.geometry,
@@ -464,6 +475,13 @@ export class StylizedGroundDetailView {
       debrisPlacementsProvider: this.debrisPlacementsProvider,
       debrisFootprintsProvider: this.debrisFootprintsProvider,
     });
+    const nurseLogs = this.layerName === 'groundDetail'
+      ? collectChunkDebrisLogs(chunkX, chunkZ, this.debrisPlacementsProvider, this.debrisFootprintsProvider)
+      : [];
+    const treeBases = (this.layerName === 'groundDetail' || this.layerName === 'forestDebris')
+      ? collectChunkTreeBases(chunkX, chunkZ, this.treePlacementsProvider)
+      : [];
+    const microScratch = { log: 0, treeBase: 0, water: 0, shade: 0, gap: 0 };
     const key = [
       this.revisionTracker.signature(chunkX, chunkZ, 1),
       this.prototypes.length,
@@ -499,12 +517,18 @@ export class StylizedGroundDetailView {
       heightAt: (x, z) => this.terrainView.getCanonicalHeight(x, z),
       prototypeCount: this.prototypes.length,
       prototypeIndexForRoll: (roll, tileId, x, z) => {
+        const needsHabitat = this.prototypeIndexForRoll.usesCanopy || this.prototypeIndexForRoll.usesMicrohabitat;
+        const habitat = needsHabitat ? (forestField?.sample(x, z) ?? null) : null;
+        const microhabitat = this.prototypeIndexForRoll.usesMicrohabitat
+          ? sampleMicrohabitat(x, z, { habitat, treeBases, logSpines: nurseLogs, out: microScratch })
+          : null;
         const automaticIndex = this.prototypeIndexForRoll(
           roll,
           tileId,
           x,
           z,
-          this.prototypeIndexForRoll.usesCanopy ? forestField?.sample(x, z) ?? null : null,
+          habitat,
+          microhabitat,
         );
         return this.biomeAssetPalette?.resolvePrototypeIndex({
           tileId,
@@ -521,6 +545,7 @@ export class StylizedGroundDetailView {
       priorityChannel: this.priorityChannel,
       candidateEvaluator: (candidate, shouldYield) => {
         const placementRule = this.prototypePlacementRules[candidate.prototypeIndex];
+        const biomeRule = this.prototypeBiomeRules[candidate.prototypeIndex];
         if (!acceptsStrategicDetailPlacement(
           candidate,
           placementRule,
@@ -536,13 +561,27 @@ export class StylizedGroundDetailView {
           && pathBlockedForFootprint(this.pathClearance, candidate, footprint)) {
           return null;
         }
+
+        const habitat = forestField?.sample(candidate.x, candidate.z) ?? null;
+        const detailMotion = biomeRule?.motion ?? null;
+        const detailCharacter = biomeRule?.character ?? placementRule?.character ?? 'meadow';
+        const logHit = nurseLogs.length > 0 && detailCharacter === 'forest'
+          && detailMotion !== 'rigid' && placementRule?.strategy !== 'path-interior'
+          ? nearestDebrisLog(candidate.x, candidate.z, nurseLogs)
+          : null;
+        const onNurseLog = Boolean(
+          logHit && logHit.log.older && logHit.dist <= logHit.log.radius + 0.14
+          && (candidate.tileId === 8 || candidate.tileId === 6),
+        );
         if (this.layerName !== 'aquaticPlant'
+          && !onNurseLog
           && footprintHitsObstacle(candidate, footprint, obstacles)) {
           return null;
         }
 
         // A layer of woodland floor lives under canopy, thinning out with it.
-        const coverage = forestField?.sample(candidate.x, candidate.z).patchCoverage ?? 0;
+        const coverage = habitat?.patchCoverage ?? 0;
+        const edge = habitat?.patchEdge ?? 0;
         const minCanopy = this.prototypeMinCanopy[candidate.prototypeIndex] ?? 0;
         if (this.layerConfig.canopyGate && (candidate.priority >= coverage || coverage < minCanopy)) return null;
 
@@ -551,7 +590,7 @@ export class StylizedGroundDetailView {
           const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
           if (Number.isFinite(seaLevel) && candidate.height <= seaLevel + 0.9) return null;
           this.oceanDistance ??= createOceanDistanceField(this.terrainView, 24);
-          const dist = this.oceanDistance.sample(candidate.x, candidate.z);
+          const dist = this.oceanDistance.worldDistanceAt(candidate.x, candidate.z);
           if (Number.isFinite(dist) && dist < minShore) return null;
         }
 
@@ -578,16 +617,73 @@ export class StylizedGroundDetailView {
 
         const tileDensity = this.layerConfig.densityByTile?.[candidate.tileId] ?? 1;
         if (tileDensity < 1 && candidate.priority >= tileDensity) return null;
-        if (!this.regionalCharacterField) return metadata ?? true;
-        // Meadow districts thin floor accents; an understory layer follows the
-        // woodland channel instead (`regionalChannel: forest`).
-        const regionalMeadow = this.regionalCharacterField.sampleChannel(
+        const micro = sampleMicrohabitat(candidate.x, candidate.z, {
+          habitat, treeBases, logSpines: nurseLogs, out: microScratch,
+        });
+        // Shoreline sedges & reeds (`affinity.water >= 4`) keep to wet banks & wetlands cleanly.
+        if (biomeRule?.affinity?.water >= 4 && candidate.tileId !== 12 && micro.water < 0.3) {
+          return null;
+        }
+        // Group vegetative ground details into microhabitat-responsive colonies rather
+        // than uniform single-plant confetti across the floor.
+        const isColonialDetail = this.layerName === 'groundDetail'
+          && placementRule?.strategy !== 'path-interior'
+          && detailMotion !== 'rigid'
+          && candidate.tileId !== 13;
+        const bankBoost = micro.water;
+        const baseScale = candidate.scale ?? 1;
+        if (this.layerName === 'forestDebris') {
+          // Concentrate fungi clusters & damp leaf litter near tree bases, water, and dense shade.
+          const isFungi = biomeRule?.affinity?.shade >= 1.5;
+          const microScore = Math.max(micro.treeBase, micro.water, micro.shade * 0.75);
+          if (isFungi && candidate.priority >= Math.min(1, 0.25 + microScore * 0.85)) return null;
+          return true;
+        }
+        const colony = isColonialDetail
+          ? valueNoise(candidate.x / 7.5, candidate.z / 7.5, 0x636f6c6f) * 0.5 + 0.5
+          : 0.5;
+        const localHabitatBoost = Math.max(micro.log, micro.treeBase * 0.85, bankBoost);
+        let colonyGate = isColonialDetail
+          ? Math.min(1, 0.32 + 1.05 * colony * colony + localHabitatBoost * 0.7)
+          : 1;
+        let detailScale = isColonialDetail
+          ? baseScale * (0.94 + 0.26 * colony) * (1 + bankBoost * 0.28)
+          : baseScale;
+        if (isColonialDetail) {
+          if (candidate.tileId === 8) {
+            if (detailMotion === 'fern-frond') {
+              colonyGate = Math.min(1, 0.52 + 0.95 * colony + bankBoost * 0.55);
+              detailScale *= 1.24;
+            }
+            if (logHit && logHit.dist < 1.45) colonyGate = 1;
+          } else if (candidate.tileId === 9 && detailMotion === 'fern-frond') {
+            colonyGate = Math.min(1, colony * 0.42 + bankBoost * 0.95);
+          } else if (candidate.tileId === 6) {
+            if (edge > 0.28 || coverage < 0.72) colonyGate = Math.min(1, colonyGate + 0.25);
+            else if (coverage >= 0.85 && edge < 0.18) colonyGate *= 0.62;
+          } else if (candidate.tileId === 5) {
+            if (colony > 0.52 || coverage > 0.45 || bankBoost > 0.2) colonyGate = Math.min(1, colonyGate + 0.2);
+            else colonyGate *= 0.58;
+          }
+        }
+        const perchHeight = onNurseLog
+          ? { waterPlacementHeight: candidate.height + 0.19, scale: detailScale * 0.78 }
+          : { scale: detailScale };
+        if (!this.regionalCharacterField) {
+          return candidate.priority < colonyGate
+            ? { ...(metadata ?? {}), ...perchHeight }
+            : null;
+        }
+        // Let forest-adapted scans/herbs follow the forest channel rather than
+        // being thinned out inside closed woods by the open meadow channel.
+        const channel = this.layerConfig.regionalChannel ?? placementRule?.character ?? detailCharacter;
+        const regionalValue = this.regionalCharacterField.sampleChannel(
           candidate.x,
           candidate.z,
-          this.layerConfig.regionalChannel ?? 'meadow',
+          channel,
         );
-        return candidate.priority < regionalMeadow
-          ? { ...(metadata ?? {}), regionalMeadow }
+        return candidate.priority < regionalValue * colonyGate
+          ? { ...(metadata ?? {}), regionalMeadow: regionalValue, ...perchHeight }
           : null;
       },
     };

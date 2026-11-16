@@ -218,13 +218,17 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       // Trodden by the player: blades press down under a print and rise as it fades.
       const trodden = meadowTrodden(blade, uniforms.origin, tileSize);
       const growth = blade.strength.mul(oneMinus(dirt.mul(config.dirt.bladeCut))).mul(oneMinus(trodden.mul(0.75)));
+      // Thin dirt margins and sparse woodland pockets probabilistically instead of
+      // compressing every stem into a tiny vertical spike out of soil.
+      const growthKeep = growth.sub(0.14).div(0.44).clamp(0, 1);
+      const sparseHide = growth.lessThan(0.58).and(blade.variation.greaterThanEqual(growthKeep));
       // Patchy stand height, as the donor's cinematic meadow: a slow noise sets
       // each patch's scale so the field has swells and hollows, not one level.
       const profile = meadowGrowthNodes(uniforms,blade);
       const tufts = uniforms.tufts;
       const occupancy = profile.tuft.occupancy.toVar();
       const plant = meadowPlantNodes(uniforms, blade);
-      const height = profile.height.mul(growth).mul(plant.height).toVar();
+      const height = profile.height.mul(mix(float(0.62), float(1), growth)).mul(plant.height).toVar();
       // A short plant is a narrow one: width follows the stem's own height, so
       // short growth and worn ground read as slender blades, not broad wedges.
       const stature = height.div(profile.tallHeight.max(1e-3)).clamp(0, 1).toVar();
@@ -257,7 +261,10 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       // A tuft's stems share a lean and splay together; stragglers lie further over.
       const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, tufts.lean).toVar();
       const restDirection = restMix.div(restMix.length().max(1e-3));
-      const restAngle = uniforms.baseBend.mul(blade.strength).mul(HALF_PI).mul(bendPower)
+      // Keep a gentle resting splay even on shaded woodland stems so short blades
+      // arch naturally instead of standing vertically like little pointed spikes.
+      const strengthArch = blade.strength.mul(0.35).add(0.65);
+      const restAngle = uniforms.baseBend.mul(strengthArch).mul(HALF_PI).mul(bendPower)
         .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest);
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
@@ -300,6 +307,9 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       if (interaction) foldUnderBody(blade,local,ribbon,height,r,uniforms,interaction);
 
       local.assign(local.mul(clamp(lod.shrink, 0, 1)).add(blade.base));
+      If(sparseHide, () => {
+        local.assign(vec3(HIDDEN));
+      });
     });
     return local;
   })();

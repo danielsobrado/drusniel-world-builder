@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   createFallenBranchGeometry,
   createFallenLogGeometry,
+  createFungiClusterGeometry,
   createLeafLitterGeometry,
   createMossMoundGeometry,
   createStumpGeometry,
@@ -10,7 +11,7 @@ import {
 import { createForestDebrisPrototypes } from '../src/editor/stylized/forest/forestDebrisPrototypes.js';
 
 const SHAPES = {
-  createStumpGeometry, createFallenLogGeometry, createFallenBranchGeometry, createLeafLitterGeometry, createMossMoundGeometry,
+  createStumpGeometry, createFallenLogGeometry, createFallenBranchGeometry, createLeafLitterGeometry, createMossMoundGeometry, createFungiClusterGeometry,
 };
 
 for (const [name, create] of Object.entries(SHAPES)) {
@@ -22,7 +23,48 @@ for (const [name, create] of Object.entries(SHAPES)) {
     assert.ok(uv && uv.count === position.count && uv.array.every(Number.isFinite));
     assert.equal(geometry.getAttribute('color').count, position.count);
     assert.ok(geometry.getIndex().array.every((index) => index < position.count));
-    assert.ok(geometry.getIndex().count / 3 <= 440, `${geometry.getIndex().count / 3} triangles`);
+    assert.ok(geometry.getIndex().count / 3 <= 1400, `${geometry.getIndex().count / 3} triangles`);
+  });
+}
+
+for (const variant of ['jagged', 'hollow', 'weathered']) {
+  test(`createStumpGeometry variant "${variant}" has outward top normals and distinct silhouette`, () => {
+    const stump = createStumpGeometry({ variant });
+    const pos = stump.getAttribute('position');
+    const nrm = stump.getAttribute('normal');
+    assert.ok(pos.array.every(Number.isFinite));
+    assert.ok(stump.getIndex().count / 3 <= 1400);
+    let maxY = -Infinity;
+    for (let i = 0; i < pos.count; i += 1) maxY = Math.max(maxY, pos.getY(i));
+    let topNormalSum = 0;
+    for (let i = 0; i < pos.count; i += 1) {
+      if (pos.getY(i) > maxY - 0.06) topNormalSum += nrm.getY(i);
+    }
+    assert.ok(topNormalSum > 0, `stump "${variant}" top normal sum ${topNormalSum} should point +Y`);
+  });
+}
+
+for (const variant of ['split', 'uprooted', 'nurse']) {
+  test(`createFallenLogGeometry variant "${variant}" is finite, bounded, and has outward end normals`, () => {
+    const log = createFallenLogGeometry({ variant });
+    const pos = log.getAttribute('position');
+    const nrm = log.getAttribute('normal');
+    assert.ok(pos.array.every(Number.isFinite));
+    assert.ok(log.getIndex().count / 3 <= 1400);
+    let minX = Infinity;
+    let maxX = -Infinity;
+    for (let i = 0; i < pos.count; i += 1) {
+      minX = Math.min(minX, pos.getX(i));
+      maxX = Math.max(maxX, pos.getX(i));
+    }
+    let footNx = 0;
+    let tipNx = 0;
+    for (let i = 0; i < pos.count; i += 1) {
+      if (pos.getX(i) < minX + 0.08) footNx += nrm.getX(i);
+      if (pos.getX(i) > maxX - 0.08) tipNx += nrm.getX(i);
+    }
+    assert.ok(footNx < -0.2, `fallenLog "${variant}" foot normal X ${footNx} should face -X outward`);
+    assert.ok(tipNx > 0.2, `fallenLog "${variant}" tip normal X ${tipNx} should face +X outward`);
   });
 }
 

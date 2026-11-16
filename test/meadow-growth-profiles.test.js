@@ -23,8 +23,13 @@ const rows=[
 const record=values=>Object.fromEntries(['shortHeight','tallHeight','width','density','patchMeters','shape','areaStyle'].map((k,i)=>[k,values[i]]));
 test('all thirteen shipped growth rows match their exact specification and custom IDs use grassland',()=>{
  const g=resolveMeadowGrowth(surface.grass.meadow.growth);
- const configured={5:{density:.95},6:{density:.95},8:{density:.88},9:{density:.88},
-  7:{shortHeight:.2,tallHeight:.6,width:.085,density:.9,patchMeters:9}};
+ const configured={
+  5:{tallHeight:.54,width:.064,density:.36,patchMeters:13,areaStyle:.55},
+  6:{shortHeight:.14,tallHeight:.44,width:.048,density:.42,patchMeters:12,shape:'broadleaf',areaStyle:.75},
+  7:{shortHeight:.18,tallHeight:.58,width:.08,density:.54,patchMeters:9},
+  8:{shortHeight:.15,tallHeight:.48,width:.058,density:.34,patchMeters:11},
+  9:{shortHeight:.12,tallHeight:.34,width:.044,density:.22,patchMeters:10,areaStyle:.65},
+ };
  // Accent plants ride on a row without changing its stand (covered below).
  const plain=({accents,...rest})=>rest;
  for(let id=0;id<13;id++) {

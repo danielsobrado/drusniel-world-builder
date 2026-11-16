@@ -401,15 +401,17 @@ stylizedSurface:
         # Scale-leaf fronds: also the bog's swamp cedar under the giants.
         tileIds: [6, 4, 8, 9, 12, 14]
         canopy: core
+        affinity: { shade: 1.5, treeBase: 0.8 }
       # Beech-like leaf sprays, 1.3 m: the tall thicket of a broadleaf edge, the
       # alder carr of a bog, the alder and willow at a taiga's edge.
       - scene: /assets/bushes/bush2.glb
         motion: woody-shrub
-        scale: 0.5
-        weight: 1
+        scale: 0.56
+        weight: 1.25
         tileIds: [4, 6, 8, 9, 12, 14]
         character: forest
-        canopy: edge
+        canopy: any
+        affinity: { gap: 1.8, water: 1.4 }
       - scene: /assets/bushes/bush.glb
         motion: woody-shrub
         scale: 0.88
@@ -417,21 +419,24 @@ stylizedSurface:
         tileIds: [4, 6, 8, 9, 14]
         character: scrub
         canopy: open
+        affinity: { gap: 2.0 }
       - scene: /assets/bushes/bamboo_bush.glb
         motion: flexible-stem
         scale: 0.006
-        weight: 1.4
+        weight: 1.5
         tileIds: [7, 5]
-        canopy: edge
+        canopy: any
+        affinity: { water: 2.2, gap: 1.0 }
       # Authored biome-specific shrubs (tools/blender/biome_understory/builders_extra.py)
       - scene: /assets/bushes/bush-boreal-juniper-01.glb
         motion: woody-shrub
         paletteTileId: 9
-        scale: 0.9
-        weight: 1.0
+        scale: 0.95
+        weight: 1.15
         tileIds: [9, 10, 2]
-        character: scrub
+        character: forest
         canopy: any
+        affinity: { shade: 0.8, treeBase: 0.9 }
       - scene: /assets/bushes/bush-swamp-buttonbush-01.glb
         motion: woody-shrub
         scale: 0.95
@@ -439,14 +444,16 @@ stylizedSurface:
         tileIds: [12, 8]
         character: scrub
         canopy: edge
+        affinity: { water: 2.4, gap: 0.8 }
       # Poly Haven shrub scans, sized by their builder.
       - scene: /assets/bushes/bush-forest-scan-01.glb
         motion: woody-shrub
-        scale: 1
-        weight: 1.2
+        scale: 1.12
+        weight: 1.6
         tileIds: [5, 6, 7, 8]
         character: forest
-        canopy: core
+        canopy: any
+        affinity: { shade: 1.6, treeBase: 1.1 }
       - scene: /assets/bushes/bush-meadow-scan-01.glb
         motion: woody-shrub
         scale: 1
@@ -463,42 +470,65 @@ stylizedSurface:
         canopy: open
       - scene: /assets/bushes/bush-tropical-pachira-01.glb
         motion: woody-shrub
-        scale: 1
-        weight: 1.0
+        scale: 1.08
+        weight: 1.3
         tileIds: [5, 7, 8]
         character: forest
-        canopy: edge
+        canopy: any
       # Understory layers per biome (docs/adding-a-biome.md, "Objects a biome
       # needs"): tall shrubs on the edge, low shrubs, saplings. Height is the GLB's
       # times `scale`; placement multiplies it by minScale-maxScale and the edge
       # belt by up to 1 + edgeScale. Not yet reviewed in a capture.
-      # Sapling: bush.glb is a card of a young tree, 2.1 m here.
+      # Sapling: bush.glb is a card of a young tree, 2.2 m here inside woods too.
       - id: bush-sapling-broadleaf
         scene: /assets/bushes/bush.glb
         motion: woody-shrub
-        scale: 1.7
-        weight: 0.35
-        tileIds: [6, 4, 8, 9, 12]
+        scale: 1.75
+        weight: 0.92
+        tileIds: [5, 6, 4, 8, 9, 12]
         character: forest
-        canopy: edge
-      # Pachira seedlings, 0.9 m, in the shade under a tropical canopy.
+        canopy: any
+        affinity: { gap: 2.2, water: 0.8 }
+      # Small conifer seedlings carpeting boreal & temperate rainforest regeneration zones.
+      - id: bush-conifer-seedling
+        scene: /assets/bushes/small_bush.glb
+        motion: woody-shrub
+        paletteTileId: 9
+        scale: 0.72
+        weight: 1.55
+        tileIds: [9, 8]
+        character: forest
+        canopy: any
+        affinity: { shade: 1.4, treeBase: 1.2 }
+      # Woody flowering tropical understory shrub (public/assets/bushes/bush-tropical-hibiscus-01.glb).
+      - scene: /assets/bushes/bush-tropical-hibiscus-01.glb
+        motion: woody-shrub
+        scale: 1.0
+        weight: 1.45
+        tileIds: [5, 7]
+        character: forest
+        canopy: any
+        affinity: { gap: 1.6, water: 1.2 }
+      # Pachira seedlings, 1.1 m, in the shade under a tropical canopy.
       - id: bush-tropical-pachira-young
         scene: /assets/bushes/bush-tropical-pachira-01.glb
         motion: woody-shrub
-        scale: 0.45
-        weight: 0.9
+        scale: 0.62
+        weight: 1.65
         tileIds: [7, 5]
         character: forest
         canopy: core
+        affinity: { shade: 1.5, treeBase: 1.0 }
       - id: bush-boreal-juniper-tall
         scene: /assets/bushes/bush-boreal-juniper-01.glb
         motion: woody-shrub
         paletteTileId: 9
-        scale: 1.35
-        weight: 0.8
+        scale: 1.38
+        weight: 1.05
         tileIds: [9, 10]
-        character: scrub
-        canopy: edge
+        character: forest
+        canopy: any
+        affinity: { gap: 1.8 }
       - id: bush-swamp-buttonbush-thicket
         scene: /assets/bushes/bush-swamp-buttonbush-01.glb
         motion: woody-shrub
@@ -792,13 +822,13 @@ stylizedSurface:
     # the 2 681-52 188 triangle ground patches — stay offline; their streaming
     # cost was measured and rejected (docs/authored-natural-assets.md).
     groundDetailVariants:
-      # --- Lush tufts: meadow districts of the temperate and grass biomes. -----
+      # --- Lush tufts: meadow districts and grassland only so woodland floors yield to scanned herbs/ferns.
       - scene: /assets/ground/stylized-grass/clump-01.glb
         materialRoles: { GrassGrass_MAT: foliage }
         motion: grass-tuft
         scale: 1
-        weight: 1.2
-        tileIds: [4, 6, 8, 9, 14]
+        weight: 0.8
+        tileIds: [4, 14]
         character: meadow
         canopy: open
         prototypeGroups:
@@ -807,8 +837,8 @@ stylizedSurface:
         materialRoles: { GrassGrass_MAT: foliage }
         motion: grass-tuft
         scale: 1
-        weight: 1.2
-        tileIds: [4, 6, 14]
+        weight: 0.8
+        tileIds: [4, 14]
         character: meadow
         canopy: open
         prototypeGroups:
@@ -817,49 +847,48 @@ stylizedSurface:
         materialRoles: { GrassGrass_MAT: foliage }
         motion: grass-tuft
         scale: 1
-        weight: 1.2
-        tileIds: [4, 6, 8]
+        weight: 0.8
+        tileIds: [4]
         character: meadow
         canopy: open
         prototypeGroups:
           - [clump-03]
-      # --- Sparse shapes: what thin ground grows, and what survives shade. -----
-      # 32 and 96 triangles. These are the clumps' own source shapes, so a taiga
-      # floor and a tundra read as the same plant thinned out, not another plant.
+      # --- Sparse tussocks kept for arid steppe & tundra where broadleaf scans stay absent.
       - scene: /assets/ground/stylized-grass/source-01.glb
         materialRoles: { GrassGrass_MAT: foliage }
         motion: grass-tuft
         scale: 1
-        weight: 1.4
-        tileIds: [2, 7, 8, 9, 10]
-        character: forest
-        canopy: core
+        weight: 0.45
+        tileIds: [2, 10]
+        character: scrub
+        canopy: any
         prototypeGroups:
           - [source-01]
       - scene: /assets/ground/stylized-grass/source-02.glb
         materialRoles: { GrassGrass_MAT: foliage }
         motion: grass-tuft
         scale: 1
-        weight: 1.1
-        tileIds: [2, 4, 5, 6, 7, 9, 10, 14]
-        canopy: any
+        weight: 0.45
+        tileIds: [2, 4, 10, 14]
+        character: meadow
+        canopy: open
         prototypeGroups:
           - [source-02]
-      # --- Broad low patches: 80 triangles for a 2.9 m footprint, scaled down.
+      # --- Broad low patches: open savanna & grassland tussocks.
       - scene: /assets/ground/tree-scene/grass-dense.glb
         motion: grass-tuft
         scale: 0.4
-        weight: 1.3
-        tileIds: [3, 5, 7, 8]
-        character: forest
+        weight: 0.65
+        tileIds: [3, 4]
+        character: meadow
         canopy: open
         prototypeGroups:
           - [grass-dense]
       - scene: /assets/ground/tree-scene/grass-small.glb
         motion: grass-tuft
         scale: 0.55
-        weight: 1
-        tileIds: [4, 5, 6, 14]
+        weight: 0.65
+        tileIds: [4, 14]
         character: meadow
         canopy: open
         prototypeGroups:
@@ -882,16 +911,18 @@ stylizedSurface:
         motion: grass-tuft
         scale: 1
         weight: 1.2
-        tileIds: [12]
-        canopy: open
+        tileIds: [5, 6, 7, 8, 9, 12]
+        canopy: any
+        affinity: { water: 4.5, gap: 0.5, shade: -0.45 }
         prototypeGroups:
           - [grass-blade-01]
       - scene: /assets/ground/weeds/grass-blade-03.glb
         motion: grass-tuft
         scale: 1
         weight: 1.2
-        tileIds: [12]
-        canopy: open
+        tileIds: [5, 6, 7, 8, 9, 12]
+        canopy: any
+        affinity: { water: 4.5, gap: 0.5, shade: -0.45 }
         prototypeGroups:
           - [grass-blade-03]
       - scene: /assets/ground/weeds/grass-blade-04.glb
@@ -950,16 +981,16 @@ stylizedSurface:
       # given cover without it reading as vegetation cover at all.
       - scene: /assets/ground/grass-chunks/chunk-05.glb
         motion: broadleaf
-        scale: 4
-        weight: 1.5
+        scale: 1.8
+        weight: 1.25
         tileIds: [1, 2, 9, 10]
         canopy: any
         prototypeGroups:
           - [chunk-05]
       - scene: /assets/ground/grass-chunks/chunk-06.glb
         motion: broadleaf
-        scale: 4
-        weight: 1.5
+        scale: 1.8
+        weight: 1.25
         tileIds: [1, 2, 9, 10]
         canopy: any
         prototypeGroups:
@@ -990,42 +1021,46 @@ stylizedSurface:
       # builder sizes each mesh, so scale stays 1.
       - scene: /assets/ground/scans/forest-fern-02.glb
         motion: fern-frond
-        scale: 1
-        weight: 1.6
+        scale: 1.34
+        weight: 2.8
         tileIds: [5, 6, 7, 8, 9, 12]
         character: forest
         characterStrength: 1.8
-        canopy: core
+        canopy: any
+        affinity: { log: 2.6, water: 2.4, treeBase: 1.2 }
         prototypeGroups:
           - [forest-fern-02]
       - scene: /assets/ground/scans/forest-sorrel-01.glb
         motion: broadleaf
-        scale: 1
-        weight: 1.4
-        tileIds: [6, 8]
+        scale: 1.26
+        weight: 2.2
+        tileIds: [6, 8, 9]
         character: forest
         characterStrength: 1.6
-        canopy: core
+        canopy: any
+        affinity: { log: 2.0, treeBase: 2.2, shade: 1.4 }
         prototypeGroups:
           - [forest-sorrel-01]
       - scene: /assets/ground/scans/forest-periwinkle-01.glb
         motion: broadleaf
-        scale: 1
-        weight: 1.0
-        tileIds: [6, 8]
+        scale: 1.24
+        weight: 1.8
+        tileIds: [5, 6, 8]
         character: forest
         characterStrength: 1.6
-        canopy: core
+        canopy: any
+        affinity: { log: 1.6, treeBase: 1.8, shade: 1.2 }
         prototypeGroups:
           - [forest-periwinkle-01]
       - scene: /assets/ground/scans/forest-nettle-01.glb
         motion: flexible-stem
-        scale: 1
-        weight: 1.0
-        tileIds: [4, 6, 8, 12]
-        character: scrub
-        characterStrength: 1.6
-        canopy: edge
+        scale: 1.22
+        weight: 1.4
+        tileIds: [4, 5, 6, 8, 12]
+        character: forest
+        characterStrength: 1.5
+        canopy: any
+        affinity: { gap: 1.8, water: 1.5 }
         prototypeGroups:
           - [forest-nettle-01]
       # A 7 cm rosette at its scanned size: enlarged so it shows above the turf.
@@ -1041,83 +1076,82 @@ stylizedSurface:
           - [meadow-weed-02]
       - scene: /assets/ground/scans/tropical-calathea-01.glb
         motion: broadleaf
-        scale: 1
-        # The scan keeps its potting-soil mound, which the understory grade turns
-        # into a flat green disc on the floor (2026-11-11 rainforest captures).
-        # Buried until the mesh is rebuilt with `groundCrop` (understory-sources).
-        heightOffset: -0.1
-        weight: 1.4
+        scale: 1.32
+        heightOffset: -0.015
+        weight: 2.8
         tileIds: [5, 7]
         character: forest
         characterStrength: 1.8
-        canopy: core
+        canopy: any
         prototypeGroups:
           - [tropical-calathea-01]
       - scene: /assets/ground/scans/tropical-anthurium-01.glb
         motion: broadleaf
-        scale: 1
-        # The scan keeps its potting-soil mound, which the understory grade turns
-        # into a flat green disc on the floor (2026-11-11 rainforest captures).
-        # Buried until the mesh is rebuilt with `groundCrop` (understory-sources).
-        heightOffset: -0.1
-        weight: 1.1
-        tileIds: [7]
+        scale: 1.28
+        heightOffset: -0.015
+        weight: 2.4
+        tileIds: [5, 7]
         character: forest
         characterStrength: 1.8
-        canopy: core
+        canopy: any
         prototypeGroups:
           - [tropical-anthurium-01]
-      - scene: /assets/ground/scans/forest-stump-01.glb
+      - scene: /assets/ground/scans/forest-roots-01.glb
         motion: rigid
         conform: true
         sway: false
         scale: 1
-        heightOffset: -0.05
-        weight: 0.35
+        heightOffset: -0.02
+        weight: 1.35
         tileIds: [6, 8, 9, 12]
         character: forest
         characterStrength: 1.6
         canopy: any
+        affinity: { treeBase: 3.4, log: 2.2, water: 1.0 }
         prototypeGroups:
-          - [forest-stump-01]
-      - scene: /assets/ground/scans/forest-deadfall-02.glb
+          - [forest-roots-01]
+      - scene: /assets/ground/boreal/taiga-deadfall-01.glb
         motion: rigid
         conform: true
         sway: false
-        scale: 1
+        scale: 1.05
         heightOffset: -0.03
-        weight: 0.6
-        tileIds: [5, 6, 8, 9, 10]
+        weight: 1.65
+        tileIds: [8, 9, 10]
         character: forest
         characterStrength: 1.6
         canopy: any
+        affinity: { treeBase: 1.6, shade: 1.2, log: 1.4 }
         prototypeGroups:
-          - [forest-deadfall-02]
-      # Second batch of scans: logs, meadow flowers and dryland plants, at their scanned size.
+          - [taiga-deadfall-01]
+      # Photogrammetry fallen trunks preserved as featured woodland deadwood; redundant
+      # duplicate stump/deadfall scans omitted so `forestDebris` handles stumps/branches cleanly.
       - scene: /assets/ground/scans/forest-log-01.glb
         motion: rigid
         conform: true
         sway: false
-        scale: 1
+        scale: 1.15
         heightOffset: -0.04
-        weight: 0.4
+        weight: 0.55
         tileIds: [5, 6, 8, 9, 12]
         character: forest
         characterStrength: 1.6
         canopy: any
+        affinity: { shade: 1.4, treeBase: 1.2 }
         prototypeGroups:
           - [forest-log-01]
       - scene: /assets/ground/scans/forest-log-02.glb
         motion: rigid
         conform: true
         sway: false
-        scale: 1
-        heightOffset: -0.08
-        weight: 0.2
+        scale: 1.15
+        heightOffset: -0.05
+        weight: 0.45
         tileIds: [6, 7, 8, 12]
         character: forest
         characterStrength: 1.6
         canopy: core
+        affinity: { shade: 1.6, water: 1.2 }
         prototypeGroups:
           - [forest-log-02]
       - scene: /assets/ground/scans/meadow-dandelion-01.glb
@@ -1138,6 +1172,7 @@ stylizedSurface:
         character: meadow
         characterStrength: 1.6
         canopy: edge
+        affinity: { gap: 1.8, water: 1.6, shade: -0.5 }
         prototypeGroups:
           - [meadow-celandine-01]
       - scene: /assets/ground/scans/meadow-flower-01.glb
@@ -1148,6 +1183,7 @@ stylizedSurface:
         character: meadow
         characterStrength: 1.6
         canopy: edge
+        affinity: { gap: 2.5, shade: -0.7 }
         prototypeGroups:
           - [meadow-flower-01]
       - scene: /assets/ground/scans/desert-succulent-01.glb
@@ -1217,8 +1253,8 @@ stylizedSurface:
       # cushions, purple saxifrage cushions, and dwarf willow.
       - scene: /assets/ground/boreal/taiga-berry-moss-01.glb
         motion: woody-shrub
-        scale: 1.15
-        weight: 1.3
+        scale: 1.32
+        weight: 3.0
         tileIds: [9, 10]
         character: forest
         characterStrength: 1.8
@@ -1237,12 +1273,12 @@ stylizedSurface:
           - [tundra-cushion-01]
       - scene: /assets/ground/boreal/tundra-dwarf-willow-01.glb
         motion: woody-shrub
-        scale: 1.2
-        weight: 1.35
+        scale: 1.25
+        weight: 2.2
         tileIds: [9, 10]
-        character: scrub
-        characterStrength: 2.0
-        canopy: open
+        character: forest
+        characterStrength: 1.8
+        canopy: any
         prototypeGroups:
           - [tundra-dwarf-willow-01]
       # Coastal & Shoreline understory kit (biomes 0, 12): sea-oats on driftwood,
@@ -1636,21 +1672,18 @@ stylizedSurface:
               accents: [{shape: reed, share: 0.15, height: 1.3, width: 0.8}, {shape: strap, share: 0.12, height: 0.5, width: 1.8}]}
           4: {shortHeight: 0.24, tallHeight: 0.82, width: 0.045, density: 0.92, patchMeters: 17, shape: slender,
               accents: [{shape: reed, share: 0.12, height: 1.3, width: 0.8}, {shape: lance, share: 0.14, height: 0.45, width: 2.4}]}
-          5: {shortHeight: 0.16, tallHeight: 0.5, width: 0.06, density: 0.95, patchMeters: 11, shape: broadleaf, areaStyle: 0.6,
-              accents: [{shape: slender, share: 0.2, height: 1.5, width: 0.6}, {shape: lance, share: 0.2, height: 0.8, width: 1.6}]}
-          6: {shortHeight: 0.16, tallHeight: 0.44, width: 0.042, density: 0.95, patchMeters: 10, shape: slender, areaStyle: 0.85,
-              accents: [{shape: lance, share: 0.22, height: 0.9, width: 2.6}, {shape: strap, share: 0.12, height: 1.5, width: 1.6}]}
-          # Rainforest floor is a closed carpet of broad leaves at two heights, with
-          # the scanned kit standing out of it (user's jungle reference, 2026-11-12).
-          # It was litter with grass islands (density 0.45, 0.14-0.48 m, width 0.065),
-          # which read as bare park at eye level. Broad blades are fill-bound: this
-          # row is the first thing to pull back if the rainforest pose loses 60 FPS.
-          7: {shortHeight: 0.2, tallHeight: 0.6, width: 0.085, density: 0.9, patchMeters: 9, shape: broadleaf, areaStyle: 0.25,
-              accents: [{shape: strap, share: 0.22, height: 1.6, width: 1.3}, {shape: slender, share: 0.18, height: 1.4, width: 0.5}]}
-          8: {shortHeight: 0.18, tallHeight: 0.52, width: 0.062, density: 0.88, patchMeters: 10, shape: broadleaf, areaStyle: 0.3,
-              accents: [{shape: lance, share: 0.2, height: 0.8, width: 1.5}, {shape: strap, share: 0.12, height: 1.4, width: 1.2}]}
-          9: {shortHeight: 0.13, tallHeight: 0.34, width: 0.05, density: 0.88, patchMeters: 12, shape: slender, areaStyle: 0.7,
-              accents: [{shape: lance, share: 0.2, height: 0.9, width: 2.4}]}
+          5: {shortHeight: 0.16, tallHeight: 0.54, width: 0.064, density: 0.36, patchMeters: 13, shape: broadleaf, areaStyle: 0.55,
+              accents: [{shape: strap, share: 0.24, height: 1.45, width: 1.35}, {shape: lance, share: 0.22, height: 0.9, width: 1.75}]}
+          6: {shortHeight: 0.14, tallHeight: 0.44, width: 0.048, density: 0.42, patchMeters: 12, shape: broadleaf, areaStyle: 0.75,
+              accents: [{shape: lance, share: 0.28, height: 1.0, width: 2.3}, {shape: strap, share: 0.20, height: 1.35, width: 1.4}]}
+          # Rainforest floor keeps leafy broad/strap cover at patchy woodland density so scanned
+          # calathea, anthurium and ferns stay prominent instead of a meadow turf carpet.
+          7: {shortHeight: 0.18, tallHeight: 0.58, width: 0.08, density: 0.54, patchMeters: 9, shape: broadleaf, areaStyle: 0.25,
+              accents: [{shape: strap, share: 0.28, height: 1.6, width: 1.45}, {shape: lance, share: 0.22, height: 1.0, width: 1.9}]}
+          8: {shortHeight: 0.15, tallHeight: 0.48, width: 0.058, density: 0.34, patchMeters: 11, shape: broadleaf, areaStyle: 0.3,
+              accents: [{shape: strap, share: 0.22, height: 1.4, width: 1.4}, {shape: lance, share: 0.24, height: 0.85, width: 1.8}]}
+          9: {shortHeight: 0.12, tallHeight: 0.34, width: 0.044, density: 0.22, patchMeters: 10, shape: slender, areaStyle: 0.65,
+              accents: [{shape: broadleaf, share: 0.26, height: 0.72, width: 1.55}, {shape: lance, share: 0.22, height: 0.85, width: 2.2}]}
           10: {shortHeight: 0.06, tallHeight: 0.16, width: 0.028, density: 0.28, patchMeters: 7, shape: slender, areaStyle: 0.8}
           11: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
           # Bog: sedge tussocks on the islands, patchy over moss rather than a field.
@@ -2359,13 +2392,13 @@ stylizedSurface:
       # Dry tussocks enough to break up the bare steppe floor.
       2: 0.35
       3: 0.55
-      9: 0.8
+      9: 0.92
       10: 0.24
       11: 0.14
       13: 0.4
       32: 0.22
-    minScale: 0.82
-    maxScale: 1.24
+    minScale: 0.9
+    maxScale: 1.42
     radius: 0.34
     heightOffset: 0.015
     colorVariation: 0.14
@@ -2386,15 +2419,33 @@ stylizedSurface:
     colorVariation: 0.16
     castShadow: false
     variants:
-      leafLitter: { weight: 5.5, tileIds: [5, 6, 7, 8] }
-      mossMound: { weight: 1.5, tileIds: [5, 6, 7, 8, 9, 12] }
-      fallenBranchBroadleaf: { kind: fallenBranch, barkProfile: pine, weight: 0.95, tileIds: [5, 6, 7], minCanopy: 0.14 }
-      fallenBranchConifer: { kind: fallenBranch, barkProfile: spruce, weight: 0.95, tileIds: [8, 9, 12], minCanopy: 0.14 }
-      fallenLogBroadleaf: { kind: fallenLog, barkProfile: pine, weight: 0.24, tileIds: [5, 6, 7], minCanopy: 0.30, minShoreClearance: 4.5 }
-      fallenLogConifer: { kind: fallenLog, barkProfile: spruce, weight: 0.24, tileIds: [8, 9], minCanopy: 0.30, minShoreClearance: 4.5 }
-      fallenLogSwamp: { kind: fallenLog, barkProfile: swamp, weight: 0.2, tileIds: [12], minCanopy: 0.16, minShoreClearance: 1.5 }
-      stumpBroadleaf: { kind: stump, barkProfile: pine, weight: 0.16, tileIds: [5, 6, 7], minCanopy: 0.28, minShoreClearance: 4.5 }
-      stumpConifer: { kind: stump, barkProfile: spruce, weight: 0.16, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
+      leafLitterDeciduous: { kind: leafLitter, weight: 7.5, tileIds: [6, 5], affinity: { treeBase: 1.8, shade: 1.2 } }
+      leafLitterForest: { kind: leafLitter, weight: 5.0, tileIds: [7, 8, 9], affinity: { treeBase: 1.6, shade: 1.1 } }
+      mossMound: { weight: 2.0, tileIds: [5, 6, 7, 9, 12], affinity: { treeBase: 1.8, water: 1.6, shade: 1.1 } }
+      mossMoundRainforest: { kind: mossMound, weight: 3.4, tileIds: [8], affinity: { treeBase: 2.0, water: 2.0, shade: 1.2 } }
+      forestFungi: { kind: fungiCluster, weight: 2.2, tileIds: [5, 6, 7, 8, 9, 12], minCanopy: 0.30, affinity: { shade: 1.8, treeBase: 2.4, water: 0.6 } }
+      fallenBranchDeciduous: { kind: fallenBranch, barkProfile: beech, weight: 0.95, tileIds: [6], minCanopy: 0.14, affinity: { treeBase: 1.2, shade: 1.0 } }
+      fallenBranchBroadleaf: { kind: fallenBranch, barkProfile: pine, weight: 0.95, tileIds: [5, 7], minCanopy: 0.14, affinity: { treeBase: 1.2, shade: 1.0 } }
+      fallenBranchConifer: { kind: fallenBranch, barkProfile: spruce, weight: 0.95, tileIds: [8, 9, 12], minCanopy: 0.14, affinity: { treeBase: 1.2, shade: 1.0 } }
+      fallenLogDeciduousSplit: { kind: fallenLog, variant: split, barkProfile: beech, weight: 0.05, tileIds: [6], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogDeciduousUprooted: { kind: fallenLog, variant: uprooted, barkProfile: beech, weight: 0.05, tileIds: [6], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogDeciduousNurse: { kind: fallenLog, variant: nurse, barkProfile: beech, olderWood: true, weight: 0.06, tileIds: [6], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogBroadleafSplit: { kind: fallenLog, variant: split, barkProfile: pine, weight: 0.05, tileIds: [5, 7], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogBroadleafUprooted: { kind: fallenLog, variant: uprooted, barkProfile: pine, weight: 0.05, tileIds: [5, 7], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogBroadleafNurse: { kind: fallenLog, variant: nurse, barkProfile: pine, olderWood: true, weight: 0.06, tileIds: [5, 7], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogConiferSplit: { kind: fallenLog, variant: split, barkProfile: spruce, weight: 0.05, tileIds: [8, 9], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogConiferUprooted: { kind: fallenLog, variant: uprooted, barkProfile: spruce, weight: 0.05, tileIds: [8, 9], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogConiferNurse: { kind: fallenLog, variant: nurse, barkProfile: spruce, olderWood: true, weight: 0.06, tileIds: [8, 9], minCanopy: 0.30, minShoreClearance: 4.5 }
+      fallenLogSwamp: { kind: fallenLog, variant: nurse, barkProfile: swamp, olderWood: true, weight: 0.14, tileIds: [12], minCanopy: 0.16, minShoreClearance: 1.5 }
+      stumpDeciduousJagged: { kind: stump, variant: jagged, barkProfile: beech, weight: 0.05, tileIds: [6], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpDeciduousHollow: { kind: stump, variant: hollow, barkProfile: beech, olderWood: true, weight: 0.05, tileIds: [6], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpDeciduousWeathered: { kind: stump, variant: weathered, barkProfile: beech, olderWood: true, weight: 0.05, tileIds: [6], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpBroadleafJagged: { kind: stump, variant: jagged, barkProfile: pine, weight: 0.05, tileIds: [5, 7], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpBroadleafHollow: { kind: stump, variant: hollow, barkProfile: pine, olderWood: true, weight: 0.05, tileIds: [5, 7], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpBroadleafWeathered: { kind: stump, variant: weathered, barkProfile: pine, olderWood: true, weight: 0.05, tileIds: [5, 7], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpConiferJagged: { kind: stump, variant: jagged, barkProfile: spruce, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpConiferHollow: { kind: stump, variant: hollow, barkProfile: spruce, olderWood: true, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
+      stumpConiferWeathered: { kind: stump, variant: weathered, barkProfile: spruce, olderWood: true, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
   # The tropical kit's understory (assets.tropicalKitVariants): jungle grasses and
   # groundcover in tropical seasonal forest and rainforest. At 324-1 960 triangles
   # an instance it is a heavier job than the 350-triangle ground-detail accents, so
@@ -2408,7 +2459,7 @@ stylizedSurface:
     # Seasonal forest takes 0.65 of it (166; 128 until 2026-11-12). Rainforest is
     # at the validator's 256 cap for this layer.
     perChunk: 256
-    densityByTile: { 5: 0.65 }
+    densityByTile: { 5: 0.85 }
     # Understory grows with the wood, not with the meadow districts that thin
     # floor accents (the meadow channel sat near 0.33 across rainforest).
     regionalChannel: forest
@@ -2730,17 +2781,15 @@ stylizedSurface:
         12: { density: 0.9, elevationMax: 300, elevationFade: 60, waterMaximum: 100000, maximumSlope: 0.9,
           patchRadiusMin: 0.62, patchRadiusMax: 0.96, patchEdgeWidth: 0.2, regionalForestFloor: 0.75 }
     forestFloor:
-      # Sparse forest-floor plants and shaded margins use the same canopy field
-      # as litter. Open meadows retain the default population.
+      # Restrained woodland grass yields to soil/litter/moss (level 1), colonial scanned
+      # ferns/herbs (level 2), and interior shrubs/saplings (level 3). Open meadows retain full growth.
       byTileId:
-        5: { grassCoreDensity: 0.24, flowerCoreDensity: 0.06 }
-        6: { grassCoreDensity: 0.28, flowerCoreDensity: 0.08 }
-        # A rainforest floor is a closed broadleaf carpet under the canopy too (was
-        # 0.12 / 0.45, which left it bare litter: 2026-11-12 captures).
-        7: { grassCoreDensity: 0.85, grassEdgeDensity: 0.95, flowerCoreDensity: 0.04 }
-        8: { grassCoreDensity: 0.32, flowerCoreDensity: 0.06 }   # rainforest floor: moss and grass islands
-        9: { grassCoreDensity: 0.28, flowerCoreDensity: 0.04 }
-        12: { grassCoreDensity: 0.22, flowerCoreDensity: 0.04 }
+        5: { grassCoreDensity: 0.09, grassEdgeDensity: 0.54, flowerCoreDensity: 0.05, bushCoreDensity: 0.74 }
+        6: { grassCoreDensity: 0.08, grassEdgeDensity: 0.60, flowerCoreDensity: 0.04, bushCoreDensity: 0.78 }
+        7: { grassCoreDensity: 0.16, grassEdgeDensity: 0.44, flowerCoreDensity: 0.04, bushCoreDensity: 0.82 }
+        8: { grassCoreDensity: 0.09, grassEdgeDensity: 0.44, flowerCoreDensity: 0.05, bushCoreDensity: 0.80 }
+        9: { grassCoreDensity: 0.05, grassEdgeDensity: 0.30, flowerCoreDensity: 0.02, bushCoreDensity: 0.64 }
+        12: { grassCoreDensity: 0.18, grassEdgeDensity: 0.48, flowerCoreDensity: 0.04, bushCoreDensity: 0.54 }
       # Core densities are how much ground cover survives under closed canopy.
       # Forest overrides leave room for the shared litter/moss substrate and
       # shade-tolerant understory. Edges and open meadow keep their growth.
@@ -2748,13 +2797,12 @@ stylizedSurface:
       # trunk, thinning back to full over `falloff` m, both times the tree's size.
       # Bare roots and litter at the foot, inside the contactShade patch.
       rootZone: { radius: 0.9, falloff: 1.8 }
-      grassCoreDensity: 0.28
-      grassEdgeDensity: 0.78
-      flowerCoreDensity: 0.10
+      grassCoreDensity: 0.16
+      grassEdgeDensity: 0.58
+      flowerCoreDensity: 0.08
       flowerEdgeDensity: 0.48
-      # Raised from 0.28 so a wood's interior keeps a shaded shrub layer; the
-      # shade-tolerant variant (canopy: core) is what grows there.
-      bushCoreDensity: 0.6
+      # Wood interiors keep an active middle/upper shrub & sapling layer breaking trunk sightlines.
+      bushCoreDensity: 0.72
       bushEdgeDensity: 0.95
       # Tint the ground takes under canopy. The old '#273c25' at 0.68 landed the
       # wood interior near black once Lambert shading and canopy shadow stacked on

@@ -3,7 +3,7 @@ import { attribute, dot, float, materialRoughness, mix, mx_noise_float, normalWo
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
-import { gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
+import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
 import { understoryShadeEmission } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { applyCloudShadow } from './CloudShadow.js';
@@ -71,25 +71,31 @@ export function biomeUnderstoryColor(color) {
   // and drew every shrub, plant and log there pale blue (2026-11-12 captures).
   const depth = snowSteps.div(LOOK_SNOW_STEPS);
   const cap = smoothstep(0.15, 0.55, normalWorld.y.add(clumps.sub(0.5).mul(0.5)))
-    .mul(depth.mul(1.2).clamp(0, 1)).mul(depth.smoothstep(0.08, 0.3));
+    .mul(depth.mul(1.2).clamp(0, 1)).mul(depth.smoothstep(0.14, 0.38));
   return mix(tinted, vec3(0.9, 0.93, 0.97), cap.mul(0.9));
 }
 
 /**
- * Green leaves share the meadow/canopy ramp; flowers and bark retain their paint.
+ * Green leaves share the meadow/canopy ramp; flowers, bark and stone retain their pigment.
  * `biomeLook` reads the instance's understory look; its mesh must carry
  * `instanceBiomeLook` (a part with `instanceBiomeLook: true`).
  */
 export function applyUnderstoryPalette(material, config, tileId = null, role = 'auto', { biomeLook = false } = {}) {
-  const graded = gradePlantPart(authoredFoliageColor(material), resolveFoliagePalette(config, tileId), role);
-  // Leaves follow the patches of the grass they stand in; petals, bark and stems keep their paint.
-  const leafy = role === 'auto' || role === 'leaf' || role === 'foliage';
-  const local = leafy ? meadowPatchOnPlant(graded, config) : graded;
+  const sample = authoredFoliageColor(material);
+  const graded = gradePlantPart(sample, resolveFoliagePalette(config, tileId), role);
+  // Leaves follow the meadow/canopy patches; non-green stones, stems, and petals stay grounded.
+  const plantGreen = (role === 'leaf' || role === 'foliage')
+    ? float(1)
+    : (role === 'auto' ? authoredGreenMask(sample) : float(0));
+  const patched = meadowPatchOnPlant(graded, config);
+  const local = (role === 'leaf' || role === 'foliage') ? patched : mix(graded, patched, plantGreen);
   const color = biomeLook ? biomeUnderstoryColor(local) : local;
   material.colorNode = color;
   const blossom = role === 'petal' || role === 'center';
   const fill = understoryShadeEmission(color, { blossom });
-  material.foliageTransmissionNode = float(blossom ? .16 : .22);
+  material.foliageTransmissionNode = blossom
+    ? float(0.16)
+    : mix(float(0.02), float(0.22), plantGreen);
   // Retain any authored emission (e.g. flower centres).
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(fill) : fill;
   if ('roughness' in material) {

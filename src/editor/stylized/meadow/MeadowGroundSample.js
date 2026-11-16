@@ -111,16 +111,18 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
         if (distSq >= root.reach * root.reach) continue;
         const dist = Math.sqrt(distSq);
         const edgeJitter = 1 + 0.16 * Math.sin(t * 14 + root.phase);
-        const coreR = root.radius * (0.9 + 0.12 * Math.sin(t * 9 + root.phase));
+        const spineWave = 0.72 + 0.22 * Math.sin(t * 11 + root.phase) + 0.12 * Math.cos(t * 19 - root.phase);
+        const coreR = root.radius * spineWave;
         if (dist < coreR) return false;
         const collarEnd = root.collar * edgeJitter;
+        const minKeep = root.older ? 0.38 : 0.24;
         const keep = dist < collarEnd
-          ? 0.25 + 0.75 * smoothstep(coreR, collarEnd, dist)
+          ? minKeep + (1 - minKeep) * smoothstep(coreR, collarEnd, dist)
           : 1;
         if (hash2d(rank, 93) >= keep) return false;
         if (dist < collarEnd && dist > 1e-4) {
           // Sheltered moisture beside the log produces slightly fuller collar tufts parted outward.
-          const collarBoost = 1 + 0.22 * (1 - smoothstep(coreR, collarEnd, dist));
+          const collarBoost = 1 + 0.24 * (1 - smoothstep(coreR, collarEnd, dist));
           strength = Math.min(1.25, strength * collarBoost);
           out.rotSin = -dx / dist;
           out.rotCos = dz / dist;
@@ -133,13 +135,14 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
       if (distanceSquared >= root.reach * root.reach) continue;
       const dist = Math.sqrt(distanceSquared);
       if (root.kind === 'stump') {
-        const lobe = 1 + ROOT_LOBE * Math.cos(5 * Math.atan2(dz, dx) + root.phase);
-        const coreR = root.radius * lobe * 0.9;
+        const angle = Math.atan2(dz, dx);
+        const lobe = 1 + ROOT_LOBE * (0.65 * Math.cos(4 * angle + root.phase) + 0.45 * Math.cos(3 * angle - root.phase * 0.7));
+        const coreR = root.radius * lobe * 0.58;
         if (dist < coreR) return false;
         const keep = smoothstep(coreR, root.reach * lobe, dist);
         if (hash2d(rank, 93) >= keep) return false;
         if (dist < root.collar * lobe && dist > 1e-4) {
-          strength *= 0.85 + 0.3 * keep;
+          strength *= 0.9 + 0.25 * keep;
           out.rotSin = -dx / dist;
           out.rotCos = dz / dist;
         }

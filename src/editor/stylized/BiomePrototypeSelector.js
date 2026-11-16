@@ -24,6 +24,7 @@
  */
 
 import { valueNoise } from '../world/valueNoise2d.js';
+import { microhabitatAffinityWeight, normalizeAffinity } from './MicrohabitatField.js';
 
 export const CHARACTER_CHANNELS = Object.freeze(['meadow', 'forest', 'scrub', 'rocky']);
 export const CANOPY_PREFERENCES = Object.freeze(['any', 'core', 'edge', 'open']);
@@ -83,14 +84,15 @@ export function normalizeBiomePrototypeRule(rule = {}) {
       ? characterStrength
       : 1,
     canopy,
+    affinity: normalizeAffinity(rule.affinity),
   });
 }
 
 /**
  * `rules` must contain one entry per prototype, in prototype-index order.
  *
- * The returned selector is `(roll, tileId, x, z, habitat) => prototypeIndex`.
- * `x`, `z` and `habitat` may be omitted; the corresponding filters then go
+ * The returned selector is `(roll, tileId, x, z, habitat, microhabitat) => prototypeIndex`.
+ * `x`, `z`, `habitat` and `microhabitat` may be omitted; the corresponding filters then go
  * inert rather than failing, which keeps callers that have no forest field or no
  * regional field working unchanged.
  */
@@ -103,7 +105,8 @@ export function createBiomePrototypeSelector({ rules, regionalCharacterField = n
   const hasCharacter = Boolean(regionalCharacterField)
     && normalized.some((rule) => rule.character !== null);
   const hasCanopy = normalized.some((rule) => rule.canopy !== 'any');
-  const dynamic = hasCharacter || hasCanopy;
+  const hasAffinity = normalized.some((rule) => rule.affinity !== null);
+  const dynamic = hasCharacter || hasCanopy || hasAffinity;
 
   // Eligible index lists are per biome and never change, so they are built once
   // on first sight of a tile and reused for every later candidate.
@@ -127,7 +130,7 @@ export function createBiomePrototypeSelector({ rules, regionalCharacterField = n
     return result;
   }
 
-  function selectPrototype(roll, tileId, x = 0, z = 0, habitat = null) {
+  function selectPrototype(roll, tileId, x = 0, z = 0, habitat = null, microhabitat = null) {
     const eligible = eligibleFor(tileId);
     if (eligible.length === 1) return eligible[0];
     const target = roll > 0 ? (roll < 1 ? roll : 1 - Number.EPSILON) : 0;
@@ -142,9 +145,12 @@ export function createBiomePrototypeSelector({ rules, regionalCharacterField = n
           weight *= (DYNAMIC_FLOOR + influence) ** rule.characterStrength;
         }
         if (rule.canopy !== 'any') weight *= canopyFactor(rule.canopy, habitat);
+        if (rule.affinity !== null && microhabitat) {
+          weight *= microhabitatAffinityWeight(rule.affinity, microhabitat);
+        }
       }
       weightScratch[slot] = communities ? weight * communityFactor(eligible[slot], x, z) : weight;
-      total += weight;
+      total += weightScratch[slot];
     }
     if (!(total > 0)) return eligible[Math.min(eligible.length - 1, Math.floor(target * eligible.length))];
 
@@ -159,5 +165,6 @@ export function createBiomePrototypeSelector({ rules, regionalCharacterField = n
   // Lets a caller skip sampling the forest habitat field per candidate when no
   // rule would look at it, which is the common case.
   selectPrototype.usesCanopy = hasCanopy;
+  selectPrototype.usesMicrohabitat = hasAffinity;
   return selectPrototype;
 }

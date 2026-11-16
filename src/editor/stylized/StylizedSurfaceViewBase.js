@@ -294,6 +294,7 @@ export class StylizedSurfaceView {
       floorColor: config.trees?.forestFloor?.groundCoreColor,
       barkGrade: config.trees?.barkGrade,
       baseUrl,
+      config,
     }));
     // Every per-chunk detail layer, authored or procedural, is rebuilt and disposed
     // the same way; the array is what keeps a new layer from having to be added to
@@ -1070,7 +1071,7 @@ export class StylizedSurfaceView {
     const debrisSources = [];
     for (const zone of collectDebrisGrassZones(debrisPlacements, this.forestDebrisView?.prototypeFootprints)) {
       if (zone.kind === 'log') {
-        const shadeRadius = Math.max(0.55, zone.radius + 0.36);
+        const shadeRadius = Math.max(0.58, zone.radius + 0.42);
         const entry = {
           x0: zone.x0,
           z0: zone.z0,
@@ -1079,19 +1080,19 @@ export class StylizedSurfaceView {
           x: zone.x,
           z: zone.z,
           radius: shadeRadius,
-          strength: this.contactShadeSettings.rockStrength * 0.92,
+          strength: Math.min(1, this.contactShadeSettings.rockStrength * 1.2),
         };
         sources.push(entry);
-        debrisSources.push({ ...entry, radius: Math.max(0.85, zone.collar + 0.35), strength: 0.68 });
+        debrisSources.push({ ...entry, radius: Math.max(0.95, zone.collar + 0.42), strength: 0.85 });
       } else {
         const entry = {
           x: zone.x,
           z: zone.z,
-          radius: Math.max(0.65, zone.radius + 0.42),
-          strength: this.contactShadeSettings.rockStrength * 0.92,
+          radius: Math.max(0.75, zone.radius + 0.45),
+          strength: Math.min(1, this.contactShadeSettings.rockStrength * 1.25),
         };
         sources.push(entry);
-        debrisSources.push({ ...entry, radius: Math.max(0.95, zone.collar + 0.38), strength: 0.68 });
+        debrisSources.push({ ...entry, radius: Math.max(1.1, zone.collar + 0.45), strength: 0.9 });
       }
     }
     if (sources.length === 0) return;

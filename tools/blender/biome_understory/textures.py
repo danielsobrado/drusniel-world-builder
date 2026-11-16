@@ -678,14 +678,16 @@ def _tex_taiga_berry_moss(tex_dir):
     noise = fbm(w, h, (10, 10), rng, 4)
     fine = fbm(w, h, (20, 20), rng, 3)
 
-    # Hummock base u < 0.52: creamy reindeer lichen tufts over boreal moss
+    # Hummock base u < 0.52: warm boreal feather moss with scattered sage-cream Cladonia lichen & peat foot
     in_hummock = u < 0.52
-    is_lichen = (fine > 0.52) & (v > 0.25)
+    is_lichen = (fine > 0.59) & (noise > 0.48) & (v > 0.28)
     hum_col = np.where(
         is_lichen[..., None],
-        np.array([0.78, 0.80, 0.72]) * (0.82 + 0.25 * fine[..., None]),
-        np.array([0.17, 0.28, 0.11]) * (0.75 + 0.4 * noise[..., None]),
+        np.array([0.46, 0.50, 0.41]) * (0.80 + 0.30 * fine[..., None]),
+        np.array([0.15, 0.26, 0.10]) * (0.72 + 0.46 * noise[..., None]),
     )
+    peat_foot = in_hummock & (v < 0.22)
+    hum_col[peat_foot] = hum_col[peat_foot] * 0.5 + np.array([0.18, 0.14, 0.09]) * 0.5
     rgba[in_hummock, :3] = np.clip(hum_col[in_hummock], 0, 1)
     rgba[in_hummock, 3] = 1.0
 

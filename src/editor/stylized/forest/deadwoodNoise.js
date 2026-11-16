@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
+import { resolveAssetUrl } from '../../assets/assetUrl.js';
 
-const URL_PATH = '/assets/textures/noise/deadwood-noise.png';
+const URL_PATH = 'assets/textures/noise/deadwood-noise.png';
 export const DEADWOOD_NOISE_SIZE = 256;
 export const DEADWOOD_NOISE_NEUTRAL = 128;
 
@@ -58,7 +59,7 @@ export function acquireDeadwoodNoise(baseUrl = '') {
     },
   };
   if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return shared;
-  const load = () => decodeNoiseImage(`${baseUrl}${URL_PATH}`)
+  const load = () => decodeNoiseImage(resolveAssetUrl(baseUrl, URL_PATH))
     .then((data) => {
       pixels.set(data.subarray(0, pixels.length));
       texture.needsUpdate = true;
@@ -66,7 +67,7 @@ export function acquireDeadwoodNoise(baseUrl = '') {
       for (const use of waiting.splice(0)) use(pixels);
     })
     .catch((error) => console.warn('Deadwood noise failed to load; shaders keep neutral fields.', error));
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(load, { timeout: 2500 });
-  else setTimeout(load, 250);
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(load, { timeout: 600 });
+  else setTimeout(load, 100);
   return shared;
 }

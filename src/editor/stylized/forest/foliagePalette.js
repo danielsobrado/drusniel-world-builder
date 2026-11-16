@@ -69,10 +69,15 @@ function applyUnderstoryWeathering(color) {
   return mix(grounded, bleached(color), skyFacing.mul(0.06));
 }
 
+/** Per-pixel green-leaf detector shared between grading and meadow patch tinting. */
+export function authoredGreenMask(sample) {
+  return smoothstep(0.005, 0.06, sample.g.sub(max(sample.r, sample.b)));
+}
+
 /** Keep painted veins, stems and blossoms while harmonising them with the biome palette. */
 export function gradeUnderstory(sample, palette) {
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
-  const green = smoothstep(0.005, 0.06, sample.g.sub(max(sample.r, sample.b)));
+  const green = authoredGreenMask(sample);
   const earth = bleached(vec3(...palette.base.toArray()), 0.22, 0.75).mul(vec3(1.12, 0.96, 0.82));
   const mutedAccent = mix(
     mix(vec3(luminance), sample, 0.82),
