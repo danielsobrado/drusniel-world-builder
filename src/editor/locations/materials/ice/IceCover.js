@@ -1,7 +1,8 @@
 import {
-  clamp, color, float, fwidth, max, mix, mx_noise_float, normalize, smoothstep, texture, time, vec3,
+  clamp, color, float, fwidth, max, mix, mx_noise_float, normalize, smoothstep, texture, time, vec2, vec3,
 } from 'three/tsl';
 import { bumpNormal, geometryNormal, viewDirection } from '../LocationShading.js';
+import { NOISE, locationNoise, planarNoise } from '../locationNoise.js';
 
 /** Snow texture repeats per metre. */
 const SNOW_SCALE = 0.4;
@@ -74,9 +75,9 @@ export function iceCover(surface, { point, profile, snowMaps, frost, snow, trail
   // Hoar frost grows as fine crystals, thickest on the rims; a light frost is a stipple, never a blot.
   const rimmed = frost.add(hollow.oneMinus().sub(0.5).mul(FROST_RIM));
   // The grain is centimetres across and soft: thresholded hard at a coarser scale it reads as camouflage.
-  const grain = mx_noise_float(point.mul(FROST_GRAIN)).mul(0.15).mul(near);
+  const grain = locationNoise(NOISE.grit, point.mul(FROST_GRAIN)).mul(0.15).mul(near);
   const frosted = smoothstep(0, 1, rimmed.add(grain)).mul(clamp(frost.mul(4), 0, 1));
-  const glitter = smoothstep(0.5, 0.75, mx_noise_float(point.mul(46).add(viewDirection.mul(5)))).mul(near);
+  const glitter = smoothstep(0.5, 0.75, locationNoise(NOISE.pits, point.mul(46).add(viewDirection.mul(5)))).mul(near);
   albedo = mix(albedo, color(profile.frostColor).mul(glitter.mul(0.3).add(1)), frosted.mul(0.85));
   roughness = mix(roughness, float(0.78), frosted);
   bare = bare.mul(frosted.oneMinus());
@@ -84,6 +85,7 @@ export function iceCover(surface, { point, profile, snowMaps, frost, snow, trail
   const [slopeFrom, slopeTo] = profile.snowSlope;
   const { gather, breakup, lip, shadow } = profile.snowEdge;
   const cover = snow.mul(smoothstep(slopeFrom, slopeTo, geometryNormal.y));
+  // Procedural, like the ridges and ruts: the edge's slope lights the lip through bumpNormal, and 8-bit noise would band it.
   const settle = hollow.sub(0.5).add(occlusion.oneMinus()).mul(gather)
     .add(mx_noise_float(point.mul(0.7)).add(mx_noise_float(point.mul(EDGE_GRAIN)).mul(0.6)).mul(breakup));
   // Only the edge moves: bare ice stays bare and a full cover stays whole.
@@ -100,15 +102,15 @@ export function iceCover(surface, { point, profile, snowMaps, frost, snow, trail
     .add(mx_noise_float(vec3(cross.mul(4.1), down.mul(0.7), 3.3)).mul(0.35));
   // Spindrift: loose snow on the move, snaking over the surface down the wind.
   const flow = down.sub(time.mul(profile.driftSpeed));
-  const snakes = smoothstep(0.1, 0.55, mx_noise_float(vec3(cross.mul(0.3), flow.mul(0.07), 1.7))
-    .add(mx_noise_float(vec3(cross.mul(1.1), flow.mul(0.26), 5.1)).mul(0.45))).mul(sky).mul(profile.drift);
+  const snakes = smoothstep(0.1, 0.55, planarNoise(NOISE.patch, vec2(cross.mul(0.3), flow.mul(0.07)))
+    .add(planarNoise(NOISE.mottle, vec2(cross.mul(1.1), flow.mul(0.26).add(5.1))).mul(0.45))).mul(sky).mul(profile.drift);
   const uv = point.xz.mul(SNOW_SCALE);
   const tilt = texture(snowMaps.normal, uv).xy.mul(2).sub(1);
   // Packed snow loses its wind ridges and takes the ruts of what packed it.
   const ruts = mx_noise_float(vec3(point.x.mul(5), point.y, point.z.mul(5))).mul(RUT_DEPTH);
   const relief = mix(ridges.mul(SASTRUGI_HEIGHT), ruts, packed).add(smoothstep(0, LIP_SPREAD, edge).mul(lip));
   const snowNormal = normalize(bumpNormal(geometryNormal, relief, 1).add(vec3(tilt.x, 0, tilt.y).mul(0.45)));
-  const sparkle = smoothstep(0.62, 0.8, mx_noise_float(point.mul(55).add(viewDirection.mul(6)))).mul(near);
+  const sparkle = smoothstep(0.62, 0.8, locationNoise(NOISE.grit, point.mul(55).add(viewDirection.mul(6)))).mul(near);
   // Snow the sky cannot see is lit by the blue bounce of the ice around it.
   const shelter = occlusion.mul(sky.mul(0.4).add(0.6));
   const snowAlbedo = texture(snowMaps.color, uv).rgb.mul(color(profile.snowColor))

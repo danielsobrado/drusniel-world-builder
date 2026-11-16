@@ -1,5 +1,5 @@
 import {
-  attribute, cameraPosition, clamp, color, exp, float, length, mix, mx_noise_float, mx_worley_noise_float, normalize,
+  attribute, cameraPosition, clamp, color, exp, float, length, mix, mx_worley_noise_float, normalize,
   positionWorld, refract, saturation, smoothstep, vec3, vec4,
 } from 'three/tsl';
 import { iceCover, weatheringCrust } from './ice/IceCover.js';
@@ -10,6 +10,7 @@ import {
   bakedLight, bakedShade, bumpNormal, createLocationMaterial, geometryNormal, locationLight, shadeSurface,
   triplanarNormal, triplanarSample, triplanarWeights, viewDirection,
 } from './LocationShading.js';
+import { NOISE, locationNoise } from './locationNoise.js';
 import { stoneSurface } from './StoneSurface.js';
 
 /**
@@ -126,7 +127,7 @@ export function createGlacierIceMaterial(name, { profile, maps, stoneProfile = n
   albedo = mix(albedo, color(profile.thinColor), smoothstep(THROUGH_FROM, THROUGH_TO, redDeficit).mul(profile.lightThrough));
 
   // Grit rides in the dirt layers, fine enough to read as silt and not as spots.
-  const grit = smoothstep(0.3, 0.55, mx_noise_float(deepPoint.mul(23))).mul(strata.ash.mul(0.7).add(0.3)).mul(near);
+  const grit = smoothstep(0.3, 0.55, locationNoise(NOISE.grit, deepPoint.mul(23))).mul(strata.ash.mul(0.7).add(0.3)).mul(near);
   const dirt = clamp(strata.ash.mul(sediment.mul(1.6).add(ASH_TRACE)).add(grit.mul(sediment).mul(0.32)), 0, 1);
   albedo = mix(albedo, color(profile.sedimentColor), dirt);
   const interior = iceInterior({
@@ -138,7 +139,7 @@ export function createGlacierIceMaterial(name, { profile, maps, stoneProfile = n
   // Rough at three scales: the photographed grain (its full strength draws a crack web in every highlight),
   // metre-scale patches, and whole stretches of aerated ice and scallop rims against glassy clear ice.
   let roughness = float(profile.roughness).mul(triplanarSample(maps.ice.rough, point, weights, 0.11).g.mul(0.3).add(0.85))
-    .add(mx_noise_float(point.mul(0.4)).mul(0.08)).add(scatter.mul(0.18)).add(hollow.oneMinus().mul(0.08)).add(dirt.mul(0.3));
+    .add(locationNoise(NOISE.patch, point.mul(0.4)).mul(0.08)).add(scatter.mul(0.18)).add(hollow.oneMinus().mul(0.08)).add(dirt.mul(0.3));
   roughness = mix(roughness, float(0.05), polish);
   let f0 = float(ICE_F0);
   let wrap = float(0.9);
@@ -146,7 +147,7 @@ export function createGlacierIceMaterial(name, { profile, maps, stoneProfile = n
 
   if (stoneProfile && maps.rock) {
     const rock = stoneSurface(stoneProfile, maps.rock, null);
-    const share = smoothstep(0.42, 0.58, mask.x.add(mx_noise_float(point.mul(0.6)).mul(0.14)));
+    const share = smoothstep(0.42, 0.58, mask.x.add(locationNoise(NOISE.patch, point.mul(0.6)).mul(0.14)));
     albedo = mix(albedo, rock.albedo, share);
     normal = normalize(mix(normal, rock.normal, share));
     roughness = mix(roughness, rock.roughness, share);

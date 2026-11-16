@@ -9,6 +9,7 @@ import {
   bakedShade, bumpNormal, createLocationMaterial, geometryNormal, shadeSurface, triplanarNormal, triplanarSample,
   triplanarWeights,
 } from './LocationShading.js';
+import { NOISE, locationNoise } from './locationNoise.js';
 import { patinate, weatherDressedStone } from './StoneWeathering.js';
 
 /**
@@ -17,6 +18,10 @@ import { patinate, weatherDressedStone } from './StoneWeathering.js';
  *
  * The optional vertex mask `surfMask` means, for every stone profile:
  *   x mineral vein or crystal   y damp   z soot / scorch   w dressed (tool-cut, coursed if the profile has masonry)
+ *
+ * Colour and mask noise reads the world-noise texture (`locationNoise`); every
+ * `mx_noise_float` left here feeds a `bumpNormal` height or the masonry joints,
+ * where an 8-bit texture's slope would band.
  */
 
 const joint = (u, v, courseHeight, blockLength, width) => {
@@ -94,9 +99,9 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
   let wrap = float(profile.wrap ?? 0.12);
 
   // Multi-scale mineral variation so no stone wall repeats or reads as uniform gray.
-  const macro = mx_noise_float(point.mul(0.085)).mul(0.5).add(0.5);
-  const midPatch = mx_noise_float(point.mul(0.37).add(vec3(4.1, 1.7, 9.3))).mul(0.5).add(0.5);
-  const grainMix = mx_noise_float(point.mul(1.85).add(vec3(2.3, 6.1, 0.8))).mul(0.5).add(0.5);
+  const macro = locationNoise(NOISE.broad, point.mul(0.085)).mul(0.5).add(0.5);
+  const midPatch = locationNoise(NOISE.patch, point.mul(0.37).add(vec3(4.1, 1.7, 9.3))).mul(0.5).add(0.5);
+  const grainMix = locationNoise(NOISE.fbm, point.mul(1.85).add(vec3(2.3, 6.1, 0.8))).mul(0.5).add(0.5);
   albedo = albedo.mul(mix(float(0.8), float(1.13), macro));
   albedo = albedo.mul(mix(color('#c3c7d0'), color('#cfc6bc'), midPatch));
   albedo = albedo.mul(mix(float(0.94), float(1.06), grainMix));
@@ -207,7 +212,7 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     albedo = albedo.mul(mix(float(0.86), float(1.12), hammer));
     roughness = clamp(roughness.mul(mix(float(0.78), float(1.22), brush.mul(0.55).add(hammer.mul(0.45)))), 0.16, 0.92);
     if (profile.forgedPatina) {
-      const rustNoise = mx_noise_float(point.mul(2.8).add(vec3(3.1, 7.4, 1.9))).mul(0.5).add(0.5);
+      const rustNoise = locationNoise(NOISE.mottle, point.mul(2.8).add(vec3(3.1, 7.4, 1.9))).mul(0.5).add(0.5);
       const contactCrevice = clamp(float(1).sub(bakedShade.x), 0, 1);
       const rustMask = smoothstep(0.46, 0.84, rustNoise).mul(mix(float(0.28), float(0.95), contactCrevice));
       const edgeWear = smoothstep(0.62, 0.92, hammer.mul(0.6).add(brush.mul(0.4)));
@@ -220,8 +225,8 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
 
   if (mask) {
     if (profile.vein) {
-      const warp = mx_noise_float(point.mul(profile.vein.scale * 0.35)).mul(1.25);
-      const line = safePow(abs(mx_noise_float(point.mul(profile.vein.scale).add(warp))).oneMinus(), profile.vein.sharpness ?? 12);
+      const warp = locationNoise(NOISE.broad, point.mul(profile.vein.scale * 0.35)).mul(1.25);
+      const line = safePow(abs(locationNoise(NOISE.fbm, point.mul(profile.vein.scale).add(warp))).oneMinus(), profile.vein.sharpness ?? 12);
       const pocket = smoothstep(0.38, 0.78, detailAlbedo.g.mul(0.6).add(grainMix.mul(0.4))).mul(smoothstep(0.28, 0.72, midPatch));
       const vein = smoothstep(0.28, 0.75, line.mul(mask.x.mul(1.4)).mul(pocket));
       const veinGain = float(profile.vein.gain ?? 1.85);
@@ -295,7 +300,7 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
   // Grounding & contact dust patina (opt-in per profile, e.g. mine props).
   if (profile.contactDust) {
     const contactAO = clamp(float(1).sub(bakedShade.x), 0, 1);
-    const dustPatch = mx_noise_float(point.mul(2.4).add(vec3(1.7, 5.3, 8.1))).mul(0.5).add(0.5);
+    const dustPatch = locationNoise(NOISE.mottle, point.mul(2.4).add(vec3(1.7, 5.3, 8.1))).mul(0.5).add(0.5);
     const dustMask = pow(contactAO, 1.35).mul(mix(float(0.35), float(0.85), dustPatch));
     albedo = mix(albedo, color('#6e6254'), dustMask.mul(0.48));
     roughness = mix(roughness, float(0.95), dustMask.mul(0.65));
@@ -312,10 +317,10 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     // Rime: whatever stands in the weather is greyed with frost before any snow settles on it.
     albedo = mix(albedo, color(profile.snow.color).mul(0.55), bakedShade.z.mul(profile.snow.rime ?? 0));
     // Snow lies on what faces a sky it can fall from: ledges, roof pitches, the tops of logs and stones.
-    const settle = mx_noise_float(point.mul(1.3)).mul(0.22);
+    const settle = locationNoise(NOISE.patch, point.mul(1.3)).mul(0.22);
     const lying = smoothstep(profile.snow.from, profile.snow.from + 0.35, geometryNormal.y.add(settle))
       .mul(bakedShade.z).mul(profile.snow.amount);
-    albedo = mix(albedo, color(profile.snow.color).mul(mx_noise_float(point.mul(9)).mul(0.04).add(1)), lying);
+    albedo = mix(albedo, color(profile.snow.color).mul(locationNoise(NOISE.grit, point.mul(9)).mul(0.04).add(1)), lying);
     normal = normalize(mix(normal, geometryNormal, lying.mul(0.8)));
     roughness = mix(roughness, float(0.9), lying);
     f0 = mix(f0, float(0.02), lying);

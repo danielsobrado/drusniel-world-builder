@@ -1,5 +1,6 @@
-import { abs, dot, exp, fract, length, max, mix, mx_noise_float, smoothstep, step, vec3 } from 'three/tsl';
+import { abs, dot, exp, fract, length, max, mix, smoothstep, step, vec3 } from 'three/tsl';
 import { triplanarSample } from '../LocationShading.js';
+import { NOISE, locationNoise } from '../locationNoise.js';
 
 /** Metres below the surface at which the interior is sampled, nearest first. */
 const LAYER_DEPTHS = [0.1, 0.4, 1.1, 2.4];
@@ -41,7 +42,7 @@ function fracturePlane({ normal, spacing, salt }, { point, into, absorption, vei
   const ahead = mix(fract(across), fract(across).oneMinus(), step(0, toward));
   const distance = ahead.mul(spacing).div(crossing);
   const hit = point.add(into.mul(distance));
-  const patch = smoothstep(threshold, threshold.add(0.12), mx_noise_float(hit.mul(PLANE_EXTENT).add(salt)));
+  const patch = smoothstep(threshold, threshold.add(0.12), locationNoise(NOISE.patch, hit.mul(PLANE_EXTENT).add(salt)));
   const mirror = smoothstep(CRITICAL_COS + 0.1, CRITICAL_COS - 0.1, crossing).mul(0.8).add(0.2);
   return exp(absorption.mul(distance.mul(-2))).mul(exp(veil.mul(distance).negate()))
     .mul(smoothstep(PLANE_DEPTH, PLANE_DEPTH * 0.6, distance)).mul(patch).mul(mirror);
@@ -77,9 +78,9 @@ export function iceInterior({ point, into, weights, cracks, absorption, layers, 
   const count = Math.min(layers, LAYER_DEPTHS.length);
   const veil = mix(VEIL_CLEAR, VEIL_MILKY, scatter);
   // Cracks gather into fractured zones and leave clear ice between them.
-  const zone = smoothstep(-0.1, 0.35, mx_noise_float(point.mul(0.14))).mul(0.3).add(fracture.mul(1.5));
+  const zone = smoothstep(-0.1, 0.35, locationNoise(NOISE.broad, point.mul(0.14))).mul(0.3).add(fracture.mul(1.5));
   // Bubbles string out along the vertical, the way they rose before the ice closed on them.
-  const cluster = smoothstep(0, 0.45, mx_noise_float(point.mul(0.9))).mul(bubbles).mul(1.2);
+  const cluster = smoothstep(0, 0.45, locationNoise(NOISE.mottle, point.mul(0.9))).mul(bubbles).mul(1.2);
   let glow = vec3(0);
   let seen = exp(veil.mul(-LAYER_DEPTHS[0]));
   for (let index = 0; index < count; index += 1) {
@@ -90,7 +91,7 @@ export function iceInterior({ point, into, weights, cracks, absorption, layers, 
     const crack = smoothstep(0.035, 0.16, slope).mul(zone).mul(crackGain);
     let light = crack;
     if (index < DETAILED_LAYERS) {
-      light = light.add(smoothstep(0.42, 0.68, mx_noise_float(inside.mul(vec3(24, 7, 24)))).mul(cluster));
+      light = light.add(smoothstep(0.42, 0.68, locationNoise(NOISE.pits, inside.mul(vec3(24, 7, 24)))).mul(cluster));
     }
     // In to the feature and back out again.
     glow = glow.add(exp(absorption.mul(-2 * depth)).mul(light).mul(seen));

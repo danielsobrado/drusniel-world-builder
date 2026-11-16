@@ -1,9 +1,10 @@
 import {
-  abs, clamp, color, float, max, mix, mx_noise_float, mx_worley_noise_float, normalize, pow, smoothstep, vec3,
+  abs, clamp, color, float, max, mix, mx_worley_noise_float, normalize, pow, smoothstep, vec3,
 } from 'three/tsl';
 import {
   bumpNormal, geometryNormal, triplanarNormal, triplanarSample,
 } from './LocationShading.js';
+import { NOISE, locationNoise } from './locationNoise.js';
 
 /**
  * Reusable TSL geological variation, rock-to-rock blending, ground-family
@@ -11,6 +12,8 @@ import {
  *
  * Designed as an additive layer over `StoneSurface` so existing rock materials
  * preserve their base texture, lighting response, and artistic identity.
+ * Zone and stain fields read the world-noise texture; the Worley cells stay
+ * procedural because they feed `bumpNormal` heights.
  */
 
 /** Guarantees a non-zero vector before WGSL `normalize()` to avoid NaNs. */
@@ -27,8 +30,8 @@ function normalizeTint(tintNode) {
  * emerge and recede naturally instead of running uniformly across every wall.
  */
 export function evaluateGeologicalStrataMask(point, zoneMask, strataCfg) {
-  const warp = mx_noise_float(point.mul(0.045).add(vec3(5.2, 1.9, 8.4))).mul(0.35);
-  const regional = mx_noise_float(point.mul(0.065).add(vec3(11.3, 4.1, 2.7))).mul(0.5).add(0.5);
+  const warp = locationNoise(NOISE.broad, point.mul(0.045).add(vec3(5.2, 1.9, 8.4))).mul(0.35);
+  const regional = locationNoise(NOISE.broad, point.mul(0.065).add(vec3(11.3, 4.1, 2.7))).mul(0.5).add(0.5);
   const variation = float(strataCfg?.strataVariation ?? 0.45);
   const zoneBias = smoothstep(0.2, 0.8, zoneMask.add(warp));
   return clamp(mix(float(1), regional.mul(0.75).add(zoneBias.mul(0.55)), variation), 0.2, 1.35);
@@ -63,14 +66,14 @@ export function applyGeologicalVariation({
 
   // 1. Macro geological rock-mass tinting (coherent world-space zones).
   const macroScale = max(float(geo.macroScale ?? 0.048), 1e-4);
-  const zoneWarp = mx_noise_float(point.mul(macroScale.mul(0.6))).mul(0.28);
-  const zoneNoise = mx_noise_float(point.mul(macroScale).add(vec3(7.3, 2.1, 13.7))).mul(0.5).add(0.5);
+  const zoneWarp = locationNoise(NOISE.broad, point.mul(macroScale.mul(0.6))).mul(0.28);
+  const zoneNoise = locationNoise(NOISE.broad, point.mul(macroScale).add(vec3(7.3, 2.1, 13.7))).mul(0.5).add(0.5);
   const macroZone = clamp(mix(zone, zoneNoise, float(0.35)).add(zoneWarp), 0, 1);
 
   const contrast = clamp(float(geo.macroContrast ?? 0.22), 0, 0.8);
   const darkMass = smoothstep(0.45, 0.08, macroZone);
   const lightMass = smoothstep(0.58, 0.94, macroZone);
-  const warmCool = mx_noise_float(point.mul(0.075).add(vec3(2.9, 8.4, 1.3))).mul(0.5).add(0.5);
+  const warmCool = locationNoise(NOISE.broad, point.mul(0.075).add(vec3(2.9, 8.4, 1.3))).mul(0.5).add(0.5);
 
   let outAlbedo = albedo.add(vec3(0.008, 0.008, 0.008)).mul(float(geo.baseGain ?? 1.35));
   let outNormal = normal;
@@ -148,9 +151,9 @@ export function applyGeologicalVariation({
   outRoughness = mix(outRoughness, clamp(outRoughness.add(0.08), 0.12, 0.98), fractureField.mul(0.5));
 
   // Coherent mineral staining pockets (restrained iron-oxide ochre + pale mineral traces).
-  const mineralNoise = mx_noise_float(point.mul(0.24).add(vec3(15.1, 3.7, 6.2))).mul(0.5).add(0.5);
+  const mineralNoise = locationNoise(NOISE.patch, point.mul(0.24).add(vec3(15.1, 3.7, 6.2))).mul(0.5).add(0.5);
   const ironPocket = smoothstep(0.60, 0.90, mineralNoise).mul(smoothstep(0.34, 0.80, midPatch));
-  const paleTrace = smoothstep(0.66, 0.93, mx_noise_float(point.mul(0.42).add(vec3(1.4, 9.8, 4.5))).mul(0.5).add(0.5))
+  const paleTrace = smoothstep(0.66, 0.93, locationNoise(NOISE.patch, point.mul(0.42).add(vec3(1.4, 9.8, 4.5))).mul(0.5).add(0.5))
     .mul(crevice.mul(0.55).add(0.22));
   outAlbedo = mix(
     outAlbedo,
@@ -172,9 +175,9 @@ export function applyGeologicalVariation({
   outNormal = bumpNormal(outNormal, clastMask.mul(0.012), float(0.65));
 
   // 4. Gravity-aligned vertical seepage streaks on walls and recesses.
-  const seepBand = mx_noise_float(vec3(point.x.mul(1.35), point.y.mul(0.22), point.z.mul(1.35)).add(vec3(3.1, 0.7, 8.2)))
+  const seepBand = locationNoise(NOISE.mottle, vec3(point.x.mul(1.35), point.y.mul(0.22), point.z.mul(1.35)).add(vec3(3.1, 0.7, 8.2)))
     .mul(0.5).add(0.5);
-  const seepZone = smoothstep(0.46, 0.8, mx_noise_float(point.mul(0.11).add(vec3(4.4, 1.2, 7.9))).mul(0.5).add(0.5));
+  const seepZone = smoothstep(0.46, 0.8, locationNoise(NOISE.broad, point.mul(0.11).add(vec3(4.4, 1.2, 7.9))).mul(0.5).add(0.5));
   const seepMask = clamp(
     smoothstep(0.56, 0.86, seepBand).mul(seepZone).mul(wallMask).mul(float(geo.verticalSeep ?? 0.24)),
     0,
