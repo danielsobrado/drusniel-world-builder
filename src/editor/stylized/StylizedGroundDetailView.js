@@ -639,12 +639,13 @@ export class StylizedGroundDetailView {
           if (isFungi && candidate.priority >= Math.min(1, 0.25 + microScore * 0.85)) return null;
           return true;
         }
-        const colony = isColonialDetail
-          ? valueNoise(candidate.x / 7.5, candidate.z / 7.5, 0x636f6c6f) * 0.5 + 0.5
+        const colonyRaw = isColonialDetail
+          ? valueNoise(candidate.x / 6.5, candidate.z / 6.5, 0x636f6c6f) * 0.5 + 0.5
           : 0.5;
-        const localHabitatBoost = Math.max(micro.log, micro.treeBase * 0.85, bankBoost);
+        const colony = isColonialDetail ? Math.max(0, Math.min(1, (colonyRaw - 0.24) / 0.52)) : 0.5;
+        const localHabitatBoost = Math.max(micro.log, micro.treeBase * 0.9, bankBoost);
         let colonyGate = isColonialDetail
-          ? Math.min(1, 0.32 + 1.05 * colony * colony + localHabitatBoost * 0.7)
+          ? Math.min(1, 0.24 + 0.78 * colony + localHabitatBoost * 0.75)
           : 1;
         let detailScale = isColonialDetail
           ? baseScale * (0.94 + 0.26 * colony) * (1 + bankBoost * 0.28)
@@ -652,18 +653,18 @@ export class StylizedGroundDetailView {
         if (isColonialDetail) {
           if (candidate.tileId === 8) {
             if (detailMotion === 'fern-frond') {
-              colonyGate = Math.min(1, 0.52 + 0.95 * colony + bankBoost * 0.55);
+              colonyGate = Math.min(1, 0.48 + 0.75 * colony + bankBoost * 0.55);
               detailScale *= 1.24;
             }
             if (logHit && logHit.dist < 1.45) colonyGate = 1;
           } else if (candidate.tileId === 9 && detailMotion === 'fern-frond') {
-            colonyGate = Math.min(1, colony * 0.42 + bankBoost * 0.95);
+            colonyGate = Math.min(1, colony * 0.36 + bankBoost * 0.95);
           } else if (candidate.tileId === 6) {
-            if (edge > 0.28 || coverage < 0.72) colonyGate = Math.min(1, colonyGate + 0.25);
-            else if (coverage >= 0.85 && edge < 0.18) colonyGate *= 0.62;
+            if (edge > 0.28 || coverage < 0.72) colonyGate = Math.min(1, colonyGate + 0.22);
+            else if (coverage >= 0.85 && edge < 0.18) colonyGate *= 0.74;
           } else if (candidate.tileId === 5) {
-            if (colony > 0.52 || coverage > 0.45 || bankBoost > 0.2) colonyGate = Math.min(1, colonyGate + 0.2);
-            else colonyGate *= 0.58;
+            if (colony > 0.45 || coverage > 0.40 || bankBoost > 0.2) colonyGate = Math.min(1, colonyGate + 0.24);
+            else colonyGate *= 0.65;
           }
         }
         const perchHeight = onNurseLog
@@ -674,15 +675,18 @@ export class StylizedGroundDetailView {
             ? { ...(metadata ?? {}), ...perchHeight }
             : null;
         }
-        // Let forest-adapted scans/herbs follow the forest channel rather than
-        // being thinned out inside closed woods by the open meadow channel.
+        // Let forest-adapted scans/herbs follow natural local colonies under canopy without double-draining
+        // the 400-candidate pool when regional channels soften mid-chunk.
         const channel = this.layerConfig.regionalChannel ?? placementRule?.character ?? detailCharacter;
         const regionalValue = this.regionalCharacterField.sampleChannel(
           candidate.x,
           candidate.z,
           channel,
         );
-        return candidate.priority < regionalValue * colonyGate
+        const gate = detailCharacter === 'forest' && this.layerName === 'groundDetail'
+          ? Math.min(1, colonyGate * (0.58 + 0.48 * regionalValue))
+          : regionalValue * colonyGate;
+        return candidate.priority < gate
           ? { ...(metadata ?? {}), regionalMeadow: regionalValue, ...perchHeight }
           : null;
       },
@@ -696,9 +700,86 @@ export class StylizedGroundDetailView {
     }
     const placements = state.builder.step({ shouldYield });
     if (placements === null) return null;
+    if (this.layerName === 'groundDetail') {
+      this.appendNurseLogFlora(placements, chunkX, chunkZ, options);
+    }
     this.pendingManifests.delete(cacheKey);
     this.manifestCache.set(cacheKey, { key, placements });
     return placements;
+  }
+
+  /**
+   * Adds deterministic flanking ferns/herbs and perched nurse-log seedlings along fallen
+   * logs owned by `(chunkX, chunkZ)` using existing instanced prototypes.
+   */
+  appendNurseLogFlora(placements, chunkX, chunkZ, options) {
+    const localLogs = collectChunkDebrisLogs(
+      chunkX,
+      chunkZ,
+      this.debrisPlacementsProvider,
+      this.debrisFootprintsProvider,
+      0,
+    );
+    if (localLogs.length === 0) return;
+    const candidateAssets = ['forest-fern-02', 'forest-sorrel-01', 'tropical-calathea-01', 'taiga-berry-moss-01'];
+    const speciesByAsset = new Map();
+    for (const assetId of candidateAssets) {
+      const indices = this.prototypeIndicesByAsset.get(assetId);
+      if (indices?.length > 0) speciesByAsset.set(assetId, indices[0]);
+    }
+    if (speciesByAsset.size === 0) return;
+    const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
+    const { tileSize, tileAt, heightAt } = options;
+    for (const log of localLogs) {
+      const lenX = log.x1 - log.x0;
+      const lenZ = log.z1 - log.z0;
+      const span = Math.hypot(lenX, lenZ);
+      if (span < 0.6) continue;
+      const dirX = lenX / span;
+      const dirZ = lenZ / span;
+      const perpX = -dirZ;
+      const perpZ = dirX;
+      const tileId = tileAt(Math.floor(log.x / tileSize), Math.floor(log.z / tileSize));
+      const pickForTile = (primary, secondary) => {
+        for (const id of [primary, secondary, 'forest-fern-02']) {
+          const idx = speciesByAsset.get(id);
+          if (idx === undefined) continue;
+          const allowed = this.prototypeBiomeRules[idx]?.tileIds;
+          if (!allowed || allowed.includes(tileId)) return idx;
+        }
+        return null;
+      };
+      const flankA = pickForTile(tileId === 5 || tileId === 7 ? 'tropical-calathea-01' : (tileId === 9 ? 'taiga-berry-moss-01' : 'forest-fern-02'), 'forest-sorrel-01');
+      const flankB = pickForTile(tileId === 8 || tileId === 6 ? 'forest-sorrel-01' : 'forest-fern-02', 'taiga-berry-moss-01');
+      const spots = [
+        { along: -0.28, side: log.radius + 0.28, idx: flankA, scale: 0.96, perch: false },
+        { along: 0.24, side: -(log.radius + 0.26), idx: flankB, scale: 1.04, perch: false },
+      ];
+      if (log.older && flankA !== null) {
+        spots.push({ along: 0.04, side: 0, idx: flankA, scale: 0.72, perch: true });
+      }
+      spots.forEach((spot, sIdx) => {
+        if (spot.idx === null || placements.length >= (options.perChunk ?? 400) + 32) return;
+        const px = log.x + dirX * (span * 0.5 * spot.along) + perpX * spot.side;
+        const pz = log.z + dirZ * (span * 0.5 * spot.along) + perpZ * spot.side;
+        const h = heightAt(px, pz);
+        if (!Number.isFinite(h)) return;
+        if (Number.isFinite(seaLevel) && h <= seaLevel + 0.35) return;
+        if (pathBlockedForFootprint(this.pathClearance, { x: px, z: pz }, this.prototypeFootprints[spot.idx] ?? null)) return;
+        const seed = Math.abs(Math.sin(px * 12.7 + pz * 31.3 + sIdx * 7.1)) % 1;
+        placements.push({
+          x: px,
+          z: pz,
+          height: h,
+          tileId,
+          prototypeIndex: spot.idx,
+          scale: spot.scale * (0.9 + seed * 0.2),
+          rotationY: ((log.phase + sIdx * 2.1) % (Math.PI * 2)),
+          priority: seed,
+          ...(spot.perch ? { waterPlacementHeight: h + log.radius * 0.72 } : {}),
+        });
+      });
+    }
   }
 
   update() {

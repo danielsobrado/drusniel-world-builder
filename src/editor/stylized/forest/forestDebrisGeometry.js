@@ -121,20 +121,22 @@ class MeshBuilder {
       const angle = (side / sides) * Math.PI * 2;
       const offset = (ring + side) * 3;
       const [x, y, z] = this.positions.slice(offset, offset + 3);
-      const scale = 0.56 + 0.08 * Math.sin(angle * 3 + 0.7);
+      const scale = 0.54 + 0.10 * Math.sin(angle * 3 + 0.7);
       const jag = jagX * Math.sin(angle * 4 + 0.5);
-      const px = centreAt[0] + (x - centreAt[0]) * scale + (axisY ? 0 : jag);
-      const py = centreAt[1] + (y - centreAt[1]) * scale - cupDepth * 0.45 + (axisY ? jag : 0);
+      const signX = flip ? -1 : 1;
+      const px = centreAt[0] + (x - centreAt[0]) * scale + (axisY ? 0 : jag + signX * cupDepth * 0.45);
+      const py = centreAt[1] + (y - centreAt[1]) * scale + (axisY ? jag - cupDepth * 0.45 : 0);
       const pz = centreAt[2] + (z - centreAt[2]) * scale;
       const c = rotCenter > 0.5
-        ? SCRATCH.copy(EXPOSED_DEEP).lerp(ROT_PUNK, 0.65)
-        : SCRATCH.copy(EXPOSED_DEEP).lerp(EXPOSED_WOOD, 0.55);
+        ? SCRATCH.copy(EXPOSED_DEEP).lerp(ROT_PUNK, 0.72)
+        : SCRATCH.copy(EXPOSED_DEEP).lerp(EXPOSED_WOOD, 0.48);
       this.vertex(px, py, pz, c, 0.5 + Math.cos(angle) * 0.28, 0.5 + Math.sin(angle) * 0.28);
     }
     const centerColor = rotCenter > 0.25 ? ROT_DARK : EXPOSED_WOOD;
+    const signX = flip ? -1 : 1;
     const centre = this.vertex(
-      centreAt[0],
-      centreAt[1] - cupDepth,
+      centreAt[0] + (axisY ? 0 : signX * cupDepth),
+      centreAt[1] - (axisY ? cupDepth : 0),
       centreAt[2],
       centerColor,
       0.5,
@@ -409,10 +411,12 @@ export function createFallenLogGeometry({ length = 3.6, radius = 0.24, variant =
 
       const tipJag = t === 1
         ? (preset.tipMode === 'splintered'
-          ? (0.11 * Math.max(0, Math.sin(angle * 2 + 0.6)) + 0.05 * Math.cos(angle * 5))
-          : 0.03 * Math.sin(angle * 3 + preset.phase))
+          ? (0.14 * Math.max(0, Math.sin(angle * 2 + 0.6)) + 0.06 * Math.cos(angle * 5))
+          : (0.065 * Math.sin(angle * 3 + preset.phase) + 0.035 * Math.cos(angle * 5 - 0.8)))
         : 0;
-      const footJag = t === 0 ? (-0.03 * Math.sin(angle * 3 + preset.phase)) : 0;
+      const footJag = t === 0
+        ? (-0.055 * Math.sin(angle * 3 + preset.phase) - 0.03 * Math.cos(angle * 4 + 0.5))
+        : 0;
 
       const moss = smoothstep(0.46, 0.84, up * 0.48 + mottle(t * 7.5 + preset.phase, angle * 3.1) * 0.72)
         * (variant === 'nurse' ? 0.82 : 0.58);
@@ -433,13 +437,15 @@ export function createFallenLogGeometry({ length = 3.6, radius = 0.24, variant =
 
   const foot = ringCentre(0);
   builder.endGrain(0, sides, [foot[0] - 0.04, foot[1], foot[2]], false, {
-    cupDepth: 0.015, rotCenter: preset.footMode === 'rotEnd' ? 0.9 : 0.45, jagX: 0.02,
+    cupDepth: preset.footMode === 'rotEnd' ? 0.055 : 0.032,
+    rotCenter: preset.footMode === 'rotEnd' ? 0.92 : 0.68,
+    jagX: 0.038,
   });
   const tip = ringCentre(1);
-  builder.endGrain((rings - 1) * sides, sides, [tip[0] + 0.12, tip[1] + 0.005, tip[2]], true, {
-    cupDepth: preset.tipMode === 'splintered' ? -0.02 : 0.018,
-    rotCenter: preset.tipMode === 'rotEnd' ? 0.95 : 0.35,
-    jagX: 0.02,
+  builder.endGrain((rings - 1) * sides, sides, [tip[0] + 0.10, tip[1] + 0.005, tip[2]], true, {
+    cupDepth: preset.tipMode === 'splintered' ? 0.015 : 0.048,
+    rotCenter: preset.tipMode === 'rotEnd' ? 0.95 : 0.65,
+    jagX: 0.042,
   });
 
   // Crooked broken limb & empty socket collar.

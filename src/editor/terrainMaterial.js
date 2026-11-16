@@ -269,20 +269,28 @@ export function createTerrainMaterial({
     );
   }
   const forestFloorConfig = stylizedConfig.trees?.forestFloor ?? {};
+  const floorMoss = meadowGround?.root
+    ? mix(colorNode(forestFloorConfig.groundCoreColor ?? '#273c25'), meadowGround.root.mul(0.78), 0.52)
+    : colorNode(forestFloorConfig.groundCoreColor ?? '#273c25');
+  const floorLitter = meadowGround?.detail?.litter
+    ? mix(colorNode(forestFloorConfig.litterColor ?? '#5c4a30'), meadowGround.detail.litter.rgb, 0.72)
+    : colorNode(forestFloorConfig.litterColor ?? '#5c4a30');
+  const floorBreakup = micro ? micro.g.mul(0.28).add(0.86) : float(1);
   const forestFloorTint = forestFloor
     .mul(forestFloorConfig.groundStrength ?? 0.68)
     .mul(oneMinus(dirt));
   groundColor = mix(
     groundColor,
-    colorNode(forestFloorConfig.groundCoreColor ?? '#273c25'),
+    floorMoss.mul(floorBreakup),
     forestFloorTint,
   );
-  // Leaf litter between the canopy's grass islands (forestFloorTexture B).
+  // Biome-specific leaf litter / needle duff between canopy islands (forestFloorTexture B).
   const litterStrength = forestFloorConfig.litterStrength ?? 0;
   if (litterStrength > 0) {
+    const litterMod = meso ? meso.b.mul(0.32).add(0.84) : float(1);
     groundColor = mix(
       groundColor,
-      colorNode(forestFloorConfig.litterColor ?? '#5c4a30'),
+      floorLitter.mul(litterMod),
       forestFloorSample.b.mul(litterStrength).mul(oneMinus(dirt)),
     );
   }

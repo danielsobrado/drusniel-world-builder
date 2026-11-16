@@ -36,7 +36,7 @@ import {
 } from './forestDebrisGeometry.js';
 
 const BARK_UNDERTONES = Object.freeze({
-  beech: '#705b45',
+  beech: '#7a654e',
   spruce: '#73583f',
   pine: '#7c5539',
   swamp: '#665b47',
@@ -182,7 +182,7 @@ function deadwoodMaterial(
   const longitudinalGrain = mix(isHardwood ? 0.82 : 0.88, isHardwood ? 1.18 : 1.14, fiberNoise.r);
   const crackPattern = smoothstep(isHardwood ? 0.20 : 0.18, isHardwood ? 0.66 : 0.62, detailNoise.g);
   const cracks = mix(isHardwood ? 0.66 : 0.78, 1.06, crackPattern);
-  const barkMottle = mix(color('#574431'), color('#856e54'), deadwoodNoise.b);
+  const barkMottle = mix(color('#5f4c37'), color('#8f785d'), deadwoodNoise.b);
   const weatheredBase = isHardwood ? mix(subtleBark, barkMottle, 0.44) : subtleBark;
   const topSky = smoothstep(0.24, 0.82, normalGeometry.y);
   const sunSilver = topSky.mul(smoothstep(0.58, 0.92, deadwoodNoise.r)).mul(isHardwood ? 0.08 : 0.12);

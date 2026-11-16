@@ -14245,13 +14245,13 @@
         "-tu",
         "normal"
       ],
-      "cacheKey": "5d254c9c3bb8b31666543941e1f31ab7b645406b3cc25a7c502286411a44098b",
-      "sourceSha256": "da1d93a0c859b4b35be543ebf9d8b4eff6a011e1e599e2fd605e54721ff49ff8",
-      "outputSha256": "c326c028186250d36d2083837e10be10268ef773fcb477e723aa62cbde2bc420",
-      "sourceBytes": 75784,
-      "outputBytes": 20404,
-      "gzipBytes": 17581,
-      "brotliBytes": 17217,
+      "cacheKey": "824c19e9cf3541efa404be4cc3ec2ddf53244a5d798a98b7cfa27434f8f41e61",
+      "sourceSha256": "2e886637ad6e9fca25c855da036908ae7df0fb2c4fff09e7711b2c76e58eb8b5",
+      "outputSha256": "305be5fb8c6d3082765a9a397b514e969c57967618bd31d91f6723bb7f25bd60",
+      "sourceBytes": 75768,
+      "outputBytes": 20412,
+      "gzipBytes": 17588,
+      "brotliBytes": 17230,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
@@ -14270,16 +14270,16 @@
         "sceneBounds": {
           "min": [
             -0.4921988844871521,
-            0.0493621788918972,
+            -0.019999999552965164,
             -0.28625184297561646
           ],
           "max": [
             0.6793913245201111,
-            0.39000001549720764,
+            0.3206378221511841,
             0.45794183015823364
           ]
         },
-        "bufferBytes": 74076,
+        "bufferBytes": 74080,
         "logicalAccessorBytes": 7060,
         "logicalVertexBytes": 5632,
         "logicalIndexBytes": 1428,
@@ -14314,16 +14314,16 @@
         "sceneBounds": {
           "min": [
             -0.492202759,
-            0.0493621826,
+            -0.0200004578,
             -0.286254883
           ],
           "max": [
             0.679382324,
-            0.38999939,
+            0.320632935,
             0.457946777
           ]
         },
-        "bufferBytes": 22444,
+        "bufferBytes": 22452,
         "logicalAccessorBytes": 4772,
         "logicalVertexBytes": 3344,
         "logicalIndexBytes": 1428,
@@ -14379,10 +14379,10 @@
           "triangleCount": 238
         },
         "data": {
-          "json": 2764,
-          "binary": 17496,
+          "json": 2766,
+          "binary": 17504,
           "buffers": {
-            "vertex": 2008,
+            "vertex": 2016,
             "index": 267,
             "animation": 0,
             "transform": 0,
@@ -14761,13 +14761,13 @@
         "-tu",
         "normal"
       ],
-      "cacheKey": "eec661bf8f8e34491b1fd3bc7c03dd137916449e02166cd1e4be97ace40f6fa3",
-      "sourceSha256": "2ce75a1f4566300d0c1e363a695534c9de622ed93c45c2fa668041cb0693956a",
-      "outputSha256": "483e11e0078014a10511d68cb80af4e23c4731aa8401e152fa3dd9f882e775ac",
-      "sourceBytes": 75020,
-      "outputBytes": 17296,
-      "gzipBytes": 14564,
-      "brotliBytes": 14213,
+      "cacheKey": "7fcf2ab1a31c314644f6349d4a90b5c85c8e49a58d1d5619433a0ba27275ffa8",
+      "sourceSha256": "11eaaf42406a46ed7e0594f5cb5c22ef6c69b857229c482ce22b160e4989c11a",
+      "outputSha256": "ac3c6b54eecaa44ad53888bc1c5b7a75c3dc5569f6eed3ead78189fa587c951c",
+      "sourceBytes": 75004,
+      "outputBytes": 17336,
+      "gzipBytes": 14606,
+      "brotliBytes": 14255,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
@@ -14786,16 +14786,16 @@
         "sceneBounds": {
           "min": [
             -0.21702298521995544,
-            0.6284752488136292,
+            -0.03999999910593033,
             -0.19820278882980347
           ],
           "max": [
             0.09939224272966385,
-            0.8050132393836975,
+            0.13653798401355743,
             0.08572403341531754
           ]
         },
-        "bufferBytes": 73316,
+        "bufferBytes": 73320,
         "logicalAccessorBytes": 7304,
         "logicalVertexBytes": 5408,
         "logicalIndexBytes": 1896,
@@ -14830,16 +14830,16 @@
         "sceneBounds": {
           "min": [
             -0.217025757,
-            0.628479004,
+            -0.0400009155,
             -0.198204041
           ],
           "max": [
             0.0993919373,
-            0.805023193,
+            0.136535645,
             0.085723877
           ]
         },
-        "bufferBytes": 19648,
+        "bufferBytes": 19688,
         "logicalAccessorBytes": 5088,
         "logicalVertexBytes": 3192,
         "logicalIndexBytes": 1896,
@@ -14895,10 +14895,10 @@
           "triangleCount": 316
         },
         "data": {
-          "json": 2761,
-          "binary": 14392,
+          "json": 2763,
+          "binary": 14432,
           "buffers": {
-            "vertex": 1801,
+            "vertex": 1843,
             "index": 358,
             "animation": 0,
             "transform": 0,
@@ -15103,13 +15103,13 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "61ac7c5c52d85807a07db24109225fe841d5bb43559cd608f4d01e7ab286535f",
-      "sourceSha256": "48df215e1153e38fc84f7ba89a54cbb0e18294526dcc5633347727c673111f19",
-      "outputSha256": "1b588e7687ee314c5d236643d282aa539194109048bea2509a391270a2637f5a",
-      "sourceBytes": 47732,
-      "outputBytes": 41380,
-      "gzipBytes": 38694,
-      "brotliBytes": 38237,
+      "cacheKey": "1e843fa916507995c3b34100b9f6056fce4c14095dbc9e76103a0ba9092b2c6a",
+      "sourceSha256": "3e89bab902e815df31f41138d3c933538f11c9557bde1f3f14834018b6cc0631",
+      "outputSha256": "7dfdce8800d1314838d6e2c16a7c696bb8376b8bca4c9a075220ad313c559285",
+      "sourceBytes": 47712,
+      "outputBytes": 41392,
+      "gzipBytes": 38706,
+      "brotliBytes": 38253,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
@@ -15128,16 +15128,16 @@
         "sceneBounds": {
           "min": [
             -0.5534511208534241,
-            0.040058232843875885,
+            -0.019999999552965164,
             -0.4411870837211609
           ],
           "max": [
             0.5428653359413147,
-            0.5951867699623108,
+            0.5351285338401794,
             0.5384155511856079
           ]
         },
-        "bufferBytes": 45972,
+        "bufferBytes": 45976,
         "logicalAccessorBytes": 5720,
         "logicalVertexBytes": 4544,
         "logicalIndexBytes": 1176,
@@ -15172,16 +15172,16 @@
         "sceneBounds": {
           "min": [
             -0.553436279,
-            0.040058136,
+            -0.0200004578,
             -0.441192627
           ],
           "max": [
             0.542877197,
-            0.595184326,
+            0.535125732,
             0.538421631
           ]
         },
-        "bufferBytes": 42368,
+        "bufferBytes": 42376,
         "logicalAccessorBytes": 3798,
         "logicalVertexBytes": 2622,
         "logicalIndexBytes": 1176,
@@ -15237,10 +15237,10 @@
           "triangleCount": 196
         },
         "data": {
-          "json": 2807,
-          "binary": 38432,
+          "json": 2809,
+          "binary": 38440,
           "buffers": {
-            "vertex": 1663,
+            "vertex": 1671,
             "index": 229,
             "animation": 0,
             "transform": 0,
@@ -21279,15 +21279,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 143971744,
-    "outputBytes": 38044288,
-    "gzipBytes": 36025804,
-    "brotliBytes": 35941492,
+    "sourceBytes": 143971692,
+    "outputBytes": 38044348,
+    "gzipBytes": 36025865,
+    "brotliBytes": 35941563,
     "logicalSourceVertexBytes": 34875912,
     "logicalOutputVertexBytes": 17297490,
     "logicalSourceIndexBytes": 4760088,
     "logicalOutputIndexBytes": 4519524,
-    "savedBytes": 105927456,
-    "reductionRatio": 0.735752
+    "savedBytes": 105927344,
+    "reductionRatio": 0.735751
   }
 }

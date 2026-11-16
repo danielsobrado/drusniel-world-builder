@@ -288,12 +288,18 @@ export function collectDebrisGrassZones(placements = [], footprints = [], out = 
  * Collects fallen log spine segments `{ x0, z0, x1, z1, radius, older }` across the
  * 3x3 chunk neighborhood so middle-layer plants can hug flanks or perch on nurse logs.
  */
-export function collectChunkDebrisLogs(chunkX, chunkZ, debrisPlacementsProvider = null, debrisFootprintsProvider = null) {
+export function collectChunkDebrisLogs(
+  chunkX,
+  chunkZ,
+  debrisPlacementsProvider = null,
+  debrisFootprintsProvider = null,
+  radius = 1,
+) {
   const logs = [];
   if (typeof debrisPlacementsProvider !== 'function') return logs;
   const footprints = typeof debrisFootprintsProvider === 'function' ? debrisFootprintsProvider() : null;
-  for (let dz = -1; dz <= 1; dz += 1) {
-    for (let dx = -1; dx <= 1; dx += 1) {
+  for (let dz = -radius; dz <= radius; dz += 1) {
+    for (let dx = -radius; dx <= radius; dx += 1) {
       const debris = debrisPlacementsProvider(chunkX + dx, chunkZ + dz);
       if (!Array.isArray(debris) || debris.length === 0) continue;
       for (const zone of collectDebrisGrassZones(debris, footprints)) {
