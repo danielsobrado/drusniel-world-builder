@@ -1,8 +1,9 @@
 import { Color } from 'three/webgpu';
 import {
-  Fn, If, cameraPosition, dot, step, clamp, float, fwidth, max, min, mix, normalize, oneMinus, positionWorld, pow, reflect, smoothstep, vec2, vec3,
+  Fn, If, cameraPosition, dFdx, dFdy, dot, int, step, texture, clamp, float, fwidth, max, min, mix, normalize, oneMinus, positionWorld, pow, reflect, smoothstep, vec2, vec3,
 } from 'three/tsl';
-import { worldNoiseField } from './worldNoise.js';
+import { acquireWorldNoise, worldNoiseField } from './worldNoise.js';
+import { acquireIceTextures } from './ice/iceTextures.js';
 import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from './worldNoiseLayout.js';
 import { periodicFbm2, periodicVoronoiCellValue, periodicVoronoiDistances } from './PeriodicNoiseNodes.js';
 
@@ -37,6 +38,15 @@ const GRAZE = color('#d4e8f0');
 // Spaced under a crack's width, so the layers merge into one sheet sinking into the ice.
 const CRACK_LAYER_DEPTHS = Object.freeze([0.04, 0.08, 0.12, 0.16]);
 const CLOUD_DEPTH = 0.6;
+/** Shallow ice over the bed: clear and pale blue, not white (white only as a thin frost rim). */
+const SHALLOW_ICE = color('#8cc3d4');
+/** Air frozen into the ice: white points and the pale veins of the ice set. */
+const BUBBLE = color('#f4fbff');
+const VEIN = color('#cdeefa');
+/** Metres one repeat of the ice set spans on a lake. */
+const ICE_REPEAT = 6;
+/** Depths (metres along the view ray) the inner layers are read at, and how much each shows. */
+const INNER_LAYERS = Object.freeze([[0.15, 1, 0.8], [0.5, 0.7, 0.55], [1.1, 0.45, 0.35]]);
 
 /**
  * Water in the coldest country lies frozen where `cold` is glacier or tundra
@@ -117,6 +127,35 @@ export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDep
     });
     return result;
   })();
+  // Inside the ice, read along the view ray at three depths: the ice set's veins
+  // and milky cloud, and air frozen in as bubbles (the world noise's pits), so
+  // a lake reads metres thick. Frozen pixels only; explicit gradients because the
+  // taps sit in a branch.
+  const iceDetail = acquireIceTextures().detail;
+  const noiseArray = acquireWorldNoise().texture;
+  const iceUv = localXZ.div(ICE_REPEAT);
+  const iceGrad = [dFdx(iceUv), dFdy(iceUv)];
+  const bubbleUv = localXZ.div(WORLD_NOISE_METERS.micro);
+  const bubbleGrad = [dFdx(bubbleUv), dFdy(bubbleUv)];
+  const inner = Fn(() => {
+    // x veins, y milky cloud, z bubbles.
+    const result = vec3(0).toVar();
+    If(frozen.greaterThan(0.001), () => {
+      let veins = float(0);
+      let haze = float(0);
+      INNER_LAYERS.forEach(([depth, scale, weight]) => {
+        const tap = texture(iceDetail, below(depth).div(ICE_REPEAT).mul(scale))
+          .grad(iceGrad[0].mul(scale), iceGrad[1].mul(scale));
+        veins = max(veins, tap.r.mul(weight));
+        haze = haze.add(tap.g.mul(weight / 1.7));
+      });
+      const bubbles = [[0.3, 1], [0.8, 0.6]].reduce((sum, [depth, weight]) => sum.add(
+        smoothstep(0.78, 0.86, texture(noiseArray, below(depth).div(WORLD_NOISE_METERS.micro))
+          .grad(bubbleGrad[0], bubbleGrad[1]).depth(int(WORLD_NOISE_LAYERS.micro)).g).mul(weight)), float(0));
+      result.assign(vec3(veins, haze, bubbles));
+    });
+    return result;
+  })();
   const depthShade = smoothstep(0.4, 4, waterDepth);
   // Cloudy depth: the macro noise read again below the surface, so clear and milky
   // ice slide past each other as the view moves.
@@ -129,12 +168,14 @@ export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDep
   // little milkier, so the sheet reads as plates rather than one painted plane.
   const slabTone = cracks.z.sub(0.5);
   const slabbed = mix(deepBody, CLOUD, max(slabTone, 0).mul(0.35)).mul(slabTone.mul(0.22).add(1));
-  const body = mix(WHITE_ICE, slabbed, smoothstep(0.05, 0.5, waterDepth));
+  // Clear pale ice over the shallows; white only in a thin frost rim at the bank.
+  const body = mix(WHITE_ICE, mix(SHALLOW_ICE, slabbed, smoothstep(0.1, 0.6, waterDepth)), smoothstep(0, 0.025, waterDepth));
   const facing = pow(oneMinus(clamp(view.y, 0, 1)), 3);
   const lit = mix(body, GRAZE, facing.mul(0.55));
   // Snow drifts onto the ice in patches, thicker near the banks, and is caught in the cracks.
   const snow = smoothstep(0.64, 0.74, macro.add(oneMinus(smoothstep(0.1, 1, waterDepth)).mul(0.12)));
-  const cracked = mix(mix(lit, DEEP_CRACK, cracks.y.mul(0.6)), CRACK, cracks.x.mul(0.85));
+  const inside = mix(mix(mix(lit, VEIN, inner.x.mul(0.35)), CLOUD, inner.y.mul(0.3)), BUBBLE, inner.z.clamp(0, 1).mul(0.75));
+  const cracked = mix(mix(inside, DEEP_CRACK, cracks.y.mul(0.6)), CRACK, cracks.x.mul(0.85));
   const ice = mix(cracked, SNOW, snow);
   // The sheet is unlit (MeshBasic), so its highlight is added: a sharp sun glint
   // off clear ice, tilted by the micro relief and the crack facets, and frost
@@ -157,7 +198,8 @@ export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDep
     color(base) { return mix(base, ice, frozen); },
     // Ice is solid to the bank: the thin-water fade only softens its last edge.
     alpha(base, waterlineFade, distanceFade) {
-      return mix(base, clamp(waterlineFade.mul(4), 0, 1).mul(0.98).mul(distanceFade), frozen);
+      // A crisp edge: faded over a metre, the ice drew a white halo round every bank.
+      return mix(base, clamp(waterlineFade.mul(14), 0, 1).mul(0.98).mul(distanceFade), frozen);
     },
     /** Waves, glints and foam: none on ice. */
     open: oneMinus(frozen),
