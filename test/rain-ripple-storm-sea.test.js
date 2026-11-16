@@ -28,5 +28,5 @@ test('the sea exposes storm foam and a shore foam line', () => {
       slopeShading: 0.55, crestLift: 0.12, whitecapThreshold: 0.8, stormWhitecapThreshold: 0.45 },
   });
   assert.equal(typeof sea.whitecap().mul, 'function');
-  assert.equal(typeof sea.shoreLine().mul, 'function');
+  assert.equal(typeof sea.shoreLine(float(1)).mul, 'function');
 });

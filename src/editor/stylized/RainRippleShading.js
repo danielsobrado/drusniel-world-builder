@@ -61,8 +61,10 @@ function rippleLayer({ localMeters, originMeters, time, rain, cellMeters, salt }
   const offset = step(0.5, local).mul(2).sub(1);
   const origin = originMeters.mul(perMetre);
   const width = float(RING_WIDTH * perMetre);
-  // Crests narrower than about a pixel only alias: fade them to nothing.
-  const resolved = oneMinus(smoothstep(width.mul(0.6), width.mul(2.2), fwidth(point.x).add(fwidth(point.y))));
+  // A crest is never drawn thinner than a pixel; it widens and dims instead, and
+  // the rings fade once a pixel spans a fifth of a cell (they would blur to discs).
+  const footprint = fwidth(point.x).add(fwidth(point.y));
+  const resolved = oneMinus(smoothstep(0.08, 0.2, footprint));
   let ring = float(0);
   let slope = vec2(0);
   for (const [ox, oz] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
@@ -78,10 +80,11 @@ function rippleLayer({ localMeters, originMeters, time, rain, cellMeters, salt }
     const distance = length(toPixel);
     // The crest runs out fast and slows, broadening as it spreads.
     const radius = reach.mul(oneMinus(age.oneMinus().mul(age.oneMinus())));
-    const crestWidth = width.mul(age.mul(1.5).add(1));
+    const ownWidth = width.mul(age.mul(1.5).add(1));
+    const crestWidth = max(ownWidth, footprint.mul(0.8));
     const x = distance.sub(radius).div(crestWidth);
     const crest = exp(x.mul(x).negate());
-    const life = age.oneMinus().mul(age.oneMinus()).mul(active);
+    const life = age.oneMinus().mul(age.oneMinus()).mul(active).mul(ownWidth.div(crestWidth).sqrt());
     ring = max(ring, crest.mul(life));
     // d(crest)/d(distance), along the ring's radius, in slope per metre.
     const fall = x.mul(crest).mul(-2).div(crestWidth).mul(life).mul(perMetre * 0.004);

@@ -589,8 +589,8 @@ export function createStylizedWaterMaterial({
       config: { ...DEFAULT_COAST_SWASH, ...water.coast }, clock: time,
       shorelineFadeDepth: water.optics.shorelineFadeDepth });
     const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask)
-      .mul(seaStateUniforms.storm.mul(1.5).add(1)) : float(0);
-    const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine())).mul(waterCoverage);
+      .mul(seaStateUniforms.storm.add(1)) : float(0);
+    const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine(shoreDistance))).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
     whitewater = whitewater ? max(whitewater, whitecap) : whitecap;
   }

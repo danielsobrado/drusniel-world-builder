@@ -142,8 +142,7 @@ export function createSeaSurfaceNodes({
     },
     // How much of this water is sea, 0..1: at sea level and without a current.
     mask: seaMask,
-    // Breakers run longer and whiter in a storm.
-    surfFoam: surf?.foam.mul(seaMask).mul(storm.add(1)),
+    surfFoam: surf?.foam.mul(seaMask),
     shade(color) {
       const shaded = color.mul(float(1).add(lit.mul(config.slopeShading)));
       // A lit crest retains the water's chroma. Blending every carrier peak
@@ -161,16 +160,16 @@ export function createSeaSurfaceNodes({
     },
     /**
      * The standing foam line where the sea meets the beach: a laced band over
-     * the last few decimetres of depth, wider and denser in a storm. The swash
-     * front only draws a thin moving wire; this is what reads from afar.
+     * the first metre or two from the shore, wider and denser in a storm. The
+     * swash front only draws a thin moving wire; this is what reads from afar.
+     * Measured in metres, not depth: a depth band on a flat shelf ran metres
+     * wide even at 0.34 m and read as a milky smear, worse in a storm.
      */
-    shoreLine() {
+    shoreLine(shoreDistance) {
       // Starts just past the waterline fade (0.2 m), so the sheet does not thin it away.
-      // In calm weather it ends by 0.34 m of depth: out to 0.6 m a shallow beach
-      // drew it metres wide, and it read as a milky smear, not a line of foam.
       const band = smoothstep(0.06, 0.16, waterDepth)
-        .mul(oneMinus(smoothstep(0.2, storm.mul(0.76).add(0.34), waterDepth)));
-      return band.mul(smoothstep(0.42, 0.72, foamNoise)).mul(storm.mul(0.35).add(0.45)).mul(seaMask);
+        .mul(oneMinus(smoothstep(0.5, storm.mul(2).add(1.4), shoreDistance)));
+      return band.mul(smoothstep(0.45, 0.75, foamNoise)).mul(storm.mul(0.3).add(0.5)).mul(seaMask);
     },
     /**
      * Light coming through a crest, after grass-test's crest transmission.
