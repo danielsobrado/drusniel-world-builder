@@ -83,6 +83,7 @@
     "verify": "npm run lint && npm run check:natural-ui && npm run validate:assets:production && npm test && npm run build",
     "extract:grass-profiles": "node scripts/extract-grass-blade-profiles.mjs",
     "bake:resident-lods": "node scripts/bake-resident-lods.mjs",
+    "pack:ice": "node scripts/pack-ice-textures.mjs",
     "pack:noise": "node scripts/pack-noise-textures.mjs",
     "pack:deadwood-noise": "node scripts/pack-deadwood-noise.mjs",
     "bake:impostor-mips": "node scripts/bake-impostor-mips.mjs",

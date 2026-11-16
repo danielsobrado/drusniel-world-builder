@@ -1,7 +1,9 @@
 import { Color } from 'three/webgpu';
 import {
-  Fn, If, cameraPosition, step, clamp, float, fwidth, max, min, mix, normalize, oneMinus, positionWorld, pow, smoothstep, vec2, vec3,
+  Fn, If, cameraPosition, dot, step, clamp, float, fwidth, max, min, mix, normalize, oneMinus, positionWorld, pow, reflect, smoothstep, vec2, vec3,
 } from 'three/tsl';
+import { worldNoiseField } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from './worldNoiseLayout.js';
 import { periodicFbm2, periodicVoronoiCellValue, periodicVoronoiDistances } from './PeriodicNoiseNodes.js';
 
 /** Pattern frames the ice reads; merged into the water's pattern origins. */
@@ -53,8 +55,9 @@ const CLOUD_DEPTH = 0.6;
  * @param {object} options.waterDepth float node, metres
  * @param {object} options.currentStrength float node, 0..1
  * @param {object} options.shoreDistance float node, metres from the bank
+ * @param {object} [options.sunDirection] the live sun, for the ice's glint and sparkle
  */
-export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDepth, currentStrength, shoreDistance }) {
+export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDepth, currentStrength, shoreDistance, sunDirection = null }) {
   if (!appearance || !patterns) return null;
   const macro = periodicFbm2(patterns.latticePoint('iceMacro', localXZ));
   // The edge breaks into floes: each ~9 m Voronoi cell freezes out to its own
@@ -133,7 +136,23 @@ export function createFrozenWaterNodes({ appearance, patterns, localXZ, waterDep
   const snow = smoothstep(0.64, 0.74, macro.add(oneMinus(smoothstep(0.1, 1, waterDepth)).mul(0.12)));
   const cracked = mix(mix(lit, DEEP_CRACK, cracks.y.mul(0.6)), CRACK, cracks.x.mul(0.85));
   const ice = mix(cracked, SNOW, snow);
+  // The sheet is unlit (MeshBasic), so its highlight is added: a sharp sun glint
+  // off clear ice, tilted by the micro relief and the crack facets, and frost
+  // crystals in the snow and white ice that catch the sun as points. Chunk-local
+  // metres: 128 m chunks centred on multiples of 64 are whole micro repeats.
+  const micro = worldNoiseField(WORLD_NOISE_LAYERS.micro)(localXZ.div(WORLD_NOISE_METERS.micro));
+  const tilt = micro.rg.sub(0.5).mul(0.22).add(vec2(cracks.x, cracks.y).mul(0.12));
+  const surfaceNormal = normalize(vec3(tilt.x, 1, tilt.y));
+  const sparkleGlint = (sun) => {
+    const mirror = max(dot(reflect(view.negate(), surfaceNormal), normalize(sun)), 0);
+    const clearIce = oneMinus(snow).mul(oneMinus(smoothstep(0.05, 0.5, waterDepth)).oneMinus());
+    const glint = pow(mirror, 160).mul(2.2).mul(clearIce);
+    const crystals = smoothstep(0.86, 0.92, micro.r).mul(pow(mirror, 18)).mul(max(snow, oneMinus(clearIce))).mul(2.5);
+    return glint.add(crystals).mul(frozen);
+  };
   return {
+    /** Sun glint and frost sparkle, to be multiplied by the sun's colour; 0 without a sun. */
+    glint: sunDirection ? sparkleGlint(sunDirection) : float(0),
     frozen,
     color(base) { return mix(base, ice, frozen); },
     // Ice is solid to the bank: the thin-water fade only softens its last edge.

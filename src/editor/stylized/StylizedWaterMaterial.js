@@ -635,7 +635,7 @@ export function createStylizedWaterMaterial({
   // the sheet down onto the bed exactly at the waterline, so the terrain
   // occludes the rest per pixel and the bank follows the contour, not the grid.
   // Lakes in glacier and tundra country lie frozen: ice over the body, no waves.
-  const ice = createFrozenWaterNodes({ appearance, patterns: surfacePatterns, localXZ, waterDepth, currentStrength, shoreDistance });
+  const ice = createFrozenWaterNodes({ appearance, patterns: surfacePatterns, localXZ, waterDepth, currentStrength, shoreDistance, sunDirection });
   if (ice) {
     color = ice.color(color);
     alpha = ice.alpha(alpha, waterlineFade.mul(waterCoverage), fade);
@@ -674,6 +674,7 @@ export function createStylizedWaterMaterial({
   material.positionNode = positionLocal.add(vec3(0, 0, surfaceHeight));
   // Unlit, so it dims with the sky's light itself.
   let lit = color.mul(skyLightUniforms.brightness);
+  if (ice) lit = lit.add(skyLightUniforms.sunColor.mul(ice.glint).mul(reflectionVisibility));
   // The sun's glint is its own light, not the sky's: added after the dimming.
   if (river) {
     lit = lit.add(river.glint.mul(skyLightUniforms.sunColor)

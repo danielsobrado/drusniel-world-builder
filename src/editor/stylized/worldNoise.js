@@ -22,7 +22,7 @@ function createTexture(pixels) {
   return texture;
 }
 
-async function decodeStrip(url) {
+export async function decodeImagePixels(url) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`World noise ${url}: ${response.status}`);
   const bitmap = await createImageBitmap(await response.blob(), { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
@@ -60,7 +60,7 @@ export function acquireWorldNoise(baseUrl = '') {
   };
   // Node (tests, bakes) has no bitmap decoder: the neutral texture is the result.
   if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return shared;
-  const load = () => decodeStrip(`${baseUrl}${URL_PATH}`).then((data) => {
+  const load = () => decodeImagePixels(`${baseUrl}${URL_PATH}`).then((data) => {
     pixels.set(data.subarray(0, pixels.length));
     texture.needsUpdate = true;
     loaded = true;
