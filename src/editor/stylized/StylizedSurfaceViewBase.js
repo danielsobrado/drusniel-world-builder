@@ -28,6 +28,7 @@ import { StylizedChunkRevisionTracker } from './StylizedChunkRevisionTracker.js'
 import { StylizedFlowerView } from './StylizedFlowerView.js';
 import { StylizedGroundDetailView } from './StylizedGroundDetailView.js';
 import { createForestDebrisPrototypes } from './forest/forestDebrisPrototypes.js';
+import { createBiomeUnderstoryPrototypes } from './flora/biomeUnderstoryPrototypes.js';
 import { collectDebrisGrassZones } from './UnderstoryClearance.js';
 import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
@@ -296,6 +297,13 @@ export class StylizedSurfaceView {
       baseUrl,
       config,
     }));
+    this.groundDetailView?.appendProceduralPrototypes(createBiomeUnderstoryPrototypes(config, {
+      soilColor: config.trees?.forestFloor?.litterColor,
+      floorColor: config.trees?.forestFloor?.groundCoreColor,
+      barkGrade: config.trees?.barkGrade,
+      baseUrl,
+      config,
+    }));
     // Every per-chunk detail layer, authored or procedural, is rebuilt and disposed
     // the same way; the array is what keeps a new layer from having to be added to
     // three separate places.
@@ -507,6 +515,7 @@ export class StylizedSurfaceView {
         this.flowerView?.ready,
       ].filter(Boolean));
       this.forestDebrisView?.syncScannedBark?.(this.treeView?.barkScans);
+      this.groundDetailView?.syncScannedBark?.(this.treeView?.barkScans);
       return null;
     } catch (error) {
       console.warn('Some stylized assets failed to load; remaining layers stay active.', error);

@@ -8,6 +8,13 @@ import { doorHide, dryingRack, hallInterior, sled, woodShed, woodpile } from './
 import { airlock, cutIceStore, fitIceStore, storeFrame } from './frostgardIceStore.js';
 import { COLD_POST } from './frostgardStoreKit.js';
 import { barrel, crate, lantern, timberSet } from './kits.js';
+import {
+  buildCutIceBlockHoist,
+  buildMeadHallTrophyStand,
+  buildSaltBrineCaskFrame,
+  buildWatchmanBraziersGate,
+  buildWolfTotemPalisadePost,
+} from './frostgardHoldExtraProps.js';
 
 /**
  * A Frostgard hold at the foot of a glacier.
@@ -231,6 +238,12 @@ export function generate(b, params) {
   barrel(b, stand(12.2, 1.6));
   crate(b, stand(11.4, 0.6), 0.8, 0.4);
   b.nav.block(stand(11.8, 1.1), 0.9, 2);
+
+  buildWolfTotemPalisadePost(b, stand(-5.2, gateZ + 3.2), 0.2);
+  buildWatchmanBraziersGate(b, stand(5.2, gateZ + 3.2), -0.2);
+  buildCutIceBlockHoist(b, stand(8.8, 2.2), 0.6);
+  buildSaltBrineCaskFrame(b, stand(11.8, -5.2), -0.3);
+  buildMeadHallTrophyStand(b, P(hallAt.x + 2.4, floor, hallAt.z - 1.5), -Math.PI / 2);
   // Boulders the bluff has shed, half buried.
   for (const [x, z, size] of [[-13, knoll.front + 3, 1.5], [14, knoll.front + 2.4, 1.9], [24, 3, 1.3], [-30, -2, 1.7], [-34, gateZ + 9, 1.4], [30, gateZ + 12, 1.8]]) {
     const at = stand(x, z);

@@ -1,0 +1,101 @@
+import {
+  angularRock,
+  beam,
+  box,
+  extrudedProfile,
+  hewnBeam,
+  panel,
+  rod,
+  roughTimber,
+  stoneBox,
+} from '../gen/propKit.js';
+
+import { atFrame } from './propFrame.js';
+
+const P = (x, y, z) => ({ x, y, z });
+
+/** 1. Heavy timbered ore loading hopper chute over spilled ore gravel & gate lever. */
+export function buildOreHopperChute(b, at, yaw = 0) {
+  const L = atFrame(at, yaw);
+  for (const sx of [-0.65, 0.65]) {
+    for (const sz of [-0.55, 0.55]) {
+      b.prop('timber', roughTimber(L(sx, 0, sz), L(sx, 1.9, sz), 0.16, 0.16, { taper: 0.04 }), 0x7b5e3e);
+    }
+    b.prop('timber', hewnBeam(L(sx, 0.9, -0.55), L(sx, 1.85, 0.55), 0.1, 0.1), 0x6b5034);
+  }
+  b.prop('timber', extrudedProfile([[-0.7, 0], [0.7, 0], [0.42, -0.65], [-0.42, -0.65]], 1.15, {
+    yaw,
+    rx: Math.PI / 2,
+    at: L(0, 1.65, 0),
+  }), 0x856643);
+  for (const sy of [1.25, 1.65]) {
+    b.prop('iron', stoneBox(1.48, 0.07, 1.24, L(0, sy, 0), { yaw, bevel: 0.01 }), 0x2d3036);
+  }
+  b.prop('iron', hewnBeam(L(0.42, 1.1, 0), L(0.86, 1.55, 0), 0.05, 0.05), 0x3b3e45);
+  b.prop('iron', stoneBox(0.84, 0.06, 0.55, L(0, 1.0, 0.48), { yaw, bevel: 0.01 }), 0x34373d);
+  b.prop('ore', angularRock(0.42, 0.24, 0.38, L(0, 0.18, 0.42), { seed: 41, yaw }), 0xc8a468);
+  b.nav.block(at, 0.95, 2.2);
+}
+
+/** 2. Underground dewatering rocker-pump rig with iron cylinder & wooden trough. */
+export function buildDewateringPumpRig(b, at, yaw = 0) {
+  const L = atFrame(at, yaw);
+  for (const sz of [-0.36, 0.36]) {
+    b.prop('timber', roughTimber(L(-0.55, 0, sz), L(0, 1.55, sz * 0.4), 0.13, 0.11), 0x785b3c);
+    b.prop('timber', roughTimber(L(0.55, 0, sz), L(0, 1.55, sz * 0.4), 0.13, 0.11), 0x785b3c);
+  }
+  b.prop('timber', rod(L(0, 1.5, -0.35), L(0, 1.5, 0.35), 0.075, 0.075, 8), 0x5c442c);
+  b.prop('timber', hewnBeam(L(-1.1, 1.62, 0), L(1.05, 1.48, 0), 0.12, 0.16), 0x876745);
+  b.prop('iron', rod(L(-0.78, 0.12, 0), L(-0.78, 1.56, 0), 0.045, 0.045, 7), 0x383b42);
+  b.prop('iron', rod(L(-0.78, 0, 0), L(-0.78, 0.85, 0), 0.18, 0.16, 10), 0x2e3138);
+  b.prop('timber', box(1.25, 0.22, 0.42, L(0.05, 0.28, 0.18), yaw), 0x6f5336);
+  b.prop('iron', rod(L(0.85, 1.48, 0), L(0.95, 0.45, 0), 0.03, 0.03, 6), 0x454952);
+  b.nav.block(at, 1.0, 2.0);
+}
+
+/** 3. Padlocked timber powder magazine locker under lean-to slate shed & stacked kegs. */
+export function buildPowderMagazineLocker(b, at, yaw = 0) {
+  const L = atFrame(at, yaw);
+  b.prop('timber', stoneBox(1.5, 1.25, 0.82, L(0, 0.62, 0), { yaw, bevel: 0.03 }), 0x6b4e34);
+  for (const dy of [0.28, 0.62, 0.96]) {
+    b.prop('iron', stoneBox(1.54, 0.06, 0.86, L(0, dy, 0), { yaw, bevel: 0.01 }), 0x2a2d33);
+  }
+  b.prop('timber', panel(L(-0.88, 1.38, -0.52), L(-0.88, 1.32, 0.54), P(1, 0, 0), 1.85, 0.09), 0x584029);
+  b.prop('iron', stoneBox(0.18, 0.24, 0.12, L(0, 0.64, 0.44), { yaw, bevel: 0.015 }), 0xb68d46);
+  b.prop('cloth', panel(L(0.68, 1.22, 0.42), L(0.68, 0.72, 0.42), P(1, 0, 0), 0.24, 0.02), 0xb83828);
+  b.prop('timber', rod(L(-0.48, 0, 0.65), L(-0.48, 0.56, 0.65), 0.2, 0.19, 9), 0x80603e);
+  b.nav.block(at, 0.95, 1.8);
+}
+
+/** 4. Flush spiked timber-and-iron mine rail turntable & counterweighted throw switch. */
+export function buildRailTurntableSwitch(b, at, yaw = 0) {
+  const L = atFrame(at, yaw);
+  b.prop('timber', rod(L(0, 0.02, 0), L(0, 0.06, 0), 1.08, 1.08, 12), 0x5b422a);
+  b.prop('iron', rod(L(0, 0.06, 0), L(0, 0.11, 0), 0.94, 0.94, 14), 0x353840);
+  for (const dx of [-0.34, 0.34]) {
+    b.prop('iron', beam(L(dx, 0.13, -0.92), L(dx, 0.13, 0.92), 0.06, 0.06), 0x4b505c);
+    b.prop('iron', beam(L(-0.92, 0.13, dx), L(0.92, 0.13, dx), 0.06, 0.06), 0x4b505c);
+  }
+  b.prop('iron', box(0.24, 0.22, 0.24, L(1.05, 0.11, 0.4), yaw), 0x2b2e34);
+  b.prop('iron', beam(L(1.05, 0.16, 0.4), L(1.32, 0.92, 0.4), 0.045, 0.045), 0x4a4e58);
+  b.prop('iron', rod(L(1.32, 0.88, 0.4), L(1.32, 1.0, 0.4), 0.1, 0.1, 8), 0x9b3628);
+}
+
+/** 5. Four-wheeled assaying furnace brazier trolley with glowing coke crucible & tongs. */
+export function buildAssayingBrazierCart(b, at, yaw = 0) {
+  const L = atFrame(at, yaw);
+  b.prop('iron', stoneBox(1.18, 0.14, 0.78, L(0, 0.34, 0), { yaw, bevel: 0.02 }), 0x30333a);
+  for (const wx of [-0.42, 0.42]) {
+    for (const wz of [-0.42, 0.42]) {
+      b.prop('iron', rod(L(wx, 0.18, wz - 0.05), L(wx, 0.18, wz + 0.05), 0.18, 0.18, 10), 0x454952);
+    }
+  }
+  b.prop('rock_debris', stoneBox(0.68, 0.48, 0.62, L(-0.14, 0.64, 0), { yaw, bevel: 0.04 }), 0x625a54);
+  b.prop('iron', rod(L(-0.14, 0.88, 0), L(-0.14, 1.02, 0), 0.24, 0.28, 10), 0x2e3138);
+  b.prop('glow', box(0.28, 0.14, 0.28, L(-0.14, 1.04, 0), yaw), '#ff7828', 2.8);
+  b.light(L(-0.14, 1.24, 0), '#ff8836', 3.4, 13, { halo: 0.85, flicker: 0.18 });
+  b.prop('iron', beam(L(0.45, 0.42, -0.32), L(0.84, 0.86, -0.32), 0.04, 0.04), 0x3d4048);
+  b.prop('iron', beam(L(0.45, 0.42, 0.32), L(0.84, 0.86, 0.32), 0.04, 0.04), 0x3d4048);
+  b.prop('timber', rod(L(0.84, 0.86, -0.34), L(0.84, 0.86, 0.34), 0.04, 0.04, 7), 0x7c5c3b);
+  b.nav.block(at, 0.8, 1.4);
+}

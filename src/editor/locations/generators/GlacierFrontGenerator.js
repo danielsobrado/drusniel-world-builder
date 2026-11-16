@@ -8,6 +8,13 @@ import { dryingRack, sled, woodpile } from './frostgardDressing.js';
 import { hangCornice, openRidge, raiseRidge, ridgeLayout, splitLip } from './glacierFrontIce.js';
 import { driftAround, leeBank, scourAt } from './glacierFrontSnow.js';
 import { fallFringe, frozenFall, icicleCluster, icicleCurtain, scatter } from './glacierKit.js';
+import {
+  buildFrostBannerStandards,
+  buildGlacialWayfinderCairn,
+  buildIceSawyerTrestle,
+  buildMoraineErraticAnchorPost,
+  buildSeracFinMonolith,
+} from './glacierFrontExtraProps.js';
 
 /**
  * The front of a Frostgard glacier, under the sky.
@@ -270,6 +277,12 @@ export function generate(b, params) {
   woodpile(b, stand(way.x + 3.2, way.z - 1.5), { length: 1.4, rows: 3, count: 5 });
   dryingRack(b, stand(way.x + 1.5, way.z + 3.5), { width: 3.4, hides: true });
   for (const [x, z] of way.torches) torch(b, stand(x, z), { intensity: 3, range: 11 });
+
+  buildSeracFinMonolith(b, stand(-16, arch.z + 10), 0.4);
+  buildGlacialWayfinderCairn(b, stand(way.x - 3.6, way.z + 2.5), -0.4);
+  buildIceSawyerTrestle(b, stand(way.x - 2.8, way.z - 3.2), 0.7);
+  buildFrostBannerStandards(b, stand(way.x + 5.2, way.z + 2.2), -0.3);
+  buildMoraineErraticAnchorPost(b, stand(14, moraine.z - 16), 0.2);
 
   const entry = stand(0, moraine.z - 13);
   b.spawn('entry', entry, 0);

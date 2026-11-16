@@ -9,6 +9,13 @@ import {
   resolveMineLightingSections,
 } from './mineLightingLayout.js';
 import { buildOreSack, buildShovel } from './mineCampAndDressing.js';
+import {
+  buildAssayingBrazierCart,
+  buildDewateringPumpRig,
+  buildOreHopperChute,
+  buildPowderMagazineLocker,
+  buildRailTurntableSwitch,
+} from './mineExtraProps.js';
 import { buildMiningTool } from './mineProps.js';
 import {
   MINE_WORKINGS_SPOTS,
@@ -250,6 +257,12 @@ export function generate(b, params) {
   buildStopeWorkings(b, stope, westShape, params.timber, lightingSections);
   buildCollapsedHeading(b, eastTurn, fall, eastShape, params.timber, lightingSections);
   buildFloodedLevel(b, inclineTop, flooded, waterY, inclineShape, params.timber, lightingSections);
+
+  buildRailTurntableSwitch(b, P(-0.9, -0.95, -39.5), 0);
+  buildOreHopperChute(b, P(4.2, -1, -46.8), -0.6);
+  buildPowderMagazineLocker(b, P(-6.2, -1, -56.5), 0.7);
+  buildDewateringPumpRig(b, P(2.2, -9, -82.5), 0.4);
+  buildAssayingBrazierCart(b, P(-32.2, -3, -57.2), -0.8);
 
   // Selective physical rock talus tucked along wall-floor skirts, stope bases, and collapse fringe.
   scatterWallBaseDebris(b, [

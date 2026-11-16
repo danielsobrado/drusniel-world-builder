@@ -26,7 +26,9 @@ test('a berg needs open water around it, not just under it', () => {
   assert.equal(icebergHasRoom(berg, () => false), false);
 });
 
-test('every berg shape stands proud of sea level with a shorter keel', () => {
+test('every berg shape stands proud of sea level with high sculpted detail', () => {
+  assert.ok(ICEBERG_KINDS >= 8, `expected >= 8 iceberg kinds, got ${ICEBERG_KINDS}`);
+  const signatures = new Set();
   for (let kind = 0; kind < ICEBERG_KINDS; kind += 1) {
     const geometry = createIcebergGeometry(kind);
     geometry.computeBoundingBox();
@@ -34,5 +36,12 @@ test('every berg shape stands proud of sea level with a shorter keel', () => {
     assert.ok(max.y > 0.3, `kind ${kind} rises above the water`);
     assert.ok(min.y < 0 && min.y > -0.8, `kind ${kind} has a stubby keel`);
     assert.ok(Number.isFinite(geometry.boundingSphere.radius));
+    const triCount = (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
+    assert.ok(triCount >= 1200, `kind ${kind} should be detailed (>=1200 tris), got ${triCount}`);
+    const normals = geometry.attributes.normal;
+    assert.ok(normals && normals.count === geometry.attributes.position.count);
+    signatures.add(`${Math.round(max.y * 100)}:${triCount}`);
+    geometry.dispose();
   }
+  assert.equal(signatures.size, ICEBERG_KINDS, 'each glacier kind should have a distinct silhouette');
 });

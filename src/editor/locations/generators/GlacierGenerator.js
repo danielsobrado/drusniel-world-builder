@@ -6,6 +6,13 @@ import { DARK, LOG, torch } from './frostgardKit.js';
 import { curtain, hollow, meltTube, pillar, plug, walkClearance } from './glacierCave.js';
 import { fallFringe, frozenFall, icicleCluster, scatter } from './glacierKit.js';
 import { cairnLamp, plankBridge, refugeCamp, sealedVault } from './glacierWorks.js';
+import {
+  buildBoneMooringAnchor,
+  buildFrozenMeltMushroomColumn,
+  buildHoarfrostRoseCluster,
+  buildOrganPipeIceFormation,
+  buildRunicIceLanternShrine,
+} from './glacierExtraProps.js';
 
 /**
  * A natural ice cave under a Frostgard glacier, and the refuge inside it.
@@ -276,6 +283,12 @@ export function generate(b, params) {
 
   refugeCamp(b, REFUGE, params.longhall);
   sealedVault(b, VAULT);
+
+  buildOrganPipeIceFormation(b, across(-13.5, 5.8), 1.05);
+  buildHoarfrostRoseCluster(b, across(13.2, -5.8), 1.0);
+  buildFrozenMeltMushroomColumn(b, across(-11.2, -6.2), 0.95);
+  buildBoneMooringAnchor(b, across(3.8, 5.2), 0.5);
+  buildRunicIceLanternShrine(b, P(REFUGE.x - 7.5, REFUGE.y, REFUGE.z + 4.5), 0.3);
 
   // Icicles wherever the roof hangs low enough to drip; over the refuge's warmth they do.
   for (let index = 0; index < params.icicles; index += 1) {

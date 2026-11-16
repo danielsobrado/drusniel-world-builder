@@ -3,7 +3,7 @@
  * so the same world always grows the same bergs and streaming cannot change them.
  */
 export const ICEBERG_CELL_METERS = 320;
-export const ICEBERG_KINDS = 3;
+export const ICEBERG_KINDS = 8;
 const SHARE_OF_CELLS = 0.45;
 const MIN_SCALE = 26;
 const MAX_SCALE = 110;

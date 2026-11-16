@@ -75,6 +75,65 @@ function yardFence(occupancy, out, building, size) {
  * winter wood, curing racks, clan banners, street fire and a tree or rock behind, so a town reads
  * as lived in and set in its land (the hill-fort reference) instead of a lowland street.
  */
+const CULTURE_EXTRA_PROPS = Object.freeze({
+  Tudor: [
+    { kind: 'tudor_market_pavilion', lx: beside => beside(1, 2.3), lz: 0.2, w: 2.3, d: 1.7, turn: 0 },
+    { kind: 'tudor_dovecote_post', lx: beside => beside(-1, 1.2), lz: -1.4, w: 1.2, d: 1.2, turn: 0 },
+    { kind: 'tudor_flower_trellis_arch', lx: beside => beside(1, 2.3), lz: -1.8, w: 2.3, d: 0.9, turn: Math.PI / 2 },
+    { kind: 'tudor_watch_lantern_gallows', lx: (beside, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.0, d: 0.8, turn: 0 },
+    { kind: 'tudor_guild_display_cart', lx: beside => beside(-1, 2.6), lz: 0.6, w: 2.6, d: 1.4, turn: 0.1 },
+  ],
+  Nordic: [
+    { kind: 'nordic_dragon_totem_post', lx: (_b, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.0, d: 1.0, turn: 0 },
+    { kind: 'nordic_brewery_cask_rack', lx: beside => beside(1, 1.7), lz: -0.5, w: 1.7, d: 1.2, turn: 0 },
+    { kind: 'nordic_mead_hall_brazier', lx: (_b, w) => w / 2 - 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.4, d: 1.4, turn: 0 },
+    { kind: 'nordic_furs_tanning_frame', lx: beside => beside(-1, 1.8), lz: -0.6, w: 1.8, d: 1.0, turn: 0 },
+    { kind: 'nordic_skiff_drydock_hull', lx: beside => beside(-1, 3.2), lz: -2.0, w: 3.2, d: 1.5, turn: 0.2 },
+  ],
+  Med: [
+    { kind: 'med_amphora_terrace_stand', lx: beside => beside(1, 2.0), lz: 0.2, w: 2.0, d: 1.1, turn: 0 },
+    { kind: 'med_cypress_urn_planter', lx: (_b, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.0, d: 1.0, turn: 0 },
+    { kind: 'med_sun_arbor_pergola', lx: beside => beside(-1, 2.3), lz: -0.4, w: 2.3, d: 1.7, turn: 0 },
+    { kind: 'med_marble_lion_fountain', lx: beside => beside(1, 2.0), lz: -1.6, w: 2.0, d: 2.0, turn: 0 },
+    { kind: 'med_merchant_scale_counter', lx: beside => beside(-1, 2.1), lz: 1.0, w: 2.1, d: 1.2, turn: 0 },
+  ],
+  Goblin: [
+    { kind: 'goblin_scrap_still_boiler', lx: beside => beside(1, 1.4), lz: -1.2, w: 1.4, d: 1.4, turn: 0 },
+    { kind: 'goblin_cage_spike_gibbet', lx: (_b, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.1, w: 1.4, d: 1.3, turn: 0 },
+    { kind: 'goblin_salvage_trophy_totem', lx: beside => beside(-1, 1.2), lz: 0.8, w: 1.2, d: 1.0, turn: 0 },
+    { kind: 'goblin_bog_mushroom_coop', lx: beside => beside(1, 1.6), lz: 1.1, w: 1.6, d: 1.3, turn: 0 },
+    { kind: 'goblin_tinker_scrap_cart', lx: beside => beside(-1, 2.4), lz: -1.4, w: 2.4, d: 1.2, turn: 0.1 },
+  ],
+  Orc: [
+    { kind: 'orc_warchief_drum_pavilion', lx: beside => beside(1, 1.9), lz: 0.9, w: 1.9, d: 1.5, turn: 0 },
+    { kind: 'orc_bone_spike_barricade', lx: beside => beside(-1, 2.2), lz: -1.4, w: 2.2, d: 1.8, turn: 0 },
+    { kind: 'orc_forge_quench_anvil_rig', lx: beside => beside(1, 2.4), lz: -1.6, w: 2.4, d: 1.1, turn: 0 },
+    { kind: 'orc_hide_rack_trophy_frame', lx: beside => beside(-1, 2.1), lz: 0.8, w: 2.1, d: 0.7, turn: 0 },
+    { kind: 'orc_charred_idol_pillar', lx: (_b, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.1, w: 1.4, d: 1.4, turn: 0 },
+  ],
+  Frostgard: [
+    { kind: 'frostgard_ice_saw_rack', lx: beside => beside(1, 1.9), lz: 0.8, w: 1.9, d: 1.1, turn: 0 },
+    { kind: 'frostgard_hearth_kettle_shelter', lx: beside => beside(-1, 2.1), lz: 0.6, w: 2.1, d: 1.4, turn: 0 },
+    { kind: 'frostgard_runic_lantern_post', lx: (_b, w) => w / 2 - 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.0, d: 0.8, turn: 0 },
+    { kind: 'frostgard_wolf_pelt_sled', lx: beside => beside(1, 2.3), lz: -1.5, w: 2.3, d: 1.1, turn: 0.1 },
+    { kind: 'frostgard_rime_shrine_cairn', lx: beside => beside(-1, 1.5), lz: -1.6, w: 1.5, d: 1.5, turn: 0 },
+  ],
+  Stonehold: [
+    { kind: 'dwarf_steam_exhaust_monument', lx: beside => beside(1, 1.5), lz: -1.4, w: 1.5, d: 1.5, turn: 0 },
+    { kind: 'dwarf_rune_forge_pedestal', lx: beside => beside(-1, 1.6), lz: -0.9, w: 1.6, d: 1.4, turn: 0 },
+    { kind: 'dwarf_aqueduct_spout', lx: beside => beside(1, 1.7), lz: 1.0, w: 1.7, d: 1.5, turn: 0 },
+    { kind: 'dwarf_ore_classifier_chute', lx: beside => beside(-1, 1.6), lz: 1.2, w: 1.6, d: 1.5, turn: 0 },
+    { kind: 'dwarf_ancestral_stele', lx: (_b, w) => w / 2 - 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.6, d: 1.1, turn: 0 },
+  ],
+  umbrakor: [
+    { kind: 'umbrakor_spider_silk_obelisk', lx: (_b, w) => w / 2 - 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.2, d: 1.2, turn: 0 },
+    { kind: 'umbrakor_bioluminescent_cap_shrine', lx: beside => beside(1, 1.7), lz: 0.8, w: 1.7, d: 1.7, turn: 0 },
+    { kind: 'umbrakor_wrought_censer_gallows', lx: (_b, w) => -w / 2 + 0.4, lz: (_b, d) => d / 2 + 1.0, w: 1.0, d: 0.8, turn: 0 },
+    { kind: 'umbrakor_night_market_canopy', lx: beside => beside(-1, 2.0), lz: 0.4, w: 2.0, d: 1.4, turn: 0 },
+    { kind: 'umbrakor_abyssal_waystone', lx: beside => beside(1, 1.5), lz: -1.4, w: 1.5, d: 1.5, turn: 0 },
+  ],
+});
+
 const REGIONAL_DRESSING = Object.freeze({
   Orc: (beside, w, d, roll) => [
     { kind: 'woodpile', lx: beside(1, 1.2), lz: -0.4, w: 1.3, d: 1.2, turn: Math.PI / 2 },
@@ -187,6 +246,16 @@ export function* planDressingJob({ plan, seed, placed, family = null }) {
       );
     } else if (['warehouse', 'shop'].includes(building.kind)) {
       candidates.push({ kind: 'cargo', lx: beside(1, 1.7), lz: -0.2, w: 1.7, d: 1.4, turn: 0.2 });
+    }
+    const activeFamily = buildingFamily || building.kitFamily || family || 'Tudor';
+    const cultureKey = loreRealm === 'umbrakor'
+      ? 'umbrakor'
+      : (isGoblin ? 'Goblin' : (CULTURE_EXTRA_PROPS[activeFamily] ? activeFamily : 'Tudor'));
+    const extras = CULTURE_EXTRA_PROPS[cultureKey] ?? [];
+    for (const item of extras) {
+      const lx = typeof item.lx === 'function' ? item.lx(beside, w) : item.lx;
+      const lz = typeof item.lz === 'function' ? item.lz(beside, d) : item.lz;
+      candidates.push({ kind: item.kind, lx, lz, w: item.w, d: item.d, turn: item.turn });
     }
     for (const [salt, candidate] of candidates.entries()) {
       if (roll(10 + salt) < 0.62) tryProp(occupancy, out, building, candidate);

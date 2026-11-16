@@ -1,17 +1,34 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  createArchedRootBridgeGeometry,
   createFallenBranchGeometry,
   createFallenLogGeometry,
   createFungiClusterGeometry,
+  createHollowNurseTrunkGeometry,
   createLeafLitterGeometry,
   createMossMoundGeometry,
+  createRootWadGeometry,
+  createShelfFungusLogGeometry,
+  createSnappedSnagGeometry,
+  createSplitTimberLogGeometry,
   createStumpGeometry,
 } from '../src/editor/stylized/forest/forestDebrisGeometry.js';
 import { createForestDebrisPrototypes } from '../src/editor/stylized/forest/forestDebrisPrototypes.js';
 
 const SHAPES = {
-  createStumpGeometry, createFallenLogGeometry, createFallenBranchGeometry, createLeafLitterGeometry, createMossMoundGeometry, createFungiClusterGeometry,
+  createStumpGeometry,
+  createFallenLogGeometry,
+  createFallenBranchGeometry,
+  createLeafLitterGeometry,
+  createMossMoundGeometry,
+  createFungiClusterGeometry,
+  createSnappedSnagGeometry,
+  createRootWadGeometry,
+  createHollowNurseTrunkGeometry,
+  createArchedRootBridgeGeometry,
+  createSplitTimberLogGeometry,
+  createShelfFungusLogGeometry,
 };
 
 for (const [name, create] of Object.entries(SHAPES)) {

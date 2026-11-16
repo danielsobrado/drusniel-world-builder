@@ -4,6 +4,13 @@ import { hall, shaft } from '../gen/shapes.js';
 import { buildForgeheartInterior } from './forgeheartInterior.js';
 import { brazier, bridge, crate, pillar, stairs } from './kits.js';
 import { buildEntranceHall, buildFloorInlay, buildHeroGateway, buildVaultedCeiling, buildWallBay } from './stoneholdArchitecture.js';
+import {
+  buildAncestorReliefStele,
+  buildDropHammerForgePress,
+  buildGearedCapstanWinch,
+  buildIngotCraneTrolley,
+  buildRunicBrazierPedestal,
+} from './stoneholdExtraProps.js';
 
 /**
  * A Stonehold mountain hold: everything is cut, squared and carried on
@@ -253,6 +260,13 @@ export function generate(b, params) {
   // --- Forgeheart Interior & Ore Lift -------------------------------------
   buildHeroGateway(b, farZ, height);
   buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmTint: WARM });
+  buildAncestorReliefStele(b, P(-6.6, 0, -10.5), Math.PI / 2);
+  buildAncestorReliefStele(b, P(6.6, 0, -10.5), -Math.PI / 2);
+  buildRunicBrazierPedestal(b, P(-7.8, 0, avenueZ + 12), 0);
+  buildRunicBrazierPedestal(b, P(7.8, 0, avenueZ + 12), 0);
+  buildGearedCapstanWinch(b, P(-11.5, 0, forge.z + 5.5), 0.4);
+  buildDropHammerForgePress(b, P(11.5, 0, forge.z + 5.5), -0.4);
+  buildIngotCraneTrolley(b, P(14.5, 0, forge.z - 2.2), 0.8);
 
   b.spawn('entry', P(0, 0, 0), 0);
   b.exit('gate', P(0, 0, 2.2), { radius: 2.6, label: 'Leave by the mountain gate' });

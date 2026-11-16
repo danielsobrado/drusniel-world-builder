@@ -390,6 +390,7 @@ export class StylizedGroundDetailView {
       }
       this.prototypeBiomeRules.push({
         tileIds: definition.tileIds ?? null,
+        paletteTileId: definition.paletteTileId ?? definition.tileIds?.[0],
         weight: definition.weight ?? 1,
         character: definition.character ?? null,
         characterStrength: definition.characterStrength,
@@ -698,11 +699,11 @@ export class StylizedGroundDetailView {
       state = { key, builder: createStableChunkManifestBuilder(options) };
       this.pendingManifests.set(cacheKey, state);
     }
-    const placements = state.builder.step({ shouldYield });
-    if (placements === null) return null;
-    if (this.layerName === 'groundDetail') {
-      this.appendNurseLogFlora(placements, chunkX, chunkZ, options);
-    }
+    const built = state.builder.step({ shouldYield });
+    if (built === null) return null;
+    const placements = this.layerName === 'groundDetail'
+      ? Object.freeze(this.appendNurseLogFlora(built.slice(), chunkX, chunkZ, options))
+      : built;
     this.pendingManifests.delete(cacheKey);
     this.manifestCache.set(cacheKey, { key, placements });
     return placements;
@@ -720,14 +721,19 @@ export class StylizedGroundDetailView {
       this.debrisFootprintsProvider,
       0,
     );
-    if (localLogs.length === 0) return;
-    const candidateAssets = ['forest-fern-02', 'forest-sorrel-01', 'tropical-calathea-01', 'taiga-berry-moss-01'];
+    if (localLogs.length === 0) return placements;
+    const candidateAssets = {
+      fern: '/assets/ground/scans/forest-fern-02.glb',
+      sorrel: '/assets/ground/scans/forest-sorrel-01.glb',
+      calathea: '/assets/ground/scans/tropical-calathea-01.glb',
+      berry: '/assets/ground/boreal/taiga-berry-moss-01.glb',
+    };
     const speciesByAsset = new Map();
-    for (const assetId of candidateAssets) {
-      const indices = this.prototypeIndicesByAsset.get(assetId);
-      if (indices?.length > 0) speciesByAsset.set(assetId, indices[0]);
+    for (const [alias, key] of Object.entries(candidateAssets)) {
+      const indices = this.prototypeIndicesByAsset.get(key);
+      if (indices?.length > 0) speciesByAsset.set(alias, indices[0]);
     }
-    if (speciesByAsset.size === 0) return;
+    if (speciesByAsset.size === 0) return placements;
     const seaLevel = this.terrainView.worldStore?.generator?.seaLevel;
     const { tileSize, tileAt, heightAt } = options;
     for (const log of localLogs) {
@@ -739,9 +745,9 @@ export class StylizedGroundDetailView {
       const dirZ = lenZ / span;
       const perpX = -dirZ;
       const perpZ = dirX;
-      const tileId = tileAt(Math.floor(log.x / tileSize), Math.floor(log.z / tileSize));
+      const tileId = tileAt(Math.floor(log.x / tileSize), Math.floor(-log.z / tileSize));
       const pickForTile = (primary, secondary) => {
-        for (const id of [primary, secondary, 'forest-fern-02']) {
+        for (const id of [primary, secondary, 'fern']) {
           const idx = speciesByAsset.get(id);
           if (idx === undefined) continue;
           const allowed = this.prototypeBiomeRules[idx]?.tileIds;
@@ -749,14 +755,15 @@ export class StylizedGroundDetailView {
         }
         return null;
       };
-      const flankA = pickForTile(tileId === 5 || tileId === 7 ? 'tropical-calathea-01' : (tileId === 9 ? 'taiga-berry-moss-01' : 'forest-fern-02'), 'forest-sorrel-01');
-      const flankB = pickForTile(tileId === 8 || tileId === 6 ? 'forest-sorrel-01' : 'forest-fern-02', 'taiga-berry-moss-01');
+      const flankA = pickForTile(tileId === 5 || tileId === 7 ? 'calathea' : (tileId === 9 ? 'berry' : 'fern'), 'sorrel');
+      const flankB = pickForTile(tileId === 8 || tileId === 6 ? 'sorrel' : 'fern', 'berry');
+      const perchIdx = tileId === 8 ? pickForTile('fern', 'sorrel') : (tileId === 6 ? pickForTile('sorrel', 'fern') : null);
       const spots = [
-        { along: -0.28, side: log.radius + 0.28, idx: flankA, scale: 0.96, perch: false },
-        { along: 0.24, side: -(log.radius + 0.26), idx: flankB, scale: 1.04, perch: false },
+        { along: -0.28, side: log.radius + 0.34, idx: flankA, scale: 0.94, perch: false },
+        { along: 0.24, side: -(log.radius + 0.30), idx: flankB, scale: 1.0, perch: false },
       ];
-      if (log.older && flankA !== null) {
-        spots.push({ along: 0.04, side: 0, idx: flankA, scale: 0.72, perch: true });
+      if (log.older && perchIdx !== null) {
+        spots.push({ along: 0.04, side: 0, idx: perchIdx, scale: 0.66, perch: true });
       }
       spots.forEach((spot, sIdx) => {
         if (spot.idx === null || placements.length >= (options.perChunk ?? 400) + 32) return;
@@ -780,6 +787,7 @@ export class StylizedGroundDetailView {
         });
       });
     }
+    return placements;
   }
 
   update() {

@@ -27,11 +27,17 @@ import { treeBarkEmission, understoryShadeEmission } from './foliageLight.js';
 import { createProceduralBarkTextures } from './ProceduralBarkTextures.js';
 import { barkBumpNormal, barkPackedNormal } from './TreeBarkMaterial.js';
 import {
+  createArchedRootBridgeGeometry,
   createFallenBranchGeometry,
   createFallenLogGeometry,
   createFungiClusterGeometry,
+  createHollowNurseTrunkGeometry,
   createLeafLitterGeometry,
   createMossMoundGeometry,
+  createRootWadGeometry,
+  createShelfFungusLogGeometry,
+  createSnappedSnagGeometry,
+  createSplitTimberLogGeometry,
   createStumpGeometry,
 } from './forestDebrisGeometry.js';
 
@@ -125,7 +131,7 @@ function sampleTriplanar(map, { weights, coords }, collector = null) {
  * - Semantic vertex-color regions from geometry (`BARK`, `EXPOSED_WOOD`, `ROT_DARK/PUNK`, `MOSS` pockets)
  * - Biome moss, crustose lichen, damp humus collar, snow cap, rain wetness, and `treeBarkEmission`
  */
-function deadwoodMaterial(
+export function deadwoodMaterial(
   barkTextures,
   {
     barkProfile = 'spruce',
@@ -339,6 +345,12 @@ const KINDS = Object.freeze({
   leafLitter: Object.freeze({ geometry: createLeafLitterGeometry, roughness: 0.9, side: THREE.DoubleSide }),
   mossMound: Object.freeze({ geometry: createMossMoundGeometry, roughness: 1, moss: true }),
   fungiCluster: Object.freeze({ geometry: createFungiClusterGeometry, roughness: 0.74, fungi: true }),
+  snappedSnag: Object.freeze({ geometry: createSnappedSnagGeometry, roughness: 0.94, deadwood: true, horizontal: false, conform: false, bumpScale: 0.024 }),
+  rootWad: Object.freeze({ geometry: createRootWadGeometry, roughness: 0.94, deadwood: true, horizontal: false, conform: false, bumpScale: 0.024 }),
+  hollowNurseTrunk: Object.freeze({ geometry: createHollowNurseTrunkGeometry, roughness: 0.94, deadwood: true, horizontal: true, conform: true, bumpScale: 0.024 }),
+  archedRootBridge: Object.freeze({ geometry: createArchedRootBridgeGeometry, roughness: 0.94, deadwood: true, horizontal: true, conform: false, bumpScale: 0.022 }),
+  splitTimberLog: Object.freeze({ geometry: createSplitTimberLogGeometry, roughness: 0.92, deadwood: true, horizontal: true, conform: true, bumpScale: 0.024 }),
+  shelfFungusLog: Object.freeze({ geometry: createShelfFungusLogGeometry, roughness: 0.93, deadwood: true, horizontal: true, conform: true, bumpScale: 0.024 }),
 });
 
 /** Turns `stylizedSurface.forestDebris.variants` into prototype definitions. */

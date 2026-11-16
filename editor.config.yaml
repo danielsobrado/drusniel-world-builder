@@ -2450,6 +2450,18 @@ stylizedSurface:
       stumpConiferJagged: { kind: stump, variant: jagged, barkProfile: spruce, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
       stumpConiferHollow: { kind: stump, variant: hollow, barkProfile: spruce, olderWood: true, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
       stumpConiferWeathered: { kind: stump, variant: weathered, barkProfile: spruce, olderWood: true, weight: 0.05, tileIds: [8, 9], minCanopy: 0.28, minShoreClearance: 4.5 }
+      snappedSnagDeciduous: { kind: snappedSnag, barkProfile: beech, weight: 0.06, tileIds: [5, 6], minCanopy: 0.24, minShoreClearance: 4.0 }
+      snappedSnagConifer: { kind: snappedSnag, barkProfile: spruce, olderWood: true, weight: 0.07, tileIds: [7, 8, 9], minCanopy: 0.24, minShoreClearance: 4.0 }
+      rootWadForest: { kind: rootWad, barkProfile: pine, weight: 0.06, tileIds: [5, 6, 7], minCanopy: 0.26, minShoreClearance: 4.5 }
+      rootWadConifer: { kind: rootWad, barkProfile: spruce, olderWood: true, weight: 0.06, tileIds: [8, 9, 12], minCanopy: 0.22, minShoreClearance: 2.5 }
+      hollowNurseTrunkWoodland: { kind: hollowNurseTrunk, barkProfile: beech, olderWood: true, weight: 0.08, tileIds: [6, 8], minCanopy: 0.28, minShoreClearance: 4.0 }
+      hollowNurseTrunkJungle: { kind: hollowNurseTrunk, barkProfile: pine, olderWood: true, weight: 0.08, tileIds: [5, 7], minCanopy: 0.28, minShoreClearance: 4.0 }
+      archedRootBridgeRainforest: { kind: archedRootBridge, barkProfile: pine, olderWood: true, weight: 0.07, tileIds: [7, 8], minCanopy: 0.24, minShoreClearance: 1.5 }
+      archedRootBridgeSwamp: { kind: archedRootBridge, barkProfile: swamp, olderWood: true, weight: 0.09, tileIds: [12], minCanopy: 0.14, minShoreClearance: 1.2 }
+      splitTimberLogOak: { kind: splitTimberLog, barkProfile: beech, weight: 0.06, tileIds: [5, 6], minCanopy: 0.26, minShoreClearance: 4.0 }
+      splitTimberLogTaiga: { kind: splitTimberLog, barkProfile: spruce, weight: 0.06, tileIds: [9], minCanopy: 0.26, minShoreClearance: 4.0 }
+      shelfFungusLogWet: { kind: shelfFungusLog, barkProfile: swamp, olderWood: true, weight: 0.09, tileIds: [8, 12], minCanopy: 0.20, minShoreClearance: 1.5 }
+      shelfFungusLogWoodland: { kind: shelfFungusLog, barkProfile: beech, olderWood: true, weight: 0.07, tileIds: [6, 7, 9], minCanopy: 0.28, minShoreClearance: 3.5 }
   # The tropical kit's understory (assets.tropicalKitVariants): jungle grasses and
   # groundcover in tropical seasonal forest and rainforest. At 324-1 960 triangles
   # an instance it is a heavier job than the 350-triangle ground-detail accents, so

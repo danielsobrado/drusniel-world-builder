@@ -3,6 +3,13 @@ import { fbm3 } from '../gen/noise.js';
 import { chamber, column, plateau, slab } from '../gen/shapes.js';
 import { bridge, crystal, house, lantern } from './kits.js';
 import { bellCluster, lanternCap, loamMound, shelfBrackets } from './umbraFungus.js';
+import {
+  buildCrystalResonatorObelisk,
+  buildHangingCenserSpire,
+  buildSpiderWebBalustradeShrine,
+  buildTideGondolaSkiff,
+  buildVeilFungusParasol,
+} from './umbraExtraProps.js';
 
 /**
  * An Umbra'kor cavern city. The cavern comes first — a void far larger than
@@ -253,6 +260,14 @@ export function generate(b, params) {
   for (const [x, y, z] of [[-17.5, 8, -72], [-35.4, 14, -70], [17.5, 8, -76], [35.4, 2, -80], [8, 8, -88], [20, -6, -103]]) {
     growth(P(x, y, z), growthIndex++);
   }
+
+  buildSpiderWebBalustradeShrine(b, P(-6.8, ledge.y, ledge.z - 1.5), 0.6);
+  buildCrystalResonatorObelisk(b, P(market.x, market.y, market.z + 12.5), 0);
+  buildHangingCenserSpire(b, P(market.x - 8.2, market.y, market.z + 3.5), 0.4);
+  buildHangingCenserSpire(b, P(market.x + 8.2, market.y, market.z - 2.5), -2.6);
+  buildVeilFungusParasol(b, P(beds.x - 13.5, beds.y, beds.z - 3.5), 1.15);
+  buildVeilFungusParasol(b, P(beds.x + 13.5, beds.y, beds.z - 3.5), 1.1);
+  buildTideGondolaSkiff(b, P(17.5, LAKE + 2.52, -96), 0.8);
 
   b.spawn('entry', P(0, 16, 2), 0);
   b.exit('gate', P(gate.x, gate.y, gate.z - 0.5), { radius: 2.8, label: 'Take the tunnel back to the surface' });
