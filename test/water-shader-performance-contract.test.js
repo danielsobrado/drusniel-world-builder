@@ -32,5 +32,6 @@ test('water uses bounded two-octave noise for vector distortion and refraction',
 
 test('procedural water edges use derivative anti-aliasing', () => {
   assert.match(materialSource, /fwidth\(edge\)/);
-  assert.match(materialSource, /fwidth\(causticRing\)/);
+  // Caustics are a mip-filtered texture web (world noise), so they need no derivative band.
+  assert.match(materialSource, /causticWeb\(/);
 });

@@ -2785,8 +2785,8 @@ stylizedSurface:
       # ferns/herbs (level 2), and interior shrubs/saplings (level 3). Open meadows retain full growth.
       byTileId:
         5: { grassCoreDensity: 0.09, grassEdgeDensity: 0.54, flowerCoreDensity: 0.05, bushCoreDensity: 0.74 }
-        6: { grassCoreDensity: 0.08, grassEdgeDensity: 0.60, flowerCoreDensity: 0.04, bushCoreDensity: 0.78 }
-        7: { grassCoreDensity: 0.16, grassEdgeDensity: 0.44, flowerCoreDensity: 0.04, bushCoreDensity: 0.82 }
+        6: { grassCoreDensity: 0.28, grassEdgeDensity: 0.60, flowerCoreDensity: 0.04, bushCoreDensity: 0.78 }
+        7: { grassCoreDensity: 0.85, grassEdgeDensity: 0.95, flowerCoreDensity: 0.04, bushCoreDensity: 0.82 }
         8: { grassCoreDensity: 0.09, grassEdgeDensity: 0.44, flowerCoreDensity: 0.05, bushCoreDensity: 0.80 }
         9: { grassCoreDensity: 0.05, grassEdgeDensity: 0.30, flowerCoreDensity: 0.02, bushCoreDensity: 0.64 }
         12: { grassCoreDensity: 0.18, grassEdgeDensity: 0.48, flowerCoreDensity: 0.04, bushCoreDensity: 0.54 }
