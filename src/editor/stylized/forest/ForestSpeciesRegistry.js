@@ -31,10 +31,10 @@ export function groveSpacingFactor(x, z) {
  * changed, so stand density did not move with this.
  */
 const AGE_CLASSES = Object.freeze({
-  sapling: Object.freeze({ height: 0.48, crown: 0.5, trunk: 0.42, crownHeight: 1.3,
-    taper: 0.1, bole: -0.15, flare: 0, asymmetry: 0.4, spacing: 0.6 }),
-  young: Object.freeze({ height: 0.76, crown: 0.72, trunk: 0.64, crownHeight: 1.15,
-    taper: 0, bole: 0, flare: 0.1, asymmetry: 0.7, spacing: 0.87 }),
+  sapling: Object.freeze({ height: 0.48, crown: 0.82, trunk: 0.42, crownHeight: 1.1,
+    taper: 0.1, bole: -0.15, flare: 0, asymmetry: 0.4, spacing: 0.366 }),
+  young: Object.freeze({ height: 0.76, crown: 0.9, trunk: 0.64, crownHeight: 1.05,
+    taper: 0, bole: 0, flare: 0.1, asymmetry: 0.7, spacing: 0.696 }),
   mature: Object.freeze({ height: 1, crown: 1, trunk: 0.93, crownHeight: 1,
     taper: 0, bole: 0.15, flare: 0.2, asymmetry: 1, spacing: 1 }),
   ancient: Object.freeze({ height: 1.2, crown: 1.4, trunk: 1.3, crownHeight: 1,
