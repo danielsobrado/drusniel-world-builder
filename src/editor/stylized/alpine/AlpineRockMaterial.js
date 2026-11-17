@@ -1,8 +1,11 @@
 import * as THREE from 'three/webgpu';
 import {
-  attribute, color, float, mix, mx_noise_float, normalWorld, normalize, positionWorld, vec3,
+  attribute, color, float, mix, mx_noise_float, normalView, normalWorld, normalize, positionWorld, vec3,
 } from 'three/tsl';
-import { coldStone, snowGrain } from '../rockSnowSurface.js';
+import { coldStone } from '../rockSnowSurface.js';
+import { snowCoat } from '../surfaceCoatings/SnowCoat.js';
+import { surfaceCoatings } from '../surfaceCoatings/SurfaceCoatingConfig.js';
+import { blendCoat } from '../../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from '../snowDeposition.js';
 import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.js';
 
@@ -20,9 +23,14 @@ export function createAlpineRockMaterial() {
   const breakup = mx_noise_float(p.mul(0.35)).add(mx_noise_float(p.mul(1.4)).mul(0.5)).toVar();
   // Per crag (AlpineRockView): its biome's ground snow or its altitude's, so badlands crags stay bare.
   const { cover: snow, skirt } = snowDeposition({ snow: attribute('instanceSnow', 'float').max(stormSnowCoverUniform), breakup: breakup.mul(0.9), centre: [0, 0, 0], groundY: GROUND_Y, height: 1.15 });
-  const grain = snowGrain(p, n);
-  const snowColor = mix(color(SNOW), color(SNOW_GROUND_COLOR), skirt).mul(grain?.tint ?? vec3(1));
-  material.colorNode = mix(stone, snowColor, snow);
-  material.roughnessNode = mix(float(0.86), float(0.78).add(grain?.roughness ?? 0), snow);
+  const settings = surfaceCoatings();
+  const coat = snowCoat(p, n, snow, settings);
+  const snowColor = mix(color(SNOW), color(SNOW_GROUND_COLOR), skirt).mul(coat?.tint ?? vec3(1));
+  const snowRoughness = settings.snow.enabled ? settings.snow.roughness : 0.78;
+  const surface = blendCoat({ color: stone, roughness: float(0.86), normal: normalView },
+    { color: snowColor, roughness: float(snowRoughness).add(coat?.roughness ?? 0), normal: coat?.normal() }, snow);
+  material.colorNode = surface.color;
+  material.roughnessNode = surface.roughness;
+  if (coat && settings.snow.enabled) material.normalNode = surface.normal;
   return material;
 }

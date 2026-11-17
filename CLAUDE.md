@@ -27,6 +27,14 @@ the three plant layers, border behaviour and streaming. `tests/biomeContract.tes
 enforces the checklist; a missing piece is fixed in the biome's rows, and waived
 there only with a reason.
 
+## Snow and moss coats
+
+Snow and moss on rocks, towns and trunks are coats with their own albedo,
+normal and roughness, laid over the surface by its existing coverage mask — see
+[surface coatings](docs/surface-coatings.md). Coverage stays with each surface's
+masks; never add a second snow or moss coverage system, and never mix moss into
+a colour that the moss coat also lays.
+
 ## QA and performance
 
 Before changing terrain generation, chunk streaming, rendering, or residency

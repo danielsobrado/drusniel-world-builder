@@ -1,7 +1,9 @@
 import * as THREE from 'three/webgpu';
 import { dot, float, materialColor, materialNormal, materialRoughness, mix, normalWorld, positionGeometry, vec3, vertexColor } from 'three/tsl';
 
-import { WEATHER_FAMILIES, weatherTownSurface } from './townWeathering.js';
+import { WEATHER_FAMILIES, weatherTownLayers } from './townWeathering.js';
+import { blendCoat } from './surfaceLayers/PbrCoatBlend.js';
+import { mossCoat } from '../../editor/stylized/surfaceCoatings/MossCoat.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from './townWetness.js';
 import { filterSpecularRoughness } from './specularAntialiasing.js';
 import { buildingShadeEmission } from '../../editor/stylized/forest/foliageLight.js';
@@ -110,14 +112,23 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   let albedo = painted.mul(vec3(...(rubble ? FAMILY_GRADE.stone : tone)));
   const hued = rubble ? KIT_HUE.rubble : slot === 'mortar' ? (plastered ? KIT_HUE.render : null) : KIT_HUE[slot];
   if (hued) albedo = kitHued(albedo, hued);
-  material.colorNode = weatherTownSurface(albedo, {
+  const weathered = weatherTownLayers(albedo, {
     place: positionGeometry.add(vec3(spread, 0, spread.mul(0.61))),
     up: normalWorld.y,
     height: positionGeometry.y,
     family,
   });
-  const wet = wetTownSurface(material.colorNode, material.roughnessNode ?? materialRoughness,
-    normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
+  // Moss under the wet film: rain darkens and glosses it with the stone it grows on.
+  const baseRoughness = material.roughnessNode ?? materialRoughness;
+  const baseNormal = material.normalNode ?? materialNormal;
+  const mossLayer = mossCoat(weathered.moss);
+  const mossed = blendCoat({ color: weathered.color, roughness: baseRoughness, normal: baseNormal }, {
+    color: mossLayer.color,
+    roughness: mossLayer.roughness ?? baseRoughness,
+    normal: mossLayer.normal(baseNormal),
+  }, weathered.moss.mask);
+  material.colorNode = mossed.color;
+  const wet = wetTownSurface(material.colorNode, mossed.roughness, normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
   material.colorNode = wet.color;
   material.roughnessNode = wet.roughness;
   const shadeEmission = buildingShadeEmission(material.colorNode);
@@ -129,4 +140,5 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
     const scale = materialNormal.getCache('normalScale', 'vec2');
     material.roughnessNode = filterSpecularRoughness(wet.roughness, normal.mul(vec3(scale, 1)));
   }
+  if (mossed.normal !== baseNormal) material.normalNode = mossed.normal;
 }

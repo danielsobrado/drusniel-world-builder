@@ -11,8 +11,10 @@ import {
   mix,
   modelWorldMatrix,
   mx_noise_float,
+  normalLocal,
   normalMap,
   normalWorld,
+  normalWorldGeometry,
   parallaxDirection,
   positionGeometry,
   positionLocal,
@@ -30,7 +32,11 @@ import {
   vec4,
 } from 'three/tsl';
 
-import { WEATHER_FAMILIES, treadPaving, weatherTownSurface } from '../../render/materials/townWeathering.js';
+import { WEATHER_FAMILIES, treadPaving, weatherTownLayers } from '../../render/materials/townWeathering.js';
+import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { mossCoat } from '../stylized/surfaceCoatings/MossCoat.js';
+import { snowCoat } from '../stylized/surfaceCoatings/SnowCoat.js';
+import { surfaceCoatings } from '../stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../render/materials/townWetness.js';
 import { filterSpecularRoughness } from '../../render/materials/specularAntialiasing.js';
 import { buildingShadeEmission } from '../stylized/forest/foliageLight.js';
@@ -47,6 +53,10 @@ import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
  */
 
 const SNOW = vec3(0.9, 0.93, 0.98);
+/** Snow's roughness when the snow coat is off. */
+const PLAIN_SNOW_ROUGHNESS = 0.62;
+/** How far up the hold band climbs as a town's snow thins: a light fall lies only on the flattest faces. */
+const THIN_LIFT = 0.4;
 
 export const townKitShared = Object.freeze({
   /** Sun elevation in radians, written each frame by the town runtime. */
@@ -206,30 +216,52 @@ export function createTownKitMaterial(atlas, look) {
   // the band is for walls, not the floors and steps at the same height.
   const wall = smoothstep(0.7, 0.3, up.abs());
   const height = mix(float(99), positionGeometry.y, seed.grounded.mul(wall));
-  colour = weatherTownSurface(colour, {
+  const weathered = weatherTownLayers(colour, {
     place,
     up,
     height,
     family: { moss: amount('moss'), streaks: amount('streaks'), damp: amount('damp'), dust: amount('dust'), cracks: amount('cracks'), wash: amount('wash') },
+    crevice,
   });
+  // Snow first decided, as it flattens the relief the moss then grows on; the
+  // geometric normal, so slates' and stones' bumps do not speckle the cap.
+  const coatSettings = surfaceCoatings();
+  const thin = float(1).sub(snow).mul(THIN_LIFT);
+  const hold = normalWorldGeometry.y.add(wearNoise.mul(0.12));
+  const snowCover = smoothstep(thin.add(0.38), thin.add(0.72), hold).mul(smoothstep(0, 0.12, snow)).mul(kind.y);
+  const strength = surface.x.mul(townKitShared.reliefScale).mul(float(1).sub(snowCover.mul(0.7)));
+  const reliefNormal = normalMap(normalSample, vec2(strength));
+  const dryRoughness = row.z.mul(surfaceSample.a);
+  const mossLayer = mossCoat({ ...weathered.moss, settings: coatSettings });
+  const mossed = blendCoat({ color: weathered.color, roughness: dryRoughness, normal: reliefNormal }, {
+    color: mossLayer.color,
+    roughness: mossLayer.roughness ?? dryRoughness,
+    normal: mossLayer.normal(reliefNormal),
+  }, weathered.moss.mask);
+  colour = mossed.color;
   // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
   colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving).add(isCobble));
   const wetAmount = (key) => [[ROLE.stone, 'stone'], [ROLE.plaster, 'plaster'], [ROLE.timber, 'timber'],
     [ROLE.roof, 'roof'], [ROLE.paving, 'stone'], [ROLE.cobble, 'stone']]
     .reduce((sum, [value, family]) => sum.add(isRole(value).mul(TOWN_WET_FAMILIES[family][key])), float(0));
-  const wet = wetTownSurface(colour, row.z.mul(surfaceSample.a), up, {
+  const wet = wetTownSurface(colour, mossed.roughness, up, {
     wetness: wetAmount('wetness'), darkening: wetAmount('darkening'), roughness: wetAmount('roughness'),
   });
-  colour = wet.color;
-  const snowCover = smoothstep(0.38, 0.72, up).mul(snow).mul(kind.y);
-  colour = mix(colour, SNOW.mul(data.x.mul(0.3).add(0.7)), snowCover);
+  const snowLayer = snowCoat(place, normalLocal, snowCover, coatSettings);
+  const snowRoughness = coatSettings.snow.enabled ? coatSettings.snow.roughness : PLAIN_SNOW_ROUGHNESS;
+  const snowed = blendCoat({ color: wet.color, roughness: wet.roughness, metalness: row.w, normal: mossed.normal }, {
+    color: SNOW.mul(data.x.mul(0.3).add(0.7)).mul(snowLayer?.tint ?? vec3(1)),
+    roughness: float(snowRoughness).add(snowLayer?.roughness ?? 0),
+    metalness: float(0),
+    normal: snowLayer?.normal(),
+  }, snowCover);
+  colour = snowed.color;
 
   material.colorNode = vec4(colour, 1);
-  const strength = surface.x.mul(townKitShared.reliefScale).mul(float(1).sub(snowCover.mul(0.7)));
-  material.normalNode = normalMap(normalSample, vec2(strength));
-  const roughness = mix(wet.roughness, float(0.62), snowCover).add(wear.mul(0.05)).add(crevice.mul(0.08));
+  material.normalNode = snowed.normal;
+  const roughness = snowed.roughness.add(wear.mul(0.05)).add(crevice.mul(0.08));
   material.roughnessNode = filterSpecularRoughness(roughness, normalSample.mul(2).sub(1).mul(vec3(strength, strength, 1)));
-  material.metalnessNode = mix(row.w, float(0), snowCover);
+  material.metalnessNode = snowed.metalness;
   const selfEmissive = sample.mul(tint.rgb).mul(tint.w).mul(mix(float(1), flicker, flame));
   const shadeEmissive = buildingShadeEmission(colour).mul(float(1).sub(flame));
   material.emissiveNode = selfEmissive.add(shadeEmissive);

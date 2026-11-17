@@ -5,6 +5,8 @@ import {
   float,
   fract,
   materialColor,
+  materialNormal,
+  materialRoughness,
   mix,
   normalWorld,
   normalWorldGeometry,
@@ -17,6 +19,10 @@ import {
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
+import { worldNoiseField } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
+import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { mossCoat } from './surfaceCoatings/MossCoat.js';
 
 /**
  * Bark weathering — after grass-test's `barkWeathering`.
@@ -149,11 +155,27 @@ export function applyBarkWeathering(material, { settings }) {
     : float(0);
   // Nothing mossy survives above the snow line, which is the same line the ground
   // whitens at.
+  // Moss settles into the bark's grooves before it climbs its ridges.
+  const groove = (material.treeBarkHeightNode ?? float(0.5)).clamp(0, 1).oneMinus();
   const moss = facing.mul(patches).mul(low).mul(snowLine.oneMinus())
-    .mul(settings.moss).clamp(0, 1);
+    .mul(settings.moss).mul(groove.mul(0.6).add(0.7)).clamp(0, 1);
   const mossColor = mix(color(settings.mossDark), color(settings.mossLight), fract(seed.mul(3.1)))
     .mul(dot(bark, vec3(0.3, 0.59, 0.11)).mul(1.2).add(0.6));
-  const mossy = mix(tinted, mossColor, moss);
+  // One world-noise tap around the trunk: its pits are the cushions, its grit the tufts.
+  const micro = worldNoiseField(WORLD_NOISE_LAYERS.micro)(vec2(around, local.y).div(0.8).add(seed.mul(5.3)));
+  const mossLayer = mossCoat({ color: mossColor, pillow: micro.g, tuft: micro.r });
+  const barkRoughness = material.roughnessNode ?? materialRoughness;
+  const barkNormal = material.normalNode ?? materialNormal;
+  const mossed = blendCoat({ color: tinted, roughness: barkRoughness, normal: barkNormal }, {
+    color: mossLayer.color,
+    roughness: mossLayer.roughness ?? barkRoughness,
+    normal: mossLayer.normal(barkNormal),
+  }, moss);
+  if (mossed.normal !== barkNormal) {
+    material.roughnessNode = mossed.roughness;
+    material.normalNode = mossed.normal;
+  }
+  const mossy = mossed.color;
 
   // Soil splashes and damp wick up from the ground.
   const baseShade = smoothstep(0, settings.baseHeight, local.y).oneMinus().mul(settings.base);

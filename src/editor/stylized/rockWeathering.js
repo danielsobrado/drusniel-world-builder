@@ -4,10 +4,13 @@ import {
   color,
   dot,
   float,
+  materialNormal,
   mx_noise_float,
   mix,
+  normalGeometry,
   normalLocal,
   normalWorld,
+  normalWorldGeometry,
   positionGeometry,
   positionWorld,
   sin,
@@ -20,7 +23,12 @@ import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
-import { coldStone, snowGrain } from './rockSnowSurface.js';
+import { coldStone } from './rockSnowSurface.js';
+import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { mossCoat } from './surfaceCoatings/MossCoat.js';
+import { mossGrowth } from './surfaceCoatings/MossGrowthMask.js';
+import { snowCoat } from './surfaceCoatings/SnowCoat.js';
+import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
 import { stormSnowCoverUniform } from '../weather/storm/stormGroundUniforms.js';
 
@@ -74,6 +82,8 @@ const FROST_STONE = 0.85;
 const FROST_SHADING = 2.2;
 /** Snow on a face tipping away from the sky: a cooler, deeper white. */
 const ROCK_SNOW_SHADE = '#c3cfdc';
+/** Rock snow's roughness when the snow coat is off. */
+const PLAIN_SNOW_ROUGHNESS = 0.6;
 /** Soil-line noise frequency: a few lobes round a metre-scale boulder. */
 const SOIL_EDGE_PER_METRE = 1.1;
 
@@ -177,16 +187,18 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   // Bias moss gently toward stone crevices/darker grain while keeping upward-facing growth.
   const creviceBias = rockLuma.smoothstep(0.18, 0.65).oneMinus().mul(0.14);
   const patchField = macroPatch.mul(0.72).add(edgeBreakup.mul(0.28)).add(creviceBias);
-  const mossCoverage = patchField.smoothstep(0.42, 0.56);
-  const mossMask = up.smoothstep(0.28, 0.80)
-    .mul(mossCoverage)
+  // Orientation from the geometric normal: the authored normal map's bumps
+  // would otherwise speckle the mat's edge.
+  const potential = normalWorldGeometry.y.smoothstep(0.28, 0.80)
     .mul(settings.moss)
-    .mul(look ? moss : float(1))
-    .clamp(0, 1);
+    .mul(look ? moss : float(1));
+  // Thresholds put the default stone's patch edge (0.85 potential) where the
+  // old fixed 0.42-0.56 band had it.
+  const mossMask = mossGrowth({ field: patchField, potential, sparse: 0.8, dense: 0.44, edge: 0.07 });
 
   // Damp moisture rim around moss edges grounds the mat onto bare stone.
   const dampBand = patchField.smoothstep(0.36, 0.45)
-    .mul(mossCoverage.oneMinus())
+    .mul(mossMask.oneMinus())
     .mul(up.smoothstep(0.22, 0.72))
     .mul(settings.moss)
     .mul(look ? moss : float(1));
@@ -199,10 +211,21 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   const mossColor = mossVelvet.mul(shade);
   // Keep a modest contact cue; Lambert lighting and scene AO supply the shade.
   const underside = mix(float(1 - settings.undersideShade), float(1), up.smoothstep(-0.7, 0.15));
-  let weathered = mix(dampStone, mossColor, mossMask).mul(underside);
-  let roughness = material.roughnessMap
-    ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1).max(mossMask.mul(0.96))
-    : float(material.roughness ?? 0.85).max(mossMask.mul(0.96));
+  const coatSettings = surfaceCoatings();
+  const stoneRoughness = material.roughnessMap
+    ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1)
+    : float(material.roughness ?? 0.85);
+  const stoneNormal = material.normalNode ?? materialNormal;
+  // The micro layer's pits are the cushions, its grit the tufts inside them.
+  const mossLayer = mossCoat({ color: mossColor, pillow: edgeBreakup, tuft: tuftGrain, settings: coatSettings });
+  const mossed = blendCoat({ color: dampStone, roughness: stoneRoughness, normal: stoneNormal }, {
+    color: mossLayer.color,
+    roughness: mossLayer.roughness ?? stoneRoughness.max(0.96),
+    normal: mossLayer.normal(stoneNormal),
+  }, mossMask);
+  let weathered = mossed.color.mul(underside);
+  let roughness = mossed.roughness;
+  let normal = mossed.normal;
 
   // Dust settles on the bare tops the moss has not claimed.
   const dust = up.smoothstep(0.55, 0.95)
@@ -271,15 +294,25 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
       // A storm's snow settles on any stone; the cold stone stays the biome's.
       snow: snowGround.max(stormSnowCoverUniform), breakup: tear, ...(ground ?? {}),
     });
-    const grain = snowGrain(pattern, normalLocal);
+    // Pattern space on both sides: the projection follows the stone, not its placement.
+    const snowLayer = snowCoat(pattern, normalGeometry, cover, coatSettings);
     const snowColor = mix(mix(color(ROCK_SNOW_SHADE), color(ROCK_SNOW), up.smoothstep(0.6, 0.95)), color(SNOW_GROUND_COLOR), skirt)
-      .mul(grain?.tint ?? vec3(1));
-    weathered = mix(weathered, snowColor, cover);
-    roughness = mix(roughness, float(0.6).add(grain?.roughness ?? 0), cover);
+      .mul(snowLayer?.tint ?? vec3(1));
+    const snowRoughness = coatSettings.snow.enabled ? coatSettings.snow.roughness : PLAIN_SNOW_ROUGHNESS;
+    // Over the moss, not in place of it: the mat beneath stays where it grew.
+    const snowed = blendCoat({ color: weathered, roughness, normal }, {
+      color: snowColor,
+      roughness: float(snowRoughness).add(snowLayer?.roughness ?? 0),
+      normal: snowLayer?.normal(),
+    }, cover);
+    weathered = snowed.color;
+    roughness = snowed.roughness;
+    normal = snowed.normal;
   }
 
   material.colorNode = weathered;
   material.roughnessNode = roughness;
+  if (normal !== stoneNormal) material.normalNode = normal;
   material.needsUpdate = true;
   return material;
 }

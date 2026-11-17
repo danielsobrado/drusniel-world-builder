@@ -208,6 +208,28 @@ stylizedSurface:
     # How far snow normals lean to a low sun. At 7° real snow glows gold; plain
     # N·L left it in the blue fill, and leaning keeps the shadow map, which emission would not.
     lowSunWrap: 0.4
+  # How snow and moss coats look where they lie (surfaceCoatings/): their own
+  # grain, normals and roughness over the stone, slate, timber and bark beneath.
+  # Coverage stays with biome looks, the snowline, storms and each surface's
+  # masks. enabled: false compiles a coat's surfaces as they were without it.
+  surfaceCoatings:
+    snow:
+      enabled: true
+      # Share of Snow007C's normal kept on rocks, roofs and ledges.
+      normalStrength: 0.7
+      roughness: 0.85
+    moss:
+      enabled: true
+      roughness: 0.95
+      # Metres of relief: cushions across a mat, tufts inside them.
+      pillowHeight: 0.02
+      tuftHeight: 0.004
+      # How much darker the low ground between cushions is than their tops.
+      recessShade: 0.3
+    # Coat micro-detail fades out between these distances (metres) so it does not shimmer.
+    detail:
+      nearDistance: 20
+      farDistance: 65
   # The trail a walking body cuts through deep snow (grass-test's SnowSurfWake):
   # a banked trench that widens and deepens with speed and settles flat within
   # 25 s. Terrain-only and gated on baked snow, on a live trail and on a circle

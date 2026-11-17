@@ -1,6 +1,7 @@
 import { float, mix, normalGeometry, normalize, smoothstep, vec2, vec3 } from 'three/tsl';
 import { NOISE, SIGNED_GAIN, planarNoise, triplanarNoise } from '../../editor/locations/materials/locationNoise.js';
 import { triplanarWeights } from '../../editor/locations/materials/LocationShading.js';
+import { mossGrowth } from '../../editor/stylized/surfaceCoatings/MossGrowthMask.js';
 
 /**
  * The weather a town's buildings have stood in, shared by both town renderers
@@ -23,6 +24,14 @@ export const WEATHER_DAMP = Object.freeze([0.31, 0.27, 0.21]);
 /** How far sun-bleached dust lifts a surface toward pale, and how much of its hue it keeps. */
 const DUST_LIFT = 0.42;
 const DUST_HUE_KEEP = 0.7;
+/**
+ * Moss patch thresholds on the signed patch field, from no potential to full.
+ * A stone ledge (0.48) grows patches over about the area the old fixed band
+ * tinted, each fully moss rather than half-green.
+ */
+const MOSS_GROWTH = Object.freeze({ sparse: 0.6, dense: -0.1, edge: 0.12 });
+/** How far a joint or crevice lowers the bar for moss: it grows into the mortar first. */
+const MOSS_CREVICE_BIAS = 0.3;
 
 /** Per material family: how much of each the surface takes. */
 export const WEATHER_FAMILIES = Object.freeze({
@@ -34,6 +43,9 @@ export const WEATHER_FAMILIES = Object.freeze({
 });
 
 /**
+ * The weathered surface, with moss returned as its own layer (mask, colour and
+ * cushion/tuft fields for MossCoat) for the caller to coat over `color`.
+ *
  * @param {import('three/tsl').Node} colour linear albedo (vec3)
  * @param {object} options
  * @param {import('three/tsl').Node} options.place position in metres, stable per building
@@ -42,14 +54,17 @@ export const WEATHER_FAMILIES = Object.freeze({
  * @param {?import('three/tsl').Node} [options.height] metres above the building's ground,
  *   or null where it is not known (no damp band then)
  * @param {{ moss: number|Node, streaks: number|Node, damp: number|Node, dust?: number|Node, cracks?: number|Node, wash?: number|Node }} options.family amounts, 0..1
- * @returns {import('three/tsl').Node} weathered albedo (vec3)
+ * @param {?import('three/tsl').Node} [options.crevice] 0..1 joints and crevices from the surface's
+ *   own normal map, where it has one; moss takes hold there first
+ * @returns {{ color, moss: { mask, color, pillow, tuft } }} weathered albedo without moss, and the moss layer
  */
-export function weatherTownSurface(colour, { place, up, height = null, family }) {
+export function weatherTownLayers(colour, { place, up, height = null, family, crevice = null }) {
   // `place` is in the building's own frame, so the projection follows its normal, not the world's.
   const blend = triplanarWeights(normalize(normalGeometry));
   const patch = triplanarNoise(NOISE.patch, place.mul(0.6), blend).sub(0.5).mul(SIGNED_GAIN);
   const facing = smoothstep(0.35, 0.85, up);
-  const moss = facing.mul(smoothstep(-0.15, 0.35, patch)).mul(family.moss);
+  const mossField = crevice ? patch.add(crevice.mul(MOSS_CREVICE_BIAS)) : patch;
+  const moss = mossGrowth({ field: mossField, potential: facing.mul(family.moss), ...MOSS_GROWTH });
   // Runs: noise stretched along the fall line on the two wall planes, on faces near vertical.
   const wall = (kind, across, down) => {
     const tap = (u) => planarNoise(kind, vec2(u.mul(across), place.y.mul(down)));
@@ -66,8 +81,9 @@ export function weatherTownSurface(colour, { place, up, height = null, family })
     .mul(family.cracks ?? 0).mul(0.5);
   // Uneven limewash and coat: blotches a metre across and a finer cloud within
   // them, so a rendered panel reads as hand-laid rather than one flat paint.
+  const fineCoat = triplanarNoise(NOISE.fbm, place.mul(3.1), blend);
   const coat = triplanarNoise(NOISE.mottle, place.mul(0.9), blend).sub(0.5)
-    .add(triplanarNoise(NOISE.fbm, place.mul(3.1), blend).sub(0.5).mul(0.6));
+    .add(fineCoat.sub(0.5).mul(0.6));
   const wash = coat.mul(family.wash ?? 0).mul(0.42).add(1);
   let weathered = colour.mul(wash).mul(float(1).sub(streak).sub(drips).sub(cracks).max(0.3));
   if (height) {
@@ -80,7 +96,16 @@ export function weatherTownSurface(colour, { place, up, height = null, family })
   const luma = colour.dot(vec3(0.3, 0.55, 0.15));
   const bleached = mix(vec3(luma), colour, DUST_HUE_KEEP).mul(1 - DUST_LIFT).add(DUST_LIFT * 0.62);
   weathered = mix(weathered, bleached, dustMask.clamp(0, 0.45));
-  return mix(weathered, vec3(...WEATHER_MOSS).mul(colour.dot(vec3(0.3, 0.55, 0.15)).mul(0.9).add(0.55)), moss.clamp(0, 0.72));
+  return {
+    color: weathered,
+    moss: {
+      mask: moss,
+      color: vec3(...WEATHER_MOSS).mul(luma.mul(0.9).add(0.55)),
+      // The coat's fine fBm makes the cushions; the grit, a few millimetres a texel, the tufts.
+      pillow: fineCoat,
+      tuft: triplanarNoise(NOISE.grit, place.mul(20), blend),
+    },
+  };
 }
 
 /** Trodden grime on paving: how dark a patch gets, and the earth it darkens toward. */

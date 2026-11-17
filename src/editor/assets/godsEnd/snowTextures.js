@@ -10,8 +10,9 @@ let shared = null;
 
 /** Donor Snow007C maps: sRGB albedo, linear GL normal, and linear AO/roughness/height. */
 export function acquireSnowTextures({ loader, baseUrl = import.meta.env?.BASE_URL ?? '/' } = {}) {
-  // CPU-only callers do not have an image decoder. An injected loader supports tests.
-  if (!loader && typeof document === 'undefined') return null;
+  // CPU-only callers do not have an image decoder. An injected loader supports tests,
+  // and a set it already loaded is shared like any other.
+  if (!loader && !shared && typeof document === 'undefined') return null;
   if (!shared) {
     const entry = { textures: {}, ready: uniform(0), refs: 0, disposed: false };
     let pending = Object.keys(FILES).length;
