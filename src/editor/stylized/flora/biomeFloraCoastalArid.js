@@ -27,6 +27,7 @@ function createCoastalDriftwoodSnag() {
   const b = new OrganicMeshBuilder();
   const silver = C('#b8ae9e');
   const dark = C('#6a6258');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.36, height: 0.08, sides: 10, colorBase: C('#8a7d6b'), colorTop: silver });
   b.addTube(
     [[-0.08, -0.08, 0.04], [0, 0.28, 0], [0.14, 0.62, -0.06], [0.28, 0.94, 0.08], [0.36, 1.18, 0.14]],
     [0.18, 0.14, 0.11, 0.075, 0.025],
@@ -396,6 +397,7 @@ function createSteppeTwistedJuniperSnag() {
   const b = new OrganicMeshBuilder();
   const grey = C('#9c8e7e');
   const heart = C('#b8895a');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.34, height: 0.075, sides: 10, colorBase: C('#7a6c5a'), colorTop: grey });
   b.addTube(
     [[0, -0.07, 0], [-0.05, 0.16, 0.03], [-0.08, 0.34, 0.06], [0.06, 0.56, 0.12], [-0.05, 0.76, 0.04], [-0.16, 0.94, -0.06], [-0.25, 1.08, -0.1]],
     [0.17, 0.14, 0.12, 0.098, 0.078, 0.052, 0.016],

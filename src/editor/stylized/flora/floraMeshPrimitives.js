@@ -136,7 +136,7 @@ export class OrganicMeshBuilder {
     width = 0.14,
     arch = 0.08,
     cup = 0.025,
-    segments = 5,
+    segments = 6,
     serration = 0,
     colorBase,
     colorTip,
@@ -186,7 +186,7 @@ export class OrganicMeshBuilder {
     }
   }
 
-  /** Appends a cupped 3D multi-petal blossom with raised center receptacle. */
+  /** Appends a multi-whorl cupped 3D blossom with raised staminal crown. */
   addBlossom({
     center = [0, 0.3, 0],
     radius = 0.08,
@@ -202,9 +202,10 @@ export class OrganicMeshBuilder {
       v.set(lx, ly, lz).applyEuler(euler);
       return [center[0] + v.x, center[1] + v.y, center[2] + v.z];
     };
-    const coreIdx = this.vertex(...toWorld(0, cupDepth * 0.45, 0), colorCore, 0.5, 0.5);
+    const coreApex = this.vertex(...toWorld(0, cupDepth * 0.72, 0), colorCore.clone().multiplyScalar(1.15), 0.5, 0.5);
     const ringCount = petals;
     const baseRing = [];
+    const innerRing = [];
     for (let p = 0; p < ringCount; p += 1) {
       const a = (p / ringCount) * Math.PI * 2;
       baseRing.push(this.vertex(
@@ -213,9 +214,17 @@ export class OrganicMeshBuilder {
         0.5,
         0.5,
       ));
+      innerRing.push(this.vertex(
+        ...toWorld(Math.cos(a + Math.PI / ringCount) * radius * 0.22, cupDepth * 0.42, Math.sin(a + Math.PI / ringCount) * radius * 0.22),
+        colorCore.clone().multiplyScalar(0.9),
+        0.5,
+        0.5,
+      ));
     }
     for (let p = 0; p < ringCount; p += 1) {
-      this.tri(coreIdx, baseRing[(p + 1) % ringCount], baseRing[p]);
+      const pNext = (p + 1) % ringCount;
+      this.tri(coreApex, innerRing[pNext], innerRing[p]);
+      this.quad(baseRing[p], innerRing[p], innerRing[pNext], baseRing[pNext]);
       const a = (p / ringCount) * Math.PI * 2;
       const da = (Math.PI / ringCount) * 0.85;
       const tipColor = SCRATCH_COLOR.copy(colorPetal);
@@ -233,14 +242,37 @@ export class OrganicMeshBuilder {
       );
       const outer = this.vertex(
         ...toWorld(Math.cos(a) * radius, cupDepth, Math.sin(a) * radius),
-        tipColor.clone().multiplyScalar(1.12),
+        tipColor.clone().multiplyScalar(1.14),
         0.5,
         1,
       );
       this.tri(baseRing[p], midA, outer);
       this.tri(baseRing[p], outer, midB);
-      this.tri(baseRing[p], midB, baseRing[(p + 1) % ringCount]);
+      this.tri(baseRing[p], midB, baseRing[pNext]);
     }
+  }
+
+  /** Appends an undulating soil/moss/snow transition skirt anchoring a plant or trunk seamlessly into ground. */
+  addRootCollar({
+    center = [0, 0, 0],
+    radius = 0.24,
+    height = 0.065,
+    sides = 10,
+    colorBase,
+    colorTop,
+  }) {
+    this.addBlob({
+      center: [center[0], center[1] - height * 0.25, center[2]],
+      radiusX: radius,
+      radiusY: height,
+      radiusZ: radius,
+      rings: 4,
+      sides,
+      ribAmp: 0.16,
+      ribFreq: 5,
+      colorBase,
+      colorTop: colorTop ?? colorBase,
+    });
   }
 
   /** Appends an asymmetric organic mound, cushion, berry, or pebble cluster via warped sphere grid. */

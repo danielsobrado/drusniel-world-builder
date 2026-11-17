@@ -209,19 +209,20 @@ function createGlacierPenitentesCluster() {
   const b = new OrganicMeshBuilder();
   const baseIce = C('#6898bd');
   const sunTip = C('#e4f2fc');
-  for (let i = 0; i < 8; i += 1) {
-    const row = Math.floor(i / 4);
-    const col = i % 4;
-    const x = (col - 1.5) * 0.17 + row * 0.05;
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.44, height: 0.12, sides: 12, colorBase: C('#a8cde4'), colorTop: sunTip });
+  for (let i = 0; i < 10; i += 1) {
+    const row = Math.floor(i / 5);
+    const col = i % 5;
+    const x = (col - 2.0) * 0.15 + row * 0.05;
     const z = (row - 0.5) * 0.22;
-    const h = 0.58 + ((i * 3) % 4) * 0.14;
+    const h = 0.56 + ((i * 3) % 4) * 0.15;
     b.addFacetedPrism({
       base: [x, -0.06, z],
       height: h,
-      radiusX: 0.065,
-      radiusZ: 0.12,
+      radiusX: 0.062,
+      radiusZ: 0.11,
       sides: 6,
-      tiers: 5,
+      tiers: 6,
       tilt: [0.18, 0.15, -0.1],
       taper: 0.88,
       colorBase: baseIce,
@@ -235,6 +236,7 @@ function createGlacierBlueSeracSpur() {
   const b = new OrganicMeshBuilder();
   const deepBlue = C('#4580b4');
   const frostTip = C('#d4ebf8');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.42, height: 0.14, sides: 12, colorBase: C('#90bddc'), colorTop: frostTip });
   b.addFacetedPrism({ base: [0, -0.1, 0], height: 1.26, radiusX: 0.27, radiusZ: 0.22, sides: 8, tiers: 7, tilt: [0.1, 0.3, -0.08], taper: 0.78, colorBase: deepBlue, colorTip: frostTip });
   const shards = [
     [-0.22, 0.12, 0.82, 0.16, 0.15, [0.22, 0.1, 0.18]],
@@ -276,6 +278,7 @@ function createGlacierPressureRidgeHeave() {
   const b = new OrganicMeshBuilder();
   const shadowIce = C('#4f83ad');
   const ridgeTip = C('#dff0fa');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.46, height: 0.11, sides: 12, colorBase: C('#9cc4df'), colorTop: ridgeTip });
   const slabs = [
     { base: [-0.12, -0.08, 0], h: 0.58, rx: 0.26, rz: 0.065, tilt: [0.42, 0.2, 0.15] },
     { base: [0.14, -0.08, 0.06], h: 0.64, rx: 0.24, rz: 0.06, tilt: [-0.38, -0.1, -0.18] },

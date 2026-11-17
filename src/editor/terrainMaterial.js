@@ -391,6 +391,9 @@ export function createTerrainMaterial({
       pathMask,
       localXZ,
       transitionPatterns,
+      worldNoise: familyAtlas
+        ? { macro: atlasNoise(WORLD_NOISE_LAYERS.macro)(worldXZ.div(WORLD_NOISE_METERS.macro)), meso, micro }
+        : null,
     });
     const grassVolume = farCover?.enabled ? farCover.volume : null;
     if (grassVolume?.enabled) {

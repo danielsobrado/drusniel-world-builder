@@ -18,26 +18,43 @@ def _m(x=0.0, y=0.0, z=0.0, rz=0.0, rx=0.0, ry=0.0):
     return m
 
 
+def _skirt(b, rx, ry, mat='cobble', apron_mat=None, blobs=4, seed=1):
+    """Beveled below-grade plinth collar + surrounding scatter blobs for natural sloping ground contact."""
+    b.box((-rx, -ry, -0.16), (rx, ry, 0.08), mat, skip=('-z',))
+    if apron_mat:
+        for i in range(blobs):
+            a = 2 * math.pi * i / blobs + (seed % 5) * 0.2
+            b.blob((rx * 0.92 * math.cos(a), ry * 0.92 * math.sin(a), 0.01),
+                   0.18, apron_mat, subdiv=1, squash=(1.2, 1.0, 0.42), jitter=0.2, seed=seed + i)
+
+
 # =========================================================================
 # TUDOR / LUMESHIRE (5 detailed meshes)
 # =========================================================================
 def tudor_market_pavilion():
     b = MeshBuilder()
-    b.box((-1.05, -0.7, -0.05), (1.05, 0.7, 0.08), 'cobble', skip=('-z',))
+    _skirt(b, 1.12, 0.78, 'cobble', 'earth', 4, 11)
     for px in (-0.9, 0.9):
         for py in (-0.55, 0.55):
-            b.box((px - 0.07, py - 0.07, 0.08), (px + 0.07, py + 0.07, 2.15), 'timber')
+            b.box((px - 0.11, py - 0.11, 0.06), (px + 0.11, py + 0.11, 0.24), 'stone_dressed')
+            b.box((px - 0.07, py - 0.07, 0.24), (px + 0.07, py + 0.07, 2.15), 'timber')
             b.beam((px, py, 1.55), (px * 0.68, py, 2.08), (0, 1, 0), (-0.04, 0.04), 0.07, 'timber')
-    # Market table + stepped produce trays
+            b.box((px - 0.08, py - 0.08, 1.98), (px + 0.08, py + 0.08, 2.08), 'iron')
+    # Market counter, under-shelf, wine cask, hanging balance & stepped trays
     b.box((-0.82, -0.35, 0.72), (0.82, 0.35, 0.84), 'planks')
+    b.box((-0.78, -0.3, 0.22), (0.78, 0.3, 0.3), 'planks')
+    b.lathe([(0.0, -0.18), (0.16, -0.18), (0.2, 0.0), (0.16, 0.18), (0.0, 0.18)], 9, 'wood_trim', m=_m(-0.46, 0, 0.5, rx=math.pi / 2))
     for bx in (-0.52, 0.0, 0.52):
         b.box((bx - 0.22, -0.26, 0.84), (bx + 0.22, 0.22, 0.94), 'wood_trim')
         b.blob((bx, -0.02, 0.98), 0.14, 'flowers' if bx == 0.0 else 'foliage', subdiv=1, squash=(1.2, 0.9, 0.55), seed=int((bx + 2) * 17))
-    # Steep Tudor shingle gable canopy
+    # Hanging brass shop balance beam & fascia sign
+    b.box((-0.44, -0.58, 1.88), (0.44, -0.52, 2.08), 'carved_wood')
+    b.box((0.52, -0.02, 1.72), (0.84, 0.02, 1.76), 'hold_bronze')
+    # Steep Tudor shingle gable canopy + ridge crest
     b.extrude([(-1.16, 0.0, 2.65), (-1.16, -0.82, 2.02), (-1.16, 0.82, 2.02)], (2.32, 0, 0), 'roof')
     b.box((-1.18, -0.06, 2.6), (1.18, 0.06, 2.74), 'wood_trim')
-    b.lathe([(0.0, 2.72), (0.07, 2.82), (0.02, 2.98)], 8, 'bronze', m=_m(x=-0.95))
-    b.lathe([(0.0, 2.72), (0.07, 2.82), (0.02, 2.98)], 8, 'bronze', m=_m(x=0.95))
+    b.lathe([(0.0, 2.72), (0.07, 2.82), (0.02, 2.98)], 8, 'hold_bronze', m=_m(x=-0.95))
+    b.lathe([(0.0, 2.72), (0.07, 2.82), (0.02, 2.98)], 8, 'hold_bronze', m=_m(x=0.95))
     return b
 
 
@@ -388,17 +405,21 @@ def orc_charred_idol_pillar():
 # =========================================================================
 def frostgard_ice_saw_rack():
     b = MeshBuilder()
+    _skirt(b, 0.92, 0.56, 'stone_granite', 'snow', 4, 21)
     for sx in (-0.75, 0.75):
         b.beam((sx, -0.45, -0.04), (sx, 0.0, 1.32), (1, 0, 0), (-0.05, 0.05), 0.1, 'log')
         b.beam((sx, 0.45, -0.04), (sx, 0.0, 1.32), (1, 0, 0), (-0.05, 0.05), 0.1, 'log')
+        b.box((sx - 0.08, -0.42, 0.45), (sx + 0.08, 0.42, 0.54), 'iron')
     b.box((-0.92, -0.06, 1.24), (0.92, 0.06, 1.38), 'log')
-    b.box((-0.62, -0.42, 0.0), (0.62, 0.42, 0.14), 'planks')
-    # Cut translucent blue glacier blocks stacked on sled tray
-    b.box((-0.5, -0.3, 0.14), (-0.02, 0.28, 0.62), 'ice')
-    b.box((0.04, -0.28, 0.14), (0.52, 0.3, 0.56), 'ice')
-    b.box((-0.24, -0.24, 0.62), (0.28, 0.24, 0.98), 'ice')
-    # Hanging ice saw blade
+    b.box((-0.62, -0.42, 0.06), (0.62, 0.42, 0.18), 'planks')
+    # Cut translucent blue glacier blocks strapped on sled tray + frosted sawyer bench
+    b.box((-0.5, -0.3, 0.18), (-0.02, 0.28, 0.66), 'ice')
+    b.box((0.04, -0.28, 0.18), (0.52, 0.3, 0.6), 'ice')
+    b.box((-0.24, -0.24, 0.66), (0.28, 0.24, 1.02), 'ice')
+    b.box((-0.26, -0.26, 0.98), (0.3, 0.26, 1.08), 'snow')
     b.box((-0.62, -0.09, 0.78), (0.62, -0.05, 0.92), 'iron')
+    b.box((-0.72, -0.11, 0.74), (-0.58, -0.03, 0.96), 'wood_trim')
+    b.box((0.58, -0.11, 0.74), (0.72, -0.03, 0.96), 'wood_trim')
     return b
 
 
@@ -454,12 +475,16 @@ def frostgard_rime_shrine_cairn():
 # =========================================================================
 def stonehold_steam_exhaust_monument():
     b = MeshBuilder()
-    b.box((-0.66, -0.66, -0.05), (0.66, 0.66, 0.48), 'stone_granite', skip=('-z',))
+    _skirt(b, 0.78, 0.78, 'stone_flag', 'rock', 4, 31)
+    b.box((-0.66, -0.66, 0.04), (0.66, 0.66, 0.48), 'stone_granite', skip=('-z',))
     b.box((-0.56, -0.56, 0.48), (0.56, 0.56, 0.64), 'stone_basalt')
     b.lathe([(0.42, 0.64), (0.4, 1.95), (0.5, 2.08), (0.36, 2.55), (0.44, 2.68), (0.28, 2.68)], 10, 'hold_bronze')
+    for hz in (1.05, 1.55):
+        b.lathe([(0.44, hz - 0.03), (0.47, hz), (0.44, hz + 0.03)], 10, 'iron', smooth=False)
     for i in range(4):
         a = i * math.pi / 2
         b.box((-0.07, -0.07, 0.7), (0.07, 0.07, 2.05), 'iron', m=_m(0.42 * math.cos(a), 0.42 * math.sin(a), 0.0))
+        b.beam((0.46 * math.cos(a), 0.46 * math.sin(a), 0.64), (0.62 * math.cos(a), 0.62 * math.sin(a), 0.42), (0, 0, 1), (-0.05, 0.05), 0.1, 'stone_basalt')
     b.blob((0, 0, 2.68), 0.24, 'glow', subdiv=1, squash=(1, 1, 0.5))
     return b
 
@@ -514,13 +539,15 @@ def stonehold_ancestral_stele():
 # =========================================================================
 def umbrakor_spider_silk_obelisk():
     b = MeshBuilder()
-    b.lathe([(0.56, -0.05), (0.52, 0.34), (0.4, 0.42)], 6, 'stone_basalt', smooth=False)
+    _skirt(b, 0.66, 0.66, 'stone_basalt', 'stone_dark', 6, 41)
+    b.lathe([(0.56, 0.04), (0.52, 0.34), (0.4, 0.42)], 6, 'stone_basalt', smooth=False)
     b.lathe([(0.28, 0.42), (0.18, 2.2), (0.0, 2.95)], 6, 'stone_dark', smooth=False)
     for hz in (0.95, 1.48, 2.02):
         b.lathe([(0.29, hz - 0.03), (0.31, hz), (0.29, hz + 0.03)], 6, 'cloth_cream', smooth=False)
     for k in range(3):
         a = k * 2 * math.pi / 3
         b.beam((0.36 * math.cos(a), 0.36 * math.sin(a), 0.42), (0.14 * math.cos(a + 0.8), 0.14 * math.sin(a + 0.8), 2.1), (0, 0, 1), (-0.025, 0.025), 0.05, 'iron')
+        b.beam((0.28 * math.cos(a), 0.28 * math.sin(a), 1.48), (0.18 * math.cos(a - 0.9), 0.18 * math.sin(a - 0.9), 2.42), (0, 0, 1), (-0.02, 0.02), 0.035, 'iron')
     b.blob((0.0, 0.0, 2.58), 0.14, 'glow', subdiv=1)
     return b
 
@@ -611,6 +638,43 @@ CITY_MODULES = (
 )
 
 
+_SKIRT_SPEC = {
+    'Tudor_': ('cobble', 'earth'),
+    'Nordic_': ('stone_granite', 'earth'),
+    'Med_': ('stone_dressed', 'cobble'),
+    'Goblin_': ('stone_dark', 'earth'),
+    'Orc_': ('stone_dark', 'rock'),
+    'Frostgard_': ('stone_granite', 'snow'),
+    'Stonehold_': ('stone_flag', 'rock'),
+    'Umbrakor_': ('stone_basalt', 'stone_dark'),
+}
+_HAS_EXPLICIT_SKIRT = {
+    'Tudor_Market_Pavilion',
+    'Frostgard_Ice_Saw_Rack',
+    'Stonehold_Steam_Exhaust_Monument',
+    'Umbrakor_Spider_Silk_Obelisk',
+}
+
+
+def _apply_grounding_skirt(name, b):
+    if name in _HAS_EXPLICIT_SKIRT or not b.verts:
+        return
+    xs = [v.x for v in b.verts]
+    ys = [v.y for v in b.verts]
+    rx = min(1.35, max(0.38, (max(xs) - min(xs)) * 0.46))
+    ry = min(1.35, max(0.38, (max(ys) - min(ys)) * 0.46))
+    cx = (min(xs) + max(xs)) * 0.5
+    cy = (min(ys) + max(ys)) * 0.5
+    plinth_mat, apron_mat = next((v for prefix, v in _SKIRT_SPEC.items() if name.startswith(prefix)), ('cobble', 'earth'))
+    b.box((cx - rx, cy - ry, -0.16), (cx + rx, cy + ry, 0.06), plinth_mat, skip=('-z',))
+    for i in range(4):
+        a = 2 * math.pi * i / 4 + 0.4
+        b.blob((cx + rx * 0.92 * math.cos(a), cy + ry * 0.92 * math.sin(a), 0.0),
+               0.16, apron_mat, subdiv=1, squash=(1.15, 1.0, 0.4), jitter=0.22, seed=len(name) + i)
+
+
 def define(kit):
     for name, fn in CITY_MODULES:
-        kit.define(name, 'props', fn())
+        b = fn()
+        _apply_grounding_skirt(name, b)
+        kit.define(name, 'props', b)

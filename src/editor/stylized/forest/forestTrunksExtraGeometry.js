@@ -94,19 +94,32 @@ export function createSnappedSnagGeometry({ height = 1.38, radius = 0.28 } = {})
   const topRing = (rings - 1) * sides;
   builder.endGrain(topRing, sides, [0.09, height - 0.06, 0.02], true, { cupDepth: 0.08, rotCenter: 0.3, jagX: 0.05, axisY: true });
 
-  // 5 spreading claw buttress roots gripping the forest floor.
-  for (let i = 0; i < 5; i += 1) {
-    const a = (i / 5) * Math.PI * 2 + 0.32;
-    const reach = radius * (2.05 + 0.28 * Math.sin(i * 2.1));
+  // 6 spreading claw buttress roots gripping and burying naturally into the forest floor.
+  for (let i = 0; i < 6; i += 1) {
+    const a = (i / 6) * Math.PI * 2 + 0.32;
+    const reach = radius * (2.15 + 0.28 * Math.sin(i * 2.1));
     builder.curvedLimb(
       [
-        [Math.cos(a) * radius * 0.65, 0.24, Math.sin(a) * radius * 0.65],
-        [Math.cos(a + 0.08) * radius * 1.35, 0.08, Math.sin(a + 0.08) * radius * 1.35],
-        [Math.cos(a + 0.14) * reach, -0.05, Math.sin(a + 0.14) * reach],
+        [Math.cos(a) * radius * 0.62, 0.26, Math.sin(a) * radius * 0.62],
+        [Math.cos(a + 0.08) * radius * 1.38, 0.09, Math.sin(a + 0.08) * radius * 1.38],
+        [Math.cos(a + 0.14) * reach, -0.065, Math.sin(a + 0.14) * reach],
       ],
-      [radius * 0.34, radius * 0.2, radius * 0.08],
+      [radius * 0.35, radius * 0.21, radius * 0.075],
       7,
-      { seed: 11 + i, moss: 0.75, rotTip: true },
+      { seed: 11 + i, moss: 0.85, rotTip: true },
+    );
+  }
+
+  // Basal moss-humus skirt blending the root crown smoothly into the forest floor.
+  for (let m = 0; m < 4; m += 1) {
+    const ma = (m / 4) * Math.PI * 2 + 0.7;
+    const mx = Math.cos(ma) * radius * 1.15;
+    const mz = Math.sin(ma) * radius * 1.15;
+    builder.curvedLimb(
+      [[mx * 0.5, 0.02, mz * 0.5], [mx, 0.04, mz], [mx * 1.45, -0.05, mz * 1.45]],
+      [0.09, 0.085, 0.04],
+      6,
+      { seed: 25 + m, moss: 0.95 },
     );
   }
 

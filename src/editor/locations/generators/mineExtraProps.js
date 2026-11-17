@@ -34,12 +34,18 @@ export function buildOreHopperChute(b, at, yaw = 0) {
   b.prop('iron', hewnBeam(L(0.42, 1.1, 0), L(0.86, 1.55, 0), 0.05, 0.05), 0x3b3e45);
   b.prop('iron', stoneBox(0.84, 0.06, 0.55, L(0, 1.0, 0.48), { yaw, bevel: 0.01 }), 0x34373d);
   b.prop('ore', angularRock(0.42, 0.24, 0.38, L(0, 0.18, 0.42), { seed: 41, yaw }), 0xc8a468);
+  // Embedded sleeper footings and mine-rubble transition apron so post bases lock naturally into rock floor.
+  b.prop('timber', stoneBox(1.56, 0.16, 1.38, L(0, -0.04, 0), { yaw, bevel: 0.02 }), 0x5c432b);
+  for (const [rx, rz, sd] of [[-0.78, 0.62, 11], [0.76, -0.62, 12], [0.68, 0.64, 13]]) {
+    b.prop('rock_debris', angularRock(0.32, 0.14, 0.28, L(rx, 0.02, rz), { seed: sd, yaw }), 0x7b7268);
+  }
   b.nav.block(at, 0.95, 2.2);
 }
 
 /** 2. Underground dewatering rocker-pump rig with iron cylinder & wooden trough. */
 export function buildDewateringPumpRig(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('timber', stoneBox(1.42, 0.18, 1.04, L(0, -0.05, 0), { yaw, bevel: 0.025 }), 0x5c432b);
   for (const sz of [-0.36, 0.36]) {
     b.prop('timber', roughTimber(L(-0.55, 0, sz), L(0, 1.55, sz * 0.4), 0.13, 0.11), 0x785b3c);
     b.prop('timber', roughTimber(L(0.55, 0, sz), L(0, 1.55, sz * 0.4), 0.13, 0.11), 0x785b3c);
@@ -48,8 +54,12 @@ export function buildDewateringPumpRig(b, at, yaw = 0) {
   b.prop('timber', hewnBeam(L(-1.1, 1.62, 0), L(1.05, 1.48, 0), 0.12, 0.16), 0x876745);
   b.prop('iron', rod(L(-0.78, 0.12, 0), L(-0.78, 1.56, 0), 0.045, 0.045, 7), 0x383b42);
   b.prop('iron', rod(L(-0.78, 0, 0), L(-0.78, 0.85, 0), 0.18, 0.16, 10), 0x2e3138);
+  b.prop('iron', rod(L(-0.78, 0.08, 0), L(-0.78, 0.14, 0), 0.25, 0.25, 10), 0x3e424b);
   b.prop('timber', box(1.25, 0.22, 0.42, L(0.05, 0.28, 0.18), yaw), 0x6f5336);
   b.prop('iron', rod(L(0.85, 1.48, 0), L(0.95, 0.45, 0), 0.03, 0.03, 6), 0x454952);
+  // Pump flywheel & crank flange.
+  b.prop('iron', rod(L(0.95, 0.45, -0.14), L(0.95, 0.45, 0.14), 0.26, 0.26, 10), 0x3a3d45);
+  b.prop('rock_debris', angularRock(0.36, 0.12, 0.34, L(-0.72, 0.02, -0.45), { seed: 23, yaw }), 0x6f6860);
   b.nav.block(at, 1.0, 2.0);
 }
 

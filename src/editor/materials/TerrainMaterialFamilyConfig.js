@@ -174,6 +174,24 @@ function normalizeWeathering(source) {
   return Object.freeze({ ...source });
 }
 
+function normalizeWorldNoise(source) {
+  const path = 'families.worldNoise';
+  assertObject(source, path);
+  assertBoolean(source.enabled, `${path}.enabled`);
+  validateFadeRange(source, 'mesoFadeStartDistance', 'mesoFadeEndDistance', path);
+  validateFadeRange(source, 'microFadeStartDistance', 'microFadeEndDistance', path);
+  for (const field of [
+    'moistureDarkening', 'moistureRoughness', 'patchStrength', 'mossLevel', 'mossStrength',
+    'stainStrength', 'grainStrength', 'pitLevel', 'pitStrength',
+  ]) {
+    assertUnit(source[field], `${path}.${field}`);
+  }
+  for (const field of ['patchWarm', 'patchCool', 'mossTint', 'stainTint']) {
+    assertColor(source[field], `${path}.${field}`);
+  }
+  return Object.freeze({ ...source });
+}
+
 export function normalizeTerrainMaterialFamilies(source) {
   assertObject(source, 'families');
   assertBoolean(source.enabled, 'families.enabled');
@@ -263,6 +281,7 @@ export function normalizeTerrainMaterialFamilies(source) {
     genomes: normalizeGenomes(source.genomes),
     features: normalizeFeatures(source.features),
     weathering: normalizeWeathering(source.weathering),
+    worldNoise: normalizeWorldNoise(source.worldNoise),
     transitions: resolveTerrainTransitionConfig(source.transitions),
     projection: Object.freeze({ ...source.projection }),
     environment: Object.freeze({ ...source.environment }),

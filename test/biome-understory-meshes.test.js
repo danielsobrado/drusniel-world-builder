@@ -60,7 +60,8 @@ test('createBiomeUnderstoryPrototypes compiles materials with instanceBiomeLook 
     assert.ok(Array.isArray(proto.tileIds) && proto.tileIds.length > 0);
     assert.equal(proto.parts.length, 1);
     assert.equal(proto.parts[0].instanceBiomeLook, true);
-    assert.ok(proto.parts[0].material);
+    const mat = proto.parts[0].material;
+    assert.ok(mat && mat.colorNode && mat.normalNode && mat.roughnessNode, `${proto.id} should wire PBR color/normal/roughness nodes`);
     proto.parts[0].geometry.dispose();
   }
 });

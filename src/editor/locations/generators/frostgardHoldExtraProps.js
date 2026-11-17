@@ -4,11 +4,13 @@ import { atFrame } from './propFrame.js';
 
 const P = (x, y, z) => ({ x, y, z });
 
-/** 1. Carved Frostgard gate-totem post with horned wolf-skull finial & iron ember basket. */
+/** 1. Carved Frostgard gate-totem post with horned wolf-skull finial, snow footing & ember basket. */
 export function buildWolfTotemPalisadePost(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('roof', rod(L(0, -0.24, 0), L(0, 0.08, 0), 0.86, 0.66, 8), 0xffffff);
   b.prop('masonry', stoneBlock(0.78, 0.42, 0.78, L(0, -0.04, 0), { yaw, bevel: 0.06 }), STONE);
   b.prop('timber', rod(L(0, 0.36, 0), L(0, 2.75, 0), 0.16, 0.13, 8), LOG);
+  b.prop('iron', rod(L(0, 1.48, 0), L(0, 1.62, 0), 0.15, 0.15, 8), 0x2c3038);
   b.prop('timber', stoneBox(0.42, 0.34, 0.62, L(0, 2.52, 0.18), { yaw, bevel: 0.03 }), PALE);
   for (const sx of [-1, 1]) {
     b.prop('timber', rod(L(sx * 0.18, 2.66, 0.06), L(sx * 0.48, 3.08, -0.08), 0.06, 0.015, 6), PALE);
@@ -20,6 +22,7 @@ export function buildWolfTotemPalisadePost(b, at, yaw = 0) {
 /** 2. Braced tripod ice-block hoist lifting a strapped block of clear glacier ice onto sled. */
 export function buildCutIceBlockHoist(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('roof', stoneBox(1.62, 0.22, 1.52, L(0, -0.08, 0), { yaw, bevel: 0.06 }), 0xffffff);
   for (let i = 0; i < 3; i += 1) {
     const a = (i / 3) * Math.PI * 2 + yaw;
     b.prop('timber', rod(

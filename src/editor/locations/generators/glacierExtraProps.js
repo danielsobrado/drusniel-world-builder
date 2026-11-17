@@ -4,7 +4,7 @@ import { atFrame } from './propFrame.js';
 
 const P = (x, y, z) => ({ x, y, z });
 
-/** 1. Cathedral cluster of fluted clear-ice organ pipes fused along frozen flow flutes. */
+/** 1. Cathedral cluster of fluted clear-ice organ pipes fused along frozen flow flutes & basal lens. */
 export function buildOrganPipeIceFormation(b, at, scale = 1.0) {
   const s = scale;
   const pipes = [
@@ -12,11 +12,12 @@ export function buildOrganPipeIceFormation(b, at, scale = 1.0) {
     [-0.3, -0.36, 2.5, 0.18], [0.32, -0.34, 2.7, 0.19], [-0.72, -0.05, 1.9, 0.15],
     [0.74, -0.08, 2.05, 0.16], [0.02, 0.56, 2.35, 0.17], [-0.04, -0.58, 2.15, 0.16],
   ];
+  b.prop('iceBlock', rod(P(at.x, at.y - 0.32 * s, at.z), P(at.x, at.y + 0.12 * s, at.z), 1.48 * s, 1.15 * s, 10), 0xffffff);
   b.prop('iceBlock', rod(P(at.x, at.y - 0.2, at.z), P(at.x, at.y + 0.35 * s, at.z), 1.15 * s, 0.92 * s, 9), 0xffffff);
   for (const [dx, dz, h, r] of pipes) {
     const px = at.x + dx * s;
     const pz = at.z + dz * s;
-    b.prop('clearIce', rod(P(px, at.y, pz), P(px, at.y + h * s, pz), r * s, r * 0.45 * s, 8), 0xffffff);
+    b.prop('clearIce', rod(P(px, at.y - 0.08, pz), P(px, at.y + h * s, pz), r * s, r * 0.45 * s, 8), 0xffffff);
   }
   b.nav.block(at, 1.1 * s, 3.6 * s);
 }
@@ -24,6 +25,7 @@ export function buildOrganPipeIceFormation(b, at, scale = 1.0) {
 /** 2. Radial hoarfrost blue-ice crystal rose bursting from a fractured basal lens. */
 export function buildHoarfrostRoseCluster(b, at, scale = 1.0) {
   const s = scale;
+  b.prop('iceBlock', rod(P(at.x, at.y - 0.28 * s, at.z), P(at.x, at.y + 0.08 * s, at.z), 1.08 * s, 0.78 * s, 9), 0xffffff);
   b.prop('iceBlock', rod(P(at.x, at.y - 0.12, at.z), P(at.x, at.y + 0.24 * s, at.z), 0.78 * s, 0.62 * s, 7), 0xffffff);
   for (let i = 0; i < 9; i += 1) {
     const a = (i / 9) * Math.PI * 2;

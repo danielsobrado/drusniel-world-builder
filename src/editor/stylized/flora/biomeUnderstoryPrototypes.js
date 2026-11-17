@@ -1,12 +1,35 @@
 import * as THREE from 'three/webgpu';
-import { attribute, float, mix } from 'three/tsl';
+import {
+  attribute,
+  cameraViewMatrix,
+  clamp,
+  color,
+  dot,
+  float,
+  mix,
+  normalGeometry,
+  normalWorld,
+  positionGeometry,
+  smoothstep,
+  texture,
+  uv,
+  vec3,
+  vec4,
+} from 'three/tsl';
+import { LOOK_SNOW_STEPS } from '../../biomes/BiomeLooks.js';
+import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { applyPlantMotion } from '../PlantMotionNodes.js';
 import { biomeUnderstoryColor } from '../AuthoredFoliageMaterial.js';
+import { barkBumpNormal, barkPackedNormal } from '../forest/TreeBarkMaterial.js';
+import { acquireDeadwoodNoise } from '../forest/deadwoodNoise.js';
 import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from '../forest/foliagePalette.js';
 import { understoryShadeEmission } from '../forest/foliageLight.js';
-import { meadowPatchOnPlant } from '../understoryPatch.js';
 import { createProceduralBarkTextures } from '../forest/ProceduralBarkTextures.js';
 import { deadwoodMaterial } from '../forest/forestDebrisPrototypes.js';
+import { acquireIceTextures } from '../ice/iceTextures.js';
+import { meadowPatchOnPlant } from '../understoryPatch.js';
+import { worldNoiseField } from '../worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 import { COLD_ALPINE_BIOME_FLORA } from './biomeFloraColdAlpine.js';
 import { COASTAL_ARID_BIOME_FLORA } from './biomeFloraCoastalArid.js';
 import { SAVANNA_BADLANDS_BIOME_FLORA } from './biomeFloraSavannaBadlands.js';
@@ -23,27 +46,68 @@ export const BIOME_FLORA_CATALOG = Object.freeze([
   ...COLD_ALPINE_BIOME_FLORA,
 ]);
 
-function createLivingPlantMaterial(entry, config) {
+function triplanarSample(map, point, weights) {
+  const planes = [point.yz, point.zx, point.xy];
+  const taps = planes.map((coord) => texture(map, coord));
+  return {
+    planes,
+    taps,
+    value: taps[0].mul(weights.x).add(taps[1].mul(weights.y)).add(taps[2].mul(weights.z)),
+  };
+}
+
+function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNoise = null) {
   const sample = attribute('color', 'vec3');
   const graded = gradePlantPart(sample, resolveFoliagePalette(config, entry.paletteTileId), 'auto');
   const plantGreen = authoredGreenMask(sample);
   const patched = meadowPatchOnPlant(graded, config);
   const local = mix(graded, patched, plantGreen);
-  const finalColor = biomeUnderstoryColor(local);
+
+  // Sample packed CC0 noise textures (deadwood-noise + world-noise micro) for real PBR surface detail.
+  const uvCoord = uv();
+  const grainSample = deadwoodNoise
+    ? texture(deadwoodNoise.texture, uvCoord.mul(3.5))
+    : worldNoiseField(WORLD_NOISE_LAYERS.micro)(positionGeometry.xz.mul(2.4));
+  const microField = worldNoiseField(WORLD_NOISE_LAYERS.micro)(positionGeometry.xz.mul(3.8).add(positionGeometry.y.mul(1.6)));
+  const veinRib = dot(uvCoord.sub(0.5).abs(), vec3(2, 0, 0).xy).oneMinus().clamp(0, 1);
+
+  // Smooth ground-contact soil/humus collar + AO so roots & cushions blend seamlessly off terrain.
+  const soilWave = microField.g.sub(0.5).mul(0.06);
+  const groundTouch = smoothstep(0.09, -0.03, positionGeometry.y.add(soilWave));
+  const contactAO = mix(float(1), float(0.42), groundTouch.mul(0.85));
+  const soilTone = color(environment.soilColor ?? '#5c4a30').mul(mix(0.82, 1.12, grainSample.r));
+  const groundedColor = mix(local, soilTone, groundTouch.mul(0.58)).mul(contactAO);
+
+  const finalColor = biomeUnderstoryColor(groundedColor);
   const blossom = entry.kind === 'blossom';
   const fill = understoryShadeEmission(finalColor, { blossom });
 
+  // Normal relief from vein height + organic noise texture, blending smoothly toward ground-up at root skirt.
+  const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.55)).mul(0.014);
+  const bumpNormal = barkBumpNormal(reliefHeight);
+  const groundUpView = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
+  const blendedNormal = mix(bumpNormal, groundUpView, groundTouch.mul(0.78)).normalize();
+
+  // Spatially varying PBR roughness: waxy leaves (0.44..0.58), soft petals (0.68..0.78), matte soil/woody base (0.92).
+  const baseRoughness = blossom
+    ? mix(float(0.66), float(0.78), grainSample.g)
+    : mix(float(0.84), mix(float(0.42), float(0.62), microField.r), plantGreen);
+  const dryRoughness = baseRoughness.max(groundTouch.mul(0.94)).clamp(0.32, 1);
+  const roughnessNode = mix(dryRoughness, dryRoughness.min(0.28), surfaceWetnessUniform.mul(0.6));
+
   const material = new THREE.MeshStandardNodeMaterial({
     vertexColors: false,
-    roughness: entry.ice ? 0.16 : 0.78,
+    roughness: 0.72,
     metalness: 0,
     side: THREE.DoubleSide,
     colorNode: finalColor,
+    normalNode: blendedNormal,
+    roughnessNode,
     emissiveNode: fill,
   });
   material.foliageTransmissionNode = blossom
     ? float(0.16)
-    : mix(float(0.02), float(0.22), plantGreen);
+    : mix(float(0.02), float(0.24), plantGreen);
 
   applyPlantMotion(material, {
     wind: config?.wind,
@@ -53,26 +117,75 @@ function createLivingPlantMaterial(entry, config) {
   return material;
 }
 
-function createGlacialIceFloraMaterial() {
-  const iceColor = biomeUnderstoryColor(attribute('color', 'vec3'));
-  return new THREE.MeshPhysicalNodeMaterial({
+/**
+ * Glacial flora PBR material sharing `ice-detail.png` and `ice-normal-rough.png` via
+ * triplanar projection, clearcoat, frost sparkle, and snow-skirt base blending.
+ */
+function createGlacialIceFloraMaterial(baseUrl = '') {
+  const { detail, surface } = acquireIceTextures(baseUrl);
+  const facing = normalGeometry.abs().pow(4);
+  const weights = facing.div(dot(facing, vec3(1)).max(1e-4)).toVar();
+  const fine = positionGeometry.mul(3.4).toVar();
+  const coarse = positionGeometry.mul(1.1).toVar();
+
+  const masks = triplanarSample(detail, coarse, weights).value.toVar();
+  const fineSurface = triplanarSample(surface, fine, weights);
+  const coarseSurface = triplanarSample(surface, coarse, weights);
+
+  const w = [weights.x, weights.y, weights.z];
+  const packedNormal = fineSurface.taps.map((tap, i) => barkPackedNormal(tap, fineSurface.planes[i]))
+    .reduce((sum, n, i) => sum.add(n.mul(w[i])), vec3(0))
+    .mul(0.55)
+    .add(
+      coarseSurface.taps.map((tap, i) => barkPackedNormal(tap, coarseSurface.planes[i]))
+        .reduce((sum, n, i) => sum.add(n.mul(w[i])), vec3(0))
+        .mul(0.45),
+    )
+    .normalize();
+
+  const groundTouch = smoothstep(0.16, -0.05, positionGeometry.y.add(masks.g.sub(0.5).mul(0.08)));
+  const groundUpView = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
+  const iceNormal = mix(packedNormal, groundUpView, groundTouch.mul(0.75)).normalize();
+
+  const look = attribute('instanceBiomeLook', 'vec4');
+  const snowSteps = look.w.div(4).floor();
+  const snowDepth = snowSteps.div(LOOK_SNOW_STEPS);
+  const slopeSnow = smoothstep(0.42, 0.78, normalWorld.y.add(masks.g.sub(0.4).mul(0.45)))
+    .mul(snowDepth.mul(1.15).clamp(0, 1));
+  const basalSnow = groundTouch.mul(0.88);
+  const cap = clamp(slopeSnow.max(basalSnow), 0, 1);
+
+  const blueShare = clamp(smoothstep(0.28, 0.74, masks.b.mul(0.9).add(masks.r.mul(0.45)))
+    .add(normalWorld.y.abs().oneMinus().mul(0.28)), 0, 1).toVar();
+  const iceTint = mix(attribute('color', 'vec3'), color('#1f78c4'), blueShare.mul(0.42));
+  const shadedIce = mix(iceTint, color('#edf4f9'), cap);
+  const iceAlbedo = biomeUnderstoryColor(shadedIce);
+  const mirrorRoughness = mix(mix(fineSurface.value.b.max(0.22), float(0.08), blueShare), float(0.82), cap);
+
+  const material = new THREE.MeshPhysicalNodeMaterial({
     vertexColors: false,
-    roughness: 0.14,
+    roughness: 0.16,
     metalness: 0,
     ior: 1.31,
-    clearcoat: 0.65,
-    clearcoatRoughness: 0.16,
     side: THREE.FrontSide,
-    colorNode: iceColor,
-    emissiveNode: iceColor.mul(0.1),
+    colorNode: iceAlbedo,
+    normalNode: iceNormal,
+    roughnessNode: mirrorRoughness,
+    clearcoatNode: blueShare.mul(cap.oneMinus()).mul(0.85),
+    clearcoatRoughnessNode: float(0.06),
+    emissiveNode: iceAlbedo.mul(blueShare.mul(0.18).add(0.06)).mul(cap.oneMinus()),
   });
+  return material;
 }
 
 /**
  * Builds `StylizedGroundDetailView` prototype definitions for all 80 biome-specific
- * trunks, understories, small plants, and glacier formations across biomes `0–14` and `32`.
+ * trunks, understories, small plants, and glacier formations across biomes `0–14` and `32`,
+ * wired with PBR normal/roughness maps and smooth terrain contact skirts.
  */
 export function createBiomeUnderstoryPrototypes(config = {}, environment = {}) {
+  const baseUrl = environment.baseUrl ?? '';
+  const deadwoodNoise = acquireDeadwoodNoise(baseUrl);
   const barkByProfile = new Map();
   const getBarkTextures = (profile = 'spruce') => {
     if (!barkByProfile.has(profile)) {
@@ -88,7 +201,7 @@ export function createBiomeUnderstoryPrototypes(config = {}, environment = {}) {
     const isTrunk = entry.kind === 'trunk';
 
     if (entry.ice) {
-      material = createGlacialIceFloraMaterial();
+      material = createGlacialIceFloraMaterial(baseUrl);
     } else if (isTrunk) {
       const deadwood = deadwoodMaterial(getBarkTextures(entry.barkProfile ?? 'spruce'), {
         ...environment,
@@ -96,12 +209,12 @@ export function createBiomeUnderstoryPrototypes(config = {}, environment = {}) {
         horizontal: false,
         olderWood: true,
         roughness: 0.94,
-        bumpScale: 0.022,
+        bumpScale: 0.024,
       });
       material = deadwood.material;
       swapScannedBark = deadwood.swapScannedBark;
     } else {
-      material = createLivingPlantMaterial(entry, config);
+      material = createLivingPlantMaterial(entry, config, environment, deadwoodNoise);
     }
 
     return {

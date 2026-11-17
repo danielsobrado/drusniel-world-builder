@@ -4,9 +4,10 @@ import { atFrame } from './propFrame.js';
 
 const P = (x, y, z) => ({ x, y, z });
 
-/** 1. Cantilevered pressure-sheared glacier serac fin with fractured basal apron. */
+/** 1. Cantilevered pressure-sheared glacier serac fin with fractured basal apron & drifted snow skirt. */
 export function buildSeracFinMonolith(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('roof', rod(L(0, -0.32, 0), L(0, 0.14, 0), 1.52, 1.12, 9), 0xffffff);
   b.prop('clearIce', rod(L(0, -0.3, 0), L(0.65, 3.8, -0.25), 0.95, 0.24, 6), 0xffffff);
   b.prop('clearIce', rod(L(-0.62, -0.25, 0.22), L(-0.35, 2.35, 0.15), 0.56, 0.15, 6), 0xffffff);
   b.prop('iceBlock', stoneBox(1.75, 0.52, 1.35, L(0, 0.24, 0), { yaw, bevel: 0.08 }), 0xffffff);
@@ -14,9 +15,10 @@ export function buildSeracFinMonolith(b, at, yaw = 0) {
   b.nav.block(at, 1.15, 3.8);
 }
 
-/** 2. Stacked drystone glacial wayfinder cairn crowned by red cloth streamer & lantern. */
+/** 2. Stacked drystone glacial wayfinder cairn crowned by red cloth streamer, lantern & snow drift collar. */
 export function buildGlacialWayfinderCairn(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('roof', rod(L(0, -0.28, 0), L(0, 0.08, 0), 1.04, 0.84, 8), 0xffffff);
   b.prop('rock', stoneBlock(1.18, 0.65, 1.18, L(0, -0.05, 0), { yaw, bevel: 0.08, irregular: 0.55 }), STONE);
   b.prop('rock', stoneBlock(0.84, 0.68, 0.84, L(0, 0.6, 0), { yaw: yaw + 0.3, bevel: 0.06, irregular: 0.5 }), STONE);
   b.prop('roof', stoneBox(0.88, 0.16, 0.88, L(0, 1.34, 0), { yaw, bevel: 0.04 }), 0xffffff);

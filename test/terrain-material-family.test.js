@@ -49,6 +49,9 @@ test('terrain material families validate bounded shared-atlas settings', () => {
   assert.equal(Object.isFrozen(config.families.genomes), true);
   assert.equal(Object.isFrozen(config.families.features), true);
   assert.equal(Object.isFrozen(config.families.weathering), true);
+  assert.equal(config.families.worldNoise.enabled, true);
+  assert.equal(config.families.worldNoise.mesoFadeStartDistance < config.families.worldNoise.mesoFadeEndDistance, true);
+  assert.equal(Object.isFrozen(config.families.worldNoise), true);
 });
 
 test('terrain material family config rejects unsafe atlas, fade, scale and feature settings', () => {
@@ -92,6 +95,20 @@ test('terrain material family config rejects unsafe atlas, fade, scale and featu
   assert.throws(
     () => createTerrainMaterialBakeConfig(invalidWeatheringFade),
     /families\.weathering\.fadeEndDistance must exceed fadeStartDistance/,
+  );
+
+  const invalidNoiseFade = sourceConfig();
+  invalidNoiseFade.families.worldNoise.microFadeEndDistance = invalidNoiseFade.families.worldNoise.microFadeStartDistance;
+  assert.throws(
+    () => createTerrainMaterialBakeConfig(invalidNoiseFade),
+    /families\.worldNoise\.microFadeEndDistance must exceed microFadeStartDistance/,
+  );
+
+  const invalidNoiseTint = sourceConfig();
+  invalidNoiseTint.families.worldNoise.mossTint = 'moss';
+  assert.throws(
+    () => createTerrainMaterialBakeConfig(invalidNoiseTint),
+    /families\.worldNoise\.mossTint must be a six-digit hex color/,
   );
 
   const invalidFeatureColor = sourceConfig();

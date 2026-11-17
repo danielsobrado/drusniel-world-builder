@@ -9,6 +9,7 @@ function createSeasonalTeakStump() {
   const bark = C('#6a543c');
   const top = C('#a68b64');
   const leaf = C('#557f34');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.42, height: 0.085, sides: 10, colorBase: C('#4c5c32'), colorTop: leaf });
   b.addTube([[0, -0.08, 0], [0, 0.16, 0], [0, 0.44, 0], [0, 0.72, 0]], [0.23, 0.18, 0.16, 0.14], 14, {
     colorBase: bark, colorTip: top, fluteCount: 7, fluteDepth: 0.22,
   });

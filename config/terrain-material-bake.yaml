@@ -121,6 +121,31 @@ families:
     litterColor: '#63513d'
     crackColor: '#58483c'
     mineralColor: '#8a908a'
+  # The packed world-noise layers in the family atlas (worldNoiseLayout.js) as
+  # ground properties. Fades are by camera distance, shared by all three bands.
+  # Tints are grey-centred: '#808080' changes nothing.
+  worldNoise:
+    enabled: true
+    # macro (512 m): soil moisture and large colour patches
+    moistureDarkening: 0.10
+    moistureRoughness: 0.06
+    patchStrength: 0.55
+    patchWarm: '#8e8070'
+    patchCool: '#74847a'
+    # meso (32 m): grass and moss clusters on turf, staining on rock
+    mesoFadeStartDistance: 260
+    mesoFadeEndDistance: 700
+    mossLevel: 0.55
+    mossStrength: 0.45
+    mossTint: '#64785a'
+    stainStrength: 0.35
+    stainTint: '#70665c'
+    # micro (8 m): grain and pits at walking distance
+    microFadeStartDistance: 20
+    microFadeEndDistance: 80
+    grainStrength: 0.07
+    pitLevel: 0.32
+    pitStrength: 0.10
   weathering:
     enabled: true
     fadeStartDistance: 120

@@ -18,6 +18,7 @@ import {
   vec3,
 } from 'three/tsl';
 import { createTerrainMaterialFamilyMultiplier } from './TerrainMaterialStochasticNodes.js';
+import { applyTerrainWorldNoiseColor, createTerrainWorldNoiseShaping } from './TerrainMaterialWorldNoiseNodes.js';
 import { bilinearLoad } from './TerrainSlotBindings.js';
 import { createTerrainMaterialGenome } from './TerrainMaterialGenomeNodes.js';
 import { createTerrainTransitionState } from './TerrainTransitionNodes.js';
@@ -140,6 +141,8 @@ export function createTerrainMaterialBakedSurface({
   localXZ = null,
   transitionPatterns = null,
   grassColorOverride = null,
+  /** { macro, meso, micro } world-noise taps from the family atlas, or null. */
+  worldNoise = null,
 }) {
   const materialBake = stylizedConfig.materialBake;
   const render = materialBake.render;
@@ -189,6 +192,9 @@ export function createTerrainMaterialBakedSurface({
     cameraDistance,
     weathering: families.weathering,
   });
+  const noiseShaping = createTerrainWorldNoiseShaping({
+    noise: worldNoise, weights, cameraDistance, config: families.worldNoise,
+  });
   const substrate = createTerrainSubstrateNodes({tileId,canopy:samples.canopyWater.r,
     wetness:samples.wetnessShoreline.r,shoreline:samples.wetnessShoreline.g,profiles:families.substrates});
   const roughness = clamp(
@@ -197,7 +203,8 @@ export function createTerrainMaterialBakedSurface({
         .add(samples.wetnessShoreline.r.mul(families.profiles.dirt.wetRoughness-families.profiles.dirt.roughness)))))
       .add(genome.roughnessOffset)
       .add(featureState.roughnessOffset)
-      .add(weatheringState.roughnessOffset),
+      .add(weatheringState.roughnessOffset)
+      .add(noiseShaping?.roughnessOffset ?? float(0)),
     0,
     1,
   );
@@ -287,6 +294,7 @@ export function createTerrainMaterialBakedSurface({
     .mul(genome.colorMultiplier);
   midColor = applyTerrainMaterialFeatureColor(midColor, featureState, families.features);
   midColor = applyTerrainWeatheringColor(midColor, weatheringState);
+  midColor = applyTerrainWorldNoiseColor(midColor, noiseShaping);
   midColor = mix(
     midColor,
     colorNode(render.shorelineColor),
@@ -328,6 +336,7 @@ export function createTerrainMaterialBakedSurface({
     families.features,
   );
   nearProcedural = applyTerrainWeatheringColor(nearProcedural, weatheringState);
+  nearProcedural = applyTerrainWorldNoiseColor(nearProcedural, noiseShaping);
   // Exposed rock and snow need their own colour at walking distance, rather
   // than being reduced to the turf's detail multiplier. Banks retain some turf.
   const nearMaterialBlend = families.transitions?.enabled
@@ -343,7 +352,11 @@ export function createTerrainMaterialBakedSurface({
   const farBlend = smoothstep(render.farDistance, farBlendEnd, cameraDistance);
 
   // The far bake predates the storm: lay its snow there too, or the snow stops at the far band.
-  const farColor = mix(samples.farColor.rgb.mul(genome.colorMultiplier), snowColor.mul(heightShade), stormSnow);
+  const farColor = mix(
+    applyTerrainWorldNoiseColor(samples.farColor.rgb.mul(genome.colorMultiplier), noiseShaping),
+    snowColor.mul(heightShade),
+    stormSnow,
+  );
   return {
     color: assembleBakedColor({
       nearDetailed,

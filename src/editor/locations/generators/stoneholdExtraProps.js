@@ -14,21 +14,25 @@ const P = (x, y, z) => ({ x, y, z });
 /** 1. Stepped bronze-and-granite steam drop-hammer forging press & die anvil. */
 export function buildDropHammerForgePress(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
+  b.prop('masonry', stoneBlock(2.75, 0.38, 1.92, L(0, -0.18, 0), { yaw, bevel: 0.06 }));
   b.prop('masonry', stoneBlock(2.4, 0.42, 1.6, at, { yaw, bevel: 0.05 }));
   for (const sx of [-0.88, 0.88]) {
     b.prop('carved', stoneBox(0.42, 2.45, 0.56, L(sx, 1.64, 0), { yaw, bevel: 0.04 }), 0xe6e2da);
+    b.prop('bronze', stoneBox(0.5, 0.18, 0.64, L(sx, 0.52, 0), { yaw, bevel: 0.02 }), 0xffffff);
   }
   b.prop('bronze', stoneBox(2.36, 0.42, 0.72, L(0, 3.04, 0), { yaw, bevel: 0.04 }), 0xffffff);
   b.prop('iron', stoneBox(0.84, 0.62, 0.58, L(0, 0.74, 0), { yaw, bevel: 0.03 }), 0x5c606a);
   b.prop('iron', stoneBox(0.68, 0.72, 0.48, L(0, 1.98, 0), { yaw, bevel: 0.03 }), 0x454952);
   b.prop('bronze', rod(L(0, 2.34, 0), L(0, 2.95, 0), 0.14, 0.14, 8), 0xe8d0a8);
+  b.prop('ore', stoneBox(0.28, 0.14, 0.38, L(-0.98, 0.48, 0.44), { yaw, bevel: 0.02 }), 0xd9a862);
   b.nav.block(at, 1.35, 3.2);
 }
 
 /** 2. Tiered octagonal granite-and-bronze ancestral brazier pedestal with live ember dome. */
 export function buildRunicBrazierPedestal(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
-  b.prop('masonry', rod(L(0, 0, 0), L(0, 0.36, 0), 0.96, 0.84, 8), 0xe2dfd8);
+  b.prop('masonry', rod(L(0, -0.22, 0), L(0, 0.12, 0), 1.18, 1.02, 8), 0xdad6ce);
+  b.prop('masonry', rod(L(0, 0.08, 0), L(0, 0.36, 0), 0.96, 0.84, 8), 0xe2dfd8);
   b.prop('carved', rod(L(0, 0.36, 0), L(0, 1.24, 0), 0.54, 0.46, 8), 0xedeae2);
   b.prop('bronze', rod(L(0, 1.24, 0), L(0, 1.62, 0), 0.48, 0.74, 10), 0xffffff);
   b.prop('glow', rod(L(0, 1.54, 0), L(0, 1.72, 0), 0.54, 0.22, 8), '#ff6818', 2.4);

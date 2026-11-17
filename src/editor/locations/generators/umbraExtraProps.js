@@ -11,11 +11,12 @@ import { atFrame } from './propFrame.js';
 
 const P = (x, y, z) => ({ x, y, z });
 
-/** 1. Giant sinuous segmented veil-fungus parasol with hanging luminescent spore tendrils. */
+/** 1. Giant sinuous segmented veil-fungus parasol with basal loam root collar & luminescent spores. */
 export function buildVeilFungusParasol(b, at, scale = 1.0) {
   const s = scale;
+  b.prop('loam', rod(P(at.x, at.y - 0.18 * s, at.z), P(at.x, at.y + 0.12 * s, at.z), 0.72 * s, 0.36 * s, 10), 0x2e2838);
   const segments = [
-    P(at.x, at.y - 0.1, at.z),
+    P(at.x, at.y - 0.12, at.z),
     P(at.x + 0.14 * s, at.y + 1.1 * s, at.z + 0.08 * s),
     P(at.x - 0.08 * s, at.y + 2.2 * s, at.z - 0.1 * s),
     P(at.x, at.y + 3.1 * s, at.z),
@@ -24,11 +25,14 @@ export function buildVeilFungusParasol(b, at, scale = 1.0) {
   for (let i = 0; i < segments.length - 1; i += 1) {
     b.prop('loam', rod(segments[i], segments[i + 1], radii[i], radii[i + 1], 9), 0x3b3348);
   }
+  // Collar ring & secondary sapling buds grounding the stalk smoothly into the cavern silt.
+  b.prop('loam', rod(P(at.x + 0.34 * s, at.y - 0.06 * s, at.z + 0.2 * s), P(at.x + 0.42 * s, at.y + 0.56 * s, at.z + 0.24 * s), 0.1 * s, 0.05 * s, 7), 0x443a54);
+  b.prop('glow', rod(P(at.x + 0.42 * s, at.y + 0.52 * s, at.z + 0.24 * s), P(at.x + 0.42 * s, at.y + 0.68 * s, at.z + 0.24 * s), 0.24 * s, 0.04 * s, 7), '#9b7ef0', 1.1);
   const capAt = segments[3];
   b.prop('masonry', rod(P(capAt.x, capAt.y - 0.12 * s, capAt.z), P(capAt.x, capAt.y + 0.35 * s, capAt.z), 1.45 * s, 0.72 * s, 12), 0x2c2440);
   b.prop('glow', rod(P(capAt.x, capAt.y + 0.34 * s, capAt.z), P(capAt.x, capAt.y + 0.62 * s, capAt.z), 0.72 * s, 0.12 * s, 10), '#79e3c4', 1.4);
-  for (let k = 0; k < 6; k += 1) {
-    const a = (k / 6) * Math.PI * 2;
+  for (let k = 0; k < 8; k += 1) {
+    const a = (k / 8) * Math.PI * 2;
     const rx = Math.cos(a) * 1.15 * s;
     const rz = Math.sin(a) * 1.15 * s;
     b.prop('glow', rod(P(capAt.x + rx, capAt.y - 0.1 * s, capAt.z + rz), P(capAt.x + rx * 0.92, capAt.y - 0.95 * s, capAt.z + rz * 0.92), 0.035 * s, 0.01 * s, 5), '#9b7ef0', 1.1);
@@ -37,15 +41,17 @@ export function buildVeilFungusParasol(b, at, scale = 1.0) {
   b.nav.block(at, 0.45 * s, 3.2 * s);
 }
 
-/** 2. Faceted dark-basalt crystal resonator obelisk ringed by forged tuning arcs. */
+/** 2. Faceted dark-basalt crystal resonator obelisk ringed by forged tuning arcs & bedded plinth. */
 export function buildCrystalResonatorObelisk(b, at, yaw = 0) {
   const L = atFrame(at, yaw);
-  b.prop('masonry', rod(L(0, -0.05, 0), L(0, 0.55, 0), 0.92, 0.68, 6), 0xffffff);
+  b.prop('masonry', rod(L(0, -0.22, 0), L(0, 0.18, 0), 1.12, 0.96, 6), 0xffffff);
+  b.prop('masonry', rod(L(0, 0.14, 0), L(0, 0.55, 0), 0.92, 0.68, 6), 0xffffff);
   b.prop('masonry', stoneBox(0.95, 0.28, 0.95, L(0, 0.68, 0), { yaw, bevel: 0.04 }), 0xffffff);
   b.prop('glow', rod(L(0, 1.05, 0), L(0, 2.85, 0), 0.32, 0.06, 6), '#9b7ef0', 2.2);
   for (let k = 0; k < 3; k += 1) {
     const a = (k / 3) * Math.PI * 2 + yaw;
     b.prop('iron', beam(P(at.x + Math.cos(a) * 0.62, at.y + 0.72, at.z + Math.sin(a) * 0.62), P(at.x + Math.cos(a) * 0.34, at.y + 2.45, at.z + Math.sin(a) * 0.34), 0.07, 0.07), 0x252832);
+    b.prop('glow', rod(P(at.x + Math.cos(a + 0.9) * 0.55, at.y + 0.2, at.z + Math.sin(a + 0.9) * 0.55), P(at.x + Math.cos(a + 0.9) * 0.62, at.y + 0.85, at.z + Math.sin(a + 0.9) * 0.62), 0.1, 0.02, 5), '#79e3c4', 1.6);
   }
   b.light(L(0, 2.1, 0), '#9b7ef0', 2.8, 16, { halo: 1.2 });
   b.nav.block(at, 0.95, 3.0);

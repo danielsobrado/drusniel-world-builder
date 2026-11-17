@@ -11,6 +11,7 @@ function createTemperateRainNurseStump() {
   const moss = C('#4c7b30');
   const shootB = C('#42742e');
   const shootT = C('#74a848');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.42, height: 0.095, sides: 10, colorBase: bark, colorTop: moss });
   b.addTube([[0, -0.08, 0], [0.02, 0.36, 0], [0, 0.78, -0.02]], [0.24, 0.18, 0.15], 12, {
     colorBase: bark, colorTip: moss, fluteCount: 6, fluteDepth: 0.16,
   });

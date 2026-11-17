@@ -30,6 +30,7 @@ function createGrasslandHawthornStump() {
   const barkTip = C('#7c6452');
   const leafB = C('#4c7634');
   const leafT = C('#74a24d');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.34, height: 0.08, sides: 10, colorBase: bark, colorTop: leafB });
   b.addTube([[0, -0.07, 0], [0.04, 0.28, 0.02], [-0.02, 0.62, -0.03]], [0.18, 0.14, 0.1], 9, {
     colorBase: bark, colorTip: barkTip, fluteCount: 5, fluteDepth: 0.14,
   });

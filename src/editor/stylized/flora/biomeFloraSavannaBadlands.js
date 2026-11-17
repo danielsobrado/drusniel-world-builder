@@ -150,6 +150,7 @@ function createBadlandsBrittlebushSnag() {
   const b = new OrganicMeshBuilder();
   const pale = C('#baa992');
   const redRoot = C('#7e543e');
+  b.addRootCollar({ center: [0, 0, 0], radius: 0.35, height: 0.08, sides: 10, colorBase: redRoot, colorTop: C('#a87254') });
   b.addTube(
     [[0, -0.07, 0], [0.05, 0.18, -0.03], [0.07, 0.38, -0.02], [-0.08, 0.62, 0.06], [0.06, 0.88, 0.14], [0.16, 1.09, 0.06]],
     [0.16, 0.13, 0.11, 0.085, 0.055, 0.015],

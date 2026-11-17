@@ -107,6 +107,18 @@
         "5197"
       ],
       "port": 5197
+    },
+    {
+      "name": "worldnoise-A",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenA", "run", "dev", "--", "--port", "5292", "--strictPort"],
+      "port": 5292
+    },
+    {
+      "name": "worldnoise-B",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenB", "run", "dev", "--", "--port", "5293", "--strictPort"],
+      "port": 5293
     }
   ]
 }

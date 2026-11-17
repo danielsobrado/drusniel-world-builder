@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
-const DETAIL = 26;
-const SUB_DETAIL = 10;
+const DETAIL = 30;
+const SUB_DETAIL = 12;
 const BELOW_WATER = 0.45;
 
 function lattice(x, y, z, seed) {
@@ -61,12 +61,38 @@ function createKeel(radius = 0.92, depth = BELOW_WATER, seed = 13) {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const z = pos.getZ(i);
-    const n = ridgedNoise3(x * 2.1, y * 1.7, z * 2.1, seed);
-    const r = radius * (0.86 + n * 0.24);
-    const wy = y > 0 ? y * 0.1 : y * depth * (0.85 + n * 0.3);
+    const n = ridgedNoise3(x * 2.3, y * 1.9, z * 2.3, seed);
+    // Gentle submerged shelf collar flaring slightly near y = 0 for smooth sea-to-glacier transition.
+    const collar = Math.exp(-Math.pow(y * 3.5, 2)) * 0.16;
+    const r = radius * (0.86 + n * 0.24 + collar);
+    const wy = y > 0 ? y * 0.09 : y * depth * (0.85 + n * 0.3);
     pos.setXYZ(i, x * r, wy, z * r);
   }
   return geom;
+}
+
+/** Ring of fractured brash-ice floes resting along the waterline so cliffs blend naturally into sea ice. */
+function createWaterlineBrashCollar(count = 8, radius = 0.88, seed = 401) {
+  const parts = [];
+  for (let i = 0; i < count; i += 1) {
+    const angle = (i / count) * Math.PI * 2 + (seed % 7) * 0.15;
+    const dist = radius * (0.88 + 0.16 * Math.sin(i * 2.3 + seed));
+    parts.push(createIceShard({
+      offsetX: Math.cos(angle) * dist,
+      offsetZ: Math.sin(angle) * dist,
+      radiusX: 0.16 + (i % 3) * 0.04,
+      radiusZ: 0.14 + (i % 2) * 0.04,
+      height: 0.14 + (i % 3) * 0.05,
+      baseY: -0.09,
+      tiltX: Math.sin(angle) * 0.22,
+      tiltZ: -Math.cos(angle) * 0.22,
+      yaw: angle,
+      taper: 0.28,
+      flutes: 5,
+      seed: seed + i * 11,
+    }));
+  }
+  return parts;
 }
 
 function createIceShard({
@@ -374,6 +400,7 @@ const SCULPTORS = Object.freeze([
 export function createIcebergGeometry(kind) {
   const sculptor = SCULPTORS[kind] ?? SCULPTORS[0];
   const parts = sculptor();
+  parts.push(...createWaterlineBrashCollar(7 + (kind % 3), 0.9, 300 + kind * 37));
   const merged = parts.length === 1 ? parts[0] : mergeGeometries(parts, false);
   if (parts.length > 1) {
     for (const part of parts) part.dispose();
