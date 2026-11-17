@@ -8,6 +8,14 @@ this checkout, and work parked on a side branch has ended up diverging from
 `main` and needing hand-merged conflicts. Pull before starting, and commit
 in-progress work rather than leaving it uncommitted for the next session.
 
+## Documents
+
+A document's file name ends with the date it was last updated, as
+`name-YYYY-MM-DD.md`, so a reader can tell at a glance whether it may be
+outdated. When you change a document, rename it to the current date
+(`git mv`) and update every link to it. Older documents without a date take
+one the next time they are updated.
+
 ## Azgaar terrain compatibility
 
 Azgaar is the canonical terrain format. Keep its 13 standard biome IDs as the
@@ -31,7 +39,7 @@ there only with a reason.
 
 Snow and moss on rocks, towns and trunks are coats with their own albedo,
 normal and roughness, laid over the surface by its existing coverage mask — see
-[surface coatings](docs/surface-coatings.md). Coverage stays with each surface's
+[surface coatings](docs/surface-coatings-2026-11-17.md). Coverage stays with each surface's
 masks; never add a second snow or moss coverage system, and never mix moss into
 a colour that the moss coat also lays.
 
