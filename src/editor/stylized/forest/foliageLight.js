@@ -20,7 +20,8 @@ import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 import { authoredTexture } from '../AuthoredTextureNode.js';
 
 /** Share of foliage vs woody-stem normals bent to the sky, preserving branch contrast. */
-const SKYWARD_FOLIAGE_NORMAL = 0.48;
+// 0.35 since 2026-11-17 (was 0.48): crown tops lit brighter than the sky behind them.
+const SKYWARD_FOLIAGE_NORMAL = 0.35;
 const SKYWARD_WOODY_NORMAL = 0.12;
 /** Strength of a plant's own normal map over the bent normal. */
 const UNDERSTORY_NORMAL_STRENGTH = 0.8;
@@ -28,6 +29,8 @@ const UNDERSTORY_NORMAL_STRENGTH = 0.8;
 const CROWN_AIR_START = 14;
 const CROWN_AIR_END = 220;
 const CROWN_AIR = 0.42;
+/** Thicker air pulls the ramp in by the root of its fog scale, up to this factor. */
+const MAX_AIR_REACH = 2.5;
 /** Share of the sky fill a crown's and a trunk's shaded faces take. */
 const CROWN_FILL = 0.55;
 const BARK_FILL = 0.6;
@@ -69,6 +72,8 @@ export const foliageLight = Object.freeze({
   /** The hemisphere's ground colour: light coming back up off the forest floor. */
   groundColor: uniform(new THREE.Color('#000000')),
   sunDirection: uniform(new THREE.Vector3(0, 1, 0)),
+  /** Distance multiplier on the in-scatter ramp: humid regions haze their near trees. */
+  airReach: uniform(1),
 });
 
 /**
@@ -87,11 +92,16 @@ export function syncFoliageLight(sky, fogColor = null) {
   if (fogLuminance > 1e-4) air.copy(fogColor).multiplyScalar(luminance(foliageLight.skyColor.value) / fogLuminance);
   if (hemisphere) foliageLight.groundColor.value.copy(hemisphere.groundColor);
   else foliageLight.groundColor.value.setRGB(0, 0, 0);
+  foliageLight.airReach.value = airReach(sky?.fogDensityScale);
   foliageLight.fill.value = Math.min(Math.max(hemisphere?.intensity ?? 0, 0) * 0.35, 0.7);
   // Light intensity and colour are already included in the lighting model.
   foliageLight.strength.value = sky?.directional ? 0.12 : 0;
   if (sky?.directional) foliageLight.sunDirection.value.copy(sky.directional.position)
     .sub(sky.directional.target.position).normalize();
+}
+
+export function airReach(fogDensityScale) {
+  return Math.min(MAX_AIR_REACH, Math.max(1, Math.sqrt(Number.isFinite(fogDensityScale) ? fogDensityScale : 1)));
 }
 
 function luminance(colour) {
@@ -151,7 +161,7 @@ export function treeFoliageEmission(crown, skyEdge = null, visibility = float(1)
 }
 
 function treeAir() {
-  return smoothstep(CROWN_AIR_START, CROWN_AIR_END, positionView.length()).mul(CROWN_AIR);
+  return smoothstep(CROWN_AIR_START, CROWN_AIR_END, positionView.length().mul(foliageLight.airReach)).mul(CROWN_AIR);
 }
 
 /**

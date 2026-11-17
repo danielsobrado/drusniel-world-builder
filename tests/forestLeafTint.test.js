@@ -159,7 +159,7 @@ test('biomes outside the table and unknown species stay untinted', () => {
 
 test('textured crowns take their tints against the canopy grade, and only a nudge of biome hue', () => {
   const table = createForestLeafTintTable({ config: config(1) });
-  const gradeLight = new THREE.Color('#8cb75a');
+  const gradeLight = new THREE.Color('#90b566');
   // Autumn still lands exactly on its target from the grade's light colour.
   const autumn = table.tintFor('broadleaf_tall', 0.1, null, false, true);
   const target = new THREE.Color(FOREST_AUTUMN_TARGETS.broadleaf_tall[0]);

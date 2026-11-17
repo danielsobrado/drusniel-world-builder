@@ -183,6 +183,9 @@ export function boundRegionalFogScale(combined, base) {
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 /** The clearest a region's sky may get (cloud threshold on the 0..1 field). */
 const MAX_CLOUD_DENSITY = 0.68;
+/** Per unit of mist: zenith paling toward its grey, and the dome's fog share at the horizon. */
+const HUMID_ZENITH_PALE = 0.25;
+const HUMID_SKY_FOG = 0.4;
 
 /**
  * What the place's air is like, from its moisture and temperature plus the
@@ -221,6 +224,10 @@ export function applyRegionalCharacter(look, { mist, form, cold, damp }) {
   result.directionalIntensity *= 1 - 0.3 * mist;
   result.sunGlowIntensity *= 1 + 0.4 * mist;
   result.mist = clamp01((look.mist ?? 0) + mist);
+  // Wet air pales the dome: a milky horizon band and a softer zenith, so crowns
+  // stand against haze rather than a saturated blue cut-out.
+  result.highColor = recolour(look.highColor, [1, 1, 1], HUMID_ZENITH_PALE * mist);
+  result.skyFog = Math.max(look.skyFog ?? 0, HUMID_SKY_FOG * mist);
   // A truly empty sky is rare: above this threshold the fbm field shows almost
   // no cloud, so stop short of it (deserts included).
   result.cloudDensity = Math.min(result.cloudDensity, MAX_CLOUD_DENSITY);

@@ -78,3 +78,12 @@ test('the running clock blends neighbouring presets so the sun moves continuousl
   assert.equal(controller.preset, 'highfield');
   assert.ok(applied.at(-1).sunElevation > half === noon.sunElevation > morning.sunElevation);
 });
+
+test('humid air pales the zenith and fogs the horizon band; dry air leaves the dome alone', () => {
+  const wet = applyRegionalCharacter(LOOK, airCharacter(region({ moisture: 0.95, temperature: 0.5 })));
+  const dry = applyRegionalCharacter(LOOK, airCharacter(region({ moisture: 0.2, temperature: 0.5 })));
+  assert.ok(wet.skyFog > 0.15, `wet skyFog ${wet.skyFog}`);
+  assert.equal(dry.skyFog, LOOK.skyFog);
+  assert.equal(dry.highColor, LOOK.highColor);
+  assert.notEqual(wet.highColor, LOOK.highColor);
+});

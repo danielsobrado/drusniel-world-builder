@@ -71,6 +71,7 @@ import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading
 import { applyMeadowGroundDetail } from './stylized/meadow/meadowGroundDetail.js';
 import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
+import { foliageSkyFill } from './stylized/forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
 import { createPuddleShading } from './stylized/PuddleShading.js';
@@ -115,6 +116,8 @@ function ecotoneTileUv({ terrainUv, transitionPatterns, chunkWorldSize, cellsPer
 
 /** The packed noise swings wider than four-octave value noise (std 0.2 against ~0.12). */
 const NOISE_TO_FBM = 0.6;
+/** Share of the canopy's sky fill the forest floor takes, so it sits ~2 stops under the crowns, not 4. */
+const FOREST_FLOOR_FILL = 0.8;
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -639,6 +642,8 @@ export function createTerrainMaterial({
       const spellLight = material.colorNode.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0)));
       material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(spellLight) : spellLight;
     }
+    const floorFill = foliageSkyFill(material.colorNode, FOREST_FLOOR_FILL).mul(forestFloor);
+    material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(floorFill) : floorFill;
     if (puddles) material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(puddles.reflection) : puddles.reflection;
     // Valley mist pooling in the gorges below the view, marched against the
     // camera-local height patch. It blends last, over everything, because it sits

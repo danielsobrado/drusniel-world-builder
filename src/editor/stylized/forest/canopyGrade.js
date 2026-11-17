@@ -14,8 +14,10 @@ import { color as colorNode, dot, mix, smoothstep, vec3 } from 'three/tsl';
  */
 export const DEFAULT_CANOPY_GRADE = Object.freeze({
   enabled: true,
-  shadow: '#286746',
-  light: '#8cb75a',
+  // 2026-11-17: ~15% less saturated, shadow lifted (was #286746 → #8cb75a): saturated
+  // light/dark cards read as a speckled cut-out against the sky.
+  shadow: '#326c4e',
+  light: '#90b566',
   tint: 0.9,
   /**
    * Gain on the leaf luminance before it picks a point on the ramp. Our KTX2
