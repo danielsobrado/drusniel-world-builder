@@ -6,7 +6,7 @@ import { WATER_KIND_NONE, WATER_KIND_OCEAN } from './WaterConstants.js';
 const FAR_DISTANCE = 1e6;
 const DIAGONAL = Math.SQRT2;
 
-function distanceTransform(mask, size, match) {
+export function distanceTransform(mask, size, match) {
   const distances = new Float32Array(size * size);
   for (let i = 0; i < distances.length; i++) distances[i] = mask[i] === match ? 0 : FAR_DISTANCE;
   const update = (x, y, nx, ny, cost) => {
