@@ -324,6 +324,7 @@
   cursor: pointer;
 }
 .workspace-panel-extras .weather-panel-title { display: none; }
+#app .workspace-panel-extras .weather-panel { display: block; }
 #app .workspace-panel-extras .weather-panel-row { color: var(--workspace-muted); }
 #app .workspace-panel-extras .weather-panel select {
   width: 100%;
@@ -358,6 +359,7 @@
 .editor-shell[data-docked][data-compact] .workspace-splitter { display: none; }
 .editor-shell[data-docked][data-compact] :is(.sidebar, .workspace-inspector) {
   position: absolute;
+  grid-area: auto;
   top: calc(var(--workspace-menu) + var(--workspace-toolbar));
   bottom: var(--workspace-status);
   z-index: 48;
