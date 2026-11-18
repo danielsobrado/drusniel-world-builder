@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  Fn, cos, exp, float, instanceIndex, int, max, min, mix, oneMinus,
+  Fn, exp, float, instanceIndex, int, ivec2, max, min, mix, oneMinus,
   sin, smoothstep, texture, textureStore, vec2, vec4,
 } from 'three/tsl';
 import { frameUniform } from '../../render/FrameUniforms.js';
@@ -110,7 +110,7 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
       .add(deposit).clamp(0, 1);
     const result = vec4(wetness, film, mobile.sub(deposit), stranded)
       .mul(coastGate);
-    textureStore(target, vec2(x, z).toInt(), result);
+    textureStore(target, ivec2(x, z), result);
   })().compute(size * size, [64]);
 }
 
@@ -131,6 +131,8 @@ export class CoastalSwashField {
     this.accumulator = 0;
     this.initialized = false;
     this.lastActivation = -Infinity;
+    this.lastActivationX = NaN;
+    this.lastActivationZ = NaN;
     this.active = false;
     this.disposed = false;
     this.dispatchCount = 0;
@@ -143,11 +145,19 @@ export class CoastalSwashField {
       this.settings.inputTexelMeters, this.coast.runupMeters,
     );
     this.patterns = createCoastPatternOrigins();
-    this.step = stepUniforms();
-    this.forward = makeCompute(this.state, this.scratch, this.inputs.texture,
-      this.patterns, this.coast, this.settings, this.step, this.size, true);
-    this.backward = makeCompute(this.scratch, this.state, this.inputs.texture,
-      this.patterns, this.coast, this.settings, this.step, this.size, false);
+    // Each dispatch owns uniforms so queued compute passes never observe the next step's values.
+    this.passes = Array.from({ length: this.settings.maxStepsPerFrame }, () => {
+      const forwardStep = stepUniforms();
+      const backwardStep = stepUniforms();
+      return {
+        forwardStep,
+        backwardStep,
+        forward: makeCompute(this.state, this.scratch, this.inputs.texture,
+          this.patterns, this.coast, this.settings, forwardStep, this.size, true),
+        backward: makeCompute(this.scratch, this.state, this.inputs.texture,
+          this.patterns, this.coast, this.settings, backwardStep, this.size, false),
+      };
+    });
     setCoastalSwashTexture(this.state);
     coastalSwashUniforms.inverseSpan.value = 1 / this.span;
     coastalSwashUniforms.fadeFraction.value = this.settings.boundaryFadeMeters / this.span;
@@ -156,10 +166,13 @@ export class CoastalSwashField {
   update(camera, timeSeconds) {
     if (!this.supported || this.disposed || !camera || !Number.isFinite(timeSeconds)) return;
     const canonical = this.terrainView.floatingOrigin.toCanonical(camera.position.x, camera.position.z);
-    if (timeSeconds - this.lastActivation >= 1 || this.lastActivation === -Infinity) {
+    if (timeSeconds - this.lastActivation >= 1 || this.lastActivation === -Infinity
+      || Math.hypot(canonical.x - this.lastActivationX, canonical.z - this.lastActivationZ) >= this.settings.scrollMeters) {
       this.active = nearOcean(this.terrainView.worldStore, canonical.x, canonical.z,
         this.settings.activationDistanceMeters);
       this.lastActivation = timeSeconds;
+      this.lastActivationX = canonical.x;
+      this.lastActivationZ = canonical.z;
     }
     if (!this.active) {
       coastalSwashUniforms.active.value = 0;
@@ -176,22 +189,18 @@ export class CoastalSwashField {
       const previousX = this.originX;
       const previousZ = this.originZ;
       this.inputs.update(nextX, nextZ);
-      this.step.shift.value.set(
-        this.initialized ? coastalScrollCells(previousX, nextX, this.settings.texelMeters) / this.size : 0,
-        this.initialized ? coastalScrollCells(previousZ, nextZ, this.settings.texelMeters) / this.size : 0,
-      );
+      this.pendingShiftX = this.initialized ? coastalScrollCells(previousX, nextX, this.settings.texelMeters) / this.size : 0;
+      this.pendingShiftZ = this.initialized ? coastalScrollCells(previousZ, nextZ, this.settings.texelMeters) / this.size : 0;
       if (this.revision !== null && this.revision !== revision) this.initialized = false;
       this.originX = nextX;
       this.originZ = nextZ;
       this.revision = revision;
       this.patterns.update(nextX + this.span / 2, nextZ + this.span / 2);
-    } else {
-      this.step.shift.value.set(0, 0);
     }
 
     const render = this.terrainView.floatingOrigin.toRender(nextX, nextZ);
     coastalSwashUniforms.renderOrigin.value.set(render.x, render.z);
-    if (!this.inputs.oceanCount) {
+    if (!this.inputs.eligibleCount) {
       coastalSwashUniforms.active.value = 0;
       this.initialized = false;
       this.lastTime = timeSeconds;
@@ -210,14 +219,26 @@ export class CoastalSwashField {
     if (moved && this.accumulator < dt) this.accumulator = dt;
     let steps = 0;
     while (this.accumulator >= dt && steps < this.settings.maxStepsPerFrame) {
-      this.step.time.value = timeSeconds - (this.accumulator - dt * 0.5);
-      this.step.delta.value = dt * 0.5;
-      this.step.initialized.value = this.initialized ? 1 : 0;
-      this.renderer.compute(this.forward);
-      this.step.time.value = timeSeconds - (this.accumulator - dt);
-      this.renderer.compute(this.backward);
+      const pass = this.passes[steps];
+      const halfDt = dt * 0.5;
+      pass.forwardStep.time.value = timeSeconds - this.accumulator + halfDt;
+      pass.forwardStep.delta.value = halfDt;
+      pass.forwardStep.initialized.value = this.initialized ? 1 : 0;
+      pass.forwardStep.shift.value.set(this.pendingShiftX ?? 0, this.pendingShiftZ ?? 0);
+      pass.backwardStep.time.value = timeSeconds - this.accumulator + dt;
+      pass.backwardStep.delta.value = halfDt;
+      try {
+        this.renderer.compute(pass.forward);
+        this.renderer.compute(pass.backward);
+      } catch (error) {
+        console.error('Persistent coastal swash compute failed; restoring analytic swash.', error);
+        coastalSwashUniforms.active.value = 0;
+        this.supported = false;
+        return;
+      }
       this.initialized = true;
-      this.step.shift.value.set(0, 0);
+      this.pendingShiftX = 0;
+      this.pendingShiftZ = 0;
       this.accumulator -= dt;
       steps++;
     }
@@ -234,8 +255,10 @@ export class CoastalSwashField {
     this.disposed = true;
     coastalSwashUniforms.active.value = 0;
     setCoastalSwashTexture(null);
-    this.forward?.dispose?.();
-    this.backward?.dispose?.();
+    for (const pass of this.passes ?? []) {
+      pass.forward.dispose?.();
+      pass.backward.dispose?.();
+    }
     this.state?.dispose();
     this.scratch?.dispose();
     this.inputs?.dispose();
