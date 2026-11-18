@@ -138,6 +138,7 @@ export function createCoastSwashNodes({
   shorelineFadeDepth = 0.35,
   oceanMask = float(1),
   laceField = null,
+  persistentEnabled = true,
 }) {
   if (!config.enabled) return null;
   const height = groundHeight.sub(seaStateUniforms.seaLevel);
@@ -176,7 +177,7 @@ export function createCoastSwashNodes({
     .mul(oneMinus(smoothstep(runupMeters, runupMeters * 1.6, inland)))
     .mul(oceanMask);
   const analyticWet = max(memory.mul(band), damp.mul(above));
-  const persistent = config.persistent?.enabled ? sampleCoastalSwashState() : null;
+  const persistent = persistentEnabled && config.persistent?.enabled ? sampleCoastalSwashState() : null;
   const weight = persistent ? persistent.activeWeight.mul(band).mul(oceanMask) : float(0);
   const film = persistent
     ? mix(analyticFilm, persistent.film.mul(band), weight) : analyticFilm;
