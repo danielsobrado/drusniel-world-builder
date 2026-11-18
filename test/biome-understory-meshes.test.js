@@ -20,7 +20,7 @@ test('every biome has at least 5 detailed procedural flora, understory, trunk, o
   }
 });
 
-test('all biome flora geometries are valid, finite, richly tessellated, and include attributes', () => {
+test('all biome flora geometries are valid, finite, richly tessellated (>=15k tris), and include attributes', () => {
   const seenIds = new Set();
   for (const entry of BIOME_FLORA_CATALOG) {
     assert.ok(!seenIds.has(entry.id), `duplicate flora id: ${entry.id}`);
@@ -38,10 +38,19 @@ test('all biome flora geometries are valid, finite, richly tessellated, and incl
     assert.ok(norm && norm.count === pos.count && norm.array.every(Number.isFinite), `${entry.id} invalid normals`);
     assert.ok(uv && uv.count === pos.count && uv.array.every(Number.isFinite), `${entry.id} invalid UVs`);
     assert.ok(color && color.count === pos.count && color.array.every(Number.isFinite), `${entry.id} invalid colors`);
-    assert.ok(index && index.count >= 1050, `${entry.id} expected >= 350 tris, got ${(index?.count ?? 0) / 3}`);
+    assert.ok(index && index.count >= 45000, `${entry.id} expected >= 15000 tris, got ${(index?.count ?? 0) / 3}`);
     assert.ok(index.array.every((i) => i < pos.count), `${entry.id} out-of-range index`);
-    assert.ok(index.count / 3 <= 2200, `${entry.id} exceeds per-prop detail cap: ${index.count / 3} tris`);
+    assert.ok(index.count / 3 <= 35000, `${entry.id} exceeds per-prop detail cap: ${index.count / 3} tris`);
     geometry.dispose();
+  }
+});
+
+test('headless Blender biome flora manifest exports >= 15k tris PBR GLBs for every biome & trunk', async () => {
+  const manifest = JSON.parse(await fs.readFile('assets/runtime-sources/ground/biomes/manifest.json', 'utf8'));
+  const entries = manifest.assets ?? [];
+  assert.ok(entries.length >= 80, `expected >= 80 biome GLBs, got ${entries.length}`);
+  for (const entry of entries) {
+    assert.ok(entry.triangles >= 15000, `${entry.id} Blender GLB below 15000 tris: ${entry.triangles}`);
   }
 });
 

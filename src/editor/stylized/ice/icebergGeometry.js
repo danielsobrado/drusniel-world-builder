@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import {
+  sculptPositionKeyedRelief,
+  subdivideGeometryRedGreen,
+} from '../shared/meshDetailRefine.js';
 
 const DETAIL = 30;
 const SUB_DETAIL = 12;
@@ -401,10 +405,18 @@ export function createIcebergGeometry(kind) {
   const sculptor = SCULPTORS[kind] ?? SCULPTORS[0];
   const parts = sculptor();
   parts.push(...createWaterlineBrashCollar(7 + (kind % 3), 0.9, 300 + kind * 37));
-  const merged = parts.length === 1 ? parts[0] : mergeGeometries(parts, false);
+  let merged = parts.length === 1 ? parts[0] : mergeGeometries(parts, false);
   if (parts.length > 1) {
     for (const part of parts) part.dispose();
   }
+  merged = subdivideGeometryRedGreen(merged, 15400, { maxTris: 30000 });
+  sculptPositionKeyedRelief(merged, {
+    amplitude: 0.0085,
+    freq: 10.5,
+    seed: 307 + kind * 41,
+    groundY: -0.04,
+    groundFade: false,
+  });
   merged.computeVertexNormals();
   merged.computeBoundingBox();
   merged.computeBoundingSphere();

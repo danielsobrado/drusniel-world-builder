@@ -1,0 +1,614 @@
+{
+  "count": 87,
+  "assets": [
+    {
+      "id": "coastal_driftwood_snag",
+      "biomeId": 0,
+      "kind": "trunk",
+      "triangles": 15600,
+      "path": "assets/runtime-sources/ground/biomes/coastal_driftwood_snag.glb"
+    },
+    {
+      "id": "coastal_sea_buckthorn",
+      "biomeId": 0,
+      "kind": "understory",
+      "triangles": 15204,
+      "path": "assets/runtime-sources/ground/biomes/coastal_sea_buckthorn.glb"
+    },
+    {
+      "id": "coastal_sea_holly",
+      "biomeId": 0,
+      "kind": "blossom",
+      "triangles": 15622,
+      "path": "assets/runtime-sources/ground/biomes/coastal_sea_holly.glb"
+    },
+    {
+      "id": "coastal_beach_pea_tangle",
+      "biomeId": 0,
+      "kind": "blossom",
+      "triangles": 16050,
+      "path": "assets/runtime-sources/ground/biomes/coastal_beach_pea_tangle.glb"
+    },
+    {
+      "id": "coastal_samphire_tuft",
+      "biomeId": 0,
+      "kind": "smallPlant",
+      "triangles": 15933,
+      "path": "assets/runtime-sources/ground/biomes/coastal_samphire_tuft.glb"
+    },
+    {
+      "id": "desert_petrified_trunk",
+      "biomeId": 1,
+      "kind": "trunk",
+      "triangles": 15596,
+      "path": "assets/runtime-sources/ground/biomes/desert_petrified_trunk.glb"
+    },
+    {
+      "id": "desert_prickly_pear",
+      "biomeId": 1,
+      "kind": "understory",
+      "triangles": 16142,
+      "path": "assets/runtime-sources/ground/biomes/desert_prickly_pear.glb"
+    },
+    {
+      "id": "desert_barrel_cactus_cluster",
+      "biomeId": 1,
+      "kind": "smallPlant",
+      "triangles": 15293,
+      "path": "assets/runtime-sources/ground/biomes/desert_barrel_cactus_cluster.glb"
+    },
+    {
+      "id": "desert_joshua_agave",
+      "biomeId": 1,
+      "kind": "understory",
+      "triangles": 17926,
+      "path": "assets/runtime-sources/ground/biomes/desert_joshua_agave.glb"
+    },
+    {
+      "id": "desert_creosote_scrub",
+      "biomeId": 1,
+      "kind": "understory",
+      "triangles": 15326,
+      "path": "assets/runtime-sources/ground/biomes/desert_creosote_scrub.glb"
+    },
+    {
+      "id": "steppe_twisted_juniper_snag",
+      "biomeId": 2,
+      "kind": "trunk",
+      "triangles": 16141,
+      "path": "assets/runtime-sources/ground/biomes/steppe_twisted_juniper_snag.glb"
+    },
+    {
+      "id": "steppe_big_sagebrush",
+      "biomeId": 2,
+      "kind": "understory",
+      "triangles": 15191,
+      "path": "assets/runtime-sources/ground/biomes/steppe_big_sagebrush.glb"
+    },
+    {
+      "id": "steppe_cushion_buckwheat",
+      "biomeId": 2,
+      "kind": "blossom",
+      "triangles": 15946,
+      "path": "assets/runtime-sources/ground/biomes/steppe_cushion_buckwheat.glb"
+    },
+    {
+      "id": "steppe_ephedra_jointfir",
+      "biomeId": 2,
+      "kind": "understory",
+      "triangles": 16139,
+      "path": "assets/runtime-sources/ground/biomes/steppe_ephedra_jointfir.glb"
+    },
+    {
+      "id": "steppe_rabbitbrush_clump",
+      "biomeId": 2,
+      "kind": "blossom",
+      "triangles": 15947,
+      "path": "assets/runtime-sources/ground/biomes/steppe_rabbitbrush_clump.glb"
+    },
+    {
+      "id": "savanna_termite_stump",
+      "biomeId": 3,
+      "kind": "trunk",
+      "triangles": 16140,
+      "path": "assets/runtime-sources/ground/biomes/savanna_termite_stump.glb"
+    },
+    {
+      "id": "savanna_wait_a_bit_thorn",
+      "biomeId": 3,
+      "kind": "understory",
+      "triangles": 16125,
+      "path": "assets/runtime-sources/ground/biomes/savanna_wait_a_bit_thorn.glb"
+    },
+    {
+      "id": "savanna_aloe_candelabra",
+      "biomeId": 3,
+      "kind": "blossom",
+      "triangles": 16991,
+      "path": "assets/runtime-sources/ground/biomes/savanna_aloe_candelabra.glb"
+    },
+    {
+      "id": "savanna_baobab_sapling",
+      "biomeId": 3,
+      "kind": "trunk",
+      "triangles": 16138,
+      "path": "assets/runtime-sources/ground/biomes/savanna_baobab_sapling.glb"
+    },
+    {
+      "id": "savanna_red_oat_tussock",
+      "biomeId": 3,
+      "kind": "smallPlant",
+      "triangles": 15611,
+      "path": "assets/runtime-sources/ground/biomes/savanna_red_oat_tussock.glb"
+    },
+    {
+      "id": "grassland_hawthorn_stump",
+      "biomeId": 4,
+      "kind": "trunk",
+      "triangles": 15191,
+      "path": "assets/runtime-sources/ground/biomes/grassland_hawthorn_stump.glb"
+    },
+    {
+      "id": "grassland_gorse_thicket",
+      "biomeId": 4,
+      "kind": "blossom",
+      "triangles": 16148,
+      "path": "assets/runtime-sources/ground/biomes/grassland_gorse_thicket.glb"
+    },
+    {
+      "id": "grassland_yarrow_clump",
+      "biomeId": 4,
+      "kind": "blossom",
+      "triangles": 15209,
+      "path": "assets/runtime-sources/ground/biomes/grassland_yarrow_clump.glb"
+    },
+    {
+      "id": "grassland_thistle_rosette",
+      "biomeId": 4,
+      "kind": "blossom",
+      "triangles": 15603,
+      "path": "assets/runtime-sources/ground/biomes/grassland_thistle_rosette.glb"
+    },
+    {
+      "id": "grassland_poppy_tuft",
+      "biomeId": 4,
+      "kind": "blossom",
+      "triangles": 16143,
+      "path": "assets/runtime-sources/ground/biomes/grassland_poppy_tuft.glb"
+    },
+    {
+      "id": "seasonal_teak_stump",
+      "biomeId": 5,
+      "kind": "trunk",
+      "triangles": 16050,
+      "path": "assets/runtime-sources/ground/biomes/seasonal_teak_stump.glb"
+    },
+    {
+      "id": "seasonal_bamboo_culm_clump",
+      "biomeId": 5,
+      "kind": "understory",
+      "triangles": 19185,
+      "path": "assets/runtime-sources/ground/biomes/seasonal_bamboo_culm_clump.glb"
+    },
+    {
+      "id": "seasonal_heliconia_cluster",
+      "biomeId": 5,
+      "kind": "blossom",
+      "triangles": 15203,
+      "path": "assets/runtime-sources/ground/biomes/seasonal_heliconia_cluster.glb"
+    },
+    {
+      "id": "seasonal_cycad_crown",
+      "biomeId": 5,
+      "kind": "understory",
+      "triangles": 16146,
+      "path": "assets/runtime-sources/ground/biomes/seasonal_cycad_crown.glb"
+    },
+    {
+      "id": "seasonal_lantana_bush",
+      "biomeId": 5,
+      "kind": "blossom",
+      "triangles": 16142,
+      "path": "assets/runtime-sources/ground/biomes/seasonal_lantana_bush.glb"
+    },
+    {
+      "id": "deciduous_coppice_stool",
+      "biomeId": 6,
+      "kind": "trunk",
+      "triangles": 16137,
+      "path": "assets/runtime-sources/ground/biomes/deciduous_coppice_stool.glb"
+    },
+    {
+      "id": "deciduous_bramble_arch",
+      "biomeId": 6,
+      "kind": "understory",
+      "triangles": 15055,
+      "path": "assets/runtime-sources/ground/biomes/deciduous_bramble_arch.glb"
+    },
+    {
+      "id": "deciduous_rhododendron_clump",
+      "biomeId": 6,
+      "kind": "blossom",
+      "triangles": 15561,
+      "path": "assets/runtime-sources/ground/biomes/deciduous_rhododendron_clump.glb"
+    },
+    {
+      "id": "deciduous_foxglove_spire",
+      "biomeId": 6,
+      "kind": "blossom",
+      "triangles": 16287,
+      "path": "assets/runtime-sources/ground/biomes/deciduous_foxglove_spire.glb"
+    },
+    {
+      "id": "deciduous_wood_anemone_patch",
+      "biomeId": 6,
+      "kind": "blossom",
+      "triangles": 15717,
+      "path": "assets/runtime-sources/ground/biomes/deciduous_wood_anemone_patch.glb"
+    },
+    {
+      "id": "rainforest_buttress_snag",
+      "biomeId": 7,
+      "kind": "trunk",
+      "triangles": 16139,
+      "path": "assets/runtime-sources/ground/biomes/rainforest_buttress_snag.glb"
+    },
+    {
+      "id": "rainforest_tree_fern",
+      "biomeId": 7,
+      "kind": "understory",
+      "triangles": 17755,
+      "path": "assets/runtime-sources/ground/biomes/rainforest_tree_fern.glb"
+    },
+    {
+      "id": "rainforest_monstera_patch",
+      "biomeId": 7,
+      "kind": "broadleaf",
+      "triangles": 16140,
+      "path": "assets/runtime-sources/ground/biomes/rainforest_monstera_patch.glb"
+    },
+    {
+      "id": "rainforest_bird_of_paradise",
+      "biomeId": 7,
+      "kind": "blossom",
+      "triangles": 16520,
+      "path": "assets/runtime-sources/ground/biomes/rainforest_bird_of_paradise.glb"
+    },
+    {
+      "id": "rainforest_bromeliad_epiphyte",
+      "biomeId": 7,
+      "kind": "blossom",
+      "triangles": 15843,
+      "path": "assets/runtime-sources/ground/biomes/rainforest_bromeliad_epiphyte.glb"
+    },
+    {
+      "id": "temperate_rain_nurse_stump",
+      "biomeId": 8,
+      "kind": "trunk",
+      "triangles": 15567,
+      "path": "assets/runtime-sources/ground/biomes/temperate_rain_nurse_stump.glb"
+    },
+    {
+      "id": "temperate_rain_devils_club",
+      "biomeId": 8,
+      "kind": "understory",
+      "triangles": 16535,
+      "path": "assets/runtime-sources/ground/biomes/temperate_rain_devils_club.glb"
+    },
+    {
+      "id": "temperate_rain_salal_thicket",
+      "biomeId": 8,
+      "kind": "understory",
+      "triangles": 15945,
+      "path": "assets/runtime-sources/ground/biomes/temperate_rain_salal_thicket.glb"
+    },
+    {
+      "id": "temperate_rain_trillium_trio",
+      "biomeId": 8,
+      "kind": "blossom",
+      "triangles": 16025,
+      "path": "assets/runtime-sources/ground/biomes/temperate_rain_trillium_trio.glb"
+    },
+    {
+      "id": "temperate_rain_oxalis_carpet",
+      "biomeId": 8,
+      "kind": "blossom",
+      "triangles": 15935,
+      "path": "assets/runtime-sources/ground/biomes/temperate_rain_oxalis_carpet.glb"
+    },
+    {
+      "id": "taiga_pine_windfall_snag",
+      "biomeId": 9,
+      "kind": "trunk",
+      "triangles": 16315,
+      "path": "assets/runtime-sources/ground/biomes/taiga_pine_windfall_snag.glb"
+    },
+    {
+      "id": "taiga_labrador_tea_bush",
+      "biomeId": 9,
+      "kind": "blossom",
+      "triangles": 15050,
+      "path": "assets/runtime-sources/ground/biomes/taiga_labrador_tea_bush.glb"
+    },
+    {
+      "id": "taiga_cloudberry_mat",
+      "biomeId": 9,
+      "kind": "blossom",
+      "triangles": 15997,
+      "path": "assets/runtime-sources/ground/biomes/taiga_cloudberry_mat.glb"
+    },
+    {
+      "id": "taiga_lingonberry_tussock",
+      "biomeId": 9,
+      "kind": "smallPlant",
+      "triangles": 16050,
+      "path": "assets/runtime-sources/ground/biomes/taiga_lingonberry_tussock.glb"
+    },
+    {
+      "id": "taiga_horsetail_reed_patch",
+      "biomeId": 9,
+      "kind": "smallPlant",
+      "triangles": 15593,
+      "path": "assets/runtime-sources/ground/biomes/taiga_horsetail_reed_patch.glb"
+    },
+    {
+      "id": "tundra_krummholz_dwarf_birch",
+      "biomeId": 10,
+      "kind": "trunk",
+      "triangles": 15440,
+      "path": "assets/runtime-sources/ground/biomes/tundra_krummholz_dwarf_birch.glb"
+    },
+    {
+      "id": "tundra_arctic_willow_mat",
+      "biomeId": 10,
+      "kind": "understory",
+      "triangles": 15812,
+      "path": "assets/runtime-sources/ground/biomes/tundra_arctic_willow_mat.glb"
+    },
+    {
+      "id": "tundra_crowberry_cushion",
+      "biomeId": 10,
+      "kind": "smallPlant",
+      "triangles": 16048,
+      "path": "assets/runtime-sources/ground/biomes/tundra_crowberry_cushion.glb"
+    },
+    {
+      "id": "tundra_cotton_grass_tuft",
+      "biomeId": 10,
+      "kind": "blossom",
+      "triangles": 15673,
+      "path": "assets/runtime-sources/ground/biomes/tundra_cotton_grass_tuft.glb"
+    },
+    {
+      "id": "tundra_reindeer_lichen_clump",
+      "biomeId": 10,
+      "kind": "smallPlant",
+      "triangles": 15717,
+      "path": "assets/runtime-sources/ground/biomes/tundra_reindeer_lichen_clump.glb"
+    },
+    {
+      "id": "glacier_penitentes_cluster",
+      "biomeId": 11,
+      "kind": "ice",
+      "triangles": 16114,
+      "path": "assets/runtime-sources/ground/biomes/glacier_penitentes_cluster.glb"
+    },
+    {
+      "id": "glacier_blue_serac_spur",
+      "biomeId": 11,
+      "kind": "ice",
+      "triangles": 15416,
+      "path": "assets/runtime-sources/ground/biomes/glacier_blue_serac_spur.glb"
+    },
+    {
+      "id": "glacier_frost_crystal_rose",
+      "biomeId": 11,
+      "kind": "ice",
+      "triangles": 15710,
+      "path": "assets/runtime-sources/ground/biomes/glacier_frost_crystal_rose.glb"
+    },
+    {
+      "id": "glacier_pressure_ridge_heave",
+      "biomeId": 11,
+      "kind": "ice",
+      "triangles": 15349,
+      "path": "assets/runtime-sources/ground/biomes/glacier_pressure_ridge_heave.glb"
+    },
+    {
+      "id": "glacier_frozen_lichen_snag",
+      "biomeId": 11,
+      "kind": "trunk",
+      "triangles": 15605,
+      "path": "assets/runtime-sources/ground/biomes/glacier_frozen_lichen_snag.glb"
+    },
+    {
+      "id": "wetland_cypress_knees",
+      "biomeId": 12,
+      "kind": "trunk",
+      "triangles": 15814,
+      "path": "assets/runtime-sources/ground/biomes/wetland_cypress_knees.glb"
+    },
+    {
+      "id": "wetland_pitcher_plant_cluster",
+      "biomeId": 12,
+      "kind": "blossom",
+      "triangles": 15857,
+      "path": "assets/runtime-sources/ground/biomes/wetland_pitcher_plant_cluster.glb"
+    },
+    {
+      "id": "wetland_skunk_cabbage_rosette",
+      "biomeId": 12,
+      "kind": "understory",
+      "triangles": 16005,
+      "path": "assets/runtime-sources/ground/biomes/wetland_skunk_cabbage_rosette.glb"
+    },
+    {
+      "id": "wetland_bog_myrtle_clump",
+      "biomeId": 12,
+      "kind": "understory",
+      "triangles": 16140,
+      "path": "assets/runtime-sources/ground/biomes/wetland_bog_myrtle_clump.glb"
+    },
+    {
+      "id": "wetland_sundew_sphagnum_pad",
+      "biomeId": 12,
+      "kind": "blossom",
+      "triangles": 15353,
+      "path": "assets/runtime-sources/ground/biomes/wetland_sundew_sphagnum_pad.glb"
+    },
+    {
+      "id": "road_milestone_stump",
+      "biomeId": 13,
+      "kind": "trunk",
+      "triangles": 15568,
+      "path": "assets/runtime-sources/ground/biomes/road_milestone_stump.glb"
+    },
+    {
+      "id": "road_chicory_stalk",
+      "biomeId": 13,
+      "kind": "blossom",
+      "triangles": 16148,
+      "path": "assets/runtime-sources/ground/biomes/road_chicory_stalk.glb"
+    },
+    {
+      "id": "road_mullein_spire",
+      "biomeId": 13,
+      "kind": "blossom",
+      "triangles": 16142,
+      "path": "assets/runtime-sources/ground/biomes/road_mullein_spire.glb"
+    },
+    {
+      "id": "road_plantain_wheel",
+      "biomeId": 13,
+      "kind": "smallPlant",
+      "triangles": 15816,
+      "path": "assets/runtime-sources/ground/biomes/road_plantain_wheel.glb"
+    },
+    {
+      "id": "road_blackberry_hedgerow",
+      "biomeId": 13,
+      "kind": "understory",
+      "triangles": 15453,
+      "path": "assets/runtime-sources/ground/biomes/road_blackberry_hedgerow.glb"
+    },
+    {
+      "id": "farm_pollard_willow_stump",
+      "biomeId": 14,
+      "kind": "trunk",
+      "triangles": 16142,
+      "path": "assets/runtime-sources/ground/biomes/farm_pollard_willow_stump.glb"
+    },
+    {
+      "id": "farm_sunflower_trio",
+      "biomeId": 14,
+      "kind": "blossom",
+      "triangles": 18252,
+      "path": "assets/runtime-sources/ground/biomes/farm_sunflower_trio.glb"
+    },
+    {
+      "id": "farm_lavender_mound",
+      "biomeId": 14,
+      "kind": "blossom",
+      "triangles": 15560,
+      "path": "assets/runtime-sources/ground/biomes/farm_lavender_mound.glb"
+    },
+    {
+      "id": "farm_corn_maize_sheaf",
+      "biomeId": 14,
+      "kind": "understory",
+      "triangles": 21020,
+      "path": "assets/runtime-sources/ground/biomes/farm_corn_maize_sheaf.glb"
+    },
+    {
+      "id": "farm_clover_hay_patch",
+      "biomeId": 14,
+      "kind": "blossom",
+      "triangles": 16045,
+      "path": "assets/runtime-sources/ground/biomes/farm_clover_hay_patch.glb"
+    },
+    {
+      "id": "snapped-snag",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 18134,
+      "path": "assets/runtime-sources/ground/trunks/snapped-snag.glb"
+    },
+    {
+      "id": "root-wad",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 16148,
+      "path": "assets/runtime-sources/ground/trunks/root-wad.glb"
+    },
+    {
+      "id": "hollow-nurse-trunk",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 18505,
+      "path": "assets/runtime-sources/ground/trunks/hollow-nurse-trunk.glb"
+    },
+    {
+      "id": "arched-root-bridge",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 15215,
+      "path": "assets/runtime-sources/ground/trunks/arched-root-bridge.glb"
+    },
+    {
+      "id": "split-timber-log",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 18381,
+      "path": "assets/runtime-sources/ground/trunks/split-timber-log.glb"
+    },
+    {
+      "id": "shelf-fungus-log",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 18255,
+      "path": "assets/runtime-sources/ground/trunks/shelf-fungus-log.glb"
+    },
+    {
+      "id": "stump-jagged",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 16236,
+      "path": "assets/runtime-sources/ground/trunks/stump-jagged.glb"
+    },
+    {
+      "id": "stump-hollow",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 17589,
+      "path": "assets/runtime-sources/ground/trunks/stump-hollow.glb"
+    },
+    {
+      "id": "stump-weathered",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 17018,
+      "path": "assets/runtime-sources/ground/trunks/stump-weathered.glb"
+    },
+    {
+      "id": "fallen-log-split",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 15580,
+      "path": "assets/runtime-sources/ground/trunks/fallen-log-split.glb"
+    },
+    {
+      "id": "fallen-log-uprooted",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 15983,
+      "path": "assets/runtime-sources/ground/trunks/fallen-log-uprooted.glb"
+    },
+    {
+      "id": "fallen-log-nurse",
+      "biomeId": "forest_trunks",
+      "kind": "trunk",
+      "triangles": 16130,
+      "path": "assets/runtime-sources/ground/trunks/fallen-log-nurse.glb"
+    }
+  ]
+}

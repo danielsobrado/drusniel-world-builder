@@ -5,6 +5,7 @@ from mathutils import Matrix
 
 from ..config import detailed
 from ..mesh import MeshBuilder
+from .props_city_helpers import enhance_city_ground_contact, finalize_city_prop
 
 
 def _m(x=0.0, y=0.0, z=0.0, rz=0.0, rx=0.0, ry=0.0):
@@ -657,24 +658,12 @@ _HAS_EXPLICIT_SKIRT = {
 
 
 def _apply_grounding_skirt(name, b):
-    if name in _HAS_EXPLICIT_SKIRT or not b.verts:
-        return
-    xs = [v.x for v in b.verts]
-    ys = [v.y for v in b.verts]
-    rx = min(1.35, max(0.38, (max(xs) - min(xs)) * 0.46))
-    ry = min(1.35, max(0.38, (max(ys) - min(ys)) * 0.46))
-    cx = (min(xs) + max(xs)) * 0.5
-    cy = (min(ys) + max(ys)) * 0.5
-    plinth_mat, apron_mat = next((v for prefix, v in _SKIRT_SPEC.items() if name.startswith(prefix)), ('cobble', 'earth'))
-    b.box((cx - rx, cy - ry, -0.16), (cx + rx, cy + ry, 0.06), plinth_mat, skip=('-z',))
-    for i in range(4):
-        a = 2 * math.pi * i / 4 + 0.4
-        b.blob((cx + rx * 0.92 * math.cos(a), cy + ry * 0.92 * math.sin(a), 0.0),
-               0.16, apron_mat, subdiv=1, squash=(1.15, 1.0, 0.4), jitter=0.22, seed=len(name) + i)
+    enhance_city_ground_contact(name, b, _SKIRT_SPEC, _HAS_EXPLICIT_SKIRT)
 
 
 def define(kit):
     for name, fn in CITY_MODULES:
         b = fn()
         _apply_grounding_skirt(name, b)
+        finalize_city_prop(name, b)
         kit.define(name, 'props', b)

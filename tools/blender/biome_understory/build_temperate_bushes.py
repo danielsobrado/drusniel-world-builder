@@ -23,6 +23,8 @@ if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
 
 from understory_common import (
+    MAX_TRIANGLES,
+    MIN_TRIANGLES,
     fbm,
     finish_mesh,
     leaf_spray_fan,
@@ -44,7 +46,7 @@ TEX_DIR = os.path.join(ROOT, 'tmp', 'understory', 'textures')
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 RENDER = '--no-render' not in argv
 
-TEMPERATE_BUSH_BUDGET = 760
+TEMPERATE_BUSH_BUDGET = MAX_TRIANGLES
 
 
 def _temperate_shrub_texture(tex_dir, mat_name, filename, seed, wood_rgb, leaf_rgb, style='hazel'):
@@ -252,7 +254,7 @@ def build_stylized_bush(mat):
         _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.12))).normalized(), 0.68 * s0, 0.72 * s0, arch=0.14, roll_bias=idx * 0.55)
         _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.60 * s0, 0.64 * s0, arch=0.10, roll_bias=-0.45 + idx * 0.2)
         _add_spray_pair(bm, uv, twig_in_end, (twig_in_end - twig_in_pts[1]).normalized(), 0.54 * s0, 0.56 * s0, arch=0.08, roll_bias=0.32 - idx * 0.15)
-    return finish_mesh('stylized_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET)
+    return finish_mesh('stylized_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
 def build_small_bush(mat):
@@ -291,7 +293,7 @@ def build_small_bush(mat):
         _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.06))).normalized(), 0.44 * s0, 0.46 * s0, arch=0.10, roll_bias=idx * 0.4)
         _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.38 * s0, 0.40 * s0, arch=0.06, roll_bias=-0.5 + idx * 0.2)
         _add_spray_pair(bm, uv, low_end, (low_end - low_pts[1]).normalized(), 0.34 * s0, 0.36 * s0, arch=0.06, roll_bias=0.3 - idx * 0.15)
-    return finish_mesh('small_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET)
+    return finish_mesh('small_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
 def build_bush2(mat):
@@ -331,7 +333,7 @@ def build_bush2(mat):
         _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.24))).normalized(), 1.38 * s0, 1.44 * s0, arch=-0.04, roll_bias=idx * 0.5)
         _add_spray_pair(bm, uv, twig1_end, (twig1_end - twig1_pts[1]).normalized(), 1.22 * s0, 1.28 * s0, arch=-0.02, roll_bias=-0.4 + idx * 0.2)
         _add_spray_pair(bm, uv, twig2_end, (twig2_end - twig2_pts[1]).normalized(), 1.12 * s0, 1.18 * s0, arch=-0.02, roll_bias=0.3 - idx * 0.15)
-    return finish_mesh('bush2', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET)
+    return finish_mesh('bush2', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
 def build_sapling_bush(mat):
@@ -370,7 +372,7 @@ def build_sapling_bush(mat):
         limb_pts = _curved_twig(rng, base, end, arch_up=0.04, gnarl=0.02)
         tube(bm, uv, limb_pts, [0.017, 0.011, 0.005], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
         _add_spray_pair(bm, uv, end, (end - limb_pts[1]).normalized(), 0.52, 0.50, arch=0.06, roll_bias=idx * 0.6)
-    return finish_mesh('bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET)
+    return finish_mesh('bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
 def main():
@@ -407,7 +409,9 @@ def main():
     previews = []
     for key, builder, cam_dist, look_z in specs:
         mesh, tris = builder(mats[key])
-        assert tris <= TEMPERATE_BUSH_BUDGET, f'{key} has {tris} tris > {TEMPERATE_BUSH_BUDGET}'
+        assert MIN_TRIANGLES <= tris <= TEMPERATE_BUSH_BUDGET, (
+            f'{key} has {tris} tris (expected [{MIN_TRIANGLES}, {TEMPERATE_BUSH_BUDGET}])'
+        )
         glb_path = os.path.join(OUT_BUSHES, f'{key}.glb')
         root = place_and_export(key, mesh, glb_path)
         print(f'[temperate] {key}: {tris} tris -> {glb_path}')

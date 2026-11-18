@@ -37,7 +37,7 @@ test('every berg shape stands proud of sea level with high sculpted detail', () 
     assert.ok(min.y < 0 && min.y > -0.8, `kind ${kind} has a stubby keel`);
     assert.ok(Number.isFinite(geometry.boundingSphere.radius));
     const triCount = (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
-    assert.ok(triCount >= 1200, `kind ${kind} should be detailed (>=1200 tris), got ${triCount}`);
+    assert.ok(triCount >= 15000 && triCount <= 75000, `kind ${kind} should be >=15000 tris, got ${triCount}`);
     const normals = geometry.attributes.normal;
     assert.ok(normals && normals.count === geometry.attributes.position.count);
     signatures.add(`${Math.round(max.y * 100)}:${triCount}`);

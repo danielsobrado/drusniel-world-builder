@@ -1,4 +1,9 @@
 import * as THREE from 'three/webgpu';
+import {
+  bakeContactAndNeighbourAO,
+  sculptPositionKeyedRelief,
+  subdivideGeometryRedGreen,
+} from '../shared/meshDetailRefine.js';
 
 const SCRATCH_COLOR = new THREE.Color();
 
@@ -261,6 +266,7 @@ export class OrganicMeshBuilder {
     colorBase,
     colorTop,
   }) {
+    this.hasRootCollar = true;
     this.addBlob({
       center: [center[0], center[1] - height * 0.25, center[2]],
       radiusX: radius,
@@ -365,13 +371,47 @@ export class OrganicMeshBuilder {
     }
   }
 
-  build() {
-    const geometry = new THREE.BufferGeometry();
+  build({ minTriangles = 15200, maxTriangles = 28000 } = {}) {
+    if (!this.hasRootCollar && this.positions.length >= 9) {
+      let minX = Infinity, maxX = -Infinity;
+      let minZ = Infinity, maxZ = -Infinity;
+      let sumR = 0, sumG = 0, sumB = 0, count = 0;
+      for (let i = 0; i < this.positions.length; i += 3) {
+        const x = this.positions[i], y = this.positions[i + 1], z = this.positions[i + 2];
+        if (y < 0.35) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (z < minZ) minZ = z;
+          if (z > maxZ) maxZ = z;
+          sumR += this.colors[i] ?? 0.35;
+          sumG += this.colors[i + 1] ?? 0.3;
+          sumB += this.colors[i + 2] ?? 0.24;
+          count += 1;
+        }
+      }
+      const rx = Number.isFinite(minX) ? Math.min(0.65, Math.max(0.18, (maxX - minX) * 0.32)) : 0.22;
+      const rz = Number.isFinite(minZ) ? Math.min(0.65, Math.max(0.18, (maxZ - minZ) * 0.32)) : 0.22;
+      const rCol = Math.max(rx, rz);
+      const scale = count > 0 ? 1 / count : 0;
+      const topC = count > 0
+        ? new THREE.Color(sumR * scale * 0.72, sumG * scale * 0.72, sumB * scale * 0.68)
+        : new THREE.Color('#3b3228');
+      const baseC = topC.clone().multiplyScalar(0.68);
+      this.addRootCollar({ radius: rCol, height: Math.min(0.08, rCol * 0.28), sides: 10, colorBase: baseC, colorTop: topC });
+    }
+
+    let geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(this.colors, 3));
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(this.uvs, 2));
     geometry.setIndex(this.indices);
     geometry.computeVertexNormals();
+    if (this.indices.length >= 3) {
+      geometry = subdivideGeometryRedGreen(geometry, minTriangles, { maxTris: maxTriangles });
+      const seed = Math.abs(Math.round((this.positions[0] ?? 1) * 89 + (this.positions.length % 97))) + 5;
+      sculptPositionKeyedRelief(geometry, { amplitude: 0.0045, freq: 11.0, seed, groundY: 0, groundFade: true });
+      bakeContactAndNeighbourAO(geometry, { groundY: 0, attrName: 'color', strength: 0.42, minAO: 0.36, blendBasalNormals: true });
+    }
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
     return geometry;

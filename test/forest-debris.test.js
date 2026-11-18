@@ -32,15 +32,16 @@ const SHAPES = {
 };
 
 for (const [name, create] of Object.entries(SHAPES)) {
-  test(`${name} is finite, coloured and within its budget`, () => {
+  test(`${name} is finite, coloured and >= 15k tris`, () => {
     const geometry = create();
     const position = geometry.getAttribute('position');
     const uv = geometry.getAttribute('uv');
+    const tris = geometry.getIndex().count / 3;
     assert.ok(position.array.every(Number.isFinite));
     assert.ok(uv && uv.count === position.count && uv.array.every(Number.isFinite));
     assert.equal(geometry.getAttribute('color').count, position.count);
     assert.ok(geometry.getIndex().array.every((index) => index < position.count));
-    assert.ok(geometry.getIndex().count / 3 <= 1400, `${geometry.getIndex().count / 3} triangles`);
+    assert.ok(tris >= 15000 && tris <= 35000, `${name} expected 15000..35000 tris, got ${tris}`);
   });
 }
 
@@ -49,8 +50,9 @@ for (const variant of ['jagged', 'hollow', 'weathered']) {
     const stump = createStumpGeometry({ variant });
     const pos = stump.getAttribute('position');
     const nrm = stump.getAttribute('normal');
+    const tris = stump.getIndex().count / 3;
     assert.ok(pos.array.every(Number.isFinite));
-    assert.ok(stump.getIndex().count / 3 <= 1400);
+    assert.ok(tris >= 15000 && tris <= 35000, `stump "${variant}" expected >= 15000 tris, got ${tris}`);
     let maxY = -Infinity;
     for (let i = 0; i < pos.count; i += 1) maxY = Math.max(maxY, pos.getY(i));
     let topNormalSum = 0;
@@ -66,8 +68,9 @@ for (const variant of ['split', 'uprooted', 'nurse']) {
     const log = createFallenLogGeometry({ variant });
     const pos = log.getAttribute('position');
     const nrm = log.getAttribute('normal');
+    const tris = log.getIndex().count / 3;
     assert.ok(pos.array.every(Number.isFinite));
-    assert.ok(log.getIndex().count / 3 <= 1400);
+    assert.ok(tris >= 15000 && tris <= 35000, `fallenLog "${variant}" expected >= 15000 tris, got ${tris}`);
     let minX = Infinity;
     let maxX = -Infinity;
     for (let i = 0; i < pos.count; i += 1) {

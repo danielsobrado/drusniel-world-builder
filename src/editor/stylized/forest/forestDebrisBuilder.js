@@ -1,4 +1,9 @@
 import * as THREE from 'three/webgpu';
+import {
+  bakeContactAndNeighbourAO,
+  sculptPositionKeyedRelief,
+  subdivideGeometryRedGreen,
+} from '../shared/meshDetailRefine.js';
 
 export const BARK = new THREE.Color('#967c64');
 export const BARK_DARK = new THREE.Color('#665442');
@@ -220,13 +225,41 @@ export class MeshBuilder {
     this.fan(pitBottom, start + (pitRings - 1) * sides, sides, true);
   }
 
-  build() {
-    const geometry = new THREE.BufferGeometry();
+  build({
+    minTriangles = 15200,
+    maxTriangles = 28000,
+    sculptAmp = 0.005,
+    weightFn = null,
+    blendBasalNormals = true,
+  } = {}) {
+    let geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(this.colors, 3));
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(this.uvs, 2));
     geometry.setIndex(this.indices);
     geometry.computeVertexNormals();
+    if (this.indices.length >= 3) {
+      geometry = subdivideGeometryRedGreen(geometry, minTriangles, { maxTris: maxTriangles });
+      const seed = Math.abs(Math.round((this.positions[0] ?? 1) * 97 + (this.positions.length % 101))) + 11;
+      if (sculptAmp > 0) {
+        sculptPositionKeyedRelief(geometry, {
+          amplitude: sculptAmp,
+          freq: 9.5,
+          seed,
+          groundY: 0,
+          groundFade: true,
+          weightFn,
+        });
+      }
+      bakeContactAndNeighbourAO(geometry, {
+        groundY: 0,
+        attrName: 'color',
+        strength: 0.38,
+        minAO: 0.36,
+        blendBasalNormals,
+      });
+    }
+    geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
     return geometry;
   }

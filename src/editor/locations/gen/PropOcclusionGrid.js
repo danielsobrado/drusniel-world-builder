@@ -107,16 +107,23 @@ export class PropOcclusionGrid {
       const bx = positions[i + 3], by = positions[i + 4], bz = positions[i + 5];
       const cx = positions[i + 6], cy = positions[i + 7], cz = positions[i + 8];
 
-      const ab = Math.hypot(bx - ax, by - ay, bz - az);
-      const ac = Math.hypot(cx - ax, cy - ay, cz - az);
+      const ux = bx - ax, uy = by - ay, uz = bz - az;
+      const vx = cx - ax, vy = cy - ay, vz = cz - az;
+      const ab = Math.hypot(ux, uy, uz);
+      const ac = Math.hypot(vx, vy, vz);
       const bc = Math.hypot(cx - bx, cy - by, cz - bz);
       const maxEdge = Math.max(ab, ac, bc);
       if (maxEdge < 1e-5) continue;
 
+      const cxp = uy * vz - uz * vy;
+      const cyp = uz * vx - ux * vz;
+      const czp = ux * vy - uy * vx;
+      const areaSq = (cxp * cxp + cyp * cyp + czp * czp) * 0.25;
+
+      const mx = (ax + bx + cx) / 3;
+      const my = (ay + by + cy) / 3;
+      const mz = (az + bz + cz) / 3;
       if (excludeLights.length > 0 && maxEdge < excludeRadius * 2.1) {
-        const mx = (ax + bx + cx) / 3;
-        const my = (ay + by + cy) / 3;
-        const mz = (az + bz + cz) / 3;
         let skip = false;
         for (const light of excludeLights) {
           const dx = mx - light.x, dy = my - light.y, dz = mz - light.z;
@@ -126,6 +133,12 @@ export class PropOcclusionGrid {
           }
         }
         if (skip) continue;
+      }
+
+      // Micro-triangles from subdivided >=15k props cover a single centroid cell in O(1).
+      if (areaSq < 6.4e-5 && maxEdge < step) {
+        this.#markWorld(mx, my, mz);
+        continue;
       }
 
       const stepsU = Math.min(48, Math.max(1, Math.ceil(ab / step)));

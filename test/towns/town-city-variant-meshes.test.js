@@ -64,10 +64,32 @@ const EXPECTED_CITY_PROPS = Object.freeze({
   ],
 });
 
-test('every city family and realm has at least 5 new exported kit modules & colliders', async () => {
+function readGlbTriangleCounts(buffer) {
+  const jsonLen = buffer.readUInt32LE(12);
+  const gltf = JSON.parse(buffer.toString('utf8', 20, 20 + jsonLen));
+  const counts = new Map();
+  for (const node of gltf.nodes ?? []) {
+    if (node.mesh === undefined) continue;
+    const mesh = gltf.meshes[node.mesh];
+    let tris = 0;
+    for (const prim of mesh.primitives ?? []) {
+      if (prim.indices !== undefined) {
+        tris += (gltf.accessors[prim.indices]?.count ?? 0) / 3;
+      } else if (prim.attributes?.POSITION !== undefined) {
+        tris += (gltf.accessors[prim.attributes.POSITION]?.count ?? 0) / 3;
+      }
+    }
+    counts.set(node.name, Math.round(tris));
+  }
+  return counts;
+}
+
+test('every city family and realm has at least 5 new exported >=15k-tri kit modules & colliders', async () => {
   const prefabsJson = JSON.parse(
     await fs.readFile('public/assets/environment/medieval-kit/medieval_kit_prefabs.json', 'utf8'),
   );
+  const kitGlb = await fs.readFile('public/assets/environment/medieval-kit/medieval_kit.glb');
+  const triCounts = readGlbTriangleCounts(kitGlb);
   const colliders = prefabsJson.moduleColliders ?? {};
   for (const [culture, kinds] of Object.entries(EXPECTED_CITY_PROPS)) {
     assert.ok(kinds.length >= 5, `${culture} has >= 5 new props`);
@@ -77,6 +99,8 @@ test('every city family and realm has at least 5 new exported kit modules & coll
       const moduleName = cluster[0][0];
       assert.equal(isTownProp(moduleName), true, `${moduleName} should be flagged as town prop`);
       assert.ok(colliders[moduleName], `${moduleName} missing collider in medieval_kit_prefabs.json`);
+      const tris = triCounts.get(moduleName) ?? 0;
+      assert.ok(tris >= 15000, `${moduleName} expected >= 15000 tris in medieval_kit.glb, got ${tris}`);
     }
   }
 });

@@ -4,95 +4,111 @@ import os
 import bpy
 import bmesh
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
-MAX_TRIANGLES = 350
+from understory_pbr import (
+    add_soil_neighbour_skirt,
+    build_pbr_material,
+    fbm_2d,
+    finalize_understory_mesh,
+    height_to_normal_map,
+    save_png_image,
+    value_noise_2d,
+)
+
+MIN_TRIANGLES = 15000
+MAX_TRIANGLES = 32000
 
 
 def save_image(name, pixels, path, non_color=False):
-    h, w, _ = pixels.shape
-    out = np.clip(pixels.astype(np.float32), 0.0, 1.0)
-    if not non_color:
-        # Lift procedural dark/mid tones for sRGB texture encoding so Three.js
-        # sRGB->linear sampling and understoryRamp receive balanced luminance.
-        out[..., :3] = np.power(out[..., :3], 0.74)
-    image = bpy.data.images.new(name, w, h, alpha=True)
-    image.pixels.foreach_set(np.flipud(out).ravel())
-    image.filepath_raw = path
-    image.file_format = 'PNG'
-    if non_color:
-        image.colorspace_settings.name = 'Non-Color'
-    image.save()
-    return image
+    return save_png_image(name, pixels, path, non_color=non_color)
 
 
 def value_noise(w, h, cells, rng):
-    cx = max(1, int(cells[0]))
-    cy = max(1, int(cells[1]))
-    grid = rng.random((cy + 1, cx + 1))
-    grid[:, -1] = grid[:, 0]
-    grid[-1, :] = grid[0, :]
-    ys, xs = np.mgrid[0:h, 0:w]
-    gx, gy = xs / w * cx, ys / h * cy
-    x0, y0 = np.floor(gx).astype(int), np.floor(gy).astype(int)
-    fx, fy = gx - x0, gy - y0
-    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
-    a, b = grid[y0, x0], grid[y0, x0 + 1]
-    c, d = grid[y0 + 1, x0], grid[y0 + 1, x0 + 1]
-    return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy
+    return value_noise_2d(w, h, cells, rng)
 
 
 def fbm(w, h, cells, rng, octaves=4):
-    total, amp, norm = np.zeros((h, w)), 1.0, 0.0
-    for o in range(octaves):
-        total += amp * value_noise(w, h, (cells[0] * 2 ** o, cells[1] * 2 ** o), rng)
-        norm += amp
-        amp *= 0.5
-    return total / norm
+    return fbm_2d(w, h, cells, rng, octaves=octaves)
 
 
-def height_to_normal(height_field, strength=2.2):
-    h, w = height_field.shape
-    dx = (np.roll(height_field, -1, axis=1) - np.roll(height_field, 1, axis=1)) * strength
-    dy = (np.roll(height_field, -1, axis=0) - np.roll(height_field, 1, axis=0)) * strength
-    dz = np.ones_like(height_field)
-    norm = np.sqrt(dx * dx + dy * dy + dz * dz) + 1e-8
-    nx = (-dx / norm) * 0.5 + 0.5
-    ny = (dy / norm) * 0.5 + 0.5
-    nz = (dz / norm) * 0.5 + 0.5
-    return np.stack([nx, ny, nz, np.ones_like(nz)], axis=-1)
+def height_to_normal(height_field, strength=2.4):
+    return height_to_normal_map(height_field, strength=strength)
 
 
-def make_material(name, image, alpha=False, normal_image=None, roughness=0.78, subsurface=0.0):
-    mat = bpy.data.materials.new(name)
-    mat.use_nodes = True
-    nodes = mat.node_tree.nodes
-    links = mat.node_tree.links
-    bsdf = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
-    tex = nodes.new('ShaderNodeTexImage')
-    tex.image = image
-    links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
-    bsdf.inputs['Roughness'].default_value = roughness
-    if subsurface > 0 and 'Subsurface Weight' in bsdf.inputs:
-        bsdf.inputs['Subsurface Weight'].default_value = subsurface
-    if normal_image is not None:
-        ntex = nodes.new('ShaderNodeTexImage')
-        ntex.image = normal_image
-        nmap = nodes.new('ShaderNodeNormalMap')
-        nmap.inputs['Strength'].default_value = 0.85
-        links.new(ntex.outputs['Color'], nmap.inputs['Color'])
-        links.new(nmap.outputs['Normal'], bsdf.inputs['Normal'])
-    if alpha:
-        compare = nodes.new('ShaderNodeMath')
-        compare.operation = 'GREATER_THAN'
-        compare.inputs[1].default_value = 0.4
-        links.new(tex.outputs['Alpha'], compare.inputs[0])
-        links.new(compare.outputs[0], bsdf.inputs['Alpha'])
-        mat.use_backface_culling = False
-    return mat
+def make_material(
+    name,
+    image,
+    alpha=False,
+    normal_image=None,
+    orm_image=None,
+    roughness=0.78,
+    metallic=0.0,
+    subsurface=0.0,
+    emissive_image=None,
+    emissive_strength=0.0,
+):
+    return build_pbr_material(
+        name,
+        image,
+        alpha=alpha,
+        normal_image=normal_image,
+        orm_image=orm_image,
+        roughness=roughness,
+        metallic=metallic,
+        subsurface=subsurface,
+        emissive_image=emissive_image,
+        emissive_strength=emissive_strength,
+    )
 
 
-def tube(bm, uv, points, radii, sides, u_range=(0.0, 1.0), v_range=(0.0, 0.9), cap_end=True, rough=0.0, rng=None, scale_y=1.0):
+def _catmull_rom_chain(points, radii, subdiv=2):
+    """Interpolate smooth organic intermediate stations along a 3D polyline."""
+    if len(points) < 2 or subdiv <= 1:
+        return list(points), list(radii)
+    out_pts, out_rad = [], []
+    n = len(points)
+    for i in range(n - 1):
+        p0 = points[max(0, i - 1)]
+        p1 = points[i]
+        p2 = points[i + 1]
+        p3 = points[min(n - 1, i + 2)]
+        r1 = radii[i]
+        r2 = radii[i + 1]
+        for s in range(subdiv):
+            t = s / subdiv
+            t2 = t * t
+            t3 = t2 * t
+            pt = 0.5 * (
+                (2.0 * p1)
+                + (-p0 + p2) * t
+                + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t2
+                + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t3
+            )
+            out_pts.append(pt)
+            out_rad.append(r1 + (r2 - r1) * t)
+    out_pts.append(points[-1])
+    out_rad.append(radii[-1])
+    return out_pts, out_rad
+
+
+def tube(
+    bm,
+    uv,
+    points,
+    radii,
+    sides,
+    u_range=(0.0, 1.0),
+    v_range=(0.0, 0.9),
+    cap_end=True,
+    rough=0.0,
+    rng=None,
+    scale_y=1.0,
+    flute_count=0,
+    flute_depth=0.0,
+):
+    points, radii = _catmull_rom_chain(points, radii, subdiv=3)
+    sides = max(8, sides * 2)
     rings = []
     d0 = (points[1] - points[0]).normalized()
     normal = d0.orthogonal().normalized()
@@ -105,10 +121,12 @@ def tube(bm, uv, points, radii, sides, u_range=(0.0, 1.0), v_range=(0.0, 0.9), c
         if i:
             length += (points[i] - points[i - 1]).length
         ring = []
-        v_coord = v_range[0] + (v_range[1] - v_range[0]) * (length / max(total, 1e-6))
+        frac = length / max(total, 1e-6)
+        v_coord = v_range[0] + (v_range[1] - v_range[0]) * frac
         for s in range(sides + 1):
             a = s / sides * 2 * math.pi
-            r = radii[i] * (1 + (rng.uniform(-rough, rough) if rng and 0 < s < sides else 0))
+            flute = 1.0 + flute_depth * math.sin(a * flute_count + frac * 2.4) if flute_count > 0 else 1.0
+            r = radii[i] * flute * (1 + (rng.uniform(-rough, rough) if rng and 0 < s < sides else 0))
             offset = normal * (math.cos(a) * r) + binormal * (math.sin(a) * r * scale_y)
             v = bm.verts.new(p + offset)
             u_coord = u_range[0] + (u_range[1] - u_range[0]) * (s / sides)
@@ -136,37 +154,50 @@ def tube(bm, uv, points, radii, sides, u_range=(0.0, 1.0), v_range=(0.0, 0.9), c
     return rings
 
 
+def _quad_bezier(p0, p1, p2, t):
+    u = 1.0 - t
+    return (u * u) * p0 + (2.0 * u * t) * p1 + (t * t) * p2
+
+
 def arched_card(bm, uv, p0, p1, p2, w0, w1, w2, side_dir, u_range=(0.0, 1.0), v_range=(0.0, 1.0), v_mid=0.55):
     u0, u1 = u_range
     v0, v1 = v_range
-    vm = v0 + (v1 - v0) * v_mid
-    s0 = side_dir * (w0 * 0.5)
-    s1 = side_dir * (w1 * 0.5)
-    s2 = side_dir * (w2 * 0.5)
-    verts = [
-        bm.verts.new(p0 - s0),
-        bm.verts.new(p0 + s0),
-        bm.verts.new(p1 + s1),
-        bm.verts.new(p1 - s1),
-        bm.verts.new(p2 + s2),
-        bm.verts.new(p2 - s2),
-    ]
-    quads = (
-        (((u0, v0), (u1, v0), (u1, vm), (u0, vm)), (verts[0], verts[1], verts[2], verts[3])),
-        (((u0, vm), (u1, vm), (u1, v1), (u0, v1)), (verts[3], verts[2], verts[4], verts[5])),
-    )
+    rows = 6
+    cols = 4
+    up_hint = Vector((0.0, 0.0, 1.0))
+    grid = []
+    for r in range(rows + 1):
+        t = r / rows
+        vc = v0 + (v1 - v0) * (t * (0.55 / max(v_mid, 0.1)) if t < 0.5 else v_mid + (1.0 - v_mid) * ((t - 0.5) * 2.0))
+        vc = min(v1, max(v0, vc))
+        center = _quad_bezier(p0, p1, p2, t)
+        w = (1.0 - t) * ((1.0 - t) * w0 + t * w1) + t * ((1.0 - t) * w1 + t * w2)
+        row = []
+        for c in range(cols + 1):
+            sc = (c / cols) * 2.0 - 1.0
+            cup = 0.045 * w * (sc * sc) * math.sin(t * math.pi)
+            pt = center + side_dir * (sc * w * 0.5) + up_hint * cup
+            row.append((bm.verts.new(pt), (u0 + (u1 - u0) * (c / cols), vc)))
+        grid.append(row)
     faces = []
     out_hint = Vector((p1.x, p1.y, max(0.6, abs(p2.z - p0.z) + 0.5)))
-    for uvs, vs in quads:
-        if len(set(vs)) == 4:
-            n_est = (vs[1].co - vs[0].co).cross(vs[2].co - vs[1].co)
-            if n_est.dot(out_hint) < 0:
-                vs = (vs[1], vs[0], vs[3], vs[2])
-                uvs = (uvs[1], uvs[0], uvs[3], uvs[2])
-            f = bm.faces.new(vs)
-            for loop, coord in zip(f.loops, uvs):
-                loop[uv].uv = coord
-            faces.append(f)
+    for r in range(rows):
+        for c in range(cols):
+            v00, uv00 = grid[r][c]
+            v10, uv10 = grid[r][c + 1]
+            v11, uv11 = grid[r + 1][c + 1]
+            v01, uv01 = grid[r + 1][c]
+            vs = (v00, v10, v11, v01)
+            uvs = (uv00, uv10, uv11, uv01)
+            if len(set(vs)) == 4:
+                n_est = (vs[1].co - vs[0].co).cross(vs[2].co - vs[1].co)
+                if n_est.dot(out_hint) < 0:
+                    vs = (vs[1], vs[0], vs[3], vs[2])
+                    uvs = (uvs[1], uvs[0], uvs[3], uvs[2])
+                f = bm.faces.new(vs)
+                for loop, coord in zip(f.loops, uvs):
+                    loop[uv].uv = coord
+                faces.append(f)
     return faces
 
 
@@ -199,46 +230,50 @@ def leaf_spray_fan(
     hw0 = width * 0.16
     hw1 = width * 0.50
     hw2 = width * (0.50 * tip_scale)
-    cup1 = cup_dir * (width * cup)
-    cup2 = cup_dir * (width * cup * 0.55)
 
     u0, u1 = u_range
-    uc = 0.5 * (u0 + u1)
     v0, v1 = v_range
-    vm = v0 + (v1 - v0) * 0.54
-    du_tip = (u1 - u0) * 0.22
+    rows = 5
+    cols = 4
+    grid = []
+    for r in range(rows + 1):
+        t = r / rows
+        center = _quad_bezier(p0, p1, p2, t)
+        hw = (1.0 - t) * ((1.0 - t) * hw0 + t * hw1) + t * ((1.0 - t) * hw1 + t * hw2)
+        taper_u = 0.22 * (t ** 1.4)
+        u_row0 = u0 + (u1 - u0) * taper_u
+        u_row1 = u1 - (u1 - u0) * taper_u
+        vc = v0 + (v1 - v0) * t
+        row = []
+        for c in range(cols + 1):
+            sc = (c / cols) * 2.0 - 1.0
+            cup_off = cup_dir * (width * cup * (abs(sc) ** 1.2) * math.sin(t * math.pi * 0.85))
+            pt = center + side * (sc * hw) + cup_off
+            uc = u_row0 + (u_row1 - u_row0) * (c / cols)
+            row.append((bm.verts.new(pt), (uc, vc)))
+        grid.append(row)
 
-    v_bL = bm.verts.new(p0 - side * hw0)
-    v_bC = bm.verts.new(p0)
-    v_bR = bm.verts.new(p0 + side * hw0)
-    v_mL = bm.verts.new(p1 - side * hw1 + cup1)
-    v_mC = bm.verts.new(p1)
-    v_mR = bm.verts.new(p1 + side * hw1 + cup1)
-    v_tL = bm.verts.new(p2 - side * hw2 + cup2)
-    v_tC = bm.verts.new(p2)
-    v_tR = bm.verts.new(p2 + side * hw2 + cup2)
-
-    quads = (
-        (((u0, v0), (uc, v0), (uc, vm), (u0, vm)), (v_bL, v_bC, v_mC, v_mL)),
-        (((uc, v0), (u1, v0), (u1, vm), (uc, vm)), (v_bC, v_bR, v_mR, v_mC)),
-        (((u0, vm), (uc, vm), (uc, v1), (u0 + du_tip, v1)), (v_mL, v_mC, v_tC, v_tL)),
-        (((uc, vm), (u1, vm), (u1 - du_tip, v1), (uc, v1)), (v_mC, v_mR, v_tR, v_tC)),
-    )
     faces = []
-    for uvs, vs in quads:
-        if len(set(vs)) == 4:
-            face = bm.faces.new(vs)
-            for loop, coord in zip(face.loops, uvs):
-                loop[uv].uv = coord
-            faces.append(face)
+    for r in range(rows):
+        for c in range(cols):
+            v00, uv00 = grid[r][c]
+            v10, uv10 = grid[r][c + 1]
+            v11, uv11 = grid[r + 1][c + 1]
+            v01, uv01 = grid[r + 1][c]
+            vs = (v00, v10, v11, v01)
+            if len(set(vs)) == 4:
+                face = bm.faces.new(vs)
+                for loop, coord in zip(face.loops, (uv00, uv10, uv11, uv01)):
+                    loop[uv].uv = coord
+                faces.append(face)
     return faces
 
 
-def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), subdivisions=2, rng=None, dome=False):
+def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), subdivisions=3, rng=None, dome=False):
     """Sculpted organic boulder or moss/cushion hummock with seam-free UV projection."""
     existing_verts = set(bm.verts)
     existing_faces = set(bm.faces)
-    bmesh.ops.create_icosphere(bm, subdivisions=max(2, subdivisions), radius=1.0)
+    bmesh.ops.create_icosphere(bm, subdivisions=max(3, subdivisions + 1), radius=1.0)
     new_verts = [v for v in bm.verts if v not in existing_verts]
     new_faces = [f for f in bm.faces if f not in existing_faces]
     for f in new_faces:
@@ -248,14 +283,14 @@ def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), su
     p2 = rng.uniform(0, 6.28) if rng else 1.9
     for v in new_verts:
         co = v.co.copy()
-        # Deterministic multi-frequency facets so boulders & moss cushions undulate organically.
         warp = (
             0.14 * math.sin(co.x * 3.2 + p1) * math.cos(co.y * 2.8 + p2)
             + 0.10 * math.cos(co.z * 3.7 - p1)
             + 0.06 * math.sin(co.x * 6.4 - co.z * 5.2 + p2)
+            + 0.035 * math.cos(co.y * 11.2 + co.z * 9.6 - p1)
         )
         if rng is not None:
-            warp += rng.uniform(-0.04, 0.04)
+            warp += rng.uniform(-0.025, 0.025)
         scale = 1.0 + (warp * 0.55 if dome else warp)
         co.x *= scale
         co.y *= scale
@@ -274,34 +309,53 @@ def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), su
     return new_faces
 
 
-def mushroom_dome(bm, uv, center, radius, height, sides=6, u_range=(0.52, 0.98), v_range=(0.52, 0.98), tilt=Vector((0, 0, 1))):
-    """3D mushroom cap with top dome and gill underside."""
+def mushroom_dome(bm, uv, center, radius, height, sides=14, u_range=(0.52, 0.98), v_range=(0.52, 0.98), tilt=Vector((0, 0, 1))):
+    """Multi-ring 3D mushroom cap with flared rim and gill underside."""
     up = tilt.normalized()
     right = up.orthogonal().normalized()
     fwd = up.cross(right).normalized()
-    ring = []
-    for k in range(sides):
-        a = k * 2 * math.pi / sides
-        rim = center + (right * math.cos(a) + fwd * math.sin(a)) * radius
-        ring.append((bm.verts.new(rim), a))
-    top = bm.verts.new(center + up * height)
-    under = bm.verts.new(center - up * (height * 0.22))
+    sides = max(12, sides * 2)
     uc = 0.5 * (u_range[0] + u_range[1])
     vc = 0.5 * (v_range[0] + v_range[1])
     ru = 0.46 * (u_range[1] - u_range[0])
     rv = 0.46 * (v_range[1] - v_range[0])
+
+    # 3 dome tiers + rim + gill underside
+    tier_specs = ((0.98, 0.0), (0.76, 0.52), (0.42, 0.86))
+    rings = []
+    for r_mul, h_mul in tier_specs:
+        row = []
+        for k in range(sides):
+            a = k * 2 * math.pi / sides
+            rim_wave = 1.0 + 0.05 * math.sin(a * 5.0)
+            pt = center + (right * math.cos(a) + fwd * math.sin(a)) * (radius * r_mul * rim_wave) + up * (height * h_mul)
+            row.append((bm.verts.new(pt), a, r_mul))
+        rings.append(row)
+    top = bm.verts.new(center + up * height)
+    under = bm.verts.new(center - up * (height * 0.24))
     faces = []
+    for r_idx in range(len(rings) - 1):
+        ra, rb = rings[r_idx], rings[r_idx + 1]
+        for k in range(sides):
+            kn = (k + 1) % sides
+            f = bm.faces.new((ra[k][0], ra[kn][0], rb[kn][0], rb[k][0]))
+            for loop, (vert, ang, rm) in zip(f.loops, (ra[k], ra[kn], rb[kn], rb[k])):
+                loop[uv].uv = (uc + math.cos(ang) * ru * rm, vc + math.sin(ang) * rv * rm)
+            faces.append(f)
+    top_ring = rings[-1]
+    rim_ring = rings[0]
     for k in range(sides):
-        v_a, ang_a = ring[k]
-        v_b, ang_b = ring[(k + 1) % sides]
+        kn = (k + 1) % sides
+        v_a, ang_a, rm_a = top_ring[k]
+        v_b, ang_b, rm_b = top_ring[kn]
         f_top = bm.faces.new((v_a, v_b, top))
         for loop, coord in zip(f_top.loops, (
-            (uc + math.cos(ang_a) * ru, vc + math.sin(ang_a) * rv),
-            (uc + math.cos(ang_b) * ru, vc + math.sin(ang_b) * rv),
+            (uc + math.cos(ang_a) * ru * rm_a, vc + math.sin(ang_a) * rv * rm_a),
+            (uc + math.cos(ang_b) * ru * rm_b, vc + math.sin(ang_b) * rv * rm_b),
             (uc, vc),
         )):
             loop[uv].uv = coord
-        f_bot = bm.faces.new((v_b, v_a, under))
+        f_bot = bm.faces.new((rim_ring[kn][0], rim_ring[k][0], under))
         for loop, coord in zip(f_bot.loops, (
             (uc + math.cos(ang_b) * ru * 0.5, v_range[0] * 0.5),
             (uc + math.cos(ang_a) * ru * 0.5, v_range[0] * 0.5),
@@ -312,53 +366,27 @@ def mushroom_dome(bm, uv, center, radius, height, sides=6, u_range=(0.52, 0.98),
     return faces
 
 
-def finish_mesh(name, bm, materials, max_triangles=MAX_TRIANGLES):
-    """Weld close vertices, triangulate, purge tiny/degenerate triangles, and convert to Mesh."""
-    if not isinstance(materials, (list, tuple)):
-        materials = [materials]
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=5e-4)
-    bmesh.ops.triangulate(bm, faces=bm.faces)
-    degen = []
-    for f in bm.faces:
-        if f.calc_area() < 1e-6:
-            degen.append(f)
-            continue
-        lengths = [e.calc_length() for e in f.edges]
-        if min(lengths) < 5e-4:
-            degen.append(f)
-    if degen:
-        bmesh.ops.delete(bm, geom=degen, context='FACES')
-    # Delete any loose verts/edges
-    loose_edges = [e for e in bm.edges if not e.link_faces]
-    if loose_edges:
-        bmesh.ops.delete(bm, geom=loose_edges, context='EDGES')
-    loose_verts = [v for v in bm.verts if not v.link_faces]
-    if loose_verts:
-        bmesh.ops.delete(bm, geom=loose_verts, context='VERTS')
-
-    mesh = bpy.data.meshes.new(name)
-    bm.to_mesh(mesh)
-    bm.free()
-    for mat in materials:
-        mesh.materials.append(mat)
-    for p in mesh.polygons:
-        p.use_smooth = True
-    up = Vector((0.0, 0.0, 1.0))
-    custom_normals = []
-    for v in mesh.vertices:
-        radial = Vector((v.co.x, v.co.y, max(0.25, v.co.z + 0.25)))
-        radial = radial.normalized() if radial.length > 1e-4 else up
-        n = v.normal * 0.68 + radial * 0.18 + up * 0.14
-        if n.z < 0.05:
-            n.z = 0.05
-        custom_normals.append(n.normalized())
-    mesh.normals_split_custom_set_from_vertices(custom_normals)
-    tris = sum(len(p.vertices) - 2 for p in mesh.polygons)
-    assert tris <= max_triangles, f'{name} has {tris} triangles (budget {max_triangles})'
-    return mesh, tris
+def finish_mesh(
+    name,
+    bm,
+    materials,
+    max_triangles=MAX_TRIANGLES,
+    min_triangles=MIN_TRIANGLES,
+    add_skirt=True,
+    allow_extra_material=True,
+):
+    return finalize_understory_mesh(
+        name,
+        bm,
+        materials,
+        min_triangles=min_triangles,
+        max_triangles=max_triangles,
+        add_skirt=add_skirt,
+        allow_extra_material=allow_extra_material,
+    )
 
 
-def place_and_export(name, mesh, out_path, tangents=False):
+def place_and_export(name, mesh, out_path, tangents=True):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     root = bpy.data.objects.new(name, None)
     bpy.context.scene.collection.objects.link(root)

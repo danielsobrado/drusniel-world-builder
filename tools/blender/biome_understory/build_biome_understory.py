@@ -27,6 +27,7 @@ if THIS_DIR not in sys.path:
 
 from understory_common import (
     MAX_TRIANGLES,
+    MIN_TRIANGLES,
     arched_card,
     finish_mesh,
     leaf_spray_fan,
@@ -837,8 +838,8 @@ def main():
     for out_root, subdir, build_fn, mat_key, dist, look_z in specs:
         mesh, tris = build_fn(mats[mat_key])
         name = mesh.name
-        budget = 520 if out_root == OUT_BUSHES else MAX_TRIANGLES
-        assert tris <= budget, f'{name} has {tris} triangles > {budget}'
+        budget = MAX_TRIANGLES
+        assert MIN_TRIANGLES <= tris <= budget, f'{name} has {tris} triangles (expected [{MIN_TRIANGLES}, {budget}])'
         glb_path = os.path.join(out_root, subdir, f'{name}.glb') if subdir else os.path.join(out_root, f'{name}.glb')
         root = place_and_export(name, mesh, glb_path)
         tag = subdir if subdir else 'bushes'

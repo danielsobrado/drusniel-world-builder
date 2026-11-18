@@ -481,30 +481,79 @@ export class LocationBuilder {
 
     for (const { key, entry, geometry } of preparedProps) {
       const at = geometry.attributes.position.array, facing = geometry.attributes.normal.array;
-      const lit = bakeLighting({
-        grid: this.grid,
-        propGrid: key === 'glow' ? null : propGrid,
-        propShadows: { ...(propShadows ?? {}), isProp: true },
-        positions: at,
-        normals: facing,
-        // Glow is unlit (createGlowMaterial reads only `tint`): its bake just fills the shared attributes.
-        lights: key === 'glow' ? [] : this.lights,
-        iceAt: () => entry.ice ?? 0,
-        mediumAt,
-        absorption,
-      });
-      for (let i = 0; i < lit.light.length; i += 1) lit.light[i] *= bakeGain;
-      if (bounceField && key !== 'glow') {
-        gatherBounceLight(bounceField, {
-          positions: at,
-          normals: facing,
-          light: lit.light,
-          dir: lit.dir,
-          shade: lit.shade,
-          shadeSize: SHADE_SIZE,
-          strength: indirectBounce.strength,
-          wrap: indirectBounce.wrap ?? 0.52,
+      const vCount = at.length / 3;
+      const iceFn = () => entry.ice ?? 0;
+      const bucketLights = key === 'glow' ? [] : this.lights;
+      const pShadows = { ...(propShadows ?? {}), isProp: true };
+      const pGrid = key === 'glow' ? null : propGrid;
+
+      const runBake = (posArr, normArr) => {
+        const res = bakeLighting({
+          grid: this.grid,
+          propGrid: pGrid,
+          propShadows: pShadows,
+          positions: posArr,
+          normals: normArr,
+          // Glow is unlit (createGlowMaterial reads only `tint`): its bake just fills the shared attributes.
+          lights: bucketLights,
+          iceAt: iceFn,
+          mediumAt,
+          absorption,
         });
+        for (let i = 0; i < res.light.length; i += 1) res.light[i] *= bakeGain;
+        if (bounceField && key !== 'glow') {
+          gatherBounceLight(bounceField, {
+            positions: posArr,
+            normals: normArr,
+            light: res.light,
+            dir: res.dir,
+            shade: res.shade,
+            shadeSize: SHADE_SIZE,
+            strength: indirectBounce.strength,
+            wrap: indirectBounce.wrap ?? 0.52,
+          });
+        }
+        return res;
+      };
+
+      let lit;
+      if (vCount > 4000) {
+        // Spatial + normal-octant cache keeps high-poly >=15k props fast to light-bake.
+        const map = new Map();
+        const vertToSample = new Int32Array(vCount);
+        const sPos = [];
+        const sNorm = [];
+        for (let i = 0; i < vCount; i += 1) {
+          const p3 = i * 3;
+          const x = at[p3], y = at[p3 + 1], z = at[p3 + 2];
+          const nx = facing[p3], ny = facing[p3 + 1], nz = facing[p3 + 2];
+          const hKey = `${Math.round(x * 12)},${Math.round(y * 12)},${Math.round(z * 12)},`
+            + `${Math.round(nx * 1.4) + 2},${Math.round(ny * 1.4) + 2},${Math.round(nz * 1.4) + 2}`;
+          let sIdx = map.get(hKey);
+          if (sIdx === undefined) {
+            sIdx = sPos.length / 3;
+            map.set(hKey, sIdx);
+            sPos.push(x, y, z);
+            sNorm.push(nx, ny, nz);
+          }
+          vertToSample[i] = sIdx;
+        }
+        const sLit = runBake(new Float32Array(sPos), new Float32Array(sNorm));
+        lit = {
+          light: new Float32Array(vCount * 3),
+          dir: new Float32Array(vCount * 3),
+          shade: new Float32Array(vCount * SHADE_SIZE),
+        };
+        for (let i = 0; i < vCount; i += 1) {
+          const s = vertToSample[i];
+          const d3 = i * 3, s3 = s * 3;
+          lit.light[d3] = sLit.light[s3]; lit.light[d3 + 1] = sLit.light[s3 + 1]; lit.light[d3 + 2] = sLit.light[s3 + 2];
+          lit.dir[d3] = sLit.dir[s3]; lit.dir[d3 + 1] = sLit.dir[s3 + 1]; lit.dir[d3 + 2] = sLit.dir[s3 + 2];
+          const ds = i * SHADE_SIZE, ss = s * SHADE_SIZE;
+          for (let c = 0; c < SHADE_SIZE; c += 1) lit.shade[ds + c] = sLit.shade[ss + c];
+        }
+      } else {
+        lit = runBake(at, facing);
       }
       // An icicle is as thick as itself, not as the roof it hangs from.
       if (entry.ice) {

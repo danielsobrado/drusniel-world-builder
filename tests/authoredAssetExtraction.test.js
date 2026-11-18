@@ -77,16 +77,23 @@ test('every published ambient ground detail stays cheap enough to stream', async
     if (!trianglesByScene.has(asset.scene)) trianglesByScene.set(asset.scene, asset.sourceStats?.triangles);
   }
 
+  const BLENDER_HIGH_DETAIL_GROUND = /^\/assets\/ground\/(boreal|coastal|alpine|savanna|structures|swamp)\//;
   for (const variant of config.stylizedSurface.assets.groundDetailVariants) {
     const triangles = trianglesByScene.get(variant.scene);
     assert.ok(triangles !== undefined, `${variant.scene} is neither a published extraction nor a runtime asset`);
-    // Painted props stay under 350. Poly Haven scans are gated to forest biomes and
-    // canopy and carry their own budget (scripts/understory-sources.config.mjs).
-    const budget = variant.scene.startsWith('/assets/ground/scans/') ? 4000 : 350;
-    assert.ok(
-      triangles <= budget,
-      `${variant.scene} streams ${triangles} triangles as ambient ground cover`,
-    );
+    if (BLENDER_HIGH_DETAIL_GROUND.test(variant.scene)) {
+      assert.ok(
+        triangles >= 15000 && triangles <= 35000,
+        `${variant.scene} Blender understory kit expected 15000..35000 tris, got ${triangles}`,
+      );
+    } else {
+      // Poly Haven scans keep their own budget; small grass/weed cards stay under 350.
+      const budget = variant.scene.startsWith('/assets/ground/scans/') ? 4000 : 350;
+      assert.ok(
+        triangles <= budget,
+        `${variant.scene} streams ${triangles} triangles as ambient ground cover`,
+      );
+    }
   }
 });
 

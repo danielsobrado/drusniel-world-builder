@@ -266,7 +266,13 @@ export function createFallenLogGeometry({ length = 3.6, radius = 0.24, variant =
     builder.curvedLimb(pts, [0.095, 0.062, 0.03], 6, { seed: 7 + idx * 1.9, capTip: true, moss: 0.45 });
   });
 
-  return builder.build();
+  return builder.build({
+    blendBasalNormals: false,
+    sculptAmp: 0.004,
+    weightFn: (x, _y, z) => (
+      Math.abs(x) < half * 0.84 && Math.abs(z) < radius * 1.12 ? 1.0 : 0.0
+    ),
+  });
 }
 
 /** A forked, curved dead branch resting on the ground with bark taper and end grain. */
@@ -349,7 +355,7 @@ export function createLeafLitterGeometry({ radius = 1.7, leaves = 72, seed = 0x5
     builder.vertex(x - across[0], y, z - across[1], color, 0, 0.5);
     builder.indices.push(first, first + 2, first + 1, first, first + 3, first + 2);
   }
-  const geometry = builder.build();
+  const geometry = builder.build({ blendBasalNormals: false, sculptAmp: 0.002 });
   const normals = geometry.getAttribute('normal');
   for (let index = 0; index < normals.count; index += 1) normals.setXYZ(index, 0, 1, 0);
   return geometry;

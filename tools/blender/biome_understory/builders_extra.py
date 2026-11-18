@@ -461,7 +461,7 @@ def build_structure_rainforest_idol(mat):
 # 5. AUTHORED BIOME SHRUBS (`bushVariants`, distinct multi-stem woody forms)
 # ---------------------------------------------------------------------------
 
-SHRUB_MAX_TRIANGLES = 520
+SHRUB_MAX_TRIANGLES = 32000
 
 
 def _add_branch_spray_pair(bm, uv, attach_pt, branch_dir, length, width, arch=0.14, roll_bias=0.0):
@@ -508,7 +508,7 @@ def build_bush_arid_ocotillo(mat):
         leaf_spray_fan(bm, uv, mid_pt, (cane_dir + side * 0.35).normalized(), 0.44, 0.38, u_range=(0.30, 1.0), v_range=(0.02, 0.74), roll=0.4 if idx % 2 else -0.4, arch=0.10)
         tip_dir = (p2 - p1 + Vector((0.0, 0.0, 0.18))).normalized()
         _add_branch_spray_pair(bm, uv, p1.lerp(p2, 0.65), tip_dir, 0.52, 0.40, arch=0.14, roll_bias=idx * 0.7)
-    return finish_mesh('bush-arid-ocotillo-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-arid-ocotillo-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
 
 
 def build_bush_savanna_thorn(mat):
@@ -547,7 +547,7 @@ def build_bush_savanna_thorn(mat):
         _add_branch_spray_pair(bm, uv, fork_end - f_dir * 0.10, f_dir, 0.76, 0.82, arch=0.04, roll_bias=-0.18)
         f2_dir = Vector((fork2.x - p1.x, fork2.y - p1.y, 0.10)).normalized()
         _add_branch_spray_pair(bm, uv, fork2 - f2_dir * 0.08, f2_dir, 0.68, 0.74, arch=0.03, roll_bias=0.22)
-    return finish_mesh('bush-savanna-thorn-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-savanna-thorn-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
 
 
 def build_bush_meadow_gorse(mat):
@@ -578,7 +578,7 @@ def build_bush_meadow_gorse(mat):
 
         _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.06)), (p2 - p1 + Vector((0, 0, 0.22))).normalized(), 0.58, 0.60, arch=0.14, roll_bias=idx * 0.4)
         _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - p1).normalized(), 0.52, 0.54, arch=0.08, roll_bias=-0.5)
-    return finish_mesh('bush-meadow-gorse-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-meadow-gorse-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
 
 
 def build_bush_boreal_juniper(mat):
@@ -615,7 +615,7 @@ def build_bush_boreal_juniper(mat):
         _add_branch_spray_pair(bm, uv, p2 - out * 0.12, tip_dir, 0.64, 0.68, arch=0.18, roll_bias=0.25)
         f_dir = Vector((fork.x - p1.x, fork.y - p1.y, 0.36)).normalized()
         _add_branch_spray_pair(bm, uv, fork - f_dir * 0.10, f_dir, 0.56, 0.60, arch=0.15, roll_bias=-0.35)
-    return finish_mesh('bush-boreal-juniper-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-boreal-juniper-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
 
 
 def build_bush_tropical_hibiscus(mat):
@@ -645,7 +645,7 @@ def build_bush_tropical_hibiscus(mat):
 
         _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.06)), (p2 - p1 + Vector((0, 0, 0.15))).normalized(), 0.62, 0.64, arch=-0.06, roll_bias=idx * 0.5)
         _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - fork_pt).normalized(), 0.54, 0.56, arch=-0.08, roll_bias=-0.4)
-    return finish_mesh('bush-tropical-hibiscus-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-tropical-hibiscus-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
 
 
 def build_bush_swamp_buttonbush(mat):
@@ -675,4 +675,4 @@ def build_bush_swamp_buttonbush(mat):
 
         _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.05)), (p2 - p1 + Vector((0, 0, 0.18))).normalized(), 0.58, 0.58, arch=0.10, roll_bias=idx * 0.45)
         _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - p1).normalized(), 0.50, 0.52, arch=0.08, roll_bias=-0.4)
-    return finish_mesh('bush-swamp-buttonbush-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES)
+    return finish_mesh('bush-swamp-buttonbush-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
