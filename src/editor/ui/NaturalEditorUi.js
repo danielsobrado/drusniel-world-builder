@@ -5,8 +5,8 @@ import './NaturalGladeTerrainPanel.css';
 import { naturalEditorIcon } from './NaturalEditorIcons.js';
 import { NaturalEditorPreferences } from './NaturalEditorPreferences.js';
 import { NATURAL_EDITOR_UI_CONFIG } from './NaturalEditorUiConfig.generated.js';
+import { NaturalEditorRecommendations } from './NaturalEditorRecommendations.js';
 
-const INSTALL_MARK = 'naturalUiInstalled';
 const PANEL_SELECTOR = '.sidebar [data-panel]';
 
 function escapeHtml(value) {
@@ -41,40 +41,21 @@ function actionButtonMarkup(action, icon = null) {
   `;
 }
 
-function hiddenTool(root, tool) {
-  return root.querySelector(`.panel--tools [data-tool="${CSS.escape(tool)}"]`);
-}
-
-function clickHiddenTool(root, tool) {
-  hiddenTool(root, tool)?.click();
-}
-
-function clickCategory(root, category) {
-  const chip = root.querySelector(`[data-object-category="${CSS.escape(category)}"]`);
-  if (chip) chip.click();
-}
-
 function isPanelVisible(panel) {
   return panel && !panel.hidden;
 }
 
-function dispatchDuplicateShortcut() {
-  window.dispatchEvent(new KeyboardEvent('keydown', {
-    key: 'd',
-    code: 'KeyD',
-    ctrlKey: true,
-    bubbles: true,
-  }));
-}
-
-class NaturalEditorUi {
-  constructor(root) {
+export class NaturalEditorUi {
+  constructor(editor) {
+    const { root, commands } = editor;
+    this.editor = editor;
     this.root = root;
+    this.commands = commands;
+    this.abort = new AbortController();
     this.shell = root.querySelector('.editor-shell');
     this.sidebar = root.querySelector('.sidebar');
     this.viewport = root.querySelector('[data-role="viewport"]');
     this.objectPalette = root.querySelector('[data-role="object-palette"]');
-    this.objectSearch = root.querySelector('[data-role="object-search"]');
     this.selectedObjectCard = root.querySelector('[data-role="selected-object"]');
     this.preferences = new NaturalEditorPreferences();
     this.activeTool = 'terrain';
@@ -82,14 +63,13 @@ class NaturalEditorUi {
     this.paletteRefreshQueued = false;
     this.worldMenuOpen = false;
 
-    this.shell.dataset[INSTALL_MARK] = 'true';
     this.createChrome();
     this.createQuickPicks();
+    this.recommendations = new NaturalEditorRecommendations(root, (key, category) => this.selectQuickPick(key, category));
     this.bind();
     this.observe();
     this.refreshObjectPaletteEnhancements();
     this.syncFromPanels();
-    this.showFirstRunHint();
   }
 
   createChrome() {
@@ -128,6 +108,7 @@ class NaturalEditorUi {
         ${NATURAL_EDITOR_UI_CONFIG.worldActions.map((action) => `
           <button class="natural-menu-action" type="button" data-action="${escapeHtml(action.id)}">${escapeHtml(action.label)}</button>
         `).join('')}
+        <button class="natural-menu-action" type="button" data-natural-professional>World Editor</button>
       </div>
       <p>Save, restore or reset edits. Appearance, imports and creator tools live in Settings.</p>
     `;
@@ -163,7 +144,7 @@ class NaturalEditorUi {
       <button class="natural-context-action" type="button" data-action="rotate-selected" title="Rotate">
         ${naturalEditorIcon('rotate')}<span>Rotate</span>
       </button>
-      <button class="natural-context-action" type="button" data-natural-duplicate title="Duplicate">
+      <button class="natural-context-action" type="button" data-action="duplicate-selected" data-natural-duplicate title="Duplicate">
         ${naturalEditorIcon('duplicate')}<span>Duplicate</span>
       </button>
       <button class="natural-context-action natural-context-action--danger" type="button" data-action="delete-selected" title="Delete">
@@ -210,7 +191,7 @@ class NaturalEditorUi {
       this.previousPrimaryTool = this.activeTool || this.previousPrimaryTool;
       this.activeTool = null;
       this.sidebar.classList.remove('is-dismissed');
-      clickHiddenTool(this.root, 'settings');
+      this.commands.execute('tool.settings');
       this.syncToolbar();
     });
 
@@ -223,8 +204,9 @@ class NaturalEditorUi {
       this.sidebar.classList.add('is-dismissed');
     });
 
-    this.contextToolbar.querySelector('[data-natural-duplicate]').addEventListener('click', () => {
-      dispatchDuplicateShortcut();
+    this.worldMenu.querySelector('[data-natural-professional]').addEventListener('click', () => {
+      this.setWorldMenuOpen(false);
+      this.commands.execute('view.workspace.world');
     });
 
     this.objectPalette?.addEventListener('click', (event) => {
@@ -249,21 +231,19 @@ class NaturalEditorUi {
     });
 
     this.viewport.addEventListener('wheel', (event) => {
-      if (!event.shiftKey || this.activeTool !== 'terrain') return;
+      const terrain = this.shell.dataset.workspace === 'natural'
+        ? this.activeTool === 'terrain' : this.shell.dataset.naturalPanel === 'terrain';
+      if (!event.shiftKey || !terrain) return;
       event.preventDefault();
       event.stopPropagation();
-      window.dispatchEvent(new KeyboardEvent('keydown', {
-        key: event.deltaY > 0 ? ']' : '[',
-        code: event.deltaY > 0 ? 'BracketRight' : 'BracketLeft',
-        bubbles: true,
-      }));
+      this.commands.execute('terrain.cycle-brush', event.deltaY > 0 ? 1 : -1);
     }, { capture: true, passive: false });
 
     document.addEventListener('pointerdown', (event) => {
       if (this.worldMenuOpen && !event.target.closest('.natural-world-menu, [data-natural-world-menu]')) {
         this.setWorldMenuOpen(false);
       }
-    });
+    }, { signal: this.abort.signal });
   }
 
   observe() {
@@ -312,6 +292,20 @@ class NaturalEditorUi {
     this.buildStrip.hidden = this.activeTool !== 'build';
   }
 
+  syncPresentation(tool) {
+    if (tool === 'terrain') this.activeTool = 'terrain';
+    else if (tool === 'construction') this.activeTool = 'build';
+    else if (tool === 'settings') this.activeTool = null;
+    else if (tool === 'object') {
+      const category = this.editor.objectCategory;
+      const primary = NATURAL_EDITOR_UI_CONFIG.primaryTools.find(({ objectCategory }) => objectCategory === category);
+      const build = NATURAL_EDITOR_UI_CONFIG.buildActions.some(({ objectCategory }) => objectCategory === category);
+      this.activeTool = primary?.id ?? (build ? 'build' : 'decor');
+    }
+    if (this.activeTool) this.previousPrimaryTool = this.activeTool;
+    this.syncToolbar();
+  }
+
   syncContextToolbar() {
     const sourceDelete = this.root.querySelector('.sidebar [data-action="delete-selected"]');
     const hasObjectSelection = sourceDelete ? !sourceDelete.disabled : false;
@@ -329,12 +323,7 @@ class NaturalEditorUi {
     this.sidebar.classList.remove('is-dismissed');
     this.setWorldMenuOpen(false);
 
-    if (definition.controllerTool === 'object') {
-      clickHiddenTool(this.root, 'object');
-      queueMicrotask(() => clickCategory(this.root, definition.objectCategory ?? 'all'));
-    } else {
-      clickHiddenTool(this.root, definition.controllerTool);
-    }
+    this.commands.execute(definition.objectCategory ? `asset.${toolId}` : `tool.${definition.controllerTool}`);
     this.syncToolbar();
   }
 
@@ -344,11 +333,10 @@ class NaturalEditorUi {
     this.activeTool = 'build';
     this.sidebar.classList.remove('is-dismissed');
     if (action.action === 'workshop') {
-      clickHiddenTool(this.root, 'workshop');
+      this.commands.execute('tool.workshop');
       return;
     }
-    clickHiddenTool(this.root, action.controllerTool);
-    if (action.objectCategory) queueMicrotask(() => clickCategory(this.root, action.objectCategory));
+    this.commands.execute(action.objectCategory ? `asset.${actionId}` : `tool.${action.controllerTool}`);
     this.syncToolbar();
   }
 
@@ -402,13 +390,7 @@ class NaturalEditorUi {
   }
 
   cardInfo(key) {
-    const card = this.objectPalette?.querySelector(`.object-card[data-object-key="${CSS.escape(key)}"]`);
-    if (!card) return null;
-    return {
-      key,
-      label: card.querySelector('.object-card__label')?.textContent?.trim() || key,
-      icon: card.querySelector('.object-card__icon')?.textContent?.trim() || '',
-    };
+    return this.editor.objectByKey.get(key) ?? null;
   }
 
   renderQuickPicks() {
@@ -445,17 +427,13 @@ class NaturalEditorUi {
     `).join('');
   }
 
-  selectQuickPick(key) {
-    let card = this.objectPalette?.querySelector(`.object-card[data-object-key="${CSS.escape(key)}"]`);
-    if (!card) {
-      if (this.objectSearch) {
-        this.objectSearch.value = '';
-        this.objectSearch.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-      clickCategory(this.root, 'all');
-      card = this.objectPalette?.querySelector(`.object-card[data-object-key="${CSS.escape(key)}"]`);
+  selectQuickPick(key, category = 'all') {
+    if (!this.objectPalette.querySelector(`[data-object-key="${CSS.escape(key)}"]`)) {
+      this.commands.execute('object.category', { category, clearSearch: true });
     }
-    card?.click();
+    this.commands.execute('object.definition', key);
+    this.preferences.remember(key);
+    this.renderQuickPicks();
   }
 
   showFirstRunHint() {
@@ -474,25 +452,16 @@ class NaturalEditorUi {
     this.viewport.append(hint);
     const remove = () => hint.remove();
     hint.addEventListener('click', remove, { once: true });
-    setTimeout(remove, NATURAL_EDITOR_UI_CONFIG.motion.hintDurationMs);
+    this.hintTimer = setTimeout(remove, NATURAL_EDITOR_UI_CONFIG.motion.hintDurationMs);
   }
-}
 
-function installWhenReady() {
-  const root = document.querySelector('#app');
-  const shell = root?.querySelector('.editor-shell');
-  const sidebar = root?.querySelector('.sidebar');
-  const viewport = root?.querySelector('[data-role="viewport"]');
-  if (root && shell && sidebar && viewport && shell.dataset[INSTALL_MARK] !== 'true') {
-    new NaturalEditorUi(root);
-    return true;
+  dispose() {
+    this.abort.abort();
+    clearTimeout(this.hintTimer);
+    this.recommendations.dispose();
+    this.panelObserver.disconnect();
+    this.selectionObserver?.disconnect();
+    this.selectedObjectObserver?.disconnect();
+    this.paletteObserver?.disconnect();
   }
-  return false;
-}
-
-if (!installWhenReady()) {
-  const observer = new MutationObserver(() => {
-    if (installWhenReady()) observer.disconnect();
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
 }

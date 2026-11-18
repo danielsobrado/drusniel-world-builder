@@ -3,13 +3,12 @@ import {
   MAX_HISTORY_ENTRIES,
   PAINT_INTERVAL_MS,
   PRIMARY_POINTER_BUTTON,
-  TERRAIN_MODE_BY_SHORTCUT,
   TERRAIN_PREVIEW_COLORS,
   VALID_EDITOR_TOOLS,
   VALID_TERRAIN_MODES,
 } from './constants.js';
 import { createWorldDocument, loadWorldDocument } from './WorldDocument.js';
-import { TILE_BY_SHORTCUT } from './tileCatalog.js';
+import { createWorldCommands, editorShortcut } from './ui/commands/EditorCommands.js';
 import { executeConstructionCommand } from './construction/ConstructionCommands.js';
 import {
   closestPointOnCubicBezierPath,
@@ -344,6 +343,7 @@ export class EditorController {
     this.mapListeners = new Set();
     this.hoverListeners = new Set();
     this.noticeListeners = new Set();
+    this.commands = createWorldCommands(this);
 
     this.canvas = terrainView.renderer.domElement;
     this.boundHandlers = {
@@ -440,6 +440,23 @@ export class EditorController {
     if (tool !== 'construction') {
       this.cancelConstructionGesture();
       this.setSelectedConstruction(null);
+    }
+    this.updatePreviews();
+    this.emitState();
+  }
+
+  selectSceneEntity({ kind, id, additive = false }) {
+    if (kind === 'object' && this.objectMap.getById(id)) {
+      this.selectTool('select');
+      if (this.tool !== 'select') return;
+      const selection = this.naturalEditorInteractions?.selection;
+      if (additive && selection) selection.selectDirect(id, { additive: true });
+      else this.setSelectedObject(id);
+    } else if (kind === 'construction' && this.constructionStore?.get(id)) {
+      this.selectConstructionMode('edit');
+      this.setSelectedConstruction(id);
+    } else {
+      return;
     }
     this.updatePreviews();
     this.emitState();
@@ -1826,26 +1843,15 @@ export class EditorController {
     if (this.isWorldInputBlocked()) {
       return;
     }
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+    if (event.defaultPrevented || event.target?.closest?.('input, textarea, select, [contenteditable]')) {
       return;
     }
 
     if (event.code === 'Space' && !this.spacePressed) {
+      if (event.target?.matches?.('button:focus-visible, summary:focus-visible, [role="tree"]')) return;
       event.preventDefault();
       this.spacePressed = true;
       this.editorCamera.setLeftPanEnabled(true);
-      return;
-    }
-
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
-      event.preventDefault();
-      event.shiftKey ? this.redo() : this.undo();
-      return;
-    }
-
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') {
-      event.preventDefault();
-      this.redo();
       return;
     }
 
@@ -1856,58 +1862,19 @@ export class EditorController {
       return;
     }
 
-    const tile = TILE_BY_SHORTCUT.get(event.key);
-    if (tile) {
-      this.selectTile(tile.id);
+    const shortcut = editorShortcut(event, this.tool);
+    const command = shortcut && this.commands.get(shortcut[0]);
+    if (command) {
+      if (command.enabled() || command.id.startsWith('edit.')) event.preventDefault();
+      this.commands.execute(...shortcut);
       return;
     }
 
-    const terrainMode = TERRAIN_MODE_BY_SHORTCUT[event.key.toLowerCase()];
-    if (terrainMode) {
-      this.selectTerrainMode(terrainMode);
-      return;
-    }
-
-    switch (event.key.toLowerCase()) {
-      case 't':
-        this.selectTool('terrain');
-        break;
-      case 'o':
-        this.selectTool('object');
-        break;
-      case 'v':
-        this.selectTool('select');
-        break;
-      case 'c':
-        this.selectTool('construction');
-        break;
-      case 'r':
-        this.tool === 'select' ? this.rotateSelected() : this.rotatePlacement();
-        break;
-      case 'delete':
-      case 'backspace':
-        if (this.tool === 'construction' && this.selectedConstructionId) {
-          event.preventDefault();
-          this.deleteConstructionSelection();
-        } else if (this.tool === 'select') {
-          event.preventDefault();
-          this.deleteSelected();
-        }
-        break;
-      case 'escape':
-        this.cancelConstructionGesture();
-        this.movingObjectId = null;
-        this.setSelectedObject(null);
-        this.emitState();
-        break;
-      case '[':
-        this.cycleBrush(-1);
-        break;
-      case ']':
-        this.cycleBrush(1);
-        break;
-      default:
-        break;
+    if (event.key === 'Escape') {
+      this.cancelConstructionGesture();
+      this.movingObjectId = null;
+      this.setSelectedObject(null);
+      this.emitState();
     }
   }
 

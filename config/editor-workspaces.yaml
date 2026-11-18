@@ -1,0 +1,34 @@
+version: 1
+layout:
+  menuHeight: 26
+  toolbarHeight: 36
+  statusHeight: 24
+  iconSize: 32
+  minViewportWidth: 480
+panels:
+  toolbox: { defaultWidth: 240, minWidth: 180, maxWidth: 400 }
+  inspector: { defaultWidth: 300, minWidth: 240, maxWidth: 500 }
+workspaces:
+  world:
+    label: World Editor
+    initialTool: tool.terrain
+    tools: [tool.select, tool.terrain, asset.nature, tool.construction, tool.object, view.world-map]
+    outliner: true
+  construction:
+    label: Construction Editor
+    initialTool: tool.construction
+    tools: [tool.select, tool.construction, construction.draw, construction.edit, asset.structures, asset.defenses, tool.workshop]
+    outliner: true
+  environment:
+    label: Environment Editor
+    initialTool: tool.settings
+    tools: [tool.terrain, asset.nature, tool.settings, view.world-map]
+    outliner: false
+  natural:
+    label: Natural Building
+themes:
+  default: professional-light
+  available:
+    professional-light: Professional Light
+    dark-forge: Dark Forge
+    glade: Glade

@@ -502,17 +502,8 @@ export function installNaturalEditorInteractions(controller) {
   };
 
   controller.onKeyDown = (event) => {
-    if (isTextControl(event.target)) return;
+    if (event.defaultPrevented || isTextControl(event.target)) return;
     if (controller.isWorldInputBlocked()) return original.onKeyDown(event);
-    if (
-      (event.ctrlKey || event.metaKey)
-      && event.key.toLowerCase() === 'd'
-      && selection.size > 0
-    ) {
-      event.preventDefault();
-      selection.duplicate();
-      return;
-    }
     const escapeConstructionReturn = event.key.toLowerCase() === 'escape'
       && Boolean(controller.naturalConstructionReturnTool);
     if (event.key.toLowerCase() === 'escape') {

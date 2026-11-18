@@ -1,0 +1,47 @@
+.editor-shell[data-editor-theme='professional-light'] {
+  --workspace-frame: #e9edf3;
+  --workspace-panel: #f4f6f9;
+  --workspace-field: #fff;
+  --workspace-hover: #e5eaf1;
+  --workspace-line: #c5cedb;
+  --workspace-ink: #182b43;
+  --workspace-muted: #4d627b;
+  --workspace-accent: #285cb2;
+  --workspace-on-accent: #fff;
+  --workspace-selection: #dbe7fb;
+  --workspace-danger: #a33035;
+  --workspace-shadow: 0 10px 30px #14243d30;
+  --workspace-color-scheme: light;
+}
+
+.editor-shell[data-editor-theme='dark-forge'] {
+  --workspace-frame: #20252d;
+  --workspace-panel: #242a34;
+  --workspace-field: #1a1e25;
+  --workspace-hover: #353d49;
+  --workspace-line: #414c59;
+  --workspace-ink: #f0f3f7;
+  --workspace-muted: #b6c0cf;
+  --workspace-accent: #9ab8f4;
+  --workspace-on-accent: #111e34;
+  --workspace-selection: #354767;
+  --workspace-danger: #ffacaa;
+  --workspace-shadow: 0 10px 30px #0008;
+  --workspace-color-scheme: dark;
+}
+
+.editor-shell[data-editor-theme='glade'] {
+  --workspace-frame: #dedfd0;
+  --workspace-panel: #f1f0e4;
+  --workspace-field: #fdfbf2;
+  --workspace-hover: #e3e7d8;
+  --workspace-line: #b8beac;
+  --workspace-ink: #253d34;
+  --workspace-muted: #52665b;
+  --workspace-accent: #41694b;
+  --workspace-on-accent: #fff;
+  --workspace-selection: #dae8d7;
+  --workspace-danger: #973833;
+  --workspace-shadow: 0 10px 30px #20372935;
+  --workspace-color-scheme: light;
+}

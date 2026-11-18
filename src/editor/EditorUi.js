@@ -15,6 +15,7 @@ import { normalizeSceneSettings } from './settings/SceneSettings.js';
 import { createPostProcessingSettingsPanel } from './settings/PostProcessingSettingsPanel.js';
 import { assetFileName, formatBytes, trackStreamingSettle } from './ui/loadingSources.js';
 import { MinimapRaster, WAIT_FOR_MINIMAP } from './map/MinimapRaster.js';
+import { NATURAL_EDITOR_UI_CONFIG } from './ui/NaturalEditorUiConfig.generated.js';
 
 const TERRAIN_MODE_LABELS = Object.freeze({
   paint: 'Paint',
@@ -25,6 +26,13 @@ const TERRAIN_MODE_LABELS = Object.freeze({
 // About a quarter degree — below this a re-styled transform is wasted work.
 const MINIMAP_HEADING_EPSILON = 0.004;
 const ALL_CATEGORIES = 'all';
+const EDIT_ACTION_COMMANDS = {
+  undo: 'edit.undo', redo: 'edit.redo', 'rotate-placement': 'object.rotate-placement',
+  'move-selected': 'object.move', 'rotate-selected': 'object.rotate',
+  'duplicate-selected': 'object.duplicate', 'delete-selected': 'object.delete',
+  'delete-construction': 'construction.delete', save: 'file.save', load: 'file.load',
+  export: 'file.export', import: 'file.import', new: 'file.clear', camera: 'view.reset-camera',
+};
 const CATEGORY_LABELS = Object.freeze({
   all: 'All',
   building: 'Buildings',
@@ -1073,22 +1081,20 @@ export class EditorUi {
     this.constructionDrawingControls?.dispose();
     this.constructionDrawingControls = new ConstructionDrawingControls(this.viewport, controller);
     this.controller = controller;
+    this.commands = controller.commands;
+    this.registerCommands();
     this.toolRow.addEventListener('click', (event) => {
       const button = event.target.closest('[data-tool]');
       if (!button) return;
-      if (button.dataset.tool === 'workshop') {
-        this.workshop?.open();
-        return;
-      }
-      controller.selectTool(button.dataset.tool);
+      this.commands.execute(`tool.${button.dataset.tool}`);
     });
     this.terrainModeRow.addEventListener('click', (event) => {
       const button = event.target.closest('[data-terrain-mode]');
-      if (button) controller.selectTerrainMode(button.dataset.terrainMode);
+      if (button) this.commands.execute(`terrain.${button.dataset.terrainMode}`);
     });
     this.constructionModeRow.addEventListener('click', (event) => {
       const button = event.target.closest('[data-construction-mode]');
-      if (button) controller.selectConstructionMode(button.dataset.constructionMode);
+      if (button) this.commands.execute(`construction.${button.dataset.constructionMode}`);
     });
     const updateConstructionDimensions = () => controller.setConstructionDimensions({
       height: Number(this.constructionHeight.value),
@@ -1171,11 +1177,11 @@ export class EditorUi {
     });
     this.palette.addEventListener('click', (event) => {
       const button = event.target.closest('[data-tile-id]');
-      if (button) controller.selectTile(Number(button.dataset.tileId));
+      if (button) this.commands.execute('terrain.tile', Number(button.dataset.tileId));
     });
     this.objectPalette.addEventListener('click', (event) => {
       const button = event.target.closest('[data-object-key]');
-      if (button) controller.selectObjectDefinition(button.dataset.objectKey);
+      if (button) this.commands.execute('object.definition', button.dataset.objectKey);
     });
     this.objectSearch.addEventListener('input', () => {
       this.objectQuery = this.objectSearch.value;
@@ -1184,17 +1190,18 @@ export class EditorUi {
     this.objectCategories.addEventListener('click', (event) => {
       const chip = event.target.closest('[data-object-category]');
       if (!chip) return;
-      this.objectCategory = chip.dataset.objectCategory;
-      this.applyCategorySelection();
-      this.renderObjectButtons();
+      this.commands.execute('object.category', { category: chip.dataset.objectCategory });
     });
     this.brushRow.addEventListener('click', (event) => {
       const button = event.target.closest('[data-brush-size]');
-      if (button) controller.selectBrush(Number(button.dataset.brushSize));
+      if (button) this.commands.execute('terrain.brush', Number(button.dataset.brushSize));
     });
     this.root.addEventListener('click', (event) => {
       const button = event.target.closest('[data-action]');
-      if (button) this.handleAction(button.dataset.action);
+      if (!button) return;
+      const command = EDIT_ACTION_COMMANDS[button.dataset.action];
+      if (command) this.commands.execute(command);
+      else this.handleAction(button.dataset.action);
     });
     this.fileInput.addEventListener('change', async () => {
       const [file] = this.fileInput.files;
@@ -1321,6 +1328,45 @@ export class EditorUi {
       if (final) this.queueMinimapUpdate();
     });
     this.updateMinimap();
+  }
+
+  registerCommands() {
+    const enabled = () => !this.controller.isWorldInputBlocked();
+    for (const [action, label] of Object.entries({
+      save: 'Save world', load: 'Load browser save', export: 'Export world JSON',
+      import: 'Import local map', new: 'Clear world edits', camera: 'Reset camera',
+    })) {
+      this.commands.register(EDIT_ACTION_COMMANDS[action], label, () => this.handleAction(action), { enabled });
+    }
+    this.commands.register('tool.workshop', 'Open Asset Workshop', () => this.workshop.open(), {
+      enabled: () => enabled() && Boolean(this.workshop),
+    });
+    this.commands.register('object.category', '', ({ category, clearSearch }) => {
+      this.objectCategory = category;
+      if (clearSearch) this.objectQuery = this.objectSearch.value = '';
+      this.applyCategorySelection();
+      this.renderObjectButtons();
+      this.controller.emitState();
+    });
+    for (const action of [...NATURAL_EDITOR_UI_CONFIG.primaryTools, ...NATURAL_EDITOR_UI_CONFIG.buildActions]) {
+      if (!action.objectCategory) continue;
+      this.commands.register(`asset.${action.id}`, action.id === 'nature' ? 'Vegetation' : action.label, () => {
+        this.commands.execute('tool.object');
+        if (this.controller.tool === 'object') {
+          this.commands.execute('object.category', { category: action.objectCategory, clearSearch: true });
+        }
+      }, { enabled });
+    }
+    this.commands.register('selection.scene', '', (entity) => this.controller.selectSceneEntity(entity), { enabled });
+  }
+
+  syncCommandButtons() {
+    for (const action of ['undo', 'redo', 'move-selected', 'rotate-selected', 'duplicate-selected', 'delete-selected', 'delete-construction']) {
+      const command = this.commands.get(EDIT_ACTION_COMMANDS[action]);
+      for (const button of this.root.querySelectorAll(`[data-action="${action}"]`)) {
+        button.disabled = !command.enabled();
+      }
+    }
   }
 
   renderTileButtons() {
@@ -1501,12 +1547,7 @@ export class EditorUi {
     for (const button of this.brushRow.querySelectorAll('[data-brush-size]')) {
       button.classList.toggle('is-active', Number(button.dataset.brushSize) === state.brushSize);
     }
-    this.root.querySelector('[data-action="undo"]').disabled = !state.canUndo;
-    this.root.querySelector('[data-action="redo"]').disabled = !state.canRedo;
-    this.root.querySelector('[data-action="move-selected"]').disabled = !state.selectedObject;
-    this.root.querySelector('[data-action="rotate-selected"]').disabled = !state.selectedObject;
-    this.root.querySelector('[data-action="delete-selected"]').disabled = !state.selectedObject;
-    this.root.querySelector('[data-action="delete-construction"]').disabled = !state.selectedConstruction;
+    this.syncCommandButtons();
 
     this.objectCount.textContent = `${state.objectCount} object${state.objectCount === 1 ? '' : 's'}`;
     this.constructionCount.textContent = `${state.constructionCount} construction${state.constructionCount === 1 ? '' : 's'}`;
@@ -1606,13 +1647,6 @@ export class EditorUi {
   async handleAction(action) {
     try {
       switch (action) {
-        case 'undo': this.controller.undo(); break;
-        case 'redo': this.controller.redo(); break;
-        case 'rotate-placement': this.controller.rotatePlacement(); break;
-        case 'move-selected': this.controller.startMoveSelected(); break;
-        case 'rotate-selected': this.controller.rotateSelected(); break;
-        case 'delete-selected': this.controller.deleteSelected(); break;
-        case 'delete-construction': this.controller.deleteSelectedConstruction(); break;
         case 'save':
           await saveToBrowser(this.config.storage.key, this.controller.toDocument());
           this.showToast('World saved in this browser.');

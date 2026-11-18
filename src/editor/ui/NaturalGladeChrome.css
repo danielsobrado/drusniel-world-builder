@@ -424,7 +424,7 @@
 }
 
 /* The settings drawer takes the right column; the corner cards make room. */
-#app:has(.editor-shell[data-natural-panel="settings"] .sidebar:not(.is-dismissed)) .weather-panel,
+#app:has(.editor-shell[data-natural-ui-installed="true"][data-natural-panel="settings"] .sidebar:not(.is-dismissed)) .weather-panel,
 .editor-shell[data-natural-panel="settings"] .sidebar:not(.is-dismissed) ~ .viewport-shell .statusbar {
   opacity: 0;
   pointer-events: none;

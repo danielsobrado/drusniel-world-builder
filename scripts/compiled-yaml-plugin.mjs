@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
+import { validateWorkspaceConfig } from '../src/editor/ui/workspace/WorkspaceConfig.js';
 
 /** Compile authoring YAML into module data; runtime resolution stays in the app. */
 export function compileYamlModule(source, filename) {
@@ -8,6 +9,7 @@ export function compileYamlModule(source, filename) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${filename} must contain a configuration object.`);
   }
+  if (/[\\/]editor-workspaces\.yaml$/.test(filename)) validateWorkspaceConfig(value);
   return `export default ${JSON.stringify(value)};\n`;
 }
 

@@ -96,6 +96,7 @@ export function createWeatherUi({
   root.append(panel);
 
   return {
+    element: panel,
     sync,
     dispose() {
       panel.remove();

@@ -26,6 +26,8 @@ import { ESCAPE_PRIORITY, EscapeStack } from './editor/ui/EscapeStack.js';
 import { assetFileName, bindAssetProgress, watchWalkModeEntry } from './editor/ui/loadingSources.js';
 import { EditorCamera } from './editor/EditorCamera.js';
 import { EditorUi } from './editor/EditorUi.js';
+import { NaturalEditorUi } from './editor/ui/NaturalEditorUi.js';
+import { EditorWorkspace } from './editor/ui/workspace/EditorWorkspace.js';
 import { InfiniteTerrainView } from './editor/InfiniteTerrainView.js';
 import { MacroFarTerrainView } from './editor/world/MacroFarTerrainView.js';
 import { createLocationRuntime } from './editor/locations/createLocationRuntime.js';
@@ -912,6 +914,17 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   });
   resources.own(proceduralWorkshop);
   ui.attachWorkshop(proceduralWorkshop);
+  const naturalEditor = new NaturalEditorUi(ui);
+  resources.own(naturalEditor);
+  const editorWorkspace = new EditorWorkspace({
+    editor: ui, natural: naturalEditor, fps: frameRateDisplay, viewMode: viewModeController,
+    openMap: () => worldMapController.open(),
+    explore: () => viewModeController.setMode(PLAYER_MODE_WALK, { requestPointerLock: true }),
+    fixedNatural: Boolean(perfQaConfig),
+  });
+  resources.own(editorWorkspace);
+  resources.defer(escapeStack.register(ESCAPE_PRIORITY.modal, (event) => editorWorkspace.escape(event), { label: 'editor workspace' }));
+  ui.syncCommandButtons();
   const sceneLabel = (preset) => {
     const label = SKY_PRESETS[preset]?.label ?? '';
     return preset === 'configured' || preset === DEFAULT_SKY_PRESET
@@ -1290,7 +1303,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const characterInFirstPerson = config.character?.visibleInFirstPerson !== false;
   const weatherUi = weatherEnabled
     ? createWeatherUi({
-      root,
+      root: ui.viewport,
       settings: weatherSettings,
       timePresets: skyLooks
         ? Object.entries(SKY_PRESETS).map(([value, preset]) => ({ value, label: preset.label }))
@@ -1327,6 +1340,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     })
     : null;
   resources.own(weatherUi);
+  editorWorkspace.attachWorldDetails(roadsideDetailsUi.root, weatherUi?.element);
 
   const spellsEnabled = config.spells?.enabled !== false;
   const spellRuntime = spellsEnabled

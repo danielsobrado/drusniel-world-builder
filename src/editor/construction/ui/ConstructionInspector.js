@@ -27,18 +27,19 @@ export function masonryStyleStatusMessage(styleKey) {
 }
 
 export class ConstructionInspector {
-  constructor({ host, controller, materialStore = null, onStatus = null }) {
+  constructor({ host, controller, materialStore = null, onStatus = null, docked = false }) {
     if (!host) throw new Error('ConstructionInspector needs a host element.');
     this.host = host;
     this.controller = controller;
     this.materialStore = materialStore;
     this.onStatus = onStatus;
+    this.docked = docked;
     this.constructionId = null;
 
     this.element = document.createElement('aside');
-    this.element.className = 'construction-inspector';
+    this.element.className = docked ? 'workspace-wall-properties' : 'construction-inspector';
     this.element.hidden = true;
-    this.element.setAttribute('role', 'dialog');
+    if (!docked) this.element.setAttribute('role', 'dialog');
     this.element.setAttribute('aria-label', 'Wall properties');
     this.host.append(this.element);
 
@@ -46,7 +47,7 @@ export class ConstructionInspector {
     this.boundChange = (event) => this.handleChange(event);
     this.element.addEventListener('click', this.boundClick);
     this.element.addEventListener('change', this.boundChange);
-    this.unsubscribeStore = controller.constructionStore?.subscribe(change => {
+    if (!docked) this.unsubscribeStore = controller.constructionStore?.subscribe(change => {
       if (!this.isOpen) return;
       if (change.id !== this.constructionId && !['replace', 'clear'].includes(change.kind)) return;
       if (!controller.constructionStore.get(this.constructionId)) this.close();
@@ -62,14 +63,14 @@ export class ConstructionInspector {
     const record = this.controller.constructionStore?.get(constructionId);
     if (!record) return;
     this.constructionId = constructionId;
-    this.controller.setSelectedConstruction?.(constructionId);
+    if (!this.docked) this.controller.setSelectedConstruction?.(constructionId);
     const styles = constructionStyleOptionsMarkup(record.style.key);
     this.materialPresets = wallMaterialPresets(this.materialStore?.document);
     const materials = wallMaterialOptionsMarkup(this.materialPresets, record.style.materials?.stone ?? null);
     this.element.innerHTML = `
       <header>
         <strong>${escapeText(record.label ?? 'Wall')}</strong>
-        <button type="button" data-inspector-action="close" aria-label="Close">×</button>
+        ${this.docked ? '' : '<button type="button" data-inspector-action="close" aria-label="Close">×</button>'}
       </header>
       <label>Height
         <input type="number" data-inspector-field="height" min="0.5" max="30" step="0.1"
@@ -148,8 +149,11 @@ export class ConstructionInspector {
       this.open(this.constructionId);
       return;
     }
-    const value = Number(event.target.value);
-    if (!Number.isFinite(value)) return;
+    const value = event.target.valueAsNumber;
+    if (!Number.isFinite(value) || event.target.validity.rangeUnderflow || event.target.validity.rangeOverflow) {
+      event.target.value = this.controller.constructionStore.get(this.constructionId)?.dimensions[field] ?? '';
+      return;
+    }
     this.controller.runConstructionCommand({
       type: 'set_dimensions',
       constructionId: this.constructionId,
