@@ -716,7 +716,8 @@ const kitTowns = kitTownsEnabled();
     constructionView,
     biomeAssetPalette,
     inventoryStore,
-    worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked() || viewModeController.mode === PLAYER_MODE_FLY,
+    worldInputBlockedProvider: () => gameplayOverlayController.isWorldInputBlocked()
+      || viewModeController.mode === PLAYER_MODE_FLY || root.classList.contains('is-workshop-open'),
   });
   resources.own(controller);
   const godsEndAssets = new GodsEndAssetLibrary({

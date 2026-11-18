@@ -52,7 +52,7 @@ export class EditorWorkspace {
     this.registerCommands(openMap, explore);
     validateWorkspaceConfig(config, this.commands);
 
-    this.breakpoint = matchMedia(`(max-width: ${config.layout.minViewportWidth + config.panels.toolbox.minWidth + config.panels.inspector.minWidth + 20}px)`);
+    this.compactWidth = config.layout.minViewportWidth + config.panels.toolbox.minWidth + config.panels.inspector.minWidth + 20;
     this.menu = makeElement('header', 'workspace-menu', `
       <span class="workspace-brand"><span aria-hidden="true">◆</span> Drusniel</span>
       <nav aria-label="Editor menus">${Object.entries(MENUS).map(([label, ids]) => `
@@ -71,7 +71,7 @@ export class EditorWorkspace {
       <div class="workspace-tool-group">${this.button('view.inspector', 'icon')}</div>`);
     this.toolbox = makeElement('div', 'workspace-toolbox-heading', `
       <h2 class="workspace-panel-heading" id="workspace-toolbox-title">Toolbox</h2>
-      <div data-workspace-categories></div><h2 class="workspace-panel-heading">Active Tool</h2>`);
+      <div data-workspace-categories></div><h2 class="workspace-panel-heading workspace-active-tool">Active Tool</h2>`);
     this.sidebar.prepend(this.toolbox);
     this.sidebar.id = 'workspace-toolbox';
     this.inspector = makeElement('aside', 'workspace-inspector', '<section class="workspace-scene"></section><section class="workspace-inspector-section"></section>');
@@ -112,6 +112,10 @@ export class EditorWorkspace {
       this.exploring = exploring;
       this.updatePresentation();
     });
+    this.resize = new ResizeObserver(() => {
+      if ((this.shell.clientWidth <= this.compactWidth) !== this.compact) this.syncPanels();
+    });
+    this.resize.observe(this.shell);
   }
 
   registerCommands(openMap, explore) {
@@ -160,7 +164,7 @@ export class EditorWorkspace {
       }
       const id = button.dataset.command;
       this.commands.execute(id);
-      if (this.breakpoint.matches && button.closest('.workspace-toolbar') && /^(tool|terrain|construction|asset)\./.test(id)
+      if (this.compact && button.closest('.workspace-toolbar') && /^(tool|terrain|construction|asset)\./.test(id)
         && id !== 'tool.workshop') this.showCompactPanel('toolbox');
     }, { signal });
     this.menu.addEventListener('click', (event) => {
@@ -184,9 +188,6 @@ export class EditorWorkspace {
       this.preferences.density = this.densityPicker.value;
       this.applyPreferences();
       this.save();
-    }, { signal });
-    this.breakpoint.addEventListener('change', () => {
-      this.syncPanels();
     }, { signal });
   }
 
@@ -275,7 +276,7 @@ export class EditorWorkspace {
       return true;
     }
     const panel = this.preferences.compactPanel;
-    if (!this.shell.hasAttribute('data-docked') || !this.breakpoint.matches || !panel
+    if (!this.shell.hasAttribute('data-docked') || !this.compact || !panel
       || !event.target.closest?.('.workspace-inspector, .sidebar')) return false;
     this.showCompactPanel(null);
     this.toolbar.querySelector(`[data-command="view.${panel}"]`).focus();
@@ -283,7 +284,7 @@ export class EditorWorkspace {
   }
 
   togglePanel(id) {
-    if (this.breakpoint.matches) this.showCompactPanel(this.preferences.compactPanel === id ? null : id);
+    if (this.compact) this.showCompactPanel(this.preferences.compactPanel === id ? null : id);
     else {
       this.preferences.panels[id].visible = !this.preferences.panels[id].visible;
       this.syncPanels();
@@ -298,10 +299,10 @@ export class EditorWorkspace {
   }
 
   syncPanels() {
-    if (!this.splitters) return;
-    this.shell.toggleAttribute('data-compact', this.breakpoint.matches);
+    this.compact = this.shell.clientWidth <= this.compactWidth;
+    this.shell.toggleAttribute('data-compact', this.compact);
     for (const [id, { width, visible }] of Object.entries(this.preferences.panels)) {
-      const open = this.breakpoint.matches ? this.preferences.compactPanel === id : visible;
+      const open = this.compact ? this.preferences.compactPanel === id : visible;
       this.shell.toggleAttribute(`data-${id}-open`, open);
       this.shell.style.setProperty(`--workspace-${id}-width`, `${width}px`);
       this.toolbar.querySelector(`[data-command="view.${id}"]`).setAttribute('aria-expanded', open);
@@ -394,6 +395,7 @@ export class EditorWorkspace {
 
   dispose() {
     this.abort.abort();
+    this.resize.disconnect();
     this.unsubscribe();
     this.unsubscribeView();
     this.outliner.dispose();

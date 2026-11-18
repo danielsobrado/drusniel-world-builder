@@ -186,6 +186,7 @@
 .editor-shell[data-docked] .sidebar .tile-button { padding: 3px 6px; }
 .editor-shell[data-docked] .sidebar .tile-button__label { font-size: 12px; }
 .editor-shell[data-docked] .sidebar :is([data-panel='select'], [data-role='selected-construction'], [data-action='delete-construction']) { display: none; }
+.editor-shell[data-docked][data-natural-panel='select'] .workspace-active-tool { display: none; }
 .editor-shell[data-docked] .natural-object-card-wrap { position: relative; min-width: 0; }
 .editor-shell[data-docked] .natural-object-card-wrap .object-card { width: 100%; }
 .editor-shell[data-docked] .natural-favorite-toggle {
@@ -300,6 +301,7 @@
 .editor-shell[data-docked] .statusbar .fps-average { padding: 0; background: transparent; border: 0; color: inherit; }
 .editor-shell[data-docked] .fps-average__value { color: var(--workspace-ink); }
 .editor-shell[data-docked] .view-mode-switcher { top: 10px; left: auto; right: 12px; transform: none; }
+.editor-shell[data-docked] .toast { top: auto; bottom: 12px; }
 .workspace-panel-extras { margin-block-start: 12px; border-top: 1px solid var(--workspace-line); }
 .workspace-panel-extras > details { margin-block: 7px; }
 #app .workspace-panel-extras :is(.weather-panel, .roadside-details) {
