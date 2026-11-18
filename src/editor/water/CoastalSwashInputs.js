@@ -56,6 +56,7 @@ export class CoastalSwashInputs {
     this.originX = NaN;
     this.originZ = NaN;
     this.oceanCount = 0;
+    this.eligibleCount = 0;
   }
 
   update(originX, originZ) {
@@ -90,10 +91,12 @@ export class CoastalSwashInputs {
     const landDistances = distanceTransform(types, size, 0);
     const pixels = this.texture.image.data;
     const range = this.runupMeters + 3;
+    let eligibleCount = 0;
     for (let i = 0; i < types.length; i++) {
       const distance = (types[i] ? -landDistances[i] : oceanDistances[i]) * texelMeters;
       const eligible = valid[i] && Math.abs(distance) < range && heights[i] < range
         && heights[i] > -3 ? 1 : 0;
+      if (eligible) eligibleCount++;
       const offset = i * 4;
       pixels[offset] = floatToHalf(Math.max(-16, Math.min(16, heights[i])));
       pixels[offset + 1] = floatToHalf(Math.max(-128, Math.min(128, distance)));
@@ -105,6 +108,7 @@ export class CoastalSwashInputs {
     this.originZ = originZ;
     this.revision = revision;
     this.oceanCount = oceanCount;
+    this.eligibleCount = eligibleCount;
     return true;
   }
 
