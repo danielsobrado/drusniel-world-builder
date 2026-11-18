@@ -32,7 +32,8 @@ test('camera-local texel addressing retains canonical cells across scroll and pl
     const oldU = (worldCell - a) / texel;
     const newU = (worldCell - b) / texel;
     assert.ok(Math.abs((newU + shift) - oldU) < 1e-9);
-    assert.equal(coastalWindowOrigin(z, span, snap) % snap, 0);
+    // Negative origins leave -0 under %, which strict equality rejects; check alignment instead.
+    assert.ok(Number.isInteger(coastalWindowOrigin(z, span, snap) / snap));
   }
 });
 
