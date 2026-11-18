@@ -1,20 +1,20 @@
 import {
-  cos,
   float,
   max,
   mix,
   oneMinus,
-  sin,
   smoothstep,
   vec2,
   vec3,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import { seaStateUniforms } from '../water/seaState.js';
-import { periodicFbm, periodicFbm2 } from './PeriodicNoiseNodes.js';
+import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { PatternOrigins } from './PatternOrigins.js';
 import { shoreContactDistance } from './ShoreContactNodes.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
+import { coastSwashForcingNodes } from './CoastSwashForcingNodes.js';
+import { sampleCoastalSwashState } from './CoastalSwashStateNodes.js';
 
 /**
  * Swash on the ground at the sea's edge (after grass-test's coast field).
@@ -151,32 +151,20 @@ export function createCoastSwashNodes({
     .mul(oneMinus(smoothstep(config.runupHeight + 0.2, config.runupHeight + config.dampHeight + 0.4, height)))
     .mul(reach)
     .mul(oceanMask);
-  // Slow drift of the wave timing along the shore.
-  const drift = periodicFbm(patternOrigins.latticePoint('drift', localXZ)).mul(TAU * 1.6);
-  const frontBreakupPhase = patternOrigins.wavePhase('frontBreakup', localXZ);
-  const phase = clock.mul(TAU / config.period).add(drift);
-  const frontAt = (samplePhase) => {
-    const excursion = oneMinus(cos(samplePhase)).mul(0.5);
-    const breakup = sin(frontBreakupPhase.add(samplePhase.mul(0.17)))
-      .mul(config.breakupStrength * config.frontBand);
-    return excursion.mul(config.runupHeight + config.breakDepth).sub(config.breakDepth).add(breakup);
-  };
-  const coverageAt = (samplePhase) => {
-    const front = frontAt(samplePhase);
-    return oneMinus(smoothstep(front.sub(config.frontBand), front.add(config.frontBand), height));
-  };
-  const front = frontAt(phase);
-  const film = coverageAt(phase).mul(band);
+  const { phase, front, coverageAt } = coastSwashForcingNodes({
+    localXZ, patternOrigins, height, clock, config,
+  });
+  const analyticFilm = coverageAt(phase).mul(band);
   const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength, laceField);
   const contact = shoreContactDistance(height.sub(front), localXZ);
-  const foam = oneMinus(smoothstep(config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
+  const analyticFoam = oneMinus(smoothstep(config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
     max(float(config.foamWidthMeters ?? DEFAULT_COAST_SWASH.foamWidthMeters), contact.footprint), contact.distance))
     .mul(foamBreakup)
     // Only where the wash actually runs: on nearly flat sand the foam contour
     // otherwise crossed dry ground several times, drawing parallel white wires.
     .mul(film)
     .mul(band);
-  let memory = film;
+  let memory = analyticFilm;
   for (const cyclesAgo of MEMORY_CYCLES) {
     memory = max(memory, coverageAt(phase.sub(TAU * cyclesAgo)).mul(Math.exp(-cyclesAgo * config.washDecay)));
   }
@@ -187,7 +175,19 @@ export function createCoastSwashNodes({
   const above = oneMinus(smoothstep(config.runupHeight + 0.2, config.runupHeight + config.dampHeight + 0.4, height))
     .mul(oneMinus(smoothstep(runupMeters, runupMeters * 1.6, inland)))
     .mul(oceanMask);
-  const wet = max(memory.mul(band), damp.mul(above));
+  const analyticWet = max(memory.mul(band), damp.mul(above));
+  const persistent = config.persistent?.enabled ? sampleCoastalSwashState() : null;
+  const weight = persistent ? persistent.activeWeight.mul(band).mul(oceanMask) : float(0);
+  const film = persistent
+    ? mix(analyticFilm, persistent.film.mul(band), weight) : analyticFilm;
+  const wet = persistent
+    ? mix(analyticWet, persistent.wetness.mul(band), weight) : analyticWet;
+  const strandedOpacity = config.persistent?.strandedOpacity ?? 0.45;
+  const persistentFoam = persistent
+    ? max(persistent.mobileFoam, persistent.strandedFoam.mul(strandedOpacity))
+      .mul(foamBreakup).mul(band) : float(0);
+  const foam = persistent
+    ? mix(analyticFoam, persistentFoam, weight) : analyticFoam;
   const filmTint = colorNode(config.filmTint);
   const foamColor = colorNode(config.foamColor);
   // The same foam front crosses sand and water. The ground owns the portion
