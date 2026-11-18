@@ -1561,6 +1561,7 @@ export class ConstructionView {
    */
   pickTargets() {
     const targets = [];
+    if (!this.root.visible) return targets;
     for (const entry of this.entries.values()) {
       if (!entry.group.visible) continue;
       if (entry.shellMesh?.visible) targets.push(entry.shellMesh);
@@ -1657,6 +1658,7 @@ export class ConstructionView {
   }
 
   pickHandle(clientX, clientY, camera) {
+    if (!this.root.visible) return null;
     this.setPointer(clientX, clientY);
     this.raycaster.setFromCamera(this.pointer, camera);
     const found = this.raycaster.intersectObjects(this.handleMeshes, false)[0];

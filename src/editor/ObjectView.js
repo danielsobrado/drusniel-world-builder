@@ -509,7 +509,7 @@ export class ObjectView {
 
   pickObject(clientX, clientY, camera) {
     const bounds = this.terrainView.renderer.domElement.getBoundingClientRect();
-    if (bounds.width === 0 || bounds.height === 0) return null;
+    if (!this.root.visible || bounds.width === 0 || bounds.height === 0) return null;
     this.pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     this.pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     this.raycaster.setFromCamera(this.pointer, camera);

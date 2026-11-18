@@ -53,6 +53,7 @@ export function workspacePreferences(config, value = {}) {
     theme: THEMES.includes(value?.theme) ? value.theme : config.themes.default,
     density: value?.density === 'comfortable' ? 'comfortable' : 'compact',
     compactPanel: PANEL_NAMES.includes(value?.compactPanel) ? value.compactPanel : null,
+    overlays: value?.overlays !== false,
     outlinerHeightPercent: Number.isFinite(value?.outlinerHeightPercent)
       ? clampOutlinerHeightPercent(value.outlinerHeightPercent, config.outliner)
       : config.outliner.defaultHeightPercent,

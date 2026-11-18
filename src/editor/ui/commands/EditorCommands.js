@@ -17,9 +17,19 @@ export class EditorCommands {
     return [...this.#commands.values()];
   }
 
+  #listeners = new Set();
+
+  onExecute(listener) {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  }
+
   execute(id, value) {
     const command = this.get(id);
-    return command?.enabled() ? command.run(value) : false;
+    if (!command?.enabled()) return false;
+    const result = command.run(value);
+    for (const listener of this.#listeners) listener(command);
+    return result;
   }
 }
 

@@ -23,8 +23,8 @@ export function authoredSceneTree(objectMap, constructionStore, definitions) {
   })) ?? [];
   return [group('world', 'World', 'structures', [
     { key: 'terrain', label: 'Terrain', icon: 'terrain', command: 'tool.terrain' },
-    group('constructions', 'Constructions', 'wall', walls),
-    group('objects', 'Placed objects', 'decor', objects),
+    { ...group('constructions', 'Constructions', 'wall', walls), visibility: 'constructions' },
+    { ...group('objects', 'Placed objects', 'decor', objects), visibility: 'objects' },
   ])];
 }
 
@@ -78,7 +78,21 @@ export class SceneOutliner {
     });
     this.list.addEventListener('scroll', () => this.paint(), { passive: true });
     this.list.addEventListener('keydown', (event) => this.onKeyDown(event));
+    // shortcut: hides whole groups (one root each); per-object hiding needs instanced-renderer support.
+    this.layers = { objects: editor.controller.objectView, constructions: editor.controller.constructionView };
+    for (const [layer, label] of [['objects', 'placed objects'], ['constructions', 'constructions']]) {
+      editor.commands.register(`view.toggle-${layer}`, `Show or hide ${label}`, () => {
+        const { root } = this.layers[layer];
+        root.visible = !root.visible;
+        this.paint();
+      }, { enabled: () => Boolean(this.layers[layer]?.root) });
+    }
     this.list.addEventListener('click', (event) => {
+      const eye = event.target.closest('[data-visibility]');
+      if (eye) {
+        editor.commands.execute(`view.toggle-${eye.dataset.visibility}`);
+        return;
+      }
       const item = event.target.closest('[data-row]');
       if (!item) return;
       this.setCursor(Number(item.dataset.row));
@@ -153,6 +167,19 @@ export class SceneOutliner {
       item.querySelector('.workspace-tree-label').textContent = row.label;
       item.querySelector('small').textContent = row.detail ?? row.children?.length ?? '';
       item.title = row.label;
+      const root = this.layers[row.visibility]?.root;
+      if (root) {
+        item.classList.toggle('is-hidden', !root.visible);
+        const eye = document.createElement('button');
+        eye.type = 'button';
+        eye.tabIndex = -1;
+        eye.className = 'workspace-tree-eye';
+        eye.dataset.visibility = row.visibility;
+        eye.setAttribute('aria-pressed', !root.visible);
+        eye.setAttribute('aria-label', `${root.visible ? 'Hide' : 'Show'} ${row.label.toLowerCase()}`);
+        eye.innerHTML = naturalEditorIcon(root.visible ? 'eye' : 'eye-off');
+        item.append(eye);
+      }
       fragment.append(item);
     }
     this.spacer.replaceChildren(fragment);

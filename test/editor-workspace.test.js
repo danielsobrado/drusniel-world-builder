@@ -24,11 +24,12 @@ test('workspace preferences recover from old or malformed browser values', () =>
     panels: { toolbox: { width: -10, visible: false }, inspector: { width: '450' } },
   });
   assert.deepEqual(preferences, {
-    workspace: 'world', theme: 'dark-forge', density: 'comfortable', compactPanel: null,
+    workspace: 'world', theme: 'dark-forge', density: 'comfortable', compactPanel: null, overlays: true,
     outlinerHeightPercent: 46,
     panels: { toolbox: { width: 180, visible: false }, inspector: { width: 300, visible: true } },
   });
   assert.equal(workspacePreferences(config, null).theme, 'professional-light');
+  assert.equal(workspacePreferences(config, { overlays: false }).overlays, false);
   assert.equal(workspacePreferences(config, { outlinerHeightPercent: 0 }).outlinerHeightPercent, 20);
   assert.equal(workspacePreferences(config, { outlinerHeightPercent: 999 }).outlinerHeightPercent, 75);
   assert.equal(clampOutlinerHeightPercent(50.7, config.outliner), 51);
@@ -53,6 +54,20 @@ test('keyboard and UI share commands with the same availability and active selec
   commands.execute(...editorShortcut({ key: 'z', ctrlKey: true }, 'terrain'));
   assert.deepEqual(calls, ['smooth', 'duplicate', 'duplicate', 'undo']);
   assert.deepEqual(editorShortcut({ key: 'Delete' }, 'construction'), ['construction.delete-part']);
+});
+
+test('executed commands are reported once and blocked commands are not', () => {
+  const controller = { selectedObjectId: 1, undoStack: [], redoStack: [], isWorldInputBlocked: () => false, deleteSelected() {} };
+  const commands = createWorldCommands(controller);
+  const seen = [];
+  const stop = commands.onExecute(({ label }) => seen.push(label));
+  commands.execute('object.delete');
+  controller.selectedObjectId = null;
+  commands.execute('object.delete');
+  stop();
+  controller.selectedObjectId = 1;
+  commands.execute('object.delete');
+  assert.deepEqual(seen, ['Delete selected objects']);
 });
 
 test('scene search retains semantic ancestors and mounts a bounded window of large results', () => {

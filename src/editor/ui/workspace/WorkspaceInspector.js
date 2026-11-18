@@ -5,8 +5,12 @@ export class WorkspaceInspector {
   constructor(host, editor) {
     this.editor = editor;
     host.innerHTML = `
-      <h2 class="workspace-panel-heading">Properties</h2>
-      <div class="workspace-properties">
+      <div class="workspace-panel-tabs" role="tablist" aria-label="Inspector">
+        <button type="button" role="tab" id="workspace-tab-properties" aria-controls="workspace-panel-properties" data-inspector-tab="properties">Properties</button>
+        <button type="button" role="tab" id="workspace-tab-world" aria-controls="workspace-panel-world" data-inspector-tab="world">World</button>
+      </div>
+      <div class="workspace-properties workspace-world" role="tabpanel" id="workspace-panel-world" aria-labelledby="workspace-tab-world" hidden></div>
+      <div class="workspace-properties" role="tabpanel" id="workspace-panel-properties" aria-labelledby="workspace-tab-properties">
         <div data-properties="tool">
           <p class="workspace-property-title"></p>
           <p class="workspace-muted" data-property="tool-details"></p>
@@ -29,6 +33,22 @@ export class WorkspaceInspector {
           <button type="button" data-command="construction.delete">Delete wall</button>
         </div>
       </div>`;
+    this.host = host;
+    this.worldPanel = host.querySelector('#workspace-panel-world');
+    this.tabs = [...host.querySelectorAll('[role="tab"]')];
+    host.querySelector('[role="tablist"]').addEventListener('click', ({ target }) => {
+      const tab = target.closest('[role="tab"]');
+      if (tab) this.showTab(tab.dataset.inspectorTab);
+    });
+    host.querySelector('[role="tablist"]').addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      const index = this.tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+      const next = this.tabs[(index + (event.key === 'ArrowRight' ? 1 : -1) + this.tabs.length) % this.tabs.length];
+      this.showTab(next.dataset.inspectorTab);
+      next.focus();
+    });
+    this.showTab('properties');
     this.tool = host.querySelector('[data-properties="tool"]');
     this.object = host.querySelector('[data-properties="object"]');
     this.wall = host.querySelector('[data-properties="wall"]');
@@ -62,8 +82,20 @@ export class WorkspaceInspector {
     });
   }
 
+  showTab(id) {
+    for (const tab of this.tabs) {
+      const selected = tab.dataset.inspectorTab === id;
+      tab.setAttribute('aria-selected', selected);
+      tab.tabIndex = selected ? 0 : -1;
+      this.host.querySelector(`#${tab.getAttribute('aria-controls')}`).hidden = !selected;
+    }
+  }
+
   render(state) {
     const { selectedObject, selectedConstruction } = state;
+    const selection = selectedConstruction ? `wall:${selectedConstruction.id}` : selectedObject ? `object:${selectedObject.id}` : null;
+    if (selection && selection !== this.selection) this.showTab('properties');
+    this.selection = selection;
     this.tool.hidden = Boolean(selectedObject || selectedConstruction);
     this.object.hidden = !selectedObject;
     this.wall.hidden = !selectedConstruction;
