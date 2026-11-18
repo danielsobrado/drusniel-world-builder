@@ -20,6 +20,7 @@ import {
   vec4
 } from "three/tsl";
 import { createSpellNoiseNodes } from "./spell_noise_nodes.js";
+import { spellCardEdgeFade } from "./spell_card_edge.js";
 const AIR_NOISE_CONFIG = {
   hashSeed: 92831.73245,
   fbmFreqMul: 2.07,
@@ -119,7 +120,7 @@ function createAirNodeMaterial() {
       0,
       AIR_ALPHA.max
     );
-    return vec4(color, alpha);
+    return vec4(color, alpha.mul(spellCardEdgeFade()));
   })();
   const material = new MeshBasicNodeMaterial();
   material.name = "air-spell-node";

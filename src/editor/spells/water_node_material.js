@@ -20,6 +20,7 @@ import {
   vec4
 } from "three/tsl";
 import { createSpellNoiseNodes } from "./spell_noise_nodes.js";
+import { spellCardEdgeFade } from "./spell_card_edge.js";
 function createWaterNodeMaterial() {
   const uTime = uniform(0);
   const uProgress = uniform(0);
@@ -77,7 +78,7 @@ function createWaterNodeMaterial() {
       0,
       0.88
     );
-    return vec4(color, alpha);
+    return vec4(color, alpha.mul(spellCardEdgeFade()));
   })();
   const material = new MeshBasicNodeMaterial();
   material.name = "water-spell-node";

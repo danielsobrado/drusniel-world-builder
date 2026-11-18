@@ -20,6 +20,7 @@ import {
   vec4
 } from "three/tsl";
 import { createSpellEffectNoiseNodes } from "./spell_effect_noise.js";
+import { spellCardEdgeFade } from "./spell_card_edge.js";
 function createFireNodeMaterial() {
   const uTime = uniform(0);
   const uProgress = uniform(0);
@@ -93,7 +94,7 @@ function createFireNodeMaterial() {
       0,
       0.98
     );
-    return vec4(color, alpha);
+    return vec4(color, alpha.mul(spellCardEdgeFade()));
   })();
   const material = new MeshBasicNodeMaterial();
   material.name = "fire-spell-node";

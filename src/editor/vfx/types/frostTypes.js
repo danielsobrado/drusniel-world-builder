@@ -61,7 +61,7 @@ export const FROST_TYPES = Object.freeze({
   'ice.cloud': {
     tiles: TILE_SPANS.smoke, lit: 1, ramp: RAMP.FROST, life: [4.6, 5.6], size: [7, 11],
     sizeEnd: [1.2, 1.45], sizeEase: 'outCubic', heat: 0.12, heatEnd: 0.08, emissive: 0.35, additive: 0,
-    tint: [0.26, 0.3, 0.38], tintEnd: [0.36, 0.4, 0.48], opacity: 0.9, fadeIn: 0.15, fadeOut: 0.65,
+    tint: [0.23, 0.28, 0.4], tintEnd: [0.32, 0.37, 0.5], opacity: 0.9, fadeIn: 0.15, fadeOut: 0.65,
     drag: 1.2, swirl: 1.8, turbulence: 0.45, turbulenceScale: 0.08, spin: [0.08, 0.2],
   },
   'ice.veil': {
