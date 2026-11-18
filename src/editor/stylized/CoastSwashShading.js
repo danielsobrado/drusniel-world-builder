@@ -162,7 +162,7 @@ export function createCoastSwashNodes({
     .mul(foamBreakup)
     // Only where the wash actually runs: on nearly flat sand the foam contour
     // otherwise crossed dry ground several times, drawing parallel white wires.
-    .mul(film)
+    .mul(analyticFilm)
     .mul(band);
   let memory = analyticFilm;
   for (const cyclesAgo of MEMORY_CYCLES) {
