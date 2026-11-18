@@ -5,27 +5,27 @@
     "mine": [
       {
         "name": "mine_ore_hopper_chute",
-        "triangles": 25248,
+        "triangles": 16050,
         "file": "mine/mine_ore_hopper_chute.glb"
       },
       {
         "name": "mine_dewatering_pump_rig",
-        "triangles": 16050,
+        "triangles": 16384,
         "file": "mine/mine_dewatering_pump_rig.glb"
       },
       {
         "name": "mine_powder_magazine_locker",
-        "triangles": 21248,
+        "triangles": 16050,
         "file": "mine/mine_powder_magazine_locker.glb"
       },
       {
         "name": "mine_rail_turntable_switch",
-        "triangles": 21568,
+        "triangles": 16050,
         "file": "mine/mine_rail_turntable_switch.glb"
       },
       {
         "name": "mine_assaying_brazier_cart",
-        "triangles": 17008,
+        "triangles": 22784,
         "file": "mine/mine_assaying_brazier_cart.glb"
       }
     ],
@@ -42,12 +42,12 @@
       },
       {
         "name": "umbra_hanging_censer_spire",
-        "triangles": 18048,
+        "triangles": 16050,
         "file": "umbra_cavern/umbra_hanging_censer_spire.glb"
       },
       {
         "name": "umbra_spider_web_balustrade_shrine",
-        "triangles": 20352,
+        "triangles": 16050,
         "file": "umbra_cavern/umbra_spider_web_balustrade_shrine.glb"
       },
       {
@@ -140,27 +140,27 @@
     "frostgard_hold": [
       {
         "name": "frostgard_wolf_totem_palisade_post",
-        "triangles": 16050,
+        "triangles": 18528,
         "file": "frostgard_hold/frostgard_wolf_totem_palisade_post.glb"
       },
       {
         "name": "frostgard_cut_ice_block_hoist",
-        "triangles": 18624,
+        "triangles": 16050,
         "file": "frostgard_hold/frostgard_cut_ice_block_hoist.glb"
       },
       {
         "name": "frostgard_mead_hall_trophy_stand",
-        "triangles": 20480,
+        "triangles": 16050,
         "file": "frostgard_hold/frostgard_mead_hall_trophy_stand.glb"
       },
       {
         "name": "frostgard_salt_brine_cask_frame",
-        "triangles": 30656,
+        "triangles": 22400,
         "file": "frostgard_hold/frostgard_salt_brine_cask_frame.glb"
       },
       {
         "name": "frostgard_watchman_braziers_gate",
-        "triangles": 16050,
+        "triangles": 21744,
         "file": "frostgard_hold/frostgard_watchman_braziers_gate.glb"
       }
     ]

@@ -465,7 +465,7 @@ SHRUB_MAX_TRIANGLES = 32000
 
 
 def _add_branch_spray_pair(bm, uv, attach_pt, branch_dir, length, width, arch=0.14, roll_bias=0.0):
-    """Attach two complementary 3D V-cupped twig sprays directly onto a branch node."""
+    """Attach complementary 3D V-cupped twig sprays + lower inner canopy skirt onto a branch node."""
     fwd = branch_dir.normalized()
     leaf_spray_fan(
         bm, uv, attach_pt, fwd, length, width,
@@ -480,6 +480,14 @@ def _add_branch_spray_pair(bm, uv, attach_pt, branch_dir, length, width, arch=0.
         bm, uv, attach_pt, fwd2, length * 0.88, width * 0.92,
         u_range=(0.30, 1.0), v_range=(0.02, 0.98),
         roll=roll_bias - 0.85, arch=arch * 0.7, cup=0.15, tip_scale=0.36,
+    )
+    # Lower/inward fill skirt anchored back along the twig so canopy reads lush from ground angle
+    fwd_skirt = (fwd * 0.62 - up * 0.28 - side * 0.56).normalized()
+    skirt_anchor = attach_pt - fwd * (length * 0.16)
+    leaf_spray_fan(
+        bm, uv, skirt_anchor, fwd_skirt, length * 0.82, width * 0.88,
+        u_range=(0.30, 1.0), v_range=(0.02, 0.98),
+        roll=roll_bias + 1.05, arch=max(0.06, arch * 0.65), cup=0.16, tip_scale=0.34,
     )
 
 

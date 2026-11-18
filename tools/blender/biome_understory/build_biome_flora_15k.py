@@ -161,7 +161,8 @@ TRUNK_SPECS = [
 
 
 def _make_atlas_material(name, c_base, c_mid, c_accent, roughness=0.76, subsurface=0.0, seed=1):
-    """Build a 3-zone procedural PBR atlas (bark/stone left, foliage center, accent right)."""
+    """Build a 3-zone procedural PBR atlas (bark/soil left, foliage center, accent right)."""
+    import json
     rng = np.random.default_rng(seed)
     w = h = 256
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
@@ -175,19 +176,24 @@ def _make_atlas_material(name, c_base, c_mid, c_accent, roughness=0.76, subsurfa
     a_col = np.array(_hex(c_accent)) * (0.74 + 0.44 * mottle[..., None])
 
     col = np.where((u < 0.38)[..., None], b_col, np.where((u < 0.72)[..., None], m_col, a_col))
-    moss = (u < 0.38) & (mottle > 0.58) & (v < 0.52)
+    moss = (u < 0.38) & (mottle > 0.58) & (v >= 0.36) & (v < 0.58)
     col[moss] = np.array(_hex(c_mid)) * 0.78
+    soil_mask = (u < 0.36) & (v < 0.34)
+    humus = np.array([0.15, 0.12, 0.09], dtype=np.float32) * 0.65 + np.array(_hex(c_base)) * 0.35
+    col[soil_mask] = (humus * (0.65 + 0.60 * mottle[..., None]) * (0.85 + 0.30 * fine[..., None]))[soil_mask]
 
     height = np.where(u < 0.38, grain * 0.7 + mottle * 0.3, fine * 0.6 + mottle * 0.4)
     rgba = np.concatenate([np.clip(col, 0.0, 1.0), np.ones((h, w, 1), dtype=np.float32)], axis=-1)
     alb = save_image(f'{name}_alb', rgba, os.path.join(TEX_DIR, f'{name}-alb.png'))
     nrm = save_image(
         f'{name}_nrm',
-        height_to_normal(height, strength=2.6),
+        height_to_normal(height, strength=2.8),
         os.path.join(TEX_DIR, f'{name}-nrm.png'),
         non_color=True,
     )
-    return make_material(name, alb, alpha=False, normal_image=nrm, roughness=roughness, subsurface=subsurface)
+    mat = make_material(name, alb, alpha=False, normal_image=nrm, roughness=roughness, subsurface=subsurface)
+    mat['soil_uv_bounds'] = json.dumps([0.04, 0.30, 0.04, 0.30])
+    return mat
 
 
 def _build_trunk_bm(bm, uv, rng, height, kind, radius=0.22):
@@ -283,12 +289,13 @@ def main():
     setup_scene()
 
     manifest = []
+    from flora_archetypes import build_flora_archetype
     for idx, (asset_id, tile_id, kind, height, c_base, c_mid, c_accent, rough, subsurf) in enumerate(BIOME_SPECS):
         rng = random.Random(1000 + idx * 17)
         mat = _make_atlas_material(f'mat_{asset_id}', c_base, c_mid, c_accent, roughness=rough, subsurface=subsurf, seed=1000 + idx)
         bm = bmesh.new()
         uv = bm.loops.layers.uv.new('UVMap')
-        _build_flora_bm(bm, uv, rng, height, kind)
+        build_flora_archetype(bm, uv, rng, height, kind, asset_id)
         mesh, tris = finish_mesh(asset_id, bm, mat, allow_extra_material=False)
         assert MIN_TRIANGLES <= tris <= MAX_TRIANGLES
         glb_path = os.path.join(OUT_BIOMES, f'{asset_id}.glb')
@@ -306,17 +313,8 @@ def main():
         mat = _make_atlas_material(f'mat_{trunk_id}', c_base, c_mid, c_accent, roughness=0.88, subsurface=0.0, seed=5000 + idx)
         bm = bmesh.new()
         uv = bm.loops.layers.uv.new('UVMap')
-        if trunk_id.startswith('fallen-log'):
-            pts = [
-                Vector((-length_or_h * 0.5, -0.06, 0.16)),
-                Vector((-length_or_h * 0.18, 0.05, 0.22)),
-                Vector((length_or_h * 0.18, -0.03, 0.18)),
-                Vector((length_or_h * 0.5, 0.04, 0.12)),
-            ]
-            tube(bm, uv, pts, [radius, radius * 0.92, radius * 0.80, radius * 0.62], sides=10, u_range=(0.04, 0.34), v_range=(0.05, 0.92), rough=0.08, rng=rng, flute_count=6, flute_depth=0.09)
-            _build_trunk_bm(bm, uv, rng, 0.72, kind, radius=radius * 0.8)
-        else:
-            _build_trunk_bm(bm, uv, rng, length_or_h, kind, radius=radius)
+        from trunk_archetypes import build_forest_trunk_archetype
+        build_forest_trunk_archetype(bm, uv, rng, trunk_id, length_or_h, kind, radius=radius)
         mesh, tris = finish_mesh(trunk_id, bm, mat, allow_extra_material=False)
         assert MIN_TRIANGLES <= tris <= MAX_TRIANGLES
         glb_path = os.path.join(OUT_TRUNKS, f'{trunk_id}.glb')

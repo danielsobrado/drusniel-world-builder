@@ -209,6 +209,12 @@ def _add_spray_pair(bm, uv, tip_pt, branch_dir, length, width, arch=0.14, roll_b
     )
     up = Vector((0.0, 0.0, 1.0)) if abs(fwd.z) < 0.90 else Vector((1.0, 0.0, 0.0))
     side = fwd.cross(up).normalized()
+    fwd_skirt = (fwd * 0.64 - up * 0.26 - side * 0.52).normalized()
+    leaf_spray_fan(
+        bm, uv, anchor - fwd * (length * 0.12), fwd_skirt, length * 0.80, width * 0.86,
+        u_range=(0.30, 1.0), v_range=(0.00, 0.98),
+        roll=roll_bias + 1.02, arch=max(0.06, arch * 0.65), cup=0.15, tip_scale=0.34,
+    )
     fwd2 = (fwd * 0.84 + up * 0.30 + side * 0.26).normalized()
     leaf_spray_fan(
         bm, uv, anchor, fwd2, length * 0.88, width * 0.90,

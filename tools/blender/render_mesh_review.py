@@ -322,50 +322,65 @@ def _write_reports(sections):
 
 
 def main():
+    only = None
+    if '--' in sys.argv:
+        argv = sys.argv[sys.argv.index('--') + 1:]
+        if '--only' in argv:
+            only = argv[argv.index('--only') + 1]
+
     os.makedirs(OUT_DIR, exist_ok=True)
     studio = _setup_studio_scene(clear=True)
 
-    # 1. Biomes (80 biome flora meshes from biomes/manifest.json)
-    biome_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'ground', 'biomes', 'manifest.json'), encoding='utf-8'))
-    biome_items = []
-    by_biome = {}
-    for entry in biome_manifest['assets']:
-        if entry['kind'] == 'trunk':
-            continue
-        p = os.path.join(REPO_ROOT, entry['path'])
-        bid = entry['biomeId']
-        item = (entry['id'], p, f'biome_{bid}')
-        biome_items.append(item)
-        by_biome.setdefault(bid, []).append(item)
-    biome_results = _render_glb_batch(studio, biome_items, 'biomes', 'contact_sheet_biomes.png')
-    for bid, group_items in sorted(by_biome.items()):
-        paths = [os.path.join(OUT_DIR, 'biomes', f'{name}.png') for name, _, _ in group_items]
-        _assemble_contact_sheet(paths, os.path.join(OUT_DIR, 'biomes', f'biome_{bid}_sheet.png'), cols=5)
-
-    # 2. Trunks, Swamp, Understory & Bushes
-    tb_items = _collect_trunks_and_bushes()
-    tb_results = _render_glb_batch(studio, tb_items, 'trunks_and_bushes', 'contact_sheet_trunks_bushes.png')
-
-    # 3. Underground & Glacial Areas (30 props)
-    ug_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', 'manifest.json'), encoding='utf-8'))
+    biome_results = []
+    tb_results = []
     ug_results = []
-    all_ug_paths = []
-    for area, items in ug_manifest['areas'].items():
-        area_items = [(it['name'], os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', it['file']), area) for it in items]
-        area_res = _render_glb_batch(studio, area_items, f'underground/{area}', f'underground/area_{area}_sheet.png')
-        ug_results.extend(area_res)
-        all_ug_paths.extend(os.path.join(OUT_DIR, r['image']) for r in area_res)
-    _assemble_contact_sheet(all_ug_paths, os.path.join(OUT_DIR, 'contact_sheet_underground.png'), cols=5)
+    city_results = []
 
-    # 4. 40 City Props from medieval_town_kit.blend
-    city_results = _render_cities()
+    if only in (None, 'biomes'):
+        # 1. Biomes (80 biome flora meshes from biomes/manifest.json)
+        biome_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'ground', 'biomes', 'manifest.json'), encoding='utf-8'))
+        biome_items = []
+        by_biome = {}
+        for entry in biome_manifest['assets']:
+            if entry['kind'] == 'trunk':
+                continue
+            p = os.path.join(REPO_ROOT, entry['path'])
+            bid = entry['biomeId']
+            item = (entry['id'], p, f'biome_{bid}')
+            biome_items.append(item)
+            by_biome.setdefault(bid, []).append(item)
+        biome_results = _render_glb_batch(studio, biome_items, 'biomes', 'contact_sheet_biomes.png')
+        for bid, group_items in sorted(by_biome.items()):
+            paths = [os.path.join(OUT_DIR, 'biomes', f'{name}.png') for name, _, _ in group_items]
+            _assemble_contact_sheet(paths, os.path.join(OUT_DIR, 'biomes', f'biome_{bid}_sheet.png'), cols=5)
 
-    _write_reports([
-        ('Biome Flora & Understory (16 Biomes x 5)', biome_results),
-        ('Trunks, Swamp, Understories & Bushes', tb_results),
-        ('City Props (8 Cities x 5)', city_results),
-        ('Underground & Glacial Area Props (6 Areas x 5)', ug_results),
-    ])
+    if only in (None, 'trunks'):
+        # 2. Trunks, Swamp, Understory & Bushes
+        tb_items = _collect_trunks_and_bushes()
+        tb_results = _render_glb_batch(studio, tb_items, 'trunks_and_bushes', 'contact_sheet_trunks_bushes.png')
+
+    if only in (None, 'underground'):
+        # 3. Underground & Glacial Areas (30 props)
+        ug_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', 'manifest.json'), encoding='utf-8'))
+        all_ug_paths = []
+        for area, items in ug_manifest['areas'].items():
+            area_items = [(it['name'], os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', it['file']), area) for it in items]
+            area_res = _render_glb_batch(studio, area_items, f'underground/{area}', f'underground/area_{area}_sheet.png')
+            ug_results.extend(area_res)
+            all_ug_paths.extend(os.path.join(OUT_DIR, r['image']) for r in area_res)
+        _assemble_contact_sheet(all_ug_paths, os.path.join(OUT_DIR, 'contact_sheet_underground.png'), cols=5)
+
+    if only in (None, 'cities'):
+        # 4. 40 City Props from medieval_town_kit.blend
+        city_results = _render_cities()
+
+    if only is None:
+        _write_reports([
+            ('Biome Flora & Understory (16 Biomes x 5)', biome_results),
+            ('Trunks, Swamp, Understories & Bushes', tb_results),
+            ('City Props (8 Cities x 5)', city_results),
+            ('Underground & Glacial Area Props (6 Areas x 5)', ug_results),
+        ])
     total = len(biome_results) + len(tb_results) + len(city_results) + len(ug_results)
     print(f'[mesh-review] rendered {total} screenshots -> {OUT_DIR}')
 

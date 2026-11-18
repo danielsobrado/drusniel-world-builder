@@ -61,17 +61,28 @@ def tudor_market_pavilion():
 
 def tudor_dovecote_post():
     b = MeshBuilder()
-    b.box((-0.42, -0.42, -0.05), (0.42, 0.42, 0.22), 'stone_dressed', skip=('-z',))
-    b.box((-0.12, -0.12, 0.22), (0.12, 0.12, 2.05), 'timber')
+    b.box((-0.46, -0.46, -0.05), (0.46, 0.46, 0.16), 'stone_dressed', skip=('-z',))
+    b.box((-0.34, -0.34, 0.16), (0.34, 0.34, 0.34), 'stone_dressed')
+    b.box((-0.12, -0.12, 0.34), (0.12, 0.12, 2.05), 'timber')
+    for hz in (0.62, 1.32, 1.88):
+        b.box((-0.145, -0.145, hz), (0.145, 0.145, hz + 0.06), 'iron')
     for i in range(4):
         a = i * math.pi / 2
-        b.beam((0, 0, 1.45), (0.45 * math.cos(a), 0.45 * math.sin(a), 1.98), (0, 0, 1), (-0.04, 0.04), 0.06, 'timber')
-    # Octagonal plaster pigeon house with perch ledge and slate spire
-    b.lathe([(0.56, 1.98), (0.56, 2.06), (0.48, 2.08), (0.48, 2.82), (0.54, 2.84), (0.54, 2.9)], 8, 'plaster', smooth=False)
+        cx, cy = math.cos(a), math.sin(a)
+        b.beam((0.12 * cx, 0.12 * cy, 0.34), (0.30 * cx, 0.30 * cy, 0.18), (0, 0, 1), (-0.04, 0.04), 0.08, 'timber')
+        b.beam((0, 0, 1.45), (0.46 * cx, 0.46 * cy, 1.98), (0, 0, 1), (-0.045, 0.045), 0.07, 'timber')
+        b.beam((0, 0, 1.80), (0.50 * cx, 0.50 * cy, 1.98), (0, 0, 1), (-0.03, 0.03), 0.05, 'iron')
+    # Octagonal plaster pigeon house with perch ledge, framed openings & weathered slate spire + vane finial
+    b.lathe([(0.56, 1.98), (0.58, 2.06), (0.48, 2.08), (0.48, 2.82), (0.55, 2.84), (0.55, 2.9)], 8, 'plaster', smooth=False)
     for k in range(4):
         a = k * math.pi / 2 + 0.4
-        b.box((-0.07, -0.05, -0.06), (0.07, 0.05, 0.08), 'shadow', m=_m(0.46 * math.cos(a), 0.46 * math.sin(a), 2.48, rz=a))
-    b.lathe([(0.64, 2.9), (0.36, 3.35), (0.06, 3.72), (0.0, 3.85)], 8, 'roof', smooth=False)
+        px, py = 0.46 * math.cos(a), 0.46 * math.sin(a)
+        b.box((-0.07, -0.05, -0.06), (0.07, 0.05, 0.08), 'shadow', m=_m(px, py, 2.48, rz=a))
+        b.box((-0.11, -0.09, -0.10), (0.11, 0.09, -0.05), 'wood_trim', m=_m(px * 1.08, py * 1.08, 2.48, rz=a))
+        b.box((-0.09, -0.02, -0.07), (0.09, 0.02, 0.10), 'wood_trim', m=_m(px * 1.03, py * 1.03, 2.48, rz=a))
+    b.lathe([(0.66, 2.9), (0.38, 3.36), (0.07, 3.74), (0.0, 3.88)], 8, 'roof', smooth=False)
+    b.lathe([(0.0, 3.86), (0.06, 3.94), (0.02, 4.18)], 8, 'hold_bronze')
+    b.box((0.0, -0.015, 4.02), (0.24, 0.015, 4.12), 'hold_bronze')
     return b
 
 
@@ -94,14 +105,27 @@ def tudor_flower_trellis_arch():
 
 def tudor_watch_lantern_gallows():
     b = MeshBuilder()
-    b.lathe([(0.34, -0.05), (0.32, 0.35), (0.24, 0.45), (0.22, 0.9)], 8, 'stone_dressed', smooth=False)
+    b.lathe([(0.42, -0.05), (0.38, 0.22), (0.30, 0.36), (0.24, 0.62), (0.21, 0.92)], 8, 'stone_dressed', smooth=False)
     b.box((-0.09, -0.09, 0.88), (0.09, 0.09, 2.75), 'timber')
+    for cz in (0.94, 1.68, 2.44):
+        b.box((-0.11, -0.11, cz), (0.11, 0.11, cz + 0.06), 'iron')
+    for i in range(4):
+        a = i * math.pi / 2
+        b.beam((0.20 * math.cos(a), 0.20 * math.sin(a), 0.72), (0.08 * math.cos(a), 0.08 * math.sin(a), 1.16), (0, 0, 1), (-0.03, 0.03), 0.06, 'timber')
     b.box((-0.07, -0.07, 2.52), (0.78, 0.07, 2.66), 'timber')
+    b.lathe([(0.0, 2.75), (0.05, 2.86), (0.015, 3.04)], 8, 'iron')
     b.beam((0.08, 0, 2.05), (0.58, 0, 2.54), (0, 1, 0), (-0.04, 0.04), 0.07, 'timber')
-    b.box((0.62, -0.02, 2.3), (0.68, 0.02, 2.52), 'iron')
-    # Hanging lantern cage + glow core
-    b.lathe([(0.16, 2.28), (0.2, 2.24), (0.06, 2.36)], 6, 'iron', m=_m(x=0.65), smooth=False)
+    # Wrought-iron S-scroll brace + corner lantern cage ribs & chain links
+    b.beam((0.08, 0, 2.28), (0.36, 0, 2.52), (0, 1, 0), (-0.02, 0.02), 0.04, 'iron')
+    b.beam((-0.08, 0, 2.24), (-0.24, 0, 2.60), (0, 1, 0), (-0.02, 0.02), 0.035, 'iron')
+    b.box((0.62, -0.025, 2.36), (0.68, 0.025, 2.52), 'iron')
+    # Hanging lantern cage + corner iron mullions + glow core
+    b.lathe([(0.17, 2.28), (0.21, 2.24), (0.06, 2.38)], 6, 'iron', m=_m(x=0.65), smooth=False)
     b.lathe([(0.13, 1.96), (0.15, 2.24)], 6, 'glass_clear', m=_m(x=0.65), smooth=False)
+    for k in range(4):
+        ca = k * math.pi / 2 + 0.4
+        cx, cy = 0.65 + 0.15 * math.cos(ca), 0.15 * math.sin(ca)
+        b.box((cx - 0.015, cy - 0.015, 1.95), (cx + 0.015, cy + 0.015, 2.26), 'iron')
     b.blob((0.65, 0, 2.1), 0.08, 'glow', subdiv=1)
     b.lathe([(0.15, 1.92), (0.17, 1.96), (0.0, 1.88)], 6, 'iron', m=_m(x=0.65), smooth=False)
     return b
@@ -133,16 +157,24 @@ def tudor_guild_display_cart():
 # =========================================================================
 def nordic_dragon_totem_post():
     b = MeshBuilder()
+    b.lathe([(0.52, -0.05), (0.46, 0.22), (0.32, 0.36)], 8, 'stone_granite', smooth=False)
     for i in range(6):
         a = i * math.pi / 3
-        b.blob((0.38 * math.cos(a), 0.38 * math.sin(a), 0.14), 0.2, 'stone_granite', subdiv=1, squash=(1, 1, 0.65), seed=90 + i)
-    b.lathe([(0.24, -0.05), (0.2, 0.6), (0.16, 2.4), (0.18, 2.7)], 8, 'log')
-    b.lathe([(0.22, 1.9), (0.23, 2.04), (0.19, 2.06)], 8, 'bronze')
-    # Twin carved dragon-prow horns rising into dragon-snout crest
-    b.beam((0, 0, 2.55), (0, -0.55, 3.05), (1, 0, 0), (-0.06, 0.06), 0.12, 'carved_wood')
-    b.beam((0, 0, 2.55), (0, 0.55, 3.05), (1, 0, 0), (-0.06, 0.06), 0.12, 'carved_wood')
+        b.blob((0.40 * math.cos(a), 0.40 * math.sin(a), 0.14), 0.22, 'stone_granite', subdiv=1, squash=(1, 1, 0.65), seed=90 + i)
+    b.lathe([(0.24, -0.05), (0.20, 0.6), (0.16, 2.4), (0.18, 2.7)], 8, 'log')
+    for rz in (0.78, 1.38, 1.96):
+        b.lathe([(0.21, rz - 0.05), (0.23, rz), (0.20, rz + 0.06)], 8, 'bronze')
+    # Leaned carved buckler shield plaque anchored against lower post + twin dragon-prow horns & serrated jaws
+    b.lathe([(0.0, -0.04), (0.28, -0.04), (0.30, 0.0), (0.0, 0.02)], 12, 'planks', m=_m(x=0.22, z=0.68, ry=1.36))
+    b.lathe([(0.0, 0.02), (0.09, 0.02), (0.0, 0.08)], 10, 'bronze', m=_m(x=0.22, z=0.68, ry=1.36))
+    b.beam((0, 0, 2.55), (0, -0.58, 3.08), (1, 0, 0), (-0.06, 0.06), 0.12, 'carved_wood')
+    b.beam((0, 0, 2.55), (0, 0.58, 3.08), (1, 0, 0), (-0.06, 0.06), 0.12, 'carved_wood')
+    b.beam((0, -0.14, 2.66), (-0.36, -0.42, 3.22), (0, 0, 1), (-0.04, 0.04), 0.09, 'bronze')
+    b.beam((0, 0.14, 2.66), (-0.36, 0.42, 3.22), (0, 0, 1), (-0.04, 0.04), 0.09, 'bronze')
     b.box((-0.14, -0.18, 2.68), (0.14, 0.18, 3.22), 'carved_wood')
-    b.box((-0.16, -0.08, 3.02), (0.48, 0.08, 3.32), 'carved_wood')
+    b.box((-0.16, -0.08, 3.06), (0.52, 0.08, 3.34), 'carved_wood')
+    b.box((-0.02, -0.06, 2.86), (0.44, 0.06, 2.98), 'carved_wood')
+    b.lathe([(0.10, -0.03), (0.12, 0.0), (0.10, 0.03)], 10, 'bronze', m=_m(x=0.44, z=2.84, rx=math.pi / 2), smooth=False)
     return b
 
 
@@ -564,11 +596,23 @@ def umbrakor_bioluminescent_cap_shrine():
 
 def umbrakor_wrought_censer_gallows():
     b = MeshBuilder()
-    b.box((-0.34, -0.34, -0.05), (0.34, 0.34, 0.54), 'stone_basalt', skip=('-z',))
-    b.box((-0.07, -0.07, 0.54), (0.07, 0.07, 2.68), 'iron')
+    b.lathe([(0.44, -0.05), (0.40, 0.24), (0.30, 0.42), (0.26, 0.56)], 8, 'stone_basalt', smooth=False)
+    for i in range(4):
+        a = i * math.pi / 2 + math.pi / 4
+        b.beam((0.30 * math.cos(a), 0.30 * math.sin(a), 0.38), (0.06 * math.cos(a), 0.06 * math.sin(a), 1.06), (0, 0, 1), (-0.025, 0.025), 0.055, 'iron')
+    b.box((-0.07, -0.07, 0.54), (0.07, 0.07, 2.74), 'iron')
+    for rz in (1.12, 1.88):
+        b.box((-0.095, -0.095, rz), (0.095, 0.095, rz + 0.06), 'bronze')
+    b.lathe([(0.0, 2.74), (0.055, 2.86), (0.015, 3.12)], 6, 'iron', smooth=False)
     b.beam((0.0, 0.0, 2.2), (0.72, 0.0, 2.75), (0, 1, 0), (-0.04, 0.04), 0.08, 'iron')
-    b.box((0.68, -0.02, 2.12), (0.72, 0.02, 2.74), 'iron')
+    b.beam((0.04, 0.0, 1.92), (0.46, 0.0, 2.52), (0, 1, 0), (-0.02, 0.02), 0.04, 'bronze')
+    b.beam((0.04, 0.0, 2.48), (0.36, 0.0, 2.74), (0, 1, 0), (-0.02, 0.02), 0.035, 'iron')
+    for cz in (2.22, 2.42, 2.62):
+        b.box((0.675, -0.025, cz), (0.725, 0.025, cz + 0.12), 'iron')
     b.lathe([(0.0, 1.72), (0.18, 1.94), (0.14, 2.12), (0.0, 2.16)], 8, 'bronze', m=_m(x=0.7), smooth=False)
+    for k in range(4):
+        ca = k * math.pi / 2
+        b.beam((0.7 + 0.14 * math.cos(ca), 0.14 * math.sin(ca), 1.80), (0.7 + 0.14 * math.cos(ca), 0.14 * math.sin(ca), 2.16), (0, 0, 1), (-0.015, 0.015), 0.03, 'iron')
     b.blob((0.7, 0.0, 1.96), 0.11, 'glow', subdiv=1)
     return b
 
