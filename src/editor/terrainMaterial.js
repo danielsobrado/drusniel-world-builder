@@ -518,6 +518,7 @@ export function createTerrainMaterial({
       config: { ...DEFAULT_COAST_SWASH, ...(stylizedConfig.water?.coast ?? {}) },
       shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
       oceanMask,
+      persistentEnabled: ['high', 'ultra'].includes(stylizedConfig.water?.qualityTier),
       // Through the family atlas's noise layers: the terrain has no sampler to spare.
       laceField: familyAtlas ? (uv) => atlasNoise(WORLD_NOISE_LAYERS.water)(uv).r : null,
     });
