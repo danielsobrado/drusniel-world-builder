@@ -161,24 +161,26 @@ def _remap_new_faces_uv(bm, prev_face_count, quad):
 
 def _add_box(bm, center, size, quad=0, rx=0.0, ry=0.0, rz=0.0, bevel=0.015):
     uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
-    prev = len(bm.faces)
-    res = bmesh.ops.create_cube(bm, size=1.0)
-    verts = res['verts']
+    tmp = bmesh.new()
+    bmesh.ops.create_cube(tmp, size=1.0)
     mat = Matrix.Translation(center) @ Euler((rx, ry, rz), 'XYZ').to_matrix().to_4x4() @ Matrix.Diagonal((size[0], size[1], size[2], 1.0))
-    for v in verts:
+    for v in tmp.verts:
         v.co = mat @ v.co
-    edges = list({e for v in verts for e in v.link_edges})
     if bevel > 0.001:
-        bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=2, affect='EDGES', clamp_overlap=True)
-    bm.faces.ensure_lookup_table()
+        bmesh.ops.bevel(tmp, geom=list(tmp.edges), offset=bevel, segments=2, affect='EDGES', clamp_overlap=True)
+    tmp.normal_update()
     u0, u1, v0, v1 = _zone_uv_bounds(quad)
-    for f in bm.faces[prev:]:
-        n = f.normal
+    v_map = {v: bm.verts.new(v.co) for v in tmp.verts}
+    for tf in tmp.faces:
+        n = tf.normal
         ax = 0 if abs(n.x) > abs(n.y) and abs(n.x) > abs(n.z) else (1 if abs(n.y) > abs(n.z) else 2)
-        for loop in f.loops:
+        nf = bm.faces.new(tuple(v_map[v] for v in tf.verts))
+        nf.smooth = False
+        for loop in nf.loops:
             p = loop.vert.co
             uu, vv = ((p.y, p.z) if ax == 0 else (p.x, p.z) if ax == 1 else (p.x, p.y))
             loop[uv_layer].uv = (u0 + ((uu * 0.65) % 1.0) * (u1 - u0), v0 + ((vv * 0.65) % 1.0) * (v1 - v0))
+    tmp.free()
 
 
 def _add_tube(bm, pts, r0, r1, sides=10, quad=0, flute_amp=0.04, flute_freq=4):

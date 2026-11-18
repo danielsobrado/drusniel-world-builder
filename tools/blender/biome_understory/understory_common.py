@@ -271,17 +271,12 @@ def leaf_spray_fan(
 
 def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), subdivisions=3, rng=None, dome=False):
     """Sculpted organic boulder or moss/cushion hummock with seam-free UV projection."""
-    existing_verts = set(bm.verts)
-    existing_faces = set(bm.faces)
-    bmesh.ops.create_icosphere(bm, subdivisions=max(3, subdivisions + 1), radius=1.0)
-    new_verts = [v for v in bm.verts if v not in existing_verts]
-    new_faces = [f for f in bm.faces if f not in existing_faces]
-    for f in new_faces:
-        f.smooth = True
+    tmp = bmesh.new()
+    bmesh.ops.create_icosphere(tmp, subdivisions=max(3, subdivisions + 1), radius=1.0)
     rx, ry, rz = radii
     p1 = rng.uniform(0, 6.28) if rng else 0.7
     p2 = rng.uniform(0, 6.28) if rng else 1.9
-    for v in new_verts:
+    for v in tmp.verts:
         co = v.co.copy()
         warp = (
             0.14 * math.sin(co.x * 3.2 + p1) * math.cos(co.y * 2.8 + p2)
@@ -298,14 +293,21 @@ def rock_chunk(bm, uv, center, radii, u_range=(0.0, 0.5), v_range=(0.0, 0.9), su
         if co.z < -0.25:
             co.z = -0.25 + (co.z + 0.25) * 0.20
         v.co = Vector((center.x + co.x * rx, center.y + co.y * ry, center.z + co.z * rz))
+
     u0, u1 = u_range
     v0, v1 = v_range
-    for f in new_faces:
-        for loop in f.loops:
+    v_map = {v: bm.verts.new(v.co) for v in tmp.verts}
+    new_faces = []
+    for tf in tmp.faces:
+        nf = bm.faces.new(tuple(v_map[v] for v in tf.verts))
+        nf.smooth = True
+        for loop in nf.loops:
             rel = loop.vert.co - center
             nx = max(0.02, min(0.98, 0.5 + 0.42 * (rel.x / max(rx, 1e-4))))
             ny = max(0.02, min(0.98, 0.5 + 0.42 * (rel.y / max(ry, 1e-4)) * 0.6 + 0.35 * (rel.z / max(rz, 1e-4))))
             loop[uv].uv = (u0 + (u1 - u0) * nx, v0 + (v1 - v0) * ny)
+        new_faces.append(nf)
+    tmp.free()
     return new_faces
 
 

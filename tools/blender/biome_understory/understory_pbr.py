@@ -58,13 +58,13 @@ def save_png_image(name, pixels, path, non_color=False):
     if not non_color:
         out[..., :3] = np.power(out[..., :3], 0.74)
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
-    image = bpy.data.images.new(name, w, h, alpha=True)
+    image = bpy.data.images.new(name, w, h, alpha=True, is_data=non_color)
     image.pixels.foreach_set(np.flipud(out).ravel())
     image.filepath_raw = path
     image.file_format = 'PNG'
+    image.save()
     if non_color:
         image.colorspace_settings.name = 'Non-Color'
-    image.save()
     return image
 
 
@@ -319,19 +319,18 @@ def add_soil_neighbour_skirt(bm, uv_layer, soil_uv, mat_index=0, rx=0.38, ry=0.3
         cy = math.sin(a) * ry * rng.uniform(0.68, 0.96)
         rad = min(rx, ry) * rng.uniform(0.22, 0.32)
         h_mound = rng.uniform(0.032, 0.058)
-        ex_v = set(bm.verts)
-        ex_f = set(bm.faces)
-        bmesh.ops.create_icosphere(bm, subdivisions=2, radius=1.0)
-        new_vs = [v for v in bm.verts if v not in ex_v]
-        new_fs = [f for f in bm.faces if f not in ex_f]
-        for v in new_vs:
+        tmp = bmesh.new()
+        bmesh.ops.create_icosphere(tmp, subdivisions=2, radius=1.0)
+        for v in tmp.verts:
             co = v.co
             wobble = 1.0 + 0.16 * math.sin(co.x * 4.5 + k) * math.cos(co.y * 4.5 - k)
             vx = cx + co.x * rad * wobble
             vy = cy + co.y * rad * wobble
-            vz = (max(-0.025, co.z * h_mound) + 0.008)
+            vz = max(-0.025, co.z * h_mound) + 0.008
             v.co = Vector((vx, vy, vz))
-        for f in new_fs:
+        v_map = {v: bm.verts.new(v.co) for v in tmp.verts}
+        for tf in tmp.faces:
+            f = bm.faces.new(tuple(v_map[v] for v in tf.verts))
             f.material_index = mat_index
             f.smooth = True
             for loop in f.loops:
@@ -339,6 +338,7 @@ def add_soil_neighbour_skirt(bm, uv_layer, soil_uv, mat_index=0, rx=0.38, ry=0.3
                 uu = u0 + (u1 - u0) * min(0.95, max(0.05, 0.5 + 0.35 * (rel.x - cx) / max(rad, 1e-4)))
                 vv = v0 + (v1 - v0) * min(0.95, max(0.05, 0.5 + 0.35 * (rel.y - cy) / max(rad, 1e-4)))
                 loop[uv_layer].uv = (uu, vv)
+        tmp.free()
 
 
 def _subdivide_to_target(bm, min_triangles, max_triangles, sculpt_amp=0.0045):
