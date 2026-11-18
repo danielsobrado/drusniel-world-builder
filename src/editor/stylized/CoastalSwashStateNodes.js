@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
-import { clamp, float, max, oneMinus, positionWorld, smoothstep, texture, uniform, vec2 } from 'three/tsl';
+import { float, max, oneMinus, positionWorld, smoothstep } from 'three/tsl';
+import { bilinearLoad } from '../materials/TerrainSlotBindings.js';
 import { frameUniform } from '../../render/FrameUniforms.js';
 
 const fallbackTexture = new THREE.DataTexture(
@@ -30,10 +31,8 @@ export function sampleCoastalSwashState() {
     .mul(smoothstep(0, edge, texelUv.y))
     .mul(oneMinus(smoothstep(oneMinus(edge), 1, texelUv.x)))
     .mul(oneMinus(smoothstep(oneMinus(edge), 1, texelUv.y)));
-  const sample = texture(fallbackTexture, clamp(texelUv, vec2(0), vec2(1)));
-  sample.setUpdateMatrix(false).onObjectUpdate(() => activeTexture);
-  sample._matrixUniform = uniform(new THREE.Matrix3());
-  const state = sample;
+  // The terrain already occupies the fragment sampler budget.
+  const state = bilinearLoad(fallbackTexture, texelUv, () => activeTexture);
   return {
     wetness: state.r,
     film: state.g,
