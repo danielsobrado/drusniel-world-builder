@@ -229,13 +229,19 @@ export class CoastalSwashField {
       pass.forwardStep.shift.value.set(this.pendingShiftX ?? 0, this.pendingShiftZ ?? 0);
       pass.backwardStep.time.value = timeSeconds - this.accumulator + dt;
       pass.backwardStep.delta.value = halfDt;
-      try {
-        this.renderer.compute(pass.forward);
-        this.renderer.compute(pass.backward);
-      } catch (error) {
+      const onFailure = (error) => {
+        if (!this.supported) return;
         console.error('Persistent coastal swash compute failed; restoring analytic swash.', error);
         coastalSwashUniforms.active.value = 0;
         this.supported = false;
+      };
+      try {
+        const forwardJob = this.renderer.compute(pass.forward);
+        const backwardJob = this.renderer.compute(pass.backward);
+        forwardJob?.catch?.(onFailure);
+        backwardJob?.catch?.(onFailure);
+      } catch (error) {
+        onFailure(error);
         return;
       }
       this.initialized = true;
