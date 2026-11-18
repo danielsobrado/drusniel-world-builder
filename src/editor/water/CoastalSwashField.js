@@ -138,6 +138,8 @@ export class CoastalSwashField {
     this.active = false;
     this.disposed = false;
     this.dispatchCount = 0;
+    this.inputRebuildCount = 0;
+    this.resetCount = 0;
     if (!this.supported) return;
 
     this.state = makeStorageTexture(this.size, 'coastal-swash-state');
@@ -178,6 +180,8 @@ export class CoastalSwashField {
     }
     if (!this.active) {
       coastalSwashUniforms.active.value = 0;
+      PerfCounters.set('coastalSwashActive', 0);
+      PerfCounters.set('coastalSwashComputeDispatches', 0);
       this.lastTime = timeSeconds;
       this.initialized = false;
       this.accumulator = 0;
@@ -190,10 +194,13 @@ export class CoastalSwashField {
     if (moved || this.revision !== revision) {
       const previousX = this.originX;
       const previousZ = this.originZ;
-      this.inputs.update(nextX, nextZ);
+      if (this.inputs.update(nextX, nextZ)) this.inputRebuildCount++;
       this.pendingShiftX = this.initialized ? coastalScrollCells(previousX, nextX, this.settings.texelMeters) / this.size : 0;
       this.pendingShiftZ = this.initialized ? coastalScrollCells(previousZ, nextZ, this.settings.texelMeters) / this.size : 0;
-      if (this.revision !== null && this.revision !== revision) this.initialized = false;
+      if (this.revision !== null && this.revision !== revision) {
+        this.initialized = false;
+        this.resetCount++;
+      }
       this.originX = nextX;
       this.originZ = nextZ;
       this.revision = revision;
@@ -204,6 +211,8 @@ export class CoastalSwashField {
     coastalSwashUniforms.renderOrigin.value.set(render.x, render.z);
     if (!this.inputs.eligibleCount) {
       coastalSwashUniforms.active.value = 0;
+      PerfCounters.set('coastalSwashActive', 0);
+      PerfCounters.set('coastalSwashComputeDispatches', 0);
       this.initialized = false;
       this.lastTime = timeSeconds;
       return;
@@ -255,7 +264,9 @@ export class CoastalSwashField {
     PerfCounters.set('coastalSwashActive', this.initialized ? 1 : 0);
     PerfCounters.set('coastalSwashComputeDispatches', steps * 2);
     PerfCounters.set('coastalSwashStateBytes', this.size * this.size * 16);
-    PerfCounters.set('coastalSwashWindowResets', this.initialized ? 0 : 1);
+    PerfCounters.set('coastalSwashWindowResets', this.resetCount);
+    PerfCounters.set('coastalSwashInputRebuilds', this.inputRebuildCount);
+    PerfCounters.set('coastalSwashActiveTexels', this.initialized ? this.size * this.size : 0);
   }
 
   dispose() {
