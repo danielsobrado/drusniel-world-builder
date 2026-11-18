@@ -39,12 +39,14 @@ function stepUniforms() {
 function makeCompute(source, target, inputs, patterns, coast, settings, uniforms, size, forward) {
   const span = size * settings.texelMeters;
   const inputStep = settings.inputTexelMeters / span;
+  const inputAt = uv => texture(inputs, uv).level(0);
+  const stateAt = uv => texture(source, uv).level(0);
   return Fn(() => {
     const n = int(size);
     const x = int(instanceIndex).mod(n);
     const z = int(instanceIndex).div(n);
     const uv = vec2(float(x).add(0.5), float(z).add(0.5)).div(size);
-    const input = texture(inputs, uv);
+    const input = inputAt(uv);
     const localXZ = uv.mul(span).sub(span * 0.5);
     const forcing = coastSwashForcingNodes({
       localXZ, patternOrigins: patterns, height: input.r, clock: uniforms.time, config: coast,
@@ -58,13 +60,13 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
     const retreating = max(coveragePrev.sub(coverageNow), 0);
 
     const grad = vec2(
-      texture(inputs, uv.add(vec2(inputStep, 0))).g.sub(texture(inputs, uv.sub(vec2(inputStep, 0))).g),
-      texture(inputs, uv.add(vec2(0, inputStep))).g.sub(texture(inputs, uv.sub(vec2(0, inputStep))).g),
+      inputAt(uv.add(vec2(inputStep, 0))).g.sub(inputAt(uv.sub(vec2(inputStep, 0))).g),
+      inputAt(uv.add(vec2(0, inputStep))).g.sub(inputAt(uv.sub(vec2(0, inputStep))).g),
     ).div(2 * settings.inputTexelMeters);
     const landward = grad.div(max(grad.length(), 0.001));
     const slope = vec2(
-      texture(inputs, uv.add(vec2(inputStep, 0))).r.sub(texture(inputs, uv.sub(vec2(inputStep, 0))).r),
-      texture(inputs, uv.add(vec2(0, inputStep))).r.sub(texture(inputs, uv.sub(vec2(0, inputStep))).r),
+      inputAt(uv.add(vec2(inputStep, 0))).r.sub(inputAt(uv.sub(vec2(inputStep, 0))).r),
+      inputAt(uv.add(vec2(0, inputStep))).r.sub(inputAt(uv.sub(vec2(0, inputStep))).r),
     ).div(2 * settings.inputTexelMeters).dot(landward).max(settings.minSlope);
 
     const shift = forward ? uniforms.shift : vec2(0);
@@ -74,7 +76,7 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
       .mul(smoothstep(0, 0.0001, historicUv.y))
       .mul(oneMinus(smoothstep(0.9999, 1, historicUv.y)))
       .mul(forward ? uniforms.initialized : float(1));
-    const here = texture(source, historicUv.clamp(vec2(0), vec2(1))).mul(valid);
+    const here = stateAt(historicUv.clamp(vec2(0), vec2(1))).mul(valid);
     const frontSpeed = forcing.frontVelocity;
     const uprush = min(max(frontSpeed, 0).div(slope), settings.maxUprushSpeed);
     const backwash = min(max(frontSpeed.negate(), 0).div(slope), settings.maxBackwashSpeed);
@@ -90,7 +92,7 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
       .mul(smoothstep(0, 0.0001, previousUv.y))
       .mul(oneMinus(smoothstep(0.9999, 1, previousUv.y)))
       .mul(forward ? uniforms.initialized : float(1));
-    const carried = texture(source, previousUv.clamp(vec2(0), vec2(1))).mul(fromInside);
+    const carried = stateAt(previousUv.clamp(vec2(0), vec2(1))).mul(fromInside);
 
     const d = uniforms.delta;
     const wetBaseline = oneMinus(smoothstep(-0.12, 0.30, input.r)).mul(0.2);
