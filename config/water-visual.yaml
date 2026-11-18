@@ -214,6 +214,31 @@ water:
     # Wash foam is a hint at the waterline; at 0.55 it whitened small pools
     # edge to edge.
     foamStrength: 0.3
+    persistent:
+      enabled: true
+      fixedHz: 30
+      maxStepsPerFrame: 2
+      texelMeters: 0.25
+      inputTexelMeters: 1
+      highResolution: 256
+      ultraResolution: 512
+      scrollMeters: 8
+      boundaryFadeMeters: 4
+      activationDistanceMeters: 48
+      minSlope: 0.05
+      maxUprushSpeed: 1.3
+      maxBackwashSpeed: 0.9
+      lateralSpeed: 0.08
+      foamInjection: 0.85
+      foamDeposition: 0.35
+      foamWetSeconds: 3.5
+      foamWaterSeconds: 4.5
+      foamDrySeconds: 1.8
+      strandedSeconds: 6.5
+      filmSeconds: 3.2
+      wetSeconds: 18
+      washOff: 0.65
+      strandedOpacity: 0.45
   # grass-test's lake and river surface (`WaterMaterial`, inland branch): its detail
   # normals advected along the current, its Fresnel against its sky, its sun glint
   # (pow 170 × 1.8 + pow 20 × 0.08), and its foam — noise foam in the 0.02–0.75 m
