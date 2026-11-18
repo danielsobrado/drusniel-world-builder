@@ -3,6 +3,7 @@ import { resolveSeaDetail } from './SeaDetailPolicy.js';
 import { resolveSeaOptics } from './SeaOptics.js';
 import { resolveCoastSand } from './CoastSandConfig.js';
 import { resolveCoastalSwashConfig } from './CoastalSwashConfig.js';
+import { resolveCoastalRockImpactConfig } from './CoastalRockImpactConfig.js';
 
 function assertFiniteRange(value, fieldName, minimum, maximum) {
   if (!Number.isFinite(value) || value < minimum || value > maximum) {
@@ -70,6 +71,7 @@ export function validateCoastConfig(config) {
   const field = (name) => `stylizedSurface.water.coast.${name}`;
   resolveCoastSand(config.sand);
   resolveCoastalSwashConfig(config.persistent);
+  resolveCoastalRockImpactConfig(config.rockImpact);
   assertFiniteRange(config.period, field('period'), 1, 60);
   assertFiniteRange(config.runupHeight, field('runupHeight'), 0.05, 5);
   assertFiniteRange(config.breakDepth, field('breakDepth'), 0, 3);

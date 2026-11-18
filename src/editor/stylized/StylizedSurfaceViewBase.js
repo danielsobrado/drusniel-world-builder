@@ -50,6 +50,7 @@ import {
 } from './StylizedGrassSlot.js';
 import { GrassBladeProfilePool } from './GrassBladeProfilePool.js';
 import { StylizedRockView } from './StylizedRockView.js';
+import { CoastalRockImpact } from './CoastalRockImpact.js';
 import { syncFoliageLight } from './forest/foliageLight.js';
 import { StylizedSceneAssetCache } from './StylizedSceneAssetCache.js';
 import { StylizedSkyView } from './StylizedSkyView.js';
@@ -151,6 +152,9 @@ export class StylizedSurfaceView {
         biomeAssetPalette,
         regionalCharacterField: this.regionalCharacterField,
       })
+      : null;
+    this.coastalRockImpact = this.rockView && config.water?.coast?.rockImpact?.enabled
+      ? new CoastalRockImpact({ terrainView, rockView: this.rockView, config })
       : null;
     this.treeView = this.enabled
       ? new StylizedTreeView({
@@ -845,6 +849,7 @@ export class StylizedSurfaceView {
       else updateGeology();
     }
     syncViewRebuildQueue(this.rockBuildQueue, [this.rockView]);
+    this.coastalRockImpact?.update(camera);
     const rockPlacements = this.rockView?.getPlacements() ?? [];
     this.treeView?.update(timestamp, camera, this.rockView);
     syncViewRebuildQueue(this.treeBuildQueue, [this.treeView], 'pendingLodRebuild');
@@ -1160,6 +1165,7 @@ export class StylizedSurfaceView {
     this.detailViews = [];
     this.bushView?.dispose();
     this.treeView?.dispose();
+    this.coastalRockImpact?.dispose();
     this.rockView?.dispose();
     this.terrainView.getBridgeDeckHeight = null;
     this.icebergView?.dispose();

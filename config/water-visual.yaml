@@ -214,6 +214,55 @@ water:
     # Wash foam is a hint at the waterline; at 0.55 it whitened small pools
     # edge to edge.
     foamStrength: 0.3
+    rockImpact:
+      enabled: true
+      activationDistanceMeters: 64
+      fullEffectDistanceMeters: 32
+      contactReachMeters: 1.5
+      exposedHeightThresholdMeters: 0.1
+      maximumCandidates: 64
+      maximumActiveSites: 24
+      minimumImpactIntensity: 0.22
+      minimumIntervalSeconds: 0.65
+      referenceWaveHeightMeters: 1.4
+      foam:
+        strength: 0.85
+        widthMeters: 0.4
+        decaySeconds: 2.2
+        wakeStrength: 0.35
+      wetness:
+        decaySeconds: 18
+        runoffSeconds: 3.5
+        darkeningStrength: 0.28
+        freshRoughness: 0.25
+        normalWetReachMeters: 0.55
+        strongWetReachMeters: 1.5
+      spray:
+        enabled: true
+        minimumIntensity: 0.22
+        highMaxDroplets: 512
+        ultraMaxDroplets: 1536
+        highMaxMist: 64
+        ultraMaxMist: 160
+        mistLifetimeMin: 0.8
+        mistLifetimeMax: 2.4
+        verticalSpeedMin: 1.5
+        verticalSpeedMax: 4.5
+        horizontalSpeedMin: 0.4
+        horizontalSpeedMax: 2.2
+        minLifetimeSeconds: 0.35
+        maxLifetimeSeconds: 1.1
+      field:
+        resolution: 256
+        spanMeters: 64
+        updateHz: 15
+        scrollMeters: 8
+        boundaryFadeMeters: 4
+      quality:
+        low: false
+        medium: true
+        high: true
+        ultra: true
     persistent:
       enabled: true
       fixedHz: 30

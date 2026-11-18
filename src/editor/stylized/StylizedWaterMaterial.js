@@ -62,6 +62,7 @@ import { bilinearLoad } from '../materials/TerrainSlotBindings.js';
 import { createWaterAppearanceNodes } from './WaterAppearanceNodes.js';
 import { createFrozenWaterNodes } from './FrozenWaterNodes.js';
 import { rippleFieldSlope } from '../water/rippleFieldNode.js';
+import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 
 const CAUSTIC_RING_RADIUS = 0.4;
 const CAUSTIC_AA_SCALE = 1.25;
@@ -599,6 +600,13 @@ export function createStylizedWaterMaterial({
     const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine(shoreDistance))).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
     whitewater = whitewater ? max(whitewater, whitecap) : whitecap;
+  }
+
+  if (sea && quality.foam && water.foam.enabled && water.coast?.rockImpact?.enabled) {
+    const impact = sampleCoastalRockImpactState();
+    const rockFoam = impact.foam.mul(sea.mask).mul(waterCoverage)
+      .mul(smoothstep(0.04, 0.6, waterDepth));
+    foamAmount = max(foamAmount, rockFoam);
   }
 
   if (quality.foam && water.foam.enabled) {

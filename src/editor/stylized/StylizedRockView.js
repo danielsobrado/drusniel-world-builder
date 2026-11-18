@@ -82,6 +82,9 @@ export function createStylizedRockMaterial(mesh, config, weathering, geometry = 
       localWater: true,
       biomeLook: true,
       ground: geometry ? rockGroundLine(geometry, config?.rocks?.burial) : null,
+      impactSettings: config?.water?.coast?.rockImpact?.enabled
+        && ['medium', 'high', 'ultra'].includes(config?.water?.qualityTier)
+        ? config.water.coast.rockImpact.wetness : null,
     });
   }
   material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material));

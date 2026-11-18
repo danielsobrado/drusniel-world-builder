@@ -31,6 +31,7 @@ import { snowCoat } from './surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
 import { stormSnowCoverUniform } from '../weather/storm/stormGroundUniforms.js';
+import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -142,7 +143,7 @@ export function resolveRockWeathering(configured) {
  *   the stone's object-space ground line, height above it and centre, for the
  *   snow skirt, lee drift and cavities (snowDeposition)
  */
-export function applyRockWeathering(material, { settings, seaLevel = null, localWater = false, biomeLook = false, ground = null }) {
+export function applyRockWeathering(material, { settings, seaLevel = null, localWater = false, biomeLook = false, ground = null, impactSettings = null }) {
   if (!settings?.enabled) return material;
   const sourceMap = material.map ?? null;
   const world = positionWorld;
@@ -254,6 +255,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   // Wet, dark and glossy up to a ragged local splash line, with the green
   // that grows just above it. The donor darkens the band; the tint is the half of
   // a waterline that makes it read as a tide mark rather than as shadow.
+  let baselineWet = float(0);
   if ((localWater || Number.isFinite(seaLevel)) && settings.waterline > 0) {
     const contact = localWater ? attribute('instanceSurface', 'vec3') : null;
     const level = contact ? contact.x : frameUniform(seaLevel);
@@ -264,6 +266,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     const wet = above.smoothstep(splash.mul(0.6), splash.add(0.15)).oneMinus()
       .mul(eligible)
       .mul(settings.waterline);
+    baselineWet = wet;
     weathered = weathered.mul(wet.mul(settings.wetDarkening).oneMinus());
     roughness = mix(roughness, float(0.25), wet);
     // Algae sits in the upper, drier half of the band — it needs the water but
@@ -276,6 +279,20 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
         .mul(settings.algae);
       weathered = mix(weathered, color(settings.algaeColor ?? ALGAE), growth.mul(eligible).clamp(0, 1));
     }
+  }
+
+  if (impactSettings && localWater) {
+    const dynamic = sampleCoastalRockImpactState();
+    const contact = attribute('instanceSurface', 'vec3');
+    const height = world.y.sub(contact.x);
+    const wetReach = float(impactSettings.normalWetReachMeters).add(
+      dynamic.runoff.mul(impactSettings.strongWetReachMeters - impactSettings.normalWetReachMeters),
+    );
+    const vertical = height.smoothstep(wetReach.mul(0.45), wetReach.add(0.15)).oneMinus();
+    const damp = dynamic.wetness.mul(vertical).mul(contact.y).clamp(0, 1);
+    const additionalWet = damp.mul(baselineWet.oneMinus());
+    weathered = weathered.mul(additionalWet.mul(impactSettings.darkeningStrength).oneMinus());
+    roughness = mix(roughness, float(impactSettings.freshRoughness), additionalWet.mul(0.8));
   }
 
   // Snow country: capped on top, drifted into the lee and the recesses, and
