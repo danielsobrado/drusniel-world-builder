@@ -13,6 +13,8 @@ import {
 import { createTerrainMaterial } from './terrainMaterial.js';
 import { terrainRendererProfile } from './materials/TerrainRendererProfile.js';
 import { createCoastPatternOrigins } from './stylized/CoastSwashShading.js';
+import { CoastalSwashField } from './water/CoastalSwashField.js';
+import { waterVisualClock } from './water/WaterVisualClock.js';
 import { createTerrainTransitionPatterns } from './materials/TerrainTransitionNodes.js';
 import { resolveBlownStreaks } from './stylized/ambient/BlownStreaks.js';
 import { resolveFrost } from './stylized/ambient/FrostShading.js';
@@ -299,6 +301,7 @@ export class InfiniteTerrainView {
     this.streamingChunkState = new Float64Array(4);
     this.streamingChunkState.fill(Number.POSITIVE_INFINITY);
     this.clock = 0;
+    this.coastalSwash = null;
     this.contentRevision = 0;
     this.nextRetryAt = Number.POSITIVE_INFINITY;
     this.disposed = false;
@@ -437,6 +440,12 @@ export class InfiniteTerrainView {
     this.rendererBackendStatus = inspectRendererBackend(this.renderer);
     PerfCounters.set('rendererWebGPUBackend', this.rendererBackendStatus.webgpu ? 1 : 0);
     PerfCounters.set('rendererWebGLBackend', this.rendererBackendStatus.webgl ? 1 : 0);
+    this.coastalSwash = new CoastalSwashField({
+      renderer: this.renderer,
+      terrainView: this,
+      coastConfig: this.stylizedConfig.water?.coast,
+      qualityTier: this.stylizedConfig.water?.qualityTier,
+    });
     // Hi-Z occlusion culling, after `init()` so the backend it gates on exists. It
     // disables itself on anything but the WebGPU backend (GpuOcclusion#init), so it is
     // built whenever the config asks for it and costs nothing where it cannot run.
@@ -530,6 +539,7 @@ export class InfiniteTerrainView {
   render(camera) {
     this.finishApplications = 0;
     this.activeRenderPath = 'direct';
+    this.coastalSwash?.update(camera, waterVisualClock.value);
     this.beforeMainRender?.(camera);
     const draw = () => {
       if (
@@ -1167,6 +1177,7 @@ export class InfiniteTerrainView {
     this.preview.material.dispose();
     // Slots share one material; each mesh carries its own bake state.
     new Set(this.slots.map((slot) => slot.material)).forEach((material) => material.dispose());
+    this.coastalSwash?.dispose();
     this.valleyFog?.dispose();
     this.valleyFogSampling?.dispose();
     this.valleyFog = null;
