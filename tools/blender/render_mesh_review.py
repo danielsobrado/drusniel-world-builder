@@ -11,6 +11,7 @@ import html
 import json
 import math
 import os
+import subprocess
 import sys
 
 import bpy
@@ -22,8 +23,15 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(THIS_DIR, '..', '..'))
 OUT_DIR = os.path.join(REPO_ROOT, 'docs', 'qa', 'mesh-review-15k')
 MEDKIT_MODULES = os.path.join(THIS_DIR, 'medieval_town_kit')
-if MEDKIT_MODULES not in sys.path:
-    sys.path.insert(0, MEDKIT_MODULES)
+UNDERGROUND_PROPS_DIR = os.path.join(THIS_DIR, 'underground_props')
+for _p in (MEDKIT_MODULES, UNDERGROUND_PROPS_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    from aaa_prop_algorithms import REFERENCE_BBOXES
+except ImportError:
+    REFERENCE_BBOXES = {}
 
 RES_X = 512
 RES_Y = 384
@@ -129,6 +137,7 @@ def _get_clay_material():
     if mat:
         return mat
     mat = bpy.data.materials.new('ReviewClayMat')
+    mat.use_fake_user = True
     mat.use_nodes = True
     bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
     bsdf.inputs['Base Color'].default_value = (0.58, 0.59, 0.62, 1.0)
@@ -164,7 +173,7 @@ def _audit_imported_meshes(mesh_objs, label):
     return {'tris': total_tris, 'min_z': min_z, 'issues': issues}
 
 
-def _frame_and_render(studio, target_objs, out_path, view_vec=(0.76, -0.82, 0.44), clay_mat=None):
+def _frame_and_render(studio, target_objs, out_path, view_vec=(0.76, -0.82, 0.44), clay_mat=None, ref_bbox=None):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     mins, maxs, tris = _world_bbox_and_tris(target_objs)
     cx = 0.5 * (mins.x + maxs.x)
@@ -178,8 +187,25 @@ def _frame_and_render(studio, target_objs, out_path, view_vec=(0.76, -0.82, 0.44
     span_x = max(0.15, maxs.x - mins.x)
     span_y = max(0.15, maxs.y - mins.y)
     span_z = max(0.20, maxs.z - vis_min_z)
-    look_at = Vector((cx, cy, vis_min_z + span_z * 0.44))
-    radius = max(math.hypot(span_x, span_y) * 0.52, span_z * 0.62, 0.22)
+    actual_radius = max(math.hypot(span_x, span_y) * 0.52, span_z * 0.62, 0.22)
+
+    if ref_bbox and 'mins' in ref_bbox and 'maxs' in ref_bbox:
+        r_mins = Vector(ref_bbox['mins'])
+        r_maxs = Vector(ref_bbox['maxs'])
+        r_cx = 0.5 * (r_mins.x + r_maxs.x)
+        r_cy = 0.5 * (r_mins.y + r_maxs.y)
+        r_ground_z = 0.0 if (r_mins.z <= 0.10 and r_maxs.z >= 0.05) else r_mins.z
+        r_vis_min_z = max(r_mins.z, r_ground_z)
+        r_sx = max(0.15, r_maxs.x - r_mins.x)
+        r_sy = max(0.15, r_maxs.y - r_mins.y)
+        r_sz = max(0.20, r_maxs.z - r_vis_min_z)
+        look_at = Vector((r_cx, r_cy, r_vis_min_z + r_sz * 0.44))
+        ref_radius = max(math.hypot(r_sx, r_sy) * 0.52, r_sz * 0.62, 0.22)
+        radius = actual_radius if actual_radius > ref_radius * 1.05 else ref_radius
+    else:
+        look_at = Vector((cx, cy, vis_min_z + span_z * 0.44))
+        radius = actual_radius
+
     dist = radius / math.tan(math.radians(12.8))
 
     view_dir = Vector(view_vec).normalized()
@@ -440,7 +466,7 @@ def _render_phase1():
         for vname, vvec, is_sil in views:
             out_p = os.path.join(OUT_DIR, 'phase1', f'{label}_{vname}.png')
             clay = _get_clay_material() if is_sil else None
-            _frame_and_render(studio, mesh_objs, out_p, view_vec=vvec, clay_mat=clay)
+            _frame_and_render(studio, mesh_objs, out_p, view_vec=vvec, clay_mat=clay, ref_bbox=REFERENCE_BBOXES.get(label))
             view_paths.append(out_p)
             if vname == 'hero':
                 hero_path = out_p
@@ -499,18 +525,207 @@ def _build_family_comparisons(items_rel, sheet_out):
         _assemble_contact_sheet(pairs, os.path.join(OUT_DIR, sheet_out), cols=2)
 
 
+def _downsample_image_file(src_path, dst_path, target_w=96, target_h=72):
+    if not os.path.exists(src_path):
+        return False
+    img = bpy.data.images.load(src_path, check_existing=False)
+    sw, sh = img.size
+    arr = np.flipud(np.array(img.pixels[:], dtype=np.float32).reshape((sh, sw, 4)))
+    bpy.data.images.remove(img)
+    out_arr = np.zeros((target_h, target_w, 4), dtype=np.float32)
+    for r in range(target_h):
+        y0 = int(r * sh / target_h)
+        y1 = max(y0 + 1, int((r + 1) * sh / target_h))
+        for c in range(target_w):
+            x0 = int(c * sw / target_w)
+            x1 = max(x0 + 1, int((c + 1) * sw / target_w))
+            out_arr[r, c] = arr[y0:y1, x0:x1].mean(axis=(0, 1))
+    out_img = bpy.data.images.new('_ds_tmp', width=target_w, height=target_h, alpha=True)
+    out_img.pixels.foreach_set(np.flipud(out_arr).ravel().tolist())
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    out_img.filepath_raw = dst_path
+    out_img.file_format = 'PNG'
+    out_img.save()
+    bpy.data.images.remove(out_img)
+    return True
+
+
+def _render_underground_area_worker(area, items):
+    studio = _setup_studio_scene(clear=True)
+    clay_mat = _get_clay_material()
+    dir_views = (
+        ('hero', (0.76, -0.82, 0.44), False),
+        ('front', (0.0, -1.0, 0.28), False),
+        ('side', (1.0, 0.0, 0.28), False),
+        ('back', (-0.76, 0.82, 0.44), False),
+        ('clay', (0.76, -0.82, 0.44), True),
+    )
+
+    area_hero_paths = []
+    area_clay_paths = []
+    area_row_jobs = []
+    pending_4dir_rows = []
+    pending_96px = []
+    audit_entries = []
+    ug_results = []
+
+    for it in items:
+        name = it['name']
+        glb_path = os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', it['file'])
+        if not os.path.exists(glb_path):
+            continue
+
+        before = set(bpy.data.objects)
+        bpy.ops.import_scene.gltf(filepath=glb_path)
+        bpy.context.view_layer.update()
+        imported = [o for o in bpy.data.objects if o not in before]
+        mesh_objs = [o for o in imported if o.type == 'MESH']
+        audit = _audit_imported_meshes(mesh_objs, name)
+        mins, maxs, tris = _world_bbox_and_tris(mesh_objs)
+        mats_count = len({m for o in mesh_objs if o.data for m in o.data.materials if m is not None})
+        ref = REFERENCE_BBOXES.get(name)
+
+        rel = f'underground/{area}/{name}.png'
+        hero_path = os.path.join(OUT_DIR, rel)
+        clay_path = os.path.join(OUT_DIR, f'underground_clay/{area}/{name}.png')
+        view_paths = []
+        for vname, vvec, is_clay in dir_views:
+            out_p = hero_path if vname == 'hero' else (clay_path if vname == 'clay' else os.path.join(OUT_DIR, 'underground', 'views', area, f'{name}_{vname}.png'))
+            _frame_and_render(studio, mesh_objs, out_p, view_vec=vvec, clay_mat=(clay_mat if is_clay else None), ref_bbox=ref)
+            view_paths.append(out_p)
+
+        row_path = os.path.join(OUT_DIR, 'underground', 'views', area, f'{name}_views.png')
+        pending_4dir_rows.append((view_paths, row_path))
+        area_row_jobs.append(row_path)
+        area_hero_paths.append(hero_path)
+        area_clay_paths.append(clay_path)
+        pending_96px.append((area, name, rel, hero_path))
+
+        tris_before = ref.get('tris_before') if ref else None
+        delta_pct = round(((tris - tris_before) / tris_before) * 100.0, 1) if tris_before else None
+        audit_entries.append({
+            'name': name,
+            'area': area,
+            'triangles_before': tris_before,
+            'triangles_after': tris,
+            'triangle_delta_pct': delta_pct,
+            'materials_count': mats_count,
+            'object_count': len(mesh_objs),
+            'bbox_before': [list(ref['mins']), list(ref['maxs'])] if ref else None,
+            'bbox_after': [[round(mins.x, 3), round(mins.y, 3), round(mins.z, 3)], [round(maxs.x, 3), round(maxs.y, 3), round(maxs.z, 3)]],
+            'min_z': round(audit['min_z'], 4),
+            'issues': audit['issues'],
+        })
+        ug_results.append({'name': name, 'group': area, 'triangles': tris, 'image': rel, 'source': f'assets/runtime-sources/underground/{it["file"]}'})
+
+        for o in imported:
+            bpy.data.objects.remove(o, do_unlink=True)
+
+    area_audit_path = os.path.join(OUT_DIR, 'underground', f'audit_{area}.json')
+    os.makedirs(os.path.dirname(area_audit_path), exist_ok=True)
+    with open(area_audit_path, 'w', encoding='utf-8') as f:
+        json.dump({
+            'area': area,
+            'audit_entries': audit_entries,
+            'ug_results': ug_results,
+            'area_hero_paths': area_hero_paths,
+            'area_clay_paths': area_clay_paths,
+            'area_row_jobs': area_row_jobs,
+            'pending_4dir_rows': pending_4dir_rows,
+            'pending_96px': pending_96px,
+        }, f, indent=2)
+    print(f'[mesh-review] worker rendered area={area} ({len(ug_results)} props) -> {area_audit_path}')
+    return ug_results
+
+
+def _render_underground_suite(studio, compare=False, target_area=None):
+    ug_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', 'manifest.json'), encoding='utf-8'))
+    if target_area is not None:
+        if target_area not in ug_manifest['areas']:
+            raise ValueError(f'Unknown underground area: {target_area}')
+        return _render_underground_area_worker(target_area, ug_manifest['areas'][target_area])
+
+    ug_results = []
+    all_hero_paths = []
+    all_clay_paths = []
+    area_batches = []
+    pending_4dir_rows = []
+    pending_96px = []
+    audit_entries = []
+
+    # Phase A: Spawn isolated Blender subprocess per area (25 renders each)
+    script_path = os.path.abspath(__file__)
+    for area in ug_manifest['areas']:
+        cmd = [bpy.app.binary_path, '-b', '--factory-startup', '--python', script_path, '--', '--only', 'underground', '--area', area]
+        if compare:
+            cmd.append('--compare')
+        subprocess.run(cmd, check=True)
+        area_audit_path = os.path.join(OUT_DIR, 'underground', f'audit_{area}.json')
+        with open(area_audit_path, encoding='utf-8') as f:
+            data = json.load(f)
+        audit_entries.extend(data['audit_entries'])
+        ug_results.extend(data['ug_results'])
+        all_hero_paths.extend(data['area_hero_paths'])
+        all_clay_paths.extend(data['area_clay_paths'])
+        pending_4dir_rows.extend(data['pending_4dir_rows'])
+        pending_96px.extend(data['pending_96px'])
+        area_batches.append((area, data['area_hero_paths'], data['area_row_jobs']))
+
+    # Phase B: Clear 3D scene and assemble contact sheets, 4-dir grids & 96px gameplay strips cleanly
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    for view_paths, row_path in pending_4dir_rows:
+        _assemble_contact_sheet(view_paths, row_path, cols=5, pad=4)
+    for area, area_hero_paths, area_row_jobs in area_batches:
+        _assemble_contact_sheet(area_hero_paths, os.path.join(OUT_DIR, 'underground', f'area_{area}_sheet.png'), cols=5)
+        _assemble_contact_sheet(area_row_jobs, os.path.join(OUT_DIR, 'underground', f'area_{area}_4dir_sheet.png'), cols=1, pad=6)
+
+    all_96_paths = []
+    all_96_pairs = []
+    for area, name, rel, hero_path in pending_96px:
+        thumb_after = os.path.join(OUT_DIR, 'underground_96px', 'after', area, f'{name}.png')
+        if _downsample_image_file(hero_path, thumb_after, target_w=96, target_h=72):
+            all_96_paths.append(thumb_after)
+            if compare:
+                before_hero = os.path.join(OUT_DIR, 'before', rel)
+                thumb_before = os.path.join(OUT_DIR, 'underground_96px', 'before', area, f'{name}.png')
+                pair_96 = os.path.join(OUT_DIR, 'underground_96px', 'pairs', area, f'{name}.png')
+                if _downsample_image_file(before_hero, thumb_before, target_w=96, target_h=72) and _pair_before_after(thumb_before, thumb_after, pair_96, gap=4):
+                    all_96_pairs.append(pair_96)
+
+    _assemble_contact_sheet(all_hero_paths, os.path.join(OUT_DIR, 'contact_sheet_underground.png'), cols=5)
+    _assemble_contact_sheet(all_clay_paths, os.path.join(OUT_DIR, 'contact_sheet_underground_clay.png'), cols=5)
+    _assemble_contact_sheet(all_96_paths, os.path.join(OUT_DIR, 'contact_sheet_underground_gameplay_96px.png'), cols=5, pad=4)
+    if compare:
+        _build_family_comparisons([r['image'] for r in ug_results], 'comparison_underground.png')
+        if all_96_pairs:
+            _assemble_contact_sheet(all_96_pairs, os.path.join(OUT_DIR, 'comparison_underground_gameplay_96px.png'), cols=2, pad=4)
+
+    audit_path = os.path.join(OUT_DIR, 'underground_audit_report.json')
+    with open(audit_path, 'w', encoding='utf-8') as f:
+        json.dump({'count': len(audit_entries), 'props': audit_entries}, f, indent=2)
+    print(f'[mesh-review] wrote underground geometry cost & bbox audit ({len(audit_entries)} props) -> {audit_path}')
+    return ug_results
+
+
 def main():
     only = None
+    target_area = None
     compare = False
     if '--' in sys.argv:
         argv = sys.argv[sys.argv.index('--') + 1:]
         if '--only' in argv:
             only = argv[argv.index('--only') + 1]
+        if '--area' in argv:
+            target_area = argv[argv.index('--area') + 1]
         compare = '--compare' in argv
 
     os.makedirs(OUT_DIR, exist_ok=True)
     if only == 'phase1':
         _render_phase1()
+        return
+
+    if only == 'underground':
+        _render_underground_suite(None, compare=compare, target_area=target_area)
         return
 
     studio = _setup_studio_scene(clear=True)
@@ -548,17 +763,8 @@ def main():
             _build_family_comparisons([r['image'] for r in tb_results], 'comparison_trunks_bushes.png')
 
     if only in (None, 'underground'):
-        # 3. Underground & Glacial Areas (30 props)
-        ug_manifest = json.load(open(os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', 'manifest.json'), encoding='utf-8'))
-        all_ug_paths = []
-        for area, items in ug_manifest['areas'].items():
-            area_items = [(it['name'], os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground', it['file']), area) for it in items]
-            area_res = _render_glb_batch(studio, area_items, f'underground/{area}', f'underground/area_{area}_sheet.png')
-            ug_results.extend(area_res)
-            all_ug_paths.extend(os.path.join(OUT_DIR, r['image']) for r in area_res)
-        _assemble_contact_sheet(all_ug_paths, os.path.join(OUT_DIR, 'contact_sheet_underground.png'), cols=5)
-        if compare:
-            _build_family_comparisons([r['image'] for r in ug_results], 'comparison_underground.png')
+        # 3. Underground & Glacial Areas (30 props: equal-dimension, clay, 4-dir, 96px, audit)
+        ug_results = _render_underground_suite(studio, compare=compare, target_area=target_area)
 
     if only in (None, 'cities'):
         # 4. 40 City Props from medieval_town_kit.blend

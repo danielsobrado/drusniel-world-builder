@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import test from 'node:test';
+import { inspectGlbJson, readGlbJson } from '../scripts/lib/glb-inspection.mjs';
 import * as frostgardHoldExtra from '../src/editor/locations/generators/frostgardHoldExtraProps.js';
 import * as glacierExtra from '../src/editor/locations/generators/glacierExtraProps.js';
 import * as glacierFrontExtra from '../src/editor/locations/generators/glacierFrontExtraProps.js';
@@ -67,4 +69,34 @@ test('every underground and glacier area exports at least 5 multi-part detailed 
       assert.ok(item.triangles >= 15000, `${area}/${item.name} Blender GLB below 15000 tris: ${item.triangles}`);
     }
   }
+});
+
+test('underground Blender GLBs stay within triangle budget, single mesh/material, and valid silhouette bounds', async () => {
+  const manifest = JSON.parse(await fs.readFile('assets/runtime-sources/underground/manifest.json', 'utf8'));
+  const areas = Object.entries(manifest.areas ?? {});
+  assert.equal(areas.length, 6);
+  let checked = 0;
+  for (const [area, items] of areas) {
+    for (const item of items) {
+      const glbPath = path.join('assets', 'runtime-sources', 'underground', item.file);
+      const bytes = await fs.readFile(glbPath);
+      const stats = inspectGlbJson(readGlbJson(bytes, glbPath));
+      assert.ok(
+        stats.triangles >= 15000 && stats.triangles <= 26000,
+        `${area}/${item.name} triangles ${stats.triangles} outside [15000, 26000]`,
+      );
+      assert.equal(stats.triangles, item.triangles, `${area}/${item.name} manifest/GLB triangle mismatch`);
+      assert.equal(stats.materials, 1, `${area}/${item.name} expected 1 material, got ${stats.materials}`);
+      assert.equal(stats.meshes, 1, `${area}/${item.name} expected 1 mesh object, got ${stats.meshes}`);
+      assert.ok(stats.sceneBounds, `${area}/${item.name} missing sceneBounds`);
+      const spanX = stats.sceneBounds.max[0] - stats.sceneBounds.min[0];
+      const spanZUp = stats.sceneBounds.max[1] - stats.sceneBounds.min[1];
+      const spanYDepth = stats.sceneBounds.max[2] - stats.sceneBounds.min[2];
+      assert.ok(spanX > 0.4, `${area}/${item.name} span_x ${spanX} <= 0.4`);
+      assert.ok(spanYDepth > 0.2, `${area}/${item.name} span_y ${spanYDepth} <= 0.2`);
+      assert.ok(spanZUp > 0.8, `${area}/${item.name} span_z ${spanZUp} <= 0.8`);
+      checked += 1;
+    }
+  }
+  assert.equal(checked, 30);
 });
