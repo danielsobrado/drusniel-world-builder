@@ -15,7 +15,7 @@ test('persistent swash configuration selects only supported quality tiers and va
   assert.equal(coastalSwashResolution(config, 'ultra'), 512);
   assert.throws(() => resolveCoastalSwashConfig({ fixedHz: 0 }), /fixedHz/);
   assert.throws(() => resolveCoastalSwashConfig({ highResolution: 300 }), /highResolution/);
-  assert.throws(() => resolveCoastalSwashConfig({ scrollMeters: 0.3 }), /align/);
+  assert.throws(() => resolveCoastalSwashConfig({ scrollMeters: 8.25 }), /align/);
   assert.throws(() => resolveCoastalSwashConfig({ foamDrySeconds: -1 }), /foamDrySeconds/);
   assert.throws(() => resolveCoastalSwashConfig({ enabled: 1 }), /enabled/);
 });
