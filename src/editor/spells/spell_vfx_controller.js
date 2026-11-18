@@ -17,6 +17,8 @@ const SPELL_LIGHT_ENVELOPE = Object.freeze({
   pulseCycles: 8,
 });
 const SPELL_VISIBLE_PROGRESS_FLOOR = 0.035;
+/** Metres a spell's hand point is kept beyond the camera's near plane. */
+const SPELL_NEAR_CLEARANCE_M = 0.25;
 
 function createPoseScratch() {
   return {
@@ -49,9 +51,12 @@ function resolveSpellPose(camera, vfx, scratch = createPoseScratch()) {
   if (scratch.right.lengthSq() < 1e-6) scratch.right.set(1, 0, 0);
   else scratch.right.normalize();
   scratch.camUp.crossVectors(scratch.right, scratch.aim).normalize();
+  // The hand stays clear of the near plane: at hand_forward_m 0.5 against a 0.5 m
+  // near plane the jet's root sat on the clip plane and the whole card vanished.
+  const forward = Math.max(vfx.handForwardM, (camera.near ?? 0) + SPELL_NEAR_CLEARANCE_M);
   scratch.base
     .copy(camera.position)
-    .addScaledVector(scratch.aim, vfx.handForwardM)
+    .addScaledVector(scratch.aim, forward)
     .addScaledVector(scratch.right, vfx.handRightM)
     .addScaledVector(scratch.camUp, vfx.handUpM);
   scratch.dir.copy(scratch.aim);

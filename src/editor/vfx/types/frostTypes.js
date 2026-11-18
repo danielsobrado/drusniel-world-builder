@@ -55,11 +55,13 @@ export const FROST_TYPES = Object.freeze({
     heat: [0.45, 0.6], heatEnd: 0.3, emissive: 3, additive: 0.2, additiveEnd: 0.05, tint: [0.72, 0.86, 1],
     fadeIn: 0.03, fadeOut: 0.85, cameraFade: false,
   },
-  // The storm deck: big, dark, churning round its centre.
+  // The storm deck: big, dark, churning round its centre. Slate rather than near
+  // black, with a faint cold glow: a near-black tint under a warm sun read as a
+  // muddy brown blot.
   'ice.cloud': {
-    tiles: TILE_SPANS.smoke, lit: 1, ramp: RAMP.LIGHTNING, life: [4.6, 5.6], size: [7, 11],
-    sizeEnd: [1.2, 1.45], sizeEase: 'outCubic', heat: 0, heatEnd: 0, emissive: 0, additive: 0,
-    tint: [0.1, 0.11, 0.14], tintEnd: [0.19, 0.21, 0.26], opacity: 0.9, fadeIn: 0.15, fadeOut: 0.65,
+    tiles: TILE_SPANS.smoke, lit: 1, ramp: RAMP.FROST, life: [4.6, 5.6], size: [7, 11],
+    sizeEnd: [1.2, 1.45], sizeEase: 'outCubic', heat: 0.12, heatEnd: 0.08, emissive: 0.35, additive: 0,
+    tint: [0.26, 0.3, 0.38], tintEnd: [0.36, 0.4, 0.48], opacity: 0.9, fadeIn: 0.15, fadeOut: 0.65,
     drag: 1.2, swirl: 1.8, turbulence: 0.45, turbulenceScale: 0.08, spin: [0.08, 0.2],
   },
   'ice.veil': {
