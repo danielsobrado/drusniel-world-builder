@@ -79,7 +79,7 @@ export class CoastalRockImpactField {
     this.accumulator += time - this.lastTime;
     this.lastTime = time;
     const period = 1 / this.config.field.updateHz;
-    if (this.accumulator < period) return;
+    if (this.accumulator + 1e-7 < period) return;
     const dt = Math.min(this.accumulator, MAX_STEP_SECONDS);
     this.accumulator = 0;
     const data = this.data;

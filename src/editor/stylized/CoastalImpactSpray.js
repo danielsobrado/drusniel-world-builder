@@ -131,6 +131,7 @@ export class CoastalImpactSpray {
       this.mesh.visible = true;
     }
     this.lastEmittedMist = emittedMist;
+    this.mistLive = (this.mistLive ?? 0) + emittedMist;
     return emitted;
   }
 

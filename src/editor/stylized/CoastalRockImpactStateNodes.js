@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
-import { float, oneMinus, positionWorld, smoothstep, texture } from 'three/tsl';
+import { oneMinus, positionWorld, smoothstep } from 'three/tsl';
+import { bilinearLoad } from '../materials/TerrainSlotBindings.js';
 import { frameUniform } from '../../render/FrameUniforms.js';
 
 export const IMPACT_FIELD_RESOLUTION = 256;
@@ -36,7 +37,7 @@ export function sampleCoastalRockImpactState() {
   const inside = smoothstep(0, width, uv.x).mul(smoothstep(0, width, uv.y))
     .mul(oneMinus(smoothstep(oneMinus(width), 1, uv.x)))
     .mul(oneMinus(smoothstep(oneMinus(width), 1, uv.y)));
-  const state = texture(coastalImpactTexture, uv).level(0);
+  const state = bilinearLoad(coastalImpactTexture, uv);
   const weight = inside.mul(coastalImpactUniforms.active);
   return {
     foam: state.r.mul(weight),
