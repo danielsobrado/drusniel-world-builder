@@ -1,6 +1,6 @@
 import { Vector4 } from 'three';
 import { frameUniform as uniform } from '../../render/FrameUniforms.js';
-import { resolveSeaSurf, sampleSeaHeightCpu } from './SeaSurf.js';
+import { resolveSeaSurf, sampleSeaHeightCpu, sampleSeaSurfDisplacementCpu } from './SeaSurf.js';
 import { seaExposure } from './WaterAppearance.js';
 import { updateWaterVisualClock } from './WaterVisualClock.js';
 
@@ -57,6 +57,11 @@ export function seaSurfaceOffset(x, z, depth, shoreDistance = 48) {
   if (!seaConfig) return 0;
   const storm = seaStateUniforms.storm.value;
   const amplitude = seaAmplitude(seaConfig, storm, depth) * seaExposure(shoreDistance);
+  if (surfSettings?.enabled && surfSettings.model === 'directionalBreakers') {
+    return sampleSeaSurfDisplacementCpu(x, z, depth, shoreDistance, seaTime,
+      seaSharpness(seaConfig, storm), surfSettings, seaConfig, storm,
+      seaExposure(shoreDistance), amplitude);
+  }
   if (amplitude <= 0) return 0;
   return amplitude * sampleSeaHeightCpu(x, z, depth, seaTime, seaSharpness(seaConfig, storm), surfSettings);
 }

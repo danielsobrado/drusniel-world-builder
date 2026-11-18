@@ -118,6 +118,28 @@ water:
     # Depth-following wave sets and breaking rolls; independent of coast orientation.
     surf:
       enabled: true
+      model: directionalBreakers
+      directional:
+        referenceDepthMeters: 2.0
+        obliquity: 0.12
+        carrierWeights: [0.55, 0.30, 0.15]
+        packetMinimum: 0.55
+        packetMaximum: 1.10
+        packetModulation: 1.0
+      breaking:
+        gamma: 0.72
+        onsetRatio: 0.78
+        fullRatio: 1.12
+        shoalingReferenceDepthMeters: 4.0
+        minimumCalculationDepthMeters: 0.25
+        maximumShoalingGain: 1.65
+        shallowFadeStartMeters: 0.08
+        shallowFadeEndMeters: 0.40
+        dissipationStrength: 0.10
+        minimumCrestSkew: 0.18
+        maximumCrestSkew: 0.68
+        rollerStrength: 0.75
+        trailDecay: 4.5
       fadeStart: 2.5
       fadeEnd: 7
       depthPhaseScale: 0.45

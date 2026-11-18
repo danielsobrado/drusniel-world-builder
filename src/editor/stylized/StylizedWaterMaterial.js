@@ -212,6 +212,7 @@ export function createStylizedWaterMaterial({
       chunkWorldSize,
       surfaceWorldHeight: waterField.g.add(waterSurfaceOrigin),
       waterDepth,
+      shoreDistance,
       waterCoverage,
       currentStrength,
       time,

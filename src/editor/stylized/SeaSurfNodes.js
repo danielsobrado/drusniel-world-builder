@@ -1,4 +1,5 @@
-import { exp, float, fract, max, mix, oneMinus, sin, smoothstep, vec2 } from 'three/tsl';
+import { clamp, exp, float, fract, max, min, mix, oneMinus, pow, sin, smoothstep, vec2 } from 'three/tsl';
+import { directionalCarriers } from '../water/SeaSurfMath.js';
 import { SEA_SWELL_COMPONENTS } from '../water/SeaSwell.js';
 import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 
@@ -17,7 +18,16 @@ export function createSeaFoamNoise(patterns, localXZ, time) {
     .add(periodicFbm2(warped.mul(4).add(vec2(19.3, 7.1))).mul(.3)).toVar('seaFoamField');
 }
 
-export function createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time, settings }) {
+export function createSeaSurfNodes({
+  swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
+  offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+}) {
+  if (settings.enabled && settings.model === 'directionalBreakers' && patterns) {
+    return createDirectionalSurfNodes({
+      swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
+      offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+    });
+  }
   if (!settings.enabled || !patterns) return null;
   const wave = SEA_SWELL_COMPONENTS[0];
   const along = patterns.wavePhase('surfAlong', localXZ);
@@ -47,5 +57,87 @@ export function createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time,
     height: mix(near, swell.height, offshore),
     offshore,
     foam: max(roll, trail).mul(zone).mul(resolved).mul(float(settings.strength)),
+  };
+}
+
+/** Shoreline distance provides a coherent scalar phase over flat shelves and curved coasts. */
+function createDirectionalSurfNodes({
+  swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
+  offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+}) {
+  const { directional, breaking } = settings;
+  const phases = [];
+  const packets = [];
+  let packetEnergy = float(0);
+
+  directionalCarriers.forEach((wave, index) => {
+    const phase = float(wave.phase).add(time.mul(wave.angularSpeed).mod(Math.PI * 2))
+      .add(shoreDistance.mul(directional.waveNumbers[index]))
+      .add(patterns.wavePhase(`surfOblique${index}`, localXZ));
+    const packetA = patterns.wavePhase(`surfPacketA${index}`, localXZ)
+      .add(time.mul(wave.angularSpeed * 0.08).mod(Math.PI * 2));
+    const packetB = patterns.wavePhase(`surfPacketB${index}`, localXZ)
+      .sub(time.mul(wave.angularSpeed * 0.05).mod(Math.PI * 2));
+    const packet = clamp(float(0.78).add(sin(packetA).mul(0.14)
+      .add(sin(packetB).mul(0.08)).mul(directional.packetModulation)),
+    directional.packetMinimum, directional.packetMaximum);
+    phases.push(phase);
+    packets.push(packet);
+    packetEnergy = packetEnergy.add(packet.mul(directional.carrierWeights[index]));
+  });
+
+  const blend = smoothstep(settings.fadeStart, settings.fadeEnd, waterDepth);
+  const gain = clamp(pow(
+    float(breaking.shoalingReferenceDepthMeters).div(
+      max(waterDepth, float(breaking.minimumCalculationDepthMeters))), 0.25),
+  1, breaking.maximumShoalingGain);
+  const incident = offshoreAmplitude.mul(exposure).mul(gain);
+  const ratio = incident.mul(packetEnergy).mul(2).div(
+    max(waterDepth, float(1e-6)).mul(breaking.gamma));
+  const breakingIntensity = smoothstep(breaking.onsetRatio, breaking.fullRatio, ratio)
+    .mul(smoothstep(breaking.shallowFadeStartMeters, breaking.shallowFadeEndMeters, waterDepth))
+    .mul(oneMinus(blend))
+    .toVar('seaBreakerIntensity');
+  const skew = float(breaking.minimumCrestSkew)
+    .add(breakingIntensity.mul(breaking.maximumCrestSkew - breaking.minimumCrestSkew));
+  const norm = float(1).add(skew.mul(0.28));
+
+  let nearHeight = float(0);
+  let foamCrests = float(0);
+  phases.forEach((phase, index) => {
+    const s = sin(phase);
+    const shapedPhase = phase.add(skew.mul(s));
+    const shape = sin(shapedPhase)
+      .add(s.mul(s).sub(0.5).mul(skew).mul(0.28)).div(norm);
+    const weight = packets[index].mul(directional.carrierWeights[index]);
+    nearHeight = nearHeight.add(shape.mul(weight));
+    const age = fract(phase.sub(Math.PI / 2).div(Math.PI * 2));
+    const crest = smoothstep(0.65, 0.95, sin(shapedPhase))
+      .mul(breaking.rollerStrength);
+    const trail = smoothstep(0, 0.045, age)
+      .mul(exp(age.mul(-breaking.trailDecay)))
+      .mul(oneMinus(smoothstep(0.85, 1, age)));
+    foamCrests = max(foamCrests, max(crest, trail).mul(weight));
+  });
+  nearHeight = clamp(nearHeight.div(max(packetEnergy, float(1e-6))), -1, 1);
+  const depthCap = waterDepth.mul(0.5 * breaking.gamma);
+  const visibleAmplitude = min(incident.mul(packetEnergy), depthCap)
+    .mul(oneMinus(breakingIntensity.mul(breaking.dissipationStrength)))
+    .mul(smoothstep(breaking.shallowFadeStartMeters, breaking.shallowFadeEndMeters, waterDepth))
+    .mul(seaMask).mul(waterCoverage);
+  const amplitude = mix(visibleAmplitude, legacyAmplitude, blend)
+    .toVarying('seaDirectionalAmplitude');
+  const height = mix(nearHeight, swell.height, blend);
+  const displacement = mix(nearHeight.mul(visibleAmplitude),
+    swell.height.mul(legacyAmplitude), blend);
+  const foamNoise = createSeaFoamNoise(patterns, localXZ, time);
+  const resolved = oneMinus(smoothstep(0.35, 1.1, phases[0].fwidth()));
+  const foam = foamCrests.mul(breakingIntensity)
+    .mul(smoothstep(0.35, 0.82, foamNoise))
+    .mul(resolved).mul(settings.strength)
+    .mul(oneMinus(blend)).mul(seaMask).mul(waterCoverage);
+  return {
+    height, displacement, amplitude, offshore: blend, foam, foamNoise,
+    breaking: breakingIntensity,
   };
 }

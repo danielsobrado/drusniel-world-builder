@@ -65,6 +65,7 @@ export function createSeaSurfaceNodes({
   chunkWorldSize,
   surfaceWorldHeight,
   waterDepth,
+  shoreDistance = float(0),
   waterCoverage,
   currentStrength,
   time,
@@ -92,9 +93,6 @@ export function createSeaSurfaceNodes({
     .mul(waterCoverage)
     .mul(exposure)
     .toVarying('seaSwellAmplitude');
-  // Share of full offshore height, so crests and whitecaps fade in the shallows.
-  const strength = amplitude.div(offshore.max(1e-4));
-
   const detail = patternXZ ? createSeaDetailNodes({
     // Wind ripples survive in sheltered shallows even when large swell cannot.
     // Reusing the displacement envelope erased all surface structure there.
@@ -102,8 +100,13 @@ export function createSeaSurfaceNodes({
     strength: smoothstep(.04, .5, waterDepth).mul(mix(float(.35), float(1), exposure)), patterns, localXZ,
     phases: swell.phases, amplitude, settings: config.detail,
   }) : null;
-  const surf = createSeaSurfNodes({ swell, waterDepth, localXZ, patterns, time,
-    settings: resolveSeaSurf(config.surf) });
+  const surf = createSeaSurfNodes({
+    swell, waterDepth, shoreDistance, localXZ, patterns, time,
+    settings: resolveSeaSurf(config.surf),
+    offshoreAmplitude: offshore, legacyAmplitude: amplitude,
+    exposure, seaMask, waterCoverage,
+  });
+  const strength = (surf?.amplitude ?? amplitude).div(offshore.max(1e-4));
   const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
   const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
   const slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope;
@@ -129,7 +132,7 @@ export function createSeaSurfaceNodes({
     .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
 
   return {
-    displacement: height.mul(amplitude),
+    displacement: surf?.displacement ?? height.mul(amplitude),
     release: detail?.release,
     normal,
     foamNoise,
