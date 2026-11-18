@@ -1,0 +1,48 @@
+# AAA Procedural Mesh Upgrade Presets (Headless Blender)
+# Shared across biome flora, trunks/debris, underground/glacial props, and city variants.
+
+budgets:
+  lod0_min_tris: 15000
+  lod0_max_tris: 32000
+  city_lod0_max_tris: 38000
+  lod1_ratio: 0.25
+
+ground_contact:
+  use_circular_mud_skirt: false
+  root_penetration_depth: -0.025
+  enable_sine_subsurf_noise: false
+  normal_true_weight: 0.88
+  normal_up_weight: 0.12
+
+vegetation:
+  leaf_asymmetry: 0.14
+  leaf_twist_max: 0.24
+  leaf_cup_depth: 0.18
+  serration_default: 0.12
+  grass_droop_fraction: 0.35
+  fern_droop_strength: 0.28
+  shrub_gap_factor: 0.24
+
+wood_and_debris:
+  trunk_oval_ratio: 0.86
+  bark_ridge_depth: 0.15
+  splinter_count_min: 6
+  splinter_count_max: 10
+  root_flare_count: 6
+  root_secondary_split: true
+
+stone_crystal_ice:
+  crag_facet_planes: 10
+  crystal_sides: 6
+  crystal_secondary_count: 4
+  crystal_tertiary_count: 5
+  ice_plate_bevel: 0.02
+
+manufactured:
+  beam_chamfer: 0.014
+  wall_thickness_ratio: 0.14
+  spoke_count: 8
+  barrel_staves: 14
+  relief_timber: 0.0
+  relief_iron: 0.0
+  relief_stone: 0.005

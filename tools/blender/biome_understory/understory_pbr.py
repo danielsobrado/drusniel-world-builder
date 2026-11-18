@@ -3,12 +3,25 @@ import json
 import math
 import os
 import random
+import sys
 import tempfile
 
 import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+
+_TOOLS_BLENDER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+if _TOOLS_BLENDER_DIR not in sys.path:
+    sys.path.insert(0, _TOOLS_BLENDER_DIR)
+from upgrade_config import load_upgrade_config
+
+_UPGRADE_CFG = load_upgrade_config()
+_GROUND_CFG = _UPGRADE_CFG.get('ground_contact', {})
+DEFAULT_ADD_SKIRT = bool(_GROUND_CFG.get('use_circular_mud_skirt', False))
+DEFAULT_SCULPT_AMP = 0.0045 if _GROUND_CFG.get('enable_sine_subsurf_noise', False) else 0.0
+_NORM_TRUE_W = float(_GROUND_CFG.get('normal_true_weight', 0.88))
+_NORM_UP_W = float(_GROUND_CFG.get('normal_up_weight', 0.12))
 
 
 def _smoothstep(edge0, edge1, x):
@@ -341,7 +354,7 @@ def add_soil_neighbour_skirt(bm, uv_layer, soil_uv, mat_index=0, rx=0.38, ry=0.3
         tmp.free()
 
 
-def _subdivide_to_target(bm, min_triangles, max_triangles, sculpt_amp=0.0045):
+def _subdivide_to_target(bm, min_triangles, max_triangles, sculpt_amp=DEFAULT_SCULPT_AMP):
     bmesh.ops.triangulate(bm, faces=bm.faces)
     target = min(max_triangles - 400, min_triangles + 650)
     guard = 0
@@ -355,7 +368,7 @@ def _subdivide_to_target(bm, min_triangles, max_triangles, sculpt_amp=0.0045):
             bmesh.ops.subdivide_edges(bm, edges=list(bm.edges), cuts=1, use_grid_fill=True)
         else:
             edges = sorted(bm.edges, key=lambda e: e.calc_length(), reverse=True)
-            k = max(1, min(len(edges), (need + 1) // 2))
+            k = max(1, min(len(edges), max(1, need // 4)))
             bmesh.ops.subdivide_edges(bm, edges=edges[:k], cuts=1, use_grid_fill=False)
         bmesh.ops.triangulate(bm, faces=bm.faces)
         if sculpt_amp > 0.0:
@@ -400,7 +413,7 @@ def _snap_and_clean(bm):
 
 
 def bake_soil_and_neighbour_ao(mesh):
-    """Bake soil contact AO, interior cluster AO, cavity curvature, and neighbour-fit shading into Col."""
+    """Bake directional ground-contact AO, inner-cluster occlusion, and upward sky exposure into Col."""
     for attr in list(mesh.color_attributes):
         mesh.color_attributes.remove(attr)
     col = mesh.color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
@@ -412,18 +425,15 @@ def bake_soil_and_neighbour_ao(mesh):
     max_r = max((math.hypot(v.co.x, v.co.y) for v in verts), default=0.5)
     max_r = max(max_r, 0.25)
 
-    # Approximate local cavity from vertex normal variance across polygons
     vert_ao = [1.0] * len(verts)
     for idx, v in enumerate(verts):
         co = v.co
         n = v.normal
-        soil_ao = 0.44 + 0.56 * _smoothstep(-0.02, 0.24, co.z)
+        soil_ao = 0.50 + 0.50 * _smoothstep(-0.02, 0.22, co.z)
         radial = math.hypot(co.x, co.y) / max_r
-        interior_ao = 0.68 + 0.32 * _smoothstep(0.0, 0.72, radial)
-        neighbour_fit = 0.74 + 0.26 * (1.0 - _smoothstep(0.62, 1.02, radial) * (1.0 - _smoothstep(0.0, 0.14, co.z)))
-        up_ao = 0.76 + 0.24 * (0.5 + 0.5 * n.z)
-        micro_crevice = 0.92 + 0.08 * math.sin(co.x * 17.0 + co.y * 19.0 + co.z * 23.0)
-        ao = max(0.28, min(1.0, soil_ao * interior_ao * neighbour_fit * up_ao * micro_crevice))
+        interior_ao = 0.72 + 0.28 * _smoothstep(0.0, 0.72, radial)
+        up_ao = 0.74 + 0.26 * (0.5 + 0.5 * n.z)
+        ao = max(0.32, min(1.0, soil_ao * interior_ao * up_ao))
         vert_ao[idx] = ao
 
     loops = mesh.loops
@@ -437,10 +447,12 @@ def finalize_understory_mesh(
     materials,
     min_triangles=15000,
     max_triangles=32000,
-    add_skirt=True,
+    add_skirt=None,
     allow_extra_material=False,
 ):
-    """Attach soil/neighbour contact skirt, refine to >=15k tris, snap for float16, and bake AO."""
+    """Refine geometry to >=15k tris while preserving faceted/organic normals and baking AO."""
+    if add_skirt is None:
+        add_skirt = DEFAULT_ADD_SKIRT
     if not isinstance(materials, (list, tuple)):
         materials = [materials]
     else:
@@ -478,13 +490,26 @@ def finalize_understory_mesh(
             add_soil_neighbour_skirt(bm, uv_layer, soil_uv, mat_index=mat_idx, rx=rx, ry=ry, seed=seed)
 
     _snap_and_clean(bm)
-    _subdivide_to_target(bm, min_triangles + 400, max_triangles)
+    _subdivide_to_target(bm, min_triangles + 400, max_triangles, sculpt_amp=DEFAULT_SCULPT_AMP)
     _snap_and_clean(bm)
     guard = 0
     while len(bm.faces) < min_triangles and guard < 4:
         guard += 1
-        _subdivide_to_target(bm, min_triangles + 500, max_triangles, sculpt_amp=0.0015)
+        _subdivide_to_target(bm, min_triangles + 500, max_triangles, sculpt_amp=0.0)
         _snap_and_clean(bm)
+
+    flat_layer = bm.faces.layers.int.get('aaa_flat')
+    has_flat = False
+    if flat_layer is not None:
+        sharp_edges = [
+            e for e in bm.edges
+            if len(e.link_faces) == 2
+            and (e.link_faces[0][flat_layer] or e.link_faces[1][flat_layer])
+            and e.calc_face_angle(0.0) > 0.40
+        ]
+        if sharp_edges:
+            bmesh.ops.split_edges(bm, edges=sharp_edges)
+        has_flat = any(f[flat_layer] for f in bm.faces)
 
     mesh = bpy.data.meshes.new(name)
     bm.to_mesh(mesh)
@@ -498,14 +523,12 @@ def finalize_understory_mesh(
 
     up = Vector((0.0, 0.0, 1.0))
     custom_normals = []
+    n_true = 0.98 if has_flat else _NORM_TRUE_W
+    n_up = 0.02 if has_flat else _NORM_UP_W
     for v in mesh.vertices:
-        radial = Vector((v.co.x, v.co.y, max(0.25, v.co.z + 0.25)))
-        radial = radial.normalized() if radial.length > 1e-4 else up
-        n = v.normal * 0.68 + radial * 0.18 + up * 0.14
-        basal_blend = 0.78 * _smoothstep(0.08, -0.02, v.co.z)
-        n = n.lerp(up, basal_blend)
-        if n.z < 0.05:
-            n.z = 0.05
+        n = v.normal * n_true + up * n_up
+        if n.length_squared < 1e-8:
+            n = up
         custom_normals.append(n.normalized())
     mesh.normals_split_custom_set_from_vertices(custom_normals)
 

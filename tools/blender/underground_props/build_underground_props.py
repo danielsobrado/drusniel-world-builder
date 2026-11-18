@@ -28,6 +28,12 @@ for p in (TOOLS_BLENDER_DIR, BIOME_UNDERSTORY_DIR):
 
 from understory_common import setup_scene, tube, rock_chunk, mushroom_dome, place_and_export, MIN_TRIANGLES, MAX_TRIANGLES
 from understory_pbr import build_pbr_material, finalize_understory_mesh
+from aaa_natural_forms import (
+    crystal_cluster_formation,
+    ice_formation_mesh,
+    mushroom_cluster_mesh,
+    planar_rock,
+)
 
 REPO_ROOT = os.path.abspath(os.path.join(THIS_DIR, '..', '..', '..'))
 OUT_ROOT = os.path.join(REPO_ROOT, 'assets', 'runtime-sources', 'underground')
@@ -170,17 +176,121 @@ def _add_box(bm, center, size, quad=0, rx=0.0, ry=0.0, rz=0.0, bevel=0.015):
         bmesh.ops.bevel(tmp, geom=list(tmp.edges), offset=bevel, segments=2, affect='EDGES', clamp_overlap=True)
     tmp.normal_update()
     u0, u1, v0, v1 = _zone_uv_bounds(quad)
+    flat_layer = bm.faces.layers.int.get('aaa_flat') or bm.faces.layers.int.new('aaa_flat')
     v_map = {v: bm.verts.new(v.co) for v in tmp.verts}
     for tf in tmp.faces:
         n = tf.normal
         ax = 0 if abs(n.x) > abs(n.y) and abs(n.x) > abs(n.z) else (1 if abs(n.y) > abs(n.z) else 2)
         nf = bm.faces.new(tuple(v_map[v] for v in tf.verts))
         nf.smooth = False
+        nf[flat_layer] = 1
         for loop in nf.loops:
             p = loop.vert.co
             uu, vv = ((p.y, p.z) if ax == 0 else (p.x, p.z) if ax == 1 else (p.x, p.y))
             loop[uv_layer].uv = (u0 + ((uu * 0.65) % 1.0) * (u1 - u0), v0 + ((vv * 0.65) % 1.0) * (v1 - v0))
     tmp.free()
+
+
+def _add_hollow_box(bm, center, outer_size, wall_t=0.07, floor_t=0.07, quad=1, bevel=0.012, rim_flange=0.03):
+    """Build a genuine open-top rectangular trough/bin with thick walls, bottom slab & rim flange."""
+    cx, cy, cz = center
+    sx, sy, sz = outer_size
+    wt = min(wall_t, sx * 0.28, sy * 0.28)
+    ft = min(floor_t, sz * 0.45)
+    # Floor bottom slab
+    _add_box(bm, (cx, cy, cz - sz * 0.5 + ft * 0.5), (sx, sy, ft), quad=quad, bevel=bevel)
+    # 4 perimeter walls rising from floor
+    wh = sz - ft
+    wz = cz + ft * 0.5
+    _add_box(bm, (cx - (sx - wt) * 0.5, cy, wz), (wt, sy, wh), quad=quad, bevel=bevel)
+    _add_box(bm, (cx + (sx - wt) * 0.5, cy, wz), (wt, sy, wh), quad=quad, bevel=bevel)
+    _add_box(bm, (cx, cy - (sy - wt) * 0.5, wz), (sx - 2 * wt, wt, wh), quad=quad, bevel=bevel)
+    _add_box(bm, (cx, cy + (sy - wt) * 0.5, wz), (sx - 2 * wt, wt, wh), quad=quad, bevel=bevel)
+    if rim_flange > 0.004:
+        rt = wt + rim_flange
+        rz = cz + sz * 0.5 + bevel * 0.5
+        _add_box(bm, (cx - (sx - wt) * 0.5, cy, rz), (rt, sy + rim_flange * 2, bevel * 2.2), quad=2, bevel=bevel * 0.6)
+        _add_box(bm, (cx + (sx - wt) * 0.5, cy, rz), (rt, sy + rim_flange * 2, bevel * 2.2), quad=2, bevel=bevel * 0.6)
+        _add_box(bm, (cx, cy - (sy - wt) * 0.5, rz), (sx + rim_flange * 2, rt, bevel * 2.2), quad=2, bevel=bevel * 0.6)
+        _add_box(bm, (cx, cy + (sy - wt) * 0.5, rz), (sx + rim_flange * 2, rt, bevel * 2.2), quad=2, bevel=bevel * 0.6)
+
+
+def _add_timber_beam(bm, p0, p1, width=0.14, depth=0.14, quad=1, straps=False, strap_quad=2):
+    """Chamfered rectangular heavy structural beam between endpoints with optional iron collars."""
+    v0 = Vector(p0)
+    v1 = Vector(p1)
+    delta = v1 - v0
+    length = delta.length
+    if length < 1e-4:
+        return
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    flat_layer = bm.faces.layers.int.get('aaa_flat') or bm.faces.layers.int.new('aaa_flat')
+    z_ax = delta.normalized()
+    ref = Vector((0, 0, 1)) if abs(z_ax.z) < 0.92 else Vector((1, 0, 0))
+    x_ax = z_ax.cross(ref).normalized()
+    y_ax = z_ax.cross(x_ax).normalized()
+    rot_m = Matrix(((x_ax.x, y_ax.x, z_ax.x, 0.0), (x_ax.y, y_ax.y, z_ax.y, 0.0), (x_ax.z, y_ax.z, z_ax.z, 0.0), (0.0, 0.0, 0.0, 1.0)))
+    mid = (v0 + v1) * 0.5
+    tmp = bmesh.new()
+    bmesh.ops.create_cube(tmp, size=1.0)
+    bmesh.ops.scale(tmp, vec=(width, depth, length), verts=tmp.verts)
+    bmesh.ops.bevel(tmp, geom=list(tmp.edges), offset=min(width, depth) * 0.12, segments=1, affect='EDGES', clamp_overlap=True)
+    xform = Matrix.Translation(mid) @ rot_m
+    for v in tmp.verts:
+        v.co = xform @ v.co
+    tmp.normal_update()
+    u0, u1, v0_uv, v1_uv = _zone_uv_bounds(quad)
+    v_map = {v: bm.verts.new(v.co) for v in tmp.verts}
+    for tf in tmp.faces:
+        nf = bm.faces.new(tuple(v_map[v] for v in tf.verts))
+        nf[flat_layer] = 1
+        for loop in nf.loops:
+            co = loop.vert.co
+            loop[uv_layer].uv = (u0 + ((co.x + co.y) * 0.65 % 1.0) * (u1 - u0), v0_uv + ((co.z * 0.65) % 1.0) * (v1_uv - v0_uv))
+    tmp.free()
+    if straps and length > 0.25:
+        for frac in (0.12, 0.88):
+            c_pt = v0.lerp(v1, frac)
+            _add_timber_beam(bm, c_pt - z_ax * 0.035, c_pt + z_ax * 0.035, width=width * 1.14, depth=depth * 1.14, quad=strap_quad, straps=False)
+
+
+def _add_spoked_wheel(bm, center, radius=0.24, width=0.075, spokes=8, quad_wood=1, quad_iron=2):
+    """Spoked wooden cart wheel with beveled iron rim tire, felloe, hub & iron end caps."""
+    cx, cy, cz = center
+    _add_tube(bm, [(cx, cy - width * 0.85, cz), (cx, cy + width * 0.85, cz)], radius * 0.26, radius * 0.26, 12, quad=quad_iron)
+    # Build segmented rim ring (wooden felloe + iron tire collar)
+    segs = max(12, spokes * 2)
+    pts_outer = []
+    for s in range(segs + 1):
+        a = (s / segs) * math.tau
+        pts_outer.append((cx + math.cos(a) * radius, cy, cz + math.sin(a) * radius))
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    prev = len(bm.faces)
+    tube(bm, uv_layer, [Vector(p) for p in pts_outer], [width * 0.48] * len(pts_outer), sides=8, cap_end=False)
+    _remap_new_faces_uv(bm, prev, quad_iron)
+    for k in range(spokes):
+        a = (k / spokes) * math.tau
+        p_in = (cx + math.cos(a) * radius * 0.22, cy, cz + math.sin(a) * radius * 0.22)
+        p_out = (cx + math.cos(a) * radius * 0.90, cy, cz + math.sin(a) * radius * 0.90)
+        _add_timber_beam(bm, p_in, p_out, width=radius * 0.11, depth=width * 0.56, quad=quad_wood)
+
+
+def _add_staved_barrel(bm, p0, p1, radius=0.24, quad_wood=1, quad_iron=2, tap_side=False):
+    """Bilged oak cask between p0 and p1 with raised iron hoops & bronze tap spigot."""
+    v0 = Vector(p0)
+    v1 = Vector(p1)
+    d = (v1 - v0).normalized()
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    pts = [v0.lerp(v1, t) for t in (0.0, 0.22, 0.50, 0.78, 1.0)]
+    rads = [radius * 0.82, radius * 0.98, radius * 1.05, radius * 0.98, radius * 0.82]
+    prev = len(bm.faces)
+    tube(bm, uv_layer, pts, rads, sides=14, cap_end=True, flute_count=14, flute_depth=0.025)
+    _remap_new_faces_uv(bm, prev, quad_wood)
+    for frac, hr in ((0.12, radius * 0.92), (0.34, radius * 1.06), (0.66, radius * 1.06), (0.88, radius * 0.92)):
+        hc = v0.lerp(v1, frac)
+        _add_tube(bm, [hc - d * 0.025, hc + d * 0.025], hr, hr, 14, quad=quad_iron)
+    if tap_side:
+        _add_tube(bm, [v0 - d * 0.01 + Vector((0, 0, -radius * 0.35)), v0 - d * 0.14 + Vector((0, 0, -radius * 0.35))], 0.032, 0.022, 8, quad=3)
 
 
 def _add_tube(bm, pts, r0, r1, sides=10, quad=0, flute_amp=0.04, flute_freq=4):
@@ -201,11 +311,10 @@ def _add_tube(bm, pts, r0, r1, sides=10, quad=0, flute_amp=0.04, flute_freq=4):
     _remap_new_faces_uv(bm, prev, quad)
 
 
-def _add_rock(bm, center, scale, quad=0, subdiv=3, seed=1):
+def _add_rock(bm, center, scale, quad=0, style='crag', seed=1):
     uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
-    prev = len(bm.faces)
-    rock_chunk(bm, uv_layer, Vector(center), scale, subdivisions=subdiv, rng=random.Random(seed))
-    _remap_new_faces_uv(bm, prev, quad)
+    u0, u1, v0, v1 = _zone_uv_bounds(quad)
+    planar_rock(bm, uv_layer, Vector(center), scale, style=style, seed=seed, u_range=(u0, u1), v_range=(v0, v1))
 
 
 def _add_dome(bm, center, radius, height, quad=2, seed=1, sides=16, flare=0.18):
@@ -241,119 +350,120 @@ def _add_prism_pillar(bm, base, radius, height, sides=6, quad=1, seed=1, twist=0
 # ---------------------------------------------------------------------------
 def build_mine_ore_hopper_chute():
     bm = bmesh.new()
-    for sx in (-0.65, 0.65):
+    rng = random.Random(107)
+    # Timber sole-plates anchored directly into cave floor + 4 mortised batter posts with iron collars
+    for sy in (-0.52, 0.52):
+        _add_timber_beam(bm, (-0.78, sy, 0.04), (0.78, sy, 0.04), width=0.14, depth=0.12, quad=1)
+    for sx in (-0.64, 0.64):
         for sy in (-0.52, 0.52):
-            _add_tube(bm, [(sx, sy, -0.05), (sx * 0.92, sy * 0.9, 1.52)], 0.11, 0.095, 10, quad=1)
-        # Side X-braces and longitudinal sills
-        _add_tube(bm, [(sx, -0.50, 0.18), (sx * 0.94, 0.48, 1.24)], 0.055, 0.055, 8, quad=1)
-        _add_tube(bm, [(sx, 0.50, 0.18), (sx * 0.94, -0.48, 1.24)], 0.055, 0.055, 8, quad=1)
-        _add_box(bm, (sx * 0.95, 0, 0.42), (0.11, 1.12, 0.11), quad=1, bevel=0.015)
-    _add_box(bm, (0, 0.48, 0.55), (1.34, 0.11, 0.11), quad=1, bevel=0.015)
-    # Upper hopper funnel collar & steel rim
-    _add_box(bm, (0, 0, 1.56), (1.58, 1.32, 0.18), quad=1, bevel=0.025)
-    for px, pry in ((-0.74, -0.42), (0.74, 0.42)):
-        _add_box(bm, (px, 0, 1.84), (0.12, 1.36, 0.52), quad=2, ry=pry, bevel=0.02)
-    for py, prx in ((-0.62, 0.42), (0.62, -0.42)):
-        _add_box(bm, (0, py, 1.84), (1.56, 0.12, 0.52), quad=2, rx=prx, bevel=0.02)
-    # Angled discharge chute, side cheek plates & iron gate lever
-    _add_box(bm, (0, -0.22, 1.12), (1.28, 1.46, 0.14), quad=2, rx=0.42, bevel=0.02)
-    for cx in (-0.62, 0.62):
-        _add_box(bm, (cx, -0.26, 1.24), (0.10, 1.44, 0.24), quad=1, rx=0.42, bevel=0.015)
-    _add_tube(bm, [(0.74, -0.24, 1.32), (0.98, -0.46, 1.72)], 0.032, 0.028, 8, quad=2)
-    _add_box(bm, (0.98, -0.46, 1.74), (0.12, 0.16, 0.12), quad=3, bevel=0.015)
-    for bx in (-0.34, 0.0, 0.32):
-        _add_rock(bm, (bx, -0.58, 0.34), (0.34, 0.28, 0.24), quad=0, seed=11 + int(bx * 10))
-    _add_rock(bm, (0.05, -0.05, 1.66), (0.56, 0.46, 0.28), quad=3, seed=21)
-    _add_rock(bm, (-0.18, -0.55, 0.92), (0.28, 0.24, 0.18), quad=3, seed=22)
+            _add_timber_beam(bm, (sx, sy, 0.02), (sx * 0.90, sy * 0.90, 1.54), width=0.16, depth=0.16, quad=1, straps=True, strap_quad=2)
+        # Side diagonal knee/X-braces + forged gusset plates at joints
+        _add_timber_beam(bm, (sx, -0.50, 0.16), (sx * 0.92, 0.48, 1.38), width=0.09, depth=0.09, quad=1)
+        _add_timber_beam(bm, (sx, 0.50, 0.16), (sx * 0.92, -0.48, 1.38), width=0.09, depth=0.09, quad=1)
+        _add_box(bm, (sx * 0.95, 0.0, 0.78), (0.12, 0.22, 0.22), quad=2, bevel=0.01)
+    # Cross spreader beams supporting chute and rear bin
+    _add_timber_beam(bm, (-0.62, 0.48, 0.58), (0.62, 0.48, 0.58), width=0.12, depth=0.12, quad=1)
+    _add_timber_beam(bm, (-0.62, -0.48, 0.96), (0.62, -0.48, 0.96), width=0.12, depth=0.12, quad=1, straps=True)
+    # True open-top hollow steel/timber ore bin with thick flared funnel walls & interior
+    _add_hollow_box(bm, (0.0, 0.0, 1.72), (1.56, 1.28, 0.44), wall_t=0.09, floor_t=0.08, quad=1, bevel=0.014, rim_flange=0.04)
+    # Angled discharge chute trough + tall cheek walls + pivoted gate damper lever
+    _add_box(bm, (0.0, -0.26, 1.12), (1.24, 1.44, 0.10), quad=2, rx=0.42, bevel=0.014)
+    for cx in (-0.58, 0.58):
+        _add_box(bm, (cx, -0.28, 1.24), (0.08, 1.44, 0.28), quad=1, rx=0.42, bevel=0.012)
+    _add_box(bm, (0.0, -0.56, 1.28), (1.12, 0.06, 0.28), quad=2, rx=0.42, bevel=0.01)
+    _add_timber_beam(bm, (0.66, -0.34, 1.26), (0.98, -0.58, 1.66), width=0.06, depth=0.06, quad=2)
+    _add_box(bm, (0.98, -0.58, 1.68), (0.10, 0.14, 0.10), quad=3, bevel=0.012)
+    # Planar fractured ore boulders & spilled gold-bearing ore chunks
+    for i, (bx, by, bz) in enumerate(((-0.36, -0.78, 0.16), (0.08, -0.84, 0.14), (0.38, -0.72, 0.18))):
+        planar_rock(bm, bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap'), Vector((bx, by, bz)), (0.28, 0.24, 0.18), style='crag', seed=11 + i, u_range=_zone_uv_bounds(0)[:2], v_range=_zone_uv_bounds(0)[2:])
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    for j, (ox, oy, oz) in enumerate(((-0.18, 0.04, 1.66), (0.16, -0.04, 1.70), (0.0, 0.14, 1.68), (-0.12, -0.62, 0.94), (0.20, -0.68, 0.90))):
+        planar_rock(bm, bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap'), Vector((ox, oy, oz)), (0.26, 0.22, 0.16), style='ore_matrix', seed=21 + j, u_range=(u3, u3e), v_range=(v3, v3e))
     return bm
 
 
 def build_mine_dewatering_pump_rig():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.12), (1.36, 0.92, 0.24), quad=1, bevel=0.025)
-    # A-frame fulcrum stanchions straddling walking beam & pivot axle
+    _add_hollow_box(bm, (0.55, 0.15, 0.14), (0.86, 0.72, 0.24), wall_t=0.07, floor_t=0.06, quad=0, bevel=0.015, rim_flange=0.025)
+    _add_timber_beam(bm, (-0.72, 0.0, 0.12), (0.28, 0.0, 0.12), width=0.88, depth=0.20, quad=1)
+    # Mortised timber A-frame fulcrum stanchions + forged iron collars
     for fy in (-0.28, 0.28):
-        _add_tube(bm, [(-0.56, fy, 0.20), (-0.18, fy * 0.65, 1.94)], 0.075, 0.06, 8, quad=1)
-        _add_tube(bm, [(0.24, fy, 0.20), (-0.18, fy * 0.65, 1.94)], 0.075, 0.06, 8, quad=1)
-    _add_tube(bm, [(-0.18, -0.32, 1.94), (-0.18, 0.32, 1.94)], 0.055, 0.055, 10, quad=2)
-    # Main pump barrel, iron collar bands & spout trough
+        _add_timber_beam(bm, (-0.56, fy, 0.20), (-0.18, fy * 0.68, 1.94), width=0.13, depth=0.13, quad=1, straps=True)
+        _add_timber_beam(bm, (0.24, fy, 0.20), (-0.18, fy * 0.68, 1.94), width=0.13, depth=0.13, quad=1)
+    _add_tube(bm, [(-0.18, -0.34, 1.94), (-0.18, 0.34, 1.94)], 0.058, 0.058, 10, quad=2)
+    # Main flanged cast-iron pump cylinder barrel & drainage sluice spout
     _add_tube(bm, [(-0.22, 0, 0.2), (-0.22, 0, 1.85)], 0.16, 0.14, 14, quad=2, flute_amp=0.02)
     for bz in (0.62, 1.18, 1.65):
-        _add_tube(bm, [(-0.22, 0, bz), (-0.22, 0, bz + 0.08)], 0.185, 0.185, 14, quad=2)
-    _add_tube(bm, [(-0.22, 0, 1.75), (0.45, 0.05, 1.58), (0.58, 0.15, 0.85)], 0.08, 0.075, 12, quad=2)
-    # Walking beam & tail counterweight block
+        _add_tube(bm, [(-0.22, 0, bz), (-0.22, 0, bz + 0.08)], 0.19, 0.19, 14, quad=2)
+    _add_timber_beam(bm, (-0.22, 0, 1.72), (0.52, 0.12, 0.92), width=0.16, depth=0.14, quad=2, straps=True)
+    # Chamfered walking rocker beam + forged counterweight iron block
     _add_box(bm, (-0.18, 0, 1.98), (1.85, 0.14, 0.16), quad=1, ry=0.14, bevel=0.02)
-    _add_box(bm, (-0.98, 0, 2.06), (0.28, 0.28, 0.30), quad=2, ry=0.14, bevel=0.025)
-    _add_tube(bm, [(0.62, 0, 0.24), (0.62, 0, 1.75)], 0.04, 0.04, 10, quad=2)
-    # Slatted drainage grate around sump splash apron
+    _add_box(bm, (-0.98, 0, 2.06), (0.30, 0.30, 0.32), quad=2, ry=0.14, bevel=0.025)
+    _add_tube(bm, [(0.62, 0, 0.24), (0.62, 0, 1.75)], 0.042, 0.042, 10, quad=2)
     for gx in range(-2, 3):
-        _add_box(bm, (0.55 + gx * 0.12, 0.15, 0.26), (0.05, 0.68, 0.04), quad=1, bevel=0.008)
-    _add_rock(bm, (0.55, 0.15, 0.22), (0.44, 0.42, 0.14), quad=0, seed=31)
+        _add_box(bm, (0.55 + gx * 0.12, 0.15, 0.27), (0.045, 0.66, 0.035), quad=1, bevel=0.008)
+    _add_rock(bm, (0.55, 0.15, 0.20), (0.36, 0.34, 0.12), quad=0, style='river', seed=31)
     return bm
 
 
 def build_mine_powder_magazine_locker():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.56), (1.18, 0.84, 1.05), quad=1, bevel=0.03)
+    # Timber skid frame + heavily strapped iron powder safe cabinet
+    for sy in (-0.34, 0.34):
+        _add_timber_beam(bm, (-0.64, sy, 0.04), (0.64, sy, 0.04), width=0.12, depth=0.10, quad=1)
+    _add_box(bm, (0, 0, 0.58), (1.18, 0.84, 1.02), quad=1, bevel=0.03)
     for hz in (0.28, 0.62, 0.95):
         _add_box(bm, (0, 0, hz), (1.24, 0.88, 0.07), quad=2, bevel=0.01)
-    # Pitched protective roof planks + iron ridge flashing + corner straps
-    _add_box(bm, (0, -0.24, 1.18), (1.36, 0.56, 0.08), quad=1, rx=0.28, bevel=0.015)
-    _add_box(bm, (0, 0.24, 1.18), (1.36, 0.56, 0.08), quad=1, rx=-0.28, bevel=0.015)
-    _add_box(bm, (0, 0, 1.28), (1.40, 0.16, 0.08), quad=2, bevel=0.015)
-    _add_box(bm, (0, -0.44, 0.56), (0.22, 0.08, 0.28), quad=2, bevel=0.015)
-    _add_box(bm, (0, -0.49, 0.50), (0.14, 0.06, 0.18), quad=3, bevel=0.015)
-    for k, ox in enumerate((-0.44, 0.44)):
-        _add_tube(bm, [(ox, 0.48, -0.02), (ox, 0.48, 0.72)], 0.2, 0.19, 12, quad=1)
-        for sz in (0.14, 0.36, 0.58):
-            _add_tube(bm, [(ox, 0.48, sz), (ox, 0.48, sz + 0.05)], 0.215, 0.215, 12, quad=2)
-        _add_box(bm, (ox, 0.48, 0.35), (0.42, 0.42, 0.05), quad=2)
-    _add_box(bm, (-0.28, -0.22, 1.24), (0.32, 0.24, 0.22), quad=3, rz=0.35, bevel=0.02)
+    for sx in (-0.58, 0.58):
+        _add_timber_beam(bm, (sx, 0, 0.12), (sx, 0, 1.06), width=0.09, depth=0.88, quad=2)
+    _add_box(bm, (0, -0.24, 1.20), (1.36, 0.56, 0.08), quad=1, rx=0.28, bevel=0.015)
+    _add_box(bm, (0, 0.24, 1.20), (1.36, 0.56, 0.08), quad=1, rx=-0.28, bevel=0.015)
+    _add_box(bm, (0, 0, 1.30), (1.40, 0.16, 0.08), quad=2, bevel=0.015)
+    _add_box(bm, (0, -0.44, 0.58), (0.22, 0.08, 0.28), quad=2, bevel=0.015)
+    _add_box(bm, (0, -0.49, 0.52), (0.14, 0.06, 0.18), quad=3, bevel=0.015)
+    for ox in (-0.44, 0.44):
+        _add_staved_barrel(bm, (ox, 0.50, 0.02), (ox, 0.50, 0.74), radius=0.21, quad_wood=1, quad_iron=2, tap_side=False)
+    _add_box(bm, (-0.28, -0.22, 1.26), (0.32, 0.24, 0.22), quad=3, rz=0.35, bevel=0.02)
     return bm
 
 
 def build_mine_rail_turntable_switch():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.08), (1.68, 1.68, 0.14), quad=0, bevel=0.03)
+    _add_box(bm, (0, 0, 0.08), (1.70, 1.70, 0.14), quad=0, bevel=0.03)
     _add_tube(bm, [(0, 0, 0.06), (0, 0, 0.24)], 0.72, 0.68, 24, quad=2, flute_amp=0.01)
-    # Radial spider brace ribs + rim locking dogs around rotating plate
     for sk in range(6):
         sa = sk * (math.pi / 3.0)
-        _add_box(bm, (0.34 * math.cos(sa), 0.34 * math.sin(sa), 0.22), (0.66, 0.06, 0.06), quad=1, rz=sa, bevel=0.01)
+        _add_timber_beam(bm, (0, 0, 0.21), (0.68 * math.cos(sa), 0.68 * math.sin(sa), 0.21), width=0.07, depth=0.06, quad=1)
         _add_box(bm, (0.74 * math.cos(sa), 0.74 * math.sin(sa), 0.20), (0.12, 0.12, 0.10), quad=2, rz=sa, bevel=0.01)
     for ry in (-0.42, 0.42):
         _add_box(bm, (0, ry, 0.27), (1.65, 0.08, 0.08), quad=2, bevel=0.01)
         _add_box(bm, (ry, 0, 0.27), (0.08, 1.65, 0.08), quad=2, bevel=0.01)
-    # Braced throw-lever switch stand & weighted counterweight arm
-    _add_box(bm, (0.86, 0.62, 0.16), (0.32, 0.32, 0.14), quad=2, bevel=0.02)
-    _add_tube(bm, [(0.86, 0.62, 0.18), (0.86, 0.62, 1.25)], 0.05, 0.04, 10, quad=2)
-    _add_tube(bm, [(0.86, 0.62, 0.34), (0.58, 0.42, 0.22)], 0.025, 0.025, 8, quad=2)
-    _add_tube(bm, [(0.86, 0.62, 0.78), (1.16, 0.86, 1.06)], 0.028, 0.024, 8, quad=2)
-    _add_rock(bm, (1.16, 0.86, 1.08), (0.10, 0.10, 0.10), quad=2, seed=39)
-    _add_box(bm, (0.86, 0.62, 1.22), (0.22, 0.22, 0.26), quad=3, bevel=0.02)
+    _add_box(bm, (0.86, 0.62, 0.16), (0.34, 0.34, 0.14), quad=2, bevel=0.02)
+    _add_timber_beam(bm, (0.86, 0.62, 0.18), (0.86, 0.62, 1.24), width=0.09, depth=0.09, quad=2, straps=True)
+    _add_timber_beam(bm, (0.86, 0.62, 0.34), (0.58, 0.42, 0.22), width=0.05, depth=0.05, quad=2)
+    _add_timber_beam(bm, (0.86, 0.62, 0.78), (1.16, 0.86, 1.06), width=0.05, depth=0.05, quad=2)
+    _add_rock(bm, (1.16, 0.86, 1.08), (0.12, 0.11, 0.11), quad=2, style='crag', seed=39)
+    _add_box(bm, (0.86, 0.62, 1.24), (0.22, 0.22, 0.26), quad=3, bevel=0.02)
     return bm
 
 
 def build_mine_assaying_brazier_cart():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.56), (1.34, 0.78, 0.54), quad=1, bevel=0.025)
-    # Steel corner trim, axles, wheel hubs & U-push handle bars
-    _add_box(bm, (0, 0, 0.84), (1.38, 0.82, 0.06), quad=2, bevel=0.01)
+    # Hollow assaying furnace & sorting bed on spoked wheels with iron tire rims
+    _add_hollow_box(bm, (0, 0, 0.56), (1.36, 0.80, 0.52), wall_t=0.08, floor_t=0.07, quad=1, bevel=0.02, rim_flange=0.03)
     for wx in (-0.46, 0.46):
         _add_tube(bm, [(wx, -0.52, 0.22), (wx, 0.52, 0.22)], 0.045, 0.045, 8, quad=2)
         for wy in (-0.44, 0.44):
-            _add_tube(bm, [(wx, wy - 0.04, 0.22), (wx, wy + 0.04, 0.22)], 0.22, 0.22, 16, quad=2)
-            _add_tube(bm, [(wx, wy - 0.06, 0.22), (wx, wy + 0.06, 0.22)], 0.08, 0.08, 10, quad=1)
+            _add_spoked_wheel(bm, (wx, wy, 0.22), radius=0.22, width=0.07, spokes=8, quad_wood=1, quad_iron=2)
     for hy in (-0.32, 0.32):
-        _add_tube(bm, [(0.62, hy, 0.72), (0.98, hy, 0.92)], 0.03, 0.028, 8, quad=2)
-    _add_tube(bm, [(0.98, -0.32, 0.92), (0.98, 0.32, 0.92)], 0.03, 0.03, 8, quad=1)
-    _add_tube(bm, [(-0.22, 0, 0.8), (-0.22, 0, 1.05)], 0.24, 0.34, 16, quad=2)
-    # Cast ingot bars & crucible tongs on workbench deck
-    for iz, ox, oy in ((0.88, 0.32, -0.18), (0.88, 0.34, 0.02), (0.94, 0.33, -0.08)):
+        _add_timber_beam(bm, (0.62, hy, 0.72), (0.98, hy, 0.92), width=0.055, depth=0.055, quad=2)
+    _add_timber_beam(bm, (0.98, -0.34, 0.92), (0.98, 0.34, 0.92), width=0.06, depth=0.06, quad=1)
+    # Assaying iron pot + glowing ore samples inside cart bed
+    _add_hollow_box(bm, (-0.22, 0.0, 0.84), (0.48, 0.48, 0.24), wall_t=0.05, floor_t=0.05, quad=2, bevel=0.015, rim_flange=0.03)
+    for iz, ox, oy in ((0.64, 0.32, -0.18), (0.64, 0.34, 0.02), (0.70, 0.33, -0.08)):
         _add_box(bm, (ox, oy, iz), (0.24, 0.11, 0.07), quad=3, bevel=0.01)
-    _add_tube(bm, [(0.10, 0.24, 0.86), (0.52, 0.28, 0.86)], 0.018, 0.015, 6, quad=2)
-    _add_rock(bm, (-0.22, 0, 1.02), (0.26, 0.26, 0.16), quad=3, seed=41)
-    _add_rock(bm, (0.34, 0.18, 0.92), (0.18, 0.16, 0.14), quad=0, seed=42)
+    _add_rock(bm, (-0.22, 0, 0.94), (0.22, 0.20, 0.12), quad=3, style='ore_matrix', seed=41)
+    _add_rock(bm, (0.34, 0.18, 0.68), (0.18, 0.16, 0.14), quad=0, style='ore_matrix', seed=42)
     return bm
 
 
@@ -362,78 +472,132 @@ def build_mine_assaying_brazier_cart():
 # ---------------------------------------------------------------------------
 def build_umbra_veil_fungus_parasol():
     bm = bmesh.new()
-    _add_tube(bm, [(0, 0, -0.05), (0.12, 0.08, 1.2), (-0.05, -0.06, 2.55)], 0.26, 0.14, 16, quad=1, flute_amp=0.05)
-    _add_dome(bm, (-0.05, -0.06, 2.52), 1.35, 0.62, quad=2, seed=51, sides=24, flare=0.22)
-    _add_dome(bm, (0.58, 0.42, 0.95), 0.48, 0.26, quad=2, seed=52, sides=16)
-    _add_tube(bm, [(0.22, 0.18, 0.02), (0.58, 0.42, 0.94)], 0.12, 0.08, 10, quad=1)
-    _add_rock(bm, (0, 0, 0.12), (0.85, 0.78, 0.22), quad=0, seed=53)
+    rng = random.Random(51)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u1, u1e, v1, v1e = _zone_uv_bounds(1)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    mushroom_cluster_mesh(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.0)),
+        2.55,
+        1.25,
+        rng,
+        cap_u=(u2, u2e),
+        cap_v=(v2, v2e),
+        stipe_u=(u1, u1e),
+        stipe_v=(v1, v1e),
+        base_u=(u0, u0e),
+        base_v=(v0, v0e),
+    )
     return bm
 
 
 def build_umbra_crystal_resonator_obelisk():
     bm = bmesh.new()
-    _add_tube(bm, [(0, 0, -0.04), (0, 0, 0.38)], 0.68, 0.56, 8, quad=0)
-    _add_prism_pillar(bm, (0, 0, 0.34), 0.34, 2.45, sides=6, quad=1, seed=61)
-    for k in range(5):
-        a = k * (2 * math.pi / 5) + 0.3
-        _add_prism_pillar(bm, (0.34 * math.cos(a), 0.34 * math.sin(a), 0.24), 0.16, 1.15 + (k % 2) * 0.35,
-                          sides=6, quad=3, tilt=(0.24 * math.cos(a), 0.24 * math.sin(a)))
+    rng = random.Random(61)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    # Faceted basalt resonator socket plinth + carved iron retaining claws around main crystal base
+    _add_box(bm, (0, 0, 0.16), (1.28, 1.28, 0.32), quad=0, bevel=0.04)
+    _add_box(bm, (0, 0, 0.42), (0.92, 0.92, 0.22), quad=1, bevel=0.03)
+    for ci in range(4):
+        ca = ci * (math.pi * 0.5) + math.pi * 0.25
+        _add_timber_beam(bm, (0.52 * math.cos(ca), 0.52 * math.sin(ca), 0.44), (0.28 * math.cos(ca), 0.28 * math.sin(ca), 0.96), width=0.09, depth=0.08, quad=1)
+    _add_box(bm, (0, 0, 0.78), (0.68, 0.68, 0.10), quad=1, rz=0.78, bevel=0.015)
+    crystal_cluster_formation(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.42)),
+        2.65,
+        0.72,
+        rng,
+        u_crystal=(u3, u3e),
+        v_crystal=(v3, v3e),
+        u_rock=(u0, u0e),
+        v_rock=(v0, v0e),
+        matrix_style='volcanic',
+    )
+    # Floating/socketed secondary crystal shards tilted off-axis inside outer base stones
+    for j in range(3):
+        a = j * (math.tau / 3.0) + 0.6
+        _add_rock(bm, (0.64 * math.cos(a), 0.64 * math.sin(a), 0.14), (0.28, 0.24, 0.18), quad=0, style='crag', seed=64 + j)
     return bm
 
 
 def build_umbra_hanging_censer_spire():
     bm = bmesh.new()
-    _add_tube(bm, [(0, 0, -0.04), (0, 0, 0.42)], 0.42, 0.34, 8, quad=0)
-    # 4 gothic buttress ribs bracing plinth to spire shaft
+    rng = random.Random(69)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    _add_tube(bm, [(0, 0, -0.04), (0, 0, 0.42)], 0.44, 0.34, 8, quad=0)
     for bi in range(4):
         ba = bi * (math.pi * 0.5)
-        _add_tube(bm, [(0.36 * math.cos(ba), 0.36 * math.sin(ba), 0.16), (0.08 * math.cos(ba), 0.08 * math.sin(ba), 1.05)], 0.055, 0.04, 8, quad=1)
+        _add_timber_beam(bm, (0.36 * math.cos(ba), 0.36 * math.sin(ba), 0.14), (0.08 * math.cos(ba), 0.08 * math.sin(ba), 1.05), width=0.09, depth=0.09, quad=1)
     _add_tube(bm, [(0, 0, 0.42), (0.04, 0, 2.48)], 0.09, 0.06, 10, quad=1)
-    _add_tube(bm, [(0.04, 0, 2.2), (0.68, 0, 2.65)], 0.06, 0.045, 8, quad=1)
-    # Curved cantilevered knee-brace under hook arm + filigree finial tip
+    _add_timber_beam(bm, (0.04, 0, 2.2), (0.68, 0, 2.65), width=0.09, depth=0.08, quad=1, straps=True)
     _add_tube(bm, [(0.04, 0, 1.72), (0.34, 0, 2.18), (0.52, 0, 2.48)], 0.042, 0.032, 8, quad=2)
-    _add_prism_pillar(bm, (0.04, 0, 2.45), 0.065, 0.32, sides=6, quad=2, seed=69)
-    # Chain link beads descending from hook
+    crystal_cluster_formation(bm, uv_layer, Vector((0.04, 0, 2.42)), 0.42, 0.14, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
     for cz in (2.52, 2.38, 2.24, 2.10):
         _add_tube(bm, [(0.68, 0, cz), (0.68, 0, cz - 0.11)], 0.028, 0.028, 6, quad=2)
-    _add_tube(bm, [(0.68, 0, 1.62), (0.68, 0, 2.05)], 0.2, 0.14, 12, quad=3)
-    for ring_z, ring_r in ((1.72, 0.215), (1.92, 0.185)):
-        _add_tube(bm, [(0.68, 0, ring_z), (0.68, 0, ring_z + 0.045)], ring_r, ring_r, 12, quad=2)
-    _add_rock(bm, (0.68, 0, 1.98), (0.14, 0.14, 0.10), quad=3, seed=68)
+    _add_hollow_box(bm, (0.68, 0, 1.82), (0.40, 0.40, 0.28), wall_t=0.045, floor_t=0.05, quad=2, bevel=0.015, rim_flange=0.03)
+    crystal_cluster_formation(bm, uv_layer, Vector((0.68, 0, 1.86)), 0.34, 0.13, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
     return bm
 
 
 def build_umbra_spider_web_balustrade_shrine():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.18), (1.36, 1.36, 0.36), quad=0, bevel=0.04)
+    rng = random.Random(71)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    _add_box(bm, (0, 0, 0.18), (1.38, 1.38, 0.36), quad=0, bevel=0.04)
     for px, py in ((-0.46, -0.46), (0.46, -0.46), (-0.46, 0.46), (0.46, 0.46)):
-        _add_tube(bm, [(px, py, 0.32), (px, py, 1.85)], 0.11, 0.09, 8, quad=1)
+        _add_timber_beam(bm, (px, py, 0.30), (px, py, 1.88), width=0.16, depth=0.16, quad=1, straps=True)
         _add_prism_pillar(bm, (px, py, 2.02), 0.09, 0.34, sides=6, quad=2, seed=72)
-    # Low perimeter balustrade rail & webbed upper transom bars
     for side_y in (-0.46, 0.46):
         _add_box(bm, (0, side_y, 0.68), (0.94, 0.07, 0.08), quad=1, bevel=0.01)
         _add_box(bm, (side_y, 0, 0.68), (0.07, 0.94, 0.08), quad=1, bevel=0.01)
     for sx in (-0.28, 0.28):
         _add_tube(bm, [(sx, -0.46, 0.36), (sx, -0.46, 0.68)], 0.032, 0.032, 6, quad=1)
         _add_tube(bm, [(sx, 0.46, 0.36), (sx, 0.46, 0.68)], 0.032, 0.032, 6, quad=1)
-    # Central pedestal altar + offering basin inside canopy
     _add_tube(bm, [(0, 0, 0.34), (0, 0, 0.88)], 0.22, 0.16, 8, quad=0)
-    _add_tube(bm, [(0, 0, 0.86), (0, 0, 1.04)], 0.18, 0.28, 10, quad=2)
-    _add_rock(bm, (0, 0, 1.04), (0.19, 0.19, 0.10), quad=3, seed=73)
-    _add_box(bm, (0, 0, 1.92), (1.28, 1.28, 0.22), quad=0, bevel=0.03)
-    _add_dome(bm, (0, 0, 2.04), 0.48, 0.35, quad=3, seed=71)
+    _add_hollow_box(bm, (0, 0, 0.96), (0.46, 0.46, 0.18), wall_t=0.05, floor_t=0.05, quad=2, bevel=0.012, rim_flange=0.025)
+    crystal_cluster_formation(bm, uv_layer, Vector((0, 0, 0.98)), 0.36, 0.16, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
+    _add_box(bm, (0, 0, 1.92), (1.30, 1.30, 0.20), quad=0, bevel=0.03)
+    crystal_cluster_formation(bm, uv_layer, Vector((0, 0, 2.02)), 0.62, 0.28, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
     return bm
 
 
 def build_umbra_tide_gondola_skiff():
     bm = bmesh.new()
-    pts = [(-1.6, 0, 0.42), (-0.95, 0, 0.14), (0, 0, 0.10), (0.95, 0, 0.14), (1.6, 0, 0.48)]
-    _add_tube(bm, pts, 0.12, 0.14, 12, quad=1, flute_amp=0.03)
-    _add_box(bm, (0, 0, 0.28), (2.25, 0.88, 0.24), quad=1, bevel=0.04)
+    rng = random.Random(77)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    # Keel timber arching at stem & stern
+    pts = [(-1.62, 0, 0.50), (-0.98, 0, 0.14), (0, 0, 0.08), (0.98, 0, 0.14), (1.64, 0, 0.56)]
+    _add_tube(bm, pts, 0.10, 0.12, 10, quad=1, flute_amp=0.02)
+    # Hollowed rib-framed skiff hull (curved port/starboard gunwales + deck floor planks)
+    _add_box(bm, (0, 0, 0.16), (2.15, 0.72, 0.08), quad=1, bevel=0.02)
+    for side_y in (-1, 1):
+        gunwale = [(-1.55, 0.02 * side_y, 0.52), (-0.82, 0.40 * side_y, 0.42), (0.0, 0.48 * side_y, 0.40), (0.82, 0.40 * side_y, 0.42), (1.58, 0.02 * side_y, 0.58)]
+        _add_tube(bm, gunwale, 0.055, 0.055, 8, quad=1)
+        chine = [(-1.40, 0.02 * side_y, 0.36), (-0.75, 0.34 * side_y, 0.22), (0.0, 0.40 * side_y, 0.20), (0.75, 0.34 * side_y, 0.22), (1.42, 0.02 * side_y, 0.40)]
+        _add_tube(bm, chine, 0.048, 0.048, 6, quad=1)
+    for sx in (-0.80, -0.40, 0.0, 0.40, 0.80):
+        hw = 0.44 * (1.0 - 0.32 * (abs(sx) / 0.90))
+        _add_timber_beam(bm, (sx, -hw, 0.20), (sx, hw, 0.20), width=0.07, depth=0.05, quad=1)
+        _add_timber_beam(bm, (sx, -hw, 0.20), (sx, -hw * 1.06, 0.41), width=0.06, depth=0.05, quad=1)
+        _add_timber_beam(bm, (sx, hw, 0.20), (sx, hw * 1.06, 0.41), width=0.06, depth=0.05, quad=1)
     for sx in (-0.55, 0.0, 0.55):
-        _add_box(bm, (sx, 0, 0.44), (0.24, 0.84, 0.06), quad=2, bevel=0.01)
-    _add_tube(bm, [(1.35, 0, 0.45), (1.62, 0, 1.15)], 0.05, 0.03, 8, quad=2)
-    _add_rock(bm, (1.62, 0, 1.16), (0.14, 0.14, 0.16), quad=3, seed=77)
+        _add_box(bm, (sx, 0, 0.40), (0.24, 0.82, 0.05), quad=2, bevel=0.01)
+    _add_timber_beam(bm, (1.38, 0, 0.48), (1.64, 0, 1.15), width=0.07, depth=0.07, quad=2)
+    crystal_cluster_formation(bm, uv_layer, Vector((1.64, 0, 1.10)), 0.32, 0.12, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
     return bm
 
 
@@ -442,32 +606,36 @@ def build_umbra_tide_gondola_skiff():
 # ---------------------------------------------------------------------------
 def build_stonehold_drop_hammer_forge_press():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.24), (1.42, 1.18, 0.48), quad=0, bevel=0.04)
+    _add_box(bm, (0, 0, 0.22), (1.46, 1.20, 0.44), quad=0, bevel=0.04)
     for sx in (-0.52, 0.52):
-        _add_box(bm, (sx, 0, 1.45), (0.26, 0.38, 2.15), quad=0, bevel=0.03)
-    _add_box(bm, (0, 0, 2.52), (1.48, 0.52, 0.32), quad=2, bevel=0.03)
-    _add_box(bm, (0, 0, 0.68), (0.58, 0.42, 0.42), quad=1, bevel=0.03)
+        _add_timber_beam(bm, (sx, 0, 0.40), (sx, 0, 2.48), width=0.26, depth=0.38, quad=0, straps=True)
+    _add_box(bm, (0, 0, 2.52), (1.50, 0.52, 0.32), quad=2, bevel=0.03)
+    _add_box(bm, (0, 0, 0.68), (0.58, 0.44, 0.44), quad=1, bevel=0.03)
+    _add_timber_beam(bm, (-0.36, 0, 0.72), (0.48, 0, 0.72), width=0.22, depth=0.14, quad=2)
     _add_box(bm, (0, 0, 1.62), (0.48, 0.44, 0.52), quad=2, bevel=0.03)
-    _add_rock(bm, (-0.1, -0.35, 0.62), (0.26, 0.24, 0.18), quad=3, seed=81)
+    _add_rock(bm, (-0.08, -0.32, 0.66), (0.24, 0.22, 0.16), quad=3, style='ore_matrix', seed=81)
     return bm
 
 
 def build_stonehold_runic_brazier_pedestal():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.22), (1.12, 1.12, 0.44), quad=0, bevel=0.04)
-    _add_tube(bm, [(0, 0, 0.44), (0, 0, 1.18)], 0.34, 0.28, 8, quad=0)
-    _add_tube(bm, [(0, 0, 1.18), (0, 0, 1.52)], 0.36, 0.54, 10, quad=2)
-    _add_rock(bm, (0, 0, 1.56), (0.38, 0.38, 0.22), quad=3, seed=85)
+    _add_box(bm, (0, 0, 0.20), (1.16, 1.16, 0.40), quad=0, bevel=0.04)
+    _add_tube(bm, [(0, 0, 0.38), (0, 0, 1.16)], 0.36, 0.28, 8, quad=0)
+    for ca in (0.785, 2.356, 3.927, 5.498):
+        _add_timber_beam(bm, (0.44 * math.cos(ca), 0.44 * math.sin(ca), 0.38), (0.24 * math.cos(ca), 0.24 * math.sin(ca), 1.05), width=0.08, depth=0.08, quad=2)
+    _add_hollow_box(bm, (0, 0, 1.38), (1.02, 1.02, 0.34), wall_t=0.10, floor_t=0.09, quad=2, bevel=0.025, rim_flange=0.06)
+    _add_rock(bm, (0, 0, 1.46), (0.38, 0.36, 0.22), quad=3, style='ore_matrix', seed=85)
     return bm
 
 
 def build_stonehold_geared_capstan_winch():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.16), (1.28, 1.28, 0.32), quad=0, bevel=0.04)
-    _add_tube(bm, [(0, 0, 0.32), (0, 0, 1.38)], 0.32, 0.28, 16, quad=1, flute_amp=0.02, flute_freq=8)
-    _add_tube(bm, [(0, 0, 0.52), (0, 0, 0.64)], 0.56, 0.56, 18, quad=2, flute_amp=0.06, flute_freq=12)
-    _add_box(bm, (0, 0, 1.22), (1.45, 0.12, 0.12), quad=1, bevel=0.015)
-    _add_box(bm, (0, 0, 1.22), (0.12, 1.45, 0.12), quad=1, bevel=0.015)
+    _add_box(bm, (0, 0, 0.16), (1.32, 1.32, 0.32), quad=0, bevel=0.04)
+    _add_tube(bm, [(0, 0, 0.30), (0, 0, 1.38)], 0.32, 0.28, 16, quad=1, flute_amp=0.025, flute_freq=8)
+    _add_tube(bm, [(0, 0, 0.50), (0, 0, 0.64)], 0.56, 0.56, 20, quad=2, flute_amp=0.07, flute_freq=14)
+    _add_timber_beam(bm, (-0.75, 0, 1.22), (0.75, 0, 1.22), width=0.12, depth=0.12, quad=1, straps=True)
+    _add_timber_beam(bm, (0, -0.75, 1.22), (0, 0.75, 1.22), width=0.12, depth=0.12, quad=1, straps=True)
+    _add_timber_beam(bm, (0.48, 0.48, 0.28), (0.38, 0.38, 0.66), width=0.09, depth=0.09, quad=2)
     return bm
 
 
@@ -482,20 +650,18 @@ def build_stonehold_ancestor_relief_stele():
 
 def build_stonehold_ingot_crane_trolley():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.18), (1.26, 0.96, 0.36), quad=0, bevel=0.04)
-    _add_tube(bm, [(-0.26, 0, 0.34), (-0.26, 0, 2.28)], 0.14, 0.12, 12, quad=2)
-    # Heavy diagonal knee brace + rolling trolley carriage + geared hand-wheel winch
-    _add_tube(bm, [(-0.24, 0, 1.28), (0.52, 0, 2.15)], 0.075, 0.065, 8, quad=2)
+    _add_box(bm, (0, 0, 0.16), (1.30, 0.98, 0.32), quad=0, bevel=0.04)
+    _add_timber_beam(bm, (-0.26, 0, 0.28), (-0.26, 0, 2.28), width=0.26, depth=0.26, quad=2, straps=True)
+    _add_timber_beam(bm, (-0.24, 0, 1.28), (0.52, 0, 2.15), width=0.14, depth=0.14, quad=2)
     _add_box(bm, (0.36, 0, 2.18), (1.36, 0.16, 0.18), quad=2, bevel=0.02)
     _add_box(bm, (0.88, 0, 2.18), (0.28, 0.28, 0.26), quad=2, bevel=0.02)
     _add_tube(bm, [(-0.26, -0.22, 1.05), (-0.26, 0.22, 1.05)], 0.18, 0.18, 14, quad=2, flute_amp=0.04, flute_freq=10)
     _add_tube(bm, [(-0.18, -0.20, 1.18), (0.94, 0, 2.28)], 0.018, 0.018, 6, quad=1)
-    # Dual sling chains carrying molten-topped crucible cauldron
     _add_tube(bm, [(0.88, 0, 2.10), (0.88, 0, 1.54)], 0.028, 0.028, 8, quad=2)
     for vy in (-0.18, 0.18):
         _add_tube(bm, [(0.88, 0, 1.54), (0.88, vy, 1.16)], 0.022, 0.020, 6, quad=2)
-    _add_box(bm, (0.88, 0, 1.04), (0.48, 0.36, 0.24), quad=1, bevel=0.025)
-    _add_rock(bm, (0.88, 0, 1.16), (0.18, 0.13, 0.06), quad=3, seed=89)
+    _add_hollow_box(bm, (0.88, 0, 1.04), (0.50, 0.38, 0.26), wall_t=0.05, floor_t=0.05, quad=1, bevel=0.02, rim_flange=0.025)
+    _add_rock(bm, (0.88, 0, 1.10), (0.16, 0.12, 0.06), quad=3, style='ore_matrix', seed=89)
     return bm
 
 
@@ -504,29 +670,79 @@ def build_stonehold_ingot_crane_trolley():
 # ---------------------------------------------------------------------------
 def build_frostgard_organ_pipe_ice_formation():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.15), (1.15, 1.05, 0.32), quad=0, seed=91)
-    pipes = [(0, 0, 3.2, 0.26), (-0.4, 0.22, 2.6, 0.19), (0.42, 0.18, 2.75, 0.2), (-0.28, -0.34, 2.25, 0.17), (0.3, -0.32, 2.4, 0.18)]
-    for idx, (dx, dy, h, r) in enumerate(pipes):
-        _add_prism_pillar(bm, (dx, dy, 0.12), r, h, sides=8, quad=1 if idx % 2 == 0 else 2, seed=92 + idx)
+    rng = random.Random(91)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u1, u1e, v1, v1e = _zone_uv_bounds(1)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    ice_formation_mesh(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.0)),
+        3.2,
+        1.15,
+        style='organ_pipe',
+        rng=rng,
+        u_inner=(u1, u1e),
+        v_inner=(v1, v1e),
+        u_frost=(u2, u2e),
+        v_frost=(v2, v2e),
+        u_base=(u0, u0e),
+        v_base=(v0, v0e),
+    )
     return bm
 
 
 def build_frostgard_hoarfrost_rose_cluster():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.14), (0.92, 0.88, 0.28), quad=0, seed=101)
-    for i in range(9):
-        a = (i / 9.0) * math.pi * 2
-        tilt = (math.cos(a) * (0.45 + (i % 3) * 0.18), math.sin(a) * (0.45 + (i % 3) * 0.18))
-        _add_prism_pillar(bm, (math.cos(a) * 0.18, math.sin(a) * 0.18, 0.12), 0.16, 1.05 + (i % 3) * 0.28,
-                          sides=6, quad=1, seed=102 + i, tilt=tilt)
+    rng = random.Random(101)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u1, u1e, v1, v1e = _zone_uv_bounds(1)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    ice_formation_mesh(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.0)),
+        1.55,
+        0.96,
+        style='frost_rose',
+        rng=rng,
+        u_inner=(u1, u1e),
+        v_inner=(v1, v1e),
+        u_frost=(u2, u2e),
+        v_frost=(v2, v2e),
+        u_base=(u0, u0e),
+        v_base=(v0, v0e),
+    )
     return bm
 
 
 def build_frostgard_frozen_melt_mushroom_column():
     bm = bmesh.new()
-    _add_tube(bm, [(0, 0, -0.05), (0, 0, 1.28), (0, 0, 2.65)], 0.56, 0.26, 14, quad=1, flute_amp=0.05, flute_freq=6)
-    _add_dome(bm, (0, 0, 2.55), 1.18, 0.45, quad=2, seed=111, sides=20, flare=0.16)
-    _add_rock(bm, (0, 0, 0.08), (0.85, 0.85, 0.2), quad=0, seed=112)
+    rng = random.Random(111)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u1, u1e, v1, v1e = _zone_uv_bounds(1)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    # Multi-tiered wind-scoured glacial pressure-ridge / melt mushroom formation + basalt floor
+    ice_formation_mesh(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.0)),
+        2.65,
+        1.12,
+        style='pressure_ridge',
+        rng=rng,
+        u_inner=(u1, u1e),
+        v_inner=(v1, v1e),
+        u_frost=(u2, u2e),
+        v_frost=(v2, v2e),
+        u_base=(u0, u0e),
+        v_base=(v0, v0e),
+    )
+    # Flanking basalt & frosty drip buttresses around base
+    planar_rock(bm, uv_layer, Vector((0.0, 0.0, 0.06)), (0.95, 0.88, 0.24), style='sedimentary', seed=112, u_range=(u0, u0e), v_range=(v0, v0e))
     return bm
 
 
@@ -534,21 +750,27 @@ def build_frostgard_bone_mooring_anchor():
     bm = bmesh.new()
     for i in range(6):
         a = (i / 6.0) * math.pi * 2
-        _add_rock(bm, (0.36 * math.cos(a), 0.36 * math.sin(a), 0.16), (0.36, 0.3, 0.26), quad=0, seed=120 + i)
-    _add_tube(bm, [(-0.22, 0, 0), (0.24, 0, 1.24)], 0.09, 0.075, 10, quad=2)
-    _add_tube(bm, [(0.26, 0, 0), (-0.2, 0, 1.14)], 0.085, 0.07, 10, quad=2)
-    _add_tube(bm, [(0, -0.2, 0.56), (0, 0.22, 0.6)], 0.2, 0.18, 12, quad=1)
+        _add_rock(bm, (0.36 * math.cos(a), 0.36 * math.sin(a), 0.14), (0.38, 0.32, 0.26), quad=0, style='crag', seed=120 + i)
+    # Massive lashed whale-rib bone tusks + collared hawser drum
+    _add_tube(bm, [(-0.24, 0, -0.02), (-0.08, 0, 0.62), (0.26, 0, 1.28)], 0.10, 0.05, 10, quad=2, flute_amp=0.02)
+    _add_tube(bm, [(0.28, 0, -0.02), (0.08, 0, 0.58), (-0.22, 0, 1.18)], 0.095, 0.045, 10, quad=2, flute_amp=0.02)
+    _add_staved_barrel(bm, (0, -0.22, 0.58), (0, 0.22, 0.62), radius=0.20, quad_wood=1, quad_iron=2, tap_side=False)
     return bm
 
 
 def build_frostgard_runic_ice_lantern_shrine():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.2), (1.12, 1.12, 0.4), quad=0, bevel=0.04)
+    rng = random.Random(131)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u3, u3e, v3, v3e = _zone_uv_bounds(3)
+    _add_box(bm, (0, 0, 0.20), (1.16, 1.16, 0.40), quad=0, bevel=0.04)
     for sx in (-0.36, 0.36):
-        _add_box(bm, (sx, 0, 0.84), (0.22, 0.72, 0.84), quad=1, bevel=0.03)
-    _add_box(bm, (0, 0, 1.4), (0.94, 0.86, 0.26), quad=1, bevel=0.03)
-    _add_box(bm, (0, 0, 1.6), (1.04, 0.94, 0.14), quad=2, bevel=0.025)
-    _add_rock(bm, (0, 0, 0.62), (0.2, 0.2, 0.2), quad=3, seed=131)
+        _add_timber_beam(bm, (sx, 0, 0.36), (sx, 0, 1.32), width=0.22, depth=0.72, quad=1, straps=True)
+    _add_box(bm, (0, 0, 1.40), (0.96, 0.88, 0.24), quad=1, bevel=0.03)
+    _add_box(bm, (0, -0.24, 1.62), (1.06, 0.56, 0.10), quad=2, rx=0.24, bevel=0.02)
+    _add_box(bm, (0, 0.24, 1.62), (1.06, 0.56, 0.10), quad=2, rx=-0.24, bevel=0.02)
+    crystal_cluster_formation(bm, uv_layer, Vector((0, 0, 0.42)), 0.68, 0.22, rng, u_crystal=(u3, u3e), v_crystal=(v3, v3e), u_rock=(u0, u0e), v_rock=(v0, v0e), matrix_style='volcanic')
     return bm
 
 
@@ -557,49 +779,74 @@ def build_frostgard_runic_ice_lantern_shrine():
 # ---------------------------------------------------------------------------
 def build_frostgard_serac_fin_monolith():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.18), (1.42, 1.12, 0.36), quad=2, seed=141)
-    _add_prism_pillar(bm, (0, 0, 0.08), 0.78, 3.4, sides=6, quad=1, seed=142, tilt=(0.55, -0.18))
-    _add_prism_pillar(bm, (-0.58, 0.18, 0.08), 0.46, 2.05, sides=6, quad=1, seed=143, tilt=(0.24, -0.08))
+    rng = random.Random(141)
+    uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
+    u0, u0e, v0, v0e = _zone_uv_bounds(0)
+    u1, u1e, v1, v1e = _zone_uv_bounds(1)
+    u2, u2e, v2, v2e = _zone_uv_bounds(2)
+    ice_formation_mesh(
+        bm,
+        uv_layer,
+        Vector((0.0, 0.0, 0.0)),
+        3.4,
+        1.25,
+        style='serac',
+        rng=rng,
+        u_inner=(u1, u1e),
+        v_inner=(v1, v1e),
+        u_frost=(u2, u2e),
+        v_frost=(v2, v2e),
+        u_base=(u0, u0e),
+        v_base=(v0, v0e),
+    )
     return bm
 
 
 def build_frostgard_glacial_wayfinder_cairn():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.24), (0.92, 0.86, 0.42), quad=0, seed=151)
-    _add_rock(bm, (0, 0, 0.78), (0.68, 0.64, 0.38), quad=0, seed=152)
-    _add_rock(bm, (0, 0, 1.24), (0.48, 0.46, 0.22), quad=2, seed=153)
-    _add_tube(bm, [(0, 0, 1.2), (0.08, 0, 2.88)], 0.06, 0.045, 8, quad=1)
-    _add_box(bm, (0.48, 0.08, 2.58), (0.76, 0.04, 0.36), quad=3, ry=0.14, bevel=0.01)
+    # Flat-planed sedimentary slate stones stacked with iron guide pole & runic banner board
+    _add_rock(bm, (0, 0, 0.18), (0.94, 0.86, 0.38), quad=0, style='sedimentary', seed=151)
+    _add_rock(bm, (0, 0, 0.68), (0.70, 0.64, 0.34), quad=0, style='sedimentary', seed=152)
+    _add_rock(bm, (0, 0, 1.12), (0.48, 0.44, 0.22), quad=2, style='sedimentary', seed=153)
+    _add_timber_beam(bm, (0, 0, 1.05), (0.08, 0, 2.88), width=0.11, depth=0.11, quad=1, straps=True, strap_quad=2)
+    _add_timber_beam(bm, (0.06, 0.0, 2.58), (0.88, 0.08, 2.66), width=0.38, depth=0.055, quad=3)
+    _add_box(bm, (0.08, 0.02, 2.88), (0.14, 0.14, 0.12), quad=2, bevel=0.015)
     return bm
 
 
 def build_frostgard_ice_sawyer_trestle():
     bm = bmesh.new()
     for sx in (-0.68, 0.68):
-        _add_tube(bm, [(sx, -0.42, -0.04), (sx, 0, 0.92)], 0.065, 0.055, 8, quad=1)
-        _add_tube(bm, [(sx, 0.42, -0.04), (sx, 0, 0.92)], 0.065, 0.055, 8, quad=1)
-    _add_tube(bm, [(-0.85, 0, 0.88), (0.85, 0, 0.88)], 0.075, 0.075, 10, quad=1)
-    _add_box(bm, (0, 0, 1.18), (1.08, 0.64, 0.52), quad=2, bevel=0.04)
-    _add_box(bm, (0, 0, 1.48), (1.42, 0.05, 0.09), quad=3, bevel=0.008)
+        _add_timber_beam(bm, (sx, -0.44, -0.04), (sx, 0, 0.92), width=0.12, depth=0.12, quad=1, straps=True)
+        _add_timber_beam(bm, (sx, 0.44, -0.04), (sx, 0, 0.92), width=0.12, depth=0.12, quad=1)
+        _add_timber_beam(bm, (sx, -0.26, 0.36), (sx, 0.26, 0.36), width=0.09, depth=0.09, quad=1)
+    _add_timber_beam(bm, (-0.88, 0, 0.88), (0.88, 0, 0.88), width=0.15, depth=0.15, quad=1, straps=True)
+    # Angular cleaved ice block + two-man pit saw blade on top
+    _add_rock(bm, (0, 0, 1.18), (0.98, 0.58, 0.48), quad=2, style='limestone', seed=156)
+    _add_box(bm, (0, 0, 1.48), (1.42, 0.04, 0.09), quad=3, bevel=0.008)
+    for hx in (-0.72, 0.72):
+        _add_timber_beam(bm, (hx, 0, 1.44), (hx, 0, 1.62), width=0.05, depth=0.05, quad=1)
     return bm
 
 
 def build_frostgard_frost_banner_standards():
     bm = bmesh.new()
-    _add_tube(bm, [(-0.48, 0, -0.05), (0.26, 0.1, 2.68)], 0.065, 0.045, 8, quad=1)
-    _add_tube(bm, [(0.48, 0, -0.05), (-0.26, -0.1, 2.58)], 0.065, 0.045, 8, quad=1)
-    _add_box(bm, (0, 0.02, 1.22), (0.92, 0.08, 0.3), quad=1, bevel=0.02)
-    _add_box(bm, (0.62, 0.14, 2.34), (0.76, 0.04, 0.4), quad=3, bevel=0.01)
-    _add_box(bm, (-0.58, -0.14, 2.28), (0.68, 0.04, 0.34), quad=2, bevel=0.01)
+    _add_rock(bm, (0, 0, 0.08), (0.68, 0.42, 0.16), quad=0, style='crag', seed=158)
+    _add_timber_beam(bm, (-0.48, 0, -0.05), (0.26, 0.1, 2.68), width=0.11, depth=0.11, quad=1, straps=True)
+    _add_timber_beam(bm, (0.48, 0, -0.05), (-0.26, -0.1, 2.58), width=0.11, depth=0.11, quad=1, straps=True)
+    _add_timber_beam(bm, (-0.44, -0.02, 1.22), (0.44, 0.04, 1.22), width=0.12, depth=0.22, quad=1, straps=True)
+    _add_box(bm, (0.62, 0.14, 2.34), (0.76, 0.04, 0.42), quad=3, bevel=0.01)
+    _add_box(bm, (-0.58, -0.14, 2.28), (0.68, 0.04, 0.36), quad=2, bevel=0.01)
     return bm
 
 
 def build_frostgard_moraine_erratic_anchor_post():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.34), (1.22, 1.08, 0.56), quad=0, seed=161)
-    _add_tube(bm, [(0, 0, 0.64), (0, 0, 1.46)], 0.25, 0.22, 14, quad=2)
-    _add_box(bm, (0, 0, 1.32), (1.34, 0.1, 0.1), quad=1, bevel=0.015)
-    _add_box(bm, (0, 0, 1.32), (0.1, 1.34, 0.1), quad=1, bevel=0.015)
+    _add_rock(bm, (0, 0, 0.28), (1.22, 1.08, 0.56), quad=0, style='crag', seed=161)
+    _add_timber_beam(bm, (0, 0, 0.52), (0, 0, 1.48), width=0.38, depth=0.38, quad=2, straps=True, strap_quad=0)
+    _add_box(bm, (0, 0, 1.18), (0.52, 0.52, 0.09), quad=0, bevel=0.015)
+    _add_timber_beam(bm, (-0.66, 0, 1.32), (0.66, 0, 1.32), width=0.10, depth=0.10, quad=1)
+    _add_timber_beam(bm, (0, -0.66, 1.32), (0, 0.66, 1.32), width=0.10, depth=0.10, quad=1)
     return bm
 
 
@@ -608,45 +855,40 @@ def build_frostgard_moraine_erratic_anchor_post():
 # ---------------------------------------------------------------------------
 def build_frostgard_wolf_totem_palisade_post():
     bm = bmesh.new()
-    _add_rock(bm, (0, 0, 0.12), (0.76, 0.72, 0.24), quad=0, seed=171)
-    _add_tube(bm, [(0, 0, 0.2), (0, 0, 2.68)], 0.16, 0.13, 12, quad=1)
-    # Iron binding bands, carved shield buckler & wolf head crest (snout + brow + fangs)
-    for bz in (0.95, 1.98):
-        _add_tube(bm, [(0, 0, bz), (0, 0, bz + 0.07)], 0.17, 0.17, 12, quad=2)
+    _add_rock(bm, (0, 0, 0.10), (0.78, 0.72, 0.24), quad=0, style='crag', seed=171)
+    _add_timber_beam(bm, (0, 0, 0.14), (0, 0, 2.68), width=0.28, depth=0.28, quad=1, straps=True, strap_quad=2)
+    # Carved circular shield boss & snarling wolf totem crest
     _add_tube(bm, [(0, -0.14, 1.18), (0, -0.22, 1.18)], 0.28, 0.28, 14, quad=2)
-    _add_box(bm, (0, 0.16, 2.48), (0.4, 0.58, 0.34), quad=2, bevel=0.03)
+    _add_box(bm, (0, 0.16, 2.48), (0.40, 0.58, 0.34), quad=2, bevel=0.03)
     _add_box(bm, (0, 0.42, 2.42), (0.24, 0.24, 0.20), quad=2, bevel=0.025)
     for sx in (-1, 1):
         _add_tube(bm, [(sx * 0.18, 0.06, 2.6), (sx * 0.44, -0.06, 3.04)], 0.055, 0.016, 8, quad=2)
         _add_tube(bm, [(sx * 0.09, 0.48, 2.34), (sx * 0.09, 0.48, 2.22)], 0.025, 0.006, 6, quad=3)
-    # Wrought-iron sconce arm & brazier basket physically holding the ember stone
     _add_tube(bm, [(0, 0.04, 1.38), (0.20, 0.14, 1.50), (0.30, 0.22, 1.66)], 0.042, 0.032, 8, quad=2)
-    _add_tube(bm, [(0.30, 0.22, 1.62), (0.30, 0.22, 1.78)], 0.12, 0.20, 10, quad=2)
-    _add_rock(bm, (0.3, 0.22, 1.80), (0.18, 0.18, 0.16), quad=3, seed=172)
+    _add_hollow_box(bm, (0.30, 0.22, 1.72), (0.38, 0.38, 0.22), wall_t=0.04, floor_t=0.04, quad=2, bevel=0.015, rim_flange=0.03)
+    _add_rock(bm, (0.30, 0.22, 1.78), (0.16, 0.16, 0.12), quad=3, style='ore_matrix', seed=172)
     return bm
 
 
 def build_frostgard_cut_ice_block_hoist():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.08), (1.42, 1.32, 0.16), quad=0, bevel=0.03)
+    _add_box(bm, (0, 0, 0.08), (1.44, 1.34, 0.16), quad=0, bevel=0.03)
     pts_base = []
     for i in range(3):
         a = (i / 3.0) * math.pi * 2
         bp = (1.08 * math.cos(a), 1.08 * math.sin(a), -0.04)
         pts_base.append(bp)
-        _add_tube(bm, [bp, (0, 0, 2.58)], 0.085, 0.065, 10, quad=1)
-    # Tripod horizontal spreader rails + hand windlass winch drum
+        _add_timber_beam(bm, bp, (0, 0, 2.58), width=0.14, depth=0.14, quad=1, straps=True)
     for i in range(3):
         p_a = pts_base[i]
         p_b = pts_base[(i + 1) % 3]
-        _add_tube(bm, [(p_a[0] * 0.58, p_a[1] * 0.58, 1.08), (p_b[0] * 0.58, p_b[1] * 0.58, 1.08)], 0.045, 0.045, 8, quad=1)
+        _add_timber_beam(bm, (p_a[0] * 0.58, p_a[1] * 0.58, 1.08), (p_b[0] * 0.58, p_b[1] * 0.58, 1.08), width=0.08, depth=0.08, quad=1)
     _add_tube(bm, [(-0.45, 0.18, 1.58), (0.45, 0.18, 1.58)], 0.075, 0.075, 10, quad=2, flute_amp=0.015)
-    _add_tube(bm, [(0.45, 0.18, 1.58), (0.58, 0.18, 1.40)], 0.025, 0.025, 6, quad=2)
+    _add_spoked_wheel(bm, (0.50, 0.18, 1.58), radius=0.22, width=0.05, spokes=6, quad_wood=1, quad_iron=2)
     _add_tube(bm, [(0, 0, 1.28), (0, 0, 2.52)], 0.03, 0.03, 8, quad=3)
-    # Iron ice-tongs gripping sides of lifted glacial block
     for sx in (-1, 1):
         _add_tube(bm, [(0, 0, 1.48), (sx * 0.40, 0, 1.18), (sx * 0.38, 0, 0.92)], 0.028, 0.024, 6, quad=1)
-    _add_box(bm, (0, 0, 0.98), (0.74, 0.72, 0.56), quad=2, bevel=0.035)
+    _add_rock(bm, (0, 0, 0.96), (0.46, 0.44, 0.36), quad=2, style='limestone', seed=175)
     return bm
 
 
@@ -654,16 +896,15 @@ def build_frostgard_mead_hall_trophy_stand():
     bm = bmesh.new()
     for sx in (-0.68, 0.68):
         _add_box(bm, (sx, 0, 0.38), (0.16, 0.76, 0.76), quad=1, bevel=0.025)
-    _add_box(bm, (0, 0, 0.32), (1.36, 0.16, 0.12), quad=1, bevel=0.02)
-    _add_box(bm, (0, 0, 0.82), (1.82, 0.84, 0.12), quad=1, bevel=0.025)
-    # Mounted trophy horn rack + bossed shield & carved crest plaques
+    _add_timber_beam(bm, (-0.72, 0, 0.32), (0.72, 0, 0.32), width=0.14, depth=0.14, quad=1, straps=True)
+    _add_box(bm, (0, 0, 0.82), (1.84, 0.86, 0.12), quad=1, bevel=0.025)
     for tx in (-0.5, 0.0, 0.52):
         _add_tube(bm, [(tx, 0.12, 0.88), (tx, 0.12, 1.18)], 0.075, 0.065, 10, quad=2)
         for horn_s in (-1, 1):
             _add_tube(bm, [(tx, 0.12, 1.14), (tx + horn_s * 0.18, 0.06, 1.38), (tx + horn_s * 0.24, -0.02, 1.56)], 0.042, 0.012, 8, quad=3)
-    _add_tube(bm, [(0.24, -0.14, 0.88), (0.24, -0.14, 1.24)], 0.2, 0.18, 12, quad=3)
+    _add_staved_barrel(bm, (0.24, -0.14, 0.86), (0.24, -0.14, 1.24), radius=0.19, quad_wood=1, quad_iron=2, tap_side=True)
     _add_tube(bm, [(-0.46, -0.44, 0.56), (-0.46, -0.52, 0.56)], 0.26, 0.24, 14, quad=2)
-    _add_dome(bm, (-0.46, -0.52, 0.56), 0.10, 0.08, quad=3, seed=176, sides=10)
+    _add_tube(bm, [(-0.46, -0.52, 0.56), (-0.46, -0.58, 0.56)], 0.10, 0.04, 10, quad=3)
     return bm
 
 
@@ -671,9 +912,8 @@ def build_frostgard_salt_brine_cask_frame():
     bm = bmesh.new()
     for sx in (-0.72, 0.72):
         for sy in (-0.4, 0.4):
-            _add_tube(bm, [(sx, sy, -0.04), (sx, sy, 1.65)], 0.09, 0.085, 10, quad=1)
-        _add_tube(bm, [(sx, -0.42, 0.12), (sx, 0.42, 1.52)], 0.055, 0.055, 8, quad=1)
-    # Bearer rails & cradle saddle chocks supporting every barrel
+            _add_timber_beam(bm, (sx, sy, -0.04), (sx, sy, 1.68), width=0.16, depth=0.16, quad=1, straps=True)
+        _add_timber_beam(bm, (sx, -0.42, 0.12), (sx, 0.42, 1.52), width=0.10, depth=0.10, quad=1)
     for bz in (0.30, 0.88):
         _add_box(bm, (0, 0, bz), (1.62, 0.88, 0.09), quad=1, bevel=0.015)
         for cx in (-0.34, 0.34):
@@ -683,29 +923,25 @@ def build_frostgard_salt_brine_cask_frame():
     _add_box(bm, (0, -0.52, 0.12), (1.36, 0.24, 0.08), quad=0, bevel=0.015)
     for cx in (-0.34, 0.34):
         for cz in (0.54, 1.12):
-            _add_tube(bm, [(cx, -0.34, cz), (cx, 0.34, cz)], 0.235, 0.235, 14, quad=1)
-            for hy in (-0.26, 0.0, 0.26):
-                _add_tube(bm, [(cx, hy - 0.03, cz), (cx, hy + 0.03, cz)], 0.252, 0.252, 14, quad=2)
-            _add_tube(bm, [(cx, -0.34, cz - 0.08), (cx, -0.46, cz - 0.08)], 0.035, 0.025, 8, quad=3)
+            _add_staved_barrel(bm, (cx, -0.34, cz), (cx, 0.34, cz), radius=0.23, quad_wood=1, quad_iron=2, tap_side=True)
     return bm
 
 
 def build_frostgard_watchman_braziers_gate():
     bm = bmesh.new()
-    _add_box(bm, (0, 0, 0.18), (1.78, 0.72, 0.36), quad=0, bevel=0.04)
+    _add_box(bm, (0, 0, 0.18), (1.80, 0.74, 0.36), quad=0, bevel=0.04)
     _add_box(bm, (0, 0, 0.66), (1.06, 0.44, 0.68), quad=1, bevel=0.025)
-    # Braced overhead gate beam + iron portcullis teeth + cross-bracing
-    _add_box(bm, (0, 0, 1.50), (1.58, 0.26, 0.18), quad=1, bevel=0.025)
+    _add_timber_beam(bm, (-0.82, 0, 1.50), (0.82, 0, 1.50), width=0.26, depth=0.20, quad=1, straps=True)
     for px in (-0.36, -0.12, 0.12, 0.36):
         _add_tube(bm, [(px, 0, 1.44), (px, 0, 1.02)], 0.028, 0.012, 6, quad=2)
     for sx in (-0.72, 0.72):
-        _add_tube(bm, [(sx, 0, 0.32), (sx, 0, 1.54)], 0.06, 0.06, 10, quad=2)
-        _add_tube(bm, [(sx * 0.74, 0, 0.32), (sx, 0, 1.24)], 0.045, 0.045, 8, quad=1)
-        _add_tube(bm, [(sx, 0, 1.52), (sx, 0, 1.78)], 0.12, 0.25, 12, quad=2)
+        _add_timber_beam(bm, (sx, 0, 0.32), (sx, 0, 1.54), width=0.12, depth=0.12, quad=2)
+        _add_timber_beam(bm, (sx * 0.74, 0, 0.32), (sx, 0, 1.24), width=0.09, depth=0.09, quad=1)
+        _add_hollow_box(bm, (sx, 0, 1.66), (0.46, 0.46, 0.24), wall_t=0.05, floor_t=0.05, quad=2, bevel=0.015, rim_flange=0.04)
         for sp in range(6):
             sa = (sp / 6.0) * math.tau
             _add_tube(bm, [(sx + 0.22 * math.cos(sa), 0.22 * math.sin(sa), 1.72), (sx + 0.26 * math.cos(sa), 0.26 * math.sin(sa), 1.94)], 0.022, 0.008, 6, quad=2)
-        _add_rock(bm, (sx, 0, 1.8), (0.2, 0.2, 0.16), quad=3, seed=181 + int(sx * 10))
+        _add_rock(bm, (sx, 0, 1.76), (0.19, 0.19, 0.14), quad=3, style='ore_matrix', seed=181 + int(sx * 10))
     return bm
 
 
@@ -811,7 +1047,7 @@ def build_all():
                 [mat],
                 min_triangles=MIN_TRIANGLES,
                 max_triangles=MAX_TRIANGLES,
-                add_skirt=True,
+                add_skirt=False,
                 allow_extra_material=False,
             )
             if tris < MIN_TRIANGLES:

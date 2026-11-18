@@ -22,6 +22,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
 
+from aaa_natural_forms import organic_trunk_loft
 from understory_common import (
     MAX_TRIANGLES,
     MIN_TRIANGLES,
@@ -200,7 +201,6 @@ def _curved_twig(rng, base, tip, arch_up=0.04, gnarl=0.025):
 
 def _add_spray_pair(bm, uv, tip_pt, branch_dir, length, width, arch=0.14, roll_bias=0.0, inset=None):
     fwd = branch_dir.normalized()
-    # Bury the spray root back along the twig axis so the painted stem emerges seamlessly from the 3D wood
     anchor = tip_pt - fwd * (inset if inset is not None else length * 0.14)
     leaf_spray_fan(
         bm, uv, anchor, fwd, length, width,
@@ -211,15 +211,21 @@ def _add_spray_pair(bm, uv, tip_pt, branch_dir, length, width, arch=0.14, roll_b
     side = fwd.cross(up).normalized()
     fwd_skirt = (fwd * 0.64 - up * 0.26 - side * 0.52).normalized()
     leaf_spray_fan(
-        bm, uv, anchor - fwd * (length * 0.12), fwd_skirt, length * 0.80, width * 0.86,
+        bm, uv, anchor - fwd * (length * 0.12), fwd_skirt, length * 0.78, width * 0.84,
         u_range=(0.30, 1.0), v_range=(0.00, 0.98),
         roll=roll_bias + 1.02, arch=max(0.06, arch * 0.65), cup=0.15, tip_scale=0.34,
     )
     fwd2 = (fwd * 0.84 + up * 0.30 + side * 0.26).normalized()
     leaf_spray_fan(
-        bm, uv, anchor, fwd2, length * 0.88, width * 0.90,
+        bm, uv, anchor, fwd2, length * 0.86, width * 0.88,
         u_range=(0.30, 1.0), v_range=(0.00, 0.98),
         roll=roll_bias - 0.82, arch=arch * 0.65, cup=0.16, tip_scale=0.36,
+    )
+    fwd_bud = (fwd * 0.74 + up * 0.42 - side * 0.38).normalized()
+    leaf_spray_fan(
+        bm, uv, anchor + fwd * (length * 0.14), fwd_bud, length * 0.56, width * 0.60,
+        u_range=(0.30, 1.0), v_range=(0.00, 0.98),
+        roll=roll_bias - 0.38, arch=arch * 0.95, cup=0.20, tip_scale=0.32,
     )
 
 
@@ -240,11 +246,11 @@ def build_stylized_bush(mat):
     for idx, (yaw, r_xy, z_mid, z_top) in enumerate(canes):
         out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        p0 = out * rng.uniform(0.04, 0.09) + side * rng.uniform(-0.03, 0.03)
+        p0 = out * rng.uniform(0.04, 0.09) + side * rng.uniform(-0.03, 0.03) + Vector((0.0, 0.0, -0.025))
         p1 = out * (r_xy * rng.uniform(0.42, 0.52)) + side * rng.uniform(-0.12, 0.12) + Vector((0.0, 0.0, z_mid))
         p2 = out * (r_xy + rng.uniform(-0.06, 0.06)) + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, z_top))
         cane_pts = _curved_cane(rng, p0, p1, p2, gnarl=0.055)
-        tube(bm, uv, cane_pts, [0.050, 0.039, 0.029, 0.019, 0.008], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+        organic_trunk_loft(bm, uv, cane_pts, [0.056, 0.039, 0.029, 0.019, 0.008], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig_end = p1 + out * rng.uniform(0.20, 0.28) + side * (fork_side * rng.uniform(0.24, 0.34)) + Vector((0.0, 0.0, 0.18 if idx % 3 else 0.04))
@@ -257,9 +263,9 @@ def build_stylized_bush(mat):
         tube(bm, uv, twig_in_pts, [0.019, 0.012, 0.006], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
 
         s0 = rng.uniform(0.90, 1.12)
-        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.12))).normalized(), 0.68 * s0, 0.72 * s0, arch=0.14, roll_bias=idx * 0.55)
-        _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.60 * s0, 0.64 * s0, arch=0.10, roll_bias=-0.45 + idx * 0.2)
-        _add_spray_pair(bm, uv, twig_in_end, (twig_in_end - twig_in_pts[1]).normalized(), 0.54 * s0, 0.56 * s0, arch=0.08, roll_bias=0.32 - idx * 0.15)
+        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.12))).normalized(), 0.64 * s0, 0.68 * s0, arch=0.14, roll_bias=idx * 0.55)
+        _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.56 * s0, 0.60 * s0, arch=0.10, roll_bias=-0.45 + idx * 0.2)
+        _add_spray_pair(bm, uv, twig_in_end, (twig_in_end - twig_in_pts[1]).normalized(), 0.50 * s0, 0.52 * s0, arch=0.08, roll_bias=0.32 - idx * 0.15)
     return finish_mesh('stylized_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
@@ -279,11 +285,11 @@ def build_small_bush(mat):
     for idx, (yaw, r_xy, z_mid, z_top) in enumerate(canes):
         out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        p0 = out * rng.uniform(0.03, 0.06) + side * rng.uniform(-0.02, 0.02)
+        p0 = out * rng.uniform(0.03, 0.06) + side * rng.uniform(-0.02, 0.02) + Vector((0.0, 0.0, -0.02))
         p1 = out * (r_xy * rng.uniform(0.45, 0.55)) + side * rng.uniform(-0.07, 0.07) + Vector((0.0, 0.0, z_mid))
         p2 = out * (r_xy + rng.uniform(-0.04, 0.04)) + side * rng.uniform(-0.05, 0.05) + Vector((0.0, 0.0, z_top))
         cane_pts = _curved_cane(rng, p0, p1, p2, gnarl=0.035)
-        tube(bm, uv, cane_pts, [0.032, 0.025, 0.019, 0.012, 0.006], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.06, rng=rng, cap_end=False)
+        organic_trunk_loft(bm, uv, cane_pts, [0.036, 0.025, 0.019, 0.012, 0.006], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig_end = p1 + out * rng.uniform(0.14, 0.19) + side * (fork_side * rng.uniform(0.15, 0.21)) + Vector((0.0, 0.0, 0.09))
@@ -296,9 +302,9 @@ def build_small_bush(mat):
         tube(bm, uv, low_pts, [0.014, 0.009, 0.005], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
 
         s0 = rng.uniform(0.90, 1.12)
-        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.06))).normalized(), 0.44 * s0, 0.46 * s0, arch=0.10, roll_bias=idx * 0.4)
-        _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.38 * s0, 0.40 * s0, arch=0.06, roll_bias=-0.5 + idx * 0.2)
-        _add_spray_pair(bm, uv, low_end, (low_end - low_pts[1]).normalized(), 0.34 * s0, 0.36 * s0, arch=0.06, roll_bias=0.3 - idx * 0.15)
+        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.06))).normalized(), 0.42 * s0, 0.44 * s0, arch=0.10, roll_bias=idx * 0.4)
+        _add_spray_pair(bm, uv, twig_end, (twig_end - twig_pts[1]).normalized(), 0.36 * s0, 0.38 * s0, arch=0.06, roll_bias=-0.5 + idx * 0.2)
+        _add_spray_pair(bm, uv, low_end, (low_end - low_pts[1]).normalized(), 0.32 * s0, 0.34 * s0, arch=0.06, roll_bias=0.3 - idx * 0.15)
     return finish_mesh('small_bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
@@ -319,11 +325,11 @@ def build_bush2(mat):
     for idx, (yaw, r_xy, z_mid, z_top) in enumerate(canes):
         out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        p0 = out * rng.uniform(0.10, 0.18) + side * rng.uniform(-0.06, 0.06)
+        p0 = out * rng.uniform(0.10, 0.18) + side * rng.uniform(-0.06, 0.06) + Vector((0.0, 0.0, -0.04))
         p1 = out * (r_xy * rng.uniform(0.42, 0.52)) + side * rng.uniform(-0.24, 0.24) + Vector((0.0, 0.0, z_mid))
         p2 = out * (r_xy + rng.uniform(-0.12, 0.12)) + side * rng.uniform(-0.16, 0.16) + Vector((0.0, 0.0, z_top))
         cane_pts = _curved_cane(rng, p0, p1, p2, gnarl=0.11)
-        tube(bm, uv, cane_pts, [0.100, 0.078, 0.058, 0.036, 0.016], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.07, rng=rng, cap_end=False)
+        organic_trunk_loft(bm, uv, cane_pts, [0.112, 0.078, 0.058, 0.036, 0.016], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
 
         fork_side = 1.0 if idx % 2 == 0 else -1.0
         twig1_end = p1 + out * rng.uniform(0.42, 0.56) + side * (fork_side * rng.uniform(0.54, 0.70)) + Vector((0.0, 0.0, 0.36 if idx % 3 else 0.08))
@@ -336,9 +342,9 @@ def build_bush2(mat):
         tube(bm, uv, twig2_pts, [0.038, 0.024, 0.010], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
 
         s0 = rng.uniform(0.90, 1.12)
-        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.24))).normalized(), 1.38 * s0, 1.44 * s0, arch=-0.04, roll_bias=idx * 0.5)
-        _add_spray_pair(bm, uv, twig1_end, (twig1_end - twig1_pts[1]).normalized(), 1.22 * s0, 1.28 * s0, arch=-0.02, roll_bias=-0.4 + idx * 0.2)
-        _add_spray_pair(bm, uv, twig2_end, (twig2_end - twig2_pts[1]).normalized(), 1.12 * s0, 1.18 * s0, arch=-0.02, roll_bias=0.3 - idx * 0.15)
+        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.24))).normalized(), 1.28 * s0, 1.34 * s0, arch=-0.04, roll_bias=idx * 0.5)
+        _add_spray_pair(bm, uv, twig1_end, (twig1_end - twig1_pts[1]).normalized(), 1.14 * s0, 1.20 * s0, arch=-0.02, roll_bias=-0.4 + idx * 0.2)
+        _add_spray_pair(bm, uv, twig2_end, (twig2_end - twig2_pts[1]).normalized(), 1.04 * s0, 1.10 * s0, arch=-0.02, roll_bias=0.3 - idx * 0.15)
     return finish_mesh('bush2', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 
@@ -348,17 +354,15 @@ def build_sapling_bush(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Twin slender curved ascending whip leaders (young tree / sapling character, not a thick squat trunk)
     leaders = (
-        (Vector((0.0, 0.0, 0.0)), Vector((0.06, 0.04, 0.58)), Vector((0.12, -0.05, 1.24)), 0.032),
-        (Vector((-0.03, 0.02, 0.0)), Vector((-0.12, 0.09, 0.48)), Vector((-0.24, 0.16, 0.98)), 0.026),
+        (Vector((0.0, 0.0, -0.025)), Vector((0.06, 0.04, 0.58)), Vector((0.12, -0.05, 1.24)), 0.036),
+        (Vector((-0.03, 0.02, -0.025)), Vector((-0.12, 0.09, 0.48)), Vector((-0.24, 0.16, 0.98)), 0.028),
     )
     for l_idx, (p0, p1, p2, r0) in enumerate(leaders):
         cane_pts = _curved_cane(rng, p0, p1, p2, gnarl=0.03)
-        tube(bm, uv, cane_pts, [r0, r0 * 0.80, r0 * 0.62, r0 * 0.42, r0 * 0.24], sides=5, u_range=(0.02, 0.27), v_range=(0.04, 0.94), rough=0.04, rng=rng, cap_end=False)
-        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.22))).normalized(), 0.54, 0.52, arch=0.12, roll_bias=l_idx * 0.8)
+        organic_trunk_loft(bm, uv, cane_pts, [r0, r0 * 0.80, r0 * 0.62, r0 * 0.42, r0 * 0.24], rng, sides=6, bark_ridges=5, ridge_depth=0.12, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
+        _add_spray_pair(bm, uv, p2, (p2 - cane_pts[-2] + Vector((0, 0, 0.22))).normalized(), 0.50, 0.48, arch=0.12, roll_bias=l_idx * 0.8)
 
-    # 8 alternate tiered slim lateral sapling limbs rising asymmetrically
     limb_specs = (
         (0.30, 0.30, 0.46, 0.54),
         (2.15, 0.40, 0.50, 0.68),
@@ -377,7 +381,7 @@ def build_sapling_bush(mat):
         end = base + out * reach + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, max(0.14, z_tip - base.z)))
         limb_pts = _curved_twig(rng, base, end, arch_up=0.04, gnarl=0.02)
         tube(bm, uv, limb_pts, [0.017, 0.011, 0.005], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
-        _add_spray_pair(bm, uv, end, (end - limb_pts[1]).normalized(), 0.52, 0.50, arch=0.06, roll_bias=idx * 0.6)
+        _add_spray_pair(bm, uv, end, (end - limb_pts[1]).normalized(), 0.48, 0.46, arch=0.06, roll_bias=idx * 0.6)
     return finish_mesh('bush', bm, mat, max_triangles=TEMPERATE_BUSH_BUDGET, allow_extra_material=False)
 
 

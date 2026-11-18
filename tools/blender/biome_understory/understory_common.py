@@ -374,7 +374,7 @@ def finish_mesh(
     materials,
     max_triangles=MAX_TRIANGLES,
     min_triangles=MIN_TRIANGLES,
-    add_skirt=True,
+    add_skirt=None,
     allow_extra_material=True,
 ):
     return finalize_understory_mesh(

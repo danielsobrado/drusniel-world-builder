@@ -5,147 +5,147 @@
     "mine": [
       {
         "name": "mine_ore_hopper_chute",
-        "triangles": 16050,
+        "triangles": 15988,
         "file": "mine/mine_ore_hopper_chute.glb"
       },
       {
         "name": "mine_dewatering_pump_rig",
-        "triangles": 16384,
+        "triangles": 16023,
         "file": "mine/mine_dewatering_pump_rig.glb"
       },
       {
         "name": "mine_powder_magazine_locker",
-        "triangles": 16050,
+        "triangles": 15988,
         "file": "mine/mine_powder_magazine_locker.glb"
       },
       {
         "name": "mine_rail_turntable_switch",
-        "triangles": 16050,
+        "triangles": 28704,
         "file": "mine/mine_rail_turntable_switch.glb"
       },
       {
         "name": "mine_assaying_brazier_cart",
-        "triangles": 22784,
+        "triangles": 16013,
         "file": "mine/mine_assaying_brazier_cart.glb"
       }
     ],
     "umbra_cavern": [
       {
         "name": "umbra_veil_fungus_parasol",
-        "triangles": 16050,
+        "triangles": 16028,
         "file": "umbra_cavern/umbra_veil_fungus_parasol.glb"
       },
       {
         "name": "umbra_crystal_resonator_obelisk",
-        "triangles": 24960,
+        "triangles": 16040,
         "file": "umbra_cavern/umbra_crystal_resonator_obelisk.glb"
       },
       {
         "name": "umbra_hanging_censer_spire",
-        "triangles": 16050,
+        "triangles": 16036,
         "file": "umbra_cavern/umbra_hanging_censer_spire.glb"
       },
       {
         "name": "umbra_spider_web_balustrade_shrine",
-        "triangles": 16050,
+        "triangles": 16042,
         "file": "umbra_cavern/umbra_spider_web_balustrade_shrine.glb"
       },
       {
         "name": "umbra_tide_gondola_skiff",
-        "triangles": 16050,
+        "triangles": 16042,
         "file": "umbra_cavern/umbra_tide_gondola_skiff.glb"
       }
     ],
     "stonehold_hold": [
       {
         "name": "stonehold_drop_hammer_forge_press",
-        "triangles": 16050,
+        "triangles": 16020,
         "file": "stonehold_hold/stonehold_drop_hammer_forge_press.glb"
       },
       {
         "name": "stonehold_runic_brazier_pedestal",
-        "triangles": 16050,
+        "triangles": 16046,
         "file": "stonehold_hold/stonehold_runic_brazier_pedestal.glb"
       },
       {
         "name": "stonehold_geared_capstan_winch",
-        "triangles": 18688,
+        "triangles": 16040,
         "file": "stonehold_hold/stonehold_geared_capstan_winch.glb"
       },
       {
         "name": "stonehold_ancestor_relief_stele",
-        "triangles": 16050,
+        "triangles": 16044,
         "file": "stonehold_hold/stonehold_ancestor_relief_stele.glb"
       },
       {
         "name": "stonehold_ingot_crane_trolley",
-        "triangles": 16050,
+        "triangles": 23616,
         "file": "stonehold_hold/stonehold_ingot_crane_trolley.glb"
       }
     ],
     "frostgard_glacier_cave": [
       {
         "name": "frostgard_organ_pipe_ice_formation",
-        "triangles": 16050,
+        "triangles": 30016,
         "file": "frostgard_glacier_cave/frostgard_organ_pipe_ice_formation.glb"
       },
       {
         "name": "frostgard_hoarfrost_rose_cluster",
-        "triangles": 16050,
+        "triangles": 16640,
         "file": "frostgard_glacier_cave/frostgard_hoarfrost_rose_cluster.glb"
       },
       {
         "name": "frostgard_frozen_melt_mushroom_column",
-        "triangles": 16050,
+        "triangles": 23808,
         "file": "frostgard_glacier_cave/frostgard_frozen_melt_mushroom_column.glb"
       },
       {
         "name": "frostgard_bone_mooring_anchor",
-        "triangles": 16050,
+        "triangles": 16033,
         "file": "frostgard_glacier_cave/frostgard_bone_mooring_anchor.glb"
       },
       {
         "name": "frostgard_runic_ice_lantern_shrine",
-        "triangles": 16050,
+        "triangles": 15860,
         "file": "frostgard_glacier_cave/frostgard_runic_ice_lantern_shrine.glb"
       }
     ],
     "frostgard_glacier_front": [
       {
         "name": "frostgard_serac_fin_monolith",
-        "triangles": 16050,
+        "triangles": 31296,
         "file": "frostgard_glacier_front/frostgard_serac_fin_monolith.glb"
       },
       {
         "name": "frostgard_glacial_wayfinder_cairn",
-        "triangles": 18096,
+        "triangles": 26624,
         "file": "frostgard_glacier_front/frostgard_glacial_wayfinder_cairn.glb"
       },
       {
         "name": "frostgard_ice_sawyer_trestle",
-        "triangles": 19520,
+        "triangles": 15879,
         "file": "frostgard_glacier_front/frostgard_ice_sawyer_trestle.glb"
       },
       {
         "name": "frostgard_frost_banner_standards",
-        "triangles": 16050,
+        "triangles": 15912,
         "file": "frostgard_glacier_front/frostgard_frost_banner_standards.glb"
       },
       {
         "name": "frostgard_moraine_erratic_anchor_post",
-        "triangles": 16050,
+        "triangles": 18688,
         "file": "frostgard_glacier_front/frostgard_moraine_erratic_anchor_post.glb"
       }
     ],
     "frostgard_hold": [
       {
         "name": "frostgard_wolf_totem_palisade_post",
-        "triangles": 18528,
+        "triangles": 26432,
         "file": "frostgard_hold/frostgard_wolf_totem_palisade_post.glb"
       },
       {
         "name": "frostgard_cut_ice_block_hoist",
-        "triangles": 16050,
+        "triangles": 16039,
         "file": "frostgard_hold/frostgard_cut_ice_block_hoist.glb"
       },
       {
@@ -155,12 +155,12 @@
       },
       {
         "name": "frostgard_salt_brine_cask_frame",
-        "triangles": 22400,
+        "triangles": 30880,
         "file": "frostgard_hold/frostgard_salt_brine_cask_frame.glb"
       },
       {
         "name": "frostgard_watchman_braziers_gate",
-        "triangles": 21744,
+        "triangles": 16040,
         "file": "frostgard_hold/frostgard_watchman_braziers_gate.glb"
       }
     ]

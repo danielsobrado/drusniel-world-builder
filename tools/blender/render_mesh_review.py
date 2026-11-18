@@ -124,7 +124,47 @@ def _world_bbox_and_tris(mesh_objs):
     return mins, maxs, tris
 
 
-def _frame_and_render(studio, target_objs, out_path):
+def _get_clay_material():
+    mat = bpy.data.materials.get('ReviewClayMat')
+    if mat:
+        return mat
+    mat = bpy.data.materials.new('ReviewClayMat')
+    mat.use_nodes = True
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    bsdf.inputs['Base Color'].default_value = (0.58, 0.59, 0.62, 1.0)
+    bsdf.inputs['Roughness'].default_value = 0.62
+    return mat
+
+
+def _audit_imported_meshes(mesh_objs, label):
+    issues = []
+    min_z = 1e9
+    total_tris = 0
+    for o in mesh_objs:
+        mesh = o.data
+        if not mesh or len(mesh.vertices) == 0:
+            issues.append('empty_mesh')
+            continue
+        mw = o.matrix_world
+        for v in mesh.vertices:
+            wp = mw @ v.co
+            if not (math.isfinite(wp.x) and math.isfinite(wp.y) and math.isfinite(wp.z)):
+                issues.append('nonfinite_vertex')
+                break
+            if wp.z < min_z:
+                min_z = wp.z
+        degen = sum(1 for p in mesh.polygons if p.area < 1e-10)
+        if degen:
+            issues.append(f'degen_faces={degen}')
+        total_tris += sum(max(1, len(p.vertices) - 2) for p in mesh.polygons)
+    if min_z > 0.08:
+        issues.append(f'floating_min_z={min_z:.3f}')
+    if issues:
+        print(f'[qa-audit] WARN {label} ({total_tris} tris): {", ".join(issues)}')
+    return {'tris': total_tris, 'min_z': min_z, 'issues': issues}
+
+
+def _frame_and_render(studio, target_objs, out_path, view_vec=(0.76, -0.82, 0.44), clay_mat=None):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     mins, maxs, tris = _world_bbox_and_tris(target_objs)
     cx = 0.5 * (mins.x + maxs.x)
@@ -132,7 +172,7 @@ def _frame_and_render(studio, target_objs, out_path):
     # Lock receiver plane to z=0 when object rests at standard origin grade, else bottom.
     ground_z = 0.0 if (mins.z <= 0.10 and maxs.z >= 0.05) else mins.z
     studio['ground'].location = Vector((cx, cy, ground_z))
-    studio['ground'].hide_render = False
+    studio['ground'].hide_render = clay_mat is not None
 
     vis_min_z = max(mins.z, ground_z)
     span_x = max(0.15, maxs.x - mins.x)
@@ -142,7 +182,7 @@ def _frame_and_render(studio, target_objs, out_path):
     radius = max(math.hypot(span_x, span_y) * 0.52, span_z * 0.62, 0.22)
     dist = radius / math.tan(math.radians(12.8))
 
-    view_dir = Vector((0.76, -0.82, 0.44)).normalized()
+    view_dir = Vector(view_vec).normalized()
     cam_pos = look_at + view_dir * dist
     cam_pos.z = max(ground_z + 0.14, cam_pos.z)
     cam = studio['cam']
@@ -152,9 +192,51 @@ def _frame_and_render(studio, target_objs, out_path):
     cam.data.clip_end = max(100.0, dist * 16.0)
     bpy.context.view_layer.update()
 
+    saved_mats = []
+    if clay_mat is not None:
+        for o in target_objs:
+            if o.type == 'MESH' and o.data:
+                saved_mats.append((o.data, list(o.data.materials)))
+                o.data.materials.clear()
+                o.data.materials.append(clay_mat)
+
     bpy.context.scene.render.filepath = out_path
     bpy.ops.render.render(write_still=True)
+
+    for mesh_data, mats in saved_mats:
+        mesh_data.materials.clear()
+        for m in mats:
+            mesh_data.materials.append(m)
+    studio['ground'].hide_render = False
     return tris
+
+
+def _pair_before_after(before_path, after_path, out_path, gap=8):
+    if not (os.path.exists(before_path) and os.path.exists(after_path)):
+        return False
+    ib = bpy.data.images.load(before_path, check_existing=False)
+    ia = bpy.data.images.load(after_path, check_existing=False)
+    bw, bh = ib.size
+    aw, ah = ia.size
+    b_arr = np.flipud(np.array(ib.pixels[:], dtype=np.float32).reshape((bh, bw, 4)))
+    a_arr = np.flipud(np.array(ia.pixels[:], dtype=np.float32).reshape((ah, aw, 4)))
+    bpy.data.images.remove(ib)
+    bpy.data.images.remove(ia)
+    h = max(bh, ah)
+    w = bw + gap + aw
+    canvas = np.zeros((h, w, 4), dtype=np.float32)
+    canvas[..., :3] = (0.09, 0.10, 0.12)
+    canvas[..., 3] = 1.0
+    canvas[:bh, :bw] = b_arr
+    canvas[:ah, bw + gap:bw + gap + aw] = a_arr
+    out = bpy.data.images.new('_cmp_tmp', width=w, height=h, alpha=True)
+    out.pixels.foreach_set(np.flipud(canvas).ravel().tolist())
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    out.filepath_raw = out_path
+    out.file_format = 'PNG'
+    out.save()
+    bpy.data.images.remove(out)
+    return True
 
 
 def _assemble_contact_sheet(paths, out_path, cols=5, pad=6):
@@ -201,6 +283,7 @@ def _render_glb_batch(studio, items, sub_dir, sheet_name=None):
         bpy.context.view_layer.update()
         imported = [o for o in bpy.data.objects if o not in before]
         mesh_objs = [o for o in imported if o.type == 'MESH']
+        _audit_imported_meshes(mesh_objs, label)
         rel = os.path.join(sub_dir, f'{label}.png').replace('\\', '/')
         out_path = os.path.join(OUT_DIR, rel)
         tris = _frame_and_render(studio, mesh_objs, out_path)
@@ -321,14 +404,115 @@ def _write_reports(sections):
         f.write('\n'.join(md_lines))
 
 
+def _render_phase1():
+    """Render 4-angle QA sheets (hero, side, elevated, silhouette) + Before/After comparisons for Phase 1."""
+    reps = (
+        ('seasonal_heliconia_cluster', os.path.join(REPO_ROOT, 'assets/runtime-sources/ground/biomes/seasonal_heliconia_cluster.glb'), 'biomes/seasonal_heliconia_cluster.png'),
+        ('deciduous_foxglove_spire', os.path.join(REPO_ROOT, 'assets/runtime-sources/ground/biomes/deciduous_foxglove_spire.glb'), 'biomes/deciduous_foxglove_spire.png'),
+        ('rainforest_tree_fern', os.path.join(REPO_ROOT, 'assets/runtime-sources/ground/biomes/rainforest_tree_fern.glb'), 'biomes/rainforest_tree_fern.png'),
+        ('stump-hollow', os.path.join(REPO_ROOT, 'assets/runtime-sources/ground/trunks/stump-hollow.glb'), 'trunks_and_bushes/stump-hollow.png'),
+        ('umbra_crystal_resonator_obelisk', os.path.join(REPO_ROOT, 'assets/runtime-sources/underground/umbra_cavern/umbra_crystal_resonator_obelisk.glb'), 'underground/umbra_cavern/umbra_crystal_resonator_obelisk.png'),
+        ('mine_ore_hopper_chute', os.path.join(REPO_ROOT, 'assets/runtime-sources/underground/mine/mine_ore_hopper_chute.glb'), 'underground/mine/mine_ore_hopper_chute.png'),
+    )
+    views = (
+        ('hero', (0.76, -0.82, 0.44), False),
+        ('side', (1.0, -0.05, 0.20), False),
+        ('elevated', (0.55, -0.58, 0.92), False),
+        ('silhouette', (0.76, -0.82, 0.44), True),
+    )
+
+    studio = _setup_studio_scene(clear=True)
+    compare_paths = []
+
+    for label, glb_path, before_rel in reps:
+        if not os.path.exists(glb_path):
+            print(f'[phase1] missing {glb_path}')
+            continue
+        before = set(bpy.data.objects)
+        bpy.ops.import_scene.gltf(filepath=glb_path)
+        bpy.context.view_layer.update()
+        imported = [o for o in bpy.data.objects if o not in before]
+        mesh_objs = [o for o in imported if o.type == 'MESH']
+        _audit_imported_meshes(mesh_objs, label)
+
+        view_paths = []
+        hero_path = None
+        for vname, vvec, is_sil in views:
+            out_p = os.path.join(OUT_DIR, 'phase1', f'{label}_{vname}.png')
+            clay = _get_clay_material() if is_sil else None
+            _frame_and_render(studio, mesh_objs, out_p, view_vec=vvec, clay_mat=clay)
+            view_paths.append(out_p)
+            if vname == 'hero':
+                hero_path = out_p
+        _assemble_contact_sheet(view_paths, os.path.join(OUT_DIR, 'phase1', f'{label}_views.png'), cols=4)
+        for o in imported:
+            bpy.data.objects.remove(o, do_unlink=True)
+        bpy.data.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
+
+        cmp_p = os.path.join(OUT_DIR, 'comparisons', f'{label}_compare.png')
+        if hero_path and _pair_before_after(os.path.join(OUT_DIR, 'before', before_rel), hero_path, cmp_p):
+            compare_paths.append(cmp_p)
+
+    # Render city representative directly from medieval_town_kit.blend
+    blend_path = os.path.join(REPO_ROOT, 'assets-src', 'medieval-town-kit', 'medieval_town_kit.blend')
+    if os.path.exists(blend_path):
+        bpy.ops.wm.open_mainfile(filepath=blend_path)
+        studio_c = _setup_studio_scene(clear=False)
+        clay_c = _get_clay_material()
+        for o in bpy.data.objects:
+            if o not in studio_c['studio_objs']:
+                o.hide_render = True
+        obj = bpy.data.objects.get('Tudor_Market_Pavilion')
+        if obj:
+            targets = [obj] + [c for c in obj.children_recursive if c.type == 'MESH']
+            for t in targets:
+                t.hide_render = False
+            mesh_targets = [t for t in targets if t.type == 'MESH']
+            _audit_imported_meshes(mesh_targets, 'Tudor_Market_Pavilion')
+            view_paths = []
+            hero_path = None
+            for vname, vvec, is_sil in views:
+                out_p = os.path.join(OUT_DIR, 'phase1', f'Tudor_Market_Pavilion_{vname}.png')
+                _frame_and_render(studio_c, mesh_targets, out_p, view_vec=vvec, clay_mat=(clay_c if is_sil else None))
+                view_paths.append(out_p)
+                if vname == 'hero':
+                    hero_path = out_p
+            _assemble_contact_sheet(view_paths, os.path.join(OUT_DIR, 'phase1', 'Tudor_Market_Pavilion_views.png'), cols=4)
+            cmp_p = os.path.join(OUT_DIR, 'comparisons', 'Tudor_Market_Pavilion_compare.png')
+            if hero_path and _pair_before_after(os.path.join(OUT_DIR, 'before', 'cities/tudor/Tudor_Market_Pavilion.png'), hero_path, cmp_p):
+                compare_paths.append(cmp_p)
+
+    if compare_paths:
+        _assemble_contact_sheet(compare_paths, os.path.join(OUT_DIR, 'comparison_sheet_phase1.png'), cols=1)
+    print(f'[mesh-review] rendered phase1 multi-angle + comparison sheets ({len(compare_paths)} pairs)')
+
+
+def _build_family_comparisons(items_rel, sheet_out):
+    pairs = []
+    for rel in items_rel:
+        b_p = os.path.join(OUT_DIR, 'before', rel)
+        a_p = os.path.join(OUT_DIR, rel)
+        c_p = os.path.join(OUT_DIR, 'comparisons', rel)
+        if _pair_before_after(b_p, a_p, c_p):
+            pairs.append(c_p)
+    if pairs:
+        _assemble_contact_sheet(pairs, os.path.join(OUT_DIR, sheet_out), cols=2)
+
+
 def main():
     only = None
+    compare = False
     if '--' in sys.argv:
         argv = sys.argv[sys.argv.index('--') + 1:]
         if '--only' in argv:
             only = argv[argv.index('--only') + 1]
+        compare = '--compare' in argv
 
     os.makedirs(OUT_DIR, exist_ok=True)
+    if only == 'phase1':
+        _render_phase1()
+        return
+
     studio = _setup_studio_scene(clear=True)
 
     biome_results = []
@@ -353,11 +537,15 @@ def main():
         for bid, group_items in sorted(by_biome.items()):
             paths = [os.path.join(OUT_DIR, 'biomes', f'{name}.png') for name, _, _ in group_items]
             _assemble_contact_sheet(paths, os.path.join(OUT_DIR, 'biomes', f'biome_{bid}_sheet.png'), cols=5)
+        if compare:
+            _build_family_comparisons([r['image'] for r in biome_results], 'comparison_biomes.png')
 
     if only in (None, 'trunks'):
         # 2. Trunks, Swamp, Understory & Bushes
         tb_items = _collect_trunks_and_bushes()
         tb_results = _render_glb_batch(studio, tb_items, 'trunks_and_bushes', 'contact_sheet_trunks_bushes.png')
+        if compare:
+            _build_family_comparisons([r['image'] for r in tb_results], 'comparison_trunks_bushes.png')
 
     if only in (None, 'underground'):
         # 3. Underground & Glacial Areas (30 props)
@@ -369,10 +557,14 @@ def main():
             ug_results.extend(area_res)
             all_ug_paths.extend(os.path.join(OUT_DIR, r['image']) for r in area_res)
         _assemble_contact_sheet(all_ug_paths, os.path.join(OUT_DIR, 'contact_sheet_underground.png'), cols=5)
+        if compare:
+            _build_family_comparisons([r['image'] for r in ug_results], 'comparison_underground.png')
 
     if only in (None, 'cities'):
         # 4. 40 City Props from medieval_town_kit.blend
         city_results = _render_cities()
+        if compare:
+            _build_family_comparisons([r['image'] for r in city_results], 'comparison_cities.png')
 
     if only is None:
         _write_reports([

@@ -25,6 +25,14 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
 
+from aaa_geometry import fern_crosier_spiral, shaped_leaf
+from aaa_natural_forms import (
+    buttress_root_system,
+    mushroom_cluster_mesh,
+    organic_trunk_loft,
+    planar_rock,
+    splintered_fracture_cap,
+)
 from understory_common import (
     MAX_TRIANGLES,
     MIN_TRIANGLES,
@@ -308,17 +316,17 @@ def build_meadow_thistle_stone(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Weathered fieldstone boulder + smaller companion stone
-    rock_chunk(bm, uv, Vector((-0.18, 0.06, 0.20)), (0.44, 0.36, 0.28), u_range=(0.02, 0.46), v_range=(0.04, 0.94), subdivisions=1, rng=rng)
-    rock_chunk(bm, uv, Vector((0.24, -0.18, 0.11)), (0.25, 0.22, 0.15), u_range=(0.02, 0.46), v_range=(0.04, 0.94), subdivisions=1, rng=rng)
+    # Faceted limestone/fieldstone boulders anchored below ground plane
+    planar_rock(bm, uv, Vector((-0.18, 0.06, 0.15)), Vector((0.46, 0.38, 0.28)), style='crag', seed=2081, u_range=(0.02, 0.46), v_range=(0.04, 0.94))
+    planar_rock(bm, uv, Vector((0.24, -0.18, 0.08)), Vector((0.26, 0.22, 0.16)), style='crag', seed=2082, u_range=(0.02, 0.46), v_range=(0.04, 0.94))
 
-    # 5 crossed Scotch thistle stems (10 cards) emerging behind and beside the stones
+    # 5 crossed Scotch thistle stems emerging behind and beside the stones
     thistles = [
-        (Vector((0.12, 0.16, 0.02)), Vector((0.22, 0.26, 0.96)), 0.28),
-        (Vector((0.28, 0.04, 0.02)), Vector((0.44, 0.08, 0.82)), 0.25),
-        (Vector((-0.04, -0.22, 0.02)), Vector((-0.08, -0.36, 0.76)), 0.24),
-        (Vector((-0.34, -0.16, 0.02)), Vector((-0.48, -0.26, 0.68)), 0.22),
-        (Vector((0.02, 0.28, 0.02)), Vector((0.04, 0.44, 0.72)), 0.22),
+        (Vector((0.12, 0.16, -0.02)), Vector((0.22, 0.26, 0.96)), 0.28),
+        (Vector((0.28, 0.04, -0.02)), Vector((0.44, 0.08, 0.82)), 0.25),
+        (Vector((-0.04, -0.22, -0.02)), Vector((-0.08, -0.36, 0.76)), 0.24),
+        (Vector((-0.34, -0.16, -0.02)), Vector((-0.48, -0.26, 0.68)), 0.22),
+        (Vector((0.02, 0.28, -0.02)), Vector((0.04, 0.44, 0.72)), 0.22),
     ]
     for b0, b2, w in thistles:
         b1 = b0.lerp(b2, 0.52)
@@ -333,12 +341,15 @@ def build_meadow_thistle_stone(mat):
 # ---------------------------------------------------------------------------
 
 def build_forest_bracken(mat):
-    """Multi-tiered woodland lady-fern / bracken crown with 3D basal rachises, graceful arch, and progressively tapered tips."""
+    """Multi-tiered woodland lady-fern / bracken crown with 3D basal rachises, curled croziers, and tapered tips."""
     rng = random.Random(209)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Three irregular tiers: outer sprawling fronds, mid arching fronds, steep inner croziers
+    # Coiled uncurling fiddleheads at crown core
+    for f_i in range(3):
+        fern_crosier_spiral(bm, uv, Vector((0, 0, -0.02)), f_i * 2.1 + 0.3, 0.28 + f_i * 0.06, rng, u_foliage=(0.35, 0.65), v_foliage=(0.08, 0.72))
+
     tiers = (
         (0, 5, 0.22, 0.98, 1.08),
         (1, 5, 0.46, 0.88, 0.96),
@@ -352,17 +363,14 @@ def build_forest_bracken(mat):
             out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
             side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
 
-            # 4-point naturally arching frond spine (steep basal rise -> graceful arch -> nodding fine tip)
             pts = (
-                out * 0.04 + Vector((0.0, 0.0, 0.02)),
+                out * 0.04 + Vector((0.0, 0.0, -0.02)),
                 out * (length * 0.28) + Vector((0.0, 0.0, length * (0.34 + up_bias * 0.28))),
                 out * (length * 0.66) + Vector((0.0, 0.0, length * (0.44 + up_bias * 0.36))),
                 out * (length * 0.98) + Vector((0.0, 0.0, length * (0.18 + up_bias * 0.30))),
             )
-            # Slim 3D basal rachis stem into lower frond
-            tube(bm, uv, [pts[0], pts[1], pts[2]], [0.014, 0.010, 0.005], sides=3, u_range=(0.48, 0.52), v_range=(0.02, 0.65), cap_end=False)
+            tube(bm, uv, [pts[0], pts[1], pts[2]], [0.015, 0.010, 0.005], sides=4, u_range=(0.48, 0.52), v_range=(0.02, 0.65), cap_end=False)
 
-            # V-cupped tapered 3-segment blade progressively narrowing toward the tip
             rings = []
             profiles = (
                 (0.14 * width, 0.00, 0.02),
@@ -391,41 +399,48 @@ def build_forest_mushrooms(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Mossy nurse log base
+    # Gnarled mossy nurse log base with broken splintered end
     log_pts = [
-        Vector((-0.65, -0.06, 0.14)),
-        Vector((-0.20, 0.04, 0.18)),
-        Vector((0.25, 0.02, 0.16)),
-        Vector((0.68, -0.05, 0.12)),
+        Vector((-0.68, -0.06, 0.12)),
+        Vector((-0.20, 0.04, 0.17)),
+        Vector((0.25, 0.02, 0.15)),
+        Vector((0.70, -0.05, 0.08)),
     ]
-    tube(bm, uv, log_pts, [0.22, 0.24, 0.21, 0.17], sides=7, u_range=(0.04, 0.46), v_range=(0.04, 0.60), rough=0.08, rng=rng)
+    organic_trunk_loft(bm, uv, log_pts, [0.22, 0.24, 0.21, 0.16], rng, sides=9, bark_ridges=6, ridge_depth=0.14, cap_end=False, u_range=(0.04, 0.46), v_range=(0.04, 0.60))
+    splintered_fracture_cap(bm, uv, log_pts[0], (log_pts[0] - log_pts[1]).normalized(), 0.21, rng, (0.04, 0.46), (0.04, 0.60), (0.04, 0.46), (0.04, 0.60), splinters=6)
+    splintered_fracture_cap(bm, uv, log_pts[-1], (log_pts[-1] - log_pts[-2]).normalized(), 0.15, rng, (0.04, 0.46), (0.04, 0.60), (0.04, 0.46), (0.04, 0.60), splinters=5)
 
-    # 5 scarlet Fly Agaric (Amanita muscaria) mushrooms (stipe + 3D spotted cap)
-    amanitas = [
-        (Vector((-0.12, 0.02, 0.32)), 0.26, 0.16, 0.08),
-        (Vector((0.14, 0.06, 0.30)), 0.21, 0.13, 0.065),
-        (Vector((-0.34, -0.04, 0.28)), 0.16, 0.10, 0.05),
-        (Vector((0.04, -0.26, 0.0)), 0.22, 0.12, 0.06),
-        (Vector((-0.22, 0.28, 0.0)), 0.17, 0.09, 0.045),
-    ]
-    for base, h, rad, ch in amanitas:
-        lean = Vector((rng.uniform(-0.04, 0.04), rng.uniform(-0.04, 0.04), h))
-        top = base + lean
-        tube(bm, uv, [base, base + lean * 0.55, top], [rad * 0.24, rad * 0.18, rad * 0.15],
-             sides=4, u_range=(0.08, 0.42), v_range=(0.68, 0.96), cap_end=False)
-        mushroom_dome(bm, uv, top, rad, ch, sides=6, u_range=(0.52, 0.98), v_range=(0.52, 0.98), tilt=lean)
+    # Scarlet Fly Agaric clusters (organic curved stipes + gilled caps)
+    mushroom_cluster_mesh(
+        bm,
+        uv,
+        Vector((-0.08, 0.02, 0.28)),
+        0.30,
+        0.24,
+        rng,
+        cap_u=(0.52, 0.98),
+        cap_v=(0.52, 0.98),
+        stipe_u=(0.08, 0.42),
+        stipe_v=(0.68, 0.96),
+        base_u=(0.04, 0.46),
+        base_v=(0.04, 0.60),
+    )
 
-    # 4 golden Chanterelles around the mossy foot
-    chanterelles = [
-        (Vector((0.32, 0.22, 0.0)), 0.14, 0.085),
-        (Vector((0.44, 0.14, 0.0)), 0.11, 0.070),
-        (Vector((-0.42, -0.24, 0.0)), 0.13, 0.080),
-        (Vector((0.22, -0.22, 0.0)), 0.10, 0.065),
-    ]
-    for base, h, rad in chanterelles:
-        top = base + Vector((0, 0, h))
-        tube(bm, uv, [base, top], [rad * 0.25, rad * 0.42], sides=4, u_range=(0.55, 0.95), v_range=(0.05, 0.45), cap_end=False)
-        mushroom_dome(bm, uv, top, rad, 0.025, sides=5, u_range=(0.52, 0.98), v_range=(0.02, 0.48))
+    # Golden Chanterelle funnel clusters around mossy base
+    mushroom_cluster_mesh(
+        bm,
+        uv,
+        Vector((0.32, 0.18, -0.01)),
+        0.18,
+        0.16,
+        rng,
+        cap_u=(0.52, 0.98),
+        cap_v=(0.02, 0.48),
+        stipe_u=(0.55, 0.95),
+        stipe_v=(0.05, 0.45),
+        base_u=(0.04, 0.46),
+        base_v=(0.04, 0.60),
+    )
     return finish_mesh('forest-mushrooms-01', bm, mat)
 
 
@@ -439,22 +454,26 @@ def build_forest_birch_log(mat):
     pts, radii = [], []
     for i in range(6):
         t = i / 5
-        pts.append(Vector((t * length - length * 0.5, 0.07 * math.sin(t * 4.5), 0.26 - 0.08 * t + 0.03 * math.sin(t * 6))))
+        pts.append(Vector((t * length - length * 0.5, 0.07 * math.sin(t * 4.5), 0.24 - 0.08 * t + 0.03 * math.sin(t * 6))))
         radii.append(0.30 * (1.0 - 0.26 * t))
-    tube(bm, uv, pts, radii, sides=8, u_range=(0.0, 1.0), v_range=(0.02, 0.78), rough=0.06, rng=rng)
+    organic_trunk_loft(bm, uv, pts, radii, rng, sides=10, bark_ridges=6, ridge_depth=0.10, cap_end=False, u_range=(0.0, 1.0), v_range=(0.02, 0.78))
+    splintered_fracture_cap(bm, uv, pts[0], (pts[0] - pts[1]).normalized(), radii[0] * 0.95, rng, (0.0, 1.0), (0.02, 0.78), (0.0, 1.0), (0.02, 0.78), splinters=8)
+    splintered_fracture_cap(bm, uv, pts[-1], (pts[-1] - pts[-2]).normalized(), radii[-1] * 0.95, rng, (0.0, 1.0), (0.02, 0.78), (0.0, 1.0), (0.02, 0.78), splinters=7)
 
-    # Two snapped silver-birch limbs
+    # Two snapped silver-birch limbs with splintered tops
     for t, ang in ((0.30, 0.9), (0.68, -1.1)):
         base = pts[0].lerp(pts[-1], t) + Vector((0, 0, 0.12))
         d = Vector((0.28, math.cos(ang), 0.55)).normalized()
-        tube(bm, uv, [base, base + d * 0.42, base + d * 0.78], [0.085, 0.065, 0.045],
-             sides=5, u_range=(0.0, 1.0), v_range=(0.05, 0.75), rough=0.04, rng=rng)
+        l_pts = [base, base + d * 0.42, base + d * 0.78]
+        organic_trunk_loft(bm, uv, l_pts, [0.085, 0.065, 0.042], rng, sides=6, bark_ridges=4, ridge_depth=0.08, cap_end=False, u_range=(0.0, 1.0), v_range=(0.05, 0.75))
+        splintered_fracture_cap(bm, uv, l_pts[-1], d, 0.044, rng, (0.0, 1.0), (0.05, 0.75), (0.0, 1.0), (0.05, 0.75), splinters=5)
 
-    # 6 zoned turkey-tail bracket fungus shelves along the log flanks
+    # Fan-shaped zoned turkey-tail shelf bracket plates along log flanks
     for t, side_y, z_off in ((0.22, 0.24, 0.22), (0.26, 0.25, 0.27), (0.48, -0.22, 0.20),
                              (0.52, -0.23, 0.25), (0.74, 0.20, 0.18), (0.78, 0.21, 0.22)):
         pos = pts[0].lerp(pts[-1], t) + Vector((0, side_y, z_off - 0.12))
-        mushroom_dome(bm, uv, pos, 0.11, 0.025, sides=5, u_range=(0.15, 0.85), v_range=(0.82, 0.98))
+        fdir = Vector((0.0, 1.0 if side_y > 0 else -1.0, 0.12)).normalized()
+        shaped_leaf(bm, uv, pos, fdir, 0.18, 0.22, profile='paddle', asym=0.14, arch=0.06, droop=0.04, cup_depth=-0.12, u_range=(0.15, 0.85), v_range=(0.82, 0.98))
     return finish_mesh('forest-birch-log-01', bm, mat)
 
 
@@ -589,15 +608,15 @@ def build_taiga_berry_moss(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Two soft reindeer-lichen & moss hummock cushions
-    rock_chunk(bm, uv, Vector((-0.12, 0.04, 0.11)), (0.48, 0.42, 0.18), u_range=(0.02, 0.50), v_range=(0.05, 0.95), subdivisions=2, rng=rng, dome=True)
-    rock_chunk(bm, uv, Vector((0.24, -0.14, 0.08)), (0.34, 0.30, 0.14), u_range=(0.02, 0.50), v_range=(0.05, 0.95), subdivisions=1, rng=rng, dome=True)
+    # Grounded reindeer-lichen & moss cushions anchored below ground
+    planar_rock(bm, uv, Vector((-0.12, 0.04, 0.08)), Vector((0.50, 0.44, 0.18)), style='river', seed=2161, u_range=(0.02, 0.50), v_range=(0.05, 0.95))
+    planar_rock(bm, uv, Vector((0.24, -0.14, 0.05)), Vector((0.36, 0.30, 0.14)), style='river', seed=2162, u_range=(0.02, 0.50), v_range=(0.05, 0.95))
 
-    # 10 crimson-berried lingonberry/bilberry sprigs emerging across the hummock
-    for k in range(10):
-        yaw = k / 10 * 2 * math.pi + rng.uniform(-0.25, 0.25)
+    # 11 crimson-berried lingonberry/bilberry sprigs emerging across the hummock
+    for k in range(11):
+        yaw = k / 11 * 2 * math.pi + rng.uniform(-0.25, 0.25)
         r = rng.uniform(0.06, 0.34)
-        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, 0.14))
+        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, 0.10))
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0))
         p1 = base + out * 0.16 + Vector((0, 0, 0.22))
@@ -612,22 +631,25 @@ def build_taiga_deadfall(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    rock_chunk(bm, uv, Vector((-0.24, 0.10, 0.20)), (0.50, 0.38, 0.28), u_range=(0.02, 0.50), v_range=(0.04, 0.96), subdivisions=2, rng=rng)
-    rock_chunk(bm, uv, Vector((0.26, -0.20, 0.13)), (0.32, 0.26, 0.18), u_range=(0.02, 0.50), v_range=(0.04, 0.96), subdivisions=1, rng=rng)
+    planar_rock(bm, uv, Vector((-0.24, 0.10, 0.16)), Vector((0.52, 0.40, 0.28)), style='crag', seed=2171, u_range=(0.02, 0.50), v_range=(0.04, 0.96))
+    planar_rock(bm, uv, Vector((0.26, -0.20, 0.10)), Vector((0.34, 0.28, 0.18)), style='crag', seed=2172, u_range=(0.02, 0.50), v_range=(0.04, 0.96))
 
-    # Fallen frosted spruce limb resting across the boulder
+    # Fallen frosted spruce limb with splintered break resting across the boulder
     limb = [
-        Vector((-0.72, -0.18, 0.06)),
-        Vector((-0.18, -0.02, 0.34)),
-        Vector((0.32, 0.14, 0.24)),
-        Vector((0.78, 0.26, 0.08)),
+        Vector((-0.74, -0.18, 0.02)),
+        Vector((-0.18, -0.02, 0.32)),
+        Vector((0.32, 0.14, 0.22)),
+        Vector((0.80, 0.26, 0.04)),
     ]
-    tube(bm, uv, limb, [0.12, 0.10, 0.08, 0.05], sides=6, u_range=(0.54, 0.98), v_range=(0.04, 0.94), rough=0.08, rng=rng)
+    organic_trunk_loft(bm, uv, limb, [0.12, 0.105, 0.08, 0.048], rng, sides=7, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.54, 0.98), v_range=(0.04, 0.94))
+    splintered_fracture_cap(bm, uv, limb[0], (limb[0] - limb[1]).normalized(), 0.11, rng, (0.54, 0.98), (0.04, 0.94), (0.54, 0.98), (0.04, 0.94), splinters=6)
+    splintered_fracture_cap(bm, uv, limb[-1], (limb[-1] - limb[-2]).normalized(), 0.048, rng, (0.54, 0.98), (0.04, 0.94), (0.54, 0.98), (0.04, 0.94), splinters=5)
     for t, ang in ((0.35, 1.1), (0.68, -0.9)):
         b0 = limb[0].lerp(limb[-1], t) + Vector((0, 0, 0.08))
         d = Vector((0.25, math.cos(ang), 0.55)).normalized()
-        tube(bm, uv, [b0, b0 + d * 0.36, b0 + d * 0.65], [0.05, 0.035, 0.018],
-             sides=4, u_range=(0.54, 0.98), v_range=(0.10, 0.90), rough=0.06, rng=rng)
+        l_pts = [b0, b0 + d * 0.36, b0 + d * 0.65]
+        organic_trunk_loft(bm, uv, l_pts, [0.05, 0.035, 0.018], rng, sides=5, bark_ridges=4, ridge_depth=0.10, cap_end=False, u_range=(0.54, 0.98), v_range=(0.10, 0.90))
+        splintered_fracture_cap(bm, uv, l_pts[-1], d, 0.019, rng, (0.54, 0.98), (0.10, 0.90), (0.54, 0.98), (0.10, 0.90), splinters=4)
     return finish_mesh('taiga-deadfall-01', bm, mat)
 
 
@@ -637,18 +659,18 @@ def build_tundra_cushion(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Purple saxifrage cushion dome + frost-shattered alpine slate
-    rock_chunk(bm, uv, Vector((0.0, 0.02, 0.11)), (0.48, 0.42, 0.18), u_range=(0.02, 0.53), v_range=(0.38, 0.98), subdivisions=2, rng=rng, dome=True)
-    rock_chunk(bm, uv, Vector((-0.34, -0.18, 0.07)), (0.32, 0.24, 0.11), u_range=(0.02, 0.53), v_range=(0.02, 0.33), subdivisions=1, rng=rng)
+    # Purple saxifrage cushion mound + frost-shattered alpine slate
+    planar_rock(bm, uv, Vector((0.0, 0.02, 0.08)), Vector((0.50, 0.44, 0.18)), style='river', seed=2181, u_range=(0.02, 0.53), v_range=(0.38, 0.98))
+    planar_rock(bm, uv, Vector((-0.34, -0.18, 0.05)), Vector((0.34, 0.26, 0.12)), style='sedimentary', seed=2182, u_range=(0.02, 0.53), v_range=(0.02, 0.33))
 
-    # 8 golden arctic poppy stems rising from the cushion
-    for k in range(8):
-        yaw = k / 8 * 2 * math.pi + rng.uniform(-0.2, 0.2)
+    # 9 golden arctic poppy stems rising from the cushion
+    for k in range(9):
+        yaw = k / 9 * 2 * math.pi + rng.uniform(-0.2, 0.2)
         r = rng.uniform(0.08, 0.28)
-        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, 0.16))
+        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, 0.12))
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        h = rng.uniform(0.32, 0.48)
+        h = rng.uniform(0.32, 0.50)
         p1 = base + out * 0.10 + Vector((0, 0, h * 0.55))
         p2 = base + out * 0.18 + Vector((0, 0, h))
         arched_card(bm, uv, base, p1, p2, 0.14, 0.24, 0.22, side, u_range=(0.55, 1.0), v_range=(0.02, 0.98))
@@ -661,7 +683,6 @@ def build_tundra_dwarf_willow(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # 5 creeping woody krummholz stems biased downwind (+X) hugging close to the frost soil
     boughs = (
         (0.18, 0.84, 0.09, 0.22),
         (1.02, 0.72, 0.12, 0.26),
@@ -669,17 +690,17 @@ def build_tundra_dwarf_willow(mat):
         (3.60, 0.66, 0.07, 0.16),
         (5.05, 0.78, 0.11, 0.24),
     )
-    root = Vector((-0.14, 0.02, 0.01))
+    root = Vector((-0.14, 0.02, -0.02))
     for idx, (yaw, r_xy, z_elbow, z_tip) in enumerate(boughs):
         out = Vector((math.cos(yaw) + 0.28, math.sin(yaw), 0.0)).normalized()
         side = Vector((-out.y, out.x, 0.0))
         p0 = root + out * 0.04
         p1 = root + out * (r_xy * 0.50) + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, z_elbow))
         p2 = root + out * r_xy + Vector((0.0, 0.0, z_tip))
-        tube(bm, uv, [p0, p1, p2], [0.036, 0.022, 0.011], sides=3, u_range=(0.47, 0.53), v_range=(0.05, 0.80), cap_end=False)
+        organic_trunk_loft(bm, uv, [p0, p1, p2], [0.038, 0.022, 0.011], rng, sides=6, bark_ridges=4, ridge_depth=0.12, cap_end=False, u_range=(0.47, 0.53), v_range=(0.05, 0.80))
 
         twig = p1 + out * 0.22 + side * (0.20 if idx % 2 == 0 else -0.20) + Vector((0.0, 0.0, 0.06))
-        tube(bm, uv, [p1, twig], [0.018, 0.009], sides=3, u_range=(0.47, 0.53), v_range=(0.10, 0.75), cap_end=False)
+        tube(bm, uv, [p1, twig], [0.018, 0.009], sides=4, u_range=(0.47, 0.53), v_range=(0.10, 0.75), cap_end=False)
 
         leaf_spray_fan(bm, uv, p2 - out * 0.06, Vector((out.x, out.y, 0.28)).normalized(), 0.42, 0.44, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=0.2 if idx % 2 else -0.2, arch=0.06)
         leaf_spray_fan(bm, uv, twig - out * 0.04, Vector((twig.x - p1.x, twig.y - p1.y, 0.18)).normalized(), 0.36, 0.38, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=-0.4 if idx % 2 else 0.4, arch=0.04)
@@ -696,25 +717,30 @@ def build_swamp_pitcher(mat):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # 7 tall flaring 3D pitcher trumpets curving outward from the crown
+    # Hollow flaring 3D pitcher trumpets + peristome lip + articulated curved operculum hoods
     for k in range(7):
         yaw = k / 7 * 2 * math.pi + rng.uniform(-0.18, 0.18)
         reach = 0.14 if k == 0 else rng.uniform(0.28, 0.44)
         h = 0.88 if k == 0 else rng.uniform(0.58, 0.84)
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        p0 = out * 0.05 + Vector((0, 0, 0.02))
+        p0 = out * 0.05 + Vector((0, 0, -0.02))
         p1 = out * (reach * 0.48) + Vector((0, 0, h * 0.50))
-        p2 = out * (reach * 0.96) + Vector((0, 0, h * 0.86))
-        p3 = out * (reach * 0.78) + Vector((0, 0, h))
-        tube(bm, uv, [p0, p1, p2, p3], [0.024, 0.052, 0.088, 0.042],
-             sides=6, u_range=(0.02, 0.52), v_range=(0.04, 0.96), cap_end=True, rng=rng)
+        p2 = out * (reach * 0.96) + Vector((0, 0, h * 0.88))
+        tube(bm, uv, [p0, p1, p2], [0.024, 0.052, 0.084],
+             sides=9, u_range=(0.02, 0.52), v_range=(0.04, 0.92), cap_end=False, rng=rng)
+        # Flared rolled peristome collar + overarching lid hood
+        tube(bm, uv, [p2 - Vector((0, 0, 0.015)), p2, p2 + Vector((0, 0, 0.012))], [0.084, 0.098, 0.072], sides=9, u_range=(0.02, 0.52), v_range=(0.75, 0.96), cap_end=False)
+        neck0 = p2 - out * 0.065
+        lid_p = p2 + Vector((0, 0, 0.042))
+        tube(bm, uv, [neck0, lid_p], [0.018, 0.014], sides=5, u_range=(0.02, 0.52), v_range=(0.50, 0.90))
+        shaped_leaf(bm, uv, lid_p - out * 0.025, Vector((out.x * 0.9, out.y * 0.9, 0.36)).normalized(), 0.14, 0.12, profile='cordate', cup_depth=0.28, arch=0.14, droop=0.16, u_range=(0.02, 0.52), v_range=(0.68, 0.98))
 
     # 8 basal ruby sundew (Drosera) spoon-leaf cards
     for k in range(8):
         yaw = (k + 0.5) / 8 * 2 * math.pi
         out = Vector((math.cos(yaw), math.sin(yaw), 0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        p0 = out * 0.06 + Vector((0, 0, 0.02))
+        p0 = out * 0.06 + Vector((0, 0, -0.015))
         p1 = out * 0.28 + Vector((0, 0, 0.14))
         p2 = out * 0.50 + Vector((0, 0, 0.08))
         arched_card(bm, uv, p0, p1, p2, 0.10, 0.22, 0.16, side, u_range=(0.55, 1.0), v_range=(0.02, 0.98))

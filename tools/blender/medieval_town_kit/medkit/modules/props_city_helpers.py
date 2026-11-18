@@ -10,45 +10,45 @@ CITY_PROP_MIN_TRIS = 15200
 CITY_PROP_MAX_TRIS = 38000
 
 _MAT_RELIEF = {
-    'stone': 0.011,
-    'stone_ashlar': 0.008,
-    'stone_dressed': 0.007,
-    'stone_dark': 0.013,
-    'stone_granite': 0.012,
-    'stone_basalt': 0.012,
-    'stone_flag': 0.009,
-    'brick': 0.006,
-    'cobble': 0.012,
-    'rock': 0.018,
-    'earth': 0.016,
-    'sod': 0.014,
-    'snow': 0.014,
-    'ice': 0.009,
-    'timber': 0.006,
-    'timber_dark': 0.007,
-    'log': 0.009,
-    'wood_trim': 0.004,
-    'carved_wood': 0.005,
-    'planks': 0.005,
-    'bark': 0.010,
-    'roof': 0.007,
-    'roof_terracotta': 0.007,
-    'thatch': 0.012,
-    'thatch_reed': 0.013,
-    'plaster': 0.005,
-    'hide': 0.008,
-    'hide_red': 0.008,
-    'cloth_cream': 0.007,
-    'cloth_blue': 0.007,
-    'cloth_red': 0.007,
-    'rope': 0.006,
-    'bone': 0.007,
-    'iron': 0.0025,
-    'bronze': 0.0025,
-    'hold_bronze': 0.0025,
-    'gold': 0.002,
-    'foliage': 0.014,
-    'flowers': 0.012,
+    'stone': 0.006,
+    'stone_ashlar': 0.004,
+    'stone_dressed': 0.003,
+    'stone_dark': 0.007,
+    'stone_granite': 0.006,
+    'stone_basalt': 0.006,
+    'stone_flag': 0.005,
+    'brick': 0.003,
+    'cobble': 0.007,
+    'rock': 0.012,
+    'earth': 0.010,
+    'sod': 0.010,
+    'snow': 0.008,
+    'ice': 0.002,
+    'timber': 0.0,
+    'timber_dark': 0.0,
+    'log': 0.004,
+    'wood_trim': 0.0,
+    'carved_wood': 0.0,
+    'planks': 0.0,
+    'bark': 0.006,
+    'roof': 0.002,
+    'roof_terracotta': 0.002,
+    'thatch': 0.009,
+    'thatch_reed': 0.010,
+    'plaster': 0.0,
+    'hide': 0.005,
+    'hide_red': 0.005,
+    'cloth_cream': 0.004,
+    'cloth_blue': 0.004,
+    'cloth_red': 0.004,
+    'rope': 0.003,
+    'bone': 0.003,
+    'iron': 0.0,
+    'bronze': 0.0,
+    'hold_bronze': 0.0,
+    'gold': 0.0,
+    'foliage': 0.010,
+    'flowers': 0.008,
 }
 
 
@@ -82,10 +82,10 @@ def _noise3(x, y, z, seed):
 
 
 def enhance_city_ground_contact(name, b, skirt_spec, has_explicit):
-    """Enrich city prop base with sculpted stepped plinths, cobble kerbs, and soil aprons."""
+    """Ground city structures cleanly with chamfered stone kerb plinths instead of mud-blob rings."""
     if not b.verts:
         return
-    plinth_mat, apron_mat = next(
+    plinth_mat, _ = next(
         (v for prefix, v in skirt_spec.items() if name.startswith(prefix)),
         ('cobble', 'earth'),
     )
@@ -93,40 +93,21 @@ def enhance_city_ground_contact(name, b, skirt_spec, has_explicit):
     ys = [v.y for v in b.verts]
     cx = (min(xs) + max(xs)) * 0.5
     cy = (min(ys) + max(ys)) * 0.5
-    rx = min(1.38, max(0.38, (max(xs) - min(xs)) * 0.46))
-    ry = min(1.38, max(0.38, (max(ys) - min(ys)) * 0.46))
-    seed = sum(ord(c) * (i + 1) for i, c in enumerate(name))
+    rx = min(1.36, max(0.36, (max(xs) - min(xs)) * 0.45))
+    ry = min(1.36, max(0.36, (max(ys) - min(ys)) * 0.45))
 
     if name not in has_explicit:
-        b.box((cx - rx, cy - ry, -0.16), (cx + rx, cy + ry, 0.06), plinth_mat, skip=('-z',))
-
-    ring_count = 8 if detailed() else 4
-    for i in range(ring_count):
-        ang = 2.0 * math.pi * i / ring_count + (seed % 7) * 0.15
-        jitter_r = 0.88 + 0.10 * math.sin(i * 2.3 + seed)
-        px = cx + rx * jitter_r * math.cos(ang)
-        py = cy + ry * jitter_r * math.sin(ang)
-        mat = apron_mat if (i % 2 == 0 or not detailed()) else plinth_mat
-        rad = 0.15 if (i % 2 == 0) else 0.11
-        b.blob(
-            (px, py, 0.0),
-            rad,
-            mat,
-            subdiv=2 if detailed() else 1,
-            squash=(1.22, 0.96, 0.40),
-            jitter=0.22,
-            seed=seed + i * 13,
-        )
+        b.box((cx - rx, cy - ry, -0.16), (cx + rx, cy + ry, 0.05), plinth_mat, bevel=0.025, skip=('-z',))
 
     if detailed():
-        # Subtle recessed soil-transition kerb collar around the base for road/plaza blending
+        # Clean chamfered corner kerb stones anchored flush with pavement grade
         for sx in (-1, 1):
             for sy in (-1, 1):
-                kx = cx + sx * (rx * 0.84)
-                ky = cy + sy * (ry * 0.84)
+                kx = cx + sx * (rx * 0.88)
+                ky = cy + sy * (ry * 0.88)
                 b.box(
-                    (kx - 0.10, ky - 0.10, -0.08),
-                    (kx + 0.10, ky + 0.10, 0.07),
+                    (kx - 0.11, ky - 0.11, -0.08),
+                    (kx + 0.11, ky + 0.11, 0.06),
                     plinth_mat,
                     bevel=0.02,
                     skip=('-z',),
