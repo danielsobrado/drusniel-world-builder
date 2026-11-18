@@ -5,7 +5,7 @@ import yaml from 'js-yaml';
 import { compileYamlModule } from '../scripts/compiled-yaml-plugin.mjs';
 import { createWorldCommands, editorShortcut } from '../src/editor/ui/commands/EditorCommands.js';
 import { authoredSceneTree, flattenSceneTree, sceneRowWindow } from '../src/editor/ui/workspace/SceneOutliner.js';
-import { validateWorkspaceConfig, workspacePreferences } from '../src/editor/ui/workspace/WorkspaceConfig.js';
+import { clampOutlinerHeightPercent, validateWorkspaceConfig, workspacePreferences } from '../src/editor/ui/workspace/WorkspaceConfig.js';
 
 const filename = 'config/editor-workspaces.yaml';
 const source = readFileSync(new URL(`../${filename}`, import.meta.url), 'utf8');
@@ -15,6 +15,7 @@ test('workspace configuration compiles and invalid sizing or command IDs fail va
   assert.match(compileYamlModule(source, filename), /^export default /);
   assert.throws(() => compileYamlModule(source.replace('maxWidth: 400', 'maxWidth: 100'), filename), /panels.toolbox/);
   assert.throws(() => validateWorkspaceConfig(config, { get: () => undefined }), /workspaces.world.tools/);
+  assert.throws(() => validateWorkspaceConfig({ ...config, outliner: { ...config.outliner, maxHeightPercent: 95 } }), /outliner/);
 });
 
 test('workspace preferences recover from old or malformed browser values', () => {
@@ -24,9 +25,13 @@ test('workspace preferences recover from old or malformed browser values', () =>
   });
   assert.deepEqual(preferences, {
     workspace: 'world', theme: 'dark-forge', density: 'comfortable', compactPanel: null,
+    outlinerHeightPercent: 46,
     panels: { toolbox: { width: 180, visible: false }, inspector: { width: 300, visible: true } },
   });
   assert.equal(workspacePreferences(config, null).theme, 'professional-light');
+  assert.equal(workspacePreferences(config, { outlinerHeightPercent: 0 }).outlinerHeightPercent, 20);
+  assert.equal(workspacePreferences(config, { outlinerHeightPercent: 999 }).outlinerHeightPercent, 75);
+  assert.equal(clampOutlinerHeightPercent(50.7, config.outliner), 51);
 });
 
 test('keyboard and UI share commands with the same availability and active selection', () => {

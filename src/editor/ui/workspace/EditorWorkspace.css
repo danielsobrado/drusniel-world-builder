@@ -230,7 +230,10 @@
   font: 650 12px/1.25 var(--workspace-font);
 }
 .workspace-inspector { grid-area: 3 / 3; display: grid; grid-template-rows: minmax(0, 1fr); border-left: 1px solid var(--workspace-line); }
-.workspace-inspector.has-outliner { grid-template-rows: minmax(134px, 46%) minmax(0, 1fr); }
+.workspace-inspector.has-outliner { grid-template-rows: minmax(110px, var(--workspace-outliner-height, 46%)) 6px minmax(0, 1fr); }
+.workspace-outliner-splitter { background: var(--workspace-frame); border-block: 1px solid var(--workspace-line); cursor: row-resize; touch-action: none; }
+.workspace-outliner-splitter:is(:hover, :focus-visible, .is-dragging) { background: var(--workspace-accent); opacity: .7; }
+.workspace-inspector:not(.has-outliner) .workspace-outliner-splitter { display: none; }
 .workspace-scene, .workspace-inspector-section { display: flex; flex-direction: column; min-height: 0; }
 .workspace-filter { padding: 7px 8px; }
 .workspace-filter input { width: 100%; }

@@ -3,6 +3,10 @@ const THEMES = ['professional-light', 'dark-forge', 'glade'];
 const PANEL_NAMES = ['toolbox', 'inspector'];
 const STORAGE_KEY = 'drusniel:editor-workspace:v1';
 
+export function clampOutlinerHeightPercent(value, bounds) {
+  return Math.min(bounds.maxHeightPercent, Math.max(bounds.minHeightPercent, Math.round(value)));
+}
+
 export function validateWorkspaceConfig(config, commands) {
   const check = (condition, path) => {
     if (!condition) throw new Error(`Invalid editor-workspaces.yaml field: ${path}`);
@@ -17,6 +21,13 @@ export function validateWorkspaceConfig(config, commands) {
     check([minWidth, defaultWidth, maxWidth].every(Number.isSafeInteger)
       && 0 < minWidth && minWidth <= defaultWidth && defaultWidth <= maxWidth, `panels.${key}`);
   }
+  const outliner = config.outliner ?? {};
+  check([outliner.minHeightPercent, outliner.defaultHeightPercent, outliner.maxHeightPercent]
+    .every(Number.isSafeInteger)
+    && 10 <= outliner.minHeightPercent
+    && outliner.minHeightPercent <= outliner.defaultHeightPercent
+    && outliner.defaultHeightPercent <= outliner.maxHeightPercent
+    && outliner.maxHeightPercent <= 90, 'outliner');
   for (const key of WORKSPACES) {
     const workspace = config.workspaces?.[key];
     check(typeof workspace?.label === 'string' && workspace.label.trim(), `workspaces.${key}.label`);
@@ -42,6 +53,9 @@ export function workspacePreferences(config, value = {}) {
     theme: THEMES.includes(value?.theme) ? value.theme : config.themes.default,
     density: value?.density === 'comfortable' ? 'comfortable' : 'compact',
     compactPanel: PANEL_NAMES.includes(value?.compactPanel) ? value.compactPanel : null,
+    outlinerHeightPercent: Number.isFinite(value?.outlinerHeightPercent)
+      ? clampOutlinerHeightPercent(value.outlinerHeightPercent, config.outliner)
+      : config.outliner.defaultHeightPercent,
     panels: Object.fromEntries(PANEL_NAMES.map((key) => {
       const panel = config.panels[key];
       const saved = value?.panels?.[key];

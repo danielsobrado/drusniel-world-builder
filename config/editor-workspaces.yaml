@@ -8,6 +8,10 @@ layout:
 panels:
   toolbox: { defaultWidth: 240, minWidth: 180, maxWidth: 400 }
   inspector: { defaultWidth: 300, minWidth: 240, maxWidth: 500 }
+outliner:
+  defaultHeightPercent: 46
+  minHeightPercent: 20
+  maxHeightPercent: 75
 workspaces:
   world:
     label: World Editor

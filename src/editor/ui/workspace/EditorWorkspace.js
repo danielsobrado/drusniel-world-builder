@@ -5,7 +5,7 @@ import { PLAYER_MODE_EDIT } from '../../player/playerConstants.js';
 import { CommandSearch } from './CommandSearch.js';
 import { SceneOutliner } from './SceneOutliner.js';
 import { WorkspaceInspector } from './WorkspaceInspector.js';
-import { clampPanelWidth, loadWorkspacePreferences, saveWorkspacePreferences, validateWorkspaceConfig, workspacePreferences } from './WorkspaceConfig.js';
+import { clampOutlinerHeightPercent, clampPanelWidth, loadWorkspacePreferences, saveWorkspacePreferences, validateWorkspaceConfig, workspacePreferences } from './WorkspaceConfig.js';
 import './WorkspaceThemes.css';
 import './EditorWorkspace.css';
 
@@ -74,7 +74,9 @@ export class EditorWorkspace {
       <div data-workspace-categories></div><h2 class="workspace-panel-heading workspace-active-tool">Active Tool</h2>`);
     this.sidebar.prepend(this.toolbox);
     this.sidebar.id = 'workspace-toolbox';
-    this.inspector = makeElement('aside', 'workspace-inspector', '<section class="workspace-scene"></section><section class="workspace-inspector-section"></section>');
+    this.inspector = makeElement('aside', 'workspace-inspector', '<section class="workspace-scene" id="workspace-scene"></section><section class="workspace-inspector-section"></section>');
+    this.outlinerSplitter = this.createOutlinerSplitter();
+    this.inspector.firstElementChild.after(this.outlinerSplitter);
     this.inspector.setAttribute('aria-label', 'Scene and properties');
     this.inspector.id = 'workspace-inspector';
     this.inspector.classList.add('workspace-chrome');
@@ -195,6 +197,7 @@ export class EditorWorkspace {
     this.shell.dataset.editorTheme = this.themePicker.value = this.preferences.theme;
     this.shell.dataset.editorDensity = this.densityPicker.value = this.preferences.density;
     this.outliner.setRowHeight(this.preferences.density === 'compact' ? 26 : 34);
+    this.syncOutlinerSplit();
     this.syncPanels();
   }
 
@@ -309,6 +312,66 @@ export class EditorWorkspace {
       this.splitters[id].setAttribute('aria-valuenow', width);
     }
     this.queueRender();
+  }
+
+  syncOutlinerSplit() {
+    const height = this.preferences.outlinerHeightPercent;
+    this.inspector.style.setProperty('--workspace-outliner-height', `${height}%`);
+    this.outlinerSplitter.setAttribute('aria-valuenow', String(height));
+    this.outlinerSplitter.setAttribute('aria-valuetext', `${height}%`);
+  }
+
+  createOutlinerSplitter() {
+    const splitter = makeElement('div', 'workspace-outliner-splitter', '');
+    splitter.tabIndex = 0;
+    splitter.dataset.captureUi = '';
+    splitter.setAttribute('role', 'separator');
+    splitter.setAttribute('aria-orientation', 'horizontal');
+    splitter.setAttribute('aria-label', 'Resize scene outliner');
+    splitter.setAttribute('aria-controls', 'workspace-scene');
+    splitter.setAttribute('aria-valuemin', String(config.outliner.minHeightPercent));
+    splitter.setAttribute('aria-valuemax', String(config.outliner.maxHeightPercent));
+    const update = (value, persist = false) => {
+      this.preferences.outlinerHeightPercent = clampOutlinerHeightPercent(value, config.outliner);
+      this.syncOutlinerSplit();
+      if (persist) this.save();
+    };
+    const fromPointer = (event) => {
+      const bounds = this.inspector.getBoundingClientRect();
+      return bounds.height > 0 ? ((event.clientY - bounds.top) / bounds.height) * 100 : this.preferences.outlinerHeightPercent;
+    };
+    let dragging = false;
+    splitter.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      dragging = true;
+      splitter.setPointerCapture(event.pointerId);
+      splitter.focus();
+      splitter.classList.add('is-dragging');
+    });
+    splitter.addEventListener('pointermove', (event) => {
+      if (dragging) update(fromPointer(event));
+    });
+    splitter.addEventListener('pointerup', (event) => {
+      if (!dragging) return;
+      update(fromPointer(event), true);
+      dragging = false;
+      splitter.classList.remove('is-dragging');
+    });
+    splitter.addEventListener('lostpointercapture', () => {
+      if (dragging) this.save();
+      dragging = false;
+      splitter.classList.remove('is-dragging');
+    });
+    splitter.addEventListener('dblclick', () => update(config.outliner.defaultHeightPercent, true));
+    splitter.addEventListener('keydown', (event) => {
+      const delta = event.key === 'ArrowUp' ? -5 : event.key === 'ArrowDown' ? 5 : null;
+      if (delta !== null) update(this.preferences.outlinerHeightPercent + delta, true);
+      else if (event.key === 'Home') update(config.outliner.minHeightPercent, true);
+      else if (event.key === 'End') update(config.outliner.maxHeightPercent, true);
+      else return;
+      event.preventDefault();
+    });
+    return splitter;
   }
 
   createSplitter(id) {
