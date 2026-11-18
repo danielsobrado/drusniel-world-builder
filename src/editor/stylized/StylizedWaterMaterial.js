@@ -592,6 +592,7 @@ export function createStylizedWaterMaterial({
       groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterField.b),
       config: { ...DEFAULT_COAST_SWASH, ...water.coast }, clock: time,
       shorelineFadeDepth: water.optics.shorelineFadeDepth,
+      persistentEnabled: ['high', 'ultra'].includes(water.qualityTier),
       laceField: (uv) => texture(acquireWorldNoise().texture, uv).depth(int(WORLD_NOISE_LAYERS.water)).r });
     const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask)
       .mul(seaStateUniforms.storm.add(1)) : float(0);
