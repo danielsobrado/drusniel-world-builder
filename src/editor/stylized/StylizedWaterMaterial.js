@@ -37,7 +37,6 @@ import { resolveWaterQualityFeatures } from '../water/WaterQuality.js';
 import { assignWaterMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import {
   periodicFbm2,
-  periodicVoronoiF1,
   periodicVoronoiMetrics,
 } from './PeriodicNoiseNodes.js';
 import { referenceBlendTaps } from './PatternOrigins.js';
@@ -64,8 +63,6 @@ import { createFrozenWaterNodes } from './FrozenWaterNodes.js';
 import { rippleFieldSlope } from '../water/rippleFieldNode.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 
-const CAUSTIC_RING_RADIUS = 0.4;
-const CAUSTIC_AA_SCALE = 1.25;
 const FRESNEL_POWER = 5;
 const LOW_SURFACE_RAMP_MIN = 0.2;
 const LOW_SURFACE_RAMP_MAX = 0.8;
