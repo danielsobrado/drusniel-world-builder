@@ -13537,7 +13537,7 @@
       "scene": "/assets/ground/boreal/taiga-berry-moss-01.glb",
       "source": "assets/runtime-sources/ground/boreal/taiga-berry-moss-01.glb",
       "output": "public/assets/ground/boreal/taiga-berry-moss-01.glb",
-      "profile": "alphaCriticalScatter",
+      "profile": "standardScatter",
       "optimizerArgs": [
         "-cc",
         "-kn",
@@ -13555,17 +13555,17 @@
         "-tj",
         "1",
         "-tc",
-        "attrib",
+        "color,attrib",
         "-tu",
-        "color,normal"
+        "normal"
       ],
-      "cacheKey": "7f260b37259cec51054ede361e4c6e14c3343c244f32ce69c23bfbdf4d687f0e",
-      "sourceSha256": "56a3bc0ae2f114c1b176eec7b2487cdb5e6d5ea232b413aec7fe7e5c27351085",
-      "outputSha256": "331df44955c0bee3491f9f2706d6b778e5b64de679ca7a7f4efbbc412ea2d325",
-      "sourceBytes": 838976,
-      "outputBytes": 232960,
-      "gzipBytes": 182230,
-      "brotliBytes": 179948,
+      "cacheKey": "5abadb2c753d5b0e71e5c39d6df9a262c001f5f5cd0d71a94aeb22f71946ed92",
+      "sourceSha256": "376da6f0dfb77bad5523e4dc6016e66d55caf9ea20e71572d2de2726d7c42b3a",
+      "outputSha256": "604631418f4dfddb54f0f977cf0a59d93fd4df5db4232e1ab4f4d9331eea025a",
+      "sourceBytes": 1882916,
+      "outputBytes": 527956,
+      "gzipBytes": 438742,
+      "brotliBytes": 436373,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
@@ -13575,30 +13575,30 @@
         "images": 3,
         "skins": 0,
         "animations": 0,
-        "triangles": 16048,
-        "renderedTriangles": 16048,
+        "triangles": 20208,
+        "renderedTriangles": 20208,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "TaigaBerryMoss": 16048
+          "TaigaBerryMoss": 20208
         },
         "sceneBounds": {
           "min": [
-            -0.6202467083930969,
-            -0.10000000894069672,
-            -0.6373615264892578
+            -0.543250560760498,
+            -0.04500000178813934,
+            -0.4135661721229553
           ],
           "max": [
-            0.5703941583633423,
-            0.46000000834465027,
-            0.5922684669494629
+            0.5134379863739014,
+            0.4383210241794586,
+            0.5943434834480286
           ]
         },
-        "bufferBytes": 836756,
-        "logicalAccessorBytes": 632928,
-        "logicalVertexBytes": 536640,
-        "logicalIndexBytes": 96288,
-        "geometryBufferBytes": 632928,
-        "imageBufferBytes": 203826,
+        "bufferBytes": 1880736,
+        "logicalAccessorBytes": 1104768,
+        "logicalVertexBytes": 983520,
+        "logicalIndexBytes": 121248,
+        "geometryBufferBytes": 1104768,
+        "imageBufferBytes": 775965,
         "nodeNames": [
           "taiga-berry-moss-01",
           "taiga-berry-moss-01-mesh"
@@ -13619,30 +13619,30 @@
         "images": 3,
         "skins": 0,
         "animations": 0,
-        "triangles": 16048,
-        "renderedTriangles": 16048,
+        "triangles": 20208,
+        "renderedTriangles": 20208,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "TaigaBerryMoss": 16048
+          "TaigaBerryMoss": 20208
         },
         "sceneBounds": {
           "min": [
-            -0.620239258,
-            -0.0999984741,
-            -0.637359619
+            -0.543243408,
+            -0.0450000763,
+            -0.41355896
           ],
           "max": [
-            0.570404053,
-            0.460006714,
-            0.592254639
+            0.513427734,
+            0.438323975,
+            0.594329834
           ]
         },
-        "bufferBytes": 575588,
-        "logicalAccessorBytes": 337776,
-        "logicalVertexBytes": 241488,
-        "logicalIndexBytes": 96288,
-        "geometryBufferBytes": 346720,
-        "imageBufferBytes": 118060,
+        "bufferBytes": 1104112,
+        "logicalAccessorBytes": 563832,
+        "logicalVertexBytes": 442584,
+        "logicalIndexBytes": 121248,
+        "geometryBufferBytes": 580224,
+        "imageBufferBytes": 280828,
         "nodeNames": [
           "taiga-berry-moss-01",
           "taiga-berry-moss-01-mesh"
@@ -13673,8 +13673,8 @@
         "infos": 5,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 8944,
-        "triangles": 16048
+        "vertices": 16392,
+        "triangles": 20208
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -13688,17 +13688,17 @@
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 16048
+          "triangleCount": 20208
         },
         "data": {
-          "json": 3945,
-          "binary": 228868,
+          "json": 3924,
+          "binary": 523888,
           "buffers": {
-            "vertex": 92505,
-            "index": 18290,
+            "vertex": 221642,
+            "index": 21401,
             "animation": 0,
             "transform": 0,
-            "image": 118060
+            "image": 280828
           }
         }
       }
@@ -21247,15 +21247,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 167760132,
-    "outputBytes": 43432768,
-    "gzipBytes": 39873570,
-    "brotliBytes": 39730688,
-    "logicalSourceVertexBytes": 51776920,
-    "logicalOutputVertexBytes": 24873914,
-    "logicalSourceIndexBytes": 7709106,
-    "logicalOutputIndexBytes": 7468542,
-    "savedBytes": 124327364,
-    "reductionRatio": 0.741102
+    "sourceBytes": 168804072,
+    "outputBytes": 43727764,
+    "gzipBytes": 40130082,
+    "brotliBytes": 39987113,
+    "logicalSourceVertexBytes": 52223800,
+    "logicalOutputVertexBytes": 25075010,
+    "logicalSourceIndexBytes": 7734066,
+    "logicalOutputIndexBytes": 7493502,
+    "savedBytes": 125076308,
+    "reductionRatio": 0.740956
   }
 }

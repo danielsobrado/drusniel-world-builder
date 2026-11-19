@@ -12,7 +12,7 @@ presets:
         label: Two-storey stone workshop
         kind: curved-volume
         position: [0, -0.4]
-        footprint: { family: rounded, width: 7.4, depth: 4.6, cornerRadius: 0.12 }
+        footprint: { family: rounded, width: 7.4, depth: 4.6, cornerRadius: 0.03 }
         height: 4
         levels: 2
         thickness: 0.45
@@ -40,7 +40,7 @@ presets:
           - { id: left-upper, role: window, profile: square, bottom: 2.45, width: 0.85, height: 0.92, at: 0.9005 }
           - { id: left-gable-vent, role: slit, profile: square, bottom: 4.85, width: 0.36, height: 0.36, at: 0.9005 }
         features:
-          - { id: hearth-chimney, kind: chimney, at: 0.928, width: 1.15, depth: 1.05, height: 7.75, bottom: 0 }
+          - { id: hearth-chimney, kind: chimney, at: 0.928, width: 1.1, depth: 0.82, height: 7.75, bottom: 0 }
           - { id: front-right-buttress, kind: buttress, profile: curved, at: 0.515, width: 0.48, depth: 0.65, height: 1.35 }
           - { id: front-left-buttress, kind: buttress, profile: curved, at: 0.835, width: 0.48, depth: 0.65, height: 1.35 }
           - { id: back-plinth-buttress, kind: buttress, profile: stepped, at: 0.255, width: 1.4, depth: 0.42, height: 1.2 }
@@ -48,7 +48,7 @@ presets:
         label: Lean-to forge bay
         kind: curved-volume
         position: [-0.8, 2.75]
-        footprint: { family: rounded, width: 4.9, depth: 3.1, cornerRadius: 0.12 }
+        footprint: { family: rounded, width: 4.9, depth: 3.1, cornerRadius: 0.03 }
         height: 2.15
         levels: 1
         thickness: 0.42

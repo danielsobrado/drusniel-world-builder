@@ -76,7 +76,7 @@ def build_all_materials(tex_dir):
 
     # 16. Boreal Taiga: Reindeer Lichen, Feather Moss & Crimson Lingonberry Hummock
     alb, nrm = _tex_taiga_berry_moss(tex_dir)
-    mats['taiga_berry_moss'] = make_material('TaigaBerryMoss', alb, alpha=True, normal_image=nrm, roughness=0.76)
+    mats['taiga_berry_moss'] = make_material('TaigaBerryMoss', alb, alpha=False, normal_image=nrm, roughness=0.78)
 
     # 17. Boreal Taiga: Lichen Granite Slab & Frosted Spruce Deadfall
     alb, nrm = _tex_taiga_deadfall(tex_dir)
@@ -669,45 +669,106 @@ def _tex_tropical_monstera(tex_dir):
 
 
 def _tex_taiga_berry_moss(tex_dir):
-    """u < 0.52: creamy reindeer lichen (Cladonia) & feather moss cushion; u >= 0.52: lingonberry/bilberry sprigs with crimson berries."""
+    """512x512 opaque botanical atlas for 3D taiga lingonberry & feather-moss hummock:
+    - BL (u < 0.50, v < 0.50): boreal feather moss cushion with humus hollows & soft lichen flecks
+    - BR-low (u >= 0.50, v < 0.25): reddish-brown woody lingonberry stem bark
+    - BR-high (u >= 0.50, 0.25 <= v < 0.50): pale sage-cream Cladonia reindeer lichen
+    - TL (u < 0.50, v >= 0.50): leathery evergreen lingonberry leaf blade with midrib & veins
+    - TR (u >= 0.50, v >= 0.50): plump crimson lingonberry skin with subtle calyx dimple at v -> 1
+    """
     rng = np.random.default_rng(116)
-    w = h = 256
+    w = h = 512
     ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
     u, v = xs / w, 1.0 - ys / h
-    rgba = np.zeros((h, w, 4), dtype=np.float32)
-    noise = fbm(w, h, (10, 10), rng, 4)
-    fine = fbm(w, h, (20, 20), rng, 3)
 
-    # Hummock base u < 0.52: warm boreal feather moss with scattered sage-cream Cladonia lichen & peat foot
-    in_hummock = u < 0.52
-    is_lichen = (fine > 0.59) & (noise > 0.48) & (v > 0.28)
-    hum_col = np.where(
-        is_lichen[..., None],
-        np.array([0.46, 0.50, 0.41]) * (0.80 + 0.30 * fine[..., None]),
-        np.array([0.15, 0.26, 0.10]) * (0.72 + 0.46 * noise[..., None]),
-    )
-    peat_foot = in_hummock & (v < 0.22)
-    hum_col[peat_foot] = hum_col[peat_foot] * 0.5 + np.array([0.18, 0.14, 0.09]) * 0.5
-    rgba[in_hummock, :3] = np.clip(hum_col[in_hummock], 0, 1)
-    rgba[in_hummock, 3] = 1.0
+    coarse = fbm(w, h, (8, 8), rng, 4)
+    med = fbm(w, h, (20, 20), rng, 3)
+    fine = fbm(w, h, (48, 48), rng, 3)
+    micro = fbm(w, h, (96, 96), rng, 2)
+    bark_grain = fbm(w, h, (6, 36), rng, 4)
 
-    # Lingonberry sprig card u >= 0.52
-    ru = (u - 0.52) / 0.48
-    cx = 0.5 + 0.05 * np.sin(v * 8.0)
-    dist = np.abs(ru - cx)
-    env = 0.40 * np.sin(np.clip(v * 1.05, 0, 1) * math.pi) + 0.05
-    in_sprig = (u >= 0.52) & (dist < env) & (fine > 0.32 + 0.25 * (dist / np.maximum(env, 0.05)))
-    rgba[in_sprig, :3] = np.clip(np.array([0.15, 0.27, 0.11]) * (0.8 + 0.35 * fine[in_sprig, None]), 0, 1)
-    rgba[in_sprig, 3] = 1.0
-    # Glossy crimson lingonberries
-    for bu, bv in ((0.68, 0.55), (0.82, 0.64), (0.74, 0.78), (0.78, 0.84)):
-        br = np.sqrt((u - bu) ** 2 + (v - bv) ** 2)
-        berry = br < 0.048
-        rgba[berry, :3] = np.array([0.84, 0.12, 0.14]) * (1.1 - br[berry, None] * 6.0)
-        rgba[berry, 3] = 1.0
+    rgb = np.zeros((h, w, 3), dtype=np.float32)
+    height_map = np.full((h, w), 0.5, dtype=np.float32)
 
+    # 1. Bottom-left: boreal feather moss cushion (velvety olive-moss fronds + peaty crevices + soft lichen)
+    bl = (u < 0.50) & (v < 0.50)
+    moss_relief = 0.34 * coarse + 0.30 * med + 0.22 * fine + 0.14 * micro
+    moss_deep = np.array([0.055, 0.095, 0.035], dtype=np.float32)
+    moss_mid = np.array([0.14, 0.23, 0.075], dtype=np.float32)
+    moss_tip = np.array([0.27, 0.36, 0.12], dtype=np.float32)
+    peat_col = np.array([0.13, 0.095, 0.055], dtype=np.float32)
+    lichen_col = np.array([0.46, 0.50, 0.41], dtype=np.float32)
+
+    t_mid = np.clip((moss_relief - 0.28) / 0.30, 0.0, 1.0)[..., None]
+    t_tip = np.clip((moss_relief - 0.56) / 0.24, 0.0, 1.0)[..., None]
+    moss_c = moss_deep * (1.0 - t_mid) + moss_mid * t_mid
+    moss_c = moss_c * (1.0 - t_tip) + moss_tip * t_tip
+    # Fine feathery stipple contrast
+    moss_c *= (0.80 + 0.42 * micro[..., None])
+    # Subtle humus in deepest pockets
+    peat_w = np.clip((0.36 - moss_relief) / 0.18, 0.0, 1.0)[..., None] * 0.65
+    moss_c = moss_c * (1.0 - peat_w) + peat_col * peat_w
+    # Soft scattered pale Cladonia flecks (smooth blend, no hard stripes)
+    lichen_w = np.clip((med - 0.61) / 0.13, 0.0, 1.0) * np.clip((coarse - 0.50) / 0.18, 0.0, 1.0) * 0.68
+    moss_c = moss_c * (1.0 - lichen_w[..., None]) + lichen_col * lichen_w[..., None]
+    rgb[bl] = moss_c[bl]
+    height_map[bl] = moss_relief[bl] * 1.45
+
+    # 2. Bottom-right low: woody lingonberry stem bark
+    br_low = (u >= 0.50) & (v < 0.25)
+    bark_c = np.array([0.24, 0.15, 0.10], dtype=np.float32) * (0.68 + 0.62 * bark_grain[..., None])
+    bark_c += np.array([0.05, 0.02, 0.01], dtype=np.float32) * fine[..., None]
+    rgb[br_low] = bark_c[br_low]
+    height_map[br_low] = 0.65 * bark_grain[br_low] + 0.35 * fine[br_low]
+
+    # 3. Bottom-right high: pale sage-cream reindeer lichen (Cladonia)
+    br_high = (u >= 0.50) & (v >= 0.25) & (v < 0.50)
+    clad_relief = 0.50 * med + 0.50 * fine
+    clad_c = np.array([0.48, 0.52, 0.43], dtype=np.float32) * (0.78 + 0.44 * clad_relief[..., None])
+    rgb[br_high] = clad_c[br_high]
+    height_map[br_high] = clad_relief[br_high]
+
+    # 4. Top-left: leathery evergreen lingonberry leaf blade
+    tl = (u < 0.50) & (v >= 0.50)
+    lu = np.clip(u / 0.50, 0.0, 1.0)
+    lv = np.clip((v - 0.50) / 0.50, 0.0, 1.0)
+    mid_dist = np.abs(lu - 0.50)
+    midrib = np.exp(-((mid_dist / 0.042) ** 2)) * np.clip(1.15 - lv * 0.55, 0.0, 1.0)
+    # Subtle pinnate lateral veins curving outward and upward from the midrib
+    vein_phase = (lv * 7.5 - mid_dist * 3.6) * math.pi * 2.0
+    vein_ridge = np.power(0.5 + 0.5 * np.cos(vein_phase), 6.0) * np.exp(-((mid_dist - 0.22) / 0.22) ** 2) * np.sin(lv * math.pi)
+    leaf_base = np.array([0.11, 0.22, 0.07], dtype=np.float32)
+    leaf_blade = np.array([0.18, 0.32, 0.11], dtype=np.float32)
+    leaf_vein = np.array([0.27, 0.39, 0.15], dtype=np.float32)
+    leaf_blush = np.array([0.29, 0.20, 0.09], dtype=np.float32)
+
+    t_blade = np.clip(lv * 0.65 + mid_dist * 0.55, 0.0, 1.0)[..., None]
+    leaf_c = (leaf_base * (1.0 - t_blade) + leaf_blade * t_blade) * (0.86 + 0.28 * fine[..., None])
+    # Highlight midrib & faint lateral veins
+    vein_w = np.clip(midrib * 0.55 + vein_ridge * 0.22, 0.0, 0.65)[..., None]
+    leaf_c = leaf_c * (1.0 - vein_w) + leaf_vein * vein_w
+    # Subtle boreal autumn bronze tint along very outer margin/tip
+    margin_w = np.clip((lv - 0.78) / 0.22, 0.0, 1.0) * np.clip(fine * 1.1 - 0.25, 0.0, 1.0) * 0.40
+    leaf_c = leaf_c * (1.0 - margin_w[..., None]) + leaf_blush * margin_w[..., None]
+    rgb[tl] = leaf_c[tl]
+    height_map[tl] = 0.50 - midrib[tl] * 0.22 + vein_ridge[tl] * 0.08 + fine[tl] * 0.10
+
+    # 5. Top-right: plump glossy crimson lingonberry skin
+    tr = (u >= 0.50) & (v >= 0.50)
+    bv = np.clip((v - 0.50) / 0.50, 0.0, 1.0)
+    berry_deep = np.array([0.44, 0.03, 0.04], dtype=np.float32)
+    berry_ripe = np.array([0.74, 0.055, 0.065], dtype=np.float32)
+    berry_calyx = np.array([0.16, 0.04, 0.04], dtype=np.float32)
+    t_ripe = np.sin(np.clip(bv, 0.0, 1.0) * math.pi)[..., None]
+    berry_c = (berry_deep * (1.0 - t_ripe) + berry_ripe * t_ripe) * (0.92 + 0.14 * fine[..., None])
+    calyx_w = np.clip((bv - 0.88) / 0.10, 0.0, 1.0)[..., None]
+    berry_c = berry_c * (1.0 - calyx_w) + berry_calyx * calyx_w
+    rgb[tr] = berry_c[tr]
+    height_map[tr] = 0.52 + fine[tr] * 0.05 - calyx_w[..., 0][tr] * 0.18
+
+    rgba = np.concatenate([np.clip(rgb, 0.0, 1.0), np.ones((h, w, 1), dtype=np.float32)], axis=-1)
     alb = save_image('taiga_berry_moss_alb', rgba, os.path.join(tex_dir, 'taiga-berry-moss-alb.png'))
-    nrm = save_image('taiga_berry_moss_nrm', height_to_normal(fine * 0.6 + noise * 0.4, 2.2), os.path.join(tex_dir, 'taiga-berry-moss-nrm.png'), non_color=True)
+    nrm = save_image('taiga_berry_moss_nrm', height_to_normal(height_map, 2.0), os.path.join(tex_dir, 'taiga-berry-moss-nrm.png'), non_color=True)
     return alb, nrm
 
 

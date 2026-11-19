@@ -335,6 +335,22 @@ def layered_wear(bm, verts, material='wood', seed=1, intensity=1.0):
             v.co.y = cy + (p.y - cy) * flute * ablation
 
 
+def _bisect_closed(tmp, plane_co, plane_no):
+    if len(tmp.faces) < 4:
+        return
+    bmesh.ops.bisect_plane(
+        tmp,
+        geom=list(tmp.verts) + list(tmp.edges) + list(tmp.faces),
+        plane_co=plane_co,
+        plane_no=plane_no,
+        clear_outer=True,
+        clear_inner=False,
+    )
+    boundary = [e for e in tmp.edges if e.is_boundary]
+    if boundary:
+        bmesh.ops.holes_fill(tmp, edges=boundary)
+
+
 def structured_fracture(
     bm,
     center,
@@ -353,89 +369,138 @@ def structured_fracture(
     layers = max(1, int(strata_layers))
     added = []
 
-    for l_idx in range(layers):
+    # Define multi-lobe sub-masses for natural boulders/slabs/drifts so they never read as single boxes
+    if style in ('crag', 'erratic') and layers == 1 and max(sx, sy) > 0.45:
+        lobes = [
+            (0.0, 0.0, 0.0, 0.96, 0.94, 1.00, 0),
+            (0.24 * math.cos(seed * 1.3), 0.24 * math.sin(seed * 1.3), -0.10, 0.64, 0.60, 0.74, 1),
+            (-0.22 * math.sin(seed * 1.7), 0.22 * math.cos(seed * 1.7), -0.14, 0.58, 0.54, 0.66, 2),
+        ]
+    elif style in ('stone_slab', 'sedimentary', 'frost_drift') and layers == 1 and max(sx, sy) > 0.55:
+        lobes = [
+            (0.0, 0.0, 0.0, 0.96, 0.96, 1.00, 0),
+            (0.18 * math.cos(seed * 1.1), 0.18 * math.sin(seed * 1.1), -0.08, 0.72, 0.68, 0.80, 1),
+        ]
+    else:
+        lobes = [(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, i) for i in range(layers)]
+
+    for l_idx, (lx_f, ly_f, lz_f, wsx, wsy, wsz, sub_seed) in enumerate(lobes):
         tmp = bmesh.new()
-        if style in ('serac_fin', 'ice_block', 'stone_slab', 'carved_ashlar'):
+        layer_h = (sz / layers) * wsz
+        cur_sx = sx * wsx * ((1.0 - 0.05 * l_idx) if layers > 1 else 1.0)
+        cur_sy = sy * wsy * ((1.0 - 0.05 * l_idx) if layers > 1 else 1.0)
+        rx_h, ry_h, rz_h = cur_sx * 0.5, cur_sy * 0.5, layer_h * 0.5
+        s_val = seed * 13 + sub_seed * 7 + l_idx * 5
+
+        if style in ('serac_fin', 'ice_block', 'carved_ashlar'):
             bmesh.ops.create_cube(tmp, size=1.0)
             bmesh.ops.subdivide_edges(tmp, edges=list(tmp.edges), cuts=1, use_grid_fill=True)
+            bmesh.ops.scale(tmp, vec=(cur_sx, cur_sy, layer_h), verts=tmp.verts)
+        elif style in ('stone_slab', 'sedimentary', 'frost_drift'):
+            # Start from a 10-sided irregular prism cylinder so no 90-degree square corners ever appear
+            bmesh.ops.create_cone(tmp, cap_ends=True, cap_tris=True, segments=10, radius1=0.52, radius2=0.46, depth=1.0)
+            for v in tmp.verts:
+                ang = math.atan2(v.co.y, v.co.x)
+                wob = 1.0 + 0.11 * math.sin(ang * 3.0 + s_val * 0.7) + 0.07 * math.cos(ang * 2.0 - s_val * 1.1)
+                v.co.x *= cur_sx * wob
+                v.co.y *= cur_sy * wob
+                v.co.z *= layer_h
         else:
-            bmesh.ops.create_icosphere(tmp, subdivisions=1, radius=0.58)
-
-        layer_h = sz / layers
-        z_off = (l_idx - 0.5 * (layers - 1)) * (layer_h * 0.94)
-        shift_x = (0.04 * sx * math.sin(seed * 1.7 + l_idx * 2.1)) if layers > 1 else 0.0
-        shift_y = (0.04 * sy * math.cos(seed * 1.3 + l_idx * 1.9)) if layers > 1 else 0.0
-        scale_mul = (1.0 - 0.05 * l_idx) if layers > 1 else 1.0
-        bmesh.ops.scale(tmp, vec=(sx * scale_mul, sy * scale_mul, layer_h), verts=tmp.verts)
+            # crag / erratic / ore_matrix
+            bmesh.ops.create_icosphere(tmp, subdivisions=1, radius=0.56)
+            for v in tmp.verts:
+                ang = math.atan2(v.co.y, v.co.x)
+                wob = 1.0 + 0.12 * math.sin(ang * 3.0 + s_val * 0.9) + 0.08 * math.cos(ang * 4.0 + s_val * 1.4)
+                v.co.x *= cur_sx * wob
+                v.co.y *= cur_sy * wob
+                v.co.z *= layer_h
 
         if style == 'serac_fin':
-            # Sweeping curved knife-edged fin tapering with altitude and leaning along tilt
+            # Sweeping curved knife-edged fin tapering with altitude and leaning along tilt with flank ridges
             for v in tmp.verts:
-                zf = (v.co.z / max(layer_h, 1e-4)) + 0.5
+                zf = max(0.0, min(1.0, (v.co.z / max(layer_h, 1e-4)) + 0.5))
                 taper_x = 1.0 - 0.72 * (zf ** 1.35)
-                taper_y = 1.0 - 0.80 * (zf ** 1.20)
-                v.co.x = v.co.x * taper_x + tilt[0] * zf + 0.06 * sx * math.sin(zf * math.pi)
-                v.co.y = v.co.y * taper_y + tilt[1] * zf
+                taper_y = 1.0 - 0.78 * (zf ** 1.20)
+                curve_x = 0.08 * cur_sx * math.sin(zf * math.pi)
+                curve_y = 0.06 * cur_sy * math.cos(zf * math.pi * 0.85)
+                v.co.x = v.co.x * taper_x + tilt[0] * zf + curve_x
+                v.co.y = v.co.y * taper_y + tilt[1] * zf + curve_y
 
         planes = []
+        eff_rz = max(rz_h, min(rx_h, ry_h) * 0.58)
         if style == 'carved_ashlar':
             if chip_edges:
                 planes = [
-                    (Vector((0.46 * sx, 0.44 * sy, 0.42 * layer_h)), Vector((0.7, 0.7, 0.5)).normalized()),
-                    (Vector((-0.46 * sx, -0.45 * sy, 0.43 * layer_h)), Vector((-0.7, -0.6, 0.5)).normalized()),
+                    (Vector((0.45 * cur_sx, 0.43 * cur_sy, 0.40 * layer_h)), Vector((0.68, 0.68, 0.52)).normalized()),
+                    (Vector((-0.45 * cur_sx, -0.44 * cur_sy, 0.41 * layer_h)), Vector((-0.68, -0.62, 0.50)).normalized()),
+                    (Vector((0.46 * cur_sx, -0.43 * cur_sy, 0.42 * layer_h)), Vector((0.65, -0.65, 0.48)).normalized()),
+                    (Vector((0.0, -0.47 * cur_sy, 0.44 * layer_h)), Vector((0.12, -0.78, 0.61)).normalized()),
                 ]
-        elif style in ('stone_slab', 'sedimentary'):
-            for k in range(7):
-                ang = k * 2.39996 + seed * 0.91 + l_idx * 1.4
-                elev = 0.25 + 0.65 * ((k % 3) / 2.0)
-                n = Vector((math.cos(ang) * math.cos(elev), math.sin(ang) * math.cos(elev), math.sin(elev))).normalized()
-                frac = 0.48 + 0.06 * math.sin(seed * 2.3 + k)
-                plane_co = Vector((n.x * sx * frac, n.y * sy * frac, n.z * layer_h * frac))
-                plane_no = Vector((n.x / max(sx, 1e-4), n.y / max(sy, 1e-4), n.z / max(layer_h, 1e-4))).normalized()
-                planes.append((plane_co, plane_no))
+        elif style in ('stone_slab', 'sedimentary', 'frost_drift'):
+            # 8 evenly distributed perimeter cleavage facets + 2 broad upper shelf planes
+            for k in range(8):
+                ang = (k / 8.0) * math.tau + 0.22 * math.sin(s_val + k * 1.7)
+                elev = 0.24 + 0.34 * ((k % 3) / 2.0)
+                ca, sa = math.cos(ang), math.sin(ang)
+                ce, se = math.cos(elev), math.sin(elev)
+                frac = 0.84 + 0.08 * math.sin(s_val * 1.9 + k * 2.1)
+                p_co = Vector((ca * ce * rx_h * frac, sa * ce * ry_h * frac, se * rz_h * frac))
+                p_no = Vector((ca * ce / max(rx_h, 1e-4), sa * ce / max(ry_h, 1e-4), se / max(eff_rz, 1e-4))).normalized()
+                planes.append((p_co, p_no))
+            # Broad tilted top cleavage plane
+            t_ang = s_val * 0.8
+            planes.append((
+                Vector((0.0, 0.0, rz_h * 0.88)),
+                Vector((0.14 * math.cos(t_ang), 0.14 * math.sin(t_ang), 0.98)).normalized(),
+            ))
         elif style == 'ice_block':
             planes = [
-                (Vector((0.47 * sx, 0.0, 0.44 * layer_h)), Vector((0.55, 0.12, 0.82)).normalized()),
-                (Vector((-0.46 * sx, 0.42 * sy, 0.42 * layer_h)), Vector((-0.65, 0.65, 0.40)).normalized()),
-                (Vector((0.44 * sx, -0.44 * sy, -0.42 * layer_h)), Vector((0.68, -0.62, -0.40)).normalized()),
+                (Vector((0.47 * cur_sx, 0.0, 0.44 * layer_h)), Vector((0.55, 0.12, 0.82)).normalized()),
+                (Vector((-0.46 * cur_sx, 0.42 * cur_sy, 0.42 * layer_h)), Vector((-0.65, 0.65, 0.40)).normalized()),
+                (Vector((0.44 * cur_sx, -0.44 * cur_sy, -0.42 * layer_h)), Vector((0.68, -0.62, -0.40)).normalized()),
             ]
         elif style == 'serac_fin':
             planes = [
-                (Vector((0.28 * sx + tilt[0] * 0.5, 0.22 * sy + tilt[1] * 0.5, 0.40 * layer_h)), Vector((0.48, 0.58, 0.66)).normalized()),
-                (Vector((-0.26 * sx + tilt[0] * 0.7, -0.20 * sy + tilt[1] * 0.7, 0.36 * layer_h)), Vector((-0.55, -0.52, 0.65)).normalized()),
-                (Vector((tilt[0] * 0.9, 0.18 * sy + tilt[1] * 0.9, 0.46 * layer_h)), Vector((0.15, 0.72, 0.68)).normalized()),
+                (Vector((0.28 * cur_sx + tilt[0] * 0.5, 0.22 * cur_sy + tilt[1] * 0.5, 0.40 * layer_h)), Vector((0.48, 0.58, 0.66)).normalized()),
+                (Vector((-0.26 * cur_sx + tilt[0] * 0.7, -0.20 * cur_sy + tilt[1] * 0.7, 0.36 * layer_h)), Vector((-0.55, -0.52, 0.65)).normalized()),
+                (Vector((tilt[0] * 0.9, 0.18 * cur_sy + tilt[1] * 0.9, 0.46 * layer_h)), Vector((0.15, 0.72, 0.68)).normalized()),
+                (Vector((0.34 * cur_sx + tilt[0] * 0.3, -0.24 * cur_sy, 0.12 * layer_h)), Vector((0.62, -0.58, 0.52)).normalized()),
             ]
         else:
-            # crag / erratic / ore_matrix / frost_drift
-            for k in range(9):
-                ang = k * 2.39996 + seed * 1.13 + l_idx
-                elev = -0.25 + 1.35 * ((k % 5) / 4.0)
-                n = Vector((math.cos(ang) * math.cos(elev), math.sin(ang) * math.cos(elev), math.sin(elev))).normalized()
-                frac = 0.44 + 0.10 * math.sin(seed * 3.1 + k * 1.9)
-                plane_co = Vector((n.x * sx * frac, n.y * sy * frac, n.z * layer_h * frac))
-                plane_no = Vector((n.x / max(sx, 1e-4), n.y / max(sy, 1e-4), n.z / max(layer_h, 1e-4))).normalized()
-                planes.append((plane_co, plane_no))
+            # crag / erratic / ore_matrix: 8 sector-distributed cleavage planes + 2 crown facets
+            for k in range(8):
+                ang = (k / 8.0) * math.tau + 0.28 * math.cos(s_val + k * 2.3)
+                elev = -0.15 + 0.85 * ((k % 4) / 3.0)
+                ca, sa = math.cos(ang), math.sin(ang)
+                ce, se = math.cos(elev), math.sin(elev)
+                frac = 0.82 + 0.10 * math.sin(s_val * 2.7 + k * 1.9)
+                p_co = Vector((ca * ce * rx_h * frac, sa * ce * ry_h * frac, se * rz_h * frac))
+                p_no = Vector((ca * ce / max(rx_h, 1e-4), sa * ce / max(ry_h, 1e-4), se / max(eff_rz, 1e-4))).normalized()
+                planes.append((p_co, p_no))
+            for k_top in range(2):
+                ang = s_val * 1.1 + k_top * math.pi
+                planes.append((
+                    Vector((0.18 * rx_h * math.cos(ang), 0.18 * ry_h * math.sin(ang), rz_h * 0.84)),
+                    Vector((0.28 * math.cos(ang), 0.28 * math.sin(ang), 0.92)).normalized(),
+                ))
 
         for p_co, p_no in planes:
-            if len(tmp.faces) < 6:
-                break
-            bmesh.ops.bisect_plane(
-                tmp,
-                geom=list(tmp.verts) + list(tmp.edges) + list(tmp.faces),
-                plane_co=p_co,
-                plane_no=p_no,
-                clear_outer=True,
-                clear_inner=False,
-            )
-            boundary = [e for e in tmp.edges if e.is_boundary]
-            if boundary:
-                bmesh.ops.holes_fill(tmp, edges=boundary)
+            _bisect_closed(tmp, p_co, p_no)
 
         wear_mat = 'ice' if style in ('ice_block', 'serac_fin', 'frost_drift') else 'stone'
         if style != 'ice_block':
-            layered_wear(tmp, list(tmp.verts), material=wear_mat, seed=seed + l_idx, intensity=0.8)
+            layered_wear(tmp, list(tmp.verts), material=wear_mat, seed=s_val, intensity=0.8)
         bmesh.ops.triangulate(tmp, faces=tmp.faces)
         tmp.normal_update()
+
+        if layers > 1:
+            z_off = (l_idx - 0.5 * (layers - 1)) * ((sz / layers) * 0.94)
+            shift_x = 0.04 * sx * math.sin(seed * 1.7 + l_idx * 2.1)
+            shift_y = 0.04 * sy * math.cos(seed * 1.3 + l_idx * 1.9)
+        else:
+            z_off = lz_f * sz
+            shift_x = lx_f * sx
+            shift_y = ly_f * sy
 
         offset = c_vec + Vector((shift_x, shift_y, z_off))
         v_map = {v: bm.verts.new(v.co + offset) for v in tmp.verts}
@@ -476,20 +541,37 @@ def _build_prism_crystal(
     u0, u1, v0, v1 = zone_uv_bounds(quad)
     mid_u = 0.5 * (u0 + u1)
 
-    stations = [0.0, 0.48, 0.52, 0.86] if stepped else [0.0, 0.52, 0.88]
-    r_factors = [1.0, 0.94, 0.84, 0.78] if stepped else [1.0, 0.90, 0.78]
+    if stepped and tip_chip:
+        stations = [0.0, 0.48, 0.51, 0.82, 0.94]
+        r_factors = [1.0, 1.02, 0.89, 0.92, 0.42]
+    elif stepped:
+        stations = [0.0, 0.48, 0.51, 0.83]
+        r_factors = [1.0, 1.02, 0.90, 0.93]
+    elif tip_chip:
+        stations = [0.0, 0.52, 0.82, 0.94]
+        r_factors = [1.0, 0.98, 0.94, 0.44]
+    else:
+        stations = [0.0, 0.52, 0.84]
+        r_factors = [1.0, 0.98, 0.95]
     rings = []
     face_centers = []
 
     for st_idx, (frac, rf) in enumerate(zip(stations, r_factors)):
         ring = []
+        is_shoulder = st_idx >= len(stations) - (2 if tip_chip else 1)
         for s in range(sides):
             a = (s / sides) * math.tau
             ang_wob = 1.0 + 0.09 * math.sin(a * 2.0 + r0 * 9.0)
             rad_x = (r0 + (r1 - r0) * frac) * rf * ang_wob
             rad_y = rad_x * flatness
             local_rad = tx * (math.cos(a) * rad_x) + ty * (math.sin(a) * rad_y)
-            h_skew = (chisel_skew * 0.4 * length * math.cos(a - 0.5)) if st_idx == len(stations) - 1 else 0.0
+            if tip_chip and st_idx == len(stations) - 1:
+                h_skew = chisel_skew * 0.28 * length * math.cos(a - 0.35)
+                local_rad += tx * (r1 * 0.18)
+            elif is_shoulder:
+                h_skew = chisel_skew * 0.22 * length * math.cos(a - 0.5)
+            else:
+                h_skew = 0.0
             v = bm.verts.new(b_vec + d * (length * frac + h_skew) + local_rad)
             ring.append(v)
         rings.append(ring)
@@ -503,8 +585,9 @@ def _build_prism_crystal(
                 fc_low = b_vec + d * (length * collar_frac) + fn * (r0 * 0.90)
                 face_centers.append((fc_low, fn))
 
-    apex_off = tx * (r1 * 0.25) if tip_chip else Vector((0, 0, 0))
-    apex = bm.verts.new(b_vec + d * (length * (1.03 + chisel_skew * 0.3)) + apex_off)
+    apex_off = (tx * (r1 * 0.30) - ty * (r1 * 0.12)) if tip_chip else Vector((0, 0, 0))
+    apex_h = length * (0.99 + chisel_skew * 0.18) if tip_chip else length * (1.03 + chisel_skew * 0.25)
+    apex = bm.verts.new(b_vec + d * apex_h + apex_off)
     base_center = bm.verts.new(b_vec)
     added = []
 

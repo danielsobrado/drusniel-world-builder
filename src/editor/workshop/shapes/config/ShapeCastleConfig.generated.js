@@ -3063,7 +3063,7 @@ export const SHAPE_CRAFT_PRESETS = Object.freeze([
           "family": "rounded",
           "width": 7.4,
           "depth": 4.6,
-          "cornerRadius": 0.12
+          "cornerRadius": 0.03
         },
         "height": 4,
         "levels": 2,
@@ -3180,8 +3180,8 @@ export const SHAPE_CRAFT_PRESETS = Object.freeze([
             "id": "hearth-chimney",
             "kind": "chimney",
             "at": 0.928,
-            "width": 1.15,
-            "depth": 1.05,
+            "width": 1.1,
+            "depth": 0.82,
             "height": 7.75,
             "bottom": 0
           },
@@ -3226,7 +3226,7 @@ export const SHAPE_CRAFT_PRESETS = Object.freeze([
           "family": "rounded",
           "width": 4.9,
           "depth": 3.1,
-          "cornerRadius": 0.12
+          "cornerRadius": 0.03
         },
         "height": 2.15,
         "levels": 1,

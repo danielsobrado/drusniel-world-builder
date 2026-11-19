@@ -119,7 +119,7 @@ const registry = new Map([
     const width = Math.max(0.6, Math.min(2.4, f.width));
     const depth = Math.max(0.35, Math.min(1.6, f.depth));
     const bottom = Math.min(f.bottom ?? 0, p.height);
-    const [cx, , cz] = offset(frame, depth * (bottom <= 0.15 ? 0.28 : 0.2), p.elevation + bottom);
+    const [cx, , cz] = offset(frame, depth * (bottom <= 0.15 ? 0.14 : 0.2), p.elevation + bottom);
     const roofY = p.roof && !host.roofReplaced
       ? createShapeRoofSurface(host).heightAt(cx, cz)
       : p.elevation + p.height;

@@ -1,3 +1,4 @@
+import { pointInShape } from './ShapeEnvelope.js';
 import { shapeStoneTint, shapeStoneTone } from './ShapeMasonryCourses.js';
 
 function taperedBox(mesh, [cx, y0, cz], [w0, d0], [w1, d1], height, color, detail = 2, [fx, fz] = [0, 1], [tx, tz] = [1, 0]) {
@@ -61,9 +62,11 @@ function addRoofFlashing(meshes, [cx, roofY, cz], [w, d], surface, fx, fz, tx, t
     [cx + tx * iw + fx * id, cz + tz * iw + fz * id],
     [cx - tx * iw + fx * id, cz - tz * iw + fz * id],
   ].map(([x, z]) => [x, Math.max(roofY, surface.heightAt(x, z) + 0.14), z]);
+  const eaves = surface.outline?.map((v) => [v[0], v[2]]);
   const ccw = tx * fz - tz * fx < 0;
   for (let i = 0; i < 4; i++) {
     const j = (i + 1) % 4;
+    if (eaves && !pointInShape([(outer[i][0] + outer[j][0]) * 0.5, (outer[i][2] + outer[j][2]) * 0.5], eaves)) continue;
     const quad = [outer[i], outer[j], inner[j], inner[i]];
     meshes.flashing.quad(...(ccw ? quad : quad.toReversed()), [0.84, 0.89, 0.92]);
   }

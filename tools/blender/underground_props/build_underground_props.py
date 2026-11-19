@@ -243,40 +243,44 @@ def _add_sculpted_mushroom_cap(
     sides=18,
     gill_count=18,
 ):
-    """Build a thick sculpted asymmetrical mushroom cap with irregular rim & 3D underside gills."""
+    """Build a thick sculpted asymmetrical mushroom cap with radial ribs, irregular rim & deep 3D underside gills."""
     uv_layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new('UVMap')
     flat_layer = bm.faces.layers.int.get('aaa_flat') or bm.faces.layers.int.new('aaa_flat')
     c_vec = Vector(center)
     u_c0, u_c1, v_c0, v_c1 = zone_uv_bounds(cap_quad)
     u_g0, u_g1, v_g0, v_g1 = zone_uv_bounds(gill_quad)
 
-    # Outer dome profile (rim underside -> thick rolled margin -> mid shoulder -> crown -> apex)
+    # Outer dome profile (recessed underside collar -> rolled margin lip -> mid terrace -> upper ribbed crown)
     rings_spec = (
-        (0.88, -0.10, True),   # recessed inner underside collar
-        (1.00, -0.04, False),  # thick lower margin lip
-        (1.03, 0.08, False),   # rolled outer rim thickness
-        (0.82, 0.44, False),   # mid shoulder
-        (0.46, 0.80, False),   # upper dome
-        (0.18, 0.97, False),   # crown collar
+        (0.76, -0.14, True),   # deep recessed inner underside gill cavity
+        (0.98, -0.06, False),  # lower scalloped margin lip
+        (1.04, 0.08, False),   # thick rolled outer rim edge
+        (0.84, 0.42, False),   # mid terrace shoulder
+        (0.50, 0.78, False),   # upper ribbed dome
+        (0.20, 0.96, False),   # crown umbo collar
     )
     rings = []
-    rim_outer_pts = []
     for r_idx, (rf, zf, is_under) in enumerate(rings_spec):
         row = []
         for s in range(sides):
             a = (s / sides) * math.tau
-            scallop = 1.0 + 0.12 * math.sin(a * 3.0 + seed * 0.9) + 0.06 * math.cos(a * 5.0 - seed * 1.4) + 0.03 * math.sin(a * 7.0 + seed)
-            rr = radius * rf * scallop
-            zz = height * (zf + 0.06 * math.sin(a * 2.0 + seed * 0.7) * rf)
+            scallop = (
+                1.0
+                + 0.14 * math.sin(a * 3.0 + seed * 0.9)
+                + 0.08 * math.cos(a * 5.0 - seed * 1.4)
+                + 0.04 * math.sin(a * 7.0 + seed)
+            )
+            rib = 0.045 * math.cos(a * max(6, sides // 2)) * (0.4 + 0.6 * rf)
+            rr = radius * (rf + rib) * scallop
+            droop = 0.09 * math.sin(a * 2.0 + seed * 0.7) * rf + 0.05 * math.cos(a * 3.0 - seed) * (rf ** 2)
+            zz = height * (zf + droop + rib * 0.55)
             pt = c_vec + Vector((math.cos(a) * rr, math.sin(a) * rr, zz))
             v = bm.verts.new(pt)
             row.append((v, a, is_under, pt))
-            if r_idx == 1:
-                rim_outer_pts.append(pt)
         rings.append(row)
 
-    top_apex = bm.verts.new(c_vec + Vector((0.02 * radius, -0.01 * radius, height * 1.03)))
-    under_apex = bm.verts.new(c_vec + Vector((0.0, 0.0, height * 0.22)))
+    top_apex = bm.verts.new(c_vec + Vector((0.03 * radius, -0.02 * radius, height * 1.05)))
+    under_apex = bm.verts.new(c_vec + Vector((0.0, 0.0, height * 0.16)))
 
     for r_idx in range(len(rings) - 1):
         ra, rb = rings[r_idx], rings[r_idx + 1]
@@ -306,18 +310,19 @@ def _add_sculpted_mushroom_cap(
         for loop in fb.loops:
             loop[uv_layer].uv = (0.5 * (u_g0 + u_g1), v_g0 + 0.04)
 
-    # 3D radial lamellae gill blades radiating underneath cap from stipe collar to rim
+    # Prominent 3D radial lamellae gill blades radiating underneath cap from stipe collar to rim
     for g in range(gill_count):
         a = (g / gill_count) * math.tau + 0.12 * seed
-        scallop = 1.0 + 0.12 * math.sin(a * 3.0 + seed * 0.9) + 0.06 * math.cos(a * 5.0 - seed * 1.4)
-        z_rim = height * (-0.02 + 0.05 * math.sin(a * 2.0 + seed * 0.7))
-        p_in = c_vec + Vector((math.cos(a) * radius * 0.22, math.sin(a) * radius * 0.22, height * 0.12))
-        p_mid = c_vec + Vector((math.cos(a) * radius * 0.62 * scallop, math.sin(a) * radius * 0.62 * scallop, height * 0.04))
-        p_out = c_vec + Vector((math.cos(a) * radius * 0.94 * scallop, math.sin(a) * radius * 0.94 * scallop, z_rim))
+        scallop = 1.0 + 0.14 * math.sin(a * 3.0 + seed * 0.9) + 0.08 * math.cos(a * 5.0 - seed * 1.4)
+        droop = 0.09 * math.sin(a * 2.0 + seed * 0.7)
+        z_rim = height * (-0.05 + droop)
+        p_in = c_vec + Vector((math.cos(a) * radius * 0.18, math.sin(a) * radius * 0.18, -height * 0.18))
+        p_mid = c_vec + Vector((math.cos(a) * radius * 0.58 * scallop, math.sin(a) * radius * 0.58 * scallop, -height * 0.07 + height * droop * 0.5))
+        p_out = c_vec + Vector((math.cos(a) * radius * 0.95 * scallop, math.sin(a) * radius * 0.95 * scallop, z_rim))
         profile_sweep(
             bm,
             [p_in, p_mid, p_out],
-            [(0.012, radius * 0.032), (0.014, radius * 0.045), (0.008, radius * 0.018)],
+            [(0.016, radius * 0.048), (0.018, radius * 0.058), (0.010, radius * 0.024)],
             profile='rect_chamfer',
             sides=6,
             quad=gill_quad,
@@ -330,12 +335,14 @@ def _add_sculpted_mushroom_cap(
 # ---------------------------------------------------------------------------
 def build_mine_ore_hopper_chute():
     bm = bmesh.new()
-    # Floor sill sleepers + 4 uneven hand-hewn batter posts with iron collars & wooden pegs
-    for sy in (-0.52, 0.52):
-        timber_joinery(bm, (-0.78, sy, 0.04), (0.78, sy, 0.04), width=0.14, depth=0.12, quad=1, bow=0.01, pegs=True)
+    # Ground sill frame + lower rock-and-ore receiving crib bed between the 4 timber legs
+    for sy in (-0.54, 0.54):
+        timber_joinery(bm, (-0.78, sy, 0.05), (0.78, sy, 0.05), width=0.14, depth=0.12, quad=1, bow=0.01, pegs=True)
     for sx in (-0.64, 0.64):
+        timber_joinery(bm, (sx, -0.54, 0.05), (sx, 0.54, 0.05), width=0.14, depth=0.12, quad=1, bow=0.008, pegs=True)
         for sy in (-0.52, 0.52):
-            timber_joinery(bm, (sx, sy, 0.02), (sx * 0.88, sy * 0.88, 1.48), width=0.16, depth=0.16, quad=1, bow=0.015, wear_seed=int(sx * 10 + sy * 5), tenon_ends=True, pegs=True, iron_straps=True, bracket_ends=True)
+            bow_v = 0.018 if sx * sy > 0 else -0.014
+            timber_joinery(bm, (sx, sy, 0.02), (sx * 0.88, sy * 0.88, 1.48), width=0.16, depth=0.16, quad=1, bow=bow_v, wear_seed=int(sx * 10 + sy * 5), tenon_ends=True, pegs=True, iron_straps=True, bracket_ends=True)
         # Side X-braces + bolted central iron gusset plate
         timber_joinery(bm, (sx, -0.50, 0.16), (sx * 0.90, 0.46, 1.32), width=0.09, depth=0.09, quad=1, bow=0.008, pegs=True)
         timber_joinery(bm, (sx, 0.50, 0.16), (sx * 0.90, -0.46, 1.32), width=0.09, depth=0.09, quad=1, bow=-0.008, pegs=True)
@@ -345,49 +352,48 @@ def build_mine_ore_hopper_chute():
     timber_joinery(bm, (-0.62, 0.48, 0.58), (0.62, 0.48, 0.58), width=0.12, depth=0.12, quad=1, pegs=True)
     timber_joinery(bm, (-0.62, -0.46, 0.98), (0.62, -0.46, 0.98), width=0.13, depth=0.13, quad=1, iron_straps=True)
 
-    # True flared trapezoidal hopper funnel with interior metal wear plates & corner bolts
-    add_flared_hopper_box(bm, (0.0, 0.0, 1.36), (0.94, 0.82), (1.56, 1.28), height=0.58, wall_t=0.08, quad_wood=1, quad_metal=2, wear_plates=True)
+    # True flared trapezoidal hopper funnel with interior/exterior metal wear plates & corner bolts
+    add_flared_hopper_box(bm, (0.0, 0.0, 1.36), (0.98, 0.86), (1.62, 1.34), height=0.60, wall_t=0.085, quad_wood=1, quad_metal=2, wear_plates=True)
 
-    # Slanted iron-lined discharge chute + cheek walls + pivoted sliding gate lever
-    add_chamfered_box(bm, (0.0, -0.28, 1.12), (1.22, 1.46, 0.10), quad=2, rx=0.42, bevel=0.012)
+    # Slanted iron-lined discharge chute + bolted cheek walls + pivoted sliding gate lever
+    add_chamfered_box(bm, (0.0, -0.28, 1.10), (1.24, 1.48, 0.10), quad=2, rx=0.42, bevel=0.012)
     for cx in (-0.58, 0.58):
-        add_chamfered_box(bm, (cx, -0.30, 1.24), (0.08, 1.44, 0.28), quad=1, rx=0.42, bevel=0.01, wear='wood')
-    add_chamfered_box(bm, (0.0, -0.58, 1.28), (1.10, 0.06, 0.26), quad=2, rx=0.42, bevel=0.01)
+        add_chamfered_box(bm, (cx, -0.30, 1.22), (0.09, 1.46, 0.30), quad=1, rx=0.42, bevel=0.01, wear='wood')
+        add_chamfered_box(bm, (cx * 1.03, -0.30, 1.32), (0.11, 1.46, 0.07), quad=2, rx=0.42, bevel=0.008)
+    add_chamfered_box(bm, (0.0, -0.58, 1.28), (1.12, 0.06, 0.26), quad=2, rx=0.42, bevel=0.01)
     # Pivot bracket + quadrant lever arm
     add_chamfered_box(bm, (0.68, -0.34, 1.24), (0.12, 0.16, 0.14), quad=2, bevel=0.01)
     timber_joinery(bm, (0.70, -0.34, 1.26), (1.00, -0.56, 1.70), width=0.055, depth=0.055, quad=2, bow=0.0)
-    add_chamfered_box(bm, (1.00, -0.56, 1.72), (0.10, 0.14, 0.10), quad=3, bevel=0.012)
+    add_chamfered_box(bm, (1.00, -0.56, 1.72), (0.11, 0.15, 0.11), quad=3, bevel=0.012)
 
-    # Rich visible gold ore flow: heaped top hopper load + chute stream + base spill pile
-    for j, (ox, oy, oz, sc) in enumerate((
-        (-0.22, 0.06, 1.82, (0.48, 0.42, 0.30)),
-        (0.20, -0.02, 1.86, (0.46, 0.40, 0.32)),
-        (0.0, 0.16, 1.92, (0.44, 0.38, 0.28)),
-        (0.02, -0.18, 1.76, (0.42, 0.36, 0.24)),
-        (-0.16, -0.52, 1.04, (0.34, 0.30, 0.22)),
-        (0.18, -0.64, 0.96, (0.36, 0.30, 0.22)),
-        (-0.04, -0.78, 0.86, (0.32, 0.28, 0.20)),
+    # Lower battered stone & ore bed between legs + continuous ore cascade from top hopper down chute
+    structured_fracture(bm, (0.0, -0.18, 0.22), (1.16, 1.04, 0.38), style='crag', quad=0, seed=10)
+    for j, (ox, oy, oz, sc, q_ore) in enumerate((
+        (-0.28, 0.08, 1.84, (0.54, 0.48, 0.34), 3),
+        (0.24, -0.04, 1.88, (0.52, 0.44, 0.34), 3),
+        (0.0, 0.18, 1.94, (0.48, 0.42, 0.30), 0),
+        (0.02, -0.20, 1.80, (0.46, 0.40, 0.28), 3),
+        (-0.18, -0.50, 1.06, (0.38, 0.34, 0.24), 3),
+        (0.18, -0.62, 0.98, (0.38, 0.32, 0.24), 0),
+        (-0.04, -0.74, 0.88, (0.36, 0.32, 0.24), 3),
+        (-0.26, -0.66, 0.28, (0.48, 0.44, 0.32), 0),
+        (0.06, -0.74, 0.26, (0.46, 0.42, 0.30), 3),
+        (0.32, -0.62, 0.28, (0.44, 0.38, 0.30), 3),
     )):
-        structured_fracture(bm, (ox, oy, oz), sc, style='ore_matrix', quad=3 if j % 3 != 2 else 0, seed=20 + j)
-    for i, (bx, by, bz, sc) in enumerate((
-        (-0.34, -0.76, 0.18, (0.52, 0.46, 0.34)),
-        (0.08, -0.82, 0.16, (0.48, 0.42, 0.30)),
-        (0.38, -0.70, 0.20, (0.44, 0.38, 0.32)),
-    )):
-        structured_fracture(bm, (bx, by, bz), sc, style='crag', quad=0 if i != 1 else 3, seed=11 + i)
+        structured_fracture(bm, (ox, oy, oz), sc, style='ore_matrix', quad=q_ore, seed=20 + j)
     semantic_silhouette_constraints(bm, 'mine_ore_hopper_chute')
     return bm
 
 
 def build_mine_dewatering_pump_rig():
     bm = bmesh.new()
-    # Heavy skid frame + recessed sump box + iron bar grate
-    timber_joinery(bm, (-0.74, -0.32, 0.06), (0.32, -0.32, 0.06), width=0.16, depth=0.14, quad=1, pegs=True)
-    timber_joinery(bm, (-0.74, 0.32, 0.06), (0.32, 0.32, 0.06), width=0.16, depth=0.14, quad=1, pegs=True)
-    add_chamfered_box(bm, (-0.22, 0.0, 0.14), (1.06, 0.72, 0.14), quad=1, bevel=0.015, wear='wood')
-    add_flared_hopper_box(bm, (0.64, 0.10, 0.02), (0.78, 0.68), (0.86, 0.76), height=0.26, wall_t=0.07, quad_wood=0, quad_metal=2, wear_plates=False)
+    # Heavy skid frame + recessed timbered shaft collar sump + iron bar grate
+    timber_joinery(bm, (-0.76, -0.34, 0.06), (0.34, -0.34, 0.06), width=0.16, depth=0.14, quad=1, pegs=True)
+    timber_joinery(bm, (-0.76, 0.34, 0.06), (0.34, 0.34, 0.06), width=0.16, depth=0.14, quad=1, pegs=True)
+    add_chamfered_box(bm, (-0.22, 0.0, 0.14), (1.08, 0.74, 0.14), quad=1, bevel=0.015, wear='wood')
+    add_flared_hopper_box(bm, (0.64, 0.10, 0.02), (0.78, 0.68), (0.88, 0.78), height=0.28, wall_t=0.075, quad_wood=1, quad_metal=2, wear_plates=True)
     for gx in range(-2, 3):
-        add_chamfered_box(bm, (0.64 + gx * 0.12, 0.10, 0.27), (0.04, 0.68, 0.04), quad=2, bevel=0.006)
+        add_chamfered_box(bm, (0.64 + gx * 0.12, 0.10, 0.28), (0.045, 0.68, 0.045), quad=2, bevel=0.006)
     structured_fracture(bm, (0.64, 0.10, 0.12), (0.58, 0.50, 0.16), style='crag', quad=0, seed=31)
 
     # Mortised A-frame hoist & fulcrum stanchions straddling Y = +-0.30
@@ -396,21 +402,25 @@ def build_mine_dewatering_pump_rig():
         timber_joinery(bm, (0.28, fy, 0.18), (-0.18, fy * 0.72, 1.94), width=0.13, depth=0.13, quad=1, bow=-0.008, pegs=True, iron_straps=True)
         # Cross tie brace between A-frame legs
         timber_joinery(bm, (-0.42, fy * 0.90, 0.86), (0.16, fy * 0.90, 0.86), width=0.11, depth=0.11, quad=1, pegs=True)
-        add_pillow_block_bearing(bm, (-0.18, fy * 0.72, 1.94), (0, 1, 0), shaft_r=0.055, base_w=0.20, quad_metal=2)
-        add_pillow_block_bearing(bm, (0.14, fy * 0.88, 0.86), (0, 1, 0), shaft_r=0.045, base_w=0.18, quad_metal=2)
+        add_pillow_block_bearing(bm, (-0.18, fy * 0.72, 1.94), (0, 1, 0), shaft_r=0.06, base_w=0.24, quad_metal=2)
+        add_pillow_block_bearing(bm, (0.14, fy * 0.88, 0.86), (0, 1, 0), shaft_r=0.048, base_w=0.20, quad_metal=2)
 
-    # Central fulcrum trunnion shaft + walking beam with arched horsehead & counterweight
-    profile_sweep(bm, [(-0.18, -0.34, 1.94), (-0.18, 0.34, 1.94)], [0.052] * 2, profile='oval', sides=10, quad=2, mark_flat=True)
-    timber_joinery(bm, (-1.04, 0.0, 2.08), (0.68, 0.0, 1.84), width=0.14, depth=0.16, quad=1, iron_straps=True, bracket_ends=True)
+    # Central fulcrum trunnion shaft + walking beam with forged saddle trunnion, tension stay-rod & counterweight
+    profile_sweep(bm, [(-0.18, -0.36, 1.94), (-0.18, 0.36, 1.94)], [0.056] * 2, profile='oval', sides=10, quad=2, mark_flat=True)
+    add_chamfered_box(bm, (-0.18, 0.0, 1.96), (0.26, 0.42, 0.22), quad=2, bevel=0.015)
+    timber_joinery(bm, (-1.04, 0.0, 2.08), (0.68, 0.0, 1.84), width=0.15, depth=0.17, quad=1, iron_straps=True, bracket_ends=True)
+    # Forged iron king-post & tension stay rods above walking beam
+    profile_sweep(bm, [(-0.18, 0.0, 2.02), (-0.18, 0.0, 2.22)], [0.036, 0.028], profile='oval', sides=8, quad=2, mark_flat=True)
+    profile_sweep(bm, [(-0.88, 0.0, 2.12), (-0.18, 0.0, 2.20), (0.60, 0.0, 1.90)], [0.018] * 3, profile='oval', sides=6, quad=2, mark_flat=True)
     # Bolted counterweight iron ballast box at -X end
-    add_chamfered_box(bm, (-0.98, 0.0, 2.06), (0.30, 0.30, 0.32), quad=2, ry=0.14, bevel=0.02)
+    add_chamfered_box(bm, (-0.98, 0.0, 2.06), (0.32, 0.32, 0.34), quad=2, ry=0.14, bevel=0.02)
     # Curved horsehead arc sector at +X end + crown pulley sheave
     horse_pts = [(0.62, 0.0, 1.94), (0.74, 0.0, 1.84), (0.72, 0.0, 1.66)]
-    profile_sweep(bm, horse_pts, [(0.05, 0.08)] * 3, profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
-    add_pulley_sheave(bm, (0.66, 0.0, 1.84), (0, 1, 0), radius=0.13, width=0.075, quad_metal=2, clevis_dir=(0, 0, 1))
+    profile_sweep(bm, horse_pts, [(0.055, 0.085)] * 3, profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+    add_pulley_sheave(bm, (0.66, 0.0, 1.84), (0, 1, 0), radius=0.14, width=0.08, quad_metal=2, clevis_dir=(0, 0, 1))
 
     # Geared winding drum + ratchet brake wheel + crank handle between A-frame legs (x=0.14, z=0.86)
-    add_winding_drum(bm, (0.14, -0.22, 0.86), (0.14, 0.22, 0.86), drum_r=0.12, flange_r=0.20, wraps=6, rope_r=0.018, quad_wood=1, quad_metal=2, quad_rope=1)
+    add_winding_drum(bm, (0.14, -0.22, 0.86), (0.14, 0.22, 0.86), drum_r=0.125, flange_r=0.21, wraps=6, rope_r=0.019, quad_wood=1, quad_metal=2, quad_rope=1)
     add_gear_wheel_with_pawl(bm, (0.14, -0.34, 0.86), (0, 1, 0), pitch_r=0.22, thickness=0.07, teeth=12, quad_metal=2, with_pawl=True)
     _add_spoked_wheel(bm, (0.14, 0.34, 0.86), radius=0.22, width=0.05, spokes=6, quad_wood=1, quad_iron=2)
 
@@ -420,145 +430,195 @@ def build_mine_dewatering_pump_rig():
         profile_sweep(bm, [(-0.28, 0.0, bz), (-0.28, 0.0, bz + 0.07)], [0.19] * 2, profile='oval', sides=14, quad=2, mark_flat=True)
     profile_sweep(bm, [(-0.28, 0.0, 1.68), (0.18, 0.04, 1.44), (0.56, 0.10, 0.92)], [(0.06, 0.08)] * 3, profile='channel_u', sides=8, quad=2, mark_flat=True)
 
-    # Continuous taut rope from drum -> over horsehead pulley -> vertical tensioned drop -> clevis & load bucket/plunger
+    # Continuous taut rope from drum -> over horsehead pulley -> vertical tensioned drop -> clevis & load bucket
     add_routed_rope_path(
         bm,
         [(0.14, 0.0, 0.98), (0.36, 0.0, 1.44), (0.64, 0.0, 1.96), (0.76, 0.0, 1.84), (0.70, 0.0, 0.94)],
-        rope_r=0.020,
+        rope_r=0.022,
         quad=1,
     )
-    add_chamfered_box(bm, (0.70, 0.0, 0.92), (0.09, 0.09, 0.12), quad=2, bevel=0.01)
-    add_revolved_vessel(bm, (0.70, 0.0, 0.42), [(0.16, 0.0), (0.20, 0.16), (0.22, 0.34)], sides=12, wall_t=0.035, quad_outer=2, quad_inner=0, ribs=4)
-    for sy in (-0.18, 0.18):
-        profile_sweep(bm, [(0.70, 0.0, 0.88), (0.70, sy, 0.74)], [0.015] * 2, profile='oval', sides=6, quad=2, mark_flat=True)
+    add_chamfered_box(bm, (0.70, 0.0, 0.92), (0.10, 0.10, 0.13), quad=2, bevel=0.01)
+    add_revolved_vessel(bm, (0.70, 0.0, 0.42), [(0.16, 0.0), (0.21, 0.16), (0.23, 0.34)], sides=12, wall_t=0.038, quad_outer=2, quad_inner=0, ribs=4)
+    for sy in (-0.19, 0.19):
+        profile_sweep(bm, [(0.70, 0.0, 0.88), (0.70, sy, 0.74)], [0.018] * 2, profile='oval', sides=6, quad=2, mark_flat=True)
     semantic_silhouette_constraints(bm, 'mine_dewatering_pump_rig')
     return bm
 
 
 def build_mine_powder_magazine_locker():
     bm = bmesh.new()
-    # Heavy timber skid runners anchored to ground
-    for sy in (-0.34, 0.34):
-        timber_joinery(bm, (-0.64, sy, 0.05), (0.64, sy, 0.05), width=0.12, depth=0.10, quad=1, pegs=True)
+    # Heavy timber skid runners anchored to ground under the full-width chest
+    for sy in (-0.42, 0.42):
+        timber_joinery(bm, (-0.66, sy, 0.06), (0.66, sy, 0.06), width=0.14, depth=0.11, quad=1, pegs=True, iron_straps=True)
 
-    # Individual horizontal planked walls (front/back & sides) with V-grooved seams & slight timber warp
+    # Individual thick horizontal planked walls (front/back & sides) with distinct bevel seams & slight timber warp
     for pz in range(5):
-        zc = 0.18 + pz * 0.185
-        warp = 0.008 * math.sin(pz * 1.4)
+        zc = 0.20 + pz * 0.185
+        warp = 0.012 * math.sin(pz * 1.7 + 0.4)
+        p_out = 0.018 * ((pz % 2) * 2 - 1)
         # Front and back planks
-        for sy in (-0.38, 0.38):
-            add_chamfered_box(bm, (0.0, sy, zc), (1.14, 0.08, 0.175), quad=1, rz=warp, bevel=0.010, wear='wood', wear_seed=pz + int(sy * 10))
-        # Left and right end planks
-        for sx in (-0.55, 0.55):
-            add_chamfered_box(bm, (sx, 0.0, zc), (0.08, 0.78, 0.175), quad=1, rz=-warp, bevel=0.010, wear='wood', wear_seed=pz + int(sx * 10))
+        for sy in (-0.48, 0.48):
+            add_chamfered_box(
+                bm,
+                (0.0, sy + (p_out if sy > 0 else -p_out), zc),
+                (1.26, 0.11, 0.172),
+                quad=1,
+                rz=warp,
+                bevel=0.016,
+                wear='wood',
+                wear_seed=pz + int(sy * 10),
+            )
+        # Left and right end planks with overlapping box-joint finger tabs at corners
+        for sx in (-0.61, 0.61):
+            add_chamfered_box(
+                bm,
+                (sx + (p_out if sx > 0 else -p_out), 0.0, zc),
+                (0.11, 0.98, 0.172),
+                quad=1,
+                rx=-warp,
+                bevel=0.016,
+                wear='wood',
+                wear_seed=pz + int(sx * 10),
+            )
 
-    # Corner timber posts & forged L-shaped iron corner brackets + horizontal reinforcement straps
-    for sx in (-0.56, 0.56):
-        for sy in (-0.39, 0.39):
-            timber_joinery(bm, (sx, sy, 0.10), (sx, sy, 1.02), width=0.10, depth=0.10, quad=2, bow=0.0)
-            for hz in (0.24, 0.62, 0.95):
-                add_chamfered_box(bm, (sx, sy, hz), (0.14, 0.14, 0.08), quad=2, bevel=0.008)
-    for hz in (0.24, 0.62, 0.95):
-        add_chamfered_box(bm, (0.0, -0.41, hz), (1.18, 0.04, 0.065), quad=2, bevel=0.008)
-        add_chamfered_box(bm, (0.0, 0.41, hz), (1.18, 0.04, 0.065), quad=2, bevel=0.008)
+    # Corner timber posts & forged L-shaped iron corner brackets + rivet heads + horizontal reinforcement bands
+    for sx in (-0.62, 0.62):
+        for sy in (-0.49, 0.49):
+            timber_joinery(bm, (sx, sy, 0.10), (sx, sy, 1.04), width=0.12, depth=0.12, quad=2, bow=0.0)
+            for hz in (0.24, 0.60, 0.95):
+                add_chamfered_box(bm, (sx, sy, hz), (0.17, 0.17, 0.085), quad=2, bevel=0.010)
+    for hz in (0.24, 0.60, 0.95):
+        add_chamfered_box(bm, (0.0, -0.52, hz), (1.28, 0.05, 0.07), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (0.0, 0.52, hz), (1.28, 0.05, 0.07), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (-0.64, 0.0, hz), (0.05, 1.02, 0.07), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (0.64, 0.0, hz), (0.05, 1.02, 0.07), quad=2, bevel=0.008)
 
-    # Pitched planked functional lid seated cleanly onto side gable filler boards + ridge flashing
-    for sx in (-0.54, 0.54):
-        add_chamfered_box(bm, (sx, 0.0, 1.06), (0.09, 0.72, 0.14), quad=1, bevel=0.008)
-        add_chamfered_box(bm, (sx, 0.0, 1.13), (0.09, 0.34, 0.12), quad=1, bevel=0.008)
-    for p_idx, (cy, crx) in enumerate(((-0.24, 0.28), (0.24, -0.28))):
+    # Forged iron side drop-bail carrying handles on left & right chest flanks
+    for sx in (-0.66, 0.66):
+        add_chamfered_box(bm, (sx, 0.0, 0.64), (0.06, 0.26, 0.10), quad=2, bevel=0.01)
+        bail_pts = [(sx, -0.10, 0.62), (sx + (0.06 if sx > 0 else -0.06), -0.10, 0.50), (sx + (0.06 if sx > 0 else -0.06), 0.10, 0.50), (sx, 0.10, 0.62)]
+        profile_sweep(bm, bail_pts, [0.020] * 4, profile='oval', sides=6, quad=2, mark_flat=True)
+
+    # Pitched planked functional lid seated cleanly onto side gable filler boards + forged strap hinges
+    for sx in (-0.59, 0.59):
+        add_chamfered_box(bm, (sx, 0.0, 1.08), (0.11, 0.90, 0.14), quad=1, bevel=0.01)
+        add_chamfered_box(bm, (sx, 0.0, 1.16), (0.11, 0.46, 0.12), quad=1, bevel=0.01)
+    for p_idx, (cy, crx) in enumerate(((-0.28, 0.28), (0.28, -0.28))):
         for plank_i in range(3):
-            off_y = (plank_i - 1) * 0.18
-            add_chamfered_box(bm, (0.0, cy + off_y * 0.35, 1.10 - abs(off_y) * 0.08), (1.34, 0.20, 0.075), quad=1, rx=crx, bevel=0.009, wear='wood', wear_seed=plank_i + p_idx)
-    add_chamfered_box(bm, (0.0, 0.0, 1.21), (1.38, 0.15, 0.08), quad=2, bevel=0.012)
-    for hx in (-0.42, 0.0, 0.42):
-        add_chamfered_box(bm, (hx, 0.22, 1.14), (0.07, 0.48, 0.09), quad=2, rx=-0.28, bevel=0.008)
-        add_chamfered_box(bm, (hx, -0.18, 1.14), (0.07, 0.36, 0.09), quad=2, rx=0.28, bevel=0.008)
+            off_y = (plank_i - 1) * 0.22
+            add_chamfered_box(
+                bm,
+                (0.0, cy + off_y * 0.38, 1.12 - abs(off_y) * 0.08),
+                (1.36, 0.23, 0.085),
+                quad=1,
+                rx=crx,
+                bevel=0.012,
+                wear='wood',
+                wear_seed=plank_i + p_idx,
+            )
+    add_chamfered_box(bm, (0.0, 0.0, 1.24), (1.38, 0.16, 0.085), quad=2, bevel=0.012)
+    for hx in (-0.44, 0.0, 0.44):
+        add_chamfered_box(bm, (hx, 0.26, 1.16), (0.08, 0.56, 0.095), quad=2, rx=-0.28, bevel=0.008)
+        add_chamfered_box(bm, (hx, -0.22, 1.16), (0.08, 0.46, 0.095), quad=2, rx=0.28, bevel=0.008)
 
     # Functional front hasp plate, staple & padlock assembly + top gold ingots/ore cache
-    add_chamfered_box(bm, (0.0, -0.43, 0.66), (0.18, 0.06, 0.34), quad=2, bevel=0.01)
-    add_chamfered_box(bm, (0.0, -0.47, 0.56), (0.13, 0.06, 0.16), quad=3, bevel=0.012)
-    add_chamfered_box(bm, (-0.28, -0.22, 1.18), (0.34, 0.24, 0.18), quad=3, rz=0.32, bevel=0.015)
-
-    # Coopered powder kegs wedged behind chest on skid rails
-    for ox in (-0.44, 0.44):
-        _add_staved_barrel(bm, (ox, 0.52, 0.02), (ox, 0.52, 0.74), radius=0.20, quad_wood=1, quad_iron=2, tap_side=False)
+    add_chamfered_box(bm, (0.0, -0.54, 0.68), (0.24, 0.07, 0.40), quad=2, bevel=0.012)
+    add_chamfered_box(bm, (0.0, -0.58, 0.56), (0.15, 0.07, 0.19), quad=3, bevel=0.014)
+    add_chamfered_box(bm, (-0.34, -0.24, 1.22), (0.36, 0.24, 0.16), quad=3, rz=0.28, bevel=0.016)
+    structured_fracture(bm, (-0.22, -0.10, 1.26), (0.28, 0.24, 0.18), style='ore_matrix', quad=3, seed=36)
     semantic_silhouette_constraints(bm, 'mine_powder_magazine_locker')
     return bm
 
 
 def build_mine_rail_turntable_switch():
     bm = bmesh.new()
-    # Heavy chamfered stone/iron curb pit frame with 4 bolted corner anchor blocks
-    add_chamfered_box(bm, (0.0, 0.0, 0.07), (1.72, 1.72, 0.14), quad=0, bevel=0.025, wear='stone', wear_seed=5)
-    for cx in (-0.72, 0.72):
-        for cy in (-0.72, 0.72):
-            add_chamfered_box(bm, (cx, cy, 0.15), (0.28, 0.28, 0.10), quad=2, bevel=0.015)
-            profile_sweep(bm, [(cx, cy, 0.18), (cx, cy, 0.23)], [0.03] * 2, profile='oval', sides=6, quad=2, mark_flat=True)
+    # Heavy chamfered stone/iron curb pit frame with 8 bolted anchor blocks & corner anchor bolts
+    add_chamfered_box(bm, (0.0, 0.0, 0.07), (1.76, 1.76, 0.14), quad=0, bevel=0.03, wear='stone', wear_seed=5)
+    for cx in (-0.74, 0.74):
+        for cy in (-0.74, 0.74):
+            add_chamfered_box(bm, (cx, cy, 0.16), (0.32, 0.32, 0.12), quad=2, bevel=0.018)
+            profile_sweep(bm, [(cx, cy, 0.20), (cx, cy, 0.27)], [0.038] * 2, profile='oval', sides=6, quad=2, mark_flat=True)
 
-    # Rotating turntable rim collar + heavy beveled iron grate bars & central kingpin hub
-    profile_sweep(bm, [(0, 0, 0.08), (0, 0, 0.22)], [0.74, 0.70], profile='oval', sides=24, quad=2, mark_flat=True)
-    profile_sweep(bm, [(0, 0, 0.20), (0, 0, 0.28)], [0.16, 0.14], profile='oval', sides=12, quad=2, mark_flat=True)
-    for sk in range(6):
-        sa = sk * (math.pi / 3.0)
+    # Raised octagonal cast-iron pit curb collar + rotating turntable ring & central kingpin hub
+    profile_sweep(bm, [(0, 0, 0.08), (0, 0, 0.24)], [0.82, 0.78], profile='oval', sides=16, quad=0, mark_flat=True)
+    profile_sweep(bm, [(0, 0, 0.12), (0, 0, 0.25)], [0.72, 0.69], profile='oval', sides=20, quad=2, mark_flat=True)
+    profile_sweep(bm, [(0, 0, 0.20), (0, 0, 0.31)], [0.19, 0.16], profile='oval', sides=12, quad=2, mark_flat=True)
+    for sk in range(8):
+        sa = sk * (math.pi / 4.0)
         timber_joinery(bm, (0, 0, 0.20), (0.68 * math.cos(sa), 0.68 * math.sin(sa), 0.20), width=0.09, depth=0.07, quad=1)
-        add_chamfered_box(bm, (0.74 * math.cos(sa), 0.74 * math.sin(sa), 0.19), (0.14, 0.14, 0.11), quad=2, rz=sa, bevel=0.012)
-    # Beveled steel grate bars spanning turntable bed
-    for gb in (-0.54, -0.22, 0.0, 0.22, 0.54):
-        add_chamfered_box(bm, (0.0, gb, 0.23), (1.28, 0.05, 0.055), quad=2, bevel=0.008)
-        add_chamfered_box(bm, (gb, 0.0, 0.23), (0.05, 1.28, 0.055), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (0.76 * math.cos(sa), 0.76 * math.sin(sa), 0.20), (0.16, 0.16, 0.12), quad=2, rz=sa, bevel=0.014)
 
-    # Genuine T-profile flanged mine rails crossing at 90 deg
+    # Heavy beveled steel grate bars spanning turntable bed with clear height & thickness hierarchy
+    for gb in (-0.54, -0.26, 0.0, 0.26, 0.54):
+        add_chamfered_box(bm, (0.0, gb, 0.24), (1.30, 0.065, 0.065), quad=2, bevel=0.012)
+        add_chamfered_box(bm, (gb, 0.0, 0.24), (0.065, 1.30, 0.065), quad=2, bevel=0.012)
+
+    # Genuine T-profile flanged mine rails crossing at 90 deg + bolted crossing frog chairs
     for ry in (-0.42, 0.42):
-        profile_sweep(bm, [(-0.84, ry, 0.28), (0.84, ry, 0.28)], [(0.045, 0.055)] * 2, profile='t_rail', sides=12, quad=2, mark_flat=True)
-        profile_sweep(bm, [(ry, -0.84, 0.28), (ry, 0.84, 0.28)], [(0.045, 0.055)] * 2, profile='t_rail', sides=12, quad=2, mark_flat=True)
+        profile_sweep(bm, [(-0.86, ry, 0.30), (0.86, ry, 0.30)], [(0.052, 0.062)] * 2, profile='t_rail', sides=12, quad=2, mark_flat=True)
+        profile_sweep(bm, [(ry, -0.86, 0.30), (ry, 0.86, 0.30)], [(0.052, 0.062)] * 2, profile='t_rail', sides=12, quad=2, mark_flat=True)
+        for rx_c in (-0.42, 0.42):
+            add_chamfered_box(bm, (rx_c, ry, 0.27), (0.15, 0.15, 0.05), quad=2, bevel=0.008)
 
-    # Grounded throw-switch stand, tie-rod linkage, quadrant sector, counterweight & lantern
-    add_chamfered_box(bm, (0.88, 0.64, 0.14), (0.36, 0.36, 0.16), quad=2, bevel=0.02)
-    profile_sweep(bm, [(0.88, 0.64, 0.22), (0.58, 0.42, 0.20)], [0.028] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
-    timber_joinery(bm, (0.88, 0.64, 0.18), (0.88, 0.64, 1.24), width=0.09, depth=0.09, quad=2, iron_straps=True)
-    timber_joinery(bm, (0.88, 0.64, 0.78), (1.18, 0.88, 1.06), width=0.05, depth=0.05, quad=2)
-    structured_fracture(bm, (1.18, 0.88, 1.08), (0.18, 0.16, 0.16), style='crag', quad=2, seed=39)
-    add_chamfered_box(bm, (0.88, 0.64, 1.25), (0.24, 0.24, 0.26), quad=3, bevel=0.02)
+    # Grounded throw-switch stand, tie-rod linkage, notched quadrant sector, counterweight & framed signal lantern
+    add_chamfered_box(bm, (0.88, 0.64, 0.15), (0.38, 0.38, 0.18), quad=2, bevel=0.02)
+    add_gear_wheel_with_pawl(bm, (0.88, 0.64, 0.26), (1, -1, 0), pitch_r=0.18, thickness=0.06, teeth=8, quad_metal=2, with_pawl=True)
+    profile_sweep(bm, [(0.88, 0.64, 0.22), (0.52, 0.42, 0.22)], [0.032] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
+    timber_joinery(bm, (0.88, 0.64, 0.18), (0.88, 0.64, 1.18), width=0.095, depth=0.095, quad=2, iron_straps=True)
+    timber_joinery(bm, (0.88, 0.64, 0.74), (1.18, 0.88, 1.04), width=0.055, depth=0.055, quad=2)
+    structured_fracture(bm, (1.18, 0.88, 1.06), (0.20, 0.18, 0.18), style='crag', quad=2, seed=39)
+    # Framed iron signal lantern cage around glowing core
+    add_chamfered_box(bm, (0.88, 0.64, 1.24), (0.24, 0.24, 0.24), quad=3, bevel=0.02)
+    add_chamfered_box(bm, (0.88, 0.64, 1.11), (0.28, 0.28, 0.04), quad=2, bevel=0.008)
+    add_chamfered_box(bm, (0.88, 0.64, 1.37), (0.30, 0.30, 0.05), quad=2, bevel=0.010)
     semantic_silhouette_constraints(bm, 'mine_rail_turntable_switch')
     return bm
 
 
 def build_mine_assaying_brazier_cart():
     bm = bmesh.new()
-    # Tapered trapezoidal planked cart body (wider at top rim than bottom bed)
+    # Tapered trapezoidal planked cart body + individual horizontal beveled side boards
     add_flared_hopper_box(bm, (0.0, 0.0, 0.34), (1.12, 0.62), (1.38, 0.82), height=0.48, wall_t=0.075, quad_wood=1, quad_metal=2, wear_plates=False)
-    add_chamfered_box(bm, (0.0, 0.0, 0.37), (1.16, 0.66, 0.08), quad=1, bevel=0.012, wear='wood')
+    add_chamfered_box(bm, (0.0, 0.0, 0.36), (1.16, 0.66, 0.08), quad=1, bevel=0.012, wear='wood')
+    for pz in range(3):
+        zf = (pz + 0.5) / 3.0
+        zc = 0.36 + zf * 0.44
+        len_x = 1.12 + zf * 0.26
+        off_y = 0.31 + zf * 0.10
+        for sgn in (-1.0, 1.0):
+            add_chamfered_box(bm, (0.0, sgn * off_y, zc), (len_x, 0.08, 0.135), quad=1, rx=-sgn * 0.20, bevel=0.012, wear='wood', wear_seed=pz + 40)
     # Vertical side stiffener ribs on cart exterior
-    for rx_rib in (-0.36, 0.0, 0.36):
-        add_chamfered_box(bm, (rx_rib, -0.38, 0.58), (0.07, 0.06, 0.44), quad=2, rx=-0.20, bevel=0.008)
-        add_chamfered_box(bm, (rx_rib, 0.38, 0.58), (0.07, 0.06, 0.44), quad=2, rx=0.20, bevel=0.008)
+    for rx_rib in (-0.38, 0.0, 0.38):
+        add_chamfered_box(bm, (rx_rib, -0.38, 0.58), (0.075, 0.065, 0.46), quad=2, rx=-0.20, bevel=0.008)
+        add_chamfered_box(bm, (rx_rib, 0.38, 0.58), (0.075, 0.065, 0.46), quad=2, rx=0.20, bevel=0.008)
 
     # Heavy chassis frame + bolted cast-iron axle journal mounts + real axles + spoked wheels
     for cy in (-0.30, 0.30):
-        timber_joinery(bm, (-0.58, cy, 0.28), (0.58, cy, 0.28), width=0.11, depth=0.10, quad=1, pegs=True)
+        timber_joinery(bm, (-0.60, cy, 0.28), (0.60, cy, 0.28), width=0.11, depth=0.10, quad=1, pegs=True, iron_straps=True)
     for wx in (-0.44, 0.44):
-        profile_sweep(bm, [(wx, -0.52, 0.22), (wx, 0.52, 0.22)], [0.042] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
+        profile_sweep(bm, [(wx, -0.52, 0.22), (wx, 0.52, 0.22)], [0.044] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
         for wy in (-0.30, 0.30):
-            add_pillow_block_bearing(bm, (wx, wy, 0.22), (0, 1, 0), shaft_r=0.042, base_w=0.18, quad_metal=2)
+            add_pillow_block_bearing(bm, (wx, wy, 0.22), (0, 1, 0), shaft_r=0.044, base_w=0.20, quad_metal=2)
         for wy in (-0.44, 0.44):
             _add_spoked_wheel(bm, (wx, wy, 0.22), radius=0.22, width=0.07, spokes=8, quad_wood=1, quad_iron=2)
 
-    # Curved U-push handle bars with iron sockets
+    # Curved U-push handle bars with bolted iron mounting sockets
     for hy in (-0.32, 0.32):
-        profile_sweep(bm, [(0.62, hy, 0.72), (0.84, hy, 0.84), (0.98, hy, 0.92)], [0.032, 0.030, 0.028], profile='oval', sides=8, quad=2, mark_flat=True)
-    timber_joinery(bm, (0.98, -0.34, 0.92), (0.98, 0.34, 0.92), width=0.065, depth=0.065, quad=1)
+        add_chamfered_box(bm, (0.64, hy, 0.72), (0.10, 0.09, 0.10), quad=2, bevel=0.01)
+        profile_sweep(bm, [(0.62, hy, 0.72), (0.84, hy, 0.84), (0.98, hy, 0.92)], [0.034, 0.030, 0.028], profile='oval', sides=8, quad=2, mark_flat=True)
+    timber_joinery(bm, (0.98, -0.34, 0.92), (0.98, 0.34, 0.92), width=0.068, depth=0.068, quad=1)
 
-    # Round thick-walled assaying crucible pot + prominent high-profile gold ore load & ingots
-    add_revolved_vessel(bm, (-0.24, 0.0, 0.72), [(0.20, 0.0), (0.28, 0.14), (0.31, 0.28)], sides=14, wall_t=0.048, quad_outer=2, quad_inner=0, ribs=6)
-    for ox, oy, oz, sc, sd in (
-        (-0.24, 0.0, 1.00, (0.44, 0.42, 0.24), 41),
-        (0.18, -0.10, 0.88, (0.42, 0.36, 0.26), 42),
-        (0.24, 0.14, 0.86, (0.38, 0.34, 0.24), 43),
-        (0.02, 0.02, 0.94, (0.40, 0.38, 0.24), 44),
+    # Round thick-walled assaying crucible pot + prominent high-profile gold ore load & ingots filling cart
+    add_revolved_vessel(bm, (-0.22, 0.0, 0.70), [(0.22, 0.0), (0.30, 0.14), (0.33, 0.28)], sides=14, wall_t=0.050, quad_outer=2, quad_inner=0, ribs=6)
+    for ox, oy, oz, sc, sd, q_o in (
+        (-0.22, 0.0, 1.00, (0.48, 0.46, 0.26), 41, 3),
+        (0.18, -0.12, 0.88, (0.46, 0.38, 0.28), 42, 3),
+        (0.24, 0.14, 0.86, (0.42, 0.36, 0.26), 43, 0),
+        (0.02, 0.04, 0.94, (0.44, 0.40, 0.26), 44, 3),
+        (-0.44, 0.12, 0.84, (0.34, 0.30, 0.22), 45, 0),
     ):
-        structured_fracture(bm, (ox, oy, oz), sc, style='ore_matrix', quad=3 if sd != 43 else 0, seed=sd)
-    for iz, ox, oy in ((0.76, 0.38, -0.18), (0.76, 0.40, 0.02), (0.82, 0.39, -0.08)):
+        structured_fracture(bm, (ox, oy, oz), sc, style='ore_matrix', quad=q_o, seed=sd)
+    for iz, ox, oy in ((0.78, 0.40, -0.18), (0.78, 0.42, 0.02), (0.84, 0.41, -0.08)):
         add_chamfered_box(bm, (ox, oy, iz), (0.24, 0.11, 0.07), quad=3, bevel=0.01)
     semantic_silhouette_constraints(bm, 'mine_assaying_brazier_cart')
     return bm
@@ -569,25 +629,26 @@ def build_mine_assaying_brazier_cart():
 # ---------------------------------------------------------------------------
 def build_umbra_veil_fungus_parasol():
     bm = bmesh.new()
-    # Fractured basalt root outcrop
-    structured_fracture(bm, (0.0, 0.0, 0.12), (1.35, 1.24, 0.36), style='crag', quad=0, seed=53)
+    # Multi-lobed fractured basalt root outcrop
+    structured_fracture(bm, (0.0, 0.0, 0.14), (1.38, 1.28, 0.36), style='crag', quad=0, seed=53)
 
-    # Stage 1: Mature tall parasol on curved fibrous stipe with annular veil ring & underside gills
-    stipe_main = [(0.0, 0.0, -0.04), (0.14, 0.08, 0.85), (0.06, 0.02, 1.78), (-0.06, -0.05, 2.52)]
-    profile_sweep(bm, stipe_main, [0.27, 0.19, 0.16, 0.15], profile='oval', sides=12, twist_total=0.5, ridge_count=8, ridge_amp=0.05, quad=1)
-    # Draped membranous veil collar around upper stipe
-    profile_sweep(bm, [(0.02, 0.0, 1.98), (0.04, 0.01, 1.82)], [0.16, 0.29], profile='oval', sides=12, ridge_count=9, ridge_amp=0.08, quad=2)
-    _add_sculpted_mushroom_cap(bm, (-0.06, -0.05, 2.50), radius=1.32, height=0.58, cap_quad=2, gill_quad=3, seed=51, sides=20, gill_count=20)
+    # Stage 1: Mature tall parasol on S-curved fibrous stipe with flaring skirt veil & deep underside gills
+    stipe_main = [(0.0, 0.0, -0.04), (0.15, 0.09, 0.85), (0.05, 0.01, 1.78), (-0.06, -0.05, 2.52)]
+    profile_sweep(bm, stipe_main, [0.28, 0.20, 0.16, 0.17], profile='oval', sides=14, twist_total=0.5, ridge_count=9, ridge_amp=0.06, quad=1)
+    # Draped skirt-like membranous veil collar flaring organically downward around upper stipe
+    veil_pts = [(0.02, 0.0, 2.08), (0.04, 0.01, 1.92), (0.06, 0.02, 1.74)]
+    profile_sweep(bm, veil_pts, [0.16, 0.24, 0.33], profile='oval', sides=14, ridge_count=11, ridge_amp=0.14, quad=1)
+    _add_sculpted_mushroom_cap(bm, (-0.06, -0.05, 2.50), radius=1.32, height=0.60, cap_quad=2, gill_quad=3, seed=51, sides=22, gill_count=22)
 
-    # Stage 2: Mid-maturity companion leaning out on separate stipe
-    stipe_mid = [(0.22, 0.16, 0.02), (0.42, 0.30, 0.48), (0.58, 0.42, 0.96)]
-    profile_sweep(bm, stipe_mid, [0.13, 0.095, 0.08], profile='oval', sides=10, ridge_count=6, ridge_amp=0.04, quad=1)
-    _add_sculpted_mushroom_cap(bm, (0.58, 0.42, 0.95), radius=0.50, height=0.26, cap_quad=2, gill_quad=3, seed=52, sides=14, gill_count=12)
+    # Stage 2: Mid-maturity companion leaning out on curved stipe
+    stipe_mid = [(0.20, 0.14, 0.02), (0.42, 0.30, 0.48), (0.58, 0.42, 0.96)]
+    profile_sweep(bm, stipe_mid, [0.14, 0.10, 0.09], profile='oval', sides=10, ridge_count=7, ridge_amp=0.05, quad=1)
+    _add_sculpted_mushroom_cap(bm, (0.58, 0.42, 0.95), radius=0.52, height=0.28, cap_quad=2, gill_quad=3, seed=52, sides=16, gill_count=14)
 
     # Stage 3: Two juvenile conical mushrooms at base
     for off_x, off_y, h_j, r_j, sd in ((-0.36, -0.28, 0.56, 0.24, 54), (0.28, -0.38, 0.40, 0.18, 55)):
         profile_sweep(bm, [(off_x * 0.4, off_y * 0.4, 0.02), (off_x * 0.8, off_y * 0.8, h_j * 0.52), (off_x, off_y, h_j)], [r_j * 0.28, r_j * 0.20, r_j * 0.18], profile='oval', sides=8, quad=1)
-        _add_sculpted_mushroom_cap(bm, (off_x, off_y, h_j), radius=r_j, height=h_j * 0.42, cap_quad=2, gill_quad=3, seed=sd, sides=12, gill_count=8)
+        _add_sculpted_mushroom_cap(bm, (off_x, off_y, h_j), radius=r_j, height=h_j * 0.44, cap_quad=2, gill_quad=3, seed=sd, sides=12, gill_count=10)
 
     semantic_silhouette_constraints(bm, 'umbra_veil_fungus_parasol')
     return bm
@@ -596,26 +657,26 @@ def build_umbra_veil_fungus_parasol():
 def build_umbra_crystal_resonator_obelisk():
     bm = bmesh.new()
     rng = random.Random(61)
-    # Stepped basalt plinth & dark stone retaining brackets
-    structured_fracture(bm, (0.0, 0.0, 0.18), (1.28, 1.24, 0.36), style='stone_slab', quad=0, seed=62)
-    profile_sweep(bm, [(0, 0, 0.28), (0, 0, 0.50)], [0.54, 0.44], profile='oval', sides=8, quad=0, mark_flat=True)
-    for ci in range(4):
-        ca = ci * (math.pi * 0.5) + math.pi * 0.25
-        timber_joinery(bm, (0.50 * math.cos(ca), 0.50 * math.sin(ca), 0.34), (0.28 * math.cos(ca), 0.28 * math.sin(ca), 0.82), width=0.08, depth=0.08, quad=1)
+    # Multi-lobed rounded/fractured basalt outcrop base + dark stone retaining socket collar (never a square box)
+    structured_fracture(bm, (0.0, 0.0, 0.20), (1.30, 1.26, 0.42), style='crag', quad=0, seed=62)
+    structured_fracture(bm, (0.0, 0.0, 0.36), (0.98, 0.96, 0.28), style='stone_slab', quad=0, seed=63)
+    for ci in range(5):
+        ca = ci * (math.tau / 5.0) + 0.3
+        timber_joinery(bm, (0.48 * math.cos(ca), 0.48 * math.sin(ca), 0.28), (0.28 * math.cos(ca), 0.28 * math.sin(ca), 0.82), width=0.09, depth=0.09, quad=1)
 
-    # Preserve tall DARK CENTRAL STONE OBELISK (parent_quad=1) + intergrown glowing cyan secondary crystals (child_quad=3)
+    # Tall DARK CENTRAL STONE OBELISK (parent_quad=1) + intergrown glowing cyan secondary crystals (child_quad=3)
     crystal_growth_graph(
         bm,
-        (0.0, 0.0, 0.34),
-        height=2.45,
-        radius=0.68,
+        (0.0, 0.0, 0.32),
+        height=2.47,
+        radius=0.70,
         rng=rng,
         parent_quad=1,
         child_quad=3,
         rock_quad=0,
         parent_sides=6,
         parent_count=1,
-        daughter_count=7,
+        daughter_count=8,
         basal_count=6,
         stepped=True,
         directional_tilt=(0.03, -0.02),
@@ -628,37 +689,37 @@ def build_umbra_crystal_resonator_obelisk():
 def build_umbra_hanging_censer_spire():
     bm = bmesh.new()
     rng = random.Random(69)
-    # Stepped octagonal basalt plinth + forged metal socket collar + 4 arched gothic buttress ribs
-    structured_fracture(bm, (0.0, 0.0, 0.14), (0.84, 0.84, 0.28), style='stone_slab', quad=0, seed=68)
-    profile_sweep(bm, [(0, 0, 0.22), (0, 0, 0.48)], [0.36, 0.22], profile='oval', sides=8, quad=1, mark_flat=True)
+    # Multi-lobed cleaved basalt plinth + forged metal socket collar + 4 arched gothic buttress claws
+    structured_fracture(bm, (0.0, 0.0, 0.16), (0.88, 0.84, 0.32), style='crag', quad=0, seed=68)
+    profile_sweep(bm, [(0, 0, 0.22), (0, 0, 0.50)], [0.38, 0.22], profile='oval', sides=8, quad=1, mark_flat=True)
     for bi in range(4):
-        ba = bi * (math.pi * 0.5)
+        ba = bi * (math.pi * 0.5) + 0.35
         cx, cy = math.cos(ba), math.sin(ba)
-        profile_sweep(bm, [(0.34 * cx, 0.34 * cy, 0.16), (0.20 * cx, 0.20 * cy, 0.62), (0.08 * cx, 0.08 * cy, 1.06)], [0.055, 0.045, 0.038], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+        profile_sweep(bm, [(0.36 * cx, 0.36 * cy, 0.14), (0.22 * cx, 0.22 * cy, 0.62), (0.09 * cx, 0.09 * cy, 1.08)], [0.062, 0.050, 0.040], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
 
     # Tapered octagonal post shaft with forged socket collars
-    profile_sweep(bm, [(0, 0, 0.42), (0.02, 0, 1.48), (0.04, 0, 2.48)], [0.095, 0.075, 0.062], profile='oval', sides=8, quad=1, mark_flat=True)
+    profile_sweep(bm, [(0, 0, 0.42), (0.02, 0, 1.48), (0.04, 0, 2.48)], [0.10, 0.080, 0.066], profile='oval', sides=8, quad=1, mark_flat=True)
     for cz in (1.06, 1.72, 2.18, 2.44):
-        profile_sweep(bm, [(0.02, 0, cz - 0.04), (0.02, 0, cz + 0.04)], [0.11] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
+        profile_sweep(bm, [(0.02, 0, cz - 0.045), (0.02, 0, cz + 0.045)], [0.118] * 2, profile='oval', sides=8, quad=1, mark_flat=True)
 
     # Socketed crystal finial at spire peak
     crystal_growth_graph(bm, (0.04, 0, 2.46), height=0.32, radius=0.10, rng=rng, parent_quad=3, child_quad=2, parent_count=1, daughter_count=2, basal_count=0, with_rock_base=False)
 
     # Distinctive S-curved bent gooseneck supporting arm + scrolled under-brace
     arm_pts = [(0.04, 0, 2.18), (0.24, 0, 2.44), (0.48, 0, 2.66), (0.68, 0, 2.62), (0.72, 0, 2.50)]
-    profile_sweep(bm, arm_pts, [(0.048, 0.045), (0.042, 0.040), (0.038, 0.036), (0.032, 0.032), (0.028, 0.028)], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
-    profile_sweep(bm, [(0.04, 0, 1.74), (0.26, 0, 2.12), (0.50, 0, 2.46)], [0.036, 0.032, 0.026], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+    profile_sweep(bm, arm_pts, [(0.054, 0.050), (0.048, 0.044), (0.042, 0.040), (0.036, 0.036), (0.032, 0.032)], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+    profile_sweep(bm, [(0.04, 0, 1.72), (0.26, 0, 2.12), (0.50, 0, 2.46)], [0.042, 0.036, 0.030], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
 
     # Real 3D chain links suspending a hexagonal wrought-iron lantern cage around glowing crystal
-    add_chain_link_span(bm, (0.72, 0, 2.48), (0.72, 0, 2.10), link_len=0.10, link_w=0.056, wire_r=0.012, quad=2)
+    add_chain_link_span(bm, (0.72, 0, 2.48), (0.72, 0, 2.10), link_len=0.10, link_w=0.056, wire_r=0.013, quad=1)
     # Lantern cage top conical hood, top/bottom guard rings, 6 bowed ribs & spike finial
-    profile_sweep(bm, [(0.72, 0, 2.10), (0.72, 0, 2.02), (0.72, 0, 1.96)], [0.04, 0.14, 0.21], profile='oval', sides=6, quad=1, mark_flat=True)
-    profile_sweep(bm, [(0.72, 0, 1.66), (0.72, 0, 1.60), (0.72, 0, 1.50)], [0.17, 0.12, 0.02], profile='oval', sides=6, quad=1, mark_flat=True)
+    profile_sweep(bm, [(0.72, 0, 2.10), (0.72, 0, 2.02), (0.72, 0, 1.95)], [0.05, 0.16, 0.23], profile='oval', sides=6, quad=1, mark_flat=True)
+    profile_sweep(bm, [(0.72, 0, 1.65), (0.72, 0, 1.58), (0.72, 0, 1.48)], [0.19, 0.13, 0.025], profile='oval', sides=6, quad=1, mark_flat=True)
     for ri in range(6):
         a = (ri / 6.0) * math.tau
         ca, sa = math.cos(a), math.sin(a)
-        profile_sweep(bm, [(0.72 + 0.19 * ca, 0.19 * sa, 1.96), (0.72 + 0.23 * ca, 0.23 * sa, 1.80), (0.72 + 0.16 * ca, 0.16 * sa, 1.66)], [0.016] * 3, profile='oval', sides=6, quad=2, mark_flat=True)
-    crystal_growth_graph(bm, (0.72, 0, 1.66), height=0.34, radius=0.14, rng=rng, parent_quad=3, child_quad=3, parent_count=1, daughter_count=3, basal_count=0, with_rock_base=False)
+        profile_sweep(bm, [(0.72 + 0.21 * ca, 0.21 * sa, 1.95), (0.72 + 0.24 * ca, 0.24 * sa, 1.80), (0.72 + 0.18 * ca, 0.18 * sa, 1.65)], [0.018] * 3, profile='oval', sides=6, quad=1, mark_flat=True)
+    crystal_growth_graph(bm, (0.72, 0, 1.65), height=0.34, radius=0.15, rng=rng, parent_quad=3, child_quad=3, parent_count=1, daughter_count=3, basal_count=0, with_rock_base=False)
     semantic_silhouette_constraints(bm, 'umbra_hanging_censer_spire')
     return bm
 
@@ -666,12 +727,13 @@ def build_umbra_hanging_censer_spire():
 def build_umbra_spider_web_balustrade_shrine():
     bm = bmesh.new()
     rng = random.Random(71)
-    # Stepped shrine plinth + 4 reinforced corner pillars with bases, collars, capitals & corner spires
-    structured_fracture(bm, (0.0, 0.0, 0.18), (1.36, 1.36, 0.36), style='stone_slab', quad=0, seed=70)
+    # Stepped carved basalt shrine plinth with corner buttress blocks + 4 reinforced corner pillars
+    structured_fracture(bm, (0.0, 0.0, 0.14), (1.36, 1.36, 0.28), style='carved_ashlar', quad=0, seed=70)
+    add_chamfered_box(bm, (0.0, 0.0, 0.31), (1.18, 1.18, 0.12), quad=0, bevel=0.02, wear='stone')
     for px, py in ((-0.46, -0.46), (0.46, -0.46), (-0.46, 0.46), (0.46, 0.46)):
-        add_chamfered_box(bm, (px, py, 0.39), (0.22, 0.22, 0.10), quad=0, bevel=0.015)
+        add_chamfered_box(bm, (px, py, 0.39), (0.24, 0.24, 0.12), quad=0, bevel=0.015)
         timber_joinery(bm, (px, py, 0.40), (px, py, 1.84), width=0.16, depth=0.16, quad=1, iron_straps=True, strap_quad=2)
-        add_chamfered_box(bm, (px, py, 1.84), (0.22, 0.22, 0.10), quad=0, bevel=0.015)
+        add_chamfered_box(bm, (px, py, 1.84), (0.24, 0.24, 0.12), quad=0, bevel=0.015)
         crystal_growth_graph(bm, (px, py, 2.00), height=0.34, radius=0.09, rng=rng, parent_quad=2, child_quad=3, parent_count=1, daughter_count=2, basal_count=0, with_rock_base=False)
 
     # Lower balustrade rails, balusters & spider-webbed diagonal arch struts
@@ -683,18 +745,18 @@ def build_umbra_spider_web_balustrade_shrine():
             profile_sweep(bm, [(side, sx, 0.36), (side, sx, 0.68)], [0.032] * 2, profile='oval', sides=6, quad=1, mark_flat=True)
         # Upper canopy webbed diagonal corner braces
         for sgn in (-1, 1):
-            timber_joinery(bm, (sgn * 0.46, side, 1.54), (sgn * 0.22, side, 1.86), width=0.055, depth=0.055, quad=2)
-            timber_joinery(bm, (side, sgn * 0.46, 1.54), (side, sgn * 0.22, 1.86), width=0.055, depth=0.055, quad=2)
+            timber_joinery(bm, (sgn * 0.46, side, 1.54), (sgn * 0.22, side, 1.86), width=0.055, depth=0.055, quad=1)
+            timber_joinery(bm, (side, sgn * 0.46, 1.54), (side, sgn * 0.22, 1.86), width=0.055, depth=0.055, quad=1)
 
     # Central altar pedestal + round revolved offering chalice cradling glowing crystal
     profile_sweep(bm, [(0, 0, 0.34), (0, 0, 0.88)], [0.22, 0.16], profile='oval', sides=8, quad=0, mark_flat=True)
-    add_revolved_vessel(bm, (0, 0, 0.86), [(0.15, 0.0), (0.24, 0.10), (0.28, 0.20)], sides=12, wall_t=0.04, quad_outer=2, quad_inner=0, ribs=6)
+    add_revolved_vessel(bm, (0, 0, 0.86), [(0.15, 0.0), (0.24, 0.10), (0.28, 0.20)], sides=12, wall_t=0.04, quad_outer=1, quad_inner=0, ribs=6)
     crystal_growth_graph(bm, (0, 0, 0.98), height=0.38, radius=0.16, rng=rng, parent_quad=3, child_quad=2, parent_count=1, daughter_count=4, basal_count=0, with_rock_base=False)
 
-    # Canopy entablature combining RIBBED SHRINE DOME + SHARP CRYSTAL CROWN erupting from oculus!
+    # Canopy entablature combining RIBBED SHRINE DOME + SHARP CRYSTAL CROWN erupting from oculus
     add_chamfered_box(bm, (0, 0, 1.92), (1.30, 1.30, 0.20), quad=0, bevel=0.03, wear='stone')
     profile_sweep(bm, [(0, 0, 2.00), (0, 0, 2.18), (0, 0, 2.30), (0, 0, 2.36)], [0.48, 0.42, 0.28, 0.16], profile='oval', sides=14, ridge_count=8, ridge_amp=0.05, quad=3)
-    profile_sweep(bm, [(0, 0, 2.00), (0, 0, 2.08)], [0.52, 0.50], profile='oval', sides=14, quad=2, mark_flat=True)
+    profile_sweep(bm, [(0, 0, 2.00), (0, 0, 2.08)], [0.52, 0.50], profile='oval', sides=14, quad=1, mark_flat=True)
     crystal_growth_graph(bm, (0, 0, 2.12), height=0.46, radius=0.22, rng=rng, parent_quad=3, child_quad=2, parent_count=1, daughter_count=4, basal_count=0, with_rock_base=False)
     semantic_silhouette_constraints(bm, 'umbra_spider_web_balustrade_shrine')
     return bm
@@ -703,39 +765,41 @@ def build_umbra_spider_web_balustrade_shrine():
 def build_umbra_tide_gondola_skiff():
     bm = bmesh.new()
     rng = random.Random(77)
-    # Twin curved sled runners underneath with upturned iron prow shoes & mortised riser blocks
+    # Twin curved structural sled runners underneath in dark iron/basalt (quad=0) with mortised riser blocks (quad=1)
     for ry in (-0.30, 0.30):
         runner_pts = [(-1.42, ry, 0.26), (-1.10, ry, 0.04), (0.0, ry, 0.02), (1.10, ry, 0.04), (1.46, ry, 0.28)]
-        profile_sweep(bm, runner_pts, [(0.045, 0.055)] * 5, profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+        profile_sweep(bm, runner_pts, [(0.048, 0.058)] * 5, profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
         for rx_post in (-0.75, 0.0, 0.75):
-            timber_joinery(bm, (rx_post, ry, 0.05), (rx_post, ry, 0.24), width=0.07, depth=0.07, quad=1)
+            timber_joinery(bm, (rx_post, ry, 0.05), (rx_post, ry, 0.24), width=0.075, depth=0.075, quad=1, pegs=True)
 
-    # Keel timber arching smoothly at stem & stern + flat floor planks
+    # Keel timber arching smoothly at stem & stern + planked deck floor
     keel_pts = [(-1.66, 0, 0.54), (-0.98, 0, 0.16), (0, 0, 0.10), (0.98, 0, 0.16), (1.68, 0, 0.58)]
-    profile_sweep(bm, keel_pts, [0.09, 0.11, 0.11, 0.11, 0.09], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+    profile_sweep(bm, keel_pts, [0.09, 0.11, 0.11, 0.11, 0.09], profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
     add_chamfered_box(bm, (0.0, 0.0, 0.18), (2.15, 0.68, 0.07), quad=1, bevel=0.015, wear='wood')
 
-    # Sweeping curved gunwale & chine rails + steamed hull ribs
+    # Sweeping curved gunwale & chine rails + steamed hull ribs with mortised knee joints
     for side_y in (-1, 1):
         gunwale = [(-1.58, 0.03 * side_y, 0.54), (-0.82, 0.40 * side_y, 0.42), (0.0, 0.46 * side_y, 0.40), (0.82, 0.40 * side_y, 0.42), (1.60, 0.03 * side_y, 0.60)]
-        profile_sweep(bm, gunwale, [0.052] * 5, profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+        profile_sweep(bm, gunwale, [0.054] * 5, profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
         chine = [(-1.42, 0.03 * side_y, 0.36), (-0.75, 0.34 * side_y, 0.22), (0.0, 0.39 * side_y, 0.20), (0.75, 0.34 * side_y, 0.22), (1.44, 0.03 * side_y, 0.40)]
-        profile_sweep(bm, chine, [0.045] * 5, profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+        profile_sweep(bm, chine, [0.048] * 5, profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
     for sx in (-0.80, -0.40, 0.0, 0.40, 0.80):
         hw = 0.42 * (1.0 - 0.32 * (abs(sx) / 0.90))
-        timber_joinery(bm, (sx, -hw, 0.21), (sx, hw, 0.21), width=0.065, depth=0.05, quad=1)
-        timber_joinery(bm, (sx, -hw, 0.21), (sx, -hw * 1.06, 0.41), width=0.055, depth=0.05, quad=1)
-        timber_joinery(bm, (sx, hw, 0.21), (sx, hw * 1.06, 0.41), width=0.055, depth=0.05, quad=1)
+        timber_joinery(bm, (sx, -hw, 0.21), (sx, hw, 0.21), width=0.068, depth=0.055, quad=1)
+        timber_joinery(bm, (sx, -hw, 0.21), (sx, -hw * 1.06, 0.41), width=0.058, depth=0.052, quad=0)
+        timber_joinery(bm, (sx, hw, 0.21), (sx, hw * 1.06, 0.41), width=0.058, depth=0.052, quad=0)
 
-    # Layered magical inlay thwarts (recessed channel bench + metallic border + faceted cyan inlay bar)
+    # Layered magical inlay thwarts (recessed dark channel bench + teal border bezel + faceted cyan inlay bar)
     for sx in (-0.56, 0.0, 0.56):
-        add_chamfered_box(bm, (sx, 0, 0.40), (0.26, 0.80, 0.055), quad=1, bevel=0.01)
-        add_chamfered_box(bm, (sx, 0, 0.43), (0.16, 0.68, 0.025), quad=2, bevel=0.006)
-        add_chamfered_box(bm, (sx, 0, 0.445), (0.09, 0.56, 0.03), quad=3, bevel=0.008)
+        add_chamfered_box(bm, (sx, 0, 0.40), (0.28, 0.82, 0.06), quad=0, bevel=0.01)
+        add_chamfered_box(bm, (sx, 0, 0.432), (0.18, 0.70, 0.026), quad=2, bevel=0.006)
+        add_chamfered_box(bm, (sx, 0, 0.448), (0.11, 0.58, 0.032), quad=3, bevel=0.008)
 
-    # Prow stempost with forged socket claw & navigator crystal cluster
-    timber_joinery(bm, (1.38, 0, 0.48), (1.66, 0, 1.12), width=0.075, depth=0.075, quad=2, iron_straps=True)
-    crystal_growth_graph(bm, (1.66, 0, 1.08), height=0.34, radius=0.11, rng=rng, parent_quad=3, child_quad=2, parent_count=1, daughter_count=3, basal_count=0, with_rock_base=False)
+    # Curved prow stempost with forged socket collar + glowing fungus/crystal navigator finial
+    prow_pts = [(1.36, 0, 0.46), (1.54, 0, 0.78), (1.66, 0, 1.12)]
+    profile_sweep(bm, prow_pts, [0.058, 0.048, 0.042], profile='rect_chamfer', sides=8, quad=1, mark_flat=True)
+    _add_sculpted_mushroom_cap(bm, (1.66, 0, 1.14), radius=0.19, height=0.14, cap_quad=3, gill_quad=2, seed=78, sides=12, gill_count=10)
+    crystal_growth_graph(bm, (1.66, 0, 1.16), height=0.20, radius=0.08, rng=rng, parent_quad=3, child_quad=2, parent_count=1, daughter_count=2, basal_count=0, with_rock_base=False)
     semantic_silhouette_constraints(bm, 'umbra_tide_gondola_skiff')
     return bm
 
@@ -747,58 +811,61 @@ def build_stonehold_drop_hammer_forge_press():
     bm = bmesh.new()
     # Multi-tier carved granite foundation with recessed side panels & chipped stone edges
     structured_fracture(bm, (0, 0, 0.14), (1.46, 1.20, 0.28), style='carved_ashlar', quad=0, seed=80)
-    add_chamfered_box(bm, (0, 0, 0.34), (1.28, 1.04, 0.16), quad=0, bevel=0.02, wear='stone', wear_seed=81)
+    structured_fracture(bm, (0, 0, 0.34), (1.26, 1.02, 0.18), style='carved_ashlar', quad=0, seed=81)
 
-    # Twin carved stone pillars with recessed panels, bolted bronze V-guide rails & stepped capitals
+    # Twin carved stone pillars with recessed bronze panels, bolted V-guide rails & stepped capitals
     for sx in (-0.52, 0.52):
-        structured_fracture(bm, (sx, 0, 1.44), (0.28, 0.40, 2.08), style='carved_ashlar', quad=0, seed=82 + int(sx * 10), strata_layers=2)
-        add_chamfered_box(bm, (sx, 0, 2.40), (0.34, 0.46, 0.14), quad=0, bevel=0.015)
+        structured_fracture(bm, (sx, 0, 1.44), (0.30, 0.42, 2.08), style='carved_ashlar', quad=0, seed=82 + int(sx * 10), strata_layers=3)
+        add_chamfered_box(bm, (sx, -0.20, 1.44), (0.14, 0.04, 1.42), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (sx, 0.20, 1.44), (0.14, 0.04, 1.42), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (sx, 0, 2.40), (0.36, 0.48, 0.14), quad=0, bevel=0.015)
         # Inner bronze guide rail bolted to pillar face
-        in_x = sx - (0.14 if sx > 0 else -0.14)
+        in_x = sx - (0.15 if sx > 0 else -0.15)
         add_chamfered_box(bm, (in_x, 0, 1.46), (0.06, 0.14, 1.92), quad=2, bevel=0.008)
 
-    # Overhead crosshead beam + mechanical drive gear housing & spoked hand-wheel
-    add_chamfered_box(bm, (0, 0, 2.54), (1.50, 0.52, 0.28), quad=2, bevel=0.025)
-    add_chamfered_box(bm, (0, 0, 2.68), (0.56, 0.42, 0.14), quad=0, bevel=0.02)
-    profile_sweep(bm, [(-0.08, 0, 2.56), (0.86, 0, 2.56)], [0.045] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
-    _add_spoked_wheel(bm, (0.84, 0, 2.56), radius=0.22, width=0.06, spokes=6, quad_wood=2, quad_iron=0)
-    # Note: wheel axis in _add_spoked_wheel is along Y; orient handwheel cleanly on front/side or add flywheel along X:
+    # Overhead crosshead beam + coaxial drive gear housing & X-axis spoked flywheel
+    add_chamfered_box(bm, (0, 0, 2.54), (1.44, 0.52, 0.28), quad=2, bevel=0.025)
+    add_chamfered_box(bm, (0, 0, 2.68), (0.58, 0.44, 0.14), quad=0, bevel=0.02)
+    profile_sweep(bm, [(-0.08, 0, 2.54), (0.82, 0, 2.54)], [0.048] * 2, profile='oval', sides=8, quad=2, mark_flat=True)
+    # Coaxial flywheel mounted on X-axis shaft at x=0.78
+    add_gear_wheel_with_pawl(bm, (0.76, 0.0, 2.54), (1, 0, 0), pitch_r=0.22, thickness=0.07, teeth=12, quad_metal=2, with_pawl=True)
     add_gear_wheel_with_pawl(bm, (0.0, -0.26, 2.54), (0, 1, 0), pitch_r=0.20, thickness=0.08, teeth=10, quad_metal=2, with_pawl=False)
 
     # Credible mechanical moving tup: vertical acme screw shaft connecting crosshead to sliding hammer head
-    profile_sweep(bm, [(0, 0, 1.84), (0, 0, 2.50)], [0.068] * 2, profile='oval', sides=10, ridge_count=6, ridge_amp=0.10, quad=2, mark_flat=True)
-    add_chamfered_box(bm, (0, 0, 1.62), (0.54, 0.44, 0.48), quad=2, bevel=0.025)
+    profile_sweep(bm, [(0, 0, 1.80), (0, 0, 2.50)], [0.075] * 2, profile='oval', sides=10, ridge_count=6, ridge_amp=0.10, quad=2, mark_flat=True)
+    add_chamfered_box(bm, (0, 0, 1.56), (0.58, 0.46, 0.52), quad=2, bevel=0.025)
     # Guide shoes clasping vertical pillar guide rails cleanly
     for sx in (-0.34, 0.34):
-        add_chamfered_box(bm, (sx, 0, 1.62), (0.14, 0.24, 0.34), quad=2, bevel=0.01)
+        add_chamfered_box(bm, (sx, 0, 1.56), (0.15, 0.24, 0.34), quad=2, bevel=0.01)
 
-    # Anvil bolster, iron anvil + glowing golden ingot billet + side trip lever
-    add_chamfered_box(bm, (0, 0, 0.54), (0.64, 0.48, 0.24), quad=1, bevel=0.02)
-    add_chamfered_box(bm, (0, 0, 0.74), (0.52, 0.38, 0.18), quad=2, bevel=0.015)
-    timber_joinery(bm, (-0.36, 0, 0.74), (0.48, 0, 0.74), width=0.20, depth=0.14, quad=2)
-    structured_fracture(bm, (-0.06, -0.28, 0.88), (0.24, 0.22, 0.14), style='ore_matrix', quad=3, seed=81)
+    # Anvil bolster, iron anvil + prominent glowing golden ingot/ore billet centered on anvil face
+    add_chamfered_box(bm, (0, 0, 0.52), (0.68, 0.52, 0.24), quad=1, bevel=0.02)
+    add_chamfered_box(bm, (0, 0, 0.72), (0.56, 0.42, 0.18), quad=2, bevel=0.015)
+    structured_fracture(bm, (0.0, -0.06, 0.90), (0.42, 0.36, 0.24), style='ore_matrix', quad=3, seed=81)
+    add_chamfered_box(bm, (-0.12, -0.26, 0.48), (0.28, 0.18, 0.14), quad=3, rz=0.25, bevel=0.015)
     semantic_silhouette_constraints(bm, 'stonehold_drop_hammer_forge_press')
     return bm
 
 
 def build_stonehold_runic_brazier_pedestal():
     bm = bmesh.new()
-    # Stepped carved stone base plinth + octagonal pedestal with recessed runic panels & flared capital
-    structured_fracture(bm, (0, 0, 0.18), (1.12, 1.12, 0.36), style='carved_ashlar', quad=0, seed=84)
-    profile_sweep(bm, [(0, 0, 0.34), (0, 0, 0.46), (0, 0, 1.06), (0, 0, 1.18)], [0.38, 0.34, 0.28, 0.40], profile='oval', sides=8, quad=0, mark_flat=True)
+    # Multi-tier chamfered & chipped carved granite plinth + stout octagonal pedestal column
+    structured_fracture(bm, (0, 0, 0.14), (1.12, 1.12, 0.28), style='carved_ashlar', quad=0, seed=84)
+    structured_fracture(bm, (0, 0, 0.34), (0.94, 0.94, 0.18), style='carved_ashlar', quad=0, seed=85)
+    profile_sweep(bm, [(0, 0, 0.40), (0, 0, 0.54), (0, 0, 1.04), (0, 0, 1.18)], [0.42, 0.35, 0.30, 0.42], profile='oval', sides=8, quad=0, mark_flat=True)
     for ca in (0.0, math.pi * 0.5, math.pi, math.pi * 1.5):
-        # Recessed golden runic inlays on pedestal faces + 4 forged bronze scroll corbels cradling bowl
+        # Recessed bronze relief plates on stone pedestal + 4 heavy forged bronze scroll corbels cradling bowl
         rx, ry = math.cos(ca), math.sin(ca)
-        add_chamfered_box(bm, (0.29 * rx, 0.29 * ry, 0.76), (0.05 if abs(rx) > 0.5 else 0.14, 0.05 if abs(ry) > 0.5 else 0.14, 0.44), quad=3, bevel=0.006)
-        profile_sweep(bm, [(0.36 * rx, 0.36 * ry, 0.96), (0.46 * rx, 0.46 * ry, 1.14), (0.48 * rx, 0.48 * ry, 1.30)], [0.045, 0.040, 0.035], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+        add_chamfered_box(bm, (0.31 * rx, 0.31 * ry, 0.76), (0.05 if abs(rx) > 0.5 else 0.18, 0.05 if abs(ry) > 0.5 else 0.18, 0.36), quad=2, bevel=0.008)
+        profile_sweep(bm, [(0.34 * rx, 0.34 * ry, 0.92), (0.46 * rx, 0.46 * ry, 1.12), (0.50 * rx, 0.50 * ry, 1.32)], [0.055, 0.048, 0.040], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
 
     # RESTORE CEREMONIAL ROUND/12-SIDED FLARED BRAZIER BOWL SILHOUETTE
     add_revolved_vessel(
         bm,
-        (0.0, 0.0, 1.16),
-        [(0.28, 0.0), (0.42, 0.12), (0.52, 0.26), (0.55, 0.38)],
+        (0.0, 0.0, 1.14),
+        [(0.30, 0.0), (0.44, 0.12), (0.53, 0.26), (0.56, 0.40)],
         sides=12,
-        wall_t=0.055,
+        wall_t=0.058,
         quad_outer=2,
         quad_inner=0,
         ribs=6,
@@ -807,9 +874,9 @@ def build_stonehold_runic_brazier_pedestal():
     )
     # Glowing golden ember mound inside the concave bowl interior
     for i, (ex, ey, ez, sc) in enumerate((
-        (0.0, 0.0, 1.56, (0.68, 0.68, 0.36)),
-        (-0.14, 0.10, 1.62, (0.36, 0.34, 0.24)),
-        (0.14, -0.10, 1.60, (0.34, 0.34, 0.22)),
+        (0.0, 0.0, 1.56, (0.74, 0.74, 0.38)),
+        (-0.15, 0.12, 1.62, (0.40, 0.38, 0.26)),
+        (0.15, -0.12, 1.60, (0.38, 0.36, 0.24)),
     )):
         structured_fracture(bm, (ex, ey, ez), sc, style='ore_matrix', quad=3, seed=85 + i)
     semantic_silhouette_constraints(bm, 'stonehold_runic_brazier_pedestal')
@@ -818,9 +885,13 @@ def build_stonehold_runic_brazier_pedestal():
 
 def build_stonehold_geared_capstan_winch():
     bm = bmesh.new()
-    # Stepped carved granite foundation bedplate + recessed gear pit collar
-    structured_fracture(bm, (0, 0, 0.16), (1.30, 1.30, 0.32), style='carved_ashlar', quad=0, seed=86)
-    profile_sweep(bm, [(0, 0, 0.28), (0, 0, 0.36)], [0.58, 0.56], profile='oval', sides=16, quad=0, mark_flat=True)
+    # Stepped chamfered & chipped granite foundation bedplate + 4 bolted bronze corner anchor plates
+    structured_fracture(bm, (0, 0, 0.14), (1.34, 1.34, 0.28), style='carved_ashlar', quad=0, seed=86)
+    structured_fracture(bm, (0, 0, 0.28), (1.14, 1.14, 0.16), style='stone_slab', quad=0, seed=87)
+    for cx in (-0.48, 0.48):
+        for cy in (-0.48, 0.48):
+            add_chamfered_box(bm, (cx, cy, 0.34), (0.18, 0.18, 0.07), quad=2, bevel=0.01)
+    profile_sweep(bm, [(0, 0, 0.28), (0, 0, 0.38)], [0.58, 0.55], profile='oval', sides=16, quad=0, mark_flat=True)
 
     # Central rotating capstan shaft + large meshed bronze crown gear wheel + coiled rope drum
     profile_sweep(bm, [(0, 0, 0.30), (0, 0, 1.38)], [0.14, 0.14], profile='oval', sides=12, quad=2, mark_flat=True)
@@ -828,13 +899,13 @@ def build_stonehold_geared_capstan_winch():
     add_winding_drum(bm, (0, 0, 0.62), (0, 0, 1.08), drum_r=0.25, flange_r=0.33, wraps=5, rope_r=0.022, quad_wood=1, quad_metal=2, quad_rope=1)
 
     # Side pinion drive gear + shaft + bolted bearing pedestal meshing with main gear
-    add_pillow_block_bearing(bm, (0.50, 0.44, 0.44), (0, 0, 1), shaft_r=0.045, base_w=0.22, quad_metal=2)
+    add_pillow_block_bearing(bm, (0.50, 0.44, 0.44), (0, 0, 1), shaft_r=0.048, base_w=0.22, quad_metal=2)
     profile_sweep(bm, [(0.50, 0.44, 0.30), (0.50, 0.44, 0.86)], [0.055] * 2, profile='oval', sides=10, quad=2, mark_flat=True)
     add_gear_wheel_with_pawl(bm, (0.50, 0.44, 0.54), (0, 0, 1), pitch_r=0.18, thickness=0.10, teeth=8, quad_metal=2, with_pawl=False)
     add_chamfered_box(bm, (0.50, 0.44, 0.88), (0.28, 0.08, 0.06), quad=2, bevel=0.008)
 
     # Upper iron-strapped capstan head + 4 tapered oak capstan bars with iron ferrules
-    profile_sweep(bm, [(0, 0, 1.08), (0, 0, 1.36)], [0.34, 0.32], profile='oval', sides=12, quad=2, mark_flat=True)
+    profile_sweep(bm, [(0, 0, 1.08), (0, 0, 1.36)], [0.35, 0.33], profile='oval', sides=12, quad=2, mark_flat=True)
     timber_joinery(bm, (-0.74, 0, 1.22), (0.74, 0, 1.22), width=0.11, depth=0.11, quad=1, iron_straps=True, strap_quad=2)
     timber_joinery(bm, (0, -0.74, 1.22), (0, 0.74, 1.22), width=0.11, depth=0.11, quad=1, iron_straps=True, strap_quad=2)
     semantic_silhouette_constraints(bm, 'stonehold_geared_capstan_winch')
@@ -843,73 +914,81 @@ def build_stonehold_geared_capstan_winch():
 
 def build_stonehold_ancestor_relief_stele():
     bm = bmesh.new()
-    # Multi-stepped granite base with corner buttresses
-    structured_fracture(bm, (0, 0, 0.18), (1.36, 0.88, 0.36), style='carved_ashlar', quad=0, seed=87)
-    add_chamfered_box(bm, (0, 0, 0.42), (1.14, 0.68, 0.14), quad=0, bevel=0.02, wear='stone')
+    # Multi-stepped granite base with corner buttress blocks & chipped ashlar courses
+    structured_fracture(bm, (0, 0, 0.16), (1.36, 0.88, 0.32), style='carved_ashlar', quad=0, seed=87)
+    structured_fracture(bm, (0, 0, 0.38), (1.16, 0.72, 0.16), style='carved_ashlar', quad=0, seed=88)
+    for sx in (-0.50, 0.50):
+        add_chamfered_box(bm, (sx, 0, 0.56), (0.22, 0.58, 0.24), quad=0, bevel=0.02, wear='stone')
 
-    # Recessed central shrine architecture: back wall + flanking fluted pilasters + upper/lower sills
-    add_chamfered_box(bm, (0, 0.06, 1.40), (0.94, 0.32, 1.88), quad=0, bevel=0.03, wear='stone', wear_seed=88)
-    for sx in (-0.38, 0.38):
-        structured_fracture(bm, (sx, -0.14, 1.40), (0.22, 0.18, 1.82), style='carved_ashlar', quad=0, seed=89 + int(sx * 10), strata_layers=2)
-        add_chamfered_box(bm, (sx, -0.16, 2.24), (0.26, 0.22, 0.12), quad=2, bevel=0.015)
+    # Sculpted stele body with flanking multi-course ashlar pilasters & side bronze rune channels
+    structured_fracture(bm, (0, 0.0, 1.40), (0.76, 0.36, 1.84), style='carved_ashlar', quad=0, seed=89, strata_layers=3)
+    for sx in (-0.42, 0.42):
+        structured_fracture(bm, (sx, 0.0, 1.40), (0.24, 0.48, 1.84), style='carved_ashlar', quad=0, seed=90 + int(sx * 10), strata_layers=3)
+        add_chamfered_box(bm, (sx, 0.0, 2.24), (0.28, 0.52, 0.14), quad=2, bevel=0.015)
+        # Side architectural recessed bronze & glowing rune slots so side views have rich detail
+        out_x = sx + (0.12 if sx > 0 else -0.12)
+        add_chamfered_box(bm, (out_x, 0.0, 1.40), (0.04, 0.20, 1.24), quad=2, bevel=0.008)
+        add_chamfered_box(bm, (out_x + (0.01 if sx > 0 else -0.01), 0.0, 1.40), (0.03, 0.10, 1.04), quad=3, bevel=0.006)
 
-    # Illuminated runic recess panel + overlaid 3D bronze geometric dwarf fretwork & ancestral helm crest
-    add_chamfered_box(bm, (0, -0.11, 1.42), (0.54, 0.06, 1.24), quad=3, bevel=0.01)
-    for rz_bar in (0.96, 1.42, 1.88):
-        add_chamfered_box(bm, (0, -0.15, rz_bar), (0.56, 0.05, 0.06), quad=2, bevel=0.008)
-    for rx_bar in (-0.16, 0.16):
-        add_chamfered_box(bm, (rx_bar, -0.15, 1.42), (0.05, 0.05, 1.18), quad=2, bevel=0.008)
-    # Sculpted ancestral crown/beard crest inside niche
-    add_chamfered_box(bm, (0, -0.18, 1.62), (0.26, 0.10, 0.28), quad=0, bevel=0.02)
-    add_chamfered_box(bm, (0, -0.19, 1.76), (0.32, 0.09, 0.09), quad=2, bevel=0.012)
+    # Illuminated golden runic chambers on BOTH front and back faces with perimeter bronze framing & top crest
+    for sy_s in (-1.0, 1.0):
+        add_chamfered_box(bm, (0, sy_s * 0.18, 1.40), (0.58, 0.05, 1.30), quad=3, bevel=0.01)
+        # Perimeter bronze molding arch & top ancestral crown crest (preserving large unbroken golden window)
+        for rx_b in (-0.28, 0.28):
+            add_chamfered_box(bm, (rx_b, sy_s * 0.21, 1.40), (0.06, 0.05, 1.34), quad=2, bevel=0.008)
+        for rz_b in (0.74, 2.06):
+            add_chamfered_box(bm, (0, sy_s * 0.21, rz_b), (0.62, 0.05, 0.08), quad=2, bevel=0.01)
+        add_chamfered_box(bm, (0, sy_s * 0.22, 1.92), (0.30, 0.07, 0.18), quad=2, bevel=0.012)
 
     # Corbelled bronze/stone cornice + stepped pediment crown
-    add_chamfered_box(bm, (0, 0, 2.38), (1.14, 0.56, 0.18), quad=2, bevel=0.025)
-    structured_fracture(bm, (0, 0, 2.52), (0.86, 0.44, 0.16), style='carved_ashlar', quad=0, seed=90)
+    add_chamfered_box(bm, (0, 0, 2.36), (1.16, 0.62, 0.18), quad=2, bevel=0.025)
+    structured_fracture(bm, (0, 0, 2.52), (0.90, 0.48, 0.18), style='carved_ashlar', quad=0, seed=91)
     semantic_silhouette_constraints(bm, 'stonehold_ancestor_relief_stele')
     return bm
 
 
 def build_stonehold_ingot_crane_trolley():
     bm = bmesh.new()
-    # Stepped granite footing + bolted slewing pintle collar bearing
-    structured_fracture(bm, (0, 0, 0.16), (1.30, 0.98, 0.32), style='carved_ashlar', quad=0, seed=91)
-    add_pillow_block_bearing(bm, (-0.26, 0.0, 0.36), (0, 0, 1), shaft_r=0.14, base_w=0.46, quad_metal=2)
+    # Multi-tier stepped granite footing + bolted slewing pintle collar bearing
+    structured_fracture(bm, (0, 0, 0.14), (1.32, 0.98, 0.28), style='carved_ashlar', quad=0, seed=91)
+    structured_fracture(bm, (-0.12, 0, 0.28), (1.02, 0.78, 0.14), style='carved_ashlar', quad=0, seed=93)
+    add_pillow_block_bearing(bm, (-0.26, 0.0, 0.38), (0, 0, 1), shaft_r=0.15, base_w=0.48, quad_metal=2)
 
     # Heavy vertical mast + rear counterweight tail-boom with strapped stone ballast + front jib & knee brace
-    timber_joinery(bm, (-0.26, 0, 0.30), (-0.26, 0, 2.28), width=0.24, depth=0.24, quad=2, iron_straps=True, strap_quad=0)
-    timber_joinery(bm, (-0.24, 0, 1.24), (0.50, 0, 2.12), width=0.14, depth=0.14, quad=2, pegs=True)
+    timber_joinery(bm, (-0.26, 0, 0.32), (-0.26, 0, 2.28), width=0.24, depth=0.24, quad=2, iron_straps=True, strap_quad=0)
+    timber_joinery(bm, (-0.24, 0, 1.28), (0.48, 0, 2.12), width=0.14, depth=0.14, quad=2, pegs=True, iron_straps=True, strap_quad=0)
     # Jib beam extending from counterweight tail (-0.72) to forward nose (+1.04)
-    add_chamfered_box(bm, (0.18, 0, 2.18), (1.76, 0.16, 0.18), quad=2, bevel=0.02)
+    timber_joinery(bm, (-0.70, 0, 2.18), (1.04, 0, 2.18), width=0.18, depth=0.18, quad=2, pegs=True, iron_straps=True, strap_quad=0)
     # Counterweight ballast block slung at rear tail-boom
-    structured_fracture(bm, (-0.64, 0, 1.94), (0.34, 0.34, 0.30), style='carved_ashlar', quad=0, seed=92)
-    add_chamfered_box(bm, (-0.64, 0, 1.94), (0.38, 0.36, 0.06), quad=2, bevel=0.008)
+    structured_fracture(bm, (-0.64, 0, 1.92), (0.36, 0.36, 0.32), style='carved_ashlar', quad=0, seed=92)
+    add_chamfered_box(bm, (-0.64, 0, 1.98), (0.40, 0.38, 0.07), quad=2, bevel=0.008)
 
-    # Mast-mounted geared winding drum + spoked hand-crank wheel + masthead sheave
-    add_winding_drum(bm, (-0.26, -0.22, 1.04), (-0.26, 0.22, 1.04), drum_r=0.14, flange_r=0.22, wraps=6, rope_r=0.018, quad_wood=1, quad_metal=2, quad_rope=1)
+    # Mast-mounted geared winding drum + ratchet gear + spoked hand-crank wheel + throat guide sheave
+    add_winding_drum(bm, (-0.26, -0.22, 1.04), (-0.26, 0.22, 1.04), drum_r=0.14, flange_r=0.22, wraps=6, rope_r=0.019, quad_wood=1, quad_metal=2, quad_rope=1)
+    add_gear_wheel_with_pawl(bm, (-0.26, 0.28, 1.04), (0, 1, 0), pitch_r=0.20, thickness=0.06, teeth=10, quad_metal=2, with_pawl=True)
     _add_spoked_wheel(bm, (-0.26, -0.32, 1.04), radius=0.24, width=0.05, spokes=6, quad_wood=2, quad_iron=0)
-    add_pulley_sheave(bm, (-0.26, 0.0, 2.28), (0, 1, 0), radius=0.12, width=0.07, quad_metal=2)
+    add_pulley_sheave(bm, (-0.06, 0.0, 2.02), (0, 1, 0), radius=0.11, width=0.07, quad_metal=2)
 
     # Wheeled overhead trolley carriage + grooved trolley sheave
-    add_chamfered_box(bm, (0.86, 0, 2.18), (0.30, 0.28, 0.24), quad=2, bevel=0.015)
+    add_chamfered_box(bm, (0.86, 0, 2.18), (0.32, 0.30, 0.24), quad=2, bevel=0.015)
     for tx in (0.76, 0.96):
-        profile_sweep(bm, [(tx, -0.16, 2.28), (tx, 0.16, 2.28)], [0.055] * 2, profile='oval', sides=8, quad=0, mark_flat=True)
-    add_pulley_sheave(bm, (0.86, 0, 2.00), (0, 1, 0), radius=0.10, width=0.06, quad_metal=2)
+        profile_sweep(bm, [(tx, -0.17, 2.28), (tx, 0.17, 2.28)], [0.058] * 2, profile='oval', sides=8, quad=0, mark_flat=True)
+    add_pulley_sheave(bm, (0.86, 0, 2.00), (0, 1, 0), radius=0.11, width=0.07, quad_metal=2)
 
-    # Continuous aligned rope from winch drum -> masthead sheave -> along jib -> trolley sheave -> hook block
+    # Clean non-intersecting rope route: drum front edge -> throat guide sheave -> along under-jib -> trolley sheave -> hook block
     add_routed_rope_path(
         bm,
-        [(-0.18, 0.0, 1.12), (-0.22, 0.0, 2.38), (0.88, 0.0, 2.10), (0.86, 0.0, 1.54)],
-        rope_r=0.018,
+        [(-0.12, 0.0, 1.08), (-0.06, 0.0, 2.00), (0.86, 0.0, 2.02), (0.86, 0.0, 1.54)],
+        rope_r=0.020,
         quad=1,
     )
     # Hanging hook block + dual chain slings hooked to side trunnion lugs of round bronze crucible cauldron
-    add_chamfered_box(bm, (0.86, 0, 1.52), (0.10, 0.10, 0.12), quad=2, bevel=0.01)
+    add_chamfered_box(bm, (0.86, 0, 1.52), (0.11, 0.11, 0.13), quad=2, bevel=0.01)
     for vy in (-0.22, 0.22):
-        add_chain_link_span(bm, (0.86, 0, 1.46), (0.86, vy, 1.14), link_len=0.09, link_w=0.05, wire_r=0.011, quad=2)
+        add_chain_link_span(bm, (0.86, 0, 1.46), (0.86, vy, 1.14), link_len=0.09, link_w=0.05, wire_r=0.012, quad=2)
         add_chamfered_box(bm, (0.86, vy, 1.12), (0.07, 0.07, 0.07), quad=2, bevel=0.008)
-    add_revolved_vessel(bm, (0.86, 0, 0.88), [(0.17, 0.0), (0.23, 0.14), (0.25, 0.26)], sides=14, wall_t=0.042, quad_outer=2, quad_inner=0, ribs=6)
-    structured_fracture(bm, (0.86, 0, 1.13), (0.34, 0.30, 0.12), style='ore_matrix', quad=3, seed=89)
+    add_revolved_vessel(bm, (0.86, 0, 0.88), [(0.18, 0.0), (0.24, 0.14), (0.26, 0.26)], sides=14, wall_t=0.044, quad_outer=2, quad_inner=0, ribs=6)
+    structured_fracture(bm, (0.86, 0, 1.14), (0.36, 0.34, 0.14), style='ore_matrix', quad=3, seed=89)
     semantic_silhouette_constraints(bm, 'stonehold_ingot_crane_trolley')
     return bm
 
@@ -919,47 +998,67 @@ def build_stonehold_ingot_crane_trolley():
 # ---------------------------------------------------------------------------
 def build_frostgard_organ_pipe_ice_formation():
     bm = bmesh.new()
-    structured_fracture(bm, (0, 0, 0.16), (2.25, 2.10, 0.36), style='stone_slab', quad=0, seed=91)
-    structured_fracture(bm, (0.12, -0.10, 0.24), (1.75, 1.60, 0.26), style='frost_drift', quad=2, seed=92)
-    # 7 fused vertical/near-vertical fluted organ-pipe columns preserving colonnade silhouette
+    # Organic multi-lobed fractured basalt crag + wind-sculpted frost drift collar (never a square box)
+    structured_fracture(bm, (0, 0, 0.18), (2.28, 2.12, 0.40), style='crag', quad=0, seed=91)
+    structured_fracture(bm, (0.08, -0.06, 0.28), (1.78, 1.64, 0.30), style='frost_drift', quad=2, seed=92)
+    # 7 stout directional fluted organ-pipe ice columns with stepped ledges & chisel-cleaved tops
     pipes = (
-        (0.0, 0.0, 3.20, 0.27, (0.04, -0.02, 1.0)),
-        (-0.40, 0.22, 2.65, 0.20, (-0.06, 0.04, 1.0)),
-        (0.42, 0.18, 2.80, 0.21, (0.07, 0.03, 1.0)),
-        (-0.28, -0.34, 2.28, 0.18, (-0.04, -0.06, 1.0)),
-        (0.30, -0.32, 2.45, 0.19, (0.05, -0.05, 1.0)),
-        (-0.14, 0.44, 1.85, 0.15, (-0.03, 0.08, 1.0)),
-        (0.18, -0.46, 1.60, 0.14, (0.04, -0.08, 1.0)),
+        (0.0, 0.0, 3.22, 0.32, (0.06, -0.03, 1.0), 8),
+        (-0.42, 0.20, 2.70, 0.25, (-0.04, 0.05, 1.0), 8),
+        (0.44, 0.16, 2.84, 0.26, (0.09, 0.03, 1.0), 6),
+        (-0.30, -0.34, 2.34, 0.23, (-0.03, -0.06, 1.0), 8),
+        (0.32, -0.32, 2.50, 0.24, (0.07, -0.05, 1.0), 6),
+        (-0.16, 0.46, 1.92, 0.20, (-0.02, 0.09, 1.0), 6),
+        (0.20, -0.48, 1.68, 0.19, (0.06, -0.08, 1.0), 5),
     )
-    for idx, (dx, dy, h, r, axis) in enumerate(pipes):
+    for idx, (dx, dy, h, r, axis, p_sides) in enumerate(pipes):
+        ax_v = Vector(axis).normalized()
         build_prism_crystal(
             bm,
-            (dx, dy, 0.12),
-            Vector(axis),
+            (dx, dy, 0.14),
+            ax_v,
             r,
-            r * 0.42,
+            r * 0.68,
             h,
-            sides=8,
-            chisel_skew=0.18 + (idx % 3) * 0.06,
-            flatness=1.0,
+            sides=p_sides,
+            chisel_skew=0.22 + (idx % 3) * 0.07,
+            flatness=0.88 if idx % 2 else 1.0,
             stepped=True,
-            quad=1 if idx % 2 == 0 else 2,
+            quad=1 if idx % 3 != 2 else 2,
             tip_chip=(idx % 2 == 1),
         )
-    # 6 shorter angled basal ice shards around the collar
+        if idx < 4:
+            # Epitaxial branching daughter prism emerging from lower third of pipe
+            b_ang = idx * 1.7 + 0.4
+            b_dir = (ax_v + Vector((math.cos(b_ang) * 0.42, math.sin(b_ang) * 0.42, 0.35))).normalized()
+            build_prism_crystal(
+                bm,
+                Vector((dx, dy, 0.14)) + ax_v * (h * 0.22),
+                b_dir,
+                r * 0.58,
+                r * 0.36,
+                h * 0.38,
+                sides=6,
+                chisel_skew=0.30,
+                flatness=0.75,
+                stepped=False,
+                quad=2 if idx % 2 == 0 else 1,
+                tip_chip=True,
+            )
+    # 6 shattered basal ice plates embedded into the frost collar
     for b_i in range(6):
         a = (b_i / 6.0) * math.tau + 0.35
-        bx, by = math.cos(a) * 0.62, math.sin(a) * 0.62
+        bx, by = math.cos(a) * 0.66, math.sin(a) * 0.66
         build_prism_crystal(
             bm,
-            (bx, by, 0.10),
-            Vector((math.cos(a) * 0.48, math.sin(a) * 0.48, 0.88)),
-            0.11,
-            0.03,
-            0.78 + (b_i % 2) * 0.26,
-            sides=6,
-            chisel_skew=0.30,
-            flatness=0.80,
+            (bx, by, 0.12),
+            Vector((math.cos(a) * 0.52 + 0.06, math.sin(a) * 0.52, 0.85)).normalized(),
+            0.16,
+            0.09,
+            0.74 + (b_i % 2) * 0.24,
+            sides=5 if b_i % 2 else 6,
+            chisel_skew=0.32,
+            flatness=0.65,
             stepped=False,
             quad=2 if b_i % 2 else 1,
             tip_chip=True,
@@ -971,27 +1070,27 @@ def build_frostgard_organ_pipe_ice_formation():
 def build_frostgard_hoarfrost_rose_cluster():
     bm = bmesh.new()
     rng = random.Random(101)
-    # Natural crag & frost drift base matching original 1.95m footprint
-    structured_fracture(bm, (0, 0, 0.16), (1.84, 1.76, 0.34), style='crag', quad=0, seed=101)
-    structured_fracture(bm, (-0.12, 0.08, 0.24), (1.42, 1.36, 0.24), style='frost_drift', quad=2, seed=102)
-    # Radiating directional fan of 10 stout ice prism blades + 6 epitaxial branching plates
+    # Substantial multi-lobed dark stone boulder mound matching original grounded rocky base + frost collar
+    structured_fracture(bm, (0, 0, 0.22), (1.90, 1.82, 0.48), style='crag', quad=0, seed=101)
+    structured_fracture(bm, (-0.10, 0.08, 0.34), (1.36, 1.28, 0.26), style='frost_drift', quad=2, seed=102)
+    # Radiating directional fan of 10 stout sculpted blue-ice blades + 6 epitaxial branching plates
     for i in range(10):
         a = (i / 10.0) * math.tau + 0.18
-        out_tilt = 0.38 + (i % 3) * 0.18
-        axis = Vector((math.cos(a) * out_tilt + 0.18, math.sin(a) * out_tilt - 0.08, 1.0)).normalized()
-        r_b = 0.16 + (i % 3) * 0.04
-        h_b = 1.05 + (i % 3) * 0.28
-        base_pt = Vector((math.cos(a) * 0.22, math.sin(a) * 0.22, 0.14))
+        out_tilt = 0.40 + (i % 3) * 0.16
+        axis = Vector((math.cos(a) * out_tilt + 0.16, math.sin(a) * out_tilt - 0.06, 1.0)).normalized()
+        r_b = 0.21 + (i % 3) * 0.045
+        h_b = 1.08 + (i % 3) * 0.26
+        base_pt = Vector((math.cos(a) * 0.24, math.sin(a) * 0.24, 0.24))
         build_prism_crystal(
             bm,
             base_pt,
             axis,
             r_b,
-            r_b * 0.38,
+            r_b * 0.58,
             h_b,
             sides=6 if i % 2 == 0 else 5,
             chisel_skew=0.28,
-            flatness=0.72 if i % 2 else 0.90,
+            flatness=0.68 if i % 2 else 0.88,
             stepped=(i % 2 == 0),
             quad=1 if i % 3 != 2 else 2,
             tip_chip=(i % 2 == 1),
@@ -1004,14 +1103,14 @@ def build_frostgard_hoarfrost_rose_cluster():
                 bm,
                 branch_base,
                 branch_axis,
-                r_b * 0.65,
-                r_b * 0.22,
-                h_b * rng.uniform(0.42, 0.58),
+                r_b * 0.68,
+                r_b * 0.38,
+                h_b * rng.uniform(0.44, 0.58),
                 sides=5,
                 chisel_skew=0.32,
-                flatness=0.62,
+                flatness=0.60,
                 stepped=False,
-                quad=2,
+                quad=2 if i % 2 == 0 else 1,
                 tip_chip=True,
             )
     semantic_silhouette_constraints(bm, 'frostgard_hoarfrost_rose_cluster')
@@ -1020,25 +1119,26 @@ def build_frostgard_hoarfrost_rose_cluster():
 
 def build_frostgard_frozen_melt_mushroom_column():
     bm = bmesh.new()
-    # RESTORE ICE MUSHROOM SILHOUETTE: basalt/frost footing + waisted fluted ice stalk + overhanging snow/ice cap + radial gills + icicles
-    structured_fracture(bm, (0.0, 0.0, 0.12), (1.76, 1.72, 0.28), style='stone_slab', quad=0, seed=112)
-    structured_fracture(bm, (0.14, -0.08, 0.20), (1.34, 1.28, 0.20), style='frost_drift', quad=2, seed=113)
+    # RESTORE ICE MUSHROOM SILHOUETTE: organic multi-lobed crag base + stout fluted ice stalk + snow-crowned cap + radial ice gills
+    structured_fracture(bm, (0.0, 0.0, 0.16), (1.84, 1.78, 0.36), style='crag', quad=0, seed=112)
+    structured_fracture(bm, (0.10, -0.06, 0.26), (1.38, 1.32, 0.26), style='frost_drift', quad=2, seed=113)
 
-    # Fluted waisted glacial ice stalk with undercut ablation neck and subtle organic lean
-    stalk_pts = [(0.0, 0.0, -0.04), (0.03, 0.02, 0.88), (0.01, -0.02, 1.85), (0.0, 0.0, 2.58)]
-    profile_sweep(bm, stalk_pts, [0.56, 0.36, 0.25, 0.34], profile='oval', sides=14, twist_total=0.35, ridge_count=9, ridge_amp=0.08, quad=1)
-    # Freeze-thaw collar ring near stalk mid-section
-    profile_sweep(bm, [(0.02, 0.01, 1.24), (0.02, 0.01, 1.34)], [0.39, 0.36], profile='oval', sides=14, ridge_count=9, ridge_amp=0.06, quad=2)
+    # Stout, organically curved & deeply fluted glacial ice stalk flaring into underside of cap
+    stalk_pts = [(0.0, 0.0, -0.04), (0.06, 0.03, 0.78), (0.02, -0.02, 1.66), (-0.02, 0.0, 2.54)]
+    profile_sweep(bm, stalk_pts, [0.56, 0.43, 0.38, 0.48], profile='oval', sides=16, twist_total=0.35, ridge_count=9, ridge_amp=0.09, quad=1)
+    # Asymmetric windward frost-shelf accretions along stalk flank (not an artificial lathe ring)
+    structured_fracture(bm, (0.18, -0.10, 1.18), (0.62, 0.54, 0.20), style='frost_drift', quad=2, seed=114)
+    structured_fracture(bm, (-0.16, 0.12, 1.62), (0.54, 0.48, 0.18), style='frost_drift', quad=2, seed=115)
 
-    # Sculpted overhanging snow-and-ice mushroom cap with thick irregular lip & radial underside ice gill ribs
-    _add_sculpted_mushroom_cap(bm, (0.0, 0.0, 2.54), radius=1.18, height=0.48, cap_quad=2, gill_quad=1, seed=111, sides=20, gill_count=16)
+    # Sculpted overhanging snow-and-ice mushroom cap with thick irregular lip & deep radial underside blue-ice gill ribs
+    _add_sculpted_mushroom_cap(bm, (-0.02, 0.0, 2.50), radius=1.18, height=0.52, cap_quad=2, gill_quad=1, seed=111, sides=22, gill_count=18)
 
     # Hanging icicle drip spurs around the cap eave margin
     for ic in range(10):
         a = (ic / 10.0) * math.tau + 0.2
-        r_eave = 1.02 + 0.08 * math.sin(a * 3.0 + 1.1)
-        p_top = (math.cos(a) * r_eave, math.sin(a) * r_eave, 2.54)
-        p_bot = (math.cos(a) * r_eave, math.sin(a) * r_eave, 2.26 - (ic % 3) * 0.08)
+        r_eave = 0.98 + 0.10 * math.sin(a * 3.0 + 1.1)
+        p_top = (-0.02 + math.cos(a) * r_eave, math.sin(a) * r_eave, 2.48)
+        p_bot = (-0.02 + math.cos(a) * r_eave, math.sin(a) * r_eave, 2.18 - (ic % 3) * 0.08)
         profile_sweep(bm, [p_top, p_bot], [0.048, 0.010], profile='oval', sides=5, quad=1, mark_flat=True)
 
     semantic_silhouette_constraints(bm, 'frostgard_frozen_melt_mushroom_column')
@@ -1047,23 +1147,25 @@ def build_frostgard_frozen_melt_mushroom_column():
 
 def build_frostgard_bone_mooring_anchor():
     bm = bmesh.new()
-    # Carved stone-and-ice socket ring embedding two sweeping whale-rib tusks
-    for i in range(6):
-        a = (i / 6.0) * math.tau
-        structured_fracture(bm, (0.40 * math.cos(a), 0.40 * math.sin(a), 0.16), (0.68, 0.56, 0.38), style='crag', quad=0, seed=120 + i)
-    profile_sweep(bm, [(0, 0, 0.04), (0, 0, 0.26)], [0.48, 0.42], profile='oval', sides=12, quad=1, mark_flat=True)
+    # Cohesive, broad fractured basalt boulder mound + frost crust
+    structured_fracture(bm, (0.0, 0.0, 0.18), (1.52, 1.34, 0.42), style='crag', quad=0, seed=120)
+    structured_fracture(bm, (-0.14, 0.10, 0.28), (1.06, 0.94, 0.22), style='frost_drift', quad=2, seed=121)
 
-    # Curved ribbed bone tusks passing cleanly through bolted bronze/ice collar brackets
-    profile_sweep(bm, [(-0.26, 0, 0.04), (-0.12, 0, 0.60), (0.14, 0, 1.02), (0.28, 0, 1.26)], [0.105, 0.085, 0.062, 0.042], profile='horn_ribbed', sides=10, ridge_amp=0.05, quad=2)
-    profile_sweep(bm, [(0.28, 0, 0.04), (0.12, 0, 0.56), (-0.12, 0, 0.96), (-0.24, 0, 1.18)], [0.100, 0.080, 0.058, 0.038], profile='horn_ribbed', sides=10, ridge_amp=0.05, quad=2)
+    # Prominent carved translucent blue-ice socket cradle & side cheek housings rising from the stone
+    structured_fracture(bm, (0.0, 0.0, 0.36), (0.86, 0.78, 0.28), style='stone_slab', quad=1, seed=122)
+    for sx in (-0.28, 0.28):
+        add_chamfered_box(bm, (sx, 0.0, 0.56), (0.16, 0.52, 0.36), quad=1, bevel=0.025, wear='ice', wear_seed=123 + int(sx * 10))
+        add_pillow_block_bearing(bm, (sx, 0.0, 0.60), (1, 0, 0), shaft_r=0.055, base_w=0.22, quad_metal=0)
 
-    # Rotational locking mooring drum + side gear & pawl + glowing runic lock keystone
-    add_pillow_block_bearing(bm, (0, -0.24, 0.58), (0, 1, 0), shaft_r=0.05, base_w=0.22, quad_metal=0)
-    add_pillow_block_bearing(bm, (0, 0.24, 0.58), (0, 1, 0), shaft_r=0.05, base_w=0.22, quad_metal=0)
-    add_winding_drum(bm, (0, -0.20, 0.58), (0, 0.20, 0.58), drum_r=0.14, flange_r=0.22, wraps=5, rope_r=0.020, quad_wood=1, quad_metal=0, quad_rope=2)
-    add_gear_wheel_with_pawl(bm, (0, -0.28, 0.58), (0, 1, 0), pitch_r=0.21, thickness=0.06, teeth=10, quad_metal=0, with_pawl=True)
-    # Socketed glowing runic lock core at axle hub
-    add_chamfered_box(bm, (0, 0.28, 0.58), (0.14, 0.10, 0.14), quad=3, bevel=0.015)
+    # Curved ribbed bone/frost anchor tusks socketed through bolted dark-iron collar brackets
+    profile_sweep(bm, [(-0.22, -0.04, 0.18), (-0.10, -0.02, 0.62), (0.16, 0.02, 1.02), (0.32, 0.04, 1.26)], [0.11, 0.09, 0.068, 0.045], profile='horn_ribbed', sides=10, ridge_amp=0.06, quad=2)
+    profile_sweep(bm, [(0.24, 0.04, 0.18), (0.10, 0.02, 0.58), (-0.14, -0.02, 0.98), (-0.28, -0.04, 1.20)], [0.105, 0.085, 0.064, 0.042], profile='horn_ribbed', sides=10, ridge_amp=0.06, quad=2)
+
+    # Rotational locking mooring drum + side X-axis ratchet gear & pawl + glowing runic lock keystone
+    add_winding_drum(bm, (-0.20, 0.0, 0.60), (0.20, 0.0, 0.60), drum_r=0.14, flange_r=0.21, wraps=5, rope_r=0.020, quad_wood=1, quad_metal=0, quad_rope=2)
+    add_gear_wheel_with_pawl(bm, (-0.36, 0.0, 0.60), (1, 0, 0), pitch_r=0.21, thickness=0.06, teeth=10, quad_metal=0, with_pawl=True)
+    # Socketed glowing amber runic lock core at right axle hub
+    add_chamfered_box(bm, (0.37, 0.0, 0.60), (0.10, 0.16, 0.16), quad=3, bevel=0.015)
     semantic_silhouette_constraints(bm, 'frostgard_bone_mooring_anchor')
     return bm
 
@@ -1071,25 +1173,27 @@ def build_frostgard_bone_mooring_anchor():
 def build_frostgard_runic_ice_lantern_shrine():
     bm = bmesh.new()
     rng = random.Random(131)
-    # Stepped carved basalt base plinth
-    structured_fracture(bm, (0, 0, 0.18), (1.12, 1.12, 0.36), style='carved_ashlar', quad=0, seed=130)
-    # Multi-course carved ice jamb pillars (3 distinct ashlar courses with chipped corners)
-    for sx in (-0.36, 0.36):
-        structured_fracture(bm, (sx, 0, 0.84), (0.24, 0.72, 0.92), style='carved_ashlar', quad=1, seed=132 + int(sx * 10), strata_layers=3)
-    # Overhanging layered ice cornice slab + asymmetrical windward frost/snow cap
-    structured_fracture(bm, (0, 0, 1.38), (0.98, 0.88, 0.24), style='carved_ashlar', quad=1, seed=134)
-    structured_fracture(bm, (-0.06, 0.04, 1.56), (1.08, 0.96, 0.16), style='frost_drift', quad=2, seed=135)
-    for ic in (-0.38, 0.38):
-        profile_sweep(bm, [(ic, -0.44, 1.48), (ic, -0.44, 1.24)], [0.036, 0.008], profile='oval', sides=5, quad=2, mark_flat=True)
+    # Multi-tier stepped & chipped dark basalt base plinth
+    structured_fracture(bm, (0, 0, 0.14), (1.12, 1.12, 0.28), style='carved_ashlar', quad=0, seed=130)
+    structured_fracture(bm, (0, 0, 0.32), (0.98, 0.98, 0.16), style='carved_ashlar', quad=0, seed=131)
 
-    # Suspended dark-iron lantern frame + glowing golden amber crystal core clearly visible inside alcove
-    add_chain_link_span(bm, (0, 0, 1.28), (0, 0, 1.02), link_len=0.08, link_w=0.046, wire_r=0.011, quad=0)
-    add_chamfered_box(bm, (0, 0, 0.98), (0.34, 0.34, 0.05), quad=0, bevel=0.008)
-    add_chamfered_box(bm, (0, 0, 0.62), (0.34, 0.34, 0.05), quad=0, bevel=0.008)
-    for lx in (-0.14, 0.14):
-        for ly in (-0.14, 0.14):
-            profile_sweep(bm, [(lx, ly, 0.64), (lx, ly, 0.96)], [0.018] * 2, profile='oval', sides=6, quad=0, mark_flat=True)
-    crystal_growth_graph(bm, (0, 0, 0.64), height=0.34, radius=0.14, rng=rng, parent_quad=3, child_quad=3, parent_count=1, daughter_count=3, basal_count=0, with_rock_base=False)
+    # Multi-course carved ice jamb pillars (3 distinct ashlar courses with chipped slab boundaries & inner pilasters)
+    for sx in (-0.35, 0.35):
+        structured_fracture(bm, (sx, 0, 0.84), (0.28, 0.76, 0.94), style='carved_ashlar', quad=1, seed=132 + int(sx * 10), strata_layers=3)
+        add_chamfered_box(bm, (sx * 0.72, 0, 0.84), (0.10, 0.56, 0.88), quad=1, bevel=0.018, wear='ice', wear_seed=133)
+
+    # Overhanging layered ice cornice lintel + full-width asymmetrical wind-sculpted snow-slab roof
+    structured_fracture(bm, (0, 0, 1.38), (1.04, 0.92, 0.22), style='carved_ashlar', quad=1, seed=134)
+    structured_fracture(bm, (-0.03, 0.02, 1.54), (1.12, 1.00, 0.20), style='frost_drift', quad=2, seed=135)
+    structured_fracture(bm, (-0.12, 0.06, 1.62), (0.78, 0.72, 0.14), style='frost_drift', quad=2, seed=136)
+    for ic in (-0.42, -0.14, 0.22, 0.42):
+        profile_sweep(bm, [(ic, -0.46, 1.48), (ic, -0.46, 1.24 - abs(ic) * 0.15)], [0.038, 0.008], profile='oval', sides=5, quad=2, mark_flat=True)
+
+    # Carved alcove hearth cradle + suspended iron lantern hood housing a large, boldly readable glowing amber crystal core
+    add_revolved_vessel(bm, (0, 0, 0.38), [(0.16, 0.0), (0.23, 0.09), (0.25, 0.16)], sides=10, wall_t=0.035, quad_outer=0, quad_inner=0, ribs=4)
+    crystal_growth_graph(bm, (0, 0, 0.44), height=0.58, radius=0.22, rng=rng, parent_quad=3, child_quad=3, parent_count=1, daughter_count=5, basal_count=3, with_rock_base=False)
+    add_chain_link_span(bm, (0, 0, 1.28), (0, 0, 1.08), link_len=0.08, link_w=0.046, wire_r=0.012, quad=0)
+    profile_sweep(bm, [(0, 0, 1.08), (0, 0, 0.98)], [0.08, 0.22], profile='oval', sides=8, quad=0, mark_flat=True)
     semantic_silhouette_constraints(bm, 'frostgard_runic_ice_lantern_shrine')
     return bm
 
@@ -1099,71 +1203,78 @@ def build_frostgard_runic_ice_lantern_shrine():
 # ---------------------------------------------------------------------------
 def build_frostgard_serac_fin_monolith():
     bm = bmesh.new()
-    # RESTORE MONOLITHIC LEANING GLACIAL SERAC FIN SILHOUETTE
-    structured_fracture(bm, (0.0, 0.0, 0.16), (2.40, 1.98, 0.36), style='frost_drift', quad=2, seed=141)
-    structured_fracture(bm, (0.28, -0.16, 0.24), (1.76, 1.48, 0.28), style='frost_drift', quad=0, seed=140)
-    # Massive sweeping curved & leaning primary glacial serac fin
-    structured_fracture(bm, (0.05, 0.0, 1.72), (1.38, 0.98, 3.36), style='serac_fin', quad=1, seed=142, tilt=(0.56, -0.18))
-    # Subordinate leaning calved serac fin + shattered basal ice slabs
-    structured_fracture(bm, (-0.58, 0.18, 1.06), (0.82, 0.66, 2.02), style='serac_fin', quad=1, seed=143, tilt=(0.24, -0.08))
+    # RESTORE MONOLITHIC LEANING GLACIAL SERAC FIN SILHOUETTE with continuous white snow skirt
+    structured_fracture(bm, (0.0, 0.0, 0.18), (2.46, 2.04, 0.40), style='frost_drift', quad=2, seed=141)
+    structured_fracture(bm, (0.22, -0.14, 0.28), (1.84, 1.56, 0.32), style='frost_drift', quad=2, seed=140)
+    # Massive sweeping curved & leaning primary glacial serac fin + flank cleavage rib
+    structured_fracture(bm, (0.05, 0.0, 1.74), (1.42, 1.04, 3.38), style='serac_fin', quad=1, seed=142, tilt=(0.56, -0.18))
+    structured_fracture(bm, (0.28, -0.12, 1.32), (0.86, 0.72, 2.46), style='serac_fin', quad=1, seed=147, tilt=(0.44, -0.12))
+    # Subordinate leaning calved serac fin + shattered basal snow/ice slabs
+    structured_fracture(bm, (-0.54, 0.16, 1.08), (0.84, 0.68, 2.04), style='serac_fin', quad=1, seed=143, tilt=(0.24, -0.08))
     for i, (sx, sy, sz, sc) in enumerate((
-        (0.68, -0.44, 0.36, (0.68, 0.54, 0.56)),
-        (-0.74, -0.36, 0.32, (0.58, 0.48, 0.48)),
-        (0.32, 0.58, 0.34, (0.62, 0.52, 0.52)),
+        (0.68, -0.44, 0.34, (0.72, 0.58, 0.48)),
+        (-0.74, -0.36, 0.30, (0.64, 0.52, 0.44)),
+        (0.32, 0.58, 0.32, (0.68, 0.56, 0.46)),
     )):
-        structured_fracture(bm, (sx, sy, sz), sc, style='frost_drift', quad=2 if i != 1 else 1, seed=144 + i)
+        structured_fracture(bm, (sx, sy, sz), sc, style='frost_drift', quad=2, seed=144 + i)
     semantic_silhouette_constraints(bm, 'frostgard_serac_fin_monolith')
     return bm
 
 
 def build_frostgard_glacial_wayfinder_cairn():
     bm = bmesh.new()
-    # 4 graduated dry-stone slate cairn boulders + snow crusts on upper ledges
-    structured_fracture(bm, (0.0, 0.0, 0.20), (1.68, 1.56, 0.42), style='stone_slab', quad=0, seed=151)
-    structured_fracture(bm, (0.02, -0.02, 0.62), (1.24, 1.14, 0.38), style='stone_slab', quad=0, seed=152)
-    structured_fracture(bm, (-0.02, 0.02, 0.98), (0.86, 0.80, 0.30), style='stone_slab', quad=0, seed=153)
-    structured_fracture(bm, (0.0, 0.0, 1.24), (0.56, 0.52, 0.20), style='frost_drift', quad=2, seed=154)
+    # 4 graduated organically cleaved mountain boulders stacked into a natural dry-stone cairn + snowdrift cap
+    structured_fracture(bm, (0.0, 0.0, 0.24), (1.76, 1.64, 0.52), style='crag', quad=0, seed=151)
+    structured_fracture(bm, (0.03, -0.02, 0.64), (1.36, 1.26, 0.46), style='crag', quad=0, seed=152)
+    structured_fracture(bm, (-0.02, 0.03, 0.98), (0.98, 0.92, 0.38), style='crag', quad=0, seed=153)
+    structured_fracture(bm, (0.0, 0.0, 1.24), (0.76, 0.72, 0.26), style='frost_drift', quad=2, seed=154)
 
-    # Carved stone socket collar + iron-strapped timber mast + diagonal guy brace
-    profile_sweep(bm, [(0, 0, 1.24), (0, 0, 1.42)], [0.18, 0.14], profile='oval', sides=8, quad=0, mark_flat=True)
+    # Carved stone socket collar + iron-strapped timber mast + diagonal guy rope
+    profile_sweep(bm, [(0, 0, 1.24), (0, 0, 1.44)], [0.19, 0.14], profile='oval', sides=8, quad=0, mark_flat=True)
     timber_joinery(bm, (0.0, 0.0, 1.18), (0.08, 0.0, 2.86), width=0.10, depth=0.10, quad=1, bow=0.015, pegs=True, iron_straps=True, strap_quad=0)
-    profile_sweep(bm, [(-0.28, -0.18, 1.26), (0.03, 0.0, 1.88)], [0.022] * 2, profile='rope_strand', sides=6, quad=0)
+    profile_sweep(bm, [(-0.32, -0.18, 1.24), (0.03, 0.0, 1.92)], [0.024] * 2, profile='rope_strand', sides=6, quad=0)
     add_chamfered_box(bm, (0.08, 0.0, 2.86), (0.14, 0.14, 0.12), quad=0, bevel=0.015)
 
     # Prominent 3D draped & wind-billowed red wayfinder flag as primary upper silhouette
-    add_draped_banner_flag(bm, (0.08, 0.0, 2.68), (0.98, 0.12, 0.04), width=0.82, height=0.42, sag=0.07, billow=0.08, swallowtail=True, quad_cloth=3, quad_trim=0)
+    add_draped_banner_flag(bm, (0.08, 0.0, 2.70), (0.98, 0.12, 0.04), width=0.86, height=0.48, sag=0.07, billow=0.08, swallowtail=True, quad_cloth=3, quad_trim=0)
     semantic_silhouette_constraints(bm, 'frostgard_glacial_wayfinder_cairn')
     return bm
 
 
 def build_frostgard_ice_sawyer_trestle():
     bm = bmesh.new()
-    # Mortised A-frame timber trestles with notched saddle cradles & bolted crossbars
+    # Mortised A-frame timber trestles with notched saddle cradles, bolted crossbars & basal snow drifts
     for sx in (-0.64, 0.64):
         timber_joinery(bm, (sx, -0.44, -0.04), (sx, 0.0, 0.90), width=0.12, depth=0.12, quad=1, pegs=True, iron_straps=True, strap_quad=0)
         timber_joinery(bm, (sx, 0.44, -0.04), (sx, 0.0, 0.90), width=0.12, depth=0.12, quad=1, pegs=True)
         timber_joinery(bm, (sx, -0.28, 0.36), (sx, 0.28, 0.36), width=0.09, depth=0.09, quad=1, pegs=True)
-        add_chamfered_box(bm, (sx, 0.0, 0.92), (0.18, 0.34, 0.12), quad=0, bevel=0.012)
+        add_chamfered_box(bm, (sx, 0.0, 0.92), (0.18, 0.36, 0.12), quad=0, bevel=0.012)
+        structured_fracture(bm, (sx, -0.40, 0.02), (0.28, 0.24, 0.10), style='frost_drift', quad=2, seed=159 + int(sx * 10))
     timber_joinery(bm, (-0.84, 0.0, 0.88), (0.84, 0.0, 0.88), width=0.14, depth=0.14, quad=1, iron_straps=True, strap_quad=0)
 
-    # Cleaved rectangular ice block split around a central saw kerf slot
+    # Cleaved rectangular ice block split around a central saw kerf slot + forged hold-down dog clamps
     structured_fracture(bm, (0.0, -0.18, 1.18), (1.06, 0.28, 0.48), style='ice_block', quad=2, seed=156)
     structured_fracture(bm, (0.0, 0.18, 1.18), (1.06, 0.28, 0.48), style='ice_block', quad=2, seed=157)
     structured_fracture(bm, (0.0, 0.0, 1.04), (1.06, 0.62, 0.20), style='ice_block', quad=1, seed=158)
+    for sx_d in (-0.46, 0.46):
+        profile_sweep(bm, [(sx_d, -0.32, 0.90), (sx_d, -0.34, 1.14), (sx_d, -0.24, 1.16)], [0.022] * 3, profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
 
-    # Two-man pit-saw seated directly inside the saw kerf: steel spine, toothed blade & upright wooden handles
-    add_chamfered_box(bm, (0.0, 0.0, 1.38), (1.44, 0.032, 0.11), quad=0, bevel=0.005)
-    add_chamfered_box(bm, (0.0, 0.0, 1.44), (1.46, 0.048, 0.04), quad=3, bevel=0.006)
+    # Two-man pit-saw seated directly inside the saw kerf: steel blade, crimson spine, saw teeth & upright wooden handles
+    add_chamfered_box(bm, (0.0, 0.0, 1.38), (1.44, 0.032, 0.12), quad=0, bevel=0.005)
+    add_chamfered_box(bm, (0.0, 0.0, 1.45), (1.46, 0.050, 0.045), quad=3, bevel=0.006)
+    for tx in range(-6, 7):
+        add_chamfered_box(bm, (tx * 0.10, 0.0, 1.31), (0.045, 0.028, 0.045), quad=0, ry=0.78, bevel=0.003)
     for hx in (-0.72, 0.72):
-        timber_joinery(bm, (hx, 0.0, 1.32), (hx, 0.0, 1.62), width=0.06, depth=0.06, quad=3)
+        timber_joinery(bm, (hx, 0.0, 1.32), (hx, 0.0, 1.62), width=0.062, depth=0.062, quad=3)
     semantic_silhouette_constraints(bm, 'frostgard_ice_sawyer_trestle')
     return bm
 
 
 def build_frostgard_frost_banner_standards():
     bm = bmesh.new()
-    # Moraine stone footing + crossed X-frame timber standards + mortised transom & rope lashing
-    structured_fracture(bm, (0, 0, 0.08), (1.10, 0.68, 0.20), style='crag', quad=0, seed=158)
+    # Moraine stone footing + frost crust + crossed X-frame timber standards + mortised transom & rope lashing
+    structured_fracture(bm, (0, 0, 0.10), (1.14, 0.72, 0.24), style='crag', quad=0, seed=158)
+    structured_fracture(bm, (-0.12, 0.04, 0.18), (0.76, 0.52, 0.14), style='frost_drift', quad=2, seed=159)
     timber_joinery(bm, (-0.48, 0, -0.05), (0.26, 0.10, 2.68), width=0.10, depth=0.10, quad=1, bow=0.015, pegs=True, iron_straps=True, strap_quad=0)
     timber_joinery(bm, (0.48, 0, -0.05), (-0.26, -0.10, 2.58), width=0.10, depth=0.10, quad=1, bow=-0.015, pegs=True, iron_straps=True, strap_quad=0)
     timber_joinery(bm, (-0.44, -0.02, 1.22), (0.44, 0.04, 1.22), width=0.11, depth=0.18, quad=1, iron_straps=True, strap_quad=0)
@@ -1171,26 +1282,27 @@ def build_frostgard_frost_banner_standards():
     for diag in (((-0.14, -0.08, 1.08), (0.14, 0.08, 1.36)), ((0.14, -0.08, 1.08), (-0.14, 0.08, 1.36))):
         profile_sweep(bm, list(diag), [0.028] * 2, profile='rope_strand', sides=6, quad=0)
 
-    # Twin 3D draped & wind-billowed flags hanging from cantilevered crossbars at top tips
-    add_draped_banner_flag(bm, (0.24, 0.10, 2.56), (0.96, 0.08, 0.0), width=0.72, height=0.40, sag=0.07, billow=0.08, swallowtail=True, quad_cloth=3, quad_trim=0)
-    add_draped_banner_flag(bm, (-0.24, -0.10, 2.48), (-0.96, -0.08, 0.0), width=0.66, height=0.36, sag=0.06, billow=-0.07, swallowtail=True, quad_cloth=2, quad_trim=0)
+    # Prominent twin 3D draped & wind-billowed flags hanging from cantilevered crossbars at top tips
+    add_draped_banner_flag(bm, (0.24, 0.10, 2.58), (0.96, 0.08, 0.0), width=0.76, height=0.52, sag=0.07, billow=0.08, swallowtail=True, quad_cloth=3, quad_trim=0)
+    add_draped_banner_flag(bm, (-0.24, -0.10, 2.50), (-0.96, -0.08, 0.0), width=0.70, height=0.48, sag=0.06, billow=-0.07, swallowtail=True, quad_cloth=2, quad_trim=0)
     semantic_silhouette_constraints(bm, 'frostgard_frost_banner_standards')
     return bm
 
 
 def build_frostgard_moraine_erratic_anchor_post():
     bm = bmesh.new()
-    # Massive cleaved glacial erratic boulder + snow crust
-    structured_fracture(bm, (0.0, 0.0, 0.30), (2.20, 1.98, 0.62), style='crag', quad=0, seed=161)
-    structured_fracture(bm, (-0.24, 0.18, 0.48), (1.16, 1.04, 0.24), style='frost_drift', quad=2, seed=162)
+    # Massive high-shouldered cleaved glacial erratic boulder + interlocking shoulder stones + snow crust
+    structured_fracture(bm, (0.0, 0.0, 0.42), (2.26, 2.04, 0.88), style='crag', quad=0, seed=161)
+    structured_fracture(bm, (0.26, -0.18, 0.34), (1.64, 1.48, 0.68), style='crag', quad=0, seed=163)
+    structured_fracture(bm, (-0.18, 0.14, 0.72), (1.28, 1.16, 0.30), style='frost_drift', quad=2, seed=162)
 
-    # Carved circular stone-and-ice bearing socket recessed in erratic crest + notched locking gear + turnstile
-    profile_sweep(bm, [(0, 0, 0.50), (0, 0, 0.68)], [0.48, 0.42], profile='oval', sides=12, quad=2, mark_flat=True)
-    add_gear_wheel_with_pawl(bm, (0, 0, 0.68), (0, 0, 1), pitch_r=0.38, thickness=0.09, teeth=10, quad_metal=0, with_pawl=True)
-    timber_joinery(bm, (0, 0, 0.62), (0, 0, 1.44), width=0.36, depth=0.36, quad=1, iron_straps=True, strap_quad=0)
-    add_chamfered_box(bm, (0, 0, 1.16), (0.52, 0.52, 0.09), quad=0, bevel=0.015)
-    timber_joinery(bm, (-0.68, 0, 1.32), (0.68, 0, 1.32), width=0.10, depth=0.10, quad=1, pegs=True)
-    timber_joinery(bm, (0, -0.68, 1.32), (0, 0.68, 1.32), width=0.10, depth=0.10, quad=1, pegs=True)
+    # Carved circular stone-and-ice bearing socket recessed into boulder summit + notched locking gear & low-slung capstan
+    profile_sweep(bm, [(0, 0, 0.72), (0, 0, 0.92)], [0.46, 0.40], profile='oval', sides=12, quad=2, mark_flat=True)
+    add_gear_wheel_with_pawl(bm, (0, 0, 0.94), (0, 0, 1), pitch_r=0.38, thickness=0.09, teeth=10, quad_metal=0, with_pawl=True)
+    timber_joinery(bm, (0, 0, 0.86), (0, 0, 1.44), width=0.34, depth=0.34, quad=1, iron_straps=True, strap_quad=0)
+    add_chamfered_box(bm, (0, 0, 1.18), (0.48, 0.48, 0.08), quad=0, bevel=0.015)
+    timber_joinery(bm, (-0.64, 0, 1.32), (0.64, 0, 1.32), width=0.10, depth=0.10, quad=2, pegs=True)
+    timber_joinery(bm, (0, -0.64, 1.32), (0, 0.64, 1.32), width=0.10, depth=0.10, quad=2, pegs=True)
     semantic_silhouette_constraints(bm, 'frostgard_moraine_erratic_anchor_post')
     return bm
 
@@ -1200,47 +1312,52 @@ def build_frostgard_moraine_erratic_anchor_post():
 # ---------------------------------------------------------------------------
 def build_frostgard_wolf_totem_palisade_post():
     bm = bmesh.new()
-    # Frost-rimmed stone socket plinth + anchor collar straps
-    structured_fracture(bm, (0, 0, 0.12), (1.32, 1.24, 0.26), style='crag', quad=0, seed=171)
-    structured_fracture(bm, (-0.16, 0.12, 0.20), (0.86, 0.80, 0.14), style='frost_drift', quad=2, seed=172)
-    timber_joinery(bm, (0, 0, 0.14), (0, 0, 2.66), width=0.28, depth=0.28, quad=1, bow=0.012, iron_straps=True, strap_quad=0)
+    # Wide multi-lobed frost-rimmed stone foundation mound + anchor collar straps
+    structured_fracture(bm, (0, 0, 0.16), (1.46, 1.38, 0.36), style='crag', quad=0, seed=171)
+    structured_fracture(bm, (-0.16, 0.12, 0.26), (0.98, 0.92, 0.20), style='frost_drift', quad=2, seed=172)
+    timber_joinery(bm, (0, 0, 0.14), (0, 0, 2.58), width=0.30, depth=0.30, quad=1, bow=0.012, iron_straps=True, strap_quad=0)
 
-    # Carved circular bossed ward-shield bolted via iron bracket
-    add_chamfered_box(bm, (0, -0.14, 1.18), (0.14, 0.10, 0.18), quad=0, bevel=0.01)
-    profile_sweep(bm, [(0, -0.16, 1.18), (0, -0.22, 1.18)], [0.28, 0.27], profile='oval', sides=14, quad=2, mark_flat=True)
-    profile_sweep(bm, [(0, -0.22, 1.18), (0, -0.27, 1.18)], [0.10, 0.05], profile='oval', sides=10, quad=3, mark_flat=True)
+    # Carved circular bossed ward-shield bolted on front-left flank
+    add_chamfered_box(bm, (-0.08, -0.14, 1.18), (0.14, 0.10, 0.18), quad=0, bevel=0.01)
+    profile_sweep(bm, [(-0.10, -0.16, 1.18), (-0.14, -0.22, 1.18)], [0.30, 0.28], profile='oval', sides=14, quad=2, mark_flat=True)
+    profile_sweep(bm, [(-0.14, -0.22, 1.18), (-0.18, -0.28, 1.18)], [0.11, 0.05], profile='oval', sides=10, quad=3, mark_flat=True)
 
-    # Sculpted wolf-head totem crest + lower jaw fangs + swept ribbed horns
-    add_chamfered_box(bm, (0, 0.16, 2.48), (0.40, 0.56, 0.34), quad=2, bevel=0.025)
-    add_chamfered_box(bm, (0, 0.42, 2.42), (0.24, 0.24, 0.20), quad=2, bevel=0.02)
+    # Multi-plane sculpted wolf-head totem crest (cranium, brow ridges, tapered muzzle, lower jaw, fangs, ears & swept horns)
+    profile_sweep(bm, [(0, 0.04, 2.56), (0, -0.22, 2.58), (0, -0.46, 2.50)], [(0.24, 0.22), (0.20, 0.18), (0.13, 0.11)], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+    # Lower snarling jaw + glowing amber wolf eyes + pinned wolf ears + bared fangs
+    profile_sweep(bm, [(0, -0.14, 2.38), (0, -0.40, 2.34)], [(0.16, 0.08), (0.11, 0.06)], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
     for sx in (-1, 1):
-        profile_sweep(bm, [(sx * 0.16, 0.06, 2.60), (sx * 0.30, 0.0, 2.84), (sx * 0.44, -0.06, 3.04)], [0.055, 0.036, 0.014], profile='horn_ribbed', sides=8, ridge_amp=0.06, quad=2)
-        profile_sweep(bm, [(sx * 0.09, 0.48, 2.34), (sx * 0.09, 0.48, 2.22)], [0.024, 0.006], profile='oval', sides=6, quad=3, mark_flat=True)
+        add_chamfered_box(bm, (sx * 0.17, -0.20, 2.62), (0.08, 0.12, 0.07), quad=3, ry=sx * 0.25, bevel=0.008)
+        profile_sweep(bm, [(sx * 0.16, 0.04, 2.66), (sx * 0.22, 0.16, 2.84)], [0.06, 0.02], profile='rect_chamfer', sides=8, quad=2, mark_flat=True)
+        profile_sweep(bm, [(sx * 0.16, 0.0, 2.64), (sx * 0.32, -0.04, 2.86), (sx * 0.46, -0.08, 3.04)], [0.060, 0.038, 0.015], profile='horn_ribbed', sides=8, ridge_amp=0.06, quad=2)
+        profile_sweep(bm, [(sx * 0.09, -0.40, 2.46), (sx * 0.09, -0.40, 2.34)], [0.026, 0.008], profile='oval', sides=6, quad=3, mark_flat=True)
 
-    # Wrought-iron cantilever sconce arm + chain link hanger + round hollow brazier basket & embers
-    profile_sweep(bm, [(0, 0.04, 1.38), (0.20, 0.14, 1.56), (0.32, 0.24, 1.94)], [0.042, 0.034, 0.028], profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
-    add_chain_link_span(bm, (0.32, 0.24, 1.92), (0.32, 0.24, 1.74), link_len=0.075, link_w=0.042, wire_r=0.010, quad=0)
-    add_revolved_vessel(bm, (0.32, 0.24, 1.54), [(0.11, 0.0), (0.17, 0.10), (0.20, 0.20)], sides=10, wall_t=0.03, quad_outer=0, quad_inner=0, ribs=4)
-    structured_fracture(bm, (0.32, 0.24, 1.72), (0.28, 0.28, 0.22), style='ore_matrix', quad=3, seed=173)
+    # Wrought-iron cantilever sconce arm on +X flank + chain hanger + round hollow brazier basket & bright golden embers
+    profile_sweep(bm, [(0.12, 0.0, 1.38), (0.30, -0.04, 1.56), (0.42, -0.06, 1.94)], [0.045, 0.036, 0.030], profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
+    add_chain_link_span(bm, (0.42, -0.06, 1.92), (0.42, -0.06, 1.72), link_len=0.075, link_w=0.044, wire_r=0.011, quad=0)
+    add_revolved_vessel(bm, (0.42, -0.06, 1.50), [(0.13, 0.0), (0.20, 0.10), (0.23, 0.22)], sides=10, wall_t=0.032, quad_outer=0, quad_inner=0, ribs=4)
+    structured_fracture(bm, (0.42, -0.06, 1.72), (0.34, 0.34, 0.26), style='ore_matrix', quad=3, seed=173)
     semantic_silhouette_constraints(bm, 'frostgard_wolf_totem_palisade_post')
     return bm
 
 
 def build_frostgard_cut_ice_block_hoist():
     bm = bmesh.new()
-    # Frost-dusted stone & timber platform base
-    structured_fracture(bm, (0, 0, 0.08), (1.48, 1.38, 0.18), style='carved_ashlar', quad=0, seed=174)
-    structured_fracture(bm, (-0.28, 0.24, 0.14), (0.86, 0.72, 0.12), style='frost_drift', quad=2, seed=179)
+    # Fractured central stone bedplate + frost drift + triangular ground sill frame anchoring all 3 tripod legs
+    structured_fracture(bm, (0, 0, 0.09), (1.36, 1.32, 0.20), style='stone_slab', quad=0, seed=174)
+    structured_fracture(bm, (-0.22, 0.18, 0.16), (0.94, 0.82, 0.16), style='frost_drift', quad=2, seed=179)
 
     # Coherent 3-legged shear-legs timber tripod converging at apex shackle bracket
     pts_base = []
     for i in range(3):
         a = (i / 3.0) * math.tau
-        bp = (1.06 * math.cos(a), 1.06 * math.sin(a), -0.04)
+        bp = (1.02 * math.cos(a), 1.02 * math.sin(a), 0.04)
         pts_base.append(bp)
+        add_chamfered_box(bm, (bp[0], bp[1], 0.05), (0.26, 0.26, 0.12), quad=0, rz=a, bevel=0.015)
         timber_joinery(bm, bp, (0, 0, 2.54), width=0.14, depth=0.14, quad=1, bow=0.012, pegs=True, iron_straps=True, strap_quad=0)
     for i in range(3):
         p_a, p_b = pts_base[i], pts_base[(i + 1) % 3]
+        timber_joinery(bm, (p_a[0] * 0.92, p_a[1] * 0.92, 0.06), (p_b[0] * 0.92, p_b[1] * 0.92, 0.06), width=0.11, depth=0.10, quad=1, pegs=True)
         timber_joinery(bm, (p_a[0] * 0.58, p_a[1] * 0.58, 1.08), (p_b[0] * 0.58, p_b[1] * 0.58, 1.08), width=0.085, depth=0.085, quad=1, pegs=True)
 
     # Apex iron shackle collar & grooved crown pulley sheave
@@ -1253,7 +1370,7 @@ def build_frostgard_cut_ice_block_hoist():
     add_pillow_block_bearing(bm, (0.40, drum_y, 1.56), (1, 0, 0), shaft_r=0.045, base_w=0.18, quad_metal=0)
     add_winding_drum(bm, (-0.36, drum_y, 1.56), (0.36, drum_y, 1.56), drum_r=0.085, flange_r=0.16, wraps=6, rope_r=0.016, quad_wood=1, quad_metal=0, quad_rope=3)
     add_gear_wheel_with_pawl(bm, (-0.42, drum_y, 1.56), (1, 0, 0), pitch_r=0.16, thickness=0.05, teeth=10, quad_metal=0, with_pawl=True)
-    # Spoked hand-crank wheel on +X end of windlass shaft (rotate around X)
+    # Spoked hand-crank wheel on +X end of windlass shaft
     profile_sweep(bm, [(0.44, drum_y, 1.56), (0.50, drum_y, 1.56)], [0.22] * 2, profile='oval', sides=12, quad=0, mark_flat=True)
     add_chamfered_box(bm, (0.54, drum_y + 0.16, 1.56), (0.14, 0.04, 0.04), quad=3, bevel=0.006)
 
@@ -1271,36 +1388,61 @@ def build_frostgard_cut_ice_block_hoist():
 
 def build_frostgard_mead_hall_trophy_stand():
     bm = bmesh.new()
-    # Heavy trestle slab legs + under-table stretcher beam + apron rails + diagonal knee braces + iron tool holder
+    # Cleaved dark-stone hearth plinth between trestle legs + mortised trestle slab legs, stretcher & knee braces
+    structured_fracture(bm, (-0.18, 0.0, 0.14), (1.16, 0.76, 0.28), style='crag', quad=0, seed=176)
     for sx in (-0.68, 0.68):
-        add_chamfered_box(bm, (sx, 0, 0.38), (0.16, 0.76, 0.76), quad=1, bevel=0.02, wear='wood', wear_seed=177)
-        timber_joinery(bm, (sx * 0.88, 0, 0.34), (sx * 0.46, 0, 0.76), width=0.09, depth=0.09, quad=1, pegs=True)
-    timber_joinery(bm, (-0.76, 0, 0.32), (0.76, 0, 0.32), width=0.14, depth=0.14, quad=1, tenon_ends=True, iron_straps=True, strap_quad=0)
-    timber_joinery(bm, (-0.64, -0.26, 0.70), (0.64, -0.26, 0.70), width=0.09, depth=0.09, quad=1)
-    timber_joinery(bm, (-0.64, 0.26, 0.70), (0.64, 0.26, 0.70), width=0.09, depth=0.09, quad=1)
+        add_chamfered_box(bm, (sx, 0, 0.38), (0.16, 0.78, 0.76), quad=1, bevel=0.02, wear='wood', wear_seed=177)
+        timber_joinery(bm, (sx * 0.88, 0, 0.34), (sx * 0.46, 0, 0.76), width=0.095, depth=0.095, quad=1, pegs=True)
+    timber_joinery(bm, (-0.76, 0, 0.34), (0.76, 0, 0.34), width=0.14, depth=0.14, quad=1, tenon_ends=True, iron_straps=True, strap_quad=0)
+    timber_joinery(bm, (-0.64, -0.28, 0.70), (0.64, -0.28, 0.70), width=0.095, depth=0.095, quad=1, pegs=True)
+    timber_joinery(bm, (-0.64, 0.28, 0.70), (0.64, 0.28, 0.70), width=0.095, depth=0.095, quad=1, pegs=True)
     # Right-side iron tool holder bracket + hanging chisel/hammer tools
-    add_chamfered_box(bm, (0.82, 0, 0.74), (0.14, 0.44, 0.05), quad=0, bevel=0.008)
-    for ty in (-0.12, 0.12):
-        timber_joinery(bm, (0.84, ty, 0.42), (0.84, ty, 0.78), width=0.035, depth=0.035, quad=1)
-        add_chamfered_box(bm, (0.84, ty, 0.42), (0.09, 0.05, 0.05), quad=0, bevel=0.006)
+    add_chamfered_box(bm, (0.82, 0, 0.74), (0.14, 0.46, 0.055), quad=0, bevel=0.008)
+    for ty in (-0.13, 0.13):
+        timber_joinery(bm, (0.84, ty, 0.42), (0.84, ty, 0.78), width=0.038, depth=0.038, quad=1)
+        add_chamfered_box(bm, (0.84, ty, 0.42), (0.10, 0.055, 0.055), quad=0, bevel=0.006)
 
-    # Planked tabletop + recessed magical runic inlay channel & raised border rim
-    add_chamfered_box(bm, (0, 0, 0.82), (1.82, 0.84, 0.12), quad=1, bevel=0.022, wear='wood')
-    add_chamfered_box(bm, (0, -0.08, 0.885), (1.42, 0.46, 0.02), quad=0, bevel=0.005)
-    add_chamfered_box(bm, (0, -0.08, 0.892), (1.28, 0.32, 0.022), quad=2, bevel=0.005)
-    add_chamfered_box(bm, (-0.28, -0.14, 0.898), (0.58, 0.18, 0.022), quad=3, bevel=0.005)
+    # Planked tabletop + recessed magical runic inlay channels & raised border rim
+    add_chamfered_box(bm, (0, 0, 0.82), (1.82, 0.86, 0.12), quad=1, bevel=0.022, wear='wood')
+    add_chamfered_box(bm, (0, -0.06, 0.885), (1.46, 0.50, 0.022), quad=0, bevel=0.005)
+    add_chamfered_box(bm, (0, -0.06, 0.893), (1.32, 0.36, 0.022), quad=2, bevel=0.005)
+    add_chamfered_box(bm, (0, -0.06, 0.900), (1.14, 0.20, 0.022), quad=3, bevel=0.005)
 
-    # 3 collared stone/iron horn sockets + ribbed curved horns + chocked mead cask + front ward shield
-    for tx in (-0.50, 0.0, 0.52):
-        add_chamfered_box(bm, (tx, 0.14, 0.90), (0.20, 0.20, 0.06), quad=0, bevel=0.01)
-        profile_sweep(bm, [(tx, 0.14, 0.90), (tx, 0.14, 1.18)], [0.085, 0.072], profile='oval', sides=10, quad=2, mark_flat=True)
+    # Prominent central glowing golden ritual mead vessel/vat (restoring original golden focal centerpiece!)
+    add_revolved_vessel(
+        bm,
+        (0.0, -0.04, 0.88),
+        [(0.22, 0.0), (0.28, 0.16), (0.26, 0.34), (0.28, 0.42)],
+        sides=14,
+        wall_t=0.045,
+        quad_outer=3,
+        quad_inner=3,
+        ribs=6,
+        rim_lip=True,
+    )
+    for hz_v in (0.96, 1.18):
+        profile_sweep(bm, [(0.0, -0.04, hz_v - 0.02), (0.0, -0.04, hz_v + 0.02)], [0.285] * 2, profile='oval', sides=14, quad=0, mark_flat=True)
+
+    # 3 collared stone/iron horn sockets + ribbed curved golden horns
+    for tx in (-0.54, 0.0, 0.54):
+        hy_s = 0.22 if tx == 0.0 else 0.08
+        add_chamfered_box(bm, (tx, hy_s, 0.90), (0.22, 0.22, 0.065), quad=0, bevel=0.01)
+        profile_sweep(bm, [(tx, hy_s, 0.90), (tx, hy_s, 1.18)], [0.09, 0.075], profile='oval', sides=10, quad=2, mark_flat=True)
         for horn_s in (-1, 1):
-            profile_sweep(bm, [(tx, 0.14, 1.14), (tx + horn_s * 0.18, 0.06, 1.38), (tx + horn_s * 0.24, -0.02, 1.56)], [0.044, 0.028, 0.012], profile='horn_ribbed', sides=8, ridge_amp=0.06, quad=3)
-    _add_staved_barrel(bm, (0.24, -0.16, 0.88), (0.24, -0.16, 1.24), radius=0.18, quad_wood=1, quad_iron=0, quad_accent=3, tap_side=True)
+            profile_sweep(
+                bm,
+                [(tx, hy_s, 1.14), (tx + horn_s * 0.20, hy_s - 0.06, 1.38), (tx + horn_s * 0.27, hy_s - 0.12, 1.56)],
+                [0.048, 0.032, 0.014],
+                profile='horn_ribbed',
+                sides=8,
+                ridge_amp=0.06,
+                quad=3,
+            )
+
     # Front bossed shield on forged display cradle
     add_chamfered_box(bm, (-0.46, -0.41, 0.56), (0.14, 0.08, 0.18), quad=0, bevel=0.01)
-    profile_sweep(bm, [(-0.46, -0.44, 0.56), (-0.46, -0.52, 0.56)], [0.26, 0.24], profile='oval', sides=14, quad=2, mark_flat=True)
-    profile_sweep(bm, [(-0.46, -0.52, 0.56), (-0.46, -0.58, 0.56)], [0.10, 0.04], profile='oval', sides=10, quad=3, mark_flat=True)
+    profile_sweep(bm, [(-0.46, -0.44, 0.56), (-0.46, -0.52, 0.56)], [0.27, 0.25], profile='oval', sides=14, quad=2, mark_flat=True)
+    profile_sweep(bm, [(-0.46, -0.52, 0.56), (-0.46, -0.58, 0.56)], [0.11, 0.05], profile='oval', sides=10, quad=3, mark_flat=True)
     semantic_silhouette_constraints(bm, 'frostgard_mead_hall_trophy_stand')
     return bm
 
@@ -1310,23 +1452,27 @@ def build_frostgard_salt_brine_cask_frame():
     # Heavy 4-post timber rack with X-braces, bolted gussets, scalloped saddle cradles & snow-laden roof
     for sx in (-0.72, 0.72):
         for sy in (-0.40, 0.40):
-            timber_joinery(bm, (sx, sy, -0.04), (sx, sy, 1.66), width=0.15, depth=0.15, quad=1, bow=0.01, pegs=True, iron_straps=True, strap_quad=0)
-        timber_joinery(bm, (sx, -0.42, 0.12), (sx, 0.42, 1.52), width=0.095, depth=0.095, quad=1, pegs=True)
-        add_chamfered_box(bm, (sx, 0.0, 0.82), (0.12, 0.18, 0.18), quad=0, bevel=0.01)
-    for bz in (0.30, 0.88):
+            timber_joinery(bm, (sx, sy, -0.04), (sx, sy, 1.64), width=0.15, depth=0.15, quad=1, bow=0.01, pegs=True, iron_straps=True, strap_quad=0)
+        timber_joinery(bm, (sx, -0.42, 0.12), (sx, 0.42, 1.50), width=0.095, depth=0.095, quad=1, pegs=True)
+        timber_joinery(bm, (sx, 0.42, 0.12), (sx, -0.42, 1.50), width=0.095, depth=0.095, quad=1, pegs=True)
+        add_chamfered_box(bm, (sx, 0.0, 0.81), (0.13, 0.20, 0.20), quad=0, bevel=0.01)
+    for bz in (0.28, 0.88):
         add_chamfered_box(bm, (0, 0, bz), (1.62, 0.88, 0.09), quad=1, bevel=0.014, wear='wood')
         for cx in (-0.34, 0.34):
             for chock_dx in (-0.17, 0.17):
                 add_chamfered_box(bm, (cx + chock_dx, 0, bz + 0.08), (0.09, 0.68, 0.10), quad=0, ry=-0.35 if chock_dx < 0 else 0.35, bevel=0.01)
 
-    # Planked roof with broad uneven snow crust + lower brine drip trough
-    add_chamfered_box(bm, (0, 0, 1.66), (1.84, 1.12, 0.09), quad=1, bevel=0.02, wear='wood')
-    structured_fracture(bm, (-0.04, 0.02, 1.74), (1.84, 1.12, 0.09), style='stone_slab', quad=2, seed=178)
-    add_flared_hopper_box(bm, (0, -0.52, 0.06), (1.28, 0.22), (1.40, 0.28), height=0.12, wall_t=0.04, quad_wood=0, quad_metal=0, wear_plates=False)
+    # Planked roof with full-span snow blanket + wind-sculpted snowdrift crest + icicles + lower brine drip trough
+    add_chamfered_box(bm, (0, 0, 1.62), (1.82, 1.10, 0.08), quad=1, bevel=0.02, wear='wood')
+    add_chamfered_box(bm, (0, 0, 1.69), (1.86, 1.14, 0.09), quad=2, bevel=0.03, wear='ice', wear_seed=177)
+    structured_fracture(bm, (-0.03, 0.02, 1.73), (1.76, 1.06, 0.12), style='frost_drift', quad=2, seed=178)
+    for ix in (-0.76, -0.24, 0.32, 0.78):
+        profile_sweep(bm, [(ix, -0.54, 1.66), (ix, -0.54, 1.46 - (abs(ix) * 0.08))], [0.032, 0.008], profile='oval', sides=5, quad=2, mark_flat=True)
+    add_flared_hopper_box(bm, (0, -0.50, 0.05), (1.28, 0.22), (1.40, 0.28), height=0.12, wall_t=0.04, quad_wood=0, quad_metal=0, wear_plates=False)
 
     # 4 bilged 7-station brine casks with iron hoops, central bungs & draw-off spigots
     for cx in (-0.34, 0.34):
-        for cz in (0.54, 1.12):
+        for cz in (0.52, 1.12):
             _add_staved_barrel(bm, (cx, -0.34, cz), (cx, 0.34, cz), radius=0.23, quad_wood=1, quad_iron=0, quad_accent=3, tap_side=True, central_bung=True)
     semantic_silhouette_constraints(bm, 'frostgard_salt_brine_cask_frame')
     return bm
@@ -1335,49 +1481,54 @@ def build_frostgard_salt_brine_cask_frame():
 def build_frostgard_watchman_braziers_gate():
     bm = bmesh.new()
     # RESTORE ROUND REVOLVED VESSELS & ARCHITECTURAL GATE ALTAR COHERENCE
-    structured_fracture(bm, (0, 0, 0.18), (1.78, 0.72, 0.36), style='carved_ashlar', quad=0, seed=180)
-    add_chamfered_box(bm, (0, 0, 0.66), (1.06, 0.44, 0.68), quad=1, bevel=0.025, wear='wood')
-    # Carved relief shrine frame on front/back of central altar base
-    add_chamfered_box(bm, (0, -0.22, 0.68), (0.68, 0.06, 0.42), quad=0, bevel=0.01)
-    add_chamfered_box(bm, (0, -0.24, 0.68), (0.44, 0.05, 0.24), quad=2, bevel=0.008)
+    structured_fracture(bm, (0, 0, 0.16), (1.82, 0.72, 0.32), style='carved_ashlar', quad=0, seed=180)
+    structured_fracture(bm, (0, 0, 0.34), (1.58, 0.58, 0.14), style='carved_ashlar', quad=0, seed=181)
+    add_chamfered_box(bm, (0, 0, 0.70), (1.06, 0.38, 0.68), quad=1, bevel=0.025, wear='wood')
+    # Symmetric front-and-back carved relief shrine frames & chamfered pilasters on central altar wall
+    for sy_g in (-1.0, 1.0):
+        for px_g in (-0.42, 0.42):
+            add_chamfered_box(bm, (px_g, sy_g * 0.19, 0.70), (0.12, 0.06, 0.64), quad=0, bevel=0.01)
+        add_chamfered_box(bm, (0, sy_g * 0.19, 0.70), (0.64, 0.05, 0.42), quad=0, bevel=0.01)
+        add_chamfered_box(bm, (0, sy_g * 0.21, 0.70), (0.44, 0.04, 0.24), quad=2, bevel=0.008)
 
-    # Iron-strapped overhead lintel beam + forged portcullis teeth
-    timber_joinery(bm, (-0.82, 0, 1.50), (0.82, 0, 1.50), width=0.26, depth=0.20, quad=1, iron_straps=True, strap_quad=0)
+    # Iron-strapped overhead lintel beam + forged portcullis bars
+    timber_joinery(bm, (-0.82, 0, 1.48), (0.82, 0, 1.48), width=0.24, depth=0.20, quad=1, iron_straps=True, strap_quad=0)
     for px in (-0.36, -0.12, 0.12, 0.36):
-        profile_sweep(bm, [(px, 0, 1.44), (px, 0, 1.02)], [0.028, 0.010], profile='oval', sides=6, quad=0, mark_flat=True)
+        profile_sweep(bm, [(px, 0, 1.42), (px, 0, 1.02)], [0.030, 0.018], profile='oval', sides=6, quad=0, mark_flat=True)
 
-    # Left & right collared side columns + knee struts + scroll brackets + ROUND BRAZIER BOWLS
+    # Left & right collared side columns + knee struts + scroll brackets + WIDE ROUND BRAZIER BOWLS
     for sx in (-0.72, 0.72):
-        timber_joinery(bm, (sx, 0, 0.32), (sx, 0, 1.54), width=0.13, depth=0.13, quad=2, iron_straps=True, strap_quad=0)
+        timber_joinery(bm, (sx, 0, 0.32), (sx, 0, 1.50), width=0.14, depth=0.14, quad=2, iron_straps=True, strap_quad=0)
         timber_joinery(bm, (sx * 0.74, 0, 0.32), (sx, 0, 1.24), width=0.09, depth=0.09, quad=1, pegs=True)
         for ca in (0.0, math.pi * 0.5, math.pi, math.pi * 1.5):
             rx, ry = math.cos(ca), math.sin(ca)
-            profile_sweep(bm, [(sx + 0.10 * rx, 0.10 * ry, 1.38), (sx + 0.21 * rx, 0.21 * ry, 1.58)], [0.024] * 2, profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
+            profile_sweep(bm, [(sx + 0.10 * rx, 0.10 * ry, 1.34), (sx + 0.24 * rx, 0.24 * ry, 1.54)], [0.026] * 2, profile='rect_chamfer', sides=8, quad=0, mark_flat=True)
 
-        # True hollow circular flared brazier bowl with forged vertical ribs & 6 crown prongs
+        # True hollow circular flared brazier bowl with forged vertical ribs, handles & concave interior
         add_revolved_vessel(
             bm,
-            (sx, 0, 1.52),
-            [(0.12, 0.0), (0.20, 0.12), (0.26, 0.26)],
+            (sx, 0, 1.48),
+            [(0.14, 0.0), (0.24, 0.12), (0.30, 0.26)],
             sides=12,
-            wall_t=0.038,
+            wall_t=0.042,
             quad_outer=2,
             quad_inner=0,
             ribs=6,
             rim_lip=True,
+            handles=True,
         )
         for sp in range(6):
             sa = (sp / 6.0) * math.tau
             profile_sweep(
                 bm,
-                [(sx + 0.23 * math.cos(sa), 0.23 * math.sin(sa), 1.72), (sx + 0.27 * math.cos(sa), 0.27 * math.sin(sa), 1.94)],
-                [0.022, 0.008],
+                [(sx + 0.27 * math.cos(sa), 0.27 * math.sin(sa), 1.72), (sx + 0.30 * math.cos(sa), 0.30 * math.sin(sa), 1.85)],
+                [0.022, 0.010],
                 profile='oval',
                 sides=6,
                 quad=0,
                 mark_flat=True,
             )
-        structured_fracture(bm, (sx, 0, 1.80), (0.34, 0.34, 0.24), style='ore_matrix', quad=3, seed=181 + int(sx * 10))
+        structured_fracture(bm, (sx, 0, 1.80), (0.42, 0.42, 0.26), style='ore_matrix', quad=3, seed=181 + int(sx * 10))
     semantic_silhouette_constraints(bm, 'frostgard_watchman_braziers_gate')
     return bm
 

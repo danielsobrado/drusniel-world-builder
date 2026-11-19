@@ -602,26 +602,262 @@ def build_tropical_monstera(mat):
 # 5. BOREAL TAIGA & ARCTIC TUNDRA KIT
 # ---------------------------------------------------------------------------
 
+def _add_moss_pillow(bm, uv, center, rx, ry, rz, seed, u_range, v_range, rings=10, sides=20):
+    """Smooth, pillowy boreal feather-moss cushion mound with flared buried skirt and top-down UVs."""
+    u0, u1 = u_range
+    v0, v1 = v_range
+    uc, vc = 0.5 * (u0 + u1), 0.5 * (v0 + v1)
+    ru, rv = 0.44 * (u1 - u0), 0.44 * (v1 - v0)
+    ph1 = seed * 0.71
+    ph2 = seed * 1.37
+
+    def pillow_pt(frac, ang):
+        lobe = (
+            1.0
+            + 0.12 * math.sin(ang * 3.0 + ph1)
+            + 0.08 * math.cos(ang * 5.0 - ph2)
+            + 0.05 * math.sin(ang * 7.0 + ph1 * 0.5)
+        )
+        r_xy = frac * lobe
+        dx = math.cos(ang) * rx * r_xy
+        dy = math.sin(ang) * ry * r_xy
+        # Soft flattened dome profile with subtle organic pillow undulation and buried ground skirt
+        dome = math.cos(min(1.0, frac) * math.pi * 0.5) ** 0.72
+        bump = (
+            1.0
+            + 0.14 * math.sin(dx * 11.0 + ph1) * math.cos(dy * 11.0 - ph2)
+            + 0.07 * math.cos((dx + dy) * 19.0 + ph2)
+        )
+        skirt = -0.045 * max(0.0, (frac - 0.84) / 0.16) ** 1.4
+        z = center.z + rz * dome * bump + skirt
+        u_c = max(u0, min(u1, uc + (dx / max(rx, 1e-4)) * ru))
+        v_c = max(v0, min(v1, vc + (dy / max(ry, 1e-4)) * rv))
+        return Vector((center.x + dx, center.y + dy, z)), (u_c, v_c)
+
+    apex_pt, apex_uv = pillow_pt(0.0, 0.0)
+    apex = bm.verts.new(apex_pt)
+    ring_rows = []
+    for r in range(1, rings + 1):
+        frac = r / rings
+        row = []
+        for s in range(sides):
+            ang = s / sides * math.tau
+            pt, coord = pillow_pt(frac, ang)
+            row.append((bm.verts.new(pt), coord))
+        ring_rows.append(row)
+
+    for s in range(sides):
+        sn = (s + 1) % sides
+        f = bm.faces.new((apex, ring_rows[0][s][0], ring_rows[0][sn][0]))
+        f.smooth = True
+        for loop, coord in zip(f.loops, (apex_uv, ring_rows[0][s][1], ring_rows[0][sn][1])):
+            loop[uv].uv = coord
+    for r in range(rings - 1):
+        ra, rb = ring_rows[r], ring_rows[r + 1]
+        for s in range(sides):
+            sn = (s + 1) % sides
+            f = bm.faces.new((ra[s][0], rb[s][0], rb[sn][0], ra[sn][0]))
+            f.smooth = True
+            for loop, coord in zip(f.loops, (ra[s][1], rb[s][1], rb[sn][1], ra[sn][1])):
+                loop[uv].uv = coord
+
+
+def _add_lingonberry_leaf(bm, uv, origin, forward_dir, length, width, roll, arch, u_range, v_range):
+    """Compact 3D cupped leathery obovate lingonberry leaf (16 tris, midrib crease, rolled tip)."""
+    f = forward_dir.normalized() if forward_dir.length_squared > 1e-8 else Vector((1.0, 0.0, 0.0))
+    ref = Vector((0.0, 0.0, 1.0)) if abs(f.z) < 0.92 else Vector((1.0, 0.0, 0.0))
+    right0 = f.cross(ref).normalized()
+    up0 = right0.cross(f).normalized()
+    side = (right0 * math.cos(roll) + up0 * math.sin(roll)).normalized()
+    up_perp = (up0 * math.cos(roll) - right0 * math.sin(roll)).normalized()
+
+    u0, u1 = u_range
+    v0, v1 = v_range
+    # Obovate profile: narrow at petiole, broadest around t=0.62, rounded tip
+    t_steps = (0.0, 0.25, 0.56, 0.82, 1.0)
+    w_prof = (0.14, 0.68, 1.00, 0.76, 0.16)
+    grid = []
+    for t, wm in zip(t_steps, w_prof):
+        curve = length * (arch * math.sin(t * math.pi) - 0.12 * (t ** 2.2))
+        spine = origin + f * (length * t) + up_perp * curve
+        hw = 0.5 * width * wm
+        cup = width * 0.18 * math.sin(max(0.05, t) * math.pi)
+        vc = v0 + (v1 - v0) * t
+        row = [
+            (bm.verts.new(spine - side * hw + up_perp * cup), (u0, vc)),
+            (bm.verts.new(spine), (0.5 * (u0 + u1), vc)),
+            (bm.verts.new(spine + side * hw + up_perp * cup), (u1, vc)),
+        ]
+        grid.append(row)
+
+    for r in range(len(grid) - 1):
+        for c in range(2):
+            v00, uv00 = grid[r][c]
+            v10, uv10 = grid[r][c + 1]
+            v11, uv11 = grid[r + 1][c + 1]
+            v01, uv01 = grid[r + 1][c]
+            face = bm.faces.new((v00, v10, v11, v01))
+            face.smooth = True
+            for loop, coord in zip(face.loops, (uv00, uv10, uv11, uv01)):
+                loop[uv].uv = coord
+
+
+def _add_berry_sphere(bm, uv, center, radius, axis_dir, u_range, v_range, rings=4, sides=8):
+    """Plump slightly oblate 3D lingonberry with subtle calyx dimple mapped to v -> 1."""
+    up = axis_dir.normalized() if axis_dir.length_squared > 1e-8 else Vector((0.0, 0.0, -1.0))
+    right = up.orthogonal().normalized()
+    fwd = up.cross(right).normalized()
+    u0, u1 = u_range
+    v0, v1 = v_range
+
+    p_bot = bm.verts.new(center - up * (radius * 0.92))
+    p_top = bm.verts.new(center + up * (radius * 0.80))
+    row_list = []
+    for r in range(1, rings):
+        lat = (r / rings - 0.5) * math.pi
+        rad = math.cos(lat) * radius * 1.05
+        z_off = math.sin(lat) * radius * 0.92
+        vc = v0 + (v1 - v0) * (r / rings)
+        row = []
+        for s in range(sides):
+            ang = s / sides * math.tau
+            pt = center + (right * math.cos(ang) + fwd * math.sin(ang)) * rad + up * z_off
+            uc = u0 + (u1 - u0) * (s / sides)
+            row.append((bm.verts.new(pt), (uc, vc)))
+        row_list.append(row)
+
+    uc_mid = 0.5 * (u0 + u1)
+    for s in range(sides):
+        sn = (s + 1) % sides
+        fb = bm.faces.new((p_bot, row_list[0][sn][0], row_list[0][s][0]))
+        fb.smooth = True
+        for loop, coord in zip(fb.loops, ((uc_mid, v0), row_list[0][sn][1], row_list[0][s][1])):
+            loop[uv].uv = coord
+        ft = bm.faces.new((row_list[-1][s][0], row_list[-1][sn][0], p_top))
+        ft.smooth = True
+        for loop, coord in zip(ft.loops, (row_list[-1][s][1], row_list[-1][sn][1], (uc_mid, v1))):
+            loop[uv].uv = coord
+    for r in range(len(row_list) - 1):
+        ra, rb = row_list[r], row_list[r + 1]
+        for s in range(sides):
+            sn = (s + 1) % sides
+            fq = bm.faces.new((ra[s][0], ra[sn][0], rb[sn][0], rb[s][0]))
+            fq.smooth = True
+            for loop, coord in zip(fq.loops, (ra[s][1], ra[sn][1], rb[sn][1], rb[s][1])):
+                loop[uv].uv = coord
+
+
 def build_taiga_berry_moss(mat):
-    """Boreal cushion of pale reindeer lichen (Cladonia) and feather moss topped with crimson lingonberries."""
+    """Boreal cushion of feather moss & reindeer lichen topped with 3D woody lingonberry shoots and crimson berries."""
     rng = random.Random(216)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
-    # Grounded reindeer-lichen & moss cushions anchored below ground
-    planar_rock(bm, uv, Vector((-0.12, 0.04, 0.08)), Vector((0.50, 0.44, 0.18)), style='river', seed=2161, u_range=(0.02, 0.50), v_range=(0.05, 0.95))
-    planar_rock(bm, uv, Vector((0.24, -0.14, 0.05)), Vector((0.36, 0.30, 0.14)), style='river', seed=2162, u_range=(0.02, 0.50), v_range=(0.05, 0.95))
+    uv_moss = (0.02, 0.48, 0.02, 0.48)
+    uv_bark_u, uv_bark_v = (0.53, 0.97), (0.02, 0.23)
+    uv_lichen_u, uv_lichen_v = (0.53, 0.97), (0.27, 0.48)
+    uv_leaf_u, uv_leaf_v = (0.03, 0.47), (0.53, 0.97)
+    uv_berry_u, uv_berry_v = (0.53, 0.97), (0.53, 0.97)
 
-    # 11 crimson-berried lingonberry/bilberry sprigs emerging across the hummock
-    for k in range(11):
-        yaw = k / 11 * 2 * math.pi + rng.uniform(-0.25, 0.25)
-        r = rng.uniform(0.06, 0.34)
-        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, 0.10))
-        out = Vector((math.cos(yaw), math.sin(yaw), 0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0))
-        p1 = base + out * 0.16 + Vector((0, 0, 0.22))
-        p2 = base + out * 0.32 + Vector((0, 0, 0.36))
-        arched_card(bm, uv, base, p1, p2, 0.18, 0.30, 0.22, side, u_range=(0.52, 1.0), v_range=(0.02, 0.98))
+    # 1. Soft, low-profile multi-lobed boreal feather-moss hummock anchored below ground
+    pillows = (
+        (Vector((-0.07, 0.04, 0.0)), 0.37, 0.32, 0.095, 2161),
+        (Vector((0.22, -0.10, 0.0)), 0.27, 0.23, 0.075, 2162),
+        (Vector((-0.25, -0.13, 0.0)), 0.23, 0.20, 0.065, 2163),
+        (Vector((0.06, 0.20, 0.0)), 0.24, 0.19, 0.070, 2164),
+    )
+    for center, rx, ry, rz, seed in pillows:
+        _add_moss_pillow(bm, uv, center, rx, ry, rz, seed, (uv_moss[0], uv_moss[1]), (uv_moss[2], uv_moss[3]))
+
+    # 2. Small pale Cladonia reindeer-lichen coral tufts tucked across the moss hummock
+    lichen_sites = (
+        Vector((0.12, 0.08, 0.060)),
+        Vector((-0.18, -0.05, 0.052)),
+        Vector((0.22, -0.12, 0.055)),
+        Vector((0.03, -0.18, 0.046)),
+        Vector((-0.08, 0.19, 0.050)),
+    )
+    for site in lichen_sites:
+        for t_idx in range(6):
+            ang = t_idx / 6.0 * math.tau + rng.uniform(-0.3, 0.3)
+            out = Vector((math.cos(ang), math.sin(ang), 0.0))
+            h = rng.uniform(0.036, 0.058)
+            p0 = site + out * rng.uniform(0.0, 0.028) + Vector((0.0, 0.0, -0.01))
+            p1 = p0 + out * (h * 0.45) + Vector((0.0, 0.0, h * 0.65))
+            p2 = p1 + out * (h * 0.35) + Vector((0.0, 0.0, h * 0.42))
+            tube(bm, uv, [p0, p1, p2], [0.008, 0.006, 0.0035], sides=4, u_range=uv_lichen_u, v_range=uv_lichen_v, cap_end=True)
+
+    # 3. 15 woody branching lingonberry canes with 3D sculpted evergreen leaves & crimson berry racemes
+    def populate_shoot_leaves(pts, leaf_count, size_scale=1.0):
+        for i in range(leaf_count):
+            t = 0.24 + 0.72 * (i / max(1, leaf_count - 1))
+            # Sample quadratic curve along pts[0..2]
+            u_t = 1.0 - t
+            pos = (u_t * u_t) * pts[0] + (2.0 * u_t * t) * pts[1] + (t * t) * pts[2]
+            tangent = (2.0 * u_t * (pts[1] - pts[0]) + 2.0 * t * (pts[2] - pts[1])).normalized()
+            side_v = tangent.cross(Vector((0.0, 0.0, 1.0)))
+            if side_v.length_squared < 1e-6:
+                side_v = Vector((1.0, 0.0, 0.0))
+            else:
+                side_v.normalize()
+            up_v = side_v.cross(tangent).normalized()
+            # Alternate left/right/upper phyllotaxis around the twig
+            phi = i * 2.39996 + rng.uniform(-0.32, 0.32)
+            radial = (side_v * math.cos(phi) + up_v * math.sin(phi)).normalized()
+            leaf_dir = (tangent * 0.52 + radial * 0.78 + Vector((0.0, 0.0, 0.16))).normalized()
+            leaf_len = rng.uniform(0.056, 0.084) * size_scale * (0.85 + 0.25 * math.sin(t * math.pi))
+            leaf_w = leaf_len * rng.uniform(0.52, 0.64)
+            _add_lingonberry_leaf(
+                bm, uv, pos, leaf_dir, leaf_len, leaf_w,
+                roll=rng.uniform(-0.42, 0.42),
+                arch=rng.uniform(0.10, 0.22),
+                u_range=uv_leaf_u, v_range=uv_leaf_v,
+            )
+
+    cane_count = 17
+    for k in range(cane_count):
+        yaw = k / cane_count * math.tau + rng.uniform(-0.18, 0.18)
+        r_base = rng.uniform(0.04, 0.28)
+        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        base = Vector((math.cos(yaw) * r_base - 0.01, math.sin(yaw) * r_base - 0.02, 0.035))
+        reach = rng.uniform(0.18, 0.34)
+        height = rng.uniform(0.20, 0.38)
+        sway = rng.uniform(-0.06, 0.06)
+        p1 = base + out * (reach * 0.48) + side * sway + Vector((0.0, 0.0, height * 0.62))
+        p2 = base + out * reach + side * (sway * 1.4) + Vector((0.0, 0.0, height))
+
+        tube(bm, uv, [base, p1, p2], [0.0085, 0.0058, 0.0032], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
+        populate_shoot_leaves([base, p1, p2], leaf_count=14, size_scale=1.0)
+
+        # Secondary forked side shoot
+        fork_sign = 1.0 if k % 2 == 0 else -1.0
+        f0 = p1.lerp(p2, rng.uniform(0.12, 0.40))
+        f_dir = (out * 0.72 + side * (fork_sign * 0.65) + Vector((0.0, 0.0, 0.48))).normalized()
+        f_len = rng.uniform(0.11, 0.18)
+        f1 = f0 + f_dir * (f_len * 0.52) + Vector((0.0, 0.0, 0.02))
+        f2 = f0 + f_dir * f_len
+        tube(bm, uv, [f0, f1, f2], [0.0055, 0.0038, 0.0024], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
+        populate_shoot_leaves([f0, f1, f2], leaf_count=8, size_scale=0.84)
+
+        # Nodding terminal crimson berry raceme on 10 of the 15 canes
+        if k % 3 != 2:
+            raceme_anchor = p2 if k % 2 == 0 else f2
+            raceme_out = (out * 0.75 + Vector((0.0, 0.0, -0.35))).normalized()
+            berry_count = rng.randint(4, 6)
+            for b_idx in range(berry_count):
+                b_ang = b_idx / berry_count * math.tau + rng.uniform(-0.3, 0.3)
+                b_rad = rng.uniform(0.012, 0.016)
+                b_off = (
+                    raceme_out * rng.uniform(0.014, 0.036)
+                    + side * (math.cos(b_ang) * rng.uniform(0.012, 0.028))
+                    + Vector((0.0, 0.0, math.sin(b_ang) * 0.014 - rng.uniform(0.005, 0.022)))
+                )
+                b_center = raceme_anchor + b_off
+                # Tiny berry pedicel stem
+                tube(bm, uv, [raceme_anchor, b_center], [0.0022, 0.0016], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=False)
+                _add_berry_sphere(bm, uv, b_center, b_rad, (b_center - raceme_anchor).normalized(), uv_berry_u, uv_berry_v)
+
     return finish_mesh('taiga-berry-moss-01', bm, mat)
 
 
@@ -787,10 +1023,16 @@ def main():
         os.makedirs(d, exist_ok=True)
     setup_scene()
     only_extra = '--only-extra' in argv
+    only_keys = set()
+    if '--only' in argv:
+        idx = argv.index('--only')
+        if idx + 1 < len(argv):
+            only_keys = {k.strip() for k in argv[idx + 1].split(',') if k.strip()}
     mats = {}
     if not only_extra:
         mats.update(build_all_materials(TEX_DIR))
-    mats.update(build_extra_materials(TEX_DIR))
+    if not only_keys or any(k not in mats for k in only_keys):
+        mats.update(build_extra_materials(TEX_DIR))
 
     base_specs = [
         # (out_dir, subdir, builder_fn, mat_key, cam_dist, look_z)
@@ -858,6 +1100,8 @@ def main():
     ]
 
     specs = extra_specs if only_extra else (base_specs + extra_specs)
+    if only_keys:
+        specs = [s for s in specs if s[3] in only_keys]
     preview_paths = []
     extra_preview_paths = []
     extra_set = {s[2] for s in extra_specs}
