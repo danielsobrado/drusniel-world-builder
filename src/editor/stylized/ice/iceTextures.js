@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { resolveAssetUrl } from '../../assets/assetUrl.js';
 import { decodeImagePixels } from '../worldNoise.js';
 
 const SIZE = 512;
@@ -34,12 +35,12 @@ function createTexture(fill) {
  *
  * @returns {{ detail: THREE.DataTexture, surface: THREE.DataTexture }}
  */
-export function acquireIceTextures(baseUrl = import.meta.env?.BASE_URL?.replace(/\/$/, '') ?? '') {
+export function acquireIceTextures(baseUrl = import.meta.env?.BASE_URL ?? '/') {
   if (shared) return shared;
   shared = { detail: createTexture(NEUTRAL.detail), surface: createTexture(NEUTRAL.surface) };
   if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return shared;
   const load = () => Promise.all(Object.entries(FILES).map(async ([key, path]) => {
-    const data = await decodeImagePixels(`${baseUrl}${path}`);
+    const data = await decodeImagePixels(resolveAssetUrl(baseUrl, path));
     shared[key].image.data.set(data.subarray(0, SIZE * SIZE * 4));
     shared[key].needsUpdate = true;
   })).catch((error) => console.warn('Ice textures failed to load; ice keeps its neutral surface.', error));
