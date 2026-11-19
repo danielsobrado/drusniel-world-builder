@@ -3,7 +3,7 @@ import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
 
 /** Masonry course height; profile steps land on course joints so no stone straddles a step. */
 export const SHAPE_COURSE_HEIGHT = SHAPE_CASTLE_CONFIG.masonry.ashlarCourse;
-export const SHAPE_STONEWORK = Object.freeze(['fieldstone', 'ashlar']);
+export const SHAPE_STONEWORK = Object.freeze(['fieldstone', 'ashlar', 'weathered-ashlar', 'rubble']);
 export const SHAPE_BASE_STYLES = Object.freeze(['none', 'batter', 'plinth', 'stepped-plinth', 'molded']);
 const snap = (y) => Math.round(y / SHAPE_COURSE_HEIGHT) * SHAPE_COURSE_HEIGHT;
 

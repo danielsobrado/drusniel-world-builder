@@ -1,5 +1,6 @@
 import { createShapeWallSurface, addWallPatch } from './ShapeWallSurface.js';
-import { buildShapeCourseBand, shapeStoneTone, SHAPE_ASHLAR_JOINT_TONE } from './ShapeMasonryCourses.js';
+import { buildShapeCourseBand, isAshlarStonework, shapeStoneTone, SHAPE_ASHLAR_JOINT_TONE } from './ShapeMasonryCourses.js';
+import { shapeRandom } from './ShapeMesh.js';
 import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
 import { shapeRuinBreachSpans } from './ShapeRuin.js';
@@ -58,7 +59,7 @@ export function buildShapeCrown(plan, sourceMeshes, recipe) {
   const owned = turretSpans(plan, crown), free = freeSpans(owned, length);
   // Dressed crown stone shares the wall's stone tone; `level` darkens recesses and soffits.
   const tone = (key, level = 1) => shapeStoneTone(recipe, plan, 'crown', key).map((v) => v * level);
-  const joint = p.stonework === 'ashlar' ? SHAPE_ASHLAR_JOINT_TONE : [1, 1, 1];
+  const joint = isAshlarStonework(p) ? SHAPE_ASHLAR_JOINT_TONE : [1, 1, 1];
   const steps = ultra ? D.corbelSteps + 1 : detail ? D.corbelSteps : 1;
   const strips = ultra ? 14 : detail ? 10 : 4;
   const segments = Math.max(8, Math.ceil(length / (ultra ? 0.22 : 0.3)));
@@ -137,8 +138,12 @@ export function buildShapeCrown(plan, sourceMeshes, recipe) {
       { offset: side * (crown.outer - crown.thickness), thickness: -side * CELL_DEPTH }];
     if (detail) buildShapeCourseBand(plan, stone, recipe, surface, { bottom: crown.base, top: crown.wallTop, faces,
       spans: free, domain: 'crown', key: `wall${side}:` });
-    const cap = (u0, u1, y, key) => splitPatch(stone, u0, u1, y, y + D.copingHeight, crown.outer + D.copingOverhang,
-      crown.thickness + D.copingOverhang * 2, tone(key, 1.06), { bevel: detail });
+    const cap = (u0, u1, y, key) => {
+      const dy = detail ? (shapeRandom(recipe.seed, p.id, 'crown-cap-y', key) - 0.5) * 0.018 : 0;
+      const dout = detail ? (shapeRandom(recipe.seed, p.id, 'crown-cap-o', key) - 0.5) * 0.016 : 0;
+      splitPatch(stone, u0, u1, y + dy * 0.5, y + D.copingHeight + dy, crown.outer + D.copingOverhang + dout,
+        crown.thickness + D.copingOverhang * 2 + dout * 2, tone(key, 1.06), { bevel: detail });
+    };
     const block = (u0, u1, y0, y1, key) => {
       const pieces = Math.max(1, Math.ceil(((u1 - u0) * crown.scale) / 0.3));
       for (let k = 0; k < pieces; k++) splitPatch(core, u0 + ((u1 - u0) * k) / pieces, u0 + ((u1 - u0) * (k + 1)) / pieces, y0, y1,
@@ -152,9 +157,14 @@ export function buildShapeCrown(plan, sourceMeshes, recipe) {
     };
     // One sill course tops the crown wall under the merlons and across every embrasure.
     if (crown.merlons.length || !crown.roofed) for (const [a, b] of free) {
-      const pieces = Math.max(1, Math.round(((b - a) * crown.scale) / 0.7));
-      for (let k = 0; k < pieces; k++) splitPatch(stone, a + ((b - a) * k) / pieces + 0.006, a + ((b - a) * (k + 1)) / pieces - 0.006,
-        crown.wallTop - 0.07, crown.wallTop, crown.outer + 0.02, crown.thickness + 0.04, tone(`sill:${k}`, 1.03), { bevel: detail });
+      const pieces = Math.max(1, Math.round(((b - a) * crown.scale) / 0.64));
+      for (let k = 0; k < pieces; k++) {
+        const sillKey = `sill:${side}:${Math.round(a * 10)}:${k}`;
+        const dy = detail ? (shapeRandom(recipe.seed, p.id, 'crown-sill-y', sillKey) - 0.5) * 0.014 : 0;
+        const dout = detail ? (shapeRandom(recipe.seed, p.id, 'crown-sill-o', sillKey) - 0.5) * 0.014 : 0;
+        splitPatch(stone, a + ((b - a) * k) / pieces + 0.007, a + ((b - a) * (k + 1)) / pieces - 0.007,
+          crown.wallTop - 0.072 + dy, crown.wallTop + dy * 0.5, crown.outer + 0.02 + dout, crown.thickness + 0.04 + dout * 2, tone(sillKey, 1.03), { bevel: detail });
+      }
     }
     for (const merlon of crown.merlons) {
       if (overlaps(owned, merlon.u0, merlon.u1)) continue;

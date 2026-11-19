@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { getSurfaceTextures } from '../assets/proceduralSurfaces.js';
 import { HOUSE_SURFACE_ALIASES } from '../assets/godsEnd/houseSurfaces.js';
-import { applyWorkshopPbrAssetMaps } from './ProceduralWorkshopPbrLoader.js';
+import { applyWorkshopPbrAssetMaps, applyWorkshopProceduralMaps } from './ProceduralWorkshopPbrLoader.js';
 
 const catalogKinds = new Map(Object.entries(HOUSE_SURFACE_ALIASES).map(([kind, surface]) => [surface, kind]));
 
@@ -9,6 +9,10 @@ const catalogKinds = new Map(Object.entries(HOUSE_SURFACE_ALIASES).map(([kind, s
 export function applyWorkshopGeneratedMaps(material, preset) {
   if (preset?.pbrAsset) {
     applyWorkshopPbrAssetMaps(material, preset);
+    return;
+  }
+  if (preset?.proceduralKind) {
+    applyWorkshopProceduralMaps(material, preset);
     return;
   }
   if (!preset.proceduralSurface) return;

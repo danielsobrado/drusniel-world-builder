@@ -331,6 +331,36 @@ export function createShapePrimitive(kind, id) {
       ],
     });
   }
+  if (kind === 'gate') {
+    return wall(id, 'Fortress gate wall', {
+      position: [0, 0],
+      rotation: 180,
+      length: 7.6,
+      bend: 0,
+      height: 5.8,
+      thickness: 1.9,
+      surface: 'masonry',
+      stonework: 'weathered-ashlar',
+      automaticGates: false,
+      base: { style: 'stepped-plinth', height: 0.9, out: 0.25 },
+      crown: {
+        style: 'corbelled',
+        projection: 0.34,
+        height: 0.7,
+        corbelSpacing: 0.62,
+        corbelDrop: 0.72,
+        arcade: 'round',
+        merlons: 'square',
+        merlonWidth: 0.8,
+        merlonGap: 0.5,
+        merlonHeight: 0.72,
+        sides: 'both',
+      },
+      openings: [
+        { id: 'main-gate', role: 'arch', profile: 'pointed', at: 0.5, bottom: 0, width: 3.3, height: 4.35 },
+      ],
+    });
+  }
   const factory = { 'curved-volume': volume, 'curved-wall': wall, traversal }[kind];
   if (!factory) throw new Error(`Unknown shape kind: ${kind}.`);
   return factory(

@@ -19,8 +19,11 @@ const SPLIT_GAP = 0.012;
  */
 export function shapeCourseStones({ recipe, plan, domain, key, row, rows, length, closed, cellWidth, below, y0, y1 }) {
   // Even fine ashlar is cut by hand: stone lengths always vary a little, never a perfect grid.
-  const category = shapeStoneCategory(plan, domain), amount = Math.max(0.3, irregularityAmount(recipe, category));
-  const age = plan.primitive.age ?? 0.22, field = category === 'field';
+  const sw = plan.primitive.stonework;
+  const category = shapeStoneCategory(plan, domain);
+  const floor = sw === 'rubble' ? 0.68 : sw === 'weathered-ashlar' ? 0.52 : 0.3;
+  const amount = Math.max(floor, irregularityAmount(recipe, category));
+  const age = plan.primitive.age ?? 0.22, field = category === 'field' || sw === 'rubble';
   const random = (lane, i) => shapeRandom(recipe.seed, plan.id, `${domain}-bond-${lane}`, `${key}${row}:${i}`);
   const footing = row < 2 ? 1.22 : 1;
   const min = cellWidth * (0.72 - 0.22 * amount) * footing, max = cellWidth * (1.28 + 0.5 * amount) * footing;
@@ -54,10 +57,17 @@ export function shapeCourseStones({ recipe, plan, domain, key, row, rows, length
   const height = y1 - y0;
   for (const stone of stones) {
     const i = stone.index, short = stone.right - stone.left <= cellWidth * 1.05;
-    const split = short && height >= 0.2 && random('split', i) < (field ? 0.06 + 0.12 * amount : 0.02 + 0.05 * amount);
+    const splitRate = sw === 'rubble'
+      ? 0.14 + 0.16 * amount
+      : sw === 'weathered-ashlar'
+        ? 0.06 + 0.1 * amount
+        : field
+          ? 0.06 + 0.12 * amount
+          : 0.02 + 0.05 * amount;
+    const split = short && height >= 0.2 && random('split', i) < splitRate;
     const at = y0 + height * (0.38 + random('split-at', i) * 0.24);
     stone.layers = split ? [[y0, at - SPLIT_GAP / 2, ':a'], [at + SPLIT_GAP / 2, y1, ':b']] : [[y0, y1, '']];
-    stone.sunk = random('sunk', i) < (0.03 + 0.09 * age) * (0.4 + amount);
+    stone.sunk = random('sunk', i) < ((sw === 'weathered-ashlar' || sw === 'rubble' ? 0.05 : 0.03) + 0.1 * age) * (0.4 + amount);
     // Only a masonry shell has a stone core to show; a plinth on plaster or boards never gapes.
     stone.missing = field && plan.primitive.surface === 'masonry' && row > 0 && row < rows - 1 && age >= 0.3
       && random('missing', i) < age * 0.045 * amount;

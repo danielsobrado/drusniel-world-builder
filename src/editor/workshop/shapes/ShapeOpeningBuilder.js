@@ -3,6 +3,7 @@ import { shapeRandom } from './ShapeMesh.js';
 import { buildShapeOpeningCraft } from './ShapeOpeningCraft.js';
 import { shapeOpeningRise } from './ShapeOpenings.js';
 import { shapeStoneTint, shapeStoneTone } from './ShapeMasonryCourses.js';
+import { isMonumentalGate, buildMonumentalGateArch, buildMonumentalGateDoors } from './ShapeGateArch.js';
 
 function buildArchVoussoirs(plan, meshes, recipe, surface, o, dress) {
   if (recipe.detail < 2 || o.profile === 'square' || o.width < 0.45) return;
@@ -106,60 +107,66 @@ export function buildShapeOpenings(plan, meshes, recipe, surface) {
     const center = o.at * surface.length;
     const half = o.width / 2;
     const ceil = surface.ceiling ? surface.ceiling(center) : p.height;
-    const radius = shapeOpeningRise(o);
-    const jambTop = Math.min(ceil, o.bottom + o.height - radius);
-    const jambW = o.role === 'slit' ? 0.08 : 0.14;
-    if (jambTop > o.bottom + 0.02) {
-      trim(center - half - jambW, center - half, o.bottom, jambTop, p.thickness / 2 + 0.08, fullDepth, dress);
-      trim(center + half, center + half + jambW, o.bottom, jambTop, p.thickness / 2 + 0.08, fullDepth, dress);
-    }
-    const steps = o.role === 'door' ? Math.max(8, Math.ceil(o.width / 0.12)) : o.role === 'slit' ? 4 : 24;
-    for (let i = 0; i < steps; i++) {
-      const u0 = center - half + (o.width * i) / steps;
-      const u1 = center - half + (o.width * (i + 1)) / steps;
-      const top = [u0, u1].map(
-        (u) => surface.gaps(u).find((g) => g.opening.id === o.id)?.top ?? Math.min(ceil, o.bottom + o.height),
-      );
-      if (!(o.profile === 'square' && o.bottom + o.height >= ceil)) {
-        const capH = o.profile === 'square' ? 0.14 : 0.12;
-        trim(
-          u0 + (o.role === 'door' ? 0.004 : 0),
-          u1 - (o.role === 'door' ? 0.004 : 0),
-          top,
-          top.map((y) => Math.min(ceil, y + capH)),
-          p.thickness / 2 + 0.085,
-          fullDepth,
-          dress,
-          { start: i === 0, end: i === steps - 1 },
-        );
+    if (isMonumentalGate(o)) {
+      buildMonumentalGateArch(plan, meshes, recipe, surface, o);
+      if (o.role === 'door') buildMonumentalGateDoors(plan, meshes, recipe, surface, o);
+      buildOpeningMullions(meshes, surface, o, p, ceil, dress);
+    } else {
+      const radius = shapeOpeningRise(o);
+      const jambTop = Math.min(ceil, o.bottom + o.height - radius);
+      const jambW = o.role === 'slit' ? 0.08 : 0.14;
+      if (jambTop > o.bottom + 0.02) {
+        trim(center - half - jambW, center - half, o.bottom, jambTop, p.thickness / 2 + 0.08, fullDepth, dress);
+        trim(center + half, center + half + jambW, o.bottom, jambTop, p.thickness / 2 + 0.08, fullDepth, dress);
       }
-      if (o.role === 'slit') {
-        addWallPatch(meshes.walls, surface, u0, u1, o.bottom, top, -p.thickness / 2 + 0.06, 0.02, [0.06, 0.06, 0.07]);
-      } else if (o.role !== 'arch') {
-        const mesh = o.role === 'door' ? meshes.inserts : meshes.glazing;
-        const tint = o.role === 'door'
-          ? 0.72 + shapeRandom(recipe.seed, plan.id, 'door-planks', `${o.id}:${i}`) * 0.2
-          : 0.78;
-        addWallPatch(
-          mesh,
-          surface,
-          u0 + (o.role === 'door' ? 0.004 : 0),
-          u1 - (o.role === 'door' ? 0.004 : 0),
-          o.bottom + 0.03,
-          top.map((y) => y - 0.04),
-          o.role === 'window' ? -0.02 : 0,
-          0.025,
-          [tint, tint, tint],
+      const steps = o.role === 'door' ? Math.max(8, Math.ceil(o.width / 0.12)) : o.role === 'slit' ? 4 : 24;
+      for (let i = 0; i < steps; i++) {
+        const u0 = center - half + (o.width * i) / steps;
+        const u1 = center - half + (o.width * (i + 1)) / steps;
+        const top = [u0, u1].map(
+          (u) => surface.gaps(u).find((g) => g.opening.id === o.id)?.top ?? Math.min(ceil, o.bottom + o.height),
         );
+        if (!(o.profile === 'square' && o.bottom + o.height >= ceil)) {
+          const capH = o.profile === 'square' ? 0.14 : 0.12;
+          trim(
+            u0 + (o.role === 'door' ? 0.004 : 0),
+            u1 - (o.role === 'door' ? 0.004 : 0),
+            top,
+            top.map((y) => Math.min(ceil, y + capH)),
+            p.thickness / 2 + 0.085,
+            fullDepth,
+            dress,
+            { start: i === 0, end: i === steps - 1 },
+          );
+        }
+        if (o.role === 'slit') {
+          addWallPatch(meshes.walls, surface, u0, u1, o.bottom, top, -p.thickness / 2 + 0.06, 0.02, [0.06, 0.06, 0.07]);
+        } else if (o.role !== 'arch') {
+          const mesh = o.role === 'door' ? meshes.inserts : meshes.glazing;
+          const tint = o.role === 'door'
+            ? 0.72 + shapeRandom(recipe.seed, plan.id, 'door-planks', `${o.id}:${i}`) * 0.2
+            : 0.78;
+          addWallPatch(
+            mesh,
+            surface,
+            u0 + (o.role === 'door' ? 0.004 : 0),
+            u1 - (o.role === 'door' ? 0.004 : 0),
+            o.bottom + 0.03,
+            top.map((y) => y - 0.04),
+            o.role === 'window' ? -0.02 : 0,
+            0.025,
+            [tint, tint, tint],
+          );
+        }
       }
+      if (recipe.detail >= 2 && o.profile === 'square' && o.bottom + o.height < ceil - 0.18 && ['window', 'door', 'slit'].includes(o.role)) {
+        const hoodY = Math.min(ceil, o.bottom + o.height + 0.13);
+        trim(center - half - 0.13, center + half + 0.13, hoodY - 0.04, hoodY + 0.04, p.thickness / 2 + 0.135, 0.16, dress.map((c) => c * 1.04));
+      }
+      buildArchVoussoirs(plan, meshes, recipe, surface, o, dress);
+      buildOpeningMullions(meshes, surface, o, p, ceil, dress);
+      buildShapeOpeningCraft(o, meshes, surface, recipe);
     }
-    if (recipe.detail >= 2 && o.profile === 'square' && o.bottom + o.height < ceil - 0.18 && ['window', 'door', 'slit'].includes(o.role)) {
-      const hoodY = Math.min(ceil, o.bottom + o.height + 0.13);
-      trim(center - half - 0.13, center + half + 0.13, hoodY - 0.04, hoodY + 0.04, p.thickness / 2 + 0.135, 0.16, dress.map((c) => c * 1.04));
-    }
-    buildArchVoussoirs(plan, meshes, recipe, surface, o, dress);
-    buildOpeningMullions(meshes, surface, o, p, ceil, dress);
-    buildShapeOpeningCraft(o, meshes, surface, recipe);
     if (o.role === 'door' || (o.role === 'arch' && o.bottom < 0.08 && p.elevation < 0.2)) {
       const count = o.role === 'door' ? 12 : 6;
       for (let i = 0; i < count; i++) {

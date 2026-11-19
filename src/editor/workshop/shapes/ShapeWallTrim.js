@@ -56,17 +56,20 @@ export function buildShapePlinthWaterTable(plan, meshes, recipe, surface, distan
         const gap = recipe.detail >= 2 && pieces > 1 ? 0.006 : 0;
         const ua = a + gap, ub = b - gap;
         if (ub - ua < 0.02) continue;
-        const v = recipe.detail >= 2 ? 0.88 + shapeRandom(recipe.seed, p.id, 'plinth-cap', `${Math.round(breakY * 100)}:${i}:${k}`) * 0.1 : 0.92;
+        const stoneKey = `${Math.round(breakY * 100)}:${i}:${k}`;
+        const jitterOut = recipe.detail >= 2 ? (shapeRandom(recipe.seed, p.id, 'plinth-out', stoneKey) - 0.5) * 0.016 : 0;
+        const jitterY = recipe.detail >= 2 ? (shapeRandom(recipe.seed, p.id, 'plinth-y', stoneKey) - 0.5) * 0.012 : 0;
+        const v = recipe.detail >= 2 ? 0.86 + shapeRandom(recipe.seed, p.id, 'plinth-cap', stoneKey) * 0.14 : 0.92;
         const tone = dress.map((c) => c * v);
         // Vertical drip face
-        addWallPatch(meshes.trim, surface, ua, ub, lowY - 0.03, lowY, outerOffset, outerOffset - innerOffset, tone, {
+        addWallPatch(meshes.trim, surface, ua, ub, lowY - 0.032 + jitterY, lowY + jitterY, outerOffset + jitterOut, outerOffset + jitterOut - innerOffset, tone, {
           back: false, start: k === 0, end: k === pieces - 1,
         });
         // Sloped chamfered water-table top
-        const p0 = surface.point(ua, lowY, outerOffset);
-        const p1 = surface.point(ub, lowY, outerOffset);
-        const p2 = surface.point(ub, highY, innerOffset);
-        const p3 = surface.point(ua, highY, innerOffset);
+        const p0 = surface.point(ua, lowY + jitterY, outerOffset + jitterOut);
+        const p1 = surface.point(ub, lowY + jitterY, outerOffset + jitterOut);
+        const p2 = surface.point(ub, highY + jitterY * 0.5, innerOffset);
+        const p3 = surface.point(ua, highY + jitterY * 0.5, innerOffset);
         meshes.trim.quad(...(surface.clockwise ? [p0, p1, p2, p3] : [p3, p2, p1, p0]), tone.map((c) => c * 1.05));
       }
     }
@@ -105,24 +108,35 @@ export function buildShapeCornerQuoins(plan, meshes, recipe, surface) {
   }
 }
 
-/** Projecting dressed stone string courses at floor boundaries and eaves. */
+/** Projecting hand-dressed stone string courses at floor boundaries and eaves. */
 export function buildShapeBeltCourses(plan, meshes, recipe, surface, distances) {
   const p = plan.primitive;
   if (!p.beltCourses) return;
-  const dress = shapeStoneTint(recipe, plan);
+  const detail = recipe.detail >= 2;
   const levels = [];
   for (let level = 1; level < p.levels; level++) levels.push((p.height * level) / p.levels);
   if (p.kind === 'curved-volume' && !p.crown?.style?.includes('corbel')) levels.push(p.height - 0.13);
-  const bandH = 0.11;
+  const bandH = 0.13;
   for (const y of levels) {
     if (y <= shapeBaseTop(p) + 0.15 || y >= p.height - 0.02) continue;
     for (let i = 0; i < distances.length - 1; i++) {
       const u0 = distances[i], u1 = distances[i + 1];
-      for (const band of wallSolidBands(surface, u0, u1, y - bandH / 2, y + bandH / 2, true)) {
-        const tone = dress.map((c) => c * (0.9 + shapeRandom(recipe.seed, p.id, 'belt', `${Math.round(y * 10)}:${i}`) * 0.08));
-        addWallPatch(meshes.trim, surface, u0, u1, band.bottom, band.top, p.thickness / 2 + 0.068, 0.075, tone, {
-          back: false, bevel: recipe.detail >= 2, bevelSize: 0.015, start: false, end: false,
-        });
+      const pieces = detail ? Math.max(1, Math.ceil((u1 - u0) / 0.54)) : 1;
+      for (let k = 0; k < pieces; k++) {
+        const a = u0 + ((u1 - u0) * k) / pieces;
+        const b = u0 + ((u1 - u0) * (k + 1)) / pieces;
+        const gap = detail && pieces > 1 ? 0.008 : 0;
+        const ua = a + gap, ub = b - gap;
+        if (ub - ua < 0.04) continue;
+        const key = `${Math.round(y * 10)}:${i}:${k}`;
+        const jitterY = detail ? (shapeRandom(recipe.seed, p.id, 'belt-y', key) - 0.5) * 0.016 : 0;
+        const jitterOut = detail ? (shapeRandom(recipe.seed, p.id, 'belt-out', key) - 0.45) * 0.02 : 0;
+        const tone = shapeStoneTone(recipe, plan, 'belt', key).map((c) => c * 1.04);
+        for (const band of wallSolidBands(surface, ua, ub, y - bandH / 2 + jitterY, y + bandH / 2 + jitterY, true)) {
+          addWallPatch(meshes.trim, surface, ua, ub, band.bottom, band.top, p.thickness / 2 + 0.072 + jitterOut, 0.08 + Math.max(0, jitterOut), tone, {
+            back: false, bevel: detail, bevelSize: 0.016, start: detail, end: detail,
+          });
+        }
       }
     }
   }

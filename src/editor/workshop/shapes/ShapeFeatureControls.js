@@ -4,7 +4,7 @@ export function shapeFeatureMarkup() {
   const range = (field, label, min, max, step) => `<label>${label}<input type="range" data-feature-field="${field}" min="${min}" max="${max}" step="${step}"/><output data-feature-output="${field}"></output></label>`;
   return `<div data-shape-section="features"><label>Architectural feature<select data-shape-action="feature-select"></select></label>
     <div class="workshop-shape-actions">${SHAPE_FEATURES.map((f) => `<button type="button" data-shape-action="feature-add-${f.kind}">+ ${f.label}</button>`).join('')}<button type="button" data-shape-action="feature-remove">Remove feature</button></div>
-    <div class="workshop-shape-fields" data-role="feature-fields">${range('at', 'Along wall', 0, 1, 0.01)}${range('width', 'Feature width', 0.4, 8, 0.1)}${range('depth', 'Projection', 0.25, 4, 0.05)}${range('height', 'Feature height', 0.5, 16, 0.1)}${range('bottom', 'Feature bottom', 0, 24, 0.05)}
+    <div class="workshop-shape-fields" data-role="feature-fields">${range('at', 'Along wall', 0, 1, 0.01)}${range('width', 'Feature width', 0.4, 8, 0.1)}${range('depth', 'Projection', 0.15, 4, 0.05)}${range('height', 'Feature height', 0.5, 16, 0.1)}${range('bottom', 'Feature bottom', 0, 24, 0.05)}
       <label>Turret roof<select data-feature-choice="roof">${[['cone', 'Cone'], ['spire', 'Slender spire'], ['bell', 'Bell'], ['flat', 'Open battlemented top']].map(([value, text]) => `<option value="${value}">${text}</option>`).join('')}</select></label>
       <label>Buttress shape<select data-feature-choice="profile">${[['stepped', 'Stepped shoulder'], ['curved', 'Curved cheek']].map(([value, text]) => `<option value="${value}">${text}</option>`).join('')}</select></label></div></div>`;
 }
@@ -67,7 +67,8 @@ export function applyShapeFeatureAction(editor, action) {
       bottom: opening?.bottom ?? 0.9,
       ...(kind === 'turret' ? { width: 2.2, depth: 1.4, height: 4.2, bottom: Math.max(0, p.height - 1.6), roof: 'cone' } : {}),
       ...(kind === 'chimney' ? { width: 1.15, depth: 0.8, height: Math.min(16, (p.height ?? 3) + (p.roof?.rise ?? 0) + 1.2), bottom: 0 } : {}),
-      ...(kind === 'buttress' ? { width: 0.6, depth: 0.85, height: Math.max(0.8, (p.height ?? 3) * 0.72), bottom: 0, profile: 'stepped' } : {}) }] });
+      ...(kind === 'buttress' ? { width: 0.6, depth: 0.85, height: Math.max(0.8, (p.height ?? 3) * 0.72), bottom: 0, profile: 'stepped' } : {}),
+      ...(kind === 'crest' ? { width: 1.35, depth: 0.24, height: 1.65, bottom: Math.max(0.8, (p.height ?? 3) - 0.5) } : {}) }] });
   }
   return true;
 }

@@ -4,9 +4,14 @@ import { buildShapeRoofTiles } from './ShapeRoofTiles.js';
 import { buildShapeRoofCraft } from './ShapeRoofCraft.js';
 import { buildShapeRoofJunctions } from './ShapeRoofJunctionBuilder.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
-import { shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
+import {
+  isAshlarStonework,
+  shapeStoneTint,
+  shapeWallCoreMesh,
+  SHAPE_ASHLAR_JOINT_TONE,
+  SHAPE_MASONRY_CORE_TONE,
+} from './ShapeMasonryCourses.js';
 import { buildShapeProfileRail } from './ShapeProfileRail.js';
-import { shapeStoneTint } from './ShapeMasonryCourses.js';
 import { addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
 import { hasShapeRuin } from './ShapeRuin.js';
 
@@ -58,7 +63,8 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
   }
   // Close the wall up to the roof surface; split around any gable-triangle openings above wall height.
   const core = shapeWallCoreMesh(plan, meshes, recipe);
-  const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_MASONRY_CORE_TONE;
+  const coreTone = core !== meshes.walls ? SHAPE_MASONRY_CORE_TONE
+    : p.surface === 'masonry' && isAshlarStonework(p) ? SHAPE_ASHLAR_JOINT_TONE : [1, 1, 1];
   const gableOpenings = (plan.openings ?? p.openings ?? []).filter((o) => o.bottom + o.height > p.height + tolerance.length);
   const wallBoundaries = plan.curve.samples.map((s) => s.distance);
   if (plan.curve.closed) wallBoundaries.push(length);

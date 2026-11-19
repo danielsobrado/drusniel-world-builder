@@ -1,5 +1,10 @@
 import { GODS_END_WORKSHOP_PRESETS } from './ProceduralWorkshopGodsEndPresets.js';
-import { WORKSHOP_PBR_ASSET_KEYS, WORKSHOP_PBR_PRESETS } from './ProceduralWorkshopPbrPresets.js';
+import {
+  WORKSHOP_PBR_ASSET_KEYS,
+  WORKSHOP_PBR_PRESETS,
+  WORKSHOP_PROCEDURAL_PRESETS,
+} from './ProceduralWorkshopPbrPresets.js';
+import { WORKSHOP_PROCEDURAL_KINDS } from './ProceduralWorkshopSynthTextures.js';
 import { SURFACE_NAMES } from '../assets/godsEnd/houseTextureData.js';
 import { parseWorkshopImageDimensions } from './ProceduralWorkshopImageMetadata.js';
 
@@ -20,6 +25,7 @@ const VALID_SOURCE_KIND = new Set(['albedo', 'normal', 'orm', 'height']);
 
 export const BUILTIN_WORKSHOP_MATERIAL_PRESETS = Object.freeze({
   ...WORKSHOP_PBR_PRESETS,
+  ...WORKSHOP_PROCEDURAL_PRESETS,
   ...GODS_END_WORKSHOP_PRESETS,
   'granite-masonry': Object.freeze({
     id: 'granite-masonry', label: 'Granite', family: 'walls', baseColor: '#827e79',
@@ -143,6 +149,10 @@ function normalizePreset(presetId, input) {
   if (proceduralSurface !== undefined && !SURFACE_NAMES.includes(proceduralSurface)) {
     throw new Error(`Unknown Gods End surface: ${proceduralSurface}.`);
   }
+  const proceduralKind = source.proceduralKind;
+  if (proceduralKind !== undefined && !WORKSHOP_PROCEDURAL_KINDS.has(proceduralKind)) {
+    throw new Error(`Unknown procedural texture kind: ${proceduralKind}.`);
+  }
   let pbrAsset;
   if (source.pbrAsset !== undefined) {
     const asset = requireObject(source.pbrAsset, `Material preset ${presetId} PBR asset`);
@@ -156,6 +166,7 @@ function normalizePreset(presetId, input) {
   }
   return Object.freeze({
     ...(proceduralSurface ? { proceduralSurface } : {}),
+    ...(proceduralKind ? { proceduralKind } : {}),
     ...(pbrAsset ? { pbrAsset } : {}),
     id: presetId,
     label: string(source.label, `Material preset ${presetId} label`, presetId).trim().slice(0, 64)

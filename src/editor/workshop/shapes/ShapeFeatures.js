@@ -9,6 +9,7 @@ import { expandShapeFeatureFootprint } from './ShapeFeatureFootprint.js';
 import { shapeFeatureSemantics } from './ShapeFeatureSemantics.js';
 import { resolveShapeBalcony } from './ShapeBalcony.js';
 import { resolveShapeButtress } from './ShapeButtress.js';
+import { resolveShapeCrest } from './ShapeCrest.js';
 import { shapeFeatureBounds } from './ShapeFeatureBounds.js';
 import { SHAPE_CROWN_NONE, normalizeShapeCrown } from './ShapeCrown.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
@@ -40,7 +41,8 @@ function childVolume(host, f, frame, fields) {
 
 function frameAt(plan, feature) {
   const wall = createShapeWallSurface(plan), u = feature.at * wall.length;
-  const y = Math.min(feature.bottom, plan.primitive.height - 0.1);
+  const maxY = feature.kind === 'crest' && wall.ceiling ? wall.ceiling(u) : plan.primitive.height;
+  const y = Math.min(feature.bottom, Math.max(0.2, maxY - 0.1));
   const origin = wall.point(u, y, plan.primitive.thickness / 2);
   const a = wall.point(u - 0.025, y), b = wall.point(u + 0.025, y);
   const length = Math.hypot(b[0] - a[0], b[2] - a[2]) || 1;
@@ -111,6 +113,7 @@ const registry = new Map([
     }), openSides: true };
   }],
   ['buttress', resolveShapeButtress],
+  ['crest', resolveShapeCrest],
   ['chimney', (host, f, frame) => {
     const p = host.primitive;
     const width = Math.max(0.6, Math.min(2.4, f.width));

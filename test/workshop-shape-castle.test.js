@@ -20,7 +20,14 @@ import {
   normalizeWorkshopMaterialDocument,
   serializeWorkshopMaterialDocument,
 } from '../src/editor/workshop/ProceduralWorkshopMaterialConfig.js';
-import { WORKSHOP_PBR_PRESET_LIST } from '../src/editor/workshop/ProceduralWorkshopPbrPresets.js';
+import {
+  WORKSHOP_PBR_PRESET_LIST,
+  WORKSHOP_PROCEDURAL_PRESET_LIST,
+} from '../src/editor/workshop/ProceduralWorkshopPbrPresets.js';
+import {
+  createWorkshopProceduralPixels,
+  sampleWorkshopProceduralSurface,
+} from '../src/editor/workshop/ProceduralWorkshopSynthTextures.js';
 
 const materials = new Proxy({}, { get: (_, key) => key });
 const plan = (source) => { const c = shapeCapability(source.kind); return c.plan(c.normalize(source)); };
@@ -29,7 +36,7 @@ const tower = (extra = {}) => ({ id: 'tower', kind: 'curved-volume', surface: 'm
 const radius = (surface, y, offset) => { const v = surface.point(0, y, offset); return Math.hypot(v[0], v[2]); };
 
 test('castle presets are plain shape data that survive a composition round trip', () => {
-  assert.equal(SHAPE_CASTLE_PRESETS.length, 12);
+  assert.equal(SHAPE_CASTLE_PRESETS.length, 18);
   for (const preset of SHAPE_CASTLE_PRESETS) {
     assert.ok(SHAPE_PRESETS.some((item) => item.id === preset.id));
     const composition = normalizeWorkshopComposition(createShapePreset(preset.id));
@@ -232,4 +239,100 @@ test('full-PBR workshop presets map to real texture files and round-trip cleanly
   assert.deepEqual(roundTrip.materialLibrary.presets['custom-basalt'].pbrAsset, BUILTIN_WORKSHOP_MATERIAL_PRESETS['pbr-basalt'].pbrAsset);
   const p = plan(tower({ stonework: 'ashlar' }));
   assert.deepEqual(shapeStoneTint({ style: 'limestone', materialAreaOverrides: { 'tower:trim': 'pbr-brick-castle' } }, p), [1, 1, 1]);
+});
+
+test('royal fortress gates build sculpted arches, heraldic crests, double doors, and stay within real-time polygon budgets', () => {
+  const gateIds = [
+    'royal-barbican-gate',
+    'heraldic-gable-gate',
+    'twin-spire-curtain-gate',
+    'closed-fortress-portal-gate',
+    'asymmetric-bastion-gate',
+    'citadel-pavilion-gate',
+  ];
+  for (const id of gateIds) {
+    const comp = normalizeWorkshopComposition(createShapePreset(id));
+    const plans = comp.primitives.map((src) => plan(src));
+    const { plans: resolved } = resolveShapeChemistry(plans);
+    let totalTriangles = 0;
+    let hasInserts = false;
+    for (const shape of resolved) {
+      const parts = buildRegisteredShape(shape, materials, { seed: 23, detail: 2, ivy: false });
+      assert.ok(parts.length > 0, `${id}:${shape.id} builds parts`);
+      for (const part of parts) {
+        assert.ok(part.geometry.attributes.position.array.every(Number.isFinite), `${id}:${shape.id} finite vertices`);
+        const index = part.geometry.getIndex();
+        totalTriangles += index ? index.count / 3 : part.geometry.attributes.position.count / 3;
+        if (part.materialRegion.id.endsWith(':inserts')) hasInserts = true;
+        part.geometry.dispose();
+      }
+    }
+    // Reasonable real-time game budget: rich irregular masonry yet well under 180k tris per full multi-tower gatehouse.
+    assert.ok(totalTriangles > 1500 && totalTriangles < 180_000, `${id} triangle budget: ${totalTriangles}`);
+    if (id === 'closed-fortress-portal-gate') {
+      assert.ok(hasInserts, 'closed fortress portal gate builds heavy double-leaf wooden doors');
+    }
+  }
+  const quickGate = createShapePrimitive('gate', 'gate-1');
+  assert.equal(quickGate.kind, 'curved-wall');
+  assert.equal(quickGate.stonework, 'weathered-ashlar');
+  assert.ok(quickGate.openings[0].width >= 3);
+});
+
+test('irregular stonework modes and heraldic crests resolve and build cleanly', () => {
+  for (const stonework of ['weathered-ashlar', 'rubble']) {
+    const p = plan(tower({
+      stonework,
+      beltCourses: true,
+      footprint: { family: 'polygon', width: 5, depth: 3.4, sides: 4, cornerRadius: 0 },
+      roof: { family: 'gable', axis: 'depth', rise: 2.5, overhang: 0.25 },
+      features: [{ id: 'crest-1', kind: 'crest', at: 0.625, width: 1.4, depth: 0.26, height: 1.8, bottom: 8.6 }],
+    }));
+    const [resolved] = resolveShapeChemistry([p]).plans;
+    assert.ok(resolved.features.some((f) => f.crest), `${stonework} resolves heraldic crest`);
+    const parts = buildRegisteredShape(resolved, materials, { seed: 31, detail: 2, ivy: false });
+    assert.ok(parts.length > 0);
+    for (const part of parts) {
+      assert.ok(part.geometry.attributes.position.array.every(Number.isFinite));
+      part.geometry.dispose();
+    }
+  }
+});
+
+test('synthesized procedural PBR presets are periodic, produce valid RGBA maps, and round-trip in material config', () => {
+  assert.ok(WORKSHOP_PROCEDURAL_PRESET_LIST.length >= 14);
+  for (const kind of ['weatheredAshlar', 'mossyFortress', 'chiseledLimestone', 'slateShingle']) {
+    // Exact periodicity across UV tile boundaries guarantees seamless wrapping.
+    const a = sampleWorkshopProceduralSurface(kind, 0.23, 0.41);
+    const b = sampleWorkshopProceduralSurface(kind, 1.23, 2.41);
+    for (let i = 0; i < 5; i += 1) {
+      assert.ok(Math.abs(a[i] - b[i]) < 1e-9, `${kind} sample channel ${i} wraps seamlessly`);
+    }
+    const pixels = createWorkshopProceduralPixels(kind, { size: 32 });
+    assert.equal(pixels.color.length, 32 * 32 * 4);
+    assert.equal(pixels.normal.length, 32 * 32 * 4);
+    assert.equal(pixels.roughness.length, 32 * 32 * 4);
+  }
+  const doc = normalizeWorkshopMaterialDocument({
+    materialAreaOverrides: { 'gate-wall:trim': 'proc-weathered-ashlar', 'gate-wall:roof': 'proc-slate-shingle' },
+    materialLibrary: {
+      presets: {
+        'custom-mossy': {
+          ...BUILTIN_WORKSHOP_MATERIAL_PRESETS['proc-mossy-fortress'],
+          id: 'custom-mossy',
+          label: 'Custom Mossy Stone',
+          repeat: 1.9,
+        },
+      },
+    },
+    materialDefaults: { stone: 'custom-mossy' },
+  });
+  const roundTrip = normalizeWorkshopMaterialDocument(serializeWorkshopMaterialDocument(doc));
+  assert.deepEqual(roundTrip, doc);
+  assert.equal(roundTrip.materialLibrary.presets['custom-mossy'].proceduralKind, 'mossyFortress');
+  const p = plan(tower({ stonework: 'weathered-ashlar' }));
+  assert.deepEqual(
+    shapeStoneTint({ style: 'limestone', materialAreaOverrides: { 'tower:trim': 'proc-weathered-ashlar' } }, p),
+    [1, 1, 1],
+  );
 });

@@ -6,7 +6,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 /** Stone category for the shared irregularity budget: crowns and ashlar stay crisper than field stone. */
 export function shapeStoneCategory(plan, domain) {
   if (domain === 'crown') return 'merlon';
-  return plan.primitive.stonework === 'ashlar' ? 'ashlar' : 'field';
+  return ['ashlar', 'weathered-ashlar'].includes(plan.primitive.stonework) ? 'ashlar' : 'field';
 }
 
 /**
@@ -25,7 +25,8 @@ export function shapeStoneCut(recipe, plan, domain, key, left, right, y0, y1) {
   const corners = stoneQuadCorners(recipe, {}, shaped, index, category);
   // Inward-only corner moves: [bottom-left, bottom-right, top-right, top-left] as (u, y) insets.
   // Field stone is rough-dressed: wider, more uneven joints and a fuller crown than cut ashlar.
-  const rough = category === 'field' ? 1.45 : 1;
+  const sw = plan.primitive.stonework;
+  const rough = sw === 'rubble' ? 1.72 : sw === 'weathered-ashlar' ? 1.38 : category === 'field' ? 1.45 : 1;
   const maxU = Math.min(0.05 * rough, width * 0.12 * rough), maxY = Math.min(0.035 * rough, height * 0.14 * rough);
   const inset = corners.map(([x, y], i) => [
     clamp((i === 0 || i === 3 ? x + halfW : halfW - x) * 1.6, 0, maxU),

@@ -141,10 +141,11 @@ export class WorkshopShapeEditor {
         if (this.session.primitives.length > 1) this.session.remove(this.selectedId);
       } else if (
         action.startsWith('add-') &&
-        ['tower', 'volume', 'wall', 'path'].includes(action.slice(4))
+        ['tower', 'gate', 'volume', 'wall', 'path'].includes(action.slice(4))
       ) {
         const kind = {
           'add-tower': 'tower',
+          'add-gate': 'gate',
           'add-volume': 'curved-volume',
           'add-wall': 'curved-wall',
           'add-path': 'traversal',

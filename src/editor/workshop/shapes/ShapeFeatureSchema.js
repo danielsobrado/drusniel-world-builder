@@ -7,6 +7,7 @@ export const SHAPE_FEATURES = Object.freeze([
   { kind: 'balcony', label: 'Curved balcony' },
   { kind: 'turret', label: 'Attached turret' },
   { kind: 'chimney', label: 'Stone chimney' },
+  { kind: 'crest', label: 'Heraldic crest' },
 ]);
 
 export const SHAPE_TURRET_ROOFS = Object.freeze(['cone', 'spire', 'bell', 'flat']);
@@ -24,7 +25,7 @@ export function normalizeShapeFeatures(value) {
       kind,
       at: shapeNumber(f.at, 'Feature position', 0.5, 0, 1),
       width: shapeNumber(f.width, 'Feature width', 2, 0.4, 8),
-      depth: shapeNumber(f.depth, 'Feature projection', 1.2, 0.25, 4),
+      depth: shapeNumber(f.depth, 'Feature projection', 1.2, 0.15, 4),
       height: shapeNumber(f.height, 'Feature height', 1.8, 0.5, 16),
       bottom: shapeNumber(f.bottom, 'Feature elevation', 0.9, 0, 24),
       ...(kind === 'turret' ? { roof: shapeChoice(f.roof, 'turret roof', 'cone', SHAPE_TURRET_ROOFS) } : {}),

@@ -4,6 +4,7 @@ export function shapeFeatureBounds(plan, features) {
     if (feature.child) return [feature.child.bounds];
     if (feature.solidSupport) return [feature.solidSupport.bounds];
     if (feature.chimney) return [feature.chimney.bounds];
+    if (feature.crest) return [feature.crest.bounds];
     if (!feature.balcony) return [];
     const b = feature.balcony.bounds;
     return [{ min: [b.min[0], b.min[2]], max: [b.max[0], b.max[2]] }];

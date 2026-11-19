@@ -1,8 +1,10 @@
 import * as THREE from 'three/webgpu';
 import { resolveAssetUrl } from '../assets/assetUrl.js';
+import { createWorkshopProceduralPixels } from './ProceduralWorkshopSynthTextures.js';
 
 const MAX_CACHED_SETS = 24;
 const BASE_SET_CACHE = new Map();
+const PROCEDURAL_SET_CACHE = new Map();
 let sharedLoader = null;
 
 function textureLoader() {
@@ -131,5 +133,55 @@ export function applyWorkshopPbrAssetMaps(material, preset) {
       if (!disposed) bindDecodedSet(material, resolved, preset, owned);
     }).catch(() => { /* Keep procedural fallback if offline or asset fails to load. */ });
   }
+  return true;
+}
+
+function makeDataTexture(pixels, size, colorSpace, name) {
+  const texture = new THREE.DataTexture(pixels, size, size, THREE.RGBAFormat);
+  texture.name = name;
+  return configureMap(texture, colorSpace, 1, 0);
+}
+
+function loadProceduralSet(kind) {
+  if (PROCEDURAL_SET_CACHE.has(kind)) {
+    const existing = PROCEDURAL_SET_CACHE.get(kind);
+    PROCEDURAL_SET_CACHE.delete(kind);
+    PROCEDURAL_SET_CACHE.set(kind, existing);
+    return existing;
+  }
+  if (PROCEDURAL_SET_CACHE.size >= MAX_CACHED_SETS) {
+    const oldestKey = PROCEDURAL_SET_CACHE.keys().next().value;
+    const oldest = PROCEDURAL_SET_CACHE.get(oldestKey);
+    PROCEDURAL_SET_CACHE.delete(oldestKey);
+    oldest?.color?.dispose();
+    oldest?.normal?.dispose();
+    oldest?.rough?.dispose();
+  }
+  const pixels = createWorkshopProceduralPixels(kind, { size: 256 });
+  const entry = {
+    color: makeDataTexture(pixels.color, pixels.size, THREE.SRGBColorSpace, `workshop-proc-${kind}-color`),
+    normal: makeDataTexture(pixels.normal, pixels.size, THREE.NoColorSpace, `workshop-proc-${kind}-normal`),
+    rough: makeDataTexture(pixels.roughness, pixels.size, THREE.NoColorSpace, `workshop-proc-${kind}-rough`),
+    arm: null,
+  };
+  PROCEDURAL_SET_CACHE.set(kind, entry);
+  return entry;
+}
+
+/**
+ * Lazily synthesize and bind deterministic tileable full-PBR DataTextures
+ * (Albedo + Normal + Roughness) on demand. Synchronous & WebGPU-safe with zero network I/O.
+ */
+export function applyWorkshopProceduralMaps(material, preset) {
+  if (!preset?.proceduralKind) return false;
+  const base = loadProceduralSet(preset.proceduralKind);
+  const owned = [];
+  const dispose = () => {
+    owned.forEach((map) => map.dispose());
+    owned.length = 0;
+    material.removeEventListener('dispose', dispose);
+  };
+  material.addEventListener('dispose', dispose);
+  bindDecodedSet(material, base, preset, owned);
   return true;
 }

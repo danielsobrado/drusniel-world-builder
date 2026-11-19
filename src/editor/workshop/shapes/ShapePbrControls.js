@@ -1,5 +1,8 @@
 import { BUILTIN_WORKSHOP_MATERIAL_PRESETS } from '../ProceduralWorkshopMaterialConfig.js';
-import { WORKSHOP_PBR_PRESET_LIST } from '../ProceduralWorkshopPbrPresets.js';
+import {
+  WORKSHOP_PBR_PRESET_LIST,
+  WORKSHOP_PROCEDURAL_PRESET_LIST,
+} from '../ProceduralWorkshopPbrPresets.js';
 
 const PBR_SLOTS = Object.freeze([
   { family: 'trim', label: 'Stone, masonry & crown' },
@@ -12,14 +15,19 @@ const PBR_SLOTS = Object.freeze([
 function groupedPresetOptions() {
   const groups = new Map();
   for (const preset of WORKSHOP_PBR_PRESET_LIST) {
-    const key = `PBR · ${preset.category}`;
+    const key = `PBR (Photo) · ${preset.category}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(preset);
+  }
+  for (const preset of WORKSHOP_PROCEDURAL_PRESET_LIST) {
+    const key = `Procedural PBR · ${preset.category}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(preset);
   }
   const village = [];
   const classic = [];
   for (const preset of Object.values(BUILTIN_WORKSHOP_MATERIAL_PRESETS)) {
-    if (preset.pbrAsset) continue;
+    if (preset.pbrAsset || preset.proceduralKind) continue;
     if (preset.proceduralSurface) village.push(preset);
     else classic.push(preset);
   }
@@ -43,7 +51,7 @@ export function shapePbrMarkup() {
       <button type="button" data-shape-action="pbr-reset">Reset shape PBR</button>
       <button type="button" data-shape-action="pbr-open-painter">Paint &amp; custom PBR maps…</button>
     </div>
-    <p class="workshop-shape-hint">Full-PBR presets load Albedo, Normal &amp; Roughness/AO maps on demand and persist when baked into the world.</p>
+    <p class="workshop-shape-hint">Choose photographed CC0 full-PBR maps or synthesized procedural PBR textures (Albedo + Normal + Roughness/AO). Maps load or generate on demand and persist when baked.</p>
   </div>`;
 }
 

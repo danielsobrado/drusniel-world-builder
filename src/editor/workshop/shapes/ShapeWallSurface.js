@@ -81,7 +81,11 @@ export function createShapeWallSurface(plan) {
     if (p.kind === 'curved-wall') offset *= 1 + ((p.taper - 1) * y) / p.height;
     // The vertical profile moves both faces of a shell, and each face of a freestanding wall.
     const out = shapeProfileOut(p, y);
-    if (out) offset += p.kind === 'curved-wall' ? Math.sign(offset) * out : out;
+    if (out) {
+      offset += p.kind === 'curved-wall'
+        ? (Math.abs(offset) >= p.thickness * 0.35 ? Math.sign(offset) * out : 0)
+        : out;
+    }
     let k = 0;
     const m = s.miter;
     if (offset && m.kind === 'line' && (m.kStart || m.kEnd) && m.metric.length > tolerance.length) {

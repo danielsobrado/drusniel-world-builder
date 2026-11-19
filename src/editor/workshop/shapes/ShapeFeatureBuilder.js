@@ -6,6 +6,7 @@ import { createShapeRoofOcclusion, clipShapeRoofMesh, clipShapeMeshSet } from '.
 import { createShapeWallSurface } from './ShapeWallSurface.js';
 import { buildShapeBalcony } from './ShapeBalconyBuilder.js';
 import { buildShapeButtress } from './ShapeButtress.js';
+import { buildShapeCrest } from './ShapeCrest.js';
 import { buildShapeCrown } from './ShapeCrownBuilder.js';
 import { buildShapeTurretSupport } from './ShapeTurret.js';
 import { shapeStoneTint } from './ShapeMasonryCourses.js';
@@ -24,6 +25,10 @@ export function buildShapeFeatures(plan, meshes, recipe) {
     }
     if (feature.chimney) {
       buildShapeFeatureChimney(plan, feature, clipShapeMeshSet(meshes, plan, { roofs: false }), recipe, roofSurface);
+      continue;
+    }
+    if (feature.crest) {
+      buildShapeCrest(feature, clipShapeMeshSet(meshes, plan, { roofs: false }).trim, shapeStoneTint(recipe, plan), recipe.detail);
       continue;
     }
     const child = feature.child, occlusion = createShapeRoofOcclusion(child);

@@ -21,6 +21,7 @@ export function workshopShapeMarkup() {
     <label>Selected shape<select data-shape-action="select"></select></label>
     <div class="workshop-shape-actions">
       <button type="button" data-shape-action="add-tower">+ Tower</button>
+      <button type="button" data-shape-action="add-gate">+ Gate</button>
       <button type="button" data-shape-action="add-volume">+ Building</button>
       <button type="button" data-shape-action="add-wall">+ Wall</button>
       <button type="button" data-shape-action="add-path">+ Path</button>
@@ -40,7 +41,12 @@ export function workshopShapeMarkup() {
         ['masonry', 'Chunky masonry'],
         ['planks', 'Timber planks'],
       ])}
-      ${select('stonework', 'Stonework', [['fieldstone', 'Warm chunky stone'], ['ashlar', 'Grey ashlar, dark joints']])}
+      ${select('stonework', 'Stonework', [
+        ['fieldstone', 'Warm chunky fieldstone'],
+        ['ashlar', 'Crisp grey ashlar'],
+        ['weathered-ashlar', 'Weathered irregular ashlar'],
+        ['rubble', 'Rustic irregular rubble'],
+      ])}
     </div>
     <div class="workshop-shape-fields" data-shape-section="volume">
       ${select('facade', 'Facade', [
@@ -132,7 +138,7 @@ export function workshopShapeMarkup() {
           ['pointed', 'Pointed (Gothic) arch'],
         ])}
         ${range('opening-at', 'Along wall', 0, 0.99, 0.01)}${range('opening-bottom', 'Opening bottom', 0, 5, 0.05)}
-        ${range('opening-width', 'Opening width', 0.1, 3, 0.05)}${range('opening-height', 'Opening height', 0.3, 4, 0.05)}
+        ${range('opening-width', 'Opening width', 0.1, 5, 0.05)}${range('opening-height', 'Opening height', 0.3, 6, 0.05)}
         ${select('opening-mullions', 'Divider', [['none', 'Open'], ['post', 'Timber post'], ['bars', 'Iron grille bars']])}
         ${select('opening-shutterPose', 'Shutter pose', [['auto', 'Natural variation'], ['open', 'Open'], ['ajar', 'Ajar'], ['closed', 'Closed']])}
       </div>

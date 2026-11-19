@@ -665,12 +665,14 @@ export class ProceduralWorkshopMaterialController {
     const groups = new Map();
     for (const preset of Object.values(allPresets)) {
       const group = preset.pbrAsset
-        ? `PBR · ${preset.category ?? 'Library'}`
-        : preset.proceduralSurface
-          ? 'Village procedural surfaces'
-          : BUILTIN_WORKSHOP_MATERIAL_PRESETS[preset.id]
-            ? 'Classic procedural tones'
-            : 'Custom presets';
+        ? `PBR (Photo) · ${preset.category ?? 'Library'}`
+        : preset.proceduralKind
+          ? `Procedural PBR · ${preset.category ?? 'Synthesized'}`
+          : preset.proceduralSurface
+            ? 'Village procedural surfaces'
+            : BUILTIN_WORKSHOP_MATERIAL_PRESETS[preset.id]
+              ? 'Classic procedural tones'
+              : 'Custom presets';
       if (!groups.has(group)) groups.set(group, []);
       groups.get(group).push(preset);
     }

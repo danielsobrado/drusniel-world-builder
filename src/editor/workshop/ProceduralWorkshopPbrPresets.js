@@ -127,3 +127,97 @@ export const WORKSHOP_PBR_PRESET_LIST = Object.freeze(
 export const WORKSHOP_PBR_PRESETS = Object.freeze(
   Object.fromEntries(WORKSHOP_PBR_PRESET_LIST.map((preset) => [preset.id, preset])),
 );
+
+const PROCEDURAL_DEFINITIONS = Object.freeze([
+  // Stone & fortress masonry
+  {
+    id: 'proc-weathered-ashlar', label: 'Procedural · Weathered Fortress Ashlar', category: 'Stone & Masonry', family: 'stone',
+    proceduralKind: 'weatheredAshlar', repeat: 1.4, roughness: 0.96, normalStrength: 1.35,
+  },
+  {
+    id: 'proc-mossy-fortress', label: 'Procedural · Mossy Fortress Stone', category: 'Stone & Masonry', family: 'stone',
+    proceduralKind: 'mossyFortress', repeat: 1.35, roughness: 0.98, normalStrength: 1.4,
+  },
+  {
+    id: 'proc-chiseled-limestone', label: 'Procedural · Chiseled Limestone', category: 'Stone & Masonry', family: 'stone',
+    proceduralKind: 'chiseledLimestone', repeat: 1.4, roughness: 0.94, normalStrength: 1.15,
+  },
+  {
+    id: 'proc-stone-block', label: 'Procedural · Dressed Stone Blocks', category: 'Stone & Masonry', family: 'stone',
+    proceduralKind: 'stoneBlock', repeat: 1.5, roughness: 0.96, normalStrength: 1.25,
+  },
+  {
+    id: 'proc-rubble', label: 'Procedural · Irregular Field Rubble', category: 'Stone & Masonry', family: 'walls',
+    proceduralKind: 'rubble', repeat: 1.4, roughness: 0.98, normalStrength: 1.35,
+  },
+  {
+    id: 'proc-granite', label: 'Procedural · Speckled Granite', category: 'Stone & Masonry', family: 'stone',
+    proceduralKind: 'granite', repeat: 1.4, roughness: 0.94, normalStrength: 1.2,
+  },
+  // Plaster
+  {
+    id: 'proc-plaster', label: 'Procedural · Troweled Lime Plaster', category: 'Plaster', family: 'walls',
+    proceduralKind: 'plaster', repeat: 1.6, roughness: 0.98, normalStrength: 0.85,
+  },
+  // Roofing
+  {
+    id: 'proc-slate-shingle', label: 'Procedural · Scalloped Slate Roof', category: 'Roofing', family: 'roof',
+    proceduralKind: 'slateShingle', repeat: 2.0, roughness: 0.9, normalStrength: 1.25, mapping: 'local',
+  },
+  {
+    id: 'proc-roof-tile', label: 'Procedural · Clay Barrel Tiles', category: 'Roofing', family: 'roof',
+    proceduralKind: 'roofTile', repeat: 2.0, roughness: 0.92, normalStrength: 1.2, mapping: 'local',
+  },
+  {
+    id: 'proc-shingle', label: 'Procedural · Weathered Wood Shingles', category: 'Roofing', family: 'roof',
+    proceduralKind: 'shingle', repeat: 2.0, roughness: 0.94, normalStrength: 1.15, mapping: 'local',
+  },
+  {
+    id: 'proc-thatch', label: 'Procedural · Bundled Thatch', category: 'Roofing', family: 'roof',
+    proceduralKind: 'thatch', repeat: 1.8, roughness: 0.98, normalStrength: 1.3, mapping: 'local',
+  },
+  // Timber & Metal
+  {
+    id: 'proc-timber', label: 'Procedural · Hewn Dark Timber', category: 'Timber & Metal', family: 'wood',
+    proceduralKind: 'timber', repeat: 1.5, roughness: 0.94, normalStrength: 1.1, mapping: 'local',
+  },
+  {
+    id: 'proc-plank', label: 'Procedural · Sawn Oak Planks', category: 'Timber & Metal', family: 'wood',
+    proceduralKind: 'plank', repeat: 1.5, roughness: 0.94, normalStrength: 1.1, mapping: 'local',
+  },
+  {
+    id: 'proc-iron', label: 'Procedural · Hammered Forged Iron', category: 'Timber & Metal', family: 'metal',
+    proceduralKind: 'iron', repeat: 1.6, roughness: 0.65, metalness: 0.78, normalStrength: 0.9, mapping: 'local',
+  },
+  {
+    id: 'proc-bronze', label: 'Procedural · Aged Cast Bronze', category: 'Timber & Metal', family: 'metal',
+    proceduralKind: 'bronze', repeat: 1.5, roughness: 0.62, metalness: 0.8, normalStrength: 0.85, mapping: 'local',
+  },
+]);
+
+export const WORKSHOP_PROCEDURAL_PRESET_LIST = Object.freeze(
+  PROCEDURAL_DEFINITIONS.map((def) => Object.freeze({
+    id: def.id,
+    label: def.label,
+    category: def.category,
+    family: def.family,
+    proceduralKind: def.proceduralKind,
+    baseColor: def.baseColor ?? '#ffffff',
+    tint: '#ffffff',
+    roughness: def.roughness ?? 0.96,
+    metalness: def.metalness ?? 0,
+    normalStrength: def.normalStrength ?? 1.1,
+    aoStrength: 1,
+    heightStrength: 0,
+    weathering: 0.25,
+    mapping: def.mapping ?? 'projected',
+    repeat: def.repeat ?? 1.4,
+    rotation: 0,
+    alignment: def.mapping === 'local' ? 'local' : 'world',
+    sources: Object.freeze({}),
+  })),
+);
+
+export const WORKSHOP_PROCEDURAL_PRESETS = Object.freeze(
+  Object.fromEntries(WORKSHOP_PROCEDURAL_PRESET_LIST.map((preset) => [preset.id, preset])),
+);

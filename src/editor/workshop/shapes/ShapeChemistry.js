@@ -1,7 +1,7 @@
 import { WorkshopSpatialIndex } from '../spatial/WorkshopSpatialIndex.js';
 import polygonClipping from 'polygon-clipping';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
-import { shapeEnvelopeAtHeight, polylineTouchesShape, offsetShapePolygon } from './ShapeEnvelope.js';
+import { shapeEnvelopeAtHeight, polylineTouchesShape, offsetShapePolygon, pointInShape } from './ShapeEnvelope.js';
 import { resolvePathGates } from './ShapePathGateReaction.js';
 import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
 import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
@@ -67,10 +67,34 @@ export function resolveShapeChemistry(plans) {
       if (plan.primitive.elevation > tolerance.position) {
         const boundary = plan.boundary;
         const stride = Math.max(1, Math.floor(boundary.length / 4));
+        const belowCandidates = index
+          .queryBounds(plan.bounds, { excludeIds: [plan.id] })
+          .map((id) => byId.get(id))
+          .filter((other) => {
+            const op = other.primitive;
+            if (!['curved-wall', 'curved-volume'].includes(op.kind)) return false;
+            return op.elevation <= plan.primitive.elevation + 0.1
+              && op.elevation + op.height >= plan.primitive.elevation - 0.35;
+          });
+        const supportedByStructure = (x, z) => belowCandidates.some((other) => {
+          const op = other.primitive;
+          if (op.kind === 'curved-volume') {
+            return pointInShape([x, z], offsetShapePolygon(other.boundary, op.thickness / 2 + 0.45));
+          }
+          const reach = op.thickness / 2 + 0.8;
+          for (let k = 0; k < other.boundary.length - 1; k += 1) {
+            const [ax, az] = other.boundary[k], [bx, bz] = other.boundary[k + 1];
+            const dx = bx - ax, dz = bz - az, len2 = dx * dx + dz * dz;
+            const t = len2 > 1e-8 ? Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / len2)) : 0;
+            if (Math.hypot(x - (ax + dx * t), z - (az + dz * t)) <= reach) return true;
+          }
+          return false;
+        });
         for (let i = 0; i < 4; i++) {
           const key = `support:${plan.id}:corner-${i}`;
           if (plan.primitive.suppressed.includes(key)) continue;
           const [x, z] = boundary[Math.min(i * stride, boundary.length - 1)];
+          if (supportedByStructure(x, z)) continue;
           supports.push({
             id: key,
             derivationKey: key,

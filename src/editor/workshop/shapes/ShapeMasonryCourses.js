@@ -19,18 +19,22 @@ const ROOF_UNDERSIDE = 0.025;
 const ASHLAR_TINT = Object.freeze({ granite: [1.0, 1.08, 1.35], default: [0.54, 0.67, 1.06] });
 const PLAIN = Object.freeze([1, 1, 1]);
 
+export function isAshlarStonework(primitive) {
+  return primitive?.stonework === 'ashlar' || primitive?.stonework === 'weathered-ashlar';
+}
+
 function hasPbrStoneOverride(recipe, plan) {
   const regionId = `${plan.id}:trim`;
   const presetId = recipe?.materialAreaOverrides?.[regionId] ?? recipe?.materialDefaults?.stone;
   if (!presetId) return false;
   const preset = getWorkshopMaterialPreset(recipe, presetId);
-  return Boolean(preset?.pbrAsset);
+  return Boolean(preset?.pbrAsset || preset?.proceduralKind);
 }
 
 /** Multiplier every dressed-stone tone of a shape shares, so trim never drifts from its wall. */
 export function shapeStoneTint(recipe, plan) {
   if (hasPbrStoneOverride(recipe, plan)) return PLAIN;
-  return plan.primitive.stonework === 'ashlar' ? ASHLAR_TINT[recipe.style] ?? ASHLAR_TINT.default : PLAIN;
+  return isAshlarStonework(plan.primitive) ? ASHLAR_TINT[recipe.style] ?? ASHLAR_TINT.default : PLAIN;
 }
 /** Mortar seen between ashlar stones: a dark recessed joint rather than a plaster-coloured gap. */
 export const SHAPE_ASHLAR_JOINT_TONE = Object.freeze([0.17, 0.25, 0.5]);
@@ -38,14 +42,17 @@ export const SHAPE_ASHLAR_JOINT_TONE = Object.freeze([0.17, 0.25, 0.5]);
 export function shapeStoneTone(recipe, plan, domain, key) {
   const random = shapeRandom(recipe.seed, plan.id, domain, key);
   const warm = shapeRandom(recipe.seed, plan.id, `${domain}-warmth`, key) - 0.5;
-  if (plan.primitive.stonework === 'ashlar') {
-    // Mostly even stones with the occasional darker or paler block, as in weathered ashlar.
-    const v = 0.74 + random * 0.16 + (random > 0.9 ? 0.07 : random < 0.08 ? -0.1 : 0);
+  const sw = plan.primitive.stonework;
+  if (isAshlarStonework(plan.primitive)) {
+    const weathered = sw === 'weathered-ashlar';
+    const v = weathered
+      ? 0.7 + random * 0.22 + (random > 0.88 ? 0.08 : random < 0.1 ? -0.12 : 0)
+      : 0.74 + random * 0.16 + (random > 0.9 ? 0.07 : random < 0.08 ? -0.1 : 0);
     const tint = shapeStoneTint(recipe, plan);
-    return [tint[0] * (v + warm * 0.035), tint[1] * v, tint[2] * (v - warm * 0.035)];
+    return [tint[0] * (v + warm * 0.045), tint[1] * v, tint[2] * (v - warm * 0.045)];
   }
-  const v = 0.8 + random * 0.2;
-  return [v + warm * 0.04, v, v - warm * 0.04];
+  const v = sw === 'rubble' ? 0.72 + random * 0.28 : 0.8 + random * 0.2;
+  return [v + warm * 0.05, v, v - warm * 0.05];
 }
 
 /** Masonry reads as stone at every detail level, so its uncoursed core is the stone slot. */
@@ -94,7 +101,7 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
   const count = Math.ceil((top - bottom) / course - tolerance.length);
   // Stone (not boards, not regular cells) is laid as a rule-based bond rather than a grid.
   const bonded = detail && stagger && domain !== 'planks';
-  const curveStep = ultra ? 0.12 : 0.18;
+  const curveStep = ultra ? 0.14 : 0.22;
 
   // How far the wall (or a raking roof line above it) departs from a straight chord over [a, b].
   const bend = (a, b) => {

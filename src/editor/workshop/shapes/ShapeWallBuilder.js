@@ -2,7 +2,7 @@ import { createShapeWallSurface, addWallPatch, wallSolidBands } from './ShapeWal
 import { buildShapeOpenings } from './ShapeOpeningBuilder.js';
 import { buildShapeWeathering, shapeAgingSurface } from './ShapeWeathering.js';
 import { buildShapePavilionInterior } from './ShapePavilionInterior.js';
-import { buildShapeMasonryCourses, shapeStoneTint, shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE, SHAPE_ASHLAR_JOINT_TONE } from './ShapeMasonryCourses.js';
+import { buildShapeMasonryCourses, isAshlarStonework, shapeStoneTint, shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE, SHAPE_ASHLAR_JOINT_TONE } from './ShapeMasonryCourses.js';
 import { shapeBaseTop, shapeProfileBreaks } from './ShapeProfile.js';
 import { buildShapePlinthWaterTable, buildShapeCornerQuoins, buildShapeBeltCourses } from './ShapeWallTrim.js';
 import { hasShapeRuin } from './ShapeRuin.js';
@@ -30,7 +30,7 @@ export function buildShapeWalls(plan, meshes, recipe) {
   const core = shapeWallCoreMesh(plan, meshes, recipe);
   const sections = [0, ...shapeProfileBreaks(p), p.height];
   const coreTone = core !== meshes.walls ? SHAPE_MASONRY_CORE_TONE
-    : p.surface === 'masonry' && p.stonework === 'ashlar' ? SHAPE_ASHLAR_JOINT_TONE : [1, 1, 1];
+    : p.surface === 'masonry' && isAshlarStonework(p) ? SHAPE_ASHLAR_JOINT_TONE : [1, 1, 1];
   const stoneTone = shapeStoneTint(recipe, plan).map((c) => c * 0.88);
   const ruined = hasShapeRuin(p);
   for (let i = 0; i < distances.length - 1; i++) {

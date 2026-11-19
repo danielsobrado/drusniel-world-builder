@@ -1,6 +1,6 @@
 import { shapeRandom } from './ShapeMesh.js';
 import { addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
-import { shapeStoneTint } from './ShapeMasonryCourses.js';
+import { isAshlarStonework, shapeStoneTint } from './ShapeMasonryCourses.js';
 
 /** A continuous host-local field: splitting a patch never changes its wear. */
 export function shapeAgingSurface(surface, plan, seed, timber = false) {
@@ -42,7 +42,7 @@ export function buildShapeWeathering(plan, meshes, recipe, surface) {
       const vertices = [[a, 0.02], [b, 0.02], [b, y * 0.88], [a, y]].map(([d, h]) => surface.point(d, h, p.thickness / 2 + 0.004));
       meshes.walls.quad(...(surface.clockwise ? vertices.toReversed() : vertices), [0.72, 0.76, 0.68]);
     }
-    const exposedRubble = (p.surface === 'masonry' && p.stonework === 'ashlar') || p.surface === 'plaster';
+    const exposedRubble = (p.surface === 'masonry' && isAshlarStonework(p)) || p.surface === 'plaster';
     if (exposedRubble && meshes.trim && age >= 0.25 && random('rubble-patch', cell) < age * 0.42) {
       const baseY = 0.28 + random('rubble-y', cell) * Math.max(0.4, Math.min(p.height - 0.65, 1.6));
       const count = 3 + Math.floor(random('rubble-count', cell) * 4);

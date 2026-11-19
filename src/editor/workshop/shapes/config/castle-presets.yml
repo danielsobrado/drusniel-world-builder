@@ -514,3 +514,470 @@ presets:
           - { id: window-mid, role: window, profile: pointed, at: 0.5833, bottom: 7.6, width: 0.62, height: 1.65 }
           - { id: window-high-l, role: window, profile: pointed, at: 0.4167, bottom: 11.4, width: 0.58, height: 1.6 }
           - { id: window-high-r, role: window, profile: pointed, at: 0.75, bottom: 11.4, width: 0.58, height: 1.6 }
+
+  - id: royal-barbican-gate
+    label: Royal twin-turret barbican gate
+    primitives:
+      - id: gate-wall
+        label: Gatehouse arch wall
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.4
+        bend: 0
+        height: 5.8
+        thickness: 1.9
+        automaticGates: false
+        base: { style: stepped-plinth, height: 0.9, out: 0.24 }
+        crown: { style: parapet, height: 0.65, merlonWidth: 0.78, merlonGap: 0.48, merlonHeight: 0.72, sides: both }
+        openings:
+          - { id: main-gate, role: arch, profile: pointed, at: 0.5, bottom: 0, width: 3.3, height: 4.35 }
+      - id: watch-box
+        label: Central watch breteche
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [0, 0.08]
+        elevation: 5.5
+        height: 2.25
+        levels: 2
+        thickness: 0.42
+        footprint: { family: polygon, width: 2.35, depth: 2.25, sides: 4, cornerRadius: 0 }
+        roof: { family: flat }
+        crown: { style: parapet, height: 0.42, merlons: none }
+        openings:
+          - { id: window-front, role: window, profile: arched, at: 0.625, bottom: 0.55, width: 0.58, height: 1.2 }
+          - { id: window-back, role: window, profile: arched, at: 0.125, bottom: 0.55, width: 0.58, height: 1.2 }
+      - id: turret-west
+        label: West barbican turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [-4.45, 0.25]
+        height: 7.7
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.9, depth: 2.9, sides: 14, cornerRadius: 0 }
+        roof: { family: cone, rise: 1.35, overhang: 0.24, sweep: 0.2 }
+        base: { style: stepped-plinth, height: 0.95, out: 0.28 }
+        crown: { style: corbelled, projection: 0.34, height: 1.2, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.2, width: 0.13, height: 1.05 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 4.45, width: 0.46, height: 1.1 }
+      - id: turret-east
+        label: East barbican turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.45, 0.25]
+        height: 7.7
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.9, depth: 2.9, sides: 14, cornerRadius: 0 }
+        roof: { family: cone, rise: 1.35, overhang: 0.24, sweep: 0.2 }
+        base: { style: stepped-plinth, height: 0.95, out: 0.28 }
+        crown: { style: corbelled, projection: 0.34, height: 1.2, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.2, width: 0.13, height: 1.05 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 4.45, width: 0.46, height: 1.1 }
+
+  - id: heraldic-gable-gate
+    label: Heraldic Gothic gable fortress gate
+    primitives:
+      - id: gate-wall
+        label: Gatehouse arch wall
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.6
+        bend: 0
+        height: 5.7
+        thickness: 1.9
+        automaticGates: false
+        base: { style: stepped-plinth, height: 0.95, out: 0.26 }
+        crown: { style: parapet, height: 0.6, merlonWidth: 0.75, merlonGap: 0.48, merlonHeight: 0.68, sides: both }
+        openings:
+          - { id: main-gate, role: arch, profile: pointed, at: 0.5, bottom: 0, width: 3.4, height: 4.45 }
+      - id: gable-pediment
+        label: Heraldic gable pediment
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        interior: none
+        position: [0, 0.1]
+        elevation: 5.5
+        height: 1.25
+        levels: 1
+        thickness: 0.45
+        footprint: { family: polygon, width: 3.7, depth: 2.45, sides: 4, cornerRadius: 0 }
+        roof: { family: gable, axis: depth, rise: 2.95, overhang: 0.28, sweep: 0.05, sag: 0 }
+        features:
+          - { id: heraldic-shield, kind: crest, at: 0.625, width: 1.55, depth: 0.28, height: 2.05, bottom: 0.55 }
+      - id: turret-west
+        label: West spire turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [-4.55, 0.25]
+        height: 8.6
+        levels: 3
+        thickness: 0.52
+        footprint: { family: polygon, width: 3.1, depth: 3.1, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.1, overhang: 0.28, sweep: 0.18 }
+        base: { style: stepped-plinth, height: 1.0, out: 0.3 }
+        crown: { style: corbelled, projection: 0.36, height: 1.25, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.4, width: 0.13, height: 1.1 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.15, width: 0.48, height: 1.15 }
+      - id: turret-east
+        label: East spire turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.5, 0.25]
+        height: 8.0
+        levels: 3
+        thickness: 0.48
+        footprint: { family: polygon, width: 2.75, depth: 2.75, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 2.75, overhang: 0.24, sweep: 0.18 }
+        base: { style: stepped-plinth, height: 0.95, out: 0.26 }
+        crown: { style: corbelled, projection: 0.32, height: 1.2, corbelSpacing: 0.56, corbelDrop: 0.62, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.3, width: 0.13, height: 1.05 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 4.7, width: 0.46, height: 1.1 }
+
+  - id: twin-spire-curtain-gate
+    label: Twin-spire machicolated curtain gate
+    primitives:
+      - id: gate-wall
+        label: Machicolated gate curtain
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.0
+        bend: 0
+        height: 6.1
+        thickness: 1.85
+        automaticGates: false
+        base: { style: molded, height: 0.9, out: 0.24 }
+        crown: { style: corbelled, projection: 0.36, height: 0.72, corbelSpacing: 0.62, corbelDrop: 0.75, arcade: round, machicolation: decorative, merlons: square, merlonWidth: 0.82, merlonGap: 0.5, merlonHeight: 0.72, sides: both }
+        openings:
+          - { id: main-gate, role: arch, profile: arched, at: 0.5, bottom: 0, width: 3.5, height: 4.55 }
+      - id: turret-west
+        label: West spire tower
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [-4.2, 0.2]
+        height: 9.1
+        levels: 3
+        thickness: 0.52
+        footprint: { family: polygon, width: 3.1, depth: 3.1, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.3, overhang: 0.26, sweep: 0.18 }
+        base: { style: molded, height: 1.0, out: 0.3 }
+        crown: { style: corbelled, projection: 0.36, height: 1.3, corbelSpacing: 0.56, corbelDrop: 0.68, arcade: round }
+        openings:
+          - { id: loop-mid, role: slit, profile: square, at: 0.535, bottom: 2.8, width: 0.13, height: 1.15 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.55, width: 0.48, height: 1.15 }
+      - id: turret-east
+        label: East spire tower
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.2, 0.2]
+        height: 8.8
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.9, depth: 2.9, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.1, overhang: 0.25, sweep: 0.18 }
+        base: { style: molded, height: 1.0, out: 0.28 }
+        crown: { style: corbelled, projection: 0.34, height: 1.25, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-mid, role: slit, profile: square, at: 0.535, bottom: 2.7, width: 0.13, height: 1.1 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.35, width: 0.46, height: 1.15 }
+      - id: mini-turret-west
+        label: Lower bastion turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        interior: none
+        position: [-5.5, 0.72]
+        height: 2.9
+        levels: 1
+        thickness: 0.36
+        footprint: { family: polygon, width: 2.05, depth: 2.05, sides: 12, cornerRadius: 0 }
+        roof: { family: cone, rise: 1.35, overhang: 0.16, sweep: 0.2 }
+        base: { style: molded, height: 0.75, out: 0.2 }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.54, bottom: 1.35, width: 0.12, height: 0.9 }
+
+  - id: closed-fortress-portal-gate
+    label: Closed double-door pavilion gatehouse
+    primitives:
+      - id: gate-wall
+        label: Closed portal gate wall
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.4
+        bend: 0
+        height: 5.7
+        thickness: 1.9
+        automaticGates: false
+        base: { style: stepped-plinth, height: 0.9, out: 0.25 }
+        crown: { style: corbelled, projection: 0.32, height: 0.68, corbelSpacing: 0.62, corbelDrop: 0.72, arcade: round, merlons: square, merlonWidth: 0.78, merlonGap: 0.48, merlonHeight: 0.7, sides: both }
+        openings:
+          - { id: fortress-doors, role: door, profile: pointed, at: 0.5, bottom: 0, width: 3.3, height: 4.35 }
+      - id: upper-gatehouse
+        label: Upper pavilion gatehouse
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [0, 0.06]
+        elevation: 5.55
+        height: 2.65
+        levels: 2
+        thickness: 0.46
+        footprint: { family: polygon, width: 3.2, depth: 2.7, sides: 4, cornerRadius: 0 }
+        roof: { family: hip, rise: 2.55, overhang: 0.32, sweep: 0.12, sag: 0 }
+        openings:
+          - { id: win-l, role: window, profile: arched, at: 0.59, bottom: 0.85, width: 0.46, height: 1.15 }
+          - { id: win-r, role: window, profile: arched, at: 0.66, bottom: 0.85, width: 0.46, height: 1.15 }
+      - id: turret-west
+        label: West spire turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [-4.45, 0.25]
+        height: 7.8
+        levels: 3
+        thickness: 0.48
+        footprint: { family: polygon, width: 2.7, depth: 2.7, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 2.85, overhang: 0.24, sweep: 0.16 }
+        base: { style: stepped-plinth, height: 0.9, out: 0.26 }
+        crown: { style: corbelled, projection: 0.3, height: 1.2, corbelSpacing: 0.56, corbelDrop: 0.62, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.2, width: 0.13, height: 1.05 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 4.55, width: 0.44, height: 1.05 }
+      - id: turret-east
+        label: East spire turret
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.45, 0.25]
+        height: 7.8
+        levels: 3
+        thickness: 0.48
+        footprint: { family: polygon, width: 2.7, depth: 2.7, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 2.85, overhang: 0.24, sweep: 0.16 }
+        base: { style: stepped-plinth, height: 0.9, out: 0.26 }
+        crown: { style: corbelled, projection: 0.3, height: 1.2, corbelSpacing: 0.56, corbelDrop: 0.62, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.2, width: 0.13, height: 1.05 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 4.55, width: 0.44, height: 1.05 }
+
+  - id: asymmetric-bastion-gate
+    label: Asymmetric bastion & spire keep gate
+    primitives:
+      - id: gate-wall
+        label: Gatehouse arch curtain
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.2
+        bend: 0
+        height: 5.7
+        thickness: 1.9
+        automaticGates: false
+        base: { style: stepped-plinth, height: 0.95, out: 0.26 }
+        crown: { style: corbelled, projection: 0.34, height: 0.68, corbelSpacing: 0.62, corbelDrop: 0.74, arcade: round, merlons: square, merlonWidth: 0.78, merlonGap: 0.48, merlonHeight: 0.72, sides: both }
+        openings:
+          - { id: main-gate, role: arch, profile: pointed, at: 0.5, bottom: 0, width: 3.3, height: 4.4 }
+      - id: keep-box
+        label: Machicolated central keep box
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        quoins: true
+        interior: none
+        position: [0, 0.08]
+        elevation: 5.5
+        height: 2.85
+        levels: 2
+        thickness: 0.48
+        footprint: { family: polygon, width: 3.55, depth: 2.55, sides: 4, cornerRadius: 0 }
+        roof: { family: flat }
+        crown: { style: corbelled, projection: 0.32, height: 0.68, corbelSpacing: 0.54, corbelDrop: 0.65, arcade: round, merlons: square, merlonWidth: 0.76, merlonGap: 0.46, merlonHeight: 0.75 }
+        openings:
+          - { id: window-front, role: window, profile: arched, at: 0.625, bottom: 0.75, width: 0.54, height: 1.15 }
+          - { id: window-back, role: window, profile: arched, at: 0.125, bottom: 0.75, width: 0.54, height: 1.15 }
+      - id: bastion-west
+        label: West buttressed bastion
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        quoins: true
+        interior: none
+        position: [-4.35, 0.15]
+        height: 5.9
+        levels: 2
+        thickness: 0.48
+        footprint: { family: polygon, width: 2.55, depth: 2.65, sides: 4, cornerRadius: 0 }
+        roof: { family: flat }
+        base: { style: stepped-plinth, height: 1.0, out: 0.28 }
+        crown: { style: corbelled, projection: 0.34, height: 0.68, corbelSpacing: 0.58, corbelDrop: 0.72, arcade: round, merlons: square, merlonWidth: 0.76, merlonGap: 0.46, merlonHeight: 0.72 }
+        openings:
+          - { id: loop-front, role: slit, profile: square, at: 0.625, bottom: 2.4, width: 0.14, height: 1.15 }
+        features:
+          - { id: buttress-sw, kind: buttress, at: 0.72, width: 0.6, depth: 0.75, height: 3.8 }
+      - id: turret-east
+        label: East spire tower
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.4, 0.25]
+        height: 8.6
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.95, depth: 2.95, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.35, overhang: 0.26, sweep: 0.18 }
+        base: { style: stepped-plinth, height: 1.0, out: 0.28 }
+        crown: { style: corbelled, projection: 0.36, height: 1.25, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.4, width: 0.13, height: 1.1 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.15, width: 0.46, height: 1.15 }
+
+  - id: citadel-pavilion-gate
+    label: Royal citadel pavilion twin-spire gate
+    primitives:
+      - id: gate-wall
+        label: Machicolated arch wall
+        kind: curved-wall
+        surface: masonry
+        stonework: weathered-ashlar
+        rotation: 180
+        length: 8.6
+        bend: 0
+        height: 5.9
+        thickness: 1.9
+        automaticGates: false
+        base: { style: molded, height: 0.95, out: 0.26 }
+        crown: { style: corbelled, projection: 0.36, height: 0.7, corbelSpacing: 0.6, corbelDrop: 0.74, arcade: round, merlons: square, merlonWidth: 0.78, merlonGap: 0.48, merlonHeight: 0.7, sides: both }
+        openings:
+          - { id: main-gate, role: arch, profile: arched, at: 0.5, bottom: 0, width: 3.45, height: 4.45 }
+      - id: pavilion
+        label: Central hipped gate pavilion
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [0, 0.08]
+        elevation: 5.7
+        height: 2.45
+        levels: 2
+        thickness: 0.46
+        footprint: { family: polygon, width: 3.35, depth: 3.0, sides: 4, cornerRadius: 0 }
+        roof: { family: hip, rise: 3.2, overhang: 0.36, sweep: 0.14, sag: 0 }
+        openings:
+          - { id: win-l, role: window, profile: arched, at: 0.585, bottom: 0.85, width: 0.46, height: 1.05 }
+          - { id: win-r, role: window, profile: arched, at: 0.665, bottom: 0.85, width: 0.46, height: 1.05 }
+      - id: turret-west
+        label: West citadel spire
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [-4.55, 0.25]
+        height: 8.4
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.85, depth: 2.85, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.35, overhang: 0.26, sweep: 0.16 }
+        base: { style: molded, height: 0.95, out: 0.28 }
+        crown: { style: corbelled, projection: 0.36, height: 1.25, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.4, width: 0.13, height: 1.1 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.0, width: 0.46, height: 1.1 }
+      - id: turret-east
+        label: East citadel spire
+        kind: curved-volume
+        surface: masonry
+        stonework: weathered-ashlar
+        shutters: false
+        craft: false
+        beltCourses: true
+        interior: none
+        position: [4.55, 0.25]
+        height: 8.4
+        levels: 3
+        thickness: 0.5
+        footprint: { family: polygon, width: 2.85, depth: 2.85, sides: 14, cornerRadius: 0 }
+        roof: { family: spire, rise: 3.35, overhang: 0.26, sweep: 0.16 }
+        base: { style: molded, height: 0.95, out: 0.28 }
+        crown: { style: corbelled, projection: 0.36, height: 1.25, corbelSpacing: 0.56, corbelDrop: 0.65, arcade: round }
+        openings:
+          - { id: loop-low, role: slit, profile: square, at: 0.535, bottom: 2.4, width: 0.13, height: 1.1 }
+          - { id: window-high, role: window, profile: arched, at: 0.535, bottom: 5.0, width: 0.46, height: 1.1 }
