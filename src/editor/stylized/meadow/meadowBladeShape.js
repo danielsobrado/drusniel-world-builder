@@ -24,7 +24,7 @@ import {
   vec3,
 } from 'three/tsl';
 
-import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
+import { sampleWorldWindCanonical } from '../../weather/wind/worldWindState.js';
 import { groundDeformationNode } from '../deformation/groundDeformationNode.js';
 import { stylizedDirtMask, stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
@@ -32,6 +32,7 @@ import { MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 import { meadowPlantNodes } from './meadowPlantNodes.js';
+import { meadowTipFlutterNode, meadowWindFrontNodes } from './meadowWindNodes.js';
 
 const HALF_PI = Math.PI * 0.5;
 const HIDDEN = 1e9;
@@ -275,36 +276,36 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));
 
-      // Wind from the world field: gust fronts travel across the meadow and curl.
-      // The sway is expressed as a bend angle (the donor's form), so a blade arcs
-      // over rather than shearing sideways, and keeps its length as it goes.
+      // The weather's advected field determines the local direction and strength.
+      // Coherent fronts travel downwind; an independent high-frequency tip flutter
+      // avoids forcing every blade in a tuft to move in lockstep.
       const wind = sampleWorldWindCanonical(blade.canonical);
       const direction = wind.direction;
       const gust = wind.envelope.clamp(0.35, 3.5);
       const across = vec2(direction.y.negate(), direction.x);
-      // Phase against the prevailing wind, not the local field (windWaveCoordinates).
-      const wave = windWaveCoordinates(blade.canonical);
-      const along = wave.along;
-      const primary = sin(along.mul(tuning.windFrequency).add(uniforms.time.mul(tuning.windSpeed)).add(blade.phase));
-      const secondary = sin(along.mul(tuning.windFrequency.mul(2.6))
-        .add(uniforms.time.mul(tuning.windSpeed.mul(1.8))).add(blade.phase.mul(1.7)).add(1.3)).mul(0.35);
+      const { wave, phase, front, pressure } = meadowWindFrontNodes(blade, uniforms, tuning, wind);
+      const secondary = sin(phase.mul(2.25)
+        .add(wave.across.mul(tuning.windFrequency.mul(0.42))).add(1.3))
+        .mul(uniforms.wind.secondaryStrength);
       const turbulence = sin(wave.across.mul(tuning.windFrequency.mul(1.9))
-        .add(uniforms.time.mul(tuning.windSpeed.mul(0.7))).add(blade.phase.mul(0.6)).add(2.6))
+        .sub(uniforms.time.mul(tuning.windSpeed.mul(0.7))).add(blade.phase.mul(0.6)).add(2.6))
         .mul(tuning.windTurbulence);
-      // Short stems ride the gust with less swing than the tall stand round them.
+      // Pressure crests lean downwind; the negative half-cycle provides recovery.
+      const waveLean = front.mul(0.28).add(secondary).add(turbulence).add(pressure.mul(0.72));
       const compliance = oneMinus(blade.variation.mul(tuning.windStiffnessRange))
         .mul(mix(tufts.windShort, float(1), stature)).mul(profile.wind);
-      const windAngle = tuning.windLean.add(primary.add(secondary).add(turbulence).mul(tuning.windStrength))
+      const windAngle = tuning.windLean.add(waveLean.mul(tuning.windStrength))
         .mul(compliance).mul(gust).mul(blade.strength).mul(2).clamp(-1.3, 1.3)
         .mul(bendPower);
       const windReach = height.mul(sin(windAngle)).mul(r);
       local.x.addAssign(direction.x.mul(windReach));
       local.z.addAssign(direction.y.mul(windReach));
       local.y.subAssign(abs(height.mul(cos(windAngle).sub(1)).mul(r)));
-      // Tip flutter across the gust, faded before blades turn sub-pixel.
-      const flutterFade = oneMinus(smoothstep(tuning.flutterFadeStart, tuning.flutterFadeEnd, distance));
-      const flutter = sin(wave.across.mul(1.9).add(uniforms.time.mul(3.4)).add(blade.phase.mul(3.1)))
-        .mul(tuning.flutterStrength).mul(height).mul(pow(r, 3)).mul(flutterFade).mul(gust.sqrt());
+
+      const flutter = meadowTipFlutterNode({
+        blade, wave, uniforms, tuning, wind,
+        ratio: r, height, stature, distance, windResponse: profile.wind,
+      });
       local.x.addAssign(across.x.mul(flutter));
       local.z.addAssign(across.y.mul(flutter));
 

@@ -104,6 +104,9 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       meltEnd: uniform(appearance.meltEnd),
       meltFlatten: uniform(appearance.meltFlatten),
     },
+    // Local meadow response; independent from the shared weather wind field.
+    wind: Object.fromEntries(Object.entries(settings.wind)
+      .map(([key, value]) => [key, uniform(value)])),
     // The tuft field's shaping (meadowTuftField.js), live.
     tufts: Object.fromEntries(Object.entries(settings.tufts ?? MEADOW_TUFT_DEFAULTS)
       .map(([key, value]) => [key, uniform(value)])),

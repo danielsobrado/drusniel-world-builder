@@ -8,7 +8,6 @@ import {
   normalize,
   positionWorld,
   pow,
-  sin,
   smoothstep,
   vec3,
   vec4,
@@ -17,12 +16,13 @@ import {
 import { assignGrassMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
-import { sampleWorldWindCanonical, windWaveCoordinates } from '../../weather/wind/worldWindState.js';
+import { sampleWorldWindCanonical } from '../../weather/wind/worldWindState.js';
 import { applyCloudShadow } from '../CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowPigment } from './meadowPigment.js';
+import { meadowWindFrontNodes } from './meadowWindNodes.js';
 
 /** Rounded ribbon normal in the same XZ frame as createMeadowBladePosition. */
 export function meadowBladeWorldNormal(rotation, side, height) {
@@ -84,9 +84,8 @@ export function createMeadowBladeMaterial({
   // wave bends the tips over, their paler side turns up and catches the light.
   // Computed per stem in the vertex stage; the ambient layer sets how much shows.
   const wind = sampleWorldWindCanonical(blade.canonical);
-  const wave = sin(windWaveCoordinates(blade.canonical).along.mul(tuning.windFrequency)
-    .add(uniforms.time.mul(tuning.windSpeed)).add(blade.phase));
-  const gust = smoothstep(0.2, 1, wave.mul(0.5).add(0.5))
+  const { pressure } = meadowWindFrontNodes(blade, uniforms, tuning, wind);
+  const gust = pressure.clamp(0, 1)
     .mul(wind.envelope.clamp(0, 2).mul(0.5)).toVarying('meadowGust');
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))

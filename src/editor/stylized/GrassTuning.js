@@ -57,6 +57,8 @@ const SCALAR_SETTINGS = Object.freeze([
   { key: 'windLean', path: ['wind', 'lean'], fallback: 0.05 },
   { key: 'windStiffnessRange', path: ['wind', 'stiffnessRange'], fallback: 0 },
   { key: 'flutterStrength', path: ['wind', 'flutter', 'strength'], fallback: 0 },
+  { key: 'flutterSpeed', path: ['wind', 'flutter', 'speed'], fallback: 3.4 },
+  { key: 'flutterFrequency', path: ['wind', 'flutter', 'frequency'], fallback: 1.9 },
   { key: 'flutterHeightStart', path: ['wind', 'flutter', 'heightStart'], fallback: 0.62 },
   { key: 'flutterFadeStart', path: ['wind', 'flutter', 'fadeStart'], fallback: 22 },
   { key: 'flutterFadeEnd', path: ['wind', 'flutter', 'fadeEnd'], fallback: 38 },

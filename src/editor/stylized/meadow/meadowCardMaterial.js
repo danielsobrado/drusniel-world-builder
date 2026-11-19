@@ -15,7 +15,6 @@ import {
   positionWorld,
   pow,
   sin,
-  smoothstep,
   sqrt,
   texture,
   uv,
@@ -28,13 +27,14 @@ import { assignGrassMaterialData } from '../../../render/postprocessing/PostProc
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
-import { sampleWorldWindCanonical, windWaveCoordinates, worldWindUniforms } from '../../weather/wind/worldWindState.js';
+import { sampleWorldWindCanonical, worldWindUniforms } from '../../weather/wind/worldWindState.js';
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 import { meadowPigment } from './meadowPigment.js';
 import { meadowPlantNodes } from './meadowPlantNodes.js';
+import { meadowWindFrontNodes } from './meadowWindNodes.js';
 
 /** The card atlas: three silhouettes side by side, each a 2 × 2 block of clumps. */
 const ATLAS_COLUMNS = 6;
@@ -118,9 +118,8 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   // Gust fronts rolling across the far meadow, as the blades' sheen: shading moves,
   // the alpha cut does not.
   const wind = sampleWorldWindCanonical(card.canonical);
-  const wave = sin(windWaveCoordinates(card.canonical).along.mul(tuning.windFrequency)
-    .add(uniforms.time.mul(tuning.windSpeed)).add(card.phase));
-  const gust = smoothstep(0.2, 1, wave.mul(0.5).add(0.5))
+  const { pressure } = meadowWindFrontNodes(card, uniforms, tuning, wind);
+  const gust = pressure.clamp(0, 1)
     .mul(wind.envelope.clamp(0, 2).mul(0.5)).toVarying('meadowCardGust');
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
