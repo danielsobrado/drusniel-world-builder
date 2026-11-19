@@ -72,7 +72,8 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
       // Clumps stand patchier than single blades (the donor's 0.5..1.25).
       const profile = meadowGrowthNodes(uniforms,card,true);
       // The clump is whichever plant grows at its foot (the blades' accents).
-      const height = profile.height.mul(card.strength).mul(meadowPlantNodes(uniforms, card).height);
+      const height = profile.height.mul(card.strength)
+        .mul(meadowPlantNodes(uniforms, card, profile.micro).height);
       const width = uniforms.cardWidth.mul(sqrt(card.strength));
       local.x.assign(positionLocal.x.mul(toward.y).mul(width));
       local.z.assign(positionLocal.x.mul(toward.x.negate()).mul(width));

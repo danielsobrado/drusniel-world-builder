@@ -232,7 +232,7 @@ export function createMeadowBladePosition({
       const profile = meadowGrowthNodes(uniforms,blade);
       const tufts = uniforms.tufts;
       const occupancy = profile.tuft.occupancy.toVar();
-      const plant = meadowPlantNodes(uniforms, blade);
+      const plant = meadowPlantNodes(uniforms, blade, profile.micro);
       const height = profile.height.mul(mix(float(0.62), float(1), growth)).mul(plant.height).toVar();
       // A short plant is a narrow one: width follows the stem's own height, so
       // short growth and worn ground read as slender blades, not broad wedges.

@@ -1685,8 +1685,9 @@ stylizedSurface:
       tileSize: 8
       maxDistance: 50
       growth:
-        # Species community weights: rye-like tall stems, fine fescue, low cover,
-        # and flowering seed heads. All are 0..2, independent of blade count.
+        # Species weights: rye-like stems, fine fescue, low cover and seed heads
+        # (0..2). Microhabitat responses (0..1) follow the same terrain area
+        # masks that already drive dry, lush and worn ground, per biome.
         # Each biome retains its existing accents, colour and shape overrides.
         byTileId:
           0: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
@@ -1699,33 +1700,42 @@ stylizedSurface:
           # a biome reads as several plants of one hue family.
           3: {shortHeight: 0.25, tallHeight: 0.85, width: 0.05, density: 0.62, patchMeters: 8, shape: slender,
               stand: {rye: 1.45, fescue: 0.2, cover: 0.0, seeds: 1.75},
+              microhabitat: {lushLift: 0.28, drySettle: 0.55, shelter: 0.10, accentBias: 0.65},
               accents: [{shape: reed, share: 0.15, height: 1.3, width: 0.8}, {shape: strap, share: 0.12, height: 0.5, width: 1.8}]}
           4: {shortHeight: 0.24, tallHeight: 0.82, width: 0.045, density: 0.92, patchMeters: 17, shape: slender,
               stand: {rye: 1.0, fescue: 1.15, cover: 1.0, seeds: 1.0},
+              microhabitat: {lushLift: 0.58, drySettle: 0.42, shelter: 0.34, accentBias: 0.55},
               accents: [{shape: reed, share: 0.12, height: 1.3, width: 0.8}, {shape: lance, share: 0.14, height: 0.45, width: 2.4}]}
           5: {shortHeight: 0.16, tallHeight: 0.54, width: 0.064, density: 0.36, patchMeters: 13, shape: broadleaf, areaStyle: 0.55,
               stand: {rye: 0, fescue: 0, cover: 0.25, seeds: 0},
+              microhabitat: {lushLift: 0.42, drySettle: 0.24, shelter: 0.70, accentBias: 0.63},
               accents: [{shape: strap, share: 0.24, height: 1.45, width: 1.35}, {shape: lance, share: 0.22, height: 0.9, width: 1.75}]}
           6: {shortHeight: 0.14, tallHeight: 0.44, width: 0.048, density: 0.42, patchMeters: 12, shape: broadleaf, areaStyle: 0.75,
               stand: {rye: 0, fescue: 0, cover: 0.3, seeds: 0},
+              microhabitat: {lushLift: 0.65, drySettle: 0.32, shelter: 0.75, accentBias: 0.66},
               accents: [{shape: lance, share: 0.28, height: 1.0, width: 2.3}, {shape: strap, share: 0.20, height: 1.35, width: 1.4}]}
           # Rainforest floor keeps leafy broad/strap cover at patchy woodland density so scanned
           # calathea, anthurium and ferns stay prominent instead of a meadow turf carpet.
           7: {shortHeight: 0.18, tallHeight: 0.58, width: 0.08, density: 0.54, patchMeters: 9, shape: broadleaf, areaStyle: 0.25,
               stand: {rye: 0, fescue: 0, cover: 0.1, seeds: 0},
+              microhabitat: {lushLift: 0.75, drySettle: 0.16, shelter: 0.92, accentBias: 0.75},
               accents: [{shape: strap, share: 0.28, height: 1.6, width: 1.45}, {shape: lance, share: 0.22, height: 1.0, width: 1.9}]}
           8: {shortHeight: 0.15, tallHeight: 0.48, width: 0.058, density: 0.34, patchMeters: 11, shape: broadleaf, areaStyle: 0.3,
               stand: {rye: 0, fescue: 0, cover: 0.45, seeds: 0},
+              microhabitat: {lushLift: 0.68, drySettle: 0.20, shelter: 0.82, accentBias: 0.72},
               accents: [{shape: strap, share: 0.22, height: 1.4, width: 1.4}, {shape: lance, share: 0.24, height: 0.85, width: 1.8}]}
           9: {shortHeight: 0.12, tallHeight: 0.34, width: 0.044, density: 0.22, patchMeters: 10, shape: slender, areaStyle: 0.65,
               stand: {rye: 0.1, fescue: 1.65, cover: 0.3, seeds: 0.15},
+              microhabitat: {lushLift: 0.35, drySettle: 0.32, shelter: 0.65, accentBias: 0.44},
               accents: [{shape: broadleaf, share: 0.26, height: 0.72, width: 1.55}, {shape: lance, share: 0.22, height: 0.85, width: 2.2}]}
           10: {shortHeight: 0.06, tallHeight: 0.16, width: 0.028, density: 0.28, patchMeters: 7, shape: slender, areaStyle: 0.8,
-               stand: {rye: 0, fescue: 1.4, cover: 0.75, seeds: 0}}
+               stand: {rye: 0, fescue: 1.4, cover: 0.75, seeds: 0},
+               microhabitat: {lushLift: 0.22, drySettle: 0.42, shelter: 0.30, accentBias: 0}}
           11: {shortHeight: 0, tallHeight: 0, width: 0, density: 0, patchMeters: 12, shape: slender}
           # Bog: sedge tussocks on the islands, patchy over moss rather than a field.
           12: {shortHeight: 0.14, tallHeight: 0.6, width: 0.045, density: 0.5, patchMeters: 5, shape: reed, areaStyle: 0.2,
                stand: {rye: 0, fescue: 0, cover: 0, seeds: 0},
+               microhabitat: {lushLift: 0.75, drySettle: 0.17, shelter: 0.80, accentBias: 0.72},
                accents: [{shape: strap, share: 0.2, height: 0.8, width: 1.6}]}
       bladeHeight: 0.64
       bladeWidth: 0.071

@@ -1,9 +1,10 @@
 import { encodeLookTable, MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
 import { meadowStandWeights } from './meadowStandProfiles.js';
+import { meadowMicrohabitatWeights } from './meadowMicrohabitat.js';
 
 export const meadowGrowthSignature = p => JSON.stringify([
-  p.shortHeight,p.tallHeight,p.width,p.density,p.patchMeters,p.shape,p.areaStyle,p.accents,p.stand,
+  p.shortHeight,p.tallHeight,p.width,p.density,p.patchMeters,p.shape,p.areaStyle,p.accents,p.stand,p.microhabitat,
 ]);
 /** Keep unchanged uniform slots stable when a live edit changes profile deduplication. */
 export function reconcileMeadowGrowth(previous,next) {
@@ -44,6 +45,7 @@ field.uniforms.growth.density.array[i].set(...meadowGrowthResponse(p));
     field.uniforms.growth.accents.array[i].set(...accents.high);
     field.uniforms.growth.accents.array[i+16].set(...accents.low);
     field.uniforms.growth.accents.array[i+32].set(...meadowStandWeights(p));
+    field.uniforms.growth.accents.array[i+48].set(...meadowMicrohabitatWeights(p));
   }
   field.uniforms.growth.maxHeight=growth.maxHeight;field.uniforms.growth.maxWidth=growth.maxWidth;
   field.ground.setGrowth(growth,looks);

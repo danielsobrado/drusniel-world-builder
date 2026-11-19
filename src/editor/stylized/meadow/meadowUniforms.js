@@ -4,6 +4,7 @@ import { frameUniform as uniform, frameUniformArray as uniformArray } from '../.
 import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
 import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
 import { meadowStandWeights } from './meadowStandProfiles.js';
+import { meadowMicrohabitatWeights } from './meadowMicrohabitat.js';
 
 
 /**
@@ -26,10 +27,11 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       density: uniformArray(Array.from({length:16},(_,i)=>new THREE.Vector4(...meadowGrowthResponse(growth.profiles[i] ?? growth.profiles[0]))),'vec4'),
       // How much of the area field each biome wears: a rainforest stays lush.
       areaStyle: uniformArray(Array.from({length:16},(_,i)=>(growth.profiles[i] ?? growth.profiles[0]).areaStyle),'float'),
-      // Shared uniform buffer: accent-high, accent-low, then stand-species rows.
-      // Packing these together avoids exceeding WebGPU's uniform-buffer limit.
-      accents: uniformArray(Array.from({length:48},(_,i)=>{
+      // Shared buffer: accent-high, accent-low, species, microhabitat.
+      // Packing into one array keeps the WebGPU uniform-binding count unchanged.
+      accents: uniformArray(Array.from({length:64},(_,i)=>{
         const profile=growth.profiles[i%16] ?? growth.profiles[0];
+        if(i>=48)return new THREE.Vector4(...meadowMicrohabitatWeights(profile));
         if(i>=32)return new THREE.Vector4(...meadowStandWeights(profile));
         return new THREE.Vector4(...meadowAccentRows(profile)[i<16?'high':'low']);
       }),'vec4'),

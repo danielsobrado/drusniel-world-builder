@@ -31,7 +31,7 @@ test('all thirteen shipped growth rows match their exact specification and custo
   9:{shortHeight:.12,tallHeight:.34,width:.044,density:.22,patchMeters:10,areaStyle:.65},
  };
  // Accent plants ride on a row without changing its stand (covered below).
- const plain=({accents,stand,...rest})=>rest;
+ const plain=({accents,stand,microhabitat,...rest})=>rest;
  for(let id=0;id<13;id++) {
   assert.deepEqual(MEADOW_GROWTH_DEFAULTS[id],record(rows[id]));
   assert.deepEqual(plain(g.profiles[g.table[id]]),{...record(rows[id]),...configured[id]});

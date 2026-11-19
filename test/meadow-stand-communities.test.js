@@ -31,7 +31,7 @@ test('biome stands keep distinct plant communities without extra geometry profil
 test('stand weights use the existing packed accent uniform buffer', () => {
   const settings = resolveMeadowGrassConfig(meadow);
   const uniforms = createMeadowUniforms(settings);
-  assert.equal(uniforms.growth.accents.array.length, 48, 'one array, no extra uniform buffer');
+  assert.equal(uniforms.growth.accents.array.length, 64, 'one packed array, no extra uniform buffer');
   for (const id of [3, 4, 5, 7, 9, 10, 12]) {
     const index = settings.growth.table[id];
     const row = uniforms.growth.accents.array[index + 32];
