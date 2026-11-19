@@ -13,6 +13,11 @@ from aaa_natural_forms import (
     splintered_fracture_cap,
 )
 from understory_common import arched_card, finish_mesh, leaf_spray_fan, mushroom_dome, rock_chunk, tube
+from silhouette_variants import (
+    build_savanna_thorn_scrub,
+    build_taiga_krummholz_juniper,
+    build_wetland_sedge_tussock,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -20,29 +25,8 @@ from understory_common import arched_card, finish_mesh, leaf_spray_fan, mushroom
 # ---------------------------------------------------------------------------
 
 def build_coastal_dune_oats(mat):
-    """Wind-bent golden sea-oats & marram dune grass on a sand hummock with bleached driftwood."""
-    rng = random.Random(301)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
-
-    # Half-buried sun-bleached gnarled driftwood log
-    drift_pts = [Vector((-0.52, -0.15, -0.02)), Vector((-0.18, -0.02, 0.12)), Vector((0.18, 0.04, 0.14)), Vector((0.54, 0.17, 0.02))]
-    organic_trunk_loft(bm, uv, drift_pts, [0.10, 0.14, 0.11, 0.06], rng, sides=8, bark_ridges=6, ridge_depth=0.14, cap_end=False, u_range=(0.04, 0.42), v_range=(0.05, 0.92))
-    splintered_fracture_cap(bm, uv, drift_pts[-1], (drift_pts[-1] - drift_pts[-2]).normalized(), 0.065, rng, (0.04, 0.42), (0.05, 0.92), (0.04, 0.42), (0.05, 0.92), splinters=5)
-
-    # 13 wind-bent sea-oats & marram grass cards (arching gracefully along +X sea breeze)
-    for k in range(13):
-        yaw = k / 13 * 2 * math.pi + rng.uniform(-0.20, 0.20)
-        r = rng.uniform(0.05, 0.34)
-        base = Vector((math.cos(yaw) * r, math.sin(yaw) * r, -0.015))
-        out = Vector((math.cos(yaw) * 0.62 + 0.52, math.sin(yaw) * 0.62, 0)).normalized()
-        side = Vector((-out.y, out.x, 0))
-        h = rng.uniform(0.66, 1.10)
-        reach = rng.uniform(0.45, 0.80)
-        p1 = base + out * (reach * 0.45) + Vector((0, 0, h * 0.68))
-        p2 = base + out * reach + Vector((0, 0, h * 0.88))
-        arched_card(bm, uv, base, p1, p2, 0.18, 0.34, 0.28, side, u_range=(0.45, 1.0), v_range=(0.02, 0.98))
-    return finish_mesh('coastal-dune-oats-01', bm, mat)
+    """Wetland sedge & sea-oats tussock with common rooted base and multi-height arching/drooping blades."""
+    return build_wetland_sedge_tussock(mat, name='coastal-dune-oats-01', seed=301, max_triangles=16050)
 
 
 def build_coastal_tidepool_coral(mat):
@@ -558,39 +542,8 @@ def build_bush_arid_ocotillo(mat):
 
 
 def build_bush_savanna_thorn(mat):
-    """Crooked multi-stemmed flat-topped Savanna thorn scrub (Vachellia/Acacia shrub) with open basal branches."""
-    rng = random.Random(322)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
-
-    stems = (
-        (0.15, 0.84, 0.44, 0.96, 0.38),
-        (1.42, 0.92, 0.54, 1.12, 0.42),
-        (2.70, 0.76, 0.38, 0.82, 0.35),
-        (3.92, 0.88, 0.48, 1.02, 0.40),
-        (5.15, 0.70, 0.34, 0.74, 0.32),
-    )
-    for idx, (yaw, r_xy, z_f, z_t, f_sp) in enumerate(stems):
-        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        p0 = out * 0.08 + Vector((0.0, 0.0, -0.028))
-        p1 = out * (r_xy * 0.42) + side * rng.uniform(-0.10, 0.10) + Vector((0.0, 0.0, z_f))
-        p2 = out * r_xy + side * rng.uniform(-0.12, 0.12) + Vector((0.0, 0.0, z_t))
-        organic_trunk_loft(bm, uv, [p0, p1, p2], [0.058, 0.032, 0.015], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
-
-        s_sign = 1.0 if idx % 2 == 0 else -1.0
-        fork_end = p1 + out * (f_sp * 0.80) + side * (s_sign * f_sp) + Vector((0.0, 0.0, z_t * 0.38))
-        tube(bm, uv, [p1, fork_end], [0.025, 0.012], sides=4, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
-        fork2 = p1.lerp(p2, 0.45) + side * (-s_sign * f_sp * 0.72) + out * 0.14 + Vector((0.0, 0.0, 0.16))
-        tube(bm, uv, [p1.lerp(p2, 0.45), fork2], [0.020, 0.010], sides=4, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
-
-        flat_dir = Vector((p2.x - p1.x, p2.y - p1.y, 0.14)).normalized()
-        _add_branch_spray_pair(bm, uv, p2 - flat_dir * 0.14, flat_dir, 0.82, 0.88, arch=0.04, roll_bias=0.14)
-        f_dir = Vector((fork_end.x - p1.x, fork_end.y - p1.y, 0.12)).normalized()
-        _add_branch_spray_pair(bm, uv, fork_end - f_dir * 0.10, f_dir, 0.72, 0.78, arch=0.04, roll_bias=-0.18)
-        f2_dir = Vector((fork2.x - p1.x, fork2.y - p1.y, 0.10)).normalized()
-        _add_branch_spray_pair(bm, uv, fork2 - f2_dir * 0.08, f2_dir, 0.64, 0.70, arch=0.03, roll_bias=0.22)
-    return finish_mesh('bush-savanna-thorn-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
+    """Crooked multi-stemmed Savanna thorn scrub (Vachellia/Acacia shrub) with uneven branching and open center."""
+    return build_savanna_thorn_scrub(mat, name='bush-savanna-thorn-01', seed=322, low_budget=False, max_triangles=16050)
 
 
 def build_bush_meadow_gorse(mat):
@@ -625,38 +578,8 @@ def build_bush_meadow_gorse(mat):
 
 
 def build_bush_boreal_juniper(mat):
-    """Low wind-swept prostrate Boreal Krummholz Juniper with creeping twisted boughs and upturned conifer plumes."""
-    rng = random.Random(324)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
-
-    root_origin = Vector((-0.18, 0.06, -0.028))
-    boughs = (
-        (0.12, 0.96, 0.20, 0.58),
-        (0.95, 0.84, 0.24, 0.68),
-        (2.10, 0.72, 0.16, 0.42),
-        (3.45, 0.78, 0.14, 0.36),
-        (4.85, 0.88, 0.22, 0.54),
-        (5.68, 0.68, 0.15, 0.40),
-    )
-    for idx, (yaw, r_xy, z_elbow, z_tip) in enumerate(boughs):
-        out = Vector((math.cos(yaw) + 0.22, math.sin(yaw), 0.0)).normalized()
-        side = Vector((-out.y, out.x, 0.0))
-        p0 = root_origin + out * 0.06
-        p1 = root_origin + out * (r_xy * 0.52) + side * rng.uniform(-0.12, 0.12) + Vector((0.0, 0.0, z_elbow))
-        p2 = root_origin + out * r_xy + Vector((0.0, 0.0, z_tip))
-        organic_trunk_loft(bm, uv, [p0, p1, p2], [0.062, 0.036, 0.016], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
-
-        fork = p1 + out * 0.28 + side * (0.32 if idx % 2 == 0 else -0.32) + Vector((0.0, 0.0, 0.18))
-        tube(bm, uv, [p1, fork], [0.026, 0.013], sides=4, u_range=(0.02, 0.27), v_range=(0.10, 0.90), cap_end=False)
-
-        mid_dir = Vector((out.x * 0.92 + side.x * (-0.28 if idx % 2 == 0 else 0.28), out.y * 0.92 + side.y * (-0.28 if idx % 2 == 0 else 0.28), 0.34)).normalized()
-        _add_branch_spray_pair(bm, uv, p1.lerp(p2, 0.28), mid_dir, 0.54, 0.58, arch=0.14, roll_bias=-0.22)
-        tip_dir = Vector((out.x * 0.85, out.y * 0.85, 0.48)).normalized()
-        _add_branch_spray_pair(bm, uv, p2 - out * 0.12, tip_dir, 0.60, 0.64, arch=0.18, roll_bias=0.25)
-        f_dir = Vector((fork.x - p1.x, fork.y - p1.y, 0.36)).normalized()
-        _add_branch_spray_pair(bm, uv, fork - f_dir * 0.10, f_dir, 0.52, 0.56, arch=0.15, roll_bias=-0.35)
-    return finish_mesh('bush-boreal-juniper-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
+    """Tiered asymmetric Boreal Krummholz Juniper with varied heights so individual shrubs read over moss."""
+    return build_taiga_krummholz_juniper(mat, name='bush-boreal-juniper-01', seed=324, max_triangles=16050)
 
 
 def build_bush_tropical_hibiscus(mat):

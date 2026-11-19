@@ -821,8 +821,9 @@ def build_taiga_berry_moss(mat):
         out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
         base = Vector((math.cos(yaw) * r_base - 0.01, math.sin(yaw) * r_base - 0.02, 0.035))
-        reach = rng.uniform(0.18, 0.34)
-        height = rng.uniform(0.20, 0.38)
+        reach = rng.uniform(0.16, 0.34)
+        # Staggered tuft heights (low creepers + mid + taller fruiting canes) for varied taiga silhouette
+        height = rng.uniform(0.42, 0.56) if k % 4 == 0 else (rng.uniform(0.28, 0.40) if k % 2 == 0 else rng.uniform(0.16, 0.26))
         sway = rng.uniform(-0.06, 0.06)
         p1 = base + out * (reach * 0.48) + side * sway + Vector((0.0, 0.0, height * 0.62))
         p2 = base + out * reach + side * (sway * 1.4) + Vector((0.0, 0.0, height))
@@ -914,33 +915,9 @@ def build_tundra_cushion(mat):
 
 
 def build_tundra_dwarf_willow(mat):
-    """Windswept prostrate arctic dwarf willow & crimson bearberry creeping boughs with open sprig clusters."""
-    rng = random.Random(219)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
-
-    boughs = (
-        (0.18, 0.84, 0.09, 0.22),
-        (1.02, 0.72, 0.12, 0.26),
-        (2.25, 0.62, 0.08, 0.18),
-        (3.60, 0.66, 0.07, 0.16),
-        (5.05, 0.78, 0.11, 0.24),
-    )
-    root = Vector((-0.14, 0.02, -0.02))
-    for idx, (yaw, r_xy, z_elbow, z_tip) in enumerate(boughs):
-        out = Vector((math.cos(yaw) + 0.28, math.sin(yaw), 0.0)).normalized()
-        side = Vector((-out.y, out.x, 0.0))
-        p0 = root + out * 0.04
-        p1 = root + out * (r_xy * 0.50) + side * rng.uniform(-0.08, 0.08) + Vector((0.0, 0.0, z_elbow))
-        p2 = root + out * r_xy + Vector((0.0, 0.0, z_tip))
-        organic_trunk_loft(bm, uv, [p0, p1, p2], [0.038, 0.022, 0.011], rng, sides=6, bark_ridges=4, ridge_depth=0.12, cap_end=False, u_range=(0.47, 0.53), v_range=(0.05, 0.80))
-
-        twig = p1 + out * 0.22 + side * (0.20 if idx % 2 == 0 else -0.20) + Vector((0.0, 0.0, 0.06))
-        tube(bm, uv, [p1, twig], [0.018, 0.009], sides=4, u_range=(0.47, 0.53), v_range=(0.10, 0.75), cap_end=False)
-
-        leaf_spray_fan(bm, uv, p2 - out * 0.06, Vector((out.x, out.y, 0.28)).normalized(), 0.42, 0.44, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=0.2 if idx % 2 else -0.2, arch=0.06)
-        leaf_spray_fan(bm, uv, twig - out * 0.04, Vector((twig.x - p1.x, twig.y - p1.y, 0.18)).normalized(), 0.36, 0.38, u_range=(0.0, 1.0), v_range=(0.0, 0.98), roll=-0.4 if idx % 2 else 0.4, arch=0.04)
-    return finish_mesh('tundra-dwarf-willow-01', bm, mat)
+    """Varied-height boreal dwarf willow & bearberry shrub that reads clearly over moss and duff."""
+    from silhouette_variants import build_taiga_dwarf_willow_shrub
+    return build_taiga_dwarf_willow_shrub(mat, name='tundra-dwarf-willow-01', seed=219, max_triangles=16050)
 
 
 # ---------------------------------------------------------------------------
