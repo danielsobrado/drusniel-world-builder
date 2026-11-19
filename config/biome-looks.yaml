@@ -106,7 +106,7 @@ biomeLooks:
     3:
       name: savanna
       canopy: '#aeae5a'
-      soil: '#a8865a'
+      soil: '#9b744b'
       rock: { tint: '#e0c9a6', tone: 0.9, moss: 0 }
       # Granite kopjes standing out of the grass.
       formations: 0.25

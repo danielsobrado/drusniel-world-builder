@@ -1748,31 +1748,31 @@ stylizedSurface:
       palette:
         # The donor's '#5f8f34' was the most saturated colour in the frame: the
         # 2026-11-10 forest capture's ground measured saturation 0.68 (look bible: 0.55).
-        base: '#62883c'
-        tip: '#c4d27a'
+        base: '#587b3b'
+        tip: '#acbe71'
         brightness: 1
         # Biomes the donor's single meadow never had: its lime field is the base,
         # and these lean it drier, lusher or colder in the same dark-root/pale-tip
         # style. Unlisted biomes (grassland, deciduous, tropical seasonal — the
-        # spawn) wear the donor's own. One uniform-array entry per distinct pair.
+        # spawn) wear the default pair. One uniform-array entry per distinct pair.
         byTileId:
           # lush 0: the green patch and hollow tints turned the tawny root olive.
-          3: { base: '#776336', tip: '#dcc890', lush: 0 }   # savanna: sun-bleached straw
+          3: { base: '#755b35', tip: '#d1b77f', lush: 0 }   # savanna: sun-bleached straw
           5: { base: '#4d6839', tip: '#9ab477' }   # open woodland: shared forest pigment
           6: { base: '#4d6839', tip: '#9ab477' }
           7: { base: '#3d6635', tip: '#86aa60' }   # humid broadleaf floor
           8: { base: '#3d5f3c', tip: '#829b68' }   # cool mossy floor
           10: { base: '#666746', tip: '#a3a07a' }  # sparse tundra
-          9: { base: '#34563a', tip: '#8fa77a' }   # taiga: cool sage
-          12: { base: '#22351c', tip: '#6b7a3c' }  # wetland: dark sedge, olive tips
+          9: { base: '#34563a', tip: '#788e68' }   # taiga: cool sage
+          12: { base: '#2b3d27', tip: '#849652' }  # wetland: sedge with readable olive tips in shade
       # grass-test's final visual-refinement layer, converted at 2.8 units/m.
       # Keep stand density and streaming distances: depth comes from pigment.
       appearance:
         # Sparse roots approach the substrate value; dense stands keep depth
         # through persistent coverage-weighted ground shading. Both near and
         # far substrate use groundOcclusion, so this adds no distance ring.
-        rootBrightness: 1
-        canopyDepth: 0.35
+        rootBrightness: 0.83
+        canopyDepth: 0.26
         gradientPower: 1.4
         groundTipMix: 0.08
         groundOcclusion: 0.14
@@ -1865,12 +1865,12 @@ stylizedSurface:
           32: { floor: [grit, grit] }
           # Savanna earth is dry grit under straw: the cracked-mud scan read as oversized plates in the grass.
           # The mossy scan under it read as green turf (2026-11-06 review).
-          3: { litter: '#b39a5f', litterAmount: 0.7, moss: 0.0, soil: 0.6, streaks: 0.7, floor: [grit, grit] }   # savanna: straw, warm earth
+          3: { litter: '#9f7c4b', litterAmount: 0.68, moss: 0.0, soil: 0.6, streaks: 0.55, floor: [grit, grit] }   # savanna: straw, warm earth
           5: { litter: '#78613f', litterAmount: 0.70, moss: 0.25, soil: 0.3, streaks: 0.28, floor: [litter, mossy] }
           6: { litter: '#8a663c', litterAmount: 0.78, moss: 0.35, soil: 0.3, streaks: 0.38, floor: [litter, mossy] }
           7: { litter: '#5e4c31', litterAmount: 0.55, moss: 0.50, soil: 0.2, streaks: 0.32, floor: [litter, mossy] }   # tropical rainforest: leaf litter
           8: { litter: '#4e422c', litterAmount: 0.52, moss: 0.78, soil: 0.18, streaks: 0.30, floor: [mossy, litter] }    # temperate rainforest
-          9: { litter: '#6b543a', litterAmount: 0.78, moss: 0.68, soil: 0.32, streaks: 0.72, floor: [mossy, grit] }  # taiga: needle duff, moss
+          9: { litter: '#6b543a', litterAmount: 0.78, moss: 0.68, soil: 0.32, streaks: 0.38, floor: [mossy, grit] }  # taiga: needle duff, moss
           10: { litter: '#8f8d72', litterAmount: 0.45, moss: 0.3, soil: 0.5, streaks: 0.25, floor: [mossy, grit] } # tundra: lichen, mineral soil
           12: { litter: '#3f4429', litterAmount: 0.45, moss: 0.85, soil: 0.45, streaks: 0.3, floor: [mossy, grit] } # wetland: moss, peat, dead sedge
       # Which silhouette each biome's grass wears (meadow/meadowGrassShapes.js).
