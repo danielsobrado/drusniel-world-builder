@@ -8,7 +8,7 @@ function neighbor(plan, roofOnly = false, prior = null) {
     roofReplaced: Boolean(plan.roofReplaced || prior?.roofReplaced), roofOnly };
 }
 
-const hasProjection = (plan) => plan.features?.some((f) => f.balcony || f.solidSupport);
+const hasProjection = (plan) => plan.features?.some((f) => f.balcony || f.solidSupport || f.chimney);
 
 /** Projected envelopes participate in the same spatial contact layer as authored volumes. */
 export function resolveShapeFeatureContacts(plans) {

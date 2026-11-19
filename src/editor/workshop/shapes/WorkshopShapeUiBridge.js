@@ -26,6 +26,18 @@ export class WorkshopShapeUiBridge {
           presets: { ...current.materialLibrary.presets, ...document.materialLibrary?.presets } } } }, `${group} design chosen.`);
         return { before, after: this.captureLook(keys) };
       },
+      onGetMaterials: () => ui.materialController?.toDocument() ?? null,
+      onSetMaterialOverrides: (overrides, message) => {
+        const controller = ui.materialController;
+        if (!controller) return;
+        const next = controller.toDocument();
+        for (const [regionId, presetId] of Object.entries(overrides)) {
+          if (presetId) next.materialAreaOverrides[regionId] = presetId;
+          else delete next.materialAreaOverrides[regionId];
+        }
+        controller.commit(next, message);
+      },
+      onOpenMaterialMode: () => ui.toggleMaterialMode(true),
     });
     // Swap the look only if nobody changed materials or recipe bases since; otherwise keep the edits.
     this.editor.session.onLook = (look, expected) => {

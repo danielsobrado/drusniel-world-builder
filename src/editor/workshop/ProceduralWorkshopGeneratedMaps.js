@@ -1,11 +1,16 @@
 import * as THREE from 'three/webgpu';
 import { getSurfaceTextures } from '../assets/proceduralSurfaces.js';
 import { HOUSE_SURFACE_ALIASES } from '../assets/godsEnd/houseSurfaces.js';
+import { applyWorkshopPbrAssetMaps } from './ProceduralWorkshopPbrLoader.js';
 
 const catalogKinds = new Map(Object.entries(HOUSE_SURFACE_ALIASES).map(([kind, surface]) => [surface, kind]));
 
-/** Apply the same generated maps in live parts and hover previews. */
+/** Apply the same generated or library PBR maps in live parts and hover previews. */
 export function applyWorkshopGeneratedMaps(material, preset) {
+  if (preset?.pbrAsset) {
+    applyWorkshopPbrAssetMaps(material, preset);
+    return;
+  }
   if (!preset.proceduralSurface) return;
   const kind = catalogKinds.get(preset.proceduralSurface);
   if (!kind) throw new Error(`Unknown Gods End surface: ${preset.proceduralSurface}.`);

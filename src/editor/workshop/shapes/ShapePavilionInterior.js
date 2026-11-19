@@ -4,14 +4,15 @@ import { shapeRandom } from './ShapeMesh.js';
 import { clipShapePolygon } from './ShapePolygonClip.js';
 import { ShapeUtils, Vector2 } from 'three/webgpu';
 import polygonClipping from 'polygon-clipping';
+import { buildShapeForgeInterior } from './ShapeForgeInterior.js';
 
 const FLAG = 0.56;
 const JOINT = 0.022;
 const BENCH = { height: 0.44, depth: 0.38, seat: 0.07, nosing: 0.05 };
 
-/** A building entered through open archways is seen inside: it gets paving and a wall bench. */
+/** A building entered through open archways is seen inside: it gets paving, bench, or forge. */
 export function shapeHasOpenInterior(plan) {
-  return Boolean(plan.interior?.paving || plan.interior?.bench);
+  return Boolean(plan.interior?.paving || plan.interior?.bench || plan.interior?.forge);
 }
 
 function stoneTone(recipe, plan, domain, key) {
@@ -21,6 +22,7 @@ function stoneTone(recipe, plan, domain, key) {
 }
 
 const BEDDING = 0.05;
+const floorBedding = (primitive) => ((primitive.terrace ?? 0) > 0.05 ? 0.13 : BEDDING);
 
 function signedArea(polygon) {
   return polygon.reduce((sum, a, i) => {
@@ -61,7 +63,7 @@ function fan(mesh, points, y, tone) {
 
 /** Staggered flags clipped to the room, set in a darker mortar bedding that shows in the joints. */
 function buildFlagstones(plan, mesh, recipe, room) {
-  const p = plan.primitive, angle = (p.rotation * Math.PI) / 180, base = p.elevation + BEDDING;
+  const p = plan.primitive, angle = (p.rotation * Math.PI) / 180, base = p.elevation + floorBedding(p);
   const cos = Math.cos(angle), sin = Math.sin(angle), convex = isConvex(room);
   const toWorld = (u, v) => [p.position[0] + u * cos - v * sin, p.position[1] + u * sin + v * cos];
   // Far away the bedding alone reads as paving, so it takes the flag tone instead of the joint tone.
@@ -96,7 +98,8 @@ function buildWallBench(plan, meshes, recipe, surface, distances) {
     const ends = { start: !wallSolidBands(surface, u0 - 0.05, u0, 0, BENCH.height, false).length,
       end: !wallSolidBands(surface, u1, u1 + 0.05, 0, BENCH.height, false).length };
     // Recessed base, then a seat slab that overhangs it.
-    addWallPatch(meshes.trim, surface, u0, u1, BEDDING, BENCH.height - BENCH.seat, inner - BENCH.depth + BENCH.nosing,
+    const bedding = floorBedding(p);
+    addWallPatch(meshes.trim, surface, u0, u1, bedding, BENCH.height - BENCH.seat, inner - BENCH.depth + BENCH.nosing,
       -(BENCH.depth - BENCH.nosing), [0.74, 0.72, 0.68], { back: false, ...ends });
     addWallPatch(meshes.trim, surface, u0, u1, BENCH.height - BENCH.seat, BENCH.height, inner - BENCH.depth,
       -BENCH.depth, stoneTone(recipe, plan, 'bench', Math.floor(u0 / 0.9)), { back: false, ...ends });
@@ -109,4 +112,5 @@ export function buildShapePavilionInterior(plan, meshes, recipe, surface, distan
   const room = plan.interior.room;
   if (plan.interior.paving) buildFlagstones(plan, meshes.deck, recipe, room);
   if (plan.interior.bench) buildWallBench(plan, meshes, recipe, surface, distances);
+  if (plan.interior.forge) buildShapeForgeInterior(plan, meshes, recipe, room);
 }

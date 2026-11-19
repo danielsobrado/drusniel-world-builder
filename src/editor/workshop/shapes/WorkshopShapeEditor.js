@@ -6,13 +6,17 @@ import { syncShapeGateControls, applyShapeGateAction } from './ShapeGateControls
 import { shapeFieldLimits, shapeFieldEditable } from './ShapeEditConstraints.js';
 import { syncShapeFeatureControls, applyShapeFeatureAction, applyShapeFeatureInput } from './ShapeFeatureControls.js';
 import { syncShapeDetailControls, applyShapeDetailAction, applyShapeDetailInput } from './ShapeDetailControls.js';
+import { syncShapePbrControls, applyShapePbrAction, applyShapePbrInput } from './ShapePbrControls.js';
 import { WorkshopShapeInspector } from './WorkshopShapeInspector.js';
 
 export class WorkshopShapeEditor {
-  constructor({ form, onChange, onStatus, onMaterials }) {
+  constructor({ form, onChange, onStatus, onMaterials, onGetMaterials, onSetMaterialOverrides, onOpenMaterialMode }) {
     this.form = form;
     this.onChange = onChange;
     this.onMaterials = onMaterials;
+    this.onGetMaterials = onGetMaterials;
+    this.onSetMaterialOverrides = onSetMaterialOverrides;
+    this.onOpenMaterialMode = onOpenMaterialMode;
     this.onStatus = onStatus;
     this.session = new WorkshopShapeSession();
     this.resolvedPlans = new Map();
@@ -59,7 +63,7 @@ export class WorkshopShapeEditor {
       return;
     }
     try {
-      if (applyShapeFeatureInput(this, event, preview) || applyShapeDetailInput(this, event, preview)) return;
+      if (applyShapePbrInput(this, event, preview) || applyShapeFeatureInput(this, event, preview) || applyShapeDetailInput(this, event, preview)) return;
     } catch (error) {
       this.session.cancel(); this.sync(); this.onStatus?.(error.message, true); return;
     }
@@ -122,6 +126,9 @@ export class WorkshopShapeEditor {
       this.session.commit();
       if (action === 'undo') this.session.undo();
       else if (action === 'redo') this.session.redo();
+      else if (applyShapePbrAction(this, action)) {
+        /* PBR material action applied. */
+      }
       else if (applyShapeDetailAction(this, action)) {
         /* Generated output override applied. */
       }
@@ -134,9 +141,10 @@ export class WorkshopShapeEditor {
         if (this.session.primitives.length > 1) this.session.remove(this.selectedId);
       } else if (
         action.startsWith('add-') &&
-        ['volume', 'wall', 'path'].includes(action.slice(4))
+        ['tower', 'volume', 'wall', 'path'].includes(action.slice(4))
       ) {
         const kind = {
+          'add-tower': 'tower',
           'add-volume': 'curved-volume',
           'add-wall': 'curved-wall',
           'add-path': 'traversal',
@@ -222,15 +230,20 @@ export class WorkshopShapeEditor {
         [group, key] = field.split('-'),
         crown = p.crown?.style;
       // Before the undefined skip: walls have no stages, so their setback labels must still be hidden.
-      if (['base', 'crown', 'stage'].includes(group))
-        element.closest('label').hidden = group === 'stage' ? !volume : key !== 'style' && (group === 'base'
-          ? p.base?.style === 'none'
-          : crown === 'none' || (key === 'sides' && volume) ||
-            (['projection', 'corbelSpacing', 'corbelDrop', 'arcade', 'machicolation'].includes(key) && crown !== 'corbelled'));
+      if (['base', 'crown', 'stage', 'ruin'].includes(group))
+        element.closest('label').hidden = group === 'stage' ? !volume
+          : group === 'ruin' ? (key !== 'amount' && !(p.ruin?.amount > 0))
+            : key !== 'style' && (group === 'base'
+              ? p.base?.style === 'none'
+              : crown === 'none' || (key === 'sides' && volume) ||
+                (['projection', 'corbelSpacing', 'corbelDrop', 'arcade', 'machicolation'].includes(key) && crown !== 'corbelled'));
       if (value === undefined) continue;
+      if (field === 'sides') {
+        element.closest('label').hidden = p.footprint?.family !== 'polygon';
+      }
       if (field === 'radius') {
         element.max = Math.min(p.footprint.width, p.footprint.depth) / 2;
-        element.closest('label').hidden = p.footprint.family !== 'rounded';
+        element.closest('label').hidden = !['rounded', 'polygon'].includes(p.footprint.family);
       }
       const limits = shapeFieldLimits(p, field);
       if (limits && ['range', 'number'].includes(element.type)) [element.min, element.max] = limits.map(String);
@@ -239,7 +252,7 @@ export class WorkshopShapeEditor {
       if (element.type === 'checkbox') element.checked = value === true;
       else if (!(element.type === 'number' && element === document.activeElement)) element.value = String(value);
       const output = this.root.querySelector(`[data-shape-output="${field}"]`);
-      if (output) output.value = Number(value).toFixed(2);
+      if (output) output.value = field === 'sides' ? String(Math.round(Number(value))) : Number(value).toFixed(2);
     }
     this.root.querySelector('[data-shape-action="undo"]').disabled = !this.session.history.canUndo;
     this.root.querySelector('[data-shape-action="redo"]').disabled = !this.session.history.canRedo;
@@ -247,6 +260,7 @@ export class WorkshopShapeEditor {
     this.root.querySelector('[data-shape-action="remove-opening"]').disabled = !this.openingId;
     syncShapeGateControls(this);
     syncShapeFeatureControls(this);
+    syncShapePbrControls(this);
     syncShapeDetailControls(this);
     this.inspector.sync();
   }

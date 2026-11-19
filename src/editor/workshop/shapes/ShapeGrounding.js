@@ -1,5 +1,5 @@
 import { createShapeWallSurface, addWallPatch } from './ShapeWallSurface.js';
-import { pointInShape } from './ShapeEnvelope.js';
+import { pointInShape, offsetShapePolygon } from './ShapeEnvelope.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { clipShapeMeshSet } from './ShapeRoofOcclusion.js';
 import polygonClipping from 'polygon-clipping';
@@ -25,6 +25,10 @@ export function resolveShapeGroundings(plans) {
     if (!connections.has(hostId)) connections.set(hostId, []);
     connections.get(hostId).push(path);
   }
+  const volumeCuts = plans
+    .filter((other) => other.primitive.kind === 'curved-volume' && other.primitive.elevation < 0.2)
+    .map((other) => ({ id: other.id, boundary: other.boundary }));
+  const compoundTerraces = [];
   return plans.map(plan => {
     const resolved = resolveShapeGrounding(plan), prior = [];
     const porchCuts = (plan.features ?? []).filter(f => f.openSides).map(f => f.child.boundary);
@@ -32,10 +36,14 @@ export function resolveShapeGroundings(plans) {
       const outline = paving.points.map(([x, , z]) => [x, z]);
       const paths = (connections.get(plan.id) ?? []).filter(path => [path.route[0], path.route.at(-1)]
         .some(node => node.position[1] < 0.2 && pointInShape([node.position[0], node.position[2]], outline)));
-      const cuts = [...porchCuts, ...paths.flatMap(groundPathStrips), ...prior];
+      const neighborShells = paving.role === 'terrace'
+        ? volumeCuts.map((v) => v.boundary)
+        : [];
+      const cuts = [...porchCuts, ...neighborShells, ...compoundTerraces, ...paths.flatMap(groundPathStrips), ...prior];
       paving.polygons = cuts.length ? polygonClipping.difference([outline], ...cuts.map(c => [c])) : [[outline]];
       paving.connectedTo = paths.map(path => path.id).sort();
       prior.push(outline);
+      if (paving.role === 'terrace') compoundTerraces.push(outline);
     }
     return resolved;
   });
@@ -47,6 +55,21 @@ export function resolveShapeGrounding(plan) {
   else {
     masks.push(p.kind === 'curved-volume' ? { kind: 'polygon', points: plan.boundary } :
       { kind: 'path', points: plan.boundary, width: p.thickness + 0.3 });
+    if (p.kind === 'curved-volume' && (p.terrace ?? 0) > 0.05 && p.elevation < 0.2) {
+      const apron = offsetShapePolygon(plan.boundary, p.thickness / 2 + p.terrace);
+      const key = `ground:${p.id}:terrace`;
+      if (!p.suppressed.includes(key)) {
+        paving.push({
+          id: key,
+          derivationKey: key,
+          role: 'terrace',
+          curbHeight: 0.14,
+          points: apron.map(([x, z]) => [x, p.elevation, z]),
+          provenance: { source: 'auto', ruleId: 'foundation-terrace', generatorVersion: 1, sourceEntityIds: [p.id], derivationKey: key },
+        });
+      }
+      masks.push({ kind: 'polygon', points: apron });
+    }
     const surface = createShapeWallSurface(plan);
     for (const o of plan.openings) {
       if (['window', 'slit'].includes(o.role) || p.elevation + o.bottom > 0.2) continue;
@@ -88,7 +111,7 @@ export function buildShapeGrounding(plan, meshes, recipe) {
       addWallPatch(meshes.trim, surface, u0, u1, -0.1, 0.09, p.thickness / 2 + 0.075, 0.12, [0.78, 0.79, 0.73], { back: false, start: false, end: false });
       const a = surface.point(u0, 0.11), b = surface.point(u0, 0.11, 0.1);
       const shade = Math.max(0, (b[0] - a[0]) * 0.6 - (b[2] - a[2]) * 0.8) / 0.1;
-      if (recipe.detail < 2 || shapeRandom(recipe.seed, p.id, 'foundation-moss', i) > p.age * (0.15 + shade * 0.7)) continue;
+      if (recipe.detail < 2 || p.terrace > 0.05 || shapeRandom(recipe.seed, p.id, 'foundation-moss', i) > p.age * (0.15 + shade * 0.7)) continue;
       const points = [surface.point(u0, 0.02, p.thickness / 2 + 0.082), surface.point(u1, 0.025, p.thickness / 2 + 0.082),
         surface.point(u1, 0.04 + p.age * 0.06, p.thickness / 2 + 0.086), surface.point(u0, 0.06 + p.age * 0.04, p.thickness / 2 + 0.086)];
       meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.14, 0.22, 0.06]);

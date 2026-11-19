@@ -9,12 +9,23 @@ import { buildShapeButtress } from './ShapeButtress.js';
 import { buildShapeCrown } from './ShapeCrownBuilder.js';
 import { buildShapeTurretSupport } from './ShapeTurret.js';
 import { shapeStoneTint } from './ShapeMasonryCourses.js';
+import { buildShapeFeatureChimney } from './ShapeChimneyBuilder.js';
+import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 
 const tint = [0.9, 0.9, 0.9];
 export function buildShapeFeatures(plan, meshes, recipe) {
+  const roofSurface = plan.primitive.roof && !plan.roofReplaced && plan.features?.some((f) => f.chimney)
+    ? createShapeRoofSurface(plan) : null;
   for (const feature of plan.features ?? []) {
     if (feature.balcony) { buildShapeBalcony(plan, feature, meshes, recipe); continue; }
-    if (feature.solidSupport) { buildShapeButtress(feature, clipShapeMeshSet(meshes, plan).trim, shapeStoneTint(recipe, plan).map((v) => v * 0.9)); continue; }
+    if (feature.solidSupport) {
+      buildShapeButtress(feature, clipShapeMeshSet(meshes, plan).trim, shapeStoneTint(recipe, plan).map((v) => v * 0.9), recipe.detail, recipe.seed, plan.id);
+      continue;
+    }
+    if (feature.chimney) {
+      buildShapeFeatureChimney(plan, feature, clipShapeMeshSet(meshes, plan, { roofs: false }), recipe, roofSurface);
+      continue;
+    }
     const child = feature.child, occlusion = createShapeRoofOcclusion(child);
     const clipped = Object.fromEntries(Object.entries(meshes).map(([key, mesh]) => [key, clipShapeRoofMesh(mesh, occlusion)]));
     if (!feature.openSides) {

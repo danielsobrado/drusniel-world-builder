@@ -11,9 +11,16 @@ import { normalizeShapeOpenings, resolveShapeOpenings, shapeOpeningPortal } from
 import { normalizeShapeStyle } from './ShapeStyles.js';
 import { normalizeShapeProfile } from './ShapeProfile.js';
 import { normalizeShapeCrown, resolveShapeCrown } from './ShapeCrown.js';
+import {
+  hasShapeRuin,
+  normalizeShapeRuin,
+  resolveShapeRuinColumns,
+  shapeRuinCollisionGaps,
+} from './ShapeRuin.js';
 
 export function normalizeShapeWall(source) {
   const height = shapeNumber(source.height, 'Wall height', 2.4, 0.5, 16);
+  const ruin = source.ruin !== undefined ? normalizeShapeRuin(source.ruin) : null;
   return Object.freeze({
     ...shapeCommon(source),
     style: normalizeShapeStyle(source.style),
@@ -27,6 +34,7 @@ export function normalizeShapeWall(source) {
     stonework: normalizeShapeProfile(source, height).stonework,
     base: normalizeShapeProfile({ base: source.base }, height).base,
     crown: normalizeShapeCrown(source.crown),
+    ...(ruin && ruin.amount > 0 ? { ruin } : {}),
     surface: shapeChoice(source.surface, 'wall surface', 'masonry', [
       'masonry',
       'planks',
@@ -44,6 +52,8 @@ export function planShapeWall(primitive) {
   );
   const boundary = curve.samples.map((sample) => placeShapePoint(primitive, sample.point));
   const openings = resolveShapeOpenings(primitive, curve);
+  const ruinColumns = hasShapeRuin(primitive) ? resolveShapeRuinColumns(primitive, curve.length, curve.closed) : [];
+  const ruinGaps = shapeRuinCollisionGaps(primitive, curve.length, ruinColumns);
   const slabs = (curve.closed ? boundary : boundary.slice(0, -1)).map((start, index) => ({
     id: `${primitive.id}:${curve.samples[index].segmentId}:${index}`,
     primitiveId: primitive.id,
@@ -53,13 +63,14 @@ export function planShapeWall(primitive) {
     height: primitive.height,
     thickness: primitive.thickness,
     topThickness: primitive.thickness * primitive.taper,
-    gaps: openings,
+    gaps: ruinGaps.length ? [...openings, ...ruinGaps] : openings,
   }));
   return resolveShapeCrown({
     id: primitive.id,
     primitive,
     curve,
     openings,
+    ...(ruinColumns.length ? { ruinColumns } : {}),
     boundary,
     bounds: shapeBounds(boundary, primitive.thickness),
     regions: ['walls', 'trim', 'inserts', 'glazing', 'foliage', 'metal'].map((family) => ({

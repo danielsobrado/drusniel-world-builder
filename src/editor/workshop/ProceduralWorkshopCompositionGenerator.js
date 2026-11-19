@@ -171,6 +171,15 @@ export function createWorkshopCompositionParts(
     materials.foliage = material('foliage', '#648a48', { vertexColors: true });
     materials.metal = material('metal', '#7f715b', { roughness: 0.52, metalness: 0.35, vertexColors: true });
     materials.recess = material('recess', '#719293', { roughness: 0.55, vertexColors: true });
+    materials.glow = new THREE.MeshStandardNodeMaterial({
+      color: '#ffe2a8',
+      roughness: 0.38,
+      metalness: 0,
+      emissive: '#ff6e24',
+      emissiveIntensity: 1.35,
+      vertexColors: true,
+    });
+    materials.glow.userData.workshopSlot = 'glow';
     materials.walls.color.set(
       recipe.finish === 'ochre' ? '#d3aa71' : recipe.finish === 'rose' ? '#caa395' : '#e2d5b9',
     );

@@ -2,6 +2,7 @@ import { shapeChoice, shapeNumber, shapeRecord } from './ShapeValidation.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { createShapeWallSurface } from './ShapeWallSurface.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
+import { hasShapeRuin, shapeRuinBreachSpans } from './ShapeRuin.js';
 
 const D = SHAPE_CASTLE_CONFIG.crown;
 export const SHAPE_CROWN_STYLES = Object.freeze(['none', 'parapet', 'corbelled']);
@@ -99,17 +100,23 @@ export function resolveShapeCrown(plan) {
     outerLength += Math.hypot(b[0] - a[0], b[1] - a[1]);
   }
   const scale = outerLength / length;
+  const breachSpans = shapeRuinBreachSpans(plan.ruinColumns ?? []);
+  const breached = (a, b) => breachSpans.some(([s0, s1]) => a < s1 && b > s0);
   const corbels = [], bays = [], merlons = [];
   if (frame.projection) {
     const count = Math.max(closed ? 4 : 1, Math.round(outerLength / c.corbelSpacing));
     const du = Math.min(D.corbelWidth / scale, (length / count) * 0.5);
+    const allCorbels = [];
     for (let i = 0; i < count + (closed ? 0 : 1); i++) {
       const u = closed ? (length * i) / count : du / 2 + ((length - du) * i) / count;
-      corbels.push({ key: `corbel-${i}`, u, du });
+      const item = { key: `corbel-${i}`, u, du };
+      allCorbels.push(item);
+      if (!breached(u - du / 2, u + du / 2)) corbels.push(item);
     }
     for (let i = 0; i < count; i++) {
-      const a = corbels[i].u + du / 2, next = corbels[(i + 1) % corbels.length].u;
-      bays.push({ key: `bay-${i}`, u0: a, u1: (next <= corbels[i].u ? next + length : next) - du / 2 });
+      const a = allCorbels[i].u + du / 2, next = allCorbels[(i + 1) % allCorbels.length].u;
+      const b = (next <= allCorbels[i].u ? next + length : next) - du / 2;
+      if (!breached(a, b)) bays.push({ key: `bay-${i}`, u0: a, u1: b });
     }
   }
   if (!frame.roofed && c.merlons !== 'none') {
@@ -118,16 +125,19 @@ export function resolveShapeCrown(plan) {
     const unit = length / (closed ? count * cell : count * c.merlonWidth + (count - 1) * c.merlonGap);
     for (let i = 0; i < count; i++) {
       const u0 = (closed ? c.merlonGap / 2 : 0) * unit + i * cell * unit;
+      const u1 = u0 + c.merlonWidth * unit;
+      if (breached(u0, u1)) continue;
       const fate = shapeRandom(0, p.id, 'crown-ruin', i);
       if (fate < c.ruin * 0.3) continue;
       const height = fate < c.ruin * 0.75
         ? c.merlonHeight * (0.3 + 0.5 * shapeRandom(0, p.id, 'crown-ruin-height', i)) : c.merlonHeight;
-      merlons.push({ key: `merlon-${i}`, u0, u1: u0 + c.merlonWidth * unit, height, ruined: height < c.merlonHeight });
+      merlons.push({ key: `merlon-${i}`, u0, u1, height, ruined: height < c.merlonHeight });
     }
   }
   const elevation = p.elevation + frame.base;
   const gaps = crownCollisionGaps(p, frame, merlons, length, closed, scale);
   const footprint = { kind: 'polygon', points: outline(surface, frame.base + 0.01, frame.outer - frame.thickness / 2, 48) };
+  const openRuinDeck = hasShapeRuin(p) && p.ruin.amount >= 0.25;
   const rpg = {
     ...plan.rpg,
     collisionSlabs: [...plan.rpg.collisionSlabs, {
@@ -137,7 +147,7 @@ export function resolveShapeCrown(plan) {
     coverSurfaces: [...plan.rpg.coverSurfaces, { id: `${p.id}:crown:cover`, primitiveId: p.id,
       height: elevation + c.height, footprint }],
     // The deck stops at the shaft where the machicolations are real holes in the gallery floor.
-    walkableFloors: frame.roofed || p.kind !== 'curved-volume' ? plan.rpg.walkableFloors : [...plan.rpg.walkableFloors, {
+    walkableFloors: frame.roofed || openRuinDeck || p.kind !== 'curved-volume' ? plan.rpg.walkableFloors : [...plan.rpg.walkableFloors, {
       id: `${p.id}:crown-deck`, primitiveId: p.id, elevation: p.elevation + p.height + 0.08, surfaceOwner: 'crown',
       footprint: { kind: 'polygon', points: outline(surface, p.height - 0.01, shapeRoofReach(p) - (c.machicolation === 'open' ? 0 : frame.thickness), 48) },
     }],

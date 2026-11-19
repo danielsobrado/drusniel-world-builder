@@ -36,6 +36,14 @@ export function shapeFeatureSemantics(plan, features) {
       rpg.collisionSlabs.push(annotate({ id: f.id, primitiveId: plan.id, elevation: frame.origin[1],
         height: solidSupport.height, thickness: solidSupport.width, footprint, gaps: [] }));
       rpg.foundationContacts.push(annotate({ id: `${f.id}:contact`, primitiveId: plan.id, elevation: frame.origin[1], footprint }));
+    } else if (f.chimney) {
+      const c = f.chimney;
+      const footprint = { kind: 'polygon', points: c.footprint };
+      rpg.collisionSlabs.push(annotate({ id: f.id, primitiveId: plan.id, elevation: c.center[1],
+        height: c.topY - c.center[1], thickness: c.width, footprint, gaps: [] }));
+      if (c.bottom <= 0.15) {
+        rpg.foundationContacts.push(annotate({ id: `${f.id}:contact`, primitiveId: plan.id, elevation: c.center[1], footprint }));
+      }
     }
   }
   return { ...plan.rpg, ...rpg };

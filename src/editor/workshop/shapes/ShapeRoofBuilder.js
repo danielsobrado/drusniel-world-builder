@@ -7,14 +7,17 @@ import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTole
 import { shapeWallCoreMesh, SHAPE_MASONRY_CORE_TONE } from './ShapeMasonryCourses.js';
 import { buildShapeProfileRail } from './ShapeProfileRail.js';
 import { shapeStoneTint } from './ShapeMasonryCourses.js';
+import { addWallPatch, wallSolidBands } from './ShapeWallSurface.js';
+import { hasShapeRuin } from './ShapeRuin.js';
 
 // Overhangs show boarded sarking from below; bare slate there reads as a hole in the roof.
 const SOFFIT_TONE = Object.freeze([0.78, 0.74, 0.7]);
 
 export function buildShapeRoof(plan, sourceMeshes, recipe) {
   if (plan.roofReplaced) return;
-  const p = plan.primitive,
-    surface = createShapeRoofSurface(plan),
+  const p = plan.primitive;
+  if (p.roof.family === 'flat' && hasShapeRuin(p) && p.ruin.amount >= 0.25) return;
+  const surface = createShapeRoofSurface(plan),
     length = plan.curve.length;
   const mask = createShapeRoofOcclusion(plan), hidden = mask.hidden;
   const meshes = Object.fromEntries(Object.entries(sourceMeshes).map(([slot, mesh]) => [slot, clipShapeRoofMesh(mesh, mask)]));
@@ -53,19 +56,48 @@ export function buildShapeRoof(plan, sourceMeshes, recipe) {
       roofQuad(quad, [0.94, 0.97, 1], true);
     }
   }
-  // Close the wall up to the roof surface; especially visible on rounded gable ends.
+  // Close the wall up to the roof surface; split around any gable-triangle openings above wall height.
   const core = shapeWallCoreMesh(plan, meshes, recipe);
   const coreTone = core === meshes.walls ? [1, 1, 1] : SHAPE_MASONRY_CORE_TONE;
-  for (let i = 0; i < samples; i++) {
-    const u0 = plan.curve.samples[i].distance,
-      u1 = i + 1 < samples ? plan.curve.samples[i + 1].distance : length;
+  const gableOpenings = (plan.openings ?? p.openings ?? []).filter((o) => o.bottom + o.height > p.height + tolerance.length);
+  const wallBoundaries = plan.curve.samples.map((s) => s.distance);
+  if (plan.curve.closed) wallBoundaries.push(length);
+  for (const o of gableOpenings) {
+    const steps = Math.max(2, Math.min(16, Math.ceil(o.width / 0.04)));
+    for (let k = 0; k <= steps; k++) {
+      const d = o.at * length - o.width / 2 + (o.width * k) / steps;
+      wallBoundaries.push(plan.curve.closed ? ((d % length) + length) % length : Math.max(0, Math.min(length, d)));
+    }
+  }
+  const wallDistances = [...new Set(wallBoundaries)].sort((a, b) => a - b);
+  const gableTopDrop = p.surface === 'masonry' && recipe.detail >= 2 ? 0.04 : 0;
+  for (let i = 0; i < wallDistances.length - 1; i++) {
+    const u0 = wallDistances[i],
+      u1 = wallDistances[i + 1];
     const a = surface.wall.point(u0, p.height, p.thickness / 2),
       b = surface.wall.point(u1, p.height, p.thickness / 2);
-    const c = [b[0], Math.max(b[1], surface.heightAt(b[0], b[2])), b[2]];
-    const d = [a[0], Math.max(a[1], surface.heightAt(a[0], a[2])), a[2]];
-    if (c[1] > b[1] + tolerance.length || d[1] > a[1] + tolerance.length) {
+    const h0 = Math.max(p.height, surface.heightAt(a[0], a[2]) - p.elevation);
+    const h1 = Math.max(p.height, surface.heightAt(b[0], b[2]) - p.elevation);
+    if (h0 <= p.height + tolerance.length && h1 <= p.height + tolerance.length) continue;
+    const mid = (u0 + u1) / 2;
+    const hasGableGap = gableOpenings.length > 0 && surface.wall.gaps(mid).some((g) => g.top > p.height + tolerance.length);
+    if (!hasGableGap) {
+      const c = [b[0], Math.max(b[1], surface.heightAt(b[0], b[2]) - gableTopDrop), b[2]];
+      const d = [a[0], Math.max(a[1], surface.heightAt(a[0], a[2]) - gableTopDrop), a[2]];
       if (surface.wall.clockwise) core.quad(a, b, c, d, coreTone);
       else core.quad(d, c, b, a, coreTone);
+      continue;
+    }
+    const maxH = Math.max(h0, h1);
+    for (const band of wallSolidBands(surface.wall, u0, u1, p.height, maxH, false)) {
+      const top = [Math.min(band.top[0], h0), Math.min(band.top[1], h1)];
+      const bottom = [Math.min(band.bottom[0], top[0]), Math.min(band.bottom[1], top[1])];
+      if (Math.max(top[0] - bottom[0], top[1] - bottom[1]) < tolerance.length) continue;
+      addWallPatch(core, surface.wall, u0, u1, bottom, top, p.thickness / 2, p.thickness, coreTone, {
+        ...(p.surface === 'masonry' ? { sideMesh: meshes.trim, sideColor: SHAPE_MASONRY_CORE_TONE } : {}),
+        start: true,
+        end: true,
+      });
     }
   }
   buildShapeProfileRail(meshes.trim, t => surface.point(t * length, 1), length, 0.1, 0.12,

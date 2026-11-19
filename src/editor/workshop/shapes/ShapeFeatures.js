@@ -2,6 +2,7 @@ import { createShapeWallSurface } from './ShapeWallSurface.js';
 import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { planShapeVolume } from './ShapeVolume.js';
 import { shapeRandom } from './ShapeMesh.js';
+import { shapeBounds } from './ShapePaths.js';
 import { resolveShapeCraftDetails } from './ShapeCraftDetails.js';
 import { resolveShapeRoofJunctions } from './ShapeRoofJunctions.js';
 import { expandShapeFeatureFootprint } from './ShapeFeatureFootprint.js';
@@ -11,6 +12,7 @@ import { resolveShapeButtress } from './ShapeButtress.js';
 import { shapeFeatureBounds } from './ShapeFeatureBounds.js';
 import { SHAPE_CROWN_NONE, normalizeShapeCrown } from './ShapeCrown.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
+import { shapeBaseTop } from './ShapeProfile.js';
 
 const TURRET = SHAPE_CASTLE_CONFIG.turret;
 const NO_BASE = Object.freeze({ style: 'none', height: 1, out: 0 });
@@ -109,6 +111,39 @@ const registry = new Map([
     }), openSides: true };
   }],
   ['buttress', resolveShapeButtress],
+  ['chimney', (host, f, frame) => {
+    const p = host.primitive;
+    const width = Math.max(0.6, Math.min(2.4, f.width));
+    const depth = Math.max(0.35, Math.min(1.6, f.depth));
+    const bottom = Math.min(f.bottom ?? 0, p.height);
+    const [cx, , cz] = offset(frame, depth * (bottom <= 0.15 ? 0.28 : 0.2), p.elevation + bottom);
+    const roofY = p.roof && !host.roofReplaced
+      ? createShapeRoofSurface(host).heightAt(cx, cz)
+      : p.elevation + p.height;
+    const topY = Math.max(roofY + 0.45, p.elevation + bottom + f.height);
+    const breastHeight = Math.max(1.2, Math.min(p.height * 0.65, shapeBaseTop(p) + 0.9));
+    const hw = width * 0.7, hd = depth * 0.7;
+    const corners = [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(([x, z]) => [
+      cx + frame.tangent[0] * x + frame.outward[0] * z,
+      cz + frame.tangent[2] * x + frame.outward[2] * z,
+    ]);
+    return {
+      frame: { ...frame, origin: [cx, p.elevation + bottom, cz] },
+      chimney: {
+        center: [cx, p.elevation + bottom, cz],
+        bottom,
+        width,
+        depth,
+        topY,
+        roofY,
+        breastHeight,
+        outward: frame.outward,
+        tangent: frame.tangent,
+        footprint: corners,
+        bounds: shapeBounds(corners),
+      },
+    };
+  }],
   ['turret', (host, f, frame) => {
     // A turret straddles the host face; on a corbelled crown it rides the crown's outer face.
     const p = host.primitive, crown = host.crown, flat = f.roof === 'flat';

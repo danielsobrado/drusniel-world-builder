@@ -1,17 +1,26 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import test from 'node:test';
 
 import { shapeCapability } from '../src/editor/workshop/shapes/ShapeRegistry.js';
 import { resolveShapeChemistry } from '../src/editor/workshop/shapes/ShapeChemistry.js';
 import { buildRegisteredShape } from '../src/editor/workshop/shapes/ShapeGeometryRegistry.js';
-import { SHAPE_PRESETS, createShapePreset } from '../src/editor/workshop/shapes/ShapePresets.js';
+import { SHAPE_PRESETS, createShapePreset, createShapePrimitive } from '../src/editor/workshop/shapes/ShapePresets.js';
 import { SHAPE_CASTLE_PRESETS } from '../src/editor/workshop/shapes/config/ShapeCastleConfig.generated.js';
 import { shapeProfileOut, shapeProfileBreaks } from '../src/editor/workshop/shapes/ShapeProfile.js';
 import { offsetShapePolygon, polylineTouchesShape } from '../src/editor/workshop/shapes/ShapeEnvelope.js';
 import { shapeRandom } from '../src/editor/workshop/shapes/ShapeMesh.js';
 import { shapeOpeningTop } from '../src/editor/workshop/shapes/ShapeOpenings.js';
 import { createShapeWallSurface } from '../src/editor/workshop/shapes/ShapeWallSurface.js';
+import { shapeStoneTint } from '../src/editor/workshop/shapes/ShapeMasonryCourses.js';
 import { normalizeWorkshopComposition } from '../src/editor/workshop/ProceduralWorkshopComposition.js';
+import {
+  BUILTIN_WORKSHOP_MATERIAL_PRESETS,
+  normalizeWorkshopMaterialDocument,
+  serializeWorkshopMaterialDocument,
+} from '../src/editor/workshop/ProceduralWorkshopMaterialConfig.js';
+import { WORKSHOP_PBR_PRESET_LIST } from '../src/editor/workshop/ProceduralWorkshopPbrPresets.js';
 
 const materials = new Proxy({}, { get: (_, key) => key });
 const plan = (source) => { const c = shapeCapability(source.kind); return c.plan(c.normalize(source)); };
@@ -20,7 +29,7 @@ const tower = (extra = {}) => ({ id: 'tower', kind: 'curved-volume', surface: 'm
 const radius = (surface, y, offset) => { const v = surface.point(0, y, offset); return Math.hypot(v[0], v[2]); };
 
 test('castle presets are plain shape data that survive a composition round trip', () => {
-  assert.equal(SHAPE_CASTLE_PRESETS.length, 7);
+  assert.equal(SHAPE_CASTLE_PRESETS.length, 12);
   for (const preset of SHAPE_CASTLE_PRESETS) {
     assert.ok(SHAPE_PRESETS.some((item) => item.id === preset.id));
     const composition = normalizeWorkshopComposition(createShapePreset(preset.id));
@@ -138,4 +147,89 @@ test('shape randomness spreads keys that differ only in a trailing index', () =>
   const values = Array.from({ length: 64 }, (_, i) => shapeRandom(0, 'tower', 'crown-ruin', i));
   assert.ok(Math.max(...values) - Math.min(...values) > 0.8);
   assert.ok(Math.abs(values.reduce((a, b) => a + b, 0) / values.length - 0.5) < 0.12);
+});
+
+test('polygonal tower footprints support flexible side counts, mitered corners, and tall heights', () => {
+  for (const sides of [4, 6, 8, 16, 24, 48]) {
+    const p = plan(tower({
+      height: sides === 8 ? 28 : 11,
+      levels: sides === 8 ? 8 : 3,
+      footprint: { family: 'polygon', width: 6, depth: 6, sides, cornerRadius: 0 },
+      base: { style: 'molded', height: 1.0, out: 0.3 },
+      crown: { style: 'corbelled', projection: 0.45, arcade: 'round' },
+    }));
+    assert.equal(p.primitive.footprint.sides, sides);
+    const surface = createShapeWallSurface(p);
+    assert.equal(surface.corners.length, sides, `${sides}-gon exposes all sharp corner stations`);
+    if (sides === 4) {
+      // Exact mitered 90° outer corner: offset 0.5m shifts both X and Z by 0.5m.
+      const c = surface.point(0, 5, 0.5);
+      assert.ok(Math.abs(Math.abs(c[0]) - 3.5) < 1e-4 && Math.abs(Math.abs(c[2]) - 3.5) < 1e-4, `mitered corner ${c}`);
+    }
+    const [resolved] = resolveShapeChemistry([p]).plans;
+    for (const detail of [1, 2, 3]) {
+      const parts = buildRegisteredShape(resolved, materials, { seed: 7, detail, ivy: false });
+      assert.ok(parts.length > 0);
+      for (const part of parts) {
+        assert.ok(part.geometry.attributes.position.array.every(Number.isFinite));
+        part.geometry.dispose();
+      }
+    }
+  }
+  const quickTower = createShapePrimitive('tower', 'tower-1');
+  assert.equal(quickTower.footprint.family, 'polygon');
+  assert.equal(quickTower.footprint.sides, 8);
+});
+
+test('stepped-masonry wall ruin breaches walls, crowns, and collision deterministically', () => {
+  const p = plan(tower({
+    footprint: { family: 'polygon', width: 5.6, depth: 5.6, sides: 4, cornerRadius: 0 },
+    crown: { style: 'corbelled', projection: 0.42 },
+    ruin: { amount: 0.72, at: 0.625, width: 0.48 },
+  }));
+  assert.ok(p.ruinColumns.some((col) => col.breached));
+  assert.ok(p.ruinColumns.some((col) => !col.breached));
+  const shell = p.rpg.collisionSlabs.find((s) => s.id === 'tower:shell');
+  assert.ok(shell.gaps.some((g) => g.role === 'breach'), 'ruin breach publishes collision gaps');
+  assert.ok(!p.rpg.walkableFloors.some((f) => f.id === 'tower:crown-deck'), 'heavily ruined tower opens its top deck');
+  const [resolved] = resolveShapeChemistry([p]).plans;
+  const parts = buildRegisteredShape(resolved, materials, { seed: 19, detail: 2, ivy: false });
+  assert.ok(parts.length > 0);
+  for (const part of parts) {
+    assert.ok(part.geometry.attributes.position.array.every(Number.isFinite));
+    part.geometry.dispose();
+  }
+});
+
+test('full-PBR workshop presets map to real texture files and round-trip cleanly', () => {
+  assert.ok(WORKSHOP_PBR_PRESET_LIST.length >= 18);
+  const publicRoot = path.resolve('public/assets/textures');
+  for (const preset of WORKSHOP_PBR_PRESET_LIST) {
+    assert.ok(BUILTIN_WORKSHOP_MATERIAL_PRESETS[preset.id]);
+    const { folder, set, maps } = preset.pbrAsset;
+    const suffixes = maps === 'arm' ? ['color', 'normal', 'arm'] : ['color', 'normal', 'rough'];
+    for (const suffix of suffixes) {
+      const file = path.join(publicRoot, folder, `${set}-${suffix}.webp`);
+      assert.ok(fs.existsSync(file), `Missing PBR texture file ${file}`);
+    }
+  }
+  const doc = normalizeWorkshopMaterialDocument({
+    materialAreaOverrides: { 'tower:trim': 'pbr-dressed-stone', 'tower:walls': 'pbr-brick-castle' },
+    materialLibrary: {
+      presets: {
+        'custom-basalt': {
+          ...BUILTIN_WORKSHOP_MATERIAL_PRESETS['pbr-basalt'],
+          id: 'custom-basalt',
+          label: 'Custom Basalt',
+          repeat: 2.2,
+        },
+      },
+    },
+    materialDefaults: { stone: 'custom-basalt' },
+  });
+  const roundTrip = normalizeWorkshopMaterialDocument(serializeWorkshopMaterialDocument(doc));
+  assert.deepEqual(roundTrip, doc);
+  assert.deepEqual(roundTrip.materialLibrary.presets['custom-basalt'].pbrAsset, BUILTIN_WORKSHOP_MATERIAL_PRESETS['pbr-basalt'].pbrAsset);
+  const p = plan(tower({ stonework: 'ashlar' }));
+  assert.deepEqual(shapeStoneTint({ style: 'limestone', materialAreaOverrides: { 'tower:trim': 'pbr-brick-castle' } }, p), [1, 1, 1]);
 });

@@ -36,6 +36,10 @@
   color: #bacbb9;
   font-variant-numeric: tabular-nums;
 }
+.workshop-shape-fields > .workshop-shape-actions,
+.workshop-shape-fields > .workshop-shape-hint {
+  grid-column: 1 / -1;
+}
 .workshop-shape-actions {
   display: flex;
   flex-wrap: wrap;

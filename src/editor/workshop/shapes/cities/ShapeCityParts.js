@@ -70,7 +70,7 @@ export function volume(st, id, label, o) {
   const h = r2(o.h ?? (o.storey ?? st.storey) * levels);
   const roof = { ...st.roof, ...o.roof }, axis = o.axis ?? st.gable;
   const conical = ['cone', 'bell', 'spire'].includes(roof.family);
-  const span = roof.family === 'gable' ? (axis === 'width' ? d : w) : Math.min(w, d);
+  const span = ['gable', 'shed'].includes(roof.family) ? (axis === 'width' ? d : w) : Math.min(w, d);
   const family = o.footprint ?? st.footprint;
   const footprint = family === 'oval' ? { family, width: w, depth: d }
     : { family, width: w, depth: d, cornerRadius: r2(Math.min(o.corner ?? st.corner, Math.min(w, d) / 2 - 0.05)) };

@@ -1137,9 +1137,817 @@ export const SHAPE_CASTLE_PRESETS = Object.freeze([
         }
       }
     ]
+  },
+  {
+    "id": "machicolated-square-tower",
+    "label": "Machicolated square keep tower",
+    "primitives": [
+      {
+        "id": "tower",
+        "label": "Square keep tower",
+        "kind": "curved-volume",
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "shutters": false,
+        "craft": false,
+        "quoins": true,
+        "interior": "none",
+        "height": 11.6,
+        "levels": 3,
+        "thickness": 0.65,
+        "footprint": {
+          "family": "polygon",
+          "width": 5.8,
+          "depth": 5.8,
+          "sides": 4,
+          "cornerRadius": 0
+        },
+        "roof": {
+          "family": "flat"
+        },
+        "base": {
+          "style": "stepped-plinth",
+          "height": 1.05,
+          "out": 0.28
+        },
+        "crown": {
+          "style": "corbelled",
+          "projection": 0.48,
+          "height": 0.9,
+          "corbelSpacing": 0.72,
+          "corbelDrop": 0.95,
+          "arcade": "round",
+          "machicolation": "decorative",
+          "merlons": "square",
+          "merlonWidth": 0.85,
+          "merlonGap": 0.55,
+          "merlonHeight": 0.88
+        },
+        "openings": [
+          {
+            "id": "door",
+            "role": "door",
+            "profile": "pointed",
+            "at": 0.625,
+            "bottom": 0,
+            "width": 1.35,
+            "height": 2.5
+          },
+          {
+            "id": "slit-front",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.625,
+            "bottom": 4.1,
+            "width": 0.14,
+            "height": 1.3
+          },
+          {
+            "id": "window-front-l",
+            "role": "window",
+            "profile": "arched",
+            "at": 0.585,
+            "bottom": 7.4,
+            "width": 0.55,
+            "height": 1.4
+          },
+          {
+            "id": "window-front-r",
+            "role": "window",
+            "profile": "arched",
+            "at": 0.665,
+            "bottom": 7.4,
+            "width": 0.55,
+            "height": 1.4
+          },
+          {
+            "id": "slit-east",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.375,
+            "bottom": 4.1,
+            "width": 0.14,
+            "height": 1.3
+          },
+          {
+            "id": "window-east",
+            "role": "window",
+            "profile": "arched",
+            "at": 0.375,
+            "bottom": 7.4,
+            "width": 0.58,
+            "height": 1.4
+          },
+          {
+            "id": "slit-west",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.875,
+            "bottom": 4.1,
+            "width": 0.14,
+            "height": 1.3
+          }
+        ],
+        "features": [
+          {
+            "id": "buttress-se",
+            "kind": "buttress",
+            "at": 0.538,
+            "width": 0.72,
+            "depth": 0.82,
+            "height": 4.5
+          },
+          {
+            "id": "buttress-sw",
+            "kind": "buttress",
+            "at": 0.712,
+            "width": 0.72,
+            "depth": 0.82,
+            "height": 4.5
+          },
+          {
+            "id": "buttress-ne",
+            "kind": "buttress",
+            "at": 0.212,
+            "width": 0.72,
+            "depth": 0.82,
+            "height": 4.5
+          },
+          {
+            "id": "buttress-nw",
+            "kind": "buttress",
+            "at": 0.038,
+            "width": 0.72,
+            "depth": 0.82,
+            "height": 4.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "detailed-round-tower",
+    "label": "Detailed round machicolated tower",
+    "primitives": [
+      {
+        "id": "tower",
+        "label": "Round machicolated tower",
+        "kind": "curved-volume",
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "shutters": false,
+        "craft": false,
+        "interior": "none",
+        "height": 10.5,
+        "levels": 3,
+        "thickness": 0.6,
+        "footprint": {
+          "family": "polygon",
+          "width": 5.6,
+          "depth": 5.6,
+          "sides": 24,
+          "cornerRadius": 0
+        },
+        "roof": {
+          "family": "flat"
+        },
+        "base": {
+          "style": "molded",
+          "height": 0.95,
+          "out": 0.32
+        },
+        "crown": {
+          "style": "corbelled",
+          "projection": 0.5,
+          "height": 0.85,
+          "corbelSpacing": 0.72,
+          "corbelDrop": 0.95,
+          "arcade": "round",
+          "machicolation": "decorative",
+          "merlons": "square",
+          "merlonWidth": 0.92,
+          "merlonGap": 0.52,
+          "merlonHeight": 0.86
+        },
+        "openings": [
+          {
+            "id": "door",
+            "role": "door",
+            "profile": "pointed",
+            "at": 0.52,
+            "bottom": 0,
+            "width": 1.15,
+            "height": 2.3
+          },
+          {
+            "id": "window-front-l",
+            "role": "window",
+            "profile": "arched",
+            "at": 0.43,
+            "bottom": 5.8,
+            "width": 0.56,
+            "height": 1.5
+          },
+          {
+            "id": "window-front-r",
+            "role": "window",
+            "profile": "arched",
+            "at": 0.61,
+            "bottom": 5.8,
+            "width": 0.56,
+            "height": 1.5
+          },
+          {
+            "id": "slit-back",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.08,
+            "bottom": 4.5,
+            "width": 0.14,
+            "height": 1.35
+          },
+          {
+            "id": "slit-side",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.82,
+            "bottom": 6.2,
+            "width": 0.14,
+            "height": 1.35
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ruined-watchtower",
+    "label": "Ruined breached castle tower",
+    "primitives": [
+      {
+        "id": "tower",
+        "label": "Ruined watchtower",
+        "kind": "curved-volume",
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "shutters": false,
+        "craft": false,
+        "quoins": true,
+        "interior": "none",
+        "age": 0.65,
+        "height": 9.2,
+        "levels": 2,
+        "thickness": 0.72,
+        "footprint": {
+          "family": "polygon",
+          "width": 5.6,
+          "depth": 5.6,
+          "sides": 4,
+          "cornerRadius": 0
+        },
+        "roof": {
+          "family": "flat"
+        },
+        "base": {
+          "style": "stepped-plinth",
+          "height": 1,
+          "out": 0.28
+        },
+        "crown": {
+          "style": "corbelled",
+          "projection": 0.42,
+          "height": 0.8,
+          "corbelSpacing": 0.74,
+          "corbelDrop": 0.85,
+          "arcade": "round",
+          "merlons": "square",
+          "merlonWidth": 0.85,
+          "merlonGap": 0.55,
+          "merlonHeight": 0.82,
+          "ruin": 0.55
+        },
+        "ruin": {
+          "amount": 0.72,
+          "at": 0.64,
+          "width": 0.48
+        },
+        "openings": [
+          {
+            "id": "slit-east",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.375,
+            "bottom": 4.2,
+            "width": 0.14,
+            "height": 1.25
+          },
+          {
+            "id": "slit-north",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.125,
+            "bottom": 4.2,
+            "width": 0.14,
+            "height": 1.25
+          }
+        ],
+        "features": [
+          {
+            "id": "buttress-se",
+            "kind": "buttress",
+            "at": 0.54,
+            "width": 0.7,
+            "depth": 0.8,
+            "height": 4
+          },
+          {
+            "id": "buttress-sw",
+            "kind": "buttress",
+            "at": 0.71,
+            "width": 0.7,
+            "depth": 0.8,
+            "height": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "octagonal-bastion-tower",
+    "label": "Octagonal castle bastion tower",
+    "primitives": [
+      {
+        "id": "tower",
+        "label": "Octagonal tower",
+        "kind": "curved-volume",
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "shutters": false,
+        "craft": false,
+        "quoins": true,
+        "beltCourses": true,
+        "interior": "none",
+        "height": 12.6,
+        "levels": 3,
+        "thickness": 0.62,
+        "footprint": {
+          "family": "polygon",
+          "width": 6.2,
+          "depth": 6.2,
+          "sides": 8,
+          "cornerRadius": 0
+        },
+        "roof": {
+          "family": "flat"
+        },
+        "base": {
+          "style": "molded",
+          "height": 1.05,
+          "out": 0.34
+        },
+        "crown": {
+          "style": "corbelled",
+          "projection": 0.48,
+          "height": 0.9,
+          "corbelSpacing": 0.72,
+          "corbelDrop": 0.95,
+          "arcade": "pointed",
+          "machicolation": "open",
+          "merlons": "pierced",
+          "merlonWidth": 0.9,
+          "merlonGap": 0.55,
+          "merlonHeight": 0.9
+        },
+        "openings": [
+          {
+            "id": "door",
+            "role": "door",
+            "profile": "pointed",
+            "at": 0.5625,
+            "bottom": 0,
+            "width": 1.25,
+            "height": 2.4
+          },
+          {
+            "id": "slit-fl",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.6875,
+            "bottom": 4.4,
+            "width": 0.14,
+            "height": 1.4
+          },
+          {
+            "id": "slit-fr",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.4375,
+            "bottom": 4.4,
+            "width": 0.14,
+            "height": 1.4
+          },
+          {
+            "id": "window-front",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.5625,
+            "bottom": 7.8,
+            "width": 0.65,
+            "height": 1.65
+          },
+          {
+            "id": "window-east",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.3125,
+            "bottom": 7.8,
+            "width": 0.65,
+            "height": 1.65
+          },
+          {
+            "id": "window-west",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.8125,
+            "bottom": 7.8,
+            "width": 0.65,
+            "height": 1.65
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hexagonal-spire-tower",
+    "label": "Hexagonal citadel spire tower",
+    "primitives": [
+      {
+        "id": "tower",
+        "label": "Hexagonal spire tower",
+        "kind": "curved-volume",
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "shutters": false,
+        "craft": false,
+        "quoins": true,
+        "beltCourses": true,
+        "interior": "none",
+        "height": 15.6,
+        "levels": 4,
+        "thickness": 0.58,
+        "footprint": {
+          "family": "polygon",
+          "width": 5.4,
+          "depth": 5.4,
+          "sides": 6,
+          "cornerRadius": 0
+        },
+        "roof": {
+          "family": "spire",
+          "rise": 6.4,
+          "overhang": 0.3,
+          "sweep": 0.35
+        },
+        "base": {
+          "style": "stepped-plinth",
+          "height": 1.35,
+          "out": 0.34
+        },
+        "stages": [
+          {
+            "at": 9.8,
+            "out": -0.1
+          }
+        ],
+        "crown": {
+          "style": "corbelled",
+          "projection": 0.42,
+          "height": 1.5,
+          "corbelSpacing": 0.66,
+          "corbelDrop": 0.85,
+          "arcade": "pointed"
+        },
+        "openings": [
+          {
+            "id": "door",
+            "role": "door",
+            "profile": "pointed",
+            "at": 0.5833,
+            "bottom": 0,
+            "width": 1.2,
+            "height": 2.4
+          },
+          {
+            "id": "slit-1",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.4167,
+            "bottom": 4.8,
+            "width": 0.14,
+            "height": 1.4
+          },
+          {
+            "id": "slit-2",
+            "role": "slit",
+            "profile": "square",
+            "at": 0.75,
+            "bottom": 4.8,
+            "width": 0.14,
+            "height": 1.4
+          },
+          {
+            "id": "window-mid",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.5833,
+            "bottom": 7.6,
+            "width": 0.62,
+            "height": 1.65
+          },
+          {
+            "id": "window-high-l",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.4167,
+            "bottom": 11.4,
+            "width": 0.58,
+            "height": 1.6
+          },
+          {
+            "id": "window-high-r",
+            "role": "window",
+            "profile": "pointed",
+            "at": 0.75,
+            "bottom": 11.4,
+            "width": 0.58,
+            "height": 1.6
+          }
+        ]
+      }
+    ]
   }
 ]);
 export const SHAPE_CRAFT_PRESETS = Object.freeze([
+  {
+    "id": "craft-blacksmith-forge",
+    "label": "Medieval blacksmith's forge & workshop",
+    "primitives": [
+      {
+        "id": "main-workshop",
+        "label": "Two-storey stone workshop",
+        "kind": "curved-volume",
+        "position": [
+          0,
+          -0.4
+        ],
+        "footprint": {
+          "family": "rounded",
+          "width": 7.4,
+          "depth": 4.6,
+          "cornerRadius": 0.12
+        },
+        "height": 4,
+        "levels": 2,
+        "thickness": 0.45,
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "age": 0.55,
+        "quoins": true,
+        "beltCourses": true,
+        "terrace": 0.85,
+        "roof": {
+          "family": "gable",
+          "rise": 2.35,
+          "overhang": 0.42,
+          "sweep": 0.16,
+          "sag": 0.08,
+          "axis": "width"
+        },
+        "base": {
+          "style": "stepped-plinth",
+          "height": 0.85,
+          "out": 0.2
+        },
+        "shutters": false,
+        "chimney": false,
+        "windowBoxes": false,
+        "ivyDensity": 0,
+        "interior": "paving",
+        "openings": [
+          {
+            "id": "back-ground",
+            "role": "window",
+            "profile": "square",
+            "bottom": 0.9,
+            "width": 0.72,
+            "height": 0.92,
+            "at": 0.171
+          },
+          {
+            "id": "back-upper",
+            "role": "window",
+            "profile": "square",
+            "bottom": 2.35,
+            "width": 0.72,
+            "height": 0.88,
+            "at": 0.171
+          },
+          {
+            "id": "right-ground",
+            "role": "window",
+            "profile": "square",
+            "bottom": 0.95,
+            "width": 0.72,
+            "height": 0.92,
+            "at": 0.442
+          },
+          {
+            "id": "right-upper-front",
+            "role": "window",
+            "profile": "square",
+            "bottom": 2.35,
+            "width": 0.72,
+            "height": 0.88,
+            "at": 0.442
+          },
+          {
+            "id": "right-upper-back",
+            "role": "window",
+            "profile": "square",
+            "bottom": 2.35,
+            "width": 0.72,
+            "height": 0.88,
+            "at": 0.358
+          },
+          {
+            "id": "right-gable-vent",
+            "role": "slit",
+            "profile": "square",
+            "bottom": 4.85,
+            "width": 0.36,
+            "height": 0.36,
+            "at": 0.4005
+          },
+          {
+            "id": "front-loft",
+            "role": "window",
+            "profile": "square",
+            "bottom": 2.65,
+            "width": 0.85,
+            "height": 0.85,
+            "at": 0.644
+          },
+          {
+            "id": "left-upper",
+            "role": "window",
+            "profile": "square",
+            "bottom": 2.45,
+            "width": 0.85,
+            "height": 0.92,
+            "at": 0.9005
+          },
+          {
+            "id": "left-gable-vent",
+            "role": "slit",
+            "profile": "square",
+            "bottom": 4.85,
+            "width": 0.36,
+            "height": 0.36,
+            "at": 0.9005
+          }
+        ],
+        "features": [
+          {
+            "id": "hearth-chimney",
+            "kind": "chimney",
+            "at": 0.928,
+            "width": 1.15,
+            "depth": 1.05,
+            "height": 7.75,
+            "bottom": 0
+          },
+          {
+            "id": "front-right-buttress",
+            "kind": "buttress",
+            "profile": "curved",
+            "at": 0.515,
+            "width": 0.48,
+            "depth": 0.65,
+            "height": 1.35
+          },
+          {
+            "id": "front-left-buttress",
+            "kind": "buttress",
+            "profile": "curved",
+            "at": 0.835,
+            "width": 0.48,
+            "depth": 0.65,
+            "height": 1.35
+          },
+          {
+            "id": "back-plinth-buttress",
+            "kind": "buttress",
+            "profile": "stepped",
+            "at": 0.255,
+            "width": 1.4,
+            "depth": 0.42,
+            "height": 1.2
+          }
+        ]
+      },
+      {
+        "id": "forge-shed",
+        "label": "Lean-to forge bay",
+        "kind": "curved-volume",
+        "position": [
+          -0.8,
+          2.75
+        ],
+        "footprint": {
+          "family": "rounded",
+          "width": 4.9,
+          "depth": 3.1,
+          "cornerRadius": 0.12
+        },
+        "height": 2.15,
+        "levels": 1,
+        "thickness": 0.42,
+        "surface": "masonry",
+        "stonework": "ashlar",
+        "age": 0.68,
+        "quoins": true,
+        "beltCourses": true,
+        "terrace": 0.85,
+        "roof": {
+          "family": "shed",
+          "rise": 1.25,
+          "overhang": 0.34,
+          "sweep": 0.12,
+          "sag": 0.04,
+          "axis": "width"
+        },
+        "base": {
+          "style": "stepped-plinth",
+          "height": 0.55,
+          "out": 0.14
+        },
+        "shutters": false,
+        "chimney": false,
+        "windowBoxes": false,
+        "ivyDensity": 0,
+        "interior": "forge",
+        "openings": [
+          {
+            "id": "side-door",
+            "role": "arch",
+            "profile": "arched",
+            "bottom": 0,
+            "width": 1.05,
+            "height": 1.78,
+            "at": 0.415
+          },
+          {
+            "id": "front-right-arch",
+            "role": "arch",
+            "profile": "arched",
+            "bottom": 0,
+            "width": 1.38,
+            "height": 1.72,
+            "at": 0.594
+          },
+          {
+            "id": "front-left-arch",
+            "role": "arch",
+            "profile": "arched",
+            "mullions": "post",
+            "bottom": 0,
+            "width": 1.52,
+            "height": 1.75,
+            "at": 0.714
+          }
+        ],
+        "features": [
+          {
+            "id": "shed-right-buttress",
+            "kind": "buttress",
+            "profile": "curved",
+            "at": 0.522,
+            "width": 0.42,
+            "depth": 0.62,
+            "height": 1.25
+          },
+          {
+            "id": "shed-left-buttress",
+            "kind": "buttress",
+            "profile": "curved",
+            "at": 0.782,
+            "width": 0.42,
+            "depth": 0.62,
+            "height": 1.25
+          }
+        ]
+      }
+    ]
+  },
   {
     "id": "craft-smithy",
     "label": "Smithy with forge canopy and coal shed",

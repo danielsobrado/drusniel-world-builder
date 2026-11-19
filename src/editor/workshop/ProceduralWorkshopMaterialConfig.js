@@ -1,4 +1,5 @@
 import { GODS_END_WORKSHOP_PRESETS } from './ProceduralWorkshopGodsEndPresets.js';
+import { WORKSHOP_PBR_ASSET_KEYS, WORKSHOP_PBR_PRESETS } from './ProceduralWorkshopPbrPresets.js';
 import { SURFACE_NAMES } from '../assets/godsEnd/houseTextureData.js';
 import { parseWorkshopImageDimensions } from './ProceduralWorkshopImageMetadata.js';
 
@@ -18,6 +19,7 @@ const VALID_FAMILY = new Set([
 const VALID_SOURCE_KIND = new Set(['albedo', 'normal', 'orm', 'height']);
 
 export const BUILTIN_WORKSHOP_MATERIAL_PRESETS = Object.freeze({
+  ...WORKSHOP_PBR_PRESETS,
   ...GODS_END_WORKSHOP_PRESETS,
   'granite-masonry': Object.freeze({
     id: 'granite-masonry', label: 'Granite', family: 'walls', baseColor: '#827e79',
@@ -141,8 +143,20 @@ function normalizePreset(presetId, input) {
   if (proceduralSurface !== undefined && !SURFACE_NAMES.includes(proceduralSurface)) {
     throw new Error(`Unknown Gods End surface: ${proceduralSurface}.`);
   }
+  let pbrAsset;
+  if (source.pbrAsset !== undefined) {
+    const asset = requireObject(source.pbrAsset, `Material preset ${presetId} PBR asset`);
+    const folder = string(asset.folder, `Material preset ${presetId} PBR folder`);
+    const set = string(asset.set, `Material preset ${presetId} PBR set`);
+    const maps = string(asset.maps, `Material preset ${presetId} PBR maps`);
+    if (!WORKSHOP_PBR_ASSET_KEYS.has(`${folder}/${set}`) || !['arm', 'rough'].includes(maps)) {
+      throw new Error(`Unknown PBR texture asset: ${folder}/${set}.`);
+    }
+    pbrAsset = Object.freeze({ folder, set, maps });
+  }
   return Object.freeze({
     ...(proceduralSurface ? { proceduralSurface } : {}),
+    ...(pbrAsset ? { pbrAsset } : {}),
     id: presetId,
     label: string(source.label, `Material preset ${presetId} label`, presetId).trim().slice(0, 64)
       || presetId,

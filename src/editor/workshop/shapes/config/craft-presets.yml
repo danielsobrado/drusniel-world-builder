@@ -5,6 +5,74 @@
 # Rounded footprints run `at` back (-z) -> right (+x) -> front (+z) -> left (-x);
 # oval footprints run +x (0) -> +z (0.25) -> -x (0.5) -> -z (0.75).
 presets:
+  - id: craft-blacksmith-forge
+    label: Medieval blacksmith's forge & workshop
+    primitives:
+      - id: main-workshop
+        label: Two-storey stone workshop
+        kind: curved-volume
+        position: [0, -0.4]
+        footprint: { family: rounded, width: 7.4, depth: 4.6, cornerRadius: 0.12 }
+        height: 4
+        levels: 2
+        thickness: 0.45
+        surface: masonry
+        stonework: ashlar
+        age: 0.55
+        quoins: true
+        beltCourses: true
+        terrace: 0.85
+        roof: { family: gable, rise: 2.35, overhang: 0.42, sweep: 0.16, sag: 0.08, axis: width }
+        base: { style: stepped-plinth, height: 0.85, out: 0.2 }
+        shutters: false
+        chimney: false
+        windowBoxes: false
+        ivyDensity: 0
+        interior: paving
+        openings:
+          - { id: back-ground, role: window, profile: square, bottom: 0.9, width: 0.72, height: 0.92, at: 0.171 }
+          - { id: back-upper, role: window, profile: square, bottom: 2.35, width: 0.72, height: 0.88, at: 0.171 }
+          - { id: right-ground, role: window, profile: square, bottom: 0.95, width: 0.72, height: 0.92, at: 0.442 }
+          - { id: right-upper-front, role: window, profile: square, bottom: 2.35, width: 0.72, height: 0.88, at: 0.442 }
+          - { id: right-upper-back, role: window, profile: square, bottom: 2.35, width: 0.72, height: 0.88, at: 0.358 }
+          - { id: right-gable-vent, role: slit, profile: square, bottom: 4.85, width: 0.36, height: 0.36, at: 0.4005 }
+          - { id: front-loft, role: window, profile: square, bottom: 2.65, width: 0.85, height: 0.85, at: 0.644 }
+          - { id: left-upper, role: window, profile: square, bottom: 2.45, width: 0.85, height: 0.92, at: 0.9005 }
+          - { id: left-gable-vent, role: slit, profile: square, bottom: 4.85, width: 0.36, height: 0.36, at: 0.9005 }
+        features:
+          - { id: hearth-chimney, kind: chimney, at: 0.928, width: 1.15, depth: 1.05, height: 7.75, bottom: 0 }
+          - { id: front-right-buttress, kind: buttress, profile: curved, at: 0.515, width: 0.48, depth: 0.65, height: 1.35 }
+          - { id: front-left-buttress, kind: buttress, profile: curved, at: 0.835, width: 0.48, depth: 0.65, height: 1.35 }
+          - { id: back-plinth-buttress, kind: buttress, profile: stepped, at: 0.255, width: 1.4, depth: 0.42, height: 1.2 }
+      - id: forge-shed
+        label: Lean-to forge bay
+        kind: curved-volume
+        position: [-0.8, 2.75]
+        footprint: { family: rounded, width: 4.9, depth: 3.1, cornerRadius: 0.12 }
+        height: 2.15
+        levels: 1
+        thickness: 0.42
+        surface: masonry
+        stonework: ashlar
+        age: 0.68
+        quoins: true
+        beltCourses: true
+        terrace: 0.85
+        roof: { family: shed, rise: 1.25, overhang: 0.34, sweep: 0.12, sag: 0.04, axis: width }
+        base: { style: stepped-plinth, height: 0.55, out: 0.14 }
+        shutters: false
+        chimney: false
+        windowBoxes: false
+        ivyDensity: 0
+        interior: forge
+        openings:
+          - { id: side-door, role: arch, profile: arched, bottom: 0, width: 1.05, height: 1.78, at: 0.415 }
+          - { id: front-right-arch, role: arch, profile: arched, bottom: 0, width: 1.38, height: 1.72, at: 0.594 }
+          - { id: front-left-arch, role: arch, profile: arched, mullions: post, bottom: 0, width: 1.52, height: 1.75, at: 0.714 }
+        features:
+          - { id: shed-right-buttress, kind: buttress, profile: curved, at: 0.522, width: 0.42, depth: 0.62, height: 1.25 }
+          - { id: shed-left-buttress, kind: buttress, profile: curved, at: 0.782, width: 0.42, depth: 0.62, height: 1.25 }
+
   - id: craft-smithy
     label: Smithy with forge canopy and coal shed
     primitives:

@@ -14,7 +14,7 @@ export function shapeProductDomains(plan, recipe) {
 
 const openingCut = ({ shutterPose, ...fields }) => { void shutterPose; return fields; };
 const body = (primitive, includeOpenings = true, includeShutters = false) => {
-  const { roof, openings, suppressed, facade, shutters, automaticGates, craft, chimney, windowBoxes, interior, ivyDensity, features, detailOverrides, age, style, ...fields } = primitive;
+  const { roof, openings, suppressed, facade, shutters, automaticGates, craft, chimney, windowBoxes, interior, ivyDensity, features, detailOverrides, age, style, quoins, beltCourses, terrace, ...fields } = primitive;
   void roof;
   void suppressed;
   void facade;
@@ -25,6 +25,7 @@ const body = (primitive, includeOpenings = true, includeShutters = false) => {
   void detailOverrides;
   void age; void style;
   void chimney; void windowBoxes; void interior; void ivyDensity;
+  void quoins; void beltCourses; void terrace;
   return { ...fields, ...(includeOpenings ? { openings: includeShutters ? openings : openings?.map(openingCut) } : {}) };
 };
 
@@ -52,7 +53,7 @@ export function shapeProductKey(recipe, plan, domain) {
     domain === 'supports'
       ? { id: p.id, label: p.label, supports: plan.supports }
       : domain === 'ground'
-        ? { primitive: body(p), ground: plan.ground, neighbors }
+        ? { primitive: body(p), terrace: p.terrace, ground: plan.ground, neighbors }
       : domain === 'features'
         ? { features: featureProducts(plan), style: plan.resolvedStyle,
             neighbors: plan.features.some((f) => f.solidSupport) ? roofNeighbors(plan) : neighbors }
@@ -69,11 +70,12 @@ export function shapeProductKey(recipe, plan, domain) {
             height: p.height,
             thickness: p.thickness,
             taper: p.taper,
-            base: p.base, stages: p.stages, crown: p.crown,
+            base: p.base, stages: p.stages, crown: p.crown, ruin: p.ruin,
             footprint: p.footprint,
             surface: p.surface,
             roof: p.roof,
             replaced: plan.roofReplaced,
+            gableOpenings: (plan.openings ?? []).filter((o) => o.bottom + o.height > p.height - 1e-4).map(openingCut),
             decorations: plan.decorations?.filter((d) => d.role === 'chimney'),
             junctions: plan.roofJunctions,
             neighbors: roofNeighbors(plan),
@@ -93,6 +95,8 @@ export function shapeProductKey(recipe, plan, domain) {
             ? plan
             : {
                 primitive: body(p),
+                quoins: p.quoins,
+                beltCourses: p.beltCourses,
                 openings: plan.openings.map(openingCut),
                 neighbors,
                 flatCoping: p.roof?.family === 'flat',
@@ -101,7 +105,7 @@ export function shapeProductKey(recipe, plan, domain) {
                 roof: p.surface === 'masonry' ? [p.roof, Boolean(plan.roofReplaced)] : null,
               };
   const regions = {
-    walls: ['walls', 'trim', 'deck', 'inserts', 'glazing', 'metal'],
+    walls: ['walls', 'trim', 'deck', 'inserts', 'glazing', 'metal', 'glow'],
     roof: ['roof', 'walls', 'trim', 'deck', 'inserts', 'metal', 'flashing'],
     supports: ['supports'],
     crown: ['walls', 'trim', 'deck'],

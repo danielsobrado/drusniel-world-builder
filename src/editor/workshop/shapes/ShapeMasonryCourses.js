@@ -3,22 +3,33 @@ import { createShapeRoofSurface } from './ShapeRoofSurface.js';
 import { shapeRandom } from './ShapeMesh.js';
 import { shapeCellWear } from './ShapeWeathering.js';
 import { WORKSHOP_GEOMETRY_TOLERANCE as tolerance } from '../curves/GeometryTolerancePolicy.js';
-import { SHAPE_COURSE_HEIGHT } from './ShapeProfile.js';
+import { SHAPE_COURSE_HEIGHT, shapeBaseTop } from './ShapeProfile.js';
 import { SHAPE_CASTLE_CONFIG } from './config/ShapeCastleConfig.generated.js';
 import { shapeStoneCut } from './ShapeStoneCut.js';
 import { shapeCourseStones } from './ShapeCourseBond.js';
+import { hasShapeRuin } from './ShapeRuin.js';
+import { getWorkshopMaterialPreset } from '../ProceduralWorkshopMaterialConfig.js';
 
 // Furthest a course stone reaches past the wall face (base relief, bevel, protrusion, crowned face).
-const CELL_RELIEF = 0.2;
-const ROOF_UNDERSIDE = 0.07;
+const CELL_RELIEF = 0.09;
+const ROOF_UNDERSIDE = 0.025;
 
 // Cool grey ashlar is a vertex tint over the shared stone slot, so it never recolours other buildings.
 // The multipliers are linear and sized against the slot's base colour for each recipe stone.
 const ASHLAR_TINT = Object.freeze({ granite: [1.0, 1.08, 1.35], default: [0.54, 0.67, 1.06] });
 const PLAIN = Object.freeze([1, 1, 1]);
 
+function hasPbrStoneOverride(recipe, plan) {
+  const regionId = `${plan.id}:trim`;
+  const presetId = recipe?.materialAreaOverrides?.[regionId] ?? recipe?.materialDefaults?.stone;
+  if (!presetId) return false;
+  const preset = getWorkshopMaterialPreset(recipe, presetId);
+  return Boolean(preset?.pbrAsset);
+}
+
 /** Multiplier every dressed-stone tone of a shape shares, so trim never drifts from its wall. */
 export function shapeStoneTint(recipe, plan) {
+  if (hasPbrStoneOverride(recipe, plan)) return PLAIN;
   return plan.primitive.stonework === 'ashlar' ? ASHLAR_TINT[recipe.style] ?? ASHLAR_TINT.default : PLAIN;
 }
 /** Mortar seen between ashlar stones: a dark recessed joint rather than a plaster-coloured gap. */
@@ -50,11 +61,13 @@ export const SHAPE_MASONRY_CORE_TONE = Object.freeze([0.9, 0.88, 0.84]);
  */
 export function shapeMasonryCeiling(plan, surface) {
   const p = plan.primitive;
-  if (!p.roof || plan.roofReplaced || !['gable', 'hip'].includes(p.roof.family)) return () => p.height;
+  const ruinAt = surface.ruinHeight ?? (() => p.height);
+  if (!p.roof || plan.roofReplaced || !['gable', 'hip', 'shed'].includes(p.roof.family)) return ruinAt;
   const roof = createShapeRoofSurface(plan);
   return (distance) => {
     const face = surface.point(distance, p.height, p.thickness / 2 + CELL_RELIEF);
-    return roof.heightAt(face[0], face[2]) - p.elevation - ROOF_UNDERSIDE;
+    const ceiling = roof.heightAt(face[0], face[2]) - p.elevation - ROOF_UNDERSIDE;
+    return plan.ruinColumns?.length ? Math.min(ruinAt(distance), ceiling) : ceiling;
   };
 }
 
@@ -68,16 +81,20 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
   course = SHAPE_COURSE_HEIGHT, cellWidth = SHAPE_CASTLE_CONFIG.masonry.ashlarLength, stagger = true,
   domain = 'masonry', key = '', rows = null,
 }) {
-  const detail = recipe.detail >= 2, length = surface.length, closed = surface.closed;
+  const detail = recipe.detail >= 2, ultra = recipe.detail >= 3, length = surface.length, closed = surface.closed;
   const cells = closed ? Math.max(2, Math.round(length / cellWidth)) : Math.ceil(length / cellWidth);
   const width = closed ? length / cells : cellWidth;
   const marks = closed ? [...distances, ...distances.map((d) => d + length)] : distances;
+  const cornerMarks = closed
+    ? [...(surface.corners ?? []), ...(surface.corners ?? []).map((d) => d + length)]
+    : (surface.corners ?? []);
   const wrap = (d) => (closed ? ((d % length) + length) % length : d);
   const windows = !spans ? [[-Infinity, Infinity]]
     : closed ? spans.flatMap(([a, b]) => [[a - length, b - length], [a, b], [a + length, b + length]]) : spans;
   const count = Math.ceil((top - bottom) / course - tolerance.length);
   // Stone (not boards, not regular cells) is laid as a rule-based bond rather than a grid.
   const bonded = detail && stagger && domain !== 'planks';
+  const curveStep = ultra ? 0.12 : 0.18;
 
   // How far the wall (or a raking roof line above it) departs from a straight chord over [a, b].
   const bend = (a, b) => {
@@ -102,11 +119,16 @@ export function buildShapeCourseBand(plan, mesh, recipe, surface, {
       const u0 = Math.max(closed ? left : Math.max(0, left), from),
         u1 = Math.min(closed ? right : Math.min(length, right), to);
       if (u1 - u0 < 0.08) continue;
-      const marked = [u0, ...marks.filter((d) => d > u0 && d < u1 && needsCut(d, y0, y1)), u1];
+      const marked = [
+        u0,
+        ...marks.filter((d) => d > u0 && d < u1 && needsCut(d, y0, y1)),
+        ...cornerMarks.filter((d) => d > u0 + 1e-4 && d < u1 - 1e-4),
+        u1,
+      ].sort((a, b) => a - b);
       const cuts = [...marked];
       // Follow a curved wall or raking roof line with short pieces; a flat run stays one stone.
       for (let k = 0; k < marked.length - 1; k++) {
-        const a = marked[k], b = marked[k + 1], pieces = bend(a, b) > 0.003 ? Math.ceil((b - a) / 0.18) : 1;
+        const a = marked[k], b = marked[k + 1], pieces = bend(a, b) > 0.003 ? Math.ceil((b - a) / curveStep) : 1;
         for (let n = 1; n < pieces; n++) cuts.push(a + ((b - a) * n) / pieces);
       }
       cuts.sort((a, b) => a - b);
@@ -165,11 +187,13 @@ export function buildShapeMasonryCourses(plan, meshes, recipe, surface, distance
   const p = plan.primitive, planks = p.surface === 'planks';
   const ceiling = p.surface === 'masonry' ? shapeMasonryCeiling(plan, surface) : () => p.height;
   const detail = recipe.detail >= 2;
+  const baseRows = Math.max(2, Math.ceil(shapeBaseTop(p) / SHAPE_COURSE_HEIGHT));
+  const twoSided = p.kind === 'curved-wall' || (p.surface === 'masonry' && hasShapeRuin(p));
   buildShapeCourseBand(plan, planks ? meshes.inserts : meshes.trim, recipe, surface, {
     top: Math.max(p.height, ...distances.map(ceiling)),
-    faces: (p.kind === 'curved-wall' ? [-1, 1] : [1]).map((side) => ({ offset: side * (p.thickness / 2 + 0.045), thickness: side * 0.055 })),
+    faces: (twoSided ? [-1, 1] : [1]).map((side) => ({ offset: side * (p.thickness / 2 + 0.045), thickness: side * 0.055 })),
     ceiling, distances, openingEdges, domain: p.surface,
     course: planks ? p.height : SHAPE_COURSE_HEIGHT, cellWidth: planks ? 0.24 : undefined, stagger: !planks,
-    rows: (row) => (detail || row === 0) && !(p.surface === 'plaster' && (row > 1 || p.grounded === false)),
+    rows: (row) => (detail || row === 0) && !(p.surface === 'plaster' && (row >= baseRows || p.grounded === false)),
   });
 }

@@ -2,6 +2,7 @@ import { shapeChoice, shapeId, shapeNumber, shapeRecord } from './ShapeValidatio
 
 export const SHAPE_OPENING_ROLES = Object.freeze(['door', 'window', 'arch', 'slit']);
 export const SHAPE_OPENING_PROFILES = Object.freeze(['arched', 'square', 'pointed']);
+export const SHAPE_OPENING_MULLIONS = Object.freeze(['none', 'post', 'bars']);
 
 /** Height of the arched head above its springing line. */
 export function shapeOpeningRise(o) {
@@ -21,10 +22,11 @@ export function shapeOpeningTop(o, dx) {
 }
 
 /** Authored host-local opening intent, shared by closed volumes and freeform walls. */
-export function normalizeShapeOpenings(input, height) {
+export function normalizeShapeOpenings(input, height, maxHeight = height) {
   const openings = input === undefined ? [] : input;
   if (!Array.isArray(openings) || openings.length > 64)
     throw new Error('A shape supports at most 64 openings.');
+  const upper = Math.max(height, maxHeight);
   const result = openings
     .map((opening) => {
       shapeRecord(opening, 'Opening');
@@ -33,15 +35,17 @@ export function normalizeShapeOpenings(input, height) {
         (typeof opening.promotedFrom !== 'string' || opening.promotedFrom.length > 160)
       )
         throw new Error('Opening promotion requires a bounded derivation key.');
+      const mullions = shapeChoice(opening.mullions, 'opening mullions', 'none', SHAPE_OPENING_MULLIONS);
       return Object.freeze({
         id: shapeId(opening.id, 'Opening id'),
         role: shapeChoice(opening.role, 'opening role', 'window', SHAPE_OPENING_ROLES),
         profile: shapeChoice(opening.profile, 'opening profile', 'arched', SHAPE_OPENING_PROFILES),
         shutterPose: shapeChoice(opening.shutterPose, 'shutter pose', 'auto', ['auto', 'open', 'ajar', 'closed']),
+        ...(mullions !== 'none' ? { mullions } : {}),
         at: shapeNumber(opening.at, 'Opening position', 0.5, 0, 1),
-        bottom: shapeNumber(opening.bottom, 'Opening bottom', 0, 0, height - 0.3),
+        bottom: shapeNumber(opening.bottom, 'Opening bottom', 0, 0, Math.max(0, upper - 0.25)),
         width: shapeNumber(opening.width, 'Opening width', 1, 0.1, 5),
-        height: shapeNumber(opening.height, 'Opening height', 1.5, 0.3, height),
+        height: shapeNumber(opening.height, 'Opening height', 1.5, 0.25, upper),
         ...(opening.promotedFrom !== undefined ? { promotedFrom: opening.promotedFrom } : {}),
       });
     })
@@ -66,19 +70,30 @@ export function shapeOpeningPortal(plan, opening) {
 }
 
 /** Fit derived cuts to the host while preserving the authored opening intent. */
-export function resolveShapeOpenings(primitive, curve) {
+export function resolveShapeOpenings(primitive, curve, ceilingAt = () => primitive.height) {
   return primitive.openings.map((opening) => {
     const half = Math.min(opening.width, curve.length) / 2;
     const center = opening.at * curve.length;
     const start = curve.closed ? center - half : Math.max(0, center - half);
     const end = curve.closed ? center + half : Math.min(curve.length, center + half);
+    const resolvedAt = curve.closed || (start === center - half && end === center + half)
+      ? opening.at : (start + end) / 2 / curve.length;
+    const resolvedWidth = curve.closed || (start === center - half && end === center + half)
+      ? Math.min(opening.width, curve.length) : end - start;
+    const u0 = resolvedAt * curve.length - resolvedWidth / 2;
+    const u1 = resolvedAt * curve.length + resolvedWidth / 2;
+    const ceiling = Math.max(primitive.height, Math.min(
+      ceilingAt(resolvedAt * curve.length),
+      ceilingAt(u0 + 0.02),
+      ceilingAt(u1 - 0.02),
+    ));
+    const bottom = Math.min(opening.bottom, Math.max(0, ceiling - 0.25));
     return {
       ...opening,
-      width: curve.closed || (start === center - half && end === center + half)
-        ? Math.min(opening.width, curve.length) : end - start,
-      at: curve.closed || (start === center - half && end === center + half)
-        ? opening.at : (start + end) / 2 / curve.length,
-      height: Math.min(opening.height, primitive.height - opening.bottom),
+      width: resolvedWidth,
+      at: resolvedAt,
+      bottom,
+      height: Math.max(0.25, Math.min(opening.height, ceiling - bottom)),
     };
   });
 }

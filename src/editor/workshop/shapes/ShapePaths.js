@@ -59,6 +59,62 @@ export function roundedFootprint(id, width, depth, radius) {
   });
 }
 
+export function polygonFootprint(id, width, depth, sides = 8, radius = 0) {
+  const count = Math.max(3, Math.min(64, Math.round(sides)));
+  const start = -Math.PI / 2 - Math.PI / count;
+  const raw = Array.from({ length: count }, (_, index) => {
+    const angle = start + (index * Math.PI * 2) / count;
+    return [Math.cos(angle), Math.sin(angle)];
+  });
+  const maxX = Math.max(...raw.map(([x]) => Math.abs(x))) || 1;
+  const maxZ = Math.max(...raw.map(([, z]) => Math.abs(z))) || 1;
+  const vertices = raw.map(([x, z]) => [(x / maxX) * (width / 2), (z / maxZ) * (depth / 2)]);
+  if (radius <= tolerance.length) {
+    return new CurvePath({
+      id: pathId(id),
+      closed: true,
+      points: vertices.map((position, index) => ({ id: `p-${index}`, position })),
+      segments: vertices.map((_, index) => ({
+        id: `edge-${index}`,
+        kind: 'line',
+        startId: `p-${index}`,
+        endId: `p-${(index + 1) % count}`,
+      })),
+    });
+  }
+  const points = [];
+  const segments = [];
+  for (let i = 0; i < count; i++) {
+    const prev = vertices[(i - 1 + count) % count];
+    const curr = vertices[i];
+    const next = vertices[(i + 1) % count];
+    const ax = prev[0] - curr[0], az = prev[1] - curr[1], lenA = Math.hypot(ax, az) || 1;
+    const bx = next[0] - curr[0], bz = next[1] - curr[1], lenB = Math.hypot(bx, bz) || 1;
+    const ua = [ax / lenA, az / lenA], ub = [bx / lenB, bz / lenB];
+    const dot = Math.max(-0.99, Math.min(0.99, ua[0] * ub[0] + ua[1] * ub[1]));
+    const halfAngle = Math.acos(dot) / 2;
+    const tanHalf = Math.max(0.15, Math.tan(halfAngle));
+    const trim = Math.min(radius / tanHalf, lenA * 0.42, lenB * 0.42);
+    const inPt = [curr[0] + ua[0] * trim, curr[1] + ua[1] * trim];
+    const outPt = [curr[0] + ub[0] * trim, curr[1] + ub[1] * trim];
+    points.push({ id: `p-${i}-in`, position: inPt }, { id: `p-${i}-out`, position: outPt });
+    segments.push({
+      id: `corner-${i}`,
+      kind: 'quadratic',
+      startId: `p-${i}-in`,
+      endId: `p-${i}-out`,
+      control: curr,
+    });
+    segments.push({
+      id: `edge-${i}`,
+      kind: 'line',
+      startId: `p-${i}-out`,
+      endId: `p-${(i + 1) % count}-in`,
+    });
+  }
+  return new CurvePath({ id: pathId(id), closed: true, points, segments });
+}
+
 export function ovalFootprint(id, width, depth) {
   // Quadratic arcs keep ellipses in the existing curve vocabulary.
   const x = width / 2,

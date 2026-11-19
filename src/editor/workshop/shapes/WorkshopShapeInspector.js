@@ -1,11 +1,13 @@
 import { createShapeWallSurface } from './ShapeWallSurface.js';
 import { shapeShutterLeafFits } from './ShapeShutterBuilder.js';
 
-const CONTEXTS = [['building', 'Shape'], ['roof', 'Roof'], ['opening', 'Openings'], ['feature', 'Features'], ['details', 'Dressing'], ['all', 'Advanced']];
+const CONTEXTS = [['building', 'Shape'], ['roof', 'Roof'], ['opening', 'Openings'], ['feature', 'Features'], ['pbr', 'PBR'], ['details', 'Dressing'], ['all', 'Advanced']];
 const SECTION_CONTEXT = { common: 'building', wall: 'building', curve: 'building', traversal: 'building', fortification: 'building',
-  openings: 'opening', features: 'feature', details: 'details', style: 'details' };
-const unit = field => field === 'rotation' ? '°' : ['at', 'opening-at', 'age', 'ivyDensity', 'taper', 'crown-ruin'].includes(field)
-  ? 'ratio' : field === 'levels' ? 'floors' : 'm';
+  openings: 'opening', features: 'feature', pbr: 'pbr', details: 'details', style: 'details' };
+const unit = field => field === 'rotation' ? '°'
+  : field === 'sides' ? 'sides'
+    : ['at', 'opening-at', 'age', 'ivyDensity', 'taper', 'crown-ruin', 'ruin-amount', 'ruin-at', 'ruin-width'].includes(field)
+      ? 'ratio' : field === 'levels' ? 'floors' : 'm';
 
 /** Context affects presentation only; authored edits still go through the semantic session. */
 export class WorkshopShapeInspector {
@@ -23,7 +25,7 @@ export class WorkshopShapeInspector {
     }
     for (const label of root.querySelectorAll('[data-shape-section="volume"] > label')) {
       const field = label.querySelector('[data-shape-field]')?.dataset.shapeField;
-      label.dataset.inspectorScope = field?.startsWith('roof-') ? 'roof' : ['craft', 'chimney', 'windowBoxes', 'interior', 'ivyDensity'].includes(field) ? 'details' : 'building';
+      label.dataset.inspectorScope = field?.startsWith('roof-') ? 'roof' : ['craft', 'chimney', 'windowBoxes', 'interior', 'ivyDensity', 'quoins', 'beltCourses'].includes(field) ? 'details' : 'building';
     }
     for (const range of root.querySelectorAll('input[type="range"]')) {
       const number = document.createElement('input'); number.type = 'number'; number.className = 'workshop-exact-value';

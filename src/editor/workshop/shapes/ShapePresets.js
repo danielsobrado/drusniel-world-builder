@@ -309,6 +309,28 @@ export function createShapePreset(id) {
 }
 
 export function createShapePrimitive(kind, id) {
+  if (kind === 'tower') {
+    return volume(id, 'New tower', {
+      position: [4, 0],
+      height: 11,
+      levels: 3,
+      thickness: 0.55,
+      surface: 'masonry',
+      stonework: 'ashlar',
+      shutters: false,
+      craft: false,
+      interior: 'none',
+      footprint: { family: 'polygon', width: 5.6, depth: 5.6, sides: 8, cornerRadius: 0 },
+      base: { style: 'molded', height: 1.05, out: 0.28 },
+      crown: { style: 'corbelled', projection: 0.45, height: 0.85, corbelSpacing: 0.72, arcade: 'round', merlonWidth: 0.9, merlonGap: 0.55, merlonHeight: 0.85 },
+      roof: { family: 'flat' },
+      openings: [
+        { id: 'door', role: 'door', profile: 'pointed', at: 0.625, bottom: 0, width: 1.15, height: 2.3 },
+        { id: 'window-high', role: 'window', profile: 'arched', at: 0.625, bottom: 6.4, width: 0.65, height: 1.55 },
+        { id: 'loop-side', role: 'slit', profile: 'square', at: 0.375, bottom: 4.1, width: 0.14, height: 1.35 },
+      ],
+    });
+  }
   const factory = { 'curved-volume': volume, 'curved-wall': wall, traversal }[kind];
   if (!factory) throw new Error(`Unknown shape kind: ${kind}.`);
   return factory(

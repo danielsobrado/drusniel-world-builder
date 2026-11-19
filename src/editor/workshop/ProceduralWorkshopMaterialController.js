@@ -662,12 +662,29 @@ export class ProceduralWorkshopMaterialController {
       ...BUILTIN_WORKSHOP_MATERIAL_PRESETS,
       ...this.document.materialLibrary.presets,
     };
-    this.presetSelect.replaceChildren(...Object.values(allPresets).map((preset) => {
-      const option = document.createElement('option');
-      option.value = preset.id;
-      option.textContent = preset.label;
-      option.selected = preset.id === presetId;
-      return option;
+    const groups = new Map();
+    for (const preset of Object.values(allPresets)) {
+      const group = preset.pbrAsset
+        ? `PBR · ${preset.category ?? 'Library'}`
+        : preset.proceduralSurface
+          ? 'Village procedural surfaces'
+          : BUILTIN_WORKSHOP_MATERIAL_PRESETS[preset.id]
+            ? 'Classic procedural tones'
+            : 'Custom presets';
+      if (!groups.has(group)) groups.set(group, []);
+      groups.get(group).push(preset);
+    }
+    this.presetSelect.replaceChildren(...[...groups.entries()].map(([label, presets]) => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = label;
+      optgroup.append(...presets.map((preset) => {
+        const option = document.createElement('option');
+        option.value = preset.id;
+        option.textContent = preset.label;
+        option.selected = preset.id === presetId;
+        return option;
+      }));
+      return optgroup;
     }));
     const preset = getWorkshopMaterialPreset(this.document, presetId)
       ?? BUILTIN_WORKSHOP_MATERIAL_PRESETS['granite-masonry'];

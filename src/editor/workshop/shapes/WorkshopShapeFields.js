@@ -4,6 +4,7 @@ import { shapeGateMarkup } from './ShapeGateControls.js';
 import { adaptShapeHeight, shapeFieldEditable } from './ShapeEditConstraints.js';
 import { shapeFeatureMarkup } from './ShapeFeatureControls.js';
 import { shapeDetailMarkup } from './ShapeDetailControls.js';
+import { shapePbrMarkup } from './ShapePbrControls.js';
 
 const range = (field, label, min, max, step) =>
   `<label>${label}<input type="range" data-shape-field="${field}" min="${min}" max="${max}" step="${step}"/><output data-shape-output="${field}"></output></label>`;
@@ -19,6 +20,7 @@ export function workshopShapeMarkup() {
     <label>Starting design<select data-shape-action="preset">${presetOptions()}</select></label>
     <label>Selected shape<select data-shape-action="select"></select></label>
     <div class="workshop-shape-actions">
+      <button type="button" data-shape-action="add-tower">+ Tower</button>
       <button type="button" data-shape-action="add-volume">+ Building</button>
       <button type="button" data-shape-action="add-wall">+ Wall</button>
       <button type="button" data-shape-action="add-path">+ Path</button>
@@ -32,7 +34,7 @@ export function workshopShapeMarkup() {
       ${range('age', 'Weathering', 0, 1, 0.05)}
     </div>
     <div class="workshop-shape-fields" data-shape-section="wall">
-      ${range('height', 'Wall height', 1, 14, 0.1)}${range('thickness', 'Wall thickness', 0.15, 1, 0.05)}
+      ${range('height', 'Wall height', 1, 32, 0.1)}${range('thickness', 'Wall thickness', 0.15, 1.4, 0.05)}
       ${select('surface', 'Wall surface', [
         ['plaster', 'Warm plaster'],
         ['masonry', 'Chunky masonry'],
@@ -46,19 +48,23 @@ export function workshopShapeMarkup() {
         ['timber', 'Half-timber framing'],
       ])}
       <label class="workshop-check"><input type="checkbox" data-shape-field="shutters"/>Window shutters</label>
+      <label class="workshop-check"><input type="checkbox" data-shape-field="quoins"/>Corner quoins</label>
+      <label class="workshop-check"><input type="checkbox" data-shape-field="beltCourses"/>String courses</label>
       <label class="workshop-check"><input type="checkbox" data-shape-field="craft"/>Chimney &amp; planted window boxes</label>
       <label class="workshop-check"><input type="checkbox" data-shape-field="chimney"/>Chimney</label>
       <label class="workshop-check"><input type="checkbox" data-shape-field="windowBoxes"/>Planted window boxes</label>
       ${range('ivyDensity', 'Ivy density', 0, 1, 0.05)}
-      ${select('interior', 'Interior finish', [['auto', 'Automatic'], ['none', 'No interior finish'], ['paving', 'Paving'], ['bench', 'Paving and wall bench']])}
-      ${range('levels', 'Floors', 1, 6, 1)}
+      ${select('interior', 'Interior finish', [['auto', 'Automatic'], ['none', 'No interior finish'], ['paving', 'Paving'], ['bench', 'Paving and wall bench'], ['forge', 'Flagstones and forge hearth']])}
+      ${range('levels', 'Floors', 1, 10, 1)}
       ${select('footprint', 'Footprint', [
+        ['polygon', 'Polygon (N sides)'],
         ['rounded', 'Rounded rectangle'],
         ['oval', 'Oval'],
         ['custom', 'Custom outline'],
       ])}
-      ${range('width', 'Width', 2, 16, 0.1)}${range('depth', 'Depth', 2, 12, 0.1)}
-      ${range('radius', 'Corner radius', 0, 3, 0.05)}${range('taper', 'Top width', 0.65, 1.2, 0.01)}
+      ${range('sides', 'Polygon sides', 3, 64, 1)}
+      ${range('width', 'Width', 2, 24, 0.1)}${range('depth', 'Depth', 2, 24, 0.1)}
+      ${range('radius', 'Corner radius', 0, 3, 0.05)}${range('taper', 'Top width', 0.65, 1.2, 0.01)}${range('terrace', 'Foundation terrace', 0, 2.5, 0.05)}
       ${select(
         'roof-family',
         'Roof shape',
@@ -67,6 +73,7 @@ export function workshopShapeMarkup() {
           {
             hip: 'Hipped pavilion',
             gable: 'Swept gable',
+            shed: 'Lean-to shed',
             bell: 'Bell roof',
             cone: 'Cone',
             spire: 'Slender spire',
@@ -74,7 +81,7 @@ export function workshopShapeMarkup() {
           }[f],
         ]),
       )}
-      ${range('roof-rise', 'Roof height', 0.2, 8, 0.1)}${range('roof-overhang', 'Roof overhang', 0.05, 1.5, 0.05)}
+      ${range('roof-rise', 'Roof height', 0.2, 16, 0.1)}${range('roof-overhang', 'Roof overhang', 0.05, 1.5, 0.05)}
       ${select('roof-axis', 'Ridge direction', [['width', 'Along width'], ['depth', 'Along depth']])}
       ${range('roof-sweep', 'Roof sweep', 0, 1, 0.05)}${range('roof-sag', 'Ridge sag', 0, 0.5, 0.02)}
       <label class="workshop-check"><input type="checkbox" data-shape-field="supports"/>Automatic supports</label>
@@ -83,9 +90,9 @@ export function workshopShapeMarkup() {
       ${range('length', 'Length', 2, 16, 0.1)}${range('bend', 'Curve bend', -10, 10, 0.1)}
     </div>
     <div class="workshop-shape-fields" data-shape-section="fortification">
-      ${select('base-style', 'Wall footing', [['none', 'Plain'], ['batter', 'Battered (flared)'], ['plinth', 'Stepped plinth']])}
-      ${range('base-height', 'Footing height', 0.2, 6, 0.1)}${range('base-out', 'Footing spread', 0, 2, 0.05)}
-      ${range('stage-at', 'Setback height', 0.3, 24, 0.1)}${range('stage-out', 'Setback amount', -1, 1, 0.02)}
+      ${select('base-style', 'Wall footing', [['none', 'Plain'], ['batter', 'Battered (flared)'], ['plinth', 'Chamfered plinth'], ['stepped-plinth', 'Multi-stepped plinth'], ['molded', 'Molded torus plinth']])}
+      ${range('base-height', 'Footing height', 0.2, 8, 0.1)}${range('base-out', 'Footing spread', 0, 2, 0.05)}
+      ${range('stage-at', 'Setback height', 0.3, 32, 0.1)}${range('stage-out', 'Setback amount', -1, 1, 0.02)}
       ${select('crown-style', 'Crown', [['none', 'No crown'], ['parapet', 'Flush battlement'], ['corbelled', 'Projecting corbelled crown']])}
       ${range('crown-projection', 'Crown projection', 0.1, 1.5, 0.05)}${range('crown-height', 'Parapet height', 0.2, 3, 0.05)}
       ${range('crown-corbelSpacing', 'Corbel spacing', 0.35, 3, 0.05)}${range('crown-corbelDrop', 'Corbel height', 0.3, 2.5, 0.05)}
@@ -95,6 +102,9 @@ export function workshopShapeMarkup() {
       ${range('crown-merlonWidth', 'Merlon width', 0.3, 3, 0.05)}${range('crown-merlonGap', 'Embrasure width', 0.2, 3, 0.05)}
       ${range('crown-merlonHeight', 'Merlon height', 0.3, 2.5, 0.05)}${range('crown-ruin', 'Ruined battlements', 0, 1, 0.05)}
       ${select('crown-sides', 'Battlement sides', [['outer', 'Outer face'], ['both', 'Both faces']])}
+      ${range('ruin-amount', 'Wall breach / ruin', 0, 1, 0.05)}
+      ${range('ruin-at', 'Breach position', 0, 1, 0.02)}
+      ${range('ruin-width', 'Breach width', 0.12, 0.9, 0.02)}
     </div>
     <div class="workshop-shape-fields" data-shape-section="traversal">
       ${range('path-width', 'Path width', 0.6, 4, 0.1)}${range('rise', 'End height difference', 0, 6, 0.1)}
@@ -123,10 +133,12 @@ export function workshopShapeMarkup() {
         ])}
         ${range('opening-at', 'Along wall', 0, 0.99, 0.01)}${range('opening-bottom', 'Opening bottom', 0, 5, 0.05)}
         ${range('opening-width', 'Opening width', 0.1, 3, 0.05)}${range('opening-height', 'Opening height', 0.3, 4, 0.05)}
+        ${select('opening-mullions', 'Divider', [['none', 'Open'], ['post', 'Timber post'], ['bars', 'Iron grille bars']])}
         ${select('opening-shutterPose', 'Shutter pose', [['auto', 'Natural variation'], ['open', 'Open'], ['ajar', 'Ajar'], ['closed', 'Closed']])}
       </div>
     </div>
     ${shapeFeatureMarkup()}
+    ${shapePbrMarkup()}
     ${shapeDetailMarkup()}
     <div class="workshop-shape-fields" data-shape-section="style">${['floor', 'trim', 'supports', 'railing'].map((field) => select(`style-${field}`, `${field[0].toUpperCase()}${field.slice(1)} material`, [['auto', 'Inherit from connected shape'], ['stone', 'Stone'], ['timber', 'Timber']])).join('')}</div>
     ${shapeGateMarkup()}
@@ -138,6 +150,10 @@ export function shapeFieldValue(p, field, opening) {
   if (['chimney', 'windowBoxes'].includes(field)) return p.craft && p[field];
   if (field.startsWith('style-')) return p.style[field.slice(6)] ?? 'auto';
   if (field.startsWith('base-') || field.startsWith('crown-')) return p[field.split('-')[0]]?.[field.split('-')[1]];
+  if (field.startsWith('ruin-')) {
+    const key = field.slice(5);
+    return p.ruin?.[key] ?? (key === 'amount' ? 0 : key === 'at' ? 0.25 : 0.44);
+  }
   // Undefined on walls and paths, which have no setbacks; volumes show stage 0 or its would-be defaults.
   if (field.startsWith('stage-')) return p.stages && (field === 'stage-at' ? p.stages[0]?.at ?? p.height * 0.6 : p.stages[0]?.out ?? 0);
   const fields = {
@@ -145,6 +161,7 @@ export function shapeFieldValue(p, field, opening) {
     z: p.position[1],
     width: p.footprint?.width,
     depth: p.footprint?.depth,
+    sides: p.footprint?.sides ?? 8,
     radius: p.footprint?.cornerRadius,
     footprint: p.footprint?.family,
     'path-width': p.width,
@@ -155,6 +172,7 @@ export function shapeFieldValue(p, field, opening) {
     'roof-sag': p.roof?.sag,
     supports: !p.suppressed?.some((key) => key.startsWith(`support:${p.id}:`)),
   };
+  if (field === 'opening-mullions') return opening ? opening.mullions ?? 'none' : undefined;
   if (field.startsWith('opening-')) return opening?.[field.slice(8)];
   return fields[field] ?? p[field];
 }
@@ -178,17 +196,24 @@ export function shapeFieldChanges(p, field, value, openingId) {
         ? p.suppressed.filter((key) => !key.startsWith(`support:${p.id}:`))
         : [...p.suppressed, ...[0, 1, 2, 3].map((i) => `support:${p.id}:corner-${i}`)],
     };
-  if (['width', 'depth', 'radius', 'footprint'].includes(field)) {
+  if (['width', 'depth', 'radius', 'sides', 'footprint'].includes(field)) {
+    const mapped = {
+      width: 'width',
+      depth: 'depth',
+      radius: 'cornerRadius',
+      sides: 'sides',
+      footprint: 'family',
+    }[field];
     const f = {
       ...p.footprint,
-      [{
-        width: 'width',
-        depth: 'depth',
-        radius: 'cornerRadius',
-        footprint: 'family',
-      }[field]]: value,
+      [mapped]: field === 'sides' ? Math.round(value) : value,
     };
-    f.cornerRadius = Math.min(f.cornerRadius, Math.min(f.width, f.depth) / 2);
+    if (field === 'footprint' && value === 'polygon') {
+      f.sides = f.sides ?? 8;
+      if (p.footprint.family !== 'polygon') f.cornerRadius = 0;
+    }
+    if (f.family !== 'polygon') delete f.sides;
+    f.cornerRadius = Math.min(f.cornerRadius ?? 0, Math.min(f.width, f.depth) / 2);
     return { footprint: f, thickness: Math.min(p.thickness, Math.min(f.width, f.depth) / 5) };
   }
   if (field.startsWith('roof-'))
@@ -201,6 +226,11 @@ export function shapeFieldChanges(p, field, value, openingId) {
   if (field.startsWith('base-') || field.startsWith('crown-')) {
     const [group, key] = field.split('-');
     return { [group]: { ...p[group], [key]: value } };
+  }
+  if (field.startsWith('ruin-')) {
+    const key = field.slice(5);
+    const ruin = { amount: 0, at: 0.25, width: 0.44, ...p.ruin, [key]: value };
+    return { ruin };
   }
   if (field.startsWith('stage-')) {
     const stages = [...p.stages];

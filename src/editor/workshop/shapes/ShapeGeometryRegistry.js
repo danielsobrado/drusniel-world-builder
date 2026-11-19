@@ -18,7 +18,7 @@ const builders = new Map([
     'walls',
     (plan, meshes, recipe) => {
       buildShapeWalls(plan, clipShapeMeshSet(meshes, plan, { roofs: false }), recipe);
-      if (plan.primitive.roof) buildShapeFloors(plan, meshes);
+      if (plan.primitive.roof) buildShapeFloors(plan, meshes, recipe);
     },
   ],
   ['roof', buildShapeRoof],
@@ -42,6 +42,7 @@ const slots = Object.freeze({
   flashing: 'metal',
   supports: 'stone',
   rails: 'stone',
+  glow: 'glow',
 });
 
 export function buildRegisteredShape(
