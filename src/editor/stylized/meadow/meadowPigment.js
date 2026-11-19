@@ -37,9 +37,8 @@ const STRAW_SEED = '#d6c088';
  * a distant stand reads as one lit surface with the ground's own value instead
  * of a speckle of separate spikes. `melted` forces it fully on (far cards).
  */
-export function meadowPigment({ uniforms, tuning, config, blade, marks = false, melted = false }) {
+export function meadowPigment({ uniforms, tuning, config, blade, marks = false, melted = false, height = uv().y.clamp(0, 1) }) {
   const appearance = uniforms.appearance;
-  const height = uv().y.clamp(0, 1);
   const patchSettings = { ...MEADOW_GRASS_DEFAULTS.appearance, ...config.grass?.meadow?.appearance };
   const { tint, dry, dryColor } = meadowPatchColors(blade.canonical, patchSettings, {
     patchScale: appearance.patchScale, patchCool: uniforms.patchCool, patchWarm: uniforms.patchWarm,

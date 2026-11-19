@@ -33,7 +33,14 @@ test('captured scene colour uses RGB absorption and manual coverage compositing'
   // Coverage composites the body manually because the refracted colour already
   // carries the scene behind it; the waterline fade is what keeps that opaque
   // sheet from painting over the beach where the body has no thickness.
-  assert.match(source, /alpha = waterCoverage\.mul\(waterlineFade\);/);
+  assert.match(source, /const refractionAlpha = waterCoverage\.mul\(waterlineFade\);/);
+  assert.match(source, /alpha = mix\(alpha, refractionAlpha, refractionWeight\)/);
+  assert.match(source, /refractionWeight\.mul\(refractionAlpha\)\.div\(max\(alpha,/);
+});
+
+test('both water variants match at the nearest possible edge of an excluded chunk', () => {
+  assert.match(source, /const refractionWeight = oneMinus\(smoothstep\([\s\S]*?REFRACTION_CHUNK_RADIUS \* chunkWorldSize,\s*distance,/);
+  assert.match(source, /\.mul\(foam\.intersectionStrength \* quality\.intersectionFoamStrength\)\s*\.mul\(refractionWeight\)/);
 });
 
 test('refraction uses only two bounded FBM samples', () => {

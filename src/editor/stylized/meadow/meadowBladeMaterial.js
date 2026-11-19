@@ -44,18 +44,21 @@ export function createMeadowBladeMaterial({
   // Shadow receivers interpolate positionWorld so these varying assignments stay in the vertex stage.
   const bentNormal = varyingProperty('vec3', 'meadowBentNormal');
   const gust = varyingProperty('float', 'meadowGust');
+  const profileHeight = varyingProperty('float', 'meadowProfileHeight');
   const position = createMeadowBladePosition({
     uniforms, tuning, config, bandCount, tileSize,
-    interaction: uniforms.interaction, normalOutput: bentNormal, gustOutput: gust,
+    interaction: uniforms.interaction, normalOutput: bentNormal, gustOutput: gust, heightOutput: profileHeight,
   });
   material.positionNode = position;
 
   const blade = meadowInstance(uniforms.origin);
-  const { pigment, bladeValue, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade, marks: true });
+  const { pigment, bladeValue, color: albedo, height } = meadowPigment({
+    uniforms, tuning, config, blade, marks: true, height: profileHeight,
+  });
 
   // Deformation-aware shading uses the normal computed with the vertex position.
   // Interpolation adds no second wind, tuft or interaction-map evaluation.
-  const side = attribute('bladeSide', 'float').clamp(-1, 1);
+  const side = attribute('bladeProfile', 'vec4').x.clamp(-1, 1).toVarying();
   const worldNormal = bentNormal.normalize();
   material.normalNode = cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz.normalize();
   const detailReach = cameraPosition.distance(blade.base).smoothstep(6, 14).oneMinus().toVarying('meadowBladeDetailReach');

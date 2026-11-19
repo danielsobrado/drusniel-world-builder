@@ -59,7 +59,8 @@ export function sampleSeaRefraction(depth, shoreDistance, carrier, refraction) {
     localWaveNumber,
     normalWaveNumber,
     refractedSine,
-    phaseShift: (normalWaveNumber - carrier.normalReferenceWaveNumber) * phaseDistance * strength,
+    phaseShift: phaseDistance === 0 || strength === 0 ? 0
+      : (normalWaveNumber - carrier.normalReferenceWaveNumber) * phaseDistance * strength,
   };
 }
 

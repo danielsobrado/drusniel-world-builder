@@ -16,13 +16,9 @@ import { SEA_SWELL_COMPONENTS, seaSwellPhaseOrigin } from '../water/SeaSwell.js'
 import { waterfallPatternOrigin } from './WaterfallShading.js';
 import { createWaterPatternOrigins } from './WaterPatternOrigins.js';
 import { updateWaterVisualClock } from '../water/WaterVisualClock.js';
+import { REFRACTION_CHUNK_RADIUS } from '../water/WaterRefraction.js';
 
 const WATER_FIELD_CHANNELS = 4;
-// Chebyshev radius, in chunks around the focus chunk, within which water is
-// refracted. Wide enough that the swap happens well outside the range where
-// refraction reads as anything but a faint tint, narrow enough that standing
-// away from a shoreline submits no refractive material at all.
-const REFRACTION_CHUNK_RADIUS = 2;
 
 export class StylizedWaterSlot {
   constructor({ terrainSlot, terrainView, config, sunDirection = null, sharedMaterials = null }) {
@@ -139,10 +135,8 @@ export class StylizedWaterSlot {
   /**
    * Whether this chunk is close enough to the camera to be worth refracting.
    *
-   * Measured in chunks from the focus chunk rather than metres so it needs no
-   * camera pose: the focus chunk already tracks the viewer. Distant water keeps
-   * the plain variant, which is what lets a player away from the shore avoid the
-   * viewport copies entirely.
+   * The shader fades refraction to zero before the nearest possible edge of
+   * the first omitted chunk. Far slots can then skip the viewport copies.
    */
   isWithinRefractionRange() {
     const focus = this.terrainView.focusChunk;

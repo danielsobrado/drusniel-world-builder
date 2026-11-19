@@ -134,12 +134,15 @@ function silhouette(shape, primaryShape, r, taperSeed) {
  * order, and the survivors widen by the share already retired (capped), so the
  * count drops without the meadow going bald.
  */
-function lodCoverage({ bands, bandCount, distance, rank, appearance }) {
+function lodCoverage({ bands, bandCount, distance, rank, appearance, ratio }) {
   const coverage = float(1).toVar();
   const standing = bands.element(bandCount - 1).z.toVar();
+  const targets = attribute('bladeProfile', 'vec4').yzw;
   for (let index = 0; index < bandCount; index += 1) {
     const band = bands.element(index);
-    const phase = smoothstep(band.x.sub(band.w), band.x, distance).mul(1.2).toVar();
+    const progress = smoothstep(band.x.sub(band.w), band.x, distance).toVar();
+    if (index < 3) ratio.assign(mix(ratio, targets.element(index), progress));
+    const phase = progress.mul(1.2).toVar();
     standing.addAssign(band.y.sub(band.z).mul(float(1.1).sub(phase).clamp(0, 1)));
     If(rank.greaterThanEqual(band.z).and(rank.lessThan(band.y)), () => {
       const order = band.y.sub(rank).div(band.y.sub(band.z).max(1));
@@ -213,19 +216,20 @@ function foldUnderBody(blade, local, ribbon, height, ratio, uniforms, interactio
  */
 export function createMeadowBladePosition({
   uniforms, tuning, config, bandCount, tileSize, interaction = null,
-  normalOutput = null, gustOutput = null,
+  normalOutput = null, gustOutput = null, heightOutput = null,
 }) {
   return Fn(() => {
     const blade = meadowInstance(uniforms.origin);
     const bladeUv = uv();
-    const r = bladeUv.y.clamp(0, 1);
+    const r = bladeUv.y.clamp(0, 1).toVar();
     const local = vec3(0).toVar();
     if (normalOutput) normalOutput.assign(vec3(0, 1, 0));
     if (gustOutput) gustOutput.assign(float(0));
     const distance = blade.base.xz.sub(cameraPosition.xz).length();
     const lod = lodCoverage({
-      bands: uniforms.lodBands, bandCount, distance, rank: blade.rank, appearance: uniforms.appearance,
+      bands: uniforms.lodBands, bandCount, distance, rank: blade.rank, appearance: uniforms.appearance, ratio: r,
     });
+    if (heightOutput) heightOutput.assign(r);
     const hidden = distance.greaterThan(uniforms.maxDistance)
       .or(blade.strength.lessThanEqual(0))
       .or(lod.coverage.lessThanEqual(0));
@@ -386,7 +390,7 @@ export function createMeadowBladePosition({
       // Sample the final deformed centreline before LOD shrink/world translation.
       if (normalOutput) {
         const baseline = meadowBladeWorldNormal(
-          blade.rotation, attribute('bladeSide', 'float').clamp(-1, 1), r,
+          blade.rotation, attribute('bladeProfile', 'vec4').x.clamp(-1, 1), r,
         );
         normalOutput.assign(meadowBentNormalNode({
           baseline, centerline: local.sub(ribbon), ratio: r,

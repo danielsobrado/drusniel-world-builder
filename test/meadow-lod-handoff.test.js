@@ -123,6 +123,37 @@ test('card overlap follows custom LOD distances and stays finite for endpoint ha
   assert.ok(Math.abs(createMeadowUniforms(settings).cardFadeIn.value.y - 28) < 1e-9);
 });
 
+test('blade rings collapse onto the next template before each geometry swap', t => {
+  t.mock.method(TextureLoader.prototype, 'load', () => new Texture());
+  const config = load(readFileSync(new URL('../editor.config.yaml', import.meta.url), 'utf8')).stylizedSurface;
+  const settings = resolveMeadowGrassConfig(config.grass.meadow);
+  const field = new MeadowGrassField({ scene: new Scene(), terrainView: {}, config, settings,
+    tuning: new GrassTuning(config), sunDirection: vec3(0, 1, 0) });
+  try {
+    const templates = Object.values(field.blades.templates);
+    const trianglesAt = (template, band) => {
+      const uv = template.getAttribute('uv');
+      const profile = template.getAttribute('bladeProfile');
+      const rings = Array.from({ length: uv.count }, (_, vertex) => {
+        const ratio = band < 0 ? uv.getY(vertex) : profile.getComponent(vertex, band + 1);
+        return `${profile.getX(vertex)}:${ratio}`;
+      });
+      const triangles = [];
+      for (let i = 0; i < template.index.count; i += 3) {
+        const ids = [rings[template.index.getX(i)], rings[template.index.getX(i + 1)], rings[template.index.getX(i + 2)]];
+        if (new Set(ids).size === 3) triangles.push(ids.join('|'));
+      }
+      return triangles.sort();
+    };
+    for (let i = 0; i < templates.length - 1; i++) {
+      for (let target = i; target < templates.length - 1; target++) {
+        assert.deepEqual(trianglesAt(templates[i], target),
+          trianglesAt(templates[i + 1], target === i ? -1 : target));
+      }
+    }
+  } finally { field.dispose(); }
+});
+
 test('arriving grass fades in while retained ranks stay visible and distance handoff still applies', () => {
   const publicationMask = (rank, time, distanceFade = false) => {
     const material = {};

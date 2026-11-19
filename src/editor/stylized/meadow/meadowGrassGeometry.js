@@ -120,14 +120,30 @@ export function createStableInstances({ count, tileSize, cards = false }) {
  * @param {number} options.count stems in one tile
  * @param {number} options.tileSize metres
  * @param {boolean} [options.cards]
+ * @param {number[]} [options.lodDetails] segment counts in the three coarser bands
+ * @param {number} [options.lodIndex] the template's band index
  */
-export function createMeadowTemplate({ detail, count, tileSize, cards = false }) {
+export function createMeadowTemplate({ detail, count, tileSize, cards = false, lodDetails = [], lodIndex = 0 }) {
   const mesh = cards ? createCardTemplate() : createBladeTemplate(detail);
   const instances = createStableInstances({ count, tileSize, cards });
   const geometry = new THREE.InstancedBufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh.positions, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(mesh.uvs, 2));
-  geometry.setAttribute('bladeSide', new THREE.Float32BufferAttribute(mesh.sides, 1));
+  // Pack the side and three target ring ratios in one vertex buffer.
+  const profile = new Float32Array(mesh.sides.length * 4);
+  for (let vertex = 0; vertex < mesh.sides.length; vertex++) {
+    profile[vertex * 4] = mesh.sides[vertex];
+    let ratio = mesh.uvs[vertex * 2 + 1];
+    for (let band = 0; band < 3; band++) {
+      const segments = lodDetails[band];
+      // Side vertices collapse onto lower side rings. Only the tip has a centre vertex.
+      if (band >= lodIndex && segments && ratio < 1) {
+        ratio = Math.min(Math.round(ratio * segments), segments - 1) / segments;
+      }
+      profile[vertex * 4 + 1 + band] = ratio;
+    }
+  }
+  geometry.setAttribute('bladeProfile', new THREE.BufferAttribute(profile, 4));
   geometry.setIndex(mesh.indices);
   geometry.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(instances.position, 4));
   geometry.setAttribute('instanceRotation', new THREE.InstancedBufferAttribute(instances.rotation, 2));

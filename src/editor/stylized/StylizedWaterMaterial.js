@@ -34,6 +34,7 @@ import {
   viewportSafeUV,
 } from 'three/tsl';
 import { resolveWaterQualityFeatures } from '../water/WaterQuality.js';
+import { REFRACTION_CHUNK_RADIUS } from '../water/WaterRefraction.js';
 import { assignWaterMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import {
   periodicFbm2,
@@ -455,6 +456,12 @@ export function createStylizedWaterMaterial({
 
   if (enableRefraction && quality.refraction && water.refraction.enabled) {
     const refraction = water.refraction;
+    // The first excluded chunk is at least this far from the focus chunk's viewer.
+    const refractionWeight = oneMinus(smoothstep(
+      (REFRACTION_CHUNK_RADIUS - 0.75) * chunkWorldSize,
+      REFRACTION_CHUNK_RADIUS * chunkWorldSize,
+      distance,
+    )).toVar('waterRefractionWeight');
     const coarsePoint = surfacePatterns.latticePoint('refractionCoarse', localXZ)
       .add(currentFlow.mul(time.mul(refraction.coarseSpeed)));
     const finePoint = surfacePatterns.latticePoint('refractionFine', localXZ)
@@ -471,7 +478,7 @@ export function createStylizedWaterMaterial({
       : warp;
     const distortionUv = (sea ? mix(inlandWarp, waterRippleRefraction(sea.normal, vec3(0, 1, 0)), sea.mask) : inlandWarp)
       .mul(refraction.strength * quality.refractionStrength)
-      .mul(depthFactor);
+      .mul(depthFactor).mul(refractionWeight);
     const baseViewportUv = viewportSafeUV(screenUV);
     const distortedViewportUv = viewportSafeUV(baseViewportUv.add(distortionUv));
     const depthRange = cameraFar.sub(cameraNear);
@@ -526,8 +533,10 @@ export function createStylizedWaterMaterial({
       physicalColor = mix(physicalColor, seaPhysical,
         oceanWeight.mul(refraction.sceneColorStrength));
     }
-    color = mix(physicalColor, legacyColor, surfaceDetailMix);
-    alpha = waterCoverage.mul(waterlineFade);
+    const refractionAlpha = waterCoverage.mul(waterlineFade);
+    alpha = mix(alpha, refractionAlpha, refractionWeight).toVar('waterBlendedOpacity');
+    const refractedContribution = refractionWeight.mul(refractionAlpha).div(max(alpha, 1e-4));
+    color = mix(color, mix(physicalColor, legacyColor, surfaceDetailMix), refractedContribution);
 
     if (quality.intersectionFoam && water.foam.enabled) {
       const foam = water.foam;
@@ -542,6 +551,7 @@ export function createStylizedWaterMaterial({
         // accents objects in water instead of tracing a second white bank.
         .mul(smoothstep(.35, .9, waterDepth))
         .mul(foam.intersectionStrength * quality.intersectionFoamStrength)
+        .mul(refractionWeight)
         .mul(river ? mix(float(1), smoothstep(0.25, 0.7, river.foamNoise), inland) : float(1))
         .mul(sea ? mix(float(1), smoothstep(0.25, 0.7, sea.foamNoise), sea.mask) : float(1))
         .mul(waterCoverage);

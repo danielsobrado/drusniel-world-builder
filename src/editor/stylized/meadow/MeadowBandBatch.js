@@ -10,6 +10,7 @@ export const MEADOW_TILES_PER_PAGE = 16;
 // Dense bands need smaller pages: otherwise first use of a new page allocates
 // and uploads several megabytes in one render, even for a single live tile.
 const PAGE_STEMS = 65536;
+const TEMPLATE_ATTRIBUTES = ['position', 'uv', 'bladeProfile'];
 export function meadowPageTileCapacity(stride) {
   return Math.max(1, Math.min(MEADOW_TILES_PER_PAGE, Math.floor(PAGE_STEMS / stride)));
 }
@@ -35,7 +36,7 @@ export class MeadowBandBatch {
     this.present = new Set();
     this.order = [];
     this.geometry = new THREE.InstancedBufferGeometry();
-    for (const name of ['position', 'uv', 'bladeSide']) {
+    for (const name of TEMPLATE_ATTRIBUTES) {
       this.geometry.setAttribute(name, template.getAttribute(name));
     }
     this.geometry.index = template.index;
@@ -70,7 +71,7 @@ export class MeadowBandBatch {
   }
 
   setTemplate(template) {
-    for (const name of ['position', 'uv', 'bladeSide']) {
+    for (const name of TEMPLATE_ATTRIBUTES) {
       this.geometry.setAttribute(name, template.getAttribute(name));
     }
     this.geometry.index = template.index;

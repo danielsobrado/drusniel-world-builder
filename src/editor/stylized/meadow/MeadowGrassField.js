@@ -117,10 +117,13 @@ export class MeadowGrassField {
       rocks: config.rocks ?? null,
     });
     const far = settings.far;
-    const bladeTemplates = Object.fromEntries(LOD_ORDER.map((band) => [band, createMeadowTemplate({
+    const lodDetails = LOD_ORDER.slice(1).map(band => settings.lod[band].detail);
+    const bladeTemplates = Object.fromEntries(LOD_ORDER.map((band, lodIndex) => [band, createMeadowTemplate({
       detail: settings.lod[band].detail,
       count: bandStemCount(settings.tileSize, settings.lod[band].density),
       tileSize: settings.tileSize,
+      lodDetails,
+      lodIndex,
     })]));
     this.bladeMaterial = createMeadowBladeMaterial({
       uniforms: this.uniforms,

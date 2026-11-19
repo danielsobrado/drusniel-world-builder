@@ -1,4 +1,5 @@
 const CHANNEL_COUNT = 3;
+export const REFRACTION_CHUNK_RADIUS = 2;
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
