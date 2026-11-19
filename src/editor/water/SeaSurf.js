@@ -3,6 +3,7 @@ import {
   BREAKING_SURF_DEFAULTS, DIRECTIONAL_SURF_DEFAULTS, directionalCarriers,
   evaluateDirectionalSurfCpu, solveSurfWaveNumber, surfCarrierFrames, surfSmoothstep,
 } from './SeaSurfMath.js';
+import { SEA_REFRACTION_DEFAULTS, createSeaRefractionCarrier } from './SeaRefractionMath.js';
 
 /** Gods' End wave sets, scaled to humans and driven by canonical water depth. */
 export const SEA_SURF_DEFAULTS = Object.freeze({
@@ -12,21 +13,25 @@ export const SEA_SURF_DEFAULTS = Object.freeze({
   strength: 0.8, trail: 4.5, laceScale: 0.19,
   directional: DIRECTIONAL_SURF_DEFAULTS,
   breaking: BREAKING_SURF_DEFAULTS,
+  refraction: SEA_REFRACTION_DEFAULTS,
 });
 
 export function resolveSeaSurf(source = {}) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('water.sea.surf must be an object.');
+  if (source.refraction !== undefined && (!source.refraction || typeof source.refraction !== 'object'
+    || Array.isArray(source.refraction))) throw new Error('water.sea.surf.refraction must be an object.');
   const result = {
     ...SEA_SURF_DEFAULTS, ...source,
     directional: { ...DIRECTIONAL_SURF_DEFAULTS, ...source.directional },
     breaking: { ...BREAKING_SURF_DEFAULTS, ...source.breaking },
+    refraction: { ...SEA_REFRACTION_DEFAULTS, ...source.refraction },
   };
   if (!['legacy', 'directionalBreakers'].includes(result.model)) {
     throw new Error('water.sea.surf.model must be legacy or directionalBreakers.');
   }
   if (typeof result.enabled !== 'boolean') throw new Error('water.sea.surf.enabled must be boolean.');
   for (const [key, value] of Object.entries(result)) {
-    if (!['enabled', 'model', 'directional', 'breaking'].includes(key) && (!Number.isFinite(value) || value < 0)) throw new Error(`water.sea.surf.${key} must be finite and non-negative.`);
+    if (!['enabled', 'model', 'directional', 'breaking', 'refraction'].includes(key) && (!Number.isFinite(value) || value < 0)) throw new Error(`water.sea.surf.${key} must be finite and non-negative.`);
   }
   for (const [start, end] of [['fadeStart', 'fadeEnd'], ['breakDepthStart', 'breakDepthFull'],
     ['breakDepthFull', 'breakDepthFade'], ['breakDepthFade', 'breakDepthEnd']]) {
@@ -36,6 +41,21 @@ export function resolveSeaSurf(source = {}) {
     || result.fadeEnd > 30 || result.depthPhaseScale > 5 || result.alongFrequency > 1
     || result.setGroup > 1 || result.laceScale > 2 || result.trail > 20) {
     throw new Error('water.sea.surf settings exceed supported bounds.');
+  }
+  const r = result.refraction;
+  if (typeof r.enabled !== 'boolean') throw new Error('water.sea.surf.refraction.enabled must be boolean.');
+  const refractionRanges = {
+    strength: [0, 1], minimumDepthMeters: [0.15, 2],
+    maximumWaveNumberRatio: [1, 4], fadeStartMeters: [0, 6],
+    fadeEndMeters: [0.25, 20], maximumPhaseDistanceMeters: [5, 250],
+  };
+  for (const [name, [minimum, maximum]] of Object.entries(refractionRanges)) {
+    if (!Number.isFinite(r[name]) || r[name] < minimum || r[name] > maximum) {
+      throw new Error(`water.sea.surf.refraction.${name} must be within [${minimum}, ${maximum}].`);
+    }
+  }
+  if (r.fadeStartMeters >= r.fadeEndMeters) {
+    throw new Error('water.sea.surf.refraction.fadeEndMeters must exceed fadeStartMeters.');
   }
   if (result.model === 'directionalBreakers') {
     const ranges = {
@@ -73,8 +93,13 @@ export function resolveSeaSurf(source = {}) {
       || b.minimumCrestSkew > b.maximumCrestSkew) {
       throw new Error('water.sea.surf directional and breaking ranges must be ordered.');
     }
+    if (r.minimumDepthMeters >= d.referenceDepthMeters) {
+      throw new Error('water.sea.surf.refraction.minimumDepthMeters must be below directional.referenceDepthMeters.');
+    }
     d.waveNumbers = directionalCarriers.map(wave =>
       solveSurfWaveNumber(wave.waveNumber, d.referenceDepthMeters));
+    d.refractionCarriers = directionalCarriers.map((wave, index) =>
+      createSeaRefractionCarrier(wave, d.waveNumbers[index], d));
   }
   return result;
 }

@@ -1,4 +1,5 @@
 import { SEA_SWELL_COMPONENTS } from './SeaSwell.js';
+import { seaRefractionPhaseShift } from './SeaRefractionMath.js';
 
 export const SURF_TAU = Math.PI * 2;
 const EPSILON = 1e-6;
@@ -107,6 +108,7 @@ export function evaluateDirectionalSurfCpu(x, z, depth, shoreDistance, time, set
     const plane = ([vx, vz]) => x * vx + z * vz;
     const phase = wave.phase + (time * wave.angularSpeed) % SURF_TAU
       + shoreDistance * directional.waveNumbers[i]
+      + seaRefractionPhaseShift(depth, shoreDistance, wave, i, settings)
       + plane(frames[`surfOblique${i}`].wave);
     const packet = surfPacket(plane(frames[`surfPacketA${i}`].wave),
       plane(frames[`surfPacketB${i}`].wave), wave, time, directional);

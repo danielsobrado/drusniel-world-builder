@@ -144,6 +144,15 @@ water:
         packetMinimum: 0.55
         packetMaximum: 1.10
         packetModulation: 1.0
+      # Finite-depth dispersion bends crest fronts along curved shoreline contours.
+      refraction:
+        enabled: true
+        strength: 0.85
+        minimumDepthMeters: 0.4
+        maximumWaveNumberRatio: 2.2
+        fadeStartMeters: 0.5
+        fadeEndMeters: 6.0
+        maximumPhaseDistanceMeters: 40
       breaking:
         gamma: 0.72
         onsetRatio: 0.78
