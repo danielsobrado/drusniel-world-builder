@@ -22,7 +22,10 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const crowned=stemShare.add(stemShare.oneMinus().mul(tuft.crown).mul(moundStrength)).clamp(0,1);
   const share=cards?crowned.sub(.5).mul(MEADOW_CARD_HEIGHT_CONTRAST).add(.5):crowned;
   const response=uniforms.growth.density.element(instance.growth.toInt());
-  const stand=cards?1.125:meadowStandNodes(instance.canonical,instance.rank).height;
+  const species=cards?null:meadowStandNodes(
+    instance.canonical,instance.rank,uniforms.growth.accents.element(instance.growth.toInt().add(32)),
+  );
+  const stand=cards?1.125:species.height;
   const area=uniforms.groundStyle?meadowGroundStyle(instance.canonical,uniforms.groundStyle.mul(uniforms.growth.areaStyle.element(instance.growth.toInt()))).height:1;
   // A short stand gathers into plants: stragglers between tufts drop out rather
   // than standing as an even speckle of spikes over bare ground.
@@ -31,5 +34,6 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const stormSettle=stormSnowCoverUniform.mul(-.4).add(1);
   return {height:mix(dimensions.x.mul(MEADOW_SHORT_FLOOR),dimensions.y,share).mul(stand).mul(area).mul(gap).mul(stormSettle),
     tallHeight:dimensions.y,tuft,
-    width:dimensions.z,density:response.x,wind:response.y,rest:response.z,curve:response.w};
+    width:dimensions.z,density:response.x,wind:response.y,rest:response.z,curve:response.w,
+    speciesWidth:cards?1:species.width,speciesRest:cards?1:species.rest,speciesCurve:cards?1:species.curve};
 }

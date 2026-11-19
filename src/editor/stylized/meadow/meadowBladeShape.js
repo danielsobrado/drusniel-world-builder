@@ -241,11 +241,13 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
         .mul(mix(float(1), uniforms.taper, r))
         .mul(mix(0.88, 1.12, blade.variation))
         .mul(plant.width)
+        .mul(profile.speciesWidth)
         .mul(silhouette(plant.shape, r))
         .mul(lod.width);
       local.x.assign(positionLocal.x.mul(width));
       local.y.assign(r.mul(height));
-      local.z.assign(r.mul(r).mul(height).mul(uniforms.curve).mul(profile.curve).mul(mix(0.7, 1.3, blade.variation)));
+      local.z.assign(r.mul(r).mul(height).mul(uniforms.curve).mul(profile.curve)
+        .mul(profile.speciesCurve).mul(mix(0.7, 1.3, blade.variation)));
       // Face the blade. Snapshot both components: `local.x` is a live reference,
       // and reading it after the first assignment would rotate the rotated value.
       const x = local.x.toVar();
@@ -268,7 +270,7 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       const strengthArch = blade.strength.mul(0.35).add(0.65);
       const restAngle = uniforms.baseBend.mul(strengthArch).mul(HALF_PI).mul(bendPower)
         .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest)
-        .mul(float(1).add(tufts.moundSplay.mul(shoulder))).clamp(0, HALF_PI);
+        .mul(float(1).add(tufts.moundSplay.mul(shoulder))).mul(profile.speciesRest).clamp(0, HALF_PI);
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));

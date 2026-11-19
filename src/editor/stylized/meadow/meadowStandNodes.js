@@ -12,15 +12,22 @@ export const MEADOW_STAND_MAX_HEIGHT = 1.46;
  * reshapes and tints existing stems, so population, LOD prefixes and the far bake
  * (the tones average to about 1) are untouched.
  */
-export function meadowStandNodes(canonical, rank) {
+export function meadowStandNodes(canonical, rank, weights) {
   const drift = meadowNoise(canonical.div(6.5).add(vec2(13.1, 57.3)));
   const cover = meadowNoise(canonical.div(2.7).add(vec2(91.7, 23.9)));
-  const rye = smoothstep(0.42, 0.3, drift);
-  const fescue = smoothstep(0.58, 0.7, drift);
-  const clover = smoothstep(0.66, 0.76, cover).mul(rye.oneMinus());
-  const seedStem = smoothstep(0.93, 0.95, fract(rank.mul(0.754877))).mul(rye);
+  const rye = smoothstep(0.42, 0.3, drift).mul(weights.x).clamp(0, 1);
+  const fescue = smoothstep(0.58, 0.7, drift).mul(weights.y).clamp(0, 1);
+  const clover = smoothstep(0.66, 0.76, cover).mul(rye.oneMinus()).mul(weights.z).clamp(0, 1);
+  const seedRank = fract(rank.mul(0.754877)).add(weights.w.sub(1).mul(0.05));
+  const seedStem = smoothstep(0.93, 0.95, seedRank).mul(rye).mul(weights.w.clamp(0, 1));
+
   const height = mix(mix(mix(1, 1.12, rye), 0.82, fescue), 0.62, clover).mul(mix(1, 1.3, seedStem));
   const rootTone = mix(mix(mix(vec3(1), vec3(1.06, 1.03, 0.9), rye), vec3(0.88, 0.98, 1.02), fescue), vec3(0.74, 0.86, 0.76), clover);
   const tipTone = mix(mix(mix(vec3(1), vec3(1.12, 1.04, 0.8), rye), vec3(0.84, 0.97, 1.06), fescue), vec3(0.66, 0.82, 0.68), clover);
-  return { height, rootTone, tipTone, seedStem };
+  // Finer grasses grow narrower and more pliant; seed stalks are straighter.
+  // All multipliers are <= 1, so existing wind and page-bounds budgets hold.
+  const width = mix(mix(1, 0.68, fescue), 0.82, clover).mul(mix(1, 0.78, seedStem));
+  const rest = mix(mix(1, 0.78, fescue), 0.86, clover).mul(mix(1, 0.65, seedStem));
+  const curve = mix(1, 0.7, fescue).mul(mix(1, 0.72, seedStem));
+  return { height, width, rest, curve, rootTone, tipTone, seedStem };
 }

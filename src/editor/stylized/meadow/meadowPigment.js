@@ -68,7 +68,9 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
       .mul(dot(tip, vec3(0.3, 0.59, 0.11)).mul(1.6).add(0.35));
     tip = mix(tip, straw, wear.verge.mul(fringe.strength ?? DEFAULT_PATH_FRINGE_STRENGTH).clamp(0, 1));
   }
-  const stand = meadowStandNodes(blade.canonical, blade.rank);
+  const stand = meadowStandNodes(
+    blade.canonical, blade.rank, uniforms.growth.accents.element(blade.growth.toInt().add(32)),
+  );
   root = root.mul(stand.rootTone);
   tip = mix(tip.mul(stand.tipTone), color(STRAW_SEED).mul(dot(tip, vec3(0.3, 0.59, 0.11)).mul(1.1).add(0.45)), stand.seedStem.mul(0.75));
   if (uniforms.groundStyle) {

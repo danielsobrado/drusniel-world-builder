@@ -3,6 +3,7 @@ import { vec3 } from 'three/tsl';
 import { frameUniform as uniform, frameUniformArray as uniformArray } from '../../../render/FrameUniforms.js';
 import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
 import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
+import { meadowStandWeights } from './meadowStandProfiles.js';
 
 
 /**
@@ -25,11 +26,13 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
       density: uniformArray(Array.from({length:16},(_,i)=>new THREE.Vector4(...meadowGrowthResponse(growth.profiles[i] ?? growth.profiles[0]))),'vec4'),
       // How much of the area field each biome wears: a rainforest stays lush.
       areaStyle: uniformArray(Array.from({length:16},(_,i)=>(growth.profiles[i] ?? growth.profiles[0]).areaStyle),'float'),
-      // The plants mixed into each stand (meadowPlantNodes.js).
-      // One array, high rows then low rows: the blade's vertex stage sits at
-      // WebGPU's twelve uniform buffers, and a second array was the thirteenth.
-      accents: uniformArray(Array.from({length:32},(_,i)=>new THREE.Vector4(
-        ...meadowAccentRows(growth.profiles[i%16] ?? growth.profiles[0])[i<16?'high':'low'])),'vec4'),
+      // Shared uniform buffer: accent-high, accent-low, then stand-species rows.
+      // Packing these together avoids exceeding WebGPU's uniform-buffer limit.
+      accents: uniformArray(Array.from({length:48},(_,i)=>{
+        const profile=growth.profiles[i%16] ?? growth.profiles[0];
+        if(i>=32)return new THREE.Vector4(...meadowStandWeights(profile));
+        return new THREE.Vector4(...meadowAccentRows(profile)[i<16?'high':'low']);
+      }),'vec4'),
       maxHeight: growth.maxHeight, maxWidth: growth.maxWidth,
     },
     // The player's body stamp and its render-space window. The centre is the
