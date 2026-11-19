@@ -4,6 +4,7 @@ import { frameUniform as uniform, frameUniformArray as uniformArray } from '../.
 import { lodBandVectors, meadowCardFadeRange } from './meadowGrassLayout.js';
 import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
 import { meadowStandWeights } from './meadowStandProfiles.js';
+import { meadowAccentRows, meadowGrowthResponse } from './meadowGrassShapes.js';
 import { meadowMicrohabitatWeights } from './meadowMicrohabitat.js';
 
 
@@ -128,4 +129,3 @@ export function createMeadowUniforms(settings, interaction = null, spellGround =
     patchWarm: vec3(...appearance.patchWarm),
   };
 }
-import { meadowAccentRows, meadowGrowthResponse } from './meadowGrassShapes.js';

@@ -1,4 +1,4 @@
-import { color, dot, mix, smoothstep, vec2, vec3 } from 'three/tsl';
+import { color, dot, mix, oneMinus, smoothstep, vec2, vec3 } from 'three/tsl';
 import { meadowNoise } from './meadowNoise.js';
 
 const LUMA = vec3(0.3, 0.59, 0.11);
@@ -26,7 +26,7 @@ export function meadowGroundStyle(canonical, strength) {
   // The warp also adds to the field itself, so patches shed islands, not one clean rim.
   const area = meadowNoise(canonical.div(28).add(vec2(3.7, 29.1)).add(warp.mul(1.3))).add(warp.mul(0.35));
   const bare = meadowNoise(canonical.div(19).add(vec2(47.9, 83.3)).sub(warp.mul(1.1))).add(warp.mul(0.3));
-  const lush = smoothstep(0.5, 0.3, area).mul(strength);
+  const lush = oneMinus(smoothstep(0.3, 0.5, area)).mul(strength);
   const dry = smoothstep(0.5, 0.74, area).mul(strength);
   const worn = smoothstep(0.58, 0.8, bare).mul(lush.oneMinus()).mul(strength);
   return { lush, dry, worn, height: mix(1, DRY_HEIGHT, dry).mul(mix(1, WORN_HEIGHT, worn)) };

@@ -26,7 +26,6 @@ import { meadowPigment } from './meadowPigment.js';
 import { meadowWindFrontNodes } from './meadowWindNodes.js';
 export { meadowBladeWorldNormal } from './meadowBladeNormals.js';
 
- 
 /**
  * One material for every band's batch.
  *

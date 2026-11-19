@@ -1,8 +1,6 @@
 import { vec2 } from 'three/tsl';
 import { meadowNoise } from './meadowNoise.js';
 import { MEADOW_PLANT_FIELD } from './meadowGrassShapes.js';
-import { meadowGroundStyle } from './meadowGroundStyle.js';
-import { meadowMicrohabitatNodes } from './meadowMicrohabitat.js';
 
 /**
  * Which plant a stem belongs to (a growth profile's `accents`).
@@ -15,16 +13,10 @@ import { meadowMicrohabitatNodes } from './meadowMicrohabitat.js';
  *
  * @returns {{ shape: object, height: object, width: object }}
  */
-export function meadowPlantNodes(uniforms, blade, microhabitat = null) {
+export function meadowPlantNodes(uniforms, blade, micro) {
   const index = blade.growth.toInt();
   const high = uniforms.growth.accents.element(index);
   const low = uniforms.growth.accents.element(index.add(16));
-  const micro = microhabitat ?? meadowMicrohabitatNodes(
-    uniforms.groundStyle
-      ? meadowGroundStyle(blade.canonical,uniforms.groundStyle.mul(uniforms.growth.areaStyle.element(index)))
-      : null,
-    uniforms.growth.accents.element(index.add(48)),
-  );
   const field = meadowNoise(blade.canonical.div(MEADOW_PLANT_FIELD.meters)
     .add(vec2(...MEADOW_PLANT_FIELD.offset))).add(micro.accentShift);
   const isHigh = field.greaterThan(high.y);

@@ -14,7 +14,7 @@ export function meadowWindFrontNodes(blade, uniforms, tuning, wind) {
     .add(blade.phase.mul(uniforms.wind.phaseJitter));
   const front = sin(phase);
   const pressure = smoothstep(MEADOW_WIND_FRONT.onset, MEADOW_WIND_FRONT.peak, front)
-    .mul(wind.gust.mul(uniforms.wind.gustBoost).add(1));
+    .mul(wind.gust.clamp(0, 1).mul(uniforms.wind.gustBoost).add(1));
   return { wave, phase, front, pressure };
 }
 
@@ -32,7 +32,7 @@ export function meadowTipFlutterNode({
     .add(uniforms.time.mul(tuning.flutterSpeed.mul(1.55)))
     .add(blade.variation.mul(TAU)));
   const gain = wind.envelope.clamp(0, 3.5).sqrt()
-    .mul(wind.gust.mul(uniforms.wind.flutterGust).add(1))
+    .mul(wind.gust.clamp(0, 1).mul(uniforms.wind.flutterGust).add(1))
     .clamp(0, MEADOW_FLUTTER_MAX_GAIN);
   return primary.mul(0.72).add(secondary.mul(0.28))
     .mul(tuning.flutterStrength).mul(height)

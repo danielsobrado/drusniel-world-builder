@@ -21,7 +21,7 @@ const DRY_WIDTH_SHARE = 0.35;
 const WIND_SHELTER_SHARE = 0.5;
 const ACCENT_NOISE_SHIFT = 0.14;
 
-export function resolveMeadowMicrohabitat(source, path) {
+export function resolveMeadowMicrohabitat(source, path = 'stylizedSurface.grass.meadow.growth.microhabitat') {
   if (!source || typeof source !== 'object' || Array.isArray(source)) {
     throw new Error(`Invalid editor configuration: ${path} must be an object.`);
   }

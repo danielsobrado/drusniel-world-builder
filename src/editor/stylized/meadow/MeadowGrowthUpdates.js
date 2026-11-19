@@ -1,14 +1,14 @@
 import { encodeLookTable, MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
+import { MAX_MEADOW_GROWTH_PROFILES, meadowGrowthSignature } from './meadowGrowthProfiles.js';
+import { meadowAccentRows, meadowGrowthResponse } from './meadowGrassShapes.js';
 import { meadowStandWeights } from './meadowStandProfiles.js';
 import { meadowMicrohabitatWeights } from './meadowMicrohabitat.js';
 
-export const meadowGrowthSignature = p => JSON.stringify([
-  p.shortHeight,p.tallHeight,p.width,p.density,p.patchMeters,p.shape,p.areaStyle,p.accents,p.stand,p.microhabitat,
-]);
+export { meadowGrowthSignature } from './meadowGrowthProfiles.js';
 /** Keep unchanged uniform slots stable when a live edit changes profile deduplication. */
 export function reconcileMeadowGrowth(previous,next) {
-  const slots=new Array(16),indices=new Map([[0,0]]),used=new Set([0]);
+  const slots=new Array(MAX_MEADOW_GROWTH_PROFILES),indices=new Map([[0,0]]),used=new Set([0]);
   slots[0]=next.profiles[0];
   for(let i=1;i<next.profiles.length;i++) {
     const key=meadowGrowthSignature(next.profiles[i]);
@@ -20,7 +20,7 @@ export function reconcileMeadowGrowth(previous,next) {
     if(free<0)throw new Error('Meadow growth update exceeds 16 uniform slots.');
     indices.set(i,free);slots[free]=next.profiles[i];
   }
-  const profiles=Array.from({length:16},(_,i)=>slots[i]??next.profiles[0]);
+  const profiles=Array.from({length:MAX_MEADOW_GROWTH_PROFILES},(_,i)=>slots[i]??next.profiles[0]);
   return {...next,profiles,table:Uint8Array.from(next.table,index=>indices.get(index))};
 }
 /** Page-local cache keys include only biomes present on that page. */
@@ -36,7 +36,7 @@ export function applyMeadowGrowth(field,next) {
   const palette=Uint8Array.from(field.settings.shapeTable,code=>Math.floor(code/MEADOW_SHAPE_COUNT)%MAX_MEADOW_PALETTES);
   const looks=encodeLookTable(growth.shapes,palette,growth.table);
   field.settings.growth=growth;field.settings.shapeTable=looks;
-  for(let i=0;i<16;i++) {
+  for(let i=0;i<MAX_MEADOW_GROWTH_PROFILES;i++) {
     const p=growth.profiles[i];
     field.uniforms.growth.dimensions.array[i].set(p.shortHeight,p.tallHeight,p.width,p.patchMeters);
     field.uniforms.growth.areaStyle.array[i]=p.areaStyle;
@@ -50,4 +50,3 @@ field.uniforms.growth.density.array[i].set(...meadowGrowthResponse(p));
   field.uniforms.growth.maxHeight=growth.maxHeight;field.uniforms.growth.maxWidth=growth.maxWidth;
   field.ground.setGrowth(growth,looks);
 }
-import { meadowAccentRows, meadowGrowthResponse } from './meadowGrassShapes.js';

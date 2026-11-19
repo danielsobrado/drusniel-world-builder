@@ -31,7 +31,6 @@ import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
 import { MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
-import { meadowPlantNodes } from './meadowPlantNodes.js';
 import { meadowBentNormalNode, meadowBladeWorldNormal } from './meadowBladeNormals.js';
 import { meadowTipFlutterNode, meadowWindFrontNodes } from './meadowWindNodes.js';
 
@@ -232,7 +231,7 @@ export function createMeadowBladePosition({
       const profile = meadowGrowthNodes(uniforms,blade);
       const tufts = uniforms.tufts;
       const occupancy = profile.tuft.occupancy.toVar();
-      const plant = meadowPlantNodes(uniforms, blade, profile.micro);
+      const plant = profile.plant;
       const height = profile.height.mul(mix(float(0.62), float(1), growth)).mul(plant.height).toVar();
       // A short plant is a narrow one: width follows the stem's own height, so
       // short growth and worn ground read as slender blades, not broad wedges.
@@ -266,7 +265,7 @@ export function createMeadowBladePosition({
       // A resting bend toward the stem's own random side.
       const bendPower = pow(r, uniforms.stiffness);
       // A tuft's stems share a lean and splay together; stragglers lie further over.
-      const shoulder = profile.tuft.shoulder.mul(blade.shape.lessThan(.5).select(1, 0));
+      const shoulder = profile.tuft.shoulder.mul(plant.shape.lessThan(.5).select(1, 0));
       const flowWeight = tufts.lean.add(tufts.moundFlow.mul(shoulder).mul(oneMinus(tufts.lean))).clamp(0, 1);
       const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, flowWeight).toVar();
       const restDirection = restMix.div(restMix.length().max(1e-3));

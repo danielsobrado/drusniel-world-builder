@@ -53,6 +53,7 @@ export function meadowGrowthShare(
   return unit(base+(1-base)*crown*moundHeight);
 }
 
+/** Baseline height before species, accents, microhabitat, wear and weather. */
 export function meadowGrowthHeight(
   profile,x,z,cards=false,tuftHeight=MEADOW_TUFT_DEFAULTS.height,
   moundHeight=MEADOW_TUFT_DEFAULTS.moundHeight,

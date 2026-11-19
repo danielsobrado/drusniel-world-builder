@@ -131,6 +131,17 @@ const UNTUFTED = Object.freeze({
 });
 
 function resolveTufts(source, path) {
+  if (source !== undefined && (!source || typeof source !== 'object' || Array.isArray(source))) {
+    throw new Error(`Invalid editor configuration: ${path}.tufts must be an object.`);
+  }
+  for (const key of Object.keys(source ?? {})) {
+    if (key !== 'enabled' && !Object.hasOwn(TUFT_LIMITS, key)) {
+      throw new Error(`Invalid editor configuration: ${path}.tufts.${key} is unknown.`);
+    }
+  }
+  if (source?.enabled !== undefined && typeof source.enabled !== 'boolean') {
+    throw new Error(`Invalid editor configuration: ${path}.tufts.enabled must be a boolean.`);
+  }
   if (source?.enabled === false) return Object.freeze({ ...MEADOW_TUFT_DEFAULTS, ...UNTUFTED });
   const tufts = {};
   for (const [key, [min, max]] of Object.entries(TUFT_LIMITS)) {

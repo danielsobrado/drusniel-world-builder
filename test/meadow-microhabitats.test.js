@@ -129,7 +129,8 @@ test('near and far rendering reuse the ground area field without new textures', 
   assert.match(growth, /meadowGroundStyle\(instance.canonical/);
   assert.match(growth, /meadowMicrohabitatShare\(crowned,micro\)/);
   assert.match(plants, /\.add\(micro.accentShift\)/);
-  assert.match(blade, /meadowPlantNodes\(uniforms, blade, profile.micro\)/);
-  assert.match(cards, /meadowPlantNodes\(uniforms, card, profile.micro\)/);
+  assert.match(growth, /const plant=meadowPlantNodes\(uniforms,instance,micro\)/);
+  assert.match(blade, /const plant = profile\.plant/);
+  assert.match(cards, /profile\.plant\.height/);
   assert.doesNotMatch(micro, /texture\(|uniformArray\(/);
 });

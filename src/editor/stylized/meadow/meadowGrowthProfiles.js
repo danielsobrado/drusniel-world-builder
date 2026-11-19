@@ -2,6 +2,11 @@ import { MEADOW_PLANT_SHAPES, meadowShapeId } from './meadowGrassShapes.js';
 import { resolveMeadowStand } from './meadowStandProfiles.js';
 import { resolveMeadowMicrohabitat } from './meadowMicrohabitat.js';
 export const MAX_MEADOW_GROWTH_PROFILES = 16;
+export const meadowGrowthSignature = profile => JSON.stringify([
+  profile.shortHeight, profile.tallHeight, profile.width, profile.density,
+  profile.patchMeters, profile.shape, profile.areaStyle,
+  profile.accents, profile.stand, profile.microhabitat,
+]);
 const row = (shortHeight,tallHeight,width,density,patchMeters,shape='slender',areaStyle=1) =>
   Object.freeze({shortHeight,tallHeight,width,density,patchMeters,shape,areaStyle});
 export const MEADOW_GROWTH_DEFAULTS = Object.freeze({
@@ -49,7 +54,7 @@ export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow
     byId[id]=validate({...(MEADOW_GROWTH_DEFAULTS[id]??MEADOW_GROWTH_DEFAULTS[4]),...value},`${path}.byTileId.${key}`);
   }
   const profiles=[validate(byId[4],`${path}.byTileId.4`)],table=new Uint8Array(256),shapes=new Uint8Array(256);
-  const signature=p=>JSON.stringify([p.shortHeight,p.tallHeight,p.width,p.density,p.patchMeters,p.shape,p.areaStyle,p.accents,p.stand,p.microhabitat]);
+  const signature = meadowGrowthSignature;
   // An accent plant may stand taller or wider than its stand: page bounds must cover it.
   const reach=(p,key)=>Math.max(1,...(p.accents??[]).map(accent=>accent[key]));
   const indices=new Map([[signature(profiles[0]),0]]);
