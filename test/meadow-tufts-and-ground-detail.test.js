@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { meadowGrowthShare, meadowNoiseNumber, meadowTuftOccupancy } from '../src/editor/stylized/meadow/meadowGrowthMath.js';
+import {
+  meadowGrowthHeight,
+  meadowGrowthShare,
+  meadowMoundMasks,
+  meadowNoiseNumber,
+  meadowTuftOccupancy,
+} from '../src/editor/stylized/meadow/meadowGrowthMath.js';
 import { resolveMeadowGrassConfig } from '../src/editor/stylized/meadow/meadowGrassConfig.js';
 import { resolveMeadowGroundDetail } from '../src/editor/stylized/meadow/meadowGroundDetailConfig.js';
 import { MEADOW_TUFT_DEFAULTS } from '../src/editor/stylized/meadow/meadowTuftField.js';
@@ -38,7 +44,42 @@ test('tufts resolve with defaults, validate, and disable to the untufted stand',
   assert.equal(off.height, 0);
   assert.equal(off.widthFloor, 1);
   assert.equal(off.bendIsolated, 1);
+  assert.equal(off.moundHeight, 0);
+  assert.equal(off.moundSplay, 0);
+  assert.equal(off.moundFlow, 0);
+  for (const [key, value] of [['moundHeight', 1.01], ['moundSplay', 1.51], ['moundFlow', -0.01]]) {
+    assert.throws(() => resolveMeadowGrassConfig({ tufts: { [key]: value } }), /Invalid editor configuration/);
+  }
   assert.throws(() => resolveMeadowGrassConfig({ tufts: { height: 2 } }), /tufts\.height/);
+});
+
+test('mound crowns lift slender grass within the same growth envelope', () => {
+  const low = meadowMoundMasks(0);
+  const center = meadowMoundMasks(1);
+  const shoulder = meadowMoundMasks(0.55);
+  assert.equal(low.crown, 0);
+  assert.equal(center.crown, 1);
+  assert.equal(low.shoulder, 0);
+  assert.equal(center.shoulder, 0);
+  assert.ok(shoulder.shoulder > 0.5);
+  assert.ok(shoulder.crown > 0 && shoulder.crown < 1);
+
+  for (const occupancy of [0, 0.2, 0.5, 0.8, 1]) {
+    const flat = meadowGrowthShare(0.3, occupancy);
+    const raised = meadowGrowthShare(0.3, occupancy, MEADOW_TUFT_DEFAULTS.height, 0.42);
+    assert.ok(raised >= flat && raised <= 1);
+    assert.equal(meadowGrowthShare(0.3, occupancy, MEADOW_TUFT_DEFAULTS.height, 0.42, 'reed'), flat);
+    assert.equal(meadowGrowthShare(0.3, occupancy, MEADOW_TUFT_DEFAULTS.height, 0.42, 'broadleaf'), flat);
+  }
+  assert.equal(meadowGrowthShare(0.3, 0.95, MEADOW_TUFT_DEFAULTS.height, 0), meadowGrowthShare(0.3, 0.95));
+
+  const profile = { shortHeight: 0.25, tallHeight: 0.85, patchMeters: 8, shape: 'slender' };
+  const sampled = sample((x, z) => {
+    if (meadowTuftOccupancy(x, z) < 0.9) return 0;
+    return meadowGrowthHeight(profile, x, z)
+      - meadowGrowthHeight(profile, x, z, false, MEADOW_TUFT_DEFAULTS.height, 0);
+  });
+  assert.ok(sampled.some(value => value > 0.03), 'mounds are visibly taller than the old field');
 });
 
 test('ground detail packs per-biome litter and amounts by tile id', () => {

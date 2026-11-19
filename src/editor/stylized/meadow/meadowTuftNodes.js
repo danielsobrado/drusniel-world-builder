@@ -1,6 +1,11 @@
 import { cos, mix, sin, smoothstep, vec2 } from 'three/tsl';
 import { meadowNoise } from './meadowNoise.js';
-import { MEADOW_TUFT_FIELD as F } from './meadowTuftField.js';
+import {
+  MEADOW_MOUND_CROWN_RAMP,
+  MEADOW_MOUND_SHOULDER_FALL,
+  MEADOW_MOUND_SHOULDER_RISE,
+  MEADOW_TUFT_FIELD as F,
+} from './meadowTuftField.js';
 
 const TAU = Math.PI * 2;
 const offset = ([x, z]) => vec2(x, z);
@@ -15,5 +20,8 @@ export function meadowTuftNodes(canonical) {
   const cluster = meadowNoise(canonical.div(F.clusterMeters).add(offset(F.clusterOffset)));
   const occupancy = smoothstep(F.low, F.high, mix(cluster, core, F.coreWeight));
   const angle = meadowNoise(canonical.div(F.leanMeters).add(offset(F.leanOffset))).mul(TAU * F.leanTurns);
-  return { occupancy, lean: vec2(cos(angle), sin(angle)) };
+  const crown = smoothstep(...MEADOW_MOUND_CROWN_RAMP, occupancy);
+  const shoulder = smoothstep(...MEADOW_MOUND_SHOULDER_RISE, occupancy)
+    .mul(smoothstep(...MEADOW_MOUND_SHOULDER_FALL, occupancy).oneMinus());
+  return { occupancy, crown, shoulder, lean: vec2(cos(angle), sin(angle)) };
 }

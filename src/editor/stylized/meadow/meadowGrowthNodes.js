@@ -1,4 +1,4 @@
-import { mix,smoothstep } from 'three/tsl';
+import { mix, smoothstep } from 'three/tsl';
 import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.js';
 import { meadowGroundStyle } from './meadowGroundStyle.js';
 import { meadowNoise } from './meadowNoise.js';
@@ -17,7 +17,10 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const ramp=smoothstep(MEADOW_TALL_RAMP[0],MEADOW_TALL_RAMP[1],noise).toVar();
   const weight=uniforms.tufts.height.mul(ramp.mul(-MEADOW_TALL_TUFT_RELIEF).add(1));
   const stemShare=mix(ramp,tuft.occupancy,weight).clamp(0,1);
-  const share=cards?stemShare.sub(.5).mul(MEADOW_CARD_HEIGHT_CONTRAST).add(.5):stemShare;
+  // Shape the upper envelope without lifting roots or increasing the maximum height.
+  const moundStrength=instance.shape.lessThan(.5).select(uniforms.tufts.moundHeight,0);
+  const crowned=stemShare.add(stemShare.oneMinus().mul(tuft.crown).mul(moundStrength)).clamp(0,1);
+  const share=cards?crowned.sub(.5).mul(MEADOW_CARD_HEIGHT_CONTRAST).add(.5):crowned;
   const response=uniforms.growth.density.element(instance.growth.toInt());
   const stand=cards?1.125:meadowStandNodes(instance.canonical,instance.rank).height;
   const area=uniforms.groundStyle?meadowGroundStyle(instance.canonical,uniforms.groundStyle.mul(uniforms.growth.areaStyle.element(instance.growth.toInt()))).height:1;

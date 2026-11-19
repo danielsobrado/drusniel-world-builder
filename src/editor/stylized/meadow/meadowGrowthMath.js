@@ -1,4 +1,14 @@
-import { MEADOW_CARD_HEIGHT_CONTRAST, MEADOW_SHORT_FLOOR, MEADOW_TALL_RAMP, MEADOW_TALL_TUFT_RELIEF, MEADOW_TUFT_DEFAULTS, MEADOW_TUFT_FIELD } from './meadowTuftField.js';
+import {
+  MEADOW_CARD_HEIGHT_CONTRAST,
+  MEADOW_MOUND_CROWN_RAMP,
+  MEADOW_MOUND_SHOULDER_FALL,
+  MEADOW_MOUND_SHOULDER_RISE,
+  MEADOW_SHORT_FLOOR,
+  MEADOW_TALL_RAMP,
+  MEADOW_TALL_TUFT_RELIEF,
+  MEADOW_TUFT_DEFAULTS,
+  MEADOW_TUFT_FIELD,
+} from './meadowTuftField.js';
 export { meadowCoverageRoll, acceptsMeadowHabitat } from './meadowHabitat.js';
 const unit=v=>Math.max(0,Math.min(1,v));
 const smooth=(a,b,v)=>{const t=unit((v-a)/(b-a));return t*t*(3-2*t);};
@@ -22,13 +32,35 @@ export function meadowTuftOccupancy(x,z) {
   const cluster=meadowNoiseNumber(x/f.clusterMeters+f.clusterOffset[0],z/f.clusterMeters+f.clusterOffset[1]);
   return smooth(f.low,f.high,core*f.coreWeight+cluster*(1-f.coreWeight));
 }
-/** Share of the envelope from patch noise and tuft occupancy (meadowGrowthNodes, in JS). */
-export function meadowGrowthShare(patchNoise,occupancy,tuftHeight=MEADOW_TUFT_DEFAULTS.height) {
-  const ramp=smooth(MEADOW_TALL_RAMP[0],MEADOW_TALL_RAMP[1],unit(patchNoise)),weight=tuftHeight*(1-MEADOW_TALL_TUFT_RELIEF*ramp);
-  return unit(ramp*(1-weight)+occupancy*weight);
+/** CPU twin of the shader's mound crown and shoulder masks. */
+export function meadowMoundMasks(occupancy) {
+  return {
+    crown: smooth(...MEADOW_MOUND_CROWN_RAMP, occupancy),
+    shoulder: smooth(...MEADOW_MOUND_SHOULDER_RISE, occupancy)
+      * (1 - smooth(...MEADOW_MOUND_SHOULDER_FALL, occupancy)),
+  };
 }
-export function meadowGrowthHeight(profile,x,z,cards=false,tuftHeight=MEADOW_TUFT_DEFAULTS.height) {
-  const share=meadowGrowthShare(meadowNoiseNumber(x/profile.patchMeters,z/profile.patchMeters),meadowTuftOccupancy(x,z),tuftHeight);
+
+/** Share of growth height from patch noise, tuft occupancy and the crown. */
+export function meadowGrowthShare(
+  patchNoise, occupancy, tuftHeight=MEADOW_TUFT_DEFAULTS.height,
+  moundHeight=0, shape='slender',
+) {
+  const ramp=smooth(MEADOW_TALL_RAMP[0],MEADOW_TALL_RAMP[1],unit(patchNoise));
+  const weight=tuftHeight*(1-MEADOW_TALL_TUFT_RELIEF*ramp);
+  const base=unit(ramp*(1-weight)+occupancy*weight);
+  const crown=shape==='slender'?meadowMoundMasks(occupancy).crown:0;
+  return unit(base+(1-base)*crown*moundHeight);
+}
+
+export function meadowGrowthHeight(
+  profile,x,z,cards=false,tuftHeight=MEADOW_TUFT_DEFAULTS.height,
+  moundHeight=MEADOW_TUFT_DEFAULTS.moundHeight,
+) {
+  const share=meadowGrowthShare(
+    meadowNoiseNumber(x/profile.patchMeters,z/profile.patchMeters),
+    meadowTuftOccupancy(x,z),tuftHeight,moundHeight,profile.shape,
+  );
   const tall=cards?.5+(share-.5)*MEADOW_CARD_HEIGHT_CONTRAST:share;
   const short=profile.shortHeight*MEADOW_SHORT_FLOOR;
   return (short+(profile.tallHeight-short)*tall)*(cards?1.125:1);

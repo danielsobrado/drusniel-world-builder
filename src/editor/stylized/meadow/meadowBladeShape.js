@@ -259,13 +259,16 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
       // A resting bend toward the stem's own random side.
       const bendPower = pow(r, uniforms.stiffness);
       // A tuft's stems share a lean and splay together; stragglers lie further over.
-      const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, tufts.lean).toVar();
+      const shoulder = profile.tuft.shoulder.mul(blade.shape.lessThan(.5).select(1, 0));
+      const flowWeight = tufts.lean.add(tufts.moundFlow.mul(shoulder).mul(oneMinus(tufts.lean))).clamp(0, 1);
+      const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, flowWeight).toVar();
       const restDirection = restMix.div(restMix.length().max(1e-3));
       // Keep a gentle resting splay even on shaded woodland stems so short blades
       // arch naturally instead of standing vertically like little pointed spikes.
       const strengthArch = blade.strength.mul(0.35).add(0.65);
       const restAngle = uniforms.baseBend.mul(strengthArch).mul(HALF_PI).mul(bendPower)
-        .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest);
+        .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest)
+        .mul(float(1).add(tufts.moundSplay.mul(shoulder))).clamp(0, HALF_PI);
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));

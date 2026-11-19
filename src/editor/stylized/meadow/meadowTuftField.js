@@ -60,6 +60,11 @@ export const MEADOW_SHORT_STAND = Object.freeze([0.45, 0.7]);
 /** Occupancy across which a short stand's stragglers fade out to leave plants. */
 export const MEADOW_GAP_RAMP = Object.freeze([0.12, 0.42]);
 
+/** Rounded crowns and loose shoulders emerge from the canonical tuft occupancy. */
+export const MEADOW_MOUND_CROWN_RAMP = Object.freeze([0.2, 0.86]);
+export const MEADOW_MOUND_SHOULDER_RISE = Object.freeze([0.16, 0.54]);
+export const MEADOW_MOUND_SHOULDER_FALL = Object.freeze([0.62, 0.96]);
+
 /**
  * `grass.meadow.tufts`: how strongly the field shapes stems. All live uniforms.
  * Zero `height`, `lean`, `rootLift`, `gapCut` and `valueSpread` with both bends at 1,
@@ -84,4 +89,10 @@ export const MEADOW_TUFT_DEFAULTS = Object.freeze({
   valueSpread: 0.07,
   /** Share of a short stand's stragglers dropped between tufts (0..1). */
   gapCut: 0.9,
+  /** Share of unused growth height filled by a tuft's crown. */
+  moundHeight: 0.42,
+  /** Additional bend around a mound's shoulder. */
+  moundSplay: 0.4,
+  /** Directional flow shared by neighbouring shoulder blades. */
+  moundFlow: 0.55,
 });

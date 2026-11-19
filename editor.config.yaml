@@ -1800,6 +1800,11 @@ stylizedSurface:
         # Share of a short stand's stragglers that drop out between tufts, so a
         # forest floor grows plants over litter rather than an even speckle.
         gapCut: 0.75
+        # Organic grass hummocks: raised crowns, loose shoulders, shared resting flow.
+        # Slender grass stands use these; reeds and broadleaf plants retain their posture.
+        moundHeight: 0.42
+        moundSplay: 0.4
+        moundFlow: 0.55
       # The ground between stems (meadow/meadowGroundDetailConfig.js): litter
       # drifts, moss hollows, soil pockets and fallen-blade streaks, procedural on
       # the terrain's transition lattice (no sampler), fading to plain turf by
