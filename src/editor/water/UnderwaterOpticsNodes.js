@@ -1,6 +1,6 @@
 import {
   Fn, If, atan, dot, exp, float, getViewPosition, max, mix, normalize,
-  perspectiveDepthToViewZ, reflect, screenUV, sin, smoothstep, time, vec2, vec3, vec4,
+  oneMinus, perspectiveDepthToViewZ, reflect, screenUV, sin, smoothstep, time, vec2, vec3, vec4,
 } from 'three/tsl';
 import { godsEndCausticLattice, godsEndSurfaceRipple } from './GodsEndWaterPatterns.js';
 
@@ -65,7 +65,10 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const waterDistance = cameraBelow.select(distance, distance.sub(entryDistance).max(0));
       const belowWaterline = pointDepth.greaterThan(0).and(surface.not());
       const pixelBlend = max(blend, waterline.mul(belowWaterline.select(float(1), float(0))));
-      const dimming = exp(vec3(...settings.dimming).mul(pointDepth.negate()));
+      const inlandDimming = exp(vec3(...settings.dimming).mul(pointDepth.negate()));
+      const seaDimming = exp(state.seaAbsorption
+        .mul(pointDepth.negate().div(state.sunDirection.y.max(0.15))));
+      const dimming = mix(inlandDimming, seaDimming, state.oceanWeight);
       const causticReach = exp(pointDepth.mul(-0.12))
         .mul(smoothstep(0, 1, float(45).sub(distance).div(25)))
         .mul(state.sun).mul(surface.select(float(0), float(1)));
@@ -73,6 +76,12 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
         .mul(causticReach).mul(settings.causticStrength * qualityStrength);
       const bed = lit.mul(dimming).mul(caustics.add(1));
       const transmittance = exp(vec3(...settings.extinction).mul(waterDistance.negate())).toVar();
+      const seaTransmission = exp(state.seaExtinction.mul(
+        waterDistance.min(state.seaSettings.opticalDistance.maximumMeters).negate())).toVar();
+      const seaScatter = state.seaSource.mul(state.seaScatteringRatio)
+        .mul(oneMinus(seaTransmission))
+        .mul(exp(state.seaAbsorption.mul(pointDepth.mul(-0.5)
+          .div(state.sunDirection.y.max(0.15)))));
       const seen = surface.select(underside, bed);
       const angle = atan(dot(ray, state.beamV), dot(ray, state.beamU));
       const fan = sin(angle.mul(29).add(sin(angle.mul(7).add(clock.mul(0.35))).mul(2.2)).add(clock.mul(0.15)))
@@ -80,8 +89,14 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
         .mul(sin(angle.mul(13).sub(clock.mul(0.22)).add(1.7)).mul(0.5).add(0.5));
       const alongSun = dot(ray, state.sunDirection);
       const beams = fan.pow(3).mul(mix(float(0.3), float(1), smoothstep(-0.3, 1, alongSun)))
-        .mul(smoothstep(0, 0.02, alongSun.oneMinus())).mul(transmittance.g.oneMinus()).mul(state.sun);
-      const inWater = mix(murk, seen, transmittance).add(murk.mul(beams).mul(settings.shaftStrength));
+        .mul(smoothstep(0, 0.02, alongSun.oneMinus())).mul(mix(transmittance.g, seaTransmission.g, state.oceanWeight).oneMinus()).mul(state.sun);
+      const inlandWater = mix(murk, seen, transmittance)
+        .add(murk.mul(beams).mul(settings.shaftStrength));
+      // A single water-column extinction applies to submerged geometry.
+      // Do not apply the surface's opaque refraction transport a second time.
+      const oceanWater = seen.mul(seaTransmission).add(seaScatter)
+        .add(state.seaSource.mul(beams).mul(settings.shaftStrength));
+      const inWater = mix(inlandWater, oceanWater, state.oceanWeight);
       result.assign(mix(lit, inWater, pixelBlend));
     });
     return vec4(result, 1);

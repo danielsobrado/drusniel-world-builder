@@ -65,6 +65,8 @@ export class UnderwaterViewController {
         config: waterVisual.projectedCaustics,
         qualityStrength: quality.projectedCausticStrength,
         optics: config.optics,
+        seaOptics: waterVisual.sea?.enabled === false ? { enabled: false } : waterVisual.sea?.optics,
+        waterQuality: waterVisual.qualityTier,
         floatingOrigin: terrainView.floatingOrigin,
         waterSlots: () => terrainView.stylizedSurface?.waterSlots ?? [],
         waterlineRange: waterVisual.optics?.surfaceTransitionDepth,

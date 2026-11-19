@@ -252,7 +252,7 @@ export function createStylizedWaterMaterial({
     currentStrength,
   }));
   const oceanWeight = appearance?.ocean ?? sea?.mask ?? float(0);
-  const seaOptics = water.sea?.enabled && quality.depthOptics ? createSeaOpticsNodes(waterDepth, water.sea.optics) : null;
+  const seaOptics = water.sea?.enabled && quality.depthOptics ? createSeaOpticsNodes(waterDepth, water.sea.optics, water.qualityTier) : null;
   const distort = surfaceNoise.sub(0.5).mul(water.distortAmount);
   const sampleUv = surfacePatterns.latticePoint('cells', localXZ)
     .add(surfaceOffset)
@@ -296,6 +296,7 @@ export function createStylizedWaterMaterial({
     .mul(waterCoverage)
     .mul(waterlineFade);
   let opticalDistance = float(0);
+  let seaResponse = null;
   // How much of the bed still reaches the eye. Caustics are light landing on
   // the bed, so they must not survive where the body has already absorbed it.
   let bedVisibility = float(1);
@@ -326,6 +327,16 @@ export function createStylizedWaterMaterial({
       seaOptics ? mix(float(optics.maximumOpticalDistance), float(seaOptics.settings.maximumOpticalDistance), oceanWeight)
         : optics.maximumOpticalDistance,
     );
+    // Snell's law bounds the underwater ray at grazing incidence for the ocean.
+    if (seaOptics && seaOptics.mode !== 'legacy') {
+      const airCosine = sea
+        ? abs(dot(viewVector, sea.normal)).div(max(length(viewVector), 1e-4))
+        : viewCosine;
+      const seaDistance = seaOptics.pathLength(airCosine, verticalDistance);
+      opticalDistance = mix(opticalDistance, seaDistance, oceanWeight);
+      seaResponse = seaOptics.sample(seaDistance, waterDepth, sunDirection,
+        normalize(viewVector));
+    }
     let density = seaOptics ? mix(float(optics.absorptionDensity), float(seaOptics.settings.absorptionDensity), oceanWeight)
       : float(optics.absorptionDensity);
     if (appearance) density = appearance.density(density);
@@ -376,6 +387,19 @@ export function createStylizedWaterMaterial({
       float(optics.maximumOpacity),
       absorbed,
     ).mul(waterCoverage).mul(waterlineFade);
+    if (seaResponse) {
+      // Without a scene-colour copy the ocean still uses its spectral extinction.
+      // Keep the artistic palette only for this non-refracted fallback.
+      const seaFallback = seaOptics.color.mul(oneMinus(seaResponse.visibility))
+        .add(seaResponse.scattered);
+      bodyColor = mix(bodyColor, seaFallback, oceanWeight);
+      const seaOpacity = oneMinus(seaResponse.visibility).clamp(0, 1)
+        .mul(waterCoverage).mul(waterlineFade);
+      alpha = mix(alpha, seaOpacity, oceanWeight);
+      bedVisibility = mix(bedVisibility,
+        seaResponse.visibility.mul(seaResponse.sunTransmission.g), oceanWeight);
+      color = mix(bodyColor, legacyColor, surfaceDetailMix);
+    }
   }
 
   if (quality.foam && water.foam.enabled) {
@@ -493,11 +517,19 @@ export function createStylizedWaterMaterial({
     const channelTransmission = exp(coefficients.mul(opticalDistance).negate());
     const refractedBody = sceneColor.mul(channelTransmission)
       .add(bodyColor.mul(oneMinus(channelTransmission)));
-    const physicalColor = mix(
+    let physicalColor = mix(
       bodyColor,
       refractedBody,
       refraction.sceneColorStrength,
     );
+    if (seaResponse) {
+      // Scene colour already contains the seabed; never paint an opaque lagoon
+      // palette over it or re-attenuate it with framebuffer alpha.
+      const seaPhysical = sceneColor.mul(seaResponse.transmission)
+        .add(seaResponse.scattered);
+      physicalColor = mix(physicalColor, seaPhysical,
+        oceanWeight.mul(refraction.sceneColorStrength));
+    }
     color = mix(physicalColor, legacyColor, surfaceDetailMix);
     alpha = waterCoverage.mul(waterlineFade);
 

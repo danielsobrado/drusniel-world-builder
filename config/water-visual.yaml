@@ -87,9 +87,27 @@ water:
     # Clear salt water has its own depth palette and RGB absorption, rather
     # than inheriting the silty inland response. Values are per metre.
     optics:
+      enabled: true
+      model: spectralSingleScatter
       sunny: { lagoon: '#3caca8', shallow: '#25858e', deep: '#123d50' }
       storm: { lagoon: '#2f8a80', shallow: '#176662', deep: '#032d48' }
       absorptionCoefficients: [0.896, 0.182, 0.14]
+      scatteringCoefficients: [0.025, 0.045, 0.07]
+      scattering:
+        ambientStrength: 0.65
+        sunlightStrength: 0.35
+        anisotropy: 0.35
+        stormTurbidityMultiplier: 1.8
+      opticalDistance:
+        maximumMeters: 43
+        refractiveIndex: 1.333
+        minimumCosine: 0.15
+      seabed:
+        visibilityStrength: 1.0
+      quality:
+        medium: absorption
+        high: singleScatter
+        ultra: directionalSingleScatter
       absorptionDensity: 0.22
       lagoonStart: 0.18
       lagoonEnd: 2.5

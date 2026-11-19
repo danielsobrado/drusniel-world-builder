@@ -91,7 +91,7 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [], waterlineRange = 0 }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [], waterlineRange = 0, seaOptics = {}, waterQuality = 'high' }) {
     this.renderer = renderer;
     this.scene = scene;
     this.clock = clock;
@@ -99,7 +99,7 @@ export class UnderwaterCausticsPostProcess {
     this.qualityStrength = Math.max(0, Number(qualityStrength) || 0);
     this.enabled = this.config.enabled && this.qualityStrength > 0;
     this.opticsState = this.enabled && optics?.enabled
-      ? new UnderwaterOpticsState({ settings: optics, scene, floatingOrigin }) : null;
+      ? new UnderwaterOpticsState({ settings: optics, scene, floatingOrigin, seaOptics, waterQuality }) : null;
     this.waterScene = this.opticsState ? new UnderwaterWaterScene(waterSlots) : null;
     this.disposed = false;
     this.blend = uniform(0);
