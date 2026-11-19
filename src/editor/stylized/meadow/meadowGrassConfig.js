@@ -195,6 +195,10 @@ export function resolveMeadowGrassConfig(source) {
   if (typeof appearance.dryColor !== 'string' || !/^#[0-9a-f]{6}$/i.test(appearance.dryColor)) {
     throw new Error(`Invalid editor configuration: ${path}.appearance.dryColor must be a #rrggbb colour.`);
   }
+  if (source.shapes !== undefined
+    && (!source.shapes || typeof source.shapes !== 'object' || Array.isArray(source.shapes))) {
+    throw new Error(`Invalid editor configuration: ${path}.shapes must be an object.`);
+  }
   const shapes = { ...d.shapes, ...(source.shapes ?? {}) };
   resolveShapeTable(shapes.byTileId, shapes.default);
   const farSource = { ...d.far, ...(source.far ?? {}) };
@@ -208,7 +212,7 @@ export function resolveMeadowGrassConfig(source) {
     transitionStart: finite(farSource.transitionStart, d.far.transitionStart, `${path}.far.transitionStart`, { min: 0, max: 1 }),
     fadeStart: finite(farSource.fadeStart, d.far.fadeStart, `${path}.far.fadeStart`, { min: 0, max: 1 }),
   };
-  const growth = resolveMeadowGrowth(source.growth);
+  const growth = resolveMeadowGrowth(source.growth, undefined, source.shapes == null ? null : shapes);
   const palette = resolveMeadowPalettes(source.palette ?? d.palette, `${path}.palette`);
   const interactionSource = { ...d.interaction, ...(source.interaction ?? {}) };
   const interaction = interactionSource.enabled === false ? null : {

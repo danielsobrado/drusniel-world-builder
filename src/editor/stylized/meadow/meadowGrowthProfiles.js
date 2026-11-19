@@ -1,4 +1,9 @@
-import { MEADOW_PLANT_SHAPES, meadowShapeId } from './meadowGrassShapes.js';
+import {
+  DEFAULT_MEADOW_SHAPE,
+  MEADOW_PLANT_SHAPES,
+  meadowShapeId,
+  resolveShapeTable,
+} from './meadowGrassShapes.js';
 import { resolveMeadowStand } from './meadowStandProfiles.js';
 import { resolveMeadowMicrohabitat } from './meadowMicrohabitat.js';
 export const MAX_MEADOW_GROWTH_PROFILES = 16;
@@ -7,6 +12,13 @@ export const meadowGrowthSignature = profile => JSON.stringify([
   profile.patchMeters, profile.shape, profile.areaStyle,
   profile.accents, profile.stand, profile.microhabitat,
 ]);
+const GROWTH_KEYS = new Set([
+  'shortHeight', 'tallHeight', 'width', 'density', 'patchMeters',
+  'shape', 'areaStyle', 'accents', 'stand', 'microhabitat',
+]);
+const ACCENT_KEYS = new Set(['shape', 'share', 'height', 'width']);
+const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+
 const row = (shortHeight,tallHeight,width,density,patchMeters,shape='slender',areaStyle=1) =>
   Object.freeze({shortHeight,tallHeight,width,density,patchMeters,shape,areaStyle});
 export const MEADOW_GROWTH_DEFAULTS = Object.freeze({
@@ -18,12 +30,16 @@ export const MEADOW_GROWTH_DEFAULTS = Object.freeze({
   11:row(0,0,0,0,12),12:row(.14,.60,.045,.50,5,'reed',.2),
 });
 function validate(source,path) {
+  if (!isRecord(source)) throw new Error(`Invalid editor configuration: ${path} must be an object.`);
+  for (const key of Object.keys(source)) {
+    if (!GROWTH_KEYS.has(key)) throw new Error(`Invalid editor configuration: ${path}.${key} is unknown.`);
+  }
   const p={...source};
   for(const key of ['shortHeight','tallHeight','width','density','patchMeters']) {
     if(!Number.isFinite(p[key]) || p[key]<0)throw new Error(`Invalid editor configuration: ${path}.${key} must be finite and nonnegative.`);
   }
   if(p.tallHeight<p.shortHeight)throw new Error(`Invalid editor configuration: ${path}.tallHeight must be at least shortHeight.`);
-  if(!(p.areaStyle>=0&&p.areaStyle<=1))throw new Error(`Invalid editor configuration: ${path}.areaStyle must be in [0,1].`);
+  if(!Number.isFinite(p.areaStyle)||p.areaStyle<0||p.areaStyle>1)throw new Error(`Invalid editor configuration: ${path}.areaStyle must be in [0,1].`);
   if(p.density>1)throw new Error(`Invalid editor configuration: ${path}.density must be in [0,1].`);
   if(p.density>0 && p.width<=0)throw new Error(`Invalid editor configuration: ${path}.width must be positive for nonzero density.`);
   if(p.patchMeters<2||p.patchMeters>64)throw new Error(`Invalid editor configuration: ${path}.patchMeters must be in [2,64].`);
@@ -35,25 +51,62 @@ function validate(source,path) {
   if(p.accents!==undefined) {
     if(!Array.isArray(p.accents)||p.accents.length>2)throw new Error(`Invalid editor configuration: ${path}.accents must list at most two plants.`);
     p.accents=Object.freeze(p.accents.map((accent,i)=>{
-      const at=`${path}.accents.${i}`,{shape,share,height=1,width=1}=accent??{};
-      if(!(shape in MEADOW_PLANT_SHAPES))throw new Error(`Invalid editor configuration: ${at}.shape is unknown.`);
-      if(!(share>0&&share<=.45))throw new Error(`Invalid editor configuration: ${at}.share must be in (0,0.45].`);
-      if(!(height>=.3&&height<=2.5))throw new Error(`Invalid editor configuration: ${at}.height must be in [0.3,2.5].`);
-      if(!(width>=.3&&width<=4))throw new Error(`Invalid editor configuration: ${at}.width must be in [0.3,4].`);
+      const at=`${path}.accents.${i}`;
+      if (!isRecord(accent)) throw new Error(`Invalid editor configuration: ${at} must be an object.`);
+      for (const key of Object.keys(accent)) {
+        if (!ACCENT_KEYS.has(key)) throw new Error(`Invalid editor configuration: ${at}.${key} is unknown.`);
+      }
+      const {shape,share,height=1,width=1}=accent;
+      if(!Object.hasOwn(MEADOW_PLANT_SHAPES, shape))throw new Error(`Invalid editor configuration: ${at}.shape is unknown.`);
+      if(!Number.isFinite(share)||share<=0||share>.45)throw new Error(`Invalid editor configuration: ${at}.share must be in (0,0.45].`);
+      if(!Number.isFinite(height)||height<.3||height>2.5)throw new Error(`Invalid editor configuration: ${at}.height must be in [0.3,2.5].`);
+      if(!Number.isFinite(width)||width<.3||width>4)throw new Error(`Invalid editor configuration: ${at}.width must be in [0.3,4].`);
       return Object.freeze({shape,share,height,width});
     }));
   }
   return Object.freeze(p);
 }
 /** Index zero is grassland fallback. Exact records deduplicate in ascending ID order. */
-export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow.growth') {
+export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow.growth',shapeSource=null) {
+  if (!isRecord(source)) throw new Error(`Invalid editor configuration: ${path} must be an object.`);
+  for (const key of Object.keys(source)) {
+    if (key !== 'byTileId') throw new Error(`Invalid editor configuration: ${path}.${key} is unknown.`);
+  }
+  if (source.byTileId !== undefined && !isRecord(source.byTileId)) {
+    throw new Error(`Invalid editor configuration: ${path}.byTileId must be an object.`);
+  }
   const byId={...MEADOW_GROWTH_DEFAULTS};
   for(const [key,value] of Object.entries(source?.byTileId??{})) {
     const id=Number(key);
     if(!Number.isInteger(id)||id<0||id>255)throw new Error(`Invalid editor configuration: ${path}.byTileId.${key} is not a terrain ID.`);
+    if (!isRecord(value)) throw new Error(`Invalid editor configuration: ${path}.byTileId.${key} must be an object.`);
     byId[id]=validate({...(MEADOW_GROWTH_DEFAULTS[id]??MEADOW_GROWTH_DEFAULTS[4]),...value},`${path}.byTileId.${key}`);
   }
-  const profiles=[validate(byId[4],`${path}.byTileId.4`)],table=new Uint8Array(256),shapes=new Uint8Array(256);
+  if (shapeSource !== null) {
+    const shapePath = 'stylizedSurface.grass.meadow.shapes';
+    if (!isRecord(shapeSource)) throw new Error(`Invalid editor configuration: ${shapePath} must be an object.`);
+    for (const key of Object.keys(shapeSource)) {
+      if (key !== 'default' && key !== 'byTileId') {
+        throw new Error(`Invalid editor configuration: ${shapePath}.${key} is unknown.`);
+      }
+    }
+    if (shapeSource.byTileId !== undefined && !isRecord(shapeSource.byTileId)) {
+      throw new Error(`Invalid editor configuration: ${shapePath}.byTileId must be an object.`);
+    }
+    const baseShape = shapeSource.default ?? DEFAULT_MEADOW_SHAPE;
+    resolveShapeTable(shapeSource.byTileId, baseShape);
+    for (const [tile, shape] of Object.entries(shapeSource.byTileId ?? {})) {
+      if (!Object.hasOwn(source.byTileId?.[tile] ?? {}, 'shape')) {
+        byId[tile] = validate({
+          ...(byId[tile] ?? MEADOW_GROWTH_DEFAULTS[4]), shape,
+        }, `${path}.byTileId.${tile}`);
+      }
+    }
+  }
+  const fallback = shapeSource === null ? byId[4] : {
+    ...byId[4], shape: shapeSource.default ?? DEFAULT_MEADOW_SHAPE,
+  };
+  const profiles=[validate(fallback,`${path}.byTileId.4`)],table=new Uint8Array(256),shapes=new Uint8Array(256);
   const signature = meadowGrowthSignature;
   // An accent plant may stand taller or wider than its stand: page bounds must cover it.
   const reach=(p,key)=>Math.max(1,...(p.accents??[]).map(accent=>accent[key]));

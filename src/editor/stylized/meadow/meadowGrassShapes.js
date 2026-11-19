@@ -39,6 +39,12 @@ export const MEADOW_PLANT_SHAPES = Object.freeze({
   strap: 4,
 });
 
+/** Accent-only silhouettes share the nearest built-in grass motion profile. */
+export const MEADOW_ACCENT_MOTION_SHAPES = Object.freeze({
+  lance: 'broadleaf',
+  strap: 'reed',
+});
+
 /** The noise that sorts stems into plants: clump size, and an offset clear of the tuft field's. */
 export const MEADOW_PLANT_FIELD = Object.freeze({ meters: 0.9, offset: Object.freeze([17.3, 53.9]) });
 /** Spread of meadowNoise round 0.5, for turning a share of stems into a threshold. */
@@ -67,7 +73,8 @@ export const DEFAULT_MEADOW_SHAPE = 'slender';
 export const MEADOW_SHAPE_COUNT = Object.keys(MEADOW_GRASS_SHAPES).length;
 
 export function meadowShapeId(name) {
-  return (MEADOW_GRASS_SHAPES[name] ?? MEADOW_GRASS_SHAPES[DEFAULT_MEADOW_SHAPE]).id;
+  return (Object.hasOwn(MEADOW_GRASS_SHAPES, name)
+    ? MEADOW_GRASS_SHAPES[name] : MEADOW_GRASS_SHAPES[DEFAULT_MEADOW_SHAPE]).id;
 }
 
 /**
@@ -78,13 +85,16 @@ export function meadowShapeId(name) {
  * @returns {Uint8Array} 256 entries, shape id per tile id
  */
 export function resolveShapeTable(byTileId, fallback = DEFAULT_MEADOW_SHAPE) {
+  if (!Object.hasOwn(MEADOW_GRASS_SHAPES, fallback)) {
+    throw new Error(`Invalid editor configuration: grass.meadow.shapes.default names an unknown shape "${fallback}".`);
+  }
   const table = new Uint8Array(256).fill(meadowShapeId(fallback));
   for (const [tile, name] of Object.entries(byTileId ?? {})) {
     const id = Number(tile);
     if (!Number.isInteger(id) || id < 0 || id > 255) {
       throw new Error(`Invalid editor configuration: grass.meadow.shapes.byTileId key ${tile} is not a tile id.`);
     }
-    if (!MEADOW_GRASS_SHAPES[name]) {
+    if (!Object.hasOwn(MEADOW_GRASS_SHAPES, name)) {
       throw new Error(`Invalid editor configuration: grass.meadow.shapes.byTileId.${tile} names an unknown shape "${name}".`);
     }
     table[id] = MEADOW_GRASS_SHAPES[name].id;

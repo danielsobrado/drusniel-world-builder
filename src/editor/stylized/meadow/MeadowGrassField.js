@@ -63,6 +63,7 @@ export class MeadowGrassField {
   }) {
     this.terrainView = terrainView;
     this.settings = settings;
+    this.shapeOverrides = config.grass?.meadow?.shapes ?? null;
     this.tuning = tuning.uniforms;
     this.dirtBladeCut = config.dirt.bladeCut;
     this.forward = new Vector3();
@@ -183,7 +184,7 @@ export class MeadowGrassField {
   }
 
   setGrowth(source) {
-    applyMeadowGrowth(this,resolveMeadowGrowth(source));
+    applyMeadowGrowth(this,resolveMeadowGrowth(source,undefined,this.shapeOverrides));
   }
 
   get meshes() {

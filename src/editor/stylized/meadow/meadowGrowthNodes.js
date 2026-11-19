@@ -5,6 +5,7 @@ import { meadowMicrohabitatNodes, meadowMicrohabitatShare } from './meadowMicroh
 import { meadowNoise } from './meadowNoise.js';
 import { meadowStandNodes } from './meadowStandNodes.js';
 import { meadowPlantNodes } from './meadowPlantNodes.js';
+import { meadowPlantMotionNodes } from './meadowPlantMotionNodes.js';
 import { MEADOW_CARD_HEIGHT_CONTRAST, MEADOW_GAP_RAMP, MEADOW_SHORT_FLOOR, MEADOW_SHORT_STAND, MEADOW_TALL_RAMP, MEADOW_TALL_TUFT_RELIEF } from './meadowTuftField.js';
 import { meadowTuftNodes } from './meadowTuftNodes.js';
 /** 1 in a short stand, 0 in a sward tall enough to shade its own roots. */
@@ -32,6 +33,8 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const microShare=meadowMicrohabitatShare(crowned,micro);
   const share=cards?microShare.sub(.5).mul(MEADOW_CARD_HEIGHT_CONTRAST).add(.5):microShare;
   const response=uniforms.growth.density.element(instance.growth.toInt());
+  const motion=plant.shape.equal(instance.shape)
+    .select(response.yzw,meadowPlantMotionNodes(plant.shape));
   const species=cards?null:meadowStandNodes(
     instance.canonical,instance.rank,uniforms.growth.accents.element(instance.growth.toInt().add(32)),
   );
@@ -44,6 +47,7 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const stormSettle=stormSnowCoverUniform.mul(-.4).add(1);
   return {height:mix(dimensions.x.mul(MEADOW_SHORT_FLOOR),dimensions.y,share).mul(stand).mul(areaHeight).mul(gap).mul(stormSettle),
     tallHeight:dimensions.y,tuft,micro,plant,
-    width:dimensions.z.mul(micro.width),density:response.x,wind:response.y.mul(micro.wind),rest:response.z,curve:response.w,
+    width:dimensions.z.mul(micro.width),density:response.x,
+    wind:motion.x.mul(micro.wind),rest:motion.y,curve:motion.z,
     speciesWidth:cards?1:species.width,speciesRest:cards?1:species.rest,speciesCurve:cards?1:species.curve};
 }
