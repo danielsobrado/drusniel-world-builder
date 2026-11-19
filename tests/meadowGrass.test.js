@@ -13,7 +13,13 @@ import { MeadowTileLayer } from '../src/editor/stylized/meadow/MeadowTileLayer.j
 import { MeadowGroundSampler } from '../src/editor/stylized/meadow/MeadowGroundSampler.js';
 import { validateForestFloorDensities } from '../src/editor/stylized/forest/ForestFloor.js';
 import { MeadowInteractionMap } from '../src/editor/stylized/meadow/MeadowInteractionMap.js';
-import { meadowShapeId, resolveShapeTable } from '../src/editor/stylized/meadow/meadowGrassShapes.js';
+import {
+  MEADOW_GRASS_SHAPES,
+  MEADOW_PLANT_SHAPES,
+  evaluateBladeSilhouette,
+  meadowShapeId,
+  resolveShapeTable,
+} from '../src/editor/stylized/meadow/meadowGrassShapes.js';
 
 const SETTINGS = resolveMeadowGrassConfig({ ...MEADOW_GRASS_DEFAULTS });
 
@@ -351,4 +357,44 @@ test('per-biome palettes ride in the look code beside the shape', () => {
   assert.equal(settings.shapeTable[12], 1 + count * (2 + 16 * settings.growth.table[12]), 'reed keeps its shape under its palette');
   // Without palette overrides the growth code still carries the natural shape.
   assert.equal(resolveMeadowGrassConfig({ shapes: { byTileId: { 12: 'reed' } } }).shapeTable[12] % 3, 1);
+});
+
+test('deterministic silhouettes vary taper for fine leaves, delicate seed heads and broadleaf', () => {
+  const slender = MEADOW_PLANT_SHAPES.slender;
+  const reed = MEADOW_PLANT_SHAPES.reed;
+  const lance = MEADOW_PLANT_SHAPES.lance;
+  const broadleaf = MEADOW_PLANT_SHAPES.broadleaf;
+
+  // Slender blades vary taper deterministically with variation.
+  const fineSlender = evaluateBladeSilhouette(slender, 0.5, 1, slender);
+  const fullerSlender = evaluateBladeSilhouette(slender, 0.5, 0, slender);
+  assert.ok(fineSlender < fullerSlender, 'higher variation tapers slender blades finer');
+
+  // Highfield tall reed accent on a slender stand reads as a slender stalk with a seed head in the upper third.
+  const stalkWidth = evaluateBladeSilhouette(reed, 0.35, 0.5, slender);
+  const headWidth = evaluateBladeSilhouette(reed, 0.79, 0.5, slender);
+  const tipWidth = evaluateBladeSilhouette(reed, 0.99, 0.5, slender);
+  assert.ok(stalkWidth < 0.2, `seed-head stalk stays fine (${stalkWidth})`);
+  assert.ok(headWidth > stalkWidth * 2.2, `seed head swells clearly above stalk (${headWidth} vs ${stalkWidth})`);
+  assert.ok(tipWidth < headWidth * 0.4, `seed head tapers cleanly at the tip (${tipWidth})`);
+
+  // Wetland primary reed keeps its broader sedge profile.
+  const wetlandReed = evaluateBladeSilhouette(reed, 0.35, 0.5, reed);
+  assert.ok(wetlandReed > stalkWidth * 2.5, 'primary wetland reed retains sedge width');
+
+  // Highfield lance accent reads as a fine leaf with narrow petiole and pointed tip.
+  const leafBase = evaluateBladeSilhouette(lance, 0.04, 0.5, slender);
+  const leafMid = evaluateBladeSilhouette(lance, 0.36, 0.5, slender);
+  const leafTip = evaluateBladeSilhouette(lance, 0.96, 0.5, slender);
+  assert.ok(leafBase < 0.12 && leafMid > leafBase * 2.5 && leafMid < 0.52, 'fine leaf stays slender and tapers from petiole');
+  assert.ok(leafTip < 0.05, 'fine leaf ends in a delicate point');
+
+  // Broadleaf profile carries asymmetric arch/droop response within the normalized <= 1 envelope.
+  assert.ok(MEADOW_GRASS_SHAPES.broadleaf.curve >= 0.9 && MEADOW_GRASS_SHAPES.broadleaf.curve <= 1);
+  assert.ok(MEADOW_GRASS_SHAPES.broadleaf.rest > 0.85 && MEADOW_GRASS_SHAPES.broadleaf.rest <= 1);
+  assert.notEqual(
+    evaluateBladeSilhouette(broadleaf, 0.75, 0.1, broadleaf),
+    evaluateBladeSilhouette(broadleaf, 0.75, 0.9, broadleaf),
+    'broadleaf tip taper varies deterministically',
+  );
 });

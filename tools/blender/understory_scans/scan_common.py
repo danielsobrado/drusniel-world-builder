@@ -22,8 +22,8 @@ def activate(obj):
     bpy.context.view_layer.objects.active = obj
 
 
-def import_scan(gltf_path):
-    """Import a glTF and return its meshes joined into one object with identity transform."""
+def import_scan_parts(gltf_path):
+    """Import a glTF and return its individual mesh objects with identity transforms."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=gltf_path)
     new = [o for o in bpy.data.objects if o not in before]
@@ -31,21 +31,103 @@ def import_scan(gltf_path):
     for o in meshes:
         activate(o)
         bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        for layer in list(o.data.uv_layers)[1:]:
+            o.data.uv_layers.remove(layer)
+        for attr in list(o.data.color_attributes):
+            o.data.color_attributes.remove(attr)
     for o in new:
         if o.type != 'MESH':
             bpy.data.objects.remove(o)
+    return meshes
+
+
+def join_mesh_objects(meshes):
+    """Join a list of mesh objects into a single active object."""
     bpy.ops.object.select_all(action='DESELECT')
     for o in meshes:
         o.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     bpy.ops.object.join()
-    obj = bpy.context.view_layer.objects.active
-    for layer in list(obj.data.uv_layers)[1:]:
-        obj.data.uv_layers.remove(layer)
-    for attr in list(obj.data.color_attributes):  # periwinkle ships COLOR_0/COLOR_1; the exporter emits a discontinuous set
-        obj.data.color_attributes.remove(attr)
-    return obj
+    return bpy.context.view_layer.objects.active
+
+
+def import_scan(gltf_path):
+    """Import a glTF and return its meshes joined into one object with identity transform."""
+    return join_mesh_objects(import_scan_parts(gltf_path))
+
+
+def _prune_asymmetric_notch(mesh, notch_angle, notch_half_width=0.62, min_z_frac=0.35):
+    """Carve an asymmetric wind-broken notch into one side of a shrub silhouette."""
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    zs = [v.co.z for v in bm.verts]
+    if not zs:
+        bm.free()
+        return
+    z_min, z_max = min(zs), max(zs)
+    z_cut = z_min + (z_max - z_min) * min_z_frac
+    to_delete = []
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if c.z < z_cut:
+            continue
+        ang = math.atan2(c.y, c.x)
+        delta = abs((ang - notch_angle + math.pi) % (2.0 * math.pi) - math.pi)
+        if delta < notch_half_width:
+            to_delete.append(f)
+    if to_delete and len(to_delete) < len(bm.faces) * 0.45:
+        bmesh.ops.delete(bm, geom=to_delete, context='FACES')
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+        bm.to_mesh(mesh)
+    bm.free()
+
+
+def build_scrub_cluster(parts):
+    """Compose multi-plant scan parts into staggered asymmetrical scrub silhouettes with distinct gaps.
+
+    Preserves a single joined mesh (1 draw call) and fits inside the existing culling footprint.
+    """
+    if len(parts) < 2:
+        return join_mesh_objects(parts), len(parts)
+    # Deterministic selection of 4 distinct scanned shrubs (drops 1 to open clear gaps).
+    chosen_indices = [0, 1, 2, len(parts) - 1] if len(parts) >= 4 else list(range(len(parts)))
+    kept = [parts[i] for i in chosen_indices]
+    for i, obj in enumerate(parts):
+        if i not in chosen_indices:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+    # (offset_x, offset_y, yaw, (sx, sy, sz), (shear_x, shear_y), notch_angle)
+    specs = (
+        (-1.26, -0.22, 0.42, (0.98, 0.84, 1.06), (0.20, 0.08), 2.25),
+        (-0.18, 0.30, 2.18, (0.88, 0.74, 0.72), (-0.16, 0.14), 5.10),
+        (0.84, -0.24, 4.02, (0.76, 0.84, 0.90), (0.12, -0.18), 1.05),
+        (1.56, 0.24, 5.48, (0.68, 0.60, 0.56), (-0.18, -0.10), 3.70),
+    )
+    for obj, (ox, oy, yaw, (sx, sy, sz), (shx, shy), notch_ang) in zip(kept, specs):
+        co = coords(obj.data)
+        lo, hi = co.min(0), co.max(0)
+        cx, cy, z0 = (lo[0] + hi[0]) * 0.5, (lo[1] + hi[1]) * 0.5, lo[2]
+        co -= np.array([cx, cy, z0], np.float32)
+        h = max(float(hi[2] - lo[2]), 1e-4)
+        # Scale each plant individually to unit height first so relative proportions are explicit.
+        co /= h
+        obj.data.vertices.foreach_set('co', co.ravel())
+        obj.data.update()
+        _prune_asymmetric_notch(obj.data, notch_ang)
+
+        co = coords(obj.data)
+        c, s = math.cos(yaw), math.sin(yaw)
+        rx = co[:, 0] * c - co[:, 1] * s
+        ry = co[:, 0] * s + co[:, 1] * c
+        z_norm = np.clip(co[:, 2], 0.0, 1.2)
+        co[:, 0] = rx * sx + z_norm * shx + ox
+        co[:, 1] = ry * sy + z_norm * shy + oy
+        co[:, 2] = co[:, 2] * sz
+        obj.data.vertices.foreach_set('co', co.ravel())
+        obj.data.update()
+
+    return join_mesh_objects(kept), len(kept)
 
 
 def coords(mesh):

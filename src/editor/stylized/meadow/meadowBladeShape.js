@@ -6,6 +6,7 @@ import {
   cameraPosition,
   clamp,
   cos,
+  exp,
   float,
   floor,
   fract,
@@ -27,7 +28,7 @@ import {
 import { sampleWorldWindCanonical } from '../../weather/wind/worldWindState.js';
 import { groundDeformationNode } from '../deformation/groundDeformationNode.js';
 import { stylizedDirtMask, stylizedPathWearMask } from '../StylizedNoiseNodes.js';
-import { MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
+import { MEADOW_BLADE_SHAPE_TUNING, MEADOW_SHAPE_COUNT } from './meadowGrassShapes.js';
 import { MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
@@ -91,13 +92,37 @@ export function meadowTrodden(blade, originUniform, tileSize) {
 }
 
 /** The silhouette's half-width factor at height ratio r (meadowGrassShapes.js, in TSL). */
-function silhouette(shape, r) {
-  const slender = oneMinus(r);
-  const reed = oneMinus(pow(r, 5)).mul(0.55);
-  const broadleaf = sqrt(max(float(0), oneMinus(r.mul(r)))).mul(0.85);
-  // Accent-only silhouettes (MEADOW_PLANT_SHAPES): a stalked leaf and a strap.
-  const lance = pow(r.mul(oneMinus(r)).mul(4), 0.7).mul(0.9).max(0.06);
-  const strap = oneMinus(pow(r, 3)).mul(0.7);
+function silhouette(shape, primaryShape, r, taperSeed) {
+  const t = MEADOW_BLADE_SHAPE_TUNING;
+  const slender = pow(oneMinus(r), mix(float(t.slenderTaperMin), float(t.slenderTaperMax), taperSeed));
+  // Slender-biome tall reed accents read as delicate stalks with fusiform seed heads;
+  // wetland primary reeds keep their upright sedge silhouette with varied taper.
+  const stalk = mix(float(t.seedHeadStalkBase), float(t.seedHeadStalkTop), r);
+  const seedPeak = mix(float(t.seedHeadPeakMin), float(t.seedHeadPeakMax), taperSeed);
+  const seedDist = r.sub(seedPeak).div(t.seedHeadSpread);
+  const seedHeadBody = exp(seedDist.mul(seedDist).negate())
+    .mul(mix(float(t.seedHeadWidthMin), float(t.seedHeadWidthMax), taperSeed));
+  const seedTipFade = oneMinus(r.sub(0.90).div(0.10).clamp(0, 1));
+  const seedHead = stalk.add(seedHeadBody).mul(seedTipFade.mul(0.8).add(0.2));
+  const wetReed = oneMinus(pow(r, mix(float(4.2), float(5.8), taperSeed)))
+    .mul(mix(float(0.50), float(0.58), taperSeed));
+  const reed = primaryShape.lessThan(0.5).select(seedHead, wetReed);
+
+  const broadleafTip = pow(oneMinus(r.mul(0.22)), mix(float(1.05), float(1.38), taperSeed));
+  const broadleaf = sqrt(max(float(0), oneMinus(r.mul(r)))).mul(broadleafTip).mul(0.85);
+
+  // Accent-only silhouettes (MEADOW_PLANT_SHAPES): a fine stalked leaf and a supple strap.
+  const leafPeak = mix(float(t.fineLeafPeakMin), float(t.fineLeafPeakMax), taperSeed);
+  const leafRise = r.div(leafPeak.max(0.05)).clamp(0, 1);
+  const leafFall = oneMinus(r).div(oneMinus(leafPeak).max(0.05)).clamp(0, 1);
+  const leafBody = pow(leafRise, 0.72)
+    .mul(pow(leafFall, t.fineLeafTipPower))
+    .mul(mix(float(t.fineLeafWidthMin), float(t.fineLeafWidthMax), taperSeed));
+  const petiole = float(t.fineLeafBaseWidth).mul(oneMinus(r));
+  const lance = max(petiole, leafBody);
+
+  const strap = oneMinus(pow(r, mix(float(2.2), float(3.6), taperSeed)))
+    .mul(mix(float(0.56), float(0.72), taperSeed));
   return shape.lessThan(0.5).select(slender, shape.lessThan(1.5).select(reed,
     shape.lessThan(2.5).select(broadleaf, shape.lessThan(3.5).select(lance, strap))));
 }
@@ -239,6 +264,14 @@ export function createMeadowBladePosition({
       // short growth and worn ground read as slender blades, not broad wedges.
       const stature = height.div(profile.tallHeight.max(1e-3)).clamp(0, 1).toVar();
       const proportion = pow(stature, tufts.widthPower).max(tufts.widthFloor);
+      // Deterministic per-stem taper and curvature seeds (rebase-invariant).
+      const taperSeed = fract(blade.phase.mul(1.371).add(blade.variation.mul(2.13)));
+      const curveSeed = fract(blade.phase.mul(2.193).add(blade.variation.mul(1.61)));
+      const isSlenderBiome = blade.shape.lessThan(0.5);
+      const isSeedAccent = isSlenderBiome.and(plant.shape.greaterThanEqual(0.5)).and(plant.shape.lessThan(1.5));
+      const isFineLeafAccent = isSlenderBiome.and(plant.shape.greaterThanEqual(2.5)).and(plant.shape.lessThan(3.5));
+      const isBroadleafCluster = blade.shape.greaterThan(1.5)
+        .or(plant.shape.greaterThan(1.5).and(plant.shape.lessThan(2.5)));
       const width = profile.width
         .mul(proportion)
         .mul(tuning.widthScale)
@@ -248,12 +281,33 @@ export function createMeadowBladePosition({
         .mul(mix(0.88, 1.12, blade.variation))
         .mul(plant.width)
         .mul(profile.speciesWidth)
-        .mul(silhouette(plant.shape, r))
+        .mul(silhouette(plant.shape, blade.shape, r, taperSeed))
         .mul(lod.width);
-      local.x.assign(positionLocal.x.mul(width));
-      local.y.assign(r.mul(height));
-      local.z.assign(r.mul(r).mul(height).mul(uniforms.curve).mul(profile.curve)
-        .mul(profile.speciesCurve).mul(mix(0.7, 1.3, blade.variation)));
+      const t = MEADOW_BLADE_SHAPE_TUNING;
+      const lateralSweep = isBroadleafCluster.select(
+        r.mul(r).mul(height).mul(curveSeed.sub(0.5).mul(t.broadleafAsymmetry)),
+        isFineLeafAccent.select(r.mul(r).mul(height).mul(curveSeed.sub(0.5).mul(0.14)), float(0)),
+      );
+      local.x.assign(positionLocal.x.mul(width).add(lateralSweep));
+      const baseCurve = r.mul(r).mul(height).mul(uniforms.curve).mul(profile.curve)
+        .mul(profile.speciesCurve).mul(mix(0.65, 1.45, curveSeed));
+      const accentNod = isSeedAccent.select(
+        pow(r, 2.4).mul(height).mul(mix(0.08, 0.22, curveSeed)),
+        isFineLeafAccent.select(pow(r, 1.9).mul(height).mul(mix(0.10, 0.24, curveSeed)), float(0)),
+      );
+      const broadleafReach = isBroadleafCluster.select(
+        pow(r, 2.05).mul(height).mul(mix(float(t.broadleafReachMin), float(t.broadleafReachMax), curveSeed)),
+        float(0),
+      );
+      local.z.assign(baseCurve.add(accentNod).add(broadleafReach));
+      const tipDroop = isBroadleafCluster.select(
+        pow(r, 2.65).mul(height).mul(mix(float(t.broadleafDroopMin), float(t.broadleafDroopMax), curveSeed)),
+        isSeedAccent.select(
+          pow(r, 2.8).mul(height).mul(mix(0.04, 0.11, curveSeed)),
+          isFineLeafAccent.select(pow(r, 2.4).mul(height).mul(mix(0.05, 0.13, curveSeed)), float(0)),
+        ),
+      );
+      local.y.assign(max(r.mul(height).mul(0.28), r.mul(height).sub(tipDroop)));
       // Face the blade. Snapshot both components: `local.x` is a live reference,
       // and reading it after the first assignment would rotate the rotated value.
       const x = local.x.toVar();
@@ -266,17 +320,26 @@ export function createMeadowBladePosition({
 
       // A resting bend toward the stem's own random side.
       const bendPower = pow(r, uniforms.stiffness);
-      // A tuft's stems share a lean and splay together; stragglers lie further over.
-      const shoulder = profile.tuft.shoulder.mul(plant.shape.lessThan(.5).select(1, 0));
+      // A tuft's stems share a lean and splay together; stragglers and broadleaf clusters arch asymmetrically.
+      const shoulder = profile.tuft.shoulder.mul(plant.shape.lessThan(.5).or(isBroadleafCluster).select(1, 0));
       const flowWeight = tufts.lean.add(tufts.moundFlow.mul(shoulder).mul(oneMinus(tufts.lean))).clamp(0, 1);
-      const restMix = mix(vec2(cos(blade.phase), sin(blade.phase)), profile.tuft.lean, flowWeight).toVar();
+      const stemSide = isBroadleafCluster.select(
+        vec2(cos(blade.phase.add(curveSeed.mul(2.4))), sin(blade.phase.add(curveSeed.mul(2.4)))),
+        vec2(cos(blade.phase), sin(blade.phase)),
+      );
+      const restMix = mix(stemSide, profile.tuft.lean, isBroadleafCluster.select(flowWeight.mul(0.45), flowWeight)).toVar();
       const restDirection = restMix.div(restMix.length().max(1e-3));
       // Keep a gentle resting splay even on shaded woodland stems so short blades
       // arch naturally instead of standing vertically like little pointed spikes.
       const strengthArch = blade.strength.mul(0.35).add(0.65);
+      const shapeBendScale = isBroadleafCluster.select(
+        mix(float(1.18), float(1.62), curveSeed),
+        isSeedAccent.or(isFineLeafAccent).select(mix(float(0.88), float(1.42), taperSeed), mix(float(0.88), float(1.14), curveSeed)),
+      );
       const restAngle = uniforms.baseBend.mul(strengthArch).mul(HALF_PI).mul(bendPower)
         .mul(mix(tufts.bendIsolated, tufts.bendCore, occupancy)).mul(profile.rest)
-        .mul(float(1).add(tufts.moundSplay.mul(shoulder))).mul(profile.speciesRest).clamp(0, HALF_PI);
+        .mul(float(1).add(tufts.moundSplay.mul(shoulder))).mul(profile.speciesRest)
+        .mul(shapeBendScale).clamp(0, HALF_PI);
       local.x.addAssign(restDirection.x.mul(height.mul(sin(restAngle)).mul(r)));
       local.z.addAssign(restDirection.y.mul(height.mul(sin(restAngle)).mul(r)));
       local.y.subAssign(abs(height.mul(cos(restAngle).sub(1)).mul(r)));

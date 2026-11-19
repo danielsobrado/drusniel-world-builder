@@ -36,7 +36,7 @@ export const assets = [
   scan('root_cluster_01', 'forest-roots-01', 'ground', 'wood', 2500, 0.45, { groundCrop: 0.1 }),
   scan('shrub_03', 'bush-forest-scan-01', 'bush', 'shrub', 2500, 1.5, ONE),
   scan('shrub_02', 'bush-meadow-scan-01', 'bush', 'shrub', 2500, 1.2, ONE),
-  scan('wild_rooibos_bush', 'bush-arid-rooibos-01', 'bush', 'shrub', 4000, 1.1, ONE),
+  scan('wild_rooibos_bush', 'bush-arid-rooibos-01', 'bush', 'shrub', 4000, 1.1, { plants: 'scrub_cluster' }),
   // Needle cards do not survive collapse decimation. Built, not placed.
   scan('pine_sapling_small', 'bush-taiga-sapling-01', 'bush', 'shrub', 6000, 1.9, ONE),
 

@@ -15,8 +15,8 @@ for extra in (THIS_DIR, os.path.join(THIS_DIR, '..', 'biome_understory')):
         sys.path.insert(0, extra)
 
 from scan_common import (  # noqa: E402
-    arrange_plants, build_material, crop_ground, decimate, grade, import_scan, material_sets, normalise,
-    pack_atlas, shade, silhouette, tri_count, write_px,
+    arrange_plants, build_material, build_scrub_cluster, crop_ground, decimate, grade, import_scan,
+    import_scan_parts, material_sets, normalise, pack_atlas, shade, silhouette, tri_count, write_px,
 )
 from understory_common import place_and_export, render_preview, save_contact_sheet, setup_scene  # noqa: E402
 
@@ -76,11 +76,18 @@ def inspect_glb(path):
 def build(asset, preview):
     name = asset['name']
     src = os.path.join(CACHE, asset['id'])
-    obj = import_scan(os.path.join(src, f"{asset['id']}_2k.gltf"))
-    source_tris = tri_count(obj)
-    sets, slot_set = material_sets(obj, src, asset['id'])
-    # Both trims come before normalise, so `targetHeight` measures the plant or stump that is kept.
-    plants = arrange_plants(obj.data, asset['plants']) if asset.get('plants') else 1
+    gltf_path = os.path.join(src, f"{asset['id']}_2k.gltf")
+    if asset.get('plants') == 'scrub_cluster':
+        parts = import_scan_parts(gltf_path)
+        source_tris = sum(tri_count(p) for p in parts)
+        obj, plants = build_scrub_cluster(parts)
+        sets, slot_set = material_sets(obj, src, asset['id'])
+    else:
+        obj = import_scan(gltf_path)
+        source_tris = tri_count(obj)
+        sets, slot_set = material_sets(obj, src, asset['id'])
+        # Both trims come before normalise, so `targetHeight` measures the plant or stump that is kept.
+        plants = arrange_plants(obj.data, asset['plants']) if asset.get('plants') else 1
     if asset.get('groundCrop'):
         crop_ground(obj.data, asset['groundCrop'])
     cutout = any(s['alpha'] for s in sets)  # a scan with an alpha map carries cut-out leaves

@@ -15,8 +15,88 @@
 export const MEADOW_GRASS_SHAPES = Object.freeze({
   slender: Object.freeze({ id: 0, label: 'Slender', wind: 1, rest: 1, curve: 1, widthScale: 1, width: (r) => 1 - r }),
   reed: Object.freeze({ id: 1, label: 'Reed', wind: .45, rest: .28, curve: .35, widthScale: 0.55, width: (r) => 1 - r ** 5 }),
-  broadleaf: Object.freeze({ id: 2, label: 'Broadleaf', wind: .7, rest: .7, curve: .75, widthScale: 0.85, width: (r) => Math.sqrt(Math.max(0, 1 - r * r)) }),
+  broadleaf: Object.freeze({ id: 2, label: 'Broadleaf', wind: .72, rest: .92, curve: .98, widthScale: 0.85, width: (r) => Math.sqrt(Math.max(0, 1 - r * r)) }),
 });
+
+/**
+ * Deterministic per-stem taper, seed-head, fine-leaf, and broadleaf-droop
+ * parameters shared between the vertex shader (`meadowBladeShape.js`) and tests.
+ * Every silhouette stays at or below the donor fill-rate envelope (~1.35x slender).
+ */
+export const MEADOW_BLADE_SHAPE_TUNING = Object.freeze({
+  slenderTaperMin: 0.86,
+  slenderTaperMax: 1.32,
+  seedHeadStalkBase: 0.16,
+  seedHeadStalkTop: 0.10,
+  seedHeadPeakMin: 0.74,
+  seedHeadPeakMax: 0.84,
+  seedHeadWidthMin: 0.34,
+  seedHeadWidthMax: 0.46,
+  seedHeadSpread: 0.14,
+  fineLeafBaseWidth: 0.08,
+  fineLeafPeakMin: 0.28,
+  fineLeafPeakMax: 0.44,
+  fineLeafWidthMin: 0.34,
+  fineLeafWidthMax: 0.50,
+  fineLeafTipPower: 1.45,
+  broadleafDroopMin: 0.16,
+  broadleafDroopMax: 0.40,
+  broadleafReachMin: 0.22,
+  broadleafReachMax: 0.48,
+  broadleafAsymmetry: 0.26,
+});
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+/**
+ * Deterministic CPU mirror of `meadowBladeShape.js`'s silhouette width factor at
+ * height ratio `r` (0..1) for a stem with variation `v` (0..1) and primary biome
+ * shape `primaryShapeId`.
+ */
+export function evaluateBladeSilhouette(shapeId, r, variation = 0.5, primaryShapeId = shapeId) {
+  const ratio = clamp01(r);
+  const v = clamp01(variation);
+  const t = MEADOW_BLADE_SHAPE_TUNING;
+  if (shapeId < 0.5) {
+    return (1 - ratio) ** lerp(t.slenderTaperMin, t.slenderTaperMax, v);
+  }
+  if (shapeId < 1.5) {
+    if (primaryShapeId < 0.5) {
+      // Highfield / slender-biome tall accent: delicate stalk with slender nodding seed head.
+      const stalk = lerp(t.seedHeadStalkBase, t.seedHeadStalkTop, ratio);
+      const peak = lerp(t.seedHeadPeakMin, t.seedHeadPeakMax, v);
+      const dist = (ratio - peak) / t.seedHeadSpread;
+      const head = Math.exp(-dist * dist) * lerp(t.seedHeadWidthMin, t.seedHeadWidthMax, v);
+      const tipFade = Math.max(0, 1 - Math.max(0, (ratio - 0.90) / 0.10));
+      return (stalk + head) * (0.2 + 0.8 * tipFade);
+    }
+    const reedPower = lerp(4.2, 5.8, v);
+    return (1 - ratio ** reedPower) * lerp(0.50, 0.58, v);
+  }
+  if (shapeId < 2.5) {
+    const tipPower = lerp(1.05, 1.38, v);
+    const body = Math.sqrt(Math.max(0, 1 - ratio * ratio));
+    return body * (1 - ratio * 0.22) ** tipPower * 0.85;
+  }
+  if (shapeId < 3.5) {
+    // Lance accent: fine, slender leaf with narrow petiole and tapered pointed tip.
+    const peak = lerp(t.fineLeafPeakMin, t.fineLeafPeakMax, v);
+    const rise = clamp01(ratio / Math.max(peak, 0.05));
+    const fall = clamp01((1 - ratio) / Math.max(1 - peak, 0.05));
+    const blade = (rise ** 0.72) * (fall ** t.fineLeafTipPower);
+    const petiole = t.fineLeafBaseWidth * (1 - ratio);
+    return Math.max(petiole, blade * lerp(t.fineLeafWidthMin, t.fineLeafWidthMax, v));
+  }
+  // Strap accent: supple tapering ribbon with varied tip fineness.
+  const strapPower = lerp(2.2, 3.6, v);
+  return (1 - ratio ** strapPower) * lerp(0.56, 0.72, v);
+}
 
 /** Reuse the density uniform's spare channels for structure, shared by blades,
  * cards and live profile updates. No extra instance data or shader branch. */
