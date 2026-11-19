@@ -362,6 +362,7 @@ ambientEffects:
       region: wetland
       presetDefault: 0.6
       presets:
+        sunny: 0.26
         moonlight: 1
         rainy: 0.5
         goldenHour: 0.9

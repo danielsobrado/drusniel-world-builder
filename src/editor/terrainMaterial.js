@@ -464,6 +464,7 @@ export function createTerrainMaterial({
       chunkCenter,
       pathMask: pathMask.mul(oneMinus(bakedSurface.snow ?? float(0))),
       verge: pathWear.verge.mul(oneMinus(bakedSurface.snow ?? float(0))),
+      trail: { soil: floorLitter, weight: naturalTrail.mul(oneMinus(surfaceMask.r)) },
       settings: pathPaintSettings,
       textures: pathPaintSettings ? acquireGroundLayers() : null,
       noise: familyAtlas ? atlasNoise : null,

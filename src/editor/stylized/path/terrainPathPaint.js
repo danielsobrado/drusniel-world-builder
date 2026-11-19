@@ -33,9 +33,7 @@ import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from '../worldNoiseLayout.js';
  * the soft path mask's contour with turf fibres and a macro wave, so grass and
  * soil interpenetrate at the edge instead of meeting on a clean line; and it
  * paints the verge beside the tread as worn turf — duller, browner, broken by
- * soil patches. This is that, verbatim in its constants; what changes is only
- * where the mask comes from (the terrain's own path/road mask) and the
- * coordinates, because this map is not 960 units across:
+ * soil patches. Natural trails also pick up local soil colour and floor detail.
  *
  *  - The dirt tiles a whole number of times per terrain chunk, so the texture
  *    UV is the chunk UV times an integer — exact at planet scale, where a
@@ -95,6 +93,7 @@ function floorMod(value, period) {
  * @param {object} options.chunkCenter vec2 uniform, canonical chunk centre
  * @param {object} options.pathMask 0..1 path/road mask (the donor's path texture R)
  * @param {object} options.verge 0..1 verge band beside the tread
+ * @param {{ soil: object, weight: object }} options.trail local soil colour and natural trail share
  * @param {object | null} options.settings resolvePathPaint()
  * @param {{ colorRoughness: object } | null} options.textures acquireGroundLayers()
  * @param {{ layers: object, blend: object } | null} [options.floor] floor scans:
@@ -104,7 +103,7 @@ function floorMod(value, period) {
  * @returns {{ apply: (color: object, roughness: object) => { color: object, roughness: object } } | null}
  */
 export function createTerrainPathPaint({
-  terrainUv, chunkWorldSize, chunkCenter, pathMask, verge, settings, textures, floor: floorScan = null,
+  terrainUv, chunkWorldSize, chunkCenter, pathMask, verge, trail, settings, textures, floor: floorScan = null,
   noise = null,
 }) {
   if (!settings || !textures) return null;
@@ -150,6 +149,7 @@ export function createTerrainPathPaint({
           .add(macro.b.sub(0.5).mul(0.1)).toVar();
         const edgeWidth = fwidth(edgeField).mul(1.5).max(0.06).toVar();
         const result = vec4(baseColor, baseRoughness).toVar();
+        const floorDetail = float(1).toVar();
         // The ground has no texture of its own: lay a neutral scan over it near the
         // viewer, so the palette keeps the hue and the scan brings the structure, with
         // no brightness ring where it fades. Past 45 m the branch skips its taps.
@@ -169,7 +169,9 @@ export function createTerrainPathPaint({
           const layerB = floorScan ? floorScan.layers.y.round().toInt() : layerA;
           const own = mix(scan(uvA, gradA, layerA), scan(uvB, gradB, layerB), floorScan?.blend ?? float(0));
           const detail = floorScan?.wet ? mix(own, scan(uvA, gradA, int(GROUND_LAYERS.grit)), floorScan.wet) : own;
-          result.assign(vec4(result.xyz.mul(mix(vec3(1), detail.div(GROUND_LAYER_MEAN).clamp(0.45, 1.8), floorFade.mul(0.85))), result.w));
+          const modulation = mix(vec3(1), detail.div(GROUND_LAYER_MEAN).clamp(0.45, 1.8), floorFade.mul(0.85)).toVar();
+          floorDetail.assign(dot(modulation, vec3(0.2126, 0.7152, 0.0722)));
+          result.assign(vec4(result.xyz.mul(modulation), result.w));
         });
         const vergeBand = verge.toVar();
         // Only a path and its verge are painted: elsewhere (nearly all the
@@ -193,7 +195,10 @@ export function createTerrainPathPaint({
             .mul(mix(vec3(1.08, 1.05, 1.0), vec3(0.72, 0.7, 0.68), damp)).toVar();
           const soilRoughness = dirt.a
             .add(macroTile.sub(0.5).mul(ANTI_TILING.roughnessVariation * 2)).clamp(0, 1);
-          const pathPaint = mix(ground, colorNode(settings.color).mul(ground.r.mul(0.65).add(0.65)), settings.tint)
+          const trailWeight = trail.weight.toVar();
+          const tint = mix(colorNode(settings.color), trail.soil, trailWeight.mul(0.65));
+          const pathPaint = mix(ground, tint.mul(ground.r.mul(0.65).add(0.65)), settings.tint)
+            .mul(mix(1, floorDetail, trailWeight.mul(0.35)))
             .toVar();
           const soilEdge = smoothstep(float(0.5).sub(edgeWidth), float(0.5).add(edgeWidth), edgeField).toVar();
           // The ground as the terrain painted it, read from the variable: naming
