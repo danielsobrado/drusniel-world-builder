@@ -1825,6 +1825,15 @@ stylizedSurface:
         gustBoost: 0.55
         secondaryStrength: 0.24
         flutterGust: 0.65
+      # Vertex-computed normals follow the displaced grass centreline, including
+      # gusts and footsteps. Strength 0 restores the original ribbon lighting.
+      # Fade avoids flickering highlights on distant thin blades and cards.
+      normals:
+        strength: 0.75
+        slopeScale: 1.2
+        maxSlope: 1.25
+        fadeStart: 14
+        fadeEnd: 38
       # The ground between stems (meadow/meadowGroundDetailConfig.js): litter
       # drifts, moss hollows, soil pockets and fallen-blade streaks, procedural on
       # the terrain's transition lattice (no sampler), fading to plain turf by

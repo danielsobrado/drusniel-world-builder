@@ -32,6 +32,7 @@ import { MAX_MEADOW_PALETTES } from './meadowPalettes.js';
 import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 import { meadowPlantNodes } from './meadowPlantNodes.js';
+import { meadowBentNormalNode, meadowBladeWorldNormal } from './meadowBladeNormals.js';
 import { meadowTipFlutterNode, meadowWindFrontNodes } from './meadowWindNodes.js';
 
 const HALF_PI = Math.PI * 0.5;
@@ -186,12 +187,15 @@ function foldUnderBody(blade, local, ribbon, height, ratio, uniforms, interactio
  * @param {object | null} [options.interaction] uniforms.interaction, when the field
  *   has an interaction map; without it the fold is not built at all
  */
-export function createMeadowBladePosition({ uniforms, tuning, config, bandCount, tileSize, interaction = null }) {
+export function createMeadowBladePosition({
+  uniforms, tuning, config, bandCount, tileSize, interaction = null, normalOutput = null,
+}) {
   return Fn(() => {
     const blade = meadowInstance(uniforms.origin);
     const bladeUv = uv();
     const r = bladeUv.y.clamp(0, 1);
     const local = vec3(0).toVar();
+    if (normalOutput) normalOutput.assign(vec3(0, 1, 0));
     const distance = blade.base.xz.sub(cameraPosition.xz).length();
     const lod = lodCoverage({
       bands: uniforms.lodBands, bandCount, distance, rank: blade.rank, appearance: uniforms.appearance,
@@ -311,6 +315,17 @@ export function createMeadowBladePosition({ uniforms, tuning, config, bandCount,
 
       // The player's body, last so it folds whatever the wind has already done.
       if (interaction) foldUnderBody(blade,local,ribbon,height,r,uniforms,interaction);
+
+      // Sample the final deformed centreline before LOD shrink/world translation.
+      if (normalOutput) {
+        const baseline = meadowBladeWorldNormal(
+          blade.rotation, attribute('bladeSide', 'float').clamp(-1, 1), r,
+        );
+        normalOutput.assign(meadowBentNormalNode({
+          baseline, centerline: local.sub(ribbon), ratio: r,
+          height, distance, settings: uniforms.normals,
+        }));
+      }
 
       local.assign(local.mul(clamp(lod.shrink, 0, 1)).add(blade.base));
       If(sparseHide, () => {

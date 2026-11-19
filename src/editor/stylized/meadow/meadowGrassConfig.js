@@ -4,6 +4,7 @@ import { resolveShapeTable } from './meadowGrassShapes.js';
 import { encodeLookTable, resolveMeadowPalettes } from './meadowPalettes.js';
 import { MEADOW_TUFT_DEFAULTS } from './meadowTuftField.js';
 import { MEADOW_WIND_DEFAULTS, resolveMeadowWind } from './meadowWindConfig.js';
+import { MEADOW_NORMAL_DEFAULTS, resolveMeadowNormals } from './meadowBladeNormals.js';
 
 /**
  * Meadow grass settings (`stylizedSurface.grass.meadow`), resolved.
@@ -115,6 +116,7 @@ export const MEADOW_GRASS_DEFAULTS = Object.freeze({
   tufts: MEADOW_TUFT_DEFAULTS,
   /** Local meadow response to the shared world wind. */
   wind: MEADOW_WIND_DEFAULTS,
+  normals: MEADOW_NORMAL_DEFAULTS,
 });
 
 const TUFT_LIMITS = Object.freeze({
@@ -235,6 +237,7 @@ export function resolveMeadowGrassConfig(source) {
     appearance,
     tufts: resolveTufts(source.tufts, path),
     wind: resolveMeadowWind(source.wind, `${path}.wind`),
+    normals: resolveMeadowNormals(source.normals, `${path}.normals`),
     far,
     interaction,
     palette: palette ? { palettes: palette.palettes, brightness: palette.brightness } : null,
