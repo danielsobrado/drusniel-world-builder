@@ -390,12 +390,11 @@ export function createStylizedWaterMaterial({
     if (seaResponse) {
       // Without a scene-colour copy the ocean still uses its spectral extinction.
       // Keep the artistic palette only for this non-refracted fallback.
-      const seaFallback = seaOptics.color.mul(oneMinus(seaResponse.visibility))
-        .add(seaResponse.scattered);
+      const seaOpacity = oneMinus(seaResponse.visibility).clamp(0, 1);
+      // Normal alpha blending applies the optical opacity to this colour.
+      const seaFallback = seaOptics.color.add(seaResponse.scattered.div(seaOpacity.max(1e-4)));
       bodyColor = mix(bodyColor, seaFallback, oceanWeight);
-      const seaOpacity = oneMinus(seaResponse.visibility).clamp(0, 1)
-        .mul(waterCoverage).mul(waterlineFade);
-      alpha = mix(alpha, seaOpacity, oceanWeight);
+      alpha = mix(alpha, seaOpacity.mul(waterCoverage).mul(waterlineFade), oceanWeight);
       bedVisibility = mix(bedVisibility,
         seaResponse.visibility.mul(seaResponse.sunTransmission.g), oceanWeight);
       color = mix(bodyColor, legacyColor, surfaceDetailMix);

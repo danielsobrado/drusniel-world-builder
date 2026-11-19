@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { DirectionalLight, PerspectiveCamera, Scene } from 'three/webgpu';
 import { computeSeaOpticsSample, refractedSeaCosine, seaOpticalPathLength } from '../src/editor/water/SeaOpticsMath.js';
 import { resolveSeaOptics, seaOpticsMode } from '../src/editor/water/SeaOptics.js';
+import { UnderwaterOpticsState } from '../src/editor/water/UnderwaterOpticsState.js';
+import { WATER_KIND_OCEAN, WATER_KIND_LAKE } from '../src/editor/water/WaterConstants.js';
 
 const config = resolveSeaOptics();
 
@@ -12,6 +15,26 @@ test('air-water Snell path is finite at grazing incidence', () => {
   assert.equal(seaOpticalPathLength(10000, 0, config.opticalDistance), 43);
   assert.ok(seaOpticalPathLength(3, 0.01, config.opticalDistance) >
     seaOpticalPathLength(3, 1, config.opticalDistance));
+});
+
+test('submerged ocean uses its configured refraction while inland retains its own', () => {
+  const scene = new Scene();
+  const sunlight = new DirectionalLight();
+  sunlight.position.set(1, 1, 0);
+  scene.add(sunlight);
+  const state = new UnderwaterOpticsState({
+    scene, seaOptics: { opticalDistance: { refractiveIndex: 1.8 } }, waterQuality: 'ultra',
+  });
+  const camera = new PerspectiveCamera();
+  state.update({ waterKind: WATER_KIND_OCEAN });
+  state.updateCamera(camera, 1);
+  assert.equal(state.seaMode, 'directionalSingleScatter');
+  assert.ok(Math.abs(state.sunDirection.value.x - Math.SQRT1_2 / 1.8) < 1e-12);
+  assert.ok(state.seaCriticalCosineShift > 0);
+  assert.ok(state.seaSunSource.value.y > 0);
+  state.update({ waterKind: WATER_KIND_LAKE });
+  state.updateCamera(camera, 1);
+  assert.ok(Math.abs(state.sunDirection.value.x - Math.SQRT1_2 / 1.333) < 1e-12);
 });
 
 test('RGB transmission decreases monotonically; scattering remains bounded', () => {

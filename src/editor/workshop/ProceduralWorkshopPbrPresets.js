@@ -97,8 +97,8 @@ const DEFINITIONS = Object.freeze([
   },
 ]);
 
-export const WORKSHOP_PBR_ASSET_KEYS = Object.freeze(
-  new Set(DEFINITIONS.map(({ folder, set }) => `${folder}/${set}`)),
+export const WORKSHOP_PBR_ASSET_LAYOUTS = Object.freeze(
+  Object.fromEntries(DEFINITIONS.map(({ folder, set, maps }) => [`${folder}/${set}`, maps])),
 );
 
 export const WORKSHOP_PBR_PRESET_LIST = Object.freeze(

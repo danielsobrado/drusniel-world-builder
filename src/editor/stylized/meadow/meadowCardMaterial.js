@@ -96,7 +96,6 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
     return local;
   })();
   material.positionNode = position;
-  material.receivedShadowPositionNode = position;
 
   const card = meadowInstance(uniforms.origin, { cards: true });
   const variant = card.cell.sub(floor(card.cell.div(4)).mul(4));

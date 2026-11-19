@@ -5,6 +5,7 @@ import { createWorkshopProceduralPixels } from './ProceduralWorkshopSynthTexture
 const MAX_CACHED_SETS = 24;
 const BASE_SET_CACHE = new Map();
 const PROCEDURAL_SET_CACHE = new Map();
+const MAP_SLOTS = ['map', 'normalMap', 'bumpMap', 'aoMap', 'roughnessMap', 'metalnessMap'];
 let sharedLoader = null;
 
 function textureLoader() {
@@ -81,7 +82,7 @@ function loadBaseSet({ folder, set, maps }) {
   return entry;
 }
 
-function bindDecodedSet(material, base, preset, owned) {
+function bindDecodedSet(material, base, preset, owned, initialMaps = null) {
   const wrap = (source, colorSpace) => {
     const clone = source.clone();
     clone.image = source.image;
@@ -89,20 +90,16 @@ function bindDecodedSet(material, base, preset, owned) {
     owned.push(clone);
     return clone;
   };
-  material.map = wrap(base.color, THREE.SRGBColorSpace);
-  material.normalMap = wrap(base.normal, THREE.NoColorSpace);
-  material.bumpMap = null;
-  if (base.arm) {
-    const arm = wrap(base.arm, THREE.NoColorSpace);
-    arm.channel = 0;
+  const canBind = slot => !initialMaps || material[slot] === initialMaps[slot];
+  if (canBind('map')) material.map = wrap(base.color, THREE.SRGBColorSpace);
+  if (canBind('normalMap')) material.normalMap = wrap(base.normal, THREE.NoColorSpace);
+  if (canBind('bumpMap')) material.bumpMap = null;
+  if (['aoMap', 'roughnessMap', 'metalnessMap'].every(canBind)) {
+    const arm = base.arm ? wrap(base.arm, THREE.NoColorSpace) : null;
     material.aoMap = arm;
-    material.aoMapIntensity = preset.aoStrength ?? 1;
-    material.roughnessMap = arm;
+    if (arm) material.aoMapIntensity = preset.aoStrength ?? 1;
+    material.roughnessMap = arm ?? wrap(base.rough, THREE.NoColorSpace);
     material.metalnessMap = preset.metalness > 0 ? arm : null;
-  } else if (base.rough) {
-    material.aoMap = null;
-    material.roughnessMap = wrap(base.rough, THREE.NoColorSpace);
-    material.metalnessMap = null;
   }
   material.emissive?.set(0);
   material.emissiveIntensity = 0;
@@ -129,8 +126,9 @@ export function applyWorkshopPbrAssetMaps(material, preset) {
   if (base.loaded) {
     bindDecodedSet(material, base, preset, owned);
   } else {
+    const initialMaps = Object.fromEntries(MAP_SLOTS.map(slot => [slot, material[slot]]));
     base.promise.then((resolved) => {
-      if (!disposed) bindDecodedSet(material, resolved, preset, owned);
+      if (!disposed) bindDecodedSet(material, resolved, preset, owned, initialMaps);
     }).catch(() => { /* Keep procedural fallback if offline or asset fails to load. */ });
   }
   return true;

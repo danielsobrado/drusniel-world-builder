@@ -1,6 +1,6 @@
 import { GODS_END_WORKSHOP_PRESETS } from './ProceduralWorkshopGodsEndPresets.js';
 import {
-  WORKSHOP_PBR_ASSET_KEYS,
+  WORKSHOP_PBR_ASSET_LAYOUTS,
   WORKSHOP_PBR_PRESETS,
   WORKSHOP_PROCEDURAL_PRESETS,
 } from './ProceduralWorkshopPbrPresets.js';
@@ -159,7 +159,7 @@ function normalizePreset(presetId, input) {
     const folder = string(asset.folder, `Material preset ${presetId} PBR folder`);
     const set = string(asset.set, `Material preset ${presetId} PBR set`);
     const maps = string(asset.maps, `Material preset ${presetId} PBR maps`);
-    if (!WORKSHOP_PBR_ASSET_KEYS.has(`${folder}/${set}`) || !['arm', 'rough'].includes(maps)) {
+    if (WORKSHOP_PBR_ASSET_LAYOUTS[`${folder}/${set}`] !== maps) {
       throw new Error(`Unknown PBR texture asset: ${folder}/${set}.`);
     }
     pbrAsset = Object.freeze({ folder, set, maps });

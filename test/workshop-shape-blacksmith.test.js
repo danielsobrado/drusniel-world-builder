@@ -14,8 +14,24 @@ import { buildShapeFeatures } from '../src/editor/workshop/shapes/ShapeFeatureBu
 import { ShapeMesh } from '../src/editor/workshop/shapes/ShapeMesh.js';
 import { WorkshopShapeSession } from '../src/editor/workshop/shapes/WorkshopShapeSession.js';
 import { WorkshopShapeCache } from '../src/editor/workshop/shapes/WorkshopShapeCache.js';
+import { buildShapeGrounding } from '../src/editor/workshop/shapes/ShapeGrounding.js';
 
 const SLOTS = ['walls', 'roof', 'trim', 'inserts', 'glazing', 'glow', 'deck', 'foliage', 'metal', 'flashing'];
+
+test('suppressing the foundation terrace restores the exposed ground and its moss', () => {
+  const composition = createShapePreset('craft-blacksmith-forge');
+  const source = composition.primitives.find((p) => p.id === 'main-workshop');
+  const primitive = { ...source, age: 1, features: [] };
+  const planFor = (p) => planWorkshopComposition({ composition: { primitives: [p] } }).shapePlans[0];
+  const normal = planFor(primitive);
+  const terrace = normal.ground.paving.find((paving) => paving.role === 'terrace');
+  const suppressed = planFor({ ...primitive, suppressed: [terrace.derivationKey] });
+  assert.equal(suppressed.ground.paving.some((paving) => paving.role === 'terrace'), false);
+  assert.equal(suppressed.ground.masks.length, normal.ground.masks.length - 1);
+  const meshes = { trim: new ShapeMesh(), foliage: new ShapeMesh() };
+  buildShapeGrounding(suppressed, meshes, { detail: 2, seed: 1848 });
+  assert.ok(meshes.foliage.positions.length > 0);
+});
 
 function buildPlanMeshes(plan, detail = 3) {
   const meshes = Object.fromEntries(SLOTS.map((slot) => [slot, new ShapeMesh()]));

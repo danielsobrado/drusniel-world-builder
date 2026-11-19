@@ -67,7 +67,7 @@ function validate(source,path) {
   return Object.freeze(p);
 }
 /** Index zero is grassland fallback. Exact records deduplicate in ascending ID order. */
-export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow.growth',shapeSource=null) {
+export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow.growth',shapeSource=null,previous=null) {
   if (!isRecord(source)) throw new Error(`Invalid editor configuration: ${path} must be an object.`);
   for (const key of Object.keys(source)) {
     if (key !== 'byTileId') throw new Error(`Invalid editor configuration: ${path}.${key} is unknown.`);
@@ -75,14 +75,17 @@ export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow
   if (source.byTileId !== undefined && !isRecord(source.byTileId)) {
     throw new Error(`Invalid editor configuration: ${path}.byTileId must be an object.`);
   }
-  const byId={...MEADOW_GROWTH_DEFAULTS};
+  const base=previous?.byTileId??MEADOW_GROWTH_DEFAULTS;
+  const byId={...base};
+  const explicitShapes = new Set();
   for(const [key,value] of Object.entries(source?.byTileId??{})) {
     const id=Number(key);
     if(!Number.isInteger(id)||id<0||id>255)throw new Error(`Invalid editor configuration: ${path}.byTileId.${key} is not a terrain ID.`);
     if (!isRecord(value)) throw new Error(`Invalid editor configuration: ${path}.byTileId.${key} must be an object.`);
-    byId[id]=validate({...(MEADOW_GROWTH_DEFAULTS[id]??MEADOW_GROWTH_DEFAULTS[4]),...value},`${path}.byTileId.${key}`);
+    if (Object.hasOwn(value, 'shape')) explicitShapes.add(id);
+    byId[id]=validate({...(base[id]??base[4]),...value},`${path}.byTileId.${key}`);
   }
-  if (shapeSource !== null) {
+  if (shapeSource !== null && previous === null) {
     const shapePath = 'stylizedSurface.grass.meadow.shapes';
     if (!isRecord(shapeSource)) throw new Error(`Invalid editor configuration: ${shapePath} must be an object.`);
     for (const key of Object.keys(shapeSource)) {
@@ -96,9 +99,10 @@ export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow
     const baseShape = shapeSource.default ?? DEFAULT_MEADOW_SHAPE;
     resolveShapeTable(shapeSource.byTileId, baseShape);
     for (const [tile, shape] of Object.entries(shapeSource.byTileId ?? {})) {
-      if (!Object.hasOwn(source.byTileId?.[tile] ?? {}, 'shape')) {
-        byId[tile] = validate({
-          ...(byId[tile] ?? MEADOW_GROWTH_DEFAULTS[4]), shape,
+      const id = Number(tile);
+      if (!explicitShapes.has(id)) {
+        byId[id] = validate({
+          ...(byId[id] ?? MEADOW_GROWTH_DEFAULTS[4]), shape,
         }, `${path}.byTileId.${tile}`);
       }
     }
@@ -114,13 +118,14 @@ export function resolveMeadowGrowth(source={},path='stylizedSurface.grass.meadow
   shapes.fill(meadowShapeId(profiles[0].shape));
   for(const id of Object.keys(byId).map(Number).sort((a,b)=>a-b)) {
     const p=validate(byId[id],`${path}.byTileId.${id}`),key=signature(p);
+    byId[id]=p;
     if(!indices.has(key)) {
       if(profiles.length===MAX_MEADOW_GROWTH_PROFILES)throw new Error(`Invalid editor configuration: ${path} exceeds ${MAX_MEADOW_GROWTH_PROFILES} profiles.`);
       indices.set(key,profiles.length);profiles.push(p);
     }
     table[id]=indices.get(key);shapes[id]=meadowShapeId(p.shape);
   }
-  return Object.freeze({profiles:Object.freeze(profiles),table,shapes,
+  return Object.freeze({byTileId:Object.freeze(byId),profiles:Object.freeze(profiles),table,shapes,
     revision:profiles.map(signature).join('|')+':'+Array.from(table).join(','),
     maxHeight:Math.max(...profiles.map(p=>p.tallHeight*reach(p,'height'))),maxWidth:Math.max(...profiles.map(p=>p.width*reach(p,'width')))});
 }

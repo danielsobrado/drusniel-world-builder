@@ -29,7 +29,11 @@ test('a live density change rebuilds only pages containing the affected biome an
   const changed=[...layer.tiles.values()].filter(t=>t.output?.count&&t.centerX<16),unchanged=[...layer.tiles.values()].filter(t=>t.output?.count&&t.centerX>=16&&t.centerX<32);
   assert.ok(changed.length&&unchanged.length);
   const retained=new Map([...changed,...unchanged].map(t=>[t.key,{output:t.output,buildId:t.buildId}]));
+  const oldGrowth=field.settings.growth;
   field.setGrowth({byTileId:{9:{density:.2}}});
+  const growth=field.settings.growth;
+  assert.deepEqual(growth.profiles[growth.table[9]],{...oldGrowth.profiles[oldGrowth.table[9]],density:.2});
+  assert.deepEqual(growth.profiles[growth.table[4]],oldGrowth.profiles[oldGrowth.table[4]]);
   layer.update({x:12,z:-8},origin,performance.now()-1,2);
   for(const tile of [...changed,...unchanged])assert.equal(tile.output,retained.get(tile.key).output,'old publication survives pending work');
   settle(3);

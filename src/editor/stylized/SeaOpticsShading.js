@@ -11,6 +11,12 @@ function colorNode(value) {
   return vec3(color.r, color.g, color.b);
 }
 
+export function seaDirectionalScatter(cosine, anisotropy) {
+  const forward = cosine.clamp(-1, 1);
+  const denominator = pow(float(1 + anisotropy * anisotropy).sub(forward.mul(2 * anisotropy)).max(0.001), 1.5);
+  return float(1 - anisotropy * anisotropy).div(denominator).clamp(0.6, 1.6);
+}
+
 /** Above-water and underwater ocean transport use the same extinction coefficients. */
 export function createSeaOpticsNodes(waterDepth, source, tier = 'high') {
   const settings = resolveSeaOptics(source);
@@ -39,10 +45,7 @@ export function createSeaOpticsNodes(waterDepth, source, tier = 'high') {
     const sunTransmission = exp(absorption.mul(depth.max(0).mul(-0.5).div(sunlightCosine)));
     let sunlight = skyLightUniforms.sunColor.mul(settings.scattering.sunlightStrength).mul(sunTransmission);
     if (mode === 'directionalSingleScatter' && sunDirection && viewDirection) {
-      const anisotropy = settings.scattering.anisotropy;
-      const forward = dot(sunDirection, viewDirection).clamp(-1, 1);
-      const denominator = pow(float(1 + anisotropy * anisotropy).sub(forward.mul(2 * anisotropy)).max(0.001), 1.5);
-      sunlight = sunlight.mul(float(1 - anisotropy * anisotropy).div(denominator).clamp(0.6, 1.6));
+      sunlight = sunlight.mul(seaDirectionalScatter(dot(sunDirection, viewDirection), settings.scattering.anisotropy));
     }
     const sourceRadiance = palette('lagoon').mul(settings.scattering.ambientStrength)
       .add(palette('shallow').mul(sunlight))

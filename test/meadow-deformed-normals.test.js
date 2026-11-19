@@ -79,14 +79,16 @@ test('strong folds, gusts and tiny stems always produce finite unit normals', ()
   }
 });
 
-test('lighting responds to the final normal while silhouette and shadow paths remain unchanged', () => {
+test('meadow materials let shadow receivers read the vertex-transformed world position', () => {
   const root = new URL('../src/editor/stylized/meadow/', import.meta.url);
   const material = readFileSync(new URL('meadowBladeMaterial.js', root), 'utf8');
+  const cards = readFileSync(new URL('meadowCardMaterial.js', root), 'utf8');
   const shape = readFileSync(new URL('meadowBladeShape.js', root), 'utf8');
   const normals = readFileSync(new URL('meadowBladeNormals.js', root), 'utf8');
   assert.match(material, /varyingProperty\('vec3', 'meadowBentNormal'\)/);
   assert.match(material, /spellLightIrradiance\(positionWorld, worldNormal\)/);
-  assert.match(material, /receivedShadowPositionNode = position/);
+  assert.doesNotMatch(material, /receivedShadowPositionNode/);
+  assert.doesNotMatch(cards, /receivedShadowPositionNode/);
   assert.match(shape, /centerline: local\.sub\(ribbon\)/);
   assert.match(shape, /foldUnderBody\(blade,local,ribbon,height,r,uniforms,interaction\)/);
   assert.doesNotMatch(normals, /sampleWorldWind|texture\(/, 'no duplicate field sampling');

@@ -5,6 +5,7 @@ import { UNDERWATER_RIPPLE_WAVES } from './GodsEndWaterPatterns.js';
 import { resolveUnderwaterOpticsConfig } from './UnderwaterOpticsConfig.js';
 import { WATER_KIND_OCEAN } from './WaterConstants.js';
 import { resolveSeaOptics, seaOpticsMode } from './SeaOptics.js';
+import { refractedSeaCosine } from './SeaOpticsMath.js';
 import { seaStateUniforms } from './seaState.js';
 
 const VECTOR_AXES = Object.freeze(['x', 'y', 'z']);
@@ -16,6 +17,7 @@ export class UnderwaterOpticsState {
     this.settings = resolveUnderwaterOpticsConfig(settings);
     this.seaSettings = resolveSeaOptics(seaOptics);
     this.seaMode = seaOpticsMode(this.seaSettings, waterQuality);
+    this.seaCriticalCosineShift = refractedSeaCosine(0, this.seaSettings.opticalDistance.refractiveIndex) - refractedSeaCosine(0);
     this.sunnyLagoon = new THREE.Color(this.seaSettings.sunny.lagoon);
     this.stormLagoon = new THREE.Color(this.seaSettings.storm.lagoon);
     this.sunnyShallow = new THREE.Color(this.seaSettings.sunny.shallow);
@@ -32,6 +34,7 @@ export class UnderwaterOpticsState {
     this.seaAbsorption = uniform(new THREE.Vector3());
     this.seaScatteringRatio = uniform(new THREE.Vector3());
     this.seaSource = uniform(new THREE.Vector3());
+    this.seaSunSource = uniform(new THREE.Vector3());
     this.sun = uniform(1);
     this.sunDirection = uniform(new THREE.Vector3(0, 1, 0));
     this.beamU = uniform(new THREE.Vector3(1, 0, 0));
@@ -67,8 +70,8 @@ export class UnderwaterOpticsState {
     const light = this.scene.children.find(child => child.isDirectionalLight && !child.userData.fallbackLighting);
     if (light) {
       this.direction.copy(light.position).sub(light.target.position).normalize();
-      const horizontal = Math.hypot(this.direction.x, this.direction.z) / 1.333;
-      this.sunDirection.value.set(this.direction.x / 1.333, Math.sqrt(Math.max(1 - horizontal * horizontal, 0)), this.direction.z / 1.333).normalize();
+      const index = this.oceanWeight.value ? this.seaSettings.opticalDistance.refractiveIndex : 1.333;
+      this.sunDirection.value.set(this.direction.x / index, refractedSeaCosine(this.direction.y, index), this.direction.z / index);
       this.sun.value = THREE.MathUtils.clamp(this.direction.y * light.intensity, 0, 1);
     } else this.sun.value = 0;
     const storm = THREE.MathUtils.clamp(seaStateUniforms.storm.value, 0, 1);
@@ -84,10 +87,11 @@ export class UnderwaterOpticsState {
       this.seaAbsorption.value[axis] = absorb;
       this.seaExtinction.value[axis] = extinct;
       this.seaScatteringRatio.value[axis] = scatter / Math.max(extinct, 1e-4);
-      this.seaSource.value[axis] = (
-        this.currentLagoon[COLOR_AXES[i]] * this.seaSettings.scattering.ambientStrength
-        + this.currentShallow[COLOR_AXES[i]] * this.seaSettings.scattering.sunlightStrength * this.sun.value
-      ) * (1 - storm * 0.2);
+      const weather = 1 - storm * 0.2;
+      this.seaSunSource.value[axis] = this.currentShallow[COLOR_AXES[i]]
+        * this.seaSettings.scattering.sunlightStrength * this.sun.value * weather;
+      this.seaSource.value[axis] = this.currentLagoon[COLOR_AXES[i]]
+        * this.seaSettings.scattering.ambientStrength * weather + this.seaSunSource.value[axis];
     }
     this.beamU.value.set(0, 0, 1).cross(this.sunDirection.value).normalize();
     this.beamV.value.crossVectors(this.sunDirection.value, this.beamU.value).normalize();

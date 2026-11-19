@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { resolveMeadowGrassConfig } from '../src/editor/stylized/meadow/meadowGrassConfig.js';
@@ -26,11 +25,12 @@ test('legacy per-biome shape overrides change real geometry and wind profiles', 
 
 test('explicit growth shape wins against legacy shape override', () => {
   const settings = resolveMeadowGrassConfig({
-    shapes: { byTileId: { 10: 'reed' } },
+    shapes: { byTileId: { '010': 'reed', '012': 'broadleaf' } },
     growth: { byTileId: { 10: { shape: 'broadleaf' } } },
   });
   assert.equal(at(settings.growth, 10).shape, 'broadleaf');
   assert.equal(lookShape(settings, 10), meadowShapeId('broadleaf'));
+  assert.equal(at(settings.growth, 12).shape, 'broadleaf');
 });
 
 test('legacy default shape applies only to unlisted fallback biomes', () => {
@@ -45,7 +45,7 @@ test('legacy default shape applies only to unlisted fallback biomes', () => {
 test('live growth changes preserve shapes-only overrides and unaffected page revisions', () => {
   const shapes = { default: 'slender', byTileId: { 10: 'reed' } };
   const previous = resolveMeadowGrowth({}, undefined, shapes);
-  const updated = resolveMeadowGrowth({ byTileId: { 10: { density: 0.36 } } }, undefined, shapes);
+  const updated = resolveMeadowGrowth({ byTileId: { 10: { density: 0.36 } } }, undefined, shapes, previous);
   const remapped = reconcileMeadowGrowth(previous, updated);
   const looks = growth => encodeLookTable(growth.shapes, null, growth.table);
   assert.equal(at(remapped, 10).shape, 'reed');
@@ -70,10 +70,10 @@ test('invalid legacy shape records fail instead of falling back silently', () =>
   }
 });
 
-test('live meadow updates pass the same legacy shape source to the resolver', () => {
-  const source = readFileSync(new URL('../src/editor/stylized/meadow/MeadowGrassField.js', import.meta.url), 'utf8');
-  const config = readFileSync(new URL('../src/editor/stylized/meadow/meadowGrassConfig.js', import.meta.url), 'utf8');
-  assert.match(source, /this\.shapeOverrides = config\.grass\?\.meadow\?\.shapes/);
-  assert.match(source, /resolveMeadowGrowth\(source,undefined,this\.shapeOverrides\)/);
-  assert.match(config, /resolveMeadowGrowth\(source\.growth, undefined, source\.shapes == null \? null : shapes\)/);
+test('live density edits retain explicit growth shapes and the configured fallback', () => {
+  const shapes = { default: 'broadleaf', byTileId: { 10: 'reed' } };
+  const previous = resolveMeadowGrowth({ byTileId: { 10: { shape: 'slender' } } }, undefined, shapes);
+  const next = resolveMeadowGrowth({ byTileId: { 10: { density: 0.36 } } }, undefined, shapes, previous);
+  assert.equal(at(next, 10).shape, 'slender');
+  assert.equal(at(next, 254).shape, 'broadleaf');
 });

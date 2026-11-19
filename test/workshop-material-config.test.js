@@ -6,6 +6,7 @@ import {
   MAX_WORKSHOP_MATERIAL_TOTAL_SOURCE_LENGTH,
   normalizeWorkshopMaterialDocument,
 } from '../src/editor/workshop/ProceduralWorkshopMaterialConfig.js';
+import { WORKSHOP_PBR_PRESET_LIST } from '../src/editor/workshop/ProceduralWorkshopPbrPresets.js';
 
 function pngDataUrl(extraBytes = 0) {
   const header = Buffer.alloc(24);
@@ -37,6 +38,16 @@ function documentWithSources(sources, presetSources) {
     },
   };
 }
+
+test('workshop photo presets require the asset set’s actual channel layout', () => {
+  const { pbrAsset } = WORKSHOP_PBR_PRESET_LIST[0];
+  const document = documentWithSources({}, {});
+  const preset = document.materialLibrary.presets['custom-test'];
+  preset.pbrAsset = pbrAsset;
+  assert.deepEqual(normalizeWorkshopMaterialDocument(document).materialLibrary.presets['custom-test'].pbrAsset, pbrAsset);
+  preset.pbrAsset = { ...pbrAsset, maps: pbrAsset.maps === 'arm' ? 'rough' : 'arm' };
+  assert.throws(() => normalizeWorkshopMaterialDocument(document), /Unknown PBR texture asset/);
+});
 
 test('workshop material sources derive the expected texture color space', () => {
   const dataUrl = pngDataUrl();

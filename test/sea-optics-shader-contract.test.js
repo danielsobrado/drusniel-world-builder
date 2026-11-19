@@ -26,6 +26,11 @@ test('refracted ocean scene colour is transported once and alpha retains coverag
   assert.match(material, /seaResponse\.visibility\.mul\(seaResponse\.sunTransmission\.g\)/);
 });
 
+test('transparent ocean fallback applies optical opacity once', () => {
+  assert.match(material, /seaOptics\.color\.add\(seaResponse\.scattered\.div\(seaOpacity\.max\(1e-4\)\)\)/);
+  assert.match(material, /alpha = mix\(alpha, seaOpacity\.mul\(waterCoverage\)\.mul\(waterlineFade\), oceanWeight\)/);
+});
+
 test('underwater ocean shares extinction while inland keeps its own medium', () => {
   assert.match(underwater, /seaTransmission = exp\(state\.seaExtinction\.mul\(\s*waterDistance\.min\(state\.seaSettings\.opticalDistance\.maximumMeters\)\.negate\(\)\)\)/);
   assert.match(underwater, /const inWater = mix\(inlandWater, oceanWater, state\.oceanWeight\)/);

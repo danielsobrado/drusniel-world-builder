@@ -1,23 +1,28 @@
 import { Box3, Sphere } from 'three/webgpu';
 import { MEADOW_STAND_MAX_HEIGHT } from './meadowStandNodes.js';
+import { MEADOW_FLUTTER_MAX_GAIN } from './meadowWindConfig.js';
 
 /** Shader displacement envelopes, including live tuning and body interaction. */
 export function meadowBladeBoundsPadding(uniforms, tuning, dirtCut = 0) {
   const height = (uniforms.growth?.maxHeight ?? (Math.abs(uniforms.bladeHeight.value)
     * Math.max(Math.abs(uniforms.heightScale.value.x), Math.abs(uniforms.heightScale.value.y))))
     * Math.max(1, Math.abs(1 - dirtCut)) * MEADOW_STAND_MAX_HEIGHT;
-  const restAngle = Math.abs(uniforms.baseBend.value) * Math.PI / 2;
+  const tufts = uniforms.tufts;
+  const tuftBend = tufts
+    ? Math.max(tufts.bendIsolated.value, tufts.bendCore.value) * (1 + tufts.moundSplay.value)
+    : 1;
+  const restAngle = Math.min(Math.abs(uniforms.baseBend.value) * tuftBend * Math.PI / 2, Math.PI / 2);
   const windAngle = 1.3; // The blade shader clamps wind before applying bend power.
   const vertical = height * (1
-    + 1 - Math.cos(Math.min(restAngle, Math.PI)) + 1 - Math.cos(windAngle));
+    + 1 - Math.cos(restAngle) + 1 - Math.cos(windAngle));
   const width = Math.abs((uniforms.growth?.maxWidth ?? uniforms.bladeWidth.value) * uniforms.widthScale.value * tuning.widthScale.value)
     * Math.max(1, Math.abs(uniforms.taper.value)) * 1.12
     * Math.max(1, uniforms.appearance.lodWidenMax.value)
     * Math.max(1, Math.abs(1 - uniforms.appearance.lodThinning.value));
   const horizontal = width + height * (
     Math.abs(uniforms.curve.value) * 1.3
-    + Math.sin(Math.min(restAngle, Math.PI / 2)) + Math.sin(windAngle)
-    + Math.abs(tuning.flutterStrength.value) * Math.sqrt(3.5)
+    + Math.sin(restAngle) + Math.sin(windAngle)
+    + Math.abs(tuning.flutterStrength.value) * MEADOW_FLUTTER_MAX_GAIN
   ) + Math.abs(uniforms.bladeHeight.value * uniforms.bladeWidth.value) * 2.8;
   return Math.max(horizontal, vertical) + 0.01;
 }

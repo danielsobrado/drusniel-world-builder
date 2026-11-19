@@ -41,8 +41,7 @@ export function createMeadowBladeMaterial({
 }) {
   const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
   material.name = 'meadow-grass-blades';
-  // The batch mesh has an identity transform, so the blade position is already
-  // render-space world: shadows and fog read it as such.
+  // Shadow receivers interpolate positionWorld so these varying assignments stay in the vertex stage.
   const bentNormal = varyingProperty('vec3', 'meadowBentNormal');
   const gust = varyingProperty('float', 'meadowGust');
   const position = createMeadowBladePosition({
@@ -50,7 +49,6 @@ export function createMeadowBladeMaterial({
     interaction: uniforms.interaction, normalOutput: bentNormal, gustOutput: gust,
   });
   material.positionNode = position;
-  material.receivedShadowPositionNode = position;
 
   const blade = meadowInstance(uniforms.origin);
   const { pigment, bladeValue, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade, marks: true });

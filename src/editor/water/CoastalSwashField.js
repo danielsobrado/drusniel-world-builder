@@ -86,7 +86,7 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
     const transportedVelocity = velocity.add(
       vec2(landward.y.negate(), landward.x).mul(sideways),
     );
-    const previousUv = historicUv.sub(transportedVelocity.mul(uniforms.delta / span));
+    const previousUv = historicUv.sub(transportedVelocity.mul(uniforms.delta.div(span)));
     const fromInside = smoothstep(0, 0.0001, previousUv.x)
       .mul(oneMinus(smoothstep(0.9999, 1, previousUv.x)))
       .mul(smoothstep(0, 0.0001, previousUv.y))

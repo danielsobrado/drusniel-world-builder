@@ -3,6 +3,7 @@ import {
   oneMinus, perspectiveDepthToViewZ, reflect, screenUV, sin, smoothstep, time, vec2, vec3, vec4,
 } from 'three/tsl';
 import { godsEndCausticLattice, godsEndSurfaceRipple } from './GodsEndWaterPatterns.js';
+import { seaDirectionalScatter } from '../stylized/SeaOpticsShading.js';
 
 /**
  * Gods' End CinematicPipeline underwater optics, using one existing scene pass.
@@ -40,7 +41,7 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const hit = state.eye.xz.add(ray.xz.mul(toSurface.min(400)));
       const slope = godsEndSurfaceRipple(hit, toSurface.min(400), state.ripplePhases, clock).toVar();
       const surfaceNormal = normalize(vec3(slope.x.negate(), 1, slope.y.negate()));
-      const steepness = dot(ray, surfaceNormal);
+      const steepness = dot(ray, surfaceNormal).sub(state.oceanWeight.mul(state.seaCriticalCosineShift));
       const inWindow = smoothstep(0.645, 0.685, steepness).toVar();
       const rim = smoothstep(0.615, 0.645, steepness).mul(inWindow.oneMinus());
       const glow = direction => mix(float(0.5), float(1.45), smoothstep(-0.7, 0.8, direction));
@@ -78,7 +79,11 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const transmittance = exp(vec3(...settings.extinction).mul(waterDistance.negate())).toVar();
       const seaTransmission = exp(state.seaExtinction.mul(
         waterDistance.min(state.seaSettings.opticalDistance.maximumMeters).negate())).toVar();
-      const seaScatter = state.seaSource.mul(state.seaScatteringRatio)
+      const alongSun = dot(ray, state.sunDirection);
+      const seaSource = state.seaMode === 'directionalSingleScatter'
+        ? state.seaSource.add(state.seaSunSource.mul(seaDirectionalScatter(alongSun, state.seaSettings.scattering.anisotropy).sub(1)))
+        : state.seaSource;
+      const seaScatter = seaSource.mul(state.seaScatteringRatio)
         .mul(oneMinus(seaTransmission))
         .mul(exp(state.seaAbsorption.mul(pointDepth.mul(-0.5)
           .div(state.sunDirection.y.max(0.15)))));
@@ -87,7 +92,6 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const fan = sin(angle.mul(29).add(sin(angle.mul(7).add(clock.mul(0.35))).mul(2.2)).add(clock.mul(0.15)))
         .mul(0.5).add(0.5)
         .mul(sin(angle.mul(13).sub(clock.mul(0.22)).add(1.7)).mul(0.5).add(0.5));
-      const alongSun = dot(ray, state.sunDirection);
       const beams = fan.pow(3).mul(mix(float(0.3), float(1), smoothstep(-0.3, 1, alongSun)))
         .mul(smoothstep(0, 0.02, alongSun.oneMinus())).mul(mix(transmittance.g, seaTransmission.g, state.oceanWeight).oneMinus()).mul(state.sun);
       const inlandWater = mix(murk, seen, transmittance)

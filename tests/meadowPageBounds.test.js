@@ -3,11 +3,24 @@ import test from 'node:test';
 import { Frustum, Matrix4, MeshBasicNodeMaterial, PerspectiveCamera, Scene, Vector3 } from 'three/webgpu';
 import { MeadowBandBatch } from '../src/editor/stylized/meadow/MeadowBandBatch.js';
 import { meadowBladeBoundsPadding, meadowCardBoundsPadding } from '../src/editor/stylized/meadow/MeadowPageBounds.js';
+import { MEADOW_STAND_MAX_HEIGHT } from '../src/editor/stylized/meadow/meadowStandNodes.js';
 import { createCompaction } from '../src/editor/stylized/meadow/meadowGrassCompaction.js';
 import { compactionPrefix } from '../src/editor/stylized/meadow/MeadowCompactionPrefix.js';
 import { createMeadowTemplate } from '../src/editor/stylized/meadow/meadowGrassGeometry.js';
 
 const node = value => ({ value });
+
+test('page bounds cover strongly splayed stems on a mound shoulder', () => {
+  const uniforms = {
+    growth: { maxHeight: 1, maxWidth: 0.01 },
+    bladeHeight: node(1), bladeWidth: node(0.01), widthScale: node(1),
+    taper: node(1), curve: node(0), baseBend: node(0.1),
+    tufts: { bendIsolated: node(6), bendCore: node(6), moundSplay: node(1.5) },
+    appearance: { lodWidenMax: node(1), lodThinning: node(0) },
+  };
+  const tuning = { widthScale: node(1), flutterStrength: node(0) };
+  assert.ok(meadowBladeBoundsPadding(uniforms, tuning) >= MEADOW_STAND_MAX_HEIGHT * (1 + Math.sin(1.3)));
+});
 
 function frustum(camera) {
   camera.updateMatrixWorld();

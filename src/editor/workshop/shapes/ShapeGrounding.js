@@ -56,9 +56,9 @@ export function resolveShapeGrounding(plan) {
     masks.push(p.kind === 'curved-volume' ? { kind: 'polygon', points: plan.boundary } :
       { kind: 'path', points: plan.boundary, width: p.thickness + 0.3 });
     if (p.kind === 'curved-volume' && (p.terrace ?? 0) > 0.05 && p.elevation < 0.2) {
-      const apron = offsetShapePolygon(plan.boundary, p.thickness / 2 + p.terrace);
       const key = `ground:${p.id}:terrace`;
       if (!p.suppressed.includes(key)) {
+        const apron = offsetShapePolygon(plan.boundary, p.thickness / 2 + p.terrace);
         paving.push({
           id: key,
           derivationKey: key,
@@ -67,8 +67,8 @@ export function resolveShapeGrounding(plan) {
           points: apron.map(([x, z]) => [x, p.elevation, z]),
           provenance: { source: 'auto', ruleId: 'foundation-terrace', generatorVersion: 1, sourceEntityIds: [p.id], derivationKey: key },
         });
+        masks.push({ kind: 'polygon', points: apron });
       }
-      masks.push({ kind: 'polygon', points: apron });
     }
     const surface = createShapeWallSurface(plan);
     for (const o of plan.openings) {
@@ -104,6 +104,7 @@ export function shapeGroundExcluded(point, masks) {
 export function buildShapeGrounding(plan, meshes, recipe) {
   const p = plan.primitive;
   if (p.kind !== 'traversal' && p.elevation < 0.2) {
+    const hasTerrace = plan.ground.paving.some((paving) => paving.role === 'terrace' && paving.polygons?.length);
     const surface = createShapeWallSurface(plan), count = Math.ceil(surface.length / 0.24);
     for (let i = 0; i < count; i++) {
       const u0 = surface.length * i / count, u1 = surface.length * (i + 1) / count;
@@ -111,7 +112,7 @@ export function buildShapeGrounding(plan, meshes, recipe) {
       addWallPatch(meshes.trim, surface, u0, u1, -0.1, 0.09, p.thickness / 2 + 0.075, 0.12, [0.78, 0.79, 0.73], { back: false, start: false, end: false });
       const a = surface.point(u0, 0.11), b = surface.point(u0, 0.11, 0.1);
       const shade = Math.max(0, (b[0] - a[0]) * 0.6 - (b[2] - a[2]) * 0.8) / 0.1;
-      if (recipe.detail < 2 || p.terrace > 0.05 || shapeRandom(recipe.seed, p.id, 'foundation-moss', i) > p.age * (0.15 + shade * 0.7)) continue;
+      if (recipe.detail < 2 || hasTerrace || shapeRandom(recipe.seed, p.id, 'foundation-moss', i) > p.age * (0.15 + shade * 0.7)) continue;
       const points = [surface.point(u0, 0.02, p.thickness / 2 + 0.082), surface.point(u1, 0.025, p.thickness / 2 + 0.082),
         surface.point(u1, 0.04 + p.age * 0.06, p.thickness / 2 + 0.086), surface.point(u0, 0.06 + p.age * 0.04, p.thickness / 2 + 0.086)];
       meshes.foliage.quad(...(surface.clockwise ? points.toReversed() : points), [0.14, 0.22, 0.06]);

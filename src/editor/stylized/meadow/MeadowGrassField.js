@@ -186,7 +186,7 @@ export class MeadowGrassField {
   }
 
   setGrowth(source) {
-    applyMeadowGrowth(this,resolveMeadowGrowth(source,undefined,this.shapeOverrides));
+    applyMeadowGrowth(this,resolveMeadowGrowth(source,undefined,this.shapeOverrides,this.settings.growth));
   }
 
   get meshes() {
