@@ -187,7 +187,8 @@ function foldUnderBody(blade, local, ribbon, height, ratio, uniforms, interactio
  *   has an interaction map; without it the fold is not built at all
  */
 export function createMeadowBladePosition({
-  uniforms, tuning, config, bandCount, tileSize, interaction = null, normalOutput = null,
+  uniforms, tuning, config, bandCount, tileSize, interaction = null,
+  normalOutput = null, gustOutput = null,
 }) {
   return Fn(() => {
     const blade = meadowInstance(uniforms.origin);
@@ -195,6 +196,7 @@ export function createMeadowBladePosition({
     const r = bladeUv.y.clamp(0, 1);
     const local = vec3(0).toVar();
     if (normalOutput) normalOutput.assign(vec3(0, 1, 0));
+    if (gustOutput) gustOutput.assign(float(0));
     const distance = blade.base.xz.sub(cameraPosition.xz).length();
     const lod = lodCoverage({
       bands: uniforms.lodBands, bandCount, distance, rank: blade.rank, appearance: uniforms.appearance,
@@ -287,6 +289,9 @@ export function createMeadowBladePosition({
       const gust = wind.envelope.clamp(0.35, 3.5);
       const across = vec2(direction.y.negate(), direction.x);
       const { wave, phase, front, pressure } = meadowWindFrontNodes(blade, uniforms, tuning, wind);
+      if (gustOutput) {
+        gustOutput.assign(pressure.clamp(0, 1).mul(wind.envelope.clamp(0, 2).mul(0.5)));
+      }
       const secondary = sin(phase.mul(2.25)
         .add(wave.across.mul(tuning.windFrequency.mul(0.42))).add(1.3))
         .mul(uniforms.wind.secondaryStrength);

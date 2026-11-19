@@ -17,13 +17,11 @@ import {
 import { assignGrassMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
-import { sampleWorldWindCanonical } from '../../weather/wind/worldWindState.js';
 import { applyCloudShadow } from '../CloudShadow.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
 import { meadowPigment } from './meadowPigment.js';
-import { meadowWindFrontNodes } from './meadowWindNodes.js';
 export { meadowBladeWorldNormal } from './meadowBladeNormals.js';
 
 /**
@@ -46,9 +44,10 @@ export function createMeadowBladeMaterial({
   // The batch mesh has an identity transform, so the blade position is already
   // render-space world: shadows and fog read it as such.
   const bentNormal = varyingProperty('vec3', 'meadowBentNormal');
+  const gust = varyingProperty('float', 'meadowGust');
   const position = createMeadowBladePosition({
     uniforms, tuning, config, bandCount, tileSize,
-    interaction: uniforms.interaction, normalOutput: bentNormal,
+    interaction: uniforms.interaction, normalOutput: bentNormal, gustOutput: gust,
   });
   material.positionNode = position;
   material.receivedShadowPositionNode = position;
@@ -74,10 +73,6 @@ export function createMeadowBladeMaterial({
   // Gust fronts crossing the meadow (grass-test's gust sheen): where the travelling
   // wave bends the tips over, their paler side turns up and catches the light.
   // Computed per stem in the vertex stage; the ambient layer sets how much shows.
-  const wind = sampleWorldWindCanonical(blade.canonical);
-  const { pressure } = meadowWindFrontNodes(blade, uniforms, tuning, wind);
-  const gust = pressure.clamp(0, 1)
-    .mul(wind.envelope.clamp(0, 2).mul(0.5)).toVarying('meadowGust');
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);

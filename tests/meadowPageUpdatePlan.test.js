@@ -60,11 +60,10 @@ const STEPS = [
     { order: ['u', 'a'], slots: [['a', [[0, 10, 0], [40, 5, 10]], 15, 2, 0], ['u', [[10, 30, 0]], 30, 1, 8]],
       instanceCount: 45, uploads: [[[0, 40], [160, 20]], [[0, 20], [80, 10]], [[0, 40], [160, 20]], [[0, 40], [160, 20]]],
       repackBytes: 0, uploadedBytes: 840 }],
-  // The rebuild left `order` unlike the slot order, so this full rebuild restores it.
+  // A prior rebuild changed the packed order; unchanged membership requires no replanning.
   ['unchanged after a rebuild reordered the page', f => [f.a, f.u],
-    { present: ['a', 'u'], order: ['a', 'u'], writes: [['a', 15, 2, [[0, 10, 0], [40, 5, 10]], [], false],
-      ['u', 30, 1, [[10, 30, 0]], [], false]], count: 45, bytes: 0, repackBytes: 0 },
-    { order: ['a', 'u'], slots: [['a', [[0, 10, 0], [40, 5, 10]], 15, 2, 0], ['u', [[10, 30, 0]], 30, 1, 8]],
+    { present: ['a', 'u'], order: ['u', 'a'], writes: [], count: 45, bytes: 0, repackBytes: 0 },
+    { order: ['u', 'a'], slots: [['a', [[0, 10, 0], [40, 5, 10]], 15, 2, 0], ['u', [[10, 30, 0]], 30, 1, 8]],
       instanceCount: 45, uploads: none, repackBytes: 0, uploadedBytes: 0 }],
   ['retired tile', f => [f.a],
     { present: ['a'], order: ['a'], writes: [['a', 15, 2, [[0, 10, 0], [10, 5, 10]], [[10, 5, 10]], false]],
@@ -99,6 +98,34 @@ test('page plans and commits match the recorded ranges, bytes and counters', t =
     f.page.update(tiles);
     assert.deepEqual(stateOf(f.page), state, label);
   }
+});
+
+
+test('unmodified pages keep the zero-write path across permutation and rebuilt packed order', t => {
+  const { page, tile } = fixture(t);
+  const a = tile('stable-a', 20, 0);
+  const b = tile('stable-b', 12, 8);
+  const c = tile('stable-c', 8, 16);
+  page.update([a, b, c]);
+  a.buildId++;
+  page.update([c, a, b]);
+  assert.notDeepEqual(names(page.order), names(page.slots.keys()), 'rebuild changed packing order');
+  const stableOrder = names(page.order);
+
+  for (let iteration = 0; iteration < 500; iteration++) {
+    const tiles = iteration % 2 ? [a, b, c] : [c, b, a];
+    const plan = meadowPageUpdatePlan(page, tiles);
+    assert.equal(plan.writes.length, 0);
+    assert.equal(plan.bytes, 0);
+    assert.equal(plan.present, page.present);
+    assert.equal(plan.order, page.order);
+    page.update(tiles);
+  }
+  assert.deepEqual(names(page.order), stableOrder);
+  a.renderX += 2;
+  const changed = meadowPageUpdatePlan(page, [a, b, c]);
+  assert.ok(changed.writes.length > 0, 'origin changes must not hit the fast path');
+  assert.ok(changed.bytes > 0, 'origin changes still upload metadata');
 });
 
 test('consecutive plans for different inputs share no state', t => {

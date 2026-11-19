@@ -114,10 +114,15 @@ export class MeadowTileLayer {
       this.publicationBytes = 0; this.publications = 0; this.batchBudget.reset(this.maxPublicationBytes);
     }
     else this.beginFrame(frameId);
-    if (this.origin && (this.origin.x !== origin.x || this.origin.z !== origin.z)) {
-      this.batches.rebase(this.origin.x - origin.x, this.origin.z - origin.z, this.batchBudget);
+    if (this.origin) {
+      if (this.origin.x !== origin.x || this.origin.z !== origin.z) {
+        this.batches.rebase(this.origin.x - origin.x, this.origin.z - origin.z, this.batchBudget);
+        this.origin.x = origin.x;
+        this.origin.z = origin.z;
+      }
+    } else {
+      this.origin = { x: origin.x, z: origin.z };
     }
-    this.origin = { x: origin.x, z: origin.z };
     this.updateSerial += 1;
     const groundRevision = Number.isFinite(this.ground.revision)
       ? this.ground.revision

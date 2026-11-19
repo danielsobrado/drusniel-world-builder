@@ -35,11 +35,11 @@ function claimHoles(holes, count, offset, target) {
  */
 function unchangedPlan(page, tiles, count) {
   if (tiles.length !== page.slots.size || page.order.length !== tiles.length) return null;
-  let i = 0;
-  for (const tile of page.slots.keys()) {
-    const slot = page.slots.get(tile), ranges = slot.ranges;
-    if (page.order[i++] !== tile || !tiles.includes(tile) || slot.count !== stems(page, tile)
-      || slot.source !== sourceOf(tile) || metadataChanged(slot, tile)) return null;
+  for (const tile of tiles) {
+    const slot = page.slots.get(tile);
+    if (!slot || slot.count !== stems(page, tile) || slot.source !== sourceOf(tile)
+      || metadataChanged(slot, tile)) return null;
+    const ranges = slot.ranges;
     for (let r = 0; r < ranges.length; r += 1) {
       const { start, count: length, offset } = ranges[r];
       if (length <= 0 || start + length > count || (r > 0 && continues(ranges[r - 1], start, offset))) return null;

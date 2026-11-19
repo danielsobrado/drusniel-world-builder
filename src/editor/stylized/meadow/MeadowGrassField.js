@@ -136,6 +136,7 @@ export class MeadowGrassField {
     // About half a second of running ahead of a density boundary. Preparation
     // uses the same shared deadline; the drawn band and viewing range stay put.
     const preparationLead = settings.tileSize;
+    this.bladeBoundsPadding = meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut);
     this.blades = new MeadowTileLayer({
       scene,
       name: 'meadow-grass',
@@ -148,7 +149,7 @@ export class MeadowGrassField {
       reach: settings.maxDistance + preparationLead,
       ground: this.ground,
       preparer: this.preparer,
-      boundsPadding: meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut),
+      boundsPadding: this.bladeBoundsPadding,
       maxPublicationBytes: MAX_PUBLICATION_BYTES,
       maxPublicationsPerFrame: MAX_PUBLICATIONS_PER_FRAME,
     });
@@ -162,6 +163,7 @@ export class MeadowGrassField {
         detail: 1, count: bandStemCount(far.tileSize, far.density), tileSize: far.tileSize, cards: true,
       });
       const start = this.uniforms.cardFadeIn.value.x;
+      this.cardBoundsPadding = meadowCardBoundsPadding(this.uniforms);
       this.cards = new MeadowTileLayer({
         scene,
         name: 'meadow-grass-cards',
@@ -175,7 +177,7 @@ export class MeadowGrassField {
         reach: far.distance,
         ground: this.ground,
         preparer: this.preparer,
-        boundsPadding: meadowCardBoundsPadding(this.uniforms),
+        boundsPadding: this.cardBoundsPadding,
         maxPublicationBytes: MAX_PUBLICATION_BYTES,
         maxPublicationsPerFrame: MAX_PUBLICATIONS_PER_FRAME,
       });
@@ -238,8 +240,18 @@ export class MeadowGrassField {
     this.uniforms.time.value = timestamp / 1000;
     this.uniforms.origin.value.set(origin.x, origin.z);
     this.syncLight();
-    this.blades.batches.setBoundsPadding(meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut));
-    this.cards?.batches.setBoundsPadding(meadowCardBoundsPadding(this.uniforms));
+    const bladePadding = meadowBladeBoundsPadding(this.uniforms, this.tuning, this.dirtBladeCut);
+    if (bladePadding !== this.bladeBoundsPadding) {
+      this.bladeBoundsPadding = bladePadding;
+      this.blades.batches.setBoundsPadding(bladePadding);
+    }
+    if (this.cards) {
+      const cardPadding = meadowCardBoundsPadding(this.uniforms);
+      if (cardPadding !== this.cardBoundsPadding) {
+        this.cardBoundsPadding = cardPadding;
+        this.cards.batches.setBoundsPadding(cardPadding);
+      }
+    }
     const dtSeconds = this.lastInteractionTime == null ? 0 : Math.max(0,(timestamp-this.lastInteractionTime)/1000);
     this.lastInteractionTime=timestamp;
     this.interaction?.update(body,{dtSeconds});
@@ -252,8 +264,13 @@ export class MeadowGrassField {
     this.cards?.update(canonical, origin, noBuildDeadline, timestamp / 1000, viewCone, false, timestamp);
     this.frameInputs ??= {};
     const focus=this.terrainView.focusChunk;
-    Object.assign(this.frameInputs, { canonical, origin, timestamp, viewCone,
-      focusX:focus?.chunkX??null,focusZ:focus?.chunkZ??null });
+    const frame = this.frameInputs;
+    frame.canonical = canonical;
+    frame.origin = origin;
+    frame.timestamp = timestamp;
+    frame.viewCone = viewCone;
+    frame.focusX = focus?.chunkX ?? null;
+    frame.focusZ = focus?.chunkZ ?? null;
   }
 
   prepareFrame(shouldYield = null, budgetProvider = null) {
@@ -266,10 +283,13 @@ export class MeadowGrassField {
       || (focus?.chunkZ??null)!==this.frameInputs.focusZ) return;
     const startedAt = performance.now();
     const deadline = shouldYield?.() ? startedAt : startedAt + this.settings.buildBudgetMs;
-    for (const layer of [this.blades, this.cards]) if (layer) {
-      layer.workBudgetProvider = budgetProvider;
-      layer.workBudgetMs = this.settings.buildBudgetMs;
-      layer.workRunner = this.workRunner;
+    this.blades.workBudgetProvider = budgetProvider;
+    this.blades.workBudgetMs = this.settings.buildBudgetMs;
+    this.blades.workRunner = this.workRunner;
+    if (this.cards) {
+      this.cards.workBudgetProvider = budgetProvider;
+      this.cards.workBudgetMs = this.settings.buildBudgetMs;
+      this.cards.workRunner = this.workRunner;
     }
     // Blades first: the ground under the player matters more than the horizon.
     this.blades.update(canonical, origin, deadline, timestamp / 1000, viewCone, true, this.publicationFrame);
