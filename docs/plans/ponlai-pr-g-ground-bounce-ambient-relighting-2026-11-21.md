@@ -430,3 +430,445 @@ frameP95P99, hitchCount, terrainCommitWait, renderPath, gpuBackend
 Classify GPU timing measurements accurately: render-pass samples do **not** include compute/upload by default, and unavailable timestamp queries aren't zero-cost execution.
 
 ---
+
+## 10. Material receiver integration — no doubled lighting
+
+### 10.1 Fundamental rule: replace ambient irradiance, not add glowing pixels
+
+At each opted-in material, the new physical/stylized indirect response should enter the existing **indirect-diffuse PBR calculation**. Keep direct sun and moon, contact shadows, shadowed transmitted sunlight, rough specular environment reflections, actual emissive, and the user's colour palette intact.
+
+```text
+directDiffuse/directSpecular = EXISTING_UNCHANGED
+environmentSpecular         = EXISTING_UNCHANGED
+ambientSkyDiffuse            = blend(existingAmbientSkyDiffuse,
+                                     E_probeSky, receiverWeight)
+ambientBounceDiffuse         = E_bouncedSky
+                              + E_uniqueKeyGroundMap
+                              + E_optionalSea
+finalIndirectDiffuse         = BRDF(diffuseAlbedo, roughness, metalness,
+                                    ambientSkyDiffuse + ambientBounceDiffuse)
+legacyArtSkyGroundEmission   = fadeOutOldSkyGroundFill(whereProbeIsValid)
+actualEmissiveAndAir         = EXISTING_UNCHANGED
+post/exposure                = EXISTING_UNCHANGED
+```
+
+A small relative-visibility ratio applied to the **existing ambient sky component** may be safer while a first receiver is validated. Never multiply final `material.colorNode` or output HDR to fake bounced light; that darkens sunlight, true emission and specular indiscriminately. Never change `HemisphereLight.intensity` globally to “compensate” for one local surface. If the exact current Three.js lighting model cannot isolate the ambient contribution safely, **do not enable that receiver**.
+
+### 10.2 Terrain: compose the snow model [D6/D7]
+
+Current terrain material [D6] is shared among up to 49 chunks. It calls `applySnowLighting(material, snowSurface.sunResponse...)`. [D7] returns a new `SnowLightingModel extends PhysicalLightingModel` whose `direct` calls `super.direct` and conditionally adds an already-shadowed snow sun glint.
+
+**Bug to avoid:** setting `material.setupLightingModel = () => new BounceLightingModel(...)` after snow **removes the snow direct contribution**. Calling `applySnowLighting` after bounce **removes bounce**.
+
+Required approach:
+
+1. Inspect the actual installed Three.js version's `PhysicalLightingModel` and its `indirect/indirectDiffuse/indirectSpecular` context and output nodes.
+2. Create a **small compositional extension**: use the original returned model and wrap the **indirect** method, or provide a combined model that retains the existing snow `direct` override.
+3. Prove no change to already-shadowed direct glints, snow wet/ice specular and Fresnel. Do not fork all of Three.js's lighting code or import Ponlai's full GGX replacement.
+4. Bind the **same** G probe field to all terrain slot meshes via [D5] stable node identity/`onObjectUpdate`, or a single atlas. No 49 independent shader graphs.
+5. When G data is missing or invalid, fallback to F/legacy **per slot** with no black flash or previously visited chunk's brightness.
+6. Selectively reduce the existing `floorFill = foliageSkyFill(...).mul(forestFloor)` from [D6] only if equivalent sky contribution is now delivered through indirect lighting. Preserve forest-floor G-contact texture and the snowy/wetness feature layers.
+7. Verify rain, snow, moss, forest dirt, spell-light emission and coast surf mask remain as authored.
+
+### 10.3 Second approved receiver: rocks [D17/D11]
+
+**Recommendation:** implement rocks and boulders **before** broad tree/grass/town coverage. Their stable geometry, visible underside and existing PBR normal/roughness make extra reflected light easy to validate.
+
+- [D17] `createStylizedRockMaterial` already supplies weathering/wetness and `rockShadeEmission` as an artistic sky + ground + distance-air term.
+- A receiver adapter should use geometric/render-space normal and a bias **outside** the rock, sample G once from the canonical lattice, and add only the new indirect term to its proper BRDF stage.
+- Fade old **sky fill** and **ground bounce** emission on the rock in proportion to valid G coverage. Preserve its **distance-air** in-scatter, if a separate authorial choice remains desirable, and preserve actual authored emissive.
+- Validate dark basalt, pale limestone, wet coastal stones, snow-covered stone and mountain talus. Do not make every rock artificially warm from a nearby **camera** town.
+- Rocks may be instanced/material shared; do not create an independent material program for every rock instance.
+- An unsupported rock material **keeps legacy lighting** rather than being silently reclassified as a valid receiver.
+
+### 10.4 Tree foliage and bark [D11–D15/D40]
+
+The existing outdoor tree chain is **not one generic PBR class**:
+
+- [D12] `TreeSurfaceMaterial.js` preserves authored emissive and clones materials.
+- [D13] `FoliageNodeMaterial.js` wraps `setupLightingModel` and modifies **direct** lighting to handle leaf transmission, foliage thickness, wet film, snow and relief. G must *delegate*, never overwrite or mutate a shared base model such that its source's direct contribution disappears.
+- [D14] `StylizedTreeMaterials.js` constructs leaf colour, opacity and `treeFoliageEmission`.
+- [D15] `TreeBarkMaterial.js` builds bark PBR/height/normal/wetness and `treeBarkEmission`.
+- [D40] `CanopyVisibility.js` bakes **prototype-local** canopy visibility, not an outdoor world-volume sky-probe buffer. It can still supply fine self-shadowing independently.
+
+#### Bark pilot
+
+Bark is more straightforward than leaves; sample near the bark surface with a small geometric normal bias, optionally biased up the trunk to avoid probe mixing inside it. Compare shadow-side bark warm fill near grass, snow and bare rock. Existing `treeBarkEmission` contains **sky fill + ground bounce + air fog**: convert the first two only when G ready; retain the air term and true authored emission.
+
+#### Leaves and thin-sheet energy
+
+- Direct transmission currently uses **already-shadowed direct light**. G's diffuse irradiance should not multiply that transmission by a second canopy shadow.
+- A translucent two-sided leaf is not opaque Lambert. Model wrap/thin-side response separately; preserve leaf/needle color, transparency and snow masking.
+- Use a **probe point above canopy/leaf root** or stable crown anchor, not each wind-animated leaf normal as a sampling coordinate. Otherwise G causes shimmering and worker or GPU field churn.
+- For the SH band response, test full L2 first in one leaf, then a lower-band approximation only when quality/performance data supports it.
+- If slow or visually worse, defer leaves. Terrain + rocks are the minimum G receiver acceptance; tree coverage is an optional separate gate.
+
+### 10.5 Grass and meadow [D16]
+
+Current grass is a `MeshLambertNodeMaterial` with double-sided cards, displaced normals, bespoke translucency/opacity and LOD/instancing. It may not share the `PhysicalLightingModel` hook used by terrain and rock.
+
+- Confirm its exact current Lambert indirect-light hook before touching it. Do not assume a PhysicalLightingModel extension works.
+- Prefer one bounce sample at the **blade base / root**, with stable canonical X/Z, then interpolate to blade height; never make each wind-bending blade pull a different probe every frame.
+- Benchmark **vertex-level** or per-instance bounce versus fragment-level SH9 × up to eight neighbouring samples. Dense grass covers many screen pixels and already consumes shader bandwidth.
+- Keep existing sunlight, grass self-shade, canopy attenuation, movement and alpha-test exact.
+- A 16 m bounce field lacks 1 m tussock detail; don't exaggerate gains to make the effect show at overview.
+- If GPU cost, shader complexity or visual noise is unacceptable, leave grass on legacy/sky-only F lighting and document why.
+
+### 10.6 Buildings, town lighting and camera-global hemisphere [D18–D20]
+
+[D20] `SettlementGroundBounce.update(town)` rewrites `light.groundColor` based on the **nearest town to the viewer**, with a tuned daylight luminance. That is an effective **legacy style adjustment**, but not physically local.
+
+- Do not remove the town system globally while unconverted walls, roofs and medieval props still use it.
+- A G-converted outdoor town wall should use the colour of the actual emitting nearby paving/stone, not the camera-nearest town hue added on top of G.
+- If material uses `buildingShadeEmission` in [D18/D19], fade its **ground/sky fill terms** only on converted valid receivers, preserving genuine flame/lantern emissive, distance air and weather coating.
+- Preserve **cultural material palette** (granite, terracotta, dark slate, plaster, timber). No universal beige bounce.
+- Walls/roofs/portals have possible light leaks: require **structural occluder provider** from authored semantic geometry, a revision channel, cross-wall tests and deterministic LOD ownership before enable.
+- No per-frame scene-graph loop over thousands of town pieces to infer surfels. If not supported by semantic data, keep G off for walls and record TODO.
+- Town ground itself may still contribute a **terrain-only** colour bounce proxy when its paving family is valid, without requiring all building receivers in G.
+
+### 10.7 Specular/environment occlusion and metal [D9/D30/P3]
+
+G's diffuse bounce **does not** justify scaling metallic environment reflections by the same occlusion factor:
+
+```text
+envDiffuse   = existing diffuse sky/environment contribution
+envSpecular  = prefiltered scene.environment * PBR BRDF
+probeDiffuse = sky visibility + bounced sky + optional unique key/sea
+
+# Optional correction only if the same spectral/angle/unit reference is established:
+specularOcclusion = clamp(
+    matchedLocalFrontIrradiance / max(matchedEnvironmentIrradiance, referenceFloor),
+    minValue, 1
+) * geometricHorizonVisibility(Nshading, Ngeometry, view, roughness)
+```
+
+- The numerator/denominator require the **same** incident-light convention. A diffuse irradiance divided by glossy radiance is not a valid ratio.
+- Use geometric normal and roughness-dependent reflection cone/horizon if adapting [P3], and use bounded values that do not turn metal black or paint bright chrome like stone.
+- [D30] GTAO is already a post composite; [D31] god-rays contact AO may replace it in cinematic path. Test no double-darkening of stone joints/grass under foliage.
+- Do not disable environment HDR. [D9] makes it essential for hero armour and other metallic assets.
+- Leave `specularOcclusion.enabled=false` unless exact PBR hook and controls pass independent verification.
+
+### 10.8 Dedicated locations remain separate [D32/D33]
+
+The project already has `src/editor/locations/gen/IndirectBounce.js`, a **different** deterministic one-bounce, surfel/visibility-tested system feeding baked underground geometry, with separate `LocationShading` lamps. It operates in unique load-screen locations and **must not** import the outdoor probe streaming or sun-ground map. Its ray visibility methodology can be a CPU reference, but its source geometry, runtime light and versioning are different.
+
+---
+
+## 11. YAML configuration and runtime states
+
+### 11.1 One owner: extend the **actual F config**, not a competing root
+
+PR F recommends `editor.config.yaml → stylizedSurface.sky.ambientProbes`, but this is **not yet implemented** at the source baseline. G must first inspect the actual F config owner and extend it. If F uses a different existing validated location, **follow that** instead of creating duplicate keys.
+
+Illustrative proposal, disabled until genuinely implemented and QA approved:
+
+```yaml
+stylizedSurface:
+  sky:
+    ambientProbes:
+      enabled: false
+      bounce:
+        enabled: false
+        quality: balanced
+        receivers: [terrain, rocks]
+        skyGain: 1.0
+        sunGround:
+          enabled: false
+          strength: 1.0
+        seaReturn:
+          enabled: false
+          strength: 1.0
+        specularOcclusion:
+          enabled: false
+        debugMode: off
+```
+
+Keep user-facing settings minimal. Grid spacing, vertical samples, ray counts, secondary reach, cache limits, output packing and GPU/worker budgets belong in a **single validated quality profile** (or appropriately existing F constants). Do not allow many independent YAML knobs to create impossible grid combinations. Ranges must be finite, physical metres correct and exact enum values validated; rejected input should have actionable configuration errors.
+
+### 11.2 State machine, source readiness and neutral fallback
+
+```text
+off
+  -> no G worker, RTT, GPU field, shader variant or extra sampler
+waiting-F
+  -> diagnose; preserve existing look
+static-bounce-baking
+  -> F sky-only output and legacy fill continue
+transfer-ready, sky-not-ready
+  -> do not sample black/empty GPU target
+relight-ready
+  -> bind matching geometrySource + skyGeneration atomically
+dynamic-ground-unavailable
+  -> zero *extra* key bounce, keep other valid terms
+coast-unsupported
+  -> sea term zero, not generic teal
+renderer-fallback
+  -> F/legacy as validated, no background compute
+dispose
+  -> worker jobs cancelled or generations invalidated, textures freed
+```
+
+Expose effective `supportedReceivers`, `sourceVersion`, `skyGeneration`, `outputGeneration`, `shadowGeneration`, `readyCoverage` and `fallbackReason` in existing diagnostics. A shader having compiled **does not** mean a physically valid relight has been published.
+
+### 11.3 Source and debug flags
+
+Proposed debug modes: `off | sky | static-bounce | sun-ground | sea | validity | seam | receiver-coverage | diffuse-only | specular-only`. All are opt-in and must not change normal runtime data. Debug heatmap must show **which** term drives brightness, with linear scale legend and input version, not only a final attractive screenshot.
+
+### 11.4 Minimum feature matrix
+
+| Feature | Default | Hard prerequisite |
+| --- | --- | --- |
+| G static white-sky bounce | **off** | Real F CPU/GPU, common SH basis, linear albedo |
+| G terrain receiver | **off** | Correct PBR indirect composability incl. snow |
+| G rocks receiver | **off** | Valid world sample + rock material adapter |
+| G local sun-ground target | **off** | Proven same-shadow-sampler and draw ordering |
+| G water/sea return | **off** | Valid depth/optical units and no duplication |
+| G bark/leaves/grass/town | **off** | Dedicated material compatibility + LOD/visibility QA |
+| G specular occlusion | **off** | Matching radiometric reference and PBR hook |
+
+G can be released at terrain+rocks with only static sky bounce if the optional sun-ground/coast/more receivers fail cost or correctness gates. Do not label optional work “done” just because the YAML can enable it.
+
+---
+
+## 12. Proposed modular source layout and edits
+
+### 12.1 New module responsibilities (not a mandate to create every file)
+
+| Proposed path | One responsibility |
+| --- | --- |
+| `src/editor/lighting/probes/BounceConstants.js` | SH/profile/format constants separated from runtime code; reuse F constants |
+| `src/editor/lighting/probes/BounceTransfer.js` | Pure one-bounce source SH projection, fixed-order secondary visibility |
+| `src/editor/lighting/probes/BounceAlbedo.js` | Validated worker-side linear albedo adapter for terrain and static receivers |
+| `src/editor/lighting/probes/BouncePage.js` | Compact versioned binary metadata, exact source/halo hashes and validity |
+| `src/editor/lighting/probes/BounceResidency.js` | Low-priority optional jobs/LRU/eviction/cancellation; preferably reuse F worker |
+| `src/editor/lighting/probes/BounceRelight.js` | One sky+static bounce combined SH irradiance output, coherent generations |
+| `src/editor/lighting/probes/BounceGpuAtlas.js` | Bounded staging/upload, neutral target, atlas slot generation and dispose |
+| `src/editor/lighting/probes/GroundBounceMap.js` | Optional local sun-key RTT and shadow/sky signature |
+| `src/editor/lighting/probes/GroundBounceNodes.js` | Shared small emitter/receiver samples, height and normal falloff |
+| `src/editor/lighting/probes/SeaBounceNodes.js` | Only if coastal optical model validated; may live beside existing sea optics |
+| `src/editor/lighting/probes/AmbientReceiverModel.js` | Safe PhysicalLightingModel **indirect** composition without losing direct snow |
+| `src/editor/lighting/probes/BounceDiagnostics.js` | Per-term/source/coverage/perf counters, debug readback |
+| `docs/rendering/ambient-bounce.md` | Implementation/units/material support, licences and QA evidence |
+
+Prefer **fewer files initially** if small responsibilities naturally fit existing F modules. No generic GI framework, material scanner, event bus, “configure every object” manager or copy of F's coordinate/SH helpers.
+
+### 12.2 Existing file integration, minimised
+
+| Existing source | Change | Forbidden side effect |
+| --- | --- | --- |
+| [D3] `src/main.js` | Wire lifecycle only via existing resource owners | No second sky/light rig |
+| [D4] `InfiniteTerrainView.js` | Relight/map schedule and same slot/source version, existing render phase | No terrain first-frame delay |
+| [D5] `TerrainSlotBindings.js` | Optional one shared atlas/samplerless receiver binding | No 49 material programs |
+| [D6/D7] terrain/snow model | Correct ambient indirect composition | No missing snow glint |
+| [D8/D9] sky/environment | Publish/read consistent sky source and scale; no new exposure | No lost IBL reflections |
+| [D10] cloud | Reuse emitter cloud transmittance, canonical origin/clock | No duplicate cloud noise or double shade |
+| [D11] foliage fill | Split legacy fake sky/ground/air for converted receivers only | No global scene colour change |
+| [D12–D15] trees/bark | Optional composer, preserve wet/snow/transmission/LOD | No class monkeypatch breaking clones |
+| [D16] grass | Only if measured cheap; root-based field | No costly per-fragment 7-slab×8 gather |
+| [D17] rocks | Preferred extra receiver pilot | No rock glow on top of existing emission |
+| [D18–D20] town | Later explicit receiver, avoid camera-global hue duplication | No unconverted town darkening |
+| [D21–D24] sea | Read source only; do not rewrite water renderer | No lost foam/refraction/wet rocks |
+| [D25/D26] bake | Extract worker-safe albedo **only if source correct** | No GPU readback on move |
+| [D27/D28] world coords/store | Same canonical edit revision and neighbour halo | No new world-save format |
+| [D29] shadows | Access same real CSM shadow if public API supports | No second shadow-map render |
+| [D30/D31] AO | Only carefully balanced material-specific AO interaction | No blanket GTAO removal |
+| [D32/D33] location lighting | No production change | No cross-location probe leakage |
+| [D34/D35/D39] QA | Add comparison coverage and source diagnostics | No false success in software GPU |
+
+---
+
+## 13. Update graph and exact invalidation
+
+```text
+canonical Azgaar terrain + edited height + family albedo + forest/structure
+                       |
+                       v
+             F visibility geometry snapshot
+                       |
+           +-----------+------------+
+           |                        |
+      F SH visibility       G low-priority static RGB bounce
+           |                        |
+           +-----------+------------+
+                       v
+         bounded resident GPU source pages
+                       ^
+sky radiance SH / look generation (same sky authority)
+                       |
+                       v
+        G combined sky + white-sky-bounce relight
+                       |
+             one RGB SH output field
+                       |
+ optional sun ground RTT from real shadow + cloud / sea
+                       |
+                       v
+             opted-in material indirect
+                       |
+  direct sun, snow, vegetation transmission and metal IBL unchanged
+                       |
+              existing HDR scene + post
+```
+
+| Event | Retrace F sky visibility? | Retrace G static bounce? | Relight GPU? | Update key ground map? |
+| --- | --- | --- | --- | --- |
+| Sky colour/time broad change | no | no | yes | if key changes |
+| Cloud field moves | no | no | only if broad sky changes | yes, within budget |
+| Moon/sun intensity changes | no | no | sky/key term only | yes if supported |
+| Material palette changes | only if geometry/occluder changes | affected material halo | affected resident | local covered map |
+| Terrain sculpt / undo | affected F halo | affected G primary+secondary halo | changed pages | intersecting local map |
+| Forest planted/felled | if canopy provider in F | affected canopy source halo | affected pages | maybe shadow changes |
+| Town structure edit | only with approved structural provider | only with approved material/occluder source | affected pages | covered map |
+| Player walks within stable region | no | no | no | shift map only at required texel coverage |
+| New streamed terrain chunk | cache or F worker | cache or low-priority G worker | newly ready page only | not necessarily |
+| Floating origin snaps | **no** | **no** | **no** | **no** if canonical coverage same |
+| Teleport | no for old data | no for old data | new resident pages | new map coverage |
+| Device loss | CPU pages remain | CPU pages remain | recreate GPU targets | recreate RTT |
+| Disabled G | no new work | no new work | no G dispatch | none |
+
+- G source hash includes material family version/terrain/forest/structure revision and full primary + secondary ray support radius; sky colour/time never part of **static** cache key.
+- A late worker result must pass **canonical chunk key, source generation, slot token and source config version** checks before uploading. An old chunk's light must not appear for a recycled slot.
+- Adjacent owners must bake identical shared boundary probes from the same canonical halo; first-load, revisit, different worker concurrency, undo/redo produce identical hashes.
+- Paused render with same sky and material source must not require temporal convergence inside G; TAA outside G still needs normal settle.
+- If an edit invalidates geometry for a visible receiver, fall back to F/legacy or an explicitly allowed short grace period, not to a static stale bounce that leaks through raised walls.
+- Renderer device loss/quality switch must free old GPU targets only when no current frame reads them, and leave CPU source caches safe for replay.
+
+---
+
+## 14. Test plan: reference mathematics, user visuals and real hardware
+
+### 14.1 Mathematical CPU tests, no renderer
+
+1. `shBasis` axes and order match F and [P7] (+X/+Y/+Z and negative Z).
+2. Under a unit upper-hemisphere white sky, an exposed upward Lambert hit with albedo 1 emits outgoing radiance 1; a black hit emits zero.
+3. Under occluded hit sky, bounce magnitude decreases monotonically with visibility, all else fixed.
+4. Red/blue albedo influences only correct linear RGB channels; SRGB encoding/decoding validated explicitly.
+5. Primary angular projection into SH9 matches fixed high-sample quadrature on analytic scenes.
+6. Gaunt sky×visibility product matches direct quadrature for band-limited test functions; no coefficient-wise product mistake.
+7. Cosine convolution applied once; Lambert divide-by-π only at final material BRDF.
+8. Input sky mean ×2 → bounced sky irradiance ×2; **geometry page hash unchanged**.
+9. Sun key strength ×2 → distinct key ground term ×2, sky-only white-transfer unchanged.
+10. Sun below horizon and no moon → key ground term zero; no hidden daytime constant.
+11. Cloud transmittance 0 at emitting patch → direct-key ground emitter zero; no second receiver cloud multiply.
+12. Dark cliff between emitter/receiver → blocked or explicitly unsupported, never falsely labelled occlusion-correct.
+13. Signed SH coefficients accepted, reconstructed final RGB finite/nonnegative after deliberate window/clamp.
+14. Static bake same world/edits/seed/profile → identical Float32 page across worker counts/completion orders.
+15. Edits in G primary+secondary support range invalidate page; distant edits don't.
+16. Negative canonical chunks and translated equivalent geometry match; origin rebase does not change source bytes.
+17. Float16 packed SH output reconstruction tested at dark night, overcast, noon and bright snow to choose acceptable error.
+18. Invalid/buried probe relocation and interpolation must not borrow bright light from the other side of a wall.
+19. No unbounded cache key/worker scratch growth after a long linear traversal and repeated revisits.
+20. Sea depth and optical functions monotonic for **floor** return in deepening same-turbidity water, with finite nonnegative outputs.
+
+### 14.2 Material and GPU renderer tests
+
+- A snow terrain material **with G off and G on** retains identical shadowed directional glints from [D7].
+- The same 49 terrain slots share a single shader graph (or unchanged known number of render-route variants), not 49 builds.
+- Rock PBR normal, roughness, emissive and wetness unaffected by G on/off except physically local diffuse.
+- Bark and foliage custom `direct` wrappers remain active if those receiver options are implemented. Alpha-cut leaf transmission retains backlight but not sun glow inside key shadows.
+- A night lantern or actual emissive window retains source brightness; G does not fade the true emissive channel.
+- Metallic hero armour and wet rocks retain `scene.environment` specular reflections.
+- Town outside/inside boundary shows no view-camera-dependent GI colour discontinuity; unconverted town buildings retain legacy [D20] treatment.
+- Dedicated locations and underground vertex lighting remain untouched.
+- No 17th fragment sampler, MRT output override, full-screen viewport copy or new shader variant per rock/tree instance.
+- Direct, postprocessing, volumetric/cinematic god rays and WebGPU/WebGL fallback paths maintain supported semantics and sane output.
+- Missing G bounce while F sky is ready results in F sky-only shading, not black/old chunk.
+
+### 14.3 Synthetic scenes for unbiased reference
+
+| Scene | Required comparison |
+| --- | --- |
+| Open grey plane + pure black box | Zero bounce from black; sky unaffected |
+| Bright sand floor / white wall | Warm tinted lower wall, soft falloff with height |
+| Half red / half blue floor | Receiver tracks true source region without chunk squares |
+| Grass patch / dry rock | Modest green bounce only on faces looking toward grass |
+| 90° cliff corner | No bright sky/sun leaking through cliff |
+| Thin wall and gap | Probe normal/view bias and invalid fallback prevent bright-side leak |
+| Dense canopy / clearing | Different sky visibility and coloured floor return, no double darkness |
+| Dark soil under fresh snow | Bounce shifts colour with snow condition without per-frame static rebake |
+| Shallow clear lagoon / deep bay | Bright bottom return in shallows, reduced floor return in deep water |
+| Sloped mountains and negative coords | Correct canonical/normal sample and large-world precision |
+| Forced rebase / teleport / stream eviction | No stale atlas page, momentary flash or unexpected worker rebake |
+
+### 14.4 Verified real look fixture names [D35]
+
+Existing `scripts/fixtures/environment-look-shots.json` has 38 known shots. Use their **actual** IDs, not guesses:
+
+| Fixture | Check |
+| --- | --- |
+| `forest-off-12` | Forest floor/bark contrast and emission rebalancing |
+| `forest-air-off-12` | Crown/skyline and air in-scatter stay natural |
+| `core-rainforest-off-12` | Dense understory readable, no luminous leaves |
+| `core-temperate-rainforest-off-12` | Cold wet litter and directional bounce |
+| `core-taiga-off-12` | Needle/bark and soil |
+| `core-taiga-snow-12` | Snow bounce and glints remain |
+| `core-deciduous-off-12` | Canopy and litter contrast |
+| `grassland-off-12` | Open sky near-neutral |
+| `wetland-off-12` | Mud/water albedo correctness |
+| `wetland-rain-12` | Wetness/cloud changes do not static-rebake |
+| `coast-off-12` | Cliff/shore rocks, water shader untouched |
+| `coast-storm-12` | Sea return and cloud shadow coherence |
+| `desert-off-12` | Sand response, no washed tan globe |
+| `tundra-off-12` | Open large terrain and quality |
+| `glacier-off-12` | Snowfield cool reflectance |
+| `forest-off-18.6` | Sunset sky-vs-key energy separation |
+| `forest-off-21` | No fake sun bounce at night |
+| `town-off-12` | Cobble/wall material and legacy town hue |
+| `town-off-21` | Lamps and night contrast preserved |
+| `town-rain-19` | Wet rainy dusk and specular |
+
+For each, capture identical pose/time/weather/seed and **G-off (F baseline) / G sky bounce / dynamic key-only / combined** plus debug component heatmaps. First compare **A/A** on the same build to calibrate noise from temporal effects/streaming. Capture a nearby shaded rock, floor, bark and cliff seam crop; whole-image mean can hide a leak.
+
+### 14.5 Numeric quality and performance gates
+
+**Correctness must pass:**
+
+- Zero NaN/Inf/negative displayed irradiance and zero GPU validation errors.
+- No unshadowed sun bounce behind a tested opaque cliff, and no source shown as “occlusion correct” if structural blockers weren't included.
+- No shared boundary probe mismatch under identical version/halo inputs.
+- No geometry ray retrace solely because sun/weather/sky changes.
+- No additional sun/sky/canopy AO contribution counted twice; validate per-term decomposition.
+- No stale chunk/slot light after eviction/teleport/edits.
+- No dark/saturated tile square from probe atlas interpolation at 128 m boundaries.
+- No missing snow direct glint, foliage transmission or metallic environment reflections.
+- No change to Azgaar IDs, terrain persistence, material family ownership or ocean VFX.
+
+**Performance targets are proposals, NOT measurements:**
+
+- Off: **zero** G worker work, GPU allocations and additional shader variants.
+- On, initial terrain+rocks: target **≤0.5 ms incremental mean or close p95** GPU stage at fixed 1280×720 desktop; normal project budget in [D34] may be tighter (+0.20 ms GPU/+0.25 ms CPU reported in older controlled comparison). Do not quietly exceed it without a measured quality tradeoff.
+- No regression to terrain first-visible-page latency, moving chunk-commit budget, p95/p99 frame pacing and hitch count. A GPU pass timestamp alone does not include asynchronous uploads and all compute.
+- Worker jobs may be costly; they must be low priority, cancellable and bounded; record p50/p95 job, queue wait, scratch buffers, cache hit rate and cancelled generations.
+- Dynamic key ground map only if update cadence/shadow sampling and memory budget pass in **native headed WebGPU** at baseline and player movement.
+- No accumulated textures as user crosses hundreds of chunks; total live GPU pages bounded by F/G residence limit and local map.
+- At night/overcast, data still appears plausible at low luminance; half precision and exposure changes must not quantize shaded areas to black.
+
+### 14.6 Run commands and evidence policy
+
+Existing scripts confirmed in inspected `package.json` (new G-specific flags/scripts must be implemented separately):
+
+```bash
+git status --short
+git branch --show-current
+git log -15 --oneline
+
+npm test
+npm run lint
+npm run build
+
+npm run qa:perf -- --headed --qa chunk-cross --warmup 8 --duration 12 --settle
+npm run qa:perf -- --headed --qa edited-world --warmup 8 --duration 12 --settle
+npm run qa:perf -- --headed --qa object-town --warmup 8 --duration 12 --settle
+npm run qa:look
+npm run qa:postprocessing:browser
+npm run qa:world:visual
+
+# WSL: launch real native Windows Chromium WebGPU when Linux browser is software:
+npm run qa:perf:windows -- --qa chunk-cross --warmup 8 --duration 12 --settle
+```
+
+Use the project's existing `docs/perf-qa.md` native hardware validation and snapshot format. Save ignored evidence under `tmp/ponlai-pr-g/`: `source.json`, `radiometry.json`, `worker.json`, `gpu.json`, `coverage.json`, `seams.json`, `edited-world.json`, `look-captures/` and `abo/`. Record adapter/vendor, render route, active world chunk dimensions, sky/source SHA, all tunables, timestamps source, durations, percentile summaries, screenshot paths, rejected captures and blockers.
+
+**This document makes no claim that tests/hardware QA were run.** The future implementation must actually execute and report them.
+
+---
