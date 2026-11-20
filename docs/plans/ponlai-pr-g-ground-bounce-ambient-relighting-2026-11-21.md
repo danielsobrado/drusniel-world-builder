@@ -872,3 +872,202 @@ Use the project's existing `docs/perf-qa.md` native hardware validation and snap
 **This document makes no claim that tests/hardware QA were run.** The future implementation must actually execute and report them.
 
 ---
+
+## 15. Implementation roadmap with stop gates
+
+Follow these **separate, reviewable implementation slices**, integrate only after checking current `main` and existing code, and do not let an optional failure weaken the minimum correctness of static sky bounce. Each phase produces its own small tests or screenshots and must preserve changes committed by other sessions.
+
+### G.0 — Latest-main + dependency and shading-model audit (mandatory)
+
+- [ ] Check `git status`, active branch `main`, last 15+ commits and [D42] `AGENTS.md`; never overwrite newer renderer, coast or forest work.
+- [ ] Open actual PR F code. If only the PR F Markdown exists, **stop G and implement/test F first**; record exact missing modules, test evidence and blocker. No guessed import/class names.
+- [ ] Verify F's worker-safe visibility SH9 data, canonical X/Z/chunk/halo, stable source hashes, normal/view bias, GPU atlas/residency and neutral fallback.
+- [ ] Verify F's terrain ambient diffuse hook does not add sky illumination via a general `emissiveNode`/final-colour multiplication.
+- [ ] Resolve source sky SH from implemented PR E (if any), else documented existing [D8]/[D9] authored look, with exact scene-linear and sun-disc exclusion semantics.
+- [ ] Inspect installed Three.js's `PhysicalLightingModel`, `LambertLightingModel`, and actual material `setupLightingModel`/`indirect` lifecycle. Do not trust Ponlai's customized Three.js methods as drop-in equivalents.
+- [ ] Read [D7] snow, [D13] foliage, [D10] cloud, [D20] camera-global town bounce, [D11] emissive fill before choosing a model composition strategy.
+- [ ] Confirm runtime `worldStore.chunkSize=64` and `tileSize=2` from [D3] (128 m terrain chunk), the effective GPU backend, shader sampler count, time/sky look and sample-mode path.
+- [ ] Save current baseline screenshots and native WebGPU performance with QA settle and A/A calibration in `tmp/ponlai-pr-g/`. A software/WebGL run is not authoritative performance evidence.
+
+**Stop:** PR F code absent, ambiguous sky units, incompatible lighting model hook, broken or non-headless-ready QA, or unexpected latest changes. Fix/report prerequisites rather than starting a speculative “GI” subsystem.
+
+### G.1 — Real linear albedo proxy + deterministic worker bounce
+
+- [ ] Implement pure `BounceAlbedo` from vetted terrain/bake materials [D25/D26], not screen-space colour or approximate per-biome ID colours.
+- [ ] Verify sRGB-to-linear conversion and source palette values against controlled neutral lighting fixtures (grass, pale stone, basalt, snowy ground, mud/litter).
+- [ ] Share F's canonical height, forest/structure occluder snapshot and geometry revision, with **extended halo** for primary+secondary rays.
+- [ ] Implement fixed-order hit-surface normal, secondary sky-visibility estimator, memoized result for repeated hits, and one Lambert bounce.
+- [ ] Start with **16 m bounce spacing, 3 height levels, 48 primary rays** per probe as a budgeted prototype — not mandated production settings.
+- [ ] Project the reflected radiance to RGB SH9, test Y-up, SH band order, sign, fixed sample order, normal and secondary-hemisphere orientation.
+- [ ] Add source material hash, world generator/edited terrain/forest revision and `bounceFormatVersion` to separate cache entry.
+- [ ] Set cancellable low priority, bound scratch arrays and worker jobs and ensure no main-thread synchronous fallback when the worker is unavailable.
+- [ ] Test stream order, adjacent boundary equality, edit/undo, huge/negative coordinates, origin rebase, worker failure and invalidation.
+- [ ] Save actual per-chunk bounce time, rays, hit-cache reuse and memory before approving quality presets.
+
+**Stop:** blocking terrain jobs, stale albedo on edit, ray-through-cliff false bounce, worker nondeterminism, source hash mismatch or unbounded bake time/memory. Lower resolution before inventing GPU ray tracing.
+
+### G.2 — Unified sky + bounced-sky SH relight
+
+- [ ] Extend F's *actual* relight output; avoid creating a second, independently sampled “bounce GI” texture alongside F's field.
+- [ ] Combine sky SH × sky visibility SH using Gaunt product; multiply white-sky bounced transfer by **one** linear sky mean RGB scale.
+- [ ] Preserve exact radiance/irradiance/BRDF conversion and exclude direct sun disc.
+- [ ] Use SH9 until calibrated; optional deringing must pass energy/colour difference tests and must not artificially brighten deep canopy.
+- [ ] Produce one bounded resident RGB SH output (e.g. 7×RGBA16F slabs) and stage an **entire matching source/sky generation** before showing it.
+- [ ] Measure upsampling G's 16 m source at F's 8 m nodes once in compute versus sampling both on every fragment; choose smaller GPU cost.
+- [ ] Preserve shared program and [D5] samplerless binding constraints, including post/cinematic route shader compile.
+- [ ] Confirm G missing → F sky-only, never black/undefined or stale other-chunk bounce.
+- [ ] Debug readback/hash **only** during QA to verify static paused output.
+- [ ] Test new sky/hour/weather switching yields new relight and **zero additional geometry ray tracing**.
+
+**Stop:** per-component double accumulation, SH basis mismatch, incorrect cosine twice, atlas seam, >16 fragment samplers, per-slot shader program recompilation, invalid GPU resource lifetime or changed baseline with feature off.
+
+### G.3 — Proper terrain indirect + one real rock receiver
+
+- [ ] Create a small PBR indirect model composition that preserves [D7] `SnowLightingModel.direct` and existing TSL lighting context.
+- [ ] Opt in terrain only behind valid F/G sky+geometry readiness; test forest floor R canopy and G contact separately from probe visibility.
+- [ ] Transition old `foliageSkyFill` in terrain's `floorFill` selectively without removing true spell emission, snow detail and jungle air/fog.
+- [ ] Add a specific adapter for [D17] PBR rocks/boulders; preserve authored colour, roughness, normals, moss/snow, rain wetness and coastal rock material state.
+- [ ] Fade only the former rock sky/ground fill emission where probe bounce is ready; keep independently authored distance-air effect.
+- [ ] Run rocky forest, pale cliff, shaded granite and wet coast A/B; inspect *normal-dependent* bounce, not brightness alone.
+- [ ] Validate existing `scene.environment` PBR specular and metal reflection remain unchanged.
+- [ ] Count real shader programs: one shared terrain program (per known render-path variant), no per-rock instance clones.
+- [ ] Verify no material switches from physical to fake unlit and no surface emission is counted twice.
+
+**Stop:** general `emissiveNode` or `colorNode` multiply, loss of snow glint, metallic cut-out, retained full old rock fill alongside bounced light, over-dark canopy or cost greater than visual gain.
+
+### G.4 — Optional local sunlit ground map, gated on real shadow access
+
+- [ ] Build **tiny proof** that the installed Three.js TSL renderer can sample the same directional/CSM shadow visibility used by direct lighting [D8/D29] within the requested pass.
+- [ ] Validate shadow generation ordering in direct, post, volumetric and cinematic paths; do not trigger duplicate full-scene shadow redraw.
+- [ ] If the shadow gate fails, leave this slice disabled, document unsupported source, and keep G sky bounce correct.
+- [ ] Create one bounded local RTT around camera with canonical world UV, ground-height/linear albedo and valid rectangle metadata.
+- [ ] Share [D10] cloud transmission at the **emitter**, not the receiver, with the same weather clock and wrapped coordinates.
+- [ ] Use key irradiance × Lambert response × actual shadow/cloud **once**, and a validated normalized blur of local ground response.
+- [ ] Incorporate receiver geometric normal, height difference, view/facing and local range, avoiding light through vertical solids.
+- [ ] Choose **one** key-bounce mode: local RTT OR directional bounced-probe SH, never both for same key energy.
+- [ ] Update on meaningful shadow/source/map footprint signature changes and only within measured GPU budget.
+- [ ] Validate missing shadow/cloud/RTT, sunrise, sun below horizon, moon if supported, teleport, origin rebase and device loss.
+
+**Stop:** current renderer does not expose a safe shadow sampler, blue/green surface glow behind a solid, >one sky/key attenuation, read-write hazard, new viewport copies or newly expensive shadow update.
+
+### G.5 — Optional coast return, only with consistent optics
+
+- [ ] Re-open the latest coastal commits and [D21–D24] sea optics/levels before code changes.
+- [ ] Prove linear seafloor albedo, depth and attenuation scale against the actual sea material. Don't convert rendered turquoise visual colour to diffuse radiance.
+- [ ] Separate diffuse floor return and waterbody backscatter from surface Fresnel/specular/refraction/foam.
+- [ ] Ensure sea level -1.5 m default and dynamically driven source, no Ponlai zero-level assumption.
+- [ ] Bound shore-distance and surface-facing influence; deep water does not retain shallow floor bounce.
+- [ ] Only share source versions; do not rewrite advanced sea rendering or wave texture array just for G.
+- [ ] Test lagoon, deep bay, sandstone cliff, wet granite, night, storm and camera jumps.
+- [ ] Leave `seaReturn.enabled=false` with a documented pending item if no validated depth/optical contract.
+
+**Stop:** generic turquoise emission, deep-water brightness incorrectly rising, double water BRDF or overwriting new ocean work.
+
+### G.6 — Optional additional outdoor receivers and specular occlusion
+
+- [ ] After rock pilot, attempt **bark** first, composing [D13] direct transmission/wet/snow wrappers and [D12/D15] authored emission.
+- [ ] Only then test selected leaves; use stable crown point, thin-sheet response and preserved alpha/LOD transitions.
+- [ ] For grass [D16], evaluate root/vertex probe sampling cost before any fragment SH9 implementation.
+- [ ] For town walls [D18–D20], require structural occluder source, material palette and semantic revision; avoid camera-global town hue in local physically bounced result.
+- [ ] Keep unconverted buildings/trees/grass on legacy emission and hemisphere system.
+- [ ] Test optional specular/environment occlusion only after correct matching units and existing GTAO/SSGI interaction understood. Preserve metallic armour reflection.
+- [ ] Do not broaden material tagging to “all meshes” unless explicit adapters, LOD and per-type QA exist.
+
+**Stop:** duplicate thin-leaf transmission, missing wet highlights, breakage in material clones, new shadow leaks through interiors, or 49×/N-instances shader multiplication. Optional slices may remain pending.
+
+### G.7 — Combined QA, performance and two review passes
+
+- [ ] Run pure math, CPU source, deterministic worker, GPU pack/read, lighting composition and lifecycle tests from `14`.
+- [ ] Execute `npm test`, `npm run lint`, `npm run build` and existing visual/movement/post QA commands.
+- [ ] Capture **A/A** and A/B/A from same hardware, source SHA, render size and camera/look for forest, rainforest, stone coast, snow, town and night.
+- [ ] Native WebGPU compare GPU timestamps **and** separate CPU/frame pacing with timestamps off; report GPU compute/transfer scopes explicitly unavailable when unsupported.
+- [ ] Check 128 m seam, float-origin rebases, negative coords, huge imported Azgaar mountain, fast travel and resuming streaming after editor reset.
+- [ ] Check all dynamic weather/time transitions and feature on/off/rebuild/dispose cycles.
+- [ ] Verify no initial huge worker GPU shader compilation, >16 samplers, new whole-screen copy/mips or growing LRU memory.
+- [ ] Review each code path for fatal GPU/device error handling, resource disposal, strong logging with throttling and defensible defaults.
+- [ ] Review known limitations and rejected screenshot captures; no false performance claim from unheaded/software GPU.
+
+**Stop:** any hard correctness condition, significant new stutter or undocumented visual regression. Resolve them before enabling a tier.
+
+### G.8 — Final implementation commit and release rollback
+
+- [ ] Recheck latest `main` and integrate without overwriting newer changes. Keep files focused and clearly owned, not giant god object.
+- [ ] Confirm no GitHub Actions, feature branches or worktrees.
+- [ ] Preserve Ponlai **and** tidewater copyright/MIT notices on directly adapted implementation fragments, including third-party asset/source scrutiny.
+- [ ] Document exact visual support and fallback: terrain+rocks required, bark/grass/sea/key-map optional.
+- [ ] Update `docs/rendering/ambient-bounce.md` with maths, scene units, YAML keys, storage format, supported GPUs, QA results and known limitations.
+- [ ] One rollback `ambientProbes.bounce.enabled: false` must return pixel-identically to the validated F-only scene and release G resources.
+- [ ] Record native hardware QA report, p95/p99, GPU cost/bytes, shader counts, screenshots, source IDs and explicit pending TODOs.
+- [ ] Don't mark G fully completed when PR F is still a plan or only Markdown/docs have changed.
+
+**Proposed later code commit title (not this document commit):**
+
+```text
+feat(lighting): add streamed SH sky bounce and validated terrain and rock receivers
+```
+
+---
+
+## 16. Definition of done and rejection conditions
+
+### Mandatory source and math correctness
+
+- [ ] Actual PR F code, tests and active valid outdoor receiver are verified **before** G code starts.
+- [ ] One shared SH9 basis/sky radiance source with **one** angular Gaunt product, **one** cosine convolution and a clear Lambert BRDF division.
+- [ ] A unit white sky and diffuse albedo yield physically interpretable one-bounce transfer; no impossible negative/NaN irradiance.
+- [ ] Static geometry albedo comes from real material-family source, not screen-space display RGB or arbitrary colour-by-biome ID.
+- [ ] Signed Y-up/negative-Z/canonical index convention works for negative and enormous world positions.
+- [ ] All F/G shared boundary probes produce identical source coefficients under same source version; terrain edit halo includes secondary source reach.
+- [ ] Sun/key and sea source energy cannot be counted a second time through other terms.
+- [ ] Changed sun/weather/sky never cause static geometry retrace.
+- [ ] Source bin/layout version, source hash, sky generation and GPU output generation available in diagnostics.
+
+### Mandatory production renderer behaviour
+
+- [ ] One coherent sky+G bounced-sky **indirect field**, no extra global scene sun, second environment, or independent “GI-as-emissive”.
+- [ ] Terrain and **one more PBR exterior receiver**, preferably rocks, actually render bounced indirect **at the correct lighting-model stage**.
+- [ ] Snow shadows and glints [D7], wet reflections, authored roughness/material IDs, grass blade alpha/transmission and remaining true emissions stay valid.
+- [ ] Old terrain/rock faux sky and ground fill is disabled or blended **only while receiving equivalent G bounce**, not globally.
+- [ ] Unconverted towns/trees/rooms retain prior look; [D20] camera-global town hemisphere remains in place for those legacy receivers.
+- [ ] Metallic armour and wet rock environment IBL and existing contact AO remain coherent, no universal black metal.
+- [ ] Dedicated load-screen location bake and light/lamps unaffected.
+- [ ] No extra full scene viewport copy, unneeded shadow pass, 17th sampler, lost MRT data or per-slot shader compilation.
+
+### Mandatory streaming, quality, performance and fallback
+
+- [ ] Disabled G runs **zero** G workers, dispatches or GPU allocations and restores F/legacy pixels exactly.
+- [ ] No stale previous-chunk bounce when a terrain slot recycles, camera teleports, resets or edits; neutral sky-only fallback reliable.
+- [ ] CPU/GPU residency and worker caches bounded over unbounded traversal and repeated revisits.
+- [ ] No terrain first-visible-page latency or critical upload queue regression; workers prioritised correctly.
+- [ ] Native WebGPU QA for the **same** 38-fixture world, paired sample A/A/A/B/A and stage profiling; screenshots reviewed in forest, rock, coast, snow, town, sunset/night.
+- [ ] Measured memory, shader/sampler counts, direct/indirect term intensity, frame p95/p99/hitches and worker p95 before claiming performance safe.
+- [ ] All device fallback/unsupported shading paths explicit and stable.
+- [ ] Code review, tests, docs, source license/provenance completed on newest `main`.
+
+### Optional slices have their own real gates
+
+- [ ] Dynamic sun-ground map: only if existing CSM/directional shadow visibility and renderer ordering are demonstrably correct.
+- [ ] Coastal return: only if floor/water absorption and cloud/key energy are correctly separated.
+- [ ] Bark/leaves/grass/town: only if existing material hooks, LOD/alpha/semantic occluders and performance pass.
+- [ ] Specular probe occlusion: only if identical radiance conventions and roughness-dependent visibility are validated.
+
+**Reject G** if: F remains unimplemented but G claims success; sky multiplied by SH visibility coefficients element-wise; geometry rebaked on each cloud frame; bounce emitted as flat global colour; snow model direct lost; water renderer overwritten; shadows sampled without validating API; 49 material recompiles; previous chunk lighting sampled after slot reassignment; fake bright interior bounce; unbounded resource residency; no GPU proof; or specification is represented as completed feature.
+
+---
+
+## 17. PR H handoff — volumetric clouds and coherent shadows
+
+Next PR H will implement volumetric/cloud layers. PR G should leave **these narrow real interfaces**, only once actual source code exists:
+
+1. **Sky source**: one scene-linear SH9/mean-sky publisher with generation, no duplicate exposure or sun-disc energy.
+2. **Cloud transmission field**: shared existing [D10] canonical world-position wrap, weather clock, cloud source version and a sunlight attenuation query for *emitting* ground patches. PR H can change the cloud algorithm without rewriting G's bounce physics.
+3. **Light sources**: one authoritative [D8] sun/moon directional colour/intensity state; no duplicate sun shadow maps.
+4. **Ground map dirty contract**: sun shadow generation, cloud field generation, canonical coverage and source albedo revision; a weather change updates the map, not the CPU geometry bake.
+5. **Relight contract**: G recomputes SH sky+static bounce only when source environment generation or resident probe pages change; a cloud moving without changing mean sky does not invalidate worker data.
+6. **Receiver policy**: explicit supported terrain/rocks and optional vegetation, town, metal; avoid all-object material mutation.
+7. **GPU budgets**: bounded GPU compute/update/upload costs so cloud rays can coexist with shadow and postprocessing.
+8. **Debug and test evidence**: cloud-shading at emitter vs receiver, A/A unchanged baseline, spot/night differences, source versions and existing screenshot QA.
+
+Do not let PR H “improve cloud lighting” by applying the same attenuation to G's received bounce twice, reducing sky SH under the same cloud a second time, or overwriting the direct sun shadow path.
+
+---
