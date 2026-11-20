@@ -1,6 +1,6 @@
 import { abs, clamp, color, float, max, mix, pow, smoothstep, vec3 } from 'three/tsl';
-import { bakedShade, geometryNormal } from './LocationShading.js';
-import { NOISE, locationNoise } from './locationNoise.js';
+import { bakedShade, geometryNormal, triplanarWeights } from './LocationShading.js';
+import { NOISE, locationNoise, triplanarNoise } from './locationNoise.js';
 
 /**
  * Age on worked stone and metal, opt-in per material profile. Both read the
@@ -41,7 +41,17 @@ export function weatherDressedStone({ point, albedo, roughness }, weathering) {
   // Streaks: water and smoke run down a wall, so the noise is stretched along height.
   const run = unit(locationNoise(NOISE.mottle, point.mul(vec3(3.1, 0.22, 3.1))));
   const streak = smoothstep(0.55, 0.85, run).mul(vertical).mul(streaks);
-  out = out.mul(mix(float(1), float(0.72), streak));
+  out = out.mul(mix(float(1), float(0.68), streak));
+
+  // Hairline stone fractures & basal floor dampness grounding columns into the flagstones.
+  const cracksRaw = triplanarNoise(NOISE.cracks, point.mul(18.0), triplanarWeights(geometryNormal));
+  const crackLine = smoothstep(float(0.32), float(0.08), cracksRaw).mul(grime);
+  out = mix(out, out.mul(color('#2d2926')), crackLine.mul(0.62));
+  rough = mix(rough, float(0.96), crackLine.mul(0.55));
+
+  const basalDamp = smoothstep(float(1.35), float(0.0), point.y).mul(vertical).mul(grime);
+  out = out.mul(mix(float(1), float(0.74), basalDamp.mul(0.75)));
+  rough = mix(rough, roughness.mul(0.82), basalDamp.mul(0.4));
 
   // Dust settles on anything facing up, thicker where it is sheltered.
   const settled = smoothstep(0.55, 0.95, up).mul(dust).mul(occluded.mul(0.6).add(0.4));
