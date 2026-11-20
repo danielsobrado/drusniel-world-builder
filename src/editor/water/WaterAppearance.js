@@ -16,7 +16,7 @@ export function waterBiomeContext(biome) {
  * Smooth numeric properties across biome borders; never blend discrete kinds.
  * Sampling cost scales with coarse context cells, not every water vertex.
  */
-export function createWaterAppearanceSampler(sampleBiome = () => 0) {
+export function createWaterAppearanceSampler(sampleBiome = () => 0, sampleDiffraction = null) {
   const cache = new Map();
   const at = (x, z) => {
     const key = `${x}:${z}`;
@@ -40,7 +40,8 @@ export function createWaterAppearanceSampler(sampleBiome = () => 0) {
     const corners = [at(cx, cz), at(cx + 1, cz), at(cx, cz + 1), at(cx + 1, cz + 1)];
     const value = key => mix(mix(corners[0][key], corners[1][key], tx), mix(corners[2][key], corners[3][key], tx), tz);
     return { organic: kind === WATER_KIND_OCEAN ? value('organic') * .16 : value('organic'), cold: value('cold'),
-      exposure: kind === WATER_KIND_OCEAN ? seaExposure(shoreDistance) : 0 };
+      exposure: kind === WATER_KIND_OCEAN ? seaExposure(shoreDistance)
+        * (sampleDiffraction?.(x, z, shoreDistance) ?? 1) : 0 };
   };
 }
 

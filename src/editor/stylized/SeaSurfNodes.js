@@ -3,6 +3,7 @@ import { directionalCarriers } from '../water/SeaSurfMath.js';
 import { SEA_SWELL_COMPONENTS } from '../water/SeaSwell.js';
 import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { createSeaRefractionPhaseNode } from './SeaRefractionNodes.js';
+import { createSeaDiffractionPhaseNode } from './SeaDiffractionNodes.js';
 
 /** Depth-following surf on an arbitrary coast; all pattern origins are bounded. */
 export function createSeaFoamNoise(patterns, localXZ, time) {
@@ -75,12 +76,18 @@ function createDirectionalSurfNodes({
     const carrierPhase = float(wave.phase).add(time.mul(wave.angularSpeed).mod(Math.PI * 2))
       .add(shoreDistance.mul(directional.waveNumbers[index]))
       .add(patterns.wavePhase(`surfOblique${index}`, localXZ));
-    const phase = settings.refraction.enabled
+    const refractedPhase = settings.refraction.enabled
       ? carrierPhase.add(createSeaRefractionPhaseNode({
         waterDepth, shoreDistance, wave, referenceWaveNumber: directional.waveNumbers[index],
         directional, settings: settings.refraction,
-      })).toVarying(`seaRefractedSurfPhase${index}`)
+      }))
       : carrierPhase;
+    const phase = settings.diffraction.enabled
+      ? refractedPhase.add(createSeaDiffractionPhaseNode({
+        exposure, shoreDistance, wave, settings: settings.diffraction,
+      })).toVarying(`seaCoastalSurfPhase${index}`)
+      : settings.refraction.enabled ? refractedPhase.toVarying(`seaRefractedSurfPhase${index}`)
+        : refractedPhase;
     const packetA = patterns.wavePhase(`surfPacketA${index}`, localXZ)
       .add(time.mul(wave.angularSpeed * 0.08).mod(Math.PI * 2));
     const packetB = patterns.wavePhase(`surfPacketB${index}`, localXZ)

@@ -300,6 +300,11 @@ async function initializeEditor(restoreState, resources, startup) {
     generator,
     surfaceMaskConfig,
     vegetationScatterConfig,
+    seaDiffractionConfig: config.stylizedSurface.water?.enabled !== false
+      && config.stylizedSurface.water?.sea?.enabled !== false
+      && config.stylizedSurface.water?.sea?.surf?.enabled
+      ? config.stylizedSurface.water.sea.surf.diffraction
+      : null,
     workerCount: config.world.workerCount ?? null,
   });
   const localContent = new IndexedDbWorldContentProvider();

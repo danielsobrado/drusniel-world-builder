@@ -1,5 +1,5 @@
 import { SpatialOverrideMap } from './SpatialOverrideMap.js';
-import { sampleWorldStoreWater } from '../water/TerrainWaterQueries.js';
+import { sampleWorldStoreWater, sampleWorldStoreWaterSurface } from '../water/TerrainWaterQueries.js';
 
 /** Same canonical edit and water semantics as the store, evaluated in a worker. */
 export function createEditedChunkSampling(generator, chunkSize, overrides) {
@@ -18,5 +18,7 @@ export function createEditedChunkSampling(generator, chunkSize, overrides) {
     return north + (c + (d - c) * fx - north) * fz;
   };
   const store = { generator, getTile: sampleTile, sampleHeight, tileOverrides, heightOverrides };
-  return { sampleTile, sampleHeight: vertex, sampleWater: (x, z) => sampleWorldStoreWater(store, x, z) };
+  return { sampleTile, sampleHeight: vertex,
+    sampleWater: (x, z) => sampleWorldStoreWater(store, x, z),
+    sampleWaterSurface: (x, z) => sampleWorldStoreWaterSurface(store, x, z) };
 }

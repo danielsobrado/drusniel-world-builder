@@ -1,4 +1,5 @@
 import { createWaterAppearanceSampler } from './WaterAppearance.js';
+import { createSeaDiffractionSampler } from './SeaDiffraction.js';
 
 const WATER_FIELD_CHANNELS = 4;
 /** RGBA8: discrete kind, organic tint, cold substrate, local sea exposure. */
@@ -183,6 +184,9 @@ export function createWaterField({
   chunkSize,
   sampleWater,
   sampleBiome,
+  diffraction = null,
+  tileSizeMeters = 2,
+  sampleOceanSurface = sampleWater,
 }) {
   if (!Number.isSafeInteger(originX) || !Number.isSafeInteger(originZ)) {
     throw new Error('Water field origin must use safe integer cell coordinates.');
@@ -243,7 +247,10 @@ export function createWaterField({
   const pixels = new Uint16Array(vertexCount * WATER_FIELD_CHANNELS);
   const flowPixels = new Uint8Array(vertexCount * WATER_FLOW_CHANNELS);
   const appearancePixels = new Uint8Array(vertexCount * WATER_APPEARANCE_CHANNELS);
-  const appearanceAt = createWaterAppearanceSampler(sampleBiome);
+  const diffractionAt = diffraction?.enabled
+    ? createSeaDiffractionSampler({ sampleWater: sampleOceanSurface, tileSizeMeters, settings: diffraction })
+    : null;
+  const appearanceAt = createWaterAppearanceSampler(sampleBiome, diffractionAt);
   for (let localZ = 0; localZ < height; localZ += 1) {
     for (let localX = 0; localX < width; localX += 1) {
       const sample = samples[sampleIndex(
@@ -296,13 +303,14 @@ function resolveChunkSize(page) {
   return chunkSize;
 }
 
-export function enrichPageWaterField(page, sampleWater, sampleBiome) {
+export function enrichPageWaterField(page, sampleWater, sampleBiome, options = {}) {
   const field = createWaterField({
     originX: page.originX,
     originZ: page.originZ,
     chunkSize: resolveChunkSize(page),
     sampleWater,
     sampleBiome,
+    ...options,
   });
   page.waterFieldPixels = field.pixels;
   page.waterFieldWidth = field.width;

@@ -633,7 +633,7 @@ export function createStylizedWaterMaterial({
       shorelineFadeDepth: water.optics.shorelineFadeDepth,
       persistentEnabled: ['high', 'ultra'].includes(water.qualityTier),
       laceField: (uv) => texture(acquireWorldNoise().texture, uv).depth(int(WORLD_NOISE_LAYERS.water)).r });
-    const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask)
+    const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask).mul(sea.shelter)
       .mul(seaStateUniforms.storm.add(1)) : float(0);
     const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine(shoreDistance))).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
@@ -642,7 +642,7 @@ export function createStylizedWaterMaterial({
 
   if (sea && quality.foam && water.foam.enabled && water.coast?.rockImpact?.enabled) {
     const impact = sampleCoastalRockImpactState();
-    const rockFoam = impact.foam.mul(sea.mask).mul(waterCoverage)
+    const rockFoam = impact.foam.mul(sea.mask).mul(waterCoverage).mul(sea.shelter)
       .mul(smoothstep(0.04, 0.6, waterDepth));
     foamAmount = max(foamAmount, rockFoam);
   }

@@ -4,6 +4,7 @@ import {
   evaluateDirectionalSurfCpu, solveSurfWaveNumber, surfCarrierFrames, surfSmoothstep,
 } from './SeaSurfMath.js';
 import { SEA_REFRACTION_DEFAULTS, createSeaRefractionCarrier } from './SeaRefractionMath.js';
+import { SEA_DIFFRACTION_DEFAULTS, resolveSeaDiffraction } from './SeaDiffraction.js';
 
 /** Gods' End wave sets, scaled to humans and driven by canonical water depth. */
 export const SEA_SURF_DEFAULTS = Object.freeze({
@@ -14,6 +15,7 @@ export const SEA_SURF_DEFAULTS = Object.freeze({
   directional: DIRECTIONAL_SURF_DEFAULTS,
   breaking: BREAKING_SURF_DEFAULTS,
   refraction: SEA_REFRACTION_DEFAULTS,
+  diffraction: SEA_DIFFRACTION_DEFAULTS,
 });
 
 export function resolveSeaSurf(source = {}) {
@@ -25,13 +27,14 @@ export function resolveSeaSurf(source = {}) {
     directional: { ...DIRECTIONAL_SURF_DEFAULTS, ...source.directional },
     breaking: { ...BREAKING_SURF_DEFAULTS, ...source.breaking },
     refraction: { ...SEA_REFRACTION_DEFAULTS, ...source.refraction },
+    diffraction: resolveSeaDiffraction(source.diffraction),
   };
   if (!['legacy', 'directionalBreakers'].includes(result.model)) {
     throw new Error('water.sea.surf.model must be legacy or directionalBreakers.');
   }
   if (typeof result.enabled !== 'boolean') throw new Error('water.sea.surf.enabled must be boolean.');
   for (const [key, value] of Object.entries(result)) {
-    if (!['enabled', 'model', 'directional', 'breaking', 'refraction'].includes(key) && (!Number.isFinite(value) || value < 0)) throw new Error(`water.sea.surf.${key} must be finite and non-negative.`);
+    if (!['enabled', 'model', 'directional', 'breaking', 'refraction', 'diffraction'].includes(key) && (!Number.isFinite(value) || value < 0)) throw new Error(`water.sea.surf.${key} must be finite and non-negative.`);
   }
   for (const [start, end] of [['fadeStart', 'fadeEnd'], ['breakDepthStart', 'breakDepthFull'],
     ['breakDepthFull', 'breakDepthFade'], ['breakDepthFade', 'breakDepthEnd']]) {

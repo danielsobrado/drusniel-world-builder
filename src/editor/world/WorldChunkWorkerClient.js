@@ -63,6 +63,7 @@ export class WorldChunkWorkerClient {
     generator,
     surfaceMaskConfig = null,
     vegetationScatterConfig = null,
+    seaDiffractionConfig = null,
     workerCount = null,
     maxInFlightPerWorker = DEFAULT_MAX_IN_FLIGHT_PER_WORKER,
     allowMainThreadFallback = typeof window === 'undefined' && typeof Worker !== 'function',
@@ -74,6 +75,7 @@ export class WorldChunkWorkerClient {
     this.worldGenerator = null;
     this.surfaceMaskConfig = surfaceMaskConfig;
     this.vegetationScatterConfig = vegetationScatterConfig;
+    this.seaDiffractionConfig = seaDiffractionConfig;
     this.maxInFlightPerWorker = resolveMaxInFlightPerWorker(maxInFlightPerWorker);
     this.nextId = 1;
     this.pending = new Map();      // id -> { resolve, reject, workerIndex }
@@ -221,6 +223,7 @@ export class WorldChunkWorkerClient {
       generator: this.generator,
       surfaceMaskConfig: this.surfaceMaskConfig,
       vegetationScatterConfig: this.vegetationScatterConfig,
+      seaDiffractionConfig: this.seaDiffractionConfig,
       placementSamplingConfig,
       materialBakeRequest,
       terrainOverrides,

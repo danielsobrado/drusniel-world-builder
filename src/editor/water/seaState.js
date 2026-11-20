@@ -31,6 +31,11 @@ export function configureSea(config) {
   surfSettings = resolveSeaSurf(config?.surf);
 }
 
+export function getSeaDiffractionConfig() {
+  return seaConfig && surfSettings?.enabled && surfSettings.model === 'directionalBreakers'
+    ? surfSettings.diffraction : null;
+}
+
 export function updateSeaState({ timeSeconds, storm, seaLevel, rain, water }) {
   if (water) seaStateUniforms.waterTint.value.set(water.tint[0], water.tint[1], water.tint[2], water.desaturate);
   if (Number.isFinite(rain)) seaStateUniforms.rain.value = Math.max(0, Math.min(1, rain));
@@ -53,14 +58,15 @@ export function seaAmplitude(config, storm, depth) {
 }
 
 /** The drawn swell's height, in metres, over canonical sea water `depth` deep. */
-export function seaSurfaceOffset(x, z, depth, shoreDistance = 48) {
+export function seaSurfaceOffset(x, z, depth, shoreDistance = 48,
+  exposure = seaExposure(shoreDistance)) {
   if (!seaConfig) return 0;
   const storm = seaStateUniforms.storm.value;
-  const amplitude = seaAmplitude(seaConfig, storm, depth) * seaExposure(shoreDistance);
+  const amplitude = seaAmplitude(seaConfig, storm, depth) * exposure;
   if (surfSettings?.enabled && surfSettings.model === 'directionalBreakers') {
     return sampleSeaSurfDisplacementCpu(x, z, depth, shoreDistance, seaTime,
       seaSharpness(seaConfig, storm), surfSettings, seaConfig, storm,
-      seaExposure(shoreDistance), amplitude);
+      exposure, amplitude);
   }
   if (amplitude <= 0) return 0;
   return amplitude * sampleSeaHeightCpu(x, z, depth, seaTime, seaSharpness(seaConfig, storm), surfSettings);

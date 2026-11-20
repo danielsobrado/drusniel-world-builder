@@ -10,7 +10,7 @@ export function createWaterAppearanceNodes(nearest, filtered) {
   return {
     kind, organic, cold,
     ocean: float(kind.equal(1)), lake: float(kind.equal(2)), river: float(kind.equal(3)),
-    exposure: filtered.a.clamp(.3, 1),
+    exposure: filtered.a.clamp(0, 1),
     color(base, depth) {
       // Tannin water: tea-brown in a few centimetres, black-green beyond. A bog
       // (organic 1) owns its colour outright; forest streams only lean to it.

@@ -153,6 +153,17 @@ water:
         fadeStartMeters: 0.5
         fadeEndMeters: 6.0
         maximumPhaseDistanceMeters: 40
+      # Coarse upstream visibility attenuates crests behind headlands and coves.
+      diffraction:
+        enabled: true
+        latticeStepMeters: 16
+        rayStepMeters: 10
+        rayReachMeters: 80
+        angularSpreadRadians: 0.42
+        minimumTransmission: 0.22
+        offshoreFadeStartMeters: 40
+        offshoreFadeEndMeters: 90
+        phaseLagMeters: 3
       breaking:
         gamma: 0.72
         onsetRatio: 0.78

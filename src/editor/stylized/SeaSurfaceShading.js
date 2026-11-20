@@ -1,5 +1,6 @@
 import { createSeaDetailNodes } from './SeaDetailShading.js';
 import { createSeaSurfNodes, createSeaFoamNoise } from './SeaSurfNodes.js';
+import { createSeaShelterNode } from './SeaDiffractionNodes.js';
 import { resolveSeaSurf } from '../water/SeaSurf.js';
 import {
   abs,
@@ -106,6 +107,8 @@ export function createSeaSurfaceNodes({
     offshoreAmplitude: offshore, legacyAmplitude: amplitude,
     exposure, seaMask, waterCoverage,
   });
+  const shelter = config.surf?.diffraction?.enabled
+    ? createSeaShelterNode(exposure, shoreDistance) : float(1);
   const strength = (surf?.amplitude ?? amplitude).div(offshore.max(1e-4));
   const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
   const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
@@ -133,6 +136,7 @@ export function createSeaSurfaceNodes({
 
   return {
     displacement: surf?.displacement ?? height.mul(amplitude),
+    shelter,
     release: detail?.release,
     normal,
     foamNoise,
@@ -172,7 +176,9 @@ export function createSeaSurfaceNodes({
       // Starts just past the waterline fade (0.2 m), so the sheet does not thin it away.
       const band = smoothstep(0.06, 0.16, waterDepth)
         .mul(oneMinus(smoothstep(0.5, storm.mul(2).add(1.4), shoreDistance)));
-      return band.mul(smoothstep(0.45, 0.75, foamNoise)).mul(storm.mul(0.3).add(0.5)).mul(seaMask);
+      return band.mul(smoothstep(0.45, 0.75, foamNoise))
+        .mul(storm.mul(0.3).add(0.5)).mul(seaMask)
+        .mul(shelter);
     },
     /**
      * Light coming through a crest, after grass-test's crest transmission.

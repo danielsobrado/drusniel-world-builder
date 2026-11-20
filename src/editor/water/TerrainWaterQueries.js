@@ -8,9 +8,29 @@ import {
 } from './WaterConstants.js';
 import { createWaterNavigationSample } from './WaterNavigation.js';
 import { createNoWaterSample, createWaterSample } from './WaterSample.js';
-import { seaSurfaceOffset } from './seaState.js';
+import { getSeaDiffractionConfig, seaSurfaceOffset } from './seaState.js';
+import { seaExposure } from './WaterAppearance.js';
+import { createSeaDiffractionSampler } from './SeaDiffraction.js';
 
 const WATER_TILE_ID = 0;
+const oceanExposureCache = new WeakMap();
+
+/** CPU gameplay uses the same directional shelter field as streamed water pages. */
+export function sampleWorldStoreSeaExposure(world, worldX, worldZ, shoreDistance) {
+  const settings = getSeaDiffractionConfig();
+  const baseline = seaExposure(shoreDistance);
+  if (!settings?.enabled || shoreDistance >= settings.offshoreFadeEndMeters) return baseline;
+  const revision = world.revision ?? 0;
+  let entry = oceanExposureCache.get(world);
+  if (!entry || entry.revision !== revision || entry.settings !== settings) {
+    entry = { revision, settings, sample: createSeaDiffractionSampler({
+      sampleWater: (cellX, cellZ) => sampleWorldStoreWaterSurface(world, cellX, cellZ),
+      tileSizeMeters: world.tileSize, settings,
+    }) };
+    oceanExposureCache.set(world, entry);
+  }
+  return baseline * entry.sample(worldX / world.tileSize, -worldZ / world.tileSize, shoreDistance);
+}
 
 function assertWorldStore(worldStore) {
   if (!worldStore?.generator
@@ -52,10 +72,11 @@ export function sampleWorldStoreWaterSurface(world, cellX, cellZ) {
  * The water as the player meets it, in canonical space: flow turned to world
  * axes, and the open sea riding the same swell the water material draws.
  */
-function toCanonicalWorldSample(sample, worldX, worldZ) {
+function toCanonicalWorldSample(sample, worldX, worldZ, worldStore) {
   if (sample.kind === WATER_KIND_NONE) return sample;
   const swell = sample.kind === WATER_KIND_OCEAN
-    ? seaSurfaceOffset(worldX, worldZ, sample.depth, sample.shoreDistance)
+    ? seaSurfaceOffset(worldX, worldZ, sample.depth, sample.shoreDistance,
+      sampleWorldStoreSeaExposure(worldStore, worldX, worldZ, sample.shoreDistance))
     : 0;
   if (swell === 0 && sample.flowX === 0 && sample.flowZ === 0) return sample;
   return createWaterSample({
@@ -129,7 +150,7 @@ export function getCanonicalWater(terrainView, worldX, worldZ) {
     terrainView.worldStore,
     worldX / tileSize,
     -worldZ / tileSize,
-  ), worldX, worldZ);
+  ), worldX, worldZ, terrainView.worldStore);
 }
 
 export function getWorldWater(terrainView, renderX, renderZ) {
