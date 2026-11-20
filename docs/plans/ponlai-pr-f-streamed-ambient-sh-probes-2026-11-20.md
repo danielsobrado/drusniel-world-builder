@@ -23,7 +23,7 @@ Produce an efficient **streamed world-space representation of directional sky vi
 - A clear gap between trees receives more diffuse sky light than the floor behind a cliff or beneath a dense canopy.
 - The **direction of open sky** matters: a shaded rock face pointed toward an open valley gets different ambient light from a face pointed into a hill.
 - Changes in the authored sky from clear noon through overcast, sunset and moonlight relight probes **without retracing geometry**.
-- The transition across a streaming chunk boundary is smooth; no 64 m square, horizontal stripe, tile-edge line or one-frame dark flash.
+- The transition across a streaming chunk boundary is smooth; no 128 m square, horizontal stripe, tile-edge line or one-frame dark flash.
 - Sky occlusion is **not** a new contact AO pass. Fine trunk/rock contact darkening remains in existing forest-floor/GTAO systems; probes represent low-frequency directional visibility.
 - The world remains just as responsive to movement, terrain sculpting, edited biome tiles, imported Azgaar terrain and floating-origin rebases.
 - Standard materials that cannot yet safely participate remain on existing hemisphere/environment lighting, rather than receiving guessed “GI” through emissive.
@@ -59,7 +59,7 @@ Produce an efficient **streamed world-space representation of directional sky vi
 | Area | Drusniel verified owner | Ponlai verified reference | PR F adaptation |
 | --- | --- | --- | --- |
 | World topology | [D1] `InfiniteWorldStore`, [D2] `WorldCoordinates` | [P1] island `AmbientProbes` | Deterministic **unbounded** canonical X/Z; no island box or finite map assumption |
-| Chunk dimensions | [D3] `editor.config.yaml`: tile=2 m, chunk=32 cells → **64 m/chunk** | [P1] 16 m island tile, 2 m probe spacing | **Do not copy** 2 m island lattice; start ~8 m outdoor probe spacing, measure |
+| Chunk dimensions | [D3] `editor.config.yaml` and [D32] `src/main.js`: `map.tileSize=2 m`, `world.chunkSize=64` → **128 m/terrain chunk** (`map.chunkSize=32` is separate) | [P1] 16 m island tile, 2 m probe spacing | **Do not copy** 2 m island lattice; start ~8 m outdoor probe spacing, measure |
 | Terrain residency | [D4] `InfiniteTerrainView.updateStreamingFrame`, [D5] `TerrainStreamingPlan` | [P2] `WorldChunks`, [P3] `ChunkMerge` | Match *current+predicted* resident selection, separate probe budget, not one merged island volume |
 | Worker generation | [D6] `WorldChunkWorkerClient`, [D7] `worldChunk.worker`, [D8] `generateWorldChunk` | [P4] `chunkWorker`, [P1] `bakeProbes` | Low-priority sidecar; do **not** expand every mandatory terrain page with expensive ray work |
 | Editor patches | [D1] change events, [D4] `onWorldChange` | [P2] deterministic chunk-version/cache keys | Invalidate probes within **trace support radius** around edits; generation guards |
@@ -79,7 +79,7 @@ Produce an efficient **streamed world-space representation of directional sky vi
 
 **Important actual-code discovery:** Drusniel [D4] creates one shared terrain material for its slot pool. [D9] documents that 49 separate material compilations cost ~0.6 s each and ~17 s on first player entry. Any F implementation that creates 49 materials or injects a new per-slot shader function **fails architecture review**.
 
-**Another real mismatch:** [D11] `forestFloorTexture.js` comments describe an earlier 128 m chunk shape, but current [D3] config has 32 cells × 2 m = 64 m per chunk. Derive probe spacing/halo/texture dimensions **at runtime from current chunkSize and tileSize**, not stale comments or Ponlai's 16 m island tiles.
+**Important configuration trap:** [D11] `forestFloorTexture.js` comments describe a 128 m terrain chunk, matching current `world.chunkSize=64` × `map.tileSize=2`; however, `map.chunkSize=32` can be mistaken for the streaming dimension. [D32] `src/main.js` explicitly passes `config.world.chunkSize` to the world store. Derive probe spacing, halo and GPU texture dimensions **from the runtime `worldStore`**, not from map-level values or Ponlai's finite island tiles.
 
 ---
 
@@ -198,21 +198,22 @@ Ponlai's island bakes complete chunk sets and then merges them, possibly using i
 The current config includes:
 
 ```yaml
-world:
+map:
   tileSize: 2
-  # other world settings
-streaming:
-  chunkSize: 64   # Example only; inspect precise indentation and actual value below
+  chunkSize: 32      # Separate map setting; not the worker's terrain chunk span
+world:
+  chunkSize: 64      # Streaming terrain chunk size in cells
+  maxResidentChunks: 49
 ```
 
-**Correction / authoritative observed fields** (not the illustrative structure above):
+**Authoritative inspected runtime wiring:**
 
-- The inspected `editor.config.yaml` top block has `tileSize: 2` and `chunkSize: 32`, while a **separate** streaming block has `chunkSize: 64`. The source of truth for terrain generation/slot dimensions is **`worldStore.chunkSize`**, not any single printed YAML key without tracing how config loaders merge it.
+- [D3] `editor.config.yaml` declares `map.tileSize=2`, `map.chunkSize=32` and `world.chunkSize=64`. [D32] `src/main.js` lines 298–326 explicitly construct both the worker and `WorkerBackedWorldStore` with `chunkSize: config.world.chunkSize` and `tileSize: config.map.tileSize`. Therefore the configured terrain chunk is **64 cells × 2 m = 128 m** along each side. `map.chunkSize=32` must **not** be used to size or identify a terrain probe page.
 - [D4] explicitly uses `worldStore.chunkSize * worldStore.tileSize` for `chunkWorldSize`; [D4] `createSlot` allocates its `tileTexture`/`heightTexture` from `worldStore.chunkSize`.
 - [D2] `chunkKey(chunkX,chunkZ)` joins signed safe integers with the project separator, not an ad-hoc string format.
 - [D2] maps world X to cell X and world Z to **negative cell Z**. [D5] `createTerrainChunkDescriptor` centre: `worldZ = -(originCellZ + size/2)*tileSize`.
 
-**Mandatory audit:** record the **actual runtime** `worldStore.chunkSize`, `worldStore.tileSize` and `terrainView.chunkWorldSize` in the QA manifest. A prose comment mentioning “128 m chunks” is not source-of-truth. Two simultaneous chunk-size notions must be resolved before calculating probe counts and cache keys.
+**Mandatory audit:** record the **actual runtime** `worldStore.chunkSize`, `worldStore.tileSize` and `terrainView.chunkWorldSize` in the QA manifest. The concrete source wiring [D32] resolves the two chunk-size fields for the inspected runtime, but runtime QA must still capture actual values to support other world configurations.
 
 ### 4.2 [D4] slot pool, draw material and generation tokens
 
@@ -273,18 +274,18 @@ The probe's job is **directional sky light** at metre-scale; it is not a replace
 
 Given actual terrain chunk span `S = worldStore.chunkSize * worldStore.tileSize` (metres), define an integer global probe stride `P` satisfying `S/P` integer in the selected configuration.
 
-For the **inspected typical 64 m runtime chunk** a proposed **8 m** spacing gives:
+For the **inspected 128 m streamed terrain chunk** a proposed **8 m** spacing gives:
 
-- `S/P = 8` ownership intervals per X/Z.
-- Include **one shared boundary column** for interpolation: `9 × 9` columns per chunk (`(S/P+1)^2`).
+- `S/P = 16` ownership intervals per X/Z.
+- Include **one shared boundary column** for interpolation: `17 × 17` columns per chunk (`(S/P+1)^2`).
 - Use **4 relative-to-terrain vertical levels**, prototype at offsets `[0.6, 2.5, 8, 18]` m above local terrain; **NOT** Ponlai's global fixed `Y0=-2` to `22`.
-- Total raw probes per chunk: `9×9×4 = 324`, including duplicated boundary samples.
+- Total raw probes per chunk: `17×17×4 = 1,156`, including duplicated boundary samples.
 - Visibility storage: **9 SH floats + 3 position-offset floats + validity/occupancy**. Prefer packed alignment as **16 floats per probe**, 64 bytes.
-- Raw per-chunk CPU data: `324×64 = 20,736 bytes` ≈ **20.25 KiB**, before metadata, halo/worker buffers/cache overhead.
-- For 49 resident slots: `49×20,736 = 1,016,064 bytes` ≈ **0.969 MiB** CPU raw, **plus** similarly sized GPU visibility storage and any computed RGB irradiance atlas.
-- A 256-probe alternative with 8×8 columns without shared boundaries saves bytes but needs guaranteed cross-chunk seam access and makes streaming gaps more expensive to interpolate.
+- Raw per-chunk CPU data: `1,156×64 = 73,984 bytes` ≈ **72.25 KiB**, before metadata, halo/worker buffers/cache overhead.
+- For 49 resident slots: `49×73,984 = 3,625,216 bytes` ≈ **3.457 MiB** CPU raw, **plus** similarly sized GPU visibility storage and any computed RGB irradiance atlas.
+- A 1,024-probe alternative with 16×16 owned columns, 4 levels and no boundary copies saves some bytes but requires guaranteed cross-chunk seam sampling and makes streaming gaps more expensive to interpolate.
 
-**These are PROPOSALS, not claims of current or Ponlai values.** Actual runtime chunk span may be 128 m if a different config block feeds `worldStore.chunkSize`. Calculate widths from the **resolved** store, assert divisibility, and choose a tier by physical metres, not tile-ID count.
+**These are PROPOSALS, not claims of current or Ponlai values.** The inspected terrain span is **128 m** based on [D32]; other runtime/world configurations may differ. Calculate widths from the **resolved** store, assert divisibility, and choose a tier by physical metres, not tile-ID count.
 
 **Memory estimation excludes:** temporary ray cache/voxel occupancy, triangle/heightfield acceleration, metadata, worker clones, GPU row padding/alignment and staging uploads. The probe grid is small; trace time and residency synchronization are likely harder than raw memory.
 
@@ -349,14 +350,14 @@ PROBE_REVISION = hash(generator, overrides, occluders, format, lattice, bounds)
 
 Proposed starting matrix, chosen by physical spacing and hardware:
 
-| Tier | Columns for 64 m chunk | Vertical levels | Probe points | Expected role |
+| Tier | Columns for 128 m chunk | Vertical levels | Probe points | Expected role |
 | --- | --- | --- | --- | --- |
 | `off` | 0 | 0 | 0 | Default / mobile |
-| `balanced` | 5×5 (16 m) | 3 | 75 | Coarse visibility/sky fill |
-| `high` | 9×9 (8 m) | 4 | 324 | Preferred desktop pilot |
-| `ultra` | 17×17 (4 m) | 5 | 1,445 | Only if clear quality gain and worker cost acceptable |
+| `balanced` | 9×9 (16 m) | 3 | 243 | Coarse visibility/sky fill |
+| `high` | 17×17 (8 m) | 4 | 1,156 | Preferred desktop pilot if worker cost passes |
+| `ultra` | 33×33 (4 m) | 5 | 5,445 | Only if major quality benefit and worker cost acceptable |
 
-**Performance warning:** `ultra` has ~4.46× the high probe count and may require more ray work per point. At 128 rays/probe, **high** already proposes ~41,472 primary ray traces/chunk, ultra ~184,960. Ray-march **steps** compound that; do not silently bind all probes to mandatory terrain worker replies.
+**Performance warning:** `ultra` has ~4.71× the high probe count and may require more ray work per point. At 128 rays/probe, **high** already proposes ~147,968 primary ray traces/chunk, ultra ~696,960. Ray-march **steps** compound that; do not silently bind all probes to mandatory terrain worker replies.
 
 Use ≤3 quality tiers only if actual QA proves distinct benefits. “Ultra” is not mandatory to ship F.
 
@@ -438,7 +439,7 @@ function projectSkyVisibility(scene, probePoint, count) {
 - A descending ray from a point near ground is normally blocked quickly; an upward ray may exit through open sky.
 - For a sky ray that reaches trace cap while pointing toward a far mountain ridge, decide whether to use coarse distant horizon lookup or treat as open; document bounded-support approximation.
 - Rays should be coalesced/early-out in dense canopy/solid.
-- Don't build a dense voxel matrix per 64 m² chunk if heightfield intersection plus sparse occluder acceleration is sufficient.
+- Don't build a dense voxel matrix per 128 m-wide chunk if heightfield intersection plus sparse occluder acceleration is sufficient.
 
 ### 6.5 Per-ray Beer–Lambert canopy term (optional)
 
@@ -931,14 +932,14 @@ stylizedSurface:
 
 ### 13.1 Raw memory examples
 
-For `9×9×4=324` probes and 16 Float32 values/probe:
+For `17×17×4=1,156` probes and 16 Float32 values/probe:
 
 ```text
 bytesPerProbe = 16 * 4 = 64
-cpuRawChunk = 324 * 64 = 20,736 bytes
-cpuRaw49Slots = 1,016,064 bytes ~= 0.969 MiB
-gpuVis64BitChunk (if 4 RGBA16F texels/probe) = 324 * 4 * 8 = 10,368 bytes
-gpuVis32BitChunk (if 4 RGBA32F texels/probe) = 324 * 4 * 16 = 20,736 bytes
+cpuRawChunk = 1,156 * 64 = 73,984 bytes
+cpuRaw49Slots = 3,625,216 bytes ~= 3.457 MiB
+gpuVis64BitChunk (if 4 RGBA16F texels/probe) = 1,156 * 4 * 8 = 36,992 bytes
+gpuVis32BitChunk (if 4 RGBA32F texels/probe) = 1,156 * 4 * 16 = 73,984 bytes
 ```
 
 This represents **visibility coefficient/source data** only. A relit RGB SH9 atlas is additional:
@@ -946,22 +947,22 @@ This represents **visibility coefficient/source data** only. A relit RGB SH9 atl
 ```text
 RGB SH9 = 27 floats/probe
 7 RGBA16F texels * 8 bytes = 56 bytes/probe
-324 * 56 = 18,144 bytes/chunk
-49 chunks * 18,144 = 889,056 bytes (~0.848 MiB)
+1,156 * 56 = 64,736 bytes/chunk
+49 chunks * 64,736 = 3,172,064 bytes (~3.025 MiB)
 ```
 
 The seven-slab format is **Ponlai-style full RGB SH**; PR F may choose a cheaper **scalar visibility + sky reference approximation** rather than allocate it until PR G. GPU resources include staging alignment, texture metadata, neutral textures, cache variants and memory from all resident chunks.
 
 ### 13.2 CPU cost estimate: don't underestimate the rays
 
-At 324 probes and 96 rays/probe:
+At 1,156 probes and 96 rays/probe:
 
 ```text
-primaryRays = 31,104 rays / chunk
-primaryRaysFor49Chunks = 1,524,096 rays before cache/retries
+primaryRays = 110,976 rays / chunk
+primaryRaysFor49Chunks = 5,437,824 rays before cache/retries
 ```
 
-With up to ~20 m reach and steps e.g. 0.5–1 m, the worst case is tens of millions of terrain/occluder tests, *not* a 20 KB memory-copy cost. Some downward rays early exit; still the worker job must be **bounded, low priority and cancellable**. The initial trace count is a **proposal**, not a measured guarantee.
+With up to ~20 m reach and steps e.g. 0.5–1 m, the worst case is tens of millions of terrain/occluder tests, *not* a ~74 KB memory-copy cost. Some downward rays early exit; still the worker job must be **bounded, low priority and cancellable**. The initial trace count is a **proposal**, not a measured guarantee.
 
 **Mandatory optimization order:**
 
@@ -1344,7 +1345,7 @@ All URLs use the exact inspected Drusniel SHA `c990d37ee50d3991e8c6f6ccaf2435b31
 - **[D8]** [`src/editor/world/generateWorldChunk.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/world/generateWorldChunk.js#L1-L128) — generation with edited source, tile/height/render masks/water and scatter; **critical path to protect**.
 - **[D9]** [`src/editor/materials/TerrainSlotBindings.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/materials/TerrainSlotBindings.js#L1-L134) — per-object node bindings, samplerless loads, one shared material, historic shader rebuild bottleneck.
 - **[D10]** [`src/editor/terrainMaterial.js` initial terrain inputs/world coordinates](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/terrainMaterial.js#L130-L225), [`PBR snow/wetness and final shading`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/terrainMaterial.js#L530-L688).
-- **[D11]** [`src/editor/stylized/forestFloorTexture.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/forestFloorTexture.js#L1-L125) — R canopy, G contact, B litter; caution stale physical size comments.
+- **[D11]** [`src/editor/stylized/forestFloorTexture.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/forestFloorTexture.js#L1-L125) — R canopy, G contact, B litter; 128 m chunk comment agrees with the current 64-cell × 2 m streaming terrain [D32].
 - **[D12]** [`src/editor/stylized/StylizedSkyView.js` lighting authority](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/StylizedSkyView.js#L259-L455) — one hemisphere and directional light, update sky state.
 - **[D13]** [`src/editor/stylized/sky/skyAmbient.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/sky/skyAmbient.js#L1-L42) — authored diffuse sky colour.
 - **[D14]** [`src/editor/stylized/sky/sceneEnvironment.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/sky/sceneEnvironment.js#L1-L76) — static HDR environment/metallic specular fallback; PR E dynamic IBL optional.
@@ -1365,6 +1366,8 @@ All URLs use the exact inspected Drusniel SHA `c990d37ee50d3991e8c6f6ccaf2435b31
 - **[D29]** [`src/editor/locations/gen/PropOcclusionGrid.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/locations/gen/PropOcclusionGrid.js) — scoped structural voxel occupancy for dedicated location light bake; reference, **not** drop-in outdoor grid.
 - **[D30]** [`src/editor/stylized/forest/ScatterClusterField.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/stylized/forest/ScatterClusterField.js) — canonical deterministic forest placement; inspect if using as canopy source.
 - **[D31]** [`src/editor/world/ChunkedHeightField.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/editor/world/ChunkedHeightField.js#L1-L35) — wrapper exposes authoritative world-store sample heights.
+
+- **[D32]** [`src/main.js` terrain worker/store size wiring](https://github.com/danielsobrado/drusniel-world-builder/blob/c990d37ee50d3991e8c6f6ccaf2435b31747fabe/src/main.js#L292-L326) — explicitly passes `config.world.chunkSize` to the terrain worker and `WorkerBackedWorldStore`, and `config.map.tileSize` to the store; with [D3] this proves 128 m streamed chunks.
 
 ## 19. Immutable Ponlai source references (P)
 
