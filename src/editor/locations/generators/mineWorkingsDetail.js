@@ -190,6 +190,9 @@ export function buildSortingStation(b, shaftAt, hub, lightingSections = resolveM
   }
   for (const [dx, dz] of [[-2.7, -2.7], [2.7, -2.7], [-2.7, 2.7], [2.7, 2.7]]) {
     b.prop('timber', roughTimber(P(shaftAt.x + dx * 0.8, 2.4, shaftAt.z + dz * 0.8), P(shaftAt.x - dx * 0.8, 2.4, shaftAt.z + dz * 0.8), 0.18, 0.18, { bow: 0.02, irregular: 0.32 }), 0x8c6c4a);
+    // Diagonal sway braces & upper cross-ties stiffening the headframe tower.
+    b.prop('timber', roughTimber(P(shaftAt.x + dx * 0.8, 2.4, shaftAt.z + dz * 0.8), P(shaftAt.x + dx * 0.64, 4.6, shaftAt.z - dz * 0.64), 0.13, 0.13, { bow: 0.015, irregular: 0.28 }), 0x826242);
+    b.prop('iron', stoneBox(0.32, 0.20, 0.32, P(shaftAt.x + dx * 0.64, 4.6, shaftAt.z + dz * 0.64), { bevel: 0.018, irregular: 0.04 }), 0x727984);
   }
   b.prop('timber', roughTimber(P(shaftAt.x - 1.9, frameTop, shaftAt.z), P(shaftAt.x + 1.9, frameTop, shaftAt.z), 0.36, 0.34, { bow: 0.025, irregular: 0.3 }), 0x9b7a54);
   b.prop('timber', roughTimber(P(shaftAt.x, frameTop, shaftAt.z - 1.9), P(shaftAt.x, frameTop, shaftAt.z + 1.9), 0.36, 0.34, { bow: 0.025, irregular: 0.3 }), 0x9b7a54);
@@ -201,8 +204,10 @@ export function buildSortingStation(b, shaftAt, hub, lightingSections = resolveM
     b.prop('iron', stoneBox(0.1, 0.86, 0.1, P(shaftAt.x + cx, -0.55, shaftAt.z + 0.45 + cz), { bevel: 0.01 }), 0x787f8b);
   }
   b.prop('iron', stoneBox(1.56, 0.1, 1.56, P(shaftAt.x, -0.18, shaftAt.z + 0.45), { bevel: 0.015 }), 0x7e8591);
+  b.prop('iron', stoneBox(1.54, 0.07, 1.54, P(shaftAt.x, -0.88, shaftAt.z + 0.45), { bevel: 0.012 }), 0x707783);
   b.prop('iron', hewnBeam(P(shaftAt.x - 0.72, -0.14, shaftAt.z + 0.45), P(shaftAt.x, 0.52, shaftAt.z + 0.45), 0.045, 0.045), 0x828995);
   b.prop('iron', hewnBeam(P(shaftAt.x + 0.72, -0.14, shaftAt.z + 0.45), P(shaftAt.x, 0.52, shaftAt.z + 0.45), 0.045, 0.045), 0x828995);
+  b.prop('iron', rod(P(shaftAt.x, 0.44, shaftAt.z + 0.45), P(shaftAt.x, 0.62, shaftAt.z + 0.45), 0.08, 0.06, 8), 0x8e95a1);
   for (const [ox, oz, rx, ry, rz] of [[0, 0, 0.4, 0.24, 0.36], [-0.28, 0.22, 0.24, 0.18, 0.24], [0.26, -0.2, 0.26, 0.2, 0.22]]) {
     b.prop('ore', angularRock(rx, ry, rz, P(shaftAt.x + ox, -0.05, shaftAt.z + 0.45 + oz), { irregular: 0.48 }), 0xd6b88e);
   }
@@ -281,8 +286,12 @@ export function buildSortingStation(b, shaftAt, hub, lightingSections = resolveM
     section: 'hub',
   });
 
-  // Rail terminus timber bumper block + parked empty secondary ore tub + grounded switch lamp post.
+  // Rail terminus timber bumper block with iron buffer plates & rear chock braces + parked empty ore tub.
   b.prop('timber', stoneBox(1.5, 0.42, 0.35, P(-2.6, -0.82, -52.2), { yaw: -0.2, bevel: 0.03 }), 0x8e6e4b);
+  for (const bx of [-0.45, 0.45]) {
+    b.prop('iron', stoneBox(0.24, 0.24, 0.06, P(-2.6 + bx, -0.78, -52.01), { yaw: -0.2, bevel: 0.012 }), 0x6f7682);
+    b.prop('timber', hewnBeam(P(-2.6 + bx, -0.76, -52.32), P(-2.6 + bx, -1.0, -52.72), 0.12, 0.12), 0x7a5c3d);
+  }
   buildOreCart(b, P(-1.8, -1.0, -47.2), { loaded: false, yaw: -0.14 });
   const switchFloorY = b.probe(-0.92, 0.2, -45.5, -1, 3.0) ?? hub.y;
   const switchArmY = switchFloorY + 2.46;

@@ -1,8 +1,17 @@
-import { beam, block, box, rod } from '../gen/propKit.js';
+import { block, box, rod } from '../gen/propKit.js';
 import { fbm3 } from '../gen/noise.js';
 import { chamber, column, plateau, slab } from '../gen/shapes.js';
-import { bridge, crystal, house, lantern } from './kits.js';
+import { bridge, crystal, house } from './kits.js';
 import { bellCluster, lanternCap, loamMound, shelfBrackets } from './umbraFungus.js';
+import {
+  buildDrowAqueduct,
+  buildDrowCompoundWallAndGate,
+  buildDrowGatePortal,
+  buildDrowLampPost,
+  buildDrowMarketStall,
+  buildDrowSpireCrown,
+  buildDrowWardenGate,
+} from './umbraArchitecture.js';
 import {
   buildCrystalResonatorObelisk,
   buildHangingCenserSpire,
@@ -116,9 +125,7 @@ export function generate(b, params) {
   };
 
   // --- Gate ledge -------------------------------------------------------------
-  b.prop('masonry', block(1.6, 6.5, 1.6, P(-3.6, 16, -14.5)));
-  b.prop('masonry', block(1.6, 6.5, 1.6, P(3.6, 16, -14.5)));
-  b.prop('masonry', box(9.4, 1.2, 1.8, P(0, 23, -14.5)));
+  buildDrowGatePortal(b, P(0, 16, -14.5), crystalTint);
   lamp(P(-5.5, 16, -19), 1.1);
   lamp(P(5.5, 16, -19), 1.1);
   lamp(P(-3.6, 16, -29.5), 0.9);
@@ -126,22 +133,13 @@ export function generate(b, params) {
 
   // --- Market island -----------------------------------------------------------
   house(b, market, 0, 7.5, 12.5, 7.5, { windowTint, windows: 3, floors: 4, light: 3.5 });
-  b.prop('masonry', block(5, 4, 5, P(market.x, market.y + 13.4, market.z)));
-  b.prop('masonry', rod(P(market.x, market.y + 17.4, market.z), P(market.x, market.y + 20.4, market.z), 1.6, 0.2, 4));
+  buildDrowSpireCrown(b, market, crystalTint);
   for (let index = 0; index < 9; index += 1) {
     const angle = index / 9 * Math.PI * 2 + 0.35;
     const at = P(market.x + Math.cos(angle) * 14, market.y, market.z + Math.sin(angle) * 14);
     const facing = Math.atan2(-Math.cos(angle), -Math.sin(angle));
     if (index % 3 === 2) {
-      // Open stalls: posts, a slab roof, goods under it.
-      for (const [dx, dz] of [[-1.6, -1.2], [1.6, -1.2], [-1.6, 1.2], [1.6, 1.2]]) {
-        b.prop('masonry', block(0.35, 2.6, 0.35, P(at.x + dx, at.y, at.z + dz)));
-      }
-      b.prop('masonry', box(4.2, 0.3, 3.4, P(at.x, at.y + 2.75, at.z), facing));
-      b.prop('timber', block(2.6, 0.9, 1, at, facing), 0x4b3a2c);
-      b.prop('glow', box(0.25, 0.25, 0.25, P(at.x, at.y + 2.3, at.z)), windowTint, 3);
-      b.light(P(at.x, at.y + 2.2, at.z), windowTint, 2.4, 9, { halo: 1.2 });
-      b.nav.block(at, 2.1, 3);
+      buildDrowMarketStall(b, at, facing, windowTint);
     } else {
       house(b, at, facing, b.range(4.6, 5.8), b.range(4.2, 7.5), 4.4, { windowTint, windows: 2, floors: 2, light: 3 });
     }
@@ -152,9 +150,7 @@ export function generate(b, params) {
   }
   // Warm lamps where people trade and live: the only fire-coloured light in the city.
   for (const [x, y, z] of [[-6, 8, -62], [7, 8, -80], [-9, 8, -79], [10, 8, -66], [-36, 14, -58], [-36, 14, -84], [37, 2, -70]]) {
-    b.prop('iron', rod(P(x, y, z), P(x, y + 2.6, z), 0.05, 0.04, 6), 0x23262d);
-    lantern(b, P(x, y + 2.8, z), { tint: windowTint, intensity: 5, range: 14, halo: 1.4 });
-    b.nav.block(P(x, y, z), 0.35, 3);
+    buildDrowLampPost(b, P(x, y, z), windowTint);
   }
   // The Spindle's lamp: a hanging mass of crystal over the market.
   for (let index = 0; index < 9; index += 1) {
@@ -171,12 +167,7 @@ export function generate(b, params) {
     if (Math.round(z) % 2) lamp(P(west.x + 7, west.y, z + 3.6), 0.8, 1.8);
   }
   // --- East tier: a house compound behind its own wall ----------------------------
-  b.prop('masonry', box(0.9, 3.2, 30, P(east.x - 3.5, east.y + 1.6, east.z - 6)));
-  b.prop('masonry', block(1.6, 4.6, 1.6, P(east.x - 3.5, east.y, east.z + 9.8)));
-  b.prop('masonry', block(1.6, 4.6, 1.6, P(east.x - 3.5, east.y, east.z + 13.4)));
-  b.prop('iron', box(0.2, 3, 2.2, P(east.x - 3.5, east.y + 1.5, east.z + 11.6)), 0x23262d);
-  for (let z = east.z - 20; z <= east.z + 7; z += 0.9) b.nav.block(P(east.x - 3.5, east.y, z), 0.7, 4);
-  b.nav.block(P(east.x - 3.5, east.y, east.z + 11.6), 1.4, 4);
+  buildDrowCompoundWallAndGate(b, east);
   for (const [dz, tall] of [[-15, 9], [-6, 12], [3, 7]]) {
     house(b, P(east.x + 3.6, east.y, east.z + dz), -ALONG_Z, 7, tall, 5.4, { windowTint, windows: 3, floors: 4, light: 3 });
   }
@@ -222,29 +213,13 @@ export function generate(b, params) {
     }
   }
   // Aqueduct along the back of the shelf, fed from the wall.
-  b.prop('masonry', box(46, 0.9, 1.3, P(beds.x, beds.y + 1.6, beds.z - 8.6)));
-  b.prop('water', box(45.6, 0.05, 0.7, P(beds.x, beds.y + 2.06, beds.z - 8.6)));
-  for (let x = -21; x <= 21; x += 6) {
-    b.prop('masonry', block(0.9, 1.2, 1.1, P(beds.x + x, beds.y, beds.z - 8.6)));
-    // Wild growth where the aqueduct seeps: brackets up the post, a tuft at its foot.
-    b.prop('glow', shelfBrackets(P(beds.x + x + b.range(-0.2, 0.2), beds.y + b.range(0.35, 0.7), beds.z - 8.04), 0, 2 + Math.floor(b.range(0, 3)), range), 0xffffff, 0.7);
-    const fx = beds.x + x + b.range(-0.6, 0.6), fz = beds.z - b.range(7.6, 7.85);
-    const ground = b.terrainAt(fx, beds.y + 1, fz) ?? beds.y;
-    b.prop('glow', bellCluster(P(fx, ground - 0.02, fz), 4 + Math.floor(b.range(0, 4)), range), 0xffffff, 0.8);
-  }
+  buildDrowAqueduct(b, beds, range);
   lamp(P(beds.x - 21, beds.y, beds.z + 6.5), 0.8, 1.6);
   lamp(P(beds.x + 12, beds.y, beds.z + 6.8), 0.8, 1.6);
 
   // --- The deep passage and its warden gate ---------------------------------------
   const wardenGate = P(-33, -6.9, -121);
-  for (let index = -3; index <= 3; index += 1) {
-    const at = P(wardenGate.x + index * 0.3, wardenGate.y, wardenGate.z + index * 0.56);
-    b.prop('iron', rod(at, P(at.x, at.y + 4.4, at.z), 0.05, 0.05, 6), 0x23262d);
-  }
-  for (const y of [0.5, 2.2, 3.9]) {
-    b.prop('iron', beam(P(wardenGate.x - 0.9, wardenGate.y + y, wardenGate.z - 1.7), P(wardenGate.x + 0.9, wardenGate.y + y, wardenGate.z + 1.7), 0.09), 0x23262d);
-  }
-  b.nav.block(wardenGate, 2.4, 5);
+  buildDrowWardenGate(b, wardenGate);
   lamp(P(-27.5, -6.4, -116), 0.9, 2);
   b.light(P(-45, -6, -128), '#6b4fb0', 1.3, 14, { halo: 2.2 });
 
