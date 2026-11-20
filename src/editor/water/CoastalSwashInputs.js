@@ -52,7 +52,7 @@ export class CoastalSwashInputs {
     this.size = size;
     this.texelMeters = texelMeters;
     this.runupMeters = runupMeters;
-    this.diffraction = resolveSeaDiffraction(diffraction);
+    this.diffraction = resolveSeaDiffraction(diffraction ?? undefined);
     this.texture = createTexture(size);
     this.revision = null;
     this.originX = NaN;

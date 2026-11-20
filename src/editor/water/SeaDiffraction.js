@@ -50,6 +50,14 @@ export function resolveSeaDiffraction(source = {}) {
   return Object.freeze(settings);
 }
 
+/** Tile edits can affect any ray from the four surrounding lattice points. */
+export function seaDiffractionTileHalo(settings, tileSizeMeters) {
+  if (!settings?.enabled) return 0;
+  const reach = settings.rayReachMeters ?? SEA_DIFFRACTION_DEFAULTS.rayReachMeters;
+  const step = settings.latticeStepMeters ?? SEA_DIFFRACTION_DEFAULTS.latticeStepMeters;
+  return Math.ceil((reach + step) / tileSizeMeters);
+}
+
 function isOcean(sample) {
   return sample?.kind === WATER_KIND_OCEAN && sample.coverage > 0.5;
 }
@@ -123,6 +131,6 @@ export function createSeaDiffractionSampler({ sampleWater, tileSizeMeters, setti
 export function seaDiffractionPhaseDelay(exposure, shoreDistance, waveNumber, settings) {
   if (!settings?.enabled) return 0;
   const reference = seaExposure(shoreDistance);
-  const shadow = clamp(1 - exposure / reference, 0, 1);
-  return -shadow * settings.phaseLagMeters * waveNumber;
+  const transmission = clamp(exposure / reference, 0, 1);
+  return (transmission - 1) * settings.phaseLagMeters * waveNumber;
 }

@@ -21,9 +21,11 @@ export function sampleWorldStoreSeaExposure(world, worldX, worldZ, shoreDistance
   const baseline = seaExposure(shoreDistance);
   if (!settings?.enabled || shoreDistance >= settings.offshoreFadeEndMeters) return baseline;
   const revision = world.revision ?? 0;
+  const { baseTerrainRevision, generator } = world;
   let entry = oceanExposureCache.get(world);
-  if (!entry || entry.revision !== revision || entry.settings !== settings) {
-    entry = { revision, settings, sample: createSeaDiffractionSampler({
+  if (!entry || entry.revision !== revision || entry.baseTerrainRevision !== baseTerrainRevision
+      || entry.generator !== generator || entry.settings !== settings) {
+    entry = { revision, baseTerrainRevision, generator, settings, sample: createSeaDiffractionSampler({
       sampleWater: (cellX, cellZ) => sampleWorldStoreWaterSurface(world, cellX, cellZ),
       tileSizeMeters: world.tileSize, settings,
     }) };

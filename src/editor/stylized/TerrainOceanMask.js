@@ -1,5 +1,5 @@
 import { DataTexture, HalfFloatType, RGBAFormat, DataUtils } from 'three/webgpu';
-import { Fn, If, float, max, mix, oneMinus, smoothstep, uniform, vec4 } from 'three/tsl';
+import { Fn, If, float, max, mix, smoothstep, uniform, vec4 } from 'three/tsl';
 import { bilinearLoad, TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
 import { createSeaShelterNode } from './SeaDiffractionNodes.js';
 

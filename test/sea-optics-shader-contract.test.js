@@ -22,7 +22,8 @@ test('refracted ocean scene colour is transported once and alpha retains coverag
   assert.match(material, /seaOptics\.pathLength\(airCosine, verticalDistance\)/);
   assert.match(material, /sceneColor\.mul\(seaResponse\.transmission\)/);
   assert.match(material, /\.add\(seaResponse\.scattered\)/);
-  assert.match(material, /alpha = waterCoverage\.mul\(waterlineFade\)/);
+  assert.match(material, /const refractionAlpha = waterCoverage\.mul\(waterlineFade\)/);
+  assert.match(material, /alpha = mix\(alpha, refractionAlpha, refractionWeight\)/);
   assert.match(material, /seaResponse\.visibility\.mul\(seaResponse\.sunTransmission\.g\)/);
 });
 

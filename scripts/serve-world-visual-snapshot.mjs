@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {existsSync,readFileSync} from 'node:fs';
 import {createServer} from 'vite';
-import base from '../vite.config.js';
+import viteConfig from '../vite.config.js';
 import {compileYamlModule} from './compiled-yaml-plugin.mjs';
 
 // QA-only immutable source/atlas snapshot. Never changes the shared checkout.
@@ -76,6 +76,7 @@ const snapshot={name:'immutable-world-visual-snapshot',enforce:'pre',
   });
  },
 };
+const base=typeof viteConfig==='function'?await viteConfig({command:'serve',mode:'development',isSsrBuild:false,isPreview:false}):viteConfig;
 const server=await createServer({...base,configFile:false,root,cacheDir:`tmp/world-visual-quality/vite-${revision.slice(0,8)}-${port}`,
  plugins:[snapshot,...base.plugins],server:{host:'0.0.0.0',port,strictPort:true,hmr:false,watch:{ignored:['**/*']}}});
 await server.listen();console.log(JSON.stringify({sourceSha:revision,harnessSha:harnessRevision,sha256:manifest.sha256,files:files.size,port}));server.printUrls();

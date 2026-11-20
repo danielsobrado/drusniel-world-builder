@@ -5,11 +5,12 @@
  * array, the valley-fog height patch, the shadow map and the cloud shadow in one
  * fragment stage — seventeen textures, one past the default of sixteen. Past the
  * default the pipeline fails validation and the terrain does not draw at all, so
- * the device asks for what the adapter can give, up to a cap that keeps the
- * request modest on hardware that reports very large numbers.
+ * the device asks for what the adapter can give. Wind, dither and atmosphere
+ * also put some authored foliage pipelines past the default 16 interstage variables.
  */
 export const RAISED_DEVICE_LIMITS = Object.freeze({
   maxSampledTexturesPerShaderStage: 32,
+  maxInterStageShaderVariables: 24,
 });
 
 /**

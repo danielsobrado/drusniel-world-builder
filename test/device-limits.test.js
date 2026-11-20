@@ -11,14 +11,17 @@ const gpuOffering = (limits) => ({
 });
 
 test('the device asks for what the adapter offers, up to the cap', async () => {
-  const cap = RAISED_DEVICE_LIMITS.maxSampledTexturesPerShaderStage;
   assert.deepEqual(
-    await raiseDeviceLimits({}, { gpu: gpuOffering({ maxSampledTexturesPerShaderStage: 48 }) }),
-    { maxSampledTexturesPerShaderStage: cap },
+    await raiseDeviceLimits({}, { gpu: gpuOffering({
+      maxSampledTexturesPerShaderStage: 48, maxInterStageShaderVariables: 28,
+    }) }),
+    RAISED_DEVICE_LIMITS,
   );
   assert.deepEqual(
-    await raiseDeviceLimits({}, { gpu: gpuOffering({ maxSampledTexturesPerShaderStage: 16 }) }),
-    { maxSampledTexturesPerShaderStage: 16 },
+    await raiseDeviceLimits({}, { gpu: gpuOffering({
+      maxSampledTexturesPerShaderStage: 16, maxInterStageShaderVariables: 16,
+    }) }),
+    { maxSampledTexturesPerShaderStage: 16, maxInterStageShaderVariables: 16 },
     'never more than the adapter has',
   );
 });

@@ -13,6 +13,7 @@ import {
   getSurfaceMaskSearchRadius,
 } from './ChunkRenderPixels.js';
 import { assertCompatibleWaterDomainMetadata } from '../water/WaterConfig.js';
+import { seaDiffractionTileHalo } from '../water/SeaDiffraction.js';
 import { chunkKey } from './WorldCoordinates.js';
 import { INFINITE_WORLD_FORMAT_VERSION } from './worldConstants.js';
 
@@ -162,18 +163,24 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     this.pendingChunks.clear();
   }
 
+  get diffractionTileHalo() {
+    return seaDiffractionTileHalo(this.chunkWorker.seaDiffractionConfig, this.tileSize);
+  }
+
   pageEditState(chunkX, chunkZ) {
     const radius = Math.max(2, getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells, this.tileSize));
-    const minX = chunkX * this.chunkSize - radius;
-    const maxX = (chunkX + 1) * this.chunkSize + radius;
-    const minZ = chunkZ * this.chunkSize - radius;
-    const maxZ = (chunkZ + 1) * this.chunkSize + radius;
+    const tileRadius = Math.max(radius, this.diffractionTileHalo);
+    const bounds = margin => [chunkX * this.chunkSize - margin, (chunkX + 1) * this.chunkSize + margin,
+      chunkZ * this.chunkSize - margin, (chunkZ + 1) * this.chunkSize + margin];
+    const heightBounds = bounds(radius);
+    const tileBounds = tileRadius === radius ? heightBounds : bounds(tileRadius);
     return {
       tiles: this.tileOverrides,
       heights: this.heightOverrides,
-      tileVersion: this.tileOverrides.signature(minX, maxX, minZ, maxZ),
-      heightVersion: this.heightOverrides.signature(minX, maxX, minZ, maxZ),
-      bounds: [minX, maxX, minZ, maxZ],
+      tileVersion: this.tileOverrides.signature(...tileBounds),
+      heightVersion: this.heightOverrides.signature(...heightBounds),
+      tileBounds,
+      heightBounds,
     };
   }
 
@@ -208,8 +215,8 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
       try {
         const editState = this.pageEditState(chunkX, chunkZ);
         const terrainOverrides = {
-          tiles: editState.tiles.entriesInRect(...editState.bounds),
-          heights: editState.heights.entriesInRect(...editState.bounds),
+          tiles: editState.tiles.entriesInRect(...editState.tileBounds),
+          heights: editState.heights.entriesInRect(...editState.heightBounds),
         };
         const page = await this.chunkWorker.request(chunkX, chunkZ, { priority, terrainOverrides });
         assertCurrent();

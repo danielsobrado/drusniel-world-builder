@@ -1,0 +1,75 @@
+[
+  {
+    "id": "open-beach-close", "folder": "01-open-beach",
+    "pose": { "x": -8998, "z": -7533, "heightAboveGround": 12, "pitch": -0.40, "fov": 66 },
+    "target": [{ "x": -9012, "z": -7515 }],
+    "tiers": [],
+    "controls": [{ "qualityTier": "high", "label": "shore-close-high" }]
+  },
+  {
+    "id": "01-open-beach", "benchmark": true,
+    "pose": { "x": -9022, "z": -7492, "heightAboveGround": 13, "pitch": -0.43 },
+    "target": [{ "x": -8999, "z": -7518 }],
+    "tiers": ["low", "medium", "high", "ultra"]
+  },
+  {
+    "id": "02-curved-coast",
+    "pose": { "x": 2176, "z": -10604, "heightAboveGround": 29, "pitch": -0.52 },
+    "target": [{ "x": 2234, "z": -10597 }],
+    "tiers": ["medium", "high", "ultra"],
+    "controls": [
+      { "qualityTier": "high", "folder": "07-comparisons", "label": "curved-wave-refraction-off", "waveRefraction": false },
+      { "qualityTier": "high", "folder": "07-comparisons", "label": "curved-wave-refraction-on" },
+      { "qualityTier": "high", "folder": "07-comparisons", "label": "curved-optical-refraction-off", "opticalRefraction": false }
+    ]
+  },
+  {
+    "id": "03-headland",
+    "pose": { "x": 2376, "z": -4538, "heightAboveGround": 42, "pitch": -0.47, "fov": 72, "yaw": 0 },
+    "target": [{ "x": 2410, "z": -4610 }, { "x": 2268, "z": -4605 }],
+    "tiers": ["medium", "high", "ultra"]
+  },
+  {
+    "id": "headland-overhead", "folder": "03-headland",
+    "pose": { "x": 2376, "z": -4560, "heightAboveGround": 95, "pitch": -1.28, "fov": 75, "yaw": 0 },
+    "target": [{ "x": 2410, "z": -4610 }, { "x": 2268, "z": -4605 }],
+    "tiers": [],
+    "controls": [{ "qualityTier": "high", "label": "high-overhead" }]
+  },
+  {
+    "id": "04-sheltered-cove", "benchmark": true,
+    "pose": { "x": 2270, "z": -4640, "heightAboveGround": 20, "pitch": -0.48, "fov": 70 },
+    "target": [{ "x": 2268, "z": -4604 }, { "x": 2285, "z": -4590 }],
+    "tiers": ["low", "medium", "high", "ultra"],
+    "controls": [
+      { "qualityTier": "high", "folder": "07-comparisons", "label": "cove-diffraction-off", "diffraction": false },
+      { "qualityTier": "high", "folder": "07-comparisons", "label": "cove-diffraction-on" }
+    ]
+  },
+  {
+    "id": "05-rocky-shore", "impact": true, "weather": "storm",
+    "pose": { "x": -5397, "z": 13552, "heightAboveGround": 8.5, "pitch": -0.31, "fov": 55, "yaw": 3.076 },
+    "target": [{ "x": -5393, "z": 13569 }],
+    "tiers": ["high", "ultra"]
+  },
+  {
+    "id": "storm-exposed", "folder": "06-storm", "weather": "storm",
+    "pose": { "x": -9022, "z": -7492, "heightAboveGround": 13, "pitch": -0.43 },
+    "target": [{ "x": -8999, "z": -7518 }],
+    "tiers": [],
+    "controls": [
+      { "qualityTier": "high", "label": "exposed-high" },
+      { "qualityTier": "ultra", "label": "exposed-ultra" }
+    ]
+  },
+  {
+    "id": "storm-sheltered", "folder": "06-storm", "weather": "storm",
+    "pose": { "x": 2270, "z": -4640, "heightAboveGround": 20, "pitch": -0.48, "fov": 70 },
+    "target": [{ "x": 2268, "z": -4604 }, { "x": 2285, "z": -4590 }],
+    "tiers": [],
+    "controls": [
+      { "qualityTier": "high", "label": "sheltered-high" },
+      { "qualityTier": "ultra", "label": "sheltered-ultra" }
+    ]
+  }
+]

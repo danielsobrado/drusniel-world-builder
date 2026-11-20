@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { Scene, StaticDrawUsage } from 'three/webgpu';
+import { CoastalImpactSpray } from '../src/editor/stylized/CoastalImpactSpray.js';
 import { resolveCoastalRockImpactConfig, coastalRockImpactEnabled } from '../src/editor/water/CoastalRockImpactConfig.js';
 import {
   impactCrestIndex, impactContactPoint, impactDecay, impactDroplet, impactHash,
@@ -70,6 +72,28 @@ test('spray seeds and ballistic motion are reproducible and finite', () => {
   for (const age of [0, 0.2, 0.5, p.life]) {
     const y = p.vy * age - 4.905 * age * age;
     assert.ok(Number.isFinite(y));
+  }
+});
+
+test('spray attributes upload on emission and origin shifts, with no idle uploads', () => {
+  const origin = { x: 0, z: 0 };
+  const spray = new CoastalImpactSpray({ scene: new Scene(), qualityTier: 'high', settings: settings.spray,
+    floatingOrigin: { getState: () => origin, toRender: (x, z) => ({ x: x - origin.x, z: z - origin.z }) } });
+  try {
+    const attributes = [spray.spawn, spray.velocity, spray.style];
+    assert.ok(attributes.every(attribute => attribute.usage === StaticDrawUsage));
+    assert.ok(spray.emit({ rockId: 'fixture', crestId: 1, directionX: 1, directionZ: 0,
+      intensity: 0.9, contactX: 5, contactY: 0, contactZ: 5, radius: 1 }, 1) > 0);
+    spray.update(1.1);
+    const versions = attributes.map(attribute => attribute.version);
+    assert.ok(versions.every(version => version > 0));
+    spray.update(1.2);
+    assert.deepEqual(attributes.map(attribute => attribute.version), versions);
+    origin.x = 8;
+    spray.update(1.3);
+    assert.ok(attributes.every((attribute, index) => attribute.version > versions[index]));
+  } finally {
+    spray.dispose();
   }
 });
 

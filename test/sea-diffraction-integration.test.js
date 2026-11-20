@@ -26,13 +26,16 @@ function createSyntheticCoast() {
     };
   };
   const world = {
-    revision: 1, tileSize: 2,
+    revision: 1, baseTerrainRevision: 0, tileSize: 2,
     getTile: (x, z) => sample(x, z).kind === 1 ? 0 : 2,
     sampleHeight: () => -2,
     heightOverrides: new Map(), tileOverrides: new Map(),
     generator: { sampleWater: sample, seaLevel: 0 },
   };
-  return { sample, world, removeBarrier() { barrier = false; world.revision++; } };
+  return { sample, world,
+    removeBarrier() { barrier = false; world.revision++; },
+    regenerate() { barrier = false; world.baseTerrainRevision++; },
+  };
 }
 
 test('streamed water appearance and CPU gameplay use the same shelter', () => {
@@ -57,6 +60,36 @@ test('streamed water appearance and CPU gameplay use the same shelter', () => {
     coast.removeBarrier();
     assert.equal(sampleWorldStoreSeaExposure(coast.world, 0, 0, 12), seaExposure(12),
       'terrain revision invalidates cached headland visibility');
+  } finally {
+    configureSea(null);
+  }
+});
+
+test('base terrain regeneration replaces cached shelter without an ordinary terrain edit', () => {
+  const { world, regenerate } = createSyntheticCoast();
+  const surf = { enabled: true, model: 'directionalBreakers', diffraction: settings };
+  configureSea({ enabled: true, surf });
+  try {
+    const revision = world.revision;
+    let probes = 0;
+    world.generator.sampleWaterSurface = (x, z) => {
+      probes++;
+      return world.generator.sampleWater(x, z);
+    };
+    const sheltered = sampleWorldStoreSeaExposure(world, 0, 0, 12);
+    assert.ok(sheltered < seaExposure(12));
+    const firstProbes = probes;
+    assert.equal(sampleWorldStoreSeaExposure(world, 0, 0, 12), sheltered);
+    assert.equal(probes, firstProbes, 'stable terrain reuses the ray lattice');
+
+    configureSea({ enabled: true, surf: { ...surf, diffraction: { ...settings, minimumTransmission: 1 } } });
+    assert.equal(sampleWorldStoreSeaExposure(world, 0, 0, 12), seaExposure(12));
+    configureSea({ enabled: true, surf });
+    assert.equal(sampleWorldStoreSeaExposure(world, 0, 0, 12), sheltered);
+
+    regenerate();
+    assert.equal(world.revision, revision);
+    assert.equal(sampleWorldStoreSeaExposure(world, 0, 0, 12), seaExposure(12));
   } finally {
     configureSea(null);
   }

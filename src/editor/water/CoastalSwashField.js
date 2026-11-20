@@ -132,7 +132,7 @@ export class CoastalSwashField {
     this.coast = { ...DEFAULT_COAST_SWASH, ...coastConfig };
     this.settings = resolveCoastalSwashConfig(coastConfig?.persistent);
     this.diffraction = resolveSeaDiffraction(seaSurfConfig?.enabled
-      && seaSurfConfig?.model === 'directionalBreakers' ? seaSurfConfig.diffraction : null);
+      && seaSurfConfig?.model === 'directionalBreakers' ? seaSurfConfig.diffraction : undefined);
     this.size = coastalSwashResolution(this.settings, qualityTier);
     this.supported = Boolean(this.size && renderer?.backend?.isWebGPUBackend && this.coast.enabled);
     this.span = this.size * this.settings.texelMeters;
@@ -180,10 +180,12 @@ export class CoastalSwashField {
   update(camera, timeSeconds) {
     if (!this.supported || this.disposed || !camera || !Number.isFinite(timeSeconds)) return;
     const canonical = this.terrainView.floatingOrigin.toCanonical(camera.position.x, camera.position.z);
-    if (timeSeconds - this.lastActivation >= 1 || this.lastActivation === -Infinity
+    const revision = `${this.terrainView.worldStore.baseTerrainRevision}:${this.terrainView.worldStore.revision}`;
+    if (this.activationRevision !== revision || timeSeconds < this.lastActivation || timeSeconds - this.lastActivation >= 1
       || Math.hypot(canonical.x - this.lastActivationX, canonical.z - this.lastActivationZ) >= this.settings.scrollMeters) {
       this.active = nearOcean(this.terrainView.worldStore, canonical.x, canonical.z,
         this.settings.activationDistanceMeters);
+      this.activationRevision = revision;
       this.lastActivation = timeSeconds;
       this.lastActivationX = canonical.x;
       this.lastActivationZ = canonical.z;
@@ -200,7 +202,6 @@ export class CoastalSwashField {
     const nextX = coastalWindowOrigin(canonical.x, this.span, this.settings.scrollMeters);
     const nextZ = coastalWindowOrigin(canonical.z, this.span, this.settings.scrollMeters);
     const moved = nextX !== this.originX || nextZ !== this.originZ;
-    const revision = `${this.terrainView.worldStore.baseTerrainRevision}:${this.terrainView.worldStore.revision}`;
     if (moved || this.revision !== revision) {
       const previousX = this.originX;
       const previousZ = this.originZ;

@@ -444,7 +444,7 @@ export class InfiniteTerrainView {
       renderer: this.renderer,
       terrainView: this,
       coastConfig: this.stylizedConfig.water?.coast,
-      seaSurfConfig: this.stylizedConfig.water?.sea?.surf,
+      seaSurfConfig: this.stylizedConfig.water?.sea?.enabled ? this.stylizedConfig.water.sea.surf : null,
       qualityTier: this.stylizedConfig.water?.qualityTier,
     });
     // Hi-Z occlusion culling, after `init()` so the backend it gates on exists. It
@@ -993,10 +993,11 @@ export class InfiniteTerrainView {
     }
     const coordinates = change.cells ?? change.vertices ?? [];
     const affected = new Set();
+    const diffractionHalo = change.kind === 'tile' ? this.worldStore.diffractionTileHalo ?? 0 : 0;
+    const radius = Math.max(1, this.surfaceMaskChunkRadius, Math.floor(diffractionHalo / this.chunkSize) + 1);
     for (const coordinate of coordinates) {
       const chunkX = Math.floor(coordinate.x / this.chunkSize);
       const chunkZ = Math.floor(coordinate.z / this.chunkSize);
-      const radius = Math.max(1, this.surfaceMaskChunkRadius);
       const minimumOffset = this.worldStore.renderPagesPreparedInWorker ? -radius
         : change.kind === 'tile' ? -this.surfaceMaskChunkRadius : -1;
       const maximumOffset = this.worldStore.renderPagesPreparedInWorker ? radius

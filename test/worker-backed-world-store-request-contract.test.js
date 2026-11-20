@@ -3,6 +3,8 @@ import test from 'node:test';
 
 import { ProceduralWorldGenerator } from '../src/editor/world/ProceduralWorldGenerator.js';
 import { WorkerBackedWorldStore } from '../src/editor/world/WorkerBackedWorldStore.js';
+import { createEditedChunkSampling } from '../src/editor/world/EditedChunkSampling.js';
+import { createWaterField } from '../src/editor/water/WaterField.js';
 
 const CHUNK_SIZE = 8;
 
@@ -43,6 +45,40 @@ function retryableError(message) {
   error.retryable = true;
   return error;
 }
+
+test('a headland painted beyond the surface mask halo refreshes worker exposure', async () => {
+  const diffraction = { enabled: true, latticeStepMeters: 16, rayReachMeters: 80 };
+  const ocean = () => ({ kind: 1, coverage: 1, surfaceHeight: 0, bedHeight: -2, shoreDistance: 12 });
+  const generator = { sampleTile: () => 0, sampleHeight: () => -2,
+    sampleWater: ocean, sampleWaterSurface: ocean, seaLevel: 0 };
+  const store = createStore({
+    chunkWorker: {
+      seaDiffractionConfig: diffraction,
+      async request(chunkX, chunkZ, { terrainOverrides }) {
+        const page = createPage(chunkX, chunkZ);
+        const sampling = createEditedChunkSampling(generator, CHUNK_SIZE, terrainOverrides);
+        page.waterAppearancePixels = createWaterField({
+          originX: page.originX, originZ: page.originZ, chunkSize: CHUNK_SIZE,
+          sampleWater: sampling.sampleWater, sampleOceanSurface: sampling.sampleWaterSurface,
+          tileSizeMeters: 2, diffraction,
+        }).appearancePixels;
+        return page;
+      },
+    },
+  });
+  store.generator = generator;
+  try {
+    const open = await store.requestChunk(0, 0);
+    store.paintSquare(35, 0, 16, 4);
+    const sheltered = await store.requestChunk(0, 0);
+    assert.ok(sheltered.waterAppearancePixels[3] < open.waterAppearancePixels[3]);
+    store.paintSquare(35, 0, 16, 0);
+    const reopened = await store.requestChunk(0, 0);
+    assert.equal(reopened.waterAppearancePixels[3], open.waterAppearancePixels[3]);
+  } finally {
+    store.dispose();
+  }
+});
 
 test('synchronous worker failures are returned as rejected chunk promises', async () => {
   const store = createStore({

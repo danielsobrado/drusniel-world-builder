@@ -37,7 +37,8 @@ function createSprayMaterial(clock) {
 }
 
 function makeAttribute(data) {
-  return new THREE.InstancedBufferAttribute(data, 4).setUsage(THREE.DynamicDrawUsage);
+  // Emission and rebasing mark writes. DynamicDrawUsage uploads even without a new version.
+  return new THREE.InstancedBufferAttribute(data, 4);
 }
 
 export class CoastalImpactSpray {
