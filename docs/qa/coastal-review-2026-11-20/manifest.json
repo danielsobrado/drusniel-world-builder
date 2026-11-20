@@ -1,0 +1,5748 @@
+{
+  "schemaVersion": 1,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+  "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+  "runtimeDiffSha256": null,
+  "sourceOverrides": [
+    {
+      "file": "src/editor/InfiniteTerrainView.js",
+      "sha256": "55df9c1cf2ce8d40adffb8a77eb66fe8a59d293eb7b38bd17c3effa6152bc459"
+    },
+    {
+      "file": "src/editor/stylized/TerrainOceanMask.js",
+      "sha256": "31406350009c237db78c19b4e0c596ce6e4c87fedac297ed30679ac737883362"
+    },
+    {
+      "file": "src/editor/water/CoastalSwashField.js",
+      "sha256": "bb6979cf6604f4c3f7d01382588ec3072ba1b0f23a097f4e05dc5fddda809a62"
+    },
+    {
+      "file": "src/editor/water/CoastalSwashInputs.js",
+      "sha256": "5073bf3808eddcc0289874a264e45109f9d449c67c8d2f5ee69f18c0d2230fc5"
+    },
+    {
+      "file": "src/editor/water/SeaDiffraction.js",
+      "sha256": "131f68d1b85e38ce18677bf67e8a59079d68b0fd033a6544fbcf078c2367a2a8"
+    },
+    {
+      "file": "src/editor/water/TerrainWaterQueries.js",
+      "sha256": "4a1994f98c66efc8ad6f2c2b1db266f6b2ae38aac631ab37926c4ddd38f3e4d1"
+    },
+    {
+      "file": "src/editor/world/WorkerBackedWorldStore.js",
+      "sha256": "ff1fe3342a87bfc9ab4757b0e4794ab3bdf3c146867e4fd72ea052900d1c1a34"
+    },
+    {
+      "file": "src/main.js",
+      "sha256": "914fe75b07a5930d1d687a71a69530a9ce6dfc209b7b19c13606efa4a4ec7025"
+    },
+    {
+      "file": "src/render/deviceLimits.js",
+      "sha256": "85e8ce499937eb9348e48742b328c3bed956ec0cdf8e239384b8b4ceba7223f9"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "screenshots/01-open-beach/high.png",
+      "sha256": "76bab00067627e3f63bb81bb2ae0d120beb4143f3cf692576f38048d9d1ad5a5",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5280.5999999940395,
+        "groundMs": 958.7999999970198
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 3242,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.347256280125464,
+            "bedHeight": -5.136951992267953,
+            "depth": 3.789695712142489,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 2,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/01-open-beach/low.png",
+      "sha256": "7501b7f3a6b90d4dd78c332bf968e85766f0bef733828d0b78dc7055e51a7386",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5265.0999999940395,
+        "groundMs": 10831.40000000596
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "low",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.5,
+            "bedHeight": -5.136951992267953,
+            "depth": 3.636951992267953,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/01-open-beach/medium.png",
+      "sha256": "ba6b73149a34392f0b7658193abe7c9ba986a5f99e9fa2d9983ba43f00fcd35a",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5282.899999991059,
+        "groundMs": 10467.79999999702
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "medium",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.347256280125464,
+            "bedHeight": -5.136951992267953,
+            "depth": 3.789695712142489,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 2,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/01-open-beach/shore-close-high.png",
+      "sha256": "b011fe620f6d4845e2df6c1e6efb127445d0001b8331e6d011aed103546bff6b",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "open-beach-close",
+      "pose": {
+        "mode": "fly",
+        "fov": 66,
+        "x": -8998,
+        "z": -7533,
+        "heightAboveGround": 12,
+        "pitch": -0.4,
+        "yaw": 2.4805494847391065
+      },
+      "preparation": {
+        "cameraMs": 5368.199999988079,
+        "groundMs": 10252.20000000298
+      },
+      "canonicalCamera": {
+        "x": -8998,
+        "z": -7533,
+        "y": 0.7533121814173214
+      },
+      "cameraQuaternion": [
+        -0.06447543442236184,
+        0.9270187092683502,
+        0.187915995472991,
+        0.31806730367625735
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 66,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 442,
+        "dispatches": 1508,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 3,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": -9012,
+          "z": -7515,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.615420654949477,
+            "bedHeight": -2.787290615078888,
+            "depth": 1.171869960129411,
+            "shoreDistance": 8.246211051940918,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.32540432483455894,
+          "transmission": 0.9751251220703407,
+          "appearance": {
+            "cell": {
+              "x": -4506,
+              "z": 3758
+            },
+            "kind": 1,
+            "exposure": 0.33725490196078434,
+            "shoreDistance": 8.9453125,
+            "transmission": 0.9775875735446337
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 2,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/01-open-beach/ultra.png",
+      "sha256": "5cb36e4b929e6ff2290e57a161fe15a3f36ba974733c70d8e9a5180261272b86",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5677.29999999702,
+        "groundMs": 24074.30000001192
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 3520,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.347256280125464,
+            "bedHeight": -5.136951992267953,
+            "depth": 3.789695712142489,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 2,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/02-curved-coast/high.png",
+      "sha256": "25dd53ceabb0cd9fde49666ae560b09839f32c9c7b7107a68f5d4d49e7252d95",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5324.9000000059605,
+        "groundMs": 9673.199999988079
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 966,
+        "dispatches": 2088,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 2,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": true,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    },
+    {
+      "path": "screenshots/02-curved-coast/medium.png",
+      "sha256": "cce419a5053aae4d479a7e759dfe4ccc67ced87bbec7bc8c81b1955bc27705ef",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5291.20000000298,
+        "groundMs": 6864.899999991059
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "medium",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    },
+    {
+      "path": "screenshots/02-curved-coast/ultra.png",
+      "sha256": "25102beac11dbcf02fd49e5cf0349fcb922014f15d688d7c861851bdff1f7211",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5323.20000000298,
+        "groundMs": 6779.29999999702
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2324,
+        "dispatches": 5484,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 8,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": true,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    },
+    {
+      "path": "screenshots/03-headland/high-overhead.png",
+      "sha256": "2d1d9202d7b04b5f9c4d69b4c92e998c9ffa4a2c50fdc90563e87db0382e954e",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "headland-overhead",
+      "pose": {
+        "mode": "fly",
+        "fov": 75,
+        "x": 2376,
+        "z": -4560,
+        "heightAboveGround": 95,
+        "pitch": -1.28,
+        "yaw": 0
+      },
+      "preparation": {
+        "cameraMs": 5534.4000000059605,
+        "groundMs": 4784
+      },
+      "canonicalCamera": {
+        "x": 2376,
+        "z": -4560,
+        "y": 73.14039727703336
+      },
+      "cameraQuaternion": [
+        -0.5971954413623921,
+        0,
+        0,
+        0.8020957578842927
+      ],
+      "renderOrigin": {
+        "x": 2304,
+        "z": -4608
+      },
+      "fov": 75,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 3262,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 5,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2410,
+          "z": -4610,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.696343918415158,
+            "bedHeight": -6.104946614477547,
+            "depth": 4.408602696062389,
+            "shoreDistance": 19.697715759277344,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.6400824784670731,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1205,
+              "z": 2305
+            },
+            "kind": 1,
+            "exposure": 0.6392156862745098,
+            "shoreDistance": 19.703125,
+            "transmission": 0.9983690675202039
+          }
+        },
+        {
+          "x": 2268,
+          "z": -4605,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4888152821408474,
+            "bedHeight": -2.853058641564285,
+            "depth": 1.3642433594234378,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09162797708543283,
+          "transmission": 0.22382406616288936,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2303
+            },
+            "kind": 1,
+            "exposure": 0.08235294117647059,
+            "shoreDistance": 10,
+            "transmission": 0.225872269357723
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": true,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 37
+    },
+    {
+      "path": "screenshots/03-headland/high.png",
+      "sha256": "4968b9fdd8604bd6d06822769cec7be85d6bfde82e15aea91781b781245ab244",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "03-headland",
+      "pose": {
+        "mode": "fly",
+        "fov": 72,
+        "x": 2376,
+        "z": -4538,
+        "heightAboveGround": 42,
+        "pitch": -0.47,
+        "yaw": 0
+      },
+      "preparation": {
+        "cameraMs": 5291,
+        "groundMs": 9687.70000000298
+      },
+      "canonicalCamera": {
+        "x": 2376,
+        "z": -4538,
+        "y": 17.031681062050268
+      },
+      "cameraQuaternion": [
+        -0.23284298551241678,
+        0,
+        0,
+        0.972514341332643
+      ],
+      "renderOrigin": {
+        "x": 2304,
+        "z": -4608
+      },
+      "fov": 72,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 3262,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 4,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2410,
+          "z": -4610,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.696343918415158,
+            "bedHeight": -6.104946614477547,
+            "depth": 4.408602696062389,
+            "shoreDistance": 19.697715759277344,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.6400824784670731,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1205,
+              "z": 2305
+            },
+            "kind": 1,
+            "exposure": 0.6392156862745098,
+            "shoreDistance": 19.703125,
+            "transmission": 0.9983690675202039
+          }
+        },
+        {
+          "x": 2268,
+          "z": -4605,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4888152821408474,
+            "bedHeight": -2.853058641564285,
+            "depth": 1.3642433594234378,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09162797708543283,
+          "transmission": 0.22382406616288936,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2303
+            },
+            "kind": 1,
+            "exposure": 0.08235294117647059,
+            "shoreDistance": 10,
+            "transmission": 0.225872269357723
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 37
+    },
+    {
+      "path": "screenshots/03-headland/medium.png",
+      "sha256": "33cc863b258a8d0f9eb5b0b4dcb2313cc901f1d131c9015f0f7e6efddb3af1fe",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "03-headland",
+      "pose": {
+        "mode": "fly",
+        "fov": 72,
+        "x": 2376,
+        "z": -4538,
+        "heightAboveGround": 42,
+        "pitch": -0.47,
+        "yaw": 0
+      },
+      "preparation": {
+        "cameraMs": 5348.20000000298,
+        "groundMs": 13918.90000000596
+      },
+      "canonicalCamera": {
+        "x": 2376,
+        "z": -4538,
+        "y": 17.031681062050268
+      },
+      "cameraQuaternion": [
+        -0.23284298551241678,
+        0,
+        0,
+        0.972514341332643
+      ],
+      "renderOrigin": {
+        "x": 2304,
+        "z": -4608
+      },
+      "fov": 72,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "medium",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 7,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2410,
+          "z": -4610,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.696343918415158,
+            "bedHeight": -6.104946614477547,
+            "depth": 4.408602696062389,
+            "shoreDistance": 19.697715759277344,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.6400824784670731,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1205,
+              "z": 2305
+            },
+            "kind": 1,
+            "exposure": 0.6392156862745098,
+            "shoreDistance": 19.703125,
+            "transmission": 0.9983690675202039
+          }
+        },
+        {
+          "x": 2268,
+          "z": -4605,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4888152821408474,
+            "bedHeight": -2.853058641564285,
+            "depth": 1.3642433594234378,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09162797708543283,
+          "transmission": 0.22382406616288936,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2303
+            },
+            "kind": 1,
+            "exposure": 0.08235294117647059,
+            "shoreDistance": 10,
+            "transmission": 0.225872269357723
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 37
+    },
+    {
+      "path": "screenshots/03-headland/ultra.png",
+      "sha256": "9ea9ac96b7cdb587f143dae557d70146dc59c4e6f4e760ddf627b2d4273d4beb",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "03-headland",
+      "pose": {
+        "mode": "fly",
+        "fov": 72,
+        "x": 2376,
+        "z": -4538,
+        "heightAboveGround": 42,
+        "pitch": -0.47,
+        "yaw": 0
+      },
+      "preparation": {
+        "cameraMs": 5297.199999988079,
+        "groundMs": 11628.39999999106
+      },
+      "canonicalCamera": {
+        "x": 2376,
+        "z": -4538,
+        "y": 17.031681062050268
+      },
+      "cameraQuaternion": [
+        -0.23284298551241678,
+        0,
+        0,
+        0.972514341332643
+      ],
+      "renderOrigin": {
+        "x": 2304,
+        "z": -4608
+      },
+      "fov": 72,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 821,
+        "dispatches": 6810,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 8,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2410,
+          "z": -4610,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.696343918415158,
+            "bedHeight": -6.104946614477547,
+            "depth": 4.408602696062389,
+            "shoreDistance": 19.697715759277344,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.6400824784670731,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1205,
+              "z": 2305
+            },
+            "kind": 1,
+            "exposure": 0.6392156862745098,
+            "shoreDistance": 19.703125,
+            "transmission": 0.9983690675202039
+          }
+        },
+        {
+          "x": 2268,
+          "z": -4605,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4888152821408474,
+            "bedHeight": -2.853058641564285,
+            "depth": 1.3642433594234378,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09162797708543283,
+          "transmission": 0.22382406616288936,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2303
+            },
+            "kind": 1,
+            "exposure": 0.08235294117647059,
+            "shoreDistance": 10,
+            "transmission": 0.225872269357723
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 37
+    },
+    {
+      "path": "screenshots/04-sheltered-cove/high.png",
+      "sha256": "fe5c0f91256f2508b61d1d2dae393ffe743d0b40c576d02f811a44c6beb7dc40",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5640.20000000298,
+        "groundMs": 8885
+      },
+      "canonicalCamera": {
+        "x": 2271.365893763185,
+        "z": -4639.924117013156,
+        "y": 23.90264643937451
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 5748,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.493352313904997,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4734551559436104,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 0,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/04-sheltered-cove/low.png",
+      "sha256": "06ea780977e81b61a71961ce1029c2a1428cda866de8c623180c7b88110b1824",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5340.20000000298,
+        "groundMs": 7031.79999999702
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "low",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.5,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4668074698486073,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.409375,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/04-sheltered-cove/medium.png",
+      "sha256": "97e517c76517a3294005fe989fefa49e0065c5e06605b05b262e19de58c0c9e8",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5314.100000008941,
+        "groundMs": 8773.5
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "medium",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.493352313904997,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4734551559436104,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 0,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/04-sheltered-cove/ultra.png",
+      "sha256": "2071f686e39df11f0c1252f203e6f07bf4008ba6a08a9d4fefbf7a8d3ca519a0",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5342.70000000298,
+        "groundMs": 8706.90000000596
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 5944,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.493352313904997,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4734551559436104,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 0,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/05-rocky-shore/high-decay.png",
+      "sha256": "6d1e06c4b14b92903c55aca675110927a469f3aac5435c878f39d06cc6703332",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "05-rocky-shore",
+      "pose": {
+        "mode": "fly",
+        "fov": 55,
+        "x": -5397,
+        "z": 13552,
+        "heightAboveGround": 8.5,
+        "pitch": -0.31,
+        "yaw": 3.076
+      },
+      "preparation": {
+        "cameraMs": 5329,
+        "groundMs": 9647.70000000298
+      },
+      "canonicalCamera": {
+        "x": -5397,
+        "z": 13552,
+        "y": 3.7137541364922875
+      },
+      "cameraQuaternion": [
+        -0.005062192591499833,
+        0.9874802262667968,
+        0.15429708118856256,
+        0.032397340553392794
+      ],
+      "renderOrigin": {
+        "x": -5376,
+        "z": 13440
+      },
+      "fov": 55,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 131.03333333333285,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 1081,
+        "dispatches": 8724,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 3,
+        "events": 17,
+        "droplets": 4,
+        "closestSites": [
+          {
+            "x": -5398.241871869657,
+            "z": 13570.976783525432,
+            "radius": 1.0314915646893492,
+            "exposure": 0.18575643531101527
+          },
+          {
+            "x": -5387.842417946085,
+            "z": 13515.426831702003,
+            "radius": 0.33021402792927057,
+            "exposure": 0.14139900400487437
+          },
+          {
+            "x": -5408.088389126351,
+            "z": 13497.71666867542,
+            "radius": 0.2613609810316575,
+            "exposure": 0.06600532190651641
+          }
+        ]
+      },
+      "samples": [
+        {
+          "x": -5393,
+          "z": 13569,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.512975628651207,
+            "bedHeight": -1.976231694478211,
+            "depth": 0.46325606582700396,
+            "shoreDistance": 2.8284270763397217,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.2173024213316396,
+          "transmission": 0.7243414044387987,
+          "appearance": {
+            "cell": {
+              "x": -2696,
+              "z": -6784
+            },
+            "kind": 1,
+            "exposure": 0.2235294117647059,
+            "shoreDistance": 5.65625,
+            "transmission": 0.7318478942781032
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 131.03333333333285,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 4
+      },
+      "residentPages": 49,
+      "wetPages": 48
+    },
+    {
+      "path": "screenshots/05-rocky-shore/high-impact.png",
+      "sha256": "da9f1da3097cc4c99ff464676d0c84958e6e75e59d9f3739523c097d47bb88fd",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "05-rocky-shore",
+      "pose": {
+        "mode": "fly",
+        "fov": 55,
+        "x": -5397,
+        "z": 13552,
+        "heightAboveGround": 8.5,
+        "pitch": -0.31,
+        "yaw": 3.076
+      },
+      "preparation": {
+        "cameraMs": 5329,
+        "groundMs": 9647.70000000298
+      },
+      "canonicalCamera": {
+        "x": -5397,
+        "z": 13552,
+        "y": 3.7137541364922875
+      },
+      "cameraQuaternion": [
+        -0.005062192591499833,
+        0.9874802262667968,
+        0.15429708118856256,
+        0.032397340553392794
+      ],
+      "renderOrigin": {
+        "x": -5376,
+        "z": 13440
+      },
+      "fov": 55,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 130.53333333333285,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 1081,
+        "dispatches": 8694,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 3,
+        "events": 16,
+        "droplets": 20,
+        "closestSites": [
+          {
+            "x": -5398.241871869657,
+            "z": 13570.976783525432,
+            "radius": 1.0314915646893492,
+            "exposure": 0.18575643531101527
+          },
+          {
+            "x": -5387.842417946085,
+            "z": 13515.426831702003,
+            "radius": 0.33021402792927057,
+            "exposure": 0.14139900400487437
+          },
+          {
+            "x": -5408.088389126351,
+            "z": 13497.71666867542,
+            "radius": 0.2613609810316575,
+            "exposure": 0.06600532190651641
+          }
+        ]
+      },
+      "samples": [
+        {
+          "x": -5393,
+          "z": 13569,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4808798365938927,
+            "bedHeight": -1.976231694478211,
+            "depth": 0.49535185788431835,
+            "shoreDistance": 2.8284270763397217,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.2173024213316396,
+          "transmission": 0.7243414044387987,
+          "appearance": {
+            "cell": {
+              "x": -2696,
+              "z": -6784
+            },
+            "kind": 1,
+            "exposure": 0.2235294117647059,
+            "shoreDistance": 5.65625,
+            "transmission": 0.7318478942781032
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 130.53333333333285,
+        "impact": true,
+        "impactEvents": 0,
+        "droplets": 20,
+        "impactTime": 130.43333333333285
+      },
+      "residentPages": 49,
+      "wetPages": 48
+    },
+    {
+      "path": "screenshots/05-rocky-shore/ultra-decay.png",
+      "sha256": "92f7b60e94878f5524c1907ea89ecdb6520fc6412184944e8de9f7454d2ade6d",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "05-rocky-shore",
+      "pose": {
+        "mode": "fly",
+        "fov": 55,
+        "x": -5397,
+        "z": 13552,
+        "heightAboveGround": 8.5,
+        "pitch": -0.31,
+        "yaw": 3.076
+      },
+      "preparation": {
+        "cameraMs": 5663.600000008941,
+        "groundMs": 23817.90000000596
+      },
+      "canonicalCamera": {
+        "x": -5397,
+        "z": 13552,
+        "y": 3.7137541364922875
+      },
+      "cameraQuaternion": [
+        -0.005062192591499833,
+        0.9874802262667968,
+        0.15429708118856256,
+        0.032397340553392794
+      ],
+      "renderOrigin": {
+        "x": -5376,
+        "z": 13440
+      },
+      "fov": 55,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 131.03333333333285,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 3197,
+        "dispatches": 7948,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 3,
+        "events": 20,
+        "droplets": 4,
+        "closestSites": [
+          {
+            "x": -5398.241871869657,
+            "z": 13570.976783525432,
+            "radius": 1.0314915646893492,
+            "exposure": 0.18575643531101527
+          },
+          {
+            "x": -5387.842417946085,
+            "z": 13515.426831702003,
+            "radius": 0.33021402792927057,
+            "exposure": 0.14139900400487437
+          },
+          {
+            "x": -5408.088389126351,
+            "z": 13497.71666867542,
+            "radius": 0.2613609810316575,
+            "exposure": 0.06600532190651641
+          }
+        ]
+      },
+      "samples": [
+        {
+          "x": -5393,
+          "z": 13569,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.512975628651207,
+            "bedHeight": -1.976231694478211,
+            "depth": 0.46325606582700396,
+            "shoreDistance": 2.8284270763397217,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.2173024213316396,
+          "transmission": 0.7243414044387987,
+          "appearance": {
+            "cell": {
+              "x": -2696,
+              "z": -6784
+            },
+            "kind": 1,
+            "exposure": 0.2235294117647059,
+            "shoreDistance": 5.65625,
+            "transmission": 0.7318478942781032
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 131.03333333333285,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 4
+      },
+      "residentPages": 49,
+      "wetPages": 48
+    },
+    {
+      "path": "screenshots/05-rocky-shore/ultra-impact.png",
+      "sha256": "9abe5fd29aa62d7dcd53c777a22b3421cca7fefb6ab4a1d20d76b933d05eb019",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "05-rocky-shore",
+      "pose": {
+        "mode": "fly",
+        "fov": 55,
+        "x": -5397,
+        "z": 13552,
+        "heightAboveGround": 8.5,
+        "pitch": -0.31,
+        "yaw": 3.076
+      },
+      "preparation": {
+        "cameraMs": 5663.600000008941,
+        "groundMs": 23817.90000000596
+      },
+      "canonicalCamera": {
+        "x": -5397,
+        "z": 13552,
+        "y": 3.7137541364922875
+      },
+      "cameraQuaternion": [
+        -0.005062192591499833,
+        0.9874802262667968,
+        0.15429708118856256,
+        0.032397340553392794
+      ],
+      "renderOrigin": {
+        "x": -5376,
+        "z": 13440
+      },
+      "fov": 55,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 130.53333333333285,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 3197,
+        "dispatches": 7918,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 3,
+        "events": 19,
+        "droplets": 20,
+        "closestSites": [
+          {
+            "x": -5398.241871869657,
+            "z": 13570.976783525432,
+            "radius": 1.0314915646893492,
+            "exposure": 0.18575643531101527
+          },
+          {
+            "x": -5387.842417946085,
+            "z": 13515.426831702003,
+            "radius": 0.33021402792927057,
+            "exposure": 0.14139900400487437
+          },
+          {
+            "x": -5408.088389126351,
+            "z": 13497.71666867542,
+            "radius": 0.2613609810316575,
+            "exposure": 0.06600532190651641
+          }
+        ]
+      },
+      "samples": [
+        {
+          "x": -5393,
+          "z": 13569,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4808798365938927,
+            "bedHeight": -1.976231694478211,
+            "depth": 0.49535185788431835,
+            "shoreDistance": 2.8284270763397217,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.2173024213316396,
+          "transmission": 0.7243414044387987,
+          "appearance": {
+            "cell": {
+              "x": -2696,
+              "z": -6784
+            },
+            "kind": 1,
+            "exposure": 0.2235294117647059,
+            "shoreDistance": 5.65625,
+            "transmission": 0.7318478942781032
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 130.53333333333285,
+        "impact": true,
+        "impactEvents": 0,
+        "droplets": 20,
+        "impactTime": 130.43333333333285
+      },
+      "residentPages": 49,
+      "wetPages": 48
+    },
+    {
+      "path": "screenshots/06-storm/exposed-high.png",
+      "sha256": "f4690ba95e9da5cc51547635bbf1699a5f55b4a197de0501d33a1ee866ee6927",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "storm-exposed",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5336.199999988079,
+        "groundMs": 8488.09999999404
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 10378,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 31,
+        "droplets": 5
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.1362344435365141,
+            "bedHeight": -5.136951992267953,
+            "depth": 4.000717548731439,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 8,
+        "droplets": 5
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/06-storm/exposed-ultra.png",
+      "sha256": "053d73ad2c6b787ff1bb37da4174693419f030feef54f4f20c135efd6a195e0b",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "storm-exposed",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "preparation": {
+        "cameraMs": 5251.399999991059,
+        "groundMs": 8756
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 9612,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 32,
+        "droplets": 5
+      },
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.1362344435365141,
+            "bedHeight": -5.136951992267953,
+            "depth": 4.000717548731439,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 8,
+        "droplets": 5
+      },
+      "residentPages": 49,
+      "wetPages": 47
+    },
+    {
+      "path": "screenshots/06-storm/sheltered-high.png",
+      "sha256": "2e15407f12bae5889149774dbb3202728bfd43390d98e61d06a23d37f9a6dbad",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "storm-sheltered",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5374.4000000059605,
+        "groundMs": 9474.90000000596
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 12102,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 34,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4827160161529918,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4840914536956156,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/06-storm/sheltered-ultra.png",
+      "sha256": "ada1ba9c73dadd9fa9b6642be05af3a3c205e869c7970c14b28b85ef251fb217",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "storm-sheltered",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5658.29999999702,
+        "groundMs": 7923.20000000298
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "storm",
+        "intensity": 1,
+        "seaStorm": 1
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 11286,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 34,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.4827160161529918,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4840914536956156,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/07-comparisons/cove-diffraction-off.png",
+      "sha256": "945fd5ddb6431317336a7c28efc77eee36c42fbac4ab3c5a21db7c87f0cb9ea2",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5221.4000000059605,
+        "groundMs": 7331.79999999702
+      },
+      "canonicalCamera": {
+        "x": 2272.087181522341,
+        "z": -4639.884045470981,
+        "y": 23.26904643937465
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": false,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 681,
+        "dispatches": 5084,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 12,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.375573793052364,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.5912336767962434,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.409375,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.40784313725490196,
+            "shoreDistance": 12,
+            "transmission": 0.9962580452028139
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.30196078431372547,
+            "shoreDistance": 0,
+            "transmission": 1
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/07-comparisons/cove-diffraction-on.png",
+      "sha256": "432fd13035c464150838427a96eca9ab0217dfe794e0af13930565e91c302577",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "preparation": {
+        "cameraMs": 5280.79999999702,
+        "groundMs": 423.90000000596046
+      },
+      "canonicalCamera": {
+        "x": 2270,
+        "z": -4640,
+        "y": 20.07224643937437
+      },
+      "cameraQuaternion": [
+        -0.006595223743645814,
+        0.9709640235191916,
+        0.23761111428998677,
+        0.026950443800892128
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -4736
+      },
+      "fov": 70,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 6924,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2268,
+          "z": -4604,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.493352313904997,
+            "bedHeight": -2.9668074698486073,
+            "depth": 1.4734551559436104,
+            "shoreDistance": 12,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.09271304321320994,
+          "transmission": 0.22647460937578,
+          "appearance": {
+            "cell": {
+              "x": 1134,
+              "z": 2302
+            },
+            "kind": 1,
+            "exposure": 0.09411764705882353,
+            "shoreDistance": 12,
+            "transmission": 0.2299057027391109
+          }
+        },
+        {
+          "x": 2285,
+          "z": -4590,
+          "water": {
+            "kind": 0,
+            "bodyId": 0,
+            "coverage": 0,
+            "surfaceHeight": -1.4100865544046652,
+            "bedHeight": -1.4100865544046652,
+            "depth": 0,
+            "shoreDistance": 0,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": null,
+          "transmission": null,
+          "appearance": {
+            "cell": {
+              "x": 1143,
+              "z": 2295
+            },
+            "kind": 1,
+            "exposure": 0.07450980392156863,
+            "shoreDistance": 0,
+            "transmission": 0.24836601307189543
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 0,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 35
+    },
+    {
+      "path": "screenshots/07-comparisons/curved-optical-refraction-off.png",
+      "sha256": "73b3dcc5f74e7340d9793cd2b2fdb740bd6ff3aa7ea3f7cf796daedf39d0f78e",
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5695.5999999940395,
+        "groundMs": 18817.20000000298
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": false,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 966,
+        "dispatches": 2738,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": false,
+        "impactEvents": 1,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    },
+    {
+      "path": "screenshots/07-comparisons/curved-wave-refraction-off.png",
+      "sha256": "4f8e44896e230769a4883168e650d8c56fcc2de57ae33cd83ff074c28d71aa12",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5686.70000000298,
+        "groundMs": 20889
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": false,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 966,
+        "dispatches": 2804,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": true,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    },
+    {
+      "path": "screenshots/07-comparisons/curved-wave-refraction-on.png",
+      "sha256": "02bee33cabe4db6753b064b564dc82e642f24eb865159387968a7109b45137b8",
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "captureMethod": "Playwright screenshot of the active game canvas",
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "preparation": {
+        "cameraMs": 5338.399999991059,
+        "groundMs": 407.40000000596046
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "seaLevel": -1.5,
+        "heightScale": 24
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 123.4,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "loading": 0,
+          "pendingCommits": 0
+        },
+        "scenery": {
+          "ready": true
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 966,
+        "dispatches": 3262,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0
+      },
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.8659379721736902,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.769134663346012,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ],
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "moment": {
+        "time": 123.4,
+        "impact": true,
+        "droplets": 0
+      },
+      "residentPages": 49,
+      "wetPages": 40
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "gpuAndNetworkAlerts": [],
+  "sourceSnapshots": [
+    {
+      "sourceRevision": "f96a386775e0e237ddcddc0073a76af1d19b01d4",
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "sourceOverrides": [
+        {
+          "file": "src/editor/InfiniteTerrainView.js",
+          "sha256": "55df9c1cf2ce8d40adffb8a77eb66fe8a59d293eb7b38bd17c3effa6152bc459"
+        },
+        {
+          "file": "src/editor/stylized/TerrainOceanMask.js",
+          "sha256": "31406350009c237db78c19b4e0c596ce6e4c87fedac297ed30679ac737883362"
+        },
+        {
+          "file": "src/editor/water/CoastalSwashField.js",
+          "sha256": "bb6979cf6604f4c3f7d01382588ec3072ba1b0f23a097f4e05dc5fddda809a62"
+        },
+        {
+          "file": "src/editor/water/CoastalSwashInputs.js",
+          "sha256": "5073bf3808eddcc0289874a264e45109f9d449c67c8d2f5ee69f18c0d2230fc5"
+        },
+        {
+          "file": "src/editor/water/SeaDiffraction.js",
+          "sha256": "131f68d1b85e38ce18677bf67e8a59079d68b0fd033a6544fbcf078c2367a2a8"
+        },
+        {
+          "file": "src/editor/water/TerrainWaterQueries.js",
+          "sha256": "4a1994f98c66efc8ad6f2c2b1db266f6b2ae38aac631ab37926c4ddd38f3e4d1"
+        },
+        {
+          "file": "src/editor/world/WorkerBackedWorldStore.js",
+          "sha256": "ff1fe3342a87bfc9ab4757b0e4794ab3bdf3c146867e4fd72ea052900d1c1a34"
+        },
+        {
+          "file": "src/main.js",
+          "sha256": "914fe75b07a5930d1d687a71a69530a9ce6dfc209b7b19c13606efa4a4ec7025"
+        },
+        {
+          "file": "src/render/deviceLimits.js",
+          "sha256": "85e8ce499937eb9348e48742b328c3bed956ec0cdf8e239384b8b4ceba7223f9"
+        }
+      ]
+    },
+    {
+      "sourceRevision": "7ce8f9b44ceb3109e015e1bdef083a2983294a47",
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "sourceOverrides": [
+        {
+          "file": "src/editor/InfiniteTerrainView.js",
+          "sha256": "55df9c1cf2ce8d40adffb8a77eb66fe8a59d293eb7b38bd17c3effa6152bc459"
+        },
+        {
+          "file": "src/editor/stylized/TerrainOceanMask.js",
+          "sha256": "31406350009c237db78c19b4e0c596ce6e4c87fedac297ed30679ac737883362"
+        },
+        {
+          "file": "src/editor/stylized/CoastalImpactSpray.js",
+          "sha256": "ccf557f65c7ecd4ce6ede2fe864dcebc88eea5439db0336cbd0de418a59ff7f2"
+        },
+        {
+          "file": "src/editor/water/CoastalSwashField.js",
+          "sha256": "bb6979cf6604f4c3f7d01382588ec3072ba1b0f23a097f4e05dc5fddda809a62"
+        },
+        {
+          "file": "src/editor/water/CoastalSwashInputs.js",
+          "sha256": "5073bf3808eddcc0289874a264e45109f9d449c67c8d2f5ee69f18c0d2230fc5"
+        },
+        {
+          "file": "src/editor/water/SeaDiffraction.js",
+          "sha256": "131f68d1b85e38ce18677bf67e8a59079d68b0fd033a6544fbcf078c2367a2a8"
+        },
+        {
+          "file": "src/editor/water/TerrainWaterQueries.js",
+          "sha256": "4a1994f98c66efc8ad6f2c2b1db266f6b2ae38aac631ab37926c4ddd38f3e4d1"
+        },
+        {
+          "file": "src/editor/world/WorkerBackedWorldStore.js",
+          "sha256": "ff1fe3342a87bfc9ab4757b0e4794ab3bdf3c146867e4fd72ea052900d1c1a34"
+        },
+        {
+          "file": "src/main.js",
+          "sha256": "914fe75b07a5930d1d687a71a69530a9ce6dfc209b7b19c13606efa4a4ec7025"
+        },
+        {
+          "file": "src/render/deviceLimits.js",
+          "sha256": "85e8ce499937eb9348e48742b328c3bed956ec0cdf8e239384b8b4ceba7223f9"
+        }
+      ]
+    }
+  ],
+  "runtimeFixCommit": "5dd5cbf53821c113708a97f77fa5e97a95f1a385",
+  "world": {
+    "seed": 918273,
+    "version": 1,
+    "heightScale": 24,
+    "seaLevel": -1.5,
+    "waterDomainVersion": 4,
+    "waterDomain": {
+      "version": 4,
+      "cellSizeMeters": 2,
+      "shoreDistanceMeters": 48,
+      "ocean": {
+        "coastalShelfMeters": 20,
+        "shelfDepth": 4,
+        "maximumDepth": 24,
+        "maximumBedSlope": 0.75,
+        "beachHeight": 1.8,
+        "beachWidthMeters": 30
+      },
+      "river": {
+        "minimumDepth": 0.8,
+        "maximumDepth": 8,
+        "widthDepthRatio": 0.18,
+        "bankExponent": 1.8,
+        "minimumGradient": 0.0002,
+        "profileStepMeters": 100,
+        "valleySlope": 0.7,
+        "valleyReachMeters": 1500,
+        "leveeHeight": 1,
+        "leveeWidthMeters": 12
+      },
+      "lake": {
+        "minimumDepth": 1.5,
+        "maximumDepth": 18,
+        "shoreDepthMeters": 300,
+        "bankHeight": 1.5,
+        "bankWidthMeters": 60,
+        "shoreSlope": 0.3,
+        "shoreReachMeters": 3000,
+        "shorelineNoiseMeters": 400,
+        "shorelineNoiseScaleMeters": 2500
+      },
+      "falls": {
+        "enabled": true,
+        "minimumHeight": 4,
+        "maximumHeight": 30,
+        "faceSlope": 1.2,
+        "plungeDecayMeters": 40
+      },
+      "bog": {
+        "enabled": true,
+        "tileIds": [
+          12
+        ],
+        "latticeMeters": 32,
+        "tableDrop": 0.1,
+        "poolScaleMeters": 38,
+        "threshold": 0.14,
+        "shoreWidth": 0.16,
+        "islandHeight": 0.35,
+        "maximumDepth": 0.9,
+        "hummockHeight": 0.12
+      }
+    }
+  }
+}

@@ -48,6 +48,7 @@ npm run build
 npm run qa:water:acceptance
 ```
 
-Visual captures and GPU frame timings still require a WebGPU-equipped browser
-and should not be inferred from CPU reference tests. A future diffraction phase
-can add sheltering and wave-energy gradients in coves.
+The [diffraction implementation](coastal-wave-diffraction-2026-11-20.md) adds
+headland shelter, wave-energy gradients and an additional crest delay. The
+[coastal review](qa/coastal-review-2026-11-20/README.md) records the browser
+captures and GPU timing evidence.

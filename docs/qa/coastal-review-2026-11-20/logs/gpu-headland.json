@@ -1,0 +1,63 @@
+{
+  "before": {
+    "snapshot": "6ddc64321ffbce955ca6a56832761146429cca19f862a71035a9bc789a4b2b3e",
+    "validation": [
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_vetka_kusta_1635): [EntryPoint \"main\"] infringes limits:\n - Vertex output variable \"<retval>.nodeVarying18\" has a location (16) that is too large. It should be less than (16).\n - Total vertex output variables count (17 = 17 (user-defined)) exceeds the maximum (16).\n\n - While validating vertex stage ([ShaderModule \"vertex_vetka_kusta\"], entryPoint: \"main\").\n - While validating vertex state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_vetka_kusta_1635\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Leaves_1587): [EntryPoint \"main\"] infringes limits:\n - Vertex output variable \"<retval>.nodeVarying18\" has a location (16) that is too large. It should be less than (16).\n - Total vertex output variables count (17 = 17 (user-defined)) exceeds the maximum (16).\n\n - While validating vertex stage ([ShaderModule \"vertex_vetka_kusta\"], entryPoint: \"main\").\n - While validating vertex state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Leaves_1587\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Scan bush-meadow-scan-01_1625): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_Scan bush-meadow-scan-01\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Scan bush-meadow-scan-01_1625\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Scan forest-nettle-01_1723): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_Scan forest-nettle-01\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Scan forest-nettle-01_1723\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_SteppeFeathergrass_1774): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_SteppeFeathergrass\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_SteppeFeathergrass_1774\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_CoastalDuneOats_1767): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_CoastalDuneOats\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_CoastalDuneOats_1767\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Scan savanna-empodium-01_1762): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_Scan bush-meadow-scan-01\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Scan savanna-empodium-01_1762\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Scan meadow-celandine-01_1744): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_Scan forest-nettle-01\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Scan meadow-celandine-01_1744\"\"]).\n"
+      },
+      {
+        "kind": "console",
+        "message": "THREE.WebGPURenderer: Render pipeline creation failed (renderPipeline_Scan steppe-ursinia-01_1759): [EntryPoint \"main\"] infringes limits:\n - Total fragment input variables count (17 = 16 (user-defined) + 1 (front_facing) exceeds the maximum (16).\n\n - While validating fragment stage ([ShaderModule \"fragment_Scan steppe-ursinia-01\"], entryPoint: \"main\").\n - While validating fragment state.\n - While calling [Device].CreateRenderPipeline([RenderPipelineDescriptor \"\"renderPipeline_Scan steppe-ursinia-01_1759\"\"]).\n"
+      }
+    ],
+    "uncaptured": "THREE.WebGPURenderer: Uncaptured WebGPU GPUValidationError: [Invalid RenderPipeline \"renderPipeline_vetka_kusta_1635\"] is invalid due to a previous error.\n - While encoding [RenderPassEncoder (unlabeled)].SetPipeline([Invalid RenderPipeline \"renderPipeline_vetka_kusta_1635\"]).\n - While finishing [CommandEncoder \"renderContext_94\"].\n"
+  },
+  "after": {
+    "snapshot": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+    "browser": "151.0.7922.34",
+    "backend": "webgpu",
+    "adapter": {
+      "backend": "webgpu",
+      "device": true,
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "adapterInterstageVariables": 28,
+      "deviceInterstageVariables": 24,
+      "fallback": false
+    },
+    "ready": true,
+    "assetsReady": true,
+    "path": "screenshots/03-headland/high-overhead.png",
+    "sha256": "2d1d9202d7b04b5f9c4d69b4c92e998c9ffa4a2c50fdc90563e87db0382e954e"
+  }
+}

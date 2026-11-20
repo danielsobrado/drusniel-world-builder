@@ -78,5 +78,5 @@ Acceptance:
 5. Disabling diffraction removes all added terrain texture loads.
 6. GPU sampler count remains unchanged.
 
-TODO: Run real WebGPU screenshots and profile frame time on exposed beaches
-and sheltered coves across low, medium, high and ultra quality tiers.
+See the [coastal review](qa/coastal-review-2026-11-20/README.md) for the hardware
+WebGPU screenshots and frame timing results.

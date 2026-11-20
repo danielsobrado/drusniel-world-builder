@@ -1,0 +1,6900 @@
+{
+  "baselineRevision": "72c9d90cb2bc3d508631a61f7b9ca83b4a056d40",
+  "baseline": [
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 49592,
+          "finalForegroundPid": 49592,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 49592,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1706,
+          "p50Ms": 4.399999999994179,
+          "p95Ms": 7.2000000000116415
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1707,
+          "p50Ms": 3.899999998509884,
+          "p95Ms": 6.600000001490116
+        },
+        "renderCpu": {
+          "samples": 1707,
+          "p50Ms": 3.399999998509884,
+          "p95Ms": 5.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1707,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000149011612
+        },
+        "rockCpu": {
+          "samples": 1707,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 4.355831741935485,
+          "p50Ms": 4.191232000000001,
+          "p95Ms": 5.575680000000001,
+          "maxMs": 5.695488000000001
+        }
+      },
+      "pages": 49,
+      "wetPages": 0,
+      "waterGenerationMs": [
+        57.20000000298023,
+        95.29999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3733.8999999836087,
+        "waterGeneration": 71.69999999552965,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 86,
+        "waterReflectionCpuMs": 363.0999999642372,
+        "waterReflectionBudgetEstimateMs": 3.9375000004656613,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 1840,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 49592,
+          "finalForegroundPid": 49592,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 49592,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1699,
+          "p50Ms": 4.5,
+          "p95Ms": 7.199999999982538
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1700,
+          "p50Ms": 4,
+          "p95Ms": 6.5
+        },
+        "renderCpu": {
+          "samples": 1700,
+          "p50Ms": 3.399999998509884,
+          "p95Ms": 5.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1700,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000149011612
+        },
+        "rockCpu": {
+          "samples": 1700,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.043422896551725,
+          "p50Ms": 4.100096000000001,
+          "p95Ms": 4.679680000000001,
+          "maxMs": 4.883456000000001
+        }
+      },
+      "pages": 49,
+      "wetPages": 0,
+      "waterGenerationMs": [
+        57.70000000298023,
+        90.79999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3865.8999999836087,
+        "waterGeneration": 76.69999999552965,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 84,
+        "waterReflectionCpuMs": 372.6999999806285,
+        "waterReflectionBudgetEstimateMs": 7.5,
+        "coastalRockImpacts": 2,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 1840,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 2,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    }
+  ],
+  "sprayBefore": [
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1732,
+          "p50Ms": 4.399999999994179,
+          "p95Ms": 6.899999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1733,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1733,
+          "p50Ms": 3.3999999910593033,
+          "p95Ms": 5.4000000059604645
+        },
+        "swashCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 2506752,
+        "swashDispatches": 480,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 62,
+          "avgMs": 4.274308129032258,
+          "p50Ms": 4.203520000000001,
+          "p95Ms": 4.751360000000001,
+          "maxMs": 6.391808000000001
+        }
+      },
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        139.59999999403954,
+        258.59999999403954
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 9333.200000032783,
+        "waterGeneration": 144,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 514.1999999135733,
+        "waterReflectionBudgetEstimateMs": 5.7187499944120646,
+        "coastalRockImpacts": 10,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2718,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 10,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1660,
+          "p50Ms": 4.600000000005821,
+          "p95Ms": 6.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1661,
+          "p50Ms": 4.200000002980232,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1661,
+          "p50Ms": 3.6000000089406967,
+          "p95Ms": 5.200000002980232
+        },
+        "swashCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 49152,
+        "swashDispatches": 484,
+        "rockImpacts": 3,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 101,
+          "avgMs": 4.29121900990099,
+          "p50Ms": 4.203520000000001,
+          "p95Ms": 4.785152000000002,
+          "maxMs": 6.125568
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        157.19999998807907,
+        382.79999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 11535.800000101328,
+        "waterGeneration": 143.3999999910593,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 518.1999999582767,
+        "waterReflectionBudgetEstimateMs": 7.375000007450581,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 12
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2768,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1697,
+          "p50Ms": 4.5,
+          "p95Ms": 7
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1698,
+          "p50Ms": 4,
+          "p95Ms": 6.299999997019768
+        },
+        "renderCpu": {
+          "samples": 1698,
+          "p50Ms": 3.4000000059604645,
+          "p95Ms": 5.5
+        },
+        "swashCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 24576,
+        "swashDispatches": 480,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.267961379310347,
+          "p50Ms": 4.0591360000000005,
+          "p95Ms": 5.364736000000002,
+          "maxMs": 5.905408000000002
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        75.59999999403954,
+        134.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4764.400000065565,
+        "waterGeneration": 111.80000001192093,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 2,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 65536,
+        "waterProjectedCausticFrames": 983,
+        "waterProjectedCausticCpuMs": 0.19999998807907104,
+        "waterProjectedCausticSceneCpuMs": 4.600000008940697,
+        "waterProjectedCausticPipelineCpuMs": 4.799999997019768,
+        "coastalRockImpacts": 4,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterProbeFaces": 126,
+        "waterReflectionCpuMs": 511.7999999076128,
+        "waterReflectionBudgetEstimateMs": 5.9375,
+        "waterPlanarCaptures": 20
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2438,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "low",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1973,
+          "p50Ms": 3.8999999999941792,
+          "p95Ms": 5.600000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1974,
+          "p50Ms": 3.4000000059604645,
+          "p95Ms": 4.9000000059604645
+        },
+        "renderCpu": {
+          "samples": 1974,
+          "p50Ms": 2.9000000059604645,
+          "p95Ms": 4.300000011920929
+        },
+        "swashCpu": {
+          "samples": 1974,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1974,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 38,
+          "avgMs": 3.8035941052631577,
+          "p50Ms": 3.782655999999999,
+          "p95Ms": 4.036608000000002,
+          "maxMs": 5.1752959999999995
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        54.599999994039536,
+        93.8999999910593
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3643.299999937415,
+        "waterGeneration": 64,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 94,
+        "waterReflectionCpuMs": 3071.400000050664,
+        "waterReflectionBudgetEstimateMs": 5.437499996041879,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "low",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1873,
+          "p50Ms": 4.099999999976717,
+          "p95Ms": 6.199999999982538
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1874,
+          "p50Ms": 3.6000000089406967,
+          "p95Ms": 5.5
+        },
+        "renderCpu": {
+          "samples": 1874,
+          "p50Ms": 3.199999988079071,
+          "p95Ms": 4.799999997019768
+        },
+        "swashCpu": {
+          "samples": 1874,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1874,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 69,
+          "avgMs": 4.001792,
+          "p50Ms": 3.9157759999999993,
+          "p95Ms": 4.537344000000001,
+          "maxMs": 5.788672000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        67.79999999701977,
+        108.19999998807907
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4448.4000000059605,
+        "waterGeneration": 73.19999998807907,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 92,
+        "waterReflectionCpuMs": 379.7000000178814,
+        "waterReflectionBudgetEstimateMs": 3.3341426817433018,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1843,
+          "p50Ms": 4.100000000005821,
+          "p95Ms": 6.399999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1844,
+          "p50Ms": 3.699999988079071,
+          "p95Ms": 5.800000011920929
+        },
+        "renderCpu": {
+          "samples": 1844,
+          "p50Ms": 3.1000000089406967,
+          "p95Ms": 5
+        },
+        "swashCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 56,
+          "avgMs": 4.144457142857142,
+          "p50Ms": 4.047872000000002,
+          "p95Ms": 4.512768000000003,
+          "maxMs": 6.056960000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        52.5,
+        92.5
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3646.4999998807907,
+        "waterGeneration": 50.79999999701977,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 88,
+        "waterReflectionCpuMs": 1684.6000000685453,
+        "waterReflectionBudgetEstimateMs": 3.0000000074505806,
+        "coastalRockImpacts": 7,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 7,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1818,
+          "p50Ms": 4.100000000005821,
+          "p95Ms": 6.899999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1819,
+          "p50Ms": 3.5999999940395355,
+          "p95Ms": 6.299999997019768
+        },
+        "renderCpu": {
+          "samples": 1819,
+          "p50Ms": 3.0999999940395355,
+          "p95Ms": 5.399999991059303
+        },
+        "swashCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 34,
+          "avgMs": 4.142712470588235,
+          "p50Ms": 4.036608000000001,
+          "p95Ms": 5.280768,
+          "maxMs": 5.827584000000002
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        63.099999994039536,
+        99.80000001192093
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4192,
+        "waterGeneration": 75.19999998807907,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 93,
+        "waterReflectionCpuMs": 1057.999999910593,
+        "waterReflectionBudgetEstimateMs": 5.999999991618097,
+        "waterPlanarCaptures": 14,
+        "coastalRockImpacts": 2,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 2,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1746,
+          "p50Ms": 4.30000000000291,
+          "p95Ms": 7.100000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1747,
+          "p50Ms": 3.7999999970197678,
+          "p95Ms": 6.5
+        },
+        "renderCpu": {
+          "samples": 1747,
+          "p50Ms": 3.2999999970197678,
+          "p95Ms": 5.5
+        },
+        "swashCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 486,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 32,
+          "avgMs": 4.152352000000001,
+          "p50Ms": 4.037632000000001,
+          "p95Ms": 5.4016,
+          "maxMs": 5.583872
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        66,
+        111.6000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4321.000000119209,
+        "waterGeneration": 41.5,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 2,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 84,
+        "waterReflectionCpuMs": 360.39999993145466,
+        "waterReflectionBudgetEstimateMs": 5.625,
+        "coastalRockImpacts": 7,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 1844,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 7,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1586,
+          "p50Ms": 4.900000000023283,
+          "p95Ms": 6.800000000017462
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1587,
+          "p50Ms": 4.5,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1587,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 5.200000002980232
+        },
+        "swashCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 15040512,
+        "swashDispatches": 482,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 114,
+          "avgMs": 4.452953824561406,
+          "p50Ms": 4.346880000000002,
+          "p95Ms": 4.883456000000002,
+          "maxMs": 6.859776000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        150.3999999910593,
+        356.90000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 9170.5,
+        "waterGeneration": 105.3999999910593,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 559.2000000327826,
+        "waterReflectionBudgetEstimateMs": 2.770874018606264,
+        "coastalRockImpacts": 4,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 2848,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1488,
+          "p50Ms": 5.100000000005821,
+          "p95Ms": 9.700000000011642
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1489,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 9.199999988079071
+        },
+        "renderCpu": {
+          "samples": 1489,
+          "p50Ms": 4,
+          "p95Ms": 7.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 1
+        },
+        "rockRefreshCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 490,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 5.2001897931034495,
+          "p50Ms": 4.901888000000001,
+          "p95Ms": 6.9427200000000004,
+          "maxMs": 7.696384000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        47.3999999910593,
+        99.8999999910593
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 11555.40000000596,
+        "waterGeneration": 48.20000000298023,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 162,
+        "waterReflectionCpuMs": 807.5999999344349,
+        "waterReflectionBudgetEstimateMs": 6.562500004656613,
+        "coastalRockImpacts": 12,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 4220,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 12,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 24,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 5499
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 8014
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1456,
+          "p50Ms": 5.2999999999883585,
+          "p95Ms": 8
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1457,
+          "p50Ms": 4.700000002980232,
+          "p95Ms": 7.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1457,
+          "p50Ms": 4,
+          "p95Ms": 6.299999997019768
+        },
+        "swashCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 482,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 34,
+          "avgMs": 5.195685647058825,
+          "p50Ms": 5.153792000000001,
+          "p95Ms": 5.688320000000001,
+          "maxMs": 6.9109760000000025
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        67.5,
+        107.69999998807907
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7652.000000059605,
+        "waterGeneration": 72.90000000596046,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 3,
+        "coastalSwashActiveTexels": 65536,
+        "waterProjectedCausticFrames": 983,
+        "waterProjectedCausticCpuMs": 0.19999998807907104,
+        "waterProjectedCausticSceneCpuMs": 4.600000008940697,
+        "waterProjectedCausticPipelineCpuMs": 4.799999997019768,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterProbeFaces": 216,
+        "waterReflectionCpuMs": 863.9999998211861,
+        "waterReflectionBudgetEstimateMs": 7.531249993480742,
+        "waterPlanarCaptures": 35
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 4944,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "low",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1731,
+          "p50Ms": 4.5,
+          "p95Ms": 5.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1732,
+          "p50Ms": 4.0999999940395355,
+          "p95Ms": 5.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1732,
+          "p50Ms": 3.5999999940395355,
+          "p95Ms": 4.9000000059604645
+        },
+        "swashCpu": {
+          "samples": 1732,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1732,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 4.306382451612904,
+          "p50Ms": 4.2065920000000006,
+          "p95Ms": 4.641792000000001,
+          "maxMs": 4.876288
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        55.599999994039536,
+        88.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6041.599999949336,
+        "waterGeneration": 55.400000005960464,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 174,
+        "waterReflectionCpuMs": 3380.600000053644,
+        "waterReflectionBudgetEstimateMs": 5.0156249981955625,
+        "waterPlanarCaptures": 27
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "low",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1727,
+          "p50Ms": 4.5,
+          "p95Ms": 5.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1728,
+          "p50Ms": 4.0999999940395355,
+          "p95Ms": 5.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1728,
+          "p50Ms": 3.699999988079071,
+          "p95Ms": 5
+        },
+        "swashCpu": {
+          "samples": 1728,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1728,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 4.284019612903227,
+          "p50Ms": 4.220928,
+          "p95Ms": 4.547584000000002,
+          "maxMs": 4.548608000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        60.1000000089407,
+        94
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7023.5999999940395,
+        "waterGeneration": 61.79999999701977,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 189,
+        "waterReflectionCpuMs": 732.9000001102686,
+        "waterReflectionBudgetEstimateMs": 6.6562499944120646,
+        "waterPlanarCaptures": 29
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50072,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 50992,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 2531
+          },
+          "lastLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 5967
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1560,
+          "p50Ms": 5,
+          "p95Ms": 7
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1561,
+          "p50Ms": 4.5,
+          "p95Ms": 6.300000011920929
+        },
+        "renderCpu": {
+          "samples": 1561,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 5.5999999940395355
+        },
+        "swashCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 1
+        },
+        "rockRefreshCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 30,
+          "avgMs": 4.871802666666667,
+          "p50Ms": 4.699136,
+          "p95Ms": 5.530624000000001,
+          "maxMs": 6.32832
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        57.29999999701977,
+        87.80000001192093
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6028.39999987185,
+        "waterGeneration": 6,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 166,
+        "waterReflectionCpuMs": 1949.5000000298023,
+        "waterReflectionBudgetEstimateMs": 4.167968749825377,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 27
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1585,
+          "p50Ms": 4.900000000023283,
+          "p95Ms": 6.399999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1586,
+          "p50Ms": 4.5,
+          "p95Ms": 5.799999997019768
+        },
+        "renderCpu": {
+          "samples": 1586,
+          "p50Ms": 4,
+          "p95Ms": 5.299999997019768
+        },
+        "swashCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.708140137931035,
+          "p50Ms": 4.708352,
+          "p95Ms": 4.758528,
+          "maxMs": 4.7882240000000005
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        52.3999999910593,
+        84.40000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 8440.10000000894,
+        "waterGeneration": 61.5,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 13249600,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 44,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 238,
+        "waterReflectionCpuMs": 1590.8999998122454,
+        "waterReflectionBudgetEstimateMs": 5.625000009313226,
+        "waterPlanarCaptures": 37,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1496,
+          "p50Ms": 5,
+          "p95Ms": 10
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1497,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 9.5
+        },
+        "renderCpu": {
+          "samples": 1497,
+          "p50Ms": 4,
+          "p95Ms": 8
+        },
+        "swashCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 1.0999999940395355
+        },
+        "rockRefreshCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 484,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.9868446896551735,
+          "p50Ms": 4.873216000000002,
+          "p95Ms": 5.459968000000001,
+          "maxMs": 6.980608
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        53.19999998807907,
+        87.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6609.80000013113,
+        "waterGeneration": 53.19999998807907,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 166,
+        "waterReflectionCpuMs": 638.0999998897314,
+        "waterReflectionBudgetEstimateMs": 5,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 3330,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 5984,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 3524
+          },
+          "lastLoss": {
+            "foregroundPid": 5984,
+            "elapsedMs": 6930
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1196,
+          "p50Ms": 5.7000000000116415,
+          "p95Ms": 13
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1197,
+          "p50Ms": 5.200000002980232,
+          "p95Ms": 12.800000011920929
+        },
+        "renderCpu": {
+          "samples": 1197,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 11.099999994039536
+        },
+        "swashCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0.800000011920929
+        },
+        "rockRefreshCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 480,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 40,
+          "avgMs": 5.4744576,
+          "p50Ms": 5.474304000000002,
+          "p95Ms": 7.631872,
+          "maxMs": 7.644160000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        68.1000000089407,
+        107
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 10345.799999982119,
+        "waterGeneration": 73.40000000596046,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 174,
+        "waterReflectionCpuMs": 911.4000000804663,
+        "waterReflectionBudgetEstimateMs": 6.0617675758112455,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 28
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 5138,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    }
+  ],
+  "candidateTrials": [
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 5984,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 12,
+          "firstLoss": {
+            "foregroundPid": 9228,
+            "elapsedMs": 6797
+          },
+          "lastLoss": {
+            "foregroundPid": 5984,
+            "elapsedMs": 7999
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1341,
+          "p50Ms": 5.600000000005821,
+          "p95Ms": 9.5
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1342,
+          "p50Ms": 5.100000008940697,
+          "p95Ms": 8.799999997019768
+        },
+        "renderCpu": {
+          "samples": 1342,
+          "p50Ms": 4.5,
+          "p95Ms": 7.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1342,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1342,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1342,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1342,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 482,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 32,
+          "avgMs": 5.390336000000002,
+          "p50Ms": 5.244928000000001,
+          "p95Ms": 7.038976000000001,
+          "maxMs": 8.271872000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        56.6000000089407,
+        117.6000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7213.29999999702,
+        "waterGeneration": 49.20000000298023,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 10816000,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 4,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 280,
+        "waterReflectionCpuMs": 926.9000000655651,
+        "waterReflectionBudgetEstimateMs": 5.479003907821607,
+        "coastalRockImpacts": 5,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 42,
+        "waterProjectedCausticFrames": 3540,
+        "waterProjectedCausticCpuMs": 0,
+        "waterProjectedCausticSceneCpuMs": 1.8999999910593033,
+        "waterProjectedCausticPipelineCpuMs": 1.8999999910593033
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 4414,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 5,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1732,
+          "p50Ms": 4.399999999994179,
+          "p95Ms": 6.899999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1733,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1733,
+          "p50Ms": 3.3999999910593033,
+          "p95Ms": 5.4000000059604645
+        },
+        "swashCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1733,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 2506752,
+        "swashDispatches": 480,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 62,
+          "avgMs": 4.274308129032258,
+          "p50Ms": 4.203520000000001,
+          "p95Ms": 4.751360000000001,
+          "maxMs": 6.391808000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        139.59999999403954,
+        258.59999999403954
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 9333.200000032783,
+        "waterGeneration": 144,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 514.1999999135733,
+        "waterReflectionBudgetEstimateMs": 5.7187499944120646,
+        "coastalRockImpacts": 10,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2718,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 10,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1488,
+          "p50Ms": 5.100000000005821,
+          "p95Ms": 9.700000000011642
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1489,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 9.199999988079071
+        },
+        "renderCpu": {
+          "samples": 1489,
+          "p50Ms": 4,
+          "p95Ms": 7.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 1
+        },
+        "rockRefreshCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1489,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 490,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 5.2001897931034495,
+          "p50Ms": 4.901888000000001,
+          "p95Ms": 6.9427200000000004,
+          "maxMs": 7.696384000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        47.3999999910593,
+        99.8999999910593
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 11555.40000000596,
+        "waterGeneration": 48.20000000298023,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 162,
+        "waterReflectionCpuMs": 807.5999999344349,
+        "waterReflectionBudgetEstimateMs": 6.562500004656613,
+        "coastalRockImpacts": 12,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 4220,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 12,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1586,
+          "p50Ms": 4.900000000023283,
+          "p95Ms": 6.800000000017462
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1587,
+          "p50Ms": 4.5,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1587,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 5.200000002980232
+        },
+        "swashCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1587,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 15040512,
+        "swashDispatches": 482,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 114,
+          "avgMs": 4.452953824561406,
+          "p50Ms": 4.346880000000002,
+          "p95Ms": 4.883456000000002,
+          "maxMs": 6.859776000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        150.3999999910593,
+        356.90000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 9170.5,
+        "waterGeneration": 105.3999999910593,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 559.2000000327826,
+        "waterReflectionBudgetEstimateMs": 2.770874018606264,
+        "coastalRockImpacts": 4,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 2848,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 76,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 4513
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7910
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1376,
+          "p50Ms": 5.600000000034925,
+          "p95Ms": 8
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1377,
+          "p50Ms": 5.0999999940395355,
+          "p95Ms": 7.299999997019768
+        },
+        "renderCpu": {
+          "samples": 1377,
+          "p50Ms": 4.4000000059604645,
+          "p95Ms": 6.5
+        },
+        "swashCpu": {
+          "samples": 1377,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1377,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1377,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1377,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 496,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 26,
+          "avgMs": 5.460676923076923,
+          "p50Ms": 5.334016000000001,
+          "p95Ms": 5.761024000000001,
+          "maxMs": 8.627200000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        65.79999999701977,
+        104.40000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 15185.19999986887,
+        "waterGeneration": 57.20000000298023,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 14128400,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 46,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0.09999999403953552,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 4,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 276,
+        "waterReflectionCpuMs": 1260.6000000983477,
+        "waterReflectionBudgetEstimateMs": 5.404296875349246,
+        "coastalRockImpacts": 8,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 44,
+        "waterProjectedCausticFrames": 2326,
+        "waterProjectedCausticCpuMs": 0,
+        "waterProjectedCausticSceneCpuMs": 2.699999988079071,
+        "waterProjectedCausticPipelineCpuMs": 2.699999988079071
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 8016,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 8,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 2,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7880
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7988
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1438,
+          "p50Ms": 5.2000000000116415,
+          "p95Ms": 8.700000000011642
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1439,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 7.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1439,
+          "p50Ms": 3.8999999910593033,
+          "p95Ms": 6
+        },
+        "swashCpu": {
+          "samples": 1439,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1439,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1439,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1439,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 13197312,
+        "swashDispatches": 482,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 69,
+          "avgMs": 4.606263652173913,
+          "p50Ms": 4.54656,
+          "p95Ms": 5.194752000000002,
+          "maxMs": 6.482944000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        72.6000000089407,
+        112.5
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4723.79999999702,
+        "waterGeneration": 14.899999991059303,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 7976800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 30,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0.09999999403953552,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 3,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 362.79999996721745,
+        "waterReflectionBudgetEstimateMs": 3.6326904238921998,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 1896,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 76,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 1751
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 5145
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1430,
+          "p50Ms": 5.2999999999883585,
+          "p95Ms": 8.89999999999418
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1431,
+          "p50Ms": 4.299999997019768,
+          "p95Ms": 7.399999991059303
+        },
+        "renderCpu": {
+          "samples": 1431,
+          "p50Ms": 3.6000000089406967,
+          "p95Ms": 6.299999997019768
+        },
+        "swashCpu": {
+          "samples": 1431,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1431,
+          "p50Ms": 0,
+          "p95Ms": 1.0999999940395355
+        },
+        "rockRefreshCpu": {
+          "samples": 1431,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1431,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 490,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 40,
+          "avgMs": 5.2707584,
+          "p50Ms": 5.075968000000001,
+          "p95Ms": 6.115328,
+          "maxMs": 7.132159999999999
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        64.29999999701977,
+        95.40000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7449.500000029802,
+        "waterGeneration": 64.59999999403954,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 11289200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 41,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 4,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 159,
+        "waterReflectionCpuMs": 610.200000077486,
+        "waterReflectionBudgetEstimateMs": 3.7749023481592303,
+        "coastalRockImpacts": 10,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 3572,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 10,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 3941
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7357
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1769,
+          "p50Ms": 4.2999999999883585,
+          "p95Ms": 6.600000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1770,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 5.9000000059604645
+        },
+        "renderCpu": {
+          "samples": 1770,
+          "p50Ms": 3.300000011920929,
+          "p95Ms": 5
+        },
+        "swashCpu": {
+          "samples": 1770,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1770,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1770,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 133,
+          "avgMs": 4.043521924812028,
+          "p50Ms": 4.003839999999999,
+          "p95Ms": 4.532224000000002,
+          "maxMs": 5.939200000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        69.6000000089407,
+        111.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4423.999999940395,
+        "waterGeneration": 41.8999999910593,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 86,
+        "waterReflectionCpuMs": 351.60000006854534,
+        "waterReflectionBudgetEstimateMs": 3.00650978194426,
+        "coastalRockImpacts": 3,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 3,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 25,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 5363
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7998
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1466,
+          "p50Ms": 5.2000000000116415,
+          "p95Ms": 7.2999999999883585
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1467,
+          "p50Ms": 4.4000000059604645,
+          "p95Ms": 6.100000008940697
+        },
+        "renderCpu": {
+          "samples": 1467,
+          "p50Ms": 3.7999999970197678,
+          "p95Ms": 5.399999991059303
+        },
+        "swashCpu": {
+          "samples": 1467,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1467,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1467,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 27,
+          "avgMs": 5.049533629629631,
+          "p50Ms": 4.996096000000001,
+          "p95Ms": 5.39136,
+          "maxMs": 5.430272000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        59,
+        112.29999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 10649.399999916553,
+        "waterGeneration": 80.20000000298023,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 14128400,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 46,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 272,
+        "waterReflectionCpuMs": 905.8000002652407,
+        "waterReflectionBudgetEstimateMs": 5.99999999627471,
+        "coastalRockImpacts": 7,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 45
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 7,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1605,
+          "p50Ms": 4.7000000000116415,
+          "p95Ms": 7.300000000017462
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1606,
+          "p50Ms": 4.300000011920929,
+          "p95Ms": 6.700000002980232
+        },
+        "renderCpu": {
+          "samples": 1606,
+          "p50Ms": 3.699999988079071,
+          "p95Ms": 5.700000002980232
+        },
+        "swashCpu": {
+          "samples": 1606,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1606,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1606,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 3,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 130,
+          "avgMs": 4.393873723076923,
+          "p50Ms": 4.265984,
+          "p95Ms": 4.847616,
+          "maxMs": 6.326272000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        67,
+        118.5
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4527.200000062585,
+        "waterGeneration": 94,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 82,
+        "waterReflectionCpuMs": 3099.999999925494,
+        "waterReflectionBudgetEstimateMs": 3.6562500009313226,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 4165
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 7560
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1397,
+          "p50Ms": 5.399999999994179,
+          "p95Ms": 9.299999999988358
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1398,
+          "p50Ms": 4.899999991059303,
+          "p95Ms": 8.699999988079071
+        },
+        "renderCpu": {
+          "samples": 1398,
+          "p50Ms": 4.199999988079071,
+          "p95Ms": 7.300000011920929
+        },
+        "swashCpu": {
+          "samples": 1398,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1398,
+          "p50Ms": 0,
+          "p95Ms": 1.1000000089406967
+        },
+        "rockRefreshCpu": {
+          "samples": 1398,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 96,
+          "avgMs": 5.273021333333334,
+          "p50Ms": 5.159936,
+          "p95Ms": 7.131136000000001,
+          "maxMs": 8.082432
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        53.70000000298023,
+        102.79999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7137.700000077486,
+        "waterGeneration": 66.79999999701977,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 160,
+        "waterReflectionCpuMs": 3363.6999999135733,
+        "waterReflectionBudgetEstimateMs": 8.81249999627471,
+        "coastalRockImpacts": 11,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 11,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "low",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1873,
+          "p50Ms": 4.099999999976717,
+          "p95Ms": 6.199999999982538
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1874,
+          "p50Ms": 3.6000000089406967,
+          "p95Ms": 5.5
+        },
+        "renderCpu": {
+          "samples": 1874,
+          "p50Ms": 3.199999988079071,
+          "p95Ms": 4.799999997019768
+        },
+        "swashCpu": {
+          "samples": 1874,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1874,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 69,
+          "avgMs": 4.001792,
+          "p50Ms": 3.9157759999999993,
+          "p95Ms": 4.537344000000001,
+          "maxMs": 5.788672000000002
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        67.79999999701977,
+        108.19999998807907
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4448.4000000059605,
+        "waterGeneration": 73.19999998807907,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 92,
+        "waterReflectionCpuMs": 379.7000000178814,
+        "waterReflectionBudgetEstimateMs": 3.3341426817433018,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "low",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1727,
+          "p50Ms": 4.5,
+          "p95Ms": 5.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1728,
+          "p50Ms": 4.0999999940395355,
+          "p95Ms": 5.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1728,
+          "p50Ms": 3.699999988079071,
+          "p95Ms": 5
+        },
+        "swashCpu": {
+          "samples": 1728,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1728,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 4.284019612903227,
+          "p50Ms": 4.220928,
+          "p95Ms": 4.547584000000002,
+          "maxMs": 4.548608000000001
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        60.1000000089407,
+        94
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7023.5999999940395,
+        "waterGeneration": 61.79999999701977,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 189,
+        "waterReflectionCpuMs": 732.9000001102686,
+        "waterReflectionBudgetEstimateMs": 6.6562499944120646,
+        "waterPlanarCaptures": 29
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "low",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1973,
+          "p50Ms": 3.8999999999941792,
+          "p95Ms": 5.600000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1974,
+          "p50Ms": 3.4000000059604645,
+          "p95Ms": 4.9000000059604645
+        },
+        "renderCpu": {
+          "samples": 1974,
+          "p50Ms": 2.9000000059604645,
+          "p95Ms": 4.300000011920929
+        },
+        "swashCpu": {
+          "samples": 1974,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1974,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 38,
+          "avgMs": 3.8035941052631577,
+          "p50Ms": 3.782655999999999,
+          "p95Ms": 4.036608000000002,
+          "maxMs": 5.1752959999999995
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        54.599999994039536,
+        93.8999999910593
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3643.299999937415,
+        "waterGeneration": 64,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 94,
+        "waterReflectionCpuMs": 3071.400000050664,
+        "waterReflectionBudgetEstimateMs": 5.437499996041879,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "low",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 15752,
+          "finalForegroundPid": 15752,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 15752,
+          "samples": 73,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1731,
+          "p50Ms": 4.5,
+          "p95Ms": 5.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1732,
+          "p50Ms": 4.0999999940395355,
+          "p95Ms": 5.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1732,
+          "p50Ms": 3.5999999940395355,
+          "p95Ms": 4.9000000059604645
+        },
+        "swashCpu": {
+          "samples": 1732,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1732,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockRefreshCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 4.306382451612904,
+          "p50Ms": 4.2065920000000006,
+          "p95Ms": 4.641792000000001,
+          "maxMs": 4.876288
+        }
+      },
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        55.599999994039536,
+        88.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6041.599999949336,
+        "waterGeneration": 55.400000005960464,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 174,
+        "waterReflectionCpuMs": 3380.600000053644,
+        "waterReflectionBudgetEstimateMs": 5.0156249981955625,
+        "waterPlanarCaptures": 27
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 0,
+        "events": 0,
+        "droplets": 0,
+        "closestSites": []
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1697,
+          "p50Ms": 4.5,
+          "p95Ms": 7
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1698,
+          "p50Ms": 4,
+          "p95Ms": 6.299999997019768
+        },
+        "renderCpu": {
+          "samples": 1698,
+          "p50Ms": 3.4000000059604645,
+          "p95Ms": 5.5
+        },
+        "swashCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1698,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 24576,
+        "swashDispatches": 480,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.267961379310347,
+          "p50Ms": 4.0591360000000005,
+          "p95Ms": 5.364736000000002,
+          "maxMs": 5.905408000000002
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        75.59999999403954,
+        134.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4764.400000065565,
+        "waterGeneration": 111.80000001192093,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 2,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 65536,
+        "waterProjectedCausticFrames": 983,
+        "waterProjectedCausticCpuMs": 0.19999998807907104,
+        "waterProjectedCausticSceneCpuMs": 4.600000008940697,
+        "waterProjectedCausticPipelineCpuMs": 4.799999997019768,
+        "coastalRockImpacts": 4,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterProbeFaces": 126,
+        "waterReflectionCpuMs": 511.7999999076128,
+        "waterReflectionBudgetEstimateMs": 5.9375,
+        "waterPlanarCaptures": 20
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2438,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 24,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 5499
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 8014
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1456,
+          "p50Ms": 5.2999999999883585,
+          "p95Ms": 8
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1457,
+          "p50Ms": 4.700000002980232,
+          "p95Ms": 7.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1457,
+          "p50Ms": 4,
+          "p95Ms": 6.299999997019768
+        },
+        "swashCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1457,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 482,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 34,
+          "avgMs": 5.195685647058825,
+          "p50Ms": 5.153792000000001,
+          "p95Ms": 5.688320000000001,
+          "maxMs": 6.9109760000000025
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        67.5,
+        107.69999998807907
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7652.000000059605,
+        "waterGeneration": 72.90000000596046,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 3,
+        "coastalSwashActiveTexels": 65536,
+        "waterProjectedCausticFrames": 983,
+        "waterProjectedCausticCpuMs": 0.19999998807907104,
+        "waterProjectedCausticSceneCpuMs": 4.600000008940697,
+        "waterProjectedCausticPipelineCpuMs": 4.799999997019768,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterProbeFaces": 216,
+        "waterReflectionCpuMs": 863.9999998211861,
+        "waterReflectionBudgetEstimateMs": 7.531249993480742,
+        "waterPlanarCaptures": 35
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 840,
+        "dispatches": 4944,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1660,
+          "p50Ms": 4.600000000005821,
+          "p95Ms": 6.900000000023283
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1661,
+          "p50Ms": 4.200000002980232,
+          "p95Ms": 6.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1661,
+          "p50Ms": 3.6000000089406967,
+          "p95Ms": 5.200000002980232
+        },
+        "swashCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1661,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 49152,
+        "swashDispatches": 484,
+        "rockImpacts": 3,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 101,
+          "avgMs": 4.29121900990099,
+          "p50Ms": 4.203520000000001,
+          "p95Ms": 4.785152000000002,
+          "maxMs": 6.125568
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        157.19999998807907,
+        382.79999999701977
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 11535.800000101328,
+        "waterGeneration": 143.3999999910593,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 518.1999999582767,
+        "waterReflectionBudgetEstimateMs": 7.375000007450581,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 12
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 2768,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "high",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 50072,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 2858
+          },
+          "lastLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 6266
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1476,
+          "p50Ms": 5,
+          "p95Ms": 9.89999999999418
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1477,
+          "p50Ms": 4.5,
+          "p95Ms": 9.200000002980232
+        },
+        "renderCpu": {
+          "samples": 1477,
+          "p50Ms": 3.8999999910593033,
+          "p95Ms": 8
+        },
+        "swashCpu": {
+          "samples": 1477,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1477,
+          "p50Ms": 0,
+          "p95Ms": 1
+        },
+        "rockRefreshCpu": {
+          "samples": 1477,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1477,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 482,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 30,
+          "avgMs": 5.136691200000002,
+          "p50Ms": 4.891648000000002,
+          "p95Ms": 7.393280000000002,
+          "maxMs": 7.723008000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        59.599999994039536,
+        107.09999999403954
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 14045.400000110269,
+        "waterGeneration": 48.6000000089407,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 3,
+        "coastalSwashActiveTexels": 65536,
+        "waterProbeFaces": 156,
+        "waterReflectionCpuMs": 813.9999999701977,
+        "waterReflectionBudgetEstimateMs": 6.873046877881279,
+        "coastalRockImpacts": 11,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 24
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 681,
+        "dispatches": 4280,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 1,
+        "events": 11,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 49832,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 76,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 1871
+          },
+          "lastLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 5268
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1631,
+          "p50Ms": 4.600000000005821,
+          "p95Ms": 7.300000000017462
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1632,
+          "p50Ms": 4.200000002980232,
+          "p95Ms": 6.700000002980232
+        },
+        "renderCpu": {
+          "samples": 1632,
+          "p50Ms": 3.5999999940395355,
+          "p95Ms": 5.899999991059303
+        },
+        "swashCpu": {
+          "samples": 1632,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1632,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1632,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1632,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 73728,
+        "swashDispatches": 494,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 74,
+          "avgMs": 4.433172756756758,
+          "p50Ms": 4.341760000000001,
+          "p95Ms": 4.889600000000001,
+          "maxMs": 6.365184000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        123.3999999910593,
+        242.70000000298023
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 7318.899999946356,
+        "waterGeneration": 276.20000000298023,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 78,
+        "waterReflectionCpuMs": 552.3000000417233,
+        "waterReflectionBudgetEstimateMs": 4.968749992549419,
+        "coastalRockImpacts": 4,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 2716,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 4,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 5984,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 3524
+          },
+          "lastLoss": {
+            "foregroundPid": 5984,
+            "elapsedMs": 6930
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1196,
+          "p50Ms": 5.7000000000116415,
+          "p95Ms": 13
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1197,
+          "p50Ms": 5.200000002980232,
+          "p95Ms": 12.800000011920929
+        },
+        "renderCpu": {
+          "samples": 1197,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 11.099999994039536
+        },
+        "swashCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0.800000011920929
+        },
+        "rockRefreshCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1197,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 480,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 40,
+          "avgMs": 5.4744576,
+          "p50Ms": 5.474304000000002,
+          "p95Ms": 7.631872,
+          "maxMs": 7.644160000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        68.1000000089407,
+        107
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 10345.799999982119,
+        "waterGeneration": 73.40000000596046,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 174,
+        "waterReflectionCpuMs": 911.4000000804663,
+        "waterReflectionBudgetEstimateMs": 6.0617675758112455,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 28
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 5138,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1746,
+          "p50Ms": 4.30000000000291,
+          "p95Ms": 7.100000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1747,
+          "p50Ms": 3.7999999970197678,
+          "p95Ms": 6.5
+        },
+        "renderCpu": {
+          "samples": 1747,
+          "p50Ms": 3.2999999970197678,
+          "p95Ms": 5.5
+        },
+        "swashCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1747,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 486,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 32,
+          "avgMs": 4.152352000000001,
+          "p50Ms": 4.037632000000001,
+          "p95Ms": 5.4016,
+          "maxMs": 5.583872
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        66,
+        111.6000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4321.000000119209,
+        "waterGeneration": 41.5,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 2,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 84,
+        "waterReflectionCpuMs": 360.39999993145466,
+        "waterReflectionBudgetEstimateMs": 5.625,
+        "coastalRockImpacts": 7,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 13
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2492,
+        "dispatches": 1844,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 7,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "ultra",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 38208,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 38208,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1496,
+          "p50Ms": 5,
+          "p95Ms": 10
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1497,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 9.5
+        },
+        "renderCpu": {
+          "samples": 1497,
+          "p50Ms": 4,
+          "p95Ms": 8
+        },
+        "swashCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999403953552
+        },
+        "rockCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 1.0999999940395355
+        },
+        "rockRefreshCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1497,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 484,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.9868446896551735,
+          "p50Ms": 4.873216000000002,
+          "p95Ms": 5.459968000000001,
+          "maxMs": 6.980608
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        53.19999998807907,
+        87.1000000089407
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6609.80000013113,
+        "waterGeneration": 53.19999998807907,
+        "waterOpticsPlainWaterMeshes": 0,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 2,
+        "coastalSwashActiveTexels": 262144,
+        "waterProbeFaces": 166,
+        "waterReflectionCpuMs": 638.0999998897314,
+        "waterReflectionBudgetEstimateMs": 5,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 26
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2580,
+        "dispatches": 3330,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 1,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1818,
+          "p50Ms": 4.100000000005821,
+          "p95Ms": 6.899999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1819,
+          "p50Ms": 3.5999999940395355,
+          "p95Ms": 6.299999997019768
+        },
+        "renderCpu": {
+          "samples": 1819,
+          "p50Ms": 3.0999999940395355,
+          "p95Ms": 5.399999991059303
+        },
+        "swashCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1819,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 34,
+          "avgMs": 4.142712470588235,
+          "p50Ms": 4.036608000000001,
+          "p95Ms": 5.280768,
+          "maxMs": 5.827584000000002
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        63.099999994039536,
+        99.80000001192093
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 4192,
+        "waterGeneration": 75.19999998807907,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 93,
+        "waterReflectionCpuMs": 1057.999999910593,
+        "waterReflectionBudgetEstimateMs": 5.999999991618097,
+        "waterPlanarCaptures": 14,
+        "coastalRockImpacts": 2,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 2,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": true,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 75,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1585,
+          "p50Ms": 4.900000000023283,
+          "p95Ms": 6.399999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1586,
+          "p50Ms": 4.5,
+          "p95Ms": 5.799999997019768
+        },
+        "renderCpu": {
+          "samples": 1586,
+          "p50Ms": 4,
+          "p95Ms": 5.299999997019768
+        },
+        "swashCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1586,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 29,
+          "avgMs": 4.708140137931035,
+          "p50Ms": 4.708352,
+          "p95Ms": 4.758528,
+          "maxMs": 4.7882240000000005
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        52.3999999910593,
+        84.40000000596046
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 8440.10000000894,
+        "waterGeneration": 61.5,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 13249600,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 44,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 238,
+        "waterReflectionCpuMs": 1590.8999998122454,
+        "waterReflectionBudgetEstimateMs": 5.625000009313226,
+        "waterPlanarCaptures": 37,
+        "coastalRockImpacts": 6,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 6,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.08576222055939131
+          }
+        ]
+      }
+    },
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50992,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "initialForegroundPid": 50992,
+          "samples": 74,
+          "reportedLossSamples": 0,
+          "firstLoss": null,
+          "lastLoss": null
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1843,
+          "p50Ms": 4.100000000005821,
+          "p95Ms": 6.399999999994179
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1844,
+          "p50Ms": 3.699999988079071,
+          "p95Ms": 5.800000011920929
+        },
+        "renderCpu": {
+          "samples": 1844,
+          "p50Ms": 3.1000000089406967,
+          "p95Ms": 5
+        },
+        "swashCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1844,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 56,
+          "avgMs": 4.144457142857142,
+          "p50Ms": 4.047872000000002,
+          "p95Ms": 4.512768000000003,
+          "maxMs": 6.056960000000001
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 47,
+      "waterGenerationMs": [
+        52.5,
+        92.5
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 3646.4999998807907,
+        "waterGeneration": 50.79999999701977,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 88,
+        "waterReflectionCpuMs": 1684.6000000685453,
+        "waterReflectionBudgetEstimateMs": 3.0000000074505806,
+        "coastalRockImpacts": 7,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 14
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 4,
+        "events": 7,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.3
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.3
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.3
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "04-sheltered-cove",
+      "pose": {
+        "mode": "fly",
+        "fov": 70,
+        "x": 2270,
+        "z": -4640,
+        "heightAboveGround": 20,
+        "pitch": -0.48,
+        "yaw": 3.0860941483440762
+      },
+      "qualityTier": "medium",
+      "diffraction": false,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50072,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 50992,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 2531
+          },
+          "lastLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 5967
+          }
+        },
+        "passed": false
+      },
+      "frames": {
+        "raf": {
+          "samples": 1560,
+          "p50Ms": 5,
+          "p95Ms": 7
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1561,
+          "p50Ms": 4.5,
+          "p95Ms": 6.300000011920929
+        },
+        "renderCpu": {
+          "samples": 1561,
+          "p50Ms": 3.9000000059604645,
+          "p95Ms": 5.5999999940395355
+        },
+        "swashCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "rockCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 1
+        },
+        "rockRefreshCpu": {
+          "samples": 1561,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 0,
+          "p50Ms": null,
+          "p95Ms": null
+        },
+        "sprayUploadBytes": 0,
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 30,
+          "avgMs": 4.871802666666667,
+          "p50Ms": 4.699136,
+          "p95Ms": 5.530624000000001,
+          "maxMs": 6.32832
+        }
+      },
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "pages": 49,
+      "wetPages": 35,
+      "waterGenerationMs": [
+        57.29999999701977,
+        87.80000001192093
+      ],
+      "coastalCounters": {
+        "waterGenerationMs": 6028.39999987185,
+        "waterGeneration": 6,
+        "waterChunksWet": 35,
+        "waterChunksDry": 14,
+        "waterChunksRefractive": 18,
+        "coastalRockEligible": 1,
+        "coastalRockActiveSites": 1,
+        "waterUploadBytes": 9937200,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 40,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "waterProbeFaces": 166,
+        "waterReflectionCpuMs": 1949.5000000298023,
+        "waterReflectionBudgetEstimateMs": 4.167968749825377,
+        "coastalRockImpacts": 9,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "waterPlanarCaptures": 27
+      },
+      "swash": {
+        "supported": false,
+        "initialized": false,
+        "eligible": 0,
+        "dispatches": 0,
+        "inputBytes": 0
+      },
+      "rock": {
+        "sites": 1,
+        "events": 9,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2241.472904740915,
+            "z": -4655.676665347228,
+            "radius": 17.231571978893943,
+            "exposure": 0.3
+          }
+        ]
+      }
+    }
+  ],
+  "failedAttempts": [
+    {
+      "scope": "01-open-beach/high (diffraction on)",
+      "error": "Error: Windows foreground monitor timed out.\n    at Timeout.<anonymous> (file:///F:/Development/drusniel-world-builder/scripts/lib/perf-browser-foreground-win32.mjs:95:64)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+    },
+    {
+      "scope": "04-sheltered-cove/high (diffraction on)",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 30868,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 24,
+          "firstLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 5499
+          },
+          "lastLoss": {
+            "foregroundPid": 30868,
+            "elapsedMs": 8014
+          }
+        },
+        "passed": false
+      }
+    },
+    {
+      "scope": "04-sheltered-cove/cove-diffraction-off (diffraction off)",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 50072,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 2858
+          },
+          "lastLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 6266
+          }
+        },
+        "passed": false
+      }
+    },
+    {
+      "scope": "01-open-beach/ultra (diffraction on)",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 49832,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 76,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 1871
+          },
+          "lastLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 5268
+          }
+        },
+        "passed": false
+      }
+    },
+    {
+      "scope": "04-sheltered-cove/ultra (diffraction on)",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 38208,
+          "finalForegroundPid": 5984,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 38208,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 49832,
+            "elapsedMs": 3524
+          },
+          "lastLoss": {
+            "foregroundPid": 5984,
+            "elapsedMs": 6930
+          }
+        },
+        "passed": false
+      }
+    },
+    {
+      "scope": "04-sheltered-cove/medium (diffraction off)",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 50992,
+          "finalForegroundPid": 50072,
+          "type": "complete",
+          "focusedAtEnd": false,
+          "passed": false,
+          "lostFocus": true,
+          "initialForegroundPid": 50992,
+          "samples": 74,
+          "reportedLossSamples": 32,
+          "firstLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 2531
+          },
+          "lastLoss": {
+            "foregroundPid": 50072,
+            "elapsedMs": 5967
+          }
+        },
+        "passed": false
+      }
+    }
+  ]
+}

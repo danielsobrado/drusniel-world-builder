@@ -1,0 +1,64 @@
+{
+  "runs": [
+    {
+      "directory": "coastal-delivery",
+      "sourceSnapshotSha256": "13d59d0ac6dd2e2a983a2f125cd4912e285b8232fe70038fa04b4abc8a75f676",
+      "browser": "151.0.7922.34",
+      "capturedFrames": 26,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      },
+      "validationAndNetworkAlerts": [],
+      "warnings": null
+    },
+    {
+      "directory": "coastal-supplement",
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "browser": "151.0.7922.34",
+      "capturedFrames": 16,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      },
+      "validationAndNetworkAlerts": [],
+      "warnings": [
+        "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+        "THREE.MeshPhysicalMaterial: The \"iridescenceThicknessRange\" property has been replaced by \"iridescenceThicknessMinimum\" and \"iridescenceThicknessMaximum\".",
+        "THREE.Source: \"Source\" has been renamed to \"TextureSource\". Please update your code to use \"THREE.TextureSource\" instead.",
+        "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+        "Calling [RenderPassEncoder (unlabeled)].Draw with an index count of 0 is unusual.",
+        "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n3 warning(s) generated while compiling the shader:\n:136:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:193:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:255:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n1 warning(s) generated while compiling the shader:\n:123:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Compilation log for [ShaderModule \"fragment\"]:\n\n3 warning(s) generated while compiling the shader:\n:306:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:367:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:433:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Calling [RenderPassEncoder (unlabeled)].Draw with a vertex count of 0 is unusual.",
+        "Compilation log for [ShaderModule \"fragment\"]:\n\n1 warning(s) generated while compiling the shader:\n:277:5 warning: code is unreachable\n        break;\n        ^^^^^\n"
+      ]
+    },
+    {
+      "directory": "coastal-medium-retry",
+      "sourceSnapshotSha256": "9686ce018e974ac16cc89c1fea3334cd4467229cf84f022ebdb91847aa9fc20f",
+      "browser": "151.0.7922.34",
+      "capturedFrames": 3,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      },
+      "validationAndNetworkAlerts": [],
+      "warnings": [
+        "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+        "THREE.MeshPhysicalMaterial: The \"iridescenceThicknessRange\" property has been replaced by \"iridescenceThicknessMinimum\" and \"iridescenceThicknessMaximum\".",
+        "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+        "Calling [RenderPassEncoder (unlabeled)].Draw with an index count of 0 is unusual.",
+        "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n3 warning(s) generated while compiling the shader:\n:136:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:193:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:255:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n1 warning(s) generated while compiling the shader:\n:123:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Compilation log for [ShaderModule \"fragment\"]:\n\n3 warning(s) generated while compiling the shader:\n:306:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:367:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:433:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+        "Calling [RenderPassEncoder (unlabeled)].Draw with a vertex count of 0 is unusual.",
+        "Compilation log for [ShaderModule \"fragment\"]:\n\n1 warning(s) generated while compiling the shader:\n:277:5 warning: code is unreachable\n        break;\n        ^^^^^\n"
+      ]
+    }
+  ]
+}

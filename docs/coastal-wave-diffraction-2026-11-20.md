@@ -25,7 +25,9 @@ reflection or harbour resonance.
 4. Multiply the established `seaExposure(shoreDistance)` by that transmission.
    Encode it into the *existing* water-appearance alpha channel.
 5. Use the same transmission in water pages and terrain-aware gameplay water
-   queries; cache world probes per page or per world revision respectively.
+   queries. The CPU cache is scoped to the world, generator, terrain edit and
+   base terrain revisions, and resolved diffraction settings. Worker pages
+   include tile edits within the lattice and ray reach.
 6. Scale nearshore breaker energy, foam, swash surface foam and rock-impact
    water foam by shelter. Add a bounded, carrier-wave-number-scaled phase lag
    to the same phases used by surface displacement and directional breaker
@@ -57,7 +59,8 @@ settings in each chunk request; they rebuild the field with terrain edits.
 - Cove entrance: smooth partial exposure and curved, lagged crests.
 - Paired chunk edges (including negative coordinates): identical encoded
   exposure without seams.
-- Terrain edits: exposure cache discarded when the world revision changes.
+- Terrain edits and base regeneration refresh exposure. Tile edits outside
+  the standard surface-mask halo still reach affected diffraction probes.
 - Gameplay CPU wave height equals water height query with the same exposure.
 - Disabled/legacy behavior, quality tiers, storm behavior and inland water
   unaffected.
@@ -68,10 +71,9 @@ npm run build
 npm run qa:water:acceptance
 ```
 
-**Visual review still required:** coastline screenshots in daylight/storm,
-slow-moving crests along high-curvature headlands, sheltered-cove swash,
-GPU shader compilation, and actual frame-time/worker-generation cost on
-representative maps. The swash *simulation* and rock-impact *simulation* still
-use their original forcing; only their visible water-surface foam is sheltered
-in this phase. A later phase can propagate energy to those simulations and
-add true spectral wave-energy transport.
+The [persistent swash and rock-impact implementation](coastal-sheltered-swash-rocks-2026-11-20.md)
+uses sheltered wave energy in both simulations. The
+[analytic swash implementation](coastal-analytic-shelter-2026-11-20.md)
+carries shelter into low and medium quality and the high and ultra fallback.
+The [coastal review](qa/coastal-review-2026-11-20/README.md) records visual and
+performance checks.

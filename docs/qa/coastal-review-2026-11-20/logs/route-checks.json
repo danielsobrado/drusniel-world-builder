@@ -1,0 +1,323 @@
+{
+  "originalWater": {
+    "adapter": {
+      "ok": true,
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "fallback": false
+    },
+    "frameP95Ms": 10.1,
+    "gpuValidationErrorCount": 0,
+    "performanceAuthoritative": true,
+    "acceptance": {
+      "pass": true,
+      "gates": {
+        "routeFound": true,
+        "measuredFrames": true,
+        "enteredWater": true,
+        "reachedSwimming": true,
+        "submerged": true,
+        "surfaced": true,
+        "returnedDry": true,
+        "stableBodyIdentity": true,
+        "originStable": true,
+        "projectedCausticsActive": true,
+        "projectedCausticsCpuBounded": true,
+        "frameP95Bounded": true,
+        "hitchRateBounded": true
+      },
+      "route": {
+        "start": {
+          "x": 238,
+          "z": 416
+        },
+        "target": {
+          "x": 152,
+          "z": 416
+        },
+        "yawDegrees": 90,
+        "distance": 86,
+        "bodyId": 1,
+        "kind": 1,
+        "surfaceHeight": -1.6318451440938282,
+        "targetDepth": 8.024204977972943
+      },
+      "qualityTier": "high",
+      "states": [
+        "dry",
+        "wading",
+        "swimming",
+        "submerged"
+      ],
+      "bodyIds": [
+        1
+      ],
+      "transitions": [
+        {
+          "from": "dry",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "enter-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "dive"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "dive"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "surface"
+        },
+        {
+          "from": "wading",
+          "to": "submerged",
+          "phaseId": "surface"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "surface"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "surface"
+        },
+        {
+          "from": "swimming",
+          "to": "submerged",
+          "phaseId": "surface"
+        },
+        {
+          "from": "submerged",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "swimming",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "swimming",
+          "to": "wading",
+          "phaseId": "exit-water"
+        },
+        {
+          "from": "wading",
+          "to": "dry",
+          "phaseId": "exit-water"
+        }
+      ],
+      "metrics": {
+        "frameCount": 531,
+        "wetFrames": 449,
+        "submergedFrames": 61,
+        "maxDepth": 8.149951229759028,
+        "maxUnderwaterBlend": 1,
+        "projectedCausticFrames": 5655,
+        "maximumProjectedCausticCpuMs": 0.30000000447034836,
+        "maximumProjectedCausticPipelineCpuMs": 15.899999998509884,
+        "projectedCausticCpuScope": "post-effect excluding scene pass",
+        "originSnapCount": 0,
+        "originSnapViolations": 0
+      },
+      "thresholds": {
+        "maximumFrameP95Ms": 33.3,
+        "maximumHitchRate": 0.02,
+        "maximumProjectedCausticCpuMs": 4
+      }
+    }
+  },
+  "candidateWater": {
+    "headedAttempts": 2,
+    "headedBlocker": "Water route discovery lost browser foreground focus.",
+    "headlessBlocker": "Measured spawn did not come within 2 m of the discovered route start within 120000 ms.",
+    "headlessWaitLine": "scripts/run-water-acceptance-qa.mjs:381"
+  },
+  "candidateEditedWorld": {
+    "adapter": {
+      "ok": true,
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "fallback": false
+    },
+    "rendererBackend": {
+      "webgpu": true,
+      "webgl2": false,
+      "reason": null
+    },
+    "settle": {
+      "settled": true,
+      "waitedSeconds": 36.2,
+      "blockers": []
+    },
+    "terrainEdits": 4,
+    "browserErrors": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    },
+    "collisionGate": {
+      "provisionalP95TargetMs": 0.83,
+      "measuredP95Ms": 0.3,
+      "sampleCount": 1023,
+      "samplePassed": true,
+      "timingPassed": true,
+      "readinessPassed": true,
+      "passed": true
+    },
+    "focusPassed": false,
+    "nativeFocusChanged": true,
+    "diagnosticFrameIntervalsMs": {
+      "minMs": 0.4,
+      "p50Ms": 11.1,
+      "p95Ms": 18.24,
+      "p99Ms": 30.834,
+      "maxMs": 36.5,
+      "meanMs": 11.727
+    }
+  }
+}

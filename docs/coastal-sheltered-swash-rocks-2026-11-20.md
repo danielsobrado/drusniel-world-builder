@@ -47,11 +47,9 @@ remain the single source for headland transmission and phase lag.
 
 ### Water-shader double counting
 
-The preceding diffraction phase already multiplied visible swash and rock
-foam by shelter. Now those simulations generate less foam themselves, so
-that second multiplier is removed from the persistent variants. Only the
-*analytic swash fallback* is attenuated in the water material, while
-persistent swash represents its own attenuation.
+The persistent swash and rock-impact simulations attenuate foam at its source.
+The analytic swash path uses the same transmission for run-up, phase and foam
+strength. Both mount their result on the existing shoreline blend.
 
 ## Boundaries and performance
 
@@ -63,10 +61,8 @@ persistent swash represents its own attenuation.
   the sampler caches its global 16 m lattice and uses the bed-free ocean
   surface query.
 - Rock lookups run on candidate scans, not for every spray particle.
-- WebGPU low/medium and fallback analytic **terrain swash** do not yet have
-  a shelter-texture input; that path retains its prior behavior. The
-  water-material analytic foam fallback is sheltered. No additional texture
-  sampler is added to the already crowded terrain shader.
+- The low/medium and fallback [analytic terrain swash](coastal-analytic-shelter-2026-11-20.md)
+  reads shelter from the existing water-appearance texture. It adds no sampler.
 
 ## Acceptance and follow-up
 
@@ -88,6 +84,5 @@ npm run build
 npm run qa:water:acceptance
 ```
 
-The low/medium analytic terrain swash fallback is implemented in
-[coastal-analytic-shelter-2026-11-20.md](coastal-analytic-shelter-2026-11-20.md),
-using the existing water-appearance texture without another sampler.
+The [coastal review](qa/coastal-review-2026-11-20/README.md) records hardware
+WebGPU captures, timings and outstanding visual limitations.
