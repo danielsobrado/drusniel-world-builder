@@ -1,6 +1,6 @@
 import { DataTexture, HalfFloatType, RGBAFormat, DataUtils } from 'three/webgpu';
-import { Fn, If, float, max, mix, smoothstep, uniform, vec4 } from 'three/tsl';
-import { bilinearLoad, TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
+import { Fn, If, float, mat3, max, mix, smoothstep, uniform, vec3, vec4 } from 'three/tsl';
+import { bilinearLoad, bilinearTexels, TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
 import { createSeaShelterNode } from './SeaDiffractionNodes.js';
 
 const MIN_SHELTER_HEIGHT_METERS = 2.8;
@@ -23,59 +23,44 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
   shelteredSurf = false, runupHeight = 0) {
   const readTexture = object => waterSlot(object)?.waterFieldTexture;
   const fieldUv = terrainUv.mul((fieldSize - 1) / fieldSize).add(0.5 / fieldSize);
-  const field = bilinearLoad(empty, fieldUv, readTexture);
   const origin = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.surfaceOrigin.value ?? 0);
   const wet = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.hasWaterCoverage ? 1 : 0);
   const readAppearance = object => waterSlot(object)?.waterAppearanceTexture ?? emptyAppearance;
-  // Decode each discrete texel before filtering its coverage. Interpolating IDs
-  // could turn a none/lake boundary (0/2) into a fictional ocean (1).
-  const filtered = bilinearLoad(emptyAppearance, fieldUv, readAppearance, value => {
-    const kind = value.r.mul(255).round();
-    return vec4(float(kind.equal(1)), value.g, value.b, float(kind.greaterThan(0)));
-  });
-  const context = Fn(() => {
-    const result = vec4(0).toVar();
-    If(wet.greaterThan(0), () => {
-      const height = groundHeight.sub(field.g.add(origin));
-      If(height.greaterThan(-16).and(height.lessThan(2.8)), () => {
-        result.assign(vec4(filtered.r, filtered.g, filtered.b,
-          // Damp up to 35 cm above the water: 85 cm smeared a dark ring
-          // some 13 m wide round every gently shelving pool.
-          smoothstep(-.05, .35, height).oneMinus().mul(filtered.a)));
-      });
-    });
-    return result;
-  })().toVar();
-  // The bog's mud keeps the wide margin round its pools.
-  const damp = Fn(() => {
-    const result = float(0).toVar();
-    If(wet.greaterThan(0), () => {
-      const height = groundHeight.sub(field.g.add(origin));
-      If(height.greaterThan(-16).and(height.lessThan(2.8)), () => {
-        result.assign(smoothstep(-.1, .85, height).oneMinus().mul(filtered.a));
-      });
-    });
-    return result;
-  })().toVar();
-  // The appearance alpha already carries sea energy. Read only the existing
-  // texture, with no sampler, and only for the shallow coastal height band.
   const shelterHeightLimit = Math.max(MIN_SHELTER_HEIGHT_METERS,
     runupHeight + SHELTER_HEIGHT_MARGIN_METERS);
-  const shelter = shelteredSurf ? Fn(() => {
-    const result = float(1).toVar();
+  const context = Fn(() => {
+    const identity = vec3(0).toVar();
+    const response = vec3(0, 0, 1).toVar();
     If(wet.greaterThan(0), () => {
-      const height = groundHeight.sub(field.g.add(origin));
-      If(height.greaterThan(-16).and(height.lessThan(shelterHeightLimit)), () => {
-        const exposed = bilinearLoad(emptyAppearance, fieldUv, readAppearance, value => {
-          const isOcean = value.r.mul(255).round().equal(1);
-          return value.a.mul(float(isOcean));
+      const field = bilinearLoad(empty, fieldUv, readTexture).toVar();
+      const height = groundHeight.sub(field.g.add(origin)).toVar();
+      If(height.greaterThan(-17).and(height.lessThan(shelterHeightLimit)), () => {
+        const { texels, blend } = bilinearTexels(emptyAppearance, fieldUv, readAppearance);
+        const samples = texels.map(value => value.toVar());
+        // Decode IDs before blending. A lake and dry ground cannot blend into ocean.
+        const filtered = blend(samples.map(value => {
+          const kind = value.r.mul(255).round();
+          return vec4(float(kind.equal(1)), value.g, value.b, float(kind.greaterThan(0)));
+        })).toVar();
+        If(height.lessThan(MIN_SHELTER_HEIGHT_METERS), () => {
+          const bedFade = smoothstep(-17, -10, height);
+          identity.assign(vec3(filtered.r, filtered.gb.mul(bedFade)));
+          response.x.assign(smoothstep(-.05, .35, height).oneMinus().mul(filtered.a).mul(bedFade));
+          // Bog mud keeps its wider damp margin.
+          response.y.assign(smoothstep(-.1, .85, height).oneMinus().mul(filtered.a).mul(bedFade));
         });
-        const relative = exposed.div(max(filtered.r, 0.0001));
-        const transmission = createSeaShelterNode(relative, max(field.a, 0));
-        result.assign(mix(float(1), transmission, smoothstep(0, 0.05, filtered.r)));
+        if (shelteredSurf) {
+          // Appearance alpha is zero for every non-ocean texel.
+          const exposed = blend(samples.map(value => value.a));
+          const relative = exposed.div(max(filtered.r, 0.0001));
+          const transmission = createSeaShelterNode(relative, max(field.a, 0));
+          response.z.assign(mix(float(1), transmission, smoothstep(0, 0.05, filtered.r).mul(smoothstep(-17, -10, height))));
+        }
       });
     });
-    return result;
-  })().toVar('terrainSeaShelter') : float(1);
-  return { ocean: context.r, organic: context.g, cold: context.b, wet: context.a, damp, shelter };
+    return mat3(identity, response, vec3(0));
+  })().toVar();
+  const identity = context.element(0), response = context.element(1);
+  return { ocean: identity.r, organic: identity.g, cold: identity.b,
+    wet: response.x, damp: response.y, shelter: response.z };
 }

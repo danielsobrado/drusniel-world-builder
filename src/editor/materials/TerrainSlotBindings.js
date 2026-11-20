@@ -50,6 +50,12 @@ export function perObjectTexture(template, uvNode, read, node = texture(template
  * bake read this way frees one for the path dirt (stylized/path).
  */
 export function bilinearLoad(template, uvNode, read = null, transform = null) {
+  const { texels, blend } = bilinearTexels(template, uvNode, read);
+  return blend(transform ? texels.map(transform) : texels);
+}
+
+/** Allows multiple decoded quantities to share their raw texture reads. */
+export function bilinearTexels(template, uvNode, read) {
   const node = (coords) => {
     const load = texture(template, coords).setSampler(false);
     return read ? perObjectTexture(template, null, read, load) : load;
@@ -60,15 +66,11 @@ export function bilinearLoad(template, uvNode, read = null, transform = null) {
   const base = floor(texel);
   const weight = fract(texel);
   const limit = size.sub(1);
-  const load = (dx, dy) => {
-    const value = node(base.add(vec2(dx, dy)).clamp(vec2(0), limit));
-    return transform ? transform(value) : value;
+  const load = (dx, dy) => node(base.add(vec2(dx, dy)).clamp(vec2(0), limit));
+  return {
+    texels: [load(0, 0), load(1, 0), load(0, 1), load(1, 1)],
+    blend: ([a, b, c, d]) => mix(mix(a, b, weight.x), mix(c, d, weight.x), weight.y),
   };
-  return mix(
-    mix(load(0, 0), load(1, 0), weight.x),
-    mix(load(0, 1), load(1, 1), weight.x),
-    weight.y,
-  );
 }
 
 /** `bilinearLoad` of the drawn slot's own texture `name`, each texel decoded by `transform` before filtering. */

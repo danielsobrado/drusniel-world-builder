@@ -21,6 +21,7 @@ const fixtures = JSON.parse(await readFile(option('--fixtures',
   new URL('../docs/qa/coastal-review-2026-11-20/poses.json', import.meta.url)), 'utf8'));
 const perf = process.argv.includes('--perf');
 const measure = perf || process.argv.includes('--measure');
+const minimumInterstageLimit = process.argv.includes('--minimum-interstage-limit');
 const only = option('--only', '').split(',').filter(Boolean);
 const minimumMs = Number(option('--settle-ms', 5000));
 const durationMs = Number(option('--duration-ms', 8000));
@@ -101,6 +102,12 @@ try {
     if (response.status() >= 400 && alerts.length < 64) alerts.push(`${response.status()} ${response.url()}`);
   });
   let job;
+  if (minimumInterstageLimit) await page.route(/\/src\/render\/deviceLimits\.js(?:\?|$)/, async route => {
+    const response = await route.fetch();
+    const body = await response.text();
+    assert.match(body, /maxInterStageShaderVariables: \d+/);
+    await route.fulfill({ response, body: body.replace(/maxInterStageShaderVariables: \d+/, 'maxInterStageShaderVariables: 16') });
+  });
   const compiled = await fetch(new URL('/config/water-visual.yaml?import&compiled', url));
   assert.ok(compiled.ok, 'Could not read the compiled water configuration');
   const baseConfig = /^export default (.*);/m.exec(await compiled.text());
@@ -124,7 +131,7 @@ try {
     const firstAlert = alerts.length;
     try {
       if (currentConfig !== configKey(job)) {
-        await page.goto(browserUrl.href, { waitUntil: 'domcontentloaded' });
+        await page.goto(browserUrl.href, { waitUntil: 'commit' });
         await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
         adapter = await page.evaluate(async () => {
           const e = window.__editor, { backend } = e.terrainView.renderer;
@@ -142,6 +149,7 @@ try {
         assert.ok(adapter.device && adapter.backend === 'webgpu' && adapter.vendor && !adapter.fallback
           && !/swiftshader|lavapipe|llvmpipe|warp|basic render/i.test(JSON.stringify(adapter)),
         `Hardware WebGPU required: ${JSON.stringify(adapter)}`);
+        if (minimumInterstageLimit) assert.equal(adapter.deviceInterstageVariables, 16);
         currentConfig = configKey(job);
         console.log(`  ${adapter.vendor} ${adapter.architecture} ${adapter.backend}`);
       }

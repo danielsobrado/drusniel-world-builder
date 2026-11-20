@@ -11,9 +11,41 @@ import { createNoWaterSample, createWaterSample } from './WaterSample.js';
 import { getSeaDiffractionConfig, seaSurfaceOffset } from './seaState.js';
 import { seaExposure } from './WaterAppearance.js';
 import { createSeaDiffractionSampler } from './SeaDiffraction.js';
+import { WaterDistanceField } from './WaterDistanceField.js';
 
 const WATER_TILE_ID = 0;
 const oceanExposureCache = new WeakMap();
+const editedShoreCache = new WeakMap();
+
+function editedShoreDistance(world, x, z, original) {
+  const model = world.generator.waterTerrainModel;
+  const overrides = world.tileOverrides;
+  if (!model?.oceanDistance || !overrides?.size || !overrides.entriesInRect) return original;
+  const { blockSize, maxDistanceCells, cacheLimit } = model.oceanDistance;
+  let entry = editedShoreCache.get(world);
+  if (entry?.model !== model || entry.overrides !== overrides || entry.version !== overrides.version) {
+    const isOcean = (cx, cz, tile) => {
+      if (tile === undefined) return model.isOceanCell(cx, cz);
+      return tile === WATER_TILE_ID && (model.isOceanCell(cx, cz) || !model.sampleWaterSurface(cx + .5, cz + .5));
+    };
+    const field = new WaterDistanceField({ blockSize, maxDistanceCells, cacheLimit,
+      isWaterCell: (cx, cz) => isOcean(cx, cz, overrides.getAt(cx, cz)) });
+    entry = { model, overrides, version: overrides.version, blocks: new Map(), field, isOcean };
+    editedShoreCache.set(world, entry);
+  }
+  const minX = Math.floor(x / blockSize) * blockSize;
+  const minZ = Math.floor(z / blockSize) * blockSize;
+  const key = cellKey(minX, minZ);
+  if (!entry.blocks.has(key)) {
+    const reach = maxDistanceCells + 2;
+    const affected = overrides.entriesInRect(minX - reach, minX + blockSize - 1 + reach,
+      minZ - reach, minZ + blockSize - 1 + reach)
+      .some(([cx, cz, tile]) => entry.isOcean(cx, cz, tile) !== model.isOceanCell(cx, cz));
+    entry.blocks.set(key, affected);
+    if (entry.blocks.size > cacheLimit) entry.blocks.delete(entry.blocks.keys().next().value);
+  }
+  return entry.blocks.get(key) ? entry.field.sample(x, z) * model.config.cellSizeMeters : original;
+}
 
 /** CPU gameplay uses the same directional shelter field as streamed water pages. */
 export function sampleWorldStoreSeaExposure(world, worldX, worldZ, shoreDistance) {
@@ -133,7 +165,8 @@ export function sampleWorldStoreWater(worldStore, cellX, cellZ) {
     coverage: addedWater ? 1 : base.coverage,
     surfaceHeight,
     bedHeight,
-    shoreDistance: addedWater ? 0 : base.shoreDistance,
+    shoreDistance: kind === WATER_KIND_OCEAN
+      ? editedShoreDistance(worldStore, tileX, tileZ, addedWater ? 0 : base.shoreDistance) : base.shoreDistance,
     flowX: addedWater ? 0 : base.flowX,
     flowZ: addedWater ? 0 : base.flowZ,
     fall: addedWater ? 0 : base.fall,

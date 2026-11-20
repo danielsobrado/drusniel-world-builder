@@ -1,4 +1,4 @@
-import { mix, positionWorld, varying, vec3 } from 'three/tsl';
+import { mix, positionWorld, varying, vec3, vec4 } from 'three/tsl';
 import { canonicalFromRender } from '../weather/wind/worldWindState.js';
 import { MEADOW_GRASS_DEFAULTS } from './meadow/meadowGrassConfig.js';
 import { meadowPatchColors } from './meadow/meadowColorNodes.js';
@@ -24,7 +24,6 @@ export function meadowPatchOnPlant(color, config) {
   const patch = meadowPatchColors(canonicalFromRender(positionWorld.xz), appearance, {
     noiseField: worldNoiseField(WORLD_NOISE_LAYERS.macro),
   });
-  const tint = varying(patch.tint, 'understoryPatchTint');
-  const dry = varying(patch.dry, 'understoryPatchDry');
-  return mix(color.mul(tint), vec3(patch.dryColor).mul(1.05), dry.mul(UNDERSTORY_DRY_SHARE));
+  const appearancePatch = varying(vec4(patch.tint, patch.dry), 'understoryPatch');
+  return mix(color.mul(appearancePatch.rgb), vec3(patch.dryColor).mul(1.05), appearancePatch.a.mul(UNDERSTORY_DRY_SHARE));
 }

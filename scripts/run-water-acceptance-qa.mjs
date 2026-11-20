@@ -371,17 +371,21 @@ async function main() {
       duration: String(measuredSeconds),
       speed: 'walk',
       hitchMs: '33.3',
-      autostart: '1',
+      autostart: '0',
       download: '0',
     });
     const measuredUrl = new URL(baseUrl);
     for (const [key, value] of query) measuredUrl.searchParams.set(key, value);
     await page.goto(measuredUrl.href, { waitUntil: 'commit' });
     const captureFocus = await focusPerfBrowser(browser, page, { headed });
-    await page.waitForFunction(({ x, z }) => {
-      const focus = window.__editor?.controller?.focusProvider?.();
-      return focus && Math.hypot(focus.x - x, focus.z - z) < 2;
-    }, discovery.route.start);
+    await page.waitForFunction(() => typeof window.__perfQa?.restart === 'function', null, { timeout: 180_000 });
+    const spawn = await page.evaluate(() => {
+      window.__perfQa.restart();
+      return window.__editor.controller.focusProvider();
+    });
+    if (Math.hypot(spawn.x - discovery.route.start.x, spawn.z - discovery.route.start.z) >= 2) {
+      throw new Error(`Measured player spawned at ${JSON.stringify(spawn)} instead of ${JSON.stringify(discovery.route.start)}.`);
+    }
     await page.waitForFunction(() => window.__perfQa?.recording, null, { timeout: 180_000 });
 
     const tracker = new WaterAcceptanceTracker({

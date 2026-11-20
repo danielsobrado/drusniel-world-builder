@@ -1,5 +1,5 @@
 import { block, box, rod } from '../gen/propKit.js';
-import { fbm3 } from '../gen/noise.js';
+import { createRng, fbm3 } from '../gen/noise.js';
 import { chamber, column, plateau, slab } from '../gen/shapes.js';
 import { bridge, crystal, house } from './kits.js';
 import { bellCluster, lanternCap, loamMound, shelfBrackets } from './umbraFungus.js';
@@ -103,9 +103,7 @@ export function generate(b, params) {
 
   // --- Water and the light that shows the void ------------------------------
   b.prop('water', box(140, 0.05, 140, P(0, LAKE + 2.6, -72)));
-  // Doubled and leaning violet or teal by turns (was one #8496b8 at 1-1.6): at that
-  // level the void, its walls and the city's silhouette all read as black.
-  const VOID_TINTS = ['#7d8fd6', '#8a72cf', '#6fb0c8'];
+  const VOID_TINTS = ['#a2b3d8', '#a4a5cb', '#8fb8c9'];
   for (const [index, [x, y, z, power]] of [[32, LAKE + 6, -40, 1.6], [-36, LAKE + 6, -102, 1.6], [0, 46, -40, 1.5], [-30, 40, -80, 1.3], [34, 40, -92, 1.3], [0, 30, -110, 1.2], [-44, 20, -40, 1], [44, 14, -100, 1]].entries()) {
     b.light(P(x, y, z), VOID_TINTS[index % VOID_TINTS.length], power * 2.2, 80, { flat: true });
   }
@@ -192,22 +190,35 @@ export function generate(b, params) {
       const at = P(beds.x + x, beds.y, beds.z - 5.4 + row * 4.6);
       b.prop('masonry', block(5.6, 0.5, 2.4, at));
       b.prop('timber', block(5.1, 0.62, 1.9, at), 0x2a211b);
-      const loam = loamMound(P(at.x, at.y + 0.6, at.z), 2.42, 0.86, 0.17, Math.round(at.x * 13 + at.z * 7));
+      const seed = Math.round(at.x * 13 + at.z * 7);
+      const loam = loamMound(P(at.x, at.y + 0.65, at.z), 2.48, 0.9, 0.13, seed);
       b.prop('loam', loam.geometry);
       // The crop stands in a loose row down the bed; tufts and brackets take the gaps and the kerb.
       for (let cap = 0; cap < 7; cap += 1) {
         const cx = at.x - 2.05 + cap * 0.68 + b.range(-0.2, 0.2), cz = at.z + b.range(-0.45, 0.45), tall = b.range(0.3, 0.95);
-        b.prop('glow', lanternCap(P(cx, loam.groundAt(cx, cz) - 0.03, cz), tall, tall * b.range(0.24, 0.36), range), 0xffffff, 0.9);
+        b.prop('glow', lanternCap(P(cx, loam.groundAt(cx, cz) - 0.03, cz), tall, tall * b.range(0.24, 0.36), range), 0xffffff, 0.75);
       }
       for (let tuft = 0; tuft < 3; tuft += 1) {
         const cx = at.x + b.range(-2.1, 2.1), cz = at.z + (tuft % 2 ? 1 : -1) * b.range(0.4, 0.7);
-        b.prop('glow', bellCluster(P(cx, loam.groundAt(cx, cz) - 0.02, cz), 3 + Math.floor(b.range(0, 4)), range), 0xffffff, 0.8);
+        b.prop('glow', bellCluster(P(cx, loam.groundAt(cx, cz) - 0.02, cz), 3 + Math.floor(b.range(0, 4)), range), 0xffffff, 0.55);
+      }
+      const roll = createRng(seed);
+      const localRange = (lo, hi) => lo + (hi - lo) * roll();
+      for (let patch = 0; patch < 8; patch += 1) {
+        const cx = at.x + (patch - 3.5) * 0.54 + localRange(-0.24, 0.24);
+        const cz = at.z + (patch % 2 ? 1 : -1) * localRange(0.22, 0.66);
+        const tint = patch % 3 === 0 ? 0xbac9ff : 0xb9dfb7;
+        for (let tuft = 0; tuft < 2; tuft += 1) {
+          const tx = cx + localRange(-0.21, 0.21), tz = cz + localRange(-0.13, 0.13);
+          b.prop('glow', bellCluster(P(tx, loam.groundAt(tx, tz) - 0.018, tz), 3, localRange, localRange(0.42, 0.85)),
+            tint, localRange(0.21, 0.37));
+        }
       }
       for (const side of [1, -1]) {
         const bx = at.x + b.range(-2.2, 2.2);
         b.prop('glow', shelfBrackets(P(bx, at.y + b.range(0.12, 0.26), at.z + side * 1.205), side > 0 ? 0 : Math.PI, 2 + Math.floor(b.range(0, 2)), range), 0xffffff, 0.7);
       }
-      b.light(P(at.x, at.y + 1.3, at.z), TEAL, 0.9, 7, { halo: 0 });
+      b.light(P(at.x, at.y + 1.65, at.z), TEAL, 0.86, 7, { radius: 1, halo: 0 });
       b.nav.block(P(at.x - 1.6, at.y, at.z), 1.3, 2);
       b.nav.block(P(at.x + 1.6, at.y, at.z), 1.3, 2);
     }

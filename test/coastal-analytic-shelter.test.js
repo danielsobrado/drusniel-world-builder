@@ -67,11 +67,11 @@ test('shader integration uses existing sampler-free field only when configured',
     key, await readFile(new URL(name, import.meta.url), 'utf8'),
   ]));
   const { context, terrain, swash, material } = Object.fromEntries(entries);
-  assert.match(context, /bilinearLoad\(emptyAppearance, fieldUv, readAppearance/);
+  assert.equal((context.match(/bilinearTexels\(emptyAppearance, fieldUv, readAppearance\)/g) ?? []).length, 1);
+  assert.match(context, /const samples = texels\.map\(value => value\.toVar\(\)\)/);
   assert.match(context, /createSeaShelterNode\(relative, max\(field\.a, 0\)\)/);
-  assert.match(context, /shelteredSurf \? Fn\(/);
+  assert.match(context, /if \(shelteredSurf\)/);
   assert.match(context, /height\.lessThan\(shelterHeightLimit\)/);
-  assert.match(context, /return \{ ocean: context\.r, organic: context\.g, cold: context\.b, wet: context\.a, damp, shelter \}/);
   assert.match(terrain, /diffraction\?\.enabled === true/);
   assert.match(terrain, /stylizedConfig\.water\?\.coast\?\.runupHeight \?\? DEFAULT_COAST_SWASH\.runupHeight/);
   assert.match(terrain, /shelter: waterContext\?\.shelter \?\? float\(1\)/);

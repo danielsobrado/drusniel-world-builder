@@ -8,6 +8,9 @@ import { generateBaseWorldChunk } from '../src/editor/world/generateWorldChunk.j
 import { sampleWorldStoreWater } from '../src/editor/water/TerrainWaterQueries.js';
 import { enrichPageWaterField } from '../src/editor/water/WaterField.js';
 import { enrichPageRenderPixels } from '../src/editor/world/ChunkRenderPixels.js';
+import { createEditedChunkSampling } from '../src/editor/world/EditedChunkSampling.js';
+import { WaterTerrainModel } from '../src/editor/water/WaterTerrainModel.js';
+import { resolveWaterDomainConfig } from '../src/editor/water/WaterConfig.js';
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture({ hold = false, contentProvider = null } = {}) {
@@ -87,6 +90,31 @@ test('worker sparse halo edits produce the same height, water and surface pixels
   const neighbor = await store.requestChunk(1, 1);
   assert.equal(neighbor.heights[0], page.heights[24]);
   store.dispose();
+});
+
+test('coastal paint moves the distance field across page boundaries and undo restores it', () => {
+  const sampleBaseTile = (_, z) => z < 0 ? 0 : 9;
+  const model = new WaterTerrainModel({ seed: 73, seaLevel: 0, sampleBaseTile,
+    sampleBaseHeight: () => -5, config: resolveWaterDomainConfig() });
+  const generator = { waterTerrainModel: model, seaLevel: 0, sampleTile: sampleBaseTile,
+    sampleHeight: (...point) => model.sampleHeight(...point),
+    sampleWater: (...point) => model.sampleWater(...point) };
+  const tileOverrides = new SpatialOverrideMap(4);
+  const world = { generator, tileOverrides, heightOverrides: new SpatialOverrideMap(4),
+    getTile: (x, z) => tileOverrides.getAt(x, z) ?? sampleBaseTile(x, z), sampleHeight: generator.sampleHeight };
+  const point = [-4, -6];
+  const original = sampleWorldStoreWater(world, ...point).shoreDistance;
+  tileOverrides.set('-4:-2', 9);
+  const distance = sampleWorldStoreWater(world, ...point).shoreDistance;
+  assert.equal(distance, original * 2 / 3);
+  const page = createEditedChunkSampling(generator, 4, { tiles: [[-4, -2, 9]] });
+  assert.equal(page.sampleWater(...point).shoreDistance, distance);
+  tileOverrides.delete('-4:-2');
+  for (let x = -6; x <= -2; x += 1) for (let z = 0; z <= 4; z += 1) tileOverrides.set(`${x}:${z}`, 0);
+  assert.ok(sampleWorldStoreWater(world, -4, -1).shoreDistance > model.sampleWater(-4, -1).shoreDistance);
+  assert.ok(sampleWorldStoreWater(world, -4, 1).shoreDistance > 0);
+  tileOverrides.clear();
+  assert.equal(sampleWorldStoreWater(world, ...point).shoreDistance, original);
 });
 
 test('an edit during generation supersedes the stale worker result before caching', async () => {

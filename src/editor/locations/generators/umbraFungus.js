@@ -26,8 +26,9 @@ const BELL = linear('#b5f2ff');
 const BRACKET = linear('#b08cff');
 const DUSK = linear('#3a2d6b');
 const PALE = linear('#e6fff6');
-const LOAM = linear('#3b2e28');
+const LOAM = linear('#57453c');
 const MYCELIUM = linear('#9d98ad');
+const MOSS = linear('#5c6957');
 
 /** Paints a spindle per (station, side): `paint(station, side, x, y, z)` → linear rgb. */
 function painted(geometry, stations, sides, paint) {
@@ -50,24 +51,26 @@ function painted(geometry, stations, sides, paint) {
 export function loamMound(at, hx, hz, peak, seed) {
   const bump = (x, z) => (fbm3(x * 1.4, 0, z * 1.4, seed, 3) - 0.5) * peak * 0.9;
   // [radial share, height share]: a domed top that rolls over at the boards.
-  const profile = [[0.45, 0.88], [0.8, 0.55], [0.95, 0.18], [1, 0]];
-  const sides = 20;
+  const profile = [[0.22, 0.96], [0.45, 0.88], [0.64, 0.74], [0.8, 0.55], [0.95, 0.18], [1, 0]];
+  const sides = 32;
   const stations = [{ ...at, y: at.y + peak, r: 1 }];
   for (const [, rise] of profile) stations.push({ ...at, y: at.y + peak * rise, r: 1 });
   stations.push({ ...at, y: at.y - 0.06, r: 0 });
   const shape = (u, t) => {
     const s = Math.round(t * (stations.length - 1));
     const share = profile[s - 1]?.[0] ?? 0;
-    const dx = Math.cos(u) * hx * share, dz = Math.sin(u) * hz * share;
+    const radial = share / Math.hypot(Math.cos(u) ** 2, Math.sin(u) ** 2) ** 0.5;
+    const dx = Math.cos(u) * hx * radial, dz = Math.sin(u) * hz * radial;
     return [dx, dz, s <= profile.length - 1 ? bump(at.x + dx, at.z + dz) : 0];
   };
   const geometry = painted(spindle(stations, sides, shape), stations, sides, (s, k, x, y, z) => {
     const threads = fbm3(x * 3.1, y * 3.1, z * 3.1, seed + 3, 3);
     const grain = 0.8 + fbm3(x * 9, y * 9, z * 9, seed + 5, 2) * 0.4;
-    return scale(mix(LOAM, MYCELIUM, Math.max(0, Math.min(1, (threads - 0.56) * 4.5))), grain);
+    const moss = Math.max(0, Math.min(1, (fbm3(x * 2.2, y, z * 3.4, seed + 11) - 0.43) * 5));
+    return scale(mix(mix(LOAM, MOSS, moss), MYCELIUM, Math.max(0, Math.min(0.6, (threads - 0.56) * 4.5))), grain);
   });
   const groundAt = (x, z) => {
-    const reach = Math.hypot((x - at.x) / hx, (z - at.z) / hz);
+    const reach = Math.hypot(((x - at.x) / hx) ** 2, ((z - at.z) / hz) ** 2) ** 0.5;
     let lo = [0, 1];
     for (const point of profile) {
       if (reach <= point[0]) {
@@ -143,11 +146,11 @@ export function lanternCap(base, height, radius, range) {
  * from it and curving back up. Caps are conical, darker at the point, ribbed
  * where the gills show through.
  */
-export function bellCluster(at, count, range) {
+export function bellCluster(at, count, range, size = 1) {
   const bodies = [];
   for (let index = 0; index < count; index += 1) {
     const heading = index / count * TAU + range(-0.4, 0.4), splay = range(0.03, 0.09);
-    const height = range(0.1, 0.32), girth = range(0.008, 0.015), radius = range(0.025, 0.055);
+    const height = range(0.1, 0.32) * size, girth = range(0.008, 0.015) * size, radius = range(0.025, 0.055) * size;
     const axis = (s) => {
       const out = splay * Math.sin(s * Math.PI * 0.6);
       return P(at.x + Math.cos(heading) * out, at.y + height * s, at.z + Math.sin(heading) * out);

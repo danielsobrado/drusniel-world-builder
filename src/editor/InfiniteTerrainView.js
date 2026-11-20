@@ -993,8 +993,8 @@ export class InfiniteTerrainView {
     }
     const coordinates = change.cells ?? change.vertices ?? [];
     const affected = new Set();
-    const diffractionHalo = change.kind === 'tile' ? this.worldStore.diffractionTileHalo ?? 0 : 0;
-    const radius = Math.max(1, this.surfaceMaskChunkRadius, Math.floor(diffractionHalo / this.chunkSize) + 1);
+    const coastalHalo = change.kind === 'tile' ? this.worldStore.coastalTileHalo ?? 0 : 0;
+    const radius = Math.max(1, this.surfaceMaskChunkRadius, Math.floor(coastalHalo / this.chunkSize) + 1);
     for (const coordinate of coordinates) {
       const chunkX = Math.floor(coordinate.x / this.chunkSize);
       const chunkZ = Math.floor(coordinate.z / this.chunkSize);

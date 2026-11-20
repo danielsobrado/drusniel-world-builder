@@ -163,13 +163,16 @@ export class WorkerBackedWorldStore extends InfiniteWorldStore {
     this.pendingChunks.clear();
   }
 
-  get diffractionTileHalo() {
-    return seaDiffractionTileHalo(this.chunkWorker.seaDiffractionConfig, this.tileSize);
+  get coastalTileHalo() {
+    const shore = this.generator.waterTerrainModel?.oceanDistance;
+    // The water field samples one cell beyond the page; the transform has its own two-cell margin.
+    return Math.max(shore ? shore.maxDistanceCells + 3 : 0,
+      seaDiffractionTileHalo(this.chunkWorker.seaDiffractionConfig, this.tileSize));
   }
 
   pageEditState(chunkX, chunkZ) {
     const radius = Math.max(2, getSurfaceMaskSearchRadius(this.surfaceMaskConfig.blendCells, this.tileSize));
-    const tileRadius = Math.max(radius, this.diffractionTileHalo);
+    const tileRadius = Math.max(radius, this.coastalTileHalo);
     const bounds = margin => [chunkX * this.chunkSize - margin, (chunkX + 1) * this.chunkSize + margin,
       chunkZ * this.chunkSize - margin, (chunkZ + 1) * this.chunkSize + margin];
     const heightBounds = bounds(radius);
