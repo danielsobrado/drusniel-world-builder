@@ -167,20 +167,20 @@ def main():
     results.append(export_one('bush-swamp-buttonbush-01', mesh, os.path.join(SRC_BUSHES, 'bush-swamp-buttonbush-01.glb'), alpha_mask=True, side_cam=(3.0, 0.72, 0.65)))
 
     # 4. Rainforest: layered-frond fern & cupped overlapping broadleaves with visible stems
-    mesh, _ = build_rainforest_layered_fern(mat_fern, name='forest-fern-02', seed=701, max_triangles=1999)
+    mesh, _ = build_rainforest_layered_fern(mat_fern, name='forest-fern-02', seed=701, max_triangles=3800)
     results.append(export_one('forest-fern-02', mesh, os.path.join(SRC_GROUND, 'scans', 'forest-fern-02.glb'), alpha_mask=True, side_cam=(2.4, 0.36, 0.32)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_elephant, name='elephant_ear', seed=711, style='elephant_ear', max_triangles=306)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_elephant, name='elephant_ear', seed=711, style='elephant_ear', max_triangles=1950)
     results.append(export_one('elephant_ear', mesh, os.path.join(SRC_GROUND, 'tropical', 'elephant-ear.glb'), alpha_mask=False, side_cam=(2.4, 0.56, 0.52)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_banana, name='banana_understory', seed=712, style='banana', max_triangles=340)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_banana, name='banana_understory', seed=712, style='banana', max_triangles=1980)
     results.append(export_one('banana_understory', mesh, os.path.join(SRC_GROUND, 'tropical', 'banana-understory.glb'), alpha_mask=False, side_cam=(4.8, 0.96, 0.90)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_calathea, name='tropical-calathea-01', seed=713, style='calathea', max_triangles=1500)
-    results.append(export_one('tropical-calathea-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-calathea-01.glb'), alpha_mask=False))
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_calathea, name='tropical-calathea-01', seed=713, style='calathea', max_triangles=3600)
+    results.append(export_one('tropical-calathea-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-calathea-01.glb'), alpha_mask=False, side_cam=(1.6, 0.42, 0.38)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_anthurium, name='tropical-anthurium-01', seed=714, style='anthurium', max_triangles=1432)
-    results.append(export_one('tropical-anthurium-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-anthurium-01.glb'), alpha_mask=False))
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_anthurium, name='tropical-anthurium-01', seed=714, style='anthurium', max_triangles=3600)
+    results.append(export_one('tropical-anthurium-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-anthurium-01.glb'), alpha_mask=False, side_cam=(1.8, 0.46, 0.42)))
 
     print('SILHOUETTE_REVISIONS_SUMMARY=' + json.dumps(results, indent=2))
 
