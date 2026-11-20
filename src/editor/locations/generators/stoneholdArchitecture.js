@@ -64,6 +64,37 @@ function lanternCage(b, at, lightColor = '#ffd29e', intensity = 3.4, range = 14)
   b.light(at, lightColor, intensity, range, { radius: 1.5, halo: 0.58 });
 }
 
+function dwemerChandelier(b, bossAt, drop = 3.6) {
+  const ringY = bossAt.y - drop;
+  const radius = 1.48;
+  // Central iron chain & stepped bronze finial hub.
+  b.prop('iron', rod(P(bossAt.x, bossAt.y - 0.55, bossAt.z), P(bossAt.x, ringY - 0.45, bossAt.z), 0.045, 0.045, 6), 0x3a3e46);
+  b.prop('bronze', rod(P(bossAt.x, ringY + 0.55, bossAt.z), P(bossAt.x, ringY + 0.25, bossAt.z), 0.16, 0.24, 8), 0xd8b478);
+  b.prop('bronze', rod(P(bossAt.x, ringY - 0.15, bossAt.z), P(bossAt.x, ringY - 0.72, bossAt.z), 0.24, 0.04, 8), 0xe2c086);
+  // 8-sided riveted bronze wheel ring + 4 diagonal suspension chains + 4 glowing fire bowls.
+  for (let i = 0; i < 8; i += 1) {
+    const a0 = (i / 8) * Math.PI * 2;
+    const a1 = ((i + 1) / 8) * Math.PI * 2;
+    const p0 = P(bossAt.x + Math.cos(a0) * radius, ringY, bossAt.z + Math.sin(a0) * radius);
+    const p1 = P(bossAt.x + Math.cos(a1) * radius, ringY, bossAt.z + Math.sin(a1) * radius);
+    b.prop('bronze', hewnBeam(p0, p1, 0.14, 0.20, { bevel: 0.02 }), 0xd6af6c);
+    if (i % 2 === 0) {
+      b.prop('iron', rod(P(bossAt.x, ringY + 1.45, bossAt.z), p0, 0.026, 0.026, 5), 0x454952);
+      b.prop('iron', rod(P(p0.x, ringY + 0.04, p0.z), P(p0.x, ringY + 0.24, p0.z), 0.16, 0.22, 8), 0x2c2824);
+      b.prop('glow', rod(P(p0.x, ringY + 0.20, p0.z), P(p0.x, ringY + 0.34, p0.z), 0.14, 0.06, 6), '#ff8628', 2.0);
+    }
+  }
+}
+
+function dwemerSteamPipe(b, x, z, y0, y1, radius = 0.14) {
+  b.prop('bronze', rod(P(x, y0, z), P(x, y1, z), radius, radius, 10), 0xcfa86a);
+  const spans = Math.max(2, Math.round((y1 - y0) / 2.2));
+  for (let i = 0; i <= spans; i += 1) {
+    const fy = y0 + (y1 - y0) * (i / spans);
+    b.prop('bronze', rod(P(x, fy - 0.06, z), P(x, fy + 0.06, z), radius * 1.42, radius * 1.42, 10), 0xe2c086);
+  }
+}
+
 /**
  * Zone A — Monumental entrance threshold & coursed masonry gate hall with
  * arched blind shrine niches and true radial voussoir threshold arch.
@@ -85,6 +116,9 @@ export function buildEntranceHall(b, { height = 8 } = {}) {
       baseTint: 0xe6e4e0,
       trimTint: 0xf0ede7,
     });
+    // Flanged Dwemer bronze steam conduits flanking the entrance shrine niches.
+    dwemerSteamPipe(b, wx + inDir * 0.42, -7.2, 0.0, 7.6, 0.14);
+    dwemerSteamPipe(b, wx + inDir * 0.42, -13.8, 0.0, 7.6, 0.14);
     // Recessed dark stone blind-niche backplate inside the dressed arch opening.
     b.prop('carved', stoneBlock(0.28, 4.6, 3.8, P(sign * 7.9, 0.85, -10.5), { bevel: 0.04, irregular: 0.04 }), 0x858a94);
     b.prop('bronze', stoneBox(0.24, 1.8, 1.2, P(wx + inDir * 0.28, 3.3, -10.5), { bevel: 0.03, irregular: 0.03 }), 0xc9a56b);
@@ -122,6 +156,9 @@ export function buildVaultedCeiling(b, bays, { rowX, height, vaultRise, avenueZ,
       const midZ = (z + bays[i + 1]) * 0.5;
       b.prop('carved', stoneBox(1.75, 1.08, 1.75, P(0, crownY - 0.15, midZ), { yaw: Math.PI / 4, bevel: 0.1, irregular: 0.04 }), 0xe2dfd9);
       b.prop('bronze', stoneBox(0.86, 0.22, 0.86, P(0, crownY - 0.68, midZ), { yaw: Math.PI / 4, bevel: 0.025, irregular: 0.03 }), 0xd8b478);
+      if (i % 2 === 0) {
+        dwemerChandelier(b, P(0, crownY - 0.15, midZ), 3.6);
+      }
       // Tier 2 — Clean darker diagonal groin ribs seating from pier imposts into the bay boss to preserve contrast.
       for (const sign of [-1, 1]) {
         for (const endZ of [z, bays[i + 1]]) {
@@ -260,13 +297,19 @@ export function buildWallBay(b, sign, halfWidth, height, galleryY, z0, z1, varia
     for (const dz of [-2.4, 2.4]) {
       b.prop('carved', stoneBlock(0.95, 3.6, 0.38, P(sign * (halfWidth + 0.02), 0, midZ + dz), { bevel: 0.03 }), 0x808590);
     }
-    // Stepped stone capstan base + horizontal oak/iron drum + spokes + tensioned twin hoist chains.
+    // Stepped stone capstan base + horizontal oak/iron drum + bronze gear wheel + tensioned twin hoist chains.
     b.prop('carved', stoneBlock(1.4, 0.55, 2.5, P(xWall + inDir * 0.3, 0, midZ), { bevel: 0.04, batter: 0.08 }), 0xc8cace);
     for (const dz of [-0.95, 0.95]) {
       b.prop('iron', stoneBlock(0.55, 1.35, 0.24, P(xWall + inDir * 0.3, 0.55, midZ + dz), { bevel: 0.025 }), 0x6a6e78);
     }
     b.prop('timber', rod(P(xWall + inDir * 0.3, 1.45, midZ - 0.9), P(xWall + inDir * 0.3, 1.45, midZ + 0.9), 0.32, 0.32, 10), 0x6a5038);
     b.prop('iron', rod(P(xWall + inDir * 0.3, 1.45, midZ - 1.15), P(xWall + inDir * 0.3, 1.45, midZ + 1.15), 0.14, 0.14, 8), 0x767b84);
+    b.prop('bronze', rod(P(xWall + inDir * 0.3, 1.45, midZ - 1.12), P(xWall + inDir * 0.3, 1.45, midZ - 0.96), 0.52, 0.52, 12), 0xd8b478);
+    for (let g = 0; g < 10; g += 1) {
+      const ga = (g / 10) * Math.PI * 2;
+      b.prop('bronze', stoneBox(0.14, 0.12, 0.14, P(xWall + inDir * (0.3 + Math.cos(ga) * 0.54), 1.45 + Math.sin(ga) * 0.54, midZ - 1.04), { bevel: 0.015 }), 0xe2c086);
+    }
+    dwemerSteamPipe(b, xWall + inDir * 0.28, midZ - 1.95, 0.0, 5.2, 0.12);
     for (const dz of [-0.55, 0.55]) {
       b.prop('iron', rod(P(xWall + inDir * 0.3, 1.65, midZ + dz), P(xWall + inDir * 0.3, 4.95, midZ + dz), 0.032, 0.032, 6), 0x646872);
     }
@@ -373,6 +416,9 @@ export function buildHeroGateway(b, farZ, height) {
     for (const cy of [2.4, 5.2, 8.0, 10.6]) {
       b.prop('bronze', stoneBox(0.92, 0.24, 0.54, P(px - sign * 1.1, cy, farZ + 0.76), { bevel: 0.025 }), 0xd8b478);
     }
+    // Monumental bronze Dwemer steam-organ pipes framing the Forgeheart portal bastions.
+    dwemerSteamPipe(b, sign * 8.15, farZ + 0.82, 0.0, 9.6, 0.18);
+    dwemerSteamPipe(b, sign * 8.65, farZ + 0.72, 0.0, 7.2, 0.14);
 
     // Artisan riveted iron & bronze fortress gate leaves with diagonal X-truss bracing and central roundel.
     b.prop('iron', stoneBlock(0.36, 8.6, 3.4, P(sign * 4.15, 0, farZ - 2.3), { bevel: 0.03, irregular: 0.04 }), 0x626670);
