@@ -153,7 +153,8 @@ water:
         fadeStartMeters: 0.5
         fadeEndMeters: 6.0
         maximumPhaseDistanceMeters: 40
-      # Coarse upstream visibility drives surf, swash, rock impacts, and spray.
+      # Drives surf, analytic/persistent swash, rock impacts, and spray.
+      # The low/medium terrain shader reuses the existing ocean exposure.
       diffraction:
         enabled: true
         latticeStepMeters: 16

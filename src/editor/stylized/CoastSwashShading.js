@@ -9,6 +9,7 @@ import {
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import { seaStateUniforms } from '../water/seaState.js';
+import { SEA_SWELL_COMPONENTS } from '../water/SeaSwell.js';
 import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { PatternOrigins } from './PatternOrigins.js';
 import { shoreContactDistance } from './ShoreContactNodes.js';
@@ -138,6 +139,7 @@ export function createCoastSwashNodes({
   shorelineFadeDepth = 0.35,
   oceanMask = float(1),
   shelter = float(1),
+  diffraction = null,
   laceField = null,
   persistentEnabled = true,
 }) {
@@ -153,8 +155,11 @@ export function createCoastSwashNodes({
     .mul(oneMinus(smoothstep(config.runupHeight + 0.2, config.runupHeight + config.dampHeight + 0.4, height)))
     .mul(reach)
     .mul(oceanMask);
+  const phaseLag = diffraction?.enabled
+    ? shelter.sub(1).mul(SEA_SWELL_COMPONENTS[0].waveNumber * diffraction.phaseLagMeters)
+    : float(0);
   const { phase, front, coverageAt } = coastSwashForcingNodes({
-    localXZ, patternOrigins, height, clock, config,
+    localXZ, patternOrigins, height, clock, config, runupScale: shelter, phaseLag,
   });
   const analyticFilm = coverageAt(phase).mul(band);
   const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength, laceField);

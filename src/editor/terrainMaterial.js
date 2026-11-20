@@ -485,7 +485,14 @@ export function createTerrainMaterial({
     // The interpolated mesh height keeps narrow wash fronts smooth between
     // vertices; the nearest-filtered height texture would make texel terraces.
     const coastalHeight = positionWorld.y;
-    const waterContext = coastPatterns ? createTerrainWaterContext(terrainUv, coastalHeight, width + 1) : null;
+    const diffraction = stylizedConfig.water?.sea?.enabled !== false
+      && stylizedConfig.water?.sea?.surf?.enabled
+      && stylizedConfig.water?.sea?.surf?.model === 'directionalBreakers'
+      ? stylizedConfig.water.sea.surf.diffraction : null;
+    const waterContext = coastPatterns ? createTerrainWaterContext(
+      terrainUv, coastalHeight, width + 1, diffraction?.enabled === true,
+      stylizedConfig.water?.coast?.runupHeight ?? DEFAULT_COAST_SWASH.runupHeight,
+    ) : null;
     const oceanMask = waterContext?.ocean ?? float(0);
     const sand = coastPatterns && createCoastSandNodes({
       localXZ, patterns: coastPatterns, groundHeight: coastalHeight,
@@ -519,6 +526,8 @@ export function createTerrainMaterial({
       config: { ...DEFAULT_COAST_SWASH, ...(stylizedConfig.water?.coast ?? {}) },
       shorelineFadeDepth: stylizedConfig.water?.optics?.shorelineFadeDepth ?? 0.35,
       oceanMask,
+      shelter: waterContext?.shelter ?? float(1),
+      diffraction,
       persistentEnabled: ['high', 'ultra'].includes(stylizedConfig.water?.qualityTier),
       // Through the family atlas's noise layers: the terrain has no sampler to spare.
       laceField: familyAtlas ? (uv) => atlasNoise(WORLD_NOISE_LAYERS.water)(uv).r : null,

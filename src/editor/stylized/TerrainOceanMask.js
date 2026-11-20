@@ -1,6 +1,10 @@
 import { DataTexture, HalfFloatType, RGBAFormat, DataUtils } from 'three/webgpu';
-import { Fn, If, float, smoothstep, uniform, vec4 } from 'three/tsl';
+import { Fn, If, float, max, mix, oneMinus, smoothstep, uniform, vec4 } from 'three/tsl';
 import { bilinearLoad, TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
+import { createSeaShelterNode } from './SeaDiffractionNodes.js';
+
+const MIN_SHELTER_HEIGHT_METERS = 2.8;
+const SHELTER_HEIGHT_MARGIN_METERS = 1.5;
 
 // Neutral stand-in until the existing water slot is available. Shared by all terrain.
 const empty = new DataTexture(new Uint16Array([0, DataUtils.toHalfFloat(10000), 0, 0]), 1, 1, RGBAFormat, HalfFloatType);
@@ -15,7 +19,8 @@ export function createTerrainOceanMask(terrainUv, groundHeight, fieldSize) {
 }
 
 /** Share the slot's derived water identity with the ground without a sampler. */
-export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize) {
+export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
+  shelteredSurf = false, runupHeight = 0) {
   const readTexture = object => waterSlot(object)?.waterFieldTexture;
   const fieldUv = terrainUv.mul((fieldSize - 1) / fieldSize).add(0.5 / fieldSize);
   const field = bilinearLoad(empty, fieldUv, readTexture);
@@ -52,5 +57,25 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize) {
     });
     return result;
   })().toVar();
-  return { ocean: context.r, organic: context.g, cold: context.b, wet: context.a, damp };
+  // The appearance alpha already carries sea energy. Read only the existing
+  // texture, with no sampler, and only for the shallow coastal height band.
+  const shelterHeightLimit = Math.max(MIN_SHELTER_HEIGHT_METERS,
+    runupHeight + SHELTER_HEIGHT_MARGIN_METERS);
+  const shelter = shelteredSurf ? Fn(() => {
+    const result = float(1).toVar();
+    If(wet.greaterThan(0), () => {
+      const height = groundHeight.sub(field.g.add(origin));
+      If(height.greaterThan(-16).and(height.lessThan(shelterHeightLimit)), () => {
+        const exposed = bilinearLoad(emptyAppearance, fieldUv, readAppearance, value => {
+          const isOcean = value.r.mul(255).round().equal(1);
+          return value.a.mul(float(isOcean));
+        });
+        const relative = exposed.div(max(filtered.r, 0.0001));
+        const transmission = createSeaShelterNode(relative, max(field.a, 0));
+        result.assign(mix(float(1), transmission, smoothstep(0, 0.05, filtered.r)));
+      });
+    });
+    return result;
+  })().toVar('terrainSeaShelter') : float(1);
+  return { ocean: context.r, organic: context.g, cold: context.b, wet: context.a, damp, shelter };
 }

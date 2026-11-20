@@ -88,5 +88,6 @@ npm run build
 npm run qa:water:acceptance
 ```
 
-TODO: A later phase can bring the sheltered analytic terrain swash fallback
-to medium/low quality without consuming a new terrain material sampler.
+The low/medium analytic terrain swash fallback is implemented in
+[coastal-analytic-shelter-2026-11-20.md](coastal-analytic-shelter-2026-11-20.md),
+using the existing water-appearance texture without another sampler.
