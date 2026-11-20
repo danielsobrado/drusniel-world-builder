@@ -111,8 +111,8 @@ biomeLooks:
       # Granite kopjes standing out of the grass.
       formations: 0.25
       water: { tint: '#c8bf98', desaturate: 0.45 }
-      # Dry-season thorn scrub, olive going to straw.
-      understory: { tint: '#e6d6a0', tone: 1.05, saturation: 0.7 }
+      # Dusty olive scrub stays legible against the straw grass.
+      understory: { tint: '#bed09b', tone: 0.98, saturation: 0.82 }
       prints: { ground: 0.4, lifetime: 90, tint: '#8a6a48' }
     # Soils for the green biomes (docs/look-bible.md, rule 2). Without one, bare
     # ground between thin grass showed the Azgaar map colour: pale lime in
