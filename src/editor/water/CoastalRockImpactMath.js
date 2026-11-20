@@ -1,6 +1,8 @@
 import { SEA_SWELL_COMPONENTS } from './SeaSwell.js';
 import { directionalCarriers, evaluateDirectionalSurfCpu, surfCarrierFrames, surfShoalingGain } from './SeaSurfMath.js';
 import { seaExposure } from './WaterAppearance.js';
+import { seaRefractionPhaseShift } from './SeaRefractionMath.js';
+import { seaDiffractionPhaseDelay } from './SeaDiffraction.js';
 
 const TAU = Math.PI * 2;
 const CREST_PHASE = Math.PI * 0.5;
@@ -21,7 +23,8 @@ export function impactHash(id, crest, index = 0) {
   return ((hash >>> 0) + 0.5) / 4294967296;
 }
 
-export function impactWaveSample(x, z, water, time, surf, sea, storm) {
+export function impactWaveSample(x, z, water, time, surf, sea, storm,
+  exposure = seaExposure(Math.max(0, water.shoreDistance ?? 0))) {
   const depth = Math.max(water.depth ?? 0, 0.25);
   const shoreDistance = Math.max(0, water.shoreDistance ?? 0);
   const wave = SEA_SWELL_COMPONENTS[0];
@@ -31,8 +34,10 @@ export function impactWaveSample(x, z, water, time, surf, sea, storm) {
   const oblique = frames?.surfOblique0.wave ?? [carrier.waveNumber * carrier.x, carrier.waveNumber * carrier.z];
   const phase = carrier.phase + time * carrier.angularSpeed
     + (directional ? shoreDistance * surf.directional.waveNumbers[0] : 0)
+    + (directional ? seaRefractionPhaseShift(depth, shoreDistance, carrier, 0, surf) : 0)
+    + (directional ? seaDiffractionPhaseDelay(
+      exposure, shoreDistance, carrier.waveNumber, surf.diffraction) : 0)
     + x * oblique[0] + z * oblique[1];
-  const exposure = seaExposure(shoreDistance);
   const swellHeight = 2 * sea.amplitude * (1 + storm * (sea.stormScale - 1)) * exposure;
   if (!directional) {
     return { phase, crest: impactCrestIndex(phase), height: swellHeight, breaking: impactClamp(1 - depth / 3) };

@@ -12,6 +12,8 @@ import { coastalWindowOrigin, coastalScrollCells } from './CoastalSwashMath.js';
 import { CoastalSwashInputs, nearOcean } from './CoastalSwashInputs.js';
 import { coastalSwashResolution, resolveCoastalSwashConfig } from './CoastalSwashConfig.js';
 import { seaStateUniforms } from './seaState.js';
+import { SEA_SWELL_COMPONENTS } from './SeaSwell.js';
+import { resolveSeaDiffraction } from './SeaDiffraction.js';
 
 function makeStorageTexture(size, name) {
   const result = new THREE.StorageTexture(size, size);
@@ -36,7 +38,7 @@ function stepUniforms() {
   };
 }
 
-function makeCompute(source, target, inputs, patterns, coast, settings, uniforms, size, forward) {
+function makeCompute(source, target, inputs, patterns, coast, settings, diffraction, uniforms, size, forward) {
   const span = size * settings.texelMeters;
   const inputStep = settings.inputTexelMeters / span;
   const inputAt = uv => texture(inputs, uv).level(0);
@@ -48,8 +50,13 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
     const uv = vec2(float(x).add(0.5), float(z).add(0.5)).div(size);
     const input = inputAt(uv);
     const localXZ = uv.mul(span).sub(span * 0.5);
+    const transmission = input.a.clamp(0, 1);
+    const phaseLag = diffraction.enabled
+      ? transmission.sub(1).mul(SEA_SWELL_COMPONENTS[0].waveNumber * diffraction.phaseLagMeters)
+      : float(0);
     const forcing = coastSwashForcingNodes({
       localXZ, patternOrigins: patterns, height: input.r, clock: uniforms.time, config: coast,
+      runupScale: transmission, phaseLag,
     });
     const reach = oneMinus(smoothstep(coast.runupMeters * 0.6, coast.runupMeters, max(input.g, 0)));
     const coastGate = input.b.mul(reach);
@@ -82,7 +89,7 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
     const backwash = min(max(frontSpeed.negate(), 0).div(slope), settings.maxBackwashSpeed);
     const velocity = landward.mul(uprush.sub(backwash)).mul(here.g.mul(0.85).add(0.15));
     const sideways = sin(patterns.wavePhase('frontBreakup', localXZ))
-      .mul(settings.lateralSpeed).mul(coastGate);
+      .mul(settings.lateralSpeed).mul(coastGate).mul(transmission);
     const transportedVelocity = velocity.add(
       vec2(landward.y.negate(), landward.x).mul(sideways),
     );
@@ -103,7 +110,8 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
       .add(coverageNow.mul(settings.foamWaterSeconds - settings.foamWetSeconds));
     const packet = sin(patterns.wavePhase('frontBreakup', localXZ).mul(3)).mul(0.2).add(0.8);
     const breaker = seaStateUniforms.storm.mul(0.45).add(0.55).clamp(0, 1);
-    const injected = advancing.mul(settings.foamInjection).mul(packet).mul(breaker);
+    const injected = advancing.mul(settings.foamInjection).mul(packet).mul(breaker)
+      .mul(transmission);
     const mobile = carried.b.mul(exp(d.div(foamLifetime).negate()))
       .add(injected).clamp(0, 1);
     const deposit = min(mobile, mobile.mul(retreating).mul(settings.foamDeposition));
@@ -118,11 +126,13 @@ function makeCompute(source, target, inputs, patterns, coast, settings, uniforms
 
 /** Persistent, single-view coastal state; no per-chunk simulation or readback. */
 export class CoastalSwashField {
-  constructor({ renderer, terrainView, coastConfig, qualityTier }) {
+  constructor({ renderer, terrainView, coastConfig, qualityTier, seaSurfConfig = null }) {
     this.renderer = renderer;
     this.terrainView = terrainView;
     this.coast = { ...DEFAULT_COAST_SWASH, ...coastConfig };
     this.settings = resolveCoastalSwashConfig(coastConfig?.persistent);
+    this.diffraction = resolveSeaDiffraction(seaSurfConfig?.enabled
+      && seaSurfConfig?.model === 'directionalBreakers' ? seaSurfConfig.diffraction : null);
     this.size = coastalSwashResolution(this.settings, qualityTier);
     this.supported = Boolean(this.size && renderer?.backend?.isWebGPUBackend && this.coast.enabled);
     this.span = this.size * this.settings.texelMeters;
@@ -146,7 +156,7 @@ export class CoastalSwashField {
     this.scratch = makeStorageTexture(this.size, 'coastal-swash-scratch');
     this.inputs = new CoastalSwashInputs(
       terrainView.worldStore, Math.round(this.span / this.settings.inputTexelMeters),
-      this.settings.inputTexelMeters, this.coast.runupMeters,
+      this.settings.inputTexelMeters, this.coast.runupMeters, this.diffraction,
     );
     this.patterns = createCoastPatternOrigins();
     // Each dispatch owns uniforms so queued compute passes never observe the next step's values.
@@ -157,9 +167,9 @@ export class CoastalSwashField {
         forwardStep,
         backwardStep,
         forward: makeCompute(this.state, this.scratch, this.inputs.texture,
-          this.patterns, this.coast, this.settings, forwardStep, this.size, true),
+          this.patterns, this.coast, this.settings, this.diffraction, forwardStep, this.size, true),
         backward: makeCompute(this.scratch, this.state, this.inputs.texture,
-          this.patterns, this.coast, this.settings, backwardStep, this.size, false),
+          this.patterns, this.coast, this.settings, this.diffraction, backwardStep, this.size, false),
       };
     });
     setCoastalSwashTexture(this.state);

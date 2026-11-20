@@ -137,6 +137,7 @@ export function createCoastSwashNodes({
   clock = waterVisualClock,
   shorelineFadeDepth = 0.35,
   oceanMask = float(1),
+  shelter = float(1),
   laceField = null,
   persistentEnabled = true,
 }) {
@@ -164,7 +165,8 @@ export function createCoastSwashNodes({
     // Only where the wash actually runs: on nearly flat sand the foam contour
     // otherwise crossed dry ground several times, drawing parallel white wires.
     .mul(analyticFilm)
-    .mul(band);
+    .mul(band)
+    .mul(shelter);
   let memory = analyticFilm;
   for (const cyclesAgo of MEMORY_CYCLES) {
     memory = max(memory, coverageAt(phase.sub(TAU * cyclesAgo)).mul(Math.exp(-cyclesAgo * config.washDecay)));

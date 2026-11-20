@@ -27,6 +27,7 @@ export function coastalFlowVelocity(frontSpeed, landwardX, landwardZ, slope, fil
 
 export function coastalFoamStep({
   wetness, film, mobileFoam, strandedFoam, coverageNow, coveragePrevious, breaking, foamPattern,
+  shelter = 1,
 }, dt, config) {
   const advance = Math.max(0, coverageNow - coveragePrevious);
   const retreat = Math.max(0, coveragePrevious - coverageNow);
@@ -34,7 +35,8 @@ export function coastalFoamStep({
   const thinFilm = Math.min(1, Math.max(film * coastalDecay(dt, config.filmSeconds), coverageNow));
   const lifetime = config.foamDrySeconds + (config.foamWetSeconds - config.foamDrySeconds) * thinFilm;
   const carried = Math.min(1, mobileFoam * coastalDecay(dt, lifetime)
-    + config.foamInjection * advance * breaking * foamPattern);
+    + config.foamInjection * advance * breaking * foamPattern
+      * Math.min(1, Math.max(0, shelter)));
   const deposit = Math.min(carried, carried * retreat * config.foamDeposition);
   const stranded = Math.min(1, strandedFoam * coastalDecay(dt, config.strandedSeconds)
     * Math.exp(-config.washOff * advance) + deposit);

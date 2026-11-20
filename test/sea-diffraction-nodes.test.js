@@ -47,6 +47,7 @@ test('coastal foam and waterline effects share shelter, without extra material s
   ].map(async path => readFile(new URL(path, import.meta.url), 'utf8')));
   assert.match(surf, /createSeaDiffractionPhaseNode\(/);
   assert.match(surf, /seaCoastalSurfPhase/);
-  assert.match(water, /\.mul\(sea\.shelter\)/);
+  assert.match(water, /shelter: sea\.shelter/);
+  assert.doesNotMatch(water, /impact\.foam[^\n]*\.mul\(sea\.shelter\)/);
   assert.match(appearance, /exposure: filtered.a.clamp\(0, 1\)/);
 });

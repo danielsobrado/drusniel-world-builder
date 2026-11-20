@@ -444,6 +444,7 @@ export class InfiniteTerrainView {
       renderer: this.renderer,
       terrainView: this,
       coastConfig: this.stylizedConfig.water?.coast,
+      seaSurfConfig: this.stylizedConfig.water?.sea?.surf,
       qualityTier: this.stylizedConfig.water?.qualityTier,
     });
     // Hi-Z occlusion culling, after `init()` so the backend it gates on exists. It

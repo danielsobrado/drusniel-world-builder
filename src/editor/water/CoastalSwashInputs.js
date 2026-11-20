@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { floatToHalf } from './WaterField.js';
-import { sampleWorldStoreWater } from './TerrainWaterQueries.js';
+import { sampleWorldStoreWater, sampleWorldStoreWaterSurface } from './TerrainWaterQueries.js';
+import { createSeaDiffractionSampler, resolveSeaDiffraction } from './SeaDiffraction.js';
 import { WATER_KIND_NONE, WATER_KIND_OCEAN } from './WaterConstants.js';
 
 const FAR_DISTANCE = 1e6;
@@ -46,11 +47,12 @@ function createTexture(size) {
 
 /** A sampled view of authoritative ocean classification and editable terrain. */
 export class CoastalSwashInputs {
-  constructor(worldStore, size, texelMeters, runupMeters) {
+  constructor(worldStore, size, texelMeters, runupMeters, diffraction = null) {
     this.worldStore = worldStore;
     this.size = size;
     this.texelMeters = texelMeters;
     this.runupMeters = runupMeters;
+    this.diffraction = resolveSeaDiffraction(diffraction);
     this.texture = createTexture(size);
     this.revision = null;
     this.originX = NaN;
@@ -90,6 +92,13 @@ export class CoastalSwashInputs {
     const oceanDistances = distanceTransform(types, size, 1);
     const landDistances = distanceTransform(types, size, 0);
     const pixels = this.texture.image.data;
+    const shelter = this.diffraction.enabled
+      ? createSeaDiffractionSampler({
+        sampleWater: (cellX, cellZ) => sampleWorldStoreWaterSurface(worldStore, cellX, cellZ),
+        tileSizeMeters: tileSize,
+        settings: this.diffraction,
+      })
+      : null;
     const range = this.runupMeters + 3;
     let eligibleCount = 0;
     for (let i = 0; i < types.length; i++) {
@@ -101,7 +110,11 @@ export class CoastalSwashInputs {
       pixels[offset] = floatToHalf(Math.max(-16, Math.min(16, heights[i])));
       pixels[offset + 1] = floatToHalf(Math.max(-128, Math.min(128, distance)));
       pixels[offset + 2] = floatToHalf(eligible);
-      pixels[offset + 3] = floatToHalf(1);
+      const worldX = originX + (i % size + 0.5) * texelMeters;
+      const worldZ = originZ + (Math.floor(i / size) + 0.5) * texelMeters;
+      const shoreDistance = Math.max(0, -distance);
+      pixels[offset + 3] = floatToHalf(eligible && shelter
+        ? shelter(worldX / tileSize, -worldZ / tileSize, shoreDistance) : 1);
     }
     this.texture.needsUpdate = true;
     this.originX = originX;

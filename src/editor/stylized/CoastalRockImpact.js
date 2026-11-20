@@ -2,6 +2,7 @@ import { WATER_KIND_OCEAN } from '../water/WaterConstants.js';
 import { staticWaterAt } from '../water/StaticWaterSample.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { seaStateUniforms } from '../water/seaState.js';
+import { sampleWorldStoreSeaExposure } from '../water/TerrainWaterQueries.js';
 import { resolveSeaSurf } from '../water/SeaSurf.js';
 import {
   impactContactPoint, impactIntensity, impactWaveSample, impactClamp,
@@ -32,6 +33,7 @@ export class CoastalRockImpact {
     this.history = new Map();
     this.placements = null;
     this.scanAt = -Infinity;
+    this.scanRevision = null;
     this.scanX = NaN;
     this.scanZ = NaN;
     this.lastTime = null;
@@ -77,6 +79,11 @@ export class CoastalRockImpact {
       id: String(placement.stableId),
       x: placement.x, z: placement.z,
       bottom, top, radius, water: selected,
+      exposure: sampleWorldStoreSeaExposure(
+        this.terrainView.worldStore,
+        placement.x + selectedOffset[0], placement.z + selectedOffset[1],
+        selected.shoreDistance ?? 0,
+      ),
       directionX: length > 0.001 ? directionX / length : 1,
       directionZ: length > 0.001 ? directionZ / length : 0,
     };
@@ -86,7 +93,15 @@ export class CoastalRockImpact {
     const canonical = this.terrainView.floatingOrigin.toCanonical(camera.position.x, camera.position.z);
     const rockPlacements = this.rockView.getPlacements();
     const moved = Math.hypot(canonical.x - this.scanX, canonical.z - this.scanZ);
-    if (this.placements === rockPlacements && time - this.scanAt < 1 && moved < 8) return;
+    const revision = `${this.terrainView.worldStore.baseTerrainRevision}:${this.terrainView.worldStore.revision}`;
+    if (this.placements === rockPlacements && this.scanRevision === revision
+      && time - this.scanAt < 1 && moved < 8) return;
+    if (this.scanRevision !== null && this.scanRevision !== revision) {
+      this.history.clear();
+      this.field?.reset();
+      this.spray?.reset();
+    }
+    this.scanRevision = revision;
     this.scanAt = time;
     this.scanX = canonical.x;
     this.scanZ = canonical.z;
@@ -134,7 +149,8 @@ export class CoastalRockImpact {
     const cameraWorld = this.terrainView.floatingOrigin.toCanonical(camera.position.x, camera.position.z);
     let emittedThisFrame = 0;
     for (const site of this.sites) {
-      const wave = impactWaveSample(site.x, site.z, site.water, time, this.surf, this.sea, storm);
+      const wave = impactWaveSample(site.x, site.z, site.water, time, this.surf, this.sea,
+        storm, site.exposure);
       const last = this.history.get(site.id);
       if (!last || jumped) {
         this.history.set(site.id, { crest: wave.crest, time });

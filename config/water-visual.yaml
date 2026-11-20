@@ -153,7 +153,7 @@ water:
         fadeStartMeters: 0.5
         fadeEndMeters: 6.0
         maximumPhaseDistanceMeters: 40
-      # Coarse upstream visibility attenuates crests behind headlands and coves.
+      # Coarse upstream visibility drives surf, swash, rock impacts, and spray.
       diffraction:
         enabled: true
         latticeStepMeters: 16
@@ -252,6 +252,7 @@ water:
     # Wash foam is a hint at the waterline; at 0.55 it whitened small pools
     # edge to edge.
     foamStrength: 0.3
+    # Rock contact events share sea.surf.diffraction exposure and crest timing.
     rockImpact:
       enabled: true
       activationDistanceMeters: 64
@@ -301,6 +302,7 @@ water:
         medium: true
         high: true
         ultra: true
+    # The existing swash-input alpha carries sheltered run-up and foam energy.
     persistent:
       enabled: true
       fixedHz: 30
