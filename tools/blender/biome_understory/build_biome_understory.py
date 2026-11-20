@@ -614,21 +614,21 @@ def _add_moss_pillow(bm, uv, center, rx, ry, rz, seed, u_range, v_range, rings=1
     def pillow_pt(frac, ang):
         lobe = (
             1.0
-            + 0.12 * math.sin(ang * 3.0 + ph1)
-            + 0.08 * math.cos(ang * 5.0 - ph2)
-            + 0.05 * math.sin(ang * 7.0 + ph1 * 0.5)
+            + 0.22 * math.sin(ang * 3.0 + ph1)
+            + 0.14 * math.cos(ang * 5.0 - ph2)
+            + 0.08 * math.sin(ang * 7.0 + ph1 * 0.5)
         )
         r_xy = frac * lobe
         dx = math.cos(ang) * rx * r_xy
         dy = math.sin(ang) * ry * r_xy
-        # Soft flattened dome profile with subtle organic pillow undulation and buried ground skirt
-        dome = math.cos(min(1.0, frac) * math.pi * 0.5) ** 0.72
+        # Shallow ground-hugging feather-moss profile tapering smoothly to ground with no steep dark rim
+        dome = (max(0.0, 1.0 - frac * frac) ** 1.35)
         bump = (
             1.0
-            + 0.14 * math.sin(dx * 11.0 + ph1) * math.cos(dy * 11.0 - ph2)
-            + 0.07 * math.cos((dx + dy) * 19.0 + ph2)
+            + 0.16 * math.sin(dx * 12.0 + ph1) * math.cos(dy * 12.0 - ph2)
+            + 0.08 * math.cos((dx + dy) * 20.0 + ph2)
         )
-        skirt = -0.045 * max(0.0, (frac - 0.84) / 0.16) ** 1.4
+        skirt = -0.022 * max(0.0, (frac - 0.72) / 0.28) ** 1.2
         z = center.z + rz * dome * bump + skirt
         u_c = max(u0, min(u1, uc + (dx / max(rx, 1e-4)) * ru))
         v_c = max(v0, min(v1, vc + (dy / max(ry, 1e-4)) * rv))
@@ -759,23 +759,40 @@ def build_taiga_berry_moss(mat):
     uv_leaf_u, uv_leaf_v = (0.03, 0.47), (0.53, 0.97)
     uv_berry_u, uv_berry_v = (0.53, 0.97), (0.53, 0.97)
 
-    # 1. Soft, low-profile multi-lobed boreal feather-moss hummock anchored below ground
+    # 1. Shallow, irregular multi-lobed boreal feather-moss base (no steep dark oval rim)
     pillows = (
-        (Vector((-0.07, 0.04, 0.0)), 0.37, 0.32, 0.095, 2161),
-        (Vector((0.22, -0.10, 0.0)), 0.27, 0.23, 0.075, 2162),
-        (Vector((-0.25, -0.13, 0.0)), 0.23, 0.20, 0.065, 2163),
-        (Vector((0.06, 0.20, 0.0)), 0.24, 0.19, 0.070, 2164),
+        (Vector((-0.11, 0.08, 0.0)), 0.30, 0.24, 0.048, 2161),
+        (Vector((0.20, -0.09, 0.0)), 0.24, 0.19, 0.036, 2162),
+        (Vector((-0.26, -0.14, 0.0)), 0.20, 0.16, 0.030, 2163),
+        (Vector((0.08, 0.22, 0.0)), 0.21, 0.17, 0.032, 2164),
+        (Vector((-0.22, 0.22, 0.0)), 0.17, 0.14, 0.026, 2165),
+        (Vector((0.28, 0.10, 0.0)), 0.18, 0.14, 0.024, 2166),
     )
     for center, rx, ry, rz, seed in pillows:
         _add_moss_pillow(bm, uv, center, rx, ry, rz, seed, (uv_moss[0], uv_moss[1]), (uv_moss[2], uv_moss[3]))
 
-    # 2. Small pale Cladonia reindeer-lichen coral tufts tucked across the moss hummock
+    # 1b. Creeping perimeter moss/lingonberry runners breaking up the base outline
+    for r_idx in range(7):
+        ang = (r_idx / 7.0) * math.tau + rng.uniform(-0.26, 0.26)
+        out = Vector((math.cos(ang), math.sin(ang), 0.0))
+        side = Vector((-out.y, out.x, 0.0))
+        r0 = out * rng.uniform(0.22, 0.30) + Vector((0.0, 0.0, 0.014))
+        r1 = r0 + out * 0.12 + side * rng.uniform(-0.04, 0.04) + Vector((0.0, 0.0, 0.012))
+        r2 = r1 + out * rng.uniform(0.10, 0.16) + side * rng.uniform(-0.05, 0.05) + Vector((0.0, 0.0, -0.008))
+        tube(bm, uv, [r0, r1, r2], [0.007, 0.005, 0.0025], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
+        for li in range(4):
+            t_l = 0.25 + 0.22 * li
+            lp = r0.lerp(r2, t_l) + Vector((0.0, 0.0, 0.008))
+            ldir = (out * 0.55 + side * (0.75 if li % 2 == 0 else -0.75) + Vector((0.0, 0.0, 0.35))).normalized()
+            _add_lingonberry_leaf(bm, uv, lp, ldir, 0.055, 0.034, roll=rng.uniform(-0.3, 0.3), arch=0.14, u_range=uv_leaf_u, v_range=uv_leaf_v)
+
+    # 2. Small pale Cladonia reindeer-lichen coral tufts tucked across the shallow moss lobes
     lichen_sites = (
-        Vector((0.12, 0.08, 0.060)),
-        Vector((-0.18, -0.05, 0.052)),
-        Vector((0.22, -0.12, 0.055)),
-        Vector((0.03, -0.18, 0.046)),
-        Vector((-0.08, 0.19, 0.050)),
+        Vector((0.14, 0.08, 0.026)),
+        Vector((-0.18, -0.06, 0.024)),
+        Vector((0.22, -0.12, 0.024)),
+        Vector((0.04, -0.18, 0.022)),
+        Vector((-0.08, 0.20, 0.024)),
     )
     for site in lichen_sites:
         for t_idx in range(6):
@@ -814,35 +831,43 @@ def build_taiga_berry_moss(mat):
                 u_range=uv_leaf_u, v_range=uv_leaf_v,
             )
 
-    cane_count = 17
-    for k in range(cane_count):
-        yaw = k / cane_count * math.tau + rng.uniform(-0.18, 0.18)
-        r_base = rng.uniform(0.04, 0.28)
+    # Off-center taller fruiting canes grouped around (-0.12, 0.09) + shorter shoots along the perimeter edge
+    cane_specs = []
+    # 7 tall off-center fruiting canes
+    for k in range(7):
+        yaw = (k / 7.0) * math.tau + rng.uniform(-0.28, 0.28)
+        r_off = rng.uniform(0.02, 0.14)
+        base = Vector((-0.12 + math.cos(yaw) * r_off, 0.09 + math.sin(yaw) * r_off, 0.020))
+        cane_specs.append((yaw, base, rng.uniform(0.14, 0.24), rng.uniform(0.36, 0.54), True, 12))
+    # 10 shorter shoots along the outer edge
+    for k in range(10):
+        yaw = (k / 10.0) * math.tau + rng.uniform(-0.22, 0.22)
+        r_edge = rng.uniform(0.22, 0.36)
+        base = Vector((math.cos(yaw) * r_edge, math.sin(yaw) * r_edge, 0.012))
+        cane_specs.append((yaw, base, rng.uniform(0.12, 0.22), rng.uniform(0.11, 0.23), k % 3 == 0, 8))
+
+    for k, (yaw, base, reach, height, has_berries, leaf_n) in enumerate(cane_specs):
         out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
         side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        base = Vector((math.cos(yaw) * r_base - 0.01, math.sin(yaw) * r_base - 0.02, 0.035))
-        reach = rng.uniform(0.16, 0.34)
-        # Staggered tuft heights (low creepers + mid + taller fruiting canes) for varied taiga silhouette
-        height = rng.uniform(0.42, 0.56) if k % 4 == 0 else (rng.uniform(0.28, 0.40) if k % 2 == 0 else rng.uniform(0.16, 0.26))
-        sway = rng.uniform(-0.06, 0.06)
+        sway = rng.uniform(-0.05, 0.05)
         p1 = base + out * (reach * 0.48) + side * sway + Vector((0.0, 0.0, height * 0.62))
         p2 = base + out * reach + side * (sway * 1.4) + Vector((0.0, 0.0, height))
 
-        tube(bm, uv, [base, p1, p2], [0.0085, 0.0058, 0.0032], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
-        populate_shoot_leaves([base, p1, p2], leaf_count=14, size_scale=1.0)
+        tube(bm, uv, [base, p1, p2], [0.0080, 0.0054, 0.0030], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
+        populate_shoot_leaves([base, p1, p2], leaf_count=leaf_n, size_scale=1.0 if has_berries else 0.85)
 
         # Secondary forked side shoot
         fork_sign = 1.0 if k % 2 == 0 else -1.0
-        f0 = p1.lerp(p2, rng.uniform(0.12, 0.40))
-        f_dir = (out * 0.72 + side * (fork_sign * 0.65) + Vector((0.0, 0.0, 0.48))).normalized()
-        f_len = rng.uniform(0.11, 0.18)
+        f0 = p1.lerp(p2, rng.uniform(0.15, 0.42))
+        f_dir = (out * 0.72 + side * (fork_sign * 0.65) + Vector((0.0, 0.0, 0.42))).normalized()
+        f_len = rng.uniform(0.10, 0.17) if has_berries else rng.uniform(0.07, 0.12)
         f1 = f0 + f_dir * (f_len * 0.52) + Vector((0.0, 0.0, 0.02))
         f2 = f0 + f_dir * f_len
-        tube(bm, uv, [f0, f1, f2], [0.0055, 0.0038, 0.0024], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
-        populate_shoot_leaves([f0, f1, f2], leaf_count=8, size_scale=0.84)
+        tube(bm, uv, [f0, f1, f2], [0.0052, 0.0036, 0.0022], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=True)
+        populate_shoot_leaves([f0, f1, f2], leaf_count=max(5, leaf_n - 4), size_scale=0.82)
 
-        # Nodding terminal crimson berry raceme on 10 of the 15 canes
-        if k % 3 != 2:
+        # Nodding terminal crimson berry racemes concentrated on the off-center tall fruiting canes
+        if has_berries:
             raceme_anchor = p2 if k % 2 == 0 else f2
             raceme_out = (out * 0.75 + Vector((0.0, 0.0, -0.35))).normalized()
             berry_count = rng.randint(4, 6)
@@ -855,7 +880,6 @@ def build_taiga_berry_moss(mat):
                     + Vector((0.0, 0.0, math.sin(b_ang) * 0.014 - rng.uniform(0.005, 0.022)))
                 )
                 b_center = raceme_anchor + b_off
-                # Tiny berry pedicel stem
                 tube(bm, uv, [raceme_anchor, b_center], [0.0022, 0.0016], sides=4, u_range=uv_bark_u, v_range=uv_bark_v, cap_end=False)
                 _add_berry_sphere(bm, uv, b_center, b_rad, (b_center - raceme_anchor).normalized(), uv_berry_u, uv_berry_v)
 

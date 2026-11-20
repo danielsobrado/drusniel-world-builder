@@ -1,0 +1,131 @@
+{
+  "meadowVisible": false,
+  "layers": {
+    "groundDetails": {
+      "totalNear28m": 21,
+      "legend": [
+        {
+          "layer": "groundDetails",
+          "asset": "proto-33",
+          "color": "#ff2222",
+          "count": 1,
+          "minDist": 23.86,
+          "protoIndex": 33
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-34",
+          "color": "#22ff22",
+          "count": 1,
+          "minDist": 14.13,
+          "protoIndex": 34
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-60",
+          "color": "#2266ff",
+          "count": 1,
+          "minDist": 27.68,
+          "protoIndex": 60
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-64",
+          "color": "#ffff00",
+          "count": 1,
+          "minDist": 9.62,
+          "protoIndex": 64
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-86",
+          "color": "#ff00ff",
+          "count": 3,
+          "minDist": 4.45,
+          "protoIndex": 86
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-95",
+          "color": "#00ffff",
+          "count": 6,
+          "minDist": 14.82,
+          "protoIndex": 95
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-97",
+          "color": "#ff8800",
+          "count": 1,
+          "minDist": 27.39,
+          "protoIndex": 97
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-98",
+          "color": "#88ff00",
+          "count": 5,
+          "minDist": 7.03,
+          "protoIndex": 98
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-99",
+          "color": "#00ff88",
+          "count": 1,
+          "minDist": 14.71,
+          "protoIndex": 99
+        },
+        {
+          "layer": "groundDetails",
+          "asset": "proto-102",
+          "color": "#8800ff",
+          "count": 1,
+          "minDist": 27.03,
+          "protoIndex": 102
+        }
+      ]
+    },
+    "bushes": {
+      "totalNear28m": 21,
+      "legend": [
+        {
+          "layer": "bushes",
+          "asset": "proto-3",
+          "color": "#ff0088",
+          "count": 10,
+          "minDist": 9.86,
+          "protoIndex": 3
+        },
+        {
+          "layer": "bushes",
+          "asset": "proto-4",
+          "color": "#ffffff",
+          "count": 3,
+          "minDist": 13.56,
+          "protoIndex": 4
+        },
+        {
+          "layer": "bushes",
+          "asset": "proto-6",
+          "color": "#ff6666",
+          "count": 1,
+          "minDist": 24.08,
+          "protoIndex": 6
+        },
+        {
+          "layer": "bushes",
+          "asset": "proto-10",
+          "color": "#66ff66",
+          "count": 7,
+          "minDist": 15.38,
+          "protoIndex": 10
+        }
+      ]
+    },
+    "aquatic": {
+      "totalNear28m": 0,
+      "legend": []
+    }
+  }
+}

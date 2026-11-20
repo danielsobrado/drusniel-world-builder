@@ -25,6 +25,7 @@ const PROXY_FIT_MARGIN = 2e-7;
 const WHITE_THRESHOLD = 0.92;
 const WHITE_SPREAD = 0.05;
 // Irregular asymmetrical multi-cluster arrangement: [x, y, z, scaleX, scaleY, scaleZ, rotX, rotY, rotZ]
+// Every silhouette profile keeps exactly 5 icosahedron lobes (5 x 20 = BUSH_PROXY_TRIANGLES = 100).
 const PROXY_LOBES = Object.freeze([
   Object.freeze([-0.34, -0.18, 0.12, 0.56, 0.42, 0.52, 0.15, 0.4, -0.2]),
   Object.freeze([0.32, -0.10, -0.14, 0.50, 0.52, 0.48, -0.18, 1.1, 0.14]),
@@ -32,6 +33,42 @@ const PROXY_LOBES = Object.freeze([
   Object.freeze([-0.14, 0.06, -0.26, 0.42, 0.44, 0.46, -0.22, -0.8, 0.16]),
   Object.freeze([0.04, -0.24, 0.30, 0.44, 0.34, 0.40, 0.08, 0.9, -0.12]),
 ]);
+
+export const BUSH_PROXY_PROFILES = Object.freeze({
+  default: PROXY_LOBES,
+  // Savanna thorn scrub: open center, vertically staggered flat-topped outer pads, sparser on one side.
+  savannaThorn: Object.freeze([
+    Object.freeze([0.66, 0.34, 0.14, 0.42, 0.16, 0.36, 0.08, 0.3, -0.14]),
+    Object.freeze([0.16, 0.56, 0.60, 0.38, 0.17, 0.34, -0.10, 1.1, 0.12]),
+    Object.freeze([-0.68, 0.06, -0.22, 0.44, 0.16, 0.36, 0.12, 2.2, -0.10]),
+    Object.freeze([0.28, 0.22, -0.64, 0.40, 0.15, 0.34, -0.14, -0.7, 0.16]),
+    Object.freeze([-0.42, 0.42, 0.48, 0.26, 0.13, 0.24, 0.10, 0.8, -0.12]),
+  ]),
+  // Boreal krummholz juniper: tall offset conifer spire, asymmetric mid shoulder, and low creeping runners.
+  borealJuniper: Object.freeze([
+    Object.freeze([0.26, 0.56, 0.14, 0.26, 0.56, 0.26, 0.06, 0.4, -0.10]),
+    Object.freeze([-0.14, 0.12, 0.32, 0.34, 0.34, 0.32, -0.12, 1.3, 0.14]),
+    Object.freeze([-0.58, -0.36, -0.16, 0.44, 0.18, 0.34, 0.10, 2.1, -0.08]),
+    Object.freeze([0.52, -0.38, -0.38, 0.42, 0.17, 0.32, -0.08, -0.9, 0.12]),
+    Object.freeze([-0.18, -0.40, 0.56, 0.38, 0.16, 0.30, 0.06, 0.7, -0.06]),
+  ]),
+  // Wetland buttonbush: broken multi-cane crown with visible sky gaps between leaning clusters.
+  swampButtonbush: Object.freeze([
+    Object.freeze([0.52, 0.36, 0.22, 0.34, 0.36, 0.32, 0.18, 0.5, -0.22]),
+    Object.freeze([-0.48, 0.48, -0.18, 0.32, 0.38, 0.30, -0.16, 1.4, 0.20]),
+    Object.freeze([0.08, 0.54, -0.52, 0.30, 0.34, 0.28, 0.14, 2.3, 0.12]),
+    Object.freeze([-0.22, -0.04, 0.56, 0.34, 0.32, 0.30, -0.20, -0.8, -0.14]),
+    Object.freeze([0.36, -0.22, -0.24, 0.28, 0.30, 0.28, 0.12, 0.9, 0.16]),
+  ]),
+});
+
+export function resolveBushProxyProfile(identifier = '') {
+  const key = String(identifier ?? '').toLowerCase();
+  if (key.includes('rooibos') || key.includes('savanna-thorn')) return 'savannaThorn';
+  if (key.includes('juniper')) return 'borealJuniper';
+  if (key.includes('buttonbush')) return 'swampButtonbush';
+  return 'default';
+}
 
 function usesCutout(material) {
   return Boolean(
@@ -104,12 +141,13 @@ function fitGeometryToBounds(geometry, bounds) {
   geometry.translate(targetCenter.x, targetCenter.y, targetCenter.z);
 }
 
-export function createBushProxyGeometry(sourceGeometry) {
+export function createBushProxyGeometry(sourceGeometry, { profile = 'default' } = {}) {
   if (!sourceGeometry?.isBufferGeometry) {
     throw new Error('Bush proxy generation requires buffer geometry.');
   }
+  const profileName = BUSH_PROXY_PROFILES[profile] ? profile : 'default';
   const proxyBounds = expandedProxyBounds(sourceGeometry);
-  const lobes = PROXY_LOBES.map(([x, y, z, width, height, depth, rx, ry, rz]) => {
+  const lobes = BUSH_PROXY_PROFILES[profileName].map(([x, y, z, width, height, depth, rx, ry, rz]) => {
     const geometry = new THREE.IcosahedronGeometry(1, 0);
     geometry.scale(width, height, depth);
     geometry.rotateX(rx);
@@ -125,6 +163,7 @@ export function createBushProxyGeometry(sourceGeometry) {
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
   geometry.userData.proxyKind = 'clustered-low-poly-canopy';
+  geometry.userData.proxyProfile = profileName;
   return geometry;
 }
 
@@ -167,8 +206,11 @@ export function createBushProxyPrototype(prototype, options = {}) {
     throw new Error('Bush proxy generation requires a complete prototype.');
   }
   const bounds = expandedProxyBounds(prototype.geometry);
+  const profile = options.profile ?? resolveBushProxyProfile(
+    options.assetId ?? prototype.assetId ?? prototype.scenePath ?? prototype.prototypeId,
+  );
   return {
-    geometry: createBushProxyGeometry(prototype.geometry),
+    geometry: createBushProxyGeometry(prototype.geometry, { profile }),
     material: createBushProxyMaterial(prototype.material, {
       ...options,
       motion: prototype.material.userData.plantMotionProfile,
@@ -179,5 +221,6 @@ export function createBushProxyPrototype(prototype, options = {}) {
     instanceBiomeLook: Boolean(options.biomeLook),
     height: prototype.height,
     prototypeId: `${prototype.prototypeId}-proxy`,
+    proxyProfile: profile,
   };
 }

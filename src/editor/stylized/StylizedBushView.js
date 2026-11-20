@@ -185,7 +185,12 @@ export class StylizedBushView {
       if (variants.length === 0) {
         throw new Error(`Bush variant ${definition.scene} produced no prototypes.`);
       }
-      extracted.push(...variants.map(part => ({ ...part, motion: definition.motion })));
+      extracted.push(...variants.map(part => ({
+        ...part,
+        motion: definition.motion,
+        assetId: definition.id ?? definition.scene,
+        scenePath: definition.scene,
+      })));
       for (let index = 0; index < variants.length; index += 1) {
         this.prototypeBiomeRules.push({
           tileIds: definition.tileIds ?? null,
@@ -210,7 +215,7 @@ export class StylizedBushView {
       communities: true,
     });
     const newPrototypes = [];
-    for (const [index, { geometry, source, motion }] of extracted.entries()) {
+    for (const [index, { geometry, source, motion, assetId, scenePath }] of extracted.entries()) {
       const sourceMaterial = materialList(source)[0];
       if (!sourceMaterial) {
         geometry.dispose();
@@ -230,6 +235,8 @@ export class StylizedBushView {
         instanceBiomeLook: true,
         height: geometry.boundingBox.max.y - geometry.boundingBox.min.y,
         prototypeId: `authored-bush-${firstNewPrototype + index}`,
+        assetId,
+        scenePath,
       };
       newPrototypes.push(prototype);
       yield prototype.material;

@@ -1,0 +1,191 @@
+{
+  "startedAt": "2026-11-20T01:26:54.892Z",
+  "species": [
+    {
+      "key": "savanna-thorn",
+      "scene": "/assets/bushes/bush-arid-rooibos-01.glb",
+      "scale": 1,
+      "tileId": 3,
+      "height": 1.759033203125,
+      "proxyProfile": "savannaThorn",
+      "nearTris": 1010,
+      "proxyTris": 100,
+      "pullbackDist": 76.7,
+      "approachDist": 56.69,
+      "measurements": {
+        "pullback-before": {
+          "dist": 73.63,
+          "band": "near",
+          "widthPx": 16,
+          "heightPx": 11,
+          "largestGapPx": 4,
+          "filledPx": 79
+        },
+        "pullback-after": {
+          "dist": 79.77,
+          "band": "proxy",
+          "widthPx": 14,
+          "heightPx": 11,
+          "largestGapPx": 4,
+          "filledPx": 70
+        },
+        "approach-before": {
+          "dist": 58.96,
+          "band": "proxy",
+          "widthPx": 20,
+          "heightPx": 13,
+          "largestGapPx": 4,
+          "filledPx": 120
+        },
+        "approach-after": {
+          "dist": 54.43,
+          "band": "near",
+          "widthPx": 22,
+          "heightPx": 15,
+          "largestGapPx": 7,
+          "filledPx": 129
+        },
+        "closeup-near": {
+          "dist": 3.34,
+          "band": "near",
+          "widthPx": 332,
+          "heightPx": 224,
+          "largestGapPx": 163,
+          "filledPx": 23138
+        },
+        "closeup-proxy": {
+          "dist": 3.34,
+          "band": "proxy",
+          "widthPx": 341,
+          "heightPx": 272,
+          "largestGapPx": 102,
+          "filledPx": 36700
+        }
+      }
+    },
+    {
+      "key": "boreal-juniper",
+      "scene": "/assets/bushes/bush-boreal-juniper-01.glb",
+      "scale": 0.95,
+      "tileId": 9,
+      "height": 1.6819825172424316,
+      "proxyProfile": "borealJuniper",
+      "nearTris": 15599,
+      "proxyTris": 100,
+      "pullbackDist": 73.34,
+      "approachDist": 54.21,
+      "measurements": {
+        "pullback-before": {
+          "dist": 70.41,
+          "band": "near",
+          "widthPx": 12,
+          "heightPx": 11,
+          "largestGapPx": 1,
+          "filledPx": 64
+        },
+        "pullback-after": {
+          "dist": 76.28,
+          "band": "proxy",
+          "widthPx": 10,
+          "heightPx": 11,
+          "largestGapPx": 2,
+          "filledPx": 50
+        },
+        "approach-before": {
+          "dist": 56.38,
+          "band": "proxy",
+          "widthPx": 14,
+          "heightPx": 14,
+          "largestGapPx": 2,
+          "filledPx": 83
+        },
+        "approach-after": {
+          "dist": 52.04,
+          "band": "near",
+          "widthPx": 16,
+          "heightPx": 15,
+          "largestGapPx": 2,
+          "filledPx": 111
+        },
+        "closeup-near": {
+          "dist": 3.2,
+          "band": "near",
+          "widthPx": 285,
+          "heightPx": 231,
+          "largestGapPx": 70,
+          "filledPx": 25047
+        },
+        "closeup-proxy": {
+          "dist": 3.2,
+          "band": "proxy",
+          "widthPx": 211,
+          "heightPx": 273,
+          "largestGapPx": 66,
+          "filledPx": 23070
+        }
+      }
+    },
+    {
+      "key": "swamp-buttonbush",
+      "scene": "/assets/bushes/bush-swamp-buttonbush-01.glb",
+      "scale": 0.95,
+      "tileId": 12,
+      "height": 1.5883971452713013,
+      "proxyProfile": "swampButtonbush",
+      "nearTris": 15891,
+      "proxyTris": 100,
+      "pullbackDist": 69.26,
+      "approachDist": 51.19,
+      "measurements": {
+        "pullback-before": {
+          "dist": 66.49,
+          "band": "near",
+          "widthPx": 14,
+          "heightPx": 11,
+          "largestGapPx": 4,
+          "filledPx": 89
+        },
+        "pullback-after": {
+          "dist": 72.03,
+          "band": "proxy",
+          "widthPx": 13,
+          "heightPx": 11,
+          "largestGapPx": 2,
+          "filledPx": 88
+        },
+        "approach-before": {
+          "dist": 53.24,
+          "band": "proxy",
+          "widthPx": 18,
+          "heightPx": 14,
+          "largestGapPx": 3,
+          "filledPx": 156
+        },
+        "approach-after": {
+          "dist": 49.15,
+          "band": "near",
+          "widthPx": 18,
+          "heightPx": 15,
+          "largestGapPx": 6,
+          "filledPx": 154
+        },
+        "closeup-near": {
+          "dist": 3.02,
+          "band": "near",
+          "widthPx": 283,
+          "heightPx": 257,
+          "largestGapPx": 141,
+          "filledPx": 34273
+        },
+        "closeup-proxy": {
+          "dist": 3.02,
+          "band": "proxy",
+          "widthPx": 300,
+          "heightPx": 221,
+          "largestGapPx": 198,
+          "filledPx": 42044
+        }
+      }
+    }
+  ]
+}

@@ -14,6 +14,8 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
 
+from mathutils import Vector
+
 from build_biome_understory import build_taiga_berry_moss, build_tundra_dwarf_willow
 from builders_extra import (
     build_bush_boreal_juniper,
@@ -36,6 +38,21 @@ ROOT = os.path.abspath(os.path.join(THIS_DIR, '..', '..', '..'))
 SRC_GROUND = os.path.join(ROOT, 'assets', 'runtime-sources', 'ground')
 SRC_BUSHES = os.path.join(ROOT, 'assets', 'runtime-sources', 'bushes')
 TEX_DIR = os.path.join(ROOT, 'tmp', 'understory', 'textures')
+SIDE_DIR = os.path.join(ROOT, 'docs', 'screenshots', 'understory-silhouettes-2026-11-19', 'side-views')
+RENDER_SIDE = '--side-views' in sys.argv
+
+
+def render_side_view(root, png_path, dist, cam_z, look_z):
+    os.makedirs(os.path.dirname(png_path), exist_ok=True)
+    scene = bpy.context.scene
+    scene.render.resolution_x, scene.render.resolution_y = 640, 480
+    for o in scene.objects:
+        o.hide_render = not (o == root or o.parent == root or o.type in {'CAMERA', 'LIGHT'} or o.name == 'Ground')
+    cam = scene.camera
+    cam.location = Vector((dist, 0.0, cam_z))
+    cam.rotation_euler = (Vector((0.0, 0.0, look_z)) - cam.location).to_track_quat('-Z', 'Y').to_euler()
+    scene.render.filepath = png_path
+    bpy.ops.render.render(write_still=True)
 
 
 def patch_alpha_mask(glb_path, cutoff=0.45):
@@ -65,10 +82,13 @@ def patch_alpha_mask(glb_path, cutoff=0.45):
     open(glb_path, 'wb').write(out)
 
 
-def export_one(name, mesh, out_path, alpha_mask=False):
+def export_one(name, mesh, out_path, alpha_mask=False, side_cam=None):
     root = place_and_export(name, mesh, out_path, tangents=True)
     if alpha_mask:
         patch_alpha_mask(out_path)
+    if RENDER_SIDE and side_cam is not None:
+        dist, cam_z, look_z = side_cam
+        render_side_view(root, os.path.join(SIDE_DIR, f'{name}-side.png'), dist, cam_z, look_z)
     xs = [v.co.x for v in mesh.vertices]
     ys = [v.co.y for v in mesh.vertices]
     zs = [v.co.z for v in mesh.vertices]
@@ -124,37 +144,37 @@ def main():
     mesh, _ = build_savanna_thorn_scrub(
         mats['bush_savanna'], name='bush-arid-rooibos-01', seed=328, low_budget=True, max_triangles=4000,
     )
-    results.append(export_one('bush-arid-rooibos-01', mesh, os.path.join(SRC_BUSHES, 'bush-arid-rooibos-01.glb'), alpha_mask=True))
+    results.append(export_one('bush-arid-rooibos-01', mesh, os.path.join(SRC_BUSHES, 'bush-arid-rooibos-01.glb'), alpha_mask=True, side_cam=(3.9, 0.78, 0.68)))
 
     mesh, _ = build_bush_savanna_thorn(mats['bush_savanna'])
     results.append(export_one('bush-savanna-thorn-01', mesh, os.path.join(SRC_BUSHES, 'bush-savanna-thorn-01.glb'), alpha_mask=True))
 
     # 2. Taiga: varied-height krummholz juniper, dwarf willow, and berry-moss
     mesh, _ = build_bush_boreal_juniper(mats['bush_juniper'])
-    results.append(export_one('bush-boreal-juniper-01', mesh, os.path.join(SRC_BUSHES, 'bush-boreal-juniper-01.glb'), alpha_mask=True))
+    results.append(export_one('bush-boreal-juniper-01', mesh, os.path.join(SRC_BUSHES, 'bush-boreal-juniper-01.glb'), alpha_mask=True, side_cam=(2.8, 0.68, 0.58)))
 
     mesh, _ = build_tundra_dwarf_willow(mats['tundra_willow'])
     results.append(export_one('tundra-dwarf-willow-01', mesh, os.path.join(SRC_GROUND, 'boreal', 'tundra-dwarf-willow-01.glb'), alpha_mask=True))
 
     mesh, _ = build_taiga_berry_moss(mats['taiga_berry_moss'])
-    results.append(export_one('taiga-berry-moss-01', mesh, os.path.join(SRC_GROUND, 'boreal', 'taiga-berry-moss-01.glb'), alpha_mask=False))
+    results.append(export_one('taiga-berry-moss-01', mesh, os.path.join(SRC_GROUND, 'boreal', 'taiga-berry-moss-01.glb'), alpha_mask=False, side_cam=(1.35, 0.14, 0.16)))
 
     # 3. Wetland: common-rooted sedge tussock + wetland buttonbush
     mesh, _ = build_coastal_dune_oats(mats['coastal_oats'])
-    results.append(export_one('coastal-dune-oats-01', mesh, os.path.join(SRC_GROUND, 'coastal', 'coastal-dune-oats-01.glb'), alpha_mask=True))
+    results.append(export_one('coastal-dune-oats-01', mesh, os.path.join(SRC_GROUND, 'coastal', 'coastal-dune-oats-01.glb'), alpha_mask=True, side_cam=(1.65, 0.22, 0.24)))
 
     mesh, _ = build_bush_swamp_buttonbush(mats['bush_buttonbush'])
-    results.append(export_one('bush-swamp-buttonbush-01', mesh, os.path.join(SRC_BUSHES, 'bush-swamp-buttonbush-01.glb'), alpha_mask=True))
+    results.append(export_one('bush-swamp-buttonbush-01', mesh, os.path.join(SRC_BUSHES, 'bush-swamp-buttonbush-01.glb'), alpha_mask=True, side_cam=(3.0, 0.72, 0.65)))
 
     # 4. Rainforest: layered-frond fern & cupped overlapping broadleaves with visible stems
     mesh, _ = build_rainforest_layered_fern(mat_fern, name='forest-fern-02', seed=701, max_triangles=1999)
-    results.append(export_one('forest-fern-02', mesh, os.path.join(SRC_GROUND, 'scans', 'forest-fern-02.glb'), alpha_mask=True))
+    results.append(export_one('forest-fern-02', mesh, os.path.join(SRC_GROUND, 'scans', 'forest-fern-02.glb'), alpha_mask=True, side_cam=(2.4, 0.36, 0.32)))
 
     mesh, _ = build_rainforest_cupped_broadleaf(mat_elephant, name='elephant_ear', seed=711, style='elephant_ear', max_triangles=306)
-    results.append(export_one('elephant_ear', mesh, os.path.join(SRC_GROUND, 'tropical', 'elephant-ear.glb'), alpha_mask=False))
+    results.append(export_one('elephant_ear', mesh, os.path.join(SRC_GROUND, 'tropical', 'elephant-ear.glb'), alpha_mask=False, side_cam=(2.4, 0.56, 0.52)))
 
     mesh, _ = build_rainforest_cupped_broadleaf(mat_banana, name='banana_understory', seed=712, style='banana', max_triangles=340)
-    results.append(export_one('banana_understory', mesh, os.path.join(SRC_GROUND, 'tropical', 'banana-understory.glb'), alpha_mask=False))
+    results.append(export_one('banana_understory', mesh, os.path.join(SRC_GROUND, 'tropical', 'banana-understory.glb'), alpha_mask=False, side_cam=(4.8, 0.96, 0.90)))
 
     mesh, _ = build_rainforest_cupped_broadleaf(mat_calathea, name='tropical-calathea-01', seed=713, style='calathea', max_triangles=1500)
     results.append(export_one('tropical-calathea-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-calathea-01.glb'), alpha_mask=False))

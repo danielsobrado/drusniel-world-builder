@@ -1,0 +1,121 @@
+{
+  "startedAt": "2026-11-20T01:18:16.752Z",
+  "url": "http://localhost:5173",
+  "out": "F:\\Development\\drusniel-world-builder\\docs\\screenshots\\understory-silhouettes-2026-11-19\\after-v2",
+  "poses": [
+    {
+      "id": "rainforest-ground",
+      "pose": {
+        "id": "rainforest-ground",
+        "biome": "rainforest",
+        "name": "Rainforest (ground)",
+        "world": "procedural",
+        "expectedBiomeId": 7,
+        "x": 2033,
+        "z": 2983,
+        "yaw": 2.8507386048197727,
+        "pitch": -0.1,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 7,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4113,
+          "near30m": 39,
+          "prototypes": {
+            "proto-6": 6,
+            "proto-12": 9,
+            "proto-5": 18,
+            "proto-9": 1,
+            "proto-3": 1,
+            "proto-10": 2,
+            "proto-11": 1,
+            "proto-2": 1
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 21050
+    },
+    {
+      "id": "rainforest-mid",
+      "pose": {
+        "id": "rainforest-mid",
+        "biome": "rainforest",
+        "name": "Rainforest (mid-distance)",
+        "world": "procedural",
+        "expectedBiomeId": 7,
+        "x": 2035.5809345694975,
+        "z": 2974.3780062196743,
+        "yaw": 2.8507386048197727,
+        "pitch": -0.22,
+        "mode": "fly",
+        "heightAboveGround": 4.2,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 7,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4113,
+          "near30m": 38,
+          "prototypes": {
+            "proto-6": 5,
+            "proto-12": 10,
+            "proto-5": 18,
+            "proto-11": 2,
+            "proto-3": 1,
+            "proto-10": 1,
+            "proto-2": 1
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 8491
+    }
+  ],
+  "failures": [],
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-11-20T01:20:12.073Z"
+}
