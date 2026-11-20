@@ -432,8 +432,14 @@ export function buildFloorInlay(b, chasmZ, chasmHalf, farZ, medallions = []) {
       const len = Math.abs(z0 - z1);
       const midZ = (z0 + z1) * 0.5;
       // Tops at 0.04 (runner) and 0.046 (strip): clear of the floor, and below the sills crossing them.
-      b.prop('carved', stoneBox(0.68, 0.04, len, P(sign * 3.18, 0.02, midZ), { bevel: 0.015, irregular: 0.02 }));
       b.prop('bronze', stoneBox(0.14, 0.046, len, P(sign * 2.8, 0.023, midZ), { bevel: 0.01, irregular: 0.02 }), 0xd4ae72);
+      const count = Math.max(1, Math.round(len / 1.4));
+      for (let i = 0; i < count; i += 1) {
+        const z = z0 + (z1 - z0) * (i + 0.5) / count;
+        b.prop('carved', stoneBox(0.68, 0.04, len / count - 0.02, P(sign * 3.18, 0.02, z), {
+          bevel: 0.01, irregular: 0,
+        }), i % 3 === 1 ? 0xe1ded6 : 0xffffff);
+      }
     }
   }
   for (const z of [-19.5, chasmZ + chasmHalf + 2.4, chasmZ - chasmHalf - 2.4, farZ + 9.5]) {
@@ -446,6 +452,12 @@ export function buildFloorInlay(b, chasmZ, chasmHalf, farZ, medallions = []) {
     b.prop('carved', rod(P(0, -0.02, mz), P(0, 0.032, mz), 2.35, 2.35, 8));
     b.prop('bronze', rod(P(0, -0.02, mz), P(0, 0.036, mz), 1.75, 1.75, 8), 0xd4ae72);
     b.prop('masonry', rod(P(0, -0.02, mz), P(0, 0.039, mz), 1.45, 1.45, 8), 0xa8acb4);
+    for (let i = 0; i < 8; i += 1) {
+      const angle = i * Math.PI / 4;
+      b.prop('bronze', stoneBox(0.38, 0.026, 0.13, P(1.1 * Math.cos(angle), 0.04, mz - 1.1 * Math.sin(angle)), {
+        yaw: angle, bevel: 0.006, irregular: 0,
+      }), 0xc2a36d);
+    }
     b.prop('bronze', stoneBox(0.9, 0.055, 0.9, P(0, 0.018, mz), { yaw: Math.PI / 4, bevel: 0.015, irregular: 0.02 }), 0xe2c086);
   }
 }

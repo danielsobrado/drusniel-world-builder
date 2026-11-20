@@ -281,10 +281,10 @@ def stonehold_cavern_maw():
     mini_pine(b, -1.48, -0.42, 0.32, height=0.40, seed=745)
     mini_pine(b, 1.48, -0.38, 0.32, height=0.38, seed=746)
     _talus_skirt(b, 0.0, 0.2, 0.0, 1.85, 1.55, 14, 0.16, 0.32, seed=750)
-    # Authored aperture volume: the sculpted rock must respect the entrance.
+    # Start outside the bluff so protruding relief cannot cap the entrance.
     section = [(-0.44, 0.44), (0.44, 0.44), (0.0, 1.98)]
     b.cutouts.append({
-        'vertices': [(x, y, z) for y in (-0.32, 1.04) for x, z in section],
+        'vertices': [(x, y, z) for y in (-2.6, 1.04) for x, z in section],
         'faces': [(0, 1, 2), (5, 4, 3), (3, 4, 1, 0), (4, 5, 2, 1), (5, 3, 0, 2)],
     })
     return b

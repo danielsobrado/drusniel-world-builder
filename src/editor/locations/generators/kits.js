@@ -153,6 +153,10 @@ export function rails(b, a, c, gauge = 0.9) {
     for (const offset of [-gauge / 2, gauge / 2]) {
       const rp = side(p, f, offset);
       b.prop('iron', stoneBox(0.14, 0.024, 0.16, up(rp, 0.088), { yaw: f.yaw, bevel: 0.005, irregular: 0.02 }), 0x6b727e);
+        for (const edge of [-0.064, 0.064]) {
+          const fastener = side(rp, f, edge);
+          b.prop('iron', rod(up(fastener, 0.094), up(fastener, 0.12), 0.016, 0.019, 6), 0x59616b);
+        }
     }
     idx += 1;
   }

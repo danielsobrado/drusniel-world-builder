@@ -393,6 +393,10 @@ def mine_cart_track():
     # Forged iron rails
     for x in (-0.36, 0.36):
         b.box((x - 0.035, -1.26, 0.15), (x + 0.035, 1.26, 0.23), 'iron')
+        if detailed():
+            for y in (-1.05, -0.63, -0.21, 0.21, 0.63, 1.05):
+                b.box((x - 0.065, y - 0.045, 0.14), (x + 0.065, y + 0.045, 0.174),
+                      'iron', bevel=0.008)
 
     # Flanged iron wheels
     wheel_prof = [(0.0, -0.04), (0.18, -0.04), (0.18, 0.04), (0.0, 0.04)]
@@ -407,6 +411,11 @@ def mine_cart_track():
     b.box((-0.50, -0.72, 0.92), (0.50, 0.72, 1.02), 'bronze')
     for y in (-0.68, 0.0, 0.64):
         b.box((-0.49, y - 0.03, 0.42), (0.49, y + 0.03, 0.96), 'bronze')
+        if detailed():
+            for x in (-0.49, 0.49):
+                for z in (0.53, 0.83):
+                    b.lathe([(0.026, -0.016), (0.028, 0.012), (0.0, 0.022)], 6,
+                            'iron', m=Matrix.Translation((x, y, z)) @ (R90Y if x > 0 else R90Y.inverted()))
 
     # Heaped raw ore & glowing geothermal ember crystals inside the cart
     b.blob((0.0, -0.18, 1.04), 0.34, 'rock', subdiv=1, squash=(1.1, 1.2, 0.65), jitter=0.22, seed=81)
@@ -424,6 +433,10 @@ def smelter_stack():
     b.box((-0.82, -0.70, 0.58), (0.82, 0.70, 2.25), 'stone_granite')
     for z in (0.95, 1.65, 2.20):
         b.box((-0.86, -0.74, z), (0.86, 0.74, z + 0.12), 'iron')
+        if detailed():
+            for x in (-0.71, 0.71):
+                b.box((x - 0.06, -0.768, z + 0.018), (x + 0.06, -0.728, z + 0.10),
+                      'iron', bevel=0.012)
     # Tapered upper stack & twin basalt flues
     b.box((-0.62, -0.52, 2.32), (0.62, 0.52, 3.45), 'stone_granite')
     b.box((-0.68, -0.58, 3.45), (0.68, 0.58, 3.62), 'stone_basalt')
@@ -463,6 +476,12 @@ def stonehold_ward_pillar():
     # Stepped basalt & bronze crown with brazier flame
     b.box((-0.48, -0.48, 2.58), (0.48, 0.48, 2.76), 'stone_basalt')
     b.box((-0.36, -0.36, 2.76), (0.36, 0.36, 2.92), 'bronze')
+    if detailed():
+        for k in range(4):
+            frame = Matrix.Rotation(k * math.pi / 2, 4, 'Z')
+            for x in (-0.21, 0.21):
+                b.box((x - 0.026, -0.405, 0.84), (x + 0.026, -0.365, 2.57),
+                      'stone_basalt', m=frame, bevel=0.01)
     b.blob((0.0, 0.0, 2.98), 0.22, 'glow', subdiv=1, squash=(1.0, 1.0, 0.85), jitter=0.15, seed=44)
     return b
 

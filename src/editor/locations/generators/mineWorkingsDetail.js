@@ -36,6 +36,8 @@ export { buildOreCart };
 
 const P = (x, y, z) => ({ x, y, z });
 const UP_DIR = P(0, 1, 0);
+const ORE_SEAM = [[-0.79, 0.96, 0.24], [-0.43, 1.02, 0.33], [0, 1.19, 0.36], [0.34, 1.25, 0.3], [0.7, 1.4, 0.22]];
+const STONE_LEDGE = [[-0.42, 1.01, 0.40], [0.14, 1.15, 0.57]];
 
 /** Shared layout anchors so geology footings and built props stay in sync. */
 export const MINE_WORKINGS_SPOTS = {
@@ -624,16 +626,18 @@ export function buildFloodedLevel(b, inclineTop, flooded, waterY, inclineShape =
  */
 export function scatterWallBaseDebris(b, pockets) {
   for (const pocket of pockets) {
-    const { x, y, z, dx, dz, count = 3, tint = 0xb0a79c } = pocket;
-    const step = 0.2;
-    let wallDist = null;
-    for (let d = 0.6; d <= 4.2; d += step) {
-      if (b.grid.sample(x + dx * d, y + 0.75, z + dz * d) < 0) {
-        wallDist = d;
-        break;
-      }
-    }
+    const { x, y, z, dx, dz, count = 3, tint = 0xb0a79c, ore = false } = pocket;
+    const wallDist = findRockFace(b.grid, x, y + 0.75, z, dx, dz);
     if (wallDist === null) continue;
+    for (const [lateral, height, span] of ore ? ORE_SEAM : STONE_LEDGE) {
+      const sx = x - dz * lateral, sy = y + height, sz = z + dx * lateral;
+      const distance = findRockFace(b.grid, sx, sy, sz, dx, dz);
+      if (distance === null || distance < 1) continue;
+      const at = P(sx + dx * (distance + 0.008), sy, sz + dz * (distance + 0.008));
+      b.prop(ore ? 'ore' : 'rock_debris', angularRock(span, ore ? 0.115 : 0.16, ore ? 0.093 : 0.118, at, {
+        yaw: Math.atan2(dx, dz), detail: 0,
+      }), ore ? 0xbda986 : tint);
+    }
     const baseDist = Math.max(0.8, wallDist - 0.36);
     for (let i = 0; i < count; i += 1) {
       const side = b.range(-0.65, 0.65);
@@ -651,4 +655,17 @@ export function scatterWallBaseDebris(b, pockets) {
       }), tint);
     }
   }
+}
+
+function findRockFace(grid, x, y, z, dx, dz) {
+  const step = 0.2;
+  let previous = grid.sample(x, y, z);
+  if (previous <= 0) return null;
+  for (let i = 1; i <= 21; i += 1) {
+    const distance = i * step;
+    const next = grid.sample(x + dx * distance, y, z + dz * distance);
+    if (next <= 0) return distance - step * next / (next - previous);
+    previous = next;
+  }
+  return null;
 }

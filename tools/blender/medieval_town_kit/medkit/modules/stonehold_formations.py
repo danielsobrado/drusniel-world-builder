@@ -36,10 +36,10 @@ FORMATION_SCALE = 5.0
 
 # Mountain pieces sculpted the same way: (wrap-UV centres, rock triangle floor); no bluff.
 MOUNTAIN_SCULPT = {
-    'Mountain_Cliff_Wall': (((0.0, 0.0),), 12000),
-    'Mountain_Gate_Massif': (((-4.5, 0.4), (4.5, 0.4)), 12000),
-    'Mountain_Cavern_Vault': (((0.0, 0.0),), 8000),
-    'Mine_Vent_Stack': (((0.0, 0.0),), 1500),
+    'Mountain_Cliff_Wall': (((0.0, 0.0),), 22000),
+    'Mountain_Gate_Massif': (((-4.5, 0.4), (4.5, 0.4)), 21000),
+    'Mountain_Cavern_Vault': (((0.0, 0.0),), 16000),
+    'Mine_Vent_Stack': (((0.0, 0.0),), 3200),
 }
 
 
@@ -84,7 +84,7 @@ def build_module(kit, name, fn):
     if name in BLUFFS:
         centres = [(cx, cy) for cx, cy, _, _, _ in BLUFFS[name][1]]
         blockout, sculpted = sculpt_rock(obj, seed=len(name) * 131 + sum(map(ord, name)), centres=centres,
-                                       cutouts=b.cutouts)
+                                       floor=18000, cutouts=b.cutouts, bedding=True)
         for v in obj.data.vertices:
             v.co *= FORMATION_SCALE
         for poly in obj.data.polygons:
@@ -98,6 +98,6 @@ def build_module(kit, name, fn):
         print(f'[kit] sculpted {name}: rock {blockout} -> {sculpted} tris')
     elif name in MOUNTAIN_SCULPT:
         centres, floor = MOUNTAIN_SCULPT[name]
-        blockout, sculpted = sculpt_rock(obj, seed=sum(map(ord, name)), centres=centres, floor=floor)
+        blockout, sculpted = sculpt_rock(obj, seed=sum(map(ord, name)), centres=centres, floor=floor, bedding=True)
         print(f'[kit] sculpted {name}: rock {blockout} -> {sculpted} tris')
     return obj

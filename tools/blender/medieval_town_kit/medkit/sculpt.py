@@ -59,19 +59,26 @@ def _apply(obj, mod):
     bpy.data.meshes.remove(old)
 
 
-def _shape(rock, seed, voxel):
+def _shape(rock, seed, voxel, k, bedding):
     """Fuse and fracture: voxel remesh, then columnar Voronoi plus fine crackle displacement."""
     rem = rock.modifiers.new('remesh', 'REMESH')
     rem.mode = 'VOXEL'
     rem.voxel_size = voxel
     _apply(rock, rem)
     # Texture space squashed in z (via a scaled empty) stretches cells into vertical columns.
-    k = max(1.0, voxel / 0.045)  # big pieces (mountains) get proportionally bigger fractures
     space = bpy.data.objects.new(f'{rock.name}_space', None)
     bpy.context.scene.collection.objects.link(space)
     space.scale = (1.0, 1.0, 2.4)
     space.location = (random.Random(seed).uniform(-9, 9), 0.0, 0.0)
-    for tex_type, size, strength in (('VORONOI', 0.48, 0.050), ('STUCCI', 0.10, 0.009)):
+    layers = [((1.0, 1.0, 2.4), 'VORONOI', 0.48, 0.050),
+              ((1.0, 1.0, 2.4), 'STUCCI', 0.10, 0.009)]
+    if bedding:
+        # Compressed, tilted cells break the vertical columns into shallow ledges.
+        layers.append(((2.2, 1.6, 0.34), 'VORONOI', 0.64, 0.034))
+    for scale, tex_type, size, strength in layers:
+        space.scale = scale
+        if scale[2] < 1:
+            space.rotation_euler.y = 0.13
         tex = bpy.data.textures.new(f'{rock.name}_{tex_type}', tex_type)
         tex.noise_scale = size * k
         if tex_type == 'VORONOI':
@@ -217,7 +224,7 @@ def _join(obj, rock):
         bpy.ops.object.join()
 
 
-def sculpt_rock(obj, seed, centres=((0.0, 0.0),), floor=ROCK_FLOOR, mat='rock_cliff', cutouts=()):
+def sculpt_rock(obj, seed, centres=((0.0, 0.0),), floor=ROCK_FLOOR, mat='rock_cliff', cutouts=(), bedding=False):
     """Replace obj's blockout rock with sculpted rock within the budgets above; returns
     (blockout_tris, sculpted_tris) for the build's budget report."""
     mats = obj.data.materials
@@ -232,12 +239,14 @@ def sculpt_rock(obj, seed, centres=((0.0, 0.0),), floor=ROCK_FLOOR, mat='rock_cl
     budget = min(max(blockout, floor if detailed() else blockout), limit - architecture - 64)
     # Voxel scales with the rock (a 20 m mountain wall would otherwise remesh into millions).
     size = Vector(rock.dimensions).length
-    voxel = max(0.045 if detailed() else 0.08, size / (110 if detailed() else 45))
-    k = max(1.0, voxel / 0.045)
-    _shape(rock, seed, voxel)
+    base_voxel = max(0.045 if detailed() else 0.08, size / (110 if detailed() else 45))
+    bedding = bedding and detailed()
+    voxel = max(0.034, size / 155) if bedding else base_voxel
+    k = max(1.0, base_voxel / 0.045)
+    _shape(rock, seed, voxel, k, bedding)
     assert len(rock.data.materials) == 1 and rock.data.materials[0] == materials.get(mat), obj.name
     _cut_openings(rock, cutouts)
-    _drop_islands(rock, 400 if detailed() else 60)
+    _drop_islands(rock, round(400 * (base_voxel / voxel) ** 2) if detailed() else 60)
     _drop_underside(rock)
     _decimate(rock, budget)
     _wrap_uvs(rock, centres, mat, k)

@@ -267,13 +267,15 @@ export function generate(b, params) {
   // Selective physical rock talus tucked along wall-floor skirts, stope bases, and collapse fringe.
   scatterWallBaseDebris(b, [
     { x: 0.2, y: -0.2, z: -8, dx: 1, dz: 0, count: 2 },
-    { x: 0.2, y: -0.45, z: -19, dx: 1, dz: 0, count: 3 },
+    { x: -0.1, y: -0.45, z: -21, dx: -1, dz: 0, count: 3, ore: true },
     { x: 0.2, y: -0.7, z: -31, dx: 1, dz: 0, count: 2 },
     { x: -16, y: -1.7, z: -50, dx: 0, dz: 1, count: 3 },
-    { x: -34, y: -3, z: -61, dx: -1, dz: 0, count: 4 },
-    { x: -36, y: -3, z: -63, dx: 0, dz: -1, count: 3 },
+    { x: -39.7, y: -3, z: -62, dx: -1, dz: 0, count: 4, ore: true },
+    { x: -35, y: -3, z: -65, dx: 0, dz: -1, count: 3, ore: true },
     { x: 24, y: 0.3, z: -39, dx: 0.5, dz: -0.86, count: 3 },
     { x: 32, y: 1.4, z: -31, dx: 0.7, dz: -0.7, count: 4 },
+    { x: 0.2, y: -5.2, z: -69, dx: 1, dz: 0, count: 2 },
+    { x: 4.6, y: -8.55, z: -86, dx: 1, dz: 0, count: 0, ore: true },
   ]);
 
   // Outside the adit exit's 2.5 m radius, so arriving never offers to leave at once.

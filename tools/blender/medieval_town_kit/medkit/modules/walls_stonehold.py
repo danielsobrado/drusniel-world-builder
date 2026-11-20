@@ -43,6 +43,27 @@ def _bands(b, gap):
     b.box((0, FACE - 0.1, STORY - 0.2), (GRID, FACE + 0.06, STORY), 'stone_basalt', skip=('-x', '+x'))
 
 
+def _granite_courses(b, x0, x1, z0, z1, face, opening=None, outward=-1):
+    rows = max(1, round((z1 - z0) / 0.36))
+    course = (z1 - z0) / rows
+    for row in range(rows):
+        bottom = z0 + course * row
+        top = bottom + course
+        gap = opening[:2] if opening and bottom < opening[3] and top > opening[2] else None
+        for left, right in _cut(x0, x1, gap):
+            cursor = left
+            width = 0.41 if row % 2 else 0.68
+            while cursor < right - 0.055:
+                end = min(right, cursor + width)
+                if right - end < 0.14:
+                    end = right
+                projection = 0.033 + 0.008 * math.sin(cursor * 17 + row * 3)
+                y0, y1 = sorted((face + outward * projection, face - outward * 0.012))
+                b.box((cursor + 0.006, y0, bottom + 0.006),
+                      (end - 0.006, y1, top - 0.006), 'stone_granite', bevel=0.008)
+                cursor, width = end, 0.68
+
+
 def _squared_head(b, x0, x1, z1, reach, depth, shoulder):
     """Massive lintel over a squared opening with corbelled shoulders under its ends."""
     b.box((x0 - reach, FACE - depth, z1), (x1 + reach, FACE + 0.08, z1 + 0.44), 'stone_basalt')
@@ -55,6 +76,9 @@ def granite_wall(kind):
     hole = {'plain': None, 'window': GRANITE_WINDOW, 'door': DOOR}[kind]
     panel(b, 'stone_granite', FACE, T, hole, INTERIOR)
     _bands(b, (DOOR[0] - 0.22, DOOR[1] + 0.22) if kind == 'door' else None)
+    if detailed():
+        keepout = None if hole is None else (hole[0] - 0.04, hole[1] + 0.04, hole[2] - 0.03, hole[3] + 0.03)
+        _granite_courses(b, 0, GRID, 0.6, STORY - 0.2, FACE, keepout)
     if kind == 'window':
         x0, x1, z0, z1 = hole
         for jx0, jx1 in ((x0 - 0.16, x0), (x1, x1 + 0.16)):
@@ -91,6 +115,8 @@ def granite_arcade():
     b.box((x0, deep + 0.22, z1 + 0.42), (x1, T, STORY), 'stone_granite', mats=INTERIOR)
     b.box((x0, T - 0.1, z1), (x1, T, z1 + 0.42), 'stone_granite', mats=INTERIOR)
     b.box((0, FACE - 0.1, STORY - 0.2), (GRID, FACE + 0.06, STORY), 'stone_basalt', skip=('-x', '+x'))
+    if detailed():
+        _granite_courses(b, 0, GRID, 0.15, z1, deep, ARCADE)
     # Segmental vault soffit between the piers, seen when walking through.
     cx, half, rise, seg = (x0 + x1) / 2, (x1 - x0) / 2, 0.36, 8
     r = (half ** 2 + rise ** 2) / (2 * rise)
@@ -121,8 +147,14 @@ def granite_corner():
 def flat_roof():
     """One cell of flagged roof deck on the wall tops."""
     b = MeshBuilder()
-    b.box((0, 0, -0.06), (GRID, GRID, 0.14), 'stone_granite', mats={'+z': 'stone_ashlar'},
+    b.box((0, 0, -0.06), (GRID, GRID, 0.112 if detailed() else 0.14), 'stone_granite', mats={'+z': 'stone_ashlar'},
           skip=('-x', '+x', '-y', '+y'))
+    if detailed():
+        for row in range(4):
+            cuts = (0, 0.5, 1.5, GRID) if row % 2 else (0, 1.0, GRID)
+            for x0, x1 in zip(cuts, cuts[1:]):
+                b.box((x0 + 0.007, row * 0.5 + 0.007, 0.105),
+                      (x1 - 0.007, (row + 1) * 0.5 - 0.007, 0.14), 'stone_ashlar', bevel=0.008)
     return b
 
 
@@ -133,6 +165,7 @@ def parapet():
     b.box((0, FACE - 0.04, 0.24), (GRID, FACE + 0.42, 1.0), 'stone_granite', skip=('-x', '+x'))
     b.box((0, FACE - 0.1, 1.0), (GRID, FACE + 0.48, 1.14), 'stone_basalt', skip=('-x', '+x'))
     if detailed():
+        _granite_courses(b, 0, GRID, 0.24, 1.0, FACE - 0.04)
         for i in range(4):
             cx = 0.25 + i * 0.5
             b.box((cx - 0.09, FACE - 0.14, -0.3), (cx + 0.09, FACE + 0.02, 0.0), 'stone_basalt')
@@ -155,6 +188,9 @@ def chimney_stack():
     b.box((-0.72, -0.4, -0.1), (0.72, 0.4, 2.6), 'stone_granite', skip=('-z',))
     b.box((-0.78, -0.46, 1.2), (0.78, 0.46, 1.36), 'stone_basalt')
     b.box((-0.84, -0.52, 2.6), (0.84, 0.52, 2.78), 'stone_basalt')
+    if detailed():
+        for face, outward in ((-0.4, -1), (0.4, 1)):
+            _granite_courses(b, -0.72, 0.72, 0.05, 2.6, face, outward=outward)
     for x in (-0.46, 0.0, 0.46):
         b.box((x - 0.17, -0.17, 2.78), (x + 0.17, 0.17, 3.12), 'stone_basalt')
         b.box((x - 0.1, -0.1, 3.0), (x + 0.1, 0.1, 3.125), 'shadow', bevel=0, skip=('-z',))
@@ -194,6 +230,8 @@ def gate():
         b.box((px0, -0.18, 0), (px1, 0.02, 0.8), 'stone_basalt', skip=('-z',))
         b.box((px0, -0.1, 2.4), (px1, 0.02, 2.62), 'stone_basalt')
     b.box((0, -0.1, 5.3), (GATE_W, 0.02, 5.52), 'stone_basalt')
+    if detailed():
+        _granite_courses(b, 0, GATE_W, 0.8, GATE_H - 0.28, 0, (x0 - 0.36, x1 + 0.36, 0, oh + 0.05))
     # Corbel table and parapet along front and back.
     for y0, y1, out in ((-0.32, 0.0, -1), (GATE_D, GATE_D + 0.32, 1)):
         b.box((0, y0, GATE_H - 0.28), (GATE_W, y1, GATE_H), 'stone_basalt')

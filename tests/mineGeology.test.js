@@ -6,6 +6,7 @@ import * as THREE from 'three/webgpu';
 import { DensityGrid } from '../src/editor/locations/gen/DensityGrid.js';
 import { computeFloorContext, createMineGeologyClassifier } from '../src/editor/locations/gen/mineGeology.js';
 import { resolveMineGeologyConfig } from '../src/editor/locations/gen/mineGeologyConfig.js';
+import { scatterWallBaseDebris } from '../src/editor/locations/generators/mineWorkingsDetail.js';
 import { extractSurface } from '../src/editor/locations/gen/SurfaceNets.js';
 import { LOCATION_GENERATORS } from '../src/editor/locations/generators/index.js';
 import { generateLocation } from '../src/editor/locations/LocationBuilder.js';
@@ -13,6 +14,28 @@ import { resolveLocationCatalog } from '../src/editor/locations/LocationCatalog.
 
 const source = yaml.load(fs.readFileSync(new URL('../config/instanced-locations.yaml', import.meta.url), 'utf8'));
 const catalog = resolveLocationCatalog(source, { generatorKeys: Object.keys(LOCATION_GENERATORS), quality: 'low' });
+
+test('mine ore relief is attached to an open wall and stays out of the walking lane', () => {
+  const pocket = { x: 0, y: 0, z: 0, dx: 1, dz: 0, count: 0, ore: true };
+  const parts = [];
+  const emit = (sample) => scatterWallBaseDebris({
+    grid: { sample },
+    prop: (material, geometry) => parts.push({ material, geometry }),
+  }, [pocket]);
+  emit((x) => 1.6 - x);
+  assert.equal(parts.length, 5);
+  assert.ok(parts.every(({ material }) => material === 'ore'));
+  for (const { geometry } of parts) {
+    geometry.computeBoundingBox();
+    assert.ok(geometry.boundingBox.min.x > 1.25 && geometry.boundingBox.min.x < 1.6);
+    assert.ok(geometry.boundingBox.max.x >= 1.6);
+    geometry.dispose();
+  }
+  parts.length = 0;
+  emit(() => -1);
+  emit(() => 1);
+  assert.equal(parts.length, 0);
+});
 
 test('resolveMineGeologyConfig provides defaults and validates bounds', () => {
   const defaults = resolveMineGeologyConfig();

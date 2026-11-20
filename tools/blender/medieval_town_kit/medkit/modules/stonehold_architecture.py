@@ -45,6 +45,18 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
     pave_top = ring_pts(cx, cy, z_deck + 0.012, rx * 0.96, ry * 0.96, angles, radii)
     loft_rings(b, pave_bot, pave_top, 'stone_flag', cap_bot=False, cap_top=True,
                cap_mat='stone_flag', tone=0.96)
+    if detailed():
+        centre = Vector((cx, cy, z_deck + 0.012))
+        for index, start in enumerate(pave_top):
+            end = pave_top[(index + 1) % sides]
+            steps = max(1, round((end - start).length / 0.23))
+            for piece in range(steps):
+                a = start.lerp(end, (piece + 0.032) / steps).lerp(centre, 0.025)
+                c = start.lerp(end, (piece + 0.968) / steps).lerp(centre, 0.025)
+                # Shallow inset flags give the exposed deck fascia real joints.
+                depth = min(0.21, 0.085 / (a - centre).length)
+                b.extrude([a, c, c.lerp(centre, depth), a.lerp(centre, depth)],
+                          (0, 0, 0.007), 'stone_flag', tone=rng.uniform(0.88, 1.01))
 
     # 3. Sleek perimeter crenellated parapet curbs & slender vertical cliff pilaster buttresses
     rim_pts = ring_pts(cx, cy, z_deck, rx * 0.97, ry * 0.97, angles, radii)
