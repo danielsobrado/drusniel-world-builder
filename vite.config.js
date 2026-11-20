@@ -6,7 +6,7 @@ import { compiledYamlPlugin } from './scripts/compiled-yaml-plugin.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [compiledYamlPlugin(), contentLibraryPlugin(root)],
   resolve: {
     // The PTL runtime ships its own three; it must share the app's single copy.
@@ -19,9 +19,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: path.resolve(root, 'index.html'),
-        workshopQa: path.resolve(root, 'workshop-qa.html'),
-        stoneholdQa: path.resolve(root, 'stonehold-qa.html'),
+        ...(mode === 'qa' && {
+          workshopQa: path.resolve(root, 'workshop-qa.html'),
+          stoneholdQa: path.resolve(root, 'stonehold-qa.html'),
+        }),
       },
     },
   },
-});
+}));

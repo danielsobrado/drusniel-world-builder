@@ -8,7 +8,7 @@ these fixtures and accumulated tracked allocations during repeated reloads.
 Revisit native meshlets when a denser source asset makes raster work the
 measured bottleneck and its intended material qualifies for conversion.
 
-## Hardware results
+## Original hardware results
 
 Captured on 20 November 2026 in headed Chromium 151.0.7922.34, NVIDIA RTX 4080
 (Lovelace), at 1280 × 720. All 12 retained runs held native foreground focus.
@@ -76,20 +76,107 @@ these fixtures. The native triangle counts include meshlet padding.
   production blocker pending allocation and disposal verification on the
   graphics backend.
 
-The accepted JSON and screenshots are in `tmp/stonehold-meshlets-hardware/`.
+The [original hardware report](qa/stonehold-meshlets/original.json) and
+[baseline](qa/stonehold-meshlets/shrine-baseline-reflection.webp) and
+[external reflector captures](qa/stonehold-meshlets/shrine-external-reflection.webp)
+are committed. The complete screenshot set is in `tmp/stonehold-meshlets-hardware/`.
 The earlier native reflector validation error is in
 `tmp/stonehold-meshlets/report.json`. The earlier external reload mismatch is
 in `tmp/stonehold-meshlets-verified/report.json`.
 
+## Review follow-up
+
+The dense test uses a deterministic, displaced cliff with 523,264 triangles.
+Its conventional near and far meshes sample the same shape at 50,880 and
+4,512 triangles. The stock-kit comparison also includes its shipped far meshes.
+Both authored arms use the runtime's 100 m town-edge threshold and 20 m
+hysteresis on a fixed batch. The runner verifies that both LODs draw on each
+timed route. The dense arms share a front-sided stone PBR material with color
+and normal maps. Their geometry detail differs by design, so the comparison
+measures cost at those quality settings.
+
+The 54 dense captures passed on the same RTX 4080 with zero browser or GPU
+validation errors. GPU p95 in milliseconds across both runs follows. The
+occlusion columns use native culling with hierarchical depth disabled or
+enabled. The enabled arm retains Three.js's built-in occlusion heuristic.
+
+| Resolution | Instances | Authored LODs | Native, occlusion off | Native, occlusion on |
+| --- | ---: | ---: | ---: | ---: |
+| 1080p | 1 | 0.125–0.126 | 0.410–0.414 | 0.398–0.410 |
+| 1080p | 16 | 0.258–0.259 | 0.870–0.878 | 0.895–0.916 |
+| 1080p | 100 | 0.785–0.786 | 1.421–1.520 | 1.325–1.449 |
+| 1440p | 1 | 0.213–0.221 | 0.536–0.553 | 0.546–0.552 |
+| 1440p | 16 | 0.364–0.366 | 1.158–1.217 | 1.160–1.174 |
+| 1440p | 100 | 0.912 | 1.779–1.888 | 2.219–2.246 |
+| 4K | 1 | 0.453–0.461 | 0.867–0.874 | 0.967–0.969 |
+| 4K | 16 | 0.656–0.665 | 1.810–1.835 | 1.807–1.834 |
+| 4K | 100 | 1.249–1.255 | 2.960–2.964 | 2.942–2.948 |
+
+Authored LODs had the lowest GPU p95 in every cell. Native meshlets rendered
+the denser source and layered rock detail. At 4K with 100 copies the first
+native overview submitted 9.21 million padded main-view triangles with depth
+culling disabled and 8.14 million with it enabled. The corresponding GPU p95
+improvement was about 0.01 ms. This fixture provides a measured price for that
+extra detail and a reason to retain authored LODs as the default.
+[Dense capture JSON](qa/stonehold-meshlets/dense.json) ·
+[Authored cliff](qa/stonehold-meshlets/cliff-authored.webp) ·
+[Native cliff](qa/stonehold-meshlets/cliff-native.webp)
+
+### Shipped LODs and visual gates
+
+The 16 stock-kit timing captures also passed. The authored arm chose the
+3,442-triangle far shrine on 226 of 480 pacing frames and the 11,712-triangle
+far outcrop on 302 of 480 frames. The outcrop's GPU median fell from
+0.241–0.243 ms with the near mesh held throughout to 0.093–0.094 ms with authored
+switching. Its p95 remained close to 0.295 ms in both arms and was 0.303 ms with
+native meshlets. The shrine's authored p95 was 0.172–0.173 ms, compared with
+0.206–0.208 ms for native. [Stock-kit capture JSON](qa/stonehold-meshlets/kit.json)
+
+The visual checks use reference renders with the subject hidden, shadows
+disabled, and the reflector active with an empty scene. They measure silhouette
+coverage, shadow gaps, reflected geometry, and foreground coverage when the
+reflector activates. Each check counts the worst loss over 32 × 32 pixel tiles
+with at least 64 selected pixels. The native arm passed all four checks for
+both stock assets. With the external arm the nearest shrine lost foreground
+coverage on 3,750 pixels. The worst tile lost 50.9%, above the 20% gate.
+
+### Buffer lifetime
+
+The Fang Shrine lifecycle probe counts WebGPU `createBuffer` and explicit
+`GPUBuffer.destroy()` calls by usage. It also samples dedicated and shared
+WDDM memory for Chromium's own GPU process after the queue drains. This probe
+runs separately from the timing captures. Its control creates and destroys a
+16-byte staging buffer and verifies that a second destroy does not double-count.
+
+| Path | Tracked storage after reloads 1 / 2 / 3 | WDDM dedicated after reloads 1 / 2 / 3 |
+| --- | ---: | ---: |
+| Baseline | 0 / 0 / 0 MiB | 170.5 / 170.5 / 166.8 MiB |
+| Native | 6.1 / 6.1 / 6.1 MiB | 176.8 / 176.8 / 176.8 MiB |
+| External | 148.3 / 237.7 / 327.2 MiB | 317.8 / 411.5 / 495.7 MiB |
+
+The external arm created 379.9 MiB of storage buffers and explicitly destroyed
+52.7 MiB by the third reload. The 327.2 MiB difference tracks the WDDM growth
+while the document is open. WDDM dedicated memory fell to 37.2 MiB after
+navigating away. The storage category dominates the growth. The allocation
+interception tracks explicit destroys, and WDDM reports process totals.
+Neither identifies which live references retain individual buffers. The first
+baseline WDDM sample was unavailable, and all three reload samples succeeded.
+[Buffer lifecycle JSON](qa/stonehold-meshlets/buffers.json) ·
+[Upstream geometry pool](https://github.com/elad12390/three-virtual-geometry/blob/main/src/core/runtime/GeometryPool.ts)
+
 ## Reproduce
 
 The prototype runs in the existing `stonehold-qa.html` asset viewer. The query
-parameters `meshlets=baseline|native|external` and `material=static` select the
-comparison. The viewer's default material is TownKit.
+parameters `meshlets=baseline|authored|native|external` and `material=static`
+select the comparison. The viewer's default material is TownKit. `occlusion=1`
+enables native hierarchical-depth culling. `module=Dense_Cliff` selects the
+generated cliff in the authored and native modes.
 
 ```powershell
 npm run dev -- --host 127.0.0.1 --port 5197 --strictPort
 node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5197
+node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5197 --suite buffers --out tmp/stonehold-buffers
+node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5197 --suite dense --out tmp/stonehold-dense
 ```
 
 Close other app tabs and leave the Chromium QA window foreground. The runner
@@ -98,10 +185,16 @@ on Windows. It writes the JSON report and screenshots to `tmp/stonehold-meshlets
 `--out` selects a different artifact directory. `--modes baseline,native` limits
 the comparison to native meshlets and the baseline.
 
+`npm run build:qa` builds the game and both standalone QA pages into
+`tmp/qa-dist`. `npm run preview -- --outDir tmp/qa-dist` serves that build.
+The production build has only the game entry. The dense runner also accepts
+`--resolutions 1080,1440,2160` and `--copies 1,16,100` to select subsets.
+
 ## Method
 
-- Compare 16 copies of the Fang Shrine (21,012 triangles each) and Twin Outcrop
-  (47,331 each), using their shipped near meshes. All three paths use the same
+- The original experiment compares 16 copies of the Fang Shrine (21,012
+  triangles each) and Twin Outcrop (47,331 each), using their shipped near
+  meshes. All three paths use the same
   opaque, front-sided material with the settlement rock texture and the same
   light, fog, and directional shadow map. The first comparison disables both
   occlusion systems and disables the external library's LOD blending. Both use

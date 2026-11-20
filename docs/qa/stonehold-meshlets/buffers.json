@@ -1,0 +1,1308 @@
+{
+  "recordedAt": "2026-11-20T00:58:55.318Z",
+  "suite": "buffers",
+  "runs": [],
+  "checks": [
+    {
+      "current": {
+        "module": "Stonehold_Fang_Shrine",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 21012,
+        "mode": "baseline",
+        "occlusion": false,
+        "material": "static",
+        "converted": 0,
+        "buildMs": 0
+      },
+      "firstFrameMs": 1899.0999999940395,
+      "compileMs": 127.69999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "check": "buffer-lifecycle",
+      "samples": [
+        {
+          "phase": "initial-loaded",
+          "renderer": {
+            "attributes": 8,
+            "attributesSize": 1226660,
+            "geometries": 3,
+            "indexAttributes": 2,
+            "indexAttributesSize": 126084,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 8,
+            "programsSize": 42264,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 7,
+            "uniformBuffersSize": 1216,
+            "total": 51601887
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 10,
+              "createdBytes": 1352744,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "uniform": {
+              "created": 9,
+              "createdBytes": 1224,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "unavailable": "Command failed: powershell.exe -NoProfile -Command Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUProcessMemory -Filter \"Name LIKE 'pid_43960_%'\" | Select-Object Name,DedicatedUsage,SharedUsage | ConvertTo-Json -Compress\n"
+          }
+        },
+        {
+          "phase": "unloaded-1",
+          "renderer": {
+            "attributes": 9,
+            "attributesSize": 1433668,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 51806854
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 16,
+              "createdBytes": 1582836,
+              "destroyed": 4,
+              "destroyedBytes": 2432
+            },
+            "uniform": {
+              "created": 12,
+              "createdBytes": 1688,
+              "destroyed": 6,
+              "destroyedBytes": 928
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 178839552,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "reloaded-1",
+          "renderer": {
+            "attributes": 11,
+            "attributesSize": 1434884,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 8,
+            "programsSize": 42264,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 7,
+            "uniformBuffersSize": 1216,
+            "total": 51830763
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 18,
+              "createdBytes": 1584052,
+              "destroyed": 4,
+              "destroyedBytes": 2432
+            },
+            "uniform": {
+              "created": 15,
+              "createdBytes": 2152,
+              "destroyed": 6,
+              "destroyedBytes": 928
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 178839552,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "unloaded-2",
+          "renderer": {
+            "attributes": 9,
+            "attributesSize": 1433668,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 51806854
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 20,
+              "createdBytes": 1585268,
+              "destroyed": 8,
+              "destroyedBytes": 4864
+            },
+            "uniform": {
+              "created": 18,
+              "createdBytes": 2616,
+              "destroyed": 12,
+              "destroyedBytes": 1856
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 178839552,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "reloaded-2",
+          "renderer": {
+            "attributes": 11,
+            "attributesSize": 1434884,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 8,
+            "programsSize": 42264,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 7,
+            "uniformBuffersSize": 1216,
+            "total": 51830763
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 22,
+              "createdBytes": 1586484,
+              "destroyed": 8,
+              "destroyedBytes": 4864
+            },
+            "uniform": {
+              "created": 21,
+              "createdBytes": 3080,
+              "destroyed": 12,
+              "destroyedBytes": 1856
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 178839552,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "unloaded-3",
+          "renderer": {
+            "attributes": 9,
+            "attributesSize": 1433668,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 51806854
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 24,
+              "createdBytes": 1587700,
+              "destroyed": 12,
+              "destroyedBytes": 7296
+            },
+            "uniform": {
+              "created": 24,
+              "createdBytes": 3544,
+              "destroyed": 18,
+              "destroyedBytes": 2784
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 174895104,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "reloaded-3",
+          "renderer": {
+            "attributes": 11,
+            "attributesSize": 1434884,
+            "geometries": 4,
+            "indexAttributes": 3,
+            "indexAttributesSize": 146736,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 8,
+            "programsSize": 42264,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 0,
+            "storageAttributesSize": 0,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 7,
+            "uniformBuffersSize": 1216,
+            "total": 51830763
+          },
+          "webgpu": {
+            "vertexIndex": {
+              "created": 26,
+              "createdBytes": 1588916,
+              "destroyed": 12,
+              "destroyedBytes": 7296
+            },
+            "uniform": {
+              "created": 27,
+              "createdBytes": 4008,
+              "destroyed": 18,
+              "destroyedBytes": 2784
+            },
+            "staging": {
+              "created": 1,
+              "createdBytes": 16,
+              "destroyed": 1,
+              "destroyedBytes": 16
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 174899200,
+            "sharedBytes": 71610368
+          }
+        },
+        {
+          "phase": "document-closed",
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 34357248,
+            "sharedBytes": 4448256
+          }
+        }
+      ]
+    },
+    {
+      "current": {
+        "module": "Stonehold_Fang_Shrine",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 21012,
+        "mode": "native",
+        "occlusion": false,
+        "material": "static",
+        "converted": 0,
+        "buildMs": 134.69999999552965
+      },
+      "firstFrameMs": 2031.9000000059605,
+      "compileMs": 168.39999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "check": "buffer-lifecycle",
+      "samples": [
+        {
+          "phase": "initial-loaded",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 4,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 4,
+            "indirectStorageAttributesSize": 2080,
+            "programs": 17,
+            "programsSize": 80595,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 24,
+            "storageAttributesSize": 4856016,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 23,
+            "uniformBuffersSize": 1888,
+            "total": 55146386
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 25,
+              "createdBytes": 1896,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "storage": {
+              "created": 24,
+              "createdBytes": 4856016,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "indirect": {
+              "created": 4,
+              "createdBytes": 2080,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 8,
+              "createdBytes": 968,
+              "destroyed": 6,
+              "destroyedBytes": 696
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 182820864,
+            "sharedBytes": 57487360
+          }
+        },
+        {
+          "phase": "unloaded-1",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 2,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 2,
+            "storageAttributesSize": 4481760,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 54708354
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 25,
+              "createdBytes": 1896,
+              "destroyed": 19,
+              "destroyedBytes": 1136
+            },
+            "storage": {
+              "created": 26,
+              "createdBytes": 9337776,
+              "destroyed": 24,
+              "destroyedBytes": 4856016
+            },
+            "indirect": {
+              "created": 4,
+              "createdBytes": 2080,
+              "destroyed": 4,
+              "destroyedBytes": 2080
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 13,
+              "createdBytes": 1648,
+              "destroyed": 13,
+              "destroyedBytes": 1648
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185356288,
+            "sharedBytes": 52801536
+          }
+        },
+        {
+          "phase": "reloaded-1",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 4,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 4,
+            "indirectStorageAttributesSize": 2080,
+            "programs": 17,
+            "programsSize": 80595,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 24,
+            "storageAttributesSize": 6349936,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 23,
+            "uniformBuffersSize": 1888,
+            "total": 56640306
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 44,
+              "createdBytes": 3032,
+              "destroyed": 19,
+              "destroyedBytes": 1136
+            },
+            "storage": {
+              "created": 48,
+              "createdBytes": 11205952,
+              "destroyed": 24,
+              "destroyedBytes": 4856016
+            },
+            "indirect": {
+              "created": 8,
+              "createdBytes": 4160,
+              "destroyed": 4,
+              "destroyedBytes": 2080
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 17,
+              "createdBytes": 2192,
+              "destroyed": 15,
+              "destroyedBytes": 1920
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185356288,
+            "sharedBytes": 52801536
+          }
+        },
+        {
+          "phase": "unloaded-2",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 2,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 2,
+            "storageAttributesSize": 4481760,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 54708354
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 44,
+              "createdBytes": 3032,
+              "destroyed": 38,
+              "destroyedBytes": 2272
+            },
+            "storage": {
+              "created": 48,
+              "createdBytes": 11205952,
+              "destroyed": 46,
+              "destroyedBytes": 6724192
+            },
+            "indirect": {
+              "created": 8,
+              "createdBytes": 4160,
+              "destroyed": 8,
+              "destroyedBytes": 4160
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 21,
+              "createdBytes": 2736,
+              "destroyed": 21,
+              "destroyedBytes": 2736
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185356288,
+            "sharedBytes": 52801536
+          }
+        },
+        {
+          "phase": "reloaded-2",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 4,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 4,
+            "indirectStorageAttributesSize": 2080,
+            "programs": 17,
+            "programsSize": 80595,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 24,
+            "storageAttributesSize": 6349936,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 23,
+            "uniformBuffersSize": 1888,
+            "total": 56640306
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 63,
+              "createdBytes": 4168,
+              "destroyed": 38,
+              "destroyedBytes": 2272
+            },
+            "storage": {
+              "created": 70,
+              "createdBytes": 13074128,
+              "destroyed": 46,
+              "destroyedBytes": 6724192
+            },
+            "indirect": {
+              "created": 12,
+              "createdBytes": 6240,
+              "destroyed": 8,
+              "destroyedBytes": 4160
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 25,
+              "createdBytes": 3280,
+              "destroyed": 23,
+              "destroyedBytes": 3008
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185360384,
+            "sharedBytes": 53194752
+          }
+        },
+        {
+          "phase": "unloaded-3",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 2,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 0,
+            "indirectStorageAttributesSize": 0,
+            "programs": 4,
+            "programsSize": 20035,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 2,
+            "storageAttributesSize": 4481760,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 4,
+            "uniformBuffersSize": 752,
+            "total": 54708354
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 63,
+              "createdBytes": 4168,
+              "destroyed": 57,
+              "destroyedBytes": 3408
+            },
+            "storage": {
+              "created": 70,
+              "createdBytes": 13074128,
+              "destroyed": 68,
+              "destroyedBytes": 8592368
+            },
+            "indirect": {
+              "created": 12,
+              "createdBytes": 6240,
+              "destroyed": 12,
+              "destroyedBytes": 6240
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 29,
+              "createdBytes": 3824,
+              "destroyed": 29,
+              "destroyedBytes": 3824
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185360384,
+            "sharedBytes": 53194752
+          }
+        },
+        {
+          "phase": "reloaded-3",
+          "renderer": {
+            "attributes": 3,
+            "attributesSize": 132,
+            "geometries": 4,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 4,
+            "indirectStorageAttributesSize": 2080,
+            "programs": 17,
+            "programsSize": 80607,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 24,
+            "storageAttributesSize": 6349936,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 23,
+            "uniformBuffersSize": 1888,
+            "total": 56640318
+          },
+          "webgpu": {
+            "uniform": {
+              "created": 82,
+              "createdBytes": 5304,
+              "destroyed": 57,
+              "destroyedBytes": 3408
+            },
+            "storage": {
+              "created": 92,
+              "createdBytes": 14942304,
+              "destroyed": 68,
+              "destroyedBytes": 8592368
+            },
+            "indirect": {
+              "created": 16,
+              "createdBytes": 8320,
+              "destroyed": 12,
+              "destroyedBytes": 6240
+            },
+            "vertexIndex": {
+              "created": 4,
+              "createdBytes": 144,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 33,
+              "createdBytes": 4368,
+              "destroyed": 31,
+              "destroyedBytes": 4096
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 185360384,
+            "sharedBytes": 53194752
+          }
+        },
+        {
+          "phase": "document-closed",
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 38838272,
+            "sharedBytes": 5169152
+          }
+        }
+      ]
+    },
+    {
+      "current": {
+        "module": "Stonehold_Fang_Shrine",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 21012,
+        "mode": "external",
+        "occlusion": false,
+        "material": "static",
+        "converted": 1,
+        "buildMs": 467.79999999701977
+      },
+      "firstFrameMs": 2500.8000000044703,
+      "compileMs": 262.29999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "check": "buffer-lifecycle",
+      "samples": [
+        {
+          "phase": "initial-loaded",
+          "renderer": {
+            "attributes": 11,
+            "attributesSize": 228,
+            "geometries": 6,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 7,
+            "indirectStorageAttributesSize": 5216,
+            "programs": 29,
+            "programsSize": 185463,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 16,
+            "storageAttributesSize": 61699348,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 24,
+            "uniformBuffersSize": 3296,
+            "total": 112099226
+          },
+          "webgpu": {
+            "storage": {
+              "created": 16,
+              "createdBytes": 61699348,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "uniform": {
+              "created": 26,
+              "createdBytes": 3304,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "indirect": {
+              "created": 7,
+              "createdBytes": 5216,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 12,
+              "createdBytes": 240,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "staging": {
+              "created": 4,
+              "createdBytes": 6400,
+              "destroyed": 3,
+              "destroyedBytes": 4272
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 239276032,
+            "sharedBytes": 53981184
+          }
+        },
+        {
+          "phase": "unloaded-1",
+          "renderer": {
+            "attributes": 15,
+            "attributesSize": 276,
+            "geometries": 8,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 14,
+            "indirectStorageAttributesSize": 10432,
+            "programs": 8,
+            "programsSize": 53572,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 29,
+            "storageAttributesSize": 99374020,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 9,
+            "uniformBuffersSize": 1872,
+            "total": 149645847
+          },
+          "webgpu": {
+            "storage": {
+              "created": 31,
+              "createdBytes": 117806020,
+              "destroyed": 2,
+              "destroyedBytes": 18432000
+            },
+            "uniform": {
+              "created": 45,
+              "createdBytes": 5720,
+              "destroyed": 34,
+              "destroyedBytes": 3840
+            },
+            "indirect": {
+              "created": 14,
+              "createdBytes": 10432,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 20,
+              "createdBytes": 336,
+              "destroyed": 4,
+              "destroyedBytes": 48
+            },
+            "staging": {
+              "created": 35,
+              "createdBytes": 72368,
+              "destroyed": 35,
+              "destroyedBytes": 72368
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 277028864,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "reloaded-1",
+          "renderer": {
+            "attributes": 23,
+            "attributesSize": 372,
+            "geometries": 12,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 21,
+            "indirectStorageAttributesSize": 15648,
+            "programs": 29,
+            "programsSize": 185475,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 44,
+            "storageAttributesSize": 155480692,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 28,
+            "uniformBuffersSize": 4288,
+            "total": 205892150
+          },
+          "webgpu": {
+            "storage": {
+              "created": 46,
+              "createdBytes": 173912692,
+              "destroyed": 2,
+              "destroyedBytes": 18432000
+            },
+            "uniform": {
+              "created": 64,
+              "createdBytes": 8136,
+              "destroyed": 34,
+              "destroyedBytes": 3840
+            },
+            "indirect": {
+              "created": 21,
+              "createdBytes": 15648,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 28,
+              "createdBytes": 432,
+              "destroyed": 4,
+              "destroyedBytes": 48
+            },
+            "staging": {
+              "created": 39,
+              "createdBytes": 80880,
+              "destroyed": 39,
+              "destroyedBytes": 80880
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 333266944,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "unloaded-2",
+          "renderer": {
+            "attributes": 27,
+            "attributesSize": 420,
+            "geometries": 14,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 28,
+            "indirectStorageAttributesSize": 20864,
+            "programs": 8,
+            "programsSize": 53572,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 57,
+            "storageAttributesSize": 193155364,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 13,
+            "uniformBuffersSize": 2864,
+            "total": 243438759
+          },
+          "webgpu": {
+            "storage": {
+              "created": 61,
+              "createdBytes": 230019364,
+              "destroyed": 4,
+              "destroyedBytes": 36864000
+            },
+            "uniform": {
+              "created": 83,
+              "createdBytes": 10552,
+              "destroyed": 68,
+              "destroyedBytes": 7680
+            },
+            "indirect": {
+              "created": 28,
+              "createdBytes": 20864,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 36,
+              "createdBytes": 528,
+              "destroyed": 8,
+              "destroyedBytes": 96
+            },
+            "staging": {
+              "created": 113,
+              "createdBytes": 238352,
+              "destroyed": 113,
+              "destroyedBytes": 238352
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 371015680,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "reloaded-2",
+          "renderer": {
+            "attributes": 35,
+            "attributesSize": 516,
+            "geometries": 18,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 35,
+            "indirectStorageAttributesSize": 26080,
+            "programs": 29,
+            "programsSize": 185475,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 72,
+            "storageAttributesSize": 249262036,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 32,
+            "uniformBuffersSize": 5280,
+            "total": 299685062
+          },
+          "webgpu": {
+            "storage": {
+              "created": 76,
+              "createdBytes": 286126036,
+              "destroyed": 4,
+              "destroyedBytes": 36864000
+            },
+            "uniform": {
+              "created": 102,
+              "createdBytes": 12968,
+              "destroyed": 68,
+              "destroyedBytes": 7680
+            },
+            "indirect": {
+              "created": 35,
+              "createdBytes": 26080,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 44,
+              "createdBytes": 624,
+              "destroyed": 8,
+              "destroyedBytes": 96
+            },
+            "staging": {
+              "created": 118,
+              "createdBytes": 248992,
+              "destroyed": 118,
+              "destroyedBytes": 248992
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 431448064,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "unloaded-3",
+          "renderer": {
+            "attributes": 39,
+            "attributesSize": 564,
+            "geometries": 20,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 42,
+            "indirectStorageAttributesSize": 31296,
+            "programs": 8,
+            "programsSize": 53572,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 85,
+            "storageAttributesSize": 286936708,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 17,
+            "uniformBuffersSize": 3856,
+            "total": 337231671
+          },
+          "webgpu": {
+            "storage": {
+              "created": 91,
+              "createdBytes": 342232708,
+              "destroyed": 6,
+              "destroyedBytes": 55296000
+            },
+            "uniform": {
+              "created": 121,
+              "createdBytes": 15384,
+              "destroyed": 102,
+              "destroyedBytes": 11520
+            },
+            "indirect": {
+              "created": 42,
+              "createdBytes": 31296,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 52,
+              "createdBytes": 720,
+              "destroyed": 12,
+              "destroyedBytes": 144
+            },
+            "staging": {
+              "created": 195,
+              "createdBytes": 412848,
+              "destroyed": 195,
+              "destroyedBytes": 412848
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 463556608,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "reloaded-3",
+          "renderer": {
+            "attributes": 47,
+            "attributesSize": 660,
+            "geometries": 24,
+            "indexAttributes": 1,
+            "indexAttributesSize": 12,
+            "indirectStorageAttributes": 49,
+            "indirectStorageAttributesSize": 36512,
+            "programs": 29,
+            "programsSize": 185475,
+            "readbackBuffers": 0,
+            "readbackBuffersSize": 0,
+            "renderTargets": 2,
+            "storageAttributes": 100,
+            "storageAttributesSize": 343043380,
+            "textures": 6,
+            "texturesSize": 50205663,
+            "uniformBuffers": 36,
+            "uniformBuffersSize": 6272,
+            "total": 393477974
+          },
+          "webgpu": {
+            "storage": {
+              "created": 106,
+              "createdBytes": 398339380,
+              "destroyed": 6,
+              "destroyedBytes": 55296000
+            },
+            "uniform": {
+              "created": 140,
+              "createdBytes": 17800,
+              "destroyed": 102,
+              "destroyedBytes": 11520
+            },
+            "indirect": {
+              "created": 49,
+              "createdBytes": 36512,
+              "destroyed": 0,
+              "destroyedBytes": 0
+            },
+            "vertexIndex": {
+              "created": 60,
+              "createdBytes": 816,
+              "destroyed": 12,
+              "destroyedBytes": 144
+            },
+            "staging": {
+              "created": 200,
+              "createdBytes": 423488,
+              "destroyed": 199,
+              "destroyedBytes": 421360
+            }
+          },
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 519794688,
+            "sharedBytes": 55521280
+          }
+        },
+        {
+          "phase": "document-closed",
+          "driver": {
+            "gpuPid": 43960,
+            "dedicatedBytes": 39018496,
+            "sharedBytes": 4677632
+          }
+        }
+      ]
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  }
+}

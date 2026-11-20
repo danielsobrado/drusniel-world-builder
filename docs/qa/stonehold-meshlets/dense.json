@@ -1,0 +1,5251 @@
+{
+  "recordedAt": "2026-11-20T00:58:03.035Z",
+  "suite": "dense",
+  "runs": [
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 792.2000000029802,
+      "compileMs": 530.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 12
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.29999999701976776,
+          "p95": 0.5,
+          "max": 1.3000000044703484
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.29999999701976776,
+          "max": 0.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.08703999999999999,
+          "p95": 0.12595199999999998,
+          "max": 0.13312
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.08703999999999999,
+          "p95": 0.12595199999999998,
+          "max": 0.13312
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 101763,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 906512,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 70904916
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1211.1000000014901
+      },
+      "firstFrameMs": 1654.2000000029802,
+      "compileMs": 243.89999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.7000000029802322,
+          "max": 2.600000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.29999999701976776,
+          "p95": 0.5,
+          "max": 0.8000000044703484
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.228352,
+          "p95": 0.40959999999999996,
+          "max": 0.423936
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.128,
+          "p95": 0.262144,
+          "max": 0.285696
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.100352,
+          "p95": 0.139264,
+          "max": 0.150528
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 4261,
+          "triangles": 272704
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 124361805
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1082.6999999955297
+      },
+      "firstFrameMs": 1587.6000000014901,
+      "compileMs": 278.3999999985099,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 13
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.4000000059604645,
+          "p95": 0.7999999970197678,
+          "max": 1.7000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.30000000447034836,
+          "p95": 0.6000000014901161,
+          "max": 1.3999999985098839
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.223232,
+          "p95": 0.398336,
+          "max": 0.42803199999999997
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.121856,
+          "p95": 0.259072,
+          "max": 0.28876799999999997
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.099328,
+          "p95": 0.14233600000000002,
+          "max": 0.164864
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 3182,
+          "triangles": 203648
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 33,
+          "programsSize": 138104,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 60559304,
+          "textures": 8,
+          "texturesSize": 77915070,
+          "uniformBuffers": 44,
+          "uniformBuffersSize": 3248,
+          "total": 138617950
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1022.6999999955297
+      },
+      "firstFrameMs": 1492.2999999970198,
+      "compileMs": 249.79999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 1,
+          "max": 1.8999999985098839
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.30000000447034836,
+          "p95": 0.7000000029802322,
+          "max": 1.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.226304,
+          "p95": 0.40959999999999996,
+          "max": 0.427008
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.121856,
+          "p95": 0.27033599999999997,
+          "max": 0.28364799999999996
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.099328,
+          "p95": 0.146432,
+          "max": 0.164864
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1027.2000000029802
+      },
+      "firstFrameMs": 1427.6999999955297,
+      "compileMs": 200.29999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.7000000029802322,
+          "max": 1.7999999970197678
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.29999999701976776,
+          "p95": 0.5,
+          "max": 1.1999999955296516
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.221184,
+          "p95": 0.413696,
+          "max": 0.43008
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.123904,
+          "p95": 0.27136,
+          "max": 0.290816
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.099328,
+          "p95": 0.139264,
+          "max": 0.14336
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 291.6000000014901,
+      "compileMs": 109.39999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 12
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.29999999701976776,
+          "p95": 0.5,
+          "max": 3
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.29999999701976776,
+          "max": 0.6999999955296516
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.086016,
+          "p95": 0.124928,
+          "max": 0.13824
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.086016,
+          "p95": 0.124928,
+          "max": 0.13824
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 280.5,
+      "compileMs": 109.60000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 13
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.29999999701976776,
+          "p95": 0.5,
+          "max": 67
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.19999999552965164,
+          "p95": 0.30000000447034836,
+          "max": 0.8999999985098839
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.083968,
+          "p95": 0.258048,
+          "max": 0.25907199999999997
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.083968,
+          "p95": 0.258048,
+          "max": 0.25907199999999997
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 1628163,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 907652,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 70906056
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1169.2000000029802
+      },
+      "firstFrameMs": 1562,
+      "compileMs": 193.59999999403954,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 15
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.7000000029802322,
+          "p95": 1.1000000014901161,
+          "max": 1.7999999970197678
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.5,
+          "p95": 0.8999999985098839,
+          "max": 1.2000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.516096,
+          "p95": 0.8704,
+          "max": 0.9113600000000002
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.38809599999999994,
+          "p95": 0.6963199999999999,
+          "max": 0.7219200000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.128,
+          "p95": 0.182272,
+          "max": 0.205824
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 18934,
+          "triangles": 1211776
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 124361805
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1052
+      },
+      "firstFrameMs": 1602,
+      "compileMs": 248.79999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 15
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.7000000029802322,
+          "p95": 1.0999999940395355,
+          "max": 1.7000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.6000000014901161,
+          "p95": 0.8999999985098839,
+          "max": 1.3000000044703484
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.512,
+          "p95": 0.91648,
+          "max": 1.211392
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.38502400000000003,
+          "p95": 0.729088,
+          "max": 1.027072
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.126976,
+          "p95": 0.18944,
+          "max": 0.241664
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 15535,
+          "triangles": 994240
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 33,
+          "programsSize": 138104,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 60559304,
+          "textures": 8,
+          "texturesSize": 77915070,
+          "uniformBuffers": 44,
+          "uniformBuffersSize": 3248,
+          "total": 138617950
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1038.6000000014901
+      },
+      "firstFrameMs": 1474.6000000014901,
+      "compileMs": 240.19999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 15
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.7000000029802322,
+          "p95": 1.1000000014901161,
+          "max": 1.8999999985098839
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.6000000014901161,
+          "p95": 0.8999999985098839,
+          "max": 1.3000000044703484
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.512,
+          "p95": 0.894976,
+          "max": 1.057792
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.385024,
+          "p95": 0.71168,
+          "max": 0.820224
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.128,
+          "p95": 0.186368,
+          "max": 0.237568
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1022.7999999970198
+      },
+      "firstFrameMs": 1426.6000000014901,
+      "compileMs": 197.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 15
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.7000000029802322,
+          "p95": 1.1000000014901161,
+          "max": 1.8999999985098839
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.5,
+          "p95": 0.8000000044703484,
+          "max": 1.5
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.5181439999999999,
+          "p95": 0.8775679999999999,
+          "max": 0.915456
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.390144,
+          "p95": 0.697344,
+          "max": 0.730112
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.129024,
+          "p95": 0.182272,
+          "max": 0.185344
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 298.29999999701977,
+      "compileMs": 108.19999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 12
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 0.4000000059604645,
+          "max": 82.80000000447035
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.29999999701976776,
+          "max": 0.6999999955296516
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.086016,
+          "p95": 0.25907199999999997,
+          "max": 0.262144
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.086016,
+          "p95": 0.25907199999999997,
+          "max": 0.262144
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 280.8999999985099,
+      "compileMs": 105.09999999403954,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 1,
+          "max": 270
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.8000000044703484,
+          "max": 1.3000000044703484
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.704512,
+          "p95": 0.786432,
+          "max": 0.7925760000000001
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.704512,
+          "p95": 0.786432,
+          "max": 0.7925760000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 10176003,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 914036,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 70912440
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1173.3999999985099
+      },
+      "firstFrameMs": 1715.2999999970198,
+      "compileMs": 231.30000000447035,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 19
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.3999999985098839,
+          "p95": 1.8000000044703484,
+          "max": 2.9000000059604645
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.2000000029802322,
+          "p95": 1.5,
+          "max": 2.600000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.1868159999999999,
+          "p95": 1.5196159999999999,
+          "max": 1.6230399999999998
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.98304,
+          "p95": 1.297408,
+          "max": 1.384448
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.206848,
+          "p95": 0.241664,
+          "max": 0.252928
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 67645,
+          "triangles": 4329280
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82465,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 86087216,
+          "textures": 7,
+          "texturesSize": 69620670,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 155794527
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1017.6000000014901
+      },
+      "firstFrameMs": 1573.3000000044703,
+      "compileMs": 259.70000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 19
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.3999999985098839,
+          "p95": 1.8999999985098839,
+          "max": 2.7999999970197678
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.2999999970197678,
+          "p95": 1.6999999955296516,
+          "max": 2.600000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.19808,
+          "p95": 1.325056,
+          "max": 1.580032
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.9861119999999999,
+          "p95": 1.1008,
+          "max": 1.263616
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.21094400000000002,
+          "p95": 0.24575999999999998,
+          "max": 0.319488
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 55301,
+          "triangles": 3539264
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 33,
+          "programsSize": 138126,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 95131592,
+          "textures": 8,
+          "texturesSize": 77915070,
+          "uniformBuffers": 44,
+          "uniformBuffersSize": 3248,
+          "total": 173190260
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1020.6999999955297
+      },
+      "firstFrameMs": 1560.1000000014901,
+      "compileMs": 242,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 19
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.3999999985098839,
+          "p95": 1.8000000044703484,
+          "max": 4.299999997019768
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.2000000029802322,
+          "p95": 1.6000000014901161,
+          "max": 2.6999999955296516
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.2031999999999998,
+          "p95": 1.44896,
+          "max": 1.733632
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.9891840000000001,
+          "p95": 1.227776,
+          "max": 1.481728
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.211968,
+          "p95": 0.24780799999999997,
+          "max": 0.31232000000000004
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1023.8999999985099
+      },
+      "firstFrameMs": 1520,
+      "compileMs": 193,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 20
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.3999999985098839,
+          "p95": 1.8000000044703484,
+          "max": 4.300000004470348
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.2000000029802322,
+          "p95": 1.6000000014901161,
+          "max": 2.2000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.195008,
+          "p95": 1.4213120000000001,
+          "max": 1.610752
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.98304,
+          "p95": 1.195008,
+          "max": 1.380352
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.211968,
+          "p95": 0.24575999999999998,
+          "max": 0.256
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 366.69999999552965,
+      "compileMs": 115.60000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.19999999552965164,
+          "p95": 0.9000000059604645,
+          "max": 269
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.8000000044703484,
+          "max": 1.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.70656,
+          "p95": 0.785408,
+          "max": 0.8734719999999999
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.70656,
+          "p95": 0.785408,
+          "max": 0.8734719999999999
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 299.40000000596046,
+      "compileMs": 112.70000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 12
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 0.3999999985098839,
+          "max": 60.600000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.20000000298023224,
+          "max": 0.7000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.13824,
+          "p95": 0.221184,
+          "max": 0.227328
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.13824,
+          "p95": 0.221184,
+          "max": 0.227328
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 101763,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 906512,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 90258516
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1146.5
+      },
+      "firstFrameMs": 1542.7000000029802,
+      "compileMs": 193.79999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.8999999985098839,
+          "max": 2.2000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.30000000447034836,
+          "p95": 0.6000000014901161,
+          "max": 1.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.284672,
+          "p95": 0.5529599999999999,
+          "max": 0.562176
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.18636799999999998,
+          "p95": 0.40448000000000006,
+          "max": 0.41472000000000003
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.10342399999999999,
+          "p95": 0.14336,
+          "max": 0.157696
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 4261,
+          "triangles": 272704
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 143715405
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1026.7000000029802
+      },
+      "firstFrameMs": 1498.5,
+      "compileMs": 259,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.8999999985098839,
+          "max": 1.5999999940395355
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.3999999985098839,
+          "p95": 0.7000000029802322,
+          "max": 1.3999999985098839
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.31232000000000004,
+          "p95": 0.545792,
+          "max": 0.6369279999999999
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.17510399999999998,
+          "p95": 0.402432,
+          "max": 0.44134399999999996
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.113664,
+          "p95": 0.155648,
+          "max": 0.195584
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 3101,
+          "triangles": 198464
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140079,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 62709472,
+          "textures": 8,
+          "texturesSize": 103719870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 166574909
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1022.1000000014901
+      },
+      "firstFrameMs": 1458.3000000044703,
+      "compileMs": 238.80000000447035,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.8999999985098839,
+          "max": 1.7000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.3999999985098839,
+          "p95": 0.6999999955296516,
+          "max": 1.1000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.313344,
+          "p95": 0.551936,
+          "max": 0.5928960000000001
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.17510399999999998,
+          "p95": 0.39321600000000007,
+          "max": 0.41369599999999995
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.114688,
+          "p95": 0.15462399999999998,
+          "max": 0.19968
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1024.5
+      },
+      "firstFrameMs": 1425.7999999970198,
+      "compileMs": 197.30000000447035,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.5,
+          "p95": 0.7999999970197678,
+          "max": 4.100000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.30000000447034836,
+          "p95": 0.5999999940395355,
+          "max": 1.3999999985098839
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.282624,
+          "p95": 0.535552,
+          "max": 0.741376
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.18534399999999998,
+          "p95": 0.39219200000000004,
+          "max": 0.59904
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.100352,
+          "p95": 0.14233600000000002,
+          "max": 0.14336
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 287.29999999701977,
+      "compileMs": 106.60000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 12
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 0.4000000059604645,
+          "max": 48.400000005960464
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.20000000298023224,
+          "max": 0.5
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.13619199999999998,
+          "p95": 0.21299200000000001,
+          "max": 0.224256
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.13619199999999998,
+          "p95": 0.21299200000000001,
+          "max": 0.224256
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 282.29999999701977,
+      "compileMs": 106.20000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 14
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.3999999985098839,
+          "p95": 0.6000000014901161,
+          "max": 120.5
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.20000000298023224,
+          "p95": 0.4000000059604645,
+          "max": 0.8999999985098839
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.139264,
+          "p95": 0.365568,
+          "max": 0.366592
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.139264,
+          "p95": 0.365568,
+          "max": 0.366592
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 1628163,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 907652,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 90259656
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1159.4000000059605
+      },
+      "firstFrameMs": 1540.5,
+      "compileMs": 193.29999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1,
+          "p95": 1.4000000059604645,
+          "max": 2.100000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.7999999970197678,
+          "p95": 1.2000000029802322,
+          "max": 1.7000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.58368,
+          "p95": 1.216512,
+          "max": 1.4469119999999998
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.456704,
+          "p95": 1.026048,
+          "max": 1.2595199999999998
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.130048,
+          "p95": 0.190464,
+          "max": 0.19456
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 30781,
+          "triangles": 1969984
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 143715405
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1022.3999999985099
+      },
+      "firstFrameMs": 1454.2000000029802,
+      "compileMs": 236.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1,
+          "p95": 1.4000000059604645,
+          "max": 2.2999999970197678
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.8999999985098839,
+          "p95": 1.2999999970197678,
+          "max": 2.100000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.63488,
+          "p95": 1.173504,
+          "max": 1.3137920000000003
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.49459200000000003,
+          "p95": 0.98304,
+          "max": 1.0618880000000002
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.139264,
+          "p95": 0.19353599999999999,
+          "max": 0.253952
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 23597,
+          "triangles": 1510208
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140079,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 62709472,
+          "textures": 8,
+          "texturesSize": 103719870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 166574909
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1053.5
+      },
+      "firstFrameMs": 1489.7000000029802,
+      "compileMs": 240.40000000596046,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1,
+          "p95": 1.4000000059604645,
+          "max": 2.2000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.8999999985098839,
+          "p95": 1.2000000029802322,
+          "max": 2
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.699392,
+          "p95": 1.160192,
+          "max": 1.302528
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.520192,
+          "p95": 0.9697279999999999,
+          "max": 1.114112
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.145408,
+          "p95": 0.191488,
+          "max": 0.198656
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1039.7000000029802
+      },
+      "firstFrameMs": 1439.5,
+      "compileMs": 192.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1,
+          "p95": 1.5,
+          "max": 2.2000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.8000000044703484,
+          "p95": 1.2999999970197678,
+          "max": 1.7000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.5765119999999999,
+          "p95": 1.158144,
+          "max": 1.190912
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.45055999999999996,
+          "p95": 0.968704,
+          "max": 0.9943040000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.130048,
+          "p95": 0.19046400000000002,
+          "max": 0.196608
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 287.8999999985099,
+      "compileMs": 112.59999999403954,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 13
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.30000000447034836,
+          "p95": 0.6000000014901161,
+          "max": 123.89999999850988
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.20000000298023224,
+          "p95": 0.4000000059604645,
+          "max": 0.7999999970197678
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.140288,
+          "p95": 0.36352,
+          "max": 0.36863999999999997
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.140288,
+          "p95": 0.36352,
+          "max": 0.36863999999999997
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 288.20000000298023,
+      "compileMs": 105.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.19999999552965164,
+          "p95": 1.2000000029802322,
+          "max": 336.1000000014901
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 1,
+          "max": 1.5
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.81408,
+          "p95": 0.9123840000000001,
+          "max": 1.040384
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.81408,
+          "p95": 0.9123840000000001,
+          "max": 1.040384
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 10176003,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 914036,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 90266040
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1167.3999999985099
+      },
+      "firstFrameMs": 1585,
+      "compileMs": 209.79999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 23
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.9000000059604645,
+          "p95": 2.399999998509884,
+          "max": 3.6999999955296516
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.7000000029802322,
+          "p95": 2.100000001490116,
+          "max": 3.5999999940395355
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.564672,
+          "p95": 1.7786880000000003,
+          "max": 1.8862079999999999
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.296384,
+          "p95": 1.512448,
+          "max": 1.605632
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.247808,
+          "p95": 0.280576,
+          "max": 0.288768
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 87522,
+          "triangles": 5601408
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82465,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 86087216,
+          "textures": 7,
+          "texturesSize": 88974270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 175148127
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1094.7999999970198
+      },
+      "firstFrameMs": 1638.1000000014901,
+      "compileMs": 258.20000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 23
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.9000000059604645,
+          "p95": 2.5,
+          "max": 3.8000000044703484
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.7000000029802322,
+          "p95": 2.2000000029802322,
+          "max": 3.600000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.7408,
+          "p95": 2.245632,
+          "max": 2.2773760000000003
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.4428159999999999,
+          "p95": 1.8913280000000001,
+          "max": 1.9445760000000003
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.28467200000000004,
+          "p95": 0.36659200000000003,
+          "max": 0.384
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 68933,
+          "triangles": 4411712
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140101,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 97281760,
+          "textures": 8,
+          "texturesSize": 103719870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 201147219
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1031.8000000044703
+      },
+      "firstFrameMs": 1541.6000000014901,
+      "compileMs": 257.19999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 22
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.9000000059604645,
+          "p95": 2.5,
+          "max": 3.7000000029802322
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.7000000029802322,
+          "p95": 2.2000000029802322,
+          "max": 3.600000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.7336319999999998,
+          "p95": 2.219008,
+          "max": 2.336768
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.442816,
+          "p95": 1.874944,
+          "max": 1.985536
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.287744,
+          "p95": 0.37683200000000006,
+          "max": 0.38912
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1028.8999999985099
+      },
+      "firstFrameMs": 1534.1000000014901,
+      "compileMs": 211.89999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 23
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.9000000059604645,
+          "p95": 2.399999998509884,
+          "max": 4.600000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.7000000029802322,
+          "p95": 2.100000001490116,
+          "max": 2.5999999940395355
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.569792,
+          "p95": 1.8882560000000002,
+          "max": 2.028544
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.319936,
+          "p95": 1.630208,
+          "max": 1.75104
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.246784,
+          "p95": 0.278528,
+          "max": 0.28467200000000004
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 390.40000000596046,
+      "compileMs": 109.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.19999999552965164,
+          "p95": 1.1999999955296516,
+          "max": 1.6999999955296516
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 1.0999999940395355,
+          "max": 1.5999999940395355
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.8192,
+          "p95": 0.912384,
+          "max": 0.918528
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.8192,
+          "p95": 0.912384,
+          "max": 0.918528
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 311.09999999403954,
+      "compileMs": 117.69999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 0.7999999970197678,
+          "max": 209.39999999850988
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.5999999940395355,
+          "max": 1
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.305152,
+          "p95": 0.4608,
+          "max": 0.479232
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.305152,
+          "p95": 0.4608,
+          "max": 0.479232
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 101763,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 906512,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 145554516
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1173.2000000029802
+      },
+      "firstFrameMs": 1573.6000000014901,
+      "compileMs": 193.89999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.8999999985098839,
+          "p95": 1.2999999970197678,
+          "max": 2.8000000044703484
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.6999999955296516,
+          "p95": 1.1000000014901161,
+          "max": 1.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.484352,
+          "p95": 0.8744959999999999,
+          "max": 0.9400320000000001
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.37376,
+          "p95": 0.729088,
+          "max": 0.7976960000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.11571200000000001,
+          "p95": 0.14233600000000002,
+          "max": 0.145408
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 4261,
+          "triangles": 272704
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 199011405
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1047.2000000029802
+      },
+      "firstFrameMs": 1505.5,
+      "compileMs": 256.70000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.8999999985098839,
+          "p95": 1.2999999970197678,
+          "max": 1.6999999955296516
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.7999999970197678,
+          "p95": 1.1000000014901161,
+          "max": 1.5
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.5058560000000001,
+          "p95": 0.968704,
+          "max": 1.2226560000000002
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.367616,
+          "p95": 0.7516160000000001,
+          "max": 0.7802880000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.16896,
+          "p95": 0.20992000000000002,
+          "max": 0.47104
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 3179,
+          "triangles": 203456
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140111,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 68853704,
+          "textures": 8,
+          "texturesSize": 177447870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 246447173
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1052.7999999970198
+      },
+      "firstFrameMs": 1515.3000000044703,
+      "compileMs": 255.39999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.8999999985098839,
+          "p95": 1.3000000044703484,
+          "max": 2.5
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.7000000029802322,
+          "p95": 1.1999999955296516,
+          "max": 1.7999999970197678
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.5171199999999999,
+          "p95": 0.966656,
+          "max": 1.3824
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.364544,
+          "p95": 0.756736,
+          "max": 1.238016
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.16384,
+          "p95": 0.20992000000000002,
+          "max": 0.214016
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1066.7000000029802
+      },
+      "firstFrameMs": 1471.7999999970198,
+      "compileMs": 191.79999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.8999999985098839,
+          "p95": 1.2999999970197678,
+          "max": 3.5
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.6999999955296516,
+          "p95": 1.1000000014901161,
+          "max": 1.6000000014901161
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.487424,
+          "p95": 0.8673280000000001,
+          "max": 0.943104
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.37376000000000004,
+          "p95": 0.722944,
+          "max": 0.800768
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.116736,
+          "p95": 0.142336,
+          "max": 0.144384
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 1,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 303.20000000298023,
+      "compileMs": 121.70000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 15
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          285,
+          195
+        ],
+        "gpu": [
+          36,
+          24
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 0.7000000029802322,
+          "max": 203.89999999850988
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.5999999940395355,
+          "max": 1.2000000029802322
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.30208,
+          "p95": 0.452608,
+          "max": 0.470016
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.30208,
+          "p95": 0.452608,
+          "max": 0.470016
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 280.8999999985099,
+      "compileMs": 112.5,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 17
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.20000000298023224,
+          "p95": 1,
+          "max": 274.1000000014901
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.8000000044703484,
+          "max": 1.2999999970197678
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.306176,
+          "p95": 0.6645760000000001,
+          "max": 0.68096
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.306176,
+          "p95": 0.6645760000000001,
+          "max": 0.68096
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 1628163,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 907652,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 145555656
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1172.2000000029802
+      },
+      "firstFrameMs": 1589.3999999985099,
+      "compileMs": 193.20000000298023,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.6000000014901161,
+          "p95": 2.3000000044703484,
+          "max": 3.1999999955296516
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.3999999985098839,
+          "p95": 2.0999999940395355,
+          "max": 2.600000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.02912,
+          "p95": 1.8350080000000002,
+          "max": 1.9087360000000002
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.867328,
+          "p95": 1.6353280000000001,
+          "max": 1.6875520000000002
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.161792,
+          "p95": 0.22220800000000002,
+          "max": 0.232448
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 36481,
+          "triangles": 2334784
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82447,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 54654512,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 199011405
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1017.3000000044703
+      },
+      "firstFrameMs": 1545.5,
+      "compileMs": 240.29999999701977,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.6999999955296516,
+          "p95": 2.3000000044703484,
+          "max": 3.100000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.5,
+          "p95": 2.1999999955296516,
+          "max": 2.8000000044703484
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.004544,
+          "p95": 1.80736,
+          "max": 1.968128
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.8448,
+          "p95": 1.60768,
+          "max": 1.6640000000000001
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.161792,
+          "p95": 0.221184,
+          "max": 0.321536
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 28024,
+          "triangles": 1793536
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140111,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 68853704,
+          "textures": 8,
+          "texturesSize": 177447870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 246447173
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1022.3000000044703
+      },
+      "firstFrameMs": 1573,
+      "compileMs": 259.3999999985099,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.6999999955296516,
+          "p95": 2.3000000044703484,
+          "max": 3
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.5,
+          "p95": 2.100000001490116,
+          "max": 2.7999999970197678
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.0178559999999999,
+          "p95": 1.8339839999999998,
+          "max": 2.0490239999999997
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.8560639999999999,
+          "p95": 1.6332799999999998,
+          "max": 1.851392
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.161792,
+          "p95": 0.223232,
+          "max": 0.324608
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1034.3999999985099
+      },
+      "firstFrameMs": 1533.6999999955297,
+      "compileMs": 192.60000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 1.6000000014901161,
+          "p95": 2.2999999970197678,
+          "max": 4.799999997019768
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 1.3999999985098839,
+          "p95": 2,
+          "max": 2.9000000059604645
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.011712,
+          "p95": 1.810432,
+          "max": 1.903616
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.84992,
+          "p95": 1.610752,
+          "max": 1.685504
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.161792,
+          "p95": 0.221184,
+          "max": 0.22937600000000002
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 16,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 396.70000000298023,
+      "compileMs": 115.60000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 16
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          187,
+          293
+        ],
+        "gpu": [
+          23,
+          37
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.29999999701976776,
+          "p95": 0.7000000029802322,
+          "max": 279.59999999403954
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 0.5,
+          "max": 1.0999999940395355
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 0.304128,
+          "p95": 0.656384,
+          "max": 0.683008
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 0.304128,
+          "p95": 0.656384,
+          "max": 0.683008
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 307.20000000298023,
+      "compileMs": 115.39999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.19999999552965164,
+          "p95": 1.7999999970197678,
+          "max": 510.5
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 1.6000000014901161,
+          "max": 2.100000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.1100160000000001,
+          "p95": 1.2492800000000002,
+          "max": 1.386496
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.1100160000000001,
+          "p95": 1.2492800000000002,
+          "max": 1.386496
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 4,
+          "indirect": 0
+        },
+        "directTriangles": 10176003,
+        "memory": {
+          "attributes": 11,
+          "attributesSize": 914036,
+          "geometries": 4,
+          "indexAttributes": 3,
+          "indexAttributesSize": 332364,
+          "indirectStorageAttributes": 0,
+          "indirectStorageAttributesSize": 0,
+          "programs": 8,
+          "programsSize": 44090,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 0,
+          "storageAttributesSize": 0,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 7,
+          "uniformBuffersSize": 1280,
+          "total": 145562040
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1157.5
+      },
+      "firstFrameMs": 1644.1999999955297,
+      "compileMs": 213.39999999850988,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 31
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 3.399999998509884,
+          "p95": 4,
+          "max": 4.699999995529652
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 3.100000001490116,
+          "p95": 3.600000001490116,
+          "max": 4.100000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 2.4709119999999998,
+          "p95": 2.960384,
+          "max": 2.9972480000000004
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 2.1504,
+          "p95": 2.594816,
+          "max": 2.6419200000000003
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.30208,
+          "p95": 0.359424,
+          "max": 0.37171200000000004
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 143950,
+          "triangles": 9212800
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 4,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 17,
+          "programsSize": 82465,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 2,
+          "storageAttributes": 24,
+          "storageAttributesSize": 86087216,
+          "textures": 7,
+          "texturesSize": 144270270,
+          "uniformBuffers": 23,
+          "uniformBuffersSize": 1952,
+          "total": 230444127
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1033.3999999985099
+      },
+      "firstFrameMs": 1589.5,
+      "compileMs": 254.19999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 1,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 32
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 3.399999998509884,
+          "p95": 5,
+          "max": 7.100000001490116
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 2.899999998509884,
+          "p95": 4.299999997019768,
+          "max": 6.799999997019768
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 2.4637439999999997,
+          "p95": 2.948096,
+          "max": 3.086336
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 2.143232,
+          "p95": 2.59072,
+          "max": 2.727936
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.310272,
+          "p95": 0.364544,
+          "max": 0.45568000000000003
+        }
+      },
+      "hero": {
+        "draws": {
+          "direct": 2,
+          "indirect": 2
+        },
+        "directTriangles": 3,
+        "native": {
+          "clusters": 127228,
+          "triangles": 8142592
+        },
+        "memory": {
+          "attributes": 3,
+          "attributesSize": 132,
+          "geometries": 5,
+          "indexAttributes": 1,
+          "indexAttributesSize": 12,
+          "indirectStorageAttributes": 4,
+          "indirectStorageAttributesSize": 2080,
+          "programs": 34,
+          "programsSize": 140133,
+          "readbackBuffers": 0,
+          "readbackBuffersSize": 0,
+          "renderTargets": 3,
+          "storageAttributes": 26,
+          "storageAttributesSize": 103425992,
+          "textures": 8,
+          "texturesSize": 177447870,
+          "uniformBuffers": 45,
+          "uniformBuffersSize": 3264,
+          "total": 281019483
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": true,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1023.1999999955297
+      },
+      "firstFrameMs": 1575,
+      "compileMs": 256.1000000014901,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 32
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 3.399999998509884,
+          "p95": 5.0999999940395355,
+          "max": 6.800000004470348
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 2.899999998509884,
+          "p95": 4.200000002980232,
+          "max": 6.299999997019768
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 2.485248,
+          "p95": 2.941952,
+          "max": 3.007488
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 2.1647359999999995,
+          "p95": 2.589696,
+          "max": 2.649088
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.304128,
+          "p95": 0.364544,
+          "max": 0.453632
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 523264,
+        "mode": "native",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 1021.1000000014901
+      },
+      "firstFrameMs": 1546.5,
+      "compileMs": 210.19999999552965,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 31
+        },
+        "passed": true
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 3.399999998509884,
+          "p95": 4,
+          "max": 5.799999997019768
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 3.100000001490116,
+          "p95": 3.6999999955296516,
+          "max": 4.100000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 2.4842239999999998,
+          "p95": 2.96448,
+          "max": 3.064832
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 2.163712,
+          "p95": 2.60096,
+          "max": 2.743296
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0.299008,
+          "p95": 0.361472,
+          "max": 0.372736
+        }
+      }
+    },
+    {
+      "current": {
+        "module": "Dense_Cliff",
+        "lod": 0,
+        "copies": 100,
+        "triangles": 50880,
+        "mode": "authored",
+        "occlusion": false,
+        "material": "stone-pbr",
+        "converted": 0,
+        "buildMs": 0,
+        "farTriangles": 4512
+      },
+      "firstFrameMs": 377.19999999552965,
+      "compileMs": 125.10000000149012,
+      "timestamps": true,
+      "webgpu": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "fallback": false
+      },
+      "viewport": {
+        "width": 3840,
+        "height": 2160
+      },
+      "repeat": 2,
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 48228,
+          "finalForegroundPid": 48228,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 48228,
+          "samples": 21
+        },
+        "passed": true
+      },
+      "lodFrames": {
+        "pacing": [
+          293,
+          187
+        ],
+        "gpu": [
+          37,
+          23
+        ]
+      },
+      "timings": {
+        "frameMs": {
+          "samples": 479,
+          "p50": 0.29999999701976776,
+          "p95": 1.7000000029802322,
+          "max": 506.6000000014901
+        },
+        "renderCpuMs": {
+          "samples": 480,
+          "p50": 0.10000000149011612,
+          "p95": 1.5,
+          "max": 2.100000001490116
+        },
+        "gpuPassMs": {
+          "samples": 60,
+          "p50": 1.1100160000000001,
+          "p95": 1.2554239999999999,
+          "max": 1.406976
+        },
+        "gpuRenderMs": {
+          "samples": 60,
+          "p50": 1.1100160000000001,
+          "p95": 1.2554239999999999,
+          "max": 1.406976
+        },
+        "gpuComputeMs": {
+          "samples": 60,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    }
+  ],
+  "checks": [],
+  "browser": "151.0.7922.34",
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  }
+}

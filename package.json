@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:qa": "vite build --mode qa --outDir tmp/qa-dist",
     "preview": "vite preview",
     "generate:natural-ui": "node tools/generate-editor-natural-ui.mjs",
     "generate:workshop-castle": "node tools/generate-workshop-castle.mjs",

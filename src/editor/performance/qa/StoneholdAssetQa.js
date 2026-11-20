@@ -5,7 +5,9 @@ import { reflector } from 'three/tsl';
 import { resolveAssetUrl } from '../../assets/assetUrl.js';
 import { TownKitAssets } from '../../towns/TownKitAssets.js';
 import { createTownKitMaterial } from '../../towns/TownKitMaterial.js';
+import { selectTownLod, townEdgeDistance, TOWN_LOD_NEAR } from '../../towns/TownLod.js';
 import { resolveLook } from '../../towns/TownMaterialPalette.js';
+import { createDenseCliff, DENSE_CLIFF } from './StoneholdDenseCliff.js';
 
 const NAMES = [
   'Stonehold_Ledge_Small', 'Stonehold_Ledge_Large', 'Stonehold_Twin_Outcrop',
@@ -14,17 +16,21 @@ const NAMES = [
   'Mountain_Cliff_Wall', 'Mountain_Gate_Massif', 'Mountain_Cavern_Vault',
 ];
 const query = new URLSearchParams(location.search);
+const mode = query.get('meshlets') ?? 'baseline';
+const comparison = query.has('meshlets');
+const staticMaterial = query.get('material') === 'static';
+const dense = comparison && query.get('module') === DENSE_CLIFF;
+if (dense) NAMES.splice(0, NAMES.length, DENSE_CLIFF);
 const controls = Object.fromEntries(['module', 'lod', 'light', 'view'].map(id => [id, document.getElementById(id)]));
 for (const name of NAMES) controls.module.add(new Option(name.replaceAll('_', ' '), name));
 for (const [key, input] of Object.entries(controls)) if (query.has(key)) input.value = query.get(key);
 if (!NAMES.includes(controls.module.value)) controls.module.value = 'Stonehold_Twin_Outcrop';
 const status = document.getElementById('status');
-const mode = query.get('meshlets') ?? 'baseline';
-const comparison = query.has('meshlets');
-const staticMaterial = query.get('material') === 'static';
 
 async function main() {
-  if (!['baseline', 'native', 'external'].includes(mode)) throw new Error(`Unknown meshlet mode: ${mode}`);
+  if (!['baseline', 'authored', 'native', 'external'].includes(mode)) throw new Error(`Unknown meshlet mode: ${mode}`);
+  if (dense && mode === 'external') throw new Error('The dense fixture compares authored LODs and native meshlets.');
+  const occlusion = mode === 'native' && query.get('occlusion') === '1';
   const startup = performance.now();
   const renderer = new THREE.WebGPURenderer({
     antialias: true, forceWebGL: query.get('webgl') === '1', trackTimestamp: comparison,
@@ -43,24 +49,32 @@ async function main() {
   }
   if (mode === 'native') {
     const { MeshletDrawingPipeline } = await import('three/addons/pipelines/MeshletDrawingPipeline.js');
-    renderer.drawingPipeline = new MeshletDrawingPipeline({ occlusionCulling: false });
+    renderer.drawingPipeline = new MeshletDrawingPipeline({ occlusionCulling: occlusion });
   }
   const assets = new TownKitAssets({ baseUrl: import.meta.env.BASE_URL });
-  await assets.ensure();
-  if (assets.failed) throw assets.failed;
-  const townMaterial = createTownKitMaterial(assets.atlas, resolveLook({
-    skin: 'heartland', stone: 'granite', finish: 'masonry', family: 'Stonehold',
-    thatch: false, banner: [0.11, 0.18, 0.32],
-  }));
+  let townMaterial;
+  if (!dense) {
+    await assets.ensure();
+    if (assets.failed) throw assets.failed;
+    townMaterial = createTownKitMaterial(assets.atlas, resolveLook({
+      skin: 'heartland', stone: 'granite', finish: 'masonry', family: 'Stonehold',
+      thatch: false, banner: [0.11, 0.18, 0.32],
+    }));
+  }
   let material = townMaterial;
-  if (staticMaterial) {
-    const map = await new THREE.TextureLoader().loadAsync(resolveAssetUrl(import.meta.env.BASE_URL,
-      'assets/textures/settlement/stone-rock-color.webp'));
+  if (staticMaterial || dense) {
+    const loader = new THREE.TextureLoader();
+    const load = name => loader.loadAsync(resolveAssetUrl(import.meta.env.BASE_URL, `assets/textures/settlement/stone-rock-${name}.webp`));
+    const [map, normalMap] = await Promise.all([load('color'), dense ? load('normal') : null]);
     map.colorSpace = THREE.SRGBColorSpace;
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    material = new THREE.MeshStandardNodeMaterial({ map, roughness: 0.9 });
+    material = new THREE.MeshStandardNodeMaterial({ map, normalMap, roughness: 0.9 });
   }
-  const copies = THREE.MathUtils.clamp(Math.trunc(Number(query.get('copies'))) || 1, 1, 16);
+  const cliff = dense ? {
+    source: createDenseCliff(512), near: createDenseCliff(160), far: createDenseCliff(48),
+  } : null;
+  const copies = THREE.MathUtils.clamp(Math.trunc(Number(query.get('copies'))) || 1, 1, dense ? 100 : 16);
+  const columns = copies > 16 ? 10 : 4;
   let vg;
   if (mode === 'external' && staticMaterial && renderer.backend.isWebGPUBackend) {
     const { VirtualGeometry } = await import('three-virtual-geometry');
@@ -95,7 +109,9 @@ async function main() {
   const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 1500);
   const orbit = new OrbitControls(camera, renderer.domElement);
   let mesh;
+  let activeGeometry;
   let imported;
+  let authoredLod = TOWN_LOD_NEAR;
   function unload() {
     if (imported) {
       imported.dispose();
@@ -105,25 +121,41 @@ async function main() {
     mesh?.removeFromParent();
     mesh?.dispose();
     mesh = null;
+    activeGeometry = null;
   }
   async function update() {
     const far = controls.lod.value === '1';
-    const geometry = (far ? assets.farModules : assets.modules).get(controls.module.value)?.opaque;
+    const name = controls.module.value;
+    const nearGeometry = cliff ? (mode === 'authored' ? cliff.near : cliff.source) : assets.modules.get(name)?.opaque;
+    const farGeometry = cliff ? cliff.far : assets.farModules.get(name)?.opaque;
+    const geometry = far ? farGeometry : nearGeometry;
     if (!geometry) throw new Error(`Missing ${controls.module.value} at LOD ${controls.lod.value}`);
-    const size = geometry.boundingBox.getSize(new THREE.Vector3());
-    const centre = geometry.boundingBox.getCenter(new THREE.Vector3());
-    if (mesh?.geometry !== geometry) {
+    const frameGeometry = cliff?.source ?? (mode === 'authored' ? nearGeometry : geometry);
+    const size = frameGeometry.boundingBox.getSize(new THREE.Vector3());
+    const centre = frameGeometry.boundingBox.getCenter(new THREE.Vector3());
+    if (activeGeometry !== geometry) {
       unload();
+      activeGeometry = geometry;
       mesh = new THREE.InstancedMesh(geometry, material, copies);
       for (let i = 0; i < copies; i += 1) {
-        mesh.setMatrixAt(i, new THREE.Matrix4().makeTranslation((i % 4) * (size.x + 4), 0, Math.floor(i / 4) * (size.z + 4)));
+        mesh.setMatrixAt(i, new THREE.Matrix4().makeTranslation((i % columns) * (size.x + 4), 0, Math.floor(i / columns) * (size.z + 4)));
         mesh.setColorAt(i, new THREE.Color(0.95, 0.95, 0.95));
       }
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       subject.add(mesh);
       const current = { module: controls.module.value, lod: Number(controls.lod.value), copies, triangles: geometry.index.count / 3 };
-      if (comparison) Object.assign(current, { mode, material: staticMaterial ? 'static' : 'town', converted: 0, buildMs: 0 });
+      if (comparison) Object.assign(current, { mode, occlusion, material: dense ? 'stone-pbr' : staticMaterial ? 'static' : 'town', converted: 0, buildMs: 0 });
+      if (mode === 'authored') {
+        current.farTriangles = farGeometry.index.count / 3;
+        authoredLod = TOWN_LOD_NEAR;
+        state.applyAuthoredLod = () => {
+          if (!mesh) return;
+          authoredLod = selectTownLod(authoredLod, townEdgeDistance(orbit.target, state.lodRadius, camera.position.x, camera.position.z));
+          mesh.geometry = authoredLod === TOWN_LOD_NEAR ? nearGeometry : farGeometry;
+          if (state.lodFrames) state.lodFrames[authoredLod]++;
+        };
+      }
       if (vg) {
         state.preparing = true;
         try {
@@ -139,8 +171,11 @@ async function main() {
       state.current = current;
     }
     const reach = Math.max(size.x, size.y, size.z) * (copies > 1 ? 3 : 1);
+    const rowSpan = (Math.min(copies, columns) - 1) * (size.x + 4);
+    const columnSpan = Math.floor((copies - 1) / columns) * (size.z + 4);
+    state.lodRadius = Math.hypot(rowSpan + size.x, columnSpan + size.z) / 2;
     if (copies > 1) centre.add(new THREE.Vector3(
-      (Math.min(copies, 4) - 1) * (size.x + 4) / 2, 0, Math.floor((copies - 1) / 4) * (size.z + 4) / 2));
+      rowSpan / 2, 0, columnSpan / 2));
     centre.add(subject.position);
     if (controls.view.value === 'detail') {
       centre.y += size.y * 0.10;
@@ -161,6 +196,8 @@ async function main() {
   const state = window.__stoneholdQa = { ready: false, renderer, assets, scene, camera, update, frameTimes: [] };
   if (comparison) Object.assign(state, {
     timestamps, orbit, unload, vg,
+    setSubjectVisible(value) { subject.visible = value; },
+    setShadows(value) { renderer.shadowMap.enabled = value; },
     shiftOrigin(offset) {
       for (const object of [subject, ground, sun, sun.target, rim, camera]) object.position.x += offset;
       orbit.target.x += offset;
@@ -209,6 +246,7 @@ async function main() {
     previous = now;
     if (state.beforeRender?.() === false) return;
     const start = state.afterRender ? performance.now() : 0;
+    state.applyAuthoredLod?.();
     renderer.render(scene, camera);
     state.afterRender?.(dt, performance.now() - start);
     if (!state.ready) state.firstFrameMs = performance.now() - startup;
