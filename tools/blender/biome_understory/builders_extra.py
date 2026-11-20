@@ -16,6 +16,7 @@ from understory_common import arched_card, finish_mesh, leaf_spray_fan, mushroom
 from silhouette_variants import (
     build_savanna_thorn_scrub,
     build_taiga_krummholz_juniper,
+    build_wetland_buttonbush,
     build_wetland_sedge_tussock,
 )
 
@@ -613,30 +614,5 @@ def build_bush_tropical_hibiscus(mat):
 
 
 def build_bush_swamp_buttonbush(mat):
-    """Sprawling crooked wetland Buttonbush with leaning forked bog canes and distinct airy leaf groupings."""
-    rng = random.Random(326)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new('UVMap')
-
-    canes = (
-        (0.08, 0.82, 0.38, 0.82),
-        (1.12, 0.68, 0.48, 1.08),
-        (2.18, 0.86, 0.32, 0.68),
-        (3.36, 0.64, 0.44, 0.96),
-        (4.42, 0.78, 0.34, 0.74),
-        (5.50, 0.58, 0.52, 1.12),
-    )
-    for idx, (yaw, r_xy, z_f, z_t) in enumerate(canes):
-        out = Vector((math.cos(yaw), math.sin(yaw), 0.0))
-        side = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
-        p0 = out * 0.08 + Vector((0.0, 0.0, -0.028))
-        p1 = out * (r_xy * 0.46) + side * rng.uniform(-0.14, 0.14) + Vector((0.0, 0.0, z_f))
-        p2 = out * r_xy + side * rng.uniform(-0.10, 0.10) + Vector((0.0, 0.0, z_t))
-        organic_trunk_loft(bm, uv, [p0, p1, p2], [0.056, 0.032, 0.015], rng, sides=6, bark_ridges=5, ridge_depth=0.14, cap_end=False, u_range=(0.02, 0.27), v_range=(0.04, 0.94))
-
-        twig_end = p1 + out * 0.28 + side * (-0.34 if idx % 2 else 0.34) + Vector((0.0, 0.0, 0.12))
-        tube(bm, uv, [p1, twig_end], [0.024, 0.012], sides=4, u_range=(0.02, 0.27), v_range=(0.12, 0.90), cap_end=False)
-
-        _add_branch_spray_pair(bm, uv, p2 - Vector((0, 0, 0.05)), (p2 - p1 + Vector((0, 0, 0.18))).normalized(), 0.54, 0.54, arch=0.10, roll_bias=idx * 0.45)
-        _add_branch_spray_pair(bm, uv, twig_end - Vector((0, 0, 0.04)), (twig_end - p1).normalized(), 0.48, 0.50, arch=0.08, roll_bias=-0.4)
-    return finish_mesh('bush-swamp-buttonbush-01', bm, mat, max_triangles=SHRUB_MAX_TRIANGLES, allow_extra_material=False)
+    """Sprawling crooked wetland Buttonbush with slender arching canes, 3D leaf clusters & cream flower heads."""
+    return build_wetland_buttonbush(mat, name='bush-swamp-buttonbush-01', seed=326, max_triangles=16050)

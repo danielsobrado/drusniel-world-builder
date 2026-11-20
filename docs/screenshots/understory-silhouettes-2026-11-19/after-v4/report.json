@@ -1,0 +1,222 @@
+{
+  "startedAt": "2026-11-20T02:28:45.895Z",
+  "url": "http://localhost:5173",
+  "out": "F:\\Development\\drusniel-world-builder\\docs\\screenshots\\understory-silhouettes-2026-11-19\\after-v4",
+  "poses": [
+    {
+      "id": "wetland-ground",
+      "pose": {
+        "id": "wetland-ground",
+        "biome": "wetland",
+        "name": "Wetland (ground)",
+        "world": "procedural",
+        "expectedBiomeId": 12,
+        "x": 15809,
+        "z": 8475,
+        "yaw": 1.6404573346040559,
+        "pitch": -0.1,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 12,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4105,
+          "near30m": 25,
+          "prototypes": {
+            "proto-10": 7,
+            "proto-4": 6,
+            "proto-3": 11,
+            "proto-6": 1
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 18692
+    },
+    {
+      "id": "wetland-mid",
+      "pose": {
+        "id": "wetland-mid",
+        "biome": "wetland",
+        "name": "Wetland (mid-distance)",
+        "world": "procedural",
+        "expectedBiomeId": 12,
+        "x": 15817.978171877132,
+        "z": 8474.373557868064,
+        "yaw": 1.6404573346040559,
+        "pitch": -0.22,
+        "mode": "fly",
+        "heightAboveGround": 4.2,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 12,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4105,
+          "near30m": 21,
+          "prototypes": {
+            "proto-10": 7,
+            "proto-4": 4,
+            "proto-3": 10
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 8490
+    },
+    {
+      "id": "rainforest-ground",
+      "pose": {
+        "id": "rainforest-ground",
+        "biome": "rainforest",
+        "name": "Rainforest (ground)",
+        "world": "procedural",
+        "expectedBiomeId": 7,
+        "x": 2033,
+        "z": 2983,
+        "yaw": 2.8507386048197727,
+        "pitch": -0.1,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 7,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4113,
+          "near30m": 39,
+          "prototypes": {
+            "proto-6": 5,
+            "proto-12": 9,
+            "proto-5": 18,
+            "proto-9": 1,
+            "proto-4": 1,
+            "proto-3": 1,
+            "proto-10": 2,
+            "proto-11": 1,
+            "proto-2": 1
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 18151
+    },
+    {
+      "id": "rainforest-mid",
+      "pose": {
+        "id": "rainforest-mid",
+        "biome": "rainforest",
+        "name": "Rainforest (mid-distance)",
+        "world": "procedural",
+        "expectedBiomeId": 7,
+        "x": 2035.5809345694975,
+        "z": 2974.3780062196743,
+        "yaw": 2.8507386048197727,
+        "pitch": -0.22,
+        "mode": "fly",
+        "heightAboveGround": 4.2,
+        "fov": 68
+      },
+      "census": {
+        "actualBiomeId": 7,
+        "bushes": {
+          "label": "bushes",
+          "totalPlacements": 4113,
+          "near30m": 38,
+          "prototypes": {
+            "proto-6": 4,
+            "proto-12": 10,
+            "proto-4": 1,
+            "proto-5": 18,
+            "proto-11": 2,
+            "proto-3": 1,
+            "proto-10": 1,
+            "proto-2": 1
+          }
+        },
+        "groundDetails": {
+          "label": "groundDetails",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "tropicalKit": {
+          "label": "tropicalKit",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        },
+        "aquatic": {
+          "label": "aquatic",
+          "totalPlacements": 0,
+          "near30m": 0,
+          "prototypes": {}
+        }
+      },
+      "waitedMs": 8517
+    }
+  ],
+  "failures": [],
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-11-20T02:31:18.146Z"
+}

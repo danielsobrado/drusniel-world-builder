@@ -16,6 +16,7 @@ if THIS_DIR not in sys.path:
 
 from mathutils import Vector
 
+from botanical_detail import build_wood_foliage_pbr_material
 from build_biome_understory import build_taiga_berry_moss, build_tundra_dwarf_willow
 from builders_extra import (
     build_bush_boreal_juniper,
@@ -138,20 +139,37 @@ def main():
         accent_rgb=(0.76, 0.18, 0.20),
     )
 
+    # Dedicated solid PBR bark + 3D foliage atlases for woody bushes (zero alpha-card edge jaggies)
+    mat_bush_savanna = build_wood_foliage_pbr_material(
+        TEX_DIR, 'BushSavannaThorn3D', 'bush-savanna-3d', 322,
+        bark_rgb=(0.45, 0.36, 0.27), leaf_rgb=(0.28, 0.42, 0.17), vein_rgb=(0.40, 0.52, 0.24),
+        accent_rgb=(0.84, 0.72, 0.30), roughness=0.72, subsurface=0.16,
+    )
+    mat_bush_juniper = build_wood_foliage_pbr_material(
+        TEX_DIR, 'BushBorealJuniper3D', 'bush-juniper-3d', 324,
+        bark_rgb=(0.38, 0.28, 0.20), leaf_rgb=(0.18, 0.36, 0.19), vein_rgb=(0.28, 0.46, 0.28),
+        accent_rgb=(0.36, 0.48, 0.62), roughness=0.72, subsurface=0.14,
+    )
+    mat_bush_buttonbush = build_wood_foliage_pbr_material(
+        TEX_DIR, 'BushSwampButtonbush3D', 'bush-buttonbush-3d', 326,
+        bark_rgb=(0.34, 0.27, 0.19), leaf_rgb=(0.20, 0.40, 0.14), vein_rgb=(0.36, 0.54, 0.22),
+        accent_rgb=(0.86, 0.84, 0.62), roughness=0.64, subsurface=0.20,
+    )
+
     results = []
 
-    # 1. Savanna: uneven-branching open-center thorn scrub
+    # 1. Savanna: uneven-branching open-center thorn scrub with volumetric 3D foliage pads
     mesh, _ = build_savanna_thorn_scrub(
-        mats['bush_savanna'], name='bush-arid-rooibos-01', seed=328, low_budget=True, max_triangles=4000,
+        mat_bush_savanna, name='bush-arid-rooibos-01', seed=328, low_budget=True, max_triangles=4000,
     )
-    results.append(export_one('bush-arid-rooibos-01', mesh, os.path.join(SRC_BUSHES, 'bush-arid-rooibos-01.glb'), alpha_mask=True, side_cam=(3.9, 0.78, 0.68)))
+    results.append(export_one('bush-arid-rooibos-01', mesh, os.path.join(SRC_BUSHES, 'bush-arid-rooibos-01.glb'), alpha_mask=False, side_cam=(3.9, 0.78, 0.68)))
 
-    mesh, _ = build_bush_savanna_thorn(mats['bush_savanna'])
-    results.append(export_one('bush-savanna-thorn-01', mesh, os.path.join(SRC_BUSHES, 'bush-savanna-thorn-01.glb'), alpha_mask=True))
+    mesh, _ = build_bush_savanna_thorn(mat_bush_savanna)
+    results.append(export_one('bush-savanna-thorn-01', mesh, os.path.join(SRC_BUSHES, 'bush-savanna-thorn-01.glb'), alpha_mask=False))
 
-    # 2. Taiga: varied-height krummholz juniper, dwarf willow, and berry-moss
-    mesh, _ = build_bush_boreal_juniper(mats['bush_juniper'])
-    results.append(export_one('bush-boreal-juniper-01', mesh, os.path.join(SRC_BUSHES, 'bush-boreal-juniper-01.glb'), alpha_mask=True, side_cam=(2.8, 0.68, 0.58)))
+    # 2. Taiga: wind-sculpted krummholz juniper, dwarf willow, and berry-moss
+    mesh, _ = build_bush_boreal_juniper(mat_bush_juniper)
+    results.append(export_one('bush-boreal-juniper-01', mesh, os.path.join(SRC_BUSHES, 'bush-boreal-juniper-01.glb'), alpha_mask=False, side_cam=(2.8, 0.68, 0.58)))
 
     mesh, _ = build_tundra_dwarf_willow(mats['tundra_willow'])
     results.append(export_one('tundra-dwarf-willow-01', mesh, os.path.join(SRC_GROUND, 'boreal', 'tundra-dwarf-willow-01.glb'), alpha_mask=True))
@@ -159,27 +177,27 @@ def main():
     mesh, _ = build_taiga_berry_moss(mats['taiga_berry_moss'])
     results.append(export_one('taiga-berry-moss-01', mesh, os.path.join(SRC_GROUND, 'boreal', 'taiga-berry-moss-01.glb'), alpha_mask=False, side_cam=(1.35, 0.14, 0.16)))
 
-    # 3. Wetland: common-rooted sedge tussock + wetland buttonbush
+    # 3. Wetland: common-rooted sedge tussock + arching 3D buttonbush
     mesh, _ = build_coastal_dune_oats(mats['coastal_oats'])
     results.append(export_one('coastal-dune-oats-01', mesh, os.path.join(SRC_GROUND, 'coastal', 'coastal-dune-oats-01.glb'), alpha_mask=True, side_cam=(1.65, 0.22, 0.24)))
 
-    mesh, _ = build_bush_swamp_buttonbush(mats['bush_buttonbush'])
-    results.append(export_one('bush-swamp-buttonbush-01', mesh, os.path.join(SRC_BUSHES, 'bush-swamp-buttonbush-01.glb'), alpha_mask=True, side_cam=(3.0, 0.72, 0.65)))
+    mesh, _ = build_bush_swamp_buttonbush(mat_bush_buttonbush)
+    results.append(export_one('bush-swamp-buttonbush-01', mesh, os.path.join(SRC_BUSHES, 'bush-swamp-buttonbush-01.glb'), alpha_mask=False, side_cam=(3.0, 0.72, 0.65)))
 
-    # 4. Rainforest: layered-frond fern & cupped overlapping broadleaves with visible stems
-    mesh, _ = build_rainforest_layered_fern(mat_fern, name='forest-fern-02', seed=701, max_triangles=3800)
+    # 4. Rainforest: continuous-rachis fern & continuous-midrib broadleaves
+    mesh, _ = build_rainforest_layered_fern(mat_fern, name='forest-fern-02', seed=701, max_triangles=3950)
     results.append(export_one('forest-fern-02', mesh, os.path.join(SRC_GROUND, 'scans', 'forest-fern-02.glb'), alpha_mask=True, side_cam=(2.4, 0.36, 0.32)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_elephant, name='elephant_ear', seed=711, style='elephant_ear', max_triangles=1950)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_elephant, name='elephant_ear', seed=711, style='elephant_ear', max_triangles=5400)
     results.append(export_one('elephant_ear', mesh, os.path.join(SRC_GROUND, 'tropical', 'elephant-ear.glb'), alpha_mask=False, side_cam=(2.4, 0.56, 0.52)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_banana, name='banana_understory', seed=712, style='banana', max_triangles=1980)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_banana, name='banana_understory', seed=712, style='banana', max_triangles=6200)
     results.append(export_one('banana_understory', mesh, os.path.join(SRC_GROUND, 'tropical', 'banana-understory.glb'), alpha_mask=False, side_cam=(4.8, 0.96, 0.90)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_calathea, name='tropical-calathea-01', seed=713, style='calathea', max_triangles=3600)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_calathea, name='tropical-calathea-01', seed=713, style='calathea', max_triangles=3950)
     results.append(export_one('tropical-calathea-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-calathea-01.glb'), alpha_mask=False, side_cam=(1.6, 0.42, 0.38)))
 
-    mesh, _ = build_rainforest_cupped_broadleaf(mat_anthurium, name='tropical-anthurium-01', seed=714, style='anthurium', max_triangles=3600)
+    mesh, _ = build_rainforest_cupped_broadleaf(mat_anthurium, name='tropical-anthurium-01', seed=714, style='anthurium', max_triangles=3950)
     results.append(export_one('tropical-anthurium-01', mesh, os.path.join(SRC_GROUND, 'scans', 'tropical-anthurium-01.glb'), alpha_mask=False, side_cam=(1.8, 0.46, 0.42)))
 
     print('SILHOUETTE_REVISIONS_SUMMARY=' + json.dumps(results, indent=2))
