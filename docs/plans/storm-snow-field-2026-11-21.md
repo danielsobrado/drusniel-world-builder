@@ -221,3 +221,38 @@ changes: the window moves 64 m, the drift creeps during snowfall, or the sun
 moves during a thaw. A held storm under a still wind draws nothing per frame.
 In the `qa:perf` GPU timestamp samples (every 8th frame) the pass never showed
 up during a walk, because it was not being drawn.
+
+### 5.3 Frame A/B in a storm (`qa:perf`)
+
+`npm run qa:perf -- --headed --qa move --speed walk --x -1945 --z 7795 --yaw 20
+--warmup 20 --duration 12 --settle --gpuTimings 1`, against the `3af7bb12`
+snapshot with `?storm=1&stormKind=snow&stormSnap=1&snowField=0|1`, in the order
+on, off, (on), off, on. Every run below held the native foreground. The second
+field-on run (`on-b`) lost focus and was discarded; `on-c` replaced it.
+
+| Run | fps | frame p50 / p95 / p99 (ms) | hitches | GPU avg / p50 / p95 (ms) |
+| --- | --- | --- | --- | --- |
+| on-a | 100.5 | 9.5 / 13.5 / 16.1 | 0 | 4.56 / 4.41 / 5.14 |
+| off-a | 98.8 | 9.6 / 13.5 / 17.4 | 1 | 4.63 / 4.40 / 6.88 |
+| off-b | 98.6 | 9.6 / 13.7 / 17.2 | 1 | 4.51 / 4.35 / 5.15 |
+| on-c | 96.0 | 9.8 / 14.1 / 26.8 | 1 | 4.59 / 4.45 / 6.48 |
+
+GPU average, on minus off: (4.56 + 4.59)/2 − (4.63 + 4.51)/2 = **+0.005 ms**.
+The two sides overlap run to run, and on-c's p99 comes from its single hitch.
+The timestamp sampler (every 8th frame) caught the snow pass once in on-a, at
+0.002 ms. While walking, it is drawn only when the 512 m window steps.
+
+A first attempt at `--warmup 8` without `--settle` failed the harness gate on
+**both** sides: streaming and pipeline compiles caused hitches of up to 1.8 s.
+Those numbers are not authoritative and are not used.
+
+## 6. Follow-ups
+
+- The chunk seam the thaw exposes (§5.1): find which baked terrain input steps
+  across that chunk edge.
+- Settlement roofs take no storm snow yet (storm plan §5.2 follow-up). When
+  they do, they should read `stormSnowCoverAt`, so the field applies to them
+  too.
+- The far terrain (`MacroFarTerrainView`) keeps the global cover by design. A
+  coarser second window would only be worth it if a distant thaw reads too
+  uniform.
