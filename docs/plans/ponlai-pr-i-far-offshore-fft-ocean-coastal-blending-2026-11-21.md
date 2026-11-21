@@ -1077,13 +1077,21 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.1 — Pure spectrum model and test oracle
 
-- [ ] Add `OceanSpectrum` pure model, JONSWAP/TMA terms, time dispersion and directional spread, explicit sea-vs-swell units.
-- [ ] Implement seeded normal-pair mode generator, Hermitian index, zero/Nyquist handling and stable same-seed reproducibility.
-- [ ] Implement tiny 8²/16² direct inverse DFT and mathematical invariants `13.1`; confirm normalization, Parseval and travel direction before GPU.
-- [ ] Add high-pass short residual excluding wavelengths ≥7.5m, with a band/taper table and expected slope variance computation.
-- [ ] Compare analytic current five-wave energy and existing detail source variance; choose replacement strategy for overlapping detail.
-- [ ] Test U=0, unusual fetch/depth, extreme storm, signed large canonical coordinate seed, and time seek.
-- [ ] Keep mode constants in separate file; actual tuning in approved quality profile.
+- [x] Add `OceanSpectrum` pure model, JONSWAP/TMA terms, time dispersion and directional spread, explicit sea-vs-swell units.
+- [x] Implement seeded normal-pair mode generator, Hermitian index, zero/Nyquist handling and stable same-seed reproducibility.
+- [x] Implement tiny 8²/16² direct inverse DFT and mathematical invariants `13.1`; confirm normalization, Parseval and travel direction before GPU.
+- [x] Add high-pass short residual excluding wavelengths ≥7.5m, with a band/taper table and expected slope variance computation.
+- [x] Compare analytic current five-wave energy and existing detail source variance; choose replacement strategy for overlapping detail.
+- [x] Test U=0, unusual fetch/depth, extreme storm, signed large canonical coordinate seed, and time seek.
+- [x] Keep mode constants in separate file; actual tuning in approved quality profile.
+
+**I.1 result** (`src/editor/water/fft/OceanSpectrum.js`, `OceanFourierReference.js`, `OceanFftConstants.js`; `test/ocean-fft-spectrum.test.js`):
+
+- Convention: `h(k,t) = h0(k)e^{-iωt} + conj(h0(-k))e^{+iωt}` with synthesis `Σ h e^{+ik·x}`, so modes travel toward +k (downwind); this is the opposite time sign to Ponlai [P1]. Wind direction is the heading the wind blows toward, radians from +X toward +Z.
+- `h0 = (z0+iz1)·sqrt(PΔk²)/2`, not `/√2`: the conjugate partner contributes the other half, and the seed-averaged variance test confirms `E[H²] = ΣPΔk²`. DC and both Nyquist lines are zero. Each mode's Gaussian pair is hashed from (seed, cascade, signed index), so it is independent of scan order and N.
+- Spreading is Donelan–Banner sech² (closed-form normalisation); TMA is Kitaigorodskii; fetch-limited α and ω_p follow Hasselmann.
+- Candidate cascades: 48 m tile for λ 7.5→2 m and 12 m tile for λ 2→0.5 m, disjoint half-open bands. At fetch 50 km the residual RMS height / mean-square slope is 0.040 m / 0.0084 (U=3), 0.054 m / 0.0147 (U=10), 0.064 m / 0.0200 (U=20), each below the Cox–Munk whole-spectrum prior; the five carriers at amplitude 0.9 carry 0.39 m RMS / 0.0057 slope.
+- Detail overlap: the medium detail train (~0.95 m ripples) lies inside the FFT band, so FFT **replaces** it in I.4; the fine train (~0.35 m) lies above the 0.5 m band top and stays. The test fails if either moves.
 
 **Stop:** inconsistent Fourier sign, seed non-determinism, overlapping energy with five carrier modes, unbounded variance, invalid TMA small-depth behavior or CPU oracle disagreement.
 
