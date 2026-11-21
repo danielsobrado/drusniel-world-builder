@@ -426,3 +426,221 @@ No eager initialization at startup just because sea YAML exists. Create/compile 
 - Mark buffer/target memory and dispatch count in diagnostics; dispose exact owned targets, shader nodes, kernels and staging resources.
 
 ---
+
+## 6. Exact shoreline blending and water-surface integration
+
+### 6.1 Composition order and normalized contribution
+
+The existing sea uses three bands of *different* physics. Preserve that ownership:
+
+```text
+canonical_water_kind, depth, shoreDistance, exposure, shelter
+         |
+         +--- nearshore directional breakers + shoaling/refraction/diffraction
+         |       (existing SeaSurf, SurfNodes and CPU water query)
+         |
+         +--- authored five-wave swell height + coarse slope
+         |       (existing SeaSwell; CPU and shader use identical math)
+         |
+         +--- offshoreFFT spectral slope residual
+                 (new, normal/roughness only; zero height in PR I MVP)
+         |
+     original sea foam / whitecaps / swash / impact / spray
+         |
+     normal + roughness + current sea optics + existing reflections/glints
+```
+
+The **geometry** returns the exact existing `sea.displacement`; the FFT does *not* change `material.positionNode`, `surfaceHeight` or the CPU query path. The offshore FFT's gain only affects surface slope/roughness/glint where ocean water is eligible. A wave crest rendered at shore continues to be the existing carrier, with original phase.
+
+### 6.2 Field inputs available without worker modifications
+
+[D12/D19/D29] already expose:
+
+- `waterDepth`: max(field.b,0) metres, appropriate for protecting waterline and surf.
+- `shoreDistance`: field.a metres, but [D22] source may be capped beyond a bounded distance; **must not** assume accurate kilometres.
+- `waterCoverage`: field/coverage sample 0..1, zero on dry land.
+- `oceanMask`: explicit appearance.ocean weight when available, unlike fallback sea-level/current heuristic.
+- `exposure`: marine wave shelter/diffraction from the existing water appearance texture, 0..1, and meaningful in narrow coves/headlands.
+- `seaStateUniforms.storm` and current quality.
+- `ice.open`: frozen-water masking appears later in [D12] and can be used to suppress visible FFT.
+- `water.refraction` / `seaOptics`: existing light response and viewport copy as separately gated.
+
+Do **not** create new worker page channels, bitmap, water-kind enum, or ocean-shelf distance field solely for the initial spectral normal. Do not sample ocean-kind using only sea level: a lake can occur at the same level, and the [D17] water contract forbids that inference as authoritative.
+
+### 6.3 Fade and ownership: continuous, bounded, never a hard step
+
+Define two physically justified blend factors and multiply them with actual marine water:
+
+```text
+B_depth = smoothstep(depthBegin, depthFull, max(0, waterDepth))
+B_shore = smoothstep(shoreBegin, shoreFull, max(0, shoreDistance))
+B_exposure = existingMarineExposure(...) # 0..1 near shelter, may remain partial
+B_kind = oceanMask * waterCoverage
+B_open = ice.open when present, else 1
+B_quality = 1 iff FFT tier permitted and resource generation valid
+
+B_fft = clamp(B_depth * B_shore * B_exposure * B_kind * B_open * B_quality,0,1)
+
+fftSlopeEffective = B_fft * fftSlopeFiltered
+```
+
+**Starting candidates, not fixed requirements:** `depthBegin=7m` (existing directional surf deep end) and `depthFull=12–15m`. `shoreBegin` and `shoreFull` must be **inside the actual guaranteed support** of [D22]'s capped shoreDistance, or the range must be expressed using a reliable alternative. For example 12–36m if [D22] proves its distance field actually reaches 36m at the chosen tile size. Do not propose a 200m smoothstep on a 48m-clamped field: it would **never reach full offshore FFT**.
+
+Do not place a secondary hard blend threshold at 17m, where [D34] just removed a visibly abrupt ocean-bed material cutoff. Keep analytic derivative continuity at the deep-water transition, rather than abruptly switching a height or roughness value.
+
+**Wave shelter policy:** the FFT source is global and has no geometry-aware cove scattering. Close to a headland, the existing `exposure` already suppresses/diffracts surf. Apply this **only to the FFT's local short-wind detail**, not to the authoritative long-travel analytic swell, which already has its own shelter/diffraction. In a sheltered cove, short chop decreases and the surface looks calmer while residual long breakers still curl toward the beach. Do not attenuate local short-wave detail twice if current `SeaDetailShading` already uses a shelter factor on the same band.
+
+### 6.4 Preserve amplitude and derivative of the existing wave as mix changes
+
+The mandatory normal-only mix cannot create a vertical ridge because height remains unchanged. But a visible bright/dark ring can still occur if the normal variance or Fresnel roughness changes abruptly. Ensure:
+
+```text
+rawAnalyticSlope = existing five-wave + directional surf geometry slope
+legacyFineSlope  = existing packed fine/medium ripple slope
+newFftSlope      = sampled highpass FFT derivative at chosen mip
+
+replacement = mix(legacyFineSlope, spectralFineSlope, B_fft)
+totalSlope  = rawAnalyticSlope + replacement + rainRippleSlope + interactionSlope
+normal      = normalize(vec3(-totalSlope.x,1,-totalSlope.z))
+```
+
+This is an illustrative strategy; actual code in [D11] is:
+
+- `slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope`;
+- `detailed = slope + detail.slope * storm detail gain`;
+- `surfaceSlope = detailed + ripple`;
+- `normal = normalize(vec3(-surfaceSlope.x,1,-surfaceSlope.y))`.
+
+**Integration point:** where `detail.slope` currently enters [D11] at lines ~97–120, compute **FFT replacement**, not an addition after final normal. Avoid TSL sampling FFT inside the nearshore `createDirectionalSurfNodes` loop or multiplying it by the surf's breaker `skew`. If current detail lease is created even when FFT fully replaces it, avoid losing the expected disposal event and prefer compile-time elision only once the material variant is tested.
+
+`smoothstep` is C1 continuous at its endpoints. If visually necessary, tune material LOD/normal variance transitions to also have limited second derivative. At just below/above the blend, compare mean square slope, horizontal energy and direct sun glint: no “flat ring” or “bright ring” at 7, 12, 15 or 17m.
+
+### 6.5 Fragment normals, foam, reflection and crest transmission
+
+- FFT adds only *short-wave orientation*. The [D11] coarse swell controls crest lift, per-wave shoreline whitecap and crest backlighting. Do not feed raw micro-slope into `height` normalized current crest threshold.
+- The [D12] `sea.glint` uses sea normal and [D40] `skyLightUniforms.sunColor`. Changing the normal changes visible glint; calibrate FFT micro-variance so it doesn't create pinpricks of clipped white at far distance.
+- `skyLightUniforms.reflectionTint` and [D37] `WaterReflectionController` still own environmental reflection. FFT can broaden/roughen the lobe through the **same** response, not a new independent clear-sky colour.
+- Existing `SeaDetailShading` has packed donor slopes and second moments. When spectral source takes over, retain the ability to fallback to donor texture on unsupported renderer and avoid slope variance duplication.
+- Rain and interaction normal fields are still summed separately; FFT should not interpret raindrop ripple energy as a change in underlying wind spectrum.
+- Existing shore foam, swash foam, intersection foam, rock foam and spray are still combined using their existing max/composite chain. Additional offshore whitecaps, if ever added, must use a physically bounded metric (e.g. Jacobian/compression) and cross-fade into the existing sea whitecap channel; **do not** simply add a new white opacity full screen.
+- Sea optics [D45] and refraction [D12] use sea normal to determine Snell path, diffuse depth/visibility. Fine wave normal effects should be damped/filtered on the transmitted underwater body if they yield unnaturally distorted seabed fragments in 1–3m water. Offshore FFT gate should already make that a rare problem.
+- Frozen glacial/taiga lake/ocean water stays frozen: `ice.open` or actual ice source should turn FFT to zero without changing freeze/coverage logic.
+
+### 6.6 Geometry as a separate gated architecture milestone
+
+If later PR I phase adds far **vertex FFT displacement**, an arbitrary player/boat/simulation query can still sample that water; a distance-from-camera “it's visually far” heuristic does not satisfy [D17]. Two acceptable architectural strategies:
+
+**Strategy A — authoritative deterministic CPU-evaluable long modes:** Build the offshore geometry from a *small finite* set of spectral low-frequency modes which can be evaluated synchronously in O(K) at any query, while the GPU computes their identical positions and derivative. This can be coupled with a separate FFT high-frequency normal field, but it is **not** a full 256² height FFT in geometry.
+
+**Strategy B — shared deterministic precomputed low-res height field with guaranteed synchronous CPU sampling:** Generate a bounded spatial field from source Fourier coefficients on CPU at a safe cadence, store map/reference state and expose it without readbacks, with correct infinite canonical wrapping and snapshot timing. This must not require expensive per-query DFT nor cause stale physics during render time advances; test memory/CPU and field interpolation precisely.
+
+Unacceptable: using the GPU FFT's height at all visible offshore vertices while leaving `seaSurfaceOffset` unchanged; syncing the GPU to CPU once per frame; computing a 256² DFT on every buoyancy sample; hiding height mismatch by changing camera water height; or making a boat gameplay contract depend on distant-only scene visibility.
+
+**Release gate:** until one strategy is proven, the first PR I feature has no additional geometric displacement. It is still useful visually and remains a safe, independently reversible spectral normal renderer.
+
+### 6.7 Direct CPU vs shader consistency tests
+
+For selected canonical points (beach, reef, cove, open ocean, negative world), compare `getCanonicalWater` vs renderer's **actual displaced water** (not just surface static field). Before FFT and with FFT on, max height delta must remain the same original interpolation/field quantization tolerance. The current coast QA [D33/D34] demonstrates canonical page-field vs triangulated bed comparisons; follow this style.
+
+If optional geometry is introduced, compare numerical wave at same clock over at least one full dominant wave period with float32/half precision and worker streaming. Include frozen time, forward/backward scrub, rebase, chunk edge and event timing.
+
+---
+
+## 7. Stable large-world phase, tiling and motion
+
+### 7.1 One phase field over an unbounded world
+
+[D6] correctly computes the five carrier phases at each **chunk centre in double precision** and the shader adds local delta. FFT texture coordinates must follow exactly the same principle, separately per cascade tile size.
+
+```text
+function positiveModuloDouble(x,L) {
+    return ((x % L) + L) % L;
+}
+
+for each cascade c:
+  originPhaseUv[c] = positiveModuloDouble(chunkCenterCanonicalXZ,L[c])/L[c]
+  uv_c = fract(originPhaseUv[c] + chunkLocalXZ/L[c])
+  # sample prefiltered 2D array texture layer c
+
+# Never compute fract((worldPosRender + 4_200_000)/3.1) in GPU f32.
+```
+
+Update on resident slot descriptor change only. [D13] currently already updates `seaSwellPhaseOrigin` then; PR I may extend its per-slot `materialOptions` to include a **small array of FFT UV origin uniforms** with [D14] `onObjectUpdate`, without creating per-slot materials. This is one of the few legitimate slot edits.
+
+Ensure negative modulo and seam continuity across actual shared chunk edges: two adjacent chunk centres map identical shared border UV despite center differences, to within texture sampling precision. Avoid tiny visible jump when wrapping the FFT tile phase. If a projected FFT normal is generated at finite resolution with bilinear filtering and standard RepeatWrapping, verify the texel 0/N boundary and spectral phase match.
+
+### 7.2 Do not make a camera-following FFT field swim
+
+A common shortcut is to draw a 128×128 FFT texture around the camera and shift sampling when camera moves. This causes the crest pattern to slide relative to the rocks/land. The Fourier source is a **world-periodic field**, sampled in canonical XZ independent of camera, not a world position derived from viewport UV.
+
+A camera jump may affect **which resident chunks** sample the source, but not the source's random seed, global Fourier phase or water clock. Floating-origin snap translates render positions and camera together; UV from canonical chunk centres stays unchanged.
+
+### 7.3 Wave tile repetition and cascade decorrelation
+
+Small FFT grids repeat every tile size L. Multiple cascades with nonintegral ratios reduce synchronized repetition, but if only two short-wave cascades are used, obvious repeating crests can still appear at the horizon.
+
+- Use separate seeded mode subsets/phase salts per cascade, disjoint frequency bands and ratios chosen not to line up over short distance.
+- A very distant pixel needs fewer resolved fine slopes: mip/variance aggregation hides short tile repetition; do not increase tile size at the cost of wasting resolution on subpixel waves.
+- Use current [D23] long-range packed ripple for remaining nonperiodic appearance when appropriate; if combined, its variance/energy must be counted once.
+- A domain warp must not break the phase, gradient/wave propagation or match across chunks; avoid procedural random UV offsets per slot.
+- At extreme distances, use **expected statistical roughness** rather than sample pointwise centimetre wave normals that cannot be resolved.
+
+### 7.4 Wind and storm sign conventions
+
+[P1] positive IFFT time sign moves opposite +k. [D6] five analytic waves use their own (+time) convention, and shore carriers are designed to move onshore. The FFT wind heading converter must be unambiguous:
+
+- Normalize input weather direction in degrees 0..360, with explicit from/to convention and X/Z world axes.
+- A known east wind should produce statistically eastward travel if declared “towards east”; test a single mode's crest at t0/t1.
+- Distinguish *local wind sea* response from long-travel swell direction already in [D6]. No global wind rotation of CPU analytic carriers.
+- Storm intensity currently multiplies analytic offshore amplitude by `stormScale` and influences choppiness. FFT's wind-energy control must be tuned so storm doesn't scale the same energy twice in residual normal/roughness.
+
+---
+
+## 8. Integration with the current frame lifecycle and render graph
+
+### 8.1 The actual active rendering hooks
+
+[D15] builds `SharedWaterMaterials`, `WaterReflectionController`, water slots, and attaches a `beforeMainRender` callback which prepares cascaded shadows and reflection schedule. Its `afterMainRender` runs bounded reflection capture using the existing deferred work scheduler. In `update(timestamp,camera)`, it updates sky and then water slots; when land streaming is suspended underwater, **water slots still update**.
+
+Choose **one** owner point to prepare FFT once per app frame **after** [D18] water time has been published but **before** the first water scene draw. If water slot update sets the time as it currently does, add a single well-defined water-clock publication at the start of this owner update (without changing value) or prepare in the existing beforeMainRender callback after the clock is already set. Do **not** append a new hook that overwrites the existing reflection/shadow callback, and do **not** call compute separately for the reflection camera.
+
+### 8.2 Atomic state publication
+
+A compute operation cannot publish partially transformed rows or changed spectrum uniforms while the water shader still samples stale output. Use a generated output resource/validity state or a safe update order:
+
+```text
+read canonical water time once
+update weather-derived spectral parameters only if revision changes
+if spectrum rebuild needed:
+    compute seeded mode amplitude buffer
+if enabled and visible, update:
+    evolve modes at current water time
+    run row/column inverse
+    publish complete output (and mips if required)
+    update spectralRevision + timeGeneration
+draw exactly one active water scene with published output
+capture reflection using same published output, no compute again
+```
+
+When output is not ready, use original donor detailed texture seamlessly. Do not sample an uninitialized FFT target, a partially updated row buffer, or a texture from a previous renderer generation. When toggling feature on/off, compile the appropriate shared water variant once, not per chunk.
+
+### 8.3 Avoid other expensive render features
+
+- [D12/D13] only use the refractive near-water material around the focus chunk, because any viewport-opaque/depth texture sampler triggers a **full scene colour/depth/mipmap copy**. Do not add viewport sampling to FFT, and ensure far ocean FFT continues using the nonrefractive shared variant.
+- FFT does **not** justify a new global ocean skydome, depth prepass, water MRT or separate TAA. It should supply stable normal data into existing surface shader.
+- [D37] reflections read current ocean normal. Keep existing water refraction and scene reflection ownership; if FFT makes normal more detailed, reflection lobe should follow filtered roughness, not one new reflection pass per slope band.
+- Existing water material is unlit and applies sky light/glint manually. Do not port Ponlai's full `Water.ts` physical shading and thus double sun/sky in this phase.
+- Existing screenshots/profilers already depend on a precise render-path lifecycle. The FFT runtime must not advance the clock again for cinematic god-rays, direct editor, postprocess or scene reflection.
+
+### 8.4 Shader and GPU binding limits
+
+Before passing FFT slope textures into [D12], query actual portable limits and inspect generated shaders for the **high/ultra ocean material**:
+
+- Existing waterField, waterFlow, waterAppearance, surface mask, per-object obstacle, packed normal/noise, reflection plus optional refractive viewport nodes may already be near the 16 sampler binding limit.
+- Prefer reusing the one sea detail sampler already present **if** format/binding and lease semantics can be swapped safely. A 2D array texture may count as a new sampled binding; it is not “free” because cascades share one sampler.
+- Extra `varying` for FFT UV origins can exceed 16 interstage variables. Compute per-cascade UV from per-object uniforms + local XZ instead of allocating many vertex-to-fragment varyings.
+- Verify WebGPU vertex/fragment sampler budgets and actual Three shader compilation on a 16-sampler/16-varying device profile, even if development NVIDIA exposes larger limits.
+- Keep the old unfiltered source if a capability fails; do not silently expand the device's required limits beyond browser portability.
+- Use a small pooled immutable data object for FFT output metadata to avoid per-frame JS allocations in the hot loop.
+
+---
