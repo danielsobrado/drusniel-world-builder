@@ -1,0 +1,10 @@
+# tests 5071
+# pass 5066
+# fail 5
+5 matches in 1 files:
+
+docs/.../logs/clean-export-npm-test.log:3477:not ok 575 - underground Blender GLBs stay within triangle budget, single mes...
+docs/.../logs/clean-export-npm-test.log:9281:not ok 1533 - stylized source assets are present with valid container signatures
+docs/.../logs/clean-export-npm-test.log:9309:not ok 1536 - authored rocks and bushes bake upright at scenery scale
+docs/.../logs/clean-export-npm-test.log:10153:not ok 382 - test\\towns\\stonehold-export.test.js
+docs/.../logs/clean-export-npm-test.log:10177:not ok 1675 - every city family and realm has at least 5 new exported >=15k-t...

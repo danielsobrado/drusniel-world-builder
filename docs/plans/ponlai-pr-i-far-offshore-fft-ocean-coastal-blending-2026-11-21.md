@@ -1188,16 +1188,25 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.8 — Full QA, performance, visual review and rollout
 
-- [ ] Run `13.1` math and `13.2` real shader build tests, plus water-on/off equivalence.
-- [ ] Run package `npm test`, `npm run lint`, `npm run build`, existing water acceptance and world visual QA.
-- [ ] Capture at least ten `13.4` real scenes with matched seed/clock/pose, plus synthetic/negative positions and island/cove control.
-- [ ] Run native hardware A/A/FFT-off/FFT-on timing in water/beach/cove/headland/open sea, across four quality tiers; publish actual compute cost.
-- [ ] Measure full GPU buffer/resource residency and dispatch counts. Confirm no extra per-slot work at 1 vs 49 resident water chunks.
-- [ ] Validate runtime first load, water time freeze, speedup, downgrade, camera rebase and renderer/device recovery.
-- [ ] Perform two code-review rounds for numerical correctness, shader sampler complexity, resource lifecycle and performance. Fix issues then rerun authoritative benchmarks.
-- [ ] Retain rejected measurements and screenshots in report, including focus failures or software/WebGL adapter.
-- [ ] Record source/FFT assets and downstream derivative licensing in THIRD_PARTY_NOTICES only if code is actually adapted.
-- [ ] Keep opt-in default if any functional gate fails or quality delta insufficient.
+- [x] Run `13.1` math and `13.2` real shader build tests, plus water-on/off equivalence.
+- [x] Run package `npm test`, `npm run lint`, `npm run build`, existing water acceptance and world visual QA.
+- [x] Capture at least ten `13.4` real scenes with matched seed/clock/pose, plus synthetic/negative positions and island/cove control.
+- [x] Run native hardware A/A/FFT-off/FFT-on timing in water/beach/cove/headland/open sea, across four quality tiers; publish actual compute cost.
+- [x] Measure full GPU buffer/resource residency and dispatch counts. Confirm no extra per-slot work at 1 vs 49 resident water chunks.
+- [x] Validate runtime first load, water time freeze, speedup, downgrade, camera rebase and renderer/device recovery.
+- [x] Perform two code-review rounds for numerical correctness, shader sampler complexity, resource lifecycle and performance. Fix issues then rerun authoritative benchmarks.
+- [x] Retain rejected measurements and screenshots in report, including focus failures or software/WebGL adapter.
+- [x] Record source/FFT assets and downstream derivative licensing in THIRD_PARTY_NOTICES only if code is actually adapted.
+- [x] Keep opt-in default if any functional gate fails or quality delta insufficient.
+
+**I.8 result:** [Phase I.8 QA and rollout](ponlai-pr-i-phase-i8-qa-and-rollout-2026-11-21.md). Frozen snapshot of `8bb0106b`.
+- **Scenes:** 19 captures per side across 8 places, FFT on vs off, with 0 failures; nearshore is unchanged.
+- **Shaders:** on uses 16/13/12 (plain) and 21/14/12 (refraction) textures, samplers and varyings; off is back to the pre-PR I 15/12/12 and 20/13/12.
+- **GPU timing:** A/A′ agree within 0.07 ms; the cost is 0.07–0.19 ms at offshore and open-coast poses, 0.33–0.35 ms in the cove, and 0 on medium and low. FFT compute is 0.055 + 0.010 ms, with one transform per frame.
+- **Fixture:** all cases pass, including device-loss recovery and the zero-work disabled path.
+- **Water acceptance:** an authoritative 13/13 pass.
+- **Licensing:** the Ponlai MIT notice is recorded.
+- **Decision:** keep enabled.
 
 **Stop:** hardware compute unmeasured, CPU water-height mismatch, invisible quality improvement, scene sampler overflow, nearshore look regression, missing water acceptance route or broken device recovery.
 

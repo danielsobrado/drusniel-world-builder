@@ -1,0 +1,269 @@
+{
+  "sourceRevision": "8bb0106b01fa8911f5dac12c8ded809483da401b",
+  "waterPatch": {
+    "sea": {
+      "offshoreFft": {
+        "enabled": false,
+        "geometry": {
+          "enabled": false
+        }
+      }
+    }
+  },
+  "failures": [],
+  "alerts": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-windy/windy (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-storm/storm (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "exposed/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "curved-coast/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "cove/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "headland/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    },
+    {
+      "scope": "rocky/high (diffraction on)",
+      "state": "off",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213914,
+          "hash": "9f1cc5ea"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228113,
+          "hash": "6dee5f22"
+        }
+      ]
+    }
+  ]
+}

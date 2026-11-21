@@ -1,0 +1,260 @@
+{
+  "sourceRevision": "8bb0106b01fa8911f5dac12c8ded809483da401b",
+  "waterPatch": {},
+  "failures": [],
+  "alerts": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-windy/windy (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-storm/storm (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "exposed/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "curved-coast/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "cove/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "headland/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    },
+    {
+      "scope": "rocky/high (diffraction on)",
+      "state": "active",
+      "slotOrigins": {
+        "checked": 49,
+        "maxError": 0
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ]
+    }
+  ]
+}
