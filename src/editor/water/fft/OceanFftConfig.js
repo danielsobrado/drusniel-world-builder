@@ -16,6 +16,8 @@ export const OFFSHORE_FFT_DEFAULTS = Object.freeze({
   weather: Object.freeze({ referenceWindSpeed: 10, transitionSeconds: 2 }),
   // I.6: wind-driven long swell (48–160 m) as real wave height, CPU and shader alike.
   geometry: Object.freeze({ enabled: false }),
+  // [P9] follow-on: underwater caustics from the FFT slopes where it owns the sea (OceanFftCaustics).
+  caustics: Object.freeze({ enabled: false, strength: 1 }),
 });
 
 // config/water-domain.yaml waterDomain.shoreDistanceMeters: the field saturates there.
@@ -34,7 +36,8 @@ export function resolveOffshoreFft(source = {}) {
   const blend = { ...OFFSHORE_FFT_DEFAULTS.blend, ...(source.blend ?? {}) };
   const weather = { ...OFFSHORE_FFT_DEFAULTS.weather, ...(source.weather ?? {}) };
   const geometry = { ...OFFSHORE_FFT_DEFAULTS.geometry, ...(source.geometry ?? {}) };
-  const result = { ...OFFSHORE_FFT_DEFAULTS, ...source, blend, weather, geometry };
+  const caustics = { ...OFFSHORE_FFT_DEFAULTS.caustics, ...(source.caustics ?? {}) };
+  const result = { ...OFFSHORE_FFT_DEFAULTS, ...source, blend, weather, geometry, caustics };
   if (typeof result.enabled !== 'boolean') throw new Error(`${field('enabled')} must be a boolean.`);
   finiteIn(result.slopeStrength, 'slopeStrength', 0, 2);
   finiteIn(blend.depthStartMeters, 'blend.depthStartMeters', 0, 100);
@@ -46,11 +49,13 @@ export function resolveOffshoreFft(source = {}) {
   finiteIn(weather.referenceWindSpeed, 'weather.referenceWindSpeed', 1, 25);
   finiteIn(weather.transitionSeconds, 'weather.transitionSeconds', 0.25, 60);
   if (typeof geometry.enabled !== 'boolean') throw new Error(`${field('geometry.enabled')} must be a boolean.`);
+  if (typeof caustics.enabled !== 'boolean') throw new Error(`${field('caustics.enabled')} must be a boolean.`);
+  finiteIn(caustics.strength, 'caustics.strength', 0, 4);
   for (const key of Object.keys(source)) if (!(key in OFFSHORE_FFT_DEFAULTS)) throw new Error(`${field(key)} is not a setting.`);
-  for (const group of ['blend', 'weather', 'geometry']) {
+  for (const group of ['blend', 'weather', 'geometry', 'caustics']) {
     for (const key of Object.keys(source[group] ?? {})) {
       if (!(key in OFFSHORE_FFT_DEFAULTS[group])) throw new Error(`${field(`${group}.${key}`)} is not a setting.`);
     }
   }
-  return Object.freeze({ ...result, blend: Object.freeze(blend), weather: Object.freeze(weather), geometry: Object.freeze(geometry) });
+  return Object.freeze({ ...result, blend: Object.freeze(blend), weather: Object.freeze(weather), geometry: Object.freeze(geometry), caustics: Object.freeze(caustics) });
 }

@@ -188,6 +188,17 @@ export function getCanonicalWater(terrainView, worldX, worldZ) {
   ), worldX, worldZ, terrainView.worldStore);
 }
 
+/**
+ * The CPU inputs of the I.4 offshore FFT weight at a canonical point, the twin of the
+ * streamed water pages (FFT caustics use it at the camera), or null off the sea.
+ */
+export function getCanonicalOffshoreGeography(terrainView, worldX, worldZ) {
+  const water = getCanonicalWater(terrainView, worldX, worldZ);
+  if (water.kind !== WATER_KIND_OCEAN) return null;
+  return { shoreDistance: water.shoreDistance, oceanMask: 1, waterCoverage: water.coverage,
+    exposure: sampleWorldStoreSeaExposure(terrainView.worldStore, worldX, worldZ, water.shoreDistance) };
+}
+
 export function getWorldWater(terrainView, renderX, renderZ) {
   assertTerrainView(terrainView);
   const canonical = terrainView.floatingOrigin.toCanonical(renderX, renderZ);

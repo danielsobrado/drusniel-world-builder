@@ -35,6 +35,17 @@ export class OceanFftBinding {
     this.generation = ready ? output.generation : -1;
   }
 
+  /**
+   * Show another binding's current output (or the fallback): for a consumer outside the
+   * surface view, whose binding is rebuilt and disposed with the view on a tier change.
+   */
+  mirror(source) {
+    const ready = !!source && source.available.value === 1 && source.size === this.size
+      && source.tileSizes.length === this.tileSizes.length && source.tileSizes.every((tile, c) => tile === this.tileSizes[c]);
+    this.texture.value = ready ? source.texture.value : this.fallback;
+    this.available.value = ready ? 1 : 0;
+  }
+
   /** Per-level unresolved slope variance of each cascade's spectrum (OceanFftFiltering). */
   setSpectra(spectra) {
     const values = this.unresolved.array;

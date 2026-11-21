@@ -3,6 +3,7 @@ import { validateUnderwaterConfig } from './UnderwaterConfig.js';
 import { advanceUnderwaterBlend, mixNumber } from './UnderwaterTransition.js';
 import { resolveWaterQualityFeatures } from './WaterQuality.js';
 import { UnderwaterCausticsPostProcess } from './UnderwaterCausticsPostProcess.js';
+import { getCanonicalOffshoreGeography } from './TerrainWaterQueries.js';
 import { setUnderwaterBlend } from './underwaterState.js';
 import { withPreparationFrame } from '../../render/preparation/DrawPreparation.js';
 
@@ -70,6 +71,10 @@ export class UnderwaterViewController {
         floatingOrigin: terrainView.floatingOrigin,
         waterSlots: () => terrainView.stylizedSurface?.waterSlots ?? [],
         waterlineRange: waterVisual.optics?.surfaceTransitionDepth,
+        // FFT caustics where the surface view runs the offshore FFT (`offshoreFft.caustics`).
+        offshoreFft: waterVisual.sea?.enabled === false ? null : waterVisual.sea?.offshoreFft,
+        oceanFft: () => terrainView.stylizedSurface?.oceanFft?.binding ?? null,
+        offshoreGeography: (x, z) => getCanonicalOffshoreGeography(terrainView, x, z),
       })
       : null;
     this.originalTerrainRender = terrainView.render;

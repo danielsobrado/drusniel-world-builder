@@ -27,6 +27,10 @@ import { UnderwaterOpticsState } from './UnderwaterOpticsState.js';
 import { createUnderwaterOpticsNodes } from './UnderwaterOpticsNodes.js';
 import { UnderwaterWaterScene } from './UnderwaterWaterScene.js';
 import { resolveWaterlineBlend } from './UnderwaterTransition.js';
+import { resolveOffshoreFft } from './fft/OceanFftConfig.js';
+import { causticLevels, offshoreCausticCameraWeight } from './fft/OceanFftCaustics.js';
+import { writeCascadeUvOrigins } from './fft/OceanFftCoordinates.js';
+import { OceanFftBinding } from './fft/OceanFftSampling.js';
 
 const SKY_DEPTH_THRESHOLD = 0.9999;
 
@@ -91,7 +95,8 @@ function buildProjectedCaustics({
 }
 
 export class UnderwaterCausticsPostProcess {
-  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [], waterlineRange = 0, seaOptics = {}, waterQuality = 'high' }) {
+  constructor({ renderer, scene, config, qualityStrength = 1, optics = null, floatingOrigin = null, clock = undefined, waterSlots = [], waterlineRange = 0, seaOptics = {}, waterQuality = 'high',
+    oceanFft = null, offshoreFft = null, offshoreGeography = null }) {
     this.renderer = renderer;
     this.scene = scene;
     this.clock = clock;
@@ -102,6 +107,7 @@ export class UnderwaterCausticsPostProcess {
       ? new UnderwaterOpticsState({ settings: optics, scene, floatingOrigin, seaOptics, waterQuality }) : null;
     this.waterScene = this.opticsState ? new UnderwaterWaterScene(waterSlots) : null;
     this.disposed = false;
+    this.floatingOrigin = floatingOrigin;
     this.blend = uniform(0);
     this.waterline = uniform(0);
     this.waterlineEnabled = false;
@@ -114,6 +120,37 @@ export class UnderwaterCausticsPostProcess {
     this.scenePass = null;
     this.pipeline = null;
     this.sceneCpuMs = 0;
+    // FFT caustics (PR I [P9] follow-on): `oceanFft()` is the surface view's live binding, or
+    // null; `offshoreGeography(x, z)` the canonical sea at a point ({ shoreDistance, exposure,
+    // oceanMask, waterCoverage }, or null). Built with the pipeline only where both are live.
+    this.oceanFft = oceanFft;
+    this.offshoreGeography = offshoreGeography;
+    this.offshoreFft = offshoreFft ? resolveOffshoreFft(offshoreFft) : null;
+    this.fftCaustics = null;
+    this.fftOrigin = [0, 0, 0, 0];
+    this.canonicalEye = { x: 0, z: 0 };
+  }
+
+  /** The FFT caustic inputs, or null (switch off, no FFT on this tier or backend, no optics). */
+  createFftCaustics() {
+    const settings = this.offshoreFft, live = this.oceanFft?.();
+    if (!this.opticsState || !settings?.caustics.enabled || !live) return null;
+    const binding = new OceanFftBinding({ size: live.size, tileSizes: live.tileSizes });
+    return { binding, levels: causticLevels(binding), origin: uniform(new THREE.Vector4()), cameraWeight: uniform(0),
+      refractiveIndex: this.opticsState.seaSettings.opticalDistance.refractiveIndex,
+      slopeStrength: settings.slopeStrength, strength: settings.caustics.strength, blend: settings.blend };
+  }
+
+  /** Once per drawn frame: the live FFT output, the camera's cascade origins and its offshore weight. */
+  updateFftCaustics() {
+    const fft = this.fftCaustics;
+    fft.binding.mirror(this.oceanFft?.() ?? null);
+    const eye = this.cameraPosition.value;
+    const canonical = this.floatingOrigin ? this.floatingOrigin.writeCanonical(eye.x, eye.z, this.canonicalEye) : { x: eye.x, z: eye.z };
+    fft.origin.value.fromArray(writeCascadeUvOrigins(canonical.x, canonical.z, fft.binding.tileSizes, this.fftOrigin));
+    const geography = fft.binding.available.value ? this.offshoreGeography?.(canonical.x, canonical.z) : null;
+    fft.cameraWeight.value = geography
+      ? offshoreCausticCameraWeight({ ...geography, available: 1, blend: fft.blend }) : 0;
   }
 
   update({ blend = 0, surfaceHeight, waterKind, waterlineEnabled = false } = {}) {
@@ -158,8 +195,9 @@ export class UnderwaterCausticsPostProcess {
           intensity: this.config.intensity * this.qualityStrength,
         },
       };
+      this.fftCaustics = this.createFftCaustics();
       this.pipeline.outputNode = this.opticsState
-        ? createUnderwaterOpticsNodes({ ...inputs, state: this.opticsState, qualityStrength: this.qualityStrength })
+        ? createUnderwaterOpticsNodes({ ...inputs, state: this.opticsState, qualityStrength: this.qualityStrength, fftCaustics: this.fftCaustics })
         : buildProjectedCaustics(inputs);
     }
   }
@@ -170,6 +208,7 @@ export class UnderwaterCausticsPostProcess {
     this.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
     camera.getWorldPosition(this.cameraPosition.value);
     this.opticsState?.updateCamera(camera, this.surfaceHeight.value);
+    if (this.fftCaustics) this.updateFftCaustics();
   }
 
   get active() { return this.enabled && !this.disposed && (this.blend.value > 0 || this.waterline?.value > 0); }
@@ -221,6 +260,8 @@ export class UnderwaterCausticsPostProcess {
       waterlineBlend: this.waterline.value,
       surfaceHeight: this.surfaceHeight.value,
       optics: Boolean(this.opticsState),
+      fftCaustics: this.fftCaustics ? { available: this.fftCaustics.binding.available.value,
+        cameraWeight: this.fftCaustics.cameraWeight.value, levels: this.fftCaustics.levels } : null,
     });
   }
 
@@ -229,6 +270,8 @@ export class UnderwaterCausticsPostProcess {
     this.disposed = true;
     this.pipeline?.dispose();
     this.scenePass?.dispose();
+    this.fftCaustics?.binding.dispose();
+    this.fftCaustics = null;
     this.pipeline = null;
     this.scenePass = null;
     this.renderer = null;

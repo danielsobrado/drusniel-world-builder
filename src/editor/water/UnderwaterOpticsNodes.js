@@ -4,13 +4,16 @@ import {
 } from 'three/tsl';
 import { godsEndCausticLattice, godsEndSurfaceRipple } from './GodsEndWaterPatterns.js';
 import { seaDirectionalScatter } from '../stylized/SeaOpticsShading.js';
+import { fftCausticExcess, fftCausticWeight } from './fft/OceanFftCaustics.js';
 
 /**
  * Gods' End CinematicPipeline underwater optics, using one existing scene pass.
  * Depth and beauty share the refracted coordinate. Away from the surface the
  * owning postprocess bypasses at blend 0; split views colour only wet pixels.
+ * `fftCaustics` (UnderwaterCausticsPostProcess) adds the offshore FFT caustics; null builds
+ * the original graph.
  */
-export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, waterline = float(0), state, qualityStrength = 1, clock = time }) {
+export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrixWorld, cameraProjectionMatrixInverse, surfaceHeight, blend, waterline = float(0), state, qualityStrength = 1, clock = time, fftCaustics = null }) {
   const settings = state.settings;
   const coord = screenUV;
   const wobble = vec2(
@@ -73,7 +76,13 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
       const causticReach = exp(pointDepth.mul(-0.12))
         .mul(smoothstep(0, 1, float(45).sub(distance).div(25)))
         .mul(state.sun).mul(surface.select(float(0), float(1)));
-      const caustics = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters, clock)
+      const web = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters, clock);
+      // Offshore, light focused by the FFT sea itself, traced back along the refracted sun to
+      // the surface point that lit this bed point; the web stays everywhere the FFT does not.
+      const pattern = fftCaustics ? mix(web, fftCausticExcess({ ...fftCaustics, depth: pointDepth,
+        offset: ray.xz.mul(distance).add(state.sunDirection.xz.div(state.sunDirection.y.max(0.15)).mul(pointDepth)) })
+        .mul(fftCaustics.strength), fftCausticWeight({ ...fftCaustics, depth: pointDepth })) : web;
+      const caustics = pattern
         .mul(causticReach).mul(settings.causticStrength * qualityStrength);
       const bed = lit.mul(dimming).mul(caustics.add(1));
       const transmittance = exp(vec3(...settings.extinction).mul(waterDistance.negate())).toVar();
