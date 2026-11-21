@@ -2,7 +2,7 @@
 
 Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.3 world sampling and quality](ponlai-pr-i-phase-i3-world-sampling-and-quality-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i4-2026-11-21/`](../qa/ponlai-pr-i-phase-i4-2026-11-21/README.md).
 
-**Status:** done, shipped **off** (`water.sea.offshoreFft.enabled: false`), as the plan requires until I.5 drives the spectrum from the weather.
+**Status:** done. It shipped **off** until I.5 drove the spectrum from the weather, and was enabled by default after I.5 (see the [I.5 report](ponlai-pr-i-phase-i5-weather-and-stability-2026-11-21.md)).
 
 - On high and ultra water with WebGPU, the FFT's short-wave slopes now replace the medium ripple band (groups 0 and 1) on open, deep, exposed sea. The fine band, swell, surf, rain and wakes are untouched.
 - Its unresolved slope variance replaces the medium band's variance in the roughness.

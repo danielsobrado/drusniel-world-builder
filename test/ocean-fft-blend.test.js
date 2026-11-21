@@ -25,7 +25,8 @@ test('config: default off, documented thresholds, validated bounds, no unknown k
     { blend: { shoreStartMeters: 40, shoreEndMeters: 40 } }, { gain: 2 }, { blend: { far: 1 } }]) {
     assert.throws(() => resolveOffshoreFft(bad), /offshoreFft/, JSON.stringify(bad));
   }
-  assert.match(yaml, /offshoreFft:\r?\n\s+enabled: false\r?\n/, 'shipped off in water-visual.yaml');
+  // The code default stays off; the shipped config turns it on (high/ultra WebGPU only, OceanFftQuality).
+  assert.match(yaml, /offshoreFft:\r?\n\s+enabled: true\r?\n/, 'shipped on in water-visual.yaml');
 });
 
 test('config: the sea validator rejects a malformed offshoreFft', () => {

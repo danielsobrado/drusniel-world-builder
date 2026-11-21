@@ -210,7 +210,7 @@ water:
     # and roughness only; wave heights, foam and CPU water queries never change.
     # High and ultra water tiers on WebGPU; `?oceanFft=1` forces it on for QA.
     offshoreFft:
-      enabled: false
+      enabled: true
       slopeStrength: 1
       blend:
         depthStartMeters: 7

@@ -2,7 +2,7 @@
 
 Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.4 offshore normal integration](ponlai-pr-i-phase-i4-offshore-normal-integration-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i5-2026-11-21/`](../qa/ponlai-pr-i-phase-i5-2026-11-21/README.md).
 
-**Status:** done. The feature still ships off (`water.sea.offshoreFft.enabled: false`); §12 covers enabling it.
+**Status:** done. **Enabled by default** after I.5 (`water.sea.offshoreFft.enabled: true` in `config/water-visual.yaml`). It runs on the high and ultra water tiers with WebGPU; low, medium and WebGL keep the authored sea. A default load verified this: active on high with the I.4 shader hashes, off and unchanged on low.
 
 - The offshore FFT spectrum now follows the world's resolved wind: the same direction and storm-curved intensity that drive every swaying plant.
 - Weather changes cross-fade per-mode power over 2 s, with each mode's phase fixed. The sea never flashes, resets or rotates, and the roughness table always matches the uploaded spectrum.
@@ -159,7 +159,7 @@ One fix during review: the first transition was an amplitude lerp. It would dip 
 
 - **Fetch is fixed at 50 km.** Coastal fetch-limited seas are not modelled; the coastal blend (I.4) already removes the FFT near shore.
 - **Wind mode at full intensity equals storm.** The storm system drives its wind channel to a full gale in `wind` mode, so both reach 24 m/s, which is the world's own resolved wind. A gentler wind needs a lower weather intensity (QA: `weatherIntensity`).
-- **Shipping.** The feature remains off by default. Enabling it (`offshoreFft.enabled: true`) is now a product decision rather than a technical blocker. It changes the open sea's look in every weather on high and ultra.
+- **Shipping.** Enabled in the shipped config, so the open sea looks different on high and ultra in every weather. To roll back, set `offshoreFft.enabled: false`: the shaders return byte-identical to the pre-FFT ones (I.4 §9). `resolveOffshoreFft` keeps `false` as the code default for worlds and fixtures without the setting.
 - **Single GPU.** Only the RTX 4080 was run.
 
 ## 13. Phase I.6 handoff
