@@ -36,8 +36,21 @@ export async function inspectOceanFftScene() {
       length: wgsl.length, hash: hash(wgsl),
     });
   }
+  // The underwater post (FFT caustics): its quad's fragment WGSL, once its pipeline exists (prewarm builds it).
+  const post = editor.viewModeController?.playerController?.underwaterView?.causticsPostProcess;
+  let underwaterPost = null;
+  if (post) {
+    post.prewarm(editor.viewModeController.camera);
+    const quad = post.pipeline?._quadMesh;
+    if (quad) {
+      const { fragmentShader: wgsl } = await renderer.debug.getShaderAsync(quad, quad.camera, quad);
+      underwaterPost = { textures: (wgsl.match(/var\s+\w+\s*:\s*texture_\w+/g) ?? []).length,
+        oceanFftReferenced: /oceanFft/i.test(wgsl), length: wgsl.length, hash: hash(wgsl), status: post.getStatus() };
+    }
+  }
   const fft = surface.oceanFft;
   return {
+    underwaterPost,
     oceanFft: fft ? { ...fft.runtime.diagnostics(), available: fft.binding.available.value, bindingGeneration: fft.binding.generation, tileSizes: fft.tileSizes,
       spectrumWind: { ...fft.spectrum.wind }, transitioning: fft.spectrum.transitioning } : null,
     slotOrigins: { checked, maxError: worst },
