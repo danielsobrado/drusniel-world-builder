@@ -4,7 +4,13 @@ import { readFileSync } from 'node:fs';
 import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
 import { float, normalWorld, vec3, uniform } from 'three/tsl';
-import { foliageMaterialClass, leafTransmissionResponse, foliageSurfaceHighlight } from '../src/editor/stylized/forest/FoliageNodeMaterial.js';
+import {
+  foliageMaterialClass,
+  foliageRimGlowResponse,
+  foliageSurfaceHighlight,
+  foliageWrapDiffuseResponse,
+  leafTransmissionResponse,
+} from '../src/editor/stylized/forest/FoliageNodeMaterial.js';
 import { resolveTreeFoliageSettings, resolveTreeBarkSettings } from '../src/editor/stylized/forest/treeSurfaceSettings.js';
 import { canopyVisibilityNode, configureTreeFoliageSurface } from '../src/editor/stylized/forest/TreeFoliageSurface.js';
 import { surfaceWetnessUniform } from '../src/editor/weather/surfaceWetness.js';
@@ -151,4 +157,37 @@ test('loading proxies retain species lighting and compile without parallax', () 
     if (part.kind === 'leaf') assert.equal(part.material.userData.treeFoliageSurface.thickness, source.userData.treeFoliageSurface.thickness);
     for (const forceWebGL of [false, true]) buildShader(new THREE.InstancedMesh(geo, part.material, 1), shaderTestRenderer({ forceWebGL }));
   }
+});
+
+test('wrapped diffuse and airy rim glow soften the crown terminator while respecting visibility', () => {
+  const wrapTerminator = evaluate(foliageWrapDiffuseResponse(vec3(0, 0, 1), vec3(1, 0, 0), float(0.42), float(1)));
+  const wrapLit = evaluate(foliageWrapDiffuseResponse(vec3(0, 0, 1), vec3(0, 0, 1), float(0.42), float(1)));
+  const wrapSheltered = evaluate(foliageWrapDiffuseResponse(vec3(0, 0, 1), vec3(1, 0, 0), float(0.42), float(0)));
+  assert.ok(wrapTerminator > 0.2, 'terminator receives soft wrapped fill');
+  assert.equal(wrapLit, 0, 'directly facing surfaces add no extra wrap energy');
+  assert.equal(wrapSheltered, 0, 'occluded crown interiors stay shaded');
+
+  const rimGrazing = evaluate(foliageRimGlowResponse(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), float(0.28), float(1)));
+  const rimFacing = evaluate(foliageRimGlowResponse(vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), float(0.28), float(1)));
+  assert.ok(rimGrazing > 0.1 && rimFacing === 0);
+
+  const geo = geometry();
+  bakeCanopyVisibility([{ kind: 'leaf', geometry: geo }]);
+  const map = new THREE.DataTexture(new Uint8Array([110, 165, 85, 255]), 1, 1);
+  const material = createStylizedLeafMaterial({
+    source: new THREE.MeshLambertMaterial({ map }),
+    leafMap: map,
+    bounds: { minY: -5, maxY: 5 },
+    crownRadius: 2.5,
+    time: uniform(0),
+    config,
+    preserveSourceColor: true,
+    canopyGrade: true,
+    hasCanopyVisibility: true,
+    canopyBounds: { min: [-1, -5, -1], max: [1, 5, 1] },
+  });
+  const clone = createDitheredMaterial(material, { tinted: true, kind: 'leaf' });
+  const wgsl = buildShader(new THREE.InstancedMesh(geo, clone, 1));
+  assert.doesNotMatch(wgsl.vertexShader, /dpdx|dpdy/);
+  buildShader(new THREE.InstancedMesh(geo, clone, 1), shaderTestRenderer({ forceWebGL: true }));
 });

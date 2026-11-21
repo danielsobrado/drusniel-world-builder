@@ -2,10 +2,13 @@ import * as THREE from 'three/webgpu';
 import {
   Fn,
   clamp,
+  float,
   max,
   min,
+  mix,
   rtt,
   screenUV,
+  smoothstep,
   uniform,
   vec2,
   vec4,
@@ -39,9 +42,11 @@ export function contrastSharpenReference(
 
 /**
  * Five-tap contrast-adaptive sharpening in display/output colour space.
+ * Attenuates sharpening on reactive foliage pixels (MRT material.g) on the GPU
+ * so crisp terrain/stone stays sharp while alpha-cutout crowns stay velvety.
  */
 export class ContrastSharpenNode {
-  constructor({ sourceNode, settings }) {
+  constructor({ sourceNode, materialNode = null, settings }) {
     this.disposed = false;
     this.amount = uniform(settings.amount);
     this.resolution = uniform(new THREE.Vector2(1, 1));
@@ -75,7 +80,10 @@ export class ContrastSharpenNode {
         centre,
         max(left, max(right, max(up, down))),
       );
-      const k = this.amount.mul(0.32);
+      const foliageAtten = materialNode
+        ? mix(float(1), float(0.2), smoothstep(0.4, 0.7, materialNode.sample(screenUV).g))
+        : float(1);
+      const k = this.amount.mul(foliageAtten).mul(0.32);
       const sharpened = centre
         .mul(k.mul(4).add(1))
         .sub(left.add(right).add(up).add(down).mul(k));

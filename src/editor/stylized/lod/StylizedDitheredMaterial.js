@@ -18,7 +18,7 @@ import { worldNoiseField } from '../worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 
 /** Value swing of the leaf masses inside one crown, lightest to darkest. */
-const CROWN_CLUMP_SWING = 0.55;
+const CROWN_CLUMP_SWING = 0.26;
 import { orientedScreenDitherThreshold } from './screenDither.js';
 import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';

@@ -139,7 +139,9 @@ export function createStylizedLeafMaterial({
     // sky fill in the shaded interior and sun through the leaves. No rim and no
     // noise variation — on a crown of flat cards both key to each card's own
     // facing and paint it in cream and dark-green camouflage patches.
-    const crown = authoredColor.mul(paletteValue(palette, config, 'brightness'));
+    // Graded crowns also take a gentle bottom-to-top lift so macro volume reads softly.
+    const heightLift = canopyGrade ? mix(float(0.88), float(1.07), normalizedHeight) : float(1);
+    const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightLift);
     const edge = crownRadius > 0
       ? crownEdgeNodes(authoredTexture(map).a, {
         cut: alphaTest > 0 ? alphaTest : (source?.alphaTest ?? config.trees.cardAlphaTest ?? 0.32),

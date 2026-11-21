@@ -2754,22 +2754,28 @@ stylizedSurface:
     canopyOcclusion: { resolution: 16, density: 0.65 }
     foliageLighting:
       enabled: true
-      transmission: 0.8
+      transmission: 0.85
       thickness: 0.5
       absorption: 1.8
-      transmissionColor: '#e0edb0'
-      normalBlend: 0.1
-      occlusionStrength: 0.65
-      minimumVisibility: 0.35
+      transmissionColor: '#e4f0b2'
+      normalBlend: 0.74
+      wrapDiffuse: 0.42
+      rimGlow: 0.26
+      puffStrength: 0.34
+      occlusionStrength: 0.48
+      minimumVisibility: 0.46
       wetStrength: 0.55
       wetRoughness: 0.28
       needleSpecular: 0
       species:
         conifer:
           thickness: 0.78
-          transmission: 0.6
-          transmissionColor: '#c6dba7'
-          normalBlend: 0.05
+          transmission: 0.65
+          transmissionColor: '#cde0ad'
+          normalBlend: 0.46
+          wrapDiffuse: 0.22
+          rimGlow: 0.14
+          puffStrength: 0.22
           needleSpecular: 0.06
     barkSurface:
       enabled: true
@@ -2788,8 +2794,8 @@ stylizedSurface:
     # vertex-painted (alpine snow) crowns are left alone.
     canopyGrade:
       enabled: true
-      shadow: '#1d5a42'
-      light: '#a8c566'
+      shadow: '#346648'
+      light: '#98b467'
       tint: 0.9
     enabled: true
     residentRadius: 2

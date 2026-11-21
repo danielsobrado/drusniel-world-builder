@@ -1,8 +1,27 @@
 import { Color } from 'three/webgpu';
-import { attribute, float, materialAO, materialRoughness, mix, normalWorld, positionGeometry, positionView, uv, vec3 } from 'three/tsl';
+import { attribute, cos, float, materialAO, materialRoughness, mix, normalWorld, positionGeometry, positionView, sin, uv, vec3 } from 'three/tsl';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
+
+/** Outward multi-lobe puff normal computed on the GPU in prototype space (no extra buffers). */
+function crownPuffNormalNode(bounds, puffStrength) {
+  const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
+  const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
+  const rel = positionGeometry.sub(center).div(half);
+  const macro = rel.add(vec3(0, 0.28, 0));
+  const macroDir = macro.div(macro.length().max(0.00001));
+  if (!(puffStrength > 0)) return macroDir;
+  // Low-frequency 3D lobe field breaks a large canopy into soft, stacked sub-puffs.
+  const phase = rel.mul(3.4);
+  const puff = vec3(
+    sin(phase.x).mul(cos(phase.y.add(0.6))).mul(cos(phase.z.sub(0.4))),
+    cos(phase.x.sub(0.5)).mul(sin(phase.y)).mul(cos(phase.z.add(0.3))).add(0.2),
+    cos(phase.x.add(0.4)).mul(cos(phase.y.sub(0.5))).mul(sin(phase.z)),
+  );
+  const combined = macroDir.add(puff.mul(puffStrength));
+  return combined.div(combined.length().max(0.00001));
+}
 
 /** Occlusion has a floor, retaining readable crown interiors and donor AO. */
 export function canopyVisibilityNode(visibility, settings) {
@@ -27,6 +46,8 @@ export function configureTreeFoliageSurface(material, {
   material.foliageTransmissionColorNode = vec3(...new Color(settings.transmissionColor).toArray());
   material.foliageAbsorptionNode = float(settings.absorption);
   material.foliageVisibilityNode = sky;
+  material.foliageWrapDiffuseNode = float(settings.wrapDiffuse);
+  material.foliageRimGlowNode = float(settings.rimGlow);
   material.foliageWetnessNode = surfaceWetnessUniform.mul(settings.wetStrength).mul(sky)
     .mul(normalWorld.y.abs().mul(0.35).add(0.65).clamp(0, 1));
   material.foliageNeedleSpecularNode = float(settings.needleSpecular);
@@ -43,12 +64,10 @@ export function configureTreeFoliageSurface(material, {
   }
   material.aoNode = (material.aoNode ?? materialAO).mul(sky);
   if (bounds && settings.normalBlend > 0) {
-    const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
-    const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
     // Normal adjustment happens before instancing; authored geometry stays intact.
-    const shape = positionGeometry.sub(center).div(half);
-    material.foliageShapeNormalNode = shape.div(shape.length().max(0.00001));
-    material.foliageNormalBlendNode = float(settings.normalBlend);
+    material.foliageShapeNormalNode = crownPuffNormalNode(bounds, settings.puffStrength);
+    // Outer exposed leaves take the full fluffy puff normal; sheltered interior keeps slight structure.
+    material.foliageNormalBlendNode = mix(float(settings.normalBlend * 0.72), float(settings.normalBlend), sky);
   }
   material.userData.treeFoliageSurface = settings;
   setRuntimeUserData(material, 'canopyVisibilityNode', visibility);

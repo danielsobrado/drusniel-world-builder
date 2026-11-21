@@ -170,6 +170,7 @@ export class PostProcessingGraph {
     this.sharpen = settings?.sharpen?.enabled === true
       ? new ContrastSharpenNode({
         sourceNode: this.outputConversion,
+        materialNode: this.inputs.material,
         settings: settings.sharpen,
       })
       : null;

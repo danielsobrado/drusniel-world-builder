@@ -8,14 +8,19 @@ export function resolveTreeFoliageSettings(trees = {}, species = 'broadleaf') {
   const input = trees.foliageLighting ?? {};
   const family = String(Array.isArray(species) ? species[0] : species).startsWith('conifer') ? 'conifer' : 'broadleaf';
   const settings = {
-    enabled: input.enabled === true, transmission: 0.8, thickness: 0.5,
-    absorption: 1.8, transmissionColor: '#e0edb0', normalBlend: 0.1,
-    occlusionStrength: 0.65, minimumVisibility: 0.35,
+    enabled: input.enabled === true, transmission: 0.85, thickness: 0.5,
+    absorption: 1.8, transmissionColor: '#e4f0b2', normalBlend: 0.72,
+    wrapDiffuse: 0.42, rimGlow: 0.28, puffStrength: 0.32,
+    occlusionStrength: 0.46, minimumVisibility: 0.48,
     wetStrength: 0.55, wetRoughness: 0.28, needleSpecular: 0,
     ...input, ...(input.species?.[family] ?? {}),
   };
   delete settings.species;
-  for (const key of ['transmission', 'thickness', 'normalBlend', 'occlusionStrength', 'minimumVisibility', 'wetStrength', 'wetRoughness', 'needleSpecular']) unit(settings[key], `foliageLighting.${key}`);
+  for (const key of [
+    'transmission', 'thickness', 'normalBlend', 'wrapDiffuse', 'rimGlow',
+    'puffStrength', 'occlusionStrength', 'minimumVisibility',
+    'wetStrength', 'wetRoughness', 'needleSpecular',
+  ]) unit(settings[key], `foliageLighting.${key}`);
   if (!(settings.absorption > 0) || !Number.isFinite(settings.absorption)) throw new Error('Invalid tree foliage absorption.');
   if (!/^#[\da-f]{6}$/i.test(settings.transmissionColor)) throw new Error('Invalid tree foliage transmissionColor.');
   return settings;

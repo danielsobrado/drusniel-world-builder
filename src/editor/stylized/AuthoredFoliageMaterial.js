@@ -96,6 +96,10 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   material.foliageTransmissionNode = blossom
     ? float(0.16)
     : mix(float(0.02), float(0.22), plantGreen);
+  if (!blossom) {
+    material.foliageWrapDiffuseNode = mix(float(0.08), float(0.34), plantGreen);
+    material.foliageRimGlowNode = mix(float(0), float(0.16), plantGreen);
+  }
   // Retain any authored emission (e.g. flower centres).
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(fill) : fill;
   if ('roughness' in material) {

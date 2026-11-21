@@ -20,23 +20,22 @@ import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 import { authoredTexture } from '../AuthoredTextureNode.js';
 
 /** Share of foliage vs woody-stem normals bent to the sky, preserving branch contrast. */
-// 0.35 since 2026-11-17 (was 0.48): crown tops lit brighter than the sky behind them.
-const SKYWARD_FOLIAGE_NORMAL = 0.35;
-const SKYWARD_WOODY_NORMAL = 0.12;
+const SKYWARD_FOLIAGE_NORMAL = 0.52;
+const SKYWARD_WOODY_NORMAL = 0.14;
 /** Strength of a plant's own normal map over the bent normal. */
 const UNDERSTORY_NORMAL_STRENGTH = 0.8;
 /** Crown in-scatter: metres over which it ramps, and its share of the sky fill. */
-const CROWN_AIR_START = 14;
+const CROWN_AIR_START = 10;
 const CROWN_AIR_END = 220;
-const CROWN_AIR = 0.42;
+const CROWN_AIR = 0.46;
 /** Thicker air pulls the ramp in by the root of its fog scale, up to this factor. */
 const MAX_AIR_REACH = 2.5;
 /** Share of the sky fill a crown's and a trunk's shaded faces take. */
-const CROWN_FILL = 0.55;
-const BARK_FILL = 0.6;
-/** Share of the ground's bounce light a downward face takes. */
-const CROWN_BOUNCE = 0.5;
-const BARK_BOUNCE = 0.7;
+const CROWN_FILL = 0.78;
+const BARK_FILL = 0.85;
+/** Share of the ground's bounce light a downward/lower face takes. */
+const CROWN_BOUNCE = 1.25;
+const BARK_BOUNCE = 1.05;
 /**
  * Stone takes several times bark's share: under this scene's thin ambient a backlit
  * boulder (atlas albedo ~0.25) otherwise renders as a black lump on bright ground.
@@ -60,7 +59,7 @@ const BOUNCE_REACH = 5;
  */
 export const foliageLight = Object.freeze({
   /** Transmission gain, applied to already-shadowed direct radiance. */
-  strength: uniform(0.12),
+  strength: uniform(0.24),
   /** Sky fill lifting the canopy's shaded interior. */
   fill: uniform(0.3),
   skyColor: uniform(new THREE.Color('#ffffff')),
@@ -95,7 +94,7 @@ export function syncFoliageLight(sky, fogColor = null) {
   foliageLight.airReach.value = airReach(sky?.fogDensityScale);
   foliageLight.fill.value = Math.min(Math.max(hemisphere?.intensity ?? 0, 0) * 0.35, 0.7);
   // Light intensity and colour are already included in the lighting model.
-  foliageLight.strength.value = sky?.directional ? 0.12 : 0;
+  foliageLight.strength.value = sky?.directional ? 0.24 : 0;
   if (sky?.directional) foliageLight.sunDirection.value.copy(sky.directional.position)
     .sub(sky.directional.target.position).normalize();
 }
@@ -153,11 +152,15 @@ export function withAuthoredNormalMap(material, geometricNormal) {
 export function treeFoliageEmission(crown, skyEdge = null, visibility = float(1)) {
   const air = treeAir();
   const edge = skyEdge ?? float(0);
-  const underside = normalWorld.y.negate().max(0);
+  // Broadened ground bounce lifts lower and side-facing puffs toward the meadow floor.
+  const underside = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1).pow(1.4);
+  // Blend rim atmosphere from horizon mist (sides/lower) to sky (upper crown) to avoid blue halos against hills.
+  const edgeColor = mix(foliageLight.airColor, foliageLight.skyColor, normalWorld.y.clamp(0, 1));
+  const airShadeWeight = mix(float(1.15), float(0.85), normalWorld.y.mul(0.5).add(0.5).clamp(0, 1));
   return foliageSkyFill(crown, CROWN_FILL).mul(visibility)
     .add(crown.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(underside).mul(CROWN_BOUNCE).mul(visibility))
-    .add(foliageLight.airColor.mul(foliageLight.fill).mul(air))
-    .add(foliageLight.skyColor.mul(foliageLight.fill).mul(edge));
+    .add(foliageLight.airColor.mul(foliageLight.fill).mul(air).mul(airShadeWeight))
+    .add(edgeColor.mul(foliageLight.fill).mul(edge));
 }
 
 function treeAir() {
