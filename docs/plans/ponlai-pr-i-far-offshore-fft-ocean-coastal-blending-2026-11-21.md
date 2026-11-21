@@ -1063,15 +1063,17 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.0 — New-main audit and deterministic QA baseline
 
-- [ ] Pull latest `main` and review git log since baseline `1ad7a890`. Don't overwrite fixes in coastal swash, water QA, GPU sampler allocation or other commits.
-- [ ] Follow [D1], inspect [D17] water-domain contract, and compare E/F/G/H actual code status. Do not assume planned features are present.
-- [ ] Reconfirm [D2/D3] YAML assembly and [D4/D5] validators; no alternate FFT config loader.
-- [ ] Record native adapter, Three installed/lock version, TSL storage buffer/texture array/computeKernel capabilities and actual sampling limits.
-- [ ] Benchmark on/off baseline **before** any FFT code, using recent native coastal evidence manifests/poses and water acceptance.
-- [ ] Capture current five-wave offshore look, full nearshore/rock/foam and all four quality tiers for A/A repeat.
-- [ ] Verify current CPU `seaSurfaceOffset` and shader height agreement at far and near sea; identify exact coordinate transform from per-slot centre to canonical metre.
-- [ ] Check effective shoreDistance maxima and actual blend source; no planned far shore fade requiring 200m if capped at 48m.
-- [ ] Decide initial 64² proof and 128²×2 production candidate, with device limit test and memory plan.
+- [x] Pull latest `main` and review git log since baseline `1ad7a890`. Don't overwrite fixes in coastal swash, water QA, GPU sampler allocation or other commits.
+- [x] Follow [D1], inspect [D17] water-domain contract, and compare E/F/G/H actual code status. Do not assume planned features are present.
+- [x] Reconfirm [D2/D3] YAML assembly and [D4/D5] validators; no alternate FFT config loader.
+- [x] Record native adapter, Three installed/lock version, TSL storage buffer/texture array/computeKernel capabilities and actual sampling limits.
+- [x] Benchmark on/off baseline **before** any FFT code, using recent native coastal evidence manifests/poses and water acceptance.
+- [x] Capture current five-wave offshore look, full nearshore/rock/foam and all four quality tiers for A/A repeat.
+- [x] Verify current CPU `seaSurfaceOffset` and shader height agreement at far and near sea; identify exact coordinate transform from per-slot centre to canonical metre.
+- [x] Check effective shoreDistance maxima and actual blend source; no planned far shore fade requiring 200m if capped at 48m.
+- [x] Decide initial 64² proof and 128²×2 production candidate, with device limit test and memory plan.
+
+**I.0 result:** [Phase I.0 audit and baseline](ponlai-pr-i-phase-i0-audit-and-baseline-2026-11-21.md) — architecture verified against `a6e09d59`, native RTX 4080 capability probe, coastal/offshore captures, A/A performance and water acceptance on hardware WebGPU, decisions A–H and the I.2 handoff.
 
 **Stop:** water-domain/query contract unclear, unsigned canonical transform not reproducible, no native WebGPU reference, source differences from this pinned plan, or existing offshore shader already changed radically.
 

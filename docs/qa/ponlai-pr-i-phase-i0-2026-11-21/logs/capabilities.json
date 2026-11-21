@@ -1,0 +1,2493 @@
+{
+  "threeRevision": "187",
+  "backend": "webgpu",
+  "compatibilityMode": false,
+  "trackTimestamp": true,
+  "hasTimestamp": true,
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "adapterFeatures": [
+    "bgra8unorm-storage",
+    "chromium-experimental-multi-draw-indirect",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "primitive-index",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "timestamp-query"
+  ],
+  "deviceFeatures": [
+    "bgra8unorm-storage",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "subgroups",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "timestamp-query"
+  ],
+  "adapterLimits": {
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 16,
+    "maxStorageTexturesPerShaderStage": 8,
+    "maxStorageBufferBindingSize": 2147483644,
+    "maxSampledTexturesPerShaderStage": 48,
+    "maxSamplersPerShaderStage": 16,
+    "maxInterStageShaderVariables": 28,
+    "maxTextureArrayLayers": 2048,
+    "maxTextureDimension2D": 16384,
+    "maxBufferSize": 2147483648,
+    "maxStorageBuffersInFragmentStage": 16,
+    "maxStorageTexturesInFragmentStage": 8
+  },
+  "deviceLimits": {
+    "maxComputeWorkgroupStorageSize": 16384,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxComputeWorkgroupSizeX": 256,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 8,
+    "maxStorageTexturesPerShaderStage": 4,
+    "maxStorageBufferBindingSize": 134217728,
+    "maxSampledTexturesPerShaderStage": 32,
+    "maxSamplersPerShaderStage": 16,
+    "maxInterStageShaderVariables": 24,
+    "maxTextureArrayLayers": 256,
+    "maxTextureDimension2D": 8192,
+    "maxBufferSize": 268435456,
+    "maxStorageBuffersInFragmentStage": 8,
+    "maxStorageTexturesInFragmentStage": 4
+  },
+  "formats": {
+    "rgba16float": {
+      "storage": true,
+      "render": true,
+      "mippedArray2Layer": true
+    },
+    "rg16float": {
+      "storage": true,
+      "render": true,
+      "mippedArray2Layer": true
+    },
+    "r32float": {
+      "storage": true,
+      "render": true,
+      "mippedArray2Layer": true
+    },
+    "rg32float": {
+      "storage": true,
+      "render": true,
+      "mippedArray2Layer": true
+    },
+    "rgba32float": {
+      "storage": true,
+      "render": true,
+      "mippedArray2Layer": true
+    }
+  },
+  "workgroupPipeline12KiB": {
+    "ok": true,
+    "error": null
+  },
+  "computeTiming": {
+    "supported": true,
+    "samplesNs": [
+      11264,
+      8192,
+      8192,
+      6144,
+      7168,
+      6144,
+      7168,
+      8192,
+      6144,
+      8192,
+      7168,
+      8192,
+      9216,
+      7168,
+      7168,
+      5120,
+      5120,
+      6144,
+      6144,
+      7168,
+      9216,
+      11264,
+      9216,
+      11264
+    ],
+    "workload": "256 workgroups x 256 threads, 3x4 KiB workgroup arrays, 16 barriers (probe shader, not an FFT)"
+  },
+  "deviceLostHandler": true,
+  "floatingOrigin": {
+    "x": 0,
+    "z": 0
+  },
+  "oceanSurvey": [
+    {
+      "label": "exposed-beach",
+      "samples": [
+        {
+          "d": 0,
+          "x": -9022,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 16,
+          "x": -9011,
+          "z": -7504,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 32,
+          "x": -9001,
+          "z": -7516,
+          "kind": 1,
+          "depth": 2.81,
+          "shoreDistance": 13.4
+        },
+        {
+          "d": 48,
+          "x": -8990,
+          "z": -7528,
+          "kind": 1,
+          "depth": 11.13,
+          "shoreDistance": 28.8
+        },
+        {
+          "d": 64,
+          "x": -8980,
+          "z": -7540,
+          "kind": 1,
+          "depth": 23.02,
+          "shoreDistance": 45.6
+        },
+        {
+          "d": 80,
+          "x": -8969,
+          "z": -7552,
+          "kind": 1,
+          "depth": 23.46,
+          "shoreDistance": 48
+        },
+        {
+          "d": 96,
+          "x": -8958,
+          "z": -7564,
+          "kind": 1,
+          "depth": 22.6,
+          "shoreDistance": 48
+        },
+        {
+          "d": 112,
+          "x": -8948,
+          "z": -7576,
+          "kind": 1,
+          "depth": 22.82,
+          "shoreDistance": 48
+        },
+        {
+          "d": 128,
+          "x": -8937,
+          "z": -7588,
+          "kind": 1,
+          "depth": 22.77,
+          "shoreDistance": 48
+        },
+        {
+          "d": 144,
+          "x": -8927,
+          "z": -7600,
+          "kind": 1,
+          "depth": 23.17,
+          "shoreDistance": 48
+        },
+        {
+          "d": 160,
+          "x": -8916,
+          "z": -7612,
+          "kind": 1,
+          "depth": 23.52,
+          "shoreDistance": 48
+        },
+        {
+          "d": 176,
+          "x": -8905,
+          "z": -7624,
+          "kind": 1,
+          "depth": 22.56,
+          "shoreDistance": 48
+        },
+        {
+          "d": 192,
+          "x": -8895,
+          "z": -7636,
+          "kind": 1,
+          "depth": 22.53,
+          "shoreDistance": 48
+        },
+        {
+          "d": 208,
+          "x": -8884,
+          "z": -7648,
+          "kind": 1,
+          "depth": 22.49,
+          "shoreDistance": 48
+        },
+        {
+          "d": 224,
+          "x": -8874,
+          "z": -7660,
+          "kind": 1,
+          "depth": 22.61,
+          "shoreDistance": 48
+        },
+        {
+          "d": 240,
+          "x": -8863,
+          "z": -7672,
+          "kind": 1,
+          "depth": 23.33,
+          "shoreDistance": 48
+        },
+        {
+          "d": 256,
+          "x": -8852,
+          "z": -7684,
+          "kind": 1,
+          "depth": 22.59,
+          "shoreDistance": 48
+        },
+        {
+          "d": 272,
+          "x": -8842,
+          "z": -7696,
+          "kind": 1,
+          "depth": 22.4,
+          "shoreDistance": 48
+        },
+        {
+          "d": 288,
+          "x": -8831,
+          "z": -7708,
+          "kind": 1,
+          "depth": 22.54,
+          "shoreDistance": 48
+        },
+        {
+          "d": 304,
+          "x": -8821,
+          "z": -7720,
+          "kind": 1,
+          "depth": 22.47,
+          "shoreDistance": 48
+        },
+        {
+          "d": 320,
+          "x": -8810,
+          "z": -7732,
+          "kind": 1,
+          "depth": 23.49,
+          "shoreDistance": 48
+        },
+        {
+          "d": 336,
+          "x": -8799,
+          "z": -7744,
+          "kind": 1,
+          "depth": 23.28,
+          "shoreDistance": 48
+        },
+        {
+          "d": 352,
+          "x": -8789,
+          "z": -7756,
+          "kind": 1,
+          "depth": 23.02,
+          "shoreDistance": 48
+        },
+        {
+          "d": 368,
+          "x": -8778,
+          "z": -7768,
+          "kind": 1,
+          "depth": 23.25,
+          "shoreDistance": 48
+        },
+        {
+          "d": 384,
+          "x": -8768,
+          "z": -7780,
+          "kind": 1,
+          "depth": 22.91,
+          "shoreDistance": 48
+        },
+        {
+          "d": 400,
+          "x": -8757,
+          "z": -7792,
+          "kind": 1,
+          "depth": 23.59,
+          "shoreDistance": 48
+        },
+        {
+          "d": 416,
+          "x": -8746,
+          "z": -7804,
+          "kind": 1,
+          "depth": 20.89,
+          "shoreDistance": 44
+        },
+        {
+          "d": 432,
+          "x": -8736,
+          "z": -7816,
+          "kind": 1,
+          "depth": 20.59,
+          "shoreDistance": 44.9
+        },
+        {
+          "d": 448,
+          "x": -8725,
+          "z": -7828,
+          "kind": 1,
+          "depth": 21.51,
+          "shoreDistance": 47.1
+        },
+        {
+          "d": 464,
+          "x": -8715,
+          "z": -7840,
+          "kind": 1,
+          "depth": 15.95,
+          "shoreDistance": 39.4
+        },
+        {
+          "d": 480,
+          "x": -8704,
+          "z": -7852,
+          "kind": 1,
+          "depth": 12.99,
+          "shoreDistance": 34.9
+        },
+        {
+          "d": 496,
+          "x": -8693,
+          "z": -7864,
+          "kind": 1,
+          "depth": 4.67,
+          "shoreDistance": 22.1
+        },
+        {
+          "d": 512,
+          "x": -8683,
+          "z": -7875,
+          "kind": 1,
+          "depth": 1.23,
+          "shoreDistance": 10.8
+        },
+        {
+          "d": 528,
+          "x": -8672,
+          "z": -7887,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 544,
+          "x": -8662,
+          "z": -7899,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 560,
+          "x": -8651,
+          "z": -7911,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 576,
+          "x": -8640,
+          "z": -7923,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 592,
+          "x": -8630,
+          "z": -7935,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 608,
+          "x": -8619,
+          "z": -7947,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 624,
+          "x": -8609,
+          "z": -7959,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 640,
+          "x": -8598,
+          "z": -7971,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        }
+      ]
+    },
+    {
+      "label": "exposed-beach-east",
+      "samples": [
+        {
+          "d": 0,
+          "x": -9022,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 16,
+          "x": -9006,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 32,
+          "x": -8990,
+          "z": -7492,
+          "kind": 1,
+          "depth": 0.19,
+          "shoreDistance": 2.8
+        },
+        {
+          "d": 48,
+          "x": -8974,
+          "z": -7492,
+          "kind": 1,
+          "depth": 2.35,
+          "shoreDistance": 14.1
+        },
+        {
+          "d": 64,
+          "x": -8958,
+          "z": -7492,
+          "kind": 1,
+          "depth": 7.29,
+          "shoreDistance": 25.6
+        },
+        {
+          "d": 80,
+          "x": -8942,
+          "z": -7492,
+          "kind": 1,
+          "depth": 17.13,
+          "shoreDistance": 38.4
+        },
+        {
+          "d": 96,
+          "x": -8926,
+          "z": -7492,
+          "kind": 1,
+          "depth": 22.98,
+          "shoreDistance": 48
+        },
+        {
+          "d": 112,
+          "x": -8910,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.9,
+          "shoreDistance": 48
+        },
+        {
+          "d": 128,
+          "x": -8894,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.64,
+          "shoreDistance": 48
+        },
+        {
+          "d": 144,
+          "x": -8878,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.43,
+          "shoreDistance": 48
+        },
+        {
+          "d": 160,
+          "x": -8862,
+          "z": -7492,
+          "kind": 1,
+          "depth": 24.25,
+          "shoreDistance": 48
+        },
+        {
+          "d": 176,
+          "x": -8846,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.55,
+          "shoreDistance": 48
+        },
+        {
+          "d": 192,
+          "x": -8830,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.78,
+          "shoreDistance": 48
+        },
+        {
+          "d": 208,
+          "x": -8814,
+          "z": -7492,
+          "kind": 1,
+          "depth": 24.19,
+          "shoreDistance": 48
+        },
+        {
+          "d": 224,
+          "x": -8798,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.69,
+          "shoreDistance": 48
+        },
+        {
+          "d": 240,
+          "x": -8782,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.87,
+          "shoreDistance": 48
+        },
+        {
+          "d": 256,
+          "x": -8766,
+          "z": -7492,
+          "kind": 1,
+          "depth": 24.09,
+          "shoreDistance": 48
+        },
+        {
+          "d": 272,
+          "x": -8750,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.4,
+          "shoreDistance": 48
+        },
+        {
+          "d": 288,
+          "x": -8734,
+          "z": -7492,
+          "kind": 1,
+          "depth": 24.11,
+          "shoreDistance": 48
+        },
+        {
+          "d": 304,
+          "x": -8718,
+          "z": -7492,
+          "kind": 1,
+          "depth": 23.65,
+          "shoreDistance": 48
+        },
+        {
+          "d": 320,
+          "x": -8702,
+          "z": -7492,
+          "kind": 1,
+          "depth": 20.53,
+          "shoreDistance": 43.7
+        },
+        {
+          "d": 336,
+          "x": -8686,
+          "z": -7492,
+          "kind": 1,
+          "depth": 9.8,
+          "shoreDistance": 28.3
+        },
+        {
+          "d": 352,
+          "x": -8670,
+          "z": -7492,
+          "kind": 1,
+          "depth": 2.43,
+          "shoreDistance": 12.6
+        },
+        {
+          "d": 368,
+          "x": -8654,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 384,
+          "x": -8638,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 400,
+          "x": -8622,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 416,
+          "x": -8606,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 432,
+          "x": -8590,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 448,
+          "x": -8574,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 464,
+          "x": -8558,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 480,
+          "x": -8542,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 496,
+          "x": -8526,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 512,
+          "x": -8510,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 528,
+          "x": -8494,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 544,
+          "x": -8478,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 560,
+          "x": -8462,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 576,
+          "x": -8446,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 592,
+          "x": -8430,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 608,
+          "x": -8414,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 624,
+          "x": -8398,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 640,
+          "x": -8382,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        }
+      ]
+    },
+    {
+      "label": "exposed-beach-south",
+      "samples": [
+        {
+          "d": 0,
+          "x": -9022,
+          "z": -7492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 16,
+          "x": -9022,
+          "z": -7508,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 32,
+          "x": -9022,
+          "z": -7524,
+          "kind": 1,
+          "depth": 0.38,
+          "shoreDistance": 4
+        },
+        {
+          "d": 48,
+          "x": -9022,
+          "z": -7540,
+          "kind": 1,
+          "depth": 2.44,
+          "shoreDistance": 14.4
+        },
+        {
+          "d": 64,
+          "x": -9022,
+          "z": -7556,
+          "kind": 1,
+          "depth": 8.62,
+          "shoreDistance": 27.8
+        },
+        {
+          "d": 80,
+          "x": -9022,
+          "z": -7572,
+          "kind": 1,
+          "depth": 19.25,
+          "shoreDistance": 42.4
+        },
+        {
+          "d": 96,
+          "x": -9022,
+          "z": -7588,
+          "kind": 1,
+          "depth": 22.63,
+          "shoreDistance": 48
+        },
+        {
+          "d": 112,
+          "x": -9022,
+          "z": -7604,
+          "kind": 1,
+          "depth": 22.44,
+          "shoreDistance": 48
+        },
+        {
+          "d": 128,
+          "x": -9022,
+          "z": -7620,
+          "kind": 1,
+          "depth": 22.32,
+          "shoreDistance": 48
+        },
+        {
+          "d": 144,
+          "x": -9022,
+          "z": -7636,
+          "kind": 1,
+          "depth": 22.27,
+          "shoreDistance": 48
+        },
+        {
+          "d": 160,
+          "x": -9022,
+          "z": -7652,
+          "kind": 1,
+          "depth": 22.6,
+          "shoreDistance": 48
+        },
+        {
+          "d": 176,
+          "x": -9022,
+          "z": -7668,
+          "kind": 1,
+          "depth": 22.17,
+          "shoreDistance": 48
+        },
+        {
+          "d": 192,
+          "x": -9022,
+          "z": -7684,
+          "kind": 1,
+          "depth": 22.79,
+          "shoreDistance": 48
+        },
+        {
+          "d": 208,
+          "x": -9022,
+          "z": -7700,
+          "kind": 1,
+          "depth": 22.71,
+          "shoreDistance": 48
+        },
+        {
+          "d": 224,
+          "x": -9022,
+          "z": -7716,
+          "kind": 1,
+          "depth": 23.2,
+          "shoreDistance": 48
+        },
+        {
+          "d": 240,
+          "x": -9022,
+          "z": -7732,
+          "kind": 1,
+          "depth": 23.3,
+          "shoreDistance": 48
+        },
+        {
+          "d": 256,
+          "x": -9022,
+          "z": -7748,
+          "kind": 1,
+          "depth": 22.96,
+          "shoreDistance": 48
+        },
+        {
+          "d": 272,
+          "x": -9022,
+          "z": -7764,
+          "kind": 1,
+          "depth": 23.32,
+          "shoreDistance": 48
+        },
+        {
+          "d": 288,
+          "x": -9022,
+          "z": -7780,
+          "kind": 1,
+          "depth": 22.8,
+          "shoreDistance": 48
+        },
+        {
+          "d": 304,
+          "x": -9022,
+          "z": -7796,
+          "kind": 1,
+          "depth": 22.95,
+          "shoreDistance": 48
+        },
+        {
+          "d": 320,
+          "x": -9022,
+          "z": -7812,
+          "kind": 1,
+          "depth": 20.62,
+          "shoreDistance": 45.3
+        },
+        {
+          "d": 336,
+          "x": -9022,
+          "z": -7828,
+          "kind": 1,
+          "depth": 13.96,
+          "shoreDistance": 35.8
+        },
+        {
+          "d": 352,
+          "x": -9022,
+          "z": -7844,
+          "kind": 1,
+          "depth": 9.04,
+          "shoreDistance": 28.4
+        },
+        {
+          "d": 368,
+          "x": -9022,
+          "z": -7860,
+          "kind": 1,
+          "depth": 4.79,
+          "shoreDistance": 20.9
+        },
+        {
+          "d": 384,
+          "x": -9022,
+          "z": -7876,
+          "kind": 1,
+          "depth": 2.87,
+          "shoreDistance": 15.2
+        },
+        {
+          "d": 400,
+          "x": -9022,
+          "z": -7892,
+          "kind": 1,
+          "depth": 2.67,
+          "shoreDistance": 14.6
+        },
+        {
+          "d": 416,
+          "x": -9022,
+          "z": -7908,
+          "kind": 1,
+          "depth": 4.02,
+          "shoreDistance": 18.1
+        },
+        {
+          "d": 432,
+          "x": -9022,
+          "z": -7924,
+          "kind": 1,
+          "depth": 6.42,
+          "shoreDistance": 22.8
+        },
+        {
+          "d": 448,
+          "x": -9022,
+          "z": -7940,
+          "kind": 1,
+          "depth": 10.18,
+          "shoreDistance": 28.6
+        },
+        {
+          "d": 464,
+          "x": -9022,
+          "z": -7956,
+          "kind": 1,
+          "depth": 11.4,
+          "shoreDistance": 30
+        },
+        {
+          "d": 480,
+          "x": -9022,
+          "z": -7972,
+          "kind": 1,
+          "depth": 13.27,
+          "shoreDistance": 33
+        },
+        {
+          "d": 496,
+          "x": -9022,
+          "z": -7988,
+          "kind": 1,
+          "depth": 18.86,
+          "shoreDistance": 40
+        },
+        {
+          "d": 512,
+          "x": -9022,
+          "z": -8004,
+          "kind": 1,
+          "depth": 23.55,
+          "shoreDistance": 47.5
+        },
+        {
+          "d": 528,
+          "x": -9022,
+          "z": -8020,
+          "kind": 1,
+          "depth": 23.71,
+          "shoreDistance": 48
+        },
+        {
+          "d": 544,
+          "x": -9022,
+          "z": -8036,
+          "kind": 1,
+          "depth": 23.58,
+          "shoreDistance": 48
+        },
+        {
+          "d": 560,
+          "x": -9022,
+          "z": -8052,
+          "kind": 1,
+          "depth": 23.77,
+          "shoreDistance": 48
+        },
+        {
+          "d": 576,
+          "x": -9022,
+          "z": -8068,
+          "kind": 1,
+          "depth": 24,
+          "shoreDistance": 48
+        },
+        {
+          "d": 592,
+          "x": -9022,
+          "z": -8084,
+          "kind": 1,
+          "depth": 23.85,
+          "shoreDistance": 48
+        },
+        {
+          "d": 608,
+          "x": -9022,
+          "z": -8100,
+          "kind": 1,
+          "depth": 24.54,
+          "shoreDistance": 48
+        },
+        {
+          "d": 624,
+          "x": -9022,
+          "z": -8116,
+          "kind": 1,
+          "depth": 24.3,
+          "shoreDistance": 48
+        },
+        {
+          "d": 640,
+          "x": -9022,
+          "z": -8132,
+          "kind": 1,
+          "depth": 24.61,
+          "shoreDistance": 48
+        }
+      ]
+    },
+    {
+      "label": "curved-coast",
+      "samples": [
+        {
+          "d": 0,
+          "x": 2176,
+          "z": -10604,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 16,
+          "x": 2192,
+          "z": -10604,
+          "kind": 1,
+          "depth": -0.21,
+          "shoreDistance": 2
+        },
+        {
+          "d": 32,
+          "x": 2208,
+          "z": -10604,
+          "kind": 1,
+          "depth": 1.11,
+          "shoreDistance": 6.3
+        },
+        {
+          "d": 48,
+          "x": 2224,
+          "z": -10604,
+          "kind": 1,
+          "depth": 5.65,
+          "shoreDistance": 17.9
+        },
+        {
+          "d": 64,
+          "x": 2240,
+          "z": -10604,
+          "kind": 1,
+          "depth": 14,
+          "shoreDistance": 32.6
+        },
+        {
+          "d": 80,
+          "x": 2256,
+          "z": -10604,
+          "kind": 1,
+          "depth": 22.67,
+          "shoreDistance": 44.9
+        },
+        {
+          "d": 96,
+          "x": 2272,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.34,
+          "shoreDistance": 48
+        },
+        {
+          "d": 112,
+          "x": 2288,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.73,
+          "shoreDistance": 48
+        },
+        {
+          "d": 128,
+          "x": 2304,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.91,
+          "shoreDistance": 48
+        },
+        {
+          "d": 144,
+          "x": 2320,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.21,
+          "shoreDistance": 48
+        },
+        {
+          "d": 160,
+          "x": 2336,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24,
+          "shoreDistance": 48
+        },
+        {
+          "d": 176,
+          "x": 2352,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.77,
+          "shoreDistance": 48
+        },
+        {
+          "d": 192,
+          "x": 2368,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.52,
+          "shoreDistance": 48
+        },
+        {
+          "d": 208,
+          "x": 2384,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.43,
+          "shoreDistance": 48
+        },
+        {
+          "d": 224,
+          "x": 2400,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.47,
+          "shoreDistance": 48
+        },
+        {
+          "d": 240,
+          "x": 2416,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.82,
+          "shoreDistance": 48
+        },
+        {
+          "d": 256,
+          "x": 2432,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.61,
+          "shoreDistance": 48
+        },
+        {
+          "d": 272,
+          "x": 2448,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.65,
+          "shoreDistance": 48
+        },
+        {
+          "d": 288,
+          "x": 2464,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.44,
+          "shoreDistance": 48
+        },
+        {
+          "d": 304,
+          "x": 2480,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.28,
+          "shoreDistance": 48
+        },
+        {
+          "d": 320,
+          "x": 2496,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.01,
+          "shoreDistance": 48
+        },
+        {
+          "d": 336,
+          "x": 2512,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.89,
+          "shoreDistance": 48
+        },
+        {
+          "d": 352,
+          "x": 2528,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.15,
+          "shoreDistance": 48
+        },
+        {
+          "d": 368,
+          "x": 2544,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.01,
+          "shoreDistance": 48
+        },
+        {
+          "d": 384,
+          "x": 2560,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.69,
+          "shoreDistance": 48
+        },
+        {
+          "d": 400,
+          "x": 2576,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.39,
+          "shoreDistance": 48
+        },
+        {
+          "d": 416,
+          "x": 2592,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.83,
+          "shoreDistance": 48
+        },
+        {
+          "d": 432,
+          "x": 2608,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.75,
+          "shoreDistance": 48
+        },
+        {
+          "d": 448,
+          "x": 2624,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.54,
+          "shoreDistance": 48
+        },
+        {
+          "d": 464,
+          "x": 2640,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.47,
+          "shoreDistance": 48
+        },
+        {
+          "d": 480,
+          "x": 2656,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.45,
+          "shoreDistance": 48
+        },
+        {
+          "d": 496,
+          "x": 2672,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.82,
+          "shoreDistance": 48
+        },
+        {
+          "d": 512,
+          "x": 2688,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.78,
+          "shoreDistance": 48
+        },
+        {
+          "d": 528,
+          "x": 2704,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.38,
+          "shoreDistance": 48
+        },
+        {
+          "d": 544,
+          "x": 2720,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.74,
+          "shoreDistance": 48
+        },
+        {
+          "d": 560,
+          "x": 2736,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.94,
+          "shoreDistance": 48
+        },
+        {
+          "d": 576,
+          "x": 2752,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.26,
+          "shoreDistance": 48
+        },
+        {
+          "d": 592,
+          "x": 2768,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.86,
+          "shoreDistance": 48
+        },
+        {
+          "d": 608,
+          "x": 2784,
+          "z": -10604,
+          "kind": 1,
+          "depth": 23.97,
+          "shoreDistance": 48
+        },
+        {
+          "d": 624,
+          "x": 2800,
+          "z": -10604,
+          "kind": 1,
+          "depth": 24.11,
+          "shoreDistance": 48
+        },
+        {
+          "d": 640,
+          "x": 2816,
+          "z": -10604,
+          "kind": 1,
+          "depth": 22.99,
+          "shoreDistance": 48
+        }
+      ]
+    },
+    {
+      "label": "curved-coast-north",
+      "samples": [
+        {
+          "d": 0,
+          "x": 2176,
+          "z": -10604,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 16,
+          "x": 2176,
+          "z": -10588,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 32,
+          "x": 2176,
+          "z": -10572,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 48,
+          "x": 2176,
+          "z": -10556,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 64,
+          "x": 2176,
+          "z": -10540,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 80,
+          "x": 2176,
+          "z": -10524,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 96,
+          "x": 2176,
+          "z": -10508,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 112,
+          "x": 2176,
+          "z": -10492,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 128,
+          "x": 2176,
+          "z": -10476,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 144,
+          "x": 2176,
+          "z": -10460,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 160,
+          "x": 2176,
+          "z": -10444,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 176,
+          "x": 2176,
+          "z": -10428,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 192,
+          "x": 2176,
+          "z": -10412,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 208,
+          "x": 2176,
+          "z": -10396,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 224,
+          "x": 2176,
+          "z": -10380,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 240,
+          "x": 2176,
+          "z": -10364,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 256,
+          "x": 2176,
+          "z": -10348,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 272,
+          "x": 2176,
+          "z": -10332,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 288,
+          "x": 2176,
+          "z": -10316,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 304,
+          "x": 2176,
+          "z": -10300,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 320,
+          "x": 2176,
+          "z": -10284,
+          "kind": 1,
+          "depth": 2.85,
+          "shoreDistance": 12
+        },
+        {
+          "d": 336,
+          "x": 2176,
+          "z": -10268,
+          "kind": 1,
+          "depth": 9.96,
+          "shoreDistance": 28
+        },
+        {
+          "d": 352,
+          "x": 2176,
+          "z": -10252,
+          "kind": 1,
+          "depth": 21.42,
+          "shoreDistance": 44
+        },
+        {
+          "d": 368,
+          "x": 2176,
+          "z": -10236,
+          "kind": 1,
+          "depth": 23.84,
+          "shoreDistance": 48
+        },
+        {
+          "d": 384,
+          "x": 2176,
+          "z": -10220,
+          "kind": 1,
+          "depth": 23.58,
+          "shoreDistance": 48
+        },
+        {
+          "d": 400,
+          "x": 2176,
+          "z": -10204,
+          "kind": 1,
+          "depth": 24.06,
+          "shoreDistance": 48
+        },
+        {
+          "d": 416,
+          "x": 2176,
+          "z": -10188,
+          "kind": 1,
+          "depth": 23.95,
+          "shoreDistance": 48
+        },
+        {
+          "d": 432,
+          "x": 2176,
+          "z": -10172,
+          "kind": 1,
+          "depth": 24.62,
+          "shoreDistance": 48
+        },
+        {
+          "d": 448,
+          "x": 2176,
+          "z": -10156,
+          "kind": 1,
+          "depth": 24.34,
+          "shoreDistance": 48
+        },
+        {
+          "d": 464,
+          "x": 2176,
+          "z": -10140,
+          "kind": 1,
+          "depth": 24.37,
+          "shoreDistance": 48
+        },
+        {
+          "d": 480,
+          "x": 2176,
+          "z": -10124,
+          "kind": 1,
+          "depth": 24.17,
+          "shoreDistance": 48
+        },
+        {
+          "d": 496,
+          "x": 2176,
+          "z": -10108,
+          "kind": 1,
+          "depth": 23.86,
+          "shoreDistance": 48
+        },
+        {
+          "d": 512,
+          "x": 2176,
+          "z": -10092,
+          "kind": 1,
+          "depth": 24.12,
+          "shoreDistance": 48
+        },
+        {
+          "d": 528,
+          "x": 2176,
+          "z": -10076,
+          "kind": 1,
+          "depth": 23.41,
+          "shoreDistance": 48
+        },
+        {
+          "d": 544,
+          "x": 2176,
+          "z": -10060,
+          "kind": 1,
+          "depth": 23.79,
+          "shoreDistance": 48
+        },
+        {
+          "d": 560,
+          "x": 2176,
+          "z": -10044,
+          "kind": 1,
+          "depth": 23.51,
+          "shoreDistance": 48
+        },
+        {
+          "d": 576,
+          "x": 2176,
+          "z": -10028,
+          "kind": 1,
+          "depth": 23.62,
+          "shoreDistance": 48
+        },
+        {
+          "d": 592,
+          "x": 2176,
+          "z": -10012,
+          "kind": 1,
+          "depth": 23.78,
+          "shoreDistance": 48
+        },
+        {
+          "d": 608,
+          "x": 2176,
+          "z": -9996,
+          "kind": 1,
+          "depth": 23.65,
+          "shoreDistance": 48
+        },
+        {
+          "d": 624,
+          "x": 2176,
+          "z": -9980,
+          "kind": 1,
+          "depth": 24.32,
+          "shoreDistance": 48
+        },
+        {
+          "d": 640,
+          "x": 2176,
+          "z": -9964,
+          "kind": 1,
+          "depth": 16.96,
+          "shoreDistance": 37.9
+        }
+      ]
+    },
+    {
+      "label": "headland",
+      "samples": [
+        {
+          "d": 0,
+          "x": 2376,
+          "z": -4538,
+          "kind": 1,
+          "depth": 23.04,
+          "shoreDistance": 48
+        },
+        {
+          "d": 16,
+          "x": 2383,
+          "z": -4553,
+          "kind": 1,
+          "depth": 23.05,
+          "shoreDistance": 48
+        },
+        {
+          "d": 32,
+          "x": 2389,
+          "z": -4567,
+          "kind": 1,
+          "depth": 15.88,
+          "shoreDistance": 38.8
+        },
+        {
+          "d": 48,
+          "x": 2396,
+          "z": -4582,
+          "kind": 1,
+          "depth": 8.08,
+          "shoreDistance": 27.8
+        },
+        {
+          "d": 64,
+          "x": 2402,
+          "z": -4596,
+          "kind": 1,
+          "depth": 5.08,
+          "shoreDistance": 20.6
+        },
+        {
+          "d": 80,
+          "x": 2409,
+          "z": -4611,
+          "kind": 1,
+          "depth": 4.27,
+          "shoreDistance": 19
+        },
+        {
+          "d": 96,
+          "x": 2415,
+          "z": -4626,
+          "kind": 1,
+          "depth": 0.92,
+          "shoreDistance": 7.2
+        },
+        {
+          "d": 112,
+          "x": 2422,
+          "z": -4640,
+          "kind": 1,
+          "depth": 0.24,
+          "shoreDistance": 2
+        },
+        {
+          "d": 128,
+          "x": 2429,
+          "z": -4655,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 144,
+          "x": 2435,
+          "z": -4669,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 160,
+          "x": 2442,
+          "z": -4684,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 176,
+          "x": 2448,
+          "z": -4698,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 192,
+          "x": 2455,
+          "z": -4713,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 208,
+          "x": 2461,
+          "z": -4728,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 224,
+          "x": 2468,
+          "z": -4742,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 240,
+          "x": 2474,
+          "z": -4757,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 256,
+          "x": 2481,
+          "z": -4771,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 272,
+          "x": 2488,
+          "z": -4786,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 288,
+          "x": 2494,
+          "z": -4801,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 304,
+          "x": 2501,
+          "z": -4815,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 320,
+          "x": 2507,
+          "z": -4830,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 336,
+          "x": 2514,
+          "z": -4844,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 352,
+          "x": 2520,
+          "z": -4859,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 368,
+          "x": 2527,
+          "z": -4874,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 384,
+          "x": 2534,
+          "z": -4888,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 400,
+          "x": 2540,
+          "z": -4903,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 416,
+          "x": 2547,
+          "z": -4917,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 432,
+          "x": 2553,
+          "z": -4932,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 448,
+          "x": 2560,
+          "z": -4947,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 464,
+          "x": 2566,
+          "z": -4961,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 480,
+          "x": 2573,
+          "z": -4976,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 496,
+          "x": 2580,
+          "z": -4990,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 512,
+          "x": 2586,
+          "z": -5005,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 528,
+          "x": 2593,
+          "z": -5019,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 544,
+          "x": 2599,
+          "z": -5034,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 560,
+          "x": 2606,
+          "z": -5049,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 576,
+          "x": 2612,
+          "z": -5063,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 592,
+          "x": 2619,
+          "z": -5078,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 608,
+          "x": 2626,
+          "z": -5092,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 624,
+          "x": 2632,
+          "z": -5107,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 640,
+          "x": 2639,
+          "z": -5122,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        }
+      ]
+    },
+    {
+      "label": "rocky",
+      "samples": [
+        {
+          "d": 0,
+          "x": -5397,
+          "z": 13552,
+          "kind": 1,
+          "depth": 3.2,
+          "shoreDistance": 17.1
+        },
+        {
+          "d": 16,
+          "x": -5396,
+          "z": 13568,
+          "kind": 1,
+          "depth": 0.51,
+          "shoreDistance": 2.8
+        },
+        {
+          "d": 32,
+          "x": -5395,
+          "z": 13584,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 48,
+          "x": -5394,
+          "z": 13600,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 64,
+          "x": -5393,
+          "z": 13616,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 80,
+          "x": -5392,
+          "z": 13632,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 96,
+          "x": -5391,
+          "z": 13648,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 112,
+          "x": -5390,
+          "z": 13664,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 128,
+          "x": -5389,
+          "z": 13680,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 144,
+          "x": -5388,
+          "z": 13696,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 160,
+          "x": -5387,
+          "z": 13712,
+          "kind": 1,
+          "depth": 1.45,
+          "shoreDistance": 8
+        },
+        {
+          "d": 176,
+          "x": -5386,
+          "z": 13728,
+          "kind": 1,
+          "depth": 3.28,
+          "shoreDistance": 15.6
+        },
+        {
+          "d": 192,
+          "x": -5386,
+          "z": 13744,
+          "kind": 1,
+          "depth": 10,
+          "shoreDistance": 29.5
+        },
+        {
+          "d": 208,
+          "x": -5385,
+          "z": 13760,
+          "kind": 1,
+          "depth": 20.51,
+          "shoreDistance": 43.9
+        },
+        {
+          "d": 224,
+          "x": -5384,
+          "z": 13776,
+          "kind": 1,
+          "depth": 23.57,
+          "shoreDistance": 48
+        },
+        {
+          "d": 240,
+          "x": -5383,
+          "z": 13792,
+          "kind": 1,
+          "depth": 23.53,
+          "shoreDistance": 48
+        },
+        {
+          "d": 256,
+          "x": -5382,
+          "z": 13808,
+          "kind": 1,
+          "depth": 24.46,
+          "shoreDistance": 48
+        },
+        {
+          "d": 272,
+          "x": -5381,
+          "z": 13824,
+          "kind": 1,
+          "depth": 24.39,
+          "shoreDistance": 48
+        },
+        {
+          "d": 288,
+          "x": -5380,
+          "z": 13839,
+          "kind": 1,
+          "depth": 24.33,
+          "shoreDistance": 48
+        },
+        {
+          "d": 304,
+          "x": -5379,
+          "z": 13855,
+          "kind": 1,
+          "depth": 24.34,
+          "shoreDistance": 48
+        },
+        {
+          "d": 320,
+          "x": -5378,
+          "z": 13871,
+          "kind": 1,
+          "depth": 23.77,
+          "shoreDistance": 48
+        },
+        {
+          "d": 336,
+          "x": -5377,
+          "z": 13887,
+          "kind": 1,
+          "depth": 24.01,
+          "shoreDistance": 48
+        },
+        {
+          "d": 352,
+          "x": -5376,
+          "z": 13903,
+          "kind": 1,
+          "depth": 23.56,
+          "shoreDistance": 48
+        },
+        {
+          "d": 368,
+          "x": -5375,
+          "z": 13919,
+          "kind": 1,
+          "depth": 23.52,
+          "shoreDistance": 48
+        },
+        {
+          "d": 384,
+          "x": -5374,
+          "z": 13935,
+          "kind": 1,
+          "depth": 22.01,
+          "shoreDistance": 44
+        },
+        {
+          "d": 400,
+          "x": -5373,
+          "z": 13951,
+          "kind": 1,
+          "depth": 10.6,
+          "shoreDistance": 28
+        },
+        {
+          "d": 416,
+          "x": -5372,
+          "z": 13967,
+          "kind": 1,
+          "depth": 3.08,
+          "shoreDistance": 12
+        },
+        {
+          "d": 432,
+          "x": -5371,
+          "z": 13983,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 448,
+          "x": -5370,
+          "z": 13999,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 464,
+          "x": -5369,
+          "z": 14015,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 480,
+          "x": -5368,
+          "z": 14031,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 496,
+          "x": -5367,
+          "z": 14047,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 512,
+          "x": -5366,
+          "z": 14063,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 528,
+          "x": -5365,
+          "z": 14079,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 544,
+          "x": -5364,
+          "z": 14095,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 560,
+          "x": -5363,
+          "z": 14111,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 576,
+          "x": -5363,
+          "z": 14127,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 592,
+          "x": -5362,
+          "z": 14143,
+          "kind": 0,
+          "depth": 0,
+          "shoreDistance": 0
+        },
+        {
+          "d": 608,
+          "x": -5361,
+          "z": 14159,
+          "kind": 1,
+          "depth": 1.84,
+          "shoreDistance": 12.2
+        },
+        {
+          "d": 624,
+          "x": -5360,
+          "z": 14175,
+          "kind": 1,
+          "depth": 0.54,
+          "shoreDistance": 4
+        },
+        {
+          "d": 640,
+          "x": -5359,
+          "z": 14191,
+          "kind": 1,
+          "depth": 0.59,
+          "shoreDistance": 5.7
+        }
+      ]
+    }
+  ],
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+  "browser": "151.0.7922.34",
+  "capturedAt": "2026-11-21T03:08:46.530Z"
+}

@@ -152,6 +152,9 @@ export async function measureCoastalFrame(durationMs) {
   const gpu = new GpuPassProfiler(terrainView.renderer, { requested: true });
   const intervals = [], frameCpu = [], renderCpu = [], swashCpu = [], rockCpu = [];
   const rockRefreshCpu = [], sprayCpu = [];
+  // Every draw of the frame, shadows and reflection captures included.
+  const draws = [];
+  let frameDraws = 0;
   const rock = stylizedSurface.coastalRockImpact;
   const swash = terrainView.coastalSwash;
   const firstDispatch = swash?.dispatchCount ?? 0;
@@ -169,6 +172,7 @@ export async function measureCoastalFrame(durationMs) {
     try { return original.apply(this, args); } finally { samples.push(performance.now() - start); }
   };
   wrap(terrainView, 'render', timeCall(renderCpu));
+  wrap(terrainView.renderer.backend, 'draw', function (original, args) { frameDraws++; return original.apply(this, args); });
   wrap(swash, 'update', timeCall(swashCpu));
   wrap(rock, 'update', timeCall(rockCpu));
   wrap(rock, 'refresh', timeCall(rockRefreshCpu));
@@ -194,6 +198,7 @@ export async function measureCoastalFrame(durationMs) {
   try {
     await new Promise(resolve => wrap(qa, 'afterFrame', function (original, args) {
       frameCpu.push(performance.now() - cpuStart);
+      draws.push(frameDraws); frameDraws = 0;
       gpu.endFrame();
       if (args[0] - start >= durationMs) resolve();
       return original.apply(this, args);
@@ -206,13 +211,14 @@ export async function measureCoastalFrame(durationMs) {
     const stats = values => {
       const sorted = values.slice().sort((a, b) => a - b);
       return { samples: sorted.length, p50Ms: sorted[Math.floor(sorted.length * .5)] ?? null,
-        p95Ms: sorted[Math.floor(sorted.length * .95)] ?? null };
+        p95Ms: sorted[Math.floor(sorted.length * .95)] ?? null, p99Ms: sorted[Math.floor(sorted.length * .99)] ?? null };
     };
     const report = gpu.report();
     return {
       raf: stats(intervals), cpuAfterMovementHook: stats(frameCpu), renderCpu: stats(renderCpu),
       swashCpu: stats(swashCpu), rockCpu: stats(rockCpu),
       rockRefreshCpu: stats(rockRefreshCpu), sprayCpu: stats(sprayCpu), sprayUploadBytes,
+      drawsPerFrame: stats(draws.slice(1)),
       swashDispatches: (swash?.dispatchCount ?? 0) - firstDispatch,
       rockImpacts: (rock?.eventCount ?? 0) - firstImpact,
       gpuRender: { supported: report.supported, error: report.error, scope: report.scope, ...report.total },

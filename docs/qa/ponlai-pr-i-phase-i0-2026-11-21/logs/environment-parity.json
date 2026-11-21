@@ -1,0 +1,661 @@
+{
+  "url": "http://127.0.0.1:5217",
+  "checks": [],
+  "backends": {
+    "webgpu": {
+      "backend": "webgpu",
+      "requestedBackend": "webgpu",
+      "cases": [
+        {
+          "id": "foliage-raw-near",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-near",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "foliage-raw-far",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-far",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "frost-off"
+        },
+        {
+          "id": "frost-on"
+        },
+        {
+          "id": "reflection-cached-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-refreshed-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-rebased",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-orbit-on",
+          "planarValid": 1,
+          "perspective": 0
+        },
+        {
+          "id": "reflection-orbit-off",
+          "planarValid": 0,
+          "perspective": 0
+        },
+        {
+          "id": "surf-off",
+          "calls": 56,
+          "time": 127.3
+        },
+        {
+          "id": "surf-on",
+          "calls": 58,
+          "time": 127.3
+        },
+        {
+          "id": "surf-rebased",
+          "calls": 60,
+          "time": 127.3
+        },
+        {
+          "id": "surf-moving",
+          "calls": 62,
+          "time": 129.3
+        },
+        {
+          "id": "river-medium",
+          "time": 12.3,
+          "calls": 64
+        },
+        {
+          "id": "river-high",
+          "time": 12.3,
+          "calls": 66
+        },
+        {
+          "id": "river-moving",
+          "time": 13.05,
+          "calls": 68
+        },
+        {
+          "id": "river-rebased",
+          "time": 12.3,
+          "calls": 70
+        },
+        {
+          "id": "river-fall",
+          "time": 12.3,
+          "calls": 72
+        },
+        {
+          "id": "river-foam-composite"
+        },
+        {
+          "id": "river-foam-layers"
+        },
+        {
+          "id": "beach",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-moving",
+          "time": 13.100000000000001,
+          "planarValid": 0
+        },
+        {
+          "id": "sea-level-lake",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-rebased",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea-storm",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-reflections-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-planar-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake",
+          "time": 12.3,
+          "planarValid": 1
+        },
+        {
+          "id": "lake-moving",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "water-split-off",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "water-split",
+          "time": 14.700000000000001,
+          "eyeDepth": 0,
+          "viewportCopies": 0
+        },
+        {
+          "id": "water-split-below",
+          "time": 14.700000000000001,
+          "eyeDepth": 0.04,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-shelf",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-snell",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-deep",
+          "time": 14.700000000000001,
+          "eyeDepth": 9,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-rebased",
+          "time": 14.700000000000001,
+          "eyeDepth": 9,
+          "viewportCopies": 0
+        },
+        {
+          "id": "waterline-above-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": false,
+          "eyeY": 0.04
+        },
+        {
+          "id": "waterline-above",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": true,
+          "eyeY": 0.04
+        },
+        {
+          "id": "waterline-below-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": false,
+          "eyeY": -0.04
+        },
+        {
+          "id": "waterline-below",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 1,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": true,
+          "eyeY": -0.04
+        },
+        {
+          "id": "waterline-lake",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": true,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-lake-rebased",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": true,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-dry",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-far-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 8
+        },
+        {
+          "id": "waterline-far",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 8
+        },
+        {
+          "id": "terrain-full-coast"
+        },
+        {
+          "id": "terrain-full-inland"
+        },
+        {
+          "id": "terrain-coast"
+        },
+        {
+          "id": "terrain-inland"
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 0,
+        "errors": [],
+        "truncated": false
+      }
+    },
+    "webgl": {
+      "backend": "webgl",
+      "requestedBackend": "webgl",
+      "cases": [
+        {
+          "id": "foliage-raw-near",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-near",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "foliage-raw-far",
+          "compressed": false,
+          "format": 1023,
+          "levels": 11,
+          "payloadBytes": 1398108
+        },
+        {
+          "id": "foliage-compressed-far",
+          "compressed": true,
+          "format": 36492,
+          "levels": 6,
+          "payloadBytes": 349440
+        },
+        {
+          "id": "frost-off"
+        },
+        {
+          "id": "frost-on"
+        },
+        {
+          "id": "reflection-cached-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-refreshed-turn",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-rebased",
+          "planarValid": 1,
+          "perspective": 1
+        },
+        {
+          "id": "reflection-orbit-on",
+          "planarValid": 1,
+          "perspective": 0
+        },
+        {
+          "id": "reflection-orbit-off",
+          "planarValid": 0,
+          "perspective": 0
+        },
+        {
+          "id": "surf-off",
+          "calls": 56,
+          "time": 127.3
+        },
+        {
+          "id": "surf-on",
+          "calls": 58,
+          "time": 127.3
+        },
+        {
+          "id": "surf-rebased",
+          "calls": 60,
+          "time": 127.3
+        },
+        {
+          "id": "surf-moving",
+          "calls": 62,
+          "time": 129.3
+        },
+        {
+          "id": "river-medium",
+          "time": 12.3,
+          "calls": 64
+        },
+        {
+          "id": "river-high",
+          "time": 12.3,
+          "calls": 66
+        },
+        {
+          "id": "river-moving",
+          "time": 13.05,
+          "calls": 68
+        },
+        {
+          "id": "river-rebased",
+          "time": 12.3,
+          "calls": 70
+        },
+        {
+          "id": "river-fall",
+          "time": 12.3,
+          "calls": 72
+        },
+        {
+          "id": "river-foam-composite"
+        },
+        {
+          "id": "river-foam-layers"
+        },
+        {
+          "id": "beach",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-moving",
+          "time": 13.100000000000001,
+          "planarValid": 0
+        },
+        {
+          "id": "sea-level-lake",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "beach-rebased",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "deep-sea-storm",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-reflections-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake-planar-off",
+          "time": 12.3,
+          "planarValid": 0
+        },
+        {
+          "id": "lake",
+          "time": 12.3,
+          "planarValid": 1
+        },
+        {
+          "id": "lake-moving",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "water-split-off",
+          "time": 14.700000000000001,
+          "planarValid": 1
+        },
+        {
+          "id": "water-split",
+          "time": 14.700000000000001,
+          "eyeDepth": 0,
+          "viewportCopies": 0
+        },
+        {
+          "id": "water-split-below",
+          "time": 14.700000000000001,
+          "eyeDepth": 0.04,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-shelf",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-snell",
+          "time": 14.700000000000001,
+          "eyeDepth": 1.1,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-deep",
+          "time": 14.700000000000001,
+          "eyeDepth": 9,
+          "viewportCopies": 0
+        },
+        {
+          "id": "underwater-rebased",
+          "time": 14.700000000000001,
+          "eyeDepth": 9,
+          "viewportCopies": 0
+        },
+        {
+          "id": "waterline-above-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": false,
+          "eyeY": 0.04
+        },
+        {
+          "id": "waterline-above",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": true,
+          "eyeY": 0.04
+        },
+        {
+          "id": "waterline-below-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": false,
+          "eyeY": -0.04
+        },
+        {
+          "id": "waterline-below",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 1,
+          "surfaceHeight": 0,
+          "optics": true,
+          "optical": true,
+          "eyeY": -0.04
+        },
+        {
+          "id": "waterline-lake",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": true,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-lake-rebased",
+          "enabled": true,
+          "active": true,
+          "blend": 0,
+          "waterlineBlend": 0.9466666666666667,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": true,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-dry",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 6.04
+        },
+        {
+          "id": "waterline-far-off",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 8
+        },
+        {
+          "id": "waterline-far",
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": 6,
+          "optics": true,
+          "optical": false,
+          "eyeY": 8
+        },
+        {
+          "id": "terrain-coast"
+        },
+        {
+          "id": "terrain-inland"
+        }
+      ],
+      "done": true,
+      "errors": {
+        "count": 1,
+        "errors": [
+          {
+            "kind": "console",
+            "message": "THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false\n\nProgram Info Log: FRAGMENT shader texture image units count exceeds MAX_TEXTURE_IMAGE_UNITS(16)\n\u0000\n\n"
+          }
+        ],
+        "truncated": false
+      }
+    }
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false
+  },
+  "passed": false,
+  "failure": "AssertionError [ERR_ASSERTION]: {\"count\":1,\"errors\":[{\"kind\":\"console\",\"message\":\"THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false\\n\\nProgram Info Log: FRAGMENT shader texture image units count exceeds MAX_TEXTURE_IMAGE_UNITS(16)\\n\\u0000\\n\\n\"}],\"truncated\":false}\n\n1 !== 0\n\n    at file:///F:/Development/drusniel-world-builder/scripts/run-environment-parity-qa.mjs:49:12"
+}

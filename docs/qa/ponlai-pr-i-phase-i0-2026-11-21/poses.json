@@ -1,0 +1,10 @@
+[
+  {"id":"offshore-calm","folder":"01-offshore","benchmark":"on","pose":{"x":2300,"z":-10604,"heightAboveGround":50,"pitch":-0.2,"fov":65},"target":[{"x":2620,"z":-10604},{"x":2460,"z":-10604}],"tiers":["high","ultra","medium","low"],"controls":[{"qualityTier":"high","label":"calm-motion","sequence":[124.6,126,127.6]}]},
+  {"id":"offshore-windy","folder":"01-offshore","weather":"wind","pose":{"x":2300,"z":-10604,"heightAboveGround":50,"pitch":-0.2,"fov":65},"target":[{"x":2620,"z":-10604},{"x":2460,"z":-10604}],"tiers":[],"controls":[{"qualityTier":"high","label":"windy","sequence":[124.6,126,127.6]}]},
+  {"id":"offshore-storm","folder":"01-offshore","weather":"storm","pose":{"x":2300,"z":-10604,"heightAboveGround":50,"pitch":-0.2,"fov":65},"target":[{"x":2620,"z":-10604},{"x":2460,"z":-10604}],"tiers":[],"controls":[{"qualityTier":"high","label":"storm","sequence":[124.6,126,127.6]},{"qualityTier":"ultra","label":"storm-ultra"}]},
+  {"id":"exposed","folder":"02-exposed-beach","benchmark":"on","pose":{"x":-9022,"z":-7492,"heightAboveGround":13,"pitch":-0.43},"target":[{"x":-8999,"z":-7518}],"tiers":["high"]},
+  {"id":"curved-coast","folder":"03-curved-coast","benchmark":"on","pose":{"x":2176,"z":-10604,"heightAboveGround":29,"pitch":-0.52},"target":[{"x":2234,"z":-10597}],"tiers":["high"]},
+  {"id":"cove","folder":"04-sheltered-cove","benchmark":"on","pose":{"x":2270,"z":-4640,"heightAboveGround":20,"pitch":-0.48,"fov":70},"target":[{"x":2268,"z":-4604},{"x":2285,"z":-4590}],"tiers":["high"]},
+  {"id":"headland","folder":"05-headland","pose":{"x":2376,"z":-4538,"heightAboveGround":42,"pitch":-0.47,"fov":72,"yaw":0},"target":[{"x":2410,"z":-4610},{"x":2268,"z":-4605}],"tiers":["high"]},
+  {"id":"rocky","folder":"06-rocky-shore","impact":true,"weather":"storm","pose":{"x":-5397,"z":13552,"heightAboveGround":8.5,"pitch":-0.31,"fov":55,"yaw":3.076},"target":[{"x":-5393,"z":13569}],"tiers":["high"]}
+]
