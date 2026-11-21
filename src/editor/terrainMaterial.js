@@ -551,7 +551,7 @@ export function createTerrainMaterial({
     });
     // Standing water on soaked flat hollows; a dry frame skips it with one compare.
     const puddles = bakedSurface.shape ? createPuddleShading({
-      shape: bakedSurface.shape, exposure: rainWetness.exposure, water: bakedSurface.water, worldXZ,
+      shape: bakedSurface.shape, exposure: rainWetness.exposure, water: bakedSurface.water, worldXZ, field: rainWetness.field,
     }) : null;
     const wetSurface = rainWetness.apply(
       shoreSurface.color,

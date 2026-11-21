@@ -4,6 +4,7 @@ import { NOISE, planarNoise } from '../../../locations/materials/locationNoise.j
 import { treadPaving } from '../../../../render/materials/townWeathering.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../../../render/materials/townWetness.js';
 import { buildingShadeEmission } from '../../../stylized/forest/foliageLight.js';
+import { sampleWetnessField, wetnessFieldEnabled } from '../../../weather/wetness/wetnessField.js';
 import { TOWN_GROUND } from '../view/SettlementGrade.js';
 
 /** Paving wears a hint of the town's own stone over the photographed surface. */
@@ -79,7 +80,11 @@ export function createPavingMaterial(layer, set, stoneStyle) {
   material.alphaTest = 0.5;
   // Paving lies flat open to the rain: stone's darkening and wet gloss, so a
   // street in the rain reads wet rather than only foggy.
-  const wet = wetTownSurface(untiledColour(set.color, set.arm, material.color), texture(set.arm, uv()).g, float(1), TOWN_WET_FAMILIES.stone);
+  // With the wetness field on, the street is as wet as the ground it is laid on.
+  const family = wetnessFieldEnabled()
+    ? { ...TOWN_WET_FAMILIES.stone, wetness: sampleWetnessField(positionWorld.xz).film }
+    : TOWN_WET_FAMILIES.stone;
+  const wet = wetTownSurface(untiledColour(set.color, set.arm, material.color), texture(set.arm, uv()).g, float(1), family);
   material.colorNode = wet.color;
   material.roughnessNode = wet.roughness;
   material.emissiveNode = buildingShadeEmission(material.colorNode, { fill: 1.35, bounce: 0.8 });

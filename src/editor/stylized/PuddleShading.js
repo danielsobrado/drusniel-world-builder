@@ -41,16 +41,21 @@ function hash(cell) {
  * @param {Node} options.exposure 0..1 open to the rain (not snowed, not under canopy)
  * @param {Node} options.water 0..1 open water or shoreline, which take no puddles
  * @param {Node} options.worldXZ wrapped world metres
+ * @param {object} [options.field] the wetness field's sample (RainWetnessShading `field`);
+ *   without it, puddles follow the global wetness as before the field existed
  */
-export function createPuddleShading({ shape, exposure, water, worldXZ }) {
+export function createPuddleShading({ shape, exposure, water, worldXZ, field = null }) {
   const mask = Fn(() => {
     const result = float(0).toVar();
-    If(surfaceWetnessUniform.greaterThan(PUDDLE_WETNESS), () => {
+    If((field ? field.puddleClock : surfaceWetnessUniform).greaterThan(PUDDLE_WETNESS), () => {
       const flat = oneMinus(smoothstep(0.08, 0.22, shape.r));
       const hollow = smoothstep(0.47, 0.56, clamp(shape.g.mul(8).add(0.5), 0, 1));
-      const broken = worldXZ.x.mul(0.31).sin().mul(worldXZ.y.mul(0.27).add(worldXZ.x.mul(0.11)).sin()).mul(0.25).add(0.75);
+      // The wetness field brings its own break-up (CC0 noise, coarse hollows, sun):
+      // its spread is how far this place's puddles have filled.
+      const broken = field ? float(1)
+        : worldXZ.x.mul(0.31).sin().mul(worldXZ.y.mul(0.27).add(worldXZ.x.mul(0.11)).sin()).mul(0.25).add(0.75);
       const basin = flat.mul(hollow).mul(broken).mul(exposure).mul(oneMinus(water));
-      const spread = smoothstep(PUDDLE_WETNESS, 0.9, surfaceWetnessUniform);
+      const spread = field ? field.puddle : smoothstep(PUDDLE_WETNESS, 0.9, surfaceWetnessUniform);
       result.assign(smoothstep(oneMinus(spread), oneMinus(spread).add(0.12), basin));
     });
     return result;

@@ -1,6 +1,7 @@
-import { float, min, mix, oneMinus } from 'three/tsl';
+import { float, min, mix, oneMinus, positionWorld } from 'three/tsl';
 
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
+import { sampleWetnessField, wetnessFieldEnabled } from '../weather/wetness/wetnessField.js';
 
 /**
  * Share of its albedo soaked ground keeps, rain film and standing water
@@ -23,9 +24,13 @@ const PUDDLE_DARKENING = 0.25;
  */
 export function createRainWetnessShading({ snow, canopy, config }) {
   const exposure = oneMinus(snow).mul(oneMinus(canopy.mul(config.canopyShelter)));
-  const wet = surfaceWetnessUniform.mul(exposure);
+  // With the field on, the ground's own wetness here; off, the one global value.
+  const field = wetnessFieldEnabled() ? sampleWetnessField(positionWorld.xz) : null;
+  const wet = (field ? field.film : surfaceWetnessUniform).mul(exposure);
   return {
     wet,
+    /** The wetness field's sample here, for the puddles; null with the field off. */
+    field,
     /** 0..1 open to the rain: not snowed over, not under a canopy. */
     exposure,
     /** @param {Node} [puddle] 0..1 standing water, which darkens a little further */

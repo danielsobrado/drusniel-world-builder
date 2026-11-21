@@ -82,6 +82,7 @@ import { createCharacterView } from './editor/character/createCharacterView.js';
 import { audioBus, emitAudio } from './editor/audio/index.js';
 import { WorldSoundscape } from './editor/audio/world_soundscape.js';
 import { SurfaceWetness } from './editor/weather/surfaceWetness.js';
+import { WetnessFieldPass } from './editor/weather/wetness/WetnessFieldPass.js';
 import { SnowCover } from './editor/weather/storm/SnowCover.js';
 import { createSnowFieldPass } from './editor/weather/storm/snowField/SnowFieldPass.js';
 import { stormLevelUniform, stormRainUniform, stormSnowCoverUniform, stormSnowFallUniform } from './editor/weather/storm/stormGroundUniforms.js';
@@ -1049,6 +1050,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     return weatherAudioLevelsScratch;
   };
   const surfaceWetness = new SurfaceWetness(config.stylizedSurface.wetness);
+  const wetnessField = WetnessFieldPass.forTerrain(terrainView, stylizedSurface.skyView ?? null, config.stylizedSurface.wetness.field);
+  if (wetnessField) resources.own(wetnessField);
   const snowCover = new SnowCover(config.stylizedSurface.snowCover);
   // Where that snow builds and melts first (storm-snow-field plan); null when off.
   const snowField = createSnowFieldPass({ config: config.weatherEffects.snowField, terrainView,
@@ -1495,6 +1498,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       waterfallMist,
       worldSoundscape,
       surfaceWetness,
+      wetnessField,
       snowCover,
       snowField,
       skyLooks,
@@ -1930,7 +1934,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const frameDelta = lastWetnessSeconds === null ? 0 : Math.min(1, frameSeconds - lastWetnessSeconds);
     lastWetnessSeconds = frameSeconds;
     const groundStorm = stormFrame();
-    surfaceWetness.update(groundSnap ? 1e6 : frameDelta, frameWeatherAudio.rain);
+    surfaceWetness.update(groundSnap ? 1e6 : frameDelta, frameWeatherAudio.rain, stylizedSurface.skyView?.sunDirectionValue?.y);
+    wetnessField?.update(viewModeController.camera.position, frameOrigin, deferredWork);
+    wetnessField?.render(terrainView.renderer, frameSeconds, stylizedSurface.skyView?.sunDirectionValue, frameOrigin);
     stormSnowCoverUniform.value = groundSnap
       ? snowCover.snap(groundStorm.snow)
       : snowCover.update(frameDelta, groundStorm.snow, groundStorm.snowShare);

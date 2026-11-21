@@ -20,6 +20,7 @@ import { createTerrainMaterialBakeConfig } from '../editor/materials/TerrainMate
 import { resolveBiomeLooks } from '../editor/biomes/BiomeLooks.js';
 import { applyBiomeLooks } from '../editor/biomes/applyBiomeLooks.js';
 import { resolveSurfaceWetnessConfig } from '../editor/weather/surfaceWetnessConfig.js';
+import { registerWetnessField } from '../editor/weather/wetness/wetnessField.js';
 import { resolveSnowCoverConfig } from '../editor/weather/storm/SnowCover.js';
 import { registerSurfaceCoatings, resolveSurfaceCoatings } from '../editor/stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { registerSnowFieldConfig, resolveSnowFieldConfig } from '../editor/weather/storm/snowField/snowFieldConfig.js';
@@ -70,7 +71,8 @@ export function loadEditorConfig() {
   applyBiomeLooks(config, terrainMaterialBakeSource,
     resolveBiomeLooks(structuredClone(biomeLooksConfigSource)?.biomeLooks, { snow: biomeSnow }));
   config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(terrainMaterialBakeSource);
-  config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness);
+  config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness, runtimeSearch());
+  registerWetnessField(config.stylizedSurface.wetness.field);
   config.stylizedSurface.snowCover = resolveSnowCoverConfig(config.stylizedSurface.snowCover);
   config.stylizedSurface.surfaceCoatings = resolveSurfaceCoatings(config.stylizedSurface.surfaceCoatings);
   registerSurfaceCoatings(config.stylizedSurface.surfaceCoatings);

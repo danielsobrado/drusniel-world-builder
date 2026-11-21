@@ -3022,6 +3022,13 @@ stylizedSurface:
     darkening: 0.3
     wetRoughness: 0.55
     canopyShelter: 0.7
+    # GPU wetness field around the camera (src/editor/weather/wetness/): rain
+    # darkens the ground unevenly, runs off slopes, pools in hollows and dries
+    # patchily, sunny slopes first and puddles last. Off (or ?wetnessField=0):
+    # the global wetness above, byte-identical shaders, no pass.
+    field:
+      enabled: false
+      intervalSeconds: 0.25
   sky:
     enabled: true
     # Gods' End quarter-resolution, two-pass light shafts. The effect is routed
